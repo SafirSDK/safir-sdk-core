@@ -44,16 +44,17 @@ namespace Internal
 {
 namespace Com
 {
-    typedef boost::function<void(const std::string& name, boost::int64_t id, const std::string& addr, bool isMulticast)> NewNode;
+    typedef boost::function<void(const std::string& name, boost::int64_t nodeId, const std::string& nodeTypeId, const std::string& address)> NewNode;
 
-    class CommunicationImpl : public boost::noncopyable
+    class CommunicationImpl : private boost::noncopyable
     {
     public:
         CommunicationImpl(const boost::shared_ptr<boost::asio::io_service>& ioService,
-                          const std::string& name,
-                          const boost::int64_t id, //0 is not a valid id.
-                          const std::string& unicastAddress,   //mandatory
-                          const std::string& multicastAddress);
+                          const std::string& nodeName,
+                          boost::int64_t nodeId, //0 is not a valid id.
+                          boost::int64_t& nodeTypeId,
+                          const std::string& address,
+                          bool discovering);
 
         virtual ~CommunicationImpl();
 
@@ -69,12 +70,13 @@ namespace Com
         void Start();
         void Stop();
 
-        void IncludeNode(boost::int64_t id);
-        void ExcludeNode(boost::int64_t id);
-        bool SendAll(const boost::shared_ptr<char[]>& msg, size_t size, boost::int64_t dataTypeIdentifier);
-        bool SendTo(boost::int64_t toId, const boost::shared_ptr<char[]>& msg, size_t size, boost::int64_t dataTypeIdentifier);
+        void IncludeNode(boost::int64_t nodeId);
+        void ExcludeNode(boost::int64_t nodeId);
 
-        size_t NumberOfQueuedMessages() const {return m_ackedDataSender.SendQueueSize();}
+        bool SendToNode(boost::int64_t nodeId, const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier);
+        bool SendToNodeType(boost::int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier);
+
+        size_t NumberOfQueuedMessages(boost::int64_t nodeTypeId) const {return m_ackedDataSender.SendQueueSize();}
 
         const std::string& Name() const {return m_me.Name();}
         boost::int64_t Id() const {return m_me.Id();}

@@ -44,7 +44,8 @@ namespace Com
     {
     public:
         Node(const std::string& name_,
-             boost::int64_t id_,
+             boost::int64_t nodeId_,
+             boost::int64_t nodeTypeId,
              const std::string& unicastAddr,
              const std::string& multicastAddr);
 

@@ -47,8 +47,8 @@ namespace Internal
 {
 namespace Com
 {
-    typedef boost::function<void(boost::int64_t from, const boost::shared_ptr<char[]>& data, size_t size)> ReceiveData;
-    typedef boost::function<void(boost::int64_t fromId)> GotReceiveFrom;
+    typedef boost::function<void(boost::int64_t fromNodeId, const boost::shared_ptr<char[]>& data, size_t size)> ReceiveData;
+    typedef boost::function<void(boost::int64_t fromNodeId)> GotReceiveFrom;
 
     template <class WriterType>
     class DeliveryHandlerBasic : private WriterType

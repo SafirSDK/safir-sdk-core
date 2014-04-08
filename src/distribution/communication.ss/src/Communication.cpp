@@ -35,13 +35,16 @@ namespace Internal
 {
 namespace Com
 {
-    Communication::Communication(const boost::shared_ptr<boost::asio::io_service>& ioService,
-                                 const std::string& name,
-                                 const boost::int64_t id,
-                                 const std::string& unicastAddress,
-                                 const std::string& multicastAddress)
-        : m_impl(new CommunicationImpl(ioService, name, id, unicastAddress, multicastAddress))
+    Communication(const boost::shared_ptr<boost::asio::io_service>& ioService,
+                  const std::string& nodeName,
+                  boost::int64_t nodeId, //0 is not a valid id.
+                  boost::int64_t& nodeTypeId,
+                  const std::string& unicastAddress,
+                  bool discovering,
+                  const std::vector<NodeType>& nodeTypes)
+        : m_impl(new CommunicationImpl(ioService, nodeName, nodeId, nodeTypeId, unicastAddress, discovering))
     {
+        //TODO: add all node types
     }
 
     Communication::~Communication()
@@ -89,14 +92,25 @@ namespace Com
         m_impl->InjectSeeds(seeds);
     }
 
-    void Communication::IncludeNode(boost::int64_t id)
+    void Communication::IncludeNode(boost::int64_t nodeId)
     {
-        m_impl->IncludeNode(id);
+        m_impl->IncludeNode(nodeId);
     }
 
-    void Communication::ExcludeNode(boost::int64_t id)
+    void Communication::ExcludeNode(boost::int64_t nodeId)
     {
-        m_impl->ExcludeNode(id);
+        m_impl->ExcludeNode(nodeId);
+    }
+
+    bool Communication::SendToNode(boost::int64_t nodeId, const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier)
+    {
+        return m_impl->SendToNode(nodeId, data, size, dataTypeIdentifier);
+    }
+
+    bool Communication::SendToNodeType(boost::int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier)
+    {
+        return m_impl->SendToNodeType(nodeTypeId, data, size, dataTypeIdentifier);
+
     }
 
     bool Communication::SendAll(const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier)
@@ -109,9 +123,9 @@ namespace Com
         return m_impl->SendTo(toId, data, size, dataTypeIdentifier);
     }
 
-    size_t Communication::NumberOfQueuedMessages() const
+    size_t Communication::NumberOfQueuedMessages(boost::int64_t nodeTypeId) const
     {
-        return m_impl->NumberOfQueuedMessages();
+        return m_impl->NumberOfQueuedMessages(nodeTypeId);
     }
 
     const std::string& Communication::Name() const

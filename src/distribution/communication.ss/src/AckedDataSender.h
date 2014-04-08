@@ -49,8 +49,8 @@ namespace Com
      * messages that have not been acked.
      */
 
-    typedef boost::function<void(boost::int64_t toId)> RetransmitTo;
-    typedef boost::function<void()> QueueNotFull;
+    typedef boost::function<void(boost::int64_t toNodeId)> RetransmitTo;
+    typedef boost::function<void(boost::int64_t nodeTypeId)> QueueNotFull;
 
     template <class WriterType>
     class AckedDataSenderBasic : private WriterType

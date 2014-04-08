@@ -45,7 +45,7 @@ namespace Com
      * If callback onRecv is returning false it means that there is maximum number of messages waiting to be retrieved
      * by the application and in that case Reader will sleep until callback isReceiverReady is returning true again.
      */
-    class Reader : public boost::noncopyable
+    class Reader : private boost::noncopyable
     {
     public:
         Reader(boost::asio::io_service& ioService,
