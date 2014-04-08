@@ -75,6 +75,25 @@ namespace Internal
     {
         return Safir::Utilities::Internal::GetSafirInstanceSuffix();
     }
+    
+    std::vector<std::string> ConfigHelper::GetDouDirectories(const ConfigReader& reader)
+    {
+        std::vector<std::string> directories;
+
+        // Loop through all sections in typesystem.ini
+        for (boost::property_tree::ptree::const_iterator it = reader.Typesystem().begin();
+             it != reader.Typesystem().end();
+             ++it)
+        {
+            const bool isSection = !it->second.empty();
+
+            if (isSection)
+            {
+                directories.push_back(it->second.get<std::string>("dou_directory"));
+            }
+        }
+        return directories;
+    }
 
 }
 }

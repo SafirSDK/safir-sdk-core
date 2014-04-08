@@ -37,6 +37,9 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/property_tree/ptree.hpp>
+#include <boost/filesystem.hpp>
+#include <vector>
+
 
 namespace Safir
 {
@@ -128,6 +131,25 @@ namespace Internal
          * Throws std::logic_error if SAFIR_INSTANCE is negative or not a number.
          */
         static std::string GetSafirInstanceSuffix();
+
+    };
+
+    class LLUF_CONFIG_API ConfigHelper
+    {
+    public:
+
+        /**
+         * Retreives all dou files directories specified in typesystem.ini.
+         *
+         * @param [in] reader ConfigReader object.
+         * @return Vector with the dou file directories. The order reflects the order in the configuration file.
+         *
+         * @exception std::exception Found a section without a dou_directory key. This is a fatal error.
+         *
+         */
+        static std::vector<std::string> GetDouDirectories(const ConfigReader& reader);
+
+
 
     };
 }
