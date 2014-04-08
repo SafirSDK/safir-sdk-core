@@ -76,24 +76,37 @@ namespace ToolSupport
             }
 
             MoveToMember(member);
-//            switch (m_memberDescription->GetCollectionType())
-//            {
-//            case NoCollectionType:
-//                WriteSingleValue(val, isNull, hasChanged);
-//                break;
-//            case ArrayCollectionType:
-//                WriteHashtableValue(val, key, isNull, hasChanged);
-//                break;
-//            case RangeCollectionType:
-//                WriteRangeValue(val, isNull, hasChanged);
-//                break;
-//            case SetCollectionType:
-//                WriteSetValue(val, isNull, hasChanged);
-//                break;
-//            case HashtableCollectionType:
-//                WriteHashtableValue(val, key, isNull, hasChanged);
-//                break;
-//            }
+            m_blob.AddValue(hasChanged);
+
+
+            switch (m_memberDescription->GetCollectionType())
+            {
+            case NoCollectionType:
+            {
+                WriteSingleValue(val, isNull, hasChanged);
+            }
+                break;
+            case ArrayCollectionType:
+            {
+                WriteKey(key);
+            }
+                break;
+            case RangeCollectionType:
+            {
+                WriteRangeValue(val, isNull, hasChanged);
+            }
+                break;
+            case SetCollectionType:
+            {
+                WriteSetValue(val, isNull, hasChanged);
+            }
+                break;
+            case HashtableCollectionType:
+            {
+                WriteKey(key);
+            }
+                break;
+            }
         }
 
 
@@ -119,11 +132,18 @@ namespace ToolSupport
             m_memberIndex=member;
         }
 
-        template <DotsC_CollectionType C>
-        struct Writer
+        void WriteKey(DotsC_Int32 key) {m_blob.SetKeyInt32(key);}
+        void WriteKey(DotsC_Int64 key) {m_blob.SetKeyInt64(key);}
+        void WriteKey(const std::string& key) {m_blob.SetKeyString(key);}
+        void WriteKey(const DotsC_EntityId& key)
         {
+            m_blob.SetKeyInt64(key.typeId);
+            m_blob.SetKeyHash(key.instanceId);
+        }
 
-        };
+        WriteValue(DotsC_Int32 val, bool isNull)
+
+
     };
 }
 }
