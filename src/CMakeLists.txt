@@ -3,27 +3,14 @@ cmake_minimum_required(VERSION 2.8.11)
 PROJECT(safir_sdk_core CXX C)
 
 
-#Set SAFIR_RUNTIME and SAFIR_SDK variables to paths that cmake likes.
-FILE(TO_CMAKE_PATH "$ENV{SAFIR_SDK}" SAFIR_SDK)
-FILE(TO_CMAKE_PATH "$ENV{SAFIR_RUNTIME}" SAFIR_RUNTIME)
+#TODO: !!
+set(SAFIR_SDK "/NO_THIS_IS_NOT_RIGHT")
+set(SAFIR_RUNTIME "/NO_THIS_IS_NOT_RIGHT")
 
-#TODO: move general includes somewhere sensible
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/../build/config/sdk/data/build)
-
-
-#Default build release
-#if (NOT CMAKE_BUILD_TYPE)
-#   set(CMAKE_BUILD_TYPE "Release")
-#endif()
-
-#add include path
-#INCLUDE_DIRECTORIES(${SAFIR_SDK}/include)
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} cmake})
 
 #if we're using gcc we need to set up some things
 if (UNIX)
-   #link directory for libraries
-   #LINK_DIRECTORIES(${SAFIR_RUNTIME}/lib)
-
    #turn on more warnings, set up use of threads, and set symbol visibility to hide as much as possible
    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pthread -fvisibility=hidden -fvisibility-inlines-hidden -Bsymbolic -Wl,--exclude-libs=ALL")
    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pthread -fvisibility=hidden -Bsymbolic  -Wl,--exclude-libs=ALL")
@@ -34,7 +21,6 @@ if (UNIX)
 endif ()
 
 if (MSVC)
-   #LINK_DIRECTORIES(${SAFIR_SDK}/lib)
    ADD_DEFINITIONS(-DNOMINMAX)
    ADD_DEFINITIONS(-D_CRT_SECURE_NO_DEPRECATE -D_SCL_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE)
    ADD_DEFINITIONS(-D_UNICODE -DUNICODE)
@@ -143,9 +129,10 @@ MACRO(INSTALL_DEBUG_INFO target)
     STRING(REPLACE .dll .pdb relwithdebinfo_location ${relwithdebinfo_location})
     STRING(REPLACE .exe .pdb relwithdebinfo_location ${relwithdebinfo_location})
     
+    #TODO
     #Install the pdb files using the locations we just worked out.
-    INSTALL(FILES ${debug_location} DESTINATION ${SAFIR_RUNTIME}/bin CONFIGURATIONS Debug)
-    INSTALL(FILES ${relwithdebinfo_location} DESTINATION ${SAFIR_RUNTIME}/bin CONFIGURATIONS RelWithDebInfo)
+    #INSTALL(FILES ${debug_location} DESTINATION ${SAFIR_RUNTIME}/bin CONFIGURATIONS Debug)
+    #INSTALL(FILES ${relwithdebinfo_location} DESTINATION ${SAFIR_RUNTIME}/bin CONFIGURATIONS RelWithDebInfo)
     
     UNSET(debug_location)
     UNSET(relwithdebinfo_location)
@@ -177,7 +164,7 @@ function (SET_SAFIR_TEST_PROPERTIES TEST_NAME)
     "PYTHONPATH=${pypath}")
 endfunction()
 
-INCLUDE(../build/config/sdk/data/generated/build_generated.cmake)
+INCLUDE(cmake/build_generated.cmake)
 
 
 
