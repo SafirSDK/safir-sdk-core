@@ -49,3 +49,4 @@ buildlog_*.html
 bin
 *.tmp
 *-build
+*.orig
