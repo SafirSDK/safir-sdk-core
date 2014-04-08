@@ -1,11 +1,3 @@
-cmake_minimum_required(VERSION 2.8)
-
-project(olib CXX)
-
-INCLUDE_DIRECTORIES(.)
-
-INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
-
 if (UNIX)
     FIND_PACKAGE(IODBC)
     if (IODBC_FOUND)
@@ -27,9 +19,9 @@ FILE(GLOB sources *.cpp)
 
 ADD_LIBRARY(olib SHARED ${sources} ${headers})
 
-if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(olib dots_generated-olib-cpp logging_cpp ${ODBC_LIBRARIES})
-endif()
+target_include_directories(olib PUBLIC .)
+
+TARGET_LINK_LIBRARIES(olib douf_time_cpp dots_generated-olib-cpp logging_cpp ${ODBC_LIBRARIES})
 
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE

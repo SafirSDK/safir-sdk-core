@@ -1,9 +1,3 @@
-cmake_minimum_required(VERSION 2.8)
-
-project(dope_main CXX)
-
-INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
-
 if (UNIX)
     FIND_PACKAGE(IODBC)
     if (IODBC_FOUND)

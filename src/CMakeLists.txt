@@ -186,3 +186,18 @@ add_subdirectory(dose)
 add_subdirectory(douf)
 add_subdirectory(swre)
 add_subdirectory(foreach)
+add_subdirectory(olib)
+add_subdirectory(dope)
+
+
+
+#TODO
+#run_test_suite   src/tests/stop_orders_at_exit             stop_orders_at_exit
+
+#Run static header checks to ensure only "good" headers have been included
+#run_test_suite   src/tests/header_check                    header_check
+
+#build_dir        docs/doxygen                              Release
+
+#This will install the code examples under sdk/docs
+#build_dir        docs/examples                             Release
