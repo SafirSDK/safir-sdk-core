@@ -22,5 +22,5 @@ ADD_TEST(ConfigReader_PathFinders PathFinders_test)
 ADD_TEST(ConfigReader_ConfigReaderImpl ConfigReaderImpl_test ${CMAKE_CURRENT_SOURCE_DIR}/testconf)
 
 ADD_TEST(ConfigReader_ConfigHelper ConfigHelper_test)
-SET_PROPERTY(TEST ConfigReader_ConfigHelper PROPERTY ENVIRONMENT "SAFIR_TEST_CONFIG_OVERRIDE=${lluf_config_test_SOURCE_DIR}/testconf/config_helper/")
+SET_PROPERTY(TEST ConfigReader_ConfigHelper PROPERTY ENVIRONMENT "SAFIR_TEST_CONFIG_OVERRIDE=${CMAKE_CURRENT_SOURCE_DIR}/testconf/config_helper/")
 
