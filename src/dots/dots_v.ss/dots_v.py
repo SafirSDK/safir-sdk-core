@@ -1660,7 +1660,6 @@ def main():
         sys.exit(1)
 
     dependency_paths = arguments.dependencies
-    print("Dependencies:", dependency_paths, file=sys.stderr)
                     
     gen_src_output_path = arguments.output_path
     if gen_src_output_path == "":

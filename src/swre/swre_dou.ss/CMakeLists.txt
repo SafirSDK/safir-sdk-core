@@ -1,3 +1,3 @@
-BUILD_GENERATED_LIBRARY(swre_library Safir)
+BUILD_GENERATED_LIBRARY(NAME swre_library DEPENDENCIES Safir)
 
 

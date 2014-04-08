@@ -1,3 +1,1 @@
-BUILD_GENERATED_LIBRARY(foreach Safir)
-
-#TODO: dependencies will not work if nested. E.g. C depends on B which depends on A. CMakery for dots_v doesnt "remember" deps...
+BUILD_GENERATED_LIBRARY(NAME foreach DEPENDENCIES Safir)

@@ -1,12 +1,56 @@
 #TODO use CMakeParseArguments
-FUNCTION(BUILD_GENERATED_LIBRARY NAME DEPENDENCIES)
-  message("++ Name of project is ${NAME}")
-  message("++ Dependencies of project are '${DEPENDENCIES}'")
-  SET (SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-  message("++ SOURCE_DIR is '${SOURCE_DIR}'")
+FUNCTION(BUILD_GENERATED_LIBRARY)
+  cmake_parse_arguments(GEN "" "NAME" "DEPENDENCIES" ${ARGN})
+  message("++ Will build generated library ${GEN_NAME} with dependencies '${GEN_DEPENDENCIES}'")
 
-  FIND_PACKAGE(PythonInterp)
+  if ("${GEN_NAME}" STREQUAL "")
+    message(FATAL_ERROR "Invalid NAME passed to BUILD_GENERATED_LIBRARY")
+  endif()
 
+  if (NOT "${GEN_UNPARSED_ARGUMENTS}" STREQUAL "")
+    message(FATAL_ERROR "Unknown argument to BUILD_GENERATED_LIBRARY '${GEN_UNPARSED_ARGUMENTS}'")
+  endif()
+
+  # 
+  # Dependency resolution
+  #
+  # Create custom targets dummy that we just use to have somewhere to put the dependencies.
+  # Then, when we need to resolve a targets dependencies, we recursively look at the dummy
+  # targets to find all of the dependencies of our dependencies.
+  add_custom_target(${GEN_NAME}-dou)
+  set_target_properties(${GEN_NAME}-dou PROPERTIES
+    DOU_DEPENDENCIES "${GEN_DEPENDENCIES}"
+    DOU_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+
+  #recursively get all dependendencies
+  function(GET_DEPS)
+    cmake_parse_arguments(DEP "" "" "DEPENDENCIES" ${ARGN})
+
+    FOREACH (DEP ${DEP_DEPENDENCIES})
+      if (NOT "${DEP}" STREQUAL "")
+        get_target_property(deps ${DEP}-dou DOU_DEPENDENCIES)
+        if ("${deps}" STREQUAL "deps-NOTFOUND")
+          MESSAGE(FATAL_ERROR "Could not resolve dependency ${DEP}'")
+        else()
+          GET_DEPS(DEPENDENCIES ${deps})
+          set (GET_DEPS_RESULT ${GET_DEPS_RESULT} ${DEP})
+        endif()
+      endif()
+    ENDFOREACH()
+    if(GET_DEPS_RESULT)
+      LIST(REMOVE_DUPLICATES GET_DEPS_RESULT)
+    endif()
+    set (GET_DEPS_RESULT ${GET_DEPS_RESULT} PARENT_SCOPE)
+  endfunction()
+
+  GET_DEPS(DEPENDENCIES ${GEN_DEPENDENCIES})
+  set(ALL_DEPENDENCIES ${GET_DEPS_RESULT})
+  ################
+
+
+  #
+  # Set up variables containing all dou files and all expected source code files
+  #
   FILE(GLOB_RECURSE dou_files *.dou)
   #message("Dou files: ${dou_files}")
 
@@ -19,7 +63,7 @@ FUNCTION(BUILD_GENERATED_LIBRARY NAME DEPENDENCIES)
   endforeach()
 
   #message("Cpp files: ${cpp_files}")
-  
+  ##############  
   
 
   #TODO: fix the paths below!
@@ -29,9 +73,16 @@ FUNCTION(BUILD_GENERATED_LIBRARY NAME DEPENDENCIES)
   # We set up some variables to point to dots_v and dod-files and directories,
   # and then we define the custom command that generates the code
   #
+  foreach(DEP ${ALL_DEPENDENCIES})
+    get_target_property(sd ${DEP}-dou DOU_DIR)
+    set(DOTS_V_DEPS ${DOTS_V_DEPS} ${sd})
+  endforeach()
+  message("DOTS_V_DEPS '${DOTS_V_DEPS}'")
+  FIND_PACKAGE(PythonInterp)
+
   SET(dod_directory ${safir_sdk_core_SOURCE_DIR}/dots/dots_v.ss/data/)
   FILE(GLOB dod_files ${dod_directory} *.dod)
-  SET(dots_v_command ${PYTHON_EXECUTABLE} "${safir_sdk_core_SOURCE_DIR}/dots/dots_v.ss/dots_v.py" --dod-files=${dod_directory} --dependencies "${DEPENDENCIES}" --output-path=generated_code)
+  SET(dots_v_command ${PYTHON_EXECUTABLE} "${safir_sdk_core_SOURCE_DIR}/dots/dots_v.ss/dots_v.py" --dod-files=${dod_directory} --dependencies ${DOTS_V_DEPS} --output-path=generated_code)
   
   ADD_CUSTOM_COMMAND(
     OUTPUT 
@@ -43,71 +94,34 @@ FUNCTION(BUILD_GENERATED_LIBRARY NAME DEPENDENCIES)
     generated_code/dotnet 
     ${cpp_files}
 
-    COMMAND ${dots_v_command} ${SOURCE_DIR}
+    COMMAND ${dots_v_command} ${CMAKE_CURRENT_SOURCE_DIR}
 
     DEPENDS ${dod_files} ${dou_files}
-    COMMENT "Generating code for ${SOURCE_DIR}")
+    COMMENT "Generating code for ${CMAKE_CURRENT_SOURCE_DIR}")
   #############
 
-  #TODO:precompiled headers?!
 
-  ADD_LIBRARY(dots_generated-${NAME}-cpp SHARED ${cpp_files}) #TODO headers?
+
   
-  target_include_directories(dots_generated-${NAME}-cpp
+  #
+  # Build CPP
+  #
+  ADD_LIBRARY(dots_generated-${GEN_NAME}-cpp SHARED ${cpp_files}) #TODO headers?
+  
+  target_include_directories(dots_generated-${GEN_NAME}-cpp
     PRIVATE ${safir_sdk_core_SOURCE_DIR}/dots/dots_v.ss/data
     PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/generated_code/cpp/include)
   
-  target_link_libraries(dots_generated-${NAME}-cpp dots_cpp)
+  target_link_libraries(dots_generated-${GEN_NAME}-cpp dots_cpp)
 
-  FOREACH (DEP ${DEPENDENCIES})
-    TARGET_LINK_LIBRARIES(dots_generated-${NAME}-cpp dots_generated-${DEP}-cpp)
+  FOREACH (DEP ${GEN_DEPENDENCIES})
+    TARGET_LINK_LIBRARIES(dots_generated-${GEN_NAME}-cpp dots_generated-${DEP}-cpp)
   ENDFOREACH()
-
-  #TODO: installation
-
-  #Build type needs to be set so that we can forward it to subdirectory builds
-  #if (NOT CMAKE_BUILD_TYPE)
-  #  set(CMAKE_BUILD_TYPE "RelWithDebInfo")
-  #endif()
-
-  #try to work out if make is being used, in that case we want to use $(MAKE) instead of cmake --build,
-  #since that will allow the jobserver information to be propagated automatically
-  #MESSAGE("Generator ${CMAKE_GENERATOR}")
-  # if ("${CMAKE_GENERATOR}" STREQUAL "Unix Makefiles")
-  #   set (CPP_BUILD_COMMAND "$(MAKE)")
-  # else()
-  #   #just guess that we can use 3 for parallelism...
-  #   #TODO: do something intelligent for JOM and NMAKE
-  #   set (CPP_BUILD_COMMAND "${CMAKE_COMMAND} --build . -- -j3")
-  # endif()
-
-  # #
-  # # Build CPP
-  # #
-  # # Build the generated code by running cmake in the cpp subdirectory that was created
-  # # in the code generation step.
-  # #
-  # ADD_CUSTOM_TARGET(dots_generated-${NAME}-cpp ALL
-  #   DEPENDS generated_code/cpp
-  #   COMMAND ${CMAKE_COMMAND} -G ${CMAKE_GENERATOR} -DSAFIR_PROJECT_NAME:string=${NAME}-cpp -DCMAKE_BUILD_TYPE:string=${CMAKE_BUILD_TYPE} -DDEPENDENCIES=${DEPENDENCIES} .
-  #   COMMAND ${CPP_BUILD_COMMAND}
-  #   VERBATIM
-  #   WORKING_DIRECTORY generated_code/cpp)
   ############
 
-  #TODO: this requires an installed typesystem.ini!
-  #TODO: sucks below, cant do it this way...
+  #TODO:precompiled headers?!
+  #TODO: installation
 
-#  EXECUTE_PROCESS(
-#    COMMAND safir_show_config --module-install-dir ${NAME}
-#    RESULT_VARIABLE execute_result
-#    OUTPUT_VARIABLE DOU_INSTALL_DIRECTORY
-#    ERROR_VARIABLE ERR
-#    OUTPUT_STRIP_TRAILING_WHITESPACE)
-#
-#  if (NOT execute_result EQUAL "0")
-#    MESSAGE(FATAL_ERROR "Could not find install directory for module ${NAME}. Is it configured in typesystem.ini?")
-#  endif()
 
 #  FILE(GLOB_RECURSE files_to_install *.dou *.dom *.namespace.txt)
 #  #message("files_to_install = ${files_to_install}")
