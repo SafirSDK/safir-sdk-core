@@ -118,6 +118,12 @@ namespace ToolSupport
             m_memberDescription=m_classDescription->GetMember(member);
             m_memberIndex=member;
         }
+
+        template <DotsC_CollectionType C>
+        struct Writer
+        {
+
+        };
     };
 }
 }
