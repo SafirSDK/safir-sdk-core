@@ -7,7 +7,7 @@ PROJECT(safir_sdk_core CXX C)
 set(SAFIR_SDK "/NO_THIS_IS_NOT_RIGHT")
 set(SAFIR_RUNTIME "/NO_THIS_IS_NOT_RIGHT")
 
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} cmake})
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 #if we're using gcc we need to set up some things
 if (UNIX)
