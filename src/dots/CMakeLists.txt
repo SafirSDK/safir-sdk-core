@@ -9,4 +9,4 @@ add_subdirectory(dots_cpp.ss)
 add_subdirectory(dots_v.ss)
 
 add_subdirectory(dots_test_dou.ss)
-
+add_subdirectory(dots_test.ss)
