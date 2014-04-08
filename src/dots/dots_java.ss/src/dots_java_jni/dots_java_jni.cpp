@@ -1577,23 +1577,13 @@ JNIEXPORT jobjectArray JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_Ge
     try
     {
         //Read the config files
+        //these directories have already been checked  by dots_kernel by the time we get here
+        //so we know that they exist.
+        //the only reason that we may fail here is if we do not have read permissions on
+        //the ini files...
         Safir::Utilities::Internal::ConfigReader reader;
-        
-        //loop through all sections in typesystem.ini
-        for (boost::property_tree::ptree::const_iterator it = reader.Typesystem().begin();
-             it != reader.Typesystem().end(); ++it)
-        {
-            const bool isSection = !it->second.empty();
-            
-            if (isSection)
-            {
-                //these directories have already been checked  by dots_kernel by the time we get here
-                //so we know that they exist.
-                //the only reason that we may fail here is if we do not have read permissions on 
-                //the ini files...
-                directories.push_back(it->second.get<std::string>("dou_directory"));
-            }
-        }
+
+        directories = Safir::Utilities::Internal::ConfigHelper::GetDouDirectories(reader);
     }
     catch (const std::exception& e)
     {

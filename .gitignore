@@ -34,6 +34,7 @@ moc_*.cxx
 moc_*.cxx_parameters
 qrc_*.cxx
 *.qrc.depends
+*.cbp
 
 #Misc
 __pycache__
@@ -44,3 +45,4 @@ buildlog_*.html
 bin
 *-build
 generated_code
+*.orig
