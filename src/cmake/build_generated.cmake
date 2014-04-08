@@ -85,19 +85,15 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
   SET(dots_v_command ${PYTHON_EXECUTABLE} "${safir_sdk_core_SOURCE_DIR}/dots/dots_v.ss/dots_v.py" --dod-files=${dod_directory} --dependencies ${DOTS_V_DEPS} --output-path=generated_code)
   
   ADD_CUSTOM_COMMAND(
-    OUTPUT 
-    generated_code 
-    generated_code/tags 
-    generated_code/cpp 
-    generated_code/java 
-    generated_code/ada 
-    generated_code/dotnet 
-    ${cpp_files}
+    OUTPUT ${cpp_files}
 
     COMMAND ${dots_v_command} ${CMAKE_CURRENT_SOURCE_DIR}
 
     DEPENDS ${dod_files} ${dou_files}
     COMMENT "Generating code for ${CMAKE_CURRENT_SOURCE_DIR}")
+
+  #make clean target remove the generated_code directory
+  SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES generated_code)
   #############
 
 
