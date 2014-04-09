@@ -67,13 +67,8 @@ namespace ToolSupport
             :m_repository(rep)
             ,m_classDescription(m_repository->GetClass(typeId))
             ,m_memberDescription(NULL)
-            ,m_memberIndex(-1)
-            ,m_blob(typeId)
+            ,m_blob(typeId, m_classDescription->GetNumberOfMembers())
         {
-            for (int member=0; member<m_memberDescription->GetNumberOfMembers(); ++member)
-            {
-                m_blob.AddMember(member);
-            }
         }
 
         /**
@@ -132,6 +127,9 @@ namespace ToolSupport
         template <class Key, class Val>
         void Write(DotsC_MemberIndex member, const Key& key, const Val& val, bool isNull, bool hasChanged)
         {
+            m_blob.AddValue(member, hasChanged);
+
+            if
             if (isNull && !hasChanged)
             {
                 return; //this is the default and is not present in blob.
@@ -163,7 +161,6 @@ namespace ToolSupport
         const RepositoryType* m_repository;
         const ClassDescriptionType* m_classDescription;
         const MemberDescriptionType* m_memberDescription;
-        DotsC_MemberIndex m_memberIndex;
         Safir::Dob::Typesystem::ToolSupport::Internal::Blob m_blob;
 
         void MoveToMember(DotsC_MemberIndex member)

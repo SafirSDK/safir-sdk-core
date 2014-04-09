@@ -34,19 +34,21 @@ namespace ToolSupport
 {
 namespace Internal
 {
-    Blob::Blob(boost::int64_t typeId)
+    Blob::Blob(boost::int64_t typeId, int numberOfMembers)
         :m_blobSize(0)
         ,m_typeId(typeId)
         ,m_object(new AnyObject())
-        ,m_currentObjectMemberIndex(-1)
     {
+        for (int i=0; i<numberOfMembers; ++i)
+        {
+            m_object->add_members();
+        }
     }
 
     Blob::Blob(const char* blob)
         :m_blobSize(Blob::GetSize(blob))
         ,m_typeId(Blob::GetTypeId(blob))
         ,m_object(new AnyObject())
-        ,m_currentObjectMemberIndex(-1)
     {
         bool ok=m_object->ParseFromArray(static_cast<const void*>(blob+HeaderSize), m_blobSize-HeaderSize);
         if (!ok)
@@ -92,50 +94,19 @@ namespace Internal
         m_object->SerializeWithCachedSizesToArray(content);
     }
 
-    bool Blob::MoveToMember(boost::int32_t memberIndex)
+    bool Blob::IsChangedHere(boost::int32_t member) const
     {
-        if (m_currentObjectMemberIndex>=0 && m_object->members(m_currentObjectMemberIndex).member_id()==memberIndex)
-        {
-            return true; //already there
-        }
-
-        for (int i=0; i<m_object->members_size(); ++i)
-        {
-            if (m_object->members(i).member_id()==memberIndex)
-            {
-                m_currentObjectMemberIndex=i;
-                return true;
-            }
-        }
-
-        return false;
+        return  m_object->members(member).has_is_changed_here() && m_object->members(member).is_changed_here();
     }
 
-    bool Blob::IsChangedHere() const
-    {
-        if (m_currentObjectMemberIndex<0)
-        {
-            return false;
-        }
-
-        return  m_object->members(m_currentObjectMemberIndex).has_is_changed_here() &&
-                m_object->members(m_currentObjectMemberIndex).is_changed_here();
-
+    int Blob::NumberOfValues(boost::int32_t member) const
+    {        
+        return m_object->members(member).values_size();
     }
 
-    int Blob::NumberOfValues() const
+    bool Blob::IsNull(boost::int32_t member, int index) const
     {
-        if (m_currentObjectMemberIndex<0)
-        {
-            return 0;
-        }
-
-        return m_object->members(m_currentObjectMemberIndex).values_size();
-    }
-
-    bool Blob::IsNull(int index) const
-    {
-        const AnyObject_Value& val=m_object->members(m_currentObjectMemberIndex).values(index);
+        const AnyObject_Value& val=m_object->members(member).values(index);
         bool hasValue=
                 val.value().has_int32_value() ||
                 val.value().has_int64_value() ||
@@ -149,186 +120,179 @@ namespace Internal
         return !hasValue;
     }
 
-    bool Blob::IsChanged(int index) const
+    bool Blob::IsChanged(boost::int32_t member, int index) const
     {
-        const AnyObject_Value& val=m_object->members(m_currentObjectMemberIndex).values(index);
+        const AnyObject_Value& val=m_object->members(member).values(index);
         return (val.has_is_changed() && val.is_changed());
     }
 
-    boost::int32_t Blob::GetKeyInt32(int index) const
+    boost::int32_t Blob::GetKeyInt32(boost::int32_t member, int index) const
     {
-        const AnyObject_Value& val=m_object->members(m_currentObjectMemberIndex).values(index);
+        const AnyObject_Value& val=m_object->members(member).values(index);
         return val.key().int32_value();
     }
 
-    boost::int64_t Blob::GetKeyInt64(int index) const
+    boost::int64_t Blob::GetKeyInt64(boost::int32_t member, int index) const
     {
-        const AnyObject_Value& val=m_object->members(m_currentObjectMemberIndex).values(index);
+        const AnyObject_Value& val=m_object->members(member).values(index);
         return val.key().int64_value();
     }
 
-    boost::int64_t Blob::GetKeyHash(int index) const
+    boost::int64_t Blob::GetKeyHash(boost::int32_t member, int index) const
     {
-        const AnyObject_Value& val=m_object->members(m_currentObjectMemberIndex).values(index);
+        const AnyObject_Value& val=m_object->members(member).values(index);
         return val.key().hash_value();
     }
 
-    const std::string& Blob::GetKeyString(int index) const
+    const std::string& Blob::GetKeyString(boost::int32_t member, int index) const
     {
-        const AnyObject_Value& val=m_object->members(m_currentObjectMemberIndex).values(index);
+        const AnyObject_Value& val=m_object->members(member).values(index);
         return val.key().string_value();
     }
 
-    boost::int32_t Blob::GetValueInt32(int index) const
+    boost::int32_t Blob::GetValueInt32(boost::int32_t member, int index) const
     {
-        const AnyObject_Value& val=m_object->members(m_currentObjectMemberIndex).values(index);
+        const AnyObject_Value& val=m_object->members(member).values(index);
         return val.value().int32_value();
     }
 
-    boost::int64_t Blob::GetValueInt64(int index) const
+    boost::int64_t Blob::GetValueInt64(boost::int32_t member, int index) const
     {
-        const AnyObject_Value& val=m_object->members(m_currentObjectMemberIndex).values(index);
+        const AnyObject_Value& val=m_object->members(member).values(index);
         return val.value().int64_value();
     }
 
-    float Blob::GetValueFloat32(int index) const
+    float Blob::GetValueFloat32(boost::int32_t member, int index) const
     {
-        const AnyObject_Value& val=m_object->members(m_currentObjectMemberIndex).values(index);
+        const AnyObject_Value& val=m_object->members(member).values(index);
         return val.value().float32_value();
     }
 
-    double Blob::GetValueFloat64(int index) const
+    double Blob::GetValueFloat64(boost::int32_t member, int index) const
     {
-        const AnyObject_Value& val=m_object->members(m_currentObjectMemberIndex).values(index);
+        const AnyObject_Value& val=m_object->members(member).values(index);
         return val.value().float64_value();
     }
 
-    bool Blob::GetValueBool(int index) const
+    bool Blob::GetValueBool(boost::int32_t member, int index) const
     {
-        const AnyObject_Value& val=m_object->members(m_currentObjectMemberIndex).values(index);
+        const AnyObject_Value& val=m_object->members(member).values(index);
         return val.value().boolean_value();
     }
 
-    boost::int64_t Blob::GetValueHash(int index) const
+    boost::int64_t Blob::GetValueHash(boost::int32_t member, int index) const
     {
-        const AnyObject_Value& val=m_object->members(m_currentObjectMemberIndex).values(index);
+        const AnyObject_Value& val=m_object->members(member).values(index);
         return val.value().hash_value();
     }
 
-    const std::string& Blob::GetValueString(int index) const
+    const std::string& Blob::GetValueString(boost::int32_t member, int index) const
     {
-        const AnyObject_Value& val=m_object->members(m_currentObjectMemberIndex).values(index);
+        const AnyObject_Value& val=m_object->members(member).values(index);
         return val.value().string_value();
     }
 
-    std::pair<const char*, boost::int32_t> Blob::GetValueBinary(int index) const
+    std::pair<const char*, boost::int32_t> Blob::GetValueBinary(boost::int32_t member, int index) const
     {
-        const AnyObject_Value& val=m_object->members(m_currentObjectMemberIndex).values(index);
+        const AnyObject_Value& val=m_object->members(member).values(index);
         const std::string& s=val.value().binary_value();
         return std::make_pair(s.c_str(), static_cast<boost::int32_t>(s.size()));
     }
 
-    void Blob::AddMember(boost::int32_t memberIndex)
+    void Blob::SetChangedHere(boost::int32_t member, bool isChanged)
     {
-        AnyObject_Member* m=m_object->add_members();
-
-        m_currentObjectMemberIndex=m_object->members_size()-1;
+        m_object->mutable_members(member)->set_is_changed_here(isChanged);
     }
 
-    void Blob::SetChangedHere(bool isChanged)
+    void Blob::AddValue(boost::int32_t member, bool isChanged)
     {
-        m_object->mutable_members(m_currentObjectMemberIndex)->set_is_changed_here(isChanged);
-    }
-
-    void Blob::AddValue(bool isChanged)
-    {
-        AnyObject_Value* value=m_object->mutable_members(m_currentObjectMemberIndex)->add_values();
+        AnyObject_Value* value=m_object->mutable_members(member)->add_values();
         if (isChanged)
         {
             value->set_is_changed(isChanged);
         }
     }
 
-    void Blob::SetKeyInt32(boost::int32_t val)
+    void Blob::SetKeyInt32(boost::int32_t member, boost::int32_t val)
     {
-        AnyObject_Member* m=m_object->mutable_members(m_currentObjectMemberIndex);
+        AnyObject_Member* m=m_object->mutable_members(member);
         AnyObject_Value* v=m->mutable_values(m->values_size()-1);
         v->mutable_key()->set_int32_value(val);
     }
 
-    void Blob::SetKeyInt64(boost::int64_t val)
+    void Blob::SetKeyInt64(boost::int32_t member, boost::int64_t val)
     {
-        AnyObject_Member* m=m_object->mutable_members(m_currentObjectMemberIndex);
+        AnyObject_Member* m=m_object->mutable_members(member);
         AnyObject_Value* v=m->mutable_values(m->values_size()-1);
         v->mutable_key()->set_int64_value(val);
     }
 
-    void Blob::SetKeyHash(boost::int64_t val)
+    void Blob::SetKeyHash(boost::int32_t member, boost::int64_t val)
     {
-        AnyObject_Member* m=m_object->mutable_members(m_currentObjectMemberIndex);
+        AnyObject_Member* m=m_object->mutable_members(member);
         AnyObject_Value* v=m->mutable_values(m->values_size()-1);
         v->mutable_key()->set_hash_value(val);
     }
 
-    void Blob::SetKeyString(const std::string &val)
+    void Blob::SetKeyString(boost::int32_t member, const std::string &val)
     {
-        AnyObject_Member* m=m_object->mutable_members(m_currentObjectMemberIndex);
+        AnyObject_Member* m=m_object->mutable_members(member);
         AnyObject_Value* v=m->mutable_values(m->values_size()-1);
         v->mutable_key()->set_string_value(val);
     }
 
-    void Blob::SetValueInt32(boost::int32_t val)
+    void Blob::SetValueInt32(boost::int32_t member, boost::int32_t val)
     {
-        AnyObject_Member* m=m_object->mutable_members(m_currentObjectMemberIndex);
+        AnyObject_Member* m=m_object->mutable_members(member);
         AnyObject_Value* v=m->mutable_values(m->values_size()-1);
         v->mutable_value()->set_int32_value(val);
     }
 
-    void Blob::SetValueInt64(boost::int64_t val)
+    void Blob::SetValueInt64(boost::int32_t member, boost::int64_t val)
     {
-        AnyObject_Member* m=m_object->mutable_members(m_currentObjectMemberIndex);
+        AnyObject_Member* m=m_object->mutable_members(member);
         AnyObject_Value* v=m->mutable_values(m->values_size()-1);
         v->mutable_value()->set_int64_value(val);
     }
 
-    void Blob::SetValueFloat32(float val)
+    void Blob::SetValueFloat32(boost::int32_t member, float val)
     {
-        AnyObject_Member* m=m_object->mutable_members(m_currentObjectMemberIndex);
+        AnyObject_Member* m=m_object->mutable_members(member);
         AnyObject_Value* v=m->mutable_values(m->values_size()-1);
         v->mutable_value()->set_float32_value(val);
     }
 
-    void Blob::SetValueFloat64(double val)
+    void Blob::SetValueFloat64(boost::int32_t member, double val)
     {
-        AnyObject_Member* m=m_object->mutable_members(m_currentObjectMemberIndex);
+        AnyObject_Member* m=m_object->mutable_members(member);
         AnyObject_Value* v=m->mutable_values(m->values_size()-1);
         v->mutable_value()->set_float64_value(val);
     }
 
-    void Blob::SetValueBool(bool val)
+    void Blob::SetValueBool(boost::int32_t member, bool val)
     {
-        AnyObject_Member* m=m_object->mutable_members(m_currentObjectMemberIndex);
+        AnyObject_Member* m=m_object->mutable_members(member);
         AnyObject_Value* v=m->mutable_values(m->values_size()-1);
         v->mutable_value()->set_boolean_value(val);
     }
 
-    void Blob::SetValueHash(boost::int64_t val)
+    void Blob::SetValueHash(boost::int32_t member, boost::int64_t val)
     {
-        AnyObject_Member* m=m_object->mutable_members(m_currentObjectMemberIndex);
+        AnyObject_Member* m=m_object->mutable_members(member);
         AnyObject_Value* v=m->mutable_values(m->values_size()-1);
         v->mutable_value()->set_hash_value(val);
     }
 
-    void Blob::SetValueString(const std::string &val)
+    void Blob::SetValueString(boost::int32_t member, const std::string &val)
     {
-        AnyObject_Member* m=m_object->mutable_members(m_currentObjectMemberIndex);
+        AnyObject_Member* m=m_object->mutable_members(member);
         AnyObject_Value* v=m->mutable_values(m->values_size()-1);
         v->mutable_value()->set_string_value(val);
     }
 
-    void Blob::SetValueBinary(const char *val, boost::int32_t size)
+    void Blob::SetValueBinary(boost::int32_t member, const char *val, boost::int32_t size)
     {
-        AnyObject_Member* m=m_object->mutable_members(m_currentObjectMemberIndex);
+        AnyObject_Member* m=m_object->mutable_members(member);
         AnyObject_Value* v=m->mutable_values(m->values_size()-1);
         v->mutable_value()->set_binary_value(val, static_cast<size_t>(size));
     }
