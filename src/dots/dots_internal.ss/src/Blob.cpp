@@ -231,7 +231,7 @@ namespace Internal
     void Blob::AddMember(boost::int32_t memberIndex)
     {
         AnyObject_Member* m=m_object->add_members();
-        m->set_member_id(memberIndex);
+
         m_currentObjectMemberIndex=m_object->members_size()-1;
     }
 

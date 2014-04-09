@@ -59,7 +59,7 @@ namespace ToolSupport
         typedef typename Traits::CreateRoutineDescriptionType CreateRoutineDescriptionType;
 
         /**
-         * @brief Constructor - Creates a new writeable blob of specified type.
+         * @brief Constructor - Creates a new writeable blob of specified type. Initial state isNull=true and isChanged=false.
          * @param rep [in] - A type repository to use when creating a valid blob.
          * @param typeId [in] - Type of this blob. Type descripton must exist in the type repository.
          */
@@ -70,6 +70,10 @@ namespace ToolSupport
             ,m_memberIndex(-1)
             ,m_blob(typeId)
         {
+            for (int member=0; member<m_memberDescription->GetNumberOfMembers(); ++member)
+            {
+                m_blob.AddMember(member);
+            }
         }
 
         /**
