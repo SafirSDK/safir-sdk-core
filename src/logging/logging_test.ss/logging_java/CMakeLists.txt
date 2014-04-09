@@ -12,4 +12,4 @@ ADD_JAR(log_sender_java "${sources}" ALL)
 
 ADD_TEST(logging_java ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
 
-SET_SAFIR_TEST_PROPERTIES(logging_java 120)
+SET_SAFIR_TEST_PROPERTIES(TEST logging_java TIMEOUT 120)

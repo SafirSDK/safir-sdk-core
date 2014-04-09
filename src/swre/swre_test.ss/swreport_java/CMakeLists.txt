@@ -10,4 +10,4 @@ ADD_JAR(swreport_sender_java Sender.java ALL)
 
 ADD_TEST(swreport_java ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
 
-SET_SAFIR_TEST_PROPERTIES(swreport_java 120)
+SET_SAFIR_TEST_PROPERTIES(TEST swreport_java TIMEOUT 120)

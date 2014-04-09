@@ -4,4 +4,4 @@ TARGET_LINK_LIBRARIES(lluf_id_test lluf_id)
 
 ADD_TEST(lluf_id lluf_id_test)
 
-SET_SAFIR_TEST_PROPERTIES(lluf_id)
+SET_SAFIR_TEST_PROPERTIES(TEST lluf_id)

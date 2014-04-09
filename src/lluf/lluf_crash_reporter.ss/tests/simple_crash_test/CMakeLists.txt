@@ -6,4 +6,4 @@ ENDIF()
 
 ADD_TEST(CrashReporter_simple ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
 
-SET_SAFIR_TEST_PROPERTIES(CrashReporter_simple)
+SET_SAFIR_TEST_PROPERTIES(TEST CrashReporter_simple)

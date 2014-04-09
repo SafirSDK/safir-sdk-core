@@ -3,4 +3,4 @@ TARGET_LINK_LIBRARIES(consumer_cast_test dose_cpp)
 
 ADD_TEST(ConsumerCasting consumer_cast_test)
 
-SET_SAFIR_TEST_PROPERTIES(ConsumerCasting 60)
+SET_SAFIR_TEST_PROPERTIES(TEST ConsumerCasting TIMEOUT 60)

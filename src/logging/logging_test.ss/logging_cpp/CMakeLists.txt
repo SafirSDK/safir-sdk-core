@@ -10,4 +10,4 @@ ADD_TEST(NAME logging_cpp
   --sender $<TARGET_FILE:log_sender>
   --safir-show-config $<TARGET_FILE:safir_show_config>)
 
-SET_SAFIR_TEST_PROPERTIES(logging_cpp 120)
+SET_SAFIR_TEST_PROPERTIES(TEST logging_cpp TIMEOUT 120)

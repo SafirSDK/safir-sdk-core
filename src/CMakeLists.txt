@@ -146,18 +146,35 @@ else()
 endif()
 
 
-#also accepts an optional second argument TIMEOUT which will set test timeout
-#in seconds
-function (SET_SAFIR_TEST_PROPERTIES TEST_NAME) 
-  #FIND_SAFIR_SDK_SOURCE_ROOT(SAFIR_SOURCE_ROOT)
-  if (ARGV1)
-    SET_TESTS_PROPERTIES(${TEST_NAME} PROPERTIES TIMEOUT ${ARGV1})
+# Set up properties on tests
+# Usage: SET_SAFIR_TEST_PROPERTIES(TEST <test_target> [TIMEOUT <timeout>] [CONFIG_OVERRIDE <config_dir>])
+#
+# TIMEOUT (optional): Time in seconds after which the test is interrupted. If not specified will be set to 60s.
+# CONFIG_OVERRIDE (optional): Absolute path to directory containing safir configuration. If not specified
+#                             it will be set to a default configuration.
+#
+function (SET_SAFIR_TEST_PROPERTIES) 
+  cmake_parse_arguments(PROP "" "TEST;TIMEOUT;CONFIG_OVERRIDE" "" ${ARGN})
+
+  if (NOT "${PROP_UNPARSED_ARGUMENTS}" STREQUAL "")
+    message(FATAL_ERROR "Unknown argument to SET_SAFIR_TEST_PROPERTIES '${PROP_UNPARSED_ARGUMENTS}'")
+  endif()
+
+  if (NOT PROP_TEST)
+    message(FATAL_ERROR "SET_SAFIR_TEST_PROPERTIES needs TEST argument")
+  endif()
+
+
+  if (PROP_TIMEOUT)
+    SET_TESTS_PROPERTIES(${PROP_TEST} PROPERTIES TIMEOUT ${PROP_TIMEOUT})
+  else()
+      SET_TESTS_PROPERTIES(${PROP_TEST} PROPERTIES TIMEOUT 60)
   endif()
 
   set (pypath "$ENV{PYTHONPATH}${PATH_SEPARATOR}${safir_sdk_core_SOURCE_DIR}/tests/test_support/python")
   string(REGEX REPLACE "^${PATH_SEPARATOR}+" "" pypath ${pypath}) # remove any leading path separators
 
-  SET_PROPERTY(TEST ${TEST_NAME}
+  SET_PROPERTY(TEST ${PROP_TEST}
     PROPERTY ENVIRONMENT 
     "SAFIR_TEST_CONFIG_OVERRIDE=${safir_sdk_core_SOURCE_DIR}/tests/test_support/test_config"
     "SAFIR_SOURCE_ROOT=${safir_sdk_core_SOURCE_DIR}/../"

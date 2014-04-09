@@ -11,5 +11,5 @@ ENDIF()
 ADD_TEST(ProcessMonitor_monitor ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
 ADD_TEST(ProcessMonitor_stop ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test2.py)
 
-SET_SAFIR_TEST_PROPERTIES(ProcessMonitor_monitor)
-SET_SAFIR_TEST_PROPERTIES(ProcessMonitor_stop)
+SET_SAFIR_TEST_PROPERTIES(TEST ProcessMonitor_monitor)
+SET_SAFIR_TEST_PROPERTIES(TEST ProcessMonitor_stop)

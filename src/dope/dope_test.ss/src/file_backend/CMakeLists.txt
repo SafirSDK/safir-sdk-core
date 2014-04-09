@@ -19,4 +19,4 @@ enable_testing()
 ADD_TEST(dope_file_backend_test ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_file_backend_test.py)
 
 #Long timeouts are needed on slow machines.
-SET_SAFIR_TEST_PROPERTIES(dope_file_backend_test 3600)
+SET_SAFIR_TEST_PROPERTIES(TEST dope_file_backend_test TIMEOUT 3600)

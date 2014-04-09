@@ -13,7 +13,7 @@ if (ACE_FOUND)
   
   ADD_TEST(AceTimeConverter_test AceTimeConverter_test)
 
-  SET_SAFIR_TEST_PROPERTIES(AceTimeConverter_test)
+  SET_SAFIR_TEST_PROPERTIES(TEST AceTimeConverter_test)
 
 else()
   MESSAGE(STATUS "ACE library was not found, not building and running the test for AceTimeConverter")

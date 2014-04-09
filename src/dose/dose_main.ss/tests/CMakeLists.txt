@@ -11,5 +11,5 @@ ADD_TEST(NAME TryStart_dose_main
 
 ADD_TEST(dose_main_timers timer_test)
 
-SET_SAFIR_TEST_PROPERTIES(TryStart_dose_main 600)
-SET_SAFIR_TEST_PROPERTIES(dose_main_timers 600)
+SET_SAFIR_TEST_PROPERTIES(TEST TryStart_dose_main TIMEOUT 600)
+SET_SAFIR_TEST_PROPERTIES(TEST dose_main_timers TIMEOUT 600)

@@ -5,7 +5,7 @@ ADD_TEST(NAME crash_dump_monitor_test
   --dump-monitor $<TARGET_FILE:crash_dump_monitor>
   --config-dir ${CMAKE_CURRENT_SOURCE_DIR}/testconf)
 
-SET_SAFIR_TEST_PROPERTIES(crash_dump_monitor_test 120)
+SET_SAFIR_TEST_PROPERTIES(TEST crash_dump_monitor_test TIMEOUT 120)
 
 
 

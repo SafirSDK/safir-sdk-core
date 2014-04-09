@@ -3,4 +3,4 @@ ADD_EXECUTABLE(ss_threads_test ss_threads_test.cpp)
 TARGET_LINK_LIBRARIES(ss_threads_test lluf_startup_synchronizer ${Boost_LIBRARIES})
 
 ADD_TEST(StartupSynchronizer_threads ss_threads_test)
-SET_SAFIR_TEST_PROPERTIES(StartupSynchronizer_threads 120)
+SET_SAFIR_TEST_PROPERTIES(TEST StartupSynchronizer_threads TIMEOUT 120)

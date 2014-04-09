@@ -8,4 +8,4 @@ ADD_CUSTOM_TARGET(douf_test_ada ALL
                   VERBATIM)
 
 ADD_TEST(TimeProvider_ada_test obj/douf_test_ada)
-SET_SAFIR_TEST_PROPERTIES(TimeProvider_ada_test)
+SET_SAFIR_TEST_PROPERTIES(TEST TimeProvider_ada_test)

@@ -18,4 +18,4 @@ endif()
 ENABLE_TESTING()
 ADD_TEST(container_test container_test)
 
-SET_SAFIR_TEST_PROPERTIES(container_test)
+SET_SAFIR_TEST_PROPERTIES(TEST container_test)

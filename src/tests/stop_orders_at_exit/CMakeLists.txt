@@ -17,4 +17,4 @@ enable_testing()
 
 ADD_TEST(stop_orders_at_exit ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
 
-SET_SAFIR_TEST_PROPERTIES(stop_orders_at_exit 240)
+SET_SAFIR_TEST_PROPERTIES(TEST stop_orders_at_exit TIMEOUT 240)

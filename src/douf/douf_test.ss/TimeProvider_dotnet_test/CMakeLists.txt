@@ -7,4 +7,4 @@ ADD_CS_EXECUTABLE(dotnet_tester test.cs ALL)
 
 ADD_TEST(TimeProvider_dotnet_test ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
 
-SET_SAFIR_TEST_PROPERTIES(TimeProvider_dotnet_test)
+SET_SAFIR_TEST_PROPERTIES(TEST TimeProvider_dotnet_test)

@@ -17,10 +17,10 @@ ADD_TEST(MessageQueue dose_message_queue_test)
 ADD_TEST(DistributionData distribution_data_test)
 ADD_TEST(LamportClocks lamport_clock_test)
 
-SET_SAFIR_TEST_PROPERTIES(Semaphore 60)
-SET_SAFIR_TEST_PROPERTIES(MessageQueue 360)
-SET_SAFIR_TEST_PROPERTIES(DistributionData)
-SET_SAFIR_TEST_PROPERTIES(LamportClocks 2400)
+SET_SAFIR_TEST_PROPERTIES(TEST Semaphore TIMEOUT 60)
+SET_SAFIR_TEST_PROPERTIES(TEST MessageQueue TIMEOUT 360)
+SET_SAFIR_TEST_PROPERTIES(TEST DistributionData)
+SET_SAFIR_TEST_PROPERTIES(TEST LamportClocks TIMEOUT 2400)
 
 
 #TODO: generally: Check that only "external" libraries use autolink. Applies to all libraries, this is a general reminder
