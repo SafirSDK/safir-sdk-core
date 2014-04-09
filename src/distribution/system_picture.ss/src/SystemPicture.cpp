@@ -91,7 +91,8 @@ namespace SP
                                                                             MASTER_REMOTE_RAW_NAME, 
                                                                             m_rawHandler))
             , m_collator(boost::make_shared<Collator>(ioService, 
-                                                      communication, 
+                                                      communication,
+                                                      id,
                                                       m_rawHandler))
             , m_statePublisherLocal(boost::make_shared<StatePublisherLocal>(ioService, 
                                                                             m_collator, 

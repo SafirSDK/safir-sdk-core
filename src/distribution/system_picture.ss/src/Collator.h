@@ -56,6 +56,7 @@ namespace SP
     public:
         Collator(const boost::shared_ptr<boost::asio::io_service>& ioService,
                  const boost::shared_ptr<Com::Communication>& communication,
+                 const boost::int64_t id,
                  const boost::shared_ptr<RawHandler>& rawHandler);
 
         void PerformOnStateMessage(const boost::function<void(const boost::shared_ptr<char []>& data, 
@@ -64,9 +65,13 @@ namespace SP
     private:
         void Collate(const RawStatistics& statistics);
 
+        bool IsCoordinator() const {return m_id == m_coordinator;}
         mutable boost::asio::strand m_strand;
         const boost::shared_ptr<Com::Communication> m_communication;
         boost::shared_ptr<SystemStateMessage> m_stateMessage;
+        
+        const boost::int64_t m_id;
+        boost::int64_t m_coordinator = 0;
     };
 }
 }

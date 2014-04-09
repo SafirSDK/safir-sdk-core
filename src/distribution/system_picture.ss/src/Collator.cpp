@@ -54,9 +54,11 @@ namespace SP
 {
     Collator::Collator(const boost::shared_ptr<boost::asio::io_service>& ioService,
                        const boost::shared_ptr<Com::Communication>& communication,
+                       const int64_t id,
                        const boost::shared_ptr<RawHandler>& rawHandler)
         : m_strand (*ioService)
         , m_communication(communication)
+        , m_id(id)
     {
         rawHandler->SetCollateCallback(m_strand.wrap([this](const RawStatistics& statistics)
                                                      {
@@ -123,19 +125,24 @@ namespace SP
     }
 
     void Collator::PerformOnStateMessage(const boost::function<void(const boost::shared_ptr<char []>& data, 
-                                                              const size_t size)> & fn) const
+                                                                    const size_t size)> & fn) const
     {
-        m_strand.dispatch([this,fn]
-                          {
-                              if (m_stateMessage != nullptr)
+        //only send if I'm coordinator
+        //TODO: make this only get called if we're coordinator?
+        if (IsCoordinator())
+        {
+            m_strand.dispatch([this,fn]
                               {
-                                  const size_t size = m_stateMessage->ByteSize();
-                                  auto data = boost::make_shared<char[]>(size);
-                                  m_stateMessage->SerializeWithCachedSizesToArray
-                                      (reinterpret_cast<google::protobuf::uint8*>(data.get()));
-                                  fn(data, size);
-                              }
-                          });
+                                  if (m_stateMessage != nullptr)
+                                  {
+                                      const size_t size = m_stateMessage->ByteSize();
+                                      auto data = boost::make_shared<char[]>(size);
+                                      m_stateMessage->SerializeWithCachedSizesToArray
+                                          (reinterpret_cast<google::protobuf::uint8*>(data.get()));
+                                      fn(data, size);
+                                  }
+                              });
+        }
     }
 }
 }
