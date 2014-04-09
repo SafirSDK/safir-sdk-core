@@ -29,6 +29,7 @@
 #include <Safir/Dob/Internal/RawStatistics.h>
 #include <Safir/Dob/Internal/SystemState.h>
 #include <Safir/Dob/Internal/SystemPictureExportDefs.h>
+#include <map>
 
 //Forward declare some asio stuff.
 namespace boost
@@ -62,6 +63,14 @@ namespace SP
     struct slave_tag_t {};
     const slave_tag_t slave_tag = slave_tag_t();
 
+    struct NodeType
+    {
+        NodeType(const std::string& name,
+                 const bool isLight,
+                 const std::vector<std::string>& talksTo,
+                 const bool canMulticast,
+                 const bool deadTimeout);
+    };
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -79,7 +88,8 @@ namespace SP
                       const std::string& name,
                       const boost::int64_t id,
                       const std::string& address,
-                      const std::string& multicastAddress);
+                      const std::string& multicastAddress,
+                      const std::map<std::string, NodeType>& nodeTypes);
 
         explicit SystemPicture(slave_tag_t);
 

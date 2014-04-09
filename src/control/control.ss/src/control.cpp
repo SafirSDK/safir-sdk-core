@@ -174,7 +174,8 @@ int main(int argc, char * argv[])
                                                options.name,
                                                options.id,
                                                options.address,
-                                               options.multicastAddress);
+                                               options.multicastAddress,
+                                               {});
 
 
     communication->Start();
