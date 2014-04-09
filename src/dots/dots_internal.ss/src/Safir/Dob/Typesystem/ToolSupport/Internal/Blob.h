@@ -49,8 +49,8 @@ namespace Internal
         static boost::int32_t GetSize(const char* blob);
         static boost::int64_t GetTypeId(const char* blob);
 
-        //create new empty blob of specific type
-        Blob(boost::int64_t typeId);
+        //create new empty blob of specific type and initiates all members with null and unchanged
+        Blob(boost::int64_t typeId, int numberOfMembers);
 
         //create blob object by deserialize a raw blob
         Blob(const char* blob);
@@ -70,64 +70,58 @@ namespace Internal
         //----------------------------------------
         // Read
         //----------------------------------------
-        //move to specific member, returns true if member was found
-        bool MoveToMember(boost::int32_t memberIndex);
-
         //changed at member top level, only meaningful for containers and objects
-        bool IsChangedHere() const;
+        bool IsChangedHere(boost::int32_t member) const;
 
         //get number of values in current member
-        int NumberOfValues() const;
+        int NumberOfValues(boost::int32_t member) const;
 
         //is value null
-        bool IsNull(int index) const;
+        bool IsNull(boost::int32_t member, int index) const;
 
         //is value changed
-        bool IsChanged(int index) const;
+        bool IsChanged(boost::int32_t member, int index) const;
 
         //get keys, undefined behaviour if IsNull=true
-        boost::int32_t GetKeyInt32(int index) const;
-        boost::int64_t GetKeyInt64(int index) const;
-        boost::int64_t GetKeyHash(int index) const;
-        const std::string& GetKeyString(int index) const;
+        boost::int32_t GetKeyInt32(boost::int32_t member, int index) const;
+        boost::int64_t GetKeyInt64(boost::int32_t member, int index) const;
+        boost::int64_t GetKeyHash(boost::int32_t member, int index) const;
+        const std::string& GetKeyString(boost::int32_t member, int index) const;
 
         //get value
-        boost::int32_t GetValueInt32(int index) const;
-        boost::int64_t GetValueInt64(int index) const;
-        float GetValueFloat32(int index) const;
-        double GetValueFloat64(int index) const;
-        bool GetValueBool(int index) const;
-        boost::int64_t GetValueHash(int index) const;
-        const std::string& GetValueString(int index) const;
-        std::pair<const char*, boost::int32_t> GetValueBinary(int index) const;
+        boost::int32_t GetValueInt32(boost::int32_t member, int index) const;
+        boost::int64_t GetValueInt64(boost::int32_t member, int index) const;
+        float GetValueFloat32(boost::int32_t member, int index) const;
+        double GetValueFloat64(boost::int32_t member, int index) const;
+        bool GetValueBool(boost::int32_t member, int index) const;
+        boost::int64_t GetValueHash(boost::int32_t member, int index) const;
+        const std::string& GetValueString(boost::int32_t member, int index) const;
+        std::pair<const char*, boost::int32_t> GetValueBinary(boost::int32_t member, int index) const;
 
         //----------------------------------------
         // Write
-        //----------------------------------------
-        //add member and move to the new member, no check for duplicates
-        void AddMember(boost::int32_t memberIndex);
-
+        //----------------------------------------        
         //set isChanged on top level, only meaningful for containers and objects
-        void SetChangedHere(bool isChanged);
+        void SetChangedHere(boost::int32_t member, bool isChanged);
 
         //append a new value to current member and set the changeFlag and isNull=true
-        void AddValue(bool isChanged);
+        void AddValue(boost::int32_t member, bool isChanged);
 
         //set key for last added value
-        void SetKeyInt32(boost::int32_t val);
-        void SetKeyInt64(boost::int64_t val);
-        void SetKeyHash(boost::int64_t val);
-        void SetKeyString(const std::string& val);
+        void SetKeyInt32(boost::int32_t member, boost::int32_t val);
+        void SetKeyInt64(boost::int32_t member, boost::int64_t val);
+        void SetKeyHash(boost::int32_t member, boost::int64_t val);
+        void SetKeyString(boost::int32_t member, const std::string& val);
 
         //set value for last added value, after a value have been set IsNull=false
-        void SetValueInt32(boost::int32_t val);
-        void SetValueInt64(boost::int64_t val);
-        void SetValueFloat32(float val);
-        void SetValueFloat64(double val);
-        void SetValueBool(bool val);
-        void SetValueHash(boost::int64_t val);
-        void SetValueString(const std::string& val);
-        void SetValueBinary(const char* val, boost::int32_t size);
+        void SetValueInt32(boost::int32_t member, boost::int32_t val);
+        void SetValueInt64(boost::int32_t member, boost::int64_t val);
+        void SetValueFloat32(boost::int32_t member, float val);
+        void SetValueFloat64(boost::int32_t member, double val);
+        void SetValueBool(boost::int32_t member, bool val);
+        void SetValueHash(boost::int32_t member, boost::int64_t val);
+        void SetValueString(boost::int32_t member, const std::string& val);
+        void SetValueBinary(boost::int32_t member, const char* val, boost::int32_t size);
 
 
     private:
@@ -136,7 +130,6 @@ namespace Internal
         boost::int32_t m_blobSize;
         boost::int64_t m_typeId;
         boost::shared_ptr<AnyObject> m_object;
-        int m_currentObjectMemberIndex;
     };
 
 }

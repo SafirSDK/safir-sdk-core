@@ -118,7 +118,8 @@ namespace Internal
             return false;
         }
 
-        return m_object->members(m_currentObjectMemberIndex).is_changed_here();
+        return  m_object->members(m_currentObjectMemberIndex).has_is_changed_here() &&
+                m_object->members(m_currentObjectMemberIndex).is_changed_here();
 
     }
 
@@ -218,7 +219,6 @@ namespace Internal
     {
         const AnyObject_Value& val=m_object->members(m_currentObjectMemberIndex).values(index);
         return val.value().string_value();
-
     }
 
     std::pair<const char*, boost::int32_t> Blob::GetValueBinary(int index) const
