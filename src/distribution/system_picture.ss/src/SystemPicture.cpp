@@ -22,7 +22,7 @@
 *
 ******************************************************************************/
 
-#include "Collator.h"
+#include "Coordinator.h"
 #include "RawHandler.h"
 #include "RawPublisherLocal.h"
 #include "RawPublisherRemote.h"
@@ -71,7 +71,7 @@ namespace SP
              const boost::int64_t id,
              const std::string& address,
              const std::string& multicastAddress,
-             const std::map<std::string, NodeType>& nodeTypes)
+             const std::map<std::string, NodeType>& /*nodeTypes*/)
             : m_ioService(ioService)
             , m_communication(communication)
             , m_rawHandler(boost::make_shared<RawHandler>(ioService,
@@ -90,12 +90,12 @@ namespace SP
             , m_rawSubscriberRemote(boost::make_shared<RawSubscriberRemote>(communication, 
                                                                             MASTER_REMOTE_RAW_NAME, 
                                                                             m_rawHandler))
-            , m_collator(boost::make_shared<Collator>(ioService, 
+            , m_coordinator(boost::make_shared<Coordinator>(ioService, 
                                                       communication,
                                                       id,
                                                       m_rawHandler))
             , m_statePublisherLocal(boost::make_shared<StatePublisherLocal>(ioService, 
-                                                                            m_collator, 
+                                                                            m_coordinator, 
                                                                             MASTER_LOCAL_STATE_NAME))
             , m_stopped(false)
         {
@@ -162,7 +162,7 @@ namespace SP
         boost::shared_ptr<RawPublisherRemote> m_rawPublisherRemote;
         boost::shared_ptr<RawSubscriberRemote> m_rawSubscriberRemote;
 
-        boost::shared_ptr<Collator> m_collator;
+        boost::shared_ptr<Coordinator> m_coordinator;
 
         boost::shared_ptr<StatePublisherLocal> m_statePublisherLocal;
         boost::shared_ptr<StateSubscriberLocal> m_stateSubscriberLocal;

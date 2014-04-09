@@ -21,8 +21,8 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __SYSTEM_PICTURE_COLLATOR_H__
-#define __SYSTEM_PICTURE_COLLATOR_H__
+#ifndef __SYSTEM_PICTURE_COORDINATOR_H__
+#define __SYSTEM_PICTURE_COORDINATOR_H__
 
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
@@ -50,11 +50,11 @@ namespace SP
     class SystemStateMessage;
     class SystemState;
 
-    class Collator
+    class Coordinator
         : private boost::noncopyable
     {
     public:
-        Collator(const boost::shared_ptr<boost::asio::io_service>& ioService,
+        Coordinator(const boost::shared_ptr<boost::asio::io_service>& ioService,
                  const boost::shared_ptr<Com::Communication>& communication,
                  const boost::int64_t id,
                  const boost::shared_ptr<RawHandler>& rawHandler);
@@ -63,7 +63,9 @@ namespace SP
                                                               const size_t size)> & fn) const;
 
     private:
-        void Collate(const RawStatistics& statistics);
+        void StatisticsChanged(const RawStatistics& statistics);
+        
+        void UpdateMyState(const RawStatistics& statistics);
 
         bool IsCoordinator() const {return m_id == m_coordinator;}
         mutable boost::asio::strand m_strand;

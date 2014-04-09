@@ -66,7 +66,7 @@ namespace SP
     //forward declaration
     class RawStatistics;
 
-    typedef boost::function<void(const RawStatistics& statistics)> CollateCallback;
+    typedef boost::function<void(const RawStatistics& statistics)> StatisticsChangedCallback;
 
     class RawHandler
         : private boost::noncopyable
@@ -93,7 +93,7 @@ namespace SP
         void UpdateRemoteStatistics(const boost::int64_t from, const boost::shared_ptr<char[]>& data, const size_t size);
 
         //will always be posted! data will be a copy
-        void SetCollateCallback(const CollateCallback& callback);
+        void SetStatisticsChangedCallback(const StatisticsChangedCallback& callback);
     private:
         void NewNode(const std::string& name,
                      boost::int64_t id,
@@ -106,7 +106,7 @@ namespace SP
         void CheckDeadNodes(const boost::system::error_code& error);
 
         /** Post a copy of the data on the ioservice */
-        void PostCollateCallback();
+        void PostStatisticsChangedCallback();
 
         //TODO: consider removing the timestamp
         //and replacing it with just the counter and a "last counter", which is checked
@@ -131,7 +131,7 @@ namespace SP
         mutable boost::asio::strand m_strand;
 
         boost::shared_ptr<Safir::Utilities::Internal::AsioPeriodicTimer> m_checkDeadNodesTimer;
-        boost::shared_ptr<Safir::Utilities::Internal::AsioPeriodicTimer> m_postCollateTimer;
+        boost::shared_ptr<Safir::Utilities::Internal::AsioPeriodicTimer> m_postStatisticsChangedTimer;
 
         NodeTable m_nodeTable;
         mutable NodeStatisticsMessage m_allStatisticsMessage;
@@ -139,7 +139,7 @@ namespace SP
         mutable NodeStatisticsMessage m_myStatisticsMessage; 
 #endif
 
-        CollateCallback m_collateCallback;
+        StatisticsChangedCallback m_statisticsChangedCallback;
 
         std::atomic<bool> m_stopped;
     };

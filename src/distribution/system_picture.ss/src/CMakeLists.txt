@@ -14,7 +14,7 @@ FILE(GLOB_RECURSE headers *.h)
 SET(sources 
   SystemPicture.cpp 
   RawHandler.cpp 
-  Collator.cpp
+  Coordinator.cpp
   RawStatistics.cpp
   SystemState.cpp
   )

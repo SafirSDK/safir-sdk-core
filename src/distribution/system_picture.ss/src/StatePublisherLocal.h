@@ -46,9 +46,9 @@ namespace SP
     {
     public:
         StatePublisherLocal(const boost::shared_ptr<boost::asio::io_service>& ioService,
-                            const boost::shared_ptr<Collator>& collator,
+                            const boost::shared_ptr<Coordinator>& coordinator,
                             const char* const name)
-            : m_collator(collator)
+            : m_coordinator(coordinator)
             , m_publisher(Safir::Utilities::Internal::IpcPublisher::Create(*ioService,name))
             , m_publishTimer(AsioPeriodicTimer::Create(*ioService, 
                                                        boost::chrono::seconds(1),
@@ -79,13 +79,13 @@ namespace SP
 
             lllog(8) << "Publishing system state over ipc" << std::endl;
 
-            m_collator->PerformOnStateMessage([this](const boost::shared_ptr<char[]>& data, const size_t size)
+            m_coordinator->PerformOnStateMessage([this](const boost::shared_ptr<char[]>& data, const size_t size)
                                               {
                                                   m_publisher->Send(data, static_cast<boost::uint32_t>(size));
                                               });
         }
         
-        const boost::shared_ptr<Collator> m_collator;
+        const boost::shared_ptr<Coordinator> m_coordinator;
         const boost::shared_ptr<Safir::Utilities::Internal::IpcPublisher> m_publisher;
         boost::shared_ptr<Safir::Utilities::Internal::AsioPeriodicTimer> m_publishTimer;
     };

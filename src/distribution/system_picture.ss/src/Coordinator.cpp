@@ -21,7 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include "Collator.h"
+#include "Coordinator.h"
 #include "MessageWrapperCreators.h"
 #include "RawHandler.h"
 #include <Safir/Dob/Internal/Communication.h>
@@ -52,7 +52,7 @@ namespace Internal
 {
 namespace SP
 {
-    Collator::Collator(const boost::shared_ptr<boost::asio::io_service>& ioService,
+    Coordinator::Coordinator(const boost::shared_ptr<boost::asio::io_service>& ioService,
                        const boost::shared_ptr<Com::Communication>& communication,
                        const int64_t id,
                        const boost::shared_ptr<RawHandler>& rawHandler)
@@ -60,15 +60,21 @@ namespace SP
         , m_communication(communication)
         , m_id(id)
     {
-        rawHandler->SetCollateCallback(m_strand.wrap([this](const RawStatistics& statistics)
-                                                     {
-                                                         Collate(statistics);
-                                                     }));
+        rawHandler->SetStatisticsChangedCallback(m_strand.wrap([this](const RawStatistics& statistics)
+                                                               {
+                                                                   StatisticsChanged(statistics);
+                                                               }));
     }
     
 
     //must be called in strand
-    void Collator::Collate(const RawStatistics& statistics)
+    void Coordinator::StatisticsChanged(const RawStatistics& statistics)
+    {
+        UpdateMyState(statistics);
+    }
+
+    //must be called in strand
+    void Coordinator::UpdateMyState(const RawStatistics& statistics)
     {
         //currently we just copy the raw data... mucho stupido...
 
@@ -124,7 +130,7 @@ namespace SP
 
     }
 
-    void Collator::PerformOnStateMessage(const boost::function<void(const boost::shared_ptr<char []>& data, 
+    void Coordinator::PerformOnStateMessage(const boost::function<void(const boost::shared_ptr<char []>& data, 
                                                                     const size_t size)> & fn) const
     {
         //only send if I'm coordinator

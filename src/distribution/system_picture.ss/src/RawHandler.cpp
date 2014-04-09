@@ -70,24 +70,25 @@ namespace SP
                                                                             
                                                                             CheckDeadNodes(error);
                                                                         })))
-        , m_postCollateTimer(AsioPeriodicTimer::Create
-                             (*ioService,
-                              boost::chrono::milliseconds(1000),
-                              m_strand.wrap([this](const boost::system::error_code& error)
-                                            {
-                                                if (m_stopped)
-                                                {
-                                                    return;
-                                                }
-                                                
-                                                if (error)
-                                                {
-                                                    SEND_SYSTEM_LOG(Alert,
-                                                                    << "Unexpected error in postCollateTimer: " << error);
-                                                    throw std::logic_error("Unexpected error in postCollateTimer");
-                                                }
-                                                PostCollateCallback();
-                                            })))
+        , m_postStatisticsChangedTimer
+        (AsioPeriodicTimer::Create
+             (*ioService,
+              boost::chrono::milliseconds(1000),
+              m_strand.wrap([this](const boost::system::error_code& error)
+                            {
+                                if (m_stopped)
+                                {
+                                    return;
+                                }
+                                
+                                if (error)
+                                {
+                                    SEND_SYSTEM_LOG(Alert,
+                                                    << "Unexpected error in postStatisticsChangedTimer: " << error);
+                                    throw std::logic_error("Unexpected error in postStatisticsChangedTimer");
+                                }
+                                PostStatisticsChangedCallback();
+                            })))
         , m_stopped(false)
     {
         //set up some info about ourselves in our message
@@ -114,7 +115,7 @@ namespace SP
                                                                  Retransmit(id);
                                                              }));
         m_checkDeadNodesTimer->Start();
-        m_postCollateTimer->Start();
+        m_postStatisticsChangedTimer->Start();
     }
 
     void RawHandler::Stop()
@@ -125,7 +126,7 @@ namespace SP
             m_strand.dispatch([this]
                               {
                                   m_checkDeadNodesTimer->Stop();
-                                  m_postCollateTimer->Stop();
+                                  m_postStatisticsChangedTimer->Stop();
                               });
         }
     }
@@ -169,7 +170,7 @@ namespace SP
         
         m_communication->IncludeNode(id);
 
-        PostCollateCallback();
+        PostStatisticsChangedCallback();
     }
 
     //Must be called in strand!
@@ -233,6 +234,8 @@ namespace SP
         const auto clearThreshold = GetTime() - 600*5; //5 minutes back in time.
         //        std::wcout << "  Threshold time is " << threshold << std::endl;
 
+        bool somethingChanged = false;
+
         for (auto pair : m_nodeTable)            
         {
             //lllog(5) << "SP:   lastReceiveTime is " << pair.second->lastReceiveTime.value() << std::endl;
@@ -248,7 +251,7 @@ namespace SP
                 
                 m_communication->ExcludeNode(pair.second.nodeInfo->id());
 
-                PostCollateCallback();
+                somethingChanged = true;
             }
             else if (pair.second.nodeInfo->is_dead() && 
                      pair.second.lastReceiveTime < clearThreshold &&
@@ -259,6 +262,11 @@ namespace SP
                          << " has been dead for five minutes, clearing data." << std::endl;
                 pair.second.nodeInfo->clear_remote_statistics();
             }
+        }
+
+        if (somethingChanged)
+        {
+            PostStatisticsChangedCallback();
         }
     }
 
@@ -371,24 +379,24 @@ namespace SP
         });
     }
 
-    void RawHandler::SetCollateCallback(const CollateCallback& callback)
+    void RawHandler::SetStatisticsChangedCallback(const StatisticsChangedCallback& callback)
     {
         m_strand.dispatch([this, callback]
                           {
-                              m_collateCallback = callback;
+                              m_statisticsChangedCallback = callback;
                           });
     }
     
     //must be called in strand
-    void RawHandler::PostCollateCallback()
+    void RawHandler::PostStatisticsChangedCallback()
     {
-        if (!m_collateCallback) //no callback set
+        if (!m_statisticsChangedCallback) //no callback set
         {
             return;
         }
 
         const auto copy = RawStatisticsCreator::Create(boost::make_shared<NodeStatisticsMessage>(m_allStatisticsMessage));
-        m_ioService->post([this,copy]{m_collateCallback(copy);});
+        m_ioService->post([this,copy]{m_statisticsChangedCallback(copy);});
     }
 }
 }
