@@ -13,7 +13,8 @@ ADD_TEST(NAME dots_cpp
   COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
   --show-safir-config $<TARGET_FILE:safir_show_config>
   --language cpp
-  --binary-dir ${CMAKE_CURRENT_BINARY_DIR})
+  --binary-dir ${CMAKE_CURRENT_BINARY_DIR}
+  --output ${CMAKE_CURRENT_SOURCE_DIR}/output.txt)
 
 SET_SAFIR_TEST_PROPERTIES(TEST dots_cpp CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/test_config)
 

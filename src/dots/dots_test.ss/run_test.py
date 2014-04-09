@@ -31,6 +31,7 @@ parser = argparse.ArgumentParser("test script")
 parser.add_argument("--show-safir-config", required=True)
 parser.add_argument("--language", required=True)
 parser.add_argument("--binary-dir", required=True)
+parser.add_argument("--output", required=True)
 
 arguments = parser.parse_args()
 
@@ -61,7 +62,7 @@ print("Test suite command is '" + " ".join(command) + "'")
 proc = subprocess.Popen(command, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, universal_newlines=True)
 res = proc.communicate()[0].replace("\r","").splitlines(1) #fix any DOS newlines
 
-with open("output.txt") as expected_file:
+with open(arguments.output) as expected_file:
     expected_output = expected_file.read().replace("\r","").splitlines(1) #fix any DOS newlines
 diff = list(difflib.unified_diff(expected_output,res))
 
