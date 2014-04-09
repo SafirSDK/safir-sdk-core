@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Defines a number of characteristics that control how nodes of a certain type communicates. Used by Safir.Dob.NodeParameters.</summary>
+    <name>Safir.Dob.NodeType</name>
+    <baseClass>Safir.Dob.Item</baseClass>
+    <members>
+        <member>
+            <summary>Name of the node type.</summary>
+            <name>Name</name>
+            <type>String</type>
+            <maxLength>80</maxLength>
+        </member>
+        <member>
+            <summary>Is the node type a 'light' node type?</summary>
+            <name>IsLight</name>
+            <type>Boolean</type>
+        </member>
+        <member>
+            <summary>List of node types that nodes of this type can talk to.</summary>
+            <name>TalksTo</name>
+            <arraySize>100</arraySize>
+            <type>String</type>
+            <maxLength>80</maxLength>
+        </member>
+        <member>
+            <summary>Multicast address used for nodes of this type. An empty string indicates that
+                     nodes of this type can’t be reached via multicast.</summary>
+            <name>MulticastAddress</name>
+            <type>String</type>
+            <maxLength>39</maxLength> <!-- 39 is max length for an ipv6 address-->
+        </member>
+        <member>
+            <summary>Port number used by Control executable.</summary>
+            <name>ControlPort</name>
+            <type>Int32</type>
+        </member>
+        <member>
+            <summary>Port number used by dose_main executable.</summary>
+            <name>DataPort</name>
+            <type>Int32</type>
+        </member>
+        <member>
+            <summary>How often (milliseconds) shall heartbeats/keepalives be sent</summary>
+            <name>HeartbeatInterval</name>
+            <type>Int32</type>
+        </member>
+        <member>
+            <summary>How many lost heartbeats before marking nodes of this type as dead.</summary>
+            <name>MaxLostHeartbeats</name>
+            <type>Int32</type>
+        </member>
+        <member>
+            <summary>Size of the sliding window when communicating with this node.</summary>
+            <name>SlidingWindowsSize</name>
+            <type>Int32</type>
+        </member>
+        <member>
+            <summary>Time to wait (milliseconds) for Ack before retrying transmission to this node.</summary>
+            <name>RetryTimeout</name>
+            <type>Second32</type>
+        </member>
+        <member>
+            <summary>A list of regular expressions. All types that match will be sent to this node type (unless they also match an UnwantedTypes, below).
+                     Only for nodes where IsLight is true can this be anything other than '.*'.</summary>
+            <name>WantedTypes</name>
+            <arraySize>50</arraySize>
+            <type>String</type>
+            <maxLength>80</maxLength>
+        </member>
+        <member>
+            <summary>Types that match will not be sent to this node type. Must be empty if IsLight is false.</summary>
+            <name>UnwantedTypes</name>
+            <arraySize>50</arraySize>
+            <type>String</type>
+            <maxLength>80</maxLength>
+        </member>
+    </members>
+</class>

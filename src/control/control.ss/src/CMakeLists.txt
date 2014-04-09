@@ -13,10 +13,12 @@ FIND_PACKAGE(Boost COMPONENTS program_options thread system)
 
 if (NOT MSVC)
   TARGET_LINK_LIBRARIES(safir_control
+    dots_internal
     system_picture
     communication
     lluf_id
     lluf_utils
+    lluf_config
     ${Boost_LIBRARIES})
 endif()
 
