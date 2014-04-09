@@ -9,10 +9,16 @@ ADD_SUBDIRECTORY(cpp)
 #  ADD_SUBDIRECTORY(java)
 #endif()
 
-ADD_TEST(dots_cpp ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py cpp)
+ADD_TEST(NAME dots_cpp 
+  COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
+  --show-safir-config $<TARGET_FILE:safir_show_config>
+  --language cpp
+  --binary-dir ${CMAKE_CURRENT_BINARY_DIR})
+
+SET_SAFIR_TEST_PROPERTIES(TEST dots_cpp CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/test_config)
+
 #ADD_TEST(dots_dotnet ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py dotnet)
 
-SET_SAFIR_TEST_PROPERTIES(TEST dots_cpp)
 #SET_SAFIR_TEST_PROPERTIES(TEST dots_dotnet)
 
 #if (SAFIR_ADA_SUPPORT)

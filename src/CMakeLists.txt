@@ -168,7 +168,11 @@ function (SET_SAFIR_TEST_PROPERTIES)
   if (PROP_TIMEOUT)
     SET_TESTS_PROPERTIES(${PROP_TEST} PROPERTIES TIMEOUT ${PROP_TIMEOUT})
   else()
-      SET_TESTS_PROPERTIES(${PROP_TEST} PROPERTIES TIMEOUT 60)
+    SET_TESTS_PROPERTIES(${PROP_TEST} PROPERTIES TIMEOUT 60)
+  endif()
+
+  if (NOT PROP_CONFIG_OVERRIDE)
+    set(PROP_CONFIG_OVERRIDE "${safir_sdk_core_SOURCE_DIR}/tests/test_support/test_config")
   endif()
 
   set (pypath "$ENV{PYTHONPATH}${PATH_SEPARATOR}${safir_sdk_core_SOURCE_DIR}/tests/test_support/python")
@@ -176,7 +180,7 @@ function (SET_SAFIR_TEST_PROPERTIES)
 
   SET_PROPERTY(TEST ${PROP_TEST}
     PROPERTY ENVIRONMENT 
-    "SAFIR_TEST_CONFIG_OVERRIDE=${safir_sdk_core_SOURCE_DIR}/tests/test_support/test_config"
+    "SAFIR_TEST_CONFIG_OVERRIDE=${PROP_CONFIG_OVERRIDE}"
     "SAFIR_SOURCE_ROOT=${safir_sdk_core_SOURCE_DIR}/../"
     "PYTHONPATH=${pypath}")
 endfunction()

@@ -24,38 +24,39 @@
 #
 ###############################################################################
 from __future__ import print_function
-import sys, subprocess, os, shutil, difflib
+import sys, subprocess, os, shutil, difflib, argparse
 from syslog_server import SyslogServer
 
-syslog = SyslogServer()
+parser = argparse.ArgumentParser("test script")
+parser.add_argument("--show-safir-config", required=True)
+parser.add_argument("--language", required=True)
+parser.add_argument("--binary-dir", required=True)
 
-SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
+arguments = parser.parse_args()
 
-if len(sys.argv) != 2:
-    print("Need one argument!")
-    sys.exit(1)
-if sys.argv[1] not in ("cpp","dotnet","java","ada"):
-    print("Need argument cpp, dotnet, java or ada")
-    sys.exit(1)
-lang = sys.argv[1]
+syslog = SyslogServer(arguments.show_safir_config)
+
 
 dependencies = list()
 
-if lang == "cpp":
-    command = (os.path.join("cpp", "dots_test_cpp"),)
-elif lang == "ada":
-    command = (os.path.join("ada", "obj", "dots_test_ada"),)
-elif lang == "dotnet":
-    command = (os.path.join("dotnet", "dots_test_dotnet.csexe"),)
-    dependencies = ("dots_generated-dotnet.dll", "Safir.Dob.Typesystem.dll")
-elif lang == "java":
-    command = ("java","-jar", os.path.join("java","dots_test_java.jar"))
-    dependencies = ("dots_generated-java.jar", "dots_java.jar")
+if arguments.language == "cpp":
+    command = (os.path.join(arguments.binary_dir,"cpp", "dots_test_cpp"),)
+else:
+    print("Not implemented")
+    sys.exit(1)
+#elif arguments.language == "ada":
+#    command = (os.path.join("ada", "obj", "dots_test_ada"),)
+#elif arguments.language == "dotnet":
+#    command = (os.path.join("dotnet", "dots_test_dotnet.csexe"),)
+#    dependencies = ("dots_generated-dotnet.dll", "Safir.Dob.Typesystem.dll")
+#elif arguments.language == "java":
+#    command = ("java","-jar", os.path.join("java","dots_test_java.jar"))
+#    dependencies = ("dots_generated-java.jar", "dots_java.jar")
 print("Test suite command is '" + " ".join(command) + "'")
 
-for dep in dependencies:
-    shutil.copy2(os.path.join(SAFIR_RUNTIME,"bin",dep),
-                 lang)
+#for dep in dependencies:
+#    shutil.copy2(os.path.join(SAFIR_RUNTIME,"bin",dep),
+#                 arguments.language)
 
 proc = subprocess.Popen(command, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, universal_newlines=True)
 res = proc.communicate()[0].replace("\r","").splitlines(1) #fix any DOS newlines

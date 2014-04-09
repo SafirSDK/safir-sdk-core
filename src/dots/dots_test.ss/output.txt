@@ -48,13 +48,13 @@ ParameterArrays      - 0
 =====================================================
 Testing: Get Number Of Parameters
 =====================================================
-MemberTypes          - 2
-MemberArrays         - 2
-MemberItems          - 2
-MemberItemsArray     - 3
-EmptyObject          - 112
-ParameterTypes       - 60
-ParameterArrays      - 55
+MemberTypes          - 0
+MemberArrays         - 0
+MemberItems          - 0
+MemberItemsArray     - 1
+EmptyObject          - 110
+ParameterTypes       - 58
+ParameterArrays      - 53
 
 
 
