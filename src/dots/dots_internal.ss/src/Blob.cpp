@@ -190,6 +190,18 @@ namespace Internal
         return val.value().int64_value();
     }
 
+    float Blob::GetValueFloat32(int index) const
+    {
+        const AnyObject_Value& val=m_object->members(m_currentObjectMemberIndex).values(index);
+        return val.value().float32_value();
+    }
+
+    double Blob::GetValueFloat64(int index) const
+    {
+        const AnyObject_Value& val=m_object->members(m_currentObjectMemberIndex).values(index);
+        return val.value().float64_value();
+    }
+
     bool Blob::GetValueBool(int index) const
     {
         const AnyObject_Value& val=m_object->members(m_currentObjectMemberIndex).values(index);
@@ -277,6 +289,20 @@ namespace Internal
         AnyObject_Member* m=m_object->mutable_members(m_currentObjectMemberIndex);
         AnyObject_Value* v=m->mutable_values(m->values_size()-1);
         v->mutable_value()->set_int64_value(val);
+    }
+
+    void Blob::SetValueFloat32(float val)
+    {
+        AnyObject_Member* m=m_object->mutable_members(m_currentObjectMemberIndex);
+        AnyObject_Value* v=m->mutable_values(m->values_size()-1);
+        v->mutable_value()->set_float32_value(val);
+    }
+
+    void Blob::SetValueFloat64(double val)
+    {
+        AnyObject_Member* m=m_object->mutable_members(m_currentObjectMemberIndex);
+        AnyObject_Value* v=m->mutable_values(m->values_size()-1);
+        v->mutable_value()->set_float64_value(val);
     }
 
     void Blob::SetValueBool(bool val)

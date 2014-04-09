@@ -24,6 +24,7 @@
 #ifndef __DOTS_INTERNAL_BLOB_WRITER_H__
 #define __DOTS_INTERNAL_BLOB_WRITER_H__
 
+#include <assert.h>
 #include <string>
 #include <vector>
 #include <sstream>
@@ -116,7 +117,7 @@ namespace ToolSupport
          *      ChannelId   => DotsC_Int64 or pair<DotsC_Int64, const char* optional_string>
          *      EntityId    => pair<DotsC_EntityId, const char* optional_instance_string>
          *      Binary      => pair<const char* data, DostC_Int32 size>
-         *      Object      => const char* blob
+         *      Object      => pair<const char* blob, DostC_Int32 size> OR const char* blob
          *
          * @param member [in] - Member index of the member to be written.
          * @param key [in] - Key value if the member is an array or map.
@@ -133,36 +134,22 @@ namespace ToolSupport
             }
 
             MoveToMember(member);
+
+            if (hasChanged)
+            {
+                m_blob.SetChangedHere(true);
+            }
+
             m_blob.AddValue(hasChanged);
 
+            if (m_memberDescription->GetCollectionType()==ArrayCollectionType || m_memberDescription->GetCollectionType()==HashtableCollectionType)
+            {
+                WriteKey(key);
+            }
 
-            switch (m_memberDescription->GetCollectionType())
+            if (!isNull)
             {
-            case NoCollectionType:
-            {
-                WriteSingleValue(val, isNull, hasChanged);
-            }
-                break;
-            case ArrayCollectionType:
-            {
-                WriteKey(key);
-            }
-                break;
-            case RangeCollectionType:
-            {
-                WriteRangeValue(val, isNull, hasChanged);
-            }
-                break;
-            case SetCollectionType:
-            {
-                WriteSetValue(val, isNull, hasChanged);
-            }
-                break;
-            case HashtableCollectionType:
-            {
-                WriteKey(key);
-            }
-                break;
+                WriteValue(val);
             }
         }
 
@@ -189,10 +176,34 @@ namespace ToolSupport
             m_memberIndex=member;
         }
 
-        //write keys
-        void WriteKey(DotsC_Int32 key) {m_blob.SetKeyInt32(key);}
-        void WriteKey(DotsC_Int64 key) {m_blob.SetKeyInt64(key);}
-        void WriteKey(const char* key) {m_blob.SetKeyString(key);}
+        inline void CheckType(DotsC_MemberType memberType) const
+        {
+            if (m_memberDescription->GetCollectionType()!=memberType)
+            {
+                std::ostringstream os;
+                os<<"Trying to write data of wrong type to a blob for member '"<<m_memberDescription->GetName()<<"' in class '"<<m_classDescription->GetName()<<"'";
+                throw std::logic_error(os.str());
+            }
+        }
+
+        //-----------------------
+        // write keys
+        //-----------------------
+        void WriteKey(DotsC_Int32 key)
+        {
+            m_blob.SetKeyInt32(key);
+        }
+
+        void WriteKey(DotsC_Int64 key)
+        {
+            m_blob.SetKeyInt64(key);
+
+        }
+        void WriteKey(const char* key)
+        {
+            m_blob.SetKeyString(key);
+        }
+
         void WriteKey(const std::pair<DotsC_Int64, const char *>& key)
         {
             m_blob.SetKeyHash(key.first);
@@ -201,13 +212,82 @@ namespace ToolSupport
                 m_blob.SetKeyString(key.second);
             }
         }
+
         void WriteKey(const std::pair<DotsC_EntityId, const char*>& key)
         {
             m_blob.SetKeyInt64(key.first.typeId);
             WriteKey(std::pair<DotsC_Int64, const char *>(key.first.instanceId, key.second));
         }
 
-        //write values
+        //-----------------------
+        // write values
+        //-----------------------
+        void WriteValue(DotsC_Int32 val)
+        {
+            assert(m_memberDescription->GetMemberType()==Int32MemberType);
+            m_blob.SetValueInt32(val);
+        }
+
+        void WriteValue(DotsC_Int64 val)
+        {
+            assert(m_memberDescription->GetMemberType()==Int64MemberType);
+            m_blob.SetValueInt64(val);
+        }
+
+        void WriteValue(DotsC_Float32 val)
+        {
+            assert(m_memberDescription->GetMemberType()==Float32MemberType);
+            m_blob.SetValueFloat32(val);
+        }
+
+        void WriteValue(DotsC_Float64 val)
+        {
+            assert(m_memberDescription->GetMemberType()==Float64MemberType);
+            m_blob.SetValueFloat64(val);
+        }
+
+        void WriteValue(bool val)
+        {
+            assert(m_memberDescription->GetMemberType()==BooleanMemberType);
+            m_blob.SetValueBool(val);
+        }
+
+        void WriteValue(const char* val)
+        {
+            if (m_memberDescription->GetMemberType()==StringMemberType)
+                m_blob.SetValueString(val);
+            else if (m_memberDescription->GetMemberType()==ObjectMemberType)
+                WriteValue(std::pair<const char*, DotsC_Int32>(val, Internal::Blob::GetSize(val)));
+            else
+                assert(false);
+        }
+
+        void WriteValue(const std::pair<DotsC_Int64, const char *>& val) //hashed val
+        {
+            assert(m_memberDescription->GetMemberType()==InstanceIdMemberType || m_memberDescription->GetMemberType()==ChannelIdMemberType || m_memberDescription->GetMemberType()==HandlerIdMemberType);
+            m_blob.SetValueHash(val.first);
+            if (val.second)
+            {
+                m_blob.SetValueString(val.second);
+            }
+        }
+
+        void WriteValue(const std::pair<DotsC_EntityId, const char*>& val) //entityId with optional instance string
+        {
+            assert(m_memberDescription->GetMemberType()==EntityIdMemberType);
+            m_blob.SetValueInt64(val.first.typeId);
+            m_blob.SetValueHash(val.first.instanceId);
+            if (val.second)
+            {
+                m_blob.SetValueString(val.second);
+            }
+        }
+
+        void WriteValue(const std::pair<const char*, DotsC_Int32>& val) //binary data or object
+        {
+            assert(m_memberDescription->GetMemberType()==BinaryMemberType || m_memberDescription->GetMemberType()==ObjectMemberType);
+            m_blob.SetValueBinary(val.first, val.second);
+        }
     };
 }
 }

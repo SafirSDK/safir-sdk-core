@@ -94,6 +94,8 @@ namespace Internal
         //get value
         boost::int32_t GetValueInt32(int index) const;
         boost::int64_t GetValueInt64(int index) const;
+        float GetValueFloat32(int index) const;
+        double GetValueFloat64(int index) const;
         bool GetValueBool(int index) const;
         boost::int64_t GetValueHash(int index) const;
         const std::string& GetValueString(int index) const;
@@ -120,6 +122,8 @@ namespace Internal
         //set value for last added value, after a value have been set IsNull=false
         void SetValueInt32(boost::int32_t val);
         void SetValueInt64(boost::int64_t val);
+        void SetValueFloat32(float val);
+        void SetValueFloat64(double val);
         void SetValueBool(bool val);
         void SetValueHash(boost::int64_t val);
         void SetValueString(const std::string& val);
