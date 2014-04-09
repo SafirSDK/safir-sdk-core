@@ -70,7 +70,8 @@ namespace SP
              const std::string& name,
              const boost::int64_t id,
              const std::string& address,
-             const std::string& multicastAddress)
+             const std::string& multicastAddress,
+             const std::map<std::string, NodeType>& nodeTypes)
             : m_ioService(ioService)
             , m_communication(communication)
             , m_rawHandler(boost::make_shared<RawHandler>(ioService,
@@ -181,7 +182,8 @@ namespace SP
                                           name,
                                           id,
                                           address,
-                                          multicastAddress))
+                                          multicastAddress,
+                                          nodeTypes))
     {
 
     }

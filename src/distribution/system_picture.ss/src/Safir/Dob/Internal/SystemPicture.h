@@ -30,6 +30,7 @@
 #include <Safir/Dob/Internal/SystemState.h>
 #include <Safir/Dob/Internal/SystemPictureExportDefs.h>
 #include <map>
+#include <vector>
 
 //Forward declare some asio stuff.
 namespace boost
