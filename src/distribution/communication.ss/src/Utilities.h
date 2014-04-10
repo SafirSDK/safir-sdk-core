@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2014 (http://safir.sourceforge.net)
+* Copyright Saab AB, 2013 (http://safir.sourceforge.net)
 *
 * Created by: Joel Ottosson / joel.ottosson@consoden.se
 *
@@ -21,11 +21,11 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __SAFIR_DOB_COMMUNICATION_NODETYPE_H__
-#define __SAFIR_DOB_COMMUNICATION_NODETYPE_H__
+#ifndef __SAFIR_DOB_COMMUNICATION_UTILIITIES_H__
+#define __SAFIR_DOB_COMMUNICATION_UTILIITIES_H__
 
-#include <map>
-#include "Utilities.h"
+#include <string>
+#include <boost/asio/ip/udp.hpp>
 
 namespace Safir
 {
@@ -35,27 +35,11 @@ namespace Internal
 {
 namespace Com
 {
-    class NodeType
-    {
-    public:
-        NodeType(boost::int64_t id,
-                 const std::string& name,
-                 const std::string& multicastAddr,
-                 int heartBeatInterval,
-                 int retryTimeout);
+    bool SplitAddress(const std::string& address, std::string& ip, unsigned short& port);
 
+    boost::asio::ip::udp::endpoint CreateEndpoint(const std::string& address, int& ipVersion);
 
-
-    private:
-        boost::int64_t m_id;
-        std::string m_name;               //unique readable name
-        std::string m_multicastAddress;   //multicast address including port number, 'address:port' empty string if not multicast enabled        
-        int m_heartBeatInterval;          //time between heartBeats
-        int m_retryTimeout;               //time to wait before retransmitting unacked data
-        boost::asio::ip::udp::endpoint m_multicastEndpoint;
-    };
-
-    typedef std::map<boost::int64_t, NodeType> NodeTypeMap;
+    boost::asio::ip::udp::endpoint CreateEndpoint(const std::string& address);
 }
 }
 }

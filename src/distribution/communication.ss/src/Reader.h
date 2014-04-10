@@ -76,7 +76,7 @@ namespace Com
 
         void AsyncReceive(char* buf, boost::asio::ip::udp::socket* socket);
         void HandleReceive(const boost::system::error_code& error, size_t bytesRecv,char* buf, boost::asio::ip::udp::socket* socket);
-        void BindSocket(boost::shared_ptr<boost::asio::ip::udp::socket>& socket, IpVersionType ipv, unsigned short mcPort);
+        void BindSocket(boost::shared_ptr<boost::asio::ip::udp::socket>& socket, int ipv, unsigned short mcPort);
         void SetWakeUpTimer(char* buf, boost::asio::ip::udp::socket* socket);
         void WakeUpAfterSleep(const boost::system::error_code& error, char* buf, boost::asio::ip::udp::socket* socket);
     };

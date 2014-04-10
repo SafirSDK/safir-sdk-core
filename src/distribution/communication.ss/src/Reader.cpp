@@ -76,11 +76,11 @@ namespace Com
         BindSocket(m_socket, me.IpVersion(), me.Endpoint().port());
     }
 
-    void Reader::BindSocket(boost::shared_ptr<boost::asio::ip::udp::socket>& socket, IpVersionType ipv, unsigned short port)
+    void Reader::BindSocket(boost::shared_ptr<boost::asio::ip::udp::socket>& socket, int ipv, unsigned short port)
     {
 //        try
 //        {
-            if (ipv==V4)
+            if (ipv==4)
             {
                 boost::asio::ip::udp::endpoint listenEp(boost::asio::ip::address_v4::from_string("0.0.0.0"), port);
                 socket->bind(listenEp);

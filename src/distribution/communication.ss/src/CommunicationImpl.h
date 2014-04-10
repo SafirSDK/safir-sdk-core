@@ -101,11 +101,11 @@ namespace Com
 
         //main components of communication
         Reader m_reader;
-        Writer<UserData> m_discoverWriter;
-        Discoverer m_discoverer;
-        AckedDataSender m_ackedDataSender;
-        HeartBeatSender m_heartBeatSender;
-        DeliveryHandler m_deliveryHandler;
+        //Writer<UserData> m_discoverWriter;
+        //Discoverer m_discoverer;
+        //AckedDataSender m_ackedDataSender;
+        //HeartBeatSender m_heartBeatSender;
+        //DeliveryHandler m_deliveryHandler;
 
         void SetSystemNode(boost::int64_t id, bool isSystemNode);
         bool OnRecv(const char* data, size_t size); //returns true if it is ok to call OnRecv again, false if flooded with received messages

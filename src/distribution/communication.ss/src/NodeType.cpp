@@ -32,6 +32,18 @@ namespace Internal
 namespace Com
 {
 
+    NodeType::NodeType(boost::int64_t id, const std::string &name, const std::string &multicastAddr, int heartBeatInterval, int retryTimeout)
+        :m_id(id)
+        ,m_name(name)
+        ,m_multicastAddress(multicastAddr)
+        ,m_heartBeatInterval(heartBeatInterval)
+        ,m_retryTimeout(retryTimeout)
+        ,m_multicastEndpoint()
+    {
+
+
+    }
+
 }
 }
 }
