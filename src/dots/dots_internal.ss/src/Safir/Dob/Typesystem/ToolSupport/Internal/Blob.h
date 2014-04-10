@@ -105,24 +105,27 @@ namespace Internal
         void SetChangedTopLevel(boost::int32_t member, bool isChanged);
 
         //append a new value to current member and set the changeFlag and isNull=true
-        void AddValue(boost::int32_t member, bool isChanged);
+        //returns the index of the inserted value.
+        int AddValue(boost::int32_t member, bool isChanged);
+
+        //set change flat on individual value
+        void SetChanged(boost::int32_t member, int index, bool isChanged);
 
         //set key for last added value
-        void SetKeyInt32(boost::int32_t member, boost::int32_t val);
-        void SetKeyInt64(boost::int32_t member, boost::int64_t val);
-        void SetKeyHash(boost::int32_t member, boost::int64_t val);
-        void SetKeyString(boost::int32_t member, const std::string& val);
+        void SetKeyInt32(boost::int32_t member, int index, boost::int32_t val);
+        void SetKeyInt64(boost::int32_t member, int index, boost::int64_t val);
+        void SetKeyHash(boost::int32_t member, int index, boost::int64_t val);
+        void SetKeyString(boost::int32_t member, int index, const std::string& val);
 
         //set value for last added value, after a value have been set IsNull=false
-        void SetValueInt32(boost::int32_t member, boost::int32_t val);
-        void SetValueInt64(boost::int32_t member, boost::int64_t val);
-        void SetValueFloat32(boost::int32_t member, float val);
-        void SetValueFloat64(boost::int32_t member, double val);
-        void SetValueBool(boost::int32_t member, bool val);
-        void SetValueHash(boost::int32_t member, boost::int64_t val);
-        void SetValueString(boost::int32_t member, const std::string& val);
-        void SetValueBinary(boost::int32_t member, const char* val, boost::int32_t size);
-
+        void SetValueInt32(boost::int32_t member, int index, boost::int32_t val);
+        void SetValueInt64(boost::int32_t member, int index, boost::int64_t val);
+        void SetValueFloat32(boost::int32_t member, int index, float val);
+        void SetValueFloat64(boost::int32_t member, int index, double val);
+        void SetValueBool(boost::int32_t member, int index, bool val);
+        void SetValueHash(boost::int32_t member, int index, boost::int64_t val);
+        void SetValueString(boost::int32_t member, int index, const std::string& val);
+        void SetValueBinary(boost::int32_t member, int index, const char* val, boost::int32_t size);
 
     private:
         static const size_t HeaderSize=sizeof(boost::int32_t)+sizeof(boost::int64_t);

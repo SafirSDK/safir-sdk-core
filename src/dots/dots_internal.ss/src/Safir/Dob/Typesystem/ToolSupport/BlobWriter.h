@@ -69,32 +69,10 @@ namespace ToolSupport
             ,m_classDescription(m_repository->GetClass(typeId))
             ,m_memberDescription(NULL)
             ,m_memberIndex(-1)
+            ,m_valueIndex(-1)
             ,m_blob(typeId, m_classDescription->GetNumberOfMembers())
         {
-            for (DotsC_MemberIndex memberIndex=0; memberIndex<m_classDescription->GetNumberOfMembers(); ++memberIndex)
-            {
-                const MemberDescriptionType* member=m_classDescription->GetMember(memberIndex);
-                switch (member->GetCollectionType())
-                {
-                case NoCollectionType:
-                {
-                    m_blob.AddValue(memberIndex, false);
-                }
-                    break;
-
-                case ArrayCollectionType:
-                {
-                    for (int arrayIndex=0; arrayIndex=member->GetArraySize(); ++arrayIndex)
-                    {
-                        m_blob.AddValue(memberIndex, false);
-                    }
-                }
-                    break;
-
-                default:
-                    break;
-                }
-            }
+            Init();
         }
 
         /**
@@ -115,9 +93,50 @@ namespace ToolSupport
          * @param member[in] - Member index of the member.
          * @param isChanged - Indicates if the member value is changed at top level.
          */
-        void SetChangedTopLevel(DotsC_MemberIndex member, bool isChanged)
+        void SetChangedTopLevel(DotsC_MemberIndex member, bool isChanged) {m_blob.SetChangedTopLevel(member, isChanged);}
+
+        /**
+         *
+         */
+        template <class Val>
+        void WriteValue(DotsC_MemberIndex member, const Val& val, bool isNull, bool isChanged)
         {
-            m_blob.SetChangedHere(member, isChanged);
+            MoveToMember(member);
+            DotsC_CollectionType ct=m_memberDescription->GetCollectionType();
+            if (ct==NoCollectionType)
+            {
+                m_valueIndex=0;
+                m_blob.SetChanged(m_memberIndex, m_valueIndex, isChanged);
+            }
+            else if (ct==RangeCollectionType || ct==SetCollectionType)
+            {
+                m_valueIndex=m_blob.AddValue(member, isChanged);
+            }
+            else
+            {
+                ThrowWrongCollectionType();
+            }
+
+            if (!isNull)
+            {
+                WriteValue(val);
+            }
+        }
+
+        template <class Val>
+        void WriteArrayValue(DotsC_MemberIndex member, DotsC_ArrayIndex index, const Val& val, bool isNull, bool isChanged)
+        {            
+            MoveToMember(member);
+            if (m_memberDescription->GetCollectionType()!=ArrayCollectionType)
+            {
+                ThrowWrongCollectionType();
+            }
+            m_valueIndex=index;
+            m_blob.SetChanged(m_memberIndex, m_valueIndex, isChanged);
+            if (!isNull)
+            {
+                WriteValue(val);
+            }
         }
 
         /**
@@ -161,19 +180,15 @@ namespace ToolSupport
          * @param isChanged [in] - Indicates if the member value is changed. If true it will also set the top level change flag.
          */
         template <class Key, class Val>
-        void WriteValue(DotsC_MemberIndex member, const Key& key, const Val& val, bool isNull, bool isChanged)
+        void WriteDictionaryValue(DotsC_MemberIndex member, const Key& key, const Val& val, bool isNull, bool isChanged)
         {
             MoveToMember(member);
-            if (isChanged)
+            if (m_memberDescription->GetCollectionType()!=HashtableCollectionType)
             {
-                m_blob.SetChangedHere(m_memberIndex, isChanged);
+                ThrowWrongCollectionType();
             }
-
-            m_blob.AddValue(m_memberIndex, isChanged);
-            if (m_memberDescription->GetCollectionType()==ArrayCollectionType || m_memberDescription->GetCollectionType()==HashtableCollectionType)
-            {
-                WriteKey(key);
-            }
+            m_valueIndex=m_blob.AddValue(m_memberIndex, isChanged);
+            WriteKey(key);
             if (!isNull)
             {
                 WriteValue(val);
@@ -187,7 +202,39 @@ namespace ToolSupport
         const ClassDescriptionType* m_classDescription;
         const MemberDescriptionType* m_memberDescription;
         DotsC_MemberIndex m_memberIndex;
+        DotsC_ArrayIndex m_valueIndex;
         Safir::Dob::Typesystem::ToolSupport::Internal::Blob m_blob;
+
+        inline void Init()
+        {
+            //Add values to single value members and arrays since they are not allowed to be empty.
+            //Other collections (set, sequence, dictionary) are allowed to be empty.
+            for (DotsC_MemberIndex memberIndex=0; memberIndex<m_classDescription->GetNumberOfMembers(); ++memberIndex)
+            {
+                const MemberDescriptionType* member=m_classDescription->GetMember(memberIndex);
+                switch (member->GetCollectionType())
+                {
+                case NoCollectionType:
+                {
+                    m_blob.AddValue(memberIndex, false);
+                }
+                    break;
+
+                case ArrayCollectionType:
+                {
+                    for (int arrayIndex=0; arrayIndex=member->GetArraySize(); ++arrayIndex)
+                    {
+                        m_blob.AddValue(memberIndex, false);
+                    }
+                }
+                    break;
+
+                default:
+                    break;
+                }
+            }
+
+        }
 
         inline void MoveToMember(DotsC_MemberIndex member)
         {
@@ -198,14 +245,18 @@ namespace ToolSupport
             }
         }
 
-        inline void CheckType(DotsC_MemberType memberType) const
+        inline void ThrowWrongMemberType(DotsC_MemberType memberType) const
         {
-            if (m_memberDescription->GetCollectionType()!=memberType)
-            {
-                std::ostringstream os;
-                os<<"Trying to write data of wrong type to a blob for member '"<<m_memberDescription->GetName()<<"' in class '"<<m_classDescription->GetName()<<"'";
-                throw std::logic_error(os.str());
-            }
+            std::ostringstream os;
+            os<<"Trying to write data of wrong type to a blob for member '"<<m_memberDescription->GetName()<<"' in class '"<<m_classDescription->GetName()<<"'";
+            throw std::logic_error(os.str());
+        }
+
+        inline void ThrowWrongCollectionType() const
+        {
+            std::ostringstream os;
+            os<<"Trying to write data of wrong collection type to a blob for member '"<<m_memberDescription->GetName()<<"' in class '"<<m_classDescription->GetName()<<"'";
+            throw std::logic_error(os.str());
         }
 
         //-----------------------
@@ -213,31 +264,31 @@ namespace ToolSupport
         //-----------------------
         void WriteKey(DotsC_Int32 key)
         {
-            m_blob.SetKeyInt32(m_memberIndex, key);
+            m_blob.SetKeyInt32(m_memberIndex, m_valueIndex, key);
         }
 
         void WriteKey(DotsC_Int64 key)
         {
-            m_blob.SetKeyInt64(m_memberIndex, key);
+            m_blob.SetKeyInt64(m_memberIndex, m_valueIndex, key);
 
         }
         void WriteKey(const char* key)
         {
-            m_blob.SetKeyString(m_memberIndex, key);
+            m_blob.SetKeyString(m_memberIndex, m_valueIndex, key);
         }
 
         void WriteKey(const std::pair<DotsC_Int64, const char *>& key)
         {
-            m_blob.SetKeyHash(m_memberIndex, key.first);
+            m_blob.SetKeyHash(m_memberIndex, m_valueIndex, key.first);
             if (key.second)
             {
-                m_blob.SetKeyString(m_memberIndex, key.second);
+                m_blob.SetKeyString(m_memberIndex, m_valueIndex, key.second);
             }
         }
 
         void WriteKey(const std::pair<DotsC_EntityId, const char*>& key)
         {
-            m_blob.SetKeyInt64(m_memberIndex, key.first.typeId);
+            m_blob.SetKeyInt64(m_memberIndex, m_valueIndex, key.first.typeId);
             WriteKey(std::pair<DotsC_Int64, const char *>(key.first.instanceId, key.second));
         }
 
@@ -247,37 +298,37 @@ namespace ToolSupport
         void WriteValue(DotsC_Int32 val)
         {
             assert(m_memberDescription->GetMemberType()==Int32MemberType);
-            m_blob.SetValueInt32(m_memberIndex, val);
+            m_blob.SetValueInt32(m_memberIndex, m_valueIndex, val);
         }
 
         void WriteValue(DotsC_Int64 val)
         {
             assert(m_memberDescription->GetMemberType()==Int64MemberType);
-            m_blob.SetValueInt64(m_memberIndex, val);
+            m_blob.SetValueInt64(m_memberIndex, m_valueIndex, val);
         }
 
         void WriteValue(DotsC_Float32 val)
         {
             assert(m_memberDescription->GetMemberType()==Float32MemberType);
-            m_blob.SetValueFloat32(m_memberIndex, val);
+            m_blob.SetValueFloat32(m_memberIndex, m_valueIndex, val);
         }
 
         void WriteValue(DotsC_Float64 val)
         {
             assert(m_memberDescription->GetMemberType()==Float64MemberType);
-            m_blob.SetValueFloat64(m_memberIndex, val);
+            m_blob.SetValueFloat64(m_memberIndex, m_valueIndex, val);
         }
 
         void WriteValue(bool val)
         {
             assert(m_memberDescription->GetMemberType()==BooleanMemberType);
-            m_blob.SetValueBool(m_memberIndex, val);
+            m_blob.SetValueBool(m_memberIndex, m_valueIndex, val);
         }
 
         void WriteValue(const char* val)
         {
             if (m_memberDescription->GetMemberType()==StringMemberType)
-                m_blob.SetValueString(m_memberIndex, val);
+                m_blob.SetValueString(m_memberIndex, m_valueIndex, val);
             else if (m_memberDescription->GetMemberType()==ObjectMemberType)
                 WriteValue(std::pair<const char*, DotsC_Int32>(val, Internal::Blob::GetSize(val)));
             else
@@ -287,28 +338,28 @@ namespace ToolSupport
         void WriteValue(const std::pair<DotsC_Int64, const char *>& val) //hashed val
         {
             assert(m_memberDescription->GetMemberType()==InstanceIdMemberType || m_memberDescription->GetMemberType()==ChannelIdMemberType || m_memberDescription->GetMemberType()==HandlerIdMemberType);
-            m_blob.SetValueHash(m_memberIndex, val.first);
+            m_blob.SetValueHash(m_memberIndex, m_valueIndex, val.first);
             if (val.second)
             {
-                m_blob.SetValueString(m_memberIndex, val.second);
+                m_blob.SetValueString(m_memberIndex, m_valueIndex, val.second);
             }
         }
 
         void WriteValue(const std::pair<DotsC_EntityId, const char*>& val) //entityId with optional instance string
         {
             assert(m_memberDescription->GetMemberType()==EntityIdMemberType);
-            m_blob.SetValueInt64(m_memberIndex, val.first.typeId);
-            m_blob.SetValueHash(m_memberIndex, val.first.instanceId);
+            m_blob.SetValueInt64(m_memberIndex, m_valueIndex, val.first.typeId);
+            m_blob.SetValueHash(m_memberIndex, m_valueIndex, val.first.instanceId);
             if (val.second)
             {
-                m_blob.SetValueString(m_memberIndex, val.second);
+                m_blob.SetValueString(m_memberIndex, m_valueIndex, val.second);
             }
         }
 
         void WriteValue(const std::pair<const char*, DotsC_Int32>& val) //binary data or object
         {
             assert(m_memberDescription->GetMemberType()==BinaryMemberType || m_memberDescription->GetMemberType()==ObjectMemberType);
-            m_blob.SetValueBinary(m_memberIndex, val.first, val.second);
+            m_blob.SetValueBinary(m_memberIndex, m_valueIndex, val.first, val.second);
         }
     };
 }
