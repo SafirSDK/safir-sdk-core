@@ -29,14 +29,15 @@
 #include <boost/cstdint.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/chrono.hpp>
-#include <boost/crc.hpp>
 
 #ifdef _MSC_VER
 #pragma warning (push)
 #pragma warning (disable: 4244)
+#pragma warning (disable: 4245)
 #pragma warning (disable: 4127)
 #endif
 
+#include <boost/crc.hpp>
 #include "CommunicationMessage.pb.h"
 
 #ifdef _MSC_VER

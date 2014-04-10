@@ -125,7 +125,7 @@ namespace Com
             {
                 //there are room for at least one fragment within the queue limit.
                 //then we step up the total amount, even if it will exceed the queue limit. Send queue will handle this case.
-                m_sendQueueSize+=(totalNumberOfFragments-1); //note that one already been added
+                m_sendQueueSize+=static_cast<unsigned int>(totalNumberOfFragments-1); //note that one already been added
 
             }
             else //not room for one more fragment
@@ -143,7 +143,7 @@ namespace Com
             {
                 if (!ReceiverExists(toId))
                 {
-                    m_sendQueueSize-=totalNumberOfFragments;
+                    m_sendQueueSize-=static_cast<unsigned int>(totalNumberOfFragments);
                     //receiver does not exist so we just throw it away
                     lllog(7)<<"COM: Receiver does not exist. Message will not be sent."<<std::endl;
                     return;
