@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>Safir.Dob.PersistenceParameters</name>
+    <baseClass>Safir.Dob.Parametrization</baseClass>
+    <parameters>
+      <parameter>
+        <summary>True if persistence is used in this system.</summary>
+        <name>SystemHasPersistence</name>
+        <type>Boolean</type>
+        <value>True</value>
+      </parameter>
+      <parameter>
+          <summary>Which backend should DOPE use (Currently 'File' and 'Odbc' are supported).</summary>
+          <name>Backend</name>
+          <type>Safir.Dob.PersistenceBackend</type>
+          <value>File</value>
+      </parameter>
+      <parameter>
+        <summary>Full path where the File storage backend stores its data. Use forward slashes as directory separator!</summary>
+        <name>FileStoragePath</name>
+        <type>String</type>
+        <value>${TEMP}/safir_sdk_core/persistence/</value>
+      </parameter>
+     <parameter>
+        <summary>The string to use for connection to the physical storage.</summary>
+        <name>OdbcStorageConnectString</name>
+        <type>String</type>
+        <value>Driver={MIMER};Database=SafirDb;Uid=dopeuser;Pwd=dopeuser</value>
+     </parameter>
+      <parameter>
+        <summary>The size of the XmlData column in the database.</summary>
+        <name>XmlDataColumnSize</name>
+        <type>Int32</type>
+        <value>10485760</value>
+      </parameter>
+      <parameter>
+        <summary>The size of the BinaryData column in the database. Unit is bytes.</summary>
+        <name>BinaryDataColumnSize</name>
+        <type>Int32</type>
+        <value>10485760</value>
+      </parameter>
+      <parameter>
+        <summary>The size of the BinarySmallData column in the database. Unit is bytes.</summary>
+        <name>BinarySmallDataColumnSize</name>
+        <type>Int32</type>
+        <value>5000</value>
+      </parameter>
+      <parameter>
+        <summary>The size of the TypeName column in the database. Unit is likely in unicode characters.</summary>
+        <name>TypeNameColumnSize</name>
+        <type>Int32</type>
+        <value>236</value>
+      </parameter>
+      <parameter>
+        <summary>StandaloneMode means that each dope that is started is saving its own persistent data.
+                 Only valid if when several dope_main runs on different nodes in a redundant system.
+                 Use with caution. If active dope_main(the one that is started first) has no persistent data saved, all
+                 other nodes persistent data will be cleared. </summary>
+        <name>StandaloneMode</name>
+        <type>Boolean</type>
+        <value>False</value>
+      </parameter>
+      <parameter>
+        <summary>TestMode allow initial injections without persistence started. Only valid if SystemHasPersistence flag is set to false.</summary>
+        <name>TestMode</name>
+        <type>Boolean</type>
+        <value>False</value>
+      </parameter>
+    </parameters>
+</class>

@@ -24,7 +24,7 @@
 #
 ###############################################################################
 from __future__ import print_function
-import subprocess, os, time, sys, shutil, glob
+import subprocess, os, time, sys, shutil, glob, argparse
 from testenv import TestEnv, TestEnvStopper
 
 def log(data):
@@ -49,26 +49,30 @@ def rmdir(directory):
             shutil.rmtree(directory)
 
 
-if sys.platform == "win32":
-    config_type = os.environ.get("CMAKE_CONFIG_TYPE")
-    exe_path = config_type if config_type else ""
-else:
-    exe_path = "."
+parser = argparse.ArgumentParser("test script")
+parser.add_argument("--safir-show-config", required=True)
+parser.add_argument("--dose-main", required=True)
+parser.add_argument("--dope-main", required=True)
+parser.add_argument("--entity-owner", required=True)
 
-SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
-
-file_storage_path = os.path.join(SAFIR_RUNTIME,"data/binary/dope");
-
-owner_path = os.path.join(exe_path,"entity_owner")
+arguments = parser.parse_args()
+            
+file_storage_path = "/tmp/safir_sdk_core/persistence" #TODO: read from config
 
 rmdir(file_storage_path)
 
+subprocess.call((arguments.safir_show_config, "--typesystem"))
+
 log("Set a bunch of entities")
-env = TestEnv()
+env = TestEnv(arguments.dose_main, arguments.dope_main, arguments.safir_show_config)
 with TestEnvStopper(env):
-    env.launchProcess("entity_owner", (owner_path,"set")).wait()
+    env.launchProcess("entity_owner", (arguments.entity_owner,"set")).wait()
     while(len(glob.glob(os.path.join(file_storage_path,"DopeTest.*.bin"))) != 110):
         time.sleep(0.1)
+        if not env.ReturnCodesOk():
+            log("Some process exited with an unexpected value")
+            sys.exit(1)
+
 
 if not env.ReturnCodesOk():
     log("Some process exited with an unexpected value")
@@ -80,9 +84,9 @@ if len(syslog_output) != 0:
     sys.exit(1)
 
 log("See if dope loads them at startup")
-env = TestEnv()
+env = TestEnv(arguments.dose_main, arguments.dope_main, arguments.safir_show_config)
 with TestEnvStopper(env):
-    env.launchProcess("entity_owner", (owner_path,"accept")).wait()
+    env.launchProcess("entity_owner", (arguments.entity_owner,"accept")).wait()
 
 if not env.ReturnCodesOk():
     log("Some process exited with an unexpected value")
@@ -125,9 +129,9 @@ for f in glob.glob(os.path.join(file_storage_path,"DopeTest.*.bin")):
 
 log("Check that dope can load xml")
 
-env = TestEnv()
+env = TestEnv(arguments.dose_main, arguments.dope_main, arguments.safir_show_config)
 with TestEnvStopper(env):
-    env.launchProcess("entity_owner", (owner_path,"accept")).wait()
+    env.launchProcess("entity_owner", (arguments.entity_owner,"accept")).wait()
 
 if not env.ReturnCodesOk():
     log("Some process exited with an unexpected value")
@@ -161,14 +165,14 @@ if len(glob.glob(os.path.join(file_storage_path,"DopeTest.*.xml"))) != 0:
 
 log("update the entities")
 
-env = TestEnv()
+env = TestEnv(arguments.dose_main, arguments.dope_main, arguments.safir_show_config)
 with TestEnvStopper(env):
     #remove all bin files (that have been loaded by dope by now), so 
     #that we can wait for all entities to be written again
     for f in glob.glob(os.path.join(file_storage_path,"DopeTest.*.bin")):
         remove(f)
 
-    env.launchProcess("entity_owner", (owner_path,"update")).wait()
+    env.launchProcess("entity_owner", (arguments.entity_owner,"update")).wait()
 
     while(len(glob.glob(os.path.join(file_storage_path,"DopeTest.*.bin"))) != 110):
         time.sleep(0.1)
@@ -183,9 +187,9 @@ if len(syslog_output) != 0:
     sys.exit(1)
 
 log("Load them again and check output")
-env = TestEnv()
+env = TestEnv(arguments.dose_main, arguments.dope_main, arguments.safir_show_config)
 with TestEnvStopper(env):
-    env.launchProcess("entity_owner", (owner_path,"accept")).wait()
+    env.launchProcess("entity_owner", (arguments.entity_owner,"accept")).wait()
 
 if not env.ReturnCodesOk():
     log("Some process exited with an unexpected value")

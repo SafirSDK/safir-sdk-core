@@ -1,22 +1,26 @@
-cmake_minimum_required(VERSION 2.8)
-
-project(dope_file_backend_test CXX)
-
-include($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
-
 find_package(Boost COMPONENTS system)
 
 ADD_EXECUTABLE(entity_owner ../entity_owner.cpp)
 
-if (NOT MSVC)
-  TARGET_LINK_LIBRARIES(entity_owner dose_cpp dots_generated-DopeTest-cpp dots_cpp ${Boost_LIBRARIES})
-endif()
+TARGET_LINK_LIBRARIES(entity_owner douf_time_cpp dose_cpp dots_generated-dope_test-cpp dots_cpp ${Boost_LIBRARIES})
 
-find_package(PythonInterp)
+add_dependencies(entity_owner dose_main dope_main safir_show_config)
 
-enable_testing()
-
-ADD_TEST(dope_file_backend_test ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_file_backend_test.py)
+ADD_TEST(NAME dope_file_backend_test 
+  COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_file_backend_test.py
+  --safir-show-config $<TARGET_FILE:safir_show_config>
+  --dose-main $<TARGET_FILE:dose_main>
+  --dope-main $<TARGET_FILE:dope_main>
+  --entity-owner $<TARGET_FILE:entity_owner>)
 
 #Long timeouts are needed on slow machines.
-SET_SAFIR_TEST_PROPERTIES(TEST dope_file_backend_test TIMEOUT 3600)
+SET_SAFIR_TEST_PROPERTIES(TEST dope_file_backend_test 
+  TIMEOUT 3600
+  CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/test_config
+  ENVIRONMENT 
+  "DOPE_TEST_DIR=${safir_sdk_core_BINARY_DIR}/dope/dope_test_dou.ss/"
+  "SWRE_DIR=${safir_sdk_core_BINARY_DIR}/swre/swre_dou.ss/"
+  "DOUF_DIR=${safir_sdk_core_BINARY_DIR}/douf/douf_dou.ss/"
+  "OLIB_DIR=${safir_sdk_core_BINARY_DIR}/olib/olib_dou.ss/")
+
+#TODO: this is wrong, and too difficult!
