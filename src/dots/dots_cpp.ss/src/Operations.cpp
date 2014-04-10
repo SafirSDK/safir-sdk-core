@@ -155,9 +155,9 @@ namespace Operations
         {
             throw IllegalValueException(L"There is no such enumeration or value defined. enumId = "
                                         + boost::lexical_cast<std::wstring>(enumId)
-                                        + ", enumVal = "
+                                        + L", enumVal = "
                                         + boost::lexical_cast<std::wstring>(enumVal),
-                                        , __WFILE__, __LINE__);
+                                        __WFILE__, __LINE__);
         }
         else
         {
@@ -174,8 +174,8 @@ namespace Operations
         {
             throw IllegalValueException(L"There is no such enumeration or value defined. enumId = "
                                         + boost::lexical_cast<std::wstring>(enumId)
-                                        + ", enumVal = " + enumValueName,
-                                        , __WFILE__, __LINE__);
+                                        + L", enumVal = " + enumValueName,
+                                        __WFILE__, __LINE__);
         }
         else
         {
