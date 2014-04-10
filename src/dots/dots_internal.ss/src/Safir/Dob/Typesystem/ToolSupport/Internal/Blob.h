@@ -70,8 +70,8 @@ namespace Internal
         //----------------------------------------
         // Read
         //----------------------------------------
-        //changed at member top level, only meaningful for containers and objects
-        bool IsChangedHere(boost::int32_t member) const;
+        //changed at member top level
+        bool IsChangedTopLevel(boost::int32_t member) const;
 
         //get number of values in current member
         int NumberOfValues(boost::int32_t member) const;
@@ -102,7 +102,7 @@ namespace Internal
         // Write
         //----------------------------------------        
         //set isChanged on top level, only meaningful for containers and objects
-        void SetChangedHere(boost::int32_t member, bool isChanged);
+        void SetChangedTopLevel(boost::int32_t member, bool isChanged);
 
         //append a new value to current member and set the changeFlag and isNull=true
         void AddValue(boost::int32_t member, bool isChanged);

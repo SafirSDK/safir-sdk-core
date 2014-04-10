@@ -94,9 +94,9 @@ namespace Internal
         m_object->SerializeWithCachedSizesToArray(content);
     }
 
-    bool Blob::IsChangedHere(boost::int32_t member) const
+    bool Blob::IsChangedTopLevel(boost::int32_t member) const
     {
-        return  m_object->members(member).has_is_changed_here() && m_object->members(member).is_changed_here();
+        return  m_object->members(member).has_is_changed_top_level() && m_object->members(member).is_changed_top_level();
     }
 
     int Blob::NumberOfValues(boost::int32_t member) const
@@ -199,9 +199,9 @@ namespace Internal
         return std::make_pair(s.c_str(), static_cast<boost::int32_t>(s.size()));
     }
 
-    void Blob::SetChangedHere(boost::int32_t member, bool isChanged)
+    void Blob::SetChangedTopLevel(boost::int32_t member, bool isChanged)
     {
-        m_object->mutable_members(member)->set_is_changed_here(isChanged);
+        m_object->mutable_members(member)->set_is_changed_top_level(isChanged);
     }
 
     void Blob::AddValue(boost::int32_t member, bool isChanged)
