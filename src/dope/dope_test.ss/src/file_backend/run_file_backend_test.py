@@ -54,6 +54,7 @@ parser.add_argument("--safir-show-config", required=True)
 parser.add_argument("--dose-main", required=True)
 parser.add_argument("--dope-main", required=True)
 parser.add_argument("--entity-owner", required=True)
+parser.add_argument("--dope-bin2xml", required=True)
 
 arguments = parser.parse_args()
             
@@ -117,7 +118,7 @@ if len(glob.glob(os.path.join(file_storage_path,"DopeTest.*.xml"))) != 0:
 log("Convert binaries to xml")
 
 #files are automatically chosen by parameter setting
-subprocess.call(os.path.join(SAFIR_RUNTIME,"bin","dope_bin2xml"))
+subprocess.call(arguments.dope_bin2xml)
 
 if len(glob.glob(os.path.join(file_storage_path,"DopeTest.*.xml"))) != 110:
     log("dope_bin2xml appears to have failed")
