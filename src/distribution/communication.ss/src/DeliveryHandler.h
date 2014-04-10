@@ -89,7 +89,7 @@ namespace Com
                 return;
             }
 
-            lllog(4)<<L"COM: Received AppData from "<<header->commonHeader.senderId<<std::endl;
+            lllog(8)<<L"COM: Received AppData from "<<header->commonHeader.senderId<<std::endl;
             m_gotRecvFrom(header->commonHeader.senderId); //report that we are receivinga intact data from the node
 
             bool sendAck=HandleMessage(header, payload, senderIt->second);
