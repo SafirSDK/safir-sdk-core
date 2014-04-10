@@ -28,6 +28,7 @@
 #include "Safir/Dob/Typesystem/BlobOperations.h"
 #include "Safir/Dob/Typesystem/ContainerProxies.h"
 #include <Safir/Utilities/DynamicLibraryLoader.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/ConfigReader.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <iostream>
@@ -62,17 +63,30 @@ namespace Typesystem
         const bool registered =
             ObjectFactory::Instance().RegisterClass(Safir::Dob::Typesystem::Object::ClassTypeId,CreateObject);
 
-        void LoadLib(const std::string& name)
+        void LoadLib(const std::string& path, const std::string& name)
         {
+            
             const std::string fullName = "dots_generated-" + name + "-cpp";
+                            
             try
             {
                 Safir::Utilities::DynamicLibraryLoader loader;
-                loader.Load(fullName, false, true);
+                if (path.empty())
+                {
+                    loader.Load(fullName, false, true);
+                }
+                else
+                {
+                    loader.Load(fullName, path, false, true);
+                }
             }
             catch (const std::logic_error& e)
             {
-                std::wcout << "Failed to load " << fullName.c_str() << " library: " << e.what() << std::endl;
+                SEND_SYSTEM_LOG (Critical,  << "Failed to load " << fullName.c_str() << " library: " << e.what());
+                std::wostringstream ostr;
+                ostr << "Failed to load " << fullName.c_str() << " library. Please check your configuration!";
+                throw Safir::Dob::Typesystem::ConfigurationErrorException(ostr.str(), __WFILE__, __LINE__);
+
             }
 
         }
@@ -89,18 +103,33 @@ namespace Typesystem
                 if (isSection)
                 {
                     const std::string module = it->first;
-                    lllog(1) << "Loading dots generated module " << module.c_str() << std::endl;
-                    
-                    LoadLib(module);
+
+                    std::string location;
+
+                    const boost::optional<std::string> library_location = it->second.get_optional<std::string>("library_location");            
+                    if (library_location)
+                    {
+                        location = library_location.get();
+                    }
+
+                    const boost::optional<bool> dont_load = it->second.get_optional<bool>("dont_load");
+                    if (!!dont_load && dont_load.get())
+                    {
+                        lllog(1) << "Not loading dots_generated module " << module.c_str() << " since dont_load is specified" << std::endl;
+                    }
+                    else
+                    {
+                        lllog(1) << "Loading dots generated module " << module.c_str() << std::endl;
+                        LoadLib(location, module);
+                    }
                 }
             }
 
             return true;
         }
 
-        const bool loadedLibraries = 
-                                                                                       LoadLibraries();
-
+        const bool loadedLibraries = LoadLibraries();
+        
     }
 
     //Check if anything in the object has change flags set
