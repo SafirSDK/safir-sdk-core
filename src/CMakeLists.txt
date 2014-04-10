@@ -154,7 +154,7 @@ endif()
 #                             it will be set to a default configuration.
 #
 function (SET_SAFIR_TEST_PROPERTIES) 
-  cmake_parse_arguments(PROP "" "TEST;TIMEOUT;CONFIG_OVERRIDE" "" ${ARGN})
+  cmake_parse_arguments(PROP "" "TEST;TIMEOUT;CONFIG_OVERRIDE" "ENVIRONMENT" ${ARGN})
 
   if (NOT "${PROP_UNPARSED_ARGUMENTS}" STREQUAL "")
     message(FATAL_ERROR "Unknown argument to SET_SAFIR_TEST_PROPERTIES '${PROP_UNPARSED_ARGUMENTS}'")
@@ -182,7 +182,8 @@ function (SET_SAFIR_TEST_PROPERTIES)
     PROPERTY ENVIRONMENT 
     "SAFIR_TEST_CONFIG_OVERRIDE=${PROP_CONFIG_OVERRIDE}"
     "SAFIR_SOURCE_ROOT=${safir_sdk_core_SOURCE_DIR}/../"
-    "PYTHONPATH=${pypath}")
+    "PYTHONPATH=${pypath}"
+    ${PROP_ENVIRONMENT})
 endfunction()
 
 INCLUDE(cmake/build_generated.cmake)
