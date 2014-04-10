@@ -37,6 +37,7 @@
 #include <boost/archive/iterators/transform_width.hpp>
 #include <boost/archive/iterators/insert_linebreaks.hpp>
 #include <boost/archive/iterators/remove_whitespace.hpp>
+#include <Safir/Utilities/Internal/ConfigReader.h>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeUtilities.h>
 #include <Safir/Dob/Typesystem/ToolSupport/ParseError.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Internal/classic_string_cast.h>
@@ -91,30 +92,26 @@ namespace SerializationUtils
 
     inline std::string ExpandEnvironmentVariables(const std::string& str)
     {
-        //Copied from dots_kernel::dots_class_parser
-        const size_t start=str.find("$(");
-        const size_t stop=str.find(')', start);
-
-        if (start==std::string::npos || stop==std::string::npos)
-            return str;
-
-        const std::string var=str.substr(start+2, stop-start-2);
-
-        //Get rid of Microsoft warning
-#ifdef _MSC_VER
-#pragma warning(disable:4996)
-#endif
-        const char * const env=getenv(var.c_str());
-#ifdef _MSC_VER
-#pragma warning(default:4996)
-#endif
-
-        if (env == NULL)
+        std::string result;
+        try
         {
-            throw var;
+            result = Safir::Utilities::Internal::Expansion::ExpandSpecial(str);
         }
-        const std::string res=str.substr(0, start) + env + str.substr(stop+1, str.size()-stop-1);
-        return ExpandEnvironmentVariables(res); //search for next environment variable
+        catch (const std::logic_error& e)
+        {
+            throw ParseError("Special variable expansion error", e.what(), "", 666);
+        }
+
+        try
+        {
+            result = Safir::Utilities::Internal::Expansion::ExpandEnvironment(result);
+        }
+        catch (const std::logic_error& e)
+        {
+            throw ParseError("Environment variable expansion error", e.what(), "", 666);
+        }
+        
+        return result;
     }
 
     inline DotsC_TypeId StringToTypeId(const std::string& str)
