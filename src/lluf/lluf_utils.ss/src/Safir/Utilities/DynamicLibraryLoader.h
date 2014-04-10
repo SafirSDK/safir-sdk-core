@@ -63,6 +63,27 @@ namespace Utilities
                   const bool unloadOnDestruction,
                   const bool global = false);
 
+
+        /**
+         * Load a library from a given location.
+         *
+         * Attempt to load the specified library dynamically.
+         * 
+         * @param [in] libraryName The name of the library to load. On linux "lib" and ".so" are added
+         *                         to the beginning and end of the name, and on windows ".dll" is appended.
+         * @param [in] path Location to load the library from.
+         * @param [in] unloadOnDestruction If this is true the library will be unloaded when the object
+         *                                 is destroyed. This will invalidate any function pointers.
+         * @param [in] global Use RTLD_GLOBAL flag when loading on *nix.
+         * @throws std::logic_error If library cannot be found or cannot be not loaded.
+         */
+        void Load(const std::string& libraryName,
+                  const std::string& path,
+                  const bool unloadOnDestruction,
+                  const bool global = false);
+
+        //TODO: add test for this function!
+
         /** 
          * Unload the library.
          */
