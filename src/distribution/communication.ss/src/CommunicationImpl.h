@@ -59,6 +59,12 @@ namespace Com
 
         virtual ~CommunicationImpl();
 
+        void AddNodeType(boost::int64_t id,
+                         const std::string& name,
+                         const std::string& multicastAddress,
+                         int heartBeatInterval,
+                         int retryTimeout);
+
         //set callbacks
         void SetNewNodeCallback(const NewNode& callback);
         void SetGotReceiveFromCallback(const GotReceiveFrom& callback);
@@ -86,6 +92,8 @@ namespace Com
         ::google::protobuf::LogSilencer m_disableProtobufLogs;
         boost::shared_ptr<boost::asio::io_service> m_ioService;
         Node m_me;
+        bool m_discovering;
+        std::map<boost::int64_t, NodeType> m_nodeTypes;
 
         //Callbacks
         NewNode m_onNewNode;

@@ -45,11 +45,13 @@ namespace Com
                                          const std::string& nodeName,
                                          boost::int64_t nodeId, //0 is not a valid id.
                                          boost::int64_t& nodeTypeId,
-                                         const std::string& unicastAddress,
+                                         const std::string& address,
                                          bool discovering)
         :m_disableProtobufLogs()
         ,m_ioService(ioService)
-        ,m_me(nodeName, nodeId, unicastAddress, multicastAddress)
+        ,m_me(nodeName, nodeId, nodeTypeId, address)
+        ,m_discovering(discovering)
+        ,m_nodeTypes()
         ,m_onNewNode()
         ,m_gotRecv()
         ,m_reader(*ioService, m_me,
@@ -84,6 +86,11 @@ namespace Com
 
     CommunicationImpl::~CommunicationImpl()
     {
+    }
+
+    void CommunicationImpl::AddNodeType(boost::int64_t id, const std::string &name, const std::string &multicastAddress, int heartBeatInterval, int retryTimeout)
+    {
+        m_nodeTypes.insert(std::make_pair(id, NodeType(name, multicastAddress, heartBeatInterval, retryTimeout)));
     }
 
     void CommunicationImpl::SetNewNodeCallback(const NewNode& callback)

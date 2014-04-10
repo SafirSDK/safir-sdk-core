@@ -44,7 +44,10 @@ namespace Com
                   const std::vector<NodeType>& nodeTypes)
         : m_impl(new CommunicationImpl(ioService, nodeName, nodeId, nodeTypeId, unicastAddress, discovering))
     {
-        //TODO: add all node types
+//        for (auto& nt : nodeTypes)
+//        {
+//            m_impl->AddNodeType(nt.id, nt.name)
+//        }
     }
 
     Communication::~Communication()
