@@ -45,9 +45,8 @@ namespace Com
     public:
         Node(const std::string& name_,
              boost::int64_t nodeId_,
-             boost::int64_t nodeTypeId,
-             const std::string& unicastAddr,
-             const std::string& multicastAddr);
+             boost::int64_t nodeTypeId_,
+             const std::string& address_);
 
         static bool SplitAddress(const std::string& address, std::string& ip, unsigned short& port);
         static boost::asio::ip::udp::endpoint CreateEndpoint(const std::string& address,
@@ -59,12 +58,11 @@ namespace Com
         //Getters and setters
         const std::string& Name() const {return m_name;}
         boost::int64_t Id() const {return m_id;}
-        const boost::asio::ip::udp::endpoint& Endpoint() const {return m_unicastEndpoint;}
-        bool IsMulticastEnabled() const {return m_multicastEnabled;}        
+        boost::int64_t NodeTypeId() const {return m_nodeTypeId;}
+        const boost::asio::ip::udp::endpoint& Endpoint() const {return m_endpoint;}
         bool IsSystemNode() const {return m_systemNode;}
         void SetSystemNode(bool isSystemNode) {m_systemNode=isSystemNode;}
-        const std::string& UnicastAddress() const {return m_unicastAddress;}
-        const std::string& MulticastAddress() const {return m_multicastAddress;}
+        const std::string& Address() const {return m_address;}
         IpVersionType IpVersion() const {return m_ipVersion;}
 
         boost::uint64_t& LastSentUnicastSeqNo() {return m_lastSentUnicastSeqNo;}
@@ -73,11 +71,10 @@ namespace Com
     private:
         std::string m_name;
         boost::int64_t m_id;
-        std::string m_unicastAddress;
-        std::string m_multicastAddress;
+        boost::int64_t m_nodeTypeId;
+        std::string m_address;
         IpVersionType m_ipVersion;
-        boost::asio::ip::udp::endpoint m_unicastEndpoint;
-        bool m_multicastEnabled;
+        boost::asio::ip::udp::endpoint m_endpoint;
         bool m_systemNode;
 
         //Sequence numbers - wrap around not implemented. Will only work for 6 billion msg/sec in 100 years.

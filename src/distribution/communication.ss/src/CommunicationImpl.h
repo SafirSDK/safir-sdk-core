@@ -28,6 +28,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/asio.hpp>
 #include <boost/function.hpp>
+#include "NodeType.h"
 #include "Node.h"
 #include "Reader.h"
 #include "DeliveryHandler.h"

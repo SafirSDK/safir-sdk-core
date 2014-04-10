@@ -34,16 +34,15 @@ namespace Internal
 namespace Com
 {
     Node::Node(const std::string& name_,
-               boost::int64_t id_,
-               const std::string& unicastAddr,
-               const std::string& multicastAddr)
+               boost::int64_t nodeId_,
+               boost::int64_t nodeTypeId_,
+               const std::string& address_)
         :m_name(name_)
-        ,m_id(id_)
-        ,m_unicastAddress(unicastAddr)
-        ,m_multicastAddress(multicastAddr)
+        ,m_id(nodeId_)
+        ,m_nodeTypeId(nodeTypeId_)
+        ,m_address(address_)
         ,m_ipVersion(V4)
-        ,m_unicastEndpoint(Node::CreateEndpoint(unicastAddr, m_ipVersion))
-        ,m_multicastEnabled(!multicastAddr.empty())
+        ,m_endpoint(Node::CreateEndpoint(address_, m_ipVersion))
         ,m_systemNode(false)
         ,m_lastSentUnicastSeqNo(0)
     {
@@ -52,11 +51,7 @@ namespace Com
     std::string Node::ToString() const
     {
         std::ostringstream ss;
-        ss<<"["<<m_id<<"]"<<""<<m_name<<" Uc<"<<m_unicastAddress<<">";
-        if (m_multicastEnabled)
-            ss<<" M ";
-        if (m_systemNode)
-            ss<<" S";
+        ss<<"["<<m_id<<"]"<<""<<m_name<<" Uc<"<<m_address<<"> NodeType: "<<m_nodeTypeId;
         return ss.str();
     }
 
