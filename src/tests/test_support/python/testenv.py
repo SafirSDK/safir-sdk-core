@@ -35,10 +35,6 @@ except ImportError:
     # 2.x name
     from Queue import Queue, Empty
 
-SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
-dose_main_cmd = (os.path.join(SAFIR_RUNTIME,"bin","dose_main"),)
-dope_main_cmd = (os.path.join(SAFIR_RUNTIME,"bin","dope_main"),)
-
 def enqueue_output(out, queue):
     while True:
         line = out.readline()
@@ -47,6 +43,17 @@ def enqueue_output(out, queue):
         queue.put(line.rstrip("\n\r"))
     out.close()
 
+class Unbuffered(object):
+   def __init__(self, stream):
+       self.stream = stream
+   def write(self, data):
+       self.stream.write(data)
+       self.stream.flush()
+   def __getattr__(self, attr):
+       return getattr(self.stream, attr)
+
+sys.stdout = Unbuffered(sys.stdout)
+    
 class TestEnvStopper:
     def __init__(self, env):
         self.env = env
@@ -60,15 +67,18 @@ class TestEnvStopper:
 
 
 class TestEnv:
-    def __init__(self):
+    """dose_main: full path to dose_main
+       dope_main: full path to dope_main
+       safir_show_config: full path to safir_show_config
+    """
+    def __init__(self, dose_main, dope_main, safir_show_config):
         self.__procs = dict()
         self.__creationflags = 0
         if sys.platform == "win32":
             self.__creationflags= subprocess.CREATE_NEW_PROCESS_GROUP
-        self.outputlock = threading.Lock()
-        self.dose_main = self.launchProcess("dose_main", dose_main_cmd)
-        self.launchProcess("dope_main", dope_main_cmd)
-        self.syslog = syslog_server.SyslogServer()
+        self.dose_main = self.launchProcess("dose_main", (dose_main,))
+        self.launchProcess("dope_main", (dope_main,))
+        self.syslog = syslog_server.SyslogServer(safir_show_config)
         self.syslog_output = list()
         
         start_time = time.time()
