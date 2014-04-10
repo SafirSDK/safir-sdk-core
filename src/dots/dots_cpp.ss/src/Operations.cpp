@@ -26,6 +26,7 @@
 #include <Safir/Dob/Typesystem/Utilities.h>
 #include <Safir/Dob/Typesystem/Internal/Kernel.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
+#include <boost/lexical_cast.hpp>
 
 namespace Safir
 {
@@ -118,7 +119,9 @@ namespace Operations
         const char * result = DotsC_GetTypeName(typeId);
         if (result == NULL)
         {
-            throw IllegalValueException(L"There is no such type defined", __WFILE__, __LINE__);
+            throw IllegalValueException(L"There is no such type defined. typeId = "
+                                        + boost::lexical_cast<std::wstring>(typeId),
+                                        __WFILE__, __LINE__);
         }
         else
         {
@@ -132,7 +135,9 @@ namespace Operations
         const Int32 result = DotsC_GetNumberOfEnumerationValues(enumId);
         if (result == -1)
         {
-            throw IllegalValueException(L"No such enumeration exists",__WFILE__,__LINE__);
+            throw IllegalValueException(L"No such enumeration exists. enumId = " 
+                                        + boost::lexical_cast<std::wstring>(enumId),
+                                        __WFILE__,__LINE__);
         }
         else
         {
@@ -148,7 +153,11 @@ namespace Operations
 
         if (result == NULL)
         {
-            throw IllegalValueException(L"There is no such enumeration or value defined", __WFILE__, __LINE__);
+            throw IllegalValueException(L"There is no such enumeration or value defined. enumId = "
+                                        + boost::lexical_cast<std::wstring>(enumId)
+                                        + ", enumVal = "
+                                        + boost::lexical_cast<std::wstring>(enumVal),
+                                        , __WFILE__, __LINE__);
         }
         else
         {
@@ -163,7 +172,10 @@ namespace Operations
         const EnumerationValue result = DotsC_EnumerationValueFromName(enumId, Utilities::ToUtf8(enumValueName).c_str());
         if (result == -1)
         {
-            throw IllegalValueException(L"There is no such enumeration or value defined", __WFILE__, __LINE__);
+            throw IllegalValueException(L"There is no such enumeration or value defined. enumId = "
+                                        + boost::lexical_cast<std::wstring>(enumId)
+                                        + ", enumVal = " + enumValueName,
+                                        , __WFILE__, __LINE__);
         }
         else
         {
