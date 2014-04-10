@@ -115,7 +115,7 @@ namespace SP
                                                                  Retransmit(id);
                                                              }));
         m_checkDeadNodesTimer->Start();
-        m_postStatisticsChangedTimer->Start();
+        //m_postStatisticsChangedTimer->Start();
     }
 
     void RawHandler::Stop()

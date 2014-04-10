@@ -27,7 +27,9 @@
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/asio.hpp>
+#include <boost/asio/steady_timer.hpp>
 #include <boost/function.hpp>
+#include <limits>
 
 namespace Safir
 {
@@ -55,25 +57,38 @@ namespace SP
     {
     public:
         Coordinator(const boost::shared_ptr<boost::asio::io_service>& ioService,
-                 const boost::shared_ptr<Com::Communication>& communication,
-                 const boost::int64_t id,
-                 const boost::shared_ptr<RawHandler>& rawHandler);
+                    const boost::shared_ptr<Com::Communication>& communication,
+                    const boost::int64_t id,
+                    const char* const receiverId,
+                    const boost::shared_ptr<RawHandler>& rawHandler);
 
         void PerformOnStateMessage(const boost::function<void(const boost::shared_ptr<char []>& data, 
                                                               const size_t size)> & fn) const;
-
+        
+        void Stop() {m_electionTimer.cancel();}
     private:
         void StatisticsChanged(const RawStatistics& statistics);
         
         void UpdateMyState(const RawStatistics& statistics);
 
-        bool IsCoordinator() const {return m_id == m_coordinator;}
+        bool IsElected() const {return m_id == m_elected;}
+
+        void StartElection();
+        void ElectionTimeout();
+
+        void GotData(const boost::int64_t from, 
+                     const boost::shared_ptr<char[]>& data, 
+                     size_t size);
+
         mutable boost::asio::strand m_strand;
         const boost::shared_ptr<Com::Communication> m_communication;
+        const boost::uint64_t m_dataIdentifier;
         boost::shared_ptr<SystemStateMessage> m_stateMessage;
         
         const boost::int64_t m_id;
-        boost::int64_t m_coordinator = 0;
+        boost::int64_t m_elected = std::numeric_limits<boost::int64_t>::min();
+        boost::asio::steady_timer m_electionTimer;
+        boost::int64_t m_currentElectionId = 0;
     };
 }
 }

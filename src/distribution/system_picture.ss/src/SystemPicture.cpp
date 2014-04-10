@@ -42,7 +42,8 @@ namespace
 {
     const char* const MASTER_LOCAL_RAW_NAME = "SYSTEM_PICTURE_MASTER_RAW";
     const char* const MASTER_LOCAL_STATE_NAME = "SYSTEM_PICTURE_MASTER_STATE";
-    const char* const MASTER_REMOTE_RAW_NAME = "RAW";
+    const char* const MASTER_REMOTE_RAW_NAME = "SP_RAW";
+    const char* const MASTER_REMOTE_ELECTION_NAME = "SP_ELECTION";
 }
 
 namespace Safir
@@ -91,9 +92,10 @@ namespace SP
                                                                             MASTER_REMOTE_RAW_NAME, 
                                                                             m_rawHandler))
             , m_coordinator(boost::make_shared<Coordinator>(ioService, 
-                                                      communication,
-                                                      id,
-                                                      m_rawHandler))
+                                                            communication,
+                                                            id,
+                                                            MASTER_REMOTE_ELECTION_NAME,
+                                                            m_rawHandler))
             , m_statePublisherLocal(boost::make_shared<StatePublisherLocal>(ioService, 
                                                                             m_coordinator, 
                                                                             MASTER_LOCAL_STATE_NAME))
@@ -132,8 +134,8 @@ namespace SP
                 m_rawHandler->Stop();
                 m_rawPublisherLocal->Stop();
                 m_statePublisherLocal->Stop();
-
                 m_rawPublisherRemote->Stop();
+                m_coordinator->Stop();
             }
         }
         

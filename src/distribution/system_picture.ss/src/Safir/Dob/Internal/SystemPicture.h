@@ -70,7 +70,8 @@ namespace SP
                  const bool isLight,
                  const std::vector<std::string>& talksTo,
                  const bool canMulticast,
-                 const bool deadTimeout);
+                 const double heartbeatInterval,
+                 const int maxLostHeartbeats);
     };
 
 #ifdef _MSC_VER
