@@ -99,7 +99,7 @@ namespace SerializationUtils
         }
         catch (const std::logic_error& e)
         {
-            throw ParseError("Special variable expansion error", e.what(), "", 666);
+            throw ParseError("Special variable expansion error", e.what(), "", 178);
         }
 
         try
@@ -108,7 +108,7 @@ namespace SerializationUtils
         }
         catch (const std::logic_error& e)
         {
-            throw ParseError("Environment variable expansion error", e.what(), "", 666);
+            throw ParseError("Environment variable expansion error", e.what(), "", 179);
         }
         
         return result;
