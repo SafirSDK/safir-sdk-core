@@ -24,12 +24,12 @@
 #ifndef __SAFIR_DOB_COMMUNICATION_DELIVERY_HANDLER_H__
 #define __SAFIR_DOB_COMMUNICATION_DELIVERY_HANDLER_H__
 
+#include <atomic>
 #include <boost/unordered_map.hpp>
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/asio.hpp>
-#include <boost/crc.hpp>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include "Parameters.h"
@@ -37,7 +37,6 @@
 #include "MessageQueue.h"
 #include "Node.h"
 #include "Writer.h"
-#include <atomic>
 
 namespace Safir
 {
