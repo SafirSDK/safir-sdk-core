@@ -26,6 +26,7 @@
 
 #include <boost/cstdint.hpp>
 #include <boost/shared_ptr.hpp>
+#include <Safir/Dob/Typesystem/LanguageInterfaceDefs.h>
 #include <Safir/Dob/Typesystem/ToolSupport/ParseError.h>
 
 namespace Safir
@@ -71,61 +72,58 @@ namespace Internal
         // Read
         //----------------------------------------
         //changed at member top level
-        bool IsChangedTopLevel(boost::int32_t member) const;
+        bool IsChangedTopLevel(int member) const;
 
         //get number of values in current member
-        int NumberOfValues(boost::int32_t member) const;
+        int NumberOfValues(int member) const;
 
-        //is value null
-        bool IsNull(boost::int32_t member, int index) const;
-
-        //is value changed
-        bool IsChanged(boost::int32_t member, int index) const;
+        //get isNull and isChanged
+        void ValueStatus(int member, int index, bool& isNull, bool& isChanged) const;
 
         //get keys, undefined behaviour if IsNull=true
-        boost::int32_t GetKeyInt32(boost::int32_t member, int index) const;
-        boost::int64_t GetKeyInt64(boost::int32_t member, int index) const;
-        boost::int64_t GetKeyHash(boost::int32_t member, int index) const;
-        const std::string& GetKeyString(boost::int32_t member, int index) const;
+        boost::int32_t GetKeyInt32(int member, int index) const;
+        boost::int64_t GetKeyInt64(int member, int index) const;
+        boost::int64_t GetKeyHash(int member, int index) const;
+        const char* GetKeyString(int member, int index) const;
 
         //get value
-        boost::int32_t GetValueInt32(boost::int32_t member, int index) const;
-        boost::int64_t GetValueInt64(boost::int32_t member, int index) const;
-        float GetValueFloat32(boost::int32_t member, int index) const;
-        double GetValueFloat64(boost::int32_t member, int index) const;
-        bool GetValueBool(boost::int32_t member, int index) const;
-        boost::int64_t GetValueHash(boost::int32_t member, int index) const;
-        const std::string& GetValueString(boost::int32_t member, int index) const;
-        std::pair<const char*, boost::int32_t> GetValueBinary(boost::int32_t member, int index) const;
+        boost::int32_t GetValueInt32(int member, int index) const;
+        boost::int64_t GetValueInt64(int member, int index) const;
+        float GetValueFloat32(int member, int index) const;
+        double GetValueFloat64(int member, int index) const;
+        bool GetValueBool(int member, int index) const;
+        boost::int64_t GetValueHash(int member, int index) const;
+        const char* GetValueString(int member, int index) const;
+        std::pair<const char*, boost::int32_t> GetValueBinary(int member, int index) const;
 
         //----------------------------------------
         // Write
         //----------------------------------------        
         //set isChanged on top level, only meaningful for containers and objects
-        void SetChangedTopLevel(boost::int32_t member, bool isChanged);
+        void SetChangedTopLevel(int member, bool isChanged);
 
         //append a new value to current member and set the changeFlag and isNull=true
         //returns the index of the inserted value.
-        int AddValue(boost::int32_t member, bool isChanged);
+        int AddValue(int member, bool isChanged);
 
         //set change flat on individual value
-        void SetChanged(boost::int32_t member, int index, bool isChanged);
+        void SetChanged(int member, int index, bool isChanged);
 
         //set key for last added value
-        void SetKeyInt32(boost::int32_t member, int index, boost::int32_t val);
-        void SetKeyInt64(boost::int32_t member, int index, boost::int64_t val);
-        void SetKeyHash(boost::int32_t member, int index, boost::int64_t val);
-        void SetKeyString(boost::int32_t member, int index, const std::string& val);
+        void SetKeyInt32(int member, int index, boost::int32_t val);
+        void SetKeyInt64(int member, int index, boost::int64_t val);
+        void SetKeyHash(int member, int index, boost::int64_t val);
+        void SetKeyString(int member, int index, const char* val);
 
         //set value for last added value, after a value have been set IsNull=false
-        void SetValueInt32(boost::int32_t member, int index, boost::int32_t val);
-        void SetValueInt64(boost::int32_t member, int index, boost::int64_t val);
-        void SetValueFloat32(boost::int32_t member, int index, float val);
-        void SetValueFloat64(boost::int32_t member, int index, double val);
-        void SetValueBool(boost::int32_t member, int index, bool val);
-        void SetValueHash(boost::int32_t member, int index, boost::int64_t val);
-        void SetValueString(boost::int32_t member, int index, const std::string& val);
-        void SetValueBinary(boost::int32_t member, int index, const char* val, boost::int32_t size);
+        void SetValueInt32(int member, int index, boost::int32_t val);
+        void SetValueInt64(int member, int index, boost::int64_t val);
+        void SetValueFloat32(int member, int index, float val);
+        void SetValueFloat64(int member, int index, double val);
+        void SetValueBool(int member, int index, bool val);
+        void SetValueHash(int member, int index, boost::int64_t val);
+        void SetValueString(int member, int index, const char* val);
+        void SetValueBinary(int member, int index, const char* val, boost::int32_t size);
 
     private:
         static const size_t HeaderSize=sizeof(boost::int32_t)+sizeof(boost::int64_t);
@@ -134,6 +132,64 @@ namespace Internal
         boost::int64_t m_typeId;
         boost::shared_ptr<AnyObject> m_object;
     };
+
+    namespace BlobUtils
+    {
+        //Readers
+        template <class T> struct Reader;
+
+        template <> struct Reader<DotsC_Int32>
+        {
+            static DotsC_Int32 Key(const Internal::Blob& blob, int member, int index) {return blob.GetKeyInt32(member, index);}
+            static DotsC_Int32 Value(const Internal::Blob& blob, int member, int index) {return blob.GetValueInt32(member, index);}
+        };
+
+        template <> struct Reader<DotsC_Int64>
+        {
+            static DotsC_Int64 Key(const Internal::Blob& blob, int member, int index) {return blob.GetKeyInt64(member, index);}
+            static DotsC_Int64 Value(const Internal::Blob& blob, int member, int index) {return blob.GetValueInt64(member, index);}
+        };
+
+        template <> struct Reader<DotsC_Float32>
+        {
+            static DotsC_Float32 Value(const Internal::Blob& blob, int member, int index) {return blob.GetValueFloat32(member, index);}
+        };
+
+        template <> struct Reader<DotsC_Float64>
+        {
+            static DotsC_Float64 Value(const Internal::Blob& blob, int member, int index) {return blob.GetValueFloat64(member, index);}
+        };
+
+        template <> struct Reader<bool>
+        {
+            static bool Value(const Internal::Blob& blob, int member, int index) {return blob.GetValueBool(member, index);}
+        };
+
+    template <> struct Reader<const char*> //hashed value
+    {
+        static std::pair<DotsC_Int64, const char*> Key(const Internal::Blob& blob, int member, int index)
+        {
+            return std::make_pair(blob.GetKeyHash(member, index), blob.GetKeyString(member, index));
+        }
+        static std::pair<DotsC_Int64, const char*> Value(const Internal::Blob& blob, int member, int index)
+        {
+            return std::make_pair(blob.GetValueHash(member, index), blob.GetValueString(member, index));
+        }
+    };
+
+        template <> struct Reader< std::pair<DotsC_Int64, const char*> > //hashed value
+        {
+            static std::pair<DotsC_Int64, const char*> Key(const Internal::Blob& blob, int member, int index)
+            {
+                return std::make_pair(blob.GetKeyHash(member, index), blob.GetKeyString(member, index));
+            }
+            static std::pair<DotsC_Int64, const char*> Value(const Internal::Blob& blob, int member, int index)
+            {
+                return std::make_pair(blob.GetValueHash(member, index), blob.GetValueString(member, index));
+            }
+        };
+
+    }
 
 }
 }

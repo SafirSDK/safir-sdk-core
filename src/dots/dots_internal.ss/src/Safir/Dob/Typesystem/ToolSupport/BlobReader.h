@@ -41,6 +41,24 @@ namespace ToolSupport
 {
     /**
      * This class is used to unpack and read blobs created by the BlobWriter class.
+     * The methods for reading values are templated. The memberTypes maps to c++ types
+     * like described bellow. All strings must be NULL-terminated. Optional strings shall be set to NULL if not present.
+     *
+     * Supported types:
+     * ----------------
+     *      Int32       => DostC_Int32
+     *      Int64       => DostC_Int64
+     *      Float32     => DostC_Float32
+     *      Float64     => DostC_Float64
+     *      TypeId      => DotsC_TypeId
+     *      Enumeration => DotsC_EnumerationValue
+     *      String      => const char*
+     *      InstanceId  => pair<DotsC_Int64, const char* optional_string>
+     *      HandlerId   => pair<DotsC_Int64, const char* optional_string>
+     *      ChannelId   => pair<DotsC_Int64, const char* optional_string>
+     *      EntityId    => pair<DotsC_EntityId, const char* optional_instance_string>
+     *      Binary      => pair<const char* data, DostC_Int32 size>
+     *      Object      => const char* (a valid blob pointer)
      */
     template <class RepositoryT, class Traits=Safir::Dob::Typesystem::ToolSupport::TypeRepositoryTraits<RepositoryT> >
     class BlobReader : private boost::noncopyable
@@ -60,7 +78,7 @@ namespace ToolSupport
         /**
          * @brief Static method. Get the size of a blob without having to unpack the whole blob.
          * @param blob [in] - The blob.
-         * @return Size of the blob.
+         * @return Number of bytes.
          */
         static DotsC_Int32 GetSize(const char* blob) {return Internal::Blob::GetSize(blob);}
 
@@ -86,6 +104,18 @@ namespace ToolSupport
         }
 
         /**
+         * @brief Get the size of the blob.
+         * @return Number of bytes.
+         */
+        DotsC_Int32 Size() const {return m_blob.Size();}
+
+        /**
+         * @brief Get the type id of the blob.
+         * @return TypeId of the blob.
+         */
+        DotsC_TypeId TypeId() const {return m_blob.TypeId();}
+
+        /**
          * Check if the member is changed at top level. For simple values this is the same as the change flag of the value,
          * but for collections and objects changed at top level indicates that the collection or object has changed in some way.
          * @param member
@@ -100,7 +130,40 @@ namespace ToolSupport
          */
         int NumberOfValues(DotsC_MemberIndex member) const {return m_blob.NumberOfValues(member);}
 
+        /**
+         * Reads the key element of a member value. Only applicable for dictionary members.
+         * Supported key types: Int32, Int64, TypeId, Enumeration, String, InstanceId, HandlerId, ChannelId, EntityId.
+         *
+         * @param member [in] - Member index of the member to read.
+         * @param valueIndex [in] - The value to read. Must be in range 0 to NumberOfValues()-1.
+         * @return The key value.
+         */
+        template <class Key>
+        Key ReadKey(DotsC_MemberIndex member, int valueIndex) const
+        {
+            MoveToMember(member);
+            if (m_memberDescription->GetCollectionType()!=HashtableCollectionType)
+            {
+                ThrowWrongCollectionType();
+            }
+            return Internal::BlobUtils::Reader<Key>::Key(m_blob, member, valueIndex);
+        }
 
+        /**
+         * @brief Reads the value element of a member value.
+         * @param member [in] - Member index of the member to read.
+         * @param valueIndex [in] - The value to read. Must be in range 0 to NumberOfValues()-1.
+         * @return Member value.
+         */
+        template <class Val>
+        void ReadValue(DotsC_MemberIndex member, int valueIndex, Val& val, bool& isNull, bool& isChanged) const
+        {
+            m_blob.ValueStatus(member, valueIndex, isNull, isChanged);
+            if (!isNull)
+            {
+                val=Internal::BlobUtils::Reader<Val>::Value(m_blob, member, valueIndex);
+            }
+        }
 
     private:
         const RepositoryType* m_repository;
@@ -108,6 +171,7 @@ namespace ToolSupport
         const ClassDescriptionType* m_classDescription;
         const MemberDescriptionType* m_memberDescription;
         DotsC_MemberIndex m_memberIndex;
+        int m_valueIndex;
 
         inline void MoveToMember(DotsC_MemberIndex member)
         {
@@ -116,6 +180,13 @@ namespace ToolSupport
                 m_memberDescription=m_classDescription->GetMember(member);
                 m_memberIndex=member;
             }
+        }
+
+        inline void ThrowWrongCollectionType() const
+        {
+            std::ostringstream os;
+            os<<"Trying to write data of wrong collection type to a blob for member '"<<m_memberDescription->GetName()<<"' in class '"<<m_classDescription->GetName()<<"'";
+            throw std::logic_error(os.str());
         }
     };
 }

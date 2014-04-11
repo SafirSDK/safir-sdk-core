@@ -43,6 +43,24 @@ namespace ToolSupport
 {
     /**
      * This class is used to create blobs by writing member values and the finally calling the CopyRawBlob-method.
+     * The methods for writing values to blobs are templated on the value type. The memberTypes maps to c++ types
+     * like described bellow. All strings must be NULL-terminated. Optional strings shall be set to NULL if not present.
+     *
+     * Supported types:
+     * ----------------
+     *      Int32       => DostC_Int32
+     *      Int64       => DostC_Int64
+     *      Float32     => DostC_Float32
+     *      Float64     => DostC_Float64
+     *      TypeId      => DotsC_TypeId
+     *      Enumeration => DotsC_EnumerationValue
+     *      String      => const char*
+     *      InstanceId  => pair<DotsC_Int64, const char* optional_string>
+     *      HandlerId   => pair<DotsC_Int64, const char* optional_string>
+     *      ChannelId   => pair<DotsC_Int64, const char* optional_string>
+     *      EntityId    => pair<DotsC_EntityId, const char* optional_instance_string>
+     *      Binary      => pair<const char* data, DostC_Int32 size>
+     *      Object      => const char* (a valid blob pointer)
      */
     template <class RepositoryT, class Traits=Safir::Dob::Typesystem::ToolSupport::TypeRepositoryTraits<RepositoryT> >
     class BlobWriter : private boost::noncopyable
@@ -96,7 +114,17 @@ namespace ToolSupport
         void SetChangedTopLevel(DotsC_MemberIndex member, bool isChanged) {m_blob.SetChangedTopLevel(member, isChanged);}
 
         /**
+         * Write member value to the a blob. This method is used to write values to single value members, sequences and sets.
+         * It is not allowed to use this method to write values to arrays and dictionaries (see WriteArrayValue and WriteDictionaryValue).
+         * If the member is a sequence or set, a new value is added to the collection for each call to this method.
+         * If the member is a set, only the following types are supported as value:
+         *      Int32, Int64, TypeId, Enumeration, String, InstanceId, HandlerId, ChannelId, EntityId.
+         * This method will throw logic_error if used with wrong input data.
          *
+         * @param member [in] - Member index of the member to be written.
+         * @param val [in] - Member value. Use a dummy if isNull=true. See supported types in class comments above.
+         * @param isNull [in] - True if the member value null. In that case val is not in use.
+         * @param isChanged [in] - Indicates if the member value is changed.
          */
         template <class Val>
         void WriteValue(DotsC_MemberIndex member, const Val& val, bool isNull, bool isChanged)
@@ -123,6 +151,18 @@ namespace ToolSupport
             }
         }
 
+        /**
+         * Write member value to the a blob. This method is used to write values to single value members, sequences and sets.
+         * It is not allowed to use this method to write values to arrays and dictionaries (see WriteArrayValue and WriteDictionaryValue).
+         * If the member is a sequence or set, a new value is added to the collection. If the member is single value the only value is written.
+         * This method will throw logic_error if used with wrong input data.
+         *
+         * @param member [in] - Member index of the member to be written.
+         * @param index [in] - Array index of the value to be written.
+         * @param val [in] - Member value. Use a dummy if isNull=true. See supported types in class comments above.
+         * @param isNull [in] - True if the member value null. In that case val is not in use.
+         * @param isChanged [in] - Indicates if the member value is changed.
+         */
         template <class Val>
         void WriteArrayValue(DotsC_MemberIndex member, DotsC_ArrayIndex index, const Val& val, bool isNull, bool isChanged)
         {            
@@ -140,44 +180,18 @@ namespace ToolSupport
         }
 
         /**
-         * Writes a new value to the blob. If the member is not array or map, key is neglected.
-         * Supported key types are defined below. If isNull is true, the value is not used,
-         * in that case just use a dummy value like a NULL char;
-         *
-         * Supported array key types:
-         *      Int32       => DostC_Int32
-         *
-         * Supported map key types:
-         *      Int32       => DostC_Int32
-         *      Int64       => DostC_Int64
-         *      TypeId      => DotsC_TypeId
-         *      Enumeration => DotsC_EnumerationValue
-         *      String      => const char*
-         *      InstanceId  => DotsC_Int64 or pair<DotsC_Int64, const char* optional_string>
-         *      HandlerId   => DotsC_Int64 or pair<DotsC_Int64, const char* optional_string>
-         *      ChannelId   => DotsC_Int64 or pair<DotsC_Int64, const char* optional_string>
-         *      EntityId    => pair<DotsC_EntityId, const char* optional_instance_string>
-         *
-         * Supported Val types:
-         *      Int32       => DostC_Int32
-         *      Int64       => DostC_Int64
-         *      Float32     => DostC_Float32
-         *      Float64     => DostC_Float64
-         *      TypeId      => DotsC_TypeId
-         *      Enumeration => DotsC_EnumerationValue
-         *      String      => const char*
-         *      InstanceId  => DotsC_Int64 or pair<DotsC_Int64, const char* optional_string>
-         *      HandlerId   => DotsC_Int64 or pair<DotsC_Int64, const char* optional_string>
-         *      ChannelId   => DotsC_Int64 or pair<DotsC_Int64, const char* optional_string>
-         *      EntityId    => pair<DotsC_EntityId, const char* optional_instance_string>
-         *      Binary      => pair<const char* data, DostC_Int32 size>
-         *      Object      => pair<const char* blob, DostC_Int32 size> OR const char* blob
+         * Writes a new dictionary <key, value>-item to the blob. This method is only allowed to use for
+         * dictionary memgbers. Throws logic_error if used on members with wrong collection or member type.
+         * If isNull is true, the value is not used, in that case just use a dummy value like a NULL char.
+         * Val can be any of the supported types but as key only the following types are supported:
+         * Supported key types: Int32, Int64, TypeId, Enumeration, String, InstanceId, HandlerId, ChannelId, EntityId.
+         * This method will throw logic_error if used with wrong input data.
          *
          * @param member [in] - Member index of the member to be written.
-         * @param key [in] - Key value if the member is an array or map.
-         * @param val [in] - Member value. Use a dummy if isNull=true.
+         * @param key [in] - Key value if the member. See supported key types above.
+         * @param val [in] - Member value. Use a dummy if isNull=true. See supported types in class comments above.
          * @param isNull [in] - True if the member value null. In that case val is not in use.
-         * @param isChanged [in] - Indicates if the member value is changed. If true it will also set the top level change flag.
+         * @param isChanged [in] - Indicates if the member value is changed.
          */
         template <class Key, class Val>
         void WriteDictionaryValue(DotsC_MemberIndex member, const Key& key, const Val& val, bool isNull, bool isChanged)
@@ -194,8 +208,6 @@ namespace ToolSupport
                 WriteValue(val);
             }
         }
-
-
 
     private:
         const RepositoryType* m_repository;
