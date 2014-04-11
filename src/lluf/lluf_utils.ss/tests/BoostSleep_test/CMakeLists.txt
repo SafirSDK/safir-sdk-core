@@ -8,5 +8,5 @@ ENDIF()
 
 ADD_TEST(CheckCapabilities CheckCapabilities_test)
 ADD_TEST(BoostSleep BoostSleep_test)
-SET_SAFIR_TEST_PROPERTIES(TEST BoostSleep)
+SET_SAFIR_TEST_PROPERTIES(TEST BoostSleep TIMEOUT 600)
 SET_SAFIR_TEST_PROPERTIES(TEST CheckCapabilities)
