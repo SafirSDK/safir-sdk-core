@@ -31,6 +31,8 @@ namespace Internal
 {
 namespace Com
 {
+namespace  Utilities
+{
     bool SplitAddress(const std::string& address, std::string& ip, unsigned short& port)
     {
         size_t startPortSearch=address.find_last_of(']'); //if ip6, start search after address end
@@ -92,6 +94,21 @@ namespace Com
         int dummy;
         return CreateEndpoint(address, dummy);
     }
+
+    boost::asio::ip::basic_endpoint::protocol_type Protocol(int p)
+    {
+        if (p==4)
+        {
+            return boost::asio::ip::udp::v4();
+        }
+        else if (p==6)
+        {
+            return boost::asio::ip::udp::v6();
+        }
+        throw std::logic_error("Invalid ip protocol. IPv4 and IPv6 supported.");
+    }
+
+}
 }
 }
 }

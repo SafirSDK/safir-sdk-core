@@ -35,18 +35,18 @@ namespace Internal
 {
 namespace Com
 {
-    Communication(const boost::shared_ptr<boost::asio::io_service>& ioService,
-                  const std::string& nodeName,
-                  boost::int64_t nodeId, //0 is not a valid id.
-                  boost::int64_t& nodeTypeId,
-                  const std::string& unicastAddress,
-                  bool discovering,
-                  const std::vector<NodeType>& nodeTypes)
+    Communication::Communication(const boost::shared_ptr<boost::asio::io_service>& ioService,
+                                 const std::string& nodeName,
+                                 boost::int64_t nodeId, //0 is not a valid id.
+                                 boost::int64_t& nodeTypeId,
+                                 const std::string& unicastAddress,
+                                 bool discovering,
+                                 const std::vector<NodeType>& nodeTypes)
         : m_impl(new CommunicationImpl(ioService, nodeName, nodeId, nodeTypeId, unicastAddress, discovering))
     {
-        for (auto& nt : nodeTypes)
+        for (const auto& nt : nodeTypes)
         {
-            m_impl->AddNodeType(nt.id, nt.name)
+            m_impl->AddNodeType(nt.id, nt.name, nt.multicastAddress, nt.heartbeatInterval, nt.retryTimeout);
         }
     }
 

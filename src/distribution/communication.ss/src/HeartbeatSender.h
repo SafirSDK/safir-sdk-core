@@ -47,14 +47,14 @@ namespace Com
      */
 
     template <class WriterType>
-    class HeartBeatSenderBasic : private WriterType
+    class HeartbeatSenderBasic : private WriterType
     {
     public:
-        HeartBeatSenderBasic(boost::asio::io_service& ioService, const Node& me)
+        HeartbeatSenderBasic(boost::asio::io_service& ioService, const Node& me)
             :WriterType(ioService, me)
             ,m_strand(ioService)
-            ,m_heartBeatTimer(ioService)
-            ,m_heartBeat(new HeartBeat(me.Id()))
+            ,m_heartbeatTimer(ioService)
+            ,m_heartbeat(new Heartbeat(me.Id()))
             ,m_nodes()
             ,m_running(false)
         {
@@ -65,8 +65,8 @@ namespace Com
             m_strand.dispatch([=]
             {
                 m_running=true;
-                m_heartBeatTimer.expires_from_now(boost::chrono::milliseconds(Parameters::HeartBeatInterval));
-                m_heartBeatTimer.async_wait(m_strand.wrap([=](const boost::system::error_code&){OnTimeout();}));
+                m_heartbeatTimer.expires_from_now(boost::chrono::milliseconds(Parameters::HeartbeatInterval));
+                m_heartbeatTimer.async_wait(m_strand.wrap([=](const boost::system::error_code&){OnTimeout();}));
             });
         }
 
@@ -75,7 +75,7 @@ namespace Com
             m_strand.dispatch([=]
             {
                 m_running=false;
-                m_heartBeatTimer.cancel();
+                m_heartbeatTimer.cancel();
             });
         }
 
@@ -109,8 +109,8 @@ namespace Com
         }
     private:
         boost::asio::io_service::strand m_strand;
-        boost::asio::steady_timer m_heartBeatTimer;
-        boost::shared_ptr<HeartBeat> m_heartBeat;
+        boost::asio::steady_timer m_heartbeatTimer;
+        boost::shared_ptr<Heartbeat> m_heartbeat;
         NodeMap m_nodes;
         bool m_running;
 
@@ -118,14 +118,14 @@ namespace Com
         {
             if (m_running)
             {
-                WriterType::SendToAllSystemNodes(m_heartBeat, m_nodes);
-                m_heartBeatTimer.expires_from_now(boost::chrono::milliseconds(Parameters::HeartBeatInterval));
-                m_heartBeatTimer.async_wait(m_strand.wrap([=](const boost::system::error_code&){OnTimeout();}));
+                WriterType::SendToAllSystemNodes(m_heartbeat, m_nodes);
+                m_heartbeatTimer.expires_from_now(boost::chrono::milliseconds(Parameters::HeartbeatInterval));
+                m_heartbeatTimer.async_wait(m_strand.wrap([=](const boost::system::error_code&){OnTimeout();}));
             }
         }
     };
 
-    typedef HeartBeatSenderBasic< Writer<HeartBeat> > HeartBeatSender;
+    typedef HeartbeatSenderBasic< Writer<Heartbeat> > HeartbeatSender;
 }
 }
 }

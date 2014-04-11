@@ -81,6 +81,8 @@ namespace Com
     public:
         typedef boost::shared_ptr<T> Ptr;
 
+        Writer(boost::asio::io_service& ioService, int protocol)
+
         Writer(boost::asio::io_service& ioService, const Node& me)
             :m_me(me)
             ,m_socket(ioService, m_me.Endpoint().protocol())

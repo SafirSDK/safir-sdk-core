@@ -62,7 +62,7 @@ namespace Com
                         [=](const UserDataPtr& ud, const boost::asio::ip::udp::endpoint& to){m_discoverWriter.SendTo(ud, to);},
                         [=](const Node& n){OnNewNode(n);})
         ,m_ackedDataSender(*m_ioService, m_me)
-        ,m_heartBeatSender(*m_ioService, m_me)
+        ,m_heartbeatSender(*m_ioService, m_me)
         ,m_deliveryHandler(*m_ioService, m_me)
     {
         if (id==0)
@@ -88,9 +88,9 @@ namespace Com
     {
     }
 
-    void CommunicationImpl::AddNodeType(boost::int64_t id, const std::string &name, const std::string &multicastAddress, int heartBeatInterval, int retryTimeout)
+    void CommunicationImpl::AddNodeType(boost::int64_t id, const std::string &name, const std::string &multicastAddress, int heartbeatInterval, int retryTimeout)
     {
-        m_nodeTypes.insert(std::make_pair(id, NodeType(name, multicastAddress, heartBeatInterval, retryTimeout)));
+        m_nodeTypes.insert(std::make_pair(id, NodeType(id, name, multicastAddress, heartbeatInterval, retryTimeout)));
     }
 
     void CommunicationImpl::SetNewNodeCallback(const NewNode& callback)
@@ -125,7 +125,7 @@ namespace Com
     void CommunicationImpl::Start()
     {
         m_reader.Start();
-        m_heartBeatSender.Start();
+        m_heartbeatSender.Start();
         m_ackedDataSender.Start();
         m_discoverer.Start();
     }
@@ -133,7 +133,7 @@ namespace Com
     void CommunicationImpl::Stop()
     {
         m_reader.Stop();
-        m_heartBeatSender.Stop();
+        m_heartbeatSender.Stop();
         m_ackedDataSender.Stop();
         m_discoverer.Stop();
     }
@@ -173,14 +173,14 @@ namespace Com
         });
 
         m_ackedDataSender.SetSystemNode(id, isSystemNode);
-        m_heartBeatSender.SetSystemNode(id, isSystemNode);
+        m_heartbeatSender.SetSystemNode(id, isSystemNode);
     }
 
     void CommunicationImpl::OnNewNode(const Node& node)
     {
         lllog(6)<<L"COM: New node '"<<node.Name().c_str()<<L"' ["<<node.Id()<<L"]"<<std::endl;
         m_ackedDataSender.AddNode(node);
-        m_heartBeatSender.AddNode(node);
+        m_heartbeatSender.AddNode(node);
         m_reader.Strand().dispatch([this, node]{m_deliveryHandler.AddNode(node);});
 
         //callback to host application
@@ -207,13 +207,13 @@ namespace Com
 
         switch (commonHeader->dataType)
         {
-        case HeartBeatType:
+        case HeartbeatType:
         {
             const Node* senderNode=m_deliveryHandler.GetNode(commonHeader->senderId);
             if (senderNode!=nullptr && senderNode->IsSystemNode())
             {
                 m_gotRecv(commonHeader->senderId);
-                lllog(9)<<"COM: HeartBeat from "<<commonHeader->senderId<<std::endl;
+                lllog(9)<<"COM: Heartbeat from "<<commonHeader->senderId<<std::endl;
             }
         }
             break;

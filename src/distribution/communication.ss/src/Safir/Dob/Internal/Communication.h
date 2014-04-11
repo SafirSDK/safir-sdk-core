@@ -69,7 +69,7 @@ namespace Com
             boost::int64_t id;              //node id
             std::string name;               //unique readable name
             std::string multicastAddress;   //multicast address including port number, 'address:port' empty string if not multicast enabled
-            int heartBeatInterval;          //time between heartBeats
+            int heartbeatInterval;          //time between heartbeats
             int retryTimeout;               //time to wait before retransmitting unacked data
         };
 

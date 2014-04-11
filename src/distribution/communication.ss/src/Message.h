@@ -52,7 +52,7 @@ namespace Internal
 namespace Com
 {
     //Constants
-    static const boost::int64_t HeartBeatType=-1113057794592031140; //Hash for 'Communication.HeartBeat'
+    static const boost::int64_t HeartbeatType=-1113057794592031140; //Hash for 'Communication.Heartbeat'
     static const boost::int64_t AckType=-6769271806353797703; //Hash for 'Communication.Ack'
     static const boost::int64_t ControlDataType=186858702748131856; //Hash for 'Communication.ControlData'
     static const boost::uint16_t UnicastSendMethod=0;
@@ -90,10 +90,10 @@ namespace Com
     };
     static const size_t CommonHeaderSize=sizeof(CommonHeader);
 
-    struct HeartBeat
+    struct Heartbeat
     {
         CommonHeader commonHeader;
-        HeartBeat(boost::int64_t senderId_) : commonHeader(senderId_, HeartBeatType) {}
+        Heartbeat(boost::int64_t senderId_) : commonHeader(senderId_, HeartbeatType) {}
     };
 
     struct Ack

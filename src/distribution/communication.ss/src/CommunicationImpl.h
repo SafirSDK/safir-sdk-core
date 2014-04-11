@@ -35,7 +35,7 @@
 #include "Writer.h"
 #include "Discoverer.h"
 #include "AckedDataSender.h"
-#include "HeartBeatSender.h"
+#include "HeartbeatSender.h"
 
 namespace Safir
 {
@@ -62,7 +62,7 @@ namespace Com
         void AddNodeType(boost::int64_t id,
                          const std::string& name,
                          const std::string& multicastAddress,
-                         int heartBeatInterval,
+                         int heartbeatInterval,
                          int retryTimeout);
 
         //set callbacks
@@ -102,9 +102,9 @@ namespace Com
         //main components of communication
         Reader m_reader;
         //Writer<UserData> m_discoverWriter;
-        //Discoverer m_discoverer;
+        Discoverer m_discoverer;
         //AckedDataSender m_ackedDataSender;
-        //HeartBeatSender m_heartBeatSender;
+        //HeartbeatSender m_heartbeatSender;
         //DeliveryHandler m_deliveryHandler;
 
         void SetSystemNode(boost::int64_t id, bool isSystemNode);

@@ -43,21 +43,13 @@ namespace Com
     class Node
     {
     public:
-        Node(const std::string& name_,
-             boost::int64_t nodeId_,
-             boost::int64_t nodeTypeId_,
-             const std::string& address_);
-
-        Node::Node(const std::string& name_,
-                   boost::int64_t nodeId_,
-                   boost::int64_t nodeTypeId_,
-                   const std::string& address_)
+        Node(const std::string& name_, boost::int64_t nodeId_, boost::int64_t nodeTypeId_, const std::string& address_)
             :m_name(name_)
             ,m_id(nodeId_)
             ,m_nodeTypeId(nodeTypeId_)
             ,m_address(address_)
             ,m_ipVersion(4)
-            ,m_endpoint(CreateEndpoint(address_, m_ipVersion))
+            ,m_endpoint(Utilities::CreateEndpoint(address_, m_ipVersion))
             ,m_systemNode(false)
             ,m_lastSentUnicastSeqNo(0)
         {

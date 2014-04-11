@@ -25,7 +25,7 @@
 #define __SAFIR_DOB_COMMUNICATION_NODETYPE_H__
 
 #include <map>
-#include "Utilities.h"
+#include <boost/asio.hpp>
 
 namespace Safir
 {
@@ -41,16 +41,21 @@ namespace Com
         NodeType(boost::int64_t id,
                  const std::string& name,
                  const std::string& multicastAddr,
-                 int heartBeatInterval,
+                 int heartbeatInterval,
                  int retryTimeout);
 
-
+        boost::int64_t Id() const {return m_id;}
+        const std::string& Name() const {return m_name;}
+        bool IsMulticastEnabled() const {return m_multicastAddress.empty();}
+        const boost::asio::ip::udp::endpoint& MulticastEndpoint() const {return m_multicastEndpoint;}
+        int HeartbeatInterval() const {return m_heartbeatInterval;}
+        int RetryTimeout() const {return m_retryTimeout;}
 
     private:
         boost::int64_t m_id;
         std::string m_name;               //unique readable name
         std::string m_multicastAddress;   //multicast address including port number, 'address:port' empty string if not multicast enabled        
-        int m_heartBeatInterval;          //time between heartBeats
+        int m_heartbeatInterval;          //time between heartbeats
         int m_retryTimeout;               //time to wait before retransmitting unacked data
         boost::asio::ip::udp::endpoint m_multicastEndpoint;
     };

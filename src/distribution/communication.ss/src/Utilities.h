@@ -35,11 +35,16 @@ namespace Internal
 {
 namespace Com
 {
+namespace Utilities
+{
     bool SplitAddress(const std::string& address, std::string& ip, unsigned short& port);
 
     boost::asio::ip::udp::endpoint CreateEndpoint(const std::string& address, int& ipVersion);
 
     boost::asio::ip::udp::endpoint CreateEndpoint(const std::string& address);
+
+    boost::asio::ip::udp::endpoint::protocol_type Protocol(int p);
+}
 }
 }
 }

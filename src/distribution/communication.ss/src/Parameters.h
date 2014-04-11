@@ -52,8 +52,8 @@ namespace Com
         //Receive buffer size, must be at least FragmentSize
         static const size_t ReceiveBufferSize = 66000;
 
-        //HeartBeat interval
-        static const int HeartBeatInterval = 2000; //millisec
+        //Heartbeat interval
+        static const int HeartbeatInterval = 2000; //millisec
 
         //Timeout interval for timer that check unacked sent messages
         static const int RetransmitCheckInterval = 100; //millisec
