@@ -55,9 +55,9 @@ namespace Internal
         private boost::noncopyable
     {
     protected:
-        static const int LOCAL_DISTRIBUTION_CHANNEL = -1;
-        static const int SYSTEM_DISTRIBUTION_CHANNEL = 64;
-        static const int POOL_DISTRIBUTION_CHANNEL = 65;
+        const int LOCAL_DISTRIBUTION_CHANNEL = -1;
+        const int SYSTEM_DISTRIBUTION_CHANNEL = 64;
+        const int POOL_DISTRIBUTION_CHANNEL = 65;
     public:
         QualityOfServiceData();
         ~QualityOfServiceData();
