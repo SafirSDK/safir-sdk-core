@@ -37,7 +37,6 @@
 #  pragma warning (disable: 4127)
 #endif
 
-#include "SystemStateMessage.pb.h"
 #include "ElectionMessage.pb.h"
 
 #ifdef _MSC_VER
@@ -77,6 +76,7 @@ namespace
         , m_communication(communication)
         , m_dataIdentifier(LlufId_Generate64(dataIdentifier))
         , m_id(id)
+        , m_elected(std::numeric_limits<boost::int64_t>::min())
         , m_electionTimer(*ioService)
     {
         rawHandler->SetStatisticsChangedCallback(m_strand.wrap([this](const RawStatistics& statistics)
@@ -108,14 +108,24 @@ namespace
     //must be called in strand
     void Coordinator::StatisticsChanged(const RawStatistics& statistics)
     {
-        UpdateMyState(statistics);
-
+        m_lastStatistics = statistics;
+        if (IsElected())
+        {
+            UpdateMyState();
+        }
         StartElection();
     }
 
     //must be called in strand
-    void Coordinator::UpdateMyState(const RawStatistics& statistics)
+    void Coordinator::UpdateMyState()
     {
+        if (!IsElected())
+        {
+            return;
+        }
+        /* TODO: update our state!
+        //Exclude nodes!
+
         //currently we just copy the raw data... mucho stupido...
 
         lllog(6) << "Collating" << std::endl;
@@ -141,27 +151,45 @@ namespace
                 node->set_multicast_enabled(statistics.MulticastEnabled(i));
             }
         }
-
+        */
 
     }
-
+    
     void Coordinator::PerformOnStateMessage(const boost::function<void(const boost::shared_ptr<char []>& data, 
-                                                                       const size_t size)> & fn) const
+                                                                       const size_t size)> & fn,
+                                            const size_t extraSpace) const
     {
-        m_strand.dispatch([this,fn]
+        m_strand.dispatch([this,fn,extraSpace]
                           {
-                              //only send if I'm elected
-                              //TODO: make this only get called if we're elected?
-                              if (IsElected() &&m_stateMessage != nullptr)
+                              if (IsElected())
                               {
-                                  const size_t size = m_stateMessage->ByteSize();
-                                  auto data = boost::make_shared<char[]>(size);
-                                  m_stateMessage->SerializeWithCachedSizesToArray
-                                      (reinterpret_cast<google::protobuf::uint8*>(data.get()));
-                                  fn(data, size);
+                                  UpdateMyState();
                               }
+
+                              const size_t size = m_stateMessage.ByteSize() + extraSpace;
+                              auto data = boost::make_shared<char[]>(size);
+                              m_stateMessage.SerializeWithCachedSizesToArray
+                                  (reinterpret_cast<google::protobuf::uint8*>(data.get()));
+                              fn(data, size);
                           });
     }
+
+    void Coordinator::NewSystemState(const boost::int64_t from, 
+                                     const boost::shared_ptr<char[]>& data, 
+                                     const size_t size)
+    {
+        if (IsElected())
+        {
+            //TODO: should I just ignore this, or maybe start a new election?
+            throw std::logic_error("Got SystemState from someone else, but I'm the elected coordinator!");
+        }
+        else
+        {
+            m_stateMessage.ParseFromArray(data.get(),size);
+            //TODO: act on information, such as exclude nodes.
+        }
+    }
+
 
     //must be called in strand
     void Coordinator::StartElection()
@@ -178,7 +206,7 @@ namespace
             }
             lllog(4) << "Checking if I should start election" << std::endl;
             
-            if (!m_stateMessage)
+            if (!m_lastStatistics.Valid())
             {
                 lllog(5) << "Haven't heard from any other nodes, electing myself!" << std::endl;
                 m_elected = m_id;
@@ -186,9 +214,9 @@ namespace
             }
             else
             {
-                for (int i = 0; i < m_stateMessage->node_info_size(); ++i)
+                for (int i = 0; i < m_lastStatistics.Size(); ++i)
                 {
-                    if (m_stateMessage->node_info(i).id() == m_elected)
+                    if (m_lastStatistics.Id(i) == m_elected)
                     {
                         if (m_elected > m_id)
                         {
@@ -265,6 +293,8 @@ namespace
                     if (message.election_id() == m_currentElectionId &&
                         from > m_id)
                     {
+                        lllog(5) << "Got alive from someone bigger than me (" 
+                                 << from << "), abandoning election." << std::endl;
                         m_electionTimer.cancel();
                         m_currentElectionId = 0;
                     }
@@ -274,6 +304,7 @@ namespace
                 {
                     if (from > m_id)
                     {
+                        lllog(4) << "New controller elected: " << from << std::endl;
                         //graciously accept their victory
                         m_elected = from;
 
@@ -283,6 +314,8 @@ namespace
                     }
                     else //No! We're going to usurp him! restart election
                     {
+                        lllog(5) << "Got victory from someone smaller than me (" 
+                                 << from << "), starting new election." << std::endl;
                         StartElection();
                     }
                 }

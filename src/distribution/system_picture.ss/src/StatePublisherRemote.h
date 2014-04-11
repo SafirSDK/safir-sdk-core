@@ -21,14 +21,12 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __STATE_PUBLISHER_LOCAL_H__
-#define __STATE_PUBLISHER_LOCAL_H__
+#ifndef __STATE_PUBLISHER_REMOTE_H__
+#define __STATE_PUBLISHER_REMOTE_H__
 
-#include <Safir/Utilities/Internal/IpcPublisher.h>
-#include <Safir/Utilities/Internal/AsioPeriodicTimer.h>
-#include <Safir/Utilities/Internal/SystemLog.h>
-#include <Safir/Utilities/Internal/LowLevelLogger.h>
-#include "CrcUtils.h"
+#include <Safir/Dob/Internal/Communication.h>
+#include <Safir/Utilities/Internal/Id.h>
+#include "Coordinator.h"
 
 namespace Safir
 {
@@ -39,18 +37,17 @@ namespace Internal
 namespace SP
 {
     using Safir::Utilities::Internal::AsioPeriodicTimer;
-    /**
-     * Responsible for publishing state data locally on this computer/node.
-     * E.g. for dobexplorer or other SP instance to use.
-     */
-    class StatePublisherLocal
+
+    class StatePublisherRemote
     {
     public:
-        StatePublisherLocal(const boost::shared_ptr<boost::asio::io_service>& ioService,
-                            const boost::shared_ptr<Coordinator>& coordinator,
-                            const char* const name)
-            : m_coordinator(coordinator)
-            , m_publisher(Safir::Utilities::Internal::IpcPublisher::Create(*ioService,name))
+        StatePublisherRemote(const boost::shared_ptr<boost::asio::io_service>& ioService,
+                             const boost::shared_ptr<Com::Communication>& communication,
+                             const char* const senderId,
+                             const boost::shared_ptr<Coordinator>& coordinator)
+            : m_communication(communication)
+            , m_senderId(LlufId_Generate64(senderId))
+            , m_coordinator(coordinator)
             , m_publishTimer(AsioPeriodicTimer::Create(*ioService, 
                                                        boost::chrono::seconds(1),
                                                        [this](const boost::system::error_code& error)
@@ -59,13 +56,11 @@ namespace SP
                                                        }))
         {
             m_publishTimer->Start();
-            m_publisher->Start();
         }
 
         void Stop()
         {
             m_publishTimer->Stop();
-            m_publisher->Stop();
         }
 
     private:
@@ -74,31 +69,38 @@ namespace SP
             if (error)
             {
                 SEND_SYSTEM_LOG(Alert,
-                                << "Unexpected error in StatePublisherLocal::Publish: " << error);
-                throw std::logic_error("Unexpected error in StatePublisherLocal::Publish");
+                                << "Unexpected error in StatePublisherRemote::Publish: " << error);
+                throw std::logic_error("Unexpected error in StatePublisherRemote::Publish");
             }
 
-            lllog(8) << "Publishing system state over ipc" << std::endl;
+            //Only publish if we're elected
+            if (!m_coordinator->IsElected())
+            {
+                return;
+            }
 
+            lllog(8) << "Publishing state statistics to other nodes" << std::endl;
+            
 #ifdef CHECK_CRC
             const int crcBytes = sizeof(int);
 #else
             const int crcBytes = 0;
 #endif
-
+            
             m_coordinator->PerformOnStateMessage([this,crcBytes](const boost::shared_ptr<char[]>& data, const size_t size)
                                                  {
 #ifdef CHECK_CRC
                                                      const int crc = GetCrc32(data.get(), size - crcBytes);
                                                      memcpy(data.get() + size - crcBytes, &crc, sizeof(int));
 #endif
-                                                     m_publisher->Send(data, static_cast<boost::uint32_t>(size));
+                                                     m_communication->SendAll(data,size,m_senderId);
                                                  },
                                                  crcBytes);
         }
-        
+
+        const boost::shared_ptr<Com::Communication> m_communication;
+        const boost::uint64_t m_senderId;
         const boost::shared_ptr<Coordinator> m_coordinator;
-        const boost::shared_ptr<Safir::Utilities::Internal::IpcPublisher> m_publisher;
         boost::shared_ptr<Safir::Utilities::Internal::AsioPeriodicTimer> m_publishTimer;
     };
 }

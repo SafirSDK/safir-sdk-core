@@ -30,6 +30,8 @@
 #include "RawSubscriberRemote.h"
 #include "StatePublisherLocal.h"
 #include "StateSubscriberLocal.h"
+#include "StatePublisherRemote.h"
+#include "StateSubscriberRemote.h"
 #include <Safir/Dob/Internal/Communication.h>
 #include <Safir/Dob/Internal/SystemPicture.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
@@ -43,6 +45,7 @@ namespace
     const char* const MASTER_LOCAL_RAW_NAME = "SYSTEM_PICTURE_MASTER_RAW";
     const char* const MASTER_LOCAL_STATE_NAME = "SYSTEM_PICTURE_MASTER_STATE";
     const char* const MASTER_REMOTE_RAW_NAME = "SP_RAW";
+    const char* const MASTER_REMOTE_STATE_NAME = "SP_STATE";
     const char* const MASTER_REMOTE_ELECTION_NAME = "SP_ELECTION";
 }
 
@@ -99,6 +102,13 @@ namespace SP
             , m_statePublisherLocal(boost::make_shared<StatePublisherLocal>(ioService, 
                                                                             m_coordinator, 
                                                                             MASTER_LOCAL_STATE_NAME))
+            , m_statePublisherRemote(boost::make_shared<StatePublisherRemote>(ioService, 
+                                                                              communication, 
+                                                                              MASTER_REMOTE_STATE_NAME, 
+                                                                              m_coordinator))
+            , m_stateSubscriberRemote(boost::make_shared<StateSubscriberRemote>(communication, 
+                                                                                MASTER_REMOTE_STATE_NAME, 
+                                                                                m_coordinator))
             , m_stopped(false)
         {
 
@@ -135,6 +145,7 @@ namespace SP
                 m_rawPublisherLocal->Stop();
                 m_statePublisherLocal->Stop();
                 m_rawPublisherRemote->Stop();
+                m_statePublisherRemote->Stop();
                 m_coordinator->Stop();
             }
         }
@@ -168,6 +179,9 @@ namespace SP
 
         boost::shared_ptr<StatePublisherLocal> m_statePublisherLocal;
         boost::shared_ptr<StateSubscriberLocal> m_stateSubscriberLocal;
+
+        boost::shared_ptr<StatePublisherRemote> m_statePublisherRemote;
+        boost::shared_ptr<StateSubscriberRemote> m_stateSubscriberRemote;
 
         std::atomic<bool> m_stopped;
     };

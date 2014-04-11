@@ -44,7 +44,8 @@ namespace
     void PrintMessage(const Safir::Dob::Internal::SP::SystemStateMessage& msg, 
                       std::wostream& out)
     {
-        out << msg.name().c_str() << "@" << msg.control_address().c_str() << " (" << msg.id() << ")";
+        //TODO: print message
+        /*        out << msg.name().c_str() << "@" << msg.control_address().c_str() << " (" << msg.id() << ")";
 
         for (int i = 0; i < msg.node_info_size(); ++i)
         {
@@ -57,7 +58,7 @@ namespace
 
             //out << "\n" << indent << "        recv = " << node.receive_count() << ", retransmit = " << node.retransmit_count();
         }
-        out << std::flush;
+        out << std::flush;*/
     }
 }
 
@@ -82,19 +83,9 @@ namespace SP
 
         }
 
-        const std::string& Name() const
+        boost::int64_t ElectedId() const
         {
-            return m_message.name();
-        }
-
-        boost::int64_t Id() const
-        {
-            return m_message.id();
-        }
-
-        const std::string& Address() const
-        {
-            return m_message.control_address();
+            return m_message.elected_id();
         }
         
         int Size() const
@@ -140,9 +131,7 @@ namespace SP
     };
 
 
-    const std::string& SystemState::Name() const {return m_impl->Name();}
-    boost::int64_t SystemState::Id() const {return m_impl->Id();}
-    const std::string& SystemState::Address() const {return m_impl->Address();}
+    boost::int64_t SystemState::ElectedId() const {return m_impl->ElectedId();}
     
     int SystemState::Size() const {return m_impl->Size();}
     

@@ -13,13 +13,10 @@ message SystemStateMessage
         required bool multicast_enabled = 4;
     }
     
-    //information about myself
-    required string name = 1;
-    required sfixed64 id = 2;
-    required string control_address = 3; //The address of the node's control socket
+    //Id of the elected coordinator
+    optional sfixed64 elected_id = 1;
     
-    repeated NodeInfo node_info = 5;
-
+    repeated NodeInfo node_info = 2;
 }
 
 

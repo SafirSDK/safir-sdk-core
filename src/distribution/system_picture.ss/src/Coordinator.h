@@ -24,12 +24,26 @@
 #ifndef __SYSTEM_PICTURE_COORDINATOR_H__
 #define __SYSTEM_PICTURE_COORDINATOR_H__
 
+#include <Safir/Dob/Internal/RawStatistics.h>
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/steady_timer.hpp>
 #include <boost/function.hpp>
 #include <limits>
+
+
+#ifdef _MSC_VER
+#  pragma warning (push)
+#  pragma warning (disable: 4244)
+#  pragma warning (disable: 4127)
+#endif
+
+#include "SystemStateMessage.pb.h"
+
+#ifdef _MSC_VER
+#  pragma warning (pop)
+#endif
 
 namespace Safir
 {
@@ -49,7 +63,6 @@ namespace SP
     //forward declarations
     class RawHandler;
     class RawStatistics;
-    class SystemStateMessage;
     class SystemState;
 
     class Coordinator
@@ -62,16 +75,24 @@ namespace SP
                     const char* const receiverId,
                     const boost::shared_ptr<RawHandler>& rawHandler);
 
+        bool IsElected() const {return m_id == m_elected;}
+
+        //used to send state message
+        //extraSpace adds bytes at the end of the buffer, e.g. for adding a crc
         void PerformOnStateMessage(const boost::function<void(const boost::shared_ptr<char []>& data, 
-                                                              const size_t size)> & fn) const;
+                                                              const size_t size)> & fn,
+                                   const size_t extraSpace) const;
         
+        //new incoming system state from elected coordinator
+        void NewSystemState(const boost::int64_t from, 
+                            const boost::shared_ptr<char[]>& data, 
+                            const size_t size);
+
         void Stop() {m_electionTimer.cancel();}
     private:
         void StatisticsChanged(const RawStatistics& statistics);
         
-        void UpdateMyState(const RawStatistics& statistics);
-
-        bool IsElected() const {return m_id == m_elected;}
+        void UpdateMyState();
 
         void StartElection();
         void ElectionTimeout();
@@ -83,10 +104,11 @@ namespace SP
         mutable boost::asio::strand m_strand;
         const boost::shared_ptr<Com::Communication> m_communication;
         const boost::uint64_t m_dataIdentifier;
-        boost::shared_ptr<SystemStateMessage> m_stateMessage;
+        RawStatistics m_lastStatistics;
+        SystemStateMessage m_stateMessage;
         
         const boost::int64_t m_id;
-        boost::int64_t m_elected = std::numeric_limits<boost::int64_t>::min();
+        std::atomic<boost::int64_t> m_elected;
         boost::asio::steady_timer m_electionTimer;
         boost::int64_t m_currentElectionId = 0;
     };

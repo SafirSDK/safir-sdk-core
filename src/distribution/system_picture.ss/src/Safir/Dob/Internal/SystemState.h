@@ -66,9 +66,7 @@ namespace SP
     class DISTRIBUTION_SYSTEM_PICTURE_API SystemState
     {
     public:
-        const std::string& Name() const;
-        boost::int64_t Id() const;
-        const std::string& Address() const;
+        boost::int64_t ElectedId() const;
         
         int Size() const;
 
