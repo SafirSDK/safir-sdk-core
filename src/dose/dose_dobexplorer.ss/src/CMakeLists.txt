@@ -1,8 +1,3 @@
-#make sure we link with qtmain.lib on windows
-if (NOT CMAKE_VERSION VERSION_LESS "2.8.11")
-  cmake_policy(SET CMP0020 NEW)
-endif()
-
 FILE(GLOB ui *.ui)
 FILE(GLOB sources *.cpp)
 FILE(GLOB headers [!ui_]*.h)
@@ -14,9 +9,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # We default to Qt5 if we can find it and fall back to Qt4
 
-if (CMAKE_VERSION VERSION_GREATER "2.8.10") #need cmake 2.8.11 or greater for qt5
-  find_package(Qt5Widgets QUIET)
-endif()
+find_package(Qt5Widgets QUIET)
 
 if (Qt5Widgets_FOUND)
   message("-- Building dobexplorer with Qt5")
@@ -55,16 +48,17 @@ ADD_EXECUTABLE(dobexplorer WIN32 ${sources} ${ui_headers} ${moc_sources} ${dose_
 if (Qt5Widgets_FOUND)
   qt5_use_modules(dobexplorer Widgets)
 
-  if (CMAKE_VERSION VERSION_LESS "2.8.11")
-    target_link_libraries(dobexplorer ${Qt5Core_QTMAIN_LIBRARIES})
-  endif()
 else()
   TARGET_LINK_LIBRARIES(dobexplorer ${QT_LIBRARIES})
 endif()
 
-FIND_PACKAGE(Boost COMPONENTS filesystem system)
-
-TARGET_LINK_LIBRARIES(dobexplorer dose_internal dots_generated-Safir-cpp dots_cpp lluf_utils lluf_crash_reporter ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(dobexplorer
+  dose_internal
+  dots_generated-Safir-cpp
+  dots_cpp 
+  lluf_utils
+  lluf_crash_reporter
+  lluf_startup_synchronizer)
 
 target_include_directories(dobexplorer PRIVATE ../../dose_communication.ss/src/defs/)
 target_include_directories(dobexplorer PRIVATE ../../dose_communication.ss/src/dose_com/)
@@ -78,5 +72,3 @@ INSTALL(TARGETS dobexplorer
 
 INSTALL_DEBUG_INFO(dobexplorer)
 
-
-#TODO clean up Boost stuff

@@ -7,9 +7,11 @@ add_library(lluf_startup_synchronizer SHARED StartupSynchronizer.cpp Safir/Utili
 
 TARGET_INCLUDE_DIRECTORIES(lluf_startup_synchronizer PUBLIC .)
 
-FIND_PACKAGE(Boost COMPONENTS filesystem thread system)
-
-TARGET_LINK_LIBRARIES(lluf_startup_synchronizer lluf_config ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(lluf_startup_synchronizer PRIVATE 
+  lluf_config 
+  ${Boost_FILESYSTEM_LIBRARY} 
+  ${Boost_THREAD_LIBRARY} 
+  ${Boost_SYSTEM_LIBRARY})
 
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE

@@ -3,8 +3,6 @@
 #Must be set before including safir_sdk_core_config.cmake
 SET(NO_LIBRARY_POSTFIXES 1) 
 
-FIND_PACKAGE(Boost COMPONENTS timer thread system)
-
 ADD_SUBDIRECTORY(DynamicLibraryLoader_test)
 ADD_SUBDIRECTORY(LowLevelLogger_test)
 ADD_SUBDIRECTORY(ProcessInfo_test)

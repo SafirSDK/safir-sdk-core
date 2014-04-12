@@ -2,9 +2,12 @@ FILE(GLOB sources *.cpp)
 
 ADD_EXECUTABLE(dots_configuration_check ${sources})
 
-FIND_PACKAGE(Boost COMPONENTS regex filesystem date_time system program_options)
-
-TARGET_LINK_LIBRARIES(dots_configuration_check lluf_id dots_internal dots_kernel ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(dots_configuration_check PRIVATE 
+  lluf_config
+  lluf_id
+  dots_internal
+  dots_kernel
+  ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
 INSTALL(TARGETS dots_configuration_check
         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin

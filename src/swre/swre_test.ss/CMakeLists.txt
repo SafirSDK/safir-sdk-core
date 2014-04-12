@@ -4,7 +4,7 @@ project(swre_test CXX)
 
 include($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
-find_package(Boost COMPONENTS thread system)
+#find_package(Boost COMPONENTS thread system)
 
 find_package(PythonInterp)
 

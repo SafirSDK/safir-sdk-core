@@ -5,9 +5,15 @@ ADD_LIBRARY(dots_cpp SHARED ${sources} ${headers})
 
 target_include_directories(dots_cpp PUBLIC .)
 
-FIND_PACKAGE(Boost COMPONENTS thread system)
-
-TARGET_LINK_LIBRARIES(dots_cpp dots_kernel lluf_id lluf_utils lluf_crash_reporter lluf_config ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(dots_cpp PRIVATE 
+  lluf_config 
+  lluf_id
+  lluf_utils
+  lluf_crash_reporter
+  dots_internal
+  dots_kernel
+  ${Boost_THREAD_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY})
 
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE

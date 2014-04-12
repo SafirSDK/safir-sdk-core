@@ -2,9 +2,8 @@ FILE(GLOB headers *.h)
 FILE(GLOB sources *.cpp)
 
 ADD_EXECUTABLE(dose_main ${sources} ${headers})
-FIND_PACKAGE(Boost COMPONENTS regex thread system)
 
-TARGET_LINK_LIBRARIES(dose_main 
+TARGET_LINK_LIBRARIES(dose_main PRIVATE 
   dose_cpp
   dose_internal 
   dose_com 
@@ -12,7 +11,10 @@ TARGET_LINK_LIBRARIES(dose_main
   dots_cpp
   lluf_utils
   lluf_crash_reporter
-  ${Boost_LIBRARIES})
+  lluf_startup_synchronizer
+  ${Boost_REGEX_LIBRARY}
+  ${Boost_THREAD_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY})
 
 INSTALL(TARGETS dose_main
         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin

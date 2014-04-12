@@ -12,6 +12,6 @@ add_custom_command(
 
 add_executable(dummy all_headers_included.cpp)
 
-FIND_PACKAGE(Boost COMPONENTS system)
+#FIND_PACKAGE(Boost COMPONENTS system)
 
-TARGET_LINK_LIBRARIES(dummy ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(dummy PRIVATE ${Boost_LIBRARIES})

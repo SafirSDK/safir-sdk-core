@@ -4,7 +4,7 @@ FILE(GLOB headers *.h ../common/*.h)
 ADD_EXECUTABLE(EntityIntegrityChecker ${sources} ${headers})
 
 if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(EntityIntegrityChecker dose_cpp dots_generated-DoseIntegrityCheck-cpp dots_generated-Safir-cpp dots_cpp lluf_utils ${Boost_LIBRARIES})
+    TARGET_LINK_LIBRARIES(EntityIntegrityChecker PRIVATE dose_cpp dots_generated-DoseIntegrityCheck-cpp dots_generated-Safir-cpp dots_cpp lluf_utils ${Boost_LIBRARIES})
 endif()
 
 INSTALL(TARGETS EntityIntegrityChecker

@@ -1,8 +1,14 @@
 ADD_EXECUTABLE(dope_bin2xml dope_bin2xml.cpp)
 
-FIND_PACKAGE(Boost COMPONENTS program_options filesystem system)
-
-TARGET_LINK_LIBRARIES(dope_bin2xml dots_cpp dots_generated-olib-cpp dots_generated-Safir-cpp olib ${Boost_LIBRARIES} ${ODBC_LIBRARIES})
+TARGET_LINK_LIBRARIES(dope_bin2xml PRIVATE
+  olib
+  douf_time_cpp
+  dots_generated-olib-cpp
+  dots_generated-Safir-cpp
+  dots_cpp
+  ${Boost_FILESYSTEM_LIBRARY}
+  ${Boost_PROGRAM_OPTIONS_LIBRARY}
+  ${ODBC_LIBRARIES})
 
 INSTALL(TARGETS dope_bin2xml
         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin

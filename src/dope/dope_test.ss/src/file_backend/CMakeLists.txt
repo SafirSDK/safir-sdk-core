@@ -1,8 +1,12 @@
-find_package(Boost COMPONENTS system)
-
 ADD_EXECUTABLE(entity_owner ../entity_owner.cpp)
 
-TARGET_LINK_LIBRARIES(entity_owner douf_time_cpp dose_cpp dots_generated-dope_test-cpp dots_cpp ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(entity_owner PRIVATE
+  douf_time_cpp 
+  dose_internal
+  dose_cpp
+  dots_generated-dope_test-cpp
+  dots_cpp
+  ${Boost_SYSTEM_LIBRARY})
 
 add_dependencies(entity_owner dose_main dope_main safir_show_config dope_bin2xml)
 

@@ -13,12 +13,12 @@ if (ACE_FOUND)
   
   ADD_EXECUTABLE(SplitJoinStresser ${sources} ${headers})
   
-  FIND_PACKAGE(Boost COMPONENTS program_options)
+  #FIND_PACKAGE(Boost COMPONENTS program_options)
   
-  TARGET_LINK_LIBRARIES(SplitJoinStresser ${ACE_LIBRARY})
+  TARGET_LINK_LIBRARIES(SplitJoinStresser PRIVATE ${ACE_LIBRARY})
   
   if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(SplitJoinStresser dose_cpp ${Boost_LIBRARIES})
+    TARGET_LINK_LIBRARIES(SplitJoinStresser PRIVATE dose_cpp ${Boost_LIBRARIES})
   endif()
   
   INSTALL(TARGETS SplitJoinStresser

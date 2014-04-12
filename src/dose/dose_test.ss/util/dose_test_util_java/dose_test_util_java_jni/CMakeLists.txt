@@ -24,7 +24,7 @@ ADD_CUSTOM_TARGET(javah ALL
 
 ADD_LIBRARY(dose_test_util_java_jni SHARED dose_test_util_java_jni.cpp)
 
-TARGET_LINK_LIBRARIES(dose_test_util_java_jni dose_test_util)
+TARGET_LINK_LIBRARIES(dose_test_util_java_jni PRIVATE dose_test_util)
 
 ADD_DEPENDENCIES(javah dose_test_util_java)
 ADD_DEPENDENCIES(dose_test_util_java_jni javah)

@@ -17,27 +17,25 @@ ADD_LIBRARY(lluf_utils SHARED ${headers}
 
 target_include_directories(lluf_utils PUBLIC .)
 
-#TODO: remove date_time dependency (we want date_time to be header only, but theres
-#something that makes that not work on windows)
-
-FIND_PACKAGE(Boost COMPONENTS filesystem system thread program_options date_time)
-
-TARGET_LINK_LIBRARIES(lluf_utils lluf_startup_synchronizer lluf_config ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(lluf_utils PRIVATE 
+  lluf_startup_synchronizer 
+  lluf_config 
+  ${Boost_FILESYSTEM_LIBRARY} 
+  ${Boost_THREAD_LIBRARY} 
+  ${Boost_SYSTEM_LIBRARY})
 
 if (WIN32)
-  TARGET_LINK_LIBRARIES(lluf_utils psapi)
+  TARGET_LINK_LIBRARIES(lluf_utils PRIVATE psapi)
 else()
-  TARGET_LINK_LIBRARIES(lluf_utils dl rt)
+  TARGET_LINK_LIBRARIES(lluf_utils PRIVATE dl rt)
 endif()
 
 
 ADD_EXECUTABLE(logger_control logger_control.cpp)
 
-FIND_PACKAGE(Boost COMPONENTS filesystem program_options system)
-
-TARGET_LINK_LIBRARIES(logger_control lluf_utils ${Boost_LIBRARIES})
-
-
+TARGET_LINK_LIBRARIES(logger_control PRIVATE 
+  lluf_utils
+  ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
 
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include

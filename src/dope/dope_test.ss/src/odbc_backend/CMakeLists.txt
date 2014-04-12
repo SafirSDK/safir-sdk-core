@@ -4,7 +4,7 @@ project(dope_odbc_backend_test CXX)
 
 include($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
-find_package(Boost COMPONENTS program_options system)
+#find_package(Boost COMPONENTS program_options system)
 
 if (UNIX)
     FIND_PACKAGE(IODBC)
@@ -24,8 +24,8 @@ ADD_EXECUTABLE(entity_owner ../entity_owner.cpp)
 ADD_EXECUTABLE(run_sql run_sql.cpp)
 
 if (NOT MSVC)
-  TARGET_LINK_LIBRARIES(entity_owner dose_cpp dots_generated-DopeTest-cpp dots_cpp ${Boost_LIBRARIES})
-  TARGET_LINK_LIBRARIES(run_sql dots_cpp olib ${Boost_LIBRARIES} ${ODBC_LIBRARIES})
+  TARGET_LINK_LIBRARIES(entity_owner PRIVATE dose_cpp dots_generated-DopeTest-cpp dots_cpp ${Boost_LIBRARIES})
+  TARGET_LINK_LIBRARIES(run_sql PRIVATE dots_cpp olib ${Boost_LIBRARIES} ${ODBC_LIBRARIES})
 endif()
 
 find_package(PythonInterp)

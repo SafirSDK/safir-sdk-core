@@ -8,10 +8,10 @@ FILE(GLOB headers *.h ../common/*.h)
 
 ADD_EXECUTABLE(SignalTest ${sources} ${headers})
 
-FIND_PACKAGE(Boost COMPONENTS program_options)
+#FIND_PACKAGE(Boost COMPONENTS program_options)
 
 if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(SignalTest dose_internal ${Boost_LIBRARIES})
+    TARGET_LINK_LIBRARIES(SignalTest PRIVATE dose_internal ${Boost_LIBRARIES})
 endif()
 
 INSTALL(TARGETS SignalTest

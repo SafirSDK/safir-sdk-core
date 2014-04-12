@@ -5,7 +5,7 @@ ADD_LIBRARY(logging_cpp SHARED ${sources} ${headers})
 
 target_include_directories(logging_cpp PUBLIC .)
 
-TARGET_LINK_LIBRARIES(logging_cpp logging_library lluf_utils)
+TARGET_LINK_LIBRARIES(logging_cpp PRIVATE logging_library lluf_utils)
 
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE

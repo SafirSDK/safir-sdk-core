@@ -9,10 +9,17 @@ ADD_LIBRARY(dots_kernel SHARED ${sources} ${headers})
 
 target_include_directories(dots_kernel PUBLIC .)
 
-FIND_PACKAGE(Boost COMPONENTS regex filesystem system)
+TARGET_LINK_LIBRARIES(dots_kernel PRIVATE 
+  lluf_config
+  lluf_startup_synchronizer
+  lluf_crash_reporter
+  lluf_utils
+  lluf_id
+  dots_internal
+  ${Boost_FILESYSTEM_LIBRARY}
+  ${Boost_THREAD_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY})
 
-
-TARGET_LINK_LIBRARIES(dots_kernel dots_internal lluf_utils lluf_startup_synchronizer lluf_crash_reporter lluf_config ${Boost_LIBRARIES})
 
 #check if we can do unaligned accesses, or if we should define a symbol that fixes it.
 include(CheckCXXSourceRuns)

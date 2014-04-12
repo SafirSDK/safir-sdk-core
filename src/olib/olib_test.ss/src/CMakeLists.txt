@@ -25,12 +25,12 @@ endif()
 FILE(GLOB_RECURSE headers *.h)
 FILE(GLOB sources *.cpp)
 
-FIND_PACKAGE(Boost COMPONENTS filesystem program_options system)
+#FIND_PACKAGE(Boost COMPONENTS filesystem program_options system)
 
 add_executable(OlibTester ${sources} ${headers})
 
 if (NOT MSVC)
-  TARGET_LINK_LIBRARIES(OlibTester olib swre_interface_cpp dots_generated-Safir-cpp dots_cpp ${ODBC_LIBRARIES} ${Boost_LIBRARIES})
+  TARGET_LINK_LIBRARIES(OlibTester PRIVATE olib swre_interface_cpp dots_generated-Safir-cpp dots_cpp ${ODBC_LIBRARIES} ${Boost_LIBRARIES})
 endif()
 
 enable_testing()

@@ -1,5 +1,3 @@
-FIND_PACKAGE(Boost COMPONENTS system thread)
-
 ADD_SUBDIRECTORY(signals_test)
 
 ADD_EXECUTABLE(distribution_data_test distribution_data_test.cpp)
@@ -7,9 +5,22 @@ ADD_EXECUTABLE(lamport_clock_test lamport_clock_test.cpp)
 ADD_EXECUTABLE(dose_message_queue_test dose_message_queue_test.cpp)
 ADD_EXECUTABLE(dose_sem_wrapper_test semaphore_test.cpp)
 
-TARGET_LINK_LIBRARIES(distribution_data_test dose_internal dots_generated-Safir-cpp dots_cpp lluf_id ${Boost_LIBRARIES})
-TARGET_LINK_LIBRARIES(lamport_clock_test dose_internal ${Boost_LIBRARIES})
-TARGET_LINK_LIBRARIES(dose_message_queue_test dose_internal dots_generated-Safir-cpp dots_cpp lluf_utils lluf_crash_reporter ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(distribution_data_test PRIVATE
+  dose_internal 
+  dots_generated-Safir-cpp
+  lluf_startup_synchronizer)
+
+TARGET_LINK_LIBRARIES(lamport_clock_test PRIVATE 
+  dose_internal)
+
+TARGET_LINK_LIBRARIES(dose_message_queue_test PRIVATE
+  dose_internal
+  dots_generated-Safir-cpp 
+  lluf_startup_synchronizer
+  lluf_crash_reporter
+  ${Boost_THREAD_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY})
+
 target_include_directories(dose_sem_wrapper_test PRIVATE ../src)
 
 ADD_TEST(Semaphore dose_sem_wrapper_test)

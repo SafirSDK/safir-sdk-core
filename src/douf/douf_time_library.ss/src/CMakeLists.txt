@@ -8,12 +8,11 @@ ADD_LIBRARY(douf_time_library SHARED ${sources})
 
 target_include_directories(douf_time_library PUBLIC .)
 
-FIND_PACKAGE(Boost COMPONENTS regex thread system)
-    
-TARGET_LINK_LIBRARIES(douf_time_library 
+TARGET_LINK_LIBRARIES(douf_time_library PRIVATE 
   dots_generated-douf_time-cpp 
   dots_cpp 
-  ${Boost_LIBRARIES})
+  ${Boost_THREAD_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY})
 
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE

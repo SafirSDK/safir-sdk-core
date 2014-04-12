@@ -6,9 +6,7 @@ ADD_LIBRARY(lluf_id SHARED lluf_id.cpp md5.c md5.h Safir/Utilities/Internal/Id.h
 
 target_include_directories(lluf_id PUBLIC .)
 
-FIND_PACKAGE(Boost COMPONENTS filesystem thread)
-
-TARGET_LINK_LIBRARIES(lluf_id lluf_utils ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(lluf_id PRIVATE lluf_utils)
 
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE

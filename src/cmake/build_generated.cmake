@@ -107,7 +107,11 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
     PRIVATE ${safir_sdk_core_SOURCE_DIR}/dots/dots_v.ss/data
     PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/generated_code/cpp/include)
   
-  target_link_libraries(dots_generated-${GEN_NAME}-cpp dots_cpp)
+  target_link_libraries(dots_generated-${GEN_NAME}-cpp 
+    dots_cpp
+    dots_internal
+    dots_kernel
+    lluf_utils)
 
   FOREACH (DEP ${GEN_DEPENDENCIES})
     TARGET_LINK_LIBRARIES(dots_generated-${GEN_NAME}-cpp dots_generated-${DEP}-cpp)

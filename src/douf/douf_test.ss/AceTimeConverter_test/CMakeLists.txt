@@ -6,10 +6,10 @@ if (ACE_FOUND)
   ADD_EXECUTABLE(AceTimeConverter_test test.cpp test2.cpp)
   
   if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(AceTimeConverter_test douf_time_cpp)
+    TARGET_LINK_LIBRARIES(AceTimeConverter_test PRIVATE douf_time_cpp)
   endif()
   
-  TARGET_LINK_LIBRARIES(AceTimeConverter_test ${ACE_LIBRARY})
+  TARGET_LINK_LIBRARIES(AceTimeConverter_test PRIVATE ${ACE_LIBRARY})
   
   ADD_TEST(AceTimeConverter_test AceTimeConverter_test)
 

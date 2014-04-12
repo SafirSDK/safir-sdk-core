@@ -4,13 +4,13 @@ project(stop_orders_at_exit CXX)
 
 include($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
-find_package(Boost COMPONENTS system)
+#find_package(Boost COMPONENTS system)
 find_package(PythonInterp)
 
 add_executable(stoppee stoppee.cpp)
 
 if (NOT MSVC)
-  target_link_libraries(stoppee dose_cpp dots_generated-Safir-cpp dots_cpp ${Boost_LIBRARIES})
+  target_link_libraries(stoppee PRIVATE dose_cpp dots_generated-Safir-cpp dots_cpp ${Boost_LIBRARIES})
 endif()
 
 enable_testing()

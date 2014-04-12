@@ -20,7 +20,7 @@ FILE(GLOB sources *.cpp)
 ADD_LIBRARY(swre_java_jni SHARED ${sources})
 
 if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(swre_java_jni swre_library)
+    TARGET_LINK_LIBRARIES(swre_java_jni PRIVATE swre_library)
 endif()
 
 ADD_DEPENDENCIES(javah swre_reports_java swre_application_java)

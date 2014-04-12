@@ -3,9 +3,17 @@ FILE(GLOB sources *.cpp)
 
 ADD_EXECUTABLE(foreach ${sources} ${headers})
 
-FIND_PACKAGE(Boost COMPONENTS system)
+TARGET_LINK_LIBRARIES(foreach PRIVATE
+  swre_interface_cpp
+  douf_time_cpp
+  dose_internal
+  dose_cpp
+  dots_generated-foreach-cpp
+  dots_generated-Safir-cpp
+  dots_cpp
+  logging_cpp
+  ${Boost_SYSTEM_LIBRARY})
 
-TARGET_LINK_LIBRARIES(foreach swre_interface_cpp dose_cpp dots_generated-foreach-cpp dots_generated-Safir-cpp dots_cpp logging_cpp ${Boost_LIBRARIES})
 
 INSTALL(TARGETS foreach
         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin

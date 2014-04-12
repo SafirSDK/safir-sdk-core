@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 2.8.12)
 
 PROJECT(safir_sdk_core CXX C)
 
@@ -53,11 +53,16 @@ set (Boost_ADDITIONAL_VERSIONS
 
 set(Boost_NO_BOOST_CMAKE ON)
 set(Boost_USE_MULTITHREADED ON)
-find_package(Boost)
+find_package(Boost COMPONENTS regex timer program_options filesystem thread system REQUIRED)
 if(Boost_FOUND)
    include_directories(${Boost_INCLUDE_DIRS})
    link_directories(${Boost_LIBRARY_DIRS})
 endif()
+
+
+#make sure all linking is explicit as to what parts of boost it needs, so we clear the variable
+#that "contains all".
+SET(Boost_LIBRARIES "DONT_USE_Boost_LIBRARIES_VARIABLE")
 
 #use dynamic linking with boost
 ADD_DEFINITIONS(-DBOOST_ALL_DYN_LINK)

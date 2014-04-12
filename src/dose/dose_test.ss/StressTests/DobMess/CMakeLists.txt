@@ -9,7 +9,7 @@ FILE(GLOB sources *.cpp)
 ADD_EXECUTABLE(DobMess ${sources} ${headers})
 
 if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(DobMess dose_cpp ${Boost_LIBRARIES})
+    TARGET_LINK_LIBRARIES(DobMess PRIVATE dose_cpp ${Boost_LIBRARIES})
 endif()
 
 INSTALL(TARGETS DobMess

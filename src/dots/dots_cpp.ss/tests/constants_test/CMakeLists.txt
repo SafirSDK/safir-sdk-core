@@ -1,6 +1,6 @@
 ADD_EXECUTABLE(constants_test constants_test.cpp)
 
-TARGET_LINK_LIBRARIES(constants_test dots_cpp)
+TARGET_LINK_LIBRARIES(constants_test PRIVATE dots_cpp dots_internal lluf_utils)
 
 ADD_TEST(constants_test constants_test)
 

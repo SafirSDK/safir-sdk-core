@@ -1,5 +1,5 @@
 
-FIND_PACKAGE(Boost COMPONENTS program_options thread system)
+#FIND_PACKAGE(Boost COMPONENTS program_options thread system)
 
 ADD_SUBDIRECTORY(EntityIntegrityChecker)
 ADD_SUBDIRECTORY(EntityReceptionVerifier)

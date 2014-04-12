@@ -1,5 +1,3 @@
-find_package(Boost COMPONENTS thread system)
-
 add_subdirectory(logging_cpp)
 
 #TODO 

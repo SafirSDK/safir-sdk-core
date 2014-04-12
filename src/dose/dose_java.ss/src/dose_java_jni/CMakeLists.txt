@@ -18,7 +18,7 @@ FILE(GLOB sources *.cpp)
 ADD_LIBRARY(dose_java_jni SHARED ${sources})
 
 if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(dose_java_jni dose_dll)
+    TARGET_LINK_LIBRARIES(dose_java_jni PRIVATE dose_dll)
 endif()
 
 ADD_DEPENDENCIES(javah dose_java)

@@ -1,6 +1,6 @@
 add_executable(log_sender sender.cpp)
 
-target_link_libraries(log_sender logging_cpp)
+target_link_libraries(log_sender PRIVATE logging_cpp)
 
 add_dependencies(log_sender safir_show_config) #test needs safir_show_config
 

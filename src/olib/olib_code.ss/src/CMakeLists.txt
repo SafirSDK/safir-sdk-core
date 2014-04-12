@@ -21,7 +21,10 @@ ADD_LIBRARY(olib SHARED ${sources} ${headers})
 
 target_include_directories(olib PUBLIC .)
 
-TARGET_LINK_LIBRARIES(olib douf_time_cpp dots_generated-olib-cpp logging_cpp ${ODBC_LIBRARIES})
+TARGET_LINK_LIBRARIES(olib PRIVATE 
+  douf_time_cpp 
+  dots_generated-olib-cpp
+  logging_cpp ${ODBC_LIBRARIES})
 
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE

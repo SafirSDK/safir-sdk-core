@@ -5,15 +5,19 @@ SET(CMAKE_DEBUG_POSTFIX "")
 FILE(GLOB_RECURSE headers *.h)
 FILE(GLOB sources *.cpp)
 
-FIND_PACKAGE(Boost COMPONENTS thread)
-
 ADD_LIBRARY(dose_dll SHARED ${sources} ${headers})
 
 target_include_directories(dose_dll PUBLIC .)
 
 #TODO: Move all public headers to a separate directory, in a "good way". Applies to all subsystems
 
-TARGET_LINK_LIBRARIES(dose_dll dose_internal ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(dose_dll PRIVATE 
+  dose_internal
+  dots_generated-Safir-cpp
+  lluf_startup_synchronizer
+  ${Boost_THREAD_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY})
+
 
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE

@@ -1,6 +1,6 @@
 ADD_EXECUTABLE(lluf_id_test lluf_id_test.cpp)
 
-TARGET_LINK_LIBRARIES(lluf_id_test lluf_id)
+TARGET_LINK_LIBRARIES(lluf_id_test PRIVATE lluf_id)
 
 ADD_TEST(lluf_id lluf_id_test)
 

@@ -13,11 +13,11 @@ if (ACE_FOUND)
   
   ADD_EXECUTABLE(SplitJoinTest ${sources} ${headers})
   
-  TARGET_LINK_LIBRARIES(SplitJoinTest ${ACE_LIBRARY})
+  TARGET_LINK_LIBRARIES(SplitJoinTest PRIVATE ${ACE_LIBRARY})
   
   if (NOT MSVC)
-    FIND_PACKAGE(Boost COMPONENTS program_options)
-    TARGET_LINK_LIBRARIES(SplitJoinTest dose_cpp ${Boost_LIBRARIES})
+    #FIND_PACKAGE(Boost COMPONENTS program_options)
+    TARGET_LINK_LIBRARIES(SplitJoinTest PRIVATE dose_cpp ${Boost_LIBRARIES})
   endif()
   
   INSTALL(TARGETS SplitJoinTest

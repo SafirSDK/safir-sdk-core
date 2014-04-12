@@ -4,10 +4,10 @@ FILE(GLOB sources *.cpp)
 ADD_LIBRARY(dose_com SHARED ${sources} ${headers})
 
 if (WIN32)
-    TARGET_LINK_LIBRARIES(dose_com ws2_32)
+    TARGET_LINK_LIBRARIES(dose_com PRIVATE ws2_32)
 endif()
 
-TARGET_LINK_LIBRARIES(dose_com lluf_utils)
+TARGET_LINK_LIBRARIES(dose_com PRIVATE lluf_utils)
 
 target_include_directories(dose_com PUBLIC ../defs)
 target_include_directories(dose_com PUBLIC .)

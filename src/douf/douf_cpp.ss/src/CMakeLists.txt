@@ -5,7 +5,7 @@ ADD_LIBRARY(douf_time_cpp SHARED ${sources} ${headers})
 
 target_include_directories(douf_time_cpp PUBLIC .)
 
-TARGET_LINK_LIBRARIES(douf_time_cpp douf_time_library dots_generated-douf_time-cpp)
+TARGET_LINK_LIBRARIES(douf_time_cpp PRIVATE douf_time_library dots_generated-douf_time-cpp)
 
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE

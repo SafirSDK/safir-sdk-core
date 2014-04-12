@@ -20,7 +20,7 @@ ADD_LIBRARY(douf_java_jni SHARED douf_java_jni.cpp)
 
 
 if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(douf_java_jni douf_time_library)
+    TARGET_LINK_LIBRARIES(douf_java_jni PRIVATE douf_time_library)
 endif()
 
 ADD_DEPENDENCIES(javah douf_java)

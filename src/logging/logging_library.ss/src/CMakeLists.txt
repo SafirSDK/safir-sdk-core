@@ -9,7 +9,7 @@ ADD_LIBRARY(logging_library SHARED ${sources} ${headers})
 
 target_include_directories(logging_library PUBLIC .)
 
-TARGET_LINK_LIBRARIES(logging_library lluf_utils)
+TARGET_LINK_LIBRARIES(logging_library PRIVATE lluf_utils)
 
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE

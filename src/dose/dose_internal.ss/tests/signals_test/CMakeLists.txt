@@ -5,7 +5,13 @@ target_include_directories(signals_test PRIVATE ../../src)
 #disable lock checks
 add_definitions(-DDOSE_NO_LOCK_CHECKING)
 
-TARGET_LINK_LIBRARIES(signals_test dots_generated-Safir-cpp dots_cpp lluf_utils ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(signals_test PRIVATE 
+  dots_generated-Safir-cpp 
+  dots_cpp 
+  lluf_utils
+  lluf_startup_synchronizer
+  ${Boost_THREAD_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY})
 
 ADD_TEST(Signals signals_test)
 

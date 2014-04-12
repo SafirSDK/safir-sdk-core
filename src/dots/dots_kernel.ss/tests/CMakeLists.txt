@@ -1,13 +1,26 @@
-FIND_PACKAGE(Boost COMPONENTS filesystem thread system)
-
 add_executable(multiple_accesses multiple_accesses.cpp)
 add_executable(multiple_serialization multiple_serialization.cpp)
 add_executable(repository_compare repository_compare.cpp
                 ../src/dots_shm_repository.h ../src/dots_shm_repository.cpp)
 
-TARGET_LINK_LIBRARIES(multiple_accesses dots_kernel ${Boost_LIBRARIES})
-TARGET_LINK_LIBRARIES(multiple_serialization dots_kernel ${Boost_LIBRARIES})
-TARGET_LINK_LIBRARIES(repository_compare lluf_id lluf_utils dots_internal ${Boost_LIBRARIES})
+TARGET_LINK_LIBRARIES(multiple_accesses PRIVATE
+  dots_internal
+  dots_kernel
+  ${Boost_THREAD_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY})
+
+TARGET_LINK_LIBRARIES(multiple_serialization PRIVATE 
+  dots_internal
+  dots_kernel
+  ${Boost_THREAD_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY})
+
+TARGET_LINK_LIBRARIES(repository_compare PRIVATE
+  lluf_config
+  lluf_id
+  lluf_utils
+  dots_internal
+  rt)
 
 add_test(multiple_init multiple_accesses)
 add_test(multiple_accesses_after_init multiple_accesses sleep)

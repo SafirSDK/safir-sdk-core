@@ -7,10 +7,10 @@ FILE(GLOB sources *.cpp)
 
 ADD_EXECUTABLE(dose_memory_stats ${sources})
 
-FIND_PACKAGE(Boost COMPONENTS system thread)
+#FIND_PACKAGE(Boost COMPONENTS system thread)
 
 if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(dose_memory_stats dose_internal dots_cpp ${Boost_LIBRARIES})
+    TARGET_LINK_LIBRARIES(dose_memory_stats PRIVATE dose_internal dots_cpp ${Boost_LIBRARIES})
 endif()
 
 INSTALL(TARGETS dose_memory_stats

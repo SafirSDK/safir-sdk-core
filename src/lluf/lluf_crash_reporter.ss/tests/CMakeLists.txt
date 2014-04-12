@@ -1,5 +1,3 @@
-FIND_PACKAGE(Boost COMPONENTS thread system)
-
 ADD_EXECUTABLE(start_stop start_stop.cpp)
 TARGET_LINK_LIBRARIES (start_stop lluf_crash_reporter)
 

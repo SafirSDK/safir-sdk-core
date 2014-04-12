@@ -22,7 +22,7 @@ ADD_LIBRARY(dots_java_jni SHARED dots_java_jni.cpp)
 
 
 if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(dots_java_jni lluf_id dots_kernel lluf_config)
+    TARGET_LINK_LIBRARIES(dots_java_jni PRIVATE lluf_id dots_kernel lluf_config)
 endif()
 
 ADD_DEPENDENCIES(javah dots_java)
