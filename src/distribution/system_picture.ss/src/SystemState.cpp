@@ -41,8 +41,8 @@
 
 namespace
 {
-    void PrintMessage(const Safir::Dob::Internal::SP::SystemStateMessage& msg, 
-                      std::wostream& out)
+    void PrintMessage(const Safir::Dob::Internal::SP::SystemStateMessage& /*msg*/, 
+                      std::wostream& /*out*/)
     {
         //TODO: print message
         /*        out << msg.name().c_str() << "@" << msg.control_address().c_str() << " (" << msg.id() << ")";

@@ -31,7 +31,7 @@
 #include <boost/asio/steady_timer.hpp>
 #include <boost/function.hpp>
 #include <limits>
-
+#include <atomic>
 
 #ifdef _MSC_VER
 #  pragma warning (push)

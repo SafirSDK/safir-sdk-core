@@ -185,7 +185,7 @@ namespace
         }
         else
         {
-            m_stateMessage.ParseFromArray(data.get(),size);
+            m_stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
             //TODO: act on information, such as exclude nodes.
         }
     }
