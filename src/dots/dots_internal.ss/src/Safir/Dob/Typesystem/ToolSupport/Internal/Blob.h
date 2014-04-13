@@ -165,17 +165,17 @@ namespace Internal
             static bool Value(const Internal::Blob& blob, int member, int index) {return blob.GetValueBool(member, index);}
         };
 
-    template <> struct Reader<const char*> //hashed value
-    {
-        static std::pair<DotsC_Int64, const char*> Key(const Internal::Blob& blob, int member, int index)
+        template <> struct Reader<const char*> //string
         {
-            return std::make_pair(blob.GetKeyHash(member, index), blob.GetKeyString(member, index));
-        }
-        static std::pair<DotsC_Int64, const char*> Value(const Internal::Blob& blob, int member, int index)
-        {
-            return std::make_pair(blob.GetValueHash(member, index), blob.GetValueString(member, index));
-        }
-    };
+            static const char* Key(const Internal::Blob& blob, int member, int index)
+            {
+                return blob.GetKeyString(member, index);
+            }
+            static std::pair<DotsC_Int64, const char*> Value(const Internal::Blob& blob, int member, int index)
+            {
+                return blob.GetValueString(member, index);
+            }
+        };
 
         template <> struct Reader< std::pair<DotsC_Int64, const char*> > //hashed value
         {
@@ -189,6 +189,33 @@ namespace Internal
             }
         };
 
+        template <> struct Reader< std::pair<DotsC_EntityId, const char*> > //entity id
+        {
+            static std::pair<DotsC_EntityId, const char*> Key(const Internal::Blob& blob, int member, int index)
+            {
+                std::pair<DotsC_EntityId, const char*> entityId;
+                entityId.first.typeId=blob.GetKeyInt64(member, index);
+                entityId.first.instanceId=blob.GetKeyHash(member, index);
+                entityId.second=blob.GetKeyString(member, index);
+                return entityId;
+            }
+            static std::pair<DotsC_EntityId, const char*> Value(const Internal::Blob& blob, int member, int index)
+            {
+                std::pair<DotsC_EntityId, const char*> entityId;
+                entityId.first.typeId=blob.GetValueInt64(member, index);
+                entityId.first.instanceId=blob.GetValueHash(member, index);
+                entityId.second=blob.GetValueString(member, index);
+                return entityId;
+            }
+        };
+
+        template <> struct Reader< std::pair<const char*, DotsC_Int32> > //binary
+        {
+            static std::pair<const char*, DotsC_Int32> Value(const Internal::Blob& blob, int member, int index)
+            {
+                return blob.GetValueBinary(member, index);
+            }
+        };
     }
 
 }
