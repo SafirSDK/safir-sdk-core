@@ -1,7 +1,6 @@
-#FIND_PACKAGE(Boost COMPONENTS thread system REQUIRED)
-set(CMAKE_REQUIRED_LIBRARIES ${Boost_LIBRARIES})
-
-set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${Boost_LIBRARIES})
+set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} 
+  ${Boost_THREAD_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY})
 
 add_subdirectory(boost_iostreams_flushing)
 add_subdirectory(offset_ptr)

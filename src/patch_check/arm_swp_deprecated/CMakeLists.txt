@@ -12,9 +12,7 @@ endif()
 
 #FIND_PACKAGE(Boost COMPONENTS system)
 
-if (NOT MSVC)
-  set(CMAKE_REQUIRED_LIBRARIES ${Boost_LIBRARIES})
-endif()
+set(CMAKE_REQUIRED_LIBRARIES ${Boost_SYSTEM_LIBRARY})
 
 find_path(HAVE_FENCED_BLOCK_HPP boost/asio/detail/fenced_block.hpp)
 
