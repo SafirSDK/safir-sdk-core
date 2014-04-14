@@ -1,6 +1,6 @@
 FUNCTION(BUILD_GENERATED_LIBRARY)
   cmake_parse_arguments(GEN "" "NAME" "DEPENDENCIES" ${ARGN})
-  message("++ Will build generated library ${GEN_NAME} with dependencies '${GEN_DEPENDENCIES}'")
+  #message("++ Will build generated library ${GEN_NAME} with dependencies '${GEN_DEPENDENCIES}'")
 
   if ("${GEN_NAME}" STREQUAL "")
     message(FATAL_ERROR "Invalid NAME passed to BUILD_GENERATED_LIBRARY")
