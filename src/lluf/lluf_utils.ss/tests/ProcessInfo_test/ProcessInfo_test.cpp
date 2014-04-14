@@ -45,7 +45,7 @@ int main(int argc, char** argv)
     }
 
     Safir::Utilities::ProcessInfo pi(pid);
-    if (pi.GetProcessName() != name && pi.GetProcessName() != name)
+    if (pi.GetProcessName() != name && pi.GetProcessName() != name + ".exe")
     {
         std::wcout << "Not ok! GetProcessName returned '"
                    << pi.GetProcessName().c_str() << "'" << std::endl;
