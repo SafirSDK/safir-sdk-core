@@ -174,12 +174,13 @@ namespace
                           });
     }
 
-    void Coordinator::NewSystemState(const boost::int64_t from, 
+    void Coordinator::NewSystemState(const boost::int64_t /*from*/, 
                                      const boost::shared_ptr<char[]>& data, 
                                      const size_t size)
     {
         if (IsElected())
         {
+            //TODO: log who I got it from.
             //TODO: should I just ignore this, or maybe start a new election?
             throw std::logic_error("Got SystemState from someone else, but I'm the elected coordinator!");
         }
