@@ -171,7 +171,7 @@ namespace Internal
             {
                 return blob.GetKeyString(member, index);
             }
-            static std::pair<DotsC_Int64, const char*> Value(const Internal::Blob& blob, int member, int index)
+            static const char* Value(const Internal::Blob& blob, int member, int index)
             {
                 return blob.GetValueString(member, index);
             }

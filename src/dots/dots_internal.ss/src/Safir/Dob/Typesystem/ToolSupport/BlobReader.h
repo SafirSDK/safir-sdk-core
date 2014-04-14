@@ -58,7 +58,7 @@ namespace ToolSupport
      *      ChannelId   => pair<DotsC_Int64, const char* optional_string>
      *      EntityId    => pair<DotsC_EntityId, const char* optional_instance_string>
      *      Binary      => pair<const char* data, DostC_Int32 size>
-     *      Object      => const char* (a valid blob pointer)
+     *      Object      => pair<const char* data, DostC_Int32 size> (a valid blob pointer and blob size)
      */
     template <class RepositoryT, class Traits=Safir::Dob::Typesystem::ToolSupport::TypeRepositoryTraits<RepositoryT> >
     class BlobReader : private boost::noncopyable
@@ -97,7 +97,7 @@ namespace ToolSupport
         BlobReader(const RepositoryT* rep, const char* blob)
             :m_repository(rep)
             ,m_blob(blob)
-            ,m_classDescription(rep->GetClassDescription(m_blob.TypeId()))
+            ,m_classDescription(rep->GetClass(m_blob.TypeId()))
             ,m_memberDescription(NULL)
             ,m_memberIndex(-1)
         {
@@ -158,6 +158,7 @@ namespace ToolSupport
         template <class Val>
         void ReadValue(DotsC_MemberIndex member, int valueIndex, Val& val, bool& isNull, bool& isChanged) const
         {
+            MoveToMember(member);
             m_blob.ValueStatus(member, valueIndex, isNull, isChanged);
             if (!isNull)
             {
@@ -169,11 +170,10 @@ namespace ToolSupport
         const RepositoryType* m_repository;
         Safir::Dob::Typesystem::ToolSupport::Internal::Blob m_blob;
         const ClassDescriptionType* m_classDescription;
-        const MemberDescriptionType* m_memberDescription;
-        DotsC_MemberIndex m_memberIndex;
-        int m_valueIndex;
+        mutable const MemberDescriptionType* m_memberDescription;
+        mutable DotsC_MemberIndex m_memberIndex;
 
-        inline void MoveToMember(DotsC_MemberIndex member)
+        inline void MoveToMember(DotsC_MemberIndex member) const
         {
             if (m_memberIndex!=member)
             {

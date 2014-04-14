@@ -57,6 +57,50 @@ void CheckBlobSize(const std::vector<char>& blob)
 
 }
 
+void BlobTest(RepositoryPtr rep)
+{
+    std::cout<<"========= Blob Test ========"<<std::endl;
+    //ParserTest.MyItem
+    DotsC_TypeId tid=Safir::Dob::Typesystem::ToolSupport::TypeUtilities::CalculateTypeId("ParserTest.MyItem");
+    std::cout<<"Class ParserTest.MyItem "<<tid<<std::endl;
+    BlobWriter<Safir::Dob::Typesystem::ToolSupport::TypeRepository> w(rep.get(), tid);
+
+
+    const ClassDescription* cd=GetClassByName(rep, "ParserTest.MyItem");
+    DotsC_MemberIndex myNum=cd->GetMemberIndex("MyNumber");
+    DotsC_MemberIndex myStrings=cd->GetMemberIndex("MyStrings");
+
+    w.WriteValue(myNum, 123, false, true);
+    w.WriteArrayValue(myStrings, 0, "Hej_1", false, true);
+    w.WriteArrayValue(myStrings, 3, "Hej_2", false, true);
+    w.WriteArrayValue(myStrings, 4, "Hej_3", false, true);
+
+    std::vector<char> blob(static_cast<size_t>(w.CalculateBlobSize()));
+    w.CopyRawBlob(&blob[0]);
+    std::cout<<"Blob created, with size "<<blob.size()<<std::endl;
+    std::cout<<"BlobSize = "<<BlobReader<TypeRepository>::GetSize(&blob[0])<<std::endl;
+    std::cout<<"BlobTypeId = "<<BlobReader<TypeRepository>::GetTypeId(&blob[0])<<std::endl;
+
+    bool isNull=false, isChanged=true;
+    DotsC_Int32 myNumVal;
+    BlobReader<Safir::Dob::Typesystem::ToolSupport::TypeRepository> r(rep.get(), &blob[0]);
+    r.ReadValue(myNum, 0, myNumVal, isNull, isChanged);
+    std::cout<<"isNull="<<isNull<<", isChanged="<<isChanged<<", val="<<myNumVal<<std::endl;
+
+    for (DotsC_ArrayIndex i=0; i<5; ++i)
+    {
+        const char* str;
+        r.ReadValue(myStrings, i, str, isNull, isChanged);
+        std::cout<<"isNull="<<isNull<<", isChanged="<<isChanged;
+        if (isNull)
+            std::cout<<std::endl;
+        else
+            std::cout<<", val="<<str<<std::endl;
+    }
+
+    std::cout<<"========= Blob Test Done ========"<<std::endl;
+}
+
 int main(int argc, char* argv[])
 {    
     //-----------------------------------------------------------
@@ -86,6 +130,8 @@ int main(int argc, char* argv[])
         std::cout<<err.what()<<std::endl;
         return 1;
     }
+    BlobTest(repository);
+    return 0;
 
     std::cout<<"========= Repository ========"<<std::endl;
     Safir::Dob::Typesystem::ToolSupport::RepositoryToString(repository.get(), true, std::cout);

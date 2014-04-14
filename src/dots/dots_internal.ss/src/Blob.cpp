@@ -69,7 +69,7 @@ namespace Internal
     boost::int64_t Blob::GetTypeId(const char *blob)
     {
         boost::int64_t val;
-        memcpy(&val, blob+sizeof(boost::int32_t), sizeof(boost::int32_t));
+        memcpy(&val, blob+sizeof(boost::int32_t), sizeof(boost::int64_t));
         return val;
 
     }

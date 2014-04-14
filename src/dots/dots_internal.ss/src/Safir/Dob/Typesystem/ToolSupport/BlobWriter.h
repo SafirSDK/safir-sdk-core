@@ -60,7 +60,7 @@ namespace ToolSupport
      *      ChannelId   => pair<DotsC_Int64, const char* optional_string>
      *      EntityId    => pair<DotsC_EntityId, const char* optional_instance_string>
      *      Binary      => pair<const char* data, DostC_Int32 size>
-     *      Object      => const char* (a valid blob pointer)
+     *      Object      => pair<const char* blob, DostC_Int32 size> (a valid blob pointer and blob size)
      */
     template <class RepositoryT, class Traits=Safir::Dob::Typesystem::ToolSupport::TypeRepositoryTraits<RepositoryT> >
     class BlobWriter : private boost::noncopyable
@@ -234,7 +234,7 @@ namespace ToolSupport
 
                 case ArrayCollectionType:
                 {
-                    for (int arrayIndex=0; arrayIndex=member->GetArraySize(); ++arrayIndex)
+                    for (int arrayIndex=0; arrayIndex<member->GetArraySize(); ++arrayIndex)
                     {
                         m_blob.AddValue(memberIndex, false);
                     }
@@ -257,17 +257,17 @@ namespace ToolSupport
             }
         }
 
-        inline void ThrowWrongMemberType(DotsC_MemberType memberType) const
+        inline void ThrowWrongMemberType() const
         {
             std::ostringstream os;
-            os<<"Trying to write data of wrong type to a blob for member '"<<m_memberDescription->GetName()<<"' in class '"<<m_classDescription->GetName()<<"'";
+            os<<"Trying to write data of wrong memberType to a blob for member '"<<m_memberDescription->GetName()<<"' in class '"<<m_classDescription->GetName()<<"'";
             throw std::logic_error(os.str());
         }
 
         inline void ThrowWrongCollectionType() const
         {
             std::ostringstream os;
-            os<<"Trying to write data of wrong collection type to a blob for member '"<<m_memberDescription->GetName()<<"' in class '"<<m_classDescription->GetName()<<"'";
+            os<<"Trying to write data of wrong collectionType to a blob for member '"<<m_memberDescription->GetName()<<"' in class '"<<m_classDescription->GetName()<<"'";
             throw std::logic_error(os.str());
         }
 
@@ -339,12 +339,8 @@ namespace ToolSupport
 
         void WriteValue(const char* val)
         {
-            if (m_memberDescription->GetMemberType()==StringMemberType)
-                m_blob.SetValueString(m_memberIndex, m_valueIndex, val);
-            else if (m_memberDescription->GetMemberType()==ObjectMemberType)
-                WriteValue(std::pair<const char*, DotsC_Int32>(val, Internal::Blob::GetSize(val)));
-            else
-                assert(false);
+            assert(m_memberDescription->GetMemberType()==StringMemberType);
+             m_blob.SetValueString(m_memberIndex, m_valueIndex, val);
         }
 
         void WriteValue(const std::pair<DotsC_Int64, const char *>& val) //hashed val
