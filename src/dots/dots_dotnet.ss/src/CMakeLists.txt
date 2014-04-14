@@ -1,5 +1,6 @@
-find_package(CSharp REQUIRED)
-INCLUDE(CSharpMacros)
+if (NOT CSHARP_FOUND)
+  return()
+endif()
 
 FILE(GLOB sources *.cs)
 

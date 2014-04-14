@@ -1,9 +1,10 @@
-find_package(Java COMPONENTS Development Runtime REQUIRED)
+if (NOT Java_FOUND)
+  return()
+endif()
 
-#TODO 
-#this project contains a library that has a C interface, so we don't want the "d" suffix on
-#debug builds on windows. Must be set before including safir_sdk_core_config.cmake
-SET(NO_LIBRARY_POSTFIXES 1) 
+#this project contains a library that has a C interface and we only want one version of it,
+#so we never want the "d" suffix on debug builds, which is default on windows.
+SET(CMAKE_DEBUG_POSTFIX "")
 
 INCLUDE(JavaMacros)
 

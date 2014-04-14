@@ -193,11 +193,29 @@ endfunction()
 
 INCLUDE(cmake/build_generated.cmake)
 
-
-
 include_directories(lluf/lluf_build_helpers.ss/src)
 
 ADD_DEFINITIONS(-DSAFIR_NO_AUTOLINK)
+
+
+#TODO: make this setting available from ccmake et al
+#
+# Set up .NET compilation
+#
+find_package(CSharp)
+if (NOT CSHARP_FOUND)
+  MESSAGE(WARNING "Failed to find the C# development tools, will not build .NET interfaces")
+else()
+  INCLUDE(CSharpMacros)
+endif()
+
+#
+# Set up Java compilation
+#
+find_package(Java COMPONENTS Development Runtime)
+if (NOT Java_Development_FOUND OR NOT Java_Runtime_FOUND)
+  MESSAGE(WARNING "Failed to find the Java development tools, will not build Java interfaces")
+endif()
 
 
 ENABLE_TESTING()

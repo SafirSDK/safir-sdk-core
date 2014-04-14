@@ -1,5 +1,6 @@
-find_package(CSharp REQUIRED)
-INCLUDE(CSharpMacros)
+if (NOT CSHARP_FOUND)
+  return()
+endif()
 
 SET(CS_FLAGS ${COMMON_CS_FLAGS} "-r:${SAFIR_RUNTIME}/bin/Safir.Logging.dll" )
 
