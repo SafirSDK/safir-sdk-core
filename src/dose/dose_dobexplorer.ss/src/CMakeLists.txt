@@ -12,15 +12,20 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 find_package(Qt5Widgets QUIET)
 
 if (Qt5Widgets_FOUND)
-  message("-- Building dobexplorer with Qt5")
+  message(STATUS "Building dobexplorer with Qt5")
   QT5_WRAP_UI(ui_headers ${ui})
   QT5_WRAP_CPP(moc_sources ${headers} ${QT5_WRAP_CPP_OPTIONS})
 else()
   # Try to use Qt4 instead
   SET(QT_USE_QTMAIN TRUE)
-  find_package(Qt4 REQUIRED)
+  find_package(Qt4)
 
-  message("-- Building dobexplorer with Qt4")
+  if (NOT QT4_FOUND)
+    message(STATUS "Could not find Qt4 or Qt5, will not build dobexplorer")
+    return()
+  endif()
+
+  message(STATUS "Building dobexplorer with Qt4")
 
   include(${QT_USE_FILE})
   

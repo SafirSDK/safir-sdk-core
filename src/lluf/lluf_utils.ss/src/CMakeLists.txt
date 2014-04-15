@@ -24,6 +24,12 @@ TARGET_LINK_LIBRARIES(lluf_utils PRIVATE
   ${Boost_THREAD_LIBRARY} 
   ${Boost_SYSTEM_LIBRARY})
 
+#Boost date_time is required in visual studio
+#we make it public so that all libraries dont need this workaround
+if (MSVC)
+  TARGET_LINK_LIBRARIES (lluf_utils PUBLIC ${Boost_DATE_TIME_LIBRARY})
+endif()
+
 if (WIN32)
   TARGET_LINK_LIBRARIES(lluf_utils PRIVATE psapi)
 else()

@@ -6,7 +6,16 @@ ADD_LIBRARY(lluf_id SHARED lluf_id.cpp md5.c md5.h Safir/Utilities/Internal/Id.h
 
 target_include_directories(lluf_id PUBLIC .)
 
-TARGET_LINK_LIBRARIES(lluf_id PRIVATE lluf_utils)
+TARGET_LINK_LIBRARIES(lluf_id PRIVATE 
+  lluf_utils
+  ${Boost_THREAD_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY})
+
+
+#Boost date_time is required on windows.
+if (MSVC)
+  TARGET_LINK_LIBRARIES (lluf_id PRIVATE ${Boost_DATE_TIME_LIBRARY})
+endif()
 
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE

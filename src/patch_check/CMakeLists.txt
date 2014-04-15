@@ -1,6 +1,6 @@
 set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} 
-  ${Boost_THREAD_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY})
+  ${Boost_SYSTEM_LIBRARY}
+  ${Boost_THREAD_LIBRARY})
 
 add_subdirectory(boost_iostreams_flushing)
 add_subdirectory(offset_ptr)

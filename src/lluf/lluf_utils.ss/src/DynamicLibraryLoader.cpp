@@ -103,7 +103,7 @@ namespace Utilities
             (global); //unreferenced parameter
 
             std::string filename = path;
-            if (path.back() != "\\" && path.back() != "/")
+            if (path.back() != '\\' && path.back() != '/')
             {
                 filename += "\\";
             }
