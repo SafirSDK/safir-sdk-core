@@ -114,95 +114,64 @@ namespace ToolSupport
         void SetChangedTopLevel(DotsC_MemberIndex member, bool isChanged) {m_blob.SetChangedTopLevel(member, isChanged);}
 
         /**
-         * Write member value to the a blob. This method is used to write values to single value members, sequences and sets.
-         * It is not allowed to use this method to write values to arrays and dictionaries (see WriteArrayValue and WriteDictionaryValue).
-         * If the member is a sequence or set, a new value is added to the collection for each call to this method.
+         * Write member value to the a blob.
+         * For dictionaries use WriteDictionaryValue.
+         * If the member is an array, the index is used. For all other collection types index is ignored.
+         * If the member is a dictionary, the key is used. For all other collection types index is ignored.
+         * If the member is a sequence, set or dictionary, a new value is added to the collection for each call to this method.
          * If the member is a set, only the following types are supported as value:
          *      Int32, Int64, TypeId, Enumeration, String, InstanceId, HandlerId, ChannelId, EntityId.
+         * If the member is a dictionary the key can be of the same types as the valid once for a set.
          * This method will throw logic_error if used with wrong input data.
          *
          * @param member [in] - Member index of the member to be written.
-         * @param val [in] - Member value. Use a dummy if isNull=true. See supported types in class comments above.
-         * @param isNull [in] - True if the member value null. In that case val is not in use.
-         * @param isChanged [in] - Indicates if the member value is changed.
-         */
-        template <class Val>
-        void WriteValue(DotsC_MemberIndex member, const Val& val, bool isNull, bool isChanged)
-        {
-            MoveToMember(member);
-            DotsC_CollectionType ct=m_memberDescription->GetCollectionType();
-            if (ct==NoCollectionType)
-            {
-                m_valueIndex=0;
-                m_blob.SetChanged(m_memberIndex, m_valueIndex, isChanged);
-            }
-            else if (ct==RangeCollectionType || ct==SetCollectionType)
-            {
-                m_valueIndex=m_blob.AddValue(member, isChanged);
-            }
-            else
-            {
-                ThrowWrongCollectionType();
-            }
-
-            if (!isNull)
-            {
-                WriteValue(val);
-            }
-        }
-
-        /**
-         * Write member value to the a blob. This method is used to write values to single value members, sequences and sets.
-         * It is not allowed to use this method to write values to arrays and dictionaries (see WriteArrayValue and WriteDictionaryValue).
-         * If the member is a sequence or set, a new value is added to the collection. If the member is single value the only value is written.
-         * This method will throw logic_error if used with wrong input data.
-         *
-         * @param member [in] - Member index of the member to be written.
-         * @param index [in] - Array index of the value to be written.
-         * @param val [in] - Member value. Use a dummy if isNull=true. See supported types in class comments above.
-         * @param isNull [in] - True if the member value null. In that case val is not in use.
-         * @param isChanged [in] - Indicates if the member value is changed.
-         */
-        template <class Val>
-        void WriteArrayValue(DotsC_MemberIndex member, DotsC_ArrayIndex index, const Val& val, bool isNull, bool isChanged)
-        {            
-            MoveToMember(member);
-            if (m_memberDescription->GetCollectionType()!=ArrayCollectionType)
-            {
-                ThrowWrongCollectionType();
-            }
-            m_valueIndex=index;
-            m_blob.SetChanged(m_memberIndex, m_valueIndex, isChanged);
-            if (!isNull)
-            {
-                WriteValue(val);
-            }
-        }
-
-        /**
-         * Writes a new dictionary <key, value>-item to the blob. This method is only allowed to use for
-         * dictionary memgbers. Throws logic_error if used on members with wrong collection or member type.
-         * If isNull is true, the value is not used, in that case just use a dummy value like a NULL char.
-         * Val can be any of the supported types but as key only the following types are supported:
-         * Supported key types: Int32, Int64, TypeId, Enumeration, String, InstanceId, HandlerId, ChannelId, EntityId.
-         * This method will throw logic_error if used with wrong input data.
-         *
-         * @param member [in] - Member index of the member to be written.
-         * @param key [in] - Key value if the member. See supported key types above.
+         * @param index [in] - Array index of the value to be written. Ignored if CollectionType is not Array.
+         * @param key [in] - Key value if the member is a dictionary. Ignored for all other collection types, use a dummy.
          * @param val [in] - Member value. Use a dummy if isNull=true. See supported types in class comments above.
          * @param isNull [in] - True if the member value null. In that case val is not in use.
          * @param isChanged [in] - Indicates if the member value is changed.
          */
         template <class Key, class Val>
-        void WriteDictionaryValue(DotsC_MemberIndex member, const Key& key, const Val& val, bool isNull, bool isChanged)
+        void WriteValue(DotsC_MemberIndex member, DotsC_ArrayIndex index, const Key& key, const Val& val, bool isNull, bool isChanged)
         {
             MoveToMember(member);
-            if (m_memberDescription->GetCollectionType()!=HashtableCollectionType)
+            DotsC_CollectionType ct=m_memberDescription->GetCollectionType();
+            switch (ct)
             {
-                ThrowWrongCollectionType();
+            case NoCollectionType:
+            {
+                m_valueIndex=0;
+                m_blob.SetChanged(m_memberIndex, m_valueIndex, isChanged);
             }
-            m_valueIndex=m_blob.AddValue(m_memberIndex, isChanged);
-            WriteKey(key);
+                break;
+
+            case ArrayCollectionType:
+            {
+                m_valueIndex=index;
+                m_blob.SetChanged(m_memberIndex, m_valueIndex, isChanged);
+            }
+                break;
+
+            case RangeCollectionType:
+            {
+                m_valueIndex=m_blob.AddValue(m_memberIndex, isChanged);
+            }
+                break;
+
+            case SetCollectionType:
+            {
+                m_valueIndex=m_blob.AddValue(m_memberIndex, isChanged);
+            }
+                break;
+
+            case HashtableCollectionType:
+            {
+                m_valueIndex=m_blob.AddValue(m_memberIndex, isChanged);
+                WriteKey(key);
+            }
+                break;
+            }
+
             if (!isNull)
             {
                 WriteValue(val);

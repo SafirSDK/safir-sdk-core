@@ -61,19 +61,30 @@ void BlobTest(RepositoryPtr rep)
 {
     std::cout<<"========= Blob Test ========"<<std::endl;
     //ParserTest.MyItem
-    DotsC_TypeId tid=Safir::Dob::Typesystem::ToolSupport::TypeUtilities::CalculateTypeId("ParserTest.MyItem");
+    DotsC_TypeId tid=Safir::Dob::Typesystem::ToolSupport::TypeUtilities::CalculateTypeId("ParserTest.MySpecialItem");
     std::cout<<"Class ParserTest.MyItem "<<tid<<std::endl;
-    BlobWriter<Safir::Dob::Typesystem::ToolSupport::TypeRepository> w(rep.get(), tid);
 
-
-    const ClassDescription* cd=GetClassByName(rep, "ParserTest.MyItem");
+    const ClassDescription* cd=GetClassByName(rep, "ParserTest.MySpecialItem");
     DotsC_MemberIndex myNum=cd->GetMemberIndex("MyNumber");
     DotsC_MemberIndex myStrings=cd->GetMemberIndex("MyStrings");
+    DotsC_MemberIndex myChild=cd->GetMemberIndex("Child");
+    DotsC_MemberIndex myChildName=cd->GetMemberIndex("ChildName");
 
+    BlobWriter<Safir::Dob::Typesystem::ToolSupport::TypeRepository> w2(rep.get(), tid);
+    w2.WriteValue(myNum, 456, false, true);
+    w2.WriteArrayValue(myStrings, 0, "In0", false, true);
+    w2.WriteArrayValue(myStrings, 3, "In3", false, true);
+    w2.WriteArrayValue(myStrings, 4, "In4", false, true);
+    std::vector<char> innerBlob(static_cast<size_t>(w2.CalculateBlobSize()));
+    w2.CopyRawBlob(&innerBlob[0]);
+
+    BlobWriter<Safir::Dob::Typesystem::ToolSupport::TypeRepository> w(rep.get(), tid);
     w.WriteValue(myNum, 123, false, true);
     w.WriteArrayValue(myStrings, 0, "Hej_1", false, true);
     w.WriteArrayValue(myStrings, 3, "Hej_2", false, true);
     w.WriteArrayValue(myStrings, 4, "Hej_3", false, true);
+    w.WriteValue(myChildName, "Svarre", false, true);
+    w.WriteValue(myChild, std::make_pair(&innerBlob[0], innerBlob.size()), false, true);
 
     std::vector<char> blob(static_cast<size_t>(w.CalculateBlobSize()));
     w.CopyRawBlob(&blob[0]);
@@ -86,11 +97,30 @@ void BlobTest(RepositoryPtr rep)
     BlobReader<Safir::Dob::Typesystem::ToolSupport::TypeRepository> r(rep.get(), &blob[0]);
     r.ReadValue(myNum, 0, myNumVal, isNull, isChanged);
     std::cout<<"isNull="<<isNull<<", isChanged="<<isChanged<<", val="<<myNumVal<<std::endl;
-
+    const char* str;
     for (DotsC_ArrayIndex i=0; i<5; ++i)
     {
-        const char* str;
         r.ReadValue(myStrings, i, str, isNull, isChanged);
+        std::cout<<"isNull="<<isNull<<", isChanged="<<isChanged;
+        if (isNull)
+            std::cout<<std::endl;
+        else
+            std::cout<<", val="<<str<<std::endl;
+    }
+
+    r.ReadValue(myChildName, 0, str, isNull, isChanged);
+    std::cout<<"isNull="<<isNull<<", isChanged="<<isChanged<<", val="<<str<<std::endl;
+
+    std::pair<const char*, DotsC_Int32> inner;
+    r.ReadValue(myChild, 0, inner, isNull, isChanged);
+    BlobReader<Safir::Dob::Typesystem::ToolSupport::TypeRepository> innerReader(rep.get(), inner.first);
+
+    std::cout<<" -- inner:"<<std::endl;
+    innerReader.ReadValue(myNum, 0, myNumVal, isNull, isChanged);
+    std::cout<<"isNull="<<isNull<<", isChanged="<<isChanged<<", val="<<myNumVal<<std::endl;
+    for (DotsC_ArrayIndex i=0; i<5; ++i)
+    {
+        innerReader.ReadValue(myStrings, i, str, isNull, isChanged);
         std::cout<<"isNull="<<isNull<<", isChanged="<<isChanged;
         if (isNull)
             std::cout<<std::endl;

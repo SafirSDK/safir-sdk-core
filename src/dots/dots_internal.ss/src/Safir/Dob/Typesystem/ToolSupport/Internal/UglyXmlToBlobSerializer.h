@@ -59,7 +59,6 @@ namespace Internal
 
         UglyXmlToBlobSerializer(const RepositoryType* repository)
             :m_repository(repository)
-            ,m_blobLayout(repository)
         {
         }
 
@@ -102,11 +101,7 @@ namespace Internal
                 throw ParseError("UglyXmlToBlobSerializer serialization error", "Xml does not contain a known type. Typename: "+*typeName, "", 126);
             }
 
-            char* beginningOfUnused=NULL;
-            size_t blobInitSize=std::max(size_t(1000), static_cast<size_t>(2*cd->InitialSize()));
-            blob.reserve(blobInitSize); //Note: maybe xmlSize/2 would be enogh in almost all cases
-            blob.resize(cd->InitialSize(), 0);
-            m_blobLayout.FormatBlob(&blob[0], static_cast<Size>(blob.size()), typeId, beginningOfUnused);
+            BlobWriter<RepositoryType> writer(m_repository, typeId);
 
             boost::optional<boost::property_tree::ptree&> members=content.get_child_optional("members");
             if (!members)
@@ -144,7 +139,7 @@ namespace Internal
                 {
                     try
                     {
-                        SetMember(md, memIx, 0, memIt->second, blob, beginningOfUnused);
+                        SetMember(md, memIx, 0, memIt->second, writer);
                     }
                     catch (const boost::property_tree::ptree_error&)
                     {
@@ -187,7 +182,7 @@ namespace Internal
 
                         try
                         {
-                            SetMember(md, memIx, arrayIndex, arrIt->second, blob, beginningOfUnused);
+                            SetMember(md, memIx, arrayIndex, arrIt->second, writer);
                         }
                         catch (const boost::property_tree::ptree_error&)
                         {
@@ -201,6 +196,10 @@ namespace Internal
                 }
             }
 
+            DotsC_Int32 blobSize=writer.CalculateBlobSize();
+            blob.resize(static_cast<size_t>(blobSize));
+            writer.CopyRawBlob(&blob[0]);
+
             return typeId;
         }
 
@@ -212,8 +211,7 @@ namespace Internal
                        DotsC_MemberIndex memIx,
                        DotsC_ArrayIndex arrIx,
                        boost::property_tree::ptree& memberContent,
-                       std::vector<char>& blob,
-                       char* &beginningOfUnused) const
+                       BlobWriter<RepositoryType>& writer) const
         {
             boost::optional<boost::property_tree::ptree&> val;
             if (md->GetMemberType()==ObjectMemberType)
@@ -238,13 +236,7 @@ namespace Internal
                     throw ParseError("UglyXmlToBlobSerializer serialization error", os.str(), "", 135);
                 }
 
-                SerializationUtils::CreateSpaceForDynamicMember(m_blobLayout, blob, beginningOfUnused, insideBlob.size());
-                char* writeObj=beginningOfUnused;
-                m_blobLayout.CreateObjectMember(&blob[0], static_cast<Size>(insideBlob.size()), insideBlobTypeId, memIx, arrIx, false, beginningOfUnused);
-                beginningOfUnused=writeObj+insideBlob.size(); //This is a hack. BlobLayout is not moving beginningOfUnused by the blobSize but instead only by the initialSize. Has to do with genated code.
-                assert(static_cast<size_t>(beginningOfUnused-&blob[0])<=blob.size()); //size_t usedSize=static_cast<size_t>(beginningOfUnused-&blob[0]);
-                memcpy(writeObj, &insideBlob[0], insideBlob.size());
-                m_blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
+                writer.WriteValue(memIx, arrIx, 0, std::make_pair(&insideBlob[0], static_cast<DotsC_Int32>(insideBlob.size())), false, true);
                 return;
             }
             else if (md->GetMemberType()==EntityIdMemberType)
@@ -258,7 +250,7 @@ namespace Internal
 
             if (val)
             {
-                SerializationUtils::SetMemberValue(m_repository, m_blobLayout, md, memIx, arrIx, *val, blob, beginningOfUnused);
+                SerializationUtils::SetMemberValue(m_repository, md, memIx, arrIx, *val, writer);
             }
             else
             {
@@ -267,7 +259,7 @@ namespace Internal
                 {
                     boost::property_tree::ptree& refPt=memberContent.get_child("valueRef");
                     std::pair<std::string, int> paramInfo=GetParameterNameAndIndex(md, arrIx, refPt);
-                    SerializationUtils::SetMemberFromParameter(m_repository, m_blobLayout, md, memIx, arrIx, paramInfo.first, paramInfo.second, blob, beginningOfUnused);
+                    SerializationUtils::SetMemberFromParameter(m_repository, md, memIx, arrIx, paramInfo.first, paramInfo.second, writer);
                 }
                 catch (const boost::property_tree::ptree_error&)
                 {

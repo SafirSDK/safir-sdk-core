@@ -131,12 +131,12 @@ namespace SerializationUtils
         return tid;
     }
 
-    inline std::pair<DotsC_TypeId, const char*> StringToHash(const std::string& str)
+    inline std::pair<DotsC_Int64, const char*> StringToHash(const std::string& str)
     {
-        std::pair<DotsC_TypeId, const char*> result(0, static_cast<const char*>(NULL));
+        std::pair<DotsC_Int64, const char*> result(0, static_cast<const char*>(NULL));
         try
         {
-            result.first=boost::lexical_cast<boost::int64_t>(str);
+            result.first=boost::lexical_cast<DotsC_Int64>(str);
         }
         catch (const boost::bad_lexical_cast&)
         {
@@ -146,49 +146,13 @@ namespace SerializationUtils
         return result;
     }
 
-    template <class BlobLayoutT>
-    inline void CreateSpaceForDynamicMember(const BlobLayoutT& blobLayout,
-                                            std::vector<char>& blob,
-                                            char* & beginningOfUnused,
-                                            size_t dynamicMemberSizeNeeded)
-    {
-        size_t usedSize=beginningOfUnused-&blob[0];
-        assert(usedSize<=blob.size());        
-        size_t unusedSize=blob.size()-usedSize;
-
-        if (unusedSize>=dynamicMemberSizeNeeded)
-        {
-            return; //there is enough free bytes in blob
-        }
-
-        if (blob.capacity()-blob.size()<dynamicMemberSizeNeeded)
-        {
-            //std::cout<<"  Current blob: size="<<blob.size()<<", cap="<<blob.capacity()<<", dynNeed="<<dynamicMemberSizeNeeded<<", need="<<blob.size()+dynamicMemberSizeNeeded<<std::endl;
-            //Blob is too small. A bigger blob must be allocated and the content of the old one must be copied.
-            std::vector<char> tmp;
-            tmp.swap(blob);
-            blob.clear(); //unneccessary?
-            blob.reserve((tmp.capacity()+dynamicMemberSizeNeeded)*2);
-            blob.insert(blob.begin(), tmp.begin(), tmp.end());
-            beginningOfUnused=&blob[0]+usedSize;
-            //std::cout<<"New blob capacity: "<<blob.capacity()<<std::endl;
-        }
-
-        //When we get here, the blob is guaranteed to have capacity for the needed extra space. Just resize.
-        blob.resize(blob.size()+dynamicMemberSizeNeeded);
-        blobLayout.SetSize(&blob[0], static_cast<DotsC_Int32>(blob.size()));
-        //std::cout<<"Blob grew, new size: "<<blob.size()<<std::endl;
-    }
-
-    template <class BlobLayoutT>
-    void SetMemberValue(const typename BlobLayoutT::RepositoryType* repository,
-                        const BlobLayoutT& blobLayout,
-                        const typename BlobLayoutT::MemberDescriptionType* md,
+    template <class WriterT>
+    void SetMemberValue(const typename WriterT::RepositoryType* repository,
+                        const typename WriterT::MemberDescriptionType* md,
                         DotsC_MemberIndex memIx,
                         DotsC_ArrayIndex arrIx,
                         boost::property_tree::ptree& memberContent,
-                        std::vector<char>& blob,
-                        char* &beginningOfUnused)
+                        WriterT& writer)
     {
         switch(md->GetMemberType())
         {
@@ -209,16 +173,15 @@ namespace SerializationUtils
             {
                 boolVal=memberContent.get_value<bool>();
             }
-            blobLayout.template SetMember<bool>(boolVal, &blob[0], memIx, arrIx);
-            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
+            writer.WriteValue(memIx, arrIx, 0, boolVal, false, true);
         }
             break;
 
         case EnumerationMemberType:
         {
             Trim(memberContent.data());
-            const typename BlobLayoutT::EnumDescriptionType* ed=repository->GetEnum(md->GetTypeId());
-            int enumOrdinal=ed->GetIndexOfValue(memberContent.data());
+            const typename WriterT::EnumDescriptionType* ed=repository->GetEnum(md->GetTypeId());
+            DotsC_Int32 enumOrdinal=ed->GetIndexOfValue(memberContent.data());
             if (enumOrdinal<0)
             {
                 std::ostringstream os;
@@ -226,8 +189,7 @@ namespace SerializationUtils
                 throw ParseError("Serialization error", os.str(), "", 114);
             }
 
-            blobLayout.template SetMember<DotsC_Int32>(enumOrdinal, &blob[0], memIx, arrIx);
-            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
+            writer.WriteValue(memIx, arrIx, 0, enumOrdinal, false, true);
         }
             break;
 
@@ -235,8 +197,7 @@ namespace SerializationUtils
         {
             Trim(memberContent.data());
             DotsC_Int32 val=memberContent.get_value<DotsC_Int32>();
-            blobLayout.template SetMember<DotsC_Int32>(val, &blob[0], memIx, arrIx);
-            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
+            writer.WriteValue(memIx, arrIx, 0, val, false, true);
         }
             break;
 
@@ -244,8 +205,7 @@ namespace SerializationUtils
         {
             Trim(memberContent.data());
             DotsC_Int64 val=memberContent.get_value<DotsC_Int64>();
-            blobLayout.template SetMember<DotsC_Int64>(val, &blob[0], memIx, arrIx);
-            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
+            writer.WriteValue(memIx, arrIx, 0, val, false, true);
         }
             break;
 
@@ -261,8 +221,7 @@ namespace SerializationUtils
                 throw ParseError("Serialization error", os.str(), "", 174);
             }
 
-            blobLayout.template SetMember<DotsC_TypeId>(tid, &blob[0], memIx, arrIx);
-            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
+            writer.WriteValue(memIx, arrIx, 0, tid, false, true);
         }
             break;
 
@@ -271,14 +230,8 @@ namespace SerializationUtils
         case HandlerIdMemberType:
         {
             Trim(memberContent.data());
-            std::pair<DotsC_TypeId, const char*> hash=SerializationUtils::StringToHash(memberContent.data());
-            if (hash.second!=NULL)
-            {
-                size_t numBytesNeeded=memberContent.data().size()+1+sizeof(DotsC_Int64)+sizeof(DotsC_Int32); //hash+stringLength+string
-                SerializationUtils::CreateSpaceForDynamicMember(blobLayout, blob, beginningOfUnused, numBytesNeeded);
-            }
-            blobLayout.CreateAndSetMemberWithOptionalString(&blob[0], hash.first, hash.second, static_cast<Size>(memberContent.data().size()+1), memIx, arrIx, false, beginningOfUnused);
-            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
+            std::pair<DotsC_Int64, const char*> hash=SerializationUtils::StringToHash(memberContent.data());
+            writer.WriteValue(memIx, arrIx, 0, hash, false, true);
         }
             break;
 
@@ -300,10 +253,12 @@ namespace SerializationUtils
                 os<<"EntityId member '"<<md->GetName()<<"' is missing the instanceId-element that specifies the instance.";
                 throw ParseError("Serialization error", os.str(), "", 116);
             }
-            Trim(*typeIdString);
-            DotsC_TypeId tid=SerializationUtils::StringToTypeId(*typeIdString);
 
-            if (!BasicTypeOperations::IsOfType(repository, ObjectMemberType, tid, ObjectMemberType, EntityTypeId))
+            Trim(*typeIdString);
+            std::pair<DotsC_EntityId, const char*> entityId;
+            entityId.first.typeId=SerializationUtils::StringToTypeId(*typeIdString);
+
+            if (!BasicTypeOperations::IsOfType(repository, ObjectMemberType, entityId.first.typeId, ObjectMemberType, EntityTypeId))
             {
                 std::ostringstream os;
                 os<<"EntityId member "<<md->GetName()<<" contains a typeId that does not refer to a subtype of Safir.Dob.Entity. Specified type name: "<<*typeIdString;
@@ -315,15 +270,10 @@ namespace SerializationUtils
             }
 
             Trim(*instanceIdString);
-            std::pair<DotsC_TypeId, const char*> instanceId=SerializationUtils::StringToHash(*instanceIdString);
-            if (instanceId.second!=NULL)
-            {
-                size_t numBytesNeeded=instanceIdString->size()+1+sizeof(DotsC_EntityId)+sizeof(DotsC_Int32); //(typeId+hash)+stringLength+string
-                SerializationUtils::CreateSpaceForDynamicMember(blobLayout, blob, beginningOfUnused, numBytesNeeded);
-            }
-            DotsC_EntityId eid={tid, instanceId.first};
-            blobLayout.CreateAndSetMemberWithOptionalString(&blob[0], eid, instanceId.second, static_cast<Size>(instanceIdString->size()+1), memIx, arrIx, false, beginningOfUnused);
-            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
+            std::pair<DotsC_Int64, const char*> instanceId=SerializationUtils::StringToHash(*instanceIdString);
+            entityId.first.instanceId=instanceId.first;
+            entityId.second=instanceId.second;
+            writer.WriteValue(memIx, arrIx, 0, entityId, false, true);
         }
             break;
 
@@ -335,12 +285,7 @@ namespace SerializationUtils
                 Trim(memberContent.data());
             }
             //The only time we dont trim content
-            size_t numBytesNeeded=std::min(memberContent.data().size(), static_cast<size_t>(md->GetMaxLength()))+1; //add one for '\0'
-            SerializationUtils::CreateSpaceForDynamicMember(blobLayout, blob, beginningOfUnused, numBytesNeeded);
-            char* writeString=beginningOfUnused;
-            blobLayout.CreateStringMember(&blob[0], static_cast<Size>(numBytesNeeded), memIx, arrIx, false, beginningOfUnused);
-            strncpy(writeString, memberContent.data().c_str(), numBytesNeeded-1);
-            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
+            writer.WriteValue(memIx, arrIx, 0, memberContent.data().c_str(), false, true);
         }
             break;
 
@@ -360,11 +305,8 @@ namespace SerializationUtils
                 os<<"Member "<<md->GetName()<<" of type binary containes invalid base64 data";
                 throw ParseError("Serialization error", os.str(), "",  117);
             }
-            SerializationUtils::CreateSpaceForDynamicMember(blobLayout, blob, beginningOfUnused, bin.size());
-            char* writeBinary=beginningOfUnused;
-            blobLayout.CreateBinaryMember(&blob[0], static_cast<Size>(bin.size()), memIx, arrIx, false, beginningOfUnused);
-            memcpy(writeBinary, &bin[0], bin.size());
-            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
+
+            writer.WriteValue(memIx, arrIx, 0, std::make_pair(&bin[0], static_cast<DotsC_Int32>(bin.size())), false, true);
         }
             break;
 
@@ -394,8 +336,7 @@ namespace SerializationUtils
             try
             {
                 DotsC_Float32 val=classic_string_cast<DotsC_Float32>(memberContent.data());
-                blobLayout.template SetMember<DotsC_Float32>(val, &blob[0], memIx, arrIx);
-                blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
+                writer.WriteValue(memIx, arrIx, 0, val, false, true);
             }
             catch (const boost::bad_lexical_cast&)
             {
@@ -432,8 +373,7 @@ namespace SerializationUtils
             try
             {
                 DotsC_Float64 val=classic_string_cast<DotsC_Float64>(memberContent.data());
-                blobLayout.template SetMember<DotsC_Float64>(val, &blob[0], memIx, arrIx);
-                blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
+                writer.WriteValue(memIx, arrIx, 0, val, false, true);
             }
             catch (const boost::bad_lexical_cast&)
             {
@@ -446,20 +386,18 @@ namespace SerializationUtils
         }
     }
 
-    template <class BlobLayoutT>
-    void SetMemberFromParameter(const typename BlobLayoutT::RepositoryType* repository,
-                                const BlobLayoutT& blobLayout,
-                                const typename BlobLayoutT::MemberDescriptionType* md,
+    template <class WriterT>
+    void SetMemberFromParameter(const typename WriterT::RepositoryType* repository,
+                                const typename WriterT::MemberDescriptionType* md,
                                 DotsC_MemberIndex memIx,
                                 DotsC_ArrayIndex arrIx,
                                 const std::string& parameterName,
                                 int parameterIndex,
-                                std::vector<char>& blob,
-                                char* &beginningOfUnused)
+                                WriterT& writer)
     {
         //get the referenced parameter an make all the error checking
-        Safir::Dob::Typesystem::ToolSupport::TypeUtilities::GetParameterByFullName<typename BlobLayoutT::RepositoryType> tmp;
-        const typename BlobLayoutT::ParameterDescriptionType* param=tmp(repository, parameterName);
+        Safir::Dob::Typesystem::ToolSupport::TypeUtilities::GetParameterByFullName<typename WriterT::RepositoryType> tmp;
+        const typename WriterT::ParameterDescriptionType* param=tmp(repository, parameterName);
 
         if (!param)
         {
@@ -499,83 +437,55 @@ namespace SerializationUtils
         {
         case BooleanMemberType:
         {
-            blobLayout.template SetMember<bool>(param->GetBoolValue(parameterIndex), &blob[0], memIx, arrIx);
-            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
+            writer.WriteValue(memIx, arrIx, 0, param->GetBoolValue(parameterIndex), false, true);
         }
             break;
 
         case EnumerationMemberType:
         {
-            blobLayout.template SetMember<DotsC_Int32>(param->GetInt32Value(parameterIndex), &blob[0], memIx, arrIx);
-            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
+            writer.WriteValue(memIx, arrIx, 0, param->GetInt32Value(parameterIndex), false, true);
         }
             break;
 
         case Int32MemberType:
         {
-            blobLayout.template SetMember<DotsC_Int32>(param->GetInt32Value(parameterIndex), &blob[0], memIx, arrIx);
-            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
+            writer.WriteValue(memIx, arrIx, 0, param->GetInt32Value(parameterIndex), false, true);
         }
             break;
 
         case Int64MemberType:
         {
-            blobLayout.template SetMember<DotsC_Int64>(param->GetInt64Value(parameterIndex), &blob[0], memIx, arrIx);
-            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
+            writer.WriteValue(memIx, arrIx, 0, param->GetInt64Value(parameterIndex), false, true);
         }
             break;
 
         case TypeIdMemberType:
         {
-            blobLayout.template SetMember<DotsC_TypeId>(param->GetInt64Value(parameterIndex), &blob[0], memIx, arrIx);
-            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
+            writer.WriteValue(memIx, arrIx, 0, param->GetInt64Value(parameterIndex), false, true);
         }
             break;
 
         case InstanceIdMemberType:
         case ChannelIdMemberType:
         case HandlerIdMemberType:
-        {
-            std::pair<DotsC_TypeId, const char*> hash=param->GetHashedValue(parameterIndex);
-            size_t strLen=1; //null char
-            if (hash.second!=NULL)
-            {
-                strLen+=strlen(hash.second);
-                size_t numBytesNeeded=strLen+sizeof(DotsC_Int64)+sizeof(DotsC_Int32); //hash+stringLength+string
-                SerializationUtils::CreateSpaceForDynamicMember(blobLayout, blob, beginningOfUnused, numBytesNeeded);
-            }
-            blobLayout.CreateAndSetMemberWithOptionalString(&blob[0], hash.first, hash.second, static_cast<Size>(strLen), memIx, arrIx, false, beginningOfUnused);
-            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
+        {            
+            writer.WriteValue(memIx, arrIx, 0, param->GetHashedValue(parameterIndex), false, true);
         }
             break;
 
         case EntityIdMemberType:
         {
-            DotsC_TypeId tid=param->GetInt64Value(parameterIndex);
+            DotsC_EntityId entId;
+            entId.typeId=param->GetInt64Value(parameterIndex);
             std::pair<DotsC_TypeId, const char*> instanceId=param->GetHashedValue(parameterIndex);
-            size_t strLen=1; //null char
-            if (instanceId.second!=NULL)
-            {
-                strLen+=strlen(instanceId.second);
-                size_t numBytesNeeded=strLen+sizeof(DotsC_EntityId)+sizeof(DotsC_Int32); //(typeId+hash)+stringLength+string
-                SerializationUtils::CreateSpaceForDynamicMember(blobLayout, blob, beginningOfUnused, numBytesNeeded);
-            }
-            DotsC_EntityId eid={tid, instanceId.first};
-            blobLayout.CreateAndSetMemberWithOptionalString(&blob[0], eid, instanceId.second, static_cast<Size>(strLen), memIx, arrIx, false, beginningOfUnused);
-            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
+            entId.instanceId=instanceId.first;
+            writer.WriteValue(memIx, arrIx, 0, std::make_pair(entId, instanceId.second), false, true);
         }
             break;
 
         case StringMemberType:
         {
-            const char* str=param->GetStringValue(parameterIndex);
-            size_t strLen=strlen(str);
-            size_t numBytesNeeded=std::min(strLen, static_cast<size_t>(md->GetMaxLength()))+1; //add one for '\0'
-            SerializationUtils::CreateSpaceForDynamicMember(blobLayout, blob, beginningOfUnused, numBytesNeeded);
-            char* writeString=beginningOfUnused;
-            blobLayout.CreateStringMember(&blob[0], static_cast<Size>(numBytesNeeded), memIx, arrIx, false, beginningOfUnused);
-            strncpy(writeString, str, numBytesNeeded-1);
-            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
+            writer.WriteValue(memIx, arrIx, 0, param->GetStringValue(parameterIndex), false, true);
         }
             break;
 
@@ -587,12 +497,7 @@ namespace SerializationUtils
 
         case BinaryMemberType:
         {
-            std::pair<const char*, size_t> bin=param->GetBinaryValue(parameterIndex);
-            SerializationUtils::CreateSpaceForDynamicMember(blobLayout, blob, beginningOfUnused, bin.second);
-            char* writeBinary=beginningOfUnused;
-            blobLayout.CreateBinaryMember(&blob[0], static_cast<Size>(bin.second), memIx, arrIx, false, beginningOfUnused);
-            memcpy(writeBinary, bin.first, bin.second);
-            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
+            writer.WriteValue(memIx, arrIx, 0, param->GetBinaryValue(parameterIndex), false, true);
         }
             break;
 
@@ -618,8 +523,7 @@ namespace SerializationUtils
         case Volt32MemberType:
         case Watt32MemberType:
         {
-            blobLayout.template SetMember<DotsC_Float32>(param->GetFloat32Value(parameterIndex), &blob[0], memIx, arrIx);
-            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
+            writer.WriteValue(memIx, arrIx, 0, param->GetFloat32Value(parameterIndex), false, true);
         }
             break;
 
@@ -645,8 +549,7 @@ namespace SerializationUtils
         case Volt64MemberType:
         case Watt64MemberType:
         {
-            blobLayout.template SetMember<DotsC_Float64>(param->GetFloat64Value(parameterIndex), &blob[0], memIx, arrIx);
-            blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
+            writer.WriteValue(memIx, arrIx, 0, param->GetFloat64Value(parameterIndex), false, true);
         }
             break;
         }
