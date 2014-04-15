@@ -58,6 +58,8 @@ endif()
 
 set(Boost_NO_BOOST_CMAKE ON)
 set(Boost_USE_MULTITHREADED ON)
+set(Boost_FIND_QUIETLY True)
+
 find_package(Boost COMPONENTS regex timer program_options filesystem thread system ${BOOST_REQUIRED_ON_WINDOWS} REQUIRED)
 if(Boost_FOUND)
    include_directories(${Boost_INCLUDE_DIRS})
@@ -207,6 +209,7 @@ ADD_DEFINITIONS(-DSAFIR_NO_AUTOLINK)
 #
 # Set up .NET compilation
 #
+set(CSharp_FIND_QUIETLY True)
 find_package(CSharp)
 if (NOT CSHARP_FOUND)
   MESSAGE(WARNING "Failed to find the C# development tools, will not build .NET interfaces")
@@ -217,6 +220,7 @@ endif()
 #
 # Set up Java compilation
 #
+set(Java_FIND_QUIETLY True)
 find_package(Java COMPONENTS Development Runtime)
 if (NOT Java_Development_FOUND OR NOT Java_Runtime_FOUND)
   MESSAGE(WARNING "Failed to find the Java development tools, will not build Java interfaces")

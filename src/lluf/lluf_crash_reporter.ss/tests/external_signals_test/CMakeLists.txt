@@ -1,6 +1,6 @@
-ADD_EXECUTABLE(sleeper sleeper.cpp)
+ADD_EXECUTABLE(crash_reporter_sleeper sleeper.cpp)
 
-TARGET_LINK_LIBRARIES (sleeper PRIVATE
+TARGET_LINK_LIBRARIES (crash_reporter_sleeper PRIVATE
   lluf_crash_reporter
   ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY})

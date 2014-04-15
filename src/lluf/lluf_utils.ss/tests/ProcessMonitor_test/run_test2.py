@@ -33,7 +33,7 @@ else:
     exe_path = "."
     
 ProcessMonitor_test2 = os.path.join(exe_path,"ProcessMonitor_test2")
-Sleeper = os.path.join(exe_path,"Sleeper")
+Sleeper = os.path.join(exe_path,"ProcessMonitorSleeper")
 
 #start two sleepers
 sleeper1 = subprocess.Popen((Sleeper,"120"))

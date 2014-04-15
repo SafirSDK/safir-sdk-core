@@ -1,8 +1,8 @@
 ADD_EXECUTABLE(ProcessMonitor_test ProcessMonitor_test.cpp)
 ADD_EXECUTABLE(ProcessMonitor_test2 ProcessMonitor_test2.cpp)
-ADD_EXECUTABLE(Sleeper Sleeper.cpp)
+ADD_EXECUTABLE(ProcessMonitorSleeper Sleeper.cpp)
 
-TARGET_LINK_LIBRARIES (Sleeper PRIVATE ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+TARGET_LINK_LIBRARIES (ProcessMonitorSleeper PRIVATE ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY})
 
 TARGET_LINK_LIBRARIES (ProcessMonitor_test PRIVATE 
   lluf_utils
