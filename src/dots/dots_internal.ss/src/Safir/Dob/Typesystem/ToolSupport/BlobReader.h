@@ -157,7 +157,7 @@ namespace ToolSupport
         Key ReadKey(DotsC_MemberIndex member, int valueIndex) const
         {
             MoveToMember(member);
-            if (m_memberDescription->GetCollectionType()!=HashtableCollectionType)
+            if (m_memberDescription->GetCollectionType()!=DictionaryCollectionType)
             {
                 ThrowWrongCollectionType();
             }

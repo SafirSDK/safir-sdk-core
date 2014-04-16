@@ -268,18 +268,19 @@ namespace Internal
         switch (c->GetCollectionType())
         {
         case ArrayCollectionType:
-            os<<", ArrayType, arraySize="<<c->GetArraySize()<<std::endl;
+            os<<", Array, arraySize="<<c->GetArraySize()<<std::endl;
             break;
-        case RangeCollectionType:
-            os<<", RangeType"<<std::endl;
+        case SequenceCollectionType:
+            os<<", Sequence"<<std::endl;
             break;
         case SetCollectionType:
-            os<<", SetType"<<std::endl;
+            os<<", Set"<<std::endl;
             break;
-        case HashtableCollectionType:
-            os<<", HashtableType"<<std::endl;
+        case DictionaryCollectionType:
+            os<<", Dictionary"<<std::endl;
             break;
         default:
+            os<<std::endl;
             break;
         }
     }
@@ -310,18 +311,19 @@ namespace Internal
         switch (c->GetCollectionType())
         {
         case ArrayCollectionType:
-            os<<", ArrayType, arraySize="<<c->GetArraySize()<<std::endl;
+            os<<", Array, arraySize="<<c->GetArraySize()<<std::endl;
             break;
-        case RangeCollectionType:
-            os<<", RangeType"<<std::endl;
+        case SequenceCollectionType:
+            os<<", Sequence"<<std::endl;
             break;
         case SetCollectionType:
-            os<<", SetType"<<std::endl;
+            os<<", Set"<<std::endl;
             break;
-        case HashtableCollectionType:
-            os<<", HashtableType"<<std::endl;
+        case DictionaryCollectionType:
+            os<<", Dictionary"<<std::endl;
             break;
         default:
+            os<<std::endl;
             break;
         }
 

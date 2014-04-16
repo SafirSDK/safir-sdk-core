@@ -873,9 +873,9 @@ namespace ToolSupport
         void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const {state.lastInsertedProperty->members.back()->collectionType=ArrayCollectionType;}
     };
 
-    template<> struct ParseAlgorithm<Elements::PropertyMemberIsRange>
+    template<> struct ParseAlgorithm<Elements::PropertyMemberIsSequence>
     {
-        void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const {state.lastInsertedProperty->members.back()->collectionType=RangeCollectionType;}
+        void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const {state.lastInsertedProperty->members.back()->collectionType=SequenceCollectionType;}
     };
 
     template<> struct ParseAlgorithm<Elements::PropertyMemberIsSet>
@@ -883,19 +883,19 @@ namespace ToolSupport
         void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const {state.lastInsertedProperty->members.back()->collectionType=SetCollectionType;}
     };
 
-    template<> struct ParseAlgorithm<Elements::PropertyMemberIsHashtable>
+    template<> struct ParseAlgorithm<Elements::PropertyMemberIsDictionary>
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            state.lastInsertedProperty->members.back()->collectionType=HashtableCollectionType;
+            state.lastInsertedProperty->members.back()->collectionType=DictionaryCollectionType;
             SerializationUtils::Trim(pt.data());
             state.lastInsertedProperty->members.back()->typeName=pt.data();
-            if (!BasicTypeOperations::IsBasicTypeName(pt.data(), state.lastInsertedProperty->members.back()->hashtableKeyType) ||
-                    state.lastInsertedProperty->members.back()->hashtableKeyType==BinaryMemberType)
+            if (!BasicTypeOperations::IsBasicTypeName(pt.data(), state.lastInsertedProperty->members.back()->dictionaryKeyType) ||
+                    state.lastInsertedProperty->members.back()->dictionaryKeyType==BinaryMemberType)
             {
                 std::ostringstream ss;
-                ss<<"The specified type '"<<pt.data()<<"' is not valid as key in a hashtable. On member '"<<state.lastInsertedProperty->members.back()->name<<"' in property '"<<state.lastInsertedProperty->name<<"'"<<std::endl;
-                throw ParseError("Invalid hashtable key type", ss.str(), state.currentPath, 651);
+                ss<<"The specified type '"<<pt.data()<<"' is not valid as key in a dictionary. On member '"<<state.lastInsertedProperty->members.back()->name<<"' in property '"<<state.lastInsertedProperty->name<<"'"<<std::endl;
+                throw ParseError("Invalid dictionary key type", ss.str(), state.currentPath, 651);
             }
         }
     };
@@ -964,9 +964,9 @@ namespace ToolSupport
         }
     };
 
-    template<> struct ParseAlgorithm<Elements::Range>
+    template<> struct ParseAlgorithm<Elements::Sequence>
     {
-        void operator()(boost::property_tree::ptree& pt, ParseState& state) const {state.lastInsertedClass->members.back()->collectionType=RangeCollectionType;}
+        void operator()(boost::property_tree::ptree& pt, ParseState& state) const {state.lastInsertedClass->members.back()->collectionType=SequenceCollectionType;}
     };
 
     template<> struct ParseAlgorithm<Elements::Set>
@@ -974,19 +974,19 @@ namespace ToolSupport
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const {state.lastInsertedClass->members.back()->collectionType=SetCollectionType;}
     };
 
-    template<> struct ParseAlgorithm<Elements::Hashtable>
+    template<> struct ParseAlgorithm<Elements::Dictionary>
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            state.lastInsertedClass->members.back()->collectionType=HashtableCollectionType;
+            state.lastInsertedClass->members.back()->collectionType=DictionaryCollectionType;
             SerializationUtils::Trim(pt.data());
             state.lastInsertedClass->members.back()->typeName=pt.data();
-            if (!BasicTypeOperations::IsBasicTypeName(pt.data(), state.lastInsertedClass->members.back()->hashtableKeyType) ||
-                    state.lastInsertedClass->members.back()->hashtableKeyType==BinaryMemberType)
+            if (!BasicTypeOperations::IsBasicTypeName(pt.data(), state.lastInsertedClass->members.back()->dictionaryKeyType) ||
+                    state.lastInsertedClass->members.back()->dictionaryKeyType==BinaryMemberType)
             {
                 std::ostringstream ss;
-                ss<<"The specified type '"<<pt.data()<<"' is not valid as key in a hashtable. On member '"<<state.lastInsertedClass->members.back()->name<<"' in class '"<<state.lastInsertedClass->name<<"'"<<std::endl;
-                throw ParseError("Invalid hashtable key type", ss.str(), state.currentPath, 650);
+                ss<<"The specified type '"<<pt.data()<<"' is not valid as key in a dictionary. On member '"<<state.lastInsertedClass->members.back()->name<<"' in class '"<<state.lastInsertedClass->name<<"'"<<std::endl;
+                throw ParseError("Invalid dictionary key type", ss.str(), state.currentPath, 650);
             }
         }
     };

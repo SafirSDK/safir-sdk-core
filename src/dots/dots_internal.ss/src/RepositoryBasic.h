@@ -108,7 +108,7 @@ namespace ToolSupport
         virtual const char* GetName() const { return name.c_str(); }
         virtual DotsC_MemberType GetMemberType() const {return memberType;}
         virtual DotsC_CollectionType GetCollectionType() const {return collectionType;}
-        virtual DotsC_MemberType GetKeyType() const {return hashtableKeyType;}
+        virtual DotsC_MemberType GetKeyType() const {return dictionaryKeyType;}
         virtual int GetArraySize() const {return arraySize;}
         virtual int GetMaxLength() const {return maxLength;}
 
@@ -118,7 +118,7 @@ namespace ToolSupport
         std::string typeName;
         DotsC_MemberType memberType;
         DotsC_CollectionType collectionType;
-        DotsC_MemberType hashtableKeyType;
+        DotsC_MemberType dictionaryKeyType;
         int arraySize; //If isArray
         int maxLength; //Max string length. Only applicable if typeName is 'String'.
 
@@ -192,7 +192,7 @@ namespace ToolSupport
         virtual DotsC_MemberType GetMemberType() const {return memberType;}
         virtual DotsC_TypeId GetTypeId() const {return typeId;} //only valid if MemberType is object or enum
         virtual DotsC_CollectionType GetCollectionType() const {return collectionType;}
-        virtual DotsC_MemberType GetKeyType() const {return hashtableKeyType;} //only valid if collectionType is Hashtable
+        virtual DotsC_MemberType GetKeyType() const {return dictionaryKeyType;} //only valid if collectionType is Dictionary
         virtual int GetArraySize() const {return static_cast<int>(values.size());}
         virtual bool IsHidden() const {return hidden;}
 
@@ -248,7 +248,7 @@ namespace ToolSupport
         std::string typeName;
         DotsC_MemberType memberType;
         DotsC_CollectionType collectionType;
-        DotsC_MemberType hashtableKeyType;
+        DotsC_MemberType dictionaryKeyType;
         bool hidden;   //Some parameters are derived from propertyMapping values. The parser will automatically generate a
                         //hidden parameter for those values. All explicitly declared parameters will have hidden=false.
         ParameterValues values;

@@ -24,7 +24,7 @@
         <member>
             <name>MyRange</name>
             <type>Int32</type>
-            <hashtable>EntityId</hashtable>
+            <dictionary>EntityId</dictionary>
         </member>
         
     </members>

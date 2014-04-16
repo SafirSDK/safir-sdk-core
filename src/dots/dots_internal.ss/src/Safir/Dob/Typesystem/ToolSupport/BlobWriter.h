@@ -135,8 +135,7 @@ namespace ToolSupport
         void WriteValue(DotsC_MemberIndex member, DotsC_ArrayIndex index, const Key& key, const Val& val, bool isNull, bool isChanged)
         {
             MoveToMember(member);
-            DotsC_CollectionType ct=m_memberDescription->GetCollectionType();
-            switch (ct)
+            switch (m_memberDescription->GetCollectionType())
             {
             case NoCollectionType:
             {
@@ -144,27 +143,23 @@ namespace ToolSupport
                 m_blob.SetChanged(m_memberIndex, m_valueIndex, isChanged);
             }
                 break;
-
             case ArrayCollectionType:
             {
                 m_valueIndex=index;
                 m_blob.SetChanged(m_memberIndex, m_valueIndex, isChanged);
             }
                 break;
-
-            case RangeCollectionType:
+            case SequenceCollectionType:
             {
                 m_valueIndex=m_blob.AddValue(m_memberIndex, isChanged);
             }
                 break;
-
             case SetCollectionType:
             {
                 m_valueIndex=m_blob.AddValue(m_memberIndex, isChanged);
             }
                 break;
-
-            case HashtableCollectionType:
+            case DictionaryCollectionType:
             {
                 m_valueIndex=m_blob.AddValue(m_memberIndex, isChanged);
                 WriteKey(key);

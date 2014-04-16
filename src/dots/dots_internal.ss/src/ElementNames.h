@@ -90,9 +90,9 @@ namespace ToolSupport
         struct PropertyMemberType {static const std::string& Name() {static const std::string n="type"; return n;}};
         struct PropertyMembers {static const std::string& Name() {static const std::string n="members"; return n;}};
         struct PropertyMemberisArray {static const std::string& Name() {static const std::string n="array"; return n;}};
-        struct PropertyMemberIsRange {static const std::string& Name() {static const std::string n="range"; return n;}};
+        struct PropertyMemberIsSequence {static const std::string& Name() {static const std::string n="sequence"; return n;}};
         struct PropertyMemberIsSet {static const std::string& Name() {static const std::string n="set"; return n;}};
-        struct PropertyMemberIsHashtable {static const std::string& Name() {static const std::string n="hashtable"; return n;}};
+        struct PropertyMemberIsDictionary {static const std::string& Name() {static const std::string n="dictionary"; return n;}};
         struct PropertyMapping {static const std::string& Name() {static const std::string n="propertyMapping"; return n;}};
         struct PropertyMappingsummary {static const std::string& Name() {static const std::string n="summary"; return n;}};
         struct MappedProperty {static const std::string& Name() {static const std::string n="property"; return n;}};
@@ -117,8 +117,8 @@ namespace ToolSupport
         struct ReferenceIndex {static const std::string& Name() {static const std::string n="index"; return n;}};
         struct InstanceId {static const std::string& Name() {static const std::string n="instanceId"; return n;}}; //<entityId><name/><instanceId/>..
 
-        struct Hashtable {static const std::string& Name() {static const std::string n="hashtable"; return n;}};
-        struct Range {static const std::string& Name() {static const std::string n="range"; return n;}};
+        struct Dictionary {static const std::string& Name() {static const std::string n="dictionary"; return n;}};
+        struct Sequence {static const std::string& Name() {static const std::string n="sequence"; return n;}};
         struct Set{static const std::string& Name() {static const std::string n="set"; return n;}};
 
         //for handling of old deprecated xml format

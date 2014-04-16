@@ -115,9 +115,9 @@ typedef enum
 {
     NoCollectionType,
     ArrayCollectionType,
-    RangeCollectionType,
+    SequenceCollectionType,
     SetCollectionType,
-    HashtableCollectionType
+    DictionaryCollectionType
 } DotsC_CollectionType;
 
 typedef enum

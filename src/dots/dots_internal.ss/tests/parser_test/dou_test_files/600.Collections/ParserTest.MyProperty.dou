@@ -32,7 +32,7 @@
         <member>
             <name>Int32PropertyCollection</name>
             <type>Int32</type>
-            <hashtable>InstanceId</hashtable>
+            <dictionary>InstanceId</dictionary>
         </member>
     </members>
 </property>

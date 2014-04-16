@@ -60,17 +60,17 @@ namespace ToolSupport
         typedef Element<Elements::PropertyMembersummary, OptionalOne> PropertyMembersummary;
         typedef Element<Elements::PropertyMemberName, One> PropertyMemberName;
         typedef Element<Elements::PropertyMemberisArray, OptionalOne> PropertyMemberisArray;
-        typedef Element<Elements::PropertyMemberIsRange, OptionalOne> PropertyMemberIsRange;
+        typedef Element<Elements::PropertyMemberIsSequence, OptionalOne> PropertyMemberIsSequence;
         typedef Element<Elements::PropertyMemberIsSet, OptionalOne> PropertyMemberIsSet;
-        typedef Element<Elements::PropertyMemberIsHashtable, OptionalOne> PropertyMemberIsHashtable;
+        typedef Element<Elements::PropertyMemberIsDictionary, OptionalOne> PropertyMemberIsDictionary;
         typedef Element<Elements::PropertyMemberType, One> PropertyMemberType;
-        typedef Element<Elements::PropertyMember, AtLeastOne, boost::mpl::vector<PropertyMembersummary, PropertyMemberName, PropertyMemberType, ELEMENT_CHOICE_4(PropertyMemberisArray, PropertyMemberIsRange, PropertyMemberIsSet, PropertyMemberIsHashtable, OptionalOne) > > PropertyMember;
+        typedef Element<Elements::PropertyMember, AtLeastOne, boost::mpl::vector<PropertyMembersummary, PropertyMemberName, PropertyMemberType, ELEMENT_CHOICE_4(PropertyMemberisArray, PropertyMemberIsSequence, PropertyMemberIsSet, PropertyMemberIsDictionary, OptionalOne) > > PropertyMember;
         typedef Element<Elements::PropertyMembers, OptionalOne, boost::mpl::vector<PropertyMember> > PropertyMembers;
 
         typedef Element<Elements::ArraySize, OptionalOne > ArraySize;
         typedef Element<Elements::ArraySizeRef, OptionalOne, boost::mpl::vector<IgnoreAny> > ArraySizeRef;
-        typedef Element<Elements::Hashtable, OptionalOne > Hashtable;
-        typedef Element<Elements::Range, OptionalOne > Range;
+        typedef Element<Elements::Dictionary, OptionalOne > Dictionary;
+        typedef Element<Elements::Sequence, OptionalOne > Sequence;
         typedef Element<Elements::Set, OptionalOne > Set;
 
         typedef Element<Elements::MaxLength, OptionalOne > MaxLength;
@@ -79,7 +79,7 @@ namespace ToolSupport
         typedef Element<Elements::Membersummary, OptionalOne> Membersummary;
         typedef Element<Elements::MemberName, One> MemberName;
         typedef Element<Elements::MemberType, One > MemberType;
-        typedef Element<Elements::Member, AtLeastOne, boost::mpl::vector<Membersummary, MemberName, MemberType, ELEMENT_CHOICE_5(ArraySize, ArraySizeRef, Hashtable, Range, Set, OptionalOne), ELEMENT_CHOICE_2(MaxLength, MaxLengthRef, OptionalOne) > > Member;
+        typedef Element<Elements::Member, AtLeastOne, boost::mpl::vector<Membersummary, MemberName, MemberType, ELEMENT_CHOICE_5(ArraySize, ArraySizeRef, Dictionary, Sequence, Set, OptionalOne), ELEMENT_CHOICE_2(MaxLength, MaxLengthRef, OptionalOne) > > Member;
         typedef Element<Elements::ClassMembers, OptionalOne, boost::mpl::vector<Member> > Members;
 
         typedef Element<Elements::Parametersummary, OptionalOne> Parametersummary;
