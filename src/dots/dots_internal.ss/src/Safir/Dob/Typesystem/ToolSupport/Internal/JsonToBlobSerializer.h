@@ -155,6 +155,10 @@ namespace Internal
                     }
                 }
             }
+
+            DotsC_Int32 blobSize=writer.CalculateBlobSize();
+            blob.resize(static_cast<size_t>(blobSize));
+            writer.CopyRawBlob(&blob[0]);
         }
 
     private:
@@ -242,15 +246,12 @@ namespace Internal
                     os<<"EntityId member '"<<md->GetName()<<"' is missing the instanceId-element that specifies the instance.";
                     throw ParseError("JsonToBinary serialization error", os.str(), "", 160);
                 }
-                DotsC_TypeId tid=StringToTypeId(*typeIdString);
+                std::pair<DotsC_EntityId, const char*> entId;
+                entId.first.typeId=StringToTypeId(*typeIdString);
                 std::pair<DotsC_TypeId, const char*> instanceId=SerializationUtils::StringToHash(*instanceIdString);
-                if (instanceId.second!=NULL)
-                {
-                    size_t numBytesNeeded=instanceIdString->size()+1+sizeof(DotsC_EntityId)+sizeof(DotsC_Int32); //(typeId+hash)+stringLength+string
-                    SerializationUtils::CreateSpaceForDynamicMember(m_blobLayout, blob, beginningOfUnused, numBytesNeeded);
-                }
-                DotsC_EntityId eid={tid, instanceId.first};
-                writer.WriteValue(memIx, arrIx, 0, std::make_pair(eid, instanceId.second), false, true);
+                entId.first.instanceId=instanceId.first;
+                entId.second=instanceId.second;
+                writer.WriteValue(memIx, arrIx, 0, entId, false, true);
             }
                 break;
 

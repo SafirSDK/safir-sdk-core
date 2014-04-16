@@ -8,6 +8,7 @@
 #include <iostream>
 #include <fstream>
 #include <set>
+#include <boost/chrono.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeParser.h>
@@ -71,20 +72,20 @@ void BlobTest(RepositoryPtr rep)
     DotsC_MemberIndex myChildName=cd->GetMemberIndex("ChildName");
 
     BlobWriter<Safir::Dob::Typesystem::ToolSupport::TypeRepository> w2(rep.get(), tid);
-    w2.WriteValue(myNum, 456, false, true);
-    w2.WriteArrayValue(myStrings, 0, "In0", false, true);
-    w2.WriteArrayValue(myStrings, 3, "In3", false, true);
-    w2.WriteArrayValue(myStrings, 4, "In4", false, true);
+    w2.WriteValue(myNum, 0, 0, 456, false, true);
+    w2.WriteValue(myStrings, 0, 0, "In0", false, true);
+    w2.WriteValue(myStrings, 3, 0, "In3", false, true);
+    w2.WriteValue(myStrings, 4, 0, "In4", false, true);
     std::vector<char> innerBlob(static_cast<size_t>(w2.CalculateBlobSize()));
     w2.CopyRawBlob(&innerBlob[0]);
 
     BlobWriter<Safir::Dob::Typesystem::ToolSupport::TypeRepository> w(rep.get(), tid);
-    w.WriteValue(myNum, 123, false, true);
-    w.WriteArrayValue(myStrings, 0, "Hej_1", false, true);
-    w.WriteArrayValue(myStrings, 3, "Hej_2", false, true);
-    w.WriteArrayValue(myStrings, 4, "Hej_3", false, true);
-    w.WriteValue(myChildName, "Svarre", false, true);
-    w.WriteValue(myChild, std::make_pair(&innerBlob[0], innerBlob.size()), false, true);
+    w.WriteValue(myNum, 0, 0, 123, false, true);
+    w.WriteValue(myStrings, 0, 0, "Hej_1", false, true);
+    w.WriteValue(myStrings, 3, 0, "Hej_2", false, true);
+    w.WriteValue(myStrings, 4, 0, "Hej_3", false, true);
+    w.WriteValue(myChildName, 0, 0, "Svarre", false, true);
+    w.WriteValue(myChild, 0, 0, std::make_pair(&innerBlob[0], innerBlob.size()), false, true);
 
     std::vector<char> blob(static_cast<size_t>(w.CalculateBlobSize()));
     w.CopyRawBlob(&blob[0]);
@@ -160,13 +161,16 @@ int main(int argc, char* argv[])
         std::cout<<err.what()<<std::endl;
         return 1;
     }
+
     BlobTest(repository);
-    return 0;
 
     std::cout<<"========= Repository ========"<<std::endl;
+
     Safir::Dob::Typesystem::ToolSupport::RepositoryToString(repository.get(), true, std::cout);
 
     std::cout<<"========= Test suite started ========"<<std::endl;
+
+    boost::chrono::high_resolution_clock::time_point startTime=boost::chrono::high_resolution_clock::now();
     try
     {
         RunTests(repository.get(), testDir, 0, 10000);
@@ -181,6 +185,11 @@ int main(int argc, char* argv[])
         std::cout<<"Test failed with unexpected exception!"<<std::endl;
         return 1; //Failed
     }
+
+    boost::chrono::high_resolution_clock::duration elapsed=boost::chrono::high_resolution_clock::now()-startTime;
+    boost::chrono::milliseconds millis=boost::chrono::duration_cast<boost::chrono::milliseconds>(elapsed);
+    std::cout<<"Elapsed time: "<<millis.count()<<std::endl;
+
 
     std::cout<<"====================================="<<std::endl;
     return 0;

@@ -34,7 +34,7 @@
 #include <boost/iostreams/device/array.hpp>
 #include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeRepository.h>
-#include <Safir/Dob/Typesystem/ToolSupport/Internal/BlobLayoutImpl.h>
+#include <Safir/Dob/Typesystem/ToolSupport/BlobWriter.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Internal/SerializationUtils.h>
 
 namespace Safir
@@ -205,7 +205,6 @@ namespace Internal
 
     private:
         const RepositoryType* m_repository;
-        const BlobLayoutImpl<RepositoryType> m_blobLayout;
 
         void SetMember(const MemberDescriptionType* md,
                        DotsC_MemberIndex memIx,

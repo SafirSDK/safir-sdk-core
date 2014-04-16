@@ -131,6 +131,21 @@ namespace ToolSupport
         int NumberOfValues(DotsC_MemberIndex member) const {return m_blob.NumberOfValues(member);}
 
         /**
+         * @brief Convenience method for checking if a member is null. All status flags are also fetched with the ReadValue method.
+         * @param member [in] - Member index of the member to to check..
+         * @param valueIndex [in] - The value to check. Must be in range 0 to NumberOfValues()-1.
+         * @return True if value is null.
+         */
+        bool IsNull(DotsC_MemberIndex member, int valueIndex) const
+        {
+            MoveToMember(member);
+            bool isNull=false;
+            bool isChanged=false;
+            m_blob.ValueStatus(member, valueIndex, isNull, isChanged);
+            return isNull;
+        }
+
+        /**
          * Reads the key element of a member value. Only applicable for dictionary members.
          * Supported key types: Int32, Int64, TypeId, Enumeration, String, InstanceId, HandlerId, ChannelId, EntityId.
          *

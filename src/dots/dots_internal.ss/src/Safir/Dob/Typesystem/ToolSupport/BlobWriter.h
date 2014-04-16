@@ -278,25 +278,25 @@ namespace ToolSupport
         //-----------------------
         void WriteValue(DotsC_Int32 val)
         {
-            assert(m_memberDescription->GetMemberType()==Int32MemberType);
+            assert(m_memberDescription->GetMemberType()==Int32MemberType || m_memberDescription->GetMemberType()==EnumerationMemberType);
             m_blob.SetValueInt32(m_memberIndex, m_valueIndex, val);
         }
 
         void WriteValue(DotsC_Int64 val)
         {
-            assert(m_memberDescription->GetMemberType()==Int64MemberType);
+            assert(m_memberDescription->GetMemberType()==Int64MemberType || m_memberDescription->GetMemberType()==TypeIdMemberType);
             m_blob.SetValueInt64(m_memberIndex, m_valueIndex, val);
         }
 
         void WriteValue(DotsC_Float32 val)
         {
-            assert(m_memberDescription->GetMemberType()==Float32MemberType);
+            //assert(m_memberDescription->GetMemberType()==Float32MemberType);
             m_blob.SetValueFloat32(m_memberIndex, m_valueIndex, val);
         }
 
         void WriteValue(DotsC_Float64 val)
         {
-            assert(m_memberDescription->GetMemberType()==Float64MemberType);
+            //assert(m_memberDescription->GetMemberType()==Float64MemberType);
             m_blob.SetValueFloat64(m_memberIndex, m_valueIndex, val);
         }
 

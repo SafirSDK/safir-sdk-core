@@ -30,7 +30,7 @@
 #include <stdexcept>
 #include <boost/noncopyable.hpp>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeRepository.h>
-#include <Safir/Dob/Typesystem/ToolSupport/Internal/BlobLayoutImpl.h>
+#include <Safir/Dob/Typesystem/ToolSupport/BlobReader.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Internal/SerializationUtils.h>
 
 namespace Safir
@@ -55,7 +55,6 @@ namespace Internal
 
         BlobToXmlSerializer(const RepositoryType* repository)
             :m_repository(repository)
-            ,m_blobLayout(repository)
         {
         }
 
@@ -70,18 +69,18 @@ namespace Internal
 
     private:
         const RepositoryType* m_repository;
-        const BlobLayoutImpl<RepositoryType> m_blobLayout;
 
         void SerializeMembers(const char* blob, std::ostream& os) const
         {
             const ClassDescriptionType* cd=GetClass(blob);
+            BlobReader<RepositoryType> reader(m_repository, blob);
 
             for (DotsC_MemberIndex memberIx=0; memberIx<cd->GetNumberOfMembers(); ++memberIx)
             {
                 const MemberDescriptionType* md=cd->GetMember(memberIx);
                 if (md->GetCollectionType()!=ArrayCollectionType) //normal member
                 {
-                    SerializeMember(blob, md, memberIx, 0, md->GetName(), os);
+                    SerializeMember(reader, md, memberIx, 0, md->GetName(), os);
                 }
                 else //array member
                 {
@@ -104,8 +103,7 @@ namespace Internal
                     DotsC_ArrayIndex arrIx=0;
                     while (arrIx<md->GetArraySize())
                     {
-                        MemberStatus status=m_blobLayout.GetStatus(blob, memberIx, arrIx);
-                        if (!status.IsNull())
+                        if (!reader.IsNull(memberIx, arrIx))
                         {
                             break;
                         }
@@ -117,7 +115,7 @@ namespace Internal
                         os<<"<"<<md->GetName()<<">";
                         for (DotsC_ArrayIndex arrIx=0; arrIx<md->GetArraySize(); ++arrIx)
                         {
-                            SerializeMember(blob, md, memberIx, arrIx, typeName, os);
+                            SerializeMember(reader, md, memberIx, arrIx, typeName, os);
                         }
                         os<<"</"<<md->GetName()<<">";
                     }
@@ -171,7 +169,7 @@ namespace Internal
             }
         }
 
-        void SerializeMember(const char* blob,
+        void SerializeMember(const BlobReader<RepositoryType>& reader,
                              const MemberDescriptionType* md,
                              DotsC_MemberIndex memberIndex,
                              DotsC_ArrayIndex arrayIndex,
@@ -179,14 +177,16 @@ namespace Internal
                              std::ostream& os) const
         {
 
+            bool isNull=true;
+            bool isChanged=false;
 
             switch(md->GetMemberType())
             {
             case BooleanMemberType:
             {
                 bool val=true;
-                MemberStatus status=m_blobLayout.template GetMember<bool>(blob, memberIndex, arrayIndex, val);
-                if (!status.IsNull())
+                reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
+                if (!isNull)
                 {
                     WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
                     os<<(val ? "true" : "false");
@@ -198,8 +198,8 @@ namespace Internal
             case EnumerationMemberType:
             {
                 DotsC_Int32 val=0;
-                MemberStatus status=m_blobLayout.template GetMember<DotsC_Int32>(blob, memberIndex, arrayIndex, val);
-                if (!status.IsNull())
+                reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
+                if (!isNull)
                 {
                     const char* enumVal=m_repository->GetEnum(md->GetTypeId())->GetValueName(val);
                     WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
@@ -212,8 +212,8 @@ namespace Internal
             case Int32MemberType:
             {
                 DotsC_Int32 val=0;
-                MemberStatus status=m_blobLayout.template GetMember<DotsC_Int32>(blob, memberIndex, arrayIndex, val);
-                if (!status.IsNull())
+                reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
+                if (!isNull)
                 {
                     WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
                     os<<val;
@@ -225,8 +225,8 @@ namespace Internal
             case Int64MemberType:
             {
                 DotsC_Int64 val=0;
-                MemberStatus status=m_blobLayout.template GetMember<DotsC_Int64>(blob, memberIndex, arrayIndex, val);
-                if (!status.IsNull())
+                reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
+                if (!isNull)
                 {
                     WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
                     os<<val;
@@ -238,8 +238,8 @@ namespace Internal
             case TypeIdMemberType:
             {
                 DotsC_Int64 val=0;
-                MemberStatus status=m_blobLayout.template GetMember<DotsC_Int64>(blob, memberIndex, arrayIndex, val);
-                if (!status.IsNull())
+                reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
+                if (!isNull)
                 {
                     WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
 
@@ -262,19 +262,18 @@ namespace Internal
             case ChannelIdMemberType:
             case HandlerIdMemberType:
             {
-                DotsC_Int64 val=0;
-                const char* hashStr=NULL;
-                MemberStatus status=m_blobLayout.GetMemberWithOptionalString(blob, memberIndex, arrayIndex, val, hashStr);
-                if (!status.IsNull())
+                std::pair<DotsC_Int64, const char*> val;
+                reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
+                if (!isNull)
                 {
                     WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
-                    if (hashStr)
+                    if (val.second)
                     {
-                        os<<hashStr;
+                        os<<val.second;
                     }
                     else
                     {
-                        os<<val;
+                        os<<val.first;
                     }
                     os<<"</"<<elementName<<">";
                 }
@@ -283,30 +282,29 @@ namespace Internal
 
             case EntityIdMemberType:
             {
-                DotsC_EntityId entId;
-                const char* hashStr=0;
-                MemberStatus status=m_blobLayout.GetMemberWithOptionalString(blob, memberIndex, arrayIndex, entId, hashStr);
-                if (!status.IsNull())
+                std::pair<DotsC_EntityId, const char*> val;
+                reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
+                if (!isNull)
                 {
                     WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
 
-                    const char* typeName=TypeIdToString(entId.typeId);
+                    const char* typeName=TypeIdToString(val.first.typeId);
                     if (typeName)
                     {
                         os<<"<name>"<<typeName<<"</name>";
                     }
                     else
                     {
-                        os<<"<name>"<<entId.typeId<<"</name>";
+                        os<<"<name>"<<val.first.typeId<<"</name>";
                     }
 
-                    if (hashStr)
+                    if (val.second)
                     {
-                        os<<"<instanceId>"<<hashStr<<"</instanceId>";
+                        os<<"<instanceId>"<<val.second<<"</instanceId>";
                     }
                     else
                     {
-                        os<<"<instanceId>"<<entId.instanceId<<"</instanceId>";
+                        os<<"<instanceId>"<<val.first.instanceId<<"</instanceId>";
                     }
 
                     os<<"</"<<elementName<<">";
@@ -316,10 +314,9 @@ namespace Internal
 
             case StringMemberType:
             {
-                const char* strVal=NULL;
-                DotsC_Int32 size=0;
-                MemberStatus status=m_blobLayout.GetDynamicMember(blob, memberIndex, arrayIndex, strVal, size);
-                if (!status.IsNull())
+                const char* val=NULL;
+                reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
+                if (!isNull)
                 {
                     if (md->GetCollectionType()!=ArrayCollectionType)
                     {
@@ -329,7 +326,7 @@ namespace Internal
                     {
                         os<<"<"<<elementName<<" index=\""<<arrayIndex<<"\" xml:space=\"preserve\">";
                     }
-                    WriteString(strVal, os);
+                    WriteString(val, os);
                     os<<"</"<<elementName<<">";
                 }
             }
@@ -337,16 +334,15 @@ namespace Internal
 
             case ObjectMemberType:
             {
-                const char* obj=NULL;
-                DotsC_Int32 size=0;
-                MemberStatus status=m_blobLayout.GetDynamicMember(blob, memberIndex, arrayIndex, obj, size);
-                if (!status.IsNull())
+                std::pair<const char*, DotsC_Int32> val; //blob and size
+                reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
+                if (!isNull)
                 {
-                    bool typesDiffer=m_blobLayout.GetTypeId(obj)!=md->GetTypeId();
+                    bool typesDiffer=BlobReader<RepositoryType>::GetTypeId(val.first)!=md->GetTypeId();
 
                     if (typesDiffer) //we only need to add typeAttribute if types are not same as declared in dou (differ by inheritance)
                     {
-                        os<<"<"<<elementName<<" type=\""<<GetClass(obj)->GetName()<<"\"";
+                        os<<"<"<<elementName<<" type=\""<<GetClass(val.first)->GetName()<<"\"";
                     }
                     else
                     {
@@ -362,7 +358,7 @@ namespace Internal
                         os<<" index=\""<<arrayIndex<<"\">";
                     }
 
-                    SerializeMembers(obj, os);
+                    SerializeMembers(val.first, os);
                     os<<"</"<<elementName<<">";
                 }
             }
@@ -370,13 +366,12 @@ namespace Internal
 
             case BinaryMemberType:
             {
-                const char* binary=NULL;
-                DotsC_Int32 size=0;
-                MemberStatus status=m_blobLayout.GetDynamicMember(blob, memberIndex, arrayIndex, binary, size);
-                if (!status.IsNull())
+                std::pair<const char*, DotsC_Int32> val; //blob and size
+                reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
+                if (!isNull)
                 {
                     WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
-                    std::string bin(binary, size);
+                    std::string bin(val.first, static_cast<size_t>(val.second));
                     os<<SerializationUtils::ToBase64(bin);
                     os<<"</"<<elementName<<">";
                 }
@@ -406,8 +401,8 @@ namespace Internal
             case Watt32MemberType:
             {
                 DotsC_Float32 val=0;
-                MemberStatus status=m_blobLayout.template GetMember<DotsC_Float32>(blob, memberIndex, arrayIndex, val);
-                if (!status.IsNull())
+                reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
+                if (!isNull)
                 {
                     WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
                     os<<classic_string_cast<std::string>(val);
@@ -439,8 +434,8 @@ namespace Internal
             case Watt64MemberType:
             {
                 DotsC_Float64 val=0;
-                MemberStatus status=m_blobLayout.template GetMember<DotsC_Float64>(blob, memberIndex, arrayIndex, val);
-                if (!status.IsNull())
+                reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
+                if (!isNull)
                 {
                     WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
                     os<<classic_string_cast<std::string>(val);
@@ -476,7 +471,7 @@ namespace Internal
 
         const ClassDescriptionType* GetClass(const char* blob) const
         {
-            DotsC_TypeId typeId=m_blobLayout.GetTypeId(blob);
+            DotsC_TypeId typeId=BlobReader<RepositoryType>::GetTypeId(blob);
             const ClassDescriptionType* cd=m_repository->GetClass(typeId);
             if (cd==NULL)
             {
