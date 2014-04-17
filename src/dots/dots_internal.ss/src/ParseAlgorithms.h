@@ -1649,7 +1649,6 @@ namespace ToolSupport
         void HandleCreateRoutines(ClassDescriptionBasic* cd);
         void CalculateEnumChecksums();
         void VerifyParameterTypes();
-        void CalculateClassSize(ClassDescriptionBasic* cd);
         void InsertPropertyMapping(const PropertyMappingDescriptionBasicPtr& pm);
     };
 }

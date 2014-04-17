@@ -12,7 +12,6 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeParser.h>
-#include <Safir/Dob/Typesystem/ToolSupport/BlobLayout.h>
 #include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Serialization.h>
 #include <Safir/Dob/Typesystem/ToolSupport/BlobWriter.h>

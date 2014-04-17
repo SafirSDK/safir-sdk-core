@@ -443,8 +443,6 @@ namespace ToolSupport
         obj->name=BasicTypeOperations::PredefindedClassNames::ObjectName();
         obj->typeId=LlufId_Generate64(obj->name.c_str());
         obj->base=NULL;
-        obj->ownSize=OFFSET_HEADER_LENGTH;
-        obj->initialSize=OFFSET_HEADER_LENGTH;
         m_result->InsertClass(obj);
 
         ExceptionDescriptionBasicPtr exceptionBase(new ExceptionDescriptionBasic);
@@ -563,12 +561,6 @@ namespace ToolSupport
 
         //Resolve arraySizeRef and maxLenghtRef. Also handle implicit createRoutine parameters that need some post processing.
         ResolveReferences(states);
-
-        //Class sizes
-        for (boost::unordered_map<DotsC_TypeId, ClassDescriptionBasicPtr>::iterator it=m_result->m_classes.begin(); it!=m_result->m_classes.end(); ++it)
-        {
-            CalculateClassSize(it->second.get());
-        }
 
         //Verify that parameter with memberType typeId, entityId or enum is referencing valid types.
         VerifyParameterTypes();
@@ -1076,25 +1068,6 @@ namespace ToolSupport
                 }
             }
         }
-    }
-
-    void RepositoryCompletionAlgorithms::CalculateClassSize(ClassDescriptionBasic* cd)
-    {
-        if (cd->initialSize>0)
-        {
-            //Already calculated
-            return;
-        }
-
-        CalculateClassSize(cd->base);
-
-        for (std::vector<MemberDescriptionBasicPtr>::const_iterator memIt=cd->members.begin(); memIt!=cd->members.end(); ++memIt)
-        {
-            int repeat=((*memIt)->collectionType==ArrayCollectionType) ? (*memIt)->arraySize : 1;
-            cd->ownSize+=OFFSET_MEMBER_LENGTH+(MEMBER_STATUS_LENGTH+BasicTypeOperations::SizeOfType((*memIt)->memberType))*repeat;
-        }
-
-        cd->initialSize=cd->ownSize+cd->base->InitialSize();
     }
 
     // DOM file completion algorithm

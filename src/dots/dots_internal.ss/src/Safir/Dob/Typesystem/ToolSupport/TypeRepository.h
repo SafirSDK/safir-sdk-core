@@ -535,7 +535,18 @@ namespace ToolSupport
          * @return Base class description.
          */
         virtual const ClassDescription* GetBaseClass() const=0;
+
+        /**
+         * @brief Get the number of classes that inherits from this class.
+         * @return Number of descendant classes.
+         */
         virtual int GetNumberOfDescendants() const=0;
+
+        /**
+         * @brief Get descendant class.
+         * @param index [in] - Index of descendant class. Valid range is 0 to GetNumberOfDescendants()-1.
+         * @return Descendant class description.
+         */
         virtual const ClassDescription* GetDescendant(int index) const=0;
 
         /**
@@ -621,18 +632,6 @@ namespace ToolSupport
          * @return
          */
         virtual const CreateRoutineDescription* GetCreateRoutine(int index) const=0;
-
-        /**
-         * @brief Get the minimum size that a blob of this class can be. This method will most likely be removed in later versions.
-         * @return Initial blob size.
-         */
-        virtual int InitialSize() const=0;
-
-        /**
-         * @brief Get size needed by members defined in this class, not including inherited members. This method will most likely be removed in later versions.
-         * @return Size.
-         */
-        virtual int OwnSize() const=0;
     };
 
     /**

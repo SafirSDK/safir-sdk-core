@@ -365,8 +365,6 @@ namespace ToolSupport
     {
     public:
         ClassDescriptionBasic()
-            :initialSize(0)
-            ,ownSize(0)
         {
         }
 
@@ -395,17 +393,12 @@ namespace ToolSupport
         virtual int GetNumberOfCreateRoutines() const {return static_cast<int>(createRoutines.size());}
         virtual const CreateRoutineDescription* GetCreateRoutine(int index) const {return createRoutines[index].get();}
 
-        virtual int InitialSize() const {return initialSize;}
-        virtual int OwnSize() const {return ownSize;}
-
         //Fields
         DotsC_TypeId typeId;
         std::string summary;
         std::string fileName;
         std::string name;
         std::string baseClass;
-        int initialSize;
-        int ownSize;
 
         ClassDescriptionBasic* base;
         std::vector<ClassDescriptionBasic*> descendants;
