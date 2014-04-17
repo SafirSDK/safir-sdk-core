@@ -1,8 +1,18 @@
 FILE(GLOB sources *.cpp)
 
-ADD_EXECUTABLE(ProcessInfo_test ${sources})
+ADD_EXECUTABLE(ProcessInfo_test ProcessInfo_test.cpp)
+ADD_EXECUTABLE(ProcessInfoSleeper ProcessInfoSleeper.cpp)
 
-TARGET_LINK_LIBRARIES (ProcessInfo_test lluf_utils)
+TARGET_LINK_LIBRARIES (ProcessInfo_test PRIVATE lluf_utils)
 
-ADD_TEST(ProcessInfo ProcessInfo_test)
-SET_SAFIR_TEST_PROPERTIES(TEST ProcessInfo)
+TARGET_LINK_LIBRARIES (ProcessInfoSleeper PRIVATE ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+
+#Boost date_time is required on windows.
+if (MSVC)
+  TARGET_LINK_LIBRARIES (ProcessInfoSleeper PRIVATE ${Boost_DATE_TIME_LIBRARY})
+endif()
+
+TARGET_LINK_LIBRARIES (ProcessInfoSleeper)
+
+ADD_TEST(ProcessInfo ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
+SET_SAFIR_TEST_PROPERTIES(ProcessInfo)
