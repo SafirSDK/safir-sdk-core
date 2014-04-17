@@ -14,3 +14,5 @@ ADD_TEST(NAME LowLevelLogger
   --control-exe $<TARGET_FILE:logger_control>
   --config-dir ${CMAKE_CURRENT_SOURCE_DIR}/configs)
 
+
+SET_SAFIR_TEST_PROPERTIES(TEST LowLevelLogger TIMEOUT 600)

@@ -18,6 +18,7 @@ if (Qt5Widgets_FOUND)
 else()
   # Try to use Qt4 instead
   SET(QT_USE_QTMAIN TRUE)
+  SET(QT4_FIND_QUIETLY TRUE)
   find_package(Qt4)
 
   if (NOT QT4_FOUND)

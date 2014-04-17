@@ -1,3 +1,6 @@
+#this library has a C interface and we only want one version of it,
+#so we never want the "d" suffix on debug builds, which is default on windows.
+SET(CMAKE_DEBUG_POSTFIX "")
 
 add_library(test_library SHARED test_library.cpp)
 

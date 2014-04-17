@@ -20,7 +20,11 @@ TARGET_LINK_LIBRARIES(repository_compare PRIVATE
   lluf_id
   lluf_utils
   dots_internal
-  rt)
+  ${Boost_FILESYSTEM_LIBRARY})
+
+if (NOT MSVC)
+  TARGET_LINK_LIBRARIES(repository_compare PRIVATE rt)
+endif()
 
 add_test(multiple_init multiple_accesses)
 add_test(multiple_accesses_after_init multiple_accesses sleep)

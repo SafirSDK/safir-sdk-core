@@ -157,6 +157,29 @@ else()
   set(PATH_SEPARATOR ";")
 endif()
 
+if (MSVC)
+  set_property(GLOBAL PROPERTY DLL_PATH "$ENV{PATH}")
+
+  function(add_library)
+    #message("Adding ${CMAKE_CURRENT_BINARY_DIR} to DLL_PATH")
+    file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}" curdir)
+    get_property(DLL_PATH GLOBAL PROPERTY DLL_PATH)
+    set_property(GLOBAL PROPERTY DLL_PATH "${DLL_PATH};${curdir}")
+    _add_library(${ARGN})
+  endfunction()
+endif()
+
+#function(RECURSIVE_PATH)
+#  cmake_parse_arguments(PTH "" "ROOT" "" ${ARGN})
+#  set(PATH_RESULT ${PATH_RESULT} ${PTH_ROOT})
+#  FILE(GLOB children RELATIVE ${PTH_ROOT} ${PTH_ROOT}/*)
+#  FOREACH(child ${children})
+#    IF(IS_DIRECTORY ${PTH_ROOT}/${child} AND NOT child STREQUAL "CMakeFiles")
+#        RECURSIVE_PATH(ROOT ${PTH_ROOT}/${child})
+#    ENDIF()
+#  ENDFOREACH()
+#  set(PATH_RESULT ${PATH_RESULT} PARENT_SCOPE)
+#endfunction()
 
 # Set up properties on tests
 # Usage: SET_SAFIR_TEST_PROPERTIES(TEST <test_target> [TIMEOUT <timeout>] [CONFIG_OVERRIDE <config_dir>])
@@ -190,11 +213,20 @@ function (SET_SAFIR_TEST_PROPERTIES)
   set (pypath "$ENV{PYTHONPATH}${PATH_SEPARATOR}${safir_sdk_core_SOURCE_DIR}/tests/test_support/python")
   string(REGEX REPLACE "^${PATH_SEPARATOR}+" "" pypath ${pypath}) # remove any leading path separators
 
+  #On windows we need to add all paths containing dlls to the PATH, since there's no rpath equivalent.
+  if (MSVC)
+    get_property(DLL_PATH GLOBAL PROPERTY DLL_PATH)
+    STRING(REPLACE "\;" ";" DLL_PATH "${DLL_PATH}")
+    STRING(REPLACE ";" "\\;" DLL_PATH "${DLL_PATH}")
+    set(PATH_ENVIRONMENT "PATH=${DLL_PATH}")
+  endif()
+  
   SET_PROPERTY(TEST ${PROP_TEST}
     PROPERTY ENVIRONMENT 
     "SAFIR_TEST_CONFIG_OVERRIDE=${PROP_CONFIG_OVERRIDE}"
     "SAFIR_SOURCE_ROOT=${safir_sdk_core_SOURCE_DIR}/../"
     "PYTHONPATH=${pypath}"
+    "${PATH_ENVIRONMENT}"
     ${PROP_ENVIRONMENT})
 endfunction()
 
