@@ -65,9 +65,12 @@ namespace Typesystem
 
         void LoadLib(const std::string& path, const std::string& name)
         {
+            std::string fullName = "dots_generated-" + name + "-cpp";
+
+#if defined (_MSC_VER) && !defined (NDEBUG)
+            fullName += 'd';
+#endif
             
-            const std::string fullName = "dots_generated-" + name + "-cpp";
-                            
             try
             {
                 Safir::Utilities::DynamicLibraryLoader loader;
