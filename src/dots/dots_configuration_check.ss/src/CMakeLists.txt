@@ -7,6 +7,7 @@ TARGET_LINK_LIBRARIES(dots_configuration_check PRIVATE
   lluf_id
   dots_internal
   dots_kernel
+  ${Boost_FILESYSTEM_LIBRARY}
   ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
 INSTALL(TARGETS dots_configuration_check
