@@ -14,8 +14,8 @@ TARGET_LINK_LIBRARIES(ExternalTimeProvider_test PRIVATE
 
 ADD_TEST(ExternalTimeProvider_test ExternalTimeProvider_test)
 
-SET_PROPERTY(TEST ExternalTimeProvider_test
-    PROPERTY ENVIRONMENT 
-    "SAFIR_TEST_CONFIG_OVERRIDE=${CMAKE_CURRENT_SOURCE_DIR}/config"
-    "SAFIR_SOURCE_ROOT=${safir_sdk_core_SOURCE_DIR}/../"
-    "CMAKE_CURRENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
+SET_SAFIR_TEST_PROPERTIES(TEST ExternalTimeProvider_test
+                          CONFIG_OVERRIDE "${CMAKE_CURRENT_SOURCE_DIR}/config"
+                          ENVIRONMENT
+                          "SAFIR_SOURCE_ROOT=${safir_sdk_core_SOURCE_DIR}/../"
+                          "CMAKE_CURRENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}")

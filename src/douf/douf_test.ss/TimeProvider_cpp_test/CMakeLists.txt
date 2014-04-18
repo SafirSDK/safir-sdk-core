@@ -8,8 +8,7 @@ TARGET_LINK_LIBRARIES(TimeProvider_cpp_test PRIVATE
 
 ADD_TEST(TimeProvider_cpp_test TimeProvider_cpp_test)
 
-SET_PROPERTY(TEST TimeProvider_cpp_test
-    PROPERTY ENVIRONMENT 
-    "SAFIR_TEST_CONFIG_OVERRIDE=${CMAKE_CURRENT_SOURCE_DIR}/../config"
-    "SAFIR_SOURCE_ROOT=${safir_sdk_core_SOURCE_DIR}/../")
-
+SET_SAFIR_TEST_PROPERTIES(TEST TimeProvider_cpp_test 
+                          CONFIG_OVERRIDE "${CMAKE_CURRENT_SOURCE_DIR}/../config"
+                          ENVIRONMENT
+                          "SAFIR_SOURCE_ROOT=${safir_sdk_core_SOURCE_DIR}/../")
