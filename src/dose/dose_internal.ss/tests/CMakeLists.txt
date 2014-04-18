@@ -8,7 +8,8 @@ ADD_EXECUTABLE(dose_sem_wrapper_test semaphore_test.cpp)
 TARGET_LINK_LIBRARIES(distribution_data_test PRIVATE
   dose_internal 
   dots_generated-Safir-cpp
-  lluf_startup_synchronizer)
+  lluf_startup_synchronizer
+  ${Boost_SYSTEM_LIBRARY})
 
 TARGET_LINK_LIBRARIES(lamport_clock_test PRIVATE 
   dose_internal)

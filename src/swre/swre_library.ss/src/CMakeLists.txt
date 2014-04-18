@@ -17,7 +17,10 @@ TARGET_LINK_LIBRARIES(swre_library PRIVATE
   logging_cpp
   lluf_utils
   lluf_crash_reporter
-  lluf_config)
+  lluf_config
+  ${Boost_REGEX_LIBRARY}
+  ${Boost_THREAD_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY})
 
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE
