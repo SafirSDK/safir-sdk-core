@@ -23,10 +23,6 @@ TARGET_LINK_LIBRARIES(lluf_crash_reporter PRIVATE
 if (MSVC)
   TARGET_LINK_LIBRARIES(lluf_crash_reporter PRIVATE 
   "${CMAKE_CURRENT_BINARY_DIR}/google-breakpad/src/breakpad_client.lib")
-
-  #Boost date_time is required in visual studio
-  #we make it public so that all libraries dont need this workaround
-  TARGET_LINK_LIBRARIES (lluf_crash_reporter PUBLIC ${Boost_DATE_TIME_LIBRARY})
 else()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-local-typedefs")
   TARGET_LINK_LIBRARIES(lluf_crash_reporter PRIVATE 

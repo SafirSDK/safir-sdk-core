@@ -7,11 +7,6 @@ TARGET_LINK_LIBRARIES (ProcessInfo_test PRIVATE lluf_utils)
 
 TARGET_LINK_LIBRARIES (ProcessInfoSleeper PRIVATE ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY})
 
-#Boost date_time is required on windows.
-if (MSVC)
-  TARGET_LINK_LIBRARIES (ProcessInfoSleeper PRIVATE ${Boost_DATE_TIME_LIBRARY})
-endif()
-
 TARGET_LINK_LIBRARIES (ProcessInfoSleeper)
 
 ADD_TEST(ProcessInfo ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)

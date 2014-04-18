@@ -4,11 +4,6 @@ ADD_EXECUTABLE(ProcessMonitorSleeper Sleeper.cpp)
 
 TARGET_LINK_LIBRARIES (ProcessMonitorSleeper PRIVATE ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY})
 
-#Boost date_time is required on windows.
-if (MSVC)
-  TARGET_LINK_LIBRARIES (ProcessMonitorSleeper PRIVATE ${Boost_DATE_TIME_LIBRARY})
-endif()
-
 TARGET_LINK_LIBRARIES (ProcessMonitor_test PRIVATE 
   lluf_utils
   ${Boost_THREAD_LIBRARY}

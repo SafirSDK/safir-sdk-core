@@ -11,12 +11,6 @@ TARGET_LINK_LIBRARIES(lluf_id PRIVATE
   ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY})
 
-
-#Boost date_time is required on windows.
-if (MSVC)
-  TARGET_LINK_LIBRARIES (lluf_id PRIVATE ${Boost_DATE_TIME_LIBRARY})
-endif()
-
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE
         PATTERN "*~" EXCLUDE)
