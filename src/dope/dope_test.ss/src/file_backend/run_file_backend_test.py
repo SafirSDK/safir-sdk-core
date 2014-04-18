@@ -27,6 +27,16 @@ from __future__ import print_function
 import subprocess, os, time, sys, shutil, glob, argparse
 from testenv import TestEnv, TestEnvStopper
 
+try:
+    import ConfigParser
+except ImportError:
+    import configparser as ConfigParser
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
+
+
 def log(data):
     print(data)
     sys.stdout.flush()
@@ -58,11 +68,16 @@ parser.add_argument("--dope-bin2xml", required=True)
 
 arguments = parser.parse_args()
             
-file_storage_path = "/tmp/safir_sdk_core/persistence" #TODO: read from config
+
+config_str = subprocess.check_output((arguments.safir_show_config, "--locations"),universal_newlines=True)
+#ConfigParser wants a section header so add a dummy one.
+config_str = '[root]\n' + config_str
+config = ConfigParser.ConfigParser()
+config.readfp(StringIO(config_str))
+
+file_storage_path = os.path.join(config.get('root','lock_file_directory'),"..","persistence")
 
 rmdir(file_storage_path)
-
-subprocess.call((arguments.safir_show_config, "--typesystem"))
 
 log("Set a bunch of entities")
 env = TestEnv(arguments.dose_main, arguments.dope_main, arguments.safir_show_config)
