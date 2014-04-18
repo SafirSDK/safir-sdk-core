@@ -81,7 +81,12 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
 
   SET(dod_directory ${safir_sdk_core_SOURCE_DIR}/dots/dots_v.ss/data/)
   FILE(GLOB dod_files ${dod_directory} *.dod)
-  SET(dots_v_command ${PYTHON_EXECUTABLE} "${safir_sdk_core_SOURCE_DIR}/dots/dots_v.ss/dots_v.py" --dod-files=${dod_directory} --dependencies ${DOTS_V_DEPS} --output-path=generated_code)
+  SET(dots_v_command ${PYTHON_EXECUTABLE} 
+    "${safir_sdk_core_SOURCE_DIR}/dots/dots_v.ss/dots_v.py" 
+    --dod-files=${dod_directory} 
+    --dependencies ${DOTS_V_DEPS} 
+    --library-name ${GEN_NAME}
+    --output-path=generated_code)
   
   ADD_CUSTOM_COMMAND(
     OUTPUT ${cpp_files}

@@ -804,6 +804,7 @@ def process_at_variable_lookup(gSession, var, dou, table_line, parent_table_line
         return dou.unique_dependencies[index]
     elif var == "DEPENDENCYBASE": return dou.dependency_base[index]
     elif var == "TABLE_LINE": return table_line
+    elif var == "LIBRARY_NAME": return gSession.library_name
     elif var == "CLASS": return type_formatter(gSession, dou.classname)
     elif var == "NAMESPACEV": return namespace_formatter(gSession, dou.namespaces[index])
     elif var == "NAMESPACE": 
@@ -899,6 +900,7 @@ def get_iterator_length(var, dou, table_line, parent_table_line):
     elif var == "DEPENDENCYBASE": return len(dou.dependency_base)
     elif var == "TABLE_LINE": return -1
     elif var == "CLASS": return -1
+    elif var == "LIBRARY_NAME": return -1
     elif var == "NAMESPACEV" or var == "REVNAMESPACE": return len(dou.namespaces)
     elif var == "CLASSSUMMARY" : return -1
     elif var == "BASECLASS" : return -1
@@ -1558,7 +1560,8 @@ class GeneratorSession(object):
         self.dou_xml_lookup_cache = None
         self.dependency_paths = None
         self.namespace_prefix_files = None
-
+        self.library_name = None
+        
 def dod_thread_main(dod_filename, 
                     dou_files, 
                     gen_src_output_path, 
@@ -1567,7 +1570,8 @@ def dod_thread_main(dod_filename,
                     dou_file_lookup_cache,
                     dou_xml_lookup_cache, 
                     dependency_paths,
-                    namespace_prefix_files):
+                    namespace_prefix_files,
+                    library_name):
     t1 = os.times()[4]
     global loglevel
 
@@ -1577,7 +1581,8 @@ def dod_thread_main(dod_filename,
     gSession.dou_xml_lookup_cache = dou_xml_lookup_cache
     gSession.dependency_paths = dependency_paths
     gSession.namespace_prefix_files = namespace_prefix_files
-
+    gSession.library_name = library_name
+    
     dod_file = dod_init(gSession, dod_filename)
     output_dir = os.path.join(gen_src_output_path, gSession.dod_parameters["Output_Directory"])
     gSession.mkdir_rlock = find_mkdir_rlock(output_dir.replace(os.sep, "/"))
@@ -1621,6 +1626,11 @@ def main():
                         required=False,
                         nargs="*",
                         help="Paths to dou file directory that this module depends on.")
+    parser.add_argument('--library-name', 
+                        dest='library_name', 
+                        metavar='LIBRARY_NAME', 
+                        required=True,
+                        help="Name of the generated library/module being built")
     parser.add_argument('--output-path', 
                         dest='output_path', 
                         metavar='OUTPUT_PATH', 
@@ -1705,7 +1715,7 @@ def main():
         pool = multiprocessing.Pool() # Defaults number of worker processes to number of CPUs
 
         for dod_filename in dod_files:
-            pool.apply_async(dod_thread_main, args = (dod_filename, dou_files, gen_src_output_path, arguments.show_files, dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache, dependency_paths, namespace_prefix_files))
+            pool.apply_async(dod_thread_main, args = (dod_filename, dou_files, gen_src_output_path, arguments.show_files, dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache, dependency_paths, namespace_prefix_files, arguments.library_name))
 
         pool.close()
         pool.join()
@@ -1719,7 +1729,7 @@ def main():
         dou_uniform_lookup_init(dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache, dependency_paths, dou_files)
 
         for dod_filename in dod_files:
-            dod_thread_main(dod_filename, dou_files, gen_src_output_path, arguments.show_files, dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache, dependency_paths, namespace_prefix_files)
+            dod_thread_main(dod_filename, dou_files, gen_src_output_path, arguments.show_files, dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache, dependency_paths, namespace_prefix_files, arguments.library_name)
     
     return 0
 
