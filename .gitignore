@@ -25,6 +25,14 @@ Makefile
 *.lib
 *.exp
 *.resource.txt
+*.vcxproj
+*.vcxproj.filters
+*.sln
+*.suo
+*.sdf
+*.opensdf
+*.dir/
+x64/
 
 #CTest / Unit test stuff
 DartConfiguration.tcl
