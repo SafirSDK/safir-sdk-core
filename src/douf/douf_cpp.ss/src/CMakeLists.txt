@@ -7,6 +7,11 @@ target_include_directories(douf_time_cpp PUBLIC .)
 
 TARGET_LINK_LIBRARIES(douf_time_cpp PRIVATE douf_time_library dots_generated-douf_time-cpp)
 
+#Needed on windows
+if (MSVC)
+  TARGET_LINK_LIBRARIES(douf_time_cpp PRIVATE ${Boost_DATE_TIME_LIBRARY})
+endif()
+
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE
         PATTERN "*~" EXCLUDE)
