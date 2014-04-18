@@ -1,8 +1,3 @@
-#TODO
-#this project contains a library that has a C interface, so we don't want the "d" suffix on debug builds on windows
-#Must be set before including safir_sdk_core_config.cmake
-#SET(NO_LIBRARY_POSTFIXES 1) 
-
 add_subdirectory(AceTimeConverter_test)
 add_subdirectory(ExternalTimeProvider_test)
 add_subdirectory(TimeProvider_cpp_test)
