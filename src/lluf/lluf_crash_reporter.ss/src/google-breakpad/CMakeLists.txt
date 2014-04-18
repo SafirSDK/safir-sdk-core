@@ -26,8 +26,6 @@ if (MSVC)
     SVN_REVISION -r ${MY_SVN_REVISION}
     PATCH_COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/build-breakpad-windows.cmake <SOURCE_DIR>/CMakeLists.txt
     UPDATE_COMMAND "" #disable update since we're going against fixed revision
-    CMAKE_ARGS -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-    CMAKE_GENERATOR "NMake Makefiles"
     )
 else()
   ExternalProject_Add(

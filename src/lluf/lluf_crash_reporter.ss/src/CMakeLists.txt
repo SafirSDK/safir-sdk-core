@@ -1,8 +1,3 @@
-#TODO
-if (NOT "${CMAKE_CONFIGURATION_TYPES}" STREQUAL "")
-  message(FATAL_ERROR "This project does not support being built in visual studio. Please use NMake on windows and make on linux")
-endif()
-
 #this library has an interface which is okay to call between debug/release runtimes,
 #and we only want one version of it, so we never want the "d" suffix on debug builds,
 #which is default on windows.
