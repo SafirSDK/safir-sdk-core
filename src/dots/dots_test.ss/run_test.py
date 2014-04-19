@@ -30,7 +30,7 @@ from syslog_server import SyslogServer
 parser = argparse.ArgumentParser("test script")
 parser.add_argument("--show-safir-config", required=True)
 parser.add_argument("--language", required=True)
-parser.add_argument("--binary-dir", required=True)
+parser.add_argument("--binary", required=True)
 parser.add_argument("--output", required=True)
 
 arguments = parser.parse_args()
@@ -41,7 +41,7 @@ syslog = SyslogServer(arguments.show_safir_config)
 dependencies = list()
 
 if arguments.language == "cpp":
-    command = (os.path.join(arguments.binary_dir,"cpp", "dots_test_cpp"),)
+    command = arguments.binary
 else:
     print("Not implemented")
     sys.exit(1)
