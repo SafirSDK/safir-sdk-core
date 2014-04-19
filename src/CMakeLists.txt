@@ -168,14 +168,14 @@ if (MSVC)
     #message("Adding ${CMAKE_CURRENT_BINARY_DIR} to DLL_PATH")
     file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}" curdir)
     get_property(DLL_PATH GLOBAL PROPERTY DLL_PATH)
-	#TODO: can we do the studio build path in a better way?
-    set_property(GLOBAL PROPERTY DLL_PATH "${DLL_PATH};${curdir};${curdir}\\Release;${curdir}\\Debug")
+    #TODO: can we do the studio build path in a better way?
+    set_property(GLOBAL PROPERTY DLL_PATH "${DLL_PATH};${curdir};${curdir}\\RelWithDebInfo;${curdir}\\Release;${curdir}\\Debug")
     _add_library(${ARGN})
   endfunction()
 endif()
 
 # Set up properties on tests
-# Usage: SET_SAFIR_TEST_PROPERTIES(TEST <test_target> [TIMEOUT <timeout>] [CONFIG_OVERRIDE <config_dir>])
+# Usage: SET_SAFIR_TEST_PROPERTIES(TEST <test_target> [TIMEOUT <timeout>] [CONFIG_OVERRIDE <config_dir>] [ENVIRONMENT ...])
 #
 # TIMEOUT (optional): Time in seconds after which the test is interrupted. If not specified will be set to 60s.
 # CONFIG_OVERRIDE (optional): Absolute path to directory containing safir configuration. If not specified
