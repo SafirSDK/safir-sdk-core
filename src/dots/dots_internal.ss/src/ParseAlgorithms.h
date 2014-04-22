@@ -971,7 +971,10 @@ namespace ToolSupport
 
     template<> struct ParseAlgorithm<Elements::Set>
     {
-        void operator()(boost::property_tree::ptree& pt, ParseState& state) const {state.lastInsertedClass->members.back()->collectionType=SetCollectionType;}
+        void operator()(boost::property_tree::ptree& pt, ParseState& state) const
+        {
+            state.lastInsertedClass->members.back()->collectionType=SetCollectionType;
+        }
     };
 
     template<> struct ParseAlgorithm<Elements::Dictionary>
