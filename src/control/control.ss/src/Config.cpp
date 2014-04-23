@@ -204,8 +204,8 @@ namespace Control
             }
 
             // RetryTimeout
-            float retryTimeout;
-            ms = bl.GetFloat32Member(blob, ntcd->GetMemberIndex("RetryTimeout"), 0, retryTimeout);
+            int retryTimeout;
+            ms = bl.GetInt32Member(blob, ntcd->GetMemberIndex("RetryTimeout"), 0, retryTimeout);
             if (ms.IsNull())
             {
                 throw std::logic_error("Node type " + nodeTypeName + ": RetryTimeout is mandatory");
