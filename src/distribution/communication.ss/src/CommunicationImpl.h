@@ -95,7 +95,6 @@ namespace Com
         GotReceiveFrom m_gotRecv;
 
         //main components of communication
-        Writer<UserData> m_discoverWriter;
         Discoverer m_discoverer;
         DeliveryHandler m_deliveryHandler;
         Reader m_reader;

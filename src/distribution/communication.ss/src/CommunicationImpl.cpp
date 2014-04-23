@@ -55,10 +55,7 @@ namespace Com
         ,m_nodeTypes(nodeTypes)
         ,m_onNewNode()
         ,m_gotRecv()
-        ,m_discoverWriter(m_ioService, m_me.IpVersion())
-        ,m_discoverer(m_ioService, m_me,
-                        [=](const UserDataPtr& ud, const boost::asio::ip::udp::endpoint& to){m_discoverWriter.SendTo(ud, to);},
-                        [=](const Node& n){OnNewNode(n);})
+        ,m_discoverer(m_ioService, m_me, [=](const Node& n){OnNewNode(n);})
         ,m_deliveryHandler(m_ioService, m_me)
         ,m_reader(ioService, m_me, m_nodeTypes[nodeTypeId]->MulticastAddress(),
                     [=](const char* d, size_t s){return OnRecv(d,s);},
