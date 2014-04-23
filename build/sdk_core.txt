@@ -46,12 +46,6 @@ build_dir        src/distribution/system_picture.ss/src        RelWithDebInfo De
 run_test_suite   src/distribution/communication.ss/tests/unit_tests     communication_unit_tests
 run_test_suite   src/distribution/system_picture.ss/tests      system_picture_tests
 
-#Control
-build_dir        src/control/control.ss/src                    RelWithDebInfo
-
-#Control unit tests
-run_test_suite   src/control/control.ss/tests              control_tests
-
 #DOTS
 build_dir        src/dots/dots_internal.ss/src             RelWithDebInfo   Debug
 run_test_suite   src/dots/dots_internal.ss/tests           dots_internal_test_suite
@@ -65,6 +59,12 @@ build_dir        src/dots/dots_ada.ss                      RelWithDebInfo
 build_dir        src/dots/dots_java.ss/src                 RelWithDebInfo
 build_dir        src/dots/dots_v.ss                        RelWithDebInfo
 build_dir        src/dots/dots_depends.ss                  RelWithDebInfo
+
+#Control
+build_dir        src/control/control.ss/src                RelWithDebInfo
+
+#Control unit tests
+run_test_suite   src/control/control.ss/tests              control_tests
 
 #COPY DOB FILES
 copy_dob_files   src/dose/dose_dou.ss/data                 safir_core
