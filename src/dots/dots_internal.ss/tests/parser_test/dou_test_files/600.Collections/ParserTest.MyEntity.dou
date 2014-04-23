@@ -24,7 +24,7 @@
         <member>
             <name>MyDictionary</name>
             <type>Int32</type>
-            <dictionary>EntityId</dictionary>
+            <dictionary>ParserTest.MyColorEnum</dictionary>
         </member>
 
         <member>
@@ -35,7 +35,7 @@
 
         <member>
             <name>MySet</name>
-            <type>ParserTest.MyEntity</type>
+            <type>ParserTest.MyColorEnum</type>
             <set/>
         </member>
         

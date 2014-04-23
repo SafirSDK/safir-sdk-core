@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<property xmlns="urn:safir-dots-unit" xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Defines property.</summary>
+    <name>ParserTest.MyProperty</name>
+    <members>
+        <member>
+            <set/>
+            <name>SetPropertyValue</name>
+            <type>Int64</type>
+        </member>
+        <member>
+            <dictionary>Float32</dictionary>
+            <name>DictionaryPropertyValue</name>
+            <type>Float32</type>
+        </member>
+    </members>
+</property>

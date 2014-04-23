@@ -57,6 +57,12 @@ namespace ToolSupport
     int GetReferencedIndex(boost::property_tree::ptree& pt, ParseState& state);
     std::string GetEntityIdParameterAsString(boost::property_tree::ptree& pt);
     bool ParseValue(DotsC_MemberType memberType, const std::string& val, ValueDefinition& result);
+    inline bool ValidKeyType(DotsC_MemberType memberType)
+    {
+        return  memberType==Int32MemberType || memberType==Int64MemberType || memberType==StringMemberType ||
+                memberType==InstanceIdMemberType || memberType==HandlerIdMemberType || memberType==ChannelIdMemberType ||
+                memberType==EntityIdMemberType || memberType==EnumerationMemberType || memberType==ObjectMemberType; //objectMemberType only allowed since it may be resolved to an enum later.
+    }
 
     template <class Ptr>
     bool NameComparerPtr(const Ptr& obj, const std::string& name) {return obj->name==name;}
@@ -338,21 +344,23 @@ namespace ToolSupport
                 throw ParseError("Duplicated member", os.str(), state.currentPath, 175);
             }
 
-            state.lastInsertedClass->members.push_back(def);
-        }
-    };
-
-    template<> struct ParseAlgorithm<Elements::MemberType>
-    {
-        void operator()(boost::property_tree::ptree& pt, ParseState& state) const
-        {
-            SerializationUtils::Trim(pt.data());
-            state.lastInsertedClass->members.back()->typeName=pt.data();
-            if (!BasicTypeOperations::IsBasicTypeName(pt.data(), state.lastInsertedClass->members.back()->memberType))
+            //get type
+            try
             {
-                //not a basic type, we have to check later if its an enum or class type, for now we assume class
-                state.lastInsertedClass->members.back()->memberType=ObjectMemberType;
+                 def->typeName=pt.get<std::string>(Elements::MemberType::Name());
+                 SerializationUtils::Trim(def->typeName);
+                 if (!BasicTypeOperations::IsBasicTypeName(def->typeName, def->memberType))
+                 {
+                     //not a basic type, we have to check later if its an enum or class type, for now we assume class
+                     def->memberType=ObjectMemberType;
+                 }
             }
+            catch (const boost::property_tree::ptree_error&)
+            {
+                throw ParseError("Missing element", "Element 'type' is missing for member '"+def->name+"'' in class '"+state.lastInsertedClass->name+"'.", state.currentPath, 17);
+            }
+
+            state.lastInsertedClass->members.push_back(def);
         }
     };
 
@@ -845,6 +853,22 @@ namespace ToolSupport
                 throw ParseError("Duplicated property member", def->name+" is defined more than one time in property "+state.lastInsertedProperty->name, state.currentPath, 69);
             }
 
+            //get type
+            try
+            {
+                 def->typeName=pt.get<std::string>(Elements::PropertyMemberType::Name());
+                 SerializationUtils::Trim(def->typeName);
+                 if (!BasicTypeOperations::IsBasicTypeName(def->typeName, def->memberType))
+                 {
+                     //not a basic type, we have to check later if its an enum or class type, for now we assume class
+                     def->memberType=ObjectMemberType;
+                 }
+            }
+            catch (const boost::property_tree::ptree_error&)
+            {
+                throw ParseError("Missing element", "Element 'type' is missing for member '"+def->name+"'' in property '"+state.lastInsertedProperty->name+"'.", state.currentPath, 17);
+            }
+
             state.lastInsertedProperty->members.push_back(def);
         }
     };
@@ -852,20 +876,6 @@ namespace ToolSupport
     template<> struct ParseAlgorithm<Elements::PropertyMembersummary>
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const {state.lastInsertedProperty->members.back()->summary=pt.data();}
-    };
-
-    template<> struct ParseAlgorithm<Elements::PropertyMemberType>
-    {
-        void operator()(boost::property_tree::ptree& pt, ParseState& state) const
-        {
-            SerializationUtils::Trim(pt.data());
-            state.lastInsertedProperty->members.back()->typeName=pt.data();
-            if (!BasicTypeOperations::IsBasicTypeName(pt.data(), state.lastInsertedProperty->members.back()->memberType))
-            {
-                //not a basic type, we have to check later if its an enum or class type, for now we assume class
-                state.lastInsertedProperty->members.back()->memberType=ObjectMemberType;
-            }
-        }
     };
 
     template<> struct ParseAlgorithm<Elements::PropertyMemberisArray>
@@ -880,7 +890,16 @@ namespace ToolSupport
 
     template<> struct ParseAlgorithm<Elements::PropertyMemberIsSet>
     {
-        void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const {state.lastInsertedProperty->members.back()->collectionType=SetCollectionType;}
+        void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const
+        {
+            state.lastInsertedProperty->members.back()->collectionType=SetCollectionType;
+            if (!ValidKeyType(state.lastInsertedProperty->members.back()->memberType))
+            {
+                std::ostringstream ss;
+                ss<<"The specified type '"<<state.lastInsertedProperty->members.back()->typeName<<"' is not valid as for a set collection. On member '"<<state.lastInsertedProperty->members.back()->name<<"' in property '"<<state.lastInsertedProperty->name<<"'"<<std::endl;
+                throw ParseError("Invalid set type", ss.str(), state.currentPath, 655);
+            }
+        }
     };
 
     template<> struct ParseAlgorithm<Elements::PropertyMemberIsDictionary>
@@ -889,17 +908,22 @@ namespace ToolSupport
         {
             state.lastInsertedProperty->members.back()->collectionType=DictionaryCollectionType;
             SerializationUtils::Trim(pt.data());
-            state.lastInsertedProperty->members.back()->typeName=pt.data();
-            if (!BasicTypeOperations::IsBasicTypeName(pt.data(), state.lastInsertedProperty->members.back()->dictionaryKeyType) ||
-                    state.lastInsertedProperty->members.back()->dictionaryKeyType==BinaryMemberType)
+
+            if (!BasicTypeOperations::IsBasicTypeName(pt.data(), state.lastInsertedProperty->members.back()->keyType))
+            {
+                //Assume enumeration, check type later
+                state.lastInsertedProperty->members.back()->keyType=EnumerationMemberType;
+                state.lastInsertedProperty->members.back()->keyTypeId=TypeUtilities::CalculateTypeId(pt.data());
+            }
+
+            if (!ValidKeyType(state.lastInsertedProperty->members.back()->keyType))
             {
                 std::ostringstream ss;
-                ss<<"The specified type '"<<pt.data()<<"' is not valid as key in a dictionary. On member '"<<state.lastInsertedProperty->members.back()->name<<"' in property '"<<state.lastInsertedProperty->name<<"'"<<std::endl;
-                throw ParseError("Invalid dictionary key type", ss.str(), state.currentPath, 651);
+                ss<<"The specified type '"<<pt.data()<<"' is not valid as key in a dictionary. On member '"<<state.lastInsertedProperty->members.back()->name<<"' in class '"<<state.lastInsertedProperty->name<<"'"<<std::endl;
+                throw ParseError("Invalid dictionary key type", ss.str(), state.currentPath, 652);
             }
         }
     };
-
 
     template<> struct ParseAlgorithm<Elements::Membersummary>
     {
@@ -974,6 +998,12 @@ namespace ToolSupport
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
             state.lastInsertedClass->members.back()->collectionType=SetCollectionType;
+            if (!ValidKeyType(state.lastInsertedClass->members.back()->memberType))
+            {
+                std::ostringstream ss;
+                ss<<"The specified type '"<<state.lastInsertedClass->members.back()->typeName<<"' is not valid as for a set collection. On member '"<<state.lastInsertedClass->members.back()->name<<"' in class '"<<state.lastInsertedClass->name<<"'"<<std::endl;
+                throw ParseError("Invalid set type", ss.str(), state.currentPath, 650);
+            }
         }
     };
 
@@ -983,13 +1013,19 @@ namespace ToolSupport
         {
             state.lastInsertedClass->members.back()->collectionType=DictionaryCollectionType;
             SerializationUtils::Trim(pt.data());
-            state.lastInsertedClass->members.back()->typeName=pt.data();
-            if (!BasicTypeOperations::IsBasicTypeName(pt.data(), state.lastInsertedClass->members.back()->dictionaryKeyType) ||
-                    state.lastInsertedClass->members.back()->dictionaryKeyType==BinaryMemberType)
+
+            if (!BasicTypeOperations::IsBasicTypeName(pt.data(), state.lastInsertedClass->members.back()->keyType))
+            {
+                //Assume enumeration, check type later
+                state.lastInsertedClass->members.back()->keyType=EnumerationMemberType;
+                state.lastInsertedClass->members.back()->keyTypeId=TypeUtilities::CalculateTypeId(pt.data());
+            }
+
+            if (!ValidKeyType(state.lastInsertedClass->members.back()->keyType))
             {
                 std::ostringstream ss;
                 ss<<"The specified type '"<<pt.data()<<"' is not valid as key in a dictionary. On member '"<<state.lastInsertedClass->members.back()->name<<"' in class '"<<state.lastInsertedClass->name<<"'"<<std::endl;
-                throw ParseError("Invalid dictionary key type", ss.str(), state.currentPath, 650);
+                throw ParseError("Invalid dictionary key type", ss.str(), state.currentPath, 651);
             }
         }
     };

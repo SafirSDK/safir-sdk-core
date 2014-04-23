@@ -404,7 +404,7 @@ namespace ToolSupport
                 const ClassDescription* cd=repository->GetClass(id);
                 if (cd)
                 {
-                    (*memberIt)->typeId=id;
+                    (*memberIt)->typeId=id; //type is a known class, ok
                 }
                 else
                 {
@@ -412,14 +412,40 @@ namespace ToolSupport
                     if (ed)
                     {
                         (*memberIt)->typeId=id;
-                        (*memberIt)->memberType=EnumerationMemberType;
+                        (*memberIt)->memberType=EnumerationMemberType; //type is a known enum, ok
                     }
-                    else
+                    else //not a known type
                     {
                         std::ostringstream ss;
                         ss<<"The member '"<<(*memberIt)->name<<"' in class/property '"<<d->GetName()<<"' has an invalid type specified. Type: "<<(*memberIt)->typeName;
                         throw ParseError("Invalid type", ss.str(), d->FileName(), 104);
                     }
+                }
+
+                //if we get this far, the type was ok, however if the member is a set there is a limitation that objectMemberTypes are not allowed
+                if ((*memberIt)->collectionType==SetCollectionType && (*memberIt)->memberType==ObjectMemberType) //set and objectType is not ok
+                {
+                    std::ostringstream ss;
+                    ss<<"The member '"<<(*memberIt)->name<<"' in class/property '"<<d->GetName()<<" is a set collection. Classes are not valid types for sets. Specified type: "<<(*memberIt)->typeName;
+                    throw ParseError("Invalid type", ss.str(), d->FileName(), 653);
+                }
+            }
+
+            //if member is a dictionary we also have to check that the key type exists if it is enum
+            if ((*memberIt)->collectionType==DictionaryCollectionType && (*memberIt)->keyType==EnumerationMemberType)
+            {
+                const EnumDescription* ed=repository->GetEnum((*memberIt)->keyTypeId);
+                if (!ed) //not an enum, error
+                {
+                    std::ostringstream ss;
+                    ss<<"The member '"<<(*memberIt)->name<<"' in class/property '"<<d->GetName()<<" is a dictionary collection and has an invalid key type specified. ";
+                    const ClassDescription* cd=repository->GetClass((*memberIt)->keyTypeId);
+                    if (cd)
+                        ss<<cd->GetName()<<" is a class type and is not allowed as key type.";
+                    else
+                        ss<<"The specified key type does not exist.";
+
+                    throw ParseError("Invalid key type", ss.str(), d->FileName(), 654);
                 }
             }
         }

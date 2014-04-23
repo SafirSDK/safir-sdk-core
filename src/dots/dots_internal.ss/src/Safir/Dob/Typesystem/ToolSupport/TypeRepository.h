@@ -174,10 +174,17 @@ namespace ToolSupport
         virtual DotsC_CollectionType GetCollectionType() const=0;
 
         /**
-         * @brief Get key type of this parameter. Only valid if CollectionType=HashtableCollectionType, use GetCollectionType() method.
+         * @brief Get key type of this parameter. Only valid if CollectionType=DictionaryCollectionType, use GetCollectionType() method.
          * @return Key member type.
          */
-        virtual DotsC_MemberType GetKeyType() const=0; //only valid if collectionType is Hashtable
+        virtual DotsC_MemberType GetKeyType() const=0; //only valid if collectionType is Dictionary
+
+        /**
+         * @brief If this parameter has CollectionType Dictionary and KeyType Enumeration, the specific typeId of that enumeration can be retrieved by this method.
+         * If KeyType is not Enum the result of this method is undefined. Hence always use this in conjunction with GetKeyType().
+         * @return TypeId of the enumeration type that is key type for this dictionary parameter.
+         */
+        virtual DotsC_TypeId GetKeyTypeId() const=0;
 
         /**
          * @brief Get the array size of this parameter.
@@ -354,10 +361,17 @@ namespace ToolSupport
         virtual DotsC_CollectionType GetCollectionType() const=0;
 
         /**
-         * @brief Get key type of this member. Only valid if CollectionType=HashtableCollectionType, use GetCollectionType() method.
+         * @brief Get key type of this member. Only valid if CollectionType=DictionaryCollectionType, use GetCollectionType() method.
          * @return Key member type.
          */
-        virtual DotsC_MemberType GetKeyType() const=0; //only valid if collectionType is Hashtable
+        virtual DotsC_MemberType GetKeyType() const=0; //only valid if collectionType is Dictionary
+
+        /**
+         * @brief If this member has CollectionType Dictionary and KeyType Enumeration, the specific typeId of that enumeration can be retrieved by this method.
+         * If KeyType is not Enum the result of this method is undefined. Hence always use this in conjunction with GetKeyType().
+         * @return TypeId of the enumeration type that is key type for this dictionary member.
+         */
+        virtual DotsC_TypeId GetKeyTypeId() const=0;
 
         /**
          * @brief Get the array size of this member.

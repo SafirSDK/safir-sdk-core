@@ -108,7 +108,8 @@ namespace ToolSupport
         virtual const char* GetName() const { return name.c_str(); }
         virtual DotsC_MemberType GetMemberType() const {return memberType;}
         virtual DotsC_CollectionType GetCollectionType() const {return collectionType;}
-        virtual DotsC_MemberType GetKeyType() const {return dictionaryKeyType;}
+        virtual DotsC_MemberType GetKeyType() const {return keyType;}
+        virtual DotsC_TypeId GetKeyTypeId() const {return keyTypeId;}
         virtual int GetArraySize() const {return arraySize;}
         virtual int GetMaxLength() const {return maxLength;}
 
@@ -118,11 +119,12 @@ namespace ToolSupport
         std::string typeName;
         DotsC_MemberType memberType;
         DotsC_CollectionType collectionType;
-        DotsC_MemberType dictionaryKeyType;
+        DotsC_MemberType keyType;
         int arraySize; //If isArray
         int maxLength; //Max string length. Only applicable if typeName is 'String'.
 
         DotsC_TypeId typeId; //TypeId belonging to the type of this member. Only valid if memberType is object or enum.
+        DotsC_TypeId keyTypeId; //TypeId belonging to the type of this member. Only valid if memberType is object or enum.
     };
     typedef boost::shared_ptr<MemberDescriptionBasic> MemberDescriptionBasicPtr;
 
@@ -192,7 +194,8 @@ namespace ToolSupport
         virtual DotsC_MemberType GetMemberType() const {return memberType;}
         virtual DotsC_TypeId GetTypeId() const {return typeId;} //only valid if MemberType is object or enum
         virtual DotsC_CollectionType GetCollectionType() const {return collectionType;}
-        virtual DotsC_MemberType GetKeyType() const {return dictionaryKeyType;} //only valid if collectionType is Dictionary
+        virtual DotsC_MemberType GetKeyType() const {return keyType;} //only valid if collectionType is Dictionary
+        virtual DotsC_TypeId GetKeyTypeId() const {return keyTypeId;}
         virtual int GetArraySize() const {return static_cast<int>(values.size());}
         virtual bool IsHidden() const {return hidden;}
 
@@ -248,12 +251,13 @@ namespace ToolSupport
         std::string typeName;
         DotsC_MemberType memberType;
         DotsC_CollectionType collectionType;
-        DotsC_MemberType dictionaryKeyType;
+        DotsC_MemberType keyType;
         bool hidden;   //Some parameters are derived from propertyMapping values. The parser will automatically generate a
                         //hidden parameter for those values. All explicitly declared parameters will have hidden=false.
         ParameterValues values;
 
         DotsC_TypeId typeId; //TypeId belonging to the value of this parameter. Only valid if parameter is object or enum.
+        DotsC_TypeId keyTypeId;
     };
     typedef boost::shared_ptr<ParameterDescriptionBasic> ParameterDescriptionBasicPtr;
 
