@@ -43,7 +43,7 @@ namespace Com
     class Discoverer
     {
     public:
-        Discoverer(boost::asio::io_service& ioService,
+        Discoverer(const boost::shared_ptr<boost::asio::io_service>& ioService,
                    const Node& me,
                    const boost::function<void(const UserDataPtr&, const boost::asio::ip::udp::endpoint&)>& sendTo,
                    const boost::function<void(const Node&)>& onNewNode);
@@ -59,27 +59,28 @@ namespace Com
 #endif
         struct NodeInfo
         {
-            boost::int64_t id;
+            boost::int64_t nodeId;
+            boost::int64_t nodeTypeId;
             std::string name;
             std::string unicastAddress;
-            std::string multicastAddress;
+
 
             NodeInfo()
-                :id(0)
+                :nodeId(0)
+                ,nodeTypeId(0)
                 ,name()
                 ,unicastAddress()
-                ,multicastAddress()
             {
             }
 
-            NodeInfo(boost::int64_t id_,
+            NodeInfo(boost::int64_t nodeId_,
+                     boost::int64_t nodeTypeId_,
                      const std::string& name_,
-                     const std::string& unicastAddress_,
-                     const std::string& multicastAddress_)
-                :id(id_)
+                     const std::string& address_)
+                :nodeId(nodeId_)
+                ,nodeTypeId(nodeTypeId_)
                 ,name(name_)
-                ,unicastAddress(unicastAddress_)
-                ,multicastAddress(multicastAddress_)
+                ,unicastAddress(address_)
             {
             }
         };
@@ -99,7 +100,11 @@ namespace Com
         std::map<boost::int64_t, std::vector<bool> > m_incompletedNodes; //talked to but still haven't received all node info from this node
 
         boost::asio::io_service::strand m_strand;
-        Node m_me;
+        boost::int64_t m_myNodeId;
+        std::string m_myNodeName;
+        std::string m_myAddress;
+        boost::int64_t m_myNodeTypeId;
+
         boost::function<void(const UserDataPtr&, const boost::asio::ip::udp::endpoint&)> m_sendTo;
         boost::function<void(const Node&)> m_onNewNode;
         boost::asio::steady_timer m_timer;

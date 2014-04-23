@@ -30,9 +30,8 @@
 #include <boost/function.hpp>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
-#include "Node.h"
 #include "Message.h"
-#include "MessageQueue.h"
+#include "Utilities.h"
 
 namespace Safir
 {
@@ -81,20 +80,28 @@ namespace Com
     public:
         typedef boost::shared_ptr<T> Ptr;
 
-        Writer(boost::asio::io_service& ioService, int protocol)
-
-        Writer(boost::asio::io_service& ioService, const Node& me)
-            :m_me(me)
-            ,m_socket(ioService, m_me.Endpoint().protocol())
+        Writer(const boost::shared_ptr<boost::asio::io_service>& ioService, int protocol)
+            :m_socket(*ioService, Utilities::Protocol(protocol))
+            ,m_multicastEndpoint()
+            ,m_multicastEnabled(false)
         {
             m_socket.set_option(boost::asio::ip::udp::socket::reuse_address(true));
-            if (m_me.IsMulticastEnabled())
+        }
+
+        Writer(const boost::shared_ptr<boost::asio::io_service>& ioService, int protocol, const std::string& multicastAddress)
+            :m_socket(*ioService, Utilities::Protocol(protocol))
+            ,m_multicastEndpoint(Utilities::CreateEndpoint(multicastAddress))
+            ,m_multicastEnabled(!multicastAddress.empty())
+        {
+            m_socket.set_option(boost::asio::ip::udp::socket::reuse_address(true));
+            if (m_multicastEnabled)
             {
-                m_multicastEndpoint=Node::CreateEndpoint(m_me.MulticastAddress(), m_me.Endpoint().port());
                 m_socket.set_option(boost::asio::ip::multicast::enable_loopback(true));
                 m_socket.set_option(boost::asio::ip::multicast::join_group(m_multicastEndpoint.address()));
             }
         }
+
+        bool IsMulticastEnabled() const {return m_multicastEnabled;}
 
         void SendTo(const Ptr& val, const boost::asio::ip::udp::endpoint& to)
         {
@@ -106,47 +113,10 @@ namespace Com
             SendTo(val, m_multicastEndpoint);
         }
 
-        void SendToAllSystemNodes(const Ptr& val, const NodeMap& nodes)
-        {
-            if (m_me.IsMulticastEnabled())
-            {
-                bool sendMulticast=false;
-                for (auto& vt : nodes)
-                {
-                    if (vt.second.IsSystemNode())
-                    {
-                        if (vt.second.IsMulticastEnabled())
-                        {
-                            sendMulticast=true;
-                        }
-                        else
-                        {
-                            SendTo(val, vt.second.Endpoint());
-                        }
-                    }
-                }
-
-                if (sendMulticast)
-                {
-                    SendMulticast(val);
-                }
-            }
-            else
-            {
-                for (auto& vt : nodes)
-                {
-                    if (vt.second.IsSystemNode())
-                    {
-                        SendTo(val, vt.second.Endpoint());
-                    }
-                }
-            }
-        }
-
     private:
-        Node m_me;
-        boost::asio::ip::udp::endpoint m_multicastEndpoint;
         boost::asio::ip::udp::socket m_socket;
+        boost::asio::ip::udp::endpoint m_multicastEndpoint;
+        bool m_multicastEnabled;
     };
 }
 }

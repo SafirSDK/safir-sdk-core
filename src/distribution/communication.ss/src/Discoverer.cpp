@@ -38,7 +38,7 @@ namespace Com
 #ifdef _MSC_VER
 #pragma warning (disable: 4355)
 #endif
-    Discoverer::Discoverer(boost::asio::io_service& ioService,
+    Discoverer::Discoverer(const boost::shared_ptr<boost::asio::io_service>& ioService,
                            const Node& me,
                            const boost::function<void(const UserDataPtr&, const boost::asio::ip::udp::endpoint&)>& sendTo,
                            const boost::function<void(const Node&)>& onNewNode)
@@ -46,11 +46,14 @@ namespace Com
         ,m_nodes()
         ,m_reportedNodes()
         ,m_incompletedNodes()
-        ,m_strand(ioService)
-        ,m_me(me)
+        ,m_strand(*ioService)
+        ,m_myNodeId(me.Id())
+        ,m_myNodeName(me.Name())
+        ,m_myAddress(me.Address())
+        ,m_myNodeTypeId(me.NodeTypeId())
         ,m_sendTo(sendTo)
         ,m_onNewNode(onNewNode)
-        ,m_timer(ioService)
+        ,m_timer(*ioService)
         ,m_randomGenerator(static_cast<boost::uint32_t>(me.Id()))
     {
     }
@@ -79,10 +82,10 @@ namespace Com
 
     void Discoverer::AddSeed(const std::string& seed)
     {
-        if (seed!=m_me.UnicastAddress())
+        if (seed!=m_myAddress)
         {
             boost::uint64_t id=LlufId_Generate64(seed.c_str());
-            NodeInfo s(id, "seed", seed, "");
+            NodeInfo s(id, 0, "seed", seed);
             this->m_seeds.insert(std::make_pair(id, s));
             lllog(DiscovererLogLevel)<<L"COM: Add seed "<<seed.c_str()<<std::endl;
         }
@@ -103,25 +106,25 @@ namespace Com
 
     void Discoverer::AddNewNode(const CommunicationMessage_Node& node)
     {
-        lllog(4)<<L"COM: Discoverer talked to new node "<<node.name().c_str()<<L" ["<<node.id()<<L"]"<<std::endl;
+        lllog(4)<<L"COM: Discoverer talked to new node "<<node.name().c_str()<<L" ["<<node.node_id()<<L"]"<<std::endl;
         //insert in node map
-        NodeInfo ni(node.id(), node.name(), node.unicast_address(), node.multicast_address());
-        m_nodes.insert(std::make_pair(ni.id, ni));
+        NodeInfo ni(node.node_id(), node.node_type_id(), node.name(), node.unicast_address());
+        m_nodes.insert(std::make_pair(ni.nodeId, ni));
 
-        m_reportedNodes.erase(ni.id); //now when we actually have talked to the node we also remove from reported nodes
+        m_reportedNodes.erase(ni.nodeId); //now when we actually have talked to the node we also remove from reported nodes
 
         //notify listener
-        Node n(node.name(), node.id(), node.unicast_address(), node.multicast_address());
+        Node n( node.name(), node.node_id(), node.node_type_id(), node.unicast_address());
         m_onNewNode(n);
     }
 
     void Discoverer::AddReportedNode(const CommunicationMessage_Node& node)
     {
-        lllog(DiscovererLogLevel)<<L"COM: Got report about node "<<node.name().c_str()<<L" ["<<node.id()<<L"]"<<std::endl;
+        lllog(DiscovererLogLevel)<<L"COM: Got report about node "<<node.name().c_str()<<L" ["<<node.node_id()<<L"]"<<std::endl;
 
         //insert in reported node map
-        NodeInfo ni(node.id(), node.name(), node.unicast_address(), node.multicast_address());
-        m_reportedNodes.insert(std::make_pair(ni.id, ni));
+        NodeInfo ni(node.node_id(), node.node_type_id(), node.name(), node.unicast_address());
+        m_reportedNodes.insert(std::make_pair(ni.nodeId, ni));
     }
 
     //incomplete nodes are nodes we have heard from but still haven't got all the nodeInfo messages from
@@ -199,7 +202,7 @@ namespace Com
 
     void Discoverer::HandleReceivedDiscover(const CommunicationMessage_Discover& msg)
     {
-        lllog(DiscovererLogLevel)<<L"COM: Received discover from "<<msg.from().name().c_str()<<" ["<<msg.from().id()<<"]"<<std::endl;
+        lllog(DiscovererLogLevel)<<L"COM: Received discover from "<<msg.from().name().c_str()<<" ["<<msg.from().node_id()<<"]"<<std::endl;
         m_strand.dispatch([=]
         {
             if (!m_running)
@@ -207,7 +210,7 @@ namespace Com
                 return;
             }
 
-            if (msg.from().id()==m_me.Id())
+            if (msg.from().node_id()==m_myNodeId)
             {
                 //discover from myself, remove seed
                 lllog(DiscovererLogLevel)<<L"COM: Received discover from myself. Remove from seed list"<<std::endl;
@@ -215,14 +218,14 @@ namespace Com
                 return;
             }
 
-            if (IsNewNode(msg.from().id()))
+            if (IsNewNode(msg.from().node_id()))
             {
                 //new node
                 AddNewNode(msg.from());
-                UpdateIncompleteNodes(msg.from().id(), 0, 0);
+                UpdateIncompleteNodes(msg.from().node_id(), 0, 0);
             }
 
-            SendNodeInfo(msg.from().id(), msg.sent_to_id(), Node::CreateEndpoint(msg.from().unicast_address()));
+            SendNodeInfo(msg.from().node_id(), msg.sent_to_id(), Utilities::CreateEndpoint(msg.from().unicast_address()));
         });
     }
 
@@ -242,29 +245,29 @@ namespace Com
             {
                 //we have now talked to this node, so it can be added as a real node and removed from seed and reported lists
                 m_seeds.erase(msg.sent_from_id()); //must use sentFromId and not sent_from_node().id since sentFromId is generated from address when seeding.
-                m_reportedNodes.erase(msg.sent_from_node().id());
+                m_reportedNodes.erase(msg.sent_from_node().node_id());
 
-                if (IsNewNode(msg.sent_from_node().id()))
+                if (IsNewNode(msg.sent_from_node().node_id()))
                 {
                     AddNewNode(msg.sent_from_node());
                 }
 
-                UpdateIncompleteNodes(msg.sent_from_node().id(), msg.number_of_packets(), msg.packet_number());
+                UpdateIncompleteNodes(msg.sent_from_node().node_id(), msg.number_of_packets(), msg.packet_number());
             }
 
             //Add the rest to reportedNodes if not already a known node
             for (auto nit=msg.nodes().begin(); nit!=msg.nodes().end(); ++nit)
             {
-                if (nit->id()!=m_me.Id())
+                if (nit->node_id()!=m_myNodeId)
                 {
-                    if (nit->id()==0 && nit->name()=="seed")
+                    if (nit->node_id()==0 && nit->name()=="seed")
                     {
                         lllog(DiscovererLogLevel)<<L"COM: Received seed from other node. Address to seed: "<<nit->unicast_address().c_str()<<std::endl;
                         AddSeed(nit->unicast_address());
                     }
-                    else if (IsNewNode(nit->id()))
+                    else if (IsNewNode(nit->node_id()))
                     {
-                        lllog(DiscovererLogLevel)<<L"COM: Reported node: "<<nit->name().c_str()<<L" ["<<nit->id()<<L"]"<<std::endl;
+                        lllog(DiscovererLogLevel)<<L"COM: Reported node: "<<nit->name().c_str()<<L" ["<<nit->node_id()<<L"]"<<std::endl;
                         AddReportedNode(*nit);
                         //TODO: If not very busy, we can send discover right away instead of waiting for timer.
                     }
@@ -279,26 +282,23 @@ namespace Com
         CommunicationMessage cm;
         cm.set_message_type(CommunicationMessage_MessageType_DiscoverMsg);
 
-        cm.mutable_discover()->mutable_from()->set_id(m_me.Id());
-        cm.mutable_discover()->mutable_from()->set_name(m_me.Name());
-        cm.mutable_discover()->mutable_from()->set_unicast_address(m_me.UnicastAddress());
-        if (m_me.IsMulticastEnabled())
-        {
-            cm.mutable_discover()->mutable_from()->set_multicast_address(m_me.MulticastAddress());
-        }
+        cm.mutable_discover()->mutable_from()->set_node_id(m_myNodeId);
+        cm.mutable_discover()->mutable_from()->set_name(m_myNodeName);
+        cm.mutable_discover()->mutable_from()->set_unicast_address(m_myAddress);
+        cm.mutable_discover()->mutable_from()->set_node_type_id(m_myNodeTypeId);
 
         for (auto it=m_seeds.cbegin(); it!=m_seeds.cend(); ++it)
         {
             cm.mutable_discover()->set_sent_to_id(it->first);
             lllog(DiscovererLogLevel)<<L"Send discover to seed: "<<it->second.unicastAddress.c_str()<<std::endl;
-            SendMessageTo(cm, Node::CreateEndpoint(it->second.unicastAddress));
+            SendMessageTo(cm, Utilities::CreateEndpoint(it->second.unicastAddress));
         }
 
         for (auto it=m_reportedNodes.cbegin(); it!=m_reportedNodes.cend(); ++it)
         {
             cm.mutable_discover()->set_sent_to_id(it->first);
-            lllog(DiscovererLogLevel)<<L"Send discover to node I've heard about: "<<it->second.name.c_str()<<L", id="<<it->second.id<<std::endl;
-            SendMessageTo(cm, Node::CreateEndpoint(it->second.unicastAddress));
+            lllog(DiscovererLogLevel)<<L"Send discover to node I've heard about: "<<it->second.name.c_str()<<L", id="<<it->second.nodeId<<std::endl;
+            SendMessageTo(cm, Utilities::CreateEndpoint(it->second.unicastAddress));
         }
 
         for (auto it=m_incompletedNodes.cbegin(); it!=m_incompletedNodes.cend(); ++it)
@@ -306,9 +306,9 @@ namespace Com
             const auto nodeIt=m_nodes.find(it->first);
             assert(nodeIt!=m_nodes.cend());
             const NodeInfo& node=nodeIt->second;
-            cm.mutable_discover()->set_sent_to_id(node.id);
-            lllog(DiscovererLogLevel)<<L"Resend discover to node I havent got all nodeInfo from: "<<node.name.c_str()<<L", id="<<node.id<<std::endl;
-            SendMessageTo(cm, Node::CreateEndpoint(node.unicastAddress));
+            cm.mutable_discover()->set_sent_to_id(node.nodeId);
+            lllog(DiscovererLogLevel)<<L"Resend discover to node I havent got all nodeInfo from: "<<node.name.c_str()<<L", id="<<node.nodeId<<std::endl;
+            SendMessageTo(cm, Utilities::CreateEndpoint(node.unicastAddress));
         }
     }
 
@@ -328,13 +328,10 @@ namespace Com
 
         //Add myself
         CommunicationMessage_Node* me=cm.mutable_node_info()->mutable_sent_from_node();
-        me->set_name(m_me.Name());
-        me->set_id(m_me.Id());
-        me->set_unicast_address(m_me.UnicastAddress());
-        if (m_me.IsMulticastEnabled())
-        {
-            me->set_multicast_address(m_me.MulticastAddress());
-        }
+        me->set_name(m_myNodeName);
+        me->set_node_id(m_myNodeId);
+        me->set_unicast_address(m_myAddress);
+        me->set_node_type_id(m_myNodeTypeId);
 
         int packetNumber=0;
         //Add seeds
@@ -342,7 +339,7 @@ namespace Com
         {
             CommunicationMessage_Node* ptr=cm.mutable_node_info()->mutable_nodes()->Add();
             ptr->set_name(seedIt->second.name);
-            ptr->set_id(0);
+            ptr->set_node_id(0);
             ptr->set_unicast_address(seedIt->second.unicastAddress);
             if (cm.node_info().nodes().size()==NumberOfNodesPerNodeInfoMsg)
             {
@@ -359,12 +356,9 @@ namespace Com
             const Discoverer::NodeInfo& node=nodeIt->second;
             CommunicationMessage_Node* ptr=cm.mutable_node_info()->mutable_nodes()->Add();
             ptr->set_name(node.name);
-            ptr->set_id(node.id);
+            ptr->set_node_id(node.nodeId);
+            ptr->set_node_type_id(node.nodeTypeId);
             ptr->set_unicast_address(node.unicastAddress);
-            if (!node.multicastAddress.empty())
-            {
-                ptr->set_multicast_address(node.multicastAddress);
-            }
 
             if (cm.node_info().nodes().size()==NumberOfNodesPerNodeInfoMsg)
             {
@@ -393,7 +387,7 @@ namespace Com
         boost::shared_ptr<char[]> payload(new char[size]);
         google::protobuf::uint8* buf=reinterpret_cast<google::protobuf::uint8*>(const_cast<char*>(payload.get()));
         cm.SerializeWithCachedSizesToArray(buf);
-        UserDataPtr ud(new UserData(m_me.Id(), ControlDataType, payload, static_cast<size_t>(size)));
+        UserDataPtr ud(new UserData(m_myNodeId, ControlDataType, payload, static_cast<size_t>(size)));
         m_sendTo(ud, toEndpoint);
     }
 

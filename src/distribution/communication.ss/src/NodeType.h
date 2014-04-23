@@ -26,6 +26,9 @@
 
 #include <map>
 #include <boost/asio.hpp>
+#include "AckedDataSender.h"
+#include "HeartbeatSender.h"
+
 
 namespace Safir
 {
@@ -38,29 +41,43 @@ namespace Com
     class NodeType
     {
     public:
-        NodeType(boost::int64_t id,
+        NodeType(const boost::shared_ptr<boost::asio::io_service>& ioService,
+                 boost::int64_t thisNodeId,
+                 bool useMulticast,
+                 boost::int64_t id,
                  const std::string& name,
                  const std::string& multicastAddr,
+                 int ipVersion,
                  int heartbeatInterval,
                  int retryTimeout);
 
         boost::int64_t Id() const {return m_id;}
         const std::string& Name() const {return m_name;}
-        bool IsMulticastEnabled() const {return m_multicastAddress.empty();}
-        const boost::asio::ip::udp::endpoint& MulticastEndpoint() const {return m_multicastEndpoint;}
+        bool UseMulticast() const {return m_useMulticast;}
+        const std::string& MulticastAddress() const {return m_multicastAddress;}
+        int IpVersion() const {return m_ipVersion;}
         int HeartbeatInterval() const {return m_heartbeatInterval;}
         int RetryTimeout() const {return m_retryTimeout;}
 
+        HeartbeatSender& GetHeartBeatSender() {return m_heartbeatSender;}
+        AckedDataSender& GetAckedDataSender() {return m_ackedDataSender;}
+
     private:
+        boost::int64_t m_thisNodeId;
         boost::int64_t m_id;
         std::string m_name;               //unique readable name
-        std::string m_multicastAddress;   //multicast address including port number, 'address:port' empty string if not multicast enabled        
+        std::string m_multicastAddress;   //multicast address including port number, 'address:port' empty string if not multicast enabled
+        int m_ipVersion;
         int m_heartbeatInterval;          //time between heartbeats
         int m_retryTimeout;               //time to wait before retransmitting unacked data
-        boost::asio::ip::udp::endpoint m_multicastEndpoint;
+        bool m_useMulticast;
+
+        HeartbeatSender m_heartbeatSender;
+        AckedDataSender m_ackedDataSender;
     };
 
-    typedef std::map<boost::int64_t, NodeType> NodeTypeMap;
+    typedef boost::shared_ptr<NodeType> NodeTypePtr;
+    typedef std::map<boost::int64_t, NodeTypePtr> NodeTypeMap;
 }
 }
 }

@@ -8,6 +8,7 @@
 #include <iostream>
 #include <fstream>
 #include <set>
+#include <boost/chrono.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeParser.h>
@@ -89,6 +90,7 @@ int main(int argc, char* argv[])
     Safir::Dob::Typesystem::ToolSupport::RepositoryToString(repository.get(), true, std::cout);
 
     std::cout<<"========= Test suite started ========"<<std::endl;
+    boost::chrono::high_resolution_clock::time_point startTime=boost::chrono::high_resolution_clock::now();
     try
     {
         RunTests(repository.get(), testDir, 0, 10000);
@@ -104,6 +106,9 @@ int main(int argc, char* argv[])
         return 1; //Failed
     }
 
+    boost::chrono::high_resolution_clock::duration elapsed=boost::chrono::high_resolution_clock::now()-startTime;
+    boost::chrono::milliseconds millis=boost::chrono::duration_cast<boost::chrono::milliseconds>(elapsed);
+    std::cout<<"Elapsed time: "<<millis.count()<<std::endl;
     std::cout<<"====================================="<<std::endl;
     return 0;
 }

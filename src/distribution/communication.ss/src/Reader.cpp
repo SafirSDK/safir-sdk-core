@@ -36,41 +36,35 @@ namespace Internal
 {
 namespace Com
 {
-    Reader::Reader(boost::asio::io_service& ioService,
+    Reader::Reader(const boost::shared_ptr<boost::asio::io_service>& ioService,
                    const Node& me,
+                   const std::string& multicastAddress,
                    const std::function<bool(const char*, size_t)>& onRecv,
                    const std::function<bool(void)>& isReceiverIsReady)
-        :m_ioService(ioService)
-        ,m_strand(ioService)
-        ,m_timer(m_ioService, boost::chrono::milliseconds(10))
-        ,m_me(me)
+        :m_strand(*ioService)
+        ,m_timer(*ioService, boost::chrono::milliseconds(10))
         ,m_onRecv(onRecv)
         ,m_isReceiverReady(isReceiverIsReady)
-        ,m_separateMulticastSocket(false)
         ,m_running(false)
     {
-        m_socket.reset(new boost::asio::ip::udp::socket(m_ioService));
+        m_socket.reset(new boost::asio::ip::udp::socket(*ioService));
         m_socket->open(me.Endpoint().protocol());
 
-        if (me.IsMulticastEnabled())
+        if (!multicastAddress.empty())
         {
-            boost::asio::ip::udp::endpoint mcEndpoint=Node::CreateEndpoint(me.MulticastAddress(), me.Endpoint().port());
-            m_separateMulticastSocket=(mcEndpoint.port()!=me.Endpoint().port());
-            if (m_separateMulticastSocket)
+            //using multicast
+            int multicastIpVersion=0;
+            boost::asio::ip::udp::endpoint mcEndpoint=Utilities::CreateEndpoint(multicastAddress, multicastIpVersion);
+            if (multicastIpVersion!=me.IpVersion())
             {
-                m_multicastSocket.reset(new boost::asio::ip::udp::socket(m_ioService));
-                m_multicastSocket->open(mcEndpoint.protocol());
-                m_multicastSocket->set_option(boost::asio::ip::udp::socket::reuse_address(true));
-                m_multicastSocket->set_option(boost::asio::ip::multicast::enable_loopback(true));
-                m_multicastSocket->set_option(boost::asio::ip::multicast::join_group(mcEndpoint.address()));
-                BindSocket(m_multicastSocket, me.IpVersion(), mcEndpoint.port());
+                throw std::logic_error("Unicast address and multicast address is not in same format (IPv4 and IPv6)");
             }
-            else
-            {
-                m_socket->set_option(boost::asio::ip::udp::socket::reuse_address(true));
-                m_socket->set_option(boost::asio::ip::multicast::enable_loopback(true));
-                m_socket->set_option(boost::asio::ip::multicast::join_group(mcEndpoint.address()));
-            }
+            m_multicastSocket.reset(new boost::asio::ip::udp::socket(*ioService));
+            m_multicastSocket->open(mcEndpoint.protocol());
+            m_multicastSocket->set_option(boost::asio::ip::udp::socket::reuse_address(true));
+            m_multicastSocket->set_option(boost::asio::ip::multicast::enable_loopback(true));
+            m_multicastSocket->set_option(boost::asio::ip::multicast::join_group(mcEndpoint.address()));
+            BindSocket(m_multicastSocket, multicastIpVersion, mcEndpoint.port());
         }
 
         BindSocket(m_socket, me.IpVersion(), me.Endpoint().port());
@@ -105,7 +99,7 @@ namespace Com
         {
             m_running=true;
             AsyncReceive(m_bufferUnicast, m_socket.get());
-            if (m_separateMulticastSocket)
+            if (m_multicastSocket)
             {
                 AsyncReceive(m_bufferMulticast, m_multicastSocket.get());
             }
@@ -123,7 +117,7 @@ namespace Com
             {
                 m_socket->close();
             }
-            if (m_separateMulticastSocket && m_multicastSocket->is_open())
+            if (m_multicastSocket && m_multicastSocket->is_open())
             {
                 m_multicastSocket->close();
             }

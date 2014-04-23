@@ -74,7 +74,7 @@ namespace Com
         };
 
         //Callbacks functions used in Communications public interface.
-        typedef boost::function<void(const std::string& name, boost::int64_t nodeId, const std::string& nodeTypeId, const std::string& address)> NewNode;
+        typedef boost::function<void(const std::string& name, boost::int64_t nodeId, boost::int64_t nodeTypeId, const std::string& address)> NewNode;
         typedef boost::function<void(boost::int64_t fromNodeId)> GotReceiveFrom;
         typedef boost::function<void(boost::int64_t toNodeId)> RetransmitTo;
         typedef boost::function<void(boost::int64_t fromNodeId, const boost::shared_ptr<char[]>& data, size_t size)> ReceiveData;
@@ -96,7 +96,7 @@ namespace Com
                       boost::int64_t& nodeTypeId,
                       const std::string& address,
                       bool discovering,
-                      const std::vector<NodeType>& nodeTypes);
+                      const std::vector<Communication::NodeType>& nodeTypes);
 
         /**
          * ~Communication - destructor.

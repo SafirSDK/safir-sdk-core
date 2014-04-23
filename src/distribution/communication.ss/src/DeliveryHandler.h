@@ -54,10 +54,10 @@ namespace Com
     class DeliveryHandlerBasic : private WriterType
     {
     public:
-        DeliveryHandlerBasic(boost::asio::io_service& ioService, const Node& me)
-            :WriterType(ioService, me)
+        DeliveryHandlerBasic(const boost::shared_ptr<boost::asio::io_service>& ioService, const Node& me)
+            :WriterType(ioService, me.IpVersion())
             ,m_myId(me.Id())
-            ,m_deliverStrand(ioService)
+            ,m_deliverStrand(*ioService)
             ,m_nodes()
             ,m_receivers()
             ,m_gotRecvFrom()

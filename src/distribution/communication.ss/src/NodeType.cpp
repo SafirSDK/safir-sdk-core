@@ -32,18 +32,34 @@ namespace Internal
 {
 namespace Com
 {
-    NodeType::NodeType(boost::int64_t id, const std::string &name, const std::string &multicastAddr, int heartbeatInterval, int retryTimeout)
-        :m_id(id)
+    namespace
+    {
+        std::string McAddr(const std::string& addr, bool use)
+        {
+            return use ? addr : "";
+        }
+    }
+
+    NodeType::NodeType(const boost::shared_ptr<boost::asio::io_service>& ioService,
+                       boost::int64_t thisNodeId,
+                       bool useMulticast,
+                       boost::int64_t id,
+                       const std::string &name,
+                       const std::string &multicastAddr,
+                       int ipVersion,
+                       int heartbeatInterval,
+                       int retryTimeout)
+        :m_thisNodeId(thisNodeId)
+        ,m_id(id)
         ,m_name(name)
         ,m_multicastAddress(multicastAddr)
+        ,m_ipVersion(ipVersion)
         ,m_heartbeatInterval(heartbeatInterval)
         ,m_retryTimeout(retryTimeout)
-        ,m_multicastEndpoint()
+        ,m_useMulticast(useMulticast)
+        ,m_heartbeatSender(ioService, thisNodeId, m_ipVersion, McAddr(m_multicastAddress, m_useMulticast), heartbeatInterval)
+        ,m_ackedDataSender(ioService, thisNodeId, m_ipVersion, McAddr(m_multicastAddress, m_useMulticast))
     {
-        if (IsMulticastEnabled())
-        {
-            m_multicastEndpoint=Utilities::CreateEndpoint(multicastAddr);
-        }
     }
 }
 }

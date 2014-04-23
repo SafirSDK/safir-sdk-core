@@ -46,38 +46,36 @@ namespace Com
                                          boost::int64_t nodeId, //0 is not a valid id.
                                          boost::int64_t& nodeTypeId,
                                          const std::string& address,
-                                         bool discovering)
+                                         bool discovering,
+                                         const NodeTypeMap& nodeTypes)
         :m_disableProtobufLogs()
         ,m_ioService(ioService)
         ,m_me(nodeName, nodeId, nodeTypeId, address)
         ,m_discovering(discovering)
-        ,m_nodeTypes()
+        ,m_nodeTypes(nodeTypes)
         ,m_onNewNode()
         ,m_gotRecv()
-        ,m_reader(*ioService, m_me,
-                    [=](const char* d, size_t s){return OnRecv(d,s);},
-                    [=](){return m_deliveryHandler.NumberOfUndeliveredMessages()<Parameters::MaxNumberOfUndelivered;})
-        ,m_discoverWriter(*m_ioService, m_me)
-        ,m_discoverer(*m_ioService, m_me,
+        ,m_discoverWriter(m_ioService, m_me.IpVersion())
+        ,m_discoverer(m_ioService, m_me,
                         [=](const UserDataPtr& ud, const boost::asio::ip::udp::endpoint& to){m_discoverWriter.SendTo(ud, to);},
                         [=](const Node& n){OnNewNode(n);})
-        ,m_ackedDataSender(*m_ioService, m_me)
-        ,m_heartbeatSender(*m_ioService, m_me)
-        ,m_deliveryHandler(*m_ioService, m_me)
+        ,m_deliveryHandler(m_ioService, m_me)
+        ,m_reader(ioService, m_me, m_nodeTypes[nodeTypeId]->MulticastAddress(),
+                    [=](const char* d, size_t s){return OnRecv(d,s);},
+                    [=](){return m_deliveryHandler.NumberOfUndeliveredMessages()<Parameters::MaxNumberOfUndelivered;})
     {
-        if (id==0)
+        if (nodeId==0)
         {
             throw std::invalid_argument("Safir.Communication ctor: Id=0 is reserved for internal usage and is not valid. You should consider using a random generated id.");
         }
+        auto myNodeType=m_nodeTypes[nodeTypeId];
         lllog(2)<<L"COM: -------------------------------------------------"<<std::endl;
         lllog(2)<<L"COM: Communication started"<<std::endl;
         lllog(2)<<L"COM:     id:    "<<m_me.Id()<<std::endl;
         lllog(2)<<L"COM:     name:    "<<m_me.Name().c_str()<<std::endl;
-        lllog(2)<<L"COM:     unicast: "<<m_me.UnicastAddress().c_str()<<std::endl;
-        if (m_me.IsMulticastEnabled())
-            lllog(2)<<L"COM:     multicast: "<<m_me.MulticastAddress().c_str()<<std::endl;
-        else
-            lllog(2)<<L"COM:     multicast: NOT_ENABLED"<<std::endl;
+        lllog(2)<<L"COM:     unicast: "<<m_me.Address().c_str()<<std::endl;
+        lllog(2)<<L"COM:     multicast: "<<myNodeType->MulticastAddress().c_str()<<std::endl;
+        lllog(2)<<L"COM:     using multicast: "<<std::boolalpha<<myNodeType->UseMulticast()<<std::dec<<std::endl;
         lllog(2)<<L"COM: -------------------------------------------------"<<std::endl;
     }
 #ifdef _MSC_VER
@@ -86,11 +84,6 @@ namespace Com
 
     CommunicationImpl::~CommunicationImpl()
     {
-    }
-
-    void CommunicationImpl::AddNodeType(boost::int64_t id, const std::string &name, const std::string &multicastAddress, int heartbeatInterval, int retryTimeout)
-    {
-        m_nodeTypes.insert(std::make_pair(id, NodeType(id, name, multicastAddress, heartbeatInterval, retryTimeout)));
     }
 
     void CommunicationImpl::SetNewNodeCallback(const NewNode& callback)
@@ -109,7 +102,7 @@ namespace Com
 
     void CommunicationImpl::SetRetransmitToCallback(const RetransmitTo& callback)
     {
-        m_ackedDataSender.SetRetransmitCallback(callback);
+        //m_ackedDataSender.SetRetransmitCallback(callback);
     }
 
     void CommunicationImpl::SetDataReceiver(const ReceiveData& callback, boost::int64_t dataTypeIdentifier)
@@ -119,22 +112,22 @@ namespace Com
 
     void CommunicationImpl::SetQueueNotFullCallback(const QueueNotFull& callback, int freePartThreshold)
     {
-        m_ackedDataSender.SetNotFullCallback(callback, freePartThreshold);
+        //m_ackedDataSender.SetNotFullCallback(callback, freePartThreshold);
     }
 
     void CommunicationImpl::Start()
     {
         m_reader.Start();
-        m_heartbeatSender.Start();
-        m_ackedDataSender.Start();
+        //m_heartbeatSender.Start();
+        //m_ackedDataSender.Start();
         m_discoverer.Start();
     }
 
     void CommunicationImpl::Stop()
     {
         m_reader.Stop();
-        m_heartbeatSender.Stop();
-        m_ackedDataSender.Stop();
+        //m_heartbeatSender.Stop();
+        //m_ackedDataSender.Stop();
         m_discoverer.Stop();
     }
 
@@ -148,14 +141,28 @@ namespace Com
         SetSystemNode(id, false);
     }
 
-    bool CommunicationImpl::SendAll(const boost::shared_ptr<char[]>& msg, size_t size, boost::int64_t dataTypeIdentifier)
+    bool CommunicationImpl::SendToNode(boost::int64_t nodeId, const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier)
     {
-        return m_ackedDataSender.AddToSendQueue(0, msg, size, dataTypeIdentifier); //receiverId 0 means every system node
+        //TODO
+        //find node and send
+        //return m_ackedDataSender.AddToSendQueue(toId, msg, size, dataTypeIdentifier);
+        return true;
     }
 
-    bool CommunicationImpl::SendTo(boost::int64_t toId, const boost::shared_ptr<char[]>& msg, size_t size, boost::int64_t dataTypeIdentifier)
+    bool CommunicationImpl::SendToNodeType(boost::int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier)
     {
-        return m_ackedDataSender.AddToSendQueue(toId, msg, size, dataTypeIdentifier);
+        //TODO
+        //find node type and send
+        //return m_ackedDataSender.AddToSendQueue(0, msg, size, dataTypeIdentifier); //receiverId 0 means every system node
+        return true;
+    }
+
+    size_t CommunicationImpl::NumberOfQueuedMessages(boost::int64_t nodeTypeId) const
+    {
+        //TODO
+        //find node type
+        // return m_ackedDataSender.SendQueueSize();
+        return 0;
     }
 
     void CommunicationImpl::InjectSeeds(const std::vector<std::string>& seeds)
@@ -172,19 +179,19 @@ namespace Com
             m_deliveryHandler.SetSystemNode(id, isSystemNode);
         });
 
-        m_ackedDataSender.SetSystemNode(id, isSystemNode);
-        m_heartbeatSender.SetSystemNode(id, isSystemNode);
+        //m_ackedDataSender.SetSystemNode(id, isSystemNode);
+        //m_heartbeatSender.SetSystemNode(id, isSystemNode);
     }
 
     void CommunicationImpl::OnNewNode(const Node& node)
     {
         lllog(6)<<L"COM: New node '"<<node.Name().c_str()<<L"' ["<<node.Id()<<L"]"<<std::endl;
-        m_ackedDataSender.AddNode(node);
-        m_heartbeatSender.AddNode(node);
+        //m_ackedDataSender.AddNode(node);
+        //m_heartbeatSender.AddNode(node);
         m_reader.Strand().dispatch([this, node]{m_deliveryHandler.AddNode(node);});
 
         //callback to host application
-        m_onNewNode(node.Name(), node.Id(), node.UnicastAddress(), node.IsMulticastEnabled());
+        m_onNewNode(node.Name(), node.Id(), node.NodeTypeId(), node.Address());
     }
 
     //returns true if it is ok to call OnRecv again, false if flooded with received messages
@@ -225,7 +232,7 @@ namespace Com
             {
                 m_gotRecv(commonHeader->senderId);
                 const Ack* ack=reinterpret_cast<const Ack*>(data);
-                m_ackedDataSender.HandleAck(*ack);
+                //m_ackedDataSender.HandleAck(*ack);
             }
         }
             break;
@@ -277,12 +284,6 @@ namespace Com
 
         switch (cm.message_type())
         {
-        case CommunicationMessage_MessageType_ApplicationDataMsg:
-        {
-            //can't occure here
-        }
-            break;
-
         case CommunicationMessage_MessageType_NodeInfoMsg:
         {
             m_discoverer.HandleReceivedNodeInfo(cm.node_info());

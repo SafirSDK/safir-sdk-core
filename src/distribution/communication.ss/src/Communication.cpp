@@ -41,13 +41,31 @@ namespace Com
                                  boost::int64_t& nodeTypeId,
                                  const std::string& unicastAddress,
                                  bool discovering,
-                                 const std::vector<NodeType>& nodeTypes)
-        : m_impl(new CommunicationImpl(ioService, nodeName, nodeId, nodeTypeId, unicastAddress, discovering))
+                                 const std::vector<Communication::NodeType>& nodeTypes)
     {
+        int ipVersion=4;
+        Utilities::CreateEndpoint(unicastAddress, ipVersion); //get the ip-version to use
+
+        //find own node type and check if we are multicast enabled
+        auto nodeTypeIt=std::find_if(nodeTypes.cbegin(), nodeTypes.cend(), [=](const Communication::NodeType& n){return n.id==nodeId;});
+        if (nodeTypeIt==nodeTypes.end())
+        {
+            throw std::logic_error("Own nodeType does not exist "+std::string(__FILE__));
+        }
+        bool thisNodeIsMulticastEnabled=!nodeTypeIt->multicastAddress.empty();
+
+
+        //create node type map
+        NodeTypeMap nodeTypeMap;
         for (const auto& nt : nodeTypes)
         {
-            m_impl->AddNodeType(nt.id, nt.name, nt.multicastAddress, nt.heartbeatInterval, nt.retryTimeout);
+            bool useMulticast=(thisNodeIsMulticastEnabled && !nt.multicastAddress.empty());
+            auto ptr=boost::make_shared<Safir::Dob::Internal::Com::NodeType>(ioService, nodeId, useMulticast, nt.id, nt.name, nt.multicastAddress, ipVersion, nt.heartbeatInterval, nt.retryTimeout);
+            nodeTypeMap.insert(NodeTypeMap::value_type(nt.id, ptr));
         }
+
+        //create impl object
+        m_impl=boost::make_shared<CommunicationImpl>(ioService, nodeName, nodeId, nodeTypeId, unicastAddress, discovering, nodeTypeMap);
     }
 
     Communication::~Communication()
@@ -113,17 +131,6 @@ namespace Com
     bool Communication::SendToNodeType(boost::int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier)
     {
         return m_impl->SendToNodeType(nodeTypeId, data, size, dataTypeIdentifier);
-
-    }
-
-    bool Communication::SendAll(const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier)
-    {
-        return m_impl->SendAll(data, size, dataTypeIdentifier);
-    }
-
-    bool Communication::SendTo(boost::int64_t toId, const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier)
-    {
-        return m_impl->SendTo(toId, data, size, dataTypeIdentifier);
     }
 
     size_t Communication::NumberOfQueuedMessages(boost::int64_t nodeTypeId) const

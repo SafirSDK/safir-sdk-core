@@ -27,13 +27,14 @@
 #include <map>
 #include <boost/noncopyable.hpp>
 #include <boost/asio.hpp>
+#include <boost/asio/steady_timer.hpp>
 #include <boost/function.hpp>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include "Node.h"
-#include "Message.h"
 #include "MessageQueue.h"
 #include "Parameters.h"
+#include "Writer.h"
 
 namespace Safir
 {
@@ -56,15 +57,18 @@ namespace Com
     class AckedDataSenderBasic : private WriterType
     {
     public:
-        AckedDataSenderBasic(boost::asio::io_service& ioService, const Node& me)
-            :WriterType(ioService, me)
-            ,m_strand(ioService)
-            ,m_me(me)
+        AckedDataSenderBasic(const boost::shared_ptr<boost::asio::io_service>& ioService,
+                             boost::int64_t nodeId,
+                             int ipVersion,
+                             const std::string& multicastAddress)
+            :WriterType(ioService, ipVersion, multicastAddress)
+            ,m_strand(*ioService)
+            ,m_nodeId(nodeId)
             ,m_sendQueue(Parameters::SendQueueSize)
             ,m_running(false)
             ,m_nodes()
             ,m_lastSentMulticastSeqNo(0)
-            ,m_resendTimer(ioService)
+            ,m_resendTimer(*ioService)
             ,m_retransmitNotification()
             ,m_queueNotFullNotification()
             ,m_queueNotFullNotificationLimit(0)
@@ -110,7 +114,6 @@ namespace Com
                 m_running=false;
                 m_resendTimer.cancel();
             });
-
         }
 
         //Add message to send queue. Message will be retranmitted unitl all receivers have acked. Returns false if queue is full.
@@ -154,7 +157,7 @@ namespace Com
                 for (size_t frag=0; frag<numberOfFullFragments; ++frag)
                 {
                     const char* fragment=msg.get()+frag*FragmentDataSize;
-                    UserDataPtr userData(new UserData(m_me.Id(), dataTypeIdentifier, msg, size, fragment, FragmentDataSize));
+                    UserDataPtr userData(new UserData(m_nodeId, dataTypeIdentifier, msg, size, fragment, FragmentDataSize));
                     userData->header.crc=crc;
                     userData->header.numberOfFragments=static_cast<unsigned short>(totalNumberOfFragments);
                     userData->header.fragmentNumber=static_cast<unsigned short>(frag);
@@ -169,7 +172,7 @@ namespace Com
                 if (restSize>0)
                 {
                     const char* fragment=msg.get()+numberOfFullFragments*FragmentDataSize;
-                    UserDataPtr userData(new UserData(m_me.Id(), dataTypeIdentifier, msg, size, fragment, restSize));
+                    UserDataPtr userData(new UserData(m_nodeId, dataTypeIdentifier, msg, size, fragment, restSize));
                     userData->header.crc=crc;
                     userData->header.numberOfFragments=static_cast<unsigned short>(totalNumberOfFragments);
                     userData->header.fragmentNumber=static_cast<unsigned short>(totalNumberOfFragments-1);
@@ -254,7 +257,7 @@ namespace Com
 
     private:
         boost::asio::io_service::strand m_strand;
-        Node m_me;
+        boost::int64_t m_nodeId;
         MessageQueue<UserDataPtr> m_sendQueue;
         std::atomic_uint m_sendQueueSize;
         bool m_running;
@@ -281,34 +284,20 @@ namespace Com
 
                 if (ud->sendToAllSystemNodes) //this is message that shall be sent to every system node
                 {
-                    if (m_me.IsMulticastEnabled()) //the sending node is capable of sending multicast
+                    if (WriterType::IsMulticastEnabled()) //this node and all the receivers are capable of sending and receiving multicast
                     {
-                        bool multicastReceiversExist=false;
-                        ud->header.sendMethod=UnicastSendMethod;
                         for (auto it=m_nodes.begin(); it!=m_nodes.end(); ++it)
                         {
                             Node& n=it->second;
                             if (n.IsSystemNode())
                             {
-                                if (!n.IsMulticastEnabled())
-                                {
-                                    //if receiver is not using multicast we have to send by unicast
-                                    ++n.LastSentUnicastSeqNo();
-                                    ud->header.sequenceNumber=n.LastSentUnicastSeqNo();
-                                    WriterType::SendTo(ud, n.Endpoint());
-                                    ud->receivers.insert(std::make_pair(n.Id(), Receiver(n.Id(), UnicastSendMethod, n.LastSentUnicastSeqNo())));
-                                }
-                                else
-                                {
-                                    //The node will get the message throuch the multicast message, we just add it to receiver list
-                                    //to be able to track the ack
-                                    ud->receivers.insert(std::make_pair(n.Id(), Receiver(n.Id(), MulticastSendMethod, m_lastSentMulticastSeqNo+1)));
-                                    multicastReceiversExist=true;
-                                }
+                                //The node will get the message throuch the multicast message, we just add it to receiver list
+                                //to be able to track the ack
+                                ud->receivers.insert(std::make_pair(n.Id(), Receiver(n.Id(), MulticastSendMethod, m_lastSentMulticastSeqNo+1)));
                             }
                         }
 
-                        if (multicastReceiversExist)
+                        if (ud->receivers.size()>0)
                         {
                             ++m_lastSentMulticastSeqNo;
                             ud->header.sequenceNumber=m_lastSentMulticastSeqNo;

@@ -21,6 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
+#include <boost/lexical_cast.hpp>
 #include "Utilities.h"
 
 namespace Safir
@@ -91,11 +92,16 @@ namespace  Utilities
 
     boost::asio::ip::udp::endpoint CreateEndpoint(const std::string& address)
     {
+        if (address.empty())
+        {
+            return boost::asio::ip::udp::endpoint();
+        }
+
         int dummy;
         return CreateEndpoint(address, dummy);
     }
 
-    boost::asio::ip::basic_endpoint::protocol_type Protocol(int p)
+    boost::asio::ip::udp::endpoint::protocol_type Protocol(int p)
     {
         if (p==4)
         {

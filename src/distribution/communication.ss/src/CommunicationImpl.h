@@ -45,7 +45,7 @@ namespace Internal
 {
 namespace Com
 {
-    typedef boost::function<void(const std::string& name, boost::int64_t nodeId, const std::string& nodeTypeId, const std::string& address)> NewNode;
+    typedef boost::function<void(const std::string& name, boost::int64_t nodeId, boost::int64_t nodeTypeId, const std::string& address)> NewNode;
 
     class CommunicationImpl : private boost::noncopyable
     {
@@ -55,15 +55,10 @@ namespace Com
                           boost::int64_t nodeId, //0 is not a valid id.
                           boost::int64_t& nodeTypeId,
                           const std::string& address,
-                          bool discovering);
+                          bool discovering,
+                          const NodeTypeMap& nodeTypes);
 
         virtual ~CommunicationImpl();
-
-        void AddNodeType(boost::int64_t id,
-                         const std::string& name,
-                         const std::string& multicastAddress,
-                         int heartbeatInterval,
-                         int retryTimeout);
 
         //set callbacks
         void SetNewNodeCallback(const NewNode& callback);
@@ -83,7 +78,7 @@ namespace Com
         bool SendToNode(boost::int64_t nodeId, const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier);
         bool SendToNodeType(boost::int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier);
 
-        size_t NumberOfQueuedMessages(boost::int64_t nodeTypeId) const {return m_ackedDataSender.SendQueueSize();}
+        size_t NumberOfQueuedMessages(boost::int64_t nodeTypeId) const;
 
         const std::string& Name() const {return m_me.Name();}
         boost::int64_t Id() const {return m_me.Id();}
@@ -93,19 +88,17 @@ namespace Com
         boost::shared_ptr<boost::asio::io_service> m_ioService;
         Node m_me;
         bool m_discovering;
-        std::map<boost::int64_t, NodeType> m_nodeTypes;
+        NodeTypeMap m_nodeTypes;
 
         //Callbacks
         NewNode m_onNewNode;
         GotReceiveFrom m_gotRecv;
 
         //main components of communication
-        Reader m_reader;
-        //Writer<UserData> m_discoverWriter;
+        Writer<UserData> m_discoverWriter;
         Discoverer m_discoverer;
-        //AckedDataSender m_ackedDataSender;
-        //HeartbeatSender m_heartbeatSender;
-        //DeliveryHandler m_deliveryHandler;
+        DeliveryHandler m_deliveryHandler;
+        Reader m_reader;
 
         void SetSystemNode(boost::int64_t id, bool isSystemNode);
         bool OnRecv(const char* data, size_t size); //returns true if it is ok to call OnRecv again, false if flooded with received messages

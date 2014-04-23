@@ -50,11 +50,16 @@ namespace Com
     class HeartbeatSenderBasic : private WriterType
     {
     public:
-        HeartbeatSenderBasic(boost::asio::io_service& ioService, const Node& me)
-            :WriterType(ioService, me)
-            ,m_strand(ioService)
-            ,m_heartbeatTimer(ioService)
-            ,m_heartbeat(new Heartbeat(me.Id()))
+        HeartbeatSenderBasic(const boost::shared_ptr<boost::asio::io_service>& ioService,
+                             boost::int64_t myNodeId,
+                             int ipVersion,
+                             const std::string& multicast,
+                             int heartbeatInterval)
+            :WriterType(ioService, ipVersion, multicast)
+            ,m_strand(*ioService)
+            ,m_heartbeatTimer(*ioService)
+            ,m_heartbeat(new Heartbeat(myNodeId))
+            ,m_interval(heartbeatInterval)
             ,m_nodes()
             ,m_running(false)
         {
@@ -65,7 +70,7 @@ namespace Com
             m_strand.dispatch([=]
             {
                 m_running=true;
-                m_heartbeatTimer.expires_from_now(boost::chrono::milliseconds(Parameters::HeartbeatInterval));
+                m_heartbeatTimer.expires_from_now(boost::chrono::milliseconds(m_interval));
                 m_heartbeatTimer.async_wait(m_strand.wrap([=](const boost::system::error_code&){OnTimeout();}));
             });
         }
@@ -79,46 +84,48 @@ namespace Com
             });
         }
 
-        //Add a node.
-        void AddNode(const Node& node)
+        //Add a node and starts sending heartbeats
+        void AddNode(boost::int64_t id, const boost::asio::ip::udp::endpoint& endpoint)
         {
             m_strand.dispatch([=]
             {
-                m_nodes.insert(std::make_pair(node.Id(), node));
+                m_nodes.insert(std::make_pair(id, endpoint));
             });
         }
 
-        //Make node included or excluded. If excluded it is also removed.
-        void SetSystemNode(boost::int64_t id, bool isSystemNode)
+        //Remove node and stop sending heartbeats
+        void RemoveNode(boost::int64_t id)
         {
             m_strand.dispatch([=]
             {
-                if (isSystemNode)
-                {
-                    const auto it=m_nodes.find(id);
-                    if (it!=m_nodes.end())
-                    {
-                        it->second.SetSystemNode(isSystemNode);
-                    }
-                }
-                else
-                {
-                    m_nodes.erase(id);
-                }
+                m_nodes.erase(id);
             });
         }
+
     private:
         boost::asio::io_service::strand m_strand;
         boost::asio::steady_timer m_heartbeatTimer;
         boost::shared_ptr<Heartbeat> m_heartbeat;
-        NodeMap m_nodes;
+        int m_interval;
+        std::map<boost::int64_t, boost::asio::ip::udp::endpoint> m_nodes;
         bool m_running;
 
         void OnTimeout()
         {
             if (m_running)
             {
-                WriterType::SendToAllSystemNodes(m_heartbeat, m_nodes);
+                if (WriterType::IsMulticastEnabled())
+                {
+                    WriterType::SendMulticast(m_heartbeat);
+                }
+                else
+                {
+                    for (auto& vt : m_nodes)
+                    {
+                        WriterType::SendTo(m_heartbeat, vt.second);
+                    }
+                }
+
                 m_heartbeatTimer.expires_from_now(boost::chrono::milliseconds(Parameters::HeartbeatInterval));
                 m_heartbeatTimer.async_wait(m_strand.wrap([=](const boost::system::error_code&){OnTimeout();}));
             }

@@ -48,8 +48,9 @@ namespace Com
     class Reader : private boost::noncopyable
     {
     public:
-        Reader(boost::asio::io_service& ioService,
+        Reader(const boost::shared_ptr<boost::asio::io_service>& ioService,
                const Node& me,
+               const std::string& multicastAddress, //empty if not using multicast
                const std::function<bool(const char*, size_t)>& onRecv,
                const std::function<bool(void)>& isReceiverIsReady);
 
@@ -60,15 +61,12 @@ namespace Com
 #ifndef SAFIR_TEST
     private:
 #endif
-        boost::asio::io_service& m_ioService;
         boost::asio::io_service::strand m_strand;
         boost::asio::steady_timer m_timer;
-        Node m_me;
         std::function<bool(const char*, size_t)> m_onRecv;
         std::function<bool(void)> m_isReceiverReady;
         boost::shared_ptr<boost::asio::ip::udp::socket> m_socket;
         boost::shared_ptr<boost::asio::ip::udp::socket> m_multicastSocket;
-        bool m_separateMulticastSocket;
         bool m_running;
 
         char m_bufferUnicast[Parameters::ReceiveBufferSize];
