@@ -1,58 +1,10 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <name>Test.MyParam</name>
-    <baseClass>Safir.Dob.Parametrization</baseClass>
+    <baseClass>Object</baseClass>
     <parameters>
         <parameter>
-            <summary>Slut</summary>
-            <name>Eid</name>
-            <type>EntityId</type>
-            <entityId>
-                <name>Safir.Dob.Entity</name>
-                <instanceId>123</instanceId>
-            </entityId>
-        </parameter>
-
-        <parameter>
-            <name>Tid</name>
-            <type>TypeId</type>
-            <value>Safir.Dob.Entity</value>
-        </parameter>    
-
-        <parameter>
-            <name>Iid</name>
-            <type>InstanceId</type>
-            <value>123</value>
-        </parameter>
-
-        <parameter>
-            <name>Two</name>
-            <type>Int32</type>
-            <value>2</value>
-        </parameter>
-
-        <parameter>
-            <name>Three</name>
-            <type>Int32</type>
-            <value>3</value>
-        </parameter>
-
-    <parameter>
-            <name>MyFloat</name>
-            <type>Float64</type>
-            <value>32.3</value>
-        </parameter>
-        
-        <parameter>
-         <summary>Weather Feature Type</summary>
-         <name>MyBigValue</name>
-         <type>Int64</type>
-          <value>99</value>
-         <!--value>9000006300000000010</value-->
-      </parameter>
-
-        <parameter>
-            <name>IntArray</name>
+            <name>OldArrayParam</name>
             <type>Int32</type>
             <arrayElements>
                 <arrayElement>
@@ -66,7 +18,7 @@
                 </arrayElement>
                 <arrayElement>
                     <valueRef>
-                        <name>Test.MyParam.IntArray</name>
+                        <name>Test.MyParam.OldArrayParam</name>
                         <index>2</index>
                     </valueRef>
                 </arrayElement>
@@ -76,6 +28,37 @@
             </arrayElements>            
         </parameter>
 
+
+        <parameter>
+            <name>SequenceParam</name>
+            <type>Int32</type>
+            <sequence>
+                <value>1</value>
+                <value>2</value>
+                <value>2</value>
+            </sequence>
+        </parameter>
+<!--        
+        <parameter>
+            <name>SetParam</name>
+            <type>Int32</type>
+            <set>
+                <value>1</value>
+                <value>2</value>
+                <value>3</value>
+            </set>
+        </parameter>
+        
+        <parameter>
+            <name>DictionaryParam</name>
+            <type>Int32</type>
+            <dictionary keyType="String">
+                <value key="Kalle">1</value>
+                <value key="Pelle">2</value>
+                <value key="Svarre">3</value>
+            </dictionary>
+        </parameter>
+-->
     </parameters>
 
 </class>

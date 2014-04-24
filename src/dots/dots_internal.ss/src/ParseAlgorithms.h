@@ -769,6 +769,30 @@ namespace ToolSupport
         }
     };
 
+    template<> struct ParseAlgorithm<Elements::ParameterSequence>
+    {
+        void operator()(boost::property_tree::ptree& pt, ParseState& state) const
+        {
+
+        }
+    };
+
+    template<> struct ParseAlgorithm<Elements::ParameterSet>
+    {
+        void operator()(boost::property_tree::ptree& pt, ParseState& state) const
+        {
+
+        }
+    };
+
+    template<> struct ParseAlgorithm<Elements::ParameterDictionary>
+    {
+        void operator()(boost::property_tree::ptree& pt, ParseState& state) const
+        {
+
+        }
+    };
+
     template<> struct ParseAlgorithm<Elements::BaseClass>
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const

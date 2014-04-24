@@ -55,6 +55,9 @@ namespace ToolSupport
         struct ParameterValueRef {static const std::string& Name() {static const std::string n="valueRef"; return n;}};
         struct ParameterArrayElement {static const std::string& Name() {static const std::string n="arrayElement"; return n;}};
         struct ParameterArrayElements {static const std::string& Name() {static const std::string n="arrayElements"; return n;}};
+        struct ParameterSequence {static const std::string& Name() {static const std::string n="sequence"; return n;}};
+        struct ParameterSet {static const std::string& Name() {static const std::string n="set"; return n;}};
+        struct ParameterDictionary {static const std::string& Name() {static const std::string n="dictionary"; return n;}};
         struct ParameterObject {static const std::string& Name() {static const std::string n="object"; return n;}};
         struct ParameterEntityId {static const std::string& Name() {static const std::string n="entityId"; return n;}};
         struct ParameterArrayIndex {static const std::string& Name() {static const std::string n="index"; return n;}};

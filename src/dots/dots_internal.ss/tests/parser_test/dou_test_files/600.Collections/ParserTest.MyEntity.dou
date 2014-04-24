@@ -2,18 +2,8 @@
 <class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <summary>Contains the definition of a distribution channel name.</summary>
     <name>ParserTest.MyEntity</name>
-    <baseClass>ParserTest.MyEntityBase</baseClass>
+    <baseClass>Safir.Dob.Entity</baseClass>
     <members>
-        <member>
-            <summary>Int32.</summary>
-            <name>MyInt32</name>
-            <type>Int32</type>            
-        </member>
-        <member>
-            <summary>MyItem.</summary>
-            <name>MyItem</name>
-            <type>ParserTest.MyItem</type>            
-        </member>
         <member>
             <summary>MyEntityArray</summary>
             <name>MyEntityArray</name>
@@ -40,20 +30,4 @@
         </member>
         
     </members>
-
-    <createRoutines>
-        <createRoutine>
-            <name>MyItemWithSome</name>
-            <parameters>
-                <member>MyInt32</member>
-                <member>MyInstanceId</member>
-            </parameters>
-            <values>
-                <value>
-                    <member>MyEntityId</member>
-                    <parameter><name>Test.MyParam.Eid</name></parameter>
-                </value>
-            </values>
-        </createRoutine>        
-    </createRoutines>
 </class>

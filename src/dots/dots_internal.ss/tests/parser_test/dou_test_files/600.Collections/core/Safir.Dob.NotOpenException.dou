@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<exception xmlns="urn:safir-dots-unit">
-    <summary>Exception thrown if dose_main has terminated in an unexpected way, or the application has not yet connected to dose.</summary>
-    <name>Safir.Dob.NotOpenException</name>
-    <baseClass>FundamentalException</baseClass>
-</exception>

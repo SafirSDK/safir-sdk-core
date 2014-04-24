@@ -26,7 +26,7 @@
         <member>
             <summary>object property</summary>
             <name>MyEntityBasePropertyValue</name>
-            <type>ParserTest.MyEntityBase</type>
+            <type>ParserTest.MyEntity</type>
         </member>
         
         <member>
