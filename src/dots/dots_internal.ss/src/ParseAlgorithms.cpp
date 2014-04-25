@@ -421,14 +421,6 @@ namespace ToolSupport
                         throw ParseError("Invalid type", ss.str(), d->FileName(), 104);
                     }
                 }
-
-                //if we get this far, the type was ok, however if the member is a set there is a limitation that objectMemberTypes are not allowed
-                if ((*memberIt)->collectionType==SetCollectionType && (*memberIt)->memberType==ObjectMemberType) //set and objectType is not ok
-                {
-                    std::ostringstream ss;
-                    ss<<"The member '"<<(*memberIt)->name<<"' in class/property '"<<d->GetName()<<" is a set collection. Classes are not valid types for sets. Specified type: "<<(*memberIt)->typeName;
-                    throw ParseError("Invalid type", ss.str(), d->FileName(), 653);
-                }
             }
 
             //if member is a dictionary we also have to check that the key type exists if it is enum

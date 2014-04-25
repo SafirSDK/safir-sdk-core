@@ -61,17 +61,15 @@ namespace ToolSupport
         typedef Element<Elements::PropertyMemberName, One> PropertyMemberName;
         typedef Element<Elements::PropertyMemberisArray, OptionalOne> PropertyMemberisArray;
         typedef Element<Elements::PropertyMemberIsSequence, OptionalOne> PropertyMemberIsSequence;
-        typedef Element<Elements::PropertyMemberIsSet, OptionalOne> PropertyMemberIsSet;
         typedef Element<Elements::PropertyMemberIsDictionary, OptionalOne> PropertyMemberIsDictionary;
         typedef Element<Elements::PropertyMemberType, One> PropertyMemberType;
-        typedef Element<Elements::PropertyMember, AtLeastOne, boost::mpl::vector<PropertyMembersummary, PropertyMemberName, PropertyMemberType, ELEMENT_CHOICE_4(PropertyMemberisArray, PropertyMemberIsSequence, PropertyMemberIsSet, PropertyMemberIsDictionary, OptionalOne) > > PropertyMember;
+        typedef Element<Elements::PropertyMember, AtLeastOne, boost::mpl::vector<PropertyMembersummary, PropertyMemberName, PropertyMemberType, ELEMENT_CHOICE_3(PropertyMemberisArray, PropertyMemberIsSequence, PropertyMemberIsDictionary, OptionalOne) > > PropertyMember;
         typedef Element<Elements::PropertyMembers, OptionalOne, boost::mpl::vector<PropertyMember> > PropertyMembers;
 
         typedef Element<Elements::ArraySize, OptionalOne > ArraySize;
         typedef Element<Elements::ArraySizeRef, OptionalOne, boost::mpl::vector<IgnoreAny> > ArraySizeRef;
         typedef Element<Elements::Dictionary, OptionalOne > Dictionary;
         typedef Element<Elements::Sequence, OptionalOne > Sequence;
-        typedef Element<Elements::Set, OptionalOne > Set;
 
         typedef Element<Elements::MaxLength, OptionalOne > MaxLength;
         typedef Element<Elements::MaxLengthRef, OptionalOne, boost::mpl::vector<IgnoreAny> > MaxLengthRef;
@@ -79,7 +77,7 @@ namespace ToolSupport
         typedef Element<Elements::Membersummary, OptionalOne> Membersummary;
         typedef Element<Elements::MemberName, One> MemberName;
         typedef Element<Elements::MemberType, One > MemberType;
-        typedef Element<Elements::Member, AtLeastOne, boost::mpl::vector<Membersummary, MemberName, MemberType, ELEMENT_CHOICE_5(ArraySize, ArraySizeRef, Dictionary, Sequence, Set, OptionalOne), ELEMENT_CHOICE_2(MaxLength, MaxLengthRef, OptionalOne) > > Member;
+        typedef Element<Elements::Member, AtLeastOne, boost::mpl::vector<Membersummary, MemberName, MemberType, ELEMENT_CHOICE_4(ArraySize, ArraySizeRef, Dictionary, Sequence, OptionalOne), ELEMENT_CHOICE_2(MaxLength, MaxLengthRef, OptionalOne) > > Member;
         typedef Element<Elements::ClassMembers, OptionalOne, boost::mpl::vector<Member> > Members;
 
         typedef Element<Elements::Parametersummary, OptionalOne> Parametersummary;
@@ -99,8 +97,7 @@ namespace ToolSupport
         typedef Element<Elements::ParameterObjectDeprecatedCollection, OptionalMany, boost::mpl::vector<IgnoreAny> > ParameterObjectDeprecatedCollection;
         typedef Element<Elements::Any, OptionalMany, boost::mpl::vector<IgnoreAny>, ParseAlgorithm<Elements::ParameterObjectCollection>, AnyMatcher > ParameterObjectCollection;
         typedef Element<Elements::ParameterSequence, One, boost::mpl::vector< ELEMENT_CHOICE_5(ParameterValueCollection, ParameterEntityIdCollection, ParameterValueRefCollection, ParameterObjectDeprecatedCollection, ParameterObjectCollection, OptionalOne) > > ParameterSequence;
-        typedef Element<Elements::ParameterSet, One, boost::mpl::vector< ELEMENT_CHOICE_5(ParameterValueCollection, ParameterEntityIdCollection, ParameterValueRefCollection, ParameterObjectDeprecatedCollection, ParameterObjectCollection, OptionalOne) > > ParameterSet;
-        typedef Element<Elements::Parameter, AtLeastOne, boost::mpl::vector<ELEMENT_CHOICE_8(ParameterValue, ParameterEntityId, ParameterValueRef, ParameterArrayElements, ParameterSequence, ParameterSet, ParameterObjectDeprecated, ParameterObject, One), Parametersummary, ParameterName, ParameterType > > Parameter;
+        typedef Element<Elements::Parameter, AtLeastOne, boost::mpl::vector<ELEMENT_CHOICE_7(ParameterValue, ParameterEntityId, ParameterValueRef, ParameterArrayElements, ParameterSequence, ParameterObjectDeprecated, ParameterObject, One), Parametersummary, ParameterName, ParameterType > > Parameter;
         typedef Element<Elements::Parameters, OptionalOne, boost::mpl::vector<Parameter> > Parameters;
 
         typedef Element<Elements::CreateRoutinesummary, OptionalOne> CreateRoutinesummary;

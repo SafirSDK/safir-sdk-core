@@ -4,29 +4,10 @@
     <name>ParserTest.MyProperty</name>
     <members>
         <member>
-            <summary>Int32 property</summary>
-            <name>Int32PropertyValue</name>
-            <type>Int32</type>
-        </member>
-        <member>
-            <summary>TypeId property</summary>
-            <name>TypeIdPropertyValue</name>
-            <type>TypeId</type>
-        </member>
-        <member>
-            <summary>InstanceId property</summary>
-            <name>InstanceIdPropertyValue</name>
-            <type>InstanceId</type>
-        </member>
-        <member>
-            <summary>EntityId property</summary>
-            <name>EntityIdPropertyValue</name>
-            <type>EntityId</type>
-        </member>
-        <member>
             <summary>object property</summary>
             <name>MyEntityBasePropertyValue</name>
             <type>ParserTest.MyEntity</type>
+            <sequence/>
         </member>
         
         <member>

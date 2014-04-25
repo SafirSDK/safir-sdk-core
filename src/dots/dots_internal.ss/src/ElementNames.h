@@ -56,7 +56,6 @@ namespace ToolSupport
         struct ParameterArrayElement {static const std::string& Name() {static const std::string n="arrayElement"; return n;}};
         struct ParameterArrayElements {static const std::string& Name() {static const std::string n="arrayElements"; return n;}};
         struct ParameterSequence {static const std::string& Name() {static const std::string n="sequence"; return n;}};
-        struct ParameterSet {static const std::string& Name() {static const std::string n="set"; return n;}};
         struct ParameterDictionary {static const std::string& Name() {static const std::string n="dictionary"; return n;}};
         struct ParameterObject {static const std::string& Name() {static const std::string n="object"; return n;}};
         struct ParameterEntityId {static const std::string& Name() {static const std::string n="entityId"; return n;}};
@@ -98,7 +97,6 @@ namespace ToolSupport
         struct PropertyMembers {static const std::string& Name() {static const std::string n="members"; return n;}};
         struct PropertyMemberisArray {static const std::string& Name() {static const std::string n="array"; return n;}};
         struct PropertyMemberIsSequence {static const std::string& Name() {static const std::string n="sequence"; return n;}};
-        struct PropertyMemberIsSet {static const std::string& Name() {static const std::string n="set"; return n;}};
         struct PropertyMemberIsDictionary {static const std::string& Name() {static const std::string n="dictionary"; return n;}};
         struct PropertyMapping {static const std::string& Name() {static const std::string n="propertyMapping"; return n;}};
         struct PropertyMappingsummary {static const std::string& Name() {static const std::string n="summary"; return n;}};
@@ -126,7 +124,6 @@ namespace ToolSupport
 
         struct Dictionary {static const std::string& Name() {static const std::string n="dictionary"; return n;}};
         struct Sequence {static const std::string& Name() {static const std::string n="sequence"; return n;}};
-        struct Set{static const std::string& Name() {static const std::string n="set"; return n;}};
 
         //for handling of old deprecated xml format
         struct ParameterObjectDeprecated {static const std::string& Name() {static const std::string n="object"; return n;}};

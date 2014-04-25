@@ -116,7 +116,6 @@ typedef enum
     SingleValueCollectionType,
     ArrayCollectionType,
     SequenceCollectionType,
-    SetCollectionType,
     DictionaryCollectionType
 } DotsC_CollectionType;
 

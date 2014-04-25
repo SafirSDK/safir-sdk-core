@@ -154,11 +154,6 @@ namespace ToolSupport
                 m_valueIndex=m_blob.AddValue(m_memberIndex, isChanged);
             }
                 break;
-            case SetCollectionType:
-            {
-                m_valueIndex=m_blob.AddValue(m_memberIndex, isChanged);
-            }
-                break;
             case DictionaryCollectionType:
             {
                 m_valueIndex=m_blob.AddValue(m_memberIndex, isChanged);

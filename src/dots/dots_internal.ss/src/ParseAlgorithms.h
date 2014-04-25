@@ -777,21 +777,6 @@ namespace ToolSupport
         }
     };
 
-    template<> struct ParseAlgorithm<Elements::ParameterSet>
-    {
-        void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const
-        {
-            ParameterDescriptionBasicPtr& def=state.lastInsertedClass->ownParameters.back();
-            def->collectionType=SetCollectionType;
-            if (!ValidKeyType(def->memberType))
-            {
-                std::ostringstream os;
-                os<<"Invalid type for parameter "<<def->name<<" in class "<<state.lastInsertedClass->name<<". The type '"<<def->typeName<<"' is not allowed for set collections.";
-                throw ParseError("Invalid parameter type", os.str(), state.currentPath, 655);
-            }
-        }
-    };
-
     template<> struct ParseAlgorithm<Elements::ParameterDictionary>
     {
         void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const
@@ -959,20 +944,6 @@ namespace ToolSupport
         void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const {state.lastInsertedProperty->members.back()->collectionType=SequenceCollectionType;}
     };
 
-    template<> struct ParseAlgorithm<Elements::PropertyMemberIsSet>
-    {
-        void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const
-        {
-            state.lastInsertedProperty->members.back()->collectionType=SetCollectionType;
-            if (!ValidKeyType(state.lastInsertedProperty->members.back()->memberType))
-            {
-                std::ostringstream ss;
-                ss<<"The specified type '"<<state.lastInsertedProperty->members.back()->typeName<<"' is not valid as for a set collection. On member '"<<state.lastInsertedProperty->members.back()->name<<"' in property '"<<state.lastInsertedProperty->name<<"'"<<std::endl;
-                throw ParseError("Invalid set type", ss.str(), state.currentPath, 655);
-            }
-        }
-    };
-
     template<> struct ParseAlgorithm<Elements::PropertyMemberIsDictionary>
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
@@ -1062,20 +1033,6 @@ namespace ToolSupport
     template<> struct ParseAlgorithm<Elements::Sequence>
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const {state.lastInsertedClass->members.back()->collectionType=SequenceCollectionType;}
-    };
-
-    template<> struct ParseAlgorithm<Elements::Set>
-    {
-        void operator()(boost::property_tree::ptree& pt, ParseState& state) const
-        {
-            state.lastInsertedClass->members.back()->collectionType=SetCollectionType;
-            if (!ValidKeyType(state.lastInsertedClass->members.back()->memberType))
-            {
-                std::ostringstream ss;
-                ss<<"The specified type '"<<state.lastInsertedClass->members.back()->typeName<<"' is not valid as for a set collection. On member '"<<state.lastInsertedClass->members.back()->name<<"' in class '"<<state.lastInsertedClass->name<<"'"<<std::endl;
-                throw ParseError("Invalid set type", ss.str(), state.currentPath, 650);
-            }
-        }
     };
 
     template<> struct ParseAlgorithm<Elements::Dictionary>

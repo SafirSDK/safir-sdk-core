@@ -21,13 +21,7 @@
             <name>MySequence</name>
             <type>ParserTest.MyEntity</type>
             <sequence/>
-        </member>
-
-        <member>
-            <name>MySet</name>
-            <type>ParserTest.MyColorEnum</type>
-            <set/>
-        </member>
+        </member>      
         
     </members>
 </class>

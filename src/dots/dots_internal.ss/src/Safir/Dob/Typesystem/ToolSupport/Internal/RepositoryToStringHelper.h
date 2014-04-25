@@ -273,9 +273,6 @@ namespace Internal
         case SequenceCollectionType:
             os<<", Sequence"<<std::endl;
             break;
-        case SetCollectionType:
-            os<<", Set"<<std::endl;
-            break;
         case DictionaryCollectionType:
             os<<", Dictionary"<<std::endl;
             break;
@@ -315,9 +312,6 @@ namespace Internal
             break;
         case SequenceCollectionType:
             os<<", Sequence"<<std::endl;
-            break;
-        case SetCollectionType:
-            os<<", Set"<<std::endl;
             break;
         case DictionaryCollectionType:
             os<<", Dictionary"<<std::endl;
