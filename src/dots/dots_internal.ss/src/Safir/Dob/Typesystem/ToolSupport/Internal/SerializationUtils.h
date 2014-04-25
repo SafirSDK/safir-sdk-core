@@ -406,13 +406,13 @@ namespace SerializationUtils
             throw ParseError("Serialization error", os.str(), "", 120);
         }
 
-        if (parameterIndex>=param->GetArraySize())
+        if (parameterIndex>=param->GetNumberOfValues())
         {
             std::ostringstream os;
             os<<"Parameter index out of range in valueRef. Member '"<<md->GetName()<<"'' is referencing parameter '"<<param->GetName()<<
                 "' with index="<<parameterIndex<<" but the parameter ";
             if (param->GetCollectionType()==ArrayCollectionType)
-                os<<"has arraySize="<<param->GetArraySize();
+                os<<"has arraySize="<<param->GetNumberOfValues();
             else
                 os<<" is not an array.";
 

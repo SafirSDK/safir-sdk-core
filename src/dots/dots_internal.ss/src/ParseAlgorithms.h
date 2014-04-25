@@ -518,7 +518,7 @@ namespace ToolSupport
             par->qualifiedName=paramName.str();
             par->name=par->qualifiedName;
             par->hidden=true;
-            par->collectionType=NoCollectionType;
+            par->collectionType=SingleValueCollectionType;
             par->memberType=Int32MemberType; //just to indicate that type is not object or entityId, it is a basicType or enum
             ValueDefinition val;
             val.kind=ValueKind;
@@ -575,7 +575,7 @@ namespace ToolSupport
             par->qualifiedName=paramName.str();
             par->name=par->qualifiedName;
             par->hidden=true;
-            par->collectionType=NoCollectionType;
+            par->collectionType=SingleValueCollectionType;
             par->memberType=EntityIdMemberType;
             par->typeName=BasicTypeOperations::MemberTypeToString(EntityIdMemberType);
             par->values.push_back(val);
@@ -601,7 +601,7 @@ namespace ToolSupport
             par->qualifiedName=paramName.str();
             par->name=par->qualifiedName;
             par->hidden=true;
-            par->collectionType=NoCollectionType;
+            par->collectionType=SingleValueCollectionType;
             par->memberType=ObjectMemberType;
             ValueDefinition val;
             val.kind=ValueKind;
@@ -640,7 +640,7 @@ namespace ToolSupport
             par->qualifiedName=paramName.str();
             par->name=par->qualifiedName;
             par->hidden=true;
-            par->collectionType=NoCollectionType;
+            par->collectionType=SingleValueCollectionType;
             par->memberType=ObjectMemberType;
             ValueDefinition val;
             val.kind=ValueKind;
@@ -771,25 +771,72 @@ namespace ToolSupport
 
     template<> struct ParseAlgorithm<Elements::ParameterSequence>
     {
-        void operator()(boost::property_tree::ptree& pt, ParseState& state) const
+        void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const
         {
-
+            state.lastInsertedClass->ownParameters.back()->collectionType=SequenceCollectionType;
         }
     };
 
     template<> struct ParseAlgorithm<Elements::ParameterSet>
     {
-        void operator()(boost::property_tree::ptree& pt, ParseState& state) const
+        void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const
         {
-
+            ParameterDescriptionBasicPtr& def=state.lastInsertedClass->ownParameters.back();
+            def->collectionType=SetCollectionType;
+            if (!ValidKeyType(def->memberType))
+            {
+                std::ostringstream os;
+                os<<"Invalid type for parameter "<<def->name<<" in class "<<state.lastInsertedClass->name<<". The type '"<<def->typeName<<"' is not allowed for set collections.";
+                throw ParseError("Invalid parameter type", os.str(), state.currentPath, 655);
+            }
         }
     };
 
     template<> struct ParseAlgorithm<Elements::ParameterDictionary>
     {
+        void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const
+        {
+            state.lastInsertedClass->ownParameters.back()->collectionType=DictionaryCollectionType;
+        }
+    };
+
+    template<> struct ParseAlgorithm<Elements::ParameterValueCollection>
+    {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
+            ParseAlgorithm<Elements::ParameterValue>()(pt, state);
+        }
+    };
 
+    template<> struct ParseAlgorithm<Elements::ParameterValueRefCollection>
+    {
+        void operator()(boost::property_tree::ptree& pt, ParseState& state) const
+        {
+            ParseAlgorithm<Elements::ParameterValueRef>()(pt, state);
+        }
+    };
+
+    template<> struct ParseAlgorithm<Elements::ParameterEntityIdCollection>
+    {
+        void operator()(boost::property_tree::ptree& pt, ParseState& state) const
+        {
+            ParseAlgorithm<Elements::ParameterEntityId>()(pt, state);
+        }
+    };
+
+    template<> struct ParseAlgorithm<Elements::ParameterObjectCollection>
+    {
+        void operator()(boost::property_tree::ptree& pt, ParseState& state) const
+        {
+            ParseAlgorithm<Elements::ParameterObject>()(pt, state);
+        }
+    };
+
+    template<> struct ParseAlgorithm<Elements::ParameterObjectDeprecatedCollection>
+    {
+        void operator()(boost::property_tree::ptree& pt, ParseState& state) const
+        {
+            ParseAlgorithm<Elements::ParameterObjectDeprecated>()(pt, state);
         }
     };
 
@@ -1069,7 +1116,7 @@ namespace ToolSupport
         param->qualifiedName=paramName.str();
         param->name=param->qualifiedName;
         param->hidden=true;
-        param->collectionType=isArray ? ArrayCollectionType : NoCollectionType;
+        param->collectionType=isArray ? ArrayCollectionType : SingleValueCollectionType;
         param->memberType=propMem->memberType;
         param->typeId=propMem->typeId;
         param->typeName=propMem->typeName;
@@ -1344,11 +1391,11 @@ namespace ToolSupport
                         os<<"Referenced parameter '"<<paramName<<"' is an array and an index must be specified when mapping property member "<<state.lastInsertedPropertyMapping->property->name<<"."<<propMem->GetName();
                         throw ParseError("Index expected", os.str(), state.currentPath, 93);
                     }
-                    if (paramIndex>=param->GetArraySize())
+                    if (paramIndex>=param->GetNumberOfValues())
                     {
                         //index out of range
                         std::ostringstream os;
-                        os<<"Referenced parameter '"<<paramName<<"' has arraySize="<<param->GetArraySize()<<". Index out of range in mapping of property member "<<state.lastInsertedPropertyMapping->property->name<<"."<<propMem->GetName();
+                        os<<"Referenced parameter '"<<paramName<<"' has arraySize="<<param->GetNumberOfValues()<<". Index out of range in mapping of property member "<<state.lastInsertedPropertyMapping->property->name<<"."<<propMem->GetName();
                         throw ParseError("Index out of range", os.str(), state.currentPath, 94);
                     }
                 }

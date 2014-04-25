@@ -92,8 +92,14 @@ namespace ToolSupport
         typedef Element<Elements::Any, One, boost::mpl::vector<IgnoreAny>, ParseAlgorithm<Elements::ParameterObject>, AnyMatcher > ParameterObject;
         typedef Element<Elements::ParameterArrayElement, AtLeastOne, boost::mpl::vector< ELEMENT_CHOICE_5(ParameterValue, ParameterValueRef, ParameterEntityId, ParameterObjectDeprecated, ParameterObject, OptionalOne), Ignore<Elements::ParameterArrayIndex> > > ParameterArrayElement;
         typedef Element<Elements::ParameterArrayElements, One, boost::mpl::vector<ParameterArrayElement> > ParameterArrayElements;
-        typedef Element<Elements::ParameterSequence, One, boost::mpl::vector<IgnoreAny> > ParameterSequence;
-        typedef Element<Elements::ParameterSet, One, boost::mpl::vector<IgnoreAny> > ParameterSet;
+
+        typedef Element<Elements::ParameterValueCollection, OptionalMany > ParameterValueCollection;
+        typedef Element<Elements::ParameterEntityIdCollection, OptionalMany, boost::mpl::vector< Ignore<Elements::ClassName>, Ignore<Elements::InstanceId> > > ParameterEntityIdCollection;
+        typedef Element<Elements::ParameterValueRefCollection, OptionalMany, boost::mpl::vector<IgnoreAny> > ParameterValueRefCollection;
+        typedef Element<Elements::ParameterObjectDeprecatedCollection, OptionalMany, boost::mpl::vector<IgnoreAny> > ParameterObjectDeprecatedCollection;
+        typedef Element<Elements::Any, OptionalMany, boost::mpl::vector<IgnoreAny>, ParseAlgorithm<Elements::ParameterObjectCollection>, AnyMatcher > ParameterObjectCollection;
+        typedef Element<Elements::ParameterSequence, One, boost::mpl::vector< ELEMENT_CHOICE_5(ParameterValueCollection, ParameterEntityIdCollection, ParameterValueRefCollection, ParameterObjectDeprecatedCollection, ParameterObjectCollection, OptionalOne) > > ParameterSequence;
+        typedef Element<Elements::ParameterSet, One, boost::mpl::vector< ELEMENT_CHOICE_5(ParameterValueCollection, ParameterEntityIdCollection, ParameterValueRefCollection, ParameterObjectDeprecatedCollection, ParameterObjectCollection, OptionalOne) > > ParameterSet;
         typedef Element<Elements::Parameter, AtLeastOne, boost::mpl::vector<ELEMENT_CHOICE_8(ParameterValue, ParameterEntityId, ParameterValueRef, ParameterArrayElements, ParameterSequence, ParameterSet, ParameterObjectDeprecated, ParameterObject, One), Parametersummary, ParameterName, ParameterType > > Parameter;
         typedef Element<Elements::Parameters, OptionalOne, boost::mpl::vector<Parameter> > Parameters;
 

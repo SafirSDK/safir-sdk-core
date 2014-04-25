@@ -137,7 +137,7 @@ namespace ToolSupport
             MoveToMember(member);
             switch (m_memberDescription->GetCollectionType())
             {
-            case NoCollectionType:
+            case SingleValueCollectionType:
             {
                 m_valueIndex=0;
                 m_blob.SetChanged(m_memberIndex, m_valueIndex, isChanged);
@@ -190,7 +190,7 @@ namespace ToolSupport
                 const MemberDescriptionType* member=m_classDescription->GetMember(memberIndex);
                 switch (member->GetCollectionType())
                 {
-                case NoCollectionType:
+                case SingleValueCollectionType:
                 {
                     m_blob.AddValue(memberIndex, false);
                 }

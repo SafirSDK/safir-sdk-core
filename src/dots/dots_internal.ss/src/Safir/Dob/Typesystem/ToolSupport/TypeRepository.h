@@ -187,10 +187,10 @@ namespace ToolSupport
         virtual DotsC_TypeId GetKeyTypeId() const=0;
 
         /**
-         * @brief Get the array size of this parameter.
-         * @return Array size. If parameter is not an array, 1 is returned.
+         * @brief Get the number of values this parameter holds. If collectionType is SingelValueCollectionType 1 is returned.
+         * @return Number of values.
          */
-        virtual int GetArraySize() const=0;
+        virtual int GetNumberOfValues() const=0;
 
         /**
          * @brief Check if this is a normal parameter defined explicitly in a dou-file or if it is a special hidden parameter that has been
@@ -306,11 +306,11 @@ namespace ToolSupport
          * @brief Get number of enumeration values.
          * @return Number of enumeration values.
          */
-        virtual int GetNumberOfValues() const=0;
+        virtual int GetArraySize() const=0;
 
         /**
          * @brief Get name of a enumeration value.
-         * @param val [in] - The ordinal of the requested value. Valid is 0 to GetNumberOfValues()-1.
+         * @param val [in] - The ordinal of the requested value. Valid is 0 to GetArraySize()-1.
          * @return Name of enumeration value.
          */
         virtual const char* GetValueName(DotsC_EnumerationValue val) const=0;

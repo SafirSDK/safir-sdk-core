@@ -113,7 +113,7 @@ typedef enum
 
 typedef enum
 {
-    NoCollectionType,
+    SingleValueCollectionType,
     ArrayCollectionType,
     SequenceCollectionType,
     SetCollectionType,

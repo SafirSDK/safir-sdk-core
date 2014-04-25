@@ -61,6 +61,10 @@ namespace ToolSupport
         struct ParameterObject {static const std::string& Name() {static const std::string n="object"; return n;}};
         struct ParameterEntityId {static const std::string& Name() {static const std::string n="entityId"; return n;}};
         struct ParameterArrayIndex {static const std::string& Name() {static const std::string n="index"; return n;}};
+        struct ParameterValueCollection {static const std::string& Name() {static const std::string n="value"; return n;}};
+        struct ParameterEntityIdCollection {static const std::string& Name() {static const std::string n="entityId"; return n;}};
+        struct ParameterValueRefCollection {static const std::string& Name() {static const std::string n="valueRef"; return n;}};
+        struct ParameterObjectCollection {static const std::string& Name() {static const std::string n="object"; return n;}};
         struct ArraySize {static const std::string& Name() {static const std::string n="arraySize"; return n;}};
         struct BaseClass {static const std::string& Name() {static const std::string n="baseClass"; return n;}};
         struct ExceptionBase {static const std::string& Name() {static const std::string n="baseClass"; return n;}};
@@ -126,6 +130,7 @@ namespace ToolSupport
 
         //for handling of old deprecated xml format
         struct ParameterObjectDeprecated {static const std::string& Name() {static const std::string n="object"; return n;}};
+        struct ParameterObjectDeprecatedCollection {static const std::string& Name() {static const std::string n="object"; return n;}};
         struct CreateRoutineValueObjectDeprecated {static const std::string& Name() {static const std::string n="object"; return n;}};
         struct MapObjectDeprecated {static const std::string& Name() {static const std::string n="object"; return n;}};
     }

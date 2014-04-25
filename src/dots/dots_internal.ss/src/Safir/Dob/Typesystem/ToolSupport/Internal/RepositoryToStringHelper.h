@@ -214,7 +214,7 @@ namespace Internal
         os<<"TypeId: "<<c->GetTypeId()<<std::endl;
         os<<"File: "<<c->FileName()<<std::endl;
 
-        for (int i=0; i<c->GetNumberOfValues(); ++i)
+        for (int i=0; i<c->GetArraySize(); ++i)
         {
             os<<"    Value ("<<i<<"): "<<c->GetValueName(i)<<std::endl;
         }
@@ -311,7 +311,7 @@ namespace Internal
         switch (c->GetCollectionType())
         {
         case ArrayCollectionType:
-            os<<", Array, arraySize="<<c->GetArraySize()<<std::endl;
+            os<<", Array, arraySize="<<c->GetNumberOfValues()<<std::endl;
             break;
         case SequenceCollectionType:
             os<<", Sequence"<<std::endl;
@@ -332,9 +332,9 @@ namespace Internal
         {
         case BooleanMemberType:
         {
-            for (int i=0; i<c->GetArraySize(); ++i)
+            for (int i=0; i<c->GetNumberOfValues(); ++i)
             {
-                if (c->GetCollectionType()!=NoCollectionType)
+                if (c->GetCollectionType()!=SingleValueCollectionType)
                 {
                     os<<"      value["<<i<<"]=";
                 }
@@ -349,9 +349,9 @@ namespace Internal
 
         case Int32MemberType:
         {
-            for (int i=0; i<c->GetArraySize(); ++i)
+            for (int i=0; i<c->GetNumberOfValues(); ++i)
             {
-                if (c->GetCollectionType()!=NoCollectionType)
+                if (c->GetCollectionType()!=SingleValueCollectionType)
                 {
                     os<<"      value["<<i<<"]=";
                 }
@@ -365,9 +365,9 @@ namespace Internal
             break;
         case Int64MemberType:
         {
-            for (int i=0; i<c->GetArraySize(); ++i)
+            for (int i=0; i<c->GetNumberOfValues(); ++i)
             {
-                if (c->GetCollectionType()!=NoCollectionType)
+                if (c->GetCollectionType()!=SingleValueCollectionType)
                 {
                     os<<"      value["<<i<<"]=";
                 }
@@ -382,9 +382,9 @@ namespace Internal
 
         case EntityIdMemberType:
         {
-            for (int i=0; i<c->GetArraySize(); ++i)
+            for (int i=0; i<c->GetNumberOfValues(); ++i)
             {
-                if (c->GetCollectionType()!=NoCollectionType)
+                if (c->GetCollectionType()!=SingleValueCollectionType)
                 {
                     os<<"      value["<<i<<"]=";
                 }
@@ -401,9 +401,9 @@ namespace Internal
             break;
         case TypeIdMemberType:
         {
-            for (int i=0; i<c->GetArraySize(); ++i)
+            for (int i=0; i<c->GetNumberOfValues(); ++i)
             {
-                if (c->GetCollectionType()!=NoCollectionType)
+                if (c->GetCollectionType()!=SingleValueCollectionType)
                 {
                     os<<"      value["<<i<<"]=";
                 }
@@ -420,9 +420,9 @@ namespace Internal
         case ChannelIdMemberType:
         case HandlerIdMemberType:
         {
-            for (int i=0; i<c->GetArraySize(); ++i)
+            for (int i=0; i<c->GetNumberOfValues(); ++i)
             {
-                if (c->GetCollectionType()!=NoCollectionType)
+                if (c->GetCollectionType()!=SingleValueCollectionType)
                 {
                     os<<"      value["<<i<<"]=";
                 }
@@ -438,9 +438,9 @@ namespace Internal
 
         case StringMemberType:
         {
-            for (int i=0; i<c->GetArraySize(); ++i)
+            for (int i=0; i<c->GetNumberOfValues(); ++i)
             {
-                if (c->GetCollectionType()!=NoCollectionType)
+                if (c->GetCollectionType()!=SingleValueCollectionType)
                 {
                     os<<"      value["<<i<<"]=";
                 }
@@ -455,9 +455,9 @@ namespace Internal
 
         case ObjectMemberType:
         {
-            for (int i=0; i<c->GetArraySize(); ++i)
+            for (int i=0; i<c->GetNumberOfValues(); ++i)
             {
-                if (c->GetCollectionType()!=NoCollectionType)
+                if (c->GetCollectionType()!=SingleValueCollectionType)
                 {
                     os<<"      value["<<i<<"]="<<std::endl;
                 }
@@ -475,9 +475,9 @@ namespace Internal
 
         case EnumerationMemberType:
         {
-            for (int i=0; i<c->GetArraySize(); ++i)
+            for (int i=0; i<c->GetNumberOfValues(); ++i)
             {
-                if (c->GetCollectionType()!=NoCollectionType)
+                if (c->GetCollectionType()!=SingleValueCollectionType)
                 {
                     os<<"      value["<<i<<"]=";
                 }
@@ -492,10 +492,10 @@ namespace Internal
 
         case BinaryMemberType:
         {
-            for (int i=0; i<c->GetArraySize(); ++i)
+            for (int i=0; i<c->GetNumberOfValues(); ++i)
             {
                 //TODO: change to hex or base64 output, this assumes binary is an ascii string
-                if (c->GetCollectionType()!=NoCollectionType)
+                if (c->GetCollectionType()!=SingleValueCollectionType)
                 {
                     os<<"      value["<<i<<"]=";
                 }
@@ -536,9 +536,9 @@ namespace Internal
         case Volt32MemberType:
         case Watt32MemberType:
         {
-            for (int i=0; i<c->GetArraySize(); ++i)
+            for (int i=0; i<c->GetNumberOfValues(); ++i)
             {
-                if (c->GetCollectionType()!=NoCollectionType)
+                if (c->GetCollectionType()!=SingleValueCollectionType)
                 {
                     os<<"      value["<<i<<"]=";
                 }
@@ -572,9 +572,9 @@ namespace Internal
         case Volt64MemberType:
         case Watt64MemberType:
         {
-            for (int i=0; i<c->GetArraySize(); ++i)
+            for (int i=0; i<c->GetNumberOfValues(); ++i)
             {
-                if (c->GetCollectionType()!=NoCollectionType)
+                if (c->GetCollectionType()!=SingleValueCollectionType)
                 {
                     os<<"      value["<<i<<"]=";
                 }

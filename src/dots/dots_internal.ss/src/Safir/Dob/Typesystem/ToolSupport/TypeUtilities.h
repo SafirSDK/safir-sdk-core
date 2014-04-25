@@ -104,7 +104,7 @@ namespace TypeUtilities
         size_t pos=valueName.rfind('.');
         if (pos==std::string::npos)
         {
-            for (int i=0; i<description->GetNumberOfValues(); ++i)
+            for (int i=0; i<description->GetArraySize(); ++i)
             {
                 if (valueName==description->GetValueName(i))
                 {
@@ -115,7 +115,7 @@ namespace TypeUtilities
         else
         {
             std::string strippedValueName=valueName.substr(pos+1);
-            for (int i=0; i<description->GetNumberOfValues(); ++i)
+            for (int i=0; i<description->GetArraySize(); ++i)
             {
                 if (strippedValueName==description->GetValueName(i))
                 {

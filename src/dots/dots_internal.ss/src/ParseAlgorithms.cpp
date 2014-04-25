@@ -130,14 +130,14 @@ namespace ToolSupport
             os<<"The referenced parameter '"<<*paramName<<"' has type "<<param->typeName<<". Only Int32 parameters are valid as indexRef.";
             throw ParseError("Bad indexRef", os.str(), state.currentPath, 170);
         }
-        if (paramIndex>=param->GetArraySize())
+        if (paramIndex>=param->GetNumberOfValues())
         {
             //index out of bounds
             std::ostringstream os;
             os<<"The specified index "<<paramIndex<<" is out of bounds. Referenced parameter "<<*paramName;
             if (param->GetCollectionType()==ArrayCollectionType)
             {
-                os<<" has arraySize="<<param->GetArraySize();
+                os<<" has arraySize="<<param->GetNumberOfValues();
             }
             else
             {
@@ -739,7 +739,7 @@ namespace ToolSupport
             throw ParseError("Parameter reference error", ss.str(), cd->FileName(), 42);
         }
 
-        if (referenced->GetArraySize()<=static_cast<int>(ref.parameterIndex))
+        if (referenced->GetNumberOfValues()<=static_cast<int>(ref.parameterIndex))
         {
             std::ostringstream ss;
             ss<<"Array index out of range for Parameter valueRef '"<<ref.parameterName<<"' and index="<<ref.parameterIndex<<". Referenced from parameter: "<<referencing->GetName();
@@ -800,7 +800,7 @@ namespace ToolSupport
             ss<<"Could not resolve parameter for arraySizeRef '"<<ref.parameterName<<"'. Referenced from member '"<<md->GetName()<<"' in class "<<cd->GetName();
             throw ParseError("Parameter reference error", ss.str(), cd->FileName(), 49);
         }
-        if (referenced->GetArraySize()<=static_cast<int>(ref.parameterIndex))
+        if (referenced->GetNumberOfValues()<=static_cast<int>(ref.parameterIndex))
         {
             std::ostringstream ss;
             ss<<"Array index out of range for Parameter arraySizeRef '"<<ref.parameterName<<"' and index="<<ref.parameterIndex<<". Referenced from memeber '"<<md->GetName()<<"' in class "<<cd->GetName();
@@ -837,7 +837,7 @@ namespace ToolSupport
             ss<<"Could not resolve parameter for maxLengthRef '"<<ref.parameterName<<"'. Referenced from memeber '"<<md->GetName()<<"' in class "<<cd->GetName();
             throw ParseError("Parameter reference error", ss.str(), cd->FileName(), 107);
         }
-        if (referenced->GetArraySize()<=static_cast<int>(ref.parameterIndex))
+        if (referenced->GetNumberOfValues()<=static_cast<int>(ref.parameterIndex))
         {
             std::ostringstream ss;
             ss<<"Array index out of range for Parameter maxLengthRef '"<<ref.parameterName<<"' and index="<<ref.parameterIndex<<". Referenced from memeber '"<<md->GetName()<<"' in class "<<cd->GetName();
@@ -961,7 +961,7 @@ namespace ToolSupport
                         mit->first<<"'. The parameter '"<<mit->second.first<<"' does not exist.";
                     throw ParseError("Invalid CreateRoutine value", os.str(), cd->FileName(), 58);
                 }
-                if (pd->GetArraySize()<=mit->second.second)
+                if (pd->GetNumberOfValues()<=mit->second.second)
                 {
                     //Array index out of range
                     std::ostringstream os;
@@ -973,7 +973,7 @@ namespace ToolSupport
                     }
                     else
                     {
-                        os<<" - actual array size is "<<pd->GetArraySize();
+                        os<<" - actual array size is "<<pd->GetNumberOfValues();
                     }
                     throw ParseError("Invalid CreateRoutine value", os.str(), cd->FileName(), 59);
                 }
@@ -1029,7 +1029,7 @@ namespace ToolSupport
             if (pd->GetMemberType()==TypeIdMemberType)
             {
                 //Verify that typeId parameters contains values that are existing typeIds.
-                for (int index=0; index<pd->GetArraySize(); ++index)
+                for (int index=0; index<pd->GetNumberOfValues(); ++index)
                 {
                     const ValueDefinition& val=pd->Value(static_cast<size_t>(index));
                     if (!BasicTypeOperations::ValidTypeId(m_result.get(), val.int64Val))
@@ -1044,7 +1044,7 @@ namespace ToolSupport
             else if (pd->GetMemberType()==EntityIdMemberType)
             {
                 //Verify that EntityId parameters contains values that are existing class type.
-                for (int index=0; index<pd->GetArraySize(); ++index)
+                for (int index=0; index<pd->GetNumberOfValues(); ++index)
                 {
                     const ValueDefinition& val=pd->Value(static_cast<size_t>(index));
                     const ClassDescription* tmpCd=m_result->GetClass(val.int64Val);
@@ -1080,7 +1080,7 @@ namespace ToolSupport
                 }
 
                 //Check value
-                for (int index=0; index<pd->GetArraySize(); ++index)
+                for (int index=0; index<pd->GetNumberOfValues(); ++index)
                 {
                     ValueDefinition& val=pd->MutableValue(static_cast<size_t>(index));
                     val.int32Val=ed->GetIndexOfValue(val.stringVal);

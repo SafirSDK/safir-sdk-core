@@ -96,7 +96,7 @@ namespace ToolSupport
     {
     public:
         MemberDescriptionBasic()
-            :collectionType(NoCollectionType)
+            :collectionType(SingleValueCollectionType)
             ,arraySize(1)
             ,maxLength(0)
         {
@@ -182,7 +182,7 @@ namespace ToolSupport
     {
     public:
         ParameterDescriptionBasic()
-            :collectionType(NoCollectionType)
+            :collectionType(SingleValueCollectionType)
             ,hidden(false)
         {
         }
@@ -196,7 +196,7 @@ namespace ToolSupport
         virtual DotsC_CollectionType GetCollectionType() const {return collectionType;}
         virtual DotsC_MemberType GetKeyType() const {return keyType;} //only valid if collectionType is Dictionary
         virtual DotsC_TypeId GetKeyTypeId() const {return keyTypeId;}
-        virtual int GetArraySize() const {return static_cast<int>(values.size());}
+        virtual int GetNumberOfValues() const {return static_cast<int>(values.size());}
         virtual bool IsHidden() const {return hidden;}
 
         //GetValues
@@ -274,7 +274,7 @@ namespace ToolSupport
         virtual DotsC_TypeId GetTypeId() const {return typeId;}
         virtual const char* GetName() const {return name.c_str();}
         virtual DotsC_TypeId GetCheckSum() const {return checksum;}
-        virtual int GetNumberOfValues() const {return static_cast<int>(enumerationValues.size());}
+        virtual int GetArraySize() const {return static_cast<int>(enumerationValues.size());}
         virtual const char* GetValueName(DotsC_EnumerationValue val) const {return enumerationValues[val].c_str();}
         virtual int GetIndexOfValue(const std::string& valueName) const;
 
