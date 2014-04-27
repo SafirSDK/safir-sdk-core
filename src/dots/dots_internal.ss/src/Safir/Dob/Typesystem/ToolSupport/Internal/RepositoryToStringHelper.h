@@ -308,13 +308,13 @@ namespace Internal
         switch (c->GetCollectionType())
         {
         case ArrayCollectionType:
-            os<<", Array, arraySize="<<c->GetNumberOfValues()<<std::endl;
+            os<<", Array, size="<<c->GetNumberOfValues()<<std::endl;
             break;
         case SequenceCollectionType:
-            os<<", Sequence"<<std::endl;
+            os<<", Sequence, size="<<c->GetNumberOfValues()<<std::endl;
             break;
         case DictionaryCollectionType:
-            os<<", Dictionary"<<std::endl;
+            os<<", Dictionary, size="<<c->GetNumberOfValues()<<std::endl;
             break;
         default:
             os<<std::endl;

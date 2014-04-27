@@ -825,6 +825,14 @@ namespace ToolSupport
         }
     };
 
+    template<> struct ParseAlgorithm<Elements::ParameterDictionaryEntry>
+    {
+        void operator()(boost::property_tree::ptree& pt, ParseState& state) const
+        {
+            ParseAlgorithm<Elements::ParameterObjectDeprecated>()(pt, state);
+        }
+    };
+
     template<> struct ParseAlgorithm<Elements::BaseClass>
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
