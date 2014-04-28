@@ -34,8 +34,15 @@ int main(int argc, char *argv[])
                                   boost::bind(Safir::Utilities::CrashReporter::Stop));
 
     QApplication app(argc, argv);
-    DoseMon *dialog = new DoseMon();
+    boost::shared_ptr<DoseMon> dialog (new DoseMon());
 
     dialog->show();
-    return app.exec();
+
+    const auto ret = app.exec();
+
+    dialog.reset();
+
+    return ret;
+
+
 }

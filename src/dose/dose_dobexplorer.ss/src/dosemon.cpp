@@ -31,6 +31,8 @@
 #include "dosecominfo.h"
 #include "connectionstats.h"
 #include "loggingsettings.h"
+#include "SystemPicture.h"
+#include "RawStatistics.h"
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Typesystem/Utilities.h>
 #include <Safir/Dob/Entity.h>
@@ -71,7 +73,17 @@ DoseMon::DoseMon(QWidget * /*parent*/)
     m_updateTimer.start(3000);
     UpdateTreeWidget();
 
+    connect(&m_ioServicePollTimer,SIGNAL(timeout()), this, SLOT(PollIoService()));
+    m_ioServicePollTimer.start(100);
+    PollIoService();
+
     AddEntitesToTreeWidget();
+}
+
+DoseMon::~DoseMon()
+{
+    //make sure we let all pending jobs run before exiting.
+    m_ioService.run();
 }
 
 bool DoseMon::ActivateTab(const QString& name)
@@ -110,6 +122,14 @@ void DoseMon::TreeItemActivated ( QTreeWidgetItem * item, int /*column*/ )
     else if (item->text(0) == "DoseCom Info")
     {
         newTab = tabWidget->addTab(new DoseComInfo(this),"DoseCom Info");
+    }
+    else if (item->text(0) == "Raw Node Statistics")
+    {
+        newTab = tabWidget->addTab(new RawStatistics(m_ioService, this),"Raw Node Statistics");
+    }
+    else if (item->text(0) == "System Picture")
+    {
+        newTab = tabWidget->addTab(new SystemPicture(m_ioService, this),"System Picture");
     }
     else if (item->parent() == NULL)
     {
@@ -300,4 +320,10 @@ void DoseMon::UpdateTreeWidget()
             remoteConnectionItem->addChild(new QTreeWidgetItem(QStringList(*it),RemoteConnectionWidgetType));
         }
     }
+}
+
+void DoseMon::PollIoService()
+{
+    m_ioService.poll_one();
+    m_ioService.reset();
 }

@@ -41,11 +41,10 @@
 
 namespace
 {
-    void PrintMessage(const Safir::Dob::Internal::SP::SystemStateMessage& /*msg*/, 
-                      std::wostream& /*out*/)
+    void PrintMessage(const Safir::Dob::Internal::SP::SystemStateMessage& msg, 
+                      std::wostream& out)
     {
-        //TODO: print message
-        /*        out << msg.name().c_str() << "@" << msg.control_address().c_str() << " (" << msg.id() << ")";
+        out << "Elected: " << msg.elected_id() << "\n";
 
         for (int i = 0; i < msg.node_info_size(); ++i)
         {
@@ -55,10 +54,8 @@ namespace
                 << node.name().c_str() 
                 << "@" << node.control_address().c_str() 
                 << " (" << node.id() << ")";
-
-            //out << "\n" << indent << "        recv = " << node.receive_count() << ", retransmit = " << node.retransmit_count();
         }
-        out << std::flush;*/
+        out << std::flush;
     }
 }
 

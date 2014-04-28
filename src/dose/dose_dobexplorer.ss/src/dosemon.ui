@@ -63,6 +63,16 @@
         <string>Remote Connections</string>
        </property>
       </item>
+      <item>
+       <property name="text">
+        <string>System Picture</string>
+       </property>
+      </item>
+      <item>
+        <property name="text">
+          <string>Raw Node Statistics</string>
+        </property>
+      </item>
      </widget>
      <widget class="QTabWidget" name="tabWidget">
       <property name="layoutDirection">

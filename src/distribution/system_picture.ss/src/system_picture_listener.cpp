@@ -30,7 +30,8 @@
 int main()
 {
     boost::asio::io_service ioService;
-    
+    boost::shared_ptr<boost::asio::io_service::work> wk(new boost::asio::io_service::work(ioService));
+
     boost::asio::signal_set signals(ioService);
     
 #if defined (_WIN32)
@@ -57,14 +58,14 @@ int main()
     signals.async_wait([&](const boost::system::error_code& error,
                            const int /*signal_number*/)
                        {
-                           if (!!error) //double not to remove spurious vs2010 warning
+                           if (error)
                            {
                                lllog(0) << "Got a signals error: " << error << std::endl;
                            }
                            rawSub->Stop();
+                           wk.reset();
                        });
 
-    boost::asio::io_service::work wk(ioService);
     ioService.run();
     return 0;
 }

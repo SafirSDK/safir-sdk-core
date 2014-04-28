@@ -1,8 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2008-2013 (http://safir.sourceforge.net)
+* Copyright Saab AB, 2013 (http://safir.sourceforge.net)
 *
-* Created by: Lars Hagström / stlrha
+* Created by: Lars Hagström / lars.hagstrom@consoden.se
 *
 *******************************************************************************
 *
@@ -21,41 +21,31 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef DOSEMON_H
-#define DOSEMON_H
+#ifndef __DOBEXPLORER_SYSTEM_PICTURE_H__
+#define __DOBEXPLORER_SYSTEM_PICTURE_H__
 #include "common_header.h"
-#include "ui_dosemon.h"
-#include <set>
-#include <Safir/Dob/Internal/InternalFwd.h>
-#include <Safir/Dob/Internal/StateDeleter.h>
+#include "ui_SystemPicture.h"
+#include <boost/noncopyable.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/asio.hpp>
+#include <Safir/Dob/Internal/SystemPicture.h>
 
-class DoseMon : public QWidget, private Ui::DoseMonDlg
+class SystemPicture :
+  public QWidget,
+  private Ui::SystemPicture,
+  private boost::noncopyable
 {
     Q_OBJECT
 
 public:
-    DoseMon(QWidget *parent = 0);
-    ~DoseMon();
-
-public slots:
-    void TreeItemActivated ( QTreeWidgetItem * item, int column );
-
-    void CloseCurrentTab();
-    void UpdateTreeWidget();
-
-    void PollIoService();
+    SystemPicture(boost::asio::io_service& ioService, QWidget *parent = 0);
+    ~SystemPicture();
 private:
-    void AddConnection(const Safir::Dob::Internal::Connection & connection,
-                       std::set<QString>& localConnectionNames,
-                       std::set<QString>& remoteConnectionNames);
-    bool ActivateTab(const QString& name);
-    void AddEntitesToTreeWidget();
+    void UpdateSystemTable(const Safir::Dob::Internal::SP::SystemState& statistics);
 
-    QTimer m_updateTimer;
-
-    boost::asio::io_service m_ioService;
-    QTimer m_ioServicePollTimer;
+    void UpdatedState(const Safir::Dob::Internal::SP::SystemState& data);
+    boost::asio::io_service& m_ioService;
+    boost::shared_ptr<Safir::Dob::Internal::SP::SystemStateSubscriber> m_systemStateSubscriber;
 };
 
 
