@@ -27,6 +27,7 @@
 #include <Safir/Dob/Internal/Communication.h>
 #include <Safir/Dob/Internal/RawStatistics.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/Id.h>
 #include <boost/make_shared.hpp>
 #include <set>
@@ -64,6 +65,16 @@ namespace
         default:
             throw std::logic_error("Unknown ElectionAction");
         }
+    }
+
+    std::set<int64_t> GetNodeIds(const SystemStateMessage& state)
+    {
+        std::set<int64_t> nodes;
+        for (int i = 0; i < state.node_info_size(); ++i)
+        {
+            nodes.insert(state.node_info(i).id());
+        }
+        return nodes;
     }
 }
 
@@ -123,36 +134,66 @@ namespace
         {
             return;
         }
-        /* TODO: update our state!
-        //Exclude nodes!
 
-        //currently we just copy the raw data... mucho stupido...
+        //currently we just copy the raw data... a bit stupid...
 
         lllog(6) << "Collating" << std::endl;
-        if (!m_stateMessage)
+
+
+        m_stateMessage.set_elected_id(m_id);
+
+        m_stateMessage.clear_node_info(); //don't care about efficiency...
+
+        //add myself
+        auto node = m_stateMessage.add_node_info();
+        node->set_name("Unknown");
+        node->set_id(m_id);
+        node->set_control_address("Unknown");
+        node->set_multicast_enabled(false); //TODO: get this!
+
+        if (m_lastStatistics.Valid())
         {
-            m_stateMessage = boost::make_shared<SystemStateMessage>();
+            //TODO: move these to outside the validity check, if we can get the data from somewhere else
+            node->set_name(m_lastStatistics.Name());
+            node->set_control_address(m_lastStatistics.Address());
 
-            m_stateMessage->set_name(statistics.Name());
-            m_stateMessage->set_id(statistics.Id());
-            m_stateMessage->set_control_address(statistics.Address());
-        }
-
-        m_stateMessage->clear_node_info(); //don't care about efficiency...
-
-        for (int i = 0; i < statistics.Size(); ++i)
-        {
-            if (!statistics.IsDead(i))
+            std::set<boost::int64_t> deadNodes;
+            for (int i = 0; i < m_lastStatistics.Size(); ++i)
             {
-                auto node = m_stateMessage->add_node_info();
-                node->set_name(statistics.Name(i));
-                node->set_id(statistics.Id(i));
-                node->set_control_address(statistics.Address(i));
-                node->set_multicast_enabled(statistics.MulticastEnabled(i));
+                if (m_lastStatistics.HasRemoteStatistics(i))
+                {
+                    const auto remote = m_lastStatistics.RemoteStatistics(i);
+                    for (int j = 0; j < remote.Size(); ++j)
+                    {
+                        if (remote.IsDead(j))
+                        {
+                            deadNodes.insert(remote.Id(j));
+                        }
+                    }
+                }
+            }
+            
+            
+            for (int i = 0; i < m_lastStatistics.Size(); ++i)
+            {
+                if (!m_lastStatistics.IsDead(i))
+                {
+                    //does another node think that that node is dead?
+                    if (deadNodes.find(m_lastStatistics.Id(i)) != deadNodes.end())
+                    {
+                        m_communication->ExcludeNode(m_lastStatistics.Id(i));
+                    }
+                    else
+                    {
+                        auto node = m_stateMessage.add_node_info();
+                        node->set_name(m_lastStatistics.Name(i));
+                        node->set_id(m_lastStatistics.Id(i));
+                        node->set_control_address(m_lastStatistics.Address(i));
+                        node->set_multicast_enabled(m_lastStatistics.MulticastEnabled(i));
+                    }
+                }
             }
         }
-        */
-
     }
     
     void Coordinator::PerformOnStateMessage(const boost::function<void(const boost::shared_ptr<char []>& data, 
@@ -174,20 +215,30 @@ namespace
                           });
     }
 
-    void Coordinator::NewSystemState(const boost::int64_t /*from*/, 
+    void Coordinator::NewSystemState(const boost::int64_t from, 
                                      const boost::shared_ptr<char[]>& data, 
                                      const size_t size)
     {
-        if (IsElected())
+        if (from != m_elected)
         {
-            //TODO: log who I got it from.
-            //TODO: should I just ignore this, or maybe start a new election?
-            throw std::logic_error("Got SystemState from someone else, but I'm the elected coordinator!");
+            SEND_SYSTEM_LOG(Informational, << "SystemPicture (in node " << m_id << ") got a new system state (from node "
+                            << from << ") from a node that is not elected (elected node is " << m_elected << "). Discarding.");
         }
         else
         {
             m_stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
-            //TODO: act on information, such as exclude nodes.
+            
+            const auto nodes = GetNodeIds(m_stateMessage);
+
+            for (int i = 0; i < m_lastStatistics.Size(); ++i)
+            {
+                //if we haven't marked the node as dead and electee doesnt think the node
+                //is part of the system we want to exclude the node
+                if (!m_lastStatistics.IsDead(i) && nodes.find(m_lastStatistics.Id(i)) == nodes.end())
+                {
+                    m_communication->ExcludeNode(m_lastStatistics.Id(i));
+                }
+            }
         }
     }
 
