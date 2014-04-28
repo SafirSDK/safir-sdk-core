@@ -147,7 +147,7 @@ namespace Internal
                         throw ParseError("XmlToBinary serialization error", os.str(), "", 153);
                     }
                 }
-                else
+                else if (md->GetCollectionType()==ArrayCollectionType)
                 {
                     //array, then the inner propertyTree contains array element and the array elements contains the content
                     //i.e <myIntArray><Int32 index=0>1</Int32><Int32 index=5>2</Int32></myIntArray>
@@ -199,6 +199,26 @@ namespace Internal
 
                         ++arrayIndex;
                     }
+                }
+                else if (md->GetCollectionType()==SequenceCollectionType)
+                {
+                    int count=0;
+                    for (boost::property_tree::ptree::iterator seqIt=memIt->second.begin(); seqIt!=memIt->second.end(); ++seqIt)
+                    {
+                        try
+                        {
+                            SetMember(md, memIx, 0, seqIt->second, writer);
+                        }
+                        catch (const boost::property_tree::ptree_error&)
+                        {
+                            std::ostringstream os;
+                            os<<"Failed to serialize sequence member '"<<cd->GetName()<<"."<<md->GetName()<<"' with index="<<count<<" from xml to binary. Type is incorrect.";
+                            throw ParseError("XmlToBinary serialization error", os.str(), "", 700);
+                        }
+
+                        ++count;
+                    }
+
                 }
             }
 

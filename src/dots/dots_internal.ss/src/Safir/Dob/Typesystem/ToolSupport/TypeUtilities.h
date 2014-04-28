@@ -40,19 +40,6 @@ namespace ToolSupport
 namespace TypeUtilities
 {
     /**
-     * Finds corresponding type name to a typeId. If no type exists with given typeId NULL is returned.
-     *
-     * @param repository [in] - Type repository containing all type information
-     * @param typeId [in] - TypeId to lookup and find name for.
-     * @return The type name or NULL if type doesn't exist in the repository.
-     */
-    template <class RepositoryT>
-    const char* GetTypeName(const RepositoryT* repository, DotsC_TypeId typeId)
-    {
-        return Safir::Dob::Typesystem::ToolSupport::Internal::BasicTypeOperations::TypeIdToTypeName(repository, typeId);
-    }
-
-    /**
      * Calculates a typeId from a string. Does not check that the type exists.
      * @param name [in] - Name of the type
      * @return The typeId
@@ -71,6 +58,37 @@ namespace TypeUtilities
     inline const char* GetTypeName(DotsC_MemberType memberType)
     {
         return Safir::Dob::Typesystem::ToolSupport::Internal::BasicTypeOperations::MemberTypeToString(memberType).c_str();
+    }
+
+    /**
+     * Finds corresponding type name to a typeId. If no type exists with given typeId NULL is returned.
+     *
+     * @param repository [in] - Type repository containing all type information
+     * @param typeId [in] - TypeId to lookup and find name for.
+     * @return The type name or NULL if type doesn't exist in the repository.
+     */
+    template <class RepositoryT>
+    const char* GetTypeName(const RepositoryT* repository, DotsC_TypeId typeId)
+    {
+        return Safir::Dob::Typesystem::ToolSupport::Internal::BasicTypeOperations::TypeIdToTypeName(repository, typeId);
+    }
+
+    /**
+     * Finds corresponding type name to a member description.
+     *
+     * @param repository [in] - Type repository containing all type information
+     * @param member [in] - Member description.
+     * @return The type name of the type.
+     */
+    template <class RepositoryT, class MemberDescriptionT>
+    const char* GetTypeName(const RepositoryT* repository, const MemberDescriptionT* member)
+    {
+        DotsC_MemberType mt=member->GetMemberType();
+        if (mt==EnumerationMemberType || mt==ObjectMemberType)
+        {
+            return GetTypeName(repository, member->GetTypeId());
+        }
+        return GetTypeName(mt);
     }
 
     /**

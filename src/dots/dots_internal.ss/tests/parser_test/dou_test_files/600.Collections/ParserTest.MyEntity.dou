@@ -5,6 +5,16 @@
     <baseClass>Safir.Dob.Entity</baseClass>
     <members>
         <member>
+            <name>MyInt</name>
+            <type>Int32</type>
+        </member>   
+        <member>
+            <name>MyColorEnum</name>
+            <type>ParserTest.MyColorEnum</type>
+        </member>   
+
+
+        <member>
             <summary>MyEntityArray</summary>
             <name>MyEntityArray</name>
             <arraySize>3</arraySize>

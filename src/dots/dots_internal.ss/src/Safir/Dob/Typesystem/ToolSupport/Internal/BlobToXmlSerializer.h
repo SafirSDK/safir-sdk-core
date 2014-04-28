@@ -78,11 +78,11 @@ namespace Internal
             for (DotsC_MemberIndex memberIx=0; memberIx<cd->GetNumberOfMembers(); ++memberIx)
             {
                 const MemberDescriptionType* md=cd->GetMember(memberIx);
-                if (md->GetCollectionType()!=ArrayCollectionType) //normal member
+                if (md->GetCollectionType()==SingleValueCollectionType) //normal member
                 {
                     SerializeMember(reader, md, memberIx, 0, md->GetName(), os);
                 }
-                else //array member
+                else if (md->GetCollectionType()==ArrayCollectionType)
                 {
                     DotsC_MemberType mt=md->GetMemberType();
                     const char* typeName=NULL;
@@ -119,6 +119,22 @@ namespace Internal
                         }
                         os<<"</"<<md->GetName()<<">";
                     }
+                }
+                else if (md->GetCollectionType()==SequenceCollectionType)
+                {
+                    const char* typeName=Safir::Dob::Typesystem::ToolSupport::TypeUtilities::GetTypeName(m_repository, md);
+                    int numberOfValues=reader.NumberOfValues(memberIx);
+                    if (numberOfValues>0)
+                    {
+                        os<<"<"<<md->GetName()<<">";
+                        for (DotsC_ArrayIndex valueIndex=0; valueIndex<numberOfValues; ++valueIndex)
+                        {
+                            SerializeMember(reader, md, memberIx, valueIndex, typeName, os);
+                        }
+                        os<<"</"<<md->GetName()<<">";
+
+                    }
+
                 }
             }
         }

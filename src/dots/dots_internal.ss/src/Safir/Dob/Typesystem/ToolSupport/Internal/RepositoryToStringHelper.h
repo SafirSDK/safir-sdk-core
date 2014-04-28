@@ -131,7 +131,7 @@ namespace Internal
         os<<hv.first;
         if (hv.second)
         {
-            os<<" ("<<hv.second<<")"<<std::endl;
+            os<<" ("<<hv.second<<")";
         }
     }
 
