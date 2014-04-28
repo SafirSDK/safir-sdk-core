@@ -133,7 +133,7 @@ namespace Internal
 
                 const MemberDescriptionType* md=cd->GetMember(memIx);
 
-                if (md->GetCollectionType()!=ArrayCollectionType)
+                if (md->GetCollectionType()==SingleValueCollectionType)
                 {
                     //non-array, then the inner propertyTree contains the content, i.e <myInt>123</myInt>
                     try

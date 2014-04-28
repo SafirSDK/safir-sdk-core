@@ -117,11 +117,9 @@ namespace ToolSupport
          * Write member value to the a blob.
          * For dictionaries use WriteDictionaryValue.
          * If the member is an array, the index is used. For all other collection types index is ignored.
-         * If the member is a dictionary, the key is used. For all other collection types index is ignored.
          * If the member is a sequence, set or dictionary, a new value is added to the collection for each call to this method.
-         * If the member is a set, only the following types are supported as value:
+         * If the member is a dictionary, the key is used and can be the following types:
          *      Int32, Int64, TypeId, Enumeration, String, InstanceId, HandlerId, ChannelId, EntityId.
-         * If the member is a dictionary the key can be of the same types as the valid once for a set.
          * This method will throw logic_error if used with wrong input data.
          *
          * @param member [in] - Member index of the member to be written.
