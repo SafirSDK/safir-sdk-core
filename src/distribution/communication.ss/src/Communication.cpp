@@ -123,9 +123,9 @@ namespace Com
         m_impl->ExcludeNode(nodeId);
     }
 
-    bool Communication::SendToNode(boost::int64_t nodeId, const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier)
+    bool Communication::SendToNode(boost::int64_t nodeTypeId, boost::int64_t nodeId, const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier)
     {
-        return m_impl->SendToNode(nodeId, data, size, dataTypeIdentifier);
+        return m_impl->SendToNode(nodeTypeId, nodeId, data, size, dataTypeIdentifier);
     }
 
     bool Communication::SendToNodeType(boost::int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier)

@@ -89,16 +89,36 @@ namespace Com
         {
             m_strand.dispatch([=]
             {
-                m_nodes.insert(std::make_pair(id, endpoint));
+                m_nodes.insert(std::make_pair(id, NodeInfo(false, endpoint)));
             });
         }
 
         //Remove node and stop sending heartbeats
-        void RemoveNode(boost::int64_t id)
+        void SetSystemNode(boost::int64_t id)
         {
             m_strand.dispatch([=]
             {
                 m_nodes.erase(id);
+            });
+        }
+
+        //Make node included or excluded. If excluded it is also removed.
+        void SetSystemNode(boost::int64_t id, bool isSystemNode)
+        {
+            m_strand.dispatch([=]
+            {
+                if (isSystemNode)
+                {
+                    const auto it=m_nodes.find(id);
+                    if (it!=m_nodes.end())
+                    {
+                        it->second.systemNode=isSystemNode;
+                    }
+                }
+                else
+                {
+                    m_nodes.erase(id);
+                }
             });
         }
 
@@ -107,7 +127,16 @@ namespace Com
         boost::asio::steady_timer m_heartbeatTimer;
         boost::shared_ptr<Heartbeat> m_heartbeat;
         int m_interval;
-        std::map<boost::int64_t, boost::asio::ip::udp::endpoint> m_nodes;
+
+        struct NodeInfo
+        {
+            bool systemNode;
+            boost::asio::ip::udp::endpoint endpoint;
+            NodeInfo() : systemNode(false), endpoint() {}
+            NodeInfo(bool sn_, const boost::asio::ip::udp::endpoint& ep_) : systemNode(sn_), endpoint(ep_) {}
+        };
+
+        std::map<boost::int64_t, NodeInfo> m_nodes;
         bool m_running;
 
         void OnTimeout()
@@ -122,7 +151,10 @@ namespace Com
                 {
                     for (auto& vt : m_nodes)
                     {
-                        WriterType::SendTo(m_heartbeat, vt.second);
+                        if (vt.second.systemNode)
+                        {
+                            WriterType::SendTo(m_heartbeat, vt.second.endpoint);
+                        }
                     }
                 }
 

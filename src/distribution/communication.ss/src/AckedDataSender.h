@@ -58,11 +58,13 @@ namespace Com
     {
     public:
         AckedDataSenderBasic(const boost::shared_ptr<boost::asio::io_service>& ioService,
+                             boost::int64_t nodeTypeId,
                              boost::int64_t nodeId,
                              int ipVersion,
                              const std::string& multicastAddress)
             :WriterType(ioService, ipVersion, multicastAddress)
             ,m_strand(*ioService)
+            ,m_nodeTypeId(nodeTypeId)
             ,m_nodeId(nodeId)
             ,m_sendQueue(Parameters::SendQueueSize)
             ,m_running(false)
@@ -257,6 +259,7 @@ namespace Com
 
     private:
         boost::asio::io_service::strand m_strand;
+        boost::int64_t m_nodeTypeId;
         boost::int64_t m_nodeId;
         MessageQueue<UserDataPtr> m_sendQueue;
         std::atomic_uint m_sendQueueSize;
@@ -284,6 +287,10 @@ namespace Com
 
                 if (ud->sendToAllSystemNodes) //this is message that shall be sent to every system node
                 {
+                    ++m_lastSentMulticastSeqNo;
+                    ud->header.sequenceNumber=m_lastSentMulticastSeqNo;
+                    ud->header.sendMethod=MultiReceiverSendMethod;
+
                     if (WriterType::IsMulticastEnabled()) //this node and all the receivers are capable of sending and receiving multicast
                     {
                         for (auto it=m_nodes.begin(); it!=m_nodes.end(); ++it)
@@ -293,34 +300,28 @@ namespace Com
                             {
                                 //The node will get the message throuch the multicast message, we just add it to receiver list
                                 //to be able to track the ack
-                                ud->receivers.insert(std::make_pair(n.Id(), Receiver(n.Id(), MulticastSendMethod, m_lastSentMulticastSeqNo+1)));
+                                ud->receivers.insert(std::make_pair(n.Id(), Receiver(n.Id(), MultiReceiverSendMethod, m_lastSentMulticastSeqNo)));
                             }
                         }
 
                         if (ud->receivers.size()>0)
                         {
-                            ++m_lastSentMulticastSeqNo;
-                            ud->header.sequenceNumber=m_lastSentMulticastSeqNo;
-                            ud->header.sendMethod=MulticastSendMethod;
                             WriterType::SendMulticast(ud);
                         }
                     }
-                    else //this node is not multicast enabled, only send unicast
+                    else //this node is not multicast enabled, only send unicast. However it's still a multiReceiver message and the multicast sequenceNumberSerie shall be used
                     {
-                        ud->header.sendMethod=UnicastSendMethod;
                         for (auto it=m_nodes.begin(); it!=m_nodes.end(); ++it)
                         {
                             Node& n=it->second;
-                            ++n.LastSentUnicastSeqNo();
-                            ud->header.sequenceNumber=n.LastSentUnicastSeqNo();
                             WriterType::SendTo(ud, n.Endpoint());
-                            ud->receivers.insert(std::make_pair(n.Id(), Receiver(n.Id(), UnicastSendMethod, n.LastSentUnicastSeqNo())));
+                            ud->receivers.insert(std::make_pair(n.Id(), Receiver(n.Id(), MultiReceiverSendMethod, m_lastSentMulticastSeqNo)));
                         }
                     }
                 }
-                else //messges has a receiver list, send to them using unicast
+                else //messages has a receiver list, send to them using unicast
                 {
-                    ud->header.sendMethod=UnicastSendMethod;
+                    ud->header.sendMethod=SpecifiedReceiverSendMethod;
                     auto recvIt=ud->receivers.begin();
                     while (recvIt!=ud->receivers.end())
                     {
@@ -332,7 +333,7 @@ namespace Com
                             ++n.LastSentUnicastSeqNo();
                             ud->header.sequenceNumber=n.LastSentUnicastSeqNo();
                             r.id=recvIt->first;
-                            r.sendMethod=UnicastSendMethod;
+                            r.sendMethod=SpecifiedReceiverSendMethod;
                             r.sequenceNumber=n.LastSentUnicastSeqNo();
                             WriterType::SendTo(ud, n.Endpoint());
                             ++recvIt;
@@ -395,14 +396,14 @@ namespace Com
 
                     WriterType::SendTo(ud, nodeIt->second.Endpoint());
                     m_retransmitNotification(nodeIt->first);
-                    lllog(6)<<L"COM: retransmited  "<<(r.sendMethod==UnicastSendMethod ? "Unicast" : "Multicast")<<", seq: "<<r.sequenceNumber<<" to "<<r.id<<std::endl;
+                    lllog(6)<<L"COM: retransmited  "<<(r.sendMethod==SpecifiedReceiverSendMethod ? "Unicast" : "Multicast")<<", seq: "<<r.sequenceNumber<<" to "<<r.id<<std::endl;
                     ++recvIt;
                 }
                 else
                 {
                     //node does not exist anymore or is not part of the system, dont wait for this node anymore
                     lllog(6)<<L"COM: Ignore retransmit to receiver that is not longer a system node  "<<
-                              (recvIt->second.sendMethod==UnicastSendMethod ? "Unicast" : "Multicast")<<", seq: "<<recvIt->second.sequenceNumber<<" to "<<recvIt->first<<std::endl;
+                              (recvIt->second.sendMethod==SpecifiedReceiverSendMethod ? "Unicast" : "Multicast")<<", seq: "<<recvIt->second.sequenceNumber<<" to "<<recvIt->first<<std::endl;
                     ud->receivers.erase(recvIt++);
                 }
             }
@@ -497,7 +498,7 @@ namespace Com
                 m_notifyQueueNotFull=false; //very important that this flag is set before the notification call since a new overflow may occur after notification.
                 if (m_queueNotFullNotification)
                 {
-                    m_strand.get_io_service().post([this]{m_queueNotFullNotification();});
+                    m_strand.get_io_service().post([this]{m_queueNotFullNotification(m_nodeTypeId);});
                 }
             }
         }
@@ -528,7 +529,7 @@ namespace Com
                     for (auto it=ud->receivers.cbegin(); it!=ud->receivers.cend(); ++it)
                     {
                         const auto& r=it->second;
-                        os<<"    recvId="<<r.id<<(r.sendMethod==UnicastSendMethod ? " uni seq=" : " mul seq=")<<r.sequenceNumber<<std::endl;
+                        os<<"    recvId="<<r.id<<(r.sendMethod==SpecifiedReceiverSendMethod ? " uni seq=" : " mul seq=")<<r.sequenceNumber<<std::endl;
                     }
                 }
             }

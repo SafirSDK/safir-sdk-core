@@ -99,7 +99,11 @@ namespace Com
 
     void CommunicationImpl::SetRetransmitToCallback(const RetransmitTo& callback)
     {
-        //m_ackedDataSender.SetRetransmitCallback(callback);
+        //TODO: should all RetransmitCallbacks be made from the same strand?
+        for (auto& vt : m_nodeTypes)
+        {
+            vt.second->GetAckedDataSender().SetRetransmitCallback(callback);
+        }
     }
 
     void CommunicationImpl::SetDataReceiver(const ReceiveData& callback, boost::int64_t dataTypeIdentifier)
@@ -109,22 +113,32 @@ namespace Com
 
     void CommunicationImpl::SetQueueNotFullCallback(const QueueNotFull& callback, int freePartThreshold)
     {
-        //m_ackedDataSender.SetNotFullCallback(callback, freePartThreshold);
+        //TODO: should all QueueNotFullCallbacks be made from the same strand?
+        for (auto& vt : m_nodeTypes)
+        {
+            vt.second->GetAckedDataSender().SetNotFullCallback(callback, freePartThreshold);
+        }
     }
 
     void CommunicationImpl::Start()
     {
         m_reader.Start();
-        //m_heartbeatSender.Start();
-        //m_ackedDataSender.Start();
+        for (auto& vt : m_nodeTypes)
+        {
+            vt.second->GetHeartbeatSender().Start();
+            vt.second->GetAckedDataSender().Start();
+        }
         m_discoverer.Start();
     }
 
     void CommunicationImpl::Stop()
     {
         m_reader.Stop();
-        //m_heartbeatSender.Stop();
-        //m_ackedDataSender.Stop();
+        for (auto& vt : m_nodeTypes)
+        {
+            vt.second->GetHeartbeatSender().Stop();
+            vt.second->GetAckedDataSender().Stop();
+        }
         m_discoverer.Stop();
     }
 
@@ -138,28 +152,19 @@ namespace Com
         SetSystemNode(id, false);
     }
 
-    bool CommunicationImpl::SendToNode(boost::int64_t nodeId, const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier)
+    bool CommunicationImpl::SendToNode(boost::int64_t nodeTypeId, boost::int64_t nodeId, const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier)
     {
-        //TODO
-        //find node and send
-        //return m_ackedDataSender.AddToSendQueue(toId, msg, size, dataTypeIdentifier);
-        return true;
+        return GetNodeType(nodeTypeId).GetAckedDataSender().AddToSendQueue(nodeId, data, size, dataTypeIdentifier);
     }
 
     bool CommunicationImpl::SendToNodeType(boost::int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier)
     {
-        //TODO
-        //find node type and send
-        //return m_ackedDataSender.AddToSendQueue(0, msg, size, dataTypeIdentifier); //receiverId 0 means every system node
-        return true;
+        return GetNodeType(nodeTypeId).GetAckedDataSender().AddToSendQueue(0, data, size, dataTypeIdentifier);
     }
 
     size_t CommunicationImpl::NumberOfQueuedMessages(boost::int64_t nodeTypeId) const
     {
-        //TODO
-        //find node type
-        // return m_ackedDataSender.SendQueueSize();
-        return 0;
+        return GetNodeType(nodeTypeId).GetAckedDataSender().SendQueueSize();
     }
 
     void CommunicationImpl::InjectSeeds(const std::vector<std::string>& seeds)
@@ -171,20 +176,24 @@ namespace Com
     {
         //We do post here to be sure the AddNode job will be executed before SetSystemNode. Otherwize we
         //risk losing a node.
+        //We also do the SetSystemNode for the heartbeatSender and ackedDataSender inside readerStrand since
+        //it only through the deliveryHandler we can lookup nodeTypeId from a nodeId. Since this a a very low frequent operaton this is ok.
         m_reader.Strand().post([=]
         {
+            auto& nodeType=GetNodeType(m_deliveryHandler.GetNode(id)->NodeTypeId());
+            nodeType.GetAckedDataSender().SetSystemNode(id, isSystemNode);
+            nodeType.GetHeartbeatSender().SetSystemNode(id, isSystemNode);
             m_deliveryHandler.SetSystemNode(id, isSystemNode);
         });
-
-        //m_ackedDataSender.SetSystemNode(id, isSystemNode);
-        //m_heartbeatSender.SetSystemNode(id, isSystemNode);
     }
 
     void CommunicationImpl::OnNewNode(const Node& node)
     {
         lllog(6)<<L"COM: New node '"<<node.Name().c_str()<<L"' ["<<node.Id()<<L"]"<<std::endl;
-        //m_ackedDataSender.AddNode(node);
-        //m_heartbeatSender.AddNode(node);
+
+        auto& nodeType=GetNodeType(node.NodeTypeId());
+        nodeType.GetAckedDataSender().AddNode(node);
+        nodeType.GetHeartbeatSender().AddNode(node.Id(), node.Endpoint());
         m_reader.Strand().dispatch([this, node]{m_deliveryHandler.AddNode(node);});
 
         //callback to host application
@@ -229,7 +238,7 @@ namespace Com
             {
                 m_gotRecv(commonHeader->senderId);
                 const Ack* ack=reinterpret_cast<const Ack*>(data);
-                //m_ackedDataSender.HandleAck(*ack);
+                GetNodeType(senderNode->NodeTypeId()).GetAckedDataSender().HandleAck(*ack);
             }
         }
             break;
@@ -270,7 +279,7 @@ namespace Com
     {
         //Always called from readStrand
 
-        //Protobuf message
+        //Protobuf messagenodeTypeId
         CommunicationMessage cm;
         bool parsedOk=cm.ParseFromArray(static_cast<const void*>(payload), static_cast<int>(header->fragmentContentSize));
         if (!parsedOk)

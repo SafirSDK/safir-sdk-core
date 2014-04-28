@@ -90,7 +90,7 @@ namespace Com
             }
 
             lllog(4)<<L"COM: Received AppData from "<<header->commonHeader.senderId<<std::endl;
-            m_gotRecvFrom(header->commonHeader.senderId); //report that we are receivinga intact data from the node
+            m_gotRecvFrom(header->commonHeader.senderId); //report that we are receivinga data from the node
 
             bool sendAck=HandleMessage(header, payload, senderIt->second);
             Deliver(senderIt->second, header->sendMethod); //if something is now fully received, deliver it to application
@@ -208,7 +208,7 @@ namespace Com
 
             Channel& GetChannel(boost::uint16_t sendMethod)
             {
-                return sendMethod==UnicastSendMethod ? unicastChannel : multicastChannel;
+                return sendMethod==SpecifiedReceiverSendMethod ? unicastChannel : multicastChannel;
             }
         };
         typedef std::map<boost::int64_t, NodeInfo> NodeInfoMap;
@@ -312,7 +312,7 @@ namespace Com
         bool HandleMessage(const MessageHeader* header, const char* payload, NodeInfo& ni)
         {
             lllog(8)<<L"COM: recv from: "<<ni.node.Id()<<L", sendMethod: "<<
-                      (header->sendMethod==UnicastSendMethod ? L"Unicast" : L"Multicast")<<
+                      (header->sendMethod==SpecifiedReceiverSendMethod ? L"Unicast" : L"Multicast")<<
                       L", seq: "<<header->sequenceNumber<<std::endl;
 
             Channel& ch=ni.GetChannel(header->sendMethod);

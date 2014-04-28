@@ -29,7 +29,6 @@
 #include "AckedDataSender.h"
 #include "HeartbeatSender.h"
 
-
 namespace Safir
 {
 namespace Dob
@@ -45,11 +44,23 @@ namespace Com
                  boost::int64_t thisNodeId,
                  bool useMulticast,
                  boost::int64_t id,
-                 const std::string& name,
-                 const std::string& multicastAddr,
+                 const std::string &name,
+                 const std::string &multicastAddr,
                  int ipVersion,
                  int heartbeatInterval,
-                 int retryTimeout);
+                 int retryTimeout)
+            :m_thisNodeId(thisNodeId)
+            ,m_id(id)
+            ,m_name(name)
+            ,m_multicastAddress(multicastAddr)
+            ,m_ipVersion(ipVersion)
+            ,m_heartbeatInterval(heartbeatInterval)
+            ,m_retryTimeout(retryTimeout)
+            ,m_useMulticast(useMulticast)
+            ,m_heartbeatSender(ioService, thisNodeId, m_ipVersion, McAddr(m_multicastAddress, m_useMulticast), heartbeatInterval)
+            ,m_ackedDataSender(ioService, m_id, thisNodeId, m_ipVersion, McAddr(m_multicastAddress, m_useMulticast))
+        {
+        }
 
         boost::int64_t Id() const {return m_id;}
         const std::string& Name() const {return m_name;}
@@ -59,8 +70,10 @@ namespace Com
         int HeartbeatInterval() const {return m_heartbeatInterval;}
         int RetryTimeout() const {return m_retryTimeout;}
 
-        HeartbeatSender& GetHeartBeatSender() {return m_heartbeatSender;}
+        HeartbeatSender& GetHeartbeatSender() {return m_heartbeatSender;}
+        const HeartbeatSender& GetHeartbeatSender() const {return m_heartbeatSender;}
         AckedDataSender& GetAckedDataSender() {return m_ackedDataSender;}
+        const AckedDataSender& GetAckedDataSender() const {return m_ackedDataSender;}
 
     private:
         boost::int64_t m_thisNodeId;
@@ -74,6 +87,8 @@ namespace Com
 
         HeartbeatSender m_heartbeatSender;
         AckedDataSender m_ackedDataSender;
+
+        static std::string McAddr(const std::string& addr, bool use){return use ? addr : "";}
     };
 
     typedef boost::shared_ptr<NodeType> NodeTypePtr;

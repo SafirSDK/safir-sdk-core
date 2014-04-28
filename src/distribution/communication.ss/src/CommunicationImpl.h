@@ -75,7 +75,7 @@ namespace Com
         void IncludeNode(boost::int64_t nodeId);
         void ExcludeNode(boost::int64_t nodeId);
 
-        bool SendToNode(boost::int64_t nodeId, const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier);
+        bool SendToNode(boost::int64_t nodeTypeId, boost::int64_t nodeId, const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier);
         bool SendToNodeType(boost::int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier);
 
         size_t NumberOfQueuedMessages(boost::int64_t nodeTypeId) const;
@@ -105,6 +105,9 @@ namespace Com
 
         //Received internal Communication msg that is not directly passed to application, i.e discover, nodeInfo etc.
         void ReceivedControlData(const MessageHeader* header, const char* payload);
+
+        NodeType& GetNodeType(boost::int64_t nodeTypeId) {return *(m_nodeTypes.find(nodeTypeId)->second);}
+        const NodeType& GetNodeType(boost::int64_t nodeTypeId) const {return *(m_nodeTypes.find(nodeTypeId)->second);}
     };
 }
 }

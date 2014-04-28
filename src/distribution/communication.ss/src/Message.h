@@ -55,8 +55,8 @@ namespace Com
     static const boost::int64_t HeartbeatType=-1113057794592031140; //Hash for 'Communication.Heartbeat'
     static const boost::int64_t AckType=-6769271806353797703; //Hash for 'Communication.Ack'
     static const boost::int64_t ControlDataType=186858702748131856; //Hash for 'Communication.ControlData'
-    static const boost::uint16_t UnicastSendMethod=0;
-    static const boost::uint16_t MulticastSendMethod=1;
+    static const boost::uint16_t SpecifiedReceiverSendMethod=0;
+    static const boost::uint16_t MultiReceiverSendMethod=1;
 
     inline boost::uint32_t CalculateCrc32(const char* data, size_t size)
     {
@@ -152,7 +152,7 @@ namespace Com
         boost::int64_t id;
         boost::uint16_t sendMethod;
         boost::uint64_t sequenceNumber;
-        Receiver() : id(0), sendMethod(MulticastSendMethod), sequenceNumber(0){}
+        Receiver() : id(0), sendMethod(MultiReceiverSendMethod), sequenceNumber(0){}
         Receiver(boost::int64_t id_, boost::uint16_t sendMethod_, boost::uint64_t sequenceNumber_)
             :id(id_)
             ,sendMethod(sendMethod_)
@@ -175,7 +175,7 @@ namespace Com
                  const boost::int64_t& dataType,
                  const boost::shared_ptr<char[]>& message_,
                  size_t messageSize)
-            :header(id, dataType, UnicastSendMethod, 0, messageSize, messageSize, 1, 0, 0)
+            :header(id, dataType, SpecifiedReceiverSendMethod, 0, messageSize, messageSize, 1, 0, 0)
             ,message(message_)
             ,fragment(message.get())
             ,sendToAllSystemNodes(true)
@@ -188,7 +188,7 @@ namespace Com
                  size_t messageSize,
                  const char* fragment_,
                  size_t fragmentSize)
-            :header(id, dataType, UnicastSendMethod, 0, messageSize, fragmentSize, 1, 0, static_cast<size_t>(fragment_-message_.get()))
+            :header(id, dataType, SpecifiedReceiverSendMethod, 0, messageSize, fragmentSize, 1, 0, static_cast<size_t>(fragment_-message_.get()))
             ,message(message_)
             ,fragment(fragment_)
             ,sendToAllSystemNodes(true)
