@@ -31,59 +31,59 @@ class AckedDataSenderTest
 public:
     void Run()
     {
-        boost::asio::io_service io;
-        auto work=boost::make_shared<boost::asio::io_service::work>(io);
+//        boost::asio::io_service io;
+//        auto work=boost::make_shared<boost::asio::io_service::work>(io);
 
-        boost::thread_group threads;
-        for (int i = 0; i < 9; ++i)
-        {
-            threads.create_thread([&]{io.run();});
-        }
+//        boost::thread_group threads;
+//        for (int i = 0; i < 9; ++i)
+//        {
+//            threads.create_thread([&]{io.run();});
+//        }
 
-        Com::Node me {"Test", 100, "127.0.0.1:10000", "239.192.1.1:11000"};
-        Com::AckedDataSenderBasic<AckedDataSenderTest::TestWriter> sender(io, me);
-        sender.SetNotFullCallback([=]{OnQueueNotFull();}, 50);
-        sender.SetRetransmitCallback([=](boost::int64_t to){OnRetransmit(to);});
-        sender.Start();
+//        Com::Node me {"Test", 100, "127.0.0.1:10000", "239.192.1.1:11000"};
+//        Com::AckedDataSenderBasic<AckedDataSenderTest::TestWriter> sender(io, me);
+//        sender.SetNotFullCallback([=]{OnQueueNotFull();}, 50);
+//        sender.SetRetransmitCallback([=](boost::int64_t to){OnRetransmit(to);});
+//        sender.Start();
 
-        //Add nodes
-        sender.AddNode(Com::Node("Test_1", 1, "127.0.0.1:10001", "239.192.1.1:11000"));
-        sender.AddNode(Com::Node("Test_2", 2, "127.0.0.1:10002", ""));
-        sender.AddNode(Com::Node("Test_3", 3, "127.0.0.1:10003", ""));
-        sender.AddNode(Com::Node("Test_4", 4, "127.0.0.1:10004", "239.192.1.1:11000"));
-        sender.SetSystemNode(1, true);
-        sender.SetSystemNode(2, true);
-        sender.SetSystemNode(3, true);
-        sender.SetSystemNode(4, true);
+//        //Add nodes
+//        sender.AddNode(Com::Node("Test_1", 1, "127.0.0.1:10001", "239.192.1.1:11000"));
+//        sender.AddNode(Com::Node("Test_2", 2, "127.0.0.1:10002", ""));
+//        sender.AddNode(Com::Node("Test_3", 3, "127.0.0.1:10003", ""));
+//        sender.AddNode(Com::Node("Test_4", 4, "127.0.0.1:10004", "239.192.1.1:11000"));
+//        sender.SetSystemNode(1, true);
+//        sender.SetSystemNode(2, true);
+//        sender.SetSystemNode(3, true);
+//        sender.SetSystemNode(4, true);
 
-        //Add to send queue
-        sender.AddToSendQueue(0, MakeShared("1"), 1, 0);
-        sender.AddToSendQueue(0, MakeShared("2"), 1, 0);
-        sender.AddToSendQueue(0, MakeShared("3"), 1, 0);
-        sender.AddToSendQueue(0, MakeShared("4"), 1, 0);
+//        //Add to send queue
+//        sender.AddToSendQueue(0, MakeShared("1"), 1, 0);
+//        sender.AddToSendQueue(0, MakeShared("2"), 1, 0);
+//        sender.AddToSendQueue(0, MakeShared("3"), 1, 0);
+//        sender.AddToSendQueue(0, MakeShared("4"), 1, 0);
 
-        //Send Window
+//        //Send Window
 
-        //Full queue handling and QueueNotFull callback
+//        //Full queue handling and QueueNotFull callback
 
-        //Fragmentation
+//        //Fragmentation
 
-        //Ack
+//        //Ack
 
-        //SystemNodes
+//        //SystemNodes
 
-        //SendAll and SendTo
+//        //SendAll and SendTo
 
-        //Queue size
+//        //Queue size
 
-        //Stop
-        //Wait(100);
-        work.reset();
-        sender.Stop();
-        threads.join_all();
+//        //Stop
+//        //Wait(100);
+//        work.reset();
+//        sender.Stop();
+//        threads.join_all();
 
-        Wait(10);
-        std::cout<<"AckedDataSenderTest tests passed"<<std::endl;
+//        Wait(10);
+//        std::cout<<"AckedDataSenderTest tests passed"<<std::endl;
     }
 
 private:

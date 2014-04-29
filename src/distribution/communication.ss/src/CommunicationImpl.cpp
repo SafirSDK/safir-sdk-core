@@ -99,7 +99,6 @@ namespace Com
 
     void CommunicationImpl::SetRetransmitToCallback(const RetransmitTo& callback)
     {
-        //TODO: should all RetransmitCallbacks be made from the same strand?
         for (auto& vt : m_nodeTypes)
         {
             vt.second->GetAckedDataSender().SetRetransmitCallback(callback);
@@ -113,7 +112,6 @@ namespace Com
 
     void CommunicationImpl::SetQueueNotFullCallback(const QueueNotFull& callback, int freePartThreshold)
     {
-        //TODO: should all QueueNotFullCallbacks be made from the same strand?
         for (auto& vt : m_nodeTypes)
         {
             vt.second->GetAckedDataSender().SetNotFullCallback(callback, freePartThreshold);

@@ -24,7 +24,7 @@
 #include "ReaderTest.h"
 #include "WriterTest.h"
 #include "MessageQueueTest.h"
-#include "HeartBeatSenderTest.h"
+#include "HeartbeatSenderTest.h"
 #include "DeliveryHandlerTest.h"
 #include "AckedDataSenderTest.h"
 #include "DiscovererTest.h"
@@ -35,68 +35,68 @@
 //**********************************
 int main(int argc, char* argv[])
 {    
-    if (argc>1)
-    {
-        std::string run(argv[1]);
-        if (run=="MessageQueueTest")
-        {
-            MessageQueueTest test;
-            test.Run();
-        }
-        else if (run=="DeliveryHandlerTest")
-        {
-            DeliveryHandlerTest test;
-            test.Run();
-        }
-        else if (run=="ReaderTest")
-        {
-            ReaderTest test;
-            test.Run();
-        }
-        else if (run=="WriterTest")
-        {
-            WriterTest test;
-            test.Run();
-        }
-        else if (run=="HeartBeatSenderTest")
-        {
-            HeartBeatSenderTest test;
-            test.Run();
-        }
-        else if (run=="AckedDataSenderTest")
-        {
-            AckedDataSenderTest test;
-            test.Run();
-        }
-        else if (run=="DiscovererTest")
-        {
-            DiscovererTest test;
-            test.Run();
-        }
-        else
-        {
-            std::cout<<"Valid test case args are: MessageQueueTest, DeliveryHandlerTest, ReaderTest, WriterTest, DiscovererTest"<<std::endl;
-            return 0;
-        }
-        std::cout<<"================================="<<std::endl;
-        std::cout<<"All tests passed!"<<std::endl;
-        std::cout<<"================================="<<std::endl;
-    }
-    else //run all tests
-    {
-        //{(MessageQueueTest()).Run();}
-        //{(DeliveryHandlerTest()).Run();}
-        //{(ReaderTest()).Run();}
-        //{(WriterTest()).Run();}
-        //{(HeartBeatSenderTest()).Run();}
-        {(AckedDataSenderTest()).Run();}
-        //{(DiscovererTest()).Run();}
+//    if (argc>1)
+//    {
+//        std::string run(argv[1]);
+//        if (run=="MessageQueueTest")
+//        {
+//            MessageQueueTest test;
+//            test.Run();
+//        }
+//        else if (run=="DeliveryHandlerTest")
+//        {
+//            DeliveryHandlerTest test;
+//            test.Run();
+//        }
+//        else if (run=="ReaderTest")
+//        {
+//            ReaderTest test;
+//            test.Run();
+//        }
+//        else if (run=="WriterTest")
+//        {
+//            WriterTest test;
+//            test.Run();
+//        }
+//        else if (run=="HeartBeatSenderTest")
+//        {
+//            HeartBeatSenderTest test;
+//            test.Run();
+//        }
+//        else if (run=="AckedDataSenderTest")
+//        {
+//            AckedDataSenderTest test;
+//            test.Run();
+//        }
+//        else if (run=="DiscovererTest")
+//        {
+//            DiscovererTest test;
+//            test.Run();
+//        }
+//        else
+//        {
+//            std::cout<<"Valid test case args are: MessageQueueTest, DeliveryHandlerTest, ReaderTest, WriterTest, DiscovererTest"<<std::endl;
+//            return 0;
+//        }
+//        std::cout<<"================================="<<std::endl;
+//        std::cout<<"All tests passed!"<<std::endl;
+//        std::cout<<"================================="<<std::endl;
+//    }
+//    else //run all tests
+//    {
+//        //{(MessageQueueTest()).Run();}
+//        //{(DeliveryHandlerTest()).Run();}
+//        //{(ReaderTest()).Run();}
+//        //{(WriterTest()).Run();}
+//        //{(HeartBeatSenderTest()).Run();}
+//        {(AckedDataSenderTest()).Run();}
+//        //{(DiscovererTest()).Run();}
 
-        //if we get here all tests passed without errors
-        std::cout<<"================================="<<std::endl;
-        std::cout<<"All tests passed!"<<std::endl;
-        std::cout<<"================================="<<std::endl;
-    }
+//        //if we get here all tests passed without errors
+//        std::cout<<"================================="<<std::endl;
+//        std::cout<<"All tests passed!"<<std::endl;
+//        std::cout<<"================================="<<std::endl;
+//    }
     return 0;
 }
 

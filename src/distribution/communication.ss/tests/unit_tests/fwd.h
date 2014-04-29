@@ -35,7 +35,7 @@
 #include "../../src/MessageQueue.h"
 #include "../../src/Node.h"
 #include "../../src/DeliveryHandler.h"
-#include "../../src/HeartBeatSender.h"
+#include "../../src/HeartbeatSender.h"
 #include "../../src/Reader.h"
 #include "../../src/Writer.h"
 #include "../../src/Discoverer.h"

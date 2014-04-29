@@ -58,7 +58,7 @@ namespace Com
             ,m_retryTimeout(retryTimeout)
             ,m_useMulticast(useMulticast)
             ,m_heartbeatSender(ioService, thisNodeId, m_ipVersion, McAddr(m_multicastAddress, m_useMulticast), heartbeatInterval)
-            ,m_ackedDataSender(ioService, m_id, thisNodeId, m_ipVersion, McAddr(m_multicastAddress, m_useMulticast))
+            ,m_ackedDataSender(ioService, m_id, thisNodeId, m_ipVersion, McAddr(m_multicastAddress, m_useMulticast), retryTimeout)
         {
         }
 

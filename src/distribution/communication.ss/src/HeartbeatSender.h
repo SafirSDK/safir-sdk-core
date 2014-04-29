@@ -158,7 +158,7 @@ namespace Com
                     }
                 }
 
-                m_heartbeatTimer.expires_from_now(boost::chrono::milliseconds(Parameters::HeartbeatInterval));
+                m_heartbeatTimer.expires_from_now(boost::chrono::milliseconds(m_interval));
                 m_heartbeatTimer.async_wait(m_strand.wrap([=](const boost::system::error_code&){OnTimeout();}));
             }
         }

@@ -47,7 +47,7 @@ namespace Com
         Utilities::CreateEndpoint(unicastAddress, ipVersion); //get the ip-version to use
 
         //find own node type and check if we are multicast enabled
-        auto nodeTypeIt=std::find_if(nodeTypes.cbegin(), nodeTypes.cend(), [=](const Communication::NodeType& n){return n.id==nodeId;});
+        auto nodeTypeIt=std::find_if(nodeTypes.cbegin(), nodeTypes.cend(), [=](const Communication::NodeType& n){return n.id==nodeTypeId;});
         if (nodeTypeIt==nodeTypes.end())
         {
             throw std::logic_error("Own nodeType does not exist "+std::string(__FILE__));

@@ -17,18 +17,18 @@ class Cmd
 public:
     Cmd(int argc, char * argv[])
         :unicastAddress()
-        ,multicastAddress()
+        ,nodeType("nt0")
         ,await(0)
         ,seeds()
-        ,nsend(std::numeric_limits<int>::max())
-        ,nrecv(std::numeric_limits<int>::max())
+        ,nsend(0)
+        ,nrecv(0)
         ,messageSize(1000)
     {
         boost::program_options::options_description desc("Command line options");
         desc.add_options()
                 ("help,h", "Produce help message")
-                ("uaddr,a", boost::program_options::value<std::string>(), "Unicast address on format 'address:port'")
-                ("maddr,m", boost::program_options::value<std::string>(), "Multicast address on format 'address:port'")
+                ("addr,a", boost::program_options::value<std::string>(), "Unicast address on format 'address:port'")
+                ("node-type,t", boost::program_options::value<std::string>(), "Node type nt0, nt1 or nt2, defaults to nt0'")
                 ("await,w", boost::program_options::value<int>(), "Wait for specified number of other nodes before start sending data")
                 ("seed,s", boost::program_options::value< std::vector<std::string> >()->multitoken(), "Seed addresses on format 'address:port'")
                 ("nmsg,n", boost::program_options::value<unsigned int>(), "Number of messages to send and receive. Equal to set both nsend and nsend to the same value")
@@ -44,13 +44,13 @@ public:
             return;
         }
 
-        if (vm.count("uaddr"))
+        if (vm.count("addr"))
         {
-            unicastAddress=vm["uaddr"].as<std::string>();
+            unicastAddress=vm["addr"].as<std::string>();
         }
-        if (vm.count("maddr"))
+        if (vm.count("node-type"))
         {
-            multicastAddress=vm["maddr"].as<std::string>();
+            nodeType=vm["node-type"].as<std::string>();
         }
         if (vm.count("await"))
         {
@@ -77,10 +77,16 @@ public:
         {
             messageSize=vm["size"].as<size_t>();
         }
+
+        if (nsend==0 && nrecv==0)
+        {
+            nsend=std::numeric_limits<int>::max();
+            nrecv=std::numeric_limits<int>::max();
+        }
     }
 
     std::string unicastAddress;
-    std::string multicastAddress;
+    std::string nodeType;
     int await;
     std::vector<std::string> seeds;
     unsigned int nsend;
@@ -91,9 +97,11 @@ public:
 class NodeTypes
 {
 public:
+    static const int NumberOfNodeTypes = 3;
+
     NodeTypes()
     {
-        for (int i=0; i<3; ++i)
+        for (int i=0; i<NumberOfNodeTypes; ++i)
         {
             Safir::Dob::Internal::Com::Communication::NodeType n;
             n.name="nt"+boost::lexical_cast<std::string>(i);
@@ -324,12 +332,12 @@ int main(int argc, char * argv[])
 
     NodeTypes nodeTypes;
     boost::int64_t myId=LlufId_GenerateRandom64();
-    boost::int64_t myNodeTypeId=nodeTypes.Get("nt0").id;
+    boost::int64_t myNodeTypeId=nodeTypes.Get(cmd.nodeType).id;
     std::cout<<"----------------------------------------------------------------------------"<<std::endl;
     std::cout<<"-- Name:      "<<name.str()<<std::endl;
     std::cout<<"-- Id:        "<<myId<<std::endl;
-    std::cout<<"-- Unicast:   "<<cmd.unicastAddress<<std::endl;
-    std::cout<<"-- Multicast: "<<(cmd.multicastAddress.empty() ? "NOT_ENABLED" :  cmd.multicastAddress)<<std::endl;
+    std::cout<<"-- Address:   "<<cmd.unicastAddress<<std::endl;
+    std::cout<<"-- Node type: "<<cmd.nodeType<<std::endl;
     std::cout<<"----------------------------------------------------------------------------"<<std::endl;
     com.reset(new Safir::Dob::Internal::Com::Communication(ioService, name.str(),
                                                            myId, myNodeTypeId,

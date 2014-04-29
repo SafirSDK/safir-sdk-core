@@ -61,20 +61,21 @@ namespace Com
                              boost::int64_t nodeTypeId,
                              boost::int64_t nodeId,
                              int ipVersion,
-                             const std::string& multicastAddress)
+                             const std::string& multicastAddress,
+                             int waitForAckTimeout)
             :WriterType(ioService, ipVersion, multicastAddress)
             ,m_strand(*ioService)
             ,m_nodeTypeId(nodeTypeId)
             ,m_nodeId(nodeId)
             ,m_sendQueue(Parameters::SendQueueSize)
             ,m_running(false)
+            ,m_waitForAckTimeout(waitForAckTimeout)
             ,m_nodes()
             ,m_lastSentMulticastSeqNo(0)
             ,m_resendTimer(*ioService)
             ,m_retransmitNotification()
             ,m_queueNotFullNotification()
             ,m_queueNotFullNotificationLimit(0)
-
         {
             //TODO: use initialization instead. This is due to problems with VS2013
             m_sendQueueSize=0;
@@ -264,6 +265,7 @@ namespace Com
         MessageQueue<UserDataPtr> m_sendQueue;
         std::atomic_uint m_sendQueueSize;
         bool m_running;
+        int m_waitForAckTimeout;
 
         NodeMap m_nodes;
         boost::uint64_t m_lastSentMulticastSeqNo;
@@ -360,8 +362,8 @@ namespace Com
             }
 
             //Always called from writeStrand
-            static const boost::chrono::milliseconds timerInterval(Parameters::RetransmitCheckInterval);
-            static const boost::chrono::milliseconds waitLimit(Parameters::WaitForAckTime);
+            static const boost::chrono::milliseconds timerInterval(2*m_waitForAckTimeout);
+            static const boost::chrono::milliseconds waitLimit(m_waitForAckTimeout);
 
             //Check if there is any unacked messages that are old enough to be retransmitted
             for (size_t i=0; i<m_sendQueue.first_unhandled_index(); ++i)
