@@ -74,8 +74,11 @@ namespace SP
 
         void Stop()
         {
-            m_subscriber->Disconnect();
-            m_subscriber.reset();
+            if (m_subscriber != nullptr)
+            {
+                m_subscriber->Disconnect();
+                m_subscriber.reset();
+            }
         }
  
     private:

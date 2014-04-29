@@ -96,7 +96,9 @@ namespace SP
                                                                             m_rawHandler))
             , m_coordinator(boost::make_shared<Coordinator>(ioService, 
                                                             communication,
+                                                            name,
                                                             id,
+                                                            address,
                                                             MASTER_REMOTE_ELECTION_NAME,
                                                             m_rawHandler))
             , m_statePublisherLocal(boost::make_shared<StatePublisherLocal>(ioService, 

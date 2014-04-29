@@ -44,13 +44,13 @@ namespace
     void PrintMessage(const Safir::Dob::Internal::SP::SystemStateMessage& msg, 
                       std::wostream& out)
     {
-        out << "Elected: " << msg.elected_id();
+        out << "--------------------------------------------";
 
         for (int i = 0; i < msg.node_info_size(); ++i)
         {
             const auto& node = msg.node_info(i);
             out << "\n" 
-                << "    " 
+                << (msg.elected_id() == node.id() ? "  E " : "    ")
                 << node.name().c_str() 
                 << "@" << node.control_address().c_str() 
                 << " (" << node.id() << ")";

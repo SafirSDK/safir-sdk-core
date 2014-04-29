@@ -80,13 +80,17 @@ namespace
 
     Coordinator::Coordinator(const boost::shared_ptr<boost::asio::io_service>& ioService,
                              const boost::shared_ptr<Com::Communication>& communication,
-                             const int64_t id,
+                             const std::string& name,
+                             const boost::int64_t id,
+                             const std::string& address,
                              const char* const dataIdentifier,
                              const boost::shared_ptr<RawHandler>& rawHandler)
         : m_strand (*ioService)
         , m_communication(communication)
         , m_dataIdentifier(LlufId_Generate64(dataIdentifier))
+        , m_name(name)
         , m_id(id)
+        , m_address(address)
         , m_elected(std::numeric_limits<boost::int64_t>::min())
         , m_electionTimer(*ioService)
     {
@@ -146,17 +150,13 @@ namespace
 
         //add myself
         auto node = m_stateMessage.add_node_info();
-        node->set_name("Unknown");
+        node->set_name(m_name);
         node->set_id(m_id);
-        node->set_control_address("Unknown");
+        node->set_control_address(m_address);
         node->set_multicast_enabled(false); //TODO: get this!
 
         if (m_lastStatistics.Valid())
         {
-            //TODO: move these to outside the validity check, if we can get the data from somewhere else
-            node->set_name(m_lastStatistics.Name());
-            node->set_control_address(m_lastStatistics.Address());
-
             std::set<boost::int64_t> deadNodes;
             for (int i = 0; i < m_lastStatistics.Size(); ++i)
             {

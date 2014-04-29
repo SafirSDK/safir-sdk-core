@@ -71,7 +71,9 @@ namespace SP
     public:
         Coordinator(const boost::shared_ptr<boost::asio::io_service>& ioService,
                     const boost::shared_ptr<Com::Communication>& communication,
+                    const std::string& name,
                     const boost::int64_t id,
+                    const std::string& address,
                     const char* const receiverId,
                     const boost::shared_ptr<RawHandler>& rawHandler);
 
@@ -107,7 +109,10 @@ namespace SP
         RawStatistics m_lastStatistics;
         SystemStateMessage m_stateMessage;
         
+        const std::string m_name;
         const boost::int64_t m_id;
+        const std::string m_address;
+
         std::atomic<boost::int64_t> m_elected;
         boost::asio::steady_timer m_electionTimer;
         boost::int64_t m_currentElectionId = 0;
