@@ -82,6 +82,13 @@ DoseMon::DoseMon(QWidget * /*parent*/)
 
 DoseMon::~DoseMon()
 {
+    while (tabWidget->count() != 0)
+    {
+        QWidget* w = tabWidget->widget(0);
+        tabWidget->removeTab(0);
+        delete w;
+    }
+
     //make sure we let all pending jobs run before exiting.
     m_ioService.run();
 }
