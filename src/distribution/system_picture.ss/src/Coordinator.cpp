@@ -272,7 +272,7 @@ namespace
             {
                 for (int i = 0; i < m_lastStatistics.Size(); ++i)
                 {
-                    if (m_lastStatistics.Id(i) == m_elected)
+                    if (m_lastStatistics.Id(i) == m_elected && !m_lastStatistics.IsDead(i))
                     {
                         if (m_elected > m_id)
                         {
