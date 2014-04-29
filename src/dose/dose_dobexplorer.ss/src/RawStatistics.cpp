@@ -51,6 +51,7 @@ namespace
             for (int column = 0; column < NUM_COLUMNS; ++column)
             {
                 table->item(row, column)->setBackground(QColor(200,200,200));
+                table->item(row, column)->setToolTip("Node is dead");
             }
         }
     }

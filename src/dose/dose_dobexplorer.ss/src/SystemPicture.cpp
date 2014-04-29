@@ -164,6 +164,31 @@ void SystemPicture::UpdateSystemTable(const Safir::Dob::Internal::SP::SystemStat
                              COLUMN_MULTICAST_ENABLED,
                              mc);
 
+        //set elected coordinator 
+        if (it->first == statistics.ElectedId())
+        {
+            if (systemTable->item(row, COLUMN_NAME)->background() != QColor(230,115,57))
+            {
+                for (int column = 0; column < NUM_COLUMNS; ++column)
+                {
+                    systemTable->item(row, column)->setBackground(QColor(230,115,57));
+                    systemTable->item(row, column)->setToolTip("Elected coordinator");
+                }
+            }
+        }
+        else
+        {
+            if (systemTable->item(row, COLUMN_NAME)->background() != Qt::transparent)
+            {
+                for (int column = 0; column < NUM_COLUMNS; ++column)
+                {
+                    systemTable->item(row, column)->setBackground(Qt::transparent);
+                    systemTable->item(row, column)->setToolTip("");
+                }
+            }
+
+        }
+
     }
 }
 
