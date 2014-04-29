@@ -88,8 +88,20 @@ namespace SP
         }
 
     private:
-        void DataReceived(const char* const data, const size_t size)
+        void DataReceived(const char* const data, size_t size)
         {
+#ifdef CHECK_CRC
+            size -= sizeof(int); //remove the crc from size
+            int expected;
+            memcpy(&expected, data + size, sizeof(int));
+            const int crc = GetCrc32(data, size);
+            if (crc != expected)
+            {
+                SEND_SYSTEM_LOG(Alert,
+                                << "Bad CRC in StateSubscriberLocal, expected " << expected << " got " << crc);
+                throw std::logic_error("CRC check failed!");
+            }
+#endif
             boost::shared_ptr<SystemStateMessage> state = boost::make_shared<SystemStateMessage>();
         
             const bool parseResult = state->ParseFromArray(data, static_cast<int>(size));

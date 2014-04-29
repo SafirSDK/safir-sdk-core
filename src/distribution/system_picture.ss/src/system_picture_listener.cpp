@@ -27,8 +27,92 @@
 #include <boost/asio.hpp>
 #include <boost/make_shared.hpp>
 
-int main()
+//disable warnings in boost
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4100)
+#endif
+
+#include <boost/program_options.hpp>
+
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
+
+std::wostream& operator<<(std::wostream& out, const std::string& str)
 {
+    return out << str.c_str();
+}
+
+std::wostream& operator<<(std::wostream& out, const boost::program_options::options_description& opt)
+{
+    std::ostringstream ostr;
+    ostr << opt;
+    return out << ostr.str().c_str();
+}
+
+
+class ProgramOptions
+{
+public:
+    ProgramOptions(int argc, char* argv[])
+        : parseOk(false)
+    {
+        using namespace boost::program_options;
+        options_description options("Options");
+        options.add_options()
+            ("help,h", "show help message")
+            ("raw", 
+             "Subscribe to the Raw data instead of the SystemState data");
+        
+        variables_map vm;
+
+        try
+        {
+            store(command_line_parser(argc, argv).
+                  options(options).run(), vm);
+            notify(vm);
+        }
+        catch (const std::exception& exc)
+        {
+            std::wcerr << "Error parsing command line: " << exc.what() << "\n" << std::endl;
+            ShowHelp(options);
+            return;
+        }
+
+        if (vm.count("help"))
+        {
+            ShowHelp(options);
+            return;
+        }
+
+        raw = vm.count("raw") != 0;
+
+        parseOk = true;
+    }
+    bool parseOk;
+
+    bool raw;
+
+private:
+    static void ShowHelp(const boost::program_options::options_description& desc)
+    {
+        std::wcout << std::boolalpha
+                   << "Usage: control [OPTIONS]\n"
+                   << desc
+                   << std::endl;
+    }
+
+};
+
+int main(int argc, char * argv[])
+{
+    const ProgramOptions options(argc, argv);
+    if (!options.parseOk)
+    {
+        return 1;
+    }
+
     boost::asio::io_service ioService;
     boost::shared_ptr<boost::asio::io_service::work> wk(new boost::asio::io_service::work(ioService));
 
@@ -48,12 +132,24 @@ int main()
     Safir::Dob::Internal::SP::SystemPicture sp(Safir::Dob::Internal::SP::slave_tag);
     
     auto rawSub = sp.GetRawStatistics();
+    auto stateSub = sp.GetSystemState();
     
-    rawSub->Start(ioService,
-                  [](const Safir::Dob::Internal::SP::RawStatistics& data)
-                  {                  
-                      std::wcout << data << std::endl;
-                  });
+    if (options.raw)
+    {
+        rawSub->Start(ioService,
+                      [](const Safir::Dob::Internal::SP::RawStatistics& data)
+                      {                  
+                          std::wcout << data << std::endl;
+                      });
+    }
+    else
+    {
+        stateSub->Start(ioService,
+                        [](const Safir::Dob::Internal::SP::SystemState& data)
+                        {                  
+                            std::wcout << data << std::endl;
+                        });
+    }
 
     signals.async_wait([&](const boost::system::error_code& error,
                            const int /*signal_number*/)
@@ -63,6 +159,7 @@ int main()
                                lllog(0) << "Got a signals error: " << error << std::endl;
                            }
                            rawSub->Stop();
+                           stateSub->Stop();
                            wk.reset();
                        });
 

@@ -49,8 +49,10 @@ if (NOT MSVC)
 
 endif()
 
+FIND_PACKAGE(Boost COMPONENTS program_options)
+
 add_executable(system_picture_listener system_picture_listener.cpp)
-target_link_libraries(system_picture_listener system_picture)
+target_link_libraries(system_picture_listener system_picture ${Boost_LIBRARIES})
 
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE
