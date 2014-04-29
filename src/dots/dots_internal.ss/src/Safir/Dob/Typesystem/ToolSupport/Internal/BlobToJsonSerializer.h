@@ -99,7 +99,7 @@ namespace Internal
             {
                 const MemberDescriptionType* md=cd->GetMember(memberIx);
 
-                if (md->GetCollectionType()!=ArrayCollectionType) //normal member
+                if (md->GetCollectionType()==SingleValueCollectionType) //normal member
                 {
                     if (!reader.IsNull(memberIx, 0))
                     {
@@ -108,7 +108,7 @@ namespace Internal
                         SerializeMember(reader, md, memberIx, 0, os);
                     }
                 }
-                else //array member
+                else if (md->GetCollectionType()==ArrayCollectionType)
                 {
                     std::ostringstream arrayValues;
                     arrayValues<<", ";
@@ -148,6 +148,27 @@ namespace Internal
                     if (nonNullValueInserted) //only add array element if there are non-null values
                     {
                         os<<arrayValues.str();
+                    }
+                }
+                else if (md->GetCollectionType()==SequenceCollectionType)
+                {
+                    int numberOfValues=reader.NumberOfValues(memberIx);
+                    if (numberOfValues>0)
+                    {
+                        os<<", ";
+                        WriteMemberName(md->GetName(), os);
+                        os<<"[";
+
+                        for (DotsC_ArrayIndex valueIndex=0; valueIndex<numberOfValues; ++valueIndex)
+                        {
+                            if (valueIndex>0)
+                            {
+                                os<<", ";
+                            }
+                            SerializeMember(reader, md, memberIx, valueIndex, os);
+                        }
+
+                        os<<"]";
                     }
                 }
             }

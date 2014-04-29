@@ -3,7 +3,7 @@
     <name>Test.MyParam</name>
     <baseClass>Object</baseClass>
     <parameters>
-        <parameter>
+        <!--parameter>
             <name>OldArrayParam</name>
             <type>Int32</type>
             <arrayElements>
@@ -52,7 +52,7 @@
                     <instanceId>2</instanceId>
                 </entityId>
             </sequence>
-        </parameter>
+        </parameter-->
 
         <parameter>
             <name>SequenceParamObj</name>

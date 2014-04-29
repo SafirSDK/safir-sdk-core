@@ -132,9 +132,7 @@ namespace Internal
                             SerializeMember(reader, md, memberIx, valueIndex, typeName, os);
                         }
                         os<<"</"<<md->GetName()<<">";
-
                     }
-
                 }
             }
         }

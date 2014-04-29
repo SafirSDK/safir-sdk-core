@@ -116,7 +116,7 @@ namespace Internal
                 }
 
                 const MemberDescriptionType* md=cd->GetMember(memIx);
-                if (md->GetCollectionType()!=ArrayCollectionType)
+                if (md->GetCollectionType()==SingleValueCollectionType)
                 {
                     //non-array, then the inner propertyTree contains the content, i.e <myInt>123</myInt>
                     try
@@ -130,7 +130,7 @@ namespace Internal
                         throw ParseError("JsonToBinary serialization error", os.str(), "", 146);
                     }
                 }
-                else
+                else if (md->GetCollectionType()==ArrayCollectionType)
                 {
                     DotsC_ArrayIndex arrayIndex=0;
                     for (boost::property_tree::ptree::const_iterator arrIt=memIt->second.begin(); arrIt!=memIt->second.end(); ++arrIt)
@@ -152,6 +152,24 @@ namespace Internal
                             os<<"Failed to serialize array member '"<<cd->GetName()<<"."<<md->GetName()<<"' with index="<<arrayIndex<<" from Json to binary. Type is incorrect.";
                             throw ParseError("JsonToBinary serialization error", os.str(), "", 148);
                         }
+                    }
+                }
+                else if (md->GetCollectionType()==SequenceCollectionType)
+                {
+                    DotsC_ArrayIndex valueIndex=0;
+                    for (boost::property_tree::ptree::const_iterator seqIt=memIt->second.begin(); seqIt!=memIt->second.end(); ++seqIt)
+                    {
+                        try
+                        {
+                            SetMember(md, memIx, 0, seqIt->second, writer);
+                        }
+                        catch (const boost::property_tree::ptree_error&)
+                        {
+                            std::ostringstream os;
+                            os<<"Failed to serialize sequence member '"<<cd->GetName()<<"."<<md->GetName()<<"' with index="<<valueIndex<<" from Json to binary. Type is incorrect.";
+                            throw ParseError("JsonToBinary serialization error", os.str(), "", 701);
+                        }
+                        ++valueIndex;
                     }
                 }
             }
