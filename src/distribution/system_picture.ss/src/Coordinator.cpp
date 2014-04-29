@@ -215,31 +215,35 @@ namespace
                           });
     }
 
+    //must be called in strand
     void Coordinator::NewSystemState(const boost::int64_t from, 
                                      const boost::shared_ptr<char[]>& data, 
                                      const size_t size)
     {
-        if (from != m_elected)
+        m_strand.dispatch([this,from,data,size]
         {
-            SEND_SYSTEM_LOG(Informational, << "SystemPicture (in node " << m_id << ") got a new system state (from node "
-                            << from << ") from a node that is not elected (elected node is " << m_elected << "). Discarding.");
-        }
-        else
-        {
-            m_stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
-            
-            const auto nodes = GetNodeIds(m_stateMessage);
-
-            for (int i = 0; i < m_lastStatistics.Size(); ++i)
+            if (from != m_elected)
             {
-                //if we haven't marked the node as dead and electee doesnt think the node
-                //is part of the system we want to exclude the node
-                if (!m_lastStatistics.IsDead(i) && nodes.find(m_lastStatistics.Id(i)) == nodes.end())
+                SEND_SYSTEM_LOG(Informational, << "SystemPicture (in node " << m_id << ") got a new system state (from node "
+                                << from << ") from a node that is not elected (elected node is " << m_elected << "). Discarding.");
+            }
+            else
+            {
+                m_stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
+                
+                const auto nodes = GetNodeIds(m_stateMessage);
+                
+                for (int i = 0; i < m_lastStatistics.Size(); ++i)
                 {
-                    m_communication->ExcludeNode(m_lastStatistics.Id(i));
+                    //if we haven't marked the node as dead and electee doesnt think the node
+                    //is part of the system we want to exclude the node
+                    if (!m_lastStatistics.IsDead(i) && nodes.find(m_lastStatistics.Id(i)) == nodes.end())
+                    {
+                        m_communication->ExcludeNode(m_lastStatistics.Id(i));
+                    }
                 }
             }
-        }
+        });
     }
 
 
