@@ -721,6 +721,11 @@ namespace ToolSupport
         void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const {state.lastInsertedClass->ownParameters.back()->isArray=true;}
     };
 
+    template<> struct ParseAlgorithm<Elements::ParameterArray>
+    {
+        void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const {state.lastInsertedClass->ownParameters.back()->isArray=true;}
+    };
+
     template<> struct ParseAlgorithm<Elements::ParameterValue>
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
