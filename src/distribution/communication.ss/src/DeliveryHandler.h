@@ -46,17 +46,17 @@ namespace Internal
 {
 namespace Com
 {
-    typedef boost::function<void(boost::int64_t from, const boost::shared_ptr<char[]>& data, size_t size)> ReceiveData;
-    typedef boost::function<void(boost::int64_t fromId)> GotReceiveFrom;
+    typedef boost::function<void(boost::int64_t fromNodeId, const boost::shared_ptr<char[]>& data, size_t size)> ReceiveData;
+    typedef boost::function<void(boost::int64_t fromNodeId)> GotReceiveFrom;
 
     template <class WriterType>
     class DeliveryHandlerBasic : private WriterType
     {
     public:
-        DeliveryHandlerBasic(boost::asio::io_service& ioService, const Node& me)
-            :WriterType(ioService, me)
+        DeliveryHandlerBasic(const boost::shared_ptr<boost::asio::io_service>& ioService, const Node& me)
+            :WriterType(ioService, me.IpVersion())
             ,m_myId(me.Id())
-            ,m_deliverStrand(ioService)
+            ,m_deliverStrand(*ioService)
             ,m_nodes()
             ,m_receivers()
             ,m_gotRecvFrom()
@@ -207,7 +207,7 @@ namespace Com
 
             Channel& GetChannel(boost::uint16_t sendMethod)
             {
-                return sendMethod==UnicastSendMethod ? unicastChannel : multicastChannel;
+                return sendMethod==SpecifiedReceiverSendMethod ? unicastChannel : multicastChannel;
             }
         };
         typedef std::map<boost::int64_t, NodeInfo> NodeInfoMap;
@@ -311,7 +311,7 @@ namespace Com
         bool HandleMessage(const MessageHeader* header, const char* payload, NodeInfo& ni)
         {
             lllog(8)<<L"COM: recv from: "<<ni.node.Id()<<L", sendMethod: "<<
-                      (header->sendMethod==UnicastSendMethod ? L"Unicast" : L"Multicast")<<
+                      (header->sendMethod==SpecifiedReceiverSendMethod ? L"Unicast" : L"Multicast")<<
                       L", seq: "<<header->sequenceNumber<<std::endl;
 
             Channel& ch=ni.GetChannel(header->sendMethod);

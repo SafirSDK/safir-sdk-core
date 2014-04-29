@@ -17,18 +17,18 @@ class Cmd
 public:
     Cmd(int argc, char * argv[])
         :unicastAddress()
-        ,multicastAddress()
+        ,nodeType("nt0")
         ,await(0)
         ,seeds()
-        ,nsend(std::numeric_limits<int>::max())
-        ,nrecv(std::numeric_limits<int>::max())
+        ,nsend(0)
+        ,nrecv(0)
         ,messageSize(1000)
     {
         boost::program_options::options_description desc("Command line options");
         desc.add_options()
                 ("help,h", "Produce help message")
-                ("uaddr,a", boost::program_options::value<std::string>(), "Unicast address on format 'address:port'")
-                ("maddr,m", boost::program_options::value<std::string>(), "Multicast address on format 'address:port'")
+                ("addr,a", boost::program_options::value<std::string>(), "Unicast address on format 'address:port'")
+                ("node-type,t", boost::program_options::value<std::string>(), "Node type nt0, nt1 or nt2, defaults to nt0'")
                 ("await,w", boost::program_options::value<int>(), "Wait for specified number of other nodes before start sending data")
                 ("seed,s", boost::program_options::value< std::vector<std::string> >()->multitoken(), "Seed addresses on format 'address:port'")
                 ("nmsg,n", boost::program_options::value<unsigned int>(), "Number of messages to send and receive. Equal to set both nsend and nsend to the same value")
@@ -44,13 +44,13 @@ public:
             return;
         }
 
-        if (vm.count("uaddr"))
+        if (vm.count("addr"))
         {
-            unicastAddress=vm["uaddr"].as<std::string>();
+            unicastAddress=vm["addr"].as<std::string>();
         }
-        if (vm.count("maddr"))
+        if (vm.count("node-type"))
         {
-            multicastAddress=vm["maddr"].as<std::string>();
+            nodeType=vm["node-type"].as<std::string>();
         }
         if (vm.count("await"))
         {
@@ -77,15 +77,72 @@ public:
         {
             messageSize=vm["size"].as<size_t>();
         }
+
+        if (nsend==0 && nrecv==0)
+        {
+            nsend=std::numeric_limits<int>::max();
+            nrecv=std::numeric_limits<int>::max();
+        }
     }
 
     std::string unicastAddress;
-    std::string multicastAddress;
+    std::string nodeType;
     int await;
     std::vector<std::string> seeds;
     unsigned int nsend;
     unsigned int nrecv;
     size_t messageSize;
+};
+
+class NodeTypes
+{
+public:
+    static const int NumberOfNodeTypes = 3;
+
+    NodeTypes()
+    {
+        for (int i=0; i<NumberOfNodeTypes; ++i)
+        {
+            Safir::Dob::Internal::Com::Communication::NodeType n;
+            n.name="nt"+boost::lexical_cast<std::string>(i);
+            n.id=LlufId_Generate64(n.name.c_str());
+            n.heartbeatInterval=1000+500*i;
+            n.retryTimeout=50;
+            if (i>0)
+                n.multicastAddress=std::string("224.90.90.241:")+boost::lexical_cast<std::string>(11000+i);
+
+            m_nodeTypes.insert(std::make_pair(n.id, n));
+        }
+    }
+
+    const Safir::Dob::Internal::Com::Communication::NodeType& Get(boost::int64_t nodeTypeId) const
+    {
+        return m_nodeTypes.find(nodeTypeId)->second;
+    }
+
+    const Safir::Dob::Internal::Com::Communication::NodeType& Get(const std::string& name) const
+    {
+        return m_nodeTypes.find(LlufId_Generate64(name.c_str()))->second;
+    }
+
+    const std::map<boost::int64_t, Safir::Dob::Internal::Com::Communication::NodeType> Map() const
+    {
+        return m_nodeTypes;
+    }
+
+    std::vector<Safir::Dob::Internal::Com::Communication::NodeType> ToVector() const
+    {
+        std::vector<Safir::Dob::Internal::Com::Communication::NodeType> v;
+        for (auto& n : m_nodeTypes)
+        {
+            v.push_back(n.second);
+        }
+        return v;
+    }
+
+private:
+    std::map<boost::int64_t, Safir::Dob::Internal::Com::Communication::NodeType> m_nodeTypes;
+
 };
 
 class Semaphore
@@ -145,7 +202,8 @@ public:
     Sp(unsigned int numRecv,
        const boost::function< void(boost::int64_t) >& includeNode,
        const boost::function< void(boost::int64_t) >& reportNodeFinished)
-        :m_nodeNames()
+        :m_nodeTypes()
+        ,m_nodeNames()
         ,m_recvCount()
         ,m_retransmitCount(0)
         ,m_numRecv(numRecv)
@@ -155,32 +213,25 @@ public:
     }
 
 
-    void NewNode(const std::string& name,
-                 boost::int64_t id,
-                 const std::string& address,
-                 bool multicastEnabled)
+    void NewNode(const std::string& name, boost::int64_t nodeId, boost::int64_t nodeTypeId, const std::string& address)
     {
-        m_nodeNames[id]=name;
+        m_nodeNames[nodeId]=name;
 
-        std::cout<<"SP: NewNode: "<<name<<" ["<<id<<"], "<<address;
-        if (multicastEnabled)
-        {
-            std::cout<<" MulticastEnabled";
-        }
-        std::cout<<std::endl;
-        if (m_recvCount.find(id)!=m_recvCount.cend())
+        std::cout<<"SP: NewNode: "<<name<<" ["<<nodeId<<"], nodeType: '"<<m_nodeTypes.Get(nodeTypeId).name<<"'', "<<address<<std::endl;
+
+        if (m_recvCount.find(nodeId)!=m_recvCount.cend())
         {
             std::cout<<"New node on already reported node!"<<std::endl;
             exit(1);
         }
 
-        m_recvCount[id]=0;
-        m_includeNode(id);
+        m_recvCount[nodeId]=0;
+        m_includeNode(nodeId);
 
         if (m_numRecv==0)
         {
-            std::cout<<"Received all messages from node "<<m_nodeNames[id]<<std::endl;
-            m_reportNodeFinished(id);
+            std::cout<<"Received all messages from node "<<m_nodeNames[nodeId]<<std::endl;
+            m_reportNodeFinished(nodeId);
         }
     }
 
@@ -236,6 +287,7 @@ public:
     unsigned int RetransmitCount() const {return m_retransmitCount;}
 
 private:
+    NodeTypes m_nodeTypes;
     std::map<boost::int64_t, std::string> m_nodeNames;
     std::map<boost::int64_t, unsigned int> m_recvCount;
     unsigned int m_retransmitCount;
@@ -278,27 +330,28 @@ int main(int argc, char * argv[])
         stopCondition.Notify();
     }));
 
+    NodeTypes nodeTypes;
     boost::int64_t myId=LlufId_GenerateRandom64();
+    boost::int64_t myNodeTypeId=nodeTypes.Get(cmd.nodeType).id;
     std::cout<<"----------------------------------------------------------------------------"<<std::endl;
     std::cout<<"-- Name:      "<<name.str()<<std::endl;
     std::cout<<"-- Id:        "<<myId<<std::endl;
-    std::cout<<"-- Unicast:   "<<cmd.unicastAddress<<std::endl;
-    std::cout<<"-- Multicast: "<<(cmd.multicastAddress.empty() ? "NOT_ENABLED" :  cmd.multicastAddress)<<std::endl;
+    std::cout<<"-- Address:   "<<cmd.unicastAddress<<std::endl;
+    std::cout<<"-- Node type: "<<cmd.nodeType<<std::endl;
     std::cout<<"----------------------------------------------------------------------------"<<std::endl;
     com.reset(new Safir::Dob::Internal::Com::Communication(ioService, name.str(),
-                                                           myId,
+                                                           myId, myNodeTypeId,
                                                            cmd.unicastAddress,
-                                                           cmd.multicastAddress));
+                                                           true,
+                                                           nodeTypes.ToVector()));
 
     com->SetDataReceiver([=](boost::int64_t id, const boost::shared_ptr<char[]>& msg, size_t size){sp->OnRecv(id, msg, size);}, 0);
     com->SetGotReceiveFromCallback([=](boost::int64_t id){sp->GotReceive(id);});
     com->SetRetransmitToCallback([=](boost::int64_t id){sp->Retransmit(id);});
-    com->SetNewNodeCallback([=](const std::string& name,
-                            boost::int64_t id,
-                            const std::string& address,
-                            bool multicastEnabled){sp->NewNode(name, id, address, multicastEnabled);});
+    com->SetNewNodeCallback([=](const std::string& name, boost::int64_t nodeId, boost::int64_t nodeTypeId, const std::string& address)
+                            {sp->NewNode(name, nodeId, nodeTypeId, address);});
 
-    com->SetQueueNotFullCallback([&]{queueFullSem.Notify();}, 100); //50% free queue space before we get notification
+    com->SetQueueNotFullCallback([&](boost::int64_t){queueFullSem.Notify();}, 100); //50% free queue space before we get notification
 
     boost::thread_group threads;
     for (int i = 0; i < 9; ++i)
@@ -331,10 +384,13 @@ int main(int argc, char * argv[])
         boost::shared_ptr<char[]> data=boost::make_shared<char[]>(cmd.messageSize);
         strncpy(data.get(), tmp.c_str(), cmd.messageSize);
         SetCRC(data, cmd.messageSize);
-        while (!com->SendAll(data, cmd.messageSize, 0))
+        for (auto& nt : nodeTypes.Map())
         {
-            ++numberOfOverflows;
-            queueFullSem.Wait();
+            while (!com->SendToNodeType(nt.second.id, data, cmd.messageSize, 0))
+            {
+                ++numberOfOverflows;
+                queueFullSem.Wait();
+            }
         }
         ++sendCounter;
 
@@ -346,10 +402,15 @@ int main(int argc, char * argv[])
 
     std::cout<<"All messages posted to communication. Waiting for all to get delivered..."<<std::endl;
     stopCondition.Wait();
-    while (com->NumberOfQueuedMessages()>0)
+
+    for (auto& nt : nodeTypes.Map())
     {
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+        while (com->NumberOfQueuedMessages(nt.second.id)>0)
+        {
+            boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+        }
     }
+
     std::cout<<"---------------------------------------------------------"<<std::endl;
     std::cout<<"Finished after "<<timer.elapsed()<<" sec"<<std::endl;
     std::cout<<"Sent: "<<sendCounter<<std::endl;

@@ -7,7 +7,6 @@ message CommunicationMessage {
     enum MessageType {
         DiscoverMsg = 0;
         NodeInfoMsg = 1;
-        ApplicationDataMsg = 2;
     }
 
     enum SequenceSerie {
@@ -16,10 +15,10 @@ message CommunicationMessage {
     }
 
     message Node {
-        optional sfixed64 id = 1; //id=0 and name=seed means seed_node
+        optional sfixed64 node_id = 1; //node_id=0 and name=seed means seed_node
         optional string name = 2;
         optional string unicast_address = 3;
-        optional string multicast_address = 4;
+        optional sfixed64 node_type_id = 4;
     }
     
     message Discover {
@@ -34,27 +33,11 @@ message CommunicationMessage {
         optional int32 number_of_packets = 4; //total number of packets
         optional Node sent_from_node = 5;
         repeated Node nodes = 6;
-    }
-    
-    message ApplicationData {
-        message ApplicationItem {
-            optional SequenceSerie sequence_serie = 1;
-            optional uint64 sequence_number = 2;
-            optional uint32 fragment_number = 3;
-            optional uint32 number_of_fragments = 4;
-            optional uint32 fragment_size = 5;
-            optional uint32 total_message_size = 6;
-            optional uint32 fragment_offset = 7;
-        }
-        optional sfixed64 sent_from_id = 1;
-        repeated ApplicationItem items = 2;
-        //immediately after ApplicationData will follow fragment_size number of bytes that is not protoBuf
-    }
+    }        
     
     //Fields
     required MessageType message_type = 1; //Depending on type different messages below will be used.
     optional Discover discover = 2;
     optional NodeInfo node_info = 3;
-    optional ApplicationData application_data = 4;
 }
 

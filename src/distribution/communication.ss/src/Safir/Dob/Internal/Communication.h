@@ -57,31 +57,46 @@ namespace Com
      *
      * Nowhere in this class is 0 (zero) allowed as node Id.
      */
-    class DISTRIBUTION_COMMUNICATION_API Communication : public boost::noncopyable
+    class DISTRIBUTION_COMMUNICATION_API Communication : private boost::noncopyable
     {
     public:
 
+        /**
+         * Definition of a NodeType.
+         */
+        struct NodeType
+        {
+            boost::int64_t id;              //node id
+            std::string name;               //unique readable name
+            std::string multicastAddress;   //multicast address including port number, 'address:port' empty string if not multicast enabled
+            int heartbeatInterval;          //time between heartbeats
+            int retryTimeout;               //time to wait before retransmitting unacked data
+        };
+
         //Callbacks functions used in Communications public interface.
-        typedef boost::function<void(const std::string& name, boost::int64_t id, const std::string& addr, bool isMulticast)> NewNode;
-        typedef boost::function<void(boost::int64_t fromId)> GotReceiveFrom;
-        typedef boost::function<void(boost::int64_t toId)> RetransmitTo;
-        typedef boost::function<void(boost::int64_t from, const boost::shared_ptr<char[]>& data, size_t size)> ReceiveData;
-        typedef boost::function<void()> QueueNotFull;
+        typedef boost::function<void(const std::string& name, boost::int64_t nodeId, boost::int64_t nodeTypeId, const std::string& address)> NewNode;
+        typedef boost::function<void(boost::int64_t fromNodeId)> GotReceiveFrom;
+        typedef boost::function<void(boost::int64_t toNodeId)> RetransmitTo;
+        typedef boost::function<void(boost::int64_t fromNodeId, const boost::shared_ptr<char[]>& data, size_t size)> ReceiveData;
+        typedef boost::function<void(boost::int64_t nodeTypeId)> QueueNotFull;
 
         /**
-         * Communication - constructor.
-         *
+         * @brief Communication - Constructor.
          * @param ioService [in] - Pointer to an io_service that will be used as engine.
-         * @param name [in] - Name of this node.
-         * @param id [in] - Unique id of this node. Note that 0 (zero) is not a valid id.
-         * @param unicastAddress [in] - Unicast address on format address:port, mandatory.
-         * @param multicastAddress [in] - Multicast address on format address:port. Empty string if not applicable.
+         * @param nodeName [in] - Name of this node.
+         * @param nodeId [in] - Unique id of this node. Note that 0 (zero) is not a valid id.
+         * @param nodeTypeId [in] - The node type of this node.
+         * @param address [in] - Unicast address on format address:port, mandatory.
+         * @param discovering [in] - If true, this node participates in node discovering.
+         * @param nodeTypes [in] - List of all node types that we shall be able to communicate with.
          */
         Communication(const boost::shared_ptr<boost::asio::io_service>& ioService,
-                      const std::string& name,
-                      const boost::int64_t id, //0 is not a valid id.
-                      const std::string& unicastAddress,   //mandatory
-                      const std::string& multicastAddress); //optional, can be empty string
+                      const std::string& nodeName,
+                      boost::int64_t nodeId, //0 is not a valid id.
+                      boost::int64_t& nodeTypeId,
+                      const std::string& address,
+                      bool discovering,
+                      const std::vector<Communication::NodeType>& nodeTypes);
 
         /**
          * ~Communication - destructor.
@@ -153,44 +168,46 @@ namespace Com
         /**
          * Make a node that have been reported on the NewNode callback a system node.
          *
-         * @param id [in] - id of the node.
+         * @param nodeId [in] - Id of the node to include.
          */
-        void IncludeNode(boost::int64_t id);
+        void IncludeNode(boost::int64_t nodeId);
 
         /**
          * Exclude a system node. After a node has been excluded it can never be included  again.
          *
-         * @param id [in] - id of the node.
+         * @param nodeId [in] - Id of the node to exclude.
          */
-        void ExcludeNode(boost::int64_t id);
-
-        /**
-         * Send data to all system nodes.
-         *
-         * @param data [in] - Pointer to the data that shall be sent.
-         * @param size [in] - Size of data.
-         * @param dataTypeIdentifier [in] - Custom identifier specifying which type of data. Only data receivers added with the same identifier will get the data.
-         * @return True if data could be added to send queue. False if send queue is full, in that case try again later.
-         */
-        bool SendAll(const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier);
+        void ExcludeNode(boost::int64_t nodeId);
 
         /**
          * Send data to a specific node. If the specified node is not a system node, the message is silently ignored and the return value will be 'true'.
          *
-         * @param toId [in] - Id of the node to send to.
+         * @param nodeTypeId [in] - NodeTypeId of the receiver node.
+         * @param nodeId [in] - Id of the receiver node.
          * @param data [in] - Pointer to the data that shall be sent.
          * @param size [in] - Size of data.
          * @param dataTypeIdentifier [in] - Custom identifier specifying which type of data. Only data receivers added with the same identifier will get the data.
          * @return True if data could be added to send queue. False if send queue is full, in that case try again later.
          */
-        bool SendTo(boost::int64_t toId, const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier);
+        bool SendToNode(boost::int64_t nodeTypeId, boost::int64_t nodeId, const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier);
 
         /**
-         * Get the number of messages in the send queue.
+         * Send data to all nodes of a specific node type. If the specified node type does not exist, the message is silently ignored and the return value will be 'true'.
          *
+         * @param nodeTypeId [in] - Id of the node type to send to.
+         * @param data [in] - Pointer to the data that shall be sent.
+         * @param size [in] - Size of data.
+         * @param dataTypeIdentifier [in] - Custom identifier specifying which type of data. Only data receivers added with the same identifier will get the data.
+         * @return True if data could be added to send queue. False if send queue is full, in that case try again later.
+         */
+        bool SendToNodeType(boost::int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier);
+
+        /**
+         * Get the number of messages in a node types send queue.
+         * @param nodeTypeId [in] - Node type.
          * @return Number of messages.
          */
-        size_t NumberOfQueuedMessages() const;
+        size_t NumberOfQueuedMessages(boost::int64_t nodeTypeId) const;
 
         /**
          * Get the name that was passed as argument to the constructor.

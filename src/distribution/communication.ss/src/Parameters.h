@@ -35,7 +35,7 @@ namespace Com
     namespace Parameters
     {
         //Size of a fragment, if total message is bigger the message will be sent at more than one fragment
-        static const size_t FragmentSize=500;
+        static const size_t FragmentSize=50000;
 
         //Size of the send queue, number of outstanding unacked messages
         static const size_t SendQueueSize = 50;
@@ -51,15 +51,6 @@ namespace Com
 
         //Receive buffer size, must be at least FragmentSize
         static const size_t ReceiveBufferSize = 66000;
-
-        //HeartBeat interval
-        static const int HeartBeatInterval = 2000; //millisec
-
-        //Timeout interval for timer that check unacked sent messages
-        static const int RetransmitCheckInterval = 100; //millisec
-
-        //Minimum time we will wait for an ack before retransmit
-        static const int WaitForAckTime = 50; //millisec
     }
 }
 }

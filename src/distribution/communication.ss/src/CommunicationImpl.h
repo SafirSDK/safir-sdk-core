@@ -28,13 +28,14 @@
 #include <boost/noncopyable.hpp>
 #include <boost/asio.hpp>
 #include <boost/function.hpp>
+#include "NodeType.h"
 #include "Node.h"
 #include "Reader.h"
 #include "DeliveryHandler.h"
 #include "Writer.h"
 #include "Discoverer.h"
 #include "AckedDataSender.h"
-#include "HeartBeatSender.h"
+#include "HeartbeatSender.h"
 
 namespace Safir
 {
@@ -44,16 +45,18 @@ namespace Internal
 {
 namespace Com
 {
-    typedef boost::function<void(const std::string& name, boost::int64_t id, const std::string& addr, bool isMulticast)> NewNode;
+    typedef boost::function<void(const std::string& name, boost::int64_t nodeId, boost::int64_t nodeTypeId, const std::string& address)> NewNode;
 
-    class CommunicationImpl : public boost::noncopyable
+    class CommunicationImpl : private boost::noncopyable
     {
     public:
         CommunicationImpl(const boost::shared_ptr<boost::asio::io_service>& ioService,
-                          const std::string& name,
-                          const boost::int64_t id, //0 is not a valid id.
-                          const std::string& unicastAddress,   //mandatory
-                          const std::string& multicastAddress);
+                          const std::string& nodeName,
+                          boost::int64_t nodeId, //0 is not a valid id.
+                          boost::int64_t& nodeTypeId,
+                          const std::string& address,
+                          bool discovering,
+                          const NodeTypeMap& nodeTypes);
 
         virtual ~CommunicationImpl();
 
@@ -69,12 +72,13 @@ namespace Com
         void Start();
         void Stop();
 
-        void IncludeNode(boost::int64_t id);
-        void ExcludeNode(boost::int64_t id);
-        bool SendAll(const boost::shared_ptr<char[]>& msg, size_t size, boost::int64_t dataTypeIdentifier);
-        bool SendTo(boost::int64_t toId, const boost::shared_ptr<char[]>& msg, size_t size, boost::int64_t dataTypeIdentifier);
+        void IncludeNode(boost::int64_t nodeId);
+        void ExcludeNode(boost::int64_t nodeId);
 
-        size_t NumberOfQueuedMessages() const {return m_ackedDataSender.SendQueueSize();}
+        bool SendToNode(boost::int64_t nodeTypeId, boost::int64_t nodeId, const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier);
+        bool SendToNodeType(boost::int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier);
+
+        size_t NumberOfQueuedMessages(boost::int64_t nodeTypeId) const;
 
         const std::string& Name() const {return m_me.Name();}
         boost::int64_t Id() const {return m_me.Id();}
@@ -83,18 +87,17 @@ namespace Com
         ::google::protobuf::LogSilencer m_disableProtobufLogs;
         boost::shared_ptr<boost::asio::io_service> m_ioService;
         Node m_me;
+        bool m_discovering;
+        NodeTypeMap m_nodeTypes;
 
         //Callbacks
         NewNode m_onNewNode;
         GotReceiveFrom m_gotRecv;
 
         //main components of communication
-        Reader m_reader;
-        Writer<UserData> m_discoverWriter;
         Discoverer m_discoverer;
-        AckedDataSender m_ackedDataSender;
-        HeartBeatSender m_heartBeatSender;
         DeliveryHandler m_deliveryHandler;
+        Reader m_reader;
 
         void SetSystemNode(boost::int64_t id, bool isSystemNode);
         bool OnRecv(const char* data, size_t size); //returns true if it is ok to call OnRecv again, false if flooded with received messages
@@ -102,6 +105,9 @@ namespace Com
 
         //Received internal Communication msg that is not directly passed to application, i.e discover, nodeInfo etc.
         void ReceivedControlData(const MessageHeader* header, const char* payload);
+
+        NodeType& GetNodeType(boost::int64_t nodeTypeId) {return *(m_nodeTypes.find(nodeTypeId)->second);}
+        const NodeType& GetNodeType(boost::int64_t nodeTypeId) const {return *(m_nodeTypes.find(nodeTypeId)->second);}
     };
 }
 }

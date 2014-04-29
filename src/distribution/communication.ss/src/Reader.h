@@ -45,11 +45,12 @@ namespace Com
      * If callback onRecv is returning false it means that there is maximum number of messages waiting to be retrieved
      * by the application and in that case Reader will sleep until callback isReceiverReady is returning true again.
      */
-    class Reader : public boost::noncopyable
+    class Reader : private boost::noncopyable
     {
     public:
-        Reader(boost::asio::io_service& ioService,
+        Reader(const boost::shared_ptr<boost::asio::io_service>& ioService,
                const Node& me,
+               const std::string& multicastAddress, //empty if not using multicast
                const std::function<bool(const char*, size_t)>& onRecv,
                const std::function<bool(void)>& isReceiverIsReady);
 
@@ -60,15 +61,12 @@ namespace Com
 #ifndef SAFIR_TEST
     private:
 #endif
-        boost::asio::io_service& m_ioService;
         boost::asio::io_service::strand m_strand;
         boost::asio::steady_timer m_timer;
-        Node m_me;
         std::function<bool(const char*, size_t)> m_onRecv;
         std::function<bool(void)> m_isReceiverReady;
         boost::shared_ptr<boost::asio::ip::udp::socket> m_socket;
         boost::shared_ptr<boost::asio::ip::udp::socket> m_multicastSocket;
-        bool m_separateMulticastSocket;
         bool m_running;
 
         char m_bufferUnicast[Parameters::ReceiveBufferSize];
@@ -76,7 +74,7 @@ namespace Com
 
         void AsyncReceive(char* buf, boost::asio::ip::udp::socket* socket);
         void HandleReceive(const boost::system::error_code& error, size_t bytesRecv,char* buf, boost::asio::ip::udp::socket* socket);
-        void BindSocket(boost::shared_ptr<boost::asio::ip::udp::socket>& socket, IpVersionType ipv, unsigned short mcPort);
+        void BindSocket(boost::shared_ptr<boost::asio::ip::udp::socket>& socket, int ipv, unsigned short mcPort);
         void SetWakeUpTimer(char* buf, boost::asio::ip::udp::socket* socket);
         void WakeUpAfterSleep(const boost::system::error_code& error, char* buf, boost::asio::ip::udp::socket* socket);
     };

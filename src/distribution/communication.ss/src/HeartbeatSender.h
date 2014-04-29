@@ -47,14 +47,19 @@ namespace Com
      */
 
     template <class WriterType>
-    class HeartBeatSenderBasic : private WriterType
+    class HeartbeatSenderBasic : private WriterType
     {
     public:
-        HeartBeatSenderBasic(boost::asio::io_service& ioService, const Node& me)
-            :WriterType(ioService, me)
-            ,m_strand(ioService)
-            ,m_heartBeatTimer(ioService)
-            ,m_heartBeat(new HeartBeat(me.Id()))
+        HeartbeatSenderBasic(const boost::shared_ptr<boost::asio::io_service>& ioService,
+                             boost::int64_t myNodeId,
+                             int ipVersion,
+                             const std::string& multicast,
+                             int heartbeatInterval)
+            :WriterType(ioService, ipVersion, multicast)
+            ,m_strand(*ioService)
+            ,m_heartbeatTimer(*ioService)
+            ,m_heartbeat(new Heartbeat(myNodeId))
+            ,m_interval(heartbeatInterval)
             ,m_nodes()
             ,m_running(false)
         {
@@ -65,8 +70,8 @@ namespace Com
             m_strand.dispatch([=]
             {
                 m_running=true;
-                m_heartBeatTimer.expires_from_now(boost::chrono::milliseconds(Parameters::HeartBeatInterval));
-                m_heartBeatTimer.async_wait(m_strand.wrap([=](const boost::system::error_code&){OnTimeout();}));
+                m_heartbeatTimer.expires_from_now(boost::chrono::milliseconds(m_interval));
+                m_heartbeatTimer.async_wait(m_strand.wrap([=](const boost::system::error_code&){OnTimeout();}));
             });
         }
 
@@ -75,16 +80,25 @@ namespace Com
             m_strand.dispatch([=]
             {
                 m_running=false;
-                m_heartBeatTimer.cancel();
+                m_heartbeatTimer.cancel();
             });
         }
 
-        //Add a node.
-        void AddNode(const Node& node)
+        //Add a node and starts sending heartbeats
+        void AddNode(boost::int64_t id, const boost::asio::ip::udp::endpoint& endpoint)
         {
             m_strand.dispatch([=]
             {
-                m_nodes.insert(std::make_pair(node.Id(), node));
+                m_nodes.insert(std::make_pair(id, NodeInfo(false, endpoint)));
+            });
+        }
+
+        //Remove node and stop sending heartbeats
+        void SetSystemNode(boost::int64_t id)
+        {
+            m_strand.dispatch([=]
+            {
+                m_nodes.erase(id);
             });
         }
 
@@ -98,7 +112,7 @@ namespace Com
                     const auto it=m_nodes.find(id);
                     if (it!=m_nodes.end())
                     {
-                        it->second.SetSystemNode(isSystemNode);
+                        it->second.systemNode=isSystemNode;
                     }
                 }
                 else
@@ -107,25 +121,50 @@ namespace Com
                 }
             });
         }
+
     private:
         boost::asio::io_service::strand m_strand;
-        boost::asio::steady_timer m_heartBeatTimer;
-        boost::shared_ptr<HeartBeat> m_heartBeat;
-        NodeMap m_nodes;
+        boost::asio::steady_timer m_heartbeatTimer;
+        boost::shared_ptr<Heartbeat> m_heartbeat;
+        int m_interval;
+
+        struct NodeInfo
+        {
+            bool systemNode;
+            boost::asio::ip::udp::endpoint endpoint;
+            NodeInfo() : systemNode(false), endpoint() {}
+            NodeInfo(bool sn_, const boost::asio::ip::udp::endpoint& ep_) : systemNode(sn_), endpoint(ep_) {}
+        };
+
+        std::map<boost::int64_t, NodeInfo> m_nodes;
         bool m_running;
 
         void OnTimeout()
         {
             if (m_running)
             {
-                WriterType::SendToAllSystemNodes(m_heartBeat, m_nodes);
-                m_heartBeatTimer.expires_from_now(boost::chrono::milliseconds(Parameters::HeartBeatInterval));
-                m_heartBeatTimer.async_wait(m_strand.wrap([=](const boost::system::error_code&){OnTimeout();}));
+                if (WriterType::IsMulticastEnabled())
+                {
+                    WriterType::SendMulticast(m_heartbeat);
+                }
+                else
+                {
+                    for (auto& vt : m_nodes)
+                    {
+                        if (vt.second.systemNode)
+                        {
+                            WriterType::SendTo(m_heartbeat, vt.second.endpoint);
+                        }
+                    }
+                }
+
+                m_heartbeatTimer.expires_from_now(boost::chrono::milliseconds(m_interval));
+                m_heartbeatTimer.async_wait(m_strand.wrap([=](const boost::system::error_code&){OnTimeout();}));
             }
         }
     };
 
-    typedef HeartBeatSenderBasic< Writer<HeartBeat> > HeartBeatSender;
+    typedef HeartbeatSenderBasic< Writer<Heartbeat> > HeartbeatSender;
 }
 }
 }

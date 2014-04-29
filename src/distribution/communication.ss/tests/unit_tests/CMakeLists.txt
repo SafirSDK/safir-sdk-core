@@ -20,10 +20,10 @@ endif()
 
 add_executable(unit_tests ${sources} ${headers} ${PROTO_SRCS} ${PROTO_HDRS} ../../src/MessageQueue.h
                 ../../src/DeliveryHandler.h ../../src/AckedDataSender.h
-                ../../src/Node.h ../../src/Node.cpp
-                ../../src/Writer.h ../../src/HeartBeatSender.h
+                ../../src/Node.h ../../src/NodeType.h
+                ../../src/Writer.h ../../src/HeartbeatSender.h
                 ../../src/Reader.h ../../src/Reader.cpp
-                ../../src/Discoverer.h ../../src/Discoverer.cpp)
+                ../../src/Discoverer.h ../../src/Utilities.h)
 
 TARGET_LINK_LIBRARIES(unit_tests ${PROTOBUF_LITE_LIBRARIES})
 
@@ -41,8 +41,8 @@ SET_SAFIR_TEST_PROPERTIES(ReaderTest 120)
 ADD_TEST(WriterTest unit_tests WriterTest)
 SET_SAFIR_TEST_PROPERTIES(WriterTest 120)
 
-ADD_TEST(HeartBeatSenderTest unit_tests HeartBeatSenderTest)
-SET_SAFIR_TEST_PROPERTIES(HeartBeatSenderTest 120)
+ADD_TEST(HeartbeatSenderTest unit_tests HeartbeatSenderTest)
+SET_SAFIR_TEST_PROPERTIES(HeartbeatSenderTest 120)
 
 #ADD_TEST(AckedDataSenderTest unit_tests AckedDataSenderTest)
 #SET_SAFIR_TEST_PROPERTIES(AckedDataSenderTest 120)
