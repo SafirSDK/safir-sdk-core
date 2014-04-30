@@ -2660,7 +2660,7 @@ int CDoseComTransmit::Xmit_Msg(const char *pMsg, dcom_ulong32 MsgLength,
     static int bNextPdIsFirst = 1;
 
     if(*pDbg>2)
-        PrintDbg(">>> Xmit_Msg() entry Pd=%X Size=%d\n",
+        PrintDbg(">>> Xmit_Msg() lock protected entry Pd=%X Size=%d\n",
                 PoolDistribution,MsgLength);
 
     // PoolDistribution has value 1 for Data.
