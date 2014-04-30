@@ -154,8 +154,10 @@ int main(int argc, char * argv[])
                             (ioService,
                              options.name,
                              options.id,
-                             options.address,
-                             options.multicastAddress));        
+                             10, //TODO insert node type of current node
+                             options.address, //TODO: should be control address
+                             true, //Control always partakes in discovery
+                             {})); //TODO node types go here
 
         communication->InjectSeeds(options.seeds);
     }
@@ -173,9 +175,10 @@ int main(int argc, char * argv[])
                                                communication,
                                                options.name,
                                                options.id,
-                                               options.address,
-                                               options.multicastAddress,
-                                               {});
+                                               10, //TODO node type id
+                                               options.address, //TODO Control address goes here
+                                               "TODO", //TODO: put data address here
+                                               {}); //TODO: node types go here
 
 
     communication->Start();
