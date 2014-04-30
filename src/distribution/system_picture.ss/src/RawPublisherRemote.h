@@ -44,10 +44,12 @@ namespace SP
     public:
         RawPublisherRemote(const boost::shared_ptr<boost::asio::io_service>& ioService,
                            const boost::shared_ptr<Com::Communication>& communication,
+                           const std::map<boost::int64_t, NodeType>& nodeTypes,
                            const char* const senderId,
                            const boost::shared_ptr<RawHandler>& rawHandler)
             : m_communication(communication)
             , m_senderId(LlufId_Generate64(senderId))
+            , m_nodeTypes(nodeTypes)
             , m_rawHandler(rawHandler)
             , m_publishTimer(AsioPeriodicTimer::Create(*ioService, 
                                                        boost::chrono::seconds(1),
@@ -88,13 +90,17 @@ namespace SP
                                                            const int crc = GetCrc32(data.get(), size - crcBytes);
                                                            memcpy(data.get() + size - crcBytes, &crc, sizeof(int));
 #endif
-                                                           m_communication->SendAll(data,size,m_senderId);
+                                                           for (auto it: m_nodeTypes)
+                                                           {
+                                                               m_communication->SendToNodeType(it.second.id, data, size, m_senderId);
+                                                           }
                                                        },
                                                        crcBytes);
         }
 
         const boost::shared_ptr<Com::Communication> m_communication;
         const boost::uint64_t m_senderId;
+        const std::map<boost::int64_t, NodeType> m_nodeTypes;
         const boost::shared_ptr<RawHandler> m_rawHandler;
         boost::shared_ptr<Safir::Utilities::Internal::AsioPeriodicTimer> m_publishTimer;
     };

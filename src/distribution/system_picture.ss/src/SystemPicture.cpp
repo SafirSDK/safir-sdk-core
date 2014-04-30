@@ -73,22 +73,26 @@ namespace SP
              const boost::shared_ptr<Com::Communication>& communication,
              const std::string& name,
              const boost::int64_t id,
-             const std::string& address,
-             const std::string& multicastAddress,
-             const std::map<std::string, NodeType>& /*nodeTypes*/)
+             const boost::int64_t nodeTypeId,
+             const std::string& controlAddress,
+             const std::string& dataAddress,
+             const std::map<boost::int64_t, NodeType>& nodeTypes)
             : m_ioService(ioService)
             , m_communication(communication)
             , m_rawHandler(boost::make_shared<RawHandler>(ioService,
                                                           communication,
                                                           name,
                                                           id,
-                                                          address,
-                                                          multicastAddress))
+                                                          nodeTypeId,
+                                                          controlAddress,
+                                                          dataAddress,
+                                                          nodeTypes))
             , m_rawPublisherLocal(boost::make_shared<RawPublisherLocal>(ioService, 
                                                                         m_rawHandler, 
                                                                         MASTER_LOCAL_RAW_NAME))
             , m_rawPublisherRemote(boost::make_shared<RawPublisherRemote>(ioService, 
-                                                                          communication, 
+                                                                          communication,
+                                                                          nodeTypes, 
                                                                           MASTER_REMOTE_RAW_NAME, 
                                                                           m_rawHandler))
             , m_rawSubscriberRemote(boost::make_shared<RawSubscriberRemote>(communication, 
@@ -98,7 +102,10 @@ namespace SP
                                                             communication,
                                                             name,
                                                             id,
-                                                            address,
+                                                            nodeTypeId,
+                                                            controlAddress,
+                                                            dataAddress,
+                                                            nodeTypes,
                                                             MASTER_REMOTE_ELECTION_NAME,
                                                             m_rawHandler))
             , m_statePublisherLocal(boost::make_shared<StatePublisherLocal>(ioService, 
@@ -106,6 +113,7 @@ namespace SP
                                                                             MASTER_LOCAL_STATE_NAME))
             , m_statePublisherRemote(boost::make_shared<StatePublisherRemote>(ioService, 
                                                                               communication, 
+                                                                              nodeTypes,
                                                                               MASTER_REMOTE_STATE_NAME, 
                                                                               m_coordinator))
             , m_stateSubscriberRemote(boost::make_shared<StateSubscriberRemote>(communication, 
@@ -193,15 +201,17 @@ namespace SP
                                  const boost::shared_ptr<Com::Communication>& communication,
                                  const std::string& name,
                                  const boost::int64_t id,
-                                 const std::string& address,
-                                 const std::string& multicastAddress,
-                                 const std::map<std::string, NodeType>& nodeTypes)
-        : m_impl(boost::make_shared<Impl>(ioService, 
+                                 const boost::int64_t nodeTypeId,
+                                 const std::string& controlAddress,
+                                 const std::string& dataAddress,
+                                 const std::map<boost::int64_t, NodeType>& nodeTypes)
+        : m_impl(boost::make_shared<Impl>(ioService,
                                           communication,
                                           name,
                                           id,
-                                          address,
-                                          multicastAddress,
+                                          nodeTypeId,
+                                          controlAddress,
+                                          dataAddress,
                                           nodeTypes))
     {
 

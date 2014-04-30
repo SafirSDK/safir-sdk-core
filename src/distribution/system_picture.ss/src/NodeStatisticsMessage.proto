@@ -9,11 +9,12 @@ message NodeStatisticsMessage
         //This info is about other nodes that this node talks to
         required string name = 1;
         required sfixed64 id = 2;
-        required string control_address = 3; //The address and port of the node's control socket
-        required bool multicast_enabled = 4;
+        required sfixed64 node_type_id = 3; //node type id of the node
+        required string control_address = 4; //The address and port of the node's control socket
+        required string data_address = 5; //The address and port of the node's data socket
 
-        required bool is_dead = 5;
-        required uint32 receive_count = 6;
+        required bool is_dead = 6;
+        required uint32 receive_count = 7;
         required uint32 retransmit_count = 8;
 
         //if this message is a node-local SP to SP message (e.g. between control and dose_main and dobexplorer)
@@ -27,10 +28,11 @@ message NodeStatisticsMessage
     //information about myself
     required string name = 1;
     required sfixed64 id = 2;
-    required string control_address = 3; //The address of the node's control socket
-    required string multicast_address = 4; //The address of the node's control socket
+    required sfixed64 node_type_id = 3; //node type id of the node
+    required string control_address = 4; //The address of the node's control socket
+    required string data_address = 5; //The address of the node's data socket
     
-    repeated NodeInfo node_info = 5;
+    repeated NodeInfo node_info = 6;
 
 }
 

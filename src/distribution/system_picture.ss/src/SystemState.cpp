@@ -53,7 +53,7 @@ namespace
                 << (msg.elected_id() == node.id() ? "  E " : "    ")
                 << node.name().c_str() 
                 << "@" << node.control_address().c_str() 
-                << " (" << node.id() << ")";
+                << " (id = " << node.id() << ", type = " << node.node_type_id() << ")";
         }
         out << std::flush;
     }
@@ -100,14 +100,19 @@ namespace SP
             return m_message.node_info(index).id();
         }
 
-        const std::string& Address(const int index) const
+        boost::int64_t NodeTypeId(const int index) const
+        {
+            return m_message.node_info(index).node_type_id();
+        }
+
+        const std::string& ControlAddress(const int index) const
         {
             return m_message.node_info(index).control_address();
         }
 
-        bool MulticastEnabled(const int index) const
+        const std::string& DataAddress(const int index) const
         {
-            return m_message.node_info(index).multicast_enabled();
+            return m_message.node_info(index).data_address();
         }
 
         void Print(std::wostream& out) const
@@ -134,9 +139,9 @@ namespace SP
     
     const std::string& SystemState::Name(const int index) const {return m_impl->Name(index);}
     boost::int64_t SystemState::Id(const int index) const {return m_impl->Id(index);}
-    const std::string& SystemState::Address(const int index) const {return m_impl->Address(index);}
-    bool SystemState::MulticastEnabled(const int index) const {return m_impl->MulticastEnabled(index);}
-    
+    boost::int64_t SystemState::NodeTypeId(const int index) const {return m_impl->NodeTypeId(index);}
+    const std::string& SystemState::ControlAddress(const int index) const {return m_impl->ControlAddress(index);}
+    const std::string& SystemState::DataAddress(const int index) const {return m_impl->DataAddress(index);}
     
     void SystemState::Print(std::wostream& out) const {m_impl->Print(out);}
     

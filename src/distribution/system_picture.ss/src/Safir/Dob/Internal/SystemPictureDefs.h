@@ -35,4 +35,37 @@
 #endif
 #define DISTRIBUTION_SYSTEM_PICTURE_LOCAL SAFIR_HELPER_DLL_LOCAL
 
+
+namespace Safir
+{
+namespace Dob
+{
+namespace Internal
+{
+namespace SP
+{
+    struct NodeType
+    {
+        NodeType(const boost::int64_t id_,
+                 const std::string& name_,
+                 const bool isLight_,
+                 const int heartbeatInterval_, //in milliseconds
+                 const int maxLostHeartbeats_)
+            : id(id_)
+            , name(name_)
+            , isLight(isLight_)
+            , heartbeatInterval(heartbeatInterval_)
+            , maxLostHeartbeats(maxLostHeartbeats_) {}
+
+        const boost::int64_t id;           //node type id
+        const std::string name;            //readable name
+        const bool isLight;                //is the node a light node
+        const int heartbeatInterval;       //time between heartbeats
+        const int maxLostHeartbeats;       //number of heartbeats that can be lost before node is considered dead
+    };
+}
+}
+}
+}
+
 #endif

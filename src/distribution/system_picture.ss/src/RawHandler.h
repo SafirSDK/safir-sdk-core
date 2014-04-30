@@ -24,10 +24,9 @@
 #ifndef __RAW_HANDLER_H__
 #define __RAW_HANDLER_H__
 
-//#include <Safir/Dob/Internal/RemoteStatistics.h>
-//#include <Safir/Dob/Internal/SystemPictureProvider.h>
 #include <Safir/Utilities/Internal/Atomic.h>
 #include <Safir/Utilities/Internal/AsioPeriodicTimer.h>
+#include <Safir/Dob/Internal/SystemPictureDefs.h>
 #include <boost/asio.hpp>
 #include <boost/chrono.hpp>
 #include <boost/cstdint.hpp>
@@ -76,8 +75,10 @@ namespace SP
                    const boost::shared_ptr<Com::Communication>& communication,
                    const std::string& name,
                    const boost::int64_t id,
-                   const std::string& address,
-                   const std::string& multicastAdress);
+                   const boost::int64_t nodeTypeId,
+                   const std::string& controlAddress,
+                   const std::string& dataAddress,
+                   const std::map<boost::int64_t, NodeType>& nodeTypes);
 
         void Stop();
 
@@ -96,9 +97,9 @@ namespace SP
         void SetStatisticsChangedCallback(const StatisticsChangedCallback& callback);
     private:
         void NewNode(const std::string& name,
-                     boost::int64_t id,
-                     const std::string& address,
-                     bool multicastEnabled);
+                     const boost::int64_t id,
+                     const boost::int64_t nodeTypeId,
+                     const std::string& controlAddress);
         
         void GotReceive(boost::int64_t id);
         void Retransmit(boost::int64_t id);
@@ -127,6 +128,7 @@ namespace SP
         const boost::shared_ptr<Com::Communication> m_communication;
 
         const boost::int64_t m_id;
+        const std::map<boost::int64_t, NodeType> m_nodeTypes;
         const boost::chrono::steady_clock::time_point m_epoch;
         mutable boost::asio::strand m_strand;
 

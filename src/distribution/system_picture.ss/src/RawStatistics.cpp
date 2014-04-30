@@ -128,9 +128,19 @@ namespace SP
             return m_message.id();
         }
 
-        const std::string& Address() const
+        boost::int64_t NodeTypeId() const
+        {
+            return m_message.node_type_id();
+        }
+
+        const std::string& ControlAddress() const
         {
             return m_message.control_address();
+        }
+
+        const std::string& DataAddress() const
+        {
+            return m_message.data_address();
         }
         
         int Size() const
@@ -148,14 +158,19 @@ namespace SP
             return m_message.node_info(index).id();
         }
 
-        const std::string& Address(const int index) const
+        boost::int64_t NodeTypeId(const int index) const
+        {
+            return m_message.node_info(index).node_type_id();
+        }
+
+        const std::string& ControlAddress(const int index) const
         {
             return m_message.node_info(index).control_address();
         }
 
-        bool MulticastEnabled(const int index) const
+        const std::string& DataAddress(const int index) const
         {
-            return m_message.node_info(index).multicast_enabled();
+            return m_message.node_info(index).data_address();
         }
 
         bool IsDead(const int index) const
@@ -210,14 +225,17 @@ namespace SP
 
     const std::string& RawStatistics::Name() const {return m_impl->Name();}
     boost::int64_t RawStatistics::Id() const {return m_impl->Id();}
-    const std::string& RawStatistics::Address() const {return m_impl->Address();}
+    boost::int64_t RawStatistics::NodeTypeId() const {return m_impl->NodeTypeId();}
+    const std::string& RawStatistics::ControlAddress() const {return m_impl->ControlAddress();}
+    const std::string& RawStatistics::DataAddress() const {return m_impl->DataAddress();}
     
     int RawStatistics::Size() const {return m_impl->Size();}
     
     const std::string& RawStatistics::Name(const int index) const {return m_impl->Name(index);}
     boost::int64_t RawStatistics::Id(const int index) const {return m_impl->Id(index);}
-    const std::string& RawStatistics::Address(const int index) const {return m_impl->Address(index);}
-    bool RawStatistics::MulticastEnabled(const int index) const {return m_impl->MulticastEnabled(index);}
+    boost::int64_t RawStatistics::NodeTypeId(const int index) const {return m_impl->NodeTypeId(index);}
+    const std::string& RawStatistics::ControlAddress(const int index) const {return m_impl->ControlAddress(index);}
+    const std::string& RawStatistics::DataAddress(const int index) const {return m_impl->DataAddress(index);}
     
     bool RawStatistics::IsDead(const int index) const {return m_impl->IsDead(index);}
     boost::uint32_t RawStatistics::ReceiveCount(const int index) const {return m_impl->ReceiveCount(index);}

@@ -82,7 +82,10 @@ namespace
                              const boost::shared_ptr<Com::Communication>& communication,
                              const std::string& name,
                              const boost::int64_t id,
-                             const std::string& address,
+                             const boost::int64_t nodeTypeId,
+                             const std::string& controlAddress,
+                             const std::string& dataAddress,
+                             const std::map<boost::int64_t, NodeType>& nodeTypes,
                              const char* const dataIdentifier,
                              const boost::shared_ptr<RawHandler>& rawHandler)
         : m_strand (*ioService)
@@ -90,7 +93,10 @@ namespace
         , m_dataIdentifier(LlufId_Generate64(dataIdentifier))
         , m_name(name)
         , m_id(id)
-        , m_address(address)
+        , m_nodeTypeId(nodeTypeId)
+        , m_controlAddress(controlAddress)
+        , m_dataAddress(dataAddress)
+        , m_nodeTypes(nodeTypes)
         , m_elected(std::numeric_limits<boost::int64_t>::min())
         , m_electionTimer(*ioService)
     {
@@ -152,8 +158,9 @@ namespace
         auto node = m_stateMessage.add_node_info();
         node->set_name(m_name);
         node->set_id(m_id);
-        node->set_control_address(m_address);
-        node->set_multicast_enabled(false); //TODO: get this!
+        node->set_node_type_id(m_nodeTypeId);
+        node->set_control_address(m_controlAddress);
+        node->set_data_address(m_dataAddress);
 
         if (m_lastStatistics.Valid())
         {
@@ -188,8 +195,9 @@ namespace
                         auto node = m_stateMessage.add_node_info();
                         node->set_name(m_lastStatistics.Name(i));
                         node->set_id(m_lastStatistics.Id(i));
-                        node->set_control_address(m_lastStatistics.Address(i));
-                        node->set_multicast_enabled(m_lastStatistics.MulticastEnabled(i));
+                        node->set_node_type_id(m_lastStatistics.NodeTypeId(i));
+                        node->set_control_address(m_lastStatistics.ControlAddress(i));
+                        node->set_data_address(m_lastStatistics.DataAddress(i));
                     }
                 }
             }
@@ -293,7 +301,14 @@ namespace
             const auto size = message.ByteSize();
             boost::shared_ptr<char[]> data = boost::make_shared<char[]>(size);
             message.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
-            m_communication->SendAll(data, size, m_dataIdentifier);
+            for (auto it: m_nodeTypes)
+            {
+                if (!it.second.isLight)
+                {
+                    m_communication->SendToNodeType(it.second.id, data, size, m_dataIdentifier);
+                }
+            }
+
             
             m_electionTimer.expires_from_now(boost::chrono::seconds(6));
             m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
@@ -336,7 +351,26 @@ namespace
                         const auto size = aliveMsg.ByteSize();
                         boost::shared_ptr<char[]> data = boost::make_shared<char[]>(size);
                         aliveMsg.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
-                        m_communication->SendTo(from, data, size, m_dataIdentifier);
+
+                        boost::int64_t nodeTypeId = 0;
+                        if (m_lastStatistics.Valid())
+                        {
+                            for (int i = 0; i < m_lastStatistics.Size(); ++i)
+                            {
+                                if (m_lastStatistics.Id(i) == from)
+                                {
+                                    nodeTypeId = m_lastStatistics.NodeTypeId(i);
+                                }
+                            }
+                        }
+
+                        if (nodeTypeId == 0)
+                        {
+                            throw std::logic_error("Haven't got the nodeTypeId for a node that I got an inquiry from!");
+                        }
+
+                        m_communication->SendToNode(from, nodeTypeId, data, size, m_dataIdentifier);
+                        //TODO: can communication supply nodetypeid as well in GotData?
             
                         StartElection();
                     }
@@ -396,7 +430,15 @@ namespace
         const auto size = victoryMsg.ByteSize();
         boost::shared_ptr<char[]> data = boost::make_shared<char[]>(size);
         victoryMsg.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
-        m_communication->SendAll(data, size, m_dataIdentifier);
+
+        for (auto it: m_nodeTypes)
+        {
+            if (!it.second.isLight)
+            {
+                m_communication->SendToNodeType(it.second.id, data, size, m_dataIdentifier);
+            }
+        }
+
     }
 
 }

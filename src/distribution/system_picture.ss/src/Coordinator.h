@@ -73,7 +73,10 @@ namespace SP
                     const boost::shared_ptr<Com::Communication>& communication,
                     const std::string& name,
                     const boost::int64_t id,
-                    const std::string& address,
+                    const boost::int64_t nodeTypeId,
+                    const std::string& controlAddress,
+                    const std::string& dataAddress,
+                    const std::map<boost::int64_t, NodeType>& nodeTypes,
                     const char* const receiverId,
                     const boost::shared_ptr<RawHandler>& rawHandler);
 
@@ -111,7 +114,10 @@ namespace SP
         
         const std::string m_name;
         const boost::int64_t m_id;
-        const std::string m_address;
+        const boost::int64_t m_nodeTypeId;
+        const std::string m_controlAddress;
+        const std::string m_dataAddress;
+        const std::map<boost::int64_t, NodeType> m_nodeTypes;
 
         std::atomic<boost::int64_t> m_elected;
         boost::asio::steady_timer m_electionTimer;

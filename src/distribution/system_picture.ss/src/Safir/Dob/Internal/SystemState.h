@@ -29,7 +29,7 @@
 #include <boost/cstdint.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/function.hpp>
-#include <Safir/Dob/Internal/SystemPictureExportDefs.h>
+#include <Safir/Dob/Internal/SystemPictureDefs.h>
 
 //Forward declare some asio stuff.
 namespace boost
@@ -73,8 +73,9 @@ namespace SP
         //Static fields
         const std::string& Name(const int index) const;
         boost::int64_t Id(const int index) const;
-        const std::string& Address(const int index) const;
-        bool MulticastEnabled(const int index) const;
+        boost::int64_t NodeTypeId(const int index) const;
+        const std::string& ControlAddress(const int index) const;
+        const std::string& DataAddress(const int index) const;
 
         void Print(std::wostream&) const;
 

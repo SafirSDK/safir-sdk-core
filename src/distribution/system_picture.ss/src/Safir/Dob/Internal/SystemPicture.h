@@ -28,7 +28,7 @@
 #include <boost/noncopyable.hpp>
 #include <Safir/Dob/Internal/RawStatistics.h>
 #include <Safir/Dob/Internal/SystemState.h>
-#include <Safir/Dob/Internal/SystemPictureExportDefs.h>
+#include <Safir/Dob/Internal/SystemPictureDefs.h>
 #include <map>
 #include <vector>
 
@@ -64,16 +64,6 @@ namespace SP
     struct slave_tag_t {};
     const slave_tag_t slave_tag = slave_tag_t();
 
-    struct NodeType
-    {
-        NodeType(const std::string& name,
-                 const bool isLight,
-                 const std::vector<std::string>& talksTo,
-                 const bool canMulticast,
-                 const double heartbeatInterval,
-                 const int maxLostHeartbeats);
-    };
-
 #ifdef _MSC_VER
 #pragma warning (push)
 #pragma warning (disable: 4275)
@@ -89,9 +79,10 @@ namespace SP
                       const boost::shared_ptr<Com::Communication>& communication,
                       const std::string& name,
                       const boost::int64_t id,
-                      const std::string& address,
-                      const std::string& multicastAddress,
-                      const std::map<std::string, NodeType>& nodeTypes);
+                      const boost::int64_t nodeTypeId,
+                      const std::string& controlAddress,
+                      const std::string& dataAddress,
+                      const std::map<boost::int64_t, NodeType>& nodeTypes);
 
         explicit SystemPicture(slave_tag_t);
 

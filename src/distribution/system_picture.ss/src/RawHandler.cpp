@@ -52,8 +52,10 @@ namespace SP
                            const boost::shared_ptr<Com::Communication>& communication,
                            const std::string& name,
                            const boost::int64_t id,
-                           const std::string& address,
-                           const std::string& multicastAddress)
+                           const boost::int64_t nodeTypeId,
+                           const std::string& controlAddress,
+                           const std::string& dataAddress,
+                           const std::map<boost::int64_t, NodeType>& nodeTypes)
         : m_ioService(ioService)
         , m_communication(communication)
         , m_id(id)
@@ -94,15 +96,16 @@ namespace SP
         //set up some info about ourselves in our message
         m_allStatisticsMessage.set_name(name);
         m_allStatisticsMessage.set_id(id);
-        m_allStatisticsMessage.set_control_address(address);
-        m_allStatisticsMessage.set_multicast_address(multicastAddress);
+        m_allStatisticsMessage.set_node_type_id(nodeTypeId);
+        m_allStatisticsMessage.set_control_address(controlAddress);
+        m_allStatisticsMessage.set_data_address(dataAddress);
 
         communication->SetNewNodeCallback(m_strand.wrap([this](const std::string& name,
-                                                               boost::int64_t id, 
-                                                               const std::string& addr, 
-                                                               bool isMulticast)
+                                                               const boost::int64_t id, 
+                                                               const boost::int64_t nodeTypeId,
+                                                               const std::string& controlAddress)
                                                         {
-                                                            NewNode(name,id,addr,isMulticast);
+                                                            NewNode(name,id,nodeTypeId,controlAddress);
                                                         }));
         
         communication->SetGotReceiveFromCallback(m_strand.wrap([this](boost::int64_t id)
@@ -138,9 +141,9 @@ namespace SP
 
     //Must be called in strand!
     void RawHandler::NewNode(const std::string& name,
-                             const boost::int64_t id, //NOTE: id is not const due to boost::ptr_map funkyness
-                             const std::string& address,
-                             const bool multicastEnabled)
+                             const boost::int64_t id,
+                             const boost::int64_t nodeTypeId,
+                             const std::string& controlAddress)
     {
         lllog(4) << "SP: New node '" << name.c_str() << "' with id " << id << " was added" << std::endl;
 
@@ -157,10 +160,16 @@ namespace SP
             throw std::logic_error("Got a new node that I already had");
         }
         
+        if (m_nodeTypes.find(nodeTypeId) == m_nodeTypes.end())
+        {
+            throw std::logic_error("Got a new node with a node type id that I dont know about!");
+        }
+
         newNode->set_name(name);
         newNode->set_id(id);
-        newNode->set_control_address(address);
-        newNode->set_multicast_enabled(multicastEnabled);
+        newNode->set_node_type_id(nodeTypeId);
+        newNode->set_control_address(controlAddress);
+        newNode->set_data_address("MISSING"); //TODO: communication should provide this!
         
         newNode->set_is_dead(false);
         newNode->set_receive_count(0);
@@ -229,7 +238,7 @@ namespace SP
             throw std::logic_error("Unexpected error in CheckDeadNodes");
         }
 
-        //TODO: Should this be different for different node types?
+        //TODO: Use node type information for this!
         const auto threshold = GetTime() - 90; //9 seconds back in time 
         const auto clearThreshold = GetTime() - 600*5; //5 minutes back in time.
         //        std::wcout << "  Threshold time is " << threshold << std::endl;
