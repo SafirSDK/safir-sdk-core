@@ -75,6 +75,9 @@
 #include "../defs/DoseNodeStatus.h"
 #include "../defs/DoseCom_Interface.h"  // to get an error code
 
+#include <ace/Thread_Mutex.h>
+#include <ace/Guard_T.h>
+
 //--------------------
 // Externals
 //--------------------
@@ -108,6 +111,10 @@ extern volatile int * volatile pDbg;
 //-------------------------------------------
 // Local static data
 //-------------------------------------------
+
+// We really don't rely on the lock free approach taken for the original design. This lock is
+// used to protect the different threads from concurrent access to the transmit queues.
+static ACE_Thread_Mutex g_threadLock;
 
 volatile static DOSE_SHARED_DATA_S *g_pShm;
 volatile static NODESTATUS_TABLE *g_pNodeStatusTable;
@@ -294,6 +301,8 @@ typedef volatile struct
     // cleared by Xmit_Thread() when free entries in Queue
     volatile dcom_ushort16 TransmitQueueOverflow;
 
+    volatile dcom_uchar8   bSendQueueNotOverflow;
+
 } DOSE_TXQUEUE_S;
 
 volatile static DOSE_TXQUEUE_S TxQ[NUM_TX_QUEUES] = {{0}};
@@ -353,19 +362,28 @@ static THREAD_API Ack_Thread(void *)
 
         // Check if g_Ack_Queue[] is full. If so do not receive more until
         // there is more space.
-
-        while(
-                ( (g_Ack_Get_ix - g_Ack_Put_ix) == 1)
-                ||
-                ( (g_Ack_Get_ix == 0) && (g_Ack_Put_ix == (MAX_ACK_QUEUE-1)) )
-
-              )
+        for (;;)
         {
-            if(*pDbg>=5)
+            ACE_Guard<ACE_Thread_Mutex> lck(g_threadLock);
+            
+            if(
+                    ( (g_Ack_Get_ix - g_Ack_Put_ix) == 1)
+                    ||
+                    ( (g_Ack_Get_ix == 0) && (g_Ack_Put_ix == (MAX_ACK_QUEUE-1)) )
+                    
+                    )
             {
-                PrintDbg("+++ Ack_Thread(). g_Ack_Queue[] is full, sleeping 30 ms. Ackix=%u Putix=%u\n");
+                if(*pDbg>=5)
+                {
+                    PrintDbg("+++ Ack_Thread(). g_Ack_Queue[] is full, sleeping 30 ms. Ackix=%u Putix=%u\n");
+                }
+                lck.release();
+                DoseOs::Sleep(30);
             }
-            DoseOs::Sleep(30);
+            else
+            {
+                break;
+            }
         }
 
         result = RxSock.RecvFrom2((char *) &UdpMsg, sizeof(UdpMsg), NULL,0);
@@ -387,6 +405,8 @@ static THREAD_API Ack_Thread(void *)
 
         if((UdpMsg.MsgType == MSG_TYPE_ACK) || (UdpMsg.MsgType == MSG_TYPE_NACK))
         {
+            ACE_Guard<ACE_Thread_Mutex> lck(g_threadLock);
+
             if(*pDbg>=5)
             PrintDbg("+++ AckThread() MsgTyp=%s DoseId=%d "
                     "Seq=%d FrNum=%X qIx=%u Put=%u\n",
@@ -637,9 +657,7 @@ static bool CleanUp_After_Msg_Ignored(int qIx, int TxMsgArrIx)
                     qIx,TxQ[qIx].TransmitQueueOverflow);
         if(--TxQ[qIx].TransmitQueueOverflow == 0)
         {
-            WakeUp_QueueNotFull(qIx);
-
-            if(*pDbg > 3) PrintDbg("#   Called WakeUp_QueueNotFull(%d)\n", qIx);
+            TxQ[qIx].bSendQueueNotOverflow = 1;
         }
     }
 
@@ -756,9 +774,7 @@ static int CleanUp_After_Msg_Completed(int qIx)
                     qIx,TxQ[qIx].TransmitQueueOverflow);
         if(--TxQ[qIx].TransmitQueueOverflow == 0)
         {
-            WakeUp_QueueNotFull(qIx);
-
-            if(*pDbg > 3) PrintDbg("#   Called WakeUp_QueueNotFull(%d)\n", qIx);
+            TxQ[qIx].bSendQueueNotOverflow = 1;
         }
     }
 
@@ -1167,6 +1183,7 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
                          DoseIdFrom, SequenceNum,
                          (dcom_ulong32)(TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[0]>>32),
                          (dcom_ulong32)(TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[0] & 0xFFFFFFFF));
+
             }
             else
             {
@@ -1775,16 +1792,22 @@ static THREAD_API TxThread(void *)
             if(*pDbg > 5) PrintDbg("### TxThread() There might be more\n");
             bThereMightBeMore = FALSE;
         }
+
         //===========================================================
         // Scan all,Queues
         // qIx is incremented when there is nothing more on the Queue
         //===========================================================
         for(int jj=0 ; jj < NUM_TX_QUEUES ; jj++) // Clears counters
+        {
             TxQ[jj].LapCount = 0;
+            TxQ[jj].bSendQueueNotOverflow = 0;
+        }
 
         qIx = 0;
         while(qIx < NUM_TX_QUEUES)
         {
+            ACE_Guard<ACE_Thread_Mutex> lck(g_threadLock);
+
             // There could be the following jobs:
             // 1) Timeout when waiting for Ack
             // 2) The AckThread has received an Ack
@@ -2485,7 +2508,7 @@ Send_The_Message:
                     "#   TxThread[%d] NO Buffer allocated. Ptr is NULL\n",qIx);
 
                 // Improvement: better Recovery
-                DoseOs::Sleep(1000);
+                //DoseOs::Sleep(1000); // Can't have a sleep now that we have introduced g_threadLock.
 
                 // set next GetIxToSend
                 if((UseToSendIx + 1) >= MAX_XMIT_QUEUE) SetIndexToSend(qIx, 0);
@@ -2538,7 +2561,7 @@ Send_The_Message:
                         qIx, TxQ[qIx].PutIx, TxQ[qIx].GetIxToSend,
                         TxQ[qIx].GetIxToAck);
 
-                    DoseOs::Sleep(100);
+                    //DoseOs::Sleep(100); // Can't have a sleep now that we have introduced g_threadLock.
                 }
 
                 result = TxSock.SendTo2(DestIpAddr_nw, DestPort,
@@ -2551,7 +2574,7 @@ Send_The_Message:
                         (char *) &TxMsgHdr, pData, TxMsgHdr.FragmentNumber,
                         TxMsgHdr.SequenceNumber);
 
-                    DoseOs::Sleep(100);
+                    //DoseOs::Sleep(100); // Can't have a sleep now that we have introduced g_threadLock.
                 }
 
                 if(TxMsgHdr.bWantAck)
@@ -2647,6 +2670,18 @@ Send_The_Message:
                qIx++;
 
         } // end for(qIx)
+
+        for(int qix = 0; qix < NUM_TX_QUEUES ; ++qix)
+        {
+            if (TxQ[qix].bSendQueueNotOverflow)
+            {
+                WakeUp_QueueNotFull(qix);
+                TxQ[qix].bSendQueueNotOverflow = 0;
+
+                if(*pDbg > 3) PrintDbg("#   Called WakeUp_QueueNotFull(%d)\n", qix);
+            }
+        }
+
     } // end for(;;) // For ever
 #ifndef _MSC_VER //disable warning in msvc
     return 0;
@@ -2688,6 +2723,8 @@ int CDoseComTransmit::Xmit_Msg(const char *pMsg, dcom_ulong32 MsgLength,
                                dcom_uchar8 PoolDistribution, dcom_uchar8 bUseAck,
                                int Priority, int Destination)
 {
+    ACE_Guard<ACE_Thread_Mutex> lck(g_threadLock);
+
     // Check if we should simulate a stop in the outgoing traffic
     if (g_pShm->InhibitOutgoingTraffic)
     {
@@ -2713,7 +2750,7 @@ int CDoseComTransmit::Xmit_Msg(const char *pMsg, dcom_ulong32 MsgLength,
     static int bNextPdIsFirst = 1;
 
     if(*pDbg>2)
-        PrintDbg(">>> Xmit_Msg() entry Pd=%X Size=%d\n",
+        PrintDbg(">>> Xmit_Msg() lock protected entry Pd=%X Size=%d\n",
                 PoolDistribution,MsgLength);
 
     // PoolDistribution has value 1 for Data.
