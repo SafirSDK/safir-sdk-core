@@ -38,7 +38,7 @@ namespace Com
     Communication::Communication(const boost::shared_ptr<boost::asio::io_service>& ioService,
                                  const std::string& nodeName,
                                  boost::int64_t nodeId, //0 is not a valid id.
-                                 boost::int64_t& nodeTypeId,
+                                 boost::int64_t nodeTypeId,
                                  const std::string& unicastAddress,
                                  bool discovering,
                                  const std::vector<Communication::NodeType>& nodeTypes)
