@@ -35,8 +35,9 @@ namespace
     {
         COLUMN_NAME,
         COLUMN_ID,
-        COLUMN_ADDRESS,
-        COLUMN_MULTICAST_ENABLED,
+        COLUMN_NODE_TYPE,
+        COLUMN_CONTROL_ADDRESS,
+        COLUMN_DATA_ADDRESS,
 
         NUM_COLUMNS
     };
@@ -100,8 +101,6 @@ SystemPicture::SystemPicture(boost::asio::io_service& ioService, QWidget* /*pare
     systemTable->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
     systemTable->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
     systemTable->sortItems(COLUMN_NAME);
-
-    //    UpdateWidgets();
 }
 
 SystemPicture::~SystemPicture()
@@ -111,9 +110,7 @@ SystemPicture::~SystemPicture()
 
 void SystemPicture::UpdatedState(const Safir::Dob::Internal::SP::SystemState& data)
 {
-    //TODO: SetText(name,data.Name());
-    //TODO: SetText(address,data.Address());
-    SetText(id,data.ElectedId());
+    SetText(electedId,data.ElectedId());
     
     systemTable->setSortingEnabled(false);
     UpdateSystemTable(data);
@@ -155,14 +152,14 @@ void SystemPicture::UpdateSystemTable(const Safir::Dob::Internal::SP::SystemStat
                              COLUMN_ID,
                              new QTableWidgetItem(QString::number(it->first)));
         systemTable->setItem(row,
-                             COLUMN_ADDRESS,
-                             new QTableWidgetItem(QString::fromUtf8(statistics.Address(it->second).c_str())));
-
-        auto mc = new QTableWidgetItem();
-        mc->setData(Qt::DisplayRole,statistics.MulticastEnabled(it->second));
+                             COLUMN_NODE_TYPE,
+                             new QTableWidgetItem(QString::number(statistics.NodeTypeId(it->second)))); //TODO: use name instead of id
         systemTable->setItem(row,
-                             COLUMN_MULTICAST_ENABLED,
-                             mc);
+                             COLUMN_CONTROL_ADDRESS,
+                             new QTableWidgetItem(QString::fromUtf8(statistics.ControlAddress(it->second).c_str())));
+        systemTable->setItem(row,
+                             COLUMN_DATA_ADDRESS,
+                             new QTableWidgetItem(QString::fromUtf8(statistics.DataAddress(it->second).c_str())));
 
         //set elected coordinator 
         if (it->first == statistics.ElectedId())

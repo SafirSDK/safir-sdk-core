@@ -33,7 +33,7 @@
      <item>
       <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>Address:</string>
+        <string>Control Address:</string>
        </property>
       </widget>
      </item>
@@ -118,7 +118,12 @@
       </column>
       <column>
        <property name="text">
-        <string>Address</string>
+        <string>Node Type</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Control Address</string>
        </property>
        <property name="toolTip">
         <string>Address of node</string>
@@ -126,7 +131,7 @@
       </column>
       <column>
        <property name="text">
-        <string>MC</string>
+        <string>Data Address</string>
        </property>
        <property name="toolTip">
         <string>Is this node multicast enabled.</string>
@@ -186,7 +191,12 @@
       </column>
       <column>
        <property name="text">
-        <string>Address</string>
+        <string>Node Type</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Control Address</string>
        </property>
        <property name="toolTip">
         <string>Address of node</string>
@@ -194,7 +204,7 @@
       </column>
       <column>
        <property name="text">
-        <string>MC</string>
+        <string>Data Address</string>
        </property>
        <property name="toolTip">
         <string>Is this node multicast enabled.</string>

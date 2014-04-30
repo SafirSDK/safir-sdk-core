@@ -15,44 +15,16 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,2,0,2,0,3,1">
-     <item>
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Name:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="name">
-       <property name="readOnly">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_2">
-       <property name="text">
-        <string>Address:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="address">
-       <property name="readOnly">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,3,1">
      <item>
       <widget class="QLabel" name="label_3">
        <property name="text">
-        <string>Id:</string>
+        <string>Elected Node Id:</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="id">
+      <widget class="QLineEdit" name="electedId">
        <property name="maxLength">
         <number>20</number>
        </property>
@@ -65,12 +37,6 @@
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>0</width>
-         <height>20</height>
-        </size>
        </property>
       </spacer>
      </item>
@@ -114,7 +80,12 @@
      </column>
      <column>
       <property name="text">
-       <string>Address</string>
+       <string>Node Type</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Control Address</string>
       </property>
       <property name="toolTip">
        <string>Address of node</string>
@@ -122,7 +93,7 @@
      </column>
      <column>
       <property name="text">
-       <string>MC</string>
+       <string>Data Address</string>
       </property>
       <property name="toolTip">
        <string>Is this node multicast enabled.</string>

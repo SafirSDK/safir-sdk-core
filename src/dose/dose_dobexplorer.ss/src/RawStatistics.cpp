@@ -31,12 +31,13 @@
 #include <boost/make_shared.hpp>
 namespace
 {
-    enum LocalTableColumn
+    enum TableColumn
     {
         COLUMN_NAME,
         COLUMN_ID,
-        COLUMN_ADDRESS,
-        COLUMN_MULTICAST_ENABLED,
+        COLUMN_NODE_TYPE,
+        COLUMN_CONTROL_ADDRESS,
+        COLUMN_DATA_ADDRESS,
         COLUMN_RECEIVE_COUNT,
         COLUMN_RETRANSMIT_COUNT,
 
@@ -136,7 +137,7 @@ void RawStatistics::UpdatedStatistics(const Safir::Dob::Internal::SP::RawStatist
     m_statistics = data;
 
     SetText(name,data.Name());
-    SetText(address,data.Address());
+    SetText(address,data.ControlAddress());
     SetText(id,data.Id());
     
     localTable->setSortingEnabled(false);
@@ -189,20 +190,20 @@ void RawStatistics::UpdateLocalTable()
         const int row = localTable->rowCount();
         localTable->insertRow(row);
         localTable->setItem(row,
-                             COLUMN_NAME,
-                             new QTableWidgetItem(QString::fromUtf8(m_statistics.Name(it->second).c_str())));
+                            COLUMN_NAME,
+                            new QTableWidgetItem(QString::fromUtf8(m_statistics.Name(it->second).c_str())));
         localTable->setItem(row,
-                             COLUMN_ID,
-                             new QTableWidgetItem(QString::number(it->first)));
+                            COLUMN_ID,
+                            new QTableWidgetItem(QString::number(it->first)));
         localTable->setItem(row,
-                             COLUMN_ADDRESS,
-                             new QTableWidgetItem(QString::fromUtf8(m_statistics.Address(it->second).c_str())));
-
-        auto mc = new QTableWidgetItem();
-        mc->setData(Qt::DisplayRole,m_statistics.MulticastEnabled(it->second));
+                            COLUMN_NODE_TYPE,
+                            new QTableWidgetItem(QString::number(m_statistics.NodeTypeId(it->second))));
         localTable->setItem(row,
-                             COLUMN_MULTICAST_ENABLED,
-                             mc);
+                            COLUMN_CONTROL_ADDRESS,
+                            new QTableWidgetItem(QString::fromUtf8(m_statistics.ControlAddress(it->second).c_str())));
+        localTable->setItem(row,
+                            COLUMN_DATA_ADDRESS,
+                            new QTableWidgetItem(QString::fromUtf8(m_statistics.DataAddress(it->second).c_str())));
 
         localTable->setItem(row,
                              COLUMN_RECEIVE_COUNT,
@@ -297,14 +298,14 @@ void RawStatistics::UpdateRemoteTable()
                                          COLUMN_ID,
                                          new QTableWidgetItem(QString::number(it->first)));
                     remoteTable->setItem(row,
-                                         COLUMN_ADDRESS,
-                                         new QTableWidgetItem(QString::fromUtf8(statistics.Address(it->second).c_str())));
-
-                    auto mc = new QTableWidgetItem();
-                    mc->setData(Qt::DisplayRole,statistics.MulticastEnabled(it->second));
+                                         COLUMN_NODE_TYPE,
+                                         new QTableWidgetItem(QString::number(statistics.NodeTypeId(it->second))));
                     remoteTable->setItem(row,
-                                         COLUMN_MULTICAST_ENABLED,
-                                         mc);
+                                         COLUMN_CONTROL_ADDRESS,
+                                         new QTableWidgetItem(QString::fromUtf8(statistics.ControlAddress(it->second).c_str())));
+                    remoteTable->setItem(row,
+                                         COLUMN_DATA_ADDRESS,
+                                         new QTableWidgetItem(QString::fromUtf8(statistics.DataAddress(it->second).c_str())));
 
                     remoteTable->setItem(row,
                                          COLUMN_RECEIVE_COUNT,
