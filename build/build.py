@@ -248,7 +248,7 @@ class Logger(object):
             if not line:
                 break
             #CMake does some strange thing with a carriage return alone on a line, which we get rid of like this.
-            line = line.rstrip("\r")
+            line = line.decode("utf8").rstrip("\r")
             if len(line) != 0:
                 line = line.rstrip()
                 self.log(line,"output")
