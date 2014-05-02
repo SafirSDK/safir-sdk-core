@@ -21,7 +21,7 @@ if (MSVC)
     google-breakpad
     PREFIX ""
     SOURCE_DIR src
-    BINARY_DIR bin
+    BINARY_DIR bin/${CMAKE_BUILD_TYPE}
     SVN_REPOSITORY ${MY_SVN_REPOSITORY}
     SVN_REVISION -r ${MY_SVN_REVISION}
     PATCH_COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/build-breakpad-windows.cmake <SOURCE_DIR>/CMakeLists.txt
