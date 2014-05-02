@@ -192,3 +192,12 @@ class TestEnv:
                 print (" - Output:\n", self.Output(name))
                 ok = False
         return ok;
+
+    def ProcessDied(self):
+        ok = True
+        for name, (proc,queue,output) in self.__procs.items():
+            if proc.returncode is not None and proc.returncode != 0:
+                print (" - Process", name, "exited with code", proc.returncode)
+                print (" - Output:\n", self.Output(name))
+                ok = False
+        return ok;

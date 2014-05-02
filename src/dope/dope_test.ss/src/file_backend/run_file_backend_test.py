@@ -85,7 +85,7 @@ with TestEnvStopper(env):
     env.launchProcess("entity_owner", (arguments.entity_owner,"set")).wait()
     while(len(glob.glob(os.path.join(file_storage_path,"DopeTest.*.bin"))) != 110):
         time.sleep(0.1)
-        if not env.ReturnCodesOk():
+        if not env.ProcessDied():
             log("Some process exited with an unexpected value")
             sys.exit(1)
 
