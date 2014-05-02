@@ -33,6 +33,9 @@ Makefile
 *.opensdf
 *.dir/
 x64/
+Debug/
+Release/
+RelWithDebInfo/
 
 #CTest / Unit test stuff
 DartConfiguration.tcl
