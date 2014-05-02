@@ -52,19 +52,16 @@ namespace Com
         DiscovererBasic(const boost::shared_ptr<boost::asio::io_service>& ioService,
                         const Node& me,
                         const boost::function<void(const Node&)>& onNewNode)
-            :WriterType(ioService, me.IpVersion())
+            :WriterType(ioService, me.IpVersion(true))
             ,m_seeds()
             ,m_nodes()
             ,m_reportedNodes()
             ,m_incompletedNodes()
             ,m_strand(*ioService)
-            ,m_myNodeId(me.Id())
-            ,m_myNodeName(me.Name())
-            ,m_myAddress(me.Address())
-            ,m_myNodeTypeId(me.NodeTypeId())
+            ,m_me(me)
             ,m_onNewNode(onNewNode)
             ,m_timer(*ioService)
-            ,m_randomGenerator(static_cast<boost::uint32_t>(me.Id()))
+            ,m_randomGenerator(static_cast<boost::uint32_t>(me.nodeId))
         {
         }
 #ifdef _MSC_VER
@@ -111,7 +108,7 @@ namespace Com
                     return;
                 }
 
-                if (msg.from().node_id()==m_myNodeId)
+                if (msg.from().node_id()==m_me.nodeId)
                 {
                     //discover from myself, remove seed
                     lllog(DiscovererLogLevel)<<L"COM: Received discover from myself. Remove from seed list"<<std::endl;
@@ -126,7 +123,7 @@ namespace Com
                     UpdateIncompleteNodes(msg.from().node_id(), 0, 0);
                 }
 
-                SendNodeInfo(msg.from().node_id(), msg.sent_to_id(), Utilities::CreateEndpoint(msg.from().unicast_address()));
+                SendNodeInfo(msg.from().node_id(), msg.sent_to_id(), Utilities::CreateEndpoint(msg.from().control_address()));
             });
         }
 
@@ -159,12 +156,12 @@ namespace Com
                 //Add the rest to reportedNodes if not already a known node
                 for (auto nit=msg.nodes().begin(); nit!=msg.nodes().end(); ++nit)
                 {
-                    if (nit->node_id()!=m_myNodeId)
+                    if (nit->node_id()!=m_me.nodeId)
                     {
                         if (nit->node_id()==0 && nit->name()=="seed")
                         {
-                            lllog(DiscovererLogLevel)<<L"COM: Received seed from other node. Address to seed: "<<nit->unicast_address().c_str()<<std::endl;
-                            AddSeed(nit->unicast_address());
+                            lllog(DiscovererLogLevel)<<L"COM: Received seed from other node. Address to seed: "<<nit->control_address().c_str()<<std::endl;
+                            AddSeed(nit->control_address());
                         }
                         else if (IsNewNode(nit->node_id()))
                         {
@@ -181,35 +178,6 @@ namespace Com
     private:
 #endif
         static const int DiscovererLogLevel=9;
-
-        struct NodeInfo
-        {
-            boost::int64_t nodeId;
-            boost::int64_t nodeTypeId;
-            std::string name;
-            std::string unicastAddress;
-
-
-            NodeInfo()
-                :nodeId(0)
-                ,nodeTypeId(0)
-                ,name()
-                ,unicastAddress()
-            {
-            }
-
-            NodeInfo(boost::int64_t nodeId_,
-                     boost::int64_t nodeTypeId_,
-                     const std::string& name_,
-                     const std::string& address_)
-                :nodeId(nodeId_)
-                ,nodeTypeId(nodeTypeId_)
-                ,name(name_)
-                ,unicastAddress(address_)
-            {
-            }
-        };
-
         bool m_running {false};
 
         //Constant defining how many nodes that can be sent in a singel NodeInfo message without risking that fragmentSize is exceeded.
@@ -219,16 +187,13 @@ namespace Com
         static const int NodeInfoFixedSize=30+NodeInfoPerNodeSize;
         static const int NumberOfNodesPerNodeInfoMsg=(Parameters::FragmentSize-NodeInfoFixedSize)/NodeInfoPerNodeSize;
 
-        std::map<boost::int64_t, NodeInfo> m_seeds; //id generated from ip:port
-        std::map<boost::int64_t, NodeInfo> m_nodes; //known nodes
-        std::map<boost::int64_t, NodeInfo> m_reportedNodes; //nodes only heard about from others, never talked to
+        NodeMap m_seeds; //id generated from ip:port
+        NodeMap m_nodes; //known nodes
+        NodeMap m_reportedNodes; //nodes only heard about from others, never talked to
         std::map<boost::int64_t, std::vector<bool> > m_incompletedNodes; //talked to but still haven't received all node info from this node
 
         boost::asio::io_service::strand m_strand;
-        boost::int64_t m_myNodeId;
-        std::string m_myNodeName;
-        std::string m_myAddress;
-        boost::int64_t m_myNodeTypeId;
+        Node m_me;
 
         boost::function<void(const Node&)> m_onNewNode;
         boost::asio::steady_timer m_timer;
@@ -241,33 +206,34 @@ namespace Com
             CommunicationMessage cm;
             cm.set_message_type(CommunicationMessage_MessageType_DiscoverMsg);
 
-            cm.mutable_discover()->mutable_from()->set_node_id(m_myNodeId);
-            cm.mutable_discover()->mutable_from()->set_name(m_myNodeName);
-            cm.mutable_discover()->mutable_from()->set_unicast_address(m_myAddress);
-            cm.mutable_discover()->mutable_from()->set_node_type_id(m_myNodeTypeId);
+            cm.mutable_discover()->mutable_from()->set_node_id(m_me.nodeId);
+            cm.mutable_discover()->mutable_from()->set_name(m_me.name);
+            cm.mutable_discover()->mutable_from()->set_control_address(m_me.controlAddress());
+            cm.mutable_discover()->mutable_from()->set_data_address(m_me.dataAddress());
+            cm.mutable_discover()->mutable_from()->set_node_type_id(m_me.nodeTypeId);
 
             for (auto it=m_seeds.cbegin(); it!=m_seeds.cend(); ++it)
             {
                 cm.mutable_discover()->set_sent_to_id(it->first);
-                lllog(DiscovererLogLevel)<<L"Send discover to seed: "<<it->second.unicastAddress.c_str()<<std::endl;
-                SendMessageTo(cm, Utilities::CreateEndpoint(it->second.unicastAddress));
+                lllog(DiscovererLogLevel)<<L"Send discover to seed: "<<it->second.controlAddress.c_str()<<std::endl;
+                SendMessageTo(cm, Utilities::CreateEndpoint(it->second.controlAddress));
             }
 
             for (auto it=m_reportedNodes.cbegin(); it!=m_reportedNodes.cend(); ++it)
             {
                 cm.mutable_discover()->set_sent_to_id(it->first);
                 lllog(DiscovererLogLevel)<<L"Send discover to node I've heard about: "<<it->second.name.c_str()<<L", id="<<it->second.nodeId<<std::endl;
-                SendMessageTo(cm, Utilities::CreateEndpoint(it->second.unicastAddress));
+                SendMessageTo(cm, Utilities::CreateEndpoint(it->second.controlAddress));
             }
 
             for (auto it=m_incompletedNodes.cbegin(); it!=m_incompletedNodes.cend(); ++it)
             {
                 const auto nodeIt=m_nodes.find(it->first);
                 assert(nodeIt!=m_nodes.cend());
-                const NodeInfo& node=nodeIt->second;
+                const Node& node=nodeIt->second;
                 cm.mutable_discover()->set_sent_to_id(node.nodeId);
                 lllog(DiscovererLogLevel)<<L"Resend discover to node I havent got all nodeInfo from: "<<node.name.c_str()<<L", id="<<node.nodeId<<std::endl;
-                SendMessageTo(cm, Utilities::CreateEndpoint(node.unicastAddress));
+                SendMessageTo(cm, Utilities::CreateEndpoint(node.controlAddress));
             }
         }
 
@@ -287,10 +253,11 @@ namespace Com
 
             //Add myself
             CommunicationMessage_Node* me=cm.mutable_node_info()->mutable_sent_from_node();
-            me->set_name(m_myNodeName);
-            me->set_node_id(m_myNodeId);
-            me->set_unicast_address(m_myAddress);
-            me->set_node_type_id(m_myNodeTypeId);
+            me->set_name(m_me.name);
+            me->set_node_id(m_me.nodeId);
+            me->set_control_address(m_me.controlAddress);
+            me->set_data_address(m_me.dataAddress);
+            me->set_node_type_id(m_me.nodeTypeId);
 
             int packetNumber=0;
             //Add seeds
@@ -299,7 +266,7 @@ namespace Com
                 CommunicationMessage_Node* ptr=cm.mutable_node_info()->mutable_nodes()->Add();
                 ptr->set_name(seedIt->second.name);
                 ptr->set_node_id(0);
-                ptr->set_unicast_address(seedIt->second.unicastAddress);
+                ptr->set_control_address(seedIt->second.controlAddress);
                 if (cm.node_info().nodes().size()==NumberOfNodesPerNodeInfoMsg)
                 {
                     cm.mutable_node_info()->set_packet_number(packetNumber);
@@ -312,12 +279,13 @@ namespace Com
             //Add all other nodes we have talked to. We dont send nodes that only have been reported, i.e we dont spread rumors
             for (auto nodeIt=m_nodes.cbegin(); nodeIt!=m_nodes.cend(); ++nodeIt)
             {
-                const NodeInfo& node=nodeIt->second;
+                const Node& node=nodeIt->second;
                 CommunicationMessage_Node* ptr=cm.mutable_node_info()->mutable_nodes()->Add();
                 ptr->set_name(node.name);
                 ptr->set_node_id(node.nodeId);
                 ptr->set_node_type_id(node.nodeTypeId);
-                ptr->set_unicast_address(node.unicastAddress);
+                ptr->set_control_address(node.controlAddress);
+                ptr->set_data_address(node.dataAddress);
 
                 if (cm.node_info().nodes().size()==NumberOfNodesPerNodeInfoMsg)
                 {
@@ -346,7 +314,7 @@ namespace Com
             boost::shared_ptr<char[]> payload(new char[size]);
             google::protobuf::uint8* buf=reinterpret_cast<google::protobuf::uint8*>(const_cast<char*>(payload.get()));
             cm.SerializeWithCachedSizesToArray(buf);
-            UserDataPtr ud(new UserData(m_myNodeId, ControlDataType, payload, static_cast<size_t>(size)));
+            UserDataPtr ud(new UserData(m_me.nodeId, ControlDataType, payload, static_cast<size_t>(size)));
             WriterType::SendTo(ud, toEndpoint);
         }
 
@@ -432,13 +400,12 @@ namespace Com
         {
             lllog(4)<<L"COM: Discoverer talked to new node "<<node.name().c_str()<<L" ["<<node.node_id()<<L"]"<<std::endl;
             //insert in node map
-            NodeInfo ni(node.node_id(), node.node_type_id(), node.name(), node.unicast_address());
-            m_nodes.insert(std::make_pair(ni.nodeId, ni));
+            Node n(node.name(), node.node_id(), node.node_type_id(), node.control_address(), node.data_address());
+            m_nodes.insert(std::make_pair(n.nodeId, n));
 
-            m_reportedNodes.erase(ni.nodeId); //now when we actually have talked to the node we also remove from reported nodes
+            m_reportedNodes.erase(n.nodeId); //now when we actually have talked to the node we also remove from reported nodes
 
             //notify listener
-            Node n( node.name(), node.node_id(), node.node_type_id(), node.unicast_address());
             m_onNewNode(n);
         }
 
@@ -447,16 +414,16 @@ namespace Com
             lllog(DiscovererLogLevel)<<L"COM: Got report about node "<<node.name().c_str()<<L" ["<<node.node_id()<<L"]"<<std::endl;
 
             //insert in reported node map
-            NodeInfo ni(node.node_id(), node.node_type_id(), node.name(), node.unicast_address());
-            m_reportedNodes.insert(std::make_pair(ni.nodeId, ni));
+            Node n(node.name(), node.node_id(), node.node_type_id(), node.control_address(), node.data_address());
+            m_reportedNodes.insert(std::make_pair(n.nodeId, n));
         }
 
         void AddSeed(const std::string& seed)
         {
-            if (seed!=m_myAddress)
+            if (seed!=m_me.controlAddress)
             {
                 boost::uint64_t id=LlufId_Generate64(seed.c_str());
-                NodeInfo s(id, 0, "seed", seed);
+                Node s("seed", id, 0, seed, "");
                 this->m_seeds.insert(std::make_pair(id, s));
                 lllog(DiscovererLogLevel)<<L"COM: Add seed "<<seed.c_str()<<std::endl;
             }

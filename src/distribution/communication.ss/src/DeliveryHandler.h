@@ -53,9 +53,9 @@ namespace Com
     class DeliveryHandlerBasic : private WriterType
     {
     public:
-        DeliveryHandlerBasic(const boost::shared_ptr<boost::asio::io_service>& ioService, const Node& me)
-            :WriterType(ioService, me.IpVersion())
-            ,m_myId(me.Id())
+        DeliveryHandlerBasic(const boost::shared_ptr<boost::asio::io_service>& ioService, boost::int64_t myNodeId, int ipVersion)
+            :WriterType(ioService, ipVersion)
+            ,m_myId(myNodeId)
             ,m_deliverStrand(*ioService)
             ,m_nodes()
             ,m_receivers()
@@ -104,7 +104,7 @@ namespace Com
         void AddNode(const Node& node)
         {
             //Always called from readStrand
-            m_nodes.insert(std::make_pair(node.Id(), NodeInfo(node)));
+            m_nodes.insert(std::make_pair(node.nodeId, NodeInfo(node)));
         }
 
         //Make node included or excluded. If excluded it is also removed.

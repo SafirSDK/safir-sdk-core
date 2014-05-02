@@ -37,7 +37,7 @@ namespace Internal
 namespace Com
 {
     Reader::Reader(const boost::shared_ptr<boost::asio::io_service>& ioService,
-                   const Node& me,
+                   const std::string& unicastAddress,
                    const std::string& multicastAddress,
                    const std::function<bool(const char*, size_t)>& onRecv,
                    const std::function<bool(void)>& isReceiverIsReady)
@@ -47,15 +47,18 @@ namespace Com
         ,m_isReceiverReady(isReceiverIsReady)
         ,m_running(false)
     {
+        int unicastIpVersion;
+        auto unicastEndpoint=Utilities::CreateEndpoint(unicastAddress, unicastIpVersion);
+
         m_socket.reset(new boost::asio::ip::udp::socket(*ioService));
-        m_socket->open(me.Endpoint().protocol());
+        m_socket->open(unicastEndpoint.protocol());
 
         if (!multicastAddress.empty())
         {
             //using multicast
             int multicastIpVersion=0;
-            boost::asio::ip::udp::endpoint mcEndpoint=Utilities::CreateEndpoint(multicastAddress, multicastIpVersion);
-            if (multicastIpVersion!=me.IpVersion())
+            auto mcEndpoint=Utilities::CreateEndpoint(multicastAddress, multicastIpVersion);
+            if (multicastIpVersion!=unicastIpVersion)
             {
                 throw std::logic_error("Unicast address and multicast address is not in same format (IPv4 and IPv6)");
             }
@@ -67,7 +70,7 @@ namespace Com
             BindSocket(m_multicastSocket, multicastIpVersion, mcEndpoint.port());
         }
 
-        BindSocket(m_socket, me.IpVersion(), me.Endpoint().port());
+        BindSocket(m_socket, unicastIpVersion, unicastEndpoint.port());
     }
 
     void Reader::BindSocket(boost::shared_ptr<boost::asio::ip::udp::socket>& socket, int ipv, unsigned short port)

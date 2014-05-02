@@ -40,51 +40,45 @@ namespace Internal
 {
 namespace Com
 {
-    class Node
+    struct Node
     {
-    public:
-        Node(const std::string& name_, boost::int64_t nodeId_, boost::int64_t nodeTypeId_, const std::string& address_)
-            :m_name(name_)
-            ,m_id(nodeId_)
-            ,m_nodeTypeId(nodeTypeId_)
-            ,m_address(address_)
-            ,m_ipVersion(4)
-            ,m_endpoint(Utilities::CreateEndpoint(address_, m_ipVersion))
-            ,m_systemNode(false)
-            ,m_lastSentUnicastSeqNo(0)
+        std::string name;
+        boost::int64_t nodeId;
+        boost::int64_t nodeTypeId;
+        const std::string controlAddress;
+        const std::string dataAddress;
+        bool systemNode;
+
+        Node(const std::string& name_,
+             boost::int64_t nodeId_,
+             boost::int64_t nodeTypeId_,
+             const std::string& controlAddress_,
+             const std::string& dataAddress_)
+            :name(name_)
+            ,nodeId(nodeId_)
+            ,nodeTypeId(nodeTypeId_)
+            ,controlAddress(controlAddress_)
+            ,dataAddress(dataAddress_)
+            ,systemNode(false)
         {
         }
-
-        //Getters and setters
-        const std::string& Name() const {return m_name;}
-        boost::int64_t Id() const {return m_id;}
-        boost::int64_t NodeTypeId() const {return m_nodeTypeId;}
-        const boost::asio::ip::udp::endpoint& Endpoint() const {return m_endpoint;}
-        bool IsSystemNode() const {return m_systemNode;}
-        void SetSystemNode(bool isSystemNode) {m_systemNode=isSystemNode;}
-        const std::string& Address() const {return m_address;}
-        int IpVersion() const {return m_ipVersion;}
-
-        boost::uint64_t& LastSentUnicastSeqNo() {return m_lastSentUnicastSeqNo;}
 
         std::string ToString() const
         {
             std::ostringstream ss;
-            ss<<"["<<m_id<<"]"<<""<<m_name<<" Uc<"<<m_address<<"> NodeType: "<<m_nodeTypeId;
+            ss<<"["<<nodeId<<"]"<<""<<name<<" NodeType: "<<nodeTypeId<<" Control: "<<controlAddress<<", Data: "<<dataAddress;
             return ss.str();
         }
 
-    private:
-        std::string m_name;
-        boost::int64_t m_id;
-        boost::int64_t m_nodeTypeId;
-        std::string m_address;
-        int m_ipVersion;
-        boost::asio::ip::udp::endpoint m_endpoint;
-        bool m_systemNode;
+        const std::string& Address(bool isControlInstance) const
+        {
+            return isControlInstance ? controlAddress : dataAddress;
+        }
 
-        //Sequence numbers - wrap around not implemented. Will only work for 6 billion msg/sec in 100 years.
-        boost::uint64_t m_lastSentUnicastSeqNo;     //last sent unicast msg to this node
+        int IpVersion(bool isControlInstance) const
+        {
+            return Utilities::Protocol(Address(isControlInstance));
+        }
     };
 
     typedef std::set<boost::int64_t> NodeIdSet;

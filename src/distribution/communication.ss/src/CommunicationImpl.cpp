@@ -45,19 +45,20 @@ namespace Com
                                          const std::string& nodeName,
                                          boost::int64_t nodeId, //0 is not a valid id.
                                          boost::int64_t nodeTypeId,
-                                         const std::string& address,
-                                         bool discovering,
+                                         const std::string& controlAddress,
+                                         const std::string& dataAddress,
+                                         bool isControlInstance,
                                          const NodeTypeMap& nodeTypes)
         :m_disableProtobufLogs()
         ,m_ioService(ioService)
-        ,m_me(nodeName, nodeId, nodeTypeId, address)
-        ,m_discovering(discovering)
+        ,m_me(nodeName, nodeId, nodeTypeId, controlAddress, dataAddress)
+        ,m_isControlInstance(isControlInstance)
         ,m_nodeTypes(nodeTypes)
         ,m_onNewNode()
         ,m_gotRecv()
         ,m_discoverer(m_ioService, m_me, [=](const Node& n){OnNewNode(n);})
-        ,m_deliveryHandler(m_ioService, m_me)
-        ,m_reader(ioService, m_me, m_nodeTypes[nodeTypeId]->MulticastAddress(),
+        ,m_deliveryHandler(m_ioService, m_me.nodeId, m_me.IpVersion(m_isControlInstance))
+        ,m_reader(ioService, m_me.Address(m_isControlInstance), m_nodeTypes[nodeTypeId]->MulticastAddress(),
                     [=](const char* d, size_t s){return OnRecv(d,s);},
                     [=](){return m_deliveryHandler.NumberOfUndeliveredMessages()<Parameters::MaxNumberOfUndelivered;})
     {
@@ -126,7 +127,10 @@ namespace Com
             vt.second->GetHeartbeatSender().Start();
             vt.second->GetAckedDataSender().Start();
         }
-        m_discoverer.Start();
+        if (m_isControlInstance)
+        {
+            m_discoverer.Start();
+        }
     }
 
     void CommunicationImpl::Stop()
@@ -137,7 +141,10 @@ namespace Com
             vt.second->GetHeartbeatSender().Stop();
             vt.second->GetAckedDataSender().Stop();
         }
-        m_discoverer.Stop();
+        if (m_isControlInstance)
+        {
+            m_discoverer.Stop();
+        }
     }
 
     void CommunicationImpl::IncludeNode(boost::int64_t id)
@@ -167,7 +174,10 @@ namespace Com
 
     void CommunicationImpl::InjectSeeds(const std::vector<std::string>& seeds)
     {
-        m_discoverer.AddSeeds(seeds);
+        if (m_isControlInstance)
+        {
+            m_discoverer.AddSeeds(seeds);
+        }
     }
 
     void CommunicationImpl::SetSystemNode(boost::int64_t id, bool isSystemNode)
@@ -190,12 +200,12 @@ namespace Com
         lllog(6)<<L"COM: New node '"<<node.Name().c_str()<<L"' ["<<node.Id()<<L"]"<<std::endl;
 
         auto& nodeType=GetNodeType(node.NodeTypeId());
-        nodeType.GetAckedDataSender().AddNode(node);
-        nodeType.GetHeartbeatSender().AddNode(node.Id(), node.Endpoint());
+        nodeType.GetAckedDataSender().AddNode(node.nodeId, node.Address(m_isControlInstance));
+        nodeType.GetHeartbeatSender().AddNode(node.Id(), Utilities::CreateEndpoint(node.Address(m_isControlInstance)));
         m_reader.Strand().dispatch([this, node]{m_deliveryHandler.AddNode(node);});
 
         //callback to host application
-        m_onNewNode(node.Name(), node.Id(), node.NodeTypeId(), node.Address());
+        m_onNewNode(node.name, node.nodeId, node.nodeTypeId, node.controlAddress, node.dataAddress);
     }
 
     //returns true if it is ok to call OnRecv again, false if flooded with received messages

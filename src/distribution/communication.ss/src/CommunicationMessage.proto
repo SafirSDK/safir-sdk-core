@@ -17,8 +17,9 @@ message CommunicationMessage {
     message Node {
         optional sfixed64 node_id = 1; //node_id=0 and name=seed means seed_node
         optional string name = 2;
-        optional string unicast_address = 3;
-        optional sfixed64 node_type_id = 4;
+        optional sfixed64 node_type_id = 3;
+        optional string control_address = 4;
+        optional string data_address = 5;
     }
     
     message Discover {

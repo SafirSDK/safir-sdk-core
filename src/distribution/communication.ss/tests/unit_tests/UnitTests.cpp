@@ -35,14 +35,14 @@
 //**********************************
 int main(int argc, char* argv[])
 {    
-//    if (argc>1)
-//    {
-//        std::string run(argv[1]);
-//        if (run=="MessageQueueTest")
-//        {
-//            MessageQueueTest test;
-//            test.Run();
-//        }
+    if (argc>1)
+    {
+        std::string run(argv[1]);
+        if (run=="MessageQueueTest")
+        {
+            MessageQueueTest test;
+            test.Run();
+        }
 //        else if (run=="DeliveryHandlerTest")
 //        {
 //            DeliveryHandlerTest test;
@@ -81,10 +81,10 @@ int main(int argc, char* argv[])
 //        std::cout<<"================================="<<std::endl;
 //        std::cout<<"All tests passed!"<<std::endl;
 //        std::cout<<"================================="<<std::endl;
-//    }
-//    else //run all tests
-//    {
-//        //{(MessageQueueTest()).Run();}
+    }
+    else //run all tests
+    {
+        {(MessageQueueTest()).Run();}
 //        //{(DeliveryHandlerTest()).Run();}
 //        //{(ReaderTest()).Run();}
 //        //{(WriterTest()).Run();}
@@ -96,7 +96,7 @@ int main(int argc, char* argv[])
 //        std::cout<<"================================="<<std::endl;
 //        std::cout<<"All tests passed!"<<std::endl;
 //        std::cout<<"================================="<<std::endl;
-//    }
+    }
     return 0;
 }
 

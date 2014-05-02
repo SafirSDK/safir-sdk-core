@@ -49,7 +49,7 @@ namespace Com
     {
     public:
         Reader(const boost::shared_ptr<boost::asio::io_service>& ioService,
-               const Node& me,
+               const std::string& unicastAddress,
                const std::string& multicastAddress, //empty if not using multicast
                const std::function<bool(const char*, size_t)>& onRecv,
                const std::function<bool(void)>& isReceiverIsReady);

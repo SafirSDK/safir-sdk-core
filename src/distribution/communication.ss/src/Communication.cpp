@@ -39,12 +39,20 @@ namespace Com
                                  const std::string& nodeName,
                                  boost::int64_t nodeId, //0 is not a valid id.
                                  boost::int64_t nodeTypeId,
-                                 const std::string& unicastAddress,
-                                 bool discovering,
+                                 const std::string& controlAddress,
+                                 const std::string& dataAddress,
+                                 bool isControlInstance,
                                  const std::vector<Communication::NodeType>& nodeTypes)
     {
         int ipVersion=4;
-        Utilities::CreateEndpoint(unicastAddress, ipVersion); //get the ip-version to use
+        if (isControlInstance)
+        {
+            ipVersion=Utilities::Protocol(controlAddress);
+        }
+        else
+        {
+            ipVersion=Utilities::Protocol(dataAddress);
+        }
 
         //find own node type and check if we are multicast enabled
         auto nodeTypeIt=std::find_if(nodeTypes.cbegin(), nodeTypes.cend(), [=](const Communication::NodeType& n){return n.id==nodeTypeId;});
@@ -65,7 +73,7 @@ namespace Com
         }
 
         //create impl object
-        m_impl=boost::make_shared<CommunicationImpl>(ioService, nodeName, nodeId, nodeTypeId, unicastAddress, discovering, nodeTypeMap);
+        m_impl=boost::make_shared<CommunicationImpl>(ioService, nodeName, nodeId, nodeTypeId, controlAddress, dataAddress, isControlInstance, nodeTypeMap);
     }
 
     Communication::~Communication()

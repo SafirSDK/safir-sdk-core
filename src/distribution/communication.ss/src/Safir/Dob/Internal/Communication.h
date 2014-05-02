@@ -66,15 +66,16 @@ namespace Com
          */
         struct NodeType
         {
-            boost::int64_t id;              //node id
+            boost::int64_t id;              //node type id
             std::string name;               //unique readable name
-            std::string multicastAddress;   //multicast address including port number, 'address:port' empty string if not multicast enabled
+            std::string controlMulticastAddress;   //multicast address including port number, 'address:port' empty string if not multicast enabled
+            std::string dataMulticastAddress;   //multicast address including port number, 'address:port' empty string if not multicast enabled
             int heartbeatInterval;          //time between heartbeats
             int retryTimeout;               //time to wait before retransmitting unacked data
         };
 
         //Callbacks functions used in Communications public interface.
-        typedef boost::function<void(const std::string& name, boost::int64_t nodeId, boost::int64_t nodeTypeId, const std::string& address)> NewNode;
+        typedef boost::function<void(const std::string& name, boost::int64_t nodeId, boost::int64_t nodeTypeId, const std::string& controlAddress, const std::string& dataAddress)> NewNode;
         typedef boost::function<void(boost::int64_t fromNodeId)> GotReceiveFrom;
         typedef boost::function<void(boost::int64_t toNodeId)> RetransmitTo;
         typedef boost::function<void(boost::int64_t fromNodeId, boost::int64_t fromNodeType, const boost::shared_ptr<char[]>& data, size_t size)> ReceiveData;
@@ -86,16 +87,18 @@ namespace Com
          * @param nodeName [in] - Name of this node.
          * @param nodeId [in] - Unique id of this node. Note that 0 (zero) is not a valid id.
          * @param nodeTypeId [in] - The node type of this node.
-         * @param address [in] - Unicast address on format address:port, mandatory.
-         * @param discovering [in] - If true, this node participates in node discovering.
+         * @param controlAddress [in] - Control channel unicast address on format address:port, mandatory.
+         * @param dataAddress [in] -  Data channel unicast address on format address:port, mandatory.
+         * @param isControlInstance [in] - If true this instance is the control channel part of the node, else it is the data channel of the node.
          * @param nodeTypes [in] - List of all node types that we shall be able to communicate with.
          */
         Communication(const boost::shared_ptr<boost::asio::io_service>& ioService,
                       const std::string& nodeName,
                       boost::int64_t nodeId, //0 is not a valid id.
                       boost::int64_t nodeTypeId,
-                      const std::string& address,
-                      bool discovering,
+                      const std::string& controlAddress,
+                      const std::string& dataAddress,
+                      bool isControlInstance,
                       const std::vector<Communication::NodeType>& nodeTypes);
 
         /**

@@ -45,7 +45,7 @@ namespace Internal
 {
 namespace Com
 {
-    typedef boost::function<void(const std::string& name, boost::int64_t nodeId, boost::int64_t nodeTypeId, const std::string& address)> NewNode;
+    typedef boost::function<void(const std::string& name, boost::int64_t nodeId, boost::int64_t nodeTypeId, const std::string& controlAddress, const std::string& dataAddress)> NewNode;
 
     class CommunicationImpl : private boost::noncopyable
     {
@@ -54,8 +54,9 @@ namespace Com
                           const std::string& nodeName,
                           boost::int64_t nodeId, //0 is not a valid id.
                           boost::int64_t nodeTypeId,
-                          const std::string& address,
-                          bool discovering,
+                          const std::string& controlAddress,
+                          const std::string& dataAddress,
+                          bool isControlInstance,
                           const NodeTypeMap& nodeTypes);
 
         virtual ~CommunicationImpl();
@@ -80,14 +81,14 @@ namespace Com
 
         size_t NumberOfQueuedMessages(boost::int64_t nodeTypeId) const;
 
-        const std::string& Name() const {return m_me.Name();}
-        boost::int64_t Id() const {return m_me.Id();}
+        const std::string& Name() const {return m_me.name;}
+        boost::int64_t Id() const {return m_me.nodeId;}
 
     private:
         ::google::protobuf::LogSilencer m_disableProtobufLogs;
         boost::shared_ptr<boost::asio::io_service> m_ioService;
         Node m_me;
-        bool m_discovering;
+        bool m_isControlInstance;
         NodeTypeMap m_nodeTypes;
 
         //Callbacks

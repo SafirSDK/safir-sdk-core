@@ -117,6 +117,31 @@ namespace Utilities
         }
         throw std::logic_error("Invalid ip protocol. IPv4 and IPv6 supported.");
     }
+
+    inline int Protocol(const std::string& address)
+    {
+        std::string addr;
+        unsigned short port=0;
+        if (!SplitAddress(address, addr, port))
+        {
+            throw std::logic_error("Failed to parse '"+address+"' as an udp endpoint with port_number on form <ip>:<port>");
+        }
+
+        boost::system::error_code ec;
+        boost::asio::ip::address_v4::from_string(addr, ec);
+        if (!ec) //ip v4 address
+        {
+            return 4;
+        }
+
+        boost::asio::ip::address_v6::from_string(addr, ec);
+        if (!ec) //ip v6 address
+        {
+            return 6;
+        }
+
+        throw std::logic_error("Failed to parse '"+address+"' as an udp endpoint.");
+    }
 }
 }
 }
