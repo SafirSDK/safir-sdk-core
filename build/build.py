@@ -445,7 +445,7 @@ class BuilderBase(object):
         if test:
             logger.log("   + testing", "brief")
             self.test(directory)
-            translate_results_to_junit(directory)
+            translate_results_to_junit(config)
         
     def test(self, directory):
         """run ctest in a directory"""
