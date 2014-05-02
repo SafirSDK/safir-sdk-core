@@ -46,7 +46,7 @@ namespace Internal
 {
 namespace Com
 {
-    typedef boost::function<void(boost::int64_t fromNodeId, const boost::shared_ptr<char[]>& data, size_t size)> ReceiveData;
+    typedef boost::function<void(boost::int64_t fromNodeId, boost::int64_t fromNodeType, const boost::shared_ptr<char[]>& data, size_t size)> ReceiveData;
     typedef boost::function<void(boost::int64_t fromNodeId)> GotReceiveFrom;
 
     template <class WriterType>
@@ -386,6 +386,7 @@ namespace Com
 
                         //last fragment has been received, we can deliver this message to application
                         auto fromId=ni.node.Id();
+                        auto fromNodeType=ni.node.NodeTypeId();
                         auto dataPtr=rd.data;
                         auto dataSize=rd.dataSize;
                         auto dataType=rd.dataType;
@@ -397,7 +398,7 @@ namespace Com
                             auto recvIt=m_receivers.find(dataType); //m_receivers shall be safe to use inside m_deliverStrand since it is not supposed to be modified after start
                             if (recvIt!=m_receivers.end())
                             {
-                                recvIt->second(fromId, dataPtr, dataSize);
+                                recvIt->second(fromId, fromNodeType, dataPtr, dataSize);
                             }
                             else
                             {

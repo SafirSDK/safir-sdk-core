@@ -77,7 +77,7 @@ namespace Com
         typedef boost::function<void(const std::string& name, boost::int64_t nodeId, boost::int64_t nodeTypeId, const std::string& address)> NewNode;
         typedef boost::function<void(boost::int64_t fromNodeId)> GotReceiveFrom;
         typedef boost::function<void(boost::int64_t toNodeId)> RetransmitTo;
-        typedef boost::function<void(boost::int64_t fromNodeId, const boost::shared_ptr<char[]>& data, size_t size)> ReceiveData;
+        typedef boost::function<void(boost::int64_t fromNodeId, boost::int64_t fromNodeType, const boost::shared_ptr<char[]>& data, size_t size)> ReceiveData;
         typedef boost::function<void(boost::int64_t nodeTypeId)> QueueNotFull;
 
         /**
