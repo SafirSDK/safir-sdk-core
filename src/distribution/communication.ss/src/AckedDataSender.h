@@ -25,6 +25,7 @@
 #define __SAFIR_DOB_COMMUNICATION_ACKED_DATA_SENDER_H__
 
 #include <map>
+#include <atomic>
 #include <boost/noncopyable.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/steady_timer.hpp>
