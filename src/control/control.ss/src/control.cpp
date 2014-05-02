@@ -27,9 +27,11 @@
 #include <Safir/Dob/Internal/SystemPicture.h>
 #include <Safir/Utilities/Internal/Id.h>
 #include <iostream>
+#include <map>
 #include <boost/asio.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp>
+#include "Config.h"
 
 //disable warnings in boost
 #if defined _MSC_VER
@@ -67,18 +69,21 @@ public:
         options_description options("Options");
         options.add_options()
             ("help,h", "show help message")
-            ("address,a", 
-             value<std::string>(&address)->default_value("0.0.0.0:33000"), 
-             "Address and port to listen to")
-            ("multicast-address,m", 
-             value<std::string>(&multicastAddress)->default_value(""), 
-             "Multicast address to use, defaults to empty, which means no mc at all.")
+            ("control-address,c", 
+             value<std::string>(&controlAddress)->default_value("0.0.0.0:30000"), 
+             "Address and port of the control channel")
+            ("data-address,c", 
+             value<std::string>(&dataAddress)->default_value("0.0.0.0:40000"), 
+             "Address and port of the data channel")
             ("seed,s", 
              value<std::vector<std::string> >(&seeds), 
-             "Seed address (can be specified multiple times). Pairs of address:port")
+             "Seed address (can be specified multiple times). Pairs of address:port to control channel.")
             ("name,n", 
              value<std::string>(&name)->default_value("<not set>", ""), 
              "A nice name for the node, for presentation purposes only")
+            ("node-type,t", 
+             value<std::string>(&nodeType)->default_value("Server"), 
+             "Node type of this node")
             ("force-id", 
              value<boost::int64_t>(&id)->default_value(LlufId_GenerateRandom64(), ""), 
              "Override the automatically generated node id. For debugging/testing purposes only.");
@@ -104,15 +109,34 @@ public:
             return;
         }
 
+        for (const auto& nt: config.GetNodeTypes())
+        {
+            if (nt.name == nodeType)
+            {
+                nodeTypeId = nt.id;
+                break;
+            }
+        }
+        
+        if (nodeTypeId == -1)
+        {
+            std::wcerr << "Invalid nodeType specified" << std::endl;
+            return;
+        }
+
         parseOk = true;
     }
     bool parseOk;
     
-    std::string address;
-    std::string multicastAddress;
+    const Safir::Dob::Internal::Control::Config config;
+
+    std::string controlAddress;
+    std::string dataAddress;
     std::vector<std::string> seeds;
     boost::int64_t id;
     std::string name;
+    std::string nodeType;
+    boost::int64_t nodeTypeId = -1;
 private:
     static void ShowHelp(const boost::program_options::options_description& desc)
     {
@@ -120,12 +144,12 @@ private:
                    << "Usage: control [OPTIONS]\n"
                    << desc << "\n"
                    << "Examples:\n"
-                   << "  Listen to loopback address and port 33000.\n"
-                   << "    control --address='127.0.0.1:33000'\n"
-                   << "  Listen to all addresses and port 33001.\n"
-                   << "    control --address='0.0.0.0:33001'\n"
-                   << "  Listen to ipv6 loopback and port 33001.\n"
-                   << "    control --address='[::1]:33001'\n"
+                   << "  Listen to loopback address and ports 33000 and 43000.\n"
+                   << "    control --controlAddress='127.0.0.1:33000' --data-address='127.0.0.1:43000'\n"
+                   << "  As above, but all addresses.\n"
+                   << "    control --controlAddress='0.0.0.0:33000' --data-address='0.0.0.0:43000'\n"
+                   << "  Listen to ipv6 loopback.\n"
+                   << "    control --controlAddress='[::1]:33000' --data-address='[::1]:43000'\n"
                    << std::endl;
     }
 
@@ -145,19 +169,26 @@ int main(int argc, char * argv[])
     //make some work to stop io_service from exiting.
     boost::shared_ptr<boost::asio::io_service::work> work(new boost::asio::io_service::work(*ioService));
 
-
-
     boost::shared_ptr<Safir::Dob::Internal::Com::Communication> communication;
+
     try
     {
+        std::vector<Safir::Dob::Internal::Com::Communication::NodeType> nodeTypes;
+
+        for (const auto& nt: options.config.GetNodeTypes())
+        {
+            nodeTypes.push_back({nt.id, nt.name, nt.multicastAddress, nt.heartbeatInterval, nt.retryTimeout});
+        }
+        
         communication.reset(new Safir::Dob::Internal::Com::Communication
                             (ioService,
                              options.name,
                              options.id,
-                             10, //TODO insert node type of current node
-                             options.address, //TODO: should be control address
-                             true, //Control always partakes in discovery
-                             {})); //TODO node types go here
+                             options.nodeTypeId,
+                             options.controlAddress,
+                             options.dataAddress,
+                             true, //this is the control channel
+                             nodeTypes)); 
 
         communication->InjectSeeds(options.seeds);
     }
@@ -170,15 +201,25 @@ int main(int argc, char * argv[])
         return 1;
     }
 
+
+    std::map<boost::int64_t, Safir::Dob::Internal::SP::NodeType> nodeTypes;
+    
+    for (const auto& nt: options.config.GetNodeTypes())
+    {
+        nodeTypes.insert(std::make_pair(nt.id, 
+                                        Safir::Dob::Internal::SP::NodeType(nt.id, nt.name, nt.isLight, nt.heartbeatInterval, nt.retryTimeout)));
+    }
+
+
     Safir::Dob::Internal::SP::SystemPicture sp(Safir::Dob::Internal::SP::master_tag, 
                                                ioService, 
                                                communication,
                                                options.name,
                                                options.id,
-                                               10, //TODO node type id
-                                               options.address, //TODO Control address goes here
-                                               "TODO", //TODO: put data address here
-                                               {}); //TODO: node types go here
+                                               options.nodeTypeId,
+                                               options.controlAddress,
+                                               options.dataAddress,
+                                               nodeTypes);
 
 
     communication->Start();

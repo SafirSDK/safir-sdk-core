@@ -46,6 +46,7 @@ namespace SP
             : m_rawHandler(rawHandler)
         {
             communication->SetDataReceiver([this](const boost::int64_t from, 
+                                                  const boost::int64_t /*nodeTypeId*/, 
                                                   const boost::shared_ptr<char[]>& data, 
                                                   const size_t size)
                                            {

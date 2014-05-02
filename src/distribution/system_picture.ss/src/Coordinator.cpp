@@ -106,10 +106,11 @@ namespace
                                                                }));
 
         communication->SetDataReceiver([this](const boost::int64_t from, 
+                                              const boost::int64_t nodeTypeId, 
                                               const boost::shared_ptr<char[]>& data, 
                                               const size_t size)
                                        {
-                                           GotData(from,data,size);
+                                           GotData(from, nodeTypeId, data, size);
                                        },
                                        m_dataIdentifier);
 
@@ -305,6 +306,7 @@ namespace
             {
                 if (!it.second.isLight)
                 {
+                    //TODO: handle overflow!
                     m_communication->SendToNodeType(it.second.id, data, size, m_dataIdentifier);
                 }
             }
@@ -323,6 +325,7 @@ namespace
 
     //not in strand
     void Coordinator::GotData(const boost::int64_t from, 
+                              const boost::int64_t nodeTypeId, 
                               const boost::shared_ptr<char[]>& data, 
                               size_t size)
     {
@@ -334,87 +337,79 @@ namespace
                  << message.election_id() 
                  << ") from " << from << std::endl;
         
-        m_strand.dispatch([this,message,from]
+        //        m_strand.dispatch([this,message,from]
+        //        {
+        switch (message.action())
         {
-            switch (message.action())
+        case INQUIRY: 
             {
-            case INQUIRY: 
+                //if we got an inquiry from someone smaller than us we send an alive
+                //and start a new election
+                if (from < m_id)
                 {
-                    //if we got an inquiry from someone smaller than us we send an alive
-                    //and start a new election
-                    if (from < m_id)
-                    {
-                        lllog(5) << "Got an inquiry from someone smaller than us, sending alive and starting election" << std::endl;
-                        ElectionMessage aliveMsg;
-                        aliveMsg.set_action(ALIVE);
-                        aliveMsg.set_election_id(message.election_id());
-                        const auto size = aliveMsg.ByteSize();
-                        boost::shared_ptr<char[]> data = boost::make_shared<char[]>(size);
-                        aliveMsg.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
-
-                        boost::int64_t nodeTypeId = 0;
-                        if (m_lastStatistics.Valid())
-                        {
-                            for (int i = 0; i < m_lastStatistics.Size(); ++i)
-                            {
-                                if (m_lastStatistics.Id(i) == from)
-                                {
-                                    nodeTypeId = m_lastStatistics.NodeTypeId(i);
-                                }
-                            }
-                        }
-
-                        if (nodeTypeId == 0)
-                        {
-                            throw std::logic_error("Haven't got the nodeTypeId for a node that I got an inquiry from!");
-                        }
-
-                        m_communication->SendToNode(from, nodeTypeId, data, size, m_dataIdentifier);
-                        //TODO: can communication supply nodetypeid as well in GotData?
-            
-                        StartElection();
-                    }
+                    lllog(5) << "Got an inquiry from someone smaller than us, sending alive and starting election" << std::endl;
+                    ElectionMessage aliveMsg;
+                    aliveMsg.set_action(ALIVE);
+                    aliveMsg.set_election_id(message.election_id());
+                    const auto size = aliveMsg.ByteSize();
+                    boost::shared_ptr<char[]> data = boost::make_shared<char[]>(size);
+                    aliveMsg.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
                     
-                }
-                break;
-            case ALIVE: 
-                {
-                    //if we got an alive from someone bigger than us we abandon the election
-                    if (message.election_id() == m_currentElectionId &&
-                        from > m_id)
-                    {
-                        lllog(5) << "Got alive from someone bigger than me (" 
-                                 << from << "), abandoning election." << std::endl;
-                        m_electionTimer.cancel();
-                        m_currentElectionId = 0;
-                    }
-                }
-                break;
-            case VICTORY: 
-                {
-                    if (from > m_id)
-                    {
-                        lllog(4) << "New controller elected: " << from << std::endl;
-                        //graciously accept their victory
-                        m_elected = from;
+                    //TODO: handle overflow!
+                    m_communication->SendToNode(from, nodeTypeId, data, size, m_dataIdentifier);
 
-                        //cancel any ongoing elections
-                        m_electionTimer.cancel();
-                        m_currentElectionId = 0;
-                    }
-                    else //No! We're going to usurp him! restart election
-                    {
-                        lllog(5) << "Got victory from someone smaller than me (" 
-                                 << from << "), starting new election." << std::endl;
-                        StartElection();
-                    }
+                    m_strand.dispatch([this,message,from]
+                                      {
+                                          StartElection();
+                                      });
                 }
-                break;
-            default:
-                throw std::logic_error("Unknown ElectionAction");
             }
-            
-        });
+            break;
+        
+        case ALIVE: 
+            {
+                m_strand.dispatch([this,message,from]
+                                  {
+                                      //if we got an alive from someone bigger than us we abandon the election
+                                      if (from > m_id &&
+                                          message.election_id() == m_currentElectionId)
+                                      {
+                                          lllog(5) << "Got alive from someone bigger than me (" 
+                                                   << from << "), abandoning election." << std::endl;
+                                          m_electionTimer.cancel();
+                                          m_currentElectionId = 0;
+                                      }
+                                  });
+            }
+            break;
+
+        case VICTORY: 
+            {
+                m_strand.dispatch([this,from]
+                                  {
+                                      if (from > m_id)
+                                      {
+                                          lllog(4) << "New controller elected: " << from << std::endl;
+                                          //graciously accept their victory
+                                          m_elected = from;
+                                          
+                                          //cancel any ongoing elections
+                                          m_electionTimer.cancel();
+                                          m_currentElectionId = 0;
+                                      }
+                                      else //No! We're going to usurp him! restart election
+                                      {
+                                          lllog(5) << "Got victory from someone smaller than me (" 
+                                                   << from << "), starting new election." << std::endl;
+                                          
+                                          StartElection();
+                                      }
+                                  });
+            }
+            break;
+        default:
+            throw std::logic_error("Unknown ElectionAction");
+        }
     }
 
     //must be called in strand
@@ -435,6 +430,7 @@ namespace
         {
             if (!it.second.isLight)
             {
+                //TODO: handle overflow!
                 m_communication->SendToNodeType(it.second.id, data, size, m_dataIdentifier);
             }
         }

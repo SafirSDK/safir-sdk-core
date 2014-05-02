@@ -103,6 +103,7 @@ namespace SP
         void ElectionTimeout();
 
         void GotData(const boost::int64_t from, 
+                     const boost::int64_t nodeTypeId, 
                      const boost::shared_ptr<char[]>& data, 
                      size_t size);
 
