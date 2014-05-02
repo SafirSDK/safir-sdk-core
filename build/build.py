@@ -28,10 +28,6 @@ import os, glob, sys, subprocess, platform, xml.dom.minidom, re, time, shutil
 from xml.sax.saxutils import escape
 
 
-#Load some environment variables that are needed throughout as globals
-SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
-SAFIR_SDK = os.environ.get("SAFIR_SDK")
-
 #a few constants
 known_configs = set(["Release", "Debug", "MinSizeRel", "RelWithDebInfo"])
 
@@ -42,8 +38,6 @@ force_config = None
 force_extra_config = None
 if sys.platform == "win32": #target_architecture is only set on windows platfoms!
     target_architecture = None
-ada_support = False
-java_support = False
 class FatalError(Exception):
     pass
 
@@ -83,26 +77,6 @@ def ctest():
         except:
             ctest.ctest_executable = "ctest"
     return ctest.ctest_executable
-
-def copy_dob_files(source_dir, target_dir):
-    """Copy dou and dom files from the source directory to the given subdirectory in the dots_generated directory"""
-    dots_generated_dir = os.path.join(SAFIR_SDK, "dots", "dots_generated")
-    abs_target_dir = os.path.join(dots_generated_dir, target_dir)
-
-    logger.log("Copying dob files from " + source_dir + " to " + abs_target_dir,"output")
-    
-    if not os.path.isdir(dots_generated_dir):
-        mkdir(dots_generated_dir)
-
-    pattern = re.compile("[a-zA-Z0-9\.\-]*\.do[um]$")
-    pattern2 = re.compile("[a-zA-Z0-9\.]*-java\.namespace\.txt$")
-    for filename in os.listdir(source_dir):
-        if pattern.match(filename) or pattern2.match(filename):
-            
-            if not os.path.isdir(abs_target_dir):
-                mkdir(abs_target_dir)
-                
-            shutil.copy2(os.path.join(source_dir, filename), abs_target_dir)
 
 def mkdir(newdir):
     """works the way a good mkdir should :)
@@ -283,16 +257,7 @@ class Logger(object):
         return "\n".join(output)
 
 def check_environment():
-    global SAFIR_RUNTIME
-    global SAFIR_SDK
-
-    if SAFIR_RUNTIME == None or SAFIR_SDK == None:
-        die("You need to have both SAFIR_RUNTIME and SAFIR_SDK set")
-
-    #Make sure slashes are the right direction, etc.
-    SAFIR_RUNTIME = os.path.normpath(SAFIR_RUNTIME)
-    SAFIR_SDK = os.path.normpath(SAFIR_SDK)
-
+    pass
     #TODO check cmake?! and other needed stuff
 
 
@@ -301,10 +266,6 @@ def parse_command_line(builder):
     parser = OptionParser()
     parser.add_option("--command-file", "-f",action="store",type="string",dest="command_file",
                       help="The command to execute")
-    parser.add_option("--no-ada-support", action="store_false",dest="ada_support",default=True,
-                      help="Disable Ada support")
-    parser.add_option("--no-java-support", action="store_false",dest="java_support",default=True,
-                      help="Disable Java support")
     parser.add_option("--skip-list",action="store",type="string",dest="skip_list",
                       help="A space-separated list of regular expressions of lines in the command file to skip")
     parser.add_option("--clean", action="store_true",dest="clean",default=False,
@@ -349,18 +310,9 @@ def parse_command_line(builder):
         if not is_64_bit():
             options.build_32_bit = True
 
-        if not options.build_32_bit:
-            logger.log("Will not build Ada interfaces, since Ada is not currently supported for 64bit platforms")
-            options.ada_support = False
-
         global target_architecture
         target_architecture = "x86" if options.build_32_bit else "x86-64"
 
-    global ada_support
-    ada_support = options.ada_support
-    global java_support
-    java_support = options.java_support
-    
     global skip_list
     if (options.skip_list == None):
         skip_list = list()
@@ -380,11 +332,6 @@ def parse_command_line(builder):
 
     if options.jenkins:
         builder.setenv_jenkins()
-        global SAFIR_RUNTIME
-        global SAFIR_SDK
-        #reload env
-        SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
-        SAFIR_SDK = os.environ.get("SAFIR_SDK")
 
         config = os.environ.get("Config")
         if config is not None:
@@ -443,10 +390,8 @@ class BuilderBase(object):
         WORKSPACE = os.environ.get("WORKSPACE")
         if not WORKSPACE:
             die("Environment variable WORKSPACE is not set, is this really a Jenkins build?!")
-        os.environ["SAFIR_RUNTIME"] = os.path.join(WORKSPACE,"safir","runtime")
-        os.environ["SAFIR_SDK"] = os.path.join(WORKSPACE,"safir","sdk")
-        ADA_PROJECT_PATH = (os.environ.get("ADA_PROJECT_PATH") + os.pathsep) if os.environ.get("ADA_PROJECT_PATH") else ""
-        os.environ["ADA_PROJECT_PATH"] = ADA_PROJECT_PATH + os.path.join(os.environ.get("SAFIR_SDK"),"ada")
+        #ADA_PROJECT_PATH = (os.environ.get("ADA_PROJECT_PATH") + os.pathsep) if os.environ.get("ADA_PROJECT_PATH") else ""
+        #os.environ["ADA_PROJECT_PATH"] = ADA_PROJECT_PATH + os.path.join(os.environ.get("SAFIR_SDK"),"ada")
         #java path gets set by jenkins
 
         #set database from label environment variable
@@ -457,8 +402,7 @@ class BuilderBase(object):
         #Call the platform specific setenv
         self.setenv_jenkins_internal()
 
-    def build(self, directory, configs, install):
-        configs = self.filter_configs(configs)
+    def build(self, directory, configs, install, test):
         for config in configs:
             olddir = None
             if len(configs) > 1:
@@ -469,18 +413,18 @@ class BuilderBase(object):
             self.__build_internal(directory,
                                   os.pardir if olddir else ".",
                                   config,
-                                  install)
+                                  install,
+                                  test)
             
             if olddir is not None:
                 os.chdir(olddir)
 
-    def __build_internal(self, directory, srcdir, config, install):
+
+    def __build_internal(self, directory, srcdir, config, install, test):
         logger.log(" - in config " + config, "brief")
         self.__run_command((cmake(),
                             "-G", self.cmake_generator,
                             "-D", "CMAKE_BUILD_TYPE:string=" + config,
-                            "-D", "SAFIR_ADA_SUPPORT:boolean=" + str(ada_support),
-                            "-D", "SAFIR_JAVA_SUPPORT:boolean=" + str(java_support),
                             srcdir),
                            "Configure for " + config + " build", directory)
         command = [cmake(), "--build", "."]
@@ -495,7 +439,11 @@ class BuilderBase(object):
 
         self.__run_command(command,
                            "Build " + config, directory)
-
+        if test:
+            logger.log("   + testing", "brief")
+            self.test(directory)
+            translate_results_to_junit(directory)
+        
     def test(self, directory):
         """run ctest in a directory"""
         if not os.path.isfile("DartConfiguration.tcl"):
@@ -507,33 +455,6 @@ class BuilderBase(object):
                                     "Test", directory, allow_fail = True)
         self.interpret_test_output(output)
 
-    def dobmake(self):
-        """run the dobmake command"""
-        cmd = (os.path.join(SAFIR_RUNTIME,"bin","dobmake.py"), "-b", "--rebuild") #batch mode (no gui)
-        if force_config == "Debug" and force_extra_config == "None":
-            cmd += ("--no-cpp-release","--default-config","Debug")
-        if not ada_support:
-            cmd += ("--no-ada",)
-        if not java_support:
-            cmd += ("--no-java",)
-            
-        if sys.platform == "win32":
-            #On windows we need to prepend the python executable since subprocess can't
-            #call python scripts out of the box.
-            cmd = (sys.executable,) + cmd
-
-            #and we may need to specifiy target arch
-            if is_64_bit():
-                cmd += ("--target", target_architecture)
-        
-        process = subprocess.Popen(cmd,
-                                   stdout=subprocess.PIPE,
-                                   stderr=subprocess.STDOUT,
-                                   universal_newlines=True)
-
-        logger.log_output(process)
-        if process.returncode != 0:
-            die("Failed to run dobmake")
 
     def __run_command(self, cmd, description, what, allow_fail = False):
         """Run a command"""
@@ -605,18 +526,19 @@ class VisualStudioBuilder(BuilderBase):
         return configs
 
     def setenv_jenkins_internal(self):
-        os.environ["PATH"] = os.environ.get("PATH") + os.pathsep + os.path.join(os.environ.get("SAFIR_RUNTIME"),"bin")
+        #os.environ["PATH"] = os.environ.get("PATH") + os.pathsep + os.path.join(os.environ.get("SAFIR_RUNTIME"),"bin")
 
         #set up K: drive:
-        logger.log("Setting up K: drive using subst.exe","header")
-        bindir = os.path.join(os.environ.get("SAFIR_RUNTIME"),"bin")
-        if not os.path.isdir(bindir):
-            mkdir(bindir)
-        ret = subprocess.call(("subst","/d", "k:"))
-        logger.log("'subst /d k:' exited with return code " + str(ret),"command")
-        subprocess.call(("subst","k:",bindir))
-        logger.log("'subst k:" + bindir + "' exited with return code " + str(ret),"output")
-
+        #logger.log("Setting up K: drive using subst.exe","header")
+        #bindir = os.path.join(os.environ.get("SAFIR_RUNTIME"),"bin")
+        #if not os.path.isdir(bindir):
+        #    mkdir(bindir)
+        #ret = subprocess.call(("subst","/d", "k:"))
+        #logger.log("'subst /d k:' exited with return code " + str(ret),"command")
+        #subprocess.call(("subst","k:",bindir))
+        #logger.log("'subst k:" + bindir + "' exited with return code " + str(ret),"output")
+        pass
+        
     def __find_vcvarsall(self):
         install_dirs = set(["VS120COMNTOOLS","VS110COMNTOOLS","VS100COMNTOOLS"])
         #we use set intersections so that we double check that the variable 
@@ -715,9 +637,9 @@ class UnixGccBuilder(BuilderBase):
         return (("--", "-j", str(self.num_jobs)))
 
     def setenv_jenkins_internal(self):
-        LD_LIBRARY_PATH = (os.environ.get("LD_LIBRARY_PATH") + ":") if os.environ.get("LD_LIBRARY_PATH") else ""
-        os.environ["LD_LIBRARY_PATH"] = LD_LIBRARY_PATH + os.path.join(os.environ.get("SAFIR_RUNTIME"),"lib")
-
+        #LD_LIBRARY_PATH = (os.environ.get("LD_LIBRARY_PATH") + ":") if os.environ.get("LD_LIBRARY_PATH") else ""
+        #os.environ["LD_LIBRARY_PATH"] = LD_LIBRARY_PATH + os.path.join(os.environ.get("SAFIR_RUNTIME"),"lib")
+        pass
 
 def in_skip_list(line):
     "Check the argument against all regexps in the skip-list"
@@ -737,10 +659,25 @@ def build_dir(directory, configs, builder, install = True):
     try:
         if not os.path.isfile("CMakeLists.txt"):
             die ("Couldn't find a CMakeLists.txt in " + directory + ".")
-        builder.build(directory, configs, install)
+        configs = builder.filter_configs(configs)
+        builder.build(directory, configs, install, test = False)
     finally:
         os.chdir(olddir)
 
+def build_tree(directory, configs, builder):
+    if not os.path.isdir(directory):
+        die("Failed to enter " + directory + ", since it does not exist (or is not a directory)")
+    olddir = os.getcwd()
+    os.chdir(directory)
+    try:
+        if not os.path.isfile("CMakeLists.txt"):
+            die ("Couldn't find a CMakeLists.txt in " + directory + ".")
+        #we want to build in reverse order on windows...
+        configs = builder.filter_configs(configs)[::-1] #reverse the list
+        builder.build(directory, configs, install = False, test = True)
+    finally:
+        os.chdir(olddir)
+        
 def getText(nodelist):
     rc = []
     for node in nodelist:
@@ -796,9 +733,6 @@ def run_test_suite(directory, suite_name, builder):
     finally:
         os.chdir(olddir)
 
-def dobmake(builder):
-    logger.log("Running dobmake","header")
-    builder.dobmake()
 
 def get_builder():
     if VisualStudioBuilder.can_use():
@@ -833,7 +767,7 @@ def main():
 
         start_time = time.time()
 
-        if command == "build_dir":
+        if command == "build_dir" or command == "build_tree":
             if len(split_line) > 1:
                 directory = split_line[1]
 
@@ -855,15 +789,10 @@ def main():
             if len(configs) < 1:
                 die ("Need at least one config for " + directory)
             logger.log("Building " + directory, "header")
-            build_dir(directory, configs, builder)
-        elif command == "copy_dob_files":
-            if len(split_line) < 3:
-                die ("Need both a source and target directory")
-            if len(split_line) > 3:
-                die ("To many parameters for " + command)
-            if last_line is not None and last_line[0] != "copy_dob_files":
-                logger.log("Copying dob files","header")
-            copy_dob_files(os.path.normpath(split_line[1]), os.path.normpath(split_line[2]))  
+            if command == "build_dir":
+                build_dir(directory, configs, builder)
+            else:
+                build_tree(directory, configs, builder)
         elif command == "run_test_suite":
             if len(split_line) < 3:
                 die ("Need both a source directory and a test suite name")
@@ -875,8 +804,6 @@ def main():
             cf = "RelWithDebInfo" if force_config is None else force_config
             build_dir(directory, (cf,), builder, False) # build, but do not install
             run_test_suite(directory, suite_name, builder)
-        elif command == "dobmake":
-            dobmake(builder)
         else:
             die("Got unknown command '" + command + "'")
 
