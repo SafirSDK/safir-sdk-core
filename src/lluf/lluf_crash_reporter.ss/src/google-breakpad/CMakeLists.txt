@@ -21,11 +21,12 @@ if (MSVC)
     google-breakpad
     PREFIX ""
     SOURCE_DIR src
-    BINARY_DIR bin/${CMAKE_BUILD_TYPE}
+    BINARY_DIR bin
     SVN_REPOSITORY ${MY_SVN_REPOSITORY}
     SVN_REVISION -r ${MY_SVN_REVISION}
     PATCH_COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/build-breakpad-windows.cmake <SOURCE_DIR>/CMakeLists.txt
     UPDATE_COMMAND "" #disable update since we're going against fixed revision
+    CMAKE_ARGS -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
     )
 else()
   ExternalProject_Add(
