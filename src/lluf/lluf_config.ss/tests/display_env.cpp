@@ -26,7 +26,7 @@
 //This is not really a test, it is just useful for showing what environment
 //variables are set for tests by cmake and ctest etc.
 //Change the return code to 1 if you want to use ctest --output-on-failure.
-int main(int argc, char **argv, char** envp)
+int main(int /*argc*/, char **/*argv*/, char** envp)
 {
   char** env;
   for (env = envp; *env != 0; env++)
