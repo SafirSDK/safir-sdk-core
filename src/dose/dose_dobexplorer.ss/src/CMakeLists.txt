@@ -64,7 +64,8 @@ TARGET_LINK_LIBRARIES(dobexplorer
   dots_cpp 
   lluf_utils
   lluf_crash_reporter
-  lluf_startup_synchronizer)
+  lluf_startup_synchronizer
+  ${Boost_SYSTEM_LIBRARY})
 
 target_include_directories(dobexplorer PRIVATE ../../dose_communication.ss/src/defs/)
 target_include_directories(dobexplorer PRIVATE ../../dose_communication.ss/src/dose_com/)
