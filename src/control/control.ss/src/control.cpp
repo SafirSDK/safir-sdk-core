@@ -72,7 +72,7 @@ public:
             ("control-address,c", 
              value<std::string>(&controlAddress)->default_value("0.0.0.0:30000"), 
              "Address and port of the control channel")
-            ("data-address,c", 
+            ("data-address,d", 
              value<std::string>(&dataAddress)->default_value("0.0.0.0:40000"), 
              "Address and port of the data channel")
             ("seed,s", 
@@ -186,9 +186,10 @@ int main(int argc, char * argv[])
                              options.id,
                              options.nodeTypeId,
                              options.controlAddress,
-                             options.dataAddress,
+                             //TODO: options.dataAddress,
                              true, //this is the control channel
-                             nodeTypes)); 
+                             nodeTypes));
+
 
         communication->InjectSeeds(options.seeds);
     }
