@@ -89,7 +89,7 @@ namespace ToolSupport
         typedef Element<Elements::ParameterValueRef, OptionalMany, boost::mpl::vector<IgnoreAny> > ParameterValueRefCollection;
         typedef Element<Elements::ParameterObjectDeprecated, OptionalMany, boost::mpl::vector<IgnoreAny> > ParameterObjectDeprecatedCollection;
         typedef Element<Elements::Any, OptionalMany, boost::mpl::vector<IgnoreAny>, ParseAlgorithm<Elements::ParameterObject>, AnyMatcher > ParameterObjectCollection;
-        typedef Element<Elements::ParameterArray, One, boost::mpl::vector< ELEMENT_CHOICE_5(ParameterValueCollection, ParameterEntityIdCollection, ParameterValueRefCollection, ParameterObjectDeprecatedCollection, ParameterObjectCollection, OptionalOne) > > ParameterArray;
+        typedef Element<Elements::ParameterArray, One, boost::mpl::vector<ParameterObjectCollection, ParameterValueRefCollection, ELEMENT_CHOICE_3(ParameterValueCollection, ParameterEntityIdCollection, ParameterObjectDeprecatedCollection, OptionalOne) > > ParameterArray;
         typedef Element<Elements::ParameterArrayElement, AtLeastOne, boost::mpl::vector< ELEMENT_CHOICE_5(ParameterValue, ParameterValueRef, ParameterEntityId, ParameterObjectDeprecated, ParameterObject, OptionalOne), Ignore<Elements::ParameterArrayIndex> > > ParameterArrayElement;
         typedef Element<Elements::ParameterArrayElements, One, boost::mpl::vector<ParameterArrayElement> > ParameterArrayElements;
         typedef Element<Elements::Parameter, AtLeastOne, boost::mpl::vector<ELEMENT_CHOICE_7(ParameterValue, ParameterEntityId, ParameterValueRef, ParameterArray, ParameterArrayElements, ParameterObjectDeprecated, ParameterObject, One), Parametersummary, ParameterName, ParameterType > > Parameter;
