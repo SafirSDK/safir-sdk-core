@@ -247,9 +247,12 @@ class Logger(object):
             line = process.stdout.readline()
             if not line:
                 break
-            line = line.rstrip("\n\r")
-            self.log(line,"output")
-            output += (line,)
+            #CMake does some strange thing with a carriage return alone on a line, which we get rid of like this.
+            line = line.rstrip("\r")
+            if len(line) != 0:
+                line = line.rstrip()
+                self.log(line,"output")
+                output += (line,)
         process.wait()
         if process.returncode != 0:
             self.log("Failure, return code is " + str(process.returncode))
@@ -462,7 +465,7 @@ class BuilderBase(object):
         logger.log(description + " " + what, "command_description")
         logger.log(" ".join(cmd), "command")
 
-        process = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
+        process = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         output = logger.log_output(process)
         if process.returncode != 0:
             if not allow_fail:
