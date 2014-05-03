@@ -26,18 +26,18 @@ ADD_CUSTOM_TARGET(dose_ada ALL
                   COMMENT "Building dose_ada using gnatmake"
                   VERBATIM)
 
-INSTALL(DIRECTORY src/interface/
-        DESTINATION ${SAFIR_SDK}/ada/dose_ada/interface)
+# INSTALL(DIRECTORY src/interface/
+#         DESTINATION ${SAFIR_SDK}/ada/dose_ada/interface)
 
-INSTALL(DIRECTORY src/ali/
-        DESTINATION ${SAFIR_SDK}/ada/dose_ada/ali)
-if (WIN32)
-   INSTALL(FILES src/lib/libdose_ada.dll
-           DESTINATION ${SAFIR_RUNTIME}/bin/)
-elseif (UNIX)
-   INSTALL(FILES src/lib/libdose_ada.so
-           DESTINATION ${SAFIR_RUNTIME}/lib/)
-endif(WIN32)
+# INSTALL(DIRECTORY src/ali/
+#         DESTINATION ${SAFIR_SDK}/ada/dose_ada/ali)
+# if (WIN32)
+#    INSTALL(FILES src/lib/libdose_ada.dll
+#            DESTINATION ${SAFIR_RUNTIME}/bin/)
+# elseif (UNIX)
+#    INSTALL(FILES src/lib/libdose_ada.so
+#            DESTINATION ${SAFIR_RUNTIME}/lib/)
+# endif(WIN32)
 
-INSTALL(FILES data/dose_ada.gpr
-        DESTINATION ${SAFIR_SDK}/ada/)
+# INSTALL(FILES data/dose_ada.gpr
+#         DESTINATION ${SAFIR_SDK}/ada/)

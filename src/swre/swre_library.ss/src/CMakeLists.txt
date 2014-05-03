@@ -22,17 +22,17 @@ TARGET_LINK_LIBRARIES(swre_library PRIVATE
   ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY})
 
-INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
-        PATTERN ".svn" EXCLUDE
-        PATTERN "*~" EXCLUDE)
+# INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
+#         PATTERN ".svn" EXCLUDE
+#         PATTERN "*~" EXCLUDE)
 
-INSTALL(TARGETS swre_library
-        RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-        LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-        ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
+# INSTALL(TARGETS swre_library
+#         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
+#         LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
+#         ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
 
-INSTALL(FILES ../data/swre_library.gpr
-        DESTINATION ${SAFIR_SDK}/ada)
+# INSTALL(FILES ../data/swre_library.gpr
+#         DESTINATION ${SAFIR_SDK}/ada)
 
 
-INSTALL_DEBUG_INFO(swre_library)
+# INSTALL_DEBUG_INFO(swre_library)

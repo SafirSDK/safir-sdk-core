@@ -18,17 +18,17 @@ target_link_libraries(dose_test_util PRIVATE
   dots_internal
   lluf_utils)
 
-INSTALL(DIRECTORY Safir 
-  DESTINATION ${SAFIR_SDK}/include
-  PATTERN ".svn" EXCLUDE
-  PATTERN "*~" EXCLUDE)
+# INSTALL(DIRECTORY Safir 
+#   DESTINATION ${SAFIR_SDK}/include
+#   PATTERN ".svn" EXCLUDE
+#   PATTERN "*~" EXCLUDE)
 
-INSTALL(TARGETS dose_test_util
-        RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-        LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-        ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
+# INSTALL(TARGETS dose_test_util
+#         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
+#         LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
+#         ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
 
-INSTALL(FILES dose_test_util.gpr
-        DESTINATION ${SAFIR_SDK}/ada)
+# INSTALL(FILES dose_test_util.gpr
+#         DESTINATION ${SAFIR_SDK}/ada)
 
-INSTALL_DEBUG_INFO(dose_test_util)
+# INSTALL_DEBUG_INFO(dose_test_util)

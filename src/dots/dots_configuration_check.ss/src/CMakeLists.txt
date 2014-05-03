@@ -10,9 +10,9 @@ TARGET_LINK_LIBRARIES(dots_configuration_check PRIVATE
   ${Boost_FILESYSTEM_LIBRARY}
   ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
-INSTALL(TARGETS dots_configuration_check
-        RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-        LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-        ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
+# INSTALL(TARGETS dots_configuration_check
+#         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
+#         LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
+#         ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
 
-INSTALL_DEBUG_INFO(dots_configuration_check)
+# INSTALL_DEBUG_INFO(dots_configuration_check)

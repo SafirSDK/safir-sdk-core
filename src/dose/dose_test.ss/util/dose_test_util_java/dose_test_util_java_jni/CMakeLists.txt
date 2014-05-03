@@ -30,9 +30,9 @@ TARGET_LINK_LIBRARIES(dose_test_util_java_jni PRIVATE dose_test_util)
 ADD_DEPENDENCIES(javah dose_test_util_java)
 ADD_DEPENDENCIES(dose_test_util_java_jni javah)
 
-INSTALL(TARGETS dose_test_util_java_jni
-        RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-        LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-        ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
+# INSTALL(TARGETS dose_test_util_java_jni
+#         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
+#         LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
+#         ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
 
-INSTALL_DEBUG_INFO(dose_test_util_java_jni)
+# INSTALL_DEBUG_INFO(dose_test_util_java_jni)

@@ -31,16 +31,16 @@ if(NOT can_do_unaligned_access)
 endif()
 
 
-INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
-        PATTERN ".svn" EXCLUDE
-        PATTERN "*~" EXCLUDE)
+# INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
+#         PATTERN ".svn" EXCLUDE
+#         PATTERN "*~" EXCLUDE)
 
-INSTALL(TARGETS dots_kernel
-        RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-        LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-        ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
+# INSTALL(TARGETS dots_kernel
+#         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
+#         LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
+#         ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
 
-INSTALL(FILES ../data/dots_kernel.gpr
-        DESTINATION ${SAFIR_SDK}/ada/)
+# INSTALL(FILES ../data/dots_kernel.gpr
+#         DESTINATION ${SAFIR_SDK}/ada/)
 
-INSTALL_DEBUG_INFO(dots_kernel)
+# INSTALL_DEBUG_INFO(dots_kernel)

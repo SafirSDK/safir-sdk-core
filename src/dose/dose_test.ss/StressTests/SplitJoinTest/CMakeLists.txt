@@ -20,18 +20,18 @@ if (ACE_FOUND)
     TARGET_LINK_LIBRARIES(SplitJoinTest PRIVATE dose_cpp ${Boost_LIBRARIES})
   endif()
   
-  INSTALL(TARGETS SplitJoinTest
-          RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-          LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-          ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
+  # INSTALL(TARGETS SplitJoinTest
+  #         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
+  #         LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
+  #         ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
   
-  INSTALL_DEBUG_INFO(SplitJoinTest)
+  # INSTALL_DEBUG_INFO(SplitJoinTest)
 else()
   MESSAGE(STATUS "ACE library was not found, not building SplitJoinTest")
 
-  #dummy install to get an install target in the makefiles
-  INSTALL (FILES
-    DESTINATION dummy)
+  # #dummy install to get an install target in the makefiles
+  # INSTALL (FILES
+  #   DESTINATION dummy)
 
 endif()
 

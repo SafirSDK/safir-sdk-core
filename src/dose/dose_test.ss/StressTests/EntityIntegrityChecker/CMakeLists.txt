@@ -7,9 +7,9 @@ if (NOT MSVC)
     TARGET_LINK_LIBRARIES(EntityIntegrityChecker PRIVATE dose_cpp dots_generated-DoseIntegrityCheck-cpp dots_generated-Safir-cpp dots_cpp lluf_utils ${Boost_LIBRARIES})
 endif()
 
-INSTALL(TARGETS EntityIntegrityChecker
-        RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-        LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-        ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
+# INSTALL(TARGETS EntityIntegrityChecker
+#         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
+#         LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
+#         ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
 
-INSTALL_DEBUG_INFO(EntityIntegrityChecker)
+# INSTALL_DEBUG_INFO(EntityIntegrityChecker)

@@ -26,9 +26,9 @@ endif()
 ADD_DEPENDENCIES(javah douf_java)
 ADD_DEPENDENCIES(douf_java_jni javah)
 
-INSTALL(TARGETS douf_java_jni
-        RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-        LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-        ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
+# INSTALL(TARGETS douf_java_jni
+#         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
+#         LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
+#         ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
 
-INSTALL_DEBUG_INFO(douf_java_jni)
+# INSTALL_DEBUG_INFO(douf_java_jni)

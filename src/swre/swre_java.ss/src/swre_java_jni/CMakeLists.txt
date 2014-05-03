@@ -26,9 +26,9 @@ endif()
 ADD_DEPENDENCIES(javah swre_reports_java swre_application_java)
 ADD_DEPENDENCIES(swre_java_jni javah)
 
-INSTALL(TARGETS swre_java_jni
-        RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-        LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-        ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
+# INSTALL(TARGETS swre_java_jni
+#         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
+#         LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
+#         ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
 
-INSTALL_DEBUG_INFO(swre_java_jni)
+# INSTALL_DEBUG_INFO(swre_java_jni)

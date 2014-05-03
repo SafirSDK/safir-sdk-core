@@ -11,8 +11,8 @@ FILE(GLOB sources *.cs)
 
 ADD_CS_EXECUTABLE(dob_schema_validator "${sources}" ALL)
 
-INSTALL(PROGRAMS ${target_EXE}
-  DESTINATION ${SAFIR_RUNTIME}/bin
-  RENAME dob_schema_validator.exe)
+# INSTALL(PROGRAMS ${target_EXE}
+#   DESTINATION ${SAFIR_RUNTIME}/bin
+#   RENAME dob_schema_validator.exe)
 
-INSTALL_CS_DEBUG_INFO()
+# INSTALL_CS_DEBUG_INFO()

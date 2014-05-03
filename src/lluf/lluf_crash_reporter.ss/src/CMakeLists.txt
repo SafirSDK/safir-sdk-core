@@ -27,13 +27,13 @@ endif()
 add_dependencies(lluf_crash_reporter google-breakpad)
 
 
-INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
-        PATTERN ".svn" EXCLUDE
-        PATTERN "*~" EXCLUDE)
+# INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
+#         PATTERN ".svn" EXCLUDE
+#         PATTERN "*~" EXCLUDE)
 
-INSTALL(TARGETS lluf_crash_reporter
-        RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-        LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-        ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
+# INSTALL(TARGETS lluf_crash_reporter
+#         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
+#         LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
+#         ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
 
-INSTALL_DEBUG_INFO(lluf_crash_reporter)
+# INSTALL_DEBUG_INFO(lluf_crash_reporter)

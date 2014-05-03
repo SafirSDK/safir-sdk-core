@@ -8,6 +8,6 @@ project(test_support NONE)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
-INSTALL(FILES
-  python/syslog_server.py
-  DESTINATION ${SAFIR_RUNTIME}/data/test_support/python)
+# INSTALL(FILES
+#   python/syslog_server.py
+#   DESTINATION ${SAFIR_RUNTIME}/data/test_support/python)

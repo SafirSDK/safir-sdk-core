@@ -8,5 +8,5 @@ SET(JAVA_MANIFEST ${CMAKE_CURRENT_SOURCE_DIR}/Manifest.txt)
 
 ADD_JAR(dose_java "${sources}" ALL)
 
-INSTALL(FILES dose_java.jar
-  DESTINATION ${SAFIR_RUNTIME}/bin)
+# INSTALL(FILES dose_java.jar
+#   DESTINATION ${SAFIR_RUNTIME}/bin)

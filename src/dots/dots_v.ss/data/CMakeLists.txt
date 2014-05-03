@@ -65,12 +65,12 @@ if (NOT NO_CXX)
       TARGET_LINK_LIBRARIES(dots_generated-${prefix}-cpp dots_cpp)
     endif()
 
-    INSTALL(TARGETS dots_generated-${prefix}-cpp
-      RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-      LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-      ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
+    # INSTALL(TARGETS dots_generated-${prefix}-cpp
+    #   RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
+    #   LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
+    #   ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
     
-    INSTALL_DEBUG_INFO(dots_generated-${prefix}-cpp)
+    # INSTALL_DEBUG_INFO(dots_generated-${prefix}-cpp)
   ENDFOREACH()
 
   ##
@@ -82,16 +82,16 @@ if (NOT NO_CXX)
     TARGET_LINK_LIBRARIES(dots_generated-cpp dots_cpp dl)
   endif()
 
-  INSTALL(DIRECTORY cpp/include DESTINATION ${SAFIR_SDK}
-    PATTERN ".svn" EXCLUDE
-    PATTERN "*~" EXCLUDE)
+  # INSTALL(DIRECTORY cpp/include DESTINATION ${SAFIR_SDK}
+  #   PATTERN ".svn" EXCLUDE
+  #   PATTERN "*~" EXCLUDE)
 
-  INSTALL(TARGETS dots_generated-cpp
-    RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-    LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-    ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
+  # INSTALL(TARGETS dots_generated-cpp
+  #   RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
+  #   LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
+  #   ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
   
-  INSTALL_DEBUG_INFO(dots_generated-cpp)
+  # INSTALL_DEBUG_INFO(dots_generated-cpp)
 
 
 endif()
@@ -113,10 +113,10 @@ if (NOT NO_DOTNET)
   ADD_CS_LIBRARY(dots_generated-dotnet "${cs_meta_files};${cs_files}" ALL)
 
 
-  INSTALL(FILES ${target_DLL} #This is the C# dll
-    DESTINATION ${SAFIR_RUNTIME}/bin)
+  # INSTALL(FILES ${target_DLL} #This is the C# dll
+  #   DESTINATION ${SAFIR_RUNTIME}/bin)
   
-  INSTALL_CS_DEBUG_INFO()
+  # INSTALL_CS_DEBUG_INFO()
 endif()
 
 #################################
@@ -218,8 +218,8 @@ if (NOT NO_JAVA)
     add_dependencies(dots_generated-java dots_generated-${prefix}-java)
   ENDFOREACH()
 
-  INSTALL(FILES ${target_JAR}
-    DESTINATION ${SAFIR_RUNTIME}/bin)
+  # INSTALL(FILES ${target_JAR}
+  #   DESTINATION ${SAFIR_RUNTIME}/bin)
 
 endif()
 
@@ -320,21 +320,21 @@ if (NOT NO_ADA)
 
     CONFIGURE_FILE (${dots_generated_SOURCE_DIR}/dots_generated_ada.gpr_template ${dots_generated_SOURCE_DIR}/ada/dots_generated_${CC_prefix}_ada.gpr)
     
-    INSTALL(DIRECTORY ada/${CC_prefix}/interface/
-      DESTINATION ${SAFIR_SDK}/ada/dots_generated_${CC_prefix}_ada/interface)
-    INSTALL(DIRECTORY ada/${CC_prefix}/ali/
-      DESTINATION  ${SAFIR_SDK}/ada/dots_generated_${CC_prefix}_ada/ali)
-    INSTALL(FILES ada/dots_generated_${CC_prefix}_ada.gpr
-      DESTINATION ${SAFIR_SDK}/ada)
-    INSTALL(FILES ada/dots_generated_${CC_prefix}_ada.gpr  # dummy to force uninstall of dots_generated_${CC_prefix}_ada folder.
-      DESTINATION ${SAFIR_SDK}/ada/dots_generated_${CC_prefix}_ada)
-    if (WIN32)
-      INSTALL(FILES ada/${CC_prefix}/lib/libdots_generated_${CC_prefix}_ada.dll
-        DESTINATION ${SAFIR_RUNTIME}/bin)
-    elseif (UNIX)
-      INSTALL(FILES ada/${CC_prefix}/lib/libdots_generated_${CC_prefix}_ada.so
-        DESTINATION ${SAFIR_RUNTIME}/lib/)
-    endif(WIN32)
+    # INSTALL(DIRECTORY ada/${CC_prefix}/interface/
+    #   DESTINATION ${SAFIR_SDK}/ada/dots_generated_${CC_prefix}_ada/interface)
+    # INSTALL(DIRECTORY ada/${CC_prefix}/ali/
+    #   DESTINATION  ${SAFIR_SDK}/ada/dots_generated_${CC_prefix}_ada/ali)
+    # INSTALL(FILES ada/dots_generated_${CC_prefix}_ada.gpr
+    #   DESTINATION ${SAFIR_SDK}/ada)
+    # INSTALL(FILES ada/dots_generated_${CC_prefix}_ada.gpr  # dummy to force uninstall of dots_generated_${CC_prefix}_ada folder.
+    #   DESTINATION ${SAFIR_SDK}/ada/dots_generated_${CC_prefix}_ada)
+    # if (WIN32)
+    #   INSTALL(FILES ada/${CC_prefix}/lib/libdots_generated_${CC_prefix}_ada.dll
+    #     DESTINATION ${SAFIR_RUNTIME}/bin)
+    # elseif (UNIX)
+    #   INSTALL(FILES ada/${CC_prefix}/lib/libdots_generated_${CC_prefix}_ada.so
+    #     DESTINATION ${SAFIR_RUNTIME}/lib/)
+    # endif(WIN32)
 
   ENDFOREACH()
 
@@ -351,8 +351,8 @@ if (NOT NO_ADA)
   CONFIGURE_FILE (${dots_generated_SOURCE_DIR}/dots_generated_main_ada.gpr_template ${dots_generated_SOURCE_DIR}/ada/dots_generated_ada.gpr)
 
 
-  INSTALL(FILES ada/dots_generated_ada.gpr
-    DESTINATION ${SAFIR_SDK}/ada)
+  # INSTALL(FILES ada/dots_generated_ada.gpr
+  #   DESTINATION ${SAFIR_SDK}/ada)
   
 endif()
 

@@ -28,9 +28,9 @@ endif()
 ADD_DEPENDENCIES(javah dots_java)
 ADD_DEPENDENCIES(dots_java_jni javah)
 
-INSTALL(TARGETS dots_java_jni
-        RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-        LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-        ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
+# INSTALL(TARGETS dots_java_jni
+#         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
+#         LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
+#         ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
 
-INSTALL_DEBUG_INFO(dots_java_jni)
+# INSTALL_DEBUG_INFO(dots_java_jni)

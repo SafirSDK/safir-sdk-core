@@ -12,11 +12,11 @@ ADD_CUSTOM_TARGET(dose_test_ada ALL
                   COMMENT "Building dose_test_ada using gnatmake"
                   VERBATIM)
 
-if (WIN32)
-   INSTALL(PROGRAMS obj/dose_test_ada.exe
-           DESTINATION ${SAFIR_RUNTIME}/bin/)
-elseif (UNIX)
-   INSTALL(PROGRAMS obj/dose_test_ada
-           DESTINATION ${SAFIR_RUNTIME}/bin/)
-endif(WIN32)
+# if (WIN32)
+#    INSTALL(PROGRAMS obj/dose_test_ada.exe
+#            DESTINATION ${SAFIR_RUNTIME}/bin/)
+# elseif (UNIX)
+#    INSTALL(PROGRAMS obj/dose_test_ada
+#            DESTINATION ${SAFIR_RUNTIME}/bin/)
+# endif(WIN32)
 

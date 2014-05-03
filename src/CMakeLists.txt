@@ -128,32 +128,32 @@ if (MSVC)
   SET(CMAKE_DEBUG_POSTFIX "d")
 endif()
 
-MACRO(INSTALL_DEBUG_INFO target)
-  if(MSVC)
-    #the problem here is to find out where the pdb file is located. It is located next to the binary
-    #in some directory which either the nmake/jom builds create or that the studio creates.
+# MACRO(INSTALL_DEBUG_INFO target)
+#   if(MSVC)
+#     #the problem here is to find out where the pdb file is located. It is located next to the binary
+#     #in some directory which either the nmake/jom builds create or that the studio creates.
 
-    GET_TARGET_PROPERTY(debug_location ${target} LOCATION_Debug)
-    GET_TARGET_PROPERTY(relwithdebinfo_location ${target} LOCATION_RelWithDebInfo)
+#     GET_TARGET_PROPERTY(debug_location ${target} LOCATION_Debug)
+#     GET_TARGET_PROPERTY(relwithdebinfo_location ${target} LOCATION_RelWithDebInfo)
 
-    #replace binary's the extension with .pdb
-    #.exe --> .pdb
-    #.dll --> .pdb
-    STRING(REPLACE .dll .pdb debug_location ${debug_location})
-    STRING(REPLACE .exe .pdb debug_location ${debug_location})
+#     #replace binary's the extension with .pdb
+#     #.exe --> .pdb
+#     #.dll --> .pdb
+#     STRING(REPLACE .dll .pdb debug_location ${debug_location})
+#     STRING(REPLACE .exe .pdb debug_location ${debug_location})
 
-    STRING(REPLACE .dll .pdb relwithdebinfo_location ${relwithdebinfo_location})
-    STRING(REPLACE .exe .pdb relwithdebinfo_location ${relwithdebinfo_location})
+#     STRING(REPLACE .dll .pdb relwithdebinfo_location ${relwithdebinfo_location})
+#     STRING(REPLACE .exe .pdb relwithdebinfo_location ${relwithdebinfo_location})
     
-    #TODO
-    #Install the pdb files using the locations we just worked out.
-    #INSTALL(FILES ${debug_location} DESTINATION ${SAFIR_RUNTIME}/bin CONFIGURATIONS Debug)
-    #INSTALL(FILES ${relwithdebinfo_location} DESTINATION ${SAFIR_RUNTIME}/bin CONFIGURATIONS RelWithDebInfo)
+#     #TODO
+#     #Install the pdb files using the locations we just worked out.
+#     #INSTALL(FILES ${debug_location} DESTINATION ${SAFIR_RUNTIME}/bin CONFIGURATIONS Debug)
+#     #INSTALL(FILES ${relwithdebinfo_location} DESTINATION ${SAFIR_RUNTIME}/bin CONFIGURATIONS RelWithDebInfo)
     
-    UNSET(debug_location)
-    UNSET(relwithdebinfo_location)
-  endif()
-ENDMACRO()
+#     UNSET(debug_location)
+#     UNSET(relwithdebinfo_location)
+#   endif()
+# ENDMACRO()
 
 if (UNIX)
   set(PATH_SEPARATOR ":")

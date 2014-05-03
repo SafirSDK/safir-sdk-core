@@ -7,5 +7,5 @@ TARGET_LINK_LIBRARIES(safir_show_config PRIVATE
   ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
 
-INSTALL(TARGETS safir_show_config  
-  DESTINATION ${SAFIR_RUNTIME}/bin)
+# INSTALL(TARGETS safir_show_config  
+#   DESTINATION ${SAFIR_RUNTIME}/bin)

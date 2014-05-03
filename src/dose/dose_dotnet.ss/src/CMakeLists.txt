@@ -14,8 +14,8 @@ SET(CS_FLAGS ${COMMON_CS_FLAGS} "-doc:Safir.Dob.xml" "-keyfile:${SAFIR_SDK}/data
 
 ADD_CS_LIBRARY(Safir.Dob "${sources}" ALL)
 
-INSTALL(FILES ${target_DLL}
-              Safir.Dob.xml
-  DESTINATION ${SAFIR_RUNTIME}/bin)
+# INSTALL(FILES ${target_DLL}
+#               Safir.Dob.xml
+#   DESTINATION ${SAFIR_RUNTIME}/bin)
 
-INSTALL_CS_DEBUG_INFO()
+# INSTALL_CS_DEBUG_INFO()

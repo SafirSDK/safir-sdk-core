@@ -14,9 +14,9 @@ SET(CS_FLAGS ${COMMON_CS_FLAGS} "-r:${SAFIR_RUNTIME}/bin/Safir.Dob.Typesystem.dl
 ADD_CS_RESOURCES("${resx_files}" Sate .)
 ADD_CS_GUI_EXECUTABLE(sate "${sources}" ALL)
 
-#The csharp build renames the exe to sate.csexe, so we rename it back when we install
-INSTALL(PROGRAMS ${target_EXE}
-  DESTINATION ${SAFIR_RUNTIME}/bin
-  RENAME sate.exe)
+# #The csharp build renames the exe to sate.csexe, so we rename it back when we install
+# INSTALL(PROGRAMS ${target_EXE}
+#   DESTINATION ${SAFIR_RUNTIME}/bin
+#   RENAME sate.exe)
 
-INSTALL_CS_DEBUG_INFO()
+# INSTALL_CS_DEBUG_INFO()

@@ -8,8 +8,8 @@ SET(CS_FLAGS ${COMMON_CS_FLAGS} "-doc:Safir.Dob.Typesystem.xml" "-keyfile:${safi
 
 ADD_CS_LIBRARY(Safir.Dob.Typesystem "${sources}" ALL)
 
-INSTALL(FILES ${target_DLL}
-              Safir.Dob.Typesystem.xml
-  DESTINATION ${SAFIR_RUNTIME}/bin)
+# INSTALL(FILES ${target_DLL}
+#               Safir.Dob.Typesystem.xml
+#   DESTINATION ${SAFIR_RUNTIME}/bin)
   
-INSTALL_CS_DEBUG_INFO()
+# INSTALL_CS_DEBUG_INFO()

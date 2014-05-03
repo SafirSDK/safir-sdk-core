@@ -21,18 +21,18 @@ if (ACE_FOUND)
     TARGET_LINK_LIBRARIES(SplitJoinStresser PRIVATE dose_cpp ${Boost_LIBRARIES})
   endif()
   
-  INSTALL(TARGETS SplitJoinStresser
-          RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-          LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-          ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
+  # INSTALL(TARGETS SplitJoinStresser
+  #         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
+  #         LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
+  #         ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
   
-  INSTALL_DEBUG_INFO(SplitJoinStresser)
+  # INSTALL_DEBUG_INFO(SplitJoinStresser)
 else()
   MESSAGE(STATUS "ACE library was not found, not building SplitJoinStresser")
 
-  #dummy install to get an install target in the makefiles
-  INSTALL (FILES
-    DESTINATION dummy)
+  # #dummy install to get an install target in the makefiles
+  # INSTALL (FILES
+  #   DESTINATION dummy)
 
 endif()
 

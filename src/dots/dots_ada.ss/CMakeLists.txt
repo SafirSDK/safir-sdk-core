@@ -27,18 +27,18 @@ ADD_CUSTOM_TARGET(dots_ada ALL
                   COMMENT "Building dots_ada using gnatmake"
                   VERBATIM)
 
-INSTALL(DIRECTORY program/interface/
-        DESTINATION ${SAFIR_SDK}/ada/dots_ada/interface)
+# INSTALL(DIRECTORY program/interface/
+#         DESTINATION ${SAFIR_SDK}/ada/dots_ada/interface)
 
-INSTALL(DIRECTORY program/ali/
-        DESTINATION ${SAFIR_SDK}/ada/dots_ada/ali)
-if (WIN32)
-   INSTALL(FILES program/lib/libdots_ada.dll
-           DESTINATION ${SAFIR_RUNTIME}/bin/)
-elseif (UNIX)
-   INSTALL(FILES program/lib/libdots_ada.so
-           DESTINATION ${SAFIR_RUNTIME}/lib/)
-endif(WIN32)
+# INSTALL(DIRECTORY program/ali/
+#         DESTINATION ${SAFIR_SDK}/ada/dots_ada/ali)
+# if (WIN32)
+#    INSTALL(FILES program/lib/libdots_ada.dll
+#            DESTINATION ${SAFIR_RUNTIME}/bin/)
+# elseif (UNIX)
+#    INSTALL(FILES program/lib/libdots_ada.so
+#            DESTINATION ${SAFIR_RUNTIME}/lib/)
+# endif(WIN32)
 
-INSTALL(FILES data/dots_ada.gpr
-        DESTINATION ${SAFIR_SDK}/ada/)
+# INSTALL(FILES data/dots_ada.gpr
+#         DESTINATION ${SAFIR_SDK}/ada/)

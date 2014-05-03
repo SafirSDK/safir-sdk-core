@@ -24,9 +24,9 @@ endif()
 ADD_DEPENDENCIES(javah logging_java)
 ADD_DEPENDENCIES(logging_java_jni javah)
 
-INSTALL(TARGETS logging_java_jni
-        RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-        LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-        ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
+# INSTALL(TARGETS logging_java_jni
+#         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
+#         LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
+#         ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
 
-INSTALL_DEBUG_INFO(logging_java_jni)
+# INSTALL_DEBUG_INFO(logging_java_jni)

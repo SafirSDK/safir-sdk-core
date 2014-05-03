@@ -15,7 +15,7 @@ SET(CS_FLAGS ${COMMON_CS_FLAGS} "-keyfile:${SAFIR_SDK}/data/build/safirkey.snk"
 
 ADD_CS_LIBRARY(Safir.SwReports "${sources}" ALL)
 
-INSTALL(FILES ${target_DLL}
-  DESTINATION ${SAFIR_RUNTIME}/bin)
+# INSTALL(FILES ${target_DLL}
+#   DESTINATION ${SAFIR_RUNTIME}/bin)
   
-INSTALL_CS_DEBUG_INFO()
+# INSTALL_CS_DEBUG_INFO()

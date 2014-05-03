@@ -11,5 +11,5 @@ TARGET_LINK_LIBRARIES(crash_dump_monitor
   ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY})
 
-INSTALL(TARGETS crash_dump_monitor 
-  DESTINATION ${SAFIR_RUNTIME}/bin)
+# INSTALL(TARGETS crash_dump_monitor 
+#   DESTINATION ${SAFIR_RUNTIME}/bin)

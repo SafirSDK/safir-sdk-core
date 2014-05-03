@@ -16,11 +16,11 @@ TARGET_LINK_LIBRARIES(dose_main PRIVATE
   ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY})
 
-INSTALL(TARGETS dose_main
-        RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-        LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-        ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
+# INSTALL(TARGETS dose_main
+#         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
+#         LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
+#         ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
 
-INSTALL_DEBUG_INFO(dose_main)
+# INSTALL_DEBUG_INFO(dose_main)
 
 #TODO: general: only the really exported headers need to be installed! e.g. dose_internal headers dont ever need to be installed!!

@@ -13,11 +13,11 @@ SET(CS_FLAGS ${COMMON_CS_FLAGS} "-r:${SAFIR_RUNTIME}/bin/Safir.Dob.Typesystem.dl
 
 ADD_CS_EXECUTABLE(dose_test_dotnet "${sources}" ALL)
 
-#The csharp build renames the exe to XXXX.csexe, so we rename it back when we install
-INSTALL(PROGRAMS ${target_EXE}
-  DESTINATION ${SAFIR_RUNTIME}/bin
-  RENAME dose_test_dotnet.exe)
+# #The csharp build renames the exe to XXXX.csexe, so we rename it back when we install
+# INSTALL(PROGRAMS ${target_EXE}
+#   DESTINATION ${SAFIR_RUNTIME}/bin
+#   RENAME dose_test_dotnet.exe)
 
-INSTALL_CS_DEBUG_INFO()
+# INSTALL_CS_DEBUG_INFO()
 
 

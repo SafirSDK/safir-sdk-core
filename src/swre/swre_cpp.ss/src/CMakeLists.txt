@@ -16,13 +16,13 @@ TARGET_LINK_LIBRARIES(swre_interface_cpp PRIVATE
   lluf_utils
   ${Boost_REGEX_LIBRARY})
 
-INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
-        PATTERN ".svn" EXCLUDE
-        PATTERN "*~" EXCLUDE)
+# INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
+#         PATTERN ".svn" EXCLUDE
+#         PATTERN "*~" EXCLUDE)
 
-INSTALL(TARGETS swre_interface_cpp
-        RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-        LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-        ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
+# INSTALL(TARGETS swre_interface_cpp
+#         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
+#         LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
+#         ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
 
-INSTALL_DEBUG_INFO(swre_interface_cpp)
+# INSTALL_DEBUG_INFO(swre_interface_cpp)

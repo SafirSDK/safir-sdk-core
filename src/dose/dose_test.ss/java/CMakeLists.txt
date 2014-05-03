@@ -23,6 +23,6 @@ ADD_JAR(dose_test_java "${sources}" ALL)
 add_dependencies(dose_test_java dose_test_util_java)
 
 
-INSTALL(FILES dose_test_java.jar
-  DESTINATION ${SAFIR_RUNTIME}/bin)
+# INSTALL(FILES dose_test_java.jar
+#   DESTINATION ${SAFIR_RUNTIME}/bin)
 
