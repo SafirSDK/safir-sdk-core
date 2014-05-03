@@ -37,15 +37,9 @@ TARGET_LINK_LIBRARIES(logger_control PRIVATE
   lluf_utils
   ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
-
-# INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
-#         PATTERN ".svn" EXCLUDE
-#         PATTERN "*~" EXCLUDE)
-
-# INSTALL(TARGETS lluf_utils 
-#         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-#         LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-#         ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
+SAFIR_INSTALL(
+  TARGETS lluf_utils logger_control
+  INCLUDE_DIR Safir)
 
 
 # INSTALL_DEBUG_INFO(lluf_utils)
@@ -54,7 +48,3 @@ TARGET_LINK_LIBRARIES(logger_control PRIVATE
 # INSTALL(FILES ../data/safir_event_log_registration.reg
 #         DESTINATION ${SAFIR_RUNTIME}/data/text/)
 # endif()
-
-
-# INSTALL(TARGETS logger_control 
-#   DESTINATION ${SAFIR_RUNTIME}/bin)

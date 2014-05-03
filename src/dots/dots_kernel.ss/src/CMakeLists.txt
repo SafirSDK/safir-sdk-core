@@ -30,16 +30,9 @@ if(NOT can_do_unaligned_access)
   ADD_DEFINITIONS(-DNO_UNALIGNED_ACCESS)
 endif()
 
+SAFIR_INSTALL(TARGETS dots_kernel INCLUDE_DIR Safir)
 
-# INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
-#         PATTERN ".svn" EXCLUDE
-#         PATTERN "*~" EXCLUDE)
-
-# INSTALL(TARGETS dots_kernel
-#         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-#         LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-#         ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
-
+#TODO
 # INSTALL(FILES ../data/dots_kernel.gpr
 #         DESTINATION ${SAFIR_SDK}/ada/)
 

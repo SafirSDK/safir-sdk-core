@@ -13,13 +13,6 @@ TARGET_LINK_LIBRARIES(lluf_startup_synchronizer PRIVATE
   ${Boost_THREAD_LIBRARY} 
   ${Boost_SYSTEM_LIBRARY})
 
-# INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
-#         PATTERN ".svn" EXCLUDE
-#         PATTERN "*~" EXCLUDE)
-
-# INSTALL(TARGETS lluf_startup_synchronizer
-#         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-#         LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-#         ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
+SAFIR_INSTALL(TARGETS lluf_startup_synchronizer INCLUDE_DIR Safir)
 
 # INSTALL_DEBUG_INFO(lluf_startup_synchronizer)

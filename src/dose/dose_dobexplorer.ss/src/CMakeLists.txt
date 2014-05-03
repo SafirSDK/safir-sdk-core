@@ -72,10 +72,4 @@ target_include_directories(dobexplorer PRIVATE ../../dose_communication.ss/src/d
 
 #TODO: hmmm, dobexplorer doesnt really need to link against dose_com, I added that to get the PUBLIC includes. Better way?
 
-# INSTALL(TARGETS dobexplorer
-#         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-#         LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-#         ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
-
-# INSTALL_DEBUG_INFO(dobexplorer)
-
+SAFIR_INSTALL(TARGETS dobexplorer)

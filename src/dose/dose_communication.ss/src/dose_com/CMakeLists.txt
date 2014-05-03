@@ -13,22 +13,15 @@ target_include_directories(dose_com PUBLIC ../defs)
 target_include_directories(dose_com PUBLIC .)
 #TODO: definitely move public stuff into better directories!
 
-# INSTALL(FILES ../defs/DoseCom_Interface.h 
-#               ../defs/DoseCom_Interface_Classes.h
-#         DESTINATION ${SAFIR_SDK}/include/Safir/Dob/Internal/)
+SAFIR_INSTALL(TARGETS dose_com)
 
-# INSTALL(FILES DosePlatform.h
-#               PrintError.h
-#               DoseOsInterface.h
-#               DoseOsSharedMem.cpp
-#               ../defs/DoseNodeStatus.h
-#         DESTINATION ${SAFIR_SDK}/include/Safir/Dob/Internal/DoseComAux/)
+INSTALL(FILES ../defs/DoseCom_Interface.h 
+              ../defs/DoseCom_Interface_Classes.h
+        DESTINATION include/Safir/Dob/Internal/)
 
-
-# INSTALL(TARGETS dose_com
-#         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-#         LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-#         ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
-
-
-# INSTALL_DEBUG_INFO(dose_com)
+INSTALL(FILES DosePlatform.h
+              PrintError.h
+              DoseOsInterface.h
+              DoseOsSharedMem.cpp
+               ../defs/DoseNodeStatus.h
+        DESTINATION include/Safir/Dob/Internal/DoseComAux/)

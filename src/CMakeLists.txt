@@ -155,6 +155,30 @@ endif()
 #   endif()
 # ENDMACRO()
 
+function (SAFIR_INSTALL) 
+  cmake_parse_arguments(INST "" "INCLUDE_DIR" "TARGETS" ${ARGN})
+
+  if (NOT "${INST_UNPARSED_ARGUMENTS}" STREQUAL "")
+    message(FATAL_ERROR "Unknown argument to SAFIR_INSTALL '${INST_UNPARSED_ARGUMENTS}'")
+  endif()
+
+  if (INST_TARGETS)
+    INSTALL(TARGETS ${INST_TARGETS}
+      RUNTIME DESTINATION bin
+      LIBRARY DESTINATION lib
+      ARCHIVE DESTINATION lib)
+  endif()
+
+  if (INST_INCLUDE_DIR)
+    INSTALL(DIRECTORY ${INST_INCLUDE_DIR} DESTINATION include
+      PATTERN ".svn" EXCLUDE
+      PATTERN "*~" EXCLUDE)
+  endif()
+
+  #TODO debug info
+endfunction()
+
+
 if (UNIX)
   set(PATH_SEPARATOR ":")
 else()

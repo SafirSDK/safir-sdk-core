@@ -11,15 +11,9 @@ target_include_directories(logging_library PUBLIC .)
 
 TARGET_LINK_LIBRARIES(logging_library PRIVATE lluf_utils)
 
-# INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
-#         PATTERN ".svn" EXCLUDE
-#         PATTERN "*~" EXCLUDE)
+SAFIR_INSTALL(TARGETS logging_library INCLUDE_DIR Safir)
 
-# INSTALL(TARGETS logging_library
-#         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-#         LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-#         ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
-
+#TODO
 # INSTALL(FILES ../data/logging_library.gpr
 #         DESTINATION ${SAFIR_SDK}/ada)
 

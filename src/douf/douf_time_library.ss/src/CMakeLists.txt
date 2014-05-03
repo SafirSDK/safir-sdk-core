@@ -14,16 +14,8 @@ TARGET_LINK_LIBRARIES(douf_time_library PRIVATE
   ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY})
 
-# INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
-#         PATTERN ".svn" EXCLUDE
-#         PATTERN "*~" EXCLUDE)
-
-# INSTALL(TARGETS douf_time_library
-#         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-#         LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-#         ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
+SAFIR_INSTALL(TARGETS douf_time_library INCLUDE_DIR Safir)
 
 # INSTALL(FILES ../data/douf_time_library.gpr
 #         DESTINATION ${SAFIR_SDK}/ada)
 
-# INSTALL_DEBUG_INFO(douf_time_library)
