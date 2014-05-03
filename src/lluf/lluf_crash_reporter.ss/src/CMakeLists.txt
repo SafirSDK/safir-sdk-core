@@ -27,5 +27,3 @@ endif()
 add_dependencies(lluf_crash_reporter google-breakpad)
 
 SAFIR_INSTALL(TARGETS lluf_crash_reporter INCLUDE_DIR Safir)
-
-# INSTALL_DEBUG_INFO(lluf_crash_reporter)

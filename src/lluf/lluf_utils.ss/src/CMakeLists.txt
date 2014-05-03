@@ -41,9 +41,6 @@ SAFIR_INSTALL(
   TARGETS lluf_utils logger_control
   INCLUDE_DIR Safir)
 
-
-# INSTALL_DEBUG_INFO(lluf_utils)
-
 # if (WIN32)
 # INSTALL(FILES ../data/safir_event_log_registration.reg
 #         DESTINATION ${SAFIR_RUNTIME}/data/text/)

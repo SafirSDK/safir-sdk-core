@@ -15,5 +15,3 @@ SAFIR_INSTALL(TARGETS lluf_id INCLUDE_DIR Safir)
 
 # INSTALL(FILES ../data/lluf_id.gpr
 #         DESTINATION ${SAFIR_SDK}/ada/)
-
-# INSTALL_DEBUG_INFO(lluf_id)

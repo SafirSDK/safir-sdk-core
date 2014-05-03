@@ -14,5 +14,3 @@ TARGET_LINK_LIBRARIES(lluf_startup_synchronizer PRIVATE
   ${Boost_SYSTEM_LIBRARY})
 
 SAFIR_INSTALL(TARGETS lluf_startup_synchronizer INCLUDE_DIR Safir)
-
-# INSTALL_DEBUG_INFO(lluf_startup_synchronizer)

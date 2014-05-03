@@ -17,5 +17,3 @@ SAFIR_INSTALL(TARGETS logging_library INCLUDE_DIR Safir)
 # INSTALL(FILES ../data/logging_library.gpr
 #         DESTINATION ${SAFIR_SDK}/ada)
 
-
-# INSTALL_DEBUG_INFO(logging_library)

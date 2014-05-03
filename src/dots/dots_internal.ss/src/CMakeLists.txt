@@ -18,4 +18,3 @@ SAFIR_INSTALL(TARGETS dots_internal INCLUDE_DIR Safir)
 
 #TODO
 # INSTALL(DIRECTORY ../scripts/utils DESTINATION ${SAFIR_SDK}/data)
-# INSTALL_DEBUG_INFO(dots_internal)

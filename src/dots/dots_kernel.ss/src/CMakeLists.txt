@@ -36,4 +36,3 @@ SAFIR_INSTALL(TARGETS dots_kernel INCLUDE_DIR Safir)
 # INSTALL(FILES ../data/dots_kernel.gpr
 #         DESTINATION ${SAFIR_SDK}/ada/)
 
-# INSTALL_DEBUG_INFO(dots_kernel)
