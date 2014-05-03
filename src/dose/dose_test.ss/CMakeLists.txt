@@ -1,22 +1,14 @@
-cmake_minimum_required(VERSION 2.8)
-
-#This directory contains libraries that have C interfaces, so we don't want the "d" 
-#suffix on debug builds on windows. Must be set before including safir_sdk_core_config.cmake
-SET(NO_LIBRARY_POSTFIXES 1) 
-
-INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
-
 ADD_SUBDIRECTORY(util)
 ADD_SUBDIRECTORY(cpp)
-ADD_SUBDIRECTORY(dotnet)
+#TODO ADD_SUBDIRECTORY(dotnet)
 
-if (SAFIR_JAVA_SUPPORT)
-  ADD_SUBDIRECTORY(java)
-endif()
+#TODO: if (SAFIR_JAVA_SUPPORT)
+#TODO   ADD_SUBDIRECTORY(java)
+#TODO endif()
 
-if (SAFIR_ADA_SUPPORT)
-  ADD_SUBDIRECTORY(ada)      
-endif ()
+#TODO if (SAFIR_ADA_SUPPORT)
+#TODO  ADD_SUBDIRECTORY(ada)      
+#TODO endif ()
 
 
 

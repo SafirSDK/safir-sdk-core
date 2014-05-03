@@ -10,3 +10,5 @@ add_subdirectory(dose_main.ss)
 
 #add_subdirectory(/dose_sate.ss/src                 RelWithDebInfo
 add_subdirectory(dose_dobexplorer.ss/src)
+add_subdirectory(dose_test_dou.ss)
+add_subdirectory(dose_test.ss)

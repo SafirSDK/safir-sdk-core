@@ -1,20 +1,22 @@
-cmake_minimum_required(VERSION 2.8)
-
-project(dose_test_cpp CXX)
-
-INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
-
 FILE(GLOB headers *.h)
 FILE(GLOB sources *.cpp)
-FILE(GLOB dose_com_sources ${SAFIR_SDK}/include/Safir/Dob/Internal/DoseComAux/*.cpp)
+SET(dose_com_sources ../../dose_communication.ss/src/dose_com/DoseOsSharedMem.cpp)
 
 ADD_EXECUTABLE(dose_test_cpp ${sources} ${dose_com_sources} ${headers})
 
-#FIND_PACKAGE(Boost COMPONENTS thread system)
+target_include_directories(dose_test_cpp PRIVATE ../../dose_communication.ss/src/defs/)
+target_include_directories(dose_test_cpp PRIVATE ../../dose_communication.ss/src/dose_com/)
 
-if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(dose_test_cpp PRIVATE swre_interface_cpp dose_cpp dots_generated-Safir-cpp dots_generated-DoseTest-cpp dots_cpp ${Boost_LIBRARIES})
-endif()
+TARGET_LINK_LIBRARIES(dose_test_cpp PRIVATE 
+  swre_interface_cpp 
+  dose_cpp 
+  dose_internal
+  dots_generated-Safir-cpp
+  dots_generated-DoseTest-cpp 
+  dots_cpp
+  ${Boost_THREAD_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY})
+
 
 INSTALL(TARGETS dose_test_cpp
         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin

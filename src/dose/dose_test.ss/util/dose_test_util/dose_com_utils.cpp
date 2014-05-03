@@ -37,7 +37,7 @@
 extern void PrintDbg( const char *format, ... );
 extern void PrintErr(int ErrorCode, const char *format, ... );
 
-#include <Safir/Dob/Internal/DoseComAux/DoseOsInterface.h>
+#include <DoseOsInterface.h>
 
 
 static int Debug = 0;

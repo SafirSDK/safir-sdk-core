@@ -1,10 +1,11 @@
+#this library has a C interface and we only want one version of it,
+#so we never want the "d" suffix on debug builds, which is default on windows.
+SET(CMAKE_DEBUG_POSTFIX "")
+
 project(dose_test_util_java_jni Java CXX)
 find_package(Java REQUIRED)
 find_package(JNI REQUIRED)
 string (REPLACE "javac" "javah" JAVAH ${JAVA_COMPILE})
-
-#this library has a C interface, so we don't want the "d" suffix on debug builds on windows
-# NO_LIBRARY_POSTFIXES 1 is set in the top level CMakeLists.txt file
 
 INCLUDE_DIRECTORIES(${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2} ${dose_test_util_SOURCE_DIR})
 

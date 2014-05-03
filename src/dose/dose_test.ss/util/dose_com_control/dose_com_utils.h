@@ -25,8 +25,8 @@
 #ifndef __DOSE_COM_UTILS_H__
 #define __DOSE_COM_UTILS_H__
 
-#include <Safir/Dob/Internal/DoseComAux/DosePlatform.h>
-#include <Safir/Dob/Internal/DoseComAux/DoseNodeStatus.h>
+#include <DosePlatform.h>
+#include <DoseNodeStatus.h>
 
 DOSE_SHARED_DATA_S * Get_NodeSharedData_Pointer(void);
 
