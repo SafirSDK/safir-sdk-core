@@ -79,44 +79,22 @@ namespace Internal
                 exit(1);
             }
 
-            const std::string default_dou_directory = reader.Typesystem().get<std::string>("default_dou_directory");
+            //get all dou directory strings
+            std::vector<std::string> dirs = Safir::Utilities::Internal::ConfigHelper::GetDouDirectories(reader);
 
-            //loop through all sections in typesystem.ini
-            for (boost::property_tree::ptree::const_iterator it = reader.Typesystem().begin();
-                 it != reader.Typesystem().end(); ++it)
+            for (std::vector<std::string>::const_iterator it = dirs.begin();
+                 it != dirs.end(); ++it)
             {
-                const bool isSection = !it->second.empty();
+                boost::filesystem::path douDirectory(*it);
 
-                if (isSection)
+                if (!boost::filesystem::exists(douDirectory) || !boost::filesystem::is_directory(douDirectory))
                 {
-                    boost::filesystem::path douDirectory;
-                    try
-                    {
-                        try
-                        {
-                            douDirectory = it->second.get<std::string>("dou_directory");
-                        }
-                        catch (boost::property_tree::ptree_bad_path&)
-                        {
-                            douDirectory = default_dou_directory + it->first;
-                        }
-                    }
-                    catch (const std::exception&)
-                    {
-                        SEND_SYSTEM_LOG(Error, <<"Exceptions while examining dirs");
-                        std::cout<<"Failed to read dou_directory in section "+it->first+" and default_dou_directory in root of typesystem.ini"<<std::endl;
-                        exit(1);
-                    }
-
-                    if (!boost::filesystem::exists(douDirectory) || !boost::filesystem::is_directory(douDirectory))
-                    {
-                        SEND_SYSTEM_LOG(Error, <<"Dir not found");
-                        std::cout<<"dou_directory '"+douDirectory.string()+"' in section "+it->first+" of typesystem.ini does not appear to be a directory"<<std::endl;
-                        exit(1);
-                    }
-
-                    directories.push_back(douDirectory);
+                    SEND_SYSTEM_LOG(Error, <<"Dir not found");
+                    std::cout<<"dou_directory '"+douDirectory.string()+"' in typesystem.ini does not appear to be a directory"<<std::endl;
+                    exit(1);
                 }
+
+                directories.push_back(douDirectory);
             }
         }
     };
