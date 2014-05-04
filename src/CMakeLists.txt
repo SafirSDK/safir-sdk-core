@@ -309,8 +309,8 @@ add_subdirectory(dope)
 SET(safir_config_files config/typesystem.ini config/locations.ini config/logging.ini)
 if (UNIX)
   INSTALL(FILES ${safir_config_files}
-    DESTINATION /etc/safir_sdk_core
-elsif(WIN32)
+    DESTINATION /etc/safir_sdk_core)
+elseif(WIN32)
   INSTALL(FILES ${safir_config_files}
-    DESTINATION $ENV{APPDATA}/safir_sdk_core/config
+    DESTINATION $ENV{APPDATA}/safir_sdk_core/config)
 endif()
