@@ -24,6 +24,7 @@
 #include <iostream>
 
 #include <Safir/Utilities/Internal/ConfigReader.h>
+#include <boost/filesystem/path.hpp>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -160,7 +161,7 @@ int main(int argc, char * argv[])
             }
             catch (boost::property_tree::ptree_bad_path&)
             {
-                std::cout << reader.Typesystem().get<std::string>("default_dou_directory") + options.module << std::endl;                
+                std::cout << boost::filesystem::path(reader.Typesystem().get<std::string>("default_dou_directory")) / options.module << std::endl;                
             }
             
         }
