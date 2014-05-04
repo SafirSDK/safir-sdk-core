@@ -75,6 +75,7 @@ namespace Internal
     {
         std::vector<std::string> directories;
 
+        //TODO: handle NONE(?)
         const Path default_dou_directory(reader.Typesystem().get<std::string>("default_dou_directory"));
 
         // Loop through all sections in typesystem.ini
