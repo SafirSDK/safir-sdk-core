@@ -1,4 +1,5 @@
 safir_sdk_core-git
 *.pkg.tar.xz
+*.src.tar.gz
 src
 pkg
