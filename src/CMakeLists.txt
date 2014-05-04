@@ -304,3 +304,13 @@ add_subdirectory(dope)
 
 #This will install the code examples under sdk/docs
 #build_dir        docs/examples                             Release
+
+
+SET(safir_config_files config/typesystem.ini config/locations.ini config/logging.ini)
+if (UNIX)
+  INSTALL(FILES ${safir_config_files}
+    DESTINATION /etc/safir_sdk_core
+elsif(WIN32)
+  INSTALL(FILES ${safir_config_files}
+    DESTINATION $ENV{APPDATA}/safir_sdk_core/config
+endif()
