@@ -1,7 +1,7 @@
-# $Id: pkgbuild-mode.el,v 1.23 2007/10/20 16:02:14 juergen Exp $
 # Maintainer: DonOregano <lars@foldspace.nu>
+
 pkgname=safir_sdk_core-git
-pkgver=logan_r1780.72fe16e
+pkgver=0
 pkgrel=1
 pkgdesc="Safir SDK Core is a middleware and platform for creation of distributed soft real-time systems. It is Scalable, Reliable, Portable, and last but not least, it is Open!"
 arch=('i686' 'x86_64')
@@ -11,32 +11,34 @@ groups=()
 depends=('boost' 'unixodbc' 'qt5-base' 'cmake')
 makedepends=('git' 'subversion' 'cmake' 'doxygen' 'graphviz')
 install=
-source=("git+https://github.com/SafirSDK/safir_sdk_core.git")
+source=("$pkgname"::'git+https://github.com/SafirSDK/safir_sdk_core.git#branch=logan')
 sha1sums=('SKIP')
+backup=('etc/safir_sdk_core/typesystem.ini' 'etc/safir_sdk_core/logging.ini' 'etc/safir_sdk_core/locations.ini')
 
 pkgver() {
-  cd "$srcdir/safir_sdk_core"
+  cd "$srcdir/$pkgname"
   printf "logan_r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
 }
 
 build() {
-  cd $srcdir/safir_sdk_core/src
-  git checkout logan
+  cd "$srcdir/$pkgname/src"
   cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=RelWithDebInfo .
 
   make
 }
 
 check() {
-  cd $srcdir/safir_sdk_core/src
+  cd "$srcdir/$pkgname/src"
 
   make test
 }
 
 package() {
-  cd $srcdir/safir_sdk_core/src
+  cd "$srcdir/$pkgname/src"
 
   make DESTDIR="$pkgdir/" install
+
+  #Create directories
   install -d -m 777 $pkgdir/var/run/safir_sdk_core
   install -d -m 777 $pkgdir/var/log/safir_sdk_core
 }
