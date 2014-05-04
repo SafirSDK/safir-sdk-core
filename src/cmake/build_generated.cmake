@@ -139,7 +139,7 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
       PATTERN "*~" EXCLUDE)
     
     INSTALL(FILES ${dou_files} ${dom_files} ${namespace_files}
-      DESTINATION share/${GEN_NAME})
+      DESTINATION share/safir_sdk_core/${GEN_NAME})
 
   endif()
 ENDFUNCTION()
