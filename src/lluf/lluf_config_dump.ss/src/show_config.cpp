@@ -161,7 +161,7 @@ int main(int argc, char * argv[])
             }
             catch (boost::property_tree::ptree_bad_path&)
             {
-                std::cout << boost::filesystem::path(reader.Typesystem().get<std::string>("default_dou_directory")) / options.module << std::endl;                
+                std::cout << (boost::filesystem::path(reader.Typesystem().get<std::string>("default_dou_directory")) / options.module).string() << std::endl;
             }
             
         }
