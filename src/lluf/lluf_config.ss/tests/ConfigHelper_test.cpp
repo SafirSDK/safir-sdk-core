@@ -42,7 +42,7 @@ int main()
 
         if (douFilePaths[0] != "/path/to/default/directory" ||
             douFilePaths[1] != "/path/to/some/other/directory" ||
-            douFilePaths[2] != "/path/to/default/AnotherOverride")
+            (douFilePaths[2] != "/path/to/default/AnotherOverride" && douFilePaths[2] != "/path/to/default\\AnotherOverride"))
         {
             std::wcout << "Unexpected path!\n" 
                        << " " << douFilePaths[0].c_str() << "\n"
