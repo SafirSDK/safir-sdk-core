@@ -1,5 +1,5 @@
 FUNCTION(BUILD_GENERATED_LIBRARY)
-  cmake_parse_arguments(GEN "" "NAME" "DEPENDENCIES" ${ARGN})
+  cmake_parse_arguments(GEN "NO_INSTALL" "NAME" "DEPENDENCIES" ${ARGN})
   #message("++ Will build generated library ${GEN_NAME} with dependencies '${GEN_DEPENDENCIES}'")
 
   if ("${GEN_NAME}" STREQUAL "")
@@ -51,6 +51,9 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
   # Set up variables containing all dou files and all expected source code files
   #
   FILE(GLOB_RECURSE dou_files *.dou)
+  FILE(GLOB_RECURSE dom_files *.dom)
+  FILE(GLOB_RECURSE namespace_files *.namespace.txt)
+  
   #message("Dou files: ${dou_files}")
 
   #loop over all dou files
@@ -124,14 +127,21 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
   ############
 
   #TODO:precompiled headers?!
-  #TODO: installation
 
+  if (NOT GEN_NO_INSTALL)
+    INSTALL(TARGETS dots_generated-${GEN_NAME}-cpp
+      RUNTIME DESTINATION bin
+      LIBRARY DESTINATION lib
+      ARCHIVE DESTINATION lib)
 
-#  FILE(GLOB_RECURSE files_to_install *.dou *.dom *.namespace.txt)
-#  #message("files_to_install = ${files_to_install}")
-#  INSTALL(FILES ${files_to_install} DESTINATION ${DOU_INSTALL_DIRECTORY})
-#  INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} --build . --target install WORKING_DIRECTORY generated_code/cpp)")
+    INSTALL(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated_code/cpp/include/ DESTINATION include
+      PATTERN ".svn" EXCLUDE
+      PATTERN "*~" EXCLUDE)
+    
+    INSTALL(FILES ${dou_files} ${dom_files} ${namespace_files}
+      DESTINATION share/${GEN_NAME})
 
+  endif()
 ENDFUNCTION()
 
 
