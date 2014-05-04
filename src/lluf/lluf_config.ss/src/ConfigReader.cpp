@@ -75,6 +75,8 @@ namespace Internal
     {
         std::vector<std::string> directories;
 
+        const Path default_dou_directory(reader.Typesystem().get<std::string>("default_dou_directory"));
+
         // Loop through all sections in typesystem.ini
         for (boost::property_tree::ptree::const_iterator it = reader.Typesystem().begin();
              it != reader.Typesystem().end();
@@ -84,7 +86,19 @@ namespace Internal
 
             if (isSection)
             {
-                directories.push_back(it->second.get<std::string>("dou_directory"));
+                if (it->second.get<std::string>("name") != it->first)
+                {
+                    throw std::logic_error("Error in typesystem.ini"); //TODO more info?!
+                }
+
+                try
+                {
+                    directories.push_back(it->second.get<std::string>("dou_directory"));
+                }
+                catch (boost::property_tree::ptree_bad_path&)
+                {
+                    directories.push_back((default_dou_directory / it->first).str());
+                }
             }
         }
         return directories;
