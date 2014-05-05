@@ -55,18 +55,22 @@ void GraphWidget::paintEvent(QPaintEvent* event)
     QPainterPath path;
     if (m_data.size() >= 2)
     {
-        path.moveTo(start.secsTo(m_data.begin()->first), 0);
-        path.lineTo(start.secsTo(m_data.begin()->first), m_data.begin()->second);
+        path.moveTo(static_cast<qreal>(start.secsTo(m_data.begin()->first)), 
+                    0);
+        path.lineTo(static_cast<qreal>(start.secsTo(m_data.begin()->first)),
+                    m_data.begin()->second);
         double max = m_data.begin()->second;
 
         for (PlotData::iterator it = ++m_data.begin();
              it != m_data.end(); ++it)
         {
-            path.lineTo(start.secsTo(it->first),it->second);
+            path.lineTo(static_cast<qreal>(start.secsTo(it->first)),
+                        it->second);
             max = std::max(max, it->second);
         }
         
-        path.lineTo(start.secsTo(m_data.rbegin()->first),0);
+        path.lineTo(static_cast<qreal>(start.secsTo(m_data.rbegin()->first)),
+                    0);
         path.closeSubpath();
         QLinearGradient grad(0,0,0,max);
         grad.setColorAt(1,QColor(100,100,255));
