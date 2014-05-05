@@ -23,7 +23,7 @@
 ******************************************************************************/
 
 #include "graphwidget.h"
-//#include <iostream>
+#include <iostream>
 #include <algorithm>
 
 GraphWidget::GraphWidget(QWidget * parent):
@@ -52,20 +52,30 @@ void GraphWidget::paintEvent(QPaintEvent* event)
 
     painter.translate(0,height());
     painter.scale(1.0/m_historySeconds*width(),-1.0*height()/m_scale);
-
     QPainterPath path;
-
-    path.moveTo(static_cast<qreal>(start.secsTo(m_data.begin()->first)), m_data.begin()->second);
-    for (PlotData::iterator it = ++m_data.begin();
-         it != m_data.end(); ++it)
+    if (m_data.size() >= 2)
     {
-        path.lineTo(static_cast<qreal>(start.secsTo(it->first)),it->second);
-    }
+        path.moveTo(start.secsTo(m_data.begin()->first), 0);
+        path.lineTo(start.secsTo(m_data.begin()->first), m_data.begin()->second);
+        double max = m_data.begin()->second;
 
-    painter.drawPath(path);
+        for (PlotData::iterator it = ++m_data.begin();
+             it != m_data.end(); ++it)
+        {
+            path.lineTo(start.secsTo(it->first),it->second);
+            max = std::max(max, it->second);
+        }
+        
+        path.lineTo(start.secsTo(m_data.rbegin()->first),0);
+        path.closeSubpath();
+        QLinearGradient grad(0,0,0,max);
+        grad.setColorAt(1,QColor(100,100,255));
+        grad.setColorAt(0,painter.background().color());
+        painter.fillPath(path,grad);
+    }
 }
 
-void GraphWidget::AddData(const QDateTime& time, const float value)
+void GraphWidget::AddData(const QDateTime& time, const double value)
 {
     m_data.insert(std::make_pair(time,value));
     PurgeOldData();
@@ -85,7 +95,7 @@ void GraphWidget::PurgeOldData()
     m_data.erase(m_data.begin(),m_data.upper_bound(limit));
 }
 
-void GraphWidget::SetVerticalScale(const float scale)
+void GraphWidget::SetVerticalScale(const double scale)
 {
     m_scale = scale; update();
 }

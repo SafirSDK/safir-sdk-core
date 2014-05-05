@@ -55,7 +55,7 @@ void MemGraph::Timeout()
     m_timer.start(static_cast<int>(updatePeriod->value()*1000));
     const size_t free = GetSharedMemory().get_free_memory();
 
-    graph->AddData(QDateTime::currentDateTime(),static_cast<float>((m_capacity-free)/(double)m_capacity));
+    graph->AddData(QDateTime::currentDateTime(),(m_capacity-free)/(double)m_capacity);
 }
 
 void MemGraph::PeriodChanged(double newPeriod)
@@ -69,5 +69,5 @@ void MemGraph::ScaleChanged(int newValue)
     std::ostringstream ostr;
     ostr << newValue << " %";
     scalePercent->setText(ostr.str().c_str());
-    graph->SetVerticalScale(static_cast<float>(newValue/100.0));
+    graph->SetVerticalScale(newValue/100.0);
 }
