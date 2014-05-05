@@ -120,19 +120,16 @@ namespace ToolSupport
         typedef Element<Elements::MapEntityId, One, boost::mpl::vector< Ignore<Elements::ClassName>, Ignore<Elements::InstanceId> > > MapEntityId;
         typedef Element<Elements::Any, One, boost::mpl::vector<IgnoreAny>, ParseAlgorithm<Elements::MapObject>, AnyMatcher > MapObject;
         typedef Element<Elements::MapObjectDeprecated, One, boost::mpl::vector<IgnoreAny> > MapObjectDeprecated;
-
-    typedef Element<Elements::MapValue, OptionalMany > ParameterValueCollection;
-    typedef Element<Elements::MapEntityId, OptionalMany, boost::mpl::vector< Ignore<Elements::ClassName>, Ignore<Elements::InstanceId> > > MapEntityIdCollection;
-    typedef Element<Elements::MapValueRef, OptionalMany, boost::mpl::vector<IgnoreAny> > MapValueRefCollection;
-    typedef Element<Elements::MapObjectDeprecated, OptionalMany, boost::mpl::vector<IgnoreAny> > MapObjectDeprecatedCollection;
-    typedef Element<Elements::Any, OptionalMany, boost::mpl::vector<IgnoreAny>, ParseAlgorithm<Elements::ParameterObject>, AnyMatcher > MapObjectCollection;
-    typedef Element<Elements::MapArray, One, boost::mpl::vector<MapObjectCollection, MapValueRefCollection, ELEMENT_CHOICE_3(MapValueCollection, MapEntityIdCollection, MapObjectDeprecatedCollection, OptionalOne) > > MapArray;
-
+        typedef Element<Elements::MapValue, OptionalMany > MapValueCollection;
+        typedef Element<Elements::MapEntityId, OptionalMany, boost::mpl::vector< Ignore<Elements::ClassName>, Ignore<Elements::InstanceId> > > MapEntityIdCollection;
+        typedef Element<Elements::MapValueRef, OptionalMany, boost::mpl::vector<IgnoreAny> > MapValueRefCollection;
+        typedef Element<Elements::MapObjectDeprecated, OptionalMany, boost::mpl::vector<IgnoreAny> > MapObjectDeprecatedCollection;
+        typedef Element<Elements::Any, OptionalMany, boost::mpl::vector<IgnoreAny>, ParseAlgorithm<Elements::MapObject>, AnyMatcher > MapObjectCollection;
+        typedef Element<Elements::MapArray, One, boost::mpl::vector<MapObjectCollection, MapValueRefCollection, ELEMENT_CHOICE_3(MapValueCollection, MapEntityIdCollection, MapObjectDeprecatedCollection, OptionalOne) > > MapArray;
         typedef Element<Elements::MapArrayElement, AtLeastOne, boost::mpl::vector< ELEMENT_CHOICE_5(MapValue, MapValueRef, MapEntityId, MapObjectDeprecated, MapObject, OptionalOne), Ignore<Elements::ParameterArrayIndex> > > MapArrayElement;
         typedef Element<Elements::MapArrayElements, One, boost::mpl::vector<MapArrayElement> > MapArrayElements;
-
         typedef Element<Elements::ClassMemberReference, One, boost::mpl::vector<IgnoreAny> > ClassMemberReference;
-        typedef Element<Elements::MemberMapping, AtLeastOne, boost::mpl::vector< ELEMENT_CHOICE_7(MapValue, MapValueRef, MapEntityId, MapArrayElements, ClassMemberReference, MapObjectDeprecated, MapObject, OptionalOne), MapPropertyMember > > MemberMapping;
+        typedef Element<Elements::MemberMapping, AtLeastOne, boost::mpl::vector< ELEMENT_CHOICE_8(MapValue, MapValueRef, MapEntityId, MapArray, MapArrayElements, ClassMemberReference, MapObjectDeprecated, MapObject, OptionalOne), MapPropertyMember > > MemberMapping;
         typedef Element<Elements::MemberMappings, OptionalOne, boost::mpl::vector<MemberMapping> > MemberMappings;
 
         //Top level

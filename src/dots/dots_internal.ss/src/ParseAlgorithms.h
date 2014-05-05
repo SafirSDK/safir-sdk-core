@@ -1439,34 +1439,42 @@ namespace ToolSupport
             const PropertyDescriptionBasic* pd=state.lastInsertedPropertyMapping->property;
             MemberMappingBasicPtr md(new MemberMappingBasic);
             md->kind=MappedToNull;
-            bool foundPropertyMember=false;
             bool inlineParam=false;
             bool isArray=false;
+
+            //get property member
+            try
+            {
+                std::string propMemberName=pt.get<std::string>(Elements::MapPropertyMember::Name());
+                SerializationUtils::Trim(propMemberName);
+
+                md->propertyMemberIndex=pd->GetMemberIndex(propMemberName);
+                if (md->propertyMemberIndex<0)
+                {
+                    std::ostringstream os;
+                    os<<"The property member '"<<propMemberName<<"' has been mapped in a propertyMapping, but the member does not exist in property "<<pd->GetName();
+                    throw ParseError("Invalid propertyMapping", os.str(), state.currentPath, 74);
+                }
+
+                //check for duplicates
+                if (state.lastInsertedPropertyMapping->memberMappings[md->propertyMemberIndex]!=NULL)
+                {
+                    //Already been mapped, i.e duplicated memberMapping
+                    std::ostringstream ss;
+                    ss<<"The property member '"<<propMemberName<<"' in property '"<<pd->GetName()<<"' is defined more than one time in property mapping.";
+                    throw ParseError("Duplicated property member mapping", ss.str(), state.currentPath, 75);
+                }
+            }
+            catch (const boost::property_tree::ptree_error&)
+            {
+                throw ParseError("Missing element", "PropertyMapping is missing the propertyMember-element in a memberMapping'", state.currentPath, 76);
+            }
 
             for (boost::property_tree::ptree::iterator it=pt.begin(); it!=pt.end(); ++it)
             {
                 if (it->first==Elements::MapPropertyMember::Name())
                 {
-                    //check that property member exists
-                    const std::string& propMemberName=it->second.data();
-                    md->propertyMemberIndex=pd->GetMemberIndex(propMemberName);
-                    if (md->propertyMemberIndex<0)
-                    {
-                        std::ostringstream os;
-                        os<<"The property member '"<<propMemberName<<"' has been mapped in a propertyMapping, but the member does not exist in property "<<pd->GetName();
-                        throw ParseError("Invalid propertyMapping", os.str(), state.currentPath, 74);
-                    }
-
-                    //check for duplicates
-                    if (state.lastInsertedPropertyMapping->memberMappings[md->propertyMemberIndex]!=NULL)
-                    {
-                        //Already been mapped, i.e duplicated memberMapping
-                        std::ostringstream ss;
-                        ss<<"The property member '"<<propMemberName<<"' in property '"<<pd->GetName()<<"' is defined more than one time in property mapping.";
-                        throw ParseError("Duplicated property member mapping", ss.str(), state.currentPath, 75);
-                    }
-
-                    foundPropertyMember=true;
+                    continue;
                 }
                 else if (it->first==Elements::ClassMemberReference::Name())
                 {
@@ -1480,9 +1488,18 @@ namespace ToolSupport
                     md->kind=MappedToParameter;
                     break;
                 }
+                else if (it->first==Elements::MapArray::Name())
+                {
+                    //inline array value, new format
+                    md->kind=MappedToParameter;
+                    inlineParam=true;
+                    isArray=true;
+                    break;
+
+                }
                 else if (it->first==Elements::MapArrayElements::Name())
                 {
-                    //inline array value
+                    //inline array value, old format
                     md->kind=MappedToParameter;
                     inlineParam=true;
                     isArray=true;
@@ -1495,11 +1512,6 @@ namespace ToolSupport
                     inlineParam=true;
                     break;
                 }
-            }
-
-            if (!foundPropertyMember)
-            {
-                throw ParseError("Missing element", "PropertyMapping is missing the propertyMember-element in a memberMapping'", state.currentPath, 76);
             }
 
             state.lastInsertedPropertyMapping->memberMappings[md->propertyMemberIndex]=md;
