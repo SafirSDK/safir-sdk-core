@@ -53,7 +53,22 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
   FILE(GLOB_RECURSE dou_files *.dou)
   FILE(GLOB_RECURSE dom_files *.dom)
   FILE(GLOB_RECURSE namespace_files *.namespace.txt)
-  
+
+  #set up java namespace prefixing rules
+  foreach (file ${namespace_files})
+    string (REGEX REPLACE ".*/([a-zA-Z\\.0-9]*)-java\\.namespace\\.txt" "\\1" namespace ${file})
+
+    file(STRINGS ${file} prefix REGEX "^[a-zA-Z0-9\\.]+$") #read the line we want from the file
+    set (java_namespace_keys ${java_namespace_keys} ${namespace})
+    set (java_namespace_${namespace}_replacement ${prefix}.${namespace})
+  endforeach()
+
+  if(java_namespace_keys)
+    #get them in reverse order so that 'a.b' will be replaced before 'a'
+    list(SORT java_namespace_keys)
+    list(REVERSE java_namespace_keys)
+  endif()
+
   #loop over all dou files
   foreach (dou ${dou_files})
     #message ("Dou ${dou}")
@@ -64,12 +79,19 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
 
     string (REGEX REPLACE "^([a-zA-Z\\.0-9]*)\\.[a-zA-Z0-9]+$" "\\1" namespace ${base_name})
     string (REGEX REPLACE "^[a-zA-Z\\.0-9]*\\.([a-zA-Z0-9]+)$" "\\1" java_base_name ${base_name})
+
+    #perform prefix insertion
+    foreach(key ${java_namespace_keys})
+      string (REGEX REPLACE "^${key}" "${java_namespace_${key}_replacement}" namespace ${namespace})
+    endforeach()
+    
+
     string (TOLOWER ${namespace} java_namespace)
     string (REPLACE "." "/" java_path ${java_namespace})
     #message ("namespace ${java_path}")
     #message ("class name ${java_base_name}")
-    set (java_files ${java_files} generated_code/java/src/com/saabgroup/${java_path}/${java_base_name}.java)
-    #message(generated_code/java/src/com/saabgroup/${java_path}/${java_base_name}.java)
+    set (java_files ${java_files} generated_code/java/src/${java_path}/${java_base_name}.java)
+    #message(generated_code/java/src/${java_path}/${java_base_name}.java)
     #TODO: read the namespace files and do this right
   endforeach()
 
@@ -101,7 +123,7 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
     --output-path=generated_code)
   
   ADD_CUSTOM_COMMAND(
-    OUTPUT ${cpp_files} #TODO: ${java_files}
+    OUTPUT ${cpp_files} ${java_files}
 
     COMMAND ${dots_v_command} ${CMAKE_CURRENT_SOURCE_DIR}
 
