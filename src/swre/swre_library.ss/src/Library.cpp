@@ -403,10 +403,20 @@ namespace Internal
                 {
                     // It's a 'ping' command.
 
-                    std::wcout << L"Tracer Ping reply" << std::endl;
+                    Safir::Dob::SecondaryConnection conn;
+                    conn.Attach();
+                    Safir::Dob::ConnectionAspectMisc connectionAspectMisc(conn);
+                    
+                    std::wostringstream ostr;
+                    ostr << "Tracer Ping reply from " 
+                         << connectionAspectMisc.GetConnectionName() 
+                         <<  " on node " 
+                         << Safir::Dob::NodeParameters::Nodes(Safir::Dob::ThisNodeParameters::NodeNumber())->NodeName().GetVal();
+
+                    std::wcout << ostr.str() << std::endl;
 
                     Safir::Logging::SendSystemLog(Safir::Logging::Debug,
-                                                  L"Tracer Ping reply");
+                                                  ostr.str());
 
                     return; // *** RETURN ***
                 }
