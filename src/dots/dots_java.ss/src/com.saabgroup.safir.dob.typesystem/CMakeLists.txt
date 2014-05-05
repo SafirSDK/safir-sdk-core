@@ -1,6 +1,5 @@
 file(GLOB_RECURSE sources src/*.java)
 
-ADD_JAR(dots_java "${sources}" ALL)
+ADD_JAR(dots_java SOURCES ${sources})
 
-# INSTALL(FILES dots_java.jar
-#   DESTINATION ${SAFIR_RUNTIME}/bin)
+INSTALL_JAR(dots_java share/java/safir_sdk_core)

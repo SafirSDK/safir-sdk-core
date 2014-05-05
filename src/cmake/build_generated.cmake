@@ -54,14 +54,23 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
   FILE(GLOB_RECURSE dom_files *.dom)
   FILE(GLOB_RECURSE namespace_files *.namespace.txt)
   
-  #message("Dou files: ${dou_files}")
-
   #loop over all dou files
   foreach (dou ${dou_files})
     #message ("Dou ${dou}")
     string (REGEX REPLACE ".*/([a-zA-Z\\.0-9]*)\\.dou" "\\1" base_name ${dou})
     #message ("base_name ${base_name}")
     set (cpp_files ${cpp_files} generated_code/cpp/${base_name}.cpp)
+
+
+    string (REGEX REPLACE "^([a-zA-Z\\.0-9]*)\\.[a-zA-Z0-9]+$" "\\1" namespace ${base_name})
+    string (REGEX REPLACE "^[a-zA-Z\\.0-9]*\\.([a-zA-Z0-9]+)$" "\\1" java_base_name ${base_name})
+    string (TOLOWER ${namespace} java_namespace)
+    string (REPLACE "." "/" java_path ${java_namespace})
+    #message ("namespace ${java_path}")
+    #message ("class name ${java_base_name}")
+    set (java_files ${java_files} generated_code/java/src/com/saabgroup/${java_path}/${java_base_name}.java)
+    #message(generated_code/java/src/com/saabgroup/${java_path}/${java_base_name}.java)
+    #TODO: read the namespace files and do this right
   endforeach()
 
   #message("Cpp files: ${cpp_files}")
@@ -92,7 +101,7 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
     --output-path=generated_code)
   
   ADD_CUSTOM_COMMAND(
-    OUTPUT ${cpp_files}
+    OUTPUT ${cpp_files} #TODO: ${java_files}
 
     COMMAND ${dots_v_command} ${CMAKE_CURRENT_SOURCE_DIR}
 
@@ -124,10 +133,35 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
   FOREACH (DEP ${GEN_DEPENDENCIES})
     TARGET_LINK_LIBRARIES(dots_generated-${GEN_NAME}-cpp dots_generated-${DEP}-cpp)
   ENDFOREACH()
-  ############
 
   #TODO:precompiled headers?!
 
+  ############
+
+  #
+  # Build Java
+  #
+  if (Java_FOUND)
+
+    INCLUDE(UseJava)
+
+    FOREACH (DEP ${GEN_DEPENDENCIES})
+      SET(include_jars ${include_jars} dots_generated-${DEP}-java)
+    ENDFOREACH()
+
+    ADD_JAR(dots_generated-${GEN_NAME}-java
+      SOURCES ${java_files}
+      INCLUDE_JARS dots_java ${include_jars})
+
+  endif()
+
+  ############
+
+
+
+  #
+  # Install everything
+  #
   if (NOT GEN_NO_INSTALL)
     INSTALL(TARGETS dots_generated-${GEN_NAME}-cpp
       RUNTIME DESTINATION bin
@@ -141,7 +175,14 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
     INSTALL(FILES ${dou_files} ${dom_files} ${namespace_files}
       DESTINATION share/safir_sdk_core/${GEN_NAME})
 
+    #TODO: install jars
+    if (Java_FOUND)
+      install_jar(dots_generated-${GEN_NAME}-java DESTINATION share/java/safir_sdk_core)
+    endif()
+
   endif()
+  ##############
+
 ENDFUNCTION()
 
 
