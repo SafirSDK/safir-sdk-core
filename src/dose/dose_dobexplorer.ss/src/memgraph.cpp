@@ -42,6 +42,8 @@ MemGraph::MemGraph(QWidget* /*parent*/):
     m_timer.setSingleShot(true);
     m_timer.start(static_cast<int>(updatePeriod->value()*1000));
     graph->SetHistoryLength(static_cast<int>(historyLength->value()*60));
+
+    total->setText(QString::number(m_capacity / 1024 / 1024));
 }
 
 
@@ -53,9 +55,12 @@ void MemGraph::HistoryChanged(double newValue)
 void MemGraph::Timeout()
 {
     m_timer.start(static_cast<int>(updatePeriod->value()*1000));
-    const size_t free = GetSharedMemory().get_free_memory();
+    const size_t allocated = m_capacity - GetSharedMemory().get_free_memory();
+    const double ratio = allocated/(double)m_capacity;
+    graph->AddData(QDateTime::currentDateTime(),ratio);
 
-    graph->AddData(QDateTime::currentDateTime(),(m_capacity-free)/(double)m_capacity);
+    current->setText(QString::number(allocated / 1024 /1024));
+    currentPercent->setText(QString::number(static_cast<int>(ratio * 100)));
 }
 
 void MemGraph::PeriodChanged(double newPeriod)
