@@ -19,6 +19,8 @@ ADD_TEST(NAME logging_java
   COMMAND ${PYTHON_EXECUTABLE}
   ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
   --classpath ${SAFIR_JAVA_CLASSPATH}
-  --safir-show-config $<TARGET_FILE:safir_show_config>)
+  --safir-show-config $<TARGET_FILE:safir_show_config>
+  --library-path $<TARGET_FILE_DIR:logging_java_jni>)
+
 
 SET_SAFIR_TEST_PROPERTIES(TEST logging_java TIMEOUT 120)
