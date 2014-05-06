@@ -1,32 +1,29 @@
-find_package(JNI REQUIRED)
-string (REPLACE "javac" "javah" JAVAH ${JAVA_COMPILE})
-
-INCLUDE_DIRECTORIES(${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2})
+#this project contains a library that has a C interface and we only want one version of it,
+#so we never want the "d" suffix on debug builds, which is default on windows.
+SET(CMAKE_DEBUG_POSTFIX "")
 
 ADD_CUSTOM_COMMAND(OUTPUT 
-  com_saabgroup_safir_dob_Interface.h
+  ${CMAKE_CURRENT_BINARY_DIR}/com_saabgroup_safir_dob_Interface.h
   
-  COMMAND ${JAVAH} -classpath ../com.saabgroup.safir.dob/bin com.saabgroup.safir.dob.Interface
+  COMMAND ${Java_JAVAH_EXECUTABLE} -classpath ../com.saabgroup.safir.dob/dose_java.jar com.saabgroup.safir.dob.Interface
+
+  DEPENDS dose_java
+
   COMMENT "Generating javah header files"
   VERBATIM)
 
-ADD_CUSTOM_TARGET(javah ALL
-                  DEPENDS com_saabgroup_safir_dob_Interface.h)
 
-FILE(GLOB sources *.cpp)
+ADD_LIBRARY(dose_java_jni SHARED 
+  dose_java_jni.cpp
+  Callbacks.cpp
+  ConsumerTable.cpp
+  ${CMAKE_CURRENT_BINARY_DIR}/com_saabgroup_safir_dob_Interface.h)
 
-ADD_LIBRARY(dose_java_jni SHARED ${sources})
+TARGET_INCLUDE_DIRECTORIES(dose_java_jni PRIVATE ${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2} ${CMAKE_CURRENT_BINARY_DIR})
 
-if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(dose_java_jni PRIVATE dose_dll)
-endif()
+TARGET_LINK_LIBRARIES(dose_java_jni PRIVATE 
+  dose_dll
+  dots_kernel
+  dots_internal)
 
-ADD_DEPENDENCIES(javah dose_java)
-ADD_DEPENDENCIES(dose_java_jni javah)
-
-# INSTALL(TARGETS dose_java_jni
-#         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-#         LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-#         ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
-
-# INSTALL_DEBUG_INFO(dose_java_jni)
+SAFIR_INSTALL(TARGETS dose_java_jni)

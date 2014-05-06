@@ -90,7 +90,7 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
     string (REPLACE "." "/" java_path ${java_namespace})
     #message ("namespace ${java_path}")
     #message ("class name ${java_base_name}")
-    set (java_files ${java_files} generated_code/java/src/${java_path}/${java_base_name}.java)
+    set (java_files ${java_files} "${CMAKE_CURRENT_BINARY_DIR}/generated_code/java/src/${java_path}/${java_base_name}.java")
     #message(generated_code/java/src/${java_path}/${java_base_name}.java)
     #TODO: read the namespace files and do this right
   endforeach()
