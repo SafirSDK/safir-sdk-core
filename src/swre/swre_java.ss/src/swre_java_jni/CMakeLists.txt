@@ -1,34 +1,26 @@
-find_package(JNI REQUIRED)
-string (REPLACE "javac" "javah" JAVAH ${JAVA_COMPILE})
-
-INCLUDE_DIRECTORIES(${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2})
+#this project contains a library that has a C interface and we only want one version of it,
+#so we never want the "d" suffix on debug builds, which is default on windows.
+SET(CMAKE_DEBUG_POSTFIX "")
 
 ADD_CUSTOM_COMMAND(OUTPUT 
-  com_saabgroup_safir_application_Library.h
-  com_saabgroup_safir_swreports_Library.h
+  ${CMAKE_CURRENT_BINARY_DIR}/com_saabgroup_safir_application_Library.h
+  ${CMAKE_CURRENT_BINARY_DIR}/com_saabgroup_safir_swreports_Library.h
   
-  COMMAND ${JAVAH} -classpath ../com.saabgroup.safir.application/bin com.saabgroup.safir.application.Library
-  COMMAND ${JAVAH} -classpath ../com.saabgroup.safir.swreports/bin com.saabgroup.safir.swreports.Library
+  COMMAND ${JAVAH} -classpath ../com.saabgroup.safir.application/swre_application_java.jar com.saabgroup.safir.application.Library
+  COMMAND ${JAVAH} -classpath ../com.saabgroup.safir.swreports/swre_swreports_java.jar com.saabgroup.safir.swreports.Library
+
+  DEPENDS swre_application_java swre_swreports_java
+
   COMMENT "Generating javah header files"
   VERBATIM)
 
-ADD_CUSTOM_TARGET(javah ALL
-                  DEPENDS com_saabgroup_safir_application_Library.h com_saabgroup_safir_swreports_Library.h)
+ADD_LIBRARY(swre_java_jni SHARED 
+  swre_jni.cpp
+  ${CMAKE_CURRENT_BINARY_DIR}/com_saabgroup_safir_application_Library.h
+  ${CMAKE_CURRENT_BINARY_DIR}/com_saabgroup_safir_swreports_Library.h)
 
-FILE(GLOB sources *.cpp)
+TARGET_INCLUDE_DIRECTORIES(swre_java_jni PRIVATE ${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2} ${CMAKE_CURRENT_BINARY_DIR})
 
-ADD_LIBRARY(swre_java_jni SHARED ${sources})
+TARGET_LINK_LIBRARIES(swre_java_jni PRIVATE swre_library)
 
-if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(swre_java_jni PRIVATE swre_library)
-endif()
-
-ADD_DEPENDENCIES(javah swre_reports_java swre_application_java)
-ADD_DEPENDENCIES(swre_java_jni javah)
-
-# INSTALL(TARGETS swre_java_jni
-#         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-#         LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-#         ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
-
-# INSTALL_DEBUG_INFO(swre_java_jni)
+SAFIR_INSTALL(TARGETS swre_java_jni)
