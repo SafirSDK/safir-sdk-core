@@ -46,8 +46,8 @@ if "check_output" not in dir( subprocess ): # duck punch it in!
 
 parser = argparse.ArgumentParser("test script for logging")
 parser.add_argument("--classpath", required=True)
-parser.add_argument("--safir-show-config", required=True)
 parser.add_argument("--library-path", required=True)
+parser.add_argument("--safir-show-config", required=True)
 
 arguments = parser.parse_args()
 
@@ -55,12 +55,8 @@ arguments = parser.parse_args()
 sender_cmd = ("java",
               "-Xcheck:jni",
               "-Xfuture",
-              "-cp",
-              arguments.classpath,
+              "-cp",  arguments.classpath,
               "-Djava.library.path=" + arguments.library_path,
-#              os.path.join(SAFIR_RUNTIME, "bin", "logging_java.jar") +
-#              os.pathsep +
-#              "log_sender_java.jar",
               "Sender")
 
 log_server = syslog_server.SyslogServer(arguments.safir_show_config)    

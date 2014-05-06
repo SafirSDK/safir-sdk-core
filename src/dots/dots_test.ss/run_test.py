@@ -30,8 +30,15 @@ from syslog_server import SyslogServer
 parser = argparse.ArgumentParser("test script")
 parser.add_argument("--show-safir-config", required=True)
 parser.add_argument("--language", required=True)
-parser.add_argument("--binary", required=True)
 parser.add_argument("--output", required=True)
+
+#cpp
+parser.add_argument("--binary")
+
+#for java
+parser.add_argument("--classpath")
+parser.add_argument("--library-path")
+
 
 arguments = parser.parse_args()
 
@@ -42,17 +49,22 @@ dependencies = list()
 
 if arguments.language == "cpp":
     command = arguments.binary
-else:
-    print("Not implemented")
-    sys.exit(1)
 #elif arguments.language == "ada":
 #    command = (os.path.join("ada", "obj", "dots_test_ada"),)
 #elif arguments.language == "dotnet":
 #    command = (os.path.join("dotnet", "dots_test_dotnet.csexe"),)
 #    dependencies = ("dots_generated-dotnet.dll", "Safir.Dob.Typesystem.dll")
-#elif arguments.language == "java":
-#    command = ("java","-jar", os.path.join("java","dots_test_java.jar"))
-#    dependencies = ("dots_generated-java.jar", "dots_java.jar")
+elif arguments.language == "java":
+    command = ("java",
+               "-Xcheck:jni",
+               "-Xfuture",
+               "-cp", arguments.classpath,
+               "-Djava.library.path=" + arguments.library_path,
+               "Test")
+
+else:
+    print("Not implemented")
+    sys.exit(1)
 print("Test suite command is '" + " ".join(command) + "'")
 
 #for dep in dependencies:

@@ -5,9 +5,10 @@ ADD_SUBDIRECTORY(cpp)
 #  ADD_SUBDIRECTORY(ada)
 #endif()
 
-#if (SAFIR_JAVA_SUPPORT)
-#  ADD_SUBDIRECTORY(java)
-#endif()
+if (Java_FOUND)
+  ADD_SUBDIRECTORY(java)
+endif()
+
 
 ADD_TEST(NAME dots_cpp 
   COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
@@ -27,7 +28,21 @@ SET_SAFIR_TEST_PROPERTIES(TEST dots_cpp CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_D
 #  SET_SAFIR_TEST_PROPERTIES(TEST dots_ada)
 #endif()
 
-#if (SAFIR_JAVA_SUPPORT)
-#  ADD_TEST(dots_java ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py java)
-#  SET_SAFIR_TEST_PROPERTIES(TEST dots_java)
-#endif()
+if (Java_FOUND)
+  SAFIR_GET_JAVA_CLASSPATH_AND_LIBPATH(
+    JAVA_TARGETS dots_test_java dots_generated-DotsTest-java dots_java logging_java 
+    JNI_TARGETS logging_java_jni dots_java_jni)
+  
+  ADD_TEST(NAME dots_java
+    COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
+    --show-safir-config $<TARGET_FILE:safir_show_config>
+    --language java
+    --classpath ${SAFIR_JAVA_CLASSPATH}
+    --library-path ${SAFIR_JAVA_LIBRARY_PATH}
+    --output ${CMAKE_CURRENT_SOURCE_DIR}/output.txt)
+
+#TODO: we should really be using the manifest instead of specifying entrypoint in the script
+
+SET_SAFIR_TEST_PROPERTIES(TEST dots_java CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/test_config)
+
+endif()
