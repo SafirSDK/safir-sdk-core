@@ -24,7 +24,7 @@
 #
 ###############################################################################
 from __future__ import print_function
-import subprocess, os, time, sys
+import subprocess, os, time, sys, argparse
 import syslog_server
 from safe_print import *
 
@@ -44,21 +44,26 @@ if "check_output" not in dir( subprocess ): # duck punch it in!
         return output
     subprocess.check_output = f
 
-    
-SAFIR_RUNTIME = os.environ["SAFIR_RUNTIME"]
+parser = argparse.ArgumentParser("test script for logging")
+parser.add_argument("--classpath", required=True)
+parser.add_argument("--safir-show-config", required=True)
 
+arguments = parser.parse_args()
+
+print("Classpath is '" +arguments.classpath +"'")
 sender_cmd = ("java",
               "-Xcheck:jni",
               "-Xfuture",
-              "-cp", 
-              os.path.join(SAFIR_RUNTIME, "bin", "logging_java.jar") +
-              os.pathsep +
-              "log_sender_java.jar",
+              "-cp",
+              arguments.classpath,
+#              os.path.join(SAFIR_RUNTIME, "bin", "logging_java.jar") +
+#              os.pathsep +
+#              "log_sender_java.jar",
               "Sender")
 
-log_server = syslog_server.SyslogServer()
-
-o1 = subprocess.check_output(sender_cmd, stderr=subprocess.STDOUT)
+log_server = syslog_server.SyslogServer(arguments.safir_show_config)    
+    
+o1 = subprocess.call(sender_cmd, stderr=subprocess.STDOUT)
 o2 = subprocess.check_output(sender_cmd, stderr=subprocess.STDOUT)
 o3 = subprocess.check_output(sender_cmd, stderr=subprocess.STDOUT)
 

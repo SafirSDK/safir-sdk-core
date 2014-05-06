@@ -9,9 +9,7 @@ add_subdirectory(logging_cpp)
 #   add_subdirectory(logging_ada)
 #endif()
 
-#if (SAFIR_JAVA_SUPPORT)
-#   add_subdirectory(logging_java)
-#endif()
+add_subdirectory(logging_java)
 
 
 

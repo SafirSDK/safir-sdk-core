@@ -1,15 +1,24 @@
-find_package(Java REQUIRED)
+if (NOT Java_FOUND)
+  return()
+endif()
 
-INCLUDE(JavaMacros)
+INCLUDE(UseJava)
+#SET_JAVA_CLASSPATH(${SAFIR_RUNTIME}/bin/logging_java.jar)
 
-file(GLOB_RECURSE sources *.java)
+#SET(JAVA_MANIFEST ${CMAKE_CURRENT_SOURCE_DIR}/Manifest.txt)
 
-SET_JAVA_CLASSPATH(${SAFIR_RUNTIME}/bin/logging_java.jar)
+ADD_JAR(log_sender_java 
+  SOURCES Sender.java
+  INCLUDE_JARS logging_java)
 
-SET(JAVA_MANIFEST ${CMAKE_CURRENT_SOURCE_DIR}/Manifest.txt)
+SET_JAVA_CLASSPATH(TARGETS log_sender_java logging_java)
 
-ADD_JAR(log_sender_java "${sources}" ALL)
+message("CP: ${SAFIR_JAVA_CLASSPATH}")
 
-ADD_TEST(logging_java ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
+ADD_TEST(NAME logging_java
+  COMMAND ${PYTHON_EXECUTABLE}
+  ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
+  --classpath ${SAFIR_JAVA_CLASSPATH}
+  --safir-show-config $<TARGET_FILE:safir_show_config>)
 
 SET_SAFIR_TEST_PROPERTIES(TEST logging_java TIMEOUT 120)

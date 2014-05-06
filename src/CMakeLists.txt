@@ -290,6 +290,33 @@ if (NOT Java_FOUND)
   MESSAGE(WARNING "Failed to find the Java development tools, will not build Java interfaces")
 endif()
 
+function(SET_JAVA_CLASSPATH)
+  cmake_parse_arguments(CP "" "" "TARGETS" ${ARGN})
+
+  if (NOT "${CP_UNPARSED_ARGUMENTS}" STREQUAL "")
+    message(FATAL_ERROR "Unknown argument to SET_JAVA_CLASSPATH '${CP_UNPARSED_ARGUMENTS}'")
+  endif()
+
+  if (UNIX)
+    SET(classpath_separator ":")
+  else ()
+    SET(classpath_separator "\;")
+  endif()
+
+  unset(SAFIR_JAVA_CLASSPATH)
+  foreach (TARGET ${CP_TARGETS})
+    get_target_property(jar ${TARGET} JAR_FILE)
+    if (NOT SAFIR_JAVA_CLASSPATH)
+      SET(SAFIR_JAVA_CLASSPATH ${jar})
+    else()
+      SET(SAFIR_JAVA_CLASSPATH "${SAFIR_JAVA_CLASSPATH}${classpath_separator}${jar}")
+    endif()
+  endforeach()
+
+
+
+  set (SAFIR_JAVA_CLASSPATH "${SAFIR_JAVA_CLASSPATH}" PARENT_SCOPE)
+endfunction()
 
 ENABLE_TESTING()
 FIND_PACKAGE(PythonInterp)
