@@ -30,6 +30,11 @@
       </column>
       <item>
        <property name="text">
+        <string>About</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
         <string>Memory</string>
        </property>
        <property name="toolTip">
@@ -90,7 +95,7 @@
        <enum>Qt::LeftToRight</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">

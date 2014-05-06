@@ -18,15 +18,11 @@
   </property>
   <layout class="QVBoxLayout">
    <item>
-    <widget class="QTextEdit" name="doseInfo">
-     <property name="toolTip">
-      <string>A whole bunch of interesting stuff, right?</string>
-     </property>
-     <property name="readOnly">
-      <bool>true</bool>
-     </property>
-     <property name="acceptRichText">
-      <bool>false</bool>
+    <widget class="QPlainTextEdit" name="doseInfo">
+     <property name="font">
+      <font>
+       <family>Monospace</family>
+      </font>
      </property>
     </widget>
    </item>

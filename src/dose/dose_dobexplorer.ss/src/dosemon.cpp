@@ -25,6 +25,7 @@
 #include "common_header.h"
 #include "dosemon.h"
 #include <sstream>
+#include "About.h"
 #include "memgraph.h"
 #include "entitystats.h"
 #include "nodestatus.h"
@@ -55,7 +56,10 @@ DoseMon::DoseMon(QWidget * /*parent*/)
 
     QPushButton * closeButton = new QPushButton("X");
     tabWidget->setCornerWidget(closeButton);
-    int newTab = tabWidget->addTab(new MemGraph(this),"Memory");
+    //int newTab = tabWidget->addTab(new MemGraph(this),"Memory");
+    //tabWidget->setTabToolTip(newTab,tabWidget->widget(newTab)->toolTip());
+    
+    int newTab = tabWidget->addTab(new About(this),"About");
     tabWidget->setTabToolTip(newTab,tabWidget->widget(newTab)->toolTip());
 
     connect(closeButton,
@@ -96,6 +100,11 @@ void DoseMon::TreeItemActivated ( QTreeWidgetItem * item, int /*column*/ )
     }
 
     int newTab = -1;
+    if (item->text(0) == "About")
+    {
+        newTab = tabWidget->addTab(new About(this),"About");
+        tabWidget->setTabToolTip(newTab,tabWidget->widget(newTab)->toolTip());
+    }
     if (item->text(0) == "Memory")
     {
         newTab = tabWidget->addTab(new MemGraph(this),"Memory");
