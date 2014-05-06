@@ -46,10 +46,6 @@ DoseComInfo::DoseComInfo(QWidget * /*parent*/):
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(Update()));
     m_timer.start(3000);
 
-//QFont font("");
-//font.setStyleHint(QFont::TypeWriter);
-//doseInfo->setFont(font);
-
     Update();
 
     connect(debugLevel, SIGNAL(valueChanged(double)), this, SLOT(DebugLevelChanged(double)));

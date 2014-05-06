@@ -38,16 +38,30 @@
 #include <Safir/Dob/Internal/Connections.h>
 #include <set>
 
-const int EntityWidgetType = 10;
-const int ConnectionWidgetType = 11;
-const int RemoteConnectionWidgetType = 11;
+namespace
+{
+    const int EntityWidgetType = 10;
+    const int ConnectionWidgetType = 11;
+    const int RemoteConnectionWidgetType = 11;
+
+    void SortChildrenRecursive(QTreeWidgetItem* item)
+    {
+        for (int i = 0; i < item->childCount(); ++i)
+        {
+            SortChildrenRecursive(item->child(i));
+            item->child(i)->sortChildren(0,Qt::AscendingOrder);
+        }
+    }
+}
+
+
 
 DoseMon::DoseMon(QWidget * /*parent*/)
 {
     setupUi(this); // this sets up GUI
 
-    treeWidget->setSortingEnabled(true);
-    treeWidget->sortByColumn(0,Qt::AscendingOrder);
+    //    treeWidget->setSortingEnabled(true);
+    //treeWidget->sortByColumn(0,Qt::AscendingOrder);
 
     while (tabWidget->currentIndex() != -1)
     {
@@ -221,7 +235,12 @@ void DoseMon::AddEntitesToTreeWidget()
             }
         }
     }
+    QList<QTreeWidgetItem *> items = treeWidget->findItems("Entities",Qt::MatchExactly);
+    SortChildrenRecursive(items.front());
+
 }
+
+
 
 void DoseMon::AddConnection(const Safir::Dob::Internal::Connection & connection,
                             std::set<QString>& localConnectionNames,
@@ -318,4 +337,7 @@ void DoseMon::UpdateTreeWidget()
             remoteConnectionItem->addChild(new QTreeWidgetItem(QStringList(*it),RemoteConnectionWidgetType));
         }
     }
+
+    connectionItem->sortChildren(0, Qt::AscendingOrder);
+    remoteConnectionItem->sortChildren(0, Qt::AscendingOrder);
 }

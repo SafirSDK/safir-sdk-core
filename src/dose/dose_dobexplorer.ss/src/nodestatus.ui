@@ -23,30 +23,48 @@
       <property name="text">
        <string>ID</string>
       </property>
+      <property name="toolTip">
+       <string>ID of the node, as defined in Safir.Dob.ThisNodeParameters. Color indicates whether node is up, down or new.</string>
+      </property>
      </column>
      <column>
       <property name="text">
        <string>x</string>
+      </property>
+      <property name="toolTip">
+       <string>State of pool distribution of this node.</string>
       </property>
      </column>
      <column>
       <property name="text">
        <string>Name</string>
       </property>
+      <property name="toolTip">
+       <string>Name of the node.</string>
+      </property>
      </column>
      <column>
       <property name="text">
        <string>IP Address</string>
+      </property>
+      <property name="toolTip">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;IP address of the node.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
      </column>
      <column>
       <property name="text">
        <string>State</string>
       </property>
+      <property name="toolTip">
+       <string>Current state of the node.</string>
+      </property>
      </column>
      <column>
       <property name="text">
        <string>Packets</string>
+      </property>
+      <property name="toolTip">
+       <string>Number of packets received from the node (except if it is the own node, when it is the number of packets transmitted).</string>
       </property>
      </column>
     </widget>

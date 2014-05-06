@@ -107,6 +107,7 @@ void NodeStatus::UpdateTable()
                 {
                     nodeTable->item(jx,4)->setText("Up");
                     nodeTable->item(jx,0)->setBackground(m_greenBrush);
+                    nodeTable->item(jx,0)->setToolTip("Node is UP");
                 }
                 break;
 
@@ -115,6 +116,8 @@ void NodeStatus::UpdateTable()
                     nodeTable->item(jx,4)->setText("Down");
                     nodeTable->item(jx,0)->setBackground(m_redBrush);
                     nodeTable->item(jx,1)->setBackground(m_redBrush);
+                    nodeTable->item(jx,0)->setToolTip("Node is DOWN");
+                    nodeTable->item(jx,1)->setToolTip("Node is DOWN");
                 }
                 break;
 
@@ -122,6 +125,7 @@ void NodeStatus::UpdateTable()
                 {
                     nodeTable->item(jx,4)->setText("New");
                     nodeTable->item(jx,0)->setBackground(m_blueBrush);
+                    nodeTable->item(jx,0)->setToolTip("Node is NEW");
                 }
                 break;
             }
@@ -135,10 +139,12 @@ void NodeStatus::UpdateTable()
             if(pShm->BitMapToBePoolDistributed64 | pShm->BitMapBeingPoolDistributed64)
             {
                 nodeTable->item(jx,1)->setBackground(m_blueBrush);
+                nodeTable->item(jx,1)->setToolTip("Pool distribution to at least one node is in progress or will start soon.");
             }
             else
             {
-                nodeTable->item(jx,1)->setBackground(m_yellowBrush);
+                nodeTable->item(jx,1)->setBackground(m_greenBrush);
+                nodeTable->item(jx,1)->setToolTip("No pool distribution in progress or pending. Everyone has our pool.");
             }
         }
         else
@@ -151,10 +157,12 @@ void NodeStatus::UpdateTable()
                     | pShm->BitMapBeingPoolDistributed64) & BitMap64)
                 {
                     nodeTable->item(jx,1)->setBackground(m_blueBrush);
+                    nodeTable->item(jx,1)->setToolTip("We are distributing (or about to distribute) our pool to this node.");
                 }
                 else
                 {
                     nodeTable->item(jx,1)->setBackground(m_greenBrush);
+                    nodeTable->item(jx,1)->setToolTip("This node has our pool.");
                 }
             }
             else if(pShm->NodeStatusTable[jx].Status == 'N')
@@ -163,10 +171,12 @@ void NodeStatus::UpdateTable()
                      | pShm->BitMapBeingPoolDistributed64) & BitMap64) == 0)
                 {
                     nodeTable->item(jx,1)->setBackground(m_greenBrush);
+                    nodeTable->item(jx,1)->setToolTip("This node has our pool.");
                 }
                 else
                 {
                     nodeTable->item(jx,1)->setBackground(m_blueBrush);
+                    nodeTable->item(jx,1)->setToolTip("We are distributing (or about to distribute) our pool to this node.");
                 }
             }
         }
