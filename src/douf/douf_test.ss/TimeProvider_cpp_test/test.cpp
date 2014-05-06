@@ -96,6 +96,7 @@ bool check_timezone(const std::string& tz,
         std::wcout << "Expected " << expectedOffset1 
                    << " or " << expectedOffset2 
                    << ", but got " << offset << std::endl;
+        return false;
     }
 
     return true;
