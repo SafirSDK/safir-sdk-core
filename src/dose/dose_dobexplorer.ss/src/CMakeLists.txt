@@ -13,6 +13,7 @@ find_package(Qt5Widgets QUIET)
 
 if (Qt5Widgets_FOUND)
   message(STATUS "Building dobexplorer with Qt5")
+  
   QT5_WRAP_UI(ui_headers ${ui})
   QT5_WRAP_CPP(moc_sources ${headers} ${QT5_WRAP_CPP_OPTIONS})
 else()
