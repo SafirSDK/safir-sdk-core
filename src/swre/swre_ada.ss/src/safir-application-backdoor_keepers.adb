@@ -165,7 +165,8 @@ package body Safir.Application.Backdoor_Keepers is
                         (To_String (Safir.Dob.Node_Parameters.Nodes (Safir.Dob.This_Node_Parameters.Node_Number).Ref.all.Node_Name.Get_Val),
                          GNAT.Regexp.Compile
                                  (Pattern => To_String (Cmd.Ref.all.Node_Name.Get_Val),
-                                  Case_Sensitive => False)) then
+                                  Case_Sensitive => False))
+         then
             -- Node name doesn't match
             return;  -- *** RETURN ***
          end if;
@@ -177,7 +178,8 @@ package body Safir.Application.Backdoor_Keepers is
                            (Self.Connection).Get_Connection_Name),
              GNAT.Regexp.Compile
                 (Pattern => To_String (Cmd.Ref.all.Connection_Name.Get_Val),
-                 Case_Sensitive => False)) then
+                 Case_Sensitive => False))
+         then
             -- Connection name doesn't match
             return;  -- *** RETURN ***
          end if;
@@ -196,8 +198,12 @@ package body Safir.Application.Backdoor_Keepers is
          if To_String (Cmd_Tokens.First_Element) = "ping" then
             -- It's a 'ping' command. Answer to it without bothering
             -- the subclass implementator.
-            Safir.Logging.Send_System_Log (Safir.Logging.Debug,
-                                           "Ping reply");
+            Safir.Logging.Send_System_Log
+              (Safir.Logging.Debug,
+               To_Wide_String ("Ping reply from "
+                                 & Safir.Dob.Connection_Aspect_Miscs.Create (Self.Connection).Get_Connection_Name
+                                 & " from node "
+                                 & Safir.Dob.Node_Parameters.Nodes (Safir.Dob.This_Node_Parameters.Node_Number).Ref.all.Node_Name.Get_Val));
             return; -- *** RETURN ***
 
          elsif To_String (Cmd_Tokens.First_Element) = "help" then

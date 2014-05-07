@@ -96,6 +96,7 @@ bool check_timezone(const std::string& tz,
         std::wcout << "Expected " << expectedOffset1 
                    << " or " << expectedOffset2 
                    << ", but got " << offset << std::endl;
+        return false;
     }
 
     return true;
@@ -149,7 +150,7 @@ int main()
 
     if (!check_timezone("EST5EDT", boost::posix_time::hours(-5), boost::posix_time::hours(-4)) ||
         !check_timezone("PST8PDT", boost::posix_time::hours(-8), boost::posix_time::hours(-7)) ||
-        !check_timezone("WAUST-8WAUDT", boost::posix_time::hours(8), boost::posix_time::hours(8)) ||
+        !check_timezone("WAUST-8", boost::posix_time::hours(8), boost::posix_time::hours(8)) ||
         !check_timezone("NZST-12NZDT", boost::posix_time::hours(12),boost::posix_time::hours(13)))
     {
         return 1;

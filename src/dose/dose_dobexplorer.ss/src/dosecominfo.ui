@@ -1,7 +1,8 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>DoseComInfo</class>
- <widget class="QWidget" name="DoseComInfo" >
-  <property name="geometry" >
+ <widget class="QWidget" name="DoseComInfo">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
@@ -9,35 +10,40 @@
     <height>436</height>
    </rect>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>DoseCom Info</string>
   </property>
-  <layout class="QVBoxLayout" >
+  <property name="toolTip">
+   <string>Internal dose_com statistics and information.</string>
+  </property>
+  <layout class="QVBoxLayout">
    <item>
-    <widget class="QTextEdit" name="doseInfo" >
-     <property name="readOnly" >
-      <bool>true</bool>
-     </property>
-     <property name="acceptRichText" >
-      <bool>false</bool>
+    <widget class="QPlainTextEdit" name="doseInfo">
+     <property name="font">
+      <font>
+       <family>Monospace</family>
+      </font>
      </property>
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" >
+    <layout class="QHBoxLayout">
      <item>
-      <widget class="QLabel" name="debugLevelLabel" >
-       <property name="text" >
+      <widget class="QLabel" name="debugLevelLabel">
+       <property name="text">
         <string>Debug Level</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QDoubleSpinBox" name="debugLevel" >
-       <property name="decimals" >
+      <widget class="QDoubleSpinBox" name="debugLevel">
+       <property name="toolTip">
+        <string>Log level of dose_com. Logs are sent to the low level logger, so be sure to enable that in logging.ini.</string>
+       </property>
+       <property name="decimals">
         <number>0</number>
        </property>
-       <property name="maximum" >
+       <property name="maximum">
         <double>10.000000000000000</double>
        </property>
       </widget>

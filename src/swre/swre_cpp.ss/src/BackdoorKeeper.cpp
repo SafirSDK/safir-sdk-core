@@ -142,9 +142,15 @@ void BackdoorKeeper::OnMessage(const Safir::Dob::MessageProxy messageProxy)
             {
                 // It's a 'ping' command. Answer to it without bothering
                 // the subclass implementator.
-
+                
+                std::wostringstream ostr;
+                ostr << "Ping reply from " 
+                     << connectionAspectMisc.GetConnectionName() 
+                     <<  " on node " 
+                     << Safir::Dob::NodeParameters::Nodes(Safir::Dob::ThisNodeParameters::NodeNumber())->NodeName().GetVal();
+                
                 Safir::Logging::SendSystemLog(Safir::Logging::Debug,
-                                              L"Ping reply");
+                                              ostr.str());
 
                 return; // *** RETURN ***
             }
