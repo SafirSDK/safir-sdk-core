@@ -11,6 +11,7 @@ target_include_directories(douf_time_library PUBLIC .)
 TARGET_LINK_LIBRARIES(douf_time_library PRIVATE 
   dots_generated-douf_time-cpp 
   dots_cpp 
+  lluf_utils
   ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY})
 

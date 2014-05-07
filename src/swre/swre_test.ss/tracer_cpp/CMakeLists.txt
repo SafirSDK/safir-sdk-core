@@ -1,9 +1,18 @@
 add_executable(tracer_sender_cpp sender.cpp)
 
-if (NOT MSVC)
-  target_link_libraries(tracer_sender_cpp PRIVATE dots_cpp dose_cpp swre_interface_cpp ${Boost_LIBRARIES})
-endif()
+target_link_libraries(tracer_sender_cpp PRIVATE 
+  swre_interface_cpp
+  dose_cpp
+  dose_internal
+  dots_generated-Safir-cpp
+  dots_cpp
+  dots_internal
+  lluf_utils)
 
-ADD_TEST(tracer_cpp ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
+ADD_TEST(NAME tracer_cpp
+  COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
+  --binary $<TARGET_FILE:tracer_sender_cpp>
+  --safir-show-config $<TARGET_FILE:safir_show_config>)
+
 
 SET_SAFIR_TEST_PROPERTIES(TEST tracer_cpp TIMEOUT 120)
