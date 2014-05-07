@@ -90,17 +90,22 @@ namespace SP
 #endif
             
             m_coordinator->PerformOnStateMessage([this,crcBytes](const boost::shared_ptr<char[]>& data, const size_t size)
-                                                 {
+            {
 #ifdef CHECK_CRC
-                                                     const int crc = GetCrc32(data.get(), size - crcBytes);
-                                                     memcpy(data.get() + size - crcBytes, &crc, sizeof(int));
+                const int crc = GetCrc32(data.get(), size - crcBytes);
+                memcpy(data.get() + size - crcBytes, &crc, sizeof(int));
 #endif
-
-                                                     for (auto it: m_nodeTypes)
-                                                     {
-                                                         m_communication->SendToNodeType(it.second.id, data, size, m_senderId);
-                                                     }
-                                                 },
+                
+                for (auto it: m_nodeTypes)
+                {
+                    const bool sent = m_communication->SendToNodeType(it.second.id, data, size, m_senderId);
+                    if (!sent)
+                    {
+                        lllog(7) << "StatePublisherRemote: Overflow when sending to node type " 
+                                 << it.second.name.c_str() << std::endl;
+                    }
+                }
+            },
                                                  crcBytes);
         }
 

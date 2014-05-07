@@ -148,7 +148,7 @@ namespace
 
         //currently we just copy the raw data... a bit stupid...
 
-        lllog(6) << "Collating" << std::endl;
+        //lllog(6) << "Collating" << std::endl;
 
 
         m_stateMessage.set_elected_id(m_id);
@@ -307,7 +307,12 @@ namespace
                 if (!it.second.isLight)
                 {
                     //TODO: handle overflow!
-                    m_communication->SendToNodeType(it.second.id, data, size, m_dataIdentifier);
+                    const bool sent = m_communication->SendToNodeType(it.second.id, data, size, m_dataIdentifier);
+                    if (!sent)
+                    {
+                        lllog(7) << "Coordinator: Overflow when sending INQUIRY to node type " 
+                                 << it.second.name.c_str() << std::endl;
+                    }
                 }
             }
 
@@ -356,7 +361,14 @@ namespace
                     aliveMsg.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
                     
                     //TODO: handle overflow!
-                    m_communication->SendToNode(from, nodeTypeId, data, size, m_dataIdentifier);
+                    const bool sent = m_communication->SendToNode(from, nodeTypeId, data, size, m_dataIdentifier);
+
+                    if (!sent)
+                    {
+                        lllog(7) << "Coordinator: Overflow when sending ALIVE to node " 
+                                 << from << std::endl;
+                    }
+
 
                     m_strand.dispatch([this,message,from]
                                       {
@@ -431,7 +443,14 @@ namespace
             if (!it.second.isLight)
             {
                 //TODO: handle overflow!
-                m_communication->SendToNodeType(it.second.id, data, size, m_dataIdentifier);
+                const bool sent = m_communication->SendToNodeType(it.second.id, data, size, m_dataIdentifier);
+
+                if (!sent)
+                {
+                    lllog(7) << "Coordinator: Overflow when sending VICTORY to node type " 
+                             << it.second.name.c_str() << std::endl;
+                }
+
             }
         }
 
