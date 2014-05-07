@@ -78,6 +78,8 @@ namespace Dob
         * can call the corresponding To* function, which will convert the pointer to a consumer of
         * the desired type. This is only a virtual function call, instead of a dynamic_cast, ie
         * potentially much quicker.
+        *
+        * @headerfile ConsumerBase.h <Safir/Dob/Consumer.h>
         */
         class DOSE_CPP_API ConsumerBase
         {
@@ -197,6 +199,8 @@ namespace Dob
 
     /**
      * Base class used when composing more elaborated interfaces.
+     *
+     * @headerfile ConsumerBase.h <Safir/Dob/Consumer.h>
      */
     class DOSE_CPP_API RevokedRegistrationBase:
         public virtual Internal::ConsumerBase
@@ -220,6 +224,8 @@ namespace Dob
 
     /**
      * Base class used when composing more elaborated interfaces.
+     *
+     * @headerfile ConsumerBase.h <Safir/Dob/Consumer.h>
      */
     class DOSE_CPP_API CompletedRegistrationBase : public virtual RevokedRegistrationBase
     {
@@ -239,6 +245,8 @@ namespace Dob
 
     /**
      * Interface to receive entity requests.
+     *
+     * @headerfile ConsumerBase.h <Safir/Dob/Consumer.h>
      */
     class DOSE_CPP_API EntityRequestBase:
         public virtual Internal::ConsumerBase
@@ -330,6 +338,8 @@ namespace Dob
      * of consistency between different members. In this case the handler can call
      * ConnectionAspectPostpone#IncompleteInjectionState to wait for more updates before the new state
      * is set.
+     *
+     * @headerfile ConsumerBase.h <Safir/Dob/Consumer.h>
      */
     class DOSE_CPP_API EntityInjectionBase : public virtual EntityRequestBase
     {
@@ -389,6 +399,8 @@ namespace Dob
 
     /**
      * Interface to receive service requests
+     *
+     * @headerfile ConsumerBase.h <Safir/Dob/Consumer.h>
      */
     class DOSE_CPP_API ServiceRequestBase:
         public virtual Internal::ConsumerBase
