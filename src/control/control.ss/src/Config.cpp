@@ -176,7 +176,7 @@ namespace Control
 
             // HeartbeatInterval
             int heartbeatInterval;
-            bl.GetInt32Member(blob, ntcd->GetMemberIndex("HeartbeatInterval"), 0, heartbeatInterval);
+            ms = bl.GetInt32Member(blob, ntcd->GetMemberIndex("HeartbeatInterval"), 0, heartbeatInterval);
             if (ms.IsNull())
             {
                 throw std::logic_error("Node type " + nodeTypeName + ": HeartbeatInterval is mandatory");
