@@ -150,7 +150,7 @@ int main()
 
     if (!check_timezone("EST5EDT", boost::posix_time::hours(-5), boost::posix_time::hours(-4)) ||
         !check_timezone("PST8PDT", boost::posix_time::hours(-8), boost::posix_time::hours(-7)) ||
-        !check_timezone("WAUST-8", boost::posix_time::hours(8), boost::posix_time::hours(8)) ||
+        !check_timezone("Australia/Perth", boost::posix_time::hours(8), boost::posix_time::hours(8)) ||
         !check_timezone("NZST-12NZDT", boost::posix_time::hours(12),boost::posix_time::hours(13)))
     {
         return 1;
