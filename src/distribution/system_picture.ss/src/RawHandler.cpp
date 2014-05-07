@@ -59,6 +59,7 @@ namespace SP
         : m_ioService(ioService)
         , m_communication(communication)
         , m_id(id)
+        , m_nodeTypes(nodeTypes)
         , m_epoch(steady_clock::now() - boost::chrono::hours(1))
         , m_strand(*ioService)
         , m_checkDeadNodesTimer(AsioPeriodicTimer::Create(*ioService, 

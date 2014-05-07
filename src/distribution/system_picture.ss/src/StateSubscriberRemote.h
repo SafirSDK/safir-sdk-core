@@ -41,11 +41,12 @@ namespace SP
     {
     public:
         StateSubscriberRemote(const boost::shared_ptr<Com::Communication>& communication,
-                            const char* const receiverId,
-                            const boost::shared_ptr<Coordinator>& coordinator)
+                              const char* const receiverId,
+                              const boost::shared_ptr<Coordinator>& coordinator)
             : m_coordinator(coordinator)
         {
             communication->SetDataReceiver([this](const boost::int64_t from, 
+                                                  const boost::int64_t /*nodeTypeId*/, 
                                                   const boost::shared_ptr<char[]>& data, 
                                                   const size_t size)
                                            {

@@ -27,6 +27,7 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <Safir/Utilities/Internal/Id.h>
 
 namespace Safir
 {
@@ -53,6 +54,7 @@ namespace Control
                  const std::vector<std::string>& unwantedTypes_)
 
             : name(name_),
+              id(LlufId_Generate64(name_.c_str())),
               isLight(isLight_),
               talksTo(talksTo_),
               multicastAddress(multicastAddress_),
@@ -67,6 +69,7 @@ namespace Control
         {}
 
         const std::string name;
+        const boost::int64_t id;
         const bool isLight;
         const std::set<std::string> talksTo;
         const std::string multicastAddress;
