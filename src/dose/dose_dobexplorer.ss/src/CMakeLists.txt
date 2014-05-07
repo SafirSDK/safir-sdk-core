@@ -26,8 +26,8 @@ endif()
 
 if (Qt5Widgets_FOUND)
   message("-- Building dobexplorer with Qt5")
-  set(CMAKE_AUTOMOC ON)
   QT5_WRAP_UI(ui_headers ${ui})
+  QT5_WRAP_CPP(moc_sources ${headers} ${QT5_WRAP_CPP_OPTIONS})
 else()
   # Try to use Qt4 instead
   SET(QT_USE_QTMAIN TRUE)
@@ -60,7 +60,6 @@ ADD_EXECUTABLE(dobexplorer WIN32 ${sources} ${ui_headers} ${moc_sources} ${dose_
 
 if (Qt5Widgets_FOUND)
   qt5_use_modules(dobexplorer Widgets)
-  QT5_WRAP_CPP(moc_sources ${headers} ${QT5_WRAP_CPP_OPTIONS})
 
   if (CMAKE_VERSION VERSION_LESS "2.8.11")
     target_link_libraries(dobexplorer ${Qt5Core_QTMAIN_LIBRARIES})
