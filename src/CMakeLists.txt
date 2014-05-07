@@ -275,13 +275,13 @@ endif()
 set(Java_FIND_QUIETLY True)
 find_package(Java COMPONENTS Development Runtime)
 if (Java_Development_FOUND AND Java_Runtime_FOUND)
-  find_package(JNI)
+  find_package(JNI QUIET)
   if (JNI_FOUND)
     #Found everything!
     SET(Java_FOUND True)
     INCLUDE(UseJava)
   else()
-    SET(Java_FOUND Java_NOTFOUND)
+    SET(Java_FOUND Java-NOTFOUND)
   endif()
   unset(Java_Development_FOUND)  
   unset(Java_Runtime_FOUND)
@@ -362,7 +362,7 @@ SET(safir_config_files config/typesystem.ini config/locations.ini config/logging
 
 if (UNIX)
   INSTALL(FILES ${safir_config_files}
-    DESTINATION /etc/safir_sdk_core) #TODO: absolute path?! eller gör om lluf_config att vara PREFIX-aware? Funkar det med NSIS?
+    DESTINATION /etc/safir_sdk_core) #TODO: absolute path?! eller gor om lluf_config att vara PREFIX-aware? Funkar det med NSIS?
 elseif(WIN32)
   INSTALL(FILES ${safir_config_files}
     DESTINATION $ENV{APPDATA}/safir_sdk_core/config) #TODO?!
