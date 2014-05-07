@@ -11,7 +11,7 @@
       <arrayElements>
 
         <arrayElement>
-          <Safir.Dob.NodeType type="Safir.Dob.NodeType">
+          <Safir.Dob.NodeType>
             <Name>Server</Name>
             <IsLight>False</IsLight>
             <TalksTo></TalksTo>
@@ -30,7 +30,7 @@
         </arrayElement>
 
         <arrayElement>
-          <Safir.Dob.NodeType type="Safir.Dob.NodeType">
+          <Safir.Dob.NodeType>
             <Name>Client</Name>
             <IsLight>True</IsLight>
             <TalksTo>
@@ -51,7 +51,7 @@
         </arrayElement>
 
         <arrayElement>
-          <Safir.Dob.NodeType type="Safir.Dob.NodeType">
+          <Safir.Dob.NodeType>
             <Name>RemoteClient</Name>
             <IsLight>True</IsLight>
             <TalksTo>

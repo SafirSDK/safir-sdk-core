@@ -155,29 +155,24 @@ namespace Control
                 talksTo = allNodeTypes;
             }
 
-            // MulticastAddress
-            const char* multicastAddress;
-            ms = bl.GetDynamicMember(blob, ntcd->GetMemberIndex("MulticastAddress"), 0, multicastAddress, dummy);
+            const char* const EMPTY_STRING = "";
+
+            // MulticastAddressControl
+            const char* multicastAddressControl;
+            ms = bl.GetDynamicMember(blob, ntcd->GetMemberIndex("MulticastAddressControl"), 0, multicastAddressControl, dummy);
             if (ms.IsNull())
             {
-                throw std::logic_error("Node type " + nodeTypeName + ": MulticastAddress is mandatory");
+                multicastAddressControl = EMPTY_STRING;
             }
 
-            // ControlPort
-            int controlPort;
-            ms = bl.GetInt32Member(blob, ntcd->GetMemberIndex("ControlPort"), 0, controlPort);
+            // MulticastAddressData
+            const char* multicastAddressData;
+            ms = bl.GetDynamicMember(blob, ntcd->GetMemberIndex("MulticastAddressData"), 0, multicastAddressData, dummy);
             if (ms.IsNull())
             {
-                throw std::logic_error("Node type " + nodeTypeName + ": ControlPort is mandatory");
+                multicastAddressData = EMPTY_STRING;
             }
 
-            // DataPort
-            int dataPort;
-            ms = bl.GetInt32Member(blob, ntcd->GetMemberIndex("DataPort"), 0, dataPort);
-            if (ms.IsNull())
-            {
-                throw std::logic_error("Node type " + nodeTypeName + ": DataPort is mandatory");
-            }
 
             // HeartbeatInterval
             int heartbeatInterval;
@@ -258,9 +253,8 @@ namespace Control
             m_nodeTypes.push_back(NodeType(nodeTypeName,
                                            isLight,
                                            talksTo,
-                                           multicastAddress,
-                                           controlPort,
-                                           dataPort,
+                                           multicastAddressControl,
+                                           multicastAddressData,
                                            heartbeatInterval,
                                            maxLostHeartbeats,
                                            slidingWindowsSize,
