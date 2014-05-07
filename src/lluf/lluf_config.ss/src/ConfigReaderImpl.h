@@ -99,11 +99,6 @@ namespace Internal
                 return false;
             }
 
-            if (!directory.IsDirectory())
-            {
-                return false;
-            }
-
             const Path locations = directory / "locations.ini";
             const Path logging = directory / "logging.ini";
             const Path typesystem = directory / "typesystem.ini";
