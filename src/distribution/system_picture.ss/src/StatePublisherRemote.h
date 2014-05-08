@@ -96,13 +96,14 @@ namespace SP
                 memcpy(data.get() + size - crcBytes, &crc, sizeof(int));
 #endif
                 
-                for (auto it: m_nodeTypes)
+                for (const auto& it: m_nodeTypes)
                 {
                     const bool sent = m_communication->SendToNodeType(it.second.id, data, size, m_senderId);
                     if (!sent)
                     {
-                        lllog(7) << "StatePublisherRemote: Overflow when sending to node type " 
+                        lllog(8) << "StatePublisherRemote: Overflow when sending to node type " 
                                  << it.second.name.c_str() << std::endl;
+                        //No retry handling, since we send cyclically
                     }
                 }
             },
