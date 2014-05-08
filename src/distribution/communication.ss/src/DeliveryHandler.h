@@ -82,7 +82,7 @@ namespace Com
             //Always called from readStrand
             auto senderIt=m_nodes.find(header->commonHeader.senderId);
 
-            if (senderIt==m_nodes.end() || !senderIt->second.node.IsSystemNode())
+            if (senderIt==m_nodes.end() || !senderIt->second.node.systemNode)
             {
                 lllog(4)<<L"COM: Received data from unknown node or a non system node with id="<<header->commonHeader.senderId<<std::endl;
                 return;
@@ -95,8 +95,8 @@ namespace Com
             Deliver(senderIt->second, header->sendMethod); //if something is now fully received, deliver it to application
             if (sendAck)
             {
-                auto ackPtr=boost::make_shared<Ack>(m_myId, senderIt->second.GetChannel(header->sendMethod).lastInSequence, header->sendMethod);
-                WriterType::SendTo(ackPtr, senderIt->second.node.Endpoint());
+                auto ackPtr=boost::make_shared<Ack>(m_myId, senderIt->second.channel[header->sendMethod].lastInSequence, header->sendMethod);
+                WriterType::SendTo(ackPtr, senderIt->second.endpoint);
             }
         }
 
@@ -123,7 +123,7 @@ namespace Com
             //Always called from readStrand
             if (isSystemNode)
             {
-                it->second.node.SetSystemNode(true);
+                it->second.node.systemNode=true;
             }
             else
             {
@@ -195,19 +195,13 @@ namespace Com
         struct NodeInfo
         {
             Node node;
-            Channel unicastChannel;
-            Channel multicastChannel;
+            std::vector<Channel> channel;
+            boost::asio::ip::udp::endpoint endpoint;
 
             NodeInfo(const Node& node_)
                 :node(node_)
-                ,unicastChannel()
-                ,multicastChannel()
+                ,channel(2) //two channels, one for each sendMethod
             {
-            }
-
-            Channel& GetChannel(boost::uint16_t sendMethod)
-            {
-                return sendMethod==SpecifiedReceiverSendMethod ? unicastChannel : multicastChannel;
             }
         };
         typedef std::map<boost::int64_t, NodeInfo> NodeInfoMap;
@@ -222,7 +216,7 @@ namespace Com
 
         void Insert(const MessageHeader* header, const char* payload, NodeInfo& ni)
         {
-            Channel& ch=ni.GetChannel(header->sendMethod);
+            Channel& ch=ni.channel[header->sendMethod];
             size_t currentIndex, firstIndex, lastIndex;
             CalculateIndices(ch.lastInSequence, header, currentIndex, firstIndex, lastIndex);
             RecvData& recvData=ch.queue[currentIndex];
@@ -250,8 +244,7 @@ namespace Com
                             os<<ch.queue[i].sequenceNumber<<"  ";
                     }
                     os<<"]";
-                    SEND_SYSTEM_LOG(Error,
-                                    <<os.str().c_str());
+                    SEND_SYSTEM_LOG(Error, <<os.str().c_str());
 
                     throw std::logic_error(os.str());
                     return;
@@ -296,7 +289,7 @@ namespace Com
 
         void ForceInsert(const MessageHeader* header, const char* payload, NodeInfo& ni)
         {
-            Channel& ch=ni.GetChannel(header->sendMethod);
+            Channel& ch=ni.channel[header->sendMethod];
             ch.lastInSequence=header->sequenceNumber-1; //we pretend this was exactly what we expected to get
             //Clear the queue, should not be necessary as long as we dont let excluded nodes come back.
             for (size_t i=0; i<Parameters::ReceiverWindowSize; ++i)
@@ -310,11 +303,11 @@ namespace Com
 
         bool HandleMessage(const MessageHeader* header, const char* payload, NodeInfo& ni)
         {
-            lllog(8)<<L"COM: recv from: "<<ni.node.Id()<<L", sendMethod: "<<
+            lllog(8)<<L"COM: recv from: "<<ni.node.nodeId<<L", sendMethod: "<<
                       (header->sendMethod==SpecifiedReceiverSendMethod ? L"Unicast" : L"Multicast")<<
                       L", seq: "<<header->sequenceNumber<<std::endl;
 
-            Channel& ch=ni.GetChannel(header->sendMethod);
+            Channel& ch=ni.channel[header->sendMethod];
 
             if (ch.lastInSequence==0) //first time we receive anything, we accept any seqNo and start counting from there
             {
@@ -326,7 +319,7 @@ namespace Com
             }
             else if (header->sequenceNumber<=ch.lastInSequence)
             {
-                lllog(8)<<L"COM: Recv duplicated message in order. Seq: "<<header->sequenceNumber<<L" from node "<<ni.node.Name().c_str()<<std::endl;
+                lllog(8)<<L"COM: Recv duplicated message in order. Seq: "<<header->sequenceNumber<<L" from node "<<ni.node.name.c_str()<<std::endl;
             }
             else if (header->sequenceNumber<ch.lastInSequence+Parameters::ReceiverWindowSize)
             {
@@ -358,7 +351,7 @@ namespace Com
 
         void Deliver(NodeInfo& ni, boost::uint16_t sendMethod)
         {
-            Channel& ch=ni.GetChannel(sendMethod);
+            Channel& ch=ni.channel[sendMethod];
 
             for (size_t i=0; i<ch.queue.Size(); ++i)
             {
@@ -374,7 +367,7 @@ namespace Com
                         if (crc!=rd.crc)
                         {
                             std::ostringstream os;
-                            os<<"COM: Received data from node "<<ni.node.Name()<<" with bad CRC. Got "<<crc<<" but expected "<<rd.crc<<std::endl;
+                            os<<"COM: Received data from node "<<ni.node.name<<" with bad CRC. Got "<<crc<<" but expected "<<rd.crc<<std::endl;
                             os<<"Fragments: "<<rd.numberOfFragments<<", no: "<<rd.fragmentNumber<<std::endl;
                             os<<"Seq: "<<rd.sequenceNumber<<std::endl;
                             os<<"DataType: "<<rd.dataType<<std::endl;
@@ -385,8 +378,8 @@ namespace Com
                         }
 
                         //last fragment has been received, we can deliver this message to application
-                        auto fromId=ni.node.Id();
-                        auto fromNodeType=ni.node.NodeTypeId();
+                        auto fromId=ni.node.nodeId;
+                        auto fromNodeType=ni.node.nodeTypeId;
                         auto dataPtr=rd.data;
                         auto dataSize=rd.dataSize;
                         auto dataType=rd.dataType;

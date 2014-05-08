@@ -56,6 +56,8 @@ namespace Com
     static const boost::int64_t HeartbeatType=-1113057794592031140; //Hash for 'Communication.Heartbeat'
     static const boost::int64_t AckType=-6769271806353797703; //Hash for 'Communication.Ack'
     static const boost::int64_t ControlDataType=186858702748131856; //Hash for 'Communication.ControlData'
+
+    //Send methods
     static const boost::uint16_t SpecifiedReceiverSendMethod=0;
     static const boost::uint16_t MultiReceiverSendMethod=1;
 

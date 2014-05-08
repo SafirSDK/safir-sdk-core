@@ -35,14 +35,16 @@ namespace Internal
 {
 namespace Com
 {
-    Communication::Communication(const boost::shared_ptr<boost::asio::io_service>& ioService,
-                                 const std::string& nodeName,
-                                 boost::int64_t nodeId, //0 is not a valid id.
-                                 boost::int64_t nodeTypeId,
-                                 const std::string& controlAddress,
-                                 const std::string& dataAddress,
-                                 bool isControlInstance,
-                                 const std::vector<Communication::NodeType>& nodeTypes)
+namespace
+{
+    boost::shared_ptr<CommunicationImpl> Init(bool isControlInstance,
+                                              const boost::shared_ptr<boost::asio::io_service>& ioService,
+                                              const std::string& nodeName,
+                                              boost::int64_t nodeId, //0 is not a valid id.
+                                              boost::int64_t nodeTypeId,
+                                              const std::string& controlAddress,
+                                              const std::string& dataAddress,
+                                              const std::vector<NodeTypeDefinition>& nodeTypes)
     {
         int ipVersion=4;
         if (isControlInstance)
@@ -55,25 +57,51 @@ namespace Com
         }
 
         //find own node type and check if we are multicast enabled
-        auto nodeTypeIt=std::find_if(nodeTypes.cbegin(), nodeTypes.cend(), [=](const Communication::NodeType& n){return n.id==nodeTypeId;});
+        auto nodeTypeIt=std::find_if(nodeTypes.cbegin(), nodeTypes.cend(), [=](const NodeTypeDefinition& n){return n.id==nodeTypeId;});
         if (nodeTypeIt==nodeTypes.end())
         {
             throw std::logic_error("Own nodeType does not exist "+std::string(__FILE__));
         }
-        bool thisNodeIsMulticastEnabled=!nodeTypeIt->multicastAddress.empty();
-
+        bool thisNodeIsMulticastEnabled=!(isControlInstance ? nodeTypeIt->controlMulticastAddress.empty() : nodeTypeIt->dataMulticastAddress.empty());
 
         //create node type map
         NodeTypeMap nodeTypeMap;
         for (const auto& nt : nodeTypes)
         {
-            bool useMulticast=(thisNodeIsMulticastEnabled && !nt.multicastAddress.empty());
-            auto ptr=boost::make_shared<Safir::Dob::Internal::Com::NodeType>(ioService, nodeId, useMulticast, nt.id, nt.name, nt.multicastAddress, ipVersion, nt.heartbeatInterval, nt.retryTimeout);
+            const std::string& mc=isControlInstance ? nt.controlMulticastAddress : nt.dataMulticastAddress;
+            bool useMulticast=(thisNodeIsMulticastEnabled && !mc.empty());
+            auto ptr=boost::make_shared<Safir::Dob::Internal::Com::NodeType>(ioService, nodeId, useMulticast, nt.id, nt.name, mc, ipVersion, nt.heartbeatInterval, nt.retryTimeout);
             nodeTypeMap.insert(NodeTypeMap::value_type(nt.id, ptr));
         }
 
         //create impl object
-        m_impl=boost::make_shared<CommunicationImpl>(ioService, nodeName, nodeId, nodeTypeId, controlAddress, dataAddress, isControlInstance, nodeTypeMap);
+        boost::shared_ptr<CommunicationImpl> communication=boost::make_shared<CommunicationImpl>(ioService, nodeName, nodeId, nodeTypeId, controlAddress, dataAddress, isControlInstance, nodeTypeMap);
+        return communication;
+    }
+}
+
+    Communication::Communication(ControlModeTag,
+                  const boost::shared_ptr<boost::asio::io_service>& ioService,
+                  const std::string& nodeName,
+                  boost::int64_t nodeId, //0 is not a valid id.
+                  boost::int64_t nodeTypeId,
+                  const std::string& controlAddress,
+                  const std::string& dataAddress,
+                  const std::vector<NodeTypeDefinition>& nodeTypes)
+    {
+        m_impl=Init(true, ioService, nodeName, nodeId, nodeTypeId, controlAddress, dataAddress, nodeTypes);
+    }
+
+
+    Communication::Communication(DataModeTag,
+                                 const boost::shared_ptr<boost::asio::io_service>& ioService,
+                                 const std::string& nodeName,
+                                 boost::int64_t nodeId, //0 is not a valid id.
+                                 boost::int64_t nodeTypeId,
+                                 const std::string& dataAddress,
+                                 const std::vector<NodeTypeDefinition>& nodeTypes)
+    {
+        m_impl=Init(false, ioService, nodeName, nodeId, nodeTypeId, "", dataAddress, nodeTypes);
     }
 
     Communication::~Communication()

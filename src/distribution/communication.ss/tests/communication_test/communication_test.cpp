@@ -103,36 +103,39 @@ public:
     {
         for (int i=0; i<NumberOfNodeTypes; ++i)
         {
-            Safir::Dob::Internal::Com::Communication::NodeType n;
+            Safir::Dob::Internal::Com::NodeTypeDefinition n;
             n.name="nt"+boost::lexical_cast<std::string>(i);
             n.id=LlufId_Generate64(n.name.c_str());
             n.heartbeatInterval=1000+500*i;
             n.retryTimeout=50;
             if (i>0)
-                n.multicastAddress=std::string("224.90.90.241:")+boost::lexical_cast<std::string>(11000+i);
+            {
+                n.controlMulticastAddress=std::string("224.90.90.241:")+boost::lexical_cast<std::string>(11000+i);
+                n.dataMulticastAddress=std::string("224.90.90.241:")+boost::lexical_cast<std::string>(12000+i);
+            }
 
             m_nodeTypes.insert(std::make_pair(n.id, n));
         }
     }
 
-    const Safir::Dob::Internal::Com::Communication::NodeType& Get(boost::int64_t nodeTypeId) const
+    const Safir::Dob::Internal::Com::NodeTypeDefinition& Get(boost::int64_t nodeTypeId) const
     {
         return m_nodeTypes.find(nodeTypeId)->second;
     }
 
-    const Safir::Dob::Internal::Com::Communication::NodeType& Get(const std::string& name) const
+    const Safir::Dob::Internal::Com::NodeTypeDefinition& Get(const std::string& name) const
     {
         return m_nodeTypes.find(LlufId_Generate64(name.c_str()))->second;
     }
 
-    const std::map<boost::int64_t, Safir::Dob::Internal::Com::Communication::NodeType> Map() const
+    const std::map<boost::int64_t, Safir::Dob::Internal::Com::NodeTypeDefinition> Map() const
     {
         return m_nodeTypes;
     }
 
-    std::vector<Safir::Dob::Internal::Com::Communication::NodeType> ToVector() const
+    std::vector<Safir::Dob::Internal::Com::NodeTypeDefinition> ToVector() const
     {
-        std::vector<Safir::Dob::Internal::Com::Communication::NodeType> v;
+        std::vector<Safir::Dob::Internal::Com::NodeTypeDefinition> v;
         for (auto& n : m_nodeTypes)
         {
             v.push_back(n.second);
@@ -141,7 +144,7 @@ public:
     }
 
 private:
-    std::map<boost::int64_t, Safir::Dob::Internal::Com::Communication::NodeType> m_nodeTypes;
+    std::map<boost::int64_t, Safir::Dob::Internal::Com::NodeTypeDefinition> m_nodeTypes;
 
 };
 
@@ -339,17 +342,20 @@ int main(int argc, char * argv[])
     std::cout<<"-- Address:   "<<cmd.unicastAddress<<std::endl;
     std::cout<<"-- Node type: "<<cmd.nodeType<<std::endl;
     std::cout<<"----------------------------------------------------------------------------"<<std::endl;
-    com.reset(new Safir::Dob::Internal::Com::Communication(ioService, name.str(),
-                                                           myId, myNodeTypeId,
+    com.reset(new Safir::Dob::Internal::Com::Communication(Safir::Dob::Internal::Com::controlModeTag,
+                                                           ioService,
+                                                           name.str(),
+                                                           myId,
+                                                           myNodeTypeId,
                                                            cmd.unicastAddress,
-                                                           true,
+                                                           cmd.unicastAddress,
                                                            nodeTypes.ToVector()));
 
-    com->SetDataReceiver([=](boost::int64_t id, const boost::shared_ptr<char[]>& msg, size_t size){sp->OnRecv(id, msg, size);}, 0);
+    com->SetDataReceiver([=](boost::int64_t fromNode, boost::int64_t fromNodeType, const boost::shared_ptr<char[]>& msg, size_t size){sp->OnRecv(fromNode, msg, size);}, 0);
     com->SetGotReceiveFromCallback([=](boost::int64_t id){sp->GotReceive(id);});
     com->SetRetransmitToCallback([=](boost::int64_t id){sp->Retransmit(id);});
-    com->SetNewNodeCallback([=](const std::string& name, boost::int64_t nodeId, boost::int64_t nodeTypeId, const std::string& address)
-                            {sp->NewNode(name, nodeId, nodeTypeId, address);});
+    com->SetNewNodeCallback([=](const std::string& name, boost::int64_t nodeId, boost::int64_t nodeTypeId, const std::string& ca, const std::string& da)
+                            {sp->NewNode(name, nodeId, nodeTypeId, ca);});
 
     com->SetQueueNotFullCallback([&](boost::int64_t){queueFullSem.Notify();}, 100); //50% free queue space before we get notification
 

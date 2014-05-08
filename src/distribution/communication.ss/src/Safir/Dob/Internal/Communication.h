@@ -40,6 +40,32 @@ namespace Internal
 {
 namespace Com
 {
+    /**
+     * Definition of a NodeType.
+     */
+    struct NodeTypeDefinition
+    {
+        boost::int64_t id;              //node type id
+        std::string name;               //unique readable name
+        std::string controlMulticastAddress;   //multicast address including port number, 'address:port' empty string if not multicast enabled
+        std::string dataMulticastAddress;   //multicast address including port number, 'address:port' empty string if not multicast enabled
+        int heartbeatInterval;          //time between heartbeats
+        int retryTimeout;               //time to wait before retransmitting unacked data
+    };
+
+    //Callbacks functions used in Communications public interface.
+    typedef boost::function<void(const std::string& name, boost::int64_t nodeId, boost::int64_t nodeTypeId, const std::string& controlAddress, const std::string& dataAddress)> NewNode;
+    typedef boost::function<void(boost::int64_t fromNodeId)> GotReceiveFrom;
+    typedef boost::function<void(boost::int64_t toNodeId)> RetransmitTo;
+    typedef boost::function<void(boost::int64_t fromNodeId, boost::int64_t fromNodeType, const boost::shared_ptr<char[]>& data, size_t size)> ReceiveData;
+    typedef boost::function<void(boost::int64_t nodeTypeId)> QueueNotFull;
+
+    struct ControlModeTag {};
+    const ControlModeTag controlModeTag;
+
+    struct DataModeTag {};
+    const DataModeTag dataModeTag;
+
     class CommunicationImpl; //forward declaration
 
 #ifdef _MSC_VER
@@ -47,7 +73,6 @@ namespace Com
 #pragma warning (disable: 4275)
 #pragma warning (disable: 4251)
 #endif
-
     /**
      * @brief The Communication class handles low level socket communication between nodes including discovering nodes,
      * message fragmentation and retranmits of lost packets and ordering of incoming data.
@@ -62,44 +87,42 @@ namespace Com
     public:
 
         /**
-         * Definition of a NodeType.
-         */
-        struct NodeType
-        {
-            boost::int64_t id;              //node type id
-            std::string name;               //unique readable name
-            std::string controlMulticastAddress;   //multicast address including port number, 'address:port' empty string if not multicast enabled
-            std::string dataMulticastAddress;   //multicast address including port number, 'address:port' empty string if not multicast enabled
-            int heartbeatInterval;          //time between heartbeats
-            int retryTimeout;               //time to wait before retransmitting unacked data
-        };
-
-        //Callbacks functions used in Communications public interface.
-        typedef boost::function<void(const std::string& name, boost::int64_t nodeId, boost::int64_t nodeTypeId, const std::string& controlAddress, const std::string& dataAddress)> NewNode;
-        typedef boost::function<void(boost::int64_t fromNodeId)> GotReceiveFrom;
-        typedef boost::function<void(boost::int64_t toNodeId)> RetransmitTo;
-        typedef boost::function<void(boost::int64_t fromNodeId, boost::int64_t fromNodeType, const boost::shared_ptr<char[]>& data, size_t size)> ReceiveData;
-        typedef boost::function<void(boost::int64_t nodeTypeId)> QueueNotFull;
-
-        /**
-         * @brief Communication - Constructor.
+         * @brief Communication - Creates an instance of Communication in control mode. It will run the discover mechanisme after calling start.
+         * @param controlModeTag [in] - Tag that specifies that this instance will be used in control mode.
          * @param ioService [in] - Pointer to an io_service that will be used as engine.
          * @param nodeName [in] - Name of this node.
          * @param nodeId [in] - Unique id of this node. Note that 0 (zero) is not a valid id.
          * @param nodeTypeId [in] - The node type of this node.
          * @param controlAddress [in] - Control channel unicast address on format address:port, mandatory.
          * @param dataAddress [in] -  Data channel unicast address on format address:port, mandatory.
-         * @param isControlInstance [in] - If true this instance is the control channel part of the node, else it is the data channel of the node.
          * @param nodeTypes [in] - List of all node types that we shall be able to communicate with.
          */
-        Communication(const boost::shared_ptr<boost::asio::io_service>& ioService,
+        Communication(ControlModeTag,
+                      const boost::shared_ptr<boost::asio::io_service>& ioService,
                       const std::string& nodeName,
                       boost::int64_t nodeId, //0 is not a valid id.
                       boost::int64_t nodeTypeId,
                       const std::string& controlAddress,
                       const std::string& dataAddress,
-                      bool isControlInstance,
-                      const std::vector<Communication::NodeType>& nodeTypes);
+                      const std::vector<NodeTypeDefinition>& nodeTypes);
+
+        /**
+         * @brief Communication - Creates an instance of Communication in data mode. Will not run discover and nodes must be added manually.
+         * @param dataModeTag [in] - Tag that specifies that this instance will be used in data mode.
+         * @param ioService [in] - Pointer to an io_service that will be used as engine.
+         * @param nodeName [in] - Name of this node.
+         * @param nodeId [in] - Unique id of this node. Note that 0 (zero) is not a valid id.
+         * @param nodeTypeId [in] - The node type of this node.
+         * @param dataAddress [in] -  Data channel unicast address on format address:port, mandatory.
+         * @param nodeTypes [in] - List of all node types that we shall be able to communicate with.
+         */
+        Communication(DataModeTag,
+                      const boost::shared_ptr<boost::asio::io_service>& ioService,
+                      const std::string& nodeName,
+                      boost::int64_t nodeId, //0 is not a valid id.
+                      boost::int64_t nodeTypeId,
+                      const std::string& dataAddress,
+                      const std::vector<NodeTypeDefinition>& nodeTypes);
 
         /**
          * ~Communication - destructor.
@@ -108,6 +131,7 @@ namespace Com
 
         /**
          * Set callback for notification of new discovered nodes. Must be called before calling Start.
+         * Only useful if created with ControlModeTag
          *
          * @param callback [in] - Callback function.
          */
@@ -161,7 +185,10 @@ namespace Com
 
         //Only unicast addresses.
         /**
-         * Add seed addresses used for discovering other nodes. Can be called before or after Start is called.
+         * Add seed addresses used for discovering other nodes.
+         * Only useful if created with ControlModeTag
+         *
+         * Can be called before or after Start is called.
          * Can also be called more than one time with new seed addresses.
          *
          * @param seeds [in] - Vector of seed addresses on the form address:port. Only unicast addresses are valid.
@@ -170,6 +197,7 @@ namespace Com
 
         /**
          * Make a node that have been reported on the NewNode callback a system node.
+         * Only useful if created with ControlModeTag
          *
          * @param nodeId [in] - Id of the node to include.
          */
@@ -177,6 +205,7 @@ namespace Com
 
         /**
          * Exclude a system node. After a node has been excluded it can never be included  again.
+         * Only useful if created with ControlModeTag
          *
          * @param nodeId [in] - Id of the node to exclude.
          */

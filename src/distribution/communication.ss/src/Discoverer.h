@@ -52,7 +52,7 @@ namespace Com
         DiscovererBasic(const boost::shared_ptr<boost::asio::io_service>& ioService,
                         const Node& me,
                         const boost::function<void(const Node&)>& onNewNode)
-            :WriterType(ioService, me.IpVersion(true))
+            :WriterType(ioService, Utilities::Protocol(me.unicastAddress))
             ,m_seeds()
             ,m_nodes()
             ,m_reportedNodes()
@@ -208,8 +208,8 @@ namespace Com
 
             cm.mutable_discover()->mutable_from()->set_node_id(m_me.nodeId);
             cm.mutable_discover()->mutable_from()->set_name(m_me.name);
-            cm.mutable_discover()->mutable_from()->set_control_address(m_me.controlAddress());
-            cm.mutable_discover()->mutable_from()->set_data_address(m_me.dataAddress());
+            cm.mutable_discover()->mutable_from()->set_control_address(m_me.controlAddress);
+            cm.mutable_discover()->mutable_from()->set_data_address(m_me.dataAddress);
             cm.mutable_discover()->mutable_from()->set_node_type_id(m_me.nodeTypeId);
 
             for (auto it=m_seeds.cbegin(); it!=m_seeds.cend(); ++it)
@@ -400,7 +400,7 @@ namespace Com
         {
             lllog(4)<<L"COM: Discoverer talked to new node "<<node.name().c_str()<<L" ["<<node.node_id()<<L"]"<<std::endl;
             //insert in node map
-            Node n(node.name(), node.node_id(), node.node_type_id(), node.control_address(), node.data_address());
+            Node n(node.name(), node.node_id(), node.node_type_id(), node.control_address(), node.data_address(), true);
             m_nodes.insert(std::make_pair(n.nodeId, n));
 
             m_reportedNodes.erase(n.nodeId); //now when we actually have talked to the node we also remove from reported nodes
@@ -414,7 +414,7 @@ namespace Com
             lllog(DiscovererLogLevel)<<L"COM: Got report about node "<<node.name().c_str()<<L" ["<<node.node_id()<<L"]"<<std::endl;
 
             //insert in reported node map
-            Node n(node.name(), node.node_id(), node.node_type_id(), node.control_address(), node.data_address());
+            Node n(node.name(), node.node_id(), node.node_type_id(), node.control_address(), node.data_address(), true);
             m_reportedNodes.insert(std::make_pair(n.nodeId, n));
         }
 
@@ -423,7 +423,7 @@ namespace Com
             if (seed!=m_me.controlAddress)
             {
                 boost::uint64_t id=LlufId_Generate64(seed.c_str());
-                Node s("seed", id, 0, seed, "");
+                Node s("seed", id, 0, seed, "", true);
                 this->m_seeds.insert(std::make_pair(id, s));
                 lllog(DiscovererLogLevel)<<L"COM: Add seed "<<seed.c_str()<<std::endl;
             }

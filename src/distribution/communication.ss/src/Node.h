@@ -47,42 +47,27 @@ namespace Com
         boost::int64_t nodeTypeId;
         const std::string controlAddress;
         const std::string dataAddress;
+        const std::string& unicastAddress; //will reference to controlAddress or dataAddress depending on the mode
         bool systemNode;
 
         Node(const std::string& name_,
              boost::int64_t nodeId_,
              boost::int64_t nodeTypeId_,
              const std::string& controlAddress_,
-             const std::string& dataAddress_)
+             const std::string& dataAddress_,
+             bool isControlInstance)
             :name(name_)
             ,nodeId(nodeId_)
             ,nodeTypeId(nodeTypeId_)
             ,controlAddress(controlAddress_)
             ,dataAddress(dataAddress_)
+            ,unicastAddress(isControlInstance ? controlAddress : dataAddress)
             ,systemNode(false)
         {
         }
 
-        std::string ToString() const
-        {
-            std::ostringstream ss;
-            ss<<"["<<nodeId<<"]"<<""<<name<<" NodeType: "<<nodeTypeId<<" Control: "<<controlAddress<<", Data: "<<dataAddress;
-            return ss.str();
-        }
-
-        const std::string& Address(bool isControlInstance) const
-        {
-            return isControlInstance ? controlAddress : dataAddress;
-        }
-
-        int IpVersion(bool isControlInstance) const
-        {
-            return Utilities::Protocol(Address(isControlInstance));
-        }
     };
 
-    typedef std::set<boost::int64_t> NodeIdSet;
-    typedef std::vector<boost::int64_t> NodeIdVector;
     typedef std::map<boost::int64_t, Node> NodeMap;
 }
 }

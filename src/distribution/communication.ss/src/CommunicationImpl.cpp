@@ -51,14 +51,14 @@ namespace Com
                                          const NodeTypeMap& nodeTypes)
         :m_disableProtobufLogs()
         ,m_ioService(ioService)
-        ,m_me(nodeName, nodeId, nodeTypeId, controlAddress, dataAddress)
+        ,m_me(nodeName, nodeId, nodeTypeId, controlAddress, dataAddress, isControlInstance)
         ,m_isControlInstance(isControlInstance)
         ,m_nodeTypes(nodeTypes)
         ,m_onNewNode()
         ,m_gotRecv()
         ,m_discoverer(m_ioService, m_me, [=](const Node& n){OnNewNode(n);})
-        ,m_deliveryHandler(m_ioService, m_me.nodeId, m_me.IpVersion(m_isControlInstance))
-        ,m_reader(ioService, m_me.Address(m_isControlInstance), m_nodeTypes[nodeTypeId]->MulticastAddress(),
+        ,m_deliveryHandler(m_ioService, m_me.nodeId, Utilities::Protocol(m_me.unicastAddress))
+        ,m_reader(ioService, m_me.unicastAddress, m_nodeTypes[nodeTypeId]->MulticastAddress(),
                     [=](const char* d, size_t s){return OnRecv(d,s);},
                     [=](){return m_deliveryHandler.NumberOfUndeliveredMessages()<Parameters::MaxNumberOfUndelivered;})
     {
@@ -69,9 +69,10 @@ namespace Com
         auto myNodeType=m_nodeTypes[nodeTypeId];
         lllog(2)<<L"COM: -------------------------------------------------"<<std::endl;
         lllog(2)<<L"COM: Communication started"<<std::endl;
-        lllog(2)<<L"COM:     id:    "<<m_me.Id()<<std::endl;
-        lllog(2)<<L"COM:     name:    "<<m_me.Name().c_str()<<std::endl;
-        lllog(2)<<L"COM:     unicast: "<<m_me.Address().c_str()<<std::endl;
+        lllog(2)<<L"COM:     id:    "<<m_me.nodeId<<std::endl;
+        lllog(2)<<L"COM:     name:    "<<m_me.name.c_str()<<std::endl;
+        lllog(2)<<L"COM:     data address: "<<m_me.dataAddress.c_str()<<std::endl;
+        lllog(2)<<L"COM:     control address: "<<m_me.controlAddress.c_str()<<std::endl;
         lllog(2)<<L"COM:     multicast: "<<myNodeType->MulticastAddress().c_str()<<std::endl;
         lllog(2)<<L"COM:     using multicast: "<<std::boolalpha<<myNodeType->UseMulticast()<<std::dec<<std::endl;
         lllog(2)<<L"COM: -------------------------------------------------"<<std::endl;
@@ -188,7 +189,7 @@ namespace Com
         //it only through the deliveryHandler we can lookup nodeTypeId from a nodeId. Since this a a very low frequent operaton this is ok.
         m_reader.Strand().post([=]
         {
-            auto& nodeType=GetNodeType(m_deliveryHandler.GetNode(id)->NodeTypeId());
+            auto& nodeType=GetNodeType(m_deliveryHandler.GetNode(id)->nodeTypeId);
             nodeType.GetAckedDataSender().SetSystemNode(id, isSystemNode);
             nodeType.GetHeartbeatSender().SetSystemNode(id, isSystemNode);
             m_deliveryHandler.SetSystemNode(id, isSystemNode);
@@ -197,11 +198,11 @@ namespace Com
 
     void CommunicationImpl::OnNewNode(const Node& node)
     {
-        lllog(6)<<L"COM: New node '"<<node.Name().c_str()<<L"' ["<<node.Id()<<L"]"<<std::endl;
+        lllog(6)<<L"COM: New node '"<<node.name.c_str()<<L"' ["<<node.nodeId<<L"]"<<std::endl;
 
-        auto& nodeType=GetNodeType(node.NodeTypeId());
-        nodeType.GetAckedDataSender().AddNode(node.nodeId, node.Address(m_isControlInstance));
-        nodeType.GetHeartbeatSender().AddNode(node.Id(), Utilities::CreateEndpoint(node.Address(m_isControlInstance)));
+        auto& nodeType=GetNodeType(node.nodeTypeId);
+        nodeType.GetAckedDataSender().AddNode(node.nodeId, node.unicastAddress);
+        nodeType.GetHeartbeatSender().AddNode(node.nodeId, Utilities::CreateEndpoint(node.unicastAddress));
         m_reader.Strand().dispatch([this, node]{m_deliveryHandler.AddNode(node);});
 
         //callback to host application
@@ -220,7 +221,7 @@ namespace Com
         }
 
         const CommonHeader* commonHeader=reinterpret_cast<const CommonHeader*>(data);
-        if (commonHeader->senderId==m_me.Id())
+        if (commonHeader->senderId==m_me.nodeId)
         {
             //Received message from myself, return true means it is ok to receive another message
             return true;
@@ -231,7 +232,7 @@ namespace Com
         case HeartbeatType:
         {
             const Node* senderNode=m_deliveryHandler.GetNode(commonHeader->senderId);
-            if (senderNode!=nullptr && senderNode->IsSystemNode())
+            if (senderNode!=nullptr && senderNode->systemNode)
             {
                 m_gotRecv(commonHeader->senderId);
                 lllog(9)<<"COM: Heartbeat from "<<commonHeader->senderId<<std::endl;
@@ -242,11 +243,11 @@ namespace Com
         case AckType:
         {
             const Node* senderNode=m_deliveryHandler.GetNode(commonHeader->senderId);
-            if (senderNode!=nullptr && senderNode->IsSystemNode())
+            if (senderNode!=nullptr && senderNode->systemNode)
             {
                 m_gotRecv(commonHeader->senderId);
                 const Ack* ack=reinterpret_cast<const Ack*>(data);
-                GetNodeType(senderNode->NodeTypeId()).GetAckedDataSender().HandleAck(*ack);
+                GetNodeType(senderNode->nodeTypeId).GetAckedDataSender().HandleAck(*ack);
             }
         }
             break;
