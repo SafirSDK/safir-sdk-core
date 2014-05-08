@@ -220,7 +220,7 @@ public:
     {
         m_nodeNames[nodeId]=name;
 
-        std::cout<<"SP: NewNode: "<<name<<" ["<<nodeId<<"], nodeType: '"<<m_nodeTypes.Get(nodeTypeId).name<<"'', "<<address<<std::endl;
+        std::cout<<"SP: NewNode: "<<name<<" ["<<nodeId<<"], nodeType: '"<<m_nodeTypes.Get(nodeTypeId).name<<"', "<<address<<std::endl;
 
         if (m_recvCount.find(nodeId)!=m_recvCount.cend())
         {
@@ -249,7 +249,6 @@ public:
 
     }
 
-
     void Retransmit(boost::int64_t id)
     {
         ++m_retransmitCount;
@@ -265,10 +264,16 @@ public:
         {
             std::cout<<"Bad CRC! size="<<size<<std::endl;
         }
-
         unsigned int rc=++m_recvCount[id];
+        unsigned int sendCount=*reinterpret_cast<const unsigned int*>(msg.get());
 
-        if (rc%10000==0)
+        if (rc!=sendCount+1)
+        {
+            std::cout<<"Recveived "<<sendCount<<", expected to get "<<rc-1<<std::endl;
+            m_recvCount[id]=sendCount+1;
+        }
+
+        if (rc%1000==0)
         {
             std::cout<<"Recv from "<<m_nodeNames[id]<<", count="<<m_recvCount[id]<<std::endl;
         }
@@ -317,10 +322,12 @@ int main(int argc, char * argv[])
     Semaphore stopCondition(cmd.await);
     Semaphore queueFullSem(1);
 
+    std::set<boost::int64_t> nodes;
     boost::shared_ptr<Safir::Dob::Internal::Com::Communication> com;
     boost::shared_ptr<Sp> sp(new Sp(cmd.nrecv,
     [&](boost::int64_t id)
     {
+        nodes.insert(id);
         com->IncludeNode(id);
         ++numberOfDiscoveredNodes;
         if (numberOfDiscoveredNodes==cmd.await)
@@ -330,6 +337,7 @@ int main(int argc, char * argv[])
      },
     [&](boost::int64_t id)
     {
+        std::cout<<"nofify stop cond"<<std::endl;
         stopCondition.Notify();
     }));
 
@@ -386,10 +394,10 @@ int main(int argc, char * argv[])
     unsigned int sendCounter=0;    
     while (sendCounter<cmd.nsend)
     {
-        std::string tmp="communication_test_"+boost::lexical_cast<std::string>(sendCounter);
         boost::shared_ptr<char[]> data=boost::make_shared<char[]>(cmd.messageSize);
-        strncpy(data.get(), tmp.c_str(), cmd.messageSize);
+        (*reinterpret_cast<unsigned int*>(data.get()))=sendCounter;
         SetCRC(data, cmd.messageSize);
+
         for (auto& nt : nodeTypes.Map())
         {
             while (!com->SendToNodeType(nt.second.id, data, cmd.messageSize, 0))
@@ -398,6 +406,16 @@ int main(int argc, char * argv[])
                 queueFullSem.Wait();
             }
         }
+
+//        for (auto nodeId : nodes)
+//        {
+//            if (!com->SendToNode(myNodeTypeId, nodeId, data, cmd.messageSize, 0))
+//            {
+//                ++numberOfOverflows;
+//                queueFullSem.Wait();
+//            }
+//        }
+
         ++sendCounter;
 
         if (sendCounter%10000==0)

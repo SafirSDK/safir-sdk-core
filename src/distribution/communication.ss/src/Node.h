@@ -47,7 +47,7 @@ namespace Com
         boost::int64_t nodeTypeId;
         const std::string controlAddress;
         const std::string dataAddress;
-        const std::string& unicastAddress; //will reference to controlAddress or dataAddress depending on the mode
+        const std::string unicastAddress; //will be controlAddress or dataAddress depending on the mode
         bool systemNode;
 
         Node(const std::string& name_,

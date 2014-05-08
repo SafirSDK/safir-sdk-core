@@ -81,7 +81,7 @@ namespace Com
         typedef boost::shared_ptr<T> Ptr;
 
         Writer(const boost::shared_ptr<boost::asio::io_service>& ioService, int protocol)
-            :m_socket(*ioService, Utilities::Protocol(protocol))
+            :m_socket(*ioService,  Utilities::Protocol(protocol))
             ,m_multicastEndpoint()
             ,m_multicastEnabled(false)
         {

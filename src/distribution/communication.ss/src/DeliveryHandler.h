@@ -113,6 +113,7 @@ namespace Com
             const auto it=m_nodes.find(id);
             if (it==m_nodes.end())
             {
+                std::cout<<"DeliveryHandler konstigt"<<std::endl;
 //                std::ostringstream msg;
 //                msg<<(isSystemNode ? "Include" : "Exclude")<<" unknown node! Dont have any node with id "<<id;
 //                std::cout<<msg.str()<<std::endl;
@@ -201,6 +202,7 @@ namespace Com
             NodeInfo(const Node& node_)
                 :node(node_)
                 ,channel(2) //two channels, one for each sendMethod
+                ,endpoint(Utilities::CreateEndpoint(node.unicastAddress))
             {
             }
         };
@@ -333,6 +335,10 @@ namespace Com
                 //This can occur if the senders send window i bigger than the receivers receive window. If everything is working as expected we can just ignore this message.
                 //Sooner or later the sender must retransmit all non-acked messages, and in time this message will come into our receive window.
                 lllog(8)<<L"COM: Received Seq: "<<header->sequenceNumber<<" wich means that we have lost a message. LastInSequence="<<ch.lastInSequence<<std::endl;
+
+                std::wcout<<L"COM: recv from: "<<ni.node.name.c_str()<<L", sendMethod: "<<
+                                      (header->sendMethod==SpecifiedReceiverSendMethod ? L"Unicast" : L"Multicast")<<
+                                      L", seq: "<<header->sequenceNumber<<std::endl;
                 std::wcout<<L"COM: Received Seq: "<<header->sequenceNumber<<" wich means that we have lost a message. LastInSequence="<<ch.lastInSequence<<std::endl;
                 return false; //this message is not handled, dont send ack
             }

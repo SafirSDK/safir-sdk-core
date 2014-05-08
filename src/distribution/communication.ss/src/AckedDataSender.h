@@ -130,7 +130,7 @@ namespace Com
 
             if (++m_sendQueueSize<=Parameters::SendQueueSize)
             {
-                //there are room for at least one fragment within the queue limit.
+                //there is room for at least one fragment within the queue limit.
                 //then we step up the total amount, even if it will exceed the queue limit. Send queue will handle this case.
                 m_sendQueueSize+=static_cast<unsigned int>(totalNumberOfFragments-1); //note that one already been added
 
@@ -170,7 +170,7 @@ namespace Com
                         userData->sendToAllSystemNodes=false;
                         userData->receivers.insert(std::make_pair(toId, Receiver()));
                     }
-                    this->m_sendQueue.enqueue(userData);
+                    m_sendQueue.enqueue(userData);
                 }
 
                 if (restSize>0)
@@ -185,10 +185,10 @@ namespace Com
                         userData->sendToAllSystemNodes=false;
                         userData->receivers.insert(std::make_pair(toId, Receiver()));
                     }
-                    this->m_sendQueue.enqueue(userData);
+                    m_sendQueue.enqueue(userData);
                 }
 
-                this->HandleSendQueue();
+                HandleSendQueue();
             });
 
             return true;
@@ -251,6 +251,7 @@ namespace Com
                 }
                 else
                 {
+                    std::cout<<"AckedDataSender konstigt"<<std::endl;
                     m_nodes.erase(id);
                     RemoveExcludedReceivers();
                     RemoveCompletedMessages();

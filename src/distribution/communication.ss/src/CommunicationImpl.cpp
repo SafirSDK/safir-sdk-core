@@ -189,7 +189,10 @@ namespace Com
         //it only through the deliveryHandler we can lookup nodeTypeId from a nodeId. Since this a a very low frequent operaton this is ok.
         m_reader.Strand().post([=]
         {
-            auto& nodeType=GetNodeType(m_deliveryHandler.GetNode(id)->nodeTypeId);
+            auto node=m_deliveryHandler.GetNode(id);
+            assert(node!=nullptr);
+
+            auto& nodeType=GetNodeType(node->nodeTypeId);
             nodeType.GetAckedDataSender().SetSystemNode(id, isSystemNode);
             nodeType.GetHeartbeatSender().SetSystemNode(id, isSystemNode);
             m_deliveryHandler.SetSystemNode(id, isSystemNode);
