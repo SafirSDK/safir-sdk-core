@@ -74,7 +74,6 @@ namespace SP
 
         void Stop()
         {
-            //TODO: do we need to do more here?
             m_timer.cancel();
         }
 
