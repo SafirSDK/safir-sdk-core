@@ -40,15 +40,15 @@
       <enum>Qt::Vertical</enum>
      </property>
      <widget class="QTableWidget" name="contexts">
+      <property name="toolTip">
+       <string>This table has one row for each context that the type occurs in.</string>
+      </property>
       <property name="showGrid">
        <bool>false</bool>
       </property>
       <property name="sortingEnabled">
        <bool>true</bool>
       </property>
-      <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
-       <bool>false</bool>
-      </attribute>
       <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
        <bool>false</bool>
       </attribute>
@@ -89,6 +89,9 @@
       </column>
      </widget>
      <widget class="QTableWidget" name="instances">
+      <property name="toolTip">
+       <string>This table shows each instance of the entity in the contexts that have been checked as 'Show' above.</string>
+      </property>
       <property name="showGrid">
        <bool>false</bool>
       </property>

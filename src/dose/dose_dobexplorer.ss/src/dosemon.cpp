@@ -25,6 +25,7 @@
 #include "common_header.h"
 #include "dosemon.h"
 #include <sstream>
+#include "About.h"
 #include "memgraph.h"
 #include "entitystats.h"
 #include "nodestatus.h"
@@ -39,16 +40,30 @@
 #include <Safir/Dob/Internal/Connections.h>
 #include <set>
 
-const int EntityWidgetType = 10;
-const int ConnectionWidgetType = 11;
-const int RemoteConnectionWidgetType = 11;
+namespace
+{
+    const int EntityWidgetType = 10;
+    const int ConnectionWidgetType = 11;
+    const int RemoteConnectionWidgetType = 11;
+
+    void SortChildrenRecursive(QTreeWidgetItem* item)
+    {
+        for (int i = 0; i < item->childCount(); ++i)
+        {
+            SortChildrenRecursive(item->child(i));
+            item->child(i)->sortChildren(0,Qt::AscendingOrder);
+        }
+    }
+}
+
+
 
 DoseMon::DoseMon(QWidget * /*parent*/)
 {
     setupUi(this); // this sets up GUI
 
-    treeWidget->setSortingEnabled(true);
-    treeWidget->sortByColumn(0,Qt::AscendingOrder);
+    //    treeWidget->setSortingEnabled(true);
+    //treeWidget->sortByColumn(0,Qt::AscendingOrder);
 
     while (tabWidget->currentIndex() != -1)
     {
@@ -57,7 +72,11 @@ DoseMon::DoseMon(QWidget * /*parent*/)
 
     QPushButton * closeButton = new QPushButton("X");
     tabWidget->setCornerWidget(closeButton);
-    tabWidget->addTab(new MemGraph(this),"Memory");
+    //int newTab = tabWidget->addTab(new MemGraph(this),"Memory");
+    //tabWidget->setTabToolTip(newTab,tabWidget->widget(newTab)->toolTip());
+    
+    int newTab = tabWidget->addTab(new About(this),"About");
+    tabWidget->setTabToolTip(newTab,tabWidget->widget(newTab)->toolTip());
 
     connect(closeButton,
             SIGNAL(clicked()),
@@ -114,21 +133,30 @@ void DoseMon::TreeItemActivated ( QTreeWidgetItem * item, int /*column*/ )
     }
 
     int newTab = -1;
+    if (item->text(0) == "About")
+    {
+        newTab = tabWidget->addTab(new About(this),"About");
+        tabWidget->setTabToolTip(newTab,tabWidget->widget(newTab)->toolTip());
+    }
     if (item->text(0) == "Memory")
     {
         newTab = tabWidget->addTab(new MemGraph(this),"Memory");
+        tabWidget->setTabToolTip(newTab,tabWidget->widget(newTab)->toolTip());
     }
     else if (item->text(0) == "Logging settings")
     {
         newTab = tabWidget->addTab(new LoggingSettings(this),"Logging settings");
+        tabWidget->setTabToolTip(newTab,tabWidget->widget(newTab)->toolTip());
     }
     else if (item->text(0) == "Node Statuses")
     {
         newTab = tabWidget->addTab(new NodeStatus(this),"Node Statuses");
+        tabWidget->setTabToolTip(newTab,tabWidget->widget(newTab)->toolTip());
     }
     else if (item->text(0) == "DoseCom Info")
     {
         newTab = tabWidget->addTab(new DoseComInfo(this),"DoseCom Info");
+        tabWidget->setTabToolTip(newTab,tabWidget->widget(newTab)->toolTip());
     }
     else if (item->text(0) == "Raw Node Statistics")
     {
@@ -147,14 +175,18 @@ void DoseMon::TreeItemActivated ( QTreeWidgetItem * item, int /*column*/ )
         const std::wstring text = Safir::Dob::Typesystem::Utilities::ToWstring(item->text(0).toStdString());
         const Safir::Dob::Typesystem::TypeId typeId = Safir::Dob::Typesystem::Operations::GetTypeId(text);
         newTab = tabWidget->addTab(new EntityStats(this,typeId),item->text(0));
+        tabWidget->setTabToolTip(newTab,"Information about entity " + item->text(0));
     }
     else if (item->type() == ConnectionWidgetType)
     {
         newTab = tabWidget->addTab(new ConnectionStats(this, item->text(0)), item->text(0));
+        tabWidget->setTabToolTip(newTab,"Information about connection " + item->text(0));
     }
     else
     {
-        newTab = tabWidget->addTab(new QFrame(this),item->text(0));
+        return;
+        //This code used to be here, don't really understand why...
+        //newTab = tabWidget->addTab(new QFrame(this),item->text(0));
     }
 
     if (newTab != -1)
@@ -230,7 +262,12 @@ void DoseMon::AddEntitesToTreeWidget()
             }
         }
     }
+    QList<QTreeWidgetItem *> items = treeWidget->findItems("Entities",Qt::MatchExactly);
+    SortChildrenRecursive(items.front());
+
 }
+
+
 
 void DoseMon::AddConnection(const Safir::Dob::Internal::Connection & connection,
                             std::set<QString>& localConnectionNames,
@@ -327,6 +364,9 @@ void DoseMon::UpdateTreeWidget()
             remoteConnectionItem->addChild(new QTreeWidgetItem(QStringList(*it),RemoteConnectionWidgetType));
         }
     }
+
+    connectionItem->sortChildren(0, Qt::AscendingOrder);
+    remoteConnectionItem->sortChildren(0, Qt::AscendingOrder);
 }
 
 void DoseMon::PollIoService()

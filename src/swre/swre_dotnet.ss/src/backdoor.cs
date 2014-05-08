@@ -209,8 +209,12 @@ namespace Safir.Application
                     // It's a 'ping' command. Answer to it without bothering
                     // the subclass implementator.
 
+                    Safir.Dob.ConnectionAspectMisc connectionAspectMisc = new Safir.Dob.ConnectionAspectMisc(m_connection);
                     Safir.Logging.SendSystemLog(Safir.Logging.Severity.Debug,
-                                                "Ping reply");
+                                                "Ping reply from " 
+                                                + connectionAspectMisc.GetConnectionName()
+                                                + " on node "
+                                                + Safir.Dob.NodeParameters.Nodes(Safir.Dob.ThisNodeParameters.NodeNumber).NodeName.Val);
 
                     return; // *** RETURN ***
                 }

@@ -4,6 +4,8 @@
 *.exe
 *.csexe
 *.dll
+*.mdb
+*.pdb
 
 #CMake stuff
 *.cmake

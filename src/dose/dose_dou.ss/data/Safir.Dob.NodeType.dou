@@ -23,21 +23,16 @@
             <maxLength>80</maxLength>
         </member>
         <member>
-            <summary>Multicast address used for nodes of this type. An empty string indicates that
-                     nodes of this type can’t be reached via multicast.</summary>
-            <name>MulticastAddress</name>
+            <summary>Multicast address and port used for the control channel for nodes of this type. An empty string or null for this or MulticastAddressData indicates that nodes of this type can't be reached via multicast.</summary>
+            <name>MulticastAddressControl</name>
             <type>String</type>
-            <maxLength>39</maxLength> <!-- 39 is max length for an ipv6 address-->
+            <maxLength>500</maxLength>
         </member>
         <member>
-            <summary>Port number used by Control executable.</summary>
-            <name>ControlPort</name>
-            <type>Int32</type>
-        </member>
-        <member>
-            <summary>Port number used by dose_main executable.</summary>
-            <name>DataPort</name>
-            <type>Int32</type>
+            <summary>Multicast address and port used for the control channel for nodes of this type. An empty string or null for this or MulticastAddressControl indicates that nodes of this type can't be reached via multicast.</summary>
+            <name>MulticastAddressData</name>
+            <type>String</type>
+            <maxLength>500</maxLength>
         </member>
         <member>
             <summary>How often (milliseconds) shall heartbeats/keepalives be sent</summary>

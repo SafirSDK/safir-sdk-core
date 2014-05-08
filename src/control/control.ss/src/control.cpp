@@ -177,7 +177,7 @@ int main(int argc, char * argv[])
 
         for (const auto& nt: options.config.GetNodeTypes())
         {
-            nodeTypes.push_back({nt.id, nt.name, nt.multicastAddress, nt.heartbeatInterval, nt.retryTimeout});
+            nodeTypes.push_back({nt.id, nt.name, nt.multicastAddressControl, nt.heartbeatInterval, nt.retryTimeout});
         }
         
         communication.reset(new Safir::Dob::Internal::Com::Communication

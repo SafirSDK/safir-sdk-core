@@ -103,7 +103,7 @@
       <item>
        <widget class="QCheckBox" name="toFile">
         <property name="toolTip">
-         <string>Log to logfile located in $SAFIR_RUNTIME/log/Dob-LowLevelLog.</string>
+         <string>Log to files. The location is configured in logging.ini.</string>
         </property>
         <property name="text">
          <string>Log to files</string>

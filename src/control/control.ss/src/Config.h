@@ -43,9 +43,8 @@ namespace Control
         NodeType(const std::string& name_,
                  const bool isLight_,
                  const std::set<std::string>& talksTo_,
-                 const std::string& multicastAddress_,
-                 const int controlPort_,
-                 const int dataPort_,
+                 const std::string& multicastAddressControl_,
+                 const std::string& multicastAddressData_,
                  const int heartbeatInterval_,
                  const int maxLostHeartbeats_,
                  const int slidingWindowSize_,
@@ -57,9 +56,8 @@ namespace Control
               id(LlufId_Generate64(name_.c_str())),
               isLight(isLight_),
               talksTo(talksTo_),
-              multicastAddress(multicastAddress_),
-              controlPort(controlPort_),
-              dataPort(dataPort_),
+              multicastAddressControl(multicastAddressControl_),
+              multicastAddressData(multicastAddressData_),
               heartbeatInterval(heartbeatInterval_),
               maxLostHeartbeats(maxLostHeartbeats_),
               slidingWindowSize(slidingWindowSize_),
@@ -72,9 +70,8 @@ namespace Control
         const boost::int64_t id;
         const bool isLight;
         const std::set<std::string> talksTo;
-        const std::string multicastAddress;
-        const int controlPort;
-        const int dataPort;
+        const std::string multicastAddressControl;
+        const std::string multicastAddressData;
         const int heartbeatInterval;
         const int maxLostHeartbeats;
         const int slidingWindowSize;

@@ -71,40 +71,64 @@
           <property name="text">
            <string># Pushed</string>
           </property>
+          <property name="toolTip">
+           <string>Number of requests that have been pushed on to the request out queue.</string>
+          </property>
          </column>
          <column>
           <property name="text">
            <string># Overflow</string>
+          </property>
+          <property name="toolTip">
+           <string>Number of overflows that have occurred when sending a request.</string>
           </property>
          </column>
          <column>
           <property name="text">
            <string># Dispatched</string>
           </property>
+          <property name="toolTip">
+           <string>Number of requests that have been dispatched by dose_main (i.e. have been sent onwards).</string>
+          </property>
          </column>
          <column>
           <property name="text">
            <string># Resp</string>
+          </property>
+          <property name="toolTip">
+           <string>Number of responses that have been dispatched back by dose_main.</string>
           </property>
          </column>
          <column>
           <property name="text">
            <string># Resp to app</string>
           </property>
+          <property name="toolTip">
+           <string>Number of responses that have been received by the application.</string>
+          </property>
          </column>
          <column>
           <property name="text">
            <string># Timeouts</string>
+          </property>
+          <property name="toolTip">
+           <string>Number of timeouts that have occurred.</string>
           </property>
          </column>
          <column>
           <property name="text">
            <string>Capacity</string>
           </property>
+          <property name="toolTip">
+           <string>Maximum size of the request out queue.</string>
+          </property>
          </column>
          <column>
           <property name="text">
            <string>Size</string>
+          </property>
+          <property name="toolTip">
+           <string>Current size of the request out queue (i.e. number of requests that are currently in transit).</string>
           </property>
          </column>
         </widget>
@@ -150,40 +174,64 @@
           <property name="text">
            <string>Consumer</string>
           </property>
+          <property name="toolTip">
+           <string>Address of the consumer that the request in queue belongs to.</string>
+          </property>
          </column>
          <column>
           <property name="text">
            <string># Pushed</string>
+          </property>
+          <property name="toolTip">
+           <string>Number of requests that have been pushed on to the in queue.</string>
           </property>
          </column>
          <column>
           <property name="text">
            <string># Overflow</string>
           </property>
+          <property name="toolTip">
+           <string>Number of overflows when pushing requests on to the in queue.</string>
+          </property>
          </column>
          <column>
           <property name="text">
            <string># Dispatched</string>
+          </property>
+          <property name="toolTip">
+           <string>Number of requests that have been dispatched to the application.</string>
           </property>
          </column>
          <column>
           <property name="text">
            <string># Resp</string>
           </property>
+          <property name="toolTip">
+           <string>Number of responses that the application has put back in the queue.</string>
+          </property>
          </column>
          <column>
           <property name="text">
            <string># Resp to dose_main</string>
+          </property>
+          <property name="toolTip">
+           <string>Number of responses dispatched by dose_main onwards.</string>
           </property>
          </column>
          <column>
           <property name="text">
            <string>Capacity</string>
           </property>
+          <property name="toolTip">
+           <string>Maximum size of the request in queue.</string>
+          </property>
          </column>
          <column>
           <property name="text">
            <string>Size</string>
+          </property>
+          <property name="toolTip">
+           <string>Current size of the request in queue.</string>
           </property>
          </column>
         </widget>
@@ -226,20 +274,32 @@
           <property name="text">
            <string># Pushed</string>
           </property>
+          <property name="toolTip">
+           <string>Number of messages pushed on to the message out queue by the application.</string>
+          </property>
          </column>
          <column>
           <property name="text">
            <string># Overflow</string>
+          </property>
+          <property name="toolTip">
+           <string>Number of overflows that have happened.</string>
           </property>
          </column>
          <column>
           <property name="text">
            <string>Capacity</string>
           </property>
+          <property name="toolTip">
+           <string>Maximum size of the message out queue.</string>
+          </property>
          </column>
          <column>
           <property name="text">
            <string>Size</string>
+          </property>
+          <property name="toolTip">
+           <string>Current size of the message out queue.</string>
           </property>
          </column>
         </widget>
@@ -285,25 +345,40 @@
           <property name="text">
            <string>Consumer</string>
           </property>
+          <property name="toolTip">
+           <string>Address of the consumer that the queue belongs to.</string>
+          </property>
          </column>
          <column>
           <property name="text">
            <string># Pushed</string>
+          </property>
+          <property name="toolTip">
+           <string>Number of messages that dose_main has pushed on to the queue.</string>
           </property>
          </column>
          <column>
           <property name="text">
            <string># Overflow</string>
           </property>
+          <property name="toolTip">
+           <string>Number of overflows that have occurred when dose_main has pushed messages on to the queue.</string>
+          </property>
          </column>
          <column>
           <property name="text">
            <string>Capacity</string>
           </property>
+          <property name="toolTip">
+           <string>Maximum size of the message in queue.</string>
+          </property>
          </column>
          <column>
           <property name="text">
            <string>Size</string>
+          </property>
+          <property name="toolTip">
+           <string>Current size of the queue.</string>
           </property>
          </column>
         </widget>
