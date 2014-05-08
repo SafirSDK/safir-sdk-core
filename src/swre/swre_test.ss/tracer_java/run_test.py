@@ -28,23 +28,6 @@ import subprocess, os, time, sys, signal, re, argparse
 import syslog_server
 from safe_print import *
 
-#TODO remove this when we drop python 2.6 support
-if "check_output" not in dir( subprocess ): # duck punch it in!
-    def f(*popenargs, **kwargs):
-        if 'stdout' in kwargs:
-            raise ValueError('stdout argument not allowed, it will be overridden.')
-        process = subprocess.Popen(stdout=subprocess.PIPE, *popenargs, **kwargs)
-        output, unused_err = process.communicate()
-        retcode = process.poll()
-        if retcode:
-            cmd = kwargs.get("args")
-            if cmd is None:
-                cmd = popenargs[0]
-            raise subprocess.CalledProcessError(retcode, cmd)
-        return output
-    subprocess.check_output = f
-
-
 parser = argparse.ArgumentParser("test script for logging")
 parser.add_argument("--classpath", required=True)
 parser.add_argument("--library-path", required=True)

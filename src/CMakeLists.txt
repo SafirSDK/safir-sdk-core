@@ -328,10 +328,12 @@ function(SAFIR_GET_JAVA_CLASSPATH_AND_LIBPATH)
   set (SAFIR_JAVA_LIBRARY_PATH "${SAFIR_JAVA_LIBRARY_PATH}" PARENT_SCOPE)
 endfunction()
 
-ENABLE_TESTING()
 FIND_PACKAGE(PythonInterp)
+if(PYTHON_VERSION_STRING VERSION_LESS "2.7")
+  message(FATAL_ERROR "Need Python version 2.7 or greater. Sorry.")
+endif()
 
-
+ENABLE_TESTING()
 
 add_subdirectory(patch_check)
 add_subdirectory(lluf)
