@@ -32,6 +32,8 @@
 #include <boost/function.hpp>
 #include <limits>
 #include <atomic>
+#include <map>
+#include <set>
 
 #ifdef _MSC_VER
 #  pragma warning (push)
@@ -107,6 +109,8 @@ namespace SP
                      const boost::shared_ptr<char[]>& data, 
                      size_t size);
 
+        void SendPendingElectionMessages();
+
         mutable boost::asio::strand m_strand;
         const boost::shared_ptr<Com::Communication> m_communication;
         const boost::uint64_t m_dataIdentifier;
@@ -119,10 +123,24 @@ namespace SP
         const std::string m_controlAddress;
         const std::string m_dataAddress;
         const std::map<boost::int64_t, NodeType> m_nodeTypes;
+        const std::set<boost::int64_t> m_nonLightNodeTypes;
 
         std::atomic<boost::int64_t> m_elected;
         boost::asio::steady_timer m_electionTimer;
-        boost::int64_t m_currentElectionId = 0;
+        boost::uint32_t m_currentElectionId = 0;
+
+        boost::asio::steady_timer m_sendMessageTimer;
+        //a set of node type ids to which we want to send INQUIRY to, using m_currentElectionId
+        std::set<boost::int64_t> m_pendingInquiries;
+        
+        //this is a list of the nodes that we need to send ALIVE messages to (key), along with the
+        //election id that came in the INQUIRY (value.second) and the nodeTypeId of the recipient 
+        //(value.first)
+        std::map<boost::int64_t, std::pair<boost::int64_t, boost::uint32_t>> m_pendingAlives;
+
+        //a set of node type ids to which we want to send VICTORY to, using m_currentElectionId
+        std::set<boost::int64_t> m_pendingVictories;
+        
     };
 }
 }
