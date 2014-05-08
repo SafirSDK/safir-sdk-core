@@ -94,10 +94,10 @@
             <TalksTo></TalksTo>
             <MulticastAddressControl>224.11.11.11:23000</MulticastAddressControl>
             <MulticastAddressData>224.11.11.11:24000</MulticastAddressData>
-            <HeartbeatInterval>1000</HeartbeatInterval>
+            <HeartbeatInterval>1.0</HeartbeatInterval>
             <MaxLostHeartbeats>5</MaxLostHeartbeats>
             <SlidingWindowsSize>10</SlidingWindowsSize>
-            <RetryTimeout>200</RetryTimeout>
+            <RetryTimeout>0.2</RetryTimeout>
             <WantedTypes>
               <String>.*</String> <!-- Must be all types for non IsLight node -->
             </WantedTypes> 
@@ -114,10 +114,10 @@
             </TalksTo>
             <MulticastAddressControl>224.11.11.11:23001</MulticastAddressControl>
             <MulticastAddressData>224.11.11.11:24001</MulticastAddressData>
-            <HeartbeatInterval>5000</HeartbeatInterval>
+            <HeartbeatInterval>5.0</HeartbeatInterval>
             <MaxLostHeartbeats>5</MaxLostHeartbeats>
             <SlidingWindowsSize>10</SlidingWindowsSize>
-            <RetryTimeout>2000</RetryTimeout>
+            <RetryTimeout>2.0</RetryTimeout>
             <WantedTypes>
               <String>.*</String> <!-- This client  wants all types -->
             </WantedTypes> 
@@ -132,10 +132,10 @@
             <TalksTo>
               <String>Server</String>
             </TalksTo>
-            <HeartbeatInterval>30000</HeartbeatInterval>
+            <HeartbeatInterval>30.0</HeartbeatInterval>
             <MaxLostHeartbeats>5</MaxLostHeartbeats>
             <SlidingWindowsSize>10</SlidingWindowsSize>
-            <RetryTimeout>5000</RetryTimeout>
+            <RetryTimeout>5.0</RetryTimeout>
             <WantedTypes>
               <String>Capabilities\.Vehicles\.</String>
             </WantedTypes>
