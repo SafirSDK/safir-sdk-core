@@ -22,12 +22,12 @@
 *
 ******************************************************************************/
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
- #include "../../src/Safir/Utilities/Internal/IpcAcceptorWin32.h"
+ #include <Safir/Utilities/Internal/IpcAcceptorWin32.h>
 #elif defined(linux) || defined(__linux) || defined(__linux__)
- #include "../../src/Safir/Utilities/Internal/IpcAcceptorLinux.h"
+ #include <Safir/Utilities/Internal/IpcAcceptorLinux.h>
 #endif
 
-#include "../../src/Safir/Utilities/Internal/IpcPublisher.h"
+#include <Safir/Utilities/Internal/IpcPublisher.h>
 #include <Safir/Utilities/Internal/StringEncoding.h>
 #include <boost/asio.hpp>
 #include <boost/algorithm/string.hpp>

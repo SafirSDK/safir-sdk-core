@@ -25,7 +25,6 @@
 #define __LLUF_IPC_PUBLISHER_H__
 
 #include <set>
-#include <deque>
 #include <boost/cstdint.hpp>
 #include <boost/asio.hpp>
 #include <boost/shared_ptr.hpp>
@@ -35,10 +34,12 @@
 #include <boost/function.hpp>
 #include <boost/filesystem.hpp>
 
+#include <Safir/Utilities/Internal/IpcSession.h>
+
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-#  include "IpcAcceptorWin32.h"
+#  include <Safir/Utilities/Internal/IpcAcceptorWin32.h>
 #elif defined(linux) || defined(__linux) || defined(__linux__)
-#  include "IpcAcceptorLinux.h"
+#  include <Safir/Utilities/Internal/IpcAcceptorLinux.h>
 #endif
 
 namespace Safir
@@ -47,93 +48,6 @@ namespace Utilities
 {
 namespace Internal
 {
-
-    struct Msg
-    {
-        boost::shared_ptr<char[]> data;
-        boost::uint32_t           size;
-    };
-
-    template<typename TestPolicy, typename StreamPtr>
-    class Session
-        : public boost::enable_shared_from_this<Session<TestPolicy, StreamPtr>>
-    {
-    public:
-        Session(const StreamPtr&                    streamPtr,
-                boost::asio::io_service::strand&    strand)
-            : m_streamPtr(streamPtr),
-              m_msgQueue(),
-              m_strand(strand)
-        {
-        }
-
-        ~Session()
-        {
-            if (m_streamPtr)
-            {
-                m_streamPtr->close();
-            }
-        }
-
-        void Send(const boost::shared_ptr<char[]>& msg, boost::uint32_t msgSize)
-        {
-            bool writeInProgress = !m_msgQueue.empty();
-            m_msgQueue.push_back({msg, msgSize});
-            if (!writeInProgress)
-            {
-              Write();
-            }
-        }
-
-        bool IsOpen() const
-        {
-            return m_streamPtr && m_streamPtr->is_open();
-        }
-
-    private:
-
-        void Write()
-        {
-            auto selfHandle(this->shared_from_this());
-
-            auto buffers = std::vector<boost::asio::const_buffer>();
-
-            const Msg& msg = m_msgQueue.front(); // make alias to increase readability
-
-            buffers.push_back({&msg.size, sizeof(msg.size)}); // header
-            buffers.push_back({msg.data.get(), msg.size});    // msg data
-
-            boost::asio::async_write(*m_streamPtr,
-                                     buffers,
-                                     m_strand.wrap(
-                [this, selfHandle](boost::system::error_code ec, size_t /*length*/)
-                {
-                    if (!ec)
-                    {
-                        m_msgQueue.pop_front();
-                        if (!m_msgQueue.empty())
-                        {
-                            Write();
-                        }
-                    }
-                    else
-                    {
-                        if (!m_streamPtr->is_open())
-                        {
-                            return;
-                        }
-
-                        m_streamPtr->close();
-
-                        TestPolicy::SubscriberDisconnect();
-                    }
-                }));
-        }
-
-        StreamPtr                           m_streamPtr;
-        std::deque<Msg>                     m_msgQueue;
-        boost::asio::io_service::strand&    m_strand;
-    };
 
     /**
      * This class implements an Ipc publisher which can be used to send messages
@@ -147,6 +61,9 @@ namespace Internal
      *
      * Safir::Utilities::Internal::IpcPublisher myPublisher;
      *
+     * TODO: Currently, the send queues (one for each subscriber) have no upper limits and
+     *       there is no concept of overflow when sending a message. We have to decide if this
+     *       is ok, or if a more elaborated mechanism is needed.
      */
     template<typename TestPolicy, typename Acceptor>
     class IpcPublisherImpl
