@@ -6,10 +6,10 @@ ADD_CUSTOM_COMMAND(OUTPUT
   ${CMAKE_CURRENT_BINARY_DIR}/com_saabgroup_safir_application_Library.h
   ${CMAKE_CURRENT_BINARY_DIR}/com_saabgroup_safir_swreports_Library.h
   
-  COMMAND ${JAVAH} -classpath ../com.saabgroup.safir.application/swre_application_java.jar com.saabgroup.safir.application.Library
-  COMMAND ${JAVAH} -classpath ../com.saabgroup.safir.swreports/swre_swreports_java.jar com.saabgroup.safir.swreports.Library
+  COMMAND ${Java_JAVAH_EXECUTABLE} -classpath ../com.saabgroup.safir.application/swre_application_java.jar com.saabgroup.safir.application.Library
+  COMMAND ${Java_JAVAH_EXECUTABLE} -classpath ../com.saabgroup.safir.swreports/swre_reports_java.jar com.saabgroup.safir.swreports.Library
 
-  DEPENDS swre_application_java swre_swreports_java
+  DEPENDS swre_application_java swre_reports_java
 
   COMMENT "Generating javah header files"
   VERBATIM)
@@ -21,6 +21,10 @@ ADD_LIBRARY(swre_java_jni SHARED
 
 TARGET_INCLUDE_DIRECTORIES(swre_java_jni PRIVATE ${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2} ${CMAKE_CURRENT_BINARY_DIR})
 
-TARGET_LINK_LIBRARIES(swre_java_jni PRIVATE swre_library)
+TARGET_LINK_LIBRARIES(swre_java_jni PRIVATE 
+  swre_library
+  dots_cpp
+  dots_internal
+  lluf_utils)
 
 SAFIR_INSTALL(TARGETS swre_java_jni)
