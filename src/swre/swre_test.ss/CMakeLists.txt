@@ -10,6 +10,6 @@ add_subdirectory(swreport_cpp)
 #TODO    add_subdirectory(swreport_ada)
 #endif()
 
-#add_subdirectory(tracer_java)
+add_subdirectory(tracer_java)
 #TODO    add_subdirectory(swreport_java)
 
