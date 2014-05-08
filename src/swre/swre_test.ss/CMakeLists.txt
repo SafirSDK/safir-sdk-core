@@ -11,5 +11,5 @@ add_subdirectory(swreport_cpp)
 #endif()
 
 add_subdirectory(tracer_java)
-#TODO    add_subdirectory(swreport_java)
+add_subdirectory(swreport_java)
 
