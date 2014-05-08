@@ -389,24 +389,22 @@ namespace SP
         });
     }
 
-    void RawHandler::SetStatisticsChangedCallback(const StatisticsChangedCallback& callback)
+    void RawHandler::AddStatisticsChangedCallback(const StatisticsChangedCallback& callback)
     {
         m_strand.dispatch([this, callback]
                           {
-                              m_statisticsChangedCallback = callback;
+                              m_statisticsChangedCallbacks.push_back(callback);
                           });
     }
     
     //must be called in strand
     void RawHandler::PostStatisticsChangedCallback()
     {
-        if (!m_statisticsChangedCallback) //no callback set
-        {
-            return;
-        }
-
         const auto copy = RawStatisticsCreator::Create(boost::make_shared<NodeStatisticsMessage>(m_allStatisticsMessage));
-        m_ioService->post([this,copy]{m_statisticsChangedCallback(copy);});
+        for (auto cb : m_statisticsChangedCallbacks)
+        {
+            m_ioService->post([cb,copy]{cb(copy);});
+        }
     }
 }
 }

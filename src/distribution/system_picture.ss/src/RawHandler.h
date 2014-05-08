@@ -94,7 +94,7 @@ namespace SP
         void UpdateRemoteStatistics(const boost::int64_t from, const boost::shared_ptr<char[]>& data, const size_t size);
 
         //will always be posted! data will be a copy
-        void SetStatisticsChangedCallback(const StatisticsChangedCallback& callback);
+        void AddStatisticsChangedCallback(const StatisticsChangedCallback& callback);
     private:
         void NewNode(const std::string& name,
                      const boost::int64_t id,
@@ -141,7 +141,7 @@ namespace SP
         mutable NodeStatisticsMessage m_myStatisticsMessage; 
 #endif
 
-        StatisticsChangedCallback m_statisticsChangedCallback;
+        std::vector<StatisticsChangedCallback> m_statisticsChangedCallbacks;
 
         std::atomic<bool> m_stopped;
     };

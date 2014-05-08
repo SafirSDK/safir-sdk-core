@@ -100,7 +100,7 @@ namespace
         , m_elected(std::numeric_limits<boost::int64_t>::min())
         , m_electionTimer(*ioService)
     {
-        rawHandler->SetStatisticsChangedCallback(m_strand.wrap([this](const RawStatistics& statistics)
+        rawHandler->AddStatisticsChangedCallback(m_strand.wrap([this](const RawStatistics& statistics)
                                                                {
                                                                    StatisticsChanged(statistics);
                                                                }));
@@ -342,8 +342,6 @@ namespace
                  << message.election_id() 
                  << ") from " << from << std::endl;
         
-        //        m_strand.dispatch([this,message,from]
-        //        {
         switch (message.action())
         {
         case INQUIRY: 
