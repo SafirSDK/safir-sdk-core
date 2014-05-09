@@ -97,10 +97,23 @@ namespace
         , m_controlAddress(controlAddress)
         , m_dataAddress(dataAddress)
         , m_nodeTypes(nodeTypes)
+        , m_nonLightNodeTypes([&nodeTypes]
+                              {
+                                  std::set<boost::int64_t> res;
+                                  for (const auto& it: nodeTypes)
+                                  {
+                                      if (!it.second.isLight)
+                                      {
+                                          res.insert(it.first);
+                                      }
+                                  }
+                             return res;
+                         }())
         , m_elected(std::numeric_limits<boost::int64_t>::min())
         , m_electionTimer(*ioService)
+        , m_sendMessageTimer(*ioService)
     {
-        rawHandler->SetStatisticsChangedCallback(m_strand.wrap([this](const RawStatistics& statistics)
+        rawHandler->AddStatisticsChangedCallback(m_strand.wrap([this](const RawStatistics& statistics)
                                                                {
                                                                    StatisticsChanged(statistics);
                                                                }));
@@ -262,7 +275,7 @@ namespace
         //cancel any other pending elections
         m_electionTimer.cancel(); //
         
-        m_electionTimer.expires_from_now(boost::chrono::milliseconds(200)); 
+        m_electionTimer.expires_from_now(boost::chrono::milliseconds(100)); 
         m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
         {
             if (!!error)
@@ -294,9 +307,12 @@ namespace
             
             
             lllog(4) << "Starting election" << std::endl;
-            m_currentElectionId = LlufId_GenerateRandom64();
+            ++m_currentElectionId;
             
-            ElectionMessage message;
+            m_pendingInquiries = m_nonLightNodeTypes;
+            SendPendingElectionMessages();
+
+            /*            ElectionMessage message;
             message.set_action(INQUIRY);
             message.set_election_id(m_currentElectionId);
             const auto size = message.ByteSize();
@@ -315,7 +331,7 @@ namespace
                     }
                 }
             }
-
+            */
             
             m_electionTimer.expires_from_now(boost::chrono::seconds(6));
             m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
@@ -341,93 +357,94 @@ namespace
                  << ", " 
                  << message.election_id() 
                  << ") from " << from << std::endl;
-        
-        //        m_strand.dispatch([this,message,from]
-        //        {
-        switch (message.action())
+        m_strand.dispatch([this,message,from, nodeTypeId]
         {
-        case INQUIRY: 
+            switch (message.action())
             {
-                //if we got an inquiry from someone smaller than us we send an alive
-                //and start a new election
-                if (from < m_id)
+            case INQUIRY: 
                 {
-                    lllog(5) << "Got an inquiry from someone smaller than us, sending alive and starting election" << std::endl;
-                    ElectionMessage aliveMsg;
-                    aliveMsg.set_action(ALIVE);
-                    aliveMsg.set_election_id(message.election_id());
-                    const auto size = aliveMsg.ByteSize();
-                    boost::shared_ptr<char[]> data = boost::make_shared<char[]>(size);
-                    aliveMsg.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
-                    
-                    //TODO: handle overflow!
-                    const bool sent = m_communication->SendToNode(from, nodeTypeId, data, size, m_dataIdentifier);
-
-                    if (!sent)
+                    //if we got an inquiry from someone smaller than us we send an alive
+                    //and start a new election
+                    if (from < m_id)
                     {
-                        lllog(7) << "Coordinator: Overflow when sending ALIVE to node " 
-                                 << from << std::endl;
+                        lllog(5) << "Got an inquiry from someone smaller than us, sending alive and starting election" << std::endl;
+                        m_pendingAlives.insert(std::make_pair(from, std::make_pair(nodeTypeId, message.election_id())));
+                        SendPendingElectionMessages();
+                        /*
+                        ElectionMessage aliveMsg;
+                        aliveMsg.set_action(ALIVE);
+                        aliveMsg.set_election_id(message.election_id());
+                        const auto size = aliveMsg.ByteSize();
+                        boost::shared_ptr<char[]> data = boost::make_shared<char[]>(size);
+                        aliveMsg.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
+                        
+                        //TODO: handle overflow!
+                        const bool sent = m_communication->SendToNode(from, nodeTypeId, data, size, m_dataIdentifier);
+                        
+                        if (!sent)
+                        {
+                            lllog(7) << "Coordinator: Overflow when sending ALIVE to node " 
+                                     << from << std::endl;
+                                     }*/
+                        
+                        StartElection();
                     }
-
-
-                    m_strand.dispatch([this,message,from]
-                                      {
-                                          StartElection();
-                                      });
                 }
-            }
-            break;
-        
-        case ALIVE: 
-            {
-                m_strand.dispatch([this,message,from]
-                                  {
-                                      //if we got an alive from someone bigger than us we abandon the election
-                                      if (from > m_id &&
-                                          message.election_id() == m_currentElectionId)
-                                      {
-                                          lllog(5) << "Got alive from someone bigger than me (" 
-                                                   << from << "), abandoning election." << std::endl;
-                                          m_electionTimer.cancel();
-                                          m_currentElectionId = 0;
-                                      }
-                                  });
-            }
-            break;
+                break;
+                
+            case ALIVE: 
+                {
+                    //if we got an alive from someone bigger than us we abandon the election
+                    if (from > m_id &&
+                        message.election_id() == m_currentElectionId)
+                    {
+                        lllog(5) << "Got alive from someone bigger than me (" 
+                                 << from << "), abandoning election." << std::endl;
+                        m_electionTimer.cancel();
+                        m_pendingInquiries.clear();
+                        m_pendingVictories.clear();
+                    }
+                }
+                break;
 
-        case VICTORY: 
-            {
-                m_strand.dispatch([this,from]
-                                  {
-                                      if (from > m_id)
-                                      {
-                                          lllog(4) << "New controller elected: " << from << std::endl;
-                                          //graciously accept their victory
-                                          m_elected = from;
-                                          
-                                          //cancel any ongoing elections
-                                          m_electionTimer.cancel();
-                                          m_currentElectionId = 0;
-                                      }
-                                      else //No! We're going to usurp him! restart election
-                                      {
-                                          lllog(5) << "Got victory from someone smaller than me (" 
-                                                   << from << "), starting new election." << std::endl;
-                                          
-                                          StartElection();
-                                      }
-                                  });
+            case VICTORY: 
+                {
+                    if (from > m_id)
+                    {
+                        lllog(4) << "New controller elected: " << from << std::endl;
+                        //graciously accept their victory
+                        m_elected = from;
+                        
+                        //cancel any ongoing elections
+                        m_electionTimer.cancel();
+                        m_pendingInquiries.clear();
+                        m_pendingVictories.clear();
+                    }
+                    else //No! We're going to usurp him! restart election
+                    {
+                        lllog(5) << "Got victory from someone smaller than me (" 
+                                 << from << "), starting new election." << std::endl;
+                        
+                        StartElection();
+                    }
+                }
+                break;
+            default:
+                throw std::logic_error("Unknown ElectionAction");
             }
-            break;
-        default:
-            throw std::logic_error("Unknown ElectionAction");
-        }
+        });
     }
 
     //must be called in strand
     void Coordinator::ElectionTimeout()
     {
-        lllog(4) << "Haha! There can be only one! Victory!" << std::endl;
+        lllog(4) << "There can be only one! Will send VICTORY to everyone!" << std::endl;
+        
+        m_elected = m_id;
+
+        m_pendingVictories = m_nonLightNodeTypes;
+        SendPendingElectionMessages();
+        /*
         m_elected = m_id;
         m_currentElectionId = 0;
 
@@ -452,10 +469,96 @@ namespace
                 }
 
             }
-        }
+            }*/
 
     }
 
+    //must be called in strand
+    void Coordinator::SendPendingElectionMessages()
+    {
+        m_sendMessageTimer.cancel();
+
+        { //ALIVE
+            const auto pending = m_pendingAlives;
+            m_pendingAlives.clear();
+            for (const auto& it : pending)
+            {
+                ElectionMessage aliveMsg;
+                aliveMsg.set_action(ALIVE);
+                aliveMsg.set_election_id(it.second.second);
+                const auto size = aliveMsg.ByteSize();
+                boost::shared_ptr<char[]> data = boost::make_shared<char[]>(size);
+                aliveMsg.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
+                
+                const bool sent = m_communication->SendToNode(it.first, it.second.first, data, size, m_dataIdentifier);
+                
+                if (!sent)
+                {
+                    lllog(9) << "Coordinator: Overflow when sending ALIVE to node " 
+                             << it.first << std::endl;
+                    m_pendingAlives.insert(it);
+                }
+            }
+        }
+
+        { //VICTORY
+            const auto pending = m_pendingVictories;
+            m_pendingVictories.clear();
+            for (const auto& it : pending)
+            {
+                ElectionMessage victoryMsg;
+                victoryMsg.set_action(VICTORY);
+                victoryMsg.set_election_id(m_currentElectionId);
+                const auto size = victoryMsg.ByteSize();
+                boost::shared_ptr<char[]> data = boost::make_shared<char[]>(size);
+                victoryMsg.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
+                
+                const bool sent = m_communication->SendToNodeType(it, data, size, m_dataIdentifier);
+
+                if (!sent)
+                {
+                    lllog(9) << "Coordinator: Overflow when sending VICTORY to node type " 
+                             << m_nodeTypes.find(it)->second.name.c_str() << std::endl;
+                    m_pendingVictories.insert(it);
+                }
+            }
+        }
+
+        { //INQUIRY
+            const auto pending = m_pendingInquiries;
+            m_pendingInquiries.clear();
+            for (const auto it : pending)
+            {
+                ElectionMessage message;
+                message.set_action(INQUIRY);
+                message.set_election_id(m_currentElectionId);
+                const auto size = message.ByteSize();
+                boost::shared_ptr<char[]> data = boost::make_shared<char[]>(size);
+                message.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
+
+                const bool sent = m_communication->SendToNodeType(it, data, size, m_dataIdentifier);
+                if (!sent)
+                {
+                    lllog(7) << "Coordinator: Overflow when sending INQUIRY to node type " 
+                             << m_nodeTypes.find(it)->second.name.c_str() << std::endl;
+                    m_pendingInquiries.insert(it);
+                }
+            }
+        }
+
+        //Handle retry
+        if (!m_pendingAlives.empty() || !m_pendingVictories.empty() || !m_pendingInquiries.empty())
+        {
+            m_sendMessageTimer.expires_from_now(boost::chrono::milliseconds(10)); 
+            m_sendMessageTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
+                                                        {
+                                                            if (!error)
+                                                            {
+                                                                SendPendingElectionMessages();
+                                                            }
+                                                        }));
+        }
+    }
 }
 }
 }

@@ -9,19 +9,17 @@
       <name>NodeTypes</name>
       <type>Safir.Dob.NodeType</type>
       <arrayElements>
-
         <arrayElement>
           <Safir.Dob.NodeType>
             <Name>Server</Name>
             <IsLight>False</IsLight>
             <TalksTo></TalksTo>
-            <MulticastAddress>192.0.0.1</MulticastAddress>
-            <ControlPort>9500</ControlPort>
-            <DataPort>9501</DataPort>
-            <HeartbeatInterval>1000</HeartbeatInterval>
+            <MulticastAddressControl>192.0.0.1:9500</MulticastAddressControl>
+            <MulticastAddressData>192.0.0.1:9501</MulticastAddressData>
+            <HeartbeatInterval>1.0</HeartbeatInterval>
             <MaxLostHeartbeats>5</MaxLostHeartbeats>
             <SlidingWindowsSize>10</SlidingWindowsSize>
-            <RetryTimeout>200</RetryTimeout>
+            <RetryTimeout>0.2</RetryTimeout>
             <WantedTypes>
               <String>.*</String> <!-- Must be all types for non IsLight node -->
             </WantedTypes>
@@ -36,13 +34,12 @@
             <TalksTo>
               <String>Server</String>
             </TalksTo>
-            <MulticastAddress>192.0.0.15</MulticastAddress>
-            <ControlPort>9500</ControlPort>
-            <DataPort>9501</DataPort>
-            <HeartbeatInterval>5000</HeartbeatInterval>
+            <MulticastAddressControl>192.0.0.15:9500</MulticastAddressControl>
+            <MulticastAddressData>192.0.0.15:9501</MulticastAddressData>
+            <HeartbeatInterval>5.0</HeartbeatInterval>
             <MaxLostHeartbeats>5</MaxLostHeartbeats>
             <SlidingWindowsSize>10</SlidingWindowsSize>
-            <RetryTimeout>2000</RetryTimeout>
+            <RetryTimeout>2.0</RetryTimeout>
             <WantedTypes>
               <String>.*</String> <!-- This client  wants all types -->
             </WantedTypes> 
@@ -57,13 +54,12 @@
             <TalksTo>
               <String>Server</String>
             </TalksTo>
-            <MulticastAddress>192.0.0.16</MulticastAddress>
-            <ControlPort>9500</ControlPort>
-            <DataPort>9501</DataPort>
-            <HeartbeatInterval>30000</HeartbeatInterval>
+            <MulticastAddressControl>192.0.0.16:9500</MulticastAddressControl>
+            <MulticastAddressData>192.0.0.16:9501</MulticastAddressData>
+            <HeartbeatInterval>30.00</HeartbeatInterval>
             <MaxLostHeartbeats>5</MaxLostHeartbeats>
             <SlidingWindowsSize>10</SlidingWindowsSize>
-            <RetryTimeout>5000</RetryTimeout>
+            <RetryTimeout>5.0</RetryTimeout>
             <WantedTypes>
               <String>Capabilities\.Vehicles\.</String>
             </WantedTypes>

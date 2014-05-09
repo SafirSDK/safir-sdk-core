@@ -15,13 +15,12 @@
             <Name>Server</Name>
             <IsLight>False</IsLight>
             <TalksTo></TalksTo>
-            <MulticastAddress>192.0.0.1</MulticastAddress>
-            <ControlPort>9500</ControlPort>
-            <DataPort>9501</DataPort>
-            <HeartbeatInterval>1000</HeartbeatInterval>
+            <MulticastAddressControl>192.0.0.1:9500</MulticastAddressControl>
+            <MulticastAddressData>192.0.0.1:9501</MulticastAddressData>
+            <HeartbeatInterval>1.0</HeartbeatInterval>
             <MaxLostHeartbeats>5</MaxLostHeartbeats>
             <SlidingWindowsSize>10</SlidingWindowsSize>
-            <RetryTimeout>200</RetryTimeout>
+            <RetryTimeout>0.2</RetryTimeout>
             <WantedTypes>
               <String>abc.*</String> <!-- Must be all types for non IsLight node -->
             </WantedTypes>

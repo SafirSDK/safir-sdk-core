@@ -47,36 +47,66 @@ namespace SP
                            const std::map<boost::int64_t, NodeType>& nodeTypes,
                            const char* const senderId,
                            const boost::shared_ptr<RawHandler>& rawHandler)
-            : m_communication(communication)
+            : m_strand(*ioService)
+            , m_timer(*ioService)
+            , m_communication(communication)
             , m_senderId(LlufId_Generate64(senderId))
             , m_nodeTypes(nodeTypes)
             , m_rawHandler(rawHandler)
-            , m_publishTimer(AsioPeriodicTimer::Create(*ioService, 
-                                                       boost::chrono::seconds(1),
-                                                       [this](const boost::system::error_code& error)
-                                                       {
-                                                           Publish(error);
-                                                       }))
+            , m_allNodeTypes([&nodeTypes]
+                             {
+                                 std::set<boost::int64_t> res;
+                                 for (const auto& it: nodeTypes)
+                                 {
+                                     res.insert(it.first);
+                                 }
+                                 return res;
+                             }())
         {
-            m_publishTimer->Start();
+            SchedulePublishTimer(boost::chrono::seconds(30), m_allNodeTypes);
+
+            rawHandler->AddStatisticsChangedCallback(m_strand.wrap([this](const RawStatistics&)
+                                                                   {
+                                                                       Publish(m_allNodeTypes);
+                                                                   }));
+            
         }
 
         void Stop()
         {
-            m_publishTimer->Stop();
+            m_timer.cancel();
         }
 
     private:
-        void Publish(const boost::system::error_code& error)
+        void SchedulePublishTimer(const boost::chrono::steady_clock::duration& delay,
+                                  const std::set<boost::int64_t>& toNodeTypes)
         {
-            if (error)
+            m_timer.cancel();
+            m_timer.expires_from_now(delay); 
+            m_timer.async_wait(m_strand.wrap([this, toNodeTypes](const boost::system::error_code& error)
             {
-                SEND_SYSTEM_LOG(Alert,
-                                << "Unexpected error in RawPublisherRemote::Publish: " << error);
-                throw std::logic_error("Unexpected error in RawPublisherRemote::Publish");
-            }
-
+                if (!error)
+                {
+                    Publish(toNodeTypes);
+                }
+                else
+                {
+                    SEND_SYSTEM_LOG(Alert,
+                                    << "Unexpected error in RawPublisherRemote::SchedulePublishTimer: " << error);
+                    throw std::logic_error("Unexpected error in RawPublisherRemote::SchedulePublishTimer");
+                }
+            }));
+        }
+        
+        //must be called in strand
+        //if empty set is passed to this function we send to all node types
+        void Publish(const std::set<boost::int64_t>& toNodeTypes)
+        {
             lllog(8) << "Publishing raw statistics to other nodes" << std::endl;
+
+            //start by scheduling next timer to send to all nodes.
+            //this will be cancelled if we need to do a resend due to overflow below.
+            SchedulePublishTimer(boost::chrono::seconds(30), m_allNodeTypes);
             
 #ifdef CHECK_CRC
             const int crcBytes = sizeof(int);
@@ -84,30 +114,40 @@ namespace SP
             const int crcBytes = 0;
 #endif
 
-            m_rawHandler->PerformOnMyStatisticsMessage([this,crcBytes](const boost::shared_ptr<char[]>& data, const size_t size)
+            m_rawHandler->PerformOnMyStatisticsMessage([this,crcBytes,toNodeTypes](const boost::shared_ptr<char[]>& data, const size_t size)
             {
 #ifdef CHECK_CRC
                 const int crc = GetCrc32(data.get(), size - crcBytes);
                 memcpy(data.get() + size - crcBytes, &crc, sizeof(int));
 #endif
-                for (auto it: m_nodeTypes)
+                std::set<boost::int64_t> overflowNodes;
+
+                for (auto id: toNodeTypes)
                 {
-                    const bool sent = m_communication->SendToNodeType(it.second.id, data, size, m_senderId);
+                    const bool sent = m_communication->SendToNodeType(id, data, size, m_senderId);
                     if (!sent)
                     {
                         lllog(7) << "RawPublisherRemote: Overflow when sending to node type " 
-                                 << it.second.name.c_str() << std::endl;
+                                 << m_nodeTypes.find(id)->second.name.c_str() << std::endl;
+                        overflowNodes.insert(id);
                     }
+                }
+
+                if (!overflowNodes.empty())
+                {
+                    SchedulePublishTimer(boost::chrono::milliseconds(100), overflowNodes);
                 }
             },
                                                        crcBytes);
         }
 
+        boost::asio::strand m_strand;
+        boost::asio::steady_timer m_timer;
         const boost::shared_ptr<Com::Communication> m_communication;
         const boost::uint64_t m_senderId;
         const std::map<boost::int64_t, NodeType> m_nodeTypes;
         const boost::shared_ptr<RawHandler> m_rawHandler;
-        boost::shared_ptr<Safir::Utilities::Internal::AsioPeriodicTimer> m_publishTimer;
+        const std::set<boost::int64_t> m_allNodeTypes;
     };
 }
 }

@@ -103,6 +103,7 @@ namespace Control
             auto blob = pd->GetObjectValue(paramIdx).first;
 
             // Name
+
             DotsC_Int32 dummy;
             const char* name;
             bl.GetDynamicMember(blob, ntcd->GetMemberIndex("Name"), 0, name, dummy);
@@ -175,8 +176,8 @@ namespace Control
 
 
             // HeartbeatInterval
-            int heartbeatInterval;
-            ms = bl.GetInt32Member(blob, ntcd->GetMemberIndex("HeartbeatInterval"), 0, heartbeatInterval);
+            float heartbeatInterval;
+            ms = bl.GetFloat32Member(blob, ntcd->GetMemberIndex("HeartbeatInterval"), 0, heartbeatInterval);
             if (ms.IsNull())
             {
                 throw std::logic_error("Node type " + nodeTypeName + ": HeartbeatInterval is mandatory");
@@ -199,8 +200,8 @@ namespace Control
             }
 
             // RetryTimeout
-            int retryTimeout;
-            ms = bl.GetInt32Member(blob, ntcd->GetMemberIndex("RetryTimeout"), 0, retryTimeout);
+            float retryTimeout;
+            ms = bl.GetFloat32Member(blob, ntcd->GetMemberIndex("RetryTimeout"), 0, retryTimeout);
             if (ms.IsNull())
             {
                 throw std::logic_error("Node type " + nodeTypeName + ": RetryTimeout is mandatory");
@@ -255,10 +256,10 @@ namespace Control
                                            talksTo,
                                            multicastAddressControl,
                                            multicastAddressData,
-                                           heartbeatInterval,
+                                           static_cast<int>(heartbeatInterval * 1000), // seconds -> milliseconds
                                            maxLostHeartbeats,
                                            slidingWindowsSize,
-                                           retryTimeout,
+                                           static_cast<int>(retryTimeout * 1000), // seconds -> milliseconds
                                            wantedTypes,
                                            unwantedTypes));
 

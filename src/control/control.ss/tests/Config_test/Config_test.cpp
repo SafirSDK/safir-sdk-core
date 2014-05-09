@@ -55,9 +55,8 @@ int main(int argc, char* argv[])
         CHECK(nodeTypes[0].talksTo.find("Server") != nodeTypes[0].talksTo.end());
         CHECK(nodeTypes[0].talksTo.find("Client") != nodeTypes[0].talksTo.end());
         CHECK(nodeTypes[0].talksTo.find("RemoteClient") != nodeTypes[0].talksTo.end());
-        //TODO CHECK(nodeTypes[0].multicastAddress == "192.0.0.1");
-        //TODO CHECK(nodeTypes[0].controlPort == 9500);
-        //TODO CHECK(nodeTypes[0].dataPort == 9501);
+        CHECK(nodeTypes[0].multicastAddressControl == "192.0.0.1:9500");
+        CHECK(nodeTypes[0].multicastAddressData == "192.0.0.1:9501");
         CHECK(nodeTypes[0].heartbeatInterval == 1000);
         CHECK(nodeTypes[0].maxLostHeartbeats == 5);
         CHECK(nodeTypes[0].slidingWindowSize == 10);
@@ -71,9 +70,8 @@ int main(int argc, char* argv[])
         CHECK(nodeTypes[1].isLight == true);
         CHECK(nodeTypes[1].talksTo.size() == 1);
         CHECK(nodeTypes[1].talksTo.find("Server") != nodeTypes[1].talksTo.end());
-        //TODO CHECK(nodeTypes[1].multicastAddress == "192.0.0.15");
-        //TODO CHECK(nodeTypes[1].controlPort == 9500);
-        //TODO CHECK(nodeTypes[1].dataPort == 9501);
+        CHECK(nodeTypes[1].multicastAddressControl == "192.0.0.15:9500");
+        CHECK(nodeTypes[1].multicastAddressData == "192.0.0.15:9501");
         CHECK(nodeTypes[1].heartbeatInterval == 5000);
         CHECK(nodeTypes[1].maxLostHeartbeats == 5);
         CHECK(nodeTypes[1].slidingWindowSize == 10);
@@ -87,9 +85,8 @@ int main(int argc, char* argv[])
         CHECK(nodeTypes[2].isLight == true);
         CHECK(nodeTypes[2].talksTo.size() == 1);
         CHECK(nodeTypes[2].talksTo.find("Server") != nodeTypes[2].talksTo.end());
-        //TODO CHECK(nodeTypes[2].multicastAddress == "192.0.0.16");
-        //TODO CHECK(nodeTypes[2].controlPort == 9500);
-        //TODO CHECK(nodeTypes[2].dataPort == 9501);
+        CHECK(nodeTypes[2].multicastAddressControl == "192.0.0.16:9500");
+        CHECK(nodeTypes[2].multicastAddressData == "192.0.0.16:9501");
         CHECK(nodeTypes[2].heartbeatInterval == 30000);
         CHECK(nodeTypes[2].maxLostHeartbeats == 5);
         CHECK(nodeTypes[2].slidingWindowSize == 10);
