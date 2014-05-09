@@ -95,7 +95,7 @@ namespace SP
                             const boost::shared_ptr<char[]>& data, 
                             const size_t size);
 
-        void Stop() {m_electionTimer.cancel();}
+        void Stop();
     private:
         void StatisticsChanged(const RawStatistics& statistics);
         

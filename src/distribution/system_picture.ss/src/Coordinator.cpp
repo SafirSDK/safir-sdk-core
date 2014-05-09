@@ -140,6 +140,11 @@ namespace
     }
     
 
+    void Coordinator::Stop()
+     {
+         m_electionTimer.cancel();
+         m_sendMessageTimer.cancel();
+     }
     //must be called in strand
     void Coordinator::StatisticsChanged(const RawStatistics& statistics)
     {
@@ -311,27 +316,6 @@ namespace
             
             m_pendingInquiries = m_nonLightNodeTypes;
             SendPendingElectionMessages();
-
-            /*            ElectionMessage message;
-            message.set_action(INQUIRY);
-            message.set_election_id(m_currentElectionId);
-            const auto size = message.ByteSize();
-            boost::shared_ptr<char[]> data = boost::make_shared<char[]>(size);
-            message.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
-            for (auto it: m_nodeTypes)
-            {
-                if (!it.second.isLight)
-                {
-                    //TODO: handle overflow!
-                    const bool sent = m_communication->SendToNodeType(it.second.id, data, size, m_dataIdentifier);
-                    if (!sent)
-                    {
-                        lllog(7) << "Coordinator: Overflow when sending INQUIRY to node type " 
-                                 << it.second.name.c_str() << std::endl;
-                    }
-                }
-            }
-            */
             
             m_electionTimer.expires_from_now(boost::chrono::seconds(6));
             m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
@@ -370,22 +354,6 @@ namespace
                         lllog(5) << "Got an inquiry from someone smaller than us, sending alive and starting election" << std::endl;
                         m_pendingAlives.insert(std::make_pair(from, std::make_pair(nodeTypeId, message.election_id())));
                         SendPendingElectionMessages();
-                        /*
-                        ElectionMessage aliveMsg;
-                        aliveMsg.set_action(ALIVE);
-                        aliveMsg.set_election_id(message.election_id());
-                        const auto size = aliveMsg.ByteSize();
-                        boost::shared_ptr<char[]> data = boost::make_shared<char[]>(size);
-                        aliveMsg.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
-                        
-                        //TODO: handle overflow!
-                        const bool sent = m_communication->SendToNode(from, nodeTypeId, data, size, m_dataIdentifier);
-                        
-                        if (!sent)
-                        {
-                            lllog(7) << "Coordinator: Overflow when sending ALIVE to node " 
-                                     << from << std::endl;
-                                     }*/
                         
                         StartElection();
                     }
@@ -444,33 +412,6 @@ namespace
 
         m_pendingVictories = m_nonLightNodeTypes;
         SendPendingElectionMessages();
-        /*
-        m_elected = m_id;
-        m_currentElectionId = 0;
-
-        ElectionMessage victoryMsg;
-        victoryMsg.set_action(VICTORY);
-        victoryMsg.set_election_id(m_currentElectionId);
-        const auto size = victoryMsg.ByteSize();
-        boost::shared_ptr<char[]> data = boost::make_shared<char[]>(size);
-        victoryMsg.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
-
-        for (auto it: m_nodeTypes)
-        {
-            if (!it.second.isLight)
-            {
-                //TODO: handle overflow!
-                const bool sent = m_communication->SendToNodeType(it.second.id, data, size, m_dataIdentifier);
-
-                if (!sent)
-                {
-                    lllog(7) << "Coordinator: Overflow when sending VICTORY to node type " 
-                             << it.second.name.c_str() << std::endl;
-                }
-
-            }
-            }*/
-
     }
 
     //must be called in strand

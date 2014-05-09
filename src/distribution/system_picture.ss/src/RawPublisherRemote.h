@@ -89,12 +89,6 @@ namespace SP
                 {
                     Publish(toNodeTypes);
                 }
-                else
-                {
-                    SEND_SYSTEM_LOG(Alert,
-                                    << "Unexpected error in RawPublisherRemote::SchedulePublishTimer: " << error);
-                    throw std::logic_error("Unexpected error in RawPublisherRemote::SchedulePublishTimer");
-                }
             }));
         }
         
