@@ -107,8 +107,20 @@ namespace Com
         //Received internal Communication msg that is not directly passed to application, i.e discover, nodeInfo etc.
         void ReceivedControlData(const MessageHeader* header, const char* payload);
 
-        NodeType& GetNodeType(boost::int64_t nodeTypeId) {return *(m_nodeTypes.find(nodeTypeId)->second);}
-        const NodeType& GetNodeType(boost::int64_t nodeTypeId) const {return *(m_nodeTypes.find(nodeTypeId)->second);}
+        NodeType& GetNodeType(boost::int64_t nodeTypeId) 
+        {
+            auto findIt = m_nodeTypes.find(nodeTypeId);
+            if (findIt == m_nodeTypes.end())
+            {
+                throw std::logic_error("Invalid nodeTypeId");
+            }
+            return *(findIt->second);
+        }
+
+        const NodeType& GetNodeType(boost::int64_t nodeTypeId) const 
+        {
+            return const_cast<CommunicationImpl*>(this)->GetNodeType(nodeTypeId);
+        }
     };
 }
 }

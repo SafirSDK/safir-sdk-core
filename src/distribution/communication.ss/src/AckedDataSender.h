@@ -152,7 +152,7 @@ namespace Com
                 {
                     m_sendQueueSize-=static_cast<unsigned int>(totalNumberOfFragments);
                     //receiver does not exist so we just throw it away
-                    lllog(7)<<"COM: Receiver does not exist. Message will not be sent."<<std::endl;
+                    lllog(9)<<"COM: Receiver does not exist. Message will not be sent."<<std::endl;
                     return;
                 }
 
