@@ -267,10 +267,11 @@ public:
         unsigned int rc=++m_recvCount[id];
         unsigned int sendCount=*reinterpret_cast<const unsigned int*>(msg.get());
 
-        if (rc!=sendCount+1)
+        if (rc!=sendCount)
         {
-            std::cout<<"Recveived "<<sendCount<<", expected to get "<<rc-1<<std::endl;
-            m_recvCount[id]=sendCount+1;
+            std::cout<<"Recveived "<<sendCount<<", expected to get "<<rc<<std::endl;
+            exit(1);
+            m_recvCount[id]=sendCount;
         }
 
         if (rc%1000==0)
@@ -394,6 +395,8 @@ int main(int argc, char * argv[])
     unsigned int sendCounter=0;    
     while (sendCounter<cmd.nsend)
     {
+        ++sendCounter;
+
         boost::shared_ptr<char[]> data=boost::make_shared<char[]>(cmd.messageSize);
         (*reinterpret_cast<unsigned int*>(data.get()))=sendCounter;
         SetCRC(data, cmd.messageSize);
@@ -409,14 +412,12 @@ int main(int argc, char * argv[])
 
         for (auto nodeId : nodes)
         {
-            if (!com->SendToNode(myNodeTypeId, nodeId, data, cmd.messageSize, 0))
+            if (!com->SendToNode(nodeId, myNodeTypeId, data, cmd.messageSize, 0))
             {
                 ++numberOfOverflows;
                 queueFullSem.Wait();
             }
         }
-
-        ++sendCounter;
 
         if (sendCounter%10000==0)
         {

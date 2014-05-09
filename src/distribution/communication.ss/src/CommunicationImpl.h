@@ -76,7 +76,7 @@ namespace Com
         void IncludeNode(boost::int64_t nodeId);
         void ExcludeNode(boost::int64_t nodeId);
 
-        bool SendToNode(boost::int64_t nodeTypeId, boost::int64_t nodeId, const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier);
+        bool SendToNode(boost::int64_t nodeId, boost::int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier);
         bool SendToNodeType(boost::int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier);
 
         size_t NumberOfQueuedMessages(boost::int64_t nodeTypeId) const;

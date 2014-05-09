@@ -214,14 +214,14 @@ namespace Com
         /**
          * Send data to a specific node. If the specified node is not a system node, the message is silently ignored and the return value will be 'true'.
          *
-         * @param nodeTypeId [in] - NodeTypeId of the receiver node.
          * @param nodeId [in] - Id of the receiver node.
+         * @param nodeTypeId [in] - NodeTypeId of the receiver node.
          * @param data [in] - Pointer to the data that shall be sent.
          * @param size [in] - Size of data.
          * @param dataTypeIdentifier [in] - Custom identifier specifying which type of data. Only data receivers added with the same identifier will get the data.
          * @return True if data could be added to send queue. False if send queue is full, in that case try again later.
          */
-        bool SendToNode(boost::int64_t nodeTypeId, boost::int64_t nodeId, const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier);
+        bool SendToNode(boost::int64_t nodeId, boost::int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier);
 
         /**
          * Send data to all nodes of a specific node type. If the specified node type does not exist, the message is silently ignored and the return value will be 'true'.
