@@ -431,7 +431,7 @@ namespace
                 boost::shared_ptr<char[]> data = boost::make_shared<char[]>(size);
                 aliveMsg.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
                 
-                const bool sent = m_communication->SendToNode(it.second.first, it.first, data, size, m_dataIdentifier);
+                const bool sent = m_communication->SendToNode(it.first, it.second.first, data, size, m_dataIdentifier);
                 
                 if (!sent)
                 {
