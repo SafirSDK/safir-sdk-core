@@ -173,21 +173,26 @@ int main(int argc, char * argv[])
 
     try
     {
-        std::vector<Safir::Dob::Internal::Com::Communication::NodeType> nodeTypes;
+        std::vector<Safir::Dob::Internal::Com::NodeTypeDefinition> nodeTypes;
 
         for (const auto& nt: options.config.GetNodeTypes())
         {
-            nodeTypes.push_back({nt.id, nt.name, nt.multicastAddressControl, nt.heartbeatInterval, nt.retryTimeout});
+            nodeTypes.push_back({nt.id, 
+                        nt.name, 
+                        nt.multicastAddressControl, 
+                        nt.multicastAddressData,
+                        nt.heartbeatInterval,
+                        nt.retryTimeout});
         }
         
         communication.reset(new Safir::Dob::Internal::Com::Communication
-                            (ioService,
+                            (Safir::Dob::Internal::Com::controlModeTag,
+                             ioService,
                              options.name,
                              options.id,
                              options.nodeTypeId,
                              options.controlAddress,
-                             //TODO: options.dataAddress,
-                             true, //this is the control channel
+                             options.dataAddress,
                              nodeTypes));
 
 

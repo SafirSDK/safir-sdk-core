@@ -104,9 +104,10 @@ namespace SP
         communication->SetNewNodeCallback(m_strand.wrap([this](const std::string& name,
                                                                const boost::int64_t id, 
                                                                const boost::int64_t nodeTypeId,
-                                                               const std::string& controlAddress)
+                                                               const std::string& controlAddress,
+                                                               const std::string& dataAddress)
                                                         {
-                                                            NewNode(name,id,nodeTypeId,controlAddress);
+                                                            NewNode(name,id,nodeTypeId,controlAddress,dataAddress);
                                                         }));
         
         communication->SetGotReceiveFromCallback(m_strand.wrap([this](boost::int64_t id)
@@ -144,7 +145,8 @@ namespace SP
     void RawHandler::NewNode(const std::string& name,
                              const boost::int64_t id,
                              const boost::int64_t nodeTypeId,
-                             const std::string& controlAddress)
+                             const std::string& controlAddress,
+                             const std::string& dataAddress)
     {
         lllog(4) << "SP: New node '" << name.c_str() << "' with id " << id << " was added" << std::endl;
 
@@ -170,7 +172,7 @@ namespace SP
         newNode->set_id(id);
         newNode->set_node_type_id(nodeTypeId);
         newNode->set_control_address(controlAddress);
-        newNode->set_data_address("MISSING"); //TODO: communication should provide this!
+        newNode->set_data_address(dataAddress);
         
         newNode->set_is_dead(false);
         newNode->set_receive_count(0);

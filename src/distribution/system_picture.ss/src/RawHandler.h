@@ -99,7 +99,8 @@ namespace SP
         void NewNode(const std::string& name,
                      const boost::int64_t id,
                      const boost::int64_t nodeTypeId,
-                     const std::string& controlAddress);
+                     const std::string& controlAddress,
+                     const std::string& dataAddress);
         
         void GotReceive(boost::int64_t id);
         void Retransmit(boost::int64_t id);
