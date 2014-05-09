@@ -389,6 +389,8 @@ namespace Com
                         auto dataPtr=rd.data;
                         auto dataSize=rd.dataSize;
                         auto dataType=rd.dataType;
+                        //auto seqNo=rd.sequenceNumber;
+
 
                         m_numberOfUndeliveredMessages++;
 
@@ -397,6 +399,7 @@ namespace Com
                             auto recvIt=m_receivers.find(dataType); //m_receivers shall be safe to use inside m_deliverStrand since it is not supposed to be modified after start
                             if (recvIt!=m_receivers.end())
                             {
+                                //std::cout<<"deliver "<<seqNo<<std::endl;
                                 recvIt->second(fromId, fromNodeType, dataPtr, dataSize);
                             }
                             else

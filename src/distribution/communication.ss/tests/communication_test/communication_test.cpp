@@ -398,23 +398,23 @@ int main(int argc, char * argv[])
         (*reinterpret_cast<unsigned int*>(data.get()))=sendCounter;
         SetCRC(data, cmd.messageSize);
 
-        for (auto& nt : nodeTypes.Map())
-        {
-            while (!com->SendToNodeType(nt.second.id, data, cmd.messageSize, 0))
-            {
-                ++numberOfOverflows;
-                queueFullSem.Wait();
-            }
-        }
-
-//        for (auto nodeId : nodes)
+//        for (auto& nt : nodeTypes.Map())
 //        {
-//            if (!com->SendToNode(myNodeTypeId, nodeId, data, cmd.messageSize, 0))
+//            while (!com->SendToNodeType(nt.second.id, data, cmd.messageSize, 0))
 //            {
 //                ++numberOfOverflows;
 //                queueFullSem.Wait();
 //            }
 //        }
+
+        for (auto nodeId : nodes)
+        {
+            if (!com->SendToNode(myNodeTypeId, nodeId, data, cmd.messageSize, 0))
+            {
+                ++numberOfOverflows;
+                queueFullSem.Wait();
+            }
+        }
 
         ++sendCounter;
 
