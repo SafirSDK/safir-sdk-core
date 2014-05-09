@@ -280,6 +280,7 @@ if (Java_Development_FOUND AND Java_Runtime_FOUND)
     #Found everything!
     SET(Java_FOUND True)
     INCLUDE(UseJava)
+	SET(CMAKE_JAVA_COMPILE_FLAGS -encoding UTF-8)
   else()
     SET(Java_FOUND Java-NOTFOUND)
   endif()
