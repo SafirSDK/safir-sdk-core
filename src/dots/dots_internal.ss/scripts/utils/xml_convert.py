@@ -125,6 +125,7 @@ def indent(elem, level=0):
             elem.tail = i
 
 def convert_array(src, dest, member_name):
+    print("Array "+member_name)
     array_elements=src.find(ns('arrayElements'))
     if array_elements.find(ns('arrayElement'))==None:
         #empty array
@@ -136,8 +137,8 @@ def convert_array(src, dest, member_name):
         index_el=arr_el.find(ns('index'))
         if index_el!=None:
             index=int(index_el.text)
-        convert_member_item(arr_el, member_element, '')
-        member_element[-1].attrib['index']=str(index)
+        if convert_member_item(arr_el, member_element, ''):
+            member_element[-1].attrib['index']=str(index)
         index=index+1
 
 def convert_member_item(src, dest, member_name):    
@@ -185,17 +186,9 @@ def convert_member_item(src, dest, member_name):
                     param_index_element=value_ref_element.find(ns('index'))
                     if param_index_element!=None:
                         member_element.attrib['valueRefIndex']=param_index_element.text.strip()
-                #else:
-                    #Treated as null in old syntax
-                    #print('*************************************************************************')
-                    #print('* Unexpected member structure in member: '+src.tag.replace(current_namespace, ''))
-                    #print('* '+current_file)
-                    #print('* Expected <name> and one of: <value>, <entityId>, <object>, <valueRef>')
-                    #print('* Found:')
-                    #for x in src:
-                    #    print('*    <'+x.tag.replace(current_namespace, '')+'>')
-                    #print('* Member will be removed from the converted result')
-                    #print('*************************************************************************')
+                else:
+                    return False #null member, not inserted
+    return True #somethin inserted
 
 def convert_object(tree, root_name, base_type):
     """Convert object structure"""
@@ -275,7 +268,7 @@ def convert_create_routines(tree):
                 changed=True
     return changed
     
-def convert_arrays(tree):
+def convert_parameter_arrays(tree):
     """Converts all old format arrays in a xml tree"""
     root = tree.getroot()
     set_current_namespace(root.tag)    
@@ -283,9 +276,13 @@ def convert_arrays(tree):
     for arrayElements in root.findall(".//"+ns("arrayElements")):
         index=0
         for ae in arrayElements:
-            child=ae[0]
+            index_element=ae.find(ns("index"))
+            if index_element!=None:
+                ae.remove(index_element)
+            if len(ae)>0:
+                child=ae[0]
+                arrayElements.insert(index, child)
             arrayElements.remove(ae)
-            arrayElements.insert(index, child)
             index=index+1
         arrayElements.tag="array"
         changed=True
@@ -315,7 +312,7 @@ def convert_file(file_path, out_dir):
     converted_objects=convert_objects(tree)
 
     #Convert old format arrays, i.e arrayElements
-    converted_arrays=convert_arrays(tree)
+    converted_arrays=convert_parameter_arrays(tree)
     
     if  converted_objects or converted_arrays or converted_create_routines:        
         #save new file tree.write
