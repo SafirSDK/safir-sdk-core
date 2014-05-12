@@ -15,6 +15,4 @@ endif()
 ADD_TEST(TimeProvider_cpp_test TimeProvider_cpp_test)
 
 SET_SAFIR_TEST_PROPERTIES(TEST TimeProvider_cpp_test 
-                          CONFIG_OVERRIDE "${CMAKE_CURRENT_SOURCE_DIR}/../config"
-                          ENVIRONMENT
-                          "SAFIR_SOURCE_ROOT=${safir_sdk_core_SOURCE_DIR}/../")
+                          CONFIG_OVERRIDE "${CMAKE_CURRENT_SOURCE_DIR}/../config")

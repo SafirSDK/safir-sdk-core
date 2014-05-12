@@ -21,9 +21,4 @@ ADD_TEST(NAME tracer_backdoor
   --dots-generated-paths "${DOTS_GENERATED_PATHS}")
 
 SET_SAFIR_TEST_PROPERTIES(TEST tracer_backdoor TIMEOUT 120
-                          CONFIG_OVERRIDE "${CMAKE_CURRENT_SOURCE_DIR}/test_config"
-                          ENVIRONMENT
-                          "SAFIR_SOURCE_ROOT=${safir_sdk_core_SOURCE_DIR}/../"
-                          "CMAKE_CURRENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
-
-#TODO why not set these last two (source root and current dir, and maybe current bin dir ) by default in the fcn?
+                          CONFIG_OVERRIDE "${CMAKE_CURRENT_SOURCE_DIR}/test_config")

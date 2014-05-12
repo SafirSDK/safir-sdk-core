@@ -197,12 +197,14 @@ endif()
 
 if (MSVC)
   set_property(GLOBAL PROPERTY DLL_PATH "$ENV{PATH}")
+  #TODO: rename to SAFIR_DLL_PATH
 
   function(add_library)
     #message("Adding ${CMAKE_CURRENT_BINARY_DIR} to DLL_PATH")
     file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}" curdir)
     get_property(DLL_PATH GLOBAL PROPERTY DLL_PATH)
     #TODO: can we do the studio build path in a better way?
+    #maybe use generator expressions, like in the build_generated path thing.
     set_property(GLOBAL PROPERTY DLL_PATH "${DLL_PATH};${curdir};${curdir}\\RelWithDebInfo;${curdir}\\Release;${curdir}\\Debug")
     _add_library(${ARGN})
   endfunction()
@@ -252,6 +254,8 @@ function (SET_SAFIR_TEST_PROPERTIES)
     PROPERTY ENVIRONMENT 
     "SAFIR_TEST_CONFIG_OVERRIDE=${PROP_CONFIG_OVERRIDE}"
     "SAFIR_SOURCE_ROOT=${safir_sdk_core_SOURCE_DIR}/../"
+    "CMAKE_CURRENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}"
+    "CMAKE_CURRENT_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}"
     "PYTHONPATH=${pypath}"
     "${PATH_ENVIRONMENT}"
     ${PROP_ENVIRONMENT})
