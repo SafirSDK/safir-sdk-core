@@ -138,6 +138,30 @@ if (MSVC)
   SET(CMAKE_DEBUG_POSTFIX "d")
 endif()
 
+
+#
+# Find an ODBC installation, of either iODBC or UnixODBC
+#
+if (UNIX)
+    FIND_PACKAGE(IODBC)
+    if (IODBC_FOUND)
+      INCLUDE_DIRECTORIES(${IODBC_INCLUDE_DIRS})
+      SET(SAFIR_ODBC_LIBRARIES ${IODBC_LIBRARIES})
+      ADD_DEFINITIONS(-DSAFIR_ODBC_IS_IODBC)
+    else()
+      message(STATUS "iODBC not found, trying UnixODBC")
+      FIND_PACKAGE(UnixODBC)
+      if (NOT UnixODBC_FOUND)
+        message(FATAL_ERROR "Failed to find either iODBC or UnixODBC!")
+      endif()
+      INCLUDE_DIRECTORIES(${UnixODBC_INCLUDE_DIRS})
+      SET(SAFIR_ODBC_LIBRARIES ${UnixODBC_LIBRARIES})
+      ADD_DEFINITIONS(-DSAFIR_ODBC_IS_UNIXODBC)
+    endif()
+endif()
+###########
+
+
 # MACRO(INSTALL_DEBUG_INFO target)
 #   if(MSVC)
 #     #the problem here is to find out where the pdb file is located. It is located next to the binary

@@ -6,26 +6,12 @@ include($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
 #find_package(Boost COMPONENTS program_options system)
 
-if (UNIX)
-    FIND_PACKAGE(IODBC)
-    if (IODBC_FOUND)
-      INCLUDE_DIRECTORIES(${IODBC_INCLUDE_DIRS})
-      SET(ODBC_LIBRARIES ${IODBC_LIBRARIES})
-    else()
-      message("iODBC not found, trying UnixODBC")
-      FIND_PACKAGE(UnixODBC REQUIRED)
-      INCLUDE_DIRECTORIES(${UnixODBC_INCLUDE_DIRS})
-      SET(ODBC_LIBRARIES ${UnixODBC_LIBRARIES})
-    endif()
-endif()
-
-
 ADD_EXECUTABLE(entity_owner ../entity_owner.cpp)
 ADD_EXECUTABLE(run_sql run_sql.cpp)
 
 if (NOT MSVC)
   TARGET_LINK_LIBRARIES(entity_owner PRIVATE dose_cpp dots_generated-DopeTest-cpp dots_cpp ${Boost_LIBRARIES})
-  TARGET_LINK_LIBRARIES(run_sql PRIVATE dots_cpp olib ${Boost_LIBRARIES} ${ODBC_LIBRARIES})
+  TARGET_LINK_LIBRARIES(run_sql PRIVATE dots_cpp olib ${Boost_LIBRARIES} ${SAFIR_ODBC_LIBRARIES})
 endif()
 
 find_package(PythonInterp)

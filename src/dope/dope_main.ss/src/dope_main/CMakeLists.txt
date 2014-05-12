@@ -13,7 +13,7 @@ TARGET_LINK_LIBRARIES(dope_main PRIVATE
   dots_generated-Safir-cpp
   dots_cpp
   logging_cpp
-  ${ODBC_LIBRARIES}
+  ${SAFIR_ODBC_LIBRARIES}
   ${Boost_FILESYSTEM_LIBRARY}
   ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY})

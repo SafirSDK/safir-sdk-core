@@ -7,21 +7,6 @@ INCLUDE_DIRECTORIES(.)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
-if (UNIX)
-    FIND_PACKAGE(IODBC)
-    if (IODBC_FOUND)
-      INCLUDE_DIRECTORIES(${IODBC_INCLUDE_DIRS})
-      SET(ODBC_LIBRARIES ${IODBC_LIBRARIES})
-      ADD_DEFINITIONS(-DODBC_IS_IODBC)
-    else()
-      message("iODBC not found, trying UnixODBC")
-      FIND_PACKAGE(UnixODBC REQUIRED)
-      INCLUDE_DIRECTORIES(${UnixODBC_INCLUDE_DIRS})
-      SET(ODBC_LIBRARIES ${UnixODBC_LIBRARIES})
-      ADD_DEFINITIONS(-DODBC_IS_UNIXODBC)
-    endif()
-endif()
-
 FILE(GLOB_RECURSE headers *.h)
 FILE(GLOB sources *.cpp)
 
@@ -30,7 +15,7 @@ FILE(GLOB sources *.cpp)
 add_executable(OlibTester ${sources} ${headers})
 
 if (NOT MSVC)
-  TARGET_LINK_LIBRARIES(OlibTester PRIVATE olib swre_interface_cpp dots_generated-Safir-cpp dots_cpp ${ODBC_LIBRARIES} ${Boost_LIBRARIES})
+  TARGET_LINK_LIBRARIES(OlibTester PRIVATE olib swre_interface_cpp dots_generated-Safir-cpp dots_cpp ${SAFIR_ODBC_LIBRARIES} ${Boost_LIBRARIES})
 endif()
 
 enable_testing()
