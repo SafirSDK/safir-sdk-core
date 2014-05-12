@@ -196,16 +196,16 @@ else()
 endif()
 
 if (MSVC)
-  set_property(GLOBAL PROPERTY DLL_PATH "$ENV{PATH}")
-  #TODO: rename to SAFIR_DLL_PATH
+  set_property(GLOBAL PROPERTY SAFIR_DLL_PATH "$ENV{PATH}")
+  #TODO: rename to SAFIR_SAFIR_DLL_PATH
 
   function(add_library)
-    #message("Adding ${CMAKE_CURRENT_BINARY_DIR} to DLL_PATH")
+    #message("Adding ${CMAKE_CURRENT_BINARY_DIR} to SAFIR_DLL_PATH")
     file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}" curdir)
-    get_property(DLL_PATH GLOBAL PROPERTY DLL_PATH)
+    get_property(SAFIR_DLL_PATH GLOBAL PROPERTY SAFIR_DLL_PATH)
     #TODO: can we do the studio build path in a better way?
     #maybe use generator expressions, like in the build_generated path thing.
-    set_property(GLOBAL PROPERTY DLL_PATH "${DLL_PATH};${curdir};${curdir}\\RelWithDebInfo;${curdir}\\Release;${curdir}\\Debug")
+    set_property(GLOBAL PROPERTY SAFIR_DLL_PATH "${SAFIR_DLL_PATH};${curdir};${curdir}\\RelWithDebInfo;${curdir}\\Release;${curdir}\\Debug")
     _add_library(${ARGN})
   endfunction()
 endif()
@@ -244,10 +244,10 @@ function (SET_SAFIR_TEST_PROPERTIES)
 
   #On windows we need to add all paths containing dlls to the PATH, since there's no rpath equivalent.
   if (MSVC)
-    get_property(DLL_PATH GLOBAL PROPERTY DLL_PATH)
-    STRING(REPLACE "\;" ";" DLL_PATH "${DLL_PATH}")
-    STRING(REPLACE ";" "\\;" DLL_PATH "${DLL_PATH}")
-    set(PATH_ENVIRONMENT "PATH=${DLL_PATH}")
+    get_property(SAFIR_DLL_PATH GLOBAL PROPERTY SAFIR_DLL_PATH)
+    STRING(REPLACE "\;" ";" SAFIR_DLL_PATH "${SAFIR_DLL_PATH}")
+    STRING(REPLACE ";" "\\;" SAFIR_DLL_PATH "${SAFIR_DLL_PATH}")
+    set(PATH_ENVIRONMENT "PATH=${SAFIR_DLL_PATH}")
   endif()
   
   SET_PROPERTY(TEST ${PROP_TEST}
