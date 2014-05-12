@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2008-2013 (http://safir.sourceforge.net)
+* Copyright Saab AB, 2011-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -21,37 +21,29 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef GRAPHWIDGET_H
-#define GRAPHWIDGET_H
-#include "common_header.h"
-#include <map>
+#include <iostream>
 
-class GraphWidget : public QFrame
-{
-    Q_OBJECT
-
-public:
-    GraphWidget(QWidget *parent = 0);
-
-    void AddData(const QDateTime& time, const double value);
-
-    void SetHistoryLength(const int seconds);
-
-    void SetVerticalScale(const double scale);
-
-protected:
-    void paintEvent(QPaintEvent* event);
-
-private:
-    void PurgeOldData();
-
-
-    typedef std::map<QDateTime, double> PlotData;
-
-    PlotData m_data;
-    int m_historySeconds;
-    double m_scale;
-};
-
-
+#if defined _MSC_VER
+  #pragma warning (push)
+  #pragma warning (disable : 4244)
 #endif
+
+#include <boost/lexical_cast.hpp>
+#include <boost/thread.hpp>
+
+#if defined _MSC_VER
+  #pragma warning (pop)
+#endif
+
+int main(int argc, char* argv[])
+{
+    if (argc != 2)
+    {
+        std::wcout << "Need one numeric argument (seconds to sleep)" << std::endl;
+        return 1;
+    }
+
+    boost::this_thread::sleep_for(boost::chrono::seconds(boost::lexical_cast<int>(argv[1])));
+    return 0;
+}
+

@@ -21,37 +21,11 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef GRAPHWIDGET_H
-#define GRAPHWIDGET_H
-#include "common_header.h"
-#include <map>
 
-class GraphWidget : public QFrame
+#include "About.h"
+
+About::About(QWidget* parent):
+    QWidget(parent)
 {
-    Q_OBJECT
-
-public:
-    GraphWidget(QWidget *parent = 0);
-
-    void AddData(const QDateTime& time, const double value);
-
-    void SetHistoryLength(const int seconds);
-
-    void SetVerticalScale(const double scale);
-
-protected:
-    void paintEvent(QPaintEvent* event);
-
-private:
-    void PurgeOldData();
-
-
-    typedef std::map<QDateTime, double> PlotData;
-
-    PlotData m_data;
-    int m_historySeconds;
-    double m_scale;
-};
-
-
-#endif
+    setupUi(this); // this sets up GUI
+}

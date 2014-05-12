@@ -5,11 +5,11 @@
     <class>ParserTest.MyEntity</class>
     
     <memberMapping>
-        <member>
-            <propertyMember>Int32PropertyValue</propertyMember>
+        <member>            
             <classMemberReference>
                 <classMember>MyInt32</classMember>
             </classMemberReference>
+            <propertyMember>Int32PropertyValue</propertyMember>
         </member>        
         <member>
             <propertyMember>Float64PropertyValue</propertyMember>

@@ -157,8 +157,14 @@ public class BackdoorKeeper
             {
                 // It's a 'ping' command. Answer to it without bothering
                 // the subclass implementator.
-                com.saabgroup.safir.Logging.sendSystemLog(com.saabgroup.safir.Logging.Severity.DEBUG,
-                                                          "Ping reply");
+                com.saabgroup.safir.Logging.sendSystemLog
+                    (com.saabgroup.safir.Logging.Severity.DEBUG,
+                     "Ping reply from "
+                     + new com.saabgroup.safir.dob.ConnectionAspectMisc(m_connection).getConnectionName()
+                     + " on node "
+                     + (com.saabgroup.safir.dob.NodeParameters.getNodes
+                        (com.saabgroup.safir.dob.ThisNodeParameters.getNodeNumber()).nodeName().getVal()));
+
                 return; // *** RETURN ***
             }
             else if (cmdTokens[0].compareToIgnoreCase("help") == 0)
