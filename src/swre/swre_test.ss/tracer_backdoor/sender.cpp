@@ -102,9 +102,9 @@ int main()
         app.Run();
         return 0;
     }
-    catch (...)
+    catch (const std::exception& e)
     {
-        std::wcout << "caught exception" << std::endl;
+        std::wcout << "caught exception: " <<e.what() << std::endl;
         return 1;
     }
 }

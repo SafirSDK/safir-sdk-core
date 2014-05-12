@@ -1,5 +1,5 @@
 add_subdirectory(tracer_cpp)
-#add_subdirectory(tracer_backdoor)
+add_subdirectory(tracer_backdoor)
 add_subdirectory(swreport_cpp)
 
 #TODO add_subdirectory(tracer_dotnet)

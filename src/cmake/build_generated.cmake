@@ -205,12 +205,16 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
   endif()
   ##############
 
+  #
+  # Remember paths to all generated libraries, for use by tests
+  # use get_property to get hold of the value (like below)
+  #
+  get_property(DOTS_GENERATED_PATHS GLOBAL PROPERTY DOTS_GENERATED_PATHS)
+
+  set_property(GLOBAL PROPERTY DOTS_GENERATED_PATHS ${DOTS_GENERATED_PATHS} "DOTS_GENERATED_${GEN_NAME}_DIR=$<TARGET_FILE_DIR:dots_generated-${GEN_NAME}-cpp>")
+  ##############
+
 ENDFUNCTION()
-
-
-return()
-
-
 
 
 
