@@ -26,10 +26,3 @@ ADD_TEST(NAME dope_file_backend_test
 SET_SAFIR_TEST_PROPERTIES(TEST dope_file_backend_test 
   TIMEOUT 3600
   CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/test_config)
-#  ENVIRONMENT 
-#  "DOPE_TEST_DIR=${safir_sdk_core_BINARY_DIR}/dope/dope_test_dou.ss/"
-#  "SWRE_DIR=${safir_sdk_core_BINARY_DIR}/swre/swre_dou.ss/"
-#  "DOUF_DIR=${safir_sdk_core_BINARY_DIR}/douf/douf_dou.ss/"
-#  "OLIB_DIR=${safir_sdk_core_BINARY_DIR}/olib/olib_dou.ss/")
-
-#TODO: this is wrong, and too difficult!

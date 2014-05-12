@@ -221,7 +221,6 @@ endif()
 
 if (MSVC)
   set_property(GLOBAL PROPERTY SAFIR_DLL_PATH "$ENV{PATH}")
-  #TODO: rename to SAFIR_SAFIR_DLL_PATH
 
   function(add_library)
     #message("Adding ${CMAKE_CURRENT_BINARY_DIR} to SAFIR_DLL_PATH")
