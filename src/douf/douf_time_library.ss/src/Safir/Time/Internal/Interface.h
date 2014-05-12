@@ -30,9 +30,6 @@
 #  define DOUF_TIME_LIBRARY_API SAFIR_HELPER_DLL_EXPORT
 #else
 #  define DOUF_TIME_LIBRARY_API SAFIR_HELPER_DLL_IMPORT
-#  define SAFIR_LIBRARY_NAME "douf_time_library"
-#  define SAFIR_NO_DEBUG_LIBRARY_SUFFIX
-#  include <Safir/Utilities/Internal/AutoLink.h>
 #endif
 #define DOUF_TIME_LIBRARY_LOCAL SAFIR_HELPER_DLL_LOCAL
 

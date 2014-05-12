@@ -31,8 +31,6 @@
 #  define DOSE_INTERNAL_API SAFIR_HELPER_DLL_EXPORT
 #else
 #  define DOSE_INTERNAL_API SAFIR_HELPER_DLL_IMPORT
-#  define SAFIR_LIBRARY_NAME "dose_internal"
-#  include <Safir/Utilities/Internal/AutoLink.h>
 #endif
 #define DOSE_INTERNAL_LOCAL SAFIR_HELPER_DLL_LOCAL
 

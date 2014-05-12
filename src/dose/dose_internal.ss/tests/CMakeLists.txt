@@ -33,6 +33,3 @@ SET_SAFIR_TEST_PROPERTIES(TEST Semaphore TIMEOUT 60)
 SET_SAFIR_TEST_PROPERTIES(TEST MessageQueue TIMEOUT 360)
 SET_SAFIR_TEST_PROPERTIES(TEST DistributionData)
 SET_SAFIR_TEST_PROPERTIES(TEST LamportClocks TIMEOUT 2400)
-
-
-#TODO: generally: Check that only "external" libraries use autolink. Applies to all libraries, this is a general reminder

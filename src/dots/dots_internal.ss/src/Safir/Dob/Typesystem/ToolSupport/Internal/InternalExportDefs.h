@@ -30,8 +30,6 @@
 #  define DOTS_INTERNAL_API SAFIR_HELPER_DLL_EXPORT
 #else
 #  define DOTS_INTERNAL_API SAFIR_HELPER_DLL_IMPORT
-#  define SAFIR_LIBRARY_NAME "dots_internal"
-#  include <Safir/Utilities/Internal/AutoLink.h>
 #endif
 #define DOTS_INTERNAL_LOCAL SAFIR_HELPER_DLL_LOCAL
 
