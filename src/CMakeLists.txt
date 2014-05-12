@@ -380,10 +380,12 @@ add_subdirectory(dots)
 add_subdirectory(dose)
 add_subdirectory(douf)
 add_subdirectory(swre)
+add_subdirectory(dose/dose_test.ss)
 add_subdirectory(foreach)
 add_subdirectory(olib)
 add_subdirectory(dope)
 
+#TODO: move the test suite to outside dose.
 
 
 #TODO

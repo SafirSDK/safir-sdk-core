@@ -17,9 +17,4 @@ TARGET_LINK_LIBRARIES(dose_test_sequencer PRIVATE
   ${Boost_PROGRAM_OPTIONS_LIBRARY}
   ${Boost_TIMER_LIBRARY})
 
-# INSTALL(TARGETS dose_test_sequencer
-#         RUNTIME DESTINATION $ENV{SAFIR_RUNTIME}/bin
-#         LIBRARY DESTINATION $ENV{SAFIR_RUNTIME}/lib
-#         ARCHIVE DESTINATION $ENV{SAFIR_SDK}/lib)
-
-# INSTALL_DEBUG_INFO(dose_test_sequencer)
+SAFIR_INSTALL(TARGETS dose_test_sequencer)

@@ -2,37 +2,23 @@
 #so we never want the "d" suffix on debug builds, which is default on windows.
 SET(CMAKE_DEBUG_POSTFIX "")
 
-project(dose_test_util_java_jni Java CXX)
-find_package(Java REQUIRED)
-find_package(JNI REQUIRED)
-string (REPLACE "javac" "javah" JAVAH ${JAVA_COMPILE})
-
-INCLUDE_DIRECTORIES(${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2} ${dose_test_util_SOURCE_DIR})
-
-#we link explicitly, so disable autolinking
-ADD_DEFINITIONS(-DDOSE_TEST_NO_AUTOLINK)
-
 ADD_CUSTOM_COMMAND(OUTPUT 
-  com_saabgroup_safir_dob_test_util_DoseTestUtil.h
+  ${CMAKE_CURRENT_BINARY_DIR}/com_saabgroup_safir_dob_test_util_DoseTestUtil.h
   
-  COMMAND ${JAVAH} -classpath ../com.saabgroup.safir.dob.test.util/bin com.saabgroup.safir.dob.test.util.DoseTestUtil
+  COMMAND ${Java_JAVAH_EXECUTABLE} -classpath ../com.saabgroup.safir.dob.test.util/dose_test_util_java.jar com.saabgroup.safir.dob.test.util.DoseTestUtil
+  
+  DEPENDS dose_test_util_java
   
   COMMENT "Generating javah header files"
   VERBATIM)
 
-ADD_CUSTOM_TARGET(javah ALL
-                  DEPENDS com_saabgroup_safir_dob_test_util_DoseTestUtil.h)
+ADD_LIBRARY(dose_test_util_java_jni SHARED
+  dose_test_util_java_jni.cpp
+  ${CMAKE_CURRENT_BINARY_DIR}/com_saabgroup_safir_dob_test_util_DoseTestUtil.h)
 
-ADD_LIBRARY(dose_test_util_java_jni SHARED dose_test_util_java_jni.cpp)
+
+TARGET_INCLUDE_DIRECTORIES(dose_test_util_java_jni PRIVATE ${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2} ${CMAKE_CURRENT_BINARY_DIR})
 
 TARGET_LINK_LIBRARIES(dose_test_util_java_jni PRIVATE dose_test_util)
 
-ADD_DEPENDENCIES(javah dose_test_util_java)
-ADD_DEPENDENCIES(dose_test_util_java_jni javah)
-
-# INSTALL(TARGETS dose_test_util_java_jni
-#         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-#         LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-#         ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
-
-# INSTALL_DEBUG_INFO(dose_test_util_java_jni)
+SAFIR_INSTALL(TARGETS dose_test_util_java_jni)

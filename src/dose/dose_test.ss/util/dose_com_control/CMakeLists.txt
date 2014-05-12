@@ -9,10 +9,4 @@ target_include_directories(dose_com_control PRIVATE ../../../dose_communication.
 
 #TODO: hmmm, dose_com_control doesnt really need to link against dose_com, I added that to get the PUBLIC includes. Better way?
 
-
-# INSTALL(TARGETS dose_com_control
-#         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-#         LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-#         ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
-
-# INSTALL_DEBUG_INFO(dose_com_control)
+SAFIR_INSTALL(TARGETS dose_com_control)

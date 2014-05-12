@@ -1,28 +1,21 @@
-cmake_minimum_required(VERSION 2.8)
-
-project(dose_test_java Java)
-find_package(Java REQUIRED)
-
-INCLUDE(JavaMacros)
+if (NOT Java_FOUND)
+  return()
+endif()
 
 file(GLOB_RECURSE sources src/*.java)
 
-get_target_property(UTIL_LOCATION dose_test_util_java LOCATION )
-if (NOT UTIL_LOCATION)
-  SET(UTIL_LOCATION ${SAFIR_RUNTIME}/bin/dose_test_util_java.jar)
-endif()
+#SET(JAVA_MANIFEST ${CMAKE_CURRENT_SOURCE_DIR}/Manifest.txt)
+
+ADD_JAR(dose_test_java 
+  SOURCES ${sources}
+  INCLUDE_JARS 
+  swre_application_java
+  dose_test_util_java
+  dose_java
+  dots_generated-swre_library-java
+  dots_generated-DoseTest-java 
+  dots_generated-Safir-java
+  dots_java)
 
 
-SET_JAVA_CLASSPATH(${UTIL_LOCATION} ${SAFIR_RUNTIME}/bin/dots_java.jar ${SAFIR_RUNTIME}/bin/dots_generated-java.jar ${SAFIR_RUNTIME}/bin/dose_java.jar ${SAFIR_RUNTIME}/bin/swre_application_java.jar)
-
-SET(JAVA_MANIFEST ${CMAKE_CURRENT_SOURCE_DIR}/Manifest.txt)
-
-
-ADD_JAR(dose_test_java "${sources}" ALL)
-
-add_dependencies(dose_test_java dose_test_util_java)
-
-
-# INSTALL(FILES dose_test_java.jar
-#   DESTINATION ${SAFIR_RUNTIME}/bin)
-
+INSTALL_JAR(dose_test_java share/java/safir_sdk_core)
