@@ -196,6 +196,7 @@ namespace ToolSupport
     #define ELEMENT_CHOICE_5(A,B,C,D,E,Occurrence) Choice<A, ELEMENT_CHOICE_4(B,C,D,E,Occurrence), Occurrence >
     #define ELEMENT_CHOICE_6(A,B,C,D,E,F,Occurrence) Choice<A, ELEMENT_CHOICE_5(B,C,D,E,F,Occurrence), Occurrence >
     #define ELEMENT_CHOICE_7(A,B,C,D,E,F,G,Occurrence) Choice<A, ELEMENT_CHOICE_6(B,C,D,E,F,G,Occurrence), Occurrence >
+    #define ELEMENT_CHOICE_8(A,B,C,D,E,F,G,H,Occurrence) Choice<A, ELEMENT_CHOICE_7(B,C,D,E,F,G,H,Occurrence), Occurrence >
 
     //------------------------------------------------------------
     //Helper element class that allows an element to be ignored
