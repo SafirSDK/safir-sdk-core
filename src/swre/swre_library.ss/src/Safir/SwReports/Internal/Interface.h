@@ -30,9 +30,6 @@
 #  define SWRE_LIBRARY_API SAFIR_HELPER_DLL_EXPORT
 #else
 #  define SWRE_LIBRARY_API SAFIR_HELPER_DLL_IMPORT
-#  define SAFIR_LIBRARY_NAME "swre_library"
-#  define SAFIR_NO_DEBUG_LIBRARY_SUFFIX
-#  include <Safir/Utilities/Internal/AutoLink.h>
 #endif
 #define SWRE_LIBRARY_LOCAL SAFIR_HELPER_DLL_LOCAL
 
