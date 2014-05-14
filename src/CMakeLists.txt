@@ -385,7 +385,9 @@ add_subdirectory(foreach)
 add_subdirectory(olib)
 add_subdirectory(dope)
 
-#TODO: move the test suite to outside dose.
+add_subdirectory(tests)
+
+#TODO: move the test suite to outside dose, maybe into tests?
 
 
 #TODO

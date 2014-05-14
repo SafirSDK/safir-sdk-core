@@ -24,19 +24,28 @@
 #
 ###############################################################################
 from __future__ import print_function
-import subprocess, os, time, sys, signal, re
+import subprocess, os, time, sys, signal, re, argparse
 from testenv import TestEnv, TestEnvStopper
 
-if sys.platform == "win32":
-    config_type = os.environ.get("CMAKE_CONFIG_TYPE")
-    exe_path = config_type if config_type else ""
-else:
-    exe_path = "."
+
+parser = argparse.ArgumentParser("test script")
+parser.add_argument("--stoppee", required=True)
+parser.add_argument("--dose_main", required=True)
+parser.add_argument("--dope_main", required=True)
+parser.add_argument("--safir-show-config", required=True)
+parser.add_argument("--dots-generated-paths", required=True)
+
+arguments = parser.parse_args()
     
-stoppee_path = os.path.join(exe_path,"stoppee")
+stoppee_path = arguments.stoppee
 
+#add all the environment variables. passed on format A=10;B=20
+for pair in arguments.dots_generated_paths.split(";"):
+    (name,value) = pair.split("=")
+    print("Setting environment variable", name, "to", value)
+    os.environ[name] = value
 
-env = TestEnv()
+env = TestEnv(dose_main = arguments.dose_main, dope_main = arguments.dope_main, safir_show_config = arguments.safir_show_config)
 with TestEnvStopper(env):
     for i in range(95):
         env.launchProcess("stoppee_" + str(i),stoppee_path)
