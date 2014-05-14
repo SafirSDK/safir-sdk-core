@@ -10,6 +10,12 @@ target_link_libraries(tracer_backdoor_sender PRIVATE
   lluf_utils
   ${Boost_SYSTEM_LIBRARY})
 
+#Needed on windows
+if (MSVC)
+  TARGET_LINK_LIBRARIES(tracer_backdoor_sender PRIVATE ${Boost_DATE_TIME_LIBRARY})
+endif()
+
+
 get_property(DOTS_GENERATED_PATHS GLOBAL PROPERTY DOTS_GENERATED_PATHS)
 
 ADD_TEST(NAME tracer_backdoor
