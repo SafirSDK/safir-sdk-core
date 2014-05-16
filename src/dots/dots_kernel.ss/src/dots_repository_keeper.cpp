@@ -131,12 +131,12 @@ namespace Internal
         }
         catch(const Safir::Dob::Typesystem::ToolSupport::ParseError& err)
         {
-            lllog(0)<<"********** Parse Error **********************************************\n"
-                    <<"* Label: "<<err.Label().c_str()<<"\n"
-                    <<"* Descr: "<<err.Description().c_str()<<"\n"
-                    <<"* File:  "<<err.File().c_str()<<"\n"
-                    <<"* ErrId: "<<err.ErrorId()<<"\n"
-                    <<"*********************************************************************"<<std::endl;
+            std::cout<<"********** Parse Error **********************************************"<<std::endl;
+            std::cout<<"* Label: "<<err.Label()<<std::endl;
+            std::cout<<"* Descr: "<<err.Description()<<std::endl;
+            std::cout<<"* File:  "<<err.File()<<std::endl;
+            std::cout<<"* ErrId: "<<err.ErrorId()<<std::endl;
+            std::cout<<"*********************************************************************"<<std::endl;
             localRepository.reset();
             m_repository=NULL;
             return;

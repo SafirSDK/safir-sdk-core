@@ -34,10 +34,9 @@ else()
     PREFIX ""
     SOURCE_DIR src
     BINARY_DIR src
-    #SVN_REPOSITORY ${MY_SVN_REPOSITORY}
-    #SVN_REVISION -r ${MY_SVN_REVISION}
-    #UPDATE_COMMAND "" #disable update since we're going against fixed revision
-    URL /home/lars/tmp/google_breakpad.tar.gz
+    SVN_REPOSITORY ${MY_SVN_REPOSITORY}
+    SVN_REVISION -r ${MY_SVN_REVISION}
+    UPDATE_COMMAND "" #disable update since we're going against fixed revision
     CONFIGURE_COMMAND cd <SOURCE_DIR> && ./configure CFLAGS=-fPIC CXXFLAGS=-fPIC
     INSTALL_COMMAND ""
     ) 
