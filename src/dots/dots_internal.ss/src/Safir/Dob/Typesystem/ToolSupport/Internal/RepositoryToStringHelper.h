@@ -314,7 +314,7 @@ namespace Internal
             os<<", Sequence, size="<<c->GetNumberOfValues()<<std::endl;
             break;
         case DictionaryCollectionType:
-            os<<", Dictionary, size="<<c->GetNumberOfValues()<<std::endl;
+            os<<", Dictionary<"<<(c->GetKeyType()==EnumerationMemberType ? m_rep->GetEnum(c->GetKeyTypeId())->GetName() : BasicTypeOperations::MemberTypeToString(c->GetKeyType()))<<">, size="<<c->GetNumberOfValues()<<std::endl;
             break;
         default:
             os<<std::endl;

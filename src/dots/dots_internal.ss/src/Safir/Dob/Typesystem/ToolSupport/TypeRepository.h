@@ -264,6 +264,34 @@ namespace ToolSupport
          * @return Parameter value as a pair containing a hash value and optionally a string that can be NULL.
          */
         virtual std::pair<boost::int64_t, const char*> GetHashedValue(int index) const=0; //instanceId, channelId, handlerId
+
+        /**
+         * @brief Get string key. Only valid if memer is DictionaryCollectionType and has keyType StringMemberType.
+         * @param index [in] - Parameter index.
+         * @return Parameter key for specified dictionary entry.
+         */
+        virtual const char* GetStringKey(int index) const=0;
+
+        /**
+         * @brief Get int32 or enum key. Only valid if memer is DictionaryCollectionType and has keyType Int32MemberType or EnumerationMemberType.
+         * @param index [in] - Parameter index.
+         * @return Parameter key for specified dictionary entry.
+         */
+        virtual boost::int64_t GetInt32Key(int index) const=0;
+
+        /**
+         * @brief Get int64 or typeId key. Only valid if memer is DictionaryCollectionType and has keyType Int64MemberType or TypeIdMemberType.
+         * @param index [in] - Parameter index.
+         * @return Parameter key for specified dictionary entry.
+         */
+        virtual boost::int64_t GetInt64Key(int index) const=0;
+
+        /**
+         * @brief Get hashed key. Only valid if memer is DictionaryCollectionType and has keyType InstanceId, ChannelId, HandlerId
+         * @param index [in] - Parameter index.
+         * @return Parameter key as a pair containing a hash and optionally a string that can be NULL.
+         */
+        virtual std::pair<boost::int64_t, const char*> GetHashedKey(int index) const=0; //instanceId, channelId, handlerId
     };
 
     /**

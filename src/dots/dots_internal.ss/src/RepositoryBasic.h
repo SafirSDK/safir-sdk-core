@@ -68,6 +68,13 @@ namespace ToolSupport
             bool boolVal;
         };
 
+        struct
+        {
+            std::string str;
+            DotsC_Int64 num;
+            DotsC_Int64 hash;
+        } key;
+
         ValueDefinition()
             :kind(ValueKind)
             ,hashedVal(0)
@@ -226,6 +233,31 @@ namespace ToolSupport
                 return std::make_pair(hash, val.stringVal.c_str());
             }
             return std::make_pair(val.hashedVal, val.stringVal.empty() ? NULL : val.stringVal.c_str());
+        }
+
+        //keys
+        virtual const char* GetStringKey(int index) const
+        {
+            return Value(static_cast<size_t>(index)).key.str.c_str();
+        }
+        virtual boost::int64_t GetInt32Key(int index) const
+        {
+            return static_cast<boost::int32_t>(Value(static_cast<size_t>(index)).key.num);
+        }
+        virtual boost::int64_t GetInt64Key(int index) const
+        {
+            return Value(static_cast<size_t>(index)).key.num;
+        }
+        virtual std::pair<boost::int64_t, const char*> GetHashedKey(int index) const
+        {
+            const ValueDefinition& val=Value(static_cast<size_t>(index));
+            if (!val.key.str.empty() && val.key.hash==0)
+            {
+                //This is most likely a reference to a plain string, and if it's not this won't break anything anyway
+                boost::int64_t hash=LlufId_Generate64(val.key.str.c_str());
+                return std::make_pair(hash, val.key.str.c_str());
+            }
+            return std::make_pair(val.key.hash, val.key.str.empty() ? NULL : val.key.str.c_str());
         }
 
         const ValueDefinition& Value(size_t index) const

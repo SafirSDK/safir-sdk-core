@@ -414,6 +414,18 @@ namespace BasicTypeOperations
         return helper.TypeIdToTypeName(repository, tid);
     }
 
+    inline std::string CollectionTypeToString(DotsC_CollectionType collectionType)
+    {
+        switch (collectionType)
+        {
+        case SingleValueCollectionType: return "single_value";
+        case ArrayCollectionType: return "array";
+        case SequenceCollectionType: return "sequence";
+        case DictionaryCollectionType: return "dictionary";
+        }
+        return "";
+    }
+
     struct PredefindedClassNames
     {
         static const std::string& ObjectName() {static const std::string s("Object"); return s;}

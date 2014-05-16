@@ -60,7 +60,6 @@ namespace ToolSupport
         struct ParameterDictionary {static const std::string& Name() {static const std::string n="dictionary"; return n;}};
         struct ParameterDictionaryEntry {static const std::string& Name() {static const std::string n="entry"; return n;}};
         struct ParameterDictionaryKey {static const std::string& Name() {static const std::string n="key"; return n;}};
-        struct ParameterDictionaryValue {static const std::string& Name() {static const std::string n="value"; return n;}};
         struct ParameterObject {static const std::string& Name() {static const std::string n="object"; return n;}};
         struct ParameterEntityId {static const std::string& Name() {static const std::string n="entityId"; return n;}};
         struct ParameterArrayIndex {static const std::string& Name() {static const std::string n="index"; return n;}};
@@ -69,6 +68,8 @@ namespace ToolSupport
         struct ParameterValueRefCollection {static const std::string& Name() {static const std::string n="valueRef"; return n;}};
         struct ParameterObjectCollection {static const std::string& Name() {static const std::string n="object"; return n;}};
         struct ArraySize {static const std::string& Name() {static const std::string n="arraySize"; return n;}};
+        struct Dictionary {static const std::string& Name() {static const std::string n="dictionary"; return n;}};
+        struct Sequence {static const std::string& Name() {static const std::string n="sequence"; return n;}};
         struct BaseClass {static const std::string& Name() {static const std::string n="baseClass"; return n;}};
         struct ExceptionBase {static const std::string& Name() {static const std::string n="baseClass"; return n;}};
         struct Class {static const std::string& Name() {static const std::string n="class"; return n;}};
@@ -114,6 +115,10 @@ namespace ToolSupport
         struct MapArray {static const std::string& Name() {static const std::string n="array"; return n;}}; //dom
         struct MapArrayElements {static const std::string& Name() {static const std::string n="arrayElements"; return n;}}; //dom
         struct MapArrayElement {static const std::string& Name() {static const std::string n="arrayElement"; return n;}}; //dom
+        struct MapSequence {static const std::string& Name() {static const std::string n="sequence"; return n;}}; //dom
+        struct MapDictionaryEntry {static const std::string& Name() {static const std::string n="entry"; return n;}};
+        struct MapDictionaryKey {static const std::string& Name() {static const std::string n="key"; return n;}};
+        struct MapDictionary {static const std::string& Name() {static const std::string n="dictionary"; return n;}}; //dom
         struct ClassMemberReference {static const std::string& Name() {static const std::string n="classMemberReference"; return n;}}; //dom
         struct ClassMemberReferenceName {static const std::string& Name() {static const std::string n="classMember"; return n;}};
         struct ClassMemberReferenceIndex {static const std::string& Name() {static const std::string n="index"; return n;}};
@@ -127,8 +132,6 @@ namespace ToolSupport
         struct ReferenceIndex {static const std::string& Name() {static const std::string n="index"; return n;}};
         struct InstanceId {static const std::string& Name() {static const std::string n="instanceId"; return n;}}; //<entityId><name/><instanceId/>..
 
-        struct Dictionary {static const std::string& Name() {static const std::string n="dictionary"; return n;}};
-        struct Sequence {static const std::string& Name() {static const std::string n="sequence"; return n;}};
 
         //for handling of old deprecated xml format
         struct ParameterObjectDeprecated {static const std::string& Name() {static const std::string n="object"; return n;}};

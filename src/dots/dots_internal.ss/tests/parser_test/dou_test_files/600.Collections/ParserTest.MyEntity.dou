@@ -23,7 +23,7 @@
         
         <member>
             <name>MyDictionary</name>
-            <type>Int32</type>
+            <type>ParserTest.MyEntity</type>
             <dictionary>ParserTest.MyColorEnum</dictionary>
         </member>
 

@@ -3,17 +3,24 @@
     <summary>Defines property.</summary>
     <name>ParserTest.MyProperty</name>
     <members>
+        
         <member>
-            <summary>object property</summary>
-            <name>MyEntityBasePropertyValue</name>
+            <name>ArrayPropertyValue</name>
+            <type>ParserTest.MyEntity</type>
+            <array/>
+        </member>
+        
+        <member>
+            <name>SequencePropertyValue</name>
             <type>ParserTest.MyEntity</type>
             <sequence/>
         </member>
         
-        <member>
-            <name>Int32PropertyCollection</name>
-            <type>Int32</type>
+        <!--member>
+            <name>DictionaryPropertyCollection</name>
+            <type>ParserTest.MyEntity</type>
             <dictionary>InstanceId</dictionary>
-        </member>
+        </member-->
+        
     </members>
 </property>

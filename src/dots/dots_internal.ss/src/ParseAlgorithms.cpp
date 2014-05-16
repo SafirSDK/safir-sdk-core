@@ -311,6 +311,78 @@ namespace ToolSupport
         return true;
     }
 
+    bool ParseKey(DotsC_MemberType memberType, const std::string& val, ValueDefinition& result)
+    {
+        try
+        {
+            switch(memberType)
+            {
+            case Int32MemberType:
+            {
+                result.key.num=boost::lexical_cast<DotsC_Int32>(val);
+            }
+                break;
+            case Int64MemberType:
+            {
+                result.key.num=boost::lexical_cast<DotsC_Int64>(val);
+            }
+                break;
+            case EntityIdMemberType:
+            {
+                size_t sep=val.find(", ");
+                result.key.num=LlufId_Generate64(val.substr(0, sep).c_str());
+                result.key.str=val.substr(sep+2);
+                try
+                {
+                    result.key.hash=boost::lexical_cast<boost::int64_t>(result.key.str);
+                    result.key.str.clear();
+                }
+                catch(const boost::bad_lexical_cast&)
+                {
+                    result.key.hash=LlufId_Generate64(result.key.str.c_str());
+                }
+            }
+                break;
+            case TypeIdMemberType:
+            {
+                result.key.num=LlufId_Generate64(val.c_str());
+            }
+                break;
+            case InstanceIdMemberType:
+            case ChannelIdMemberType:
+            case HandlerIdMemberType:
+            {
+                try
+                {
+                    result.key.hash=boost::lexical_cast<boost::int64_t>(val);
+                    result.key.str.clear();
+                }
+                catch(const boost::bad_lexical_cast&)
+                {
+                    result.key.hash=LlufId_Generate64(val.c_str());
+                    result.key.str=val;
+                }
+            }
+                break;
+
+            case StringMemberType:
+            {
+                result.key.str=val;
+            }
+                break;
+
+            default: //not valid key type
+                return false;
+            }
+        }
+        catch (const boost::bad_lexical_cast&)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
     template <class Key, class Val>
     Val* GetPtr(const boost::unordered_map< Key, boost::shared_ptr<Val> >& m, Key key)
     {
