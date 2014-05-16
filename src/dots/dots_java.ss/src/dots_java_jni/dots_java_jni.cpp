@@ -1605,4 +1605,17 @@ JNIEXPORT jobjectArray JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_Ge
 }
 
 
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    GetGeneratedJars
+ * Signature: ()[Ljava/lang/String;
+ */
+JNIEXPORT jobjectArray JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetGeneratedJars
+  (JNIEnv * env, jclass)
+{
+    jobjectArray stringArray = env->NewObjectArray(0,
+                                                   env->FindClass("java/lang/String"),  
+                                                   env->NewStringUTF(""));
+    return stringArray;
+}
 
