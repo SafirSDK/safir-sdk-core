@@ -1627,6 +1627,8 @@ JNIEXPORT jobjectArray JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_Ge
         {
             const std::string module = it->first;
 
+            //TODO noooo, jars will not be next to shared libraries!!!
+
             const boost::optional<std::string> library_location = it->second.get_optional<std::string>("library_location");            
             if (!library_location)
             {
@@ -1642,8 +1644,8 @@ JNIEXPORT jobjectArray JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_Ge
             {
                 boost::filesystem::path p = library_location.get();
                 p /= "dots_generated-" + module + "-java.jar";
-                
-                libraries.push_back(p.string());
+
+                libraries.push_back(p.make_preferred().string());
             }
         }
     }
