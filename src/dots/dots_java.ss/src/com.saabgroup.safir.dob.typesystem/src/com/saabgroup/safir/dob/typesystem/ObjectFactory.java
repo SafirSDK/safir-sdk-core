@@ -118,9 +118,16 @@ public class ObjectFactory {
         }
         catch (ClassNotFoundException e) {
         }
-        
-        //then try the jars from typesystem.ini
-        return m_classLoader.loadClass(getClassName(typeId));
+
+        try {
+            //then try the jars from typesystem.ini
+            return m_classLoader.loadClass(getClassName(typeId));
+        }
+        catch (ClassNotFoundException e) {
+            throw new ClassNotFoundException(e.toString()
+                                             + "\nLoaded jars are '" 
+                                             + m_classLoader.getJarList() + "'");
+        }
 
     }
 
@@ -129,7 +136,8 @@ public class ObjectFactory {
         public GeneratedClassLoader()
         {
             super (new java.net.URL[0]);
-            for (String file : Kernel.GetGeneratedJars())
+            m_generatedJars = Kernel.GetGeneratedJars();
+            for (String file : m_generatedJars)
             {
                 try
                 {
@@ -145,10 +153,26 @@ public class ObjectFactory {
             
                 }
             }
-
         }
+        
+        public String getJarList() {
+            java.lang.StringBuilder builder = new java.lang.StringBuilder();
+            boolean first = false;
+            for (String jar : m_generatedJars) {
+                if (!first) {
+                    first = true;
+                }
+                else {
+                    builder.append(", ");
+                }
+                builder.append(jar);
+            }
+            return builder.toString();
+        }
+
+        private String[] m_generatedJars = null;
     }
 
     private static final ObjectFactory m_instance = new ObjectFactory();
-    private java.net.URLClassLoader m_classLoader = new GeneratedClassLoader();
+    private GeneratedClassLoader m_classLoader = new GeneratedClassLoader();
 }
