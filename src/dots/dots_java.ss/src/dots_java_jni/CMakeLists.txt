@@ -26,7 +26,8 @@ TARGET_LINK_LIBRARIES(dots_java_jni PRIVATE
   dots_kernel
   dots_internal
   lluf_id
-  lluf_config)
+  lluf_config
+  ${Boost_FILESYSTEM_LIBRARY})
 
 SAFIR_INSTALL(TARGETS dots_java_jni)
 
