@@ -9,4 +9,5 @@ add_subdirectory(dots_java.ss/src)
 add_subdirectory(dots_v.ss)
 
 add_subdirectory(dots_test_dou.ss)
+add_subdirectory(dots_test_extra_dou.ss)
 add_subdirectory(dots_test.ss)

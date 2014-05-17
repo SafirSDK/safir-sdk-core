@@ -29,3 +29,6 @@ TARGET_LINK_LIBRARIES(dots_java_jni PRIVATE
   lluf_config)
 
 SAFIR_INSTALL(TARGETS dots_java_jni)
+
+
+#TODO: make the headers regenerate upon change of a java file, e.g. Kernel.java. Doesnt work now for some reason!

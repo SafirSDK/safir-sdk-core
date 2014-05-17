@@ -43,6 +43,7 @@
 #include <boost/scoped_array.hpp>
 #include <boost/bind.hpp>
 #include <string.h>
+#include <boost/filesystem.hpp>
 
 //use this to set the first element of an array
 //will assert on arraylength == 1
@@ -1613,9 +1614,49 @@ JNIEXPORT jobjectArray JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_Ge
 JNIEXPORT jobjectArray JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetGeneratedJars
   (JNIEnv * env, jclass)
 {
-    jobjectArray stringArray = env->NewObjectArray(0,
+    std::vector<std::string> libraries;
+
+    const Safir::Utilities::Internal::ConfigReader reader;
+    const boost::property_tree::ptree& ptree = reader.Typesystem();
+    for (boost::property_tree::ptree::const_iterator it = ptree.begin();
+         it != ptree.end(); ++it)
+    {
+        const bool isSection = !it->second.empty();
+        
+        if (isSection)
+        {
+            const std::string module = it->first;
+
+            const boost::optional<std::string> library_location = it->second.get_optional<std::string>("library_location");            
+            if (!library_location)
+            {
+                continue;
+            }
+
+            const boost::optional<bool> dont_load = it->second.get_optional<bool>("dont_load");
+            if (!!dont_load && dont_load.get())
+            {
+                continue;
+            }
+            else
+            {
+                boost::filesystem::path p = library_location.get();
+                p /= "dots_generated-" + module + "-java.jar";
+                
+                libraries.push_back(p.string());
+            }
+        }
+    }
+
+    jobjectArray stringArray = env->NewObjectArray(static_cast<jsize>(libraries.size()),
                                                    env->FindClass("java/lang/String"),  
                                                    env->NewStringUTF(""));
+    for(size_t i = 0; i < libraries.size(); ++i) 
+    {  
+        env->SetObjectArrayElement(stringArray,
+                                   static_cast<jsize>(i),
+                                   env->NewStringUTF(libraries[i].c_str()));
+    }
     return stringArray;
 }
 

@@ -8592,6 +8592,23 @@ void Test_GetDouFilePath()
               L"DotsTest.MemberTypesProperty.dou");
 }
 
+/* This test attempts to deserialize a piece of xml that represents a class 
+ * that is part of a dou library that this executable has not been linked with.
+ * The idea being that this test will succeed if dots_cpp has loaded all the
+ * required libraries as specified by typesystem.ini
+ */
+void Test_DeserializeUnlinkedObject()
+{
+    Header(L"DeserializeUnlinkedObject");
+    const std::wstring xml(L"<?xml version=\"1.0\" encoding=\"utf-8\"?><DotsTest.ExtraObject><Int32Member>-32</Int32Member></DotsTest.ExtraObject>");
+    
+    const Safir::Dob::Typesystem::ObjectPtr obj = Safir::Dob::Typesystem::Serialization::ToObject(xml);
+
+    std::wcout << "Class name: " << Safir::Dob::Typesystem::Operations::GetName(obj->GetTypeId()) << std::endl;
+
+}
+
+
 int tests = 0;
 int failures = 0;
 
@@ -9028,6 +9045,7 @@ void ContainerTest()
 
 }
 
+
 int main(int /*argc*/, char* /*argv*/[])
 {
     std::wcout << std::boolalpha;
@@ -9106,6 +9124,9 @@ int main(int /*argc*/, char* /*argv*/[])
         Test_IsEnumeration();
         Test_IsException();
         Test_GetDouFilePath();
+        Test_DeserializeUnlinkedObject();
+
+        ContainerTest();
     }
     catch (const Safir::Dob::Typesystem::FundamentalException & e)
     {

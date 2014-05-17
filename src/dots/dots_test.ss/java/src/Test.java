@@ -100,6 +100,7 @@ public class Test {
         Test_IsProperty();
         Test_IsEnumeration();
         Test_IsException();
+        Test_DeserializeUnlinkedObject();
 
         MiscTests misc_tests = new MiscTests();
         misc_tests.test_Containers();
@@ -10355,6 +10356,19 @@ public class Test {
             }
         }        
     }
+
+    /* This test attempts to deserialize a piece of xml that represents a class 
+     * that is part of a dou library whose jar is *not* in the classpath of this test.
+     * The idea being that this test will succeed if dots_cpp has loaded all the
+     * required jars as specified by typesystem.ini
+     */
+    private static void Test_DeserializeUnlinkedObject() {
+        Header("DeserializeUnlinkedObject");
+        String xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?><DotsTest.ExtraObject><Int32Member>-32</Int32Member></DotsTest.ExtraObject>";
+        com.saabgroup.safir.dob.typesystem.Object obj = Serialization.toObject(xml);
+        System.out.println("Class name: " + Operations.getName(obj.getTypeId()));
+    }
+
 
     static class MiscTests {
         private int tests = 0;

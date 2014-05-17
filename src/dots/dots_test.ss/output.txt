@@ -1806,3 +1806,10 @@ DotsTest.TestEnum
 Testing: IsException
 =====================================================
 DotsTest.TestException
+
+
+
+=====================================================
+Testing: DeserializeUnlinkedObject
+=====================================================
+Class name: DotsTest.ExtraObject

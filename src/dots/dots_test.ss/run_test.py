@@ -31,6 +31,7 @@ parser = argparse.ArgumentParser("test script")
 parser.add_argument("--show-safir-config", required=True)
 parser.add_argument("--language", required=True)
 parser.add_argument("--output", required=True)
+parser.add_argument("--dots-generated-paths", required=True)
 
 #cpp
 parser.add_argument("--binary")
@@ -39,11 +40,15 @@ parser.add_argument("--binary")
 parser.add_argument("--classpath")
 parser.add_argument("--library-path")
 
-
 arguments = parser.parse_args()
 
-syslog = SyslogServer(arguments.show_safir_config)
+#add all the environment variables. passed on format A=10;B=20
+for pair in arguments.dots_generated_paths.split(";"):
+    (name,value) = pair.split("=")
+    print("Setting environment variable", name, "to", value)
+    os.environ[name] = value
 
+syslog = SyslogServer(arguments.show_safir_config)
 
 dependencies = list()
 
