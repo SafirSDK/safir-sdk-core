@@ -285,7 +285,8 @@ namespace Internal
 
                 std::vector<char> insideBlob;
                 SerializeObjectContent(cd->GetName(), insideBlob, memberContent);
-                writer.WriteValue(memIx, arrIx, 0, std::make_pair(&insideBlob[0], static_cast<DotsC_Int32>(insideBlob.size())), false, true);
+                writer.WriteValue(memIx, arrIx, 0, std::pair<char*, DotsC_Int32>(&insideBlob[0], static_cast<DotsC_Int32>(insideBlob.size())), false, true);
+                //writer.WriteValue(memIx, arrIx, 0, std::make_pair(static_cast<const char*>(&insideBlob[0]), static_cast<DotsC_Int32>(insideBlob.size())), false, true);
             }
             else
             {

@@ -305,7 +305,7 @@ namespace Internal
 
                 std::vector<char> insideBlob;
                 SerializeObjectContent(*xsiType, insideBlob, memberContent);
-                writer.WriteValue(memIx, arrIx, 0, std::make_pair(&insideBlob[0], static_cast<DotsC_Int32>(insideBlob.size())), false, true);
+                writer.WriteValue(memIx, arrIx, 0, std::make_pair(static_cast<const char*>(&insideBlob[0]), static_cast<DotsC_Int32>(insideBlob.size())), false, true);
             }
                 break;
 
@@ -318,7 +318,7 @@ namespace Internal
                     os<<"Member "<<md->GetName()<<" of type binary containes invalid base64 data";
                     throw ParseError("JsonToBinary serialization error", os.str(), "", 164);
                 }
-                writer.WriteValue(memIx, arrIx, 0, std::make_pair(&bin[0], static_cast<DotsC_Int32>(bin.size())), false, true);
+                writer.WriteValue(memIx, arrIx, 0, std::make_pair(static_cast<const char*>(&bin[0]), static_cast<DotsC_Int32>(bin.size())), false, true);
             }
                 break;
 

@@ -303,7 +303,7 @@ namespace SerializationUtils
                 throw ParseError("Serialization error", os.str(), "",  117);
             }
 
-            writer.WriteValue(memIx, arrIx, 0, std::make_pair(&bin[0], static_cast<DotsC_Int32>(bin.size())), false, true);
+            writer.WriteValue(memIx, arrIx, 0, std::make_pair(static_cast<const char*>(&bin[0]), static_cast<DotsC_Int32>(bin.size())), false, true);
         }
             break;
 

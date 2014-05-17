@@ -84,7 +84,7 @@ void BlobTest(RepositoryPtr rep)
     w.WriteValue(myStrings, 3, 0, "Hej_2", false, true);
     w.WriteValue(myStrings, 4, 0, "Hej_3", false, true);
     w.WriteValue(myChildName, 0, 0, "Svarre", false, true);
-    w.WriteValue(myChild, 0, 0, std::make_pair(&innerBlob[0], innerBlob.size()), false, true);
+    w.WriteValue(myChild, 0, 0, std::make_pair(&innerBlob[0], static_cast<DotsC_Int32>(innerBlob.size())), false, true);
 
     std::vector<char> blob(static_cast<size_t>(w.CalculateBlobSize()));
     w.CopyRawBlob(&blob[0]);

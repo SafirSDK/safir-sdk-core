@@ -326,6 +326,12 @@ namespace ToolSupport
             assert(m_memberDescription->GetMemberType()==BinaryMemberType || m_memberDescription->GetMemberType()==ObjectMemberType);
             m_blob.SetValueBinary(m_memberIndex, m_valueIndex, val.first, val.second);
         }
+
+        void WriteValue(const std::pair<char*, DotsC_Int32>& val) //binary data or object
+        {
+            assert(m_memberDescription->GetMemberType()==BinaryMemberType || m_memberDescription->GetMemberType()==ObjectMemberType);
+            m_blob.SetValueBinary(m_memberIndex, m_valueIndex, val.first, val.second);
+        }
     };
 }
 }

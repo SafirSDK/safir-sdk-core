@@ -207,29 +207,29 @@ namespace ToolSupport
         virtual bool IsHidden() const {return hidden;}
 
         //GetValues
-        virtual boost::int32_t GetInt32Value(int index) const {return Value(static_cast<size_t>(index)).int32Val;}
-        virtual boost::int64_t GetInt64Value(int index) const {return Value(static_cast<size_t>(index)).int64Val;}
-        virtual float GetFloat32Value(int index) const {return Value(static_cast<size_t>(index)).float32Val;}
-        virtual double GetFloat64Value(int index) const {return Value(static_cast<size_t>(index)).float64Val;}
+        virtual DotsC_Int32 GetInt32Value(int index) const {return Value(static_cast<size_t>(index)).int32Val;}
+        virtual DotsC_Int64 GetInt64Value(int index) const {return Value(static_cast<size_t>(index)).int64Val;}
+        virtual DotsC_Float32 GetFloat32Value(int index) const {return Value(static_cast<size_t>(index)).float32Val;}
+        virtual DotsC_Float64 GetFloat64Value(int index) const {return Value(static_cast<size_t>(index)).float64Val;}
         virtual bool GetBoolValue(int index) const {return Value(static_cast<size_t>(index)).boolVal;}
         virtual const char* GetStringValue(int index) const {return Value(static_cast<size_t>(index)).stringVal.c_str();}
-        virtual std::pair<const char*, size_t> GetObjectValue(int index) const
+        virtual std::pair<const char*, DotsC_Int32> GetObjectValue(int index) const
         {
             const ValueDefinition& v=Value(static_cast<size_t>(index));
-            return std::make_pair(&v.binaryVal[0], v.binaryVal.size());
+            return std::make_pair(&v.binaryVal[0], static_cast<DotsC_Int32>(v.binaryVal.size()));
         }
-        virtual std::pair<const char*, size_t> GetBinaryValue(int index) const
+        virtual std::pair<const char*, DotsC_Int32> GetBinaryValue(int index) const
         {
             const ValueDefinition& v=Value(static_cast<size_t>(index));
-            return std::make_pair(v.stringVal.c_str(), v.stringVal.size());
+            return std::make_pair(v.stringVal.c_str(), static_cast<DotsC_Int32>(v.stringVal.size()));
         }
-        virtual std::pair<boost::int64_t, const char*> GetHashedValue(int index) const
+        virtual std::pair<DotsC_Int64, const char*> GetHashedValue(int index) const
         {
             const ValueDefinition& val=Value(static_cast<size_t>(index));
             if (!val.stringVal.empty() && val.hashedVal==0)
             {
                 //This is most likely a reference to a plain string, and if it's not this won't break anything anyway
-                boost::int64_t hash=LlufId_Generate64(val.stringVal.c_str());
+                DotsC_Int64 hash=LlufId_Generate64(val.stringVal.c_str());
                 return std::make_pair(hash, val.stringVal.c_str());
             }
             return std::make_pair(val.hashedVal, val.stringVal.empty() ? NULL : val.stringVal.c_str());
@@ -240,21 +240,21 @@ namespace ToolSupport
         {
             return Value(static_cast<size_t>(index)).key.str.c_str();
         }
-        virtual boost::int64_t GetInt32Key(int index) const
+        virtual DotsC_Int32 GetInt32Key(int index) const
         {
-            return static_cast<boost::int32_t>(Value(static_cast<size_t>(index)).key.num);
+            return static_cast<DotsC_Int32>(Value(static_cast<size_t>(index)).key.num);
         }
-        virtual boost::int64_t GetInt64Key(int index) const
+        virtual DotsC_Int64 GetInt64Key(int index) const
         {
             return Value(static_cast<size_t>(index)).key.num;
         }
-        virtual std::pair<boost::int64_t, const char*> GetHashedKey(int index) const
+        virtual std::pair<DotsC_Int64, const char*> GetHashedKey(int index) const
         {
             const ValueDefinition& val=Value(static_cast<size_t>(index));
             if (!val.key.str.empty() && val.key.hash==0)
             {
                 //This is most likely a reference to a plain string, and if it's not this won't break anything anyway
-                boost::int64_t hash=LlufId_Generate64(val.key.str.c_str());
+                DotsC_Int64 hash=LlufId_Generate64(val.key.str.c_str());
                 return std::make_pair(hash, val.key.str.c_str());
             }
             return std::make_pair(val.key.hash, val.key.str.empty() ? NULL : val.key.str.c_str());

@@ -207,28 +207,28 @@ namespace ToolSupport
          * @param index [in] - Parameter index.
          * @return Parameter value.
          */
-        virtual boost::int32_t GetInt32Value(int index) const=0; //int32, enum
+        virtual DotsC_Int32 GetInt32Value(int index) const=0; //int32, enum
 
         /**
          * @brief Get int64 parameter value. Only valid if MemberType is Int64 or TypeId
          * @param index [in] - Parameter index.
          * @return Parameter value.
          */
-        virtual boost::int64_t GetInt64Value(int index) const=0; //int64, typeId
+        virtual DotsC_Int64 GetInt64Value(int index) const=0; //int64, typeId
 
         /**
          * @brief Get float32 parameter value. Only valid if MemberType is Float32 or any Si32 type.
          * @param index [in] - Parameter index.
          * @return Parameter value.
          */
-        virtual float GetFloat32Value(int index) const=0; //float32, si32
+        virtual DotsC_Float32 GetFloat32Value(int index) const=0; //float32, si32
 
         /**
          * @brief Get float64 parameter value. Only valid if MemberType is Float64 or any Si64 type.
          * @param index [in] - Parameter index.
          * @return Parameter value.
          */
-        virtual double GetFloat64Value(int index) const=0; //float64, si64
+        virtual DotsC_Float64 GetFloat64Value(int index) const=0; //float64, si64
 
         /**
          * @brief Get bool parameter value. Only valid if MemberType is Boolean.
@@ -249,21 +249,21 @@ namespace ToolSupport
          * @param index [in] - Parameter index.
          * @return Parameter value as a pair containing a blob and a blob size.
          */
-        virtual std::pair<const char*, size_t> GetObjectValue(int index) const=0;
+        virtual std::pair<const char*, DotsC_Int32> GetObjectValue(int index) const=0;
 
         /**
          * @brief Get binary parameter value. Only valid if MemberType is Binary.
          * @param index [in] - Parameter index.
          * @return Parameter value as a pair containing a binary and a binary size.
          */
-        virtual std::pair<const char*, size_t> GetBinaryValue(int index) const=0;
+        virtual std::pair<const char*, DotsC_Int32> GetBinaryValue(int index) const=0;
 
         /**
          * @brief Get hashed parameter value. Only valid if MemberType is InstanceId, ChannelId, HandlerId
          * @param index [in] - Parameter index.
          * @return Parameter value as a pair containing a hash value and optionally a string that can be NULL.
          */
-        virtual std::pair<boost::int64_t, const char*> GetHashedValue(int index) const=0; //instanceId, channelId, handlerId
+        virtual std::pair<DotsC_Int64, const char*> GetHashedValue(int index) const=0; //instanceId, channelId, handlerId
 
         /**
          * @brief Get string key. Only valid if memer is DictionaryCollectionType and has keyType StringMemberType.
@@ -277,21 +277,21 @@ namespace ToolSupport
          * @param index [in] - Parameter index.
          * @return Parameter key for specified dictionary entry.
          */
-        virtual boost::int64_t GetInt32Key(int index) const=0;
+        virtual DotsC_Int32 GetInt32Key(int index) const=0;
 
         /**
          * @brief Get int64 or typeId key. Only valid if memer is DictionaryCollectionType and has keyType Int64MemberType or TypeIdMemberType.
          * @param index [in] - Parameter index.
          * @return Parameter key for specified dictionary entry.
          */
-        virtual boost::int64_t GetInt64Key(int index) const=0;
+        virtual DotsC_Int64 GetInt64Key(int index) const=0;
 
         /**
          * @brief Get hashed key. Only valid if memer is DictionaryCollectionType and has keyType InstanceId, ChannelId, HandlerId
          * @param index [in] - Parameter index.
          * @return Parameter key as a pair containing a hash and optionally a string that can be NULL.
          */
-        virtual std::pair<boost::int64_t, const char*> GetHashedKey(int index) const=0; //instanceId, channelId, handlerId
+        virtual std::pair<DotsC_Int64, const char*> GetHashedKey(int index) const=0; //instanceId, channelId, handlerId
     };
 
     /**
