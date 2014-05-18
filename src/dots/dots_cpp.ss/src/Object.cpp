@@ -109,7 +109,7 @@ namespace Typesystem
 
                     std::string location;
 
-                    const boost::optional<std::string> library_location = it->second.get_optional<std::string>("library_location");            
+                    const boost::optional<std::string> library_location = it->second.get_optional<std::string>("cpp_library_location");
                     if (library_location)
                     {
                         location = library_location.get();

@@ -1627,9 +1627,10 @@ JNIEXPORT jobjectArray JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_Ge
         {
             const std::string module = it->first;
 
-            //TODO noooo, jars will not be next to shared libraries!!!
-
-            const boost::optional<std::string> library_location = it->second.get_optional<std::string>("library_location");            
+            //TODO: should we try to automatically locate jars, so that they work
+            //like cpp libraries that are loaded from PATH as fallback?
+            
+            const boost::optional<std::string> library_location = it->second.get_optional<std::string>("java_library_location");            
             if (!library_location)
             {
                 continue;
