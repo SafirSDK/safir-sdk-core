@@ -5,11 +5,11 @@ SET(CMAKE_DEBUG_POSTFIX "")
 ADD_CUSTOM_COMMAND(OUTPUT 
   ${CMAKE_CURRENT_BINARY_DIR}/com_saabgroup_safir_Logging.h
   
-  COMMAND ${Java_JAVAH_EXECUTABLE} -classpath ../com.saabgroup.safir/logging_java.jar com.saabgroup.safir.Logging
+  COMMAND ${Java_JAVAH_EXECUTABLE} -classpath $<TARGET_PROPERTY:logging_java,CLASSDIR> com.saabgroup.safir.Logging
   
   DEPENDS logging_java
   
-  COMMENT "Generating javah header file"
+  COMMENT "Generating javah header files for logging_java"
   VERBATIM)
 
 ADD_LIBRARY(logging_java_jni SHARED 

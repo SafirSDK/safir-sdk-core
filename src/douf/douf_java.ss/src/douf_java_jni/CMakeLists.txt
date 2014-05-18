@@ -5,12 +5,9 @@ SET(CMAKE_DEBUG_POSTFIX "")
 ADD_CUSTOM_COMMAND(OUTPUT 
   ${CMAKE_CURRENT_BINARY_DIR}/com_saabgroup_safir_time_Library.h
 
-  COMMAND ${Java_JAVAH_EXECUTABLE} -classpath ../com.saabgroup.safir.time/douf_java.jar com.saabgroup.safir.time.Library
+  COMMAND ${Java_JAVAH_EXECUTABLE} -classpath $<TARGET_PROPERTY:douf_java,CLASSDIR> com.saabgroup.safir.time.Library
 
-  DEPENDS douf_java
-
-  COMMENT "Generating javah header files"
-  VERBATIM)
+  COMMENT "Generating javah header files for douf_java_jni")
 
 ADD_LIBRARY(douf_java_jni SHARED 
   douf_java_jni.cpp

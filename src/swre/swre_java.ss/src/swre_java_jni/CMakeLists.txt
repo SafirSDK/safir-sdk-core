@@ -6,13 +6,10 @@ ADD_CUSTOM_COMMAND(OUTPUT
   ${CMAKE_CURRENT_BINARY_DIR}/com_saabgroup_safir_application_Library.h
   ${CMAKE_CURRENT_BINARY_DIR}/com_saabgroup_safir_swreports_Library.h
   
-  COMMAND ${Java_JAVAH_EXECUTABLE} -classpath ../com.saabgroup.safir.application/swre_application_java.jar com.saabgroup.safir.application.Library
-  COMMAND ${Java_JAVAH_EXECUTABLE} -classpath ../com.saabgroup.safir.swreports/swre_reports_java.jar com.saabgroup.safir.swreports.Library
+  COMMAND ${Java_JAVAH_EXECUTABLE} -classpath $<TARGET_PROPERTY:swre_application_java,CLASSDIR> com.saabgroup.safir.application.Library
+  COMMAND ${Java_JAVAH_EXECUTABLE} -classpath $<TARGET_PROPERTY:swre_reports_java,CLASSDIR> com.saabgroup.safir.swreports.Library
 
-  DEPENDS swre_application_java swre_reports_java
-
-  COMMENT "Generating javah header files"
-  VERBATIM)
+  COMMENT "Generating javah header files")
 
 ADD_LIBRARY(swre_java_jni SHARED 
   swre_jni.cpp

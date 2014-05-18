@@ -5,12 +5,9 @@ SET(CMAKE_DEBUG_POSTFIX "")
 ADD_CUSTOM_COMMAND(OUTPUT 
   ${CMAKE_CURRENT_BINARY_DIR}/com_saabgroup_safir_dob_test_util_DoseTestUtil.h
   
-  COMMAND ${Java_JAVAH_EXECUTABLE} -classpath ../com.saabgroup.safir.dob.test.util/dose_test_util_java.jar com.saabgroup.safir.dob.test.util.DoseTestUtil
-  
-  DEPENDS dose_test_util_java
-  
-  COMMENT "Generating javah header files"
-  VERBATIM)
+  COMMAND ${Java_JAVAH_EXECUTABLE} -classpath $<TARGET_PROPERTY:dose_test_util_java,CLASSDIR> com.saabgroup.safir.dob.test.util.DoseTestUtil
+   
+  COMMENT "Generating javah header files for dose_test_util_java_jni")
 
 ADD_LIBRARY(dose_test_util_java_jni SHARED
   dose_test_util_java_jni.cpp

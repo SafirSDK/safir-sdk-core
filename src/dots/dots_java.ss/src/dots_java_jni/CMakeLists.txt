@@ -7,12 +7,9 @@ ADD_CUSTOM_COMMAND(OUTPUT
   ${CMAKE_CURRENT_BINARY_DIR}/com_saabgroup_safir_dob_typesystem_Kernel.h
   ${CMAKE_CURRENT_BINARY_DIR}/com_saabgroup_safir_dob_typesystem_Kernel_DotsC_PropertyMappingKind.h
 
-  COMMAND ${Java_JAVAH_EXECUTABLE} -classpath ../com.saabgroup.safir.dob.typesystem/dots_java.jar com.saabgroup.safir.dob.typesystem.Kernel
-
-  DEPENDS dots_java
-
-  COMMENT "Generating javah header files"
-  VERBATIM)
+  COMMAND ${Java_JAVAH_EXECUTABLE} -classpath $<TARGET_PROPERTY:dots_java,CLASSDIR> com.saabgroup.safir.dob.typesystem.Kernel
+  
+  COMMENT "Generating javah header files for dots_java_jni")
 
 ADD_LIBRARY(dots_java_jni SHARED 
   dots_java_jni.cpp

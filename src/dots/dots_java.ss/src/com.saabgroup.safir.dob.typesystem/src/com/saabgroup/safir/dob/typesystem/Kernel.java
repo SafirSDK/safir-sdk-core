@@ -289,4 +289,5 @@ final class Kernel {
     public static native String[] GetDouDirectories();
 
     public static native String [] GetGeneratedJars();
+    public static native String [] GetGeneratedJarsd();
 }
