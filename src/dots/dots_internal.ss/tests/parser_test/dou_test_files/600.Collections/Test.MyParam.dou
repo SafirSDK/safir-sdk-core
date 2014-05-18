@@ -96,7 +96,7 @@
                 </entry>
             </dictionary>
         </parameter>
-        <!--
+        
         <parameter>
             <name>DictionaryParam2</name>
             <type>InstanceId</type>
@@ -129,6 +129,10 @@
                 </entry>
                 <entry>
                     <key>Grey</key>
+                    <entityId>
+                        <name>ParserTest.MyEntity</name>
+                        <instanceId>2</instanceId>
+                    </entityId>
                 </entry>
                 <entry>
                     <key>Black</key>
@@ -139,7 +143,7 @@
                 </entry>
             </dictionary>
         </parameter>
-        
+  
        <parameter>
             <name>DictionaryParam4</name>
             <type>ParserTest.MyEntity</type>
@@ -174,7 +178,7 @@
                 </entry>
             </dictionary>
         </parameter>
-        -->
+     
     </parameters>
 
 </class>

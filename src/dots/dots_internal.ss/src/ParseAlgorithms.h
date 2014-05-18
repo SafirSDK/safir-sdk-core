@@ -883,9 +883,16 @@ namespace ToolSupport
             //get key
             try
             {
-                key=pt.get<std::string>(Elements::ParameterDictionaryKey::Name());
-                SerializationUtils::Trim(key);
-                key=SerializationUtils::ExpandEnvironmentVariables(key);
+                if (def->GetKeyType()==EntityIdMemberType)
+                {
+                    key=GetEntityIdParameterAsString(pt.get_child(Elements::ParameterDictionaryKey::Name()));
+                }
+                else
+                {
+                    key=pt.get<std::string>(Elements::ParameterDictionaryKey::Name());
+                    SerializationUtils::Trim(key);
+                    key=SerializationUtils::ExpandEnvironmentVariables(key);
+                }
             }
             catch (const boost::property_tree::ptree_error&)
             {

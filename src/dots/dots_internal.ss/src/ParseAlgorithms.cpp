@@ -1157,6 +1157,35 @@ namespace ToolSupport
                     }
                 }
             }
+
+            //if dictionary and key is enum we must check the enum value too
+            if (pd->GetCollectionType()==DictionaryCollectionType && pd->GetKeyType()==EnumerationMemberType)
+            {
+                //Verify that enum parameter key is valid according to the specified enum type.
+                const EnumDescription* ed=m_result->GetEnum(pd->GetKeyTypeId());
+                if (!ed)
+                {
+                    //Enum type does not exist
+                    std::string file=parIt->first.substr(0, parIt->first.rfind(".")+1)+"dou";
+                    std::ostringstream os;
+                    os<<"The keyType specified for the dictionary paramaeter '"<<pd->typeName<<"' does not exist";
+                    throw ParseError("Key type does not exist", os.str(), file, 765);
+                }
+
+                //Check value
+                for (int index=0; index<pd->GetNumberOfValues(); ++index)
+                {
+                    ValueDefinition& val=pd->MutableValue(static_cast<size_t>(index));
+                    val.key.num=ed->GetIndexOfValue(val.key.str);
+                    if (val.key.num<0)
+                    {
+                        std::string file=parIt->first.substr(0, parIt->first.rfind(".")+1)+"dou";
+                        std::ostringstream os;
+                        os<<"The parameter "<<pd->GetName()<<" has an invalid key '"<<val.key.str<<"'. Expected to be an enum value of type "<<ed->GetName();
+                        throw ParseError("Invalid key", os.str(), file, 766);
+                    }
+                }
+            }
         }
     }
 

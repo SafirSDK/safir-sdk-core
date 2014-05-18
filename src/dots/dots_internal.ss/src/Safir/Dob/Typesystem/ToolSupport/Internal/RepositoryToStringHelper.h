@@ -78,6 +78,8 @@ namespace Internal
 
         void TypeIdToString(boost::int64_t tid, std::ostream& os) const;
         void HashedValToString(const std::pair<boost::int64_t, const char*>& hv, std::ostream& os) const;
+        void KeyToString(const ParameterDescriptionType* c, int index, std::ostream& os) const;
+        void ValueToString(const ParameterDescriptionType* c, int index, std::ostream& os) const;
     };
 
     template <class RepT, class Traits>
@@ -133,6 +135,187 @@ namespace Internal
         {
             os<<" ("<<hv.second<<")";
         }
+    }
+
+    template <class RepT, class Traits>
+    void ToStringHelper<RepT, Traits>::KeyToString(const ParameterDescriptionType* c, int index, std::ostream& os) const
+    {
+        switch(c->GetKeyType())
+        {
+        case Int32MemberType:
+        {
+            os<<c->GetInt32Key(index);
+        }
+            break;
+        case Int64MemberType:
+        {
+            os<<c->GetInt64Key(index);
+        }
+            break;
+
+        case EntityIdMemberType:
+        {
+            TypeIdToString(c->GetInt64Key(index), os);
+            os<<" : ";
+            HashedValToString(c->GetHashedKey(index), os);
+        }
+            break;
+        case TypeIdMemberType:
+        {
+            TypeIdToString(c->GetInt64Key(index), os);
+        }
+            break;
+        case InstanceIdMemberType:
+        case ChannelIdMemberType:
+        case HandlerIdMemberType:
+        {
+            HashedValToString(c->GetHashedKey(index), os);
+        }
+            break;
+
+        case StringMemberType:
+        {
+            os<<c->GetStringKey(index);
+        }
+            break;
+
+        case EnumerationMemberType:
+        {
+            os<<m_rep->GetEnum(c->GetKeyTypeId())->GetValueName(c->GetInt32Key(index));
+        }
+            break;
+
+        default:
+            break;
+        }
+    }
+
+    template <class RepT, class Traits>
+    void ToStringHelper<RepT, Traits>::ValueToString(const ParameterDescriptionType* c, int i, std::ostream& os) const
+    {
+        switch(c->GetMemberType())
+        {
+        case BooleanMemberType:
+        {
+            os<<std::boolalpha<<c->GetBoolValue(i)<<std::dec;
+
+        }
+            break;
+
+        case Int32MemberType:
+        {
+            os<<c->GetInt32Value(i);
+        }
+            break;
+        case Int64MemberType:
+        {
+            os<<c->GetInt64Value(i);
+        }
+            break;
+
+        case EntityIdMemberType:
+        {
+            TypeIdToString(c->GetInt64Value(i), os);
+            os<<" : ";
+            HashedValToString(c->GetHashedValue(i), os);
+        }
+            break;
+        case TypeIdMemberType:
+        {
+            TypeIdToString(c->GetInt64Value(i), os);
+        }
+            break;
+        case InstanceIdMemberType:
+        case ChannelIdMemberType:
+        case HandlerIdMemberType:
+        {
+            HashedValToString(c->GetHashedValue(i), os);
+        }
+            break;
+
+        case StringMemberType:
+        {
+            os<<c->GetStringValue(i)<<std::endl;
+        }
+            break;
+
+        case ObjectMemberType:
+        {
+            const char* objParam=c->GetObjectValue(i).first;
+            std::ostringstream json;
+            (BlobToJsonSerializer<RepositoryType>(m_rep))(objParam, json);
+            os<<std::endl<<json.str();
+        }
+            break;
+
+        case EnumerationMemberType:
+        {
+            os<<m_rep->GetEnum(c->GetTypeId())->GetValueName(c->GetInt32Value(i));
+        }
+            break;
+
+        case BinaryMemberType:
+        {
+            std::pair<const char*, size_t> bin=c->GetBinaryValue(i);
+            if (bin.second>0)
+            {
+                std::string tmp(bin.first, bin.first+bin.second);
+                os<<Safir::Dob::Typesystem::ToolSupport::Internal::SerializationUtils::ToBase64(tmp);
+            }
+        }
+            break;
+
+        case Float32MemberType:
+        case Ampere32MemberType:
+        case CubicMeter32MemberType:
+        case Hertz32MemberType:
+        case Joule32MemberType:
+        case Kelvin32MemberType:
+        case Kilogram32MemberType:
+        case Meter32MemberType:
+        case MeterPerSecond32MemberType:
+        case MeterPerSecondSquared32MemberType:
+        case Newton32MemberType:
+        case Pascal32MemberType:
+        case Radian32MemberType:
+        case RadianPerSecond32MemberType:
+        case RadianPerSecondSquared32MemberType:
+        case Second32MemberType:
+        case SquareMeter32MemberType:
+        case Steradian32MemberType:
+        case Volt32MemberType:
+        case Watt32MemberType:
+        {
+            os<<c->GetFloat32Value(i);
+        }
+            break;
+
+        case Float64MemberType:
+        case Ampere64MemberType:
+        case CubicMeter64MemberType:
+        case Hertz64MemberType:
+        case Joule64MemberType:
+        case Kelvin64MemberType:
+        case Kilogram64MemberType:
+        case Meter64MemberType:
+        case MeterPerSecond64MemberType:
+        case MeterPerSecondSquared64MemberType:
+        case Newton64MemberType:
+        case Pascal64MemberType:
+        case Radian64MemberType:
+        case RadianPerSecond64MemberType:
+        case RadianPerSecondSquared64MemberType:
+        case Second64MemberType:
+        case SquareMeter64MemberType:
+        case Steradian64MemberType:
+        case Volt64MemberType:
+        case Watt64MemberType:
+        {
+            os<<c->GetFloat64Value(i);
+        }
+            break;
+        }
+
     }
 
     template <class RepT, class Traits>
@@ -307,276 +490,49 @@ namespace Internal
 
         switch (c->GetCollectionType())
         {
+        case SingleValueCollectionType:
+        {
+            os<<std::endl;
+            for (int i=0; i<c->GetNumberOfValues(); ++i)
+            {
+                os<<"      value=";
+                ValueToString(c, i, os);
+                os<<std::endl;
+            }
+        }
+            break;
         case ArrayCollectionType:
+        {
             os<<", Array, size="<<c->GetNumberOfValues()<<std::endl;
+            for (int i=0; i<c->GetNumberOfValues(); ++i)
+            {
+                os<<"      value["<<i<<"]=";
+                ValueToString(c, i, os);
+                os<<std::endl;
+            }
+        }
             break;
         case SequenceCollectionType:
+        {
             os<<", Sequence, size="<<c->GetNumberOfValues()<<std::endl;
+            for (int i=0; i<c->GetNumberOfValues(); ++i)
+            {
+                os<<"      value["<<i<<"]=";
+                ValueToString(c, i, os);
+                os<<std::endl;
+            }
+        }
             break;
         case DictionaryCollectionType:
+        {
             os<<", Dictionary<"<<(c->GetKeyType()==EnumerationMemberType ? m_rep->GetEnum(c->GetKeyTypeId())->GetName() : BasicTypeOperations::MemberTypeToString(c->GetKeyType()))<<">, size="<<c->GetNumberOfValues()<<std::endl;
-            break;
-        default:
-            os<<std::endl;
-            break;
-        }
-
-        //Values
-        switch(c->GetMemberType())
-        {
-        case BooleanMemberType:
-        {
             for (int i=0; i<c->GetNumberOfValues(); ++i)
             {
-                if (c->GetCollectionType()!=SingleValueCollectionType)
-                {
-                    os<<"      value["<<i<<"]=";
-                }
-                else
-                {
-                    os<<"      value=";
-                }
-                os<<std::boolalpha<<c->GetBoolValue(i)<<std::dec<<std::endl;
-            }
-        }
-            break;
-
-        case Int32MemberType:
-        {
-            for (int i=0; i<c->GetNumberOfValues(); ++i)
-            {
-                if (c->GetCollectionType()!=SingleValueCollectionType)
-                {
-                    os<<"      value["<<i<<"]=";
-                }
-                else
-                {
-                    os<<"      value=";
-                }
-                os<<c->GetInt32Value(i)<<std::endl;
-            }
-        }
-            break;
-        case Int64MemberType:
-        {
-            for (int i=0; i<c->GetNumberOfValues(); ++i)
-            {
-                if (c->GetCollectionType()!=SingleValueCollectionType)
-                {
-                    os<<"      value["<<i<<"]=";
-                }
-                else
-                {
-                    os<<"      value=";
-                }
-                os<<c->GetInt64Value(i)<<std::endl;
-            }
-        }
-            break;
-
-        case EntityIdMemberType:
-        {
-            for (int i=0; i<c->GetNumberOfValues(); ++i)
-            {
-                if (c->GetCollectionType()!=SingleValueCollectionType)
-                {
-                    os<<"      value["<<i<<"]=";
-                }
-                else
-                {
-                    os<<"      value=";
-                }
-                TypeIdToString(c->GetInt64Value(i), os);
-                os<<" : ";
-                HashedValToString(c->GetHashedValue(i), os);
+                os<<"      value[";
+                KeyToString(c, i, os);
+                os<<"]=";
+                ValueToString(c, i, os);
                 os<<std::endl;
-            }
-        }
-            break;
-        case TypeIdMemberType:
-        {
-            for (int i=0; i<c->GetNumberOfValues(); ++i)
-            {
-                if (c->GetCollectionType()!=SingleValueCollectionType)
-                {
-                    os<<"      value["<<i<<"]=";
-                }
-                else
-                {
-                    os<<"      value=";
-                }
-                TypeIdToString(c->GetInt64Value(i), os);
-                os<<std::endl;
-            }
-        }
-            break;
-        case InstanceIdMemberType:
-        case ChannelIdMemberType:
-        case HandlerIdMemberType:
-        {
-            for (int i=0; i<c->GetNumberOfValues(); ++i)
-            {
-                if (c->GetCollectionType()!=SingleValueCollectionType)
-                {
-                    os<<"      value["<<i<<"]=";
-                }
-                else
-                {
-                    os<<"      value=";
-                }
-                HashedValToString(c->GetHashedValue(i), os);
-                os<<std::endl;
-            }
-        }
-            break;
-
-        case StringMemberType:
-        {
-            for (int i=0; i<c->GetNumberOfValues(); ++i)
-            {
-                if (c->GetCollectionType()!=SingleValueCollectionType)
-                {
-                    os<<"      value["<<i<<"]=";
-                }
-                else
-                {
-                    os<<"      value=";
-                }
-                os<<c->GetStringValue(i)<<std::endl;
-            }
-        }
-            break;
-
-        case ObjectMemberType:
-        {
-            for (int i=0; i<c->GetNumberOfValues(); ++i)
-            {
-                if (c->GetCollectionType()!=SingleValueCollectionType)
-                {
-                    os<<"      value["<<i<<"]="<<std::endl;
-                }
-                else
-                {
-                    os<<"      value="<<std::endl;
-                }
-                const char* objParam=c->GetObjectValue(i).first;
-                std::ostringstream json;
-                (BlobToJsonSerializer<RepositoryType>(m_rep))(objParam, json);
-                os<<json.str()<<std::endl;
-            }
-        }
-            break;
-
-        case EnumerationMemberType:
-        {
-            for (int i=0; i<c->GetNumberOfValues(); ++i)
-            {
-                if (c->GetCollectionType()!=SingleValueCollectionType)
-                {
-                    os<<"      value["<<i<<"]=";
-                }
-                else
-                {
-                    os<<"      value=";
-                }
-                os<<m_rep->GetEnum(c->GetTypeId())->GetValueName(c->GetInt32Value(i))<<std::endl;
-            }
-        }
-            break;
-
-        case BinaryMemberType:
-        {
-            for (int i=0; i<c->GetNumberOfValues(); ++i)
-            {
-                //TODO: change to hex or base64 output, this assumes binary is an ascii string
-                if (c->GetCollectionType()!=SingleValueCollectionType)
-                {
-                    os<<"      value["<<i<<"]=";
-                }
-                else
-                {
-                    os<<"      value=";
-                }
-
-                std::pair<const char*, size_t> bin=c->GetBinaryValue(i);
-                if (bin.second>0)
-                {
-                    std::string tmp(bin.first, bin.first+bin.second);
-                    os<<Safir::Dob::Typesystem::ToolSupport::Internal::SerializationUtils::ToBase64(tmp)<<std::endl;
-                }
-            }
-
-        }
-            break;
-
-        case Float32MemberType:
-        case Ampere32MemberType:
-        case CubicMeter32MemberType:
-        case Hertz32MemberType:
-        case Joule32MemberType:
-        case Kelvin32MemberType:
-        case Kilogram32MemberType:
-        case Meter32MemberType:
-        case MeterPerSecond32MemberType:
-        case MeterPerSecondSquared32MemberType:
-        case Newton32MemberType:
-        case Pascal32MemberType:
-        case Radian32MemberType:
-        case RadianPerSecond32MemberType:
-        case RadianPerSecondSquared32MemberType:
-        case Second32MemberType:
-        case SquareMeter32MemberType:
-        case Steradian32MemberType:
-        case Volt32MemberType:
-        case Watt32MemberType:
-        {
-            for (int i=0; i<c->GetNumberOfValues(); ++i)
-            {
-                if (c->GetCollectionType()!=SingleValueCollectionType)
-                {
-                    os<<"      value["<<i<<"]=";
-                }
-                else
-                {
-                    os<<"      value=";
-                }
-                os<<c->GetFloat32Value(i)<<std::endl;
-            }
-        }
-            break;
-
-        case Float64MemberType:
-        case Ampere64MemberType:
-        case CubicMeter64MemberType:
-        case Hertz64MemberType:
-        case Joule64MemberType:
-        case Kelvin64MemberType:
-        case Kilogram64MemberType:
-        case Meter64MemberType:
-        case MeterPerSecond64MemberType:
-        case MeterPerSecondSquared64MemberType:
-        case Newton64MemberType:
-        case Pascal64MemberType:
-        case Radian64MemberType:
-        case RadianPerSecond64MemberType:
-        case RadianPerSecondSquared64MemberType:
-        case Second64MemberType:
-        case SquareMeter64MemberType:
-        case Steradian64MemberType:
-        case Volt64MemberType:
-        case Watt64MemberType:
-        {
-            for (int i=0; i<c->GetNumberOfValues(); ++i)
-            {
-                if (c->GetCollectionType()!=SingleValueCollectionType)
-                {
-                    os<<"      value["<<i<<"]=";
-                }
-                else
-                {
-                    os<<"      value=";
-                }
-                os<<c->GetFloat64Value(i)<<std::endl;
             }
         }
             break;
