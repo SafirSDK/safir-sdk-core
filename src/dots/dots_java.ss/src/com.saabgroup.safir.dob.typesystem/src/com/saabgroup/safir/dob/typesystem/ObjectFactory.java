@@ -141,8 +141,8 @@ public class ObjectFactory {
             {
                 try
                 {
-                    String urlPath = "jar:file://" + file + "!/";
-                    addURL (new java.net.URL (urlPath));
+                    java.io.File jar = new java.io.File(file);
+                    addURL (jar.toURI().toURL());
                 }
                 catch (java.net.MalformedURLException e)
                 {
