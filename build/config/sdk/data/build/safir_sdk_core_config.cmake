@@ -43,6 +43,10 @@ endif()
 #add include path
 INCLUDE_DIRECTORIES(${SAFIR_SDK}/include)
 
+#This makes cmake produce a compile_commands.json file that is useful with for example
+#clang-modernize and other clang tools.
+SET(CMAKE_EXPORT_COMPILE_COMMANDS True)
+
 #if we're using gcc we need to set up some things
 if (UNIX)
    #link directory for libraries

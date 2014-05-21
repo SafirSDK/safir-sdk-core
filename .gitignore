@@ -15,7 +15,7 @@ CMakeFiles
 *.rsp
 CMakeCache.txt
 Makefile
-
+compile_commands.json
 
 #CTest / Unit test stuff
 DartConfiguration.tcl
