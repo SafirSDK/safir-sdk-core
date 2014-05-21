@@ -61,10 +61,10 @@ namespace Com
     typedef boost::function<void(boost::int64_t nodeTypeId)> QueueNotFull;
 
     struct ControlModeTag {};
-    const ControlModeTag controlModeTag;
+    const ControlModeTag controlModeTag = ControlModeTag();
 
     struct DataModeTag {};
-    const DataModeTag dataModeTag;
+    const DataModeTag dataModeTag = DataModeTag();
 
     class CommunicationImpl; //forward declaration
 
