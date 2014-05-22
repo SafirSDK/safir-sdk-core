@@ -26,7 +26,6 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/property_tree/ptree.hpp>
-#include <boost/thread.hpp>
 #include <Safir/Dob/Typesystem/ToolSupport/ParseError.h>
 #include "ParseState.h"
 
@@ -39,23 +38,18 @@ namespace Typesystem
 namespace ToolSupport
 {
     //-----------------------------------------------------------------------------------------
-    //Parses a location with dou/dom-files. Will start worker-threads depending on the number
-    //of files to parse. Will never start more threads than specified by maxNumberOfThreads.
+    //Parses a location with dou/dom-files.
     //Constructor will do all the work, throws ParseError on failure. Of success
     //result is collected by calling GetResult.
     //-----------------------------------------------------------------------------------------
     class ParseJob : public boost::noncopyable
     {
     public:        
-        ParseJob(const std::vector<boost::filesystem::path>& roots, size_t maxNumberOfThreads);
+        ParseJob(const std::vector<boost::filesystem::path>& roots);
         boost::shared_ptr<TypeRepository> GetResult() {return m_result;}
 
     private:
         boost::shared_ptr<RepositoryBasic> m_result;
-
-        void CreateAndRunWorkers(const std::map<boost::filesystem::path, boost::filesystem::path>& douFiles,
-                                 size_t numberOfWorkers,
-                                 std::vector<ParseStatePtr>& states) const;
     };
 }
 }
