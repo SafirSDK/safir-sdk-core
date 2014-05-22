@@ -105,7 +105,7 @@ int main()
         {
             ++c;
         }
-        Check(c.GetCounter() == std::numeric_limits<Int32>::min() + 100);
+        Check(c.GetCounter() == std::numeric_limits<Int32>::min() + 99);
     }
 
     {
