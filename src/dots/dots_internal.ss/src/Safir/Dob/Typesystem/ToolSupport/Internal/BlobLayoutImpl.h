@@ -123,23 +123,15 @@ namespace Internal
         template <class T>
         static inline void Write(char* const blob, const T val)
         {
-#ifdef NO_UNALIGNED_ACCESS
             memcpy(blob,&val,sizeof(T));
-#else
-            *static_cast<T*>(static_cast<void*>(blob)) = val;
-#endif
         }
 
         template <class T>
         static inline T Read(const char* const blob)
         {
-#ifdef NO_UNALIGNED_ACCESS
             T val;
             memcpy(&val,blob,sizeof(T));
             return val;
-#else
-            return *static_cast<const T*>(static_cast<const void*>(blob));
-#endif
         }
 
 
