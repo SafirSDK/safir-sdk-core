@@ -91,7 +91,12 @@ template <> struct STATIC_ASSERTION_FAILURE<true> { };
 
 namespace
 {
-    static inline void dummy()  //static inline to avoid warnings about being unused
+    //make clang and gcc not warn about unused fcn
+#ifdef __GNUC__
+    static inline void dummy() __attribute__ ((unused));
+#endif
+    
+    static inline void dummy()  //static inline to avoid warnings about being unused on windows
     { 
         STATIC_ASSERT(sizeof(dcom_ushort16) == 2);
         STATIC_ASSERT(sizeof(dcom_uchar8) == 1);

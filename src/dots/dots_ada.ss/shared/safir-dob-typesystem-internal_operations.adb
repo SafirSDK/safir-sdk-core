@@ -110,8 +110,8 @@ package body Safir.Dob.Typesystem.Internal_Operations is
                         From_Object_Ptr := From_Container_Obj_Base_Ptr.Get_Object_Pointer.Ref;
                         Into_Object_Ptr := Into_Container_Obj_Base_Ptr.Get_Object_Pointer.Ref;
                         if Into_Container_Obj_Base_Ptr.Is_Null or else
-                          Into_Object_Ptr.Get_Type_Id /= Into_Object_Ptr.Get_Type_Id then
-
+                          Into_Object_Ptr.Get_Type_Id /= Into_Object_Ptr.Get_Type_Id
+                        then
                            -- ... unless the type has changed or the into-member is null.
                            if not Into_Container_Obj_Base_Ptr.Is_Null then
                               Put_Line ("Warning (Contact a DOB developer if you do not understand it):");

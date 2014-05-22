@@ -27,16 +27,6 @@ IF (NOT MSVC)
   TARGET_LINK_LIBRARIES(dots_kernel dots_internal lluf_utils lluf_startup_synchronizer lluf_crash_reporter lluf_config ${Boost_LIBRARIES} rt)
 ENDIF()
 
-#check if we can do unaligned accesses, or if we should define a symbol that fixes it.
-include(CheckCXXSourceRuns)
-SET(CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS} -O2)
-CHECK_CXX_SOURCE_RUNS("#include \"${CMAKE_CURRENT_SOURCE_DIR}/checks/check_unaligned_access.cpp\"" can_do_unaligned_access)
-if(NOT can_do_unaligned_access)
-  MESSAGE("This platform does not appear able to do unaligned accesses, so we'll use memcpy instead")
-  ADD_DEFINITIONS(-DNO_UNALIGNED_ACCESS)
-endif()
-
-
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE
         PATTERN "*~" EXCLUDE)
