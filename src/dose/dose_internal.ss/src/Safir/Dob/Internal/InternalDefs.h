@@ -64,9 +64,9 @@ namespace Internal
     typedef std::vector<Dob::Typesystem::EntityId> EntityIdVector;
     typedef std::vector<Dob::Typesystem::TypeId> TypeIdVector;
 
-    typedef WrapAroundCounter<Typesystem::Int32> InternalRequestId;
+    typedef WrapAroundCounter InternalRequestId;
 
-    typedef WrapAroundCounter<Typesystem::Int32> ResponseId;
+    typedef WrapAroundCounter ResponseId;
 
     //-------------------------------------------------
     //  Connection name types

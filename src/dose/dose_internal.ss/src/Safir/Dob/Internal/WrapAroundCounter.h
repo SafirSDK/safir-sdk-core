@@ -28,6 +28,7 @@
 
 #include <iostream>
 #include <boost/limits.hpp>
+#include <Safir/Dob/Typesystem/Defs.h>
 
 namespace Safir
 {
@@ -36,103 +37,80 @@ namespace Dob
 namespace Internal
 {
     /**
-     *  A simple wrap around counter template.
-     *  Note that only integer scalar types are allowed.
-     *  will count from std::numeric_limits<T>::min() to std::numeric_limits<T>::max()
+     *  A simple wrap around counter.
+     *  will count from std::numeric_limits<Typesystem::Int32>::min() to 
+     *  std::numeric_limits<Typesystem::Int32>::max()
      */
-    template <typename T>
     class WrapAroundCounter
     {
     public:
         WrapAroundCounter() : m_counter(min()) {}
-        explicit WrapAroundCounter(const T counter) : m_counter(counter) {}
+        explicit WrapAroundCounter(const Safir::Dob::Typesystem::Int32 counter) 
+            : m_counter(counter) 
+        {
+        
+        }
 
-        bool operator<(const WrapAroundCounter& rhs) const;
-        bool operator<=(const WrapAroundCounter& rhs) const {return operator==(rhs) || operator<(rhs);};
-        bool operator==(const WrapAroundCounter& rhs) const {return this->m_counter == rhs.m_counter;}
-        bool operator!=(const WrapAroundCounter& rhs) const {return !operator==(rhs);}
-        const WrapAroundCounter& operator++();
-        const WrapAroundCounter operator++(int);
-        const WrapAroundCounter& operator--();
+        bool operator==(const WrapAroundCounter& rhs) const 
+        {
+            return this->m_counter == rhs.m_counter;
+        }
 
-        T GetCounter() const {return m_counter;}
+        bool operator!=(const WrapAroundCounter& rhs) const 
+        {
+            return !operator==(rhs);
+        }
+
+        const WrapAroundCounter& operator++()
+        {
+            if (m_counter < max())
+            {
+                ++m_counter;
+            }
+            else
+            {
+                m_counter = min();
+            }
+            
+            return *this;
+        }
+
+        const WrapAroundCounter operator++(int)
+        {
+            const WrapAroundCounter oldVal = *this;
+            ++(*this);
+            return oldVal;
+        }
+
+        const WrapAroundCounter& operator--()
+        {
+            if (m_counter > min())
+            {
+                --m_counter;
+            }
+            else
+            {
+                m_counter = max();
+            }
+            
+            return *this;
+        }
+
+
+        Safir::Dob::Typesystem::Int32 GetCounter() const {return m_counter;}
         void Reset() {m_counter = min();}
 
     private:
-        static inline T min() {return std::numeric_limits<T>::min();}
-        static inline T max() {return std::numeric_limits<T>::max();}
+        static inline Safir::Dob::Typesystem::Int32 min()
+        {return std::numeric_limits<Safir::Dob::Typesystem::Int32>::min();}
 
-        T m_counter;
+        static inline Safir::Dob::Typesystem::Int32 max() 
+        {return std::numeric_limits<Safir::Dob::Typesystem::Int32>::max();}
+
+        Safir::Dob::Typesystem::Int32 m_counter;
     };
 
-    template <typename T>
-    bool WrapAroundCounter<T>::operator<(const WrapAroundCounter& rhs) const
-    {
-        if (this->m_counter < rhs.m_counter)
-        {
-            if (rhs.m_counter - this->m_counter > (max()-min())/2)
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
-        }
-        else
-        {
-            if (this->m_counter - rhs.m_counter > (max()-min())/2)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-    }
-
-    template <typename T>
-    const WrapAroundCounter<T>& WrapAroundCounter<T>::operator++()
-    {
-        if (m_counter < max())
-        {
-            ++m_counter;
-        }
-        else
-        {
-            m_counter = min();
-        }
-
-        return *this;
-    }
-
-    template <typename T>
-    const WrapAroundCounter<T> WrapAroundCounter<T>::operator++(int)
-    {
-        const WrapAroundCounter oldVal = *this;
-        ++(*this);
-        return oldVal;
-    }
-
-    template <typename T>
-    const WrapAroundCounter<T>& WrapAroundCounter<T>::operator--()
-    {
-        if (m_counter > min())
-        {
-            --m_counter;
-        }
-        else
-        {
-            m_counter = max();
-        }
-
-        return *this;
-    }
-
-
-    template <typename T>
-    std::wostream & operator << (std::wostream & out, const WrapAroundCounter<T> & counter)
+    inline std::wostream& operator << (std::wostream& out, const WrapAroundCounter& counter)
     {
         return out << counter.GetCounter();
     }
