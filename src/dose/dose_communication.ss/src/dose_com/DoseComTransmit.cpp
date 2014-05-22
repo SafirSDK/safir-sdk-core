@@ -301,6 +301,8 @@ typedef volatile struct
     // cleared by Xmit_Thread() when free entries in Queue
     volatile dcom_ushort16 TransmitQueueOverflow;
 
+    volatile dcom_uchar8   bSendQueueNotOverflow;
+
 } DOSE_TXQUEUE_S;
 
 volatile static DOSE_TXQUEUE_S TxQ[NUM_TX_QUEUES] = {{0}};
@@ -655,9 +657,7 @@ static bool CleanUp_After_Msg_Ignored(int qIx, int TxMsgArrIx)
                     qIx,TxQ[qIx].TransmitQueueOverflow);
         if(--TxQ[qIx].TransmitQueueOverflow == 0)
         {
-            WakeUp_QueueNotFull(qIx);
-
-            if(*pDbg > 3) PrintDbg("#   Called WakeUp_QueueNotFull(%d)\n", qIx);
+            TxQ[qIx].bSendQueueNotOverflow = 1;
         }
     }
 
@@ -774,9 +774,7 @@ static int CleanUp_After_Msg_Completed(int qIx)
                     qIx,TxQ[qIx].TransmitQueueOverflow);
         if(--TxQ[qIx].TransmitQueueOverflow == 0)
         {
-            WakeUp_QueueNotFull(qIx);
-
-            if(*pDbg > 3) PrintDbg("#   Called WakeUp_QueueNotFull(%d)\n", qIx);
+            TxQ[qIx].bSendQueueNotOverflow = 1;
         }
     }
 
@@ -1183,8 +1181,8 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
                 if(*pDbg>3)
                 PrintDbg("#-  Ack from %d SeqNum=%d. New Expected=%IX.%08X\n",
                   DoseIdFrom, SequenceNum,
-                  (dcom_ulong32)(TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[0]>>32));
-                  (dcom_ulong32)(TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[0] & 0xFFFFFFFF);
+                  (dcom_ulong32)(TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[0]>>32),
+                  (dcom_ulong32)(TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[0] & 0xFFFFFFFF));
             }
             else
             {
@@ -1723,7 +1721,10 @@ static THREAD_API TxThread(void *)
         // qIx is incremented when there is nothing more on the Queue
         //===========================================================
         for(int jj=0 ; jj < NUM_TX_QUEUES ; jj++) // Clears counters
+        {
             TxQ[jj].LapCount = 0;
+            TxQ[jj].bSendQueueNotOverflow = 0;
+        }
 
         qIx = 0;
         while(qIx < NUM_TX_QUEUES)
@@ -2592,6 +2593,18 @@ Send_The_Message:
                qIx++;
 
         } // end for(qIx)
+
+        for(int qix = 0; qix < NUM_TX_QUEUES ; ++qix)
+        {
+            if (TxQ[qix].bSendQueueNotOverflow)
+            {
+                WakeUp_QueueNotFull(qix);
+                TxQ[qix].bSendQueueNotOverflow = 0;
+
+                if(*pDbg > 3) PrintDbg("#   Called WakeUp_QueueNotFull(%d)\n", qix);
+            }
+        }
+
     } // end for(;;) // For ever
 #ifndef _MSC_VER //disable warning in msvc
     return 0;
