@@ -1153,7 +1153,8 @@ package body @_NAMESPACE_@.@_CLASS_@ is
          if not Self.@_MEMBER_@_Member.Element (Idx).Is_Null and then
             Length (Safir.Dob.Typesystem.Instance_Id.Get_Raw_String
                 (Safir.Dob.Typesystem.Entity_Id.Get_Instance_Id
-                   (Self.@_MEMBER_@_Member.Element (Idx).Get_Val))) > 0 then
+                   (Self.@_MEMBER_@_Member.Element (Idx).Get_Val))) > 0 
+         then
             Size := Size + 16 + 4 +
               Safir.Dob.Typesystem.Instance_Id.Utf_8_String_Length
                 (Safir.Dob.Typesystem.Entity_Id.Get_Instance_Id
@@ -1164,7 +1165,8 @@ package body @_NAMESPACE_@.@_CLASS_@ is
       for Idx in 0 .. @_MEMBER_@_Size - 1 loop
          if not Self.@_MEMBER_@_Member.Element (Idx).Is_Null and then
             Length (Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@.Get_Raw_String
-                   (Self.@_MEMBER_@_Member.Element (Idx).Get_Val)) > 0 then
+                   (Self.@_MEMBER_@_Member.Element (Idx).Get_Val)) > 0
+         then
             Size := Size + 8 + 4 +
               Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@.Utf_8_String_Length
                      (Self.@_MEMBER_@_Member.Element (Idx).Get_Val);
@@ -1186,7 +1188,8 @@ package body @_NAMESPACE_@.@_CLASS_@ is
       if not Self.@_MEMBER_@_Member.Is_Null and then
          Length (Safir.Dob.Typesystem.Instance_Id.Get_Raw_String
              (Safir.Dob.Typesystem.Entity_Id.Get_Instance_Id
-                (Self.@_MEMBER_@_Member.Get_Val))) > 0 then
+                (Self.@_MEMBER_@_Member.Get_Val))) > 0
+      then
          Size := Size + 16 + 4 +
            Safir.Dob.Typesystem.Instance_Id.Utf_8_String_Length
              (Safir.Dob.Typesystem.Entity_Id.Get_Instance_Id
@@ -1195,7 +1198,8 @@ package body @_NAMESPACE_@.@_CLASS_@ is
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Instance_Id or @_UNIFORM_MEMBERTYPE_@=Channel_Id or @_UNIFORM_MEMBERTYPE_@=Handler_Id
       if not Self.@_MEMBER_@_Member.Is_Null and then
          Length (Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@.Get_Raw_String
-                (Self.@_MEMBER_@_Member.Get_Val)) > 0 then
+                (Self.@_MEMBER_@_Member.Get_Val)) > 0
+      then
          Size := Size + 8 + 4 +
            Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@.Utf_8_String_Length
                   (Self.@_MEMBER_@_Member.Get_Val);
@@ -1232,7 +1236,8 @@ package body @_NAMESPACE_@.@_CLASS_@ is
                                                    Idx);
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=String
          if not Self.@_MEMBER_@_Member.Element (Idx).Is_Null and then
-           Ada.Strings.Wide_Unbounded.Length (Self.@_MEMBER_@_Member.Element (Idx).Get_Val) > Natural (@_MEMBER_@_Max_String_Length) then
+           Ada.Strings.Wide_Unbounded.Length (Self.@_MEMBER_@_Member.Element (Idx).Get_Val) > Natural (@_MEMBER_@_Max_String_Length)
+         then
             Throw (Safir.Dob.Typesystem.Illegal_Value_Exception'Identity,
                    "The @_MEMBER_@ member, index" & Safir.Dob.Typesystem.Array_Index'Image (Idx) & ", is longer than what is specified in the dou file");
          end if;
@@ -1263,7 +1268,8 @@ package body @_NAMESPACE_@.@_CLASS_@ is
                                                 0);
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=String
       if not Self.@_MEMBER_@_Member.Is_Null and then
-        Ada.Strings.Wide_Unbounded.Length (Self.@_MEMBER_@_Member.Get_Val) > Natural (@_MEMBER_@_Max_String_Length) then
+        Ada.Strings.Wide_Unbounded.Length (Self.@_MEMBER_@_Member.Get_Val) > Natural (@_MEMBER_@_Max_String_Length)
+      then
          Throw (Safir.Dob.Typesystem.Illegal_Value_Exception'Identity,
                 "The @_MEMBER_@ member is longer than what is specified in the dou file");
       end if;
