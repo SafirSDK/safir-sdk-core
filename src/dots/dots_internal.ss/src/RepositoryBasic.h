@@ -480,7 +480,8 @@ namespace ToolSupport
         ExceptionDescriptionBasic* GetExceptionBasic(DotsC_TypeId typeId) const {return GetPtr(m_exceptions, typeId);}
 
     private:
-        friend class RepositoryCompletionAlgorithms;
+        friend class DouCompletionAlgorithm;
+        friend class DomCompletionAlgorithm;
 
         //Type containers
         boost::unordered_map<DotsC_TypeId, EnumDescriptionBasicPtr> m_enums;

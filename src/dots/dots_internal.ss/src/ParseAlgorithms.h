@@ -1816,25 +1816,31 @@ namespace ToolSupport
     //-----------------------------------------------
     // Post parsing algorithms
     //-----------------------------------------------
-    class RepositoryCompletionAlgorithms
+    class DouCompletionAlgorithm
     {
     public:
-        RepositoryCompletionAlgorithms(boost::shared_ptr<RepositoryBasic>& emptyRepository);
-        void DouParsingCompletion(const std::vector<ParseStatePtr>& states);
-        void DomParsingCompletion(const std::vector<ParseStatePtr>& states);
-    private:
-        boost::shared_ptr<RepositoryBasic>& m_result;
+        void operator()(const ParseState& state);
 
-        void DeserializeObjects(const std::vector<ParseStatePtr>& states);
-        void ResolveReferences(const std::vector<ParseStatePtr>& states);
-        void ResolveParamToParamRefs(const std::vector<ParseStatePtr>& states);
-        bool ResolveParamToParamRef(const ParseState::ParameterReference<ParameterDescriptionBasic>& ref);
-        void ResolveArraySizeRef(const ParseState::ParameterReference<MemberDescriptionBasic>& ref);
-        void ResolveMaxLengthRef(const ParseState::ParameterReference<MemberDescriptionBasic>& ref);
-        void ResolveHiddenCreateRoutineParams(const ParseState::ParameterReference<CreateRoutineDescriptionBasic>& ref);
-        void HandleCreateRoutines(ClassDescriptionBasic* cd);
-        void CalculateEnumChecksums();
-        void VerifyParameterTypes();
+    private:
+        void DeserializeObjects(const ParseState& state);
+        void ResolveReferences(const ParseState& state);
+        void ResolveParamToParamRefs(const ParseState& state);
+        bool ResolveParamToParamRef(const ParseState& state, const ParseState::ParameterReference<ParameterDescriptionBasic>& ref);
+        void ResolveArraySizeRef(const ParseState& state, const ParseState::ParameterReference<MemberDescriptionBasic>& ref);
+        void ResolveMaxLengthRef(const ParseState& state, const ParseState::ParameterReference<MemberDescriptionBasic>& ref);
+        void ResolveHiddenCreateRoutineParams(const ParseState& state, const ParseState::ParameterReference<CreateRoutineDescriptionBasic>& ref);
+        void HandleCreateRoutines(const ParseState& state, ClassDescriptionBasic* cd);
+        void CalculateEnumChecksums(const ParseState& state);
+        void VerifyParameterTypes(const ParseState& state);
+        void CalculateClassSize(const ParseState& state, ClassDescriptionBasic* cd);
+    };
+
+    class DomCompletionAlgorithm
+    {
+    public:
+        void operator()(const ParseState& state);
+
+    private:
         void InsertPropertyMapping(const PropertyMappingDescriptionBasicPtr& pm);
     };
 }
