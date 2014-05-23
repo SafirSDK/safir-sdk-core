@@ -232,10 +232,11 @@ These are the simple types that class members can have, either as single members
 |InstanceId   |An Entity instance identifier (see <<hashed_types>>).
 |EntityId     |An aggregate of a TypeId and an InstanceId. A reference to an Entity instance
 |String       |Unicode string. Size is defined in number of Unicode characters.
+|Binary       |Binary data. An arbitrary sequence of bytes.
 
 |=========================================================================
 
-==== SI Types 
+==== SI types 
 The Dob type system also has definitions for the SI units. This makes it easier to specify what values are expected in objects. If a member is called "Angle" it should have a type of Radian32; this makes it easy for object users to know what to expect from the member. If it had been defined as a Float32 the users would have to find out from somewhere else what the expected contents are supposed to be; should there be radians, degrees, gons or mils in there?
 
 The SI unit types are all based on Float32 or Float64 respectively:
@@ -273,6 +274,10 @@ The InstanceId, ChannelId and HandlerId types are _hashed types_. They can be de
 
 If a string is used to define hashed type, the string will be included in the type, but is only meant to be used for reference (the hash value is used for all built-in operations). There is a method on all the hashed types, +RemoveString+, that removes the string to save space/bandwidth.
 
+[[binary_data]]
+==== Binary type
+The type Binary is the type that shall be used for binary data of any size. When the Binary type is used in parameters and xml- or json- serialized objects, the data shall be standard base64 encoded, which is a common binary-to-text encoding format.
+
 [[member_flags]]
 === Flags on members
 
@@ -298,7 +303,7 @@ Apart from members a class can also contain constant parameters. These parameter
 
 Parameters are defined by a name, a type and a value. Here is an example of a parameter definition (it is cut out of its context, but it goes in the dou-file at the same level as the _members_-tag).
 
-.A parameter definition
+.Example of parameter definitions
 [source,xml]
 ----------------------------
 <?xml version="1.0" encoding="utf-8" ?>
@@ -309,14 +314,57 @@ Parameters are defined by a name, a type and a value. Here is an example of a pa
     <baseClass>Safir.Dob.Parametrization</baseClass>
     <parameters>
         <parameter>
-            <name>MyParameter</name>
+            <name>MyStringParameter</name>
+            <type>String</type>
+            <value>Safir SDK Core, for truly distibuted systems</value>
+        </parameter>
+        <parameter>
+            <name>MyInt32Parameter</name>
             <type>Int32</type>
             <value>25</value>
+        </parameter>
+        <parameter>
+            <name>MyFloat32Parameter</name>
+            <type>Float32</type>
+            <value>3.14</value>
+        </parameter>
+        <parameter>
+            <name>MyBooleanParameter</name>
+            <type>Boolean</type>
+            <value>True</value>
+        </parameter>
+        <parameter>
+            <name>MyWeekdayParameter</name>
+            <type>Capabilities.MyWeekdayEnum</type> <!--assumes this type has been defined in another dou-file-->
+            <value>Monday</value>
+        </parameter>
+        <parameter>
+            <name>MyTypeId</name>
+            <type>TypeId</type>
+            <value>Safir.Dob.Item</value>
+        </parameter>
+        <parameter>
+            <name>MyInstanceId</name>
+            <type>InstanceId</type>
+            <value>myNamedInstance</value> <!-- name or hash are valid, same sytax for ChannelId and HandlerId -->
+        </parameter>
+        <parameter>
+            <name>MyEntityId</name>
+            <type>EntityId</type>
+            <entityId>
+                <name>Safir.Dob.Entity</name> <!-- name of an entity type -->
+                <instanceId>theOnlyInstance</instanceId>
+            </entityId>
+        </parameter>
+        <parameter>
+            <name>MyBinaryParameter</name>
+            <type>Binary</type>
+            <value>SGVsbG8gV29ybGQ=</value> <!-- base64 encoding of the ascii bytes "Hello World" -->
         </parameter>
     </parameters>
 </class>
 ----------------------------
-This defines a parameter MyParameter that is a 32 bit integer of value 25.
+This defines a number of parameters of different types. For example the parameter MyInt32Parameter that is a 32 bit integer of value 25.
 
 It is recommended to keep most parameters in pure parameter classes, suffixed Parameters, that inherit from Safir.Dob.Parametrization. These classes should not contain any members. The reason for this is to make it easier to know where parameters can be found. The Dob does not enforce this recommendation in any way.
 
