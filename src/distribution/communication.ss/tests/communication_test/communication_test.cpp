@@ -274,7 +274,7 @@ public:
             m_recvCount[id]=sendCount;
         }
 
-        if (rc%1000==0)
+        if (true)//(rc%1000==0)
         {
             std::cout<<"Recv from "<<m_nodeNames[id]<<", count="<<m_recvCount[id]<<std::endl;
         }
@@ -401,23 +401,23 @@ int main(int argc, char * argv[])
         (*reinterpret_cast<unsigned int*>(data.get()))=sendCounter;
         SetCRC(data, cmd.messageSize);
 
-//        for (auto& nt : nodeTypes.Map())
-//        {
-//            while (!com->SendToNodeType(nt.second.id, data, cmd.messageSize, 0))
-//            {
-//                ++numberOfOverflows;
-//                queueFullSem.Wait();
-//            }
-//        }
-
-        for (auto nodeId : nodes)
+        for (auto& nt : nodeTypes.Map())
         {
-            if (!com->SendToNode(nodeId, myNodeTypeId, data, cmd.messageSize, 0))
+            while (!com->SendToNodeType(nt.second.id, data, cmd.messageSize, 0))
             {
                 ++numberOfOverflows;
                 queueFullSem.Wait();
             }
         }
+
+//        for (auto nodeId : nodes)
+//        {
+//            while (!com->SendToNode(nodeId, myNodeTypeId, data, cmd.messageSize, 0))
+//            {
+//                ++numberOfOverflows;
+//                queueFullSem.Wait();
+//            }
+//        }
 
         if (sendCounter%10000==0)
         {
