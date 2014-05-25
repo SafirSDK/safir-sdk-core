@@ -40,8 +40,6 @@ namespace Internal
     typedef Dob::Typesystem::Int64 Identifier;
     typedef std::set<Identifier> IdentifierSet;
 
-#pragma pack (push)
-#pragma pack (4)
     //POD type that is possible to store in shared memory.
     //Since it is a POD type it does not inherit from SharedMemoryObject!
     struct ConnectionId
@@ -51,9 +49,12 @@ namespace Internal
         //ConnectionId(const NodeNumber node, const Identifier id): m_node(node), m_contextId(-1), m_id(id) {}
         ConnectionId(const NodeNumber node, const ContextId contextId, const Identifier id): m_node(node), m_contextId(contextId), m_id(id) {}
 
+#pragma pack (push)
+#pragma pack (4)
         NodeNumber m_node;
         ContextId  m_contextId;
         Identifier m_id; //enough to identify a connection globally among connected DOB's
+#pragma pack (pop)
 
         bool operator ==(const ConnectionId & other) const
         {
@@ -85,7 +86,6 @@ namespace Internal
 
     };
 
-#pragma pack (pop)
 
     typedef std::set<ConnectionId> ConnectionIdSet;
 

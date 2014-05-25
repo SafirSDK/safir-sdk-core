@@ -41,7 +41,7 @@ public final class TracerBackdoor
         }
     }
     
-    static void stop()
+    public static void stop()
     {
         Library.StopTraceBackdoor();
     }

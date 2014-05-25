@@ -20,19 +20,8 @@ TARGET_LINK_LIBRARIES(dots_kernel PRIVATE
   ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY})
 
-
-#check if we can do unaligned accesses, or if we should define a symbol that fixes it.
-include(CheckCXXSourceRuns)
-SET(CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS} -O2)
-CHECK_CXX_SOURCE_RUNS("#include \"${CMAKE_CURRENT_SOURCE_DIR}/checks/check_unaligned_access.cpp\"" can_do_unaligned_access)
-if(NOT can_do_unaligned_access)
-  MESSAGE("This platform does not appear able to do unaligned accesses, so we'll use memcpy instead")
-  ADD_DEFINITIONS(-DNO_UNALIGNED_ACCESS)
-endif()
-
 SAFIR_INSTALL(TARGETS dots_kernel INCLUDE_DIR Safir)
 
 #TODO
 # INSTALL(FILES ../data/dots_kernel.gpr
 #         DESTINATION ${SAFIR_SDK}/ada/)
-

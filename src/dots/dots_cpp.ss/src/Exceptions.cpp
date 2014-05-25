@@ -172,12 +172,19 @@ namespace Typesystem
 
         const char * CommonExceptionBase::what() const throw ()
         {
-            if (m_ConvertedMessage.empty())
+            try 
             {
-                m_ConvertedMessage = Utilities::ToUtf8(GetExceptionInfo());
+                if (m_ConvertedMessage.empty())
+                {
+                    m_ConvertedMessage = Utilities::ToUtf8(GetExceptionInfo());
+                }
+                
+                return m_ConvertedMessage.c_str();
             }
-
-            return m_ConvertedMessage.c_str();
+            catch (...)
+            {
+                return STRING_CONVERSION_FAILED;
+            }
         }
     }
 }

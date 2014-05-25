@@ -79,7 +79,7 @@ if (NOT NO_CXX)
   ADD_LIBRARY(dots_generated-cpp SHARED dll_imports.cpp dll_imports.h)  
 
   if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(dots_generated-cpp dots_cpp dl)
+    TARGET_LINK_LIBRARIES(dots_generated-cpp dots_cpp lluf_utils)
   endif()
 
   # INSTALL(DIRECTORY cpp/include DESTINATION ${SAFIR_SDK}

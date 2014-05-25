@@ -48,9 +48,21 @@ if (UNIX)
    #link directory for libraries
    LINK_DIRECTORIES(${SAFIR_RUNTIME}/lib)
 
+   if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+     if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.9")
+       set(stack_protector_option "-fstack-protector")
+     else()
+       set(stack_protector_option "-fstack-protector-strong")
+     endif()
+   endif()
+
    #turn on more warnings, set up use of threads, and set symbol visibility to hide as much as possible
-   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pthread -fvisibility=hidden -fvisibility-inlines-hidden -Bsymbolic -Wl,--exclude-libs=ALL")
-   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pthread -fvisibility=hidden -Bsymbolic  -Wl,--exclude-libs=ALL")
+   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pthread -fvisibility=hidden -fvisibility-inlines-hidden -Bsymbolic ${stack_protector_option}")
+   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pthread -fvisibility=hidden -Bsymbolic ${stack_protector_option}")
+
+   SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Xlinker --exclude-libs=ALL")
+   SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Xlinker --exclude-libs=ALL")
+
    SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -DNDEBUG")
 
    #make sure we get the correct posix version
