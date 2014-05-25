@@ -16,6 +16,8 @@ if (Qt5Widgets_FOUND)
   
   QT5_WRAP_UI(ui_headers ${ui})
   QT5_WRAP_CPP(moc_sources ${headers} ${QT5_WRAP_CPP_OPTIONS})
+  
+  mark_as_advanced(Qt5Core_DIR Qt5Gui_DIR Qt5Widgets_DIR)
 else()
   # Try to use Qt4 instead
   SET(QT_USE_QTMAIN TRUE)
