@@ -22,7 +22,6 @@
 *
 ******************************************************************************/
 #include "../src/Safir/Dob/Internal/WrapAroundCounter.h"
-#include <Safir/Dob/Typesystem/Defs.h>
 #include <boost/lexical_cast.hpp>
 
 int failures = 0;
