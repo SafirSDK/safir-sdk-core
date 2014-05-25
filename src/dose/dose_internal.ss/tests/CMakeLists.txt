@@ -23,6 +23,9 @@ TARGET_LINK_LIBRARIES(dose_message_queue_test PRIVATE
   ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY})
 
+TARGET_LINK_LIBRARIES(wrap_around_counter_test PRIVATE dots_internal)
+#TODO: really need to clean up the include directories. this is stupid.
+
 target_include_directories(dose_sem_wrapper_test PRIVATE ../src)
 
 ADD_TEST(Semaphore dose_sem_wrapper_test)
