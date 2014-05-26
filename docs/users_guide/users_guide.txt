@@ -373,9 +373,49 @@ String members are normally trimmed, i.e. leading and trailing whitespace is rem
 Parameter values can contain CDATA sections and use character references to specify characters by their numeric codes, e.g. +&amp;#89;+.
 
 ==== Parameter arrays
-A parameter can also be an array of values, as shown below, where an array of string parameters are defined with two values.
+A parameter can also be an array of values, as shown below, where one array parameter of strings and one array parameter of entityIds are defined with two values each.
 
 .A parameter array
+[source,xml]
+----------------------------
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" 
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>An example parameter file.</summary>
+    <name>Capabilities.MyParameters</name>
+    <baseClass>Safir.Dob.Parametrization</baseClass>
+    <parameters>
+        <parameter>
+            <name>StringParameter</name>
+            <type>String</type>
+            <array>
+                <value>Safir(R)</value>
+                <value>(R)rifaS</value>
+            </array>
+        </parameter>
+        <parameter>
+            <name>EntityIdParameter</name>
+            <type>EntityId</type>
+            <array>
+                <entityId>
+                    <name>Safir.Dob.Entity</name>
+                    <instanceId>one</instanceId>
+                </entityId>
+                <entityId>
+                    <name>Safir.Dob.Entity</name>
+                    <instanceId>two</instanceId>
+                </entityId>
+            </array>
+        </parameter>
+    </parameters>
+</class>
+----------------------------
+
+Array indexing starts at 0 when accessing the values from code.
+
+In previous versions of Safir SDK Core the array parameter syntax was a bit more bulky. For backward compatibility the old syntax is still supported but is considered deprecated. The example below shows a parameter declaration in the old format.
+
+.Old syntax array parameter (deprecated)
 [source,xml]
 ----------------------------
 <?xml version="1.0" encoding="utf-8" ?>
@@ -401,8 +441,6 @@ A parameter can also be an array of values, as shown below, where an array of st
 </class>
 ----------------------------
 
-Array indexing starts at 0 when accessing the values from code.
-
 ==== Objects in parameters
 Parameters can also contain whole Dou-defined objects, not just the basic types. Below is an example from +Safir.Dob.NodeParameters+, where there is in fact an array of items in a parameter.
 
@@ -417,25 +455,19 @@ Parameters can also contain whole Dou-defined objects, not just the basic types.
         <parameter>
             <name>Nodes</name>
             <type>Safir.Dob.NodeDefinition</type>
-            <arrayElements>
-                <arrayElement>
-                    <Safir.Dob.NodeDefinition>
-                        <NodeName>My Server</NodeName>
-                    </Safir.Dob.NodeDefinition>
-                </arrayElement>
-                <arrayElement>
-                    <Safir.Dob.NodeDefinition>
-                        <NodeName>My Client</NodeName>
-                    </Safir.Dob.NodeDefinition>
-                </arrayElement>
-                <arrayElement>
-                    <Safir.Dob.NodeDefinition type="Safir.Dob.NodeDefinitionSubtype">
-                        <!-- type attribute is needed since we're inserting derived type -->
-                        <NodeName>My Special Client</NodeName>
-                        <AnotherValue>5</AnotherValue>
-                    </Safir.Dob.NodeDefinition>
-                </arrayElement>
-            </arrayElements>
+            <array>
+                <Safir.Dob.NodeDefinition>
+                    <NodeName>My Server</NodeName>
+                </Safir.Dob.NodeDefinition>
+                <Safir.Dob.NodeDefinition>
+                    <NodeName>My Client</NodeName>
+                </Safir.Dob.NodeDefinition>
+                <Safir.Dob.NodeDefinition type="Safir.Dob.NodeDefinitionSubtype">
+                    <!-- type attribute is needed since we're inserting derived type -->
+                    <NodeName>My Special Client</NodeName>
+                    <AnotherValue>5</AnotherValue>
+                </Safir.Dob.NodeDefinition>
+            </array>
         </parameter>
     </parameters>
 </class>
@@ -2783,8 +2815,7 @@ To configure a system to be Standalone (which is the default configuration anywa
 .Standalone configuration
 [source,xml]
 ----------------------------
-<arrayElements>
-  <arrayElement>
+<array>
     <Safir.Dob.DistributionChannel>
         <Name>System</Name>
         ... IncludedNodes parameter that doesn't fit here ...
@@ -2940,39 +2971,34 @@ The QueueRules paramater is an array of +Safir.Dob.QueueRule+ items, each contai
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <name>Safir.Dob.QueueParameters</name>
   <baseClass>Safir.Dob.Parametrization</baseClass>
-  <parameters><parameter>
-      <name>QueueRules</name><type>Safir.Dob.QueueRule</type>
-      <arrayElements>
-<!-- The first array item is the default queue lengths.
-     It matches all connection names. -->
-        <arrayElement>
+  <parameters>
+    <parameter>
+        <name>QueueRules</name><type>Safir.Dob.QueueRule</type>
+        <array>
+            <!-- The first array item is the default queue lengths.
+            It matches all connection names. -->
             <Safir.Dob.QueueRule>
                 <MessageInQueueCapacity>10</MessageInQueueCapacity>
                 <MessageOutQueueCapacity>10</MessageOutQueueCapacity>
                 <RequestInQueueCapacity>10</RequestInQueueCapacity>
                 <RequestOutQueueCapacity>10</RequestOutQueueCapacity>
             </Safir.Dob.QueueRule>
-        </arrayElement>
-<!-- let connections with 'long' in their connection names
-     have longer message in queues and request out queues. -->
-        <arrayElement>
+            <!-- let connections with 'long' in their connection names
+            have longer message in queues and request out queues. -->
             <Safir.Dob.QueueRule>
                 <ConnectionNameRegex>long</ConnectionNameRegex>
                 <MessageInQueueCapacity>20</MessageInQueueCapacity>
                 <RequestOutQueueCapacity>50</RequestOutQueueCapacity>
             </Safir.Dob.QueueRule>
-        </arrayElement>
-<!-- let connections with at least one capital letter in 
-     their connection name have longer message out queues. -->
-        <arrayElement>
+            <!-- let connections with at least one capital letter in their
+            connection name have longer message out queues. -->
             <Safir.Dob.QueueRule>
                 <ConnectionNameRegex>[A-Z]+</ConnectionNameRegex>
                 <MessageOutQueueCapacity>300</MessageOutQueueCapacity>
-
             </Safir.Dob.QueueRule>
-        </arrayElement>
-      </arrayElements>
-  </parameter></parameters>
+        </array>
+    </parameter>
+  </parameters>
 </class>
 ----------------------------
 
