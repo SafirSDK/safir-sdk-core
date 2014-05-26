@@ -7,7 +7,7 @@ PROJECT(safir_sdk_core CXX C)
 set(SAFIR_SDK "/NO_THIS_IS_NOT_RIGHT")
 set(SAFIR_RUNTIME "/NO_THIS_IS_NOT_RIGHT")
 
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
 #if we're using gcc we need to set up some things
 if (UNIX)
@@ -284,7 +284,7 @@ function (SET_SAFIR_TEST_PROPERTIES)
     ${PROP_ENVIRONMENT})
 endfunction()
 
-INCLUDE(cmake/build_generated.cmake)
+INCLUDE(build_generated)
 
 include_directories(lluf/lluf_build_helpers.ss/src)
 
