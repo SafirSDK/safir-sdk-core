@@ -8,7 +8,8 @@
 *.pdb
 
 #CMake stuff
-*.cmake
+cmake_install.cmake
+CTestTestfile.cmake
 CMakeLists.txt.user
 install_manifest.txt
 CMakeFiles
