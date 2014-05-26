@@ -206,7 +206,9 @@ package body Executor is
 
                   Put_Line ("Got Blob");
                   Action := Dose_Test.Action.Smart_Pointer (Safir.Dob.Typesystem.Object.Factory.Create_Object
-                                                               (Blob => To_Char_Star (Blob_Ptr)));
+                                                              (Blob => To_Char_Star (Blob_Ptr)));
+
+                  Put_Line ("Blob contains action: " & Dose_Test.Action_Enum.Enumeration'Image (Action.Ref.Action_Kind.Get_Val));
 
                   Put_Line ("Posting to reactor");
                   Reactor.Post (Received_Action);
@@ -216,8 +218,10 @@ package body Executor is
                      accept Get_Action (The_Action : out Dose_Test.Action.Smart_Pointer) do
                         The_Action := Action;
                      end Get_Action;
+                     Put_Line ("Got Get_Action");
                   or
                      accept Stop;
+                     Put_Line ("Got stop");
                      exit Receive_Loop;
                   or
                      terminate;
@@ -226,8 +230,10 @@ package body Executor is
                   Put_Line ("Waiting for Action_Completed");
                   select
                      accept Action_Completed;
+                     Put_Line ("Got action completed");
                   or
                      accept Stop;
+                     Put_Line ("Got stop");
                      exit Receive_Loop;
                   or
                      terminate;
@@ -548,6 +554,8 @@ package body Executor is
                   if not Action.Ref.Connection_Name.Is_Null then
                      Conn_Name := Action.Ref.Connection_Name.Get_Val;
                   end if;
+
+                  Put_Line ("Opening connection in context " & Safir.Dob.Typesystem.Int_32'Image (Context));
 
                   Self.Test_Connection.Open
                     (Conn_Name,

@@ -123,7 +123,10 @@ SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
 logger_control = os.path.join(SAFIR_RUNTIME,"bin","logger_control")
 
 def logfilename(proc):
-    fn = "lll_test-" + str(proc.pid) + ".txt"
+    if sys.platform == "win32":
+        fn = "lll_test.exe-" + str(proc.pid) + ".txt"
+    else:
+        fn = "lll_test-" + str(proc.pid) + ".txt"
     return os.path.join(logdir,fn)
 
 if len(sys.argv) != 2:

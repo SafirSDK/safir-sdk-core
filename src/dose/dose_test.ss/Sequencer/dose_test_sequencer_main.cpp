@@ -36,6 +36,7 @@
 
 #include <boost/program_options.hpp>
 #include <boost/filesystem/path.hpp>
+#include <boost/chrono.hpp>
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 
@@ -161,6 +162,10 @@ const CommandLineResults & HandleCommandLine(int argc, char* argv[])
 
 int main(int argc, char* argv[])
 {
+    //call this once before we start, to work around a problem in Chrono <= 1.55.
+    //See https://svn.boost.org/trac/boost/ticket/9720
+    boost::chrono::steady_clock::now();
+
     //random numbers are used in command line handling and inside the sequencer, so seed the generator here.
     srand(static_cast<unsigned int>(time(NULL)));
 

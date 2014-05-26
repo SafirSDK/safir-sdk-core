@@ -14,6 +14,14 @@
         </parameter>
         
         <parameter>
+            <name>ObjParam1</name>
+            <type>ParserTest.MyEntity</type>
+            <ParserTest.MyEntity>
+                <Int32Arr/>
+            </ParserTest.MyEntity>
+        </parameter>
+        
+        <parameter>
             <name>ObjParam2</name>
             <type>ParserTest.MyEntity</type>
             <ParserTest.MyEntity>
@@ -90,5 +98,74 @@
                 </arrayElement> 
             </arrayElements>                              
         </parameter>
+        
+        <parameter>
+            <name>Int32ParamArrayNew</name>
+            <type>Int32</type>
+            <array>
+                <value>10</value>
+                <value>20</value>
+                <value>30</value>
+            </array>                              
+        </parameter>
+        
+        <parameter>
+            <name>EntityIdParamArrayNew</name>
+            <type>EntityId</type>
+            <array>
+                <entityId>
+                    <name>Safir.Dob.Entity</name>
+                    <instanceId>abcd</instanceId>
+                </entityId>
+                <entityId>
+                    <name>ParserTest.MyEntity</name>
+                    <instanceId>123</instanceId>
+                </entityId>
+            </array>                              
+        </parameter>
+        
+        <parameter>
+            <name>ObjParamArrayNew</name>
+            <type>ParserTest.MyEntity</type>
+            <array>
+                <ParserTest.MyEntity>
+                    <Int32Arr>
+                        <Int32 index="2">1</Int32>
+                        <Int32 index="0">3</Int32>
+                    </Int32Arr>
+                </ParserTest.MyEntity>
+                <ParserTest.MyEntity>
+                    <StringVal>Kalle</StringVal>
+                    <Int32Val>1</Int32Val>
+                </ParserTest.MyEntity>              
+            </array>                              
+        </parameter>
+        
+        <parameter>
+            <name>DeprecatedObjParamArrayNew</name>
+            <type>ParserTest.MyEntity</type>
+            <array>                
+                <object>
+                    <name>ParserTest.MyEntity</name>
+                    <members>
+                        <member>
+                            <name>StringVal</name>
+                            <value>Svarre</value>
+                        </member>
+                    </members>
+                </object>
+                <object>
+                    <name>ParserTest.MyEntity</name>
+                    <members>
+                        <member>
+                            <name>StringVal</name>
+                            <value>Kurre</value>
+                        </member>
+                    </members>
+                </object>
+
+            </array>                              
+        </parameter>
+        
     </parameters>
 </class>

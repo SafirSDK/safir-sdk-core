@@ -1,0 +1,51 @@
+#Binaries
+*.jar
+*.so
+*.exe
+*.csexe
+*.dll
+*.mdb
+*.pdb
+
+#CMake stuff
+*.cmake
+CMakeLists.txt.user
+install_manifest.txt
+CMakeFiles
+*.rsp
+CMakeCache.txt
+Makefile
+
+
+#CTest / Unit test stuff
+DartConfiguration.tcl
+Testing
+*.junit.xml
+
+#Ada horrors
+ali
+obj
+interface
+
+#Qt stuff
+*_automoc.cpp
+moc_*.cpp
+moc_*.cpp_parameters
+ui_*.h
+moc_*.cxx
+moc_*.cxx_parameters
+qrc_*.cxx
+*.qrc.depends
+*.cbp
+
+#Misc
+__pycache__
+buildlog_*.html
+*.resources
+*.bak
+*.pyc
+bin
+*-build
+*.orig
+
+

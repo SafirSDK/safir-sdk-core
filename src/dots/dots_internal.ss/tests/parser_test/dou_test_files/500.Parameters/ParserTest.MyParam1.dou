@@ -158,6 +158,19 @@
                 </arrayElement>
             </arrayElements>            
         </parameter>
+        
+        <parameter>
+            <name>NewEnumArray</name>
+            <type>ParserTest.MyColorEnum</type>
+            <array>
+                <value>Black</value>
+                <valueRef>
+                    <name>ParserTest.MyParam1.EnumArray</name>
+                    <index>1</index>
+                </valueRef>
+                <value>White</value>
+            </array>            
+        </parameter>
 
     </parameters>
 

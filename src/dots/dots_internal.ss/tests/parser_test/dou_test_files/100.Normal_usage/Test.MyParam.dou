@@ -54,26 +54,16 @@
         <parameter>
             <name>IntArray</name>
             <type>Int32</type>
-            <arrayElements>
-                <arrayElement>
-                    <value>1</value>
-                </arrayElement>
-                <arrayElement>
-                    <value>2</value>
-                </arrayElement>
-                <arrayElement>
-                    <value>3</value>
-                </arrayElement>
-                <arrayElement>
+            <array>                
+                    <value>1</value>                                
+                    <value>2</value>                
+                    <value>3</value>                
                     <valueRef>
                         <name>Test.MyParam.IntArray</name>
                         <index>2</index>
-                    </valueRef>
-                </arrayElement>
-                <arrayElement>
-                    <value>4</value>
-                </arrayElement>
-            </arrayElements>            
+                    </valueRef>                
+                    <value>4</value>                
+            </array>            
         </parameter>
 
     </parameters>

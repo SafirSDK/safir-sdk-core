@@ -149,8 +149,7 @@ namespace Internal
         {
             for (int i=0; i<ed->GetNumberOfValues(); ++i)
             {
-                StringShm val(ed->GetValueName(i), shm->get_segment_manager());
-                m_enumerationValues.push_back(val);
+                m_enumerationValues.push_back(StringShm(ed->GetValueName(i), shm->get_segment_manager()));
             }
         }
 
@@ -215,8 +214,7 @@ namespace Internal
         {
             for (int i=0; i<pd->GetNumberOfMembers(); ++i)
             {
-                MemberDescriptionShm member(pd->GetMember(i), shm);
-                m_members.push_back(member);
+                m_members.push_back(MemberDescriptionShm(pd->GetMember(i), shm));
             }
         }
 
@@ -490,8 +488,7 @@ namespace Internal
             int startOwnMembers=totalNumMembers-cd->GetNumberOfOwnMembers();
             for (int i=startOwnMembers; i<totalNumMembers; ++i)
             {
-                MemberDescriptionShm member(cd->GetMember(i), shm);
-                m_members.push_back(member);
+                m_members.push_back(MemberDescriptionShm(cd->GetMember(i), shm));
             }
         }
 

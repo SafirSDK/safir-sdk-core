@@ -21,5 +21,5 @@ FIND_PACKAGE(PythonInterp)
 ADD_TEST(TryStart_dose_main  ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/try_start_dose_main.py)
 ADD_TEST(dose_main_timers timer_test)
 
-SET_SAFIR_TEST_PROPERTIES(TryStart_dose_main 120)
-SET_SAFIR_TEST_PROPERTIES(dose_main_timers 120)
+SET_SAFIR_TEST_PROPERTIES(TryStart_dose_main 600)
+SET_SAFIR_TEST_PROPERTIES(dose_main_timers 600)

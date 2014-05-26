@@ -238,7 +238,7 @@ namespace Internal
                     throw ParseError("UglyXmlToBlobSerializer serialization error", os.str(), "", 135);
                 }
 
-                SerializationUtils::CreateSpaceForDynamicMember(blob, beginningOfUnused, insideBlob.size());
+                SerializationUtils::CreateSpaceForDynamicMember(m_blobLayout, blob, beginningOfUnused, insideBlob.size());
                 char* writeObj=beginningOfUnused;
                 m_blobLayout.CreateObjectMember(&blob[0], static_cast<Size>(insideBlob.size()), insideBlobTypeId, memIx, arrIx, false, beginningOfUnused);
                 beginningOfUnused=writeObj+insideBlob.size(); //This is a hack. BlobLayout is not moving beginningOfUnused by the blobSize but instead only by the initialSize. Has to do with genated code.

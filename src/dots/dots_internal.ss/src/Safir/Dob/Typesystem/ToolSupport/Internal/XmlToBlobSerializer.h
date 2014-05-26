@@ -158,7 +158,8 @@ namespace Internal
                     //array, then the inner propertyTree contains array element and the array elements contains the content
                     //i.e <myIntArray><Int32 index=0>1</Int32><Int32 index=5>2</Int32></myIntArray>
                     int arrayIndex=0;
-                    bool usesIndexAttr=memIt->second.begin()->second.get_optional<int>("<xmlattr>.index") ? true : false;
+                    bool usesIndexAttr=(!memIt->second.empty() && memIt->second.begin()->second.get_optional<int>("<xmlattr>.index")) ? true : false;
+
                     for (boost::property_tree::ptree::iterator arrIt=memIt->second.begin(); arrIt!=memIt->second.end(); ++arrIt)
                     {
                         boost::optional<int> index=arrIt->second.get_optional<int>("<xmlattr>.index");
@@ -237,7 +238,6 @@ namespace Internal
                     os<<"Only members of non-object types can use the valueRef mechanism. Member '"<<md->GetName()<<"' has type "<<m_repository->GetClass(md->GetTypeId())->GetName();
                     throw ParseError("XmlToBinary serialization error", os.str(), "", 110);
                 }
-
                 SerializationUtils::SetMemberFromParameter(m_repository, m_blobLayout, md, memIx, arrIx, *valueRef, valueRefIndex, blob, beginningOfUnused);
             }
             else if (md->GetMemberType()==ObjectMemberType)
@@ -269,7 +269,7 @@ namespace Internal
 
                 std::vector<char> insideBlob;
                 SerializeObjectContent(cd->GetName(), insideBlob, memberContent);
-                SerializationUtils::CreateSpaceForDynamicMember(blob, beginningOfUnused, insideBlob.size());
+                SerializationUtils::CreateSpaceForDynamicMember(m_blobLayout, blob, beginningOfUnused, insideBlob.size());
                 char* writeObj=beginningOfUnused;
                 m_blobLayout.CreateObjectMember(&blob[0], static_cast<Size>(insideBlob.size()), cd->GetTypeId(), memIx, arrIx, false, beginningOfUnused);
                 beginningOfUnused=writeObj+insideBlob.size(); //This is a hack. BlobLayout is not moving beginningOfUnused by the blobSize but instead only by the initialSize. Has to do with genated code.

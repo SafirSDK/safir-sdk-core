@@ -50,9 +50,10 @@
 
 namespace bfs = boost::filesystem;
 
+#if defined(linux) || defined(__linux) || defined(__linux__)
 namespace
 {
-#if defined(linux) || defined(__linux) || defined(__linux__)
+
     const std::vector<std::string> GetCommandLine(const pid_t pid)
     {
         const std::string pidString = boost::lexical_cast<std::string>(pid);
@@ -82,36 +83,8 @@ namespace
         }
         return result;
     }
-#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-    const std::vector<std::string> GetCmdLine()
-    {
-        using Safir::Utilities::Internal::ToUtf8;
-
-        std::vector<std::string> res;
-
-        LPWSTR *szArglist;
-        int nArgs;
-        int i;
-
-        szArglist = CommandLineToArgvW(GetCommandLineW(), &nArgs);
-        if (szArglist != NULL)
-        {
-            for (i = 0; i < nArgs; ++i)
-            {
-                res.push_back(ToUtf8(szArglist[i]));
-            }
-        }
-
-        // Free memory allocated for CommandLineToArgvW arguments.
-        LocalFree(szArglist);
-
-        return res;
-    }
-#else
-#  error You need to implement GetCmdLine for this platform!
-#endif
 }
-
+#endif
 
 namespace Safir
 {
@@ -143,11 +116,6 @@ namespace Utilities
     {
 #if defined(linux) || defined(__linux) || defined(__linux__)
         const std::vector<std::string> cmdline = GetCommandLine(m_pid);
-#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-        const std::vector<std::string> cmdline = GetCmdLine();
-#else
-#  error You need to implement GetCommandLine for this platform!
-#endif
 
         if (cmdline.size() == 0)
         {
@@ -155,7 +123,7 @@ namespace Utilities
         }
 
         const bfs::path filename = bfs::path(cmdline[0]).filename();
-        
+
         //try to find the name of the jar file
         if (filename == "java" || filename == "java.exe")
         {
@@ -183,6 +151,36 @@ namespace Utilities
         }
 
         return bfs::path(bfs::path(*cmdline.begin()).filename()).string();
+
+#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+        HANDLE hProcess = ::OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,
+                                        FALSE,
+                                        m_pid);
+        if (hProcess == NULL)
+        {
+            return boost::lexical_cast<std::string>(m_pid);
+        }
+
+        // Get the process name.
+        char szProcessName[MAX_PATH];
+        strncpy(szProcessName,boost::lexical_cast<std::string>(m_pid).c_str(), MAX_PATH);
+
+        HMODULE hMod;
+        DWORD cbNeededMBN;
+
+        if ( EnumProcessModules( hProcess, &hMod, sizeof(hMod),
+            &cbNeededMBN) )
+        {
+            GetModuleBaseNameA( hProcess, hMod, szProcessName, MAX_PATH );
+        }
+
+        CloseHandle(hProcess);
+
+        return szProcessName;
+
+#else
+#  error You need to implement GetCommandLine for this platform!
+#endif
     }
 
     pid_t ProcessInfo::GetPid()

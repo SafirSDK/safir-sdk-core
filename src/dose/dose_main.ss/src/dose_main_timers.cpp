@@ -69,20 +69,6 @@ namespace Internal
     //static member initialization
     TimerHandler* TimerHandler::m_instance = NULL;
 
-    static const boost::posix_time::ptime epoch(boost::gregorian::date(1970,1,1));
-    static const double fraction_multiplicator = pow(10.0,-boost::posix_time::time_duration::num_fractional_digits());
-
-    double GetUtcTime()
-    {
-        using namespace boost::posix_time;
-
-        const ptime now = microsec_clock::universal_time();
-        const time_duration diff = now - epoch;
-        const double foo =  diff.total_seconds() + diff.fractional_seconds() * fraction_multiplicator;
-        return foo;
-    }
-
-
     TimerInfoBase::TimerInfoBase(const TimerId timerId):
         m_timerId(timerId)
     {
@@ -173,7 +159,7 @@ namespace Internal
 
     void TimerHandler::Set(const SetPolicy policy,
                            const TimerInfoPtr & timerInfo,
-                           const double when)
+                           const boost::chrono::steady_clock::time_point& when)
     {
         switch (policy)
         {
@@ -358,39 +344,28 @@ namespace Internal
         return m_timerTable.find(timerInfo) != m_timerTable.end();
     }
 
-    //returns the time to the next timeout in milliseconds
-    const boost::posix_time::time_duration TimerHandler::NextTimeout() const
+    const boost::chrono::steady_clock::time_point TimerHandler::NextTimeout() const
     {
-        using namespace boost::posix_time;
+        using namespace boost::chrono;
 
         if(m_timerQueue.empty())
         {
-            return seconds(100000); //one hundred thousand seconds...
+            return boost::chrono::steady_clock::now() + seconds(100000); //one hundred thousand seconds...
         }
         else
         {
-            const double delay = m_timerQueue.begin()->first - GetUtcTime();
-
-            if (delay < 0.0)
-            {
-                return seconds(0);
-            }
-            else
-            {
-                return microseconds(static_cast<boost::int64_t>(delay*1e6));
-            }
-
+            return m_timerQueue.begin()->first;
         }
     }
 
     void TimerHandler::ScheduleTimer()
     {
-        if (m_deadlineTimer != NULL)
+        if (m_steadyTimer != NULL)
         {
-            m_deadlineTimer->cancel();
+            m_steadyTimer->cancel();
         }
-        m_deadlineTimer.reset(new boost::asio::deadline_timer(m_ioService,NextTimeout()));
-        m_deadlineTimer->async_wait(boost::bind(&TimerHandler::HandleTimeout,this,_1));
+        m_steadyTimer.reset(new boost::asio::steady_timer(m_ioService, NextTimeout()));
+        m_steadyTimer->async_wait(boost::bind(&TimerHandler::HandleTimeout,this,_1));
     }
 
     void TimerHandler::HandleTimeout(const boost::system::error_code & error)
@@ -405,7 +380,7 @@ namespace Internal
 
         if (!m_timerQueue.empty())
         {
-            const double now = GetUtcTime();
+            const boost::chrono::steady_clock::time_point now = boost::chrono::steady_clock::now();
 
             TimerQueue::iterator theTimer = m_timerQueue.begin();
 

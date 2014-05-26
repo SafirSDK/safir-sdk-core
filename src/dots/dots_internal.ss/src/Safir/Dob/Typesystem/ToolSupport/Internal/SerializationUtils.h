@@ -37,6 +37,7 @@
 #include <boost/archive/iterators/transform_width.hpp>
 #include <boost/archive/iterators/insert_linebreaks.hpp>
 #include <boost/archive/iterators/remove_whitespace.hpp>
+#include <Safir/Utilities/Internal/ConfigReader.h>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeUtilities.h>
 #include <Safir/Dob/Typesystem/ToolSupport/ParseError.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Internal/classic_string_cast.h>
@@ -91,30 +92,26 @@ namespace SerializationUtils
 
     inline std::string ExpandEnvironmentVariables(const std::string& str)
     {
-        //Copied from dots_kernel::dots_class_parser
-        const size_t start=str.find("$(");
-        const size_t stop=str.find(')', start);
-
-        if (start==std::string::npos || stop==std::string::npos)
-            return str;
-
-        const std::string var=str.substr(start+2, stop-start-2);
-
-        //Get rid of Microsoft warning
-#ifdef _MSC_VER
-#pragma warning(disable:4996)
-#endif
-        const char * const env=getenv(var.c_str());
-#ifdef _MSC_VER
-#pragma warning(default:4996)
-#endif
-
-        if (env == NULL)
+        std::string result;
+        try
         {
-            throw var;
+            result = Safir::Utilities::Internal::Expansion::ExpandSpecial(str);
         }
-        const std::string res=str.substr(0, start) + env + str.substr(stop+1, str.size()-stop-1);
-        return ExpandEnvironmentVariables(res); //search for next environment variable
+        catch (const std::logic_error& e)
+        {
+            throw ParseError("Special variable expansion error", e.what(), "", 178);
+        }
+
+        try
+        {
+            result = Safir::Utilities::Internal::Expansion::ExpandEnvironment(result);
+        }
+        catch (const std::logic_error& e)
+        {
+            throw ParseError("Environment variable expansion error", e.what(), "", 179);
+        }
+        
+        return result;
     }
 
     inline DotsC_TypeId StringToTypeId(const std::string& str)
@@ -146,13 +143,14 @@ namespace SerializationUtils
         return result;
     }
 
-    inline void CreateSpaceForDynamicMember(std::vector<char>& blob,
+    template <class BlobLayoutT>
+    inline void CreateSpaceForDynamicMember(const BlobLayoutT& blobLayout,
+                                            std::vector<char>& blob,
                                             char* & beginningOfUnused,
                                             size_t dynamicMemberSizeNeeded)
     {
         size_t usedSize=beginningOfUnused-&blob[0];
-        assert(usedSize<=blob.size());
-        //ENSURE(usedSize<=blob.size(), <<"XmlToBlob has written outside blob");
+        assert(usedSize<=blob.size());        
         size_t unusedSize=blob.size()-usedSize;
 
         if (unusedSize>=dynamicMemberSizeNeeded)
@@ -162,6 +160,7 @@ namespace SerializationUtils
 
         if (blob.capacity()-blob.size()<dynamicMemberSizeNeeded)
         {
+            //std::cout<<"  Current blob: size="<<blob.size()<<", cap="<<blob.capacity()<<", dynNeed="<<dynamicMemberSizeNeeded<<", need="<<blob.size()+dynamicMemberSizeNeeded<<std::endl;
             //Blob is too small. A bigger blob must be allocated and the content of the old one must be copied.
             std::vector<char> tmp;
             tmp.swap(blob);
@@ -169,10 +168,13 @@ namespace SerializationUtils
             blob.reserve((tmp.capacity()+dynamicMemberSizeNeeded)*2);
             blob.insert(blob.begin(), tmp.begin(), tmp.end());
             beginningOfUnused=&blob[0]+usedSize;
+            //std::cout<<"New blob capacity: "<<blob.capacity()<<std::endl;
         }
 
         //When we get here, the blob is guaranteed to have capacity for the needed extra space. Just resize.
         blob.resize(blob.size()+dynamicMemberSizeNeeded);
+        blobLayout.SetSize(&blob[0], static_cast<DotsC_Int32>(blob.size()));
+        //std::cout<<"Blob grew, new size: "<<blob.size()<<std::endl;
     }
 
     template <class BlobLayoutT>
@@ -270,7 +272,7 @@ namespace SerializationUtils
             if (hash.second!=NULL)
             {
                 size_t numBytesNeeded=memberContent.data().size()+1+sizeof(DotsC_Int64)+sizeof(DotsC_Int32); //hash+stringLength+string
-                SerializationUtils::CreateSpaceForDynamicMember(blob, beginningOfUnused, numBytesNeeded);
+                SerializationUtils::CreateSpaceForDynamicMember(blobLayout, blob, beginningOfUnused, numBytesNeeded);
             }
             blobLayout.CreateAndSetMemberWithOptionalString(&blob[0], hash.first, hash.second, static_cast<Size>(memberContent.data().size()+1), memIx, arrIx, false, beginningOfUnused);
             blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
@@ -314,7 +316,7 @@ namespace SerializationUtils
             if (instanceId.second!=NULL)
             {
                 size_t numBytesNeeded=instanceIdString->size()+1+sizeof(DotsC_EntityId)+sizeof(DotsC_Int32); //(typeId+hash)+stringLength+string
-                SerializationUtils::CreateSpaceForDynamicMember(blob, beginningOfUnused, numBytesNeeded);
+                SerializationUtils::CreateSpaceForDynamicMember(blobLayout, blob, beginningOfUnused, numBytesNeeded);
             }
             DotsC_EntityId eid={tid, instanceId.first};
             blobLayout.CreateAndSetMemberWithOptionalString(&blob[0], eid, instanceId.second, static_cast<Size>(instanceIdString->size()+1), memIx, arrIx, false, beginningOfUnused);
@@ -331,7 +333,7 @@ namespace SerializationUtils
             }
             //The only time we dont trim content
             size_t numBytesNeeded=std::min(memberContent.data().size(), static_cast<size_t>(md->GetMaxLength()))+1; //add one for '\0'
-            SerializationUtils::CreateSpaceForDynamicMember(blob, beginningOfUnused, numBytesNeeded);
+            SerializationUtils::CreateSpaceForDynamicMember(blobLayout, blob, beginningOfUnused, numBytesNeeded);
             char* writeString=beginningOfUnused;
             blobLayout.CreateStringMember(&blob[0], static_cast<Size>(numBytesNeeded), memIx, arrIx, false, beginningOfUnused);
             strncpy(writeString, memberContent.data().c_str(), numBytesNeeded-1);
@@ -355,7 +357,7 @@ namespace SerializationUtils
                 os<<"Member "<<md->GetName()<<" of type binary containes invalid base64 data";
                 throw ParseError("Serialization error", os.str(), "",  117);
             }
-            SerializationUtils::CreateSpaceForDynamicMember(blob, beginningOfUnused, bin.size());
+            SerializationUtils::CreateSpaceForDynamicMember(blobLayout, blob, beginningOfUnused, bin.size());
             char* writeBinary=beginningOfUnused;
             blobLayout.CreateBinaryMember(&blob[0], static_cast<Size>(bin.size()), memIx, arrIx, false, beginningOfUnused);
             memcpy(writeBinary, &bin[0], bin.size());
@@ -537,7 +539,7 @@ namespace SerializationUtils
             {
                 strLen+=strlen(hash.second);
                 size_t numBytesNeeded=strLen+sizeof(DotsC_Int64)+sizeof(DotsC_Int32); //hash+stringLength+string
-                SerializationUtils::CreateSpaceForDynamicMember(blob, beginningOfUnused, numBytesNeeded);
+                SerializationUtils::CreateSpaceForDynamicMember(blobLayout, blob, beginningOfUnused, numBytesNeeded);
             }
             blobLayout.CreateAndSetMemberWithOptionalString(&blob[0], hash.first, hash.second, static_cast<Size>(strLen), memIx, arrIx, false, beginningOfUnused);
             blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
@@ -553,7 +555,7 @@ namespace SerializationUtils
             {
                 strLen+=strlen(instanceId.second);
                 size_t numBytesNeeded=strLen+sizeof(DotsC_EntityId)+sizeof(DotsC_Int32); //(typeId+hash)+stringLength+string
-                SerializationUtils::CreateSpaceForDynamicMember(blob, beginningOfUnused, numBytesNeeded);
+                SerializationUtils::CreateSpaceForDynamicMember(blobLayout, blob, beginningOfUnused, numBytesNeeded);
             }
             DotsC_EntityId eid={tid, instanceId.first};
             blobLayout.CreateAndSetMemberWithOptionalString(&blob[0], eid, instanceId.second, static_cast<Size>(strLen), memIx, arrIx, false, beginningOfUnused);
@@ -566,7 +568,7 @@ namespace SerializationUtils
             const char* str=param->GetStringValue(parameterIndex);
             size_t strLen=strlen(str);
             size_t numBytesNeeded=std::min(strLen, static_cast<size_t>(md->GetMaxLength()))+1; //add one for '\0'
-            SerializationUtils::CreateSpaceForDynamicMember(blob, beginningOfUnused, numBytesNeeded);
+            SerializationUtils::CreateSpaceForDynamicMember(blobLayout, blob, beginningOfUnused, numBytesNeeded);
             char* writeString=beginningOfUnused;
             blobLayout.CreateStringMember(&blob[0], static_cast<Size>(numBytesNeeded), memIx, arrIx, false, beginningOfUnused);
             strncpy(writeString, str, numBytesNeeded-1);
@@ -583,7 +585,7 @@ namespace SerializationUtils
         case BinaryMemberType:
         {
             std::pair<const char*, size_t> bin=param->GetBinaryValue(parameterIndex);
-            SerializationUtils::CreateSpaceForDynamicMember(blob, beginningOfUnused, bin.second);
+            SerializationUtils::CreateSpaceForDynamicMember(blobLayout, blob, beginningOfUnused, bin.second);
             char* writeBinary=beginningOfUnused;
             blobLayout.CreateBinaryMember(&blob[0], static_cast<Size>(bin.second), memIx, arrIx, false, beginningOfUnused);
             memcpy(writeBinary, bin.first, bin.second);

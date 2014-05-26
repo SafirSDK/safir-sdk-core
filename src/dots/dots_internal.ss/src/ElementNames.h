@@ -53,6 +53,7 @@ namespace ToolSupport
         struct ParameterType {static const std::string& Name() {static const std::string n="type"; return n;}};
         struct ParameterValue {static const std::string& Name() {static const std::string n="value"; return n;}};
         struct ParameterValueRef {static const std::string& Name() {static const std::string n="valueRef"; return n;}};
+        struct ParameterArray {static const std::string& Name() {static const std::string n="array"; return n;}};
         struct ParameterArrayElement {static const std::string& Name() {static const std::string n="arrayElement"; return n;}};
         struct ParameterArrayElements {static const std::string& Name() {static const std::string n="arrayElements"; return n;}};
         struct ParameterObject {static const std::string& Name() {static const std::string n="object"; return n;}};
@@ -99,6 +100,7 @@ namespace ToolSupport
         struct MapPropertyMember {static const std::string& Name() {static const std::string n="propertyMember"; return n;}};
         struct MapValue {static const std::string& Name() {static const std::string n="value"; return n;}}; //dom
         struct MapValueRef {static const std::string& Name() {static const std::string n="valueRef"; return n;}}; //dom
+        struct MapArray {static const std::string& Name() {static const std::string n="array"; return n;}}; //dom
         struct MapArrayElements {static const std::string& Name() {static const std::string n="arrayElements"; return n;}}; //dom
         struct MapArrayElement {static const std::string& Name() {static const std::string n="arrayElement"; return n;}}; //dom
         struct ClassMemberReference {static const std::string& Name() {static const std::string n="classMemberReference"; return n;}}; //dom

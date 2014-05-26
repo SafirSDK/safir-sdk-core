@@ -22,20 +22,36 @@
 *
 ******************************************************************************/
 #include <Safir/Utilities/ProcessInfo.h>
+#include <boost/lexical_cast.hpp>
 #include <iostream>
 
-int main()
+int main(int argc, char** argv)
 {
-    Safir::Utilities::ProcessInfo pi(Safir::Utilities::ProcessInfo::GetPid());
-    if (pi.GetProcessName() == "ProcessInfo_test" || pi.GetProcessName() == "ProcessInfo_test.exe")
+    if (argc != 3)
     {
-        return 0;
+        std::wcout << "Wrong number of arguments!" << std::endl;
     }
-    else
+
+    const std::string name = argv[1];
+    const pid_t pid = boost::lexical_cast<pid_t>(std::string(argv[2]));
+    const pid_t ownPid = Safir::Utilities::ProcessInfo::GetPid();
+
+    Safir::Utilities::ProcessInfo piOwn(ownPid);
+    if (piOwn.GetProcessName() != "ProcessInfo_test" && piOwn.GetProcessName() != "ProcessInfo_test.exe")
+    {
+        std::wcout << "Not ok! GetProcessName returned '"
+                   << piOwn.GetProcessName().c_str() << "'" << std::endl;
+        return 1;
+    }
+
+    Safir::Utilities::ProcessInfo pi(pid);
+    if (pi.GetProcessName() != name && pi.GetProcessName() != name + ".exe")
     {
         std::wcout << "Not ok! GetProcessName returned '"
                    << pi.GetProcessName().c_str() << "'" << std::endl;
         return 1;
     }
+
+    return 0;
 }
 

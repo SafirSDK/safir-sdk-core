@@ -361,7 +361,7 @@ void Sequencer::Tick()
         break;
     case SequencerStates::CleaningUpTestcase:
         {
-            boost::this_thread::sleep_for(boost::chrono::milliseconds(150));
+            boost::this_thread::sleep_for(boost::chrono::milliseconds(500));
             SetState(SequencerStates::ResetPartners);
             m_currentCaseNo++;
         }

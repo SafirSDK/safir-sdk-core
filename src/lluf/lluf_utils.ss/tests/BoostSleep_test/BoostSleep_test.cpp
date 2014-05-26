@@ -45,6 +45,9 @@ void Timeout()
 
 void run_test()
 {
+    //call this once before we start, to work around a problem in Chrono <= 1.55.
+    //See https://svn.boost.org/trac/boost/ticket/9720
+    boost::chrono::steady_clock::now();
 
     std::wcout << "first test" << std::endl;
     for(int i = 0; i < 10000; ++i)

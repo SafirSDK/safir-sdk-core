@@ -238,7 +238,7 @@ namespace Internal
                 if (hash.second!=NULL)
                 {
                     size_t numBytesNeeded=memberContent.data().size()+1+sizeof(DotsC_Int64)+sizeof(DotsC_Int32); //hash+stringLength+string
-                    CreateSpaceForDynamicMember(blob, beginningOfUnused, numBytesNeeded);
+                    SerializationUtils::CreateSpaceForDynamicMember(m_blobLayout, blob, beginningOfUnused, numBytesNeeded);
                 }
                 m_blobLayout.CreateAndSetMemberWithOptionalString(&blob[0], hash.first, hash.second, static_cast<Size>(memberContent.data().size())+1, memIx, arrIx, false, beginningOfUnused);
                 m_blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
@@ -266,7 +266,7 @@ namespace Internal
                 if (instanceId.second!=NULL)
                 {
                     size_t numBytesNeeded=instanceIdString->size()+1+sizeof(DotsC_EntityId)+sizeof(DotsC_Int32); //(typeId+hash)+stringLength+string
-                    CreateSpaceForDynamicMember(blob, beginningOfUnused, numBytesNeeded);
+                    SerializationUtils::CreateSpaceForDynamicMember(m_blobLayout, blob, beginningOfUnused, numBytesNeeded);
                 }
                 DotsC_EntityId eid={tid, instanceId.first};
                 m_blobLayout.CreateAndSetMemberWithOptionalString(&blob[0], eid, instanceId.second, static_cast<Size>(instanceIdString->size())+1, memIx, arrIx, false, beginningOfUnused);
@@ -277,7 +277,7 @@ namespace Internal
             case StringMemberType:
             {
                 size_t numBytesNeeded=std::min(memberContent.data().size(), static_cast<size_t>(md->GetMaxLength()))+1; //add one for '\0'
-                CreateSpaceForDynamicMember(blob, beginningOfUnused, numBytesNeeded);
+                SerializationUtils::CreateSpaceForDynamicMember(m_blobLayout, blob, beginningOfUnused, numBytesNeeded);
                 char* writeString=beginningOfUnused;
                 m_blobLayout.CreateStringMember(&blob[0], static_cast<Size>(numBytesNeeded), memIx, arrIx, false, beginningOfUnused);
                 strncpy(writeString, memberContent.data().c_str(), numBytesNeeded);
@@ -311,7 +311,7 @@ namespace Internal
 
                 std::vector<char> insideBlob;
                 SerializeObjectContent(*xsiType, insideBlob, memberContent);
-                CreateSpaceForDynamicMember(blob, beginningOfUnused, insideBlob.size());
+                SerializationUtils::CreateSpaceForDynamicMember(m_blobLayout, blob, beginningOfUnused, insideBlob.size());
                 char* writeObj=beginningOfUnused;
                 m_blobLayout.CreateObjectMember(&blob[0], static_cast<Size>(insideBlob.size()), LlufId_Generate64(xsiType->c_str()), memIx, arrIx, false, beginningOfUnused);
                 beginningOfUnused=writeObj+insideBlob.size(); //This is a hack. BlobLayout is not moving beginningOfUnused by the blobSize but instead only by the initialSize. Has to do with genated code.
@@ -329,7 +329,7 @@ namespace Internal
                     os<<"Member "<<md->GetName()<<" of type binary containes invalid base64 data";
                     throw ParseError("JsonToBinary serialization error", os.str(), "", 164);
                 }
-                CreateSpaceForDynamicMember(blob, beginningOfUnused, bin.size());
+                SerializationUtils::CreateSpaceForDynamicMember(m_blobLayout, blob, beginningOfUnused, bin.size());
                 char* writeBinary=beginningOfUnused;
                 m_blobLayout.CreateBinaryMember(&blob[0], static_cast<Size>(bin.size()), memIx, arrIx, false, beginningOfUnused);
                 memcpy(writeBinary, &bin[0], bin.size());
@@ -440,35 +440,6 @@ namespace Internal
                 result.second=str.c_str();
             }
             return result;
-        }
-
-        void CreateSpaceForDynamicMember(std::vector<char>& blob,
-                                         char* & beginningOfUnused,
-                                         size_t dynamicMemberSizeNeeded) const
-        {
-            size_t usedSize=beginningOfUnused-&blob[0];
-
-            //ENSURE(usedSize<=blob.size(), <<"JsonToBlobSerializer has written outside blob");
-            size_t unusedSize=blob.size()-usedSize;
-
-            if (unusedSize>=dynamicMemberSizeNeeded)
-            {
-                return; //there is enough free bytes in blob
-            }
-
-            if (blob.capacity()-blob.size()<dynamicMemberSizeNeeded)
-            {
-                //Blob is too small. A bigger blob must be allocated and the content of the old one must be copied.
-                std::vector<char> tmp;
-                tmp.swap(blob);
-                blob.clear(); //unneccessary?
-                blob.reserve(tmp.capacity()*2);
-                blob.insert(blob.begin(), tmp.begin(), tmp.end());
-                beginningOfUnused=&blob[0]+usedSize;
-            }
-
-            //When we get here, the blob is guaranteed to have capacity for the needed extra space. Just resize.
-            blob.resize(blob.size()+dynamicMemberSizeNeeded);
         }
     };
 
