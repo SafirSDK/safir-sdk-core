@@ -8,7 +8,7 @@
 # RESGEN_EXECUTABLE - where to find 'resgen' or 'resgen2'
 #
 # copyright (c) 2007 Arno Rehn arno@arnorehn.de
-# copyright (c) 2008 Lars Hagstrom lars.hagstrom@saabgroup.com
+# copyright (c) 2008,2014 Lars Hagstrom lars.hagstrom@saabgroup.com
 #
 # Redistribution and use is allowed according to the terms of the GPL license.
 
@@ -32,9 +32,9 @@ endif()
 SET(version_output "")
 
 if (CSHARP_IS_MONO)
-    SET(DEBUG_INFO_FILE_SUFFIX ".mdb")
+    SET(CSHARP_DEBUG_INFO_FILE_SUFFIX ".mdb")
 else()
-    SET(DEBUG_INFO_FILE_SUFFIX ".pdb")
+    SET(CSHARP_DEBUG_INFO_FILE_SUFFIX ".pdb")
 endif()
 
 
