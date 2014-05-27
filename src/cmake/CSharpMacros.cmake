@@ -32,9 +32,9 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
     SET (response_file ${CMAKE_CURRENT_BINARY_DIR}/command_line_${TARGET_NAME}.rsp)
     string(REPLACE ";" "\"\n\"" _cs_sources_spaced "\"${_cs_SOURCES}\"")
     file (WRITE ${response_file} "${_cs_flags} 
-                                  -out:'${_cs_target}' 
-                                  -target:'${_cs_target_kind}'
-                                  -doc:'${_cs_doc_file}'
+                                  -out:\"${_cs_target}\" 
+                                  -target:\"${_cs_target_kind}\"
+                                  -doc:\"${_cs_doc_file}\"
                                   ${_cs_sources_spaced}")
     
     #Log contents if needed
