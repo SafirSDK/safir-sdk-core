@@ -26,7 +26,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/version.hpp>
-#include "config.h"
+#include <config.h>
 
 int main()
 {

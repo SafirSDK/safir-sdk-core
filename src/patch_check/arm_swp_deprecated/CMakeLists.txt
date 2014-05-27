@@ -15,10 +15,12 @@ set(CMAKE_REQUIRED_LIBRARIES ${Boost_SYSTEM_LIBRARY})
 find_path(HAVE_FENCED_BLOCK_HPP boost/asio/detail/fenced_block.hpp)
 
 if (HAVE_FENCED_BLOCK_HPP)
-  file(WRITE config.h "#define CMAKE_HAVE_FENCED_BLOCK_HPP\n")
+  file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/config.h "#define CMAKE_HAVE_FENCED_BLOCK_HPP\n")
 else()
-  file(WRITE config.h "\n")
+  file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/config.h "\n")
 endif()
+
+set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} ${CMAKE_CURRENT_BINARY_DIR})
 
 CHECK_CXX_SOURCE_RUNS("#include \"${CMAKE_CURRENT_SOURCE_DIR}/test.cpp\"" arm_swp_deprecated)
 
@@ -31,3 +33,5 @@ message (FATAL_ERROR
     "Please follow the included instructions for patching your Boost headers.\n"
     "Then remove CMakeCache.txt from the build/patch_check directory.")
 endif()
+
+#TODO: fix these error messages
