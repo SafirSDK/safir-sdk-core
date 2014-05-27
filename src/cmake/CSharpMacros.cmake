@@ -1,5 +1,5 @@
 function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
-    cmake_parse_arguments(_cs "LIBRARY;EXE;WINEXE" "SIGN" "SOURCES" ${ARGN})
+    cmake_parse_arguments(_cs "LIBRARY;EXE;WINEXE" "SIGN" "SOURCES;REFERENCES" ${ARGN})
     
     if (NOT _cs_LIBRARY AND NOT _cs_EXE AND NOT _cs_WINEXE)
       message(FATAL_ERROR "ADD_CSHARP_ASSEMBLY: TARGET_KIND not specified!")
@@ -30,6 +30,10 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
     endif()
 
     set (_cs_debug_file "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}${CSHARP_DEBUG_INFO_FILE_SUFFIX}")
+    foreach(_cs_ref ${_cs_REFERENCES})
+      get_target_property(_cs_ref_file ${_cs_ref} ASSEMBLY_FILE)
+      set(references "-reference:\"${_cs_ref_file}\"")
+    endforeach()
 
     SET (response_file ${CMAKE_CURRENT_BINARY_DIR}/command_line_${TARGET_NAME}.rsp)
     string(REPLACE ";" "\"\n\"" _cs_sources_spaced "\"${_cs_SOURCES}\"")
@@ -37,6 +41,7 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
                                   -nologo
                                   -out:\"${_cs_target}\"
                                   -target:${_cs_target_kind}
+                                  ${references}
                                   -doc:\"${_cs_doc_file}\"
                                   ${_cs_sources_spaced}")
     
