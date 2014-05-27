@@ -38,10 +38,10 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
                                   ${_cs_sources_spaced}")
     
     #Log contents if needed
-    if (_cs_VERBOSE OR NOT $ENV{VERBOSE} STREQUAL "")
+    #if (_cs_VERBOSE OR NOT $ENV{VERBOSE} STREQUAL "")
       FILE(READ ${response_file} response_file_contents)
       MESSAGE("Contents of ${response_file} is ${response_file_contents}")
-    endif()   
+    #endif()   
 
     add_custom_command (
       OUTPUT ${_cs_target} ${_cs_doc_file}
