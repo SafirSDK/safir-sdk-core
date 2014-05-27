@@ -213,7 +213,7 @@ namespace Internal
                         {
                             std::ostringstream os;
                             os<<"Failed to serialize sequence member '"<<cd->GetName()<<"."<<md->GetName()<<"' with index="<<count<<" from xml to binary. Type is incorrect.";
-                            throw ParseError("XmlToBinary serialization error", os.str(), "", 700);
+                            throw ParseError("XmlToBinary serialization error", os.str(), "", 193);
                         }
 
                         ++count;

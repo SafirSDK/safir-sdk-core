@@ -36,9 +36,38 @@
             </sequence>
         </member>
         
-         <!--member>
+         <member>
             <propertyMember>DictionaryPropertyValue</propertyMember>
-        </member-->
+            <dictionary>
+                <entry>
+                    <key>First</key>
+                    <entityId>
+                        <name>Safir.Dob.Entity</name>
+                        <instanceId>123</instanceId>
+                    </entityId>
+                </entry>
+                <entry>
+                    <key>First</key>
+                    <entityId>
+                        <name>ParserTest.MyEntity</name>
+                        <instanceId>my instance</instanceId>
+                    </entityId>
+                </entry>
+            </dictionary>
+        </member>
+        
+        
+        
+        <member>
+            <propertyMember>ArrayIntPropertyValue</propertyMember>
+            <array>
+                <value>1</value>
+                <valueRef>
+                    <name>Test.MyParam.IntPar</name>
+                </valueRef>
+                <value>2</value>
+            </array>
+        </member>        
         
     </memberMapping>
 

@@ -394,29 +394,6 @@ namespace ToolSupport
         return NULL;
     }
 
-    template <class T>
-    void MergeMaps(const boost::unordered_map<DotsC_TypeId, T>& src, boost::unordered_map<DotsC_TypeId, T>& dest)
-    {
-        for (typename boost::unordered_map<DotsC_TypeId, T>::const_iterator it=src.begin(); it!=src.end(); ++it)
-        {
-            if (!dest.insert(*it).second)
-            {
-                std::ostringstream ss;
-                ss<<"The type '"<<it->second->GetName()<<"' is already defined. ";
-                throw ParseError("Duplicated type definition", ss.str(), it->second->FileName(), 11);
-            }
-        }
-    }
-
-    template <class K, class V>
-    void MergeMapsNoCheck(const boost::unordered_map<K, V>& src, boost::unordered_map<K, V>& dest)
-    {
-        for (typename boost::unordered_map<K, V>::const_iterator it=src.begin(); it!=src.end(); ++it)
-        {
-            dest.insert(*it);
-        }
-    }
-
     static void SetExceptionBase(ExceptionDescriptionBasic* me, ExceptionDescriptionBasic* base) {me->base=base;}
     static void SetClassBase(ClassDescriptionBasic* me, ClassDescriptionBasic* base)
     {
@@ -509,7 +486,7 @@ namespace ToolSupport
                     else
                         ss<<"The specified key type does not exist.";
 
-                    throw ParseError("Invalid key type", ss.str(), d->FileName(), 654);
+                    throw ParseError("Invalid key type", ss.str(), d->FileName(), 183);
                 }
             }
         }
@@ -523,60 +500,60 @@ namespace ToolSupport
     void DouCompletionAlgorithm::operator()(const ParseState& state)
     {
         //Add predefined types
-        ClassDescriptionBasicPtr obj(new ClassDescriptionBasic);
+        ClassDescriptionBasicPtr obj=boost::make_shared<ClassDescriptionBasic>();
         obj->name=BasicTypeOperations::PredefindedClassNames::ObjectName();
         obj->typeId=LlufId_Generate64(obj->name.c_str());
         obj->base=NULL;
         state.repository->InsertClass(obj);
 
-        ExceptionDescriptionBasicPtr exceptionBase(new ExceptionDescriptionBasic);
+        ExceptionDescriptionBasicPtr exceptionBase=boost::make_shared<ExceptionDescriptionBasic>();
         exceptionBase->name=BasicTypeOperations::PredefindedClassNames::ExceptionName();
         exceptionBase->typeId=LlufId_Generate64(exceptionBase->name.c_str());
         exceptionBase->base=NULL;
         state.repository->InsertException(exceptionBase);
 
-        ExceptionDescriptionBasicPtr fundamentalException(new ExceptionDescriptionBasic);
+        ExceptionDescriptionBasicPtr fundamentalException=boost::make_shared<ExceptionDescriptionBasic>();
         fundamentalException->name=BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName();
         fundamentalException->typeId=LlufId_Generate64(fundamentalException->name.c_str());
         fundamentalException->base=NULL;
         state.repository->InsertException(fundamentalException);
 
-        ExceptionDescriptionBasicPtr nullException(new ExceptionDescriptionBasic);
+        ExceptionDescriptionBasicPtr nullException=boost::make_shared<ExceptionDescriptionBasic>();
         nullException->name=BasicTypeOperations::PredefindedClassNames::NullExceptionName();
         nullException->typeId=LlufId_Generate64(nullException->name.c_str());
         nullException->baseClass=BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName();
         nullException->base=fundamentalException.get();
         state.repository->InsertException(nullException);
 
-        ExceptionDescriptionBasicPtr incompatibleTypesException(new ExceptionDescriptionBasic);
+        ExceptionDescriptionBasicPtr incompatibleTypesException=boost::make_shared<ExceptionDescriptionBasic>();
         incompatibleTypesException->name=BasicTypeOperations::PredefindedClassNames::IncompatibleTypesExceptionName();
         incompatibleTypesException->typeId=LlufId_Generate64(incompatibleTypesException->name.c_str());
         incompatibleTypesException->baseClass=BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName();
         incompatibleTypesException->base=fundamentalException.get();
         state.repository->InsertException(incompatibleTypesException);
 
-        ExceptionDescriptionBasicPtr readOnlyException(new ExceptionDescriptionBasic);
+        ExceptionDescriptionBasicPtr readOnlyException=boost::make_shared<ExceptionDescriptionBasic>();
         readOnlyException->name=BasicTypeOperations::PredefindedClassNames::ReadOnlyExceptionName();
         readOnlyException->typeId=LlufId_Generate64(readOnlyException->name.c_str());
         readOnlyException->baseClass=BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName();
         readOnlyException->base=fundamentalException.get();
         state.repository->InsertException(readOnlyException);
 
-        ExceptionDescriptionBasicPtr illegalValueException(new ExceptionDescriptionBasic);
+        ExceptionDescriptionBasicPtr illegalValueException=boost::make_shared<ExceptionDescriptionBasic>();
         illegalValueException->name=BasicTypeOperations::PredefindedClassNames::IllegalValueExceptionName();
         illegalValueException->typeId=LlufId_Generate64(illegalValueException->name.c_str());
         illegalValueException->baseClass=BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName();
         illegalValueException->base=fundamentalException.get();
         state.repository->InsertException(illegalValueException);
 
-        ExceptionDescriptionBasicPtr softwareViolationException(new ExceptionDescriptionBasic);
+        ExceptionDescriptionBasicPtr softwareViolationException=boost::make_shared<ExceptionDescriptionBasic>();
         softwareViolationException->name=BasicTypeOperations::PredefindedClassNames::SoftwareViolationExceptionName();
         softwareViolationException->typeId=LlufId_Generate64(softwareViolationException->name.c_str());
         softwareViolationException->baseClass=BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName();
         softwareViolationException->base=fundamentalException.get();
         state.repository->InsertException(softwareViolationException);
 
-        ExceptionDescriptionBasicPtr configurationErrorException(new ExceptionDescriptionBasic);
+        ExceptionDescriptionBasicPtr configurationErrorException=boost::make_shared<ExceptionDescriptionBasic>();
         configurationErrorException->name=BasicTypeOperations::PredefindedClassNames::ConfigurationErrorExceptionName();
         configurationErrorException->typeId=LlufId_Generate64(configurationErrorException->name.c_str());
         configurationErrorException->baseClass=BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName();
@@ -1144,7 +1121,7 @@ namespace ToolSupport
                     std::string file=parIt->first.substr(0, parIt->first.rfind(".")+1)+"dou";
                     std::ostringstream os;
                     os<<"The keyType specified for the dictionary paramaeter '"<<pd->typeName<<"' does not exist";
-                    throw ParseError("Key type does not exist", os.str(), file, 765);
+                    throw ParseError("Key type does not exist", os.str(), file, 194);
                 }
 
                 //Check value
@@ -1157,7 +1134,7 @@ namespace ToolSupport
                         std::string file=parIt->first.substr(0, parIt->first.rfind(".")+1)+"dou";
                         std::ostringstream os;
                         os<<"The parameter "<<pd->GetName()<<" has an invalid key '"<<val.key.str<<"'. Expected to be an enum value of type "<<ed->GetName();
-                        throw ParseError("Invalid key", os.str(), file, 766);
+                        throw ParseError("Invalid key", os.str(), file, 196);
                     }
                 }
             }

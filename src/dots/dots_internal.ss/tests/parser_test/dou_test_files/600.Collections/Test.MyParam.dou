@@ -178,6 +178,12 @@
                 </entry>
             </dictionary>
         </parameter>
+        
+        <parameter>
+            <name>IntPar</name>
+            <type>Int32</type>
+            <value>123</value>
+        </parameter>        
      
     </parameters>
 

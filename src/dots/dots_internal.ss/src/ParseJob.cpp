@@ -97,7 +97,7 @@ namespace ToolSupport
 
                 for (std::map<boost::filesystem::path, boost::filesystem::path>::const_iterator pathIt=paths.begin(); pathIt!=paths.end(); ++pathIt)
                 {
-                    boost::shared_ptr<boost::property_tree::ptree> pt(new boost::property_tree::ptree);
+                    boost::shared_ptr<boost::property_tree::ptree> pt=boost::make_shared<boost::property_tree::ptree>();
                     try
                     {
                         boost::property_tree::read_xml(pathIt->second.string(), *pt, boost::property_tree::xml_parser::no_comments);

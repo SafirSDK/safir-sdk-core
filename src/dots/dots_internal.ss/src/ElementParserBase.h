@@ -89,7 +89,7 @@ namespace ToolSupport
         typedef typename boost::mpl::at< ElementTypeVector, boost::mpl::int_<Index> >::type type;
         void operator()(ElementParserBase* current, ElementParserBaseVector& subElements)
         {
-            ElementParserBasePtr subEl(new type(current));
+            ElementParserBasePtr subEl(boost::make_shared<type>(current));
             subElements.push_back(subEl);
             ElementInstantiator< ElementTypeVector, Index-1 >()(current, subElements);
         }
@@ -144,13 +144,13 @@ namespace ToolSupport
 
             if (A::MatchElementName(name))
             {
-                m_parser.reset(new A(Parent()));
+                m_parser=boost::make_shared<A>(Parent());
                 m_parser->Match(name, state); //necessary if m_parser is another Choice since the static version can't instatiate m_parser.
                 return true;
             }
             else if (B::MatchElementName(name))
             {
-                m_parser.reset(new B(Parent()));
+                m_parser=boost::make_shared<B>(Parent());
                 m_parser->Match(name, state); //necessary if m_parser is another Choice since the static version can't instatiate m_parser.
                 return true;
             }
@@ -198,7 +198,7 @@ namespace ToolSupport
     #define ELEMENT_CHOICE_7(A,B,C,D,E,F,G,Occurrence) Choice<A, ELEMENT_CHOICE_6(B,C,D,E,F,G,Occurrence), Occurrence >
     #define ELEMENT_CHOICE_8(A,B,C,D,E,F,G,H,Occurrence) Choice<A, ELEMENT_CHOICE_7(B,C,D,E,F,G,H,Occurrence), Occurrence >
     #define ELEMENT_CHOICE_9(A,B,C,D,E,F,G,H,I,Occurrence) Choice<A, ELEMENT_CHOICE_8(B,C,D,E,F,G,H,I,Occurrence), Occurrence >
-    #define ELEMENT_CHOICE_10(A,B,C,D,E,F,G,H,I,J,Occurrence) Choice<A, ELEMENT_CHOICE_8(B,C,D,E,F,G,H,I,J,Occurrence), Occurrence >
+    #define ELEMENT_CHOICE_10(A,B,C,D,E,F,G,H,I,J,Occurrence) Choice<A, ELEMENT_CHOICE_9(B,C,D,E,F,G,H,I,J,Occurrence), Occurrence >
 
     //------------------------------------------------------------
     //Helper element class that allows an element to be ignored

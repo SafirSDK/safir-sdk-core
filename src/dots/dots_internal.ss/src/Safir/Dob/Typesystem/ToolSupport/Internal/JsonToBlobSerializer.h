@@ -167,7 +167,7 @@ namespace Internal
                         {
                             std::ostringstream os;
                             os<<"Failed to serialize sequence member '"<<cd->GetName()<<"."<<md->GetName()<<"' with index="<<valueIndex<<" from Json to binary. Type is incorrect.";
-                            throw ParseError("JsonToBinary serialization error", os.str(), "", 701);
+                            throw ParseError("JsonToBinary serialization error", os.str(), "", 195);
                         }
                         ++valueIndex;
                     }

@@ -16,11 +16,17 @@
             <sequence/>
         </member>
         
-        <!--member>
-            <name>DictionaryPropertyCollection</name>
-            <type>ParserTest.MyEntity</type>
-            <dictionary>InstanceId</dictionary>
-        </member-->
+        <member>
+            <name>DictionaryPropertyValue</name>
+            <type>EntityId</type>
+            <dictionary>String</dictionary>
+        </member>
+        
+        <member>
+            <name>ArrayIntPropertyValue</name>
+            <type>Int32</type>
+            <array/>
+        </member>
         
     </members>
 </property>

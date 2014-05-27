@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<propertyMapping xmlns="urn:safir-dots-unit" xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance">
+
+    <class>ParserTest.MyEntity</class>
+    <property>ParserTest.MyProperty</property>
+
+    <memberMapping>
+        
+         <member>
+            <propertyMember>DictionaryPropertyValue</propertyMember>
+            <dictionary>
+                <entry>
+                    <key>First</key>
+                    <entityId>
+                        <name>Safir.Dob.Entity</name>
+                        <instanceId>123</instanceId>
+                    </entityId>
+                </entry>
+                <entry>
+                    <key>Second</key>
+                    <entityId>
+                        <name>ParserTest.MyEntity</name>
+                        <instanceId>my instance</instanceId>
+                    </entityId>
+                </entry>
+            </dictionary>
+        </member>
+        
+    </memberMapping>
+
+</propertyMapping>

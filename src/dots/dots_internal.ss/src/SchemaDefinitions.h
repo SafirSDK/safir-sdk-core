@@ -135,14 +135,14 @@ namespace ToolSupport
         typedef Element<Elements::Any, OptionalMany, boost::mpl::vector<IgnoreAny>, ParseAlgorithm<Elements::MapObject>, AnyMatcher > MapObjectCollection;
         typedef Element<Elements::MapArray, One, boost::mpl::vector<MapObjectCollection, MapValueRefCollection, ELEMENT_CHOICE_3(MapValueCollection, MapEntityIdCollection, MapObjectDeprecatedCollection, OptionalOne) > > MapArray;
         typedef Element<Elements::MapSequence, One, boost::mpl::vector<MapObjectCollection, MapValueRefCollection, ELEMENT_CHOICE_3(MapValueCollection, MapEntityIdCollection, MapObjectDeprecatedCollection, OptionalOne) > > MapSequence;
-        typedef Element<Elements::MapDictionaryKey, One > MapDictionaryKey;
-        typedef Element<Elements::MapDictionaryEntry, OptionalMany, boost::mpl::vector<MapDictionaryKey, ELEMENT_CHOICE_5(MapValue, MapValueRef, MapEntityId, MapObjectDeprecated, MapObject, OptionalOne)> > MapDictionaryEntry;
+        typedef Element<Elements::MapDictionaryKey, One, boost::mpl::vector< Ignore<Elements::ClassName>, Ignore<Elements::InstanceId> > > MapDictionaryKey;
+        typedef Element<Elements::MapDictionaryEntry, OptionalMany, boost::mpl::vector<ELEMENT_CHOICE_5(MapValue, MapValueRef, MapEntityId, MapObjectDeprecated, MapObject, OptionalOne), MapDictionaryKey> > MapDictionaryEntry;
         typedef Element<Elements::MapDictionary, One, boost::mpl::vector<MapDictionaryEntry > > MapDictionary;
 
         typedef Element<Elements::MapArrayElement, AtLeastOne, boost::mpl::vector< ELEMENT_CHOICE_5(MapValue, MapValueRef, MapEntityId, MapObjectDeprecated, MapObject, OptionalOne), Ignore<Elements::ParameterArrayIndex> > > MapArrayElement;
         typedef Element<Elements::MapArrayElements, One, boost::mpl::vector<MapArrayElement> > MapArrayElements;
         typedef Element<Elements::ClassMemberReference, One, boost::mpl::vector<IgnoreAny> > ClassMemberReference;
-        typedef Element<Elements::MemberMapping, AtLeastOne, boost::mpl::vector< ELEMENT_CHOICE_9(MapValue, MapValueRef, MapEntityId, MapArray, MapArrayElements, MapSequence, ClassMemberReference, MapObjectDeprecated, MapObject, OptionalOne), MapPropertyMember > > MemberMapping;
+        typedef Element<Elements::MemberMapping, AtLeastOne, boost::mpl::vector< ELEMENT_CHOICE_10(MapValue, MapEntityId, MapValueRef, MapArray, MapArrayElements, MapSequence, MapDictionary, ClassMemberReference, MapObjectDeprecated, MapObject, OptionalOne), MapPropertyMember > > MemberMapping;
         typedef Element<Elements::MemberMappings, OptionalOne, boost::mpl::vector<MemberMapping> > MemberMappings;
 
         //Top level

@@ -26,6 +26,7 @@
 
 #include <boost/cstdint.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 #include <Safir/Dob/Typesystem/LanguageInterfaceDefs.h>
 #include <Safir/Dob/Typesystem/ToolSupport/ParseError.h>
 
