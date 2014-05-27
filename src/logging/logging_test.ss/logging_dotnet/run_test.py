@@ -28,33 +28,23 @@ import subprocess, os, time, sys, shutil, argparse
 import syslog_server
 
 parser = argparse.ArgumentParser("test script for logging")
-#parser.add_argument("--classpath", required=True)
-#parser.add_argument("--library-path", required=True)
 parser.add_argument("--safir-show-config", required=True)
+parser.add_argument("--sender-exe", required=True)
+parser.add_argument("--dependencies", required=True)
 
 arguments = parser.parse_args()
-    
-#sender_path_base = os.path.join(exe_path,"log_sender_dotnet")
-#sender_csexe = sender_path_base+".csexe"
-#sender_exe = sender_path_base+".exe"
-#shutil.copy2(sender_csexe,sender_exe)
 
-#dependencies = ("Safir.Logging.dll",)
+dependencies = arguments.dependencies.split(",")
 
-#SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
-#for dep in dependencies:
-#    shutil.copy2(os.path.join(SAFIR_RUNTIME,"bin",dep),
-#                 ".")
+for dep in dependencies:
+    shutil.copy2(dep,
+                 ".")
 
 log_server = syslog_server.SyslogServer(arguments.safir_show_config)
-sys.exit(1)
-o1 = subprocess.check_output(sender_exe, stderr=subprocess.STDOUT)
-o2 = subprocess.check_output(sender_exe, stderr=subprocess.STDOUT)
-o3 = subprocess.check_output(sender_exe, stderr=subprocess.STDOUT)
 
-os.remove(sender_exe)
-for dep in dependencies:
-    os.remove(dep)
+o1 = subprocess.check_output(arguments.sender_exe, stderr=subprocess.STDOUT)
+o2 = subprocess.check_output(arguments.sender_exe, stderr=subprocess.STDOUT)
+o3 = subprocess.check_output(arguments.sender_exe, stderr=subprocess.STDOUT)
 
 syslog_output = log_server.get_data(1)
 stdout_output = (o1 + o2 + o3).decode("utf-8").replace("\r","")
