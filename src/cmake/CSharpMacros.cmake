@@ -21,6 +21,7 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
     if (_cs_LIBRARY)
       set (_cs_target "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.dll")
       set (_cs_target_kind library)
+      set (_cs_flags ${_cs_flags} "-doc:\"${_cs_doc_file}\"")
     elseif (_cs_EXE)
       set (_cs_target "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.exe")
       set (_cs_target_kind exe)
@@ -50,7 +51,6 @@ endif()
                                   -out:\"${_cs_target}\"
                                   -target:${_cs_target_kind}
                                   ${references}
-                                  -doc:\"${_cs_doc_file}\"
                                   ${_cs_sources_spaced}")
     
     #Log contents if needed
@@ -74,9 +74,15 @@ endif()
 
     set_property(TARGET ${TARGET_NAME}
       PROPERTY DOC_FILE ${_cs_doc_file})
-    
+
     set_property(TARGET ${TARGET_NAME}
-      PROPERTY DEBUG_INFO_FILE ${_cs_debug_file})
+      PROPERTY TARGET_KIND ${_cs_target_kind})
+
+    if (_cs_LIBRARY)
+      set_property(TARGET ${TARGET_NAME}
+        PROPERTY DEBUG_INFO_FILE ${_cs_debug_file})
+    endif()
+
 endfunction()
 
 #TODO: install fcn
