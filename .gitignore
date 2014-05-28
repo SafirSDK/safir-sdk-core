@@ -69,3 +69,4 @@ bin
 *-build
 generated_code
 *.orig
+*-dotnet.xml
