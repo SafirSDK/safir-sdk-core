@@ -59,7 +59,7 @@ namespace Safir.Dob.Typesystem
         /// </para>
         /// </summary>
         /// <returns>The TypeId of the object.</returns>
-        virtual public System.Int64 GetTypeId() //MUST BE OVERRIDDEN!
+        virtual public System.Int64 GetTypeId()
         {
             return ClassTypeId;
         }
@@ -104,7 +104,7 @@ namespace Safir.Dob.Typesystem
         /// Cast it to the type of object that you're after.
         /// </para>
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A copy of the object</returns>
         public virtual Object Clone()
         {
             return (Object)((ICloneable)this).Clone();
