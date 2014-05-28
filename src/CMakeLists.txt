@@ -330,6 +330,8 @@ if (NOT Java_FOUND)
   MESSAGE(WARNING "Failed to find the Java development tools, will not build Java interfaces")
 endif()
 
+#TODO: javadoc?
+
 function(SAFIR_GET_JAVA_CLASSPATH_AND_LIBPATH)
   cmake_parse_arguments(CP "" "" "JAVA_TARGETS;JNI_TARGETS" ${ARGN})
 

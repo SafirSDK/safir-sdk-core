@@ -61,7 +61,7 @@ endif()
     endif()   
 
     add_custom_command (
-      OUTPUT ${_cs_target} ${_cs_doc_file} ${_cs_debug_file} ${response_file}
+      OUTPUT ${_cs_target} ${_cs_doc_file} ${_cs_debug_file}
       COMMAND ${CSHARP_COMPILER} @${response_file}
       DEPENDS ${_cs_SOURCES} ${_cs_REFERENCES}
       COMMENT "Building assembly ${TARGET_NAME}"
