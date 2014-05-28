@@ -75,7 +75,7 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
     string (REGEX REPLACE ".*/([a-zA-Z\\.0-9]*)\\.dou" "\\1" base_name ${dou})
     #message ("base_name ${base_name}")
     set (cpp_files ${cpp_files} generated_code/cpp/${base_name}.cpp)
-    set (dotnet_files ${dotnet_files} ${CMAKE_CURRENT_BINARY_DIR}/generated_code/dotnet/${base_name}.cs)
+    set (dotnet_files ${dotnet_files} "${CMAKE_CURRENT_BINARY_DIR}/generated_code/dotnet/${base_name}.cs")
 
 
     string (REGEX REPLACE "^([a-zA-Z\\.0-9]*)\\.[a-zA-Z0-9]+$" "\\1" namespace ${base_name})
