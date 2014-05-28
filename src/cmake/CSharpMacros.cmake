@@ -30,13 +30,13 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
       set (_cs_target_kind winexe)
     endif()
 
-#on msvc the debug files will be named MyAssembly.pdb, but with mono they will be 
-#named MyAssembly.dll.mdb
-if (CSHARP_IS_MONO)
-    set (_cs_debug_file "${_cs_target}.mdb")
-else()
-    set (_cs_debug_file "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.pdb")
-endif()
+    #on msvc the debug files will be named MyAssembly.pdb, but with mono they will be 
+    #named MyAssembly.dll.mdb
+    if (CSHARP_IS_MONO)
+      set (_cs_debug_file "${_cs_target}.mdb")
+    else()
+      set (_cs_debug_file "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.pdb")
+    endif()
 
 
     foreach(_cs_ref ${_cs_REFERENCES})
@@ -46,7 +46,12 @@ endif()
     endforeach()
 
     SET (response_file ${CMAKE_CURRENT_BINARY_DIR}/command_line_${TARGET_NAME}.rsp)
-    string(REPLACE ";" "\"\n\"" _cs_sources_spaced "\"${_cs_SOURCES}\"")
+    foreach(src ${_cs_SOURCES})
+      file (TO_NATIVE_PATH ${src} _cs_source_native)
+      set (_cs_sources_native ${_cs_sources_native} "${_cs_source_native}")
+    endforeach()
+
+    string(REPLACE ";" "\"\n\"" _cs_sources_spaced "\"${_cs_sources_native}\"")
     file (WRITE ${response_file} "${_cs_flags}
                                   -nologo
                                   -out:\"${_cs_target}\"
@@ -64,7 +69,7 @@ endif()
       OUTPUT ${_cs_target} ${_cs_doc_file} ${_cs_debug_file}
       COMMAND ${CSHARP_COMPILER} @${response_file}
       DEPENDS ${_cs_SOURCES} ${_cs_REFERENCES}
-      COMMENT "Building assembly ${TARGET_NAME}"
+      COMMENT "Building ${_cs_target_kind} assembly ${TARGET_NAME}"
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
     ADD_CUSTOM_TARGET (${TARGET_NAME} ALL DEPENDS ${_cs_target})
