@@ -75,6 +75,7 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
     string (REGEX REPLACE ".*/([a-zA-Z\\.0-9]*)\\.dou" "\\1" base_name ${dou})
     #message ("base_name ${base_name}")
     set (cpp_files ${cpp_files} generated_code/cpp/${base_name}.cpp)
+    set (dotnet_files ${dotnet_files} generated_code/dotnet/${base_name}.cs)
 
 
     string (REGEX REPLACE "^([a-zA-Z\\.0-9]*)\\.[a-zA-Z0-9]+$" "\\1" namespace ${base_name})
@@ -123,7 +124,7 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
     --output-path=generated_code)
   
   ADD_CUSTOM_COMMAND(
-    OUTPUT ${cpp_files} ${java_files}
+    OUTPUT ${cpp_files} ${java_files} ${dotnet_files}
 
     COMMAND ${dots_v_command} ${CMAKE_CURRENT_SOURCE_DIR}
 
@@ -165,8 +166,6 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
   #
   if (Java_FOUND)
 
-    INCLUDE(UseJava)
-
     FOREACH (DEP ${GEN_DEPENDENCIES})
       SET(include_jars ${include_jars} dots_generated-${DEP}-java)
     ENDFOREACH()
@@ -178,6 +177,24 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
   endif()
 
   ############
+
+  #
+  # Build Dotnet
+  #
+  if (CSHARP_FOUND)
+
+    FOREACH (DEP ${GEN_DEPENDENCIES})
+      SET(assembly_refs ${assembly_refs} dots_generated-${DEP}-dotnet)
+    ENDFOREACH()
+
+    ADD_CSHARP_ASSEMBLY(dots_generated-${GEN_NAME}-dotnet LIBRARY
+      SOURCES ${dotnet_files}
+      REFERENCES Safir.Dob.Typesystem ${assembly_refs})
+
+  endif()
+
+  ############
+
 
 
 

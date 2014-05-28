@@ -41,7 +41,8 @@ endif()
 
     foreach(_cs_ref ${_cs_REFERENCES})
       get_target_property(_cs_ref_file ${_cs_ref} ASSEMBLY_FILE)
-      set(references "-reference:\"${_cs_ref_file}\"")
+      set(references "${references} -reference:\"${_cs_ref_file}\"")
+      #set(ref_depends ${ref_depends} ${_cs_ref_file})
     endforeach()
 
     SET (response_file ${CMAKE_CURRENT_BINARY_DIR}/command_line_${TARGET_NAME}.rsp)
@@ -54,15 +55,15 @@ endif()
                                   ${_cs_sources_spaced}")
     
     #Log contents if needed
-    #if (NOT $ENV{VERBOSE} STREQUAL "")
+    if (NOT $ENV{VERBOSE} STREQUAL "")
       FILE(READ ${response_file} response_file_contents)
       MESSAGE("Contents of ${response_file} is ${response_file_contents}")
-    #endif()   
+    endif()   
 
     add_custom_command (
       OUTPUT ${_cs_target} ${_cs_doc_file} ${_cs_debug_file} ${response_file}
       COMMAND ${CSHARP_COMPILER} @${response_file}
-      DEPENDS ${source}
+      DEPENDS ${_cs_SOURCES} ${_cs_REFERENCES}
       COMMENT "Building assembly ${TARGET_NAME}"
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 

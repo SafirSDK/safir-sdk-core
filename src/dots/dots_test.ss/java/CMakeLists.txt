@@ -1,3 +1,6 @@
+if (NOT Java_FOUND)
+  return()
+endif()
 
 #SET_JAVA_CLASSPATH(${SAFIR_RUNTIME}/bin/dots_java.jar ${SAFIR_RUNTIME}/bin/dots_generated-java.jar)
 
