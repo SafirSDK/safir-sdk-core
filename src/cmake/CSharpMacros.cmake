@@ -29,7 +29,15 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
       set (_cs_target_kind winexe)
     endif()
 
-    set (_cs_debug_file "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}${CSHARP_DEBUG_INFO_FILE_SUFFIX}")
+#on msvc the debug files will be named MyAssembly.pdb, but with mono they will be 
+#named MyAssembly.dll.mdb
+if (CSHARP_IS_MONO)
+    set (_cs_debug_file "${_cs_target}.mdb")
+else()
+    set (_cs_debug_file "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.pdb")
+endif()
+
+
     foreach(_cs_ref ${_cs_REFERENCES})
       get_target_property(_cs_ref_file ${_cs_ref} ASSEMBLY_FILE)
       set(references "-reference:\"${_cs_ref_file}\"")

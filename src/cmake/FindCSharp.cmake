@@ -31,13 +31,6 @@ if (version_output MATCHES "Mono")
 endif()
 SET(version_output "")
 
-if (CSHARP_IS_MONO)
-    SET(CSHARP_DEBUG_INFO_FILE_SUFFIX ".mdb")
-else()
-    SET(CSHARP_DEBUG_INFO_FILE_SUFFIX ".pdb")
-endif()
-
-
 IF (CSHARP_FOUND)
     IF (NOT CSharp_FIND_QUIETLY)
         MESSAGE(STATUS "Found CSharp compiler: ${CSHARP_COMPILER}")
