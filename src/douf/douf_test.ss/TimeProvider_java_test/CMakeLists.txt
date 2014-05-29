@@ -8,14 +8,12 @@ ADD_JAR(douf_test_java
   SOURCES src/Test.java
   INCLUDE_JARS douf_java)
 
-SAFIR_GET_JAVA_CLASSPATH_AND_LIBPATH(
-  JAVA_TARGETS douf_test_java douf_java dots_generated-Safir-java dots_java
-  JNI_TARGETS douf_java_jni dots_java_jni)
+SAFIR_GET_JAVA_CLASSPATH(
+  JAVA_TARGETS douf_test_java douf_java dots_generated-Safir-java dots_java)
 
 add_test(NAME TimeProvider_java_test 
   COMMAND ${Java_JAVA_EXECUTABLE} 
   -cp ${SAFIR_JAVA_CLASSPATH}
-  -Djava.library.path=${SAFIR_JAVA_LIBRARY_PATH}
   Test)
 
 SET_SAFIR_TEST_PROPERTIES(TEST TimeProvider_java_test

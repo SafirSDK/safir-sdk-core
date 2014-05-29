@@ -30,7 +30,6 @@ from safe_print import *
 
 parser = argparse.ArgumentParser("test script for logging")
 parser.add_argument("--classpath", required=True)
-parser.add_argument("--library-path", required=True)
 parser.add_argument("--safir-show-config", required=True)
 
 arguments = parser.parse_args()
@@ -39,7 +38,6 @@ sender_cmd = ("java",
               "-Xcheck:jni",
               "-Xfuture",
               "-cp", arguments.classpath,
-              "-Djava.library.path=" + arguments.library_path,
               "Sender")
 
 syslog = syslog_server.SyslogServer(arguments.safir_show_config)

@@ -219,19 +219,26 @@ else()
   set(PATH_SEPARATOR ";")
 endif()
 
+#We need to collect all library paths so that tests on windows (where there is no rpath equivalent)
+#and java and dotnet tests on both platforms can find libraries.
 if (MSVC)
-  set_property(GLOBAL PROPERTY SAFIR_DLL_PATH "$ENV{PATH}")
-
-  function(add_library)
-    #message("Adding ${CMAKE_CURRENT_BINARY_DIR} to SAFIR_DLL_PATH")
-    file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}" curdir)
-    get_property(SAFIR_DLL_PATH GLOBAL PROPERTY SAFIR_DLL_PATH)
-    #TODO: can we do the studio build path in a better way?
-    #maybe use generator expressions, like in the build_generated path thing.
-    set_property(GLOBAL PROPERTY SAFIR_DLL_PATH "${SAFIR_DLL_PATH};${curdir};${curdir}\\RelWithDebInfo;${curdir}\\Release;${curdir}\\Debug")
-    _add_library(${ARGN})
-  endfunction()
+  set_property(GLOBAL PROPERTY SAFIR_LIBRARY_PATH "$ENV{PATH}")
+else()
+  set_property(GLOBAL PROPERTY SAFIR_LIBRARY_PATH "$ENV{LD_LIBRARY_PATH}")
 endif()
+
+function(add_library)
+  file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}" curdir)
+  get_property(SAFIR_LIBRARY_PATH GLOBAL PROPERTY SAFIR_LIBRARY_PATH)
+  #TODO: can we do the studio build path in a better way?
+  #maybe use generator expressions, like in the build_generated path thing.
+  #;${curdir}\\RelWithDebInfo;${curdir}\\Release;${curdir}\\Debug
+  #cmake 3 appears to support generator expressions for test properties.
+  set_property(GLOBAL PROPERTY SAFIR_LIBRARY_PATH "${SAFIR_LIBRARY_PATH}${PATH_SEPARATOR}${curdir}")
+
+  #call the real add_library function
+  _add_library(${ARGN})
+endfunction()
 
 # Set up properties on tests
 # Usage: SET_SAFIR_TEST_PROPERTIES(TEST <test_target> [TIMEOUT <timeout>] [CONFIG_OVERRIDE <config_dir>] [ENVIRONMENT ...])
@@ -265,12 +272,15 @@ function (SET_SAFIR_TEST_PROPERTIES)
   set (pypath "$ENV{PYTHONPATH}${PATH_SEPARATOR}${safir_sdk_core_SOURCE_DIR}/tests/test_support/python")
   string(REGEX REPLACE "^${PATH_SEPARATOR}+" "" pypath ${pypath}) # remove any leading path separators
 
-  #On windows we need to add all paths containing dlls to the PATH, since there's no rpath equivalent.
+  #Add the library path to the environment
+  get_property(SAFIR_LIBRARY_PATH GLOBAL PROPERTY SAFIR_LIBRARY_PATH)
   if (MSVC)
-    get_property(SAFIR_DLL_PATH GLOBAL PROPERTY SAFIR_DLL_PATH)
-    STRING(REPLACE "\;" ";" SAFIR_DLL_PATH "${SAFIR_DLL_PATH}")
-    STRING(REPLACE ";" "\\;" SAFIR_DLL_PATH "${SAFIR_DLL_PATH}")
-    set(PATH_ENVIRONMENT "PATH=${SAFIR_DLL_PATH}")
+    #TODO: wtf?
+    STRING(REPLACE "\;" ";" SAFIR_LIBRARY_PATH "${SAFIR_LIBRARY_PATH}")
+    STRING(REPLACE ";" "\\;" SAFIR_LIBRARY_PATH "${SAFIR_LIBRARY_PATH}")
+    set(PATH_ENVIRONMENT "PATH=${SAFIR_LIBRARY_PATH}")
+  else()
+    set(PATH_ENVIRONMENT "LD_LIBRARY_PATH=${SAFIR_LIBRARY_PATH}")
   endif()
   
   SET_PROPERTY(TEST ${PROP_TEST}
@@ -332,17 +342,11 @@ endif()
 
 #TODO: javadoc?
 
-function(SAFIR_GET_JAVA_CLASSPATH_AND_LIBPATH)
-  cmake_parse_arguments(CP "" "" "JAVA_TARGETS;JNI_TARGETS" ${ARGN})
+function(SAFIR_GET_JAVA_CLASSPATH)
+  cmake_parse_arguments(CP "" "" "JAVA_TARGETS" ${ARGN})
 
   if (NOT "${CP_UNPARSED_ARGUMENTS}" STREQUAL "")
     message(FATAL_ERROR "Unknown argument to SET_JAVA_CLASSPATH '${CP_UNPARSED_ARGUMENTS}'")
-  endif()
-
-  if (UNIX)
-    SET(path_separator ":")
-  else ()
-    SET(path_separator "\;")
   endif()
 
   unset(SAFIR_JAVA_CLASSPATH)
@@ -351,21 +355,11 @@ function(SAFIR_GET_JAVA_CLASSPATH_AND_LIBPATH)
     if (NOT SAFIR_JAVA_CLASSPATH)
       SET(SAFIR_JAVA_CLASSPATH ${jar})
     else()
-      SET(SAFIR_JAVA_CLASSPATH "${SAFIR_JAVA_CLASSPATH}${path_separator}${jar}")
-    endif()
-  endforeach()
-
-  unset(SAFIR_JAVA_LIBRARY_PATH)
-  foreach (TARGET ${CP_JNI_TARGETS})
-    if (NOT SAFIR_JAVA_LIBRARY_PATH)
-      SET(SAFIR_JAVA_LIBRARY_PATH $<TARGET_FILE_DIR:${TARGET}>)
-    else()
-      SET(SAFIR_JAVA_LIBRARY_PATH "${SAFIR_JAVA_LIBRARY_PATH}${path_separator}$<TARGET_FILE_DIR:${TARGET}>")
+      SET(SAFIR_JAVA_CLASSPATH "${SAFIR_JAVA_CLASSPATH}${PATH_SEPARATOR}${jar}")
     endif()
   endforeach()
 
   set (SAFIR_JAVA_CLASSPATH "${SAFIR_JAVA_CLASSPATH}" PARENT_SCOPE)
-  set (SAFIR_JAVA_LIBRARY_PATH "${SAFIR_JAVA_LIBRARY_PATH}" PARENT_SCOPE)
 endfunction()
 
 FIND_PACKAGE(PythonInterp)

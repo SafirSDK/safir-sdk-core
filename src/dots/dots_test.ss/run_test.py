@@ -38,7 +38,6 @@ parser.add_argument("--binary")
 
 #for java
 parser.add_argument("--classpath")
-parser.add_argument("--library-path")
 
 arguments = parser.parse_args()
 
@@ -64,7 +63,6 @@ elif arguments.language == "java":
                "-Xcheck:jni",
                "-Xfuture",
                "-cp", arguments.classpath,
-               "-Djava.library.path=" + arguments.library_path,
                "Test")
 
 else:

@@ -36,16 +36,14 @@ SET_SAFIR_TEST_PROPERTIES(TEST dots_cpp
 #TODO: why does dots_java_jni not rebuild when make is run from here?
 
 if (Java_FOUND)
-  SAFIR_GET_JAVA_CLASSPATH_AND_LIBPATH(
-    JAVA_TARGETS dots_test_java dots_generated-DotsTest-java dots_java logging_java 
-    JNI_TARGETS logging_java_jni dots_java_jni)
+  SAFIR_GET_JAVA_CLASSPATH(
+    JAVA_TARGETS dots_test_java dots_generated-DotsTest-java dots_java logging_java)
   
   ADD_TEST(NAME dots_java
     COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
     --show-safir-config $<TARGET_FILE:safir_show_config>
     --language java
     --classpath ${SAFIR_JAVA_CLASSPATH}
-    --library-path ${SAFIR_JAVA_LIBRARY_PATH}
     --output ${CMAKE_CURRENT_SOURCE_DIR}/output.txt
     --dots-generated-paths "${DOTS_GENERATED_PATHS}")
 
