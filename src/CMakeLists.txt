@@ -228,14 +228,24 @@ else()
 endif()
 
 function(add_library)
-  file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}" curdir)
+  if (WIN32)
+    file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}" curdir)
+  else()
+    set(curdir "${CMAKE_CURRENT_BINARY_DIR}")
+  endif()
   get_property(SAFIR_LIBRARY_PATH GLOBAL PROPERTY SAFIR_LIBRARY_PATH)
   #TODO: can we do the studio build path in a better way?
   #maybe use generator expressions, like in the build_generated path thing.
   #;${curdir}\\RelWithDebInfo;${curdir}\\Release;${curdir}\\Debug
   #cmake 3 appears to support generator expressions for test properties.
-  set_property(GLOBAL PROPERTY SAFIR_LIBRARY_PATH "${SAFIR_LIBRARY_PATH}${PATH_SEPARATOR}${curdir}")
-
+  if ("${SAFIR_LIBRARY_PATH}" STREQUAL "")
+    set_property(GLOBAL PROPERTY SAFIR_LIBRARY_PATH "${curdir}")
+    #message("SAFIR_LIBRARY_PATH set to ${curdir}")
+  else()
+    set_property(GLOBAL PROPERTY SAFIR_LIBRARY_PATH "${SAFIR_LIBRARY_PATH}${PATH_SEPARATOR}${curdir}")
+    #message("SAFIR_LIBRARY_PATH set to ${SAFIR_LIBRARY_PATH}${PATH_SEPARATOR}${curdir}")
+  endif()
+  
   #call the real add_library function
   _add_library(${ARGN})
 endfunction()
