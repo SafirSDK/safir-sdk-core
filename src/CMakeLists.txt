@@ -1,11 +1,13 @@
 cmake_minimum_required(VERSION 2.8.12)
 
+#TODO: require 3.0 on windows (for the generator expressions on test properties)
+
 PROJECT(safir_sdk_core CXX C)
 
 
 #TODO: !!
-set(SAFIR_SDK "/NO_THIS_IS_NOT_RIGHT")
-set(SAFIR_RUNTIME "/NO_THIS_IS_NOT_RIGHT")
+set(SAFIR_SDK "STOP_USING_SAFIR_SDK_VARIABLE" NOW PLEASE)
+set(SAFIR_RUNTIME "STOP_USING_SAFIR_RUNTIME_VARIABLE" NOW PLEASE)
 
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
@@ -227,27 +229,37 @@ else()
   set_property(GLOBAL PROPERTY SAFIR_LIBRARY_PATH "$ENV{LD_LIBRARY_PATH}")
 endif()
 
-function(add_library)
-  if (WIN32)
-    file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}" curdir)
+function(add_library NAME)
+  list(FIND ARGN "IMPORTED" is_imported)
+  if(NOT is_imported EQUAL -1)
+    #call the real add_library function
+    _add_library(${NAME} ${ARGN})
+    
+    #and get out of here, the rest of this function is only for our own targets
+    return()
+  endif()
+
+  if (CMAKE_VERSION VERSION_LESS "3.0.0")
+    if (WIN32)
+      file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}" dir_to_add)
+    else()
+      set(dir_to_add "${CMAKE_CURRENT_BINARY_DIR}")
+    endif()
   else()
-    set(curdir "${CMAKE_CURRENT_BINARY_DIR}")
+    set (dir_to_add "$<TARGET_FILE_DIR:${NAME}>")
   endif()
   get_property(SAFIR_LIBRARY_PATH GLOBAL PROPERTY SAFIR_LIBRARY_PATH)
-  #TODO: can we do the studio build path in a better way?
-  #maybe use generator expressions, like in the build_generated path thing.
-  #;${curdir}\\RelWithDebInfo;${curdir}\\Release;${curdir}\\Debug
-  #cmake 3 appears to support generator expressions for test properties.
-  if ("${SAFIR_LIBRARY_PATH}" STREQUAL "")
-    set_property(GLOBAL PROPERTY SAFIR_LIBRARY_PATH "${curdir}")
-    #message("SAFIR_LIBRARY_PATH set to ${curdir}")
+
+  if (NOT SAFIR_LIBRARY_PATH)
+    set_property(GLOBAL PROPERTY SAFIR_LIBRARY_PATH "${dir_to_add}")
+    #message("SAFIR_LIBRARY_PATH set to ${dir_to_add}")
   else()
-    set_property(GLOBAL PROPERTY SAFIR_LIBRARY_PATH "${SAFIR_LIBRARY_PATH}${PATH_SEPARATOR}${curdir}")
-    #message("SAFIR_LIBRARY_PATH set to ${SAFIR_LIBRARY_PATH}${PATH_SEPARATOR}${curdir}")
+    set_property(GLOBAL PROPERTY SAFIR_LIBRARY_PATH "${SAFIR_LIBRARY_PATH}${PATH_SEPARATOR}${dir_to_add}")
+    #message("SAFIR_LIBRARY_PATH set to ${SAFIR_LIBRARY_PATH}${PATH_SEPARATOR}${dir_to_add}")
   endif()
   
   #call the real add_library function
-  _add_library(${ARGN})
+  _add_library(${NAME} ${ARGN})
 endfunction()
 
 # Set up properties on tests
