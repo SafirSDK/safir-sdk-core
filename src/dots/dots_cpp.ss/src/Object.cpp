@@ -27,10 +27,6 @@
 #include "Safir/Dob/Typesystem/ObjectFactory.h"
 #include "Safir/Dob/Typesystem/BlobOperations.h"
 #include "Safir/Dob/Typesystem/ContainerProxies.h"
-#include <Safir/Utilities/DynamicLibraryLoader.h>
-#include <Safir/Utilities/Internal/SystemLog.h>
-#include <Safir/Utilities/Internal/ConfigReader.h>
-#include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <iostream>
 
 namespace Safir
@@ -45,8 +41,6 @@ namespace Typesystem
     const Safir::Dob::Typesystem::TypeId Object::ClassTypeId;
 #endif
 
-    //An anonymous namespace for object factory registration
-    //this can never be called directly by anyone (since it is anonymous)
     namespace
     {
         ObjectPtr CreateObject(char const * const blob)
@@ -60,78 +54,10 @@ namespace Typesystem
                 return ObjectPtr(new Object(blob));
             }
         }
+
+        //This ensures that Object is registered in the object factory 
         const bool registered =
             ObjectFactory::Instance().RegisterClass(Safir::Dob::Typesystem::Object::ClassTypeId,CreateObject);
-
-        void LoadLib(const std::string& path, const std::string& name)
-        {
-            std::string fullName = "dots_generated-" + name + "-cpp";
-
-#if defined (_MSC_VER) && !defined (NDEBUG)
-            fullName += 'd';
-#endif
-            
-            try
-            {
-                Safir::Utilities::DynamicLibraryLoader loader;
-                if (path.empty())
-                {
-                    loader.Load(fullName, false, true);
-                }
-                else
-                {
-                    loader.Load(fullName, path, false, true);
-                }
-            }
-            catch (const std::logic_error& e)
-            {
-                SEND_SYSTEM_LOG (Critical,  << "Failed to load " << fullName.c_str() << " library: " << e.what());
-                std::wostringstream ostr;
-                ostr << "Failed to load " << fullName.c_str() << " library. Please check your configuration!";
-                throw Safir::Dob::Typesystem::ConfigurationErrorException(ostr.str(), __WFILE__, __LINE__);
-
-            }
-
-        }
-
-        bool LoadLibraries()
-        {
-            Safir::Utilities::Internal::ConfigReader reader;
-            const boost::property_tree::ptree& ptree = reader.Typesystem();
-            for (boost::property_tree::ptree::const_iterator it = ptree.begin();
-                 it != ptree.end(); ++it)
-            {
-                const bool isSection = !it->second.empty();
-
-                if (isSection)
-                {
-                    const std::string module = it->first;
-
-                    std::string location;
-
-                    const boost::optional<std::string> library_location = it->second.get_optional<std::string>("cpp_library_location");
-                    if (library_location)
-                    {
-                        location = library_location.get();
-                    }
-
-                    const boost::optional<bool> dont_load = it->second.get_optional<bool>("dont_load");
-                    if (!!dont_load && dont_load.get())
-                    {
-                        lllog(1) << "Not loading dots_generated module " << module.c_str() << " since dont_load is specified" << std::endl;
-                    }
-                    else
-                    {
-                        lllog(1) << "Loading dots generated module " << module.c_str() << std::endl;
-                        LoadLib(location, module);
-                    }
-                }
-            }
-
-            return true;
-        }
-
-        const bool loadedLibraries = LoadLibraries();
         
     }
 

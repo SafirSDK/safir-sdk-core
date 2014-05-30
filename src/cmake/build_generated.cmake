@@ -191,6 +191,7 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
       SOURCES ${dotnet_files}
       REFERENCES Safir.Dob.Typesystem ${assembly_refs})
 
+    #TODO: sign!
   endif()
 
   ############

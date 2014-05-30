@@ -23,10 +23,23 @@ SET_SAFIR_TEST_PROPERTIES(TEST dots_cpp
   CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/test_config)
 
 
+if (CSHARP_FOUND)
+  ADD_TEST(NAME dots_dotnet
+    COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py 
+    --show-safir-config $<TARGET_FILE:safir_show_config>
+    --language dotnet
+    --binary $<TARGET_PROPERTY:dots_test_dotnet,ASSEMBLY_FILE>
+    --dependencies $<TARGET_PROPERTY:Safir.Dob.Typesystem,ASSEMBLY_FILE>,$<TARGET_PROPERTY:dots_generated-DotsTest-dotnet,ASSEMBLY_FILE>
+    --output ${CMAKE_CURRENT_SOURCE_DIR}/output.txt
+    --dots-generated-paths "${DOTS_GENERATED_PATHS}"
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/dotnet)
 
-#ADD_TEST(dots_dotnet ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py dotnet)
+  #TODO: collect all the dependencies in a property on the target, so that we can access them as a generator expr for the --dependencies argument
 
-#SET_SAFIR_TEST_PROPERTIES(TEST dots_dotnet)
+  SET_SAFIR_TEST_PROPERTIES(TEST dots_dotnet
+    CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/test_config)
+endif()
+
 
 #if (SAFIR_ADA_SUPPORT)
 #  ADD_TEST(dots_ada ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py ada)
@@ -47,8 +60,9 @@ if (Java_FOUND)
     --output ${CMAKE_CURRENT_SOURCE_DIR}/output.txt
     --dots-generated-paths "${DOTS_GENERATED_PATHS}")
 
-#TODO: we should really be using the manifest instead of specifying entrypoint in the script
+  #TODO: we should really be using the manifest instead of specifying entrypoint in the script
 
-SET_SAFIR_TEST_PROPERTIES(TEST dots_java CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/test_config)
+  SET_SAFIR_TEST_PROPERTIES(TEST dots_java
+    CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/test_config)
 
 endif()

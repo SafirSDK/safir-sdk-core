@@ -33,11 +33,14 @@ parser.add_argument("--language", required=True)
 parser.add_argument("--output", required=True)
 parser.add_argument("--dots-generated-paths", required=True)
 
-#cpp
+#cpp and dotnet
 parser.add_argument("--binary")
 
 #for java
 parser.add_argument("--classpath")
+
+#for dotnet
+parser.add_argument("--dependencies")
 
 arguments = parser.parse_args()
 
@@ -48,8 +51,6 @@ for pair in arguments.dots_generated_paths.split(";"):
     os.environ[name] = value
 
 syslog = SyslogServer(arguments.show_safir_config)
-
-dependencies = list()
 
 if arguments.language == "cpp":
     command = arguments.binary
@@ -64,15 +65,18 @@ elif arguments.language == "java":
                "-Xfuture",
                "-cp", arguments.classpath,
                "Test")
+elif arguments.language == "dotnet":
+    dependencies = arguments.dependencies.split(",")
 
+    for dep in dependencies:
+        shutil.copy2(dep,
+                    ".")
+    command = arguments.binary
+     
 else:
     print("Not implemented")
     sys.exit(1)
 print("Test suite command is '" + " ".join(command) + "'")
-
-#for dep in dependencies:
-#    shutil.copy2(os.path.join(SAFIR_RUNTIME,"bin",dep),
-#                 arguments.language)
 
 proc = subprocess.Popen(command, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, universal_newlines=True)
 res = proc.communicate()[0].replace("\r","").splitlines(1) #fix any DOS newlines

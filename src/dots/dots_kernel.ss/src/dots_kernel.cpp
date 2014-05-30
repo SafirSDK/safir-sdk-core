@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2013 (http://safir.sourceforge.net)
+* Copyright Saab AB, 2004-2014 (http://safir.sourceforge.net)
 * 
 * Created by: Joel Ottosson / stjoot
 *
@@ -51,11 +51,26 @@ namespace
 
     void DeleteBytePointer(char* & ptr)
     {
-        if (ptr!=NULL)
+        delete [] ptr;
+        ptr=NULL;
+    }
+
+    void DeleteGeneratedLibraryList(DotsC_GeneratedLibrary* list, 
+                                    const DotsC_Int32 size)
+    {
+        for (int i = 0; i < size; ++i)
         {
-            delete [] ptr;
-            ptr=NULL;
+            delete [] list[i].name;
+            delete [] list[i].cppLibraryName;
+            delete [] list[i].cppLibraryLocation;
+            
+            delete [] list[i].javaJarName;
+            delete [] list[i].javaJarLocation;
+            
+            delete [] list[i].dotnetAssemblyName;
+            delete [] list[i].dotnetAssemblyLocation;
         }
+        delete [] list;
     }
 
     void GetCompleteTypeInternal(const ClassDescriptionShm * const cd,
@@ -112,6 +127,13 @@ namespace
         }
 
         return true;
+    }
+
+    char* CopyStringToNew(const std::string& str)
+    {
+        char* dest = new char[str.size() + 1];
+        strcpy(dest,str.c_str());
+        return dest;
     }
 }
 
@@ -1942,4 +1964,82 @@ void DotsC_GetTypeDescription(const DotsC_TypeId typeId,
     }
 
     strncpy(buf, &text[0], resultSize);
+}
+
+void DotsC_GetGeneratedLibraryList(DotsC_GeneratedLibrary*& generatedLibraries,
+                                   DotsC_Int32& size,
+                                   DotsC_GeneratedLibraryListDeleter& deleter)
+{
+    Safir::Utilities::Internal::ConfigReader reader;
+    const boost::property_tree::ptree& ptree = reader.Typesystem();
+
+    //work out our size
+    size = 0;
+    for (boost::property_tree::ptree::const_iterator it = ptree.begin();
+         it != ptree.end(); ++it)
+    {
+        const bool isSection = !it->second.empty();
+        
+        if (isSection)
+        {
+            ++size;
+        }
+    }
+    
+    //allocate our array. 
+    generatedLibraries = new DotsC_GeneratedLibrary[size];
+    deleter = DeleteGeneratedLibraryList;
+        
+    int i = 0;
+    for (boost::property_tree::ptree::const_iterator it = ptree.begin();
+         it != ptree.end(); ++it)
+    {
+        const bool isSection = !it->second.empty();
+        
+        if (isSection)
+        {
+            const std::string module = it->first;
+            generatedLibraries[i].name = CopyStringToNew(module);
+
+            generatedLibraries[i].cppLibraryName = CopyStringToNew("dots_generated-" + module + "-cpp");
+            generatedLibraries[i].dotnetAssemblyName = CopyStringToNew("dots_generated-" + module + "-dotnet");
+            generatedLibraries[i].javaJarName = CopyStringToNew("dots_generated-" + module + "-java.jar");
+
+            const boost::optional<std::string> cpp_library_location = it->second.get_optional<std::string>("cpp_library_location");
+            if (cpp_library_location)
+            {
+                generatedLibraries[i].cppLibraryLocation = CopyStringToNew(cpp_library_location.get());
+            }
+            else
+            {
+                generatedLibraries[i].cppLibraryLocation = NULL;
+            }
+
+            const boost::optional<std::string> dotnet_assembly_location = it->second.get_optional<std::string>("dotnet_assembly_location");
+            if (dotnet_assembly_location)
+            {
+                generatedLibraries[i].dotnetAssemblyLocation = CopyStringToNew(dotnet_assembly_location.get());
+            }
+            else
+            {
+                generatedLibraries[i].dotnetAssemblyLocation = NULL;
+            }
+
+            const boost::optional<std::string> java_jar_location = it->second.get_optional<std::string>("java_jar_location");
+            if (java_jar_location)
+            {
+                generatedLibraries[i].javaJarLocation = CopyStringToNew(java_jar_location.get());
+            }
+            else
+            {
+                generatedLibraries[i].javaJarLocation = NULL;
+            }
+
+            const boost::optional<bool> dont_load = it->second.get_optional<bool>("dont_load");
+            generatedLibraries[i].dontLoad = !!dont_load && dont_load.get();
+
+            ++i;
+        }
+    }
+    
 }

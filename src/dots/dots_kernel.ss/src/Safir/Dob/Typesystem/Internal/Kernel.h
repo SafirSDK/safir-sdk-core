@@ -1458,6 +1458,33 @@ extern "C"
                                                   char * const buf,
                                                   const DotsC_Int32 bufSize,
                                                   DotsC_Int32 & resultSize);
+
+
+#pragma pack(push)
+#pragma pack(4)
+    struct DotsC_GeneratedLibrary
+    {
+        char* name;
+
+        char* cppLibraryName;
+        char* cppLibraryLocation;
+
+        char* javaJarName;
+        char* javaJarLocation;
+
+        char* dotnetAssemblyName;
+        char* dotnetAssemblyLocation;
+
+        bool dontLoad;
+    };
+#pragma pack(pop)
+
+    typedef void (*DotsC_GeneratedLibraryListDeleter)(DotsC_GeneratedLibrary* list, 
+                                                      const DotsC_Int32 size);
+
+    DOTS_KERNEL_API void DotsC_GetGeneratedLibraryList(DotsC_GeneratedLibrary*& generatedLibraries,
+                                                       DotsC_Int32& size,
+                                                       DotsC_GeneratedLibraryListDeleter& deleter);
 }
 
 

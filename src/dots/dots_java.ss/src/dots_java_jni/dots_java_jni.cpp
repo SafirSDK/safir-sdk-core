@@ -1616,40 +1616,29 @@ JNIEXPORT jobjectArray JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_Ge
 {
     std::vector<std::string> libraries;
 
-    const Safir::Utilities::Internal::ConfigReader reader;
-    const boost::property_tree::ptree& ptree = reader.Typesystem();
-    for (boost::property_tree::ptree::const_iterator it = ptree.begin();
-         it != ptree.end(); ++it)
+    DotsC_GeneratedLibrary* generatedLibraries;
+    DotsC_Int32 size;
+    DotsC_GeneratedLibraryListDeleter deleter;
+    
+    DotsC_GetGeneratedLibraryList(generatedLibraries,
+                                  size,
+                                  deleter);
+
+    for (int i = 0; i < size; ++i)
     {
-        const bool isSection = !it->second.empty();
-        
-        if (isSection)
+        if (generatedLibraries[i].javaJarLocation != NULL &&
+            !generatedLibraries[i].dontLoad)
         {
-            const std::string module = it->first;
-
-            //TODO: should we try to automatically locate jars, so that they work
-            //like cpp libraries that are loaded from PATH as fallback?
+            boost::filesystem::path p = generatedLibraries[i].javaJarLocation;
+            p /= generatedLibraries[i].javaJarName;
             
-            const boost::optional<std::string> library_location = it->second.get_optional<std::string>("java_library_location");            
-            if (!library_location)
-            {
-                continue;
-            }
-
-            const boost::optional<bool> dont_load = it->second.get_optional<bool>("dont_load");
-            if (!!dont_load && dont_load.get())
-            {
-                continue;
-            }
-            else
-            {
-                boost::filesystem::path p = library_location.get();
-                p /= "dots_generated-" + module + "-java.jar";
-
-                libraries.push_back(p.make_preferred().string());
-            }
+            libraries.push_back(p.make_preferred().string());
         }
     }
+
+    //TODO: should we try to automatically locate jars, so that they work
+    //like cpp libraries that are loaded from PATH as fallback?
+    //Currently jars are only loaded if full location is given.
 
     jobjectArray stringArray = env->NewObjectArray(static_cast<jsize>(libraries.size()),
                                                    env->FindClass("java/lang/String"),  
