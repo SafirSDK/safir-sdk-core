@@ -54,46 +54,42 @@ namespace ToolSupport
      */
     enum ValueDefinitionKind {ValueKind, NullKind, RefKind};
     struct ValueDefinition
-    {
+    {        
         ValueDefinitionKind kind;
-        std::string stringVal;
-        std::vector<char> binaryVal; //object and binary
-        DotsC_Int64 hashedVal;
-        union
-        {
-            ValueDefinition* referenced; //if value is a reference to another value
-            DotsC_Int32 int32Val;
-            DotsC_Int64 int64Val;
-            DotsC_Float32 float32Val;
-            DotsC_Float64 float64Val;
-            bool boolVal;
-        };
 
         struct
         {
             std::string str;
-            DotsC_Int64 num;
             DotsC_Int64 hash;
+            union
+            {
+                DotsC_Int32 int32;
+                DotsC_Int64 int64;
+            };
         } key;
 
-        ValueDefinition()
-            :kind(ValueKind)
-            ,hashedVal(0)
-            ,referenced(NULL)
+        struct
         {
-        }
+            std::string str;
+            std::vector<char> bin; //object and binary
+            DotsC_Int64 hash;
+            union
+            {
+                ValueDefinition* referenced; //if value is a reference to another value
+                DotsC_Int32 int32;
+                DotsC_Int64 int64;
+                DotsC_Float32 float32;
+                DotsC_Float64 float64;
+                bool boolean;
+            };
+        } val;
 
-        ValueDefinition(ValueDefinitionKind k)
-            :kind(k)
-            ,hashedVal(0)
-            ,referenced(NULL)
-        {
-        }
+        ValueDefinition() : kind(ValueKind) {}
+        ValueDefinition(ValueDefinitionKind k) : kind(k) {}
     };
 
     typedef std::vector<ValueDefinition> ParameterValues;
     typedef std::pair<std::string, int> MemberReference; //pair<Member, Index> or pair<Parameter, Index>
-    typedef std::vector<MemberReference> MemberReferenceVector;
     typedef std::pair<std::string, MemberReference> MemberValue; //pair <memberName, pair<Parameter,Index> >
     typedef std::vector<MemberValue> MemberValueVector;
 
@@ -208,32 +204,32 @@ namespace ToolSupport
         virtual bool IsHidden() const {return hidden;}
 
         //GetValues
-        virtual DotsC_Int32 GetInt32Value(int index) const {return Value(static_cast<size_t>(index)).int32Val;}
-        virtual DotsC_Int64 GetInt64Value(int index) const {return Value(static_cast<size_t>(index)).int64Val;}
-        virtual DotsC_Float32 GetFloat32Value(int index) const {return Value(static_cast<size_t>(index)).float32Val;}
-        virtual DotsC_Float64 GetFloat64Value(int index) const {return Value(static_cast<size_t>(index)).float64Val;}
-        virtual bool GetBoolValue(int index) const {return Value(static_cast<size_t>(index)).boolVal;}
-        virtual const char* GetStringValue(int index) const {return Value(static_cast<size_t>(index)).stringVal.c_str();}
+        virtual DotsC_Int32 GetInt32Value(int index) const {return Value(static_cast<size_t>(index)).val.int32;}
+        virtual DotsC_Int64 GetInt64Value(int index) const {return Value(static_cast<size_t>(index)).val.int64;}
+        virtual DotsC_Float32 GetFloat32Value(int index) const {return Value(static_cast<size_t>(index)).val.float32;}
+        virtual DotsC_Float64 GetFloat64Value(int index) const {return Value(static_cast<size_t>(index)).val.float64;}
+        virtual bool GetBoolValue(int index) const {return Value(static_cast<size_t>(index)).val.boolean;}
+        virtual const char* GetStringValue(int index) const {return Value(static_cast<size_t>(index)).val.str.c_str();}
         virtual std::pair<const char*, DotsC_Int32> GetObjectValue(int index) const
         {
             const ValueDefinition& v=Value(static_cast<size_t>(index));
-            return std::make_pair(&v.binaryVal[0], static_cast<DotsC_Int32>(v.binaryVal.size()));
+            return std::make_pair(&v.val.bin[0], static_cast<DotsC_Int32>(v.val.bin.size()));
         }
         virtual std::pair<const char*, DotsC_Int32> GetBinaryValue(int index) const
         {
             const ValueDefinition& v=Value(static_cast<size_t>(index));
-            return std::make_pair(v.stringVal.c_str(), static_cast<DotsC_Int32>(v.stringVal.size()));
+            return std::make_pair(v.val.str.c_str(), static_cast<DotsC_Int32>(v.val.str.size()));
         }
         virtual std::pair<DotsC_Int64, const char*> GetHashedValue(int index) const
         {
-            const ValueDefinition& val=Value(static_cast<size_t>(index));
-            if (!val.stringVal.empty() && val.hashedVal==0)
+            const ValueDefinition& v=Value(static_cast<size_t>(index));
+            if (!v.val.str.empty() && v.val.hash==0)
             {
                 //This is most likely a reference to a plain string, and if it's not this won't break anything anyway
-                DotsC_Int64 hash=LlufId_Generate64(val.stringVal.c_str());
-                return std::make_pair(hash, val.stringVal.c_str());
+                DotsC_Int64 hash=LlufId_Generate64(v.val.str.c_str());
+                return std::make_pair(hash, v.val.str.c_str());
             }
-            return std::make_pair(val.hashedVal, val.stringVal.empty() ? NULL : val.stringVal.c_str());
+            return std::make_pair(v.val.hash, v.val.str.empty() ? NULL : v.val.str.c_str());
         }
 
         //keys
@@ -243,11 +239,11 @@ namespace ToolSupport
         }
         virtual DotsC_Int32 GetInt32Key(int index) const
         {
-            return static_cast<DotsC_Int32>(Value(static_cast<size_t>(index)).key.num);
+            return static_cast<DotsC_Int32>(Value(static_cast<size_t>(index)).key.int32);
         }
         virtual DotsC_Int64 GetInt64Key(int index) const
         {
-            return Value(static_cast<size_t>(index)).key.num;
+            return Value(static_cast<size_t>(index)).key.int64;
         }
         virtual std::pair<DotsC_Int64, const char*> GetHashedKey(int index) const
         {
@@ -263,12 +259,12 @@ namespace ToolSupport
 
         const ValueDefinition& Value(size_t index) const
         {
-            const ValueDefinition* val=&values[index];
-            while (val->kind==RefKind)
+            const ValueDefinition* v=&values[index];
+            while (v->kind==RefKind)
             {
-                val=val->referenced;
+                v=v->val.referenced;
             }
-            return *val;
+            return *v;
         }
 
         ValueDefinition& MutableValue(size_t index)

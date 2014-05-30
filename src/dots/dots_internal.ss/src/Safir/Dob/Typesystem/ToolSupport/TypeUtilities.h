@@ -237,6 +237,13 @@ namespace TypeUtilities
             return GetParameterByName<ClassDescriptionType, ParameterDescriptionType>(cd, parameterName.substr(pos+1));
         }
     };
+
+    template <class ParameterDescriptionT, class KeyT>
+    int GetDictionaryIndexFromKey(const ParameterDescriptionT* pd, const KeyT& key)
+    {
+        assert(pd->GetCollectionType()==DictionaryCollectionType);
+        return Internal::BasicTypeOperations::DictionaryKeyToIndexHelper<ParameterDescriptionT, KeyT>::Index(pd, key);
+    }
 }
 }
 }

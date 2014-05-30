@@ -438,6 +438,85 @@ namespace BasicTypeOperations
         static const std::string& SoftwareViolationExceptionName() {static const std::string s("Safir.Dob.Typesystem.SoftwareViolationException"); return s;}
         static const std::string& ConfigurationErrorExceptionName() {static const std::string s("Safir.Dob.Typesystem.ConfigurationErrorException"); return s;}
     };
+
+    template <class ParameterDescriptionT, class KeyT>
+    int GetDictionaryIndexFromKey(const ParameterDescriptionT* pd, DotsC_Int32 key)
+    {
+        for (int i=0; i<pd->GetNumberOfValues(); ++i)
+        {
+
+
+        }
+        return -1;
+    }
+
+    /**
+     * Helper class for getting index corresponiding to a specific key. Only applicable on dictionaries.
+     */
+    template <class ParameterDescriptionT, class KeyT> struct DictionaryKeyToIndexHelper;
+    template <class ParameterDescriptionT> struct DictionaryKeyToIndexHelper<ParameterDescriptionT, std::string>
+    {
+        static int Index(const ParameterDescriptionT* pd, const std::string& key)
+        {
+            for (int i=0; i<pd->GetNumberOfValues(); ++i)
+            {
+                if (key==pd->GetStringKey(i))
+                    return i;
+            }
+            return -1;
+        }
+    };
+    template <class ParameterDescriptionT> struct DictionaryKeyToIndexHelper<ParameterDescriptionT, DotsC_Int32>
+    {
+        static int Index(const ParameterDescriptionT* pd, DotsC_Int32 key)
+        {
+            for (int i=0; i<pd->GetNumberOfValues(); ++i)
+            {
+                if (key==pd->GetInt32Key(i))
+                    return i;
+            }
+            return -1;
+        }
+
+    };
+    template <class ParameterDescriptionT> struct DictionaryKeyToIndexHelper<ParameterDescriptionT, DotsC_Int64>
+    {
+        static int Index(const ParameterDescriptionT* pd, DotsC_Int64 key)
+        {
+            for (int i=0; i<pd->GetNumberOfValues(); ++i)
+            {
+                if (key==pd->GetInt64Key(i))
+                    return i;
+            }
+            return -1;
+        }
+
+    };
+    template <class ParameterDescriptionT> struct DictionaryKeyToIndexHelper<ParameterDescriptionT, std::pair<DotsC_TypeId, DotsC_Int64> >
+    {
+        static int Index(const ParameterDescriptionT* pd, std::pair<DotsC_TypeId, DotsC_Int64> key)
+        {
+            for (int i=0; i<pd->GetNumberOfValues(); ++i)
+            {
+                if (key.first==pd->GetInt64Key(i) && key.second==pd->GetHashedKey(i).first)
+                    return i;
+            }
+            return -1;
+        }
+    };
+    template <class ParameterDescriptionT> struct DictionaryKeyToIndexHelper<ParameterDescriptionT, std::pair<DotsC_Int64, const char*> >
+    {
+        static int Index(const ParameterDescriptionT* pd, std::pair<DotsC_Int64, const char*> key)
+        {
+            for (int i=0; i<pd->GetNumberOfValues(); ++i)
+            {
+                if (key.first==pd->GetHashedKey(i).first)
+                    return i;
+            }
+            return -1;
+        }
+    };
+
 }
 }
 }

@@ -4,27 +4,18 @@
     <class>ParserTest.MyEntity</class>
     <property>ParserTest.MyProperty</property>
 
-    <memberMapping>
+    <memberMapping>                 
         
-         <member>
-            <propertyMember>DictionaryPropertyValue</propertyMember>
-            <dictionary>
-                <entry>
-                    <key>First</key>
-                    <entityId>
-                        <name>Safir.Dob.Entity</name>
-                        <instanceId>123</instanceId>
-                    </entityId>
-                </entry>
-                <entry>
-                    <key>Second</key>
-                    <entityId>
-                        <name>ParserTest.MyEntity</name>
-                        <instanceId>my instance</instanceId>
-                    </entityId>
-                </entry>
-            </dictionary>
-        </member>
+        <member>
+            <propertyMember>ArrayIntPropertyValue</propertyMember>
+            <array>
+                <value>1</value>
+                <valueRef>
+                    <name>ParserTest.MyEntity.IntPar</name>
+                </valueRef>
+                <value>2</value>
+            </array>
+        </member>      
         
     </memberMapping>
 

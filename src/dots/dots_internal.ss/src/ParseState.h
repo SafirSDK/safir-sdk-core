@@ -72,17 +72,17 @@ namespace ToolSupport
         {
             Reference<ReferencedSubItem> referee;
             std::string parameterName; //referenced parameter
-            size_t parameterIndex; //referenced parameter index
+            std::string parameterKey; //referenced parameter key or index
 
             ParameterReference() {}
             ParameterReference(const ClassDescriptionBasicPtr& referencingClass,
                                const boost::shared_ptr<ReferencedSubItem>& referencingSubItem,
                                size_t referencingIndex,
                                const std::string& paramName,
-                               size_t paramIndex)
+                               const std::string& paramKey)
                 :referee(referencingClass, referencingSubItem, referencingIndex)
                 ,parameterName(paramName)
-                ,parameterIndex(paramIndex)
+                ,parameterKey(paramKey)
             {
             }
         };

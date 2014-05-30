@@ -5,9 +5,9 @@
     <members>                
         
         <member>
-            <name>DictionaryPropertyValue</name>
-            <type>EntityId</type>
-            <dictionary>String</dictionary>
+            <name>ArrayIntPropertyValue</name>
+            <type>Int32</type>
+            <array/>
         </member>
         
     </members>

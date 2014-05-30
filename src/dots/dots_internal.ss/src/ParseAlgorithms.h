@@ -53,8 +53,9 @@ namespace ToolSupport
     bool ValidName(const std::string& name);
     void CheckNameAndFilenameConsistency(const std::string& filename, const std::string name);
     //Resolves references on the form <...><name>param</name>123<index></index></...>
-    void GetReferencedParameter(boost::property_tree::ptree& pt, std::string& paramName, int& paramIndex);
+    void GetReferencedParameter(boost::property_tree::ptree& pt, std::string& paramName, std::string& paramKey);
     int GetReferencedIndex(boost::property_tree::ptree& pt, ParseState& state);
+    boost::optional<int> ReferencedKeyToIndex(const ParameterDescriptionBasic* pd, const std::string& key);
     std::string GetEntityIdParameterAsString(boost::property_tree::ptree& pt);
     bool ParseValue(DotsC_MemberType memberType, const std::string& val, ValueDefinition& result);
     bool ParseKey(DotsC_MemberType memberType, const std::string& val, ValueDefinition& result);
@@ -174,11 +175,11 @@ namespace ToolSupport
                 {
                     def->values.push_back(ValueDefinition()); //placeholder
                 }
-                ValueDefinition& val=def->values.back();
-                if (!ParseValue(def->memberType, GetEntityIdParameterAsString(pt), val))
+                ValueDefinition& v=def->values.back();
+                if (!ParseValue(def->memberType, GetEntityIdParameterAsString(pt), v))
                 {
                     std::ostringstream os;
-                    os<<"The value '"<<val.stringVal<<"' doesn't match the type "<<def->typeName<<" for parameter "<<def->name<<" in class "<<state.lastInsertedClass->name;
+                    os<<"The value '"<<v.val.str<<"' doesn't match the type "<<def->typeName<<" for parameter "<<def->name<<" in class "<<state.lastInsertedClass->name;
                     throw ParseError("Invalid parameter value", os.str(), state.currentPath, 34);
                 }
             }
@@ -208,17 +209,17 @@ namespace ToolSupport
                 val.kind=RefKind;
 
                 std::string paramName;
-                int paramIx;
-                GetReferencedParameter(pt, paramName, paramIx);
+                std::string paramKey;
+                GetReferencedParameter(pt, paramName, paramKey);
                 ParseState::ParameterReference<ParameterDescriptionBasic> ref(state.lastInsertedClass,
                                                                               def, def->values.size()-1,
-                                                                              paramName, paramIx);
+                                                                              paramName, paramKey);
                 state.paramToParamReferences.push_back(ref);
             }
             catch (...)
             {
                 std::ostringstream os;
-                os<<"Missing <name> element in parameter reference. In parameter "<<def->name<<" in class "<<state.lastInsertedClass->name;
+                os<<"Something is wrong with the parameter reference. In parameter "<<def->name<<" in class "<<state.lastInsertedClass->name<<". It can be that the <name> element is missing or that both a <key> and an <index> element is specified.";
                 throw ParseError("Invalid parameter reference syntax", os.str(), state.currentPath, 31);
             }
         }
@@ -231,7 +232,7 @@ namespace ToolSupport
             try
             {
                 std::string paramName;
-                int paramIx;
+                std::string paramIx;
                 GetReferencedParameter(pt, paramName, paramIx);
                 ParseState::ParameterReference<MemberDescriptionBasic> ref(state.lastInsertedClass,
                                                                            state.lastInsertedClass->members.back(),
@@ -242,8 +243,7 @@ namespace ToolSupport
             catch (...)
             {
                 std::ostringstream os;
-                os<<"Missing <name> element in maxLengthRef. In member "<<state.lastInsertedClass->members.back()->name<<
-                    " in class "<<state.lastInsertedClass->name;
+                os<<"Something is wrong with the maxLengthRef. In member "<<state.lastInsertedClass->members.back()->name<<" in class "<<state.lastInsertedClass->name<<". It can be that the <name> element is missing or that both a <key> and an <index> element is specified.";
                 throw ParseError("Invalid parameter reference syntax", os.str(), state.currentPath, 32);
             }
         }
@@ -257,7 +257,7 @@ namespace ToolSupport
             try
             {
                 std::string paramName;
-                int paramIx;
+                std::string paramIx;
                 GetReferencedParameter(pt, paramName, paramIx);
                 ParseState::ParameterReference<MemberDescriptionBasic> ref(state.lastInsertedClass,
                                                                            state.lastInsertedClass->members.back(),
@@ -268,8 +268,7 @@ namespace ToolSupport
             catch (...)
             {
                 std::ostringstream os;
-                os<<"Missing <name> element in arraySizeRef. In member "<<state.lastInsertedClass->members.back()->name<<
-                    " in class "<<state.lastInsertedClass->name;
+                os<<"Something is wrong with the arraySizeRef. In member "<<state.lastInsertedClass->members.back()->name<<" in class "<<state.lastInsertedClass->name<<". It can be that the <name> element is missing or that both a <key> and an <index> element is specified.";
                 throw ParseError("Invalid parameter reference syntax", os.str(), state.currentPath, 33);
             }
         }
@@ -490,25 +489,22 @@ namespace ToolSupport
         {
             try
             {
-                MemberValue& memVal=state.lastInsertedClass->createRoutines.back()->memberValues.back();
-                GetReferencedParameter(pt, memVal.second.first, memVal.second.second);
+                CreateRoutineDescriptionBasicPtr& def=state.lastInsertedClass->createRoutines.back();
+                std::string paramName, paramKey;
+                GetReferencedParameter(pt, paramName, paramKey);
+
+                ParseState::ParameterReference<CreateRoutineDescriptionBasic> ref(state.lastInsertedClass,
+                                                                                  def,
+                                                                                  def->memberValues.size()-1,
+                                                                                  paramName, paramKey);
+
+                state.createRoutineIncompleteHiddenParameters.push_back(ref);
             }
             catch (...)
             {
                 std::ostringstream os;
-                os<<"Missing <name> element in parameter reference. In createRoutine "<<state.lastInsertedClass->createRoutines.back()->name<<
-                    " in class "<<state.lastInsertedClass->name;
+                os<<"Can't understand the parameter reference. In createRoutine "<<state.lastInsertedClass->createRoutines.back()->name<<" in class "<<state.lastInsertedClass->name;
                 throw ParseError("Invalid parameter reference syntax", os.str(), state.currentPath, 29);
-
-                //This is for backward compatibility. If it ok to change syntax throw exception above instead.
-                //Reason for change is that CreateRoutine.Values only allow to specify a parameter name and no index
-                //Instead we should use the same sytax as for maxLenghtRef and arraySizeRef: <...><name>MyParam</name><index>123</index></...>
-                //and remove the code here:
-                // --- BEGIN to be removed ----
-//                MemberValue& memVal=state.lastInsertedClass->createRoutines.back()->memberValues.back();
-//                memVal.second.first=pt.data();
-//                memVal.second.second=0;
-                // --- END to be removed ----
             }
         }
     };
@@ -534,10 +530,10 @@ namespace ToolSupport
             par->hidden=true;
             par->collectionType=SingleValueCollectionType;
             par->memberType=Int32MemberType; //just to indicate that type is not object or entityId, it is a basicType or enum
-            ValueDefinition val;
-            val.kind=ValueKind;
-            val.stringVal=pt.data();
-            par->values.push_back(val);
+            ValueDefinition v;
+            v.kind=ValueKind;
+            v.val.str=pt.data();
+            par->values.push_back(v);
             state.lastInsertedClass->ownParameters.push_back(par);
             state.repository->InsertParameter(par);
 
@@ -545,7 +541,8 @@ namespace ToolSupport
             ParseState::ParameterReference<CreateRoutineDescriptionBasic> ref(state.lastInsertedClass,
                                                                               def,
                                                                               def->memberValues.size()-1,
-                                                                              par->GetName(), 0);
+                                                                              par->GetName(), "");
+
             state.createRoutineIncompleteHiddenParameters.push_back(ref);
         }
     };
@@ -563,16 +560,16 @@ namespace ToolSupport
             memVal.second.first=paramName.str();
             memVal.second.second=0;
 
-            ValueDefinition val;
-            val.kind=ValueKind;
+            ValueDefinition v;
+            v.kind=ValueKind;
             try
             {
                 if (!ParseValue(EntityIdMemberType,
                                 GetEntityIdParameterAsString(pt),
-                                val))
+                                v))
                 {
                     std::ostringstream os;
-                    os<<"The value '"<<val.stringVal<<"' doesn't match the type entityId for createRoutine "<<def->name<<" in class "<<state.lastInsertedClass->name;
+                    os<<"The value '"<<v.val.str<<"' doesn't match the type entityId for createRoutine "<<def->name<<" in class "<<state.lastInsertedClass->name;
                     throw ParseError("Invalid create routine value", os.str(), state.currentPath, 62);
                 }
             }
@@ -592,7 +589,7 @@ namespace ToolSupport
             par->collectionType=SingleValueCollectionType;
             par->memberType=EntityIdMemberType;
             par->typeName=BasicTypeOperations::MemberTypeToString(EntityIdMemberType);
-            par->values.push_back(val);
+            par->values.push_back(v);
             state.lastInsertedClass->ownParameters.push_back(par);
             state.repository->InsertParameter(par);
         }
@@ -617,10 +614,10 @@ namespace ToolSupport
             par->hidden=true;
             par->collectionType=SingleValueCollectionType;
             par->memberType=ObjectMemberType;
-            ValueDefinition val;
-            val.kind=ValueKind;
-            val.stringVal=pt.data();
-            par->values.push_back(val);
+            ValueDefinition v;
+            v.kind=ValueKind;
+            v.val.str=pt.data();
+            par->values.push_back(v);
             state.lastInsertedClass->ownParameters.push_back(par);
             state.objectParameters.push_back(ParseState::ObjectParameter(state.lastInsertedClass,
                                                                          par,
@@ -632,7 +629,7 @@ namespace ToolSupport
             ParseState::ParameterReference<CreateRoutineDescriptionBasic> ref(state.lastInsertedClass,
                                                                               def,
                                                                               def->memberValues.size()-1,
-                                                                              par->GetName(), 0);
+                                                                              par->GetName(), "");
             state.createRoutineIncompleteHiddenParameters.push_back(ref);
         }
     };
@@ -656,10 +653,10 @@ namespace ToolSupport
             par->hidden=true;
             par->collectionType=SingleValueCollectionType;
             par->memberType=ObjectMemberType;
-            ValueDefinition val;
-            val.kind=ValueKind;
-            val.stringVal=pt.data();
-            par->values.push_back(val);
+            ValueDefinition v;
+            v.kind=ValueKind;
+            v.val.str=pt.data();
+            par->values.push_back(v);
             state.lastInsertedClass->ownParameters.push_back(par);
             state.objectParameters.push_back(ParseState::ObjectParameter(state.lastInsertedClass,
                                                                          par,
@@ -672,7 +669,7 @@ namespace ToolSupport
             ParseState::ParameterReference<CreateRoutineDescriptionBasic> ref(state.lastInsertedClass,
                                                                               def,
                                                                               def->memberValues.size()-1,
-                                                                              par->GetName(), 0);
+                                                                              par->GetName(), "");
             state.createRoutineIncompleteHiddenParameters.push_back(ref);
         }
     };
@@ -760,7 +757,7 @@ namespace ToolSupport
             {
                 def->values.push_back(ValueDefinition()); //placeholder
             }
-            ValueDefinition& val=def->values.back();
+            ValueDefinition& v=def->values.back();
 
             try
             {
@@ -771,9 +768,9 @@ namespace ToolSupport
 
                 if (def->memberType==EnumerationMemberType)
                 {
-                    val.stringVal=SerializationUtils::ExpandEnvironmentVariables(pt.data());
+                    v.val.str=SerializationUtils::ExpandEnvironmentVariables(pt.data());
                 }
-                else if (!ParseValue(def->memberType, SerializationUtils::ExpandEnvironmentVariables(pt.data()), val))
+                else if (!ParseValue(def->memberType, SerializationUtils::ExpandEnvironmentVariables(pt.data()), v))
                 {
                     std::ostringstream os;
                     os<<"The value '"<<pt.data()<<"' doesn't match the type "<<def->typeName<<" for parameter "<<def->name<<" in class "<<state.lastInsertedClass->name;
@@ -1294,7 +1291,7 @@ namespace ToolSupport
             try
             {
                 XmlToBlobSerializer<TypeRepository> serializer(state.repository.get());
-                serializer.SerializeObjectContent(typeName, vd.binaryVal, pt); //since pt does not include the root element we have to use method SerializeObjectContent
+                serializer.SerializeObjectContent(typeName, vd.val.bin, pt); //since pt does not include the root element we have to use method SerializeObjectContent
             }
             catch (const ParseError& err)
             {
@@ -1336,7 +1333,7 @@ namespace ToolSupport
             try
             {
                 UglyXmlToBlobSerializer<TypeRepository> serializer(state.repository.get());
-                tid=serializer.SerializeObjectContent(vd.binaryVal, pt); //since pt does not include the root element we have to use method SerializeObjectContent
+                tid=serializer.SerializeObjectContent(vd.val.bin, pt); //since pt does not include the root element we have to use method SerializeObjectContent
             }
             catch (const ParseError& err)
             {
@@ -1384,7 +1381,7 @@ namespace ToolSupport
                 if (!ParseValue(param->memberType, GetEntityIdParameterAsString(pt), vd))
                 {
                     std::ostringstream os;
-                    os<<"The value '"<<vd.stringVal<<"' doesn't match the type "<<param->typeName<<" for property mapping of member "<<propMem->name;
+                    os<<"The value '"<<vd.val.str<<"' doesn't match the type "<<param->typeName<<" for property mapping of member "<<propMem->name;
                     throw ParseError("Invalid value", os.str(), state.currentPath, 97);
                 }
             }
@@ -1429,14 +1426,14 @@ namespace ToolSupport
             if (param->memberType==EnumerationMemberType)
             {
                 const EnumDescription* ed=state.repository->GetEnum(param->typeId);
-                vd.int32Val=ed->GetIndexOfValue(pt.data());
-                if (vd.int32Val<0)
+                vd.val.int32=ed->GetIndexOfValue(pt.data());
+                if (vd.val.int32<0)
                 {
                     std::ostringstream os;
                     os<<"The value '"<<pt.data()<<"' doesn't match the type "<<param->typeName<<" for property mapping of member "<<propMem->name;
                     throw ParseError("Invalid value", os.str(), state.currentPath, 111);
                 }
-                vd.stringVal=pt.data();
+                vd.val.str=pt.data();
             }
             else
             {
@@ -1543,6 +1540,69 @@ namespace ToolSupport
 
             state.lastInsertedMemberMapping->paramRef=param;
             state.lastInsertedMemberMapping->paramIndex=paramIndex<0 ? 0 : paramIndex;
+        }
+    };
+
+    template<> struct ParseAlgorithm<Elements::MapValueRefCollection>
+    {
+        void operator()(boost::property_tree::ptree& pt, ParseState& state) const
+        {
+            state.lastInsertedMemberMapping->kind=MappedToParameter;
+            const PropertyDescriptionBasic* pd=state.lastInsertedPropertyMapping->property;
+            const MemberDescriptionBasic* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
+            std::string paramName;
+            std::string paramKey;
+            int paramIndex=-1;
+
+            //Get parameterName
+            try
+            {
+                GetReferencedParameter(pt, paramName, paramKey);
+                paramIndex=paramKey.empty() ? 0 : boost::lexical_cast<int>(paramKey);
+            }
+            catch (const boost::property_tree::ptree_error&)
+            {
+                std::ostringstream os;
+                os<<"Something is wrong with the <valueRef> in propertyMapping for member "<<state.lastInsertedPropertyMapping->property->name<<"."<<
+                    propMem->GetName()<<" in class "<<state.lastInsertedPropertyMapping->class_->GetName()<<". It can be that the <name> element is missing or that both a <key> and an <index> element is specified.";
+                throw ParseError("Invalid parameter reference syntax", os.str(), state.currentPath, 199);
+            }
+
+            ParameterDescriptionBasic* srcParam=state.repository->GetParameterBasic(paramName);
+            if (!srcParam)
+            {
+                //parameter does not exist
+                std::ostringstream os;
+                os<<"Referenced parameter '"<<paramName<<"' does not exist. In propertyMapping for member "<<state.lastInsertedPropertyMapping->property->name<<"."<<propMem->GetName()<<".";
+                throw ParseError("Invalid parameter reference", os.str(), state.currentPath, 200);
+            }
+
+            if (!BasicTypeOperations::IsOfType<TypeRepository>(state.repository.get(), srcParam->GetMemberType(), srcParam->GetTypeId(), propMem->GetMemberType(), propMem->GetTypeId()))
+            {
+                //Types does not match
+                std::ostringstream os;
+                os<<"PropertyMapping is mapping property member "<<propMem->GetName()<<" that has type "<<propMem->typeName
+                    <<" to parameter '"<<srcParam->GetName()<<"' that has type "<<srcParam->typeName<<". The types are not compatible.";
+                throw ParseError("Type missmatch", os.str(), state.currentPath, 201);
+            }
+
+            if (paramIndex>=srcParam->GetNumberOfValues())
+            {
+                //index out of range
+                std::ostringstream os;
+                os<<"Referenced parameter '"<<paramName<<"' has arraySize="<<srcParam->GetNumberOfValues()<<". Index out of range in mapping of property member "<<state.lastInsertedPropertyMapping->property->name<<"."<<propMem->GetName();
+                throw ParseError("Index out of range", os.str(), state.currentPath, 202);
+            }
+
+            ParameterDescriptionBasic* destParam=state.lastInsertedMemberMapping->paramRef;
+            if (destParam->collectionType!=DictionaryCollectionType) //dictionaries have ValueDef inserted at dictionaryEntry
+            {
+                destParam->values.push_back(ValueDefinition()); //placeholder
+            }
+            ValueDefinition& vd=destParam->values.back();
+
+            vd.kind=RefKind;
+            vd.val.referenced=&(srcParam->values[static_cast<size_t>(paramIndex)]);
         }
     };
 
@@ -1904,7 +1964,7 @@ namespace ToolSupport
         bool ResolveParamToParamRef(const ParseState& state, const ParseState::ParameterReference<ParameterDescriptionBasic>& ref);
         void ResolveArraySizeRef(const ParseState& state, const ParseState::ParameterReference<MemberDescriptionBasic>& ref);
         void ResolveMaxLengthRef(const ParseState& state, const ParseState::ParameterReference<MemberDescriptionBasic>& ref);
-        void ResolveHiddenCreateRoutineParams(const ParseState& state, const ParseState::ParameterReference<CreateRoutineDescriptionBasic>& ref);
+        void ResolveCreateRoutineParams(const ParseState& state, const ParseState::ParameterReference<CreateRoutineDescriptionBasic>& ref);
         void HandleCreateRoutines(const ParseState& state, ClassDescriptionBasic* cd);
         void CalculateEnumChecksums(const ParseState& state);
         void VerifyParameterTypes(const ParseState& state);

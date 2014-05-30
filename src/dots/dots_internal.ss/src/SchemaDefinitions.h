@@ -130,7 +130,7 @@ namespace ToolSupport
         typedef Element<Elements::MapObjectDeprecated, One, boost::mpl::vector<IgnoreAny> > MapObjectDeprecated;
         typedef Element<Elements::MapValue, OptionalMany > MapValueCollection;
         typedef Element<Elements::MapEntityId, OptionalMany, boost::mpl::vector< Ignore<Elements::ClassName>, Ignore<Elements::InstanceId> > > MapEntityIdCollection;
-        typedef Element<Elements::MapValueRef, OptionalMany, boost::mpl::vector<IgnoreAny> > MapValueRefCollection;
+        typedef Element<Elements::MapValueRefCollection, OptionalMany, boost::mpl::vector<IgnoreAny> > MapValueRefCollection;
         typedef Element<Elements::MapObjectDeprecated, OptionalMany, boost::mpl::vector<IgnoreAny> > MapObjectDeprecatedCollection;
         typedef Element<Elements::Any, OptionalMany, boost::mpl::vector<IgnoreAny>, ParseAlgorithm<Elements::MapObject>, AnyMatcher > MapObjectCollection;
         typedef Element<Elements::MapArray, One, boost::mpl::vector<MapObjectCollection, MapValueRefCollection, ELEMENT_CHOICE_3(MapValueCollection, MapEntityIdCollection, MapObjectDeprecatedCollection, OptionalOne) > > MapArray;

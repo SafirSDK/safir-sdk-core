@@ -112,6 +112,7 @@ namespace ToolSupport
         struct MapPropertyMember {static const std::string& Name() {static const std::string n="propertyMember"; return n;}};
         struct MapValue {static const std::string& Name() {static const std::string n="value"; return n;}}; //dom
         struct MapValueRef {static const std::string& Name() {static const std::string n="valueRef"; return n;}}; //dom
+        struct MapValueRefCollection {static const std::string& Name() {static const std::string n="valueRef"; return n;}}; //dom
         struct MapArray {static const std::string& Name() {static const std::string n="array"; return n;}}; //dom
         struct MapArrayElements {static const std::string& Name() {static const std::string n="arrayElements"; return n;}}; //dom
         struct MapArrayElement {static const std::string& Name() {static const std::string n="arrayElement"; return n;}}; //dom
@@ -130,8 +131,8 @@ namespace ToolSupport
         struct IndexRef {static const std::string& Name() {static const std::string n="indexRef"; return n;}}; //domFiles valueRef and classMemberReference
         struct ReferenceName {static const std::string& Name() {static const std::string n="name"; return n;}};
         struct ReferenceIndex {static const std::string& Name() {static const std::string n="index"; return n;}};
+        struct ReferenceKey {static const std::string& Name() {static const std::string n="key"; return n;}};
         struct InstanceId {static const std::string& Name() {static const std::string n="instanceId"; return n;}}; //<entityId><name/><instanceId/>..
-
 
         //for handling of old deprecated xml format
         struct ParameterObjectDeprecated {static const std::string& Name() {static const std::string n="object"; return n;}};

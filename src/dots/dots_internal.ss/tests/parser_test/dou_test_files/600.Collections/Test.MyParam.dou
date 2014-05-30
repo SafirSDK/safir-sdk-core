@@ -18,8 +18,8 @@
                 </arrayElement>
                 <arrayElement>
                     <valueRef>
-                        <name>Test.MyParam.OldArrayParam</name>
-                        <index>2</index>
+                        <name>Test.MyParam.SingelInt</name>
+                        <!--index>2</index-->
                     </valueRef>
                 </arrayElement>
                 <arrayElement>
@@ -28,6 +28,11 @@
             </arrayElements>            
         </parameter>
 
+        <parameter>
+            <name>SingelInt</name>
+            <type>Int32</type>
+            <value>1</value>
+        </parameter>
 
         <parameter>
             <name>SequenceParam</name>

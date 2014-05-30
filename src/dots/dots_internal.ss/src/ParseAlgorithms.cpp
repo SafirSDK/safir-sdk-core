@@ -71,14 +71,36 @@ namespace ToolSupport
         }
     }
 
-    //Resolves references on the form <...><name>param</name>123<index></index></...>
-    void GetReferencedParameter(boost::property_tree::ptree& pt, std::string& paramName, int& paramIndex)
+    //Resolves references on the form <...><name>foo</name><index>10</index></...> or <...><name>foo</name><key>bar</key></...>
+    void GetReferencedParameter(boost::property_tree::ptree& pt, std::string& paramName, std::string& paramKey)
     {
         paramName=pt.get<std::string>(Elements::ReferenceName::Name());
         SerializationUtils::Trim(paramName);
-        std::string index=pt.get(Elements::ReferenceIndex::Name(), "0");
-        SerializationUtils::Trim(index);
-        paramIndex=boost::lexical_cast<int>(index);
+        boost::optional<std::string> key=pt.get_optional<std::string>(Elements::ReferenceKey::Name());
+        boost::optional<std::string> index=pt.get_optional<std::string>(Elements::ReferenceIndex::Name());
+
+        //both key and index can't exist
+        if (key && index) throw std::string("Cant have both key and index element in reference");
+
+        if (key)
+        {
+            if (key->empty())
+            {
+                key=GetEntityIdParameterAsString(pt.get_child(Elements::ReferenceKey::Name()));
+            }
+            else
+            {
+                paramKey=*key;
+            }
+        }
+        else if (index)
+        {
+            paramKey=*index;
+        }
+        else
+        {
+            paramKey.clear();
+        }
     }
 
     int GetReferencedIndex(boost::property_tree::ptree& pt, ParseState& state)
@@ -149,6 +171,60 @@ namespace ToolSupport
         return param->GetInt32Value(paramIndex);
     }
 
+    boost::optional<int> ReferencedKeyToIndex(const ParameterDescriptionBasic* pd, const std::string& key)
+    {
+        if (pd->GetCollectionType()==DictionaryCollectionType)
+        {
+            ValueDefinition vd;
+            if (ParseKey(pd->GetMemberType(), key, vd))
+            {
+                switch(pd->GetKeyType())
+                {
+                case Int32MemberType:
+                    return TypeUtilities::GetDictionaryIndexFromKey(pd, vd.key.int32);
+                    break;
+
+                case Int64MemberType:
+                case TypeIdMemberType:
+                    return TypeUtilities::GetDictionaryIndexFromKey(pd, vd.key.int64);
+                    break;
+
+                case StringMemberType:
+                    return TypeUtilities::GetDictionaryIndexFromKey(pd, vd.key.str);
+                    break;
+
+                case EntityIdMemberType:
+                    return TypeUtilities::GetDictionaryIndexFromKey(pd, std::make_pair(vd.key.int64, vd.key.hash));
+                    break;
+
+                case InstanceIdMemberType:
+                case HandlerIdMemberType:
+                case ChannelIdMemberType:
+                    return TypeUtilities::GetDictionaryIndexFromKey(pd, std::make_pair(vd.key.hash, static_cast<const char*>(NULL)));
+                    break;
+
+                default:
+                    break;
+                }
+            }
+        }
+        else
+        {
+            if (key.empty()) //the case if index is not present, then we implicit mean 0
+            {
+                return boost::optional<int>(0);
+            }
+
+            try
+            {
+                return boost::optional<int>(boost::lexical_cast<int>(key));
+            }
+            catch (const boost::bad_lexical_cast&) {}
+        }
+
+        return boost::optional<int>();
+    }
+
     std::string GetEntityIdParameterAsString(boost::property_tree::ptree& pt)
     {
         std::string name=pt.get<std::string>(Elements::ClassName::Name());
@@ -167,9 +243,9 @@ namespace ToolSupport
             case BooleanMemberType:
             {
                 if (val=="True" || val=="true")
-                    result.boolVal=true;
+                    result.val.boolean=true;
                 else if (val=="False" || val=="false")
-                    result.boolVal=false;
+                    result.val.boolean=false;
                 else
                     return false;
             }
@@ -177,45 +253,45 @@ namespace ToolSupport
 
             case Int32MemberType:
             {
-                result.int32Val=boost::lexical_cast<DotsC_Int32>(val);
+                result.val.int32=boost::lexical_cast<DotsC_Int32>(val);
             }
                 break;
             case Int64MemberType:
             {
-                result.int64Val=boost::lexical_cast<DotsC_Int64>(val);
+                result.val.int64=boost::lexical_cast<DotsC_Int64>(val);
             }
                 break;
             case Float32MemberType:
             {
-                result.float32Val=classic_string_cast<DotsC_Float32>(val);
+                result.val.float32=classic_string_cast<DotsC_Float32>(val);
             }
                 break;
             case Float64MemberType:
             {
-                result.float64Val=classic_string_cast<DotsC_Float64>(val);
+                result.val.float64=classic_string_cast<DotsC_Float64>(val);
             }
                 break;
             case EntityIdMemberType:
             {
-                result.stringVal=val;
+                result.val.str=val;
                 size_t sep=val.find(", ");
-                result.int64Val=LlufId_Generate64(val.substr(0, sep).c_str());
-                result.stringVal=val.substr(sep+2);
+                result.val.int64=LlufId_Generate64(val.substr(0, sep).c_str());
+                result.val.str=val.substr(sep+2);
                 try
                 {
-                    result.hashedVal=boost::lexical_cast<boost::int64_t>(result.stringVal);
-                    result.stringVal.clear();
+                    result.val.hash=boost::lexical_cast<boost::int64_t>(result.val.str);
+                    result.val.str.clear();
                 }
                 catch(const boost::bad_lexical_cast&)
                 {
-                    result.hashedVal=LlufId_Generate64(result.stringVal.c_str());
+                    result.val.hash=LlufId_Generate64(result.val.str.c_str());
                 }
             }
                 break;
             case TypeIdMemberType:
             {
-                result.int64Val=LlufId_Generate64(val.c_str());
-                result.stringVal=val;
+                result.val.int64=LlufId_Generate64(val.c_str());
+                result.val.str=val;
             }
                 break;
             case InstanceIdMemberType:
@@ -224,20 +300,20 @@ namespace ToolSupport
             {
                 try
                 {
-                    result.hashedVal=boost::lexical_cast<boost::int64_t>(val);
-                    result.stringVal.clear();
+                    result.val.hash=boost::lexical_cast<boost::int64_t>(val);
+                    result.val.str.clear();
                 }
                 catch(const boost::bad_lexical_cast&)
                 {
-                    result.hashedVal=LlufId_Generate64(val.c_str());
-                    result.stringVal=val;
+                    result.val.hash=LlufId_Generate64(val.c_str());
+                    result.val.str=val;
                 }
             }
                 break;
 
             case StringMemberType:
             {
-                result.stringVal=val;
+                result.val.str=val;
             }
                 break;
 
@@ -247,7 +323,7 @@ namespace ToolSupport
                 return false; //dont know about enum types here
             case BinaryMemberType:
             {
-                if (!SerializationUtils::FromBase64(val, result.stringVal))
+                if (!SerializationUtils::FromBase64(val, result.val.str))
                 {
                     return false;
                 }
@@ -274,7 +350,7 @@ namespace ToolSupport
             case Volt32MemberType:
             case Watt32MemberType:
             {
-                result.float32Val=classic_string_cast<DotsC_Float32>(val);
+                result.val.float32=classic_string_cast<DotsC_Float32>(val);
             }
                 break;
 
@@ -298,7 +374,7 @@ namespace ToolSupport
             case Volt64MemberType:
             case Watt64MemberType:
             {
-                result.float64Val=classic_string_cast<DotsC_Float64>(val);
+                result.val.float64=classic_string_cast<DotsC_Float64>(val);
             }
                 break;
             }
@@ -319,18 +395,18 @@ namespace ToolSupport
             {
             case Int32MemberType:
             {
-                result.key.num=boost::lexical_cast<DotsC_Int32>(val);
+                result.key.int32=boost::lexical_cast<DotsC_Int32>(val);
             }
                 break;
             case Int64MemberType:
             {
-                result.key.num=boost::lexical_cast<DotsC_Int64>(val);
+                result.key.int64=boost::lexical_cast<DotsC_Int64>(val);
             }
                 break;
             case EntityIdMemberType:
             {
                 size_t sep=val.find(", ");
-                result.key.num=LlufId_Generate64(val.substr(0, sep).c_str());
+                result.key.int64=LlufId_Generate64(val.substr(0, sep).c_str());
                 result.key.str=val.substr(sep+2);
                 try
                 {
@@ -345,7 +421,7 @@ namespace ToolSupport
                 break;
             case TypeIdMemberType:
             {
-                result.key.num=LlufId_Generate64(val.c_str());
+                result.key.int64=LlufId_Generate64(val.c_str());
             }
                 break;
             case InstanceIdMemberType:
@@ -634,7 +710,7 @@ namespace ToolSupport
         {
             ParameterDescriptionBasic* param=parIt->referee.referencingItem;
             size_t paramIndex=parIt->referee.referencingIndex;
-            ValueDefinition& val=param->MutableValue(paramIndex);
+            ValueDefinition& vd=param->MutableValue(paramIndex);
             boost::property_tree::ptree& pt=*(parIt->obj);
 
             if (!parIt->deprecatedXmlFormat)
@@ -665,7 +741,7 @@ namespace ToolSupport
                 //do the serialization to the expected type
                 try
                 {
-                    niceSerializer.SerializeObjectContent(typeName, val.binaryVal, pt); //since pt does not include the root element we have to use method SerializeObjectContent
+                    niceSerializer.SerializeObjectContent(typeName, vd.val.bin, pt); //since pt does not include the root element we have to use method SerializeObjectContent
                 }
                 catch (const ParseError& err)
                 {
@@ -680,7 +756,7 @@ namespace ToolSupport
                 DotsC_TypeId tid;
                 try
                 {
-                    tid=deprecatedSerializer.SerializeObjectContent(val.binaryVal, pt);
+                    tid=deprecatedSerializer.SerializeObjectContent(vd.val.bin, pt);
                 }
                 catch (const ParseError& err)
                 {
@@ -740,7 +816,7 @@ namespace ToolSupport
         ClassDescriptionBasic* cd=ref.referee.referencingClass;
         ParameterDescriptionBasic* referencing=ref.referee.referencingItem;
 
-        if (referencing->values[ref.referee.referencingIndex].referenced!=NULL)
+        if (referencing->values[ref.referee.referencingIndex].val.referenced!=NULL)
         {
             //this parameter has already been resolved.
             return true;
@@ -758,15 +834,23 @@ namespace ToolSupport
             throw ParseError("Parameter reference error", ss.str(), cd->FileName(), 42);
         }
 
-        if (referenced->GetNumberOfValues()<=static_cast<int>(ref.parameterIndex))
+        boost::optional<int> parameterIndex=ReferencedKeyToIndex(referenced, ref.parameterKey);
+        if (!parameterIndex)
         {
             std::ostringstream ss;
-            ss<<"Array index out of range for Parameter valueRef '"<<ref.parameterName<<"' and index="<<ref.parameterIndex<<". Referenced from parameter: "<<referencing->GetName();
+            ss<<"Array index is not a number. Parameter valueRef '"<<ref.parameterName<<"' and index="<<ref.parameterKey<<". Referenced from parameter: "<<referencing->GetName();
+            throw ParseError("Invalid parameter index", ss.str(), cd->FileName(), 203);
+        }
+
+        if (referenced->GetNumberOfValues()<=*parameterIndex)
+        {
+            std::ostringstream ss;
+            ss<<"Array index out of range for Parameter valueRef '"<<ref.parameterName<<"' and index="<<parameterIndex<<". Referenced from parameter: "<<referencing->GetName();
             throw ParseError("Parameter index out of bounds", ss.str(), cd->FileName(), 43);
         }
 
         //Check that the referenced parameter contains a value. If referenced param is also referencing another param, we have to resolve that one first.
-        if (referenced->values[ref.parameterIndex].kind==RefKind && referenced->values[ref.parameterIndex].referenced==NULL)
+        if (referenced->values[static_cast<size_t>(*parameterIndex)].kind==RefKind && referenced->values[static_cast<size_t>(*parameterIndex)].val.referenced==NULL)
         {
             //unresolved paramToParamRef
             return false;
@@ -803,7 +887,7 @@ namespace ToolSupport
         }
 
         //point to referenced
-        referencing->values[ref.referee.referencingIndex].referenced=&referenced->values[ref.parameterIndex];
+        referencing->values[ref.referee.referencingIndex].val.referenced=&referenced->values[static_cast<size_t>(*parameterIndex)];
 
         return true;
     }    
@@ -819,10 +903,19 @@ namespace ToolSupport
             ss<<"Could not resolve parameter for arraySizeRef '"<<ref.parameterName<<"'. Referenced from member '"<<md->GetName()<<"' in class "<<cd->GetName();
             throw ParseError("Parameter reference error", ss.str(), cd->FileName(), 49);
         }
-        if (referenced->GetNumberOfValues()<=static_cast<int>(ref.parameterIndex))
+
+        boost::optional<int> parameterIndex=ReferencedKeyToIndex(referenced, ref.parameterKey);
+        if (!parameterIndex)
         {
             std::ostringstream ss;
-            ss<<"Array index out of range for Parameter arraySizeRef '"<<ref.parameterName<<"' and index="<<ref.parameterIndex<<". Referenced from memeber '"<<md->GetName()<<"' in class "<<cd->GetName();
+            ss<<"Array index is not a number. Parameter arraySizeRef '"<<ref.parameterName<<"' and index="<<ref.parameterKey<<". Referenced from memeber '"<<md->GetName()<<"' in class "<<cd->GetName();
+            throw ParseError("Parameter index out of bounds", ss.str(), cd->FileName(), 204);
+        }
+
+        if (referenced->GetNumberOfValues()<=*parameterIndex)
+        {
+            std::ostringstream ss;
+            ss<<"Array index out of range for Parameter arraySizeRef '"<<ref.parameterName<<"' and index="<<*parameterIndex<<". Referenced from memeber '"<<md->GetName()<<"' in class "<<cd->GetName();
             throw ParseError("Parameter index out of bounds", ss.str(), cd->FileName(), 51);
         }
         if (referenced->GetMemberType()!=Int32MemberType)
@@ -832,7 +925,7 @@ namespace ToolSupport
             throw ParseError("Type missmatch in arraySizeRef", ss.str(), cd->FileName(), 52);
         }
 
-        int size=referenced->GetInt32Value(static_cast<int>(ref.parameterIndex));
+        int size=referenced->GetInt32Value(*parameterIndex);
         if (size<=0)
         {
             std::ostringstream ss;
@@ -856,10 +949,19 @@ namespace ToolSupport
             ss<<"Could not resolve parameter for maxLengthRef '"<<ref.parameterName<<"'. Referenced from memeber '"<<md->GetName()<<"' in class "<<cd->GetName();
             throw ParseError("Parameter reference error", ss.str(), cd->FileName(), 107);
         }
-        if (referenced->GetNumberOfValues()<=static_cast<int>(ref.parameterIndex))
+
+        boost::optional<int> parameterIndex=ReferencedKeyToIndex(referenced, ref.parameterKey);
+        if (!parameterIndex)
         {
             std::ostringstream ss;
-            ss<<"Array index out of range for Parameter maxLengthRef '"<<ref.parameterName<<"' and index="<<ref.parameterIndex<<". Referenced from memeber '"<<md->GetName()<<"' in class "<<cd->GetName();
+            ss<<"Array index is not a number. Parameter maxLengthRef '"<<ref.parameterName<<"' and index="<<ref.parameterKey<<". Referenced from memeber '"<<md->GetName()<<"' in class "<<cd->GetName();
+            throw ParseError("Parameter index out of bounds", ss.str(), cd->FileName(), 205);
+        }
+
+        if (referenced->GetNumberOfValues()<=*parameterIndex)
+        {
+            std::ostringstream ss;
+            ss<<"Array index out of range for Parameter maxLengthRef '"<<ref.parameterName<<"' and index="<<*parameterIndex<<". Referenced from memeber '"<<md->GetName()<<"' in class "<<cd->GetName();
             throw ParseError("Parameter index out of bounds", ss.str(), cd->FileName(), 53);
         }
         if (referenced->GetMemberType()!=Int32MemberType)
@@ -869,7 +971,7 @@ namespace ToolSupport
             throw ParseError("Type missmatch in maxLengthRef", ss.str(), cd->FileName(), 41);
         }
 
-        int size=referenced->GetInt32Value(static_cast<int>(ref.parameterIndex));
+        int size=referenced->GetInt32Value(*parameterIndex);
         if (size<=0)
         {
             std::ostringstream ss;
@@ -882,7 +984,7 @@ namespace ToolSupport
         md->maxLength=size;
     }
 
-    void DouCompletionAlgorithm::ResolveHiddenCreateRoutineParams(const ParseState& state, const ParseState::ParameterReference<CreateRoutineDescriptionBasic>& ref)
+    void DouCompletionAlgorithm::ResolveCreateRoutineParams(const ParseState& state, const ParseState::ParameterReference<CreateRoutineDescriptionBasic>& ref)
     {
         ClassDescriptionBasic* cd=ref.referee.referencingClass;
         CreateRoutineDescriptionBasic* cr=ref.referee.referencingItem;
@@ -897,20 +999,51 @@ namespace ToolSupport
         //ParameterDescription is a hidden parameter that can't be null, if so its a programming error in dots.
         ParameterDescriptionBasic* pdef=state.repository->GetParameterBasic(ref.parameterName);
 
-        pdef->memberType=md->memberType;
-        pdef->typeName=md->typeName;
-        pdef->typeId=md->typeId;
-
-        if (pdef->memberType!=EnumerationMemberType && pdef->memberType!=ObjectMemberType)
+        if (pdef->hidden) //inline parameter
         {
-            //Basic types is just stored as strings and must be converted
-            std::string paramRawVal=pdef->Value(0).stringVal;
-            if (!ParseValue(pdef->memberType, paramRawVal, pdef->MutableValue(0)))
+            pdef->memberType=md->memberType;
+            pdef->typeName=md->typeName;
+            pdef->typeId=md->typeId;
+
+            if (pdef->memberType!=EnumerationMemberType && pdef->memberType!=ObjectMemberType)
+            {
+                //Basic types is just stored as strings and must be converted
+                std::string paramRawVal=pdef->Value(0).val.str;
+                if (!ParseValue(pdef->memberType, paramRawVal, pdef->MutableValue(0)))
+                {
+                    std::ostringstream os;
+                    os<<"Cant parse createRoutine value '"<<paramRawVal<<"' for member "<<memberName<<" in createRoutine "<<cr->GetName()<<" in class "<<cd->GetName()<<" as a value of the expected type";
+                    throw ParseError("Invalid create routine value", os.str(), cd->FileName(), 63);
+                }
+            }
+        }
+        else //explicit parameter
+        {
+            if (md->GetMemberType()!=pdef->GetMemberType())
+            {
+                //wrong type
+                std::ostringstream os;
+                os<<"Wrong type of parameter. "<<ref.parameterName<<"['"<<ref.parameterKey<<"] for member "<<memberName<<" in createRoutine "<<cr->GetName()<<" in class "<<cd->GetName();
+                throw ParseError("Create routine value has wrong type", os.str(), cd->FileName(), 206);
+            }
+            else if ((md->GetMemberType()==ObjectMemberType || md->GetMemberType()==EnumerationMemberType) && md->GetTypeId()!=pdef->GetTypeId())
+            {
+                //wrong type
+                std::ostringstream os;
+                os<<"Wrong type of parameter. "<<ref.parameterName<<"['"<<ref.parameterKey<<"] for member "<<memberName<<" in createRoutine "<<cr->GetName()<<" in class "<<cd->GetName();
+                throw ParseError("Create routine value has wrong type", os.str(), cd->FileName(), 207);
+            }
+
+            boost::optional<int> paramIndex=ReferencedKeyToIndex(pdef, ref.parameterKey);
+            if (!paramIndex)
             {
                 std::ostringstream os;
-                os<<"Cant parse createRoutine value '"<<paramRawVal<<"' for member "<<memberName<<" in createRoutine "<<cr->GetName()<<" in class "<<cd->GetName()<<" as a value of the expected type";
-                throw ParseError("Invalid create routine value", os.str(), cd->FileName(), 63);
+                os<<"Can't resolve createRoutine value reference "<<ref.parameterName<<"['"<<ref.parameterKey<<"] for member "<<memberName<<" in createRoutine "<<cr->GetName()<<" in class "<<cd->GetName();
+                throw ParseError("Invalid create routine value", os.str(), cd->FileName(), 208);
             }
+
+            cr->memberValues[ref.referee.referencingIndex].second.first=ref.parameterName;
+            cr->memberValues[ref.referee.referencingIndex].second.second=*paramIndex;
         }
     }
 
@@ -929,7 +1062,7 @@ namespace ToolSupport
         //hidden create routine basic type parameters (not enums or objects)
         std::for_each(state.createRoutineIncompleteHiddenParameters.begin(),
                       state.createRoutineIncompleteHiddenParameters.end(),
-                      boost::bind(&DouCompletionAlgorithm::ResolveHiddenCreateRoutineParams, this, boost::ref(state), _1));
+                      boost::bind(&DouCompletionAlgorithm::ResolveCreateRoutineParams, this, boost::ref(state), _1));
     }
 
     void DouCompletionAlgorithm::HandleCreateRoutines(const ParseState& state, ClassDescriptionBasic* cd)
@@ -957,8 +1090,8 @@ namespace ToolSupport
             for (MemberValueVector::const_iterator mit=cr.memberValues.begin(); mit!=cr.memberValues.end(); ++mit)
             {
                 //memberName: mit->first
-                //paramName:  mit->second.first;
-                //paramIndex: mit->second.second;
+                //paramName:  mit->second.first
+                //paramIndex: mit->second.second
 
                 int memberIndex=cd->GetMemberIndex(mit->first);
                 if (memberIndex<0)
@@ -1003,12 +1136,11 @@ namespace ToolSupport
                     throw ParseError("Invalid CreateRoutine value", os.str(), cd->FileName(), 60);
                 }
 
-                if (md->GetCollectionType()==ArrayCollectionType)
+                if (md->GetCollectionType()!=SingleValueCollectionType)
                 {
                     std::ostringstream os;
-                    os<<"The createRoutine '"<<cr.name<<"' in class '"<<cd->GetName()<<"' a default value for member '"<<mit->first<<"' wich is an array. Array members can't have default values.";
-                    os<<" ..."<<md->GetName()<<" arrSize="<<md->GetArraySize()<<" isArr="<<(md->GetCollectionType()==ArrayCollectionType);
-                    throw ParseError("CreateRoutine array values not supported", os.str(), cd->FileName(), 61);
+                    os<<"The createRoutine '"<<cr.name<<"' in class '"<<cd->GetName()<<"' specifies a default value for member '"<<mit->first<<"' wich has collectionType="<<BasicTypeOperations::CollectionTypeToString(md->GetCollectionType())<<". Collections can't have default values.";
+                    throw ParseError("CreateRoutine collection values not supported", os.str(), cd->FileName(), 61);
                 }
 
                 cr.memberValuesParams.push_back(std::make_pair(pd, mit->second.second));
@@ -1047,12 +1179,12 @@ namespace ToolSupport
                 //Verify that typeId parameters contains values that are existing typeIds.
                 for (int index=0; index<pd->GetNumberOfValues(); ++index)
                 {
-                    const ValueDefinition& val=pd->Value(static_cast<size_t>(index));
-                    if (!BasicTypeOperations::ValidTypeId(state.repository.get(), val.int64Val))
+                    const ValueDefinition& v=pd->Value(static_cast<size_t>(index));
+                    if (!BasicTypeOperations::ValidTypeId(state.repository.get(), v.val.int64))
                     {
                         std::string file=parIt->first.substr(0, parIt->first.rfind(".")+1)+"dou";
                         std::ostringstream os;
-                        os<<"The parameter "<<pd->GetName()<<" has an invalid value. '"<<val.stringVal<<"' is not a TypeId of an existing type.";
+                        os<<"The parameter "<<pd->GetName()<<" has an invalid value. '"<<v.val.str<<"' is not a TypeId of an existing type.";
                         throw ParseError("Invalid TypeId parameter", os.str(), file, 45);
                     }
                 }
@@ -1062,8 +1194,8 @@ namespace ToolSupport
                 //Verify that EntityId parameters contains values that are existing class type.
                 for (int index=0; index<pd->GetNumberOfValues(); ++index)
                 {
-                    const ValueDefinition& val=pd->Value(static_cast<size_t>(index));
-                    const ClassDescription* tmpCd=state.repository->GetClass(val.int64Val);
+                    const ValueDefinition& v=pd->Value(static_cast<size_t>(index));
+                    const ClassDescription* tmpCd=state.repository->GetClass(v.val.int64);
                     if (!tmpCd)
                     {
                         std::string file=parIt->first.substr(0, parIt->first.rfind(".")+1)+"dou";
@@ -1072,7 +1204,7 @@ namespace ToolSupport
                         throw ParseError("Invalid EntityId parameter", os.str(), file, 46);
                     }
 
-                    if (!BasicTypeOperations::IsOfType<TypeRepository>(state.repository.get(), ObjectMemberType, val.int64Val, ObjectMemberType, EntityTypeId))
+                    if (!BasicTypeOperations::IsOfType<TypeRepository>(state.repository.get(), ObjectMemberType, v.val.int64, ObjectMemberType, EntityTypeId))
                     {
                         std::string file=parIt->first.substr(0, parIt->first.rfind(".")+1)+"dou";
                         std::ostringstream os;
@@ -1098,13 +1230,13 @@ namespace ToolSupport
                 //Check value
                 for (int index=0; index<pd->GetNumberOfValues(); ++index)
                 {
-                    ValueDefinition& val=pd->MutableValue(static_cast<size_t>(index));
-                    val.int32Val=ed->GetIndexOfValue(val.stringVal);
-                    if (val.int32Val<0)
+                    ValueDefinition& v=pd->MutableValue(static_cast<size_t>(index));
+                    v.val.int32=ed->GetIndexOfValue(v.val.str);
+                    if (v.val.int32<0)
                     {
                         std::string file=parIt->first.substr(0, parIt->first.rfind(".")+1)+"dou";
                         std::ostringstream os;
-                        os<<"The parameter "<<pd->GetName()<<" has an invalid value '"<<val.stringVal<<"'. Expected to be an enum value of type "<<ed->GetName();
+                        os<<"The parameter "<<pd->GetName()<<" has an invalid value '"<<v.val.str<<"'. Expected to be an enum value of type "<<ed->GetName();
                         throw ParseError("Invalid enum value", os.str(), file, 48);
                     }
                 }
@@ -1128,8 +1260,8 @@ namespace ToolSupport
                 for (int index=0; index<pd->GetNumberOfValues(); ++index)
                 {
                     ValueDefinition& val=pd->MutableValue(static_cast<size_t>(index));
-                    val.key.num=ed->GetIndexOfValue(val.key.str);
-                    if (val.key.num<0)
+                    val.key.int32=ed->GetIndexOfValue(val.key.str);
+                    if (val.key.int32<0)
                     {
                         std::string file=parIt->first.substr(0, parIt->first.rfind(".")+1)+"dou";
                         std::ostringstream os;

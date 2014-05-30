@@ -3,4 +3,12 @@
     <summary>Contains the definition of a distribution channel name.</summary>
     <name>ParserTest.MyEntity</name>
     <baseClass>Safir.Dob.Entity</baseClass>  
+    
+    <parameters>
+        <parameter>
+            <name>IntPar</name>
+            <type>Int32</type>
+            <value>123</value>
+        </parameter>        
+    </parameters>
 </class>
