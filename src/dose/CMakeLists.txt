@@ -9,7 +9,7 @@ add_subdirectory(dose_dotnet.ss/src)
 add_subdirectory(dose_java.ss/src)
 #add_subdirectory(/dose_ada.ss                      RelWithDebInfo
 
-#add_subdirectory(/dose_sate.ss/src                 RelWithDebInfo
+add_subdirectory(dose_sate.ss/src)
 add_subdirectory(dose_dobexplorer.ss/src)
 add_subdirectory(dose_test_dou.ss)
 #add_subdirectory(dose_test.ss) #these should be moved

@@ -1,5 +1,5 @@
 function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
-    cmake_parse_arguments(_cs "LIBRARY;EXE;WINEXE" "SIGN" "SOURCES;REFERENCES" ${ARGN})
+    cmake_parse_arguments(_cs "LIBRARY;EXE;WINEXE" "SIGN;RESOURCE_PREFIX" "SOURCES;RESOURCES;REFERENCES" ${ARGN})
     
     if (NOT _cs_LIBRARY AND NOT _cs_EXE AND NOT _cs_WINEXE)
       message(FATAL_ERROR "ADD_CSHARP_ASSEMBLY: TARGET_KIND not specified!")
@@ -10,7 +10,7 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
     endif()
 
     #we always generated debug info and enable optimizations, regardless of build type
-    SET(_cs_flags "-debug -optimize -fullpaths")
+    SET(_cs_flags "-debug -optimize -fullpaths -define:FUNC_PTR_WORKAROUND")
 
     if (_cs_SIGN)
       set(_cs_flags "${_cs_flags} -keyfile:\"${_cs_SIGN}\"")
@@ -26,7 +26,7 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
       set (_cs_target "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.exe")
       set (_cs_target_kind exe)
     elseif (_cs_WINEXE)
-      set (_cs_target "${CMAKE_CURRENT_CURRENT_BINARY_DIR}/${TARGET_NAME}.exe")
+      set (_cs_target "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.exe")
       set (_cs_target_kind winexe)
     endif()
 
@@ -38,10 +38,31 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
       set (_cs_debug_file "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.pdb")
     endif()
 
+    foreach(resx_file ${_cs_RESOURCES})
+      get_filename_component(base_name ${resx_file} NAME_WE)
+      set (resources_file "${CMAKE_CURRENT_BINARY_DIR}/${_cs_RESOURCE_PREFIX}${base_name}.resources")
+      set (_cs_resources_files ${_cs_resources_files} ${resources_file})
+      set (_cs_resources_cmd "${_cs_resources_cmd} -res:${resources_file}")
+      
+      ADD_CUSTOM_COMMAND(OUTPUT ${resources_file}
+        COMMAND ${RESGEN_EXECUTABLE} ARGS ${resx_file} ${resources_file}
+        DEPENDS ${resx_file}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        )
+    endforeach()
 
     foreach(_cs_ref ${_cs_REFERENCES})
+      #This disables a warning about getting properties for targets that dont exist
+      #which is exactly what we do below.
+      cmake_policy(SET CMP0045 OLD)
+
       get_target_property(_cs_ref_file ${_cs_ref} ASSEMBLY_FILE)
-      set(references "${references} -reference:\"${_cs_ref_file}\"")
+      if (_cs_ref_file)
+        set(references "${references} -reference:\"${_cs_ref_file}\"")
+        set(_cs_target_dependencies ${_cs_target_dependencies} ${_cs_ref})
+      else()
+        set(references "${references} -reference:\"${_cs_ref}\"")
+      endif()
       #set(ref_depends ${ref_depends} ${_cs_ref_file})
     endforeach()
 
@@ -61,6 +82,7 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
                                   -out:\"${_cs_target}\"
                                   -target:${_cs_target_kind}
                                   ${references}
+                                  ${_cs_resources_cmd}
                                   ${_cs_sources_spaced}")
     
     #Log contents if needed
@@ -69,10 +91,11 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
       MESSAGE("Contents of ${response_file} is ${response_file_contents}")
     endif()   
 
+
     add_custom_command (
       OUTPUT ${_cs_target} ${_cs_doc_file} ${_cs_debug_file}
       COMMAND ${CSHARP_COMPILER} @${response_file}
-      DEPENDS ${_cs_SOURCES} ${_cs_REFERENCES}
+      DEPENDS ${_cs_SOURCES} ${_cs_target_dependencies} ${_cs_resources_files}
       COMMENT "Building ${_cs_target_kind} assembly ${TARGET_NAME}"
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
