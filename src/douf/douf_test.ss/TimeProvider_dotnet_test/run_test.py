@@ -24,34 +24,21 @@
 #
 ###############################################################################
 from __future__ import print_function
-import subprocess, sys, os, shutil, time
+import subprocess, sys, os, shutil, time, argparse
 
-if sys.platform == "win32":
-    config_type = os.environ.get("CMAKE_CONFIG_TYPE")
-    exe_path = config_type if config_type else ""
-else:
-    exe_path = "."
+parser = argparse.ArgumentParser("test script")
+parser.add_argument("--test-exe", required=True)
+parser.add_argument("--dependencies", required=True)
 
-tester_path_base = os.path.join(exe_path,"dotnet_tester")
-tester_csexe = tester_path_base+".csexe"
-tester_exe = tester_path_base+".exe"
-shutil.copy2(tester_csexe,tester_exe)
+arguments = parser.parse_args()
 
-SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
-dependencies = ("Safir.Dob.Typesystem.dll",
-                "Safir.Time.dll",)
+dependencies = arguments.dependencies.split(",")
 
 for dep in dependencies:
-    shutil.copy2(os.path.join(SAFIR_RUNTIME,"bin",dep),
+    shutil.copy2(dep,
                  ".")
 
-result = subprocess.call(tester_exe)
-
-time.sleep(0.1)
-
-os.remove(tester_exe)
-for dep in dependencies:
-    os.remove(dep)
+result = subprocess.call(arguments.test_exe)
 
 print("Result =", result)
 
