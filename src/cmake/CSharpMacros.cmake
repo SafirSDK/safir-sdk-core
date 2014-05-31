@@ -52,9 +52,12 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
     endforeach()
 
     foreach(_cs_ref ${_cs_REFERENCES})
-      #This disables a warning about getting properties for targets that dont exist
-      #which is exactly what we do below.
-      cmake_policy(SET CMP0045 OLD)
+
+      if (NOT CMAKE_VERSION VERSION_LESS "3.0.0")
+        #This disables a warning about getting properties for targets that dont exist
+        #which is exactly what we do below.
+        cmake_policy(SET CMP0045 OLD)
+      endif()
 
       get_target_property(_cs_ref_file ${_cs_ref} ASSEMBLY_FILE)
       if (_cs_ref_file)
