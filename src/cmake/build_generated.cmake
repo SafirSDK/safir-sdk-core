@@ -188,10 +188,10 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
     ENDFOREACH()
 
     ADD_CSHARP_ASSEMBLY(dots_generated-${GEN_NAME}-dotnet LIBRARY
+      SIGN ${safir_sdk_core_SOURCE_DIR}/../build/config/sdk/data/build/safirkey.snk
       SOURCES ${dotnet_files}
       REFERENCES Safir.Dob.Typesystem ${assembly_refs})
 
-    #TODO: sign!
   endif()
 
   ############
