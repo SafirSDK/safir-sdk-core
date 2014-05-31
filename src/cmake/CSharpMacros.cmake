@@ -10,7 +10,7 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
     endif()
 
     #we always generated debug info and enable optimizations, regardless of build type
-    SET(_cs_flags "-debug -optimize")
+    SET(_cs_flags "-debug -optimize -fullpaths")
 
     if (_cs_SIGN)
       set(_cs_flags "${_cs_flags} -keyfile:\"${_cs_SIGN}\"")

@@ -103,6 +103,7 @@ class DotsTestDotnet
             Test_IsProperty();
             Test_IsEnumeration();
             Test_IsException();
+            Test_DeserializeUnlinkedObject();
             Test_GetDouFilePath();
         }
         finally
@@ -7712,5 +7713,17 @@ class DotsTestDotnet
                   "DotsTest.MemberTypesProperty.dou");
     }
 
+
+    /* This test attempts to deserialize a piece of xml that represents a class 
+     * that is part of a dou library whose jar is *not* in the classpath of this test.
+     * The idea being that this test will succeed if dots_cpp has loaded all the
+     * required jars as specified by typesystem.ini
+     */
+    private static void Test_DeserializeUnlinkedObject() {
+        Header("DeserializeUnlinkedObject");
+        string xml = "<?xml version=\"1.0\" encoding=\"utf-8\"?><DotsTest.ExtraObject><Int32Member>-32</Int32Member></DotsTest.ExtraObject>";
+        Safir.Dob.Typesystem.Object obj = Safir.Dob.Typesystem.Serialization.ToObject(xml);
+        Console.WriteLine("Class name: " + Safir.Dob.Typesystem.Operations.GetName(obj.GetTypeId()));
+    }
 
 }

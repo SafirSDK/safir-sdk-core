@@ -53,7 +53,7 @@ for pair in arguments.dots_generated_paths.split(";"):
 syslog = SyslogServer(arguments.show_safir_config)
 
 if arguments.language == "cpp":
-    command = arguments.binary
+    command = (arguments.binary,)
 #elif arguments.language == "ada":
 #    command = (os.path.join("ada", "obj", "dots_test_ada"),)
 #elif arguments.language == "dotnet":
@@ -71,7 +71,7 @@ elif arguments.language == "dotnet":
     for dep in dependencies:
         shutil.copy2(dep,
                     ".")
-    command = arguments.binary
+    command = (arguments.binary,)
      
 else:
     print("Not implemented")

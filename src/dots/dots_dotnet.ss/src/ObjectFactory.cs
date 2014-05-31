@@ -80,25 +80,17 @@ namespace Safir.Dob.Typesystem
             }
 
             System.Int64 typeId = Internal.Kernel.DotsC_GetTypeId(blob);
-            string typeName = Operations.GetName(typeId);
-            if (typeName == "Object")
-            {
-                typeName = "Safir.Dob.Typesystem.Object";
-            }
-            else
-            {
-                typeName += ", dots_generated-dotnet";
-            }
+            
 
-            System.Type type = System.Type.GetType(typeName);
+            System.Type type = GeneratedAssemblies.Instance.GetType(typeId);
             if (type == null)
             {
-                throw new IllegalValueException("Could not create type " + typeName);
+                throw new IllegalValueException("Could not create type " + Operations.GetName(typeId));
             }
             Object obj = System.Activator.CreateInstance(type, blob) as Object;
             if (obj == null)
             {
-                throw new IllegalValueException("Could not create type " + typeName);
+                throw new IllegalValueException("Could not create type " + Operations.GetName(typeId));
             }
             return obj;
         }
@@ -114,24 +106,16 @@ namespace Safir.Dob.Typesystem
         /// <exception cref="IllegalValueException">The type couldn't be found in the ObjectFactory.</exception>
         public Object CreateObject(System.Int64 typeId)
         {
-            string typeName = Operations.GetName(typeId);
-            if (typeName == "Object")
-            {
-                typeName = "Safir.Dob.Typesystem.Object";
-            }
-            else
-            {
-                typeName += ", dots_generated-dotnet";
-            }
-            System.Type type = System.Type.GetType(typeName ,true);
+            System.Type type = GeneratedAssemblies.Instance.GetType(typeId);
+
             if (type == null)
             {
-                throw new IllegalValueException("Could not create type " + typeName);
+                throw new IllegalValueException("Could not create type " + Operations.GetName(typeId));
             }
             Object obj = System.Activator.CreateInstance(type) as Object;
             if (obj == null)
             {
-                throw new IllegalValueException("Could not create type " + typeName);
+                throw new IllegalValueException("Could not create type " + Operations.GetName(typeId));
             }
             return obj;
         }
