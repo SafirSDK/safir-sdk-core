@@ -1197,5 +1197,44 @@ namespace Safir.Dob.Typesystem.Internal
                                                                 System.IntPtr buf,
                                                                 System.Int32 bufSize,
                                                                 out System.Int32 resultSize);
+
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 4)]
+        internal struct DotsC_GeneratedLibrary
+        {
+            [MarshalAs(UnmanagedType.LPStr)]
+            public string name;
+
+            [MarshalAs(UnmanagedType.LPStr)]
+            public string cppLibraryName;
+
+            [MarshalAs(UnmanagedType.LPStr)]
+            public string cppLibraryLocation;
+
+            [MarshalAs(UnmanagedType.LPStr)]
+            public string javaJarName;
+
+            [MarshalAs(UnmanagedType.LPStr)]
+            public string javaJarLocation;
+
+            [MarshalAs(UnmanagedType.LPStr)]
+            public string dotnetAssemblyName;
+
+            [MarshalAs(UnmanagedType.LPStr)]
+            public string dotnetAssemblyLocation;
+
+            [MarshalAs(UnmanagedType.Bool)]
+            public bool dontLoad;
+        }
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        internal delegate void DotsC_GeneratedLibraryListDeleter(System.IntPtr list,
+                                                                 System.Int32 size);
+
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        static internal extern void DotsC_GetGeneratedLibraryList(out System.IntPtr generatedLibraries,
+                                                                  out System.Int32 size,
+                                                                  out DotsC_GeneratedLibraryListDeleter deleter);
+
     }
 }

@@ -25,6 +25,8 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using Safir.Dob.Typesystem.Internal;
 
 namespace Safir.Dob.Typesystem
 {
@@ -55,9 +57,37 @@ namespace Safir.Dob.Typesystem
 
         private GeneratedAssemblies()
         {
-            m_assemblies.Add(System.Reflection.Assembly.LoadFile("/home/lars/logan/src/dots/dots_test_dou.ss/dots_generated-DotsTest-dotnet.dll"));
-            m_assemblies.Add(System.Reflection.Assembly.LoadFile("/home/lars/logan/src/dots/dots_test_extra_dou.ss/dots_generated-DotsTestExtra-dotnet.dll"));
-            //TODO
+            System.IntPtr generatedLibraries;
+            System.Int32 size;
+            Kernel.DotsC_GeneratedLibraryListDeleter deleter;
+
+            Kernel.DotsC_GetGeneratedLibraryList(out generatedLibraries,
+                                                 out size,
+                                                 out deleter);
+            Kernel.DotsC_GeneratedLibrary lib;
+
+            for (int i = 0; i < size; ++i)
+            {
+                System.IntPtr iterator =
+                    (System.IntPtr)(generatedLibraries.ToInt64() + 
+                                    i * Marshal.SizeOf(typeof(Kernel.DotsC_GeneratedLibrary)));
+                lib = (Kernel.DotsC_GeneratedLibrary)Marshal.PtrToStructure(iterator, typeof(Kernel.DotsC_GeneratedLibrary));
+                
+                if (lib.dontLoad)
+                {
+                    System.Console.WriteLine("Not loading " + lib.dotnetAssemblyName + ", since dont_load is set.");
+                }
+                else if (string.IsNullOrEmpty(lib.dotnetAssemblyLocation))
+                {
+                    m_assemblies.Add(System.Reflection.Assembly.Load(lib.dotnetAssemblyName));
+                }
+                else
+                {
+                    m_assemblies.Add(System.Reflection.Assembly.LoadFile(lib.dotnetAssemblyLocation + "/" + lib.dotnetAssemblyName + ".dll"));
+                }
+            }
+
+            deleter(generatedLibraries,size);
         }
 
         private System.Type LoadType(System.Int64 typeId)

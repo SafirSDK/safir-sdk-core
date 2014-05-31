@@ -89,7 +89,7 @@ namespace Typesystem
                     location = generatedLibraries[i].cppLibraryLocation;
                 }
                 
-                if (generatedLibraries[i].dontLoad)
+                if (generatedLibraries[i].dontLoad != 0)
                 {
                     lllog(1) << "Not loading " << generatedLibraries[i].cppLibraryLocation << " since dont_load is specified" << std::endl;
                 }

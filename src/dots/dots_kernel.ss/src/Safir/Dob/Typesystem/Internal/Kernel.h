@@ -1475,7 +1475,7 @@ extern "C"
         char* dotnetAssemblyName;
         char* dotnetAssemblyLocation;
 
-        bool dontLoad;
+        DotsC_Int32 dontLoad; //boolean value, 0 if false, 1 otherwise
     };
 #pragma pack(pop)
 

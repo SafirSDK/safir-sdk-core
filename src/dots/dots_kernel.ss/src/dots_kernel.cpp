@@ -2036,7 +2036,7 @@ void DotsC_GetGeneratedLibraryList(DotsC_GeneratedLibrary*& generatedLibraries,
             }
 
             const boost::optional<bool> dont_load = it->second.get_optional<bool>("dont_load");
-            generatedLibraries[i].dontLoad = !!dont_load && dont_load.get();
+            generatedLibraries[i].dontLoad = (!!dont_load && dont_load.get()) ? 1 : 0;
 
             ++i;
         }
