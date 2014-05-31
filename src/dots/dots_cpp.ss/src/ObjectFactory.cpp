@@ -95,7 +95,7 @@ namespace Typesystem
                 }
                 else
                 {
-                    lllog(1) << "Loading " << generatedLibraries[i].cppLibraryLocation << std::endl;
+                    lllog(1) << "Loading " << generatedLibraries[i].cppLibraryName << std::endl;
                     LoadGeneratedLibrary(location, generatedLibraries[i].cppLibraryName);
                 }
             }
