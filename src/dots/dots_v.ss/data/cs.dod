@@ -490,6 +490,9 @@ namespace @_NAMESPACE_@
     {
         #region Constructors
 
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
         public @_CLASS_@()
             : base()
         {
@@ -1218,6 +1221,9 @@ namespace @_NAMESPACE_@
     /// </summary>
     public class @_CLASS_@Container : Safir.Dob.Typesystem.ObjectContainerImpl<@_CLASS_@>, ICloneable
     {
+        /// <summary>
+        /// Constructor.
+        /// </summary>
         public @_CLASS_@Container() : base() { }
 
         #region Cloning
