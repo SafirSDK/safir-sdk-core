@@ -114,11 +114,38 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
     set_property(TARGET ${TARGET_NAME}
       PROPERTY TARGET_KIND ${_cs_target_kind})
 
-    if (_cs_LIBRARY)
-      set_property(TARGET ${TARGET_NAME}
-        PROPERTY DEBUG_INFO_FILE ${_cs_debug_file})
-    endif()
+    #if (_cs_LIBRARY)
+    set_property(TARGET ${TARGET_NAME}
+      PROPERTY DEBUG_INFO_FILE ${_cs_debug_file})
+    #endif()
 
 endfunction()
 
+
+function(INSTALL_CSHARP_ASSEMBLY)
+    cmake_parse_arguments(_cs "" "TARGET;DESTINATION" "" ${ARGN})
+    
+    if (NOT "${_cs_UNPARSED_ARGUMENTS}" STREQUAL "")
+      message(FATAL_ERROR "Unknown argument to SAFIR_INSTALL '${_cs_UNPARSED_ARGUMENTS}'")
+    endif()
+
+    if (NOT CMAKE_VERSION VERSION_LESS "3.0.0")
+      #This disables a warning about getting properties for targets that dont exist
+      #which is exactly what we do below.
+      cmake_policy(SET CMP0045 OLD)
+    endif()
+
+    get_property(_cs_ASSEMBLY_FILE TARGET ${_cs_TARGET} PROPERTY ASSEMBLY_FILE)
+
+    if (NOT _cs_ASSEMBLY_FILE)
+      message(FATAL_ERROR "The target ${_TARGET_NAME} is not known in this scope.")
+      return()
+    endif()
+
+    get_property(_cs_DOC_FILE TARGET ${_cs_TARGET} PROPERTY DOC_FILE)
+    get_property(_cs_DEBUG_INFO_FILE TARGET ${_cs_TARGET} PROPERTY DEBUG_INFO_FILE)
+
+    install(FILES ${_cs_ASSEMBLY_FILE} ${_cs_DOC_FILE} ${_cs_DEBUG_INFO_FILE}
+      DESTINATION ${_cs_DESTINATION})
+endfunction()
 #TODO: install fcn

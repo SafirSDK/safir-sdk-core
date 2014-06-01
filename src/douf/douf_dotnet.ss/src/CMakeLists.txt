@@ -9,5 +9,6 @@ ADD_CSHARP_ASSEMBLY(Safir.Time LIBRARY
   SOURCES ${sources}
   REFERENCES Safir.Dob.Typesystem)
 
+INSTALL_CSHARP_ASSEMBLY(TARGET Safir.Time
+  DESTINATION lib/safir_sdk_core)
 
-#TODO: install

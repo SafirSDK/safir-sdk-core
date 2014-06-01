@@ -215,9 +215,13 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
     INSTALL(FILES ${dou_files} ${dom_files} ${namespace_files}
       DESTINATION share/safir_sdk_core/${GEN_NAME})
 
-    #TODO: install jars
     if (Java_FOUND)
-      install_jar(dots_generated-${GEN_NAME}-java DESTINATION share/java/safir_sdk_core)
+      install_jar(dots_generated-${GEN_NAME}-java share/java/safir_sdk_core)
+    endif()
+
+    if (CSHARP_FOUND)
+      INSTALL_CSHARP_ASSEMBLY(TARGET dots_generated-${GEN_NAME}-dotnet
+        DESTINATION lib/safir_sdk_core)
     endif()
 
   endif()
