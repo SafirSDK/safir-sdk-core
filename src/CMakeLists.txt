@@ -430,7 +430,7 @@ SET(safir_config_files config/typesystem.ini config/locations.ini config/logging
 
 if (UNIX)
   INSTALL(FILES ${safir_config_files}
-    DESTINATION etc/safir_sdk_core) #TODO: absolute path?! eller gor om lluf_config att vara PREFIX-aware? Funkar det med NSIS?
+    DESTINATION /etc/safir_sdk_core) #TODO: absolute path?! eller gor om lluf_config att vara PREFIX-aware? Funkar det med NSIS?
 elseif(WIN32)
   INSTALL(FILES ${safir_config_files}
     DESTINATION $ENV{APPDATA}/safir_sdk_core/config) #TODO?!

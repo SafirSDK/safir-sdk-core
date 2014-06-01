@@ -12,5 +12,5 @@ ADD_CSHARP_ASSEMBLY(sate WINEXE
   RESOURCE_PREFIX Sate.
   REFERENCES Safir.Dob dots_generated-Safir-dotnet Safir.Dob.Typesystem System.Windows.Forms System.Drawing System.Data)
 
-INSTALL_CSHARP_ASSEMBLY(TARGET Safir.Logging
+INSTALL_CSHARP_ASSEMBLY(TARGET sate
   DESTINATION bin)
