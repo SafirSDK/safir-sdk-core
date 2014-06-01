@@ -108,16 +108,16 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
     set_property(TARGET ${TARGET_NAME}
       PROPERTY ASSEMBLY_FILE ${_cs_target})
 
-    set_property(TARGET ${TARGET_NAME}
-      PROPERTY DOC_FILE ${_cs_doc_file})
+    if (_cs_LIBRARY)
+      set_property(TARGET ${TARGET_NAME}
+        PROPERTY DOC_FILE ${_cs_doc_file})
+    endif()
 
     set_property(TARGET ${TARGET_NAME}
       PROPERTY TARGET_KIND ${_cs_target_kind})
 
-    #if (_cs_LIBRARY)
     set_property(TARGET ${TARGET_NAME}
       PROPERTY DEBUG_INFO_FILE ${_cs_debug_file})
-    #endif()
 
 endfunction()
 
@@ -145,7 +145,11 @@ function(INSTALL_CSHARP_ASSEMBLY)
     get_property(_cs_DOC_FILE TARGET ${_cs_TARGET} PROPERTY DOC_FILE)
     get_property(_cs_DEBUG_INFO_FILE TARGET ${_cs_TARGET} PROPERTY DEBUG_INFO_FILE)
 
+    if(NOT _cs_DOC_FILE)
+      unset(_cs_DOC_FILE)
+    endif()
+
     install(FILES ${_cs_ASSEMBLY_FILE} ${_cs_DOC_FILE} ${_cs_DEBUG_INFO_FILE}
       DESTINATION ${_cs_DESTINATION})
 endfunction()
-#TODO: install fcn
+
