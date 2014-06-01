@@ -42,7 +42,7 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
       get_filename_component(base_name ${resx_file} NAME_WE)
       set (resources_file "${CMAKE_CURRENT_BINARY_DIR}/${_cs_RESOURCE_PREFIX}${base_name}.resources")
       set (_cs_resources_files ${_cs_resources_files} ${resources_file})
-      set (_cs_resources_cmd "${_cs_resources_cmd} -res:${resources_file}")
+      set (_cs_resources_cmd "${_cs_resources_cmd} -res:\"${resources_file}\"")
       
       ADD_CUSTOM_COMMAND(OUTPUT ${resources_file}
         COMMAND ${RESGEN_EXECUTABLE} ARGS ${resx_file} ${resources_file}
