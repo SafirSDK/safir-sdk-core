@@ -142,14 +142,21 @@ function(INSTALL_CSHARP_ASSEMBLY)
       return()
     endif()
 
+    get_property(_cs_TARGET_KIND TARGET ${_cs_TARGET} PROPERTY TARGET_KIND)
     get_property(_cs_DOC_FILE TARGET ${_cs_TARGET} PROPERTY DOC_FILE)
     get_property(_cs_DEBUG_INFO_FILE TARGET ${_cs_TARGET} PROPERTY DEBUG_INFO_FILE)
 
-    if(NOT _cs_DOC_FILE)
-      unset(_cs_DOC_FILE)
+    if ("${_cs_TARGET_KIND}" STREQUAL "library")
+      install(FILES ${_cs_ASSEMBLY_FILE} ${_cs_DOC_FILE} ${_cs_DEBUG_INFO_FILE}
+        DESTINATION ${_cs_DESTINATION})
+    else()
+      install(FILES ${_cs_DEBUG_INFO_FILE}
+        DESTINATION ${_cs_DESTINATION})
+
+      install(PROGRAMS ${_cs_ASSEMBLY_FILE}
+        DESTINATION ${_cs_DESTINATION})
     endif()
 
-    install(FILES ${_cs_ASSEMBLY_FILE} ${_cs_DOC_FILE} ${_cs_DEBUG_INFO_FILE}
-      DESTINATION ${_cs_DESTINATION})
+
 endfunction()
 
