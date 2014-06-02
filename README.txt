@@ -1,5 +1,5 @@
-Welcome to Safir SDK Core 5.0.1
-===============================
+Welcome to the Safir SDK master branch.
+=======================================
 
 Safir SDK Core is released under the GPL v3 license, a copy of which can be found in COPYING.txt.
 
