@@ -1362,6 +1362,9 @@ namespace @_NAMESPACE_@
         /// </summary>        
         public class EnumerationContainer : Safir.Dob.Typesystem.EnumerationContainerBase, ICloneable
         {
+            /// <summary>
+            /// Constructor.
+            /// </summary>        
             public EnumerationContainer() : base() { }
 
             #region Cloning
