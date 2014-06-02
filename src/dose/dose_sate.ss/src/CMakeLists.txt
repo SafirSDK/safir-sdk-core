@@ -16,6 +16,8 @@ INSTALL_CSHARP_ASSEMBLY(TARGET sate
   DESTINATION bin)
 
 if(UNIX)
+  configure_file(run_sate.sh-template run_sate.sh)
+
   install(PROGRAMS run_sate.sh
     DESTINATION bin
     RENAME sate)
