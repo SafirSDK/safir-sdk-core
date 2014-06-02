@@ -14,3 +14,10 @@ ADD_CSHARP_ASSEMBLY(sate WINEXE
 
 INSTALL_CSHARP_ASSEMBLY(TARGET sate
   DESTINATION bin)
+
+if(UNIX)
+  install(PROGRAMS run_sate.sh
+    DESTINATION bin
+    RENAME sate)
+endif()
+
