@@ -84,8 +84,8 @@ namespace ToolSupport
             };
         } val;
 
-        ValueDefinition() : kind(ValueKind) {}
-        ValueDefinition(ValueDefinitionKind k) : kind(k) {}
+        ValueDefinition() : kind(ValueKind) {val.referenced=NULL;}
+        ValueDefinition(ValueDefinitionKind k) : kind(k) {val.referenced=NULL;}
     };
 
     typedef std::vector<ValueDefinition> ParameterValues;

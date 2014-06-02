@@ -996,8 +996,16 @@ namespace ToolSupport
             return;
         }
         const MemberDescriptionBasic* md=static_cast<const MemberDescriptionBasic*>(cd->GetMember(memberIndex));
-        //ParameterDescription is a hidden parameter that can't be null, if so its a programming error in dots.
         ParameterDescriptionBasic* pdef=state.repository->GetParameterBasic(ref.parameterName);
+
+        if (!pdef)
+        {
+            //Parameter not found
+            std::ostringstream os;
+            os<<"The createRoutine '"<<cr->name<<"' in class "<<cd->GetName()<<"' specifies an invalid parameter as default value for member '"<<
+                md->name<<"'. The parameter '"<<ref.parameterName<<"' does not exist.";
+            throw ParseError("Invalid CreateRoutine value", os.str(), cd->FileName(), 58);
+        }
 
         if (pdef->hidden) //inline parameter
         {
@@ -1019,19 +1027,20 @@ namespace ToolSupport
         }
         else //explicit parameter
         {
-            if (md->GetMemberType()!=pdef->GetMemberType())
+            if (!BasicTypeOperations::IsOfType<TypeRepository>(state.repository.get(), pdef->GetMemberType(), pdef->GetTypeId(), md->GetMemberType(), md->GetTypeId()))
             {
-                //wrong type
+                //Type missmatch
                 std::ostringstream os;
-                os<<"Wrong type of parameter. "<<ref.parameterName<<"['"<<ref.parameterKey<<"] for member "<<memberName<<" in createRoutine "<<cr->GetName()<<" in class "<<cd->GetName();
-                throw ParseError("Create routine value has wrong type", os.str(), cd->FileName(), 206);
+                os<<"The createRoutine '"<<cr->name<<"' in class '"<<cd->GetName()<<"' specifies a value of incorrect type for member '"<<md->name<<"'. Expected type "<<
+                    md->typeName<<" but specified value has type "<<pdef->typeName;
+                throw ParseError("Invalid CreateRoutine value", os.str(), cd->FileName(), 60);
             }
-            else if ((md->GetMemberType()==ObjectMemberType || md->GetMemberType()==EnumerationMemberType) && md->GetTypeId()!=pdef->GetTypeId())
+
+            if (md->GetCollectionType()!=SingleValueCollectionType)
             {
-                //wrong type
                 std::ostringstream os;
-                os<<"Wrong type of parameter. "<<ref.parameterName<<"['"<<ref.parameterKey<<"] for member "<<memberName<<" in createRoutine "<<cr->GetName()<<" in class "<<cd->GetName();
-                throw ParseError("Create routine value has wrong type", os.str(), cd->FileName(), 207);
+                os<<"The createRoutine '"<<cr->name<<"' in class '"<<cd->name<<"' specifies a default value for member '"<<md->name<<"' wich has collectionType="<<BasicTypeOperations::CollectionTypeToString(md->GetCollectionType())<<". Collections can't have default values.";
+                throw ParseError("CreateRoutine collection values not supported", os.str(), cd->FileName(), 61);
             }
 
             boost::optional<int> paramIndex=ReferencedKeyToIndex(pdef, ref.parameterKey);
@@ -1102,14 +1111,7 @@ namespace ToolSupport
                     throw ParseError("Invalid CreateRoutine value", os.str(), cd->FileName(), 57);
                 }
                 const ParameterDescriptionBasic* pd=state.repository->GetParameterBasic(mit->second.first);
-                if (!pd)
-                {
-                    //Parameter not found
-                    std::ostringstream os;
-                    os<<"The createRoutine '"<<cr.name<<"' in class "<<cd->GetName()<<"' specifies an invalid parameter as default value for member '"<<
-                        mit->first<<"'. The parameter '"<<mit->second.first<<"' does not exist.";
-                    throw ParseError("Invalid CreateRoutine value", os.str(), cd->FileName(), 58);
-                }
+
                 if (pd->GetNumberOfValues()<=mit->second.second)
                 {
                     //Array index out of range
@@ -1125,22 +1127,6 @@ namespace ToolSupport
                         os<<" - actual array size is "<<pd->GetNumberOfValues();
                     }
                     throw ParseError("Invalid CreateRoutine value", os.str(), cd->FileName(), 59);
-                }
-                const MemberDescriptionBasic* md=static_cast<const MemberDescriptionBasic*>(cd->GetMember(memberIndex));
-                if (!BasicTypeOperations::IsOfType<TypeRepository>(state.repository.get(), pd->GetMemberType(), pd->GetTypeId(), md->GetMemberType(), md->GetTypeId()))
-                {
-                    //Type missmatch
-                    std::ostringstream os;
-                    os<<"The createRoutine '"<<cr.name<<"' in class '"<<cd->GetName()<<"' specifies a value of incorrect type for member '"<<mit->first<<"'. Expected type "<<
-                        md->typeName<<" but specified value has type "<<pd->typeName;
-                    throw ParseError("Invalid CreateRoutine value", os.str(), cd->FileName(), 60);
-                }
-
-                if (md->GetCollectionType()!=SingleValueCollectionType)
-                {
-                    std::ostringstream os;
-                    os<<"The createRoutine '"<<cr.name<<"' in class '"<<cd->GetName()<<"' specifies a default value for member '"<<mit->first<<"' wich has collectionType="<<BasicTypeOperations::CollectionTypeToString(md->GetCollectionType())<<". Collections can't have default values.";
-                    throw ParseError("CreateRoutine collection values not supported", os.str(), cd->FileName(), 61);
                 }
 
                 cr.memberValuesParams.push_back(std::make_pair(pd, mit->second.second));

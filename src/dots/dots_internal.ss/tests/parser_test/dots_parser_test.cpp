@@ -19,7 +19,7 @@
 #include <boost/limits.hpp>
 
 static bool StopOnError=false;
-static bool PrintRepository=true;
+static bool PrintRepository=false;
 
 struct TestCase
 {
@@ -72,11 +72,11 @@ int main(int argc, char* argv[])
     }
     if (argc>4)
     {
-        PrintRepository=true;
+        PrintRepository=std::string(argv[4])=="true";
     }
     if (argc>5)
     {
-        StopOnError=true;
+        StopOnError=std::string(argv[5])=="true";
     }
 
     std::cout<<"========= Test suite started ========"<<std::endl;
