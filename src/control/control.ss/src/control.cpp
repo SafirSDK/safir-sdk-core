@@ -30,6 +30,7 @@
 #include <map>
 #include <boost/asio.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 #include <boost/thread.hpp>
 #include "Config.h"
 
@@ -164,55 +165,39 @@ int main(int argc, char * argv[])
         return 1;
     }
 
-    boost::shared_ptr<boost::asio::io_service> ioService(new boost::asio::io_service());
+    boost::asio::io_service ioService;
 
     //make some work to stop io_service from exiting.
-    boost::shared_ptr<boost::asio::io_service::work> work(new boost::asio::io_service::work(*ioService));
+    auto work = std::make_unique<boost::asio::io_service::work>(ioService);
 
-    boost::shared_ptr<Safir::Dob::Internal::Com::Communication> communication;
+    std::vector<Safir::Dob::Internal::Com::NodeTypeDefinition> commNodeTypes;
 
-    try
+    for (const auto& nt: options.config.GetNodeTypes())
     {
-        std::vector<Safir::Dob::Internal::Com::NodeTypeDefinition> nodeTypes;
-
-        for (const auto& nt: options.config.GetNodeTypes())
-        {
-            nodeTypes.push_back({nt.id, 
-                        nt.name, 
-                        nt.multicastAddressControl, 
-                        nt.multicastAddressData,
-                        nt.heartbeatInterval,
-                        nt.retryTimeout});
-        }
-        
-        communication.reset(new Safir::Dob::Internal::Com::Communication
-                            (Safir::Dob::Internal::Com::controlModeTag,
-                             ioService,
-                             options.name,
-                             options.id,
-                             options.nodeTypeId,
-                             options.controlAddress,
-                             options.dataAddress,
-                             nodeTypes));
-
-
-        communication->InjectSeeds(options.seeds);
+        commNodeTypes.push_back({nt.id, 
+                    nt.name, 
+                    nt.multicastAddressControl, 
+                    nt.multicastAddressData,
+                    nt.heartbeatInterval,
+                    nt.retryTimeout});
     }
-    catch (const std::invalid_argument& e)
-    {
-        std::wcerr << "Address does not appear to be valid. Got exception:\n" 
-                   << e.what()
-                   << std::endl;
-        
-        return 1;
-    }
+    
+    Safir::Dob::Internal::Com::Communication communication(Safir::Dob::Internal::Com::controlModeTag,
+                                                           ioService,
+                                                           options.name,
+                                                           options.id,
+                                                           options.nodeTypeId,
+                                                           options.controlAddress,
+                                                           options.dataAddress,
+                                                           commNodeTypes);
+    
+    communication.InjectSeeds(options.seeds);
 
-
-    std::map<boost::int64_t, Safir::Dob::Internal::SP::NodeType> nodeTypes;
+    std::map<boost::int64_t, Safir::Dob::Internal::SP::NodeType> spNodeTypes;
     
     for (const auto& nt: options.config.GetNodeTypes())
     {
-        nodeTypes.insert(std::make_pair(nt.id, 
+        spNodeTypes.insert(std::make_pair(nt.id, 
                                         Safir::Dob::Internal::SP::NodeType(nt.id, nt.name, nt.isLight, nt.heartbeatInterval, nt.retryTimeout)));
     }
 
@@ -225,14 +210,14 @@ int main(int argc, char * argv[])
                                                options.nodeTypeId,
                                                options.controlAddress,
                                                options.dataAddress,
-                                               nodeTypes);
+                                               spNodeTypes);
 
 
-    communication->Start();
+    communication.Start();
 
 
 
-    boost::asio::signal_set signals(*ioService);
+    boost::asio::signal_set signals(ioService);
     
 #if defined (_WIN32)
     signals.add(SIGABRT);
@@ -245,16 +230,17 @@ int main(int argc, char * argv[])
     signals.add(SIGTERM);
 #endif
 
-    signals.async_wait([&sp,&work,communication,&signals](const boost::system::error_code& error,
-                                   const int /*signal_number*/)
+    signals.async_wait([&sp,&work,&communication,&signals](const boost::system::error_code& error,
+                                                           const int signal_number)
                        {
-                           if (!!error) //double not to remove spurious vs2010 warning
+                           lllog(3) << "Got signal " << signal_number << std::endl;
+                           if (error)
                            {
                                SEND_SYSTEM_LOG(Error,
                                                << "Got a signals error: " << error);
                            }
                            sp.Stop();
-                           communication->Stop();
+                           communication.Stop();
                            work.reset();
                        }
                        );
@@ -264,10 +250,10 @@ int main(int argc, char * argv[])
     boost::thread_group threads;
     for (int i = 0; i < 9; ++i)
     {
-        threads.create_thread([ioService]{ioService->run();});
+        threads.create_thread([&ioService]{ioService.run();});
     }
 
-    ioService->run();
+    ioService.run();
 
     threads.join_all();
 
