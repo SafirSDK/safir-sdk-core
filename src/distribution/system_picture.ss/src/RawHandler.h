@@ -73,12 +73,12 @@ namespace SP
     public:
         RawHandler(boost::asio::io_service& ioService,
                    Com::Communication& communication,
-                   const std::string& name,
+                   std::string name,
                    const boost::int64_t id,
                    const boost::int64_t nodeTypeId,
-                   const std::string& controlAddress,
-                   const std::string& dataAddress,
-                   const std::map<boost::int64_t, NodeType>& nodeTypes);
+                   std::string controlAddress,
+                   std::string dataAddress,
+                   std::map<boost::int64_t, NodeType> nodeTypes);
 
         void Stop();
 

@@ -77,9 +77,7 @@ namespace SP
              const std::string& controlAddress,
              const std::string& dataAddress,
              const std::map<boost::int64_t, NodeType>& nodeTypes)
-            : m_ioService(&ioService)
-            , m_communication(&communication)
-            , m_rawHandler(std::make_unique<RawHandler>(ioService,
+            : m_rawHandler(std::make_unique<RawHandler>(ioService,
                                                         communication,
                                                         name,
                                                         id,
@@ -128,9 +126,7 @@ namespace SP
          * Construct a slave SystemPicture.
          */
         Impl()
-            : m_ioService(nullptr)
-            , m_communication(nullptr)
-            , m_rawSubscriberLocal(std::make_unique<RawSubscriberLocal>(MASTER_LOCAL_RAW_NAME))
+            : m_rawSubscriberLocal(std::make_unique<RawSubscriberLocal>(MASTER_LOCAL_RAW_NAME))
             , m_stateSubscriberLocal(std::make_unique<StateSubscriberLocal>(MASTER_LOCAL_STATE_NAME))
             , m_stopped(true) //not really started in this case...
         {
@@ -175,9 +171,6 @@ namespace SP
 
         
     private:
- 
-        boost::asio::io_service* m_ioService;
-        Com::Communication* m_communication;
         
         std::unique_ptr<RawHandler> m_rawHandler;
 

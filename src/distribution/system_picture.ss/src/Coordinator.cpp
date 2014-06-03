@@ -80,23 +80,23 @@ namespace
 
     Coordinator::Coordinator(boost::asio::io_service& ioService,
                              Com::Communication& communication,
-                             const std::string& name,
+                             std::string name,
                              const boost::int64_t id,
                              const boost::int64_t nodeTypeId,
-                             const std::string& controlAddress,
-                             const std::string& dataAddress,
-                             const std::map<boost::int64_t, NodeType>& nodeTypes,
+                             std::string controlAddress,
+                             std::string dataAddress,
+                             std::map<boost::int64_t, NodeType> nodeTypes,
                              const char* const dataIdentifier,
                              RawHandler& rawHandler)
         : m_strand (ioService)
         , m_communication(communication)
         , m_dataIdentifier(LlufId_Generate64(dataIdentifier))
-        , m_name(name)
+        , m_name(std::move(name))
         , m_id(id)
         , m_nodeTypeId(nodeTypeId)
-        , m_controlAddress(controlAddress)
-        , m_dataAddress(dataAddress)
-        , m_nodeTypes(nodeTypes)
+        , m_controlAddress(std::move(controlAddress))
+        , m_dataAddress(std::move(dataAddress))
+        , m_nodeTypes(std::move(nodeTypes))
         , m_nonLightNodeTypes([&nodeTypes]
                               {
                                   std::set<boost::int64_t> res;

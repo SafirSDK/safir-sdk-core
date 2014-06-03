@@ -84,8 +84,8 @@ namespace SP
 
         class Impl;
 
-        explicit SystemState(const boost::shared_ptr<Impl>& impl)
-            : m_impl(impl) {}
+        explicit SystemState(boost::shared_ptr<Impl>  impl)
+            : m_impl(std::move(impl)) {}
 
         boost::shared_ptr<Impl> m_impl;
 

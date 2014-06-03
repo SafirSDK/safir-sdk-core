@@ -25,6 +25,7 @@
 #define __SYSTEM_PICTURE_EXPORT_DEFS_H__
 
 #include <Safir/Utilities/Internal/VisibilityHelpers.h>
+#include <utility>
 
 #ifdef system_picture_EXPORTS
 #  define DISTRIBUTION_SYSTEM_PICTURE_API SAFIR_HELPER_DLL_EXPORT
@@ -47,12 +48,12 @@ namespace SP
     struct NodeType
     {
         NodeType(const boost::int64_t id_,
-                 const std::string& name_,
+                 std::string  name_,
                  const bool isLight_,
                  const int heartbeatInterval_, //in milliseconds
                  const int maxLostHeartbeats_)
             : id(id_)
-            , name(name_)
+            , name(std::move(name_))
             , isLight(isLight_)
             , heartbeatInterval(heartbeatInterval_)
             , maxLostHeartbeats(maxLostHeartbeats_) {}

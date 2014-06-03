@@ -215,7 +215,7 @@ namespace SP
 
         static RawStatistics Create(std::unique_ptr<NodeStatisticsMessage> message)
         {
-            boost::shared_ptr<NodeStatisticsMessage> msg(std::move(message));
+            boost::shared_ptr<NodeStatisticsMessage> msg(message.release());
             return RawStatistics(boost::make_shared<Impl>(*msg.get(), msg));
         }
 

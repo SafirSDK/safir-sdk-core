@@ -50,16 +50,16 @@ namespace SP
 
     RawHandler::RawHandler(boost::asio::io_service& ioService,
                            Com::Communication& communication,
-                           const std::string& name,
+                           std::string name,
                            const boost::int64_t id,
                            const boost::int64_t nodeTypeId,
-                           const std::string& controlAddress,
-                           const std::string& dataAddress,
-                           const std::map<boost::int64_t, NodeType>& nodeTypes)
+                           std::string controlAddress,
+                           std::string dataAddress,
+                           std::map<boost::int64_t, NodeType> nodeTypes)
         : m_ioService(ioService)
         , m_communication(communication)
         , m_id(id)
-        , m_nodeTypes(nodeTypes)
+        , m_nodeTypes(std::move(nodeTypes))
         , m_epoch(steady_clock::now() - boost::chrono::hours(1))
         , m_strand(ioService)
         , m_checkDeadNodesTimer(ioService, 
@@ -93,17 +93,17 @@ namespace SP
         , m_stopped(false)
     {
         //set up some info about ourselves in our message
-        m_allStatisticsMessage.set_name(name);
+        m_allStatisticsMessage.set_name(std::move(name));
         m_allStatisticsMessage.set_id(id);
         m_allStatisticsMessage.set_node_type_id(nodeTypeId);
-        m_allStatisticsMessage.set_control_address(controlAddress);
-        m_allStatisticsMessage.set_data_address(dataAddress);
+        m_allStatisticsMessage.set_control_address(std::move(controlAddress));
+        m_allStatisticsMessage.set_data_address(std::move(dataAddress));
 
         communication.SetNewNodeCallback(m_strand.wrap([this](const std::string& name,
-                                                               const boost::int64_t id, 
-                                                               const boost::int64_t nodeTypeId,
-                                                               const std::string& controlAddress,
-                                                               const std::string& dataAddress)
+                                                              const boost::int64_t id, 
+                                                              const boost::int64_t nodeTypeId,
+                                                              const std::string& controlAddress,
+                                                              const std::string& dataAddress)
                                                         {
                                                             NewNode(name,id,nodeTypeId,controlAddress,dataAddress);
                                                         }));
