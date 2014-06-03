@@ -30,8 +30,8 @@
                 </ParserTest.MyEntity>
                 
                 <valueRef>
-                    <name></name>
-                    <key></key>
+                    <name>Test.MyParam.ObjArray</name>
+                    <index>12</index>
                 </valueRef>
                 
                 <ParserTest.MyEntity>
@@ -45,17 +45,10 @@
             <propertyMember>DictionaryPropertyValue</propertyMember>
             <dictionary>
                 <entry>
-                    <key>First</key>
+                    <key>1</key>
                     <entityId>
                         <name>Safir.Dob.Entity</name>
                         <instanceId>123</instanceId>
-                    </entityId>
-                </entry>
-                <entry>
-                    <key>First</key>
-                    <entityId>
-                        <name>ParserTest.MyEntity</name>
-                        <instanceId>my instance</instanceId>
                     </entityId>
                 </entry>
             </dictionary>

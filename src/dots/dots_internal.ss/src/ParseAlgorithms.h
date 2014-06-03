@@ -55,7 +55,7 @@ namespace ToolSupport
     //Resolves references on the form <...><name>param</name>123<index></index></...>
     void GetReferencedParameter(boost::property_tree::ptree& pt, std::string& paramName, std::string& paramKey);
     int GetReferencedIndex(boost::property_tree::ptree& pt, ParseState& state);
-    boost::optional<int> ReferencedKeyToIndex(const ParameterDescriptionBasic* pd, const std::string& key);
+    int ReferencedKeyToIndex(const ParameterDescriptionBasic* pd, const std::string& key);
     std::string GetEntityIdParameterAsString(boost::property_tree::ptree& pt);
     bool ParseValue(DotsC_MemberType memberType, const std::string& val, ValueDefinition& result);
     bool ParseKey(DotsC_MemberType memberType, const std::string& val, ValueDefinition& result);
@@ -780,7 +780,7 @@ namespace ToolSupport
             catch(const std::string& envVar)
             {
                 std::ostringstream os;
-                os<<"Failed to expand environment variable '"<<envVar<<"' in parameter "<<def->name<<" in class "<<state.lastInsertedClass->name;
+                os<<"Failed to expand environment variable in parameter "<<def->name<<" in class "<<state.lastInsertedClass->name<<". "<<envVar;
                 throw ParseError("Invalid parameter value", os.str(), state.currentPath, 142);
             }
         }
@@ -900,7 +900,7 @@ namespace ToolSupport
             catch (const std::string& envVar)
             {
                 std::ostringstream os;
-                os<<"Failed to expand environment variable '"<<envVar<<"' in parameter "<<def->name<<" in class "<<state.lastInsertedClass->name;
+                os<<"Failed to expand environment variable in parameter "<<def->name<<" in class "<<state.lastInsertedClass->name<<". "<<envVar;
                 throw ParseError("Invalid dictionary key", os.str(), state.currentPath, 187);
             }
 
@@ -1219,7 +1219,7 @@ namespace ToolSupport
                 const PropertyMappingDescriptionBasic* pdm=state.lastInsertedPropertyMapping.get();
                 const MemberDescriptionBasic* propMem=pdm->property->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
                 std::ostringstream os;
-                os<<"Failed to expand environment variable '"<<envVar<<"' in propertyMapping of '"<<pdm->property->name<<"."<<propMem->name<<"' for class  '"<<pdm->class_->name<<"' has no key specified.";
+                os<<"Failed to expand environment variable in propertyMapping of '"<<pdm->property->name<<"."<<propMem->name<<"' for class  '"<<pdm->class_->name<<". "<<envVar;
                 throw ParseError("Invalid dictionary key", os.str(), state.currentPath, 190);
             }
 
@@ -1410,7 +1410,7 @@ namespace ToolSupport
             catch(const std::string& envVar)
             {
                 std::ostringstream os;
-                os<<"Failed to expand environment variable '"<<envVar<<"' in property value "<<param->name;
+                os<<"Failed to expand environment variable in property value "<<param->name<<". "<<envVar;
                 throw ParseError("Invalid propertyMapping value", os.str(), state.currentPath, 197);
             }
 
@@ -1552,13 +1552,11 @@ namespace ToolSupport
             const MemberDescriptionBasic* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
             std::string paramName;
             std::string paramKey;
-            int paramIndex=-1;
 
             //Get parameterName
             try
             {
                 GetReferencedParameter(pt, paramName, paramKey);
-                paramIndex=paramKey.empty() ? 0 : boost::lexical_cast<int>(paramKey);
             }
             catch (const boost::property_tree::ptree_error&)
             {
@@ -1584,6 +1582,14 @@ namespace ToolSupport
                 os<<"PropertyMapping is mapping property member "<<propMem->GetName()<<" that has type "<<propMem->typeName
                     <<" to parameter '"<<srcParam->GetName()<<"' that has type "<<srcParam->typeName<<". The types are not compatible.";
                 throw ParseError("Type missmatch", os.str(), state.currentPath, 201);
+            }
+
+            int paramIndex=ReferencedKeyToIndex(srcParam, paramKey);
+            if (paramIndex<0)
+            {
+                std::ostringstream os;
+                os<<"In propertyMapping for "<<state.lastInsertedPropertyMapping->property->name<<"."<<propMem->GetName()<<" the parameter '"<<paramName<<"' is referenced with key or index '"<<paramKey<<"' wich does not exist.";
+                throw ParseError("Key does not exist", os.str(), state.currentPath, 205);
             }
 
             if (paramIndex>=srcParam->GetNumberOfValues())

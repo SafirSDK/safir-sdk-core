@@ -2,13 +2,17 @@
 <class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <summary>Contains the definition of a distribution channel name.</summary>
     <name>ParserTest.MyEntity</name>
-    <baseClass>Safir.Dob.Entity</baseClass>  
-    
-    <parameters>
+    <baseClass>Object</baseClass>
+    <parameters>        
         <parameter>
-            <name>IntPar</name>
+            <name>MyDictionary</name>
             <type>Int32</type>
-            <value>123</value>
-        </parameter>        
+            <dictionary keyType="String">
+                <entry>
+                    <key>$(DUMMY_ENVPAR)</key>
+                    <value>123</value>
+                </entry>
+            </dictionary>
+        </parameter>
     </parameters>
 </class>

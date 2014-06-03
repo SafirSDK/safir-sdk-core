@@ -29,11 +29,6 @@
                     <MyInt>1</MyInt>
                 </ParserTest.MyEntity>
                 
-                <valueRef>
-                    <name></name>
-                    <key></key>
-                </valueRef>
-                
                 <ParserTest.MyEntity>
                     <MyColorEnum>Black</MyColorEnum>
                     <MyInt>2</MyInt>
@@ -45,7 +40,7 @@
             <propertyMember>DictionaryPropertyValue</propertyMember>
             <dictionary>
                 <entry>
-                    <key>First</key>
+                    <key>$(MY_TEST_ENV)</key>
                     <entityId>
                         <name>Safir.Dob.Entity</name>
                         <instanceId>123</instanceId>

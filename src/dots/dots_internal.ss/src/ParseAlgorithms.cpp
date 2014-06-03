@@ -171,12 +171,12 @@ namespace ToolSupport
         return param->GetInt32Value(paramIndex);
     }
 
-    boost::optional<int> ReferencedKeyToIndex(const ParameterDescriptionBasic* pd, const std::string& key)
+    int ReferencedKeyToIndex(const ParameterDescriptionBasic* pd, const std::string& key)
     {
         if (pd->GetCollectionType()==DictionaryCollectionType)
         {
             ValueDefinition vd;
-            if (ParseKey(pd->GetMemberType(), key, vd))
+            if (ParseKey(pd->GetKeyType(), key, vd))
             {
                 switch(pd->GetKeyType())
                 {
@@ -212,17 +212,17 @@ namespace ToolSupport
         {
             if (key.empty()) //the case if index is not present, then we implicit mean 0
             {
-                return boost::optional<int>(0);
+                return 0;
             }
 
             try
             {
-                return boost::optional<int>(boost::lexical_cast<int>(key));
+                return boost::lexical_cast<int>(key);
             }
             catch (const boost::bad_lexical_cast&) {}
         }
 
-        return boost::optional<int>();
+        return -1;
     }
 
     std::string GetEntityIdParameterAsString(boost::property_tree::ptree& pt)
@@ -834,15 +834,15 @@ namespace ToolSupport
             throw ParseError("Parameter reference error", ss.str(), cd->FileName(), 42);
         }
 
-        boost::optional<int> parameterIndex=ReferencedKeyToIndex(referenced, ref.parameterKey);
-        if (!parameterIndex)
+        int parameterIndex=ReferencedKeyToIndex(referenced, ref.parameterKey);
+        if (parameterIndex<0)
         {
             std::ostringstream ss;
-            ss<<"Array index is not a number. Parameter valueRef '"<<ref.parameterName<<"' and index="<<ref.parameterKey<<". Referenced from parameter: "<<referencing->GetName();
-            throw ParseError("Invalid parameter index", ss.str(), cd->FileName(), 203);
+            ss<<"The specified key in parameter valueRef does not exist or is out of bounds.'"<<ref.parameterName<<"' and key='"<<ref.parameterKey<<"'. Referenced from parameter: "<<referencing->GetName();
+            throw ParseError("Invalid parameter reference", ss.str(), cd->FileName(), 203);
         }
 
-        if (referenced->GetNumberOfValues()<=*parameterIndex)
+        if (referenced->GetNumberOfValues()<=parameterIndex)
         {
             std::ostringstream ss;
             ss<<"Array index out of range for Parameter valueRef '"<<ref.parameterName<<"' and index="<<parameterIndex<<". Referenced from parameter: "<<referencing->GetName();
@@ -850,7 +850,7 @@ namespace ToolSupport
         }
 
         //Check that the referenced parameter contains a value. If referenced param is also referencing another param, we have to resolve that one first.
-        if (referenced->values[static_cast<size_t>(*parameterIndex)].kind==RefKind && referenced->values[static_cast<size_t>(*parameterIndex)].val.referenced==NULL)
+        if (referenced->values[static_cast<size_t>(parameterIndex)].kind==RefKind && referenced->values[static_cast<size_t>(parameterIndex)].val.referenced==NULL)
         {
             //unresolved paramToParamRef
             return false;
@@ -887,7 +887,7 @@ namespace ToolSupport
         }
 
         //point to referenced
-        referencing->values[ref.referee.referencingIndex].val.referenced=&referenced->values[static_cast<size_t>(*parameterIndex)];
+        referencing->values[ref.referee.referencingIndex].val.referenced=&referenced->values[static_cast<size_t>(parameterIndex)];
 
         return true;
     }    
@@ -904,18 +904,18 @@ namespace ToolSupport
             throw ParseError("Parameter reference error", ss.str(), cd->FileName(), 49);
         }
 
-        boost::optional<int> parameterIndex=ReferencedKeyToIndex(referenced, ref.parameterKey);
-        if (!parameterIndex)
+        int parameterIndex=ReferencedKeyToIndex(referenced, ref.parameterKey);
+        if (parameterIndex<0)
         {
-            std::ostringstream ss;
-            ss<<"Array index is not a number. Parameter arraySizeRef '"<<ref.parameterName<<"' and index="<<ref.parameterKey<<". Referenced from memeber '"<<md->GetName()<<"' in class "<<cd->GetName();
-            throw ParseError("Parameter index out of bounds", ss.str(), cd->FileName(), 204);
+            std::ostringstream os;
+            os<<"Can't resolve arraySizeRef "<<ref.parameterName<<"['"<<ref.parameterKey<<"]. Referenced from memeber '"<<md->GetName()<<"' in class "<<cd->GetName();
+            throw ParseError("Invalid arraySizeRef", os.str(), cd->FileName(), 204);
         }
 
-        if (referenced->GetNumberOfValues()<=*parameterIndex)
+        if (referenced->GetNumberOfValues()<=parameterIndex)
         {
             std::ostringstream ss;
-            ss<<"Array index out of range for Parameter arraySizeRef '"<<ref.parameterName<<"' and index="<<*parameterIndex<<". Referenced from memeber '"<<md->GetName()<<"' in class "<<cd->GetName();
+            ss<<"Array index out of range for Parameter arraySizeRef '"<<ref.parameterName<<"' and index="<<parameterIndex<<". Referenced from memeber '"<<md->GetName()<<"' in class "<<cd->GetName();
             throw ParseError("Parameter index out of bounds", ss.str(), cd->FileName(), 51);
         }
         if (referenced->GetMemberType()!=Int32MemberType)
@@ -925,7 +925,7 @@ namespace ToolSupport
             throw ParseError("Type missmatch in arraySizeRef", ss.str(), cd->FileName(), 52);
         }
 
-        int size=referenced->GetInt32Value(*parameterIndex);
+        int size=referenced->GetInt32Value(parameterIndex);
         if (size<=0)
         {
             std::ostringstream ss;
@@ -950,18 +950,18 @@ namespace ToolSupport
             throw ParseError("Parameter reference error", ss.str(), cd->FileName(), 107);
         }
 
-        boost::optional<int> parameterIndex=ReferencedKeyToIndex(referenced, ref.parameterKey);
-        if (!parameterIndex)
+        int parameterIndex=ReferencedKeyToIndex(referenced, ref.parameterKey);
+        if (parameterIndex<0)
         {
-            std::ostringstream ss;
-            ss<<"Array index is not a number. Parameter maxLengthRef '"<<ref.parameterName<<"' and index="<<ref.parameterKey<<". Referenced from memeber '"<<md->GetName()<<"' in class "<<cd->GetName();
-            throw ParseError("Parameter index out of bounds", ss.str(), cd->FileName(), 205);
+            std::ostringstream os;
+            os<<"Can't resolve maxLengthRef "<<ref.parameterName<<"['"<<ref.parameterKey<<"]. Referenced from memeber '"<<md->GetName()<<"' in class "<<cd->GetName();
+            throw ParseError("Invalid maxLengthRef", os.str(), cd->FileName(), 178);
         }
 
-        if (referenced->GetNumberOfValues()<=*parameterIndex)
+        if (referenced->GetNumberOfValues()<=parameterIndex)
         {
             std::ostringstream ss;
-            ss<<"Array index out of range for Parameter maxLengthRef '"<<ref.parameterName<<"' and index="<<*parameterIndex<<". Referenced from memeber '"<<md->GetName()<<"' in class "<<cd->GetName();
+            ss<<"Array index out of range for Parameter maxLengthRef '"<<ref.parameterName<<"' and index="<<parameterIndex<<". Referenced from memeber '"<<md->GetName()<<"' in class "<<cd->GetName();
             throw ParseError("Parameter index out of bounds", ss.str(), cd->FileName(), 53);
         }
         if (referenced->GetMemberType()!=Int32MemberType)
@@ -971,7 +971,7 @@ namespace ToolSupport
             throw ParseError("Type missmatch in maxLengthRef", ss.str(), cd->FileName(), 41);
         }
 
-        int size=referenced->GetInt32Value(*parameterIndex);
+        int size=referenced->GetInt32Value(parameterIndex);
         if (size<=0)
         {
             std::ostringstream ss;
@@ -1043,16 +1043,16 @@ namespace ToolSupport
                 throw ParseError("CreateRoutine collection values not supported", os.str(), cd->FileName(), 61);
             }
 
-            boost::optional<int> paramIndex=ReferencedKeyToIndex(pdef, ref.parameterKey);
-            if (!paramIndex)
+            int paramIndex=ReferencedKeyToIndex(pdef, ref.parameterKey);
+            if (paramIndex<0)
             {
                 std::ostringstream os;
-                os<<"Can't resolve createRoutine value reference "<<ref.parameterName<<"['"<<ref.parameterKey<<"] for member "<<memberName<<" in createRoutine "<<cr->GetName()<<" in class "<<cd->GetName();
-                throw ParseError("Invalid create routine value", os.str(), cd->FileName(), 208);
+                os<<"Can't resolve createRoutine value reference "<<ref.parameterName<<"["<<ref.parameterKey<<"] for member "<<memberName<<" in createRoutine "<<cr->GetName()<<" in class "<<cd->GetName();
+                throw ParseError("Invalid create routine value", os.str(), cd->FileName(), 179);
             }
 
             cr->memberValues[ref.referee.referencingIndex].second.first=ref.parameterName;
-            cr->memberValues[ref.referee.referencingIndex].second.second=*paramIndex;
+            cr->memberValues[ref.referee.referencingIndex].second.second=paramIndex;
         }
     }
 

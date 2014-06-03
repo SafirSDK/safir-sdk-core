@@ -29,10 +29,7 @@
                     <MyInt>1</MyInt>
                 </ParserTest.MyEntity>
                 
-                <valueRef>
-                    <name></name>
-                    <key></key>
-                </valueRef>
+                <valueRef><nameaol>Svoawaag</nameaol></valueRef>
                 
                 <ParserTest.MyEntity>
                     <MyColorEnum>Black</MyColorEnum>
@@ -45,17 +42,10 @@
             <propertyMember>DictionaryPropertyValue</propertyMember>
             <dictionary>
                 <entry>
-                    <key>First</key>
+                    <key>1</key>
                     <entityId>
                         <name>Safir.Dob.Entity</name>
                         <instanceId>123</instanceId>
-                    </entityId>
-                </entry>
-                <entry>
-                    <key>First</key>
-                    <entityId>
-                        <name>ParserTest.MyEntity</name>
-                        <instanceId>my instance</instanceId>
                     </entityId>
                 </entry>
             </dictionary>
