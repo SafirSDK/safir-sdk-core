@@ -71,8 +71,8 @@ namespace SP
         : private boost::noncopyable
     {
     public:
-        Coordinator(const boost::shared_ptr<boost::asio::io_service>& ioService,
-                    const boost::shared_ptr<Com::Communication>& communication,
+        Coordinator(boost::asio::io_service& ioService,
+                    Com::Communication& communication,
                     const std::string& name,
                     const boost::int64_t id,
                     const boost::int64_t nodeTypeId,
@@ -80,8 +80,8 @@ namespace SP
                     const std::string& dataAddress,
                     const std::map<boost::int64_t, NodeType>& nodeTypes,
                     const char* const receiverId,
-                    const boost::shared_ptr<RawHandler>& rawHandler);
-
+                    RawHandler& rawHandler);
+        
         bool IsElected() const {return m_id == m_elected;}
 
         //used to send state message
@@ -112,7 +112,7 @@ namespace SP
         void SendPendingElectionMessages();
 
         mutable boost::asio::strand m_strand;
-        const boost::shared_ptr<Com::Communication> m_communication;
+        Com::Communication& m_communication;
         const boost::uint64_t m_dataIdentifier;
         RawStatistics m_lastStatistics;
         SystemStateMessage m_stateMessage;
@@ -130,6 +130,9 @@ namespace SP
         boost::uint32_t m_currentElectionId = 0;
 
         boost::asio::steady_timer m_sendMessageTimer;
+        RawHandler& m_rawHandler;
+
+
         //a set of node type ids to which we want to send INQUIRY to, using m_currentElectionId
         std::set<boost::int64_t> m_pendingInquiries;
         

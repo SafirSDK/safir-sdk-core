@@ -41,16 +41,16 @@ namespace SP
     class StatePublisherRemote
     {
     public:
-        StatePublisherRemote(const boost::shared_ptr<boost::asio::io_service>& ioService,
-                             const boost::shared_ptr<Com::Communication>& communication,
+        StatePublisherRemote(boost::asio::io_service& ioService,
+                             Com::Communication& communication,
                              const std::map<boost::int64_t, NodeType>& nodeTypes,
                              const char* const senderId,
-                             const boost::shared_ptr<Coordinator>& coordinator)
+                             Coordinator& coordinator)
             : m_communication(communication)
             , m_senderId(LlufId_Generate64(senderId))
             , m_nodeTypes(nodeTypes)
             , m_coordinator(coordinator)
-            , m_publishTimer(AsioPeriodicTimer::Create(*ioService, 
+            , m_publishTimer(AsioPeriodicTimer::Create(ioService, 
                                                        boost::chrono::seconds(1),
                                                        [this](const boost::system::error_code& error)
                                                        {
@@ -76,7 +76,7 @@ namespace SP
             }
 
             //Only publish if we're elected
-            if (!m_coordinator->IsElected())
+            if (!m_coordinator.IsElected())
             {
                 return;
             }
@@ -89,7 +89,7 @@ namespace SP
             const int crcBytes = 0;
 #endif
             
-            m_coordinator->PerformOnStateMessage([this,crcBytes](const boost::shared_ptr<char[]>& data, const size_t size)
+            m_coordinator.PerformOnStateMessage([this,crcBytes](const boost::shared_ptr<char[]>& data, const size_t size)
             {
 #ifdef CHECK_CRC
                 const int crc = GetCrc32(data.get(), size - crcBytes);
@@ -98,7 +98,7 @@ namespace SP
                 
                 for (const auto& it: m_nodeTypes)
                 {
-                    const bool sent = m_communication->SendToNodeType(it.second.id, data, size, m_senderId);
+                    const bool sent = m_communication.SendToNodeType(it.second.id, std::move(data), size, m_senderId);
                     if (!sent)
                     {
                         lllog(8) << "StatePublisherRemote: Overflow when sending to node type " 
@@ -110,10 +110,10 @@ namespace SP
                                                  crcBytes);
         }
 
-        const boost::shared_ptr<Com::Communication> m_communication;
+        Com::Communication& m_communication;
         const boost::uint64_t m_senderId;
         const std::map<boost::int64_t, NodeType> m_nodeTypes;
-        const boost::shared_ptr<Coordinator> m_coordinator;
+        Coordinator& m_coordinator;
         boost::shared_ptr<Safir::Utilities::Internal::AsioPeriodicTimer> m_publishTimer;
     };
 }

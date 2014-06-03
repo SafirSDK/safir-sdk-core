@@ -111,9 +111,9 @@ namespace SP
     {
     public:
         Impl(const NodeStatisticsMessage& message,
-             const boost::shared_ptr<const NodeStatisticsMessage>& owner)
+             boost::shared_ptr<const NodeStatisticsMessage> owner)
             : m_message(message)
-            , m_owner(owner)
+            , m_owner(std::move(owner))
         {
 
         }
@@ -213,9 +213,10 @@ namespace SP
     private:
         friend class RawStatisticsCreator;
 
-        static RawStatistics Create(const boost::shared_ptr<NodeStatisticsMessage>& message)
+        static RawStatistics Create(std::unique_ptr<NodeStatisticsMessage> message)
         {
-            return RawStatistics(boost::make_shared<Impl>(*message.get(), message));
+            boost::shared_ptr<NodeStatisticsMessage> msg(std::move(message));
+            return RawStatistics(boost::make_shared<Impl>(*msg.get(), msg));
         }
 
         const NodeStatisticsMessage& m_message;
@@ -246,9 +247,9 @@ namespace SP
     
     void RawStatistics::Print(std::wostream& out) const {m_impl->Print(out);}
 
-    RawStatistics RawStatisticsCreator::Create(const boost::shared_ptr<NodeStatisticsMessage>& message)
+    RawStatistics RawStatisticsCreator::Create(std::unique_ptr<NodeStatisticsMessage> message)
     {
-        return RawStatistics::Impl::Create(message);
+        return RawStatistics::Impl::Create(std::move(message));
     }
 }
 }

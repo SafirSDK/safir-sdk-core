@@ -105,7 +105,7 @@ namespace SP
                 throw std::logic_error("CRC check failed!");
             }
 #endif
-            boost::shared_ptr<SystemStateMessage> state = boost::make_shared<SystemStateMessage>();
+            auto state = std::make_unique<SystemStateMessage>();
         
             const bool parseResult = state->ParseFromArray(data, static_cast<int>(size));
 
@@ -113,7 +113,7 @@ namespace SP
             {
                 throw std::logic_error("StateSubscriberLocal: Failed to parse message");
             }
-            m_dataCallback(SystemStateCreator::Create(state));
+            m_dataCallback(SystemStateCreator::Create(std::move(state)));
         }
 
         //Order/sync is guaranteed by IpcSubscribers delivery order guarantee.

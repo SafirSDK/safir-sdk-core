@@ -46,12 +46,12 @@ namespace SP
     class RawPublisherLocal
     {
     public:
-        RawPublisherLocal(const boost::shared_ptr<boost::asio::io_service>& ioService,
-                          const boost::shared_ptr<RawHandler>& rawHandler,
+        RawPublisherLocal(boost::asio::io_service& ioService,
+                          RawHandler& rawHandler,
                           const char* const name)
             : m_rawHandler(rawHandler)
-            , m_publisher(Safir::Utilities::Internal::IpcPublisher::Create(*ioService,name))
-            , m_publishTimer(AsioPeriodicTimer::Create(*ioService, 
+            , m_publisher(Safir::Utilities::Internal::IpcPublisher::Create(ioService,name))
+            , m_publishTimer(AsioPeriodicTimer::Create(ioService, 
                                                        boost::chrono::seconds(1),
                                                        [this](const boost::system::error_code& error)
                                                        {
@@ -86,18 +86,18 @@ namespace SP
             const int crcBytes = 0;
 #endif
 
-            m_rawHandler->PerformOnAllStatisticsMessage([this,crcBytes](const boost::shared_ptr<char[]>& data, const size_t size)
-                                                        {
+            m_rawHandler.PerformOnAllStatisticsMessage([this,crcBytes](const boost::shared_ptr<char[]>& data, const size_t size)
+                                                       {
 #ifdef CHECK_CRC
                                                            const int crc = GetCrc32(data.get(), size - crcBytes);
                                                            memcpy(data.get() + size - crcBytes, &crc, sizeof(int));
 #endif
                                                            m_publisher->Send(data, static_cast<boost::uint32_t>(size));
-                                                        },
-                                                        crcBytes);
+                                                       },
+                                                       crcBytes);
         }
         
-        const boost::shared_ptr<RawHandler> m_rawHandler;
+        RawHandler& m_rawHandler;
         const boost::shared_ptr<Safir::Utilities::Internal::IpcPublisher> m_publisher;
         boost::shared_ptr<Safir::Utilities::Internal::AsioPeriodicTimer> m_publishTimer;
     };

@@ -72,64 +72,61 @@ namespace SP
         : private boost::noncopyable
     {
     public:
-        Impl(const SystemStateMessage& message,
-             const boost::shared_ptr<const SystemStateMessage>& owner)
-            : m_message(message)
-            , m_owner(owner)
+        Impl(std::unique_ptr<SystemStateMessage> message)
+            : m_message(std::move(message))
         {
 
         }
 
         boost::int64_t ElectedId() const
         {
-            return m_message.elected_id();
+            return m_message->elected_id();
         }
         
         int Size() const
         {
-            return m_message.node_info_size();
+            return m_message->node_info_size();
         }
 
         const std::string& Name(const int index) const
         {
-            return m_message.node_info(index).name();
+            return m_message->node_info(index).name();
         }
 
         boost::int64_t Id(const int index) const
         {
-            return m_message.node_info(index).id();
+            return m_message->node_info(index).id();
         }
 
         boost::int64_t NodeTypeId(const int index) const
         {
-            return m_message.node_info(index).node_type_id();
+            return m_message->node_info(index).node_type_id();
         }
 
         const std::string& ControlAddress(const int index) const
         {
-            return m_message.node_info(index).control_address();
+            return m_message->node_info(index).control_address();
         }
 
         const std::string& DataAddress(const int index) const
         {
-            return m_message.node_info(index).data_address();
+            return m_message->node_info(index).data_address();
         }
 
         void Print(std::wostream& out) const
         {
-            PrintMessage(m_message, out);
+            PrintMessage(*m_message, out);
         }
 
     private:
         friend class SystemStateCreator;
 
-        static SystemState Create(const boost::shared_ptr<SystemStateMessage>& message)
+        static SystemState Create(std::unique_ptr<SystemStateMessage> message)
         {
-            return SystemState(boost::make_shared<Impl>(*message.get(), message));
+            return SystemState(boost::make_shared<Impl>(std::move(message)));
         }
 
-        const SystemStateMessage& m_message;
-        const boost::shared_ptr<const SystemStateMessage> m_owner;
+        std::unique_ptr<const SystemStateMessage> m_message;
     };
 
 
@@ -145,9 +142,9 @@ namespace SP
     
     void SystemState::Print(std::wostream& out) const {m_impl->Print(out);}
     
-    SystemState SystemStateCreator::Create(const boost::shared_ptr<SystemStateMessage>& message)
+    SystemState SystemStateCreator::Create(std::unique_ptr<SystemStateMessage> message)
     {
-        return SystemState::Impl::Create(message);
+        return SystemState::Impl::Create(std::move(message));
     }
 }
 }
