@@ -114,10 +114,10 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
 
   FIND_PACKAGE(PythonInterp)
 
-  SET(dod_directory ${safir_sdk_core_SOURCE_DIR}/dots/dots_v.ss/data/)
+  SET(dod_directory ${safir_sdk_core_SOURCE_DIR}/src/dots/dots_v.ss/data/)
   FILE(GLOB dod_files ${dod_directory} *.dod)
   SET(dots_v_command ${PYTHON_EXECUTABLE} 
-    "${safir_sdk_core_SOURCE_DIR}/dots/dots_v.ss/dots_v.py" 
+    "${safir_sdk_core_SOURCE_DIR}/src/dots/dots_v.ss/dots_v.py" 
     --dod-files=${dod_directory} 
     --dependencies ${DOTS_V_DEPS} 
     --library-name ${GEN_NAME}
@@ -144,7 +144,7 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
   ADD_LIBRARY(dots_generated-${GEN_NAME}-cpp SHARED ${cpp_files}) #TODO headers?
   
   target_include_directories(dots_generated-${GEN_NAME}-cpp
-    PRIVATE ${safir_sdk_core_SOURCE_DIR}/dots/dots_v.ss/data
+    PRIVATE ${safir_sdk_core_SOURCE_DIR}/src/dots/dots_v.ss/data
     PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/generated_code/cpp/include)
   
   target_link_libraries(dots_generated-${GEN_NAME}-cpp 
@@ -188,7 +188,7 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
     ENDFOREACH()
 
     ADD_CSHARP_ASSEMBLY(dots_generated-${GEN_NAME}-dotnet LIBRARY
-      SIGN ${safir_sdk_core_SOURCE_DIR}/../build/config/sdk/data/build/safirkey.snk
+      SIGN ${safir_sdk_core_SOURCE_DIR}/build/config/sdk/data/build/safirkey.snk
       SOURCES ${dotnet_files}
       REFERENCES Safir.Dob.Typesystem ${assembly_refs})
 

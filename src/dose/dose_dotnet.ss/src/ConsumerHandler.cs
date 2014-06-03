@@ -65,6 +65,8 @@ namespace Safir.Dob
             return (Internal.ConsumerBase)GCHandle.FromIntPtr(p).Target;
         }
 
+        //needs locking since it reads and writes the consumer table
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
         public System.IntPtr AddReference(Internal.ConsumerBase consumer)
         {
             if (consumer == null)
@@ -73,31 +75,18 @@ namespace Safir.Dob
             }
 
             Reference reference;
-            m_consumerTableLock.AcquireReaderLock(System.Threading.Timeout.Infinite);
-            try
+            if (!m_consumerTable.TryGetValue(consumer, out reference))
             {
-                if (!m_consumerTable.TryGetValue(consumer, out reference))
-                {
-                    System.Threading.LockCookie lockCookie = m_consumerTableLock.UpgradeToWriterLock(System.Threading.Timeout.Infinite);
-                    try
-                    {
-                        reference = new Reference(GCHandle.Alloc(consumer));
-                        m_consumerTable.Add(consumer, reference);
-                    }
-                    finally
-                    {
-                        m_consumerTableLock.DowngradeFromWriterLock(ref lockCookie);
-                    }
-                }
-                System.Threading.Interlocked.Increment(ref reference.references);
+                reference = new Reference(GCHandle.Alloc(consumer));
+                m_consumerTable.Add(consumer, reference);
             }
-            finally
-            {
-                m_consumerTableLock.ReleaseReaderLock();
-            }
+            ++reference.references;
             return GCHandle.ToIntPtr(reference.handle);
+            //return System.IntPtr.Zero;
         }
 
+        //needs locking since it reads and writes the consumer table
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
         public void DropReference(Internal.ConsumerBase consumer)
         {
             if (consumer == null)
@@ -106,24 +95,15 @@ namespace Safir.Dob
             }
 
             Reference reference;
-            try
+            if (!m_consumerTable.TryGetValue(consumer, out reference))
             {
-                m_consumerTableLock.AcquireReaderLock(-1);
-                if (!m_consumerTable.TryGetValue(consumer, out reference))
-                {
-                    return;
-                }
-                int result = System.Threading.Interlocked.Decrement(ref reference.references);
-                if (result == 0)
-                {
-                    m_consumerTableLock.UpgradeToWriterLock(-1);
-                    m_consumerTable.Remove(consumer);
-                    reference.handle.Free();
-                }
+                return;
             }
-            finally
+            --reference.references;
+            if (reference.references == 0)
             {
-                m_consumerTableLock.ReleaseLock();
+                m_consumerTable.Remove(consumer);
+                reference.handle.Free();
             }
         }
 
@@ -143,7 +123,6 @@ namespace Safir.Dob
 
         // Static synchronization root object, for locking
         private static object m_instantiationLock = new object();
-        private static System.Threading.ReaderWriterLock m_consumerTableLock = new System.Threading.ReaderWriterLock();
 
     }
 

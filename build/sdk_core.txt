@@ -1,1 +1,1 @@
-build_tree        src                              RelWithDebInfo Debug
+build_tree        .                              RelWithDebInfo Debug

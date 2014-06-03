@@ -25,10 +25,14 @@
 using System;
 using System.Runtime.InteropServices;
 using Safir.Dob;
+
+#pragma warning disable 219
+
 class Program
 {
     static int objects = 0;
-
+    static int check = 0;
+    static int fails = 0;
     class foo:
         Safir.Dob.Dispatcher
     {
@@ -50,38 +54,40 @@ class Program
         {
             throw new Exception("The method or operation is not implemented.");
         }
-
+        
         #endregion
     }
 
     static void RunGC()
     {
-        for (int i = 0; i < 100; ++i)
-        {
-            GC.Collect();
-            System.Threading.Thread.Sleep(1);
-        }
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        //System.Threading.Thread.Sleep(1000);
     }
 
     static void Check0()
     {
+        ++check;
         RunGC();
         if (objects != 0)
         {
-            System.Console.WriteLine("ERROR! objects should be 0 but is " + objects);
+            System.Console.WriteLine("ERROR! objects should be 0 but is " + objects + " at check " + check);
+            ++fails;
         }
     }
 
     static void Check1()
     {
+        ++check;
         RunGC();
         if (objects != 1)
         {
-            System.Console.WriteLine("ERROR! objects should be 1 but is " + objects);
+            System.Console.WriteLine("ERROR! objects should be 1 but is " + objects + " at check " + check);
+            ++fails;
         }
     }
 
-    static void Main(string[] args)
+    static int Main(string[] args)
     {
         //no external refs
         {
@@ -185,6 +191,15 @@ class Program
             Check0();
 
         }*/
-
+        if (fails == 0)
+        {
+            System.Console.WriteLine("Success!");
+            return 0;
+        }
+        else
+        {
+            System.Console.WriteLine("Failure!");
+            return 1;
+        }
     }
 }

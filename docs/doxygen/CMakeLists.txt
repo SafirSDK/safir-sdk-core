@@ -1,17 +1,15 @@
-project(doxygen NONE)
+find_package(Doxygen)
 
-cmake_minimum_required(VERSION 2.8)
-
-FILE(TO_CMAKE_PATH $ENV{SAFIR_SDK} SAFIR_SDK)
-FILE(TO_CMAKE_PATH $ENV{SAFIR_RUNTIME} SAFIR_RUNTIME)
-
-ADD_CUSTOM_TARGET(html ALL
-  COMMAND doxygen)
-
-INSTALL(DIRECTORY html
-  DESTINATION ${SAFIR_SDK}/docs/)
-
-#just use these variables to avoid some cmake warnings 
-#(they're set in the build script)
-if(SAFIR_ADA_SUPPORT OR SAFIR_JAVA_SUPPORT)
+if (NOT DOXYGEN_FOUND)
+  message(WARNING "Failed to find the Doxygen tools, will not build Doxygen documentation")
+  return()
 endif()
+
+#TODO: we need all the public headers to be in one useful folder so that we can run doxygen on them
+
+#ADD_CUSTOM_TARGET(Doxygen ALL
+#  COMMAND doxygen)
+
+#INSTALL(DIRECTORY html
+#  DESTINATION ${SAFIR_SDK}/docs/)
+
