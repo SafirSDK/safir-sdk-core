@@ -50,14 +50,14 @@ namespace Com
     class HeartbeatSenderBasic : private WriterType
     {
     public:
-        HeartbeatSenderBasic(const boost::shared_ptr<boost::asio::io_service>& ioService,
-                             boost::int64_t myNodeId,
+        HeartbeatSenderBasic(boost::asio::io_service& ioService,
+                             int64_t myNodeId,
                              int ipVersion,
                              const std::string& multicast,
                              int heartbeatInterval)
             :WriterType(ioService, ipVersion, multicast)
-            ,m_strand(*ioService)
-            ,m_heartbeatTimer(*ioService)
+            ,m_strand(ioService)
+            ,m_heartbeatTimer(ioService)
             ,m_heartbeat(new Heartbeat(myNodeId))
             ,m_interval(heartbeatInterval)
             ,m_nodes()
@@ -85,7 +85,7 @@ namespace Com
         }
 
         //Add a node and starts sending heartbeats
-        void AddNode(boost::int64_t id, const boost::asio::ip::udp::endpoint& endpoint)
+        void AddNode(int64_t id, const boost::asio::ip::udp::endpoint& endpoint)
         {
             m_strand.dispatch([=]
             {
@@ -94,7 +94,7 @@ namespace Com
         }
 
         //Remove node and stop sending heartbeats
-        void SetSystemNode(boost::int64_t id)
+        void SetSystemNode(int64_t id)
         {
             m_strand.dispatch([=]
             {
@@ -103,7 +103,7 @@ namespace Com
         }
 
         //Make node included or excluded. If excluded it is also removed.
-        void SetSystemNode(boost::int64_t id, bool isSystemNode)
+        void SetSystemNode(int64_t id, bool isSystemNode)
         {
             m_strand.dispatch([=]
             {
@@ -136,7 +136,7 @@ namespace Com
             NodeInfo(bool sn_, const boost::asio::ip::udp::endpoint& ep_) : systemNode(sn_), endpoint(ep_) {}
         };
 
-        std::map<boost::int64_t, NodeInfo> m_nodes;
+        std::map<int64_t, NodeInfo> m_nodes;
         bool m_running;
 
         void OnTimeout()

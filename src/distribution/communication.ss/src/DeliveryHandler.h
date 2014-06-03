@@ -46,17 +46,17 @@ namespace Internal
 {
 namespace Com
 {
-    typedef boost::function<void(boost::int64_t fromNodeId, boost::int64_t fromNodeType, const boost::shared_ptr<char[]>& data, size_t size)> ReceiveData;
-    typedef boost::function<void(boost::int64_t fromNodeId)> GotReceiveFrom;
+    typedef std::function<void(int64_t fromNodeId, int64_t fromNodeType, const boost::shared_ptr<char[]>& data, size_t size)> ReceiveData;
+    typedef std::function<void(int64_t fromNodeId)> GotReceiveFrom;
 
     template <class WriterType>
     class DeliveryHandlerBasic : private WriterType
     {
     public:
-        DeliveryHandlerBasic(const boost::shared_ptr<boost::asio::io_service>& ioService, boost::int64_t myNodeId, int ipVersion)
+        DeliveryHandlerBasic(boost::asio::io_service& ioService, int64_t myNodeId, int ipVersion)
             :WriterType(ioService, ipVersion)
             ,m_myId(myNodeId)
-            ,m_deliverStrand(*ioService)
+            ,m_deliverStrand(ioService)
             ,m_nodes()
             ,m_receivers()
             ,m_gotRecvFrom()
@@ -71,7 +71,7 @@ namespace Com
             m_gotRecvFrom=callback;
         }
 
-        void SetReceiver(const ReceiveData& callback, boost::int64_t dataTypeIdentifier)
+        void SetReceiver(const ReceiveData& callback, int64_t dataTypeIdentifier)
         {
             m_receivers.insert(std::make_pair(dataTypeIdentifier, callback));
         }
@@ -108,7 +108,7 @@ namespace Com
         }
 
         //Make node included or excluded. If excluded it is also removed.
-        void SetSystemNode(boost::int64_t id, bool isSystemNode)
+        void SetSystemNode(int64_t id, bool isSystemNode)
         {
             const auto it=m_nodes.find(id);
             if (it==m_nodes.end())
@@ -132,7 +132,7 @@ namespace Com
             }
         }
 
-        const Node* GetNode(boost::int64_t id) const
+        const Node* GetNode(int64_t id) const
         {
             //Always called from readStrand
             auto it=m_nodes.find(id);
@@ -149,7 +149,7 @@ namespace Com
         }
 
     private:
-        typedef boost::unordered_map<boost::int64_t, ReceiveData>  ReceiverMap;
+        typedef boost::unordered_map<int64_t, ReceiveData>  ReceiverMap;
 
         struct RecvData
         {
@@ -206,9 +206,9 @@ namespace Com
             {
             }
         };
-        typedef std::map<boost::int64_t, NodeInfo> NodeInfoMap;
+        typedef std::map<int64_t, NodeInfo> NodeInfoMap;
 
-        boost::int64_t m_myId;
+        int64_t m_myId;
         boost::asio::strand m_deliverStrand; //for delivering data to application
         std::atomic_uint m_numberOfUndeliveredMessages;
 

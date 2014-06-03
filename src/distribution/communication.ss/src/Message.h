@@ -53,9 +53,9 @@ namespace Internal
 namespace Com
 {
     //Constants
-    static const boost::int64_t HeartbeatType=-1113057794592031140; //Hash for 'Communication.Heartbeat'
-    static const boost::int64_t AckType=-6769271806353797703; //Hash for 'Communication.Ack'
-    static const boost::int64_t ControlDataType=186858702748131856; //Hash for 'Communication.ControlData'
+    static const int64_t HeartbeatType=-1113057794592031140; //Hash for 'Communication.Heartbeat'
+    static const int64_t AckType=-6769271806353797703; //Hash for 'Communication.Ack'
+    static const int64_t ControlDataType=186858702748131856; //Hash for 'Communication.ControlData'
 
     //Send methods
     static const boost::uint16_t SpecifiedReceiverSendMethod=0;
@@ -84,10 +84,10 @@ namespace Com
     #pragma pack(1)
     struct CommonHeader
     {
-        boost::int64_t senderId;
-        boost::int64_t dataType;
-        CommonHeader(boost::int64_t senderId_,
-                     boost::int64_t dataType_)
+        int64_t senderId;
+        int64_t dataType;
+        CommonHeader(int64_t senderId_,
+                     int64_t dataType_)
             :senderId(senderId_)
             ,dataType(dataType_) {}
     };
@@ -96,7 +96,7 @@ namespace Com
     struct Heartbeat
     {
         CommonHeader commonHeader;
-        Heartbeat(boost::int64_t senderId_) : commonHeader(senderId_, HeartbeatType) {}
+        Heartbeat(int64_t senderId_) : commonHeader(senderId_, HeartbeatType) {}
     };
 
     struct Ack
@@ -104,7 +104,7 @@ namespace Com
         CommonHeader commonHeader;
         boost::uint64_t sequenceNumber;
         boost::uint16_t sendMethod; //tells if the ack is for unicast or multicast serie
-        Ack(boost::int64_t senderId_, boost::uint64_t sequenceNumber_, boost::uint16_t serie)
+        Ack(int64_t senderId_, boost::uint64_t sequenceNumber_, boost::uint16_t serie)
             :commonHeader(senderId_, AckType)
             ,sequenceNumber(sequenceNumber_)
             ,sendMethod(serie)
@@ -124,8 +124,8 @@ namespace Com
         boost::uint16_t fragmentNumber;
         size_t fragmentOffset;
 
-        MessageHeader(boost::int64_t senderId_,
-                      boost::int64_t dataType_ ,
+        MessageHeader(int64_t senderId_,
+                      int64_t dataType_ ,
                       boost::uint16_t sendMethod_,
                       boost::uint64_t sequenceNumber_,
                       size_t totalContentSize_,
@@ -152,18 +152,18 @@ namespace Com
     //This is for keeping track of ack's and not sent messages.
     struct Receiver
     {
-        boost::int64_t id;
+        int64_t id;
         boost::uint16_t sendMethod;
         boost::uint64_t sequenceNumber;
         Receiver() : id(0), sendMethod(MultiReceiverSendMethod), sequenceNumber(0){}
-        Receiver(boost::int64_t id_, boost::uint16_t sendMethod_, boost::uint64_t sequenceNumber_)
+        Receiver(int64_t id_, boost::uint16_t sendMethod_, boost::uint64_t sequenceNumber_)
             :id(id_)
             ,sendMethod(sendMethod_)
             ,sequenceNumber(sequenceNumber_)
         {
         }
     };
-    typedef std::map<boost::int64_t, Receiver> ReceiverMap;
+    typedef std::map<int64_t, Receiver> ReceiverMap;
 
     struct UserData
     {
@@ -174,8 +174,8 @@ namespace Com
         ReceiverMap receivers; //Set of receivers, can be filled with a receiver list, or if sendToAllSystemNodes it will be filled when its sent
         boost::chrono::steady_clock::time_point sendTime; //timestamp when this messages was last transmitted so we know when it's time to make retransmit
 
-        UserData(const boost::int64_t& id,
-                 const boost::int64_t& dataType,
+        UserData(const int64_t& id,
+                 const int64_t& dataType,
                  const boost::shared_ptr<char[]>& message_,
                  size_t messageSize)
             :header(id, dataType, SpecifiedReceiverSendMethod, 0, messageSize, messageSize, 1, 0, 0)
@@ -185,8 +185,8 @@ namespace Com
         {
         }
 
-        UserData(const boost::int64_t& id,
-                 const boost::int64_t& dataType,
+        UserData(const int64_t& id,
+                 const int64_t& dataType,
                  const boost::shared_ptr<char[]>& message_,
                  size_t messageSize,
                  const char* fragment_,

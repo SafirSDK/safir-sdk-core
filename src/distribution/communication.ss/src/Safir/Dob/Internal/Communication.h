@@ -24,10 +24,12 @@
 #ifndef __SAFIR_DOB_COMMUNICATION_H__
 #define __SAFIR_DOB_COMMUNICATION_H__
 
+#include <cstdint>
 #include <vector>
+#include <memory>
+#include <functional>
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/function.hpp>
 #include <Safir/Dob/Internal/CommunicationExportDefs.h>
 
 namespace boost{namespace asio{class io_service;}} //forward declaration
@@ -45,7 +47,7 @@ namespace Com
      */
     struct NodeTypeDefinition
     {
-        boost::int64_t id;              //node type id
+        int64_t id;              //node type id
         std::string name;               //unique readable name
         std::string controlMulticastAddress;   //multicast address including port number, 'address:port' empty string if not multicast enabled
         std::string dataMulticastAddress;   //multicast address including port number, 'address:port' empty string if not multicast enabled
@@ -54,11 +56,11 @@ namespace Com
     };
 
     //Callbacks functions used in Communications public interface.
-    typedef boost::function<void(const std::string& name, boost::int64_t nodeId, boost::int64_t nodeTypeId, const std::string& controlAddress, const std::string& dataAddress)> NewNode;
-    typedef boost::function<void(boost::int64_t fromNodeId)> GotReceiveFrom;
-    typedef boost::function<void(boost::int64_t toNodeId)> RetransmitTo;
-    typedef boost::function<void(boost::int64_t fromNodeId, boost::int64_t fromNodeType, const boost::shared_ptr<char[]>& data, size_t size)> ReceiveData;
-    typedef boost::function<void(boost::int64_t nodeTypeId)> QueueNotFull;
+    typedef std::function<void(const std::string& name, int64_t nodeId, int64_t nodeTypeId, const std::string& controlAddress, const std::string& dataAddress)> NewNode;
+    typedef std::function<void(int64_t fromNodeId)> GotReceiveFrom;
+    typedef std::function<void(int64_t toNodeId)> RetransmitTo;
+    typedef std::function<void(int64_t fromNodeId, int64_t fromNodeType, const boost::shared_ptr<char[]>& data, size_t size)> ReceiveData;
+    typedef std::function<void(int64_t nodeTypeId)> QueueNotFull;
 
     struct ControlModeTag {};
     const ControlModeTag controlModeTag = ControlModeTag();
@@ -98,10 +100,10 @@ namespace Com
          * @param nodeTypes [in] - List of all node types that we shall be able to communicate with.
          */
         Communication(ControlModeTag,
-                      const boost::shared_ptr<boost::asio::io_service>& ioService,
+                      boost::asio::io_service& ioService,
                       const std::string& nodeName,
-                      boost::int64_t nodeId, //0 is not a valid id.
-                      boost::int64_t nodeTypeId,
+                      int64_t nodeId, //0 is not a valid id.
+                      int64_t nodeTypeId,
                       const std::string& controlAddress,
                       const std::string& dataAddress,
                       const std::vector<NodeTypeDefinition>& nodeTypes);
@@ -117,10 +119,10 @@ namespace Com
          * @param nodeTypes [in] - List of all node types that we shall be able to communicate with.
          */
         Communication(DataModeTag,
-                      const boost::shared_ptr<boost::asio::io_service>& ioService,
+                      boost::asio::io_service& ioService,
                       const std::string& nodeName,
-                      boost::int64_t nodeId, //0 is not a valid id.
-                      boost::int64_t nodeTypeId,
+                      int64_t nodeId, //0 is not a valid id.
+                      int64_t nodeTypeId,
                       const std::string& dataAddress,
                       const std::vector<NodeTypeDefinition>& nodeTypes);
 
@@ -171,7 +173,7 @@ namespace Com
          * @param callback [in] - Callback function.
          * @param dataTypeIdentifier [in] - Only data sent with the same dataTypeIdentifier will be received by the callback.
          */
-        void SetDataReceiver(const ReceiveData& callback, boost::int64_t dataTypeIdentifier);
+        void SetDataReceiver(const ReceiveData& callback, int64_t dataTypeIdentifier);
 
         /**
          * Start communication, no callbacks can be setup after started.
@@ -201,7 +203,7 @@ namespace Com
          *
          * @param nodeId [in] - Id of the node to include.
          */
-        void IncludeNode(boost::int64_t nodeId);
+        void IncludeNode(int64_t nodeId);
 
         /**
          * Exclude a system node. After a node has been excluded it can never be included  again.
@@ -209,7 +211,7 @@ namespace Com
          *
          * @param nodeId [in] - Id of the node to exclude.
          */
-        void ExcludeNode(boost::int64_t nodeId);
+        void ExcludeNode(int64_t nodeId);
 
         /**
          * Send data to a specific node. If the specified node is not a system node, the message is silently ignored and the return value will be 'true'.
@@ -221,7 +223,7 @@ namespace Com
          * @param dataTypeIdentifier [in] - Custom identifier specifying which type of data. Only data receivers added with the same identifier will get the data.
          * @return True if data could be added to send queue. False if send queue is full, in that case try again later.
          */
-        bool SendToNode(boost::int64_t nodeId, boost::int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier);
+        bool SendToNode(int64_t nodeId, int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, int64_t dataTypeIdentifier);
 
         /**
          * Send data to all nodes of a specific node type. If the specified node type does not exist, the message is silently ignored and the return value will be 'true'.
@@ -232,14 +234,14 @@ namespace Com
          * @param dataTypeIdentifier [in] - Custom identifier specifying which type of data. Only data receivers added with the same identifier will get the data.
          * @return True if data could be added to send queue. False if send queue is full, in that case try again later.
          */
-        bool SendToNodeType(boost::int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier);
+        bool SendToNodeType(int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, int64_t dataTypeIdentifier);
 
         /**
          * Get the number of messages in a node types send queue.
          * @param nodeTypeId [in] - Node type.
          * @return Number of messages.
          */
-        size_t NumberOfQueuedMessages(boost::int64_t nodeTypeId) const;
+        size_t NumberOfQueuedMessages(int64_t nodeTypeId) const;
 
         /**
          * Get the name that was passed as argument to the constructor.
@@ -253,10 +255,11 @@ namespace Com
          *
          * @return Id of the node.
          */
-        boost::int64_t Id() const;
+        int64_t Id() const;
 
     private:
-        boost::shared_ptr<CommunicationImpl> m_impl;
+        std::unique_ptr<CommunicationImpl> m_impl;
+
     };
 #ifdef _MSC_VER
 #pragma warning (pop)

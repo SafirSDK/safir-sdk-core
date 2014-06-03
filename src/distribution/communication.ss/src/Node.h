@@ -43,16 +43,16 @@ namespace Com
     struct Node
     {
         std::string name;
-        boost::int64_t nodeId;
-        boost::int64_t nodeTypeId;
+        int64_t nodeId;
+        int64_t nodeTypeId;
         const std::string controlAddress;
         const std::string dataAddress;
         const std::string unicastAddress; //will be controlAddress or dataAddress depending on the mode
         bool systemNode;
 
         Node(const std::string& name_,
-             boost::int64_t nodeId_,
-             boost::int64_t nodeTypeId_,
+             int64_t nodeId_,
+             int64_t nodeTypeId_,
              const std::string& controlAddress_,
              const std::string& dataAddress_,
              bool isControlInstance)
@@ -68,7 +68,7 @@ namespace Com
 
     };
 
-    typedef std::map<boost::int64_t, Node> NodeMap;
+    typedef std::map<int64_t, Node> NodeMap;
 }
 }
 }

@@ -40,10 +40,10 @@ namespace Com
     class NodeType
     {
     public:
-        NodeType(const boost::shared_ptr<boost::asio::io_service>& ioService,
-                 boost::int64_t thisNodeId,
+        NodeType(boost::asio::io_service& ioService,
+                 int64_t thisNodeId,
                  bool useMulticast,
-                 boost::int64_t id,
+                 int64_t id,
                  const std::string &name,
                  const std::string &multicastAddr,
                  int ipVersion,
@@ -62,7 +62,7 @@ namespace Com
         {
         }
 
-        boost::int64_t Id() const {return m_id;}
+        int64_t Id() const {return m_id;}
         const std::string& Name() const {return m_name;}
         bool UseMulticast() const {return m_useMulticast;}
         const std::string& MulticastAddress() const {return m_multicastAddress;}
@@ -76,8 +76,8 @@ namespace Com
         const AckedDataSender& GetAckedDataSender() const {return m_ackedDataSender;}
 
     private:
-        boost::int64_t m_thisNodeId;
-        boost::int64_t m_id;
+        int64_t m_thisNodeId;
+        int64_t m_id;
         std::string m_name;               //unique readable name
         std::string m_multicastAddress;   //multicast address including port number, 'address:port' empty string if not multicast enabled
         int m_ipVersion;
@@ -92,7 +92,7 @@ namespace Com
     };
 
     typedef boost::shared_ptr<NodeType> NodeTypePtr;
-    typedef std::map<boost::int64_t, NodeTypePtr> NodeTypeMap;
+    typedef std::map<int64_t, NodeTypePtr> NodeTypeMap;
 }
 }
 }

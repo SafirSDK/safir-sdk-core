@@ -51,21 +51,21 @@ namespace Com
      * messages that have not been acked.
      */
 
-    typedef boost::function<void(boost::int64_t toNodeId)> RetransmitTo;
-    typedef boost::function<void(boost::int64_t nodeTypeId)> QueueNotFull;
+    typedef std::function<void(int64_t toNodeId)> RetransmitTo;
+    typedef std::function<void(int64_t nodeTypeId)> QueueNotFull;
 
     template <class WriterType>
     class AckedDataSenderBasic : private WriterType
     {
     public:
-        AckedDataSenderBasic(const boost::shared_ptr<boost::asio::io_service>& ioService,
-                             boost::int64_t nodeTypeId,
-                             boost::int64_t nodeId,
+        AckedDataSenderBasic(boost::asio::io_service& ioService,
+                             int64_t nodeTypeId,
+                             int64_t nodeId,
                              int ipVersion,
                              const std::string& multicastAddress,
                              int waitForAckTimeout)
             :WriterType(ioService, ipVersion, multicastAddress)
-            ,m_strand(*ioService)
+            ,m_strand(ioService)
             ,m_nodeTypeId(nodeTypeId)
             ,m_nodeId(nodeId)
             ,m_sendQueue(Parameters::SendQueueSize)
@@ -73,7 +73,7 @@ namespace Com
             ,m_waitForAckTimeout(waitForAckTimeout)
             ,m_nodes()
             ,m_lastSentMulticastSeqNo(0)
-            ,m_resendTimer(*ioService)
+            ,m_resendTimer(ioService)
             ,m_retransmitNotification()
             ,m_queueNotFullNotification()
             ,m_queueNotFullNotificationLimit(0)
@@ -121,7 +121,7 @@ namespace Com
         }
 
         //Add message to send queue. Message will be retranmitted unitl all receivers have acked. Returns false if queue is full.
-        bool AddToSendQueue(boost::int64_t toId, const boost::shared_ptr<char[]>& msg, size_t size, boost::int64_t dataTypeIdentifier)
+        bool AddToSendQueue(int64_t toId, const boost::shared_ptr<char[]>& msg, size_t size, int64_t dataTypeIdentifier)
         {
             //calculate number of fragments
             size_t numberOfFullFragments=size/FragmentDataSize;
@@ -224,7 +224,7 @@ namespace Com
         }
 
         //Add a node.
-        void AddNode(boost::int64_t id, const std::string& address)
+        void AddNode(int64_t id, const std::string& address)
         {
             m_strand.dispatch([=]
             {
@@ -237,7 +237,7 @@ namespace Com
         }
 
         //Make node included or excluded. If excluded it is also removed.
-        void SetSystemNode(boost::int64_t id, bool isSystemNode)
+        void SetSystemNode(int64_t id, bool isSystemNode)
         {
             m_strand.dispatch([=]
             {
@@ -266,8 +266,8 @@ namespace Com
 
     private:
         boost::asio::io_service::strand m_strand;
-        boost::int64_t m_nodeTypeId;
-        boost::int64_t m_nodeId;
+        int64_t m_nodeTypeId;
+        int64_t m_nodeId;
         MessageQueue<UserDataPtr> m_sendQueue;
         std::atomic_uint m_sendQueueSize;
         bool m_running;
@@ -279,7 +279,7 @@ namespace Com
             boost::asio::ip::udp::endpoint endpoint;
             boost::uint64_t lastSentSeqNo;
         };
-        std::map<boost::int64_t, NodeInfo> m_nodes;
+        std::map<int64_t, NodeInfo> m_nodes;
 
         boost::uint64_t m_lastSentMulticastSeqNo;
         boost::asio::steady_timer m_resendTimer;
@@ -492,7 +492,7 @@ namespace Com
             }
         }
 
-        bool ReceiverExists(boost::int64_t toId) const
+        bool ReceiverExists(int64_t toId) const
         {
             if (toId==0) //send to all, check if there are any nodes
             {

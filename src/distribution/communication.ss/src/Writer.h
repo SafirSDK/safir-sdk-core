@@ -80,16 +80,16 @@ namespace Com
     public:
         typedef boost::shared_ptr<T> Ptr;
 
-        Writer(const boost::shared_ptr<boost::asio::io_service>& ioService, int protocol)
-            :m_socket(*ioService,  Utilities::Protocol(protocol))
+        Writer(boost::asio::io_service& ioService, int protocol)
+            :m_socket(ioService,  Utilities::Protocol(protocol))
             ,m_multicastEndpoint()
             ,m_multicastEnabled(false)
         {
             m_socket.set_option(boost::asio::ip::udp::socket::reuse_address(true));
         }
 
-        Writer(const boost::shared_ptr<boost::asio::io_service>& ioService, int protocol, const std::string& multicastAddress)
-            :m_socket(*ioService, Utilities::Protocol(protocol))
+        Writer(boost::asio::io_service& ioService, int protocol, const std::string& multicastAddress)
+            :m_socket(ioService, Utilities::Protocol(protocol))
             ,m_multicastEndpoint(Utilities::CreateEndpoint(multicastAddress))
             ,m_multicastEnabled(!multicastAddress.empty())
         {

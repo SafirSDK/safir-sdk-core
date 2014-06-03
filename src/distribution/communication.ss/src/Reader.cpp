@@ -36,13 +36,13 @@ namespace Internal
 {
 namespace Com
 {
-    Reader::Reader(const boost::shared_ptr<boost::asio::io_service>& ioService,
+    Reader::Reader(boost::asio::io_service& ioService,
                    const std::string& unicastAddress,
                    const std::string& multicastAddress,
                    const std::function<bool(const char*, size_t)>& onRecv,
                    const std::function<bool(void)>& isReceiverIsReady)
-        :m_strand(*ioService)
-        ,m_timer(*ioService, boost::chrono::milliseconds(10))
+        :m_strand(ioService)
+        ,m_timer(ioService, boost::chrono::milliseconds(10))
         ,m_onRecv(onRecv)
         ,m_isReceiverReady(isReceiverIsReady)
         ,m_running(false)
@@ -50,7 +50,7 @@ namespace Com
         int unicastIpVersion;
         auto unicastEndpoint=Utilities::CreateEndpoint(unicastAddress, unicastIpVersion);
 
-        m_socket.reset(new boost::asio::ip::udp::socket(*ioService));
+        m_socket.reset(new boost::asio::ip::udp::socket(ioService));
         m_socket->open(unicastEndpoint.protocol());
 
         if (!multicastAddress.empty())
@@ -62,7 +62,7 @@ namespace Com
             {
                 throw std::logic_error("Unicast address and multicast address is not in same format (IPv4 and IPv6)");
             }
-            m_multicastSocket.reset(new boost::asio::ip::udp::socket(*ioService));
+            m_multicastSocket.reset(new boost::asio::ip::udp::socket(ioService));
             m_multicastSocket->open(mcEndpoint.protocol());
             m_multicastSocket->set_option(boost::asio::ip::udp::socket::reuse_address(true));
             m_multicastSocket->set_option(boost::asio::ip::multicast::enable_loopback(true));

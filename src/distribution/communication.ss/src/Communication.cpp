@@ -37,11 +37,11 @@ namespace Com
 {
 namespace
 {
-    boost::shared_ptr<CommunicationImpl> Init(bool isControlInstance,
-                                              const boost::shared_ptr<boost::asio::io_service>& ioService,
+    std::unique_ptr<CommunicationImpl> Init(bool isControlInstance,
+                                              boost::asio::io_service& ioService,
                                               const std::string& nodeName,
-                                              boost::int64_t nodeId, //0 is not a valid id.
-                                              boost::int64_t nodeTypeId,
+                                              int64_t nodeId, //0 is not a valid id.
+                                              int64_t nodeTypeId,
                                               const std::string& controlAddress,
                                               const std::string& dataAddress,
                                               const std::vector<NodeTypeDefinition>& nodeTypes)
@@ -75,33 +75,34 @@ namespace
         }
 
         //create impl object
-        boost::shared_ptr<CommunicationImpl> communication=boost::make_shared<CommunicationImpl>(ioService, nodeName, nodeId, nodeTypeId, controlAddress, dataAddress, isControlInstance, nodeTypeMap);
-        return communication;
+        return std::unique_ptr<CommunicationImpl>(new CommunicationImpl(ioService, nodeName, nodeId, nodeTypeId, controlAddress, dataAddress, isControlInstance, nodeTypeMap));
     }
 }
 
     Communication::Communication(ControlModeTag,
-                  const boost::shared_ptr<boost::asio::io_service>& ioService,
+                  boost::asio::io_service& ioService,
                   const std::string& nodeName,
-                  boost::int64_t nodeId, //0 is not a valid id.
-                  boost::int64_t nodeTypeId,
+                  int64_t nodeId, //0 is not a valid id.
+                  int64_t nodeTypeId,
                   const std::string& controlAddress,
                   const std::string& dataAddress,
                   const std::vector<NodeTypeDefinition>& nodeTypes)
+        :m_impl(Init(true, ioService, nodeName, nodeId, nodeTypeId, controlAddress, dataAddress, nodeTypes))
     {
-        m_impl=Init(true, ioService, nodeName, nodeId, nodeTypeId, controlAddress, dataAddress, nodeTypes);
+       // m_impl=Init(true, ioService, nodeName, nodeId, nodeTypeId, controlAddress, dataAddress, nodeTypes);
     }
 
 
     Communication::Communication(DataModeTag,
-                                 const boost::shared_ptr<boost::asio::io_service>& ioService,
+                                 boost::asio::io_service& ioService,
                                  const std::string& nodeName,
-                                 boost::int64_t nodeId, //0 is not a valid id.
-                                 boost::int64_t nodeTypeId,
+                                 int64_t nodeId, //0 is not a valid id.
+                                 int64_t nodeTypeId,
                                  const std::string& dataAddress,
                                  const std::vector<NodeTypeDefinition>& nodeTypes)
+        :m_impl(Init(false, ioService, nodeName, nodeId, nodeTypeId, "", dataAddress, nodeTypes))
     {
-        m_impl=Init(false, ioService, nodeName, nodeId, nodeTypeId, "", dataAddress, nodeTypes);
+        //m_impl=Init(false, ioService, nodeName, nodeId, nodeTypeId, "", dataAddress, nodeTypes);
     }
 
     Communication::~Communication()
@@ -129,7 +130,7 @@ namespace
        m_impl->SetQueueNotFullCallback(callback, freePartThreshold);
     }
 
-    void Communication::SetDataReceiver(const ReceiveData& callback, boost::int64_t dataTypeIdentifier)
+    void Communication::SetDataReceiver(const ReceiveData& callback, int64_t dataTypeIdentifier)
     {
         m_impl->SetDataReceiver(callback, dataTypeIdentifier);
     }
@@ -149,27 +150,27 @@ namespace
         m_impl->InjectSeeds(seeds);
     }
 
-    void Communication::IncludeNode(boost::int64_t nodeId)
+    void Communication::IncludeNode(int64_t nodeId)
     {
         m_impl->IncludeNode(nodeId);
     }
 
-    void Communication::ExcludeNode(boost::int64_t nodeId)
+    void Communication::ExcludeNode(int64_t nodeId)
     {
         m_impl->ExcludeNode(nodeId);
     }
 
-    bool Communication::SendToNode(boost::int64_t nodeId, boost::int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier)
+    bool Communication::SendToNode(int64_t nodeId, int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, int64_t dataTypeIdentifier)
     {
         return m_impl->SendToNode(nodeId, nodeTypeId, data, size, dataTypeIdentifier);
     }
 
-    bool Communication::SendToNodeType(boost::int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier)
+    bool Communication::SendToNodeType(int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, int64_t dataTypeIdentifier)
     {
         return m_impl->SendToNodeType(nodeTypeId, data, size, dataTypeIdentifier);
     }
 
-    size_t Communication::NumberOfQueuedMessages(boost::int64_t nodeTypeId) const
+    size_t Communication::NumberOfQueuedMessages(int64_t nodeTypeId) const
     {
         return m_impl->NumberOfQueuedMessages(nodeTypeId);
     }
@@ -179,7 +180,7 @@ namespace
         return m_impl->Name();
     }
 
-    boost::int64_t Communication::Id() const
+    int64_t Communication::Id() const
     {
         return m_impl->Id();
     }

@@ -118,7 +118,7 @@ public:
         }
     }
 
-    const Safir::Dob::Internal::Com::NodeTypeDefinition& Get(boost::int64_t nodeTypeId) const
+    const Safir::Dob::Internal::Com::NodeTypeDefinition& Get(int64_t nodeTypeId) const
     {
         return m_nodeTypes.find(nodeTypeId)->second;
     }
@@ -128,7 +128,7 @@ public:
         return m_nodeTypes.find(LlufId_Generate64(name.c_str()))->second;
     }
 
-    const std::map<boost::int64_t, Safir::Dob::Internal::Com::NodeTypeDefinition> Map() const
+    const std::map<int64_t, Safir::Dob::Internal::Com::NodeTypeDefinition> Map() const
     {
         return m_nodeTypes;
     }
@@ -144,7 +144,7 @@ public:
     }
 
 private:
-    std::map<boost::int64_t, Safir::Dob::Internal::Com::NodeTypeDefinition> m_nodeTypes;
+    std::map<int64_t, Safir::Dob::Internal::Com::NodeTypeDefinition> m_nodeTypes;
 
 };
 
@@ -203,8 +203,8 @@ class Sp : private boost::noncopyable
 public:
 
     Sp(unsigned int numRecv,
-       const boost::function< void(boost::int64_t) >& includeNode,
-       const boost::function< void(boost::int64_t) >& reportNodeFinished)
+       const std::function< void(int64_t) >& includeNode,
+       const std::function< void(int64_t) >& reportNodeFinished)
         :m_nodeTypes()
         ,m_nodeNames()
         ,m_recvCount()
@@ -216,7 +216,7 @@ public:
     }
 
 
-    void NewNode(const std::string& name, boost::int64_t nodeId, boost::int64_t nodeTypeId, const std::string& address)
+    void NewNode(const std::string& name, int64_t nodeId, int64_t nodeTypeId, const std::string& address)
     {
         m_nodeNames[nodeId]=name;
 
@@ -238,18 +238,18 @@ public:
         }
     }
 
-    void GotReceive(boost::int64_t /*id*/)
+    void GotReceive(int64_t /*id*/)
     {
         //std::cout<<"SP: GotRecv from "<<id<<std::endl;
 
     }
 
-    void GotNack(boost::int64_t /*id*/)
+    void GotNack(int64_t /*id*/)
     {        
 
     }
 
-    void Retransmit(boost::int64_t id)
+    void Retransmit(int64_t id)
     {
         ++m_retransmitCount;
         if (m_retransmitCount%25==0)
@@ -258,7 +258,7 @@ public:
         }
     }
 
-    void OnRecv(boost::int64_t id, const boost::shared_ptr<char[]>& msg, size_t size)
+    void OnRecv(int64_t id, const boost::shared_ptr<char[]>& msg, size_t size)
     {
         if (!ValidCRC(msg, size))
         {
@@ -287,7 +287,7 @@ public:
 
     void PrintRecvCount()
     {
-        for (std::map<boost::int64_t, unsigned int>::const_iterator it=m_recvCount.begin(); it!=m_recvCount.end(); ++it)
+        for (std::map<int64_t, unsigned int>::const_iterator it=m_recvCount.begin(); it!=m_recvCount.end(); ++it)
         {
             std::cout<<"Has got "<<it->second<<" from node "<<m_nodeNames[it->first]<<std::endl;
         }
@@ -297,12 +297,12 @@ public:
 
 private:
     NodeTypes m_nodeTypes;
-    std::map<boost::int64_t, std::string> m_nodeNames;
-    std::map<boost::int64_t, unsigned int> m_recvCount;
+    std::map<int64_t, std::string> m_nodeNames;
+    std::map<int64_t, unsigned int> m_recvCount;
     unsigned int m_retransmitCount;
     unsigned int m_numRecv;
-    boost::function< void(boost::int64_t) > m_includeNode;
-    boost::function< void(boost::int64_t) > m_reportNodeFinished;
+    std::function< void(int64_t) > m_includeNode;
+    std::function< void(int64_t) > m_reportNodeFinished;
 };
 
 int main(int argc, char * argv[])
@@ -316,17 +316,17 @@ int main(int argc, char * argv[])
 
     std::ostringstream name;
     name<<"Test_"<<cmd.unicastAddress;
-    boost::shared_ptr<boost::asio::io_service> ioService(new boost::asio::io_service());
-    auto work=boost::make_shared<boost::asio::io_service::work>(*ioService);
+    boost::asio::io_service ioService;
+    auto work=boost::make_shared<boost::asio::io_service::work>(ioService);
     int numberOfDiscoveredNodes=0;
     boost::barrier startBarrier(2);
     Semaphore stopCondition(cmd.await);
     Semaphore queueFullSem(1);
 
-    std::set<boost::int64_t> nodes;
+    std::set<int64_t> nodes;
     boost::shared_ptr<Safir::Dob::Internal::Com::Communication> com;
     boost::shared_ptr<Sp> sp(new Sp(cmd.nrecv,
-    [&](boost::int64_t id)
+    [&](int64_t id)
     {
         nodes.insert(id);
         com->IncludeNode(id);
@@ -336,15 +336,15 @@ int main(int argc, char * argv[])
             startBarrier.wait();
         }
      },
-    [&](boost::int64_t id)
+    [&](int64_t id)
     {
         std::cout<<"nofify stop cond"<<std::endl;
         stopCondition.Notify();
     }));
 
     NodeTypes nodeTypes;
-    boost::int64_t myId=LlufId_GenerateRandom64();
-    boost::int64_t myNodeTypeId=nodeTypes.Get(cmd.nodeType).id;
+    int64_t myId=LlufId_GenerateRandom64();
+    int64_t myNodeTypeId=nodeTypes.Get(cmd.nodeType).id;
     std::cout<<"----------------------------------------------------------------------------"<<std::endl;
     std::cout<<"-- Name:      "<<name.str()<<std::endl;
     std::cout<<"-- Id:        "<<myId<<std::endl;
@@ -360,18 +360,18 @@ int main(int argc, char * argv[])
                                                            cmd.unicastAddress,
                                                            nodeTypes.ToVector()));
 
-    com->SetDataReceiver([=](boost::int64_t fromNode, boost::int64_t fromNodeType, const boost::shared_ptr<char[]>& msg, size_t size){sp->OnRecv(fromNode, msg, size);}, 0);
-    com->SetGotReceiveFromCallback([=](boost::int64_t id){sp->GotReceive(id);});
-    com->SetRetransmitToCallback([=](boost::int64_t id){sp->Retransmit(id);});
-    com->SetNewNodeCallback([=](const std::string& name, boost::int64_t nodeId, boost::int64_t nodeTypeId, const std::string& ca, const std::string& da)
+    com->SetDataReceiver([=](int64_t fromNode, int64_t fromNodeType, const boost::shared_ptr<char[]>& msg, size_t size){sp->OnRecv(fromNode, msg, size);}, 0);
+    com->SetGotReceiveFromCallback([=](int64_t id){sp->GotReceive(id);});
+    com->SetRetransmitToCallback([=](int64_t id){sp->Retransmit(id);});
+    com->SetNewNodeCallback([=](const std::string& name, int64_t nodeId, int64_t nodeTypeId, const std::string& ca, const std::string& da)
                             {sp->NewNode(name, nodeId, nodeTypeId, ca);});
 
-    com->SetQueueNotFullCallback([&](boost::int64_t){queueFullSem.Notify();}, 100); //50% free queue space before we get notification
+    com->SetQueueNotFullCallback([&](int64_t){queueFullSem.Notify();}, 100); //50% free queue space before we get notification
 
     boost::thread_group threads;
     for (int i = 0; i < 9; ++i)
     {
-        threads.create_thread(boost::bind(&boost::asio::io_service::run, ioService));
+        threads.create_thread([&]{ioService.run();});
     }
 
     if (cmd.seeds.size()>0)
@@ -444,7 +444,7 @@ int main(int argc, char * argv[])
     sp->PrintRecvCount();
     std::cout<<"---------------------------------------------------------"<<std::endl;
     boost::this_thread::sleep_for(boost::chrono::milliseconds(1000)); //allow 1 sec for retransmissions
-    ioService->stop();
+    ioService.stop();
     threads.join_all();
 
     return 0;

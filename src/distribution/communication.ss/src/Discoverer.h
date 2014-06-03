@@ -49,18 +49,18 @@ namespace Com
 #ifdef _MSC_VER
 #pragma warning (disable: 4355)
 #endif
-        DiscovererBasic(const boost::shared_ptr<boost::asio::io_service>& ioService,
+        DiscovererBasic(boost::asio::io_service& ioService,
                         const Node& me,
-                        const boost::function<void(const Node&)>& onNewNode)
+                        const std::function<void(const Node&)>& onNewNode)
             :WriterType(ioService, Utilities::Protocol(me.unicastAddress))
             ,m_seeds()
             ,m_nodes()
             ,m_reportedNodes()
             ,m_incompletedNodes()
-            ,m_strand(*ioService)
+            ,m_strand(ioService)
             ,m_me(me)
             ,m_onNewNode(onNewNode)
-            ,m_timer(*ioService)
+            ,m_timer(ioService)
             ,m_randomGenerator(static_cast<boost::uint32_t>(me.nodeId))
         {
         }
@@ -190,12 +190,12 @@ namespace Com
         NodeMap m_seeds; //id generated from ip:port
         NodeMap m_nodes; //known nodes
         NodeMap m_reportedNodes; //nodes only heard about from others, never talked to
-        std::map<boost::int64_t, std::vector<bool> > m_incompletedNodes; //talked to but still haven't received all node info from this node
+        std::map<int64_t, std::vector<bool> > m_incompletedNodes; //talked to but still haven't received all node info from this node
 
         boost::asio::io_service::strand m_strand;
         Node m_me;
 
-        boost::function<void(const Node&)> m_onNewNode;
+        std::function<void(const Node&)> m_onNewNode;
         boost::asio::steady_timer m_timer;
 
         mutable boost::random::mt19937 m_randomGenerator;
@@ -237,7 +237,7 @@ namespace Com
             }
         }
 
-        void SendNodeInfo(boost::int64_t toId, boost::int64_t fromId, const boost::asio::ip::udp::endpoint& toEndpoint)
+        void SendNodeInfo(int64_t toId, int64_t fromId, const boost::asio::ip::udp::endpoint& toEndpoint)
         {
             //This method must always be called from within writeStrand
             const int totalNumberOfNodes=static_cast<int>(m_seeds.size()+m_nodes.size());
@@ -318,13 +318,13 @@ namespace Com
             WriterType::SendTo(ud, toEndpoint);
         }
 
-        bool IsNewNode(boost::int64_t id) const
+        bool IsNewNode(int64_t id) const
         {
             return m_nodes.find(id)==m_nodes.cend();
         }
 
         //incomplete nodes are nodes we have heard from but still haven't got all the nodeInfo messages from
-        bool UpdateIncompleteNodes(boost::int64_t id, size_t numberOfPackets, size_t packetNumber)
+        bool UpdateIncompleteNodes(int64_t id, size_t numberOfPackets, size_t packetNumber)
         {
             if (numberOfPackets==1 && packetNumber==0)
             {

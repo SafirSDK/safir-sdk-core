@@ -45,15 +45,15 @@ namespace Internal
 {
 namespace Com
 {
-    typedef boost::function<void(const std::string& name, boost::int64_t nodeId, boost::int64_t nodeTypeId, const std::string& controlAddress, const std::string& dataAddress)> NewNode;
+    typedef std::function<void(const std::string& name, int64_t nodeId, int64_t nodeTypeId, const std::string& controlAddress, const std::string& dataAddress)> NewNode;
 
     class CommunicationImpl : private boost::noncopyable
     {
     public:
-        CommunicationImpl(const boost::shared_ptr<boost::asio::io_service>& ioService,
+        CommunicationImpl(boost::asio::io_service& ioService,
                           const std::string& nodeName,
-                          boost::int64_t nodeId, //0 is not a valid id.
-                          boost::int64_t nodeTypeId,
+                          int64_t nodeId, //0 is not a valid id.
+                          int64_t nodeTypeId,
                           const std::string& controlAddress,
                           const std::string& dataAddress,
                           bool isControlInstance,
@@ -66,27 +66,27 @@ namespace Com
         void SetGotReceiveFromCallback(const GotReceiveFrom& callback);
         void SetRetransmitToCallback(const RetransmitTo& callback);
         void SetQueueNotFullCallback(const QueueNotFull& callback, int freePartThreshold);
-        void SetDataReceiver(const ReceiveData& callback, boost::int64_t dataTypeIdentifier);
+        void SetDataReceiver(const ReceiveData& callback, int64_t dataTypeIdentifier);
 
         void InjectSeeds(const std::vector<std::string>& seeds);
 
         void Start();
         void Stop();
 
-        void IncludeNode(boost::int64_t nodeId);
-        void ExcludeNode(boost::int64_t nodeId);
+        void IncludeNode(int64_t nodeId);
+        void ExcludeNode(int64_t nodeId);
 
-        bool SendToNode(boost::int64_t nodeId, boost::int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier);
-        bool SendToNodeType(boost::int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier);
+        bool SendToNode(int64_t nodeId, int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, int64_t dataTypeIdentifier);
+        bool SendToNodeType(int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, int64_t dataTypeIdentifier);
 
-        size_t NumberOfQueuedMessages(boost::int64_t nodeTypeId) const;
+        size_t NumberOfQueuedMessages(int64_t nodeTypeId) const;
 
         const std::string& Name() const {return m_me.name;}
-        boost::int64_t Id() const {return m_me.nodeId;}
+        int64_t Id() const {return m_me.nodeId;}
 
     private:
         ::google::protobuf::LogSilencer m_disableProtobufLogs;
-        boost::shared_ptr<boost::asio::io_service> m_ioService;
+        boost::asio::io_service& m_ioService;
         Node m_me;
         bool m_isControlInstance;
         NodeTypeMap m_nodeTypes;
@@ -100,14 +100,14 @@ namespace Com
         DeliveryHandler m_deliveryHandler;
         Reader m_reader;
 
-        void SetSystemNode(boost::int64_t id, bool isSystemNode);
+        void SetSystemNode(int64_t id, bool isSystemNode);
         bool OnRecv(const char* data, size_t size); //returns true if it is ok to call OnRecv again, false if flooded with received messages
         void OnNewNode(const Node& node);
 
         //Received internal Communication msg that is not directly passed to application, i.e discover, nodeInfo etc.
         void ReceivedControlData(const MessageHeader* header, const char* payload);
 
-        NodeType& GetNodeType(boost::int64_t nodeTypeId) 
+        NodeType& GetNodeType(int64_t nodeTypeId)
         {
             auto findIt = m_nodeTypes.find(nodeTypeId);
             if (findIt == m_nodeTypes.end())
@@ -117,7 +117,7 @@ namespace Com
             return *(findIt->second);
         }
 
-        const NodeType& GetNodeType(boost::int64_t nodeTypeId) const 
+        const NodeType& GetNodeType(int64_t nodeTypeId) const
         {
             return const_cast<CommunicationImpl*>(this)->GetNodeType(nodeTypeId);
         }

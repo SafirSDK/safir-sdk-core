@@ -41,10 +41,10 @@ namespace Com
 #ifdef _MSC_VER
 #pragma warning (disable: 4355)
 #endif
-    CommunicationImpl::CommunicationImpl(const boost::shared_ptr<boost::asio::io_service>& ioService,
+    CommunicationImpl::CommunicationImpl(boost::asio::io_service& ioService,
                                          const std::string& nodeName,
-                                         boost::int64_t nodeId, //0 is not a valid id.
-                                         boost::int64_t nodeTypeId,
+                                         int64_t nodeId, //0 is not a valid id.
+                                         int64_t nodeTypeId,
                                          const std::string& controlAddress,
                                          const std::string& dataAddress,
                                          bool isControlInstance,
@@ -107,7 +107,7 @@ namespace Com
         }
     }
 
-    void CommunicationImpl::SetDataReceiver(const ReceiveData& callback, boost::int64_t dataTypeIdentifier)
+    void CommunicationImpl::SetDataReceiver(const ReceiveData& callback, int64_t dataTypeIdentifier)
     {
         m_reader.Strand().post([=]{m_deliveryHandler.SetReceiver(callback, dataTypeIdentifier);});
     }
@@ -148,27 +148,27 @@ namespace Com
         }
     }
 
-    void CommunicationImpl::IncludeNode(boost::int64_t id)
+    void CommunicationImpl::IncludeNode(int64_t id)
     {
         SetSystemNode(id, true);
     }
 
-    void CommunicationImpl::ExcludeNode(boost::int64_t id)
+    void CommunicationImpl::ExcludeNode(int64_t id)
     {
         SetSystemNode(id, false);
     }
 
-    bool CommunicationImpl::SendToNode(boost::int64_t nodeId, boost::int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier)
+    bool CommunicationImpl::SendToNode(int64_t nodeId, int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, int64_t dataTypeIdentifier)
     {
         return GetNodeType(nodeTypeId).GetAckedDataSender().AddToSendQueue(nodeId, data, size, dataTypeIdentifier);
     }
 
-    bool CommunicationImpl::SendToNodeType(boost::int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, boost::int64_t dataTypeIdentifier)
+    bool CommunicationImpl::SendToNodeType(int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, int64_t dataTypeIdentifier)
     {
         return GetNodeType(nodeTypeId).GetAckedDataSender().AddToSendQueue(0, data, size, dataTypeIdentifier);
     }
 
-    size_t CommunicationImpl::NumberOfQueuedMessages(boost::int64_t nodeTypeId) const
+    size_t CommunicationImpl::NumberOfQueuedMessages(int64_t nodeTypeId) const
     {
         return GetNodeType(nodeTypeId).GetAckedDataSender().SendQueueSize();
     }
@@ -181,7 +181,7 @@ namespace Com
         }
     }
 
-    void CommunicationImpl::SetSystemNode(boost::int64_t id, bool isSystemNode)
+    void CommunicationImpl::SetSystemNode(int64_t id, bool isSystemNode)
     {
         //We do post here to be sure the AddNode job will be executed before SetSystemNode. Otherwize we
         //risk losing a node.

@@ -48,7 +48,7 @@ namespace Com
     class Reader : private boost::noncopyable
     {
     public:
-        Reader(const boost::shared_ptr<boost::asio::io_service>& ioService,
+        Reader(boost::asio::io_service& ioService,
                const std::string& unicastAddress,
                const std::string& multicastAddress, //empty if not using multicast
                const std::function<bool(const char*, size_t)>& onRecv,
