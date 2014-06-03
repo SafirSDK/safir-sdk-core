@@ -382,8 +382,6 @@ if(PYTHON_VERSION_STRING VERSION_LESS "2.7")
   message(FATAL_ERROR "Need Python version 2.7 or greater. Sorry.")
 endif()
 
-ENABLE_TESTING()
-
 add_subdirectory(patch_check)
 add_subdirectory(lluf)
 add_subdirectory(logging)
