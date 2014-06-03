@@ -51,20 +51,20 @@ namespace SP
                             const char* const name)
             : m_coordinator(coordinator)
             , m_publisher(Safir::Utilities::Internal::IpcPublisher::Create(ioService,name))
-            , m_publishTimer(AsioPeriodicTimer::Create(ioService, 
-                                                       boost::chrono::seconds(1),
-                                                       [this](const boost::system::error_code& error)
-                                                       {
-                                                           Publish(error);
-                                                       }))
+            , m_publishTimer(ioService, 
+                             boost::chrono::seconds(1),
+                             [this](const boost::system::error_code& error)
+                             {
+                                 Publish(error);
+                             })
         {
-            m_publishTimer->Start();
+            m_publishTimer.Start();
             m_publisher->Start();
         }
 
         void Stop()
         {
-            m_publishTimer->Stop();
+            m_publishTimer.Stop();
             m_publisher->Stop();
         }
 
@@ -99,7 +99,7 @@ namespace SP
         
         Coordinator& m_coordinator;
         const boost::shared_ptr<Safir::Utilities::Internal::IpcPublisher> m_publisher;
-        boost::shared_ptr<Safir::Utilities::Internal::AsioPeriodicTimer> m_publishTimer;
+        Safir::Utilities::Internal::AsioPeriodicTimer m_publishTimer;
     };
 }
 }

@@ -135,9 +135,9 @@ namespace SP
         const boost::chrono::steady_clock::time_point m_epoch;
         mutable boost::asio::strand m_strand;
 
-        boost::shared_ptr<Safir::Utilities::Internal::AsioPeriodicTimer> m_checkDeadNodesTimer;
-        boost::shared_ptr<Safir::Utilities::Internal::AsioPeriodicTimer> m_postStatisticsChangedTimer;
-
+        Safir::Utilities::Internal::AsioPeriodicTimer m_checkDeadNodesTimer;
+        Safir::Utilities::Internal::AsioPeriodicTimer m_postStatisticsChangedTimer;
+        
         NodeTable m_nodeTable;
         mutable NodeStatisticsMessage m_allStatisticsMessage;
 #if GOOGLE_PROTOBUF_VERSION < 2005000

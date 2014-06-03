@@ -50,19 +50,19 @@ namespace SP
             , m_senderId(LlufId_Generate64(senderId))
             , m_nodeTypes(nodeTypes)
             , m_coordinator(coordinator)
-            , m_publishTimer(AsioPeriodicTimer::Create(ioService, 
-                                                       boost::chrono::seconds(1),
-                                                       [this](const boost::system::error_code& error)
-                                                       {
-                                                           Publish(error);
-                                                       }))
+            , m_publishTimer(ioService, 
+                             boost::chrono::seconds(1),
+                             [this](const boost::system::error_code& error)
+                             {
+                                 Publish(error);
+                             })
         {
-            m_publishTimer->Start();
+            m_publishTimer.Start();
         }
 
         void Stop()
         {
-            m_publishTimer->Stop();
+            m_publishTimer.Stop();
         }
 
     private:
@@ -114,7 +114,7 @@ namespace SP
         const boost::uint64_t m_senderId;
         const std::map<boost::int64_t, NodeType> m_nodeTypes;
         Coordinator& m_coordinator;
-        boost::shared_ptr<Safir::Utilities::Internal::AsioPeriodicTimer> m_publishTimer;
+        Safir::Utilities::Internal::AsioPeriodicTimer m_publishTimer;
     };
 }
 }

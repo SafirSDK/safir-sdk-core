@@ -62,36 +62,34 @@ namespace SP
         , m_nodeTypes(nodeTypes)
         , m_epoch(steady_clock::now() - boost::chrono::hours(1))
         , m_strand(ioService)
-        , m_checkDeadNodesTimer(AsioPeriodicTimer::Create(ioService, 
-                                                          boost::chrono::milliseconds(1100),
-                                                          m_strand.wrap([this](const boost::system::error_code& error)
-                                                                        {
-                                                                            if (m_stopped)
-                                                                            {
-                                                                                return;
-                                                                            }
-                                                                            
-                                                                            CheckDeadNodes(error);
-                                                                        })))
-        , m_postStatisticsChangedTimer
-        (AsioPeriodicTimer::Create
-             (ioService,
-              boost::chrono::milliseconds(1000),
-              m_strand.wrap([this](const boost::system::error_code& error)
-                            {
-                                if (m_stopped)
-                                {
-                                    return;
-                                }
-                                
-                                if (error)
-                                {
-                                    SEND_SYSTEM_LOG(Alert,
-                                                    << "Unexpected error in postStatisticsChangedTimer: " << error);
-                                    throw std::logic_error("Unexpected error in postStatisticsChangedTimer");
-                                }
-                                PostStatisticsChangedCallback();
-                            })))
+        , m_checkDeadNodesTimer(ioService, 
+                                boost::chrono::milliseconds(1100),
+                                m_strand.wrap([this](const boost::system::error_code& error)
+                                              {
+                                                  if (m_stopped)
+                                                  {
+                                                      return;
+                                                  }
+                                                  
+                                                  CheckDeadNodes(error);
+                                              }))
+        , m_postStatisticsChangedTimer(ioService,
+                                       boost::chrono::milliseconds(1000),
+                                       m_strand.wrap([this](const boost::system::error_code& error)
+                                                     {
+                                                         if (m_stopped)
+                                                         {
+                                                             return;
+                                                         }
+                                                         
+                                                         if (error)
+                                                         {
+                                                             SEND_SYSTEM_LOG(Alert,
+                                                                             << "Unexpected error in postStatisticsChangedTimer: " << error);
+                                                             throw std::logic_error("Unexpected error in postStatisticsChangedTimer");
+                                                         }
+                                                         PostStatisticsChangedCallback();
+                                                     }))
         , m_stopped(false)
     {
         //set up some info about ourselves in our message
@@ -119,7 +117,7 @@ namespace SP
                                                              {
                                                                  Retransmit(id);
                                                              }));
-        m_checkDeadNodesTimer->Start();
+        m_checkDeadNodesTimer.Start();
         //m_postStatisticsChangedTimer->Start();
     }
 
@@ -130,8 +128,8 @@ namespace SP
         {
             m_strand.dispatch([this]
                               {
-                                  m_checkDeadNodesTimer->Stop();
-                                  m_postStatisticsChangedTimer->Stop();
+                                  m_checkDeadNodesTimer.Stop();
+                                  m_postStatisticsChangedTimer.Stop();
                               });
         }
     }

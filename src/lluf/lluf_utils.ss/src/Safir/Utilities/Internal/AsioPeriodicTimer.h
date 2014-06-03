@@ -54,13 +54,16 @@ namespace Internal
 
 
     public:
-        static boost::shared_ptr<AsioPeriodicTimer> 
-        Create(boost::asio::io_service& ioService,
-               const boost::chrono::steady_clock::duration& period,
-               const boost::function<void(const boost::system::error_code& error)>& handler)
+        AsioPeriodicTimer(boost::asio::io_service& ioService,
+                          const boost::chrono::steady_clock::duration& period,
+                          const boost::function<void(const boost::system::error_code& error)>& handler)
+            : m_strand(ioService)
+            , m_timer(ioService)
+            , m_period(period)
+            , m_handler(handler)
+            , m_started(false)
         {
-            boost::shared_ptr<AsioPeriodicTimer> t(new AsioPeriodicTimer(ioService,period,handler));
-            return t;
+
         }
 
         /**
@@ -100,17 +103,6 @@ namespace Internal
         }
 
     private:
-        AsioPeriodicTimer(boost::asio::io_service& ioService,
-                          const boost::chrono::steady_clock::duration& period,
-                          const boost::function<void(const boost::system::error_code& error)>& handler)
-            : m_strand(ioService)
-            , m_timer(ioService)
-            , m_period(period)
-            , m_handler(handler)
-            , m_started(false)
-        {
-
-        }
         
         void Timeout(const boost::system::error_code& error)
         {
