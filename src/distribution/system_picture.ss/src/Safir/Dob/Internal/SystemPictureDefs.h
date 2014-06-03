@@ -47,8 +47,8 @@ namespace SP
 {
     struct NodeType
     {
-        NodeType(const boost::int64_t id_,
-                 std::string  name_,
+        NodeType(const int64_t id_,
+                 std::string name_,
                  const bool isLight_,
                  const int heartbeatInterval_, //in milliseconds
                  const int maxLostHeartbeats_)
@@ -58,7 +58,7 @@ namespace SP
             , heartbeatInterval(heartbeatInterval_)
             , maxLostHeartbeats(maxLostHeartbeats_) {}
 
-        const boost::int64_t id;           //node type id
+        const int64_t id;           //node type id
         const std::string name;            //readable name
         const bool isLight;                //is the node a light node
         const int heartbeatInterval;       //time between heartbeats

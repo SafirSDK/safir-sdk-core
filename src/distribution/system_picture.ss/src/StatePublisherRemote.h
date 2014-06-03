@@ -43,7 +43,7 @@ namespace SP
     public:
         StatePublisherRemote(boost::asio::io_service& ioService,
                              Com::Communication& communication,
-                             std::map<boost::int64_t, NodeType>  nodeTypes,
+                             std::map<int64_t, NodeType>  nodeTypes,
                              const char* const senderId,
                              Coordinator& coordinator)
             : m_communication(communication)
@@ -111,8 +111,8 @@ namespace SP
         }
 
         Com::Communication& m_communication;
-        const boost::uint64_t m_senderId;
-        const std::map<boost::int64_t, NodeType> m_nodeTypes;
+        const uint64_t m_senderId;
+        const std::map<int64_t, NodeType> m_nodeTypes;
         Coordinator& m_coordinator;
         Safir::Utilities::Internal::AsioPeriodicTimer m_publishTimer;
     };

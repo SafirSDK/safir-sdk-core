@@ -23,8 +23,6 @@
 ******************************************************************************/
 #include <Safir/Dob/Internal/RawStatistics.h>
 #include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
 #include "MessageWrapperCreators.h"
 #include <stdexcept>
 
@@ -111,7 +109,7 @@ namespace SP
     {
     public:
         Impl(const NodeStatisticsMessage& message,
-             boost::shared_ptr<const NodeStatisticsMessage> owner)
+             std::shared_ptr<const NodeStatisticsMessage> owner)
             : m_message(message)
             , m_owner(std::move(owner))
         {
@@ -123,12 +121,12 @@ namespace SP
             return m_message.name();
         }
 
-        boost::int64_t Id() const
+        int64_t Id() const
         {
             return m_message.id();
         }
 
-        boost::int64_t NodeTypeId() const
+        int64_t NodeTypeId() const
         {
             return m_message.node_type_id();
         }
@@ -153,12 +151,12 @@ namespace SP
             return m_message.node_info(index).name();
         }
 
-        boost::int64_t Id(const int index) const
+        int64_t Id(const int index) const
         {
             return m_message.node_info(index).id();
         }
 
-        boost::int64_t NodeTypeId(const int index) const
+        int64_t NodeTypeId(const int index) const
         {
             return m_message.node_info(index).node_type_id();
         }
@@ -178,12 +176,12 @@ namespace SP
             return m_message.node_info(index).is_dead();
         }
 
-        boost::uint32_t ReceiveCount(const int index) const
+        uint32_t ReceiveCount(const int index) const
         {
             return m_message.node_info(index).receive_count();
         }
 
-        boost::uint32_t RetransmitCount(const int index) const
+        uint32_t RetransmitCount(const int index) const
         {
             return m_message.node_info(index).retransmit_count();
         }
@@ -197,7 +195,7 @@ namespace SP
         {
             if (m_message.node_info(index).has_remote_statistics())
             {
-                return RawStatistics(boost::make_shared<Impl>(m_message.node_info(index).remote_statistics(), m_owner));
+                return RawStatistics(std::make_shared<Impl>(m_message.node_info(index).remote_statistics(), m_owner));
             }
             else
             {
@@ -215,32 +213,32 @@ namespace SP
 
         static RawStatistics Create(std::unique_ptr<NodeStatisticsMessage> message)
         {
-            boost::shared_ptr<NodeStatisticsMessage> msg(message.release());
-            return RawStatistics(boost::make_shared<Impl>(*msg.get(), msg));
+            std::shared_ptr<NodeStatisticsMessage> msg(std::move(message));
+            return RawStatistics(std::make_shared<Impl>(*msg.get(), msg));
         }
 
         const NodeStatisticsMessage& m_message;
-        const boost::shared_ptr<const NodeStatisticsMessage> m_owner;
+        const std::shared_ptr<const NodeStatisticsMessage> m_owner;
     };
 
 
     const std::string& RawStatistics::Name() const {return m_impl->Name();}
-    boost::int64_t RawStatistics::Id() const {return m_impl->Id();}
-    boost::int64_t RawStatistics::NodeTypeId() const {return m_impl->NodeTypeId();}
+    int64_t RawStatistics::Id() const {return m_impl->Id();}
+    int64_t RawStatistics::NodeTypeId() const {return m_impl->NodeTypeId();}
     const std::string& RawStatistics::ControlAddress() const {return m_impl->ControlAddress();}
     const std::string& RawStatistics::DataAddress() const {return m_impl->DataAddress();}
     
     int RawStatistics::Size() const {return m_impl->Size();}
     
     const std::string& RawStatistics::Name(const int index) const {return m_impl->Name(index);}
-    boost::int64_t RawStatistics::Id(const int index) const {return m_impl->Id(index);}
-    boost::int64_t RawStatistics::NodeTypeId(const int index) const {return m_impl->NodeTypeId(index);}
+    int64_t RawStatistics::Id(const int index) const {return m_impl->Id(index);}
+    int64_t RawStatistics::NodeTypeId(const int index) const {return m_impl->NodeTypeId(index);}
     const std::string& RawStatistics::ControlAddress(const int index) const {return m_impl->ControlAddress(index);}
     const std::string& RawStatistics::DataAddress(const int index) const {return m_impl->DataAddress(index);}
     
     bool RawStatistics::IsDead(const int index) const {return m_impl->IsDead(index);}
-    boost::uint32_t RawStatistics::ReceiveCount(const int index) const {return m_impl->ReceiveCount(index);}
-    boost::uint32_t RawStatistics::RetransmitCount(const int index) const {return m_impl->RetransmitCount(index);}
+    uint32_t RawStatistics::ReceiveCount(const int index) const {return m_impl->ReceiveCount(index);}
+    uint32_t RawStatistics::RetransmitCount(const int index) const {return m_impl->RetransmitCount(index);}
     
     bool RawStatistics::HasRemoteStatistics(const int index) const {return m_impl->HasRemoteStatistics(index);}
     RawStatistics RawStatistics::RemoteStatistics(const int index) const {return m_impl->RemoteStatistics(index);}

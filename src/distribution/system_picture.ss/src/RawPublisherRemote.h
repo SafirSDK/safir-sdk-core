@@ -44,7 +44,7 @@ namespace SP
     public:
         RawPublisherRemote(boost::asio::io_service& ioService,
                            Com::Communication& communication,
-                           const std::map<boost::int64_t, NodeType>& nodeTypes,
+                           const std::map<int64_t, NodeType>& nodeTypes,
                            const char* const senderId,
                            RawHandler& rawHandler)
             : m_strand(ioService)
@@ -55,7 +55,7 @@ namespace SP
             , m_rawHandler(rawHandler)
             , m_allNodeTypes([&nodeTypes]
                              {
-                                 std::set<boost::int64_t> res;
+                                 std::set<int64_t> res;
                                  for (const auto& it: nodeTypes)
                                  {
                                      res.insert(it.first);
@@ -79,7 +79,7 @@ namespace SP
 
     private:
         void SchedulePublishTimer(const boost::chrono::steady_clock::duration& delay,
-                                  const std::set<boost::int64_t>& toNodeTypes)
+                                  const std::set<int64_t>& toNodeTypes)
         {
             m_timer.cancel();
             m_timer.expires_from_now(delay); 
@@ -94,7 +94,7 @@ namespace SP
         
         //must be called in strand
         //if empty set is passed to this function we send to all node types
-        void Publish(const std::set<boost::int64_t>& toNodeTypes)
+        void Publish(const std::set<int64_t>& toNodeTypes)
         {
             lllog(8) << "Publishing raw statistics to other nodes" << std::endl;
 
@@ -114,7 +114,7 @@ namespace SP
                 const int crc = GetCrc32(data.get(), size - crcBytes);
                 memcpy(data.get() + size - crcBytes, &crc, sizeof(int));
 #endif
-                std::set<boost::int64_t> overflowNodes;
+                std::set<int64_t> overflowNodes;
 
                 for (auto id: toNodeTypes)
                 {
@@ -138,10 +138,10 @@ namespace SP
         boost::asio::strand m_strand;
         boost::asio::steady_timer m_timer;
         Com::Communication& m_communication;
-        const boost::uint64_t m_senderId;
-        const std::map<boost::int64_t, NodeType> m_nodeTypes;
+        const uint64_t m_senderId;
+        const std::map<int64_t, NodeType> m_nodeTypes;
         RawHandler& m_rawHandler;
-        const std::set<boost::int64_t> m_allNodeTypes;
+        const std::set<int64_t> m_allNodeTypes;
     };
 }
 }

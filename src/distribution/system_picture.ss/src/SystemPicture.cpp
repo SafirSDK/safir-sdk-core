@@ -71,12 +71,12 @@ namespace SP
          */
         Impl(boost::asio::io_service& ioService,
              Com::Communication& communication,
-             const std::string& name,
-             const boost::int64_t id,
-             const boost::int64_t nodeTypeId,
-             const std::string& controlAddress,
-             const std::string& dataAddress,
-             const std::map<boost::int64_t, NodeType>& nodeTypes)
+             std::string name,
+             const int64_t id,
+             const int64_t nodeTypeId,
+             std::string controlAddress,
+             std::string dataAddress,
+             std::map<int64_t, NodeType> nodeTypes)
             : m_rawHandler(std::make_unique<RawHandler>(ioService,
                                                         communication,
                                                         name,
@@ -98,11 +98,11 @@ namespace SP
                                                                           *m_rawHandler))
             , m_coordinator(std::make_unique<Coordinator>(ioService, 
                                                           communication,
-                                                          name,
+                                                          std::move(name),
                                                           id,
                                                           nodeTypeId,
-                                                          controlAddress,
-                                                          dataAddress,
+                                                          std::move(controlAddress),
+                                                          std::move(dataAddress),
                                                           nodeTypes,
                                                           MASTER_REMOTE_ELECTION_NAME,
                                                           *m_rawHandler))
@@ -111,7 +111,7 @@ namespace SP
                                                                           MASTER_LOCAL_STATE_NAME))
             , m_statePublisherRemote(std::make_unique<StatePublisherRemote>(ioService, 
                                                                             communication, 
-                                                                            nodeTypes,
+                                                                            std::move(nodeTypes),
                                                                             MASTER_REMOTE_STATE_NAME, 
                                                                             *m_coordinator))
             , m_stateSubscriberRemote(std::make_unique<StateSubscriberRemote>(communication, 
@@ -194,12 +194,12 @@ namespace SP
     SystemPicture::SystemPicture(master_tag_t,
                                  boost::asio::io_service& ioService,
                                  Com::Communication& communication,
-                                 const std::string& name,
-                                 const boost::int64_t id,
-                                 const boost::int64_t nodeTypeId,
-                                 const std::string& controlAddress,
-                                 const std::string& dataAddress,
-                                 const std::map<boost::int64_t, NodeType>& nodeTypes)
+                                 std::string name,
+                                 const int64_t id,
+                                 const int64_t nodeTypeId,
+                                 std::string controlAddress,
+                                 std::string dataAddress,
+                                 std::map<int64_t, NodeType> nodeTypes)
     : m_impl(std::make_unique<Impl>(ioService,
                                     communication,
                                     name,

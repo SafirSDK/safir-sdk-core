@@ -29,7 +29,6 @@
 #include <Safir/Dob/Internal/SystemPictureDefs.h>
 #include <boost/asio.hpp>
 #include <boost/chrono.hpp>
-#include <boost/cstdint.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/ptr_container/ptr_map.hpp>
 #include <boost/thread.hpp>
@@ -74,11 +73,11 @@ namespace SP
         RawHandler(boost::asio::io_service& ioService,
                    Com::Communication& communication,
                    std::string name,
-                   const boost::int64_t id,
-                   const boost::int64_t nodeTypeId,
+                   const int64_t id,
+                   const int64_t nodeTypeId,
                    std::string controlAddress,
                    std::string dataAddress,
-                   std::map<boost::int64_t, NodeType> nodeTypes);
+                   std::map<int64_t, NodeType> nodeTypes);
 
         void Stop();
 
@@ -91,21 +90,21 @@ namespace SP
                                                                       const size_t size)> & fn,
                                            const size_t extraSpace) const;
         
-        void UpdateRemoteStatistics(const boost::int64_t from, const boost::shared_ptr<char[]>& data, const size_t size);
+        void UpdateRemoteStatistics(const int64_t from, const boost::shared_ptr<char[]>& data, const size_t size);
 
         //will always be posted! data will be a copy
         void AddStatisticsChangedCallback(const StatisticsChangedCallback& callback);
 
-        void SetDeadNode(const boost::int64_t id);
+        void SetDeadNode(const int64_t id);
     private:
         void NewNode(const std::string& name,
-                     const boost::int64_t id,
-                     const boost::int64_t nodeTypeId,
+                     const int64_t id,
+                     const int64_t nodeTypeId,
                      const std::string& controlAddress,
                      const std::string& dataAddress);
         
-        void GotReceive(boost::int64_t id);
-        void Retransmit(boost::int64_t id);
+        void GotReceive(int64_t id);
+        void Retransmit(int64_t id);
 
         void CheckDeadNodes(const boost::system::error_code& error);
 
@@ -120,18 +119,18 @@ namespace SP
             explicit NodeInfo(NodeStatisticsMessage_NodeInfo* const nodeInfo_)
             : lastReceiveTime(0),nodeInfo(nodeInfo_) {}
 
-            boost::uint32_t lastReceiveTime;
+            uint32_t lastReceiveTime;
             NodeStatisticsMessage_NodeInfo* nodeInfo;
         };
-        typedef std::unordered_map<boost::int64_t, NodeInfo> NodeTable;
+        typedef std::unordered_map<int64_t, NodeInfo> NodeTable;
 
-        boost::uint32_t GetTime() const;
+        uint32_t GetTime() const;
 
         boost::asio::io_service& m_ioService;
         Com::Communication& m_communication;
 
-        const boost::int64_t m_id;
-        const std::map<boost::int64_t, NodeType> m_nodeTypes;
+        const int64_t m_id;
+        const std::map<int64_t, NodeType> m_nodeTypes;
         const boost::chrono::steady_clock::time_point m_epoch;
         mutable boost::asio::strand m_strand;
 

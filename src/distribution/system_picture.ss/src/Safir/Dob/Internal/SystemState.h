@@ -26,10 +26,8 @@
 
 #include <string>
 #include <ostream>
-#include <boost/cstdint.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/function.hpp>
 #include <Safir/Dob/Internal/SystemPictureDefs.h>
+#include <memory>
 
 //Forward declare some asio stuff.
 namespace boost
@@ -66,14 +64,14 @@ namespace SP
     class DISTRIBUTION_SYSTEM_PICTURE_API SystemState
     {
     public:
-        boost::int64_t ElectedId() const;
+        int64_t ElectedId() const;
         
         int Size() const;
 
         //Static fields
         const std::string& Name(const int index) const;
-        boost::int64_t Id(const int index) const;
-        boost::int64_t NodeTypeId(const int index) const;
+        int64_t Id(const int index) const;
+        int64_t NodeTypeId(const int index) const;
         const std::string& ControlAddress(const int index) const;
         const std::string& DataAddress(const int index) const;
 
@@ -84,10 +82,10 @@ namespace SP
 
         class Impl;
 
-        explicit SystemState(boost::shared_ptr<Impl>  impl)
+        explicit SystemState(std::shared_ptr<Impl>  impl)
             : m_impl(std::move(impl)) {}
 
-        boost::shared_ptr<Impl> m_impl;
+        std::shared_ptr<Impl> m_impl;
 
     };
 
@@ -99,7 +97,7 @@ namespace SP
     {
     public:
         virtual void Start(boost::asio::io_service& ioService,
-                           const boost::function<void (const SystemState& data)>& dataCallback) = 0;
+                           const std::function<void (const SystemState& data)>& dataCallback) = 0;
 
         virtual void Stop() = 0;
     };

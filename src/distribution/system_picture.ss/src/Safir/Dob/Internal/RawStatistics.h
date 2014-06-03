@@ -26,9 +26,7 @@
 
 #include <string>
 #include <ostream>
-#include <boost/cstdint.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/function.hpp>
+#include <memory>
 #include <Safir/Dob/Internal/SystemPictureDefs.h>
 
 //Forward declare some asio stuff.
@@ -73,8 +71,8 @@ namespace SP
         bool Valid() const {return m_impl != nullptr;};
 
         const std::string& Name() const;
-        boost::int64_t Id() const;
-        boost::int64_t NodeTypeId() const;
+        int64_t Id() const;
+        int64_t NodeTypeId() const;
         const std::string& ControlAddress() const;
         const std::string& DataAddress() const;
         
@@ -82,15 +80,15 @@ namespace SP
 
         //Static fields
         const std::string& Name(const int index) const;
-        boost::int64_t Id(const int index) const;
-        boost::int64_t NodeTypeId(const int index) const;
+        int64_t Id(const int index) const;
+        int64_t NodeTypeId(const int index) const;
         const std::string& ControlAddress(const int index) const;
         const std::string& DataAddress(const int index) const;
 
         //status fields
         bool IsDead(const int index) const;
-        boost::uint32_t ReceiveCount(const int index) const;
-        boost::uint32_t RetransmitCount(const int index) const;
+        uint32_t ReceiveCount(const int index) const;
+        uint32_t RetransmitCount(const int index) const;
 
         /**
          * Check if we have any remote statistics.
@@ -111,10 +109,10 @@ namespace SP
 
         class Impl;
 
-        explicit RawStatistics(boost::shared_ptr<Impl>  impl)
+        explicit RawStatistics(std::shared_ptr<Impl>  impl)
             : m_impl(std::move(impl)) {}
 
-        boost::shared_ptr<Impl> m_impl;
+        std::shared_ptr<Impl> m_impl;
     };
 
 #ifdef _MSC_VER
@@ -126,7 +124,7 @@ namespace SP
     public:
 
         virtual void Start(boost::asio::io_service& ioService,
-                           const boost::function<void (const RawStatistics& data)>& dataCallback) = 0;
+                           const std::function<void (const RawStatistics& data)>& dataCallback) = 0;
 
         virtual void Stop() = 0;
     };

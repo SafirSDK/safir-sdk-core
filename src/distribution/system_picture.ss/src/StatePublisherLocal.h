@@ -92,7 +92,7 @@ namespace SP
                                                     const int crc = GetCrc32(data.get(), size - crcBytes);
                                                     memcpy(data.get() + size - crcBytes, &crc, sizeof(int));
 #endif
-                                                    m_publisher->Send(data, static_cast<boost::uint32_t>(size));
+                                                    m_publisher->Send(data, static_cast<uint32_t>(size));
                                                 },
                                                 crcBytes);
         }

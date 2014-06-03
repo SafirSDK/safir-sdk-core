@@ -62,7 +62,7 @@ namespace SP
         //callback will be delivered on one strand.
         //but Start and Stop are not MT safe, please only call one at a time.
         void Start(boost::asio::io_service& ioService,
-                   const boost::function<void (const SystemState& data)>& dataCallback) override
+                   const std::function<void (const SystemState& data)>& dataCallback) override
         {
             if (m_subscriber != nullptr)
             {

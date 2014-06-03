@@ -51,11 +51,11 @@ namespace SP
     RawHandler::RawHandler(boost::asio::io_service& ioService,
                            Com::Communication& communication,
                            std::string name,
-                           const boost::int64_t id,
-                           const boost::int64_t nodeTypeId,
+                           const int64_t id,
+                           const int64_t nodeTypeId,
                            std::string controlAddress,
                            std::string dataAddress,
-                           std::map<boost::int64_t, NodeType> nodeTypes)
+                           std::map<int64_t, NodeType> nodeTypes)
         : m_ioService(ioService)
         , m_communication(communication)
         , m_id(id)
@@ -100,20 +100,20 @@ namespace SP
         m_allStatisticsMessage.set_data_address(std::move(dataAddress));
 
         communication.SetNewNodeCallback(m_strand.wrap([this](const std::string& name,
-                                                              const boost::int64_t id, 
-                                                              const boost::int64_t nodeTypeId,
+                                                              const int64_t id, 
+                                                              const int64_t nodeTypeId,
                                                               const std::string& controlAddress,
                                                               const std::string& dataAddress)
                                                         {
                                                             NewNode(name,id,nodeTypeId,controlAddress,dataAddress);
                                                         }));
         
-        communication.SetGotReceiveFromCallback(m_strand.wrap([this](boost::int64_t id)
+        communication.SetGotReceiveFromCallback(m_strand.wrap([this](int64_t id)
                                                                {
                                                                    GotReceive(id);
                                                                }));
         
-        communication.SetRetransmitToCallback(m_strand.wrap([this](boost::int64_t id)
+        communication.SetRetransmitToCallback(m_strand.wrap([this](int64_t id)
                                                              {
                                                                  Retransmit(id);
                                                              }));
@@ -134,15 +134,15 @@ namespace SP
         }
     }
 
-    boost::uint32_t RawHandler::GetTime() const
+    uint32_t RawHandler::GetTime() const
     {
-        return static_cast<boost::uint32_t>((steady_clock::now() - m_epoch).count() / 100000000);
+        return static_cast<uint32_t>((steady_clock::now() - m_epoch).count() / 100000000);
     }
 
     //Must be called in strand!
     void RawHandler::NewNode(const std::string& name,
-                             const boost::int64_t id,
-                             const boost::int64_t nodeTypeId,
+                             const int64_t id,
+                             const int64_t nodeTypeId,
                              const std::string& controlAddress,
                              const std::string& dataAddress)
     {
@@ -184,9 +184,9 @@ namespace SP
     }
 
     //Must be called in strand!
-    void RawHandler::GotReceive(const boost::int64_t id)
+    void RawHandler::GotReceive(const int64_t id)
     {
-        const boost::uint32_t now = GetTime();
+        const uint32_t now = GetTime();
         lllog(9) << "SP: GotReceive from node with id " << id <<", time = " << now << std::endl;
 
         const auto findIt = m_nodeTable.find(id);
@@ -208,7 +208,7 @@ namespace SP
     }
     
     //Must be called in strand!
-    void RawHandler::Retransmit(const boost::int64_t id)
+    void RawHandler::Retransmit(const int64_t id)
     {
         lllog(9) << "SP: Retransmit to node with id " << id <<  std::endl;
         
@@ -356,7 +356,7 @@ namespace SP
         });
     }
     
-    void RawHandler::UpdateRemoteStatistics(const boost::int64_t from, 
+    void RawHandler::UpdateRemoteStatistics(const int64_t from, 
                                             const boost::shared_ptr<char[]>& data,
                                             const size_t size)
     {
@@ -407,7 +407,7 @@ namespace SP
         }
     }
 
-    void RawHandler::SetDeadNode(const boost::int64_t id)
+    void RawHandler::SetDeadNode(const int64_t id)
     {
         m_strand.dispatch([this, id]
                           {

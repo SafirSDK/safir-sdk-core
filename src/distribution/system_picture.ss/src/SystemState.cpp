@@ -23,7 +23,6 @@
 ******************************************************************************/
 #include <Safir/Dob/Internal/SystemState.h>
 #include <boost/noncopyable.hpp>
-#include <boost/make_shared.hpp>
 #include "MessageWrapperCreators.h"
 
 #ifdef _MSC_VER
@@ -78,7 +77,7 @@ namespace SP
 
         }
 
-        boost::int64_t ElectedId() const
+        int64_t ElectedId() const
         {
             return m_message->elected_id();
         }
@@ -93,12 +92,12 @@ namespace SP
             return m_message->node_info(index).name();
         }
 
-        boost::int64_t Id(const int index) const
+        int64_t Id(const int index) const
         {
             return m_message->node_info(index).id();
         }
 
-        boost::int64_t NodeTypeId(const int index) const
+        int64_t NodeTypeId(const int index) const
         {
             return m_message->node_info(index).node_type_id();
         }
@@ -123,20 +122,20 @@ namespace SP
 
         static SystemState Create(std::unique_ptr<SystemStateMessage> message)
         {
-            return SystemState(boost::make_shared<Impl>(std::move(message)));
+            return SystemState(std::make_shared<Impl>(std::move(message)));
         }
 
         std::unique_ptr<const SystemStateMessage> m_message;
     };
 
 
-    boost::int64_t SystemState::ElectedId() const {return m_impl->ElectedId();}
+    int64_t SystemState::ElectedId() const {return m_impl->ElectedId();}
     
     int SystemState::Size() const {return m_impl->Size();}
     
     const std::string& SystemState::Name(const int index) const {return m_impl->Name(index);}
-    boost::int64_t SystemState::Id(const int index) const {return m_impl->Id(index);}
-    boost::int64_t SystemState::NodeTypeId(const int index) const {return m_impl->NodeTypeId(index);}
+    int64_t SystemState::Id(const int index) const {return m_impl->Id(index);}
+    int64_t SystemState::NodeTypeId(const int index) const {return m_impl->NodeTypeId(index);}
     const std::string& SystemState::ControlAddress(const int index) const {return m_impl->ControlAddress(index);}
     const std::string& SystemState::DataAddress(const int index) const {return m_impl->DataAddress(index);}
     

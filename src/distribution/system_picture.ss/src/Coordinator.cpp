@@ -81,11 +81,11 @@ namespace
     Coordinator::Coordinator(boost::asio::io_service& ioService,
                              Com::Communication& communication,
                              std::string name,
-                             const boost::int64_t id,
-                             const boost::int64_t nodeTypeId,
+                             const int64_t id,
+                             const int64_t nodeTypeId,
                              std::string controlAddress,
                              std::string dataAddress,
-                             std::map<boost::int64_t, NodeType> nodeTypes,
+                             std::map<int64_t, NodeType> nodeTypes,
                              const char* const dataIdentifier,
                              RawHandler& rawHandler)
         : m_strand (ioService)
@@ -99,7 +99,7 @@ namespace
         , m_nodeTypes(std::move(nodeTypes))
         , m_nonLightNodeTypes([&nodeTypes]
                               {
-                                  std::set<boost::int64_t> res;
+                                  std::set<int64_t> res;
                                   for (const auto& it: nodeTypes)
                                   {
                                       if (!it.second.isLight)
@@ -109,7 +109,7 @@ namespace
                                   }
                              return res;
                          }())
-        , m_elected(std::numeric_limits<boost::int64_t>::min())
+        , m_elected(std::numeric_limits<int64_t>::min())
         , m_electionTimer(ioService)
         , m_sendMessageTimer(ioService)
         , m_rawHandler(rawHandler)
@@ -119,8 +119,8 @@ namespace
                                                                    StatisticsChanged(statistics);
                                                                }));
 
-        communication.SetDataReceiver([this](const boost::int64_t from, 
-                                              const boost::int64_t nodeTypeId, 
+        communication.SetDataReceiver([this](const int64_t from, 
+                                              const int64_t nodeTypeId, 
                                               const boost::shared_ptr<char[]>& data, 
                                               const size_t size)
                                        {
@@ -185,7 +185,7 @@ namespace
 
         if (m_lastStatistics.Valid())
         {
-            std::set<boost::int64_t> deadNodes;
+            std::set<int64_t> deadNodes;
             for (int i = 0; i < m_lastStatistics.Size(); ++i)
             {
                 if (m_lastStatistics.HasRemoteStatistics(i))
@@ -246,7 +246,7 @@ namespace
     }
 
     //must be called in strand
-    void Coordinator::NewSystemState(const boost::int64_t from, 
+    void Coordinator::NewSystemState(const int64_t from, 
                                      const boost::shared_ptr<char[]>& data, 
                                      const size_t size)
     {
@@ -333,8 +333,8 @@ namespace
     }
 
     //not in strand
-    void Coordinator::GotData(const boost::int64_t from, 
-                              const boost::int64_t nodeTypeId, 
+    void Coordinator::GotData(const int64_t from, 
+                              const int64_t nodeTypeId, 
                               const boost::shared_ptr<char[]>& data, 
                               size_t size)
     {
