@@ -112,6 +112,7 @@ namespace
         , m_elected(std::numeric_limits<boost::int64_t>::min())
         , m_electionTimer(*ioService)
         , m_sendMessageTimer(*ioService)
+        , m_rawHandler(rawHandler)
     {
         rawHandler->AddStatisticsChangedCallback(m_strand.wrap([this](const RawStatistics& statistics)
                                                                {
@@ -141,10 +142,11 @@ namespace
     
 
     void Coordinator::Stop()
-     {
-         m_electionTimer.cancel();
-         m_sendMessageTimer.cancel();
-     }
+    {
+        m_electionTimer.cancel();
+        m_sendMessageTimer.cancel();
+    }
+
     //must be called in strand
     void Coordinator::StatisticsChanged(const RawStatistics& statistics)
     {
@@ -208,6 +210,7 @@ namespace
                     if (deadNodes.find(m_lastStatistics.Id(i)) != deadNodes.end())
                     {
                         m_communication->ExcludeNode(m_lastStatistics.Id(i));
+                        m_rawHandler->SetDeadNode(m_lastStatistics.Id(i));
                     }
                     else
                     {
@@ -267,6 +270,7 @@ namespace
                     if (!m_lastStatistics.IsDead(i) && nodes.find(m_lastStatistics.Id(i)) == nodes.end())
                     {
                         m_communication->ExcludeNode(m_lastStatistics.Id(i));
+                        m_rawHandler->SetDeadNode(m_lastStatistics.Id(i));
                     }
                 }
             }

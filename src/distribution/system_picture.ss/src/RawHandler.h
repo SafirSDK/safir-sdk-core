@@ -95,6 +95,8 @@ namespace SP
 
         //will always be posted! data will be a copy
         void AddStatisticsChangedCallback(const StatisticsChangedCallback& callback);
+
+        void SetDeadNode(const boost::int64_t id);
     private:
         void NewNode(const std::string& name,
                      const boost::int64_t id,

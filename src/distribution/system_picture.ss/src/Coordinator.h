@@ -130,6 +130,9 @@ namespace SP
         boost::uint32_t m_currentElectionId = 0;
 
         boost::asio::steady_timer m_sendMessageTimer;
+        const boost::shared_ptr<RawHandler> m_rawHandler;
+
+
         //a set of node type ids to which we want to send INQUIRY to, using m_currentElectionId
         std::set<boost::int64_t> m_pendingInquiries;
         

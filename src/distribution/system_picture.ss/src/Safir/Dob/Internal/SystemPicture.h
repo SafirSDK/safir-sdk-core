@@ -24,7 +24,6 @@
 #ifndef __SAFIR_DOB_INTERNAL_SYSTEMPICTURE_H__
 #define __SAFIR_DOB_INTERNAL_SYSTEMPICTURE_H__
 
-#include <boost/shared_ptr.hpp>
 #include <boost/noncopyable.hpp>
 #include <Safir/Dob/Internal/RawStatistics.h>
 #include <Safir/Dob/Internal/SystemState.h>
@@ -75,8 +74,8 @@ namespace SP
     {
     public:
         SystemPicture(master_tag_t,
-                      const boost::shared_ptr<boost::asio::io_service>& ioService,
-                      const boost::shared_ptr<Com::Communication>& communication,
+                      boost::asio::io_service& ioService,
+                      Com::Communication& communication,
                       const std::string& name,
                       const boost::int64_t id,
                       const boost::int64_t nodeTypeId,
@@ -98,18 +97,18 @@ namespace SP
          *
          * Only available if you've instantiated SystemPicture with slave_tag.
          */
-        boost::shared_ptr<RawStatisticsSubscriber> GetRawStatistics() const;
+        RawStatisticsSubscriber& GetRawStatistics() const;
 
         /** 
          * Get the system picture state produced by System Picture
          *
          * Only available if you've instantiated SystemPicture with slave_tag.
          */
-        boost::shared_ptr<SystemStateSubscriber> GetSystemState() const;
+        SystemStateSubscriber& GetSystemState() const;
     private:
         class Impl;
 
-        boost::shared_ptr<Impl> m_impl;
+        std::unique_ptr<Impl> m_impl;
     };
 
 #ifdef _MSC_VER

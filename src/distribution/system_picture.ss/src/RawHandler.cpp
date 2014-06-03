@@ -408,6 +408,21 @@ namespace SP
             m_ioService->post([cb,copy]{cb(copy);});
         }
     }
+
+    void RawHandler::SetDeadNode(const boost::int64_t id)
+    {
+        m_strand.dispatch([this, id]
+                          {
+                              auto findIt = m_nodeTable.find(id);
+            
+                              if (findIt == m_nodeTable.end())
+                              {
+                                  throw std::logic_error("SetDeadNode on unknown node");
+                              }
+                              findIt->second.nodeInfo->set_is_dead(true);
+                          });
+    }
+
 }
 }
 }
