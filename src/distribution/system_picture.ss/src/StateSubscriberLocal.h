@@ -120,7 +120,7 @@ namespace SP
 
         const std::string m_name;
 
-        boost::function<void (const SystemState& data)> m_dataCallback;
+        std::function<void (const SystemState& data)> m_dataCallback;
         boost::shared_ptr<Safir::Utilities::Internal::IpcSubscriber> m_subscriber;
     };
 }

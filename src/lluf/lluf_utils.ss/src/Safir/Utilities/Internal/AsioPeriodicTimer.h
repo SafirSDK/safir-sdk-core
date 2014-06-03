@@ -25,12 +25,9 @@
 #define __LLUF_ASIO_PERIODIC_TIMER_H__
 
 #include <atomic>
+#include <functional>
 #include <boost/asio.hpp>
-#include <boost/enable_shared_from_this.hpp>
-#include <boost/function.hpp>
-#include <boost/make_shared.hpp>
 #include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/asio/steady_timer.hpp>
 
 namespace Safir
@@ -48,15 +45,14 @@ namespace Internal
      * that the handler callback took.
      */
     class AsioPeriodicTimer
-        : public boost::enable_shared_from_this<AsioPeriodicTimer>
-        , private boost::noncopyable
+        : private boost::noncopyable
     {
 
 
     public:
         AsioPeriodicTimer(boost::asio::io_service& ioService,
                           const boost::chrono::steady_clock::duration& period,
-                          const boost::function<void(const boost::system::error_code& error)>& handler)
+                          const std::function<void(const boost::system::error_code& error)>& handler)
             : m_strand(ioService)
             , m_timer(ioService)
             , m_period(period)
@@ -75,8 +71,7 @@ namespace Internal
             const bool was_started = m_started.exchange(true);
             if (!was_started)
             {
-                auto self = shared_from_this();
-                m_strand.dispatch([this, self]
+                m_strand.dispatch([this]
                                   {
                                       m_timer.expires_from_now(m_period);
                                       ScheduleTimer();
@@ -93,8 +88,7 @@ namespace Internal
             const bool was_started = m_started.exchange(false);
             if (was_started)
             {
-                auto self = shared_from_this();
-                m_strand.dispatch([this, self]
+                m_strand.dispatch([this]
                                   {
                                       m_timer.cancel();
                                   });
@@ -128,8 +122,7 @@ namespace Internal
 
         void ScheduleTimer()
         {
-            auto self = shared_from_this();
-            m_timer.async_wait(m_strand.wrap([this, self](const boost::system::error_code& error)
+            m_timer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
                                              {
                                                  Timeout(error);
                                              }));
@@ -138,7 +131,7 @@ namespace Internal
         boost::asio::strand m_strand;
         boost::asio::steady_timer m_timer;
         const boost::chrono::steady_clock::duration m_period;
-        const boost::function<void(const boost::system::error_code& error)> m_handler;
+        const std::function<void(const boost::system::error_code& error)> m_handler;
         std::atomic<bool> m_started;
     };
 }

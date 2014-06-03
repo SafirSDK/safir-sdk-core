@@ -281,7 +281,7 @@ namespace SP
     }
 
 
-    void RawHandler::PerformOnMyStatisticsMessage(const boost::function<void(const boost::shared_ptr<char[]>& data, 
+    void RawHandler::PerformOnMyStatisticsMessage(const std::function<void(const boost::shared_ptr<char[]>& data, 
                                                                              const size_t size)> & fn,
                                                   const size_t extraSpace) const
     {
@@ -342,7 +342,7 @@ namespace SP
 
     }
     
-    void RawHandler::PerformOnAllStatisticsMessage(const boost::function<void(const boost::shared_ptr<char[]>& data,
+    void RawHandler::PerformOnAllStatisticsMessage(const std::function<void(const boost::shared_ptr<char[]>& data,
                                                                               const size_t size)> & fn,
                                                    const size_t extraSpace) const
     {

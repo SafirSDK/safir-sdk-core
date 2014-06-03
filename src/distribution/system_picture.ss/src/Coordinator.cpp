@@ -226,8 +226,8 @@ namespace
         }
     }
     
-    void Coordinator::PerformOnStateMessage(const boost::function<void(const boost::shared_ptr<char []>& data, 
-                                                                       const size_t size)> & fn,
+    void Coordinator::PerformOnStateMessage(const std::function<void(const boost::shared_ptr<char []>& data, 
+                                                                     const size_t size)> & fn,
                                             const size_t extraSpace)
     {
         m_strand.dispatch([this,fn,extraSpace]

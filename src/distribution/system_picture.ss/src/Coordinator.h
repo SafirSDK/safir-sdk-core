@@ -86,8 +86,8 @@ namespace SP
 
         //used to send state message
         //extraSpace adds bytes at the end of the buffer, e.g. for adding a crc
-        void PerformOnStateMessage(const boost::function<void(const boost::shared_ptr<char []>& data, 
-                                                              const size_t size)> & fn,
+        void PerformOnStateMessage(const std::function<void(const boost::shared_ptr<char []>& data, 
+                                                            const size_t size)> & fn,
                                    const size_t extraSpace);
         
         //new incoming system state from elected coordinator

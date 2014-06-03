@@ -30,8 +30,6 @@
 #include <boost/asio.hpp>
 #include <boost/chrono.hpp>
 #include <boost/noncopyable.hpp>
-#include <boost/ptr_container/ptr_map.hpp>
-#include <boost/thread.hpp>
 #include <string>
 #include <unordered_map>
 
@@ -64,7 +62,7 @@ namespace SP
     //forward declaration
     class RawStatistics;
 
-    typedef boost::function<void(const RawStatistics& statistics)> StatisticsChangedCallback;
+    typedef std::function<void(const RawStatistics& statistics)> StatisticsChangedCallback;
 
     class RawHandler
         : private boost::noncopyable
@@ -82,11 +80,11 @@ namespace SP
         void Stop();
 
         //extraSpace adds bytes at the end of the buffer, e.g. for adding a crc
-        void PerformOnMyStatisticsMessage(const boost::function<void(const boost::shared_ptr<char[]>& data, 
+        void PerformOnMyStatisticsMessage(const std::function<void(const boost::shared_ptr<char[]>& data, 
                                                                      const size_t size)> & fn,
                                           const size_t extraSpace) const;
 
-        void PerformOnAllStatisticsMessage(const boost::function<void(const boost::shared_ptr<char []>& data, 
+        void PerformOnAllStatisticsMessage(const std::function<void(const boost::shared_ptr<char []>& data, 
                                                                       const size_t size)> & fn,
                                            const size_t extraSpace) const;
         

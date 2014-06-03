@@ -35,31 +35,30 @@ int main()
 
         int countdown = 10;
 
-        boost::function<void()> stopCb;
+        std::function<void()> stopCb;
         
-        auto timer = 
-            Safir::Utilities::Internal::AsioPeriodicTimer::Create(ioService,
-                                                                  boost::chrono::milliseconds(10),
-                                                                  [&](const boost::system::error_code& error)
-                                                                  {
-                                                                      std::wcout << "Got callback" << std::endl;
-                                                                      if (!error)
-                                                                      {
-                                                                          --countdown;
-                                                                          if (countdown == 0)
-                                                                          {
-                                                                              stopCb();
-                                                                          }
-                                                                      }
-                                                                      else
-                                                                      {
-                                                                          std::wcout << "Asio error " << error << std::endl;
-                                                                          exit(2);
-                                                                      }
-                                                                  });
+        Safir::Utilities::Internal::AsioPeriodicTimer timer(ioService,
+                                                            boost::chrono::milliseconds(10),
+                                                            [&](const boost::system::error_code& error)
+                                                            {
+                                                                std::wcout << "Got callback" << std::endl;
+                                                                if (!error)
+                                                                {
+                                                                    --countdown;
+                                                                    if (countdown == 0)
+                                                                    {
+                                                                        stopCb();
+                                                                    }
+                                                                }
+                                                                else
+                                                                {
+                                                                    std::wcout << "Asio error " << error << std::endl;
+                                                                    exit(2);
+                                                                }
+                                                            });
         
-        stopCb = [timer]{timer->Stop();};
-        timer->Start();
+        stopCb = [&timer]{timer.Stop();};
+        timer.Start();
         ioService.run();
         
         if (countdown == 0)
