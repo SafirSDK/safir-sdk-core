@@ -74,7 +74,7 @@ if (UNIX)
 
    #enable c++11 support unless we've explicitly been told not to.
    if (NOT SAFIR_NO_CXX11)
-     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y")
    endif()
 endif ()
 
