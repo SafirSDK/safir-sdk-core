@@ -97,7 +97,7 @@ namespace SP
             }
 #endif
 
-            boost::shared_ptr<NodeStatisticsMessage> statistics = boost::make_shared<NodeStatisticsMessage>();
+            auto statistics = std::make_unique<NodeStatisticsMessage>();
         
             const bool parseResult = statistics->ParseFromArray(data, static_cast<int>(size));
 
@@ -105,7 +105,7 @@ namespace SP
             {
                 throw std::logic_error("RawSubscriberLocal: Failed to parse message");
             }
-            m_dataCallback(RawStatisticsCreator::Create(statistics));
+            m_dataCallback(RawStatisticsCreator::Create(std::move(statistics)));
         }
 
         //Order/sync is guaranteed by IpcSubscribers delivery order guarantee.

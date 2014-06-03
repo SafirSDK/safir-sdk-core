@@ -26,6 +26,7 @@
 
 #include <Safir/Dob/Internal/RawStatistics.h>
 #include <Safir/Dob/Internal/SystemState.h>
+#include <memory>
 
 namespace Safir
 {
@@ -42,14 +43,14 @@ namespace SP
     class RawStatisticsCreator
     {
     public:
-        static RawStatistics Create(const boost::shared_ptr<NodeStatisticsMessage>& message);
+        static RawStatistics Create(std::unique_ptr<NodeStatisticsMessage> message);
 
     };
 
     class SystemStateCreator
     {
     public:
-        static SystemState Create(const boost::shared_ptr<SystemStateMessage>& message);
+        static SystemState Create(std::unique_ptr<SystemStateMessage> message);
 
     };
 

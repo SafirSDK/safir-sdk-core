@@ -78,8 +78,8 @@ namespace
     }
 }
 
-    Coordinator::Coordinator(const boost::shared_ptr<boost::asio::io_service>& ioService,
-                             const boost::shared_ptr<Com::Communication>& communication,
+    Coordinator::Coordinator(boost::asio::io_service& ioService,
+                             Com::Communication& communication,
                              const std::string& name,
                              const boost::int64_t id,
                              const boost::int64_t nodeTypeId,
@@ -87,8 +87,8 @@ namespace
                              const std::string& dataAddress,
                              const std::map<boost::int64_t, NodeType>& nodeTypes,
                              const char* const dataIdentifier,
-                             const boost::shared_ptr<RawHandler>& rawHandler)
-        : m_strand (*ioService)
+                             RawHandler& rawHandler)
+        : m_strand (ioService)
         , m_communication(communication)
         , m_dataIdentifier(LlufId_Generate64(dataIdentifier))
         , m_name(name)
@@ -110,16 +110,16 @@ namespace
                              return res;
                          }())
         , m_elected(std::numeric_limits<boost::int64_t>::min())
-        , m_electionTimer(*ioService)
-        , m_sendMessageTimer(*ioService)
+        , m_electionTimer(ioService)
+        , m_sendMessageTimer(ioService)
         , m_rawHandler(rawHandler)
     {
-        rawHandler->AddStatisticsChangedCallback(m_strand.wrap([this](const RawStatistics& statistics)
+        rawHandler.AddStatisticsChangedCallback(m_strand.wrap([this](const RawStatistics& statistics)
                                                                {
                                                                    StatisticsChanged(statistics);
                                                                }));
 
-        communication->SetDataReceiver([this](const boost::int64_t from, 
+        communication.SetDataReceiver([this](const boost::int64_t from, 
                                               const boost::int64_t nodeTypeId, 
                                               const boost::shared_ptr<char[]>& data, 
                                               const size_t size)
@@ -209,8 +209,8 @@ namespace
                     //does another node think that that node is dead?
                     if (deadNodes.find(m_lastStatistics.Id(i)) != deadNodes.end())
                     {
-                        m_communication->ExcludeNode(m_lastStatistics.Id(i));
-                        m_rawHandler->SetDeadNode(m_lastStatistics.Id(i));
+                        m_communication.ExcludeNode(m_lastStatistics.Id(i));
+                        m_rawHandler.SetDeadNode(m_lastStatistics.Id(i));
                     }
                     else
                     {
@@ -269,8 +269,8 @@ namespace
                     //is part of the system we want to exclude the node
                     if (!m_lastStatistics.IsDead(i) && nodes.find(m_lastStatistics.Id(i)) == nodes.end())
                     {
-                        m_communication->ExcludeNode(m_lastStatistics.Id(i));
-                        m_rawHandler->SetDeadNode(m_lastStatistics.Id(i));
+                        m_communication.ExcludeNode(m_lastStatistics.Id(i));
+                        m_rawHandler.SetDeadNode(m_lastStatistics.Id(i));
                     }
                 }
             }
@@ -435,7 +435,7 @@ namespace
                 boost::shared_ptr<char[]> data = boost::make_shared<char[]>(size);
                 aliveMsg.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
                 
-                const bool sent = m_communication->SendToNode(it.first, it.second.first, data, size, m_dataIdentifier);
+                const bool sent = m_communication.SendToNode(it.first, it.second.first, std::move(data), size, m_dataIdentifier);
                 
                 if (!sent)
                 {
@@ -458,7 +458,7 @@ namespace
                 boost::shared_ptr<char[]> data = boost::make_shared<char[]>(size);
                 victoryMsg.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
                 
-                const bool sent = m_communication->SendToNodeType(it, data, size, m_dataIdentifier);
+                const bool sent = m_communication.SendToNodeType(it, std::move(data), size, m_dataIdentifier);
 
                 if (!sent)
                 {
@@ -481,7 +481,7 @@ namespace
                 boost::shared_ptr<char[]> data = boost::make_shared<char[]>(size);
                 message.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
 
-                const bool sent = m_communication->SendToNodeType(it, data, size, m_dataIdentifier);
+                const bool sent = m_communication.SendToNodeType(it, std::move(data), size, m_dataIdentifier);
                 if (!sent)
                 {
                     lllog(7) << "Coordinator: Overflow when sending INQUIRY to node type " 

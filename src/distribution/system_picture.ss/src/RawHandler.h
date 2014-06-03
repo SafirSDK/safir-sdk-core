@@ -71,8 +71,8 @@ namespace SP
         : private boost::noncopyable
     {
     public:
-        RawHandler(const boost::shared_ptr<boost::asio::io_service>& ioService,
-                   const boost::shared_ptr<Com::Communication>& communication,
+        RawHandler(boost::asio::io_service& ioService,
+                   Com::Communication& communication,
                    const std::string& name,
                    const boost::int64_t id,
                    const boost::int64_t nodeTypeId,
@@ -127,8 +127,8 @@ namespace SP
 
         boost::uint32_t GetTime() const;
 
-        const boost::shared_ptr<boost::asio::io_service> m_ioService;
-        const boost::shared_ptr<Com::Communication> m_communication;
+        boost::asio::io_service& m_ioService;
+        Com::Communication& m_communication;
 
         const boost::int64_t m_id;
         const std::map<boost::int64_t, NodeType> m_nodeTypes;

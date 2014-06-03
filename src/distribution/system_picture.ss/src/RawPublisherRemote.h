@@ -42,13 +42,13 @@ namespace SP
     class RawPublisherRemote
     {
     public:
-        RawPublisherRemote(const boost::shared_ptr<boost::asio::io_service>& ioService,
-                           const boost::shared_ptr<Com::Communication>& communication,
+        RawPublisherRemote(boost::asio::io_service& ioService,
+                           Com::Communication& communication,
                            const std::map<boost::int64_t, NodeType>& nodeTypes,
                            const char* const senderId,
-                           const boost::shared_ptr<RawHandler>& rawHandler)
-            : m_strand(*ioService)
-            , m_timer(*ioService)
+                           RawHandler& rawHandler)
+            : m_strand(ioService)
+            , m_timer(ioService)
             , m_communication(communication)
             , m_senderId(LlufId_Generate64(senderId))
             , m_nodeTypes(nodeTypes)
@@ -65,10 +65,10 @@ namespace SP
         {
             SchedulePublishTimer(boost::chrono::seconds(30), m_allNodeTypes);
 
-            rawHandler->AddStatisticsChangedCallback(m_strand.wrap([this](const RawStatistics&)
-                                                                   {
-                                                                       Publish(m_allNodeTypes);
-                                                                   }));
+            rawHandler.AddStatisticsChangedCallback(m_strand.wrap([this](const RawStatistics&)
+                                                                  {
+                                                                      Publish(m_allNodeTypes);
+                                                                  }));
             
         }
 
@@ -108,7 +108,7 @@ namespace SP
             const int crcBytes = 0;
 #endif
 
-            m_rawHandler->PerformOnMyStatisticsMessage([this,crcBytes,toNodeTypes](const boost::shared_ptr<char[]>& data, const size_t size)
+            m_rawHandler.PerformOnMyStatisticsMessage([this,crcBytes,toNodeTypes](const boost::shared_ptr<char[]>& data, const size_t size)
             {
 #ifdef CHECK_CRC
                 const int crc = GetCrc32(data.get(), size - crcBytes);
@@ -118,7 +118,7 @@ namespace SP
 
                 for (auto id: toNodeTypes)
                 {
-                    const bool sent = m_communication->SendToNodeType(id, data, size, m_senderId);
+                    const bool sent = m_communication.SendToNodeType(id, std::move(data), size, m_senderId);
                     if (!sent)
                     {
                         lllog(7) << "RawPublisherRemote: Overflow when sending to node type " 
@@ -137,10 +137,10 @@ namespace SP
 
         boost::asio::strand m_strand;
         boost::asio::steady_timer m_timer;
-        const boost::shared_ptr<Com::Communication> m_communication;
+        Com::Communication& m_communication;
         const boost::uint64_t m_senderId;
         const std::map<boost::int64_t, NodeType> m_nodeTypes;
-        const boost::shared_ptr<RawHandler> m_rawHandler;
+        RawHandler& m_rawHandler;
         const std::set<boost::int64_t> m_allNodeTypes;
     };
 }

@@ -25,7 +25,7 @@
 #include <Safir/Utilities/Internal/AsioPeriodicTimer.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <boost/asio.hpp>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 //disable warnings in boost
 #if defined _MSC_VER
@@ -114,8 +114,9 @@ int main(int argc, char * argv[])
     }
 
     boost::asio::io_service ioService;
-    boost::shared_ptr<boost::asio::io_service::work> wk(new boost::asio::io_service::work(ioService));
-
+    
+    auto wk = std::make_unique<boost::asio::io_service::work>(ioService);
+    
     boost::asio::signal_set signals(ioService);
     
 #if defined (_WIN32)
@@ -131,12 +132,12 @@ int main(int argc, char * argv[])
 
     Safir::Dob::Internal::SP::SystemPicture sp(Safir::Dob::Internal::SP::slave_tag);
     
-    auto rawSub = sp.GetRawStatistics();
-    auto stateSub = sp.GetSystemState();
+    auto& rawSub = sp.GetRawStatistics();
+    auto& stateSub = sp.GetSystemState();
     
     if (options.raw)
     {
-        rawSub->Start(ioService,
+        rawSub.Start(ioService,
                       [](const Safir::Dob::Internal::SP::RawStatistics& data)
                       {                  
                           std::wcout << data << std::endl;
@@ -144,7 +145,7 @@ int main(int argc, char * argv[])
     }
     else
     {
-        stateSub->Start(ioService,
+        stateSub.Start(ioService,
                         [](const Safir::Dob::Internal::SP::SystemState& data)
                         {                  
                             std::wcout << data << std::endl;
@@ -158,8 +159,8 @@ int main(int argc, char * argv[])
                            {
                                lllog(0) << "Got a signals error: " << error << std::endl;
                            }
-                           rawSub->Stop();
-                           stateSub->Stop();
+                           rawSub.Stop();
+                           stateSub.Stop();
                            wk.reset();
                        });
 

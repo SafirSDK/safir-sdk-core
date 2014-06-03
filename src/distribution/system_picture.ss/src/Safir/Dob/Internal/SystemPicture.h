@@ -30,6 +30,7 @@
 #include <Safir/Dob/Internal/SystemPictureDefs.h>
 #include <map>
 #include <vector>
+#include <memory>
 
 //Forward declare some asio stuff.
 namespace boost
@@ -84,6 +85,8 @@ namespace SP
                       const std::map<boost::int64_t, NodeType>& nodeTypes);
 
         explicit SystemPicture(slave_tag_t);
+
+        ~SystemPicture();
 
         /** 
          * Stop the internal workings of this class. 

@@ -40,19 +40,19 @@ namespace SP
     class StateSubscriberRemote
     {
     public:
-        StateSubscriberRemote(const boost::shared_ptr<Com::Communication>& communication,
+        StateSubscriberRemote(Com::Communication& communication,
                               const char* const receiverId,
-                              const boost::shared_ptr<Coordinator>& coordinator)
+                              Coordinator& coordinator)
             : m_coordinator(coordinator)
         {
-            communication->SetDataReceiver([this](const boost::int64_t from, 
-                                                  const boost::int64_t /*nodeTypeId*/, 
-                                                  const boost::shared_ptr<char[]>& data, 
-                                                  const size_t size)
-                                           {
-                                               GotData(from,data,size);
-                                           },
-                                           LlufId_Generate64(receiverId));
+            communication.SetDataReceiver([this](const boost::int64_t from, 
+                                                 const boost::int64_t /*nodeTypeId*/, 
+                                                 const boost::shared_ptr<char[]>& data, 
+                                                 const size_t size)
+                                          {
+                                              GotData(from,data,size);
+                                          },
+                                          LlufId_Generate64(receiverId));
         }
                             
 
@@ -73,10 +73,10 @@ namespace SP
                 throw std::logic_error("CRC check failed!");
             }
 #endif
-            m_coordinator->NewSystemState(from, data, size);
+            m_coordinator.NewSystemState(from, data, size);
         }
 
-        const boost::shared_ptr<Coordinator> m_coordinator;
+        Coordinator& m_coordinator;
     };
 }
 }

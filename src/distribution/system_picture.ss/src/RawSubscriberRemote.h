@@ -40,19 +40,19 @@ namespace SP
     class RawSubscriberRemote
     {
     public:
-        RawSubscriberRemote(const boost::shared_ptr<Com::Communication>& communication,
+        RawSubscriberRemote(Com::Communication& communication,
                             const char* const receiverId,
-                            const boost::shared_ptr<RawHandler>& rawHandler)
+                            RawHandler& rawHandler)
             : m_rawHandler(rawHandler)
         {
-            communication->SetDataReceiver([this](const boost::int64_t from, 
-                                                  const boost::int64_t /*nodeTypeId*/, 
-                                                  const boost::shared_ptr<char[]>& data, 
-                                                  const size_t size)
-                                           {
-                                               GotData(from,data,size);
-                                           },
-                                           LlufId_Generate64(receiverId));
+            communication.SetDataReceiver([this](const boost::int64_t from, 
+                                                 const boost::int64_t /*nodeTypeId*/, 
+                                                 const boost::shared_ptr<char[]>& data, 
+                                                 const size_t size)
+                                          {
+                                              GotData(from,data,size);
+                                          },
+                                          LlufId_Generate64(receiverId));
         }
                             
 
@@ -73,10 +73,10 @@ namespace SP
                 throw std::logic_error("CRC check failed!");
             }
 #endif
-            m_rawHandler->UpdateRemoteStatistics(from, data, size);
+            m_rawHandler.UpdateRemoteStatistics(from, data, size);
         }
 
-        const boost::shared_ptr<RawHandler> m_rawHandler;
+        RawHandler& m_rawHandler;
     };
 }
 }

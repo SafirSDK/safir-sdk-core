@@ -37,8 +37,8 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <boost/asio.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/make_shared.hpp>
 #include <boost/thread.hpp>
+#include <memory>
 
 namespace
 {
@@ -69,56 +69,56 @@ namespace SP
         /** 
          * Construct a master SystemPicture.
          */
-        Impl(const boost::shared_ptr<boost::asio::io_service>& ioService,
-             const boost::shared_ptr<Com::Communication>& communication,
+        Impl(boost::asio::io_service& ioService,
+             Com::Communication& communication,
              const std::string& name,
              const boost::int64_t id,
              const boost::int64_t nodeTypeId,
              const std::string& controlAddress,
              const std::string& dataAddress,
              const std::map<boost::int64_t, NodeType>& nodeTypes)
-            : m_ioService(ioService)
-            , m_communication(communication)
-            , m_rawHandler(boost::make_shared<RawHandler>(ioService,
+            : m_ioService(&ioService)
+            , m_communication(&communication)
+            , m_rawHandler(std::make_unique<RawHandler>(ioService,
+                                                        communication,
+                                                        name,
+                                                        id,
+                                                        nodeTypeId,
+                                                        controlAddress,
+                                                        dataAddress,
+                                                        nodeTypes))
+            , m_rawPublisherLocal(std::make_unique<RawPublisherLocal>(ioService, 
+                                                                      *m_rawHandler, 
+                                                                      MASTER_LOCAL_RAW_NAME))
+            , m_rawPublisherRemote(std::make_unique<RawPublisherRemote>(ioService,
+                                                                        communication,
+                                                                        nodeTypes, 
+                                                                        MASTER_REMOTE_RAW_NAME, 
+                                                                        *m_rawHandler))
+            , m_rawSubscriberRemote(std::make_unique<RawSubscriberRemote>(communication, 
+                                                                          MASTER_REMOTE_RAW_NAME, 
+                                                                          *m_rawHandler))
+            , m_coordinator(std::make_unique<Coordinator>(ioService, 
                                                           communication,
                                                           name,
                                                           id,
                                                           nodeTypeId,
                                                           controlAddress,
                                                           dataAddress,
-                                                          nodeTypes))
-            , m_rawPublisherLocal(boost::make_shared<RawPublisherLocal>(ioService, 
-                                                                        m_rawHandler, 
-                                                                        MASTER_LOCAL_RAW_NAME))
-            , m_rawPublisherRemote(boost::make_shared<RawPublisherRemote>(ioService, 
-                                                                          communication,
-                                                                          nodeTypes, 
-                                                                          MASTER_REMOTE_RAW_NAME, 
-                                                                          m_rawHandler))
-            , m_rawSubscriberRemote(boost::make_shared<RawSubscriberRemote>(communication, 
-                                                                            MASTER_REMOTE_RAW_NAME, 
-                                                                            m_rawHandler))
-            , m_coordinator(boost::make_shared<Coordinator>(ioService, 
-                                                            communication,
-                                                            name,
-                                                            id,
-                                                            nodeTypeId,
-                                                            controlAddress,
-                                                            dataAddress,
-                                                            nodeTypes,
-                                                            MASTER_REMOTE_ELECTION_NAME,
-                                                            m_rawHandler))
-            , m_statePublisherLocal(boost::make_shared<StatePublisherLocal>(ioService, 
-                                                                            m_coordinator, 
-                                                                            MASTER_LOCAL_STATE_NAME))
-            , m_statePublisherRemote(boost::make_shared<StatePublisherRemote>(ioService, 
-                                                                              communication, 
-                                                                              nodeTypes,
+                                                          nodeTypes,
+                                                          MASTER_REMOTE_ELECTION_NAME,
+                                                          *m_rawHandler))
+            , m_statePublisherLocal(std::make_unique<StatePublisherLocal>(ioService, 
+                                                                          *m_coordinator, 
+                                                                          MASTER_LOCAL_STATE_NAME))
+            , m_statePublisherRemote(std::make_unique<StatePublisherRemote>(ioService, 
+                                                                            communication, 
+                                                                            nodeTypes,
+                                                                            MASTER_REMOTE_STATE_NAME, 
+                                                                            *m_coordinator))
+            , m_stateSubscriberRemote(std::make_unique<StateSubscriberRemote>(communication, 
                                                                               MASTER_REMOTE_STATE_NAME, 
-                                                                              m_coordinator))
-            , m_stateSubscriberRemote(boost::make_shared<StateSubscriberRemote>(communication, 
-                                                                                MASTER_REMOTE_STATE_NAME, 
-                                                                                m_coordinator))
+                                                                              *m_coordinator))
             , m_stopped(false)
         {
 
@@ -128,8 +128,10 @@ namespace SP
          * Construct a slave SystemPicture.
          */
         Impl()
-            : m_rawSubscriberLocal(boost::make_shared<RawSubscriberLocal>(MASTER_LOCAL_RAW_NAME))
-            , m_stateSubscriberLocal(boost::make_shared<StateSubscriberLocal>(MASTER_LOCAL_STATE_NAME))
+            : m_ioService(nullptr)
+            , m_communication(nullptr)
+            , m_rawSubscriberLocal(std::make_unique<RawSubscriberLocal>(MASTER_LOCAL_RAW_NAME))
+            , m_stateSubscriberLocal(std::make_unique<StateSubscriberLocal>(MASTER_LOCAL_STATE_NAME))
             , m_stopped(true) //not really started in this case...
         {
 
@@ -161,64 +163,69 @@ namespace SP
         }
         
         //Only valid for slaves
-        boost::shared_ptr<RawStatisticsSubscriber> GetRawStatistics() const
+        RawStatisticsSubscriber& GetRawStatistics() const
         {
-            return m_rawSubscriberLocal;
+            return *m_rawSubscriberLocal;
         }
 
-        boost::shared_ptr<SystemStateSubscriber> GetSystemState() const
+        SystemStateSubscriber& GetSystemState() const
         {
-            return m_stateSubscriberLocal;
+            return *m_stateSubscriberLocal;
         }
 
         
     private:
  
-        const boost::shared_ptr<boost::asio::io_service> m_ioService;
-        const boost::shared_ptr<Com::Communication> m_communication;
+        boost::asio::io_service* m_ioService;
+        Com::Communication* m_communication;
         
-        boost::shared_ptr<RawHandler> m_rawHandler;
+        std::unique_ptr<RawHandler> m_rawHandler;
 
-        boost::shared_ptr<RawPublisherLocal> m_rawPublisherLocal;
-        boost::shared_ptr<RawSubscriberLocal> m_rawSubscriberLocal;
+        std::unique_ptr<RawPublisherLocal> m_rawPublisherLocal;
+        std::unique_ptr<RawSubscriberLocal> m_rawSubscriberLocal;
 
-        boost::shared_ptr<RawPublisherRemote> m_rawPublisherRemote;
-        boost::shared_ptr<RawSubscriberRemote> m_rawSubscriberRemote;
+        std::unique_ptr<RawPublisherRemote> m_rawPublisherRemote;
+        std::unique_ptr<RawSubscriberRemote> m_rawSubscriberRemote;
 
-        boost::shared_ptr<Coordinator> m_coordinator;
+        std::unique_ptr<Coordinator> m_coordinator;
 
-        boost::shared_ptr<StatePublisherLocal> m_statePublisherLocal;
-        boost::shared_ptr<StateSubscriberLocal> m_stateSubscriberLocal;
+        std::unique_ptr<StatePublisherLocal> m_statePublisherLocal;
+        std::unique_ptr<StateSubscriberLocal> m_stateSubscriberLocal;
 
-        boost::shared_ptr<StatePublisherRemote> m_statePublisherRemote;
-        boost::shared_ptr<StateSubscriberRemote> m_stateSubscriberRemote;
+        std::unique_ptr<StatePublisherRemote> m_statePublisherRemote;
+        std::unique_ptr<StateSubscriberRemote> m_stateSubscriberRemote;
 
         std::atomic<bool> m_stopped;
     };
     
     SystemPicture::SystemPicture(master_tag_t,
-                                 const boost::shared_ptr<boost::asio::io_service>& ioService,
-                                 const boost::shared_ptr<Com::Communication>& communication,
+                                 boost::asio::io_service& ioService,
+                                 Com::Communication& communication,
                                  const std::string& name,
                                  const boost::int64_t id,
                                  const boost::int64_t nodeTypeId,
                                  const std::string& controlAddress,
                                  const std::string& dataAddress,
                                  const std::map<boost::int64_t, NodeType>& nodeTypes)
-        : m_impl(boost::make_shared<Impl>(ioService,
-                                          communication,
-                                          name,
-                                          id,
-                                          nodeTypeId,
-                                          controlAddress,
-                                          dataAddress,
-                                          nodeTypes))
+    : m_impl(std::make_unique<Impl>(ioService,
+                                    communication,
+                                    name,
+                                    id,
+                                    nodeTypeId,
+                                    controlAddress,
+                                    dataAddress,
+                                    nodeTypes))
     {
 
     }
 
     SystemPicture::SystemPicture(slave_tag_t)
-        : m_impl(boost::make_shared<Impl>())
+        : m_impl(std::make_unique<Impl>())
+    {
+
+    }
+
+    SystemPicture::~SystemPicture()
     {
 
     }
@@ -228,13 +235,13 @@ namespace SP
         m_impl->Stop();
     }
 
-    boost::shared_ptr<RawStatisticsSubscriber> 
+    RawStatisticsSubscriber& 
     SystemPicture::GetRawStatistics() const
     {
         return m_impl->GetRawStatistics();
     }
 
-    boost::shared_ptr<SystemStateSubscriber> 
+    SystemStateSubscriber&
     SystemPicture::GetSystemState() const
     {
         return m_impl->GetSystemState();

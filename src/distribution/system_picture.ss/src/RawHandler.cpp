@@ -48,8 +48,8 @@ namespace SP
         using Safir::Utilities::Internal::AsioPeriodicTimer;
     }
 
-    RawHandler::RawHandler(const boost::shared_ptr<boost::asio::io_service>& ioService,
-                           const boost::shared_ptr<Com::Communication>& communication,
+    RawHandler::RawHandler(boost::asio::io_service& ioService,
+                           Com::Communication& communication,
                            const std::string& name,
                            const boost::int64_t id,
                            const boost::int64_t nodeTypeId,
@@ -61,8 +61,8 @@ namespace SP
         , m_id(id)
         , m_nodeTypes(nodeTypes)
         , m_epoch(steady_clock::now() - boost::chrono::hours(1))
-        , m_strand(*ioService)
-        , m_checkDeadNodesTimer(AsioPeriodicTimer::Create(*ioService, 
+        , m_strand(ioService)
+        , m_checkDeadNodesTimer(AsioPeriodicTimer::Create(ioService, 
                                                           boost::chrono::milliseconds(1100),
                                                           m_strand.wrap([this](const boost::system::error_code& error)
                                                                         {
@@ -75,7 +75,7 @@ namespace SP
                                                                         })))
         , m_postStatisticsChangedTimer
         (AsioPeriodicTimer::Create
-             (*ioService,
+             (ioService,
               boost::chrono::milliseconds(1000),
               m_strand.wrap([this](const boost::system::error_code& error)
                             {
@@ -101,7 +101,7 @@ namespace SP
         m_allStatisticsMessage.set_control_address(controlAddress);
         m_allStatisticsMessage.set_data_address(dataAddress);
 
-        communication->SetNewNodeCallback(m_strand.wrap([this](const std::string& name,
+        communication.SetNewNodeCallback(m_strand.wrap([this](const std::string& name,
                                                                const boost::int64_t id, 
                                                                const boost::int64_t nodeTypeId,
                                                                const std::string& controlAddress,
@@ -110,12 +110,12 @@ namespace SP
                                                             NewNode(name,id,nodeTypeId,controlAddress,dataAddress);
                                                         }));
         
-        communication->SetGotReceiveFromCallback(m_strand.wrap([this](boost::int64_t id)
+        communication.SetGotReceiveFromCallback(m_strand.wrap([this](boost::int64_t id)
                                                                {
                                                                    GotReceive(id);
                                                                }));
         
-        communication->SetRetransmitToCallback(m_strand.wrap([this](boost::int64_t id)
+        communication.SetRetransmitToCallback(m_strand.wrap([this](boost::int64_t id)
                                                              {
                                                                  Retransmit(id);
                                                              }));
@@ -180,7 +180,7 @@ namespace SP
         
         insertResult.first->second.lastReceiveTime = GetTime();
         
-        m_communication->IncludeNode(id);
+        m_communication.IncludeNode(id);
 
         PostStatisticsChangedCallback();
     }
@@ -261,7 +261,7 @@ namespace SP
                 
                 pair.second.nodeInfo->set_is_dead(true);
                 
-                m_communication->ExcludeNode(pair.second.nodeInfo->id());
+                m_communication.ExcludeNode(pair.second.nodeInfo->id());
 
                 somethingChanged = true;
             }
@@ -402,10 +402,10 @@ namespace SP
     //must be called in strand
     void RawHandler::PostStatisticsChangedCallback()
     {
-        const auto copy = RawStatisticsCreator::Create(boost::make_shared<NodeStatisticsMessage>(m_allStatisticsMessage));
+        const auto copy = RawStatisticsCreator::Create(std::make_unique<NodeStatisticsMessage>(m_allStatisticsMessage));
         for (auto cb : m_statisticsChangedCallbacks)
         {
-            m_ioService->post([cb,copy]{cb(copy);});
+            m_ioService.post([cb,copy]{cb(copy);});
         }
     }
 
