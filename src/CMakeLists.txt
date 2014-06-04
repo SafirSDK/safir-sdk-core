@@ -399,24 +399,10 @@ add_subdirectory(tests)
 #TODO: move the test suite to outside dose, maybe into tests?
 
 
-#TODO
-#run_test_suite   src/tests/stop_orders_at_exit             stop_orders_at_exit
+INSTALL(FILES config/typesystem.ini config/locations.ini config/logging.ini
+  DESTINATION share/doc/safir_sdk_core/example_configuration)
 
-#Run static header checks to ensure only "good" headers have been included
-#run_test_suite   src/tests/header_check                    header_check
-
-#build_dir        docs/doxygen                              Release
-
-#This will install the code examples under sdk/docs
-#build_dir        docs/examples                             Release
-
-
-SET(safir_config_files config/typesystem.ini config/locations.ini config/logging.ini)
-
-if (UNIX)
-  INSTALL(FILES ${safir_config_files}
-    DESTINATION /etc/safir_sdk_core) #TODO: absolute path?! eller gor om lluf_config att vara PREFIX-aware? Funkar det med NSIS?
-elseif(WIN32)
-  INSTALL(FILES ${safir_config_files}
-    DESTINATION $ENV{APPDATA}/safir_sdk_core/config) #TODO?!
-endif()
+#TODO: install the doxygen stuff in doc
+#TODO: install users guide in doc?
+#TODO: install requirements in doc?
+#TODO: install examples in doc

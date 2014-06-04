@@ -6,7 +6,6 @@ ADD_EXECUTABLE(SignalTest ${sources} ${headers})
 TARGET_LINK_LIBRARIES(SignalTest PRIVATE
   dose_internal
   dots_cpp
-  dots_kernel
   dots_internal
   lluf_utils 
   ${Boost_PROGRAM_OPTIONS_LIBRARY}
