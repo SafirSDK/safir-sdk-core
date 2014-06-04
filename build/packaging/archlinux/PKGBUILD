@@ -48,7 +48,8 @@ package() {
     gacutil -i $file -root "$pkgdir/usr/lib"
   done
 
-  #install configuration
-  install -D -m 644 $pkgdir/share/doc/safir_sdk_core/example_configuration $pkgdir/etc/safir_sdk_core
+  #install configuration in /etc/safir_sdk_core
+  install -d -m 644 $pkgdir/etc/safir_sdk_core
+  install -m 644 -t $pkgdir/etc/safir_sdk_core $pkgdir/usr/share/doc/safir_sdk_core/example_configuration/*.ini
 }
 
