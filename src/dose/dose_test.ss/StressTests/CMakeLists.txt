@@ -1,15 +1,18 @@
-
-#FIND_PACKAGE(Boost COMPONENTS program_options thread system)
-
+#NOT WORKING ADD_SUBDIRECTORY(DobMess)
 ADD_SUBDIRECTORY(EntityIntegrityChecker)
 ADD_SUBDIRECTORY(EntityReceptionVerifier)
 ADD_SUBDIRECTORY(EntityStresser)
-ADD_SUBDIRECTORY(MultiPingPong)
 
 ADD_SUBDIRECTORY(MessageLatencies)
 ADD_SUBDIRECTORY(MessageStresser)
+ADD_SUBDIRECTORY(MultiPingPong)
+
 
 ADD_SUBDIRECTORY(RequestLatencies)
-ADD_SUBDIRECTORY(RequestStresser)
 ADD_SUBDIRECTORY(RequestPingPong)
+ADD_SUBDIRECTORY(RequestStresser)
+
+ADD_SUBDIRECTORY(SignalTest)
+ADD_SUBDIRECTORY(SplitJoinStresser)
+ADD_SUBDIRECTORY(SplitJoinTest)
 

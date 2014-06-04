@@ -3,8 +3,6 @@
 #which is default on windows.
 SET(CMAKE_DEBUG_POSTFIX "")
 
-#TODO: try to use existing breakpad if already installed
-
 add_subdirectory(google-breakpad)
 
 add_library(lluf_crash_reporter SHARED CrashReporter.cpp Safir/Utilities/CrashReporter.h)

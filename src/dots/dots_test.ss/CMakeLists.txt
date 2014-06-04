@@ -34,8 +34,6 @@ if (CSHARP_FOUND)
     --dots-generated-paths "${DOTS_GENERATED_PATHS}"
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/dotnet)
 
-  #TODO: collect all the dependencies in a property on the target, so that we can access them as a generator expr for the --dependencies argument
-
   SET_SAFIR_TEST_PROPERTIES(TEST dots_dotnet
     CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/test_config)
 endif()

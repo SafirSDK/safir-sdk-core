@@ -36,9 +36,8 @@ public:
         m_otherSem.post();
     }
 
-    void App::Run()
+    void Run()
     {
-        int counter = 0;
         for (;;)
         {
             m_mySem.wait();

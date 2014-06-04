@@ -44,12 +44,12 @@ void Handler::Start()
     m_Connection.RegisterEntityHandlerInjection(DoseTest::SynchronousVolatileEntity::ClassTypeId, 
         m_handlerId, Safir::Dob::InstanceIdPolicy::HandlerDecidesInstanceId, this);
 
-    lllerr << "Handler started" <<std::endl;
+    lllog(0) << "Handler started" <<std::endl;
 }
 
 void Handler::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId /*typeId*/, const Safir::Dob::Typesystem::HandlerId& /*handlerId*/)
 {
-    lllerr << "Handler::OnRevokedRegistration" <<std::endl;
+    lllog(0) << "Handler::OnRevokedRegistration" <<std::endl;
 
     m_Connection.RegisterEntityHandlerInjection(DoseTest::SynchronousVolatileEntity::ClassTypeId, 
         m_handlerId, Safir::Dob::InstanceIdPolicy::HandlerDecidesInstanceId, this);
@@ -58,12 +58,12 @@ void Handler::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId /*typeI
 
 void Handler::OnCompletedRegistration(const Safir::Dob::Typesystem::TypeId /*typeId*/, const Safir::Dob::Typesystem::HandlerId& /*handlerId*/)
 {
-    lllerr << "Handler::OnCompletedRegistration" <<std::endl;
+    lllog(0) << "Handler::OnCompletedRegistration" <<std::endl;
 }
 
 void Handler::OnInitialInjectionsDone(const Safir::Dob::Typesystem::TypeId /*typeId*/, const Safir::Dob::Typesystem::HandlerId& /*handlerId*/)
 {
-    lllerr << "Handler::OnInitialInjectionsDone" <<std::endl;
+    lllog(0) << "Handler::OnInitialInjectionsDone" <<std::endl;
 }
 
 void Handler::OnCreateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy, Safir::Dob::ResponseSenderPtr responseSender)
@@ -74,7 +74,7 @@ void Handler::OnCreateRequest(const Safir::Dob::EntityRequestProxy entityRequest
 
     responseSender->Send(Safir::Dob::EntityIdResponse::CreateResponse(entityId));
 
-    //    lllerr << "Handler::Created " <<  entityId << std::endl;
+    //    lllog(0) << "Handler::Created " <<  entityId << std::endl;
 
 }
 
@@ -90,7 +90,7 @@ void Handler::OnDeleteRequest(const Safir::Dob::EntityRequestProxy entityRequest
     m_Connection.Delete(entityRequestProxy.GetEntityId(), m_handlerId);
     responseSender->Send(Safir::Dob::SuccessResponse::Create());
 
-    //    lllerr << "Handler::Deleted " <<  entityRequestProxy.GetEntityId() << std::endl;
+    //    lllog(0) << "Handler::Deleted " <<  entityRequestProxy.GetEntityId() << std::endl;
 
 }
 

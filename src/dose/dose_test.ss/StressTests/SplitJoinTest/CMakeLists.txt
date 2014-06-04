@@ -1,8 +1,3 @@
-cmake_minimum_required(VERSION 2.8)
-project(SplitJoinTest CXX)
-
-INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
-
 find_package(ACE)
 
 if (ACE_FOUND)
@@ -15,23 +10,12 @@ if (ACE_FOUND)
   
   TARGET_LINK_LIBRARIES(SplitJoinTest PRIVATE ${ACE_LIBRARY})
   
-  if (NOT MSVC)
-    #FIND_PACKAGE(Boost COMPONENTS program_options)
-    TARGET_LINK_LIBRARIES(SplitJoinTest PRIVATE dose_cpp ${Boost_LIBRARIES})
-  endif()
+  TARGET_LINK_LIBRARIES(SplitJoinTest PRIVATE dose_cpp ${Boost_LIBRARIES})
   
-  # INSTALL(TARGETS SplitJoinTest
-  #         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-  #         LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-  #         ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
-  
-  # INSTALL_DEBUG_INFO(SplitJoinTest)
+  #TODO: install
+
 else()
   MESSAGE(STATUS "ACE library was not found, not building SplitJoinTest")
-
-  # #dummy install to get an install target in the makefiles
-  # INSTALL (FILES
-  #   DESTINATION dummy)
 
 endif()
 

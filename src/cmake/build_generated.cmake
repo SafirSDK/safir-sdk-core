@@ -71,9 +71,7 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
 
   #loop over all dou files
   foreach (dou ${dou_files})
-    #message ("Dou ${dou}")
     string (REGEX REPLACE ".*/([a-zA-Z\\.0-9]*)\\.dou" "\\1" base_name ${dou})
-    #message ("base_name ${base_name}")
     set (cpp_files ${cpp_files} generated_code/cpp/${base_name}.cpp)
     set (dotnet_files ${dotnet_files} "${CMAKE_CURRENT_BINARY_DIR}/generated_code/dotnet/${base_name}.cs")
 
@@ -89,14 +87,9 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
 
     string (TOLOWER ${namespace} java_namespace)
     string (REPLACE "." "/" java_path ${java_namespace})
-    #message ("namespace ${java_path}")
-    #message ("class name ${java_base_name}")
     set (java_files ${java_files} "${CMAKE_CURRENT_BINARY_DIR}/generated_code/java/src/${java_path}/${java_base_name}.java")
-    #message(generated_code/java/src/${java_path}/${java_base_name}.java)
-    #TODO: read the namespace files and do this right
   endforeach()
 
-  #message("Cpp files: ${cpp_files}")
   ##############  
   
 

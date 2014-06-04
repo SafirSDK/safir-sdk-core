@@ -24,7 +24,7 @@
 #include "ErrorReporter.h"
 #include "../common/CommonIncludes.h"
 #include <Safir/Utilities/ProcessInfo.h>
-#include <Safir/Utilities/Internal/Logging.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <sstream>
 void ErrorReporter::Log(const std::string& text)
 {

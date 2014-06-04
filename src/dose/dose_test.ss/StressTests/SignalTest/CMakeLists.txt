@@ -1,23 +1,17 @@
-cmake_minimum_required(VERSION 2.8)
-project(SignalTest CXX)
-
-INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
-
 FILE(GLOB sources *.cpp ../common/*.cpp)
 FILE(GLOB headers *.h ../common/*.h)
 
 ADD_EXECUTABLE(SignalTest ${sources} ${headers})
 
-#FIND_PACKAGE(Boost COMPONENTS program_options)
+TARGET_LINK_LIBRARIES(SignalTest PRIVATE
+  dose_internal
+  dots_cpp
+  dots_kernel
+  dots_internal
+  lluf_utils 
+  ${Boost_PROGRAM_OPTIONS_LIBRARY}
+  ${Boost_THREAD_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY})
 
-if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(SignalTest PRIVATE dose_internal ${Boost_LIBRARIES})
-endif()
 
-# INSTALL(TARGETS SignalTest
-#         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-#         LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-#         ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
-
-
-# INSTALL_DEBUG_INFO(SignalTest)
+#TODO: install
