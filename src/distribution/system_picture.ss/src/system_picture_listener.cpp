@@ -24,6 +24,7 @@
 #include <Safir/Dob/Internal/SystemPicture.h>
 #include <Safir/Utilities/Internal/AsioPeriodicTimer.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/MakeUnique.h>
 #include <boost/asio.hpp>
 #include <memory>
 
@@ -115,7 +116,7 @@ int main(int argc, char * argv[])
 
     boost::asio::io_service ioService;
     
-    auto wk = std::make_unique<boost::asio::io_service::work>(ioService);
+    auto wk = Safir::make_unique<boost::asio::io_service::work>(ioService);
     
     boost::asio::signal_set signals(ioService);
     

@@ -26,6 +26,7 @@
 #include <Safir/Dob/Internal/Communication.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
+#include <Safir/Utilities/Internal/MakeUnique.h>
 #include <boost/chrono.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/static_assert.hpp>
@@ -400,7 +401,7 @@ namespace SP
     //must be called in strand
     void RawHandler::PostStatisticsChangedCallback()
     {
-        const auto copy = RawStatisticsCreator::Create(std::make_unique<NodeStatisticsMessage>(m_allStatisticsMessage));
+        const auto copy = RawStatisticsCreator::Create(Safir::make_unique<NodeStatisticsMessage>(m_allStatisticsMessage));
         for (auto cb : m_statisticsChangedCallbacks)
         {
             m_ioService.post([cb,copy]{cb(copy);});

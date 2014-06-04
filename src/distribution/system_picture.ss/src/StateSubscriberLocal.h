@@ -26,6 +26,7 @@
 
 #include "MessageWrapperCreators.h"
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/MakeUnique.h>
 #include <boost/make_shared.hpp>
 
 #ifdef _MSC_VER
@@ -105,7 +106,7 @@ namespace SP
                 throw std::logic_error("CRC check failed!");
             }
 #endif
-            auto state = std::make_unique<SystemStateMessage>();
+            auto state = Safir::make_unique<SystemStateMessage>();
         
             const bool parseResult = state->ParseFromArray(data, static_cast<int>(size));
 

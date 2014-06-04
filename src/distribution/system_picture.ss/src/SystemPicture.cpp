@@ -35,6 +35,7 @@
 #include <Safir/Dob/Internal/Communication.h>
 #include <Safir/Dob/Internal/SystemPicture.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/MakeUnique.h>
 #include <boost/asio.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/thread.hpp>
@@ -77,46 +78,46 @@ namespace SP
              std::string controlAddress,
              std::string dataAddress,
              std::map<int64_t, NodeType> nodeTypes)
-            : m_rawHandler(std::make_unique<RawHandler>(ioService,
-                                                        communication,
-                                                        name,
-                                                        id,
-                                                        nodeTypeId,
-                                                        controlAddress,
-                                                        dataAddress,
-                                                        nodeTypes))
-            , m_rawPublisherLocal(std::make_unique<RawPublisherLocal>(ioService, 
-                                                                      *m_rawHandler, 
-                                                                      MASTER_LOCAL_RAW_NAME))
-            , m_rawPublisherRemote(std::make_unique<RawPublisherRemote>(ioService,
-                                                                        communication,
-                                                                        nodeTypes, 
-                                                                        MASTER_REMOTE_RAW_NAME, 
-                                                                        *m_rawHandler))
-            , m_rawSubscriberRemote(std::make_unique<RawSubscriberRemote>(communication, 
-                                                                          MASTER_REMOTE_RAW_NAME, 
-                                                                          *m_rawHandler))
-            , m_coordinator(std::make_unique<Coordinator>(ioService, 
+            : m_rawHandler(Safir::make_unique<RawHandler>(ioService,
                                                           communication,
-                                                          std::move(name),
+                                                          name,
                                                           id,
                                                           nodeTypeId,
-                                                          std::move(controlAddress),
-                                                          std::move(dataAddress),
-                                                          nodeTypes,
-                                                          MASTER_REMOTE_ELECTION_NAME,
-                                                          *m_rawHandler))
-            , m_statePublisherLocal(std::make_unique<StatePublisherLocal>(ioService, 
-                                                                          *m_coordinator, 
-                                                                          MASTER_LOCAL_STATE_NAME))
-            , m_statePublisherRemote(std::make_unique<StatePublisherRemote>(ioService, 
-                                                                            communication, 
-                                                                            std::move(nodeTypes),
-                                                                            MASTER_REMOTE_STATE_NAME, 
-                                                                            *m_coordinator))
-            , m_stateSubscriberRemote(std::make_unique<StateSubscriberRemote>(communication, 
+                                                          controlAddress,
+                                                          dataAddress,
+                                                          nodeTypes))
+            , m_rawPublisherLocal(Safir::make_unique<RawPublisherLocal>(ioService, 
+                                                                        *m_rawHandler, 
+                                                                        MASTER_LOCAL_RAW_NAME))
+            , m_rawPublisherRemote(Safir::make_unique<RawPublisherRemote>(ioService,
+                                                                          communication,
+                                                                          nodeTypes, 
+                                                                          MASTER_REMOTE_RAW_NAME, 
+                                                                          *m_rawHandler))
+            , m_rawSubscriberRemote(Safir::make_unique<RawSubscriberRemote>(communication, 
+                                                                            MASTER_REMOTE_RAW_NAME, 
+                                                                            *m_rawHandler))
+            , m_coordinator(Safir::make_unique<Coordinator>(ioService, 
+                                                            communication,
+                                                            std::move(name),
+                                                            id,
+                                                            nodeTypeId,
+                                                            std::move(controlAddress),
+                                                            std::move(dataAddress),
+                                                            nodeTypes,
+                                                            MASTER_REMOTE_ELECTION_NAME,
+                                                            *m_rawHandler))
+            , m_statePublisherLocal(Safir::make_unique<StatePublisherLocal>(ioService, 
+                                                                            *m_coordinator, 
+                                                                            MASTER_LOCAL_STATE_NAME))
+            , m_statePublisherRemote(Safir::make_unique<StatePublisherRemote>(ioService, 
+                                                                              communication, 
+                                                                              std::move(nodeTypes),
                                                                               MASTER_REMOTE_STATE_NAME, 
                                                                               *m_coordinator))
+            , m_stateSubscriberRemote(Safir::make_unique<StateSubscriberRemote>(communication, 
+                                                                                MASTER_REMOTE_STATE_NAME, 
+                                                                                *m_coordinator))
             , m_stopped(false)
         {
 
@@ -126,8 +127,8 @@ namespace SP
          * Construct a slave SystemPicture.
          */
         Impl()
-            : m_rawSubscriberLocal(std::make_unique<RawSubscriberLocal>(MASTER_LOCAL_RAW_NAME))
-            , m_stateSubscriberLocal(std::make_unique<StateSubscriberLocal>(MASTER_LOCAL_STATE_NAME))
+            : m_rawSubscriberLocal(Safir::make_unique<RawSubscriberLocal>(MASTER_LOCAL_RAW_NAME))
+            , m_stateSubscriberLocal(Safir::make_unique<StateSubscriberLocal>(MASTER_LOCAL_STATE_NAME))
             , m_stopped(true) //not really started in this case...
         {
 
@@ -200,7 +201,7 @@ namespace SP
                                  std::string controlAddress,
                                  std::string dataAddress,
                                  std::map<int64_t, NodeType> nodeTypes)
-    : m_impl(std::make_unique<Impl>(ioService,
+    : m_impl(Safir::make_unique<Impl>(ioService,
                                     communication,
                                     name,
                                     id,
@@ -213,7 +214,7 @@ namespace SP
     }
 
     SystemPicture::SystemPicture(slave_tag_t)
-        : m_impl(std::make_unique<Impl>())
+        : m_impl(Safir::make_unique<Impl>())
     {
 
     }

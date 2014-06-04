@@ -24,13 +24,12 @@
 #include <Safir/Dob/Internal/Communication.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
+#include <Safir/Utilities/Internal/MakeUnique.h>
 #include <Safir/Dob/Internal/SystemPicture.h>
 #include <Safir/Utilities/Internal/Id.h>
 #include <iostream>
 #include <map>
 #include <boost/asio.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
 #include <boost/thread.hpp>
 #include "Config.h"
 
@@ -168,7 +167,7 @@ int main(int argc, char * argv[])
     boost::asio::io_service ioService;
 
     //make some work to stop io_service from exiting.
-    auto work = std::make_unique<boost::asio::io_service::work>(ioService);
+    auto work = Safir::make_unique<boost::asio::io_service::work>(ioService);
 
     std::vector<Safir::Dob::Internal::Com::NodeTypeDefinition> commNodeTypes;
 

@@ -28,6 +28,7 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <boost/make_shared.hpp>
 #include <Safir/Utilities/Internal/IpcSubscriber.h>
+#include <Safir/Utilities/Internal/MakeUnique.h>
 #include "CrcUtils.h"
 
 namespace Safir
@@ -97,7 +98,7 @@ namespace SP
             }
 #endif
 
-            auto statistics = std::make_unique<NodeStatisticsMessage>();
+            auto statistics = Safir::make_unique<NodeStatisticsMessage>();
         
             const bool parseResult = statistics->ParseFromArray(data, static_cast<int>(size));
 
