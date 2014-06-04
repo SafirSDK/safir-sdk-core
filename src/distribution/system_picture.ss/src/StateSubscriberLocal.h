@@ -27,7 +27,7 @@
 #include "MessageWrapperCreators.h"
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/MakeUnique.h>
-#include <boost/make_shared.hpp>
+#include <functional>
 
 #ifdef _MSC_VER
 #  pragma warning (push)

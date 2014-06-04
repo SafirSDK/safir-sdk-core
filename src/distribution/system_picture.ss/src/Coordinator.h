@@ -29,7 +29,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/steady_timer.hpp>
-#include <boost/function.hpp>
+#include <functional>
 #include <limits>
 #include <atomic>
 #include <map>

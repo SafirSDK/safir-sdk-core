@@ -32,6 +32,7 @@
 #include <boost/noncopyable.hpp>
 #include <string>
 #include <unordered_map>
+#include <functional>
 
 #ifdef _MSC_VER
 #  pragma warning (push)

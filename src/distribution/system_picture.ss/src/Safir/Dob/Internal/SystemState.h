@@ -24,10 +24,11 @@
 #ifndef __SAFIR_DOB_INTERNAL_SYSTEM_STATE_H__
 #define __SAFIR_DOB_INTERNAL_SYSTEM_STATE_H__
 
-#include <string>
-#include <ostream>
 #include <Safir/Dob/Internal/SystemPictureDefs.h>
+#include <functional>
 #include <memory>
+#include <ostream>
+#include <string>
 
 //Forward declare some asio stuff.
 namespace boost
