@@ -50,7 +50,8 @@ namespace ToolSupport
             }
         }
 
-        ParseJob job(roots);
+        int cores=static_cast<int>(boost::thread::hardware_concurrency());
+        ParseJob job(roots, cores);
         return job.GetResult();
     }
 }

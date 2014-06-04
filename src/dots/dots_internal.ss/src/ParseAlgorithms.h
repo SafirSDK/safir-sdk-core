@@ -1578,15 +1578,15 @@ namespace ToolSupport
     class RepositoryCompletionAlgorithms
     {
     public:
-        RepositoryCompletionAlgorithms(boost::shared_ptr<RepositoryBasic>& repo);
-        void DouParsingCompletion(const ParseState& state);
-        void DomParsingCompletion(const ParseState& state);
+        RepositoryCompletionAlgorithms(boost::shared_ptr<RepositoryBasic>& emptyRepository);
+        void DouParsingCompletion(const std::vector<ParseStatePtr>& states);
+        void DomParsingCompletion(const std::vector<ParseStatePtr>& states);
     private:
         boost::shared_ptr<RepositoryBasic>& m_result;
 
-        void DeserializeObjects(const ParseState& state);
-        void ResolveReferences(const ParseState& state);
-        void ResolveParamToParamRefs(const ParseState& state);
+        void DeserializeObjects(const std::vector<ParseStatePtr>& states);
+        void ResolveReferences(const std::vector<ParseStatePtr>& states);
+        void ResolveParamToParamRefs(const std::vector<ParseStatePtr>& states);
         bool ResolveParamToParamRef(const ParseState::ParameterReference<ParameterDescriptionBasic>& ref);
         void ResolveArraySizeRef(const ParseState::ParameterReference<MemberDescriptionBasic>& ref);
         void ResolveMaxLengthRef(const ParseState::ParameterReference<MemberDescriptionBasic>& ref);

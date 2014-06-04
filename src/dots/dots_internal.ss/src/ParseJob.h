@@ -47,11 +47,15 @@ namespace ToolSupport
     class ParseJob : public boost::noncopyable
     {
     public:        
-        ParseJob(const std::vector<boost::filesystem::path>& roots);
+        ParseJob(const std::vector<boost::filesystem::path>& roots, size_t maxNumberOfThreads);
         boost::shared_ptr<TypeRepository> GetResult() {return m_result;}
 
     private:
         boost::shared_ptr<RepositoryBasic> m_result;
+
+        void CreateAndRunWorkers(const std::map<boost::filesystem::path, boost::filesystem::path>& douFiles,
+                                 size_t numberOfWorkers,
+                                 std::vector<ParseStatePtr>& states) const;
     };
 }
 }
