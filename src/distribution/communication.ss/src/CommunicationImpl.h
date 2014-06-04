@@ -75,6 +75,7 @@ namespace Com
 
         void IncludeNode(int64_t nodeId);
         void ExcludeNode(int64_t nodeId);
+        void InjectNode(const std::string& name, int64_t id, int64_t nodeTypeId, const std::string& dataAddress);
 
         bool SendToNode(int64_t nodeId, int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, int64_t dataTypeIdentifier);
         bool SendToNodeType(int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, int64_t dataTypeIdentifier);

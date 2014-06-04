@@ -143,7 +143,7 @@ namespace Com
             return nullptr;
         }
 
-        boost::uint32_t NumberOfUndeliveredMessages() const
+        uint32_t NumberOfUndeliveredMessages() const
         {
             return m_numberOfUndeliveredMessages;
         }
@@ -154,13 +154,13 @@ namespace Com
         struct RecvData
         {
             bool free;
-            boost::uint64_t dataType;
-            boost::uint64_t sequenceNumber;
-            boost::uint16_t fragmentNumber;
-            boost::uint16_t numberOfFragments;
+            uint64_t dataType;
+            uint64_t sequenceNumber;
+            uint16_t fragmentNumber;
+            uint16_t numberOfFragments;
             boost::shared_ptr<char[]> data;
             size_t dataSize;
-            boost::uint32_t crc;
+            uint32_t crc;
 
             RecvData()
                 :free(true)
@@ -184,7 +184,7 @@ namespace Com
 
         struct Channel
         {
-            boost::uint64_t lastInSequence; //last sequence number that was moved out of the queue. seq(queue[0])-1
+            uint64_t lastInSequence; //last sequence number that was moved out of the queue. seq(queue[0])-1
             CircularArray<RecvData> queue;
             Channel()
                 :lastInSequence(0)
@@ -267,7 +267,7 @@ namespace Com
                 recvData.dataSize=header->totalContentSize;
 
                 //copy buffer to other indices if it shall be shared among many fragments
-                boost::uint16_t tmpFragNo=0;
+                uint16_t tmpFragNo=0;
                 for (size_t i=firstIndex; i<currentIndex; ++i)
                 {
                     ch.queue[i].data=recvData.data;
@@ -346,7 +346,7 @@ namespace Com
             return true; // all messages except lost message when the received is too far ahead of us, must be acked.
         }
 
-        void CalculateIndices(boost::uint64_t lastSeq, const MessageHeader* header,
+        void CalculateIndices(uint64_t lastSeq, const MessageHeader* header,
                               size_t& currentIndex, size_t& firstIndex, size_t& lastIndex) const
         {
             currentIndex=static_cast<size_t>(header->sequenceNumber-lastSeq-1);
@@ -355,7 +355,7 @@ namespace Com
             lastIndex=std::min(Parameters::ReceiverWindowSize-1, currentIndex+header->numberOfFragments-header->fragmentNumber-1);
         }
 
-        void Deliver(NodeInfo& ni, boost::uint16_t sendMethod)
+        void Deliver(NodeInfo& ni, uint16_t sendMethod)
         {
             Channel& ch=ni.channel[sendMethod];
 
@@ -369,7 +369,7 @@ namespace Com
                     if (rd.fragmentNumber+1==rd.numberOfFragments)
                     {
                         //check crc
-                        boost::uint32_t crc=CalculateCrc32(rd.data.get(), rd.dataSize);
+                        uint32_t crc=CalculateCrc32(rd.data.get(), rd.dataSize);
                         if (crc!=rd.crc)
                         {
                             std::ostringstream os;
@@ -422,8 +422,8 @@ namespace Com
                         //remember if windowSize=1 then lastInQueue==rd, so we have to copy data before clearing rd if we need to to
                         boost::shared_ptr<char[]> data=lastInQueue.data;
                         size_t dataSize=lastInQueue.dataSize;
-                        boost::uint16_t numberOfFragments=lastInQueue.numberOfFragments;
-                        boost::uint16_t fragmentNumber=lastInQueue.fragmentNumber+1;
+                        uint16_t numberOfFragments=lastInQueue.numberOfFragments;
+                        uint16_t fragmentNumber=lastInQueue.fragmentNumber+1;
 
                         rd.Clear();
                         ch.queue.Step();

@@ -89,7 +89,7 @@ namespace Com
     public:
 
         /**
-         * @brief Communication - Creates an instance of Communication in control mode. It will run the discover mechanisme after calling start.
+         * @brief Communication - Creates an instance of Communication in control mode. It will run the discover mechanism after calling start.
          * @param controlModeTag [in] - Tag that specifies that this instance will be used in control mode.
          * @param ioService [in] - Pointer to an io_service that will be used as engine.
          * @param nodeName [in] - Name of this node.
@@ -212,6 +212,17 @@ namespace Com
          * @param nodeId [in] - Id of the node to exclude.
          */
         void ExcludeNode(int64_t nodeId);
+
+        /**
+         * Tell communication that a node exist and is part of the system. Calls to this method will be ignored if the instance was created with
+         * ControlModeTag and hence is running the discover mechanism.
+         * Only useful if created with DataModeTag
+         * @param name [in] - Name of the node.
+         * @param id [in] - Id of the node.
+         * @param nodeTypeId [in] - Node type of the node.
+         * @param dataAddress [in] - Ip address for the unicast data channel to the node. On the form ip:port
+         */
+        void InjectNode(const std::string& name, int64_t id, int64_t nodeTypeId, const std::string& dataAddress);
 
         /**
          * Send data to a specific node. If the specified node is not a system node, the message is silently ignored and the return value will be 'true'.

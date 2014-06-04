@@ -58,10 +58,10 @@ namespace Com
     static const int64_t ControlDataType=186858702748131856; //Hash for 'Communication.ControlData'
 
     //Send methods
-    static const boost::uint16_t SpecifiedReceiverSendMethod=0;
-    static const boost::uint16_t MultiReceiverSendMethod=1;
+    static const uint16_t SpecifiedReceiverSendMethod=0;
+    static const uint16_t MultiReceiverSendMethod=1;
 
-    inline boost::uint32_t CalculateCrc32(const char* data, size_t size)
+    inline uint32_t CalculateCrc32(const char* data, size_t size)
     {
         boost::crc_32_type crc;
         crc.process_bytes(data, size);
@@ -102,9 +102,9 @@ namespace Com
     struct Ack
     {
         CommonHeader commonHeader;
-        boost::uint64_t sequenceNumber;
-        boost::uint16_t sendMethod; //tells if the ack is for unicast or multicast serie
-        Ack(int64_t senderId_, boost::uint64_t sequenceNumber_, boost::uint16_t serie)
+        uint64_t sequenceNumber;
+        uint16_t sendMethod; //tells if the ack is for unicast or multicast serie
+        Ack(int64_t senderId_, uint64_t sequenceNumber_, uint16_t serie)
             :commonHeader(senderId_, AckType)
             ,sequenceNumber(sequenceNumber_)
             ,sendMethod(serie)
@@ -115,23 +115,23 @@ namespace Com
     struct MessageHeader
     {
         CommonHeader commonHeader;
-        boost::uint32_t crc;
-        boost::uint16_t sendMethod;
-        boost::uint64_t sequenceNumber;
+        uint32_t crc;
+        uint16_t sendMethod;
+        uint64_t sequenceNumber;
         size_t totalContentSize;
         size_t fragmentContentSize;
-        boost::uint16_t numberOfFragments;
-        boost::uint16_t fragmentNumber;
+        uint16_t numberOfFragments;
+        uint16_t fragmentNumber;
         size_t fragmentOffset;
 
         MessageHeader(int64_t senderId_,
                       int64_t dataType_ ,
-                      boost::uint16_t sendMethod_,
-                      boost::uint64_t sequenceNumber_,
+                      uint16_t sendMethod_,
+                      uint64_t sequenceNumber_,
                       size_t totalContentSize_,
                       size_t fragmentContentSize_,
-                      boost::uint16_t numberOfFragments_,
-                      boost::uint16_t fragmentNumber_,
+                      uint16_t numberOfFragments_,
+                      uint16_t fragmentNumber_,
                       size_t fragmentOffset_)
             :commonHeader(senderId_, dataType_)
             ,crc(0)
@@ -153,10 +153,10 @@ namespace Com
     struct Receiver
     {
         int64_t id;
-        boost::uint16_t sendMethod;
-        boost::uint64_t sequenceNumber;
+        uint16_t sendMethod;
+        uint64_t sequenceNumber;
         Receiver() : id(0), sendMethod(MultiReceiverSendMethod), sequenceNumber(0){}
-        Receiver(int64_t id_, boost::uint16_t sendMethod_, boost::uint64_t sequenceNumber_)
+        Receiver(int64_t id_, uint16_t sendMethod_, uint64_t sequenceNumber_)
             :id(id_)
             ,sendMethod(sendMethod_)
             ,sequenceNumber(sequenceNumber_)

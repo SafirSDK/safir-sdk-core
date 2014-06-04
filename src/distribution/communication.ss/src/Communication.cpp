@@ -89,7 +89,6 @@ namespace
                   const std::vector<NodeTypeDefinition>& nodeTypes)
         :m_impl(Init(true, ioService, nodeName, nodeId, nodeTypeId, controlAddress, dataAddress, nodeTypes))
     {
-       // m_impl=Init(true, ioService, nodeName, nodeId, nodeTypeId, controlAddress, dataAddress, nodeTypes);
     }
 
 
@@ -102,7 +101,6 @@ namespace
                                  const std::vector<NodeTypeDefinition>& nodeTypes)
         :m_impl(Init(false, ioService, nodeName, nodeId, nodeTypeId, "", dataAddress, nodeTypes))
     {
-        //m_impl=Init(false, ioService, nodeName, nodeId, nodeTypeId, "", dataAddress, nodeTypes);
     }
 
     Communication::~Communication()
@@ -158,6 +156,11 @@ namespace
     void Communication::ExcludeNode(int64_t nodeId)
     {
         m_impl->ExcludeNode(nodeId);
+    }
+
+    void Communication::InjectNode(const std::string& name, int64_t id, int64_t nodeTypeId, const std::string& dataAddress)
+    {
+        m_impl->InjectNode(name, id, nodeTypeId, dataAddress);
     }
 
     bool Communication::SendToNode(int64_t nodeId, int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, int64_t dataTypeIdentifier)

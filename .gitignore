@@ -51,4 +51,5 @@ buildlog_*.html
 bin
 *.tmp
 *-build
+build-*
 *.orig

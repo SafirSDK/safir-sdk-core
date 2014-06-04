@@ -158,6 +158,18 @@ namespace Com
         SetSystemNode(id, false);
     }
 
+    void CommunicationImpl::InjectNode(const std::string& name, int64_t id, int64_t nodeTypeId, const std::string& dataAddress)
+    {
+        lllog(6)<<L"COM: Inject node '"<<name.c_str()<<L"' ["<<id<<L"]"<<std::endl;
+
+        Node node(name, id, nodeTypeId, "", dataAddress, false);
+        auto& nodeType=GetNodeType(node.nodeTypeId);
+        nodeType.GetAckedDataSender().AddNode(node.nodeId, node.unicastAddress);
+        nodeType.GetHeartbeatSender().AddNode(node.nodeId, Utilities::CreateEndpoint(node.unicastAddress));
+        m_reader.Strand().dispatch([this, node]{m_deliveryHandler.AddNode(node);});
+        SetSystemNode(id, true);
+    }
+
     bool CommunicationImpl::SendToNode(int64_t nodeId, int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, int64_t dataTypeIdentifier)
     {
         return GetNodeType(nodeTypeId).GetAckedDataSender().AddToSendQueue(nodeId, data, size, dataTypeIdentifier);

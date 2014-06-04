@@ -61,7 +61,7 @@ namespace Com
             ,m_me(me)
             ,m_onNewNode(onNewNode)
             ,m_timer(ioService)
-            ,m_randomGenerator(static_cast<boost::uint32_t>(me.nodeId))
+            ,m_randomGenerator(static_cast<uint32_t>(me.nodeId))
         {
         }
 #ifdef _MSC_VER
@@ -422,7 +422,7 @@ namespace Com
         {
             if (seed!=m_me.controlAddress)
             {
-                boost::uint64_t id=LlufId_Generate64(seed.c_str());
+                uint64_t id=LlufId_Generate64(seed.c_str());
                 Node s("seed", id, 0, seed, "", true);
                 this->m_seeds.insert(std::make_pair(id, s));
                 lllog(DiscovererLogLevel)<<L"COM: Add seed "<<seed.c_str()<<std::endl;

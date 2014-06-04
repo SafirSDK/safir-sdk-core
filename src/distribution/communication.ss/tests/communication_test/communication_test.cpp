@@ -186,7 +186,7 @@ void SetCRC(const boost::shared_ptr<char[]>& ptr, size_t size)
 {
     boost::crc_32_type crc;
     crc.process_bytes(static_cast<const void*>(ptr.get()), size-4);
-    boost::uint32_t* val=reinterpret_cast<boost::uint32_t*>(ptr.get()+size-4);
+    uint32_t* val=reinterpret_cast<uint32_t*>(ptr.get()+size-4);
     *val=crc.checksum();
 }
 
@@ -194,7 +194,7 @@ bool ValidCRC(const boost::shared_ptr<char[]>& ptr, size_t size)
 {
     boost::crc_32_type crc;
     crc.process_bytes(static_cast<const void*>(ptr.get()), size-4);
-    boost::uint32_t checksum=*reinterpret_cast<boost::uint32_t*>(ptr.get()+size-4);
+    uint32_t checksum=*reinterpret_cast<uint32_t*>(ptr.get()+size-4);
     return checksum==crc.checksum();
 }
 

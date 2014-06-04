@@ -156,7 +156,7 @@ namespace Com
                     return;
                 }
 
-                boost::uint32_t crc=CalculateCrc32(msg.get(), size);
+                uint32_t crc=CalculateCrc32(msg.get(), size);
 
                 for (size_t frag=0; frag<numberOfFullFragments; ++frag)
                 {
@@ -277,11 +277,11 @@ namespace Com
         {
             bool systemNode;
             boost::asio::ip::udp::endpoint endpoint;
-            boost::uint64_t lastSentSeqNo;
+            uint64_t lastSentSeqNo;
         };
         std::map<int64_t, NodeInfo> m_nodes;
 
-        boost::uint64_t m_lastSentMulticastSeqNo;
+        uint64_t m_lastSentMulticastSeqNo;
         boost::asio::steady_timer m_resendTimer;
         RetransmitTo m_retransmitNotification;
         QueueNotFull m_queueNotFullNotification;
