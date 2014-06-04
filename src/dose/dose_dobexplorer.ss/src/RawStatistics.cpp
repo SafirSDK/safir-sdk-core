@@ -104,12 +104,11 @@ namespace
 
 RawStatistics::RawStatistics(boost::asio::io_service& ioService, QWidget* /*parent*/)
     : m_ioService(ioService)
+    , m_systemPicture(Safir::Dob::Internal::SP::slave_tag)
+    , m_rawStatisticsSubscriber(m_systemPicture.GetRawStatistics())
 {
-    namespace SP = Safir::Dob::Internal::SP;
-    SP::SystemPicture sp(SP::slave_tag);
-    m_rawStatisticsSubscriber = sp.GetRawStatistics();
-
-    m_rawStatisticsSubscriber->Start(ioService, [this](const SP::RawStatistics& data){UpdatedStatistics(data);});
+    m_rawStatisticsSubscriber.Start(ioService, [this](const Safir::Dob::Internal::SP::RawStatistics& data)
+                                    {UpdatedStatistics(data);});
 
     setupUi(this);
     connect(localTable, SIGNAL(itemSelectionChanged()), this, SLOT(LocalTableSelectionChanged()));
@@ -128,7 +127,7 @@ RawStatistics::RawStatistics(boost::asio::io_service& ioService, QWidget* /*pare
 
 RawStatistics::~RawStatistics()
 {
-    m_rawStatisticsSubscriber->Stop();
+    m_rawStatisticsSubscriber.Stop();
 }
 
 

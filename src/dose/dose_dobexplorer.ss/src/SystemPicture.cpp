@@ -88,13 +88,11 @@ namespace
 
 SystemPicture::SystemPicture(boost::asio::io_service& ioService, QWidget* /*parent*/)
     : m_ioService(ioService)
+    , m_systemPicture(Safir::Dob::Internal::SP::slave_tag)
+    , m_systemStateSubscriber(m_systemPicture.GetSystemState())
 {
-    namespace SP = Safir::Dob::Internal::SP;
-    
-    SP::SystemPicture sp(SP::slave_tag);
-    m_systemStateSubscriber = sp.GetSystemState();
-
-    m_systemStateSubscriber->Start(ioService, [this](const SP::SystemState& state){UpdatedState(state);});
+    m_systemStateSubscriber.Start(ioService, [this](const Safir::Dob::Internal::SP::SystemState& state)
+                                  {UpdatedState(state);});
 
     setupUi(this);
 
@@ -105,7 +103,7 @@ SystemPicture::SystemPicture(boost::asio::io_service& ioService, QWidget* /*pare
 
 SystemPicture::~SystemPicture()
 {
-    m_systemStateSubscriber->Stop();
+    m_systemStateSubscriber.Stop();
 }
 
 void SystemPicture::UpdatedState(const Safir::Dob::Internal::SP::SystemState& data)
