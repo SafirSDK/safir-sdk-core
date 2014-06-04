@@ -1,4 +1,34 @@
 -----------------------------------------------------------------------------------------------------------------------
+2014-06-02 version 5.0.1
+-----------------------------------------------------------------------------------------------------------------------
+
+This release fixes the following tickets (see http://safir.sourceforge.net for details):
+
+#167    Improve alignment in DistributionData
+#166    Less than operator of WrapAroundCounter is broken
+#165    stop() in TracerBackdoor in java is not public
+#164    Douf unit test fails to report a failure
+#162    ConfigReader does not support symlinked config directory
+#161    Dobexplorer memory graph shows 50% memory all the time
+#160    Property mapping order of elements
+#158    Array parameter format
+#157    Dobexplorer needs more documentation
+#156    Tweak output of xml_convert.py
+#155    No description of Binary in User's Guide
+#154    "Special variables" are not expanded in dou files
+#153    Safir.Dob.ProcessInfo entity shows incorrect process name
+#152    String corruption in boost.interprocess or boost.container
+#151    Backdoor ping reply
+#150    Remove Windows specific scripts
+#148    Add logotype to SUG
+#142    Wrong blob size
+#141    XmlToBlob empty arrays
+#140    xml_convert.py empty elements
+#139    Users guide typesystem.ini missing information
+#138    Tweak Doxygen documentation
+#136    Rewrite start and stop scripts in python
+
+-----------------------------------------------------------------------------------------------------------------------
 2014-02-28 version 5.0
 -----------------------------------------------------------------------------------------------------------------------
 
