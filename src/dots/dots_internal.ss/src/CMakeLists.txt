@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-PROJECT (dots_internal CXX)
+PROJECT (dots_internal CXX C)
 
 INCLUDE_DIRECTORIES(.)
 
