@@ -197,7 +197,11 @@ int main(int argc, char * argv[])
     for (const auto& nt: options.config.GetNodeTypes())
     {
         spNodeTypes.insert(std::make_pair(nt.id, 
-                                        Safir::Dob::Internal::SP::NodeType(nt.id, nt.name, nt.isLight, nt.heartbeatInterval, nt.retryTimeout)));
+                                          Safir::Dob::Internal::SP::NodeType(nt.id, 
+                                                                             nt.name, 
+                                                                             nt.isLight, 
+                                                                             nt.heartbeatInterval, 
+                                                                             nt.retryTimeout)));
     }
 
 
@@ -209,7 +213,7 @@ int main(int argc, char * argv[])
                                                options.nodeTypeId,
                                                options.controlAddress,
                                                options.dataAddress,
-                                               spNodeTypes);
+                                               std::move(spNodeTypes));
 
 
     communication.Start();

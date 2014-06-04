@@ -122,8 +122,8 @@ namespace SP
         const int64_t m_nodeTypeId;
         const std::string m_controlAddress;
         const std::string m_dataAddress;
-        const std::map<int64_t, NodeType> m_nodeTypes;
         const std::set<int64_t> m_nonLightNodeTypes;
+        const std::map<int64_t, NodeType> m_nodeTypes;
 
         std::atomic<int64_t> m_elected;
         boost::asio::steady_timer m_electionTimer;

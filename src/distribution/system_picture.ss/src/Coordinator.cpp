@@ -96,7 +96,6 @@ namespace
         , m_nodeTypeId(nodeTypeId)
         , m_controlAddress(std::move(controlAddress))
         , m_dataAddress(std::move(dataAddress))
-        , m_nodeTypes(std::move(nodeTypes))
         , m_nonLightNodeTypes([&nodeTypes]
                               {
                                   std::set<int64_t> res;
@@ -109,6 +108,7 @@ namespace
                                   }
                              return res;
                          }())
+        , m_nodeTypes(std::move(nodeTypes))
         , m_elected(std::numeric_limits<int64_t>::min())
         , m_electionTimer(ioService)
         , m_sendMessageTimer(ioService)
@@ -168,7 +168,7 @@ namespace
 
         //currently we just copy the raw data... a bit stupid...
 
-        //lllog(6) << "Collating" << std::endl;
+        //lllog(6) << "SP: Collating" << std::endl;
 
 
         m_stateMessage.set_elected_id(m_id);
@@ -291,11 +291,11 @@ namespace
             {
                 return;
             }
-            lllog(4) << "Checking if I should start election" << std::endl;
+            lllog(4) << "SP: Checking if I should start election" << std::endl;
             
             if (!m_lastStatistics.Valid())
             {
-                lllog(5) << "Haven't heard from any other nodes, electing myself!" << std::endl;
+                lllog(4) << "SP: Haven't heard from any other nodes, electing myself!" << std::endl;
                 m_elected = m_id;
                 return;
             }
@@ -303,11 +303,13 @@ namespace
             {
                 for (int i = 0; i < m_lastStatistics.Size(); ++i)
                 {
+                    lllog(7) << "SP:   know of node " << m_lastStatistics.Id(i) << std::endl;
+                        
                     if (m_lastStatistics.Id(i) == m_elected && !m_lastStatistics.IsDead(i))
                     {
                         if (m_elected > m_id)
                         {
-                            lllog(5) << "Found elected node with higher id than me, not starting election!" << std::endl;
+                            lllog(4) << "SP: Found elected node with higher id than me, not starting election!" << std::endl;
                             return;
                         }
                     }
@@ -315,7 +317,7 @@ namespace
             }
             
             
-            lllog(4) << "Starting election" << std::endl;
+            lllog(4) << "SP: Starting election" << std::endl;
             ++m_currentElectionId;
             
             m_pendingInquiries = m_nonLightNodeTypes;
@@ -340,7 +342,7 @@ namespace
     {
         ElectionMessage message;
         message.ParseFromArray(data.get(), static_cast<int>(size));
-        lllog(5) << "Got ElectionMessage (" 
+        lllog(5) << "SP: Got ElectionMessage (" 
                  << ToString(message.action())
                  << ", " 
                  << message.election_id() 
@@ -355,7 +357,7 @@ namespace
                     //and start a new election
                     if (from < m_id)
                     {
-                        lllog(5) << "Got an inquiry from someone smaller than us, sending alive and starting election" << std::endl;
+                        lllog(5) << "SP: Got an inquiry from someone smaller than us, sending alive and starting election" << std::endl;
                         m_pendingAlives.insert(std::make_pair(from, std::make_pair(nodeTypeId, message.election_id())));
                         SendPendingElectionMessages();
                         
@@ -370,7 +372,7 @@ namespace
                     if (from > m_id &&
                         message.election_id() == m_currentElectionId)
                     {
-                        lllog(5) << "Got alive from someone bigger than me (" 
+                        lllog(5) << "SP: Got alive from someone bigger than me (" 
                                  << from << "), abandoning election." << std::endl;
                         m_electionTimer.cancel();
                         m_pendingInquiries.clear();
@@ -383,7 +385,7 @@ namespace
                 {
                     if (from > m_id)
                     {
-                        lllog(4) << "New controller elected: " << from << std::endl;
+                        lllog(4) << "SP: New controller elected: " << from << std::endl;
                         //graciously accept their victory
                         m_elected = from;
                         
@@ -394,7 +396,7 @@ namespace
                     }
                     else //No! We're going to usurp him! restart election
                     {
-                        lllog(5) << "Got victory from someone smaller than me (" 
+                        lllog(5) << "SP: Got victory from someone smaller than me (" 
                                  << from << "), starting new election." << std::endl;
                         
                         StartElection();
@@ -410,7 +412,7 @@ namespace
     //must be called in strand
     void Coordinator::ElectionTimeout()
     {
-        lllog(4) << "There can be only one! Will send VICTORY to everyone!" << std::endl;
+        lllog(4) << "SP: There can be only one! Will send VICTORY to everyone!" << std::endl;
         
         m_elected = m_id;
 
@@ -439,7 +441,7 @@ namespace
                 
                 if (!sent)
                 {
-                    lllog(9) << "Coordinator: Overflow when sending ALIVE to node " 
+                    lllog(9) << "SP: Coordinator: Overflow when sending ALIVE to node " 
                              << it.first << std::endl;
                     m_pendingAlives.insert(it);
                 }
@@ -462,7 +464,7 @@ namespace
 
                 if (!sent)
                 {
-                    lllog(9) << "Coordinator: Overflow when sending VICTORY to node type " 
+                    lllog(9) << "SP: Coordinator: Overflow when sending VICTORY to node type " 
                              << m_nodeTypes.find(it)->second.name.c_str() << std::endl;
                     m_pendingVictories.insert(it);
                 }
@@ -484,9 +486,14 @@ namespace
                 const bool sent = m_communication.SendToNodeType(it, std::move(data), size, m_dataIdentifier);
                 if (!sent)
                 {
-                    lllog(7) << "Coordinator: Overflow when sending INQUIRY to node type " 
+                    lllog(7) << "SP: Coordinator: Overflow when sending INQUIRY to node type " 
                              << m_nodeTypes.find(it)->second.name.c_str() << std::endl;
                     m_pendingInquiries.insert(it);
+                }
+                else
+                {
+                    lllog(9) << "SP: Coordinator: sent INQUIRY to node type " 
+                             << m_nodeTypes.find(it)->second.name.c_str() << std::endl;
                 }
             }
         }
