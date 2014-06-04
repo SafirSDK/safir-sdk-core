@@ -26,6 +26,8 @@
 
 #include <Safir/Utilities/Internal/VisibilityHelpers.h>
 #include <utility>
+#include <cstdint>
+#include <string>
 
 #ifdef system_picture_EXPORTS
 #  define DISTRIBUTION_SYSTEM_PICTURE_API SAFIR_HELPER_DLL_EXPORT
