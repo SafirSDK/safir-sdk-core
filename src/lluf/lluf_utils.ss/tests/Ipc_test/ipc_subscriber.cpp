@@ -153,7 +153,7 @@ int main(int argc, char* argv[])
     boost::mutex mut;
     unsigned int nbrOfMsg = 0;
 
-    auto subPtr = Safir::Utilities::Internal::IpcSubscriberImpl<SubscriberTestPolicy>::Create(
+    auto subPtr = boost::make_shared<Safir::Utilities::Internal::IpcSubscriberImpl<SubscriberTestPolicy>>(
                     ioService,
                     po.endpointName,
                     [&nbrOfMsg, &cond, &mut, po](const char* msg, size_t size)

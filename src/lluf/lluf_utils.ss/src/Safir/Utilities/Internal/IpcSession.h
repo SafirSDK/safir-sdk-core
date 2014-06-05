@@ -40,8 +40,8 @@ namespace Internal
 
     struct Msg
     {
-        boost::shared_ptr<char[]> data;
-        boost::uint32_t           size;
+        boost::shared_ptr<char[]>   data;
+        uint32_t                    size;
     };
 
     /**
@@ -68,7 +68,7 @@ namespace Internal
             }
         }
 
-        void Send(const boost::shared_ptr<char[]>& msg, boost::uint32_t msgSize)
+        void Send(boost::shared_ptr<char[]> msg, uint32_t msgSize)
         {
             bool writeInProgress = !m_msgQueue.empty();
             m_msgQueue.push_back({msg, msgSize});

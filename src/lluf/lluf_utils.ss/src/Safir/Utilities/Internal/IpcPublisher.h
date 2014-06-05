@@ -50,20 +50,7 @@ namespace Internal
 {
 
     /**
-     * This class implements an Ipc publisher which can be used to send messages
-     * that will be received by Ipc subscribers.
-     *
-     * The Ipc "channel" is identified by a name that the subscriber and publisher has
-     * to somehow agree on.
-     *
-     * Although this is a class template there is a typedef that provides a "do nothing"
-     * TestPolicy so a user can declare a publisher like:
-     *
-     * Safir::Utilities::Internal::IpcPublisher myPublisher;
-     *
-     * TODO: Currently, the send queues (one for each subscriber) have no upper limits and
-     *       there is no concept of overflow when sending a message. We have to decide if this
-     *       is ok, or if a more elaborated mechanism is needed.
+     * Implementation class. Users should use class IpcPublisher.
      */
     template<typename TestPolicy, typename Acceptor>
     class IpcPublisherImpl
@@ -72,22 +59,21 @@ namespace Internal
     {
     public:
 
-        /**
-         * Create an Ipc publisher.
-         *
-         * @param ioService [in] - io_service that will be used as engine.
-         * @param name [in] - Ipc identification.
-         */
-        static boost::shared_ptr<IpcPublisherImpl>
-            Create(boost::asio::io_service&        ioService,
-                   const std::string&              name)
+        IpcPublisherImpl(boost::asio::io_service&   ioService,
+                         const std::string&         name)
+            : m_strand(ioService),
+              m_ioService(ioService),
+              m_acceptor(boost::make_shared<Acceptor>(m_strand,
+                                                      name,
+                                                      [this](typename Acceptor::StreamPtr streamPtr)
+                                                      {
+                                                          m_sessions.insert(boost::make_shared<SessionType>(streamPtr, m_strand));
+                                                          TestPolicy::ConnectionAcceptEvent();
+                                                      })),
+              m_sessions()
         {
-                return boost::shared_ptr<IpcPublisherImpl>(new IpcPublisherImpl(ioService, name));
         }
 
-        /**
-         * Start to accept connections from subscribers.
-         */
         void Start()
         {
             auto selfHandle(this->shared_from_this());
@@ -106,10 +92,6 @@ namespace Internal
                         });
         }
 
-
-        /**
-         * Stop accepting new subscriber connectionsa and terminate any existing connections.
-         */
         void Stop()
         {
             auto selfHandle(this->shared_from_this());
@@ -125,21 +107,15 @@ namespace Internal
                         });
         }
 
-        /**
-         * Send the given msg to all connected subscribers.
-         *
-         * The message buffer must not be modified by the user after the call
-         * to Send.
-         *
-         * @param msg [in] - Message to send.
-         * @param msgSize [in] - Message size in bytes.
-         */
-        void Send(const boost::shared_ptr<char[]>& msg, boost::uint32_t msgSize)
+
+        void Send(std::unique_ptr<char[]> msg, uint32_t msgSize)
         {
             auto selfHandle(this->shared_from_this());
 
+            boost::shared_ptr<char[]> msgSharedPtr(std::move(msg));
+
             m_strand.dispatch(
-                        [this, selfHandle, msg, msgSize]()
+                        [this, selfHandle, msgSharedPtr, msgSize]()
                         {
                             for (auto it = m_sessions.begin(); it != m_sessions.end(); /* it incremented in loop */)
                             {
@@ -151,7 +127,7 @@ namespace Internal
                                     continue;
                                 }
 
-                                sessionPtr->Send(msg, msgSize);
+                                sessionPtr->Send(msgSharedPtr, msgSize);
 
                                 ++it;
                             }
@@ -159,21 +135,6 @@ namespace Internal
         }
 
     private:
-
-        IpcPublisherImpl(boost::asio::io_service&   ioService,
-                         const std::string&         name)
-            : m_strand(ioService),
-              m_ioService(ioService),
-              m_acceptor(boost::make_shared<Acceptor>(m_strand,
-                                                      name,
-                                                      [this](typename Acceptor::StreamPtr streamPtr)
-                                                      {
-                                                          m_sessions.insert(boost::make_shared<SessionType>(streamPtr, m_strand));
-                                                          TestPolicy::ConnectionAcceptEvent();
-                                                      })),
-              m_sessions()
-        {
-        }
 
         typedef Session<TestPolicy, typename Acceptor::StreamPtr> SessionType;
 
@@ -187,7 +148,8 @@ namespace Internal
 
     };
 
-    struct IpcPublisherNoTest{
+    struct IpcPublisherNoTest
+    {
         static void ConnectionAcceptEvent(){}
         static void StartListeningEvent(){}
         static void StopListeningEvent(){}
@@ -195,10 +157,78 @@ namespace Internal
     };
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-    typedef IpcPublisherImpl<IpcPublisherNoTest, Safir::Utilities::Internal::Win32Acceptor> IpcPublisher;
+    typedef IpcPublisherImpl<IpcPublisherNoTest, Safir::Utilities::Internal::Win32Acceptor> IpcPubImpl;
 #elif defined(linux) || defined(__linux) || defined(__linux__)
-    typedef IpcPublisherImpl<IpcPublisherNoTest, LinuxAcceptor> IpcPublisher;
+    typedef IpcPublisherImpl<IpcPublisherNoTest, LinuxAcceptor> IpcPubImpl;
 #endif
+
+    /**
+     * This class implements an Ipc publisher which can be used to send messages
+     * that will be received by Ipc subscribers.
+     *
+     * The Ipc "channel" is identified by a name that the subscriber and publisher has
+     * to somehow agree on.
+     *
+     * TODO: Currently, the send queues (one for each subscriber) have no upper limits and
+     *       there is no concept of overflow when sending a message. We have to decide if this
+     *       is ok, or if a more elaborated mechanism is needed.
+     */
+    class IpcPublisher
+            : private boost::noncopyable
+    {
+    public:
+
+        /**
+         * Constructor
+         *
+         * @param ioService [in] - io_service that will be used as engine.
+         * @param name [in] - Ipc identification.
+         */
+        IpcPublisher(boost::asio::io_service&   ioService,
+                     const std::string&         name)
+            : m_pimpl(boost::make_shared<IpcPubImpl>(ioService, name))
+        {
+        }
+
+        /**
+         * Destructor
+         */
+        ~IpcPublisher()
+        {
+            m_pimpl->Stop();
+        }
+
+        /**
+         * Start to accept connections from subscribers.
+         */
+        void Start()
+        {
+            m_pimpl->Start();
+        }
+
+        /**
+         * Stop accepting new subscriber connections and terminate any existing connections.
+         */
+        void Stop()
+        {
+            m_pimpl->Stop();
+        }
+
+        /**
+         * Send the given msg to all connected subscribers.
+         *
+         * @param msg [in] - Message to send.
+         * @param msgSize [in] - Message size in bytes.
+         */
+        void Send(std::unique_ptr<char[]> msg, uint32_t msgSize)
+        {
+            m_pimpl->Send(std::move(msg), msgSize);
+        }
+
+    private:
+        boost::shared_ptr<IpcPubImpl> m_pimpl;
+
+    };
 
 }
 }

@@ -46,11 +46,12 @@ std::wostream& operator<<(std::wostream& out, const boost::program_options::opti
     return out << ostr.str().c_str();
 }
 
-boost::shared_ptr<char[]> StrToPtr(const std::wstring& str)
+std::unique_ptr<char[]> StrToPtr(const std::wstring& str)
 {
     std::string s = Safir::Utilities::Internal::ToUtf8(str);
 
-    auto ptr = boost::make_shared<char[]>(s.length());
+    std::unique_ptr<char[]> ptr(new char[s.length()]);
+
     memcpy(ptr.get(), s.c_str(), s.length());
     return ptr;
 }
@@ -170,7 +171,7 @@ int main(int argc, char* argv[])
 
     boost::shared_ptr<boost::asio::io_service::work> work (new boost::asio::io_service::work(ioService));
 
-    auto pubPtr = IpcPublisher::Create(ioService, po.endpointName);
+    auto pubPtr = boost::make_shared<IpcPublisher>(ioService, po.endpointName);
 
     boost::thread_group threads;
     for (int i = 0; i < 9; ++i)
@@ -209,7 +210,7 @@ int main(int argc, char* argv[])
 
                 while (n > 0)
                 {
-                    pubPtr->Send(StrToPtr(cmd[1]), static_cast<boost::uint32_t>(cmd[1].length()));
+                    pubPtr->Send(StrToPtr(cmd[1]), static_cast<uint32_t>(cmd[1].length()));
                     boost::this_thread::sleep_for(boost::chrono::milliseconds(stoul(cmd[3])));
                     --n;
                 }
@@ -227,21 +228,8 @@ int main(int argc, char* argv[])
     }
     else
     {
-        boost::shared_ptr<char[]> msgPtr;
-        boost::uint32_t msgLength;
-
-        if (po.largeMessageSize > 0)
-        {
-            // To minimize the overhead for very large messages we just
-            // create an uninitialized buffer in this case.
-            msgPtr = boost::make_shared<char[]>(po.largeMessageSize);
-            msgLength = po.largeMessageSize;
-        }
-        else
-        {
-            msgPtr = StrToPtr(Safir::Utilities::Internal::ToUtf16(po.message));
-            msgLength = static_cast<boost::uint32_t>(po.message.length());
-        }
+        std::unique_ptr<char[]> msgPtr;
+        uint32_t msgLength;
 
         for (unsigned int i = 0; i < po.nbrOfLoops; ++i)
         {
@@ -249,7 +237,20 @@ int main(int argc, char* argv[])
 
             for (unsigned int i = 0; i < po.nbrOfMessages; ++i)
             {
-                pubPtr->Send(msgPtr, msgLength);
+                if (po.largeMessageSize > 0)
+                {
+                    // To minimize the overhead for very large messages we just
+                    // create an uninitialized buffer in this case.
+                    msgPtr = std::unique_ptr<char[]>(new char[po.largeMessageSize]);
+                    msgLength = po.largeMessageSize;
+                }
+                else
+                {
+                    msgPtr = StrToPtr(Safir::Utilities::Internal::ToUtf16(po.message));
+                    msgLength = static_cast<uint32_t>(po.message.length());
+                }
+
+                pubPtr->Send(std::move(msgPtr), msgLength);
 
                 boost::this_thread::sleep_for(boost::chrono::milliseconds(po.delay));
             }

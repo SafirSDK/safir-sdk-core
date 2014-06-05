@@ -42,17 +42,10 @@ namespace Utilities
 namespace Internal
 {
 
+    typedef boost::function<void(const char*, size_t)> RecvDataCallback;
+
     /**
-     * This class implements an Ipc subscriber which can be used to receive messages
-     * sent by an Ipc publisher within the same host.
-     *
-     * The Ipc "channel" is identified by a name that the subscriber and publisher has
-     * to somehow agree on.
-     *
-     * Although this is a class template there is a typedef that provides a "do nothing"
-     * TestPolicy so a user can declare a subscriber like:
-     *
-     * Safir::Utilities::Internal::IpcSubscriber mySubscriber;
+     * Implementation class. Users should use class IpcSubscriber.
      */
     template<typename TestPolicy>
     class IpcSubscriberImpl
@@ -61,35 +54,20 @@ namespace Internal
     {
     public:
 
-        typedef boost::function<void(const char*, size_t)> RecvDataCallback;
-
-        /**
-         * Create an Ipc subscriber.
-         *
-         * The message buffer returned in the callback is reused by
-         * the IpcSubscriberImpl class which means that the user should
-         * not make any assumptions about the buffer content after returning
-         * from the callback.
-         *
-         * @param ioService [in] - io_service that will be used as engine.
-         * @param name [in] - Ipc identification.
-         * @param onRecvData [in] - Callback that will be called when a message is received.
-         */
-        static boost::shared_ptr<IpcSubscriberImpl>
-        Create(boost::asio::io_service&     ioService,
-               const std::string&           name,
-               const RecvDataCallback&      onRecvData)
+        IpcSubscriberImpl(boost::asio::io_service&  ioService,
+                          const std::string&        name,
+                          const RecvDataCallback&   onRecvData)
+            : m_strand(ioService),
+              m_stream(ioService),
+              m_connectRetryTimer(ioService),
+              m_streamId(GetIpcStreamId(name)),
+              m_callback(onRecvData),
+              m_msgSize(0),
+              m_connected(false),
+              m_msgRecvBuffer(1500)  // Start with a small buffer size
         {
-            return boost::shared_ptr<IpcSubscriberImpl>(new IpcSubscriberImpl(ioService, name, onRecvData));
         }
 
-
-        /**
-         * Connect and start reception of messages.
-         *
-         * Cyclic retries will be performed until a connection is established. This means
-         * that it is ok for a subscriber to call Connect before the publisher is started.
-         */
         void Connect()
         {
             const bool wasConnected = m_connected.exchange(true);
@@ -104,9 +82,6 @@ namespace Internal
             ConnectInternal();
         }
 
-        /**
-         * Disconnect and stop reception of messages.
-         */
         void Disconnect()
         {
             const bool wasConnected = m_connected.exchange(false);
@@ -132,20 +107,6 @@ namespace Internal
         }
 
     private:
-
-        IpcSubscriberImpl(boost::asio::io_service&  ioService,
-                          const std::string&        name,
-                          const RecvDataCallback&   onRecvData)
-            : m_strand(ioService),
-              m_stream(ioService),
-              m_connectRetryTimer(ioService),
-              m_streamId(GetIpcStreamId(name)),
-              m_callback(onRecvData),
-              m_msgSize(0),
-              m_connected(false),
-              m_msgRecvBuffer(1500)  // Start with a small buffer size
-        {
-        }
 
         void ConnectInternal()
         {
@@ -339,7 +300,68 @@ namespace Internal
         static void DisconnectedFromPublisherEvent(){}
     };
 
-    typedef IpcSubscriberImpl<IpcSubscriberNoTest> IpcSubscriber;
+
+    /**
+     * This class implements an Ipc subscriber which can be used to receive messages
+     * sent by an Ipc publisher within the same host.
+     *
+     * The Ipc "channel" is identified by a name that the subscriber and publisher has
+     * to somehow agree on.
+     */
+    class IpcSubscriber
+            : private boost::noncopyable
+    {
+    public:
+
+        /**
+         * Constructor.
+         *
+         * The message buffer returned in the callback is reused by
+         * the IpcSubscriberImpl class which means that the user should
+         * not make any assumptions about the buffer content after returning
+         * from the callback.
+         *
+         * @param ioService [in] - io_service that will be used as engine.
+         * @param name [in] - Ipc identification.
+         * @param onRecvData [in] - Callback that will be called when a message is received.
+         */
+        IpcSubscriber(boost::asio::io_service&     ioService,
+                      const std::string&           name,
+                      const RecvDataCallback&      onRecvData)
+            : m_pimpl(boost::make_shared<IpcSubscriberImpl<IpcSubscriberNoTest>>(ioService, name, onRecvData))
+        {
+        }
+
+        /**
+         * Destructor
+         */
+        ~IpcSubscriber()
+        {
+            m_pimpl->Disconnect();
+        }
+
+        /**
+         * Connect and start reception of messages.
+         *
+         * Cyclic retries will be performed until a connection is established. This means
+         * that it is ok for a subscriber to call Connect before the publisher is started.
+         */
+        void Connect()
+        {
+            m_pimpl->Connect();
+        }
+
+        /**
+         * Disconnect and stop reception of messages.
+         */
+        void Disconnect()
+        {
+            m_pimpl->Disconnect();
+        }
+
+    private:
+        boost::shared_ptr<IpcSubscriberImpl<IpcSubscriberNoTest>> m_pimpl;
+    };
 }
 }
 }
