@@ -93,11 +93,11 @@ void BlobTest(RepositoryPtr rep)
     std::cout<<"BlobTypeId = "<<BlobReader<TypeRepository>::GetTypeId(&blob[0])<<std::endl;
 
     bool isNull=false, isChanged=true;
-    DotsC_Int32 myNumVal;
+    DotsC_Int32 myNumVal=0;
     BlobReader<Safir::Dob::Typesystem::ToolSupport::TypeRepository> r(rep.get(), &blob[0]);
     r.ReadValue(myNum, 0, myNumVal, isNull, isChanged);
     std::cout<<"isNull="<<isNull<<", isChanged="<<isChanged<<", val="<<myNumVal<<std::endl;
-    const char* str;
+    const char* str=NULL;
     for (DotsC_ArrayIndex i=0; i<5; ++i)
     {
         r.ReadValue(myStrings, i, str, isNull, isChanged);

@@ -84,18 +84,15 @@ namespace ToolSupport
 
         if (key)
         {
-            if (key->empty())
+            paramKey=SerializationUtils::TrimCopy(*key);
+            if (paramKey.empty())
             {
-                key=GetEntityIdParameterAsString(pt.get_child(Elements::ReferenceKey::Name()));
-            }
-            else
-            {
-                paramKey=*key;
+                paramKey=GetEntityIdParameterAsString(pt.get_child(Elements::ReferenceKey::Name()));
             }
         }
         else if (index)
         {
-            paramKey=*index;
+            paramKey=SerializationUtils::TrimCopy(*index);
         }
         else
         {

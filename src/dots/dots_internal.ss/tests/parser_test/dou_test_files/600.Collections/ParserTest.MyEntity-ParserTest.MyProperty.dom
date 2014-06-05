@@ -30,8 +30,11 @@
                 </ParserTest.MyEntity>
                 
                 <valueRef>
-                    <name></name>
-                    <key></key>
+                    <name>Test.MyParam.DictionaryParam4</name>
+                    <key>
+                        <name>ParserTest.MyEntity</name>
+                        <instanceId>2</instanceId>
+                    </key>
                 </valueRef>
                 
                 <ParserTest.MyEntity>
