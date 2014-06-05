@@ -46,6 +46,7 @@ buildlog_*.html
 *.pyc
 bin
 *-build
+build-*
 *.orig
 
 
