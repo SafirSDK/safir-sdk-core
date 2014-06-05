@@ -12,10 +12,10 @@
             </valueRef>
         </member>        
         <member>
-            <propertyMember>Float64PropertyValue</propertyMember>
             <valueRef>
                 <name>ParserTest.Params.Float64Param</name>
             </valueRef>
+            <propertyMember>Float64PropertyValue</propertyMember>
         </member>
         <member>
             <propertyMember>StringPropertyValue</propertyMember>

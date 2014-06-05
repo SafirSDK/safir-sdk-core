@@ -6,8 +6,8 @@
 
     <memberMapping>
         <member>
-            <propertyMember>Int32PropertyValue</propertyMember>
             <value>123</value>
+            <propertyMember>Int32PropertyValue</propertyMember>
         </member>        
         <member>
             <propertyMember>Float64PropertyValue</propertyMember>
@@ -45,13 +45,13 @@
 
         <!-- array -->
         <member>
-            <propertyMember>Int32PropertyValueArray</propertyMember>
             <array>
                 <value>1</value>
                 <valueRef><name>ParserTest.Params.Int32Param</name></valueRef>
                 <value>2</value>
                 <value>3</value>
             </array>
+            <propertyMember>Int32PropertyValueArray</propertyMember>
         </member>        
         <member>
             <propertyMember>Float64PropertyValueArray</propertyMember>
