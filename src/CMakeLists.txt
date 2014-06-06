@@ -179,23 +179,26 @@ endif()
 # ENDMACRO()
 
 function (SAFIR_INSTALL) 
-  cmake_parse_arguments(INST "" "INCLUDE_DIR" "TARGETS" ${ARGN})
+  cmake_parse_arguments(INST "" "" "TARGETS" ${ARGN})
 
   if (NOT "${INST_UNPARSED_ARGUMENTS}" STREQUAL "")
     message(FATAL_ERROR "Unknown argument to SAFIR_INSTALL '${INST_UNPARSED_ARGUMENTS}'")
   endif()
 
+    
   if (INST_TARGETS)
-    INSTALL(TARGETS ${INST_TARGETS}
-      RUNTIME DESTINATION bin
-      LIBRARY DESTINATION lib
-      ARCHIVE DESTINATION lib)
-  endif()
+    foreach (target ${INST_TARGETS})
+      get_target_property(target_type ${target} TYPE)
+      if ("${target_type}" STREQUAL "SHARED_LIBRARY")
+        set(export EXPORT safir_sdk_core)
+      endif()
 
-  if (INST_INCLUDE_DIR)
-    INSTALL(DIRECTORY ${INST_INCLUDE_DIR} DESTINATION include
-      PATTERN ".svn" EXCLUDE
-      PATTERN "*~" EXCLUDE)
+      INSTALL(TARGETS ${target}
+        ${export}
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib)
+    endforeach()
   endif()
 
   #TODO debug info
@@ -385,7 +388,7 @@ endif()
 add_subdirectory(patch_check)
 add_subdirectory(lluf)
 add_subdirectory(logging)
-#add_subdirectory(dots)
+add_subdirectory(dots)
 #add_subdirectory(dose)
 #add_subdirectory(douf)
 #add_subdirectory(swre)
@@ -403,8 +406,10 @@ INSTALL(FILES config/typesystem.ini config/locations.ini config/logging.ini
   DESTINATION share/doc/safir_sdk_core/example_configuration)
 
 
-INSTALL(FILES cmake/FindSafirSDKCore.cmake 
-  DESTINATION share/safir_sdk_core/cmake)
+#INSTALL(FILES cmake/FindSafirSDKCore.cmake 
+#  DESTINATION share/safir_sdk_core/cmake)
+
+INSTALL(EXPORT safir_sdk_core DESTINATION lib/cmake/safir_sdk_core)
 
 #TODO: install the doxygen stuff in doc
 #TODO: install users guide in doc?

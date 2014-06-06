@@ -13,7 +13,8 @@ ADD_LIBRARY(lluf_utils SHARED ${headers}
   ProcessMonitorWin32.cpp
 )
 
-target_include_directories(lluf_utils PUBLIC include)
+#Make our INTERNAL headers available to other parts of Core.
+target_include_directories(lluf_utils PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
 TARGET_LINK_LIBRARIES(lluf_utils PRIVATE 
   lluf_startup_synchronizer 

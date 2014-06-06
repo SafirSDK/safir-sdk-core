@@ -3,17 +3,18 @@ FILE(GLOB sources *.cpp)
 
 ADD_LIBRARY(dots_cpp SHARED ${sources} ${headers})
 
-target_include_directories(dots_cpp PUBLIC .)
+#Make our INTERNAL headers available to other parts of Core.
+target_include_directories(dots_cpp PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
 TARGET_LINK_LIBRARIES(dots_cpp PRIVATE 
   dots_kernel
-  dots_internal
+#  dots_internal
   lluf_utils
-  lluf_crash_reporter
-  lluf_id
-  lluf_config 
+#  lluf_crash_reporter
+#  lluf_id
+#  lluf_config 
   ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY})
 
-SAFIR_INSTALL(TARGETS dots_cpp INCLUDE_DIR Safir)
+SAFIR_INSTALL(TARGETS dots_cpp)
 

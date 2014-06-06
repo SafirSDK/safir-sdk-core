@@ -3,10 +3,10 @@ FILE(GLOB sources *.cpp)
 ADD_EXECUTABLE(dots_configuration_check ${sources})
 
 TARGET_LINK_LIBRARIES(dots_configuration_check PRIVATE 
-  lluf_config
-  lluf_id
-  dots_internal
+  #lluf_config
+  #lluf_id
   dots_kernel
+  dots_internal
   ${Boost_FILESYSTEM_LIBRARY}
   ${Boost_PROGRAM_OPTIONS_LIBRARY})
 

@@ -2,25 +2,23 @@
 #so we never want the "d" suffix on debug builds, which is default on windows.
 SET(CMAKE_DEBUG_POSTFIX "")
 
-FILE(GLOB_RECURSE headers *.h)
 FILE(GLOB sources *.cpp)
 
-ADD_LIBRARY(dots_kernel SHARED ${sources} ${headers})
+ADD_LIBRARY(dots_kernel SHARED ${sources} include/Safir/Dob/Typesystem/Internal/Kernel.h)
 
-target_include_directories(dots_kernel PUBLIC .)
+#Make our INTERNAL headers available to other parts of Core.
+target_include_directories(dots_kernel PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
 TARGET_LINK_LIBRARIES(dots_kernel PRIVATE 
-  lluf_config
-  lluf_startup_synchronizer
-  lluf_crash_reporter
-  lluf_utils
-  lluf_id
   dots_internal
+  lluf_utils
+  lluf_crash_reporter
+  lluf_startup_synchronizer
   ${Boost_FILESYSTEM_LIBRARY}
   ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY})
 
-SAFIR_INSTALL(TARGETS dots_kernel INCLUDE_DIR Safir)
+SAFIR_INSTALL(TARGETS dots_kernel)
 
 #TODO
 # INSTALL(FILES ../data/dots_kernel.gpr
