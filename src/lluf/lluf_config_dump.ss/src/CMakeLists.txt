@@ -1,6 +1,4 @@
-FILE(GLOB sources *.cpp)
-
-ADD_EXECUTABLE(safir_show_config ${sources})
+ADD_EXECUTABLE(safir_show_config show_config.cpp)
 
 TARGET_LINK_LIBRARIES(safir_show_config PRIVATE 
   lluf_config 

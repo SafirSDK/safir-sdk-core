@@ -1,6 +1,4 @@
-FILE(GLOB sources *.cpp)
-
-ADD_EXECUTABLE(crash_dump_monitor ${sources})
+ADD_EXECUTABLE(crash_dump_monitor CrashDumpMonitor.cpp)
 
 TARGET_LINK_LIBRARIES(crash_dump_monitor 
   PRIVATE

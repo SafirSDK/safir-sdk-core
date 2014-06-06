@@ -24,10 +24,20 @@
 #ifndef __DYNAMIC_LIBRARY_LOADER_H__
 #define __DYNAMIC_LIBRARY_LOADER_H__
 
-#include <Safir/Utilities/Internal/UtilsExportDefs.h>
 #include <boost/shared_ptr.hpp>
 #include <boost/function.hpp>
 #include <string>
+#include <Safir/Utilities/Internal/VisibilityHelpers.h>
+
+#ifdef lluf_utils_EXPORTS
+#  define LLUF_UTILS_API SAFIR_HELPER_DLL_EXPORT
+#else
+#  define LLUF_UTILS_API SAFIR_HELPER_DLL_IMPORT
+#  define SAFIR_LIBRARY_NAME "lluf_utils"
+#  include <Safir/Utilities/Internal/AutoLink.h>
+#endif
+#define LLUF_UTILS_LOCAL SAFIR_HELPER_DLL_LOCAL
+
 
 namespace Safir
 {

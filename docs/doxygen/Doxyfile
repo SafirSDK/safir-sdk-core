@@ -3,7 +3,7 @@
 PROJECT_NAME           = "Safir SDK Core"
 ALWAYS_DETAILED_SEC    = YES
 FULL_PATH_NAMES        = YES
-STRIP_FROM_INC_PATH    = "$(SAFIR_SDK)/include/"
+STRIP_FROM_INC_PATH    = "../../include/"
 JAVADOC_AUTOBRIEF      = YES
 BUILTIN_STL_SUPPORT    = YES
 EXTRACT_ALL            = YES
@@ -11,11 +11,8 @@ EXTRACT_STATIC         = YES
 INLINE_INFO            = NO
 SORT_MEMBERS_CTORS_1ST = YES
 WARN_NO_PARAMDOC       = YES
-INPUT                  = "$(SAFIR_SDK)/include/Safir"
+INPUT                  = "../../include/"
 RECURSIVE              = YES
-EXCLUDE_PATTERNS       = */Internal/* \
-                         */Breakpad/* \
-                         */LanguageInterfaceDefs.h
 REFERENCED_BY_RELATION = YES
 REFERENCES_RELATION    = YES
 GENERATE_TREEVIEW      = YES

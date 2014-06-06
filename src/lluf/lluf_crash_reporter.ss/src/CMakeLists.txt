@@ -5,9 +5,9 @@ SET(CMAKE_DEBUG_POSTFIX "")
 
 add_subdirectory(google-breakpad)
 
-add_library(lluf_crash_reporter SHARED CrashReporter.cpp Safir/Utilities/CrashReporter.h)
+add_library(lluf_crash_reporter SHARED CrashReporter.cpp)
 
-TARGET_INCLUDE_DIRECTORIES(lluf_crash_reporter PUBLIC . PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/google-breakpad/src/src)
+TARGET_INCLUDE_DIRECTORIES(lluf_crash_reporter PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/google-breakpad/src/src)
 
 TARGET_LINK_LIBRARIES(lluf_crash_reporter PRIVATE 
   lluf_config 
@@ -26,4 +26,4 @@ endif()
 
 add_dependencies(lluf_crash_reporter google-breakpad)
 
-SAFIR_INSTALL(TARGETS lluf_crash_reporter INCLUDE_DIR Safir)
+SAFIR_INSTALL(TARGETS lluf_crash_reporter)

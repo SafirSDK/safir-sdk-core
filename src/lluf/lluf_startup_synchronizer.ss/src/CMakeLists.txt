@@ -3,9 +3,7 @@
 #which is default on windows.
 SET(CMAKE_DEBUG_POSTFIX "")
 
-add_library(lluf_startup_synchronizer SHARED StartupSynchronizer.cpp Safir/Utilities/StartupSynchronizer.h)
-
-TARGET_INCLUDE_DIRECTORIES(lluf_startup_synchronizer PUBLIC .)
+add_library(lluf_startup_synchronizer SHARED StartupSynchronizer.cpp)
 
 TARGET_LINK_LIBRARIES(lluf_startup_synchronizer PRIVATE 
   lluf_config 
@@ -13,4 +11,4 @@ TARGET_LINK_LIBRARIES(lluf_startup_synchronizer PRIVATE
   ${Boost_THREAD_LIBRARY} 
   ${Boost_SYSTEM_LIBRARY})
 
-SAFIR_INSTALL(TARGETS lluf_startup_synchronizer INCLUDE_DIR Safir)
+SAFIR_INSTALL(TARGETS lluf_startup_synchronizer)

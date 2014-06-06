@@ -3,15 +3,14 @@
 SET(CMAKE_DEBUG_POSTFIX "")
 
 FILE(GLOB_RECURSE headers *.h)
-FILE(GLOB sources *.cpp)
 
-ADD_LIBRARY(logging_library SHARED ${sources} ${headers})
+ADD_LIBRARY(logging_library SHARED Interface.cpp include/Safir/Logging/Internal/Interface.h)
 
-target_include_directories(logging_library PUBLIC .)
+target_include_directories(logging_library PUBLIC include)
 
 TARGET_LINK_LIBRARIES(logging_library PRIVATE lluf_utils)
 
-SAFIR_INSTALL(TARGETS logging_library INCLUDE_DIR Safir)
+SAFIR_INSTALL(TARGETS logging_library)
 
 #TODO
 # INSTALL(FILES ../data/logging_library.gpr

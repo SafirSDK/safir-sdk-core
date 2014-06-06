@@ -1,4 +1,3 @@
-add_subdirectory(lluf_build_helpers.ss/src/)
 add_subdirectory(lluf_config.ss)
 add_subdirectory(lluf_config_dump.ss/src)
 add_subdirectory(lluf_crash_reporter.ss)

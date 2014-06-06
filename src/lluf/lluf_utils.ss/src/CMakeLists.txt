@@ -1,5 +1,3 @@
-
-
 FILE(GLOB_RECURSE headers *.h)
 
 ADD_LIBRARY(lluf_utils SHARED ${headers} 
@@ -15,7 +13,7 @@ ADD_LIBRARY(lluf_utils SHARED ${headers}
   ProcessMonitorWin32.cpp
 )
 
-target_include_directories(lluf_utils PUBLIC .)
+target_include_directories(lluf_utils PUBLIC include)
 
 TARGET_LINK_LIBRARIES(lluf_utils PRIVATE 
   lluf_startup_synchronizer 
@@ -38,9 +36,9 @@ TARGET_LINK_LIBRARIES(logger_control PRIVATE
   ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
 SAFIR_INSTALL(
-  TARGETS lluf_utils logger_control
-  INCLUDE_DIR Safir)
+  TARGETS lluf_utils logger_control)
 
+#TODO install these
 # if (WIN32)
 # INSTALL(FILES ../data/safir_event_log_registration.reg
 #         DESTINATION ${SAFIR_RUNTIME}/data/text/)

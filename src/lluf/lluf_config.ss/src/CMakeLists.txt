@@ -3,8 +3,7 @@ FILE(GLOB sources *.cpp)
 
 ADD_LIBRARY(lluf_config SHARED ${sources} ${headers})
 
-TARGET_INCLUDE_DIRECTORIES(lluf_config PUBLIC .)
+TARGET_INCLUDE_DIRECTORIES(lluf_config PUBLIC include)
 
 SAFIR_INSTALL(
-  TARGETS lluf_config 
-  INCLUDE_DIR Safir)
+  TARGETS lluf_config)

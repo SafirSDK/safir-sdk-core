@@ -5,11 +5,9 @@ if (NOT DOXYGEN_FOUND)
   return()
 endif()
 
-#TODO: we need all the public headers to be in one useful folder so that we can run doxygen on them
+ADD_CUSTOM_TARGET(Doxygen ALL
+  COMMAND doxygen)
 
-#ADD_CUSTOM_TARGET(Doxygen ALL
-#  COMMAND doxygen)
-
-#INSTALL(DIRECTORY html
-#  DESTINATION ${SAFIR_SDK}/docs/)
+INSTALL(DIRECTORY html
+  DESTINATION share/doc/safir_sdk_core)
 
