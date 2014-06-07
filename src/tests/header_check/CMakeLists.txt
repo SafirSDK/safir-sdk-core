@@ -10,12 +10,9 @@ FILE(GLOB_RECURSE headers
 file(WRITE all_headers_included.cpp  "")
 
 set(EXCLUDE_LIST
-  #AutoLink\\.h #ok, needs a define, but manually checked to not include windows.h
-  #^boost/ #dont check third party library
-  #/Breakpad/
-  #AceTimeConverter\\.h #these are kind of meant to 
-  #AceDispatcher\\.h    # include ace, which includes windows.h...
-  #AsioDispatcher\\.h   #includes asio.hpp, which appears to include windows.h
+  AceTimeConverter\\.h #these are kind of meant to 
+  AceDispatcher\\.h    # include ace, which includes windows.h...
+  AsioDispatcher\\.h   #includes asio.hpp, which appears to include windows.h
 
   /Typesystem/ToolSupport #property_tree appears to have some windows.h stuff in it
 
