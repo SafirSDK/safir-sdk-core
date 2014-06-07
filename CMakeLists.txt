@@ -16,7 +16,6 @@ INSTALL(DIRECTORY include DESTINATION include
   PATTERN ".svn" EXCLUDE
   PATTERN "*~" EXCLUDE)
 
-
 ENABLE_TESTING()
 
 add_subdirectory(src)

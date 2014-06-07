@@ -120,8 +120,6 @@ if(MSVC)
 endif()
 
 
-#Let ctest output stdout on failure by default.
-set(CTEST_OUTPUT_ON_FAILURE ON)
 
 if (MSVC)
   SET(CMAKE_DEBUG_POSTFIX "d")

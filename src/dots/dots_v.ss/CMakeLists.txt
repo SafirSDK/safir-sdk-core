@@ -1,5 +1,7 @@
 FILE(GLOB dod_files data/*.dod)
 
+#TODO: install dod files and other needed things
+
 # INSTALL(FILES 
 #           ${dod_files} 
 # #          data/dots_unit.xsd
@@ -30,7 +32,8 @@ FILE(GLOB dod_files data/*.dod)
 #        data/gen/CMakeLists.txt
 #        DESTINATION ${SAFIR_SDK}/dots/dots_generated/gen)
      
-# INSTALL(PROGRAMS
-#         dots_v.py
+INSTALL(PROGRAMS
+         dots_v.py
+         DESTINATION bin)
+
 # #        data/dobmake.py
-#         DESTINATION ${SAFIR_RUNTIME}/bin)
