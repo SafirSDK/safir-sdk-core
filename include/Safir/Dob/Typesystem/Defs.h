@@ -36,7 +36,6 @@
 #endif
 #define DOTS_CPP_LOCAL SAFIR_HELPER_DLL_LOCAL
 
-#include <Safir/Utilities/Internal/UnorderedMap.h>
 #include <Safir/Dob/Typesystem/LanguageInterfaceDefs.h>
 #include <string>
 #include <vector>

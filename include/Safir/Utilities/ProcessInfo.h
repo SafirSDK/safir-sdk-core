@@ -25,10 +25,19 @@
 #ifndef __PROCESSINFO_H__
 #define __PROCESSINFO_H__
 
-#include <Safir/Utilities/Internal/UtilsExportDefs.h>
 #include <string>
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
+#include <Safir/Utilities/Internal/VisibilityHelpers.h>
+
+#ifdef lluf_utils_EXPORTS
+#  define LLUF_UTILS_API SAFIR_HELPER_DLL_EXPORT
+#else
+#  define LLUF_UTILS_API SAFIR_HELPER_DLL_IMPORT
+#  define SAFIR_LIBRARY_NAME "lluf_utils"
+#  include <Safir/Utilities/Internal/AutoLink.h>
+#endif
+#define LLUF_UTILS_LOCAL SAFIR_HELPER_DLL_LOCAL
 
 //Get hold of pid_t
 

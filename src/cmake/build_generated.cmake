@@ -138,7 +138,7 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
   
   target_include_directories(dots_generated-${GEN_NAME}-cpp
     PRIVATE ${safir_sdk_core_SOURCE_DIR}/src/dots/dots_v.ss/data
-    PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/generated_code/cpp/include)
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated_code/cpp/include>)
   
   target_link_libraries(dots_generated-${GEN_NAME}-cpp 
     dots_cpp

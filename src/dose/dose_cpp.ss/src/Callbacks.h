@@ -28,7 +28,6 @@
 #include <Safir/Dob/Typesystem/EntityId.h>
 #include <Safir/Dob/Typesystem/HandlerId.h>
 #include <Safir/Dob/Defs.h>
-#include <Safir/Dob/Internal/ConnectionId.h>
 
 namespace Safir
 {

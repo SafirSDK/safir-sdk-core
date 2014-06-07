@@ -9,7 +9,6 @@ ADD_EXECUTABLE(wrap_around_counter_test wrap_around_counter_test.cpp)
 TARGET_LINK_LIBRARIES(distribution_data_test PRIVATE
   dose_internal 
   dots_generated-Safir-cpp
-  lluf_startup_synchronizer
   ${Boost_SYSTEM_LIBRARY})
 
 TARGET_LINK_LIBRARIES(lamport_clock_test PRIVATE 
@@ -18,18 +17,12 @@ TARGET_LINK_LIBRARIES(lamport_clock_test PRIVATE
 TARGET_LINK_LIBRARIES(dose_message_queue_test PRIVATE
   dose_internal
   dots_generated-Safir-cpp 
-  lluf_startup_synchronizer
   lluf_crash_reporter
   ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY})
 
-TARGET_LINK_LIBRARIES(wrap_around_counter_test PRIVATE 
-  dots_cpp
-  dots_internal
-  lluf_utils)
-#TODO: really need to clean up the include directories. this is stupid.
-
-target_include_directories(dose_sem_wrapper_test PRIVATE ../src)
+target_include_directories(wrap_around_counter_test PRIVATE ../src/include)
+target_include_directories(dose_sem_wrapper_test PRIVATE ../src/include)
 
 ADD_TEST(Semaphore dose_sem_wrapper_test)
 ADD_TEST(MessageQueue dose_message_queue_test)

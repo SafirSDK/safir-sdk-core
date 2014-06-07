@@ -29,8 +29,6 @@
 #include "dose_dispatcher.h"
 #include "dose_dispatch_thread.h"
 #include "dose_consumer_references.h"
-
-// Sdk
 #include <Safir/Dob/Internal/Connection.h>
 #include <Safir/Dob/Internal/InternalDefs.h>
 #include <Safir/Dob/Internal/Subscription.h>
@@ -39,7 +37,7 @@
 #include <Safir/Dob/Internal/EntityTypes.h>
 #include <Safir/Dob/ConnectionQueueId.h>
 #include <Safir/Dob/CallbackId.h>
-
+#include <boost/unordered_map.hpp>
 #include <map>
 #include "Postponer.h"
 
@@ -433,7 +431,7 @@ namespace Internal
 
         RequestIds m_requestIds;
 
-        typedef unordered_map<Typesystem::Int32, Internal::EntityTypes::EntityIterator> EntityIteratorTable;
+        typedef boost::unordered_map<Typesystem::Int32, Internal::EntityTypes::EntityIterator> EntityIteratorTable;
 
         EntityIteratorTable m_entityIterators;
 

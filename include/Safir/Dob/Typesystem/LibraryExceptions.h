@@ -26,6 +26,7 @@
 #define __DOTS_LIBRARY_EXCEPTIONS_H__
 
 #include <boost/noncopyable.hpp>
+#include <boost/unordered_map.hpp>
 #include <boost/thread/once.hpp>
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
@@ -254,7 +255,7 @@ namespace Typesystem
 
         void Set(const Internal::CommonExceptionBase & exception);
 
-        typedef unordered_map<TypeId, ThrowExceptionCallback> CallbackMap;
+        typedef boost::unordered_map<TypeId, ThrowExceptionCallback> CallbackMap;
         CallbackMap m_CallbackMap;
 
         /**

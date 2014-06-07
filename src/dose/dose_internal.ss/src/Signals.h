@@ -30,11 +30,11 @@
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/mutex.hpp>
+#include <boost/unordered_map.hpp>
 #include <boost/thread/shared_mutex.hpp>
 #include <Safir/Dob/Internal/ConnectionId.h>
 #include <Safir/Dob/Internal/LeveledLock.h>
 #include <Safir/Dob/Internal/InternalDefs.h>
-#include <Safir/Utilities/Internal/UnorderedMap.h>
 
 namespace Safir
 {
@@ -109,7 +109,7 @@ namespace Internal
 
             //Note that this contains semaphores allocated with new!
             //remember to delete the semaphore if removing from map!
-            typedef unordered_map<Identifier, SemaphorePtr> Semaphores;
+            typedef boost::unordered_map<Identifier, SemaphorePtr> Semaphores;
             Semaphores m_semaphores;
 
             typedef Safir::Dob::Internal::LeveledLock<boost::shared_mutex,

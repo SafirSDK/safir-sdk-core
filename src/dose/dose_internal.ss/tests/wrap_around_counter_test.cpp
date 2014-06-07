@@ -21,7 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include "../src/Safir/Dob/Internal/WrapAroundCounter.h"
+#include <Safir/Dob/Internal/WrapAroundCounter.h>
 #include <boost/lexical_cast.hpp>
 
 int failures = 0;

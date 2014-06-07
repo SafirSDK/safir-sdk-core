@@ -387,7 +387,7 @@ add_subdirectory(patch_check)
 add_subdirectory(lluf)
 add_subdirectory(logging)
 add_subdirectory(dots)
-#add_subdirectory(dose)
+add_subdirectory(dose)
 #add_subdirectory(douf)
 #add_subdirectory(swre)
 ##add_subdirectory(dose/dose_test.ss)
@@ -395,7 +395,7 @@ add_subdirectory(dots)
 #add_subdirectory(olib)
 #add_subdirectory(dope)
 
-#add_subdirectory(tests)
+add_subdirectory(tests)
 
 #TODO: move the test suite to outside dose, maybe into tests?
 

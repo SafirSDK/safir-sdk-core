@@ -1,2 +1,3 @@
-add_subdirectory(stop_orders_at_exit)
-#TODO header check?!
+#TODO add_subdirectory(stop_orders_at_exit)
+add_subdirectory(header_check)
+

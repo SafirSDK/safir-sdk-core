@@ -27,6 +27,7 @@
 
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/unordered_map.hpp>
 #include <boost/thread/once.hpp>
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
@@ -134,7 +135,7 @@ namespace Typesystem
 #pragma warning (disable: 4251) // warning C4251: 'Safir::Dob::Typesystem::ObjectFactory::m_CallbackMap' : class 'stdext::hash_map<_Kty,_Ty>' needs to have dll-interface to be used by clients of class 'Safir::Dob::Typesystem::ObjectFactory'
 #endif
 
-        typedef unordered_map<TypeId,CreateObjectCallback> CallbackMap;
+        typedef boost::unordered_map<TypeId,CreateObjectCallback> CallbackMap;
         CallbackMap m_CallbackMap;
 
 #ifdef _MSC_VER
