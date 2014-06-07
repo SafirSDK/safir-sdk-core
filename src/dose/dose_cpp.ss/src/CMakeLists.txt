@@ -5,6 +5,7 @@ ADD_LIBRARY(dose_cpp SHARED ${sources} ${headers})
 
 TARGET_LINK_LIBRARIES(dose_cpp PRIVATE 
   dose_dll
-  dots_generated-Safir-cpp)
+
+  PUBLIC dots_generated-Safir-cpp)
 
 SAFIR_INSTALL(TARGETS dose_cpp)

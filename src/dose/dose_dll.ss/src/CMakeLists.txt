@@ -12,7 +12,7 @@ target_include_directories(dose_dll PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOU
 
 TARGET_LINK_LIBRARIES(dose_dll PRIVATE 
   dose_internal
-  dots_generated-Safir-cpp
+  #dots_generated-Safir-cpp
   ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY})
 
