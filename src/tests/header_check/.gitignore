@@ -1,2 +1,2 @@
 check_correct_public_headers
-all_headers_included.cpp
+*_generated.cpp
