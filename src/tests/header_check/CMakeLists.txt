@@ -26,7 +26,7 @@ foreach(header ${headers})
   
   if(NOT SKIP)
     string(REGEX REPLACE "[^a-zA-Z]" "_" name_base ${header})
-    set(generated_name check_${CMAKE_CURRENT_BINARY_DIR}/${name_base}_generated.cpp)
+    set(generated_name ${CMAKE_CURRENT_BINARY_DIR}/check_${name_base}_generated.cpp)
     set(sources ${sources} ${generated_name})
     file(WRITE ${generated_name} "")
     file(APPEND ${generated_name} "#ifdef SAFIR_NO_AUTOLINK\n#  undef SAFIR_NO_AUTOLINK\n#endif\n")
