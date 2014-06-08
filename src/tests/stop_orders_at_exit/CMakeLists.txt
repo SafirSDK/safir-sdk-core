@@ -1,11 +1,7 @@
 add_executable(stoppee stoppee.cpp)
 
 target_link_libraries(stoppee PRIVATE
-  douf_time_cpp
   dose_cpp 
-  dose_internal
-  dots_generated-Safir-cpp
-  dots_cpp
   ${Boost_SYSTEM_LIBRARY})
 
 get_property(DOTS_GENERATED_PATHS GLOBAL PROPERTY DOTS_GENERATED_PATHS)

@@ -393,7 +393,7 @@ add_subdirectory(swre)
 ##add_subdirectory(dose/dose_test.ss)
 add_subdirectory(foreach)
 add_subdirectory(olib)
-#add_subdirectory(dope)
+add_subdirectory(dope)
 
 add_subdirectory(tests)
 
@@ -403,13 +403,8 @@ add_subdirectory(tests)
 INSTALL(FILES config/typesystem.ini config/locations.ini config/logging.ini
   DESTINATION share/doc/safir_sdk_core/example_configuration)
 
-
-#INSTALL(FILES cmake/FindSafirSDKCore.cmake 
-#  DESTINATION share/safir_sdk_core/cmake)
-
 INSTALL(EXPORT safir_sdk_core DESTINATION lib/cmake/safir_sdk_core)
 
-#TODO: install the doxygen stuff in doc
 #TODO: install users guide in doc?
 #TODO: install requirements in doc?
 #TODO: install examples in doc
