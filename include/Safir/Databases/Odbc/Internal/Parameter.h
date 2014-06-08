@@ -80,7 +80,7 @@ public:
 
     /** @brief Sets the value for a parameter.
     *
-    *  @param [in] nSize - The size sent in bytes.
+    *  @param [in] value - The value to set.
     */
     void SetValue(const Type & value);
 

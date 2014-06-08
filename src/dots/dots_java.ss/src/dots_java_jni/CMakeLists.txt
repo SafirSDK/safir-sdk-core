@@ -17,7 +17,7 @@ ADD_LIBRARY(dots_java_jni SHARED
   ${CMAKE_CURRENT_BINARY_DIR}/com_saabgroup_safir_dob_typesystem_Kernel.h
   ${CMAKE_CURRENT_BINARY_DIR}/com_saabgroup_safir_dob_typesystem_Kernel_DotsC_PropertyMappingKind.h)
 
-TARGET_INCLUDE_DIRECTORIES(dots_java_jni PRIVATE ${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2})
+TARGET_INCLUDE_DIRECTORIES(dots_java_jni PRIVATE ${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2} ${CMAKE_CURRENT_BINARY_DIR})
 
 TARGET_LINK_LIBRARIES(dots_java_jni PRIVATE
   dots_kernel
