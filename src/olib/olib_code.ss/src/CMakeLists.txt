@@ -1,14 +1,9 @@
-FILE(GLOB_RECURSE headers *.h)
-FILE(GLOB sources *.cpp)
-
-ADD_LIBRARY(olib SHARED ${sources} ${headers})
-
-target_include_directories(olib PUBLIC .)
+ADD_LIBRARY(olib SHARED Connection.cpp  Diagnostics.cpp  Diagnostics.h  Environment.cpp  Statement.cpp  StringConversion.h)
 
 TARGET_LINK_LIBRARIES(olib PRIVATE 
-  douf_time_cpp 
+#  douf_time_cpp 
   dots_generated-olib-cpp
-  logging_cpp
+#  logging_cpp
   ${SAFIR_ODBC_LIBRARIES})
 
-SAFIR_INSTALL(TARGETS olib INCLUDE_DIR Safir)
+SAFIR_INSTALL(TARGETS olib)
