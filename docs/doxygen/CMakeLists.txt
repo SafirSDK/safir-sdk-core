@@ -16,3 +16,7 @@ add_custom_target(Doxygen ALL
 INSTALL(DIRECTORY html
   DESTINATION share/doc/safir_sdk_core)
 
+
+#TODO: can we get the dou-headers in here as well?
+#TODO: strip include path properly
+#TODO: exclude internal etc
