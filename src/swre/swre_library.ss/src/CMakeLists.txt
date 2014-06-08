@@ -13,6 +13,7 @@ target_include_directories(swre_library PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT
 TARGET_LINK_LIBRARIES(swre_library PRIVATE 
   dose_cpp
   dots_generated-swre_library-cpp
+  logging_cpp
   ${Boost_REGEX_LIBRARY}
   ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY})
