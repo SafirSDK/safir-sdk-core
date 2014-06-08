@@ -105,7 +105,8 @@ FILE_PATTERNS          =
 RECURSIVE              = YES
 EXCLUDE                =
 EXCLUDE_SYMLINKS       = NO
-EXCLUDE_PATTERNS       =
+EXCLUDE_PATTERNS       = */Internal/* \
+                         */LanguageInterfaceDefs.h
 EXCLUDE_SYMBOLS        =
 EXAMPLE_PATH           =
 EXAMPLE_PATTERNS       =
