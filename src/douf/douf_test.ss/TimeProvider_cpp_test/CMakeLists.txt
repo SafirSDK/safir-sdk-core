@@ -1,10 +1,7 @@
 ADD_EXECUTABLE(TimeProvider_cpp_test test.cpp)
 
 TARGET_LINK_LIBRARIES(TimeProvider_cpp_test PRIVATE
-  douf_time_cpp
-  dots_cpp
-  dots_internal
-  lluf_utils)
+  douf_time_cpp)
 
 #Needed on windows
 if (MSVC)

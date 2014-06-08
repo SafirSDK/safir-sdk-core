@@ -6,16 +6,15 @@ FILE(GLOB sources *.cpp)
 
 ADD_LIBRARY(douf_time_library SHARED ${sources})
 
-target_include_directories(douf_time_library PUBLIC .)
+#Make our INTERNAL headers available to other parts of Core.
+target_include_directories(douf_time_library PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
 TARGET_LINK_LIBRARIES(douf_time_library PRIVATE 
   dots_generated-douf_time-cpp 
-  dots_cpp 
-  lluf_utils
   ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY})
 
-SAFIR_INSTALL(TARGETS douf_time_library INCLUDE_DIR Safir)
+SAFIR_INSTALL(TARGETS douf_time_library)
 
 # INSTALL(FILES ../data/douf_time_library.gpr
 #         DESTINATION ${SAFIR_SDK}/ada)

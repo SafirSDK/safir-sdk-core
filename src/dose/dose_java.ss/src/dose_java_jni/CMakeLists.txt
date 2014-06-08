@@ -21,7 +21,7 @@ TARGET_INCLUDE_DIRECTORIES(dose_java_jni PRIVATE ${JAVA_INCLUDE_PATH} ${JAVA_INC
 TARGET_LINK_LIBRARIES(dose_java_jni PRIVATE 
   dose_dll
   dots_kernel
-  dots_internal
+#  dots_internal
   ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY})
 

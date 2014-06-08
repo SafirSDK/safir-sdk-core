@@ -63,16 +63,10 @@ endif()
 
 TARGET_LINK_LIBRARIES(dobexplorer
   dose_internal
-  dots_generated-Safir-cpp
-  dots_cpp 
-  lluf_utils
   lluf_crash_reporter
-  lluf_startup_synchronizer
   ${Boost_SYSTEM_LIBRARY})
 
-target_include_directories(dobexplorer PRIVATE ../../dose_communication.ss/src/defs/)
-target_include_directories(dobexplorer PRIVATE ../../dose_communication.ss/src/dose_com/)
-
-#TODO: hmmm, dobexplorer doesnt really need to link against dose_com, I added that to get the PUBLIC includes. Better way?
+target_include_directories(dobexplorer PRIVATE ../../dose_communication.ss/src/defs/ ../../dose_communication.ss/src/dose_com/)
+#dobexplorer doesnt really need to link against dose_com, so instead just add the include directories
 
 SAFIR_INSTALL(TARGETS dobexplorer)

@@ -1,13 +1,7 @@
 add_executable(tracer_backdoor_sender sender.cpp)
 
 target_link_libraries(tracer_backdoor_sender PRIVATE
-  dots_generated-Safir-cpp
   swre_interface_cpp 
-  douf_time_cpp
-  dose_cpp 
-  dose_internal
-  dots_cpp
-  lluf_utils
   ${Boost_SYSTEM_LIBRARY})
 
 #Needed on windows

@@ -10,18 +10,7 @@ endif()
 TARGET_LINK_LIBRARIES(dose_com PRIVATE lluf_utils)
 
 target_include_directories(dose_com PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../defs>)
-#target_include_directories(dose_com PUBLIC .)
-#TODO: definitely move public stuff into better directories!
+target_include_directories(dose_com PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
+#This is rather nasty (making all header files public) but it is the way dose_com is made...
 
 SAFIR_INSTALL(TARGETS dose_com)
-
-#INSTALL(FILES ../defs/DoseCom_Interface.h 
-#              ../defs/DoseCom_Interface_Classes.h
-#        DESTINATION include/Safir/Dob/Internal/)
-
-#INSTALL(FILES DosePlatform.h
-#              PrintError.h
-#              DoseOsInterface.h
-#              DoseOsSharedMem.cpp
-#               ../defs/DoseNodeStatus.h
-#        DESTINATION include/Safir/Dob/Internal/DoseComAux/)
