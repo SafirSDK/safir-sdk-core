@@ -21,6 +21,7 @@ TARGET_INCLUDE_DIRECTORIES(dots_java_jni PRIVATE ${JAVA_INCLUDE_PATH} ${JAVA_INC
 
 TARGET_LINK_LIBRARIES(dots_java_jni PRIVATE
   dots_kernel
+  lluf_id
   lluf_config
   ${Boost_FILESYSTEM_LIBRARY})
 
