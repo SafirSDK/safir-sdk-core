@@ -12,7 +12,7 @@ set(EXCLUDE_LIST
   /Typesystem/ToolSupport #property_tree appears to have some windows.h stuff in it
 
   #here are the headers that include windows.h and should not!
-  #/Odbc/
+  /Odbc/
   #/DoseComAux/
   )
 
