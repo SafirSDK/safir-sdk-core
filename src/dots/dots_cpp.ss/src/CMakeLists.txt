@@ -8,6 +8,7 @@ target_include_directories(dots_cpp PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOU
 
 TARGET_LINK_LIBRARIES(dots_cpp PRIVATE 
   dots_kernel
+  lluf_id
   lluf_utils
   lluf_crash_reporter
   ${Boost_THREAD_LIBRARY}
