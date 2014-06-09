@@ -8,6 +8,7 @@ target_include_directories(dose_internal PUBLIC $<BUILD_INTERFACE:${CMAKE_CURREN
 
 TARGET_LINK_LIBRARIES(dose_internal PRIVATE
   dots_cpp 
+  lluf_startup_synchronizer
   ${Boost_REGEX_LIBRARY}
   ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY}
