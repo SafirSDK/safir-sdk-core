@@ -220,20 +220,20 @@ int main(int argc, char * argv[])
 
 
 
-    boost::asio::signal_set signals(ioService);
+    boost::asio::signal_set signalSet(ioService);
     
 #if defined (_WIN32)
-    signals.add(SIGABRT);
-    signals.add(SIGBREAK);
-    signals.add(SIGINT);
-    signals.add(SIGTERM);
+    signalSet.add(SIGABRT);
+    signalSet.add(SIGBREAK);
+    signalSet.add(SIGINT);
+    signalSet.add(SIGTERM);
 #else
-    signals.add(SIGQUIT);
-    signals.add(SIGINT);
-    signals.add(SIGTERM);
+    signalSet.add(SIGQUIT);
+    signalSet.add(SIGINT);
+    signalSet.add(SIGTERM);
 #endif
 
-    signals.async_wait([&sp,&work,&communication,&signals](const boost::system::error_code& error,
+    signalSet.async_wait([&sp,&work,&communication,&signalSet](const boost::system::error_code& error,
                                                            const int signal_number)
                        {
                            lllog(3) << "Got signal " << signal_number << std::endl;
