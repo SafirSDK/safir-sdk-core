@@ -245,6 +245,13 @@ function(add_library NAME)
     set_property(GLOBAL PROPERTY SAFIR_LIBRARY_PATH "${SAFIR_LIBRARY_PATH}${PATH_SEPARATOR}${dir_to_add}")
     #message("SAFIR_LIBRARY_PATH set to ${SAFIR_LIBRARY_PATH}${PATH_SEPARATOR}${dir_to_add}")
   endif()
+
+  if (WIN32)
+    #TODO this will not work for studio builds, so disable header check for studio generator...
+    get_property(SAFIR_HEADER_CHECK_LINK_PATH GLOBAL PROPERTY SAFIR_HEADER_CHECK_LINK_PATH)
+    set_property(GLOBAL PROPERTY SAFIR_HEADER_CHECK_LINK_PATH ${SAFIR_HEADER_CHECK_LINK_PATH} 
+        "${CMAKE_CURRENT_BINARY_DIR}")
+  endif()
   
   #call the real add_library function
   _add_library(${NAME} ${ARGN})
