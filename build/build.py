@@ -194,18 +194,18 @@ class Logger(object):
 
         if self.__log_level == "Brief":
             if tag == "header" or tag == "normal" or tag == "brief":
-                sys.stdout.write(data + "\n")
+                sys.stdout.write(data + r"\n")
         elif self.__log_level == "Verbose":
             if tag == "brief":
                 pass
             elif tag == "header":
-                sys.stdout.write("\n==== " + data + " ====\n")
+                sys.stdout.write(r"\n==== " + data + r" ====\n")
             elif tag == "command_description":
-                sys.stdout.write("+ " + data + ": ")
+                sys.stdout.write(r"+ " + data + r": ")
             elif tag == "command":
-                sys.stdout.write("'" + data + "'\n")
+                sys.stdout.write(r"'" + data + r"'\n")
             else:
-                sys.stdout.write(data + "\n")
+                sys.stdout.write(data + r"\n")
         sys.stdout.flush()
 
     def __log_file(self, data, tag):
