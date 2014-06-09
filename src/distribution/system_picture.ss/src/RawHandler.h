@@ -71,12 +71,12 @@ namespace SP
     public:
         RawHandler(boost::asio::io_service& ioService,
                    Com::Communication& communication,
-                   std::string name,
+                   const std::string& name,
                    const int64_t id,
                    const int64_t nodeTypeId,
-                   std::string controlAddress,
-                   std::string dataAddress,
-                   std::map<int64_t, NodeType> nodeTypes);
+                   const std::string& controlAddress,
+                   const std::string& dataAddress,
+                   const std::map<int64_t, NodeType>& nodeTypes);
 
         void Stop();
 
@@ -85,8 +85,8 @@ namespace SP
                                                                      const size_t size)> & fn,
                                           const size_t extraSpace) const;
 
-        void PerformOnAllStatisticsMessage(const std::function<void(const boost::shared_ptr<char []>& data, 
-                                                                      const size_t size)> & fn,
+        void PerformOnAllStatisticsMessage(const std::function<void(std::unique_ptr<char []> data, 
+                                                                    const size_t size)> & fn,
                                            const size_t extraSpace) const;
         
         void UpdateRemoteStatistics(const int64_t from, const boost::shared_ptr<char[]>& data, const size_t size);

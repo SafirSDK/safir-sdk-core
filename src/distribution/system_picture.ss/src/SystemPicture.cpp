@@ -72,12 +72,12 @@ namespace SP
          */
         Impl(boost::asio::io_service& ioService,
              Com::Communication& communication,
-             std::string name,
+             const std::string& name,
              const int64_t id,
              const int64_t nodeTypeId,
-             std::string controlAddress,
-             std::string dataAddress,
-             std::map<int64_t, NodeType> nodeTypes)
+             const std::string& controlAddress,
+             const std::string& dataAddress,
+             const std::map<int64_t, NodeType>& nodeTypes)
             : m_rawHandler(Safir::make_unique<RawHandler>(ioService,
                                                           communication,
                                                           name,
@@ -99,11 +99,11 @@ namespace SP
                                                                             *m_rawHandler))
             , m_coordinator(Safir::make_unique<Coordinator>(ioService, 
                                                             communication,
-                                                            std::move(name),
+                                                            name,
                                                             id,
                                                             nodeTypeId,
-                                                            std::move(controlAddress),
-                                                            std::move(dataAddress),
+                                                            controlAddress,
+                                                            dataAddress,
                                                             nodeTypes,
                                                             MASTER_REMOTE_ELECTION_NAME,
                                                             *m_rawHandler))
@@ -112,7 +112,7 @@ namespace SP
                                                                             MASTER_LOCAL_STATE_NAME))
             , m_statePublisherRemote(Safir::make_unique<StatePublisherRemote>(ioService, 
                                                                               communication, 
-                                                                              std::move(nodeTypes),
+                                                                              nodeTypes,
                                                                               MASTER_REMOTE_STATE_NAME, 
                                                                               *m_coordinator))
             , m_stateSubscriberRemote(Safir::make_unique<StateSubscriberRemote>(communication, 
@@ -195,12 +195,12 @@ namespace SP
     SystemPicture::SystemPicture(master_tag_t,
                                  boost::asio::io_service& ioService,
                                  Com::Communication& communication,
-                                 std::string name,
+                                 const std::string& name,
                                  const int64_t id,
                                  const int64_t nodeTypeId,
-                                 std::string controlAddress,
-                                 std::string dataAddress,
-                                 std::map<int64_t, NodeType> nodeTypes)
+                                 const std::string& controlAddress,
+                                 const std::string& dataAddress,
+                                 const std::map<int64_t, NodeType>& nodeTypes)
     : m_impl(Safir::make_unique<Impl>(ioService,
                                     communication,
                                     name,

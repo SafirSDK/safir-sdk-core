@@ -63,7 +63,7 @@ namespace SP
 
             m_dataCallback = dataCallback;
             
-            m_subscriber = Safir::Utilities::Internal::IpcSubscriber::Create
+            m_subscriber = Safir::make_unique<Safir::Utilities::Internal::IpcSubscriber>
                 (ioService,
                  m_name,
                  [this](const char* const data, size_t size)
@@ -114,7 +114,7 @@ namespace SP
         const std::string m_name;
 
         std::function<void (const RawStatistics& data)> m_dataCallback;
-        boost::shared_ptr<Safir::Utilities::Internal::IpcSubscriber> m_subscriber;
+        std::unique_ptr<Safir::Utilities::Internal::IpcSubscriber> m_subscriber;
     };
 }
 }

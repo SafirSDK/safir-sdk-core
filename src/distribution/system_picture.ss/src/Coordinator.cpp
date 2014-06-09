@@ -80,22 +80,23 @@ namespace
 
     Coordinator::Coordinator(boost::asio::io_service& ioService,
                              Com::Communication& communication,
-                             std::string name,
+                             const std::string& name,
                              const int64_t id,
                              const int64_t nodeTypeId,
-                             std::string controlAddress,
-                             std::string dataAddress,
-                             std::map<int64_t, NodeType> nodeTypes,
+                             const std::string& controlAddress,
+                             const std::string& dataAddress,
+                             const std::map<int64_t, NodeType>& nodeTypes,
                              const char* const dataIdentifier,
                              RawHandler& rawHandler)
         : m_strand (ioService)
         , m_communication(communication)
         , m_dataIdentifier(LlufId_Generate64(dataIdentifier))
-        , m_name(std::move(name))
+        , m_name(name)
         , m_id(id)
         , m_nodeTypeId(nodeTypeId)
-        , m_controlAddress(std::move(controlAddress))
-        , m_dataAddress(std::move(dataAddress))
+        , m_controlAddress(controlAddress)
+        , m_dataAddress(dataAddress)
+        , m_nodeTypes(nodeTypes)
         , m_nonLightNodeTypes([&nodeTypes]
                               {
                                   std::set<int64_t> res;
@@ -108,7 +109,6 @@ namespace
                                   }
                              return res;
                          }())
-        , m_nodeTypes(std::move(nodeTypes))
         , m_elected(std::numeric_limits<int64_t>::min())
         , m_electionTimer(ioService)
         , m_sendMessageTimer(ioService)
@@ -226,7 +226,7 @@ namespace
         }
     }
     
-    void Coordinator::PerformOnStateMessage(const std::function<void(const boost::shared_ptr<char []>& data, 
+    void Coordinator::PerformOnStateMessage(const std::function<void(std::unique_ptr<char []> data, 
                                                                      const size_t size)> & fn,
                                             const size_t extraSpace)
     {
@@ -238,10 +238,10 @@ namespace
                               }
 
                               const size_t size = m_stateMessage.ByteSize() + extraSpace;
-                              auto data = boost::make_shared<char[]>(size);
+                              auto data = std::unique_ptr<char[]>(new char[size]);
                               m_stateMessage.SerializeWithCachedSizesToArray
                                   (reinterpret_cast<google::protobuf::uint8*>(data.get()));
-                              fn(data, size);
+                              fn(std::move(data), size);
                           });
     }
 

@@ -77,12 +77,12 @@ namespace SP
         SystemPicture(master_tag_t,
                       boost::asio::io_service& ioService,
                       Com::Communication& communication,
-                      std::string name,
+                      const std::string& name,
                       const int64_t id,
                       const int64_t nodeTypeId,
-                      std::string controlAddress,
-                      std::string dataAddress,
-                      std::map<int64_t, NodeType> nodeTypes);
+                      const std::string& controlAddress,
+                      const std::string& dataAddress,
+                      const std::map<int64_t, NodeType>& nodeTypes);
 
         explicit SystemPicture(slave_tag_t);
 

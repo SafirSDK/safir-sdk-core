@@ -43,12 +43,12 @@ namespace SP
     public:
         StatePublisherRemote(boost::asio::io_service& ioService,
                              Com::Communication& communication,
-                             std::map<int64_t, NodeType>  nodeTypes,
+                             const std::map<int64_t, NodeType>& nodeTypes,
                              const char* const senderId,
                              Coordinator& coordinator)
             : m_communication(communication)
             , m_senderId(LlufId_Generate64(senderId))
-            , m_nodeTypes(std::move(nodeTypes))
+            , m_nodeTypes(nodeTypes)
             , m_coordinator(coordinator)
             , m_publishTimer(ioService, 
                              boost::chrono::seconds(1),

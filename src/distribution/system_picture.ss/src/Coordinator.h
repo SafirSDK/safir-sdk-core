@@ -73,12 +73,12 @@ namespace SP
     public:
         Coordinator(boost::asio::io_service& ioService,
                     Com::Communication& communication,
-                    std::string name,
+                    const std::string& name,
                     const int64_t id,
                     const int64_t nodeTypeId,
-                    std::string controlAddress,
-                    std::string dataAddress,
-                    std::map<int64_t, NodeType> nodeTypes,
+                    const std::string& controlAddress,
+                    const std::string& dataAddress,
+                    const std::map<int64_t, NodeType>& nodeTypes,
                     const char* const receiverId,
                     RawHandler& rawHandler);
         
@@ -86,7 +86,7 @@ namespace SP
 
         //used to send state message
         //extraSpace adds bytes at the end of the buffer, e.g. for adding a crc
-        void PerformOnStateMessage(const std::function<void(const boost::shared_ptr<char []>& data, 
+        void PerformOnStateMessage(const std::function<void(std::unique_ptr<char []> data, 
                                                             const size_t size)> & fn,
                                    const size_t extraSpace);
         
@@ -122,8 +122,8 @@ namespace SP
         const int64_t m_nodeTypeId;
         const std::string m_controlAddress;
         const std::string m_dataAddress;
-        const std::set<int64_t> m_nonLightNodeTypes;
         const std::map<int64_t, NodeType> m_nodeTypes;
+        const std::set<int64_t> m_nonLightNodeTypes;
 
         std::atomic<int64_t> m_elected;
         boost::asio::steady_timer m_electionTimer;

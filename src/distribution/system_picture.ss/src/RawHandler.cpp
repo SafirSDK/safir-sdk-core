@@ -51,16 +51,16 @@ namespace SP
 
     RawHandler::RawHandler(boost::asio::io_service& ioService,
                            Com::Communication& communication,
-                           std::string name,
+                           const std::string& name,
                            const int64_t id,
                            const int64_t nodeTypeId,
-                           std::string controlAddress,
-                           std::string dataAddress,
-                           std::map<int64_t, NodeType> nodeTypes)
+                           const std::string& controlAddress,
+                           const std::string& dataAddress,
+                           const std::map<int64_t, NodeType>& nodeTypes)
         : m_ioService(ioService)
         , m_communication(communication)
         , m_id(id)
-        , m_nodeTypes(std::move(nodeTypes))
+        , m_nodeTypes(nodeTypes)
         , m_epoch(steady_clock::now() - boost::chrono::hours(1))
         , m_strand(ioService)
         , m_checkDeadNodesTimer(ioService, 
@@ -94,11 +94,11 @@ namespace SP
         , m_stopped(false)
     {
         //set up some info about ourselves in our message
-        m_allStatisticsMessage.set_name(std::move(name));
+        m_allStatisticsMessage.set_name(name);
         m_allStatisticsMessage.set_id(id);
         m_allStatisticsMessage.set_node_type_id(nodeTypeId);
-        m_allStatisticsMessage.set_control_address(std::move(controlAddress));
-        m_allStatisticsMessage.set_data_address(std::move(dataAddress));
+        m_allStatisticsMessage.set_control_address(controlAddress);
+        m_allStatisticsMessage.set_data_address(dataAddress);
 
         communication.SetNewNodeCallback(m_strand.wrap([this](const std::string& name,
                                                               const int64_t id, 
@@ -343,17 +343,17 @@ namespace SP
 
     }
     
-    void RawHandler::PerformOnAllStatisticsMessage(const std::function<void(const boost::shared_ptr<char[]>& data,
-                                                                              const size_t size)> & fn,
+    void RawHandler::PerformOnAllStatisticsMessage(const std::function<void(std::unique_ptr<char[]> data,
+                                                                            const size_t size)> & fn,
                                                    const size_t extraSpace) const
     {
         m_strand.dispatch([this,fn, extraSpace]
         {
             const size_t size = m_allStatisticsMessage.ByteSize() + extraSpace;
-            auto data = boost::make_shared<char[]>(size);
+            auto data = std::unique_ptr<char[]>(new char[size]);
             m_allStatisticsMessage.SerializeWithCachedSizesToArray
                 (reinterpret_cast<google::protobuf::uint8*>(data.get()));
-            fn(data, size);
+            fn(std::move(data), size);
         });
     }
     

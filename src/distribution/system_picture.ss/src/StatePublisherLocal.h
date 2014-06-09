@@ -50,7 +50,7 @@ namespace SP
                             Coordinator& coordinator,
                             const char* const name)
             : m_coordinator(coordinator)
-            , m_publisher(Safir::Utilities::Internal::IpcPublisher::Create(ioService,name))
+            , m_publisher(ioService,name)
             , m_publishTimer(ioService, 
                              boost::chrono::seconds(1),
                              [this](const boost::system::error_code& error)
@@ -59,13 +59,13 @@ namespace SP
                              })
         {
             m_publishTimer.Start();
-            m_publisher->Start();
+            m_publisher.Start();
         }
 
         void Stop()
         {
             m_publishTimer.Stop();
-            m_publisher->Stop();
+            m_publisher.Stop();
         }
 
     private:
@@ -86,19 +86,19 @@ namespace SP
             const int crcBytes = 0;
 #endif
 
-            m_coordinator.PerformOnStateMessage([this,crcBytes](const boost::shared_ptr<char[]>& data, const size_t size)
+            m_coordinator.PerformOnStateMessage([this,crcBytes](std::unique_ptr<char[]> data, const size_t size)
                                                 {
 #ifdef CHECK_CRC
                                                     const int crc = GetCrc32(data.get(), size - crcBytes);
                                                     memcpy(data.get() + size - crcBytes, &crc, sizeof(int));
 #endif
-                                                    m_publisher->Send(data, static_cast<uint32_t>(size));
+                                                    m_publisher.Send(std::move(data), static_cast<uint32_t>(size));
                                                 },
                                                 crcBytes);
         }
         
         Coordinator& m_coordinator;
-        const boost::shared_ptr<Safir::Utilities::Internal::IpcPublisher> m_publisher;
+        Safir::Utilities::Internal::IpcPublisher m_publisher;
         Safir::Utilities::Internal::AsioPeriodicTimer m_publishTimer;
     };
 }
