@@ -116,11 +116,15 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
     --library-name ${GEN_NAME}
     --output-path=generated_code)
   
+  if (UNIX)
+    set (sync_cmd COMMAND sync)
+  endif()
+
   ADD_CUSTOM_COMMAND(
     OUTPUT ${cpp_files} ${java_files} ${dotnet_files}
 
     COMMAND ${dots_v_command} ${CMAKE_CURRENT_SOURCE_DIR}
-
+    ${sync_cmd}
     DEPENDS ${dod_files} ${dou_files}
     COMMENT "Generating code for ${CMAKE_CURRENT_SOURCE_DIR}")
 
