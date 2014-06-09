@@ -24,7 +24,7 @@
 #
 ###############################################################################
 import os, glob, sys, subprocess, platform, xml.dom.minidom, re, time, shutil
-
+import locale, codecs
 from xml.sax.saxutils import escape
 
 
@@ -176,7 +176,7 @@ class Logger(object):
         else:
             name = os.path.split(command_file)[-1].replace(".txt","")
 
-        self.__buildlog = open("buildlog_" + name + ".html", "w")
+        self.__buildlog = codecs.open("buildlog_" + name + ".html", mode = "w", encoding = "utf-8")
         self.__buildlog.write("<html><head><title>Safir SDK Core Build Log</title></head>\n")
         self.__buildlog.write("<body>\n")
         self.__buildlog.write("<h1>Safir SDK Core Build Log for " + command_file + "</h1>")
@@ -187,6 +187,7 @@ class Logger(object):
     def close(self):
         self.__buildlog.write("\n<p/>End time (local time): " + time.asctime())
         self.__buildlog.write("\n</body>\n")
+        self.__buildlog.close()
         
     def __log_stdout(self, data, tag):
         if tag not in Logger.Tags:
@@ -194,18 +195,18 @@ class Logger(object):
 
         if self.__log_level == "Brief":
             if tag == "header" or tag == "normal" or tag == "brief":
-                sys.stdout.write(data + r"\n")
+                print(data)
         elif self.__log_level == "Verbose":
             if tag == "brief":
                 pass
             elif tag == "header":
-                sys.stdout.write(r"\n==== " + data + r" ====\n")
+                print("\n==== " + data + " ====")
             elif tag == "command_description":
-                sys.stdout.write(r"+ " + data + r": ")
+                print("+ " + data + ": ")
             elif tag == "command":
-                sys.stdout.write(r"'" + data + r"'\n")
+                print("'" + data + "'")
             else:
-                sys.stdout.write(data + r"\n")
+                print(data)
         sys.stdout.flush()
 
     def __log_file(self, data, tag):
@@ -236,9 +237,9 @@ class Logger(object):
 
     def log(self, data, tag = "normal"):
         if data is None: return
-        
-        self.__log_stdout(data.encode("utf-8"),tag)
-        self.__log_file(data.encode("utf-8"),tag)
+
+        self.__log_stdout(data,tag)
+        self.__log_file(data,tag)
         
 
     def log_output(self, process):
@@ -303,7 +304,7 @@ def parse_command_line(builder):
     if not os.path.isfile(options.command_file):
         die("The specified command file could not be found")
     global command_file
-    command_file = open(options.command_file,'r')
+    command_file = codecs.open(options.command_file,mode='r', encoding="utf-8")
 
     global logger
     logger = Logger("Brief" if options.verbose == 0 else "Verbose",
