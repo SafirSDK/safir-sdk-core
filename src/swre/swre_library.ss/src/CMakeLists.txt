@@ -14,6 +14,7 @@ TARGET_LINK_LIBRARIES(swre_library PRIVATE
   dose_cpp
   dots_generated-swre_library-cpp
   logging_cpp
+  lluf_crash_reporter
   ${Boost_REGEX_LIBRARY}
   ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY})
