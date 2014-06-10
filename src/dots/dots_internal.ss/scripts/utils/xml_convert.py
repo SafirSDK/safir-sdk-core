@@ -322,7 +322,14 @@ def convert_file(file_path, out_dir):
         if converted_create_routines: output('                - Converted create routines')
         indent(root)
         new_file=os.path.join(out_dir, os.path.basename(file_path))
-        tree.write(new_file, encoding='utf-8', xml_declaration=True, default_namespace=None, method='xml')
+        
+        #Since tree.write will add a unix lineending after <?xml version...?> we do this step manually instead.
+        #tree.write(new_file, encoding='utf-8', xml_declaration=True, default_namespace=None, method='xml')
+        xml_str='<?xml version="1.0" encoding="utf-8" ?>'+os.linesep+ET.tostring(root, encoding='utf-8', method='xml')
+        outfile=open(new_file, "w")
+        outfile.write(xml_str)
+        outfile.close()
+        
         number_of_converted=number_of_converted+1
     else:
         number_of_unchanged=number_of_unchanged+1
