@@ -21,6 +21,7 @@ verbose=False
 current_namespace=""
 current_file=""
 error_files=[]
+no_array_conv=False
 
 
 def print_help():
@@ -30,7 +31,8 @@ def print_help():
     print("-d <directory> : convert files in directory")
     print("-r : convert directory recursive, must be combined with -d")
     print("-o <directory> : output directory, place converted files here. (Mandatory)")
-    print("-v verbose")
+    print("-v : verbose")
+    print("--no-array-conversion : don't convert arrays to new format.")
     
 def parse_commandline(argv):
     """Parse commandline"""
@@ -39,9 +41,10 @@ def parse_commandline(argv):
     global output_dir
     global input_path
     global verbose
+    global no_array_conv
     
     try:
-        opts, args = getopt.getopt(argv,"hrvf:d:o:")
+        opts, args = getopt.getopt(argv,"hrvf:d:o:", ["no-array-conversion"])
     except getopt.GetoptError:
         print("Invalid commandline")
         print_help()
@@ -63,6 +66,8 @@ def parse_commandline(argv):
             recursive=True
         elif opt=='-v':
             verbose=True
+        elif opt=='--no-array-conversion':
+            no_array_conv=True
             
     if output_dir=="" or not os.path.isdir(output_dir):
         print("Output directory missing.")
@@ -269,6 +274,9 @@ def convert_create_routines(tree):
     
 def convert_parameter_arrays(tree):
     """Converts all old format arrays in a xml tree"""
+    if no_array_conv:
+        return False
+    
     root = tree.getroot()
     set_current_namespace(root.tag)    
     changed=False
