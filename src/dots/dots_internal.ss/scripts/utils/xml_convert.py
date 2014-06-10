@@ -110,7 +110,7 @@ def to_path(l):
     
 def indent(elem, level=0):
     """ pretty print xml """
-    i = "\n" + level*"  "
+    i = os.linesep + level*"  "
     if len(elem):
         if not elem.text or not elem.text.strip():
             elem.text = i + "  "
@@ -125,7 +125,6 @@ def indent(elem, level=0):
             elem.tail = i
 
 def convert_array(src, dest, member_name):
-    print("Array "+member_name)
     array_elements=src.find(ns('arrayElements'))
     if array_elements.find(ns('arrayElement'))==None:
         #empty array
@@ -343,6 +342,10 @@ def convert_dir(path, out_dir):
                 except:
                     pass 
                 convert_dir(os.path.join(root, d), od)
+                
+                if not os.listdir(od):
+                    #empty folder, remove it again
+                    os.rmdir(od)
         break
     
 def main(argv):
