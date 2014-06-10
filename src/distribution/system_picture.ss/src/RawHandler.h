@@ -63,7 +63,7 @@ namespace SP
     //forward declaration
     class RawStatistics;
 
-    typedef std::function<void(const RawStatistics& statistics)> StatisticsChangedCallback;
+    typedef std::function<void(const RawStatistics& statistics)> StatisticsCallback;
 
     class RawHandler
         : private boost::noncopyable
@@ -92,9 +92,11 @@ namespace SP
         void UpdateRemoteStatistics(const int64_t from, const boost::shared_ptr<char[]>& data, const size_t size);
 
         //will always be posted! data will be a copy
-        void AddStatisticsChangedCallback(const StatisticsChangedCallback& callback);
+        void AddStatisticsChangedCallback(const StatisticsCallback& callback);
+        void AddElectionIdChangedCallback(const StatisticsCallback& callback);
 
         void SetDeadNode(const int64_t id);
+        void SetElectionId(const int64_t id);
     private:
         void NewNode(const std::string& name,
                      const int64_t id,
@@ -109,6 +111,9 @@ namespace SP
 
         /** Post a copy of the data on the ioservice */
         void PostStatisticsChangedCallback();
+
+        /** Post a copy of the data on the ioservice */
+        void PostElectionIdChangedCallback();
 
         //TODO: consider removing the timestamp
         //and replacing it with just the counter and a "last counter", which is checked
@@ -138,11 +143,9 @@ namespace SP
         
         NodeTable m_nodeTable;
         mutable NodeStatisticsMessage m_allStatisticsMessage;
-#if GOOGLE_PROTOBUF_VERSION < 2005000
-        mutable NodeStatisticsMessage m_myStatisticsMessage; 
-#endif
 
-        std::vector<StatisticsChangedCallback> m_statisticsChangedCallbacks;
+        std::vector<StatisticsCallback> m_statisticsChangedCallbacks;
+        std::vector<StatisticsCallback> m_electionIdChangedCallbacks;
 
         std::atomic<bool> m_stopped;
     };

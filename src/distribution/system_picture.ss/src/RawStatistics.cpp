@@ -140,7 +140,19 @@ namespace SP
         {
             return m_message.data_address();
         }
-        
+
+        int64_t ElectionId() const
+        {
+            if (m_message.has_election_id())
+            {
+                return m_message.election_id();
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
         int Size() const
         {
             return m_message.node_info_size();
@@ -227,9 +239,11 @@ namespace SP
     int64_t RawStatistics::NodeTypeId() const {return m_impl->NodeTypeId();}
     const std::string& RawStatistics::ControlAddress() const {return m_impl->ControlAddress();}
     const std::string& RawStatistics::DataAddress() const {return m_impl->DataAddress();}
+
+    int64_t RawStatistics::ElectionId() const {return m_impl->ElectionId();}    
     
     int RawStatistics::Size() const {return m_impl->Size();}
-    
+
     const std::string& RawStatistics::Name(const int index) const {return m_impl->Name(index);}
     int64_t RawStatistics::Id(const int index) const {return m_impl->Id(index);}
     int64_t RawStatistics::NodeTypeId(const int index) const {return m_impl->NodeTypeId(index);}

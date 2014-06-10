@@ -76,6 +76,9 @@ namespace SP
         int64_t NodeTypeId() const;
         const std::string& ControlAddress() const;
         const std::string& DataAddress() const;
+
+        //last election id
+        int64_t ElectionId() const;
         
         int Size() const;
 
@@ -90,7 +93,6 @@ namespace SP
         bool IsDead(const int index) const;
         uint32_t ReceiveCount(const int index) const;
         uint32_t RetransmitCount(const int index) const;
-
         /**
          * Check if we have any remote statistics.
          */

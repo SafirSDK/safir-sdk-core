@@ -12,5 +12,5 @@ enum ElectionAction
 message ElectionMessage
 {
     required ElectionAction action = 1;
-    required uint32 election_id = 2;
+    required sfixed64 election_id = 2;
 }

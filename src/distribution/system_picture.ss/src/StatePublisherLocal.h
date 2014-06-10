@@ -94,7 +94,8 @@ namespace SP
 #endif
                                                     m_publisher.Send(std::move(data), static_cast<uint32_t>(size));
                                                 },
-                                                crcBytes);
+                                                crcBytes,
+                                                false); //ok to send anyones state
         }
         
         Coordinator& m_coordinator;

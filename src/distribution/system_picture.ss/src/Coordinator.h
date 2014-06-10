@@ -86,9 +86,12 @@ namespace SP
 
         //used to send state message
         //extraSpace adds bytes at the end of the buffer, e.g. for adding a crc
+        //if onlyOwnState is true the callback will only be called if we're elected
+        //and have a valid own system state that is ok to send.
         void PerformOnStateMessage(const std::function<void(std::unique_ptr<char []> data, 
                                                             const size_t size)> & fn,
-                                   const size_t extraSpace);
+                                   const size_t extraSpace,
+                                   const bool onlyOwnState);
         
         //new incoming system state from elected coordinator
         void NewSystemState(const int64_t from, 
@@ -99,7 +102,8 @@ namespace SP
     private:
         void StatisticsChanged(const RawStatistics& statistics);
         
-        void UpdateMyState();
+        //returns true if the state is okay to publish
+        bool UpdateMyState();
 
         void StartElection();
         void ElectionTimeout();
@@ -127,7 +131,7 @@ namespace SP
 
         std::atomic<int64_t> m_elected;
         boost::asio::steady_timer m_electionTimer;
-        uint32_t m_currentElectionId = 0;
+        int64_t m_currentElectionId = 0;
 
         boost::asio::steady_timer m_sendMessageTimer;
         RawHandler& m_rawHandler;

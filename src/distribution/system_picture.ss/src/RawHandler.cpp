@@ -288,7 +288,6 @@ namespace SP
     {
         m_strand.dispatch([this,fn,extraSpace]
         {
-#if GOOGLE_PROTOBUF_VERSION >= 2005000
             //With newer protobuf (>= 2.5.0) we can be clever
             //we just get the remote statistics out of the way before serializing a 
             //a "my statistics" message, and afterwards we put them back
@@ -309,23 +308,9 @@ namespace SP
             }
 
             const size_t size = m_allStatisticsMessage.ByteSize() + extraSpace;
-#else
-            //On older protobuf we have to make a complete copy of the message
-            //and then remove the parts we dont want...
-
-            m_myStatisticsMessage = m_allStatisticsMessage;
-
-            for (int i = 0; i < m_myStatisticsMessage.node_info_size(); ++i)
-            {
-                m_myStatisticsMessage.mutable_node_info(i)->clear_remote_statistics();
-            }
-
-            const size_t size = m_myStatisticsMessage.ByteSize() + extraSpace;
-#endif
 
             boost::shared_ptr<char[]> data = boost::make_shared<char[]>(size);
 
-#if GOOGLE_PROTOBUF_VERSION >= 2005000
             m_allStatisticsMessage.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
         
             for (size_t i = 0; i < remotes.size(); ++i)
@@ -333,9 +318,6 @@ namespace SP
                 m_allStatisticsMessage.mutable_node_info(static_cast<int>(i))->
                     set_allocated_remote_statistics(remotes[i]);
             }
-#else
-            m_myStatisticsMessage.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
-#endif
 
             //call the function object with the produced data.
             fn (data, size);
@@ -390,11 +372,19 @@ namespace SP
         });
     }
 
-    void RawHandler::AddStatisticsChangedCallback(const StatisticsChangedCallback& callback)
+    void RawHandler::AddStatisticsChangedCallback(const StatisticsCallback& callback)
     {
         m_strand.dispatch([this, callback]
                           {
                               m_statisticsChangedCallbacks.push_back(callback);
+                          });
+    }
+
+    void RawHandler::AddElectionIdChangedCallback(const StatisticsCallback& callback)
+    {
+        m_strand.dispatch([this, callback]
+                          {
+                              m_electionIdChangedCallbacks.push_back(callback);
                           });
     }
     
@@ -402,7 +392,17 @@ namespace SP
     void RawHandler::PostStatisticsChangedCallback()
     {
         const auto copy = RawStatisticsCreator::Create(Safir::make_unique<NodeStatisticsMessage>(m_allStatisticsMessage));
-        for (auto cb : m_statisticsChangedCallbacks)
+        for (const auto& cb : m_statisticsChangedCallbacks)
+        {
+            m_ioService.post([cb,copy]{cb(copy);});
+        }
+    }
+
+    //must be called in strand
+    void RawHandler::PostElectionIdChangedCallback()
+    {
+        const auto copy = RawStatisticsCreator::Create(Safir::make_unique<NodeStatisticsMessage>(m_allStatisticsMessage));
+        for (const auto& cb : m_electionIdChangedCallbacks)
         {
             m_ioService.post([cb,copy]{cb(copy);});
         }
@@ -419,6 +419,15 @@ namespace SP
                                   throw std::logic_error("SetDeadNode on unknown node");
                               }
                               findIt->second.nodeInfo->set_is_dead(true);
+                          });
+    }
+
+    void RawHandler::SetElectionId(const int64_t id)
+    {
+        m_strand.dispatch([this, id]
+                          {
+                              m_allStatisticsMessage.set_election_id(id);
+                              PostElectionIdChangedCallback();
                           });
     }
 

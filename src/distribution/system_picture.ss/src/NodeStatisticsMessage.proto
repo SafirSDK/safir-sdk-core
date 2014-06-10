@@ -24,6 +24,7 @@ message NodeStatisticsMessage
     
     //TODO: how do we stop this message from growing infinitely when there are lots of
     //nodes that have started and stopped?
+
     
     //information about myself
     required string name = 1;
@@ -31,8 +32,11 @@ message NodeStatisticsMessage
     required sfixed64 node_type_id = 3; //node type id of the node
     required string control_address = 4; //The address of the node's control socket
     required string data_address = 5; //The address of the node's data socket
+
+    //which, if any, election_id was sent out by the elected coordinator in his VICTORY message    
+    optional sfixed64 election_id = 6;
     
-    repeated NodeInfo node_info = 6;
+    repeated NodeInfo node_info = 7;
 
 }
 

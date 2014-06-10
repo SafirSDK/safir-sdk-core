@@ -69,15 +69,23 @@ namespace SP
                                                                   {
                                                                       Publish(m_allNodeTypes);
                                                                   }));
-            
+
+            rawHandler.AddElectionIdChangedCallback(m_strand.wrap([this](const RawStatistics&)
+                                                                  {
+                                                                      Publish(m_allNodeTypes);
+                                                                  }));
         }
 
         void Stop()
         {
-            m_timer.cancel();
+            m_strand.wrap([this]
+                          {
+                              m_timer.cancel();
+                          });
         }
 
     private:
+        //must be called in strand
         void SchedulePublishTimer(const boost::chrono::steady_clock::duration& delay,
                                   const std::set<int64_t>& toNodeTypes)
         {

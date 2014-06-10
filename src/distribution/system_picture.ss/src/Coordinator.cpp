@@ -120,9 +120,9 @@ namespace
                                                                }));
 
         communication.SetDataReceiver([this](const int64_t from, 
-                                              const int64_t nodeTypeId, 
-                                              const boost::shared_ptr<char[]>& data, 
-                                              const size_t size)
+                                             const int64_t nodeTypeId, 
+                                             const boost::shared_ptr<char[]>& data, 
+                                             const size_t size)
                                        {
                                            GotData(from, nodeTypeId, data, size);
                                        },
@@ -159,19 +159,46 @@ namespace
     }
 
     //must be called in strand
-    void Coordinator::UpdateMyState()
+    bool Coordinator::UpdateMyState()
     {
         if (!IsElected())
         {
-            return;
+            return false;
+        }
+        
+        if (!m_lastStatistics.Valid())
+        {
+            lllog(8) << "SP: No valid raw data yet, not updating my state" << std::endl;
+            return false;
         }
 
-        //currently we just copy the raw data... a bit stupid...
+        //Check that all other nodes raw data is from this election
+        for (int i = 0; i < m_lastStatistics.Size(); ++i)
+        {
+            if (m_lastStatistics.IsDead(i))
+            {
+                //that node is dead, we dont need any information from it.
+                continue;
+            }
 
-        //lllog(6) << "SP: Collating" << std::endl;
+            if (!m_lastStatistics.HasRemoteStatistics(i))
+            {
+                lllog(6) << "SP: No remote RAW data received from node " 
+                          << m_lastStatistics.Id(i) << ", not updating my state" << std::endl;
+                return false;
+            }
 
+            const auto remote = m_lastStatistics.RemoteStatistics(i);
+            if (remote.ElectionId() != m_currentElectionId)
+            {
+                lllog(6) << "SP: Remote RAW data from node "
+                          << m_lastStatistics.Id(i) << " has wrong election id, not updating my state." << std::endl;
+                return false;
+            }
+        }
 
         m_stateMessage.set_elected_id(m_id);
+        m_stateMessage.set_election_id(m_currentElectionId);
 
         m_stateMessage.clear_node_info(); //don't care about efficiency...
 
@@ -182,6 +209,11 @@ namespace
         node->set_node_type_id(m_nodeTypeId);
         node->set_control_address(m_controlAddress);
         node->set_data_address(m_dataAddress);
+
+        //This code will ignore the case where we for some reason have a RAW from another node
+        //that says that we are dead. If that is the case it will stop sending data to us and 
+        //we will mark him as dead eventually.
+        //He should also start a new election, and the thing should resolve itself.
 
         if (m_lastStatistics.Valid())
         {
@@ -224,17 +256,30 @@ namespace
                 }
             }
         }
+
+        return true;
     }
     
     void Coordinator::PerformOnStateMessage(const std::function<void(std::unique_ptr<char []> data, 
                                                                      const size_t size)> & fn,
-                                            const size_t extraSpace)
+                                            const size_t extraSpace,
+                                            const bool onlyOwnState)
     {
-        m_strand.dispatch([this,fn,extraSpace]
+        m_strand.dispatch([this,fn,extraSpace,onlyOwnState]
                           {
-                              if (IsElected())
+                              if (onlyOwnState)
                               {
-                                  UpdateMyState();
+                                  if (!IsElected())
+                                  {
+                                      return;
+                                  }
+                                  
+                                  const bool okToSend = UpdateMyState();
+
+                                  if (!okToSend)
+                                  {
+                                      return;
+                                  }
                               }
 
                               const size_t size = m_stateMessage.ByteSize() + extraSpace;
@@ -242,6 +287,7 @@ namespace
                               m_stateMessage.SerializeWithCachedSizesToArray
                                   (reinterpret_cast<google::protobuf::uint8*>(data.get()));
                               fn(std::move(data), size);
+                              
                           });
     }
 
@@ -318,7 +364,7 @@ namespace
             
             
             lllog(4) << "SP: Starting election" << std::endl;
-            ++m_currentElectionId;
+            m_currentElectionId = LlufId_GenerateRandom64();
             
             m_pendingInquiries = m_nonLightNodeTypes;
             SendPendingElectionMessages();
@@ -388,7 +434,9 @@ namespace
                         lllog(4) << "SP: New controller elected: " << from << std::endl;
                         //graciously accept their victory
                         m_elected = from;
-                        
+
+                        m_rawHandler.SetElectionId(message.election_id());
+
                         //cancel any ongoing elections
                         m_electionTimer.cancel();
                         m_pendingInquiries.clear();

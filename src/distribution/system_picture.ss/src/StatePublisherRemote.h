@@ -75,14 +75,6 @@ namespace SP
                 throw std::logic_error("Unexpected error in StatePublisherRemote::Publish");
             }
 
-            //Only publish if we're elected
-            if (!m_coordinator.IsElected())
-            {
-                return;
-            }
-
-            lllog(8) << "Publishing state statistics to other nodes" << std::endl;
-            
 #ifdef CHECK_CRC
             const int crcBytes = sizeof(int);
 #else
@@ -91,6 +83,8 @@ namespace SP
             
             m_coordinator.PerformOnStateMessage([this,crcBytes](const boost::shared_ptr<char[]>& data, const size_t size)
             {
+                lllog(8) << "Publishing state statistics to other nodes" << std::endl;
+            
 #ifdef CHECK_CRC
                 const int crc = GetCrc32(data.get(), size - crcBytes);
                 memcpy(data.get() + size - crcBytes, &crc, sizeof(int));
@@ -107,7 +101,8 @@ namespace SP
                     }
                 }
             },
-                                                 crcBytes);
+                                                crcBytes,
+                                                true); //we can only send own states
         }
 
         Com::Communication& m_communication;
