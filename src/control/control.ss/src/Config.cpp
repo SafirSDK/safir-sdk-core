@@ -264,6 +264,17 @@ namespace Control
                                            unwantedTypes));
 
         }
+
+        // Check that there are no duplicated ip addresses
+        std::set<std::string> ipAddr;
+        for (const auto& i : m_nodeTypes)
+        {
+            if (!ipAddr.insert(i.multicastAddressControl).second ||
+                !ipAddr.insert(i.multicastAddressData).second)
+            {
+                throw std::logic_error("Duplicated ip addresses!");
+            }
+        }
     }
 
     std::vector<NodeType> Config::GetNodeTypes() const

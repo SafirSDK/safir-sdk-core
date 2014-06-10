@@ -1,0 +1,53 @@
+<class xmlns="urn:safir-dots-unit">
+  <summary>Contains paramaters for all nodes in the system.</summary>
+  <name>Safir.Dob.NodeParameters</name>
+  <baseClass>Safir.Dob.Parametrization</baseClass>
+  <parameters>
+
+    <parameter>
+      <summary>Defines the different node types in the system.</summary>
+      <name>NodeTypes</name>
+      <type>Safir.Dob.NodeType</type>
+      <arrayElements>
+
+        <arrayElement>
+          <Safir.Dob.NodeType type="Safir.Dob.NodeType">
+            <Name>Server</Name>
+            <IsLight>False</IsLight>
+            <TalksTo></TalksTo>
+            <MulticastAddressControl>192.0.0.1:9500</MulticastAddressControl>
+            <MulticastAddressData>192.0.0.1:9501</MulticastAddressData>
+            <HeartbeatInterval>1.0</HeartbeatInterval>
+            <MaxLostHeartbeats>5</MaxLostHeartbeats>
+            <SlidingWindowsSize>10</SlidingWindowsSize>
+            <RetryTimeout>0.2</RetryTimeout>
+            <WantedTypes>
+              <String>.*</String> <!-- Must be all types for non IsLight node -->
+            </WantedTypes>
+            <UnwantedTypes></UnwantedTypes>
+          </Safir.Dob.NodeType>
+        </arrayElement>
+
+        <arrayElement>
+          <Safir.Dob.NodeType type="Safir.Dob.NodeType">
+            <Name>AnotherServer</Name>
+            <IsLight>False</IsLight>
+            <TalksTo></TalksTo>
+            <MulticastAddressControl>192.0.0.1:9500</MulticastAddressControl>
+            <MulticastAddressData>192.0.0.1:8000</MulticastAddressData>
+            <HeartbeatInterval>1.0</HeartbeatInterval>
+            <MaxLostHeartbeats>5</MaxLostHeartbeats>
+            <SlidingWindowsSize>10</SlidingWindowsSize>
+            <RetryTimeout>0.2</RetryTimeout>
+            <WantedTypes>
+              <String>.*</String> <!-- Must be all types for non IsLight node -->
+            </WantedTypes>
+            <UnwantedTypes></UnwantedTypes>
+          </Safir.Dob.NodeType>
+        </arrayElement>
+
+      </arrayElements>
+    </parameter>
+
+  </parameters>
+</class>
