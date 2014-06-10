@@ -165,5 +165,13 @@ boost::once_flag RandomGenerator::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
 
 boost::int64_t LlufId_GenerateRandom64()
 {
-    return RandomGenerator::Instance().Generate();
+    //0, 1 and -1 are "reserved" so we loop until we have a really random number...
+    boost::int64_t result;
+    do
+    {
+       result = RandomGenerator::Instance().Generate();
+    }
+    while (result == 0 || result == -1 || result == 1);
+
+    return result;
 }
