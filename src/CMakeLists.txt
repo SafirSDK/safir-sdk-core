@@ -211,6 +211,7 @@ endif()
 
 #We need to collect all library paths so that tests on windows (where there is no rpath equivalent)
 #and java and dotnet tests on both platforms can find libraries.
+#we also collect paths to make header check test linking work
 if (MSVC)
   set_property(GLOBAL PROPERTY SAFIR_LIBRARY_PATH "$ENV{PATH}")
 else()
@@ -240,10 +241,8 @@ function(add_library NAME)
 
   if (NOT SAFIR_LIBRARY_PATH)
     set_property(GLOBAL PROPERTY SAFIR_LIBRARY_PATH "${dir_to_add}")
-    #message("SAFIR_LIBRARY_PATH set to ${dir_to_add}")
   else()
-    set_property(GLOBAL PROPERTY SAFIR_LIBRARY_PATH "${SAFIR_LIBRARY_PATH}${PATH_SEPARATOR}${dir_to_add}")
-    #message("SAFIR_LIBRARY_PATH set to ${SAFIR_LIBRARY_PATH}${PATH_SEPARATOR}${dir_to_add}")
+    set_property(GLOBAL PROPERTY SAFIR_LIBRARY_PATH "${dir_to_add}${PATH_SEPARATOR}${SAFIR_LIBRARY_PATH}")
   endif()
 
   if (WIN32)
@@ -292,7 +291,6 @@ function (SET_SAFIR_TEST_PROPERTIES)
   #Add the library path to the environment
   get_property(SAFIR_LIBRARY_PATH GLOBAL PROPERTY SAFIR_LIBRARY_PATH)
   if (MSVC)
-    #TODO: wtf?
     STRING(REPLACE "\;" ";" SAFIR_LIBRARY_PATH "${SAFIR_LIBRARY_PATH}")
     STRING(REPLACE ";" "\\;" SAFIR_LIBRARY_PATH "${SAFIR_LIBRARY_PATH}")
     set(PATH_ENVIRONMENT "PATH=${SAFIR_LIBRARY_PATH}")

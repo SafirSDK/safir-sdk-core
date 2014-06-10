@@ -1,7 +1,7 @@
 find_package(Doxygen)
 
 if (NOT DOXYGEN_FOUND)
-  message(WARNING "Failed to find the Doxygen tools, will not build Doxygen documentation")
+  message(STATUS "Failed to find the Doxygen tools, will not build Doxygen documentation")
   return()
 endif()
 
@@ -13,9 +13,11 @@ add_custom_target(Doxygen ALL
   COMMENT "Generating API documentation with Doxygen" VERBATIM
   )
 
+set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES html)
+
+add_dependencies(Doxygen dots_generated-Safir-cpp dots_generated-olib-cpp dots_generated-swre_library-cpp dots_generated-foreach-cpp dots_generated-douf_time-cpp)
+
 INSTALL(DIRECTORY html
   DESTINATION share/doc/safir_sdk_core)
 
-set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES html)
-
-#TODO: can we get the dou-headers in here as well?
+#TODO: do proper depependency handling, currently this is rebuilt every time, which is annoying
