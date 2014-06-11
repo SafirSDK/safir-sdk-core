@@ -391,6 +391,7 @@ namespace ToolSupport
             switch(memberType)
             {
             case Int32MemberType:
+            case EnumerationMemberType: //TODO: correct?
             {
                 result.key.int32=boost::lexical_cast<DotsC_Int32>(val);
             }
@@ -454,6 +455,43 @@ namespace ToolSupport
         }
 
         return true;
+    }
+
+    bool EqualKey(const ValueDefinition& lhs, const ValueDefinition& rhs, DotsC_MemberType keyType)
+    {
+        switch(keyType)
+        {
+        case Int32MemberType:
+            return lhs.key.int32==rhs.key.int32;
+        case Int64MemberType:
+            return lhs.key.int64==rhs.key.int64;
+        case EntityIdMemberType:
+            return lhs.key.int64==rhs.key.int64 && lhs.key.hash==rhs.key.hash;
+        case TypeIdMemberType:
+            return lhs.key.int64==rhs.key.int64;
+        case InstanceIdMemberType:
+        case ChannelIdMemberType:
+        case HandlerIdMemberType:
+            return lhs.key.hash==rhs.key.hash;
+        case StringMemberType:
+            return lhs.key.str==rhs.key.str;
+        case EnumerationMemberType:
+            return lhs.key.str==rhs.key.str; //enums will also have
+        default: //not valid key type, could not happen here
+            return false;
+        }
+    }
+
+    void CheckDictionaryKeyDuplicates(const ParameterDescriptionBasic* pd)
+    {
+        for (ParameterValues::const_iterator it=pd->values.begin(); it!=pd->values.end(); ++it)
+        {
+            size_t count=std::count_if(it+1, pd->values.end(), boost::bind(EqualKey, _1, *it, pd->GetKeyType()));
+            if (count>0)
+            {
+                std::cout<<"TODO: DUPLICATE "<<it->key.str<<std::endl;
+            }
+        }
     }
 
     template <class Key, class Val>
@@ -1226,32 +1264,37 @@ namespace ToolSupport
             }
 
             //if dictionary and key is enum we must check the enum value too
-            if (pd->GetCollectionType()==DictionaryCollectionType && pd->GetKeyType()==EnumerationMemberType)
+            if (pd->GetCollectionType()==DictionaryCollectionType)
             {
-                //Verify that enum parameter key is valid according to the specified enum type.
-                const EnumDescription* ed=state.repository->GetEnum(pd->GetKeyTypeId());
-                if (!ed)
+                if (pd->GetKeyType()==EnumerationMemberType)
                 {
-                    //Enum type does not exist
-                    std::string file=parIt->first.substr(0, parIt->first.rfind(".")+1)+"dou";
-                    std::ostringstream os;
-                    os<<"The keyType specified for the dictionary paramaeter '"<<pd->typeName<<"' does not exist";
-                    throw ParseError("Key type does not exist", os.str(), file, 194);
-                }
-
-                //Check value
-                for (int index=0; index<pd->GetNumberOfValues(); ++index)
-                {
-                    ValueDefinition& val=pd->MutableValue(static_cast<size_t>(index));
-                    val.key.int32=ed->GetIndexOfValue(val.key.str);
-                    if (val.key.int32<0)
+                    //Verify that enum parameter key is valid according to the specified enum type.
+                    const EnumDescription* ed=state.repository->GetEnum(pd->GetKeyTypeId());
+                    if (!ed)
                     {
+                        //Enum type does not exist
                         std::string file=parIt->first.substr(0, parIt->first.rfind(".")+1)+"dou";
                         std::ostringstream os;
-                        os<<"The parameter "<<pd->GetName()<<" has an invalid key '"<<val.key.str<<"'. Expected to be an enum value of type "<<ed->GetName();
-                        throw ParseError("Invalid key", os.str(), file, 196);
+                        os<<"The keyType specified for the dictionary paramaeter '"<<pd->typeName<<"' does not exist";
+                        throw ParseError("Key type does not exist", os.str(), file, 194);
+                    }
+
+                    //Check value
+                    for (int index=0; index<pd->GetNumberOfValues(); ++index)
+                    {
+                        ValueDefinition& val=pd->MutableValue(static_cast<size_t>(index));
+                        val.key.int32=ed->GetIndexOfValue(val.key.str);
+                        if (val.key.int32<0)
+                        {
+                            std::string file=parIt->first.substr(0, parIt->first.rfind(".")+1)+"dou";
+                            std::ostringstream os;
+                            os<<"The parameter "<<pd->GetName()<<" has an invalid key '"<<val.key.str<<"'. Expected to be an enum value of type "<<ed->GetName();
+                            throw ParseError("Invalid key", os.str(), file, 196);
+                        }
                     }
                 }
+
+                CheckDictionaryKeyDuplicates(pd);
             }
         }
     }

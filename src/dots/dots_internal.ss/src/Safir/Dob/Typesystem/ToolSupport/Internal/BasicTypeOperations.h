@@ -439,17 +439,6 @@ namespace BasicTypeOperations
         static const std::string& ConfigurationErrorExceptionName() {static const std::string s("Safir.Dob.Typesystem.ConfigurationErrorException"); return s;}
     };
 
-    template <class ParameterDescriptionT, class KeyT>
-    int GetDictionaryIndexFromKey(const ParameterDescriptionT* pd, DotsC_Int32 key)
-    {
-        for (int i=0; i<pd->GetNumberOfValues(); ++i)
-        {
-
-
-        }
-        return -1;
-    }
-
     /**
      * Helper class for getting index corresponiding to a specific key. Only applicable on dictionaries.
      */
