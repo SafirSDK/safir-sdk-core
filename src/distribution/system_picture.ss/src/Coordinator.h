@@ -100,8 +100,6 @@ namespace SP
 
         void Stop();
     private:
-        void StatisticsChanged(const RawStatistics& statistics);
-        
         //returns true if the state is okay to publish
         bool UpdateMyState();
 

@@ -17,10 +17,10 @@ message SystemStateMessage
     }
 
     //Id of the elected coordinator
-    optional sfixed64 elected_id = 1;
+    required sfixed64 elected_id = 1;
 
     //which, if any, election_id was sent out by the elected coordinator in his VICTORY message    
-    optional sfixed64 election_id = 2;
+    required sfixed64 election_id = 2;
         
     repeated NodeInfo node_info = 3;
 }

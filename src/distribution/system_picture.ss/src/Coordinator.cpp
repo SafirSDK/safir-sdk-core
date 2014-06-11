@@ -136,11 +136,29 @@ namespace
         , m_sendMessageTimer(ioService)
         , m_rawHandler(rawHandler)
     {
-        rawHandler.AddStatisticsChangedCallback(m_strand.wrap([this](const RawStatistics& statistics)
-                                                               {
-                                                                   StatisticsChanged(statistics);
-                                                               }));
+        m_stateMessage.set_elected_id(0); //our state message is not valid until we have a real id set.
 
+        rawHandler.AddNodesChangedCallback(m_strand.wrap([this](const RawStatistics& statistics)
+        {
+            lllog(9) << "SP: Coordinator got new nodes change callback" << std::endl;
+            m_lastStatistics = statistics;
+            if (IsElected())
+            {
+                UpdateMyState();
+            }
+            StartElection();
+        }));
+
+        rawHandler.AddRawChangedCallback(m_strand.wrap([this](const RawStatistics& statistics)
+        {
+            lllog(9) << "SP: Coordinator got new raw data" << std::endl;
+            m_lastStatistics = statistics;
+            if (IsElected())
+            {
+                UpdateMyState();
+            }
+        }));
+        
         communication.SetDataReceiver([this](const int64_t from, 
                                              const int64_t nodeTypeId, 
                                              const boost::shared_ptr<char[]>& data, 
@@ -165,19 +183,11 @@ namespace
 
     void Coordinator::Stop()
     {
-        m_electionTimer.cancel();
-        m_sendMessageTimer.cancel();
-    }
-
-    //must be called in strand
-    void Coordinator::StatisticsChanged(const RawStatistics& statistics)
-    {
-        m_lastStatistics = statistics;
-        if (IsElected())
-        {
-            UpdateMyState();
-        }
-        StartElection();
+        m_strand.dispatch([this]
+                          {
+                              m_electionTimer.cancel();
+                              m_sendMessageTimer.cancel();
+                          });
     }
 
     //must be called in strand
@@ -214,7 +224,7 @@ namespace
             if (remote.ElectionId() != m_currentElectionId)
             {
                 lllog(6) << "SP: Remote RAW data from node "
-                          << m_lastStatistics.Id(i) << " has wrong election id, not updating my state." << std::endl;
+                         << m_lastStatistics.Id(i) << " has wrong election id (" << remote.ElectionId() << "), not updating my state." << std::endl;
                 return false;
             }
         }
@@ -231,7 +241,8 @@ namespace
         node->set_node_type_id(m_nodeTypeId);
         node->set_control_address(m_controlAddress);
         node->set_data_address(m_dataAddress);
-
+        node->set_is_dead(false);
+                
         //This code will ignore the case where we for some reason have a RAW from another node
         //that says that we are dead. If that is the case it will stop sending data to us and 
         //we will mark him as dead eventually.
@@ -267,10 +278,7 @@ namespace
                 node->set_control_address(m_lastStatistics.ControlAddress(i));
                 node->set_data_address(m_lastStatistics.DataAddress(i));
 
-                if (justKilled || m_lastStatistics.IsDead(i))
-                {
-                    node->set_is_dead(true);
-                }
+                node->set_is_dead(justKilled || m_lastStatistics.IsDead(i));
             }
         }
 
@@ -299,6 +307,11 @@ namespace
                                   }
                               }
 
+                              if (m_stateMessage.elected_id() == 0)
+                              {
+                                  return;
+                              }
+                              
                               const size_t size = m_stateMessage.ByteSize() + extraSpace;
                               auto data = std::unique_ptr<char[]>(new char[size]);
                               m_stateMessage.SerializeWithCachedSizesToArray

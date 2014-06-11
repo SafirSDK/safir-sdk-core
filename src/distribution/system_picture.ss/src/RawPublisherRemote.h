@@ -65,23 +65,24 @@ namespace SP
         {
             SchedulePublishTimer(boost::chrono::seconds(30), m_allNodeTypes);
 
-            rawHandler.AddStatisticsChangedCallback(m_strand.wrap([this](const RawStatistics&)
-                                                                  {
-                                                                      Publish(m_allNodeTypes);
-                                                                  }));
+            rawHandler.AddNodesChangedCallback(m_strand.wrap([this](const RawStatistics&)
+                                                             {
+                                                                 Publish(m_allNodeTypes);
+                                                             }));
 
             rawHandler.AddElectionIdChangedCallback(m_strand.wrap([this](const RawStatistics&)
                                                                   {
                                                                       Publish(m_allNodeTypes);
                                                                   }));
+            
         }
 
         void Stop()
         {
-            m_strand.wrap([this]
-                          {
-                              m_timer.cancel();
-                          });
+            m_strand.dispatch([this]
+                              {
+                                  m_timer.cancel();
+                              });
         }
 
     private:

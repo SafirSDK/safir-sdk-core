@@ -91,9 +91,29 @@ namespace SP
         
         void UpdateRemoteStatistics(const int64_t from, const boost::shared_ptr<char[]>& data, const size_t size);
 
-        //will always be posted! data will be a copy
-        void AddStatisticsChangedCallback(const StatisticsCallback& callback);
+
+        /** 
+         * Add a callback that will be called whenever a new node is discovered,
+         * or is declared as dead.
+         *
+         * Will always be posted! data will be a copy
+         */
+        void AddNodesChangedCallback(const StatisticsCallback& callback);
+
+        /** 
+         * Add a callback that will be called whenever a new election id is set.
+         *
+         * Will always be posted! data will be a copy
+         */
         void AddElectionIdChangedCallback(const StatisticsCallback& callback);
+
+        /** 
+         * Add a callback that will be called whenever the raw data is changed
+         * as a result of receiving new raw data from other node.
+         *
+         * Will always be posted! data will be a copy
+         */
+        void AddRawChangedCallback(const StatisticsCallback& callback);
 
         void SetDeadNode(const int64_t id);
         void SetElectionId(const int64_t id);
@@ -110,10 +130,13 @@ namespace SP
         void CheckDeadNodes(const boost::system::error_code& error);
 
         /** Post a copy of the data on the ioservice */
-        void PostStatisticsChangedCallback();
+        void PostNodesChangedCallback();
 
         /** Post a copy of the data on the ioservice */
         void PostElectionIdChangedCallback();
+
+        /** Post a copy of the data on the ioservice */
+        void PostRawChangedCallback();
 
         //TODO: consider removing the timestamp
         //and replacing it with just the counter and a "last counter", which is checked
@@ -139,13 +162,13 @@ namespace SP
         mutable boost::asio::strand m_strand;
 
         Safir::Utilities::Internal::AsioPeriodicTimer m_checkDeadNodesTimer;
-        Safir::Utilities::Internal::AsioPeriodicTimer m_postStatisticsChangedTimer;
         
         NodeTable m_nodeTable;
         mutable NodeStatisticsMessage m_allStatisticsMessage;
 
-        std::vector<StatisticsCallback> m_statisticsChangedCallbacks;
+        std::vector<StatisticsCallback> m_nodesChangedCallbacks;
         std::vector<StatisticsCallback> m_electionIdChangedCallbacks;
+        std::vector<StatisticsCallback> m_rawChangedCallbacks;
 
         std::atomic<bool> m_stopped;
     };

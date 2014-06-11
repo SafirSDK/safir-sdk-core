@@ -83,7 +83,7 @@ namespace SP
             
             m_coordinator.PerformOnStateMessage([this,crcBytes](const boost::shared_ptr<char[]>& data, const size_t size)
             {
-                lllog(8) << "Publishing state statistics to other nodes" << std::endl;
+                lllog(8) << "Publishing system state to other nodes" << std::endl;
             
 #ifdef CHECK_CRC
                 const int crc = GetCrc32(data.get(), size - crcBytes);

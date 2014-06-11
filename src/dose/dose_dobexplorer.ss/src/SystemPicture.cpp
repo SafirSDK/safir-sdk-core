@@ -171,6 +171,17 @@ void SystemPicture::UpdateSystemTable(const Safir::Dob::Internal::SP::SystemStat
                 }
             }
         }
+        else if (statistics.IsDead(it->second))
+        {
+            if (systemTable->item(row, COLUMN_NAME)->background() != QColor(200,200,200))
+            {
+                for (int column = 0; column < NUM_COLUMNS; ++column)
+                {
+                    systemTable->item(row, column)->setBackground(QColor(200,200,200));
+                    systemTable->item(row, column)->setToolTip("Node is dead");
+                }
+            }
+        }
         else
         {
             if (systemTable->item(row, COLUMN_NAME)->background() != Qt::transparent)

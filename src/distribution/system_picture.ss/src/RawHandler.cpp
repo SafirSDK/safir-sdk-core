@@ -74,23 +74,6 @@ namespace SP
                                                   
                                                   CheckDeadNodes(error);
                                               }))
-        , m_postStatisticsChangedTimer(ioService,
-                                       boost::chrono::milliseconds(1000),
-                                       m_strand.wrap([this](const boost::system::error_code& error)
-                                                     {
-                                                         if (m_stopped)
-                                                         {
-                                                             return;
-                                                         }
-                                                         
-                                                         if (error)
-                                                         {
-                                                             SEND_SYSTEM_LOG(Alert,
-                                                                             << "Unexpected error in postStatisticsChangedTimer: " << error);
-                                                             throw std::logic_error("Unexpected error in postStatisticsChangedTimer");
-                                                         }
-                                                         PostStatisticsChangedCallback();
-                                                     }))
         , m_stopped(false)
     {
         //set up some info about ourselves in our message
@@ -119,7 +102,6 @@ namespace SP
                                                                  Retransmit(id);
                                                              }));
         m_checkDeadNodesTimer.Start();
-        //m_postStatisticsChangedTimer->Start();
     }
 
     void RawHandler::Stop()
@@ -130,7 +112,6 @@ namespace SP
             m_strand.dispatch([this]
                               {
                                   m_checkDeadNodesTimer.Stop();
-                                  m_postStatisticsChangedTimer.Stop();
                               });
         }
     }
@@ -182,7 +163,8 @@ namespace SP
         
         m_communication.IncludeNode(id);
 
-        PostStatisticsChangedCallback();
+        PostNodesChangedCallback();
+        PostRawChangedCallback();
     }
 
     //Must be called in strand!
@@ -279,7 +261,8 @@ namespace SP
 
         if (somethingChanged)
         {
-            PostStatisticsChangedCallback();
+            PostNodesChangedCallback();
+            PostRawChangedCallback();
         }
     }
 
@@ -361,24 +344,27 @@ namespace SP
                 lllog(8) << "SP: UpdateRemoteStatistics from dead node, ignoring." << std::endl;
                 return;
             }
-            
+
             const bool parseResult = node.nodeInfo->mutable_remote_statistics()->ParseFromArray(data.get(),static_cast<int>(size));
+
             if (!parseResult)
             {
                 SEND_SYSTEM_LOG(Error,
                                 << "Failed to parse remote data from " 
                                 << node.nodeInfo->name().c_str() 
                                 << " (id = " << from << ", size = " << size << ")");
-                node.nodeInfo->clear_remote_statistics();
+                throw std::logic_error("Failed to parse remote data!");
             }
+
+            PostRawChangedCallback();
         });
     }
 
-    void RawHandler::AddStatisticsChangedCallback(const StatisticsCallback& callback)
+    void RawHandler::AddNodesChangedCallback(const StatisticsCallback& callback)
     {
         m_strand.dispatch([this, callback]
                           {
-                              m_statisticsChangedCallbacks.push_back(callback);
+                              m_nodesChangedCallbacks.push_back(callback);
                           });
     }
 
@@ -389,12 +375,20 @@ namespace SP
                               m_electionIdChangedCallbacks.push_back(callback);
                           });
     }
+
+    void RawHandler::AddRawChangedCallback(const StatisticsCallback& callback)
+    {
+        m_strand.dispatch([this, callback]
+                          {
+                              m_rawChangedCallbacks.push_back(callback);
+                          });
+    }
     
     //must be called in strand
-    void RawHandler::PostStatisticsChangedCallback()
+    void RawHandler::PostNodesChangedCallback()
     {
         const auto copy = RawStatisticsCreator::Create(Safir::make_unique<NodeStatisticsMessage>(m_allStatisticsMessage));
-        for (const auto& cb : m_statisticsChangedCallbacks)
+        for (const auto& cb : m_nodesChangedCallbacks)
         {
             m_ioService.post([cb,copy]{cb(copy);});
         }
@@ -405,6 +399,16 @@ namespace SP
     {
         const auto copy = RawStatisticsCreator::Create(Safir::make_unique<NodeStatisticsMessage>(m_allStatisticsMessage));
         for (const auto& cb : m_electionIdChangedCallbacks)
+        {
+            m_ioService.post([cb,copy]{cb(copy);});
+        }
+    }
+
+    //must be called in strand
+    void RawHandler::PostRawChangedCallback()
+    {
+        const auto copy = RawStatisticsCreator::Create(Safir::make_unique<NodeStatisticsMessage>(m_allStatisticsMessage));
+        for (const auto& cb : m_rawChangedCallbacks)
         {
             m_ioService.post([cb,copy]{cb(copy);});
         }
@@ -428,6 +432,7 @@ namespace SP
     {
         m_strand.dispatch([this, id]
                           {
+                              lllog(7) << "SP: Election Id " << id << " set in RawHandler, will trigger sending of raw to other nodes" << std::endl;
                               m_allStatisticsMessage.set_election_id(id);
                               PostElectionIdChangedCallback();
                           });
