@@ -70,7 +70,7 @@ int main(int argc, char* argv[])
         CHECK(nodeTypes[1].isLight == true);
         CHECK(nodeTypes[1].talksTo.size() == 1);
         CHECK(nodeTypes[1].talksTo.find("Server") != nodeTypes[1].talksTo.end());
-        CHECK(nodeTypes[1].multicastAddressControl == "192.0.0.15:9500");
+        CHECK(nodeTypes[1].multicastAddressControl == "");
         CHECK(nodeTypes[1].multicastAddressData == "192.0.0.15:9501");
         CHECK(nodeTypes[1].heartbeatInterval == 5000);
         CHECK(nodeTypes[1].maxLostHeartbeats == 5);
@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
         CHECK(nodeTypes[2].talksTo.size() == 1);
         CHECK(nodeTypes[2].talksTo.find("Server") != nodeTypes[2].talksTo.end());
         CHECK(nodeTypes[2].multicastAddressControl == "192.0.0.16:9500");
-        CHECK(nodeTypes[2].multicastAddressData == "192.0.0.16:9501");
+        CHECK(nodeTypes[2].multicastAddressData == "");
         CHECK(nodeTypes[2].heartbeatInterval == 30000);
         CHECK(nodeTypes[2].maxLostHeartbeats == 5);
         CHECK(nodeTypes[2].slidingWindowSize == 10);

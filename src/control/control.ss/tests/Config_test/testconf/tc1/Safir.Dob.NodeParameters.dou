@@ -34,7 +34,7 @@
             <TalksTo>
               <String>Server</String>
             </TalksTo>
-            <MulticastAddressControl>192.0.0.15:9500</MulticastAddressControl>
+            <MulticastAddressControl></MulticastAddressControl>
             <MulticastAddressData>192.0.0.15:9501</MulticastAddressData>
             <HeartbeatInterval>5.0</HeartbeatInterval>
             <MaxLostHeartbeats>5</MaxLostHeartbeats>
@@ -55,7 +55,6 @@
               <String>Server</String>
             </TalksTo>
             <MulticastAddressControl>192.0.0.16:9500</MulticastAddressControl>
-            <MulticastAddressData>192.0.0.16:9501</MulticastAddressData>
             <HeartbeatInterval>30.00</HeartbeatInterval>
             <MaxLostHeartbeats>5</MaxLostHeartbeats>
             <SlidingWindowsSize>10</SlidingWindowsSize>
