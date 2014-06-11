@@ -113,7 +113,7 @@ namespace ToolSupport
         //-------------------------------------------------------------------------
         // Fields
         //-------------------------------------------------------------------------
-        std::string currentPath; //current full path filename
+        mutable std::string currentPath; //current full path filename
         boost::shared_ptr<boost::property_tree::ptree> propertyTree; //the currently parsed propertyTree
         boost::shared_ptr<RepositoryBasic> repository;
 

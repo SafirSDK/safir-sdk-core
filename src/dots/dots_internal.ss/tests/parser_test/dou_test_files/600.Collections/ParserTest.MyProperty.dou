@@ -5,6 +5,21 @@
     <members>
         
         <member>
+            <name>TypeIdVal</name>
+            <type>TypeId</type>            
+        </member>
+        
+        <member>
+            <name>EntityIdVal</name>
+            <type>EntityId</type>            
+        </member>
+        
+        <member>
+            <name>MyColorEnumVal</name>
+            <type>ParserTest.MyColorEnum</type>            
+        </member>
+        
+        <member>
             <name>ArrayPropertyValue</name>
             <type>ParserTest.MyEntity</type>
             <array/>
@@ -17,9 +32,33 @@
         </member>
         
         <member>
+            <name>SequenceTypeIdValue</name>
+            <type>TypeId</type>
+            <sequence/>
+        </member>
+        
+        <member>
+            <name>SequenceEntityIdValue</name>
+            <type>EntityId</type>
+            <sequence/>
+        </member>
+        
+        <member>
             <name>DictionaryPropertyValue</name>
             <type>EntityId</type>
             <dictionary>String</dictionary>
+        </member>
+        
+        <member>
+            <name>DictionaryEntityIdKey</name>
+            <type>String</type>
+            <dictionary>EntityId</dictionary>
+        </member>
+        
+        <member>
+            <name>DictionaryEnumObject</name>
+            <type>Object</type>
+            <dictionary>ParserTest.MyColorEnum</dictionary>
         </member>
         
         <member>

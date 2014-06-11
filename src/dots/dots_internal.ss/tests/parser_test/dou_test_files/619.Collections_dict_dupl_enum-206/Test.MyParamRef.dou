@@ -1,40 +1,33 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <name>Test.MyParam</name>
+    <name>Test.MyParamRef</name>
     <baseClass>Object</baseClass>
     <parameters>
         <parameter>
-            <name>OldArrayParam</name>
+            <name>IntArrayParam</name>
             <type>Int32</type>
-            <arrayElements>
-                <arrayElement>
-                    <value>1</value>
-                </arrayElement>
-                <arrayElement>
-                    <value>2</value>
-                </arrayElement>
-                <arrayElement>
-                    <value>3</value>
-                </arrayElement>
-                <arrayElement>
-                    <valueRef>
-                        <name>Test.MyParam.SingelInt</name>
-                        <!--index>2</index-->
-                    </valueRef>
-                </arrayElement>
-                <arrayElement>
-                    <value>4</value>
-                </arrayElement>
-            </arrayElements>            
+            <array>
+                <value>1</value>
+                <value>2</value>
+                <value>3</value>
+                <valueRef>
+                    <name>Test.MyParam.DictionaryParam1</name>
+                    <key>Svarre</key>
+                </valueRef>                
+                <value>4</value>
+            </array>            
         </parameter>
 
         <parameter>
-            <name>SingelInt</name>
+            <name>IntRefParam</name>
             <type>Int32</type>
-            <value>1</value>
+            <valueRef>
+                <name>Test.MyParam.DictionaryParam1</name>
+                <key>Kalle</key>
+            </valueRef>
         </parameter>
 
-        <parameter>
+        <!--parameter>
             <name>SequenceParam</name>
             <type>Int32</type>
             <sequence>
@@ -54,10 +47,6 @@
                 </entityId>
                 <entityId>
                     <name>ParserTest.MyEntity</name>
-                    <instanceId>2</instanceId>
-                </entityId>
-                <entityId>
-                    <name>Safir.Dob.Entity</name>
                     <instanceId>2</instanceId>
                 </entityId>
             </sequence>
@@ -169,16 +158,6 @@
                 </entry>
                 <entry>
                     <key>
-                        <name>BAjs</name>
-                        <instanceId>2</instanceId>
-                    </key>
-                    <ParserTest.MyEntity>
-                        <MyColorEnum>Grey</MyColorEnum>
-                        <MyInt>123</MyInt>
-                    </ParserTest.MyEntity>
-                </entry>
-                <entry>
-                    <key>
                         <name>Safir.Dob.Entity</name>
                         <instanceId>lastInstance</instanceId>
                     </key>
@@ -196,13 +175,7 @@
                     </ParserTest.MyEntity>
                 </entry>
             </dictionary>
-        </parameter>
-        
-        <parameter>
-            <name>IntPar</name>
-            <type>Int32</type>
-            <value>123</value>
-        </parameter>        
+        </parameter-->
      
     </parameters>
 

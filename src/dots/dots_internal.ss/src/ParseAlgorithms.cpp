@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include "ParseAlgorithms.h"
+#include <Safir/Dob/Typesystem/ToolSupport/Internal/RepositoryToStringHelper.h>
 
 namespace Safir
 {
@@ -391,7 +392,6 @@ namespace ToolSupport
             switch(memberType)
             {
             case Int32MemberType:
-            case EnumerationMemberType: //TODO: correct?
             {
                 result.key.int32=boost::lexical_cast<DotsC_Int32>(val);
             }
@@ -482,14 +482,20 @@ namespace ToolSupport
         }
     }
 
-    void CheckDictionaryKeyDuplicates(const ParameterDescriptionBasic* pd)
+    void CheckDictionaryKeyDuplicates(const RepositoryBasic* rep, const ParameterDescriptionBasic* pd)
     {
         for (ParameterValues::const_iterator it=pd->values.begin(); it!=pd->values.end(); ++it)
         {
             size_t count=std::count_if(it+1, pd->values.end(), boost::bind(EqualKey, _1, *it, pd->GetKeyType()));
             if (count>0)
             {
-                std::cout<<"TODO: DUPLICATE "<<it->key.str<<std::endl;
+                std::ostringstream os;
+                Internal::ToStringHelper<TypeRepository> strHelp(rep);
+                int index=static_cast<int>(std::distance(pd->values.begin(), it));
+                os<<"The dictionary parameter '"<<pd->qualifiedName<<"' contains duplicated key '";
+                strHelp.ParameterKeyToString(pd, index, os);
+                os<<"'. Keys must be unique.";
+                throw os.str();
             }
         }
     }
@@ -602,6 +608,224 @@ namespace ToolSupport
             }
         }
     }
+
+    void VerifyParameterValue(const ParseState& state, ParameterDescriptionBasic* pd)
+    {
+        static const DotsC_TypeId EntityTypeId=LlufId_Generate64("Safir.Dob.Entity");
+
+        if (pd->GetMemberType()==TypeIdMemberType)
+        {
+            //Verify that typeId parameters contains values that are existing typeIds.
+            for (int index=0; index<pd->GetNumberOfValues(); ++index)
+            {
+                const ValueDefinition& v=pd->Value(static_cast<size_t>(index));
+                if (!BasicTypeOperations::ValidTypeId(state.repository.get(), v.val.int64))
+                {
+                    std::ostringstream os;
+                    os<<"The parameter "<<pd->GetName()<<" has an invalid value. '"<<v.val.str<<"' is not an existing type.";
+                    throw ParseError("Invalid TypeId parameter", os.str(), state.currentPath, 45);
+                }
+            }
+        }
+        else if (pd->GetMemberType()==EntityIdMemberType)
+        {
+            //Verify that EntityId parameters contains values that are existing class type.
+            for (int index=0; index<pd->GetNumberOfValues(); ++index)
+            {
+                const ValueDefinition& v=pd->Value(static_cast<size_t>(index));
+                const ClassDescription* tmpCd=state.repository->GetClass(v.val.int64);
+                if (!tmpCd)
+                {
+                    std::ostringstream os;
+                    os<<"The parameter "<<pd->GetName()<<" has an invalid value. The typeId does not exist or is not a class type.";
+                    throw ParseError("Invalid EntityId parameter", os.str(), state.currentPath, 46);
+                }
+
+                if (!BasicTypeOperations::IsOfType<TypeRepository>(state.repository.get(), ObjectMemberType, v.val.int64, ObjectMemberType, EntityTypeId))
+                {
+                    std::ostringstream os;
+                    os<<"The parameter "<<pd->GetName()<<" has an invalid typeId. The class '"<<tmpCd->GetName()<<"' is not a subtype of Safir.Dob.Entity";
+                    throw ParseError("Invalid EntityId parameter", os.str(), state.currentPath, 172);
+                }
+            }
+        }
+        else if (pd->GetMemberType()==EnumerationMemberType)
+        {
+            //Verify that enum parameter values are valid according to the specified enum type.
+            pd->typeId=LlufId_Generate64(pd->typeName.c_str());
+            const EnumDescription* ed=state.repository->GetEnum(pd->typeId);
+            if (!ed)
+            {
+                //Enum type does not exist
+                std::ostringstream os;
+                os<<"The parameter type '"<<pd->typeName<<"' does not exist. Expected to be a basic type or enum type. Specified for parameter "<<pd->GetName();
+                throw ParseError("Invalid type", os.str(), state.currentPath, 47);
+            }
+
+            //Check value
+            for (int index=0; index<pd->GetNumberOfValues(); ++index)
+            {
+                ValueDefinition& v=pd->MutableValue(static_cast<size_t>(index));
+                v.val.int32=ed->GetIndexOfValue(v.val.str);
+                if (v.val.int32<0)
+                {
+                    std::ostringstream os;
+                    os<<"The parameter "<<pd->GetName()<<" has an invalid value '"<<v.val.str<<"'. Expected to be an enum value of type "<<ed->GetName();
+                    throw ParseError("Invalid enum value", os.str(), state.currentPath, 48);
+                }
+            }
+        }
+
+        //if dictionary and key is enum we must check the enum value too
+        if (pd->GetCollectionType()==DictionaryCollectionType)
+        {
+            if (pd->GetKeyType()==EnumerationMemberType)
+            {
+                //Verify that enum parameter key is valid according to the specified enum type.
+                const EnumDescription* ed=state.repository->GetEnum(pd->GetKeyTypeId());
+                if (!ed)
+                {
+                    //Enum type does not exist
+                    std::ostringstream os;
+                    os<<"The keyType specified for the dictionary paramaeter '"<<pd->typeName<<"' does not exist";
+                    throw ParseError("Key type does not exist", os.str(), state.currentPath, 194);
+                }
+
+                //Check value
+                for (int index=0; index<pd->GetNumberOfValues(); ++index)
+                {
+                    ValueDefinition& val=pd->MutableValue(static_cast<size_t>(index));
+                    val.key.int32=ed->GetIndexOfValue(val.key.str);
+                    if (val.key.int32<0)
+                    {
+                        std::ostringstream os;
+                        os<<"The parameter "<<pd->GetName()<<" has an invalid key '"<<val.key.str<<"'. Expected to be an enum value of type "<<ed->GetName();
+                        throw ParseError("Invalid key", os.str(), state.currentPath, 196);
+                    }
+                }
+            }
+
+            try
+            {
+                CheckDictionaryKeyDuplicates(state.repository.get(), pd);
+            }
+            catch (const std::string& err)
+            {
+                throw ParseError("Duplicated dictionary key", err, state.currentPath, 206);
+            }
+        }
+    }
+
+//    void VerifyParameterKey(const ParseState& state, ParameterDescriptionBasic* pd)
+//    {
+//        static const DotsC_TypeId EntityTypeId=LlufId_Generate64("Safir.Dob.Entity");
+
+//        if (pd->GetCollectionType()!=DictionaryCollectionType)
+//            return; //not a dictionary
+
+//        if (pd->GetKeyType()==TypeIdMemberType)
+//        {
+//            //Verify that typeId parameters contains values that are existing typeIds.
+//            for (int index=0; index<pd->GetNumberOfValues(); ++index)
+//            {
+//                const ValueDefinition& v=pd->Value(static_cast<size_t>(index));
+//                if (!BasicTypeOperations::ValidTypeId(state.repository.get(), v.key.int64))
+//                {
+//                    std::ostringstream os;
+//                    os<<"The parameter "<<pd->GetName()<<" has an invalid key. '"<<v.key.str<<"' is not an existing type.";
+//                    throw ParseError("Invalid TypeId key", os.str(), state.currentPath, 220);
+//                }
+//            }
+//        }
+//        else if (pd->GetKeyType()==EntityIdMemberType)
+//        {
+//            //Verify that EntityId parameters contains values that are existing class type.
+//            for (int index=0; index<pd->GetNumberOfValues(); ++index)
+//            {
+//                const ValueDefinition& v=pd->Value(static_cast<size_t>(index));
+//                const ClassDescription* tmpCd=state.repository->GetClass(v.key.int64);
+//                if (!tmpCd)
+//                {
+//                    std::ostringstream os;
+//                    os<<"The parameter "<<pd->GetName()<<" has an invalid key. The typeId does not exist or is not a class type.";
+//                    throw ParseError("Invalid EntityId key", os.str(), state.currentPath, 46);
+//                }
+
+//                if (!BasicTypeOperations::IsOfType<TypeRepository>(state.repository.get(), ObjectMemberType, v.key.int64, ObjectMemberType, EntityTypeId))
+//                {
+//                    std::ostringstream os;
+//                    os<<"The parameter "<<pd->GetName()<<" has an invalid key. The class '"<<tmpCd->GetName()<<"' is not a subtype of Safir.Dob.Entity";
+//                    throw ParseError("Invalid EntityId key", os.str(), state.currentPath, 172);
+//                }
+//            }
+//        }
+//        else if (pd->GetKeyType()==EnumerationMemberType)
+//        {
+//            //Verify that enum parameter values are valid according to the specified enum type.
+//            pd->typeId=LlufId_Generate64(pd->typeName.c_str());
+//            const EnumDescription* ed=state.repository->GetEnum(pd->typeId);
+//            if (!ed)
+//            {
+//                //Enum type does not exist
+//                std::ostringstream os;
+//                os<<"The parameter key type '"<<pd->typeName<<"' does not exist. Expected to be a basic type or enum type. Specified for parameter "<<pd->GetName();
+//                throw ParseError("Invalid enumeration key", os.str(), state.currentPath, 47);
+//            }
+
+//            //Check value
+//            for (int index=0; index<pd->GetNumberOfValues(); ++index)
+//            {
+//                ValueDefinition& v=pd->MutableValue(static_cast<size_t>(index));
+//                v.key.int32=ed->GetIndexOfValue(v.key.str);
+//                if (v.key.int32<0)
+//                {
+//                    std::ostringstream os;
+//                    os<<"The parameter "<<pd->GetName()<<" has an invalid value '"<<v.key.str<<"'. Expected to be an enum value of type "<<ed->GetName();
+//                    throw ParseError("Invalid enum value", os.str(), state.currentPath, 48);
+//                }
+//            }
+//        }
+
+//        //if dictionary and key is enum we must check the enum value too
+//        if (pd->GetCollectionType()==DictionaryCollectionType)
+//        {
+//            if (pd->GetKeyType()==EnumerationMemberType)
+//            {
+//                //Verify that enum parameter key is valid according to the specified enum type.
+//                const EnumDescription* ed=state.repository->GetEnum(pd->GetKeyTypeId());
+//                if (!ed)
+//                {
+//                    //Enum type does not exist
+//                    std::ostringstream os;
+//                    os<<"The keyType specified for the dictionary paramaeter '"<<pd->typeName<<"' does not exist";
+//                    throw ParseError("Key type does not exist", os.str(), state.currentPath, 194);
+//                }
+
+//                //Check value
+//                for (int index=0; index<pd->GetNumberOfValues(); ++index)
+//                {
+//                    ValueDefinition& val=pd->MutableValue(static_cast<size_t>(index));
+//                    val.key.int32=ed->GetIndexOfValue(val.key.str);
+//                    if (val.key.int32<0)
+//                    {
+//                        std::ostringstream os;
+//                        os<<"The parameter "<<pd->GetName()<<" has an invalid key '"<<val.key.str<<"'. Expected to be an enum value of type "<<ed->GetName();
+//                        throw ParseError("Invalid key", os.str(), state.currentPath, 196);
+//                    }
+//                }
+//            }
+
+//            try
+//            {
+//                CheckDictionaryKeyDuplicates(state.repository.get(), pd);
+//            }
+//            catch (const std::string& err)
+//            {
+//                throw ParseError("Duplicated dictionary key", err, state.currentPath, 206);
+//            }
+//        }
+
+//    }
 
     //----------------------------------------------
     // CompletionAlgorithms
@@ -1187,115 +1411,13 @@ namespace ToolSupport
 
     void DouCompletionAlgorithm::VerifyParameterTypes(const ParseState& state)
     {
-        static const DotsC_TypeId EntityTypeId=LlufId_Generate64("Safir.Dob.Entity");
-
         //loop through all parameters and verify all TypeId, EntityId, and Enum
         for (boost::unordered_map<std::string, ParameterDescriptionBasic*>::iterator parIt=state.repository->m_parameters.begin();
              parIt!=state.repository->m_parameters.end(); ++parIt)
         {
             ParameterDescriptionBasic* pd=parIt->second;
-
-            if (pd->GetMemberType()==TypeIdMemberType)
-            {
-                //Verify that typeId parameters contains values that are existing typeIds.
-                for (int index=0; index<pd->GetNumberOfValues(); ++index)
-                {
-                    const ValueDefinition& v=pd->Value(static_cast<size_t>(index));
-                    if (!BasicTypeOperations::ValidTypeId(state.repository.get(), v.val.int64))
-                    {
-                        std::string file=parIt->first.substr(0, parIt->first.rfind(".")+1)+"dou";
-                        std::ostringstream os;
-                        os<<"The parameter "<<pd->GetName()<<" has an invalid value. '"<<v.val.str<<"' is not a TypeId of an existing type.";
-                        throw ParseError("Invalid TypeId parameter", os.str(), file, 45);
-                    }
-                }
-            }
-            else if (pd->GetMemberType()==EntityIdMemberType)
-            {
-                //Verify that EntityId parameters contains values that are existing class type.
-                for (int index=0; index<pd->GetNumberOfValues(); ++index)
-                {
-                    const ValueDefinition& v=pd->Value(static_cast<size_t>(index));
-                    const ClassDescription* tmpCd=state.repository->GetClass(v.val.int64);
-                    if (!tmpCd)
-                    {
-                        std::string file=parIt->first.substr(0, parIt->first.rfind(".")+1)+"dou";
-                        std::ostringstream os;
-                        os<<"The parameter "<<pd->GetName()<<" has an invalid value. The typeId does not exist or is not a class type.";
-                        throw ParseError("Invalid EntityId parameter", os.str(), file, 46);
-                    }
-
-                    if (!BasicTypeOperations::IsOfType<TypeRepository>(state.repository.get(), ObjectMemberType, v.val.int64, ObjectMemberType, EntityTypeId))
-                    {
-                        std::string file=parIt->first.substr(0, parIt->first.rfind(".")+1)+"dou";
-                        std::ostringstream os;
-                        os<<"The parameter "<<pd->GetName()<<" has an invalid typeId. The class '"<<tmpCd->GetName()<<"' is not a subtype of Safir.Dob.Entity";
-                        throw ParseError("Invalid EntityId parameter", os.str(), file, 172);
-                    }
-                }
-            }
-            else if (pd->GetMemberType()==EnumerationMemberType)
-            {
-                //Verify that enum parameter values are valid according to the specified enum type.
-                pd->typeId=LlufId_Generate64(pd->typeName.c_str());
-                const EnumDescription* ed=state.repository->GetEnum(pd->typeId);
-                if (!ed)
-                {
-                    //Enum type does not exist
-                    std::string file=parIt->first.substr(0, parIt->first.rfind(".")+1)+"dou";
-                    std::ostringstream os;
-                    os<<"The parameter type '"<<pd->typeName<<"' does not exist. Expected to be a basic type or enum type. Specified for parameter "<<pd->GetName();
-                    throw ParseError("Invalid type", os.str(), file, 47);
-                }
-
-                //Check value
-                for (int index=0; index<pd->GetNumberOfValues(); ++index)
-                {
-                    ValueDefinition& v=pd->MutableValue(static_cast<size_t>(index));
-                    v.val.int32=ed->GetIndexOfValue(v.val.str);
-                    if (v.val.int32<0)
-                    {
-                        std::string file=parIt->first.substr(0, parIt->first.rfind(".")+1)+"dou";
-                        std::ostringstream os;
-                        os<<"The parameter "<<pd->GetName()<<" has an invalid value '"<<v.val.str<<"'. Expected to be an enum value of type "<<ed->GetName();
-                        throw ParseError("Invalid enum value", os.str(), file, 48);
-                    }
-                }
-            }
-
-            //if dictionary and key is enum we must check the enum value too
-            if (pd->GetCollectionType()==DictionaryCollectionType)
-            {
-                if (pd->GetKeyType()==EnumerationMemberType)
-                {
-                    //Verify that enum parameter key is valid according to the specified enum type.
-                    const EnumDescription* ed=state.repository->GetEnum(pd->GetKeyTypeId());
-                    if (!ed)
-                    {
-                        //Enum type does not exist
-                        std::string file=parIt->first.substr(0, parIt->first.rfind(".")+1)+"dou";
-                        std::ostringstream os;
-                        os<<"The keyType specified for the dictionary paramaeter '"<<pd->typeName<<"' does not exist";
-                        throw ParseError("Key type does not exist", os.str(), file, 194);
-                    }
-
-                    //Check value
-                    for (int index=0; index<pd->GetNumberOfValues(); ++index)
-                    {
-                        ValueDefinition& val=pd->MutableValue(static_cast<size_t>(index));
-                        val.key.int32=ed->GetIndexOfValue(val.key.str);
-                        if (val.key.int32<0)
-                        {
-                            std::string file=parIt->first.substr(0, parIt->first.rfind(".")+1)+"dou";
-                            std::ostringstream os;
-                            os<<"The parameter "<<pd->GetName()<<" has an invalid key '"<<val.key.str<<"'. Expected to be an enum value of type "<<ed->GetName();
-                            throw ParseError("Invalid key", os.str(), file, 196);
-                        }
-                    }
-                }
-
-                CheckDictionaryKeyDuplicates(pd);
-            }
+            state.currentPath=pd->qualifiedName.substr(0, pd->qualifiedName.rfind(".")+1)+"dou";
+            VerifyParameterValue(state, pd);
         }
     }
 

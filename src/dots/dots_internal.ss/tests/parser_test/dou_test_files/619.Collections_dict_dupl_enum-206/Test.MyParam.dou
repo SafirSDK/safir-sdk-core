@@ -56,6 +56,10 @@
                     <name>ParserTest.MyEntity</name>
                     <instanceId>2</instanceId>
                 </entityId>
+                <entityId>
+                    <name>Safir.Dob.Entity</name>
+                    <instanceId>2</instanceId>
+                </entityId>
             </sequence>
         </parameter>
 
@@ -103,6 +107,10 @@
                     <key>Pelle</key>
                     <value>13</value>
                 </entry>
+                <entry>
+                    <key>Biffen</key>
+                    <value>13</value>
+                </entry>
             </dictionary>
         </parameter>
         
@@ -119,11 +127,11 @@
                     <value>AnotherInstance</value>
                 </entry>
                 <entry>
-                    <key>2</key>
+                    <key>third</key>
                     <value>AnotherInstance</value>
                 </entry>
                 <entry>
-                    <key>third</key>
+                    <key>3</key>
                     <value>12345</value>
                 </entry>
             </dictionary>
@@ -145,6 +153,13 @@
                     <entityId>
                         <name>ParserTest.MyEntity</name>
                         <instanceId>2</instanceId>
+                    </entityId>
+                </entry>
+                <entry>
+                    <key>Grey</key>
+                    <entityId>
+                        <name>Safir.Dob.Entity</name>
+                        <instanceId>lastInstance</instanceId>
                     </entityId>
                 </entry>
                 <entry>
@@ -175,6 +190,24 @@
                     <key>
                         <name>Safir.Dob.Entity</name>
                         <instanceId>lastInstance</instanceId>
+                    </key>
+                    <ParserTest.MyEntity>
+                        <MySequence>
+                            <ParserTest.MyEntity>
+                                <MyColorEnum>Black</MyColorEnum>
+                                <MyInt>1</MyInt>
+                            </ParserTest.MyEntity>
+                            <ParserTest.MyEntity>
+                                <MyColorEnum>White</MyColorEnum>
+                                <MyInt>2</MyInt>
+                            </ParserTest.MyEntity>
+                        </MySequence>
+                    </ParserTest.MyEntity>
+                </entry>
+                <entry>
+                    <key>
+                        <name>ParserTest.MyEntity</name>
+                        <instanceId>3</instanceId>
                     </key>
                     <ParserTest.MyEntity>
                         <MySequence>

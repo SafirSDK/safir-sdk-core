@@ -54,14 +54,16 @@ namespace Internal
         typedef typename Traits::PropertyMappingDescriptionType PropertyMappingDescriptionType;
         typedef typename Traits::CreateRoutineDescriptionType CreateRoutineDescriptionType;
 
-        ToStringHelper(const RepositoryType* rep, bool includeCreateRoutines) //since createRoutines are not stored in shm, this enables possibility to compare output from local and shm repos.
+        ToStringHelper(const RepositoryType* rep, bool includeCreateRoutines=false) //since createRoutines are not stored in shm, this enables possibility to compare output from local and shm repos.
             :m_rep(rep)
             ,m_includeCreateRoutines(includeCreateRoutines)
         {
         }
 
         void RepositoryToString(std::ostream& os) const {DumpRepository(os);}
-        void TypeToString(DotsC_TypeId typeId, std::ostream& os) const;
+        void TypeInfoToString(DotsC_TypeId typeId, std::ostream& os) const;
+        void ParameterKeyToString(const ParameterDescriptionType* c, int index, std::ostream& os) const;
+        void ParameterValueToString(const ParameterDescriptionType* c, int index, std::ostream& os) const;
 
     private:
         const RepositoryType* m_rep;
@@ -78,12 +80,10 @@ namespace Internal
 
         void TypeIdToString(boost::int64_t tid, std::ostream& os) const;
         void HashedValToString(const std::pair<boost::int64_t, const char*>& hv, std::ostream& os) const;
-        void KeyToString(const ParameterDescriptionType* c, int index, std::ostream& os) const;
-        void ValueToString(const ParameterDescriptionType* c, int index, std::ostream& os) const;
     };
 
     template <class RepT, class Traits>
-    void ToStringHelper<RepT, Traits>::TypeToString(DotsC_TypeId typeId, std::ostream& os) const
+    void ToStringHelper<RepT, Traits>::TypeInfoToString(DotsC_TypeId typeId, std::ostream& os) const
     {
         const ClassDescriptionType* cd=m_rep->GetClass(typeId);
         if (cd)
@@ -138,7 +138,7 @@ namespace Internal
     }
 
     template <class RepT, class Traits>
-    void ToStringHelper<RepT, Traits>::KeyToString(const ParameterDescriptionType* c, int index, std::ostream& os) const
+    void ToStringHelper<RepT, Traits>::ParameterKeyToString(const ParameterDescriptionType* c, int index, std::ostream& os) const
     {
         switch(c->GetKeyType())
         {
@@ -191,7 +191,7 @@ namespace Internal
     }
 
     template <class RepT, class Traits>
-    void ToStringHelper<RepT, Traits>::ValueToString(const ParameterDescriptionType* c, int i, std::ostream& os) const
+    void ToStringHelper<RepT, Traits>::ParameterValueToString(const ParameterDescriptionType* c, int i, std::ostream& os) const
     {
         switch(c->GetMemberType())
         {
@@ -496,7 +496,7 @@ namespace Internal
             for (int i=0; i<c->GetNumberOfValues(); ++i)
             {
                 os<<"      value=";
-                ValueToString(c, i, os);
+                ParameterValueToString(c, i, os);
                 os<<std::endl;
             }
         }
@@ -507,7 +507,7 @@ namespace Internal
             for (int i=0; i<c->GetNumberOfValues(); ++i)
             {
                 os<<"      value["<<i<<"]=";
-                ValueToString(c, i, os);
+                ParameterValueToString(c, i, os);
                 os<<std::endl;
             }
         }
@@ -518,7 +518,7 @@ namespace Internal
             for (int i=0; i<c->GetNumberOfValues(); ++i)
             {
                 os<<"      value["<<i<<"]=";
-                ValueToString(c, i, os);
+                ParameterValueToString(c, i, os);
                 os<<std::endl;
             }
         }
@@ -529,9 +529,9 @@ namespace Internal
             for (int i=0; i<c->GetNumberOfValues(); ++i)
             {
                 os<<"      value[";
-                KeyToString(c, i, os);
+                ParameterKeyToString(c, i, os);
                 os<<"]=";
-                ValueToString(c, i, os);
+                ParameterValueToString(c, i, os);
                 os<<std::endl;
             }
         }

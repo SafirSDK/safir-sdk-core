@@ -59,6 +59,8 @@ namespace ToolSupport
     std::string GetEntityIdParameterAsString(boost::property_tree::ptree& pt);
     bool ParseValue(DotsC_MemberType memberType, const std::string& val, ValueDefinition& result);
     bool ParseKey(DotsC_MemberType memberType, const std::string& val, ValueDefinition& result);
+    void VerifyParameterValue(const ParseState& state, ParameterDescriptionBasic* pd);
+    void VerifyParameterKey(const ParseState& state, ParameterDescriptionBasic* pd);
     inline bool ValidKeyType(DotsC_MemberType memberType)
     {
         return  memberType==Int32MemberType || memberType==Int64MemberType || memberType==StringMemberType ||
@@ -1393,6 +1395,8 @@ namespace ToolSupport
             {
                 throw ParseError("Incomplete EntityId XML", "Failed to expand environment variable '"+envVar+"' in propertyMapping for member "+propMem->GetName(), state.currentPath, 141);
             }
+
+            VerifyParameterValue(state, param);
         }
     };
 
@@ -1444,6 +1448,8 @@ namespace ToolSupport
                     throw ParseError("Invalid value", os.str(), state.currentPath, 112);
                 }
             }
+
+            VerifyParameterValue(state, param);
         }
     };
 

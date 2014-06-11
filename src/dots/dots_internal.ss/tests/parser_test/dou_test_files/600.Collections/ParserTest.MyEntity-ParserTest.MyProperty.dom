@@ -7,6 +7,24 @@
     <memberMapping>
       
         <member>
+            <propertyMember>TypeIdVal</propertyMember>
+            <value>ParserTest.MyColorEnum</value>
+        </member>
+        
+        <member>
+            <propertyMember>EntityIdVal</propertyMember>
+            <entityId>
+                <name>Safir.Dob.Entity</name>
+                <instanceId>123</instanceId>
+            </entityId>
+        </member>
+        
+        <member>
+            <propertyMember>MyColorEnumVal</propertyMember>
+            <value>White</value>
+        </member>
+        
+        <member>
             <propertyMember>ArrayPropertyValue</propertyMember>
             <array>
                 <ParserTest.MyEntity>
@@ -19,7 +37,30 @@
                     <MyInt>456</MyInt>
                 </ParserTest.MyEntity>
             </array>
-        </member>        
+        </member>
+        
+        <member>
+            <propertyMember>SequenceTypeIdValue</propertyMember>
+            <sequence>
+                <value>Object</value>
+                <value>ParserTest.MyEntity</value>
+                <value>ParserTest.MyProperty</value>
+            </sequence>
+        </member>
+        
+        <member>
+            <propertyMember>SequenceEntityIdValue</propertyMember>
+            <sequence>
+                <entityId>
+                    <name>Safir.Dob.Entity</name>
+                    <instanceId>123</instanceId>
+                    </entityId>
+                <entityId>
+                    <name>ParserTest.MyEntity</name>
+                    <instanceId>inst</instanceId>
+                </entityId>
+            </sequence>
+        </member>
         
         <member>
             <propertyMember>SequencePropertyValue</propertyMember>
@@ -55,11 +96,32 @@
                     </entityId>
                 </entry>
                 <entry>
-                    <key>First</key>
+                    <key>Second</key>
                     <entityId>
                         <name>ParserTest.MyEntity</name>
                         <instanceId>my instance</instanceId>
                     </entityId>
+                </entry>
+            </dictionary>
+        </member>
+        
+        <member>
+            <propertyMember>DictionaryEntityIdKey</propertyMember>
+            <dictionary>
+                <entry>
+                    <value>First</value>
+                    <key>
+                        <!--name>Safir.Dob.Entity</name-->
+                        <name>Object</name>
+                        <instanceId>123</instanceId>
+                    </key>
+                </entry>
+                <entry>
+                    <value>Second</value>
+                    <key>
+                        <name>ParserTest.MyEntity</name>
+                        <instanceId>my instance</instanceId>
+                    </key>
                 </entry>
             </dictionary>
         </member>
@@ -73,7 +135,24 @@
                 </valueRef>
                 <value>2</value>
             </array>
-        </member>        
+        </member> 
+        
+        <member>
+            <propertyMember>DictionaryEnumObject</propertyMember>
+            <dictionary>
+                <entry>
+                    <key>White</key>
+                    <Object type="ParserTest.MyEntity">
+                        <MyColorEnum>Black</MyColorEnum>
+                        <MyInt>2</MyInt>
+                    </Object>
+                </entry>
+                <entry>
+                    <key>Whitehead</key>
+                    <Object/>
+                </entry>
+            </dictionary>
+        </member>
         
     </memberMapping>
 
