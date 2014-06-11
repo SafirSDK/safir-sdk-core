@@ -143,7 +143,7 @@ namespace SP
         //this is a list of the nodes that we need to send ALIVE messages to (key), along with the
         //election id that came in the INQUIRY (value.second) and the nodeTypeId of the recipient 
         //(value.first)
-        std::map<int64_t, std::pair<int64_t, uint32_t>> m_pendingAlives;
+        std::map<int64_t, std::pair<int64_t, int64_t>> m_pendingAlives;
 
         //a set of node type ids to which we want to send VICTORY to, using m_currentElectionId
         std::set<int64_t> m_pendingVictories;

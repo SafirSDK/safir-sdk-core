@@ -112,6 +112,11 @@ namespace SP
             return m_message->node_info(index).data_address();
         }
 
+        bool IsDead(const int index) const
+        {
+            return m_message->node_info(index).is_dead();
+        }
+
         void Print(std::wostream& out) const
         {
             PrintMessage(*m_message, out);
@@ -138,7 +143,8 @@ namespace SP
     int64_t SystemState::NodeTypeId(const int index) const {return m_impl->NodeTypeId(index);}
     const std::string& SystemState::ControlAddress(const int index) const {return m_impl->ControlAddress(index);}
     const std::string& SystemState::DataAddress(const int index) const {return m_impl->DataAddress(index);}
-    
+    bool SystemState::IsDead(const int index) const {return m_impl->IsDead(index);}
+
     void SystemState::Print(std::wostream& out) const {m_impl->Print(out);}
     
     SystemState SystemStateCreator::Create(std::unique_ptr<SystemStateMessage> message)

@@ -76,6 +76,28 @@ namespace
         }
         return nodes;
     }
+
+
+    std::set<int64_t> GetDeadNodes(const RawStatistics& statistics)
+    {
+        std::set<int64_t> deadNodes;
+        for (int i = 0; i < statistics.Size(); ++i)
+        {
+            if (statistics.HasRemoteStatistics(i))
+            {
+                const auto remote = statistics.RemoteStatistics(i);
+                for (int j = 0; j < remote.Size(); ++j)
+                {
+                    if (remote.IsDead(j))
+                    {
+                        deadNodes.insert(remote.Id(j));
+                    }
+                }
+            }
+        }
+        return deadNodes;
+    }
+
 }
 
     Coordinator::Coordinator(boost::asio::io_service& ioService,
@@ -215,44 +237,39 @@ namespace
         //we will mark him as dead eventually.
         //He should also start a new election, and the thing should resolve itself.
 
-        if (m_lastStatistics.Valid())
+        //get all nodes that someone considers to be dead
+        const std::set<int64_t> deadNodes = GetDeadNodes(m_lastStatistics);
+
+        //tell rawhandler about nodes that other nodes consider dead
+        //while we also build our new system state message
+        for (int i = 0; i < m_lastStatistics.Size(); ++i)
         {
-            std::set<int64_t> deadNodes;
-            for (int i = 0; i < m_lastStatistics.Size(); ++i)
+            bool justKilled = false;
+            //if we dont think them dead, but someone else does
+            if (!m_lastStatistics.IsDead(i) &&
+                deadNodes.find(m_lastStatistics.Id(i)) != deadNodes.end())
             {
-                if (m_lastStatistics.HasRemoteStatistics(i))
-                {
-                    const auto remote = m_lastStatistics.RemoteStatistics(i);
-                    for (int j = 0; j < remote.Size(); ++j)
-                    {
-                        if (remote.IsDead(j))
-                        {
-                            deadNodes.insert(remote.Id(j));
-                        }
-                    }
-                }
+                m_communication.ExcludeNode(m_lastStatistics.Id(i));
+                m_rawHandler.SetDeadNode(m_lastStatistics.Id(i));
+                justKilled = true;
             }
-            
-            
-            for (int i = 0; i < m_lastStatistics.Size(); ++i)
+
+            //add nodes that are not dead or were just killed or 
+            //that have been dead a short while
+            if (!m_lastStatistics.IsDead(i) ||
+                justKilled ||
+                (m_lastStatistics.IsDead(i) && !m_lastStatistics.IsLongGone(i)))
             {
-                if (!m_lastStatistics.IsDead(i))
+                auto node = m_stateMessage.add_node_info();
+                node->set_name(m_lastStatistics.Name(i));
+                node->set_id(m_lastStatistics.Id(i));
+                node->set_node_type_id(m_lastStatistics.NodeTypeId(i));
+                node->set_control_address(m_lastStatistics.ControlAddress(i));
+                node->set_data_address(m_lastStatistics.DataAddress(i));
+
+                if (justKilled || m_lastStatistics.IsDead(i))
                 {
-                    //does another node think that that node is dead?
-                    if (deadNodes.find(m_lastStatistics.Id(i)) != deadNodes.end())
-                    {
-                        m_communication.ExcludeNode(m_lastStatistics.Id(i));
-                        m_rawHandler.SetDeadNode(m_lastStatistics.Id(i));
-                    }
-                    else
-                    {
-                        auto node = m_stateMessage.add_node_info();
-                        node->set_name(m_lastStatistics.Name(i));
-                        node->set_id(m_lastStatistics.Id(i));
-                        node->set_node_type_id(m_lastStatistics.NodeTypeId(i));
-                        node->set_control_address(m_lastStatistics.ControlAddress(i));
-                        node->set_data_address(m_lastStatistics.DataAddress(i));
-                    }
+                    node->set_is_dead(true);
                 }
             }
         }
@@ -404,7 +421,7 @@ namespace
                     if (from < m_id)
                     {
                         lllog(5) << "SP: Got an inquiry from someone smaller than us, sending alive and starting election" << std::endl;
-                        m_pendingAlives.insert(std::make_pair(from, std::make_pair(nodeTypeId, message.election_id())));
+                        m_pendingAlives[from] = std::make_pair(nodeTypeId, message.election_id());
                         SendPendingElectionMessages();
                         
                         StartElection();

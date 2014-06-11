@@ -174,6 +174,7 @@ namespace SP
         newNode->set_data_address(dataAddress);
         
         newNode->set_is_dead(false);
+        newNode->set_is_long_gone(false);
         newNode->set_receive_count(0);
         newNode->set_retransmit_count(0);
         
@@ -266,11 +267,12 @@ namespace SP
             }
             else if (pair.second.nodeInfo->is_dead() && 
                      pair.second.lastReceiveTime < clearThreshold &&
-                     pair.second.nodeInfo->has_remote_statistics())
+                     !pair.second.nodeInfo->is_long_gone())
             {
                 lllog(4) << "SP: Node " << pair.second.nodeInfo->name().c_str() 
                          << " with id " << pair.second.nodeInfo->id() 
                          << " has been dead for five minutes, clearing data." << std::endl;
+                pair.second.nodeInfo->set_is_long_gone(true);
                 pair.second.nodeInfo->clear_remote_statistics();
             }
         }

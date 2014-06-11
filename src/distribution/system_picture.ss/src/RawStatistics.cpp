@@ -188,6 +188,11 @@ namespace SP
             return m_message.node_info(index).is_dead();
         }
 
+        bool IsLongGone(const int index) const
+        {
+            return m_message.node_info(index).is_long_gone();
+        }
+
         uint32_t ReceiveCount(const int index) const
         {
             return m_message.node_info(index).receive_count();
@@ -251,6 +256,7 @@ namespace SP
     const std::string& RawStatistics::DataAddress(const int index) const {return m_impl->DataAddress(index);}
     
     bool RawStatistics::IsDead(const int index) const {return m_impl->IsDead(index);}
+    bool RawStatistics::IsLongGone(const int index) const {return m_impl->IsLongGone(index);}
     uint32_t RawStatistics::ReceiveCount(const int index) const {return m_impl->ReceiveCount(index);}
     uint32_t RawStatistics::RetransmitCount(const int index) const {return m_impl->RetransmitCount(index);}
     

@@ -75,6 +75,7 @@ namespace SP
         int64_t NodeTypeId(const int index) const;
         const std::string& ControlAddress(const int index) const;
         const std::string& DataAddress(const int index) const;
+        bool IsDead(const int index) const;
 
         void Print(std::wostream&) const;
 

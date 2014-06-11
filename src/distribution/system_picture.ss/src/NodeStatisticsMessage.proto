@@ -14,12 +14,13 @@ message NodeStatisticsMessage
         required string data_address = 5; //The address and port of the node's data socket
 
         required bool is_dead = 6;
-        required uint32 receive_count = 7;
-        required uint32 retransmit_count = 8;
+        required bool is_long_gone = 7; //node has been dead for 5 minutes or more
+        required uint32 receive_count = 8;
+        required uint32 retransmit_count = 9;
 
         //if this message is a node-local SP to SP message (e.g. between control and dose_main and dobexplorer)
         //it will contain all the node statistics received from other nodes.
-        optional NodeStatisticsMessage remote_statistics = 9;
+        optional NodeStatisticsMessage remote_statistics = 10;
     }
     
     //TODO: how do we stop this message from growing infinitely when there are lots of
