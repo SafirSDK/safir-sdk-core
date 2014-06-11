@@ -269,10 +269,20 @@ namespace Control
         std::set<std::string> ipAddr;
         for (const auto& i : m_nodeTypes)
         {
-            if (!ipAddr.insert(i.multicastAddressControl).second ||
-                !ipAddr.insert(i.multicastAddressData).second)
+            if (!i.multicastAddressControl.empty())
             {
-                throw std::logic_error("Duplicated ip addresses!");
+                if (!ipAddr.insert(i.multicastAddressControl).second)
+                {
+                    throw std::logic_error("Duplicated ip addresses!");
+                }
+            }
+
+            if (!i.multicastAddressData.empty())
+            {
+                if (!ipAddr.insert(i.multicastAddressData).second)
+                {
+                    throw std::logic_error("Duplicated ip addresses!");
+                }
             }
         }
     }
