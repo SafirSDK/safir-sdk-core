@@ -28,6 +28,7 @@
 #include <utility>
 #include <cstdint>
 #include <string>
+#include <boost/chrono.hpp>
 
 #ifdef system_picture_EXPORTS
 #  define DISTRIBUTION_SYSTEM_PICTURE_API SAFIR_HELPER_DLL_EXPORT
@@ -52,19 +53,21 @@ namespace SP
         NodeType(const int64_t id_,
                  std::string name_,
                  const bool isLight_,
-                 const int heartbeatInterval_, //in milliseconds
+                 const boost::chrono::steady_clock::duration& heartbeatInterval_,
                  const int maxLostHeartbeats_)
             : id(id_)
             , name(std::move(name_))
             , isLight(isLight_)
             , heartbeatInterval(heartbeatInterval_)
-            , maxLostHeartbeats(maxLostHeartbeats_) {}
+            , maxLostHeartbeats(maxLostHeartbeats_)
+            , deadTimeout(maxLostHeartbeats_ * (heartbeatInterval_ + boost::chrono::milliseconds(50))){}
 
-        const int64_t id;           //node type id
-        const std::string name;            //readable name
-        const bool isLight;                //is the node a light node
-        const int heartbeatInterval;       //time between heartbeats
-        const int maxLostHeartbeats;       //number of heartbeats that can be lost before node is considered dead
+        const int64_t id;                                                //node type id
+        const std::string name;                                          //readable name
+        const bool isLight;                                              //is the node a light node
+        const boost::chrono::steady_clock::duration heartbeatInterval;   //time between heartbeats
+        const int maxLostHeartbeats;                                     //number of heartbeats that can be lost before node is considered dead
+        const boost::chrono::steady_clock::duration deadTimeout;         //heartbeatInterval * maxLostHeartbeats + a little extra
     };
 }
 }

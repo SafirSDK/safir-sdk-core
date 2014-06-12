@@ -144,14 +144,12 @@ namespace SP
         struct NodeInfo
         {
             explicit NodeInfo(NodeStatisticsMessage_NodeInfo* const nodeInfo_)
-            : lastReceiveTime(0),nodeInfo(nodeInfo_) {}
+                : lastReceiveTime(boost::chrono::steady_clock::now()),nodeInfo(nodeInfo_) {}
 
-            uint32_t lastReceiveTime;
+            boost::chrono::steady_clock::time_point lastReceiveTime;
             NodeStatisticsMessage_NodeInfo* nodeInfo;
         };
         typedef std::unordered_map<int64_t, NodeInfo> NodeTable;
-
-        uint32_t GetTime() const;
 
         boost::asio::io_service& m_ioService;
         Com::Communication& m_communication;

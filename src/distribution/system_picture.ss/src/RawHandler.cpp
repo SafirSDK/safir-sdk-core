@@ -116,11 +116,6 @@ namespace SP
         }
     }
 
-    uint32_t RawHandler::GetTime() const
-    {
-        return static_cast<uint32_t>((steady_clock::now() - m_epoch).count() / 100000000);
-    }
-
     //Must be called in strand!
     void RawHandler::NewNode(const std::string& name,
                              const int64_t id,
@@ -137,7 +132,7 @@ namespace SP
 
         const auto newNode = this->m_allStatisticsMessage.add_node_info();
         const auto insertResult = this->m_nodeTable.insert(std::make_pair(id,RawHandler::NodeInfo(newNode)));
-        
+
         if (!insertResult.second)
         {
             throw std::logic_error("Got a new node that I already had");
@@ -147,6 +142,8 @@ namespace SP
         {
             throw std::logic_error("Got a new node with a node type id that I dont know about!");
         }
+
+        //lastReceiveTime is set by NodeInfo constructor
 
         newNode->set_name(name);
         newNode->set_id(id);
@@ -159,8 +156,6 @@ namespace SP
         newNode->set_receive_count(0);
         newNode->set_retransmit_count(0);
         
-        insertResult.first->second.lastReceiveTime = GetTime();
-        
         m_communication.IncludeNode(id);
 
         PostNodesChangedCallback();
@@ -170,7 +165,7 @@ namespace SP
     //Must be called in strand!
     void RawHandler::GotReceive(const int64_t id)
     {
-        const uint32_t now = GetTime();
+        const auto now = steady_clock::now();
         lllog(9) << "SP: GotReceive from node with id " << id <<", time = " << now << std::endl;
 
         const auto findIt = m_nodeTable.find(id);
@@ -223,17 +218,17 @@ namespace SP
             throw std::logic_error("Unexpected error in CheckDeadNodes");
         }
 
-        //TODO: Use node type information for this!
-        const auto threshold = GetTime() - 90; //9 seconds back in time 
-        const auto clearThreshold = GetTime() - 600*5; //5 minutes back in time.
-        //        std::wcout << "  Threshold time is " << threshold << std::endl;
+        const auto now = steady_clock::now();
+
+        const auto clearThreshold = now - boost::chrono::minutes(5);
 
         bool somethingChanged = false;
 
-        for (auto pair : m_nodeTable)            
+        for (auto& pair : m_nodeTable)            
         {
             //lllog(5) << "SP:   lastReceiveTime is " << pair.second->lastReceiveTime.value() << std::endl;
             //                lllog(5) << "SP:   isDead = " << pair.second->isDead.value() << std::endl;
+            const auto threshold = now - m_nodeTypes.at(pair.second.nodeInfo->node_type_id()).deadTimeout;
             
             if (!pair.second.nodeInfo->is_dead() && pair.second.lastReceiveTime < threshold)
             {

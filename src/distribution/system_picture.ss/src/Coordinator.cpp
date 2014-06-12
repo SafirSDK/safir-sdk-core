@@ -98,6 +98,23 @@ namespace
         return deadNodes;
     }
 
+    boost::chrono::steady_clock::duration CalculateElectionTimeout(const std::map<int64_t, NodeType>& nodeTypes)
+    {
+        //use average of non-light node types heartbeatInterval * maxLostHeartbeats / 2.0
+        boost::chrono::steady_clock::duration sum;
+        int number = 0;
+        for (const auto& nt: nodeTypes)
+        {
+            if (!nt.second.isLight)
+            {
+                ++number;
+                sum += nt.second.heartbeatInterval * nt.second.maxLostHeartbeats;
+            }
+        }
+        //election timeout can never be less than 1 second
+        return std::max<boost::chrono::steady_clock::duration>(boost::chrono::seconds(1), sum / (number * 2));
+    }
+
 }
 
     Coordinator::Coordinator(boost::asio::io_service& ioService,
@@ -168,9 +185,9 @@ namespace
                                        },
                                        m_dataIdentifier);
 
-
-        //TODO use average of non-light node types heartbeatInterval * maxLostHeartbeats / 2.0
-        m_electionTimer.expires_from_now(boost::chrono::seconds(6)); 
+        const auto electionTimeout = CalculateElectionTimeout(nodeTypes);
+        lllog(3) << "SP: ElectionTimeout will be " << boost::chrono::duration_cast<boost::chrono::milliseconds>(electionTimeout) << std::endl;
+        m_electionTimer.expires_from_now(electionTimeout); 
         m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
                                                       {
                                                           if (!error)
