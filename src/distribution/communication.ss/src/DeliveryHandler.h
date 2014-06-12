@@ -113,11 +113,10 @@ namespace Com
             const auto it=m_nodes.find(id);
             if (it==m_nodes.end())
             {
-                std::cout<<"DeliveryHandler konstigt"<<std::endl;
-//                std::ostringstream msg;
-//                msg<<(isSystemNode ? "Include" : "Exclude")<<" unknown node! Dont have any node with id "<<id;
-//                std::cout<<msg.str()<<std::endl;
-//                lllog(9)<<msg.str().c_str()<<std::endl;
+                std::ostringstream msg;
+                msg<<(isSystemNode ? "Include" : "Exclude")<<" unknown node! Dont have any node with id "<<id;
+                std::cout<<msg.str()<<std::endl;
+                lllog(9)<<msg.str().c_str()<<std::endl;
                 return;
             }
 

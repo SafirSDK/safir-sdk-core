@@ -239,7 +239,7 @@ namespace Com
         //Make node included or excluded. If excluded it is also removed.
         void SetSystemNode(int64_t id, bool isSystemNode)
         {
-            m_strand.dispatch([=]
+            m_strand.post([=]
             {
                 if (isSystemNode)
                 {
@@ -251,7 +251,6 @@ namespace Com
                 }
                 else
                 {
-                    std::cout<<"AckedDataSender konstigt"<<std::endl;
                     m_nodes.erase(id);
                     RemoveExcludedReceivers();
                     RemoveCompletedMessages();

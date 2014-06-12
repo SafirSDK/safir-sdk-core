@@ -150,11 +150,13 @@ namespace Com
 
     void CommunicationImpl::IncludeNode(int64_t id)
     {
+        lllog(6)<<L"COM: IncludeNode "<<id<<std::endl;
         SetSystemNode(id, true);
     }
 
     void CommunicationImpl::ExcludeNode(int64_t id)
     {
+        lllog(6)<<L"COM: ExcludeNode "<<id<<std::endl;
         SetSystemNode(id, false);
     }
 
@@ -165,7 +167,7 @@ namespace Com
         Node node(name, id, nodeTypeId, "", dataAddress, false);
         auto& nodeType=GetNodeType(node.nodeTypeId);
         nodeType.GetAckedDataSender().AddNode(node.nodeId, node.unicastAddress);
-        nodeType.GetHeartbeatSender().AddNode(node.nodeId, Utilities::CreateEndpoint(node.unicastAddress));
+        nodeType.GetHeartbeatSender().AddNode(node.nodeId, node.unicastAddress);
         m_reader.Strand().dispatch([this, node]{m_deliveryHandler.AddNode(node);});
         SetSystemNode(id, true);
     }
@@ -201,8 +203,26 @@ namespace Com
         //it only through the deliveryHandler we can lookup nodeTypeId from a nodeId. Since this a a very low frequent operaton this is ok.
         m_reader.Strand().post([=]
         {
+            lllog(6)<<L"COM: Execute SetSystemNode id="<<id<<", systemNode="<<std::boolalpha<<isSystemNode<<std::dec<<std::endl;
             auto node=m_deliveryHandler.GetNode(id);
-            assert(node!=nullptr);
+
+            if (node==nullptr)
+            {
+                if (!isSystemNode)
+                {
+                    //this case can occur if exclude is called multiple times. Not considered an error.
+                    lllog(6)<<L"COM: Exclude unknown node, call will be ignored."<<std::endl;
+                    return;
+                }
+                else
+                {
+                    //the caller tries to include a node that we dont have. Can occur if calling IncludeNode before a node
+                    //has been reported as new, or if calling IncludeNode after a call to ExcludeNode, of
+                    //there is a programming errir in Communication. Should never happen!
+                    lllog(6)<<L"COM: Include unknown node. Programming error or bug in Communication!"<<std::endl;
+                    assert(false);
+                }
+            }
 
             auto& nodeType=GetNodeType(node->nodeTypeId);
             nodeType.GetAckedDataSender().SetSystemNode(id, isSystemNode);
@@ -217,7 +237,7 @@ namespace Com
 
         auto& nodeType=GetNodeType(node.nodeTypeId);
         nodeType.GetAckedDataSender().AddNode(node.nodeId, node.unicastAddress);
-        nodeType.GetHeartbeatSender().AddNode(node.nodeId, Utilities::CreateEndpoint(node.unicastAddress));
+        nodeType.GetHeartbeatSender().AddNode(node.nodeId, node.unicastAddress);
         m_reader.Strand().dispatch([this, node]{m_deliveryHandler.AddNode(node);});
 
         //callback to host application

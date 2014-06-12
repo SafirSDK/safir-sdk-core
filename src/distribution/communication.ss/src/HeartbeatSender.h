@@ -85,27 +85,18 @@ namespace Com
         }
 
         //Add a node and starts sending heartbeats
-        void AddNode(int64_t id, const boost::asio::ip::udp::endpoint& endpoint)
+        void AddNode(int64_t id, const std::string address)
         {
             m_strand.dispatch([=]
             {
-                m_nodes.insert(std::make_pair(id, NodeInfo(false, endpoint)));
-            });
-        }
-
-        //Remove node and stop sending heartbeats
-        void SetSystemNode(int64_t id)
-        {
-            m_strand.dispatch([=]
-            {
-                m_nodes.erase(id);
+                m_nodes.insert(std::make_pair(id, NodeInfo(false, Utilities::CreateEndpoint(address))));
             });
         }
 
         //Make node included or excluded. If excluded it is also removed.
         void SetSystemNode(int64_t id, bool isSystemNode)
         {
-            m_strand.dispatch([=]
+            m_strand.post([=]
             {
                 if (isSystemNode)
                 {
