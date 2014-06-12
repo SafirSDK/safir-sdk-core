@@ -48,8 +48,10 @@ namespace
         for (int i = 0; i < msg.node_info_size(); ++i)
         {
             const auto& node = msg.node_info(i);
-            out << "\n" 
-                << (msg.elected_id() == node.id() ? "  E " : "    ")
+            out << "\n "
+                << (node.is_dead() ? "D" : " ")
+                << (msg.elected_id() == node.id() ? "E" : " ")
+                << " "
                 << node.name().c_str() 
                 << "@" << node.control_address().c_str() 
                 << " (id = " << node.id() << ", type = " << node.node_type_id() << ")";

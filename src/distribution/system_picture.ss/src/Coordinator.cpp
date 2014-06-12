@@ -379,7 +379,7 @@ namespace
             {
                 for (int i = 0; i < m_lastStatistics.Size(); ++i)
                 {
-                    lllog(7) << "SP:   know of node " << m_lastStatistics.Id(i) << std::endl;
+                    lllog(7) << "SP:   know of node " << m_lastStatistics.Id(i) << (m_lastStatistics.IsDead(i) ? " which is dead" : "") << std::endl;
                         
                     if (m_lastStatistics.Id(i) == m_elected && !m_lastStatistics.IsDead(i))
                     {

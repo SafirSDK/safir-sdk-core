@@ -53,13 +53,11 @@ def mkdir(newdir):
         if tail:
             os.mkdir(newdir)
 
-def launch_control(number, multicast, debug):
+def launch_control(number, debug):
     command = (safir_control,) + ("--name",    "Node_{0:03d}".format(number), 
-                                  "--address", "127.0.0.1:33{0:03d}".format(number),
+                                  "--control-address", "127.0.0.1:33{0:03d}".format(number),
+                                  "--data-address", "127.0.0.1:43{0:03d}".format(number),
                                   "--seed",    "127.0.0.1:33000")
-
-    if multicast:
-        command = command + ("-m", "224.100.123.123:20000")
 
     if debug:
         command = ("gdb", "--batch" , "--ex", "run", "--ex", "bt", "--args") + command
@@ -94,9 +92,6 @@ parser.add_argument('--terminate', '-t', dest='terminate', action='store_true',
 parser.add_argument('--skip-0', '-s', dest='skip', action='store_true',
                     default=False,
                     help='Dont start Node 0')
-parser.add_argument('--singlecast', '-S', dest='multicast', action='store_false',
-                    default=True,
-                    help='Use only singlecast communication')
 parser.add_argument('--gdb', '-d', dest='debug', action='store_true',
                     default=False,
                     help='Launch in GDB batch mode (needs manual cleanup after run!).')
@@ -112,7 +107,7 @@ controls = list()
 
 try:
     for i in range (1 if args.skip else 0 ,args.num):
-        controls.append((i,launch_control(i, args.multicast, args.debug)))
+        controls.append((i,launch_control(i, args.debug)))
 
     killtime = time.time()
     while True:
@@ -141,7 +136,7 @@ try:
             control.wait()
             if control.returncode != 0:
                 print ("RETURN CODE",control.returncode)
-            controls.append((i,launch_control(i, args.multicast, args.debug)))
+            controls.append((i,launch_control(i, args.debug)))
 except KeyboardInterrupt:
     pass
 except:
