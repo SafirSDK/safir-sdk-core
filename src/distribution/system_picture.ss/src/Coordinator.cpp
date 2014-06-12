@@ -270,6 +270,8 @@ namespace
 
         //tell rawhandler about nodes that other nodes consider dead
         //while we also build our new system state message
+        //Note: never do exclude on a node that is not one that we have 
+        //received NewNode for, i.e. is in m_lastStatistics top level.
         for (int i = 0; i < m_lastStatistics.Size(); ++i)
         {
             bool justKilled = false;
@@ -356,6 +358,8 @@ namespace
                 
                 const auto nodes = GetNodeIds(m_stateMessage);
                 
+                //Note: never do exclude on a node that is not one that we have 
+                //received NewNode for, i.e. is in m_lastStatistics top level.
                 for (int i = 0; i < m_lastStatistics.Size(); ++i)
                 {
                     //if we haven't marked the node as dead and electee doesnt think the node
