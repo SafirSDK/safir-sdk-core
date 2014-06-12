@@ -138,9 +138,6 @@ namespace SP
         /** Post a copy of the data on the ioservice */
         void PostRawChangedCallback();
 
-        //TODO: consider removing the timestamp
-        //and replacing it with just the counter and a "last counter", which is checked
-        //periodically to see if any data has been received in the last period.
         struct NodeInfo
         {
             explicit NodeInfo(NodeStatisticsMessage_NodeInfo* const nodeInfo_)
