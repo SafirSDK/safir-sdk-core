@@ -26,7 +26,8 @@
 #include <iostream>
 #include <math.h>
 
-#define CHECK(expr) {if (!(expr)) { std::cout << "Test failed! Line: " <<__LINE__<< ", expr: " << #expr << std::endl; exit(1);}}
+int failures = 0;
+#define CHECK(expr) {if (!(expr)) { std::wcout << "Test failed! Line: " <<__LINE__<< ", expr: " << #expr << std::endl; ++failures;}}
 
 namespace ctrl = Safir::Dob::Internal::Control;
 
@@ -147,7 +148,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    return 0;
+    return failures;
 }
 
 

@@ -37,7 +37,7 @@
         <member>
             <summary>How often shall heartbeats/keepalives be sent</summary>
             <name>HeartbeatInterval</name>
-            <type>Second32</type>
+            <type>Second64</type>
         </member>
         <member>
             <summary>How many lost heartbeats before marking nodes of this type as dead.</summary>
@@ -52,7 +52,7 @@
         <member>
             <summary>Time to wait for Ack before retrying transmission to this node.</summary>
             <name>RetryTimeout</name>
-            <type>Second32</type>
+            <type>Second64</type>
         </member>
         <member>
             <summary>A list of regular expressions. All types that match will be sent to this node type (unless they also match an UnwantedTypes, below).

@@ -174,10 +174,9 @@ namespace Control
                 multicastAddressData = EMPTY_STRING;
             }
 
-
             // HeartbeatInterval
-            float heartbeatInterval;
-            ms = bl.GetFloat32Member(blob, ntcd->GetMemberIndex("HeartbeatInterval"), 0, heartbeatInterval);
+            double heartbeatInterval;
+            ms = bl.GetFloat64Member(blob, ntcd->GetMemberIndex("HeartbeatInterval"), 0, heartbeatInterval);
             if (ms.IsNull())
             {
                 throw std::logic_error("Node type " + nodeTypeName + ": HeartbeatInterval is mandatory");
@@ -200,8 +199,8 @@ namespace Control
             }
 
             // RetryTimeout
-            float retryTimeout;
-            ms = bl.GetFloat32Member(blob, ntcd->GetMemberIndex("RetryTimeout"), 0, retryTimeout);
+            double retryTimeout;
+            ms = bl.GetFloat64Member(blob, ntcd->GetMemberIndex("RetryTimeout"), 0, retryTimeout);
             if (ms.IsNull())
             {
                 throw std::logic_error("Node type " + nodeTypeName + ": RetryTimeout is mandatory");

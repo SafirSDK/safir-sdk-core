@@ -200,8 +200,8 @@ int main(int argc, char * argv[])
                                           Safir::Dob::Internal::SP::NodeType(nt.id, 
                                                                              nt.name, 
                                                                              nt.isLight, 
-                                                                             nt.heartbeatInterval, 
-                                                                             nt.retryTimeout)));
+                                                                             boost::chrono::milliseconds(nt.heartbeatInterval),
+                                                                             nt.maxLostHeartbeats)));
     }
 
 
