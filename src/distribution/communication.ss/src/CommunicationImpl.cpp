@@ -152,12 +152,44 @@ namespace Com
     {
         lllog(6)<<L"COM: IncludeNode "<<id<<std::endl;
         SetSystemNode(id, true);
+
+        //We do post here to be sure the AddNode job will be executed before SetSystemNode. Otherwize we
+        //risk losing a node.
+        //We also do the SetSystemNode for the heartbeatSender and ackedDataSender inside readerStrand since
+        //it only through the deliveryHandler we can lookup nodeTypeId from a nodeId. Since this a a very low frequent operaton this is ok.
+        m_reader.Strand().post([=]
+        {
+            lllog(6)<<L"COM: Execute IncludeNode id="<<id<<std::endl;
+            auto node=m_deliveryHandler.GetNode(id);
+            assert(node==nullptr);
+
+            auto& nodeType=GetNodeType(node->nodeTypeId);
+            nodeType.GetAckedDataSender().IncludeNode(id);
+            m_deliveryHandler.IncludeNode(id);
+        });
     }
 
     void CommunicationImpl::ExcludeNode(int64_t id)
     {
         lllog(6)<<L"COM: ExcludeNode "<<id<<std::endl;
         SetSystemNode(id, false);
+
+        m_reader.Strand().post([=]
+        {
+            lllog(6)<<L"COM: Execute ExcludeNode id="<<id<<std::endl;
+            auto node=m_deliveryHandler.GetNode(id);
+
+            if (node==nullptr)
+            {
+                lllog(6)<<L"COM: Exclude unknown node, call will be ignored."<<std::endl;
+                return;
+            }
+
+            auto& nodeType=GetNodeType(node->nodeTypeId);
+            nodeType.GetAckedDataSender().RemoveNode(id);
+            nodeType.GetHeartbeatSender().RemoveNode(id);
+            m_deliveryHandler.RemoveNode(id);
+        });
     }
 
     void CommunicationImpl::InjectNode(const std::string& name, int64_t id, int64_t nodeTypeId, const std::string& dataAddress)
@@ -169,7 +201,7 @@ namespace Com
         nodeType.GetAckedDataSender().AddNode(node.nodeId, node.unicastAddress);
         nodeType.GetHeartbeatSender().AddNode(node.nodeId, node.unicastAddress);
         m_reader.Strand().dispatch([this, node]{m_deliveryHandler.AddNode(node);});
-        SetSystemNode(id, true);
+        IncludeNode(id);
     }
 
     bool CommunicationImpl::SendToNode(int64_t nodeId, int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, int64_t dataTypeIdentifier)
@@ -193,42 +225,6 @@ namespace Com
         {
             m_discoverer.AddSeeds(seeds);
         }
-    }
-
-    void CommunicationImpl::SetSystemNode(int64_t id, bool isSystemNode)
-    {
-        //We do post here to be sure the AddNode job will be executed before SetSystemNode. Otherwize we
-        //risk losing a node.
-        //We also do the SetSystemNode for the heartbeatSender and ackedDataSender inside readerStrand since
-        //it only through the deliveryHandler we can lookup nodeTypeId from a nodeId. Since this a a very low frequent operaton this is ok.
-        m_reader.Strand().post([=]
-        {
-            lllog(6)<<L"COM: Execute SetSystemNode id="<<id<<", systemNode="<<std::boolalpha<<isSystemNode<<std::dec<<std::endl;
-            auto node=m_deliveryHandler.GetNode(id);
-
-            if (node==nullptr)
-            {
-                if (!isSystemNode)
-                {
-                    //this case can occur if exclude is called multiple times. Not considered an error.
-                    lllog(6)<<L"COM: Exclude unknown node, call will be ignored."<<std::endl;
-                    return;
-                }
-                else
-                {
-                    //the caller tries to include a node that we dont have. Can occur if calling IncludeNode before a node
-                    //has been reported as new, or if calling IncludeNode after a call to ExcludeNode, of
-                    //there is a programming errir in Communication. Should never happen!
-                    lllog(6)<<L"COM: Include unknown node. Programming error or bug in Communication!"<<std::endl;
-                    assert(false);
-                }
-            }
-
-            auto& nodeType=GetNodeType(node->nodeTypeId);
-            nodeType.GetAckedDataSender().SetSystemNode(id, isSystemNode);
-            nodeType.GetHeartbeatSender().SetSystemNode(id, isSystemNode);
-            m_deliveryHandler.SetSystemNode(id, isSystemNode);
-        });
     }
 
     void CommunicationImpl::OnNewNode(const Node& node)
@@ -332,19 +328,13 @@ namespace Com
             return;
         }
 
-        switch (cm.message_type())
-        {
-        case CommunicationMessage_MessageType_NodeInfoMsg:
-        {
-            m_discoverer.HandleReceivedNodeInfo(cm.node_info());
-        }
-            break;
-
-        case CommunicationMessage_MessageType_DiscoverMsg:
+        if (cm.has_discover())
         {
             m_discoverer.HandleReceivedDiscover(cm.discover());
         }
-            break;
+        if (cm.has_node_info())
+        {
+            m_discoverer.HandleReceivedNodeInfo(cm.node_info());
         }
     }
 }

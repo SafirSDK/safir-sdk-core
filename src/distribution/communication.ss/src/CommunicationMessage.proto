@@ -4,11 +4,6 @@ package Safir.Dob.Internal.Com;
 
 message CommunicationMessage {
 
-    enum MessageType {
-        DiscoverMsg = 0;
-        NodeInfoMsg = 1;
-    }
-
     enum SequenceSerie {
         UnicastSerie = 0;
         MulticastSerie = 1;
@@ -37,7 +32,6 @@ message CommunicationMessage {
     }        
     
     //Fields
-    required MessageType message_type = 1; //Depending on type different messages below will be used.
     optional Discover discover = 2;
     optional NodeInfo node_info = 3;
 }

@@ -72,7 +72,7 @@ namespace Com
             ,m_running(false)
             ,m_waitForAckTimeout(waitForAckTimeout)
             ,m_nodes()
-            ,m_lastSentMulticastSeqNo(0)
+            ,m_lastSentMultiReceiverSeqNo(0)
             ,m_resendTimer(ioService)
             ,m_retransmitNotification()
             ,m_queueNotFullNotification()
@@ -237,24 +237,26 @@ namespace Com
         }
 
         //Make node included or excluded. If excluded it is also removed.
-        void SetSystemNode(int64_t id, bool isSystemNode)
+        void IncludeNode(int64_t id)
         {
             m_strand.post([=]
             {
-                if (isSystemNode)
+                const auto it=m_nodes.find(id);
+                if (it!=m_nodes.end())
                 {
-                    const auto it=m_nodes.find(id);
-                    if (it!=m_nodes.end())
-                    {
-                        it->second.systemNode=true;
-                    }
+                    it->second.systemNode=true;
                 }
-                else
-                {
-                    m_nodes.erase(id);
-                    RemoveExcludedReceivers();
-                    RemoveCompletedMessages();
-                }
+            });
+        }
+
+        //Make node included or excluded. If excluded it is also removed.
+        void RemoveNode(int64_t id)
+        {
+            m_strand.post([=]
+            {
+                m_nodes.erase(id);
+                RemoveExcludedReceivers();
+                RemoveCompletedMessages();
             });
         }
 
@@ -280,7 +282,7 @@ namespace Com
         };
         std::map<int64_t, NodeInfo> m_nodes;
 
-        uint64_t m_lastSentMulticastSeqNo;
+        uint64_t m_lastSentMultiReceiverSeqNo; // used both for multicast and unicast as long as the message is a multireceiver message
         boost::asio::steady_timer m_resendTimer;
         RetransmitTo m_retransmitNotification;
         QueueNotFull m_queueNotFullNotification;
@@ -301,8 +303,8 @@ namespace Com
 
                 if (ud->sendToAllSystemNodes) //this is message that shall be sent to every system node
                 {
-                    ++m_lastSentMulticastSeqNo;
-                    ud->header.sequenceNumber=m_lastSentMulticastSeqNo;
+                    ++m_lastSentMultiReceiverSeqNo;
+                    ud->header.sequenceNumber=m_lastSentMultiReceiverSeqNo;
                     ud->header.sendMethod=MultiReceiverSendMethod;
 
                     if (WriterType::IsMulticastEnabled()) //this node and all the receivers are capable of sending and receiving multicast
@@ -313,7 +315,7 @@ namespace Com
                             {
                                 //The node will get the message throuch the multicast message, we just add it to receiver list
                                 //to be able to track the ack
-                                ud->receivers.insert(std::make_pair(val.first, Receiver(val.first, MultiReceiverSendMethod, m_lastSentMulticastSeqNo)));
+                                ud->receivers.insert(std::make_pair(val.first, Receiver(val.first, MultiReceiverSendMethod, m_lastSentMultiReceiverSeqNo)));
                             }
                         }
 
@@ -322,18 +324,18 @@ namespace Com
                             WriterType::SendMulticast(ud);
                         }
                     }
-                    else //this node is not multicast enabled, only send unicast. However it's still a multiReceiver message and the multicast sequenceNumberSerie shall be used
+                    else //this node is not multicast enabled, only send unicast. However it's still a multiReceiver message and the multiReceiverSeqNo shall be used
                     {
                         for (const auto& val : m_nodes)
                         {
                             WriterType::SendTo(ud, val.second.endpoint);
-                            ud->receivers.insert(std::make_pair(val.first, Receiver(val.first, MultiReceiverSendMethod, m_lastSentMulticastSeqNo)));
+                            ud->receivers.insert(std::make_pair(val.first, Receiver(val.first, MultiReceiverSendMethod, m_lastSentMultiReceiverSeqNo)));
                         }
                     }
                 }
                 else //messages has a receiver list, send to them using unicast
                 {
-                    ud->header.sendMethod=SpecifiedReceiverSendMethod;
+                    ud->header.sendMethod=SingleReceiverSendMethod;
                     auto recvIt=ud->receivers.begin();
                     while (recvIt!=ud->receivers.end())
                     {
@@ -345,7 +347,7 @@ namespace Com
                             ++n.lastSentSeqNo;
                             ud->header.sequenceNumber=n.lastSentSeqNo;
                             r.id=recvIt->first;
-                            r.sendMethod=SpecifiedReceiverSendMethod;
+                            r.sendMethod=SingleReceiverSendMethod;
                             r.sequenceNumber=n.lastSentSeqNo;
                             WriterType::SendTo(ud, n.endpoint);
                             ++recvIt;
@@ -403,19 +405,19 @@ namespace Com
                 if (nodeIt!=m_nodes.end() && nodeIt->second.systemNode)
                 {
                     const auto& r=recvIt->second;
-                    ud->header.sendMethod=r.sendMethod; //even if this is Multicast we send retransmit using unicast. This is to specify correct sequence number serie.
+                    ud->header.sendMethod=r.sendMethod; //always retransmit using unicast, but keep the original sendMethod.This is to specify correct sequence number serie.
                     ud->header.sequenceNumber=r.sequenceNumber;
 
                     WriterType::SendTo(ud, nodeIt->second.endpoint);
                     m_retransmitNotification(nodeIt->first);
-                    lllog(6)<<L"COM: retransmited  "<<(r.sendMethod==SpecifiedReceiverSendMethod ? "Unicast" : "Multicast")<<", seq: "<<r.sequenceNumber<<" to "<<r.id<<std::endl;
+                    lllog(6)<<L"COM: retransmitted  "<<(r.sendMethod==SingleReceiverSendMethod ? "SingleReceiverMessage" : "MultiReceiverMessage")<<", seq: "<<r.sequenceNumber<<" to "<<r.id<<std::endl;
                     ++recvIt;
                 }
                 else
                 {
                     //node does not exist anymore or is not part of the system, dont wait for this node anymore
                     lllog(6)<<L"COM: Ignore retransmit to receiver that is not longer a system node  "<<
-                              (recvIt->second.sendMethod==SpecifiedReceiverSendMethod ? "Unicast" : "Multicast")<<", seq: "<<recvIt->second.sequenceNumber<<" to "<<recvIt->first<<std::endl;
+                              (recvIt->second.sendMethod==SingleReceiverSendMethod ? "SingleReceiverMessage" : "MultiReceiverMessage")<<", seq: "<<recvIt->second.sequenceNumber<<" to "<<recvIt->first<<std::endl;
                     ud->receivers.erase(recvIt++);
                 }
             }
@@ -541,7 +543,7 @@ namespace Com
                     for (auto it=ud->receivers.cbegin(); it!=ud->receivers.cend(); ++it)
                     {
                         const auto& r=it->second;
-                        os<<"    recvId="<<r.id<<(r.sendMethod==SpecifiedReceiverSendMethod ? " uni seq=" : " mul seq=")<<r.sequenceNumber<<std::endl;
+                        os<<"    recvId="<<r.id<<(r.sendMethod==SingleReceiverSendMethod ? " uni seq=" : " mul seq=")<<r.sequenceNumber<<std::endl;
                     }
                 }
             }

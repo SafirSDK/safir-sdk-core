@@ -204,8 +204,6 @@ namespace Com
         {
             //Compose a DiscoverMessage
             CommunicationMessage cm;
-            cm.set_message_type(CommunicationMessage_MessageType_DiscoverMsg);
-
             cm.mutable_discover()->mutable_from()->set_node_id(m_me.nodeId);
             cm.mutable_discover()->mutable_from()->set_name(m_me.name);
             cm.mutable_discover()->mutable_from()->set_control_address(m_me.controlAddress);
@@ -245,8 +243,6 @@ namespace Com
 
             //Compose a DiscoverMessage
             CommunicationMessage cm;
-            cm.set_message_type(CommunicationMessage_MessageType_NodeInfoMsg);
-
             cm.mutable_node_info()->set_sent_from_id(fromId);
             cm.mutable_node_info()->set_sent_to_id(toId);
             cm.mutable_node_info()->set_number_of_packets(numberOfPackets);

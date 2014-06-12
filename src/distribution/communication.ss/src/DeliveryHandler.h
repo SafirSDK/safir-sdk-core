@@ -107,28 +107,19 @@ namespace Com
             m_nodes.insert(std::make_pair(node.nodeId, NodeInfo(node)));
         }
 
-        //Make node included or excluded. If excluded it is also removed.
-        void SetSystemNode(int64_t id, bool isSystemNode)
+        //Make node included. If excluded it is also removed.
+        void IncludeNode(int64_t id)
         {
             const auto it=m_nodes.find(id);
-            if (it==m_nodes.end())
-            {
-                std::ostringstream msg;
-                msg<<(isSystemNode ? "Include" : "Exclude")<<" unknown node! Dont have any node with id "<<id;
-                std::cout<<msg.str()<<std::endl;
-                lllog(9)<<msg.str().c_str()<<std::endl;
-                return;
-            }
+            assert(it!=m_nodes.end());
 
-            //Always called from readStrand
-            if (isSystemNode)
-            {
-                it->second.node.systemNode=true;
-            }
-            else
-            {
-                m_nodes.erase(it);
-            }
+            it->second.node.systemNode=true;
+        }
+
+        //Make node included or excluded. If excluded it is also removed.
+        void RemoveNode(int64_t id)
+        {
+            m_nodes.erase(id);
         }
 
         const Node* GetNode(int64_t id) const
@@ -305,7 +296,7 @@ namespace Com
         bool HandleMessage(const MessageHeader* header, const char* payload, NodeInfo& ni)
         {
             lllog(8)<<L"COM: recv from: "<<ni.node.nodeId<<L", sendMethod: "<<
-                      (header->sendMethod==SpecifiedReceiverSendMethod ? L"Unicast" : L"Multicast")<<
+                      (header->sendMethod==SingleReceiverSendMethod ? L"Unicast" : L"Multicast")<<
                       L", seq: "<<header->sequenceNumber<<std::endl;
 
             Channel& ch=ni.channel[header->sendMethod];
@@ -336,7 +327,7 @@ namespace Com
                 lllog(8)<<L"COM: Received Seq: "<<header->sequenceNumber<<" wich means that we have lost a message. LastInSequence="<<ch.lastInSequence<<std::endl;
 
                 std::wcout<<L"COM: recv from: "<<ni.node.name.c_str()<<L", sendMethod: "<<
-                                      (header->sendMethod==SpecifiedReceiverSendMethod ? L"Unicast" : L"Multicast")<<
+                                      (header->sendMethod==SingleReceiverSendMethod ? L"Unicast" : L"Multicast")<<
                                       L", seq: "<<header->sequenceNumber<<std::endl;
                 std::wcout<<L"COM: Received Seq: "<<header->sequenceNumber<<" wich means that we have lost a message. LastInSequence="<<ch.lastInSequence<<std::endl;
                 return false; //this message is not handled, dont send ack

@@ -58,7 +58,7 @@ namespace Com
     static const int64_t ControlDataType=186858702748131856; //Hash for 'Communication.ControlData'
 
     //Send methods
-    static const uint16_t SpecifiedReceiverSendMethod=0;
+    static const uint16_t SingleReceiverSendMethod=0;
     static const uint16_t MultiReceiverSendMethod=1;
 
     inline uint32_t CalculateCrc32(const char* data, size_t size)
@@ -178,7 +178,7 @@ namespace Com
                  const int64_t& dataType,
                  const boost::shared_ptr<char[]>& message_,
                  size_t messageSize)
-            :header(id, dataType, SpecifiedReceiverSendMethod, 0, messageSize, messageSize, 1, 0, 0)
+            :header(id, dataType, SingleReceiverSendMethod, 0, messageSize, messageSize, 1, 0, 0)
             ,message(message_)
             ,fragment(message.get())
             ,sendToAllSystemNodes(true)
@@ -191,7 +191,7 @@ namespace Com
                  size_t messageSize,
                  const char* fragment_,
                  size_t fragmentSize)
-            :header(id, dataType, SpecifiedReceiverSendMethod, 0, messageSize, fragmentSize, 1, 0, static_cast<size_t>(fragment_-message_.get()))
+            :header(id, dataType, SingleReceiverSendMethod, 0, messageSize, fragmentSize, 1, 0, static_cast<size_t>(fragment_-message_.get()))
             ,message(message_)
             ,fragment(fragment_)
             ,sendToAllSystemNodes(true)

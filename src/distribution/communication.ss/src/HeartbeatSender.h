@@ -89,27 +89,15 @@ namespace Com
         {
             m_strand.dispatch([=]
             {
-                m_nodes.insert(std::make_pair(id, NodeInfo(false, Utilities::CreateEndpoint(address))));
+                m_nodes.emplace(id, Utilities::CreateEndpoint(address));
             });
         }
 
-        //Make node included or excluded. If excluded it is also removed.
-        void SetSystemNode(int64_t id, bool isSystemNode)
+        void RemoveNode(int64_t id)
         {
-            m_strand.post([=]
+            m_strand.dispatch([=]
             {
-                if (isSystemNode)
-                {
-                    const auto it=m_nodes.find(id);
-                    if (it!=m_nodes.end())
-                    {
-                        it->second.systemNode=isSystemNode;
-                    }
-                }
-                else
-                {
-                    m_nodes.erase(id);
-                }
+                m_nodes.erase(id);
             });
         }
 
@@ -118,16 +106,7 @@ namespace Com
         boost::asio::steady_timer m_heartbeatTimer;
         boost::shared_ptr<Heartbeat> m_heartbeat;
         int m_interval;
-
-        struct NodeInfo
-        {
-            bool systemNode;
-            boost::asio::ip::udp::endpoint endpoint;
-            NodeInfo() : systemNode(false), endpoint() {}
-            NodeInfo(bool sn_, const boost::asio::ip::udp::endpoint& ep_) : systemNode(sn_), endpoint(ep_) {}
-        };
-
-        std::map<int64_t, NodeInfo> m_nodes;
+        std::map<int64_t, boost::asio::ip::udp::endpoint> m_nodes;
         bool m_running;
 
         void OnTimeout()
@@ -142,10 +121,7 @@ namespace Com
                 {
                     for (auto& vt : m_nodes)
                     {
-                        if (vt.second.systemNode)
-                        {
-                            WriterType::SendTo(m_heartbeat, vt.second.endpoint);
-                        }
+                        WriterType::SendTo(m_heartbeat, vt.second);
                     }
                 }
 
