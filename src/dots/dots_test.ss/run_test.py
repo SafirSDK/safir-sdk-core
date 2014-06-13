@@ -36,11 +36,11 @@ parser.add_argument("--dots-generated-paths", required=True)
 #cpp and dotnet
 parser.add_argument("--binary")
 
-#for java
-parser.add_argument("--classpath")
-
-#for dotnet
+#for java and dotnet
 parser.add_argument("--dependencies")
+
+#for java
+parser.add_argument("--jar")
 
 arguments = parser.parse_args()
 
@@ -52,30 +52,25 @@ for pair in arguments.dots_generated_paths.split(";"):
 
 syslog = SyslogServer(arguments.show_safir_config)
 
+if arguments.dependencies is not None:
+    dependencies = arguments.dependencies.split(",")
+
+    for dep in dependencies:
+        shutil.copy2(dep,".")
+
 if arguments.language == "cpp":
     command = (arguments.binary,)
-#elif arguments.language == "ada":
-#    command = (os.path.join("ada", "obj", "dots_test_ada"),)
-#elif arguments.language == "dotnet":
-#    command = (os.path.join("dotnet", "dots_test_dotnet.csexe"),)
-#    dependencies = ("dots_generated-dotnet.dll", "Safir.Dob.Typesystem.dll")
 elif arguments.language == "java":
     command = ("java",
                "-Xcheck:jni",
                "-Xfuture",
-               "-cp", arguments.classpath,
-               "Test")
+               "-jar", arguments.jar)
 elif arguments.language == "dotnet":
-    dependencies = arguments.dependencies.split(",")
-
-    for dep in dependencies:
-        shutil.copy2(dep,
-                    ".")
     command = (arguments.binary,)
-     
 else:
     print("Not implemented")
     sys.exit(1)
+    
 print("Test suite command is '" + " ".join(command) + "'")
 
 proc = subprocess.Popen(command, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, universal_newlines=True)

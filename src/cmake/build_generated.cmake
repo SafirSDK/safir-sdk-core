@@ -164,11 +164,16 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
 
     FOREACH (DEP ${GEN_DEPENDENCIES})
       SET(include_jars ${include_jars} dots_generated-${DEP}-java)
+      set(DOTS_GENERATED_JAVA_MANIFEST_CLASSPATH 
+        "${DOTS_GENERATED_JAVA_MANIFEST_CLASSPATH} dots_generated-${DEP}-java.jar")
     ENDFOREACH()
+
+    configure_file(${safir_sdk_core_SOURCE_DIR}/src/dots/dots_v.ss/data/Manifest.txt.in ${CMAKE_CURRENT_BINARY_DIR}/Manifest.generated.txt @ONLY)
 
     ADD_JAR(dots_generated-${GEN_NAME}-java
       SOURCES ${java_files}
-      INCLUDE_JARS dots_java ${include_jars})
+      INCLUDE_JARS dots_java ${include_jars}
+      MANIFEST ${CMAKE_CURRENT_BINARY_DIR}/Manifest.generated.txt)
 
     add_dependencies(dots_generated-${GEN_NAME}-java dots_generated-${GEN_NAME}-code)
   endif()

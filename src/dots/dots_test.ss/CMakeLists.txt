@@ -47,18 +47,15 @@ endif()
 #TODO: why does dots_java_jni not rebuild when make is run from here?
 
 if (Java_FOUND)
-  SAFIR_GET_JAVA_CLASSPATH(
-    JAVA_TARGETS dots_test_java dots_generated-DotsTest-java dots_java logging_java)
-  
   ADD_TEST(NAME dots_java
     COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
     --show-safir-config $<TARGET_FILE:safir_show_config>
     --language java
-    --classpath ${SAFIR_JAVA_CLASSPATH}
+    --jar $<TARGET_PROPERTY:dots_test_java,JAR_FILE>
+    --dependencies $<TARGET_PROPERTY:dots_generated-DotsTest-java,JAR_FILE>,$<TARGET_PROPERTY:dots_java,JAR_FILE>
     --output ${CMAKE_CURRENT_SOURCE_DIR}/output.txt
-    --dots-generated-paths "${DOTS_GENERATED_PATHS}")
-
-  #TODO: we should really be using the manifest instead of specifying entrypoint in the script
+    --dots-generated-paths "${DOTS_GENERATED_PATHS}"
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/java)
 
   SET_SAFIR_TEST_PROPERTIES(TEST dots_java
     CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/test_config)

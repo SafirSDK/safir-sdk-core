@@ -1,1 +1,1 @@
-Class-Path: dots_java.jar
+Class-Path: dots_java.jar @DOTS_GENERATED_JAVA_MANIFEST_CLASSPATH@

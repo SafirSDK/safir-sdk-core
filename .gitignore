@@ -19,6 +19,7 @@ Makefile
 generated_code
 .ninja_*
 *.ninja
+Manifest.generated.txt
 
 #MSVC stuff
 *embed.manifest
