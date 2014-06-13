@@ -12,6 +12,7 @@ ADD_EXECUTABLE(distribution_data_test distribution_data_test.cpp)
 ADD_EXECUTABLE(lamport_clock_test lamport_clock_test.cpp)
 ADD_EXECUTABLE(dose_message_queue_test dose_message_queue_test.cpp)
 ADD_EXECUTABLE(dose_sem_wrapper_test semaphore_test.cpp)
+ADD_EXECUTABLE(wrap_around_counter_test wrap_around_counter_test.cpp)
 
 
 if (NOT MSVC)
@@ -25,8 +26,10 @@ ADD_TEST(Semaphore dose_sem_wrapper_test)
 ADD_TEST(MessageQueue dose_message_queue_test)
 ADD_TEST(DistributionData distribution_data_test)
 ADD_TEST(LamportClocks lamport_clock_test)
+ADD_TEST(WrapAroundCounter wrap_around_counter_test)
 
 SET_SAFIR_TEST_PROPERTIES(Semaphore 60)
 SET_SAFIR_TEST_PROPERTIES(MessageQueue 360)
 SET_SAFIR_TEST_PROPERTIES(DistributionData)
 SET_SAFIR_TEST_PROPERTIES(LamportClocks 2400)
+SET_SAFIR_TEST_PROPERTIES(WrapAroundCounter 600)

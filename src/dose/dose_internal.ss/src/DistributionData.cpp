@@ -52,6 +52,11 @@ namespace Internal
         BOOST_STATIC_ASSERT(sizeof(bool) == 1);
         BOOST_STATIC_ASSERT(sizeof(VersionNumber) == sizeof(boost::uint16_t));
         BOOST_STATIC_ASSERT(sizeof(ResponseId) == 4);
+        BOOST_STATIC_ASSERT(sizeof(LamportTimestamp) == 8);
+        BOOST_STATIC_ASSERT(sizeof(InternalRequestId) == 4);
+        BOOST_STATIC_ASSERT(sizeof(Identifier) == 8);
+        BOOST_STATIC_ASSERT(sizeof(NodeNumber) == 4);
+        BOOST_STATIC_ASSERT(sizeof(ContextId) == 4);
         BOOST_STATIC_ASSERT(sizeof(ConnectionId) == 16);
 #ifdef REGISTER_TIMES
         BOOST_STATIC_ASSERT(sizeof(Header) == 4 + sizeof(ConnectionId) + 4);
@@ -111,7 +116,7 @@ namespace Internal
         BOOST_STATIC_ASSERT(sizeof(RequestHeader) == sizeof(Header)
                             + sizeof(Typesystem::Int64)
                             + sizeof(InternalRequestId)
-                            + sizeof (ResponseId));
+                            + sizeof(ResponseId));
 
         BOOST_STATIC_ASSERT(sizeof(EntityCreateRequestHeader) == sizeof(RequestHeader)
                             + sizeof(Typesystem::Int64)
@@ -124,15 +129,17 @@ namespace Internal
                             + sizeof(Typesystem::Int64)*2);
 
         BOOST_STATIC_ASSERT(sizeof(ResponseHeader) == sizeof(Header)
+                            + sizeof(ConnectionId)
                             + sizeof(InternalRequestId)
-                            + sizeof(ConnectionId));
+                            + 4); //padding
+        BOOST_STATIC_ASSERT(sizeof(ResponseHeader) == 44);
 
 
         BOOST_STATIC_ASSERT(sizeof (unsigned int) == sizeof(boost::uint32_t));
 
         BOOST_STATIC_ASSERT(sizeof(Safir::Utilities::Internal::AtomicUint32) == 4);
     }
-
+    
 
 #ifdef REGISTER_TIMES
     Typesystem::Int32 GenerateId()

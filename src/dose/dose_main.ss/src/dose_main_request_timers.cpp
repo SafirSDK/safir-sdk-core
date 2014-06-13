@@ -44,7 +44,7 @@ namespace Internal
             return false;
         }
 
-        if (m_requestId < rhs.m_requestId)
+        if (m_requestId.GetCounter() < rhs.m_requestId.GetCounter())
         {
             return true;
         }

@@ -575,12 +575,17 @@ namespace Internal
 #pragma pack (push)
 #pragma pack (4)
 
+        //This structure starts on 4 byte alignment, which is a bit odd, but the reason
+        //is that the DistributionData intrusive allocation means that the data is already
+        //4 byte aligned, so 4+4 is 8 and everything is good from after m_type in this 
+        //structure.
         struct Header
         {
             Type m_type;
             ConnectionId m_sender;
 #ifdef REGISTER_TIMES
             Typesystem::Int32 m_id;
+            Typesystem::Int32 m_padding2;
 #endif
         };
 
@@ -588,6 +593,7 @@ namespace Internal
         {
             Header m_commonHeader;
             Typesystem::Int32 m_counter;
+            //followed by connection name, i.e. a string, so ok to end on 4 byte alignment
         };
 
         struct MessageHeader
@@ -610,6 +616,7 @@ namespace Internal
             Typesystem::Int32               m_handlerStrSize;
             InstanceIdPolicy::Enumeration   m_instanceIdPolicy;
             RegistrationStateKind           m_kind;
+            //followed by handler id string, i.e. a string, so ok to end on 4 byte alignment
         };
 
         /* A few thoughts on the way to store timestamps in entity states:
@@ -642,16 +649,14 @@ namespace Internal
             Typesystem::Int64           m_handlerId;
             LamportTimestamp            m_timestamp;
             Typesystem::Int32           m_requestId;
-            ConnectionId                m_originator;
             bool                        m_response;
+            ConnectionId                m_originator;
         };
 
         struct HavePersistenceDataResponseMsg
         {
             Header   m_commonHeader;
             bool     m_iHavePersistenceData;
-            bool     m_padding1;
-            short    m_padding2;
         };
 
         struct RequestHeader
@@ -667,9 +672,6 @@ namespace Internal
             RequestHeader m_requestHeader;
             Typesystem::Int64 m_instanceId;
             bool m_hasInstanceId;
-            bool dummy1;
-            bool dummy2;
-            bool dummy3;
         };
 
         struct EntityUpdateRequestHeader
@@ -688,8 +690,9 @@ namespace Internal
         struct ResponseHeader
         {
             Header m_commonHeader;
-            InternalRequestId m_requestId;
             ConnectionId m_receiver;
+            InternalRequestId m_requestId;
+            Typesystem::Int32 m_padding;
         };
 
         struct RequestPDHeader
@@ -763,12 +766,13 @@ namespace Internal
         //allocate new (unitialized) memory into m_data
         void Allocate(const size_t size);
 
-//        static const std::wstring Image(const GhostState ghostState);
         const std::wstring HeaderImage() const;
 
         /**
          * Operations for allocating and manipulating the use_count on the char
          * arrays that are contained by DistributionData.
+         * The use_count is an atomic 32 bit integer, so be aware that the alignment
+         * of the data is 4.
          */
         class IntrusiveOperations
         {

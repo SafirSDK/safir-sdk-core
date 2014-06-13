@@ -167,19 +167,8 @@ namespace Typesystem
         DOTS_CPP_API const std::wstring ToStringNumeric() const;
     private:
 
-#ifdef _MSC_VER
-#pragma pack (push)
-#pragma pack (4)
-#endif
-
         Dob::Typesystem::TypeId m_typeId;
         Dob::Typesystem::InstanceId m_instanceId;
-
-
-#ifdef _MSC_VER
-#pragma pack (pop)
-#endif
-
     };
 
     static inline std::wostream & operator << (std::wostream & out, const EntityId & entityId)

@@ -227,42 +227,26 @@
         <parameter>
             <name>MyStringArrayParam</name>
             <type>String</type>
-            <arrayElements>
-                <arrayElement>
-                    <value>aaa</value>
-                </arrayElement>
-                <arrayElement>
-                    <value>bbb</value>
-                </arrayElement>
-                <arrayElement>
-                    <value>ccc</value>
-                </arrayElement>
-                <arrayElement>
-                    <valueRef>
-                        <name>Test.MyClass2.MyStringArrayParam</name>
-                        <index>2</index>
-                    </valueRef>
-                </arrayElement>
-                <arrayElement>
-                    <value>ddd</value>
-                </arrayElement>
-            </arrayElements>            
+            <array>
+                <value>aaa</value>
+                <value>bbb</value>
+                <value>ccc</value>
+                <valueRef>
+                    <name>Test.MyClass2.MyStringArrayParam</name>
+                    <index>2</index>
+                </valueRef>
+                <value>ddd</value>
+            </array>            
         </parameter>
 
         <parameter>
             <name>MyInt32ArrayParam</name>
             <type>Int32</type>
-            <arrayElements>
-                <arrayElement>
-                    <value>11</value>
-                </arrayElement>
-                <arrayElement>
-                    <value>12</value>
-                </arrayElement>
-                <arrayElement>
-                    <value>13</value>
-                </arrayElement>
-            </arrayElements>
+            <array>
+                <value>11</value>
+                <value>12</value>
+                <value>13</value>
+            </array>
         </parameter>
 
         <parameter>

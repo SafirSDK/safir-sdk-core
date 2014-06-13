@@ -21,6 +21,7 @@ verbose=False
 current_namespace=""
 current_file=""
 error_files=[]
+no_array_conv=False
 
 
 def print_help():
@@ -30,7 +31,8 @@ def print_help():
     print("-d <directory> : convert files in directory")
     print("-r : convert directory recursive, must be combined with -d")
     print("-o <directory> : output directory, place converted files here. (Mandatory)")
-    print("-v verbose")
+    print("-v : verbose")
+    print("--no-array-conversion : don't convert arrays to new format.")
     
 def parse_commandline(argv):
     """Parse commandline"""
@@ -39,9 +41,10 @@ def parse_commandline(argv):
     global output_dir
     global input_path
     global verbose
+    global no_array_conv
     
     try:
-        opts, args = getopt.getopt(argv,"hrvf:d:o:")
+        opts, args = getopt.getopt(argv,"hrvf:d:o:", ["no-array-conversion"])
     except getopt.GetoptError:
         print("Invalid commandline")
         print_help()
@@ -63,6 +66,8 @@ def parse_commandline(argv):
             recursive=True
         elif opt=='-v':
             verbose=True
+        elif opt=='--no-array-conversion':
+            no_array_conv=True
             
     if output_dir=="" or not os.path.isdir(output_dir):
         print("Output directory missing.")
@@ -102,9 +107,15 @@ def set_current_namespace(tag):
 def ns(tag):
     return current_namespace+tag
 
+def to_path(l):
+    result=ns(l[0])
+    for s in l[1:]:
+        result=result+"/"+ns(s)
+    return result
+    
 def indent(elem, level=0):
     """ pretty print xml """
-    i = "\n" + level*"  "
+    i = os.linesep + level*"  "
     if len(elem):
         if not elem.text or not elem.text.strip():
             elem.text = i + "  "
@@ -130,8 +141,8 @@ def convert_array(src, dest, member_name):
         index_el=arr_el.find(ns('index'))
         if index_el!=None:
             index=int(index_el.text)
-        convert_member_item(arr_el, member_element, '')
-        member_element[-1].attrib['index']=str(index)
+        if convert_member_item(arr_el, member_element, ''):
+            member_element[-1].attrib['index']=str(index)
         index=index+1
 
 def convert_member_item(src, dest, member_name):    
@@ -164,7 +175,7 @@ def convert_member_item(src, dest, member_name):
         else:
             obj_element=src.find(ns('object'))
             if obj_element!=None:
-                inner_obj=convert_object(obj_element, member_name)
+                inner_obj=convert_object(obj_element, member_name, '')
                 dest.append(inner_obj)
                 #insert_at=len(dest)
                 #dest.insert(insert_at, inner_obj)
@@ -179,27 +190,20 @@ def convert_member_item(src, dest, member_name):
                     param_index_element=value_ref_element.find(ns('index'))
                     if param_index_element!=None:
                         member_element.attrib['valueRefIndex']=param_index_element.text.strip()
-                #else:
-                    #Treated as null in old syntax
-                    #print('*************************************************************************')
-                    #print('* Unexpected member structure in member: '+src.tag.replace(current_namespace, ''))
-                    #print('* '+current_file)
-                    #print('* Expected <name> and one of: <value>, <entityId>, <object>, <valueRef>')
-                    #print('* Found:')
-                    #for x in src:
-                    #    print('*    <'+x.tag.replace(current_namespace, '')+'>')
-                    #print('* Member will be removed from the converted result')
-                    #print('*************************************************************************')
+                else:
+                    return False #null member, not inserted
+    return True #somethin inserted
 
-def convert_object(tree, root_name=''):
+def convert_object(tree, root_name, base_type):
     """Convert object structure"""
     type_name=tree.find(ns('name')).text.strip()
     if root_name=='':
         root_name=type_name
+            
     obj=ET.Element(root_name)
     
-    obj.attrib['type']=type_name
-        
+    if type_name!=base_type:
+        obj.attrib['type']=type_name
 
     members=tree.find(ns('members'))
     if members!=None:        
@@ -212,24 +216,88 @@ def convert_object(tree, root_name=''):
 
     return obj
 
-def traverse_xml(tree):
+def traverse_xml(tree, base_type):
     """Traverse xml structure and converts object-elements"""
     changed=False
     index=0
     for child in tree:
         if child.tag==ns('object'):
-            new_child=convert_object(child)
+            new_child=convert_object(child, base_type, base_type)
             tree.remove(child)
             tree.insert(index, new_child)
             changed=True
         else:
-            if traverse_xml(child):
+            if traverse_xml(child, base_type):
                 changed=True
         index=index+1
     return changed
 
+def convert_objects(tree):
+    """Converts all old format objects in a xml tree"""
+    root = tree.getroot()
+    set_current_namespace(root.tag)    
+    changed=False
+    
+    #Handle parameters first since we have a chance to reduce the use of type-attributes for parameters
+    if root.tag==ns('class'):        
+        for par in root.findall(to_path(["parameters", "parameter"])):
+            par_name=par.find(ns("name")).text.strip()
+            type_name=par.find(ns("type")).text.strip()            
+            if traverse_xml(par, type_name):
+                changed=True
+    #handle other objects, can be plain serialized objects or in dom-files        
+    if root.tag==ns('object'):
+        root=convert_object(root, '', '')
+        tree._setroot(root)
+        changed=True
+    elif traverse_xml(root, ''):
+        changed=True
+    
+    return changed
+
+
+def convert_create_routines(tree):
+    """Converts all old format create routines in a xml tree"""
+    root = tree.getroot()
+    set_current_namespace(root.tag)    
+    changed=False
+    
+    #Handle parameters first since we have a chance to reduce the use of type-attributes for parameters
+    if root.tag==ns('class'):        
+        for cr in root.findall(to_path(["createRoutines", "createRoutine", "values", "value", "parameter"])):
+	    if cr.find(ns("name"))==None:
+                cr_name_element=ET.SubElement(cr, "name")
+                cr_name_element.text=cr.text.strip()
+                cr.text=""
+                changed=True
+    return changed
+    
+def convert_parameter_arrays(tree):
+    """Converts all old format arrays in a xml tree"""
+    if no_array_conv:
+        return False
+    
+    root = tree.getroot()
+    set_current_namespace(root.tag)    
+    changed=False
+    for arrayElements in root.findall(".//"+ns("arrayElements")):
+        index=0
+        for ae in arrayElements:
+            index_element=ae.find(ns("index"))
+            if index_element!=None:
+                ae.remove(index_element)
+            if len(ae)>0:
+                child=ae[0]
+                arrayElements.insert(index, child)
+            arrayElements.remove(ae)
+            index=index+1
+        arrayElements.tag="array"
+        changed=True
+    return changed
+
 def convert_file(file_path, out_dir):
     """Converts a single file and store result in out_dir. Only modified files are saved"""
+    output('Handle file '+file_path)
     global current_file
     global number_of_converted
     global number_of_unchanged
@@ -243,25 +311,37 @@ def convert_file(file_path, out_dir):
         error_files.append(file_path)
         number_of_failed=number_of_failed+1
         return
-    root = tree.getroot()
-    set_current_namespace(root.tag)
-    if root.tag==ns('object'):
-        root=convert_object(root)
-        tree._setroot(root)
-        changed=True
-    else:
-        changed=traverse_xml(root)    
+    
+    #Convert old format createRoutines
+    converted_create_routines=convert_create_routines(tree)
+    
+    #Convert old format objects
+    converted_objects=convert_objects(tree)
 
-    if changed:        
+    #Convert old format arrays, i.e arrayElements
+    converted_arrays=convert_parameter_arrays(tree)
+    
+    if  converted_objects or converted_arrays or converted_create_routines:        
         #save new file tree.write
-        output('Converted file: '+file_path)
+        root = tree.getroot()
+        set_current_namespace(root.tag)
+        if converted_objects: output('                - Converted objects')
+        if converted_arrays: output('                - Converted arrays')
+        if converted_create_routines: output('                - Converted create routines')
         indent(root)
         new_file=os.path.join(out_dir, os.path.basename(file_path))
-        tree.write(new_file, encoding='utf-8', xml_declaration=True, default_namespace=None, method='xml')
+        
+        #Since tree.write will add a unix lineending after <?xml version...?> we do this step manually instead.
+        #tree.write(new_file, encoding='utf-8', xml_declaration=True, default_namespace=None, method='xml')
+        xml_str='<?xml version="1.0" encoding="utf-8" ?>'+os.linesep+ET.tostring(root, encoding='utf-8', method='xml')
+        outfile=open(new_file, "w")
+        outfile.write(xml_str)
+        outfile.close()
+        
         number_of_converted=number_of_converted+1
     else:
-        output('No changes to: '+file_path)
         number_of_unchanged=number_of_unchanged+1
+        output('                - No changes')
  
 def convert_dir(path, out_dir):
     """Traverse a directory and convert every file."""
@@ -277,6 +357,10 @@ def convert_dir(path, out_dir):
                 except:
                     pass 
                 convert_dir(os.path.join(root, d), od)
+                
+                if not os.listdir(od):
+                    #empty folder, remove it again
+                    os.rmdir(od)
         break
     
 def main(argv):

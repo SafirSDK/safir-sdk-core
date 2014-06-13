@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<propertyMapping xmlns="urn:safir-dots-unit" xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance">
+
+    <class>ParserTest.EntityInlineMappingNew</class>
+    <property>ParserTest.MyProperty</property>
+
+    <memberMapping>
+        <member>
+            <value>123</value>
+            <propertyMember>Int32PropertyValue</propertyMember>
+        </member>        
+        <member>
+            <propertyMember>Float64PropertyValue</propertyMember>
+            <value>123.321</value>
+        </member>
+        <member>
+            <propertyMember>StringPropertyValue</propertyMember>
+            <value>Stand in line</value>
+        </member>
+        <member>
+            <propertyMember>EnumPropertyValue</propertyMember>
+            <value>ParserTest.MyColorEnum.Red</value>
+        </member>
+        <member>
+            <propertyMember>EntityIdPropertyValue</propertyMember>
+            <entityId>
+                <name>ParserTest.MyEntity</name>
+                <instanceId>TestInstanceInlined</instanceId>
+            </entityId>
+        </member>
+        <member>
+            <propertyMember>ChannelIdPropertyValue</propertyMember>
+            <value>channel_one_inlined</value>
+        </member>
+        <member>
+            <propertyMember>ItemPropertyValue</propertyMember>
+            <ParserTest.MyItem>
+                <MyNumber>5</MyNumber>
+                <MyStrings>
+                    <String index='0'>Kalle Inline</String>
+                    <String index='3'>Svarre Inline</String>
+                </MyStrings>
+            </ParserTest.MyItem>
+        </member>
+
+        <!-- array -->
+        <member>
+            <array>
+                <value>1</value>
+                <value>2</value>
+                <value>3</value>
+            </array>
+            <propertyMember>Int32PropertyValueArray</propertyMember>
+        </member>        
+        <member>
+            <propertyMember>Float64PropertyValueArray</propertyMember>
+            <array>
+                <value>1.1</value>
+                <value>2.2</value>
+                <value>3.3</value>
+            </array>
+        </member>
+        <member>
+            <propertyMember>StringPropertyValueArray</propertyMember>
+            <array>
+                <value>abc</value>
+                <value>def</value>
+                <value>ghi</value>
+            </array>
+        </member>
+        <member>
+            <propertyMember>EnumPropertyValueArray</propertyMember>
+            <array>
+                <value>White</value>
+                <value>Black</value>
+                <value>Red</value>
+            </array>
+        </member>
+        <member>
+            <propertyMember>EntityIdPropertyValueArray</propertyMember>
+            <array>
+                <entityId>
+                    <name>ParserTest.MyEntity</name>
+                    <instanceId>Inst1</instanceId>
+                </entityId>
+                <entityId>
+                    <name>ParserTest.EntityNullMapping</name>
+                    <instanceId>Inst2</instanceId>
+                </entityId>
+                <entityId>
+                    <name>ParserTest.EntityParamMapping</name>
+                    <instanceId>Inst3</instanceId>
+                </entityId>
+            </array>
+        </member>
+        <member>
+            <propertyMember>ChannelIdPropertyValueArray</propertyMember>
+            <array>
+                <value>channel_one</value>
+                <value>channel_two</value>
+                <value>channel_three</value>
+            </array>
+        </member>
+        <member>
+            <propertyMember>ItemPropertyValueArray</propertyMember>
+            <array>
+                <ParserTest.MyItem>
+                    <MyNumber>1</MyNumber>
+                    <MyStrings>
+                        <String index='0'>aaa</String>
+                        <String index='2'>bbb</String>
+                    </MyStrings>
+                </ParserTest.MyItem>
+                <ParserTest.MyItem>
+                    <MyNumber>2</MyNumber>
+                    <MyStrings>
+                        <String index='1'>ccc</String>
+                        <String index='3'>ddd</String>
+                    </MyStrings>
+                </ParserTest.MyItem>             
+                <ParserTest.MyItem>
+                    <MyNumber>3</MyNumber>
+                    <MyStrings>
+                        <String index='4'>eee</String>
+                        <String index='3'>fff</String>
+                    </MyStrings>
+                </ParserTest.MyItem>
+            </array>
+        </member>
+    </memberMapping>
+
+</propertyMapping>
