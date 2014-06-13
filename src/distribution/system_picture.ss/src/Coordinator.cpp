@@ -67,12 +67,15 @@ namespace
         }
     }
 
-    std::set<int64_t> GetNodeIds(const SystemStateMessage& state)
+    std::set<int64_t> GetDeadNodeIds(const SystemStateMessage& state)
     {
         std::set<int64_t> nodes;
         for (int i = 0; i < state.node_info_size(); ++i)
         {
-            nodes.insert(state.node_info(i).id());
+            if (state.node_info(i).is_dead())
+            {
+                nodes.insert(state.node_info(i).id());
+            }
         }
         return nodes;
     }
@@ -217,7 +220,7 @@ namespace
         
         if (!m_lastStatistics.Valid())
         {
-            lllog(8) << "SP: No valid raw data yet, not updating my state" << std::endl;
+            lllog(7) << "SP: No valid raw data yet, not updating my state" << std::endl;
             return false;
         }
 
@@ -232,7 +235,7 @@ namespace
 
             if (!m_lastStatistics.HasRemoteStatistics(i))
             {
-                lllog(6) << "SP: No remote RAW data received from node " 
+                lllog(7) << "SP: No remote RAW data received from node " 
                           << m_lastStatistics.Id(i) << ", not updating my state" << std::endl;
                 return false;
             }
@@ -240,7 +243,7 @@ namespace
             const auto remote = m_lastStatistics.RemoteStatistics(i);
             if (remote.ElectionId() != m_currentElectionId)
             {
-                lllog(6) << "SP: Remote RAW data from node "
+                lllog(7) << "SP: Remote RAW data from node "
                          << m_lastStatistics.Id(i) << " has wrong election id (" << remote.ElectionId() << "), not updating my state." << std::endl;
                 return false;
             }
@@ -279,6 +282,9 @@ namespace
             if (!m_lastStatistics.IsDead(i) &&
                 deadNodes.find(m_lastStatistics.Id(i)) != deadNodes.end())
             {
+                lllog (4) << "Someone thinks that node " << m_lastStatistics.Name(i).c_str()
+                          << " with id " << m_lastStatistics.Id(i) 
+                          << " is dead, so I'll mark him as dead and spread the word in the SystemState." << std::endl;
                 m_communication.ExcludeNode(m_lastStatistics.Id(i));
                 m_rawHandler.SetDeadNode(m_lastStatistics.Id(i));
                 justKilled = true;
@@ -356,7 +362,7 @@ namespace
             {
                 m_stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
                 
-                const auto nodes = GetNodeIds(m_stateMessage);
+                const auto deadNodes = GetDeadNodeIds(m_stateMessage);
                 
                 //Note: never do exclude on a node that is not one that we have 
                 //received NewNode for, i.e. is in m_lastStatistics top level.
@@ -364,8 +370,12 @@ namespace
                 {
                     //if we haven't marked the node as dead and electee doesnt think the node
                     //is part of the system we want to exclude the node
-                    if (!m_lastStatistics.IsDead(i) && nodes.find(m_lastStatistics.Id(i)) == nodes.end())
+                    if (!m_lastStatistics.IsDead(i) && deadNodes.find(m_lastStatistics.Id(i)) != deadNodes.end())
                     {
+                        lllog (4) << "Elected coordinator thinks that node " << m_lastStatistics.Name(i).c_str()
+                                  << " with id " << m_lastStatistics.Id(i) 
+                                  << " is dead, so I'll mark him as dead." << std::endl;
+
                         m_communication.ExcludeNode(m_lastStatistics.Id(i));
                         m_rawHandler.SetDeadNode(m_lastStatistics.Id(i));
                     }
@@ -381,7 +391,9 @@ namespace
         //cancel any other pending elections
         m_electionTimer.cancel(); //
         
-        m_electionTimer.expires_from_now(boost::chrono::milliseconds(100)); 
+        //TODO: how long should this timeout be? And how does it interact with the discovery interval
+        //in communication?
+        m_electionTimer.expires_from_now(boost::chrono::seconds(3)); 
         m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
         {
             if (!!error)
