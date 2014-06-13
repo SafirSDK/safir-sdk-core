@@ -116,24 +116,21 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
     --library-name ${GEN_NAME}
     --output-path=generated_code)
   
-  if (UNIX)
-    set (sync_cmd COMMAND sync)
-  endif()
-
   ADD_CUSTOM_COMMAND(
     OUTPUT ${cpp_files} ${java_files} ${dotnet_files}
 
     COMMAND ${dots_v_command} ${CMAKE_CURRENT_SOURCE_DIR}
-    ${sync_cmd}
     DEPENDS ${dod_files} ${dou_files}
     COMMENT "Generating code for ${CMAKE_CURRENT_SOURCE_DIR}")
 
   #make clean target remove the generated_code directory
   SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES generated_code)
+
+  #We need a custom target that the library (java,cpp,dotnet) targets can depend on, since
+  #having them all just depend on the output files will wreak havoc with cmake in parallel builds.
+  #See http://public.kitware.com/Bug/view.php?id=12311
+  add_custom_target(dots_generated-${GEN_NAME}-code ALL DEPENDS ${cpp_files} ${java_files} ${dotnet_files})
   #############
-
-
-
   
   #
   # Build CPP
@@ -154,6 +151,8 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
     TARGET_LINK_LIBRARIES(dots_generated-${GEN_NAME}-cpp dots_generated-${DEP}-cpp)
   ENDFOREACH()
 
+  add_dependencies(dots_generated-${GEN_NAME}-cpp dots_generated-${GEN_NAME}-code)
+
   #TODO:precompiled headers?!
 
   ############
@@ -171,6 +170,7 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
       SOURCES ${java_files}
       INCLUDE_JARS dots_java ${include_jars})
 
+    add_dependencies(dots_generated-${GEN_NAME}-java dots_generated-${GEN_NAME}-code)
   endif()
 
   ############
@@ -189,6 +189,7 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
       SOURCES ${dotnet_files}
       REFERENCES Safir.Dob.Typesystem ${assembly_refs})
 
+    add_dependencies(dots_generated-${GEN_NAME}-dotnet dots_generated-${GEN_NAME}-code)
   endif()
 
   ############
