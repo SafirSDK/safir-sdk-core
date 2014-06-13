@@ -274,7 +274,7 @@ public:
             m_recvCount[id]=sendCount;
         }
 
-        if (true)//(rc%1000==0)
+        if (rc%1000==0)
         {
             std::cout<<"Recv from "<<m_nodeNames[id]<<", count="<<m_recvCount[id]<<std::endl;
         }

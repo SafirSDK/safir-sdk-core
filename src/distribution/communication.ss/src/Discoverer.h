@@ -420,7 +420,7 @@ namespace Com
             {
                 uint64_t id=LlufId_Generate64(seed.c_str());
                 Node s("seed", id, 0, seed, "", true);
-                this->m_seeds.insert(std::make_pair(id, s));
+                m_seeds.insert(std::make_pair(id, s));
                 lllog(DiscovererLogLevel)<<L"COM: Add seed "<<seed.c_str()<<std::endl;
             }
             //else trying to seed myself

@@ -117,6 +117,7 @@ public:
 
         work.reset();
         io.stop();
+        threads.join_all();
         std::cout<<"ReaderWriterTest tests passed"<<std::endl;
     }
 

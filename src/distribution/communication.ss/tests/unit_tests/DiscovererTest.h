@@ -31,7 +31,21 @@ class DiscovererTest
 public:
     void Run()
     {
+        boost::asio::io_service io;
+        auto work=boost::make_shared<boost::asio::io_service::work>(io);
+        boost::thread_group threads;
+        for (int i = 0; i < 9; ++i)
+        {
+            threads.create_thread([&]{io.run();});
+        }
 
+        //----------------------
+        // Test
+        //----------------------
+        work.reset();
+        io.stop();
+        threads.join_all();
+        std::cout<<"DiscovererTest tests passed"<<std::endl;
     }
 
 private:

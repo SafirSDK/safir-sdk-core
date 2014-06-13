@@ -83,6 +83,7 @@ public:
 
         work.reset();
         io.stop();
+        threads.join_all();
         std::cout<<"HeartBeatSender tests passed"<<std::endl;
     }
 
