@@ -88,7 +88,7 @@ parser.add_argument('--number', '-n', dest="num", action='store', type=int,
                     help='Number of controls to run')
 parser.add_argument('--terminate', '-t', dest='terminate', action='store_true',
                     default=False,
-                    help='randomly terminate safir_controls every 10 seconds')
+                    help='randomly terminate safir_controls every 60 seconds')
 parser.add_argument('--skip-0', '-s', dest='skip', action='store_true',
                     default=False,
                     help='Dont start Node 0')
@@ -126,7 +126,7 @@ try:
         if not args.terminate:
             continue
 
-        if killtime + 30 < time.time():
+        if killtime + 60 < time.time():
             killtime = time.time()
             #choose one to stop
             index = random.randint(1,len(controls)-1)
