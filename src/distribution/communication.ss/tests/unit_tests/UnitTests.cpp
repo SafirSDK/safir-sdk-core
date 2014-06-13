@@ -21,8 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include "ReaderTest.h"
-#include "WriterTest.h"
+#include "ReaderWriterTest.h"
 #include "MessageQueueTest.h"
 #include "HeartbeatSenderTest.h"
 #include "DeliveryHandlerTest.h"
@@ -48,21 +47,16 @@ int main(int argc, char* argv[])
 //            DeliveryHandlerTest test;
 //            test.Run();
 //        }
-//        else if (run=="ReaderTest")
-//        {
-//            ReaderTest test;
-//            test.Run();
-//        }
-//        else if (run=="WriterTest")
-//        {
-//            WriterTest test;
-//            test.Run();
-//        }
-//        else if (run=="HeartBeatSenderTest")
-//        {
-//            HeartBeatSenderTest test;
-//            test.Run();
-//        }
+        else if (run=="ReaderWriterTest")
+        {
+            ReaderWriterTest test;
+            test.Run();
+        }
+        else if (run=="HeartbeatSenderTest")
+        {
+            HeartbeatSenderTest test;
+            test.Run();
+        }
 //        else if (run=="AckedDataSenderTest")
 //        {
 //            AckedDataSenderTest test;
@@ -75,27 +69,26 @@ int main(int argc, char* argv[])
 //        }
 //        else
 //        {
-//            std::cout<<"Valid test case args are: MessageQueueTest, DeliveryHandlerTest, ReaderTest, WriterTest, DiscovererTest"<<std::endl;
+//            std::cout<<"Valid test case args are: MessageQueueTest, DeliveryHandlerTest, ReaderTest, WriterTest, HeartbeatSenderTest, DiscovererTest"<<std::endl;
 //            return 0;
 //        }
-//        std::cout<<"================================="<<std::endl;
-//        std::cout<<"All tests passed!"<<std::endl;
-//        std::cout<<"================================="<<std::endl;
+        std::cout<<"================================="<<std::endl;
+        std::cout<<"All tests passed!"<<std::endl;
+        std::cout<<"================================="<<std::endl;
     }
     else //run all tests
     {
         {(MessageQueueTest()).Run();}
 //        //{(DeliveryHandlerTest()).Run();}
-//        //{(ReaderTest()).Run();}
-//        //{(WriterTest()).Run();}
-//        //{(HeartBeatSenderTest()).Run();}
+        {(ReaderWriterTest()).Run();}
+        {(HeartbeatSenderTest()).Run();}
 //        {(AckedDataSenderTest()).Run();}
 //        //{(DiscovererTest()).Run();}
 
-//        //if we get here all tests passed without errors
-//        std::cout<<"================================="<<std::endl;
-//        std::cout<<"All tests passed!"<<std::endl;
-//        std::cout<<"================================="<<std::endl;
+        //if we get here all tests passed without errors
+        std::cout<<"================================="<<std::endl;
+        std::cout<<"All tests passed!"<<std::endl;
+        std::cout<<"================================="<<std::endl;
     }
     return 0;
 }

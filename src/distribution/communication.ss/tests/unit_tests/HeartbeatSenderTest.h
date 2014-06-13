@@ -31,66 +31,59 @@ class HeartbeatSenderTest
 public:
     void Run()
     {
-//        boost::asio::io_service io;
-//        auto work=boost::make_shared<boost::asio::io_service::work>(io);
+        const int Interval=1000;
+        boost::asio::io_service io;
+        auto work=boost::make_shared<boost::asio::io_service::work>(io);
 
-//        boost::thread_group threads;
-//        for (int i = 0; i < 9; ++i)
-//        {
-//            threads.create_thread([&]{io.run();});
-//        }
+        boost::thread_group threads;
+        for (int i = 0; i < 9; ++i)
+        {
+            threads.create_thread([&]{io.run();});
+        }
 
-//        Com::Node me{"Test", 100, "127.0.0.1:10000", "239.192.1.1:11000"};
-//        Com::HeartBeatSenderBasic<HeartbeatSenderTest::TestWriter> hb(io, me);
-//        hb.Start();
+        //Multicast enabled HeartbeatSender
+        Com::HeartbeatSenderBasic<HeartbeatSenderTest::TestWriter> hb1(io, 100, 4, "239.192.1.1:11000", Interval);
+        hb1.Start();
+        int last11000=0;
+        Wait(Interval+200);
+        {
+            boost::mutex::scoped_lock lock(mutex);
+            CHECK(received[11000]>last11000);
+            last11000=received[11000];
+        }
 
-//        Wait(Com::Parameters::HeartBeatInterval+200);
-//        {
-//            boost::mutex::scoped_lock lock(mutex);
-//            CHECK(received.size()==0);
-//        }
+        hb1.AddNode(10001, "127.0.0.1:10001");
+        hb1.AddNode(10002, "127.0.0.1:10002");
+        Wait(Interval+200);
+        {
+            boost::mutex::scoped_lock lock(mutex);
+            CHECK(received[11000]>last11000);
+            last11000=received[11000];
 
-//        hb.AddNode(Com::Node("Test_1", 1, "127.0.0.1:10001", "239.192.1.1:11000"));
-//        hb.AddNode(Com::Node("Test_2", 2, "127.0.0.1:10002", ""));
-//        hb.AddNode(Com::Node("Test_3", 3, "127.0.0.1:10003", ""));
-//        hb.AddNode(Com::Node("Test_4", 4, "127.0.0.1:10004", "239.192.1.1:11000"));
-//        hb.SetSystemNode(1, true);
-//        hb.SetSystemNode(2, true);
-//        hb.SetSystemNode(3, true);
-//        hb.SetSystemNode(4, true);
+            CHECK(received.find(10001)==received.end());
+            CHECK(received.find(10002)==received.end());
+        }
 
-//        int last11000=0;
-//        int last10002=0;
-//        int last10003=0;
-//        for (int i=0; i<3; ++i)
-//        {
-//            Wait(Com::Parameters::HeartBeatInterval+100);
+        //Only unicast enabled HeartbeatSender
+        Com::HeartbeatSenderBasic<HeartbeatSenderTest::TestWriter> hb2(io, 100, 4, "", Interval);
+        hb2.Start();
 
-//            boost::mutex::scoped_lock lock(mutex);
-//            CHECK(received.size()==3);
-//            CHECK(received[11000]>last11000);
-//            CHECK(received[10002]>last10002);
-//            CHECK(received[10003]>last10003);
-//            last11000=received[11000];
-//            last10002=received[10002];
-//            last10003=received[10003];
-//        }
+        hb2.AddNode(10003, "127.0.0.1:10003");
+        hb2.AddNode(10004, "127.0.0.1:10004");
+        int last10003=0;
+        int last10004=0;
+        Wait(Interval+200);
+        {
+            boost::mutex::scoped_lock lock(mutex);
+            CHECK(received[10003]>last10003);
+            last10003=received[10003];
+            CHECK(received[10004]>last10004);
+            last10004=received[10004];
+        }
 
-//        std::cout<<"Stopping HeartBeatSender..."<<std::endl;
-//        hb.Stop();
-//        work.reset();
-//        threads.join_all();
-//        std::cout<<"HeartBeatSender stopped"<<std::endl;
-
-//        last11000=received[11000];
-//        last10002=received[10002];
-//        last10003=received[10003];
-//        Wait(Com::Parameters::HeartBeatInterval+100);
-//        CHECK(received[11000]==last11000);
-//        CHECK(received[10002]==last10002);
-//        CHECK(received[10003]==last10003);
-
-//        std::cout<<"HeartBeatSender tests passed"<<std::endl;
+        work.reset();
+        io.stop();
+        std::cout<<"HeartBeatSender tests passed"<<std::endl;
     }
 
 private:

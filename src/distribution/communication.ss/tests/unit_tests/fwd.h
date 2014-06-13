@@ -27,6 +27,7 @@
 #include <iostream>
 #include <string>
 #include <map>
+#include <queue>
 #include <boost/make_shared.hpp>
 #include <boost/optional.hpp>
 #include <boost/thread.hpp>
