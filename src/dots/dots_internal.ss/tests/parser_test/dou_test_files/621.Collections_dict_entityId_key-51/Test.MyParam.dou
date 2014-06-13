@@ -96,12 +96,20 @@
                     <value>1</value>
                 </entry>
                 <entry>
-                    <key>Pelle</key>
+                    <key>Olle</key>
                     <value>12</value>
                 </entry>
                 <entry>
                     <key>Svarre</key>
                     <value>5</value>
+                </entry>
+                <entry>
+                    <key>Pelle</key>
+                    <value>13</value>
+                </entry>
+                <entry>
+                    <key>Biffen</key>
+                    <value>13</value>
                 </entry>
             </dictionary>
         </parameter>
@@ -120,6 +128,10 @@
                 </entry>
                 <entry>
                     <key>third</key>
+                    <value>AnotherInstance</value>
+                </entry>
+                <entry>
+                    <key>3</key>
                     <value>12345</value>
                 </entry>
             </dictionary>
@@ -142,7 +154,7 @@
                         <name>ParserTest.MyEntity</name>
                         <instanceId>2</instanceId>
                     </entityId>
-                </entry>
+                </entry>                
                 <entry>
                     <key>Black</key>
                     <entityId>
@@ -159,17 +171,7 @@
             <dictionary keyType="EntityId">
                 <entry>
                     <key>
-                        <name>ParserTest.MyEntity</name>
-                        <instanceId>2</instanceId>
-                    </key>
-                    <ParserTest.MyEntity>
-                        <MyColorEnum>Grey</MyColorEnum>
-                        <MyInt>123</MyInt>
-                    </ParserTest.MyEntity>
-                </entry>
-                <entry>
-                    <key>
-                        <name>Safir.Dob.Entity</name>
+                        <name>Muhaha.ParserTest.MyEntity</name>
                         <instanceId>2</instanceId>
                     </key>
                     <ParserTest.MyEntity>
@@ -195,9 +197,27 @@
                         </MySequence>
                     </ParserTest.MyEntity>
                 </entry>
+                <entry>
+                    <key>
+                        <name>ParserTest.MyEntity</name>
+                        <instanceId>3</instanceId>
+                    </key>
+                    <ParserTest.MyEntity>
+                        <MySequence>
+                            <ParserTest.MyEntity>
+                                <MyColorEnum>Black</MyColorEnum>
+                                <MyInt>1</MyInt>
+                            </ParserTest.MyEntity>
+                            <ParserTest.MyEntity>
+                                <MyColorEnum>White</MyColorEnum>
+                                <MyInt>2</MyInt>
+                            </ParserTest.MyEntity>
+                        </MySequence>
+                    </ParserTest.MyEntity>
+                </entry>
             </dictionary>
         </parameter>
-        
+
         <parameter>
             <name>IntPar</name>
             <type>Int32</type>

@@ -171,56 +171,113 @@ namespace ToolSupport
 
     int ReferencedKeyToIndex(const ParameterDescriptionBasic* pd, const std::string& key)
     {
-        if (pd->GetCollectionType()==DictionaryCollectionType)
+        switch (pd->GetCollectionType())
+        {
+        case DictionaryCollectionType:
         {
             ValueDefinition vd;
             if (ParseKey(pd->GetKeyType(), key, vd))
             {
+                int index=-1;
                 switch(pd->GetKeyType())
                 {
                 case Int32MemberType:
-                    return TypeUtilities::GetDictionaryIndexFromKey(pd, vd.key.int32);
+                    index=TypeUtilities::GetDictionaryIndexFromKey(pd, vd.key.int32);
                     break;
 
                 case Int64MemberType:
                 case TypeIdMemberType:
-                    return TypeUtilities::GetDictionaryIndexFromKey(pd, vd.key.int64);
+                    index=TypeUtilities::GetDictionaryIndexFromKey(pd, vd.key.int64);
                     break;
 
                 case StringMemberType:
-                    return TypeUtilities::GetDictionaryIndexFromKey(pd, vd.key.str);
+                    index=TypeUtilities::GetDictionaryIndexFromKey(pd, vd.key.str);
                     break;
 
                 case EntityIdMemberType:
-                    return TypeUtilities::GetDictionaryIndexFromKey(pd, std::make_pair(vd.key.int64, vd.key.hash));
+                    index=TypeUtilities::GetDictionaryIndexFromKey(pd, std::make_pair(vd.key.int64, vd.key.hash));
                     break;
 
                 case InstanceIdMemberType:
                 case HandlerIdMemberType:
                 case ChannelIdMemberType:
-                    return TypeUtilities::GetDictionaryIndexFromKey(pd, std::make_pair(vd.key.hash, static_cast<const char*>(NULL)));
+                    index=TypeUtilities::GetDictionaryIndexFromKey(pd, std::make_pair(vd.key.hash, static_cast<const char*>(NULL)));
                     break;
 
                 default:
                     break;
                 }
+
+                if (index<0)
+                {
+                    std::ostringstream os;
+                    os<<"The dictionary key '"<<key<<"' is not found in the referenced parameter "<<pd->qualifiedName;
+                    throw os.str();
+                }
+
+                return index;
+            }
+            else
+            {
+                std::ostringstream os;
+                os<<"Failed to parse '"<<key<<"' as a dictionary key of type "<<BasicTypeOperations::MemberTypeToString(pd->GetKeyType());
+                throw os.str();
             }
         }
-        else
+            break;
+
+        case ArrayCollectionType:
         {
-            if (key.empty()) //the case if index is not present, then we implicit mean 0
+            if (key.empty())
             {
-                return 0;
+                std::ostringstream os;
+                os<<"Array parameter '"<<pd->qualifiedName<<"' is missing index element in reference";
+                throw os.str();
             }
 
             try
             {
-                return boost::lexical_cast<int>(key);
+                int index=boost::lexical_cast<int>(key);
+                if (index<0 || index>=pd->GetNumberOfValues())
+                {
+                    std::ostringstream os;
+                    os<<"Array parameter reference out of range. Index="<<index<<"' but the parameter '"<<pd->qualifiedName<<"' only has "<<pd->GetNumberOfValues()<<" values.";
+                    throw os.str();
+                }
+                return index;
             }
-            catch (const boost::bad_lexical_cast&) {}
+            catch (const boost::bad_lexical_cast&)
+            {
+                std::ostringstream os;
+                os<<"Specified index '"<<key<<"' can't be interpreted as an array index of type Int32. Referenced parameter is '"<<pd->qualifiedName<<"'";
+                throw os.str();
+            }
+        }
+            break;
+
+        case SingleValueCollectionType:
+        case SequenceCollectionType:
+        {
+            if (!key.empty())
+            {
+                std::ostringstream os;
+                os<<"The parameter '"<<pd->qualifiedName<<"' has collectionType="<<BasicTypeOperations::CollectionTypeToString(pd->GetCollectionType())<<"' and hence key/index is not allowed in reference.";
+                throw os.str();
+            }
+
+            return 0;
+
+        }
+            break;
+
         }
 
-        return -1;
+        {
+            //should never get here
+            std::ostringstream os;
+            os<<"Totally confused! Key='"<<key<<"' and referenced parameter is "<<pd->qualifiedName<<"' and the collectionType="<<BasicTypeOperations::CollectionTypeToString(pd->GetCollectionType())<<". Can't figure out what to do!";
+            throw os.str();
+        }
     }
 
     std::string GetEntityIdParameterAsString(boost::property_tree::ptree& pt)
@@ -694,7 +751,7 @@ namespace ToolSupport
                 {
                     std::ostringstream os;
                     os<<"The parameter "<<pd->GetName()<<" has an invalid key. The specified typeId is not a type. (Hint its the "<<index+1<<":th dictionary entry in the parameter)";
-                    throw ParseError("Invalid TypeId key", os.str(), state.currentPath, 220);
+                    throw ParseError("Invalid TypeId key", os.str(), state.currentPath, 202);
                 }
             }
         }
@@ -709,14 +766,14 @@ namespace ToolSupport
                 {
                     std::ostringstream os;
                     os<<"The parameter "<<pd->GetName()<<" has an invalid typeId in its key. The typeId does not exist or is not a class type. (Hint it's the "<<index+1<<":th dictionary entry in the parameter)";
-                    throw ParseError("Invalid EntityId key", os.str(), state.currentPath, 221);
+                    throw ParseError("Invalid EntityId key", os.str(), state.currentPath, 51);
                 }
 
                 if (!BasicTypeOperations::IsOfType<TypeRepository>(state.repository.get(), ObjectMemberType, v.key.int64, ObjectMemberType, EntityTypeId))
                 {
                     std::ostringstream os;
                     os<<"The parameter "<<pd->GetName()<<" has an invalid key. The class '"<<tmpCd->GetName()<<"' is not a subtype of Safir.Dob.Entity";
-                    throw ParseError("Invalid EntityId key", os.str(), state.currentPath, 222);
+                    throw ParseError("Invalid EntityId key", os.str(), state.currentPath, 53);
                 }
             }
         }
@@ -1022,11 +1079,15 @@ namespace ToolSupport
             throw ParseError("Parameter reference error", ss.str(), cd->FileName(), 42);
         }
 
-        int parameterIndex=ReferencedKeyToIndex(referenced, ref.parameterKey);
-        if (parameterIndex<0)
+        int parameterIndex=-1;
+        try
+        {
+            parameterIndex=ReferencedKeyToIndex(referenced, ref.parameterKey);
+        }
+        catch (const std::string& err)
         {
             std::ostringstream ss;
-            ss<<"The specified key in parameter valueRef does not exist or is out of bounds.'"<<ref.parameterName<<"' and key='"<<ref.parameterKey<<"'. Referenced from parameter: "<<referencing->GetName();
+            ss<<"The specified key/index in parameter valueRef parameter='"<<ref.parameterName<<"' and key/index='"<<ref.parameterKey<<"' can't be resolved. Referenced from parameter: "<<referencing->GetName()<<". "<<err;
             throw ParseError("Invalid parameter reference", ss.str(), cd->FileName(), 203);
         }
 
@@ -1092,20 +1153,18 @@ namespace ToolSupport
             throw ParseError("Parameter reference error", ss.str(), cd->FileName(), 49);
         }
 
-        int parameterIndex=ReferencedKeyToIndex(referenced, ref.parameterKey);
-        if (parameterIndex<0)
+        int parameterIndex=-1;
+        try
+        {
+            parameterIndex=ReferencedKeyToIndex(referenced, ref.parameterKey);
+        }
+        catch (const std::string& err)
         {
             std::ostringstream os;
-            os<<"Can't resolve arraySizeRef "<<ref.parameterName<<"['"<<ref.parameterKey<<"]. Referenced from memeber '"<<md->GetName()<<"' in class "<<cd->GetName();
+            os<<"Can't resolve arraySizeRef "<<ref.parameterName<<"["<<ref.parameterKey<<"]. Referenced from memeber '"<<md->GetName()<<"' in class "<<cd->GetName()<<". "<<err;
             throw ParseError("Invalid arraySizeRef", os.str(), cd->FileName(), 204);
         }
 
-        if (referenced->GetNumberOfValues()<=parameterIndex)
-        {
-            std::ostringstream ss;
-            ss<<"Array index out of range for Parameter arraySizeRef '"<<ref.parameterName<<"' and index="<<parameterIndex<<". Referenced from memeber '"<<md->GetName()<<"' in class "<<cd->GetName();
-            throw ParseError("Parameter index out of bounds", ss.str(), cd->FileName(), 51);
-        }
         if (referenced->GetMemberType()!=Int32MemberType)
         {
             std::ostringstream ss;
@@ -1138,20 +1197,18 @@ namespace ToolSupport
             throw ParseError("Parameter reference error", ss.str(), cd->FileName(), 107);
         }
 
-        int parameterIndex=ReferencedKeyToIndex(referenced, ref.parameterKey);
-        if (parameterIndex<0)
+        int parameterIndex=-1;
+        try
+        {
+            parameterIndex=ReferencedKeyToIndex(referenced, ref.parameterKey);
+        }
+        catch (const std::string& err)
         {
             std::ostringstream os;
-            os<<"Can't resolve maxLengthRef "<<ref.parameterName<<"['"<<ref.parameterKey<<"]. Referenced from memeber '"<<md->GetName()<<"' in class "<<cd->GetName();
+            os<<"Can't resolve maxLengthRef "<<ref.parameterName<<"["<<ref.parameterKey<<"]. Referenced from memeber '"<<md->GetName()<<"' in class "<<cd->GetName()<<". "<<err;
             throw ParseError("Invalid maxLengthRef", os.str(), cd->FileName(), 178);
         }
 
-        if (referenced->GetNumberOfValues()<=parameterIndex)
-        {
-            std::ostringstream ss;
-            ss<<"Array index out of range for Parameter maxLengthRef '"<<ref.parameterName<<"' and index="<<parameterIndex<<". Referenced from memeber '"<<md->GetName()<<"' in class "<<cd->GetName();
-            throw ParseError("Parameter index out of bounds", ss.str(), cd->FileName(), 53);
-        }
         if (referenced->GetMemberType()!=Int32MemberType)
         {
             std::ostringstream ss;
@@ -1231,11 +1288,15 @@ namespace ToolSupport
                 throw ParseError("CreateRoutine collection values not supported", os.str(), cd->FileName(), 61);
             }
 
-            int paramIndex=ReferencedKeyToIndex(pdef, ref.parameterKey);
-            if (paramIndex<0)
+            int paramIndex=-1;
+            try
+            {
+                paramIndex=ReferencedKeyToIndex(pdef, ref.parameterKey);
+            }
+            catch (const std::string& err)
             {
                 std::ostringstream os;
-                os<<"Can't resolve createRoutine value reference "<<ref.parameterName<<"["<<ref.parameterKey<<"] for member "<<memberName<<" in createRoutine "<<cr->GetName()<<" in class "<<cd->GetName();
+                os<<"Can't resolve createRoutine value reference "<<ref.parameterName<<"["<<ref.parameterKey<<"] for member "<<memberName<<" in createRoutine "<<cr->GetName()<<" in class "<<cd->GetName()<<". "<<err;
                 throw ParseError("Invalid create routine value", os.str(), cd->FileName(), 179);
             }
 

@@ -63,7 +63,7 @@ namespace ToolSupport
     void VerifyParameterKey(const ParseState& state, ParameterDescriptionBasic* pd);
     inline bool ValidKeyType(DotsC_MemberType memberType)
     {
-        return  memberType==Int32MemberType || memberType==Int64MemberType || memberType==StringMemberType ||
+        return  memberType==Int32MemberType || memberType==Int64MemberType || memberType==StringMemberType || memberType==TypeIdMemberType ||
                 memberType==InstanceIdMemberType || memberType==HandlerIdMemberType || memberType==ChannelIdMemberType ||
                 memberType==EntityIdMemberType || memberType==EnumerationMemberType || memberType==ObjectMemberType; //objectMemberType only allowed since it may be resolved to an enum later.
     }
@@ -1590,20 +1590,16 @@ namespace ToolSupport
                 throw ParseError("Type missmatch", os.str(), state.currentPath, 201);
             }
 
-            int paramIndex=ReferencedKeyToIndex(srcParam, paramKey);
-            if (paramIndex<0)
+            int paramIndex=-1;
+            try
             {
-                std::ostringstream os;
-                os<<"In propertyMapping for "<<state.lastInsertedPropertyMapping->property->name<<"."<<propMem->GetName()<<" the parameter '"<<paramName<<"' is referenced with key or index '"<<paramKey<<"' wich does not exist.";
-                throw ParseError("Key does not exist", os.str(), state.currentPath, 205);
+                paramIndex=ReferencedKeyToIndex(srcParam, paramKey);
             }
-
-            if (paramIndex>=srcParam->GetNumberOfValues())
+            catch (const std::string& err)
             {
-                //index out of range
                 std::ostringstream os;
-                os<<"Referenced parameter '"<<paramName<<"' has arraySize="<<srcParam->GetNumberOfValues()<<". Index out of range in mapping of property member "<<state.lastInsertedPropertyMapping->property->name<<"."<<propMem->GetName();
-                throw ParseError("Index out of range", os.str(), state.currentPath, 202);
+                os<<"Failed to resolve parameter reference in propertyMapping for "<<state.lastInsertedPropertyMapping->property->name<<"."<<propMem->GetName()<<". "<<err;
+                throw ParseError("Invalid parameter reference", os.str(), state.currentPath, 205);
             }
 
             ParameterDescriptionBasic* destParam=state.lastInsertedMemberMapping->paramRef;
