@@ -21,12 +21,14 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include <boost/test/minimal.hpp>
 #include <Safir/Dob/Internal/SystemState.h>
 #include "../src/MessageWrapperCreators.h"
 #include "SystemStateMessage.pb.h"
 #include <Safir/Utilities/Internal/MakeUnique.h>
 #include <boost/lexical_cast.hpp>
+
+#define BOOST_TEST_MODULE SystemStateTests
+#include <boost/test/unit_test.hpp>
 
 using namespace Safir::Dob::Internal::SP;
 
@@ -58,34 +60,30 @@ std::unique_ptr<SystemStateMessage> GetProtobuf(bool empty)
     
 }
 
-int test_main(int, char**)
+BOOST_AUTO_TEST_CASE( test_empty )
 {
-    {
-        const auto r = SystemStateCreator::Create(GetProtobuf(true));
-        BOOST_CHECK(r.Size() == 0);
-    }
-
-    {
-        const auto r = SystemStateCreator::Create(GetProtobuf(false));
-        BOOST_CHECK(r.ElectedId() == 100);
-
-        BOOST_CHECK(r.Size() == 5);
-
-        for (int i = 0; i < 5; ++i)
-        {
-            const auto iAsStr = boost::lexical_cast<std::string>(i);
-
-            BOOST_CHECK(r.Name(i) == iAsStr);
-
-            BOOST_CHECK(r.Id(i) == i);
-            BOOST_CHECK(r.NodeTypeId(i) == i + 100);
-            BOOST_CHECK(r.ControlAddress(i) == iAsStr + ":fobar!");
-            BOOST_CHECK(r.DataAddress(i) == iAsStr + ":flopp");
-            BOOST_CHECK(r.IsDead(i) == (i%2==0));
-        }
-    }
-
-    return 0;
+    const auto r = SystemStateCreator::Create(GetProtobuf(true));
+    BOOST_CHECK(r.Size() == 0);
 }
 
 
+BOOST_AUTO_TEST_CASE( test_not_empty )
+{
+    const auto r = SystemStateCreator::Create(GetProtobuf(false));
+    BOOST_CHECK(r.ElectedId() == 100);
+    
+    BOOST_CHECK(r.Size() == 5);
+    
+    for (int i = 0; i < 5; ++i)
+    {
+        const auto iAsStr = boost::lexical_cast<std::string>(i);
+        
+        BOOST_CHECK(r.Name(i) == iAsStr);
+        
+        BOOST_CHECK(r.Id(i) == i);
+        BOOST_CHECK(r.NodeTypeId(i) == i + 100);
+        BOOST_CHECK(r.ControlAddress(i) == iAsStr + ":fobar!");
+        BOOST_CHECK(r.DataAddress(i) == iAsStr + ":flopp");
+        BOOST_CHECK(r.IsDead(i) == (i%2==0));
+    }
+}
