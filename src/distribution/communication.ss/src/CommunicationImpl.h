@@ -101,7 +101,6 @@ namespace Com
         DeliveryHandler m_deliveryHandler;
         Reader m_reader;
 
-        void SetSystemNode(int64_t id, bool isSystemNode);
         bool OnRecv(const char* data, size_t size); //returns true if it is ok to call OnRecv again, false if flooded with received messages
         void OnNewNode(const Node& node);
 

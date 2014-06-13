@@ -151,11 +151,10 @@ namespace Com
     void CommunicationImpl::IncludeNode(int64_t id)
     {
         lllog(6)<<L"COM: IncludeNode "<<id<<std::endl;
-        SetSystemNode(id, true);
 
-        //We do post here to be sure the AddNode job will be executed before SetSystemNode. Otherwize we
+        //We do post here to be sure the AddNode job will be executed before IncludeNode. Otherwize we
         //risk losing a node.
-        //We also do the SetSystemNode for the heartbeatSender and ackedDataSender inside readerStrand since
+        //We also do the ackedDataSender inside readerStrand since
         //it only through the deliveryHandler we can lookup nodeTypeId from a nodeId. Since this a a very low frequent operaton this is ok.
         m_reader.Strand().post([=]
         {
@@ -172,7 +171,6 @@ namespace Com
     void CommunicationImpl::ExcludeNode(int64_t id)
     {
         lllog(6)<<L"COM: ExcludeNode "<<id<<std::endl;
-        SetSystemNode(id, false);
 
         m_reader.Strand().post([=]
         {
