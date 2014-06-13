@@ -16,11 +16,11 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
       set(_cs_flags "${_cs_flags} -keyfile:\"${_cs_SIGN}\"")
     endif()
 
-    set (_cs_doc_file "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.xml")
 
     if (_cs_LIBRARY)
       set (_cs_target "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.dll")
       set (_cs_target_kind library)
+      set (_cs_doc_file "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.xml")
       set (_cs_flags "${_cs_flags} -doc:\"${_cs_doc_file}\"")
     elseif (_cs_EXE)
       set (_cs_target "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.exe")
