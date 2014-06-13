@@ -113,7 +113,7 @@ namespace SP
 
         class Impl;
 
-        explicit RawStatistics(std::shared_ptr<Impl>  impl)
+        explicit RawStatistics(std::shared_ptr<Impl> impl)
             : m_impl(std::move(impl)) {}
 
         std::shared_ptr<Impl> m_impl;
