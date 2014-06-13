@@ -7,11 +7,17 @@ endif()
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
 
-add_custom_target(Doxygen ALL
-  ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+FILE(GLOB_RECURSE headers ${safir_sdk_core_SOURCE_DIR}/include/*.h)
+
+add_custom_command(
+  OUTPUT documentation_generated
+  COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+  COMMAND ${CMAKE_COMMAND} -E touch documentation_generated
+  DEPENDS ${headers}
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-  COMMENT "Generating API documentation with Doxygen" VERBATIM
-  )
+  COMMENT "Generating API documentation with Doxygen")
+
+add_custom_target(Doxygen ALL DEPENDS documentation_generated)
 
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES html)
 
@@ -19,5 +25,3 @@ add_dependencies(Doxygen dots_generated-Safir-cpp dots_generated-olib-cpp dots_g
 
 INSTALL(DIRECTORY html
   DESTINATION share/doc/safir_sdk_core)
-
-#TODO: do proper depependency handling, currently this is rebuilt every time, which is annoying
