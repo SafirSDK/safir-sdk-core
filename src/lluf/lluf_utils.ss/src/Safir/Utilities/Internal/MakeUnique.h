@@ -24,6 +24,8 @@
 #ifndef __SAFIR_MAKE_UNIQUE_H__
 #define __SAFIR_MAKE_UNIQUE_H__
 
+#include <memory>
+
 namespace Safir
 {
     template<typename T>
