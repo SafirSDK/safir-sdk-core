@@ -18,6 +18,8 @@ if (MSVC)
   SET_SOURCE_FILES_PROPERTIES(${PROTO_SRCS} PROPERTIES COMPILE_FLAGS "/wd4127 /wd4244 /wd4267")
 endif()
 
+ADD_DEFINITIONS(-DSAFIR_NO_AUTOLINK)
+
 ADD_EXECUTABLE(RawStatistics_test RawStatistics_test.cpp ../src/RawStatistics.cpp ${PROTO_SRCS} ${PROTO_HDRS})
 ADD_EXECUTABLE(SystemState_test SystemState_test.cpp ../src/SystemState.cpp ${PROTO_SRCS} ${PROTO_HDRS})
 ADD_EXECUTABLE(RawPublisherLocal_test RawPublisherLocal_test.cpp ${PROTO_HDRS})
