@@ -341,7 +341,15 @@ if (Java_Development_FOUND AND Java_Runtime_FOUND)
   if (JNI_FOUND)
     #Found everything!
     SET(Java_FOUND True)
-    INCLUDE(UseJava)
+
+    #old cmake versions have a UseJava file that does not support manifest files
+    #so we instead use one that is a copy of the version from cmake 3...
+    if (CMAKE_VERSION VERSION_LESS "3.0.0")
+      INCLUDE(UseJavaWithManifest)
+    else()
+      INCLUDE(UseJava)
+    endif()
+
 	SET(CMAKE_JAVA_COMPILE_FLAGS -encoding UTF-8)
   else()
     SET(Java_FOUND Java-NOTFOUND)
