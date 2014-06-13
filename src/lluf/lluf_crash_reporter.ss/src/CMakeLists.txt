@@ -5,24 +5,24 @@ SET(CMAKE_DEBUG_POSTFIX "")
 
 add_subdirectory(google-breakpad)
 
+
+if (MSVC)
+  LINK_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/google-breakpad/src/)
+else()
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-local-typedefs")
+  LINK_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/google-breakpad/src/src/client/linux)
+endif()
+
 add_library(lluf_crash_reporter SHARED CrashReporter.cpp)
 
 TARGET_INCLUDE_DIRECTORIES(lluf_crash_reporter PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/google-breakpad/src/src)
 
 TARGET_LINK_LIBRARIES(lluf_crash_reporter PRIVATE 
   lluf_config 
+  breakpad_client
   ${Boost_FILESYSTEM_LIBRARY}
   ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY})
-
-if (MSVC)
-  TARGET_LINK_LIBRARIES(lluf_crash_reporter PRIVATE 
-  "${CMAKE_CURRENT_BINARY_DIR}/google-breakpad/src/breakpad_client.lib")
-else()
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-local-typedefs")
-  TARGET_LINK_LIBRARIES(lluf_crash_reporter PRIVATE 
-    "${CMAKE_CURRENT_BINARY_DIR}/google-breakpad/src/src/client/linux/libbreakpad_client.a")
-endif()
 
 add_dependencies(lluf_crash_reporter google-breakpad)
 

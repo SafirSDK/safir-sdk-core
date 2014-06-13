@@ -17,6 +17,8 @@ CMakeFiles
 CMakeCache.txt
 Makefile
 generated_code
+.ninja_*
+*.ninja
 
 #MSVC stuff
 *embed.manifest
