@@ -29,6 +29,7 @@
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include "CrcUtils.h"
+#include "RawHandler.h"
 
 namespace Safir
 {
@@ -43,16 +44,19 @@ namespace SP
      * Responsible for publishing raw data locally on this computer/node.
      * E.g. for dobexplorer or other SP instance to use.
      */
+
+    template <class Handler = RawHandler, class Publisher = Safir::Utilities::Internal::IpcPublisher>
     class RawPublisherLocal
     {
     public:
         RawPublisherLocal(boost::asio::io_service& ioService,
-                          RawHandler& rawHandler,
-                          const char* const name)
+                          Handler& rawHandler,
+                          const char* const name,
+                          const boost::chrono::steady_clock::duration& period)
             : m_rawHandler(rawHandler)
             , m_publisher(ioService,name)
             , m_publishTimer(ioService, 
-                             boost::chrono::seconds(1),
+                             period,
                              [this](const boost::system::error_code& error)
                              {
                                  Publish(error);
@@ -97,8 +101,8 @@ namespace SP
                                                        crcBytes);
         }
         
-        RawHandler& m_rawHandler;
-        Safir::Utilities::Internal::IpcPublisher m_publisher;
+        Handler& m_rawHandler;
+        Publisher m_publisher;
         Safir::Utilities::Internal::AsioPeriodicTimer m_publishTimer;
     };
 }

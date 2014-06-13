@@ -86,9 +86,10 @@ namespace SP
                                                           controlAddress,
                                                           dataAddress,
                                                           nodeTypes))
-            , m_rawPublisherLocal(Safir::make_unique<RawPublisherLocal>(ioService, 
-                                                                        *m_rawHandler, 
-                                                                        MASTER_LOCAL_RAW_NAME))
+            , m_rawPublisherLocal(Safir::make_unique<RawPublisherLocal<>>(ioService, 
+                                                                          *m_rawHandler, 
+                                                                          MASTER_LOCAL_RAW_NAME,
+                                                                          boost::chrono::seconds(1)))
             , m_rawPublisherRemote(Safir::make_unique<RawPublisherRemote>(ioService,
                                                                           communication,
                                                                           nodeTypes, 
@@ -175,7 +176,7 @@ namespace SP
         
         std::unique_ptr<RawHandler> m_rawHandler;
 
-        std::unique_ptr<RawPublisherLocal> m_rawPublisherLocal;
+        std::unique_ptr<RawPublisherLocal<>> m_rawPublisherLocal;
         std::unique_ptr<RawSubscriberLocal> m_rawSubscriberLocal;
 
         std::unique_ptr<RawPublisherRemote> m_rawPublisherRemote;
