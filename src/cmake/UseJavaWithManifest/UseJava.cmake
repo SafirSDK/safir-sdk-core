@@ -312,64 +312,15 @@
 # Copyright 2010-2011 Andreas schneider <asn@redhat.com>
 # Copyright 2010-2013 Kitware, Inc.
 #
-# CMake - Cross Platform Makefile Generator
-# Copyright 2000-2014 Kitware, Inc.
-# Copyright 2000-2011 Insight Software Consortium
-# All rights reserved.
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
 #
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions
-# are met:
-#
-# * Redistributions of source code must retain the above copyright
-#   notice, this list of conditions and the following disclaimer.
-#
-# * Redistributions in binary form must reproduce the above copyright
-#   notice, this list of conditions and the following disclaimer in the
-#   documentation and/or other materials provided with the distribution.
-#
-# * Neither the names of Kitware, Inc., the Insight Software Consortium,
-#   nor the names of their contributors may be used to endorse or promote
-#   products derived from this software without specific prior written
-#   permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-# HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
-# ------------------------------------------------------------------------------
-#
-# The above copyright and license notice applies to distributions of
-# CMake in source and binary form.  Some source files contain additional
-# notices of original copyright by their contributors; see each source
-# for details.  Third-party software packages supplied with CMake under
-# compatible licenses provide their own copyright notices documented in
-# corresponding subdirectories.
-#
-# ------------------------------------------------------------------------------
-#
-# CMake was initially developed by Kitware with the following sponsorship:
-#
-#  * National Library of Medicine at the National Institutes of Health
-#    as part of the Insight Segmentation and Registration Toolkit (ITK).
-#
-#  * US National Labs (Los Alamos, Livermore, Sandia) ASC Parallel
-#    Visualization Initiative.
-#
-#  * National Alliance for Medical Image Computing (NAMIC) is funded by the
-#    National Institutes of Health through the NIH Roadmap for Medical Research,
-#    Grant U54 EB005149.
-#
-#  * Kitware, Inc.
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
 #=============================================================================
+# (To distribute this file outside of CMake, substitute the full
+#  License text for the above reference.)
 
 include(${CMAKE_CURRENT_LIST_DIR}/CMakeParseArguments.cmake)
 
@@ -475,6 +426,7 @@ function(add_jar _TARGET_NAME)
     set(_JAVA_DEPENDS)
     set(_JAVA_COMPILE_DEPENDS)
     set(_JAVA_RESOURCE_FILES)
+    set(_JAVA_RESOURCE_FILES_RELATIVE)
     foreach(_JAVA_SOURCE_FILE ${_JAVA_SOURCE_FILES})
         get_filename_component(_JAVA_EXT ${_JAVA_SOURCE_FILE} EXT)
         get_filename_component(_JAVA_FILE ${_JAVA_SOURCE_FILE} NAME_WE)
@@ -511,7 +463,8 @@ function(add_jar _TARGET_NAME)
             __java_copy_file(${CMAKE_CURRENT_SOURCE_DIR}/${_JAVA_SOURCE_FILE}
                              ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/${_JAVA_SOURCE_FILE}
                              "Copying ${_JAVA_SOURCE_FILE} to the build directory")
-            list(APPEND _JAVA_RESOURCE_FILES ${_JAVA_SOURCE_FILE})
+            list(APPEND _JAVA_RESOURCE_FILES ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/${_JAVA_SOURCE_FILE})
+            list(APPEND _JAVA_RESOURCE_FILES_RELATIVE ${_JAVA_SOURCE_FILE})
         endif ()
     endforeach()
 
@@ -578,7 +531,7 @@ function(add_jar _TARGET_NAME)
             OUTPUT ${_JAVA_JAR_OUTPUT_PATH}
             COMMAND ${Java_JAR_EXECUTABLE}
                 -cf${_ENTRY_POINT_OPTION}${_MANIFEST_OPTION} ${_JAVA_JAR_OUTPUT_PATH} ${_ENTRY_POINT_VALUE} ${_MANIFEST_VALUE}
-                ${_JAVA_RESOURCE_FILES} @java_class_filelist
+                ${_JAVA_RESOURCE_FILES_RELATIVE} @java_class_filelist
             COMMAND ${CMAKE_COMMAND}
                 -D_JAVA_TARGET_DIR=${_add_jar_OUTPUT_DIR}
                 -D_JAVA_TARGET_OUTPUT_NAME=${_JAVA_TARGET_OUTPUT_NAME}
@@ -598,7 +551,7 @@ function(add_jar _TARGET_NAME)
             OUTPUT ${_JAVA_JAR_OUTPUT_PATH}
             COMMAND ${Java_JAR_EXECUTABLE}
                 -cf${_ENTRY_POINT_OPTION}${_MANIFEST_OPTION} ${_JAVA_JAR_OUTPUT_PATH} ${_ENTRY_POINT_VALUE} ${_MANIFEST_VALUE}
-                ${_JAVA_RESOURCE_FILES} @java_class_filelist
+                ${_JAVA_RESOURCE_FILES_RELATIVE} @java_class_filelist
             COMMAND ${CMAKE_COMMAND}
                 -D_JAVA_TARGET_DIR=${_add_jar_OUTPUT_DIR}
                 -D_JAVA_TARGET_OUTPUT_NAME=${_JAVA_TARGET_OUTPUT_NAME}

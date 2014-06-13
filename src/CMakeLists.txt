@@ -345,7 +345,7 @@ if (Java_Development_FOUND AND Java_Runtime_FOUND)
     #old cmake versions have a UseJava file that does not support manifest files
     #so we instead use one that is a copy of the version from cmake 3...
     if (CMAKE_VERSION VERSION_LESS "3.0.0")
-      INCLUDE(UseJavaWithManifest)
+      INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/cmake/UseJavaWithManifest/UseJava.cmake)
     else()
       INCLUDE(UseJava)
     endif()
