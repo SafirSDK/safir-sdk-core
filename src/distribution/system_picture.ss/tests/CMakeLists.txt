@@ -20,8 +20,12 @@ endif()
 
 
 ADD_EXECUTABLE(RawStatistics_test RawStatistics_test.cpp ../src/RawStatistics.cpp ${PROTO_SRCS} ${PROTO_HDRS})
+ADD_EXECUTABLE(SystemState_test SystemState_test.cpp ../src/SystemState.cpp ${PROTO_SRCS} ${PROTO_HDRS})
 
 TARGET_LINK_LIBRARIES(RawStatistics_test
+  ${PROTOBUF_LITE_LIBRARIES})
+
+TARGET_LINK_LIBRARIES(SystemState_test
   ${PROTOBUF_LITE_LIBRARIES})
 
 
@@ -30,6 +34,7 @@ ENABLE_TESTING()
 
 
 add_test(RawStatistics_test RawStatistics_test)
+add_test(SystemState_test SystemState_test)
 
 
 
