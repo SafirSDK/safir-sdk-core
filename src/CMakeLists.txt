@@ -365,32 +365,6 @@ endif()
 
 #TODO: javadoc?
 
-function(SAFIR_GET_JAVA_CLASSPATH)
-  cmake_parse_arguments(CP "" "" "JAVA_TARGETS" ${ARGN})
-
-  if (NOT "${CP_UNPARSED_ARGUMENTS}" STREQUAL "")
-    message(FATAL_ERROR "Unknown argument to SET_JAVA_CLASSPATH '${CP_UNPARSED_ARGUMENTS}'")
-  endif()
-
-  if (UNIX)
-    SET(path_separator ":")
-  else ()
-    SET(path_separator "\;")
-  endif()
-
-  unset(SAFIR_JAVA_CLASSPATH)
-  foreach (TARGET ${CP_JAVA_TARGETS})
-    get_target_property(jar ${TARGET} JAR_FILE)
-    if (NOT SAFIR_JAVA_CLASSPATH)
-      SET(SAFIR_JAVA_CLASSPATH ${jar})
-    else()
-      SET(SAFIR_JAVA_CLASSPATH "${SAFIR_JAVA_CLASSPATH}${path_separator}${jar}")
-    endif()
-  endforeach()
-
-  set (SAFIR_JAVA_CLASSPATH "${SAFIR_JAVA_CLASSPATH}" PARENT_SCOPE)
-endfunction()
-
 FIND_PACKAGE(PythonInterp)
 if(PYTHON_VERSION_STRING VERSION_LESS "2.7")
   message(FATAL_ERROR "Need Python version 2.7 or greater. Sorry.")
