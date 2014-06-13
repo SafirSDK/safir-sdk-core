@@ -16,6 +16,7 @@ CMakeFiles
 *.rsp
 CMakeCache.txt
 Makefile
+generated_code
 
 #MSVC stuff
 *embed.manifest
@@ -67,6 +68,6 @@ buildlog_*.html
 *.pyc
 bin
 *-build
-generated_code
+build-*
 *.orig
 *-dotnet.xml
