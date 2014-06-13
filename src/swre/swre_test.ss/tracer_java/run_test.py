@@ -24,21 +24,27 @@
 #
 ###############################################################################
 from __future__ import print_function
-import subprocess, os, time, sys, signal, re, argparse
+import subprocess, os, time, sys, signal, re, argparse, shutil
 import syslog_server
 from safe_print import *
 
 parser = argparse.ArgumentParser("test script for logging")
-parser.add_argument("--classpath", required=True)
+parser.add_argument("--jar", required=True)
+parser.add_argument("--dependencies", required=True)
 parser.add_argument("--safir-show-config", required=True)
 
 arguments = parser.parse_args()
 
+dependencies = arguments.dependencies.split(",")
+
+for dep in dependencies:
+    shutil.copy2(dep,
+                 ".")
+
 sender_cmd = ("java",
               "-Xcheck:jni",
               "-Xfuture",
-              "-cp", arguments.classpath,
-              "Sender")
+              "-jar", arguments.jar)
 
 syslog = syslog_server.SyslogServer(arguments.safir_show_config)
 
