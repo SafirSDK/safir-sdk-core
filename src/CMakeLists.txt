@@ -43,13 +43,6 @@ if (MSVC)
    set(CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO  "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO} /OPT:REF /INCREMENTAL:NO")
 endif ()
 
-# Add some more boost library versions that we want to be able to use,
-# just to try to be "future safe". This does not actually mean that we
-# support all these versions, see our release information for that info.
-set (Boost_ADDITIONAL_VERSIONS 
-  "1.50" "1.50.0" "1.51" "1.51.0" "1.52" "1.52.0" "1.53" "1.53.0" "1.54" "1.54.0" 
-  "1.55" "1.55.0" "1.56" "1.56.0" "1.57" "1.57.0" "1.58" "1.58.0" "1.59" "1.59.0") 
-
 #Date_time is required on windows, even though we build header-only...
 if (MSVC)
   set (BOOST_REQUIRED_ON_WINDOWS date_time)
@@ -60,9 +53,12 @@ set(Boost_USE_MULTITHREADED ON)
 set(Boost_FIND_QUIETLY True)
 
 find_package(Boost COMPONENTS regex timer program_options filesystem thread system ${BOOST_REQUIRED_ON_WINDOWS} REQUIRED)
-if(Boost_FOUND)
-   include_directories(${Boost_INCLUDE_DIRS})
-   link_directories(${Boost_LIBRARY_DIRS})
+
+include_directories(${Boost_INCLUDE_DIRS})
+#link_directories(${Boost_LIBRARY_DIRS})
+
+if (Boost_VERSION LESS 105300)
+  MESSAGE(FATAL_ERROR "Boost >= 1.53 required! Sorry!")
 endif()
 
 #Date_time is needed by boost thread on windows, so we monkey-patch that in, rather than adding link dependencies everywhere.
