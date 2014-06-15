@@ -393,7 +393,7 @@ function (SAFIR_JAVAH)
   ADD_CUSTOM_COMMAND(OUTPUT 
     ${_javah_outputs}
     
-    COMMAND ${Java_JAVAH_EXECUTABLE} -classpath $<TARGET_PROPERTY:${_javah_JAR},JAR_FILE> com.saabgroup.safir.dob.typesystem.Kernel
+    COMMAND ${Java_JAVAH_EXECUTABLE} -classpath $<TARGET_PROPERTY:${_javah_JAR},JAR_FILE> ${_javah_CLASS}
     
     DEPENDS ${_javah_jar_file}
     WORKING_DIRECTORY ${_javah_OUTPUT_DIR}
