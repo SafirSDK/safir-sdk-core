@@ -2,21 +2,13 @@
 #so we never want the "d" suffix on debug builds, which is default on windows.
 SET(CMAKE_DEBUG_POSTFIX "")
 
-ADD_CUSTOM_COMMAND(OUTPUT 
-  ${CMAKE_CURRENT_BINARY_DIR}/com_saabgroup_safir_application_Library.h
-  ${CMAKE_CURRENT_BINARY_DIR}/com_saabgroup_safir_swreports_Library.h
-  
-  COMMAND ${Java_JAVAH_EXECUTABLE} -classpath $<TARGET_PROPERTY:swre_application_java,CLASSDIR> com.saabgroup.safir.application.Library
-  COMMAND ${Java_JAVAH_EXECUTABLE} -classpath $<TARGET_PROPERTY:swre_reports_java,CLASSDIR> com.saabgroup.safir.swreports.Library
-
-  COMMENT "Generating javah header files")
-
 ADD_LIBRARY(swre_java_jni SHARED 
-  swre_jni.cpp
-  ${CMAKE_CURRENT_BINARY_DIR}/com_saabgroup_safir_application_Library.h
-  ${CMAKE_CURRENT_BINARY_DIR}/com_saabgroup_safir_swreports_Library.h)
+  swre_jni.cpp)
 
 TARGET_INCLUDE_DIRECTORIES(swre_java_jni PRIVATE ${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2} ${CMAKE_CURRENT_BINARY_DIR})
+
+#depend on the javah targets to ensure we get our header files.
+add_dependencies(swre_java_jni swre_application_java_javah swre_reports_java_javah)
 
 TARGET_LINK_LIBRARIES(swre_java_jni PRIVATE 
   swre_library)

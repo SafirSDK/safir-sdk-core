@@ -6,3 +6,8 @@ ADD_JAR(dose_java
   MANIFEST ${CMAKE_CURRENT_SOURCE_DIR}/Manifest.txt)
 
 INSTALL_JAR(dose_java share/java/safir_sdk_core)
+
+SAFIR_JAVAH(JAR dose_java 
+  CLASS com.saabgroup.safir.dob.Interface
+  OUTPUT_FILES com_saabgroup_safir_dob_Interface.h
+  OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/../dose_java_jni)

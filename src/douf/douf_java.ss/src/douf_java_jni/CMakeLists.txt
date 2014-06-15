@@ -2,18 +2,13 @@
 #so we never want the "d" suffix on debug builds, which is default on windows.
 SET(CMAKE_DEBUG_POSTFIX "")
 
-ADD_CUSTOM_COMMAND(OUTPUT 
-  ${CMAKE_CURRENT_BINARY_DIR}/com_saabgroup_safir_time_Library.h
-
-  COMMAND ${Java_JAVAH_EXECUTABLE} -classpath $<TARGET_PROPERTY:douf_java,CLASSDIR> com.saabgroup.safir.time.Library
-
-  COMMENT "Generating javah header files for douf_java_jni")
-
 ADD_LIBRARY(douf_java_jni SHARED 
-  douf_java_jni.cpp
-  ${CMAKE_CURRENT_BINARY_DIR}/com_saabgroup_safir_time_Library.h)
+  douf_java_jni.cpp)
 
 TARGET_INCLUDE_DIRECTORIES(douf_java_jni PRIVATE ${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2} ${CMAKE_CURRENT_BINARY_DIR})
+
+#depend on the javah target to ensure we get our header files.
+add_dependencies(douf_java_jni douf_java_javah)
 
 TARGET_LINK_LIBRARIES(douf_java_jni PRIVATE
   douf_time_library)

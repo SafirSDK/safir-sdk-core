@@ -361,6 +361,50 @@ endif()
 
 #TODO: javadoc?
 
+function (SAFIR_JAVAH) 
+  cmake_parse_arguments(_javah "" "JAR;CLASS;OUTPUT_DIR" "OUTPUT_FILES" ${ARGN})
+
+  if (NOT _javah_JAR)
+    message(FATAL_ERROR "SAFIR_JAVAH: JAR not specified")
+  endif()
+
+  if (NOT _javah_CLASS)
+    message(FATAL_ERROR "SAFIR_JAVAH: CLASS not specified")
+  endif()
+
+  if (NOT _javah_OUTPUT_FILES)
+    message(FATAL_ERROR "SAFIR_JAVAH: OUTPUT_FILES not specified")
+  endif()
+
+  if (NOT _javah_OUTPUT_DIR)
+    message(FATAL_ERROR "SAFIR_JAVAH: OUTPUT_DIR not specified")
+  endif()
+
+  if (NOT "${_javah_UNPARSED_ARGUMENTS}" STREQUAL "")
+    message(FATAL_ERROR "Unknown argument to SAFIR_JAVAH '${_javah_UNPARSED_ARGUMENTS}'")
+  endif()
+
+  foreach(file ${_javah_OUTPUT_FILES})
+    list(APPEND _javah_outputs ${_javah_OUTPUT_DIR}/${file})
+  endforeach()
+
+  get_target_property(_javah_jar_file ${_javah_JAR} JAR_FILE)
+  
+  ADD_CUSTOM_COMMAND(OUTPUT 
+    ${_javah_outputs}
+    
+    COMMAND ${Java_JAVAH_EXECUTABLE} -classpath $<TARGET_PROPERTY:${_javah_JAR},JAR_FILE> com.saabgroup.safir.dob.typesystem.Kernel
+    
+    DEPENDS ${_javah_jar_file}
+    WORKING_DIRECTORY ${_javah_OUTPUT_DIR}
+    
+    COMMENT "Generating javah header files from ${_javah_JAR}")
+  
+  ADD_CUSTOM_TARGET(${_javah_JAR}_javah DEPENDS
+    ${_javah_outputs})
+endfunction()
+
+
 FIND_PACKAGE(PythonInterp)
 if(PYTHON_VERSION_STRING VERSION_LESS "2.7")
   message(FATAL_ERROR "Need Python version 2.7 or greater. Sorry.")
