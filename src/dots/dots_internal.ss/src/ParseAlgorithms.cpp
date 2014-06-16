@@ -169,14 +169,27 @@ namespace ToolSupport
         return param->GetInt32Value(paramIndex);
     }
 
-    int ReferencedKeyToIndex(const ParameterDescriptionBasic* pd, const std::string& key)
+    int ReferencedKeyToIndex(const RepositoryBasic* rep, const ParameterDescriptionBasic* pd, const std::string& key)
     {
         switch (pd->GetCollectionType())
         {
         case DictionaryCollectionType:
         {
             ValueDefinition vd;
-            if (ParseKey(pd->GetKeyType(), key, vd))
+            if (pd->GetKeyType()==EnumerationMemberType)
+            {
+                const EnumDescription* ed=rep->GetEnum(pd->GetKeyTypeId());
+                vd.key.int32=TypeUtilities::GetIndexOfEnumValue(ed, key);
+                int index=TypeUtilities::GetDictionaryIndexFromKey(pd, vd.key.int32);
+                if (index<0)
+                {
+                    std::ostringstream os;
+                    os<<"Failed to parse '"<<key<<"' as a dictionary key of enum type '"<<ed->GetName()<<"'";
+                    throw os.str();
+                }
+                return index;
+            }
+            else if (ParseKey(pd->GetKeyType(), key, vd))
             {
                 int index=-1;
                 switch(pd->GetKeyType())

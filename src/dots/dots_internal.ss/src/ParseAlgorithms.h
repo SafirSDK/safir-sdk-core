@@ -55,7 +55,7 @@ namespace ToolSupport
     //Resolves references on the form <...><name>param</name>123<index></index></...>
     void GetReferencedParameter(boost::property_tree::ptree& pt, std::string& paramName, std::string& paramKey);
     int GetReferencedIndex(boost::property_tree::ptree& pt, ParseState& state);
-    int ReferencedKeyToIndex(const ParameterDescriptionBasic* pd, const std::string& key);
+    int ReferencedKeyToIndex(const RepositoryBasic* rep, const ParameterDescriptionBasic* pd, const std::string& key);
     std::string GetEntityIdParameterAsString(boost::property_tree::ptree& pt);
     bool ParseValue(DotsC_MemberType memberType, const std::string& val, ValueDefinition& result);
     bool ParseKey(DotsC_MemberType memberType, const std::string& val, ValueDefinition& result);
@@ -1240,6 +1240,7 @@ namespace ToolSupport
             }
 
             def->values.push_back(val);
+            VerifyParameterKey(state, def);
         }
     };
 
@@ -1593,7 +1594,7 @@ namespace ToolSupport
             int paramIndex=-1;
             try
             {
-                paramIndex=ReferencedKeyToIndex(srcParam, paramKey);
+                paramIndex=ReferencedKeyToIndex(state.repository.get(), srcParam, paramKey);
             }
             catch (const std::string& err)
             {

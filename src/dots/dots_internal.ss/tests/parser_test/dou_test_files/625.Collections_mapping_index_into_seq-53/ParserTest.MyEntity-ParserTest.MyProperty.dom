@@ -59,6 +59,10 @@
                     <name>ParserTest.MyEntity</name>
                     <instanceId>inst</instanceId>
                 </entityId>
+		<valueRef>
+			<name>Test.MyParam.DictionaryParam3</name>
+			<index>Grey</index>
+		</valueRef>
             </sequence>
         </member>
         
@@ -147,7 +151,7 @@
                     </Object>
                 </entry>
                 <entry>
-                    <key>Grey</key>
+                    <key>Black</key>
                     <Object/>
                 </entry>
             </dictionary>
