@@ -16,7 +16,7 @@ ADD_TEST(NAME dots_cpp
   --language cpp
   --binary $<TARGET_FILE:dots_test_cpp>
   --output ${CMAKE_CURRENT_SOURCE_DIR}/output.txt
-  --dots-generated-paths "${SAFIR_GENERATED_PATHS}")
+  --safir-generated-paths "${SAFIR_GENERATED_PATHS}")
 
 
 SET_SAFIR_TEST_PROPERTIES(TEST dots_cpp
@@ -31,7 +31,7 @@ if (CSHARP_FOUND)
     --binary $<TARGET_PROPERTY:dots_test_dotnet,ASSEMBLY_FILE>
     --dependencies $<TARGET_PROPERTY:Safir.Dob.Typesystem,ASSEMBLY_FILE>,$<TARGET_PROPERTY:safir_generated-DotsTest-dotnet,ASSEMBLY_FILE>
     --output ${CMAKE_CURRENT_SOURCE_DIR}/output.txt
-    --dots-generated-paths "${SAFIR_GENERATED_PATHS}"
+    --safir-generated-paths "${SAFIR_GENERATED_PATHS}"
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/dotnet)
 
   SET_SAFIR_TEST_PROPERTIES(TEST dots_dotnet
@@ -54,7 +54,7 @@ if (Java_FOUND)
     --jar $<TARGET_PROPERTY:dots_test_java,JAR_FILE>
     --dependencies $<TARGET_PROPERTY:safir_generated-DotsTest-java,JAR_FILE>,$<TARGET_PROPERTY:dots_java,JAR_FILE>
     --output ${CMAKE_CURRENT_SOURCE_DIR}/output.txt
-    --dots-generated-paths "${SAFIR_GENERATED_PATHS}"
+    --safir-generated-paths "${SAFIR_GENERATED_PATHS}"
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/java)
 
   SET_SAFIR_TEST_PROPERTIES(TEST dots_java

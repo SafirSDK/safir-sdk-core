@@ -35,7 +35,7 @@ parser.add_argument("--sender", required=True)
 parser.add_argument("--backdoor", required=True)
 parser.add_argument("--dose-main", required=True)
 parser.add_argument("--safir-show-config", required=True)
-parser.add_argument("--dots-generated-paths", required=True)
+parser.add_argument("--safir-generated-paths", required=True)
 
 arguments = parser.parse_args()
     
@@ -44,7 +44,7 @@ sender_path = arguments.sender
 backdoor = arguments.backdoor
 
 #add all the environment variables. passed on format A=10;B=20
-for pair in arguments.dots_generated_paths.split(";"):
+for pair in arguments.safir_generated_paths.split(";"):
     (name,value) = pair.split("=")
     print("Setting environment variable", name, "to", value)
     os.environ[name] = value

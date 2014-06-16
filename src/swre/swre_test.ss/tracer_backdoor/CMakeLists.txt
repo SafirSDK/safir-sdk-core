@@ -18,7 +18,7 @@ ADD_TEST(NAME tracer_backdoor
   --backdoor $<TARGET_FILE:backdoor>
   --dose-main $<TARGET_FILE:dose_main>
   --safir-show-config $<TARGET_FILE:safir_show_config>
-  --dots-generated-paths "${SAFIR_GENERATED_PATHS}")
+  --safir-generated-paths "${SAFIR_GENERATED_PATHS}")
 
 SET_SAFIR_TEST_PROPERTIES(TEST tracer_backdoor TIMEOUT 120
                           CONFIG_OVERRIDE "${CMAKE_CURRENT_SOURCE_DIR}/test_config")

@@ -132,14 +132,14 @@ Type:Watt64:Float64:"Safir::Dob::Typesystem::Si64::Watt":"Safir/Dob/Typesystem/V
 @@--
 #include <Safir/Utilities/Internal/VisibilityHelpers.h>
 
-#ifdef dots_generated_@_LIBRARY_NAME_@_cpp_EXPORTS
-#  define DOTS_GENERATED_@_LIBRARY_NAME_@_API SAFIR_HELPER_DLL_EXPORT
+#ifdef safir_generated_@_LIBRARY_NAME_@_cpp_EXPORTS
+#  define SAFIR_GENERATED_@_LIBRARY_NAME_@_API SAFIR_HELPER_DLL_EXPORT
 #else
-#  define DOTS_GENERATED_@_LIBRARY_NAME_@_API SAFIR_HELPER_DLL_IMPORT
-#  define SAFIR_LIBRARY_NAME "dots_generated-@_LIBRARY_NAME_@-cpp"
+#  define SAFIR_GENERATED_@_LIBRARY_NAME_@_API SAFIR_HELPER_DLL_IMPORT
+#  define SAFIR_LIBRARY_NAME "safir_generated-@_LIBRARY_NAME_@-cpp"
 #  include <Safir/Utilities/Internal/AutoLink.h>
 #endif
-#define DOTS_GENERATED_@_LIBRARY_NAME_@_API_LOCAL SAFIR_HELPER_DLL_LOCAL
+#define SAFIR_GENERATED_@_LIBRARY_NAME_@_API_LOCAL SAFIR_HELPER_DLL_LOCAL
 
 #include <Safir/Dob/Typesystem/Object.h>
 
@@ -167,7 +167,7 @@ namespace @_NAMESPACEV_@
       */
 @@END_IF@@
 
-    class DOTS_GENERATED_@_LIBRARY_NAME_@_API @_CLASS_@
+    class SAFIR_GENERATED_@_LIBRARY_NAME_@_API @_CLASS_@
     {
     public:
         //HasProperty
@@ -279,14 +279,14 @@ namespace @_NAMESPACEV_@
 
 #include <Safir/Utilities/Internal/VisibilityHelpers.h>
 
-#ifdef dots_generated_@_LIBRARY_NAME_@_cpp_EXPORTS
-#  define DOTS_GENERATED_@_LIBRARY_NAME_@_API SAFIR_HELPER_DLL_EXPORT
+#ifdef safir_generated_@_LIBRARY_NAME_@_cpp_EXPORTS
+#  define SAFIR_GENERATED_@_LIBRARY_NAME_@_API SAFIR_HELPER_DLL_EXPORT
 #else
-#  define DOTS_GENERATED_@_LIBRARY_NAME_@_API SAFIR_HELPER_DLL_IMPORT
-#  define SAFIR_LIBRARY_NAME "dots_generated-@_LIBRARY_NAME_@-cpp"
+#  define SAFIR_GENERATED_@_LIBRARY_NAME_@_API SAFIR_HELPER_DLL_IMPORT
+#  define SAFIR_LIBRARY_NAME "safir_generated-@_LIBRARY_NAME_@-cpp"
 #  include <Safir/Utilities/Internal/AutoLink.h>
 #endif
-#define DOTS_GENERATED_@_LIBRARY_NAME_@_API_LOCAL SAFIR_HELPER_DLL_LOCAL
+#define SAFIR_GENERATED_@_LIBRARY_NAME_@_API_LOCAL SAFIR_HELPER_DLL_LOCAL
 
 @@TABLE@@
 /**
@@ -313,7 +313,7 @@ namespace @_NAMESPACEV_@
      */
 @@END_IF@@
 
-    class DOTS_GENERATED_@_LIBRARY_NAME_@_API @_CLASS_@ : public @_BASECLASS_@
+    class SAFIR_GENERATED_@_LIBRARY_NAME_@_API @_CLASS_@ : public @_BASECLASS_@
     {
     public:
         //Constructors and Create routines
@@ -511,14 +511,14 @@ namespace @_NAMESPACEV_@
 
 #include <Safir/Utilities/Internal/VisibilityHelpers.h>
 
-#ifdef dots_generated_@_LIBRARY_NAME_@_cpp_EXPORTS
-#  define DOTS_GENERATED_@_LIBRARY_NAME_@_API SAFIR_HELPER_DLL_EXPORT
+#ifdef safir_generated_@_LIBRARY_NAME_@_cpp_EXPORTS
+#  define SAFIR_GENERATED_@_LIBRARY_NAME_@_API SAFIR_HELPER_DLL_EXPORT
 #else
-#  define DOTS_GENERATED_@_LIBRARY_NAME_@_API SAFIR_HELPER_DLL_IMPORT
-#  define SAFIR_LIBRARY_NAME "dots_generated-@_LIBRARY_NAME_@-cpp"
+#  define SAFIR_GENERATED_@_LIBRARY_NAME_@_API SAFIR_HELPER_DLL_IMPORT
+#  define SAFIR_LIBRARY_NAME "safir_generated-@_LIBRARY_NAME_@-cpp"
 #  include <Safir/Utilities/Internal/AutoLink.h>
 #endif
-#define DOTS_GENERATED_@_LIBRARY_NAME_@_API_LOCAL SAFIR_HELPER_DLL_LOCAL
+#define SAFIR_GENERATED_@_LIBRARY_NAME_@_API_LOCAL SAFIR_HELPER_DLL_LOCAL
 
 @@TABLE@@
 /**
@@ -538,7 +538,7 @@ namespace @_NAMESPACEV_@
  */
 @@END_IF@@
 
-    struct DOTS_GENERATED_@_LIBRARY_NAME_@_API @_CLASS_@
+    struct SAFIR_GENERATED_@_LIBRARY_NAME_@_API @_CLASS_@
     {
         enum Enumeration
         {
@@ -638,14 +638,14 @@ namespace @_NAMESPACEV_@
 @@--
 #include <Safir/Utilities/Internal/VisibilityHelpers.h>
 
-#ifdef dots_generated_@_LIBRARY_NAME_@_cpp_EXPORTS
-#  define DOTS_GENERATED_@_LIBRARY_NAME_@_API SAFIR_HELPER_DLL_EXPORT
+#ifdef safir_generated_@_LIBRARY_NAME_@_cpp_EXPORTS
+#  define SAFIR_GENERATED_@_LIBRARY_NAME_@_API SAFIR_HELPER_DLL_EXPORT
 #else
-#  define DOTS_GENERATED_@_LIBRARY_NAME_@_API SAFIR_HELPER_DLL_IMPORT
-#  define SAFIR_LIBRARY_NAME "dots_generated-@_LIBRARY_NAME_@-cpp"
+#  define SAFIR_GENERATED_@_LIBRARY_NAME_@_API SAFIR_HELPER_DLL_IMPORT
+#  define SAFIR_LIBRARY_NAME "safir_generated-@_LIBRARY_NAME_@-cpp"
 #  include <Safir/Utilities/Internal/AutoLink.h>
 #endif
-#define DOTS_GENERATED_@_LIBRARY_NAME_@_API_LOCAL SAFIR_HELPER_DLL_LOCAL
+#define SAFIR_GENERATED_@_LIBRARY_NAME_@_API_LOCAL SAFIR_HELPER_DLL_LOCAL
 
 @@TABLE@@
 #include <@_REPLACE_ALL(\./\/):DEPENDENCY_@.h>
@@ -669,7 +669,7 @@ namespace @_NAMESPACEV_@
  */
 @@END_IF@@
 
-    class DOTS_GENERATED_@_LIBRARY_NAME_@_API @_CLASS_@ :
+    class SAFIR_GENERATED_@_LIBRARY_NAME_@_API @_CLASS_@ :
         public @_BASECLASS_@
     {
     public:

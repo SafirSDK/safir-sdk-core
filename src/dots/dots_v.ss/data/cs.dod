@@ -1346,7 +1346,7 @@ namespace @_NAMESPACE_@
         /// <para/>
         /// The checksum that you are passing to this function is compiled into your application
         /// so that if the enum changes the checksum in your application will be different than that
-        /// in dots_generated, which will mean that an exception is thrown.
+        /// in safir_generated, which will mean that an exception is thrown.
         /// </summary>
         /// <exception cref="Safir.Dob.Typesystem.ConfigurationErrorException">If there is an enumeration checksum mismatch</exception>
         static public void CheckForMismatch(System.Int64 checksum)

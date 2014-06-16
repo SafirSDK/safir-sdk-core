@@ -2001,9 +2001,9 @@ void DotsC_GetGeneratedLibraryList(DotsC_GeneratedLibrary*& generatedLibraries,
             const std::string module = it->first;
             generatedLibraries[i].name = CopyStringToNew(module);
 
-            generatedLibraries[i].cppLibraryName = CopyStringToNew("dots_generated-" + module + "-cpp");
-            generatedLibraries[i].dotnetAssemblyName = CopyStringToNew("dots_generated-" + module + "-dotnet");
-            generatedLibraries[i].javaJarName = CopyStringToNew("dots_generated-" + module + "-java.jar");
+            generatedLibraries[i].cppLibraryName = CopyStringToNew("safir_generated-" + module + "-cpp");
+            generatedLibraries[i].dotnetAssemblyName = CopyStringToNew("safir_generated-" + module + "-dotnet");
+            generatedLibraries[i].javaJarName = CopyStringToNew("safir_generated-" + module + "-java.jar");
 
             const boost::optional<std::string> cpp_library_location = it->second.get_optional<std::string>("cpp_library_location");
             if (cpp_library_location)
