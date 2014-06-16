@@ -44,43 +44,6 @@
 
 using namespace Safir::Dob::Internal::SP;
 
-/*
-std::unique_ptr<NodeStatisticsMessage> GetProtobuf()
-{
-    auto msg = Safir::make_unique<NodeStatisticsMessage>();
-
-    msg->set_name("foo");
-    msg->set_id(10);
-    msg->set_node_type_id(190);
-    msg->set_control_address("asdfasdf");
-    msg->set_data_address("foobar");
-    msg->set_election_id(91);
-    
-    return std::move(msg);
-}
-*/
-/*
-std::function<void(const char* const data, const size_t size)> dataCallback;
-
-int connect_calls = 0;
-int disconnect_calls = 0;
-
-class Subscriber
-{
-public:
-    Subscriber(boost::asio::io_service&, 
-               const std::string& name,
-               const std::function<void(const char* const data, const size_t size)>& callback)
-    {
-        dataCallback = callback;
-        BOOST_CHECK(name == "foo");
-    }
-    void Connect() {++connect_calls;}
-    void Disconnect() {++disconnect_calls;}
-    
-};
-*/
-
 std::function<void(int64_t fromNodeId, int64_t fromNodeType, const boost::shared_ptr<char[]>& data, size_t size)> dataCallback;
 
 class Com
