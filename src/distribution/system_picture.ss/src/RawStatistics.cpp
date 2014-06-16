@@ -238,6 +238,8 @@ namespace SP
         const std::shared_ptr<const NodeStatisticsMessage> m_owner;
     };
 
+    RawStatistics::RawStatistics() {}
+    RawStatistics::~RawStatistics() {}
 
     const std::string& RawStatistics::Name() const {return m_impl->Name();}
     int64_t RawStatistics::Id() const {return m_impl->Id();}

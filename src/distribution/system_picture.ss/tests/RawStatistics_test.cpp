@@ -99,8 +99,6 @@ std::unique_ptr<NodeStatisticsMessage> GetProtobuf(bool empty,bool recursive)
 
 }
 
-//int test_main(int, char**)
-//{
 BOOST_AUTO_TEST_CASE( test_invalid )
 {
     const RawStatistics r;

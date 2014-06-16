@@ -67,7 +67,8 @@ namespace SP
     public:
         //Create an empty statistics object (Valid will return false)
         //all other methods will yield undefined behaviour
-        RawStatistics() {} 
+        RawStatistics();
+        ~RawStatistics();
 
         bool Valid() const {return m_impl != nullptr;};
 
