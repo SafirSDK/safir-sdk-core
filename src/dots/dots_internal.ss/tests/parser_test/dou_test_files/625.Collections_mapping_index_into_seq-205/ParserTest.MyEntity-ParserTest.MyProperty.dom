@@ -134,7 +134,8 @@
             <array>
                 <value>1</value>
                 <valueRef>
-                    <name>Test.MyParam.IntPar</name>
+                    <name>Test.MyParam.SequenceParam</name>
+                    <index>1</index>
                 </valueRef>
                 <value>2</value>
             </array>

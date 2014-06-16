@@ -1095,7 +1095,7 @@ namespace ToolSupport
         int parameterIndex=-1;
         try
         {
-            parameterIndex=ReferencedKeyToIndex(referenced, ref.parameterKey);
+            parameterIndex=ReferencedKeyToIndex(state.repository.get(), referenced, ref.parameterKey);
         }
         catch (const std::string& err)
         {
@@ -1169,7 +1169,7 @@ namespace ToolSupport
         int parameterIndex=-1;
         try
         {
-            parameterIndex=ReferencedKeyToIndex(referenced, ref.parameterKey);
+            parameterIndex=ReferencedKeyToIndex(state.repository.get(), referenced, ref.parameterKey);
         }
         catch (const std::string& err)
         {
@@ -1213,7 +1213,7 @@ namespace ToolSupport
         int parameterIndex=-1;
         try
         {
-            parameterIndex=ReferencedKeyToIndex(referenced, ref.parameterKey);
+            parameterIndex=ReferencedKeyToIndex(state.repository.get(), referenced, ref.parameterKey);
         }
         catch (const std::string& err)
         {
@@ -1304,7 +1304,7 @@ namespace ToolSupport
             int paramIndex=-1;
             try
             {
-                paramIndex=ReferencedKeyToIndex(pdef, ref.parameterKey);
+                paramIndex=ReferencedKeyToIndex(state.repository.get(), pdef, ref.parameterKey);
             }
             catch (const std::string& err)
             {
