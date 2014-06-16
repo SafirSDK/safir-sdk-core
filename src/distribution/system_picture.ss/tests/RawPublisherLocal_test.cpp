@@ -35,6 +35,7 @@ boost::asio::io_service ioService;
 
 int numPerform = 0;
 int numSend = 0;
+size_t gsize = 0;
 class Handler
 {
 public:
@@ -47,6 +48,7 @@ public:
         const size_t size = 10 + extraSpace;
         auto data = std::unique_ptr<char[]>(new char[size]);
         strcpy(data.get(),"123456789");
+        gsize = size;
         fn(std::move(data), size);
 
         ++numPerform;
@@ -71,6 +73,8 @@ public:
     void Stop() {}
     void Send(std::unique_ptr<char []> data, const size_t size)
     {
+        BOOST_CHECK(size == gsize);
+        BOOST_CHECK(0 == strcmp(data.get(), "123456789"));
         std::wcout << "Send" << std::endl;
         ++numSend;
     }
