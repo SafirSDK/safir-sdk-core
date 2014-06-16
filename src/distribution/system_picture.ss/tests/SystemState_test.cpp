@@ -23,9 +23,21 @@
 ******************************************************************************/
 #include <Safir/Dob/Internal/SystemState.h>
 #include "../src/MessageWrapperCreators.h"
-#include "SystemStateMessage.pb.h"
 #include <Safir/Utilities/Internal/MakeUnique.h>
 #include <boost/lexical_cast.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4244)
+#pragma warning (disable: 4127)
+#endif
+
+#include "SystemStateMessage.pb.h"
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
+
 
 #define BOOST_TEST_MODULE SystemStateTests
 #include <boost/test/unit_test.hpp>

@@ -22,9 +22,20 @@
 *
 ******************************************************************************/
 #include <Safir/Utilities/Internal/MakeUnique.h>
-#include "NodeStatisticsMessage.pb.h"
 #include "../src/RawSubscriberLocal.h"
 #include <Safir/Utilities/Internal/MakeUnique.h>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4244)
+#pragma warning (disable: 4127)
+#endif
+
+#include "NodeStatisticsMessage.pb.h"
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 #define BOOST_TEST_MODULE RawSubscriberLocalTest
 #include <boost/test/unit_test.hpp>
