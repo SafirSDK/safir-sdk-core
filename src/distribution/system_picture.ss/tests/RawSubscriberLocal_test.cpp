@@ -55,7 +55,7 @@ int disconnect_calls = 0;
 class Subscriber
 {
 public:
-    Subscriber(boost::asio::io_service& ioService, 
+    Subscriber(boost::asio::io_service&, 
                const std::string& name,
                const std::function<void(const char* const data, const size_t size)>& callback)
     {
@@ -71,6 +71,7 @@ BOOST_AUTO_TEST_CASE( send_ten )
 {
     RawSubscriberLocalBasic<::Subscriber> subscriber("foo");
     
+    //we don't actually use the ioservice, but it is needed to be passed along to the tested classes.
     boost::asio::io_service ioService;
 
     int dataReceived = 0;
