@@ -44,15 +44,14 @@ namespace SP
      * Responsible for publishing raw data locally on this computer/node.
      * E.g. for dobexplorer or other SP instance to use.
      */
-
-    template <class Handler = RawHandler, class Publisher = Safir::Utilities::Internal::IpcPublisher>
-    class RawPublisherLocal
+    template <class Handler, class Publisher>
+    class RawPublisherLocalBasic
     {
     public:
-        RawPublisherLocal(boost::asio::io_service& ioService,
-                          Handler& rawHandler,
-                          const char* const name,
-                          const boost::chrono::steady_clock::duration& period)
+        RawPublisherLocalBasic(boost::asio::io_service& ioService,
+                               Handler& rawHandler,
+                               const char* const name,
+                               const boost::chrono::steady_clock::duration& period)
             : m_rawHandler(rawHandler)
             , m_publisher(ioService,name)
             , m_publishTimer(ioService, 
@@ -105,6 +104,8 @@ namespace SP
         Publisher m_publisher;
         Safir::Utilities::Internal::AsioPeriodicTimer m_publishTimer;
     };
+
+    typedef RawPublisherLocalBasic<RawHandler, Safir::Utilities::Internal::IpcPublisher> RawPublisherLocal;
 }
 }
 }

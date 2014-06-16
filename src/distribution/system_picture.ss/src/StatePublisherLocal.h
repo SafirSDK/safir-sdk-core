@@ -39,20 +39,25 @@ namespace Internal
 namespace SP
 {
     using Safir::Utilities::Internal::AsioPeriodicTimer;
+
+    class Coordinator;
+
     /**
      * Responsible for publishing state data locally on this computer/node.
      * E.g. for dobexplorer or other SP instance to use.
      */
-    class StatePublisherLocal
+    template <class Handler, class Publisher>
+    class StatePublisherLocalBasic
     {
     public:
-        StatePublisherLocal(boost::asio::io_service& ioService,
-                            Coordinator& coordinator,
-                            const char* const name)
+        StatePublisherLocalBasic(boost::asio::io_service& ioService,
+                                 Handler& coordinator,
+                                 const char* const name,
+                                 const boost::chrono::steady_clock::duration& period)
             : m_coordinator(coordinator)
             , m_publisher(ioService,name)
             , m_publishTimer(ioService, 
-                             boost::chrono::seconds(1),
+                             period,
                              [this](const boost::system::error_code& error)
                              {
                                  Publish(error);
@@ -98,10 +103,12 @@ namespace SP
                                                 false); //ok to send anyones state
         }
         
-        Coordinator& m_coordinator;
-        Safir::Utilities::Internal::IpcPublisher m_publisher;
+        Handler& m_coordinator;
+        Publisher m_publisher;
         Safir::Utilities::Internal::AsioPeriodicTimer m_publishTimer;
     };
+
+    typedef StatePublisherLocalBasic<Coordinator, Safir::Utilities::Internal::IpcPublisher> StatePublisherLocal;
 }
 }
 }

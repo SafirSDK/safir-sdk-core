@@ -22,9 +22,9 @@
 *
 ******************************************************************************/
 #include <Safir/Utilities/Internal/MakeUnique.h>
-#include "../src/RawPublisherLocal.h"
+#include "../src/StatePublisherLocal.h"
 
-#define BOOST_TEST_MODULE RawPublisherLocalTest
+#define BOOST_TEST_MODULE StatePublisherLocalTest
 #include <boost/test/unit_test.hpp>
 
 
@@ -38,10 +38,12 @@ int numSend = 0;
 class Handler
 {
 public:
-    void PerformOnAllStatisticsMessage(const std::function<void(std::unique_ptr<char []> data, 
-                                                                const size_t size)> & fn,
-                                       const size_t extraSpace) const
+    void PerformOnStateMessage(const std::function<void(std::unique_ptr<char []> data, 
+                                                        const size_t size)> & fn,
+                               const size_t extraSpace,
+                               const bool onlyOwnState) const
     {
+        BOOST_CHECK(onlyOwnState == false);
         std::wcout << "Perform" << std::endl;
         const size_t size = 10 + extraSpace;
         auto data = std::unique_ptr<char[]>(new char[size]);
@@ -79,7 +81,7 @@ BOOST_AUTO_TEST_CASE( send_ten )
 {
     Handler h;
 
-    RawPublisherLocalBasic<::Handler, ::Publisher> publisher(ioService,h,"foo",boost::chrono::milliseconds(10));
+    StatePublisherLocalBasic<::Handler, ::Publisher> publisher(ioService,h,"foo",boost::chrono::milliseconds(10));
      
     h.stopCall = [&]{publisher.Stop();};
     ioService.run();
