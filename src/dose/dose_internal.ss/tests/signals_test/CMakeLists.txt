@@ -6,7 +6,7 @@ target_include_directories(signals_test PRIVATE ../../src/include)
 add_definitions(-DDOSE_NO_LOCK_CHECKING)
 
 TARGET_LINK_LIBRARIES(signals_test PRIVATE 
-  dots_generated-Safir-cpp 
+  safir_generated-Core-cpp 
   dots_cpp 
   ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY})

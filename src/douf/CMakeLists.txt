@@ -1,4 +1,3 @@
-add_subdirectory(douf_dou.ss)
 add_subdirectory(douf_time_library.ss/src)
 add_subdirectory(douf_cpp.ss/src)
 add_subdirectory(douf_dotnet.ss/src)

@@ -7,6 +7,6 @@ TARGET_LINK_LIBRARIES(swre_interface_cpp PRIVATE
   
   PUBLIC
   dose_cpp
-  dots_generated-swre_library-cpp)
+  safir_generated-Core-cpp)
 
 SAFIR_INSTALL(TARGETS swre_interface_cpp)

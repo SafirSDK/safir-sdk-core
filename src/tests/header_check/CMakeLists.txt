@@ -45,7 +45,6 @@ endif()
 add_executable(check_correct_public_headers main.cpp ${sources})
 
 target_link_libraries(check_correct_public_headers
-  dots_generated-olib-cpp
-  dots_generated-Safir-cpp)
+  safir_generated-Core-cpp)
 
 add_dependencies(check_correct_public_headers logging_cpp dots_cpp dose_cpp olib douf_time_cpp swre_interface_cpp)

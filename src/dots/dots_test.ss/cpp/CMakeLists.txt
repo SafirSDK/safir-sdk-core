@@ -8,6 +8,6 @@ endif()
 ADD_EXECUTABLE(dots_test_cpp ${sources})
 
 TARGET_LINK_LIBRARIES(dots_test_cpp PRIVATE 
-  dots_generated-DotsTest-cpp
+  safir_generated-DotsTest-cpp
   dots_cpp 
   ${Boost_FILESYSTEM_LIBRARY})

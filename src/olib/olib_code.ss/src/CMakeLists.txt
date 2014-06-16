@@ -5,7 +5,7 @@ TARGET_LINK_LIBRARIES(olib
   logging_cpp
 
   PUBLIC
-  dots_generated-olib-cpp
+  safir_generated-Core-cpp
   ${SAFIR_ODBC_LIBRARIES})
 
 SAFIR_INSTALL(TARGETS olib)

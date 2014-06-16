@@ -4,7 +4,7 @@ target_link_libraries(stoppee PRIVATE
   dose_cpp 
   ${Boost_SYSTEM_LIBRARY})
 
-get_property(DOTS_GENERATED_PATHS GLOBAL PROPERTY DOTS_GENERATED_PATHS)
+get_property(SAFIR_GENERATED_PATHS GLOBAL PROPERTY SAFIR_GENERATED_PATHS)
 
 ADD_TEST(NAME stop_orders_at_exit
   COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
@@ -12,7 +12,7 @@ ADD_TEST(NAME stop_orders_at_exit
   --dose_main $<TARGET_FILE:dose_main>
   --dope_main $<TARGET_FILE:dope_main>
   --safir-show-config $<TARGET_FILE:safir_show_config>
-  --dots-generated-paths "${DOTS_GENERATED_PATHS}")
+  --dots-generated-paths "${SAFIR_GENERATED_PATHS}")
 
 SET_SAFIR_TEST_PROPERTIES(TEST stop_orders_at_exit TIMEOUT 240
                           CONFIG_OVERRIDE "${CMAKE_CURRENT_SOURCE_DIR}/test_config")

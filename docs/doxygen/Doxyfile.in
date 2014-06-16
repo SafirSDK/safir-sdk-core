@@ -103,11 +103,7 @@ WARN_LOGFILE           =
 # Configuration options related to the input files
 #---------------------------------------------------------------------------
 INPUT                  = "@CMAKE_CURRENT_SOURCE_DIR@/../../include"
-INPUT                  += "@CMAKE_CURRENT_BINARY_DIR@/../../src/douf/douf_dou.ss/generated_code/cpp/include"
-INPUT                  += "@CMAKE_CURRENT_BINARY_DIR@/../../src/dose/dose_dou.ss/generated_code/cpp/include"
-INPUT                  += "@CMAKE_CURRENT_BINARY_DIR@/../../src/swre/swre_dou.ss/generated_code/cpp/include"
-INPUT                  += "@CMAKE_CURRENT_BINARY_DIR@/../../src/olib/olib_dou.ss/generated_code/cpp/include"
-INPUT                  += "@CMAKE_CURRENT_BINARY_DIR@/../../src/foreach/foreach_dou.ss/generated_code/cpp/include"
+INPUT                  += "@CMAKE_CURRENT_BINARY_DIR@/../../src/safir_dou.ss/generated_code/cpp/include"
 INPUT                  += "@CMAKE_CURRENT_SOURCE_DIR@/mainpage.md"
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          =

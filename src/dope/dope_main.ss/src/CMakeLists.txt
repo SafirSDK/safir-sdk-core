@@ -25,7 +25,7 @@ TARGET_LINK_LIBRARIES(dope_main PRIVATE
 
 TARGET_LINK_LIBRARIES(dope_bin2xml PRIVATE
   olib
-  dots_generated-Safir-cpp
+  safir_generated-Core-cpp
   ${Boost_FILESYSTEM_LIBRARY}
   ${Boost_PROGRAM_OPTIONS_LIBRARY})
 

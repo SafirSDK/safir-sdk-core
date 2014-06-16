@@ -1,4 +1,3 @@
-add_subdirectory(dose_dou.ss)
 add_subdirectory(dose_internal.ss)
 add_subdirectory(dose_dll.ss/src)
 add_subdirectory(dose_cpp.ss)

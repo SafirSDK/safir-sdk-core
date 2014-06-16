@@ -12,7 +12,7 @@ target_include_directories(swre_library PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT
 
 TARGET_LINK_LIBRARIES(swre_library PRIVATE 
   dose_cpp
-  dots_generated-swre_library-cpp
+  safir_generated-Core-cpp
   logging_cpp
   lluf_crash_reporter
   ${Boost_REGEX_LIBRARY}

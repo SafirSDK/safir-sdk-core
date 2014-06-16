@@ -10,7 +10,7 @@ ADD_EXECUTABLE(entity_owner ../entity_owner.cpp)
 ADD_EXECUTABLE(run_sql run_sql.cpp)
 
 if (NOT MSVC)
-  TARGET_LINK_LIBRARIES(entity_owner PRIVATE dose_cpp dots_generated-DopeTest-cpp dots_cpp ${Boost_LIBRARIES})
+  TARGET_LINK_LIBRARIES(entity_owner PRIVATE dose_cpp safir_generated-DopeTest-cpp dots_cpp ${Boost_LIBRARIES})
   TARGET_LINK_LIBRARIES(run_sql PRIVATE dots_cpp olib ${Boost_LIBRARIES} ${SAFIR_ODBC_LIBRARIES})
 endif()
 

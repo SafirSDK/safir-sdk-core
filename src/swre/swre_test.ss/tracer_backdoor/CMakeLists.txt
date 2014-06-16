@@ -10,7 +10,7 @@ if (MSVC)
 endif()
 
 
-get_property(DOTS_GENERATED_PATHS GLOBAL PROPERTY DOTS_GENERATED_PATHS)
+get_property(SAFIR_GENERATED_PATHS GLOBAL PROPERTY SAFIR_GENERATED_PATHS)
 
 ADD_TEST(NAME tracer_backdoor
   COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
@@ -18,7 +18,7 @@ ADD_TEST(NAME tracer_backdoor
   --backdoor $<TARGET_FILE:backdoor>
   --dose-main $<TARGET_FILE:dose_main>
   --safir-show-config $<TARGET_FILE:safir_show_config>
-  --dots-generated-paths "${DOTS_GENERATED_PATHS}")
+  --dots-generated-paths "${SAFIR_GENERATED_PATHS}")
 
 SET_SAFIR_TEST_PROPERTIES(TEST tracer_backdoor TIMEOUT 120
                           CONFIG_OVERRIDE "${CMAKE_CURRENT_SOURCE_DIR}/test_config")

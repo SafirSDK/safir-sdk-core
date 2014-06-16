@@ -13,6 +13,6 @@ TARGET_LINK_LIBRARIES(dose_internal PRIVATE
   ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY}
 
-  PUBLIC dots_generated-Safir-cpp)
+  PUBLIC safir_generated-Core-cpp)
 
 SAFIR_INSTALL(TARGETS dose_internal)

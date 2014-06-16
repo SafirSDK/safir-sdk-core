@@ -129,29 +129,29 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
   #We need a custom target that the library (java,cpp,dotnet) targets can depend on, since
   #having them all just depend on the output files will wreak havoc with cmake in parallel builds.
   #See http://public.kitware.com/Bug/view.php?id=12311
-  add_custom_target(dots_generated-${GEN_NAME}-code ALL DEPENDS ${cpp_files} ${java_files} ${dotnet_files})
+  add_custom_target(safir_generated-${GEN_NAME}-code ALL DEPENDS ${cpp_files} ${java_files} ${dotnet_files})
   #############
   
   #
   # Build CPP
   #
-  ADD_LIBRARY(dots_generated-${GEN_NAME}-cpp SHARED ${cpp_files}) #TODO headers?
+  ADD_LIBRARY(safir_generated-${GEN_NAME}-cpp SHARED ${cpp_files}) #TODO headers?
   
-  target_include_directories(dots_generated-${GEN_NAME}-cpp
+  target_include_directories(safir_generated-${GEN_NAME}-cpp
     PRIVATE ${safir_sdk_core_SOURCE_DIR}/src/dots/dots_v.ss/data
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated_code/cpp/include>)
   
-  target_link_libraries(dots_generated-${GEN_NAME}-cpp 
+  target_link_libraries(safir_generated-${GEN_NAME}-cpp 
     dots_cpp
     dots_internal
     dots_kernel
     lluf_utils)
 
   FOREACH (DEP ${GEN_DEPENDENCIES})
-    TARGET_LINK_LIBRARIES(dots_generated-${GEN_NAME}-cpp dots_generated-${DEP}-cpp)
+    TARGET_LINK_LIBRARIES(safir_generated-${GEN_NAME}-cpp safir_generated-${DEP}-cpp)
   ENDFOREACH()
 
-  add_dependencies(dots_generated-${GEN_NAME}-cpp dots_generated-${GEN_NAME}-code)
+  add_dependencies(safir_generated-${GEN_NAME}-cpp safir_generated-${GEN_NAME}-code)
 
   #TODO:precompiled headers?!
 
@@ -163,19 +163,19 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
   if (Java_FOUND)
 
     FOREACH (DEP ${GEN_DEPENDENCIES})
-      SET(include_jars ${include_jars} dots_generated-${DEP}-java)
-      set(DOTS_GENERATED_JAVA_MANIFEST_CLASSPATH 
-        "${DOTS_GENERATED_JAVA_MANIFEST_CLASSPATH} dots_generated-${DEP}-java.jar")
+      SET(include_jars ${include_jars} safir_generated-${DEP}-java)
+      set(SAFIR_GENERATED_JAVA_MANIFEST_CLASSPATH 
+        "${SAFIR_GENERATED_JAVA_MANIFEST_CLASSPATH} safir_generated-${DEP}-java.jar")
     ENDFOREACH()
 
     configure_file(${safir_sdk_core_SOURCE_DIR}/src/dots/dots_v.ss/data/Manifest.txt.in ${CMAKE_CURRENT_BINARY_DIR}/Manifest.generated.txt @ONLY)
 
-    ADD_JAR(dots_generated-${GEN_NAME}-java
+    ADD_JAR(safir_generated-${GEN_NAME}-java
       SOURCES ${java_files}
       INCLUDE_JARS dots_java ${include_jars}
       MANIFEST ${CMAKE_CURRENT_BINARY_DIR}/Manifest.generated.txt)
 
-    add_dependencies(dots_generated-${GEN_NAME}-java dots_generated-${GEN_NAME}-code)
+    add_dependencies(safir_generated-${GEN_NAME}-java safir_generated-${GEN_NAME}-code)
   endif()
 
   ############
@@ -186,15 +186,15 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
   if (CSHARP_FOUND)
 
     FOREACH (DEP ${GEN_DEPENDENCIES})
-      SET(assembly_refs ${assembly_refs} dots_generated-${DEP}-dotnet)
+      SET(assembly_refs ${assembly_refs} safir_generated-${DEP}-dotnet)
     ENDFOREACH()
 
-    ADD_CSHARP_ASSEMBLY(dots_generated-${GEN_NAME}-dotnet LIBRARY
+    ADD_CSHARP_ASSEMBLY(safir_generated-${GEN_NAME}-dotnet LIBRARY
       SIGN ${safir_sdk_core_SOURCE_DIR}/build/config/sdk/data/build/safirkey.snk
       SOURCES ${dotnet_files}
       REFERENCES Safir.Dob.Typesystem ${assembly_refs})
 
-    add_dependencies(dots_generated-${GEN_NAME}-dotnet dots_generated-${GEN_NAME}-code)
+    add_dependencies(safir_generated-${GEN_NAME}-dotnet safir_generated-${GEN_NAME}-code)
   endif()
 
   ############
@@ -206,7 +206,7 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
   # Install everything
   #
   if (NOT GEN_NO_INSTALL)
-    INSTALL(TARGETS dots_generated-${GEN_NAME}-cpp
+    INSTALL(TARGETS safir_generated-${GEN_NAME}-cpp
       EXPORT safir_sdk_core
       RUNTIME DESTINATION bin
       LIBRARY DESTINATION lib
@@ -220,11 +220,11 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
       DESTINATION share/safir_sdk_core/${GEN_NAME})
 
     if (Java_FOUND)
-      install_jar(dots_generated-${GEN_NAME}-java share/java/safir_sdk_core)
+      install_jar(safir_generated-${GEN_NAME}-java share/java/safir_sdk_core)
     endif()
 
     if (CSHARP_FOUND)
-      INSTALL_CSHARP_ASSEMBLY(TARGET dots_generated-${GEN_NAME}-dotnet
+      INSTALL_CSHARP_ASSEMBLY(TARGET safir_generated-${GEN_NAME}-dotnet
         DESTINATION lib/safir_sdk_core)
     endif()
 
@@ -235,9 +235,9 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
   # Remember paths to all generated libraries, for use by tests
   # use get_property to get hold of the value (like below)
   #
-  get_property(DOTS_GENERATED_PATHS GLOBAL PROPERTY DOTS_GENERATED_PATHS)
+  get_property(SAFIR_GENERATED_PATHS GLOBAL PROPERTY SAFIR_GENERATED_PATHS)
 
-  set_property(GLOBAL PROPERTY DOTS_GENERATED_PATHS ${DOTS_GENERATED_PATHS} "DOTS_GENERATED_${GEN_NAME}_DIR=$<TARGET_FILE_DIR:dots_generated-${GEN_NAME}-cpp>")
+  set_property(GLOBAL PROPERTY SAFIR_GENERATED_PATHS ${SAFIR_GENERATED_PATHS} "SAFIR_GENERATED_${GEN_NAME}_DIR=$<TARGET_FILE_DIR:safir_generated-${GEN_NAME}-cpp>")
   ##############
 
 ENDFUNCTION()

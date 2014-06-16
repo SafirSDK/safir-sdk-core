@@ -21,7 +21,7 @@ add_custom_target(Doxygen ALL DEPENDS documentation_generated)
 
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES html)
 
-add_dependencies(Doxygen dots_generated-Safir-cpp dots_generated-olib-cpp dots_generated-swre_library-cpp dots_generated-foreach-cpp dots_generated-douf_time-cpp)
+add_dependencies(Doxygen safir_generated-Core-cpp)
 
 INSTALL(DIRECTORY html
   DESTINATION share/doc/safir_sdk_core)

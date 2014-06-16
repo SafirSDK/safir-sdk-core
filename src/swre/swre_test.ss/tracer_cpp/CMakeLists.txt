@@ -1,14 +1,7 @@
 add_executable(tracer_sender_cpp sender.cpp)
 
 target_link_libraries(tracer_sender_cpp PRIVATE 
-  swre_interface_cpp
-#  dose_cpp
-#  dose_internal
-#  dots_generated-Safir-cpp
-#  dots_cpp
-#  dots_internal
-#  lluf_utils
-)
+  swre_interface_cpp)
 
 ADD_TEST(NAME tracer_cpp
   COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
