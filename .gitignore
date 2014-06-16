@@ -17,6 +17,29 @@ CMakeCache.txt
 Makefile
 compile_commands.json
 
+#MSVC stuff
+*embed.manifest
+*embed.manifest.res
+*.intermediate.manifest
+*.exe.manifest
+*.ilk
+*.pdb
+*.lib
+*.exp
+*.resource.txt
+*.vcxproj
+*.vcxproj.filters
+*.sln
+*.suo
+*.sdf
+*.opensdf
+*.dir/
+x64/
+Debug/
+Release/
+RelWithDebInfo/
+
+
 #CTest / Unit test stuff
 DartConfiguration.tcl
 Testing
