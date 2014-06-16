@@ -362,6 +362,8 @@ namespace
             {
                 m_stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
                 
+                //TODO: should we check election_id?
+                
                 const auto deadNodes = GetDeadNodeIds(m_stateMessage);
                 
                 //Note: never do exclude on a node that is not one that we have 

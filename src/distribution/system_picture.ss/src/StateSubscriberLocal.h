@@ -25,6 +25,7 @@
 #define __STATE_SUBSCRIBER_LOCAL_H__
 
 #include "MessageWrapperCreators.h"
+#include <Safir/Utilities/Internal/IpcSubscriber.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/MakeUnique.h>
 #include <functional>
@@ -51,11 +52,12 @@ namespace Internal
 namespace SP
 {
 
-    class StateSubscriberLocal
+    template <class Subscriber>
+    class StateSubscriberLocalBasic
         : public SystemStateSubscriber
     {
     public:
-        explicit StateSubscriberLocal(const char* const name)
+        explicit StateSubscriberLocalBasic(const char* const name)
             : m_name (name)
         {
 
@@ -72,7 +74,7 @@ namespace SP
 
             m_dataCallback = dataCallback;
             
-            m_subscriber = Safir::make_unique<Safir::Utilities::Internal::IpcSubscriber>
+            m_subscriber = Safir::make_unique<Subscriber>
                 (ioService,
                  m_name,
                  [this](const char* const data, size_t size)
@@ -122,8 +124,11 @@ namespace SP
         const std::string m_name;
 
         std::function<void (const SystemState& data)> m_dataCallback;
-        std::unique_ptr<Safir::Utilities::Internal::IpcSubscriber> m_subscriber;
+        std::unique_ptr<Subscriber> m_subscriber;
     };
+
+    typedef StateSubscriberLocalBasic<Safir::Utilities::Internal::IpcSubscriber> StateSubscriberLocal;
+    
 }
 }
 }

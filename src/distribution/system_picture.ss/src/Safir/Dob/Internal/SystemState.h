@@ -66,6 +66,7 @@ namespace SP
     {
     public:
         int64_t ElectedId() const;
+        int64_t ElectionId() const;
         
         int Size() const;
 

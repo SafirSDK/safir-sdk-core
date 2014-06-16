@@ -3,3 +3,4 @@ SystemState_test
 RawPublisherLocal_test
 RawSubscriberLocal_test
 StatePublisherLocal_test
+StateSubscriberLocal_test

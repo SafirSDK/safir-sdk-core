@@ -22,8 +22,6 @@
 *
 ******************************************************************************/
 #include <Safir/Utilities/Internal/MakeUnique.h>
-#include "../src/RawSubscriberLocal.h"
-#include <Safir/Utilities/Internal/MakeUnique.h>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -36,6 +34,10 @@
 #ifdef _MSC_VER
 #pragma warning (pop)
 #endif
+
+#include "../src/RawSubscriberLocal.h"
+#include <Safir/Utilities/Internal/MakeUnique.h>
+
 
 #define BOOST_TEST_MODULE RawSubscriberLocalTest
 #include <boost/test/unit_test.hpp>
@@ -78,7 +80,7 @@ public:
     
 };
 
-BOOST_AUTO_TEST_CASE( send_ten )
+BOOST_AUTO_TEST_CASE( send_one )
 {
     RawSubscriberLocalBasic<::Subscriber> subscriber("foo");
     

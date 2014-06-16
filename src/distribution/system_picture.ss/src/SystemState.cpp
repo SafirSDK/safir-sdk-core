@@ -83,6 +83,11 @@ namespace SP
         {
             return m_message->elected_id();
         }
+
+        int64_t ElectionId() const
+        {
+            return m_message->election_id();
+        }
         
         int Size() const
         {
@@ -137,6 +142,7 @@ namespace SP
 
 
     int64_t SystemState::ElectedId() const {return m_impl->ElectedId();}
+    int64_t SystemState::ElectionId() const {return m_impl->ElectionId();}
     
     int SystemState::Size() const {return m_impl->Size();}
     

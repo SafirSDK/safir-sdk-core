@@ -54,6 +54,7 @@ std::unique_ptr<SystemStateMessage> GetProtobuf(bool empty)
     }
     
     msg->set_elected_id(100);
+    msg->set_election_id(1001);
 
     for (int i = 0; i < 5; ++i)
     {
@@ -83,6 +84,7 @@ BOOST_AUTO_TEST_CASE( test_not_empty )
 {
     const auto r = SystemStateCreator::Create(GetProtobuf(false));
     BOOST_CHECK(r.ElectedId() == 100);
+    BOOST_CHECK(r.ElectionId() == 1001);
     
     BOOST_CHECK(r.Size() == 5);
     
