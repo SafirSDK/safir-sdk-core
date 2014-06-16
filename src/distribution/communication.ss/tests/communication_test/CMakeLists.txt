@@ -15,7 +15,9 @@ FILE(GLOB sources *.cpp)
 
 ADD_EXECUTABLE(communication_test ${sources} ${headers})
 
+TARGET_LINK_LIBRARIES(communication_test communication)
+
 if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(communication_test lluf_id lluf_utils communication ${Boost_LIBRARIES})
+    TARGET_LINK_LIBRARIES(communication_test lluf_id lluf_utils ${Boost_LIBRARIES})
 endif()
 

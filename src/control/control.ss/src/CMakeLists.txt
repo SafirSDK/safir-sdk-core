@@ -11,11 +11,13 @@ ADD_EXECUTABLE(safir_control ${sources} ${headers})
 
 FIND_PACKAGE(Boost COMPONENTS program_options thread system)
 
+TARGET_LINK_LIBRARIES(safir_control
+  system_picture
+  communication)
+
 if (NOT MSVC)
   TARGET_LINK_LIBRARIES(safir_control
     dots_internal
-    system_picture
-    communication
     lluf_id
     lluf_utils
     lluf_config

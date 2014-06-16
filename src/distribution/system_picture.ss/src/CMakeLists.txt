@@ -33,11 +33,11 @@ endif()
 add_library(system_picture SHARED ${sources} ${headers} ${PROTO_SRCS} ${PROTO_HDRS})
 
 TARGET_LINK_LIBRARIES(system_picture 
+  communication
   ${PROTOBUF_LITE_LIBRARIES})
 
 if (NOT MSVC)
   TARGET_LINK_LIBRARIES(system_picture 
-    communication    
     lluf_id
     lluf_utils
     lluf_startup_synchronizer

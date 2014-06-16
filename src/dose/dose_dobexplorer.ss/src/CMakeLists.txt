@@ -70,13 +70,15 @@ endif()
 
 FIND_PACKAGE(Boost COMPONENTS filesystem system)
 
+TARGET_LINK_LIBRARIES(dobexplorer
+    system_picture)
+
 IF (NOT MSVC)
   TARGET_LINK_LIBRARIES(dobexplorer
     dots_cpp 
     dots_generated-Safir-cpp 
     dots_generated-cpp 
     dose_internal 
-    system_picture
     lluf_utils 
     lluf_crash_reporter 
     ${Boost_LIBRARIES})
