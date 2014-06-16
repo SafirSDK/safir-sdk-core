@@ -26,6 +26,7 @@
 
 #include <Safir/Dob/Internal/Communication.h>
 #include <Safir/Utilities/Internal/Id.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include "RawHandler.h"
 #include "CrcUtils.h"
 
@@ -37,12 +38,13 @@ namespace Internal
 {
 namespace SP
 {
-    class RawSubscriberRemote
+    template <class Communication, class Handler>
+    class RawSubscriberRemoteBasic
     {
     public:
-        RawSubscriberRemote(Com::Communication& communication,
-                            const char* const receiverId,
-                            RawHandler& rawHandler)
+        RawSubscriberRemoteBasic(Communication& communication,
+                                 const char* const receiverId,
+                                 Handler& rawHandler)
             : m_rawHandler(rawHandler)
         {
             communication.SetDataReceiver([this](const int64_t from, 
@@ -76,8 +78,10 @@ namespace SP
             m_rawHandler.UpdateRemoteStatistics(from, data, size);
         }
 
-        RawHandler& m_rawHandler;
+        Handler& m_rawHandler;
     };
+
+    typedef RawSubscriberRemoteBasic<Com::Communication, RawHandler> RawSubscriberRemote;
 }
 }
 }
