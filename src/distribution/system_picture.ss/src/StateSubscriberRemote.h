@@ -26,6 +26,7 @@
 
 #include <Safir/Dob/Internal/Communication.h>
 #include <Safir/Utilities/Internal/Id.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include "Coordinator.h"
 #include "CrcUtils.h"
 
@@ -37,12 +38,13 @@ namespace Internal
 {
 namespace SP
 {
-    class StateSubscriberRemote
+    template <class Communication, class Handler>
+    class StateSubscriberRemoteBasic
     {
     public:
-        StateSubscriberRemote(Com::Communication& communication,
-                              const char* const receiverId,
-                              Coordinator& coordinator)
+        StateSubscriberRemoteBasic(Communication& communication,
+                                   const char* const receiverId,
+                                   Handler& coordinator)
             : m_coordinator(coordinator)
         {
             communication.SetDataReceiver([this](const int64_t from, 
@@ -76,8 +78,10 @@ namespace SP
             m_coordinator.NewSystemState(from, data, size);
         }
 
-        Coordinator& m_coordinator;
+        Handler& m_coordinator;
     };
+
+    typedef StateSubscriberRemoteBasic<Com::Communication, Coordinator> StateSubscriberRemote;
 }
 }
 }

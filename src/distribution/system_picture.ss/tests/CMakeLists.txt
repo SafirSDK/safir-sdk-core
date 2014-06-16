@@ -29,6 +29,7 @@ ADD_EXECUTABLE(RawSubscriberLocal_test RawSubscriberLocal_test.cpp ../src/RawSta
 ADD_EXECUTABLE(RawSubscriberRemote_test RawSubscriberRemote_test.cpp)
 ADD_EXECUTABLE(StatePublisherLocal_test StatePublisherLocal_test.cpp ${PROTO_HDRS})
 ADD_EXECUTABLE(StateSubscriberLocal_test StateSubscriberLocal_test.cpp ../src/SystemState.cpp ${PROTO_SRCS} ${PROTO_HDRS})
+ADD_EXECUTABLE(StateSubscriberRemote_test StateSubscriberRemote_test.cpp)
 
 TARGET_LINK_LIBRARIES(RawStatistics_test
   ${PROTOBUF_LITE_LIBRARIES})
@@ -50,6 +51,7 @@ if(NOT MSVC)
   TARGET_LINK_LIBRARIES(RawSubscriberRemote_test lluf_id lluf_utils lluf_config ${Boost_LIBRARIES})
   TARGET_LINK_LIBRARIES(StatePublisherLocal_test lluf_utils lluf_config ${Boost_LIBRARIES})
   TARGET_LINK_LIBRARIES(StateSubscriberLocal_test lluf_utils lluf_config ${Boost_LIBRARIES})
+  TARGET_LINK_LIBRARIES(StateSubscriberRemote_test lluf_id lluf_utils lluf_config ${Boost_LIBRARIES})
 endif()
 
 ENABLE_TESTING()
@@ -73,3 +75,6 @@ set_tests_properties(StatePublisherLocal_test PROPERTIES TIMEOUT 30)
 
 add_test(StateSubscriberLocal_test StateSubscriberLocal_test)
 set_tests_properties(StateSubscriberLocal_test PROPERTIES TIMEOUT 30)
+
+add_test(StateSubscriberRemote_test StateSubscriberRemote_test)
+set_tests_properties(StateSubscriberRemote_test PROPERTIES TIMEOUT 30)
