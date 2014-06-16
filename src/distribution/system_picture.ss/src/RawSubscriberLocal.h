@@ -29,6 +29,7 @@
 #include <boost/make_shared.hpp>
 #include <Safir/Utilities/Internal/IpcSubscriber.h>
 #include <Safir/Utilities/Internal/MakeUnique.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include "CrcUtils.h"
 
 namespace Safir
@@ -39,12 +40,13 @@ namespace Internal
 {
 namespace SP
 {
-
-    class RawSubscriberLocal
+    
+    template <class Subscriber>
+    class RawSubscriberLocalBasic
         : public RawStatisticsSubscriber
     {
     public:
-        explicit RawSubscriberLocal(const char* const name)
+        explicit RawSubscriberLocalBasic(const char* const name)
             : m_name(name)
         {
 
@@ -63,7 +65,7 @@ namespace SP
 
             m_dataCallback = dataCallback;
             
-            m_subscriber = Safir::make_unique<Safir::Utilities::Internal::IpcSubscriber>
+            m_subscriber = Safir::make_unique<Subscriber>
                 (ioService,
                  m_name,
                  [this](const char* const data, size_t size)
@@ -114,8 +116,10 @@ namespace SP
         const std::string m_name;
 
         std::function<void (const RawStatistics& data)> m_dataCallback;
-        std::unique_ptr<Safir::Utilities::Internal::IpcSubscriber> m_subscriber;
+        std::unique_ptr<Subscriber> m_subscriber;
     };
+
+    typedef RawSubscriberLocalBasic<Safir::Utilities::Internal::IpcSubscriber> RawSubscriberLocal;
 }
 }
 }
