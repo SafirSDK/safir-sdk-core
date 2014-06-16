@@ -44,6 +44,7 @@ public:
                                const bool onlyOwnState) const
     {
         BOOST_CHECK(onlyOwnState == false);
+        BOOST_CHECK(extraSpace == 0 || extraSpace == sizeof(int32_t));
         std::wcout << "Perform" << std::endl;
         const size_t size = 10 + extraSpace;
         auto data = std::unique_ptr<char[]>(new char[size]);
