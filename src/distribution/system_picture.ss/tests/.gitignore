@@ -1,8 +1,7 @@
 RawStatistics_test
 SystemState_test
 RawPublisherLocal_test
-RawSubscriberLocal_test
-RawSubscriberRemote_test
 StatePublisherLocal_test
-StateSubscriberLocal_test
-StateSubscriberRemote_test
+
+LocalSubscriber_test
+RemoteSubscriber_test

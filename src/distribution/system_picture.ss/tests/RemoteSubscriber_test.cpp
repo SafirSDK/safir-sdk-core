@@ -22,25 +22,19 @@
 *
 ******************************************************************************/
 #include <Safir/Utilities/Internal/MakeUnique.h>
-
-#ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable: 4244)
-#pragma warning (disable: 4127)
-#endif
-
-#include "NodeStatisticsMessage.pb.h"
-
-#ifdef _MSC_VER
-#pragma warning (pop)
-#endif
-
-#include "../src/StateSubscriberRemote.h"
+#include "../src/RemoteSubscriber.h"
 #include <Safir/Utilities/Internal/MakeUnique.h>
 
 
 #define BOOST_TEST_MODULE StateSubscriberRemoteTest
 #include <boost/test/unit_test.hpp>
+
+#ifdef CHECK_CRC
+    const int crcBytes = sizeof(int);
+#else
+    const int crcBytes = 0;
+#endif
+
 
 using namespace Safir::Dob::Internal::SP;
 
@@ -50,7 +44,7 @@ class Com
 {
 public:
     void SetDataReceiver(const std::function<void(int64_t fromNodeId, int64_t fromNodeType, const boost::shared_ptr<char[]>& data, size_t size)>& callback, 
-                         int64_t dataTypeIdentifier)
+                         int64_t /*dataTypeIdentifier*/)
     {
         dataCallback = callback;
     }
@@ -61,13 +55,14 @@ int updates = 0;
 class Handler
 {
 public:
-    void NewSystemState(const int64_t from, 
-                                const boost::shared_ptr<char[]>& data,
-                                const size_t size)
+    void NewRemoteData(const int64_t from, 
+                       const boost::shared_ptr<char[]>& data,
+                       const size_t size)
     {
         ++updates;
         BOOST_CHECK(from == 1);
         BOOST_CHECK(0==strcmp(data.get(), "123456789"));
+        BOOST_CHECK(size == 10);
     }
 
 };
@@ -76,13 +71,8 @@ BOOST_AUTO_TEST_CASE( send_one )
 {
     Com c;
     Handler h;
-    StateSubscriberRemoteBasic<::Com, ::Handler> subscriber(c, "foo", h);
+    RemoteSubscriber<::Com, ::Handler> subscriber(c, "foo", h);
 
-#ifdef CHECK_CRC
-    const int crcBytes = sizeof(int);
-#else
-    const int crcBytes = 0;
-#endif
     const size_t size = crcBytes + 10;
     auto data = boost::shared_ptr<char[]>(new char[size]);
     strcpy(data.get(), "123456789");

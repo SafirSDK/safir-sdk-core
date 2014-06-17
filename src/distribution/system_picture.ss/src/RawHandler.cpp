@@ -319,9 +319,9 @@ namespace SP
         });
     }
     
-    void RawHandler::UpdateRemoteStatistics(const int64_t from, 
-                                            const boost::shared_ptr<char[]>& data,
-                                            const size_t size)
+    void RawHandler::NewRemoteData(const int64_t from, 
+                                   const boost::shared_ptr<char[]>& data,
+                                   const size_t size)
     {
         lllog(9) << "SP: UpdateRemoteStatistics for node " << from << std::endl;
         m_strand.dispatch([this,from,data,size]

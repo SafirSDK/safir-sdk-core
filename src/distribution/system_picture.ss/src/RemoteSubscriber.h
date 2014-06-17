@@ -21,14 +21,13 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __RAW_SUBSCRIBER_REMOTE_H__
-#define __RAW_SUBSCRIBER_REMOTE_H__
+#ifndef ___REMOTE_SUBSCRIBER_H__
+#define ___REMOTE_SUBSCRIBER_H__
 
-#include <Safir/Dob/Internal/Communication.h>
 #include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
-#include "RawHandler.h"
 #include "CrcUtils.h"
+#include <cstring>
 
 namespace Safir
 {
@@ -38,14 +37,14 @@ namespace Internal
 {
 namespace SP
 {
-    template <class Communication, class Handler>
-    class RawSubscriberRemoteBasic
+    template <class Communication, class Receiver>
+    class RemoteSubscriber
     {
     public:
-        RawSubscriberRemoteBasic(Communication& communication,
-                                 const char* const receiverId,
-                                 Handler& rawHandler)
-            : m_rawHandler(rawHandler)
+        RemoteSubscriber(Communication& communication,
+                                   const char* const receiverId,
+                                   Receiver& receiver)
+            : m_receiver(receiver)
         {
             communication.SetDataReceiver([this](const int64_t from, 
                                                  const int64_t /*nodeTypeId*/, 
@@ -75,13 +74,12 @@ namespace SP
                 throw std::logic_error("CRC check failed!");
             }
 #endif
-            m_rawHandler.UpdateRemoteStatistics(from, data, size);
+            m_receiver.NewRemoteData(from, data, size);
         }
 
-        Handler& m_rawHandler;
+        Receiver& m_receiver;
     };
 
-    typedef RawSubscriberRemoteBasic<Com::Communication, RawHandler> RawSubscriberRemote;
 }
 }
 }

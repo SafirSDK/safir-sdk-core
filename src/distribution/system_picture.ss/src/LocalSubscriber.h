@@ -21,27 +21,15 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __STATE_SUBSCRIBER_LOCAL_H__
-#define __STATE_SUBSCRIBER_LOCAL_H__
+#ifndef __LOCAL_SUBSCRIBER_H__
+#define __LOCAL_SUBSCRIBER_H__
 
-#include "MessageWrapperCreators.h"
-#include <Safir/Utilities/Internal/IpcSubscriber.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/MakeUnique.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <functional>
-
-#ifdef _MSC_VER
-#  pragma warning (push)
-#  pragma warning (disable: 4244)
-#  pragma warning (disable: 4127)
-#endif
-
-#include "SystemStateMessage.pb.h"
-
-#ifdef _MSC_VER
-#pragma warning (pop)
-#endif
-
+#include <boost/asio.hpp>
+#include "CrcUtils.h"
 
 namespace Safir
 {
@@ -52,12 +40,12 @@ namespace Internal
 namespace SP
 {
 
-    template <class Subscriber>
-    class StateSubscriberLocalBasic
-        : public SystemStateSubscriber
+    template <class IpcSubscriber, class SubscriberInterface, class WrapperCreator>
+    class LocalSubscriber
+        : public SubscriberInterface
     {
     public:
-        explicit StateSubscriberLocalBasic(const char* const name)
+        explicit LocalSubscriber(const char* const name)
             : m_name (name)
         {
 
@@ -65,16 +53,16 @@ namespace SP
         //callback will be delivered on one strand.
         //but Start and Stop are not MT safe, please only call one at a time.
         void Start(boost::asio::io_service& ioService,
-                   const std::function<void (const SystemState& data)>& dataCallback) override
+                   const std::function<void (const typename SubscriberInterface::DataWrapper& data)>& dataCallback) override
         {
             if (m_subscriber != nullptr)
             {
-                throw std::logic_error("StateSubscriberLocal already started");
+                throw std::logic_error("LocalSubscriber already started");
             }
 
             m_dataCallback = dataCallback;
             
-            m_subscriber = Safir::make_unique<Subscriber>
+            m_subscriber = Safir::make_unique<IpcSubscriber>
                 (ioService,
                  m_name,
                  [this](const char* const data, size_t size)
@@ -104,30 +92,30 @@ namespace SP
             if (crc != expected)
             {
                 SEND_SYSTEM_LOG(Alert,
-                                << "Bad CRC in StateSubscriberLocal, expected " << expected << " got " << crc);
+                                << "Bad CRC in LocalSubscriber, expected " << expected << " got " << crc);
                 throw std::logic_error("CRC check failed!");
             }
 #endif
-            auto state = Safir::make_unique<SystemStateMessage>();
+
+            auto msg = Safir::make_unique<typename WrapperCreator::WrappedType>();
         
-            const bool parseResult = state->ParseFromArray(data, static_cast<int>(size));
+            const bool parseResult = msg->ParseFromArray(data, static_cast<int>(size));
 
             if (!parseResult)
             {
-                throw std::logic_error("StateSubscriberLocal: Failed to parse message");
+                throw std::logic_error("LocalSubscriber: Failed to parse message");
             }
-            m_dataCallback(SystemStateCreator::Create(std::move(state)));
+            m_dataCallback(WrapperCreator::Create(std::move(msg)));
         }
 
         //Order/sync is guaranteed by IpcSubscribers delivery order guarantee.
 
         const std::string m_name;
 
-        std::function<void (const SystemState& data)> m_dataCallback;
-        std::unique_ptr<Subscriber> m_subscriber;
+        std::function<void (const typename SubscriberInterface::DataWrapper& data)> m_dataCallback;
+        std::unique_ptr<IpcSubscriber> m_subscriber;
     };
 
-    typedef StateSubscriberLocalBasic<Safir::Utilities::Internal::IpcSubscriber> StateSubscriberLocal;
     
 }
 }

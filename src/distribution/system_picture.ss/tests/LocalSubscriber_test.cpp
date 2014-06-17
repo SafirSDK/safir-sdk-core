@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include <Safir/Utilities/Internal/MakeUnique.h>
+#include <Safir/Dob/Internal/RawStatistics.h>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -35,11 +36,11 @@
 #pragma warning (pop)
 #endif
 
-#include "../src/RawSubscriberLocal.h"
-#include <Safir/Utilities/Internal/MakeUnique.h>
+#include "../src/LocalSubscriber.h"
+#include "../src/MessageWrapperCreators.h"
 
 
-#define BOOST_TEST_MODULE RawSubscriberLocalTest
+#define BOOST_TEST_MODULE LocalSubscriberTest
 #include <boost/test/unit_test.hpp>
 
 using namespace Safir::Dob::Internal::SP;
@@ -82,7 +83,7 @@ public:
 
 BOOST_AUTO_TEST_CASE( send_one )
 {
-    RawSubscriberLocalBasic<::Subscriber> subscriber("foo");
+    LocalSubscriber<::Subscriber, RawStatisticsSubscriber, RawStatisticsCreator> subscriber("foo");
     
     //we don't actually use the ioservice, but it is needed to be passed along to the tested classes.
     boost::asio::io_service ioService;
