@@ -301,7 +301,8 @@ namespace Sate
 
     public class Settings
     {
-        private static string FILE = System.Environment.GetEnvironmentVariable("SAFIR_RUNTIME")+@"\bin\SateSettings.xml";
+        private static string FILE = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)
+            + @"\SateSettings.xml";
         private static SateSettings settings = null;
 
         public static void Load()

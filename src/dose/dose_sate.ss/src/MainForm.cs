@@ -2046,8 +2046,8 @@ namespace Sate
             OpenFileDialog of = new OpenFileDialog();
             of.AddExtension = true;
             of.Filter = "DOU files (*.dou)|*.dou|All files (*.*)|*.*";
-            of.InitialDirectory = Environment.GetEnvironmentVariable(@"SAFIR_RUNTIME") +
-                                    @"\data\text\dots\classes\";
+
+            //TODO: set some sensible Initial directory? This used to be in the tower...
 
             if (of.ShowDialog() == DialogResult.OK)
             {
