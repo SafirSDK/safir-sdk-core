@@ -124,7 +124,7 @@ namespace ToolSupport
          *
          * @param member [in] - Member index of the member to be written.
          * @param index [in] - Array index of the value to be written. Ignored if CollectionType is not Array.
-         * @param key [in] - Key value if the member is a dictionary. Ignored for all other collection types, use a dummy.
+         * @param key [in] - Key value if the member is a dictionary. Ignored for all other collection types, use a dummy like 0.
          * @param val [in] - Member value. Use a dummy if isNull=true. See supported types in class comments above.
          * @param isNull [in] - True if the member value null. In that case val is not in use.
          * @param isChanged [in] - Indicates if the member value is changed.

@@ -133,7 +133,9 @@ namespace Internal
 
                 const MemberDescriptionType* md=cd->GetMember(memIx);
 
-                if (md->GetCollectionType()==SingleValueCollectionType)
+                switch (md->GetCollectionType())
+                {
+                case SingleValueCollectionType:
                 {
                     //non-array, then the inner propertyTree contains the content, i.e <myInt>123</myInt>
                     try
@@ -147,7 +149,9 @@ namespace Internal
                         throw ParseError("XmlToBinary serialization error", os.str(), "", 153);
                     }
                 }
-                else if (md->GetCollectionType()==ArrayCollectionType)
+                    break;
+
+                case ArrayCollectionType:
                 {
                     //array, then the inner propertyTree contains array element and the array elements contains the content
                     //i.e <myIntArray><Int32 index=0>1</Int32><Int32 index=5>2</Int32></myIntArray>
@@ -200,7 +204,9 @@ namespace Internal
                         ++arrayIndex;
                     }
                 }
-                else if (md->GetCollectionType()==SequenceCollectionType)
+                    break;
+
+                case SequenceCollectionType:
                 {
                     int count=0;
                     for (boost::property_tree::ptree::iterator seqIt=memIt->second.begin(); seqIt!=memIt->second.end(); ++seqIt)
@@ -218,7 +224,41 @@ namespace Internal
 
                         ++count;
                     }
+                }
+                    break;
 
+                case DictionaryCollectionType:
+                {
+                    for (boost::property_tree::ptree::iterator entryIt=memIt->second.begin(); entryIt!=memIt->second.end(); ++entryIt)
+                    {
+                        const boost::property_tree::ptree* keyTree=NULL;
+                        const boost::property_tree::ptree* valTree=NULL;
+                        for (boost::property_tree::ptree::iterator entryContentIt=entryIt->second.begin(); entryContentIt!=entryIt->second.end(); ++entryContentIt)
+                        {
+                            if (entryContentIt->first=="key")
+                            {
+                                keyTree=&(entryContentIt->second);
+                            }
+                            else
+                            {
+                                valTree=&(entryContentIt->second);
+                            }
+                        }
+
+//                        try
+//                        {
+//                            keyTree=&entryIt->second.get_child("key");
+//                        }
+//                        catch (const boost::property_tree::ptree_error& )
+//                        {
+//                            std::ostringstream os;
+//                            os<<"Failed to serialize dictionary member '"<<cd->GetName()<<"."<<md->GetName()<<"' from xml to binary. Key element is missing for a dictionary entry.";
+//                            throw ParseError("XmlToBinary serialization error", os.str(), "", 250);
+//                        }
+
+                    }
+                }
+                    break;
                 }
             }
 
