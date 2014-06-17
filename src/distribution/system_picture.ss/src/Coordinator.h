@@ -94,7 +94,7 @@ namespace SP
                                    const bool onlyOwnState);
         
         //new incoming system state from elected coordinator
-        void NewSystemState(const int64_t from, 
+        void NewRemoteData(const int64_t from, 
                             const boost::shared_ptr<char[]>& data, 
                             const size_t size);
 

@@ -89,7 +89,7 @@ namespace SP
                                                                     const size_t size)> & fn,
                                            const size_t extraSpace) const;
         
-        void UpdateRemoteStatistics(const int64_t from, const boost::shared_ptr<char[]>& data, const size_t size);
+        void NewRemoteData(const int64_t from, const boost::shared_ptr<char[]>& data, const size_t size);
 
 
         /** 

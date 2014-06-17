@@ -347,9 +347,9 @@ namespace
     }
 
     //must be called in strand
-    void Coordinator::NewSystemState(const int64_t from, 
-                                     const boost::shared_ptr<char[]>& data, 
-                                     const size_t size)
+    void Coordinator::NewRemoteData(const int64_t from, 
+                                    const boost::shared_ptr<char[]>& data, 
+                                    const size_t size)
     {
         m_strand.dispatch([this,from,data,size]
         {

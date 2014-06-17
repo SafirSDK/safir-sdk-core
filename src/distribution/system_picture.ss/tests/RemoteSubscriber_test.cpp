@@ -22,20 +22,7 @@
 *
 ******************************************************************************/
 #include <Safir/Utilities/Internal/MakeUnique.h>
-
-#ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable: 4244)
-#pragma warning (disable: 4127)
-#endif
-
-#include "NodeStatisticsMessage.pb.h"
-
-#ifdef _MSC_VER
-#pragma warning (pop)
-#endif
-
-#include "../src/StateSubscriberRemote.h"
+#include "../src/RemoteSubscriber.h"
 #include <Safir/Utilities/Internal/MakeUnique.h>
 
 
@@ -61,9 +48,9 @@ int updates = 0;
 class Handler
 {
 public:
-    void NewSystemState(const int64_t from, 
-                                const boost::shared_ptr<char[]>& data,
-                                const size_t size)
+    void NewRemoteData(const int64_t from, 
+                       const boost::shared_ptr<char[]>& data,
+                       const size_t size)
     {
         ++updates;
         BOOST_CHECK(from == 1);
@@ -76,7 +63,7 @@ BOOST_AUTO_TEST_CASE( send_one )
 {
     Com c;
     Handler h;
-    StateSubscriberRemoteBasic<::Com, ::Handler> subscriber(c, "foo", h);
+    RemoteSubscriber<::Com, ::Handler> subscriber(c, "foo", h);
 
 #ifdef CHECK_CRC
     const int crcBytes = sizeof(int);
