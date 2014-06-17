@@ -301,8 +301,8 @@ namespace Sate
 
     public class Settings
     {
-        private static string FILE = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)
-            + @"\SateSettings.xml";
+        private static string FILE = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                                                            "SateSettings.xml");
         private static SateSettings settings = null;
 
         public static void Load()
