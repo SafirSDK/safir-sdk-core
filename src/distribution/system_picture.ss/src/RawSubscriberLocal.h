@@ -100,15 +100,15 @@ namespace SP
             }
 #endif
 
-            auto statistics = Safir::make_unique<NodeStatisticsMessage>();
+            auto msg = Safir::make_unique<NodeStatisticsMessage>();
         
-            const bool parseResult = statistics->ParseFromArray(data, static_cast<int>(size));
+            const bool parseResult = msg->ParseFromArray(data, static_cast<int>(size));
 
             if (!parseResult)
             {
                 throw std::logic_error("RawSubscriberLocal: Failed to parse message");
             }
-            m_dataCallback(RawStatisticsCreator::Create(std::move(statistics)));
+            m_dataCallback(RawStatisticsCreator::Create(std::move(msg)));
         }
 
         //Order/sync is guaranteed by IpcSubscribers delivery order guarantee.

@@ -108,15 +108,16 @@ namespace SP
                 throw std::logic_error("CRC check failed!");
             }
 #endif
-            auto state = Safir::make_unique<SystemStateMessage>();
+
+            auto msg = Safir::make_unique<SystemStateMessage>();
         
-            const bool parseResult = state->ParseFromArray(data, static_cast<int>(size));
+            const bool parseResult = msg->ParseFromArray(data, static_cast<int>(size));
 
             if (!parseResult)
             {
                 throw std::logic_error("StateSubscriberLocal: Failed to parse message");
             }
-            m_dataCallback(SystemStateCreator::Create(std::move(state)));
+            m_dataCallback(SystemStateCreator::Create(std::move(msg)));
         }
 
         //Order/sync is guaranteed by IpcSubscribers delivery order guarantee.
