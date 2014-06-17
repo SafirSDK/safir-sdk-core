@@ -231,8 +231,13 @@ namespace Internal
                 {
                     for (boost::property_tree::ptree::iterator entryIt=memIt->second.begin(); entryIt!=memIt->second.end(); ++entryIt)
                     {
+                        if (entryIt->second.size()!=2) //there shall be exactly 2 subelements, key and value
+                        {
+                            throw "Wrong number of subelements";
+                        }
                         const boost::property_tree::ptree* keyTree=NULL;
                         const boost::property_tree::ptree* valTree=NULL;
+
                         for (boost::property_tree::ptree::iterator entryContentIt=entryIt->second.begin(); entryContentIt!=entryIt->second.end(); ++entryContentIt)
                         {
                             if (entryContentIt->first=="key")
@@ -244,6 +249,18 @@ namespace Internal
                                 valTree=&(entryContentIt->second);
                             }
                         }
+
+                        if (keyTree==NULL)
+                        {
+                            throw "No key element";
+                        }
+
+                        if (valTree==NULL)
+                        {
+                            throw "No val element";
+                        }
+
+                        SetMember();
 
 //                        try
 //                        {
