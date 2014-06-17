@@ -127,6 +127,7 @@ namespace SP
     class RawStatisticsSubscriber
     {
     public:
+        typedef RawStatistics DataWrapper;
 
         virtual void Start(boost::asio::io_service& ioService,
                            const std::function<void (const RawStatistics& data)>& dataCallback) = 0;

@@ -43,14 +43,18 @@ namespace SP
     class RawStatisticsCreator
     {
     public:
-        static RawStatistics Create(std::unique_ptr<NodeStatisticsMessage> message);
+        typedef NodeStatisticsMessage WrappedType;
+
+        static RawStatistics Create(std::unique_ptr<WrappedType> message);
 
     };
 
     class SystemStateCreator
     {
     public:
-        static SystemState Create(std::unique_ptr<SystemStateMessage> message);
+        typedef SystemStateMessage WrappedType;
+
+        static SystemState Create(std::unique_ptr<WrappedType> message);
 
     };
 

@@ -99,6 +99,8 @@ namespace SP
     class SystemStateSubscriber
     {
     public:
+        typedef SystemState DataWrapper;
+
         virtual void Start(boost::asio::io_service& ioService,
                            const std::function<void (const SystemState& data)>& dataCallback) = 0;
 

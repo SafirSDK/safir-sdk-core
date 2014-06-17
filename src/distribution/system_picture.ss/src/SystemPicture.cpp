@@ -26,15 +26,16 @@
 #include "RawHandler.h"
 #include "RawPublisherLocal.h"
 #include "RawPublisherRemote.h"
-#include "RawSubscriberLocal.h"
 #include "StatePublisherLocal.h"
-#include "StateSubscriberLocal.h"
 #include "StatePublisherRemote.h"
+#include "LocalSubscriber.h"
 #include "RemoteSubscriber.h"
+#include "MessageWrapperCreators.h"
 #include <Safir/Dob/Internal/Communication.h>
 #include <Safir/Dob/Internal/SystemPicture.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/MakeUnique.h>
+#include <Safir/Utilities/Internal/IpcSubscriber.h>
 #include <boost/asio.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/thread.hpp>
@@ -129,8 +130,12 @@ namespace SP
          * Construct a slave SystemPicture.
          */
         Impl()
-            : m_rawSubscriberLocal(Safir::make_unique<RawSubscriberLocal>(MASTER_LOCAL_RAW_NAME))
-            , m_stateSubscriberLocal(Safir::make_unique<StateSubscriberLocal>(MASTER_LOCAL_STATE_NAME))
+            : m_rawSubscriberLocal(Safir::make_unique<LocalSubscriber<Safir::Utilities::Internal::IpcSubscriber,
+                                                                      RawStatisticsSubscriber,
+                                                                      RawStatisticsCreator>>(MASTER_LOCAL_RAW_NAME))
+            , m_stateSubscriberLocal(Safir::make_unique<LocalSubscriber<Safir::Utilities::Internal::IpcSubscriber,
+                                                                        SystemStateSubscriber,
+                                                                        SystemStateCreator>>(MASTER_LOCAL_STATE_NAME))
             , m_stopped(true) //not really started in this case...
         {
 
@@ -178,7 +183,9 @@ namespace SP
         std::unique_ptr<RawHandler> m_rawHandler;
 
         std::unique_ptr<RawPublisherLocal> m_rawPublisherLocal;
-        std::unique_ptr<RawSubscriberLocal> m_rawSubscriberLocal;
+        std::unique_ptr<LocalSubscriber<Safir::Utilities::Internal::IpcSubscriber,
+                                        RawStatisticsSubscriber,
+                                        RawStatisticsCreator>> m_rawSubscriberLocal;
 
         std::unique_ptr<RawPublisherRemote> m_rawPublisherRemote;
         std::unique_ptr<RemoteSubscriber<Com::Communication, RawHandler>> m_rawSubscriberRemote;
@@ -186,7 +193,9 @@ namespace SP
         std::unique_ptr<Coordinator> m_coordinator;
 
         std::unique_ptr<StatePublisherLocal> m_statePublisherLocal;
-        std::unique_ptr<StateSubscriberLocal> m_stateSubscriberLocal;
+        std::unique_ptr<LocalSubscriber<Safir::Utilities::Internal::IpcSubscriber,
+                                        SystemStateSubscriber,
+                                        SystemStateCreator>> m_stateSubscriberLocal;
 
         std::unique_ptr<StatePublisherRemote> m_statePublisherRemote;
         std::unique_ptr<RemoteSubscriber<Com::Communication, Coordinator>> m_stateSubscriberRemote;
