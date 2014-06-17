@@ -29,6 +29,13 @@
 #define BOOST_TEST_MODULE StateSubscriberRemoteTest
 #include <boost/test/unit_test.hpp>
 
+#ifdef CHECK_CRC
+    const int crcBytes = sizeof(int);
+#else
+    const int crcBytes = 0;
+#endif
+
+
 using namespace Safir::Dob::Internal::SP;
 
 std::function<void(int64_t fromNodeId, int64_t fromNodeType, const boost::shared_ptr<char[]>& data, size_t size)> dataCallback;
@@ -37,7 +44,7 @@ class Com
 {
 public:
     void SetDataReceiver(const std::function<void(int64_t fromNodeId, int64_t fromNodeType, const boost::shared_ptr<char[]>& data, size_t size)>& callback, 
-                         int64_t dataTypeIdentifier)
+                         int64_t /*dataTypeIdentifier*/)
     {
         dataCallback = callback;
     }
@@ -55,6 +62,7 @@ public:
         ++updates;
         BOOST_CHECK(from == 1);
         BOOST_CHECK(0==strcmp(data.get(), "123456789"));
+        BOOST_CHECK(size == 10);
     }
 
 };
@@ -65,11 +73,6 @@ BOOST_AUTO_TEST_CASE( send_one )
     Handler h;
     RemoteSubscriber<::Com, ::Handler> subscriber(c, "foo", h);
 
-#ifdef CHECK_CRC
-    const int crcBytes = sizeof(int);
-#else
-    const int crcBytes = 0;
-#endif
     const size_t size = crcBytes + 10;
     auto data = boost::shared_ptr<char[]>(new char[size]);
     strcpy(data.get(), "123456789");
