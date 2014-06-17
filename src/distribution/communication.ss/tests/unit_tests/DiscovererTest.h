@@ -26,11 +26,15 @@
 
 #include "fwd.h"
 
-class DiscovererTest
+//------------------------------------------------
+// Test that discover is sent to seeds
+//------------------------------------------------
+class DiscoverToSeed
 {
 public:
     void Run()
     {
+        std::cout<<"  - Run SendDiscoverToSeed test"<<std::endl;
         boost::asio::io_service io;
         auto work=boost::make_shared<boost::asio::io_service::work>(io);
         boost::thread_group threads;
@@ -42,14 +46,99 @@ public:
         //----------------------
         // Test
         //----------------------
+        Com::Node me("d1", 1, 1, "127.0.0.1:10000", "", true);
+        Discoverer s0(io, CreateNode(100), [&](const Com::Node& n){});
+        Discoverer s1(io, CreateNode(200), [&](const Com::Node& n){});
+        Discoverer n0(io, CreateNode(0), [&](const Com::Node& n){});
+        Discoverer n1(io, CreateNode(1), [&](const Com::Node& n){});
+        Discoverer n2(io, CreateNode(2), [&](const Com::Node& n){});
+
+        std::vector<std::string> seeds{"127.0.0.1:10100", "127.0.0.1:10200"};
+        n0.AddSeeds(seeds);
+        n1.AddSeeds(seeds);
+        n2.AddSeeds(seeds);
+
+        s0.Start();
+        n0.Start();
+        n1.Start();
+        n2.Start();
+        s1.Start();
+
+        Wait(10000);
+
+        s0.Stop();
+        n0.Stop();
+        n1.Stop();
+        n2.Stop();
+        s1.Stop();
+
+        //-----------
+        // shutdown
+        //-----------
         work.reset();
         io.stop();
         threads.join_all();
-        std::cout<<"DiscovererTest tests passed"<<std::endl;
+
+        bool passed=false;
+        {
+            boost::mutex::scoped_lock lock(mutex);
+            passed= discoversSentToSeed100[0]>1 && discoversSentToSeed100[1]>1 && discoversSentToSeed100[2]>1 &&
+                    discoversSentToSeed200[0]>1 && discoversSentToSeed200[1]>1 && discoversSentToSeed200[2]>1;
+        }
+
+        if (passed)
+            std::cout<<"    Passed"<<std::endl;
+        else
+            std::cout<<"    Failed"<<std::endl;
     }
 
 private:
 
+    static boost::mutex mutex;
+    static std::map<boost::int64_t, int> discoversSentToSeed100;
+    static std::map<boost::int64_t, int> discoversSentToSeed200;
+
+    static Com::Node CreateNode(int i)
+    {
+        return Com::Node(std::string("discoverer_")+boost::lexical_cast<std::string>(i), i, 1, std::string("127.0.0.1:")+boost::lexical_cast<std::string>(10000+i), "", true);
+    }
+
+    struct TestSendPolicy
+    {
+        void Send(const Com::UserDataPtr val,
+                  boost::asio::ip::udp::socket& /*socket*/,
+                  const boost::asio::ip::udp::endpoint& to)
+        {
+            boost::mutex::scoped_lock lock(mutex);
+            Com::CommunicationMessage cm;
+            cm.ParseFromArray(val->message.get(), val->header.totalContentSize);
+            if (cm.has_discover())
+            {
+                //std::cout<<"From "<<val->header.commonHeader.senderId<<" to "<<to.port()<<std::endl;
+                if (to.port()==10100)
+                    discoversSentToSeed100[val->header.commonHeader.senderId]++;
+                else if (to.port()==10200)
+                    discoversSentToSeed200[val->header.commonHeader.senderId]++;
+            }
+        }
+    };
+
+    typedef Com::Writer<Com::UserData, TestSendPolicy> TestWriter;
+    typedef Com::DiscovererBasic<TestWriter> Discoverer;
+};
+
+boost::mutex DiscoverToSeed::mutex;
+std::map<boost::int64_t, int> DiscoverToSeed::discoversSentToSeed100;
+std::map<boost::int64_t, int> DiscoverToSeed::discoversSentToSeed200;
+
+//--------------------------------------------------
+
+struct DiscovererTest
+{
+    void Run()
+    {
+        DiscoverToSeed().Run();
+    }
 };
 
 #endif

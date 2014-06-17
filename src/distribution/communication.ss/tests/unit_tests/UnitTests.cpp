@@ -62,11 +62,11 @@ int main(int argc, char* argv[])
 //            AckedDataSenderTest test;
 //            test.Run();
 //        }
-//        else if (run=="DiscovererTest")
-//        {
-//            DiscovererTest test;
-//            test.Run();
-//        }
+        else if (run=="DiscovererTest")
+        {
+            DiscovererTest test;
+            test.Run();
+        }
 //        else
 //        {
 //            std::cout<<"Valid test case args are: MessageQueueTest, DeliveryHandlerTest, ReaderTest, WriterTest, HeartbeatSenderTest, DiscovererTest"<<std::endl;
@@ -83,7 +83,7 @@ int main(int argc, char* argv[])
         {(ReaderWriterTest()).Run();}
         {(HeartbeatSenderTest()).Run();}
 //        {(AckedDataSenderTest()).Run();}
-//        //{(DiscovererTest()).Run();}
+        {(DiscovererTest()).Run();}
 
         //if we get here all tests passed without errors
         std::cout<<"================================="<<std::endl;

@@ -32,7 +32,7 @@ message CommunicationMessage {
     }        
     
     //Fields
-    optional Discover discover = 2;
-    optional NodeInfo node_info = 3;
+    optional Discover discover = 1;
+    optional NodeInfo node_info = 2;
 }
 

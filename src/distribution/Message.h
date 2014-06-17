@@ -107,8 +107,8 @@ namespace Com
         CommonHeader commonHeader;
         uint64_t sequenceNumber;
         uint16_t sendMethod; //tells if the ack is for unicast or multicast serie
-        Ack(int64_t senderId_, int64_t receiverId_, uint64_t sequenceNumber_, uint16_t serie)
-            :commonHeader(senderId_, receiverId_, AckType)
+        Ack(int64_t senderId_, int64_t receiverId, uint64_t sequenceNumber_, uint16_t serie)
+            :commonHeader(senderId_, receiverId, AckType)
             ,sequenceNumber(sequenceNumber_)
             ,sendMethod(serie)
         {
@@ -128,7 +128,6 @@ namespace Com
         size_t fragmentOffset;
 
         MessageHeader(int64_t senderId_,
-                      int64_t receiverId_,
                       int64_t dataType_ ,
                       uint16_t sendMethod_,
                       uint64_t sequenceNumber_,
@@ -137,7 +136,7 @@ namespace Com
                       uint16_t numberOfFragments_,
                       uint16_t fragmentNumber_,
                       size_t fragmentOffset_)
-            :commonHeader(senderId_, receiverId_, dataType_)
+            :commonHeader(senderId_, 0, dataType_)
             ,crc(0)
             ,sendMethod(sendMethod_)
             ,sequenceNumber(sequenceNumber_)
@@ -182,7 +181,7 @@ namespace Com
                  const int64_t& dataType,
                  const boost::shared_ptr<char[]>& message_,
                  size_t messageSize)
-            :header(id, 0, dataType, SingleReceiverSendMethod, 0, messageSize, messageSize, 1, 0, 0)
+            :header(id, dataType, SingleReceiverSendMethod, 0, messageSize, messageSize, 1, 0, 0)
             ,message(message_)
             ,fragment(message.get())
             ,sendToAllSystemNodes(true)
@@ -195,7 +194,7 @@ namespace Com
                  size_t messageSize,
                  const char* fragment_,
                  size_t fragmentSize)
-            :header(id, 0, dataType, SingleReceiverSendMethod, 0, messageSize, fragmentSize, 1, 0, static_cast<size_t>(fragment_-message_.get()))
+            :header(id, dataType, SingleReceiverSendMethod, 0, messageSize, fragmentSize, 1, 0, static_cast<size_t>(fragment_-message_.get()))
             ,message(message_)
             ,fragment(fragment_)
             ,sendToAllSystemNodes(true)

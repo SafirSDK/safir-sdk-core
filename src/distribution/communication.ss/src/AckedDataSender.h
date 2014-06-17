@@ -167,6 +167,7 @@ namespace Com
                     userData->header.fragmentNumber=static_cast<unsigned short>(frag);
                     if (toId!=0)
                     {
+                        userData->header.commonHeader.receiverId=toId;
                         userData->sendToAllSystemNodes=false;
                         userData->receivers.insert(std::make_pair(toId, Receiver()));
                     }
@@ -182,6 +183,7 @@ namespace Com
                     userData->header.fragmentNumber=static_cast<unsigned short>(totalNumberOfFragments-1);
                     if (toId!=0)
                     {
+                        userData->header.commonHeader.receiverId=toId;
                         userData->sendToAllSystemNodes=false;
                         userData->receivers.insert(std::make_pair(toId, Receiver()));
                     }

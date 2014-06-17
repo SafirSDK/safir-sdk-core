@@ -250,10 +250,14 @@ namespace Com
         }
 
         const CommonHeader* commonHeader=reinterpret_cast<const CommonHeader*>(data);
+        if (commonHeader->receiverId!=0 && commonHeader->receiverId!=m_me.nodeId)
+        {
+            return true; //received message that is not for me. Can happen if node has been restarted with same ip-addr but different nodeId
+        }
+
         if (commonHeader->senderId==m_me.nodeId)
         {
-            //Received message from myself, return true means it is ok to receive another message
-            return true;
+            return true; //Message sent from myself
         }
 
         switch (commonHeader->dataType)

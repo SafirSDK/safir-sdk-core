@@ -95,7 +95,7 @@ namespace Com
             Deliver(senderIt->second, header->sendMethod); //if something is now fully received, deliver it to application
             if (sendAck)
             {
-                auto ackPtr=boost::make_shared<Ack>(m_myId, senderIt->second.channel[header->sendMethod].lastInSequence, header->sendMethod);
+                auto ackPtr=boost::make_shared<Ack>(m_myId, header->commonHeader.senderId, senderIt->second.channel[header->sendMethod].lastInSequence, header->sendMethod);
                 WriterType::SendTo(ackPtr, senderIt->second.endpoint);
             }
         }
