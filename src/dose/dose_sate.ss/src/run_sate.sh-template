@@ -1,2 +1,2 @@
 #!/bin/sh
-exec /usr/bin/mono $MONO_OPTIONS ${CMAKE_INSTALL_PREFIX}/sate.exe $@
+exec /usr/bin/mono $MONO_OPTIONS ${CMAKE_INSTALL_PREFIX}/bin/sate.exe $@
