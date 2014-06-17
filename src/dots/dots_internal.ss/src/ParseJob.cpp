@@ -91,7 +91,7 @@ namespace ToolSupport
         template <class ParserT, class CompletionAlg>
         struct ParseWorker
         {
-            void operator()(const boost::shared_ptr<RepositoryBasic>& repository, const std::map<boost::filesystem::path, boost::filesystem::path>& paths)
+            void operator()(const boost::shared_ptr<RepositoryLocal>& repository, const std::map<boost::filesystem::path, boost::filesystem::path>& paths)
             {
                 ParseState state(repository);
 
@@ -140,7 +140,7 @@ namespace ToolSupport
     }
 
     ParseJob::ParseJob(const std::vector<boost::filesystem::path>& roots)
-        :m_result(boost::make_shared<RepositoryBasic>())
+        :m_result(boost::make_shared<RepositoryLocal>())
     {
         std::map<boost::filesystem::path, boost::filesystem::path> douFiles;
         std::map<boost::filesystem::path, boost::filesystem::path> domFiles;

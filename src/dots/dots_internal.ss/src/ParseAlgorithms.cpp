@@ -107,8 +107,8 @@ namespace ToolSupport
         if (!paramName)
         {
             //name missing in indexRef
-            const PropertyDescriptionBasic* pd=state.lastInsertedPropertyMapping->property;
-            const MemberDescriptionBasic* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
+            const PropertyDescriptionLocal* pd=state.lastInsertedPropertyMapping->property;
+            const MemberDescriptionLocal* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
             std::ostringstream os;
             os<<"The <name> element is missing in indexRef for propertyMember "<<state.lastInsertedPropertyMapping->property->name<<"."<<propMem->GetName();
             throw ParseError("Bad indexRef", os.str(), state.currentPath, 168);
@@ -132,12 +132,12 @@ namespace ToolSupport
             }
         }
 
-        const ParameterDescriptionBasic* param=state.repository->GetParameterBasic(*paramName);
+        const ParameterDescriptionLocal* param=state.repository->GetParameterLocal(*paramName);
         if (!param)
         {
             //Error referenced param not exist
-            const PropertyDescriptionBasic* pd=state.lastInsertedPropertyMapping->property;
-            const MemberDescriptionBasic* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
+            const PropertyDescriptionLocal* pd=state.lastInsertedPropertyMapping->property;
+            const MemberDescriptionLocal* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
             std::ostringstream os;
             os<<"The parameter '"<<*paramName<<"' used in indexRef for propertyMember "<<state.lastInsertedPropertyMapping->property->name<<"."<<propMem->GetName()<<
                 " does not exist";
@@ -169,7 +169,7 @@ namespace ToolSupport
         return param->GetInt32Value(paramIndex);
     }
 
-    int ReferencedKeyToIndex(const RepositoryBasic* rep, const ParameterDescriptionBasic* pd, const std::string& key)
+    int ReferencedKeyToIndex(const RepositoryLocal* rep, const ParameterDescriptionLocal* pd, const std::string& key)
     {
         switch (pd->GetCollectionType())
         {
@@ -552,7 +552,7 @@ namespace ToolSupport
         }
     }
 
-    void CheckDictionaryKeyDuplicates(const RepositoryBasic* rep, const ParameterDescriptionBasic* pd)
+    void CheckDictionaryKeyDuplicates(const RepositoryLocal* rep, const ParameterDescriptionLocal* pd)
     {
         for (ParameterValues::const_iterator it=pd->values.begin(); it!=pd->values.end(); ++it)
         {
@@ -581,8 +581,8 @@ namespace ToolSupport
         return NULL;
     }
 
-    static void SetExceptionBase(ExceptionDescriptionBasic* me, ExceptionDescriptionBasic* base) {me->base=base;}
-    static void SetClassBase(ClassDescriptionBasic* me, ClassDescriptionBasic* base)
+    static void SetExceptionBase(ExceptionDescriptionLocal* me, ExceptionDescriptionLocal* base) {me->base=base;}
+    static void SetClassBase(ClassDescriptionLocal* me, ClassDescriptionLocal* base)
     {
         me->base=base;
         if (base)
@@ -628,9 +628,9 @@ namespace ToolSupport
     }
 
     template <class Descr>
-    void SetupMemberTypes(boost::shared_ptr<Descr>& d, const boost::shared_ptr<RepositoryBasic>& repository)
+    void SetupMemberTypes(boost::shared_ptr<Descr>& d, const boost::shared_ptr<RepositoryLocal>& repository)
     {
-        for (std::vector<MemberDescriptionBasicPtr>::iterator memberIt=d->members.begin(); memberIt!=d->members.end(); ++memberIt)
+        for (std::vector<MemberDescriptionLocalPtr>::iterator memberIt=d->members.begin(); memberIt!=d->members.end(); ++memberIt)
         {
             //If memberType is set to ObjectType we must check that the type exists. It is also possible
             //that the type actually is an enum, in that case we also have to change the memberType to EnumerationMemberType
@@ -679,7 +679,7 @@ namespace ToolSupport
         }
     }
 
-    void VerifyParameterValue(const ParseState& state, ParameterDescriptionBasic* pd)
+    void VerifyParameterValue(const ParseState& state, ParameterDescriptionLocal* pd)
     {
         static const DotsC_TypeId EntityTypeId=LlufId_Generate64("Safir.Dob.Entity");
 
@@ -747,7 +747,7 @@ namespace ToolSupport
         }
     }
 
-    void VerifyParameterKey(const ParseState& state, ParameterDescriptionBasic* pd)
+    void VerifyParameterKey(const ParseState& state, ParameterDescriptionLocal* pd)
     {
         static const DotsC_TypeId EntityTypeId=LlufId_Generate64("Safir.Dob.Entity");
 
@@ -834,60 +834,60 @@ namespace ToolSupport
     void DouCompletionAlgorithm::operator()(const ParseState& state)
     {
         //Add predefined types
-        ClassDescriptionBasicPtr obj=boost::make_shared<ClassDescriptionBasic>();
+        ClassDescriptionLocalPtr obj=boost::make_shared<ClassDescriptionLocal>();
         obj->name=BasicTypeOperations::PredefindedClassNames::ObjectName();
         obj->typeId=LlufId_Generate64(obj->name.c_str());
         obj->base=NULL;
         state.repository->InsertClass(obj);
 
-        ExceptionDescriptionBasicPtr exceptionBase=boost::make_shared<ExceptionDescriptionBasic>();
+        ExceptionDescriptionLocalPtr exceptionBase=boost::make_shared<ExceptionDescriptionLocal>();
         exceptionBase->name=BasicTypeOperations::PredefindedClassNames::ExceptionName();
         exceptionBase->typeId=LlufId_Generate64(exceptionBase->name.c_str());
         exceptionBase->base=NULL;
         state.repository->InsertException(exceptionBase);
 
-        ExceptionDescriptionBasicPtr fundamentalException=boost::make_shared<ExceptionDescriptionBasic>();
+        ExceptionDescriptionLocalPtr fundamentalException=boost::make_shared<ExceptionDescriptionLocal>();
         fundamentalException->name=BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName();
         fundamentalException->typeId=LlufId_Generate64(fundamentalException->name.c_str());
         fundamentalException->base=NULL;
         state.repository->InsertException(fundamentalException);
 
-        ExceptionDescriptionBasicPtr nullException=boost::make_shared<ExceptionDescriptionBasic>();
+        ExceptionDescriptionLocalPtr nullException=boost::make_shared<ExceptionDescriptionLocal>();
         nullException->name=BasicTypeOperations::PredefindedClassNames::NullExceptionName();
         nullException->typeId=LlufId_Generate64(nullException->name.c_str());
         nullException->baseClass=BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName();
         nullException->base=fundamentalException.get();
         state.repository->InsertException(nullException);
 
-        ExceptionDescriptionBasicPtr incompatibleTypesException=boost::make_shared<ExceptionDescriptionBasic>();
+        ExceptionDescriptionLocalPtr incompatibleTypesException=boost::make_shared<ExceptionDescriptionLocal>();
         incompatibleTypesException->name=BasicTypeOperations::PredefindedClassNames::IncompatibleTypesExceptionName();
         incompatibleTypesException->typeId=LlufId_Generate64(incompatibleTypesException->name.c_str());
         incompatibleTypesException->baseClass=BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName();
         incompatibleTypesException->base=fundamentalException.get();
         state.repository->InsertException(incompatibleTypesException);
 
-        ExceptionDescriptionBasicPtr readOnlyException=boost::make_shared<ExceptionDescriptionBasic>();
+        ExceptionDescriptionLocalPtr readOnlyException=boost::make_shared<ExceptionDescriptionLocal>();
         readOnlyException->name=BasicTypeOperations::PredefindedClassNames::ReadOnlyExceptionName();
         readOnlyException->typeId=LlufId_Generate64(readOnlyException->name.c_str());
         readOnlyException->baseClass=BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName();
         readOnlyException->base=fundamentalException.get();
         state.repository->InsertException(readOnlyException);
 
-        ExceptionDescriptionBasicPtr illegalValueException=boost::make_shared<ExceptionDescriptionBasic>();
+        ExceptionDescriptionLocalPtr illegalValueException=boost::make_shared<ExceptionDescriptionLocal>();
         illegalValueException->name=BasicTypeOperations::PredefindedClassNames::IllegalValueExceptionName();
         illegalValueException->typeId=LlufId_Generate64(illegalValueException->name.c_str());
         illegalValueException->baseClass=BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName();
         illegalValueException->base=fundamentalException.get();
         state.repository->InsertException(illegalValueException);
 
-        ExceptionDescriptionBasicPtr softwareViolationException=boost::make_shared<ExceptionDescriptionBasic>();
+        ExceptionDescriptionLocalPtr softwareViolationException=boost::make_shared<ExceptionDescriptionLocal>();
         softwareViolationException->name=BasicTypeOperations::PredefindedClassNames::SoftwareViolationExceptionName();
         softwareViolationException->typeId=LlufId_Generate64(softwareViolationException->name.c_str());
         softwareViolationException->baseClass=BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName();
         softwareViolationException->base=fundamentalException.get();
         state.repository->InsertException(softwareViolationException);
 
-        ExceptionDescriptionBasicPtr configurationErrorException=boost::make_shared<ExceptionDescriptionBasic>();
+        ExceptionDescriptionLocalPtr configurationErrorException=boost::make_shared<ExceptionDescriptionLocal>();
         configurationErrorException->name=BasicTypeOperations::PredefindedClassNames::ConfigurationErrorExceptionName();
         configurationErrorException->typeId=LlufId_Generate64(configurationErrorException->name.c_str());
         configurationErrorException->baseClass=BasicTypeOperations::PredefindedClassNames::FundamentalExceptionName();
@@ -907,26 +907,26 @@ namespace ToolSupport
         endConditions.insert(illegalValueException->typeId);
         endConditions.insert(softwareViolationException->typeId);
         endConditions.insert(configurationErrorException->typeId);
-        boost::function<void(ExceptionDescriptionBasic*, ExceptionDescriptionBasic*)> setExeptBaseFun(SetExceptionBase);
-        for (boost::unordered_map<DotsC_TypeId, ExceptionDescriptionBasicPtr>::iterator it=state.repository->m_exceptions.begin(); it!=state.repository->m_exceptions.end(); ++it)
+        boost::function<void(ExceptionDescriptionLocal*, ExceptionDescriptionLocal*)> setExeptBaseFun(SetExceptionBase);
+        for (boost::unordered_map<DotsC_TypeId, ExceptionDescriptionLocalPtr>::iterator it=state.repository->m_exceptions.begin(); it!=state.repository->m_exceptions.end(); ++it)
         {
             int recLevel=0;
             SetupBaseClass(state.repository->m_exceptions, endConditions, it->second.get(), setExeptBaseFun, recLevel);
         }
 
         //Property members
-        for (boost::unordered_map<DotsC_TypeId, PropertyDescriptionBasicPtr>::iterator it=state.repository->m_properties.begin(); it!=state.repository->m_properties.end(); ++it)
+        for (boost::unordered_map<DotsC_TypeId, PropertyDescriptionLocalPtr>::iterator it=state.repository->m_properties.begin(); it!=state.repository->m_properties.end(); ++it)
         {
             SetupMemberTypes(it->second, state.repository);
         }
 
         //Classes - set baseClass, create members, parameters, createRoutines.
-        std::vector<ClassDescriptionBasic*> classesWithCreateRoutines;
+        std::vector<ClassDescriptionLocal*> classesWithCreateRoutines;
         classesWithCreateRoutines.reserve(100);
-        boost::function<void(ClassDescriptionBasic*, ClassDescriptionBasic*)> setClassBaseFun(SetClassBase);
+        boost::function<void(ClassDescriptionLocal*, ClassDescriptionLocal*)> setClassBaseFun(SetClassBase);
         endConditions.clear();
         endConditions.insert(obj->typeId);
-        for (boost::unordered_map<DotsC_TypeId, ClassDescriptionBasicPtr>::iterator it=state.repository->m_classes.begin(); it!=state.repository->m_classes.end(); ++it)
+        for (boost::unordered_map<DotsC_TypeId, ClassDescriptionLocalPtr>::iterator it=state.repository->m_classes.begin(); it!=state.repository->m_classes.end(); ++it)
         {
             //Set base class
             int recLevel=0;
@@ -966,7 +966,7 @@ namespace ToolSupport
         for (std::vector<ParseState::ObjectParameter>::const_iterator parIt=state.objectParameters.begin();
              parIt!=state.objectParameters.end(); ++parIt)
         {
-            ParameterDescriptionBasic* param=parIt->referee.referencingItem;
+            ParameterDescriptionLocal* param=parIt->referee.referencingItem;
             size_t paramIndex=parIt->referee.referencingIndex;
             ValueDefinition& vd=param->MutableValue(paramIndex);
             boost::property_tree::ptree& pt=*(parIt->obj);
@@ -1037,7 +1037,7 @@ namespace ToolSupport
 
     void DouCompletionAlgorithm::ResolveParamToParamRefs(const ParseState& state)
     {
-        typedef ParseState::ParameterReference<ParameterDescriptionBasic> ParamToParamRef;
+        typedef ParseState::ParameterReference<ParameterDescriptionLocal> ParamToParamRef;
         typedef std::vector<ParamToParamRef> ParamRefVec;
 
         const ParamToParamRef* failure=NULL;
@@ -1069,10 +1069,10 @@ namespace ToolSupport
         }
     }
 
-    bool DouCompletionAlgorithm::ResolveParamToParamRef(const ParseState& state, const ParseState::ParameterReference<ParameterDescriptionBasic>& ref)
+    bool DouCompletionAlgorithm::ResolveParamToParamRef(const ParseState& state, const ParseState::ParameterReference<ParameterDescriptionLocal>& ref)
     {
-        ClassDescriptionBasic* cd=ref.referee.referencingClass;
-        ParameterDescriptionBasic* referencing=ref.referee.referencingItem;
+        ClassDescriptionLocal* cd=ref.referee.referencingClass;
+        ParameterDescriptionLocal* referencing=ref.referee.referencingItem;
 
         if (referencing->values[ref.referee.referencingIndex].val.referenced!=NULL)
         {
@@ -1081,7 +1081,7 @@ namespace ToolSupport
         }
 
 
-        ParameterDescriptionBasic* referenced=state.repository->GetParameterBasic(ref.parameterName);
+        ParameterDescriptionLocal* referenced=state.repository->GetParameterLocal(ref.parameterName);
 
         if (!referenced)
         {
@@ -1154,11 +1154,11 @@ namespace ToolSupport
         return true;
     }    
 
-    void DouCompletionAlgorithm::ResolveArraySizeRef(const ParseState& state, const ParseState::ParameterReference<MemberDescriptionBasic>& ref)
+    void DouCompletionAlgorithm::ResolveArraySizeRef(const ParseState& state, const ParseState::ParameterReference<MemberDescriptionLocal>& ref)
     {
-        ClassDescriptionBasic* cd=ref.referee.referencingClass;
-        MemberDescriptionBasic* md=ref.referee.referencingItem;
-        ParameterDescriptionBasic* referenced=state.repository->GetParameterBasic(ref.parameterName);
+        ClassDescriptionLocal* cd=ref.referee.referencingClass;
+        MemberDescriptionLocal* md=ref.referee.referencingItem;
+        ParameterDescriptionLocal* referenced=state.repository->GetParameterLocal(ref.parameterName);
         if (!referenced)
         {
             std::ostringstream ss;
@@ -1198,11 +1198,11 @@ namespace ToolSupport
         md->arraySize=size;
     }
 
-    void DouCompletionAlgorithm::ResolveMaxLengthRef(const ParseState& state, const ParseState::ParameterReference<MemberDescriptionBasic>& ref)
+    void DouCompletionAlgorithm::ResolveMaxLengthRef(const ParseState& state, const ParseState::ParameterReference<MemberDescriptionLocal>& ref)
     {
-        ClassDescriptionBasic* cd=ref.referee.referencingClass;
-        MemberDescriptionBasic* md=ref.referee.referencingItem;
-        ParameterDescriptionBasic* referenced=state.repository->GetParameterBasic(ref.parameterName);
+        ClassDescriptionLocal* cd=ref.referee.referencingClass;
+        MemberDescriptionLocal* md=ref.referee.referencingItem;
+        ParameterDescriptionLocal* referenced=state.repository->GetParameterLocal(ref.parameterName);
         if (!referenced)
         {
             std::ostringstream ss;
@@ -1242,10 +1242,10 @@ namespace ToolSupport
         md->maxLength=size;
     }
 
-    void DouCompletionAlgorithm::ResolveCreateRoutineParams(const ParseState& state, const ParseState::ParameterReference<CreateRoutineDescriptionBasic>& ref)
+    void DouCompletionAlgorithm::ResolveCreateRoutineParams(const ParseState& state, const ParseState::ParameterReference<CreateRoutineDescriptionLocal>& ref)
     {
-        ClassDescriptionBasic* cd=ref.referee.referencingClass;
-        CreateRoutineDescriptionBasic* cr=ref.referee.referencingItem;
+        ClassDescriptionLocal* cd=ref.referee.referencingClass;
+        CreateRoutineDescriptionLocal* cr=ref.referee.referencingItem;
         const std::string& memberName=cr->memberValues[ref.referee.referencingIndex].first;
         int memberIndex=cd->GetMemberIndex(memberName);
         if (memberIndex<0)
@@ -1253,8 +1253,8 @@ namespace ToolSupport
             //Error member does not exist, will be detected and reported in HandleCreateRoutines
             return;
         }
-        const MemberDescriptionBasic* md=static_cast<const MemberDescriptionBasic*>(cd->GetMember(memberIndex));
-        ParameterDescriptionBasic* pdef=state.repository->GetParameterBasic(ref.parameterName);
+        const MemberDescriptionLocal* md=static_cast<const MemberDescriptionLocal*>(cd->GetMember(memberIndex));
+        ParameterDescriptionLocal* pdef=state.repository->GetParameterLocal(ref.parameterName);
 
         if (!pdef)
         {
@@ -1336,14 +1336,14 @@ namespace ToolSupport
                       boost::bind(&DouCompletionAlgorithm::ResolveCreateRoutineParams, this, boost::ref(state), _1));
     }
 
-    void DouCompletionAlgorithm::HandleCreateRoutines(const ParseState& state, ClassDescriptionBasic* cd)
+    void DouCompletionAlgorithm::HandleCreateRoutines(const ParseState& state, ClassDescriptionLocal* cd)
     {
         //Verify all createRoutine in-parameters and default values
-        for (std::vector<CreateRoutineDescriptionBasicPtr>::iterator crit=cd->createRoutines.begin();
+        for (std::vector<CreateRoutineDescriptionLocalPtr>::iterator crit=cd->createRoutines.begin();
              crit!=cd->createRoutines.end(); ++crit)
         {
             //Check that every parameter has corresponding member
-            CreateRoutineDescriptionBasic& cr=*(crit->get());
+            CreateRoutineDescriptionLocal& cr=*(crit->get());
             for (StringVector::const_iterator inParamIt=cr.parameters.begin(); inParamIt!=cr.parameters.end(); ++inParamIt)
             {
                 if (cd->GetMemberIndex(*inParamIt)<0)
@@ -1372,7 +1372,7 @@ namespace ToolSupport
                     os<<"The createRoutine '"<<cr.name<<"' in class "<<cd->GetName()<<"' specifies an invalid member '"<<mit->first<<"'. The member does not exist in the class.";
                     throw ParseError("Invalid CreateRoutine value", os.str(), cd->FileName(), 57);
                 }
-                const ParameterDescriptionBasic* pd=state.repository->GetParameterBasic(mit->second.first);
+                const ParameterDescriptionLocal* pd=state.repository->GetParameterLocal(mit->second.first);
 
                 if (pd->GetNumberOfValues()<=mit->second.second)
                 {
@@ -1398,10 +1398,10 @@ namespace ToolSupport
 
     void DouCompletionAlgorithm::CalculateEnumChecksums(const ParseState& state)
     {
-        for (boost::unordered_map<DotsC_TypeId, EnumDescriptionBasicPtr>::iterator it=state.repository->m_enums.begin();
+        for (boost::unordered_map<DotsC_TypeId, EnumDescriptionLocalPtr>::iterator it=state.repository->m_enums.begin();
              it!=state.repository->m_enums.end(); ++it)
         {
-            EnumDescriptionBasicPtr& ed=it->second;
+            EnumDescriptionLocalPtr& ed=it->second;
             std::ostringstream ss;
             ss<<ed->name;
             for (StringVector::const_iterator valIt=ed->enumerationValues.begin(); valIt!=ed->enumerationValues.end(); ++valIt)
@@ -1415,10 +1415,10 @@ namespace ToolSupport
     void DouCompletionAlgorithm::VerifyParameterTypes(const ParseState& state)
     {
         //loop through all parameters and verify all TypeId, EntityId, and Enum
-        for (boost::unordered_map<std::string, ParameterDescriptionBasic*>::iterator parIt=state.repository->m_parameters.begin();
+        for (boost::unordered_map<std::string, ParameterDescriptionLocal*>::iterator parIt=state.repository->m_parameters.begin();
              parIt!=state.repository->m_parameters.end(); ++parIt)
         {
-            ParameterDescriptionBasic* pd=parIt->second;
+            ParameterDescriptionLocal* pd=parIt->second;
             state.currentPath=pd->qualifiedName.substr(0, pd->qualifiedName.rfind(".")+1)+"dou";
             VerifyParameterValue(state, pd);
             VerifyParameterKey(state, pd);
@@ -1433,7 +1433,7 @@ namespace ToolSupport
                       boost::bind(&DomCompletionAlgorithm::InsertPropertyMapping, this, _1));
 
         //Insert hidden parameters
-        for (std::vector< std::pair<ClassDescriptionBasic*, ParameterDescriptionBasicPtr> >::const_iterator parIt=state.notInsertedParameters.begin();
+        for (std::vector< std::pair<ClassDescriptionLocal*, ParameterDescriptionLocalPtr> >::const_iterator parIt=state.notInsertedParameters.begin();
              parIt!=state.notInsertedParameters.end(); ++parIt)
         {
             parIt->first->ownParameters.push_back(parIt->second);
@@ -1441,10 +1441,10 @@ namespace ToolSupport
         }
     }
 
-    void DomCompletionAlgorithm::InsertPropertyMapping(const PropertyMappingDescriptionBasicPtr& pm)
+    void DomCompletionAlgorithm::InsertPropertyMapping(const PropertyMappingDescriptionLocalPtr& pm)
     {
         //Check duplicated propertyMappings
-        for (std::vector<PropertyMappingDescriptionBasicPtr>::const_iterator it=pm->class_->properties.begin();
+        for (std::vector<PropertyMappingDescriptionLocalPtr>::const_iterator it=pm->class_->properties.begin();
              it!=pm->class_->properties.end(); ++it)
         {
             if (pm->property->typeId==(*it)->property->typeId)

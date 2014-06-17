@@ -21,8 +21,8 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __DOTS_INTERNAL_REPOSITORY_BASIC_H__
-#define __DOTS_INTERNAL_REPOSITORY_BASIC_H__
+#ifndef __DOTS_INTERNAL_REPOSITORY_LOCAL_H__
+#define __DOTS_INTERNAL_REPOSITORY_LOCAL_H__
 
 #include <set>
 #include <boost/noncopyable.hpp>
@@ -93,13 +93,13 @@ namespace ToolSupport
     typedef std::pair<std::string, MemberReference> MemberValue; //pair <memberName, pair<Parameter,Index> >
     typedef std::vector<MemberValue> MemberValueVector;
 
-    class ClassDescriptionBasic;
-    typedef boost::shared_ptr<ClassDescriptionBasic> ClassDescriptionBasicPtr;
+    class ClassDescriptionLocal;
+    typedef boost::shared_ptr<ClassDescriptionLocal> ClassDescriptionLocalPtr;
 
-    class MemberDescriptionBasic : public MemberDescription
+    class MemberDescriptionLocal : public MemberDescription
     {
     public:
-        MemberDescriptionBasic()
+        MemberDescriptionLocal()
             :collectionType(SingleValueCollectionType)
             ,arraySize(1)
             ,maxLength(0)
@@ -130,12 +130,12 @@ namespace ToolSupport
         DotsC_TypeId typeId; //TypeId belonging to the type of this member. Only valid if memberType is object or enum.
         DotsC_TypeId keyTypeId; //TypeId belonging to the type of this member. Only valid if memberType is object or enum.
     };
-    typedef boost::shared_ptr<MemberDescriptionBasic> MemberDescriptionBasicPtr;
+    typedef boost::shared_ptr<MemberDescriptionLocal> MemberDescriptionLocalPtr;
 
-    class PropertyDescriptionBasic : public PropertyDescription
+    class PropertyDescriptionLocal : public PropertyDescription
     {
     public:
-        PropertyDescriptionBasic()
+        PropertyDescriptionLocal()
         {
         }
 
@@ -153,14 +153,14 @@ namespace ToolSupport
         std::string summary;
         std::string fileName;
         std::string name;
-        std::vector<MemberDescriptionBasicPtr> members;
+        std::vector<MemberDescriptionLocalPtr> members;
     };
-    typedef boost::shared_ptr<PropertyDescriptionBasic> PropertyDescriptionBasicPtr;
+    typedef boost::shared_ptr<PropertyDescriptionLocal> PropertyDescriptionLocalPtr;
 
-    class ExceptionDescriptionBasic : public ExceptionDescription
+    class ExceptionDescriptionLocal : public ExceptionDescription
     {
     public:
-        ExceptionDescriptionBasic()
+        ExceptionDescriptionLocal()
             :base(NULL)
         {
         }
@@ -178,14 +178,14 @@ namespace ToolSupport
         std::string fileName;
         std::string name;
         std::string baseClass;
-        const ExceptionDescriptionBasic* base;
+        const ExceptionDescriptionLocal* base;
     };
-    typedef boost::shared_ptr<ExceptionDescriptionBasic> ExceptionDescriptionBasicPtr;
+    typedef boost::shared_ptr<ExceptionDescriptionLocal> ExceptionDescriptionLocalPtr;
 
-    class ParameterDescriptionBasic : public ParameterDescription
+    class ParameterDescriptionLocal : public ParameterDescription
     {
     public:
-        ParameterDescriptionBasic()
+        ParameterDescriptionLocal()
             :collectionType(SingleValueCollectionType)
             ,hidden(false)
         {
@@ -288,12 +288,12 @@ namespace ToolSupport
         DotsC_TypeId typeId; //TypeId belonging to the value of this parameter. Only valid if parameter is object or enum.
         DotsC_TypeId keyTypeId;
     };
-    typedef boost::shared_ptr<ParameterDescriptionBasic> ParameterDescriptionBasicPtr;
+    typedef boost::shared_ptr<ParameterDescriptionLocal> ParameterDescriptionLocalPtr;
 
-    class EnumDescriptionBasic : public EnumDescription
+    class EnumDescriptionLocal : public EnumDescription
     {
     public:
-        EnumDescriptionBasic()
+        EnumDescriptionLocal()
         {
         }
 
@@ -316,12 +316,12 @@ namespace ToolSupport
 
         DotsC_TypeId checksum;
     };
-    typedef boost::shared_ptr<EnumDescriptionBasic> EnumDescriptionBasicPtr;
+    typedef boost::shared_ptr<EnumDescriptionLocal> EnumDescriptionLocalPtr;
 
-    class MemberMappingBasic : public MemberMappingDescription
+    class MemberMappingLocal : public MemberMappingDescription
     {
     public:
-        MemberMappingBasic()
+        MemberMappingLocal()
         {
         }
 
@@ -334,16 +334,16 @@ namespace ToolSupport
         //Fields
         DotsC_PropertyMappingKind kind;
         int propertyMemberIndex;
-        ParameterDescriptionBasic* paramRef;
+        ParameterDescriptionLocal* paramRef;
         int paramIndex;
         std::vector< std::pair<DotsC_MemberIndex, DotsC_ArrayIndex> > memberRef;
     };
-    typedef boost::shared_ptr<MemberMappingBasic> MemberMappingBasicPtr;
+    typedef boost::shared_ptr<MemberMappingLocal> MemberMappingLocalPtr;
 
-    class PropertyMappingDescriptionBasic : public PropertyMappingDescription
+    class PropertyMappingDescriptionLocal : public PropertyMappingDescription
     {
     public:
-        PropertyMappingDescriptionBasic()
+        PropertyMappingDescriptionLocal()
         {
         }
 
@@ -357,16 +357,16 @@ namespace ToolSupport
         //Fields
         std::string summary;
         std::string fileName;
-        PropertyDescriptionBasic* property;
-        ClassDescriptionBasic* class_;
-        std::vector<MemberMappingBasicPtr> memberMappings;
+        PropertyDescriptionLocal* property;
+        ClassDescriptionLocal* class_;
+        std::vector<MemberMappingLocalPtr> memberMappings;
     };
-    typedef boost::shared_ptr<PropertyMappingDescriptionBasic> PropertyMappingDescriptionBasicPtr;
+    typedef boost::shared_ptr<PropertyMappingDescriptionLocal> PropertyMappingDescriptionLocalPtr;
 
-    class CreateRoutineDescriptionBasic : public CreateRoutineDescription
+    class CreateRoutineDescriptionLocal : public CreateRoutineDescription
     {
     public:
-        explicit CreateRoutineDescriptionBasic(ClassDescriptionBasic* parent_)
+        explicit CreateRoutineDescriptionLocal(ClassDescriptionLocal* parent_)
             :parent(parent_)
             ,signature()
         {
@@ -387,17 +387,17 @@ namespace ToolSupport
         std::string name;
         StringVector parameters;
         MemberValueVector memberValues;
-        std::vector< std::pair<const ParameterDescriptionBasic*, int> > memberValuesParams;
+        std::vector< std::pair<const ParameterDescriptionLocal*, int> > memberValuesParams;
 
-        ClassDescriptionBasic* parent;
+        ClassDescriptionLocal* parent;
         std::string signature;
     };
-    typedef boost::shared_ptr<CreateRoutineDescriptionBasic> CreateRoutineDescriptionBasicPtr;
+    typedef boost::shared_ptr<CreateRoutineDescriptionLocal> CreateRoutineDescriptionLocalPtr;
 
-    class ClassDescriptionBasic : public ClassDescription
+    class ClassDescriptionLocal : public ClassDescription
     {
     public:
-        ClassDescriptionBasic()
+        ClassDescriptionLocal()
         {
         }
 
@@ -433,16 +433,16 @@ namespace ToolSupport
         std::string name;
         std::string baseClass;
 
-        ClassDescriptionBasic* base;
-        std::vector<ClassDescriptionBasic*> descendants;
-        std::vector<MemberDescriptionBasicPtr> members;
-        std::vector<CreateRoutineDescriptionBasicPtr> createRoutines;
-        std::vector<PropertyMappingDescriptionBasicPtr> properties;
-        std::vector<ParameterDescriptionBasicPtr> ownParameters;
+        ClassDescriptionLocal* base;
+        std::vector<ClassDescriptionLocal*> descendants;
+        std::vector<MemberDescriptionLocalPtr> members;
+        std::vector<CreateRoutineDescriptionLocalPtr> createRoutines;
+        std::vector<PropertyMappingDescriptionLocalPtr> properties;
+        std::vector<ParameterDescriptionLocalPtr> ownParameters;
     };
 
 
-    class RepositoryBasic : public TypeRepository, boost::noncopyable
+    class RepositoryLocal : public TypeRepository, boost::noncopyable
     {
     public:
         //Enmerations
@@ -466,26 +466,26 @@ namespace ToolSupport
         virtual void GetAllExceptionTypeIds(std::set<DotsC_TypeId>& typeIds) const {GetKeys(m_exceptions, typeIds);}
 
         //Extra methods not from TypeRepository interface
-        bool InsertEnum(const EnumDescriptionBasicPtr& val) {return m_enums.insert(std::make_pair(val->typeId, val)).second;}
-        bool InsertClass(const ClassDescriptionBasicPtr& val) {return m_classes.insert(std::make_pair(val->typeId, val)).second;}
-        bool InsertProperty(const PropertyDescriptionBasicPtr& val) {return m_properties.insert(std::make_pair(val->typeId, val)).second;}
-        bool InsertException(const ExceptionDescriptionBasicPtr& val) {return m_exceptions.insert(std::make_pair(val->typeId, val)).second;}
-        bool InsertParameter(const ParameterDescriptionBasicPtr& val) {return m_parameters.insert(std::make_pair(val->GetQualifiedName(), val.get())).second;}
-        ParameterDescriptionBasic* GetParameterBasic(const std::string& qualifiedName);
-        PropertyDescriptionBasic* GetPropertyBasic(DotsC_TypeId typeId) const {return GetPtr(m_properties, typeId);}
-        ClassDescriptionBasic* GetClassBasic(DotsC_TypeId typeId) const {return GetPtr(m_classes, typeId);}
-        ExceptionDescriptionBasic* GetExceptionBasic(DotsC_TypeId typeId) const {return GetPtr(m_exceptions, typeId);}
+        bool InsertEnum(const EnumDescriptionLocalPtr& val) {return m_enums.insert(std::make_pair(val->typeId, val)).second;}
+        bool InsertClass(const ClassDescriptionLocalPtr& val) {return m_classes.insert(std::make_pair(val->typeId, val)).second;}
+        bool InsertProperty(const PropertyDescriptionLocalPtr& val) {return m_properties.insert(std::make_pair(val->typeId, val)).second;}
+        bool InsertException(const ExceptionDescriptionLocalPtr& val) {return m_exceptions.insert(std::make_pair(val->typeId, val)).second;}
+        bool InsertParameter(const ParameterDescriptionLocalPtr& val) {return m_parameters.insert(std::make_pair(val->GetQualifiedName(), val.get())).second;}
+        ParameterDescriptionLocal* GetParameterLocal(const std::string& qualifiedName);
+        PropertyDescriptionLocal* GetPropertyLocal(DotsC_TypeId typeId) const {return GetPtr(m_properties, typeId);}
+        ClassDescriptionLocal* GetClassLocal(DotsC_TypeId typeId) const {return GetPtr(m_classes, typeId);}
+        ExceptionDescriptionLocal* GetExceptionLocal(DotsC_TypeId typeId) const {return GetPtr(m_exceptions, typeId);}
 
     private:
         friend class DouCompletionAlgorithm;
         friend class DomCompletionAlgorithm;
 
         //Type containers
-        boost::unordered_map<DotsC_TypeId, EnumDescriptionBasicPtr> m_enums;
-        boost::unordered_map<DotsC_TypeId, ClassDescriptionBasicPtr> m_classes;
-        boost::unordered_map<DotsC_TypeId, PropertyDescriptionBasicPtr> m_properties;
-        boost::unordered_map<DotsC_TypeId, ExceptionDescriptionBasicPtr> m_exceptions;
-        boost::unordered_map<std::string, ParameterDescriptionBasic*> m_parameters;
+        boost::unordered_map<DotsC_TypeId, EnumDescriptionLocalPtr> m_enums;
+        boost::unordered_map<DotsC_TypeId, ClassDescriptionLocalPtr> m_classes;
+        boost::unordered_map<DotsC_TypeId, PropertyDescriptionLocalPtr> m_properties;
+        boost::unordered_map<DotsC_TypeId, ExceptionDescriptionLocalPtr> m_exceptions;
+        boost::unordered_map<std::string, ParameterDescriptionLocal*> m_parameters;
 
         template <class Key, class Val>
         static void GetKeys(const boost::unordered_map<Key, Val>& m, std::set<Key>& keys)

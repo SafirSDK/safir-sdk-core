@@ -55,12 +55,12 @@ namespace ToolSupport
     //Resolves references on the form <...><name>param</name>123<index></index></...>
     void GetReferencedParameter(boost::property_tree::ptree& pt, std::string& paramName, std::string& paramKey);
     int GetReferencedIndex(boost::property_tree::ptree& pt, ParseState& state);
-    int ReferencedKeyToIndex(const RepositoryBasic* rep, const ParameterDescriptionBasic* pd, const std::string& key);
+    int ReferencedKeyToIndex(const RepositoryLocal* rep, const ParameterDescriptionLocal* pd, const std::string& key);
     std::string GetEntityIdParameterAsString(boost::property_tree::ptree& pt);
     bool ParseValue(DotsC_MemberType memberType, const std::string& val, ValueDefinition& result);
     bool ParseKey(DotsC_MemberType memberType, const std::string& val, ValueDefinition& result);
-    void VerifyParameterValue(const ParseState& state, ParameterDescriptionBasic* pd);
-    void VerifyParameterKey(const ParseState& state, ParameterDescriptionBasic* pd);
+    void VerifyParameterValue(const ParseState& state, ParameterDescriptionLocal* pd);
+    void VerifyParameterKey(const ParseState& state, ParameterDescriptionLocal* pd);
     inline bool ValidKeyType(DotsC_MemberType memberType)
     {
         return  memberType==Int32MemberType || memberType==Int64MemberType || memberType==StringMemberType || memberType==TypeIdMemberType ||
@@ -120,7 +120,7 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            ParameterDescriptionBasicPtr& def=state.lastInsertedClass->ownParameters.back();
+            ParameterDescriptionLocalPtr& def=state.lastInsertedClass->ownParameters.back();
             if (def->memberType!=ObjectMemberType)
             {
                 std::ostringstream os;
@@ -142,7 +142,7 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            ParameterDescriptionBasicPtr& def=state.lastInsertedClass->ownParameters.back();
+            ParameterDescriptionLocalPtr& def=state.lastInsertedClass->ownParameters.back();
             if (def->memberType!=ObjectMemberType)
             {
                 std::ostringstream os;
@@ -163,7 +163,7 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            ParameterDescriptionBasicPtr& def=state.lastInsertedClass->ownParameters.back();
+            ParameterDescriptionLocalPtr& def=state.lastInsertedClass->ownParameters.back();
             if (def->memberType!=EntityIdMemberType)
             {
                 std::ostringstream os;
@@ -200,7 +200,7 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            ParameterDescriptionBasicPtr& def=state.lastInsertedClass->ownParameters.back();
+            ParameterDescriptionLocalPtr& def=state.lastInsertedClass->ownParameters.back();
             try
             {
                 if (def->collectionType!=DictionaryCollectionType) //dictionaries have ValueDef inserted at dictionaryEntry
@@ -213,7 +213,7 @@ namespace ToolSupport
                 std::string paramName;
                 std::string paramKey;
                 GetReferencedParameter(pt, paramName, paramKey);
-                ParseState::ParameterReference<ParameterDescriptionBasic> ref(state.lastInsertedClass,
+                ParseState::ParameterReference<ParameterDescriptionLocal> ref(state.lastInsertedClass,
                                                                               def, def->values.size()-1,
                                                                               paramName, paramKey);
                 state.paramToParamReferences.push_back(ref);
@@ -236,7 +236,7 @@ namespace ToolSupport
                 std::string paramName;
                 std::string paramIx;
                 GetReferencedParameter(pt, paramName, paramIx);
-                ParseState::ParameterReference<MemberDescriptionBasic> ref(state.lastInsertedClass,
+                ParseState::ParameterReference<MemberDescriptionLocal> ref(state.lastInsertedClass,
                                                                            state.lastInsertedClass->members.back(),
                                                                            0,
                                                                            paramName, paramIx);
@@ -261,7 +261,7 @@ namespace ToolSupport
                 std::string paramName;
                 std::string paramIx;
                 GetReferencedParameter(pt, paramName, paramIx);
-                ParseState::ParameterReference<MemberDescriptionBasic> ref(state.lastInsertedClass,
+                ParseState::ParameterReference<MemberDescriptionLocal> ref(state.lastInsertedClass,
                                                                            state.lastInsertedClass->members.back(),
                                                                            0,
                                                                            paramName, paramIx);
@@ -281,7 +281,7 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            boost::function< bool(const ClassDescriptionBasicPtr&) > insert=boost::bind(&RepositoryBasic::InsertClass, state.repository, _1);
+            boost::function< bool(const ClassDescriptionLocalPtr&) > insert=boost::bind(&RepositoryLocal::InsertClass, state.repository, _1);
             CreateTopLevelDefinition(pt,
                                      state.currentPath,
                                      Elements::ClassName::Name(),
@@ -295,7 +295,7 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            boost::function< bool(const EnumDescriptionBasicPtr&) > insert=boost::bind(&RepositoryBasic::InsertEnum, state.repository, _1);
+            boost::function< bool(const EnumDescriptionLocalPtr&) > insert=boost::bind(&RepositoryLocal::InsertEnum, state.repository, _1);
             CreateTopLevelDefinition(pt,
                                      state.currentPath,
                                      Elements::EnumerationName::Name(),
@@ -308,7 +308,7 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            boost::function< bool(const ExceptionDescriptionBasicPtr&) > insert=boost::bind(&RepositoryBasic::InsertException, state.repository, _1);
+            boost::function< bool(const ExceptionDescriptionLocalPtr&) > insert=boost::bind(&RepositoryLocal::InsertException, state.repository, _1);
             CreateTopLevelDefinition(pt,
                                      state.currentPath,
                                      Elements::ExceptionName::Name(),
@@ -321,7 +321,7 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            boost::function< bool(const PropertyDescriptionBasicPtr&) > insert=boost::bind(&RepositoryBasic::InsertProperty, state.repository, _1);
+            boost::function< bool(const PropertyDescriptionLocalPtr&) > insert=boost::bind(&RepositoryLocal::InsertProperty, state.repository, _1);
             CreateTopLevelDefinition(pt,
                                      state.currentPath,
                                      Elements::PropertyName::Name(),
@@ -334,7 +334,7 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            MemberDescriptionBasicPtr def=boost::make_shared<MemberDescriptionBasic>();
+            MemberDescriptionLocalPtr def=boost::make_shared<MemberDescriptionLocal>();
             try
             {
                  def->name=pt.get<std::string>(Elements::MemberName::Name());
@@ -352,7 +352,7 @@ namespace ToolSupport
 
             //check for duplicates
             if (std::find_if(state.lastInsertedClass->members.begin(), state.lastInsertedClass->members.end(),
-                             boost::bind(NameComparerPtr<MemberDescriptionBasicPtr>, _1, def->name))!=state.lastInsertedClass->members.end())
+                             boost::bind(NameComparerPtr<MemberDescriptionLocalPtr>, _1, def->name))!=state.lastInsertedClass->members.end())
             {
                 std::ostringstream os;
                 os<<"A member with name '"<<def->name<<"' is defined more than one time in class "<<state.lastInsertedClass->name;
@@ -383,7 +383,7 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            CreateRoutineDescriptionBasicPtr def=boost::make_shared<CreateRoutineDescriptionBasic>(state.lastInsertedClass.get());
+            CreateRoutineDescriptionLocalPtr def=boost::make_shared<CreateRoutineDescriptionLocal>(state.lastInsertedClass.get());
             try
             {
                 def->name=pt.get<std::string>(Elements::CreateRoutineName::Name());
@@ -428,7 +428,7 @@ namespace ToolSupport
             def->signature=signature.str();
 
             //Check for createRoutines with same signature
-            for (std::vector<CreateRoutineDescriptionBasicPtr>::const_iterator crIt=state.lastInsertedClass->createRoutines.begin(); crIt!=state.lastInsertedClass->createRoutines.end(); ++crIt)
+            for (std::vector<CreateRoutineDescriptionLocalPtr>::const_iterator crIt=state.lastInsertedClass->createRoutines.begin(); crIt!=state.lastInsertedClass->createRoutines.end(); ++crIt)
             {
                 if ((*crIt)->signature==def->signature)
                 {
@@ -447,7 +447,7 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            CreateRoutineDescriptionBasicPtr& def=state.lastInsertedClass->createRoutines.back();
+            CreateRoutineDescriptionLocalPtr& def=state.lastInsertedClass->createRoutines.back();
             //We get the member here to since it is mandatory and it simplifies the parsing of CreateRoutineValueXXX if we are sure we alredy know the member name.
             try
             {
@@ -491,11 +491,11 @@ namespace ToolSupport
         {
             try
             {
-                CreateRoutineDescriptionBasicPtr& def=state.lastInsertedClass->createRoutines.back();
+                CreateRoutineDescriptionLocalPtr& def=state.lastInsertedClass->createRoutines.back();
                 std::string paramName, paramKey;
                 GetReferencedParameter(pt, paramName, paramKey);
 
-                ParseState::ParameterReference<CreateRoutineDescriptionBasic> ref(state.lastInsertedClass,
+                ParseState::ParameterReference<CreateRoutineDescriptionLocal> ref(state.lastInsertedClass,
                                                                                   def,
                                                                                   def->memberValues.size()-1,
                                                                                   paramName, paramKey);
@@ -519,14 +519,14 @@ namespace ToolSupport
 
             //Add hidden parameter
             //member@signature -> MyClassMember@MyNamespace.MyClass.MyCreateRoutine#param1#...#paramN
-            CreateRoutineDescriptionBasicPtr& def=state.lastInsertedClass->createRoutines.back();
+            CreateRoutineDescriptionLocalPtr& def=state.lastInsertedClass->createRoutines.back();
             MemberValue& memVal=def->memberValues.back();
             std::ostringstream paramName;
             paramName<<memVal.first<<"@"<<def->signature;
             memVal.second.first=paramName.str();
             memVal.second.second=0;
 
-            ParameterDescriptionBasicPtr par=boost::make_shared<ParameterDescriptionBasic>();
+            ParameterDescriptionLocalPtr par=boost::make_shared<ParameterDescriptionLocal>();
             par->qualifiedName=paramName.str();
             par->name=par->qualifiedName;
             par->hidden=true;
@@ -540,7 +540,7 @@ namespace ToolSupport
             state.repository->InsertParameter(par);
 
             //type is still missing, add for later processing
-            ParseState::ParameterReference<CreateRoutineDescriptionBasic> ref(state.lastInsertedClass,
+            ParseState::ParameterReference<CreateRoutineDescriptionLocal> ref(state.lastInsertedClass,
                                                                               def,
                                                                               def->memberValues.size()-1,
                                                                               par->GetName(), "");
@@ -555,7 +555,7 @@ namespace ToolSupport
         {
             //Add hidden parameter
             //member@signature -> MyClassMember@MyNamespace.MyClass.MyCreateRoutine#param1#...#paramN
-            CreateRoutineDescriptionBasicPtr& def=state.lastInsertedClass->createRoutines.back();
+            CreateRoutineDescriptionLocalPtr& def=state.lastInsertedClass->createRoutines.back();
             MemberValue& memVal=def->memberValues.back();
             std::ostringstream paramName;
             paramName<<memVal.first<<"@"<<def->signature;
@@ -584,7 +584,7 @@ namespace ToolSupport
                 throw ParseError("Incomplete EntityId XML", "Failed to expand environment variable '"+envVar+"' in CreateRoutine "+def->GetName()+" member "+memVal.first, state.currentPath, 140);
             }
 
-            ParameterDescriptionBasicPtr par=boost::make_shared<ParameterDescriptionBasic>();
+            ParameterDescriptionLocalPtr par=boost::make_shared<ParameterDescriptionLocal>();
             par->qualifiedName=paramName.str();
             par->name=par->qualifiedName;
             par->hidden=true;
@@ -603,14 +603,14 @@ namespace ToolSupport
         {
             //Add hidden parameter
             //member@signature -> MyClassMember@MyNamespace.MyClass.MyCreateRoutine#param1#...#paramN
-            CreateRoutineDescriptionBasicPtr& def=state.lastInsertedClass->createRoutines.back();
+            CreateRoutineDescriptionLocalPtr& def=state.lastInsertedClass->createRoutines.back();
             MemberValue& memVal=def->memberValues.back();
             std::ostringstream paramName;
             paramName<<memVal.first<<"@"<<def->signature;
             memVal.second.first=paramName.str();
             memVal.second.second=0;
 
-            ParameterDescriptionBasicPtr par=boost::make_shared<ParameterDescriptionBasic>();
+            ParameterDescriptionLocalPtr par=boost::make_shared<ParameterDescriptionLocal>();
             par->qualifiedName=paramName.str();
             par->name=par->qualifiedName;
             par->hidden=true;
@@ -628,7 +628,7 @@ namespace ToolSupport
             state.repository->InsertParameter(par);
 
             //type is still missing, add for later processing
-            ParseState::ParameterReference<CreateRoutineDescriptionBasic> ref(state.lastInsertedClass,
+            ParseState::ParameterReference<CreateRoutineDescriptionLocal> ref(state.lastInsertedClass,
                                                                               def,
                                                                               def->memberValues.size()-1,
                                                                               par->GetName(), "");
@@ -642,14 +642,14 @@ namespace ToolSupport
         {
             //Add hidden parameter
             //member@signature -> MyClassMember@MyNamespace.MyClass.MyCreateRoutine#param1#...#paramN
-            CreateRoutineDescriptionBasicPtr& def=state.lastInsertedClass->createRoutines.back();
+            CreateRoutineDescriptionLocalPtr& def=state.lastInsertedClass->createRoutines.back();
             MemberValue& memVal=def->memberValues.back();
             std::ostringstream paramName;
             paramName<<memVal.first<<"@"<<def->signature;
             memVal.second.first=paramName.str();
             memVal.second.second=0;
 
-            ParameterDescriptionBasicPtr par=boost::make_shared<ParameterDescriptionBasic>();
+            ParameterDescriptionLocalPtr par=boost::make_shared<ParameterDescriptionLocal>();
             par->qualifiedName=paramName.str();
             par->name=par->qualifiedName;
             par->hidden=true;
@@ -668,7 +668,7 @@ namespace ToolSupport
             state.repository->InsertParameter(par);
 
             //type is still missing, add for later processing
-            ParseState::ParameterReference<CreateRoutineDescriptionBasic> ref(state.lastInsertedClass,
+            ParseState::ParameterReference<CreateRoutineDescriptionLocal> ref(state.lastInsertedClass,
                                                                               def,
                                                                               def->memberValues.size()-1,
                                                                               par->GetName(), "");
@@ -680,16 +680,16 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            ParameterDescriptionBasicPtr def=boost::make_shared<ParameterDescriptionBasic>();
+            ParameterDescriptionLocalPtr def=boost::make_shared<ParameterDescriptionLocal>();
 
             //Check parameter name
             try
             {
                 def->name=pt.get<std::string>(Elements::ParameterName::Name());
                 SerializationUtils::Trim(def->name);
-                std::vector<ParameterDescriptionBasicPtr>::const_iterator found=std::find_if(state.lastInsertedClass->ownParameters.begin(),
+                std::vector<ParameterDescriptionLocalPtr>::const_iterator found=std::find_if(state.lastInsertedClass->ownParameters.begin(),
                                                                                              state.lastInsertedClass->ownParameters.end(),
-                                                                                             boost::bind(NameComparerPtr<ParameterDescriptionBasicPtr>, _1, def->name));
+                                                                                             boost::bind(NameComparerPtr<ParameterDescriptionLocalPtr>, _1, def->name));
                 if (found!=state.lastInsertedClass->ownParameters.end())
                 {
                     std::ostringstream os;
@@ -753,7 +753,7 @@ namespace ToolSupport
         {
             SerializationUtils::Trim(pt.data());
 
-            ParameterDescriptionBasicPtr& def=state.lastInsertedClass->ownParameters.back();
+            ParameterDescriptionLocalPtr& def=state.lastInsertedClass->ownParameters.back();
 
             if (def->collectionType!=DictionaryCollectionType) //dictionaries have ValueDef inserted at dictionaryEntry
             {
@@ -800,7 +800,7 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            ParameterDescriptionBasicPtr& pd=state.lastInsertedClass->ownParameters.back();
+            ParameterDescriptionLocalPtr& pd=state.lastInsertedClass->ownParameters.back();
             pd->collectionType=DictionaryCollectionType;
 
             try
@@ -875,7 +875,7 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            ParameterDescriptionBasicPtr& def=state.lastInsertedClass->ownParameters.back();
+            ParameterDescriptionLocalPtr& def=state.lastInsertedClass->ownParameters.back();
             ValueDefinition val;
             std::string key;
 
@@ -982,7 +982,7 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            MemberDescriptionBasicPtr def=boost::make_shared<MemberDescriptionBasic>();
+            MemberDescriptionLocalPtr def=boost::make_shared<MemberDescriptionLocal>();
 
             try
             {
@@ -1001,7 +1001,7 @@ namespace ToolSupport
                 throw ParseError("Invalid name", os.str(), state.currentPath, 68);
             }
 
-            if (std::find_if(state.lastInsertedProperty->members.begin(), state.lastInsertedProperty->members.end(), boost::bind(NameComparerPtr<MemberDescriptionBasicPtr>, _1, def->name))!=
+            if (std::find_if(state.lastInsertedProperty->members.begin(), state.lastInsertedProperty->members.end(), boost::bind(NameComparerPtr<MemberDescriptionLocalPtr>, _1, def->name))!=
                 state.lastInsertedProperty->members.end())
             {
                 throw ParseError("Duplicated property member", def->name+" is defined more than one time in property "+state.lastInsertedProperty->name, state.currentPath, 69);
@@ -1161,10 +1161,10 @@ namespace ToolSupport
     //-----------------------------------------------
     inline void InsertInlineParameter(ParseState& state, DotsC_CollectionType collectionType)
     {
-        const PropertyDescriptionBasic* pd=state.lastInsertedPropertyMapping->property;
-        const MemberDescriptionBasic* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
+        const PropertyDescriptionLocal* pd=state.lastInsertedPropertyMapping->property;
+        const MemberDescriptionLocal* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
 
-        ParameterDescriptionBasicPtr param=boost::make_shared<ParameterDescriptionBasic>();
+        ParameterDescriptionLocalPtr param=boost::make_shared<ParameterDescriptionLocal>();
         std::ostringstream paramName;
         //MyPropNamespace.MyProperty.PropMember@MyClassNamespace.MyClass#pm
         paramName<<pd->GetName()<<"."<<propMem->GetName()<<"@"<<state.lastInsertedPropertyMapping->class_->GetName();
@@ -1190,7 +1190,7 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            ParameterDescriptionBasic* def=state.lastInsertedMemberMapping->paramRef;
+            ParameterDescriptionLocal* def=state.lastInsertedMemberMapping->paramRef;
             ValueDefinition val;
             std::string key;
 
@@ -1210,16 +1210,16 @@ namespace ToolSupport
             }
             catch (const boost::property_tree::ptree_error&)
             {
-                const PropertyMappingDescriptionBasic* pdm=state.lastInsertedPropertyMapping.get();
-                const MemberDescriptionBasic* propMem=pdm->property->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
+                const PropertyMappingDescriptionLocal* pdm=state.lastInsertedPropertyMapping.get();
+                const MemberDescriptionLocal* propMem=pdm->property->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
                 std::ostringstream ss;
                 ss<<"The propertyMapping of the dictionary property member '"<<pdm->property->name<<"."<<propMem->name<<"' for class  '"<<pdm->class_->name<<"' has no key specified.";
                 throw ParseError("Missing key", ss.str(), state.currentPath, 189);
             }
             catch (const std::string& envVar)
             {
-                const PropertyMappingDescriptionBasic* pdm=state.lastInsertedPropertyMapping.get();
-                const MemberDescriptionBasic* propMem=pdm->property->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
+                const PropertyMappingDescriptionLocal* pdm=state.lastInsertedPropertyMapping.get();
+                const MemberDescriptionLocal* propMem=pdm->property->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
                 std::ostringstream os;
                 os<<"Failed to expand environment variable in propertyMapping of '"<<pdm->property->name<<"."<<propMem->name<<"' for class  '"<<pdm->class_->name<<". "<<envVar;
                 throw ParseError("Invalid dictionary key", os.str(), state.currentPath, 190);
@@ -1232,8 +1232,8 @@ namespace ToolSupport
             }
             else if (!ParseKey(def->keyType, key, val))
             {
-                const PropertyMappingDescriptionBasic* pdm=state.lastInsertedPropertyMapping.get();
-                const MemberDescriptionBasic* propMem=pdm->property->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
+                const PropertyMappingDescriptionLocal* pdm=state.lastInsertedPropertyMapping.get();
+                const MemberDescriptionLocal* propMem=pdm->property->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
                 std::ostringstream os;
                 os<<"The key '"<<key<<"' doesn't match the type "<<TypeUtilities::GetTypeName(def->keyType)<<" for propertyMapping of '"<<pdm->property->name<<"."<<propMem->name<<"' for class  '"<<pdm->class_->name<<"' has no key specified.";
                 throw ParseError("Invalid dictionary key", os.str(), state.currentPath, 191);
@@ -1249,8 +1249,8 @@ namespace ToolSupport
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
             state.lastInsertedMemberMapping->kind=MappedToParameter;
-            const PropertyDescriptionBasic* pd=state.lastInsertedPropertyMapping->property;
-            const MemberDescriptionBasic* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
+            const PropertyDescriptionLocal* pd=state.lastInsertedPropertyMapping->property;
+            const MemberDescriptionLocal* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
 
             if (propMem->memberType!=ObjectMemberType)
             {
@@ -1259,7 +1259,7 @@ namespace ToolSupport
                 throw ParseError("Type missmatch", os.str(), state.currentPath, 98);
             }
 
-            ParameterDescriptionBasic* param=state.lastInsertedMemberMapping->paramRef;
+            ParameterDescriptionLocal* param=state.lastInsertedMemberMapping->paramRef;
 
             //Get the correct type name of the serialized object
             boost::optional<std::string> typeAttr=pt.get_optional<std::string>("<xmlattr>.type");
@@ -1313,8 +1313,8 @@ namespace ToolSupport
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
             state.lastInsertedMemberMapping->kind=MappedToParameter;
-            const PropertyDescriptionBasic* pd=state.lastInsertedPropertyMapping->property;
-            const MemberDescriptionBasic* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
+            const PropertyDescriptionLocal* pd=state.lastInsertedPropertyMapping->property;
+            const MemberDescriptionLocal* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
 
             if (propMem->memberType!=ObjectMemberType)
             {
@@ -1323,7 +1323,7 @@ namespace ToolSupport
                 throw ParseError("Type missmatch", os.str(), state.currentPath, 99);
             }
 
-            ParameterDescriptionBasic* param=state.lastInsertedMemberMapping->paramRef;
+            ParameterDescriptionLocal* param=state.lastInsertedMemberMapping->paramRef;
 
             //do the serialization to the expected type
             if (param->collectionType!=DictionaryCollectionType) //dictionaries have ValueDef inserted at dictionaryEntry
@@ -1361,8 +1361,8 @@ namespace ToolSupport
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
             state.lastInsertedMemberMapping->kind=MappedToParameter;
-            const PropertyDescriptionBasic* pd=state.lastInsertedPropertyMapping->property;
-            const MemberDescriptionBasic* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
+            const PropertyDescriptionLocal* pd=state.lastInsertedPropertyMapping->property;
+            const MemberDescriptionLocal* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
 
             if (propMem->memberType!=EntityIdMemberType)
             {
@@ -1371,7 +1371,7 @@ namespace ToolSupport
                 throw ParseError("Type missmatch", os.str(), state.currentPath, 103);
             }
 
-            ParameterDescriptionBasic* param=state.lastInsertedMemberMapping->paramRef;
+            ParameterDescriptionLocal* param=state.lastInsertedMemberMapping->paramRef;
 
             try
             {
@@ -1405,7 +1405,7 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            ParameterDescriptionBasic* param=state.lastInsertedMemberMapping->paramRef;
+            ParameterDescriptionLocal* param=state.lastInsertedMemberMapping->paramRef;
 
             SerializationUtils::Trim(pt.data());
             try
@@ -1426,8 +1426,8 @@ namespace ToolSupport
             ValueDefinition& vd=param->values.back();
 
             state.lastInsertedMemberMapping->kind=MappedToParameter;
-            const PropertyDescriptionBasic* pd=state.lastInsertedPropertyMapping->property;
-            const MemberDescriptionBasic* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
+            const PropertyDescriptionLocal* pd=state.lastInsertedPropertyMapping->property;
+            const MemberDescriptionLocal* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
             if (param->memberType==EnumerationMemberType)
             {
                 const EnumDescription* ed=state.repository->GetEnum(param->typeId);
@@ -1459,8 +1459,8 @@ namespace ToolSupport
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
             state.lastInsertedMemberMapping->kind=MappedToParameter;
-            const PropertyDescriptionBasic* pd=state.lastInsertedPropertyMapping->property;
-            const MemberDescriptionBasic* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
+            const PropertyDescriptionLocal* pd=state.lastInsertedPropertyMapping->property;
+            const MemberDescriptionLocal* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
             std::string paramName;
             int paramIndex=-1;
 
@@ -1489,7 +1489,7 @@ namespace ToolSupport
                 paramIndex=pt.get(Elements::ReferenceIndex::Name(), -1);
             }
 
-            ParameterDescriptionBasic* param=state.repository->GetParameterBasic(paramName);
+            ParameterDescriptionLocal* param=state.repository->GetParameterLocal(paramName);
             if (!param)
             {
                 //parameter does not exist
@@ -1555,8 +1555,8 @@ namespace ToolSupport
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
             state.lastInsertedMemberMapping->kind=MappedToParameter;
-            const PropertyDescriptionBasic* pd=state.lastInsertedPropertyMapping->property;
-            const MemberDescriptionBasic* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
+            const PropertyDescriptionLocal* pd=state.lastInsertedPropertyMapping->property;
+            const MemberDescriptionLocal* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
             std::string paramName;
             std::string paramKey;
 
@@ -1573,7 +1573,7 @@ namespace ToolSupport
                 throw ParseError("Invalid parameter reference syntax", os.str(), state.currentPath, 199);
             }
 
-            ParameterDescriptionBasic* srcParam=state.repository->GetParameterBasic(paramName);
+            ParameterDescriptionLocal* srcParam=state.repository->GetParameterLocal(paramName);
             if (!srcParam)
             {
                 //parameter does not exist
@@ -1603,7 +1603,7 @@ namespace ToolSupport
                 throw ParseError("Invalid parameter reference", os.str(), state.currentPath, 205);
             }
 
-            ParameterDescriptionBasic* destParam=state.lastInsertedMemberMapping->paramRef;
+            ParameterDescriptionLocal* destParam=state.lastInsertedMemberMapping->paramRef;
             if (destParam->collectionType!=DictionaryCollectionType) //dictionaries have ValueDef inserted at dictionaryEntry
             {
                 destParam->values.push_back(ValueDefinition()); //placeholder
@@ -1620,10 +1620,10 @@ namespace ToolSupport
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
             state.lastInsertedMemberMapping->kind=MappedToMember;
-            const PropertyDescriptionBasic* pd=state.lastInsertedPropertyMapping->property;
-            const MemberDescriptionBasic* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
-            const ClassDescriptionBasic* cd=state.lastInsertedPropertyMapping->class_;
-            const MemberDescriptionBasic* classMem=NULL;
+            const PropertyDescriptionLocal* pd=state.lastInsertedPropertyMapping->property;
+            const MemberDescriptionLocal* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
+            const ClassDescriptionLocal* cd=state.lastInsertedPropertyMapping->class_;
+            const MemberDescriptionLocal* classMem=NULL;
             int memberArrayIndex=-1;
 
             //Step into nested member refs if any
@@ -1631,7 +1631,7 @@ namespace ToolSupport
                  it!=state.lastInsertedMemberMapping->memberRef.end(); ++it)
             {
                 DotsC_TypeId tid=cd->GetMember(it->first)->GetTypeId();
-                cd=state.repository->GetClassBasic(tid);
+                cd=state.repository->GetClassLocal(tid);
             }
 
             //Get class description
@@ -1658,7 +1658,7 @@ namespace ToolSupport
                     os<<"PropertyMapping is mapping the property member '"<<propMem->GetName()<<"' to class member '"<<memberName<<"'. But the class member does not exist in class "<<cd->GetName();
                     throw ParseError("Invalid class member", os.str(), state.currentPath, 77);
                 }
-                classMem=static_cast<const MemberDescriptionBasic*>(cd->GetMember(classMemberIx));
+                classMem=static_cast<const MemberDescriptionLocal*>(cd->GetMember(classMemberIx));
                 int arrIx=memberArrayIndex<0 ? 0 : memberArrayIndex;
                 state.lastInsertedMemberMapping->memberRef.push_back(std::make_pair(classMemberIx, arrIx));
             }
@@ -1796,8 +1796,8 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            const PropertyDescriptionBasic* pd=state.lastInsertedPropertyMapping->property;
-            MemberMappingBasicPtr md=boost::make_shared<MemberMappingBasic>();
+            const PropertyDescriptionLocal* pd=state.lastInsertedPropertyMapping->property;
+            MemberMappingLocalPtr md=boost::make_shared<MemberMappingLocal>();
             md->kind=MappedToNull;
             bool inlineParam=false;
             DotsC_CollectionType collectionType=SingleValueCollectionType;
@@ -1894,7 +1894,7 @@ namespace ToolSupport
 
             if (inlineParam)
             {
-                const MemberDescriptionBasic* propMem=pd->members[md->propertyMemberIndex].get();
+                const MemberDescriptionLocal* propMem=pd->members[md->propertyMemberIndex].get();
                 if (propMem->GetCollectionType()!=collectionType)
                 {
                     std::ostringstream os;
@@ -1911,7 +1911,7 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            PropertyMappingDescriptionBasicPtr def=boost::make_shared<PropertyMappingDescriptionBasic>();
+            PropertyMappingDescriptionLocalPtr def=boost::make_shared<PropertyMappingDescriptionLocal>();
             state.notInsertedPropertyMappings.push_back(def);
             state.lastInsertedPropertyMapping=def;
             def->fileName=state.currentPath;
@@ -1922,7 +1922,7 @@ namespace ToolSupport
                 std::string className=pt.get<std::string>(Elements::MappedClass::Name());
                 SerializationUtils::Trim(className);
                 DotsC_TypeId classTypeId=LlufId_Generate64(className.c_str());
-                def->class_=state.repository->GetClassBasic(classTypeId);
+                def->class_=state.repository->GetClassLocal(classTypeId);
                 if (!def->class_)
                 {
                     throw ParseError("Class does not exist", "PropertyMapping is specifying a class that does not exist '"+className+"'.", state.currentPath, 70);
@@ -1939,7 +1939,7 @@ namespace ToolSupport
                 std::string propName=pt.get<std::string>(Elements::MappedProperty::Name());
                 SerializationUtils::Trim(propName);
                 DotsC_TypeId propTypeId=LlufId_Generate64(propName.c_str());
-                def->property=state.repository->GetPropertyBasic(propTypeId);
+                def->property=state.repository->GetPropertyLocal(propTypeId);
                 if (!def->property)
                 {
                     throw ParseError("Property does not exist", "PropertyMapping is specifying a property that does not exist '"+propName+"'.", state.currentPath, 72);
@@ -1970,14 +1970,14 @@ namespace ToolSupport
         void DeserializeObjects(const ParseState& state);
         void ResolveReferences(const ParseState& state);
         void ResolveParamToParamRefs(const ParseState& state);
-        bool ResolveParamToParamRef(const ParseState& state, const ParseState::ParameterReference<ParameterDescriptionBasic>& ref);
-        void ResolveArraySizeRef(const ParseState& state, const ParseState::ParameterReference<MemberDescriptionBasic>& ref);
-        void ResolveMaxLengthRef(const ParseState& state, const ParseState::ParameterReference<MemberDescriptionBasic>& ref);
-        void ResolveCreateRoutineParams(const ParseState& state, const ParseState::ParameterReference<CreateRoutineDescriptionBasic>& ref);
-        void HandleCreateRoutines(const ParseState& state, ClassDescriptionBasic* cd);
+        bool ResolveParamToParamRef(const ParseState& state, const ParseState::ParameterReference<ParameterDescriptionLocal>& ref);
+        void ResolveArraySizeRef(const ParseState& state, const ParseState::ParameterReference<MemberDescriptionLocal>& ref);
+        void ResolveMaxLengthRef(const ParseState& state, const ParseState::ParameterReference<MemberDescriptionLocal>& ref);
+        void ResolveCreateRoutineParams(const ParseState& state, const ParseState::ParameterReference<CreateRoutineDescriptionLocal>& ref);
+        void HandleCreateRoutines(const ParseState& state, ClassDescriptionLocal* cd);
         void CalculateEnumChecksums(const ParseState& state);
         void VerifyParameterTypes(const ParseState& state);
-        void CalculateClassSize(const ParseState& state, ClassDescriptionBasic* cd);
+        void CalculateClassSize(const ParseState& state, ClassDescriptionLocal* cd);
     };
 
     class DomCompletionAlgorithm
@@ -1986,7 +1986,7 @@ namespace ToolSupport
         void operator()(const ParseState& state);
 
     private:
-        void InsertPropertyMapping(const PropertyMappingDescriptionBasicPtr& pm);
+        void InsertPropertyMapping(const PropertyMappingDescriptionLocalPtr& pm);
     };
 }
 }

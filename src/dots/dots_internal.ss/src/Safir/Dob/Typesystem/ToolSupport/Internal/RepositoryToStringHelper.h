@@ -560,9 +560,18 @@ namespace Internal
                 std::pair<const ParameterDescriptionType*, int> par=md->GetParameter();
                 os<<"        MappingKind:     ValueMapping"<<std::endl;
                 os<<"        MappedParam:       "<<par.first->GetName();
-                if (propertyMember->GetCollectionType()!=ArrayCollectionType)
+                if (propertyMember->GetCollectionType()==SingleValueCollectionType)
                 {
-                    os<<"["<<par.second<<"]";
+                    if (par.first->GetCollectionType()==ArrayCollectionType)
+                    {
+                        os<<"["<<par.second<<"]";
+                    }
+                    else if (par.first->GetCollectionType()==DictionaryCollectionType)
+                    {
+                        os<<"[";
+                        ParameterKeyToString(par.first, par.second, os);
+                        os<<"]";
+                    }
                 }
                 os<<std::endl;
             }

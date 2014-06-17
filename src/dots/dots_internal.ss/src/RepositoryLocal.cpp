@@ -25,7 +25,7 @@
 #include <algorithm>
 #include <set>
 #include <Safir/Dob/Typesystem/ToolSupport/Internal/InternalDefs.h>
-#include "RepositoryBasic.h"
+#include "RepositoryLocal.h"
 
 namespace Safir
 {
@@ -35,9 +35,9 @@ namespace Typesystem
 {
 namespace ToolSupport
 {
-    ParameterDescriptionBasic* RepositoryBasic::GetParameterBasic(const std::string& qualifiedName)
+    ParameterDescriptionLocal* RepositoryLocal::GetParameterLocal(const std::string& qualifiedName)
     {
-        boost::unordered_map<std::string, ParameterDescriptionBasic*>::const_iterator it=m_parameters.find(qualifiedName);
+        boost::unordered_map<std::string, ParameterDescriptionLocal*>::const_iterator it=m_parameters.find(qualifiedName);
         if (it!=m_parameters.end())
         {
             return it->second;
@@ -51,7 +51,7 @@ namespace ToolSupport
     
     //Class
     //---------
-    const ParameterDescription* ClassDescriptionBasic::GetParameter(DotsC_ParameterIndex index) const
+    const ParameterDescription* ClassDescriptionLocal::GetParameter(DotsC_ParameterIndex index) const
     {
         int numInherited=GetNumberOfInheritedParameters();
         if (index<numInherited)
@@ -62,22 +62,22 @@ namespace ToolSupport
         return ownParameters[index-numInherited].get();
     }
 
-    void ClassDescriptionBasic::GetPropertyIds(std::set<DotsC_TypeId>& propertyIds) const
+    void ClassDescriptionLocal::GetPropertyIds(std::set<DotsC_TypeId>& propertyIds) const
     {
         if (base)
         {
             base->GetPropertyIds(propertyIds);
         }
 
-        for (std::vector<PropertyMappingDescriptionBasicPtr>::const_iterator it=properties.begin(); it!=properties.end(); ++it)
+        for (std::vector<PropertyMappingDescriptionLocalPtr>::const_iterator it=properties.begin(); it!=properties.end(); ++it)
         {
             propertyIds.insert((*it)->property->GetTypeId());
         }
     }
 
-    const PropertyMappingDescription* ClassDescriptionBasic::GetPropertyMapping(DotsC_TypeId propertyTypeId, bool & isInherited) const
+    const PropertyMappingDescription* ClassDescriptionLocal::GetPropertyMapping(DotsC_TypeId propertyTypeId, bool & isInherited) const
     {
-        for (std::vector<PropertyMappingDescriptionBasicPtr>::const_iterator it=properties.begin(); it!=properties.end(); ++it)
+        for (std::vector<PropertyMappingDescriptionLocalPtr>::const_iterator it=properties.begin(); it!=properties.end(); ++it)
         {
             if ((*it)->property->GetTypeId()==propertyTypeId)
             {
@@ -96,9 +96,9 @@ namespace ToolSupport
         return NULL;        
     }
 
-    DotsC_MemberIndex ClassDescriptionBasic::GetMemberIndex(const std::string& memberName) const
+    DotsC_MemberIndex ClassDescriptionLocal::GetMemberIndex(const std::string& memberName) const
     {
-        for (std::vector<MemberDescriptionBasicPtr>::const_iterator it=members.begin(); it!=members.end(); ++it)
+        for (std::vector<MemberDescriptionLocalPtr>::const_iterator it=members.begin(); it!=members.end(); ++it)
         {
             if ((*it)->GetName()==memberName)
             {
@@ -114,7 +114,7 @@ namespace ToolSupport
         return -1;
     }
 
-    const MemberDescription* ClassDescriptionBasic::GetMember(DotsC_MemberIndex index) const
+    const MemberDescription* ClassDescriptionLocal::GetMember(DotsC_MemberIndex index) const
     {
         int numInherited=GetNumberOfInheritedMembers();
         if (index<numInherited)
@@ -127,44 +127,44 @@ namespace ToolSupport
 
     //properties
     //-----------
-    DotsC_MemberIndex PropertyDescriptionBasic::GetMemberIndex(const std::string& memberName) const
+    DotsC_MemberIndex PropertyDescriptionLocal::GetMemberIndex(const std::string& memberName) const
     {
         return TypeUtilities::GetPropertyMemberIndex<PropertyDescription, MemberDescription>(this, memberName);
     }
 
     //enumerations
     //-------------
-    int EnumDescriptionBasic::GetIndexOfValue(const std::string& valueName) const
+    int EnumDescriptionLocal::GetIndexOfValue(const std::string& valueName) const
     {
         return TypeUtilities::GetIndexOfEnumValue(this, valueName);
     }
 
     //CreateRoutines
     //----------------
-    const MemberDescription* CreateRoutineDescriptionBasic::GetInParameterMember(int index) const
+    const MemberDescription* CreateRoutineDescriptionLocal::GetInParameterMember(int index) const
     {
         return parent->GetMember(parent->GetMemberIndex(parameters[index]));
     }
 
-    const MemberDescription* CreateRoutineDescriptionBasic::GetDefaultValueMember(int index) const
+    const MemberDescription* CreateRoutineDescriptionLocal::GetDefaultValueMember(int index) const
     {
         const std::pair<std::string, std::pair<std::string, int> >& ref=memberValues[index];
         return parent->GetMember(parent->GetMemberIndex(ref.first));
     }
 
-    std::pair<const ParameterDescription*, int /*paramIndex*/> CreateRoutineDescriptionBasic::GetDefaultValue(int index) const
+    std::pair<const ParameterDescription*, int /*paramIndex*/> CreateRoutineDescriptionLocal::GetDefaultValue(int index) const
     {
         return memberValuesParams[index];
     }
 
     //PropertyMappings
     //------------------
-    const PropertyDescription* PropertyMappingDescriptionBasic::GetProperty() const
+    const PropertyDescription* PropertyMappingDescriptionLocal::GetProperty() const
     {
         return property;
     }
 
-    const ClassDescription* PropertyMappingDescriptionBasic::GetClass() const
+    const ClassDescription* PropertyMappingDescriptionLocal::GetClass() const
     {
         return class_;
     }

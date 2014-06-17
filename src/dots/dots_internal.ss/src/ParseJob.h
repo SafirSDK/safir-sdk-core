@@ -49,7 +49,7 @@ namespace ToolSupport
         boost::shared_ptr<TypeRepository> GetResult() {return m_result;}
 
     private:
-        boost::shared_ptr<RepositoryBasic> m_result;
+        boost::shared_ptr<RepositoryLocal> m_result;
     };
 }
 }

@@ -28,7 +28,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <Safir/Utilities/Internal/Id.h>
-#include "RepositoryBasic.h"
+#include "RepositoryLocal.h"
 
 namespace Safir
 {
@@ -52,11 +52,11 @@ namespace ToolSupport
         template <class SubItem>
         struct Reference
         {
-            ClassDescriptionBasic* referencingClass;    //referencing class
+            ClassDescriptionLocal* referencingClass;    //referencing class
             SubItem* referencingItem; //referencing member or parameter or createRoutine
             size_t referencingIndex; //referencing parameter index if applicable
             Reference() {}
-            Reference(const ClassDescriptionBasicPtr& cl,
+            Reference(const ClassDescriptionLocalPtr& cl,
                       const boost::shared_ptr<SubItem>& sub,
                       size_t ix)
                 :referencingClass(cl.get())
@@ -75,7 +75,7 @@ namespace ToolSupport
             std::string parameterKey; //referenced parameter key or index
 
             ParameterReference() {}
-            ParameterReference(const ClassDescriptionBasicPtr& referencingClass,
+            ParameterReference(const ClassDescriptionLocalPtr& referencingClass,
                                const boost::shared_ptr<ReferencedSubItem>& referencingSubItem,
                                size_t referencingIndex,
                                const std::string& paramName,
@@ -92,13 +92,13 @@ namespace ToolSupport
         //Handling serialized object parameters is very time consuming.
         struct ObjectParameter
         {            
-            Reference<ParameterDescriptionBasic> referee;
+            Reference<ParameterDescriptionLocal> referee;
             boost::property_tree::ptree* obj;
             boost::shared_ptr<boost::property_tree::ptree> propertyTree; //prevent from destruction
             bool deprecatedXmlFormat;
             ObjectParameter(){}
-            ObjectParameter(const ClassDescriptionBasicPtr& class_,
-                            const ParameterDescriptionBasicPtr& param,
+            ObjectParameter(const ClassDescriptionLocalPtr& class_,
+                            const ParameterDescriptionLocalPtr& param,
                             size_t paramArrayIndex,
                             boost::property_tree::ptree* obj_,
                             const boost::shared_ptr<boost::property_tree::ptree>& pt)
@@ -115,29 +115,29 @@ namespace ToolSupport
         //-------------------------------------------------------------------------
         mutable std::string currentPath; //current full path filename
         boost::shared_ptr<boost::property_tree::ptree> propertyTree; //the currently parsed propertyTree
-        boost::shared_ptr<RepositoryBasic> repository;
+        boost::shared_ptr<RepositoryLocal> repository;
 
         //Pointers to quickly access the unit we are currently parsing.
-        ClassDescriptionBasicPtr lastInsertedClass;
-        EnumDescriptionBasicPtr lastInsertedEnum;
-        PropertyDescriptionBasicPtr lastInsertedProperty;
-        ExceptionDescriptionBasicPtr lastInsertedException;
-        PropertyMappingDescriptionBasicPtr lastInsertedPropertyMapping;
-        MemberMappingBasicPtr lastInsertedMemberMapping;
+        ClassDescriptionLocalPtr lastInsertedClass;
+        EnumDescriptionLocalPtr lastInsertedEnum;
+        PropertyDescriptionLocalPtr lastInsertedProperty;
+        ExceptionDescriptionLocalPtr lastInsertedException;
+        PropertyMappingDescriptionLocalPtr lastInsertedPropertyMapping;
+        MemberMappingLocalPtr lastInsertedMemberMapping;
 
         //Here we store references to stuff that must be resolved after all dou-files have been parsed
-        std::vector< ParameterReference<ParameterDescriptionBasic> > paramToParamReferences;
-        std::vector< ParameterReference<MemberDescriptionBasic> >  arraySizeReferences;
-        std::vector< ParameterReference<MemberDescriptionBasic> > maxLengthReferences;
-        std::vector< ParameterReference<CreateRoutineDescriptionBasic> > createRoutineIncompleteHiddenParameters;
+        std::vector< ParameterReference<ParameterDescriptionLocal> > paramToParamReferences;
+        std::vector< ParameterReference<MemberDescriptionLocal> >  arraySizeReferences;
+        std::vector< ParameterReference<MemberDescriptionLocal> > maxLengthReferences;
+        std::vector< ParameterReference<CreateRoutineDescriptionLocal> > createRoutineIncompleteHiddenParameters;
         std::vector<ObjectParameter> objectParameters; //object parameters are handled when all type info is available.
-        std::vector<PropertyMappingDescriptionBasicPtr> notInsertedPropertyMappings; //PropertyMappings that has not been inserted into its class
-        std::vector< std::pair<ClassDescriptionBasic*, ParameterDescriptionBasicPtr> > notInsertedParameters;
+        std::vector<PropertyMappingDescriptionLocalPtr> notInsertedPropertyMappings; //PropertyMappings that has not been inserted into its class
+        std::vector< std::pair<ClassDescriptionLocal*, ParameterDescriptionLocalPtr> > notInsertedParameters;
 
         //----------------------------------------------------------------------------------
         //Constructor
         //----------------------------------------------------------------------------------
-        ParseState(const boost::shared_ptr<RepositoryBasic>& rep)
+        ParseState(const boost::shared_ptr<RepositoryLocal>& rep)
             :repository(rep)
         {
         }

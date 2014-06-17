@@ -55,6 +55,12 @@
             <dictionary>EntityId</dictionary>
         </member>
         
+	<member>
+            <name>DictionaryStringInt</name>
+            <type>Int32</type>
+            <dictionary>String</dictionary>
+        </member>
+	
         <member>
             <name>DictionaryEnumObject</name>
             <type>Object</type>

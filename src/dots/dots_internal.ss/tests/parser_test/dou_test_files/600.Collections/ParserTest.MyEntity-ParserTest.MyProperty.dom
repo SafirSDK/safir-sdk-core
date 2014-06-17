@@ -152,6 +152,13 @@
                 </entry>
             </dictionary>
         </member>
+	
+	<member>
+	  <propertyMember>DictionaryStringInt</propertyMember>
+	  <valueRef>
+	    <name>Test.MyParam.DictionaryParam1</name>
+	  </valueRef>
+	</member>
         
     </memberMapping>
 
