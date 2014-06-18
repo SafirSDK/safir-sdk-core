@@ -15,7 +15,9 @@ FILE(GLOB sources *.cpp)
 
 ADD_EXECUTABLE(communication_test ${sources} ${headers})
 
-TARGET_LINK_LIBRARIES(communication_test communication)
+TARGET_LINK_LIBRARIES(communication_test 
+  optimized communication
+  debug communication${CMAKE_DEBUG_POSTFIX})
 
 if (NOT MSVC)
     TARGET_LINK_LIBRARIES(communication_test lluf_id lluf_utils ${Boost_LIBRARIES})

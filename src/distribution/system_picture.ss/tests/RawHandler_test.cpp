@@ -26,9 +26,50 @@
 #define BOOST_TEST_MODULE RawHandlerTest
 #include <boost/test/unit_test.hpp>
 
+class Communication
+{
+public:
+
+   //Callbacks functions used in Communications public interface.
+    typedef std::function<void(const std::string& name, int64_t nodeId, int64_t nodeTypeId, const std::string& controlAddress, const std::string& dataAddress)> NewNode;
+    typedef std::function<void(int64_t fromNodeId)> GotReceiveFrom;
+    typedef std::function<void(int64_t toNodeId)> RetransmitTo;
+
+    void SetNewNodeCallback(const NewNode& callback)
+    {
+
+    }
+
+    void SetGotReceiveFromCallback(const GotReceiveFrom& callback)
+    {
+
+    }
+
+    void SetRetransmitToCallback(const RetransmitTo& callback)
+    {
+
+    }
+
+    void IncludeNode(int64_t nodeId)
+    {
+
+    }
+
+    void ExcludeNode(int64_t nodeId)
+    {
+
+    }
+
+};
 
 BOOST_AUTO_TEST_CASE( nothing )
 {
+    using namespace Safir::Dob::Internal::SP;
+
+    Communication comm;
+    boost::asio::io_service ioService;
+
+    RawHandlerBasic<::Communication> rh(ioService,comm,"plopp",10,100,"asdfasdf","qwerty",{});
 }
 
 

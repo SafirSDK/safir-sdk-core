@@ -12,8 +12,10 @@ ADD_EXECUTABLE(safir_control ${sources} ${headers})
 FIND_PACKAGE(Boost COMPONENTS program_options thread system)
 
 TARGET_LINK_LIBRARIES(safir_control
-  system_picture
-  communication)
+  optimized system_picture
+  debug system_picture${CMAKE_DEBUG_POSTFIX}
+  optimized communication
+  debug communication${CMAKE_DEBUG_POSTFIX})
 
 if (NOT MSVC)
   TARGET_LINK_LIBRARIES(safir_control

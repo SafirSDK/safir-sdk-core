@@ -32,7 +32,8 @@ endif()
 add_library(system_picture SHARED ${sources} ${headers} ${PROTO_SRCS} ${PROTO_HDRS})
 
 TARGET_LINK_LIBRARIES(system_picture 
-  communication
+  optimized communication
+  debug communication${CMAKE_DEBUG_POSTFIX}
   ${PROTOBUF_LITE_LIBRARIES})
 
 if (NOT MSVC)
@@ -44,14 +45,15 @@ if (NOT MSVC)
     ${Boost_LIBRARIES}
     atomic
     rt)
-
-
 endif()
 
 FIND_PACKAGE(Boost COMPONENTS program_options)
 
 add_executable(system_picture_listener system_picture_listener.cpp)
-target_link_libraries(system_picture_listener system_picture ${Boost_LIBRARIES})
+target_link_libraries(system_picture_listener 
+  optimized system_picture
+  debug system_picture${CMAKE_DEBUG_POSTFIX}
+  ${Boost_LIBRARIES})
 
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE

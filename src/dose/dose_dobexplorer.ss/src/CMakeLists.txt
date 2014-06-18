@@ -71,7 +71,8 @@ endif()
 FIND_PACKAGE(Boost COMPONENTS filesystem system)
 
 TARGET_LINK_LIBRARIES(dobexplorer
-    system_picture)
+  optimized system_picture
+  debug system_picture${CMAKE_DEBUG_POSTFIX})
 
 IF (NOT MSVC)
   TARGET_LINK_LIBRARIES(dobexplorer
