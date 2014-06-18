@@ -43,7 +43,7 @@ public:
 //        Com::Node me {"Test", 100, "127.0.0.1:10000", "239.192.1.1:11000"};
 //        Com::AckedDataSenderBasic<AckedDataSenderTest::TestWriter> sender(io, me);
 //        sender.SetNotFullCallback([=]{OnQueueNotFull();}, 50);
-//        sender.SetRetransmitCallback([=](boost::int64_t to){OnRetransmit(to);});
+//        sender.SetRetransmitCallback([=](int64_t to){OnRetransmit(to);});
 //        sender.Start();
 
 //        //Add nodes
@@ -111,7 +111,7 @@ private:
 
     }
 
-    void OnRetransmit(boost::int64_t /*toId*/)
+    void OnRetransmit(int64_t /*toId*/)
     {
         std::cout<<"callback OnRetransmit"<<std::endl;
 

@@ -53,10 +53,6 @@ namespace Com
                         const Node& me,
                         const std::function<void(const Node&)>& onNewNode)
             :WriterType(ioService, Utilities::Protocol(me.unicastAddress))
-            ,m_seeds()
-            ,m_nodes()
-            ,m_reportedNodes()
-            ,m_incompletedNodes()
             ,m_strand(ioService)
             ,m_me(me)
             ,m_onNewNode(onNewNode)
@@ -187,16 +183,17 @@ namespace Com
         static const int NodeInfoFixedSize=30+NodeInfoPerNodeSize;
         static const int NumberOfNodesPerNodeInfoMsg=(Parameters::FragmentSize-NodeInfoFixedSize)/NodeInfoPerNodeSize;
 
-        NodeMap m_seeds; //id generated from ip:port
-        NodeMap m_nodes; //known nodes
-        NodeMap m_reportedNodes; //nodes only heard about from others, never talked to
-        std::map<int64_t, std::vector<bool> > m_incompletedNodes; //talked to but still haven't received all node info from this node
+        NodeMap m_seeds{}; //id generated from ip:port
+        NodeMap m_nodes{}; //known nodes
+        NodeMap m_reportedNodes{}; //nodes only heard about from others, never talked to
+        std::map<int64_t, std::vector<bool> > m_incompletedNodes{}; //talked to but still haven't received all node info from this node
 
         boost::asio::io_service::strand m_strand;
         Node m_me;
 
         std::function<void(const Node&)> m_onNewNode;
         boost::asio::steady_timer m_timer;
+        std::pair<int, int> m_timeoutInterval{500, 3000};
 
         mutable boost::random::mt19937 m_randomGenerator;
 
@@ -439,7 +436,7 @@ namespace Com
                 SendDiscover();
 
                 //restart timer
-                m_timer.expires_from_now(boost::chrono::milliseconds(Random(500, 3000)));
+                m_timer.expires_from_now(boost::chrono::milliseconds(Random(m_timeoutInterval.first, m_timeoutInterval.second)));
                 m_timer.async_wait(m_strand.wrap([=](const boost::system::error_code& error){OnTimeout(error);}));
             }
         }

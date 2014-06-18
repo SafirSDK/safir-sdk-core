@@ -140,7 +140,7 @@ private:
 
     bool Recv(const char* data, size_t size)
     {
-        assert(size==sizeof(int));
+        CHECK(size==sizeof(int));
         boost::mutex::scoped_lock lock(mutex);
 
         int val=*reinterpret_cast<const int*>(data);
