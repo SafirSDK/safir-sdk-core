@@ -250,7 +250,7 @@ namespace Internal
 
             if (val)
             {
-                SerializationUtils::SetMemberValue(m_repository, md, memIx, arrIx, *val, writer);
+                SerializationUtils::SetMemberValue(m_repository, md, memIx, arrIx, *val, 0, writer);
             }
             else
             {
@@ -259,7 +259,7 @@ namespace Internal
                 {
                     boost::property_tree::ptree& refPt=memberContent.get_child("valueRef");
                     std::pair<std::string, int> paramInfo=GetParameterNameAndIndex(md, arrIx, refPt);
-                    SerializationUtils::SetMemberFromParameter(m_repository, md, memIx, arrIx, paramInfo.first, paramInfo.second, writer);
+                    SerializationUtils::SetMemberFromParameter(m_repository, md, memIx, arrIx, paramInfo.first, paramInfo.second, 0, writer);
                 }
                 catch (const boost::property_tree::ptree_error&)
                 {

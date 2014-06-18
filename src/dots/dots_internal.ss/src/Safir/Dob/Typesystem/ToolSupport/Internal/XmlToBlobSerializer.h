@@ -140,7 +140,7 @@ namespace Internal
                     //non-array, then the inner propertyTree contains the content, i.e <myInt>123</myInt>
                     try
                     {
-                        SetMember(md, memIx, 0, memIt->second, writer);
+                        SetMember(md, memIx, 0, memIt->second, 0, writer);
                     }
                     catch (const boost::property_tree::ptree_error&)
                     {
@@ -192,7 +192,7 @@ namespace Internal
 
                         try
                         {
-                            SetMember(md, memIx, arrayIndex, arrIt->second, writer);
+                            SetMember(md, memIx, arrayIndex, arrIt->second, 0, writer);
                         }
                         catch (const boost::property_tree::ptree_error&)
                         {
@@ -213,7 +213,7 @@ namespace Internal
                     {
                         try
                         {
-                            SetMember(md, memIx, 0, seqIt->second, writer);
+                            SetMember(md, memIx, 0, seqIt->second, 0, writer);
                         }
                         catch (const boost::property_tree::ptree_error&)
                         {
@@ -235,8 +235,8 @@ namespace Internal
                         {
                             throw "Wrong number of subelements";
                         }
-                        const boost::property_tree::ptree* keyTree=NULL;
-                        const boost::property_tree::ptree* valTree=NULL;
+                        boost::property_tree::ptree* keyTree=NULL;
+                        boost::property_tree::ptree* valTree=NULL;
 
                         for (boost::property_tree::ptree::iterator entryContentIt=entryIt->second.begin(); entryContentIt!=entryIt->second.end(); ++entryContentIt)
                         {
@@ -259,6 +259,8 @@ namespace Internal
                         {
                             throw "No val element";
                         }
+
+                        SetMember(md, memIx, 0, *valTree, *keyTree, writer);
                     }
                 }
                     break;
@@ -272,6 +274,49 @@ namespace Internal
 
     private:
         const RepositoryType* m_repository;
+
+        void SetMember(const MemberDescriptionType* md,
+                       DotsC_MemberIndex memIx,
+                       DotsC_ArrayIndex arrIx,
+                       boost::property_tree::ptree& memberContent,
+                       boost::property_tree::ptree& keyContent,
+                       BlobWriter<RepositoryType>& writer) const
+        {
+            switch(md->GetKeyType())
+            {
+            case Int32MemberType:
+                SetMember(md, memIx, arrIx, memberContent, boost::lexical_cast<DotsC_Int32>(keyContent.data()), writer);
+                break;
+
+            case Int64MemberType:
+                SetMember(md, memIx, arrIx, memberContent, boost::lexical_cast<DotsC_Int64>(keyContent.data()), writer);
+                break;
+
+            case TypeIdMemberType:
+                SetMember(md, memIx, arrIx, memberContent, boost::lexical_cast<DotsC_Int32>(keyContent.data()), writer);
+                break;
+
+            case StringMemberType:
+                SetMember(md, memIx, arrIx, memberContent, keyContent.data().c_str(), writer);
+                break;
+
+            case EntityIdMemberType:
+                SetMember(md, memIx, arrIx, memberContent, boost::lexical_cast<DotsC_Int32>(keyContent.data()), writer);
+                break;
+
+            case InstanceIdMemberType:
+            case HandlerIdMemberType:
+            case ChannelIdMemberType:
+                SetMember(md, memIx, arrIx, memberContent, boost::lexical_cast<DotsC_Int32>(keyContent.data()), writer);
+                break;
+
+            case EnumerationMemberType:
+                break;
+
+            default:
+                break;
+            }
+        }
 
         template <class KeyT>
         void SetMember(const MemberDescriptionType* md,
@@ -299,7 +344,7 @@ namespace Internal
                     os<<"Only members of non-object types can use the valueRef mechanism. Member '"<<md->GetName()<<"' has type "<<m_repository->GetClass(md->GetTypeId())->GetName();
                     throw ParseError("XmlToBinary serialization error", os.str(), "", 110);
                 }
-                SerializationUtils::SetMemberFromParameter(m_repository, md, memIx, arrIx, *valueRef, valueRefIndex, writer);
+                SerializationUtils::SetMemberFromParameter(m_repository, md, memIx, arrIx, *valueRef, valueRefIndex, key, writer);
             }
             else if (md->GetMemberType()==ObjectMemberType)
             {
@@ -330,12 +375,11 @@ namespace Internal
 
                 std::vector<char> insideBlob;
                 SerializeObjectContent(cd->GetName(), insideBlob, memberContent);
-                writer.WriteValue(memIx, arrIx, 0, std::pair<char*, DotsC_Int32>(&insideBlob[0], static_cast<DotsC_Int32>(insideBlob.size())), false, true);
-                //writer.WriteValue(memIx, arrIx, 0, std::make_pair(static_cast<const char*>(&insideBlob[0]), static_cast<DotsC_Int32>(insideBlob.size())), false, true);
+                writer.WriteValue(memIx, arrIx, key, std::pair<char*, DotsC_Int32>(&insideBlob[0], static_cast<DotsC_Int32>(insideBlob.size())), false, true);
             }
             else
             {
-                SerializationUtils::SetMemberValue(m_repository, md, memIx, arrIx, memberContent, writer);
+                SerializationUtils::SetMemberValue(m_repository, md, memIx, arrIx, memberContent, key, writer);
             }
 
         }

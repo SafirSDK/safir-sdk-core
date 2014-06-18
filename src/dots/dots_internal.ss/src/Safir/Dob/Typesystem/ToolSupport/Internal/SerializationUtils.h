@@ -384,13 +384,14 @@ namespace SerializationUtils
         }
     }
 
-    template <class WriterT>
+    template <class WriterT, class KeyT>
     void SetMemberFromParameter(const typename WriterT::RepositoryType* repository,
                                 const typename WriterT::MemberDescriptionType* md,
                                 DotsC_MemberIndex memIx,
                                 DotsC_ArrayIndex arrIx,
                                 const std::string& parameterName,
                                 int parameterIndex,
+                                const KeyT& key,
                                 WriterT& writer)
     {
         //get the referenced parameter an make all the error checking
@@ -435,31 +436,31 @@ namespace SerializationUtils
         {
         case BooleanMemberType:
         {
-            writer.WriteValue(memIx, arrIx, 0, param->GetBoolValue(parameterIndex), false, true);
+            writer.WriteValue(memIx, arrIx, key, param->GetBoolValue(parameterIndex), false, true);
         }
             break;
 
         case EnumerationMemberType:
         {
-            writer.WriteValue(memIx, arrIx, 0, param->GetInt32Value(parameterIndex), false, true);
+            writer.WriteValue(memIx, arrIx, key, param->GetInt32Value(parameterIndex), false, true);
         }
             break;
 
         case Int32MemberType:
         {
-            writer.WriteValue(memIx, arrIx, 0, param->GetInt32Value(parameterIndex), false, true);
+            writer.WriteValue(memIx, arrIx, key, param->GetInt32Value(parameterIndex), false, true);
         }
             break;
 
         case Int64MemberType:
         {
-            writer.WriteValue(memIx, arrIx, 0, param->GetInt64Value(parameterIndex), false, true);
+            writer.WriteValue(memIx, arrIx, key, param->GetInt64Value(parameterIndex), false, true);
         }
             break;
 
         case TypeIdMemberType:
         {
-            writer.WriteValue(memIx, arrIx, 0, param->GetInt64Value(parameterIndex), false, true);
+            writer.WriteValue(memIx, arrIx, key, param->GetInt64Value(parameterIndex), false, true);
         }
             break;
 
@@ -467,7 +468,7 @@ namespace SerializationUtils
         case ChannelIdMemberType:
         case HandlerIdMemberType:
         {            
-            writer.WriteValue(memIx, arrIx, 0, param->GetHashedValue(parameterIndex), false, true);
+            writer.WriteValue(memIx, arrIx, key, param->GetHashedValue(parameterIndex), false, true);
         }
             break;
 
@@ -477,13 +478,13 @@ namespace SerializationUtils
             entId.typeId=param->GetInt64Value(parameterIndex);
             std::pair<DotsC_TypeId, const char*> instanceId=param->GetHashedValue(parameterIndex);
             entId.instanceId=instanceId.first;
-            writer.WriteValue(memIx, arrIx, 0, std::make_pair(entId, instanceId.second), false, true);
+            writer.WriteValue(memIx, arrIx, key, std::make_pair(entId, instanceId.second), false, true);
         }
             break;
 
         case StringMemberType:
         {
-            writer.WriteValue(memIx, arrIx, 0, param->GetStringValue(parameterIndex), false, true);
+            writer.WriteValue(memIx, arrIx, key, param->GetStringValue(parameterIndex), false, true);
         }
             break;
 
@@ -495,7 +496,7 @@ namespace SerializationUtils
 
         case BinaryMemberType:
         {
-            writer.WriteValue(memIx, arrIx, 0, param->GetBinaryValue(parameterIndex), false, true);
+            writer.WriteValue(memIx, arrIx, key, param->GetBinaryValue(parameterIndex), false, true);
         }
             break;
 
@@ -521,7 +522,7 @@ namespace SerializationUtils
         case Volt32MemberType:
         case Watt32MemberType:
         {
-            writer.WriteValue(memIx, arrIx, 0, param->GetFloat32Value(parameterIndex), false, true);
+            writer.WriteValue(memIx, arrIx, key, param->GetFloat32Value(parameterIndex), false, true);
         }
             break;
 
@@ -547,7 +548,7 @@ namespace SerializationUtils
         case Volt64MemberType:
         case Watt64MemberType:
         {
-            writer.WriteValue(memIx, arrIx, 0, param->GetFloat64Value(parameterIndex), false, true);
+            writer.WriteValue(memIx, arrIx, key, param->GetFloat64Value(parameterIndex), false, true);
         }
             break;
         }
