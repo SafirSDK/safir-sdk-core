@@ -1627,7 +1627,7 @@ JNIEXPORT jobjectArray JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_Ge
     for (int i = 0; i < size; ++i)
     {
         if (generatedLibraries[i].javaJarLocation != NULL &&
-            generatedLibraries[i].dontLoad == 0)
+            generatedLibraries[i].library == 1)
         {
             boost::filesystem::path p = generatedLibraries[i].javaJarLocation;
             p /= generatedLibraries[i].javaJarName;

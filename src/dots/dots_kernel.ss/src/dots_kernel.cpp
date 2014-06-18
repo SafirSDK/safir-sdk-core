@@ -2001,6 +2001,13 @@ void DotsC_GetGeneratedLibraryList(DotsC_GeneratedLibrary*& generatedLibraries,
             const std::string module = it->first;
             generatedLibraries[i].name = CopyStringToNew(module);
 
+            const std::string kind = it->second.get<std::string>("kind");
+            if (kind != "library" && kind != "override")
+            {
+                throw std::logic_error("Illegal value for 'kind' in typesystem.ini");
+            }
+            generatedLibraries[i].library = (kind == "library") ? 1 : 0;
+
             generatedLibraries[i].cppLibraryName = CopyStringToNew("safir_generated-" + module + "-cpp");
             generatedLibraries[i].dotnetAssemblyName = CopyStringToNew("safir_generated-" + module + "-dotnet");
             generatedLibraries[i].javaJarName = CopyStringToNew("safir_generated-" + module + "-java.jar");
@@ -2034,9 +2041,6 @@ void DotsC_GetGeneratedLibraryList(DotsC_GeneratedLibrary*& generatedLibraries,
             {
                 generatedLibraries[i].javaJarLocation = NULL;
             }
-
-            const boost::optional<bool> dont_load = it->second.get_optional<bool>("dont_load");
-            generatedLibraries[i].dontLoad = (!!dont_load && dont_load.get()) ? 1 : 0;
 
             ++i;
         }

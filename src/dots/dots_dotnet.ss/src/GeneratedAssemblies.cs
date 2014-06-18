@@ -73,9 +73,9 @@ namespace Safir.Dob.Typesystem
                                     i * Marshal.SizeOf(typeof(Kernel.DotsC_GeneratedLibrary)));
                 lib = (Kernel.DotsC_GeneratedLibrary)Marshal.PtrToStructure(iterator, typeof(Kernel.DotsC_GeneratedLibrary));
                 
-                if (lib.dontLoad)
+                if (!lib.library)
                 {
-                    System.Console.WriteLine("Not loading " + lib.dotnetAssemblyName + ", since dont_load is set.");
+                    System.Console.WriteLine("Not loading " + lib.dotnetAssemblyName + ", since it is an override.");
                 }
                 else if (string.IsNullOrEmpty(lib.dotnetAssemblyLocation))
                 {

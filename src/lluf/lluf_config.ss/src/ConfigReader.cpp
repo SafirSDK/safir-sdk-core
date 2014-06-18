@@ -87,11 +87,6 @@ namespace Internal
 
             if (isSection)
             {
-                if (it->second.get<std::string>("name") != it->first)
-                {
-                    throw std::logic_error("Error in typesystem.ini"); //TODO more info?!
-                }
-
                 try
                 {
                     directories.push_back(it->second.get<std::string>("dou_directory"));

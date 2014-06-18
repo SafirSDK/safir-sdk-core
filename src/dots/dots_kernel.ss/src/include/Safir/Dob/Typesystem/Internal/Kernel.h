@@ -1466,6 +1466,8 @@ extern "C"
     {
         char* name;
 
+        DotsC_Int32 library; //boolean: 0 if override, 1 if library
+
         char* cppLibraryName;
         char* cppLibraryLocation;
 
@@ -1474,8 +1476,6 @@ extern "C"
 
         char* dotnetAssemblyName;
         char* dotnetAssemblyLocation;
-
-        DotsC_Int32 dontLoad; //boolean value, 0 if false, 1 otherwise
     };
 #pragma pack(pop)
 

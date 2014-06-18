@@ -14,5 +14,4 @@ ADD_TEST(NAME stop_orders_at_exit
   --safir-show-config $<TARGET_FILE:safir_show_config>
   --safir-generated-paths "${SAFIR_GENERATED_PATHS}")
 
-SET_SAFIR_TEST_PROPERTIES(TEST stop_orders_at_exit TIMEOUT 240
-                          CONFIG_OVERRIDE "${CMAKE_CURRENT_SOURCE_DIR}/test_config")
+SET_SAFIR_TEST_PROPERTIES(TEST stop_orders_at_exit TIMEOUT 240)

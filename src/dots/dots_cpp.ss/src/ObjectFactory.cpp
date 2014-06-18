@@ -89,9 +89,9 @@ namespace Typesystem
                     location = generatedLibraries[i].cppLibraryLocation;
                 }
                 
-                if (generatedLibraries[i].dontLoad != 0)
+                if (generatedLibraries[i].library == 0)
                 {
-                    lllog(1) << "Not loading " << generatedLibraries[i].cppLibraryLocation << " since dont_load is specified" << std::endl;
+                    lllog(1) << "Not loading " << generatedLibraries[i].cppLibraryLocation << " since it is an override" << std::endl;
                 }
                 else
                 {

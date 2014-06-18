@@ -13,5 +13,4 @@ add_test(NAME TimeProvider_java_test
   --jar $<TARGET_PROPERTY:douf_test_java,JAR_FILE>
   --dependencies $<TARGET_PROPERTY:douf_java,JAR_FILE>,$<TARGET_PROPERTY:dots_java,JAR_FILE>)
 
-SET_SAFIR_TEST_PROPERTIES(TEST TimeProvider_java_test
-                          CONFIG_OVERRIDE "${CMAKE_CURRENT_SOURCE_DIR}/../config")
+SET_SAFIR_TEST_PROPERTIES(TEST TimeProvider_java_test)

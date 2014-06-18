@@ -1205,6 +1205,9 @@ namespace Safir.Dob.Typesystem.Internal
             [MarshalAs(UnmanagedType.LPStr)]
             public string name;
 
+            [MarshalAs(UnmanagedType.Bool)]
+            public bool library;
+
             [MarshalAs(UnmanagedType.LPStr)]
             public string cppLibraryName;
 
@@ -1222,9 +1225,6 @@ namespace Safir.Dob.Typesystem.Internal
 
             [MarshalAs(UnmanagedType.LPStr)]
             public string dotnetAssemblyLocation;
-
-            [MarshalAs(UnmanagedType.Bool)]
-            public bool dontLoad;
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
