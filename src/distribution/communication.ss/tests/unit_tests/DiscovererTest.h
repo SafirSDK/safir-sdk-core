@@ -33,8 +33,7 @@ class DiscoverToSeed
 {
 public:
     void Run()
-    {
-        std::cout<<"  - Run SendDiscoverToSeed test"<<std::endl;
+    {        
         boost::asio::io_service io;
         auto work=boost::make_shared<boost::asio::io_service::work>(io);
         boost::thread_group threads;
@@ -86,10 +85,10 @@ public:
                     discoversSentToSeed200[0]>1 && discoversSentToSeed200[1]>1 && discoversSentToSeed200[2]>1;
         }
 
-        if (passed)
-            std::cout<<"    Passed"<<std::endl;
-        else
-            std::cout<<"    Failed"<<std::endl;
+        if (!passed)
+            exit(1);
+
+        std::cout<<"SendDiscoverToSeed tests passed"<<std::endl;
     }
 
 private:
@@ -111,7 +110,7 @@ private:
         {
             boost::mutex::scoped_lock lock(mutex);
             Com::CommunicationMessage cm;
-            cm.ParseFromArray(val->message.get(), val->header.totalContentSize);
+            cm.ParseFromArray(val->message.get(), static_cast<int>(val->header.totalContentSize));
             if (cm.has_discover())
             {
                 //std::cout<<"From "<<val->header.commonHeader.senderId<<" to "<<to.port()<<std::endl;

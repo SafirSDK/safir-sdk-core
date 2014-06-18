@@ -35,11 +35,8 @@ enable_testing()
 ADD_TEST(MessageQueueTest unit_tests MessageQueueTest)
 SET_SAFIR_TEST_PROPERTIES(MessageQueueTest 120)
 
-ADD_TEST(ReaderTest unit_tests ReaderTest)
-SET_SAFIR_TEST_PROPERTIES(ReaderTest 120)
-
-ADD_TEST(WriterTest unit_tests WriterTest)
-SET_SAFIR_TEST_PROPERTIES(WriterTest 120)
+ADD_TEST(ReaderWriterTest unit_tests ReaderWriterTest)
+SET_SAFIR_TEST_PROPERTIES(ReaderWriterTest 120)
 
 ADD_TEST(HeartbeatSenderTest unit_tests HeartbeatSenderTest)
 SET_SAFIR_TEST_PROPERTIES(HeartbeatSenderTest 120)
@@ -50,5 +47,5 @@ SET_SAFIR_TEST_PROPERTIES(HeartbeatSenderTest 120)
 #ADD_TEST(DeliveryHandlerTest unit_tests DeliveryHandlerTest)
 #SET_SAFIR_TEST_PROPERTIES(DeliveryHandlerTest 120)
 
-#ADD_TEST(DiscovererTest unit_tests DiscovererTest)
-#SET_SAFIR_TEST_PROPERTIES(DiscovererTest 120)
+ADD_TEST(DiscovererTest unit_tests DiscovererTest)
+SET_SAFIR_TEST_PROPERTIES(DiscovererTest 120)
