@@ -7,3 +7,5 @@ StatePublisherRemote_test
 
 LocalSubscriber_test
 RemoteSubscriber_test
+
+RawHandler_test

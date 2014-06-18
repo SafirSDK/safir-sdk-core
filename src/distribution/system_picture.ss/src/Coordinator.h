@@ -63,7 +63,10 @@ namespace Internal
 namespace SP
 {
     //forward declarations
-    class RawHandler;
+    template <class T>
+    class RawHandlerBasic;
+    typedef RawHandlerBasic<Com::Communication> RawHandler;
+
     class RawStatistics;
     class SystemState;
 
