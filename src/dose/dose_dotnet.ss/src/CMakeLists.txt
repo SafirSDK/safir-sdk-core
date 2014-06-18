@@ -9,5 +9,7 @@ ADD_CSHARP_ASSEMBLY(Safir.Dob LIBRARY
   SOURCES ${sources}
   REFERENCES Safir.Logging Safir.Dob.Typesystem safir_generated-Core-dotnet)
 
+add_dependencies(Safir.Dob dose_dll)
+
 INSTALL_CSHARP_ASSEMBLY(TARGET Safir.Dob
   DESTINATION lib/safir_sdk_core)
