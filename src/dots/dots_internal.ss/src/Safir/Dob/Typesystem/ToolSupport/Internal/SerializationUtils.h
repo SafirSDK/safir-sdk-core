@@ -143,12 +143,13 @@ namespace SerializationUtils
         return result;
     }
 
-    template <class WriterT>
+    template <class WriterT, class KeyT>
     void SetMemberValue(const typename WriterT::RepositoryType* repository,
                         const typename WriterT::MemberDescriptionType* md,
                         DotsC_MemberIndex memIx,
                         DotsC_ArrayIndex arrIx,
                         boost::property_tree::ptree& memberContent,
+                        const KeyT& key,
                         WriterT& writer)
     {
         switch(md->GetMemberType())
@@ -170,7 +171,7 @@ namespace SerializationUtils
             {
                 boolVal=memberContent.get_value<bool>();
             }
-            writer.WriteValue(memIx, arrIx, 0, boolVal, false, true);
+            writer.WriteValue(memIx, arrIx, key, boolVal, false, true);
         }
             break;
 
@@ -186,7 +187,7 @@ namespace SerializationUtils
                 throw ParseError("Serialization error", os.str(), "", 114);
             }
 
-            writer.WriteValue(memIx, arrIx, 0, enumOrdinal, false, true);
+            writer.WriteValue(memIx, arrIx, key, enumOrdinal, false, true);
         }
             break;
 
@@ -194,7 +195,7 @@ namespace SerializationUtils
         {
             Trim(memberContent.data());
             DotsC_Int32 val=memberContent.get_value<DotsC_Int32>();
-            writer.WriteValue(memIx, arrIx, 0, val, false, true);
+            writer.WriteValue(memIx, arrIx, key, val, false, true);
         }
             break;
 
@@ -202,7 +203,7 @@ namespace SerializationUtils
         {
             Trim(memberContent.data());
             DotsC_Int64 val=memberContent.get_value<DotsC_Int64>();
-            writer.WriteValue(memIx, arrIx, 0, val, false, true);
+            writer.WriteValue(memIx, arrIx, key, val, false, true);
         }
             break;
 
@@ -218,7 +219,7 @@ namespace SerializationUtils
                 throw ParseError("Serialization error", os.str(), "", 174);
             }
 
-            writer.WriteValue(memIx, arrIx, 0, tid, false, true);
+            writer.WriteValue(memIx, arrIx, key, tid, false, true);
         }
             break;
 
@@ -228,7 +229,7 @@ namespace SerializationUtils
         {
             Trim(memberContent.data());
             std::pair<DotsC_Int64, const char*> hash=SerializationUtils::StringToHash(memberContent.data());
-            writer.WriteValue(memIx, arrIx, 0, hash, false, true);
+            writer.WriteValue(memIx, arrIx, key, hash, false, true);
         }
             break;
 
@@ -270,7 +271,7 @@ namespace SerializationUtils
             std::pair<DotsC_Int64, const char*> instanceId=SerializationUtils::StringToHash(*instanceIdString);
             entityId.first.instanceId=instanceId.first;
             entityId.second=instanceId.second;
-            writer.WriteValue(memIx, arrIx, 0, entityId, false, true);
+            writer.WriteValue(memIx, arrIx, key, entityId, false, true);
         }
             break;
 
@@ -282,7 +283,7 @@ namespace SerializationUtils
                 Trim(memberContent.data());
             }
             //The only time we dont trim content
-            writer.WriteValue(memIx, arrIx, 0, memberContent.data().c_str(), false, true);
+            writer.WriteValue(memIx, arrIx, key, memberContent.data().c_str(), false, true);
         }
             break;
 
@@ -303,7 +304,7 @@ namespace SerializationUtils
                 throw ParseError("Serialization error", os.str(), "",  117);
             }
 
-            writer.WriteValue(memIx, arrIx, 0, std::make_pair(static_cast<const char*>(&bin[0]), static_cast<DotsC_Int32>(bin.size())), false, true);
+            writer.WriteValue(memIx, arrIx, key, std::make_pair(static_cast<const char*>(&bin[0]), static_cast<DotsC_Int32>(bin.size())), false, true);
         }
             break;
 
@@ -333,7 +334,7 @@ namespace SerializationUtils
             try
             {
                 DotsC_Float32 val=classic_string_cast<DotsC_Float32>(memberContent.data());
-                writer.WriteValue(memIx, arrIx, 0, val, false, true);
+                writer.WriteValue(memIx, arrIx, key, val, false, true);
             }
             catch (const boost::bad_lexical_cast&)
             {
@@ -370,7 +371,7 @@ namespace SerializationUtils
             try
             {
                 DotsC_Float64 val=classic_string_cast<DotsC_Float64>(memberContent.data());
-                writer.WriteValue(memIx, arrIx, 0, val, false, true);
+                writer.WriteValue(memIx, arrIx, key, val, false, true);
             }
             catch (const boost::bad_lexical_cast&)
             {

@@ -259,20 +259,6 @@ namespace Internal
                         {
                             throw "No val element";
                         }
-
-                        SetMember();
-
-//                        try
-//                        {
-//                            keyTree=&entryIt->second.get_child("key");
-//                        }
-//                        catch (const boost::property_tree::ptree_error& )
-//                        {
-//                            std::ostringstream os;
-//                            os<<"Failed to serialize dictionary member '"<<cd->GetName()<<"."<<md->GetName()<<"' from xml to binary. Key element is missing for a dictionary entry.";
-//                            throw ParseError("XmlToBinary serialization error", os.str(), "", 250);
-//                        }
-
                     }
                 }
                     break;
@@ -287,10 +273,12 @@ namespace Internal
     private:
         const RepositoryType* m_repository;
 
+        template <class KeyT>
         void SetMember(const MemberDescriptionType* md,
                        DotsC_MemberIndex memIx,
                        DotsC_ArrayIndex arrIx,
                        boost::property_tree::ptree& memberContent,
+                       const KeyT& key,
                        BlobWriter<RepositoryType>& writer) const
         {
             boost::optional<std::string> valueRef=memberContent.get_optional<std::string>("<xmlattr>.valueRef");
