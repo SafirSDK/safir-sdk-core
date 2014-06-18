@@ -37,8 +37,6 @@ namespace Internal
 {
 namespace SP
 {
-    using Safir::Utilities::Internal::AsioPeriodicTimer;
-
     class RawPublisherRemote
     {
     public:

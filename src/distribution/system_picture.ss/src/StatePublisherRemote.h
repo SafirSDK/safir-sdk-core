@@ -26,6 +26,9 @@
 
 #include <Safir/Dob/Internal/Communication.h>
 #include <Safir/Utilities/Internal/Id.h>
+#include <Safir/Utilities/Internal/AsioPeriodicTimer.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
+#include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include "Coordinator.h"
 
 namespace Safir
@@ -36,22 +39,22 @@ namespace Internal
 {
 namespace SP
 {
-    using Safir::Utilities::Internal::AsioPeriodicTimer;
-
-    class StatePublisherRemote
+    template <class Handler, class Communication>
+    class StatePublisherRemoteBasic
     {
     public:
-        StatePublisherRemote(boost::asio::io_service& ioService,
-                             Com::Communication& communication,
-                             const std::map<int64_t, NodeType>& nodeTypes,
-                             const char* const senderId,
-                             Coordinator& coordinator)
+        StatePublisherRemoteBasic(boost::asio::io_service& ioService,
+                                  Communication& communication,
+                                  const std::map<int64_t, NodeType>& nodeTypes,
+                                  const char* const senderId,
+                                  Handler& coordinator,
+                                  const boost::chrono::steady_clock::duration& period)
             : m_communication(communication)
             , m_senderId(LlufId_Generate64(senderId))
             , m_nodeTypes(nodeTypes)
             , m_coordinator(coordinator)
             , m_publishTimer(ioService, 
-                             boost::chrono::seconds(1),
+                             period,
                              [this](const boost::system::error_code& error)
                              {
                                  Publish(error);
@@ -105,12 +108,14 @@ namespace SP
                                                 true); //we can only send own states
         }
 
-        Com::Communication& m_communication;
+        Communication& m_communication;
         const uint64_t m_senderId;
         const std::map<int64_t, NodeType> m_nodeTypes;
-        Coordinator& m_coordinator;
+        Handler& m_coordinator;
         Safir::Utilities::Internal::AsioPeriodicTimer m_publishTimer;
     };
+
+    typedef StatePublisherRemoteBasic<Coordinator, Com::Communication> StatePublisherRemote;
 }
 }
 }

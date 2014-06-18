@@ -44,9 +44,6 @@ namespace SP
     namespace
     {
         typedef boost::chrono::steady_clock steady_clock;
-
-
-        using Safir::Utilities::Internal::AsioPeriodicTimer;
     }
 
     RawHandler::RawHandler(boost::asio::io_service& ioService,
