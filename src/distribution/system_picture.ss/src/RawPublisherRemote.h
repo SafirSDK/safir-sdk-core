@@ -26,8 +26,10 @@
 
 #include <Safir/Dob/Internal/Communication.h>
 #include <Safir/Utilities/Internal/Id.h>
+#include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include "RawHandler.h"
 #include "CrcUtils.h"
+#include <set>
 
 namespace Safir
 {
@@ -37,16 +39,19 @@ namespace Internal
 {
 namespace SP
 {
-    class RawPublisherRemote
+    template <class Handler, class Communication>
+    class RawPublisherRemoteBasic
     {
     public:
-        RawPublisherRemote(boost::asio::io_service& ioService,
-                           Com::Communication& communication,
-                           const std::map<int64_t, NodeType>& nodeTypes,
-                           const char* const senderId,
-                           RawHandler& rawHandler)
+        RawPublisherRemoteBasic(boost::asio::io_service& ioService,
+                                Communication& communication,
+                                const std::map<int64_t, NodeType>& nodeTypes,
+                                const char* const senderId,
+                                Handler& rawHandler,
+                                const boost::chrono::steady_clock::duration& period)
             : m_strand(ioService)
             , m_timer(ioService)
+            , m_stopped(false)
             , m_communication(communication)
             , m_senderId(LlufId_Generate64(senderId))
             , m_nodeTypes(nodeTypes)
@@ -60,8 +65,9 @@ namespace SP
                                  }
                                  return res;
                              }())
+            , m_period(period)
         {
-            SchedulePublishTimer(boost::chrono::seconds(30), m_allNodeTypes);
+            SchedulePublishTimer(period, m_allNodeTypes);
 
             rawHandler.AddNodesChangedCallback(m_strand.wrap([this](const RawStatistics&)
                                                              {
@@ -77,10 +83,14 @@ namespace SP
 
         void Stop()
         {
-            m_strand.dispatch([this]
-                              {
-                                  m_timer.cancel();
-                              });
+            const bool was_stopped = m_stopped.exchange(true);
+            if (!was_stopped)
+            {
+                m_strand.dispatch([this]
+                                  {
+                                      m_timer.cancel();
+                                  });
+            }
         }
 
     private:
@@ -88,6 +98,11 @@ namespace SP
         void SchedulePublishTimer(const boost::chrono::steady_clock::duration& delay,
                                   const std::set<int64_t>& toNodeTypes)
         {
+            if (m_stopped)
+            {
+                return;
+            }
+
             m_timer.cancel();
             m_timer.expires_from_now(delay); 
             m_timer.async_wait(m_strand.wrap([this, toNodeTypes](const boost::system::error_code& error)
@@ -103,11 +118,16 @@ namespace SP
         //if empty set is passed to this function we send to all node types
         void Publish(const std::set<int64_t>& toNodeTypes)
         {
+            if (m_stopped)
+            {
+                return;
+            }
+
             lllog(8) << "Publishing raw statistics to other nodes" << std::endl;
 
             //start by scheduling next timer to send to all nodes.
             //this will be cancelled if we need to do a resend due to overflow below.
-            SchedulePublishTimer(boost::chrono::seconds(30), m_allNodeTypes);
+            SchedulePublishTimer(m_period, m_allNodeTypes);
             
 #ifdef CHECK_CRC
             const int crcBytes = sizeof(int);
@@ -144,12 +164,16 @@ namespace SP
 
         boost::asio::strand m_strand;
         boost::asio::steady_timer m_timer;
-        Com::Communication& m_communication;
+        std::atomic<bool> m_stopped;
+        Communication& m_communication;
         const uint64_t m_senderId;
         const std::map<int64_t, NodeType> m_nodeTypes;
-        RawHandler& m_rawHandler;
+        Handler& m_rawHandler;
         const std::set<int64_t> m_allNodeTypes;
+        const boost::chrono::steady_clock::duration m_period;
     };
+
+    typedef RawPublisherRemoteBasic<RawHandler, Com::Communication> RawPublisherRemote;
 }
 }
 }

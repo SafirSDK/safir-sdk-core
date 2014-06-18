@@ -1,6 +1,7 @@
 RawStatistics_test
 SystemState_test
 RawPublisherLocal_test
+RawPublisherRemote_test
 StatePublisherLocal_test
 StatePublisherRemote_test
 
