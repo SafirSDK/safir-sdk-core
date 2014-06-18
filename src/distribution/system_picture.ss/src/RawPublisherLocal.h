@@ -39,7 +39,6 @@ namespace Internal
 {
 namespace SP
 {
-    using Safir::Utilities::Internal::AsioPeriodicTimer;
     /**
      * Responsible for publishing raw data locally on this computer/node.
      * E.g. for dobexplorer or other SP instance to use.

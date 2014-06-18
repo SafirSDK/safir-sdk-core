@@ -94,7 +94,8 @@ namespace SP
                                                                           communication,
                                                                           nodeTypes, 
                                                                           MASTER_REMOTE_RAW_NAME, 
-                                                                          *m_rawHandler))
+                                                                          *m_rawHandler,
+                                                                          boost::chrono::seconds(30)))
             , m_rawSubscriberRemote(Safir::make_unique<RemoteSubscriber<Com::Communication, RawHandler>>(communication, 
                                                                             MASTER_REMOTE_RAW_NAME, 
                                                                             *m_rawHandler))
@@ -116,7 +117,8 @@ namespace SP
                                                                               communication, 
                                                                               nodeTypes,
                                                                               MASTER_REMOTE_STATE_NAME, 
-                                                                              *m_coordinator))
+                                                                              *m_coordinator,
+                                                                              boost::chrono::seconds(1)))
             , m_stateSubscriberRemote(Safir::make_unique<RemoteSubscriber<Com::Communication,Coordinator>>
                                       (communication, 
                                        MASTER_REMOTE_STATE_NAME,

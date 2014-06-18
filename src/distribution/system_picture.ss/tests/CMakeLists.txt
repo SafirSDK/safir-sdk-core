@@ -25,7 +25,9 @@ add_definitions(-Dsystem_picture_EXPORTS)
 ADD_EXECUTABLE(RawStatistics_test RawStatistics_test.cpp ../src/RawStatistics.cpp ${PROTO_SRCS} ${PROTO_HDRS})
 ADD_EXECUTABLE(SystemState_test SystemState_test.cpp ../src/SystemState.cpp ${PROTO_SRCS} ${PROTO_HDRS})
 ADD_EXECUTABLE(RawPublisherLocal_test RawPublisherLocal_test.cpp ${PROTO_HDRS})
+ADD_EXECUTABLE(RawPublisherRemote_test RawPublisherRemote_test.cpp ../src/RawStatistics.cpp ${PROTO_SRCS}  ${PROTO_HDRS})
 ADD_EXECUTABLE(StatePublisherLocal_test StatePublisherLocal_test.cpp ${PROTO_HDRS})
+ADD_EXECUTABLE(StatePublisherRemote_test StatePublisherRemote_test.cpp ${PROTO_HDRS})
 
 ADD_EXECUTABLE(LocalSubscriber_test LocalSubscriber_test.cpp ../src/RawStatistics.cpp ${PROTO_SRCS} ${PROTO_HDRS})
 ADD_EXECUTABLE(RemoteSubscriber_test RemoteSubscriber_test.cpp)
@@ -36,6 +38,9 @@ TARGET_LINK_LIBRARIES(RawStatistics_test
 TARGET_LINK_LIBRARIES(SystemState_test
   ${PROTOBUF_LITE_LIBRARIES})
 
+TARGET_LINK_LIBRARIES(RawPublisherRemote_test
+  ${PROTOBUF_LITE_LIBRARIES})
+
 TARGET_LINK_LIBRARIES(LocalSubscriber_test
   ${PROTOBUF_LITE_LIBRARIES})
 
@@ -44,7 +49,9 @@ if(NOT MSVC)
   TARGET_LINK_LIBRARIES(RawStatistics_test ${Boost_LIBRARIES})
   TARGET_LINK_LIBRARIES(SystemState_test ${Boost_LIBRARIES})
   TARGET_LINK_LIBRARIES(RawPublisherLocal_test lluf_utils lluf_config ${Boost_LIBRARIES})
+  TARGET_LINK_LIBRARIES(RawPublisherRemote_test lluf_id lluf_utils lluf_config ${Boost_LIBRARIES})
   TARGET_LINK_LIBRARIES(StatePublisherLocal_test lluf_utils lluf_config ${Boost_LIBRARIES})
+  TARGET_LINK_LIBRARIES(StatePublisherRemote_test lluf_id lluf_utils lluf_config ${Boost_LIBRARIES})
 
   TARGET_LINK_LIBRARIES(LocalSubscriber_test lluf_utils lluf_config ${Boost_LIBRARIES})
   TARGET_LINK_LIBRARIES(RemoteSubscriber_test lluf_id lluf_utils lluf_config ${Boost_LIBRARIES})
@@ -60,13 +67,16 @@ add_test(SystemState_test SystemState_test)
 add_test(RawPublisherLocal_test RawPublisherLocal_test)
 set_tests_properties(RawPublisherLocal_test PROPERTIES TIMEOUT 30)
 
+add_test(RawPublisherRemote_test RawPublisherRemote_test)
+set_tests_properties(RawPublisherRemote_test PROPERTIES TIMEOUT 30)
+
 add_test(StatePublisherLocal_test StatePublisherLocal_test)
 set_tests_properties(StatePublisherLocal_test PROPERTIES TIMEOUT 30)
 
+add_test(StatePublisherRemote_test StatePublisherRemote_test)
+set_tests_properties(StatePublisherRemote_test PROPERTIES TIMEOUT 30)
 
 
 add_test(LocalSubscriber_test LocalSubscriber_test)
-set_tests_properties(LocalSubscriber_test PROPERTIES TIMEOUT 30)
-
 add_test(RemoteSubscriber_test RemoteSubscriber_test)
-set_tests_properties(RemoteSubscriber_test PROPERTIES TIMEOUT 30)
+

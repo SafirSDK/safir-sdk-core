@@ -38,8 +38,6 @@ namespace Internal
 {
 namespace SP
 {
-    using Safir::Utilities::Internal::AsioPeriodicTimer;
-
     class Coordinator;
 
     /**
