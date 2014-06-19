@@ -92,25 +92,8 @@ namespace SerializationUtils
 
     inline std::string ExpandEnvironmentVariables(const std::string& str)
     {
-        std::string result;
-        try
-        {
-            result = Safir::Utilities::Internal::Expansion::ExpandSpecial(str);
-        }
-        catch (const std::logic_error& e)
-        {
-            throw std::string(e.what());
-        }
-
-        try
-        {
-            result = Safir::Utilities::Internal::Expansion::ExpandEnvironment(result);
-        }
-        catch (const std::logic_error& e)
-        {
-            throw std::string(e.what());
-        }
-        
+        std::string result = Safir::Utilities::Internal::Expansion::ExpandSpecial(str);
+        result = Safir::Utilities::Internal::Expansion::ExpandEnvironment(result);
         return result;
     }
 
@@ -143,6 +126,31 @@ namespace SerializationUtils
         return result;
     }
 
+    inline std::pair<DotsC_EntityId, const char*> StringToEntityId(const std::string& type, const std::string& inst)
+    {
+        std::pair<DotsC_EntityId, const char*> entityId;
+        entityId.first.typeId=SerializationUtils::StringToTypeId(type);
+        std::pair<DotsC_Int64, const char*> instanceId=SerializationUtils::StringToHash(inst);
+        entityId.first.instanceId=instanceId.first;
+        entityId.second=instanceId.second;
+        return entityId;
+    }
+
+    inline bool StringToBoolean(const std::string& val)
+    {
+        if (val=="true" || val=="True")
+        {
+            return true;
+        }
+        else if (val=="false" || val=="False")
+        {
+            return false;
+        }
+
+        throw std::invalid_argument("Failed to convert '"+val+"' to boolean");
+    }
+
+
     template <class WriterT, class KeyT>
     void SetMemberValue(const typename WriterT::RepositoryType* repository,
                         const typename WriterT::MemberDescriptionType* md,
@@ -157,20 +165,17 @@ namespace SerializationUtils
         case BooleanMemberType:
         {
             Trim(memberContent.data());
-            bool boolVal=true;
             const std::string& val=memberContent.data();
-            if (val=="True" || val=="true")
+            bool boolVal=false;
+            try
             {
-                boolVal=true;
+                boolVal=StringToBoolean(val);
             }
-            else if (val=="False" || val=="false")
+            catch (const std::exception& err)
             {
-                boolVal=false;
+                throw ParseError("Serialization error", err.what(), "", 206);
             }
-            else
-            {
-                boolVal=memberContent.get_value<bool>();
-            }
+
             writer.WriteValue(memIx, arrIx, key, boolVal, false, true);
         }
             break;
@@ -253,8 +258,8 @@ namespace SerializationUtils
             }
 
             Trim(*typeIdString);
-            std::pair<DotsC_EntityId, const char*> entityId;
-            entityId.first.typeId=SerializationUtils::StringToTypeId(*typeIdString);
+            Trim(*instanceIdString);
+            std::pair<DotsC_EntityId, const char*> entityId=StringToEntityId(*typeIdString, *instanceIdString);
 
             if (!BasicTypeOperations::IsOfType(repository, ObjectMemberType, entityId.first.typeId, ObjectMemberType, EntityTypeId))
             {
@@ -267,10 +272,6 @@ namespace SerializationUtils
                 throw ParseError("Serialization error", os.str(), "", 173);
             }
 
-            Trim(*instanceIdString);
-            std::pair<DotsC_Int64, const char*> instanceId=SerializationUtils::StringToHash(*instanceIdString);
-            entityId.first.instanceId=instanceId.first;
-            entityId.second=instanceId.second;
             writer.WriteValue(memIx, arrIx, key, entityId, false, true);
         }
             break;

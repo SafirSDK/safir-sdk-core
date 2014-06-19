@@ -189,9 +189,9 @@ namespace ToolSupport
             {
                 throw ParseError("Incomplete EntityId XML", "Missing 'name' and/or 'instanceId' element in EntityId parameter", state.currentPath, 5);
             }
-            catch(const std::string& var)
+            catch(const std::exception& var)
             {
-                throw ParseError("Incomplete EntityId XML", "Failed to expand environment variable '"+var+"' in EntityId parameter", state.currentPath, 139);
+                throw ParseError("Incomplete EntityId XML", "Failed to expand environment variable '"+std::string(var.what())+"' in EntityId parameter", state.currentPath, 139);
             }
         }
     };
@@ -579,9 +579,9 @@ namespace ToolSupport
             {
                 throw ParseError("Incomplete EntityId XML", "Missing 'name' and/or 'instanceId' element in EntityId value in createRoutine "+def->name, state.currentPath, 4);
             }
-            catch(const std::string& envVar)
+            catch(const std::exception& envVar)
             {
-                throw ParseError("Incomplete EntityId XML", "Failed to expand environment variable '"+envVar+"' in CreateRoutine "+def->GetName()+" member "+memVal.first, state.currentPath, 140);
+                throw ParseError("Incomplete EntityId XML", "Failed to expand environment variable '"+std::string(envVar.what())+"' in CreateRoutine "+def->GetName()+" member "+memVal.first, state.currentPath, 140);
             }
 
             ParameterDescriptionLocalPtr par=boost::make_shared<ParameterDescriptionLocal>();
@@ -761,13 +761,13 @@ namespace ToolSupport
             }
             ValueDefinition& v=def->values.back();
 
+            if (def->memberType==ObjectMemberType)
+            {
+                def->memberType=EnumerationMemberType; //Handled later, should be an enum otherwise <value>-element is not valid
+            }
+
             try
             {
-                if (def->memberType==ObjectMemberType)
-                {
-                    def->memberType=EnumerationMemberType; //Handled later, should be an enum otherwise <value>-element is not valid
-                }
-
                 if (def->memberType==EnumerationMemberType)
                 {
                     v.val.str=SerializationUtils::ExpandEnvironmentVariables(pt.data());
@@ -779,10 +779,14 @@ namespace ToolSupport
                     throw ParseError("Invalid parameter value", os.str(), state.currentPath, 30);
                 }
             }
-            catch(const std::string& envVar)
+            catch (const ParseError&)
+            {
+                throw; //rethrow parse error, this is to prevent ParseError to be caught by next catch that is intended for envVar errors
+            }
+            catch(const std::exception& envVar)
             {
                 std::ostringstream os;
-                os<<"Failed to expand environment variable in parameter "<<def->name<<" in class "<<state.lastInsertedClass->name<<". "<<envVar;
+                os<<"Failed to expand environment variable in parameter "<<def->name<<" in class "<<state.lastInsertedClass->name<<". "<<envVar.what();
                 throw ParseError("Invalid parameter value", os.str(), state.currentPath, 142);
             }
         }
@@ -899,10 +903,10 @@ namespace ToolSupport
                 ss<<"The dictionary parameter '"<<def->name<<"' in class '"<<state.lastInsertedClass->name<<"' has no key specified."<<std::endl;
                 throw ParseError("Missing key", ss.str(), state.currentPath, 186);
             }
-            catch (const std::string& envVar)
+            catch (const std::exception& envVar)
             {
                 std::ostringstream os;
-                os<<"Failed to expand environment variable in parameter "<<def->name<<" in class "<<state.lastInsertedClass->name<<". "<<envVar;
+                os<<"Failed to expand environment variable in parameter "<<def->name<<" in class "<<state.lastInsertedClass->name<<". "<<envVar.what();
                 throw ParseError("Invalid dictionary key", os.str(), state.currentPath, 187);
             }
 
@@ -1216,12 +1220,12 @@ namespace ToolSupport
                 ss<<"The propertyMapping of the dictionary property member '"<<pdm->property->name<<"."<<propMem->name<<"' for class  '"<<pdm->class_->name<<"' has no key specified.";
                 throw ParseError("Missing key", ss.str(), state.currentPath, 189);
             }
-            catch (const std::string& envVar)
+            catch (const std::exception& envVar)
             {
                 const PropertyMappingDescriptionLocal* pdm=state.lastInsertedPropertyMapping.get();
                 const MemberDescriptionLocal* propMem=pdm->property->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
                 std::ostringstream os;
-                os<<"Failed to expand environment variable in propertyMapping of '"<<pdm->property->name<<"."<<propMem->name<<"' for class  '"<<pdm->class_->name<<". "<<envVar;
+                os<<"Failed to expand environment variable in propertyMapping of '"<<pdm->property->name<<"."<<propMem->name<<"' for class  '"<<pdm->class_->name<<". "<<envVar.what();
                 throw ParseError("Invalid dictionary key", os.str(), state.currentPath, 190);
             }
 
@@ -1392,9 +1396,9 @@ namespace ToolSupport
             {
                 throw ParseError("Incomplete EntityId XML", "Missing 'name' and/or 'instanceId' element in EntityId parameter", state.currentPath, 40);
             }
-            catch(const std::string& envVar)
+            catch(const std::exception& envVar)
             {
-                throw ParseError("Incomplete EntityId XML", "Failed to expand environment variable '"+envVar+"' in propertyMapping for member "+propMem->GetName(), state.currentPath, 141);
+                throw ParseError("Incomplete EntityId XML", "Failed to expand environment variable '"+std::string(envVar.what())+"' in propertyMapping for member "+propMem->GetName(), state.currentPath, 141);
             }
 
             VerifyParameterValue(state, param);
@@ -1412,10 +1416,10 @@ namespace ToolSupport
             {
                 pt.data()=SerializationUtils::ExpandEnvironmentVariables(pt.data());
             }
-            catch(const std::string& envVar)
+            catch(const std::exception& envVar)
             {
                 std::ostringstream os;
-                os<<"Failed to expand environment variable in property value "<<param->name<<". "<<envVar;
+                os<<"Failed to expand environment variable in property value "<<param->name<<". "<<envVar.what();
                 throw ParseError("Invalid propertyMapping value", os.str(), state.currentPath, 197);
             }
 
@@ -1596,10 +1600,10 @@ namespace ToolSupport
             {
                 paramIndex=ReferencedKeyToIndex(state.repository.get(), srcParam, paramKey);
             }
-            catch (const std::string& err)
+            catch (const std::exception& err)
             {
                 std::ostringstream os;
-                os<<"Failed to resolve parameter reference in propertyMapping for "<<state.lastInsertedPropertyMapping->property->name<<"."<<propMem->GetName()<<". "<<err;
+                os<<"Failed to resolve parameter reference in propertyMapping for "<<state.lastInsertedPropertyMapping->property->name<<"."<<propMem->GetName()<<". "<<err.what();
                 throw ParseError("Invalid parameter reference", os.str(), state.currentPath, 205);
             }
 

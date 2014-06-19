@@ -156,7 +156,7 @@ namespace BasicTypeOperations
         case Watt64MemberType: return Watt64MemberTypeName::Get();
         }
 
-        throw "ENSURE";
+        throw std::invalid_argument("BasicTypeOperations::MemberTypeToString. The MemberType does not exist");
     }
 
     /**

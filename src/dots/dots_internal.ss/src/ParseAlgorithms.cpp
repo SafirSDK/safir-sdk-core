@@ -81,7 +81,8 @@ namespace ToolSupport
         boost::optional<std::string> index=pt.get_optional<std::string>(Elements::ReferenceIndex::Name());
 
         //both key and index can't exist
-        if (key && index) throw std::string("Cant have both key and index element in reference");
+        if (key && index)
+            throw std::invalid_argument("Cant have both key and index element in reference");
 
         if (key)
         {
@@ -185,7 +186,7 @@ namespace ToolSupport
                 {
                     std::ostringstream os;
                     os<<"Failed to parse '"<<key<<"' as a dictionary key of enum type '"<<ed->GetName()<<"'";
-                    throw os.str();
+                    throw std::invalid_argument(os.str());
                 }
                 return index;
             }
@@ -225,7 +226,7 @@ namespace ToolSupport
                 {
                     std::ostringstream os;
                     os<<"The dictionary key '"<<key<<"' is not found in the referenced parameter "<<pd->qualifiedName;
-                    throw os.str();
+                    throw std::invalid_argument(os.str());
                 }
 
                 return index;
@@ -234,7 +235,7 @@ namespace ToolSupport
             {
                 std::ostringstream os;
                 os<<"Failed to parse '"<<key<<"' as a dictionary key of type "<<BasicTypeOperations::MemberTypeToString(pd->GetKeyType());
-                throw os.str();
+                throw std::invalid_argument(os.str());
             }
         }
             break;
@@ -245,7 +246,7 @@ namespace ToolSupport
             {
                 std::ostringstream os;
                 os<<"Array parameter '"<<pd->qualifiedName<<"' is missing index element in reference";
-                throw os.str();
+                throw std::invalid_argument(os.str());
             }
 
             try
@@ -255,7 +256,7 @@ namespace ToolSupport
                 {
                     std::ostringstream os;
                     os<<"Array parameter reference out of range. Index="<<index<<"' but the parameter '"<<pd->qualifiedName<<"' only has "<<pd->GetNumberOfValues()<<" values.";
-                    throw os.str();
+                    throw std::invalid_argument(os.str());
                 }
                 return index;
             }
@@ -263,7 +264,7 @@ namespace ToolSupport
             {
                 std::ostringstream os;
                 os<<"Specified index '"<<key<<"' can't be interpreted as an array index of type Int32. Referenced parameter is '"<<pd->qualifiedName<<"'";
-                throw os.str();
+                throw std::invalid_argument(os.str());
             }
         }
             break;
@@ -275,7 +276,7 @@ namespace ToolSupport
             {
                 std::ostringstream os;
                 os<<"The parameter '"<<pd->qualifiedName<<"' has collectionType="<<BasicTypeOperations::CollectionTypeToString(pd->GetCollectionType())<<"' and hence key/index is not allowed in reference.";
-                throw os.str();
+                throw std::invalid_argument(os.str());
             }
 
             return 0;
@@ -289,7 +290,7 @@ namespace ToolSupport
             //should never get here
             std::ostringstream os;
             os<<"Totally confused! Key='"<<key<<"' and referenced parameter is "<<pd->qualifiedName<<"' and the collectionType="<<BasicTypeOperations::CollectionTypeToString(pd->GetCollectionType())<<". Can't figure out what to do!";
-            throw os.str();
+            throw std::invalid_argument(os.str());
         }
     }
 
@@ -565,7 +566,7 @@ namespace ToolSupport
                 os<<"The dictionary parameter '"<<pd->qualifiedName<<"' contains duplicated key '";
                 strHelp.ParameterKeyToString(pd, index, os);
                 os<<"'. Keys must be unique.";
-                throw os.str();
+                throw std::invalid_argument(os.str());
             }
         }
     }
@@ -820,9 +821,9 @@ namespace ToolSupport
         {
             CheckDictionaryKeyDuplicates(state.repository.get(), pd);
         }
-        catch (const std::string& err)
+        catch (const std::exception& err)
         {
-            throw ParseError("Duplicated dictionary key", err, state.currentPath, 206);
+            throw ParseError("Duplicated dictionary key", err.what(), state.currentPath, 206);
         }
     }
 
@@ -1097,10 +1098,10 @@ namespace ToolSupport
         {
             parameterIndex=ReferencedKeyToIndex(state.repository.get(), referenced, ref.parameterKey);
         }
-        catch (const std::string& err)
+        catch (const std::exception& err)
         {
             std::ostringstream ss;
-            ss<<"The specified key/index in parameter valueRef parameter='"<<ref.parameterName<<"' and key/index='"<<ref.parameterKey<<"' can't be resolved. Referenced from parameter: "<<referencing->GetName()<<". "<<err;
+            ss<<"The specified key/index in parameter valueRef parameter='"<<ref.parameterName<<"' and key/index='"<<ref.parameterKey<<"' can't be resolved. Referenced from parameter: "<<referencing->GetName()<<". "<<err.what();
             throw ParseError("Invalid parameter reference", ss.str(), cd->FileName(), 203);
         }
 
@@ -1171,10 +1172,10 @@ namespace ToolSupport
         {
             parameterIndex=ReferencedKeyToIndex(state.repository.get(), referenced, ref.parameterKey);
         }
-        catch (const std::string& err)
+        catch (const std::exception& err)
         {
             std::ostringstream os;
-            os<<"Can't resolve arraySizeRef "<<ref.parameterName<<"["<<ref.parameterKey<<"]. Referenced from memeber '"<<md->GetName()<<"' in class "<<cd->GetName()<<". "<<err;
+            os<<"Can't resolve arraySizeRef "<<ref.parameterName<<"["<<ref.parameterKey<<"]. Referenced from memeber '"<<md->GetName()<<"' in class "<<cd->GetName()<<". "<<err.what();
             throw ParseError("Invalid arraySizeRef", os.str(), cd->FileName(), 204);
         }
 
@@ -1215,10 +1216,10 @@ namespace ToolSupport
         {
             parameterIndex=ReferencedKeyToIndex(state.repository.get(), referenced, ref.parameterKey);
         }
-        catch (const std::string& err)
+        catch (const std::exception& err)
         {
             std::ostringstream os;
-            os<<"Can't resolve maxLengthRef "<<ref.parameterName<<"["<<ref.parameterKey<<"]. Referenced from memeber '"<<md->GetName()<<"' in class "<<cd->GetName()<<". "<<err;
+            os<<"Can't resolve maxLengthRef "<<ref.parameterName<<"["<<ref.parameterKey<<"]. Referenced from memeber '"<<md->GetName()<<"' in class "<<cd->GetName()<<". "<<err.what();
             throw ParseError("Invalid maxLengthRef", os.str(), cd->FileName(), 178);
         }
 
@@ -1306,10 +1307,10 @@ namespace ToolSupport
             {
                 paramIndex=ReferencedKeyToIndex(state.repository.get(), pdef, ref.parameterKey);
             }
-            catch (const std::string& err)
+            catch (const std::exception& err)
             {
                 std::ostringstream os;
-                os<<"Can't resolve createRoutine value reference "<<ref.parameterName<<"["<<ref.parameterKey<<"] for member "<<memberName<<" in createRoutine "<<cr->GetName()<<" in class "<<cd->GetName()<<". "<<err;
+                os<<"Can't resolve createRoutine value reference "<<ref.parameterName<<"["<<ref.parameterKey<<"] for member "<<memberName<<" in createRoutine "<<cr->GetName()<<" in class "<<cd->GetName()<<". "<<err.what();
                 throw ParseError("Invalid create routine value", os.str(), cd->FileName(), 179);
             }
 
