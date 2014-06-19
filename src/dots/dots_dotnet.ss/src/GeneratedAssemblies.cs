@@ -66,6 +66,11 @@ namespace Safir.Dob.Typesystem
                                                  out deleter);
             Kernel.DotsC_GeneratedLibrary lib;
 
+            if (size == 0)
+            {
+                throw new Safir.Dob.Typesystem.ConfigurationErrorException("Failed to read information from typesystem.ini");
+            }
+
             for (int i = 0; i < size; ++i)
             {
                 System.IntPtr iterator =

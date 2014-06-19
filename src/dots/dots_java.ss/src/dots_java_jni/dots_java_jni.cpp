@@ -1624,6 +1624,13 @@ JNIEXPORT jobjectArray JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_Ge
                                   size,
                                   deleter);
 
+    if (size ==0)
+    {
+        std::wcerr << "Failed to read information from typesystem.ini" << std::endl;
+        exit(1);
+    }
+
+
     for (int i = 0; i < size; ++i)
     {
         if (generatedLibraries[i].javaJarLocation != NULL &&

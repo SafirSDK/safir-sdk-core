@@ -80,6 +80,12 @@ namespace Typesystem
                                           size,
                                           deleter);
             
+            if (size ==0)
+            {
+                throw Safir::Dob::Typesystem::ConfigurationErrorException(L"Failed to read information from typesystem.ini",
+                                                                          __WFILE__, __LINE__);
+            }
+
             for (int i = 0; i < size; ++i)
             {
                 std::string location;

@@ -1970,80 +1970,88 @@ void DotsC_GetGeneratedLibraryList(DotsC_GeneratedLibrary*& generatedLibraries,
                                    DotsC_Int32& size,
                                    DotsC_GeneratedLibraryListDeleter& deleter)
 {
-    Safir::Utilities::Internal::ConfigReader reader;
-    const boost::property_tree::ptree& ptree = reader.Typesystem();
-
-    //work out our size
-    size = 0;
-    for (boost::property_tree::ptree::const_iterator it = ptree.begin();
-         it != ptree.end(); ++it)
+    try
     {
-        const bool isSection = !it->second.empty();
-        
-        if (isSection)
+        Safir::Utilities::Internal::ConfigReader reader;
+        const boost::property_tree::ptree& ptree = reader.Typesystem();
+
+        //work out our size
+        size = 0;
+        for (boost::property_tree::ptree::const_iterator it = ptree.begin();
+             it != ptree.end(); ++it)
         {
-            ++size;
+            const bool isSection = !it->second.empty();
+        
+            if (isSection)
+            {
+                ++size;
+            }
+        }
+    
+        //allocate our array. 
+        generatedLibraries = new DotsC_GeneratedLibrary[size];
+        deleter = DeleteGeneratedLibraryList;
+        
+        int i = 0;
+        for (boost::property_tree::ptree::const_iterator it = ptree.begin();
+             it != ptree.end(); ++it)
+        {
+            const bool isSection = !it->second.empty();
+        
+            if (isSection)
+            {
+                const std::string module = it->first;
+                generatedLibraries[i].name = CopyStringToNew(module);
+
+                const std::string kind = it->second.get<std::string>("kind");
+                if (kind != "library" && kind != "override")
+                {
+                    throw std::logic_error("Illegal value for 'kind' in typesystem.ini");
+                }
+                generatedLibraries[i].library = (kind == "library") ? 1 : 0;
+
+                generatedLibraries[i].cppLibraryName = CopyStringToNew("safir_generated-" + module + "-cpp");
+                generatedLibraries[i].dotnetAssemblyName = CopyStringToNew("safir_generated-" + module + "-dotnet");
+                generatedLibraries[i].javaJarName = CopyStringToNew("safir_generated-" + module + "-java.jar");
+
+                const boost::optional<std::string> cpp_library_location = it->second.get_optional<std::string>("cpp_library_location");
+                if (cpp_library_location)
+                {
+                    generatedLibraries[i].cppLibraryLocation = CopyStringToNew(cpp_library_location.get());
+                }
+                else
+                {
+                    generatedLibraries[i].cppLibraryLocation = NULL;
+                }
+
+                const boost::optional<std::string> dotnet_assembly_location = it->second.get_optional<std::string>("dotnet_assembly_location");
+                if (dotnet_assembly_location)
+                {
+                    generatedLibraries[i].dotnetAssemblyLocation = CopyStringToNew(dotnet_assembly_location.get());
+                }
+                else
+                {
+                    generatedLibraries[i].dotnetAssemblyLocation = NULL;
+                }
+
+                const boost::optional<std::string> java_jar_location = it->second.get_optional<std::string>("java_jar_location");
+                if (java_jar_location)
+                {
+                    generatedLibraries[i].javaJarLocation = CopyStringToNew(java_jar_location.get());
+                }
+                else
+                {
+                    generatedLibraries[i].javaJarLocation = NULL;
+                }
+
+                ++i;
+            }
         }
     }
-    
-    //allocate our array. 
-    generatedLibraries = new DotsC_GeneratedLibrary[size];
-    deleter = DeleteGeneratedLibraryList;
-        
-    int i = 0;
-    for (boost::property_tree::ptree::const_iterator it = ptree.begin();
-         it != ptree.end(); ++it)
+    catch(...)
     {
-        const bool isSection = !it->second.empty();
-        
-        if (isSection)
-        {
-            const std::string module = it->first;
-            generatedLibraries[i].name = CopyStringToNew(module);
-
-            const std::string kind = it->second.get<std::string>("kind");
-            if (kind != "library" && kind != "override")
-            {
-                throw std::logic_error("Illegal value for 'kind' in typesystem.ini");
-            }
-            generatedLibraries[i].library = (kind == "library") ? 1 : 0;
-
-            generatedLibraries[i].cppLibraryName = CopyStringToNew("safir_generated-" + module + "-cpp");
-            generatedLibraries[i].dotnetAssemblyName = CopyStringToNew("safir_generated-" + module + "-dotnet");
-            generatedLibraries[i].javaJarName = CopyStringToNew("safir_generated-" + module + "-java.jar");
-
-            const boost::optional<std::string> cpp_library_location = it->second.get_optional<std::string>("cpp_library_location");
-            if (cpp_library_location)
-            {
-                generatedLibraries[i].cppLibraryLocation = CopyStringToNew(cpp_library_location.get());
-            }
-            else
-            {
-                generatedLibraries[i].cppLibraryLocation = NULL;
-            }
-
-            const boost::optional<std::string> dotnet_assembly_location = it->second.get_optional<std::string>("dotnet_assembly_location");
-            if (dotnet_assembly_location)
-            {
-                generatedLibraries[i].dotnetAssemblyLocation = CopyStringToNew(dotnet_assembly_location.get());
-            }
-            else
-            {
-                generatedLibraries[i].dotnetAssemblyLocation = NULL;
-            }
-
-            const boost::optional<std::string> java_jar_location = it->second.get_optional<std::string>("java_jar_location");
-            if (java_jar_location)
-            {
-                generatedLibraries[i].javaJarLocation = CopyStringToNew(java_jar_location.get());
-            }
-            else
-            {
-                generatedLibraries[i].javaJarLocation = NULL;
-            }
-
-            ++i;
-        }
+        generatedLibraries = NULL;
+        deleter = NULL;
+        size = 0;
     }
-    
 }
