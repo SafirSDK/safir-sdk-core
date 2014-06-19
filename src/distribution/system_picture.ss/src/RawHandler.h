@@ -89,7 +89,7 @@ namespace SP
             , m_nodeTypes(nodeTypes)
             , m_strand(ioService)
             , m_checkDeadNodesTimer(ioService, 
-                                    boost::chrono::milliseconds(1100),
+                                    boost::chrono::milliseconds(1100), //TODO: change to be something related to the parameters.
                                     m_strand.wrap([this](const boost::system::error_code& error)
                                                   {
                                                       if (m_stopped)
@@ -418,8 +418,6 @@ namespace SP
 
             for (auto& pair : m_nodeTable)            
             {
-                //lllog(5) << "SP:   lastReceiveTime is " << pair.second->lastReceiveTime.value() << std::endl;
-                //                lllog(5) << "SP:   isDead = " << pair.second->isDead.value() << std::endl;
                 const auto threshold = now - m_nodeTypes.at(pair.second.nodeInfo->node_type_id()).deadTimeout;
             
                 if (!pair.second.nodeInfo->is_dead() && pair.second.lastReceiveTime < threshold)

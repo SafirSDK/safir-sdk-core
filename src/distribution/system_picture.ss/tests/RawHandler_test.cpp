@@ -23,6 +23,7 @@
 ******************************************************************************/
 #include "../src/RawHandler.h"
 #include <boost/thread.hpp>
+#include <set>
 
 #define BOOST_TEST_MODULE RawHandlerTest
 #include <boost/test/unit_test.hpp>
