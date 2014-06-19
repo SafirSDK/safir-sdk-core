@@ -1,10 +1,10 @@
 #include <iostream>
 #include <limits>
+#include <chrono>
 #include <boost/asio.hpp>
 #include <boost/function.hpp>
 #include <boost/thread.hpp>
 #include <boost/program_options.hpp>
-#include <boost/timer.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/crc.hpp>
 #include <Safir/Utilities/Internal/Id.h>
@@ -28,7 +28,7 @@ public:
         desc.add_options()
                 ("help,h", "Produce help message")
                 ("addr,a", boost::program_options::value<std::string>(), "Unicast address on format 'address:port'")
-                ("node-type,t", boost::program_options::value<std::string>(), "Node type nt0, nt1 or nt2, defaults to nt0'")
+                ("node-type,t", boost::program_options::value<std::string>(), "Node type nt0(unicast only), nt1 or nt2, defaults to nt0'.")
                 ("await,w", boost::program_options::value<int>(), "Wait for specified number of other nodes before start sending data")
                 ("seed,s", boost::program_options::value< std::vector<std::string> >()->multitoken(), "Seed addresses on format 'address:port'")
                 ("nmsg,n", boost::program_options::value<unsigned int>(), "Number of messages to send and receive. Equal to set both nsend and nsend to the same value")
@@ -264,8 +264,19 @@ public:
         {
             std::cout<<"Bad CRC! size="<<size<<std::endl;
         }
-        unsigned int rc=++m_recvCount[id];
+        unsigned int& rc=m_recvCount[id];
         unsigned int sendCount=*reinterpret_cast<const unsigned int*>(msg.get());
+
+        if (rc>0)
+        {
+            ++rc;
+        }
+        else
+        {
+            //first message we receive, accept anything and set receive count to the received value.
+            //this is to handle package loss of first message.
+            rc=sendCount;
+        }
 
         if (rc!=sendCount)
         {
@@ -390,7 +401,7 @@ int main(int argc, char * argv[])
 
     std::cout<<"Start sending "<<cmd.nsend<<" messages!"<<std::endl;
 
-    boost::timer timer;
+    auto startTime=std::chrono::high_resolution_clock::now();
     unsigned int numberOfOverflows=0;
     unsigned int sendCounter=0;    
     while (sendCounter<cmd.nsend)
@@ -436,8 +447,10 @@ int main(int argc, char * argv[])
         }
     }
 
+    auto elapsed=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now()-startTime);
+
     std::cout<<"---------------------------------------------------------"<<std::endl;
-    std::cout<<"Finished after "<<timer.elapsed()<<" sec"<<std::endl;
+    std::cout<<"Finished after "<<static_cast<double>(elapsed.count())/1000.0<<" sec"<<std::endl;
     std::cout<<"Sent: "<<sendCounter<<std::endl;
     std::cout<<"Overflows: "<<numberOfOverflows<<std::endl;
     std::cout<<"Retransmits: "<<sp->RetransmitCount()<<std::endl;

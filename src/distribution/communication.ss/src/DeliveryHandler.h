@@ -313,7 +313,7 @@ namespace Com
             {
                 lllog(8)<<L"COM: Recv duplicated message in order. Seq: "<<header->sequenceNumber<<L" from node "<<ni.node.name.c_str()<<std::endl;
             }
-            else if (header->sequenceNumber<ch.lastInSequence+Parameters::ReceiverWindowSize)
+            else if (header->sequenceNumber<=ch.lastInSequence+Parameters::ReceiverWindowSize)
             {
                 //The Normal case:
                 //This is something within our receive window, maybe it is out of order but in that case the gaps will eventually be filled in
@@ -325,10 +325,6 @@ namespace Com
                 //This can occur if the senders send window i bigger than the receivers receive window. If everything is working as expected we can just ignore this message.
                 //Sooner or later the sender must retransmit all non-acked messages, and in time this message will come into our receive window.
                 lllog(8)<<L"COM: Received Seq: "<<header->sequenceNumber<<" wich means that we have lost a message. LastInSequence="<<ch.lastInSequence<<std::endl;
-
-                std::wcout<<L"COM: recv from: "<<ni.node.name.c_str()<<L", sendMethod: "<<
-                                      (header->sendMethod==SingleReceiverSendMethod ? L"Unicast" : L"Multicast")<<
-                                      L", seq: "<<header->sequenceNumber<<std::endl;
                 std::wcout<<L"COM: Received Seq: "<<header->sequenceNumber<<" wich means that we have lost a message. LastInSequence="<<ch.lastInSequence<<std::endl;
                 return false; //this message is not handled, dont send ack
             }

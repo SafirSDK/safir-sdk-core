@@ -31,6 +31,24 @@ class AckedDataSenderTest
 public:
     void Run()
     {
+        boost::asio::io_service io;
+        auto work=boost::make_shared<boost::asio::io_service::work>(io);
+        boost::thread_group threads;
+        for (int i = 0; i < 9; ++i)
+        {
+            threads.create_thread([&]{io.run();});
+        }
+
+        //-------------------
+        // Tests
+        //-------------------
+
+
+        work.reset();
+        io.stop();
+        threads.join_all();
+        std::cout<<"AckedDataSenderTest tests passed"<<std::endl;
+
 //        boost::asio::io_service io;
 //        auto work=boost::make_shared<boost::asio::io_service::work>(io);
 

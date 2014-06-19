@@ -267,7 +267,9 @@ namespace Com
             return m_sendQueueSize;
         }
 
+#ifndef SAFIR_TEST
     private:
+#endif
         boost::asio::io_service::strand m_strand;
         int64_t m_nodeTypeId;
         int64_t m_nodeId;
