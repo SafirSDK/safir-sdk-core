@@ -35,27 +35,27 @@ public:
     typedef std::function<void(int64_t fromNodeId)> GotReceiveFrom;
     typedef std::function<void(int64_t toNodeId)> RetransmitTo;
 
-    void SetNewNodeCallback(const NewNode& callback)
+    void SetNewNodeCallback(const NewNode& /*callback*/)
     {
 
     }
 
-    void SetGotReceiveFromCallback(const GotReceiveFrom& callback)
+    void SetGotReceiveFromCallback(const GotReceiveFrom& /*callback*/)
     {
 
     }
 
-    void SetRetransmitToCallback(const RetransmitTo& callback)
+    void SetRetransmitToCallback(const RetransmitTo& /*callback*/)
     {
 
     }
 
-    void IncludeNode(int64_t nodeId)
+    void IncludeNode(int64_t /*nodeId*/)
     {
 
     }
 
-    void ExcludeNode(int64_t nodeId)
+    void ExcludeNode(int64_t /*nodeId*/)
     {
 
     }
