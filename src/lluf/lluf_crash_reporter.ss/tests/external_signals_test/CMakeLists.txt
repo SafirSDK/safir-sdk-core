@@ -5,6 +5,6 @@ TARGET_LINK_LIBRARIES (crash_reporter_sleeper PRIVATE
   ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY})
 
-ADD_TEST(CrashReporter_external_signals ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
+ADD_TEST(NAME CrashReporter_external_signals COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
 
 SET_SAFIR_TEST_PROPERTIES(TEST CrashReporter_external_signals TIMEOUT 300)

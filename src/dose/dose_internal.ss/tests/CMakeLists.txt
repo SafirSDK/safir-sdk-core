@@ -22,11 +22,11 @@ TARGET_LINK_LIBRARIES(dose_message_queue_test PRIVATE
 target_include_directories(wrap_around_counter_test PRIVATE ../src/include)
 target_include_directories(dose_sem_wrapper_test PRIVATE ../src/include)
 
-ADD_TEST(Semaphore dose_sem_wrapper_test)
-ADD_TEST(MessageQueue dose_message_queue_test)
-ADD_TEST(DistributionData distribution_data_test)
-ADD_TEST(LamportClocks lamport_clock_test)
-ADD_TEST(WrapAroundCounter wrap_around_counter_test)
+ADD_TEST(NAME Semaphore COMMAND dose_sem_wrapper_test)
+ADD_TEST(NAME MessageQueue COMMAND dose_message_queue_test)
+ADD_TEST(NAME DistributionData COMMAND distribution_data_test)
+ADD_TEST(NAME LamportClocks COMMAND lamport_clock_test)
+ADD_TEST(NAME WrapAroundCounter COMMAND wrap_around_counter_test)
 
 SET_SAFIR_TEST_PROPERTIES(TEST Semaphore TIMEOUT 60)
 SET_SAFIR_TEST_PROPERTIES(TEST MessageQueue TIMEOUT 360)

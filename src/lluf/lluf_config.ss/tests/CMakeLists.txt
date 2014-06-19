@@ -14,18 +14,18 @@ TARGET_LINK_LIBRARIES (PathFinders_test lluf_config)
 TARGET_LINK_LIBRARIES (ConfigReaderImpl_test lluf_config)
 TARGET_LINK_LIBRARIES (ConfigHelper_test lluf_config)
 
-ADD_TEST(display_test_env display_env)
+ADD_TEST(NAME display_test_env COMMAND display_env)
 SET_SAFIR_TEST_PROPERTIES(TEST display_test_env)
 
-ADD_TEST(ConfigReader_read_parameter read_parameter_test)
+ADD_TEST(NAME ConfigReader_read_parameter COMMAND read_parameter_test)
 SET_SAFIR_TEST_PROPERTIES(TEST ConfigReader_read_parameter)
 
-ADD_TEST(ConfigReader_Path Path_test ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/Path_test.cpp)
-ADD_TEST(ConfigReader_Util Util_test)
-ADD_TEST(ConfigReader_PathFinders PathFinders_test)
-ADD_TEST(ConfigReader_ConfigReaderImpl ConfigReaderImpl_test ${CMAKE_CURRENT_SOURCE_DIR}/testconf)
+ADD_TEST(NAME ConfigReader_Path COMMAND Path_test ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/Path_test.cpp)
+ADD_TEST(NAME ConfigReader_Util COMMAND Util_test)
+ADD_TEST(NAME ConfigReader_PathFinders COMMAND PathFinders_test)
+ADD_TEST(NAME ConfigReader_ConfigReaderImpl COMMAND ConfigReaderImpl_test ${CMAKE_CURRENT_SOURCE_DIR}/testconf)
 
-ADD_TEST(ConfigReader_ConfigHelper ConfigHelper_test)
+ADD_TEST(NAME ConfigReader_ConfigHelper COMMAND ConfigHelper_test)
 SET_SAFIR_TEST_PROPERTIES(TEST ConfigReader_ConfigHelper 
   CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/testconf/config_helper/)
 

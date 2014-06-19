@@ -11,7 +11,7 @@ if (ACE_FOUND)
   
   TARGET_LINK_LIBRARIES(AceTimeConverter_test PRIVATE ${ACE_LIBRARY})
   
-  ADD_TEST(AceTimeConverter_test AceTimeConverter_test)
+  ADD_TEST(NAME AceTimeConverter_test COMMAND AceTimeConverter_test)
 
   SET_SAFIR_TEST_PROPERTIES(TEST AceTimeConverter_test)
 

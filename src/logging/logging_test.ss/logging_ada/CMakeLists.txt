@@ -7,6 +7,6 @@ ADD_CUSTOM_TARGET(log_sender_ada ALL
                   COMMENT "Building sender using gnatmake"
                   VERBATIM)
 
-ADD_TEST(logging_ada ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
+ADD_TEST(NAME logging_ada COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
 
 SET_SAFIR_TEST_PROPERTIES(TEST logging_ada TIMEOUT 120)

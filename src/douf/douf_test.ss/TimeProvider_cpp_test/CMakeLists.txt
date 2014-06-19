@@ -9,6 +9,6 @@ if (MSVC)
 endif()
 
 
-ADD_TEST(TimeProvider_cpp_test TimeProvider_cpp_test)
+ADD_TEST(NAME TimeProvider_cpp_test COMMAND TimeProvider_cpp_test)
 
 SET_SAFIR_TEST_PROPERTIES(TEST TimeProvider_cpp_test)

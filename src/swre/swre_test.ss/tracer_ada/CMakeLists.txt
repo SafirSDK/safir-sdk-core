@@ -7,6 +7,6 @@ ADD_CUSTOM_TARGET(tracer_sender_ada ALL
                   COMMENT "Building sender using gnatmake"
                   VERBATIM)
 
-ADD_TEST(tracer_ada ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
+ADD_TEST(NAME tracer_ada COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
 
 SET_SAFIR_TEST_PROPERTIES(TEST tracer_ada TIMEOUT 120)

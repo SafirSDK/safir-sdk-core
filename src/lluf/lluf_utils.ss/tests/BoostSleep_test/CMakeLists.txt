@@ -11,7 +11,7 @@ TARGET_LINK_LIBRARIES (BoostSleep_test PRIVATE
   ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY})
 
-ADD_TEST(CheckCapabilities CheckCapabilities_test)
-ADD_TEST(BoostSleep BoostSleep_test)
+ADD_TEST(NAME CheckCapabilities COMMAND CheckCapabilities_test)
+ADD_TEST(NAME BoostSleep COMMAND BoostSleep_test)
 SET_SAFIR_TEST_PROPERTIES(TEST BoostSleep TIMEOUT 600)
 SET_SAFIR_TEST_PROPERTIES(TEST CheckCapabilities)

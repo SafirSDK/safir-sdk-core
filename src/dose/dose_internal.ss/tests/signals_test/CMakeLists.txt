@@ -11,6 +11,6 @@ TARGET_LINK_LIBRARIES(signals_test PRIVATE
   ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY})
 
-ADD_TEST(Signals signals_test)
+ADD_TEST(NAME Signals COMMAND signals_test)
 
 SET_SAFIR_TEST_PROPERTIES(TEST Signals TIMEOUT 180)

@@ -10,7 +10,7 @@ ADD_TEST(NAME TryStart_dose_main
   ${CMAKE_CURRENT_SOURCE_DIR}/try_start_dose_main.py
   --dose-main $<TARGET_FILE:dose_main>)
 
-ADD_TEST(dose_main_timers timer_test)
+ADD_TEST(NAME dose_main_timers COMMAND timer_test)
 
 SET_SAFIR_TEST_PROPERTIES(TEST TryStart_dose_main TIMEOUT 600)
 SET_SAFIR_TEST_PROPERTIES(TEST dose_main_timers TIMEOUT 600)

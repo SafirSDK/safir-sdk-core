@@ -1,11 +1,7 @@
 add_executable(swreport_sender_cpp sender.cpp)
 
 target_link_libraries(swreport_sender_cpp PRIVATE
-  swre_interface_cpp
-#  dose_cpp
-#  dots_cpp
-#  lluf_utils
-)
+  swre_interface_cpp)
 
 ADD_TEST(NAME swreport_cpp 
   COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
