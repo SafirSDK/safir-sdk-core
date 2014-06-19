@@ -87,7 +87,6 @@ namespace SP
             , m_communication(communication)
             , m_id(id)
             , m_nodeTypes(nodeTypes)
-            , m_epoch(boost::chrono::steady_clock::now() - boost::chrono::hours(1))
             , m_strand(ioService)
             , m_checkDeadNodesTimer(ioService, 
                                     boost::chrono::milliseconds(1100),
@@ -515,7 +514,6 @@ namespace SP
 
         const int64_t m_id;
         const std::map<int64_t, NodeType> m_nodeTypes;
-        const boost::chrono::steady_clock::time_point m_epoch;
         mutable boost::asio::strand m_strand;
 
         Safir::Utilities::Internal::AsioPeriodicTimer m_checkDeadNodesTimer;

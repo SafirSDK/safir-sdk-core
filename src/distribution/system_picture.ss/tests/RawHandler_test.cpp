@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include "../src/RawHandler.h"
+#include <boost/thread.hpp>
 
 #define BOOST_TEST_MODULE RawHandlerTest
 #include <boost/test/unit_test.hpp>
@@ -35,41 +36,150 @@ public:
     typedef std::function<void(int64_t fromNodeId)> GotReceiveFrom;
     typedef std::function<void(int64_t toNodeId)> RetransmitTo;
 
-    void SetNewNodeCallback(const NewNode& /*callback*/)
+    void SetNewNodeCallback(const NewNode& callback)
     {
-
+        BOOST_CHECK(newNodeCb == nullptr);
+        newNodeCb = callback;
     }
 
-    void SetGotReceiveFromCallback(const GotReceiveFrom& /*callback*/)
+    void SetGotReceiveFromCallback(const GotReceiveFrom& callback)
     {
-
+        BOOST_CHECK(gotReceiveFromCb == nullptr);
+        gotReceiveFromCb = callback;
     }
 
-    void SetRetransmitToCallback(const RetransmitTo& /*callback*/)
+    void SetRetransmitToCallback(const RetransmitTo& callback)
     {
-
+        BOOST_CHECK(retransmitToCb == nullptr);
+        retransmitToCb = callback;
     }
 
-    void IncludeNode(int64_t /*nodeId*/)
+    void IncludeNode(int64_t nodeId)
     {
-
+        includedNodes.insert(nodeId);
     }
 
-    void ExcludeNode(int64_t /*nodeId*/)
+    void ExcludeNode(int64_t nodeId)
     {
-
+        excludedNodes.insert(nodeId);
+        if (excludeCb != nullptr)
+        {
+            excludeCb();
+        }
     }
 
+    NewNode newNodeCb;
+    GotReceiveFrom gotReceiveFromCb;
+    RetransmitTo retransmitToCb;
+
+    std::set<int64_t> includedNodes;
+    std::set<int64_t> excludedNodes;
+    
+    std::function<void()> excludeCb;
 };
 
-BOOST_AUTO_TEST_CASE( nothing )
+using namespace Safir::Dob::Internal::SP;
+
+struct Fixture
 {
-    using namespace Safir::Dob::Internal::SP;
+    Fixture()
+        : rh (ioService,comm,"plopp",10,100,"asdfasdf","qwerty",GetNodeTypes())
+    {
+        BOOST_TEST_MESSAGE( "setup fixture" );
+    }
+    
+    ~Fixture()
+    {
+        BOOST_TEST_MESSAGE( "teardown fixture" );
+    }
+
+    static std::map<int64_t, NodeType> GetNodeTypes()
+    {
+        std::map<int64_t, NodeType> nodeTypes;
+        nodeTypes.insert(std::make_pair(10, NodeType(10,"mupp",false,boost::chrono::milliseconds(1),10)));
+        nodeTypes.insert(std::make_pair(20, NodeType(20,"tupp",true,boost::chrono::seconds(1),22)));
+        return nodeTypes;
+    }
 
     Communication comm;
     boost::asio::io_service ioService;
 
-    RawHandlerBasic<::Communication> rh(ioService,comm,"plopp",10,100,"asdfasdf","qwerty",{});
+    RawHandlerBasic<::Communication> rh;
+    
+};
+
+BOOST_FIXTURE_TEST_SUITE( s, Fixture )
+
+BOOST_AUTO_TEST_CASE( start_stop )
+{
+    BOOST_CHECK(comm.newNodeCb != nullptr);
+    BOOST_CHECK(comm.gotReceiveFromCb != nullptr);
+    BOOST_CHECK(comm.retransmitToCb != nullptr);
+
+    rh.Stop();
+    ioService.run();
 }
 
 
+BOOST_AUTO_TEST_CASE( receive_from_not_known )
+{
+    comm.gotReceiveFromCb(10);
+    BOOST_CHECK_THROW(ioService.run(), std::logic_error);
+}
+
+BOOST_AUTO_TEST_CASE( retransmit_to_not_known )
+{
+    comm.retransmitToCb(10);
+    BOOST_CHECK_THROW(ioService.run(), std::logic_error);
+}
+
+
+BOOST_AUTO_TEST_CASE( new_node )
+{
+    comm.newNodeCb("asdf",11,10,"asdf","asdf");
+    comm.gotReceiveFromCb(11);
+    comm.gotReceiveFromCb(11);
+    comm.gotReceiveFromCb(11);
+    rh.Stop();
+    BOOST_CHECK_NO_THROW(ioService.run());
+    BOOST_CHECK(comm.includedNodes == std::set<int64_t>{11});
+    BOOST_CHECK(comm.excludedNodes.empty());
+}
+
+BOOST_AUTO_TEST_CASE( new_node_of_unknown_type )
+{
+    comm.newNodeCb("asdf",11,11,"asdf","asdf");
+    BOOST_CHECK_THROW(ioService.run(), std::logic_error);
+}
+
+BOOST_AUTO_TEST_CASE( new_node_with_my_id )
+{
+    comm.newNodeCb("asdf",10,10,"asdf","asdf");
+    BOOST_CHECK_THROW(ioService.run(), std::logic_error);
+}
+
+BOOST_AUTO_TEST_CASE( new_node_twice )
+{
+    comm.newNodeCb("asdf",11,10,"asdf","asdf");
+    comm.newNodeCb("asdf",11,10,"asdf","asdf");
+    BOOST_CHECK_THROW(ioService.run(), std::logic_error);
+    BOOST_CHECK(comm.includedNodes == std::set<int64_t>{11});
+    
+}
+
+BOOST_AUTO_TEST_CASE( exclude_node )
+{
+    comm.excludeCb=[&]{rh.Stop();};
+
+    comm.newNodeCb("asdf",11,10,"asdf","asdf");
+    comm.gotReceiveFromCb(11);
+    comm.gotReceiveFromCb(11);
+    comm.gotReceiveFromCb(11);
+    
+    BOOST_CHECK_NO_THROW(ioService.run());
+    BOOST_CHECK(comm.includedNodes == std::set<int64_t>{11});
+    BOOST_CHECK(comm.excludedNodes == std::set<int64_t>{11});
+}
+
+
+BOOST_AUTO_TEST_SUITE_END()

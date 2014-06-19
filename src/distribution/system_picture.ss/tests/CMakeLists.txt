@@ -4,7 +4,7 @@ project(system_picture_test CXX C) #C is needed by FindProtobuf
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
-FIND_PACKAGE(Boost COMPONENTS REQUIRED filesystem system unit_test_framework)
+FIND_PACKAGE(Boost COMPONENTS REQUIRED thread filesystem system unit_test_framework)
 FIND_PACKAGE(Protobuf REQUIRED)
 
 INCLUDE_DIRECTORIES(${PROTOBUF_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
