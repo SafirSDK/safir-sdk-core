@@ -5,12 +5,7 @@ ADD_EXECUTABLE(RequestStresser ${sources} ${headers})
 
 TARGET_LINK_LIBRARIES(RequestStresser PRIVATE
   dose_cpp 
-  dose_dll
-  dose_internal
-  dots_generated-DoseTest-cpp 
-  dots_generated-Safir-cpp 
-  dots_cpp
-  lluf_utils 
+  safir_generated-DoseTest-cpp 
   ${Boost_PROGRAM_OPTIONS_LIBRARY}
   ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY})

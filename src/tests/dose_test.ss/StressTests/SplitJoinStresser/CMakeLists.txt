@@ -10,9 +10,9 @@ if (ACE_FOUND)
   
   #FIND_PACKAGE(Boost COMPONENTS program_options)
   
-  TARGET_LINK_LIBRARIES(SplitJoinStresser PRIVATE ${ACE_LIBRARY})
+#  TARGET_LINK_LIBRARIES(SplitJoinStresser PRIVATE ${ACE_LIBRARY})
   
-  TARGET_LINK_LIBRARIES(SplitJoinStresser PRIVATE dose_cpp ${Boost_LIBRARIES})
+#  TARGET_LINK_LIBRARIES(SplitJoinStresser PRIVATE dose_cpp ${Boost_LIBRARIES})
 
   #TODO: install
   

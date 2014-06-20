@@ -1,4 +1,3 @@
-#NOT WORKING ADD_SUBDIRECTORY(DobMess)
 ADD_SUBDIRECTORY(EntityIntegrityChecker)
 ADD_SUBDIRECTORY(EntityReceptionVerifier)
 ADD_SUBDIRECTORY(EntityStresser)

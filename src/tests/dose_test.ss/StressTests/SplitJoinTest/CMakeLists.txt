@@ -8,9 +8,9 @@ if (ACE_FOUND)
   
   ADD_EXECUTABLE(SplitJoinTest ${sources} ${headers})
   
-  TARGET_LINK_LIBRARIES(SplitJoinTest PRIVATE ${ACE_LIBRARY})
+  #TARGET_LINK_LIBRARIES(SplitJoinTest PRIVATE ${ACE_LIBRARY})
   
-  TARGET_LINK_LIBRARIES(SplitJoinTest PRIVATE dose_cpp ${Boost_LIBRARIES})
+  #TARGET_LINK_LIBRARIES(SplitJoinTest PRIVATE dose_cpp ${Boost_LIBRARIES})
   
   #TODO: install
 
