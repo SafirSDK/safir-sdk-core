@@ -1212,7 +1212,7 @@ void DbOlibTest::WriteBlob()
 
     //set ID and size of blob
     int nId=0;
-    int nSize=binary.size();
+    size_t nSize=binary.size();
     unsigned short sParameterNumber;
 
 
@@ -1471,7 +1471,7 @@ void DbOlibTest::BinaryTestWrite()
     Safir::Dob::Typesystem::Serialization::ToBinary(m_Object,binary);
 
     m_paramId.SetValue( nId );
-    m_paramBinary.SetValue( &binary[0], binary.size() );
+    m_paramBinary.SetValue( &binary[0], static_cast<unsigned int>(binary.size()) );
     m_BinaryWriteStmt.Execute();
     m_connection.Commit();
 }

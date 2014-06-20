@@ -43,7 +43,7 @@ class ConnectionOwner :
 {
     virtual void OnStopOrder() {exit(0);}
 
-    virtual void OnDoDispatch() {};
+    virtual void OnDoDispatch() {}
 };
 
 int main(int argc, char* argv[])
