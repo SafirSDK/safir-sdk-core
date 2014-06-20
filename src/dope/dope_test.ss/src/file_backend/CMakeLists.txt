@@ -1,14 +1,6 @@
-ADD_EXECUTABLE(entity_owner ../entity_owner.cpp)
-
-TARGET_LINK_LIBRARIES(entity_owner PRIVATE
-  douf_time_cpp 
-  dose_internal
-  dose_cpp
-  safir_generated-dope_test-cpp
-  dots_cpp
-  ${Boost_SYSTEM_LIBRARY})
-
-add_dependencies(entity_owner dose_main dope_main safir_show_config dope_bin2xml)
+#TODO: do we still need this?
+#entity_owner used to be built here.
+#add_dependencies(entity_owner dose_main dope_main safir_show_config dope_bin2xml)
 
 get_property(SAFIR_GENERATED_PATHS GLOBAL PROPERTY SAFIR_GENERATED_PATHS)
 

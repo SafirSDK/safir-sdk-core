@@ -92,15 +92,6 @@ DbOlibTest::~DbOlibTest(void)
     m_Object.reset();
 }
 
-void DbOlibTest::OnDoDispatch()
-{
-    std::wcout << "Dispatch" << std::endl;
-}
-
-void DbOlibTest::OnStopOrder()
-{
-    std::wcout << "StopOrder" << std::endl;
-}
 void DbOlibTest::TestOutputParameters(const bool curlyBracesNeeded)
 {
     if (!m_connection.IsConnected())
@@ -1281,9 +1272,9 @@ void DbOlibTest::ReadBlob()
     const char * const data = reinterpret_cast<const char * const>(m_columnBlob.GetValue());
 
     //Create object and serialize
-    Safir::Dob::EntityPtr entity = boost::dynamic_pointer_cast<Safir::Dob::Entity>
-        (Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(data));
-    std::wstring outputXml=Safir::Dob::Typesystem::Serialization::ToXml(entity);
+    Safir::Dob::Typesystem::ObjectPtr obj = 
+        Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(data);
+    std::wstring outputXml=Safir::Dob::Typesystem::Serialization::ToXml(obj);
     std::wstring inputXml=Safir::Dob::Typesystem::Serialization::ToXml(m_Object);
 
     //Check if diff between input and output xml
@@ -1436,11 +1427,11 @@ void DbOlibTest::BinaryTestRead()
 
     const char * const data = reinterpret_cast<const char * const>(m_columnBinary.GetValue());
 
-    Safir::Dob::EntityPtr entity = boost::dynamic_pointer_cast<Safir::Dob::Entity>
-        (Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(data));
+    Safir::Dob::Typesystem::ObjectPtr obj = 
+        Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(data);
 
 
-    std::wstring outputXml=Safir::Dob::Typesystem::Serialization::ToXml(entity);
+    std::wstring outputXml=Safir::Dob::Typesystem::Serialization::ToXml(obj);
     std::wstring inputXml=Safir::Dob::Typesystem::Serialization::ToXml(m_Object);
 
     //Check if diff between input and output xml
