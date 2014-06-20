@@ -1,6 +1,11 @@
-cmake_minimum_required(VERSION 2.8.12)
-
-#TODO: require 3.0 on windows (for the generator expressions on test properties)
+#We need a very recent cmake if we're to use a visual studio project
+#The reason is that test property generator expressions are only 
+#supported in cmake 3.
+if(MSVC AND CMAKE_GENERATOR MATCHES "Visual Studio")
+  cmake_minimum_required(VERSION 3.0.0)
+else()
+  cmake_minimum_required(VERSION 2.8.12)
+endif()
 
 PROJECT(safir_sdk_core CXX C)
 
