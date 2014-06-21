@@ -433,6 +433,18 @@ INSTALL(FILES config/typesystem.ini config/locations.ini config/logging.ini
 
 INSTALL(EXPORT safir_sdk_core DESTINATION lib/cmake/safir_sdk_core)
 
+configure_file(cmake/SafirSDKCoreConfig.cmake.in
+  "${CMAKE_CURRENT_BINARY_DIR}/cmake/SafirSDKCoreConfig.cmake" @ONLY)
+
+INSTALL(FILES 
+  cmake/build_generated.cmake 
+  cmake/CSharpMacros.cmake
+  "${CMAKE_CURRENT_BINARY_DIR}/cmake/SafirSDKCoreConfig.cmake"
+  DESTINATION lib/cmake/safir_sdk_core)
+
+
+
 #TODO: install users guide in doc?
 #TODO: install requirements in doc?
 #TODO: install examples in doc
+

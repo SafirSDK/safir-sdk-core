@@ -1,3 +1,5 @@
+include(CMakeParseArguments)
+
 FUNCTION(BUILD_GENERATED_LIBRARY)
   cmake_parse_arguments(GEN "NO_INSTALL" "NAME" "DEPENDENCIES" ${ARGN})
   #message("++ Will build generated library ${GEN_NAME} with dependencies '${GEN_DEPENDENCIES}'")

@@ -33,7 +33,7 @@ FILE(GLOB dod_files data/*.dod)
 #        DESTINATION ${SAFIR_SDK}/dots/dots_generated/gen)
      
 INSTALL(PROGRAMS
-         dots_v.py
-         DESTINATION bin)
+  dots_v.py
+  DESTINATION bin)
 
 # #        data/dobmake.py
