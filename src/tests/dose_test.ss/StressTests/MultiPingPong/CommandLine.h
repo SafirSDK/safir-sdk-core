@@ -24,9 +24,9 @@
 
 #ifndef __COMM_OPT_H__
 #define __COMM_OPT_H__
+
 #include <iostream>
 #include <boost/noncopyable.hpp>
-
 
 #include "../common/CommonIncludes.h"
 #include <Safir/Dob/Typesystem/Defs.h>
@@ -51,8 +51,8 @@ public:
 
     int Timeout() {return m_timeout;}
 private:
-    CommandLine() {};
-    ~CommandLine() {};
+    CommandLine() {}
+    ~CommandLine() {}
 
     boost::program_options::variables_map m_variablesMap;
 

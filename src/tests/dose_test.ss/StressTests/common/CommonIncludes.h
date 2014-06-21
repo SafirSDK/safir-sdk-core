@@ -34,6 +34,7 @@
   #pragma warning(disable: 4127)
   #pragma warning(disable: 4800)
   #pragma warning(disable: 4251 4275 4127)
+  #pragma warning(disable: 4913)
 #endif
 
 #include <boost/program_options/cmdline.hpp>
