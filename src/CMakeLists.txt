@@ -184,7 +184,7 @@ function (SAFIR_INSTALL)
     foreach (target ${INST_TARGETS})
       get_target_property(target_type ${target} TYPE)
       if ("${target_type}" STREQUAL "SHARED_LIBRARY")
-        set(export EXPORT safir_sdk_core)
+        set(export EXPORT SafirSDKCore)
       endif()
 
       INSTALL(TARGETS ${target}
@@ -431,7 +431,7 @@ add_subdirectory(tests)
 INSTALL(FILES config/typesystem.ini config/locations.ini config/logging.ini
   DESTINATION share/doc/safir_sdk_core/example_configuration)
 
-INSTALL(EXPORT safir_sdk_core DESTINATION lib/cmake/safir_sdk_core)
+INSTALL(EXPORT SafirSDKCore DESTINATION lib/cmake/SafirSDKCore)
 
 configure_file(cmake/SafirSDKCoreConfig.cmake.in
   "${CMAKE_CURRENT_BINARY_DIR}/cmake/SafirSDKCoreConfig.cmake" @ONLY)
@@ -440,7 +440,7 @@ INSTALL(FILES
   cmake/build_generated.cmake 
   cmake/CSharpMacros.cmake
   "${CMAKE_CURRENT_BINARY_DIR}/cmake/SafirSDKCoreConfig.cmake"
-  DESTINATION lib/cmake/safir_sdk_core)
+  DESTINATION lib/cmake/SafirSDKCore)
 
 
 

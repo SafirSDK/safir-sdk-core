@@ -209,7 +209,7 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
   #
   if (NOT GEN_NO_INSTALL)
     INSTALL(TARGETS safir_generated-${GEN_NAME}-cpp
-      EXPORT safir_sdk_core
+      EXPORT SafirSDKCore
       RUNTIME DESTINATION bin
       LIBRARY DESTINATION lib
       ARCHIVE DESTINATION lib)
