@@ -6,14 +6,18 @@
 #TODO! 
 
 # Compute paths
-set(SAFIR_SDK_CORE_CMAKE_DIR CMAKE_CURRENT_LIST_DIR)
+set(SAFIR_SDK_CORE_CMAKE_DIR ${CMAKE_CURRENT_LIST_DIR})
 #set(SAFIR_SDK_CORE_INCLUDE_DIRS "@CONF_INCLUDE_DIRS@")
- 
-# Our library dependencies (contains definitions for IMPORTED targets)
-if(NOT TARGET foo AND NOT FooBar_BINARY_DIR)
-  include("${SAFIR_SDK_CORE_CMAKE_DIR}/SafirSDKCore.cmake")
-endif()
- 
+
+get_filename_component(SAFIR_SDK_CORE_INSTALL_DIR ${CMAKE_CURRENT_LIST_DIR}/../../.. ABSOLUTE)
+
+
+include("${SAFIR_SDK_CORE_CMAKE_DIR}/SafirSDKCore.cmake")
+include("${SAFIR_SDK_CORE_CMAKE_DIR}/build_generated.cmake")
+
+MESSAGE("SAFIR_SDK_CORE_CMAKE_DIR: ${SAFIR_SDK_CORE_CMAKE_DIR}")
+MESSAGE("SAFIR_SDK_CORE_INSTALL_DIR: ${SAFIR_SDK_CORE_INSTALL_DIR}")
+
 # These are IMPORTED targets created by FooBarTargets.cmake
 #set(FOOBAR_LIBRARIES foo)
 #set(FOOBAR_EXECUTABLE bar)

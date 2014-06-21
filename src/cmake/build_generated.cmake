@@ -108,11 +108,23 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
   endforeach()
 
   FIND_PACKAGE(PythonInterp)
+  
+  if (SAFIR_SDK_CORE_INSTALL_DIR AND safir_sdk_core_SOURCE_DIR)
+    MESSAGE(FATAL_ERROR "Please do not use find_package(SafirSDKCore) from within the Safir SDK Core build tree! What are you trying to do?!")
+  elseif(SAFIR_SDK_CORE_INSTALL_DIR)
+    set(dots_v_path "${SAFIR_SDK_CORE_INSTALL_DIR}/bin/dots_v.py")
+    set(dod_directory "${SAFIR_SDK_CORE_INSTALL_DIR}/share/safir_sdk_core/generation/dod")
+  elseif(safir_sdk_core_SOURCE_DIR)
+    set(dots_v_path "${safir_sdk_core_SOURCE_DIR}/src/dots/dots_v.ss/dots_v.py")
+    set(dod_directory "${safir_sdk_core_SOURCE_DIR}/src/dots/dots_v.ss/data/")
+  else()
+    MESSAGE(FATAL_ERROR "Could not work out path to dots_v.py. Something is very wrong!")
+  endif()
+  #TODO: need to support finding dots_v from PATH as well, I guess? More?
 
-  SET(dod_directory ${safir_sdk_core_SOURCE_DIR}/src/dots/dots_v.ss/data/)
   FILE(GLOB dod_files ${dod_directory} *.dod)
   SET(dots_v_command ${PYTHON_EXECUTABLE} 
-    "${safir_sdk_core_SOURCE_DIR}/src/dots/dots_v.ss/dots_v.py" 
+    ${dots_v_path}
     --dod-files=${dod_directory} 
     --dependencies ${DOTS_V_DEPS} 
     --library-name ${GEN_NAME}

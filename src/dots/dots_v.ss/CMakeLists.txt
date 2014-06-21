@@ -2,10 +2,11 @@ FILE(GLOB dod_files data/*.dod)
 
 #TODO: install dod files and other needed things
 
-# INSTALL(FILES 
-#           ${dod_files} 
-# #          data/dots_unit.xsd
-#         DESTINATION ${SAFIR_RUNTIME}/data/text/dots/config/)
+INSTALL(FILES 
+  ${dod_files} 
+  DESTINATION share/safir_sdk_core/generation/dod)
+
+#TODO  data/dots_unit.xsd
 
 #INSTALL(FILES 
 #          data/AssemblyInfo.cs
