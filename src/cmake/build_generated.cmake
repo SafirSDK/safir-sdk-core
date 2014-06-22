@@ -161,8 +161,17 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
   ADD_LIBRARY(safir_generated-${GEN_NAME}-cpp SHARED ${cpp_files}) #TODO headers?
   
   target_include_directories(safir_generated-${GEN_NAME}-cpp
-    PRIVATE ${safir_sdk_core_SOURCE_DIR}/src/dots/dots_v.ss/data
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated_code/cpp/include>)
+
+  #include path for precompiled_header_for_cpp.h
+  if(SAFIR_SDK_CORE_INSTALL_DIR)
+    target_include_directories(safir_generated-${GEN_NAME}-cpp
+      PRIVATE ${SAFIR_SDK_CORE_INSTALL_DIR}/share/safir_sdk_core/generation/cpp)
+  elseif(safir_sdk_core_SOURCE_DIR)
+    target_include_directories(safir_generated-${GEN_NAME}-cpp
+      PRIVATE ${safir_sdk_core_SOURCE_DIR}/src/dots/dots_v.ss/data)
+  endif()
+  
   
   target_link_libraries(safir_generated-${GEN_NAME}-cpp 
     dots_cpp

@@ -8,17 +8,17 @@ INSTALL(FILES
 
 #TODO  data/dots_unit.xsd
 
-#INSTALL(FILES 
+INSTALL(FILES 
 #          data/AssemblyInfo.cs
 #          data/dots_generated-dotnet.snk
 #          data/CMakeLists.txt 
 #          data/Manifest.java.txt
-#          data/precompiled_header_for_cpp.h
+          data/precompiled_header_for_cpp.h
 #          data/precompiled_header_for_cpp.cpp
 #          data/dots_generated_ada.gpr_template
 #          data/dots_generated_ada_library.gpr_template
 #          data/dots_generated_main_ada.gpr_template
-#        DESTINATION ${SAFIR_SDK}/dots/dots_generated)
+        DESTINATION share/safir_sdk_core/generation/cpp)
 
 #TODO need better spot for these, and what about .cpp?
 # INSTALL(FILES 

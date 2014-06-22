@@ -10,6 +10,8 @@ set(SAFIR_RUNTIME "STOP_USING_SAFIR_RUNTIME_VARIABLE" NOW PLEASE)
 set (SafirSDKCore_DIR /home/lars/safir-logan/lib/cmake/SafirSDKCore/)
 
 find_package(SafirSDKCore REQUIRED)
-#include(safir_sdk_core)
 
+include_directories(${SAFIR_SDK_CORE_INCLUDE_DIRS})
+
+#TODO java & dotnet
 add_subdirectory(dou_files)
