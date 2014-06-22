@@ -32,7 +32,7 @@ int main()
         using namespace Safir::Utilities::Internal;
         ConfigReader reader;
 
-        std::vector<std::string> douFilePaths = ConfigHelper::GetDouDirectories(reader);
+        std::vector<std::pair<std::string,std::string> > douFilePaths = ConfigHelper::GetDouDirectories(reader);
 
         if (douFilePaths.size() != 3)
         {
@@ -40,14 +40,27 @@ int main()
             return 1;
         }
 
-        if (douFilePaths[0] != "/path/to/default/directory" ||
-            douFilePaths[1] != "/path/to/some/other/directory" ||
-            (douFilePaths[2] != "/path/to/default/AnotherOverride" && douFilePaths[2] != "/path/to/default\\AnotherOverride"))
+        if (douFilePaths[0].first != "Default" ||
+            douFilePaths[1].first != "Override" ||
+            douFilePaths[2].first != "AnotherOverride")
+        {
+            std::wcout << "Unexpected module!\n" 
+                       << " " << douFilePaths[0].first.c_str() << "\n"
+                       << " " << douFilePaths[1].first.c_str() << "\n"
+                       << " " << douFilePaths[2].first.c_str() << std::endl;
+
+            return 1;
+        }
+
+        if (douFilePaths[0].second != "/path/to/default/directory" ||
+            douFilePaths[1].second != "/path/to/some/other/directory" ||
+            (douFilePaths[2].second != "/path/to/default/AnotherOverride" && 
+             douFilePaths[2].second != "/path/to/default\\AnotherOverride"))
         {
             std::wcout << "Unexpected path!\n" 
-                       << " " << douFilePaths[0].c_str() << "\n"
-                       << " " << douFilePaths[1].c_str() << "\n"
-                       << " " << douFilePaths[2].c_str() << std::endl;
+                       << " " << douFilePaths[0].second.c_str() << "\n"
+                       << " " << douFilePaths[1].second.c_str() << "\n"
+                       << " " << douFilePaths[2].second.c_str() << std::endl;
 
             return 1;
         }

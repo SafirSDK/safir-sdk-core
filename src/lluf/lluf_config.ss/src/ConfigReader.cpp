@@ -71,11 +71,10 @@ namespace Internal
         return Safir::Utilities::Internal::ExpandSpecial(str);
     }
 
-    std::vector<std::string> ConfigHelper::GetDouDirectories(const ConfigReader& reader)
+    std::vector<std::pair<std::string,std::string> > ConfigHelper::GetDouDirectories(const ConfigReader& reader)
     {
-        std::vector<std::string> directories;
+        std::vector<std::pair<std::string,std::string> > directories;
 
-        //TODO: handle NONE(?)
         const Path default_dou_directory(reader.Typesystem().get<std::string>("default_dou_directory"));
 
         // Loop through all sections in typesystem.ini
@@ -89,11 +88,16 @@ namespace Internal
             {
                 try
                 {
-                    directories.push_back(it->second.get<std::string>("dou_directory"));
+                    directories.push_back(std::make_pair(it->first, it->second.get<std::string>("dou_directory")));
                 }
                 catch (boost::property_tree::ptree_bad_path&)
                 {
-                    directories.push_back((default_dou_directory / it->first).str());
+                    if (default_dou_directory.str() == "NONE")
+                    {
+                        throw std::logic_error("No default directory available, please fix your typesystem.ini");
+                    }
+
+                    directories.push_back(std::make_pair(it->first, (default_dou_directory / it->first).str()));
                 }
             }
         }

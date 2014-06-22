@@ -1404,6 +1404,51 @@ def mkdir(gSession, newdir):
         with gSession.mkdir_rlock:
             mkdir_internal(newdir)
 
+def get_dou_directories():
+    #we cache the output so that we only run the safir_show_config command once.
+    #here we check for cached data
+    if hasattr(get_dou_directories,"cache"):
+        return get_dou_directories.cache
+    
+    proc = subprocess.Popen(("safir_show_config", "--dou-install-dirs"),
+                            stdout = subprocess.PIPE,
+                            stderr = subprocess.PIPE,
+                            universal_newlines = True)
+    output = proc.communicate()
+    if proc.returncode != 0:
+        print ("Failed to run safir_show_config. \nStdout:\n",output[0],"\nStderr:\n",output[1],sep='')
+        sys.exit(1)
+    if len(output[1]) != 0:
+        print ("Spurious output from safir_show_config. \nStdout:\n",output[0],"\nStderr:\n",output[1],sep='')
+        sys.exit(1)
+    dou_directories = list()
+    for line in output[0].splitlines():
+        (module,path) = line.split(":")
+        dou_directories.append((module,path))
+
+    #cache the data
+    get_dou_directories.cache=dou_directories
+    return dou_directories
+                    
+def resolve_typesystem_dependencies(unresolved_dependencies):
+    result = list()
+
+    dirs = set([pair[0] for pair in get_dou_directories()])
+    
+    for dependency in unresolved_dependencies:
+        pair = dependency.split(":")
+        if len(pair) == 1: #an unresolved dependency
+            if pair[0] in dirs:
+                for (module,path) in get_dou_directories():
+                    result.append(path)
+                    if module == pair[0]:
+                        break
+        elif len(pair) == 2:
+            result.append(pair[1])
+        else:
+            print("Syntax error for dependencies argument!", dependency, file=sys.stderr)
+            sys.exit(1)
+    return result
 
 # Faster file reader, buffers all in memory (good since we loop through same file multiple times)
 class FileReader(object):
@@ -1669,8 +1714,9 @@ def main():
         print("Invalid argument for dod files.", file=sys.stderr)
         sys.exit(1)
 
-    dependency_paths = arguments.dependencies
-                    
+    
+    dependency_paths = resolve_typesystem_dependencies(arguments.dependencies)
+        
     gen_src_output_path = arguments.output_path
     if gen_src_output_path == "":
         gen_src_output_path = os.getcwd()

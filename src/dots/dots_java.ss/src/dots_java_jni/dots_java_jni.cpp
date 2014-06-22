@@ -1573,7 +1573,7 @@ jlong JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_Generate64
 JNIEXPORT jobjectArray JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetDouDirectories
   (JNIEnv * env, jclass)
 {
-    std::vector<std::string> directories;
+    std::vector<std::pair<std::string,std::string> > directories;
 
     try
     {
@@ -1600,7 +1600,7 @@ JNIEXPORT jobjectArray JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_Ge
     {  
         env->SetObjectArrayElement(stringArray,
                                    static_cast<jsize>(i),
-                                   env->NewStringUTF(directories[i].c_str()));
+                                   env->NewStringUTF(directories[i].second.c_str()));
     }
     return stringArray;
 }

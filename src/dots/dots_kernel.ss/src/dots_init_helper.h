@@ -80,12 +80,12 @@ namespace Internal
             }
 
             //get all dou directory strings
-            std::vector<std::string> dirs = Safir::Utilities::Internal::ConfigHelper::GetDouDirectories(reader);
+            std::vector<std::pair<std::string,std::string> > dirs = Safir::Utilities::Internal::ConfigHelper::GetDouDirectories(reader);
 
-            for (std::vector<std::string>::const_iterator it = dirs.begin();
+            for (std::vector<std::pair<std::string,std::string> >::const_iterator it = dirs.begin();
                  it != dirs.end(); ++it)
             {
-                boost::filesystem::path douDirectory(*it);
+                boost::filesystem::path douDirectory(it->second);
 
                 if (!boost::filesystem::exists(douDirectory) || !boost::filesystem::is_directory(douDirectory))
                 {

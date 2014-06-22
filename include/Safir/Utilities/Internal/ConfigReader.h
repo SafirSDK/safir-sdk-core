@@ -129,12 +129,10 @@ namespace Internal
          * Retreives all dou files directories specified in typesystem.ini.
          *
          * @param [in] reader ConfigReader object.
-         * @return Vector with the dou file directories. The order reflects the order in the configuration file.
-         *
-         * @exception std::exception Found a section without a dou_directory key. This is a fatal error.
-         *
+         * @return The dou file directories. The order reflects the order in the configuration file.
+         *         First in pair is the module name and the second is the path.
          */
-        static std::vector<std::string> GetDouDirectories(const ConfigReader& reader);
+        static std::vector<std::pair<std::string,std::string> > GetDouDirectories(const ConfigReader& reader);
 
 
 

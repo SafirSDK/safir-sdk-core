@@ -51,6 +51,7 @@ public:
             ("typesystem", "Show contents of typesystem.ini")
             ("locations", "Show contents of locations.ini")
             ("logging", "Show contents of logging.ini")
+            ("dou-install-dirs", "Show the dou install dirs of all modules defined in typesystem.ini")
             ("module-install-dir", value<std::string>(&module), "Get the install dir from typesystem.ini for the specified module");
         
         variables_map vm;
@@ -77,8 +78,9 @@ public:
         logging = vm.count("logging") != 0;
         typesystem = vm.count("typesystem") != 0;
         locations = vm.count("locations") != 0;
+        dou_install_dirs = vm.count("dou-install-dirs") != 0;
 
-        if (!logging && !locations && !typesystem && vm.count("module-install-dir") == 0)
+        if (!logging && !locations && !typesystem && !dou_install_dirs && vm.count("module-install-dir") == 0)
         {
             ShowHelp(options);
             return;
@@ -89,6 +91,7 @@ public:
     bool logging;
     bool typesystem;
     bool locations;
+    bool dou_install_dirs;
     std::string module;
 
     bool parseOk;
@@ -151,6 +154,17 @@ int main(int argc, char * argv[])
         {
             std::cout << "; ==== typesystem.ini ====" << std::endl;
             PrintPTree(reader.Typesystem());
+        }
+
+        if (options.dou_install_dirs)
+        {
+            const std::vector<std::pair<std::string,std::string> > dirs = 
+                Safir::Utilities::Internal::ConfigHelper::GetDouDirectories(reader);
+            for (std::vector<std::pair<std::string,std::string> >::const_iterator it = dirs.begin();
+                 it != dirs.end(); ++it)
+            {
+                std::cout << it->first << ":" << it->second << std::endl;
+            }
         }
         
         if (!options.module.empty())
