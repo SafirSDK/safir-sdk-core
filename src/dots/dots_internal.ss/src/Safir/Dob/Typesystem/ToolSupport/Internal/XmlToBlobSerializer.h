@@ -142,7 +142,7 @@ namespace Internal
                     {
                         SetMember(md, memIx, 0, memIt->second, 0, writer);
                     }
-                    catch (const boost::property_tree::ptree_error&)
+                    catch (boost::property_tree::ptree_error&)
                     {
                         std::ostringstream os;
                         os<<"Failed to serialize member '"<<cd->GetName()<<"."<<md->GetName()<<"' from xml to binary. Type is incorrect.";
@@ -194,7 +194,7 @@ namespace Internal
                         {
                             SetMember(md, memIx, arrayIndex, arrIt->second, 0, writer);
                         }
-                        catch (const boost::property_tree::ptree_error&)
+                        catch (boost::property_tree::ptree_error&)
                         {
                             std::ostringstream os;
                             os<<"Failed to serialize array member '"<<cd->GetName()<<"."<<md->GetName()<<"' with index="<<arrayIndex<<" from xml to binary. Type is incorrect.";
@@ -215,7 +215,11 @@ namespace Internal
                         {
                             SetMember(md, memIx, 0, seqIt->second, 0, writer);
                         }
-                        catch (const boost::property_tree::ptree_error&)
+                        catch (const ParseError&)
+                        {
+                            throw;
+                        }
+                        catch (...)
                         {
                             std::ostringstream os;
                             os<<"Failed to serialize sequence member '"<<cd->GetName()<<"."<<md->GetName()<<"' with index="<<count<<" from xml to binary. Type is incorrect.";
@@ -229,8 +233,11 @@ namespace Internal
 
                 case DictionaryCollectionType:
                 {
+                    int entryCount=0;
                     for (boost::property_tree::ptree::iterator entryIt=memIt->second.begin(); entryIt!=memIt->second.end(); ++entryIt)
                     {
+                        ++entryCount;
+
                         if (entryIt->second.size()!=2) //there shall be exactly 2 subelements, key and value
                         {
                             throw "Wrong number of subelements";
@@ -260,7 +267,16 @@ namespace Internal
                             throw "No val element";
                         }
 
-                        SetMember(md, memIx, 0, *valTree, *keyTree, writer);
+                        try
+                        {
+                            SetMember(md, memIx, 0, *valTree, *keyTree, writer);
+                        }
+                        catch (boost::property_tree::ptree_error&)
+                        {
+                            std::ostringstream os;
+                            os<<"Failed to serialize dictionary member '"<<cd->GetName()<<"."<<md->GetName()<<"'. Key or value is incorrect. (Hint it's the "<<entryCount<<":th dictionary entry).";
+                            throw ParseError("XmlToBinary serialization error", os.str(), "", 207);
+                        }
                     }
                 }
                     break;
@@ -285,32 +301,52 @@ namespace Internal
             switch(md->GetKeyType())
             {
             case Int32MemberType:
+            {
                 SetMember(md, memIx, arrIx, memberContent, boost::lexical_cast<DotsC_Int32>(keyContent.data()), writer);
+            }
                 break;
 
             case Int64MemberType:
+            {
                 SetMember(md, memIx, arrIx, memberContent, boost::lexical_cast<DotsC_Int64>(keyContent.data()), writer);
+            }
                 break;
 
             case TypeIdMemberType:
-                SetMember(md, memIx, arrIx, memberContent, boost::lexical_cast<DotsC_Int32>(keyContent.data()), writer);
+            {
+                DotsC_TypeId tid=SerializationUtils::StringToTypeId(keyContent.data());
+                SetMember(md, memIx, arrIx, memberContent, tid, writer);
+            }
                 break;
 
             case StringMemberType:
+            {
                 SetMember(md, memIx, arrIx, memberContent, keyContent.data().c_str(), writer);
+            }
                 break;
 
             case EntityIdMemberType:
-                SetMember(md, memIx, arrIx, memberContent, boost::lexical_cast<DotsC_Int32>(keyContent.data()), writer);
+            {
+                std::pair<DotsC_EntityId, const char*> eid=SerializationUtils::StringToEntityId(keyContent.get<std::string>("name"), keyContent.get<std::string>("instanceId"));
+                SetMember(md, memIx, arrIx, memberContent, eid, writer);
+            }
                 break;
 
             case InstanceIdMemberType:
             case HandlerIdMemberType:
             case ChannelIdMemberType:
-                SetMember(md, memIx, arrIx, memberContent, boost::lexical_cast<DotsC_Int32>(keyContent.data()), writer);
+            {
+                std::pair<DotsC_Int64, const char*> hash=SerializationUtils::StringToHash(keyContent.data());
+                SetMember(md, memIx, arrIx, memberContent, hash, writer);
+            }
                 break;
 
             case EnumerationMemberType:
+            {
+                const EnumDescriptionType* ed=m_repository->GetEnum(md->GetKeyTypeId());
+                DotsC_EnumerationValue enumVal=TypeUtilities::GetIndexOfEnumValue(ed, keyContent.data());
+                SetMember(md, memIx, arrIx, memberContent, enumVal, writer);
+            }
                 break;
 
             default:

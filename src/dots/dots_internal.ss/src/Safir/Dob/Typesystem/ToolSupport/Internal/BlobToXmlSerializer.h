@@ -78,26 +78,17 @@ namespace Internal
             for (DotsC_MemberIndex memberIx=0; memberIx<cd->GetNumberOfMembers(); ++memberIx)
             {
                 const MemberDescriptionType* md=cd->GetMember(memberIx);
-                if (md->GetCollectionType()==SingleValueCollectionType) //normal member
+                switch (md->GetCollectionType())
+                {
+                case SingleValueCollectionType:
                 {
                     SerializeMember(reader, md, memberIx, 0, md->GetName(), os);
                 }
-                else if (md->GetCollectionType()==ArrayCollectionType)
+                    break;
+
+                case ArrayCollectionType:
                 {
-                    DotsC_MemberType mt=md->GetMemberType();
-                    const char* typeName=NULL;
-                    switch (mt)
-                    {
-                    case ObjectMemberType:
-                        typeName=m_repository->GetClass(md->GetTypeId())->GetName();
-                        break;
-                    case EnumerationMemberType:
-                        typeName=m_repository->GetEnum(md->GetTypeId())->GetName();
-                        break;
-                    default:
-                        typeName=BasicTypeOperations::MemberTypeToString(mt).c_str();
-                        break;
-                    }
+                    const char* typeName=Safir::Dob::Typesystem::ToolSupport::TypeUtilities::GetTypeName(m_repository, md);
 
                     //find first non-null value in array
                     DotsC_ArrayIndex arrIx=0;
@@ -120,7 +111,9 @@ namespace Internal
                         os<<"</"<<md->GetName()<<">";
                     }
                 }
-                else if (md->GetCollectionType()==SequenceCollectionType)
+                    break;
+
+                case SequenceCollectionType:
                 {
                     const char* typeName=Safir::Dob::Typesystem::ToolSupport::TypeUtilities::GetTypeName(m_repository, md);
                     int numberOfValues=reader.NumberOfValues(memberIx);
@@ -133,6 +126,28 @@ namespace Internal
                         }
                         os<<"</"<<md->GetName()<<">";
                     }
+                }
+                    break;
+
+                case DictionaryCollectionType:
+                {
+                    const char* typeName=Safir::Dob::Typesystem::ToolSupport::TypeUtilities::GetTypeName(m_repository, md);
+                    int numberOfValues=reader.NumberOfValues(memberIx);
+                    if (numberOfValues>0)
+                    {
+                        os<<"<"<<md->GetName()<<">";
+                        for (DotsC_ArrayIndex valueIndex=0; valueIndex<numberOfValues; ++valueIndex)
+                        {
+                            os<<"<entry>";
+                            //SerializeKey(reader, md, memberIx, valueIndex, typeName, os);
+                            SerializeMember(reader, md, memberIx, valueIndex, typeName, os);
+                            os<<"</entry>";
+                        }
+                        os<<"</"<<md->GetName()<<">";
+                    }
+
+                }
+                    break;
                 }
             }
         }
@@ -257,7 +272,7 @@ namespace Internal
                 {
                     WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
 
-                    const char* typeName=TypeIdToString(val);
+                    const char* typeName=TypeUtilities::GetTypeName(m_repository, val);
                     if (typeName)
                     {
                         os<<typeName;
@@ -302,7 +317,7 @@ namespace Internal
                 {
                     WriteStartElement(elementName, arrayIndex, md->GetCollectionType()==ArrayCollectionType, os);
 
-                    const char* typeName=TypeIdToString(val.first.typeId);
+                    const char* typeName=TypeUtilities::GetTypeName(m_repository, val.first.typeId);
                     if (typeName)
                     {
                         os<<"<name>"<<typeName<<"</name>";
@@ -458,29 +473,6 @@ namespace Internal
             }
                 break;
             }
-        }
-
-        const char* TypeIdToString(DotsC_TypeId tid) const
-        {
-            const ClassDescriptionType* cd=m_repository->GetClass(tid);
-            if (cd)
-            {
-                return cd->GetName();
-            }
-
-            const EnumDescriptionType* ed=m_repository->GetEnum(tid);
-            if (ed)
-            {
-                return ed->GetName();
-            }
-
-            const PropertyDescriptionType* pd=m_repository->GetProperty(tid);
-            if (pd)
-            {
-                return pd->GetName();
-            }
-
-            return NULL;
         }
 
         const ClassDescriptionType* GetClass(const char* blob) const

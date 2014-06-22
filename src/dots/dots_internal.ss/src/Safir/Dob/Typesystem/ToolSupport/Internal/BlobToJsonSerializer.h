@@ -242,7 +242,7 @@ namespace Internal
                 reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
                 if (!isNull)
                 {
-                    const char* typeName=TypeIdToString(val);
+                    const char* typeName=TypeUtilities::GetTypeName(m_repository, val);
                     if (typeName)
                     {
                         os<<SAFIR_JSON_QUOTE(typeName);
@@ -285,7 +285,7 @@ namespace Internal
                 {
                     os<<"{";
                     WriteMemberName("name", os);
-                    const char* typeName=TypeIdToString(val.first.typeId);
+                    const char* typeName=TypeUtilities::GetTypeName(m_repository, val.first.typeId);
                     if (typeName)
                     {
                         os<<SAFIR_JSON_QUOTE(typeName);
@@ -417,29 +417,6 @@ namespace Internal
             }
 
             return false;
-        }
-
-        const char* TypeIdToString(DotsC_TypeId tid) const
-        {
-            const ClassDescriptionType* cd=m_repository->GetClass(tid);
-            if (cd)
-            {
-                return cd->GetName();
-            }
-
-            const EnumDescriptionType* ed=m_repository->GetEnum(tid);
-            if (ed)
-            {
-                return ed->GetName();
-            }
-
-            const PropertyDescriptionType* pd=m_repository->GetProperty(tid);
-            if (pd)
-            {
-                return pd->GetName();
-            }
-
-            return NULL;
         }
 
         const ClassDescriptionType* GetClass(const char* blob) const
