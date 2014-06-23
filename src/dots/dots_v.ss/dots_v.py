@@ -1443,6 +1443,11 @@ def resolve_typesystem_dependencies(unresolved_dependencies):
             result.append(path)
         return result
     except:
+        print("There are some unresolved dependencies in ",
+              unresolved_dependencies,
+              ". My results so far are ",
+              result,
+              sep='')
         pass
 
     #if we get here we need to use try again, using typesystem.ini
