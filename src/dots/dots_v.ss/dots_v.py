@@ -1439,15 +1439,10 @@ def resolve_typesystem_dependencies(unresolved_dependencies):
 
     try:
         for dependency in unresolved_dependencies:
-            (module,path) = dependency.split(":")
+            (module,path) = dependency.split("=")
             result.append(path)
         return result
     except:
-        print("There are some unresolved dependencies in ",
-              unresolved_dependencies,
-              ". My results so far are ",
-              result,
-              sep='')
         pass
 
     #if we get here we need to use try again, using typesystem.ini
@@ -1457,7 +1452,7 @@ def resolve_typesystem_dependencies(unresolved_dependencies):
     dirs = set([pair[0] for pair in get_dou_directories()])
     
     for dependency in unresolved_dependencies:
-        pair = dependency.split(":")
+        pair = dependency.split("=")
         if len(pair) == 1: #an unresolved dependency
             if pair[0] in dirs:
                 for (module,path) in get_dou_directories():
