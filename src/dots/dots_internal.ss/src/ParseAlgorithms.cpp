@@ -477,36 +477,31 @@ namespace ToolSupport
                 size_t sep=val.find(", ");
                 result.key.int64=LlufId_Generate64(val.substr(0, sep).c_str());
                 result.key.str=val.substr(sep+2);
-                try
-                {
-                    result.key.hash=boost::lexical_cast<boost::int64_t>(result.key.str);
+
+                std::pair<DotsC_EntityId, const char*> entId=SerializationUtils::StringToEntityId(val.substr(0, sep), val.substr(sep+2));
+                result.key.int64=entId.first.typeId;
+                result.key.hash=entId.first.instanceId;
+                if (entId.second)
+                    result.key.str=entId.second;
+                else
                     result.key.str.clear();
-                }
-                catch(const boost::bad_lexical_cast&)
-                {
-                    result.key.hash=LlufId_Generate64(result.key.str.c_str());
-                }
             }
                 break;
             case TypeIdMemberType:
             {
-                result.key.int64=LlufId_Generate64(val.c_str());
+                result.key.int64=SerializationUtils::StringToTypeId(val);
             }
                 break;
             case InstanceIdMemberType:
             case ChannelIdMemberType:
             case HandlerIdMemberType:
             {
-                try
-                {
-                    result.key.hash=boost::lexical_cast<boost::int64_t>(val);
+                std::pair<DotsC_Int64, const char*> hash=SerializationUtils::StringToHash(val);
+                result.key.hash=hash.first;
+                if (hash.second)
+                    result.key.str=hash.second;
+                else
                     result.key.str.clear();
-                }
-                catch(const boost::bad_lexical_cast&)
-                {
-                    result.key.hash=LlufId_Generate64(val.c_str());
-                    result.key.str=val;
-                }
             }
                 break;
 

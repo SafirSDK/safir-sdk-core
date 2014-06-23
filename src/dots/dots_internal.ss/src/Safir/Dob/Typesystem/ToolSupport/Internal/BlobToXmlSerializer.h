@@ -139,7 +139,7 @@ namespace Internal
                         for (DotsC_ArrayIndex valueIndex=0; valueIndex<numberOfValues; ++valueIndex)
                         {
                             os<<"<entry>";
-                            //SerializeKey(reader, md, memberIx, valueIndex, typeName, os);
+                            SerializeKey(reader, md, memberIx, valueIndex, os);
                             SerializeMember(reader, md, memberIx, valueIndex, typeName, os);
                             os<<"</entry>";
                         }
@@ -196,6 +196,67 @@ namespace Internal
                 }
                 ++i;
             }
+        }
+
+        void SerializeKey(const BlobReader<RepositoryType>& reader,
+                             const MemberDescriptionType* md,
+                             DotsC_MemberIndex memberIndex,
+                             DotsC_ArrayIndex valueIndex,
+                             std::ostream& os) const
+        {
+            os<<"<key>";
+
+            switch(md->GetKeyType())
+            {
+            case Int32MemberType:
+            {
+                os<<reader.template ReadKey<DotsC_Int32>(memberIndex, valueIndex);
+            }
+                break;
+            case Int64MemberType:
+            {
+                os<<reader.template ReadKey<DotsC_Int64>(memberIndex, valueIndex);
+            }
+                break;
+            case EntityIdMemberType:
+            {
+                std::pair<DotsC_EntityId, const char*> eid=reader.template ReadKey< std::pair<DotsC_EntityId, const char*> >(memberIndex, valueIndex);
+                os<<"<name>"<<TypeUtilities::GetTypeName(m_repository, eid.first.typeId)<<"</name>";
+                if (eid.second)
+                    os<<"<instanceId>"<<eid.second<<"</instanceId>";
+                else
+                    os<<"<instanceId>"<<eid.first.instanceId<<"</instanceId>";
+            }
+                break;
+            case TypeIdMemberType:
+            {
+                os<<TypeUtilities::GetTypeName(m_repository, reader.template ReadKey<DotsC_TypeId>(memberIndex, valueIndex));
+            }
+                break;
+            case InstanceIdMemberType:
+            case ChannelIdMemberType:
+            case HandlerIdMemberType:
+            {
+                std::pair<DotsC_Int64, const char*> hash=reader.template ReadKey< std::pair<DotsC_Int64, const char*> >(memberIndex, valueIndex);
+                if (hash.second)
+                    os<<hash.second;
+                else
+                    os<<hash.first;
+            }
+                break;
+
+            case StringMemberType:
+            {
+                os<<reader.template ReadKey<const char*>(memberIndex, valueIndex);
+            }
+                break;
+
+            default:
+                throw std::logic_error(std::string("Unexpected dictionary key type: ")+TypeUtilities::GetTypeName(md->GetKeyType()));
+                break;
+            }
+
+            os<<"</key>";
         }
 
         void SerializeMember(const BlobReader<RepositoryType>& reader,

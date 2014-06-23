@@ -116,7 +116,10 @@ namespace Internal
                 }
 
                 const MemberDescriptionType* md=cd->GetMember(memIx);
-                if (md->GetCollectionType()==SingleValueCollectionType)
+
+                switch (md->GetCollectionType())
+                {
+                case SingleValueCollectionType:
                 {
                     //non-array, then the inner propertyTree contains the content, i.e <myInt>123</myInt>
                     try
@@ -130,7 +133,9 @@ namespace Internal
                         throw ParseError("JsonToBinary serialization error", os.str(), "", 146);
                     }
                 }
-                else if (md->GetCollectionType()==ArrayCollectionType)
+                    break;
+
+                case ArrayCollectionType:
                 {
                     DotsC_ArrayIndex arrayIndex=0;
                     for (boost::property_tree::ptree::const_iterator arrIt=memIt->second.begin(); arrIt!=memIt->second.end(); ++arrIt)
@@ -154,7 +159,9 @@ namespace Internal
                         }
                     }
                 }
-                else if (md->GetCollectionType()==SequenceCollectionType)
+                    break;
+
+                case SequenceCollectionType:
                 {
                     DotsC_ArrayIndex valueIndex=0;
                     for (boost::property_tree::ptree::const_iterator seqIt=memIt->second.begin(); seqIt!=memIt->second.end(); ++seqIt)
@@ -171,6 +178,19 @@ namespace Internal
                         }
                         ++valueIndex;
                     }
+                }
+                    break;
+
+                case DictionaryCollectionType:
+                {
+                    //boost::property_tree::ptree m; m.get_child()
+                    //boost::property_tree::ptree& keyTree=memIt->get_child("key");
+                    const boost::property_tree::ptree& keyTree=memIt->second.get_child("key");
+                    const boost::property_tree::ptree& valTree=memIt->second.get_child("value");
+
+
+                }
+                    break;
                 }
             }
 

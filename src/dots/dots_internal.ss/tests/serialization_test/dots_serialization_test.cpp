@@ -62,13 +62,14 @@ void BlobTest(RepositoryPtr rep)
     std::cout<<"========= Blob Test ========"<<std::endl;
     //ParserTest.MyItem
     DotsC_TypeId tid=Safir::Dob::Typesystem::ToolSupport::TypeUtilities::CalculateTypeId("ParserTest.MySpecialItem");
-    std::cout<<"Class ParserTest.MyItem "<<tid<<std::endl;
+    std::cout<<"Class ParserTest.MySpecialItem "<<tid<<std::endl;
 
     const ClassDescription* cd=GetClassByName(rep, "ParserTest.MySpecialItem");
     DotsC_MemberIndex myNum=cd->GetMemberIndex("MyNumber");
     DotsC_MemberIndex myStrings=cd->GetMemberIndex("MyStrings");
     DotsC_MemberIndex myChild=cd->GetMemberIndex("Child");
     DotsC_MemberIndex myChildName=cd->GetMemberIndex("ChildName");
+    //DotsC_MemberIndex myDictStringInt32=cd->GetMemberIndex("DictStringInt32");
 
     BlobWriter<Safir::Dob::Typesystem::ToolSupport::TypeRepository> w2(rep.get(), tid);
     w2.WriteValue(myNum, 0, 0, 456, false, true);

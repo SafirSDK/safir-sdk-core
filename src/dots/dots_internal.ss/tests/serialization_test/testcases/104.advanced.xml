@@ -7,6 +7,16 @@
       <value index="2">Hello</value>
       <value index="3">Sheldon is cool</value>
     </MyStrings>
+    <DictStringInt32>
+      <entry>
+	<key>kalle</key>
+	<value>123</value>
+      </entry>
+      <entry>
+	<key>pelle</key>
+	<value>456</value>
+      </entry>
+    </DictStringInt32>
   </SingelItem>
   <SingleEntityId>
     <name>Safir.Dob.Entity</name>
