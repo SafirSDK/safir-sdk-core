@@ -1,0 +1,7 @@
+set(CSharp_FIND_QUIETLY True)
+find_package(CSharp)
+if (NOT CSHARP_FOUND)
+  MESSAGE(WARNING "Failed to find the C# development tools, will not build .NET interfaces")
+else()
+  INCLUDE(CSharpMacros)
+endif()
