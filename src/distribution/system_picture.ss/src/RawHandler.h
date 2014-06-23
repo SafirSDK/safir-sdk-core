@@ -63,6 +63,7 @@ namespace Internal
         class Communication;
     }
 
+
 namespace SP
 {
     //forward declaration
@@ -89,7 +90,7 @@ namespace SP
             , m_nodeTypes(nodeTypes)
             , m_strand(ioService)
             , m_checkDeadNodesTimer(ioService, 
-                                    boost::chrono::milliseconds(1100), //TODO: change to be something related to the parameters.
+                                    CalculateDeadCheckPeriod(nodeTypes),
                                     m_strand.wrap([this](const boost::system::error_code& error)
                                                   {
                                                       if (m_stopped)
@@ -171,7 +172,7 @@ namespace SP
 
                 const size_t size = m_allStatisticsMessage.ByteSize() + extraSpace;
 
-                boost::shared_ptr<char[]> data = boost::make_shared<char[]>(size);
+                auto data = boost::make_shared<char[]>(size);
 
                 m_allStatisticsMessage.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
         
@@ -307,6 +308,20 @@ namespace SP
         }
 
     private:
+        static boost::chrono::steady_clock::duration CalculateDeadCheckPeriod(const std::map<int64_t, NodeType>& nodeTypes)
+        {
+            boost::chrono::steady_clock::duration result = boost::chrono::seconds(1);
+            for (const auto& node: nodeTypes)
+            {
+                if (!node.second.isLight)
+                {
+                    result = std::min(result,node.second.heartbeatInterval);
+                }
+            }
+
+            return result + result / 10;
+        }
+
         //Must be called in strand!
         void NewNode(const std::string& name,
                      const int64_t id,
