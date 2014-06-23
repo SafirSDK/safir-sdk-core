@@ -9,12 +9,7 @@ include(${QT_USE_FILE})
 
 QT4_WRAP_UI(ui_headers entitymw.ui messagedialog.ui servicedialog.ui categoryinfodialog.ui entitydialog.ui)
 QT4_ADD_RESOURCES(rcc_sources entitymw.qrc)
-QT4_WRAP_CPP(moc_sources categoryinfodialog.h entitydialog.h entitymw.h entitytablehandler.h messagedialog.h servicedialog.h)
-
-FILE(GLOB sources *.cpp)
-FILE(GLOB headers [!ui_]*.h)
-FILE(GLOB resources *.qrc)
-  
+QT4_WRAP_CPP(moc_sources categoryinfodialog.h entitydialog.h entitymw.h entitytablehandler.h messagedialog.h servicedialog.h)  
 
 ADD_EXECUTABLE(VehicleMmiCppQt WIN32 
   app.h app.cpp
@@ -33,8 +28,7 @@ ADD_EXECUTABLE(VehicleMmiCppQt WIN32
 TARGET_LINK_LIBRARIES(VehicleMmiCppQt 
   safir_generated-Example-cpp
   ${SAFIR_SDK_CORE_LIBRARIES}  
-  ${QT_LIBRARIES}
-  ${Boost_LIBRARIES})
+  ${QT_LIBRARIES})
   
 
 #TODO: install?
