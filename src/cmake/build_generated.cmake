@@ -12,6 +12,27 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
     message(FATAL_ERROR "Unknown argument to BUILD_GENERATED_LIBRARY '${GEN_UNPARSED_ARGUMENTS}'")
   endif()
 
+  #
+  # Work out if we're building the Safir SDK Core source tree or if
+  # we're building a user library (i.e. external to Core).
+  #
+  if (SAFIR_SDK_CORE_INSTALL_DIR AND safir_sdk_core_SOURCE_DIR)
+    MESSAGE(FATAL_ERROR "Please do not use find_package(SafirSDKCore) from within the Safir SDK Core build tree! What are you trying to do?!")
+  elseif(SAFIR_SDK_CORE_INSTALL_DIR)
+    set (SAFIR_EXTERNAL_BUILD True)
+  elseif(safir_sdk_core_SOURCE_DIR)
+    set (SAFIR_EXTERNAL_BUILD False)
+  else()
+    MESSAGE(FATAL_ERROR "Could not work out whether this is an external or internal build. Did you follow the instructions in the users guide?")
+  endif()
+
+  if (SAFIR_EXTERNAL_BUILD)
+    #load compiler settings, csharp and java!
+    include(${SAFIR_SDK_CORE_CMAKE_DIR}/SafirCompilerSettings.cmake)
+    #include(${SAFIR_SDK_CORE_CMAKE_DIR}/SafirLoadCSharp.cmake)
+    #include(${SAFIR_SDK_CORE_CMAKE_DIR}/SafirLoadJava.cmake)
+  endif()
+
   # 
   # Dependency resolution
   #
@@ -117,16 +138,12 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
 
   FIND_PACKAGE(PythonInterp)
   
-  if (SAFIR_SDK_CORE_INSTALL_DIR AND safir_sdk_core_SOURCE_DIR)
-    MESSAGE(FATAL_ERROR "Please do not use find_package(SafirSDKCore) from within the Safir SDK Core build tree! What are you trying to do?!")
-  elseif(SAFIR_SDK_CORE_INSTALL_DIR)
+  if (SAFIR_EXTERNAL_BUILD)
     set(dots_v_path "${SAFIR_SDK_CORE_INSTALL_DIR}/bin/dots_v.py")
     set(dod_directory "${SAFIR_SDK_CORE_INSTALL_DIR}/share/safir_sdk_core/generation/dod")
-  elseif(safir_sdk_core_SOURCE_DIR)
+  else()
     set(dots_v_path "${safir_sdk_core_SOURCE_DIR}/src/dots/dots_v.ss/dots_v.py")
     set(dod_directory "${safir_sdk_core_SOURCE_DIR}/src/dots/dots_v.ss/data/")
-  else()
-    MESSAGE(FATAL_ERROR "Could not work out path to dots_v.py. Something is very wrong!")
   endif()
   #TODO: need to support finding dots_v from PATH as well, I guess? More?
 
@@ -163,10 +180,12 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated_code/cpp/include>)
 
   #include path for precompiled_header_for_cpp.h
-  if(SAFIR_SDK_CORE_INSTALL_DIR)
+  if (SAFIR_EXTERNAL_BUILD)
     target_include_directories(safir_generated-${GEN_NAME}-cpp
-      PRIVATE ${SAFIR_SDK_CORE_INSTALL_DIR}/share/safir_sdk_core/generation/cpp)
-  elseif(safir_sdk_core_SOURCE_DIR)
+      PRIVATE 
+      ${SAFIR_SDK_CORE_INSTALL_DIR}/share/safir_sdk_core/generation/cpp
+      ${SAFIR_SDK_CORE_INSTALL_DIR}/include)
+  else()
     target_include_directories(safir_generated-${GEN_NAME}-cpp
       PRIVATE ${safir_sdk_core_SOURCE_DIR}/src/dots/dots_v.ss/data)
   endif()
@@ -201,6 +220,8 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
 
     configure_file(${safir_sdk_core_SOURCE_DIR}/src/dots/dots_v.ss/data/Manifest.txt.in ${CMAKE_CURRENT_BINARY_DIR}/Manifest.generated.txt @ONLY)
 
+    #TODO: Manifest path!
+
     ADD_JAR(safir_generated-${GEN_NAME}-java
       SOURCES ${java_files}
       INCLUDE_JARS dots_java ${include_jars}
@@ -220,6 +241,7 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
       SET(assembly_refs ${assembly_refs} safir_generated-${DEP}-dotnet)
     ENDFOREACH()
 
+    #TODO key path!
     ADD_CSHARP_ASSEMBLY(safir_generated-${GEN_NAME}-dotnet LIBRARY
       SIGN ${safir_sdk_core_SOURCE_DIR}/build/config/sdk/data/build/safirkey.snk
       SOURCES ${dotnet_files}

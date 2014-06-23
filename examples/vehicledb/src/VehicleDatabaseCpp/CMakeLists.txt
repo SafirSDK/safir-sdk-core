@@ -1,47 +1,12 @@
-cmake_minimum_required(VERSION 2.8)
-project(VehicleAppDb CXX)
+ADD_EXECUTABLE(VehicleAppDb 
+  App.h App.cpp 
+  DatabaseInteraction.h DatabaseInteraction.cpp 
+  VehicleDatabaseServices.h VehicleDatabaseServices.cpp 
+  main.cpp)
 
-INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
+#TODO: remove ACE support
+ADD_DEFINITIONS(-DNO_ACE)
 
-FILE(GLOB sources *.cpp)
-FILE(GLOB headers *.h)
+TARGET_LINK_LIBRARIES(VehicleAppDb safir_generated-Example-cpp ${SAFIR_SDK_CORE_LIBRARIES} ${Boost_LIBRARIES})
 
-ADD_EXECUTABLE(VehicleAppDb ${sources} ${headers})
-
-find_package(ACE)
-
-if (ACE_FOUND)
-  INCLUDE_DIRECTORIES(${ACE_INCLUDE_DIRECTORIES})
-  TARGET_LINK_LIBRARIES(VehicleAppDb ${ACE_LIBRARY})
-else()
-  ADD_DEFINITIONS(-DNO_ACE)
-  FIND_PACKAGE(Boost COMPONENTS system)
-  TARGET_LINK_LIBRARIES(VehicleAppDb ${Boost_LIBRARIES})
-endif()
-
-if (UNIX)
-  FIND_PACKAGE(IODBC)
-  if (IODBC_FOUND)
-    INCLUDE_DIRECTORIES(${IODBC_INCLUDE_DIRS})
-    SET(ODBC_LIBRARIES ${IODBC_LIBRARIES})
-    message("iODBC not found, trying UnixODBC")
-  else()
-    FIND_PACKAGE(UnixODBC REQUIRED)
-    INCLUDE_DIRECTORIES(${UnixODBC_INCLUDE_DIRS})
-    SET(ODBC_LIBRARIES ${UnixODBC_LIBRARIES})
-  endif()
-endif()
-  
-TARGET_LINK_LIBRARIES(VehicleAppDb ${ODBC_LIBRARIES})
-  
-if (NOT MSVC)
-  TARGET_LINK_LIBRARIES(VehicleAppDb olib swre_interface_cpp dose_cpp dots_generated-Capabilities-cpp dots_generated-Safir-cpp dots_cpp lluf_utils logging_cpp)
-endif()
-  
-INSTALL(TARGETS VehicleAppDb
-  RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-  LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-  ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
-
-INSTALL_DEBUG_INFO(VehicleAppDb)
-
+#TODO: Install?

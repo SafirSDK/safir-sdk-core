@@ -11,7 +11,16 @@ set (SafirSDKCore_DIR /home/lars/safir-logan/lib/cmake/SafirSDKCore/)
 
 find_package(SafirSDKCore REQUIRED)
 
-include_directories(${SAFIR_SDK_CORE_INCLUDE_DIRS})
 
 #TODO java & dotnet
 add_subdirectory(dou_files)
+
+#the code below needs to be able to include the Safir SDK Core headers
+include_directories(${SAFIR_SDK_CORE_INCLUDE_DIRS})
+
+#we also need boost
+FIND_PACKAGE(Boost COMPONENTS system)
+
+add_subdirectory(vehicleapp/src)
+add_subdirectory(vehicledb/src)
+add_subdirectory(vehiclemmi/src)

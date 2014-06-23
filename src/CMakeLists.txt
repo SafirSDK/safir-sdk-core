@@ -249,6 +249,7 @@ configure_file(cmake/SafirSDKCoreConfig.cmake.in
 INSTALL(FILES 
   cmake/build_generated.cmake 
   cmake/CSharpMacros.cmake
+  cmake/SafirCompilerSettings.cmake
   cmake/SafirLoadCSharp.cmake
   cmake/SafirLoadJava.cmake
   "${CMAKE_CURRENT_BINARY_DIR}/cmake/SafirSDKCoreConfig.cmake"
