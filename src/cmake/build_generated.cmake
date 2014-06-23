@@ -108,7 +108,6 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
   #
   foreach(DEP ${ALL_DEPENDENCIES})
     if (TARGET ${DEP}-dou)
-      message("Target ${DEP}-dou exists")
       get_target_property(sd ${DEP}-dou DOU_DIR)
       list(APPEND DOTS_V_DEPS ${DEP}=${sd})
     else()
