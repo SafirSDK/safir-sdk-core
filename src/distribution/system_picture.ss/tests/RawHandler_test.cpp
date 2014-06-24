@@ -209,8 +209,8 @@ BOOST_AUTO_TEST_CASE( nodes_changed_add_callback )
                                    ++cbCalls;
                                    CheckStatisticsCommon(statistics);
                                    BOOST_CHECK(!statistics.IsDead(0));
-                                   BOOST_CHECK_EQUAL(statistics.ReceiveCount(0), 0);
-                                   BOOST_CHECK_EQUAL(statistics.RetransmitCount(0), 0);
+                                   BOOST_CHECK(statistics.ReceiveCount(0) == 0);
+                                   BOOST_CHECK(statistics.RetransmitCount(0) == 0);
                                    BOOST_CHECK(!statistics.HasRemoteStatistics(0));
                                });
     comm.newNodeCb("asdf",11,10,"asdffff","asdfqqqq");
@@ -236,14 +236,14 @@ BOOST_AUTO_TEST_CASE( nodes_changed_removed_callback )
                                    if (cbCalls == 1)
                                    {
                                        BOOST_CHECK(!statistics.IsDead(0));
-                                       BOOST_CHECK_EQUAL(statistics.ReceiveCount(0), 0);
-                                       BOOST_CHECK_EQUAL(statistics.RetransmitCount(0), 0);
+                                       BOOST_CHECK(statistics.ReceiveCount(0) == 0);
+                                       BOOST_CHECK(statistics.RetransmitCount(0) == 0);
                                    }
                                    else
                                    {
                                        BOOST_CHECK(statistics.IsDead(0));
-                                       BOOST_CHECK_EQUAL(statistics.ReceiveCount(0), 3);
-                                       BOOST_CHECK_EQUAL(statistics.RetransmitCount(0), 1);
+                                       BOOST_CHECK(statistics.ReceiveCount(0) == 3);
+                                       BOOST_CHECK(statistics.RetransmitCount(0) == 1);
                                    }
                                });
     comm.newNodeCb("asdf",11,10,"asdffff","asdfqqqq");
@@ -297,8 +297,8 @@ void CheckRemotesCommon(const RawStatistics& remote)
     BOOST_CHECK_EQUAL(remote.DataAddress(0), ":flopp");
     BOOST_CHECK(!remote.IsDead(0));
     BOOST_CHECK(!remote.IsLongGone(0));
-    BOOST_CHECK_EQUAL(remote.ReceiveCount(0), 1000);
-    BOOST_CHECK_EQUAL(remote.RetransmitCount(0), 100);
+    BOOST_CHECK(remote.ReceiveCount(0) == 1000);
+    BOOST_CHECK(remote.RetransmitCount(0) == 100);
 }
 
 BOOST_AUTO_TEST_CASE( raw_changed_callback )
@@ -402,7 +402,7 @@ BOOST_AUTO_TEST_CASE( perform_on_all )
                                          const size_t size)
                                      {
                                          auto msg = Safir::make_unique<NodeStatisticsMessage>();
-                                         msg->ParseFromArray(data.get(),size);
+                                         msg->ParseFromArray(data.get(),static_cast<int>(size));
                                          auto statistics = RawStatisticsCreator::Create(std::move(msg));
                                          CheckStatisticsCommon(statistics);
 
@@ -429,7 +429,7 @@ BOOST_AUTO_TEST_CASE( perform_on_my )
                                          const size_t size)
                                      {
                                          auto msg = Safir::make_unique<NodeStatisticsMessage>();
-                                         msg->ParseFromArray(data.get(),size);
+                                         msg->ParseFromArray(data.get(),static_cast<int>(size));
                                          auto statistics = RawStatisticsCreator::Create(std::move(msg));
                                          CheckStatisticsCommon(statistics);
 
