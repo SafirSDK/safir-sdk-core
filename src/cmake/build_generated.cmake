@@ -42,6 +42,11 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
 
     #use dynamic linking with boost
     ADD_DEFINITIONS(-DBOOST_ALL_DYN_LINK)
+
+    #Debug dlls on windows need d suffix
+    if (MSVC)
+      SET(CMAKE_DEBUG_POSTFIX "d")
+    endif()
   endif()
 
   # 
@@ -151,14 +156,14 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
   
   if (SAFIR_EXTERNAL_BUILD)
     set(dots_v_path "${SAFIR_SDK_CORE_INSTALL_DIR}/bin/dots_v.py")
-    set(dod_directory "${SAFIR_SDK_CORE_INSTALL_DIR}/share/safir_sdk_core/generation/dod")
+    set(dod_directory "${SAFIR_SDK_CORE_INSTALL_DIR}/share/safir_sdk_core/generation/dod/")
   else()
     set(dots_v_path "${safir_sdk_core_SOURCE_DIR}/src/dots/dots_v.ss/dots_v.py")
     set(dod_directory "${safir_sdk_core_SOURCE_DIR}/src/dots/dots_v.ss/data/")
   endif()
-  #TODO: need to support finding dots_v from PATH as well, I guess? More?
 
   FILE(GLOB dod_files ${dod_directory} *.dod)
+
   SET(dots_v_command ${PYTHON_EXECUTABLE} 
     ${dots_v_path}
     --dod-files=${dod_directory} 
