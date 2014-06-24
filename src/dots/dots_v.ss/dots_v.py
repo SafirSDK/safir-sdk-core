@@ -1423,7 +1423,7 @@ def get_dou_directories():
         sys.exit(1)
     dou_directories = list()
     for line in output[0].splitlines():
-        (module,path) = line.split(":")
+        (module,path) = line.split("=")
         dou_directories.append((module,path))
 
     #cache the data

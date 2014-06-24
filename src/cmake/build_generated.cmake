@@ -31,6 +31,17 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
     include(${SAFIR_SDK_CORE_CMAKE_DIR}/SafirCompilerSettings.cmake)
     #include(${SAFIR_SDK_CORE_CMAKE_DIR}/SafirLoadCSharp.cmake)
     #include(${SAFIR_SDK_CORE_CMAKE_DIR}/SafirLoadJava.cmake)
+
+    #We need boost headers.
+    set(Boost_FIND_QUIETLY True)
+    find_package(Boost COMPONENTS system thread REQUIRED)
+    include_directories(${Boost_INCLUDE_DIRS})
+
+    #dont use autolinking with boost
+    ADD_DEFINITIONS(-DBOOST_ALL_NO_LIB)
+
+    #use dynamic linking with boost
+    ADD_DEFINITIONS(-DBOOST_ALL_DYN_LINK)
   endif()
 
   # 
@@ -195,7 +206,9 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
     dots_cpp
     dots_internal
     dots_kernel
-    lluf_utils)
+    lluf_utils
+    ${Boost_THREAD_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY})
 
   FOREACH (DEP ${GEN_DEPENDENCIES})
     TARGET_LINK_LIBRARIES(safir_generated-${GEN_NAME}-cpp safir_generated-${DEP}-cpp)

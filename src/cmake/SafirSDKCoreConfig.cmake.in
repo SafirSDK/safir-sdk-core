@@ -20,7 +20,19 @@ MESSAGE("SAFIR_SDK_CORE_INSTALL_DIR: ${SAFIR_SDK_CORE_INSTALL_DIR}")
 set(SAFIR_SDK_CORE_INCLUDE_DIRS "${SAFIR_SDK_CORE_INSTALL_DIR}/include")
 
 #These are IMPORTED targets created by SafirSDKCore.cmake
-set(SAFIR_SDK_CORE_LIBRARIES olib swre_interface_cpp dose_cpp safir_generated-Core-cpp dots_cpp logging_cpp lluf_utils)
+if (MSVC)
+  set(SAFIR_SDK_CORE_LIBRARIES
+  optimized olib debug olibd
+  optimized swre_interface_cpp debug swre_interface_cppd
+  optimized douf_time_cpp debug douf_time_cppd
+  optimized dose_cpp debug dose_cppd
+  optimized safir_generated-Core-cpp debug safir_generated-Core-cppd
+  optimized dots_cpp debug dots_cppd
+  optimized logging_cpp debug logging_cpp
+  optimized lluf_utils debug lluf_utils)
+else()
+  set(SAFIR_SDK_CORE_LIBRARIES olib swre_interface_cpp douf_time_cpp dose_cpp safir_generated-Core-cpp dots_cpp logging_cpp lluf_utils)
+endif()
 
 # These are IMPORTED targets created by FooBarTargets.cmake
 #set(FOOBAR_LIBRARIES foo)

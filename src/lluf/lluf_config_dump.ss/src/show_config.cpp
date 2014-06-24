@@ -163,7 +163,7 @@ int main(int argc, char * argv[])
             for (std::vector<std::pair<std::string,std::string> >::const_iterator it = dirs.begin();
                  it != dirs.end(); ++it)
             {
-                std::cout << it->first << ":" << it->second << std::endl;
+                std::cout << it->first << "=" << it->second << std::endl;
             }
         }
         

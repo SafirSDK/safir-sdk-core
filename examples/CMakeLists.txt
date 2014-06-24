@@ -19,7 +19,15 @@ add_subdirectory(dou_files)
 include_directories(${SAFIR_SDK_CORE_INCLUDE_DIRS})
 
 #we also need boost
-FIND_PACKAGE(Boost COMPONENTS system)
+FIND_PACKAGE(Boost COMPONENTS system regex)
+include_directories(${Boost_INCLUDE_DIRS})
+
+#use dynamic linking with boost
+ADD_DEFINITIONS(-DBOOST_ALL_DYN_LINK)
+
+if (MSVC)
+   ADD_DEFINITIONS(-D_WIN32_WINNT=0x0501)
+endif()
 
 add_subdirectory(vehicleapp/src)
 add_subdirectory(vehicledb/src)
