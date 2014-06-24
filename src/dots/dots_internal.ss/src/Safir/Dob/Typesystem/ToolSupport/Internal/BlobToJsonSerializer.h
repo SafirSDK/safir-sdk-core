@@ -99,7 +99,9 @@ namespace Internal
             {
                 const MemberDescriptionType* md=cd->GetMember(memberIx);
 
-                if (md->GetCollectionType()==SingleValueCollectionType) //normal member
+                switch (md->GetCollectionType())
+                {
+                case SingleValueCollectionType:
                 {
                     if (!reader.IsNull(memberIx, 0))
                     {
@@ -108,7 +110,8 @@ namespace Internal
                         SerializeMember(reader, md, memberIx, 0, os);
                     }
                 }
-                else if (md->GetCollectionType()==ArrayCollectionType)
+                    break;
+                case ArrayCollectionType:
                 {
                     std::ostringstream arrayValues;
                     arrayValues<<", ";
@@ -150,7 +153,8 @@ namespace Internal
                         os<<arrayValues.str();
                     }
                 }
-                else if (md->GetCollectionType()==SequenceCollectionType)
+                    break;
+                case SequenceCollectionType:
                 {
                     int numberOfValues=reader.NumberOfValues(memberIx);
                     if (numberOfValues>0)
@@ -171,9 +175,135 @@ namespace Internal
                         os<<"]";
                     }
                 }
+                    break;
+                case DictionaryCollectionType:
+                {
+                    int numberOfValues=reader.NumberOfValues(memberIx);
+                    if (numberOfValues>0)
+                    {
+                        os<<", ";
+                        WriteMemberName(md->GetName(), os);
+                        os<<"[";
+
+                        for (DotsC_ArrayIndex valueIndex=0; valueIndex<numberOfValues; ++valueIndex)
+                        {
+                            if (valueIndex>0)
+                            {
+                                os<<", ";
+                            }
+                            os<<"{";
+                            WriteMemberName("key", os);
+                            SerializeKey(reader, md, memberIx, valueIndex, os);
+                            os<<", ";
+                            WriteMemberName("value", os);
+                            if (!SerializeMember(reader, md, memberIx, valueIndex, os))
+                                os<<"null";
+                            os<<"}";
+                        }
+
+                        os<<"]";
+                    }
+                }
+                    break;
+                }
             }
 
             os<<"}";
+        }
+
+        void WriteString(const std::string& val, std::ostream& os) const
+        {
+            std::string str=val;
+            std::string repl=std::string("\\")+std::string("\"");
+            boost::replace_all(str, "\"", repl);
+            os<<SAFIR_JSON_QUOTE(str);
+        }
+
+        void WriteHash(const std::pair<DotsC_Int64, const char*>& val, std::ostream& os) const
+        {
+            if (val.second)
+            {
+                os<<SAFIR_JSON_QUOTE(val.second);
+            }
+            else
+            {
+                os<<val.first;
+            }
+        }
+
+        void WriteEntityId(const std::pair<DotsC_EntityId, const char*>& val, std::ostream& os) const
+        {
+            os<<"{";
+            WriteMemberName("name", os);
+            os<<SAFIR_JSON_QUOTE(TypeUtilities::GetTypeName(m_repository, val.first.typeId));
+
+            os<<", ";
+            WriteMemberName("instanceId", os);
+            if (val.second)
+            {
+                os<<SAFIR_JSON_QUOTE(val.second);
+            }
+            else
+            {
+                os<<val.first.instanceId;
+            }
+            os<<"}";
+        }
+
+        void SerializeKey(const BlobReader<RepositoryType>& reader,
+                          const MemberDescriptionType* md,
+                          DotsC_MemberIndex memberIndex,
+                          DotsC_ArrayIndex valueIndex,
+                          std::ostream& os) const
+        {
+            switch(md->GetKeyType())
+            {
+            case Int32MemberType:
+            {
+                os<<reader.template ReadKey<DotsC_Int32>(memberIndex, valueIndex);
+            }
+                break;
+            case Int64MemberType:
+            {
+                os<<reader.template ReadKey<DotsC_Int64>(memberIndex, valueIndex);
+            }
+                break;
+            case EnumerationMemberType:
+            {
+                const char* enumVal=m_repository->GetEnum(md->GetKeyTypeId())->GetValueName(reader.template ReadKey<DotsC_EnumerationValue>(memberIndex, valueIndex));
+                os<<SAFIR_JSON_QUOTE(enumVal);
+            }
+                break;
+            case EntityIdMemberType:
+            {
+                std::pair<DotsC_EntityId, const char*> eid=reader.template ReadKey< std::pair<DotsC_EntityId, const char*> >(memberIndex, valueIndex);
+                WriteEntityId(eid, os);
+            }
+                break;
+            case TypeIdMemberType:
+            {
+                os<<SAFIR_JSON_QUOTE(TypeUtilities::GetTypeName(m_repository, reader.template ReadKey<DotsC_TypeId>(memberIndex, valueIndex)));
+            }
+                break;
+            case InstanceIdMemberType:
+            case ChannelIdMemberType:
+            case HandlerIdMemberType:
+            {
+                std::pair<DotsC_Int64, const char*> hash=reader.template ReadKey< std::pair<DotsC_Int64, const char*> >(memberIndex, valueIndex);
+                WriteHash(hash, os);
+            }
+                break;
+
+            case StringMemberType:
+            {
+                WriteString(reader.template ReadKey<const char*>(memberIndex, valueIndex), os);
+            }
+                break;
+
+            default:
+                throw std::logic_error(std::string("Unexpected dictionary key type: ")+TypeUtilities::GetTypeName(md->GetKeyType()));
+                break;
+            }
         }
 
         bool SerializeMember(const BlobReader<RepositoryType>& reader,
@@ -201,7 +331,7 @@ namespace Internal
 
             case EnumerationMemberType:
             {
-                DotsC_Int32 val=0;
+                DotsC_EnumerationValue val=0;
                 reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
                 if (!isNull)
                 {
@@ -242,15 +372,7 @@ namespace Internal
                 reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
                 if (!isNull)
                 {
-                    const char* typeName=TypeUtilities::GetTypeName(m_repository, val);
-                    if (typeName)
-                    {
-                        os<<SAFIR_JSON_QUOTE(typeName);
-                    }
-                    else
-                    {
-                        os<<val;
-                    }
+                    os<<SAFIR_JSON_QUOTE(TypeUtilities::GetTypeName(m_repository, val));
                     return true;
                 }
             }
@@ -264,14 +386,7 @@ namespace Internal
                 reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
                 if (!isNull)
                 {
-                    if (val.second)
-                    {
-                        os<<SAFIR_JSON_QUOTE(val.second);
-                    }
-                    else
-                    {
-                        os<<val.first;
-                    }
+                    WriteHash(val, os);
                     return true;
                 }
             }
@@ -283,29 +398,7 @@ namespace Internal
                 reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
                 if (!isNull)
                 {
-                    os<<"{";
-                    WriteMemberName("name", os);
-                    const char* typeName=TypeUtilities::GetTypeName(m_repository, val.first.typeId);
-                    if (typeName)
-                    {
-                        os<<SAFIR_JSON_QUOTE(typeName);
-                    }
-                    else
-                    {
-                        os<<val.first.typeId;
-                    }
-
-                    os<<", ";
-                    WriteMemberName("instanceId", os);
-                    if (val.second)
-                    {
-                        os<<SAFIR_JSON_QUOTE(val.second);
-                    }
-                    else
-                    {
-                        os<<val.first.instanceId;
-                    }
-                    os<<"}";
+                    WriteEntityId(val, os);
                     return true;
                 }
             }
@@ -317,10 +410,7 @@ namespace Internal
                 reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
                 if (!isNull)
                 {
-                    std::string str=val;
-                    std::string repl=std::string("\\")+std::string("\"");
-                    boost::replace_all(str, "\"", repl);
-                    os<<SAFIR_JSON_QUOTE(str);
+                    WriteString(val, os);
                     return true;
                 }
             }

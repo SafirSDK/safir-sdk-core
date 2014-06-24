@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Test item.</summary>
+    <name>BlobTest.MyCollections</name>
+    <baseClass>Object</baseClass>
+    <members>
+      <!-- Sequences -->
+        <member>
+            <name>SeqInt32</name>
+            <type>Int32</type>
+	    <sequence/>
+        </member>
+	<member>
+            <name>SeqInt64</name>
+            <type>Int64</type>
+	    <sequence/>
+        </member>
+	<member>
+            <name>SeqBool</name>
+            <type>Boolean</type>
+	    <sequence/>
+        </member>
+	<member>
+            <name>SeqTypeId</name>
+            <type>TypeId</type>
+	    <sequence/>
+        </member>
+	<member>
+            <name>SeqChannelId</name>
+            <type>ChannelId</type>
+	    <sequence/>
+        </member>
+	<member>
+            <name>SeqEntityId</name>
+            <type>EntityId</type>
+	    <sequence/>
+        </member>
+	<member>
+            <name>SeqEnum</name>
+            <type>BlobTest.MyColorEnum</type>
+	    <sequence/>
+        </member>
+	<member>
+            <name>SeqObject</name>
+            <type>BlobTest.MyItem</type>
+	    <sequence/>
+        </member>
+       
+	<!-- Dictonaries -->
+	<member>
+	  <name>DictStringInt32</name>
+	  <type>Int32</type>
+	  <dictionary>String</dictionary>
+	</member>
+	<member>
+	  <name>DictInt64TypeId</name>
+	  <type>TypeId</type>
+	  <dictionary>Int64</dictionary>
+	</member>
+	<member>
+	  <name>DictEnumEntityId</name>
+	  <type>EntityId</type>
+	  <dictionary>BlobTest.MyColorEnum</dictionary>
+	</member>
+	<member>
+	  <name>DictEntityIdObject</name>
+	  <type>BlobTest.MyItem</type>
+	  <dictionary>EntityId</dictionary>
+	</member>
+	<member>
+	  <name>DictHandlerIdBool</name>
+	  <type>Boolean</type>
+	  <dictionary>HandlerId</dictionary>
+	</member>
+	<member>
+	  <name>DictTypeIdEnum</name>
+	  <type>BlobTest.MyColorEnum</type>
+	  <dictionary>TypeId</dictionary>
+	</member>
+    </members>
+</class>

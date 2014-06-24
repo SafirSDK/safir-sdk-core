@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<BlobTest.MyCollections type="BlobTest.MyCollections">
+  
+  <SeqInt32>
+    <Int32>1</Int32>
+    <Int32>2</Int32>
+  </SeqInt32>
+  
+  <SeqInt64>
+    <Int64>123456789</Int64>
+    <Int64>987654321</Int64>
+  </SeqInt64>
+  
+  <SeqBool>
+    <Boolean>true</Boolean>
+    <Boolean>false</Boolean>
+  </SeqBool>
+  
+  <SeqTypeId>
+    <TypeId>BlobTest.MyItem</TypeId>
+    <TypeId>BlobTest.MyColorEnum</TypeId>
+  </SeqTypeId>
+  
+  <SeqChannelId>
+    <ChannelId>Channel one</ChannelId>
+    <ChannelId>2</ChannelId>
+  </SeqChannelId>
+  
+  <SeqEntityId>
+    <entityId>
+      <name>BlobTest.MyEntity</name>
+      <instanceId>first</instanceId>
+    </entityId>
+    <entityId>
+      <name>Safir.Dob.Entity</name>
+      <instanceId>second</instanceId>
+    </entityId>
+  </SeqEntityId>
+  
+  <SeqEnum>
+    <BlobTest.MyColorEnum>White</BlobTest.MyColorEnum>
+    <BlobTest.MyColorEnum>Black</BlobTest.MyColorEnum>
+  </SeqEnum>
+  
+  <SeqObject>
+    <BlobTest.MyItem type="BlobTest.MyItem">
+      <MyNumber>666</MyNumber>
+      <MyStrings>
+	    <String xml:space="default" index="0">  aaaa  </String>
+	  <String xml:space="preserve" index="1">  bbbb  </String>
+	  <String xml:space="preserve" index="2">cccc</String>
+	  <String xml:space="preserve" index="3">dddd</String>
+	  <String xml:space="preserve" index="4"> &lt;, &gt; &amp; </String>
+      </MyStrings>
+    </BlobTest.MyItem>
+    
+    <BlobTest.MyItem type="BlobTest.MySpecialItem">
+      <MyNumber>76</MyNumber>
+      <MyStrings>
+        <value index="1" xsi:space="preserve">  My name is Sven  </value>
+        <value index="3" xsi:space="default">  Whats yours?  </value>
+      </MyStrings>
+      <Child type="BlobTest.MySpecialItem">
+        <MyNumber>8</MyNumber>
+        <ChildName>Bob Jr</ChildName>
+      </Child>
+      <ChildName>Senior Bob</ChildName>
+    </BlobTest.MyItem>
+    
+    <BlobTest.MyItem type="BlobTest.MySpecialItem">
+      <MyNumber>5</MyNumber>
+      <MyStrings>
+	<value index="0">Svarre</value>
+	<value index="2">Hello</value>
+	<value index="3">Sheldon is cool</value>
+      </MyStrings>
+      <DictStringInt32>
+	<entry>
+	  <key>kalle</key>
+	  <value>123</value>
+	</entry>
+	<entry>
+	  <key>pelle</key>
+	  <value>456</value>
+	</entry>
+      </DictStringInt32>
+    </BlobTest.MyItem>    
+  </SeqObject>
+  
+  <!-- Dictonaries -->
+  <DictStringInt32>
+    <entry>
+      <key>Alfons</key>
+      <value>123</value>
+    </entry>
+    <entry>
+      <key>Åberg</key>
+      <value>321</value>
+    </entry>
+  </DictStringInt32>
+  
+  <DictInt64TypeId>
+    <entry>
+      <key>123456789</key>
+      <value>BlobTest.MyColorEnum</value>
+    </entry>
+    <entry>
+      <key>987654321</key>
+      <value>BlobTest.MyItem</value>
+    </entry>
+  </DictInt64TypeId>
+  
+  <DictEnumEntityId>
+    <entry>
+      <key>White</key>
+      <value>
+	<name>BlobTest.MyEntity</name>
+	<instanceId>first</instanceId>
+      </value>
+    </entry>
+    <entry>
+      <key>Black</key>
+      <value>
+	<name>Safir.Dob.Entity</name>
+	<instanceId>second</instanceId>
+      </value>
+    </entry>
+  </DictEnumEntityId>
+  
+  <DictEntityIdObject>
+    <entry>
+      <key>
+	<name>BlobTest.MyEntity</name>
+	<instanceId>first</instanceId>
+      </key>
+      <BlobTest.MyItem type="BlobTest.MySpecialItem">
+	<MyNumber>5</MyNumber>
+	<MyStrings>
+	  <value index="0">Svarre</value>
+	  <value index="2">Hello</value>
+	  <value index="3">Sheldon is cool</value>
+	</MyStrings>
+	<DictStringInt32>
+	  <entry>
+	    <key>kalle</key>
+	    <value>123</value>
+	  </entry>
+	  <entry>
+	    <key>pelle</key>
+	    <value>456</value>
+	  </entry>
+	</DictStringInt32>
+      </BlobTest.MyItem>
+    </entry>
+    <entry>
+      <key>
+	<name>Safir.Dob.Entity</name>
+	<instanceId>second</instanceId>
+      </key>
+      <BlobTest.MyItem type="BlobTest.MySpecialItem">
+	<MyNumber>76</MyNumber>
+	<MyStrings>
+	  <value index="1" xsi:space="preserve">  My name is Sven  </value>
+	  <value index="3" xsi:space="default">  Whats yours?  </value>
+	</MyStrings>
+	<Child type="BlobTest.MySpecialItem">
+	  <MyNumber>8</MyNumber>
+	  <ChildName>Bob Jr</ChildName>
+	</Child>
+	<ChildName>Senior Bob</ChildName>
+      </BlobTest.MyItem>
+    </entry>
+  </DictEntityIdObject>
+  
+  <DictHandlerIdBool>
+    <entry>
+      <key>MyHandler</key>
+      <value>true</value>
+    </entry>
+    <entry>
+      <key>123</key>
+      <value>false</value>
+    </entry>
+  </DictHandlerIdBool>
+  
+  <DictTypeIdEnum>
+    <entry>
+      <key>BlobTest.MyColorEnum</key>
+      <value>White</value>
+    </entry>
+    <entry>
+      <key>BlobTest.MyCollections</key>
+      <value>Black</value>
+    </entry>
+  </DictTypeIdEnum>
+  
+</BlobTest.MyEntity>

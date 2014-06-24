@@ -131,7 +131,7 @@ namespace Internal
 
                 case DictionaryCollectionType:
                 {
-                    const char* typeName=Safir::Dob::Typesystem::ToolSupport::TypeUtilities::GetTypeName(m_repository, md);
+                    const char* typeName=md->GetMemberType()!=ObjectMemberType ? "value" : Safir::Dob::Typesystem::ToolSupport::TypeUtilities::GetTypeName(m_repository, md);
                     int numberOfValues=reader.NumberOfValues(memberIx);
                     if (numberOfValues>0)
                     {
@@ -218,6 +218,11 @@ namespace Internal
                 os<<reader.template ReadKey<DotsC_Int64>(memberIndex, valueIndex);
             }
                 break;
+            case EnumerationMemberType:
+            {
+                os<<m_repository->GetEnum(md->GetKeyTypeId())->GetValueName(reader.template ReadKey<DotsC_EnumerationValue>(memberIndex, valueIndex));
+            }
+                break;
             case EntityIdMemberType:
             {
                 std::pair<DotsC_EntityId, const char*> eid=reader.template ReadKey< std::pair<DotsC_EntityId, const char*> >(memberIndex, valueIndex);
@@ -287,7 +292,7 @@ namespace Internal
 
             case EnumerationMemberType:
             {
-                DotsC_Int32 val=0;
+                DotsC_EnumerationValue val=0;
                 reader.ReadValue(memberIndex, arrayIndex, val, isNull, isChanged);
                 if (!isNull)
                 {

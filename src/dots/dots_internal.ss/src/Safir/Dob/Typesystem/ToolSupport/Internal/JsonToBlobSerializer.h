@@ -183,37 +183,23 @@ namespace Internal
 
                 case DictionaryCollectionType:
                 {
-                    //boost::property_tree::ptree m; m.get_child()
-                    //boost::property_tree::ptree& keyTree=memIt->get_child("key");
-                    const boost::property_tree::ptree& keyTree=memIt->second.get_child("key");
-                    const boost::property_tree::ptree& valTree=memIt->second.get_child("value");
-                    try
+                    DotsC_ArrayIndex valueIndex=0;
+                    for (boost::property_tree::ptree::const_iterator entryIt=memIt->second.begin(); entryIt!=memIt->second.end(); ++entryIt)
                     {
-                        SetMember(md, memIx, 0, valTree, keyTree, writer);
+                        try
+                        {
+                            const boost::property_tree::ptree& keyTree=entryIt->second.get_child("key");
+                            const boost::property_tree::ptree& valTree=entryIt->second.get_child("value");
+                            SetMember(md, memIx, 0, valTree, keyTree, writer);
+                        }
+                        catch (const boost::property_tree::ptree_error&)
+                        {
+                            std::ostringstream os;
+                            os<<"Failed to serialize dictionary member '"<<cd->GetName()<<"."<<md->GetName()<<"' with index="<<valueIndex<<" from Json to binary. Type is incorrect.";
+                            throw ParseError("JsonToBinary serialization error", os.str(), "", 835);
+                        }
+                        ++valueIndex;
                     }
-                    catch (const boost::property_tree::ptree_error&)
-                    {
-                        std::ostringstream os;
-                        os<<"Failed to serialize dictionary member '"<<cd->GetName()<<"."<<md->GetName()<<"' with index="<<valueIndex<<" from Json to binary. Type is incorrect.";
-                        throw ParseError("JsonToBinary serialization error", os.str(), "", 835);
-                    }
-
-                    //-----
-//                    DotsC_ArrayIndex valueIndex=0;
-//                    for (boost::property_tree::ptree::const_iterator seqIt=memIt->second.begin(); seqIt!=memIt->second.end(); ++seqIt)
-//                    {
-//                        try
-//                        {
-//                            SetMember(md, memIx, 0, seqIt->second, 0, writer);
-//                        }
-//                        catch (const boost::property_tree::ptree_error&)
-//                        {
-//                            std::ostringstream os;
-//                            os<<"Failed to serialize sequence member '"<<cd->GetName()<<"."<<md->GetName()<<"' with index="<<valueIndex<<" from Json to binary. Type is incorrect.";
-//                            throw ParseError("JsonToBinary serialization error", os.str(), "", 195);
-//                        }
-//                        ++valueIndex;
-//                    }
 
                 }
                     break;
@@ -231,8 +217,8 @@ namespace Internal
         void SetMember(const MemberDescriptionType* md,
                        DotsC_MemberIndex memIx,
                        DotsC_ArrayIndex arrIx,
-                       boost::property_tree::ptree& memberContent,
-                       boost::property_tree::ptree& keyContent,
+                       const boost::property_tree::ptree& memberContent,
+                       const boost::property_tree::ptree& keyContent,
                        BlobWriter<RepositoryType>& writer) const
         {
             switch(md->GetKeyType())
