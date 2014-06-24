@@ -21,8 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __CRC_UTILS_H__
-#define __CRC_UTILS_H__
+#pragma once
 
 //TODO: remove checksumming when communication is stable
 #define CHECK_CRC
@@ -56,5 +55,4 @@ namespace
 }
 
 #endif //CHECK_CRC
-#endif
 

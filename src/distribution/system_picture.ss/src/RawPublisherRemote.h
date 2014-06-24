@@ -21,8 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __RAW_PUBLISHER_REMOTE_H__
-#define __RAW_PUBLISHER_REMOTE_H__
+#pragma once
 
 #include <Safir/Dob/Internal/Communication.h>
 #include <Safir/Utilities/Internal/Id.h>
@@ -179,5 +178,4 @@ namespace SP
 }
 }
 
-#endif
 
