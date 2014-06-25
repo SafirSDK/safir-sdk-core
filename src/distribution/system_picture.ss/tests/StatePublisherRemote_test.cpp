@@ -70,8 +70,10 @@ public:
     bool SendToNodeType(int64_t nodeTypeId, 
                         const boost::shared_ptr<char[]>& data, 
                         size_t size, 
-                        int64_t /*dataTypeIdentifier*/)
+                        int64_t /*dataTypeIdentifier*/,
+                        bool acked)
     {
+        BOOST_CHECK(acked);
         BOOST_CHECK(size == gsize);
         BOOST_CHECK(0 == strcmp(data.get(), "123456789"));
         std::wcout << "Send" << std::endl;
