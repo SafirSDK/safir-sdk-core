@@ -21,8 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __SAFIR_DOB_INTERNAL_RAW_STATISTICS_H__
-#define __SAFIR_DOB_INTERNAL_RAW_STATISTICS_H__
+#pragma once
 
 #include <Safir/Dob/Internal/SystemPictureDefs.h>
 #include <functional>
@@ -145,6 +144,4 @@ namespace SP
 }
 }
 }
-
-#endif 
 

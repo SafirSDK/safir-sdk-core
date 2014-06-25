@@ -21,8 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __SYSTEM_PICTURE_EXPORT_DEFS_H__
-#define __SYSTEM_PICTURE_EXPORT_DEFS_H__
+#pragma once
 
 #include <Safir/Utilities/Internal/VisibilityHelpers.h>
 #include <utility>
@@ -72,4 +71,3 @@ namespace SP
 }
 }
 
-#endif

@@ -21,8 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __SYSTEM_PICTURE_COORDINATOR_H__
-#define __SYSTEM_PICTURE_COORDINATOR_H__
+#pragma once
 
 #include <Safir/Dob/Internal/RawStatistics.h>
 #include <boost/noncopyable.hpp>
@@ -154,6 +153,3 @@ namespace SP
 }
 }
 }
-
-#endif
-

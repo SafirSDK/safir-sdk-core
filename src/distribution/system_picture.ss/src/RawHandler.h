@@ -21,8 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __RAW_HANDLER_H__
-#define __RAW_HANDLER_H__
+#pragma once
 
 #include <Safir/Utilities/Internal/Atomic.h>
 #include <Safir/Utilities/Internal/AsioPeriodicTimer.h>
@@ -547,5 +546,4 @@ namespace SP
 }
 }
 
-#endif
 

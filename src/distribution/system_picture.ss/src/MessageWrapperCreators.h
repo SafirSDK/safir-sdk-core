@@ -21,8 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __MESSAGE_WRAPPER_CREATORS_H__
-#define __MESSAGE_WRAPPER_CREATORS_H__
+#pragma once
 
 #include <Safir/Dob/Internal/RawStatistics.h>
 #include <Safir/Dob/Internal/SystemState.h>
@@ -62,6 +61,4 @@ namespace SP
 }
 }
 }
-
-#endif
 

@@ -21,8 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef ___REMOTE_SUBSCRIBER_H__
-#define ___REMOTE_SUBSCRIBER_H__
+#pragma once
 
 #include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
@@ -84,6 +83,4 @@ namespace SP
 }
 }
 }
-
-#endif
 

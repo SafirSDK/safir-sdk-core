@@ -21,8 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __RAW_PUBLISHER_LOCAL_H__
-#define __RAW_PUBLISHER_LOCAL_H__
+#pragma once
 
 #include <Safir/Utilities/Internal/IpcPublisher.h>
 #include <Safir/Utilities/Internal/AsioPeriodicTimer.h>
@@ -109,6 +108,4 @@ namespace SP
 }
 }
 }
-
-#endif
 
