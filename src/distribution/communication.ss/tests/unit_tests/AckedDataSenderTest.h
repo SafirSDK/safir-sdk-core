@@ -42,66 +42,43 @@ public:
         //-------------------
         // Tests
         //-------------------
+        AckedSender sender(io, 1, 1, 4, "224.90.90.241:10000", 500); //ntId, nId, ipV, mc, waitForAck
+        sender.SetRetransmitCallback([&](int64_t id){std::cout<<"Retransmit to "<<id<<std::endl;});
+        sender.SetNotFullCallback([&](int64_t id){std::cout<<"QueueNotFull nodeType "<<id<<std::endl;}, 50);
+        sender.Start();
+        sender.AddNode(2, "127.0.0.1:2");
+        sender.AddNode(3, "127.0.0.1:3");
+        sender.IncludeNode(2);
+        sender.IncludeNode(3);
 
+        sender.m_strand.post([&]{CHECK(sender.m_nodes.size()==2);});
+
+        sender.AddNode(4, "127.0.0.1:4");
+        sender.AddNode(5, "127.0.0.1:5");
+
+        sender.m_strand.post([&]
+        {
+            CHECK(sender.m_nodes.size()==4);
+            CHECK(sender.m_nodes.find(2)->second.systemNode==true);
+            CHECK(sender.m_nodes.find(3)->second.systemNode==true);
+            CHECK(sender.m_nodes.find(4)->second.systemNode==false);
+            CHECK(sender.m_nodes.find(5)->second.systemNode==false);
+        });
+
+        sender.RemoveNode(4);
+        sender.RemoveNode(5);
+
+        sender.m_strand.post([&]{CHECK(sender.m_nodes.size()==2);});
+
+        sender.AddToSendQueue(0, MakeShared("1"), 1, 1);
+
+
+        Wait(1000);
+        sender.Stop();
 
         work.reset();
-        io.stop();
         threads.join_all();
         std::cout<<"AckedDataSenderTest tests passed"<<std::endl;
-
-//        boost::asio::io_service io;
-//        auto work=boost::make_shared<boost::asio::io_service::work>(io);
-
-//        boost::thread_group threads;
-//        for (int i = 0; i < 9; ++i)
-//        {
-//            threads.create_thread([&]{io.run();});
-//        }
-
-//        Com::Node me {"Test", 100, "127.0.0.1:10000", "239.192.1.1:11000"};
-//        Com::AckedDataSenderBasic<AckedDataSenderTest::TestWriter> sender(io, me);
-//        sender.SetNotFullCallback([=]{OnQueueNotFull();}, 50);
-//        sender.SetRetransmitCallback([=](int64_t to){OnRetransmit(to);});
-//        sender.Start();
-
-//        //Add nodes
-//        sender.AddNode(Com::Node("Test_1", 1, "127.0.0.1:10001", "239.192.1.1:11000"));
-//        sender.AddNode(Com::Node("Test_2", 2, "127.0.0.1:10002", ""));
-//        sender.AddNode(Com::Node("Test_3", 3, "127.0.0.1:10003", ""));
-//        sender.AddNode(Com::Node("Test_4", 4, "127.0.0.1:10004", "239.192.1.1:11000"));
-//        sender.SetSystemNode(1, true);
-//        sender.SetSystemNode(2, true);
-//        sender.SetSystemNode(3, true);
-//        sender.SetSystemNode(4, true);
-
-//        //Add to send queue
-//        sender.AddToSendQueue(0, MakeShared("1"), 1, 0);
-//        sender.AddToSendQueue(0, MakeShared("2"), 1, 0);
-//        sender.AddToSendQueue(0, MakeShared("3"), 1, 0);
-//        sender.AddToSendQueue(0, MakeShared("4"), 1, 0);
-
-//        //Send Window
-
-//        //Full queue handling and QueueNotFull callback
-
-//        //Fragmentation
-
-//        //Ack
-
-//        //SystemNodes
-
-//        //SendAll and SendTo
-
-//        //Queue size
-
-//        //Stop
-//        //Wait(100);
-//        work.reset();
-//        sender.Stop();
-//        threads.join_all();
-
-//        Wait(10);
-//        std::cout<<"AckedDataSenderTest tests passed"<<std::endl;
     }
 
 private:
@@ -122,6 +99,7 @@ private:
     };
 
     typedef Com::Writer<Com::UserData, AckedDataSenderTest::TestSendPolicy> TestWriter;
+    typedef Com::AckedDataSenderBasic<TestWriter> AckedSender;
 
     void OnQueueNotFull()
     {
@@ -134,7 +112,6 @@ private:
         std::cout<<"callback OnRetransmit"<<std::endl;
 
     }
-
 };
 
 boost::mutex AckedDataSenderTest::mutex;

@@ -112,11 +112,14 @@ namespace Com
         m_reader.Strand().post([=]{m_deliveryHandler.SetReceiver(callback, dataTypeIdentifier);});
     }
 
-    void CommunicationImpl::SetQueueNotFullCallback(const QueueNotFull& callback, int freePartThreshold)
+    void CommunicationImpl::SetQueueNotFullCallback(const QueueNotFull& callback, int freePartThreshold, bool ackedQueue)
     {
         for (auto& vt : m_nodeTypes)
         {
-            vt.second->GetAckedDataSender().SetNotFullCallback(callback, freePartThreshold);
+            if (ackedQueue)
+                vt.second->GetAckedDataSender().SetNotFullCallback(callback, freePartThreshold);
+            //else
+                //TODO: unacked datasender
         }
     }
 
@@ -202,12 +205,12 @@ namespace Com
         IncludeNode(id);
     }
 
-    bool CommunicationImpl::SendToNode(int64_t nodeId, int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, int64_t dataTypeIdentifier)
+    bool CommunicationImpl::SendToNode(int64_t nodeId, int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, int64_t dataTypeIdentifier, bool /*ack*/)
     {
         return GetNodeType(nodeTypeId).GetAckedDataSender().AddToSendQueue(nodeId, data, size, dataTypeIdentifier);
     }
 
-    bool CommunicationImpl::SendToNodeType(int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, int64_t dataTypeIdentifier)
+    bool CommunicationImpl::SendToNodeType(int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, int64_t dataTypeIdentifier, bool /*ack*/)
     {
         return GetNodeType(nodeTypeId).GetAckedDataSender().AddToSendQueue(0, data, size, dataTypeIdentifier);
     }

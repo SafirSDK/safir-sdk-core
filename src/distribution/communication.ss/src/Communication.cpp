@@ -123,9 +123,9 @@ namespace
         m_impl->SetRetransmitToCallback(callback);
     }
 
-    void Communication::SetQueueNotFullCallback(const QueueNotFull& callback, int freePartThreshold)
+    void Communication::SetQueueNotFullCallback(const QueueNotFull& callback, int freePartThreshold, bool ackedQueue)
     {
-       m_impl->SetQueueNotFullCallback(callback, freePartThreshold);
+       m_impl->SetQueueNotFullCallback(callback, freePartThreshold, ackedQueue);
     }
 
     void Communication::SetDataReceiver(const ReceiveData& callback, int64_t dataTypeIdentifier)
@@ -163,14 +163,14 @@ namespace
         m_impl->InjectNode(name, id, nodeTypeId, dataAddress);
     }
 
-    bool Communication::SendToNode(int64_t nodeId, int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, int64_t dataTypeIdentifier)
+    bool Communication::SendToNode(int64_t nodeId, int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, int64_t dataTypeIdentifier, bool ack)
     {
-        return m_impl->SendToNode(nodeId, nodeTypeId, data, size, dataTypeIdentifier);
+        return m_impl->SendToNode(nodeId, nodeTypeId, data, size, dataTypeIdentifier, ack);
     }
 
-    bool Communication::SendToNodeType(int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, int64_t dataTypeIdentifier)
+    bool Communication::SendToNodeType(int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, int64_t dataTypeIdentifier, bool ack)
     {
-        return m_impl->SendToNodeType(nodeTypeId, data, size, dataTypeIdentifier);
+        return m_impl->SendToNodeType(nodeTypeId, data, size, dataTypeIdentifier, ack);
     }
 
     size_t Communication::NumberOfQueuedMessages(int64_t nodeTypeId) const

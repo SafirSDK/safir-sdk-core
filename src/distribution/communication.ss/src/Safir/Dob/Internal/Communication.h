@@ -155,16 +155,18 @@ namespace Com
         void SetRetransmitToCallback(const RetransmitTo& callback);
 
         /**
-         * Set callback for notification that the send queue is nolonger full. After a SendAll or SendTo has returned false due to
+         * Set callback for notification that the send queue is nolonger full. After a SendToNode or SendToNodeType has returned false due to
          * full send queue, this callback will notfy that the send queue is no longer full. The notification will be executed when
          * at least the specified percent of the send queue is free.
          * Note that callback will only be received if user called a Send method that returned false. If the send queue has been full but
          * no attempt was made to send anything while it was full, no notification will be made.
+         * This method may be called twice to set up one callback for acked sends and one for unacked sends.
          *
          * @param callback [in] - Callback function.
          * @param percentFreeLimit [in] - Threshold value given in percent of the total capacity of the send queue.
+         * @param ackedQueue [in] - If true the callback is intended for acked sends, if false the callback in intended for unacked sends.
          */
-        void SetQueueNotFullCallback(const QueueNotFull& callback, int freePartThreshold);
+        void SetQueueNotFullCallback(const QueueNotFull& callback, int freePartThreshold, bool ackedQueue);
 
         /**
          * Set callback for receive data for a specific data type. Can be called multiple times with different dataTypeIdentifier.
@@ -232,9 +234,10 @@ namespace Com
          * @param data [in] - Pointer to the data that shall be sent.
          * @param size [in] - Size of data.
          * @param dataTypeIdentifier [in] - Custom identifier specifying which type of data. Only data receivers added with the same identifier will get the data.
+         * @param ack [in] - If true communication will assure delivery by requesting all receivers to acknowledge the reception of the data.
          * @return True if data could be added to send queue. False if send queue is full, in that case try again later.
          */
-        bool SendToNode(int64_t nodeId, int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, int64_t dataTypeIdentifier);
+        bool SendToNode(int64_t nodeId, int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, int64_t dataTypeIdentifier, bool ack);
 
         /**
          * Send data to all nodes of a specific node type. If the specified node type does not exist, the message is silently ignored and the return value will be 'true'.
@@ -243,9 +246,10 @@ namespace Com
          * @param data [in] - Pointer to the data that shall be sent.
          * @param size [in] - Size of data.
          * @param dataTypeIdentifier [in] - Custom identifier specifying which type of data. Only data receivers added with the same identifier will get the data.
+         * @param ack [in] - If true communication will assure delivery by requesting all receivers to acknowledge the reception of the data.
          * @return True if data could be added to send queue. False if send queue is full, in that case try again later.
          */
-        bool SendToNodeType(int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, int64_t dataTypeIdentifier);
+        bool SendToNodeType(int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, int64_t dataTypeIdentifier, bool ack);
 
         /**
          * Get the number of messages in a node types send queue.

@@ -34,6 +34,8 @@
 //**********************************
 int main(int argc, char* argv[])
 {    
+    boost::chrono::steady_clock::now();
+
     if (argc>1)
     {
         std::string run(argv[1]);
@@ -57,11 +59,11 @@ int main(int argc, char* argv[])
             HeartbeatSenderTest test;
             test.Run();
         }
-//        else if (run=="AckedDataSenderTest")
-//        {
-//            AckedDataSenderTest test;
-//            test.Run();
-//        }
+        else if (run=="AckedDataSenderTest")
+        {
+            AckedDataSenderTest test;
+            test.Run();
+        }
         else if (run=="DiscovererTest")
         {
             DiscovererTest test;
@@ -82,7 +84,7 @@ int main(int argc, char* argv[])
 //        //{(DeliveryHandlerTest()).Run();}
         {(ReaderWriterTest()).Run();}
         {(HeartbeatSenderTest()).Run();}
-//        {(AckedDataSenderTest()).Run();}
+        {(AckedDataSenderTest()).Run();}
         {(DiscovererTest()).Run();}
 
         //if we get here all tests passed without errors

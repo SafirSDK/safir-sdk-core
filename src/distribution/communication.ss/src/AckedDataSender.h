@@ -215,7 +215,7 @@ namespace Com
                         //here we have something unacked from the node
                         if (recvIt->second.sendMethod==ack.sendMethod && recvIt->second.sequenceNumber<=ack.sequenceNumber)
                         {
-                            ud->receivers.erase(recvIt); //This message is now acked, remove from list of still unacked
+                            ud->receivers.erase(recvIt); //This meDiscovererTestssage is now acked, remove from list of still unacked
                         }
                     }
                 }
@@ -378,7 +378,7 @@ namespace Com
             }
 
             //Always called from writeStrand
-            static const boost::chrono::milliseconds timerInterval(2*m_waitForAckTimeout);
+            static const boost::chrono::milliseconds timerInterval(m_waitForAckTimeout-10);
             static const boost::chrono::milliseconds waitLimit(m_waitForAckTimeout);
 
             //Check if there is any unacked messages that are old enough to be retransmitted
