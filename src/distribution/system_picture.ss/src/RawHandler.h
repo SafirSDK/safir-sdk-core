@@ -296,13 +296,20 @@ namespace SP
                               });
         }
 
-        void SetElectionId(const int64_t id)
+        void SetElectionId(const int64_t nodeId, const int64_t electionId)
         {
-            m_strand.dispatch([this, id]
+            m_strand.dispatch([this, nodeId, electionId]
                               {
-                                  lllog(7) << "SP: Election Id " << id << " set in RawHandler, will trigger sending of raw to other nodes" << std::endl;
-                                  m_allStatisticsMessage.set_election_id(id);
-                                  PostElectionIdChangedCallback();
+                                  lllog(7) << "SP: Election Id " << electionId 
+                                           << " set in RawHandler." << std::endl;
+
+                                  m_allStatisticsMessage.set_election_id(electionId);
+
+                                  if (nodeId != m_id)
+                                  {
+                                      lllog(7) << "SP: Triggering sending of raw to other nodes" << std::endl;
+                                      PostElectionIdChangedCallback();
+                                  }
                               });
         }
 
@@ -363,7 +370,7 @@ namespace SP
         
             m_communication.IncludeNode(id);
 
-            PostNodesChangedCallback();
+            PostNodesChangedCallback(); //TODO: should we really do double callbacks?!
             PostRawChangedCallback();
         }
 
@@ -460,7 +467,7 @@ namespace SP
 
             if (somethingChanged)
             {
-                PostNodesChangedCallback();
+                PostNodesChangedCallback(); //TODO double callbacks?
                 PostRawChangedCallback();
             }
         }

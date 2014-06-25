@@ -352,7 +352,7 @@ BOOST_AUTO_TEST_CASE( election_id_changed_callback)
                                         BOOST_CHECK_EQUAL(statistics.ElectionId(), 199);
                                     });
     comm.newNodeCb("asdf",11,10,"asdffff","asdfqqqq");
-    rh.SetElectionId(199);
+    rh.SetElectionId(11, 199);
 
     BOOST_CHECK_NO_THROW(ioService.run());
     BOOST_CHECK_EQUAL(cbCalls, 1);
