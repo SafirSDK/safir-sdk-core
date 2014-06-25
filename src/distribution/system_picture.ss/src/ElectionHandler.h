@@ -25,6 +25,8 @@
 
 #include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Dob/Internal/SystemPictureDefs.h>
+#include <Safir/Dob/Internal/RawStatistics.h>
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
@@ -353,7 +355,12 @@ namespace SP
                     boost::shared_ptr<char[]> data = boost::make_shared<char[]>(size);
                     aliveMsg.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
                 
-                    const bool sent = m_communication.SendToNode(it.first, it.second.first, std::move(data), size, m_receiverId, true);
+                    const bool sent = m_communication.SendToNode(it.first, 
+                                                                 it.second.first, 
+                                                                 std::move(data),
+                                                                 size, 
+                                                                 m_receiverId, 
+                                                                 true);
                 
                     if (!sent)
                     {

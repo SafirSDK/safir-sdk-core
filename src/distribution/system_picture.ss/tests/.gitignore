@@ -9,3 +9,4 @@ LocalSubscriber_test
 RemoteSubscriber_test
 
 RawHandler_test
+ElectionHandler_test
