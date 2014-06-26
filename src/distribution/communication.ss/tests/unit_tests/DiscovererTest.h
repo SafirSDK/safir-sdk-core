@@ -80,7 +80,6 @@ public:
         // shutdown
         //-----------
         work.reset();
-        io.stop();
         threads.join_all();
 
         bool passed=false;
@@ -153,59 +152,54 @@ public:
         //----------------------
         // Test
         //----------------------
-        Discoverer s0(io, CreateNode(10000), [&](const Com::Node& n){OnNewNode(10000, n);});
-        Discoverer n0(io, CreateNode(10001), [&](const Com::Node& n){OnNewNode(10001, n);});
-        Discoverer n1(io, CreateNode(10002), [&](const Com::Node& n){OnNewNode(10002, n);});
+        discoverState.insert(std::make_pair(10000, Info(10000, io)));
+        discoverState.insert(std::make_pair(10001, Info(10001, io)));
+        discoverState.insert(std::make_pair(10002, Info(10002, io)));
+
         auto Deliver=[&]()
         {
-            HandleDiscover::Deliver(s0, 10000);
-            HandleDiscover::Deliver(n0, 10001);
-            HandleDiscover::Deliver(n1, 10002);
+            boost::mutex::scoped_lock lock(mutex);
+            for (auto& vt : discoverState)
+            {
+                auto& dp=vt.second.discover;
+                HandleDiscover::Deliver(*dp, vt.first);
+            }
         };
-        s0.m_timeoutInterval={100, 200};
-        n0.m_timeoutInterval={100, 200};
-        n1.m_timeoutInterval={100, 200};
 
         std::vector<std::string> seeds{"127.0.0.1:10000"};
-        n0.AddSeeds(seeds);
-        n1.AddSeeds(seeds);
+        discoverState[10001].discover->AddSeeds(seeds);
+        discoverState[10002].discover->AddSeeds(seeds);
 
-        s0.Start();
-        n0.Start();
+        discoverState[10000].discover->Start();
+        discoverState[10001].discover->Start();
 
-        Wait(1100);
+        Wait(1000); //this is way more than the send discover timer, so hereafter we should have got a discover
         Deliver();
 
         CHECK(discoverState[10001].sentDiscoverTo.size()>0);
         CHECK(discoverState[10001].sentDiscoverTo.back()==10000);
 
-        Wait(200);
+        Wait(1000);
         Deliver();
 
         CHECK(discoverState[10000].sentNodeInfoTo.size()>0);
         CHECK(discoverState[10000].sentNodeInfoTo.back()==10001);
 
-        n1.Start();
-        Wait(1100);
+        discoverState[10002].discover->Start();
+
+        Wait(500);
         for (int i=0; i<10; ++i)
         {
             Deliver();
             Wait(200);
         }
 
-        s0.Stop();
-        n0.Stop();
-        n1.Stop();
-
-        //check that all messages have been dispatched
-        CHECK(discoverState[10000].recvQueue.empty());
-        CHECK(discoverState[10001].recvQueue.empty());
-        CHECK(discoverState[10002].recvQueue.empty());
-
-        //check that all nodes know about 2 other nodes
-        CHECK(discoverState[10000].newNodes.size()==2);
-        CHECK(discoverState[10001].newNodes.size()==2);
-        CHECK(discoverState[10002].newNodes.size()==2);
+        for (auto&& vt : discoverState)
+        {
+            vt.second.discover->Stop();
+            CHECK(vt.second.recvQueue.empty());
+            CHECK(vt.second.newNodes.size()==2);
+        }
 
         //check that 10000 has got discover and nodeInfo from both the others
         CHECK(std::find(discoverState[10000].sentDiscoverTo.begin(), discoverState[10000].sentDiscoverTo.end(), 10001)!=discoverState[10000].sentDiscoverTo.end());
@@ -227,7 +221,6 @@ public:
         // shutdown
         //-----------
         work.reset();
-        io.stop();
         threads.join_all();
 
         std::cout<<"HandleDiscover tests passed"<<std::endl;
@@ -237,19 +230,12 @@ private:
 
     static boost::mutex mutex;
 
-    struct Info
-    {
-        std::vector<int64_t> newNodes;
-        std::vector<int64_t> sentDiscoverTo;
-        std::vector<int64_t> sentNodeInfoTo;
-        std::queue<Com::CommunicationMessage> recvQueue;
-    };
-    static std::map<int64_t, HandleDiscover::Info> discoverState;
-
     static void DumpInfo()
     {
-        for (auto vt : discoverState)
+        std::cout<<"------ Info ------"<<std::endl;
+        for (auto&& vt : discoverState)
         {
+            boost::mutex::scoped_lock lock(mutex);
             std::cout<<"Id: "<<vt.first<<std::endl;
             std::cout<<"Nodes: ";
             for (auto id : vt.second.newNodes) {std::cout<<id<<", ";}
@@ -263,6 +249,7 @@ private:
             for (auto id : vt.second.sentNodeInfoTo) {std::cout<<id<<", ";}
             std::cout<<std::endl<<std::endl;
         }
+        std::cout<<"------------------\n"<<std::endl;
     }
 
     static Com::Node CreateNode(int i)
@@ -299,6 +286,24 @@ private:
 
     typedef Com::Writer<Com::UserData, TestSendPolicy> TestWriter;
     typedef Com::DiscovererBasic<TestWriter> Discoverer;
+
+    struct Info
+    {
+        std::vector<int64_t> newNodes;
+        std::vector<int64_t> sentDiscoverTo;
+        std::vector<int64_t> sentNodeInfoTo;
+        std::queue<Com::CommunicationMessage> recvQueue;
+        boost::shared_ptr<HandleDiscover::Discoverer> discover;
+
+        Info() {}
+
+        Info(int64_t id, boost::asio::io_service& io)
+            :discover(boost::make_shared<HandleDiscover::Discoverer>(io, HandleDiscover::CreateNode(id), [=](const Com::Node& n){HandleDiscover::OnNewNode(id, n);}))
+        {
+            discover->m_timeoutInterval={100,200};
+        }
+    };
+    static std::map<int64_t, HandleDiscover::Info> discoverState;
 
     static void Deliver(Discoverer& discoverer, int64_t id)
     {
