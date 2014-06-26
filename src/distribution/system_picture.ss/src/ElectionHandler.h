@@ -107,6 +107,7 @@ namespace SP
                                       }
                                       return res;
                                   }())
+            , m_electionTimeout(CalculateElectionTimeout(nodeTypes))
             , m_elected(std::numeric_limits<int64_t>::min())
             , m_electionTimer(ioService)
             , m_currentElectionId(0)
@@ -122,9 +123,10 @@ namespace SP
                                           },
                                           m_receiverId);
             
-            const auto electionTimeout = CalculateElectionTimeout(nodeTypes);
-            lllog(3) << "SP: ElectionTimeout will be " << boost::chrono::duration_cast<boost::chrono::milliseconds>(electionTimeout) << std::endl;
-            m_electionTimer.expires_from_now(electionTimeout); 
+            const auto aloneTimeout = CalculateAloneTimeout(nodeTypes);
+            lllog(3) << "SP: AloneTimeout will be " << boost::chrono::duration_cast<boost::chrono::milliseconds>(aloneTimeout) << std::endl;
+            lllog(3) << "SP: ElectionTimeout will be " << boost::chrono::duration_cast<boost::chrono::milliseconds>(m_electionTimeout) << std::endl;
+            m_electionTimer.expires_from_now(aloneTimeout); 
             m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
                                                      {
                                                          if (!error)
@@ -157,7 +159,9 @@ namespace SP
         }
 
     private:
-        static boost::chrono::steady_clock::duration CalculateElectionTimeout(const std::map<int64_t, NodeType>& nodeTypes)
+        /** Calculate the time to wait for other nodes to come up before assuming that 
+         * we're alone and proclaiming victory. */
+        static boost::chrono::steady_clock::duration CalculateAloneTimeout(const std::map<int64_t, NodeType>& nodeTypes)
         {
             //use average of non-light node types heartbeatInterval * maxLostHeartbeats / 2.0
             boost::chrono::steady_clock::duration sum;
@@ -170,9 +174,26 @@ namespace SP
                     sum += nt.second.heartbeatInterval * nt.second.maxLostHeartbeats;
                 }
             }
-            //election timeout can never be less than 1 second
-            return std::max<boost::chrono::steady_clock::duration>(boost::chrono::seconds(1), sum / (number * 2));
+            //election timeout can never be less than 100 milliseconds
+            return std::max<boost::chrono::steady_clock::duration>(boost::chrono::milliseconds(100),
+                                                                   sum / (number * 2));
         }
+
+        /** Calculate the time to wait for other nodes to respond to our INQUIRY. */
+        static boost::chrono::steady_clock::duration CalculateElectionTimeout(const std::map<int64_t, NodeType>& nodeTypes)
+        {
+            //use max of non-light node types retryTimeout * maxLostHeartbeats
+            boost::chrono::steady_clock::duration max = boost::chrono::milliseconds(100);
+            for (const auto& nt: nodeTypes)
+            {
+                if (!nt.second.isLight)
+                {
+                    max = std::max(max,nt.second.retryTimeout * nt.second.maxLostHeartbeats);
+                }
+            }
+            return max;
+        }
+
 
         static std::wstring ToString(const ElectionAction action)
         {
@@ -193,9 +214,7 @@ namespace SP
             //cancel any other pending elections
             m_electionTimer.cancel(); //
         
-            //TODO: how long should this timeout be? And how does it interact with the discovery interval
-            //in communication?
-            m_electionTimer.expires_from_now(boost::chrono::seconds(3)); 
+            m_electionTimer.expires_from_now(m_electionTimeout); 
             m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
                                                      {
                                                          if (!!error)
@@ -443,6 +462,8 @@ namespace SP
         const int64_t m_id;
         const std::map<int64_t, NodeType> m_nodeTypes;
         const std::set<int64_t> m_nonLightNodeTypes;
+
+        const boost::chrono::steady_clock::duration m_electionTimeout;
 
         RawStatistics m_lastStatistics;
 

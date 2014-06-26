@@ -97,8 +97,8 @@ struct Fixture
     static std::map<int64_t, NodeType> GetNodeTypes()
     {
         std::map<int64_t, NodeType> nodeTypes;
-        nodeTypes.insert(std::make_pair(10, NodeType(10,"mupp",false,boost::chrono::milliseconds(1),10)));
-        nodeTypes.insert(std::make_pair(20, NodeType(20,"tupp",true,boost::chrono::seconds(1),22)));
+        nodeTypes.insert(std::make_pair(10, NodeType(10,"mupp",false,boost::chrono::milliseconds(1),10,boost::chrono::seconds(1))));
+        nodeTypes.insert(std::make_pair(20, NodeType(20,"tupp",true,boost::chrono::seconds(1),22,boost::chrono::seconds(1))));
         return nodeTypes;
     }
 
