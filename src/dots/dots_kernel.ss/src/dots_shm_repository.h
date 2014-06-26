@@ -250,7 +250,7 @@ namespace Internal
     //-------------------------------------------
     struct ValueDefinitionShm
     {
-        struct
+        struct Key
         {
             StringShm str;
             DotsC_Int64 hash;
@@ -259,9 +259,16 @@ namespace Internal
                 DotsC_Int32 int32;
                 DotsC_Int64 int64;
             };
-        } key;
 
-        struct
+            Key(boost::interprocess::managed_shared_memory* shm)
+                :str(shm->get_segment_manager())
+                ,hash(0)
+                ,int64(0)
+            {
+            }
+        };
+
+        struct Val
         {
             StringShm str;
             DotsC_Int64 hash;
@@ -273,22 +280,33 @@ namespace Internal
                 DotsC_Float64 float64;
                 bool boolean;
             };
-        } val;
+
+            Val(boost::interprocess::managed_shared_memory* shm)
+                :str(shm->get_segment_manager())
+                ,hash(0)
+                ,int64(0)
+            {
+            }
+        };
+
+        Key key;
+        Val val;
 
         ValueDefinitionShm(boost::interprocess::managed_shared_memory* shm)
-            :stringVal(shm->get_segment_manager())
+            :key(shm)
+            ,val(shm)
         {
         }
 
-        ValueDefinitionShm(const char* strVal, boost::interprocess::managed_shared_memory* shm)
-            :stringVal(strVal, shm->get_segment_manager())
-        {
-        }
+//        ValueDefinitionShm(const char* strVal, boost::interprocess::managed_shared_memory* shm)
+//            :stringVal(strVal, shm->get_segment_manager())
+//        {
+//        }
 
-        ValueDefinitionShm(const char* strVal, size_t size, boost::interprocess::managed_shared_memory* shm)
-            :stringVal(strVal, size, shm->get_segment_manager())
-        {
-        }
+//        ValueDefinitionShm(const char* strVal, size_t size, boost::interprocess::managed_shared_memory* shm)
+//            :stringVal(strVal, size, shm->get_segment_manager())
+//        {
+//        }
 
         ValueDefinitionShm(const ValueDefinitionShm& other)
         {
@@ -530,8 +548,6 @@ namespace Internal
             :m_typeId(cd->GetTypeId())
             ,m_file(cd->FileName(), shm->get_segment_manager())
             ,m_name(cd->GetName(), shm->get_segment_manager())
-            ,m_initialSize(cd->InitialSize())
-            ,m_ownSize(cd->OwnSize())
             ,m_descendants(shm->get_segment_manager())
             ,m_members(shm->get_segment_manager())
             ,m_properties(shm->get_segment_manager())
@@ -637,8 +653,6 @@ namespace Internal
 
         int GetNumberOfCreateRoutines() const {return 0;}
         const CreateRoutineDescriptionShm* GetCreateRoutine(int /*index*/) const {return NULL;}
-        int InitialSize() const {return m_initialSize;}
-        int OwnSize() const {return m_ownSize;}
 
         void SetBaseClass(const ClassDescriptionShm* base) {m_base=base;}
         void AddDescendant(const ClassDescriptionShm* descendant) {m_descendants.push_back(ClassDescriptionShmPtr(descendant));}
@@ -649,8 +663,6 @@ namespace Internal
         DotsC_TypeId m_typeId;
         StringShm m_file;
         StringShm m_name;
-        int m_initialSize;
-        int m_ownSize;
 
         ClassDescriptionShmPtr m_base;
         ClassPtrVectorShm m_descendants;

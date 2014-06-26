@@ -170,9 +170,11 @@ namespace Internal
         :m_name(pd->GetName(), shm->get_segment_manager())
         ,m_qualifiedName(pd->GetQualifiedName(), shm->get_segment_manager())
         ,m_memberType(pd->GetMemberType())
-        ,m_isArray(pd->IsArray())
+        ,m_collectionType(pd->GetCollectionType())
+        ,m_keyType(pd->GetKeyType())
         ,m_hidden(pd->IsHidden())
         ,m_typeId(pd->GetTypeId())
+        ,m_keyTypeId(pd->GetKeyTypeId())
         ,m_values(shm->get_segment_manager())
     {
         switch(m_memberType)
