@@ -201,7 +201,8 @@ int main(int argc, char * argv[])
                                                                              nt.name, 
                                                                              nt.isLight, 
                                                                              boost::chrono::milliseconds(nt.heartbeatInterval),
-                                                                             nt.maxLostHeartbeats)));
+                                                                             nt.maxLostHeartbeats,
+                                                                             boost::chrono::milliseconds(nt.retryTimeout))));
     }
 
 
