@@ -173,7 +173,7 @@ namespace SerializationUtils
             }
             catch (const std::exception& err)
             {
-                throw ParseError("Serialization error", err.what(), "", 206);
+                throw ParseError("Serialization error", err.what(), "", 208);
             }
 
             writer.WriteValue(memIx, arrIx, key, boolVal, false, true);

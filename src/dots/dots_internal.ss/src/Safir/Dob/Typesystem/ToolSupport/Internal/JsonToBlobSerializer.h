@@ -196,7 +196,7 @@ namespace Internal
                         {
                             std::ostringstream os;
                             os<<"Failed to serialize dictionary member '"<<cd->GetName()<<"."<<md->GetName()<<"' with index="<<valueIndex<<" from Json to binary. Type is incorrect.";
-                            throw ParseError("JsonToBinary serialization error", os.str(), "", 835);
+                            throw ParseError("JsonToBinary serialization error", os.str(), "", 209);
                         }
                         ++valueIndex;
                     }

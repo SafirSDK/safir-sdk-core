@@ -303,7 +303,7 @@ namespace ToolSupport
         virtual DotsC_TypeId GetTypeId() const {return typeId;}
         virtual const char* GetName() const {return name.c_str();}
         virtual DotsC_TypeId GetCheckSum() const {return checksum;}
-        virtual int GetArraySize() const {return static_cast<int>(enumerationValues.size());}
+        virtual int GetNumberOfValues() const {return static_cast<int>(enumerationValues.size());}
         virtual const char* GetValueName(DotsC_EnumerationValue val) const {return enumerationValues[val].c_str();}
         virtual int GetIndexOfValue(const std::string& valueName) const;
 

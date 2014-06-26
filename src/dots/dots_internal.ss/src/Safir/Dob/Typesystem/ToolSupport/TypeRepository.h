@@ -334,7 +334,7 @@ namespace ToolSupport
          * @brief Get number of enumeration values.
          * @return Number of enumeration values.
          */
-        virtual int GetArraySize() const=0;
+        virtual int GetNumberOfValues() const=0;
 
         /**
          * @brief Get name of a enumeration value.
