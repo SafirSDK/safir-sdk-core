@@ -51,12 +51,14 @@ namespace SP
                  std::string name_,
                  const bool isLight_,
                  const boost::chrono::steady_clock::duration& heartbeatInterval_,
-                 const int maxLostHeartbeats_)
+                 const int maxLostHeartbeats_,
+                 const boost::chrono::steady_clock::duration& retryTimeout_)
             : id(id_)
             , name(std::move(name_))
             , isLight(isLight_)
             , heartbeatInterval(heartbeatInterval_)
             , maxLostHeartbeats(maxLostHeartbeats_)
+            , retryTimeout(retryTimeout_)
             , deadTimeout(maxLostHeartbeats_ * (heartbeatInterval_ + boost::chrono::milliseconds(50))){}
 
         const int64_t id;                                                //node type id
@@ -64,6 +66,7 @@ namespace SP
         const bool isLight;                                              //is the node a light node
         const boost::chrono::steady_clock::duration heartbeatInterval;   //time between heartbeats
         const int maxLostHeartbeats;                                     //number of heartbeats that can be lost before node is considered dead
+        const boost::chrono::steady_clock::duration retryTimeout;        //time to wait for replies.
         const boost::chrono::steady_clock::duration deadTimeout;         //heartbeatInterval * maxLostHeartbeats + a little extra
     };
 }

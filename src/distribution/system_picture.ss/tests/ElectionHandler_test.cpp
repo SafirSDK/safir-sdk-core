@@ -95,14 +95,17 @@ struct Fixture
     void ElectionComplete(const int64_t /*nodeId*/,
                           const int64_t /*electionId*/)
     {
-        
+        if (electionCompleteCb)
+        {
+            electionCompleteCb();
+        }
     }
 
     static std::map<int64_t, NodeType> GetNodeTypes()
     {
         std::map<int64_t, NodeType> nodeTypes;
-        nodeTypes.insert(std::make_pair(10, NodeType(10,"mupp",false,boost::chrono::milliseconds(1),10)));
-        nodeTypes.insert(std::make_pair(20, NodeType(20,"tupp",true,boost::chrono::seconds(1),22)));
+        nodeTypes.insert(std::make_pair(10, NodeType(10,"mupp",false,boost::chrono::milliseconds(1),10,boost::chrono::milliseconds(1))));
+        nodeTypes.insert(std::make_pair(20, NodeType(20,"tupp",true,boost::chrono::hours(1),22,boost::chrono::hours(1))));
         return nodeTypes;
     }
 
@@ -111,6 +114,9 @@ struct Fixture
     boost::asio::io_service ioService;
 
     ElectionHandlerBasic<Communication> eh;
+
+    std::function<void()> electionCompleteCb;
+
 };
 
 BOOST_FIXTURE_TEST_SUITE( s, Fixture )
@@ -125,6 +131,15 @@ BOOST_AUTO_TEST_CASE( start_stop )
 
     eh.Stop();
     ioService.run();
+}
+
+BOOST_AUTO_TEST_CASE( elect_self )
+{
+    electionCompleteCb = [&]{eh.Stop();};
+    ioService.run();
+    BOOST_CHECK(eh.IsElected());
+    BOOST_CHECK(eh.IsElected(10));
+    BOOST_CHECK(!eh.IsElected(20));
 }
 
 
