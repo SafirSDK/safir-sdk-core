@@ -97,4 +97,4 @@ add_test(RawHandler_test RawHandler_test)
 set_tests_properties(RawHandler_test PROPERTIES TIMEOUT 30)
 
 add_test(ElectionHandler_test ElectionHandler_test)
-set_tests_properties(ElectionHandler_test PROPERTIES TIMEOUT 30)
+set_tests_properties(ElectionHandler_test PROPERTIES TIMEOUT 600)
