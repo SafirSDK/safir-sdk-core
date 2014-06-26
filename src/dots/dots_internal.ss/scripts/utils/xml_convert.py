@@ -21,6 +21,7 @@ verbose=False
 current_namespace=""
 current_file=""
 error_files=[]
+no_array_conv=False
 
 
 def print_help():
@@ -30,7 +31,8 @@ def print_help():
     print("-d <directory> : convert files in directory")
     print("-r : convert directory recursive, must be combined with -d")
     print("-o <directory> : output directory, place converted files here. (Mandatory)")
-    print("-v verbose")
+    print("-v : verbose")
+    print("--no-array-conversion : don't convert arrays to new format.")
     
 def parse_commandline(argv):
     """Parse commandline"""
@@ -39,9 +41,10 @@ def parse_commandline(argv):
     global output_dir
     global input_path
     global verbose
+    global no_array_conv
     
     try:
-        opts, args = getopt.getopt(argv,"hrvf:d:o:")
+        opts, args = getopt.getopt(argv,"hrvf:d:o:", ["no-array-conversion"])
     except getopt.GetoptError:
         print("Invalid commandline")
         print_help()
@@ -63,6 +66,8 @@ def parse_commandline(argv):
             recursive=True
         elif opt=='-v':
             verbose=True
+        elif opt=='--no-array-conversion':
+            no_array_conv=True
             
     if output_dir=="" or not os.path.isdir(output_dir):
         print("Output directory missing.")
@@ -110,7 +115,7 @@ def to_path(l):
     
 def indent(elem, level=0):
     """ pretty print xml """
-    i = "\n" + level*"  "
+    i = os.linesep + level*"  "
     if len(elem):
         if not elem.text or not elem.text.strip():
             elem.text = i + "  "
@@ -125,7 +130,6 @@ def indent(elem, level=0):
             elem.tail = i
 
 def convert_array(src, dest, member_name):
-    print("Array "+member_name)
     array_elements=src.find(ns('arrayElements'))
     if array_elements.find(ns('arrayElement'))==None:
         #empty array
@@ -270,6 +274,9 @@ def convert_create_routines(tree):
     
 def convert_parameter_arrays(tree):
     """Converts all old format arrays in a xml tree"""
+    if no_array_conv:
+        return False
+    
     root = tree.getroot()
     set_current_namespace(root.tag)    
     changed=False
@@ -323,7 +330,14 @@ def convert_file(file_path, out_dir):
         if converted_create_routines: output('                - Converted create routines')
         indent(root)
         new_file=os.path.join(out_dir, os.path.basename(file_path))
-        tree.write(new_file, encoding='utf-8', xml_declaration=True, default_namespace=None, method='xml')
+        
+        #Since tree.write will add a unix lineending after <?xml version...?> we do this step manually instead.
+        #tree.write(new_file, encoding='utf-8', xml_declaration=True, default_namespace=None, method='xml')
+        xml_str='<?xml version="1.0" encoding="utf-8" ?>'+os.linesep+ET.tostring(root, encoding='utf-8', method='xml')
+        outfile=open(new_file, "w")
+        outfile.write(xml_str)
+        outfile.close()
+        
         number_of_converted=number_of_converted+1
     else:
         number_of_unchanged=number_of_unchanged+1
@@ -343,6 +357,10 @@ def convert_dir(path, out_dir):
                 except:
                     pass 
                 convert_dir(os.path.join(root, d), od)
+                
+                if not os.listdir(od):
+                    #empty folder, remove it again
+                    os.rmdir(od)
         break
     
 def main(argv):
