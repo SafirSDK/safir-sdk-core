@@ -214,54 +214,59 @@ namespace SP
             //cancel any other pending elections
             m_electionTimer.cancel(); //
         
-            m_electionTimer.expires_from_now(m_electionTimeout); 
+            //This timeout is just to make sure that if several nodes come up at the same time
+            //we will not start too many elections
+            m_electionTimer.expires_from_now(boost::chrono::milliseconds(100)); 
             m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
-                                                     {
-                                                         if (!!error)
-                                                         {
-                                                             return;
-                                                         }
-                                                         lllog(4) << "SP: Checking if I should start election" << std::endl;
+            {
+                if (!!error)
+                {
+                    return;
+                }
+                lllog(4) << "SP: Checking if I should start election" << std::endl;
             
-                                                         if (!m_lastStatistics.Valid())
-                                                         {
-                                                             lllog(4) << "SP: Haven't heard from any other nodes, electing myself!" << std::endl;
-                                                             m_elected = m_id;
-                                                             return;
-                                                         }
-                                                         else
-                                                         {
-                                                             for (int i = 0; i < m_lastStatistics.Size(); ++i)
-                                                             {
-                                                                 lllog(7) << "SP:   know of node " << m_lastStatistics.Id(i) << (m_lastStatistics.IsDead(i) ? " which is dead" : "") << std::endl;
+                if (!m_lastStatistics.Valid())
+                {
+                    lllog(4) << "SP: Haven't heard from any other nodes, electing myself!" << std::endl;
+                    m_elected = m_id;
+                    m_currentElectionId = LlufId_GenerateRandom64();
+                    m_electionCompleteCallback(m_elected,m_currentElectionId);
+
+                    return;
+                }
+                else
+                {
+                    for (int i = 0; i < m_lastStatistics.Size(); ++i)
+                    {
+                        lllog(7) << "SP:   know of node " << m_lastStatistics.Id(i) << (m_lastStatistics.IsDead(i) ? " which is dead" : "") << std::endl;
                         
-                                                                 if (m_lastStatistics.Id(i) == m_elected && !m_lastStatistics.IsDead(i))
-                                                                 {
-                                                                     if (m_elected > m_id)
-                                                                     {
-                                                                         lllog(4) << "SP: Found elected node with higher id than me, not starting election!" << std::endl;
-                                                                         return;
-                                                                     }
-                                                                 }
+                        if (m_lastStatistics.Id(i) == m_elected && !m_lastStatistics.IsDead(i))
+                        {
+                            if (m_elected > m_id)
+                            {
+                                lllog(4) << "SP: Found elected node with higher id than me, not starting election!" << std::endl;
+                                return;
+                            }
+                        }
+                    }
+                }
+            
+            
+                lllog(4) << "SP: Starting election" << std::endl;
+                m_currentElectionId = LlufId_GenerateRandom64();
+            
+                m_pendingInquiries = m_nonLightNodeTypes;
+                SendPendingElectionMessages();
+            
+                m_electionTimer.expires_from_now(m_electionTimeout);
+                m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
+                                                         {
+                                                             if (!error)
+                                                             {
+                                                                 ElectionTimeout();
                                                              }
-                                                         }
-            
-            
-                                                         lllog(4) << "SP: Starting election" << std::endl;
-                                                         m_currentElectionId = LlufId_GenerateRandom64();
-            
-                                                         m_pendingInquiries = m_nonLightNodeTypes;
-                                                         SendPendingElectionMessages();
-            
-                                                         m_electionTimer.expires_from_now(boost::chrono::seconds(6));
-                                                         m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
-                                                                                                  {
-                                                                                                      if (!error)
-                                                                                                      {
-                                                                                                          ElectionTimeout();
-                                                                                                      }
-                                                                                                  }));
-                                                     }));
+                                                         }));
+            }));
         }
 
         
