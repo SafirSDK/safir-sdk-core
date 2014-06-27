@@ -1,13 +1,9 @@
-cmake_minimum_required(VERSION 2.8)
-
-#this cmake file just installs the example code into $SAFIR_RUNTIME/sdk/docs/examples
-
-FILE(TO_CMAKE_PATH "$ENV{SAFIR_SDK}" SAFIR_SDK)
+#this cmake file just installs the example code into the doc directory of the install
 
 INSTALL(
   DIRECTORY ../../examples/
 
-  DESTINATION ${SAFIR_SDK}/docs/examples/
+  DESTINATION ${SAFIR_INSTALL_DESTINATION_DOC}/examples/
   
   FILES_MATCHING
   PATTERN "*.dou"
@@ -34,9 +30,5 @@ INSTALL(
   PATTERN "Debug" EXCLUDE
   PATTERN "Release" EXCLUDE
   PATTERN "RelWithDebInfo" EXCLUDE
-  PATTERN "MinSizeRel" EXCLUDE)
-
-#just use these variables to avoid some cmake warnings 
-#(they're set in the build script)
-if(SAFIR_ADA_SUPPORT OR SAFIR_JAVA_SUPPORT)
-endif()
+  PATTERN "MinSizeRel" EXCLUDE
+  PATTERN "generated_code" EXCLUDE)
