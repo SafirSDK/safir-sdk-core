@@ -208,7 +208,7 @@ namespace Internal
 
         void SetMember(const MemberDescriptionType* md,
                        DotsC_MemberIndex memIx,
-                       DotsC_ArrayIndex arrIx,
+                       DotsC_Int32 arrIx,
                        boost::property_tree::ptree& memberContent,
                        BlobWriter<RepositoryType>& writer) const
         {
@@ -271,7 +271,7 @@ namespace Internal
             }
         }
 
-        std::pair<std::string, int> GetParameterNameAndIndex(const MemberDescriptionType* md, DotsC_ArrayIndex arrIx, boost::property_tree::ptree& memberContent) const
+        std::pair<std::string, int> GetParameterNameAndIndex(const MemberDescriptionType* md, DotsC_Int32 arrIx, boost::property_tree::ptree& memberContent) const
         {
             try
             {

@@ -583,7 +583,7 @@ namespace Internal
                 const ClassDescriptionType* currentClass=c;
                 for (int memRef=0; memRef<md->MemberReferenceDepth(); ++memRef)
                 {
-                    std::pair<DotsC_MemberIndex, DotsC_ArrayIndex> ref=md->GetMemberReference(memRef);
+                    std::pair<DotsC_MemberIndex, DotsC_Int32> ref=md->GetMemberReference(memRef);
                     const MemberDescriptionType* member=currentClass->GetMember(ref.first);
                     os<<"->"<<member->GetName();
                     if (member->GetCollectionType()==ArrayCollectionType && propertyMember->GetCollectionType()!=ArrayCollectionType)

@@ -293,7 +293,7 @@ namespace Internal
 
         void SetMember(const MemberDescriptionType* md,
                        DotsC_MemberIndex memIx,
-                       DotsC_ArrayIndex arrIx,
+                       DotsC_Int32 arrIx,
                        boost::property_tree::ptree& memberContent,
                        boost::property_tree::ptree& keyContent,
                        BlobWriter<RepositoryType>& writer) const
@@ -357,7 +357,7 @@ namespace Internal
         template <class KeyT>
         void SetMember(const MemberDescriptionType* md,
                        DotsC_MemberIndex memIx,
-                       DotsC_ArrayIndex arrIx,
+                       DotsC_Int32 arrIx,
                        boost::property_tree::ptree& memberContent,
                        const KeyT& key,
                        BlobWriter<RepositoryType>& writer) const

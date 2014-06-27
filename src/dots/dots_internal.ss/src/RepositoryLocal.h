@@ -329,14 +329,14 @@ namespace ToolSupport
         virtual DotsC_PropertyMappingKind GetMappingKind() const {return kind;}
         virtual std::pair<const ParameterDescription*, int /*paramIndex*/> GetParameter() const {return std::make_pair(paramRef, paramIndex);} //if mapped to parameter
         virtual int MemberReferenceDepth() const {return static_cast<int>(memberRef.size());} //if mapped to member
-        virtual std::pair<DotsC_MemberIndex, DotsC_ArrayIndex> GetMemberReference(int depth) const {return memberRef[depth];} //if mapped to member
+        virtual std::pair<DotsC_MemberIndex, DotsC_Int32> GetMemberReference(int depth) const {return memberRef[depth];} //if mapped to member
 
         //Fields
         DotsC_PropertyMappingKind kind;
         int propertyMemberIndex;
         ParameterDescriptionLocal* paramRef;
         int paramIndex;
-        std::vector< std::pair<DotsC_MemberIndex, DotsC_ArrayIndex> > memberRef;
+        std::vector< std::pair<DotsC_MemberIndex, DotsC_Int32> > memberRef;
     };
     typedef boost::shared_ptr<MemberMappingLocal> MemberMappingLocalPtr;
 

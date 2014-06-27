@@ -137,7 +137,7 @@ namespace Internal
 
                 case ArrayCollectionType:
                 {
-                    DotsC_ArrayIndex arrayIndex=0;
+                    DotsC_Int32 arrayIndex=0;
                     for (boost::property_tree::ptree::const_iterator arrIt=memIt->second.begin(); arrIt!=memIt->second.end(); ++arrIt)
                     {
                         if (md->GetArraySize()<=arrayIndex)
@@ -163,7 +163,7 @@ namespace Internal
 
                 case SequenceCollectionType:
                 {
-                    DotsC_ArrayIndex valueIndex=0;
+                    DotsC_Int32 valueIndex=0;
                     for (boost::property_tree::ptree::const_iterator seqIt=memIt->second.begin(); seqIt!=memIt->second.end(); ++seqIt)
                     {
                         try
@@ -183,7 +183,7 @@ namespace Internal
 
                 case DictionaryCollectionType:
                 {
-                    DotsC_ArrayIndex valueIndex=0;
+                    DotsC_Int32 valueIndex=0;
                     for (boost::property_tree::ptree::const_iterator entryIt=memIt->second.begin(); entryIt!=memIt->second.end(); ++entryIt)
                     {
                         try
@@ -216,7 +216,7 @@ namespace Internal
 
         void SetMember(const MemberDescriptionType* md,
                        DotsC_MemberIndex memIx,
-                       DotsC_ArrayIndex arrIx,
+                       DotsC_Int32 arrIx,
                        const boost::property_tree::ptree& memberContent,
                        const boost::property_tree::ptree& keyContent,
                        BlobWriter<RepositoryType>& writer) const
@@ -280,7 +280,7 @@ namespace Internal
         template <class KeyT>
         void SetMember(const MemberDescriptionType* md,
                        DotsC_MemberIndex memIx,
-                       DotsC_ArrayIndex arrIx,
+                       DotsC_Int32 arrIx,
                        const boost::property_tree::ptree& memberContent,
                        const KeyT& key,
                        BlobWriter<RepositoryType>& writer) const

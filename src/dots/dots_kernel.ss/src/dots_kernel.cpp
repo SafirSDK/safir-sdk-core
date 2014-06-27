@@ -78,7 +78,7 @@ namespace
     bool GetPropertyParameterInternal(const DotsC_TypeId typeId,
                                       const DotsC_TypeId propertyId,
                                       const DotsC_MemberIndex member,
-                                      const DotsC_ArrayIndex index, //memberIndex
+                                      const DotsC_Int32 index, //memberIndex
                                       const ParameterDescriptionShm*& parameter,
                                       int& parameterIndex)
     {
@@ -316,7 +316,7 @@ void DotsC_SetChanged(char* const blob,
 
 void DotsC_SetChangedHere(char* const blob,
                           const DotsC_MemberIndex member,
-                          const DotsC_ArrayIndex index,
+                          const DotsC_Int32 index,
                           const bool changed)
 {
     Init();
@@ -559,7 +559,7 @@ DotsC_Int32 DotsC_GetMemberArraySizeProperty(const DotsC_TypeId classId, const D
         int refDepth=mm->MemberReferenceDepth();
         for (int i=0; i<refDepth-1; ++i)
         {
-            std::pair<DotsC_MemberIndex, DotsC_ArrayIndex> ref=mm->GetMemberReference(i);
+            std::pair<DotsC_MemberIndex, DotsC_Int32> ref=mm->GetMemberReference(i);
             parent=DotsC_GetComplexMemberTypeId(parent, ref.first);
         }
         return DotsC_GetMemberArraySize(parent, mm->GetMemberReference(refDepth-1).first);
@@ -609,7 +609,7 @@ DotsC_Int32 DotsC_GetStringMemberMaxLengthProperty(const DotsC_TypeId classId, c
         int refDepth=mm->MemberReferenceDepth();
         for (int i=0; i<refDepth-1; ++i)
         {
-            std::pair<DotsC_MemberIndex, DotsC_ArrayIndex> ref=mm->GetMemberReference(i);
+            std::pair<DotsC_MemberIndex, DotsC_Int32> ref=mm->GetMemberReference(i);
             parent=DotsC_GetComplexMemberTypeId(parent, ref.first);
         }
         return DotsC_GetStringMemberMaxLength(parent, mm->GetMemberReference(refDepth-1).first);
@@ -719,14 +719,14 @@ DotsC_Int32 DotsC_GetParameterArraySize(const DotsC_TypeId typeId, const DotsC_P
 //* Functions for retrieving member values
 //************************************************************************************
 
-bool DotsC_IsNullMember(const char* const blob, const DotsC_MemberIndex member, const DotsC_ArrayIndex index)
+bool DotsC_IsNullMember(const char* const blob, const DotsC_MemberIndex member, const DotsC_Int32 index)
 {
     Init();
     Status status=RepositoryKeeper::GetBlobLayout()->GetMemberStatus(blob, member, index);
     return status.IsNull();
 }
 
-bool DotsC_IsChangedMember(const char* const blob, const DotsC_MemberIndex member, const DotsC_ArrayIndex index)
+bool DotsC_IsChangedMember(const char* const blob, const DotsC_MemberIndex member, const DotsC_Int32 index)
 {
     Init();
     Status status=RepositoryKeeper::GetBlobLayout()->GetMemberStatus(blob, member, index);
@@ -757,7 +757,7 @@ bool DotsC_IsChangedMember(const char* const blob, const DotsC_MemberIndex membe
 }
 
 
-void DotsC_GetBooleanMember(const char* const blob, const DotsC_MemberIndex member, const DotsC_ArrayIndex index, bool& val, bool& isNull, bool& isChanged)
+void DotsC_GetBooleanMember(const char* const blob, const DotsC_MemberIndex member, const DotsC_Int32 index, bool& val, bool& isNull, bool& isChanged)
 {
     Init();
     Status status=RepositoryKeeper::GetBlobLayout()->GetBoolMember(blob, member, index, val);
@@ -767,7 +767,7 @@ void DotsC_GetBooleanMember(const char* const blob, const DotsC_MemberIndex memb
 
 void DotsC_GetEnumerationMember(const char* const blob,
                                 const DotsC_MemberIndex member,
-                                const DotsC_ArrayIndex index,
+                                const DotsC_Int32 index,
                                 DotsC_EnumerationValue & val,
                                 bool& isNull,
                                 bool& isChanged)
@@ -778,7 +778,7 @@ void DotsC_GetEnumerationMember(const char* const blob,
     isChanged=status.HasChanged();
 }
 
-void DotsC_GetInt32Member(const char* const blob, const DotsC_MemberIndex member, const DotsC_ArrayIndex index, DotsC_Int32& val, bool& isNull, bool& isChanged)
+void DotsC_GetInt32Member(const char* const blob, const DotsC_MemberIndex member, const DotsC_Int32 index, DotsC_Int32& val, bool& isNull, bool& isChanged)
 {
     Init();
     Status status=RepositoryKeeper::GetBlobLayout()->GetInt32Member(blob, member, index, val);
@@ -787,7 +787,7 @@ void DotsC_GetInt32Member(const char* const blob, const DotsC_MemberIndex member
 }
 
 
-void DotsC_GetInt64Member(const char* const blob, const DotsC_MemberIndex member, const DotsC_ArrayIndex index, DotsC_Int64& val, bool& isNull, bool& isChanged)
+void DotsC_GetInt64Member(const char* const blob, const DotsC_MemberIndex member, const DotsC_Int32 index, DotsC_Int64& val, bool& isNull, bool& isChanged)
 {
     Init();
     Status status=RepositoryKeeper::GetBlobLayout()->GetInt64Member(blob, member, index, val);
@@ -795,7 +795,7 @@ void DotsC_GetInt64Member(const char* const blob, const DotsC_MemberIndex member
     isChanged=status.HasChanged();
 }
 
-void DotsC_GetFloat32Member(const char* const blob, const DotsC_MemberIndex member, const DotsC_ArrayIndex index, DotsC_Float32& val, bool& isNull, bool& isChanged)
+void DotsC_GetFloat32Member(const char* const blob, const DotsC_MemberIndex member, const DotsC_Int32 index, DotsC_Float32& val, bool& isNull, bool& isChanged)
 {
     Init();
     Status status=RepositoryKeeper::GetBlobLayout()->GetFloat32Member(blob, member, index, val);
@@ -809,7 +809,7 @@ void DotsC_GetFloat32Member(const char* const blob, const DotsC_MemberIndex memb
     }
 }
 
-void DotsC_GetFloat64Member(const char* const blob, const DotsC_MemberIndex member, const DotsC_ArrayIndex index, DotsC_Float64& val, bool& isNull, bool& isChanged)
+void DotsC_GetFloat64Member(const char* const blob, const DotsC_MemberIndex member, const DotsC_Int32 index, DotsC_Float64& val, bool& isNull, bool& isChanged)
 {
     Init();
     Status status=RepositoryKeeper::GetBlobLayout()->GetFloat64Member(blob, member, index, val);
@@ -823,7 +823,7 @@ void DotsC_GetFloat64Member(const char* const blob, const DotsC_MemberIndex memb
     }
 }
 
-void DotsC_GetStringMember(const char* const blob, const DotsC_MemberIndex member, const DotsC_ArrayIndex index, const char* &val, bool& isNull, bool& isChanged)
+void DotsC_GetStringMember(const char* const blob, const DotsC_MemberIndex member, const DotsC_Int32 index, const char* &val, bool& isNull, bool& isChanged)
 {
     Init();
     DotsC_Int32 dummy=0;
@@ -834,7 +834,7 @@ void DotsC_GetStringMember(const char* const blob, const DotsC_MemberIndex membe
 
 void DotsC_GetObjectMember(const char* const blob,
                            const DotsC_MemberIndex member,
-                           const DotsC_ArrayIndex index,
+                           const DotsC_Int32 index,
                            const char* & val,
                            bool & isNull,
                            bool & isChanged)
@@ -848,7 +848,7 @@ void DotsC_GetObjectMember(const char* const blob,
 
 void DotsC_GetWriteableObjectMember(char* const blob,
                                     const DotsC_MemberIndex member,
-                                    const DotsC_ArrayIndex index,
+                                    const DotsC_Int32 index,
                                     char* & val,
                                     bool & isNull,
                                     bool & isChanged)
@@ -863,7 +863,7 @@ void DotsC_GetWriteableObjectMember(char* const blob,
 
 void DotsC_GetBinaryMember(const char* const blob,
                            const DotsC_MemberIndex member,
-                           const DotsC_ArrayIndex index,
+                           const DotsC_Int32 index,
                            const char* &val,
                            DotsC_Int32& size,
                            bool & isNull,
@@ -875,7 +875,7 @@ void DotsC_GetBinaryMember(const char* const blob,
     isChanged=status.HasChanged();
 }
 
-void DotsC_GetTypeIdMember(const char* const blob, const DotsC_MemberIndex member, const DotsC_ArrayIndex index, DotsC_TypeId& val, bool & isNull, bool & isChanged)
+void DotsC_GetTypeIdMember(const char* const blob, const DotsC_MemberIndex member, const DotsC_Int32 index, DotsC_TypeId& val, bool & isNull, bool & isChanged)
 {
     Init();
     Status status=RepositoryKeeper::GetBlobLayout()->GetInt64Member(blob, member, index, val);
@@ -885,7 +885,7 @@ void DotsC_GetTypeIdMember(const char* const blob, const DotsC_MemberIndex membe
 
 void DotsC_GetHashedIdMember(const char* const blob,
                              const DotsC_MemberIndex member,
-                             const DotsC_ArrayIndex index,
+                             const DotsC_Int32 index,
                              DotsC_Int64 & hashVal,
                              const char* & strVal,
                              bool & isNull,
@@ -899,7 +899,7 @@ void DotsC_GetHashedIdMember(const char* const blob,
 
 void DotsC_GetEntityIdMember(const char* const blob,
                              const DotsC_MemberIndex member,
-                             const DotsC_ArrayIndex index,
+                             const DotsC_Int32 index,
                              DotsC_EntityId & entityId,
                              const char* & instanceIdStr,
                              bool & isNull,
@@ -916,7 +916,7 @@ void DotsC_GetEntityIdMember(const char* const blob,
 //************************************************************************************
 void DotsC_SetNullMember(char* const blob,
                          const DotsC_MemberIndex member,
-                         const DotsC_ArrayIndex index)
+                         const DotsC_Int32 index)
 {
     Init();
     RepositoryKeeper::GetBlobLayout()->SetMemberStatus(true, true, blob, member, index);
@@ -925,7 +925,7 @@ void DotsC_SetNullMember(char* const blob,
 void DotsC_SetBooleanMember(const bool val,
                             char* & blob,
                             const DotsC_MemberIndex member,
-                            const DotsC_ArrayIndex index)
+                            const DotsC_Int32 index)
 {
     Init();
     RepositoryKeeper::GetBlobLayout()->SetBoolMember(val, blob, member, index);
@@ -935,7 +935,7 @@ void DotsC_SetBooleanMember(const bool val,
 void DotsC_SetEnumerationMember(const DotsC_EnumerationValue val,
                                 char* & blob,
                                 const DotsC_MemberIndex member,
-                                const DotsC_ArrayIndex index)
+                                const DotsC_Int32 index)
 {
     Init();
     RepositoryKeeper::GetBlobLayout()->SetEnumMember(val, blob, member, index);
@@ -946,7 +946,7 @@ void DotsC_SetEnumerationMember(const DotsC_EnumerationValue val,
 void DotsC_SetInt32Member(const DotsC_Int32 val,
                           char* & blob,
                           const DotsC_MemberIndex member,
-                          const DotsC_ArrayIndex index)
+                          const DotsC_Int32 index)
 {
     Init();
     RepositoryKeeper::GetBlobLayout()->SetInt32Member(val, blob, member, index);
@@ -956,7 +956,7 @@ void DotsC_SetInt32Member(const DotsC_Int32 val,
 void DotsC_SetInt64Member(const DotsC_Int64 val,
                           char* & blob,
                           const DotsC_MemberIndex member,
-                          const DotsC_ArrayIndex index)
+                          const DotsC_Int32 index)
 {
     Init();
     RepositoryKeeper::GetBlobLayout()->SetInt64Member(val, blob, member, index);
@@ -966,7 +966,7 @@ void DotsC_SetInt64Member(const DotsC_Int64 val,
 void DotsC_SetFloat32Member(const DotsC_Float32 val,
                             char* & blob,
                             const DotsC_MemberIndex member,
-                            const DotsC_ArrayIndex index)
+                            const DotsC_Int32 index)
 {
     Init();
     RepositoryKeeper::GetBlobLayout()->SetFloat32Member(val, blob, member, index);
@@ -976,7 +976,7 @@ void DotsC_SetFloat32Member(const DotsC_Float32 val,
 void DotsC_SetFloat64Member(const DotsC_Float64 val,
                             char* & blob,
                             const DotsC_MemberIndex member,
-                            const DotsC_ArrayIndex index)
+                            const DotsC_Int32 index)
 {
     Init();
     RepositoryKeeper::GetBlobLayout()->SetFloat64Member(val, blob, member, index);
@@ -986,7 +986,7 @@ void DotsC_SetFloat64Member(const DotsC_Float64 val,
 void DotsC_SetStringMember(const char* const val,
                            char* & blob,
                            const DotsC_MemberIndex member,
-                           const DotsC_ArrayIndex index)
+                           const DotsC_Int32 index)
 {
     Init();
     DotsC_Int32 dummy=0;
@@ -997,7 +997,7 @@ void DotsC_SetStringMember(const char* const val,
 void DotsC_SetTypeIdMember(const DotsC_TypeId val,
                            char* & blob,
                            const DotsC_MemberIndex member,
-                           const DotsC_ArrayIndex index)
+                           const DotsC_Int32 index)
 {
     Init();
     RepositoryKeeper::GetBlobLayout()->SetInt64Member(val, blob, member, index);
@@ -1008,7 +1008,7 @@ void DotsC_SetHashedIdMember(const DotsC_Int64 hashVal,
                              const char* const strVal,
                              char* & blob,
                              const DotsC_MemberIndex member,
-                             const DotsC_ArrayIndex index)
+                             const DotsC_Int32 index)
 {
     Init();
     RepositoryKeeper::GetBlobLayout()->SetHashedMember(hashVal, strVal, blob, member, index);
@@ -1019,14 +1019,14 @@ void DotsC_SetEntityIdMember(const DotsC_EntityId& entityId,
                              const char* const instanceIdStr,
                              char* & blob,
                              const DotsC_MemberIndex member,
-                             const DotsC_ArrayIndex index)
+                             const DotsC_Int32 index)
 {
     Init();
     RepositoryKeeper::GetBlobLayout()->SetEntityIdMember(entityId, instanceIdStr, blob, member, index);
     RepositoryKeeper::GetBlobLayout()->SetMemberStatus(false, true, blob, member, index);
 }
 
-void DotsC_SetObjectMember(const char* const val, char* & blob, const DotsC_MemberIndex member, const DotsC_ArrayIndex index)
+void DotsC_SetObjectMember(const char* const val, char* & blob, const DotsC_MemberIndex member, const DotsC_Int32 index)
 {
     Init();
     DotsC_Int32 dummy=0;
@@ -1038,7 +1038,7 @@ void DotsC_SetBinaryMember(const char* val,
                            DotsC_Int32 numberOfBytes,
                            char* & blob,
                            const DotsC_MemberIndex member,
-                           const DotsC_ArrayIndex index)
+                           const DotsC_Int32 index)
 {
     Init();
     RepositoryKeeper::GetBlobLayout()->SetDynamicMember(val, numberOfBytes, blob, member, index);
@@ -1219,7 +1219,7 @@ void DotsC_Base64ToBinary(char* binaryDest,
 //************************************************************************************
 //* Functions for retrieval of parameters
 //************************************************************************************
-void DotsC_GetBooleanParameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_ArrayIndex index, bool & val)
+void DotsC_GetBooleanParameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_Int32 index, bool & val)
 {
     Init();
     const ParameterDescriptionShm* const pd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
@@ -1228,7 +1228,7 @@ void DotsC_GetBooleanParameter(const DotsC_TypeId typeId, const DotsC_ParameterI
 
 void DotsC_GetEnumerationParameter(const DotsC_TypeId typeId,
                                    const DotsC_ParameterIndex parameter,
-                                   const DotsC_ArrayIndex index,
+                                   const DotsC_Int32 index,
                                    DotsC_EnumerationValue& val)
 {
     Init();
@@ -1236,42 +1236,42 @@ void DotsC_GetEnumerationParameter(const DotsC_TypeId typeId,
     val=pd->GetInt32Value(index);
 }
 
-void DotsC_GetInt32Parameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_ArrayIndex index, DotsC_Int32& val)
+void DotsC_GetInt32Parameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_Int32 index, DotsC_Int32& val)
 {
     Init();
     const ParameterDescriptionShm* const pd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
     val=pd->GetInt32Value(index);
 }
 
-void DotsC_GetInt64Parameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_ArrayIndex index, DotsC_Int64& val)
+void DotsC_GetInt64Parameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_Int32 index, DotsC_Int64& val)
 {
     Init();
     const ParameterDescriptionShm* const pd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
     val=pd->GetInt64Value(index);
 }
 
-void DotsC_GetFloat32Parameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_ArrayIndex index, DotsC_Float32& val)
+void DotsC_GetFloat32Parameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_Int32 index, DotsC_Float32& val)
 {
     Init();
     const ParameterDescriptionShm* const pd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
     val=pd->GetFloat32Value(index);
 }
 
-void DotsC_GetFloat64Parameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_ArrayIndex index, DotsC_Float64& val)
+void DotsC_GetFloat64Parameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_Int32 index, DotsC_Float64& val)
 {
     Init();
     const ParameterDescriptionShm* const pd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
     val=pd->GetFloat64Value(index);
 }
 
-void DotsC_GetStringParameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_ArrayIndex index, const char* &val)
+void DotsC_GetStringParameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_Int32 index, const char* &val)
 {
     Init();
     const ParameterDescriptionShm* const pd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
     val=pd->GetStringValue(index);
 }
 
-void DotsC_GetTypeIdParameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_ArrayIndex index, DotsC_TypeId& val)
+void DotsC_GetTypeIdParameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_Int32 index, DotsC_TypeId& val)
 {
     Init();
     const ParameterDescriptionShm* const pd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
@@ -1280,7 +1280,7 @@ void DotsC_GetTypeIdParameter(const DotsC_TypeId typeId, const DotsC_ParameterIn
 
 void DotsC_GetHashedIdParameter(const DotsC_TypeId typeId,
                                 const DotsC_ParameterIndex parameter,
-                                const DotsC_ArrayIndex index,
+                                const DotsC_Int32 index,
                                 DotsC_Int64 & hashVal,
                                 const char* & strVal)
 {
@@ -1293,7 +1293,7 @@ void DotsC_GetHashedIdParameter(const DotsC_TypeId typeId,
 
 void DotsC_GetEntityIdParameter(const DotsC_TypeId typeId,
                                 const DotsC_ParameterIndex parameter,
-                                const DotsC_ArrayIndex index,
+                                const DotsC_Int32 index,
                                 DotsC_EntityId & entityId,
                                 const char* & instanceIdStr)
 {
@@ -1307,7 +1307,7 @@ void DotsC_GetEntityIdParameter(const DotsC_TypeId typeId,
 
 void DotsC_GetObjectParameter(const DotsC_TypeId typeId,
                               const DotsC_ParameterIndex parameter,
-                              const DotsC_ArrayIndex index,
+                              const DotsC_Int32 index,
                               const char* & val)
 {
     Init();
@@ -1317,7 +1317,7 @@ void DotsC_GetObjectParameter(const DotsC_TypeId typeId,
 
 void DotsC_GetBinaryParameter(const DotsC_TypeId typeId,
                               const DotsC_ParameterIndex parameter,
-                              const DotsC_ArrayIndex index,
+                              const DotsC_Int32 index,
                               const char* &val,
                               DotsC_Int32& size)
 {
@@ -1359,7 +1359,7 @@ void DotsC_CreateObjectMember(char* const insideBlob,
                               const DotsC_Int32 blobSize,
                               const DotsC_TypeId typeId,
                               const DotsC_MemberIndex member,
-                              const DotsC_ArrayIndex index,
+                              const DotsC_Int32 index,
                               const bool isChanged,
                               char* & beginningOfUnused)
 {
@@ -1370,7 +1370,7 @@ void DotsC_CreateObjectMember(char* const insideBlob,
 void DotsC_CreateStringMember(char* const insideBlob,
                               const DotsC_Int32 stringLength, //remember the null-termination!
                               const DotsC_MemberIndex member,
-                              const DotsC_ArrayIndex index,
+                              const DotsC_Int32 index,
                               const bool isChanged,
                               char* & beginningOfUnused)
 {
@@ -1381,7 +1381,7 @@ void DotsC_CreateStringMember(char* const insideBlob,
 void DotsC_CreateBinaryMember(char* const insideBlob,
                               const DotsC_Int32 binarySize,
                               const DotsC_MemberIndex member,
-                              const DotsC_ArrayIndex index,
+                              const DotsC_Int32 index,
                               const bool isChanged,
                               char* & beginningOfUnused)
 {
@@ -1394,7 +1394,7 @@ void DotsC_SetBooleanMemberInPreallocated(const bool val,
                                           const bool isChanged,
                                           char* const blob,
                                           const DotsC_MemberIndex member,
-                                          const DotsC_ArrayIndex index)
+                                          const DotsC_Int32 index)
 {
     Init();
     if (!isNull)
@@ -1411,7 +1411,7 @@ void DotsC_SetInt32MemberInPreallocated(const DotsC_Int32 val,
                                         const bool isChanged,
                                         char* const blob,
                                         const DotsC_MemberIndex member,
-                                        const DotsC_ArrayIndex index)
+                                        const DotsC_Int32 index)
 {
     Init();
     if (!isNull)
@@ -1427,7 +1427,7 @@ void DotsC_SetInt64MemberInPreallocated(const DotsC_Int64 val,
                                         const bool isChanged,
                                         char* const blob,
                                         const DotsC_MemberIndex member,
-                                        const DotsC_ArrayIndex index)
+                                        const DotsC_Int32 index)
 {
     Init();
     if (!isNull)
@@ -1443,7 +1443,7 @@ void DotsC_SetFloat32MemberInPreallocated(const DotsC_Float32 val,
                                           const bool isChanged,
                                           char* const blob,
                                           const DotsC_MemberIndex member,
-                                          const DotsC_ArrayIndex index)
+                                          const DotsC_Int32 index)
 {
     Init();
     if (!isNull)
@@ -1459,7 +1459,7 @@ void DotsC_SetFloat64MemberInPreallocated(const DotsC_Float64 val,
                                           const bool isChanged,
                                           char* const blob,
                                           const DotsC_MemberIndex member,
-                                          const DotsC_ArrayIndex index)
+                                          const DotsC_Int32 index)
 {
     Init();
     if (!isNull)
@@ -1477,7 +1477,7 @@ void DotsC_SetHashedIdMemberInPreallocated(const DotsC_Int64 hashVal,
                                            const bool isChanged,
                                            char* const blob,
                                            const DotsC_MemberIndex member,
-                                           const DotsC_ArrayIndex index,
+                                           const DotsC_Int32 index,
                                            char* & beginningOfUnused)
 {
     Init();
@@ -1502,7 +1502,7 @@ void DotsC_SetEntityIdMemberInPreallocated(const DotsC_EntityId & entityId,
                                            const bool isChanged,
                                            char* const blob,
                                            const DotsC_MemberIndex member,
-                                           const DotsC_ArrayIndex index,
+                                           const DotsC_Int32 index,
                                            char* & beginningOfUnused)
 {
     Init();
@@ -1599,7 +1599,7 @@ void DotsC_GetEnumerationChecksum(const DotsC_TypeId typeId,
 void DotsC_GetBooleanPropertyParameter(const DotsC_TypeId typeId,
                                        const DotsC_TypeId propertyId,
                                        const DotsC_MemberIndex member,
-                                       const DotsC_ArrayIndex index,
+                                       const DotsC_Int32 index,
                                        bool & val)
 {
     Init();
@@ -1614,7 +1614,7 @@ void DotsC_GetBooleanPropertyParameter(const DotsC_TypeId typeId,
 void DotsC_GetEnumerationPropertyParameter( const DotsC_TypeId typeId,
                                             const DotsC_TypeId propertyId,
                                             const DotsC_MemberIndex member,
-                                            const DotsC_ArrayIndex index,
+                                            const DotsC_Int32 index,
                                             DotsC_EnumerationValue & val)
 {
     Init();
@@ -1629,7 +1629,7 @@ void DotsC_GetEnumerationPropertyParameter( const DotsC_TypeId typeId,
 void DotsC_GetInt32PropertyParameter(const DotsC_TypeId typeId,
                                      const DotsC_TypeId propertyId,
                                      const DotsC_MemberIndex member,
-                                     const DotsC_ArrayIndex index,
+                                     const DotsC_Int32 index,
                                      DotsC_Int32 & val)
 {
     Init();
@@ -1644,7 +1644,7 @@ void DotsC_GetInt32PropertyParameter(const DotsC_TypeId typeId,
 void DotsC_GetInt64PropertyParameter(const DotsC_TypeId typeId,
                                      const DotsC_TypeId propertyId,
                                      const DotsC_MemberIndex member,
-                                     const DotsC_ArrayIndex index,
+                                     const DotsC_Int32 index,
                                      DotsC_Int64 & val)
 {
     Init();
@@ -1659,7 +1659,7 @@ void DotsC_GetInt64PropertyParameter(const DotsC_TypeId typeId,
 void DotsC_GetFloat32PropertyParameter(const DotsC_TypeId typeId,
                                        const DotsC_TypeId propertyId,
                                        const DotsC_MemberIndex member,
-                                       const DotsC_ArrayIndex index,
+                                       const DotsC_Int32 index,
                                        DotsC_Float32 & val)
 {
     Init();
@@ -1674,7 +1674,7 @@ void DotsC_GetFloat32PropertyParameter(const DotsC_TypeId typeId,
 void DotsC_GetFloat64PropertyParameter(const DotsC_TypeId typeId,
                                        const DotsC_TypeId propertyId,
                                        const DotsC_MemberIndex member,
-                                       const DotsC_ArrayIndex index,
+                                       const DotsC_Int32 index,
                                        DotsC_Float64 & val)
 {
     Init();
@@ -1689,7 +1689,7 @@ void DotsC_GetFloat64PropertyParameter(const DotsC_TypeId typeId,
 void DotsC_GetStringPropertyParameter(const DotsC_TypeId typeId,
                                       const DotsC_TypeId propertyId,
                                       const DotsC_MemberIndex member,
-                                      const DotsC_ArrayIndex index,
+                                      const DotsC_Int32 index,
                                       const char* & val)
 {
     Init();
@@ -1704,7 +1704,7 @@ void DotsC_GetStringPropertyParameter(const DotsC_TypeId typeId,
 void DotsC_GetTypeIdPropertyParameter(const DotsC_TypeId typeId,
                                       const DotsC_TypeId propertyId,
                                       const DotsC_MemberIndex member,
-                                      const DotsC_ArrayIndex index,
+                                      const DotsC_Int32 index,
                                       DotsC_TypeId & val)
 {
     Init();
@@ -1719,7 +1719,7 @@ void DotsC_GetTypeIdPropertyParameter(const DotsC_TypeId typeId,
 void DotsC_GetHashedIdPropertyParameter(const DotsC_TypeId typeId,
                                         const DotsC_TypeId propertyId,
                                         const DotsC_MemberIndex member,
-                                        const DotsC_ArrayIndex index,
+                                        const DotsC_Int32 index,
                                         DotsC_Int64 & hashVal,
                                         const char* & strVal)
 {
@@ -1738,7 +1738,7 @@ void DotsC_GetHashedIdPropertyParameter(const DotsC_TypeId typeId,
 void DotsC_GetEntityIdPropertyParameter(const DotsC_TypeId typeId,
                                         const DotsC_TypeId propertyId,
                                         const DotsC_MemberIndex member,
-                                        const DotsC_ArrayIndex index,
+                                        const DotsC_Int32 index,
                                         DotsC_EntityId & entityId,
                                         const char* & instanceIdStr)
 {
@@ -1757,7 +1757,7 @@ void DotsC_GetEntityIdPropertyParameter(const DotsC_TypeId typeId,
 void DotsC_GetObjectPropertyParameter(const DotsC_TypeId typeId,
                                       const DotsC_TypeId propertyId,
                                       const DotsC_MemberIndex member,
-                                      const DotsC_ArrayIndex index,
+                                      const DotsC_Int32 index,
                                       const char* & val)
 {
     Init();
@@ -1772,7 +1772,7 @@ void DotsC_GetObjectPropertyParameter(const DotsC_TypeId typeId,
 void DotsC_GetBinaryPropertyParameter(const DotsC_TypeId typeId,
                                       const DotsC_TypeId propertyId,
                                       const DotsC_MemberIndex member,
-                                      const DotsC_ArrayIndex index,
+                                      const DotsC_Int32 index,
                                       const char* & val,
                                       DotsC_Int32& size)
 {

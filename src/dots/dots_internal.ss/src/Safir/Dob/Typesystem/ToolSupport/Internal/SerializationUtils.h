@@ -155,7 +155,7 @@ namespace SerializationUtils
     void SetMemberValue(const typename WriterT::RepositoryType* repository,
                         const typename WriterT::MemberDescriptionType* md,
                         DotsC_MemberIndex memIx,
-                        DotsC_ArrayIndex arrIx,
+                        DotsC_Int32 arrIx,
                         boost::property_tree::ptree& memberContent,
                         const KeyT& key,
                         WriterT& writer)
@@ -389,7 +389,7 @@ namespace SerializationUtils
     void SetMemberFromParameter(const typename WriterT::RepositoryType* repository,
                                 const typename WriterT::MemberDescriptionType* md,
                                 DotsC_MemberIndex memIx,
-                                DotsC_ArrayIndex arrIx,
+                                DotsC_Int32 arrIx,
                                 const std::string& parameterName,
                                 int parameterIndex,
                                 const KeyT& key,

@@ -120,7 +120,7 @@ namespace Internal
                     bool nonNullValueInserted=false;
                     int accumulatedNulls=0;
                     bool hasInsertedValues=false;
-                    for (DotsC_ArrayIndex arrIx=0; arrIx<md->GetArraySize(); ++arrIx)
+                    for (DotsC_Int32 arrIx=0; arrIx<md->GetArraySize(); ++arrIx)
                     {
                         if (reader.IsNull(memberIx, arrIx))
                         {
@@ -163,7 +163,7 @@ namespace Internal
                         WriteMemberName(md->GetName(), os);
                         os<<"[";
 
-                        for (DotsC_ArrayIndex valueIndex=0; valueIndex<numberOfValues; ++valueIndex)
+                        for (DotsC_Int32 valueIndex=0; valueIndex<numberOfValues; ++valueIndex)
                         {
                             if (valueIndex>0)
                             {
@@ -185,7 +185,7 @@ namespace Internal
                         WriteMemberName(md->GetName(), os);
                         os<<"[";
 
-                        for (DotsC_ArrayIndex valueIndex=0; valueIndex<numberOfValues; ++valueIndex)
+                        for (DotsC_Int32 valueIndex=0; valueIndex<numberOfValues; ++valueIndex)
                         {
                             if (valueIndex>0)
                             {
@@ -253,7 +253,7 @@ namespace Internal
         void SerializeKey(const BlobReader<RepositoryType>& reader,
                           const MemberDescriptionType* md,
                           DotsC_MemberIndex memberIndex,
-                          DotsC_ArrayIndex valueIndex,
+                          DotsC_Int32 valueIndex,
                           std::ostream& os) const
         {
             switch(md->GetKeyType())
@@ -309,7 +309,7 @@ namespace Internal
         bool SerializeMember(const BlobReader<RepositoryType>& reader,
                              const MemberDescriptionType* md,
                              DotsC_MemberIndex memberIndex,
-                             DotsC_ArrayIndex arrayIndex,
+                             DotsC_Int32 arrayIndex,
                              std::ostream& os) const
         {
             bool isNull=true;

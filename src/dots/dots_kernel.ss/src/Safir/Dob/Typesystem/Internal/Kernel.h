@@ -21,11 +21,6 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-
-/***************************************************************
-  Purpose:      The C main interface to DOTS.
-***************************************************************/
-
 #ifndef _dots_kernel_h
 #define _dots_kernel_h
 
@@ -43,162 +38,16 @@
 
 #include <Safir/Dob/Typesystem/LanguageInterfaceDefs.h>
 
-
+/**
+ * This is the C main interface to the TypeSystem.
+ */
 extern "C"
 {
-typedef void (*DotsC_BytePointerDeleter)(char * &);
-typedef DotsC_Int64 DotsC_Handle;
-
-//********************************************************
-// Read blob operations
-//********************************************************
-
-/**
- * @brief Create a new instance of blob reader.
- * @param blob [in] - The blob to read.
- * @return Handle to a new blob reader instance.
- */
-DotsC_Handle DotsC_CreateBlobReader(const char* blob);
-
-/**
- * @brief Deletes an instance of blob reader.
- * @param handle [in] - Handle of the blob readet to be deleted.
- */
-void DotsC_DeleteBlobReader(DotsC_Handle handle);
-
-/**
- * @brief Get the type id of the blob.
- * @param blob [in] - The blob.
- * @return Type id of blob.
- */
-DotsC_TypeId DotsC_GetTypeId(const char * const blob);
-
-
-/**
- * @brief Get size of blob.
- * @param blob [in] - The blob.
- * @return Size of blob.
- */
-DotsC_Int32 DotsC_GetSize(const char * const blob);
-
-
-//********************************************************
-// Write blob operations
-//********************************************************
-
-/**
- * @brief Create a new instance of blob writer.
- * @param typeId [in] - The type of blob to be written.
- * @return Handle to a new blob writer instance.
- */
-DotsC_Handle DotsC_CreateBlobWriter(DotsC_TypeId typeId);
-
-/**
- * @brief Deletes an instance of blob writer.
- * @param handle [in] - Handle of the blob writer to be deleted.
- */
-void DotsC_DeleteBlobWriter(DotsC_Handle handle);
-
-
+    typedef void (*DotsC_BytePointerDeleter)(char * &);
+    typedef DotsC_Int64 DotsC_Handle;
 
     //********************************************************
-    //* Base operations on blobs
-    //*
-    //* Warning: Be careful when using these methods. Wrong
-    //*          usage will cause memory leaks.
-    //********************************************************
-    // Function:    DotsC_CreateBlob
-    // Parameters:  typeId -    id of class
-    //              blob - the blob to be created (NULL if typeId was not valid)
-    // Comments:    Initializes blob to default size and members according to the given type id.
-    //              Any already crated blob must be deleted before this function is called.
-    //              No delete on 'blob' is done here.
-    DOTS_KERNEL_API void DotsC_CreateBlob(const DotsC_TypeId typeId,
-                                          char * & blob);
-
-    // Function:    DotsC_DeleteBlob
-    // Parameters:  blob - the blob to be deleted
-    // Returns:     -
-    // Comments:    Deletes a blob. Blobs created within dots_kernel must be deleted there too.
-    //              This is the only method that performs a 'delete blob'. All other methods that
-    //              allocates relies on that this metod is used for deletion.
-    DOTS_KERNEL_API void DotsC_DeleteBlob(char * & blob);
-
-    // Function:    DotsC_CreateCopyOfBlob
-    // Parameters:  to - the copy to be created
-    //              from - the original blob
-    // Returns:     -
-    // Comments:    This method will create an exact copy of a blob. The blob 'to' shall not already
-    //              have been created since it will cause memory leaks. This method does not delete
-    //              the blob 'to' before it is allocated.
-    DOTS_KERNEL_API void DotsC_CreateCopyOfBlob(char * & to,
-                                                const char * const from);
-
-    // Function:    DotsC_GetTypeId
-    // Parameters:  blob - the blob
-    // Returns:     id of the object stored in the blob
-    // Comments:    Gives the object id for the blob
-    DOTS_KERNEL_API DotsC_TypeId DotsC_GetTypeId(const char * const blob);
-
-    // Function:    DotsC_GetSize
-    // Parameters:  blob - the blob
-    // Returns:     size of the blob
-    // Comments:    Gives the total size of the blob
-    DOTS_KERNEL_API DotsC_Int32 DotsC_GetSize(const char * const blob);
-
-    // Function:    DotsC_IsAnythingChanged
-    // Parameters:  blob - the blob
-    // Returns:     true if any member has changed, else false.
-    // Comments:    Returns true if any member in the blob has been changed
-    //              since last call to DotsC_ResetChanged.
-    DOTS_KERNEL_API bool DotsC_IsAnythingChanged(const char * const blob);
-
-    // Function:    DotsC_ResetChanged
-    // Parameters:  blob - the blob
-    // Returns:     -
-    // Comments:    Reset changed flags for all members in the blob.
-    //               Note that this function is not recursive
-    DOTS_KERNEL_API void DotsC_ResetChanged(char * const blob);
-
-    /** Recursively set all change flags.
-     *
-     * Recursively set changed flags for all members in the blob.
-     *
-     * @param blob [in,out] - The blob to modify.
-     * @param changed [in] - The value to set all change flags to
-     */
-    DOTS_KERNEL_API void DotsC_SetChanged(char * const blob, const bool changed);
-
-    /** Set the change flag on one member (non-recursively).
-     *
-     * @param blob [in,out] - The blob to modify.
-     * @param member [in] - id of the member.
-     * @param index [in] - array index of member. Shall be 0 if member is not an array.
-     * @param changed [in] - The value to set change flag to.
-     */
-    DOTS_KERNEL_API void DotsC_SetChangedHere(char * const blob,
-                                              const DotsC_MemberIndex member,
-                                              const DotsC_ArrayIndex index,
-                                              const bool changed);
-
-    // Function:    DotsC_SetChangedMembers
-    // Parameters:  val -   the blob containing changes.
-    //              blob -  blob to be changed
-    // Returns:     -
-    // Comments:    Apply changes in val on the blob. Note that val and blob must be of exactly the same type.
-    DOTS_KERNEL_API void DotsC_SetChangedMembers(const char * const val,
-                                                 char * & blob);
-
-    // Function:    DotsC_SetChangedSinceLastRead
-    // Parameters:  current -   the current version of the object.
-    //              lastRead -  last read version of the object.
-    // Returns:     -
-    // Comments:    Set changed flags for all members in current that have been changed since last read object.
-    DOTS_KERNEL_API void DotsC_SetChangedSinceLastRead(const char * const lastRead,
-                                                       char * const current);
-
-    //********************************************************
-    //* Type information operations
+    //* Static type information operations
     //********************************************************
     // Function:    DotsC_NumberOfTypeIds
     // Parameters:  -
@@ -238,99 +87,94 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     // Comments:    Get a list of all type id's that exists in the system.
     //              If you want all types the buffer size should be equal to
     //              DotsC_NumberOfTypeIds()
-    DOTS_KERNEL_API void DotsC_GetAllTypeIds(DotsC_TypeId * const buf,
-                                             const DotsC_Int32 bufSize,
-                                             DotsC_Int32 & size);
+    DOTS_KERNEL_API void DotsC_GetAllTypeIds(DotsC_TypeId* buf,
+                                             DotsC_Int32 bufSize,
+                                             DotsC_Int32& size);
 
     // Function:    DotsC_TypeExists
     // Parameters:  typeId - id of class
     // Returns:     true if the type exists
     // Comments:    Check if type with specified type id exist
-    DOTS_KERNEL_API bool DotsC_TypeExists(const DotsC_TypeId typeId);
+    DOTS_KERNEL_API bool DotsC_TypeExists(DotsC_TypeId typeId);
 
     // Function:    DotsC_IsClass
     // Parameters:  typeId - id of class
     // Returns:     true if the type exists as a class
     // Comments:    Check if type id belongs to a existing class
-    DOTS_KERNEL_API bool DotsC_IsClass(const DotsC_TypeId typeId);
+    DOTS_KERNEL_API bool DotsC_IsClass(DotsC_TypeId typeId);
 
     // Function:    DotsC_IsProperty
     // Parameters:  typeId - id of property
     // Returns:     true if the type exists as a property
     // Comments:    Check if type id belongs to a existing property
-    DOTS_KERNEL_API bool DotsC_IsProperty(const DotsC_TypeId typeId);
+    DOTS_KERNEL_API bool DotsC_IsProperty(DotsC_TypeId typeId);
 
     // Function:    DotsC_IsEnumeration
     // Parameters:  typeId - id of enumeration type
     // Returns:     true if the type exists as an enumeration type
     // Comments:    Check if type id belongs to a existing enumeration type
-    DOTS_KERNEL_API bool DotsC_IsEnumeration(const DotsC_TypeId typeId);
+    DOTS_KERNEL_API bool DotsC_IsEnumeration(DotsC_TypeId typeId);
 
     // Function:    DotsC_IsException
     // Parameters:  typeId - id of exception type
     // Returns:     true if the type exists as an exception type
     // Comments:    Check if type id belongs to a existing enumeration type
-    DOTS_KERNEL_API bool DotsC_IsException(const DotsC_TypeId typeId);
+    DOTS_KERNEL_API bool DotsC_IsException(DotsC_TypeId typeId);
 
     // Function:    DotsC_TypeIdFromName
     // Parameters:  typeName -  The name shall contain namespaces and class name
     //                          with '.' as separator, example "MyNamespace1.MyNamespace2.MyClass"
     // Returns:     type id
     // Comments:    Calculates the type id for the given type name.
-    DOTS_KERNEL_API DotsC_TypeId DotsC_TypeIdFromName(const char * const typeName);
+    DOTS_KERNEL_API DotsC_TypeId DotsC_TypeIdFromName(const char* typeName);
 
     // Function:    DotsC_GetTypeName
     // Parameters:  typeId -    id of type
     // Returns:     name of the type
     // Comments:    Gets the name associated with the specified type id
-    DOTS_KERNEL_API const char* DotsC_GetTypeName(const DotsC_TypeId typeId);
+    DOTS_KERNEL_API const char* DotsC_GetTypeName(DotsC_TypeId typeId);
 
     // Function:    DotsC_GetNumberOfEnumerationValues
     // Parameters:  enumId -    id of enum type
     // Returns:     Number of enumeration values. -1 is returned if the type does not exist.
     // Comments:    Get the number of enumeration values the specified enumeration type has.
-    DOTS_KERNEL_API DotsC_Int32 DotsC_GetNumberOfEnumerationValues(const DotsC_TypeId enumId);
+    DOTS_KERNEL_API DotsC_Int32 DotsC_GetNumberOfEnumerationValues(DotsC_TypeId enumId);
 
     // Function:    DotsC_EnumerationValueName
     // Parameters:  enumId -    id of enum type
     //              enumVal -   the enumeration value
     // Returns:     String representation of the enumeration value.
     // Comments:    Get the string representation of the specified value for a enumeration type
-    DOTS_KERNEL_API const char* DotsC_GetEnumerationValueName(const DotsC_TypeId enumId,
-                                                              DotsC_EnumerationValue enumVal);
+    DOTS_KERNEL_API const char* DotsC_GetEnumerationValueName(DotsC_TypeId enumId, DotsC_EnumerationValue enumVal);
 
     // Function:    DotsC_EnumerationValueFromName
     // Parameters:  enumId          -   id of enum type
     //              enumValueName   -   string representation of the desired value
     // Returns:     Integer value for the enumeration value name
     // Comments:    Get integer value associated with the enumeration value for the specified enumeration type.
-    DOTS_KERNEL_API DotsC_EnumerationValue DotsC_EnumerationValueFromName(const DotsC_TypeId enumId,
-                                                                          const char * const enumValueName);
+    DOTS_KERNEL_API DotsC_EnumerationValue DotsC_EnumerationValueFromName(DotsC_TypeId enumId, const char* enumValueName);
 
-    //***********************************************************
-    //* Functions for retrieving member info about object types
-    //***********************************************************
+    //  Functions for retrieving member info about object types
+    //-----------------------------------------------------------
     // Function:    DotsC_GetNumberOfMembers
     // Parameters:  typeId - id of class or property
     // Returns:     number of members of the type, -1 if type does not exist
     // Comments:    Get the number of members for a class or property. Parameters are not included.
-    DOTS_KERNEL_API DotsC_Int32 DotsC_GetNumberOfMembers(const DotsC_TypeId typeId);
+    DOTS_KERNEL_API DotsC_Int32 DotsC_GetNumberOfMembers(DotsC_TypeId typeId);
 
     // Function:    DotsC_GetMemberId
     // Parameters:  typeId      -   id of class or property
     //              memberName  -   name of member as specified in xml description, case sensitive,
     // Returns:     id of the member
     // Comments:    Gets the member id for a member.
-    DOTS_KERNEL_API DotsC_MemberIndex     DotsC_GetMemberId(const DotsC_TypeId typeId,
-                                                            const char * const memberName);
+    DOTS_KERNEL_API DotsC_MemberIndex DotsC_GetMemberId(DotsC_TypeId typeId, const char* memberName);
 
     // Function:    DotsC_GetMemberName
     // Parameters:  typeId  -   id of class or property
     //              member  -   id of member
     // Returns:     name of the member
     // Comments:    Get the name of the specified member as it was defined in the xml description.
-    DOTS_KERNEL_API const char* DotsC_GetMemberName(const DotsC_TypeId typeId,
-                                                    const DotsC_MemberIndex member);
+    DOTS_KERNEL_API const char* DotsC_GetMemberName(DotsC_TypeId typeId, DotsC_MemberIndex member);
 
     // Function:    DotsC_GetComplexMemberTypeId
     // Parameters:  typeId  -   id of class or property
@@ -338,8 +182,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     // Returns:     returns the typeId for an object or enumeration member. -1 is returned of the type does not exist
     // Comments:    If a member is of type object or enumeration, this method can be used to get the typeId for the class or enum that the
     //              member is of.
-    DOTS_KERNEL_API DotsC_TypeId DotsC_GetComplexMemberTypeId(const DotsC_TypeId typeId,
-                                                              const DotsC_MemberIndex member);
+    DOTS_KERNEL_API DotsC_TypeId DotsC_GetComplexMemberTypeId(DotsC_TypeId typeId, DotsC_MemberIndex member);
 
     // Function:    DotsC_GetMemberInfo
     // Parameters:  typeId       -   id of class or property
@@ -354,22 +197,21 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     // Comments:    Returns information about a specific data type member.
     //              If the type or member does not exist memberName is set to NULL and
     //              complexType, stringLength and arrayLength are set to -1.
-    DOTS_KERNEL_API void DotsC_GetMemberInfo(const DotsC_TypeId typeId,  //in
-                                             const DotsC_MemberIndex member,  //in
-                                             DotsC_MemberType & memberType,//out
-                                             const char * & memberName,           //out
-                                             DotsC_TypeId & complexType,   //out
-                                             DotsC_Int32 & stringLength,   //out
-                                             bool & isArray,                      //out
-                                             DotsC_Int32 & arrayLength);   //out
+    DOTS_KERNEL_API void DotsC_GetMemberInfo(DotsC_TypeId typeId,  //in
+                                             DotsC_MemberIndex member,  //in
+                                             DotsC_MemberType& memberType,//out
+                                             const char*& memberName,           //out
+                                             DotsC_TypeId& complexType,   //out
+                                             DotsC_Int32& stringLength,   //out
+                                             DotsC_CollectionType& collectionType, //out
+                                             DotsC_Int32& arraySize);   //out
 
     // Function:    DotsC_GetMemberArraySize
     // Parameters:  typeId      -   id of class or property
     //              member      -   id of member
     // Returns:     The array size of the member. If typeId is not a class, then -1 is returned.
     // Comments:    Returns the array size of a member.
-    DOTS_KERNEL_API DotsC_Int32 DotsC_GetMemberArraySize(const DotsC_TypeId typeId,
-                                                         const DotsC_MemberIndex member);
+    DOTS_KERNEL_API DotsC_Int32 DotsC_GetMemberArraySize(DotsC_TypeId typeId, DotsC_MemberIndex member);
 
     // Function:    DotsC_GetStringMemberMaxLength
     // Parameters:  typeId      -   id of class
@@ -378,8 +220,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     //              If the member is not a string -1 is returned.
     //              If the id is not a class -1 is returned
     // Comments:    Returns the maximum string length of a member.
-    DOTS_KERNEL_API DotsC_Int32 DotsC_GetStringMemberMaxLength(const DotsC_TypeId typeId,
-                                                               const DotsC_MemberIndex member);
+    DOTS_KERNEL_API DotsC_Int32 DotsC_GetStringMemberMaxLength(DotsC_TypeId typeId, DotsC_MemberIndex member);
 
     // Function:    DotsC_GetMemberArraySizeProperty
     // Parameters:  classId         -   id of the class with a property
@@ -388,9 +229,9 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     // Returns:     The array size of the property member.
     //              -1 if there is no such type or array or mapping defined
     // Comments:    Returns the array size of a property member.
-    DOTS_KERNEL_API DotsC_Int32 DotsC_GetMemberArraySizeProperty(const DotsC_TypeId classId,
-                                                                 const DotsC_TypeId propertyId,
-                                                                 const DotsC_MemberIndex propertyMember);
+    DOTS_KERNEL_API DotsC_Int32 DotsC_GetMemberArraySizeProperty(DotsC_TypeId classId,
+                                                                 DotsC_TypeId propertyId,
+                                                                 DotsC_MemberIndex propertyMember);
     // Function:    DotsC_GetStringMemberMaxLengthProperty
     // Parameters:  classId         -   id of the class with a property
     //              propertyId      -   id of a property supported by the class
@@ -398,34 +239,32 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     // Returns:     The max string length of the property member.
     //              -1 if there is no such type or mapping defined
     // Comments:    Returns the max string length of a property member.
-    DOTS_KERNEL_API DotsC_Int32 DotsC_GetStringMemberMaxLengthProperty(const DotsC_TypeId classId,
-                                                                       const DotsC_TypeId propertyId,
-                                                                       const DotsC_MemberIndex propertyMember);
+    DOTS_KERNEL_API DotsC_Int32 DotsC_GetStringMemberMaxLengthProperty(DotsC_TypeId classId,
+                                                                       DotsC_TypeId propertyId,
+                                                                       DotsC_MemberIndex propertyMember);
 
     // Function:    DotsC_GetMemberTypeName
     // Parameters:  typeId  -   id of class or property
     //              member  -   id of member
     // Returns:     name of type
     // Comments:    Gets a string representation of the type of a member.
-    DOTS_KERNEL_API const char* DotsC_GetMemberTypeName(const DotsC_TypeId typeId,
-                                                        const DotsC_MemberIndex member);
+    DOTS_KERNEL_API const char* DotsC_GetMemberTypeName(DotsC_TypeId typeId, DotsC_MemberIndex member);
 
-    //***********************************************************************
-    //* Functions retrieving definitions of parameter values in object types
-    //***********************************************************************
+
+    // Parameters
+    //-----------------------------------------------------------
     // Function:    DotsC_GetNumberOfParameters
     // Parameters:  typeId  -   id of class
     // Returns:     the number of parameters, -1 if type does not exist
     // Comments:    Gets the number of parameters defined in a class.
-    DOTS_KERNEL_API DotsC_Int32 DotsC_GetNumberOfParameters(const DotsC_TypeId typeId);
+    DOTS_KERNEL_API DotsC_Int32 DotsC_GetNumberOfParameters(DotsC_TypeId typeId);
 
     // Function:    DotsC_GetParameterId
     // Parameters:  typeId          -   id of class
     //              parameterName   -   name of the parameter as defined in the xml description, case sensitive.
     // Returns:     id of the parameter, -1 if it does not exist
     // Comments:    Gets id of a parameter.
-    DOTS_KERNEL_API DotsC_ParameterIndex  DotsC_GetParameterId(const DotsC_TypeId typeId,
-                                                               const char * const parameterName);
+    DOTS_KERNEL_API DotsC_ParameterIndex  DotsC_GetParameterId(DotsC_TypeId typeId, const char* parameterName);
 
     // Function:    DotsC_GetParameterName
     // Parameters:  typeId      -   id of class
@@ -434,8 +273,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     // Comments:    Get the name of the specified parameter as it was defined in the xml description.
     //              If the parameter does not exist the return value is undefined. Use GetParameterId
     //              to obtain a parameter that is guaranteed to exist.
-    DOTS_KERNEL_API const char* DotsC_GetParameterName(const DotsC_TypeId typeId,
-                                                       const DotsC_ParameterIndex parameter);
+    DOTS_KERNEL_API const char* DotsC_GetParameterName(DotsC_TypeId typeId, DotsC_ParameterIndex parameter);
 
     // Function:    DotsC_GetParameterType
     // Parameters:  typeId      -   id of class
@@ -444,18 +282,11 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     // Comments:    Gets the type of a parameter.
     //              If the parameter does not exist the return value is undefined. Use GetParameterId
     //              to obtain a parameter that is guaranteed to exist.
-    DOTS_KERNEL_API DotsC_MemberType DotsC_GetParameterType(const DotsC_TypeId typeId,
-                                                            const DotsC_ParameterIndex parameter);
-
-    // Function:    DotsC_GetParameterTypeName
-    // Parameters:  typeId      -   id of class
-    //              parameter   -   id of parameter
-    // Returns:     name of type
-    // Comments:    Gets a string representation of the type of a parameter.
-    //              If the parameter does not exist the return value is undefined. Use GetParameterId
-    //              to obtain a parameter that is guaranteed to exist.
-    DOTS_KERNEL_API const char* DotsC_GetParameterTypeName(const DotsC_TypeId typeId,
-                                                           const DotsC_ParameterIndex parameter);
+    DOTS_KERNEL_API void DotsC_GetParameterType(DotsC_TypeId typeId,
+                                                DotsC_ParameterIndex parameter,
+                                                DotsC_MemberType& memberType,
+                                                DotsC_TypeId& complexTypeId,
+                                                DotsC_CollectionType& collectionType);
 
     // Function:    DotsC_GetParameterArraySize
     // Parameters:  typeId      -   id of class
@@ -464,19 +295,16 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     // Comments:    Returns the array size of a parameter.
     //              If the parameter does not exist the return value is undefined. Use GetParameterId
     //              to obtain a parameter that is guaranteed to exist.
-    DOTS_KERNEL_API DotsC_Int32 DotsC_GetParameterArraySize(const DotsC_TypeId typeId,
-                                                            const DotsC_ParameterIndex parameter);
+    DOTS_KERNEL_API DotsC_Int32 DotsC_GetParameterArraySize(DotsC_TypeId typeId, DotsC_ParameterIndex parameter);
 
-    //************************************************************************************
-    //* Type compatibility
-    //************************************************************************************
+    // Type compatibility
+    //------------------------------------------------------------------------
     // Function:    DotsC_IsOfType
     // Parameters:  type    -   the type to check if it is of another type
     //              ofType  -   the type to compare to
     // Returns:     true of type is equal to ofType or if type inherits from ofType
     // Comments:    Checks if type is an instance of the ofType, direct or by inheritance
-    DOTS_KERNEL_API bool DotsC_IsOfType(const DotsC_TypeId type,
-                                        const DotsC_TypeId ofType);
+    DOTS_KERNEL_API bool DotsC_IsOfType(DotsC_TypeId type, DotsC_TypeId ofType);
 
     // Function:    DotsC_GetCompleteType
     // Parameters:  type        -   the base type
@@ -488,17 +316,17 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     //              The type 'type' will also be inserted in the list.
     //              If for example type A is the base class for type B and type C, GetCompleteType for
     //              type=A will return a list with A, B and C.
-    DOTS_KERNEL_API void DotsC_GetCompleteType(const DotsC_TypeId type,
-                                               DotsC_TypeId * const buf,
-                                               const DotsC_Int32 bufSize,
-                                               DotsC_Int32 & noResults);
+    DOTS_KERNEL_API void DotsC_GetCompleteType(DotsC_TypeId type,
+                                               DotsC_TypeId* buf,
+                                               DotsC_Int32 bufSize,
+                                               DotsC_Int32& noResults);
 
     // Function:    DotsC_GetParentType
     // Parameters:  type        -   the type for which the parent type is requested
     // Returns:     type id for the parent
     // Comments:    Returns the typeId  for the parent class to 'type'. If type==object,
     //              then the object typeId is returned again.
-    DOTS_KERNEL_API DotsC_TypeId DotsC_GetParentType(const DotsC_TypeId type);
+    DOTS_KERNEL_API DotsC_TypeId DotsC_GetParentType(DotsC_TypeId type);
 
     // Function:    DotsC_HasProperty
     // Parameters:  classDotsC_TypeId     -   The type of the class to checked for a given property.
@@ -509,10 +337,110 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     //                                  a parent class.
     // Returns:     -
     // Comments:    Checks objects with 'classDotsC_TypeId' have the property with typeId 'propertyDotsC_TypeId'.
-    DOTS_KERNEL_API void DotsC_HasProperty(const DotsC_TypeId classTypeId,
-                                           const DotsC_TypeId propertyTypeId,
-                                           bool & hasProperty,
-                                           bool & isInherited);
+    DOTS_KERNEL_API void DotsC_HasProperty(DotsC_TypeId classTypeId,
+                                           DotsC_TypeId propertyTypeId,
+                                           bool& hasProperty,
+                                           bool& isInherited);
+
+    //********************************************************
+    // Operations on blobs
+    //********************************************************
+
+
+    // Read operations
+    //------------------------------------------------------------------------
+    /**
+     * @brief Create a new instance of blob reader.
+     * @param blob [in] - The blob to read.
+     * @return Handle to a new blob reader instance.
+     */
+    DOTS_KERNEL_API DotsC_Handle DotsC_CreateBlobReader(const char* blob);
+
+    /**
+     * @brief Deletes an instance of blob reader.
+     * @param handle [in] - Handle of the blob readet to be deleted.
+     */
+    DOTS_KERNEL_API void DotsC_DeleteBlobReader(DotsC_Handle handle);
+
+    /**
+     * @brief Get the type id of the blob.
+     * @param blob [in] - The blob.
+     * @return Type id of blob.
+     */
+    DOTS_KERNEL_API DotsC_TypeId DotsC_GetTypeId(const char* blob);
+
+
+    /**
+     * @brief Get size of blob.
+     * @param blob [in] - The blob.
+     * @return Size of blob.
+     */
+    DOTS_KERNEL_API DotsC_Int32 DotsC_GetSize(const char* blob);
+
+    // Function:    DotsC_IsAnythingChanged
+    // Parameters:  blob - the blob
+    // Returns:     true if any member has changed, else false.
+    // Comments:    Returns true if any member in the blob has been changed
+    //              since last call to DotsC_ResetChanged.
+    DOTS_KERNEL_API bool DotsC_IsAnythingChanged(const char* blob);
+
+
+    // Write operations
+    //------------------------------------------------------------------------
+    /**
+     * @brief Create a new instance of blob writer.
+     * @param typeId [in] - The type of blob to be written.
+     * @return Handle to a new blob writer instance.
+     */
+    DOTS_KERNEL_API DotsC_Handle DotsC_CreateBlobWriter(DotsC_TypeId typeId);
+
+    /**
+     * @brief Deletes an instance of blob writer.
+     * @param handle [in] - Handle of the blob writer to be deleted.
+     */
+    DOTS_KERNEL_API void DotsC_DeleteBlobWriter(DotsC_Handle handle);
+
+    // Function:    DotsC_ResetChanged
+    // Parameters:  blob - the blob
+    // Returns:     -
+    // Comments:    Reset changed flags for all members in the blob.
+    //               Note that this function is not recursive
+    DOTS_KERNEL_API void DotsC_ResetChanged(char* blob);
+
+    /** Recursively set all change flags.
+     *
+     * Recursively set changed flags for all members in the blob.
+     *
+     * @param blob [in,out] - The blob to modify.
+     * @param changed [in] - The value to set all change flags to
+     */
+    DOTS_KERNEL_API void DotsC_SetChanged(char* blob, bool changed);
+
+    /** Set the change flag on one member (non-recursively).
+     *
+     * @param blob [in,out] - The blob to modify.
+     * @param member [in] - id of the member.
+     * @param index [in] - array index of member. Shall be 0 if member is not an array.
+     * @param changed [in] - The value to set change flag to.
+     */
+    DOTS_KERNEL_API void DotsC_SetChangedHere(char* blob,
+                                              DotsC_MemberIndex member,
+                                              DotsC_Int32 index,
+                                              bool changed);
+
+    // Function:    DotsC_SetChangedMembers
+    // Parameters:  val -   the blob containing changes.
+    //              blob -  blob to be changed
+    // Returns:     -
+    // Comments:    Apply changes in val on the blob. Note that val and blob must be of exactly the same type.
+    DOTS_KERNEL_API void DotsC_SetChangedMembers(const char* val, char*& blob);
+
+    // Function:    DotsC_SetChangedSinceLastRead
+    // Parameters:  current -   the current version of the object.
+    //              lastRead -  last read version of the object.
+    // Returns:     -
+    // Comments:    Set changed flags for all members in current that have been changed since last read object.
+    DOTS_KERNEL_API void DotsC_SetChangedSinceLastRead(const char* lastRead, char* current);
 
     //************************************************************************************
     //* Serialization
@@ -626,7 +554,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     // Comments:    Gets a parameter boolean value.
     DOTS_KERNEL_API void DotsC_GetBooleanParameter(const DotsC_TypeId typeId,
                                                    const DotsC_ParameterIndex parameter,
-                                                   const DotsC_ArrayIndex index,
+                                                   const DotsC_Int32 index,
                                                    bool & val);
 
     // Function:    DotsC_GetEnumerationParameter
@@ -638,7 +566,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     // Comments:    Gets a parameter enumeration value.
     DOTS_KERNEL_API void DotsC_GetEnumerationParameter(const DotsC_TypeId typeId,
                                                        const DotsC_ParameterIndex parameter,
-                                                       const DotsC_ArrayIndex index,
+                                                       const DotsC_Int32 index,
                                                        DotsC_EnumerationValue & val);
 
     // Function:    DotsC_GetInt32Parameter
@@ -651,7 +579,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
 
     DOTS_KERNEL_API void DotsC_GetInt32Parameter(const DotsC_TypeId typeId,
                                                  const DotsC_ParameterIndex parameter,
-                                                 const DotsC_ArrayIndex index,
+                                                 const DotsC_Int32 index,
                                                  DotsC_Int32 & val);
 
     // Function:    DotsC_GetInt64Parameter
@@ -663,7 +591,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     // Comments:    Gets a parameter 64-bits integer value.
     DOTS_KERNEL_API void DotsC_GetInt64Parameter(const DotsC_TypeId typeId,
                                                  const DotsC_ParameterIndex parameter,
-                                                 const DotsC_ArrayIndex index,
+                                                 const DotsC_Int32 index,
                                                  DotsC_Int64 & val);
 
     // Function:    DotsC_GetFloat32Parameter
@@ -675,7 +603,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     // Comments:    Gets a parameter 32-bits float value.
     DOTS_KERNEL_API void DotsC_GetFloat32Parameter(const DotsC_TypeId typeId,
                                                    const DotsC_ParameterIndex parameter,
-                                                   const DotsC_ArrayIndex index,
+                                                   const DotsC_Int32 index,
                                                    DotsC_Float32 & val);
 
     // Function:    DotsC_GetFloat64Parameter
@@ -687,7 +615,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     // Comments:    Gets a parameter 64-bits float value.
     DOTS_KERNEL_API void DotsC_GetFloat64Parameter(const DotsC_TypeId typeId,
                                                    const DotsC_ParameterIndex parameter,
-                                                   const DotsC_ArrayIndex index,
+                                                   const DotsC_Int32 index,
                                                    DotsC_Float64 & val);
 
     // Function:    DotsC_GetStringParameter
@@ -698,7 +626,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     // Comments:    Gets a parameter string value.
     DOTS_KERNEL_API void DotsC_GetStringParameter(const DotsC_TypeId typeId,
                                                   const DotsC_ParameterIndex parameter,
-                                                  const DotsC_ArrayIndex index,
+                                                  const DotsC_Int32 index,
                                                   const char * & val);
 
     // Function:    DotsC_GetTypeIdParameter
@@ -710,7 +638,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     // Comments:    Gets a parameter type id value.
     DOTS_KERNEL_API void DotsC_GetTypeIdParameter(const DotsC_TypeId typeId,
                                                   const DotsC_ParameterIndex parameter,
-                                                  const DotsC_ArrayIndex index,
+                                                  const DotsC_Int32 index,
                                                   DotsC_TypeId & val);
 
     // Function:    DotsC_GetHashedIdParameter
@@ -723,7 +651,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     // Comments:    Gets a parameter hashed id value.
     DOTS_KERNEL_API void DotsC_GetHashedIdParameter(const DotsC_TypeId typeId,
                                                     const DotsC_ParameterIndex parameter,
-                                                    const DotsC_ArrayIndex index,
+                                                    const DotsC_Int32 index,
                                                     DotsC_Int64 & hashVal,
                                                     const char * & strVal);
 
@@ -738,7 +666,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     // Comments:    Gets a parameter object id value.
     DOTS_KERNEL_API void DotsC_GetEntityIdParameter(const DotsC_TypeId typeId,
                                                     const DotsC_ParameterIndex parameter,
-                                                    const DotsC_ArrayIndex index,
+                                                    const DotsC_Int32 index,
                                                     DotsC_EntityId & entityId,
                                                     const char * & instanceIdStr);
 
@@ -751,7 +679,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     // Comments:    Gets a parameter object value.
     DOTS_KERNEL_API void DotsC_GetObjectParameter(const DotsC_TypeId typeId,
                                                   const DotsC_ParameterIndex parameter,
-                                                  const DotsC_ArrayIndex index,
+                                                  const DotsC_Int32 index,
                                                   const char * & val);
 
     // Function:    DotsC_GetBinaryParameter
@@ -764,7 +692,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     // Comments:    Gets a parameter object value.
     DOTS_KERNEL_API void DotsC_GetBinaryParameter(const DotsC_TypeId typeId,
                                                   const DotsC_ParameterIndex parameter,
-                                                  const DotsC_ArrayIndex index,
+                                                  const DotsC_Int32 index,
                                                   const char * & val,
                                                   DotsC_Int32 & size);
 
@@ -779,7 +707,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     // Comments:    Get the if a member is null or a value.
     DOTS_KERNEL_API bool DotsC_IsNullMember(const char * const blob,
                                             const DotsC_MemberIndex member,
-                                            const DotsC_ArrayIndex index);
+                                            const DotsC_Int32 index);
 
     // Function:    DotsC_IsChangedMember
     // Parameters:  blob    -   blob containing the object
@@ -789,7 +717,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     // Comments:    Get the if a member is changed
     DOTS_KERNEL_API bool DotsC_IsChangedMember(const char * const blob,
                                                const DotsC_MemberIndex member,
-                                               const DotsC_ArrayIndex index);
+                                               const DotsC_Int32 index);
 
     // Function:    DotsC_GetBooleanMember
     // Parameters:  blob    -   blob containing the object
@@ -802,7 +730,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     // Comments:    Get a boolean member from a blob.
     DOTS_KERNEL_API void DotsC_GetBooleanMember(const char * const blob,
                                                 const DotsC_MemberIndex member,
-                                                const DotsC_ArrayIndex index,
+                                                const DotsC_Int32 index,
                                                 bool & val,
                                                 bool & isNull,
                                                 bool & isChanged);
@@ -818,7 +746,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     // Comments:    Get a enumeration member from a blob.
     DOTS_KERNEL_API void DotsC_GetEnumerationMember(const char * const blob,
                                                     const DotsC_MemberIndex member,
-                                                    const DotsC_ArrayIndex index,
+                                                    const DotsC_Int32 index,
                                                     DotsC_EnumerationValue & val,
                                                     bool & isNull,
                                                     bool & isChanged);
@@ -834,7 +762,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     // Comments:    Get a 32-bits integer member from a blob.
     DOTS_KERNEL_API void DotsC_GetInt32Member(const char * const blob,
                                               const DotsC_MemberIndex member,
-                                              const DotsC_ArrayIndex index,
+                                              const DotsC_Int32 index,
                                               DotsC_Int32 & val,
                                               bool & isNull,
                                               bool & isChanged);
@@ -850,7 +778,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     // Comments:    Get a 64-bits integer member from a blob.
     DOTS_KERNEL_API void DotsC_GetInt64Member(const char * const blob,
                                               const DotsC_MemberIndex member,
-                                              const DotsC_ArrayIndex index,
+                                              const DotsC_Int32 index,
                                               DotsC_Int64 & val,
                                               bool & isNull,
                                               bool & isChanged);
@@ -866,7 +794,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     // Comments:    Get a 32-bits float member from a blob.
     DOTS_KERNEL_API void DotsC_GetFloat32Member(const char * const blob,
                                                 const DotsC_MemberIndex member,
-                                                const DotsC_ArrayIndex index,
+                                                const DotsC_Int32 index,
                                                 DotsC_Float32 & val,
                                                 bool & isNull,
                                                 bool & isChanged);
@@ -882,7 +810,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     // Comments:    Get a 64-bits float member from a blob.
     DOTS_KERNEL_API void DotsC_GetFloat64Member(const char * const blob,
                                                 const DotsC_MemberIndex member,
-                                                const DotsC_ArrayIndex index,
+                                                const DotsC_Int32 index,
                                                 DotsC_Float64 & val,
                                                 bool & isNull,
                                                 bool & isChanged);
@@ -898,7 +826,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     // Comments:    Get a string member from a blob.
     DOTS_KERNEL_API void DotsC_GetStringMember(const char * const blob,
                                                const DotsC_MemberIndex member,
-                                               const DotsC_ArrayIndex index,
+                                               const DotsC_Int32 index,
                                                const char * & val,
                                                bool & isNull,
                                                bool & isChanged);
@@ -914,7 +842,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     // Comments:    Get a type id member from a blob.
     DOTS_KERNEL_API void DotsC_GetTypeIdMember(const char * const blob,
                                                const DotsC_MemberIndex member,
-                                               const DotsC_ArrayIndex index,
+                                               const DotsC_Int32 index,
                                                DotsC_TypeId & val,
                                                bool & isNull,
                                                bool & isChanged);
@@ -932,7 +860,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     // Comments:    Get a object id member from a blob.
     DOTS_KERNEL_API void DotsC_GetHashedIdMember(const char * const blob,
                                                  const DotsC_MemberIndex member,
-                                                 const DotsC_ArrayIndex index,
+                                                 const DotsC_Int32 index,
                                                  DotsC_Int64 & hashVal,
                                                  const char * & strVal,
                                                  bool & isNull,
@@ -950,7 +878,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     // Comments:    Get a object id member from a blob.
     DOTS_KERNEL_API void DotsC_GetEntityIdMember(const char * const blob,
                                                  const DotsC_MemberIndex member,
-                                                 const DotsC_ArrayIndex index,
+                                                 const DotsC_Int32 index,
                                                  DotsC_EntityId & entityId,
                                                  const char * & instanceIdStr,
                                                  bool & isNull,
@@ -967,7 +895,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     // Comments:    Get a object member from a blob.
     DOTS_KERNEL_API void DotsC_GetObjectMember(const char * const blob,
                                                const DotsC_MemberIndex member,
-                                               const DotsC_ArrayIndex index,
+                                               const DotsC_Int32 index,
                                                const char * & val,
                                                bool & isNull,
                                                bool & isChanged);
@@ -976,7 +904,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     //Same as above, but val is non-const.
     DOTS_KERNEL_API void DotsC_GetWriteableObjectMember(char * const blob,
                                                         const DotsC_MemberIndex member,
-                                                        const DotsC_ArrayIndex index,
+                                                        const DotsC_Int32 index,
                                                         char * & val,
                                                         bool & isNull,
                                                         bool & isChanged);
@@ -994,7 +922,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     // Comments:    Get a object member from a blob.
     DOTS_KERNEL_API void DotsC_GetBinaryMember(const char * const blob,
                                                const DotsC_MemberIndex member,
-                                               const DotsC_ArrayIndex index,
+                                               const DotsC_Int32 index,
                                                const char * & val,
                                                DotsC_Int32 & size,
                                                bool & isNull,
@@ -1011,7 +939,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     // Comments:    Sets the member to null.
     DOTS_KERNEL_API void DotsC_SetNullMember(char * const blob,
                                              const DotsC_MemberIndex member,
-                                             const DotsC_ArrayIndex index);
+                                             const DotsC_Int32 index);
 
     // Function:    DotsC_SetBooleanMember
     // Parameters:  val     -   the value to be set
@@ -1023,7 +951,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     DOTS_KERNEL_API void DotsC_SetBooleanMember(const bool val,
                                                 char * & blob,
                                                 const DotsC_MemberIndex member,
-                                                const DotsC_ArrayIndex index);
+                                                const DotsC_Int32 index);
 
     // Function:    DotsC_SetEnumerationMember
     // Parameters:  val     -   the value to be set
@@ -1035,7 +963,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     DOTS_KERNEL_API void DotsC_SetEnumerationMember(const DotsC_EnumerationValue val,
                                                     char * & blob,
                                                     const DotsC_MemberIndex member,
-                                                    const DotsC_ArrayIndex index);
+                                                    const DotsC_Int32 index);
 
     // Function:    DotsC_SetInt32Member
     // Parameters:  val     -   the value to be set
@@ -1047,7 +975,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     DOTS_KERNEL_API void DotsC_SetInt32Member(const DotsC_Int32 val,
                                               char * & blob,
                                               const DotsC_MemberIndex member,
-                                              const DotsC_ArrayIndex index);
+                                              const DotsC_Int32 index);
 
     // Function:    DotsC_SetInt64Member
     // Parameters:  val     -   the value to be set
@@ -1059,7 +987,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     DOTS_KERNEL_API void DotsC_SetInt64Member(const DotsC_Int64 val,
                                               char * & blob,
                                               const DotsC_MemberIndex member,
-                                              const DotsC_ArrayIndex index);
+                                              const DotsC_Int32 index);
 
     // Function:    DotsC_SetFloat32Member
     // Parameters:  val     -   the value to be set
@@ -1070,7 +998,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     DOTS_KERNEL_API void DotsC_SetFloat32Member(const DotsC_Float32 val,
                                                 char * & blob,
                                                 const DotsC_MemberIndex member,
-                                                const DotsC_ArrayIndex index);
+                                                const DotsC_Int32 index);
 
     // Function:    DotsC_SetFloat64Member
     // Parameters:  val     -   the value to be set
@@ -1082,7 +1010,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     DOTS_KERNEL_API void DotsC_SetFloat64Member(const DotsC_Float64 val,
                                                 char * & blob,
                                                 const DotsC_MemberIndex member,
-                                                const DotsC_ArrayIndex index);
+                                                const DotsC_Int32 index);
 
     // Function:    DotsC_SetStringMember
     // Parameters:  val     -   the value to be set
@@ -1094,7 +1022,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     DOTS_KERNEL_API void DotsC_SetStringMember(const char * const val,
                                                char * & blob,
                                                const DotsC_MemberIndex member,
-                                               const DotsC_ArrayIndex index);
+                                               const DotsC_Int32 index);
 
     // Function:    DotsC_SetTypeIdMember
     // Parameters:  val     -   the value to be set
@@ -1106,7 +1034,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     DOTS_KERNEL_API void DotsC_SetTypeIdMember(const DotsC_TypeId val,
                                                char * & blob,
                                                const DotsC_MemberIndex member,
-                                               const DotsC_ArrayIndex index);
+                                               const DotsC_Int32 index);
 
 
     // Function:    DotsC_SetHashedIdMember
@@ -1121,7 +1049,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
                                                  const char * const strVal,
                                                  char * & blob,
                                                  const DotsC_MemberIndex member,
-                                                 const DotsC_ArrayIndex index);
+                                                 const DotsC_Int32 index);
 
     // Function:    DotsC_SetEntityIdMember
     // Parameters:  val     -   the value to be set.
@@ -1137,7 +1065,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
                                                  const char * const instanceIdStr,
                                                  char * & blob,
                                                  const DotsC_MemberIndex member,
-                                                 const DotsC_ArrayIndex index);
+                                                 const DotsC_Int32 index);
 
     // Function:    DotsC_SetObjectMember
     // Parameters:  val     -   the value to be set
@@ -1149,7 +1077,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     DOTS_KERNEL_API void DotsC_SetObjectMember(const char * const val,
                                                char * & blob,
                                                const DotsC_MemberIndex member,
-                                               const DotsC_ArrayIndex index);
+                                               const DotsC_Int32 index);
 
     // Function:    DotsC_SetBinaryMember
     // Parameters:  val     -   the value to be set
@@ -1163,7 +1091,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
                                                const DotsC_Int32 numberOfBytes,
                                                char * & blob,
                                                const DotsC_MemberIndex member,
-                                               const DotsC_ArrayIndex index);
+                                               const DotsC_Int32 index);
 
 
     //*********************************
@@ -1182,21 +1110,21 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
                                                   const DotsC_Int32 blobSize,
                                                   const DotsC_TypeId typeId,
                                                   const DotsC_MemberIndex member,
-                                                  const DotsC_ArrayIndex index,
+                                                  const DotsC_Int32 index,
                                                   const bool isChanged,
                                                   char * & beginningOfUnused);
 
     DOTS_KERNEL_API void DotsC_CreateStringMember(char * const insideBlob,
                                                   const DotsC_Int32 stringLength, //remember the null-termination!
                                                   const DotsC_MemberIndex member,
-                                                  const DotsC_ArrayIndex index,
+                                                  const DotsC_Int32 index,
                                                   const bool isChanged,
                                                   char * & beginningOfUnused);
 
     DOTS_KERNEL_API void DotsC_CreateBinaryMember(char * const insideBlob,
                                                   const DotsC_Int32 binarySize,
                                                   const DotsC_MemberIndex member,
-                                                  const DotsC_ArrayIndex index,
+                                                  const DotsC_Int32 index,
                                                   const bool isChanged,
                                                   char * & beginningOfUnused);
 
@@ -1206,14 +1134,14 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
                                                               const bool isChanged,
                                                               char * const blob,
                                                               const DotsC_MemberIndex member,
-                                                              const DotsC_ArrayIndex index);
+                                                              const DotsC_Int32 index);
 
     DOTS_KERNEL_API void DotsC_SetInt32MemberInPreallocated(const DotsC_Int32 val,
                                                             const bool isNull,
                                                             const bool isChanged,
                                                             char * const blob,
                                                             const DotsC_MemberIndex member,
-                                                            const DotsC_ArrayIndex index);
+                                                            const DotsC_Int32 index);
 
 
     DOTS_KERNEL_API void DotsC_SetInt64MemberInPreallocated(const DotsC_Int64 val,
@@ -1221,21 +1149,21 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
                                                             const bool isChanged,
                                                             char * const blob,
                                                             const DotsC_MemberIndex member,
-                                                            const DotsC_ArrayIndex index);
+                                                            const DotsC_Int32 index);
 
     DOTS_KERNEL_API void DotsC_SetFloat32MemberInPreallocated(const DotsC_Float32 val,
                                                               const bool isNull,
                                                               const bool isChanged,
                                                               char * const blob,
                                                               const DotsC_MemberIndex member,
-                                                              const DotsC_ArrayIndex index);
+                                                              const DotsC_Int32 index);
 
     DOTS_KERNEL_API void DotsC_SetFloat64MemberInPreallocated(const DotsC_Float64 val,
                                                               const bool isNull,
                                                               const bool isChanged,
                                                               char * const blob,
                                                               const DotsC_MemberIndex member,
-                                                              const DotsC_ArrayIndex index);
+                                                              const DotsC_Int32 index);
 
     DOTS_KERNEL_API void DotsC_SetHashedIdMemberInPreallocated(const DotsC_Int64 hashVal,
                                                                const char * const strVal,
@@ -1244,7 +1172,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
                                                                const bool isChanged,
                                                                char * const blob,
                                                                const DotsC_MemberIndex member,
-                                                               const DotsC_ArrayIndex index,
+                                                               const DotsC_Int32 index,
                                                                char * & beginningOfUnused);
 
     DOTS_KERNEL_API void DotsC_SetEntityIdMemberInPreallocated(const DotsC_EntityId & entityId,
@@ -1254,7 +1182,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
                                                                const bool isChanged,
                                                                char * const blob,
                                                                const DotsC_MemberIndex member,
-                                                               const DotsC_ArrayIndex index,
+                                                               const DotsC_Int32 index,
                                                                char * & beginningOfUnused);
 
     DOTS_KERNEL_API void DotsC_GetPropertyMappingKind(const DotsC_TypeId typeId,
@@ -1286,7 +1214,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     DOTS_KERNEL_API void DotsC_GetBooleanPropertyParameter(const DotsC_TypeId typeId,
                                                            const DotsC_TypeId propertyId,
                                                            const DotsC_MemberIndex member,
-                                                           const DotsC_ArrayIndex index,
+                                                           const DotsC_Int32 index,
                                                            bool & val);
 
     // Function:    DotsC_GetEnumerationPropertyParameter
@@ -1302,7 +1230,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     DOTS_KERNEL_API void DotsC_GetEnumerationPropertyParameter(const DotsC_TypeId typeId,
                                                                const DotsC_TypeId propertyId,
                                                                const DotsC_MemberIndex member,
-                                                               const DotsC_ArrayIndex index,
+                                                               const DotsC_Int32 index,
                                                                DotsC_EnumerationValue & val);
 
     // Function:    DotsC_GetInt32PropertyParameter
@@ -1316,7 +1244,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     DOTS_KERNEL_API void DotsC_GetInt32PropertyParameter(const DotsC_TypeId typeId,
                                                          const DotsC_TypeId propertyId,
                                                          const DotsC_MemberIndex member,
-                                                         const DotsC_ArrayIndex index,
+                                                         const DotsC_Int32 index,
                                                          DotsC_Int32 & val);
 
     // Function:    DotsC_GetInt64PropertyParameter
@@ -1330,7 +1258,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     DOTS_KERNEL_API void DotsC_GetInt64PropertyParameter(const DotsC_TypeId typeId,
                                                          const DotsC_TypeId propertyId,
                                                          const DotsC_MemberIndex member,
-                                                         const DotsC_ArrayIndex index,
+                                                         const DotsC_Int32 index,
                                                          DotsC_Int64 & val);
 
     // Function:    DotsC_GetFloat32PropertyParameter
@@ -1344,7 +1272,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     DOTS_KERNEL_API void DotsC_GetFloat32PropertyParameter(const DotsC_TypeId typeId,
                                                            const DotsC_TypeId propertyId,
                                                            const DotsC_MemberIndex member,
-                                                           const DotsC_ArrayIndex index,
+                                                           const DotsC_Int32 index,
                                                            DotsC_Float32 & val);
 
     // Function:    DotsC_GetFloat64PropertyParameter
@@ -1358,7 +1286,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     DOTS_KERNEL_API void DotsC_GetFloat64PropertyParameter(const DotsC_TypeId typeId,
                                                            const DotsC_TypeId propertyId,
                                                            const DotsC_MemberIndex member,
-                                                           const DotsC_ArrayIndex index,
+                                                           const DotsC_Int32 index,
                                                            DotsC_Float64 & val);
 
     // Function:    DotsC_GetStringPropertyParameter
@@ -1371,7 +1299,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     DOTS_KERNEL_API void DotsC_GetStringPropertyParameter(const DotsC_TypeId typeId,
                                                           const DotsC_TypeId propertyId,
                                                           const DotsC_MemberIndex member,
-                                                          const DotsC_ArrayIndex index,
+                                                          const DotsC_Int32 index,
                                                           const char * & val);
 
     // Function:    DotsC_GetTypeIdPropertyParameter
@@ -1385,7 +1313,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     DOTS_KERNEL_API void DotsC_GetTypeIdPropertyParameter(const DotsC_TypeId typeId,
                                                           const DotsC_TypeId propertyId,
                                                           const DotsC_MemberIndex member,
-                                                          const DotsC_ArrayIndex index,
+                                                          const DotsC_Int32 index,
                                                           DotsC_TypeId & val);
 
 
@@ -1403,7 +1331,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     DOTS_KERNEL_API void DotsC_GetHashedIdPropertyParameter(const DotsC_TypeId typeId,
                                                             const DotsC_TypeId propertyId,
                                                             const DotsC_MemberIndex member,
-                                                            const DotsC_ArrayIndex index,
+                                                            const DotsC_Int32 index,
                                                             DotsC_Int64 & hashVal,
                                                             const char * & strVal);
 
@@ -1419,7 +1347,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     DOTS_KERNEL_API void DotsC_GetEntityIdPropertyParameter(const DotsC_TypeId typeId,
                                                             const DotsC_TypeId propertyId,
                                                             const DotsC_MemberIndex member,
-                                                            const DotsC_ArrayIndex index,
+                                                            const DotsC_Int32 index,
                                                             DotsC_EntityId & val,
                                                             const char * & instanceIdStr);
 
@@ -1434,7 +1362,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     DOTS_KERNEL_API void DotsC_GetObjectPropertyParameter(const DotsC_TypeId typeId,
                                                           const DotsC_TypeId propertyId,
                                                           const DotsC_MemberIndex member,
-                                                          const DotsC_ArrayIndex index,
+                                                          const DotsC_Int32 index,
                                                           const char * & val);
 
     // Function:    DotsC_GetObjectPropertyParameter
@@ -1449,7 +1377,7 @@ void DotsC_DeleteBlobWriter(DotsC_Handle handle);
     DOTS_KERNEL_API void DotsC_GetBinaryPropertyParameter(const DotsC_TypeId typeId,
                                                           const DotsC_TypeId propertyId,
                                                           const DotsC_MemberIndex member,
-                                                          const DotsC_ArrayIndex index,
+                                                          const DotsC_Int32 index,
                                                           const char * & val,
                                                           DotsC_Int32 & size);
     

@@ -404,7 +404,7 @@ namespace Internal
         {
             for (int i=0; i<md->MemberReferenceDepth(); ++i)
             {
-                std::pair<DotsC_MemberIndex, DotsC_ArrayIndex> mref=md->GetMemberReference(i);
+                std::pair<DotsC_MemberIndex, DotsC_Int32> mref=md->GetMemberReference(i);
                 m_memberRefs.push_back(mref.first); //memberIndex
                 m_memberRefs.push_back(mref.second); //arrayIndex
             }
@@ -429,7 +429,7 @@ namespace Internal
 
         int MemberReferenceDepth() const {return static_cast<int>(m_memberRefs.size())/2;}
 
-        std::pair<DotsC_MemberIndex, DotsC_ArrayIndex> GetMemberReference(int depth) const
+        std::pair<DotsC_MemberIndex, DotsC_Int32> GetMemberReference(int depth) const
         {
             size_t index=static_cast<size_t>(depth*2);
             return std::make_pair(m_memberRefs[index], m_memberRefs[index+1]);

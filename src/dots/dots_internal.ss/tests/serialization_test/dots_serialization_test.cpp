@@ -99,7 +99,7 @@ void BlobTest(RepositoryPtr rep)
     r.ReadValue(myNum, 0, myNumVal, isNull, isChanged);
     std::cout<<"isNull="<<isNull<<", isChanged="<<isChanged<<", val="<<myNumVal<<std::endl;
     const char* str=NULL;
-    for (DotsC_ArrayIndex i=0; i<5; ++i)
+    for (DotsC_Int32 i=0; i<5; ++i)
     {
         r.ReadValue(myStrings, i, str, isNull, isChanged);
         std::cout<<"isNull="<<isNull<<", isChanged="<<isChanged;
@@ -119,7 +119,7 @@ void BlobTest(RepositoryPtr rep)
     std::cout<<" -- inner:"<<std::endl;
     innerReader.ReadValue(myNum, 0, myNumVal, isNull, isChanged);
     std::cout<<"isNull="<<isNull<<", isChanged="<<isChanged<<", val="<<myNumVal<<std::endl;
-    for (DotsC_ArrayIndex i=0; i<5; ++i)
+    for (DotsC_Int32 i=0; i<5; ++i)
     {
         innerReader.ReadValue(myStrings, i, str, isNull, isChanged);
         std::cout<<"isNull="<<isNull<<", isChanged="<<isChanged;

@@ -130,7 +130,7 @@ namespace ToolSupport
          * @param isChanged [in] - Indicates if the member value is changed.
          */
         template <class Key, class Val>
-        void WriteValue(DotsC_MemberIndex member, DotsC_ArrayIndex index, const Key& key, const Val& val, bool isNull, bool isChanged)
+        void WriteValue(DotsC_MemberIndex member, DotsC_Int32 index, const Key& key, const Val& val, bool isNull, bool isChanged)
         {
             MoveToMember(member);
             switch (m_memberDescription->GetCollectionType())
@@ -171,7 +171,7 @@ namespace ToolSupport
         const ClassDescriptionType* m_classDescription;
         const MemberDescriptionType* m_memberDescription;
         DotsC_MemberIndex m_memberIndex;
-        DotsC_ArrayIndex m_valueIndex;
+        DotsC_Int32 m_valueIndex;
         Safir::Dob::Typesystem::ToolSupport::Internal::Blob m_blob;
 
         inline void Init()

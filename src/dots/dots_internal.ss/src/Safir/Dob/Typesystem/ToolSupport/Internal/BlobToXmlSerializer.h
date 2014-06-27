@@ -91,7 +91,7 @@ namespace Internal
                     const char* typeName=Safir::Dob::Typesystem::ToolSupport::TypeUtilities::GetTypeName(m_repository, md);
 
                     //find first non-null value in array
-                    DotsC_ArrayIndex arrIx=0;
+                    DotsC_Int32 arrIx=0;
                     while (arrIx<md->GetArraySize())
                     {
                         if (!reader.IsNull(memberIx, arrIx))
@@ -104,7 +104,7 @@ namespace Internal
                     if (arrIx<md->GetArraySize()) //only add array if it contains non-null values
                     {
                         os<<"<"<<md->GetName()<<">";
-                        for (DotsC_ArrayIndex arrIx=0; arrIx<md->GetArraySize(); ++arrIx)
+                        for (DotsC_Int32 arrIx=0; arrIx<md->GetArraySize(); ++arrIx)
                         {
                             SerializeMember(reader, md, memberIx, arrIx, typeName, os);
                         }
@@ -120,7 +120,7 @@ namespace Internal
                     if (numberOfValues>0)
                     {
                         os<<"<"<<md->GetName()<<">";
-                        for (DotsC_ArrayIndex valueIndex=0; valueIndex<numberOfValues; ++valueIndex)
+                        for (DotsC_Int32 valueIndex=0; valueIndex<numberOfValues; ++valueIndex)
                         {
                             SerializeMember(reader, md, memberIx, valueIndex, typeName, os);
                         }
@@ -136,7 +136,7 @@ namespace Internal
                     if (numberOfValues>0)
                     {
                         os<<"<"<<md->GetName()<<">";
-                        for (DotsC_ArrayIndex valueIndex=0; valueIndex<numberOfValues; ++valueIndex)
+                        for (DotsC_Int32 valueIndex=0; valueIndex<numberOfValues; ++valueIndex)
                         {
                             os<<"<entry>";
                             SerializeKey(reader, md, memberIx, valueIndex, os);
@@ -153,7 +153,7 @@ namespace Internal
         }
 
         void WriteStartElement(const char* elementName,
-                               DotsC_ArrayIndex arrayIndex,
+                               DotsC_Int32 arrayIndex,
                                bool isArray,
                                std::ostream& os) const
         {
@@ -201,7 +201,7 @@ namespace Internal
         void SerializeKey(const BlobReader<RepositoryType>& reader,
                              const MemberDescriptionType* md,
                              DotsC_MemberIndex memberIndex,
-                             DotsC_ArrayIndex valueIndex,
+                             DotsC_Int32 valueIndex,
                              std::ostream& os) const
         {
             os<<"<key>";
@@ -267,7 +267,7 @@ namespace Internal
         void SerializeMember(const BlobReader<RepositoryType>& reader,
                              const MemberDescriptionType* md,
                              DotsC_MemberIndex memberIndex,
-                             DotsC_ArrayIndex arrayIndex,
+                             DotsC_Int32 arrayIndex,
                              const char* elementName,
                              std::ostream& os) const
         {

@@ -449,7 +449,7 @@ namespace ToolSupport
          * @param depth [in] - The depth of the member mappping that is requested.
          * @return Pair containing member index and array index.
          */
-        virtual std::pair<DotsC_MemberIndex, DotsC_ArrayIndex> GetMemberReference(int depth) const=0;
+        virtual std::pair<DotsC_MemberIndex, DotsC_Int32> GetMemberReference(int depth) const=0;
     };
 
     /**

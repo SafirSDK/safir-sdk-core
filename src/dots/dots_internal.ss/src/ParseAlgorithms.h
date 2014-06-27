@@ -1631,7 +1631,7 @@ namespace ToolSupport
             int memberArrayIndex=-1;
 
             //Step into nested member refs if any
-            for (std::vector< std::pair<DotsC_MemberIndex, DotsC_ArrayIndex> >::const_iterator it=state.lastInsertedMemberMapping->memberRef.begin();
+            for (std::vector< std::pair<DotsC_MemberIndex, DotsC_Int32> >::const_iterator it=state.lastInsertedMemberMapping->memberRef.begin();
                  it!=state.lastInsertedMemberMapping->memberRef.end(); ++it)
             {
                 DotsC_TypeId tid=cd->GetMember(it->first)->GetTypeId();
