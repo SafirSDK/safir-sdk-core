@@ -41,8 +41,8 @@ SET_SAFIR_TEST_PROPERTIES(ReaderWriterTest 120)
 ADD_TEST(HeartbeatSenderTest unit_tests HeartbeatSenderTest)
 SET_SAFIR_TEST_PROPERTIES(HeartbeatSenderTest 120)
 
-#ADD_TEST(AckedDataSenderTest unit_tests AckedDataSenderTest)
-#SET_SAFIR_TEST_PROPERTIES(AckedDataSenderTest 120)
+ADD_TEST(AckedDataSenderTest unit_tests AckedDataSenderTest)
+SET_SAFIR_TEST_PROPERTIES(AckedDataSenderTest 120)
 
 #ADD_TEST(DeliveryHandlerTest unit_tests DeliveryHandlerTest)
 #SET_SAFIR_TEST_PROPERTIES(DeliveryHandlerTest 120)

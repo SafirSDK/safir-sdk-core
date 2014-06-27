@@ -220,6 +220,7 @@ public:
         //-----------
         // shutdown
         //-----------
+        discoverState.clear();
         work.reset();
         threads.join_all();
 
