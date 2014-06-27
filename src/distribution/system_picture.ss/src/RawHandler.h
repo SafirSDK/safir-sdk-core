@@ -70,13 +70,13 @@ namespace SP
 
     typedef std::function<void(const RawStatistics& statistics)> StatisticsCallback;
 
-    template<class Communication>
+    template<class CommunicationT>
     class RawHandlerBasic
         : private boost::noncopyable
     {
     public:
         RawHandlerBasic(boost::asio::io_service& ioService,
-                        Communication& communication,
+                        CommunicationT& communication,
                         const std::string& name,
                         const int64_t id,
                         const int64_t nodeTypeId,
@@ -529,7 +529,7 @@ namespace SP
         typedef std::unordered_map<int64_t, NodeInfo> NodeTable;
 
         boost::asio::io_service& m_ioService;
-        Communication& m_communication;
+        CommunicationT& m_communication;
 
         const int64_t m_id;
         const std::map<int64_t, NodeType> m_nodeTypes;

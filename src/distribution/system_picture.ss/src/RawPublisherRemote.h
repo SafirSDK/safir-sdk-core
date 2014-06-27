@@ -38,15 +38,15 @@ namespace Internal
 {
 namespace SP
 {
-    template <class Handler, class Communication>
+    template <class RawHandlerT, class CommunicationT>
     class RawPublisherRemoteBasic
     {
     public:
         RawPublisherRemoteBasic(boost::asio::io_service& ioService,
-                                Communication& communication,
+                                CommunicationT& communication,
                                 const std::map<int64_t, NodeType>& nodeTypes,
                                 const char* const senderId,
-                                Handler& rawHandler,
+                                RawHandlerT& rawHandler,
                                 const boost::chrono::steady_clock::duration& period)
             : m_strand(ioService)
             , m_timer(ioService)
@@ -164,10 +164,10 @@ namespace SP
         boost::asio::strand m_strand;
         boost::asio::steady_timer m_timer;
         std::atomic<bool> m_stopped;
-        Communication& m_communication;
+        CommunicationT& m_communication;
         const uint64_t m_senderId;
         const std::map<int64_t, NodeType> m_nodeTypes;
-        Handler& m_rawHandler;
+        RawHandlerT& m_rawHandler;
         const std::set<int64_t> m_allNodeTypes;
         const boost::chrono::steady_clock::duration m_period;
     };

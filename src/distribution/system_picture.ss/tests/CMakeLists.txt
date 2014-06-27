@@ -98,3 +98,6 @@ set_tests_properties(RawHandler_test PROPERTIES TIMEOUT 30)
 
 add_test(ElectionHandler_test ElectionHandler_test)
 set_tests_properties(ElectionHandler_test PROPERTIES TIMEOUT 600)
+
+add_test(ElectionHandler_test_with_overflows ElectionHandler_test --overflows)
+set_tests_properties(ElectionHandler_test_with_overflows PROPERTIES TIMEOUT 600)

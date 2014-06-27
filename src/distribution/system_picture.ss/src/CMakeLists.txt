@@ -13,7 +13,6 @@ FIND_PACKAGE(Protobuf REQUIRED)
 FILE(GLOB_RECURSE headers *.h)
 SET(sources 
   SystemPicture.cpp 
-  Coordinator.cpp
   RawStatistics.cpp
   SystemState.cpp
   )
