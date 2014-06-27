@@ -5,7 +5,7 @@ endif()
 
 FILE(GLOB sources *.cs)
 
-ADD_CSHARP_ASSEMBLY(sate WINEXE
+ADD_CSHARP_ASSEMBLY(VehicleAppCs WINEXE
   SOURCES ${sources}
 #  REFERENCES Safir.Dob safir_generated-Core-dotnet Safir.Dob.Typesystem System.Windows.Forms System.Drawing System.Data
 )
