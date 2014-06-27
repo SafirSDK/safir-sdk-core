@@ -9,7 +9,7 @@ include(${QT_USE_FILE})
 
 QT4_WRAP_UI(ui_headers entitymw.ui messagedialog.ui servicedialog.ui categoryinfodialog.ui entitydialog.ui)
 QT4_ADD_RESOURCES(rcc_sources entitymw.qrc)
-QT4_WRAP_CPP(moc_sources categoryinfodialog.h entitydialog.h entitymw.h entitytablehandler.h messagedialog.h servicedialog.h)  
+QT4_WRAP_CPP(moc_sources categoryinfodialog.h entitydialog.h entitymw.h entitytablehandler.h messagedialog.h servicedialog.h ${QT4_WRAP_CPP_OPTIONS})
 
 ADD_EXECUTABLE(VehicleMmiCppQt WIN32 
   app.h app.cpp
@@ -23,7 +23,8 @@ ADD_EXECUTABLE(VehicleMmiCppQt WIN32
   qtdispatcher.h qtdispatcher.cpp
   main.cpp
   ${moc_sources} 
-  ${rcc_sources})
+  ${rcc_sources}
+  ${ui_headers})
 
 TARGET_LINK_LIBRARIES(VehicleMmiCppQt 
   safir_generated-Example-cpp
