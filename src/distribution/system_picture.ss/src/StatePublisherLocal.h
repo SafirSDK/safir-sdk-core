@@ -28,6 +28,7 @@
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include "CrcUtils.h"
+#include "Coordinator.h"
 
 namespace Safir
 {
@@ -37,8 +38,6 @@ namespace Internal
 {
 namespace SP
 {
-    class Coordinator;
-
     /**
      * Responsible for publishing state data locally on this computer/node.
      * E.g. for dobexplorer or other SP instance to use.
