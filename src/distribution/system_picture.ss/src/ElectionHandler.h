@@ -78,13 +78,13 @@ namespace Internal
 
 namespace SP
 {
-    template <class Communication>
+    template <class CommunicationT>
     class ElectionHandlerBasic
         : private boost::noncopyable
     {
     public:
         ElectionHandlerBasic(boost::asio::io_service& ioService,
-                             Communication& communication,
+                             CommunicationT& communication,
                              const int64_t id,
                              const std::map<int64_t, NodeType>& nodeTypes,
                              const char* const receiverId,
@@ -461,7 +461,7 @@ namespace SP
 
 
         mutable boost::asio::strand m_strand;
-        Communication& m_communication;
+        CommunicationT& m_communication;
         const uint64_t m_receiverId;
         
         const int64_t m_id;

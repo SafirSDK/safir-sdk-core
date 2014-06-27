@@ -39,9 +39,9 @@ namespace Internal
 namespace SP
 {
 
-    template <class IpcSubscriber, class SubscriberInterface, class WrapperCreator>
+    template <class IpcSubscriberT, class SubscriberInterfaceT, class WrapperCreatorT>
     class LocalSubscriber
-        : public SubscriberInterface
+        : public SubscriberInterfaceT
     {
     public:
         explicit LocalSubscriber(const char* const name)
@@ -52,7 +52,7 @@ namespace SP
         //callback will be delivered on one strand.
         //but Start and Stop are not MT safe, please only call one at a time.
         void Start(boost::asio::io_service& ioService,
-                   const std::function<void (const typename SubscriberInterface::DataWrapper& data)>& dataCallback) override
+                   const std::function<void (const typename SubscriberInterfaceT::DataWrapper& data)>& dataCallback) override
         {
             if (m_subscriber != nullptr)
             {
@@ -61,7 +61,7 @@ namespace SP
 
             m_dataCallback = dataCallback;
             
-            m_subscriber = Safir::make_unique<IpcSubscriber>
+            m_subscriber = Safir::make_unique<IpcSubscriberT>
                 (ioService,
                  m_name,
                  [this](const char* const data, size_t size)
@@ -96,7 +96,7 @@ namespace SP
             }
 #endif
 
-            auto msg = Safir::make_unique<typename WrapperCreator::WrappedType>();
+            auto msg = Safir::make_unique<typename WrapperCreatorT::WrappedType>();
         
             const bool parseResult = msg->ParseFromArray(data, static_cast<int>(size));
 
@@ -104,15 +104,15 @@ namespace SP
             {
                 throw std::logic_error("LocalSubscriber: Failed to parse message");
             }
-            m_dataCallback(WrapperCreator::Create(std::move(msg)));
+            m_dataCallback(WrapperCreatorT::Create(std::move(msg)));
         }
 
         //Order/sync is guaranteed by IpcSubscribers delivery order guarantee.
 
         const std::string m_name;
 
-        std::function<void (const typename SubscriberInterface::DataWrapper& data)> m_dataCallback;
-        std::unique_ptr<IpcSubscriber> m_subscriber;
+        std::function<void (const typename SubscriberInterfaceT::DataWrapper& data)> m_dataCallback;
+        std::unique_ptr<IpcSubscriberT> m_subscriber;
     };
 
     

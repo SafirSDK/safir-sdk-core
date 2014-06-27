@@ -36,13 +36,13 @@ namespace Internal
 {
 namespace SP
 {
-    template <class Communication, class Receiver>
+    template <class CommunicationT, class ReceiverT>
     class RemoteSubscriber
     {
     public:
-        RemoteSubscriber(Communication& communication,
-                                   const char* const receiverId,
-                                   Receiver& receiver)
+        RemoteSubscriber(CommunicationT& communication,
+                         const char* const receiverId,
+                         ReceiverT& receiver)
             : m_receiver(receiver)
         {
             communication.SetDataReceiver([this](const int64_t from, 
@@ -76,7 +76,7 @@ namespace SP
             m_receiver.NewRemoteData(from, data, size);
         }
 
-        Receiver& m_receiver;
+        ReceiverT& m_receiver;
     };
 
 }

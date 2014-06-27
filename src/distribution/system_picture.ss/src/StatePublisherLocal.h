@@ -43,12 +43,12 @@ namespace SP
      * Responsible for publishing state data locally on this computer/node.
      * E.g. for dobexplorer or other SP instance to use.
      */
-    template <class Handler, class Publisher>
+    template <class CoordinatorT, class IpcPublisherT>
     class StatePublisherLocalBasic
     {
     public:
         StatePublisherLocalBasic(boost::asio::io_service& ioService,
-                                 Handler& coordinator,
+                                 CoordinatorT& coordinator,
                                  const char* const name,
                                  const boost::chrono::steady_clock::duration& period)
             : m_coordinator(coordinator)
@@ -100,8 +100,8 @@ namespace SP
                                                 false); //ok to send anyones state
         }
         
-        Handler& m_coordinator;
-        Publisher m_publisher;
+        CoordinatorT& m_coordinator;
+        IpcPublisherT m_publisher;
         Safir::Utilities::Internal::AsioPeriodicTimer m_publishTimer;
     };
 

@@ -38,7 +38,7 @@ namespace Internal
 {
 namespace SP
 {
-    template <class Handler, class Communication>
+    template <class CoordinatorT, class Communication>
     class StatePublisherRemoteBasic
     {
     public:
@@ -46,7 +46,7 @@ namespace SP
                                   Communication& communication,
                                   const std::map<int64_t, NodeType>& nodeTypes,
                                   const char* const senderId,
-                                  Handler& coordinator,
+                                  CoordinatorT& coordinator,
                                   const boost::chrono::steady_clock::duration& period)
             : m_communication(communication)
             , m_senderId(LlufId_Generate64(senderId))
@@ -110,7 +110,7 @@ namespace SP
         Communication& m_communication;
         const uint64_t m_senderId;
         const std::map<int64_t, NodeType> m_nodeTypes;
-        Handler& m_coordinator;
+        CoordinatorT& m_coordinator;
         Safir::Utilities::Internal::AsioPeriodicTimer m_publishTimer;
     };
 
