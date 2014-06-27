@@ -13,13 +13,13 @@ ADD_CSHARP_ASSEMBLY(sate WINEXE
   REFERENCES Safir.Dob safir_generated-Core-dotnet Safir.Dob.Typesystem System.Windows.Forms System.Drawing System.Data)
 
 INSTALL_CSHARP_ASSEMBLY(TARGET sate
-  DESTINATION bin)
+  DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN})
 
 if(UNIX)
   configure_file(run_sate.sh-template run_sate.sh)
 
   install(PROGRAMS run_sate.sh
-    DESTINATION bin
+    DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
     RENAME sate)
 endif()
 

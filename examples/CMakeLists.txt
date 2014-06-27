@@ -22,8 +22,11 @@ include_directories(${Boost_INCLUDE_DIRS})
 ADD_DEFINITIONS(-DBOOST_ALL_DYN_LINK)
 
 if (MSVC)
-   ADD_DEFINITIONS(-D_WIN32_WINNT=0x0501)
+  ADD_DEFINITIONS(-D_WIN32_WINNT=0x0501)
 endif()
+
+#load macros for building dotnet stuff with cmake
+include(${SAFIR_SDK_CORE_DOTNET_SETTINGS})
 
 add_subdirectory(vehicleapp/src)
 add_subdirectory(vehicledb/src)

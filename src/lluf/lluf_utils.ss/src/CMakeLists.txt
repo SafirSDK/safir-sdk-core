@@ -39,8 +39,7 @@ TARGET_LINK_LIBRARIES(logger_control PRIVATE
 SAFIR_INSTALL(
   TARGETS lluf_utils logger_control)
 
-#TODO install these
-# if (WIN32)
-# INSTALL(FILES ../data/safir_event_log_registration.reg
-#         DESTINATION ${SAFIR_RUNTIME}/data/text/)
-# endif()
+if (WIN32)
+  INSTALL(FILES ../data/safir_event_log_registration.reg
+    DESTINATION ${SAFIR_INSTALL_DESTINATION_DOC}/utilities/)
+endif()

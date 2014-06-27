@@ -10,4 +10,4 @@ ADD_CSHARP_ASSEMBLY(Safir.SwReports LIBRARY
 add_dependencies(Safir.SwReports swre_library)
 
 INSTALL_CSHARP_ASSEMBLY(TARGET Safir.SwReports
-  DESTINATION lib/safir_sdk_core)
+  DESTINATION ${SAFIR_INSTALL_DESTINATION_CSHARP_DLL})

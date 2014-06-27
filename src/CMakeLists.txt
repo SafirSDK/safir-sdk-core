@@ -74,9 +74,9 @@ function (SAFIR_INSTALL)
 
       INSTALL(TARGETS ${target}
         ${export}
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib)
+        RUNTIME DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
+        LIBRARY DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB}
+        ARCHIVE DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB})
     endforeach()
   endif()
 
@@ -237,11 +237,18 @@ add_subdirectory(dope)
 add_subdirectory(tests)
 
 
+message("CONFIG: ${CMAKE_INSTALL_PREFIX}/${SAFIR_INSTALL_DESTINATION_DOU_BASE}")
 
-INSTALL(FILES config/typesystem.ini config/locations.ini config/logging.ini
-  DESTINATION share/doc/safir_sdk_core/example_configuration)
+configure_file(config/typesystem.ini.in
+  "${CMAKE_CURRENT_BINARY_DIR}/config/typesystem.ini" @ONLY)
 
-INSTALL(EXPORT SafirSDKCore DESTINATION lib/cmake/SafirSDKCore)
+INSTALL(FILES 
+  "${CMAKE_CURRENT_BINARY_DIR}/config/typesystem.ini"
+  config/locations.ini
+  config/logging.ini
+  DESTINATION ${SAFIR_INSTALL_DESTINATION_DOC}/example_configuration)
+
+INSTALL(EXPORT SafirSDKCore DESTINATION ${SAFIR_INSTALL_DESTINATION_CMAKE})
 
 configure_file(cmake/SafirSDKCoreConfig.cmake.in
   "${CMAKE_CURRENT_BINARY_DIR}/cmake/SafirSDKCoreConfig.cmake" @ONLY)
@@ -251,9 +258,10 @@ INSTALL(FILES
   cmake/CSharpMacros.cmake
   cmake/SafirCompilerSettings.cmake
   cmake/SafirLoadCSharp.cmake
+  cmake/FindCSharp.cmake
   cmake/SafirLoadJava.cmake
   "${CMAKE_CURRENT_BINARY_DIR}/cmake/SafirSDKCoreConfig.cmake"
-  DESTINATION lib/cmake/SafirSDKCore)
+  DESTINATION ${SAFIR_INSTALL_DESTINATION_CMAKE})
 
 
 

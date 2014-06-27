@@ -2,8 +2,7 @@ file(GLOB_RECURSE sources src/*.java)
 
 ADD_JAR(dose_test_util_java SOURCES ${sources})
 
-INSTALL_JAR(dose_test_util_java share/java/safir_sdk_core)
-#TODO put this path somewhere common?
+INSTALL_JAR(dose_test_util_java ${SAFIR_INSTALL_DESTINATION_JAR})
 
 SAFIR_JAVAH(JAR dose_test_util_java
   CLASS com.saabgroup.safir.dob.test.util.DoseTestUtil

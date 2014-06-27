@@ -29,7 +29,8 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
   if (SAFIR_EXTERNAL_BUILD)
     #load compiler settings, csharp and java!
     include(${SAFIR_SDK_CORE_CMAKE_DIR}/SafirCompilerSettings.cmake)
-    #include(${SAFIR_SDK_CORE_CMAKE_DIR}/SafirLoadCSharp.cmake)
+    include(${SAFIR_SDK_CORE_DOTNET_SETTINGS})
+    #include(${SAFIR_SDK_CORE_JAVA_SETTINGS})
     #include(${SAFIR_SDK_CORE_CMAKE_DIR}/SafirLoadJava.cmake)
 
     #We need boost headers.
@@ -255,15 +256,26 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
   #
   if (CSHARP_FOUND)
 
-    FOREACH (DEP ${GEN_DEPENDENCIES})
-      SET(assembly_refs ${assembly_refs} safir_generated-${DEP}-dotnet)
-    ENDFOREACH()
+    set (assembly_refs Safir.Dob.Typesystem)
+    foreach (DEP ${GEN_DEPENDENCIES})
+      list(APPEND assembly_refs safir_generated-${DEP}-dotnet)
+    endforeach()
+
+    if (SAFIR_EXTERNAL_BUILD)
+      set (snk_path ${SAFIR_SDK_CORE_INSTALL_DIR}/share/safir_sdk_core/generation/dotnet/dots_generated-dotnet.snk)
+      foreach (dep ${assembly_refs})
+        list (APPEND assembly_refs_full_path ${SAFIR_SDK_CORE_INSTALL_DIR}/lib/safir_sdk_core/${dep})
+      endforeach()
+      set (assembly_refs ${assembly_refs_full_path})
+    else()
+      set (snk_path ${safir_sdk_core_SOURCE_DIR}/src/dots/dots_v/data/dots_generated-dotnet.snk)
+    endif()
 
     #TODO key path!
     ADD_CSHARP_ASSEMBLY(safir_generated-${GEN_NAME}-dotnet LIBRARY
-      SIGN ${safir_sdk_core_SOURCE_DIR}/build/config/sdk/data/build/safirkey.snk
+      SIGN ${snk_path}
       SOURCES ${dotnet_files}
-      REFERENCES Safir.Dob.Typesystem ${assembly_refs})
+      REFERENCES ${assembly_refs})
 
     add_dependencies(safir_generated-${GEN_NAME}-dotnet safir_generated-${GEN_NAME}-code)
   endif()
@@ -272,31 +284,32 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
 
 
 
-
+  #TODO: install externals?!
   #
   # Install everything
   #
-  if (NOT GEN_NO_INSTALL)
+  if (NOT GEN_NO_INSTALL AND NOT SAFIR_EXTERNAL_BUILD)
     INSTALL(TARGETS safir_generated-${GEN_NAME}-cpp
       EXPORT SafirSDKCore
-      RUNTIME DESTINATION bin
-      LIBRARY DESTINATION lib
-      ARCHIVE DESTINATION lib)
+      RUNTIME DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
+      LIBRARY DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB}
+      ARCHIVE DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB})
 
-    INSTALL(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated_code/cpp/include/ DESTINATION include
+    INSTALL(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated_code/cpp/include/ 
+      DESTINATION ${SAFIR_INSTALL_DESTINATION_INCLUDE}
       PATTERN ".svn" EXCLUDE
       PATTERN "*~" EXCLUDE)
     
     INSTALL(FILES ${dou_files} ${dom_files} ${namespace_files}
-      DESTINATION share/safir_sdk_core/${GEN_NAME})
+      DESTINATION ${SAFIR_INSTALL_DESTINATION_DOU_BASE}${GEN_NAME})
 
     if (Java_FOUND)
-      install_jar(safir_generated-${GEN_NAME}-java share/java/safir_sdk_core)
+      install_jar(safir_generated-${GEN_NAME}-java ${SAFIR_INSTALL_DESTINATION_JAR})
     endif()
 
     if (CSHARP_FOUND)
       INSTALL_CSHARP_ASSEMBLY(TARGET safir_generated-${GEN_NAME}-dotnet
-        DESTINATION lib/safir_sdk_core)
+        DESTINATION ${SAFIR_INSTALL_DESTINATION_CSHARP_DLL})
     endif()
 
   endif()

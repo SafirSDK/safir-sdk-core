@@ -17,4 +17,4 @@ TARGET_LINK_LIBRARIES(dots_internal PRIVATE
 SAFIR_INSTALL(TARGETS dots_internal)
 
 INSTALL(PROGRAMS ../scripts/utils/xml_convert.py
-  DESTINATION share/doc/safir_sdk_core/utilities/)
+  DESTINATION ${SAFIR_INSTALL_DESTINATION_DOC}/utilities/)

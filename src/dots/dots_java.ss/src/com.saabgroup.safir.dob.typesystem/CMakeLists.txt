@@ -2,7 +2,7 @@ file(GLOB_RECURSE sources src/*.java)
 
 ADD_JAR(dots_java SOURCES ${sources})
 
-INSTALL_JAR(dots_java share/java/safir_sdk_core)
+INSTALL_JAR(dots_java ${SAFIR_INSTALL_DESTINATION_JAR})
 
 SAFIR_JAVAH(JAR dots_java CLASS com.saabgroup.safir.dob.typesystem.Kernel
   OUTPUT_FILES

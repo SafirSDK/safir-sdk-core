@@ -5,7 +5,7 @@ ADD_JAR(dose_java
   INCLUDE_JARS safir_generated-Core-java dots_java logging_java
   MANIFEST ${CMAKE_CURRENT_SOURCE_DIR}/Manifest.txt)
 
-INSTALL_JAR(dose_java share/java/safir_sdk_core)
+INSTALL_JAR(dose_java ${SAFIR_INSTALL_DESTINATION_JAR})
 
 SAFIR_JAVAH(JAR dose_java 
   CLASS com.saabgroup.safir.dob.Interface

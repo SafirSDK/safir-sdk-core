@@ -1,3 +1,7 @@
+if (SAFIR_SDK_CORE_INSTALL_DIR)
+  list(APPEND CMAKE_MODULE_PATH ${SAFIR_SDK_CORE_CMAKE_DIR})
+endif()
+
 set(CSharp_FIND_QUIETLY True)
 find_package(CSharp)
 if (NOT CSHARP_FOUND)

@@ -20,7 +20,6 @@ target_include_directories(dose_test_util PRIVATE ${safir_sdk_core_SOURCE_DIR}/s
 #  lluf_utils)
 
 SAFIR_INSTALL(TARGETS dose_test_util)
-#TODO: should we install headers? Don't really need to any more
 
 # INSTALL(FILES dose_test_util.gpr
 #         DESTINATION ${SAFIR_SDK}/ada)

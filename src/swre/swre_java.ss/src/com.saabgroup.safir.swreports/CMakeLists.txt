@@ -5,7 +5,7 @@ ADD_JAR(swre_reports_java
   INCLUDE_JARS dots_java
   MANIFEST ${CMAKE_CURRENT_SOURCE_DIR}/Manifest.txt)
 
-INSTALL_JAR(swre_reports_java share/java/safir_sdk_core)
+INSTALL_JAR(swre_reports_java ${SAFIR_INSTALL_DESTINATION_JAR})
 
 SAFIR_JAVAH(JAR swre_reports_java
   CLASS com.saabgroup.safir.swreports.Library

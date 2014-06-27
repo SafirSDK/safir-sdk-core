@@ -4,7 +4,7 @@ FILE(GLOB dod_files data/*.dod)
 
 INSTALL(FILES 
   ${dod_files} 
-  DESTINATION share/safir_sdk_core/generation/dod)
+  DESTINATION ${SAFIR_INSTALL_DESTINATION_GENERATION}/dod)
 
 #TODO  data/dots_unit.xsd
 
@@ -18,7 +18,13 @@ INSTALL(FILES
 #          data/dots_generated_ada.gpr_template
 #          data/dots_generated_ada_library.gpr_template
 #          data/dots_generated_main_ada.gpr_template
-        DESTINATION share/safir_sdk_core/generation/cpp)
+        DESTINATION ${SAFIR_INSTALL_DESTINATION_GENERATION}/cpp)
+
+INSTALL(FILES 
+#          data/AssemblyInfo.cs TODO?
+          data/dots_generated-dotnet.snk
+        DESTINATION ${SAFIR_INSTALL_DESTINATION_GENERATION}/dotnet)
+
 
 #TODO need better spot for these, and what about .cpp?
 # INSTALL(FILES 
@@ -35,6 +41,6 @@ INSTALL(FILES
      
 INSTALL(PROGRAMS
   dots_v.py
-  DESTINATION bin)
+  DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN})
 
 # #        data/dobmake.py

@@ -4,8 +4,8 @@
 ;Number of megabytes of shared memory that will be allocated by dots kernel.
 dots_shared_memory_size=10
 
-default_dou_directory=/usr/share/safir_sdk_core
+default_dou_directory=@CMAKE_INSTALL_PREFIX@/@SAFIR_INSTALL_DESTINATION_DOU_BASE@
 
 [Core]
 kind=library
-#use defaults
+

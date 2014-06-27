@@ -24,4 +24,4 @@ set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES html)
 add_dependencies(Doxygen safir_generated-Core-cpp)
 
 INSTALL(DIRECTORY html
-  DESTINATION share/doc/safir_sdk_core)
+  DESTINATION ${SAFIR_INSTALL_DESTINATION_DOC})

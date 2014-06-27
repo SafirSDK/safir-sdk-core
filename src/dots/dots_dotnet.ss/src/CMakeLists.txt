@@ -11,4 +11,4 @@ ADD_CSHARP_ASSEMBLY(Safir.Dob.Typesystem LIBRARY
 add_dependencies(Safir.Dob.Typesystem dots_kernel)
 
 INSTALL_CSHARP_ASSEMBLY(TARGET Safir.Dob.Typesystem
-  DESTINATION lib/safir_sdk_core)
+  DESTINATION ${SAFIR_INSTALL_DESTINATION_CSHARP_DLL})
