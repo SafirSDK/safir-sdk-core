@@ -41,7 +41,6 @@
 #  pragma warning (pop)
 #endif
 
-
 #define BOOST_TEST_MODULE ElectionHandlerTest
 #include <boost/test/unit_test.hpp>
 
@@ -86,6 +85,12 @@ public:
         SAFE_BOOST_CHECK(ack);
 
         SAFE_BOOST_CHECK_NE(nodeId, id); //not to ourselves!
+
+        if (!DeliverMessage())
+        {
+            return false;
+        }
+
         for (auto&& comm: allComms)
         {
             if (comm.second == nullptr)
@@ -93,7 +98,7 @@ public:
                 continue;
             }
 
-            //send to all but ourselves
+            //send to the intended node
             if (comm.second->id == nodeId)
             {
                 SAFE_BOOST_TEST_MESSAGE(" - Sending to node " << comm.second->id);
@@ -116,6 +121,10 @@ public:
 
         //All nodes are of the same type
 
+        if (!DeliverMessage())
+        {
+            return false;
+        }
 
         for (auto&& comm: allComms)
         {
@@ -144,10 +153,27 @@ public:
     static void ClearAll() {allComms.clear();}
     static void Clear(const int64_t id) {allComms.find(id)->second = nullptr;}
     static std::map<int64_t,Communication*>  allComms;
+    
+    static bool overflows;
+
+private:
+    bool DeliverMessage() const
+    {
+        if (overflows)
+        {
+            return rand() % 4 != 0; // 75% will be delivered
+        }
+        else
+        {
+            return true;
+        }
+    }
+
 };
 
 //static initialization
 std::map<int64_t,Communication*> Communication::allComms;
+bool Communication::overflows = false;
 
 using namespace Safir::Dob::Internal::SP;
 
@@ -207,6 +233,16 @@ struct Fixture
     Fixture()
     {
         SAFE_BOOST_TEST_MESSAGE("setup fixture");
+
+        for (int i = 0; i < boost::unit_test::framework::master_test_suite().argc; ++i)
+        {
+            if (std::string(boost::unit_test::framework::master_test_suite().argv[i]) == "--overflows")
+            {
+                SAFE_BOOST_TEST_MESSAGE("Communication stub will generate overflows");
+                Communication::overflows = true;
+            }
+        }
+
         Communication::ClearAll();
 
         nodes.push_back(Safir::make_unique<Node>(ioService,nextNodeId));
@@ -516,3 +552,4 @@ BOOST_AUTO_TEST_CASE( lots_of_nodes_remove_some )
 
 
 BOOST_AUTO_TEST_SUITE_END()
+
