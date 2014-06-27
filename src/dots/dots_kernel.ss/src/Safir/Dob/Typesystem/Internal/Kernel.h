@@ -43,9 +43,63 @@
 
 #include <Safir/Dob/Typesystem/LanguageInterfaceDefs.h>
 
+
 extern "C"
 {
-    typedef void (*DotsC_BytePointerDeleter)(char * &);
+typedef void (*DotsC_BytePointerDeleter)(char * &);
+typedef DotsC_Int64 DotsC_Handle;
+
+//********************************************************
+// Read blob operations
+//********************************************************
+
+/**
+ * @brief Create a new instance of blob reader.
+ * @param blob [in] - The blob to read.
+ * @return Handle to a new blob reader instance.
+ */
+DotsC_Handle DotsC_CreateBlobReader(const char* blob);
+
+/**
+ * @brief Deletes an instance of blob reader.
+ * @param handle [in] - Handle of the blob readet to be deleted.
+ */
+void DotsC_DeleteBlobReader(DotsC_Handle handle);
+
+/**
+ * @brief Get the type id of the blob.
+ * @param blob [in] - The blob.
+ * @return Type id of blob.
+ */
+DotsC_TypeId DotsC_GetTypeId(const char * const blob);
+
+
+/**
+ * @brief Get size of blob.
+ * @param blob [in] - The blob.
+ * @return Size of blob.
+ */
+DotsC_Int32 DotsC_GetSize(const char * const blob);
+
+
+//********************************************************
+// Write blob operations
+//********************************************************
+
+/**
+ * @brief Create a new instance of blob writer.
+ * @param typeId [in] - The type of blob to be written.
+ * @return Handle to a new blob writer instance.
+ */
+DotsC_Handle DotsC_CreateBlobWriter(DotsC_TypeId typeId);
+
+/**
+ * @brief Deletes an instance of blob writer.
+ * @param handle [in] - Handle of the blob writer to be deleted.
+ */
+void DotsC_DeleteBlobWriter(DotsC_Handle handle);
+
+
 
     //********************************************************
     //* Base operations on blobs

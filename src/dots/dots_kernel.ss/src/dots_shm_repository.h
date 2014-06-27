@@ -250,27 +250,21 @@ namespace Internal
     //-------------------------------------------
     struct ValueDefinitionShm
     {
-        struct Key
+        StringShm stringKey;
+        StringShm stringVal;
+
+        struct
         {
-            StringShm str;
             DotsC_Int64 hash;
             union
             {
                 DotsC_Int32 int32;
                 DotsC_Int64 int64;
             };
+        } key;
 
-            Key(boost::interprocess::managed_shared_memory* shm)
-                :str(shm->get_segment_manager())
-                ,hash(0)
-                ,int64(0)
-            {
-            }
-        };
-
-        struct Val
+        struct
         {
-            StringShm str;
             DotsC_Int64 hash;
             union
             {
@@ -280,50 +274,42 @@ namespace Internal
                 DotsC_Float64 float64;
                 bool boolean;
             };
-
-            Val(boost::interprocess::managed_shared_memory* shm)
-                :str(shm->get_segment_manager())
-                ,hash(0)
-                ,int64(0)
-            {
-            }
-        };
-
-        Key key;
-        Val val;
+        } val;
 
         ValueDefinitionShm(boost::interprocess::managed_shared_memory* shm)
-            :key(shm)
-            ,val(shm)
+            :stringKey(shm->get_segment_manager())
+            ,stringVal(shm->get_segment_manager())
         {
         }
 
-//        ValueDefinitionShm(const char* strVal, boost::interprocess::managed_shared_memory* shm)
-//            :stringVal(strVal, shm->get_segment_manager())
-//        {
-//        }
+        ValueDefinitionShm(const char* strVal, boost::interprocess::managed_shared_memory* shm)
+            :stringKey(shm->get_segment_manager())
+            ,stringVal(strVal, shm->get_segment_manager())
+        {
+        }
 
-//        ValueDefinitionShm(const char* strVal, size_t size, boost::interprocess::managed_shared_memory* shm)
-//            :stringVal(strVal, size, shm->get_segment_manager())
-//        {
-//        }
+        ValueDefinitionShm(const char* strVal, size_t size, boost::interprocess::managed_shared_memory* shm)
+            :stringKey(shm->get_segment_manager())
+            ,stringVal(strVal, size, shm->get_segment_manager())
+        {
+        }
 
         ValueDefinitionShm(const ValueDefinitionShm& other)
         {
-            key.str=other.key.str;
+            stringKey=other.stringKey;
             key.hash=other.key.hash;
             key.int64=other.key.int64;
-            val.str=other.val.str;
+            stringVal=other.stringVal;
             val.hash=other.val.hash;
             val.int64=other.val.int64;
         }
 
         ValueDefinitionShm& operator=(const ValueDefinitionShm& other)
         {
-            key.str=other.key.str;
+            stringKey=other.stringKey;
             key.hash=other.key.hash;
             key.int64=other.key.int64;
-            val.str=other.val.str;
+            stringVal=other.stringVal;
             val.hash=other.val.hash;
             val.int64=other.val.int64;
             return *this;
@@ -354,27 +340,27 @@ namespace Internal
         float GetFloat32Value(int index) const {return m_values[static_cast<size_t>(index)].val.float32;}
         double GetFloat64Value(int index) const {return m_values[static_cast<size_t>(index)].val.float64;}
         bool GetBoolValue(int index) const {return m_values[static_cast<size_t>(index)].val.boolean;}
-        const char* GetStringValue(int index) const {return m_values[static_cast<size_t>(index)].val.str.c_str();}
+        const char* GetStringValue(int index) const {return m_values[static_cast<size_t>(index)].stringVal.c_str();}
         std::pair<const char*, size_t> GetObjectValue(int index) const
         {
             const ValueDefinitionShm& v=m_values[static_cast<size_t>(index)];
-            return std::make_pair(v.val.str.c_str(), v.val.str.size());
+            return std::make_pair(v.stringVal.c_str(), v.stringVal.size());
         }
         std::pair<const char*, size_t> GetBinaryValue(int index) const
         {
             const ValueDefinitionShm& v=m_values[static_cast<size_t>(index)];
-            return std::make_pair(v.val.str.c_str(), v.val.str.size());
+            return std::make_pair(v.stringVal.c_str(), v.stringVal.size());
         }
         std::pair<boost::int64_t, const char*> GetHashedValue(int index) const
         {
             const ValueDefinitionShm& v=m_values[static_cast<size_t>(index)];
-            return std::make_pair(v.val.hash, v.val.str.empty() ? NULL : v.val.str.c_str());
+            return std::make_pair(v.val.hash, v.stringVal.empty() ? NULL : v.stringVal.c_str());
         }
 
         //keys
         virtual const char* GetStringKey(int index) const
         {
-            return m_values[static_cast<size_t>(index)].key.str.c_str();
+            return m_values[static_cast<size_t>(index)].stringKey.c_str();
         }
         virtual DotsC_Int32 GetInt32Key(int index) const
         {
@@ -387,7 +373,7 @@ namespace Internal
         virtual std::pair<DotsC_Int64, const char*> GetHashedKey(int index) const
         {
             const ValueDefinitionShm& v=m_values[static_cast<size_t>(index)];
-            return std::make_pair(v.key.hash, v.key.str.empty() ? NULL : v.key.str.c_str());
+            return std::make_pair(v.key.hash, v.stringKey.empty() ? NULL : v.stringKey.c_str());
         }
 
     private:

@@ -220,8 +220,7 @@ namespace Internal
                 {
                     hashed.second="";
                 }
-                ValueDefinitionShm vd(shm);
-                vd.val.str=StringShm(hashed.second, shm->get_segment_manager());
+                ValueDefinitionShm vd(hashed.second, shm);
                 vd.val.hash=hashed.first;
                 vd.val.int64=pd->GetInt64Value(i);
                 m_values.push_back(vd);
@@ -249,9 +248,8 @@ namespace Internal
                 {
                     hashed.second="";
                 }
-                ValueDefinitionShm vd(shm);
-                vd.val.str=StringShm(hashed.second, shm->get_segment_manager());
-                vd.hashedVal=hashed.first;
+                ValueDefinitionShm vd(hashed.second, shm);
+                vd.val.hash=hashed.first;
                 m_values.push_back(vd);
             }
         }
@@ -262,8 +260,7 @@ namespace Internal
             for (int i=0; i<pd->GetNumberOfValues(); ++i)
             {
                 const char* str=pd->GetStringValue(i);
-                ValueDefinitionShm vd(shm);
-                vd.val.str=StringShm(str, shm->get_segment_manager());
+                ValueDefinitionShm vd(str, shm);
                 m_values.push_back(vd);
             }
         }
@@ -274,8 +271,7 @@ namespace Internal
             for (int i=0; i<pd->GetNumberOfValues(); ++i)
             {
                 std::pair<const char*, size_t> bin=pd->GetObjectValue(i);
-                ValueDefinitionShm vd(shm);
-                vd.val.str=StringShm(bin.first, bin.second, shm->get_segment_manager());
+                ValueDefinitionShm vd(bin.first, bin.second, shm);
                 m_values.push_back(vd);
             }
         }
@@ -297,8 +293,7 @@ namespace Internal
             for (int i=0; i<pd->GetNumberOfValues(); ++i)
             {
                 std::pair<const char*, size_t> bin=pd->GetBinaryValue(i);
-                ValueDefinitionShm vd(shm);
-                vd.val.str=StringShm(bin.first, bin.second, shm->get_segment_manager());
+                ValueDefinitionShm vd(bin.first, bin.second, shm);
                 m_values.push_back(vd);
             }
         }
@@ -408,7 +403,7 @@ namespace Internal
                         hashed.second="";
                     }
                     ValueDefinitionShm& vd=m_values[static_cast<size_t>(i)];
-                    vd.key.str=StringShm(hashed.second, shm->get_segment_manager());
+                    vd.stringKey=StringShm(hashed.second, shm->get_segment_manager());
                     vd.key.hash=hashed.first;
                     vd.key.int64=pd->GetInt64Key(i);
                 }
@@ -435,7 +430,7 @@ namespace Internal
                         hashed.second="";
                     }
                     ValueDefinitionShm& vd=m_values[static_cast<size_t>(i)];
-                    vd.key.str=StringShm(hashed.second, shm->get_segment_manager());
+                    vd.stringKey=StringShm(hashed.second, shm->get_segment_manager());
                     vd.hashedVal=hashed.first;
                 }
             }
@@ -447,7 +442,7 @@ namespace Internal
                 {
                     const char* str=pd->GetStringKey(i);
                     ValueDefinitionShm& vd=m_values[static_cast<size_t>(i)];
-                    vd.key.str=StringShm(str, shm->get_segment_manager());
+                    vd.stringKey=StringShm(str, shm->get_segment_manager());
                 }
             }
                 break;
