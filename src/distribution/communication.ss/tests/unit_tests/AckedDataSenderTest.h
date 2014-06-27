@@ -25,12 +25,22 @@
 #define _SAFIR_COM_ACKED_DATA_SENDER_TEST_H_
 
 #include "fwd.h"
+#include <atomic>
 
 class AckedDataSenderTest
 {
 public:
     void Run()
     {
+        std::atomic_uint go{0};
+        auto SetReady=[&]{go=1;};
+        auto WaitUntilReady=[&]
+        {
+            while(go==0)
+                Wait(20);
+            go=0;
+        };
+
         boost::asio::io_service io;
         auto work=boost::make_shared<boost::asio::io_service::work>(io);
         boost::thread_group threads;
@@ -63,7 +73,10 @@ public:
             CHECK(sender.m_nodes.find(3)->second.systemNode==true);
             CHECK(sender.m_nodes.find(4)->second.systemNode==false);
             CHECK(sender.m_nodes.find(5)->second.systemNode==false);
+            SetReady();
         });
+
+        WaitUntilReady();
 
         sender.RemoveNode(4);
         sender.RemoveNode(5);
@@ -72,11 +85,21 @@ public:
 
         sender.AddToSendQueue(0, MakeShared("1"), 1, 1);
 
+        sender.m_strand.post([&]
+        {
+            boost::mutex::scoped_lock lock(mutex);
+            CHECK(sent.size()>0);
+            std::string ss(sent.front()->fragment, sent.front()->header.fragmentContentSize);
+            CHECK(ss=="1");
+            CHECKMSG(sender.SendQueueSize()==1, sender.SendQueueSize());
+        });
 
-        Wait(1000);
-        sender.Stop();
+        sender.m_strand.post([&]
+        {
+            sender.Stop();
+            work.reset();
+        });
 
-        work.reset();
         threads.join_all();
         std::cout<<"AckedDataSenderTest tests passed"<<std::endl;
     }
@@ -85,6 +108,7 @@ private:
 
     static boost::mutex mutex;
     static std::map<unsigned short, int> received;
+    static std::queue< boost::shared_ptr<Com::UserData> > sent;
 
     struct TestSendPolicy
     {
@@ -94,7 +118,9 @@ private:
         {
             boost::mutex::scoped_lock lock(mutex);
             std::string s(val->fragment, val->fragment+val->header.fragmentContentSize);
-            std::cout<<"Writer.Send to_port: "<<to.port()<<", seq: "<<val->header.sequenceNumber<<", data: "<<s<<std::endl;
+            std::string ss(val->fragment, val->header.fragmentContentSize);
+            std::cout<<"Writer.Send to_port: "<<to.port()<<", seq: "<<val->header.sequenceNumber<<", data: '"<<s<<"', '"<<ss<<"'"<<std::endl;
+            sent.push(val);
         }
     };
 
@@ -116,5 +142,6 @@ private:
 
 boost::mutex AckedDataSenderTest::mutex;
 std::map<unsigned short, int> AckedDataSenderTest::received;
+std::queue< boost::shared_ptr<Com::UserData> > AckedDataSenderTest::sent;
 
 #endif
