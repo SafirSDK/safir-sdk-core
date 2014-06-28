@@ -1,15 +1,14 @@
-# find and setup Qt4 for this project
-SET(QT_USE_QTMAIN TRUE)
-find_package(Qt4)
-if (NOT Qt4_FOUND)
-  message("Qt4 was not found, not building this example, which currently does not support Qt5")
+# find and setup Qt5 for this project
+
+find_package(Qt5Widgets QUIET)
+if (NOT Qt5Widgets_FOUND)
+  message("Qt5 was not found, not building the VehicleMmiCppQt example.")
   return()
 endif()
-include(${QT_USE_FILE})
 
-QT4_WRAP_UI(ui_headers entitymw.ui messagedialog.ui servicedialog.ui categoryinfodialog.ui entitydialog.ui)
-QT4_ADD_RESOURCES(rcc_sources entitymw.qrc)
-QT4_WRAP_CPP(moc_sources categoryinfodialog.h entitydialog.h entitymw.h entitytablehandler.h messagedialog.h servicedialog.h ${QT4_WRAP_CPP_OPTIONS})
+QT5_WRAP_UI(ui_headers entitymw.ui messagedialog.ui servicedialog.ui categoryinfodialog.ui entitydialog.ui)
+QT5_ADD_RESOURCES(rcc_sources entitymw.qrc)
+QT5_WRAP_CPP(moc_sources categoryinfodialog.h entitydialog.h entitymw.h entitytablehandler.h messagedialog.h servicedialog.h)
 
 ADD_EXECUTABLE(VehicleMmiCppQt WIN32 
   app.h app.cpp
@@ -28,8 +27,8 @@ ADD_EXECUTABLE(VehicleMmiCppQt WIN32
 
 TARGET_LINK_LIBRARIES(VehicleMmiCppQt 
   safir_generated-Example-cpp
-  ${SAFIR_SDK_CORE_LIBRARIES}  
-  ${QT_LIBRARIES})
+  ${SAFIR_SDK_CORE_LIBRARIES}
+  Qt5::Widgets)
   
 
 #TODO: install?

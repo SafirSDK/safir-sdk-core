@@ -69,7 +69,7 @@ namespace VehicleMmiCppQt
         // Hide the vertical header.
         m_pTable->verticalHeader()->hide();
         // Make the columns movable by the user.
-        m_pTable->horizontalHeader()->setMovable(true);
+        m_pTable->horizontalHeader()->setSectionsMovable(true);
         // Read only.
         m_pTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
 

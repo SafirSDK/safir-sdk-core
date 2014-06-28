@@ -37,7 +37,7 @@
 #pragma warning (disable: 4251)
 #endif
 
-#include <QtGui/QMainWindow>
+#include <QtGui>
 #include "ui_entitymw.h"
 
 #ifdef _MSC_VER
@@ -65,7 +65,7 @@ namespace VehicleMmiCppQt
         /** 
         * Create table and dialogs. Attach to Dob.
         */
-        EntityMw(QWidget *parent = 0, Qt::WFlags flags = 0);
+        EntityMw(QWidget *parent = 0, Qt::WindowFlags flags = 0);
         
         /** 
         * Detach from Dob.

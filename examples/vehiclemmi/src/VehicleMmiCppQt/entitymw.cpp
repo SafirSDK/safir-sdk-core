@@ -32,7 +32,7 @@
 namespace VehicleMmiCppQt
 {
 
-    EntityMw::EntityMw(QWidget *parent, Qt::WFlags flags)
+    EntityMw::EntityMw(QWidget *parent, Qt::WindowFlags flags)
         : QMainWindow(parent, flags)
     {
         // Set up HMI

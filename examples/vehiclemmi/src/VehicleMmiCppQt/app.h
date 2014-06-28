@@ -34,7 +34,7 @@
 #pragma warning (disable: 4251)
 #endif
 
-#include <QtGui/QApplication>
+#include <QtGui>
 
 #ifdef _MSC_VER
 #pragma warning(pop)
