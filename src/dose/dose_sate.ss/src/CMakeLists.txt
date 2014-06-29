@@ -8,8 +8,7 @@ FILE(GLOB resx_files *.resx)
 ADD_CSHARP_ASSEMBLY(sate WINEXE
   SIGN ${safir_sdk_core_SOURCE_DIR}/build/config/sdk/data/build/safirkey.snk
   SOURCES ${sources}
-  RESOURCES ${resx_files}
-  RESOURCE_PREFIX Sate.
+  RESOURCES PREFIX Sate. ${resx_files}
   REFERENCES Safir.Dob safir_generated-Core-dotnet Safir.Dob.Typesystem System.Windows.Forms System.Drawing System.Data)
 
 INSTALL_CSHARP_ASSEMBLY(TARGET sate

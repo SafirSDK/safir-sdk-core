@@ -266,10 +266,7 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
 
     if (SAFIR_EXTERNAL_BUILD)
       set (snk_path ${SAFIR_SDK_CORE_INSTALL_DIR}/share/safir_sdk_core/generation/dotnet/dots_generated-dotnet.snk)
-      foreach (dep ${assembly_refs})
-        list (APPEND assembly_refs_full_path ${SAFIR_SDK_CORE_INSTALL_DIR}/lib/safir_sdk_core/${dep})
-      endforeach()
-      set (assembly_refs ${assembly_refs_full_path})
+      set (lib_path_arg LIBRARY_PATHS ${SAFIR_SDK_CORE_INSTALL_DIR}/lib/safir_sdk_core)
     else()
       set (snk_path ${safir_sdk_core_SOURCE_DIR}/src/dots/dots_v/data/dots_generated-dotnet.snk)
     endif()
@@ -278,7 +275,8 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
     ADD_CSHARP_ASSEMBLY(safir_generated-${GEN_NAME}-dotnet LIBRARY
       SIGN ${snk_path}
       SOURCES ${dotnet_files}
-      REFERENCES ${assembly_refs})
+      REFERENCES ${assembly_refs}
+      ${lib_path_arg})
 
     add_dependencies(safir_generated-${GEN_NAME}-dotnet safir_generated-${GEN_NAME}-code)
   endif()
@@ -304,7 +302,7 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
       PATTERN "*~" EXCLUDE)
     
     INSTALL(FILES ${dou_files} ${dom_files} ${namespace_files}
-      DESTINATION ${SAFIR_INSTALL_DESTINATION_DOU_BASE}${GEN_NAME})
+      DESTINATION ${SAFIR_INSTALL_DESTINATION_DOU_BASE}/${GEN_NAME})
 
     if (Java_FOUND)
       install_jar(safir_generated-${GEN_NAME}-java ${SAFIR_INSTALL_DESTINATION_JAR})

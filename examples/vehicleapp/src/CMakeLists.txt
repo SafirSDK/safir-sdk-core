@@ -1,3 +1,3 @@
 add_subdirectory(VehicleAppCpp)
-#add_subdirectory(VehicleAppCs)
+add_subdirectory(VehicleAppCs)
 #TODO: cs and java

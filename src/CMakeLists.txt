@@ -236,9 +236,6 @@ add_subdirectory(dope)
 
 add_subdirectory(tests)
 
-
-message("CONFIG: ${CMAKE_INSTALL_PREFIX}/${SAFIR_INSTALL_DESTINATION_DOU_BASE}")
-
 configure_file(config/typesystem.ini.in
   "${CMAKE_CURRENT_BINARY_DIR}/config/typesystem.ini" @ONLY)
 

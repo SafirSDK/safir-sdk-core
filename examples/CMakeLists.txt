@@ -28,6 +28,8 @@ endif()
 #load macros for building dotnet stuff with cmake
 include(${SAFIR_SDK_CORE_DOTNET_SETTINGS})
 
+set (CSHARP_LIBRARY_PATHS ${SAFIR_SDK_CORE_CSHARP_LIBRARY_PATH})
+
 add_subdirectory(vehicleapp/src)
 add_subdirectory(vehicledb/src)
 add_subdirectory(vehiclemmi/src)

@@ -1,12 +1,12 @@
 function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
-    cmake_parse_arguments(_cs "LIBRARY;EXE;WINEXE" "SIGN;RESOURCE_PREFIX" "SOURCES;RESOURCES;REFERENCES" ${ARGN})
+    cmake_parse_arguments(_cs "LIBRARY;EXE;WINEXE" "SIGN" "SOURCES;RESOURCES;REFERENCES;LIBRARY_PATHS" ${ARGN})
     
     if (NOT _cs_LIBRARY AND NOT _cs_EXE AND NOT _cs_WINEXE)
       message(FATAL_ERROR "ADD_CSHARP_ASSEMBLY: TARGET_KIND not specified!")
     endif()
 
     if (NOT "${_cs_UNPARSED_ARGUMENTS}" STREQUAL "")
-      message(FATAL_ERROR "Unknown argument to SAFIR_INSTALL '${_cs_UNPARSED_ARGUMENTS}'")
+      message(FATAL_ERROR "Unknown argument to ADD_CSHARP_ASSEMBLY '${_cs_UNPARSED_ARGUMENTS}'")
     endif()
 
     #we always generated debug info and enable optimizations, regardless of build type
@@ -37,18 +37,31 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
     else()
       set (_cs_debug_file "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.pdb")
     endif()
-
+    
     foreach(resx_file ${_cs_RESOURCES})
-      get_filename_component(base_name ${resx_file} NAME_WE)
-      set (resources_file "${CMAKE_CURRENT_BINARY_DIR}/${_cs_RESOURCE_PREFIX}${base_name}.resources")
-      set (_cs_resources_files ${_cs_resources_files} ${resources_file})
-      set (_cs_resources_cmd "${_cs_resources_cmd} -res:\"${resources_file}\"")
-      
-      ADD_CUSTOM_COMMAND(OUTPUT ${resources_file}
-        COMMAND ${RESGEN_EXECUTABLE} ARGS ${resx_file} ${resources_file}
-        DEPENDS ${resx_file}
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        )
+      if (resx_file STREQUAL "PREFIX")
+        set(get_resource_prefix True)
+        unset(working_directory)
+      elseif(get_resource_prefix)
+        unset(get_resource_prefix)
+        set (resource_prefix ${resx_file})
+      elseif(resx_file STREQUAL "WORKING_DIRECTORY")
+        set(get_working_directory True)
+      elseif (get_working_directory)
+        unset(get_working_directory)
+        set(working_directory ${resx_file})
+      else()
+        get_filename_component(base_name ${resx_file} NAME_WE)
+        set (resources_file "${CMAKE_CURRENT_BINARY_DIR}/${resource_prefix}${base_name}.resources")
+        set (_cs_resources_files ${_cs_resources_files} ${resources_file})
+        set (_cs_resources_cmd "${_cs_resources_cmd} -res:\"${resources_file}\"")
+        
+        ADD_CUSTOM_COMMAND(OUTPUT ${resources_file}
+          COMMAND ${RESGEN_EXECUTABLE} ARGS ${resx_file} ${resources_file}
+          DEPENDS ${resx_file}
+          WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${working_directory}
+          )
+      endif()
     endforeach()
 
     foreach(_cs_ref ${_cs_REFERENCES})
@@ -69,6 +82,14 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
       #set(ref_depends ${ref_depends} ${_cs_ref_file})
     endforeach()
 
+    if (_cs_LIBRARY_PATHS OR CSHARP_LIBRARY_PATHS)
+      set(_cs_lib_arg "-lib:")
+    endif()
+
+    foreach(path IN LISTS _cs_LIBRARY_PATHS CSHARP_LIBRARY_PATHS)
+      set(_cs_lib_arg "${_cs_lib_arg}${path},")
+    endforeach()
+
     SET (response_file ${CMAKE_CURRENT_BINARY_DIR}/command_line_${TARGET_NAME}.rsp)
     foreach(src ${_cs_SOURCES})
       if (WIN32)
@@ -85,6 +106,7 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
                                   -out:\"${_cs_target}\"
                                   -target:${_cs_target_kind}
                                   ${references}
+                                  ${_cs_lib_arg}
                                   ${_cs_resources_cmd}
                                   ${_cs_sources_spaced}")
     
@@ -126,7 +148,7 @@ function(INSTALL_CSHARP_ASSEMBLY)
     cmake_parse_arguments(_cs "" "TARGET;DESTINATION" "" ${ARGN})
     
     if (NOT "${_cs_UNPARSED_ARGUMENTS}" STREQUAL "")
-      message(FATAL_ERROR "Unknown argument to SAFIR_INSTALL '${_cs_UNPARSED_ARGUMENTS}'")
+      message(FATAL_ERROR "Unknown argument to INSTALL_CSHARP_ASSEMBLY '${_cs_UNPARSED_ARGUMENTS}'")
     endif()
 
     if (NOT CMAKE_VERSION VERSION_LESS "3.0.0")

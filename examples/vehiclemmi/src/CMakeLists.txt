@@ -1,3 +1,3 @@
 ADD_SUBDIRECTORY(VehicleMmiCppQt)
-#TODO ADD_SUBDIRECTORY(VehicleMmiCsWinForms)
+ADD_SUBDIRECTORY(VehicleMmiCsWinForms)
 
