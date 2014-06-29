@@ -123,6 +123,9 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
     string (REGEX REPLACE "^([a-zA-Z\\.0-9]*)\\.[a-zA-Z0-9]+$" "\\1" namespace ${base_name})
     string (REGEX REPLACE "^[a-zA-Z\\.0-9]*\\.([a-zA-Z0-9]+)$" "\\1" java_base_name ${base_name})
 
+    #TODO: we need to read namespace files from our dependencies too!
+    #or maybe warn when there is a difference? No, thats no good....
+
     #perform prefix insertion
     foreach(key ${java_namespace_keys})
       string (REGEX REPLACE "^${key}" "${java_namespace_${key}_replacement}" namespace ${namespace})
