@@ -48,9 +48,77 @@
 //We need thread safe variants for some of the tests that use multiple threads in the ioService.
 boost::mutex testMtx;
 #define SAFE_BOOST_CHECK(p) {boost::lock_guard<boost::mutex> lck(testMtx); BOOST_CHECK(p);}
+#define SAFE_BOOST_FAIL(s) {boost::lock_guard<boost::mutex> lck(testMtx); BOOST_FAIL(s);}
 #define SAFE_BOOST_CHECK_NE(L, R) {boost::lock_guard<boost::mutex> lck(testMtx); BOOST_CHECK_NE(L, R);}
 #define SAFE_BOOST_CHECK_EQUAL(L, R) {boost::lock_guard<boost::mutex> lck(testMtx); BOOST_CHECK_EQUAL(L, R);}
 #define SAFE_BOOST_TEST_MESSAGE(m) {boost::lock_guard<boost::mutex> lck(testMtx); BOOST_TEST_MESSAGE(m);}
+
+class Communication;
+
+/** this class is just a singleton containing all communication instances */
+class Connector
+{
+public:
+    static Connector& Instance()
+    {
+        static Connector instance;
+        return instance;
+    }
+
+    void Add(const int64_t id, Communication* comm)
+    {
+        boost::lock_guard<boost::recursive_mutex> lck(m_mutex);
+        m_allComms.insert(std::make_pair(id,comm));
+    }
+    
+    void Reset() 
+    {
+        boost::lock_guard<boost::recursive_mutex> lck(m_mutex);
+        m_allComms.clear();
+        m_overflows = false;
+    }
+
+    void Remove(const int64_t id)
+    {
+        boost::lock_guard<boost::recursive_mutex> lck(m_mutex);
+        m_allComms.find(id)->second = nullptr;
+    }
+
+    bool SendTo(const int64_t nodeId,
+                const int64_t sender,
+                const boost::shared_ptr<char[]>& data,
+                const size_t size);
+              
+    bool SendAll(const int64_t sender,
+                 const boost::shared_ptr<char[]>& data,
+                 const size_t size);
+
+    void EnableOverflows() {m_overflows = true;}
+private:
+    Connector()
+        : m_overflows(false)
+    {
+
+    }
+
+    ~Connector() {}
+
+    bool DeliverMessage() const
+    {
+        if (m_overflows)
+        {
+            return rand() % 4 != 0; // 75% will be delivered
+        }
+        else
+        {
+            return true;
+        }
+    }
+
+    std::map<int64_t,Communication*>  m_allComms;
+    boost::recursive_mutex m_mutex;
+    bool m_overflows;
+};
 
 class Communication
 {
@@ -59,7 +127,7 @@ public:
         : ioService(ioService_)
         , id(id_)
     {
-        allComms.insert(std::make_pair(id_,this));
+        Connector::Instance().Add(id,this);
     }
 
    //Callbacks functions used in Communications public interface.
@@ -86,27 +154,7 @@ public:
 
         SAFE_BOOST_CHECK_NE(nodeId, id); //not to ourselves!
 
-        if (!DeliverMessage())
-        {
-            return false;
-        }
-
-        for (auto&& comm: allComms)
-        {
-            if (comm.second == nullptr)
-            {
-                continue;
-            }
-
-            //send to the intended node
-            if (comm.second->id == nodeId)
-            {
-                SAFE_BOOST_TEST_MESSAGE(" - Sending to node " << comm.second->id);
-                comm.second->receiveDataCb(id,10,data,size);
-            }
-        }
-
-        return true;
+        return Connector::Instance().SendTo(nodeId,id,data,size);
     }
 
     bool SendToNodeType(const int64_t nodeTypeId,
@@ -118,30 +166,7 @@ public:
         SAFE_BOOST_TEST_MESSAGE("SendToNodeType from node " << id << " -> node type " << nodeTypeId);
         SAFE_BOOST_CHECK(ack);
 
-
-        //All nodes are of the same type
-
-        if (!DeliverMessage())
-        {
-            return false;
-        }
-
-        for (auto&& comm: allComms)
-        {
-            if (comm.second == nullptr)
-            {
-                continue;
-            }
-
-            //send to all but ourselves
-            if (comm.second->id != id)
-            {
-                SAFE_BOOST_TEST_MESSAGE(" - Sending to node " << comm.second->id);
-                comm.second->receiveDataCb(id,10,data,size);
-            }
-        }
-
-        return true;
+        return Connector::Instance().SendAll(id,data,size);
     }
 
     boost::asio::io_service& ioService;
@@ -149,31 +174,79 @@ public:
 
     ReceiveData receiveDataCb;
     
+};
 
-    static void ClearAll() {allComms.clear();}
-    static void Clear(const int64_t id) {allComms.find(id)->second = nullptr;}
-    static std::map<int64_t,Communication*>  allComms;
-    
-    static bool overflows;
 
-private:
-    bool DeliverMessage() const
+
+//static initialization
+//std::map<int64_t,Communication*> Communication::allComms;
+//bool Communication::overflows = false;
+
+
+bool Connector::SendTo(const int64_t nodeId,
+                       const int64_t sender,
+                       const boost::shared_ptr<char[]>& data,
+                       const size_t size)
+{
+    if (!DeliverMessage())
     {
-        if (overflows)
+        return false;
+    }
+    
+    boost::lock_guard<boost::recursive_mutex> lck(m_mutex);
+    
+    for (auto&& comm: m_allComms)
+    {
+        if (comm.second == nullptr)
         {
-            return rand() % 4 != 0; // 75% will be delivered
+            continue;
         }
-        else
+        
+        //send to the intended node
+        if (comm.first == nodeId)
         {
+            SAFE_BOOST_TEST_MESSAGE(" - Sending to node " << comm.first);
+            comm.second->receiveDataCb(sender,10,data,size);
             return true;
         }
     }
+    
+    SAFE_BOOST_FAIL("Invalid node id!");
+    return true;
+}
 
-};
 
-//static initialization
-std::map<int64_t,Communication*> Communication::allComms;
-bool Communication::overflows = false;
+bool Connector::SendAll(const int64_t sender,
+                        const boost::shared_ptr<char[]>& data, 
+                        const size_t size)
+{
+    if (!DeliverMessage())
+    {
+        return false;
+    }
+
+    boost::lock_guard<boost::recursive_mutex> lck(m_mutex);
+
+    //All nodes are of the same type
+
+    for (auto&& comm: m_allComms)
+    {
+        if (comm.second == nullptr)
+        {
+            continue;
+        }
+
+        //send to all but ourselves
+        if (comm.first != sender)
+        {
+            SAFE_BOOST_TEST_MESSAGE(" - Sending to node " << sender);
+            comm.second->receiveDataCb(sender,10,data,size);
+        }
+    }
+    
+    return true;
+}
+
 
 using namespace Safir::Dob::Internal::SP;
 
@@ -206,7 +279,7 @@ struct Node
     void ElectionComplete(const int64_t nodeId_,
                           const int64_t electionId_)
     {
-        SAFE_BOOST_TEST_MESSAGE("ElectionComplete for node " << id);
+        SAFE_BOOST_TEST_MESSAGE("ElectionComplete for node " << id << ". Elected node " << nodeId_);
         electedNode = nodeId_;
         electionId = electionId_;
     }
@@ -225,6 +298,8 @@ struct Node
 
     int64_t electedNode;
     int64_t electionId;
+
+    bool removed = false;
     
 };
 
@@ -234,16 +309,17 @@ struct Fixture
     {
         SAFE_BOOST_TEST_MESSAGE("setup fixture");
 
+        Connector::Instance().Reset();
+
         for (int i = 0; i < boost::unit_test::framework::master_test_suite().argc; ++i)
         {
             if (std::string(boost::unit_test::framework::master_test_suite().argv[i]) == "--overflows")
             {
                 SAFE_BOOST_TEST_MESSAGE("Communication stub will generate overflows");
-                Communication::overflows = true;
+                Connector::Instance().EnableOverflows();
             }
         }
 
-        Communication::ClearAll();
 
         nodes.push_back(Safir::make_unique<Node>(ioService,nextNodeId));
         ++nextNodeId;
@@ -270,7 +346,7 @@ struct Fixture
 
         for(auto&& node: nodes)
         {
-            if (node == nullptr)
+            if (node->removed)
             {
                 continue;
             }
@@ -290,8 +366,9 @@ struct Fixture
     void RemoveNode(const size_t which)
     {
         SAFE_BOOST_TEST_MESSAGE("Removing node " << which);
-        Communication::Clear(nodes[which]->id);
-        nodes[which] = nullptr;
+        Connector::Instance().Remove(nodes[which]->id);
+        //nodes[which] = nullptr;
+        nodes[which]->removed = true;
     }
 
     void SendNodesChanged()
@@ -299,19 +376,23 @@ struct Fixture
         auto msg = Safir::make_unique<NodeStatisticsMessage>();
         for(auto&& node: nodes)
         {
-            if (node == nullptr)
-            {
-                continue;
-            }
 
             auto ni = msg->add_node_info();
             ni->set_id(node->id);
+
+            if (node->removed)
+            {
+                ni->set_is_dead(true);
+                ni->set_is_long_gone(false);
+                //continue;
+            }
+
         }
         
         const auto raw = RawStatisticsCreator::Create(std::move(msg));
         for(auto&& node: nodes)
         {
-            if (node == nullptr)
+            if (node->removed)
             {
                 continue;
             }
@@ -548,6 +629,42 @@ BOOST_AUTO_TEST_CASE( lots_of_nodes_remove_some )
 
     SAFE_BOOST_CHECK(nodes[899]->eh.IsElected());
 
+}
+
+BOOST_AUTO_TEST_CASE( remove_during_election )
+{
+    const int numNodes = 100;
+
+    //remember that one node is automatically added by the fixture
+    for (int i = 0; i < numNodes - 1 ; ++i)
+    {
+        AddNode();
+    }
+    
+    SendNodesChanged();
+
+
+    boost::thread_group threads;
+    for (int i = 0; i < 6; ++i)
+    {
+        threads.create_thread([this]{ioService.run();});
+    }
+    
+    //will keep node 0 and 1    
+    for (int i = numNodes - 1; i > 1; --i)
+    {
+        RemoveNode(i);
+        SendNodesChanged();
+    }
+
+    threads.join_all();
+
+    SAFE_BOOST_CHECK(!nodes[0]->eh.IsElected());
+    SAFE_BOOST_CHECK(nodes[0]->eh.IsElected(11));
+    SAFE_BOOST_CHECK(nodes[1]->eh.IsElected());
+    SAFE_BOOST_CHECK(nodes[1]->eh.IsElected(11));
+    SAFE_BOOST_CHECK(!nodes[1]->removed);
+    SAFE_BOOST_CHECK(nodes[2]->removed);
 }
 
 

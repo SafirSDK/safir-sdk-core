@@ -297,8 +297,27 @@ namespace SP
                      << ", " 
                      << message.election_id() 
                      << ") from " << from << std::endl;
+
             m_strand.dispatch([this,message,from, nodeTypeId]
             {
+
+                //Is this check really needed? Communication should guarantee these things, but maybe
+                //asio breaks those promises by queueing/stranding?
+                //This makes the remove_during_election test case work properly, anyway
+                bool found = false;
+                for (int i = 0; i < m_lastStatistics.Size(); ++i)
+                {
+                    if (m_lastStatistics.Id(i) == from && ! m_lastStatistics.IsDead(i))
+                    {
+                        found = true;
+                    }
+                }
+                if (!found)
+                {
+                    lllog(5) << "SP Got ElectionMessage from a node that I dont know about!!! Discarding!" << std::endl;
+                    return;
+                }
+                
                 switch (message.action())
                 {
                 case INQUIRY: 
