@@ -2050,6 +2050,7 @@ void DotsC_GetGeneratedLibraryList(DotsC_GeneratedLibrary*& generatedLibraries,
     }
     catch(...)
     {
+        SEND_SYSTEM_LOG(Critical, << "Error occurred while reading typesystem.ini");
         generatedLibraries = NULL;
         deleter = NULL;
         size = 0;
