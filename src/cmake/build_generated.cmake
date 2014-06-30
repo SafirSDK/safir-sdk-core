@@ -268,7 +268,7 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
       set (snk_path ${SAFIR_SDK_CORE_INSTALL_DIR}/share/safir_sdk_core/generation/dotnet/dots_generated-dotnet.snk)
       set (lib_path_arg LIBRARY_PATHS ${SAFIR_SDK_CORE_INSTALL_DIR}/lib/safir_sdk_core)
     else()
-      set (snk_path ${safir_sdk_core_SOURCE_DIR}/src/dots/dots_v/data/dots_generated-dotnet.snk)
+      set (snk_path ${safir_sdk_core_SOURCE_DIR}/src/dots/dots_v.ss/data/dots_generated-dotnet.snk)
     endif()
 
     #TODO key path!
