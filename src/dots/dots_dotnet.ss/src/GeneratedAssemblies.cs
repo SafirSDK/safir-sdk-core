@@ -84,7 +84,7 @@ namespace Safir.Dob.Typesystem
                 }
                 else if (string.IsNullOrEmpty(lib.dotnetAssemblyLocation))
                 {
-                    m_assemblies.Add(System.Reflection.Assembly.Load(lib.dotnetAssemblyName + ", version=0.0.0.0, Culture=neutral, PublicKeyToken=fef88a5dbbc2e7c6"));
+                    m_assemblies.Add(System.Reflection.Assembly.Load(lib.dotnetAssemblyName + ", version=0.0.0.0, Culture=neutral, PublicKeyToken=40df165d3a3cadbc"));
                     //TODO: what is the correct thing to do here?
                 }
                 else
