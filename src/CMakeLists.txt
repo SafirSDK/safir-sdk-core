@@ -127,7 +127,7 @@ function(add_library NAME)
   endif()
 
   if (WIN32)
-    #TODO this will not work for studio builds, so disable header check for studio generator...
+    #This will not work for studio builds, so header_check for studio generator should be skipped.
     get_property(SAFIR_HEADER_CHECK_LINK_PATH GLOBAL PROPERTY SAFIR_HEADER_CHECK_LINK_PATH)
     set_property(GLOBAL PROPERTY SAFIR_HEADER_CHECK_LINK_PATH ${SAFIR_HEADER_CHECK_LINK_PATH} 
         "${CMAKE_CURRENT_BINARY_DIR}")
@@ -264,5 +264,4 @@ INSTALL(FILES
 
 #TODO: install users guide in doc?
 #TODO: install requirements in doc?
-#TODO: install examples in doc
 

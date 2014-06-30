@@ -1,3 +1,9 @@
+if(MSVC AND CMAKE_GENERATOR MATCHES "Visual Studio")
+  message(STATUS "Header check does not work in Visual Studio builds. Will not perform header check.")
+  return()
+endif()
+
+
 FILE(GLOB_RECURSE headers
   RELATIVE ${safir_sdk_core_SOURCE_DIR}/include
   ${safir_sdk_core_SOURCE_DIR}/include/*.h
