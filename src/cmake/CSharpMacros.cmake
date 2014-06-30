@@ -87,7 +87,7 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
     endif()
 
     foreach(path IN LISTS _cs_LIBRARY_PATHS CSHARP_LIBRARY_PATHS)
-      set(_cs_lib_arg "${_cs_lib_arg}${path},")
+      set(_cs_lib_arg "${_cs_lib_arg}\"${path}\",")
     endforeach()
 
     SET (response_file ${CMAKE_CURRENT_BINARY_DIR}/command_line_${TARGET_NAME}.rsp)
