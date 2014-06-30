@@ -27,12 +27,11 @@ foreach(header ${headers})
   if(NOT SKIP)
     string(REGEX REPLACE "[^a-zA-Z]" "_" name_base ${header})
     set(generated_name ${CMAKE_CURRENT_BINARY_DIR}/check_${name_base}_generated.cpp)
-    set(sources ${sources} ${generated_name})
-    file(WRITE ${generated_name} "")
-    file(APPEND ${generated_name} "#ifdef SAFIR_NO_AUTOLINK\n#  undef SAFIR_NO_AUTOLINK\n#endif\n")
-    file(APPEND ${generated_name} "#include <${header}>\n")
-    file(APPEND ${generated_name} "#ifdef GetMessage\n#  error windows.h appears to be included by ${header}\n#endif\n\n")
-    file(APPEND ${generated_name} "#ifdef _INC_WINDOWS\n#  error windows.h appears to be included by ${header}\n#endif\n\n")
+    list(APPEND sources ${generated_name})
+
+    ADD_CUSTOM_COMMAND(OUTPUT ${generated_name}
+      COMMAND ${CMAKE_COMMAND} -D generated_name=${generated_name} -D HEADER_TO_CHECK=${header} -P configure_file.cmake
+      DEPENDS ${header} check_header.cpp.in configure_file.cmake)
   endif()
 endforeach()
 

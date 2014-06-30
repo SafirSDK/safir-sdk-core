@@ -1,0 +1,12 @@
+#ifdef SAFIR_NO_AUTOLINK
+#  undef SAFIR_NO_AUTOLINK
+#endif
+#include <@HEADER_TO_CHECK@>
+#ifdef GetMessage
+#  error windows.h appears to be included by @HEADER_TO_CHECK@
+#endif
+
+#ifdef _INC_WINDOWS
+#  error windows.h appears to be included by @HEADER_TO_CHECK@
+#endif
+
