@@ -45,7 +45,7 @@ using namespace Safir::Dob::Internal::SP;
 typedef std::function<void(const RawStatistics& statistics)> StatisticsCallback;
 
 
-class Communication
+class CommunicationStub
 {
 public:
     void ExcludeNode(int64_t nodeId)
@@ -55,7 +55,7 @@ public:
 
 };
 
-class RawHandler
+class RawHandlerStub
 {
 public:
     void SetElectionId(const int64_t nodeId, const int64_t electionId)
@@ -65,34 +65,38 @@ public:
 
     void AddNodesChangedCallback(const StatisticsCallback& callback)
     {
-
+        BOOST_CHECK(nodesCb == nullptr);
+        nodesCb = callback;
     }
 
     void AddRawChangedCallback(const StatisticsCallback& callback)
     {
-
+        BOOST_CHECK(rawCb == nullptr);
+        rawCb = callback;
     }
 
     void SetDeadNode(int64_t nodeId)
     {
 
     }
-    
+
+    StatisticsCallback nodesCb;
+    StatisticsCallback rawCb;
 };
 
 
-class ElectionHandler
+class ElectionHandlerStub
 {
 public:
-    ElectionHandler(boost::asio::io_service& ioService,
-                    Communication& communication,
-                    const int64_t id,
-                    const std::map<int64_t, NodeType>& nodeTypes,
-                    const char* const receiverId,
-                    const std::function<void(const int64_t nodeId, 
-                                             const int64_t electionId)>& electionCompleteCallback)
+    ElectionHandlerStub(boost::asio::io_service& ioService,
+                        CommunicationStub& communication,
+                        const int64_t id,
+                        const std::map<int64_t, NodeType>& nodeTypes,
+                        const char* const receiverId,
+                        const std::function<void(const int64_t nodeId, 
+                                                 const int64_t electionId)>& electionCompleteCallback)
     {
-
+        lastInstance = this;
     }
 
     bool IsElected() const
@@ -107,9 +111,14 @@ public:
 
     void Stop()
     {
-
+        stopped = true;
     }
+
+    bool stopped = false;
+    static ElectionHandlerStub* lastInstance;
 };
+
+ElectionHandlerStub* ElectionHandlerStub::lastInstance = nullptr;
 
 struct Fixture
 {
@@ -121,7 +130,7 @@ struct Fixture
                       10,
                       "klopp",
                       "flupp",
-                      {},
+                      GetNodeTypes(),
                       "snoop",
                       rh)
     {
@@ -133,12 +142,20 @@ struct Fixture
         SAFE_BOOST_TEST_MESSAGE("teardown fixture");
     }
 
+    static std::map<int64_t, NodeType> GetNodeTypes()
+    {
+        std::map<int64_t, NodeType> nodeTypes;
+        nodeTypes.insert(std::make_pair(10, NodeType(10,"mupp",false,boost::chrono::milliseconds(1),10,boost::chrono::milliseconds(1))));
+        nodeTypes.insert(std::make_pair(20, NodeType(20,"tupp",true,boost::chrono::hours(1),22,boost::chrono::hours(1))));
+        return nodeTypes;
+    }
+
 
     boost::asio::io_service ioService;
-    ::Communication comm;
-    ::RawHandler rh;
+    CommunicationStub comm;
+    RawHandlerStub rh;
 
-    CoordinatorBasic<::Communication, ::RawHandler, ::ElectionHandler> coordinator;
+    CoordinatorBasic<CommunicationStub, RawHandlerStub, ElectionHandlerStub> coordinator;
 };
 
 BOOST_FIXTURE_TEST_SUITE( s, Fixture )
@@ -147,18 +164,12 @@ BOOST_AUTO_TEST_CASE( start_stop )
 {
     coordinator.Stop();
     ioService.run();
-    // BOOST_CHECK(nodes[0]->comm.receiveDataCb != nullptr);
-    // BOOST_CHECK(!nodes[0]->eh.IsElected());
-
-    // //this is kind of an implementation detail...
-    // BOOST_CHECK(nodes[0]->eh.IsElected(std::numeric_limits<int64_t>::min()));
-
-    // nodes[0]->eh.Stop();
-    // RunIoService();
-
-    // //The stop call should ensure that the timer never elapses, so we don't get an "alone" election
-    // BOOST_CHECK(!nodes[0]->eh.IsElected());
+    BOOST_REQUIRE(ElectionHandlerStub::lastInstance != nullptr);
+    BOOST_CHECK(ElectionHandlerStub::lastInstance->stopped);
+    BOOST_CHECK(rh.nodesCb != nullptr);
+    BOOST_CHECK(rh.rawCb != nullptr);
 }
+
 
 
 BOOST_AUTO_TEST_SUITE_END()
