@@ -100,7 +100,7 @@ private:
     static std::map<int64_t, int> discoversSentToSeed100;
     static std::map<int64_t, int> discoversSentToSeed200;
 
-    static Com::Node CreateNode(int i)
+    static Com::Node CreateNode(int64_t i) //TODO: LAHA: changed this from int to int64_t to get rid of warning. ok?
     {
         return Com::Node(std::string("discoverer_")+boost::lexical_cast<std::string>(i), i, 1, std::string("127.0.0.1:")+boost::lexical_cast<std::string>(10000+i), "", true);
     }
