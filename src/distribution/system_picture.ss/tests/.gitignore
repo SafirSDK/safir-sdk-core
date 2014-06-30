@@ -10,3 +10,5 @@ RemoteSubscriber_test
 
 RawHandler_test
 ElectionHandler_test
+
+Coordinator_test

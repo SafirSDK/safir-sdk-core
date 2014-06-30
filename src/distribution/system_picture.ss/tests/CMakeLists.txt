@@ -34,6 +34,7 @@ ADD_EXECUTABLE(RemoteSubscriber_test RemoteSubscriber_test.cpp)
 
 ADD_EXECUTABLE(RawHandler_test RawHandler_test.cpp ../src/RawStatistics.cpp ${PROTO_SRCS} ${PROTO_HDRS})
 ADD_EXECUTABLE(ElectionHandler_test ElectionHandler_test.cpp ../src/RawStatistics.cpp ${PROTO_SRCS} ${PROTO_HDRS})
+ADD_EXECUTABLE(Coordinator_test Coordinator_test.cpp ../src/RawStatistics.cpp ${PROTO_SRCS} ${PROTO_HDRS})
 
 
 TARGET_LINK_LIBRARIES(RawStatistics_test
@@ -55,6 +56,10 @@ TARGET_LINK_LIBRARIES(ElectionHandler_test
   ${PROTOBUF_LITE_LIBRARIES})
 
 
+TARGET_LINK_LIBRARIES(Coordinator_test
+  ${PROTOBUF_LITE_LIBRARIES})
+
+
 if(NOT MSVC)
   TARGET_LINK_LIBRARIES(RawStatistics_test ${Boost_LIBRARIES})
   TARGET_LINK_LIBRARIES(SystemState_test ${Boost_LIBRARIES})
@@ -67,6 +72,7 @@ if(NOT MSVC)
   TARGET_LINK_LIBRARIES(RemoteSubscriber_test lluf_id lluf_utils lluf_config ${Boost_LIBRARIES})
   TARGET_LINK_LIBRARIES(RawHandler_test lluf_utils ${Boost_LIBRARIES})
   TARGET_LINK_LIBRARIES(ElectionHandler_test lluf_id lluf_utils ${Boost_LIBRARIES})
+  TARGET_LINK_LIBRARIES(Coordinator_test lluf_utils ${Boost_LIBRARIES})
 endif()
 
 ENABLE_TESTING()
