@@ -1,2 +1,2 @@
-configure_file(check_header.cpp.in
+configure_file(${template}
   ${generated_name} @ONLY)

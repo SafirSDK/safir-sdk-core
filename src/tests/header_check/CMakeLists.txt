@@ -30,8 +30,11 @@ foreach(header ${headers})
     list(APPEND sources ${generated_name})
 
     ADD_CUSTOM_COMMAND(OUTPUT ${generated_name}
-      COMMAND ${CMAKE_COMMAND} -D generated_name=${generated_name} -D HEADER_TO_CHECK=${header} -P configure_file.cmake
-      DEPENDS ${header} check_header.cpp.in configure_file.cmake)
+      COMMAND ${CMAKE_COMMAND} -D generated_name=${generated_name}
+                               -D HEADER_TO_CHECK=${header}
+                               -D template=${CMAKE_CURRENT_SOURCE_DIR}/check_header.cpp.in
+                               -P ${CMAKE_CURRENT_SOURCE_DIR}/configure_file.cmake
+      DEPENDS ${safir_sdk_core_SOURCE_DIR}/include/${header} check_header.cpp.in configure_file.cmake)
   endif()
 endforeach()
 
