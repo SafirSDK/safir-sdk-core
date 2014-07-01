@@ -147,11 +147,6 @@ namespace SP
             {
                 if (onlyOwnState)
                 {
-                    if (!m_electionHandler.IsElected())
-                    {
-                        return;
-                    }
-                                  
                     const bool okToSend = UpdateMyState();
 
                     if (!okToSend)
@@ -189,8 +184,15 @@ namespace SP
                 else
                 {
                     m_stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
-                
-                    //TODO: should we check election_id?
+
+                    //do some sanity checks
+                    if (m_stateMessage.election_id() == 0 ||
+                        m_ownElectionId != 0)
+                    {
+                        SEND_SYSTEM_LOG(Alert, << "Got a State message with election id " << m_stateMessage.election_id() <<
+                                        " while m_ownElectionId was " << m_ownElectionId);
+                        throw std::logic_error("Incorrect ElectionIds!");
+                    }
                 
                     const auto deadNodes = GetDeadNodeIds(m_stateMessage);
                 

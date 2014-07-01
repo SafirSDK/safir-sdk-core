@@ -22,10 +22,23 @@
 *
 ******************************************************************************/
 #include "../src/Coordinator.h"
+#include "../src/MessageWrapperCreators.h"
 #include <Safir/Utilities/Internal/MakeUnique.h>
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #include <memory>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4244)
+#pragma warning (disable: 4127)
+#endif
+
+#include "NodeStatisticsMessage.pb.h"
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 
 #define BOOST_TEST_MODULE CoordinatorHandlerTest
@@ -41,6 +54,28 @@ boost::mutex testMtx;
 #define SAFE_BOOST_TEST_MESSAGE(m) {boost::lock_guard<boost::mutex> lck(testMtx); BOOST_TEST_MESSAGE(m);}
 
 using namespace Safir::Dob::Internal::SP;
+
+
+RawStatistics GetRawWithOneNode()
+{
+    auto msg = Safir::make_unique<NodeStatisticsMessage>();
+
+    msg->set_name("myself");
+    msg->set_id(1000);
+    msg->set_node_type_id(10);
+    //    msg->set_election_id(91);
+
+    auto node = msg->add_node_info();
+    
+    node->set_name("remote1");
+    node->set_id(1001);
+    node->set_node_type_id(10);
+    node->set_is_dead(false);
+    node->set_is_long_gone(false);
+    
+    return RawStatisticsCreator::Create(std::move(msg));
+}
+
 
 typedef std::function<void(const RawStatistics& statistics)> StatisticsCallback;
 
@@ -58,9 +93,10 @@ public:
 class RawHandlerStub
 {
 public:
-    void SetElectionId(const int64_t nodeId, const int64_t electionId)
+    void SetElectionId(const int64_t nodeId_, const int64_t electionId_)
     {
-
+        electedId = nodeId_;
+        electionId = electionId_;
     }
 
     void AddNodesChangedCallback(const StatisticsCallback& callback)
@@ -82,6 +118,9 @@ public:
 
     StatisticsCallback nodesCb;
     StatisticsCallback rawCb;
+
+    int64_t electedId = 0;
+    int64_t electionId = 0;
 };
 
 
@@ -94,7 +133,8 @@ public:
                         const std::map<int64_t, NodeType>& nodeTypes,
                         const char* const receiverId,
                         const std::function<void(const int64_t nodeId, 
-                                                 const int64_t electionId)>& electionCompleteCallback)
+                                                 const int64_t electionId)>& electionCompleteCallback_)
+        : electionCompleteCallback(electionCompleteCallback_)
     {
         lastInstance = this;
     }
@@ -106,7 +146,7 @@ public:
 
     void NodesChanged(RawStatistics statistics)
     {
-        
+        nodesChangedCalled = true;
     }
 
     void Stop()
@@ -115,6 +155,12 @@ public:
     }
 
     bool stopped = false;
+    bool nodesChangedCalled = false;
+
+    const std::function<void(const int64_t nodeId, 
+                             const int64_t electionId)> electionCompleteCallback;
+
+
     static ElectionHandlerStub* lastInstance;
 };
 
@@ -170,7 +216,55 @@ BOOST_AUTO_TEST_CASE( start_stop )
     BOOST_CHECK(rh.rawCb != nullptr);
 }
 
+BOOST_AUTO_TEST_CASE( perform_only_own_unelected )
+{
+    bool callbackCalled = false;
+    coordinator.PerformOnStateMessage([&callbackCalled](std::unique_ptr<char []> data, 
+                                         const size_t size)
+                                      {
+                                          callbackCalled = true;
+                                      },
+                                      0,
+                                      true);
+    ioService.run();
+    BOOST_CHECK(!callbackCalled);
+}
 
+
+BOOST_AUTO_TEST_CASE( perform_no_state_received )
+{
+    bool callbackCalled = false;
+    coordinator.PerformOnStateMessage([&callbackCalled](std::unique_ptr<char []> data, 
+                                         const size_t size)
+                                      {
+                                          callbackCalled = true;
+                                      },
+                                      0,
+                                      false);
+    ioService.run();
+    BOOST_CHECK(!callbackCalled);
+}
+
+BOOST_AUTO_TEST_CASE( election_id_propagation )
+{
+    BOOST_CHECK_EQUAL(rh.electedId,0);
+    BOOST_CHECK_EQUAL(rh.electionId,0);
+
+    ElectionHandlerStub::lastInstance->electionCompleteCallback(111,100);
+    ioService.run();
+    BOOST_CHECK_EQUAL(rh.electedId,111);
+    BOOST_CHECK_EQUAL(rh.electionId,100);
+}
+
+
+BOOST_AUTO_TEST_CASE( nodes_changed_propagation )
+{
+    BOOST_CHECK(!ElectionHandlerStub::lastInstance->nodesChangedCalled);
+    rh.nodesCb(GetRawWithOneNode());
+    ioService.run();
+    BOOST_CHECK(ElectionHandlerStub::lastInstance->nodesChangedCalled);
+
+}
 
 BOOST_AUTO_TEST_SUITE_END()
 
