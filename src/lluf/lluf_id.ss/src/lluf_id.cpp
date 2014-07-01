@@ -31,6 +31,7 @@
 #include <boost/bind.hpp>
 #include <ctime>
 #include <string.h>
+#include <limits>
 
 //disable warnings in boost
 #if defined _MSC_VER
@@ -165,13 +166,15 @@ boost::once_flag RandomGenerator::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
 
 boost::int64_t LlufId_GenerateRandom64()
 {
-    //0, 1 and -1 are "reserved" so we loop until we have a really random number...
+    //0, 1, -1, max and min are "reserved" so we loop until we have a really random number...
     boost::int64_t result;
     do
     {
        result = RandomGenerator::Instance().Generate();
     }
-    while (result == 0 || result == -1 || result == 1);
+    while (result == 0 || result == -1 || result == 1 
+               || result == std::numeric_limits<boost::int64_t>::max()
+               || result == std::numeric_limits<boost::int64_t>::min());
 
     return result;
 }

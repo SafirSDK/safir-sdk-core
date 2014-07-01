@@ -51,7 +51,7 @@ extern "C"
 
     /**
      * Generates a 64 bits long integer randomly.
-     * This function will never return 0, 1 or -1.
+     * This function will never return 0, 1, -1, int64_t max or int64_t min.
      *
      * @return A 64 bit randon number.
      */
