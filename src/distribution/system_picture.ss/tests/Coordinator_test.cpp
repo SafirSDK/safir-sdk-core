@@ -248,11 +248,11 @@ public:
 class ElectionHandlerStub
 {
 public:
-    ElectionHandlerStub(boost::asio::io_service& ioService,
-                        CommunicationStub& communication,
+    ElectionHandlerStub(boost::asio::io_service& /*ioService*/,
+                        CommunicationStub& /*communication*/,
                         const int64_t id_,
-                        const std::map<int64_t, NodeType>& nodeTypes,
-                        const char* const receiverId,
+                        const std::map<int64_t, NodeType>& /*nodeTypes*/,
+                        const char* const /*receiverId*/,
                         const std::function<void(const int64_t nodeId,
                                                  const int64_t electionId)>& electionCompleteCallback_)
         : id(id_)
@@ -349,8 +349,8 @@ BOOST_AUTO_TEST_CASE( start_stop )
 BOOST_AUTO_TEST_CASE( perform_only_own_unelected )
 {
     bool callbackCalled = false;
-    coordinator.PerformOnStateMessage([&callbackCalled](std::unique_ptr<char []> data,
-                                         const size_t size)
+    coordinator.PerformOnStateMessage([&callbackCalled](std::unique_ptr<char []> /*data*/,
+                                                        const size_t /*size*/)
                                       {
                                           callbackCalled = true;
                                       },
@@ -364,8 +364,8 @@ BOOST_AUTO_TEST_CASE( perform_only_own_unelected )
 BOOST_AUTO_TEST_CASE( perform_no_state_received )
 {
     bool callbackCalled = false;
-    coordinator.PerformOnStateMessage([&callbackCalled](std::unique_ptr<char []> data,
-                                         const size_t size)
+    coordinator.PerformOnStateMessage([&callbackCalled](std::unique_ptr<char []> /*data*/,
+                                                        const size_t /*size*/)
                                       {
                                           callbackCalled = true;
                                       },
@@ -401,8 +401,8 @@ BOOST_AUTO_TEST_CASE( simple_state_production )
     ElectionHandlerStub::lastInstance->electionCompleteCallback(1000,100);
     rh.nodesCb(GetRawWithOneNode());
     bool callbackCalled = false;
-    coordinator.PerformOnStateMessage([&callbackCalled](std::unique_ptr<char []> data,
-                                                        const size_t size)
+    coordinator.PerformOnStateMessage([&callbackCalled](std::unique_ptr<char []> /*data*/,
+                                                        const size_t /*size*/)
                                       {
                                           callbackCalled = true;
                                       },
@@ -466,8 +466,8 @@ BOOST_AUTO_TEST_CASE( propagate_state_from_other )
     coordinator.NewRemoteData(1001,data,size);
     bool callbackCalled = false;
 
-    coordinator.PerformOnStateMessage([&callbackCalled](std::unique_ptr<char []> data,
-                                                        const size_t size)
+    coordinator.PerformOnStateMessage([&callbackCalled](std::unique_ptr<char []> /*data*/,
+                                                        const size_t /*size*/)
                                       {
                                           callbackCalled = true;
                                       },
