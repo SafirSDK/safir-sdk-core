@@ -30,8 +30,7 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
     #load compiler settings, csharp and java!
     include(${SAFIR_SDK_CORE_CMAKE_DIR}/SafirCompilerSettings.cmake)
     include(${SAFIR_SDK_CORE_DOTNET_SETTINGS})
-    #include(${SAFIR_SDK_CORE_JAVA_SETTINGS})
-    #include(${SAFIR_SDK_CORE_CMAKE_DIR}/SafirLoadJava.cmake)
+    include(${SAFIR_SDK_CORE_JAVA_SETTINGS})
 
     #We need boost headers.
     set(Boost_FIND_QUIETLY True)
@@ -240,7 +239,13 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
         "${SAFIR_GENERATED_JAVA_MANIFEST_CLASSPATH} safir_generated-${DEP}-java.jar")
     ENDFOREACH()
 
-    configure_file(${safir_sdk_core_SOURCE_DIR}/src/dots/dots_v.ss/data/Manifest.txt.in ${CMAKE_CURRENT_BINARY_DIR}/Manifest.generated.txt @ONLY)
+    if (SAFIR_EXTERNAL_BUILD)
+      set (manifest_path ${SAFIR_SDK_CORE_INSTALL_DIR}/share/safir_sdk_core/generation/java/Manifest.txt.in)
+    else()
+      set (manifest_path ${safir_sdk_core_SOURCE_DIR}/src/dots/dots_v.ss/data/Manifest.txt.in)
+    endif()
+
+    configure_file(${manifest_path} ${CMAKE_CURRENT_BINARY_DIR}/Manifest.generated.txt @ONLY)
 
     #TODO: Manifest path!
 

@@ -25,6 +25,10 @@ INSTALL(FILES
           data/dots_generated-dotnet.snk
         DESTINATION ${SAFIR_INSTALL_DESTINATION_GENERATION}/dotnet)
 
+INSTALL(FILES 
+          data/Manifest.txt.in
+        DESTINATION ${SAFIR_INSTALL_DESTINATION_GENERATION}/java)
+
 
 #TODO need better spot for these, and what about .cpp?
 # INSTALL(FILES 
