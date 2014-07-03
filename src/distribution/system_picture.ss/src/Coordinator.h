@@ -165,7 +165,6 @@ namespace SP
                 m_stateMessage.SerializeWithCachedSizesToArray
                     (reinterpret_cast<google::protobuf::uint8*>(data.get()));
                 fn(std::move(data), size);
-                              
             });
         }
         
@@ -176,41 +175,41 @@ namespace SP
         {
             m_strand.dispatch([this,from,data,size]
             {
-                if (m_electionHandler.IsElected(from))
+                if (!m_electionHandler.IsElected(from))
                 {
                     SEND_SYSTEM_LOG(Informational, << "SystemPicture (in node " << m_id << ") got a new system state (from node "
                                     << from << ") from a node that is not elected. Discarding.");
+                    return;
                 }
-                else
+
+                lllog (7) << "Got new SystemState from node " << from << std::endl;
+                m_stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
+
+                //do some sanity checks
+                if (m_stateMessage.election_id() == 0 ||
+                    m_ownElectionId != 0)
                 {
-                    m_stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
-
-                    //do some sanity checks
-                    if (m_stateMessage.election_id() == 0 ||
-                        m_ownElectionId != 0)
-                    {
-                        SEND_SYSTEM_LOG(Alert, << "Got a State message with election id " << m_stateMessage.election_id() <<
-                                        " while m_ownElectionId was " << m_ownElectionId);
-                        throw std::logic_error("Incorrect ElectionIds!");
-                    }
+                    SEND_SYSTEM_LOG(Alert, << "Got a State message with election id " << m_stateMessage.election_id() <<
+                                    " while m_ownElectionId was " << m_ownElectionId);
+                    throw std::logic_error("Incorrect ElectionIds!");
+                }
                 
-                    const auto deadNodes = GetDeadNodeIds(m_stateMessage);
+                const auto deadNodes = GetDeadNodeIds(m_stateMessage);
                 
-                    //Note: never do exclude on a node that is not one that we have 
-                    //received NewNode for, i.e. is in m_lastStatistics top level.
-                    for (int i = 0; i < m_lastStatistics.Size(); ++i)
+                //Note: never do exclude on a node that is not one that we have 
+                //received NewNode for, i.e. is in m_lastStatistics top level.
+                for (int i = 0; i < m_lastStatistics.Size(); ++i)
+                {
+                    //if we haven't marked the node as dead and electee doesnt think the node
+                    //is part of the system we want to exclude the node
+                    if (!m_lastStatistics.IsDead(i) && deadNodes.find(m_lastStatistics.Id(i)) != deadNodes.end())
                     {
-                        //if we haven't marked the node as dead and electee doesnt think the node
-                        //is part of the system we want to exclude the node
-                        if (!m_lastStatistics.IsDead(i) && deadNodes.find(m_lastStatistics.Id(i)) != deadNodes.end())
-                        {
-                            lllog (4) << "Elected coordinator thinks that node " << m_lastStatistics.Name(i).c_str()
-                                      << " with id " << m_lastStatistics.Id(i) 
-                                      << " is dead, so I'll mark him as dead." << std::endl;
+                        lllog (4) << "Elected coordinator thinks that node " << m_lastStatistics.Name(i).c_str()
+                                  << " with id " << m_lastStatistics.Id(i) 
+                                  << " is dead, so I'll mark him as dead." << std::endl;
 
-                            m_communication.ExcludeNode(m_lastStatistics.Id(i));
-                            m_rawHandler.SetDeadNode(m_lastStatistics.Id(i));
-                        }
+                        m_communication.ExcludeNode(m_lastStatistics.Id(i));
+                        m_rawHandler.SetDeadNode(m_lastStatistics.Id(i));
                     }
                 }
             });
