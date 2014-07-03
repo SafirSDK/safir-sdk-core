@@ -115,6 +115,7 @@ namespace SP
             {
                 lllog(9) << "SP: Coordinator got new nodes change callback" << std::endl;
                 m_lastStatistics = statistics;
+                m_lastStatisticsDirty = true;
                 if (m_electionHandler.IsElected())
                 {
                     UpdateMyState();
@@ -126,6 +127,7 @@ namespace SP
             {
                 lllog(9) << "SP: Coordinator got new raw data" << std::endl;
                 m_lastStatistics = statistics;
+                m_lastStatisticsDirty = true;
                 if (m_electionHandler.IsElected())
                 {
                     UpdateMyState();
@@ -265,6 +267,12 @@ namespace SP
             {
                 return false;
             }
+
+            if (!m_lastStatisticsDirty)
+            {
+                lllog(7) << "SP: Last statistics is not dirty, no need to update." << std::endl;
+                return true;
+            }
         
             if (!m_lastStatistics.Valid())
             {
@@ -272,7 +280,7 @@ namespace SP
                 return false;
             }
 
-            //Check that all other nodes raw data is from this election
+            //Check that the raw data from all other nodes is from this election
             for (int i = 0; i < m_lastStatistics.Size(); ++i)
             {
                 if (m_lastStatistics.IsDead(i))
@@ -296,6 +304,8 @@ namespace SP
                     return false;
                 }
             }
+
+
 
             m_stateMessage.set_elected_id(m_id);
             m_stateMessage.set_election_id(m_ownElectionId);
@@ -355,6 +365,7 @@ namespace SP
                 }
             }
 
+            m_lastStatisticsDirty = false;
             return true;
         }
 
@@ -364,6 +375,8 @@ namespace SP
         ElectionHandlerT m_electionHandler;
 
         RawStatistics m_lastStatistics;
+        bool m_lastStatisticsDirty = true;
+
         SystemStateMessage m_stateMessage;
         
         const std::string m_name;
