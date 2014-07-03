@@ -24,8 +24,6 @@
 #include "../src/Coordinator.h"
 #include "../src/MessageWrapperCreators.h"
 #include <Safir/Utilities/Internal/MakeUnique.h>
-#include <boost/thread.hpp>
-#include <boost/thread/mutex.hpp>
 #include <memory>
 
 #ifdef _MSC_VER
@@ -40,18 +38,8 @@
 #pragma warning (pop)
 #endif
 
-
 #define BOOST_TEST_MODULE CoordinatorHandlerTest
 #include <boost/test/unit_test.hpp>
-
-
-//We need thread safe variants for some of the tests that use multiple threads in the ioService.
-boost::mutex testMtx;
-#define SAFE_BOOST_CHECK(p) {boost::lock_guard<boost::mutex> lck(testMtx); BOOST_CHECK(p);}
-#define SAFE_BOOST_FAIL(s) {boost::lock_guard<boost::mutex> lck(testMtx); BOOST_FAIL(s);}
-#define SAFE_BOOST_CHECK_NE(L, R) {boost::lock_guard<boost::mutex> lck(testMtx); BOOST_CHECK_NE(L, R);}
-#define SAFE_BOOST_CHECK_EQUAL(L, R) {boost::lock_guard<boost::mutex> lck(testMtx); BOOST_CHECK_EQUAL(L, R);}
-#define SAFE_BOOST_TEST_MESSAGE(m) {boost::lock_guard<boost::mutex> lck(testMtx); BOOST_TEST_MESSAGE(m);}
 
 using namespace Safir::Dob::Internal::SP;
 
@@ -66,12 +54,46 @@ RawStatistics GetRawWithOneNode()
     msg->set_election_id(100);
 
     auto node = msg->add_node_info();
-    
+
     node->set_name("remote1");
     node->set_id(1001);
     node->set_node_type_id(10);
     node->set_control_address("remote1:control");
     node->set_data_address("remote1:data");
+    node->set_is_dead(false);
+    node->set_is_long_gone(false);
+
+    return RawStatisticsCreator::Create(std::move(msg));
+}
+
+
+RawStatistics GetRawWithTwoNodes()
+{
+    auto msg = Safir::make_unique<NodeStatisticsMessage>();
+
+    msg->set_name("myself");
+    msg->set_id(1000);
+    msg->set_node_type_id(10);
+    msg->set_election_id(100);
+
+    auto node = msg->add_node_info();
+
+    node->set_name("remote1");
+    node->set_id(1001);
+    node->set_node_type_id(10);
+    node->set_control_address("remote1:control");
+    node->set_data_address("remote1:data");
+    node->set_is_dead(false);
+    node->set_is_long_gone(false);
+
+
+    node = msg->add_node_info();
+
+    node->set_name("remote2");
+    node->set_id(1002);
+    node->set_node_type_id(10);
+    node->set_control_address("remote2:control");
+    node->set_data_address("remote2:data");
     node->set_is_dead(false);
     node->set_is_long_gone(false);
 
@@ -88,7 +110,7 @@ RawStatistics GetRawWithOneNodeAndRemoteRaw()
     msg->set_election_id(100);
 
     auto node = msg->add_node_info();
-    
+
     node->set_name("remote1");
     node->set_id(1001);
     node->set_node_type_id(10);
@@ -110,7 +132,7 @@ RawStatistics GetRawWithOneNodeAndRemoteRaw()
     rnode->set_node_type_id(10);
     rnode->set_is_dead(false);
     rnode->set_is_long_gone(false);
-                
+
 
     return RawStatisticsCreator::Create(std::move(msg));
 }
@@ -120,7 +142,7 @@ SystemStateMessage GetStateWithOneNode()
     SystemStateMessage msg;
     msg.set_elected_id(1001);
     msg.set_election_id(100);
-    
+
     auto node = msg.add_node_info();
     node->set_name("remote1");
     node->set_id(1001);
@@ -139,6 +161,39 @@ SystemStateMessage GetStateWithOneNode()
     return msg;
 }
 
+SystemStateMessage GetStateWithTwoNodes()
+{
+    SystemStateMessage msg;
+    msg.set_elected_id(1001);
+    msg.set_election_id(100);
+
+    auto node = msg.add_node_info();
+    node->set_name("remote1");
+    node->set_id(1001);
+    node->set_node_type_id(10);
+    node->set_control_address("remote1:control");
+    node->set_data_address("remote1:data");
+    node->set_is_dead(false);
+
+    node = msg.add_node_info();
+    node->set_name("myself");
+    node->set_id(1000);
+    node->set_node_type_id(10);
+    node->set_control_address("klopp");
+    node->set_data_address("flupp");
+    node->set_is_dead(false);
+
+    node = msg.add_node_info();
+    node->set_name("remote2");
+    node->set_id(1002);
+    node->set_node_type_id(10);
+    node->set_control_address("remote2:control");
+    node->set_data_address("remote2:data");
+    node->set_is_dead(true); //!!!!
+
+    return msg;
+}
+
 
 typedef std::function<void(const RawStatistics& statistics)> StatisticsCallback;
 
@@ -150,7 +205,7 @@ public:
     {
         excludedNodes.insert(nodeId);
     }
-    
+
     std::set<int64_t> excludedNodes;
 };
 
@@ -198,7 +253,7 @@ public:
                         const int64_t id_,
                         const std::map<int64_t, NodeType>& nodeTypes,
                         const char* const receiverId,
-                        const std::function<void(const int64_t nodeId, 
+                        const std::function<void(const int64_t nodeId,
                                                  const int64_t electionId)>& electionCompleteCallback_)
         : id(id_)
         , electionCompleteCallback(electionCompleteCallback_)
@@ -232,7 +287,7 @@ public:
     bool stopped = false;
     bool nodesChangedCalled = false;
 
-    const std::function<void(const int64_t nodeId, 
+    const std::function<void(const int64_t nodeId,
                              const int64_t electionId)> electionCompleteCallback;
 
 
@@ -255,12 +310,12 @@ struct Fixture
                       "snoop",
                       rh)
     {
-        SAFE_BOOST_TEST_MESSAGE("setup fixture");
+        BOOST_TEST_MESSAGE("setup fixture");
     }
-    
+
     ~Fixture()
     {
-        SAFE_BOOST_TEST_MESSAGE("teardown fixture");
+        BOOST_TEST_MESSAGE("teardown fixture");
     }
 
     static std::map<int64_t, NodeType> GetNodeTypes()
@@ -294,7 +349,7 @@ BOOST_AUTO_TEST_CASE( start_stop )
 BOOST_AUTO_TEST_CASE( perform_only_own_unelected )
 {
     bool callbackCalled = false;
-    coordinator.PerformOnStateMessage([&callbackCalled](std::unique_ptr<char []> data, 
+    coordinator.PerformOnStateMessage([&callbackCalled](std::unique_ptr<char []> data,
                                          const size_t size)
                                       {
                                           callbackCalled = true;
@@ -309,7 +364,7 @@ BOOST_AUTO_TEST_CASE( perform_only_own_unelected )
 BOOST_AUTO_TEST_CASE( perform_no_state_received )
 {
     bool callbackCalled = false;
-    coordinator.PerformOnStateMessage([&callbackCalled](std::unique_ptr<char []> data, 
+    coordinator.PerformOnStateMessage([&callbackCalled](std::unique_ptr<char []> data,
                                          const size_t size)
                                       {
                                           callbackCalled = true;
@@ -346,7 +401,7 @@ BOOST_AUTO_TEST_CASE( simple_state_production )
     ElectionHandlerStub::lastInstance->electionCompleteCallback(1000,100);
     rh.nodesCb(GetRawWithOneNode());
     bool callbackCalled = false;
-    coordinator.PerformOnStateMessage([&callbackCalled](std::unique_ptr<char []> data, 
+    coordinator.PerformOnStateMessage([&callbackCalled](std::unique_ptr<char []> data,
                                                         const size_t size)
                                       {
                                           callbackCalled = true;
@@ -361,7 +416,7 @@ BOOST_AUTO_TEST_CASE( simple_state_production )
     rh.nodesCb(GetRawWithOneNodeAndRemoteRaw());
 
     SystemStateMessage stateMessage;
-    coordinator.PerformOnStateMessage([&callbackCalled,&stateMessage](std::unique_ptr<char []> data, 
+    coordinator.PerformOnStateMessage([&callbackCalled,&stateMessage](std::unique_ptr<char []> data,
                                                                       const size_t size)
                                       {
                                           callbackCalled = true;
@@ -407,11 +462,11 @@ BOOST_AUTO_TEST_CASE( propagate_state_from_other )
     auto data = boost::shared_ptr<char[]>(new char[size]);
     state.SerializeWithCachedSizesToArray
         (reinterpret_cast<google::protobuf::uint8*>(data.get()));
-    
+
     coordinator.NewRemoteData(1001,data,size);
     bool callbackCalled = false;
 
-    coordinator.PerformOnStateMessage([&callbackCalled](std::unique_ptr<char []> data, 
+    coordinator.PerformOnStateMessage([&callbackCalled](std::unique_ptr<char []> data,
                                                         const size_t size)
                                       {
                                           callbackCalled = true;
@@ -423,7 +478,7 @@ BOOST_AUTO_TEST_CASE( propagate_state_from_other )
 
 
     SystemStateMessage stateMessage;
-    coordinator.PerformOnStateMessage([&callbackCalled,&stateMessage](std::unique_ptr<char []> data, 
+    coordinator.PerformOnStateMessage([&callbackCalled,&stateMessage](std::unique_ptr<char []> data,
                                                                       const size_t size)
                                       {
                                           callbackCalled = true;
@@ -458,5 +513,72 @@ BOOST_AUTO_TEST_CASE( propagate_state_from_other )
     BOOST_CHECK(rh.deadNodes.empty());
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_CASE( remote_from_other_with_dead )
+{
+    ElectionHandlerStub::lastInstance->electedId = 1001;
+    ElectionHandlerStub::lastInstance->electionCompleteCallback(1001,100);
+    rh.nodesCb(GetRawWithTwoNodes());
+    auto state = GetStateWithTwoNodes();
 
+    const size_t size = state.ByteSize();
+    auto data = boost::shared_ptr<char[]>(new char[size]);
+    state.SerializeWithCachedSizesToArray
+        (reinterpret_cast<google::protobuf::uint8*>(data.get()));
+
+    coordinator.NewRemoteData(1001,data,size);
+
+    ioService.run();
+
+    BOOST_CHECK(rh.deadNodes.size() == 1);
+    BOOST_CHECK(rh.deadNodes.find(1002) != rh.deadNodes.end());
+
+    BOOST_CHECK(comm.excludedNodes.size() == 1);
+    BOOST_CHECK(comm.excludedNodes.find(1002) != comm.excludedNodes.end());
+
+
+    bool callbackCalled = false;
+
+    SystemStateMessage stateMessage;
+    coordinator.PerformOnStateMessage([&callbackCalled,&stateMessage](std::unique_ptr<char []> data,
+                                                                      const size_t size)
+                                      {
+                                          callbackCalled = true;
+                                          stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
+                                      },
+                                      0,
+                                      false);
+    ioService.reset();
+    ioService.run();
+
+    BOOST_REQUIRE(callbackCalled);
+
+    BOOST_CHECK_EQUAL(stateMessage.elected_id(),1001);
+    BOOST_CHECK_EQUAL(stateMessage.election_id(),100);
+    BOOST_CHECK_EQUAL(stateMessage.node_info_size(),3);
+
+    BOOST_CHECK_EQUAL(stateMessage.node_info(0).name(),"remote1");
+    BOOST_CHECK_EQUAL(stateMessage.node_info(0).id(),1001);
+    BOOST_CHECK_EQUAL(stateMessage.node_info(0).node_type_id(),10);
+    BOOST_CHECK_EQUAL(stateMessage.node_info(0).control_address(),"remote1:control");
+    BOOST_CHECK_EQUAL(stateMessage.node_info(0).data_address(),"remote1:data");
+    BOOST_CHECK(!stateMessage.node_info(0).is_dead());
+
+    BOOST_CHECK_EQUAL(stateMessage.node_info(1).name(),"myself");
+    BOOST_CHECK_EQUAL(stateMessage.node_info(1).id(),1000);
+    BOOST_CHECK_EQUAL(stateMessage.node_info(1).node_type_id(),10);
+    BOOST_CHECK_EQUAL(stateMessage.node_info(1).control_address(),"klopp");
+    BOOST_CHECK_EQUAL(stateMessage.node_info(1).data_address(),"flupp");
+    BOOST_CHECK(!stateMessage.node_info(1).is_dead());
+
+    BOOST_CHECK_EQUAL(stateMessage.node_info(2).name(),"remote2");
+    BOOST_CHECK_EQUAL(stateMessage.node_info(2).id(),1002);
+    BOOST_CHECK_EQUAL(stateMessage.node_info(2).node_type_id(),10);
+    BOOST_CHECK_EQUAL(stateMessage.node_info(2).control_address(),"remote2:control");
+    BOOST_CHECK_EQUAL(stateMessage.node_info(2).data_address(),"remote2:data");
+    BOOST_CHECK(stateMessage.node_info(2).is_dead());
+
+
+
+}
+
+BOOST_AUTO_TEST_SUITE_END()

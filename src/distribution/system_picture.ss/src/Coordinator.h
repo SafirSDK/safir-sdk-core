@@ -182,7 +182,7 @@ namespace SP
                     return;
                 }
 
-                lllog (7) << "Got new SystemState from node " << from << std::endl;
+                lllog (7) << "SP: Got new SystemState from node " << from << std::endl;
                 m_stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
 
                 //do some sanity checks
