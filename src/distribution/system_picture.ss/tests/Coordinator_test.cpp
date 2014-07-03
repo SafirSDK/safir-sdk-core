@@ -137,6 +137,70 @@ RawStatistics GetRawWithOneNodeAndRemoteRaw()
     return RawStatisticsCreator::Create(std::move(msg));
 }
 
+RawStatistics GetRawWithTwoNodesAndRemoteRaw(bool oneDead)
+{
+    auto msg = Safir::make_unique<NodeStatisticsMessage>();
+
+    msg->set_name("myself");
+    msg->set_id(1000);
+    msg->set_election_id(100);
+
+    //Add node remote1
+    auto node = msg->add_node_info();
+
+    node->set_name("remote1");
+    node->set_id(1001);
+    node->set_is_dead(false);
+    node->set_is_long_gone(false);
+
+    auto remote = node->mutable_remote_statistics();
+
+    remote->set_name("remote1");
+    remote->set_id(1001);
+    remote->set_election_id(100);
+
+    auto rnode = remote->add_node_info();
+    rnode->set_name("myself");
+    rnode->set_id(1000);
+    rnode->set_is_dead(false);
+    rnode->set_is_long_gone(false);
+
+    rnode = remote->add_node_info();
+    rnode->set_name("remote2");
+    rnode->set_id(1002);
+    rnode->set_is_dead(false);
+    rnode->set_is_long_gone(false);
+
+    //add node remote2
+    node = msg->add_node_info();
+
+    node->set_name("remote2");
+    node->set_id(1002);
+    node->set_is_dead(false);
+    node->set_is_long_gone(false);
+
+    remote = node->mutable_remote_statistics();
+
+    remote->set_name("remote2");
+    remote->set_id(1002);
+    remote->set_election_id(100);
+
+    rnode = remote->add_node_info();
+    rnode->set_name("myself");
+    rnode->set_id(1000);
+    rnode->set_is_dead(false);
+    rnode->set_is_long_gone(false);
+
+    rnode = remote->add_node_info();
+    rnode->set_name("remote1");
+    rnode->set_id(1001);
+    rnode->set_is_dead(oneDead);
+    rnode->set_is_long_gone(false);
+
+    return RawStatisticsCreator::Create(std::move(msg));
+}
+
+
 SystemStateMessage GetStateWithOneNode()
 {
     SystemStateMessage msg;
@@ -576,9 +640,78 @@ BOOST_AUTO_TEST_CASE( remote_from_other_with_dead )
     BOOST_CHECK_EQUAL(stateMessage.node_info(2).control_address(),"remote2:control");
     BOOST_CHECK_EQUAL(stateMessage.node_info(2).data_address(),"remote2:data");
     BOOST_CHECK(stateMessage.node_info(2).is_dead());
-
-
-
 }
+
+
+BOOST_AUTO_TEST_CASE( remote_reports_dead )
+{
+    ElectionHandlerStub::lastInstance->electedId = 1000;
+    ElectionHandlerStub::lastInstance->electionCompleteCallback(1000,100);
+    rh.nodesCb(GetRawWithTwoNodesAndRemoteRaw(false));
+
+    bool callbackCalled = false;
+    SystemStateMessage stateMessage;
+    coordinator.PerformOnStateMessage([&callbackCalled,&stateMessage](std::unique_ptr<char []> data,
+                                                                      const size_t size)
+                                      {
+                                          callbackCalled = true;
+                                          stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
+                                      },
+                                      0,
+                                      true);
+
+    ioService.run();
+    BOOST_REQUIRE(callbackCalled);
+    BOOST_CHECK_EQUAL(stateMessage.elected_id(),1000);
+    BOOST_CHECK_EQUAL(stateMessage.node_info_size(),3);
+
+    BOOST_CHECK_EQUAL(stateMessage.node_info(0).id(),1000);
+    BOOST_CHECK(!stateMessage.node_info(0).is_dead());
+
+    BOOST_CHECK_EQUAL(stateMessage.node_info(1).name(),"remote1");
+    BOOST_CHECK(!stateMessage.node_info(1).is_dead());
+
+    BOOST_CHECK_EQUAL(stateMessage.node_info(2).name(),"remote2");
+    BOOST_CHECK(!stateMessage.node_info(2).is_dead());
+
+    BOOST_CHECK(comm.excludedNodes.empty());
+    BOOST_CHECK(rh.deadNodes.empty());
+
+
+    rh.rawCb(GetRawWithTwoNodesAndRemoteRaw(true));
+
+    callbackCalled = false;
+    coordinator.PerformOnStateMessage([&callbackCalled,&stateMessage](std::unique_ptr<char []> data,
+                                                                      const size_t size)
+                                      {
+                                          callbackCalled = true;
+                                          stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
+                                      },
+                                      0,
+                                      true);
+
+    ioService.reset();
+    ioService.run();
+    BOOST_REQUIRE(callbackCalled);
+    BOOST_CHECK_EQUAL(stateMessage.elected_id(),1000);
+    BOOST_CHECK_EQUAL(stateMessage.node_info_size(),3);
+
+    BOOST_CHECK_EQUAL(stateMessage.node_info(0).id(),1000);
+    BOOST_CHECK(!stateMessage.node_info(0).is_dead());
+
+    BOOST_CHECK_EQUAL(stateMessage.node_info(1).name(),"remote1");
+    BOOST_CHECK(stateMessage.node_info(1).is_dead());
+
+    BOOST_CHECK_EQUAL(stateMessage.node_info(2).name(),"remote2");
+    BOOST_CHECK(!stateMessage.node_info(2).is_dead());
+
+    BOOST_CHECK(rh.deadNodes.size() == 1);
+    BOOST_CHECK(rh.deadNodes.find(1001) != rh.deadNodes.end());
+
+    BOOST_CHECK(comm.excludedNodes.size() == 1);
+    BOOST_CHECK(comm.excludedNodes.find(1001) != comm.excludedNodes.end());
+}
+
+
 
 BOOST_AUTO_TEST_SUITE_END()
