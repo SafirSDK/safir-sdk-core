@@ -478,9 +478,6 @@ class VisualStudioBuilder(BuilderBase):
     def handle_command_line_arguments(self,arguments):
         self.use_studio = arguments.use_studio
 
-        if self.use_studio not in ("2010", "2012", "2013"):
-            return "Invalid value for --use-studio"
-        
         if not is_64_bit() or arguments.build_32_bit:
             self.target_architecture = "x86"
         else:
