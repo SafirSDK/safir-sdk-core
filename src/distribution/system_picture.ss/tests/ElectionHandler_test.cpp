@@ -562,7 +562,12 @@ BOOST_AUTO_TEST_CASE( three_nodes_remove_elected )
 
 BOOST_AUTO_TEST_CASE( lots_of_nodes )
 {
+    //windows debug builds run out of memory when using too many nodes :-)
+#if defined (_MSC_VER) && !defined(NDEBUG)
+    const int numNodes = 100;
+#else
     const int numNodes = 1000;
+#endif
 
     //remember that one node is automatically added by the fixture
     for (int i = 0; i < numNodes - 1 ; ++i)
@@ -588,37 +593,45 @@ BOOST_AUTO_TEST_CASE( lots_of_nodes )
 
 BOOST_AUTO_TEST_CASE( lots_of_nodes_remove_some )
 {
+    //windows debug builds run out of memory when using too many nodes :-)
+#if defined (_MSC_VER) && !defined(NDEBUG)
+    const int numNodes = 100;
+#else
+    const int numNodes = 1000;
+#endif
+
     //remember that one node is automatically added by the fixture
-    for (int i = 0; i < 999; ++i)
+    for (int i = 0; i < numNodes - 1; ++i)
     {
         AddNode();
     }
 
     SendNodesChanged();
 
-    for (int i = 0; i < 1000; ++i)
+    for (int i = 0; i < numNodes; ++i)
     {
         SAFE_BOOST_CHECK(!nodes[i]->eh.IsElected());
     }
 
     RunIoService(10);
 
-    for (int i = 0; i < 999; ++i)
+    for (int i = 0; i < numNodes - 1; ++i)
     {
         SAFE_BOOST_CHECK(!nodes[i]->eh.IsElected());
     }
 
-    SAFE_BOOST_CHECK(nodes[999]->eh.IsElected());
+    SAFE_BOOST_CHECK(nodes[numNodes - 1]->eh.IsElected());
 
 
-    //remove some nodes
-    for (int i = 900; i < 1000; ++i)
+    //remove some nodes (e.g. 900 to 1000)
+    for (int i = numNodes - numNodes / 10; i < numNodes; ++i)
     {
         RemoveNode(i);
     }
 
 
-    for (int i = 250; i < 500; ++i)
+    //remove some more (e.g. 250 to 500)
+    for (int i = numNodes / 4; i < numNodes / 2; ++i)
     {
         RemoveNode(i);
     }
@@ -627,7 +640,7 @@ BOOST_AUTO_TEST_CASE( lots_of_nodes_remove_some )
 
     RunIoService(10);
 
-    SAFE_BOOST_CHECK(nodes[899]->eh.IsElected());
+    SAFE_BOOST_CHECK(nodes[numNodes - numNodes/10 - 1]->eh.IsElected());
 
 }
 
