@@ -55,8 +55,7 @@ endif()
 ADD_EXECUTABLE(dobexplorer WIN32 ${sources} ${ui_headers} ${moc_sources} ${dose_com_sources} ${headers})
 
 if (Qt5Widgets_FOUND)
-  qt5_use_modules(dobexplorer Widgets)
-
+  TARGET_LINK_LIBRARIES(dobexplorer Qt5::Widgets)
 else()
   TARGET_LINK_LIBRARIES(dobexplorer ${QT_LIBRARIES})
 endif()
