@@ -49,7 +49,7 @@ def is_64_bit():
         PROCESSOR_ARCHITECTURE = os.environ.get("PROCESSOR_ARCHITECTURE")
         PROCESSOR_ARCHITEW6432 = os.environ.get("PROCESSOR_ARCHITEW6432")
         return PROCESSOR_ARCHITECTURE == "AMD64" or PROCESSOR_ARCHITEW6432 == "AMD64"
-        
+
 def cmake():
     """Get the name of the cmake executable. Currently only detects the cmake28/cmake difference on
     centos/rhel 6"""
@@ -90,7 +90,7 @@ def mkdir(newdir):
         if tail:
             os.mkdir(newdir)
 
-            
+
 def remove(path):
     if not os.path.exists(path):
         return
@@ -100,7 +100,7 @@ def remove(path):
             return
         except Exception as e:
             die ("Failed to remove file " + path + ". Got exception " + str(e))
-            
+
     for name in os.listdir(path):
         if os.path.isdir(os.path.join(path, name)):
             remove(os.path.join(path, name))
@@ -150,9 +150,9 @@ class DummyLogger(object):
 
     def close(self):
         pass
-        
+
     def log_output(self, process):
-        raise Exception("DummyLogger doesnt support process output logging. " + 
+        raise Exception("DummyLogger doesnt support process output logging. " +
                         "You should investigate why the real logger is not instantiated by now...")
 
 class Logger(object):
@@ -177,7 +177,7 @@ class Logger(object):
         self.__buildlog.write("\n<p/>End time (local time): " + time.asctime())
         self.__buildlog.write("\n</body>\n")
         self.__buildlog.close()
-        
+
     def __log_stdout(self, data, tag):
         if tag not in Logger.Tags:
             die("unknown logging tag")
@@ -229,7 +229,7 @@ class Logger(object):
 
         self.__log_stdout(data,tag)
         self.__log_file(data,tag)
-        
+
 
     def log_output(self, process):
         output = list()
@@ -261,7 +261,7 @@ def parse_command_line(builder):
                         default=False,
                         help="Set up and use environment variables for a Jenkins automated build." +
                              "TODO: what else does it do?")
-    
+
     parser.add_argument("--stage",
                         action="store_true",
                         default=False,
@@ -303,7 +303,7 @@ class BuilderBase(object):
         #up to 400Mb of memory.
         try:
             self.num_jobs = num_cpus() + 1
-        
+
             mem_per_job = 400
             memory = physical_memory()
             if memory is not None and memory / self.num_jobs < mem_per_job:
@@ -316,7 +316,7 @@ class BuilderBase(object):
 
     def setup_build_environment(self):
         pass
-        
+
     def setup_command_line_arguments(self,parser):
         #Child is expected to set up an argument "configs"
         self.setup_command_line_arguments_internal(parser)
@@ -330,13 +330,13 @@ class BuilderBase(object):
                 self.configs = ("Debug",)
 
         self.skip_tests = arguments.skip_tests
-        
+
         self.stage = os.path.join(os.getcwd(),"stage") if arguments.stage else None
         if self.stage and os.path.exists(self.stage):
             print( "The staging directory (" + self.stage + ") already exists, please remove it and try again")
             sys.exit(1)
-                   
-        
+
+
         return self.handle_command_line_arguments_internal(arguments)
 
     def setenv_jenkins_internal(self):
@@ -365,29 +365,38 @@ class BuilderBase(object):
                 olddir = os.getcwd()
                 mkdir(config)
                 os.chdir(config)
-                
+
             self.__build_internal(directory,
                                   os.pardir if olddir else ".",
                                   config)
-            
+
             if olddir is not None:
                 os.chdir(olddir)
 
+    def __configure(self, directory, srcdir, config):
+
+        command = (cmake(),
+                   "-G", self.cmake_generator,
+                   "-D", "CMAKE_BUILD_TYPE:string=" + config)
+
+        command += self.generator_specific_configure_cmds()
+
+        command += (srcdir,)
+        self.__run_command(command,
+                           "Configure for " + config + " build", directory)
 
     def __build_internal(self, directory, srcdir, config):
         logger.log(" - in config " + config, "brief")
-        self.__run_command((cmake(),
-                            "-G", self.cmake_generator,
-                            "-D", "CMAKE_BUILD_TYPE:string=" + config,
-                            srcdir),
-                           "Configure for " + config + " build", directory)
+
+        self.__configure(directory, srcdir, config)
+
         command = [cmake(), "--build", "."]
 
         suffix = self.generator_specific_build_cmds()
 
         if self.stage:
             command += ("--target", self.install_target)
-                    
+
         if self.stage or suffix:
             command += ("--",)
         if self.stage:
@@ -401,7 +410,7 @@ class BuilderBase(object):
             logger.log("   + testing", "brief")
             self.test(directory)
             translate_results_to_junit(config)
-        
+
     def test(self, directory):
         """run ctest in a directory"""
         if not os.path.isfile("DartConfiguration.tcl"):
@@ -426,7 +435,7 @@ class BuilderBase(object):
             if not allow_fail:
                 die("Failed to run '" + " ".join(cmd) + "' for " + what)
             else:
-                logger.log("This command failed, but failure of this particular command " + 
+                logger.log("This command failed, but failure of this particular command " +
                            "is non-fatal to the build process, so I'm continuing")
 
         return output
@@ -449,7 +458,7 @@ class BuilderBase(object):
 
 
 class VisualStudioBuilder(BuilderBase):
-    def __init__(self):    
+    def __init__(self):
         super(VisualStudioBuilder, self).__init__()
 
         self.install_target = "Install"
@@ -499,6 +508,9 @@ class VisualStudioBuilder(BuilderBase):
         else:
             return ("/nologo",)
 
+    def generator_specific_configure_cmds(self):
+        return ()
+
     def filter_configs(self, configs):
         return configs
 
@@ -515,10 +527,10 @@ class VisualStudioBuilder(BuilderBase):
         #subprocess.call(("subst","k:",bindir))
         #logger.log("'subst k:" + bindir + "' exited with return code " + str(ret),"output")
         pass
-        
+
     def __find_vcvarsall(self):
         install_dirs = set(["VS120COMNTOOLS","VS110COMNTOOLS","VS100COMNTOOLS"])
-        #we use set intersections so that we double check that the variable 
+        #we use set intersections so that we double check that the variable
         #names are the same in both places...
         if self.use_studio == "2010":
             install_dirs &= set(["VS100COMNTOOLS",]) #keep only vs2010 dir
@@ -526,10 +538,10 @@ class VisualStudioBuilder(BuilderBase):
             install_dirs &= set(["VS110COMNTOOLS",]) #keep only vs2012 dir
         elif self.use_studio == "2013":
             install_dirs &= set(["VS120COMNTOOLS",]) #keep only vs2013 dir
-        
+
         if len(install_dirs) < 1:
             die("Internal error in __find_vcvarsall(...)")
-            
+
         for install_dir in install_dirs:
             env = os.environ.get(install_dir)
             if env is not None:
@@ -552,7 +564,7 @@ class VisualStudioBuilder(BuilderBase):
         if proc.returncode != 0:
             die ("Failed to fetch environment variables out of vcvarsall.bat: " + output)
         return output
-    
+
     def setup_build_environment(self):
         """Find vcvarsall.bat and load the relevant environment variables from it.
         This function is inspired (but not copied, for licensing reasons) by the one in python distutils2 msvc9compiler.py"""
@@ -570,7 +582,7 @@ class VisualStudioBuilder(BuilderBase):
         if self.target_architecture == "x86-64" and output.find("configuration might not be installed") != -1:
             logger.log("Native toolset appears to be missing, trying cross compilation")
             output = self.__run_vcvarsall(vcvarsall, "x86_amd64")
-        
+
         found_variables = set()
 
         for line in output.split("\n"):
@@ -588,7 +600,7 @@ class VisualStudioBuilder(BuilderBase):
                     logger.log("Will change '" + name + "' from '" + os.environ.get(name) + "' to '" + value + "'", "detail")
                 os.environ[name] = value
                 found_variables.add(name)
-                
+
         if len(required_variables - found_variables) != 0:
             die("Failed to find all expected variables in vcvarsall.bat")
 
@@ -614,21 +626,25 @@ class UnixGccBuilder(BuilderBase):
                             default=("RelWithDebInfo",),
                             choices=known_configs,
                             help="The configuration to build. RelWithDebInfo is the default.")
-        
+
 
 
     def handle_command_line_arguments_internal(self,arguments):
         pass
-    
+
 
     def generator_specific_build_cmds(self):
         return ( "-j", str(self.num_jobs))
+
+    def generator_specific_configure_cmds(self):
+        return ("-D", "CMAKE_INSTALL_PREFIX=/usr")
+
 
     def setenv_jenkins_internal(self):
         #LD_LIBRARY_PATH = (os.environ.get("LD_LIBRARY_PATH") + ":") if os.environ.get("LD_LIBRARY_PATH") else ""
         #os.environ["LD_LIBRARY_PATH"] = LD_LIBRARY_PATH + os.path.join(os.environ.get("SAFIR_RUNTIME"),"lib")
         pass
-        
+
 def getText(nodelist):
     rc = []
     for node in nodelist:
@@ -669,7 +685,7 @@ def translate_results_to_junit(suite_name):
                     else:
                         """failure"""
                         output = escape(getText(meas.getElementsByTagName("Value")[0].childNodes))
-                        junitfile.write(">\n    <error message=\"" + exitCode + "(" + exitValue +  ")\">" + 
+                        junitfile.write(">\n    <error message=\"" + exitCode + "(" + exitValue +  ")\">" +
                                         output +
                                         "\n</error>\n  </testcase>\n")
         junitfile.write("</testsuite>")
@@ -682,9 +698,9 @@ def get_builder():
         return UnixGccBuilder()
     else:
         die("Failed to work out what builder to use!")
-    
+
 def main():
-    builder = get_builder()  
+    builder = get_builder()
     parse_command_line(builder)
     check_environment()
     builder.setup_build_environment()
