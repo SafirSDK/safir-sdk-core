@@ -485,6 +485,11 @@ class VisualStudioBuilder(BuilderBase):
 
         self.configs = arguments.configs
 
+        if arguments.jenkins:
+            if os.environ.get("Config") == "DebugOnly":
+                logger.log("Using Config 'DebugOnly', building everything in Debug only.")
+                self.configs = ("Debug",)
+
     def get_configs(self):
         return self.configs
 
@@ -611,10 +616,15 @@ class UnixGccBuilder(BuilderBase):
 
 
     def handle_command_line_arguments(self,arguments):
-        self.config = arguments.config
-        
+        self.configs = (arguments.config,)
+
+        if arguments.jenkins:
+            if os.environ.get("Config") == "DebugOnly":
+                logger.log("Using Config 'DebugOnly', building everything in Debug only.")
+                self.configs = ("Debug",)
+
     def get_configs(self):
-        return (self.config,)
+        return self.configs
 
     def target_specific_build_cmds(self):
         return (("--", "-j", str(self.num_jobs)))
