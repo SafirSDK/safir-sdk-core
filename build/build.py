@@ -288,6 +288,7 @@ def parse_command_line(builder):
     logger = Logger("Brief" if arguments.verbose == 0 else "Verbose")
 
     if arguments.jenkins:
+        arguments.stage = True
         builder.setenv_jenkins()
 
     msg = builder.handle_command_line_arguments(arguments)
