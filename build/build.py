@@ -261,6 +261,15 @@ def parse_command_line(builder):
                         default=False,
                         help="Set up and use environment variables for a Jenkins automated build." +
                              "TODO: what else does it do?")
+    
+    parser.add_argument("--stage",
+                        action="store_true",
+                        default=False,
+                        help="Install everything to a staging area")
+
+    parser.add_argument("--skip-tests",
+                        action = "store_true",
+                        help="Skip running the unit tests")
 
     parser.add_argument("--verbose", "-v",
                         action="count",
@@ -278,26 +287,9 @@ def parse_command_line(builder):
     global logger
     logger = Logger("Brief" if arguments.verbose == 0 else "Verbose")
 
-
     if arguments.jenkins:
         builder.setenv_jenkins()
 
-        config = os.environ.get("Config")
-        if config is not None:
-            pass
-            """TODO!
-            if force_config is not None or force_extra_config is not None:
-                die("Cannot combine force_config or force_extra_config with $Config!")
-            if config == "Release":
-                logger.log("Using Config 'Release', building as specified in the command file.")
-            elif config == "DebugOnly":
-                logger.log("Using Config 'DebugOnly', ignoring command file configs, and building " + 
-                           "everything in Debug only.")
-                force_config = "Debug"
-                force_extra_config = "None"
-            else:
-                die("Unexpected 'Config' value: " + config + ", can handle 'Release' and 'DebugOnly'")
-            """
     msg = builder.handle_command_line_arguments(arguments)
     if msg is not None:
         print("Failed to parse command line:", msg)
@@ -322,17 +314,30 @@ class BuilderBase(object):
         self.total_tests = 0
         self.failed_tests = 0
 
-    def setup_command_line_arguments(self,parser):
-        pass
-
     def setup_build_environment(self):
         pass
+        
+    def setup_command_line_arguments(self,parser):
+        #Child is expected to set up an argument "configs"
+        self.setup_command_line_arguments_internal(parser)
 
     def handle_command_line_arguments(self,arguments):
-        pass
+        self.configs = arguments.configs
 
-    def get_configs(self):
-        raise Exception("Not implemented! This is an abstract method")
+        if arguments.jenkins:
+            if os.environ.get("Config") == "DebugOnly":
+                logger.log("Using Config 'DebugOnly', building everything in Debug only.")
+                self.configs = ("Debug",)
+
+        self.skip_tests = arguments.skip_tests
+        
+        self.stage = os.path.join(os.getcwd(),"stage") if arguments.stage else None
+        if self.stage and os.path.exists(self.stage):
+            print( "The staging directory (" + self.stage + ") already exists, please remove it and try again")
+            sys.exit(1)
+                   
+        
+        return self.handle_command_line_arguments_internal(arguments)
 
     def setenv_jenkins_internal(self):
         raise Exception("Not implemented! This is an abstract method")
@@ -353,26 +358,23 @@ class BuilderBase(object):
         #Call the platform specific setenv
         self.setenv_jenkins_internal()
 
-    def build(self, directory, install, test):
-        configs = self.get_configs()
-        for config in configs:
+    def build(self, directory):
+        for config in self.configs:
             olddir = None
-            if len(configs) > 1:
+            if len(self.configs) > 1:
                 olddir = os.getcwd()
                 mkdir(config)
                 os.chdir(config)
                 
             self.__build_internal(directory,
                                   os.pardir if olddir else ".",
-                                  config,
-                                  install,
-                                  test)
+                                  config)
             
             if olddir is not None:
                 os.chdir(olddir)
 
 
-    def __build_internal(self, directory, srcdir, config, install, test):
+    def __build_internal(self, directory, srcdir, config):
         logger.log(" - in config " + config, "brief")
         self.__run_command((cmake(),
                             "-G", self.cmake_generator,
@@ -381,14 +383,21 @@ class BuilderBase(object):
                            "Configure for " + config + " build", directory)
         command = [cmake(), "--build", "."]
 
-        if install:
+        suffix = self.generator_specific_build_cmds()
+
+        if self.stage:
             command += ("--target", self.install_target)
-        
-        command += self.target_specific_build_cmds()
+                    
+        if self.stage or suffix:
+            command += ("--",)
+        if self.stage:
+            command += ("DESTDIR=" + self.stage,)
+        if suffix:
+            command += suffix
 
         self.__run_command(command,
                            "Build " + config, directory)
-        if test:
+        if not self.skip_tests:
             logger.log("   + testing", "brief")
             self.test(directory)
             translate_results_to_junit(config)
@@ -433,10 +442,10 @@ class BuilderBase(object):
         tests = int(match.group(2))
         self.total_tests += tests
         self.failed_tests += failed
-        if failed == 0:
-            logger.log(" - All tests succeeded.","brief")
-        else:
-            logger.log("!! " + str(failed) + " tests failed out of " + str(tests) + ".","brief")
+        #if failed == 0:
+        #    logger.log(" - All tests succeeded.","brief")
+        #else:
+        #    logger.log("!! " + str(failed) + " tests failed out of " + str(tests) + ".","brief")
 
 
 class VisualStudioBuilder(BuilderBase):
@@ -458,7 +467,7 @@ class VisualStudioBuilder(BuilderBase):
     def can_use():
         return sys.platform == "win32"
 
-    def setup_command_line_arguments(self,parser):
+    def setup_command_line_arguments_internal(self,parser):
         parser.add_argument("--use-studio",
                             help="The visual studio to use for building, can be '2010', '2012' or '2013'")
         if is_64_bit():
@@ -475,7 +484,7 @@ class VisualStudioBuilder(BuilderBase):
 
 
 
-    def handle_command_line_arguments(self,arguments):
+    def handle_command_line_arguments_internal(self,arguments):
         self.use_studio = arguments.use_studio
 
         if not is_64_bit() or arguments.build_32_bit:
@@ -483,21 +492,12 @@ class VisualStudioBuilder(BuilderBase):
         else:
             self.target_architecture = "x86-64"
 
-        self.configs = arguments.configs
 
-        if arguments.jenkins:
-            if os.environ.get("Config") == "DebugOnly":
-                logger.log("Using Config 'DebugOnly', building everything in Debug only.")
-                self.configs = ("Debug",)
-
-    def get_configs(self):
-        return self.configs
-
-    def target_specific_build_cmds(self):
+    def generator_specific_build_cmds(self):
         if self.have_jom:
-            return (("--", "/nologo", "/j", str(self.num_jobs)))
+            return ("/nologo", "/j", str(self.num_jobs))
         else:
-            return (("--", "/nologo"))
+            return ("/nologo",)
 
     def filter_configs(self, configs):
         return configs
@@ -607,27 +607,22 @@ class UnixGccBuilder(BuilderBase):
     def can_use():
         return sys.platform.startswith("linux")
 
-    def setup_command_line_arguments(self,parser):
+    def setup_command_line_arguments_internal(self,parser):
         parser.add_argument("--config",
-                            default="RelWithDebInfo",
+                            dest="configs",
+                            nargs=1,
+                            default=("RelWithDebInfo",),
                             choices=known_configs,
                             help="The configuration to build. RelWithDebInfo is the default.")
         
 
 
-    def handle_command_line_arguments(self,arguments):
-        self.configs = (arguments.config,)
+    def handle_command_line_arguments_internal(self,arguments):
+        pass
+    
 
-        if arguments.jenkins:
-            if os.environ.get("Config") == "DebugOnly":
-                logger.log("Using Config 'DebugOnly', building everything in Debug only.")
-                self.configs = ("Debug",)
-
-    def get_configs(self):
-        return self.configs
-
-    def target_specific_build_cmds(self):
-        return (("--", "-j", str(self.num_jobs)))
+    def generator_specific_build_cmds(self):
+        return ( "-j", str(self.num_jobs))
 
     def setenv_jenkins_internal(self):
         #LD_LIBRARY_PATH = (os.environ.get("LD_LIBRARY_PATH") + ":") if os.environ.get("LD_LIBRARY_PATH") else ""
@@ -694,35 +689,7 @@ def main():
     check_environment()
     builder.setup_build_environment()
 
-
-    #split_line = None
-
-
-    #TODO How to handle all this stuff?
-    """     configs = list()
-            if len(split_line) > 2:
-                if (force_config != None):
-                    configs.append(force_config)
-                else:
-                    configs.append(split_line[2])
-            
-            if len(split_line) > 3:
-                if force_extra_config is None:
-                    configs.append(split_line[3])
-                elif force_extra_config != "None":
-                    configs.append(force_extra_config)
-                
-            if not set(configs) <= known_configs:
-                die ("Unknown build kind '" + str(configs) + "' for " + directory)
-            if len(configs) < 1:
-                die ("Need at least one config for " + directory)
-    """
-    #configs = ("RelWithDebInfo",) #temporary until above is sorted out
-    #logger.log("Building Safir SDK Core", "header")
-
-    #we want to build in reverse order on windows...
-    #configs = builder.filter_configs(configs)[::-1] #reverse the list
-    builder.build(".", install = False, test = True)
+    builder.build(".")
 
     return (builder.total_tests, builder.failed_tests)
 
@@ -744,7 +711,9 @@ try:
     (tests, failed) = main()
     logger.log("Result", "header")
     logger.log("Build completed successfully!")
-    if failed == 0:
+    if tests == 0:
+        logger.log("No tests were performed")
+    elif failed == 0:
         logger.log("All tests ran successfully!")
     else:
         logger.log(str(failed) + " tests failed out of " + str(tests) + ".","brief")

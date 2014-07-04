@@ -20,6 +20,7 @@ generated_code
 .ninja_*
 *.ninja
 Manifest.generated.txt
+stage
 
 #MSVC stuff
 *embed.manifest
