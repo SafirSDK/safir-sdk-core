@@ -293,7 +293,8 @@ def windows():
                        "regex",
                        "system",
                        "thread",
-                       "timer")
+                       "timer",
+                       "unit_test_framework")
 
     copy_boost_libs(boost_lib_dir, boost_libraries)
     copy_boost_dlls(boost_lib_dir, boost_libraries)
