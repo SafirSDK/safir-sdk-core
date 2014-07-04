@@ -7,7 +7,7 @@ add_subdirectory(google-breakpad)
 
 
 if (MSVC)
-  LINK_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/google-breakpad/src/)
+  LINK_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/google-breakpad/bin/)
 else()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-local-typedefs")
   LINK_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/google-breakpad/src/src/client/linux)
