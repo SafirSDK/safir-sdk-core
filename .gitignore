@@ -65,7 +65,7 @@ qrc_*.cxx
 
 #Misc
 __pycache__
-buildlog_*.html
+buildlog.html
 *.resources
 *.bak
 *.pyc

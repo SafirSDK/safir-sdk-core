@@ -23,7 +23,7 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-import os, glob, sys, subprocess, platform, xml.dom.minidom, re, time, shutil
+import os, glob, sys, subprocess, platform, xml.dom.minidom, re, time, shutil, argparse
 import locale, codecs
 from xml.sax.saxutils import escape
 
@@ -31,13 +31,7 @@ from xml.sax.saxutils import escape
 #a few constants
 known_configs = set(["Release", "Debug", "MinSizeRel", "RelWithDebInfo"])
 
-#define some global variables
-skip_list = None
-clean = False
-force_config = None
-force_extra_config = None
-if sys.platform == "win32": #target_architecture is only set on windows platfoms!
-    target_architecture = None
+#our own exception for "die" fcn
 class FatalError(Exception):
     pass
 
@@ -165,21 +159,16 @@ class Logger(object):
     LogLevel = ("Brief", "Verbose")
     Tags = set(["header", "brief","normal","detail", "command_description", "command","output"])
 
-    def __init__(self,level,command_file):
+    def __init__(self,level):
         if level not in Logger.LogLevel:
             die("Bad log level")
         self.__log_level = level
         self.__last_tag = None
 
-        if command_file is None:
-            name = ""
-        else:
-            name = os.path.split(command_file)[-1].replace(".txt","")
-
-        self.__buildlog = codecs.open("buildlog_" + name + ".html", mode = "w", encoding = "utf-8")
+        self.__buildlog = codecs.open("buildlog.html", mode = "w", encoding = "utf-8")
         self.__buildlog.write("<html><head><title>Safir SDK Core Build Log</title></head>\n")
         self.__buildlog.write("<body>\n")
-        self.__buildlog.write("<h1>Safir SDK Core Build Log for " + command_file + "</h1>")
+        self.__buildlog.write("<h1>Safir SDK Core Build Log</h1>")
         self.__buildlog.write("<b>Command line:</b> " + " ".join(sys.argv) + "<br/>")
         self.__buildlog.write("<b>Start time (local time)</b>: " + time.asctime() + "<br/>")
         self.__buildlog.write("<h2>Starting build</h2>\n")
@@ -266,79 +255,37 @@ def check_environment():
 
 
 def parse_command_line(builder):
-    from optparse import OptionParser
-    parser = OptionParser()
-    parser.add_option("--command-file", "-f",action="store",type="string",dest="command_file",
-                      help="The command to execute")
-    parser.add_option("--skip-list",action="store",type="string",dest="skip_list",
-                      help="A space-separated list of regular expressions of lines in the command file to skip")
-    parser.add_option("--clean", action="store_true",dest="clean",default=False,
-                      help="Run 'clean' before building each subsystem.")
-    parser.add_option("--force-config", action="store",type="string",dest="force_config",
-                      help="Build for the given config irrespective of what the command file says about config")
-    parser.add_option("--force-extra-config", action="store",type="string",dest="force_extra_config",
-                      help="Build for the given extra config irrespective of what the command " + 
-                      "file says about extra_config")    
-    parser.add_option("--jenkins", action="store_true",dest="jenkins",default=False,
-                      help="Set up and use environment variables for a Jenkins automated build." + 
-                      "Currently sets up SAFIR_RUNTIME, SAFIR_SDK, PATH, LD_LIBRARY_PATH and ADA_PROJECT_PATH " +
-                      "when needed, and honours the 'Config' matrix axis. Also implies --verbose.")
-    parser.add_option("--verbose", "-v", action="count",dest="verbose",default=0,
-                      help="Print more stuff about what is going on. Use twice to get very verbose output.")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--jenkins",
+                        action="store_true",
+                        default=False,
+                        help="Set up and use environment variables for a Jenkins automated build." +
+                             "TODO: what else does it do?")
 
-    if is_64_bit() and sys.platform == "win32":
-        parser.add_option("--32-bit",action="store_true",dest="build_32_bit",default=False,
-                          help="Build a 32 bit system even though this machine is 64 bit.")
+    parser.add_argument("--verbose", "-v",
+                        action="count",
+                        default=0,
+                        help="Print more stuff about what is going on. Use twice to get very verbose output.")
 
-    builder.setup_command_line_options(parser)
-    (options,args) = parser.parse_args()
+    builder.setup_command_line_arguments(parser)
+    arguments = parser.parse_args()
 
-    if options.jenkins:
-        options.verbose += 1
-    if options.verbose >= 2:
+    if arguments.jenkins:
+        arguments.verbose += 1
+    if arguments.verbose >= 2:
         os.environ["VERBOSE"] = "1"
 
-    if options.command_file is None:
-        die("You need to specify the command file to use")
-        
-    if not os.path.isfile(options.command_file):
-        die("The specified command file could not be found")
-    global command_file
-    command_file = codecs.open(options.command_file,mode='r', encoding="utf-8")
-
     global logger
-    logger = Logger("Brief" if options.verbose == 0 else "Verbose",
-                    options.command_file)
+    logger = Logger("Brief" if arguments.verbose == 0 else "Verbose")
 
-    if sys.platform == "win32":
-        if not is_64_bit():
-            options.build_32_bit = True
 
-        global target_architecture
-        target_architecture = "x86" if options.build_32_bit else "x86-64"
-
-    global skip_list
-    if (options.skip_list == None):
-        skip_list = list()
-    else:
-        skip_list = options.skip_list.split()
-        
-    global clean
-    clean = options.clean
-
-    global force_config
-    if options.force_config is not None:
-        force_config = options.force_config
-
-    global force_extra_config
-    if options.force_extra_config is not None:
-        force_extra_config = options.force_extra_config        
-
-    if options.jenkins:
+    if arguments.jenkins:
         builder.setenv_jenkins()
 
         config = os.environ.get("Config")
         if config is not None:
+            pass
+            """TODO!
             if force_config is not None or force_extra_config is not None:
                 die("Cannot combine force_config or force_extra_config with $Config!")
             if config == "Release":
@@ -350,15 +297,12 @@ def parse_command_line(builder):
                 force_extra_config = "None"
             else:
                 die("Unexpected 'Config' value: " + config + ", can handle 'Release' and 'DebugOnly'")
-    builder.handle_command_line_options(options)
-
-
-def find_sln():
-    sln_files = glob.glob("*.sln")
-    if (len(sln_files) != 1):
-        die("There is not exactly one sln file in " + os.getcwd() +
-            ", either cmake failed to generate one or there is another one coming from somewhere else!")
-    return sln_files[0]
+            """
+    msg = builder.handle_command_line_arguments(arguments)
+    if msg is not None:
+        print("Failed to parse command line:", msg)
+        parser.print_help()
+        sys.exit(1)
 
 class BuilderBase(object):
     def __init__(self):
@@ -378,14 +322,17 @@ class BuilderBase(object):
         self.total_tests = 0
         self.failed_tests = 0
 
-    def setup_command_line_options(self,parser):
+    def setup_command_line_arguments(self,parser):
         pass
 
     def setup_build_environment(self):
         pass
 
-    def handle_command_line_options(self,options):
+    def handle_command_line_arguments(self,arguments):
         pass
+
+    def get_configs(self):
+        raise Exception("Not implemented! This is an abstract method")
 
     def setenv_jenkins_internal(self):
         raise Exception("Not implemented! This is an abstract method")
@@ -399,14 +346,15 @@ class BuilderBase(object):
         #java path gets set by jenkins
 
         #set database from label environment variable
-        label = os.environ.get("label")
-        if label is not None:
-            os.environ["DATABASE_NAME"] = label.replace("-","")
+        #label = os.environ.get("label")
+        #if label is not None:
+        #    os.environ["DATABASE_NAME"] = label.replace("-","")
 
         #Call the platform specific setenv
         self.setenv_jenkins_internal()
 
-    def build(self, directory, configs, install, test):
+    def build(self, directory, install, test):
+        configs = self.get_configs()
         for config in configs:
             olddir = None
             if len(configs) > 1:
@@ -436,9 +384,6 @@ class BuilderBase(object):
         if install:
             command += ("--target", self.install_target)
         
-        if clean:
-            command += ("--clean-first",)
-
         command += self.target_specific_build_cmds()
 
         self.__run_command(command,
@@ -513,12 +458,38 @@ class VisualStudioBuilder(BuilderBase):
     def can_use():
         return sys.platform == "win32"
 
-    def setup_command_line_options(self,parser):
-        parser.add_option("--use-studio",action="store",type="string",dest="use_studio",
-                          help="The visual studio to use for building, can be '2010', '2012' or '2013'")
+    def setup_command_line_arguments(self,parser):
+        parser.add_argument("--use-studio",
+                            help="The visual studio to use for building, can be '2010', '2012' or '2013'")
+        if is_64_bit():
+            parser.add_argument("--32-bit",
+                                action="store_true",
+                                dest="build_32_bit",
+                                default=False,
+                                help="Build a 32 bit system even though this machine is 64 bit.")
+        parser.add_argument("--configs",
+                            default=("Debug", "RelWithDebInfo"),
+                            nargs='*',
+                            choices=known_configs,
+                            help="The configurations to build. Debug and RelWithDebInfo is the default.")
 
-    def handle_command_line_options(self,options):
-        self.use_studio = options.use_studio
+
+
+    def handle_command_line_arguments(self,arguments):
+        self.use_studio = arguments.use_studio
+
+        if self.use_studio not in ("2010", "2012", "2013"):
+            return "Invalid value for --use-studio"
+        
+        if not is_64_bit() or arguments.build_32_bit:
+            self.target_architecture = "x86"
+        else:
+            self.target_architecture = "x86-64"
+
+        self.configs = arguments.configs
+
+    def get_configs(self):
+        return self.configs
 
     def target_specific_build_cmds(self):
         if self.have_jom:
@@ -591,10 +562,10 @@ class VisualStudioBuilder(BuilderBase):
         wanted_variables = required_variables | optional_variables #union
 
         logger.log("Loading Visual Studio Environment","header")
-        output = self.__run_vcvarsall(vcvarsall, "x86" if target_architecture == "x86" else "amd64")
+        output = self.__run_vcvarsall(vcvarsall, "x86" if self.target_architecture == "x86" else "amd64")
 
         #retry with cross compilation toolset if we're on amd64 and vcvarsall says the toolset is missing
-        if target_architecture == "x86-64" and output.find("configuration might not be installed") != -1:
+        if self.target_architecture == "x86-64" and output.find("configuration might not be installed") != -1:
             logger.log("Native toolset appears to be missing, trying cross compilation")
             output = self.__run_vcvarsall(vcvarsall, "x86_amd64")
         
@@ -634,8 +605,19 @@ class UnixGccBuilder(BuilderBase):
     def can_use():
         return sys.platform.startswith("linux")
 
-    def filter_configs(self, configs):
-        return (configs[0],)
+    def setup_command_line_arguments(self,parser):
+        parser.add_argument("--config",
+                            default="RelWithDebInfo",
+                            choices=known_configs,
+                            help="The configuration to build. RelWithDebInfo is the default.")
+        
+
+
+    def handle_command_line_arguments(self,arguments):
+        self.config = arguments.config
+        
+    def get_configs(self):
+        return (self.config,)
 
     def target_specific_build_cmds(self):
         return (("--", "-j", str(self.num_jobs)))
@@ -644,43 +626,6 @@ class UnixGccBuilder(BuilderBase):
         #LD_LIBRARY_PATH = (os.environ.get("LD_LIBRARY_PATH") + ":") if os.environ.get("LD_LIBRARY_PATH") else ""
         #os.environ["LD_LIBRARY_PATH"] = LD_LIBRARY_PATH + os.path.join(os.environ.get("SAFIR_RUNTIME"),"lib")
         pass
-
-def in_skip_list(line):
-    "Check the argument against all regexps in the skip-list"
-    import re
-    for expr in skip_list:
-        p=re.compile(expr)
-        if p.search(line):
-            return True
-    return False
-
-
-def build_dir(directory, configs, builder, install = True):
-    if not os.path.isdir(directory):
-        die("Failed to enter " + directory + ", since it does not exist (or is not a directory)")
-    olddir = os.getcwd()
-    os.chdir(directory)
-    try:
-        if not os.path.isfile("CMakeLists.txt"):
-            die ("Couldn't find a CMakeLists.txt in " + directory + ".")
-        configs = builder.filter_configs(configs)
-        builder.build(directory, configs, install, test = False)
-    finally:
-        os.chdir(olddir)
-
-def build_tree(directory, configs, builder):
-    if not os.path.isdir(directory):
-        die("Failed to enter " + directory + ", since it does not exist (or is not a directory)")
-    olddir = os.getcwd()
-    os.chdir(directory)
-    try:
-        if not os.path.isfile("CMakeLists.txt"):
-            die ("Couldn't find a CMakeLists.txt in " + directory + ".")
-        #we want to build in reverse order on windows...
-        configs = builder.filter_configs(configs)[::-1] #reverse the list
-        builder.build(directory, configs, install = False, test = True)
-    finally:
-        os.chdir(olddir)
         
 def getText(nodelist):
     rc = []
@@ -728,16 +673,6 @@ def translate_results_to_junit(suite_name):
         junitfile.write("</testsuite>")
 
 
-def run_test_suite(directory, suite_name, builder):
-    olddir = os.getcwd()
-    os.chdir(directory)
-    try:
-        builder.test(directory)
-        translate_results_to_junit(suite_name)
-    finally:
-        os.chdir(olddir)
-
-
 def get_builder():
     if VisualStudioBuilder.can_use():
         return VisualStudioBuilder()
@@ -752,30 +687,12 @@ def main():
     check_environment()
     builder.setup_build_environment()
 
-    olddir = os.getcwd()
 
-    split_line = None
+    #split_line = None
 
-    for line in command_file:
-        if line[0] == '#' or line.strip() == "":
-            continue
 
-        last_line = split_line
-        split_line = line.split()
-        
-        if in_skip_list(line.strip()):
-            logger.log("- Skipping " + str(split_line) + ", matches skip-list","header")
-            continue
-                
-        command = split_line[0]
-
-        start_time = time.time()
-
-        if command == "build_dir" or command == "build_tree":
-            if len(split_line) > 1:
-                directory = split_line[1]
-
-            configs = list()
+    #TODO How to handle all this stuff?
+    """     configs = list()
             if len(split_line) > 2:
                 if (force_config != None):
                     configs.append(force_config)
@@ -792,28 +709,13 @@ def main():
                 die ("Unknown build kind '" + str(configs) + "' for " + directory)
             if len(configs) < 1:
                 die ("Need at least one config for " + directory)
-            logger.log("Building " + directory, "header")
-            if command == "build_dir":
-                build_dir(directory, configs, builder)
-            else:
-                build_tree(directory, configs, builder)
-        elif command == "run_test_suite":
-            if len(split_line) < 3:
-                die ("Need both a source directory and a test suite name")
-            if len(split_line) > 3:
-                die ("To many parameters for " + command)
-            directory = split_line[1]
-            suite_name = split_line[2]
-            logger.log("Building and running test suite " + suite_name + " in " + directory, "header")
-            cf = "RelWithDebInfo" if force_config is None else force_config
-            build_dir(directory, (cf,), builder, False) # build, but do not install
-            run_test_suite(directory, suite_name, builder)
-        else:
-            die("Got unknown command '" + command + "'")
+    """
+    #configs = ("RelWithDebInfo",) #temporary until above is sorted out
+    #logger.log("Building Safir SDK Core", "header")
 
-        logger.log("Build step took " + str(int(time.time() - start_time)) + " seconds", "detail")
-
-    os.chdir(olddir)
+    #we want to build in reverse order on windows...
+    #configs = builder.filter_configs(configs)[::-1] #reverse the list
+    builder.build(".", install = False, test = True)
 
     return (builder.total_tests, builder.failed_tests)
 
@@ -831,6 +733,7 @@ if hasattr(os,"nice"):
         logger.log("Failed to set process niceness: " + str(e))
 
 try:
+
     (tests, failed) = main()
     logger.log("Result", "header")
     logger.log("Build completed successfully!")
@@ -838,13 +741,13 @@ try:
         logger.log("All tests ran successfully!")
     else:
         logger.log(str(failed) + " tests failed out of " + str(tests) + ".","brief")
-    logger.close()
+    result = 0
 except FatalError as e:
     logger.log("Result", "header")
     logger.log("Build script failed:")
     logger.log(str(e), "output")
     logger.log(str(e), "brief")
-    logger.close()
-    sys.exit(1)
+    result = 1
 
-sys.exit(0)
+logger.close()
+sys.exit(result)

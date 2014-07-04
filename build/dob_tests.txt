@@ -1,4 +1,0 @@
-
-#python classes for test_support is needed by dose tests.
-#build_dir        src/tests/test_support                          RelWithDebInfo
-#build_dir        src/dose/dose_test.ss                           RelWithDebInfo
