@@ -379,7 +379,8 @@ class BuilderBase(object):
                    "-G", self.cmake_generator,
                    "-D", "CMAKE_BUILD_TYPE:string=" + config)
 
-        command += self.generator_specific_configure_cmds()
+        if self.stage:
+            command += ("-D", "CMAKE_INSTALL_PREFIX=" + self.stage)
 
         command += (srcdir,)
         self.__run_command(command,
@@ -392,17 +393,10 @@ class BuilderBase(object):
 
         command = [cmake(), "--build", "."]
 
-        suffix = self.generator_specific_build_cmds()
-
         if self.stage:
             command += ("--target", self.install_target)
 
-        if self.stage or suffix:
-            command += ("--",)
-        if self.stage:
-            command += ("DESTDIR=" + self.stage,)
-        if suffix:
-            command += suffix
+        command += ("--",) + self.generator_specific_build_cmds()
 
         self.__run_command(command,
                            "Build " + config, directory)
@@ -507,9 +501,6 @@ class VisualStudioBuilder(BuilderBase):
             return ("/nologo", "/j", str(self.num_jobs))
         else:
             return ("/nologo",)
-
-    def generator_specific_configure_cmds(self):
-        return ()
 
     def filter_configs(self, configs):
         return configs
@@ -635,10 +626,6 @@ class UnixGccBuilder(BuilderBase):
 
     def generator_specific_build_cmds(self):
         return ( "-j", str(self.num_jobs))
-
-    def generator_specific_configure_cmds(self):
-        return ("-D", "CMAKE_INSTALL_PREFIX=/usr")
-
 
     def setenv_jenkins_internal(self):
         #LD_LIBRARY_PATH = (os.environ.get("LD_LIBRARY_PATH") + ":") if os.environ.get("LD_LIBRARY_PATH") else ""
