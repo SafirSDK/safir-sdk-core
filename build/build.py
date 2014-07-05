@@ -334,8 +334,7 @@ class BuilderBase(object):
 
         self.stage = os.path.join(os.getcwd(),"stage") if arguments.stage else None
         if self.stage and os.path.exists(self.stage):
-            print( "The staging directory (" + self.stage + ") already exists, please remove it and try again")
-            sys.exit(1)
+            print( "Warning: The staging directory (" + self.stage + ") already exists!")
 
 
         return self.handle_command_line_arguments_internal(arguments)
