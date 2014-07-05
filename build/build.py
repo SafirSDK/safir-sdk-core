@@ -394,7 +394,7 @@ class BuilderBase(object):
         command += ("--",) + self.generator_specific_build_cmds()
 
         if self.stage is not None:
-            command += "DESTDIR=" + self.stage
+            command += ("DESTDIR=" + self.stage,)
         
         self.__run_command(command,
                            "Build " + config, directory)
