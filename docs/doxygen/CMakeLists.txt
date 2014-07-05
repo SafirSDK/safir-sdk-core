@@ -29,5 +29,5 @@ set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES html)
 
 add_dependencies(Doxygen safir_generated-Core-cpp)
 
-INSTALL(DIRECTORY html
+INSTALL(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
   DESTINATION ${SAFIR_INSTALL_DESTINATION_DOC})
