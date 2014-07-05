@@ -315,6 +315,8 @@ class BuilderBase(object):
         self.total_tests = 0
         self.failed_tests = 0
 
+        self.install_prefix = None #derived classes can override
+
     def setup_build_environment(self):
         pass
 
@@ -372,8 +374,8 @@ class BuilderBase(object):
                    "-G", self.cmake_generator,
                    "-D", "CMAKE_BUILD_TYPE:string=" + config)
 
-        if self.stage:
-            command += ("-D", "CMAKE_INSTALL_PREFIX=" + self.stage)
+        if self.install_prefix is not None:
+            command += ("-D", "CMAKE_INSTALL_PREFIX=" + self.install_prefix)
 
         command += (srcdir,)
         self.__run_command(command,
@@ -391,6 +393,9 @@ class BuilderBase(object):
 
         command += ("--",) + self.generator_specific_build_cmds()
 
+        if self.stage is not None:
+            command += "DESTDIR=" + self.stage
+        
         self.__run_command(command,
                            "Build " + config, directory)
         if not self.skip_tests:
@@ -598,6 +603,7 @@ class UnixGccBuilder(BuilderBase):
 
         self.install_target = "install"
         self.cmake_generator = "Unix Makefiles"
+        self.install_prefix = "/usr"
 
     @staticmethod
     def can_use():
