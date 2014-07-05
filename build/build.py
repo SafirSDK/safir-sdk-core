@@ -333,9 +333,6 @@ class BuilderBase(object):
         self.skip_tests = arguments.skip_tests
 
         self.stage = os.path.join(os.getcwd(),"stage") if arguments.stage else None
-        if self.stage and os.path.exists(self.stage):
-            print( "Warning: The staging directory (" + self.stage + ") already exists!")
-
 
         return self.handle_command_line_arguments_internal(arguments)
 
@@ -360,18 +357,14 @@ class BuilderBase(object):
 
     def build(self, directory):
         for config in self.configs:
-            olddir = None
-            if len(self.configs) > 1:
-                olddir = os.getcwd()
-                mkdir(config)
-                os.chdir(config)
+            olddir = os.getcwd()
+            mkdir(config)
+            os.chdir(config)
 
             self.__build_internal(directory,
                                   os.pardir if olddir else ".",
                                   config)
-
-            if olddir is not None:
-                os.chdir(olddir)
+            os.chdir(olddir)
 
     def __configure(self, directory, srcdir, config):
 
