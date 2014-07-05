@@ -9,6 +9,8 @@ if (ENV{VERBOSE})
   set(CMAKE_DOXYGEN_QUIET "NO")
 else()
   set(CMAKE_DOXYGEN_QUIET "YES")
+endif()
+
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
 
 FILE(GLOB_RECURSE headers ${safir_sdk_core_SOURCE_DIR}/include/*.h)
