@@ -17,8 +17,8 @@ INSTALL_CSHARP_ASSEMBLY(TARGET sate
 if(UNIX)
   configure_file(run_sate.sh.in "${CMAKE_CURRENT_BINARY_DIR}/run_sate.sh" @ONLY)
 
-  install(PROGRAMS run_sate.sh
+  install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/run_sate.sh
     DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
-    RENAME ${CMAKE_CURRENT_BINARY_DIR}/sate)
+    RENAME sate)
 endif()
 
