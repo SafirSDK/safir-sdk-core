@@ -158,8 +158,8 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
   FIND_PACKAGE(PythonInterp)
   
   if (SAFIR_EXTERNAL_BUILD)
-    set(dots_v_path "${SAFIR_SDK_CORE_INSTALL_DIR}/bin/dots_v.py")
-    set(dod_directory "${SAFIR_SDK_CORE_INSTALL_DIR}/share/safir_sdk_core/generation/dod/")
+    set(dots_v_path "${SAFIR_SDK_CORE_EXECUTABLES_DIR/dots_v.py")
+    set(dod_directory "${SAFIR_SDK_CORE_GENERATION_DIR}/dod/")
   else()
     set(dots_v_path "${safir_sdk_core_SOURCE_DIR}/src/dots/dots_v.ss/dots_v.py")
     set(dod_directory "${safir_sdk_core_SOURCE_DIR}/src/dots/dots_v.ss/data/")
@@ -202,8 +202,8 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
   if (SAFIR_EXTERNAL_BUILD)
     target_include_directories(safir_generated-${GEN_NAME}-cpp
       PRIVATE 
-      ${SAFIR_SDK_CORE_INSTALL_DIR}/share/safir_sdk_core/generation/cpp
-      ${SAFIR_SDK_CORE_INSTALL_DIR}/include)
+      ${SAFIR_SDK_CORE_GENERATION_DIR}/cpp
+      ${SAFIR_SDK_CORE_INCLUDE_DIRS})
   else()
     target_include_directories(safir_generated-${GEN_NAME}-cpp
       PRIVATE ${safir_sdk_core_SOURCE_DIR}/src/dots/dots_v.ss/data)
@@ -240,7 +240,7 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
     ENDFOREACH()
 
     if (SAFIR_EXTERNAL_BUILD)
-      set (manifest_path ${SAFIR_SDK_CORE_INSTALL_DIR}/share/safir_sdk_core/generation/java/Manifest.txt.in)
+      set (manifest_path ${SAFIR_SDK_CORE_GENERATION_DIR}/java/Manifest.txt.in)
     else()
       set (manifest_path ${safir_sdk_core_SOURCE_DIR}/src/dots/dots_v.ss/data/Manifest.txt.in)
     endif()
@@ -270,8 +270,8 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
     endforeach()
 
     if (SAFIR_EXTERNAL_BUILD)
-      set (snk_path ${SAFIR_SDK_CORE_INSTALL_DIR}/share/safir_sdk_core/generation/dotnet/dots_generated-dotnet.snk)
-      set (lib_path_arg LIBRARY_PATHS ${SAFIR_SDK_CORE_INSTALL_DIR}/lib/safir_sdk_core)
+      set (snk_path ${SAFIR_SDK_CORE_GENERATION_DIR}/dotnet/dots_generated-dotnet.snk)
+      set (lib_path_arg LIBRARY_PATHS ${SAFIR_SDK_CORE_CSHARP_LIBRARY_PATH})
     else()
       set (snk_path ${safir_sdk_core_SOURCE_DIR}/src/dots/dots_v.ss/data/dots_generated-dotnet.snk)
     endif()
