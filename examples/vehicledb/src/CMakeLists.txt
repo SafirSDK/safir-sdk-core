@@ -1,1 +1,1 @@
-ADD_SUBDIRECTORY(VehicleDatabaseCpp)
+ADD_SUBDIRECTORY(cpp)
