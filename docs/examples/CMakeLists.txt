@@ -5,6 +5,8 @@ INSTALL(
 
   DESTINATION ${SAFIR_INSTALL_DESTINATION_DOC}/examples/
   
+  COMPONENT Development
+  
   FILES_MATCHING
   PATTERN "*.dou"
   PATTERN "*.dom"

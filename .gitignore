@@ -11,7 +11,7 @@
 cmake_install.cmake
 CTestTestfile.cmake
 CMakeLists.txt.user
-install_manifest.txt
+install_manifest*.txt
 CMakeFiles
 *.rsp
 CMakeCache.txt

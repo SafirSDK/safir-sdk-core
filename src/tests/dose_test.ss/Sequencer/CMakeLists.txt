@@ -14,4 +14,4 @@ TARGET_LINK_LIBRARIES(dose_test_sequencer PRIVATE
   ${Boost_PROGRAM_OPTIONS_LIBRARY}
   ${Boost_TIMER_LIBRARY})
 
-SAFIR_INSTALL(TARGETS dose_test_sequencer)
+SAFIR_INSTALL(TARGETS dose_test_sequencer TEST_SUITE)

@@ -58,27 +58,34 @@ endif()
 # ENDMACRO()
 
 function (SAFIR_INSTALL) 
-  cmake_parse_arguments(INST "" "" "TARGETS" ${ARGN})
+  cmake_parse_arguments(INST "TEST_SUITE" "" "TARGETS" ${ARGN})
 
   if (NOT "${INST_UNPARSED_ARGUMENTS}" STREQUAL "")
     message(FATAL_ERROR "Unknown argument to SAFIR_INSTALL '${INST_UNPARSED_ARGUMENTS}'")
   endif()
 
     
-  if (INST_TARGETS)
-    foreach (target ${INST_TARGETS})
-      get_target_property(target_type ${target} TYPE)
-      if ("${target_type}" STREQUAL "SHARED_LIBRARY")
-        set(export EXPORT SafirSDKCore)
-      endif()
+  foreach (target ${INST_TARGETS})
+    get_target_property(target_type ${target} TYPE)
+    if ("${target_type}" STREQUAL "SHARED_LIBRARY")
+      set(export EXPORT SafirSDKCore)
+    endif()
 
+    #if the target is parto of the test suite we use the Test component
+    if (INST_TEST_SUITE)
       INSTALL(TARGETS ${target}
         ${export}
-        RUNTIME DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
-        LIBRARY DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB}
-        ARCHIVE DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB})
-    endforeach()
-  endif()
+        RUNTIME DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN} COMPONENT Test
+        LIBRARY DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT Test
+        ARCHIVE DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT Test)
+    else()
+      INSTALL(TARGETS ${target}
+        ${export}
+        RUNTIME DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN} COMPONENT Runtime
+        LIBRARY DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT Runtime
+        ARCHIVE DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT Development)
+    endif()
+  endforeach()
 
   #TODO debug info
 endfunction()
@@ -243,9 +250,11 @@ INSTALL(FILES
   "${CMAKE_CURRENT_BINARY_DIR}/config/typesystem.ini"
   config/locations.ini
   config/logging.ini
-  DESTINATION ${SAFIR_INSTALL_DESTINATION_DOC}/example_configuration)
+  DESTINATION ${SAFIR_INSTALL_DESTINATION_DOC}/example_configuration
+  COMPONENT Runtime)
 
-INSTALL(EXPORT SafirSDKCore DESTINATION ${SAFIR_INSTALL_DESTINATION_CMAKE})
+INSTALL(EXPORT SafirSDKCore DESTINATION ${SAFIR_INSTALL_DESTINATION_CMAKE}
+  COMPONENT Development)
 
 configure_file(cmake/SafirSDKCoreConfig.cmake.in
   "${CMAKE_CURRENT_BINARY_DIR}/cmake/SafirSDKCoreConfig.cmake" @ONLY)
@@ -258,7 +267,8 @@ INSTALL(FILES
   cmake/FindCSharp.cmake
   cmake/SafirLoadJava.cmake
   "${CMAKE_CURRENT_BINARY_DIR}/cmake/SafirSDKCoreConfig.cmake"
-  DESTINATION ${SAFIR_INSTALL_DESTINATION_CMAKE})
+  DESTINATION ${SAFIR_INSTALL_DESTINATION_CMAKE}
+  COMPONENT Development)
 
 
 

@@ -13,4 +13,4 @@ add_dependencies(dose_test_util_java_jni dose_test_util_java_javah)
 
 TARGET_LINK_LIBRARIES(dose_test_util_java_jni PRIVATE dose_test_util)
 
-SAFIR_INSTALL(TARGETS dose_test_util_java_jni)
+SAFIR_INSTALL(TARGETS dose_test_util_java_jni TEST_SUITE)
