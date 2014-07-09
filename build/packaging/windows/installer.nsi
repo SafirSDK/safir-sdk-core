@@ -19,7 +19,13 @@
   !define StageDirTest "..\..\..\stage\Test\Program Files\safir_sdk_core"
 
   ;Default installation folder
-  InstallDir "$PROGRAMFILES\Safir SDK Core"
+  !if ${ARCH} == "x86"
+    InstallDir "$PROGRAMFILES32\Safir SDK Core"
+  !else if ${ARCH} == "x86-64"
+    InstallDir "$PROGRAMFILES64\Safir SDK Core"
+  !else
+    !error "ARCH needs to be defined on command line to be either x86 or x86-64"
+  !endif
 
   ;Get installation folder from registry if available
   InstallDirRegKey HKCU "Software\Safir SDK Core" ""

@@ -368,6 +368,10 @@ class BuilderBase(object):
                                   config)
             os.chdir(olddir)
 
+        if self.stage:
+            logger.log("Building installation package", "brief")
+            self.stage_package()
+
     def __configure(self, directory, srcdir, config):
 
         command = (cmake(),
@@ -378,7 +382,7 @@ class BuilderBase(object):
             command += ("-D", "CMAKE_INSTALL_PREFIX=" + self.install_prefix)
 
         command += (srcdir,)
-        self.__run_command(command,
+        self._run_command(command,
                            "Configure for " + config + " build", directory)
 
     def __build_internal(self, directory, srcdir, config):
@@ -391,7 +395,7 @@ class BuilderBase(object):
                    "--") + self.generator_specific_build_cmds()
 
         
-        self.__run_command(command,
+        self._run_command(command,
                            "Build " + config, directory)
         if not self.skip_tests:
             logger.log("   + testing", "brief")
@@ -401,7 +405,7 @@ class BuilderBase(object):
         if self.stage:
             logger.log("   + installing to staging area", "brief")
             self.stage_install(directory)
-            
+
     def stage_install(self, directory):
         for component in ("Runtime", "Development", "Test"):
             command = (cmake(),
@@ -409,22 +413,24 @@ class BuilderBase(object):
                     "-P", "cmake_install.cmake")
             env = os.environ.copy()
             env["DESTDIR"] = os.path.join(self.stage,component)
-            self.__run_command(command,
+            self._run_command(command,
                                "Staged install " + component, directory, env = env)
-            
+    def stage_package(self):
+        Logger.log("Packaging not implemented on this builder","brief")
+
     def test(self, directory):
         """run ctest in a directory"""
         if not os.path.isfile("DartConfiguration.tcl"):
             dummyfile = open("DartConfiguration.tcl","w")
             dummyfile.close()
 
-        output = self.__run_command((ctest(),
+        output = self._run_command((ctest(),
                                      "-T", "Test", "--output-on-failure"),
                                     "Test", directory, allow_fail = True)
         self.interpret_test_output(output)
 
 
-    def __run_command(self, cmd, description, what, allow_fail = False, env = None):
+    def _run_command(self, cmd, description, what, allow_fail = False, env = None):
         """Run a command"""
 
         logger.log(description + " " + what, "command_description")
@@ -601,6 +607,12 @@ class VisualStudioBuilder(BuilderBase):
 
         if len(required_variables - found_variables) != 0:
             die("Failed to find all expected variables in vcvarsall.bat")
+
+    def stage_package(self):
+        command = ("makensis",
+                   "/DARCH="+self.target_architecture,
+                   os.path.join("build","packaging","windows","installer.nsi"))
+        self._run_command(command, "Packaging ", "TODO")
 
 class UnixGccBuilder(BuilderBase):
     def __init__(self):
