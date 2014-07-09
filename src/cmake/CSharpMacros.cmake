@@ -145,7 +145,7 @@ endfunction()
 
 
 function(INSTALL_CSHARP_ASSEMBLY)
-    cmake_parse_arguments(_cs "" "TARGET;DESTINATION" "" ${ARGN})
+    cmake_parse_arguments(_cs "TEST_SUITE" "TARGET;DESTINATION" "" ${ARGN})
     
     if (NOT "${_cs_UNPARSED_ARGUMENTS}" STREQUAL "")
       message(FATAL_ERROR "Unknown argument to INSTALL_CSHARP_ASSEMBLY '${_cs_UNPARSED_ARGUMENTS}'")
@@ -168,16 +168,31 @@ function(INSTALL_CSHARP_ASSEMBLY)
     get_property(_cs_DOC_FILE TARGET ${_cs_TARGET} PROPERTY DOC_FILE)
     get_property(_cs_DEBUG_INFO_FILE TARGET ${_cs_TARGET} PROPERTY DEBUG_INFO_FILE)
 
-    if ("${_cs_TARGET_KIND}" STREQUAL "library")
-      install(FILES ${_cs_ASSEMBLY_FILE} ${_cs_DOC_FILE} ${_cs_DEBUG_INFO_FILE}
-        DESTINATION ${_cs_DESTINATION})
+    if (_cs_TEST_SUITE)
+      set(_cs_COMPONENT_RUNTIME Test)
+      set(_cs_COMPONENT_DEVELOPMENT Test)
     else()
-      install(FILES ${_cs_DEBUG_INFO_FILE}
-        DESTINATION ${_cs_DESTINATION})
-
-      install(PROGRAMS ${_cs_ASSEMBLY_FILE}
-        DESTINATION ${_cs_DESTINATION})
+      set(_cs_COMPONENT_RUNTIME Runtime)
+      set(_cs_COMPONENT_DEVELOPMENT Development)
     endif()
+
+    if (_cs_TARGET_KIND STREQUAL "library")
+      install(FILES ${_cs_ASSEMBLY_FILE}
+        DESTINATION ${_cs_DESTINATION}
+        COMPONENT ${_cs_COMPONENT_RUNTIME})
+
+      install(FILES ${_cs_DOC_FILE}
+        DESTINATION ${_cs_DESTINATION}
+        COMPONENT ${_cs_COMPONENT_DEVELOPMENT})
+    else()
+      install(PROGRAMS ${_cs_ASSEMBLY_FILE}
+        DESTINATION ${_cs_DESTINATION}
+        COMPONENT ${_cs_COMPONENT_RUNTIME})
+    endif()
+
+    install(FILES ${_cs_DEBUG_INFO_FILE}
+      DESTINATION ${_cs_DESTINATION}
+      COMPONENT ${_cs_COMPONENT_DEVELOPMENT})
 
 
 endfunction()

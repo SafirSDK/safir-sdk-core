@@ -5,7 +5,7 @@ ADD_JAR(douf_java
   INCLUDE_JARS safir_generated-Core-java dots_java
   MANIFEST ${CMAKE_CURRENT_SOURCE_DIR}/Manifest.txt)
 
-INSTALL_JAR(douf_java ${SAFIR_INSTALL_DESTINATION_JAR})
+SAFIR_INSTALL(TARGETS douf_java)
 
 SAFIR_JAVAH(JAR douf_java 
   CLASS com.saabgroup.safir.time.Library

@@ -67,6 +67,52 @@ function (SAFIR_INSTALL)
     
   foreach (target ${INST_TARGETS})
     get_target_property(target_type ${target} TYPE)
+    #UTILITY means that it is a dotnet or java target, probably
+    if (target_type STREQUAL "UTILITY")
+      ################ Dotnet ####################
+      get_target_property(assembly_file ${target} ASSEMBLY_FILE)
+      if (assembly_file)
+        if (INST_TEST_SUITE)
+          set (TEST_SUITE "TEST_SUITE")
+        else()
+          unset (TEST_SUITE)
+        endif()
+
+        get_property(ASSEMBLY_KIND TARGET ${target} PROPERTY TARGET_KIND)
+        if (ASSEMBLY_KIND STREQUAL "library")
+          set(destination ${SAFIR_INSTALL_DESTINATION_CSHARP_DLL})
+        else()
+          set(destination ${SAFIR_INSTALL_DESTINATION_BIN})
+        endif()
+
+        INSTALL_CSHARP_ASSEMBLY(TARGET ${target}
+          DESTINATION ${destination}
+          ${TEST_SUITE})
+        return()
+      endif()
+
+      #################### Java ########################
+      get_target_property(jar_file ${target} JAR_FILE)
+      if (jar_file)
+        if (INST_TEST_SUITE)
+          set (component Test)
+        else()
+          set (component Runtime)
+        endif()
+
+        get_target_property(install_files ${target} INSTALL_FILES)
+        
+        if (install_files)
+          INSTALL(FILES ${install_files} 
+            DESTINATION ${SAFIR_INSTALL_DESTINATION_JAR}
+            COMPONENT ${component})
+        endif()        
+        return()
+      endif()
+      message(FATAL_ERROR "The target ${target} does not appear to be either a java or dotnte target, cannot use SAFIR_INSTALL.")
+    endif()
+
+    ############### C/C++ ####################
     if ("${target_type}" STREQUAL "SHARED_LIBRARY")
       set(export EXPORT SafirSDKCore)
     endif()

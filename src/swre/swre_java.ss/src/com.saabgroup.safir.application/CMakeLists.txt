@@ -10,7 +10,7 @@ ADD_JAR(swre_application_java
   logging_java
   MANIFEST ${CMAKE_CURRENT_SOURCE_DIR}/Manifest.txt)
 
-INSTALL_JAR(swre_application_java ${SAFIR_INSTALL_DESTINATION_JAR})
+SAFIR_INSTALL(TARGETS swre_application_java)
 
 SAFIR_JAVAH(JAR swre_application_java
   CLASS com.saabgroup.safir.application.Library

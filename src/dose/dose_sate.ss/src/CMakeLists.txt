@@ -11,8 +11,7 @@ ADD_CSHARP_ASSEMBLY(sate WINEXE
   RESOURCES PREFIX Sate. ${resx_files}
   REFERENCES Safir.Dob safir_generated-Core-dotnet Safir.Dob.Typesystem System.Windows.Forms System.Drawing System.Data)
 
-INSTALL_CSHARP_ASSEMBLY(TARGET sate
-  DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN})
+SAFIR_INSTALL(TARGETS sate)
 
 if(UNIX)
   configure_file(run_sate.sh.in "${CMAKE_CURRENT_BINARY_DIR}/run_sate.sh" @ONLY)

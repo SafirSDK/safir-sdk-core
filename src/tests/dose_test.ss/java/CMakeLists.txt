@@ -19,4 +19,4 @@ ADD_JAR(dose_test_java
   MANIFEST ${CMAKE_CURRENT_SOURCE_DIR}/Manifest.txt)
 
 
-INSTALL_JAR(dose_test_java ${SAFIR_INSTALL_DESTINATION_JAR})
+SAFIR_INSTALL(TARGETS dose_test_java)

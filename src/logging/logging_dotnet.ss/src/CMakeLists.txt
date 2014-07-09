@@ -8,6 +8,4 @@ ADD_CSHARP_ASSEMBLY(Safir.Logging LIBRARY
 
 add_dependencies(Safir.Logging logging_library)
 
-INSTALL_CSHARP_ASSEMBLY(TARGET Safir.Logging
-  DESTINATION ${SAFIR_INSTALL_DESTINATION_CSHARP_DLL})
-
+SAFIR_INSTALL(TARGETS Safir.Logging)

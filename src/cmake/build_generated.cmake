@@ -296,36 +296,49 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
   #
   if (NOT GEN_NO_INSTALL AND NOT SAFIR_EXTERNAL_BUILD)
     if (GEN_TEST_SUITE)
-      INSTALL(TARGETS safir_generated-${GEN_NAME}-cpp
-        EXPORT SafirSDKCore
-        RUNTIME DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN} COMPONENT Test
-        LIBRARY DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT Test
-        ARCHIVE DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT Test)
+      set (component_runtime Test)
+      set (component_development Test)
     else()
-      INSTALL(TARGETS safir_generated-${GEN_NAME}-cpp
-        EXPORT SafirSDKCore
-        RUNTIME DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN} COMPONENT Runtime
-        LIBRARY DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT Runtime
-        ARCHIVE DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT Development)
+      set (component_runtime Runtime)
+      set (component_development Development)
     endif()
+
+    INSTALL(TARGETS safir_generated-${GEN_NAME}-cpp
+      EXPORT SafirSDKCore
+      RUNTIME DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN} COMPONENT ${component_runtime}
+      LIBRARY DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT ${component_runtime}
+      ARCHIVE DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT ${component_development})
 
     INSTALL(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated_code/cpp/include/ 
       DESTINATION ${SAFIR_INSTALL_DESTINATION_INCLUDE}
-      COMPONENT Development
+      COMPONENT ${component_development}
       PATTERN ".svn" EXCLUDE
       PATTERN "*~" EXCLUDE)
     
     INSTALL(FILES ${dou_files} ${dom_files} ${namespace_files}
       DESTINATION ${SAFIR_INSTALL_DESTINATION_DOU_BASE}/${GEN_NAME}
-      COMPONENT Runtime)
+      COMPONENT ${component_runtime})
 
+    #TODO: components!
     if (Java_FOUND)
-      install_jar(safir_generated-${GEN_NAME}-java ${SAFIR_INSTALL_DESTINATION_JAR})
+        get_target_property(install_files safir_generated-${GEN_NAME}-java INSTALL_FILES)
+        
+        if (install_files)
+          INSTALL(FILES ${install_files} 
+            DESTINATION ${SAFIR_INSTALL_DESTINATION_JAR}
+            COMPONENT ${component_runtime})
+        endif()        
     endif()
 
     if (CSHARP_FOUND)
+      if (GEN_TEST_SUITE)
+        set (TEST_SUITE "TEST_SUITE")
+      else()
+        unset (TEST_SUITE)
+      endif()
       INSTALL_CSHARP_ASSEMBLY(TARGET safir_generated-${GEN_NAME}-dotnet
-        DESTINATION ${SAFIR_INSTALL_DESTINATION_CSHARP_DLL})
+        DESTINATION ${SAFIR_INSTALL_DESTINATION_CSHARP_DLL}
+        ${TEST_SUITE})
     endif()
 
   endif()
