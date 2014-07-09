@@ -386,15 +386,10 @@ class BuilderBase(object):
 
         self.__configure(directory, srcdir, config)
 
-        command = [cmake(), "--build", "."]
+        command = (cmake(),
+                   "--build", ".",
+                   "--") + self.generator_specific_build_cmds()
 
-        if self.stage:
-            command += ("--target", self.install_target)
-
-        command += ("--",) + self.generator_specific_build_cmds()
-
-        if self.stage is not None:
-            command += ("DESTDIR=" + self.stage,)
         
         self.__run_command(command,
                            "Build " + config, directory)
@@ -403,6 +398,20 @@ class BuilderBase(object):
             self.test(directory)
             translate_results_to_junit(config)
 
+        if self.stage:
+            logger.log("   + installing to staging area", "brief")
+            self.stage_install(directory)
+            
+    def stage_install(self, directory):
+        for component in ("Runtime", "Development", "Test"):
+            command = (cmake(),
+                    "-DCOMPONENT="+ component,
+                    "-P", "cmake_install.cmake")
+            env = os.environ.copy()
+            env["DESTDIR"] = os.path.join(self.stage,component)
+            self.__run_command(command,
+                               "Staged install " + component, directory, env = env)
+            
     def test(self, directory):
         """run ctest in a directory"""
         if not os.path.isfile("DartConfiguration.tcl"):
@@ -415,13 +424,13 @@ class BuilderBase(object):
         self.interpret_test_output(output)
 
 
-    def __run_command(self, cmd, description, what, allow_fail = False):
+    def __run_command(self, cmd, description, what, allow_fail = False, env = None):
         """Run a command"""
 
         logger.log(description + " " + what, "command_description")
         logger.log(" ".join(cmd), "command")
 
-        process = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        process = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env = env)
         output = logger.log_output(process)
         if process.returncode != 0:
             if not allow_fail:
