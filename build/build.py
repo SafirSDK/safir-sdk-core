@@ -416,7 +416,7 @@ class BuilderBase(object):
             self._run_command(command,
                                "Staged install " + component, directory, env = env)
     def stage_package(self):
-        Logger.log("Packaging not implemented on this builder","brief")
+        logger.log(" ! Packaging not implemented in this builder !","brief")
 
     def test(self, directory):
         """run ctest in a directory"""
