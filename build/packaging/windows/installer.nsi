@@ -32,7 +32,7 @@
 
   ;Name and file
   Name "Safir SDK Core"
-  OutFile "SafirSDKCore-VS$STUDIO-$nameBitwidth$debugonly.exe"
+  OutFile "SafirSDKCore-VS${STUDIO}-${nameBitwidth}${debugonly}.exe"
 
   ;Source directories created by build script
   !define StageDirRuntime "..\..\..\stage\Runtime\Program Files\safir_sdk_core"
