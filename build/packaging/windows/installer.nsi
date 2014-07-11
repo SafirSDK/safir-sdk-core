@@ -25,10 +25,14 @@
     !error "STUDIO needs to be defined on command line. Expected to be 2010 or 2012 etc"
   !endif
 
+  ;Check for debugonly
+  !ifdef DEBUGONLY
+    !define debugonly "-DebugOnly"
+  !endif
 
   ;Name and file
   Name "Safir SDK Core"
-  OutFile "SafirSDKCore-VS$STUDIO-$nameBitwidth.exe"
+  OutFile "SafirSDKCore-VS$STUDIO-$nameBitwidth$debugonly.exe"
 
   ;Source directories created by build script
   !define StageDirRuntime "..\..\..\stage\Runtime\Program Files\safir_sdk_core"

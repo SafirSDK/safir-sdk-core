@@ -327,11 +327,13 @@ class BuilderBase(object):
     def handle_command_line_arguments(self,arguments):
         self.configs = arguments.configs
 
+        self.debug_only = False
         if arguments.jenkins:
             if os.environ.get("Config") == "DebugOnly":
                 logger.log("Using Config 'DebugOnly', building everything in Debug only.")
                 self.configs = ("Debug",)
-
+                self.debug_only = True
+                
         self.skip_tests = arguments.skip_tests
 
         self.stage = os.path.join(os.getcwd(),"stage") if arguments.stage else None
@@ -611,8 +613,13 @@ class VisualStudioBuilder(BuilderBase):
     def stage_package(self):
         command = ("makensis",
                    "/DARCH=" + self.target_architecture,
-                   "/DSTUDIO=" + self.used_studio,
-                   os.path.join("build","packaging","windows","installer.nsi"))
+                   "/DSTUDIO=" + self.used_studio)
+
+        if self.debug_only:
+            command += ("/DDEBUGONLY",)
+
+        command += (os.path.join("build","packaging","windows","installer.nsi"),)
+        
         self._run_command(command, "Packaging ", "TODO")
 
 class UnixGccBuilder(BuilderBase):
