@@ -610,7 +610,8 @@ class VisualStudioBuilder(BuilderBase):
 
     def stage_package(self):
         command = ("makensis",
-                   "/DARCH="+self.target_architecture,
+                   "/DARCH=" + self.target_architecture,
+                   "/DSTUDIO=" + self.used_studio,
                    os.path.join("build","packaging","windows","installer.nsi"))
         self._run_command(command, "Packaging ", "TODO")
 

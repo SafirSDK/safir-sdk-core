@@ -9,23 +9,32 @@
 ;--------------------------------
 ;General
 
+  ;Check architecture and set default installation folder
+  !if ${ARCH} == "x86"
+    InstallDir "$PROGRAMFILES32\Safir SDK Core"
+    !define nameBitwidth "32bit"
+  !else if ${ARCH} == "x86-64"
+    InstallDir "$PROGRAMFILES64\Safir SDK Core"
+    !define nameBitwidth "64bit"
+  !else
+    !error "ARCH needs to be defined on command line to be either x86 or x86-64"
+  !endif
+
+  ;Check studio version
+  !ifndef STUDIO
+    !error "STUDIO needs to be defined on command line. Expected to be 2010 or 2012 etc"
+  !endif
+
+
   ;Name and file
   Name "Safir SDK Core"
-  OutFile "SafirSDKCore.exe"
+  OutFile "SafirSDKCore-VS$STUDIO-$nameBitwidth.exe"
 
   ;Source directories created by build script
   !define StageDirRuntime "..\..\..\stage\Runtime\Program Files\safir_sdk_core"
   !define StageDirDevelopment "..\..\..\stage\Development\Program Files\safir_sdk_core"
   !define StageDirTest "..\..\..\stage\Test\Program Files\safir_sdk_core"
 
-  ;Default installation folder
-  !if ${ARCH} == "x86"
-    InstallDir "$PROGRAMFILES32\Safir SDK Core"
-  !else if ${ARCH} == "x86-64"
-    InstallDir "$PROGRAMFILES64\Safir SDK Core"
-  !else
-    !error "ARCH needs to be defined on command line to be either x86 or x86-64"
-  !endif
 
   ;Get installation folder from registry if available
   InstallDirRegKey HKCU "Software\Safir SDK Core" ""
