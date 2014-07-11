@@ -535,22 +535,28 @@ class VisualStudioBuilder(BuilderBase):
         pass
 
     def __find_vcvarsall(self):
-        install_dirs = set(["VS120COMNTOOLS","VS110COMNTOOLS","VS100COMNTOOLS"])
-        #we use set intersections so that we double check that the variable
-        #names are the same in both places...
-        if self.use_studio == "2010":
-            install_dirs &= set(["VS100COMNTOOLS",]) #keep only vs2010 dir
-        elif self.use_studio == "2012":
-            install_dirs &= set(["VS110COMNTOOLS",]) #keep only vs2012 dir
-        elif self.use_studio == "2013":
-            install_dirs &= set(["VS120COMNTOOLS",]) #keep only vs2013 dir
+        install_dirs = {"VS120COMNTOOLS" : "2013",
+                        "VS110COMNTOOLS" : "2012",
+                        "VS100COMNTOOLS" : "2010"}
+        
+        print "Install dirs:", install_dirs
+        if self.use_studio is not None:
+            found = False
+            for dir, ver in install_dirs.iteritems():
+                if self.use_studio == ver:
+                    install_dirs = {dir : ver}
+                    found = True
+                    break
+            if not found:
+                die("The version of visual studio that you asked for is not supported.")
 
         if len(install_dirs) < 1:
             die("Internal error in __find_vcvarsall(...)")
 
-        for install_dir in install_dirs:
+        for install_dir, version in install_dirs.iteritems():
             env = os.environ.get(install_dir)
             if env is not None:
+                self.used_studio = version
                 break
         if env is None:
             die ("Failed to find Visual Studio install dir, checked the following environment variables: " + str(install_dirs))
