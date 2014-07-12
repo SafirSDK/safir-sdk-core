@@ -539,10 +539,11 @@ class VisualStudioBuilder(BuilderBase):
         install_dirs = {"VS120COMNTOOLS" : "2013",
                         "VS110COMNTOOLS" : "2012",
                         "VS100COMNTOOLS" : "2010"}
-        
+
+        # If use_studio is specified we change the list to only contain that vs.
         if self.use_studio is not None:
             found = False
-            for dir, ver in install_dirs.iteritems():
+            for dir, ver in install_dirs.items():
                 if self.use_studio == ver:
                     install_dirs = {dir : ver}
                     found = True
@@ -553,7 +554,7 @@ class VisualStudioBuilder(BuilderBase):
         if len(install_dirs) < 1:
             die("Internal error in __find_vcvarsall(...)")
 
-        for install_dir, version in install_dirs.iteritems():
+        for install_dir, version in install_dirs.items():
             env = os.environ.get(install_dir)
             if env is not None:
                 self.used_studio = version
