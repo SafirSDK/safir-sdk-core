@@ -289,6 +289,9 @@ add_subdirectory(dope)
 
 add_subdirectory(tests)
 
+
+add_subdirectory(util)
+
 configure_file(config/typesystem.ini.in
   "${CMAKE_CURRENT_BINARY_DIR}/config/typesystem.ini" @ONLY)
 
