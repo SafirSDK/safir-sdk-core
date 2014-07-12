@@ -1,10 +1,25 @@
-;Safir SDK Core installer script
+﻿;Safir SDK Core installer script
 ;Written by Lars Hagström
 
 ;--------------------------------
-;Include Modern UI
 
-  !include "MUI2.nsh"
+;Include Modern UI
+!include "MUI2.nsh"
+
+;Set a compressor that gives us very good ratios
+SetCompressor /SOLID lzma
+
+;--------------------------------
+;Check windows version
+
+!include WinVer.nsh
+ 
+Function .onInit
+  ${IfNot} ${AtLeastWin7}
+    MessageBox MB_OK "Windows 7 or above required"
+    Quit
+  ${EndIf}
+FunctionEnd
 
 ;--------------------------------
 ;General
@@ -27,14 +42,14 @@
 
   ;Check for debugonly
   !ifdef DEBUGONLY
-    !define debugonly "-DebugOnly"
+    !define debugonlyStr "-DebugOnly"
   !else
-    !define debugonly ""
+    !define debugonlyStr ""
   !endif
 
   ;Name and file
   Name "Safir SDK Core"
-  OutFile "SafirSDKCore-VS${STUDIO}-${nameBitwidth}${debugonly}.exe"
+  OutFile "SafirSDKCore-VS${STUDIO}-${nameBitwidth}${debugonlyStr}.exe"
 
   ;Source directories created by build script
   !define StageDirRuntime "..\..\..\stage\Runtime\Program Files\safir_sdk_core"
@@ -48,7 +63,6 @@
   ;Request application privileges for Windows Vista
   RequestExecutionLevel admin
 
-  SetCompressor /SOLID lzma
 ;--------------------------------
 ;Interface Settings
 
