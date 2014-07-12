@@ -28,6 +28,8 @@
   ;Check for debugonly
   !ifdef DEBUGONLY
     !define debugonly "-DebugOnly"
+  !else
+    !define debugonly ""
   !endif
 
   ;Name and file

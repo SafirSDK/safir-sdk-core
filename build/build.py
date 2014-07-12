@@ -23,6 +23,7 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
+from __future__ import print_function
 import os, glob, sys, subprocess, platform, xml.dom.minidom, re, time, shutil, argparse
 import locale, codecs
 from xml.sax.saxutils import escape
@@ -539,7 +540,6 @@ class VisualStudioBuilder(BuilderBase):
                         "VS110COMNTOOLS" : "2012",
                         "VS100COMNTOOLS" : "2010"}
         
-        print "Install dirs:", install_dirs
         if self.use_studio is not None:
             found = False
             for dir, ver in install_dirs.iteritems():
