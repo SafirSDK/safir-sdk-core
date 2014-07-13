@@ -6,6 +6,9 @@
 ;Include Modern UI
 !include "MUI2.nsh"
 
+;Include nsExec plugin for calling cmdline exes
+;!include "nsExec.nsh"
+
 ;Set a compressor that gives us very good ratios
 SetCompressor /SOLID lzma
 
@@ -98,9 +101,29 @@ Section "Runtime" SecRuntime
 
   File /r "${StageDirRuntime}\*"
 
+  ;TODO configuration - ini files
+  ;TODO Boost embed
+  ;TODO Qt embed
+  ;TODO embed more?
+
+  ;Add to PATH
+  nsExec::ExecToLog '"$INSTDIR\installer_utils\pathed" "/MACHINE" "/APPEND" "$INSTDIR/bin"'
+
   ;Store installation folder
   WriteRegStr HKCU "Software\Safir SDK Core" "" $INSTDIR
 
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Safir SDK Core" \
+                   "DisplayName" "Safir SDK Core"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Safir SDK Core" \
+                   "Publisher" "Saab AB"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Safir SDK Core" \
+                   "NoModify" "1"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Safir SDK Core" \
+                   "NoRepair" "1"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Safir SDK Core" \
+                   "UninstallString" "$\"$INSTDIR\Uninstall.exe$\""
+  ;TODO: show version!
+   
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
 
@@ -144,8 +167,12 @@ Section "Uninstall"
 
   Delete "$INSTDIR\Uninstall.exe"
 
+  ;remove from PATH
+  nsExec::ExecToStack '"$INSTDIR\installer_utils\pathed" "/MACHINE" "/REMOVE" "$INSTDIR/bin"'
+
   RMDir /r "$INSTDIR"
 
   DeleteRegKey /ifempty HKCU "Software\Safir SDK Core"
+  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Safir SDK Core"
 
 SectionEnd
