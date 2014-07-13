@@ -5,8 +5,8 @@ using System.Text;
 using System.IO;
 using System.Security;
 
-namespace pathed
-{
+//namespace pathed
+//{
     /// <summary>
     /// This program allows you to view and modify the PATH environment.
     /// </summary>
@@ -41,15 +41,15 @@ namespace pathed
         private void Run(string[] args)
         {
             Console.OutputEncoding = Encoding.GetEncoding(Encoding.Default.CodePage);
-            Args = new InputArgs("pathed", string.Format(resource.IDS_TITLE, AppVersion.Get()) + "\r\n" + resource.IDS_COPYRIGHT);
+            Args = new InputArgs("pathed", string.Format("Version {0}", AppVersion.Get()) + "\r\nFreeware written by Gerson Kurz (http://p-nand-q.com)");
 
-            Args.Add(InputArgType.Flag, "machine", false, Presence.Optional, resource.IDS_CMD_machine_doc);
-            Args.Add(InputArgType.Flag, "user", false, Presence.Optional, resource.IDS_CMD_user_doc);
-            Args.Add(InputArgType.ExistingDirectory, "add", "", Presence.Optional, resource.IDS_CMD_add_doc);
-            Args.Add(InputArgType.ExistingDirectory, "append", "", Presence.Optional, resource.IDS_CMD_append_doc);
-            Args.Add(InputArgType.StringList, "remove", null, Presence.Optional, resource.IDS_CMD_remove_doc);
-            Args.Add(InputArgType.Flag, "slim", false, Presence.Optional, resource.IDS_CMD_slim_doc);
-            Args.Add(InputArgType.Parameter, "env", "PATH", Presence.Optional, resource.IDS_CMD_env_doc);
+            Args.Add(InputArgType.Flag, "machine", false, Presence.Optional, "print machine PATH");
+            Args.Add(InputArgType.Flag, "user", false, Presence.Optional, "print user PATH");
+            Args.Add(InputArgType.ExistingDirectory, "add", "", Presence.Optional, "add variable at the head");
+            Args.Add(InputArgType.ExistingDirectory, "append", "", Presence.Optional, "add variable at the tail");
+            Args.Add(InputArgType.StringList, "remove", null, Presence.Optional, "remove path / index");
+            Args.Add(InputArgType.Flag, "slim", false, Presence.Optional, "strip duplicate vars");
+            Args.Add(InputArgType.Parameter, "env", "PATH", Presence.Optional, "environment variable, defaults to PATH");
 
             if (Args.Process(args))
             {
@@ -83,7 +83,7 @@ namespace pathed
                     if (EnvironmentVariableTarget == EnvironmentVariableTarget.Machine)
                     {
                         Console.WriteLine(ex.Message);
-                        Console.WriteLine(resource.IDS_ERR_access_denied);
+                        Console.WriteLine("ERROR, cannot manipulate the machine environment variables, aborting.");
                         return;
                     }
                     else throw;
@@ -214,7 +214,7 @@ namespace pathed
             string PathVariable = Environment.GetEnvironmentVariable(EnvironmentVariableName, EnvironmentVariableTarget);
             if (PathVariable == null)
             {
-                Console.WriteLine(resource.IDS_ERR_variable_does_not_exist, EnvironmentVariableName);
+                Console.WriteLine("ERROR, variable '{0}' does not exist.", EnvironmentVariableName);
             }
             else
             {
@@ -226,11 +226,11 @@ namespace pathed
                         continue;
                     if (!Directory.Exists(token))
                     {
-                        Console.WriteLine(resource.IDS_RESULT_invalid, index, token);
+                        Console.WriteLine("{0:00} {1} [INVALID]", index, token);
                     }
                     else
                     {
-                        Console.WriteLine(resource.IDS_RESULT_valid, index, token);
+                        Console.WriteLine("{0:00} {1}", index, token);
                     }
 
                     ++index;
@@ -243,4 +243,4 @@ namespace pathed
             new pathed().Run(args);           
         }
     }
-}
+//}
