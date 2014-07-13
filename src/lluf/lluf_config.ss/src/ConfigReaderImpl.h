@@ -71,7 +71,7 @@ namespace Internal
             
             throw std::logic_error("Failed to load configuration.\n"
                                    "Looked in '" 
-                                   + dir1.str() + "', '" 
+                                   + dir1.empty() ? "" : (dir1.str() + "', '")
                                    + dir2.str() + "', '" 
                                    + dir3.str() + "'");
         }
