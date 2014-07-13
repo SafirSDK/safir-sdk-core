@@ -106,7 +106,7 @@ using System.Security;
                 string PathVariable = Environment.GetEnvironmentVariable(EnvironmentVariableName, evt);
                 if (PathVariable != null)
                 {
-                    string[] tokens = PathVariable.Split(';');
+                    string[] tokens = PathVariable.Split(Path.PathSeparator);
                     foreach (string token in tokens)
                     {
                         if (Directory.Exists(token))
@@ -145,7 +145,7 @@ using System.Security;
             string PathVariable = Environment.GetEnvironmentVariable(EnvironmentVariableName, EnvironmentVariableTarget);
             if (PathVariable != null)
             {
-                string[] tokens = PathVariable.Split(';');
+                string[] tokens = PathVariable.Split(Path.PathSeparator);
 
                 foreach (string remove_this_item in items)
                 {
@@ -218,7 +218,7 @@ using System.Security;
             }
             else
             {
-                string[] tokens = PathVariable.Split(';');
+                string[] tokens = PathVariable.Split(Path.PathSeparator);
                 int index = 0;
                 foreach (string token in tokens)
                 {
