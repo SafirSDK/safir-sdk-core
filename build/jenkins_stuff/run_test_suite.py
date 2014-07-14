@@ -24,6 +24,18 @@
 #
 ###############################################################################
 from __future__ import print_function
+import os, glob, sys
 
 print("Hello, World!")
 
+print (os.listdir("."))
+
+installer = glob.glob("SafirSDKCore*.exe")
+
+if len(installer) != 1:
+    print("Unexpected number of installers:", installer)
+    sys.exit(1)
+
+installer = installer[0]
+
+print ("Will run installer", installer)
