@@ -80,8 +80,8 @@ try:
     if proc.returncode != 0:
         print ("safir_show_config failed")
         returncode = 1
-    except:
-        pass
+except:
+    pass
 
 try:
     print("attempt 3")
