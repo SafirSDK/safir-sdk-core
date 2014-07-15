@@ -59,14 +59,20 @@ result = subprocess.call((installer, "/S"))
 
 print ("Install result:", result)
 
-result = 0
+returncode = 0
 
 print(os.listdir(installpath))
 if len(os.listdir(installpath)) < 2:
-    result = 1
-    
+    returncode = 1
+
+
+result = subprocess.call("safir_show_config")
+if result != 0:
+    print ("safir_show_config failed")
+    returncode = 1
+
 if not uninstall(installpath):
     print("Uninstall failed")
-    result = 1
+    returncode = 1
 
-sys.exit(result)
+sys.exit(returncode)
