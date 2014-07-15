@@ -71,8 +71,8 @@ try:
     if result != 0:
         print ("safir_show_config failed")
         returncode = 1
-except:
-    pass
+except Exception as e:
+    print("Exception:", e)
 
 try:
     print("attempt 2")
@@ -80,8 +80,8 @@ try:
     if proc.returncode != 0:
         print ("safir_show_config failed")
         returncode = 1
-except:
-    pass
+except Exception as e:
+    print("Exception:", e)
 
 try:
     print("attempt 3")
@@ -89,8 +89,9 @@ try:
     if proc.returncode != 0:
         print ("safir_show_config failed")
         returncode = 1
-except:
-    pass
+except Exception as e:
+    print("Exception:", e)
+
 
 if not uninstall(installpath):
     print("Uninstall failed")
