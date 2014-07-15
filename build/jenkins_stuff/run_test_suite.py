@@ -26,7 +26,23 @@
 from __future__ import print_function
 import os, glob, sys, subprocess
 
+
+def uninstall():
+    path = os.path.join(os.environ["ProgramFiles"],"Safir SDK Core", "Uninstall.exe")
+    if not os.path.isfile(path):
+        print ("Couldn't find uninstaller")
+        return False
+    result = subprocess.call((path, "/S"))
+    print ("Uninstall result:", result)
+    return True
+    
 print (os.listdir("."))
+
+if sys.platform != "win32":
+    print ("Only windows is supported so far")
+    sys.exit(0)
+
+uninstall()
 
 installer = glob.glob("SafirSDKCore*.exe")
 
@@ -40,4 +56,10 @@ print ("Will run installer", installer)
 
 result = subprocess.call((installer, "/S"))
 
-print ("Result:", result)
+print ("Install result:", result)
+
+if not uninstall():
+    print("Uninstall failed")
+    sys.exit(1)
+
+sys.exit(0)
