@@ -24,9 +24,7 @@
 #
 ###############################################################################
 from __future__ import print_function
-import os, glob, sys
-
-print("Hello, World!")
+import os, glob, sys, subprocess
 
 print (os.listdir("."))
 
@@ -39,3 +37,7 @@ if len(installer) != 1:
 installer = installer[0]
 
 print ("Will run installer", installer)
+
+result = subprocess.call((installer, "/S"))
+
+print ("Result:", result)
