@@ -65,32 +65,28 @@ print(os.listdir(installpath))
 if len(os.listdir(installpath)) < 2:
     returncode = 1
 
-try:
-    print("attempt 1")
-    result = subprocess.call("safir_show_config")
-    if result != 0:
-        print ("safir_show_config failed")
-        returncode = 1
-except Exception as e:
-    print("Exception:", e)
+pathed = os.path.join(installpath,"installer_utils","pathed")
 
-try:
-    print("attempt 2")
-    proc = subprocess.Popen(("safir_show_config",),creationflags = subprocess.CREATE_NEW_PROCESS_GROUP).communicate()
-    if proc.returncode != 0:
-        print ("safir_show_config failed")
-        returncode = 1
-except Exception as e:
-    print("Exception:", e)
+result = subprocess.call((pathed,))
 
-try:
-    print("attempt 3")
-    proc = subprocess.Popen(("safir_show_config",),creationflags = subprocess.CREATE_NEW_CONSOLE).communicate()
-    if proc.returncode != 0:
-        print ("safir_show_config failed")
-        returncode = 1
-except Exception as e:
-    print("Exception:", e)
+
+# try:
+#     print("attempt 2")
+#     proc = subprocess.Popen(("safir_show_config",),creationflags = subprocess.CREATE_NEW_PROCESS_GROUP).communicate()
+#     if proc.returncode != 0:
+#         print ("safir_show_config failed")
+#         returncode = 1
+# except Exception as e:
+#     print("Exception:", e)
+
+# try:
+#     print("attempt 3")
+#     proc = subprocess.Popen(("safir_show_config",),creationflags = subprocess.CREATE_NEW_CONSOLE).communicate()
+#     if proc.returncode != 0:
+#         print ("safir_show_config failed")
+#         returncode = 1
+# except Exception as e:
+#     print("Exception:", e)
 
 
 if not uninstall(installpath):
