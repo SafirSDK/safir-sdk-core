@@ -74,7 +74,8 @@ class WindowsInstaller(object):
 
         proc = subprocess.Popen((pathed,"/machine"),
                                 stdout = subprocess.PIPE,
-                                stderr = subprocess.STDOUT)
+                                stderr = subprocess.STDOUT,
+                                universal_newlines = True)
 
         output = proc.communicate()[0]
         binpath = os.path.join(self.installpath,"bin")
