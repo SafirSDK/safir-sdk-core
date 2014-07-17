@@ -107,13 +107,15 @@ Section "Runtime" SecRuntime
   ;TODO embed more?
 
   ;Add to PATH
-  nsExec::ExecToLog '"$INSTDIR\installer_utils\pathed" "/MACHINE" "/APPEND" "$INSTDIR/bin"'
+  nsExec::ExecToLog '"$INSTDIR\installer_utils\pathed" "/MACHINE" "/APPEND" "$INSTDIR\bin"'
 
   ;Store installation folder
   WriteRegStr HKCU "Software\Safir SDK Core" "" $INSTDIR
 
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Safir SDK Core" \
                    "DisplayName" "Safir SDK Core"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Safir SDK Core" \
+                   "ProductID" "Safir SDK Core"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Safir SDK Core" \
                    "Publisher" "Saab AB"
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Safir SDK Core" \
