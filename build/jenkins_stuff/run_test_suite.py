@@ -26,75 +26,86 @@
 from __future__ import print_function
 import os, glob, sys, subprocess
 
+class SetupError(Exception):
+    pass
 
-def uninstall(installpath):
-    path = os.path.join(installpath, "Uninstall.exe")
-    if not os.path.isfile(path):
-        print ("Couldn't find uninstaller")
-        return False
-    result = subprocess.call((path, "/S"))
-    print ("Uninstall result:", result)
-    return True
-    
-print (os.listdir("."))
+class WindowsInstaller(object):
+    def __init__(self):
+        self.installpath = os.path.join(os.environ["ProgramFiles"],"Safir SDK Core")
+        self.uninstaller = os.path.join(self.installpath, "Uninstall.exe")
+        
+    def uninstall(self, quiet = False):
+        if not os.path.isfile(self.uninstaller):
+            if quiet:
+                return
+            else:
+                raise SetupError("No uninstaller found!")
+        print("Running uninstall.exe")
+        result = subprocess.call((self.uninstaller, "/S"))
+        if result != 0:
+            raise SetupError("Uninstaller failed (" + str(result) + ")!")
 
-if sys.platform != "win32":
-    print ("Only windows is supported so far")
-    sys.exit(0)
+    def install(self):
+        installer = glob.glob("SafirSDKCore*.exe")
 
-installpath = os.path.join(os.environ["ProgramFiles"],"Safir SDK Core")
-uninstall(installpath)
+        if len(installer) != 1:
+            raise SetupError("Unexpected number of installers: "+ str(installer))
 
-installer = glob.glob("SafirSDKCore*.exe")
+        installer = installer[0]
 
-if len(installer) != 1:
-    print("Unexpected number of installers:", installer)
-    sys.exit(1)
+        print ("Running installer:", installer)
 
-installer = installer[0]
+        result = subprocess.call((installer, "/S"))
 
-print ("Will run installer", installer)
+        if result != 0:
+            raise SetupError("Installer failed (" + str(result) + ")!")
 
-result = subprocess.call((installer, "/S"))
+    def check_installation(self):
+        if not os.path.isdir(self.installpath):
+            raise SetupError("Installation directory does not exist!")
+        listdir = os.listdir(self.installpath)
+        if len(listdir) < 2:
+            raise SetupError("Unexpected number of directories in installation directory: " + str(listdir))
+        if all (dir in listdir for k in ("bin", "installer_utils", "include", "lib")):
+            raise SetupError("Could not find some expected directory in installation directory: " + str(listdir))
 
-print ("Install result:", result)
+        #Check that bin directory is in path
+        pathed = os.path.join(self.installpath,"installer_utils","pathed")
 
-returncode = 0
+        proc = subprocess.Popen((pathed,"/machine"),
+                                stdout = subprocess.PIPE,
+                                stderr = subprocess.STDOUT)
 
-print(os.listdir(installpath))
-if len(os.listdir(installpath)) < 2:
-    returncode = 1
+        output = proc.communicate()[0]
+        binpath = os.path.join(self.installpath,"bin")
+        if output.find(binpath) == -1:
+            raise SetupError("bin directory does not appear to have been added to PATH:\n" + output)
+        if os.environ["PATH"].find(binpath) != -1:
+            raise SetupError("bin directory seems to have been added to PATH before installation!:\n" + os.environ["PATH"])
+        os.environ["PATH"] += ";" + binpath
 
-pathed = os.path.join(installpath,"installer_utils","pathed")
+        if subprocess.call(("safir_show_config","--logging")) != 0:
+            raise SetupError("Failed to run safir_show_config")
 
-proc = subprocess.Popen((pathed,),
-                        stdout = subprocess.PIPE,
-                        stderr = subprocess.STDOUT)
+def main():
+    if sys.platform != "win32":
+        print ("Only windows is supported so far")
+        sys.exit(0)
 
-output = proc.communicate()[0]
-print (output)
+    installer = WindowsInstaller()
 
-# try:
-#     print("attempt 2")
-#     proc = subprocess.Popen(("safir_show_config",),creationflags = subprocess.CREATE_NEW_PROCESS_GROUP).communicate()
-#     if proc.returncode != 0:
-#         print ("safir_show_config failed")
-#         returncode = 1
-# except Exception as e:
-#     print("Exception:", e)
+    try:
+        installer.uninstall(quiet = True)
 
-# try:
-#     print("attempt 3")
-#     proc = subprocess.Popen(("safir_show_config",),creationflags = subprocess.CREATE_NEW_CONSOLE).communicate()
-#     if proc.returncode != 0:
-#         print ("safir_show_config failed")
-#         returncode = 1
-# except Exception as e:
-#     print("Exception:", e)
+        installer.install()
+        installer.check_installation()
+        
+    except SetupError as e:
+        print ("Error: " + str(e))
+        return 1
+    finally:
+        installer.uninstall()
+        pass
+    return 0
 
-
-if not uninstall(installpath):
-    print("Uninstall failed")
-    returncode = 1
-
-sys.exit(returncode)
+sys.exit(main())
