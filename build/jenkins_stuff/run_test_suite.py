@@ -67,8 +67,12 @@ if len(os.listdir(installpath)) < 2:
 
 pathed = os.path.join(installpath,"installer_utils","pathed")
 
-result = subprocess.call((pathed,))
+proc = subprocess.Popen((pathed,),
+                        stdout = subprocess.PIPE,
+                        stderr = subprocess.STDOUT)
 
+output = proc.communicate()[0]
+print (output)
 
 # try:
 #     print("attempt 2")
