@@ -105,7 +105,6 @@ Section "Runtime" SecRuntime
   SetOutPath "$APPDATA\safir_sdk_core\config"
   File "${StageDirRuntime}\docs\example_configuration\*.ini"
 
-  ;TODO configuration - ini files
   ;TODO Boost embed
   ;TODO Qt embed
   ;TODO embed more?
@@ -178,14 +177,14 @@ Section "Uninstall"
   Delete "$INSTDIR\Uninstall.exe"
 
   ;remove from PATH
-  nsExec::ExecToStack '"$INSTDIR\installer_utils\pathed" "/MACHINE" "/REMOVE" "$INSTDIR/bin"'
+  nsExec::ExecToStack '"$INSTDIR\installer_utils\pathed" "/MACHINE" "/REMOVE" "$INSTDIR\bin"'
 
   RMDir /r "$INSTDIR"
 
   SetShellVarContext all
   RMDir /r "$APPDATA\safir_sdk_core"
 
-  DeleteRegKey /ifempty HKCU "Software\Safir SDK Core"
+  DeleteRegKey HKCU "Software\Safir SDK Core"
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Safir SDK Core"
 
 SectionEnd
