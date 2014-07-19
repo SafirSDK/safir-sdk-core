@@ -174,11 +174,12 @@ SectionEnd
 
 Section "Uninstall"
 
-  Delete "$INSTDIR\Uninstall.exe"
-
   ;remove from PATH
-  nsExec::ExecToStack '"$INSTDIR\installer_utils\pathed" "/MACHINE" "/REMOVE" "$INSTDIR\bin"'
+  nsExec::ExecToLog '"$INSTDIR\installer_utils\pathed" "/MACHINE" "/REMOVE" "$INSTDIR\bin"'
 
+  ; We blindly remove everything from the installation dir. This might blow up if someone decides to 
+  ; install to a path with other stuff in it, e.g. C:\ (yes, we'd try to remove everything from c:\...).
+  ; TODO: better way?
   RMDir /r "$INSTDIR"
 
   SetShellVarContext all
