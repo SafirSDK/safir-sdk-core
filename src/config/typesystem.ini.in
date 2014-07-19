@@ -4,8 +4,11 @@
 ;Number of megabytes of shared memory that will be allocated by dots kernel.
 dots_shared_memory_size=10
 
+;Default directory to look for dou files in. Can be overridden in each section.
 default_dou_directory=@CMAKE_INSTALL_PREFIX@/@SAFIR_INSTALL_DESTINATION_DOU_BASE@
 
 [Core]
+;This section contains the information needed to load the safir_generated-Core-xxx libraries and its dou files.
+;This section just uses the defaults.
 kind=library
 
