@@ -291,16 +291,7 @@ add_subdirectory(tests)
 
 
 add_subdirectory(util)
-
-configure_file(config/typesystem.ini.in
-  "${CMAKE_CURRENT_BINARY_DIR}/config/typesystem.ini" @ONLY)
-
-INSTALL(FILES 
-  "${CMAKE_CURRENT_BINARY_DIR}/config/typesystem.ini"
-  config/locations.ini
-  config/logging.ini
-  DESTINATION ${SAFIR_INSTALL_DESTINATION_DOC}/example_configuration
-  COMPONENT Runtime)
+add_subdirectory(config)
 
 INSTALL(EXPORT SafirSDKCore DESTINATION ${SAFIR_INSTALL_DESTINATION_CMAKE}
   COMPONENT Development)
