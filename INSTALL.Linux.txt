@@ -28,22 +28,28 @@ To install these from the command line "in one go" on distributions based on Ubu
    sudo apt-get install qt5-default mono-devel unixodbc-dev cmake g++ default-jdk doxygen graphviz make python-tk autoconf build-essential subversion gnat libboost-all-dev
 
 1.2. Centos/RHEL
-Safir SDK Core is only compatible with 7.0 or later of Centos/RHEL (unless you install a custom Boost of version 1.50 or later), and at the time of this writing RHEL 7 is in Beta. These instructions have been created while using that beta, so they may not end up being 100% correct with the final product. If in doubt, please contact us at http://safir.sourceforge.net.
+Safir SDK Core is only compatible with 7.0 or later of Centos/RHEL (unless you install a custom Boost of version 1.50 or later).
 
-#1.2.1. Add EPEL repository
+1.2.1. Add EPEL repository
 Mono, the C#/.Net environment for Linux is not part of the default repositories, so you need to add EPEL to your list of repositories. Follow the instructions on http://fedoraproject.org/wiki/EPEL.
 
 1.2.2. Install packages
 sudo yum install cmake boost-devel gcc-c++ doxygen graphviz make gcc-gnat libgnat-static tkinter java-1.7.0-openjdk-devel qt-devel libiodbc-devel m4 autoconf subversion mono-devel
 
 1.2.3. Set up Mono binfmt_misc
-You may need to perform this step to be able to run C# executables directly, like "program.exe" instead of "mono program.exe":
+You will need to perform this step to be able to run C# executables directly, like "program.exe" instead of "mono program.exe". If you do not do this the build script will indicate a number of failed tests.
 
-Add "echo ':CLR:M::MZ::/usr/bin/mono:' > /proc/sys/fs/binfmt_misc/register" to the end of /etc/rc.local
+Put the following in /etc/binfmt/mono.conf:
+-------------
+#Start mono on C#/CLR executables
+:CLR:M::MZ::/usr/bin/mono:
+-------------
+
+Reboot or restart the systemd-binfmt service.
 
 2. Patch Boost
 
-Some Boost versions have bugs that we need to patch to be able to run correctly. Our build script attempts to detect whether patches need to be installed, so if you want to you can skip this step until the build script tells you that you need to install patches.
+Some Boost versions have bugs that we need to patch to be able to run correctly. Our build script attempts to detect whether patches need to be installed, so if you want to you can skip this step until the build script tells you that you need to install patches. In fact, neither Ubuntu 14.04 or RHEL/Centos 7 require patching.
 
 Go into the build/patches directory in the Safir SDK Core source code tree and run "cmake ." followed by a "sudo make install" which will cause the files to be installed into the correct places.
 
