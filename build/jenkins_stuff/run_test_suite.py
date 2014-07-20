@@ -88,7 +88,7 @@ class WindowsInstaller(object):
         proc = subprocess.Popen(("safir_show_config","--locations", "--typesystem", "--logging"),
                                 stdout = subprocess.PIPE,
                                 stderr = subprocess.STDOUT,
-                                universal_newlines = true)
+                                universal_newlines = True)
         output = proc.communicate()[0]
         if proc.returncode != 0:
             raise SetupError("Failed to run safir_show_config. returncode = " + str(proc.returncode) + "\nOutput:\n" + output)
