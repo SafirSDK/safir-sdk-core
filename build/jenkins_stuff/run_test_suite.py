@@ -85,8 +85,13 @@ class WindowsInstaller(object):
             raise SetupError("bin directory seems to have been added to PATH before installation!:\n" + os.environ["PATH"])
         os.environ["PATH"] += ";" + binpath
 
-        if subprocess.call(("safir_show_config","--locations", "--typesystem", "--logging")) != 0:
-            raise SetupError("Failed to run safir_show_config")
+        proc = subprocess.Popen(("safir_show_config","--locations", "--typesystem", "--logging"),
+                                stdout = subprocess.PIPE,
+                                stderr = subprocess.STDOUT,
+                                universal_newlines = true)
+        output = proc.communicate()[0]
+        if proc.returncode != 0:
+            raise SetupError("Failed to run safir_show_config. returncode = " + str(proc.returncode) + "\nOutput:\n" + output)
 
 def main():
     if sys.platform != "win32":
