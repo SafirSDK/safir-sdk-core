@@ -93,7 +93,7 @@ If you run into trouble building VehicleMmiCppQt you may need to install Qt4 ("l
 If you have built the SDK on one machine and just want to run it on another without installing all the development tools you need to install some libraries and runtimes to get it to run.
 
 5.1 Ubuntu
-Run "sudo apt-get install libboost-.*1.48.0 libgnat-4.6 default-jre-headless libmono-corlib2.0-cil libmono-system2.0-cil"
+Run "sudo apt-get install "libboost-.*1.54.0$" libgnat-4.6 default-jre-headless libmono-corlib2.0-cil libmono-system2.0-cil"
 
 5.2 Centos/RHEL
 Add the EPEL repository, as outlined above.
