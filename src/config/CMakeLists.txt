@@ -2,10 +2,12 @@ if (UNIX)
   set(DEFAULT_LOCK_FILE_DIRECTORY /var/run/safir_sdk_core/locks/)
   set(DEFAULT_CRASH_DUMP_DIRECTORY /var/run/safir_sdk_core/dump/)
   set(DEFAULT_LOG_DIRECTORY /var/log/safir_sdk_core/)
+  set(DEFAULT_DOU_DIRECTORY "${CMAKE_INSTALL_PREFIX}/${SAFIR_INSTALL_DESTINATION_DOU_BASE}")
 else()
   set(DEFAULT_LOCK_FILE_DIRECTORY @{CSIDL_COMMON_APPDATA}/safir_sdk_core/locks/)
   set(DEFAULT_CRASH_DUMP_DIRECTORY @{CSIDL_COMMON_APPDATA}/safir_sdk_core/dump/)
   set(DEFAULT_LOG_DIRECTORY @{CSIDL_COMMON_APPDATA}/safir_sdk_core/log)
+  set(DEFAULT_DOU_DIRECTORY "C:/Program Files/Safir SDK Core/${SAFIR_INSTALL_DESTINATION_DOU_BASE}")
 endif()
 
 configure_file(typesystem.ini.in

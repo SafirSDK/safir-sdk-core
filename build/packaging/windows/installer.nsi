@@ -9,8 +9,11 @@
 ;Include nsExec plugin for calling cmdline exes
 ;!include "nsExec.nsh"
 
+;Include logic operations
+!include 'LogicLib.nsh'
+
 ;Set a compressor that gives us very good ratios
-SetCompressor /SOLID lzma
+SetCompressor lzma
 
 ;--------------------------------
 ;Check windows version
@@ -22,6 +25,10 @@ Function .onInit
     MessageBox MB_OK "Windows 7 or above required"
     Quit
   ${EndIf}
+  
+  
+  Var /GLOBAL BoostAll
+  StrCpy $BoostAll "1" ; Development installation is enabled by default, so we want all of boost.
 FunctionEnd
 
 ;--------------------------------
@@ -31,9 +38,11 @@ FunctionEnd
   !if ${ARCH} == "x86"
     InstallDir "$PROGRAMFILES32\Safir SDK Core"
     !define nameBitwidth "32bit"
+	!define boostLibDirPattern "lib32-msvc-*"
   !else if ${ARCH} == "x86-64"
     InstallDir "$PROGRAMFILES64\Safir SDK Core"
     !define nameBitwidth "64bit"
+	!define boostLibDirPattern "lib64-msvc-*"
   !else
     !error "ARCH needs to be defined on command line to be either x86 or x86-64"
   !endif
@@ -65,7 +74,8 @@ FunctionEnd
 
   ;Request application privileges for Windows Vista
   RequestExecutionLevel admin
-
+  
+  
 ;--------------------------------
 ;Interface Settings
 
@@ -91,6 +101,7 @@ FunctionEnd
 
   !insertmacro MUI_LANGUAGE "English"
 
+
 ;--------------------------------
 ;Installer Sections
 
@@ -105,6 +116,36 @@ Section "Runtime" SecRuntime
   SetOutPath "$APPDATA\safir_sdk_core\config"
   File "${StageDirRuntime}\docs\example_configuration\*.ini"
 
+  
+  ;Install Boost (The installer is expected to be at c:\boost-installer\boost.exe)
+  SetOutPath "$INSTDIR"
+  
+  SetCompress off ; Dont compress the boost installer
+  File "c:\boost-installer\boost.exe"
+  SetCompress auto
+  DetailPrint "Starting Boost installation"
+  nsExec::ExecToStack '"$INSTDIR\boost.exe" "/SILENT" "/DIR=$INSTDIR\boostdir" "/LOG"'
+  Pop $0
+  ${If} $0 != "0"
+    MessageBox MB_OK "Boost installer failed!"
+	Abort
+  ${EndIf}
+  
+  Var /GLOBAL BoostLibDir
+  FindFirst $0 $BoostLibDir "$INSTDIR\boostdir\${boostLibDirPattern}"
+  FindClose $0
+  
+  ${If} $BoostAll == "1"
+    Rename "$INSTDIR\boostdir\boost" "$INSTDIR\include\boost"
+    CopyFiles /SILENT "$INSTDIR\boostdir\$BoostLibDir\boost_*.lib" "$INSTDIR\lib"
+  ${EndIf}
+  CopyFiles /SILENT "$INSTDIR\boostdir\$BoostLibDir\*.dll" "$INSTDIR\bin"
+
+  
+  Delete "$INSTDIR\boost.exe"
+  RMDir /r "$INSTDIR\boostdir"
+
+  
   ;TODO Boost embed
   ;TODO Qt embed
   ;TODO embed more?
@@ -154,6 +195,17 @@ Section /o "Test suite" SecTest
   File /r "${StageDirTest}\*"
 
 SectionEnd
+
+;--------------------------------
+;Boost installer stuff
+
+Function .onSelChange
+
+  SectionGetFlags ${SecDevelopment} $0
+  IntOp $BoostAll $0 & ${SF_SELECTED}
+
+FunctionEnd
+
 ;--------------------------------
 ;Descriptions
 
