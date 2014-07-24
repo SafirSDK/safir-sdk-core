@@ -39,7 +39,7 @@ sudo yum install cmake boost-devel gcc-c++ doxygen graphviz make gcc-gnat libgna
 1.2.3. Set up Mono binfmt_misc
 You will need to perform this step to be able to run C# executables directly, like "program.exe" instead of "mono program.exe". If you do not do this the build script will indicate a number of failed tests.
 
-Put the following in /etc/binfmt/mono.conf:
+Put the following in /etc/binfmt.d/mono.conf:
 -------------
 #Start mono on C#/CLR executables
 :CLR:M::MZ::/usr/bin/mono:
