@@ -44,6 +44,8 @@ class WindowsInstaller(object):
         result = subprocess.call((self.uninstaller, "/S"))
         if result != 0:
             raise SetupError("Uninstaller failed (" + str(result) + ")!")
+        if os.path.isdir(self.installpath):
+            raise SetupError("Installer dir still exists after uninstallation! Contents:\n", str(os.listdir(self.installpath)))
 
     def install(self):
         installer = glob.glob("SafirSDKCore*.exe")
