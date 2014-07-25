@@ -26,6 +26,10 @@
 from __future__ import print_function
 import os, glob, sys, subprocess
 
+def log(*args, **kwargs):
+    print(*args, **kwargs)
+    sys.stdout.flush()
+
 class SetupError(Exception):
     pass
 
@@ -40,7 +44,7 @@ class WindowsInstaller(object):
                 return
             else:
                 raise SetupError("No uninstaller found!")
-        print("Running uninstall.exe")
+        log("Running uninstall.exe")
         result = subprocess.call((self.uninstaller, "/S"))
         if result != 0:
             raise SetupError("Uninstaller failed (" + str(result) + ")!")
@@ -55,7 +59,7 @@ class WindowsInstaller(object):
 
         installer = installer[0]
 
-        print ("Running installer:", installer)
+        log ("Running installer:", installer)
 
         result = subprocess.call((installer, "/S"))
 
@@ -97,7 +101,7 @@ class WindowsInstaller(object):
 
 def main():
     if sys.platform != "win32":
-        print ("Only windows is supported so far")
+        log ("Only windows is supported so far")
         sys.exit(0)
 
     installer = WindowsInstaller()
@@ -109,7 +113,7 @@ def main():
         installer.check_installation()
         
     except SetupError as e:
-        print ("Error: " + str(e))
+        log ("Error: " + str(e))
         return 1
     finally:
         installer.uninstall()
