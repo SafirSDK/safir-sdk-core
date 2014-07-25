@@ -6,11 +6,11 @@
 ;Include Modern UI
 !include "MUI2.nsh"
 
-;Include nsExec plugin for calling cmdline exes
-;!include "nsExec.nsh"
-
 ;Include logic operations
-!include 'LogicLib.nsh'
+!include "LogicLib.nsh"
+
+;Useful file functions
+!include "FileFunc.nsh"
 
 ;Set a compressor that gives us very good ratios
 SetCompressor lzma
@@ -25,7 +25,6 @@ Function .onInit
     MessageBox MB_OK "Windows 7 or above required"
     Quit
   ${EndIf}
-  
   
   Var /GLOBAL BoostAll
   StrCpy $BoostAll "1" ; Development installation is enabled by default, so we want all of boost.
@@ -141,12 +140,9 @@ Section "Runtime" SecRuntime
   ${EndIf}
   CopyFiles /SILENT "$INSTDIR\boostdir\$BoostLibDir\*.dll" "$INSTDIR\bin"
 
-  
   Delete "$INSTDIR\boost.exe"
   RMDir /r "$INSTDIR\boostdir"
 
-  
-  ;TODO Boost embed
   ;TODO Qt embed
   ;TODO embed more?
   ;TODO start menu (config links with notepad, dobmake, docs, etc)
