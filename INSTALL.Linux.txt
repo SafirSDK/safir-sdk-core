@@ -98,3 +98,5 @@ Run "sudo apt-get install "libboost-.*1.54.0$" libgnat-4.6 default-jre-headless 
 5.2 Centos/RHEL
 Add the EPEL repository, as outlined above.
 Run "sudo yum install boost mono-core mono-winforms libgnat"
+
+Set up the Mono binfmt_misc, as outlined above.
