@@ -84,7 +84,7 @@ class WindowsInstaller(object):
             return
         
         #Work out studio version and bitness from installer name
-        match = re.search(r"SafirSDKCore-VS([0-9]*)-([0-9]*)bit.exe", self.installer)
+        match = re.search(r"SafirSDKCore-VS([0-9]*)-([0-9]*)bit-DebugOnly.exe", self.installer)
         vs_version = match.group(1)
         width = match.group(2)
 
