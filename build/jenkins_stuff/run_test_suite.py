@@ -94,11 +94,15 @@ class WindowsInstaller(object):
             arch = "x64"
 
         debugcrt_path = os.path.join("c:",
+                                     os.sep,
                                      "debug-runtime",
                                      "vs" + vs_version,
                                      arch)
 
         log("Adding", debugcrt_path, "to the PATH")
+
+        if not os.path.isdir(debugcrt_path):
+            raise SetupError("The debug runtime directory seems to be missing: " + debugcrt_path)
 
         os.environ["PATH"] += debugcrt_path
                                            
