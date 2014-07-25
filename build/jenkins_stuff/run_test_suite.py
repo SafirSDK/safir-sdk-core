@@ -104,7 +104,7 @@ class WindowsInstaller(object):
         if not os.path.isdir(debugcrt_path):
             raise SetupError("The debug runtime directory seems to be missing: " + debugcrt_path)
 
-        os.environ["PATH"] += debugcrt_path
+        os.environ["PATH"] += os.pathsep + debugcrt_path
                                            
         
     def check_installation(self):
@@ -130,7 +130,7 @@ class WindowsInstaller(object):
             raise SetupError("bin directory does not appear to have been added to PATH:\n" + output)
         if os.environ["PATH"].find(binpath) != -1:
             raise SetupError("bin directory seems to have been added to PATH before installation!:\n" + os.environ["PATH"])
-        os.environ["PATH"] += ";" + binpath
+        os.environ["PATH"] += os.pathsep + binpath
 
 
         self.setup_debug_runtime()
