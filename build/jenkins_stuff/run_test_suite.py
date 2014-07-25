@@ -24,7 +24,7 @@
 #
 ###############################################################################
 from __future__ import print_function
-import os, glob, sys, subprocess
+import os, glob, sys, subprocess, time
 
 def log(*args, **kwargs):
     print(*args, **kwargs)
@@ -44,15 +44,26 @@ class WindowsInstaller(object):
                 return
             else:
                 raise SetupError("No uninstaller found!")
-        log("Running uninstall.exe")
-        proc = subprocess.Popen((self.uninstaller, "/S"),
-                                creationflags = subprocess.CREATE_NEW_PROCESS_GROUP)
-        proc.communicate()
-        if proc.returncode != 0:
-            raise SetupError("Uninstaller failed (" + str(proc.returncode) + ")!")
+        
+        log ("Running uninstaller:", self.uninstaller)
+        result = subprocess.call((self.uninstaller, "/S"))
+        if result != 0:
+            raise SetupError("Uninstaller failed (" + str(result) + ")!")
+        
+        #Wait for uninstaller to complete by polling for install directory...
+        starttime = time.clock()
+        while True:
+            if not os.path.exists(self.installpath):
+                break
+            if time.clock() - starttime > 10*60: # 10 minutes
+                break
+            time.sleep(1.0)
+            
         if os.path.isdir(self.installpath):
-            raise SetupError("Installer dir still exists after uninstallation! Contents:\n", str(os.listdir(self.installpath)))
-
+            raise SetupError("Installer dir still exists after uninstallation! Contents:\n" + str(os.listdir(self.installpath)))
+        if os.path.exists(self.installpath):
+            raise SetupError("Installer dir does not seem to be a directory!")
+            
     def install(self):
         installer = glob.glob("SafirSDKCore*.exe")
 
