@@ -95,7 +95,7 @@ class WindowsInstaller(object):
 
         debugcrt_path = os.path.join("c:",
                                      os.sep,
-                                     "debug-runtime",
+                                     "debug-runtimes",
                                      "vs" + vs_version,
                                      arch)
 
