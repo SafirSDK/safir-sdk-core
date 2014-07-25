@@ -34,7 +34,8 @@ Safir SDK Core is only compatible with 7.0 or later of Centos/RHEL (unless you i
 Mono, the C#/.Net environment for Linux is not part of the default repositories, so you need to add EPEL to your list of repositories. Follow the instructions on http://fedoraproject.org/wiki/EPEL.
 
 1.2.2. Install packages
-sudo yum install cmake boost-devel gcc-c++ doxygen graphviz make gcc-gnat libgnat-static tkinter java-1.7.0-openjdk-devel qt-devel libiodbc-devel m4 autoconf subversion mono-devel protobuf-lite-devel
+Run the following command to install all the needed packages:
+   sudo yum install cmake boost-devel gcc-c++ doxygen graphviz make gcc-gnat libgnat-static tkinter java-1.7.0-openjdk-devel qt-devel libiodbc-devel m4 autoconf subversion mono-devel protobuf-lite-devel libatomic
 
 1.2.3. Set up Mono binfmt_misc
 You will need to perform this step to be able to run C# executables directly, like "program.exe" instead of "mono program.exe". If you do not do this the build script will indicate a number of failed tests.
