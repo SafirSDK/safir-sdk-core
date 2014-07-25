@@ -45,9 +45,11 @@ class WindowsInstaller(object):
             else:
                 raise SetupError("No uninstaller found!")
         log("Running uninstall.exe")
-        result = subprocess.call((self.uninstaller, "/S"))
-        if result != 0:
-            raise SetupError("Uninstaller failed (" + str(result) + ")!")
+        proc = subprocess.Popen((self.uninstaller, "/S"),
+                                creationflags = subprocess.CREATE_NEW_PROCESS_GROUP)
+        proc.communicate()
+        if proc.returncode != 0:
+            raise SetupError("Uninstaller failed (" + str(proc.returncode) + ")!")
         if os.path.isdir(self.installpath):
             raise SetupError("Installer dir still exists after uninstallation! Contents:\n", str(os.listdir(self.installpath)))
 
@@ -116,8 +118,11 @@ def main():
         log ("Error: " + str(e))
         return 1
     finally:
-        installer.uninstall()
-        pass
+        try:
+            installer.uninstall()
+        except SetupError as e:
+            log ("Error: " + str(e))
+            return 1
     return 0
 
 sys.exit(main())
