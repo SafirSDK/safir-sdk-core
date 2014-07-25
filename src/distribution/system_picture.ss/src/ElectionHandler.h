@@ -61,10 +61,10 @@ namespace
     BOOST_STATIC_ASSERT(ATOMIC_LLONG_LOCK_FREE == 2); //long long and unsigned long long are always lock free
 
     //now we need to check that int32_t, uint32_t, int64_t and uint64_t actually map to any of the above types
-    BOOST_STATIC_ASSERT(boost::is_same<int32_t, int>::value || boost::is_same<int32_t, long>::value);
-    BOOST_STATIC_ASSERT(boost::is_same<uint32_t, unsigned int>::value || boost::is_same<uint32_t, unsigned long>::value);
-    BOOST_STATIC_ASSERT(boost::is_same<int64_t, long>::value || boost::is_same<int64_t, long long>::value);
-    BOOST_STATIC_ASSERT(boost::is_same<uint64_t, unsigned long>::value || boost::is_same<uint64_t, unsigned long long>::value);
+    BOOST_STATIC_ASSERT((boost::is_same<int32_t, int>::value || boost::is_same<int32_t, long>::value));
+    BOOST_STATIC_ASSERT((boost::is_same<uint32_t, unsigned int>::value || boost::is_same<uint32_t, unsigned long>::value));
+    BOOST_STATIC_ASSERT((boost::is_same<int64_t, long>::value || boost::is_same<int64_t, long long>::value));
+    BOOST_STATIC_ASSERT((boost::is_same<uint64_t, unsigned long>::value || boost::is_same<uint64_t, unsigned long long>::value));
 
     //these checks may have to be adjusted when/if we port to a platform with different sizes.
 }
