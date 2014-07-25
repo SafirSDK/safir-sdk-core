@@ -24,7 +24,7 @@
 #
 ###############################################################################
 from __future__ import print_function
-import os, glob, sys, subprocess, time
+import os, glob, sys, subprocess, time, re
 
 def log(*args, **kwargs):
     print(*args, **kwargs)
@@ -37,7 +37,13 @@ class WindowsInstaller(object):
     def __init__(self):
         self.installpath = os.path.join(os.environ["ProgramFiles"],"Safir SDK Core")
         self.uninstaller = os.path.join(self.installpath, "Uninstall.exe")
-        
+
+        installer = glob.glob("SafirSDKCore*.exe")
+        if len(installer) != 1:
+            raise SetupError("Unexpected number of installers: "+ str(installer))
+        self.installer = installer[0]
+
+                
     def uninstall(self, quiet = False):
         if not os.path.isfile(self.uninstaller):
             if quiet:
@@ -65,20 +71,38 @@ class WindowsInstaller(object):
             raise SetupError("Installer dir does not seem to be a directory!")
             
     def install(self):
-        installer = glob.glob("SafirSDKCore*.exe")
+        log ("Running installer:", self.installer)
 
-        if len(installer) != 1:
-            raise SetupError("Unexpected number of installers: "+ str(installer))
-
-        installer = installer[0]
-
-        log ("Running installer:", installer)
-
-        result = subprocess.call((installer, "/S"))
+        result = subprocess.call((self.installer, "/S"))
 
         if result != 0:
             raise SetupError("Installer failed (" + str(result) + ")!")
 
+    def setup_debug_runtime(self):
+        #we get out of here immediately if we're not running debug.
+        if os.environ.get("Config") != "DebugOnly":
+            return
+        
+        #Work out studio version and bitness from installer name
+        match = re.search(r"SafirSDKCore-VS([0-9]*)-([0-9]*)bit.exe", self.installer)
+        vs_version = match.group(1)
+        width = match.group(2)
+
+        if width == "32":
+            arch = "x86"
+        elif width == "64":
+            arch = "x64"
+
+        debugcrt_path = os.path.join("c:",
+                                     "debug-runtime",
+                                     "vs" + vs_version,
+                                     arch)
+
+        log("Adding", debugcrt_path, "to the PATH")
+
+        os.environ["PATH"] += debugcrt_path
+                                           
+        
     def check_installation(self):
         if not os.path.isdir(self.installpath):
             raise SetupError("Installation directory does not exist!")
@@ -104,6 +128,9 @@ class WindowsInstaller(object):
             raise SetupError("bin directory seems to have been added to PATH before installation!:\n" + os.environ["PATH"])
         os.environ["PATH"] += ";" + binpath
 
+
+        self.setup_debug_runtime()
+        
         proc = subprocess.Popen(("safir_show_config","--locations", "--typesystem", "--logging"),
                                 stdout = subprocess.PIPE,
                                 stderr = subprocess.STDOUT,
