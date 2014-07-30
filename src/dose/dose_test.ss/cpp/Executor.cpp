@@ -58,9 +58,10 @@
 #endif
 
 #ifdef _MSC_VER
-  #pragma warning(push)
-  #pragma warning(disable: 4355)
+#  pragma warning(push)
+#  pragma warning(disable: 4355)
 #endif
+
 Executor::Executor(const std::vector<std::string> & commandLine):
     m_identifier(L"cpp"),
     m_instance(boost::lexical_cast<int>(commandLine.at(1))),
@@ -78,13 +79,13 @@ Executor::Executor(const std::vector<std::string> & commandLine):
     m_defaultContext(0)
 {
     m_controlConnection.Open(m_controlConnectionName, m_instanceString, 0, this, &m_controlDispatcher);
-
+    
     m_controlConnection.SubscribeEntity(DoseTest::Sequencer::ClassTypeId,this);
 }
 #ifdef _MSC_VER
-  #pragma warning(pop)
+#  pragma warning(pop)
 #endif
-
+            
 void Executor::OnStopOrder()
 {
     lout << "Got stop order" << std::endl;
@@ -99,30 +100,38 @@ void Executor::HandleAction(DoseTest::ActionPtr action)
     if (!action->Partner().IsNull() && action->Partner().GetVal() != Safir::Dob::Typesystem::ChannelId(m_instance))
     {
         // Not meant for this partner
+        std::wcout << "Got action that was not meant for this partner!" << std::endl;
         return;
     }
 
     if (action->Consumer().IsNull())
     {//No consumer set, meant for the executor.
+        std::wcout << "No consumer set, meant for the executor" << std::endl;
+
         if (action->ActionCallback().IsNull()) //it is a normal action
         {
+            std::wcout << "Calling ExecuteAction" << std::endl;
             ExecuteAction(action);
         }
         else if (m_isActive)
         {
+            std::wcout << "Calling AddCallbackAction" << std::endl;
             AddCallbackAction(action);
         }
     }
     else if (m_isActive)
     {
+        std::wcout << "Meant for consumer " << action->Consumer() << std::endl;
         Consumer & theConsumer = *m_consumers.at(action->Consumer().GetVal());
 
         if (action->ActionCallback().IsNull()) //it is a normal action
         {
+            std::wcout << "Calling ExecuteAction" << std::endl;
             theConsumer.ExecuteAction(action);
         }
         else
         {
+            std::wcout << "Calling AddCallbackAction" << std::endl;
             theConsumer.AddCallbackAction(action);
         }
     }
@@ -132,15 +141,21 @@ void Executor::HandleAction(DoseTest::ActionPtr action)
 void
 Executor::ExecuteAction(DoseTest::ActionPtr action)
 {
+    std::wcout << "In ExecuteAction" << std::endl;
     switch (action->ActionKind().GetVal())
     {
     case DoseTest::ActionEnum::Reset:
         {
+            std::wcout << "Performing Reset" << std::endl;
             if (m_isActive)
             {
+                std::wcout << "Calling Close" << std::endl;
                 m_testConnection.Close();
-                m_testConnection.Open(m_testConnectionName,m_instanceString,m_defaultContext,NULL,&m_testDispatcher);
 
+                std::wcout << "Calling Open" << std::endl;
+                m_testConnection.Open(m_testConnectionName,m_instanceString,m_defaultContext,NULL,&m_testDispatcher);
+                std::wcout << "Open completed" << std::endl;
+                
                 DoseTest::PartnerPtr partner =
                     boost::static_pointer_cast<DoseTest::Partner>
                     (m_controlConnection.Read(m_partnerEntityId).GetEntity());
@@ -152,20 +167,27 @@ Executor::ExecuteAction(DoseTest::ActionPtr action)
                 {
                     ++partner->Incarnation();
                 }
+                std::wcout << "Calling SetChanges" << std::endl;
                 m_controlConnection.SetChanges(partner,
                                                m_partnerEntityId.GetInstanceId(),
                                                Safir::Dob::Typesystem::HandlerId(m_instance));
 
+                std::wcout << "Creating new consumers" << std::endl;
                 std::vector<boost::shared_ptr<Consumer> > newConsumers;
                 for (int i = 0; i < 3; ++i)
                 {
                     newConsumers.push_back(ConsumerPtr(new Consumer(i,m_testConnectionName,m_instanceString)));
                 }
-
+                std::wcout << "Swapping consumers" << std::endl;
                 m_consumers.swap(newConsumers);
 
+                std::wcout << "Deleting old consumers" << std::endl;
+                newConsumers.clear();
+
+                std::wcout << "Clearing callback actions" << std::endl;
                 std::for_each(m_callbackActions.begin(),m_callbackActions.end(),boost::bind(&Actions::clear,_1));
             }
+            std::wcout << "Reset complete" << std::endl;
         }
         break;
 
@@ -258,6 +280,8 @@ Executor::ExecuteAction(DoseTest::ActionPtr action)
             lout << "Got unexpected action " << DoseTest::ActionEnum::ToString(action->ActionKind().GetVal())<<std::endl;
         }
     }
+    
+    std::wcout << "Leaving ExecuteAction" << std::endl;
 }
 void
 Executor::AddCallbackAction(DoseTest::ActionPtr action)
