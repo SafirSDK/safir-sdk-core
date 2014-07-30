@@ -73,7 +73,7 @@ class WindowsInstaller(object):
     def install(self):
         log ("Running installer:", self.installer)
 
-        result = subprocess.call((self.installer, "/S"))
+        result = subprocess.call((self.installer, "/S", "/NODEVELOPMENT", "/TESTSUITE"))
 
         if result != 0:
             raise SetupError("Installer failed (" + str(result) + ")!")
@@ -143,6 +143,10 @@ class WindowsInstaller(object):
         if proc.returncode != 0:
             raise SetupError("Failed to run safir_show_config. returncode = " + str(proc.returncode) + "\nOutput:\n" + output)
 
+        if os.path.isdir(os.path.join(self.installpath,"include","boost")):
+            raise SetupError("Found unexpected directory 'include/boost'")
+        if os.path.isdir(os.path.join(self.installpath,"include","Safir","Dob")):
+            raise SetupError("Found unexpected directory 'include/Safir/Dob'")
 def main():
     if sys.platform != "win32":
         log ("Only windows is supported so far")

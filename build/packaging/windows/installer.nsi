@@ -12,22 +12,48 @@
 ;Useful file functions
 !include "FileFunc.nsh"
 
+;Check windows version header
+!include WinVer.nsh
+
 ;Set a compressor that gives us very good ratios
 SetCompressor lzma
 
 ;--------------------------------
-;Check windows version
 
-!include WinVer.nsh
  
 Function .onInit
-  ${IfNot} ${AtLeastWin7}
-    MessageBox MB_OK "Windows 7 or above required"
-    Quit
-  ${EndIf}
+    ;Check windows version
+    ${IfNot} ${AtLeastWin7}
+        MessageBox MB_OK "Windows 7 or above required"
+        Quit
+    ${EndIf}
   
-  Var /GLOBAL BoostAll
-  StrCpy $BoostAll "1" ; Development installation is enabled by default, so we want all of boost.
+    ;Set up command line for parsing
+    var /GLOBAL cmdLineParams
+    Push $R0
+    ${GetParameters} $cmdLineParams
+
+    ; /? param (help)
+    ClearErrors
+    ${GetOptions} $cmdLineParams '/?' $R0
+    IfErrors +3 0
+    MessageBox MB_OK "Accepted command line arguments are /nodevelopment, /testsuite and /silent!"
+    Abort
+
+    Pop $R0
+
+    ; Initialise options
+    Var /GLOBAL option_development
+    Var /GLOBAL option_testSuite
+    
+    StrCpy $option_development	  1
+    StrCpy $option_testSuite	  0
+
+    ; Parse Parameters
+    Push $R0
+    Call parseParameters
+    Pop $R0
+    
 FunctionEnd
 
 ;--------------------------------
@@ -134,7 +160,7 @@ Section "Runtime" SecRuntime
   FindFirst $0 $BoostLibDir "$INSTDIR\boostdir\${boostLibDirPattern}"
   FindClose $0
   
-  ${If} $BoostAll == "1"
+  ${If} $option_development == "1"
     Rename "$INSTDIR\boostdir\boost" "$INSTDIR\include\boost"
     CopyFiles /SILENT "$INSTDIR\boostdir\$BoostLibDir\boost_*.lib" "$INSTDIR\lib"
   ${EndIf}
@@ -198,10 +224,36 @@ SectionEnd
 Function .onSelChange
 
   SectionGetFlags ${SecDevelopment} $0
-  IntOp $BoostAll $0 & ${SF_SELECTED}
+  IntOp $option_development $0 & ${SF_SELECTED}
 
 FunctionEnd
 
+
+;--------------------------------
+Function parseParameters
+    ; /nodevelopment
+    ${GetOptions} $cmdLineParams '/nodevelopment' $R0
+    IfErrors +2 0
+    StrCpy $option_development 0
+
+    ; /testsuite
+    ${GetOptions} $cmdLineParams '/testsuite' $R0
+    IfErrors +2 0
+    StrCpy $option_testSuite 1
+    
+    
+    ${If} $option_development == "0"
+      SectionGetFlags ${SecDevelopment} $0
+      IntOp $0 $0 ^ ${SF_SELECTED}
+      SectionSetFlags ${SecDevelopment} $0
+    ${EndIf}
+    
+    ${If} $option_testSuite == "1"
+      SectionGetFlags ${SecTest} $0
+      IntOp $0 $0 ^ ${SF_SELECTED}
+      SectionSetFlags ${SecTest} $0
+    ${EndIf}
+FunctionEnd
 ;--------------------------------
 ;Descriptions
 
