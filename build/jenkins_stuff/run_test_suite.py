@@ -149,7 +149,7 @@ class WindowsInstaller(object):
             raise SetupError("Found unexpected directory 'include/Safir/Dob'")
 
     def run_test_suite(self):
-        result = subprocess.call(("run_dose_tests.py",))
+        result = subprocess.call((sys.executable, "run_dose_tests.py"))
 
         if result != 0:
             raise SetupError("Test suite failed. Returncode = " + str(result))
