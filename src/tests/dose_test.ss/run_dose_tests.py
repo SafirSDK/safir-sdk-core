@@ -29,6 +29,17 @@
 import sys, subprocess, os, shutil, difflib, time, xml.dom.minidom, glob, re, traceback, stat, signal
 from xml.sax.saxutils import escape
 
+try:
+    import ConfigParser
+except ImportError:
+    import configparser as ConfigParser
+
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
+
+
 def rmdir(directory):
     if os.path.exists(directory):
         try:
@@ -103,18 +114,18 @@ class Parameters:
         self.autostart_jenkins_slave = options.autostart_slave or (options.jenkins and self.multinode)
 
         if options.jenkins:
-            WORKSPACE = os.environ.get("WORKSPACE")
-            if not WORKSPACE:
-                print "Environment variable WORKSPACE is not set, is this really a Jenkins build?!"
-                sys.exit(1)
-            os.environ["SAFIR_RUNTIME"] = os.path.join(WORKSPACE,"safir","runtime")
-            if sys.platform.startswith("linux"):
-                LD_LIBRARY_PATH = (os.environ.get("LD_LIBRARY_PATH") + ":") if os.environ.get("LD_LIBRARY_PATH") else ""
-                os.environ["LD_LIBRARY_PATH"] = LD_LIBRARY_PATH + os.path.join(os.environ.get("SAFIR_RUNTIME"),"lib")
-                separator = ":"
-            else:
-                separator = ";"
-            os.environ["PATH"] = os.environ.get("PATH") + separator + os.path.join(os.environ.get("SAFIR_RUNTIME"),"bin")
+            #WORKSPACE = os.environ.get("WORKSPACE")
+            #if not WORKSPACE:
+            #    print "Environment variable WORKSPACE is not set, is this really a Jenkins build?!"
+            #    sys.exit(1)
+            #os.environ["SAFIR_RUNTIME"] = os.path.join(WORKSPACE,"safir","runtime")
+            #if sys.platform.startswith("linux"):
+            #    LD_LIBRARY_PATH = (os.environ.get("LD_LIBRARY_PATH") + ":") if os.environ.get("LD_LIBRARY_PATH") else ""
+            #    os.environ["LD_LIBRARY_PATH"] = LD_LIBRARY_PATH + os.path.join(os.environ.get("SAFIR_RUNTIME"),"lib")
+            #    separator = ":"
+            #else:
+            #    separator = ";"
+            #os.environ["PATH"] = os.environ.get("PATH") + separator + os.path.join(os.environ.get("SAFIR_RUNTIME"),"bin")
         
             #Get env variables if they're set
             tmp = os.environ.get("lang0")
@@ -130,27 +141,46 @@ class Parameters:
             #make stdout unbuffered
             sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
 
-        
-        self.SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
-        if not self.SAFIR_RUNTIME:
-            print "Cannot run without SAFIR_RUNTIME being set. Consider using --jenkins if this is a Jenkins build"
-            sys.exit(1)
+        # ConfigParser wants a section header so add a dummy one.
+        typesystem_ini = '[root]\n' + subprocess.check_output(("safir_show_config", "--typesystem"))
+        config = ConfigParser.ConfigParser()
+        config.readfp(StringIO(typesystem_ini))
+
+        #Get the default dou directory and set it as an environment variable that can be picked up
+        #by the typesystem.ini that belongs to the test suite.
+        directory = config.get("root","default_dou_directory")
+        os.environ["SAFIR_TEST_SUITE_DOU_DIRECTORY"] = directory
+
+        #Now walk up the path and try to find the test_data directory.
+        while not os.path.isdir(os.path.join(directory, "test_data")):
+            parent = os.path.abspath(os.path.join(directory, os.pardir))
+            if parent == directory:
+                raise Exception ("Failed to find test_data directory")
+            directory = parent
+
+        self.test_data_directory = os.path.join(directory, "test_data")
+        print self.test_data_directory
+
+        #self.SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
+        #if not self.SAFIR_RUNTIME:
+        #    print "Cannot run without SAFIR_RUNTIME being set. Consider using --jenkins if this is a Jenkins build"
+        #    sys.exit(1)
 
         #Set up to use our own test configuration
-        os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(self.SAFIR_RUNTIME,"data","text","dose_test","test_config")
-                
-        self.dose_main_cmd = (os.path.join(self.SAFIR_RUNTIME,"bin","dose_main"),)
-        self.foreach_cmd = (os.path.join(self.SAFIR_RUNTIME,"bin","foreach"),)
+        os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(self.test_data_directory, "test_config", "standalone")
+
+        self.dose_main_cmd = ("dose_main",)
+        self.foreach_cmd = ("foreach",)
         
-        self.dose_test_cpp_cmd = (os.path.join(self.SAFIR_RUNTIME, "bin", "dose_test_cpp"),)
-        self.dose_test_ada_cmd = (os.path.join(self.SAFIR_RUNTIME, "bin", "dose_test_ada", ),)
-        self.dose_test_ada_exe_name = self.dose_test_ada_cmd[0] + (".exe" if sys.platform == "win32" else "")
-        self.dose_test_dotnet_cmd = (os.path.join(self.SAFIR_RUNTIME, "bin", "dose_test_dotnet.exe"),)
-        self.dose_test_java_cmd = ("java", "-Xcheck:jni", "-Xfuture", "-jar", 
-                                   os.path.join(self.SAFIR_RUNTIME, "bin", "dose_test_java.jar"),)
+        self.dose_test_cpp_cmd = ("dose_test_cpp",)
+        #self.dose_test_ada_cmd = ("dose_test_ada",)
+        #self.dose_test_ada_exe_name = self.dose_test_ada_cmd[0] + (".exe" if sys.platform == "win32" else "")
+        #self.dose_test_dotnet_cmd = ("dose_test_dotnet.exe",)
+        #self.dose_test_java_cmd = ("java", "-Xcheck:jni", "-Xfuture", "-jar", 
+        #                           "dose_test_java.jar")
         
-        self.testcases_path = os.path.join(self.SAFIR_RUNTIME, "data", "text", "dose_test", "testcases")
-        self.dose_test_sequencer_cmd = (os.path.join(self.SAFIR_RUNTIME, "bin", "dose_test_sequencer"),
+        self.testcases_path = os.path.join(self.test_data_directory, "testcases")
+        self.dose_test_sequencer_cmd = ("dose_test_sequencer",
                                         "-d",
                                         self.testcases_path,
                                         "--no-timeout",
@@ -160,45 +190,45 @@ class Parameters:
                                         #"--last", "1"
                                         )
         
-        self.expected_output_path = os.path.join(self.SAFIR_RUNTIME, "data", "text", "dose_test", 
+        self.expected_output_path = os.path.join(self.test_data_directory,
                                                  "output_multinode" if self.multinode else "output_standalone")
-        self.parameters_path = os.path.join(self.SAFIR_RUNTIME,
-                                            "data", 
-                                            "text", 
-                                            "dots", 
-                                            "classes", 
-                                            "safir_core", 
-                                            "config")
+        # self.parameters_path = os.path.join(self.SAFIR_RUNTIME,
+        #                                     "data", 
+        #                                     "text", 
+        #                                     "dots", 
+        #                                     "classes", 
+        #                                     "safir_core", 
+        #                                     "config")
 
-        self.PersistenceParameters_path = os.path.join(self.parameters_path, 
-                                                       "Safir.Dob.PersistenceParameters.dou")
-        self.NodeParameters_path = os.path.join(self.parameters_path, 
-                                                "Safir.Dob.NodeParameters.dou")
-        self.ThisNodeParameters_path = os.path.join(self.parameters_path, 
-                                                    "Safir.Dob.ThisNodeParameters.dou")
-        self.QueueParameters_path = os.path.join(self.parameters_path, 
-                                                 "Safir.Dob.QueueParameters.dou")
-        self.DistributionChannelParameters_path = os.path.join(self.parameters_path, 
-                                                 "Safir.Dob.DistributionChannelParameters.dou")
+        # self.PersistenceParameters_path = os.path.join(self.parameters_path, 
+        #                                                "Safir.Dob.PersistenceParameters.dou")
+        # self.NodeParameters_path = os.path.join(self.parameters_path, 
+        #                                         "Safir.Dob.NodeParameters.dou")
+        # self.ThisNodeParameters_path = os.path.join(self.parameters_path, 
+        #                                             "Safir.Dob.ThisNodeParameters.dou")
+        # self.QueueParameters_path = os.path.join(self.parameters_path, 
+        #                                          "Safir.Dob.QueueParameters.dou")
+        # self.DistributionChannelParameters_path = os.path.join(self.parameters_path, 
+        #                                          "Safir.Dob.DistributionChannelParameters.dou")
 
-        self.test_parameters_path = os.path.join(self.SAFIR_RUNTIME,
-                                                 "data","text","dose_test","test_parameters")
+        # self.test_parameters_path = os.path.join(self.SAFIR_RUNTIME,
+        #                                          "data","text","dose_test","test_parameters")
 
-        self.test_QueueParameters_path = os.path.join(self.test_parameters_path,
-                                                      "Safir.Dob.QueueParameters.dou")
-        self.test_multinode_DistributionChannelParameters_path = \
-            os.path.join(self.test_parameters_path, "multinode",
-                         "Safir.Dob.DistributionChannelParameters.dou")
+        # self.test_QueueParameters_path = os.path.join(self.test_parameters_path,
+        #                                               "Safir.Dob.QueueParameters.dou")
+        # self.test_multinode_DistributionChannelParameters_path = \
+        #     os.path.join(self.test_parameters_path, "multinode",
+        #                  "Safir.Dob.DistributionChannelParameters.dou")
 
-        self.test_standalone_NodeParameters_path = \
-            os.path.join(self.test_parameters_path, "standalone",
-                         "Safir.Dob.NodeParameters.dou")
+        # self.test_standalone_NodeParameters_path = \
+        #     os.path.join(self.test_parameters_path, "standalone",
+        #                  "Safir.Dob.NodeParameters.dou")
 
-        self.test_multinode_NodeParameters_path = \
-            os.path.join(self.test_parameters_path, "multinode",
-                         "Safir.Dob.NodeParameters.dou")
+        # self.test_multinode_NodeParameters_path = \
+        #     os.path.join(self.test_parameters_path, "multinode",
+        #                  "Safir.Dob.NodeParameters.dou")
 
-        self.tempdir = tempfile.mkdtemp(prefix="dose_test_backup")
+        # self.tempdir = tempfile.mkdtemp(prefix="dose_test_backup")
 
 def getText(nodelist):
     rc = []
@@ -207,59 +237,59 @@ def getText(nodelist):
             rc.append(node.data)
     return ''.join(rc)
 
-def UpdateConfig(parameters):
-    print "** Updating configuration files"
-    #backup dou files to temporary directory
-    shutil.copy2(parameters.PersistenceParameters_path, parameters.tempdir)
-    shutil.copy2(parameters.NodeParameters_path, parameters.tempdir)
-    shutil.copy2(parameters.ThisNodeParameters_path, parameters.tempdir)
-    shutil.copy2(parameters.QueueParameters_path, parameters.tempdir)
-    shutil.copy2(parameters.DistributionChannelParameters_path, parameters.tempdir)
+# def UpdateConfig(parameters):
+#     print "** Updating configuration files"
+#     #backup dou files to temporary directory
+#     shutil.copy2(parameters.PersistenceParameters_path, parameters.tempdir)
+#     shutil.copy2(parameters.NodeParameters_path, parameters.tempdir)
+#     shutil.copy2(parameters.ThisNodeParameters_path, parameters.tempdir)
+#     shutil.copy2(parameters.QueueParameters_path, parameters.tempdir)
+#     shutil.copy2(parameters.DistributionChannelParameters_path, parameters.tempdir)
     
-    # Update PersistenceParameters
-    dom = xml.dom.minidom.parse(parameters.PersistenceParameters_path)
-    for param in dom.getElementsByTagName("parameter"):
-        name = getText(param.getElementsByTagName("name")[0].childNodes)
-        value = param.getElementsByTagName("value")[0]
-        if name == "SystemHasPersistence":
-            value.childNodes[0].data = "False"
-        if name == "TestMode":
-            value.childNodes[0].data = "True"
-    with open(parameters.PersistenceParameters_path,"w") as file:
-       file.write(dom.toxml())
+#     # Update PersistenceParameters
+#     dom = xml.dom.minidom.parse(parameters.PersistenceParameters_path)
+#     for param in dom.getElementsByTagName("parameter"):
+#         name = getText(param.getElementsByTagName("name")[0].childNodes)
+#         value = param.getElementsByTagName("value")[0]
+#         if name == "SystemHasPersistence":
+#             value.childNodes[0].data = "False"
+#         if name == "TestMode":
+#             value.childNodes[0].data = "True"
+#     with open(parameters.PersistenceParameters_path,"w") as file:
+#        file.write(dom.toxml())
 
-    # Update NodeParameters
-    if parameters.standalone:
-        shutil.copy2(parameters.test_standalone_NodeParameters_path, parameters.parameters_path)
-    else:
-        shutil.copy2(parameters.test_multinode_NodeParameters_path, parameters.parameters_path)
+#     # Update NodeParameters
+#     if parameters.standalone:
+#         shutil.copy2(parameters.test_standalone_NodeParameters_path, parameters.parameters_path)
+#     else:
+#         shutil.copy2(parameters.test_multinode_NodeParameters_path, parameters.parameters_path)
 
-    # Update ThisNodeParameters
-    if parameters.slave:
-        dom = xml.dom.minidom.parse(parameters.ThisNodeParameters_path)
-        for param in dom.getElementsByTagName("parameter"):
-            name = getText(param.getElementsByTagName("name")[0].childNodes)
-            value = param.getElementsByTagName("value")[0]
-            if name == "NodeNumber":
-                value.childNodes[0].data = "1"
-        with open(parameters.ThisNodeParameters_path,"w") as file:
-            file.write(dom.toprettyxml())
+#     # Update ThisNodeParameters
+#     if parameters.slave:
+#         dom = xml.dom.minidom.parse(parameters.ThisNodeParameters_path)
+#         for param in dom.getElementsByTagName("parameter"):
+#             name = getText(param.getElementsByTagName("name")[0].childNodes)
+#             value = param.getElementsByTagName("value")[0]
+#             if name == "NodeNumber":
+#                 value.childNodes[0].data = "1"
+#         with open(parameters.ThisNodeParameters_path,"w") as file:
+#             file.write(dom.toprettyxml())
 
 
-    # Update QueueParameters
-    shutil.copy2(parameters.test_QueueParameters_path, parameters.parameters_path)
+#     # Update QueueParameters
+#     shutil.copy2(parameters.test_QueueParameters_path, parameters.parameters_path)
 
-    # Update DistributionChannelParameters
-    if parameters.multinode or parameters.slave:
-        shutil.copy2(parameters.test_multinode_DistributionChannelParameters_path, parameters.parameters_path)
+#     # Update DistributionChannelParameters
+#     if parameters.multinode or parameters.slave:
+#         shutil.copy2(parameters.test_multinode_DistributionChannelParameters_path, parameters.parameters_path)
 
-def RestoreConfig(parameters):
-    print "** Restoring configuration files"
-    #restore dou files from temporary directory
-    dous = glob.glob(os.path.join(parameters.tempdir,"*.dou"))
-    for dou in dous:
-        shutil.copy2(os.path.join(parameters.tempdir,dou), parameters.parameters_path)
-    rmdir(parameters.tempdir)
+# def RestoreConfig(parameters):
+#     print "** Restoring configuration files"
+#     #restore dou files from temporary directory
+#     dous = glob.glob(os.path.join(parameters.tempdir,"*.dou"))
+#     for dou in dous:
+#         shutil.copy2(os.path.join(parameters.tempdir,dou), parameters.parameters_path)
+#     rmdir(parameters.tempdir)
 
 class Results:
     def __init__(self):
@@ -397,9 +427,9 @@ class Runner:
 
     def initialize(self,parameters):
         #load and start syslog server
-        sys.path.append(os.path.join(parameters.SAFIR_RUNTIME,"data","test_support","python"))
+        sys.path.append(os.path.join(parameters.test_data_directory,"python"))
         from syslog_server import SyslogServer
-        self.syslog = SyslogServer()
+        self.syslog = SyslogServer("safir_show_config") #This should be in the PATH here, so no need to give full path
         
         if parameters.standalone:
             partners = (0,1,2)
@@ -419,14 +449,14 @@ class Runner:
 
         for i in partners:
             self.__launchProcess("dose_test_cpp." + str(i), parameters.dose_test_cpp_cmd + (str(i),))
-            if os.path.isfile(parameters.dose_test_ada_exe_name): #only run ada if it exists
-                print "dose_test_ada_exe_name is", parameters.dose_test_ada_exe_name
-                self.__launchProcess("dose_test_ada." + str(i), parameters.dose_test_ada_cmd + (str(i),))
-            else:
-                print "Not running ada partner. dose_test_ada_exe_name is", parameters.dose_test_ada_exe_name
-            self.__launchProcess("dose_test_dotnet." + str(i), parameters.dose_test_dotnet_cmd + (str(i),))
-            if not parameters.no_java:
-                self.__launchProcess("dose_test_java." + str(i), parameters.dose_test_java_cmd + (str(i),))
+            #if os.path.isfile(parameters.dose_test_ada_exe_name): #only run ada if it exists
+            #    print "dose_test_ada_exe_name is", parameters.dose_test_ada_exe_name
+            #    self.__launchProcess("dose_test_ada." + str(i), parameters.dose_test_ada_cmd + (str(i),))
+            #else:
+            #    print "Not running ada partner. dose_test_ada_exe_name is", parameters.dose_test_ada_exe_name
+            #self.__launchProcess("dose_test_dotnet." + str(i), parameters.dose_test_dotnet_cmd + (str(i),))
+            #if not parameters.no_java:
+            #    self.__launchProcess("dose_test_java." + str(i), parameters.dose_test_java_cmd + (str(i),))
 
     def __kill(self, name, proc):
         try:
@@ -652,7 +682,7 @@ def main():
         jenkinsController = JenkinsController(parameters)
         jenkinsController.start_slave()
 
-    UpdateConfig(parameters)
+    #TODO UpdateConfig(parameters)
     runner = Runner()
     results = Results()
 
@@ -672,7 +702,7 @@ def main():
     if parameters.autostart_jenkins_slave:
         jenkinsController.stop_slave()
 
-    RestoreConfig(parameters)
+    #TODO RestoreConfig(parameters)
 
     if completed:
         results.check_output(parameters)
