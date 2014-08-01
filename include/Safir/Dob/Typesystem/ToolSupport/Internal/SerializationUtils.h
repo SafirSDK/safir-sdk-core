@@ -63,7 +63,7 @@ namespace SerializationUtils
         return base64;
     }
 
-    inline bool FromBase64(std::string base64, std::string& bin)
+    inline bool FromBase64(std::string base64, std::vector<char>& bin)
     {
         try
         {
@@ -350,7 +350,7 @@ namespace SerializationUtils
         case BinaryMemberType:
         {
             Trim(memberContent.data());
-            std::string bin;
+            std::vector<char> bin;
             if (!FromBase64(memberContent.data(), bin))
             {
                 std::ostringstream os;

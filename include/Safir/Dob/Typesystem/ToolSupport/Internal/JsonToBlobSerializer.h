@@ -322,7 +322,7 @@ namespace Internal
 
             case BinaryMemberType:
             {
-                std::string bin;
+                std::vector<char> bin;
                 if (!SerializationUtils::FromBase64(memberContent.data(), bin))
                 {
                     std::ostringstream os;
