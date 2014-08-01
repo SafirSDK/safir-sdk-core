@@ -54,9 +54,9 @@ namespace Internal
 {
 namespace SerializationUtils
 {
-    inline std::string ToBase64(const std::string& bin)
+    inline std::string ToBase64(const std::vector<char>& bin)
     {
-        typedef boost::archive::iterators::insert_linebreaks< boost::archive::iterators::base64_from_binary< boost::archive::iterators::transform_width<std::string::const_iterator,6,8> >, 72 > it_base64_t;
+        typedef boost::archive::iterators::insert_linebreaks< boost::archive::iterators::base64_from_binary< boost::archive::iterators::transform_width<std::vector<char>::const_iterator,6,8> >, 72 > it_base64_t;
         unsigned int writePaddChars=(3-bin.size()%3)%3;
         std::string base64(it_base64_t(bin.begin()),it_base64_t(bin.end()));
         base64.append(writePaddChars,'=');

@@ -55,7 +55,7 @@ namespace ToolSupport
      */
     inline void BinaryToBase64(const char* binary, size_t size, std::ostringstream& base64)
     {
-        std::string bin(binary, size); //Improvement: fix implementation to accept 'const char*' and avoid this copying
+        std::vector<char> bin(binary, binary + size); //Improvement: fix implementation to accept 'const char*' and avoid this copying
         base64<<Internal::SerializationUtils::ToBase64(bin);
     }
 

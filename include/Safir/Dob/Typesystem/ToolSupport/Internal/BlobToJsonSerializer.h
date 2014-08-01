@@ -325,7 +325,7 @@ namespace Internal
                 MemberStatus status=m_blobLayout.GetDynamicMember(blob, memberIndex, arrayIndex, binary, size);
                 if (!status.IsNull())
                 {
-                    std::string bin(binary, size);
+                    std::vector<char> bin(binary, binary + size);
                     os<<SAFIR_JSON_QUOTE(SerializationUtils::ToBase64(bin));
                     return true;
                 }
