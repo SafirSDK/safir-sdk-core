@@ -29,14 +29,14 @@ if (UNIX)
 endif()
 ###########
 
-function (SAFIR_INSTALL) 
+function (SAFIR_INSTALL)
   cmake_parse_arguments(INST "TEST_SUITE" "" "TARGETS" ${ARGN})
 
   if (NOT "${INST_UNPARSED_ARGUMENTS}" STREQUAL "")
     message(FATAL_ERROR "Unknown argument to SAFIR_INSTALL '${INST_UNPARSED_ARGUMENTS}'")
   endif()
 
-    
+
   foreach (target ${INST_TARGETS})
     get_target_property(target_type ${target} TYPE)
     #UTILITY means that it is a dotnet or java target, probably
@@ -73,12 +73,12 @@ function (SAFIR_INSTALL)
         endif()
 
         get_target_property(install_files ${target} INSTALL_FILES)
-        
+
         if (install_files)
-          INSTALL(FILES ${install_files} 
+          INSTALL(FILES ${install_files}
             DESTINATION ${SAFIR_INSTALL_DESTINATION_JAR}
             COMPONENT ${component})
-        endif()        
+        endif()
         return()
       endif()
       message(FATAL_ERROR "The target ${target} does not appear to be either a java or dotnte target, cannot use SAFIR_INSTALL.")
@@ -122,8 +122,8 @@ function (SAFIR_INSTALL)
 
       #Install the pdb files using the locations we just worked out.
       if (INST_TEST_SUITE)
-        INSTALL(FILES ${debug_location} 
-          DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN} 
+        INSTALL(FILES ${debug_location}
+          DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
           CONFIGURATIONS Debug
           COMPONENT Test)
         INSTALL(FILES ${relwithdebinfo_location}
@@ -131,8 +131,8 @@ function (SAFIR_INSTALL)
           CONFIGURATIONS RelWithDebInfo
           COMPONENT Test)
       else()
-        INSTALL(FILES ${debug_location} 
-          DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN} 
+        INSTALL(FILES ${debug_location}
+          DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
           CONFIGURATIONS Debug
           COMPONENT Development)
         INSTALL(FILES ${relwithdebinfo_location}
@@ -165,7 +165,7 @@ function(add_library NAME)
   if(NOT is_imported EQUAL -1)
     #call the real add_library function
     _add_library(${NAME} ${ARGN})
-    
+
     #and get out of here, the rest of this function is only for our own targets
     return()
   endif()
@@ -190,10 +190,10 @@ function(add_library NAME)
   if (WIN32)
     #This will not work for studio builds, so header_check for studio generator should be skipped.
     get_property(SAFIR_HEADER_CHECK_LINK_PATH GLOBAL PROPERTY SAFIR_HEADER_CHECK_LINK_PATH)
-    set_property(GLOBAL PROPERTY SAFIR_HEADER_CHECK_LINK_PATH ${SAFIR_HEADER_CHECK_LINK_PATH} 
+    set_property(GLOBAL PROPERTY SAFIR_HEADER_CHECK_LINK_PATH ${SAFIR_HEADER_CHECK_LINK_PATH}
         "${CMAKE_CURRENT_BINARY_DIR}")
   endif()
-  
+
   #call the real add_library function
   _add_library(${NAME} ${ARGN})
 endfunction()
@@ -205,7 +205,7 @@ endfunction()
 # CONFIG_OVERRIDE (optional): Absolute path to directory containing safir configuration. If not specified
 #                             it will be set to a default configuration.
 #
-function (SET_SAFIR_TEST_PROPERTIES) 
+function (SET_SAFIR_TEST_PROPERTIES)
   cmake_parse_arguments(PROP "" "TEST;TIMEOUT;CONFIG_OVERRIDE" "ENVIRONMENT" ${ARGN})
 
   if (NOT "${PROP_UNPARSED_ARGUMENTS}" STREQUAL "")
@@ -239,9 +239,9 @@ function (SET_SAFIR_TEST_PROPERTIES)
   else()
     set(PATH_ENVIRONMENT "LD_LIBRARY_PATH=${SAFIR_LIBRARY_PATH}")
   endif()
-  
+
   SET_PROPERTY(TEST ${PROP_TEST}
-    PROPERTY ENVIRONMENT 
+    PROPERTY ENVIRONMENT
     "SAFIR_TEST_CONFIG_OVERRIDE=${PROP_CONFIG_OVERRIDE}"
     "SAFIR_SOURCE_ROOT=${safir_sdk_core_SOURCE_DIR}/"
     "CMAKE_CURRENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}"
@@ -307,8 +307,8 @@ INSTALL(EXPORT SafirSDKCore DESTINATION ${SAFIR_INSTALL_DESTINATION_CMAKE}
 configure_file(cmake/SafirSDKCoreConfig.cmake.in
   "${CMAKE_CURRENT_BINARY_DIR}/cmake/SafirSDKCoreConfig.cmake" @ONLY)
 
-INSTALL(FILES 
-  cmake/build_generated.cmake 
+INSTALL(FILES
+  cmake/build_generated.cmake
   cmake/CSharpMacros.cmake
   cmake/SafirCompilerSettings.cmake
   cmake/SafirLoadCSharp.cmake
@@ -322,4 +322,3 @@ INSTALL(FILES
 
 #TODO: install users guide in doc?
 #TODO: install requirements in doc?
-
