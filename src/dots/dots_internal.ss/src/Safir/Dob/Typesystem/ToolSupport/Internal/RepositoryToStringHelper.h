@@ -489,7 +489,7 @@ namespace Internal
                 std::pair<const char*, size_t> bin=c->GetBinaryValue(i);
                 if (bin.second>0)
                 {
-                    std::string tmp(bin.first, bin.first+bin.second);
+                    std::vector<char> tmp(bin.first, bin.first+bin.second);
                     os<<Safir::Dob::Typesystem::ToolSupport::Internal::SerializationUtils::ToBase64(tmp)<<std::endl;
                 }
             }

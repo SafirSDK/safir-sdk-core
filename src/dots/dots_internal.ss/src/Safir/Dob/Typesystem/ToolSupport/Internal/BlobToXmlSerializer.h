@@ -376,7 +376,7 @@ namespace Internal
                 if (!status.IsNull())
                 {
                     WriteStartElement(elementName, arrayIndex, md->IsArray(), os);
-                    std::string bin(binary, size);
+                    std::vector<char> bin(binary, binary + size);
                     os<<SerializationUtils::ToBase64(bin);
                     os<<"</"<<elementName<<">";
                 }
