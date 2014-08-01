@@ -134,7 +134,8 @@ class WindowsInstaller(object):
 
 
         self.setup_debug_runtime()
-        
+
+        log("Running safir_show_config to test that exes can be run")
         proc = subprocess.Popen(("safir_show_config","--locations", "--typesystem", "--logging"),
                                 stdout = subprocess.PIPE,
                                 stderr = subprocess.STDOUT,
@@ -149,6 +150,7 @@ class WindowsInstaller(object):
             raise SetupError("Found unexpected directory 'include/Safir/Dob'")
 
     def run_test_suite(self):
+        log("Launching test suite")
         result = subprocess.call(("run_dose_tests.py",), shell = True)
 
         if result != 0:
