@@ -287,6 +287,24 @@ FilePersistor::RestoreBinary(const boost::filesystem::path & path) const
     }
 #if 0
     bin.resize(fileSize);
+    size_t numBytesRead = 0;
+    boost::filesystem::ifstream file(path, std::ios::in | std::ios::binary);
+
+    while (file.good())
+    {
+        file.read(&bin[0] + numBytesRead,4096);
+        numBytesRead += static_cast<size_t>(file.gcount());
+    }
+    if(fileSize != numBytesRead)
+    {
+        throw Safir::Dob::Typesystem::SoftwareViolationException(L"Stupid error in file reading, probably.",__WFILE__,__LINE__);
+    }
+    file.close();
+
+    return boost::dynamic_pointer_cast<Safir::Dob::Entity>(Safir::Dob::Typesystem::Serialization::ToObject(bin));
+
+#elif 0
+    bin.resize(fileSize);
 
     boost::filesystem::ifstream file(path, std::ios::in | std::ios::binary);
     file.read(&bin[0],fileSize);
@@ -321,16 +339,13 @@ FilePersistor::RestoreXml(const boost::filesystem::path & path) const
         RemoveFile(path);
         return Safir::Dob::EntityPtr(); //NULL
     }
+
     xml.resize(fileSize);
 
-    size_t numBytesRead = 0;
     boost::filesystem::wifstream file (path, std::ios::in);
-    while (file.good())
-    {
-        file.read(&xml[0] + numBytesRead,4096);
-        numBytesRead += static_cast<size_t>(file.gcount());
-    }
-    if(fileSize < numBytesRead)
+    file.read(&xml[0], fileSize);
+
+    if(!file.good())
     {
         throw Safir::Dob::Typesystem::SoftwareViolationException(L"Stupid error in file reading, probably", __WFILE__, __LINE__);
     }

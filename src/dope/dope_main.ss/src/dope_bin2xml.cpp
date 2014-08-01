@@ -39,6 +39,8 @@
 #include <boost/filesystem/convenience.hpp>
 #include <boost/filesystem/exception.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include <boost/interprocess/file_mapping.hpp>
+#include <boost/interprocess/mapped_region.hpp>
 
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
@@ -332,6 +334,7 @@ void ConvertFiles()
             {
                 continue;
             }
+#if 0
             bin.resize(fileSize);
 
             size_t numBytesRead = 0;
@@ -350,7 +353,24 @@ void ConvertFiles()
             file.close();
 
             const Safir::Dob::Typesystem::ObjectPtr object = Safir::Dob::Typesystem::Serialization::ToObject(bin);
+#elif 0
+            bin.resize(fileSize);
 
+            boost::filesystem::ifstream file(path, std::ios::in | std::ios::binary);
+            file.read(&bin[0],fileSize);
+
+            const Safir::Dob::Typesystem::ObjectPtr object = Safir::Dob::Typesystem::Serialization::ToObject(bin);
+#else
+            using namespace boost::interprocess;
+            
+            // Create the file mapping
+            file_mapping fm(path.string().c_str(), read_only);
+            // Map the file in memory
+            mapped_region region(fm, read_only);
+            // Get the address where the file has been mapped
+            const char* addr = static_cast<const char*>(region.get_address());
+            const Safir::Dob::Typesystem::ObjectPtr object = Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(addr);
+#endif
             const std::wstring xml = Safir::Dob::Typesystem::Serialization::ToXml(object);
             boost::filesystem::path xmlFileName(path);
             xmlFileName.replace_extension(".xml");
