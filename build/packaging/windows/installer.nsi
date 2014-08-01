@@ -161,6 +161,7 @@ Section "Runtime" SecRuntime
   FindClose $0
   
   ${If} $option_development == "1"
+    CreateDirectory "$INSTDIR\include"
     Rename "$INSTDIR\boostdir\boost" "$INSTDIR\include\boost"
     CopyFiles /SILENT "$INSTDIR\boostdir\$BoostLibDir\boost_*.lib" "$INSTDIR\lib"
   ${EndIf}
