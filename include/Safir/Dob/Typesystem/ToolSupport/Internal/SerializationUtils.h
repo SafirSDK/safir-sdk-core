@@ -360,7 +360,10 @@ namespace SerializationUtils
             SerializationUtils::CreateSpaceForDynamicMember(blobLayout, blob, beginningOfUnused, bin.size());
             char* writeBinary=beginningOfUnused;
             blobLayout.CreateBinaryMember(&blob[0], static_cast<Size>(bin.size()), memIx, arrIx, false, beginningOfUnused);
-            memcpy(writeBinary, &bin[0], bin.size());
+            if (bin.size() > 0)
+            {
+                memcpy(writeBinary, &bin[0], bin.size());
+            }
             blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
         }
             break;
