@@ -97,7 +97,7 @@ namespace Typesystem
                 
                 if (generatedLibraries[i].library == 0)
                 {
-                    lllog(1) << "Not loading " << generatedLibraries[i].cppLibraryLocation << " since it is an override" << std::endl;
+                    lllog(1) << "Not loading " << generatedLibraries[i].library << " since it is an override" << std::endl;
                 }
                 else
                 {
