@@ -75,3 +75,4 @@ bin
 build-*
 *.orig
 *-dotnet.xml
+dose_test_output
