@@ -32,8 +32,6 @@
 #include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/integer_traits.hpp>
-#include <boost/interprocess/file_mapping.hpp>
-#include <boost/interprocess/mapped_region.hpp>
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -122,11 +120,7 @@ Filename2EntityIdAndHandlerId(const boost::filesystem::path & filename)
             Safir::Dob::Typesystem::Utilities::ToWstring(filename.string()),__WFILE__,__LINE__);
     }
 
-#if defined (BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION == 3
     const std::string leaf = filename.filename().string();
-#else
-    const std::string leaf = filename.filename();
-#endif
 
     size_t separatorIndex = leaf.find('@');
     if (separatorIndex == std::string::npos)
@@ -274,7 +268,6 @@ FilePersistor::RemoveAll()
 Safir::Dob::EntityPtr
 FilePersistor::RestoreBinary(const boost::filesystem::path & path) const
 {
-    Safir::Dob::Typesystem::BinarySerialization bin;
     const size_t fileSize = static_cast<size_t>(boost::filesystem::file_size(path));
     if (fileSize == 0)
     {
@@ -285,42 +278,13 @@ FilePersistor::RestoreBinary(const boost::filesystem::path & path) const
         RemoveFile(path);
         return Safir::Dob::EntityPtr(); //NULL
     }
-#if 0
-    bin.resize(fileSize);
-    size_t numBytesRead = 0;
-    boost::filesystem::ifstream file(path, std::ios::in | std::ios::binary);
 
-    while (file.good())
-    {
-        file.read(&bin[0] + numBytesRead,4096);
-        numBytesRead += static_cast<size_t>(file.gcount());
-    }
-    if(fileSize != numBytesRead)
-    {
-        throw Safir::Dob::Typesystem::SoftwareViolationException(L"Stupid error in file reading, probably.",__WFILE__,__LINE__);
-    }
-    file.close();
-
-    return boost::dynamic_pointer_cast<Safir::Dob::Entity>(Safir::Dob::Typesystem::Serialization::ToObject(bin));
-
-#elif 0
-    bin.resize(fileSize);
+    Safir::Dob::Typesystem::BinarySerialization bin(fileSize);
 
     boost::filesystem::ifstream file(path, std::ios::in | std::ios::binary);
     file.read(&bin[0],fileSize);
 
     return boost::dynamic_pointer_cast<Safir::Dob::Entity>(Safir::Dob::Typesystem::Serialization::ToObject(bin));
-#else
-    using namespace boost::interprocess;
-
-    // Create the file mapping
-    file_mapping fm(path.string().c_str(), read_only);
-    // Map the file in memory
-    mapped_region region(fm, read_only);
-    // Get the address where the file has been mapped
-    const char* addr = static_cast<const char*>(region.get_address());
-    return boost::dynamic_pointer_cast<Safir::Dob::Entity>(Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(addr));
-#endif
 }
 
 
