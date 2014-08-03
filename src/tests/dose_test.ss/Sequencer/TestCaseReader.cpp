@@ -74,11 +74,7 @@ TestCaseReader::TestCaseReader(const boost::filesystem::path & testCaseDir)
             continue;
         }
 
-#if defined (BOOST_FILESYSTEM_VERSION) && BOOST_FILESYSTEM_VERSION == 3
         const std::string filename = path.filename().string();
-#else
-        const std::string filename = path.filename();
-#endif
 
         boost::smatch matchResults;
 

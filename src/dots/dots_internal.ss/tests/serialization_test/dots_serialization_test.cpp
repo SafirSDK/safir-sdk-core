@@ -124,11 +124,8 @@ const ClassDescription* GetClassByName(const RepositoryPtr& rep, const std::stri
 
 bool TestInfoFromPath(const boost::filesystem::path& p, TestCase& test)
 {
-#if !defined(BOOST_FILESYSTEM_VERSION) || (BOOST_FILESYSTEM_VERSION == 2)
-    std::string name=p.stem();
-#else
     std::string name=p.stem().string();
-#endif
+
     size_t ix=name.find_first_of('.');
     if (ix==name.npos || ix==0)
     {

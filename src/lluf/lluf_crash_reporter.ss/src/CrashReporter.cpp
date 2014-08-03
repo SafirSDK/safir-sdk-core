@@ -45,14 +45,6 @@
 #include "Windows.h"
 #endif
 
-#ifndef BOOST_FILESYSTEM_NO_DEPRECATED
-#define BOOST_FILESYSTEM_NO_DEPRECATED
-#endif
-#ifdef BOOST_FILESYSTEM_VERSION
-#undef BOOST_FILESYSTEM_VERSION
-#endif
-
-#define BOOST_FILESYSTEM_VERSION 3
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/convenience.hpp>
 
