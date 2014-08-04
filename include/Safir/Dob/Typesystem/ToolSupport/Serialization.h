@@ -71,8 +71,7 @@ namespace ToolSupport
         const bool ret = Internal::SerializationUtils::FromBase64(base64Str, binary);
         if (!ret)
         {
-            //TODO: Throw a sensible exception here
-            //throw Safir::Dob::Typesystem::ToolSupport::ParseError("Failed to decode the Base64 data");
+            throw Safir::Dob::Typesystem::ToolSupport::ParseError("Failed to decode the Base64 data","","",100101);
         }
     }
 

@@ -208,7 +208,7 @@ namespace ToolSupport
         virtual std::pair<const char*, size_t> GetBinaryValue(int index) const
         {
             const ValueDefinition& v=Value(static_cast<size_t>(index));
-            return std::make_pair(&v.binaryVal[0], v.binaryVal.size());
+            return std::make_pair(v.binaryVal.empty() ? NULL : &v.binaryVal[0], v.binaryVal.size());
         }
         virtual std::pair<boost::int64_t, const char*> GetHashedValue(int index) const
         {
