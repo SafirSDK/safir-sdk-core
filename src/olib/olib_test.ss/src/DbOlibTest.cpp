@@ -67,7 +67,7 @@ DbOlibTest::DbOlibTest():
     m_bLongTimeQueryIsPrepared(false),
     m_bInsertInto42IsPrepared( false )
 {   
-    m_Object=Safir::OlibTest::TestObject::Create();
+    m_Object=OlibTest::TestObject::Create();
     m_Object->StringName().SetVal(L"Name");
     m_Object->StringDescription().SetVal(L"Description");
     m_Object->Int32().SetVal(32);
@@ -138,7 +138,7 @@ void DbOlibTest::TestOutputParameters(const bool curlyBracesNeeded)
         ;
 
     //Create objectptr to testobject
-    Safir::OlibTest::TestObjectPtr outObjPtr =Safir::OlibTest::TestObject::Create();
+    OlibTest::TestObjectPtr outObjPtr = OlibTest::TestObject::Create();
 
     //Get values from columndata and set to outObject
     outObjPtr->StringName().SetVal(m_outParamStringName.GetValue());
@@ -745,7 +745,7 @@ void DbOlibTest::ReadData(int Id)
 void DbOlibTest::EvaluateOutData()
 {
     //Create objectptr to testobject
-    Safir::OlibTest::TestObjectPtr outObjPtr =Safir::OlibTest::TestObject::Create();
+    OlibTest::TestObjectPtr outObjPtr =OlibTest::TestObject::Create();
 
     //Get values from columndata and set to outObject
     if (m_columnStringName.IsNull())

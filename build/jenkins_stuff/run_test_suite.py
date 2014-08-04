@@ -146,8 +146,8 @@ class WindowsInstaller(object):
 
         if os.path.isdir(os.path.join(self.installpath,"include","boost")):
             raise SetupError("Found unexpected directory 'include/boost'")
-        if os.path.isdir(os.path.join(self.installpath,"include","Safir","Dob")):
-            raise SetupError("Found unexpected directory 'include/Safir/Dob'")
+        if os.path.isdir(os.path.join(self.installpath,"include","Safir")):
+            raise SetupError("Found unexpected directory 'include/Safir'")
 
     def run_test_suite(self):
         log("Launching test suite")

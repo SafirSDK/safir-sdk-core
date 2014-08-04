@@ -33,12 +33,12 @@
 #include <Safir/Databases/Odbc/InputParameter.h>
 #include <Safir/Databases/Odbc/InputOutputParameter.h>
 #include <Safir/Dob/Typesystem/Defs.h>
-#include <Safir/OlibTest/TestObject.h>
+#include <OlibTest/TestObject.h>
 
 class DbOlibTest
 {
 private:
-    Safir::OlibTest::TestObjectPtr m_Object;
+    OlibTest::TestObjectPtr m_Object;
 
     Safir::Databases::Odbc::Int32OutputParameter        m_outParamId;
     Safir::Databases::Odbc::WideStringOutputParameter   m_outParamStringName;
