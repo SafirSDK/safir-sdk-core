@@ -837,7 +837,6 @@ static bool HandleCompletedFragment(dcom_ushort16 fragmentNum,
 
                 isMsgCompleted = true;
 
-                CleanUp_After_Msg_Completed(qIx);
                 break;
             }
 
@@ -1032,7 +1031,12 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
                     goto Continue_WithNext;
                 }
 
-                HandleCompletedFragment(FragmentNum, qIx, TxMsgArr_Ix, Ahead_Ix);
+                bool msgCompleted = HandleCompletedFragment(FragmentNum, qIx, TxMsgArr_Ix, Ahead_Ix);
+
+                if (msgCompleted)
+                {
+                    CleanUp_After_Msg_Completed(qIx);
+                }
 
                 goto Continue_WithNext;
             }   // end fragmented message
@@ -1867,8 +1871,6 @@ static THREAD_API TxThread(void *)
                             TxQ[qIx].TxMsgArr[UseToSendIx].TransmitComplete |= FragBit;
                             TxQ[qIx].TxMsgArr[UseToSendIx].IsTransmitting   &= ~FragBit;
 
-                            // HandleCompletedFragment will call CleanUp_After_Msg_Completed if
-                            // all fragments have been received.
                             bool msgCompleted = HandleCompletedFragment(FragNum, qIx, UseToSendIx, Ahead_Ix);
 
                             if (msgCompleted)
@@ -1878,6 +1880,7 @@ static THREAD_API TxThread(void *)
                                 {
                                     IncreaseIndexToSend(qIx);
                                 }
+                                CleanUp_After_Msg_Completed(qIx);
                             }
                             else
                             {
