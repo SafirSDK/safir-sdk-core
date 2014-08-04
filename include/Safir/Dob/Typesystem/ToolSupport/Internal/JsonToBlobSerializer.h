@@ -332,7 +332,10 @@ namespace Internal
                 SerializationUtils::CreateSpaceForDynamicMember(m_blobLayout, blob, beginningOfUnused, bin.size());
                 char* writeBinary=beginningOfUnused;
                 m_blobLayout.CreateBinaryMember(&blob[0], static_cast<Size>(bin.size()), memIx, arrIx, false, beginningOfUnused);
-                memcpy(writeBinary, &bin[0], bin.size());
+                if (!bin.empty())
+                {
+                    memcpy(writeBinary, &bin[0], bin.size());
+                }
                 m_blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
             }
                 break;
