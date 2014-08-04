@@ -5,7 +5,7 @@ TARGET_LINK_LIBRARIES(entity_owner PRIVATE
   safir_generated-DopeTest-cpp
   ${Boost_SYSTEM_LIBRARY})
 
+SAFIR_INSTALL(TARGETS entity_owner TEST_SUITE)
+
 add_subdirectory(file_backend)
 add_subdirectory(odbc_backend)
-
-#TODO: install when installing test suite

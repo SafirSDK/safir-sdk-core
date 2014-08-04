@@ -1,7 +1,3 @@
-#TODO: do we still need this?
-#entity_owner used to be built here.
-#add_dependencies(entity_owner dose_main dope_main safir_show_config dope_bin2xml)
-
 get_property(SAFIR_GENERATED_PATHS GLOBAL PROPERTY SAFIR_GENERATED_PATHS)
 
 ADD_TEST(NAME dope_file_backend_test 
