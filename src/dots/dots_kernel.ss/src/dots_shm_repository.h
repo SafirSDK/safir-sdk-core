@@ -33,7 +33,6 @@
 #include <boost/interprocess/offset_ptr.hpp>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeParser.h>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeUtilities.h>
-#include <Safir/Dob/Typesystem/ToolSupport/BlobLayout.h>
 
 using namespace Safir::Dob::Typesystem::ToolSupport;
 
@@ -295,11 +294,11 @@ namespace Internal
         }
 
         ValueDefinitionShm(const ValueDefinitionShm& other)
+            :stringKey(other.stringKey)
+            ,stringVal(other.stringVal)
         {
-            stringKey=other.stringKey;
             key.hash=other.key.hash;
             key.int64=other.key.int64;
-            stringVal=other.stringVal;
             val.hash=other.val.hash;
             val.int64=other.val.int64;
         }

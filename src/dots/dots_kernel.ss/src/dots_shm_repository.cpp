@@ -431,7 +431,7 @@ namespace Internal
                     }
                     ValueDefinitionShm& vd=m_values[static_cast<size_t>(i)];
                     vd.stringKey=StringShm(hashed.second, shm->get_segment_manager());
-                    vd.hashedVal=hashed.first;
+                    vd.key.hash=hashed.first;
                 }
             }
                 break;
@@ -445,6 +445,9 @@ namespace Internal
                     vd.stringKey=StringShm(str, shm->get_segment_manager());
                 }
             }
+                break;
+
+            default:
                 break;
             }
         }

@@ -397,7 +397,7 @@ namespace Internal
         os<<"TypeId: "<<c->GetTypeId()<<std::endl;
         os<<"File: "<<c->FileName()<<std::endl;
 
-        for (int i=0; i<c->GetArraySize(); ++i)
+        for (int i=0; i<c->GetNumberOfValues(); ++i)
         {
             os<<"    Value ("<<i<<"): "<<c->GetValueName(i)<<std::endl;
         }
