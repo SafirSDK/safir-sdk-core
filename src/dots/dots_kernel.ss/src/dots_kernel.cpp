@@ -1963,7 +1963,7 @@ void DotsC_GetTypeDescription(const DotsC_TypeId typeId,
         return;
     }
 
-    strncpy(buf, &text[0], resultSize);
+    strncpy(buf, text.c_str(), resultSize);
 }
 
 void DotsC_GetGeneratedLibraryList(DotsC_GeneratedLibrary*& generatedLibraries,

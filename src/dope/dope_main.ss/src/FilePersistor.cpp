@@ -292,7 +292,6 @@ FilePersistor::RestoreBinary(const boost::filesystem::path & path) const
 Safir::Dob::EntityPtr
 FilePersistor::RestoreXml(const boost::filesystem::path & path) const
 {
-    std::wstring xml;
     const size_t fileSize = static_cast<size_t>(boost::filesystem::file_size(path));
     if (fileSize == 0)
     {
@@ -304,15 +303,10 @@ FilePersistor::RestoreXml(const boost::filesystem::path & path) const
         return Safir::Dob::EntityPtr(); //NULL
     }
 
-    xml.resize(fileSize);
-
     boost::filesystem::wifstream file (path, std::ios::in);
-    file.read(&xml[0], fileSize);
-
-    if(!file.good())
-    {
-        throw Safir::Dob::Typesystem::SoftwareViolationException(L"Stupid error in file reading, probably", __WFILE__, __LINE__);
-    }
+    std::wstring xml((std::istreambuf_iterator<wchar_t>(file)), 
+                     std::istreambuf_iterator<wchar_t>());
+    
     file.close();
 
     //remove .xml file
