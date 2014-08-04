@@ -167,7 +167,7 @@ class Parameters:
         #    sys.exit(1)
 
         #Set up to use our own test configuration
-        os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(self.test_data_directory, "test_config", "standalone")
+        os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(self.test_data_directory, "dose", "test_config", "standalone")
 
         self.dose_main_cmd = ("dose_main",)
         self.foreach_cmd = ("foreach",)
@@ -179,7 +179,7 @@ class Parameters:
         #self.dose_test_java_cmd = ("java", "-Xcheck:jni", "-Xfuture", "-jar", 
         #                           "dose_test_java.jar")
         
-        self.testcases_path = os.path.join(self.test_data_directory, "testcases")
+        self.testcases_path = os.path.join(self.test_data_directory, "dose", "testcases")
         self.dose_test_sequencer_cmd = ("dose_test_sequencer",
                                         "-d",
                                         self.testcases_path,
@@ -191,6 +191,7 @@ class Parameters:
                                         )
         
         self.expected_output_path = os.path.join(self.test_data_directory,
+                                                 "dose",
                                                  "output_multinode" if self.multinode else "output_standalone")
         # self.parameters_path = os.path.join(self.SAFIR_RUNTIME,
         #                                     "data", 

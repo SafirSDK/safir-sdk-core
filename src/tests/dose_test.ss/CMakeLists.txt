@@ -25,6 +25,6 @@ INSTALL(
     output_standalone
     output_multinode
     test_config
-  DESTINATION ${SAFIR_INSTALL_DESTINATION_TEST_DATA}
+  DESTINATION ${SAFIR_INSTALL_DESTINATION_TEST_DATA}/dose
   COMPONENT Test
   )
