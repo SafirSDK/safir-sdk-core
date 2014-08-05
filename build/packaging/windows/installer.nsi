@@ -280,7 +280,10 @@ Section "Uninstall"
 
   ; We blindly remove everything from the installation dir. This might blow up if someone decides to 
   ; install to a path with other stuff in it, e.g. C:\ (yes, we'd try to remove everything from c:\...).
+  ;Also, we try twice, in case f-ing windows doesn't let us delete the files the first time round...
   ; TODO: better way?
+  RMDir /r "$INSTDIR"
+  IfErrors 0 +2
   RMDir /r "$INSTDIR"
 
   SetShellVarContext all
