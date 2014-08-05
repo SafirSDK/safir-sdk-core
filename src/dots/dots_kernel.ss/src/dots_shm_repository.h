@@ -326,7 +326,7 @@ namespace Internal
         const char* GetQualifiedName() const {return m_qualifiedName.c_str();}
         DotsC_MemberType GetMemberType() const {return m_memberType;}
         DotsC_TypeId GetTypeId() const {return m_typeId;}
-        DotsC_CollectionType GetCollectionType() {return m_collectionType;}
+        DotsC_CollectionType GetCollectionType() const {return m_collectionType;}
         DotsC_MemberType GetKeyType() const {return m_keyType;} //only valid if collectionType is Dictionary
         DotsC_TypeId GetKeyTypeId() const {return m_keyTypeId;}
         int GetNumberOfValues() const {return static_cast<int>(m_values.size());}

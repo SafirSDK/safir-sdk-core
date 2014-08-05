@@ -117,7 +117,7 @@ namespace ToolSupport
          * Write member value to the a blob.
          * For dictionaries use WriteDictionaryValue.
          * If the member is an array, the index is used. For all other collection types index is ignored.
-         * If the member is a sequence, set or dictionary, a new value is added to the collection for each call to this method.
+         * If the member is a sequence or dictionary, a new value is added to the collection for each call to this method.
          * If the member is a dictionary, the key is used and can be the following types:
          *      Int32, Int64, TypeId, Enumeration, String, InstanceId, HandlerId, ChannelId, EntityId.
          * This method will throw logic_error if used with wrong input data.
@@ -177,7 +177,7 @@ namespace ToolSupport
         inline void Init()
         {
             //Add values to single value members and arrays since they are not allowed to be empty.
-            //Other collections (set, sequence, dictionary) are allowed to be empty.
+            //Other collections (sequence, dictionary) are allowed to be empty.
             for (DotsC_MemberIndex memberIndex=0; memberIndex<m_classDescription->GetNumberOfMembers(); ++memberIndex)
             {
                 const MemberDescriptionType* member=m_classDescription->GetMember(memberIndex);

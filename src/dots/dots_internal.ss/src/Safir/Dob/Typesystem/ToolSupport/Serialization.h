@@ -158,7 +158,7 @@ namespace ToolSupport
     template <class RepositoryT>
     void TypeToString(const RepositoryT* repository, DotsC_TypeId typeId, std::ostream &os)
     {
-        (Internal::ToStringHelper<RepositoryT>(repository, false)).TypeToString(typeId, os);
+        (Internal::ToStringHelper<RepositoryT>(repository, false)).TypeInfoToString(typeId, os);
     }
 }
 }

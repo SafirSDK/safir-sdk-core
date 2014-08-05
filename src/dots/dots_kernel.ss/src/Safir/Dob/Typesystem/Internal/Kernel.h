@@ -154,6 +154,9 @@ extern "C"
     // Comments:    Get integer value associated with the enumeration value for the specified enumeration type.
     DOTS_KERNEL_API DotsC_EnumerationValue DotsC_EnumerationValueFromName(DotsC_TypeId enumId, const char* enumValueName);
 
+    DOTS_KERNEL_API void DotsC_GetEnumerationChecksum(const DotsC_TypeId typeId,
+                                                      DotsC_TypeId & checksum);
+
     //  Functions for retrieving member info about object types
     //-----------------------------------------------------------
     // Function:    DotsC_GetNumberOfMembers
@@ -342,111 +345,31 @@ extern "C"
                                            bool& hasProperty,
                                            bool& isInherited);
 
-    //********************************************************
-    // Operations on blobs
-    //********************************************************
+    DOTS_KERNEL_API void DotsC_GetPropertyMappingKind(const DotsC_TypeId typeId,
+                                                      const DotsC_TypeId propertyId,
+                                                      const DotsC_MemberIndex member,
+                                                      DotsC_PropertyMappingKind & mappingKind,
+                                                      DotsC_ErrorCode & errorCode);
 
+    DOTS_KERNEL_API void DotsC_GetClassMemberReference(const DotsC_TypeId typeId,
+                                                       const DotsC_TypeId propertyId,
+                                                       const DotsC_MemberIndex member,
+                                                       const DotsC_Int32 * & classMemberReference, //out
+                                                       DotsC_Int32 & classMemberReferenceSize); //out
 
-    // Read operations
-    //------------------------------------------------------------------------
-    /**
-     * @brief Create a new instance of blob reader.
-     * @param blob [in] - The blob to read.
-     * @return Handle to a new blob reader instance.
-     */
-    DOTS_KERNEL_API DotsC_Handle DotsC_CreateBlobReader(const char* blob);
+    //Todo: Impelement and consider remove  PropertyParam-methods
+    DOTS_KERNEL_API void DotsC_GetPropertyParameterReference(const DotsC_TypeId typeId,
+                                                       const DotsC_TypeId propertyId,
+                                                       const DotsC_MemberIndex member,
+                                                       DotsC_ParameterIndex& paramId, //out
+                                                       DotsC_Int32& paramValueIndex); //out
 
-    /**
-     * @brief Deletes an instance of blob reader.
-     * @param handle [in] - Handle of the blob readet to be deleted.
-     */
-    DOTS_KERNEL_API void DotsC_DeleteBlobReader(DotsC_Handle handle);
-
-    /**
-     * @brief Get the type id of the blob.
-     * @param blob [in] - The blob.
-     * @return Type id of blob.
-     */
-    DOTS_KERNEL_API DotsC_TypeId DotsC_GetTypeId(const char* blob);
-
-
-    /**
-     * @brief Get size of blob.
-     * @param blob [in] - The blob.
-     * @return Size of blob.
-     */
-    DOTS_KERNEL_API DotsC_Int32 DotsC_GetSize(const char* blob);
-
-    // Function:    DotsC_IsAnythingChanged
-    // Parameters:  blob - the blob
-    // Returns:     true if any member has changed, else false.
-    // Comments:    Returns true if any member in the blob has been changed
-    //              since last call to DotsC_ResetChanged.
-    DOTS_KERNEL_API bool DotsC_IsAnythingChanged(const char* blob);
-
-
-    // Write operations
-    //------------------------------------------------------------------------
-    /**
-     * @brief Create a new instance of blob writer.
-     * @param typeId [in] - The type of blob to be written.
-     * @return Handle to a new blob writer instance.
-     */
-    DOTS_KERNEL_API DotsC_Handle DotsC_CreateBlobWriter(DotsC_TypeId typeId);
-
-    /**
-     * @brief Deletes an instance of blob writer.
-     * @param handle [in] - Handle of the blob writer to be deleted.
-     */
-    DOTS_KERNEL_API void DotsC_DeleteBlobWriter(DotsC_Handle handle);
-
-    // Function:    DotsC_ResetChanged
-    // Parameters:  blob - the blob
-    // Returns:     -
-    // Comments:    Reset changed flags for all members in the blob.
-    //               Note that this function is not recursive
-    DOTS_KERNEL_API void DotsC_ResetChanged(char* blob);
-
-    /** Recursively set all change flags.
-     *
-     * Recursively set changed flags for all members in the blob.
-     *
-     * @param blob [in,out] - The blob to modify.
-     * @param changed [in] - The value to set all change flags to
-     */
-    DOTS_KERNEL_API void DotsC_SetChanged(char* blob, bool changed);
-
-    /** Set the change flag on one member (non-recursively).
-     *
-     * @param blob [in,out] - The blob to modify.
-     * @param member [in] - id of the member.
-     * @param index [in] - array index of member. Shall be 0 if member is not an array.
-     * @param changed [in] - The value to set change flag to.
-     */
-    DOTS_KERNEL_API void DotsC_SetChangedHere(char* blob,
-                                              DotsC_MemberIndex member,
-                                              DotsC_Int32 index,
-                                              bool changed);
-
-    // Function:    DotsC_SetChangedMembers
-    // Parameters:  val -   the blob containing changes.
-    //              blob -  blob to be changed
-    // Returns:     -
-    // Comments:    Apply changes in val on the blob. Note that val and blob must be of exactly the same type.
-    DOTS_KERNEL_API void DotsC_SetChangedMembers(const char* val, char*& blob);
-
-    // Function:    DotsC_SetChangedSinceLastRead
-    // Parameters:  current -   the current version of the object.
-    //              lastRead -  last read version of the object.
-    // Returns:     -
-    // Comments:    Set changed flags for all members in current that have been changed since last read object.
-    DOTS_KERNEL_API void DotsC_SetChangedSinceLastRead(const char* lastRead, char* current);
 
     //************************************************************************************
     //* Serialization
     //************************************************************************************
 
-    // Function:    DotsC_BetterBlobToXml
+    // Function:    DotsC_BlobToXml
     // Parameters:  xmlDest     -   result of serialization, will be a xml string. Out parameter
     //              blobSource  -   blob to serialize
     //              bufSize     -   size of xmlDest. string is null terminated.
@@ -456,10 +379,10 @@ extern "C"
     //                              (so resultSize > bufSize ==> try again with bigger buffer)
     // Returns:     -
     // Comments:    Serializes a blob to a xml string.
-    DOTS_KERNEL_API void DotsC_BetterBlobToXml(char * const xmlDest,
-                                               const char * const blobSource,
-                                               const DotsC_Int32 bufSize,
-                                               DotsC_Int32 & resultSize);
+    DOTS_KERNEL_API void DotsC_BlobToXml(char * const xmlDest,
+                                         const char * const blobSource,
+                                         const DotsC_Int32 bufSize,
+                                         DotsC_Int32 & resultSize);
 
     // Function:    DotsC_BlobToXml
     // Parameters:  blobDest    -   blob that is the result of the serialization, out parameter
@@ -697,510 +620,6 @@ extern "C"
                                                   DotsC_Int32 & size);
 
     //************************************************************************************
-    //* Functions for retrieving member values
-    //************************************************************************************
-    // Function:    DotsC_IsNullMember
-    // Parameters:  blob    -   blob containing the object
-    //              member  -   id of member
-    //              index   -   array index. If member is not an array index shall be 0.
-    // Returns:     boolean value
-    // Comments:    Get the if a member is null or a value.
-    DOTS_KERNEL_API bool DotsC_IsNullMember(const char * const blob,
-                                            const DotsC_MemberIndex member,
-                                            const DotsC_Int32 index);
-
-    // Function:    DotsC_IsChangedMember
-    // Parameters:  blob    -   blob containing the object
-    //              member  -   id of member
-    //              index   -   array index. If member is not an array index shall be 0.
-    // Returns:     boolean value
-    // Comments:    Get the if a member is changed
-    DOTS_KERNEL_API bool DotsC_IsChangedMember(const char * const blob,
-                                               const DotsC_MemberIndex member,
-                                               const DotsC_Int32 index);
-
-    // Function:    DotsC_GetBooleanMember
-    // Parameters:  blob    -   blob containing the object
-    //              member  -   id of member
-    //              index   -   array index. If member is not an array index shall be 0.
-    //              val     -   the retrieved value.
-    //              isNull  -   indicates is this member is NULL. If true 'val' is not valid.
-    //              isChanged - indicates if the value has been changed.
-    // Returns:     -
-    // Comments:    Get a boolean member from a blob.
-    DOTS_KERNEL_API void DotsC_GetBooleanMember(const char * const blob,
-                                                const DotsC_MemberIndex member,
-                                                const DotsC_Int32 index,
-                                                bool & val,
-                                                bool & isNull,
-                                                bool & isChanged);
-
-    // Function:    DotsC_GetEnumerationMember
-    // Parameters:  blob    -   blob containing the object
-    //              member  -   id of member
-    //              index   -   array index. If member is not an array index shall be 0.
-    //              val     -   the retrieved value.
-    //              isNull  -   indicates is this member is NULL. If true 'val' is not valid.
-    //              isChanged - indicates if the value has been changed.
-    // Returns:     -
-    // Comments:    Get a enumeration member from a blob.
-    DOTS_KERNEL_API void DotsC_GetEnumerationMember(const char * const blob,
-                                                    const DotsC_MemberIndex member,
-                                                    const DotsC_Int32 index,
-                                                    DotsC_EnumerationValue & val,
-                                                    bool & isNull,
-                                                    bool & isChanged);
-
-    // Function:    DotsC_GetInt32Member
-    // Parameters:  blob    -   blob containing the object
-    //              member  -   id of member
-    //              index   -   array index. If member is not an array index shall be 0.
-    //              val     -   the retrieved value.
-    //              isNull  -   indicates is this member is NULL. If true 'val' is not valid.
-    //              isChanged - indicates if the value has been changed.
-    // Returns:     -
-    // Comments:    Get a 32-bits integer member from a blob.
-    DOTS_KERNEL_API void DotsC_GetInt32Member(const char * const blob,
-                                              const DotsC_MemberIndex member,
-                                              const DotsC_Int32 index,
-                                              DotsC_Int32 & val,
-                                              bool & isNull,
-                                              bool & isChanged);
-
-    // Function:    DotsC_GetInt64Member
-    // Parameters:  blob    -   blob containing the object
-    //              member  -   id of member
-    //              index   -   array index. If member is not an array index shall be 0.
-    //              val     -   the retrieved value.
-    //              isNull  -   indicates is this member is NULL. If true 'val' is not valid.
-    //              isChanged - indicates if the value has been changed.
-    // Returns:     -
-    // Comments:    Get a 64-bits integer member from a blob.
-    DOTS_KERNEL_API void DotsC_GetInt64Member(const char * const blob,
-                                              const DotsC_MemberIndex member,
-                                              const DotsC_Int32 index,
-                                              DotsC_Int64 & val,
-                                              bool & isNull,
-                                              bool & isChanged);
-
-    // Function:    DotsC_GetFloat32Member
-    // Parameters:  blob    -   blob containing the object
-    //              member  -   id of member
-    //              index   -   array index. If member is not an array index shall be 0.
-    //              val     -   the retrieved value.
-    //              isNull  -   indicates is this member is NULL. If true 'val' is not valid.
-    //              isChanged - indicates if the value has been changed.
-    // Returns:     -
-    // Comments:    Get a 32-bits float member from a blob.
-    DOTS_KERNEL_API void DotsC_GetFloat32Member(const char * const blob,
-                                                const DotsC_MemberIndex member,
-                                                const DotsC_Int32 index,
-                                                DotsC_Float32 & val,
-                                                bool & isNull,
-                                                bool & isChanged);
-
-    // Function:    DotsC_GetFloat64Member
-    // Parameters:  blob    -   blob containing the object
-    //              member  -   id of member
-    //              index   -   array index. If member is not an array index shall be 0.
-    //              val     -   the retrieved value.
-    //              isNull  -   indicates is this member is NULL. If true 'val' is not valid.
-    //              isChanged - indicates if the value has been changed.
-    // Returns:     -
-    // Comments:    Get a 64-bits float member from a blob.
-    DOTS_KERNEL_API void DotsC_GetFloat64Member(const char * const blob,
-                                                const DotsC_MemberIndex member,
-                                                const DotsC_Int32 index,
-                                                DotsC_Float64 & val,
-                                                bool & isNull,
-                                                bool & isChanged);
-
-    // Function:    DotsC_GetStringMember
-    // Parameters:  blob    -   blob containing the object
-    //              member  -   id of member
-    //              index   -   array index. If member is not an array index shall be 0.
-    //              val     -   the retrieved value.
-    //              isNull  -   indicates is this member is NULL. If true 'val' is not valid.
-    //              isChanged - indicates if the value has been changed.
-    // Returns:     -
-    // Comments:    Get a string member from a blob.
-    DOTS_KERNEL_API void DotsC_GetStringMember(const char * const blob,
-                                               const DotsC_MemberIndex member,
-                                               const DotsC_Int32 index,
-                                               const char * & val,
-                                               bool & isNull,
-                                               bool & isChanged);
-
-    // Function:    DotsC_GetTypeIdMember
-    // Parameters:  blob    -   blob containing the object
-    //              member  -   id of member
-    //              index   -   array index. If member is not an array index shall be 0.
-    //              val     -   the retrieved value.
-    //              isNull  -   indicates is this member is NULL. If true 'val' is not valid.
-    //              isChanged - indicates if the value has been changed.
-    // Returns:     -
-    // Comments:    Get a type id member from a blob.
-    DOTS_KERNEL_API void DotsC_GetTypeIdMember(const char * const blob,
-                                               const DotsC_MemberIndex member,
-                                               const DotsC_Int32 index,
-                                               DotsC_TypeId & val,
-                                               bool & isNull,
-                                               bool & isChanged);
-
-
-    // Function:    DotsC_GetHashedIdMember
-    // Parameters:  blob    -   blob containing the object
-    //              member  -   id of member
-    //              index   -   array index. If member is not an array index shall be 0.
-    //              hashVal -   the retrieved value.
-    //              hashStr -   the string if there was one, NULL otherwise.
-    //              isNull  -   indicates is this member is NULL. If true 'val' is not valid.
-    //              isChanged - indicates if the value has been changed.
-    // Returns:     -
-    // Comments:    Get a object id member from a blob.
-    DOTS_KERNEL_API void DotsC_GetHashedIdMember(const char * const blob,
-                                                 const DotsC_MemberIndex member,
-                                                 const DotsC_Int32 index,
-                                                 DotsC_Int64 & hashVal,
-                                                 const char * & strVal,
-                                                 bool & isNull,
-                                                 bool & isChanged);
-
-    // Function:    DotsC_GetEntityIdMember
-    // Parameters:  blob    -   blob containing the object
-    //              member  -   id of member
-    //              index   -   array index. If member is not an array index shall be 0.
-    //              entityId -   the retrieved value.
-    //              instanceIdStr - the instance string if there was one, NULL otherwise.
-    //              isNull  -   indicates is this member is NULL. If true 'val' is not valid.
-    //              isChanged - indicates if the value has been changed.
-    // Returns:     -
-    // Comments:    Get a object id member from a blob.
-    DOTS_KERNEL_API void DotsC_GetEntityIdMember(const char * const blob,
-                                                 const DotsC_MemberIndex member,
-                                                 const DotsC_Int32 index,
-                                                 DotsC_EntityId & entityId,
-                                                 const char * & instanceIdStr,
-                                                 bool & isNull,
-                                                 bool & isChanged);
-
-    // Function:    DotsC_GetObjectMember
-    // Parameters:  blob    -   blob containing the object
-    //              member  -   id of member
-    //              index   -   array index. If member is not an array index shall be 0.
-    //              val     -   the retrieved value.
-    //              isNull  -   indicates is this member is NULL. If true 'val' is not valid.
-    //              isChanged - indicates if the value has been changed.
-    // Returns:     -
-    // Comments:    Get a object member from a blob.
-    DOTS_KERNEL_API void DotsC_GetObjectMember(const char * const blob,
-                                               const DotsC_MemberIndex member,
-                                               const DotsC_Int32 index,
-                                               const char * & val,
-                                               bool & isNull,
-                                               bool & isChanged);
-
-
-    //Same as above, but val is non-const.
-    DOTS_KERNEL_API void DotsC_GetWriteableObjectMember(char * const blob,
-                                                        const DotsC_MemberIndex member,
-                                                        const DotsC_Int32 index,
-                                                        char * & val,
-                                                        bool & isNull,
-                                                        bool & isChanged);
-
-
-    // Function:    DotsC_GetBinaryMember
-    // Parameters:  blob    -   blob containing the object
-    //              member  -   id of member
-    //              index   -   array index. If member is not an array index shall be 0.
-    //              val     -   the retrieved value.
-    //              size    -   number of bytes in val.
-    //              isNull  -   indicates is this member is NULL. If true 'val' is not valid.
-    //              isChanged - indicates if the value has been changed.
-    // Returns:     -
-    // Comments:    Get a object member from a blob.
-    DOTS_KERNEL_API void DotsC_GetBinaryMember(const char * const blob,
-                                               const DotsC_MemberIndex member,
-                                               const DotsC_Int32 index,
-                                               const char * & val,
-                                               DotsC_Int32 & size,
-                                               bool & isNull,
-                                               bool & isChanged);
-
-    //************************************************************************************
-    //* Functions for setting member values
-    //************************************************************************************
-    // Function:    DotsC_SetNullMember
-    // Parameters:  blob        -   blob containing the member.
-    //              member      -   id of the member
-    //              index       -   array index of member. Shall be 0 if member is not an array.
-    // Returns:     -
-    // Comments:    Sets the member to null.
-    DOTS_KERNEL_API void DotsC_SetNullMember(char * const blob,
-                                             const DotsC_MemberIndex member,
-                                             const DotsC_Int32 index);
-
-    // Function:    DotsC_SetBooleanMember
-    // Parameters:  val     -   the value to be set
-    //              blob    -   blob containing the member.
-    //              member  -   id of the member
-    //              index   -   array index of member. Shall be 0 if member is not an array.
-    // Returns:     -
-    // Comments:    Sets the value for a boolean member.
-    DOTS_KERNEL_API void DotsC_SetBooleanMember(const bool val,
-                                                char * & blob,
-                                                const DotsC_MemberIndex member,
-                                                const DotsC_Int32 index);
-
-    // Function:    DotsC_SetEnumerationMember
-    // Parameters:  val     -   the value to be set
-    //              blob    -   blob containing the member.
-    //              member  -   id of the member
-    //              index   -   array index of member. Shall be 0 if member is not an array.
-    // Returns:     -
-    // Comments:    Sets the value for a enumeration member.
-    DOTS_KERNEL_API void DotsC_SetEnumerationMember(const DotsC_EnumerationValue val,
-                                                    char * & blob,
-                                                    const DotsC_MemberIndex member,
-                                                    const DotsC_Int32 index);
-
-    // Function:    DotsC_SetInt32Member
-    // Parameters:  val     -   the value to be set
-    //              blob    -   blob containing the member.
-    //              member  -   id of the member
-    //              index   -   array index of member. Shall be 0 if member is not an array.
-    // Returns:     -
-    // Comments:    Sets the value for a 32-bits integer member.
-    DOTS_KERNEL_API void DotsC_SetInt32Member(const DotsC_Int32 val,
-                                              char * & blob,
-                                              const DotsC_MemberIndex member,
-                                              const DotsC_Int32 index);
-
-    // Function:    DotsC_SetInt64Member
-    // Parameters:  val     -   the value to be set
-    //              blob    -   blob containing the member.
-    //              member  -   id of the member
-    //              index   -   array index of member. Shall be 0 if member is not an array.
-    // Returns:     -
-    // Comments:    Sets the value for a 64-bits integer member.
-    DOTS_KERNEL_API void DotsC_SetInt64Member(const DotsC_Int64 val,
-                                              char * & blob,
-                                              const DotsC_MemberIndex member,
-                                              const DotsC_Int32 index);
-
-    // Function:    DotsC_SetFloat32Member
-    // Parameters:  val     -   the value to be set
-    //              blob    -   blob containing the member.
-    //              member  -   id of the member
-    //              index   -   array index of member. Shall be 0 if member is not an array.
-    // Comments:    Sets the value for a 32-bits float member.
-    DOTS_KERNEL_API void DotsC_SetFloat32Member(const DotsC_Float32 val,
-                                                char * & blob,
-                                                const DotsC_MemberIndex member,
-                                                const DotsC_Int32 index);
-
-    // Function:    DotsC_SetFloat64Member
-    // Parameters:  val     -   the value to be set
-    //              blob    -   blob containing the member.
-    //              member  -   id of the member
-    //              index   -   array index of member. Shall be 0 if member is not an array.
-    // Returns:     -
-    // Comments:    Sets the value for a 64-bits float member.
-    DOTS_KERNEL_API void DotsC_SetFloat64Member(const DotsC_Float64 val,
-                                                char * & blob,
-                                                const DotsC_MemberIndex member,
-                                                const DotsC_Int32 index);
-
-    // Function:    DotsC_SetStringMember
-    // Parameters:  val     -   the value to be set
-    //              blob    -   blob containing the member.
-    //              member  -   id of the member
-    //              index   -   array index of member. Shall be 0 if member is not an array.
-    // Returns:     -
-    // Comments:    Sets the value for a string member.
-    DOTS_KERNEL_API void DotsC_SetStringMember(const char * const val,
-                                               char * & blob,
-                                               const DotsC_MemberIndex member,
-                                               const DotsC_Int32 index);
-
-    // Function:    DotsC_SetTypeIdMember
-    // Parameters:  val     -   the value to be set
-    //              blob    -   blob containing the member.
-    //              member  -   id of the member
-    //              index   -   array index of member. Shall be 0 if member is not an array.
-    // Returns:     -
-    // Comments:    Sets the value for a type id member.
-    DOTS_KERNEL_API void DotsC_SetTypeIdMember(const DotsC_TypeId val,
-                                               char * & blob,
-                                               const DotsC_MemberIndex member,
-                                               const DotsC_Int32 index);
-
-
-    // Function:    DotsC_SetHashedIdMember
-    // Parameters:  hashVal     -   the value to be set.
-    //              strVal      - the string value to set, can be NULL if need be.
-    //              blob    -   blob containing the member.
-    //              member  -   id of the member
-    //              index   -   array index of member. Shall be 0 if member is not an array.
-    // Returns:     -
-    // Comments:    Sets the value for a hashed id member.
-    DOTS_KERNEL_API void DotsC_SetHashedIdMember(const DotsC_Int64 hashVal,
-                                                 const char * const strVal,
-                                                 char * & blob,
-                                                 const DotsC_MemberIndex member,
-                                                 const DotsC_Int32 index);
-
-    // Function:    DotsC_SetEntityIdMember
-    // Parameters:  val     -   the value to be set.
-    //              instanceIdStr - the string value to set, can be NULL if need be.
-    //              blob    -   blob containing the member.
-    //              member  -   id of the member
-    //              index   -   array index of member. Shall be 0 if member is not an array.
-    // Returns:     -
-    // Comments:    Sets the value for a object id member.
-    //              NOTE! The parameter val is sent by reference because of Ada will not work
-    //                    with a structure by value.
-    DOTS_KERNEL_API void DotsC_SetEntityIdMember(const DotsC_EntityId& val,
-                                                 const char * const instanceIdStr,
-                                                 char * & blob,
-                                                 const DotsC_MemberIndex member,
-                                                 const DotsC_Int32 index);
-
-    // Function:    DotsC_SetObjectMember
-    // Parameters:  val     -   the value to be set
-    //              blob    -   blob containing the member.
-    //              member  -   id of the member
-    //              index   -   array index of member. Shall be 0 if member is not an array.
-    // Returns:     -
-    // Comments:    Sets the value for a object member.
-    DOTS_KERNEL_API void DotsC_SetObjectMember(const char * const val,
-                                               char * & blob,
-                                               const DotsC_MemberIndex member,
-                                               const DotsC_Int32 index);
-
-    // Function:    DotsC_SetBinaryMember
-    // Parameters:  val     -   the value to be set
-    //              numberOfBytes    -   number of bytes in val to be written into the blob
-    //              blob    -   blob containing the member.
-    //              member  -   id of the member
-    //              index   -   array index of member. Shall be 0 if member is not an array.
-    // Returns:     -
-    // Comments:    Sets the value for a object member.
-    DOTS_KERNEL_API void DotsC_SetBinaryMember(const char * const val,
-                                               const DotsC_Int32 numberOfBytes,
-                                               char * & blob,
-                                               const DotsC_MemberIndex member,
-                                               const DotsC_Int32 index);
-
-
-    //*********************************
-    //* For "real classes"
-    //*********************************
-
-    //TODO: rename this function to reflect what it is actually doing (not size of whole class, just of the members in this class)
-    DOTS_KERNEL_API DotsC_Int32 DotsC_GetInitialSize(const DotsC_TypeId typeId);
-
-    DOTS_KERNEL_API void DotsC_FormatBlob(char * const blob,
-                                          const DotsC_Int32 blobSize,
-                                          const DotsC_TypeId typeId,
-                                          char * & beginningOfUnused);
-
-    DOTS_KERNEL_API void DotsC_CreateObjectMember(char * const insideBlob,
-                                                  const DotsC_Int32 blobSize,
-                                                  const DotsC_TypeId typeId,
-                                                  const DotsC_MemberIndex member,
-                                                  const DotsC_Int32 index,
-                                                  const bool isChanged,
-                                                  char * & beginningOfUnused);
-
-    DOTS_KERNEL_API void DotsC_CreateStringMember(char * const insideBlob,
-                                                  const DotsC_Int32 stringLength, //remember the null-termination!
-                                                  const DotsC_MemberIndex member,
-                                                  const DotsC_Int32 index,
-                                                  const bool isChanged,
-                                                  char * & beginningOfUnused);
-
-    DOTS_KERNEL_API void DotsC_CreateBinaryMember(char * const insideBlob,
-                                                  const DotsC_Int32 binarySize,
-                                                  const DotsC_MemberIndex member,
-                                                  const DotsC_Int32 index,
-                                                  const bool isChanged,
-                                                  char * & beginningOfUnused);
-
-
-    DOTS_KERNEL_API void DotsC_SetBooleanMemberInPreallocated(const bool val,
-                                                              const bool isNull,
-                                                              const bool isChanged,
-                                                              char * const blob,
-                                                              const DotsC_MemberIndex member,
-                                                              const DotsC_Int32 index);
-
-    DOTS_KERNEL_API void DotsC_SetInt32MemberInPreallocated(const DotsC_Int32 val,
-                                                            const bool isNull,
-                                                            const bool isChanged,
-                                                            char * const blob,
-                                                            const DotsC_MemberIndex member,
-                                                            const DotsC_Int32 index);
-
-
-    DOTS_KERNEL_API void DotsC_SetInt64MemberInPreallocated(const DotsC_Int64 val,
-                                                            const bool isNull,
-                                                            const bool isChanged,
-                                                            char * const blob,
-                                                            const DotsC_MemberIndex member,
-                                                            const DotsC_Int32 index);
-
-    DOTS_KERNEL_API void DotsC_SetFloat32MemberInPreallocated(const DotsC_Float32 val,
-                                                              const bool isNull,
-                                                              const bool isChanged,
-                                                              char * const blob,
-                                                              const DotsC_MemberIndex member,
-                                                              const DotsC_Int32 index);
-
-    DOTS_KERNEL_API void DotsC_SetFloat64MemberInPreallocated(const DotsC_Float64 val,
-                                                              const bool isNull,
-                                                              const bool isChanged,
-                                                              char * const blob,
-                                                              const DotsC_MemberIndex member,
-                                                              const DotsC_Int32 index);
-
-    DOTS_KERNEL_API void DotsC_SetHashedIdMemberInPreallocated(const DotsC_Int64 hashVal,
-                                                               const char * const strVal,
-                                                               const DotsC_Int32 stringLength,
-                                                               const bool isNull,
-                                                               const bool isChanged,
-                                                               char * const blob,
-                                                               const DotsC_MemberIndex member,
-                                                               const DotsC_Int32 index,
-                                                               char * & beginningOfUnused);
-
-    DOTS_KERNEL_API void DotsC_SetEntityIdMemberInPreallocated(const DotsC_EntityId & entityId,
-                                                               const char * const instanceIdStr,
-                                                               const DotsC_Int32 stringLength,
-                                                               const bool isNull,
-                                                               const bool isChanged,
-                                                               char * const blob,
-                                                               const DotsC_MemberIndex member,
-                                                               const DotsC_Int32 index,
-                                                               char * & beginningOfUnused);
-
-    DOTS_KERNEL_API void DotsC_GetPropertyMappingKind(const DotsC_TypeId typeId,
-                                                      const DotsC_TypeId propertyId,
-                                                      const DotsC_MemberIndex member,
-                                                      DotsC_PropertyMappingKind & mappingKind,
-                                                      DotsC_ErrorCode & errorCode);
-
-    DOTS_KERNEL_API void DotsC_GetClassMemberReference(const DotsC_TypeId typeId,
-                                                       const DotsC_TypeId propertyId,
-                                                       const DotsC_MemberIndex member,
-                                                       const DotsC_Int32 * & classMemberReference, //out
-                                                       DotsC_Int32 & classMemberReferenceSize); //out
-
-    DOTS_KERNEL_API void DotsC_GetEnumerationChecksum(const DotsC_TypeId typeId,
-                                                      DotsC_TypeId & checksum);
-
-    //************************************************************************************
     //* Functions for retrieval of parameters in properties
     //************************************************************************************
     // Function:    DotsC_GetBooleanPropertyParameter
@@ -1380,7 +799,86 @@ extern "C"
                                                           const DotsC_Int32 index,
                                                           const char * & val,
                                                           DotsC_Int32 & size);
-    
+
+    //********************************************************
+    // Operations on blobs
+    //********************************************************
+
+
+    // Read operations
+    //------------------------------------------------------------------------
+    /**
+     * @brief Get the type id of the blob.
+     * @param blob [in] - The blob.
+     * @return Type id of blob.
+     */
+    DOTS_KERNEL_API DotsC_TypeId DotsC_GetTypeId(const char* blob);
+
+
+    /**
+     * @brief Get size of blob.
+     * @param blob [in] - The blob.
+     * @return Size of blob.
+     */
+    DOTS_KERNEL_API DotsC_Int32 DotsC_GetSize(const char* blob);
+
+    /**
+     * @brief Create a new instance of blob reader.
+     * @param blob [in] - The blob to read.
+     * @return Handle to a new blob reader instance.
+     */
+    DOTS_KERNEL_API DotsC_Handle DotsC_CreateBlobReader(const char* blob);
+
+    /**
+     * @brief Deletes an instance of blob reader.
+     * @param handle [in] - Handle of the blob readet to be deleted.
+     */
+    DOTS_KERNEL_API void DotsC_DeleteBlobReader(DotsC_Handle handle);
+
+    DOTS_KERNEL_API void DotsC_SetReadCursor(DotsC_Handle reader, DotsC_MemberIndex member);
+    DOTS_KERNEL_API DotsC_Int32 DotsC_GetNumberOfValues(DotsC_Handle reader);
+    DOTS_KERNEL_API bool DotsC_IsNull(DotsC_Handle reader, DotsC_Int32 valueIndex);
+    DOTS_KERNEL_API bool DotsC_IsChanged(DotsC_Handle reader, DotsC_Int32 valueIndex);
+
+    DOTS_KERNEL_API void DotsC_ReadInt32(DotsC_Handle reader, DotsC_Int32 valueIndex, bool key, DotsC_Int32& val);
+    DOTS_KERNEL_API void DotsC_ReadInt64(DotsC_Handle reader, DotsC_Int32 valueIndex, bool key, DotsC_Int64& val);
+    DOTS_KERNEL_API void DotsC_ReadFloat32(DotsC_Handle reader, DotsC_Int32 valueIndex, DotsC_Float32& val);
+    DOTS_KERNEL_API void DotsC_ReadFloat64(DotsC_Handle reader, DotsC_Int32 valueIndex, DotsC_Float64& val);
+    DOTS_KERNEL_API void DotsC_ReadBool(DotsC_Handle reader, DotsC_Int32 valueIndex, bool& val);
+    DOTS_KERNEL_API void DotsC_ReadString(DotsC_Handle reader, DotsC_Int32 valueIndex, bool key, const char*& val);
+    DOTS_KERNEL_API void DotsC_ReadHash(DotsC_Handle reader, DotsC_Int32 valueIndex, bool key, DotsC_Int64& val, const char*& optionalStr);
+    DOTS_KERNEL_API void DotsC_ReadEntityId(DotsC_Handle reader, DotsC_Int32 valueIndex, bool key, DotsC_EntityId& val, const char*& optionalStr);
+    DOTS_KERNEL_API void DotsC_ReadBinary(DotsC_Handle reader, DotsC_Int32 valueIndex, const char*& val, DotsC_Int32& size);
+    DOTS_KERNEL_API void DotsC_ReadObject(DotsC_Handle reader, DotsC_Int32 valueIndex, const char*& val);
+
+
+    // Write operations
+    //------------------------------------------------------------------------
+    /**
+     * @brief Create a new instance of blob writer.
+     * @param typeId [in] - The type of blob to be written.
+     * @return Handle to a new blob writer instance.
+     */
+    DOTS_KERNEL_API DotsC_Handle DotsC_CreateBlobWriter(DotsC_TypeId typeId);
+    DOTS_KERNEL_API void DotsC_BeginSetMember(DotsC_Handle writer, DotsC_MemberIndex member);
+    DOTS_KERNEL_API void DotsC_CommitSetMember(DotsC_Handle writer);
+
+    DOTS_KERNEL_API void DotsC_SetChanged(DotsC_Handle writer, bool isChanged);
+    DOTS_KERNEL_API void DotsC_SetInt32(DotsC_Handle writer, DotsC_Int32 val, bool key);
+    DOTS_KERNEL_API void DotsC_SetInt64(DotsC_Handle writer, DotsC_Int64 val, bool key);
+    DOTS_KERNEL_API void DotsC_SetFloat32(DotsC_Handle writer, DotsC_Float32 val);
+    DOTS_KERNEL_API void DotsC_SetFloat64(DotsC_Handle writer, DotsC_Float64 val);
+    DOTS_KERNEL_API void DotsC_SetBool(DotsC_Handle writer, bool val);
+    DOTS_KERNEL_API void DotsC_SetString(DotsC_Handle writer, const char* val, bool key);
+    DOTS_KERNEL_API void DotsC_SetHash(DotsC_Handle writer, DotsC_Int64 hash, const char* str, bool key);
+    DOTS_KERNEL_API void DotsC_SetEntityId(DotsC_Handle writer, const DotsC_EntityId& val, const char* instanceString, bool key);
+    DOTS_KERNEL_API void DotsC_SetBinary(DotsC_Handle writer, const char* val, DotsC_Int32 size);
+    DOTS_KERNEL_API void DotsC_SetObject(DotsC_Handle writer, const char* blob);
+
+    DOTS_KERNEL_API DotsC_Int32 DotsC_CalculateBlobSize(DotsC_Handle writer);
+    DOTS_KERNEL_API void DotsC_WriteBlob(DotsC_Handle writer, char* blobDest);
+    DOTS_KERNEL_API void DotsC_DeleteBlobWriter(DotsC_Handle handle);
+
     //************************************************************************************
     //* Library exception handling
     //************************************************************************************
@@ -1402,25 +900,10 @@ extern "C"
 
     // Function:    DotsC_GetDouFilePathForType
     // Parameters:  typeId      -   Type to find path for
-    //              buf         -   Buffer where file path will be put, will be null terminated
-    //              bufSize     -   size of buf.
-    //              resultSize  -   if the buffer was big enough for the xml this holds the number
-    //                              of bytes written
-    //                              if it was too small it holds the size that was needed
-    //                              (so resultSize > bufSize ==> try again with bigger buffer)
-    //                              -1 on failure to find type or dou file.
-    //                              Includes the null termination at the end.
-    // Returns:     -
-    // Comments:    Get the full path to the dou file that the type id represents
-    //              Note that this function looks at the disk every time it is called. No caching
-    //              is performed at all. Not meant to be used in "real" code.
-    DOTS_KERNEL_API void DotsC_GetDouFilePathForType(const DotsC_TypeId typeId,
-                                                     char * const buf, 
-                                                     const DotsC_Int32 bufSize, 
-                                                     DotsC_Int32 & resultSize);
 
+    // Returns:     Pointer to a string containing full path to the dou-file.
+    // Comments:    Get the full path to the dou file that the type id represents.
     DOTS_KERNEL_API const char* DotsC_GetDouFilePath(const DotsC_TypeId typeId);
-
 
     // Function:    DotsC_TypeRepositoryLoadedByThisProcess
     // Returns:     True if this process created the shared memory and loaded the type repository
