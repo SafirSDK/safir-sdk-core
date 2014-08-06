@@ -9,6 +9,10 @@ FILE(GLOB sources *.cpp)
 
 ADD_LIBRARY(dose_com SHARED ${sources} ${headers})
 
+ADD_DEFINITIONS(-DDOSE_COM_EXPORTS)
+
+TARGET_LINK_LIBRARIES(dose_com ${ACE_LIBRARY})
+
 if (WIN32)
     TARGET_LINK_LIBRARIES(dose_com ws2_32)
 endif()
