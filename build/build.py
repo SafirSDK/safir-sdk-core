@@ -428,7 +428,9 @@ class BuilderBase(object):
             dummyfile.close()
 
         output = self._run_command((ctest(),
-                                     "-T", "Test", "--output-on-failure"),
+                                     "-T", "Test",
+                                     "--output-on-failure",
+                                     "--no-compress-output"),
                                     "Test", directory, allow_fail = True)
         self.interpret_test_output(output)
 
