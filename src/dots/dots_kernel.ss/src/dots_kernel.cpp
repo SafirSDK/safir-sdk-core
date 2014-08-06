@@ -43,6 +43,7 @@
 #include "dots_exception_keeper.h"
 
 using namespace Safir::Dob::Typesystem::Internal;
+namespace ts = Safir::Dob::Typesystem::ToolSupport;
 
 namespace 
 {
@@ -110,6 +111,40 @@ namespace
 
         return true;
     }
+
+    struct ReaderState
+    {
+        ts::BlobReader<RepositoryShm> reader;
+        DotsC_MemberIndex member;
+
+        ReaderState(const char* blob)
+            :reader(RepositoryKeeper::GetRepository(), blob)
+            ,member(0)
+        {
+        }
+
+        static ReaderState* FromHandle(DotsC_Handle handle)
+        {
+            return (ReaderState*)handle;
+        }
+    };
+
+    struct WriterState
+    {
+        ts::BlobWriter<RepositoryShm> writer;
+        DotsC_MemberIndex member;
+
+        WriterState(DotsC_TypeId typeId)
+            :writer(RepositoryKeeper::GetRepository(), typeId)
+            ,member(0)
+        {
+        }
+
+        static WriterState* FromHandle(DotsC_Handle handle)
+        {
+            return (WriterState*)handle;
+        }
+    };
 }
 
 //********************************************************
@@ -206,7 +241,7 @@ bool DotsC_IsException(const DotsC_TypeId typeId)
 DotsC_TypeId DotsC_TypeIdFromName(const char* typeName)
 {
     Init();
-    return Safir::Dob::Typesystem::ToolSupport::TypeUtilities::CalculateTypeId(typeName);
+    return ts::TypeUtilities::CalculateTypeId(typeName);
 }
 
 const char* DotsC_GetTypeName(const DotsC_TypeId typeId)
@@ -244,9 +279,24 @@ DotsC_EnumerationValue DotsC_EnumerationValueFromName(const DotsC_TypeId enumId,
     const EnumDescriptionShm* ed=RepositoryKeeper::GetRepository()->GetEnum(enumId);
     if (ed!=NULL)
     {
-        return Safir::Dob::Typesystem::ToolSupport::TypeUtilities::GetIndexOfEnumValue(ed, enumValueName);
+        return ts::TypeUtilities::GetIndexOfEnumValue(ed, enumValueName);
     }
     return -1;
+}
+
+void DotsC_GetEnumerationChecksum(const DotsC_TypeId typeId,
+                                  DotsC_TypeId & checksum)
+{
+    Init();
+    const EnumDescriptionShm* ed=RepositoryKeeper::GetRepository()->GetEnum(typeId);
+    if (ed==NULL)
+    {
+        checksum=0;
+    }
+    else
+    {
+        checksum=ed->GetCheckSum();
+    }
 }
 
 //***********************************************************
@@ -542,14 +592,14 @@ const char* DotsC_GetMemberTypeName(const DotsC_TypeId typeId, const DotsC_Membe
     const ClassDescriptionShm* cd=RepositoryKeeper::GetRepository()->GetClass(typeId);
     if (cd!=NULL)
     {
-        return Safir::Dob::Typesystem::ToolSupport::TypeUtilities::GetTypeName(cd->GetMember(member)->GetMemberType());
+        return ts::TypeUtilities::GetTypeName(cd->GetMember(member)->GetMemberType());
     }
     else
     {
         const PropertyDescriptionShm* pd=RepositoryKeeper::GetRepository()->GetProperty(typeId);
         if (pd!=NULL)
         {
-            return Safir::Dob::Typesystem::ToolSupport::TypeUtilities::GetTypeName(pd->GetMember(member)->GetMemberType());
+            return ts::TypeUtilities::GetTypeName(pd->GetMember(member)->GetMemberType());
         }
     }
 
@@ -613,11 +663,11 @@ const char* DotsC_GetParameterTypeName(const DotsC_TypeId typeId, const DotsC_Pa
     const ParameterDescriptionShm* pd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
     if (pd->GetMemberType()==ObjectMemberType || pd->GetMemberType()==EnumerationMemberType)
     {
-        return Safir::Dob::Typesystem::ToolSupport::TypeUtilities::GetTypeName(RepositoryKeeper::GetRepository(), pd->GetTypeId());
+        return ts::TypeUtilities::GetTypeName(RepositoryKeeper::GetRepository(), pd->GetTypeId());
     }
     else
     {
-        return Safir::Dob::Typesystem::ToolSupport::TypeUtilities::GetTypeName(pd->GetMemberType());
+        return ts::TypeUtilities::GetTypeName(pd->GetMemberType());
     }
 }
 
@@ -634,7 +684,7 @@ DotsC_Int32 DotsC_GetParameterArraySize(const DotsC_TypeId typeId, const DotsC_P
 bool DotsC_IsOfType(const DotsC_TypeId type, const DotsC_TypeId ofType)
 {
     Init();
-    return Safir::Dob::Typesystem::ToolSupport::TypeUtilities::IsOfType(RepositoryKeeper::GetRepository(), type, ofType);
+    return ts::TypeUtilities::IsOfType(RepositoryKeeper::GetRepository(), type, ofType);
 }
 
 void DotsC_GetCompleteType(const DotsC_TypeId type,
@@ -677,7 +727,74 @@ void DotsC_HasProperty(const DotsC_TypeId classTypeId, const DotsC_TypeId proper
     }
 }
 
+void DotsC_GetPropertyMappingKind(const DotsC_TypeId typeId,
+                                  const DotsC_TypeId propertyId,
+                                  const DotsC_MemberIndex member,
+                                  DotsC_PropertyMappingKind & mappingKind,
+                                  DotsC_ErrorCode & errorCode)
+{
+    Init();
+    errorCode=NoError;
 
+    bool isInherited;
+    const PropertyMappingDescriptionShm* pmd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetPropertyMapping(propertyId, isInherited);
+
+    if (pmd==NULL)
+    {
+        errorCode=IllegalValue;
+        return;
+    }
+
+    const MemberMappingDescriptionShm* mm=pmd->GetMemberMapping(member);
+
+    if (mm==NULL)
+    {
+        errorCode=IllegalValue;
+    }
+    else
+    {
+        mappingKind=mm->GetMappingKind();
+    }
+}
+
+
+void DotsC_GetClassMemberReference(const DotsC_TypeId typeId,
+                                   const DotsC_TypeId propertyId,
+                                   const DotsC_MemberIndex member,
+                                   const DotsC_Int32* & classMemberReference,
+                                   DotsC_Int32 & classMemberReferenceSize)
+{
+    Init();
+    classMemberReference=NULL;
+    classMemberReferenceSize=0;
+
+    bool isInherited;
+    const PropertyMappingDescriptionShm* pmd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetPropertyMapping(propertyId, isInherited);
+
+    if (pmd==NULL)
+    {
+        return;
+    }
+
+    const MemberMappingDescriptionShm* mm=pmd->GetMemberMapping(member);
+
+    if (mm==NULL || mm->GetMappingKind()!=MappedToMember)
+    {
+        return;
+    }
+
+    classMemberReference=mm->GetRawMemberRef();
+    classMemberReferenceSize=mm->MemberReferenceDepth()*2;
+}
+
+void DotsC_GetPropertyParameterReference(const DotsC_TypeId typeId,
+                                         const DotsC_TypeId propertyId,
+                                         const DotsC_MemberIndex member,
+                                         DotsC_ParameterIndex& paramId, //out
+                                         DotsC_Int32& paramValueIndex) //out
+{
+    //TODO: implement and remove GetXXXPropertyParam-methods
+}
 
 ////************************************************************************************
 ////* Serialization
@@ -686,7 +803,7 @@ void DotsC_BlobToXml(char* const xmlDest, const char* const blobSource, const Do
 {
     Init();
     std::ostringstream xmlStream;
-    Safir::Dob::Typesystem::ToolSupport::BinaryToXml(RepositoryKeeper::GetRepository(), blobSource, xmlStream);
+    ts::BinaryToXml(RepositoryKeeper::GetRepository(), blobSource, xmlStream);
     std::string xml=xmlStream.str();
     resultSize=static_cast<DotsC_Int32>(xml.size())+1; //add one char for null termination
     if (resultSize <= bufSize)
@@ -704,7 +821,7 @@ void DotsC_XmlToBlob(char* & blobDest,
     Init();
     deleter=DeleteBytePointer;
     std::vector<char> blob;
-    Safir::Dob::Typesystem::ToolSupport::XmlToBinary(RepositoryKeeper::GetRepository(), xmlSource, blob);
+    ts::XmlToBinary(RepositoryKeeper::GetRepository(), xmlSource, blob);
     if (!blob.empty())
     {
         blobDest=new char[blob.size()];
@@ -723,7 +840,7 @@ void DotsC_BlobToJson(char * const jsonDest,
 {
     Init();
     std::ostringstream jsonStream;
-    Safir::Dob::Typesystem::ToolSupport::BinaryToJson(RepositoryKeeper::GetRepository(), blobSource, jsonStream);
+    ts::BinaryToJson(RepositoryKeeper::GetRepository(), blobSource, jsonStream);
     std::string json=jsonStream.str();
     resultSize=static_cast<DotsC_Int32>(json.size())+1; //add one char for null termination
     if (resultSize <= bufSize)
@@ -739,7 +856,7 @@ void DotsC_JsonToBlob(char * & blobDest,
     Init();
     deleter=DeleteBytePointer;
     std::vector<char> blob;
-    Safir::Dob::Typesystem::ToolSupport::JsonToBinary(RepositoryKeeper::GetRepository(), jsonSource, blob);
+    ts::JsonToBinary(RepositoryKeeper::GetRepository(), jsonSource, blob);
     if (!blob.empty())
     {
         blobDest=new char[blob.size()];
@@ -769,7 +886,7 @@ void DotsC_BinaryToBase64(char* base64Dest,
 {
     Init();
     std::ostringstream b64Stream;
-    Safir::Dob::Typesystem::ToolSupport::BinaryToBase64(binarySource, sourceSize, b64Stream);
+    ts::BinaryToBase64(binarySource, sourceSize, b64Stream);
     std::string base64=b64Stream.str();
     resultSize=static_cast<DotsC_Int32>(base64.size())+1; //add one char for null termination
     strncpy(base64Dest, base64.c_str(), std::min(resultSize, destSize));
@@ -791,7 +908,7 @@ void DotsC_Base64ToBinary(char* binaryDest,
     Init();
     std::vector<char> bin;
     std::string base64(base64Source, base64Source+static_cast<size_t>(sourceSize));
-    Safir::Dob::Typesystem::ToolSupport::Base64ToBinary(base64, bin);
+    ts::Base64ToBinary(base64, bin);
     resultSize=static_cast<DotsC_Int32>(bin.size());
     if (resultSize<=destSize)
     {
@@ -1104,88 +1221,258 @@ void DotsC_GetBinaryPropertyParameter(const DotsC_TypeId typeId,
     }
 }
 
-////********************************************************
-////* Base operations on blobs
-////********************************************************
+//********************************************************
+//* Base operations on blobs
+//********************************************************
 
-void DotsC_GetPropertyMappingKind(const DotsC_TypeId typeId,
-                                  const DotsC_TypeId propertyId,
-                                  const DotsC_MemberIndex member,
-                                  DotsC_PropertyMappingKind & mappingKind,
-                                  DotsC_ErrorCode & errorCode)
+//Read operations
+DotsC_TypeId DotsC_GetTypeId(const char* blob)
 {
-    Init();
-    errorCode=NoError;
+    return ts::BlobReader<RepositoryShm>::GetTypeId(blob);
+}
 
-    bool isInherited;
-    const PropertyMappingDescriptionShm* pmd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetPropertyMapping(propertyId, isInherited);
+DotsC_Int32 DotsC_GetSize(const char* blob)
+{
+    return ts::BlobReader<RepositoryShm>::GetSize(blob);
+}
 
-    if (pmd==NULL)
+DotsC_Handle DotsC_CreateBlobReader(const char* blob)
+{
+    ReaderState* rs=new ReaderState(blob);
+    DotsC_Handle address=(DotsC_Handle)rs;
+    return address;
+}
+
+void DotsC_DeleteBlobReader(DotsC_Handle handle)
+{
+    ReaderState* rs=ReaderState::FromHandle(handle);
+    delete rs;
+}
+
+void DotsC_SetReadCursor(DotsC_Handle reader, DotsC_MemberIndex member)
+{
+    ReaderState* rs=ReaderState::FromHandle(reader);
+    rs->member=member;
+}
+
+DotsC_Int32 DotsC_GetNumberOfValues(DotsC_Handle reader)
+{
+    ReaderState* rs=ReaderState::FromHandle(reader);
+    return rs->reader.NumberOfValues(rs->member);
+}
+
+void DotsC_ReadStatus(DotsC_Handle reader, DotsC_Int32 valueIndex, bool& isNull, bool& isChanged)
+{
+    ReaderState* rs=ReaderState::FromHandle(reader);
+    rs->reader.ReadStatus(rs->member, valueIndex, isNull, isChanged);
+}
+
+
+void DotsC_ReadInt32(DotsC_Handle reader, DotsC_Int32 valueIndex, bool key, DotsC_Int32& val)
+{
+    ReaderState* rs=ReaderState::FromHandle(reader);
+    if (key)
     {
-        errorCode=IllegalValue;
-        return;
-    }
-
-    const MemberMappingDescriptionShm* mm=pmd->GetMemberMapping(member);
-
-    if (mm==NULL)
-    {
-        errorCode=IllegalValue;
+        val=rs->reader.ReadKey<DotsC_Int32>(rs->member, valueIndex);
     }
     else
     {
-        mappingKind=mm->GetMappingKind();
+        bool isNull=false, isChanged=true;
+        rs->reader.ReadValue(rs->member, valueIndex, val, isNull, isChanged);
     }
 }
 
-
-void DotsC_GetClassMemberReference(const DotsC_TypeId typeId,
-                                   const DotsC_TypeId propertyId,
-                                   const DotsC_MemberIndex member,
-                                   const DotsC_Int32* & classMemberReference,
-                                   DotsC_Int32 & classMemberReferenceSize)
+void DotsC_ReadInt64(DotsC_Handle reader, DotsC_Int32 valueIndex, bool key, DotsC_Int64& val)
 {
-    Init();
-    classMemberReference=NULL;
-    classMemberReferenceSize=0;
-
-    bool isInherited;
-    const PropertyMappingDescriptionShm* pmd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetPropertyMapping(propertyId, isInherited);
-
-    if (pmd==NULL)
+    ReaderState* rs=ReaderState::FromHandle(reader);
+    if (key)
     {
-        return;
-    }
-
-    const MemberMappingDescriptionShm* mm=pmd->GetMemberMapping(member);
-
-    if (mm==NULL || mm->GetMappingKind()!=MappedToMember)
-    {
-        return;
-    }
-
-    classMemberReference=mm->GetRawMemberRef();
-    classMemberReferenceSize=mm->MemberReferenceDepth()*2;
-}
-
-
-void DotsC_GetEnumerationChecksum(const DotsC_TypeId typeId,
-                                  DotsC_TypeId & checksum)
-{
-    Init();
-    const EnumDescriptionShm* ed=RepositoryKeeper::GetRepository()->GetEnum(typeId);
-    if (ed==NULL)
-    {
-        checksum=0;
+        val=rs->reader.ReadKey<DotsC_Int64>(rs->member, valueIndex);
     }
     else
     {
-        checksum=ed->GetCheckSum();
+        bool isNull=false, isChanged=true;
+        rs->reader.ReadValue(rs->member, valueIndex, val, isNull, isChanged);
     }
 }
 
+void DotsC_ReadFloat32(DotsC_Handle reader, DotsC_Int32 valueIndex, DotsC_Float32& val)
+{
+    ReaderState* rs=ReaderState::FromHandle(reader);
+    bool isNull=false, isChanged=true;
+    rs->reader.ReadValue(rs->member, valueIndex, val, isNull, isChanged);
+}
 
+void DotsC_ReadFloat64(DotsC_Handle reader, DotsC_Int32 valueIndex, DotsC_Float64& val)
+{
+    ReaderState* rs=ReaderState::FromHandle(reader);
+    bool isNull=false, isChanged=true;
+    rs->reader.ReadValue(rs->member, valueIndex, val, isNull, isChanged);
+}
 
+void DotsC_ReadBool(DotsC_Handle reader, DotsC_Int32 valueIndex, bool& val)
+{
+    ReaderState* rs=ReaderState::FromHandle(reader);
+    bool isNull=false, isChanged=true;
+    rs->reader.ReadValue(rs->member, valueIndex, val, isNull, isChanged);
+}
+
+void DotsC_ReadString(DotsC_Handle reader, DotsC_Int32 valueIndex, bool key, const char*& val)
+{
+    ReaderState* rs=ReaderState::FromHandle(reader);
+    if (key)
+    {
+        val=rs->reader.ReadKey<const char*>(rs->member, valueIndex);
+    }
+    else
+    {
+        bool isNull=false, isChanged=true;
+        rs->reader.ReadValue(rs->member, valueIndex, val, isNull, isChanged);
+    }
+}
+
+void DotsC_ReadHash(DotsC_Handle reader, DotsC_Int32 valueIndex, bool key, DotsC_Int64& val, const char*& optionalStr)
+{
+    ReaderState* rs=ReaderState::FromHandle(reader);
+    std::pair<DotsC_Int64, const char*> hash;
+    if (key)
+    {
+        hash=rs->reader.ReadKey< std::pair<DotsC_Int64, const char*> >(rs->member, valueIndex);
+    }
+    else
+    {
+        bool isNull=false, isChanged=true;
+        rs->reader.ReadValue(rs->member, valueIndex, hash, isNull, isChanged);
+    }
+
+    val=hash.first;
+    optionalStr=hash.second;
+}
+
+void DotsC_ReadEntityId(DotsC_Handle reader, DotsC_Int32 valueIndex, bool key, DotsC_EntityId& val, const char*& optionalStr)
+{
+    ReaderState* rs=ReaderState::FromHandle(reader);
+    std::pair<DotsC_EntityId, const char*> eid;
+    if (key)
+    {
+        eid=rs->reader.ReadKey< std::pair<DotsC_EntityId, const char*> >(rs->member, valueIndex);
+    }
+    else
+    {
+        bool isNull=false, isChanged=true;
+        rs->reader.ReadValue(rs->member, valueIndex, eid, isNull, isChanged);
+    }
+
+    val=eid.first;
+    optionalStr=eid.second;
+}
+
+void DotsC_ReadBinary(DotsC_Handle reader, DotsC_Int32 valueIndex, const char*& val, DotsC_Int32& size)
+{
+    ReaderState* rs=ReaderState::FromHandle(reader);
+    bool isNull=false, isChanged=true;
+    std::pair<const char*, DotsC_Int32> bin;
+    rs->reader.ReadValue(rs->member, valueIndex, bin, isNull, isChanged);
+    val=bin.first;
+    size=bin.second;
+}
+
+void DotsC_ReadObject(DotsC_Handle reader, DotsC_Int32 valueIndex, const char*& val)
+{
+    ReaderState* rs=ReaderState::FromHandle(reader);
+    bool isNull=false, isChanged=true;
+    std::pair<const char*, DotsC_Int32> bin;
+    rs->reader.ReadValue(rs->member, valueIndex, bin, isNull, isChanged);
+    val=bin.first;
+}
+
+//Write operations
+DotsC_Handle DotsC_CreateBlobWriter(DotsC_TypeId typeId)
+{
+    WriterState* ws=new WriterState(typeId);
+    DotsC_Handle address=(DotsC_Handle)ws;
+    return address;
+}
+
+void DotsC_SetWriteCursor(DotsC_Handle writer, DotsC_MemberIndex member)
+{
+    WriterState* ws=WriterState::FromHandle(writer);
+    ws->member=member;
+}
+
+void DotsC_SetChanged(DotsC_Handle writer, bool isChanged)
+{
+
+}
+
+void DotsC_SetInt32(DotsC_Handle writer, DotsC_Int32 val, bool key)
+{
+
+}
+
+void DotsC_SetInt64(DotsC_Handle writer, DotsC_Int64 val, bool key)
+{
+
+}
+
+void DotsC_SetFloat32(DotsC_Handle writer, DotsC_Float32 val)
+{
+
+}
+
+void DotsC_SetFloat64(DotsC_Handle writer, DotsC_Float64 val)
+{
+
+}
+
+void DotsC_SetBool(DotsC_Handle writer, bool val)
+{
+
+}
+
+void DotsC_SetString(DotsC_Handle writer, const char* val, bool key)
+{
+
+}
+
+void DotsC_SetHash(DotsC_Handle writer, DotsC_Int64 hash, const char* str, bool key)
+{
+
+}
+
+void DotsC_SetEntityId(DotsC_Handle writer, const DotsC_EntityId& val, const char* instanceString, bool key)
+{
+
+}
+
+void DotsC_SetBinary(DotsC_Handle writer, const char* val, DotsC_Int32 size)
+{
+
+}
+
+void DotsC_SetObject(DotsC_Handle writer, const char* blob)
+{
+
+}
+
+DotsC_Int32 DotsC_CalculateBlobSize(DotsC_Handle writer)
+{
+
+}
+
+void DotsC_WriteBlob(DotsC_Handle writer, char* blobDest)
+{
+
+}
+
+void DotsC_DeleteBlobWriter(DotsC_Handle handle)
+{
+
+}
+
+//************************************************************************************
+//* Library exception handling
+//************************************************************************************
 void DotsC_SetException(const DotsC_TypeId exceptionId, const char* const description)
 {
     Init();
@@ -1222,6 +1509,9 @@ void DotsC_PeekAtException(DotsC_TypeId & exceptionId)
     ExceptionKeeper::Instance().Peek(exceptionId,desc);
 }
 
+//************************************************************************************
+//* Functions mostly indended for debugging
+//************************************************************************************
 const char* DotsC_GetDouFilePath(const DotsC_TypeId typeId)
 {
     const ClassDescriptionShm* cd=RepositoryKeeper::GetRepository()->GetClass(typeId);
@@ -1272,11 +1562,11 @@ void DotsC_GetTypeDescription(const DotsC_TypeId typeId,
     std::ostringstream os;
     if (typeId==0)
     {
-        Safir::Dob::Typesystem::ToolSupport::RepositoryToString(RepositoryKeeper::GetRepository(), false, os);
+        ts::RepositoryToString(RepositoryKeeper::GetRepository(), false, os);
     }
     else
     {
-        Safir::Dob::Typesystem::ToolSupport::TypeToString(RepositoryKeeper::GetRepository(), typeId, os);
+        ts::TypeToString(RepositoryKeeper::GetRepository(), typeId, os);
     }
 
     std::string text=os.str();

@@ -285,10 +285,16 @@ namespace Internal
                        const KeyT& key,
                        BlobWriter<RepositoryType>& writer) const
         {
+            //if dictionary first write the key
+            if (md->GetCollectionType()==DictionaryCollectionType)
+            {
+                writer.WriteKey(memIx, key);
+            }
+
             //first check if value is set to null in json, in that case just set status to null and return.
             if (memberContent.data()=="null")
             {
-                writer.WriteValue(memIx, arrIx, key, 0, true, false);
+                writer.WriteValue(memIx, arrIx, 0, true, false);
                 return;
             }
 
@@ -297,7 +303,7 @@ namespace Internal
             case BooleanMemberType:
             {
                 bool val=memberContent.get_value<bool>();
-                writer.WriteValue(memIx, arrIx, key, val, false, true);
+                writer.WriteValue(memIx, arrIx, val, false, true);
             }
                 break;
 
@@ -311,28 +317,28 @@ namespace Internal
                     os<<"Enumeration member '"<<md->GetName()<<"' contains an invalid value. Value="<<memberContent.data()<<" is not a value of enum type "<<ed->GetName();
                     throw ParseError("JsonToBinary serialization error", os.str(), "", 158);
                 }
-                writer.WriteValue(memIx, arrIx, key, enumOrdinal, false, true);
+                writer.WriteValue(memIx, arrIx, enumOrdinal, false, true);
             }
                 break;
 
             case Int32MemberType:
             {
                 DotsC_Int32 val=memberContent.get_value<DotsC_Int32>();
-                writer.WriteValue(memIx, arrIx, key, val, false, true);
+                writer.WriteValue(memIx, arrIx, val, false, true);
             }
                 break;
 
             case Int64MemberType:
             {
                 DotsC_Int64 val=memberContent.get_value<DotsC_Int64>();
-                writer.WriteValue(memIx, arrIx, key, val, false, true);
+                writer.WriteValue(memIx, arrIx, val, false, true);
             }
                 break;
 
             case TypeIdMemberType:
             {
                 DotsC_TypeId tid=SerializationUtils::StringToTypeId(memberContent.data());
-                writer.WriteValue(memIx, arrIx, key, tid, false, true);
+                writer.WriteValue(memIx, arrIx, tid, false, true);
             }
                 break;
 
@@ -341,7 +347,7 @@ namespace Internal
             case HandlerIdMemberType:
             {
                 std::pair<DotsC_TypeId, const char*> hash=SerializationUtils::StringToHash(memberContent.data());
-                writer.WriteValue(memIx, arrIx, key, hash, false, true);
+                writer.WriteValue(memIx, arrIx, hash, false, true);
             }
                 break;
 
@@ -366,13 +372,13 @@ namespace Internal
                 std::pair<DotsC_TypeId, const char*> instanceId=SerializationUtils::StringToHash(*instanceIdString);
                 entId.first.instanceId=instanceId.first;
                 entId.second=instanceId.second;
-                writer.WriteValue(memIx, arrIx, key, entId, false, true);
+                writer.WriteValue(memIx, arrIx, entId, false, true);
             }
                 break;
 
             case StringMemberType:
             {
-                writer.WriteValue(memIx, arrIx, key, memberContent.data().c_str(), false, true);
+                writer.WriteValue(memIx, arrIx, memberContent.data().c_str(), false, true);
             }
                 break;
 
@@ -402,7 +408,7 @@ namespace Internal
 
                 std::vector<char> insideBlob;
                 SerializeObjectContent(*xsiType, insideBlob, memberContent);
-                writer.WriteValue(memIx, arrIx, key, std::make_pair(static_cast<const char*>(&insideBlob[0]), static_cast<DotsC_Int32>(insideBlob.size())), false, true);
+                writer.WriteValue(memIx, arrIx, std::make_pair(static_cast<const char*>(&insideBlob[0]), static_cast<DotsC_Int32>(insideBlob.size())), false, true);
             }
                 break;
 
@@ -415,7 +421,7 @@ namespace Internal
                     os<<"Member "<<md->GetName()<<" of type binary containes invalid base64 data";
                     throw ParseError("JsonToBinary serialization error", os.str(), "", 164);
                 }
-                writer.WriteValue(memIx, arrIx, key, std::make_pair(static_cast<const char*>(&bin[0]), static_cast<DotsC_Int32>(bin.size())), false, true);
+                writer.WriteValue(memIx, arrIx, std::make_pair(static_cast<const char*>(&bin[0]), static_cast<DotsC_Int32>(bin.size())), false, true);
             }
                 break;
 
@@ -444,7 +450,7 @@ namespace Internal
                 try
                 {
                     DotsC_Float32 val=classic_string_cast<DotsC_Float32>(memberContent.data());
-                    writer.WriteValue(memIx, arrIx, key, val, false, true);
+                    writer.WriteValue(memIx, arrIx, val, false, true);
                 }
                 catch (const boost::bad_lexical_cast&)
                 {
@@ -480,7 +486,7 @@ namespace Internal
                 try
                 {
                     DotsC_Float64 val=classic_string_cast<DotsC_Float64>(memberContent.data());
-                    writer.WriteValue(memIx, arrIx, key, val, false, true);
+                    writer.WriteValue(memIx, arrIx, val, false, true);
                 }
                 catch (const boost::bad_lexical_cast&)
                 {

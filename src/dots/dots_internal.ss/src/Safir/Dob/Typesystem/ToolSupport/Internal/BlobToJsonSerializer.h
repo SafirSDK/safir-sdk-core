@@ -103,7 +103,9 @@ namespace Internal
                 {
                 case SingleValueCollectionType:
                 {
-                    if (!reader.IsNull(memberIx, 0))
+                    bool isNull=true, isChanged=true;
+                    reader.ReadStatus(memberIx, 0, isNull, isChanged);
+                    if (!isNull)
                     {
                         os<<", ";
                         WriteMemberName(md->GetName(), os);
@@ -122,7 +124,9 @@ namespace Internal
                     bool hasInsertedValues=false;
                     for (DotsC_Int32 arrIx=0; arrIx<md->GetArraySize(); ++arrIx)
                     {
-                        if (reader.IsNull(memberIx, arrIx))
+                        bool isNull=true, isChanged=true;
+                        reader.ReadStatus(memberIx, arrIx, isNull, isChanged);
+                        if (isNull)
                         {
                             //we wait to insert null until we know we have to because an value exists after.
                             //This way we avoid lots of null at the end of an array

@@ -160,6 +160,13 @@ namespace SerializationUtils
                         const KeyT& key,
                         WriterT& writer)
     {
+        if (md->GetCollectionType()==DictionaryCollectionType)
+        {
+            //if dictionary first write the key
+            writer.WriteKey(memIx, key);
+        }
+
+        //write the value
         switch(md->GetMemberType())
         {
         case BooleanMemberType:
@@ -176,7 +183,7 @@ namespace SerializationUtils
                 throw ParseError("Serialization error", err.what(), "", 208);
             }
 
-            writer.WriteValue(memIx, arrIx, key, boolVal, false, true);
+            writer.WriteValue(memIx, arrIx, boolVal, false, true);
         }
             break;
 
@@ -192,7 +199,7 @@ namespace SerializationUtils
                 throw ParseError("Serialization error", os.str(), "", 114);
             }
 
-            writer.WriteValue(memIx, arrIx, key, enumOrdinal, false, true);
+            writer.WriteValue(memIx, arrIx, enumOrdinal, false, true);
         }
             break;
 
@@ -200,7 +207,7 @@ namespace SerializationUtils
         {
             Trim(memberContent.data());
             DotsC_Int32 val=memberContent.get_value<DotsC_Int32>();
-            writer.WriteValue(memIx, arrIx, key, val, false, true);
+            writer.WriteValue(memIx, arrIx, val, false, true);
         }
             break;
 
@@ -208,7 +215,7 @@ namespace SerializationUtils
         {
             Trim(memberContent.data());
             DotsC_Int64 val=memberContent.get_value<DotsC_Int64>();
-            writer.WriteValue(memIx, arrIx, key, val, false, true);
+            writer.WriteValue(memIx, arrIx, val, false, true);
         }
             break;
 
@@ -224,7 +231,7 @@ namespace SerializationUtils
                 throw ParseError("Serialization error", os.str(), "", 174);
             }
 
-            writer.WriteValue(memIx, arrIx, key, tid, false, true);
+            writer.WriteValue(memIx, arrIx, tid, false, true);
         }
             break;
 
@@ -234,7 +241,7 @@ namespace SerializationUtils
         {
             Trim(memberContent.data());
             std::pair<DotsC_Int64, const char*> hash=SerializationUtils::StringToHash(memberContent.data());
-            writer.WriteValue(memIx, arrIx, key, hash, false, true);
+            writer.WriteValue(memIx, arrIx, hash, false, true);
         }
             break;
 
@@ -272,7 +279,7 @@ namespace SerializationUtils
                 throw ParseError("Serialization error", os.str(), "", 173);
             }
 
-            writer.WriteValue(memIx, arrIx, key, entityId, false, true);
+            writer.WriteValue(memIx, arrIx, entityId, false, true);
         }
             break;
 
@@ -284,7 +291,7 @@ namespace SerializationUtils
                 Trim(memberContent.data());
             }
             //The only time we dont trim content
-            writer.WriteValue(memIx, arrIx, key, memberContent.data().c_str(), false, true);
+            writer.WriteValue(memIx, arrIx, memberContent.data().c_str(), false, true);
         }
             break;
 
@@ -305,7 +312,7 @@ namespace SerializationUtils
                 throw ParseError("Serialization error", os.str(), "",  117);
             }
 
-            writer.WriteValue(memIx, arrIx, key, std::make_pair(static_cast<const char*>(&bin[0]), static_cast<DotsC_Int32>(bin.size())), false, true);
+            writer.WriteValue(memIx, arrIx, std::make_pair(static_cast<const char*>(&bin[0]), static_cast<DotsC_Int32>(bin.size())), false, true);
         }
             break;
 
@@ -335,7 +342,7 @@ namespace SerializationUtils
             try
             {
                 DotsC_Float32 val=classic_string_cast<DotsC_Float32>(memberContent.data());
-                writer.WriteValue(memIx, arrIx, key, val, false, true);
+                writer.WriteValue(memIx, arrIx, val, false, true);
             }
             catch (const boost::bad_lexical_cast&)
             {
@@ -372,7 +379,7 @@ namespace SerializationUtils
             try
             {
                 DotsC_Float64 val=classic_string_cast<DotsC_Float64>(memberContent.data());
-                writer.WriteValue(memIx, arrIx, key, val, false, true);
+                writer.WriteValue(memIx, arrIx, val, false, true);
             }
             catch (const boost::bad_lexical_cast&)
             {
@@ -433,35 +440,42 @@ namespace SerializationUtils
         }
 
         //when we get here we have found the referenced parameter and it seems to be valid for usage here
+
+        if (md->GetCollectionType()==DictionaryCollectionType)
+        {
+            //if we're dealing with a dictionary, we must first set the key
+            writer.WriteKey(memIx, key);
+        }
+
         switch(md->GetMemberType())
         {
         case BooleanMemberType:
         {
-            writer.WriteValue(memIx, arrIx, key, param->GetBoolValue(parameterIndex), false, true);
+            writer.WriteValue(memIx, arrIx, param->GetBoolValue(parameterIndex), false, true);
         }
             break;
 
         case EnumerationMemberType:
         {
-            writer.WriteValue(memIx, arrIx, key, param->GetInt32Value(parameterIndex), false, true);
+            writer.WriteValue(memIx, arrIx, param->GetInt32Value(parameterIndex), false, true);
         }
             break;
 
         case Int32MemberType:
         {
-            writer.WriteValue(memIx, arrIx, key, param->GetInt32Value(parameterIndex), false, true);
+            writer.WriteValue(memIx, arrIx, param->GetInt32Value(parameterIndex), false, true);
         }
             break;
 
         case Int64MemberType:
         {
-            writer.WriteValue(memIx, arrIx, key, param->GetInt64Value(parameterIndex), false, true);
+            writer.WriteValue(memIx, arrIx, param->GetInt64Value(parameterIndex), false, true);
         }
             break;
 
         case TypeIdMemberType:
         {
-            writer.WriteValue(memIx, arrIx, key, param->GetInt64Value(parameterIndex), false, true);
+            writer.WriteValue(memIx, arrIx, param->GetInt64Value(parameterIndex), false, true);
         }
             break;
 
@@ -469,7 +483,7 @@ namespace SerializationUtils
         case ChannelIdMemberType:
         case HandlerIdMemberType:
         {            
-            writer.WriteValue(memIx, arrIx, key, param->GetHashedValue(parameterIndex), false, true);
+            writer.WriteValue(memIx, arrIx, param->GetHashedValue(parameterIndex), false, true);
         }
             break;
 
@@ -479,13 +493,13 @@ namespace SerializationUtils
             entId.typeId=param->GetInt64Value(parameterIndex);
             std::pair<DotsC_TypeId, const char*> instanceId=param->GetHashedValue(parameterIndex);
             entId.instanceId=instanceId.first;
-            writer.WriteValue(memIx, arrIx, key, std::make_pair(entId, instanceId.second), false, true);
+            writer.WriteValue(memIx, arrIx, std::make_pair(entId, instanceId.second), false, true);
         }
             break;
 
         case StringMemberType:
         {
-            writer.WriteValue(memIx, arrIx, key, param->GetStringValue(parameterIndex), false, true);
+            writer.WriteValue(memIx, arrIx, param->GetStringValue(parameterIndex), false, true);
         }
             break;
 
@@ -497,7 +511,7 @@ namespace SerializationUtils
 
         case BinaryMemberType:
         {
-            writer.WriteValue(memIx, arrIx, key, param->GetBinaryValue(parameterIndex), false, true);
+            writer.WriteValue(memIx, arrIx, param->GetBinaryValue(parameterIndex), false, true);
         }
             break;
 
@@ -523,7 +537,7 @@ namespace SerializationUtils
         case Volt32MemberType:
         case Watt32MemberType:
         {
-            writer.WriteValue(memIx, arrIx, key, param->GetFloat32Value(parameterIndex), false, true);
+            writer.WriteValue(memIx, arrIx, param->GetFloat32Value(parameterIndex), false, true);
         }
             break;
 
@@ -549,7 +563,7 @@ namespace SerializationUtils
         case Volt64MemberType:
         case Watt64MemberType:
         {
-            writer.WriteValue(memIx, arrIx, key, param->GetFloat64Value(parameterIndex), false, true);
+            writer.WriteValue(memIx, arrIx, param->GetFloat64Value(parameterIndex), false, true);
         }
             break;
         }

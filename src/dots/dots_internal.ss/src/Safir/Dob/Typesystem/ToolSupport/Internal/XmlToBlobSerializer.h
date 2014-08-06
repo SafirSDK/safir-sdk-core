@@ -411,7 +411,12 @@ namespace Internal
 
                 std::vector<char> insideBlob;
                 SerializeObjectContent(cd->GetName(), insideBlob, memberContent);
-                writer.WriteValue(memIx, arrIx, key, std::pair<char*, DotsC_Int32>(&insideBlob[0], static_cast<DotsC_Int32>(insideBlob.size())), false, true);
+                if (md->GetCollectionType()==DictionaryCollectionType)
+                {
+                    //if dictionary, first write the key
+                    writer.WriteKey(memIx, key);
+                }
+                writer.WriteValue(memIx, arrIx, std::pair<char*, DotsC_Int32>(&insideBlob[0], static_cast<DotsC_Int32>(insideBlob.size())), false, true);
             }
             else
             {

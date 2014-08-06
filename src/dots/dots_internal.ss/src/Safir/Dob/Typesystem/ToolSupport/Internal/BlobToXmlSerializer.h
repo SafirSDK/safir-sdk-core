@@ -92,9 +92,11 @@ namespace Internal
 
                     //find first non-null value in array
                     DotsC_Int32 arrIx=0;
+                    bool isNull=true, isChanged=true;
                     while (arrIx<md->GetArraySize())
                     {
-                        if (!reader.IsNull(memberIx, arrIx))
+                        reader.ReadStatus(memberIx, arrIx, isNull, isChanged);
+                        if (!isNull)
                         {
                             break;
                         }

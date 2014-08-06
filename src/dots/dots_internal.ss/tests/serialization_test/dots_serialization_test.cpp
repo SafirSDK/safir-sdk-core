@@ -72,20 +72,20 @@ void BlobTest(RepositoryPtr rep)
     //DotsC_MemberIndex myDictStringInt32=cd->GetMemberIndex("DictStringInt32");
 
     BlobWriter<Safir::Dob::Typesystem::ToolSupport::TypeRepository> w2(rep.get(), tid);
-    w2.WriteValue(myNum, 0, 0, 456, false, true);
-    w2.WriteValue(myStrings, 0, 0, "In0", false, true);
-    w2.WriteValue(myStrings, 3, 0, "In3", false, true);
-    w2.WriteValue(myStrings, 4, 0, "In4", false, true);
+    w2.WriteValue(myNum, 0, 456, false, true);
+    w2.WriteValue(myStrings, 0, "In0", false, true);
+    w2.WriteValue(myStrings, 3, "In3", false, true);
+    w2.WriteValue(myStrings, 4, "In4", false, true);
     std::vector<char> innerBlob(static_cast<size_t>(w2.CalculateBlobSize()));
     w2.CopyRawBlob(&innerBlob[0]);
 
     BlobWriter<Safir::Dob::Typesystem::ToolSupport::TypeRepository> w(rep.get(), tid);
-    w.WriteValue(myNum, 0, 0, 123, false, true);
-    w.WriteValue(myStrings, 0, 0, "Hej_1", false, true);
-    w.WriteValue(myStrings, 3, 0, "Hej_2", false, true);
-    w.WriteValue(myStrings, 4, 0, "Hej_3", false, true);
-    w.WriteValue(myChildName, 0, 0, "Svarre", false, true);
-    w.WriteValue(myChild, 0, 0, std::make_pair(&innerBlob[0], static_cast<DotsC_Int32>(innerBlob.size())), false, true);
+    w.WriteValue(myNum, 0, 123, false, true);
+    w.WriteValue(myStrings, 0, "Hej_1", false, true);
+    w.WriteValue(myStrings, 3, "Hej_2", false, true);
+    w.WriteValue(myStrings, 4, "Hej_3", false, true);
+    w.WriteValue(myChildName, 0, "Svarre", false, true);
+    w.WriteValue(myChild, 0, std::make_pair(&innerBlob[0], static_cast<DotsC_Int32>(innerBlob.size())), false, true);
 
     std::vector<char> blob(static_cast<size_t>(w.CalculateBlobSize()));
     w.CopyRawBlob(&blob[0]);

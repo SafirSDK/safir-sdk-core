@@ -235,7 +235,7 @@ namespace Internal
                     throw ParseError("UglyXmlToBlobSerializer serialization error", os.str(), "", 135);
                 }
 
-                writer.WriteValue(memIx, arrIx, 0, std::make_pair(static_cast<const char*>(&insideBlob[0]), static_cast<DotsC_Int32>(insideBlob.size())), false, true);
+                writer.WriteValue(memIx, arrIx, std::make_pair(static_cast<const char*>(&insideBlob[0]), static_cast<DotsC_Int32>(insideBlob.size())), false, true);
 
                 return;
             }

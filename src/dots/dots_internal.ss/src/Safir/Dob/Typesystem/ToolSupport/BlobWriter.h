@@ -114,23 +114,47 @@ namespace ToolSupport
         void SetChangedTopLevel(DotsC_MemberIndex member, bool isChanged) {m_blob.SetChangedTopLevel(member, isChanged);}
 
         /**
-         * Write member value to the a blob.
-         * For dictionaries use WriteDictionaryValue.
-         * If the member is an array, the index is used. For all other collection types index is ignored.
-         * If the member is a sequence or dictionary, a new value is added to the collection for each call to this method.
-         * If the member is a dictionary, the key is used and can be the following types:
+         * Write member key to the a blob. Only use this when member is a dictionary otherwize the blob will be corrupt.
+         * A new key with value null will be added to the collection for each call to this method. Make sure to call
+         * WriteValue after a call to this method to set the correct value for the key.
+         * Valid types for Key is:
          *      Int32, Int64, TypeId, Enumeration, String, InstanceId, HandlerId, ChannelId, EntityId.
          * This method will throw logic_error if used with wrong input data.
          *
          * @param member [in] - Member index of the member to be written.
+         * @param key [in] - Key value if the member is a dictionary.
+         */
+        template <class Key>
+        void WriteKey(DotsC_MemberIndex member, const Key& key)
+        {
+            MoveToMember(member);
+            if (m_memberDescription->GetCollectionType()==DictionaryCollectionType)
+            {
+                m_valueIndex=m_blob.AddValue(m_memberIndex, false);
+                WriteKey(key);
+            }
+            else
+            {
+                throw std::logic_error("WriteKey was called on member thats not a dictionary.");
+            }
+        }
+
+        /**
+         * Write member value to the a blob.
+         * For dictionaries make sure to call WriteKey immediately before calling WriteValue since the WriteValue.
+         * If the member is an array, the index is used. For all other collection types index is ignored.
+         * If the member is a sequence, a new value is added to the collection for each call to this method.
+         * If the member is a dictionary, the key must have been written before the call to this method.
+         * This method will throw logic_error if used with wrong input data.
+         *
+         * @param member [in] - Member index of the member to be written.
          * @param index [in] - Array index of the value to be written. Ignored if CollectionType is not Array.
-         * @param key [in] - Key value if the member is a dictionary. Ignored for all other collection types, use a dummy like 0.
          * @param val [in] - Member value. Use a dummy if isNull=true. See supported types in class comments above.
          * @param isNull [in] - True if the member value null. In that case val is not in use.
          * @param isChanged [in] - Indicates if the member value is changed.
          */
-        template <class Key, class Val>
-        void WriteValue(DotsC_MemberIndex member, DotsC_Int32 index, const Key& key, const Val& val, bool isNull, bool isChanged)
+        template <class Val>
+        void WriteValue(DotsC_MemberIndex member, DotsC_Int32 index, const Val& val, bool isNull, bool isChanged)
         {
             MoveToMember(member);
             switch (m_memberDescription->GetCollectionType())
@@ -154,8 +178,7 @@ namespace ToolSupport
                 break;
             case DictionaryCollectionType:
             {
-                m_valueIndex=m_blob.AddValue(m_memberIndex, isChanged);
-                WriteKey(key);
+                m_blob.SetChanged(m_memberIndex, m_valueIndex, isChanged);
             }
                 break;
             }

@@ -134,15 +134,13 @@ namespace ToolSupport
          * @brief Convenience method for checking if a member is null. All status flags are also fetched with the ReadValue method.
          * @param member [in] - Member index of the member to to check..
          * @param valueIndex [in] - The value to check. Must be in range 0 to NumberOfValues()-1.
-         * @return True if value is null.
+         * @param isNull [out] - True if value is null.
+         * @param isChanged [out] - True if value has changed.
          */
-        bool IsNull(DotsC_MemberIndex member, int valueIndex) const
+        void ReadStatus(DotsC_MemberIndex member, int valueIndex, bool& isNull, bool& isChanged) const
         {
             MoveToMember(member);
-            bool isNull=false;
-            bool isChanged=false;
             m_blob.ValueStatus(member, valueIndex, isNull, isChanged);
-            return isNull;
         }
 
         /**
@@ -168,7 +166,8 @@ namespace ToolSupport
          * @brief Reads the value element of a member value.
          * @param member [in] - Member index of the member to read.
          * @param valueIndex [in] - The value to read. Must be in range 0 to NumberOfValues()-1.
-         * @return Member value.
+         * @param isNull [out] - True if value is null.
+         * @param isChanged [out] - True if value has changed.
          */
         template <class Val>
         void ReadValue(DotsC_MemberIndex member, int valueIndex, Val& val, bool& isNull, bool& isChanged) const

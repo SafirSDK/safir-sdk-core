@@ -814,7 +814,6 @@ extern "C"
      */
     DOTS_KERNEL_API DotsC_TypeId DotsC_GetTypeId(const char* blob);
 
-
     /**
      * @brief Get size of blob.
      * @param blob [in] - The blob.
@@ -837,9 +836,7 @@ extern "C"
 
     DOTS_KERNEL_API void DotsC_SetReadCursor(DotsC_Handle reader, DotsC_MemberIndex member);
     DOTS_KERNEL_API DotsC_Int32 DotsC_GetNumberOfValues(DotsC_Handle reader);
-    DOTS_KERNEL_API bool DotsC_IsNull(DotsC_Handle reader, DotsC_Int32 valueIndex);
-    DOTS_KERNEL_API bool DotsC_IsChanged(DotsC_Handle reader, DotsC_Int32 valueIndex);
-
+    DOTS_KERNEL_API void DotsC_ReadStatus(DotsC_Handle reader, DotsC_Int32 valueIndex, bool& isNull, bool& isChanged);
     DOTS_KERNEL_API void DotsC_ReadInt32(DotsC_Handle reader, DotsC_Int32 valueIndex, bool key, DotsC_Int32& val);
     DOTS_KERNEL_API void DotsC_ReadInt64(DotsC_Handle reader, DotsC_Int32 valueIndex, bool key, DotsC_Int64& val);
     DOTS_KERNEL_API void DotsC_ReadFloat32(DotsC_Handle reader, DotsC_Int32 valueIndex, DotsC_Float32& val);
@@ -860,8 +857,7 @@ extern "C"
      * @return Handle to a new blob writer instance.
      */
     DOTS_KERNEL_API DotsC_Handle DotsC_CreateBlobWriter(DotsC_TypeId typeId);
-    DOTS_KERNEL_API void DotsC_BeginSetMember(DotsC_Handle writer, DotsC_MemberIndex member);
-    DOTS_KERNEL_API void DotsC_CommitSetMember(DotsC_Handle writer);
+    DOTS_KERNEL_API void DotsC_SetWriteCursor(DotsC_Handle writer, DotsC_MemberIndex member);
 
     DOTS_KERNEL_API void DotsC_SetChanged(DotsC_Handle writer, bool isChanged);
     DOTS_KERNEL_API void DotsC_SetInt32(DotsC_Handle writer, DotsC_Int32 val, bool key);
