@@ -172,21 +172,6 @@ extern "C"
     // Comments:    Gets the member id for a member.
     DOTS_KERNEL_API DotsC_MemberIndex DotsC_GetMemberId(DotsC_TypeId typeId, const char* memberName);
 
-    // Function:    DotsC_GetMemberName
-    // Parameters:  typeId  -   id of class or property
-    //              member  -   id of member
-    // Returns:     name of the member
-    // Comments:    Get the name of the specified member as it was defined in the xml description.
-    DOTS_KERNEL_API const char* DotsC_GetMemberName(DotsC_TypeId typeId, DotsC_MemberIndex member);
-
-    // Function:    DotsC_GetComplexMemberTypeId
-    // Parameters:  typeId  -   id of class or property
-    //              member  -   id of member
-    // Returns:     returns the typeId for an object or enumeration member. -1 is returned of the type does not exist
-    // Comments:    If a member is of type object or enumeration, this method can be used to get the typeId for the class or enum that the
-    //              member is of.
-    DOTS_KERNEL_API DotsC_TypeId DotsC_GetComplexMemberTypeId(DotsC_TypeId typeId, DotsC_MemberIndex member);
-
     // Function:    DotsC_GetMemberInfo
     // Parameters:  typeId       -   id of class or property
     //              member       -   id of member
@@ -208,22 +193,6 @@ extern "C"
                                              DotsC_Int32& stringLength,   //out
                                              DotsC_CollectionType& collectionType, //out
                                              DotsC_Int32& arraySize);   //out
-
-    // Function:    DotsC_GetMemberArraySize
-    // Parameters:  typeId      -   id of class or property
-    //              member      -   id of member
-    // Returns:     The array size of the member. If typeId is not a class, then -1 is returned.
-    // Comments:    Returns the array size of a member.
-    DOTS_KERNEL_API DotsC_Int32 DotsC_GetMemberArraySize(DotsC_TypeId typeId, DotsC_MemberIndex member);
-
-    // Function:    DotsC_GetStringMemberMaxLength
-    // Parameters:  typeId      -   id of class
-    //              member      -   id of member
-    // Returns:     The maximum length of the string member.
-    //              If the member is not a string -1 is returned.
-    //              If the id is not a class -1 is returned
-    // Comments:    Returns the maximum string length of a member.
-    DOTS_KERNEL_API DotsC_Int32 DotsC_GetStringMemberMaxLength(DotsC_TypeId typeId, DotsC_MemberIndex member);
 
     // Function:    DotsC_GetMemberArraySizeProperty
     // Parameters:  classId         -   id of the class with a property
@@ -269,15 +238,6 @@ extern "C"
     // Comments:    Gets id of a parameter.
     DOTS_KERNEL_API DotsC_ParameterIndex  DotsC_GetParameterId(DotsC_TypeId typeId, const char* parameterName);
 
-    // Function:    DotsC_GetParameterName
-    // Parameters:  typeId      -   id of class
-    //              parameter   -   id of parameter
-    // Returns:     name of the parameter
-    // Comments:    Get the name of the specified parameter as it was defined in the xml description.
-    //              If the parameter does not exist the return value is undefined. Use GetParameterId
-    //              to obtain a parameter that is guaranteed to exist.
-    DOTS_KERNEL_API const char* DotsC_GetParameterName(DotsC_TypeId typeId, DotsC_ParameterIndex parameter);
-
     // Function:    DotsC_GetParameterType
     // Parameters:  typeId      -   id of class
     //              parameter   -   id of parameter
@@ -285,20 +245,13 @@ extern "C"
     // Comments:    Gets the type of a parameter.
     //              If the parameter does not exist the return value is undefined. Use GetParameterId
     //              to obtain a parameter that is guaranteed to exist.
-    DOTS_KERNEL_API void DotsC_GetParameterType(DotsC_TypeId typeId,
+    DOTS_KERNEL_API void DotsC_GetParameterInfo(DotsC_TypeId typeId,
                                                 DotsC_ParameterIndex parameter,
                                                 DotsC_MemberType& memberType,
+                                                const char*& parameterName,
                                                 DotsC_TypeId& complexTypeId,
-                                                DotsC_CollectionType& collectionType);
-
-    // Function:    DotsC_GetParameterArraySize
-    // Parameters:  typeId      -   id of class
-    //              parameter   -   id of parameter
-    // Returns:     The array size of the parameter.
-    // Comments:    Returns the array size of a parameter.
-    //              If the parameter does not exist the return value is undefined. Use GetParameterId
-    //              to obtain a parameter that is guaranteed to exist.
-    DOTS_KERNEL_API DotsC_Int32 DotsC_GetParameterArraySize(DotsC_TypeId typeId, DotsC_ParameterIndex parameter);
+                                                DotsC_CollectionType& collectionType,
+                                                DotsC_Int32& numberOfValues);
 
     // Type compatibility
     //------------------------------------------------------------------------
@@ -345,15 +298,14 @@ extern "C"
                                            bool& hasProperty,
                                            bool& isInherited);
 
-    DOTS_KERNEL_API void DotsC_GetPropertyMappingKind(const DotsC_TypeId typeId,
-                                                      const DotsC_TypeId propertyId,
-                                                      const DotsC_MemberIndex member,
-                                                      DotsC_PropertyMappingKind & mappingKind,
-                                                      DotsC_ErrorCode & errorCode);
+    DOTS_KERNEL_API void DotsC_GetPropertyMappingKind(const DotsC_TypeId classTypeId,
+                                                      const DotsC_TypeId propertyTypeId,
+                                                      const DotsC_MemberIndex propertyMember,
+                                                      DotsC_PropertyMappingKind & mappingKind);
 
-    DOTS_KERNEL_API void DotsC_GetClassMemberReference(const DotsC_TypeId typeId,
-                                                       const DotsC_TypeId propertyId,
-                                                       const DotsC_MemberIndex member,
+    DOTS_KERNEL_API void DotsC_GetClassMemberReference(const DotsC_TypeId classTypeId,
+                                                       const DotsC_TypeId propertyTypeId,
+                                                       const DotsC_MemberIndex propertyMember,
                                                        const DotsC_Int32 * & classMemberReference, //out
                                                        DotsC_Int32 & classMemberReferenceSize); //out
 
@@ -619,187 +571,6 @@ extern "C"
                                                   const char * & val,
                                                   DotsC_Int32 & size);
 
-    //************************************************************************************
-    //* Functions for retrieval of parameters in properties
-    //************************************************************************************
-    // Function:    DotsC_GetBooleanPropertyParameter
-    // Parameters:  typeId      -   id of class
-    //              propertyId  -   TypeId of the property
-    //              member      -   member index
-    //              index       -   array index. If parameter is not an array index shall be 0.
-    //              val         -   retrived value, out parameter
-    // Returns:     -
-    // Comments:    Gets a parameter boolean value.
-    DOTS_KERNEL_API void DotsC_GetBooleanPropertyParameter(const DotsC_TypeId typeId,
-                                                           const DotsC_TypeId propertyId,
-                                                           const DotsC_MemberIndex member,
-                                                           const DotsC_Int32 index,
-                                                           bool & val);
-
-    // Function:    DotsC_GetEnumerationPropertyParameter
-    // Parameters:  enumId      -   id of enumeration type
-    //              typeId      -   id of class
-    //              propertyId  -   TypeId of the property
-    //              member      -   member index
-    //              index       -   array index. If parameter is not an array index shall be 0.
-    //              val         -   retrived value, out parameter
-    //              isMismatch  -   true if there is mismatch between caller and dots.
-    // Returns:     -
-    // Comments:    Gets a parameter enumeration value.
-    DOTS_KERNEL_API void DotsC_GetEnumerationPropertyParameter(const DotsC_TypeId typeId,
-                                                               const DotsC_TypeId propertyId,
-                                                               const DotsC_MemberIndex member,
-                                                               const DotsC_Int32 index,
-                                                               DotsC_EnumerationValue & val);
-
-    // Function:    DotsC_GetInt32PropertyParameter
-    // Parameters:  typeId      -   id of class
-    //              propertyId  -   TypeId of the property
-    //              member      -   member index
-    //              index       -   array index. If parameter is not an array index shall be 0.
-    //              val         -   retrived value, out parameter
-    // Returns:     -
-    // Comments:    Gets a parameter 32-bits integer value.
-    DOTS_KERNEL_API void DotsC_GetInt32PropertyParameter(const DotsC_TypeId typeId,
-                                                         const DotsC_TypeId propertyId,
-                                                         const DotsC_MemberIndex member,
-                                                         const DotsC_Int32 index,
-                                                         DotsC_Int32 & val);
-
-    // Function:    DotsC_GetInt64PropertyParameter
-    // Parameters:  typeId      -   id of class
-    //              propertyId  -   TypeId of the property
-    //              member      -   member index
-    //              index       -   array index. If parameter is not an array index shall be 0.
-    //              val         -   retrived value, out parameter
-    // Returns:     -
-    // Comments:    Gets a parameter 64-bits integer value.
-    DOTS_KERNEL_API void DotsC_GetInt64PropertyParameter(const DotsC_TypeId typeId,
-                                                         const DotsC_TypeId propertyId,
-                                                         const DotsC_MemberIndex member,
-                                                         const DotsC_Int32 index,
-                                                         DotsC_Int64 & val);
-
-    // Function:    DotsC_GetFloat32PropertyParameter
-    // Parameters:  typeId      -   id of class
-    //              propertyId  -   TypeId of the property
-    //              member      -   member index
-    //              index       -   array index. If parameter is not an array index shall be 0.
-    //              val         -   retrived value, out parameter
-    // Returns:     -
-    // Comments:    Gets a parameter 32-bits float value.
-    DOTS_KERNEL_API void DotsC_GetFloat32PropertyParameter(const DotsC_TypeId typeId,
-                                                           const DotsC_TypeId propertyId,
-                                                           const DotsC_MemberIndex member,
-                                                           const DotsC_Int32 index,
-                                                           DotsC_Float32 & val);
-
-    // Function:    DotsC_GetFloat64PropertyParameter
-    // Parameters:  typeId      -   id of class
-    //              propertyId  -   TypeId of the property
-    //              member      -   member index
-    //              index       -   array index. If parameter is not an array index shall be 0.
-    //              val         -   retrived value, out parameter
-    // Returns:     -
-    // Comments:    Gets a parameter 64-bits float value.
-    DOTS_KERNEL_API void DotsC_GetFloat64PropertyParameter(const DotsC_TypeId typeId,
-                                                           const DotsC_TypeId propertyId,
-                                                           const DotsC_MemberIndex member,
-                                                           const DotsC_Int32 index,
-                                                           DotsC_Float64 & val);
-
-    // Function:    DotsC_GetStringPropertyParameter
-    // Parameters:  typeId      -   id of class
-    //              propertyId  -   TypeId of the property
-    //              member      -   member index
-    //              val         -   retrived value, out parameter
-    // Returns:     -
-    // Comments:    Gets a parameter string value.
-    DOTS_KERNEL_API void DotsC_GetStringPropertyParameter(const DotsC_TypeId typeId,
-                                                          const DotsC_TypeId propertyId,
-                                                          const DotsC_MemberIndex member,
-                                                          const DotsC_Int32 index,
-                                                          const char * & val);
-
-    // Function:    DotsC_GetTypeIdPropertyParameter
-    // Parameters:  typeId      -   id of class
-    //              propertyId  -   TypeId of the property
-    //              member      -   member index
-    //              index       -   array index. If parameter is not an array index shall be 0.
-    //              val         -   retrived value, out parameter
-    // Returns:     -
-    // Comments:    Gets a parameter type id value.
-    DOTS_KERNEL_API void DotsC_GetTypeIdPropertyParameter(const DotsC_TypeId typeId,
-                                                          const DotsC_TypeId propertyId,
-                                                          const DotsC_MemberIndex member,
-                                                          const DotsC_Int32 index,
-                                                          DotsC_TypeId & val);
-
-
-
-
-    // Function:    DotsC_GetHashedIdPropertyParameter
-    // Parameters:  typeId      -   id of class
-    //              propertyId  -   TypeId of the property
-    //              member      -   member index
-    //              index       -   array index. If parameter is not an array index shall be 0.
-    //              hashVal     -   retrived value, out parameter
-    //              strVal      -   string rep, if there was one, otherwise NULL
-    // Returns:     -
-    // Comments:    Gets a parameter object id value.
-    DOTS_KERNEL_API void DotsC_GetHashedIdPropertyParameter(const DotsC_TypeId typeId,
-                                                            const DotsC_TypeId propertyId,
-                                                            const DotsC_MemberIndex member,
-                                                            const DotsC_Int32 index,
-                                                            DotsC_Int64 & hashVal,
-                                                            const char * & strVal);
-
-    // Function:    DotsC_GetEntityIdPropertyParameter
-    // Parameters:  typeId      -   id of class
-    //              propertyId  -   TypeId of the property
-    //              member      -   member index
-    //              index       -   array index. If parameter is not an array index shall be 0.
-    //              val         -   retrived value, out parameter
-    //              instanceIdStr - string rep, if there was one, otherwise NULL
-    // Returns:     -
-    // Comments:    Gets a parameter object id value.
-    DOTS_KERNEL_API void DotsC_GetEntityIdPropertyParameter(const DotsC_TypeId typeId,
-                                                            const DotsC_TypeId propertyId,
-                                                            const DotsC_MemberIndex member,
-                                                            const DotsC_Int32 index,
-                                                            DotsC_EntityId & val,
-                                                            const char * & instanceIdStr);
-
-    // Function:    DotsC_GetObjectPropertyParameter
-    // Parameters:  typeId      -   id of class
-    //              propertyId  -   TypeId of the property
-    //              member      -   member index
-    //              index       -   array index. If parameter is not an array index shall be 0.
-    //              val         -   retrived value, out parameter
-    // Returns:     -
-    // Comments:    Gets a parameter object value.
-    DOTS_KERNEL_API void DotsC_GetObjectPropertyParameter(const DotsC_TypeId typeId,
-                                                          const DotsC_TypeId propertyId,
-                                                          const DotsC_MemberIndex member,
-                                                          const DotsC_Int32 index,
-                                                          const char * & val);
-
-    // Function:    DotsC_GetObjectPropertyParameter
-    // Parameters:  typeId      -   id of class
-    //              propertyId  -   TypeId of the property
-    //              member      -   member index
-    //              index       -   array index. If parameter is not an array index shall be 0.
-    //              val         -   retrived value, out parameter
-    //              size        -   size of the binary value
-    // Returns:     -
-    // Comments:    Gets a parameter object value.
-    DOTS_KERNEL_API void DotsC_GetBinaryPropertyParameter(const DotsC_TypeId typeId,
-                                                          const DotsC_TypeId propertyId,
-                                                          const DotsC_MemberIndex member,
-                                                          const DotsC_Int32 index,
-                                                          const char * & val,
-                                                          DotsC_Int32 & size);
-
     //********************************************************
     // Operations on blobs
     //********************************************************
@@ -834,19 +605,21 @@ extern "C"
      */
     DOTS_KERNEL_API void DotsC_DeleteBlobReader(DotsC_Handle handle);
 
-    DOTS_KERNEL_API void DotsC_SetReadCursor(DotsC_Handle reader, DotsC_MemberIndex member);
-    DOTS_KERNEL_API DotsC_Int32 DotsC_GetNumberOfValues(DotsC_Handle reader);
-    DOTS_KERNEL_API void DotsC_ReadStatus(DotsC_Handle reader, DotsC_Int32 valueIndex, bool& isNull, bool& isChanged);
-    DOTS_KERNEL_API void DotsC_ReadInt32(DotsC_Handle reader, DotsC_Int32 valueIndex, bool key, DotsC_Int32& val);
-    DOTS_KERNEL_API void DotsC_ReadInt64(DotsC_Handle reader, DotsC_Int32 valueIndex, bool key, DotsC_Int64& val);
-    DOTS_KERNEL_API void DotsC_ReadFloat32(DotsC_Handle reader, DotsC_Int32 valueIndex, DotsC_Float32& val);
-    DOTS_KERNEL_API void DotsC_ReadFloat64(DotsC_Handle reader, DotsC_Int32 valueIndex, DotsC_Float64& val);
-    DOTS_KERNEL_API void DotsC_ReadBool(DotsC_Handle reader, DotsC_Int32 valueIndex, bool& val);
-    DOTS_KERNEL_API void DotsC_ReadString(DotsC_Handle reader, DotsC_Int32 valueIndex, bool key, const char*& val);
-    DOTS_KERNEL_API void DotsC_ReadHash(DotsC_Handle reader, DotsC_Int32 valueIndex, bool key, DotsC_Int64& val, const char*& optionalStr);
-    DOTS_KERNEL_API void DotsC_ReadEntityId(DotsC_Handle reader, DotsC_Int32 valueIndex, bool key, DotsC_EntityId& val, const char*& optionalStr);
-    DOTS_KERNEL_API void DotsC_ReadBinary(DotsC_Handle reader, DotsC_Int32 valueIndex, const char*& val, DotsC_Int32& size);
-    DOTS_KERNEL_API void DotsC_ReadObject(DotsC_Handle reader, DotsC_Int32 valueIndex, const char*& val);
+    DOTS_KERNEL_API DotsC_Int32 DotsC_GetNumberOfMemberValues(DotsC_Handle reader, DotsC_MemberIndex member);
+
+    DOTS_KERNEL_API void DotsC_SetReadCursor(DotsC_Handle reader, DotsC_MemberIndex member, DotsC_Int32 valueIndex);
+
+    DOTS_KERNEL_API void DotsC_ReadMemberStatus(DotsC_Handle reader, bool& isNull, bool& isChanged);
+    DOTS_KERNEL_API void DotsC_ReadInt32Member(DotsC_Handle reader, bool key, DotsC_Int32& val);
+    DOTS_KERNEL_API void DotsC_ReadInt64Member(DotsC_Handle reader, bool key, DotsC_Int64& val);
+    DOTS_KERNEL_API void DotsC_ReadFloat32Member(DotsC_Handle reader, DotsC_Float32& val);
+    DOTS_KERNEL_API void DotsC_ReadFloat64Member(DotsC_Handle reader, DotsC_Float64& val);
+    DOTS_KERNEL_API void DotsC_ReadBoolMember(DotsC_Handle reader, bool& val);
+    DOTS_KERNEL_API void DotsC_ReadStringMember(DotsC_Handle reader, bool key, const char*& val);
+    DOTS_KERNEL_API void DotsC_ReadHashMember(DotsC_Handle reader, bool key, DotsC_Int64& val, const char*& optionalStr);
+    DOTS_KERNEL_API void DotsC_ReadEntityIdMember(DotsC_Handle reader, bool key, DotsC_EntityId& val, const char*& optionalStr);
+    DOTS_KERNEL_API void DotsC_ReadBinaryMember(DotsC_Handle reader, const char*& val, DotsC_Int32& size);
+    DOTS_KERNEL_API void DotsC_ReadObjectMember(DotsC_Handle reader, const char*& val);
 
 
     // Write operations
@@ -857,19 +630,19 @@ extern "C"
      * @return Handle to a new blob writer instance.
      */
     DOTS_KERNEL_API DotsC_Handle DotsC_CreateBlobWriter(DotsC_TypeId typeId);
-    DOTS_KERNEL_API void DotsC_SetWriteCursor(DotsC_Handle writer, DotsC_MemberIndex member);
+    DOTS_KERNEL_API void DotsC_SetWriteCursor(DotsC_Handle writer, DotsC_MemberIndex member, DotsC_Int32 arrayIndex);
 
-    DOTS_KERNEL_API void DotsC_SetChanged(DotsC_Handle writer, bool isChanged);
-    DOTS_KERNEL_API void DotsC_SetInt32(DotsC_Handle writer, DotsC_Int32 val, bool key);
-    DOTS_KERNEL_API void DotsC_SetInt64(DotsC_Handle writer, DotsC_Int64 val, bool key);
-    DOTS_KERNEL_API void DotsC_SetFloat32(DotsC_Handle writer, DotsC_Float32 val);
-    DOTS_KERNEL_API void DotsC_SetFloat64(DotsC_Handle writer, DotsC_Float64 val);
-    DOTS_KERNEL_API void DotsC_SetBool(DotsC_Handle writer, bool val);
-    DOTS_KERNEL_API void DotsC_SetString(DotsC_Handle writer, const char* val, bool key);
-    DOTS_KERNEL_API void DotsC_SetHash(DotsC_Handle writer, DotsC_Int64 hash, const char* str, bool key);
-    DOTS_KERNEL_API void DotsC_SetEntityId(DotsC_Handle writer, const DotsC_EntityId& val, const char* instanceString, bool key);
-    DOTS_KERNEL_API void DotsC_SetBinary(DotsC_Handle writer, const char* val, DotsC_Int32 size);
-    DOTS_KERNEL_API void DotsC_SetObject(DotsC_Handle writer, const char* blob);
+    DOTS_KERNEL_API void DotsC_SetMemberStatus(DotsC_Handle writer, bool isNull, bool isChanged);
+    DOTS_KERNEL_API void DotsC_SetInt32Member(DotsC_Handle writer, DotsC_Int32 val, bool key);
+    DOTS_KERNEL_API void DotsC_SetInt64Member(DotsC_Handle writer, DotsC_Int64 val, bool key);
+    DOTS_KERNEL_API void DotsC_SetFloat32Member(DotsC_Handle writer, DotsC_Float32 val);
+    DOTS_KERNEL_API void DotsC_SetFloat64Member(DotsC_Handle writer, DotsC_Float64 val);
+    DOTS_KERNEL_API void DotsC_SetBoolMember(DotsC_Handle writer, bool val);
+    DOTS_KERNEL_API void DotsC_SetStringMember(DotsC_Handle writer, const char* val, bool key);
+    DOTS_KERNEL_API void DotsC_SetHashedMember(DotsC_Handle writer, DotsC_Int64 hash, const char* str, bool key);
+    DOTS_KERNEL_API void DotsC_SetEntityIdMember(DotsC_Handle writer, const DotsC_EntityId& val, const char* instanceString, bool key);
+    DOTS_KERNEL_API void DotsC_SetBinaryMember(DotsC_Handle writer, const char* val, DotsC_Int32 size);
+    DOTS_KERNEL_API void DotsC_SetObjectMember(DotsC_Handle writer, const char* blob);
 
     DOTS_KERNEL_API DotsC_Int32 DotsC_CalculateBlobSize(DotsC_Handle writer);
     DOTS_KERNEL_API void DotsC_WriteBlob(DotsC_Handle writer, char* blobDest);

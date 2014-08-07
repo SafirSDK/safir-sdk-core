@@ -121,15 +121,6 @@ typedef enum
 
 typedef enum
 {
-    NoError=0,
-    ReadOnlyProperty,           //when reading properties straight from blobs
-    UnableToDereferenceProperty, //when reading properties straight from blobs
-    IllegalValue
-} DotsC_ErrorCode;
-
-
-typedef enum
-{
     MappedToNull,
     MappedToMember,
     MappedToParameter
