@@ -215,14 +215,6 @@ extern "C"
                                                                        DotsC_TypeId propertyId,
                                                                        DotsC_MemberIndex propertyMember);
 
-    // Function:    DotsC_GetMemberTypeName
-    // Parameters:  typeId  -   id of class or property
-    //              member  -   id of member
-    // Returns:     name of type
-    // Comments:    Gets a string representation of the type of a member.
-    DOTS_KERNEL_API const char* DotsC_GetMemberTypeName(DotsC_TypeId typeId, DotsC_MemberIndex member);
-
-
     // Parameters
     //-----------------------------------------------------------
     // Function:    DotsC_GetNumberOfParameters
@@ -298,7 +290,7 @@ extern "C"
                                            bool& hasProperty,
                                            bool& isInherited);
 
-    DOTS_KERNEL_API void DotsC_GetPropertyMappingKind(const DotsC_TypeId classTypeId,
+    DOTS_KERNEL_API bool DotsC_GetPropertyMappingKind(const DotsC_TypeId classTypeId,
                                                       const DotsC_TypeId propertyTypeId,
                                                       const DotsC_MemberIndex propertyMember,
                                                       DotsC_PropertyMappingKind & mappingKind);

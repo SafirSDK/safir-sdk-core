@@ -104,8 +104,8 @@ namespace Members
      * @param memberTypeId [out] - if memberType is object or enumeration, this is the typeId of that type.
      *                             If memberType is something else the value is -1.
      * @param stringLength [out] - If memberType is string and the type is a class (not property) then this is the length of the string.
-     * @param isArray [out] - True if member is an array. Not applicable if type id is a property.
-     * @param arrayLength [out] - Maximum capacity of array if the member is an array (1 if not an array). Not applicable if type id is a property.
+     * @param collectionType [out] - The member collection type, can be singel value, array, sequence or dictionary.
+     * @param arrayLength [out] - Maximum capacity of array if the member collection type is an array (1 if not an array). Not applicable if type id is a property.
      * @throws IllegalValueException There is no such type defined or there is no such member
      *                               in the type.
      */
@@ -115,7 +115,7 @@ namespace Members
                           const char * & memberName,
                           Dob::Typesystem::TypeId & memberTypeId,
                           Dob::Typesystem::Int32 & stringLength,
-                          bool & isArray,
+                          CollectionType & collectionType,
                           Dob::Typesystem::Int32 & arrayLength);
 
     /**
@@ -141,18 +141,6 @@ namespace Members
      */
     DOTS_CPP_API Dob::Typesystem::Int32 GetMaxStringLength(const Dob::Typesystem::TypeId typeId,
                                                        const Dob::Typesystem::MemberIndex member);
-
-    /**
-     * Get the name of the type as it was defined in the xml description.
-     *
-     * @param typeId [in] - TypeId of class.
-     * @param member [in] - Index of member.
-     * @return The name of the type.
-     * @throws IllegalValueException There is no such class defined or there is no such member
-     *                               in the type or the member is not a string.
-     */
-    DOTS_CPP_API std::wstring GetTypeName(const Dob::Typesystem::TypeId typeId,
-                                      const Dob::Typesystem::MemberIndex member);
 }
 }
 }

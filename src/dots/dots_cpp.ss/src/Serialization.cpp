@@ -52,12 +52,12 @@ namespace Typesystem
         int BUF_SIZE = 100000;
         std::vector<char> xml8(BUF_SIZE);
         Int32 resultSize;
-        DotsC_BetterBlobToXml(&xml8[0], &bin[0], BUF_SIZE, resultSize);
+        DotsC_BlobToXml(&xml8[0], &bin[0], BUF_SIZE, resultSize);
         if (resultSize> BUF_SIZE)
         {
             BUF_SIZE = resultSize;
             xml8.resize(BUF_SIZE);
-            DotsC_BetterBlobToXml(&xml8[0], &bin[0], BUF_SIZE, resultSize);
+            DotsC_BlobToXml(&xml8[0], &bin[0], BUF_SIZE, resultSize);
             if (resultSize != BUF_SIZE)
             {
                 throw SoftwareViolationException(L"Error in serialization buffer sizes",__WFILE__,__LINE__);
@@ -115,12 +115,12 @@ namespace Typesystem
         int BUF_SIZE = 100000;
         std::vector<char> xml8(BUF_SIZE);
         Int32 resultSize;
-        DotsC_BetterBlobToXml(&xml8[0], blob, BUF_SIZE, resultSize);
+        DotsC_BlobToXml(&xml8[0], blob, BUF_SIZE, resultSize);
         if (resultSize> BUF_SIZE)
         {
             BUF_SIZE = resultSize;
             xml8.resize(BUF_SIZE);
-            DotsC_BetterBlobToXml(&xml8[0], blob, BUF_SIZE, resultSize);
+            DotsC_BlobToXml(&xml8[0], blob, BUF_SIZE, resultSize);
             if (resultSize != BUF_SIZE)
             {
                 throw SoftwareViolationException(L"Error in serialization buffer sizes",__WFILE__,__LINE__);
@@ -199,12 +199,7 @@ namespace Typesystem
             throw SoftwareViolationException(L"Attempt to serialize a null pointer to binary!", __WFILE__,__LINE__);
         }
 
-        const Safir::Dob::Typesystem::Int32 blobSize = object->CalculateBlobSize();
-        binary.resize(blobSize);
-        
-        char * beginningOfUnused = 0;
-        DotsC_FormatBlob(&binary[0], blobSize, object->GetTypeId(),beginningOfUnused);
-        object->WriteToBlob(&binary[0], beginningOfUnused);
+        //TODO: JOOT implement after dod-files have been updated
     }
 
     Dob::Typesystem::ObjectPtr 

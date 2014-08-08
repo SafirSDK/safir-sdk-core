@@ -70,14 +70,21 @@ namespace Members
     GetName(const TypeId typeId, 
             const MemberIndex member)
     {
-        const char * result = DotsC_GetMemberName(typeId, member);
-        if (result == NULL)
+        DotsC_MemberType memberType;
+        const char* memberName;
+        DotsC_TypeId complexType;
+        DotsC_Int32 stringLength;
+        DotsC_CollectionType collectionType;
+        DotsC_Int32 arraySize;
+        DotsC_GetMemberInfo(typeId, member, memberType, memberName, complexType, stringLength, collectionType, arraySize);
+
+        if (memberName == NULL)
         {
             throw IllegalValueException(L"There is no such type or member defined", __WFILE__, __LINE__);
         }
         else
         {
-            return Utilities::ToWstring(result);
+            return Utilities::ToWstring(memberName);
         }
     }
 
@@ -85,14 +92,21 @@ namespace Members
     GetTypeId(const TypeId typeId, 
                       const MemberIndex member)
     {
-        TypeId result = DotsC_GetComplexMemberTypeId(typeId, member);
-        if (result == -1)
+        DotsC_MemberType memberType;
+        const char* memberName;
+        DotsC_TypeId complexType;
+        DotsC_Int32 stringLength;
+        DotsC_CollectionType collectionType;
+        DotsC_Int32 arraySize;
+        DotsC_GetMemberInfo(typeId, member, memberType, memberName, complexType, stringLength, collectionType, arraySize);
+
+        if (complexType == -1)
         {
             throw IllegalValueException(L"There is no such type or member defined", __WFILE__, __LINE__);
         }
         else
         {
-            return result;
+            return complexType;
         }
     }
 
@@ -101,12 +115,12 @@ namespace Members
             const MemberIndex member,           //in
             MemberType& memberType,             //out
             const char* & memberName,           //out
-            TypeId& memberTypeId,                //out
+            TypeId& memberTypeId,               //out
             Int32& stringLength,                //out
-            bool& isArray,                      //out
+            CollectionType& collectionType,     //out
             Int32& arrayLength)                 //out
     {
-        DotsC_GetMemberInfo(typeId, member, memberType, memberName, memberTypeId, stringLength, isArray, arrayLength);
+        DotsC_GetMemberInfo(typeId, member, memberType, memberName, memberTypeId, stringLength, collectionType, arrayLength);
         if (memberName == NULL)
         {
             throw IllegalValueException(L"There is no such type or member defined", __WFILE__, __LINE__);
@@ -118,14 +132,21 @@ namespace Members
     GetArraySize(const TypeId typeId, 
                  const MemberIndex member)
     {
-        const Int32 result = DotsC_GetMemberArraySize(typeId, member);
-        if (result == -1)
+        DotsC_MemberType memberType;
+        const char* memberName;
+        DotsC_TypeId complexType;
+        DotsC_Int32 stringLength;
+        DotsC_CollectionType collectionType;
+        DotsC_Int32 arraySize;
+        DotsC_GetMemberInfo(typeId, member, memberType, memberName, complexType, stringLength, collectionType, arraySize);
+
+        if (arraySize == -1)
         {
             throw IllegalValueException(L"No such type or array defined", __WFILE__,__LINE__);
         }
         else
         {
-            return result;
+            return arraySize;
         }
     }
 
@@ -133,30 +154,21 @@ namespace Members
     GetMaxStringLength(const TypeId typeId, 
                        const MemberIndex member)
     {
-        const Int32 result = DotsC_GetStringMemberMaxLength(typeId, member);
-        if (result == -1)
+        DotsC_MemberType memberType;
+        const char* memberName;
+        DotsC_TypeId complexType;
+        DotsC_Int32 stringLength;
+        DotsC_CollectionType collectionType;
+        DotsC_Int32 arraySize;
+        DotsC_GetMemberInfo(typeId, member, memberType, memberName, complexType, stringLength, collectionType, arraySize);
+
+        if (stringLength == -1)
         {
             throw IllegalValueException(L"No such type or member defined", __WFILE__,__LINE__);
         }
         else
         {
-            return result;
-        }
-    }
-
-
-    std::wstring 
-    GetTypeName(const TypeId typeId, 
-                const MemberIndex member)
-    {
-        const char * result = DotsC_GetMemberTypeName(typeId, member);
-        if (result == NULL)
-        {
-            throw IllegalValueException(L"There is no such type or member defined", __WFILE__, __LINE__);
-        }
-        else
-        {
-            return Utilities::ToWstring(result);
+            return stringLength;
         }
     }
 }

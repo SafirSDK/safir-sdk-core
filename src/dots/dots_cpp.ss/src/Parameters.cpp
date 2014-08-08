@@ -77,28 +77,42 @@ namespace Parameters
     GetName(const TypeId typeId,
             const ParameterIndex parameter)
     {
-        return Utilities::ToWstring(DotsC_GetParameterName(typeId, parameter));
+        DotsC_MemberType memberType;
+        const char* parameterName;
+        DotsC_TypeId complexTypeId;
+        DotsC_CollectionType collectionType;
+        DotsC_Int32 numberOfValues;
+        DotsC_GetParameterInfo(typeId, parameter, memberType, parameterName, complexTypeId, collectionType, numberOfValues);
+
+        return Utilities::ToWstring(parameterName);
     }
 
     MemberType
     GetType(const TypeId typeId,
             const ParameterIndex parameter)
     {
-        return static_cast<MemberType>(DotsC_GetParameterType(typeId, parameter));
-    }
+        DotsC_MemberType memberType;
+        const char* parameterName;
+        DotsC_TypeId complexTypeId;
+        DotsC_CollectionType collectionType;
+        DotsC_Int32 numberOfValues;
+        DotsC_GetParameterInfo(typeId, parameter, memberType, parameterName, complexTypeId, collectionType, numberOfValues);
 
-    const std::wstring
-    GetTypeName(const TypeId typeId,
-                const ParameterIndex parameter)
-    {
-        return Utilities::ToWstring(DotsC_GetParameterTypeName(typeId, parameter));
+        return memberType;
     }
 
     Int32
     GetArraySize(const TypeId typeId,
                  const ParameterIndex parameter)
     {
-        return DotsC_GetParameterArraySize(typeId, parameter);
+        DotsC_MemberType memberType;
+        const char* parameterName;
+        DotsC_TypeId complexTypeId;
+        DotsC_CollectionType collectionType;
+        DotsC_Int32 numberOfValues;
+        DotsC_GetParameterInfo(typeId, parameter, memberType, parameterName, complexTypeId, collectionType, numberOfValues);
+
+        return numberOfValues;
     }
 
     //Get parameters

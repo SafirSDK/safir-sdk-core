@@ -36,24 +36,20 @@ namespace Typesystem
 namespace Internal
 {
     /**
-     * Create an exact copy of a blob.
+     * Get type id of blob.
      *
-     * Be aware that you _MUST_ call BlobOperations::Delete on the blob you received when you are done with it.
-     * otherwise memory will leak!
-     *
-     * @param blob [in] - the blob to copy.
-     * @return The copied blob.
+     * @param blob [in] - The blob to read type id from.
+     * @return TypeId of the blob.
      */
-    DOTS_CPP_API char * CreateCopy(char const * const blob);
+    TypeId GetTypeId(const char* blob);
 
     /**
-     * Delete a blob.
+     * Get size of a blob.
      *
-     * Blobs created with CreateCopy must be deleted with this method method
-     *
-     * @param blob [in,out] - the blob to delete.
+     * @param blob [in] - The blob to read size of.
+     * @return  Size of blob.
      */
-    DOTS_CPP_API void Delete(char * & blob);
+    Int32 GetSize(const char* blob);
 
     /**
      * Set all changed flags in the blob.
@@ -61,7 +57,7 @@ namespace Internal
      * @param blob [in] - The blob to modify.
      * @param changed [in] - The value to set the change flags to.
      */
-    DOTS_CPP_API void SetChanged(char * const blob, const bool changed);
+//    DOTS_CPP_API void SetChanged(char * const blob, const bool changed);
 
     /**
      * Set the change flag on a member in blob. 
@@ -73,10 +69,10 @@ namespace Internal
      * @param [in] index - Array index in member to set. Shall be 0 if the member is not an array.
      * @param changed [in] - The value to set the change flag to.
      */
-    DOTS_CPP_API void SetChangedHere(char* const blob,
-                                 const Dob::Typesystem::MemberIndex member,
-                                 const Dob::Typesystem::ArrayIndex index,
-                                 const bool changed);
+//    DOTS_CPP_API void SetChangedHere(char* const blob,
+//                                 const Dob::Typesystem::MemberIndex member,
+//                                 const Dob::Typesystem::ArrayIndex index,
+//                                 const bool changed);
 
     /**
      * Compare two blobs and set the change flags.
@@ -87,8 +83,8 @@ namespace Internal
      * @param base [in] - Original to compare.
      * @param mine [in,out] - Compare to this and set change flags.
      */
-    DOTS_CPP_API void Diff(char const * const base,
-                       char * const mine);
+//    DOTS_CPP_API void Diff(char const * const base,
+//                       char * const mine);
 
     /**
      * Generate a 64 bit hash from a string.

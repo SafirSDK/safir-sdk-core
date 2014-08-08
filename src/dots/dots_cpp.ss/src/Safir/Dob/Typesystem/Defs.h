@@ -279,6 +279,14 @@ namespace Typesystem
     typedef DotsC_MemberType MemberType;
 
     /**
+     * An enumeration of all possible collection types of an object member.
+     *
+     * The values of this enumeration is defined in the file Safir/Dob/Typesystem/LanguageInterfaceDefs.h.
+     * @see Safir/Dob/Typesystem/LanguageInterfaceDefs.h
+     */
+    typedef DotsC_CollectionType CollectionType;
+
+    /**
      * A type to contain binary serializations of DOB objects.
      *
      * Note: If you need to get hold of a "raw" C-pointer to the data * use &binary[0].

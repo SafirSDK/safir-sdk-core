@@ -100,21 +100,6 @@ namespace Typesystem
                                     const Dob::Typesystem::ParameterIndex parameter);
 
         /**
-         * Gets a string representation of the type of a parameter.
-         *
-         * If the parameter is not an object or enumeration the result is undefined.
-         *
-         * If the parameter does not exist the returned value is undefined. Use
-         * #GetIndex to get a valid ParameterIndex, which is guaranteed to exist.
-         *
-         * @param typeId [in] - TypeId of class.
-         * @param parameter [in] - Index of parameter.
-         * @return Name of the parameter type.
-         */
-        DOTS_CPP_API const std::wstring GetTypeName(const Dob::Typesystem::TypeId typeId,
-                                                const Dob::Typesystem::ParameterIndex parameter);
-
-        /**
          * Get the array size of a parameter.
          *
          * If the parameter does not exist the returned value is undefined. Use

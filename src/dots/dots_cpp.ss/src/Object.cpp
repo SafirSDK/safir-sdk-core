@@ -25,7 +25,6 @@
 #include "Safir/Dob/Typesystem/Exceptions.h"
 #include "Safir/Dob/Typesystem/Object.h"
 #include "Safir/Dob/Typesystem/ObjectFactory.h"
-#include "Safir/Dob/Typesystem/BlobOperations.h"
 #include "Safir/Dob/Typesystem/ContainerProxies.h"
 namespace Safir
 {

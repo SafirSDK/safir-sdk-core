@@ -158,22 +158,15 @@ namespace Typesystem
                            const Dob::Typesystem::MemberIndex member)
     {
         DotsC_PropertyMappingKind kind;
-        DotsC_ErrorCode errorCode;
-        DotsC_GetPropertyMappingKind(typeId,
+        if (DotsC_GetPropertyMappingKind(typeId,
                                      propertyId,
                                      member,
-                                     kind,
-                                     errorCode);
-        switch (errorCode)
+                                     kind))
         {
-        case NoError:
-            break;
-        case IllegalValue:
-            throw IllegalValueException(L"That object is not mapped to that property!",__WFILE__,__LINE__);
-        default:
-            throw SoftwareViolationException(L"Got unexpected error code from dots_kernel",__WFILE__,__LINE__);
+            return kind;
         }
-        return kind;
+
+        throw IllegalValueException(L"That object is not mapped to that property!",__WFILE__,__LINE__);
     }
 
     void
@@ -490,11 +483,10 @@ namespace Typesystem
 
         case MappedToParameter:
             {
-                DotsC_GetBooleanPropertyParameter(object->GetTypeId(),
-                                                  propertyId,
-                                                  member,
-                                                  index,
-                                                  value);
+                DotsC_ParameterIndex paramIndex;
+                DotsC_Int32 valueIndex;
+                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, paramIndex, valueIndex);
+                DotsC_GetBooleanParameter(object->GetTypeId(), paramIndex, valueIndex, value);
             }
             break;
 
@@ -614,11 +606,10 @@ namespace Typesystem
 
         case MappedToParameter:
             {
-                DotsC_GetEnumerationPropertyParameter(object->GetTypeId(),
-                                                      propertyId,
-                                                      member,
-                                                      index,
-                                                      value);
+                DotsC_ParameterIndex paramIndex;
+                DotsC_Int32 valueIndex;
+                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, paramIndex, valueIndex);
+                DotsC_GetEnumerationParameter(object->GetTypeId(), paramIndex, valueIndex, value);
             }
             break;
 
@@ -738,11 +729,10 @@ namespace Typesystem
 
         case MappedToParameter:
             {
-                DotsC_GetInt32PropertyParameter(object->GetTypeId(),
-                                                propertyId,
-                                                member,
-                                                index,
-                                                value);
+                DotsC_ParameterIndex paramIndex;
+                DotsC_Int32 valueIndex;
+                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, paramIndex, valueIndex);
+                DotsC_GetInt32Parameter(object->GetTypeId(), paramIndex, valueIndex, value);
             }
             break;
 
@@ -862,11 +852,10 @@ namespace Typesystem
 
         case MappedToParameter:
             {
-                DotsC_GetInt64PropertyParameter(object->GetTypeId(),
-                                                propertyId,
-                                                member,
-                                                index,
-                                                value);
+                DotsC_ParameterIndex paramIndex;
+                DotsC_Int32 valueIndex;
+                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, paramIndex, valueIndex);
+                DotsC_GetInt64Parameter(object->GetTypeId(), paramIndex, valueIndex, value);
             }
             break;
 
@@ -988,11 +977,10 @@ namespace Typesystem
 
         case MappedToParameter:
             {
-                DotsC_GetFloat32PropertyParameter(object->GetTypeId(),
-                                                  propertyId,
-                                                  member,
-                                                  index,
-                                                  value);
+                DotsC_ParameterIndex paramIndex;
+                DotsC_Int32 valueIndex;
+                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, paramIndex, valueIndex);
+                DotsC_GetFloat32Parameter(object->GetTypeId(), paramIndex, valueIndex, value);
             }
             break;
 
@@ -1112,11 +1100,10 @@ namespace Typesystem
 
         case MappedToParameter:
             {
-                DotsC_GetFloat64PropertyParameter(object->GetTypeId(),
-                                                  propertyId,
-                                                  member,
-                                                  index,
-                                                  value);
+                DotsC_ParameterIndex paramIndex;
+                DotsC_Int32 valueIndex;
+                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, paramIndex, valueIndex);
+                DotsC_GetFloat64Parameter(object->GetTypeId(), paramIndex, valueIndex, value);
             }
             break;
 
@@ -1239,12 +1226,11 @@ namespace Typesystem
             {
                 Int64 hashVal;
                 const char * instanceIdStr = NULL;
-                DotsC_GetHashedIdPropertyParameter(object->GetTypeId(),
-                                                   propertyId,
-                                                   member,
-                                                   index,
-                                                   hashVal,
-                                                   instanceIdStr);
+                DotsC_ParameterIndex paramIndex;
+                DotsC_Int32 valueIndex;
+                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, paramIndex, valueIndex);
+                DotsC_GetHashedIdParameter(object->GetTypeId(), paramIndex, valueIndex, hashVal, instanceIdStr);
+
                 if (instanceIdStr == NULL)
                 {
                     value = InstanceId(hashVal);
@@ -1375,13 +1361,12 @@ namespace Typesystem
         case MappedToParameter:
             {
                 DotsC_EntityId eid;
-                const char * instanceIdStr;
-                DotsC_GetEntityIdPropertyParameter(object->GetTypeId(),
-                                                  propertyId,
-                                                  member,
-                                                  index,
-                                                  eid,
-                                                  instanceIdStr);
+                const char * instanceIdStr;                
+                DotsC_ParameterIndex paramIndex;
+                DotsC_Int32 valueIndex;
+                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, paramIndex, valueIndex);
+                DotsC_GetEntityIdParameter(object->GetTypeId(), paramIndex, valueIndex, eid, instanceIdStr);
+
                 if (instanceIdStr == NULL)
                 {
                     value = EntityId(eid.typeId,InstanceId(eid.instanceId));
@@ -1512,12 +1497,11 @@ namespace Typesystem
             {
                 Int64 hashVal;
                 const char * channelIdStr = NULL;
-                DotsC_GetHashedIdPropertyParameter(object->GetTypeId(),
-                                                   propertyId,
-                                                   member,
-                                                   index,
-                                                   hashVal,
-                                                   channelIdStr);
+                DotsC_ParameterIndex paramIndex;
+                DotsC_Int32 valueIndex;
+                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, paramIndex, valueIndex);
+                DotsC_GetHashedIdParameter(object->GetTypeId(), paramIndex, valueIndex, hashVal, channelIdStr);
+
                 if (channelIdStr == NULL)
                 {
                     value = ChannelId(hashVal);
@@ -1649,12 +1633,11 @@ namespace Typesystem
             {
                 Int64 hashVal;
                 const char * handlerIdStr = NULL;
-                DotsC_GetHashedIdPropertyParameter(object->GetTypeId(),
-                                                   propertyId,
-                                                   member,
-                                                   index,
-                                                   hashVal,
-                                                   handlerIdStr);
+                DotsC_ParameterIndex paramIndex;
+                DotsC_Int32 valueIndex;
+                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, paramIndex, valueIndex);
+                DotsC_GetHashedIdParameter(object->GetTypeId(), paramIndex, valueIndex, hashVal, handlerIdStr);
+
                 if (handlerIdStr == NULL)
                 {
                     value = HandlerId(hashVal);
@@ -1785,12 +1768,11 @@ namespace Typesystem
 
         case MappedToParameter:
             {
-                char const * str;
-                DotsC_GetStringPropertyParameter(object->GetTypeId(),
-                                                 propertyId,
-                                                 member,
-                                                 index,
-                                                 str);
+                const char* str;
+                DotsC_ParameterIndex paramIndex;
+                DotsC_Int32 valueIndex;
+                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, paramIndex, valueIndex);
+                DotsC_GetStringParameter(object->GetTypeId(), paramIndex, valueIndex, str);
                 value = Utilities::ToWstring(str);
             }
             break;
@@ -1913,12 +1895,12 @@ namespace Typesystem
 
         case MappedToParameter:
             {
-                char const * blob;
-                DotsC_GetObjectPropertyParameter(object->GetTypeId(),
-                                                 propertyId,
-                                                 member,
-                                                 index,
-                                                 blob);
+                const char* blob;
+                DotsC_ParameterIndex paramIndex;
+                DotsC_Int32 valueIndex;
+                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, paramIndex, valueIndex);
+                DotsC_GetObjectParameter(object->GetTypeId(), paramIndex, valueIndex, blob);
+
                 ptr = ObjectFactory::Instance().CreateObject(blob);
                 ptr->SetChanged(false);
             }
@@ -2049,12 +2031,11 @@ namespace Typesystem
             {
                 char const * bin;
                 DotsC_Int32 size;
-                DotsC_GetBinaryPropertyParameter(object->GetTypeId(),
-                                                 propertyId,
-                                                 member,
-                                                 index,
-                                                 bin,
-                                                 size);
+                DotsC_ParameterIndex paramIndex;
+                DotsC_Int32 valueIndex;
+                DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, paramIndex, valueIndex);
+                DotsC_GetBinaryParameter(object->GetTypeId(), paramIndex, valueIndex, bin, size);
+
                 binary.clear();
                 binary.reserve(size);
                 for (int i=0; i<size; i++)

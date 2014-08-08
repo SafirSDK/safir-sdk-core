@@ -24,8 +24,8 @@
 
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
-#include <Safir/Dob/Typesystem/BlobOperations.h>
 #include <Safir/Dob/Typesystem/Operations.h>
+#include <Safir/Dob/Typesystem/Internal/InternalOperations.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <boost/thread/mutex.hpp>
 #include <boost/bind.hpp>
@@ -69,7 +69,7 @@ namespace Typesystem
         {
             throw SoftwareViolationException(L"Cannot create object from NULL blob!",__WFILE__,__LINE__);
         }
-        const TypeId typeId = BlobOperations::GetTypeId(blob);
+        const TypeId typeId = Internal::GetTypeId(blob);
         CallbackMap::const_iterator it = m_CallbackMap.find(typeId);
         if (it == m_CallbackMap.end())
         {

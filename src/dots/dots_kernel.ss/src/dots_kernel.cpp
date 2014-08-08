@@ -504,31 +504,6 @@ DotsC_Int32 DotsC_GetStringMemberMaxLengthProperty(const DotsC_TypeId classId, c
     return -1;
 }
 
-const char* DotsC_GetMemberTypeName(const DotsC_TypeId typeId, const DotsC_MemberIndex member)
-{
-    Init();
-    const MemberDescriptionShm* md=NULL;
-    const ClassDescriptionShm* cd=RepositoryKeeper::GetRepository()->GetClass(typeId);
-    if (cd!=NULL)
-    {
-        md=cd->GetMember(member);
-    }
-    else
-    {
-        const PropertyDescriptionShm* pd=RepositoryKeeper::GetRepository()->GetProperty(typeId);
-        if (pd!=NULL)
-        {
-            md=pd->GetMember(member);
-        }
-    }
-
-    if (md==NULL)
-        return NULL;
-
-    return ts::TypeUtilities::GetTypeName(RepositoryKeeper::GetRepository(), md);
-}
-
-
  //***********************************************************************
  //* Functions retrieving definitions of parameter values in object types
  //***********************************************************************
@@ -635,7 +610,7 @@ void DotsC_HasProperty(const DotsC_TypeId classTypeId, const DotsC_TypeId proper
     }
 }
 
-void DotsC_GetPropertyMappingKind(const DotsC_TypeId typeId,
+bool DotsC_GetPropertyMappingKind(const DotsC_TypeId typeId,
                                   const DotsC_TypeId propertyId,
                                   const DotsC_MemberIndex member,
                                   DotsC_PropertyMappingKind & mappingKind)
@@ -644,8 +619,14 @@ void DotsC_GetPropertyMappingKind(const DotsC_TypeId typeId,
 
     bool isInherited;
     const PropertyMappingDescriptionShm* pmd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetPropertyMapping(propertyId, isInherited);
+    if (pmd==NULL)
+    {
+        //class not mapped to that property
+        return false;
+    }
     const MemberMappingDescriptionShm* mm=pmd->GetMemberMapping(member);
     mappingKind=mm->GetMappingKind();
+    return true;
 }
 
 
