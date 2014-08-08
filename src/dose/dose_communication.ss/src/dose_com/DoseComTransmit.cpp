@@ -77,6 +77,9 @@
 
 #include <ace/Thread_Mutex.h>
 #include <ace/Guard_T.h>
+#include <Safir/Dob/Internal/Atomic.h>
+
+namespace Atomics = Safir::Dob::Internal::Atomics;
 
 //--------------------
 // Externals
@@ -299,7 +302,7 @@ typedef volatile struct
 
     // incremented by DOSE_Xmit_msg() when overflow
     // cleared by Xmit_Thread() when free entries in Queue
-    volatile dcom_ushort16 TransmitQueueOverflow;
+    boost::uint32_t TransmitQueueOverflow;
 
     volatile dcom_uchar8   bSendQueueNotOverflow;
 
@@ -650,12 +653,15 @@ static bool CleanUp_After_Msg_Ignored(int qIx, int TxMsgArrIx)
     //----------------------------------------------------------
     // Shall we send a 'QueueOverflow' condition has ended event
     //-----------------------------------------------------------
-    if(TxQ[qIx].TransmitQueueOverflow)
+    if(Atomics::atomic_read32(&TxQ[qIx].TransmitQueueOverflow) > 0)
     {
         if(*pDbg>4)
             PrintDbg("#   Decrementing TransmitQueueOverflow (%d) from %d\n",
-                    qIx,TxQ[qIx].TransmitQueueOverflow);
-        if(--TxQ[qIx].TransmitQueueOverflow == 0)
+                    qIx,Atomics::atomic_read32(&TxQ[qIx].TransmitQueueOverflow));
+
+        Atomics::atomic_dec32(&TxQ[qIx].TransmitQueueOverflow);
+
+        if(Atomics::atomic_read32(&TxQ[qIx].TransmitQueueOverflow) == 0)
         {
             TxQ[qIx].bSendQueueNotOverflow = 1;
         }
@@ -767,12 +773,15 @@ static int CleanUp_After_Msg_Completed(int qIx)
     //----------------------------------------------------------
     // Shall we send a 'QueueOverflow' condition has ended event
     //-----------------------------------------------------------
-    if(TxQ[qIx].TransmitQueueOverflow)
+    if(Atomics::atomic_read32(&TxQ[qIx].TransmitQueueOverflow) > 0)
     {
         if(*pDbg>4)
             PrintDbg("#   Decrementing TransmitQueueOverflow (%d) from %d\n",
-                    qIx,TxQ[qIx].TransmitQueueOverflow);
-        if(--TxQ[qIx].TransmitQueueOverflow == 0)
+                    qIx,Atomics::atomic_read32(&TxQ[qIx].TransmitQueueOverflow));
+
+        Atomics::atomic_dec32(&TxQ[qIx].TransmitQueueOverflow);
+
+        if(Atomics::atomic_read32(&TxQ[qIx].TransmitQueueOverflow) == 0)
         {
             TxQ[qIx].bSendQueueNotOverflow = 1;
         }
@@ -2882,7 +2891,7 @@ int CDoseComTransmit::Xmit_Msg(const char *pMsg, dcom_ulong32 MsgLength,
                 PrintDbg(">   Xmit_Msg() Overflow in XmitQueue for PD_ISCOMPLETE\n");
 
                 // Want some free entries before signaling
-                TxQ[Qix].TransmitQueueOverflow = XMIT_QUEUE_HYSTERISIS; //  [B]
+                Atomics::atomic_write32(&TxQ[Qix].TransmitQueueOverflow, XMIT_QUEUE_HYSTERISIS); //  [B]
 
                 MightBeOverFlow = 1;
             }
@@ -2896,7 +2905,7 @@ int CDoseComTransmit::Xmit_Msg(const char *pMsg, dcom_ulong32 MsgLength,
 //          DoseOs::Sleep(2000); // force error
 //#endif
             //Want 2 free entries be fore signalling
-            TxQ[Qix].TransmitQueueOverflow = XMIT_QUEUE_HYSTERISIS;      // [B]
+            Atomics::atomic_write32(&TxQ[Qix].TransmitQueueOverflow, XMIT_QUEUE_HYSTERISIS);      // [B]
 
             //if(*pDbg>1)
             //   PrintDbg(">   Xmit_Msg()           After Sleep P/G=%u/%u\n",
@@ -2957,7 +2966,7 @@ int CDoseComTransmit::Xmit_Msg(const char *pMsg, dcom_ulong32 MsgLength,
                                 " PD_ISCOMPLETE ******\n");
 
                     //Want some free entries before signaling
-                     TxQ[Qix].TransmitQueueOverflow = XMIT_QUEUE_HYSTERISIS;//[D]
+                     Atomics::atomic_write32(&TxQ[Qix].TransmitQueueOverflow, XMIT_QUEUE_HYSTERISIS); //[D]
 
                     g_pTxStatistics[Qix].CountTxOverflow++;
                     g_pShm->Statistics.TransmitQueueFullCount++;
@@ -2969,7 +2978,7 @@ int CDoseComTransmit::Xmit_Msg(const char *pMsg, dcom_ulong32 MsgLength,
             {
                 //Sleep(2000); // force error
                 //Want some free entries be fore signalling
-                TxQ[Qix].TransmitQueueOverflow = XMIT_QUEUE_HYSTERISIS;     // [D]
+                Atomics::atomic_write32(&TxQ[Qix].TransmitQueueOverflow, XMIT_QUEUE_HYSTERISIS);     // [D]
 
                 g_pTxStatistics[Qix].CountTxOverflow++;
                 g_pShm->Statistics.TransmitQueueFullCount++;
