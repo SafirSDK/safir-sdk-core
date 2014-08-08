@@ -5,8 +5,10 @@ project(dose_internal_test CXX)
 INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
 FIND_PACKAGE(Boost COMPONENTS system thread)
+ENABLE_TESTING()
 
 ADD_SUBDIRECTORY(signals_test)
+ADD_SUBDIRECTORY(atomic_test)
 
 ADD_EXECUTABLE(distribution_data_test distribution_data_test.cpp)
 ADD_EXECUTABLE(lamport_clock_test lamport_clock_test.cpp)
@@ -21,7 +23,6 @@ if (NOT MSVC)
   TARGET_LINK_LIBRARIES(dose_message_queue_test dose_internal dots_generated-Safir-cpp dots_generated-cpp dots_cpp lluf_utils lluf_crash_reporter ${Boost_LIBRARIES})
 endif()
 
-ENABLE_TESTING()
 ADD_TEST(Semaphore dose_sem_wrapper_test)
 ADD_TEST(MessageQueue dose_message_queue_test)
 ADD_TEST(DistributionData distribution_data_test)
