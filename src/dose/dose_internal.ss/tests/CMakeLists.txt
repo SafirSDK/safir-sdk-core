@@ -1,4 +1,5 @@
 ADD_SUBDIRECTORY(signals_test)
+ADD_SUBDIRECTORY(atomic_test)
 
 ADD_EXECUTABLE(distribution_data_test distribution_data_test.cpp)
 ADD_EXECUTABLE(lamport_clock_test lamport_clock_test.cpp)
