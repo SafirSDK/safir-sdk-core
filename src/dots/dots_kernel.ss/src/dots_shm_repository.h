@@ -340,17 +340,17 @@ namespace Internal
         double GetFloat64Value(int index) const {return m_values[static_cast<size_t>(index)].val.float64;}
         bool GetBoolValue(int index) const {return m_values[static_cast<size_t>(index)].val.boolean;}
         const char* GetStringValue(int index) const {return m_values[static_cast<size_t>(index)].stringVal.c_str();}
-        std::pair<const char*, size_t> GetObjectValue(int index) const
+        std::pair<const char*, DotsC_Int32> GetObjectValue(int index) const
         {
             const ValueDefinitionShm& v=m_values[static_cast<size_t>(index)];
-            return std::make_pair(v.stringVal.c_str(), v.stringVal.size());
+            return std::make_pair(v.stringVal.c_str(), static_cast<DotsC_Int32>(v.stringVal.size()));
         }
-        std::pair<const char*, size_t> GetBinaryValue(int index) const
+        std::pair<const char*, DotsC_Int32> GetBinaryValue(int index) const
         {
             const ValueDefinitionShm& v=m_values[static_cast<size_t>(index)];
-            return std::make_pair(v.stringVal.c_str(), v.stringVal.size());
+            return std::make_pair(v.stringVal.c_str(), static_cast<DotsC_Int32>(v.stringVal.size()));
         }
-        std::pair<boost::int64_t, const char*> GetHashedValue(int index) const
+        std::pair<DotsC_Int64, const char*> GetHashedValue(int index) const
         {
             const ValueDefinitionShm& v=m_values[static_cast<size_t>(index)];
             return std::make_pair(v.val.hash, v.stringVal.empty() ? NULL : v.stringVal.c_str());
