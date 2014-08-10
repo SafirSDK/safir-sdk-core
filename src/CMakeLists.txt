@@ -106,38 +106,13 @@ function (SAFIR_INSTALL)
 
     # Install pdb files on windows
     if(MSVC)
-      #the problem here is to find out where the pdb file is located. It is located next to the binary
-      #in some directory which either the nmake/jom builds create or that the studio creates.
-
-      GET_TARGET_PROPERTY(debug_location ${target} LOCATION_Debug)
-      GET_TARGET_PROPERTY(relwithdebinfo_location ${target} LOCATION_RelWithDebInfo)
-
-      #replace binary's the extension with .pdb
-      #.exe --> .pdb
-      #.dll --> .pdb
-      STRING(REPLACE .dll .pdb debug_location ${debug_location})
-      STRING(REPLACE .exe .pdb debug_location ${debug_location})
-      STRING(REPLACE .dll .pdb relwithdebinfo_location ${relwithdebinfo_location})
-      STRING(REPLACE .exe .pdb relwithdebinfo_location ${relwithdebinfo_location})
-
-      #Install the pdb files using the locations we just worked out.
       if (INST_TEST_SUITE)
-        INSTALL(FILES ${debug_location}
+        INSTALL(FILES $<TARGET_PROPERTY:${target},PDB_NAME>
           DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
-          CONFIGURATIONS Debug
-          COMPONENT Test)
-        INSTALL(FILES ${relwithdebinfo_location}
-          DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
-          CONFIGURATIONS RelWithDebInfo
           COMPONENT Test)
       else()
-        INSTALL(FILES ${debug_location}
+        INSTALL(FILES $<TARGET_PROPERTY:${target},PDB_NAME>
           DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
-          CONFIGURATIONS Debug
-          COMPONENT Development)
-        INSTALL(FILES ${relwithdebinfo_location}
-          DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
-          CONFIGURATIONS RelWithDebInfo
           COMPONENT Development)
       endif()
     endif()

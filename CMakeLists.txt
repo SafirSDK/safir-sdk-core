@@ -1,7 +1,6 @@
-#We need a very recent cmake if we're to use a visual studio project
-#The reason is that test property generator expressions are only 
-#supported in cmake 3.
-if(MSVC AND CMAKE_GENERATOR MATCHES "Visual Studio")
+#We need a very recent cmake on windows. The reason is that test property
+#and install generator expressions are only supported in cmake 3.
+if(MSVC)
   cmake_minimum_required(VERSION 3.0.0)
 else()
   cmake_minimum_required(VERSION 2.8.12)
