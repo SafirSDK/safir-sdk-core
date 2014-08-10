@@ -107,12 +107,22 @@ function (SAFIR_INSTALL)
     # Install pdb files on windows
     if(MSVC)
       if (INST_TEST_SUITE)
-        INSTALL(FILES $<TARGET_PROPERTY:${target},PDB_NAME>
+        INSTALL(FILES $<TARGET_FILE_DIR:${target}>/${target}.pdb
           DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
+          CONFIGURATION RelWithDebInfo
+          COMPONENT Test)
+        INSTALL(FILES $<TARGET_FILE_DIR:${target}>/${target}${CMAKE_DEBUG_POSTFIX}.pdb
+          DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
+          CONFIGURATION Debug
           COMPONENT Test)
       else()
-        INSTALL(FILES $<TARGET_PROPERTY:${target},PDB_NAME>
+        INSTALL(FILES $<TARGET_FILE_DIR:${target}>/${target}.pdb
           DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
+          CONFIGURATION RelWithDebInfo
+          COMPONENT Development)
+        INSTALL(FILES $<TARGET_FILE_DIR:${target}>/${target}${CMAKE_DEBUG_POSTFIX}.pdb
+          DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
+          CONFIGURATION Debug
           COMPONENT Development)
       endif()
     endif()
