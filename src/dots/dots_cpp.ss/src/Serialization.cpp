@@ -199,7 +199,7 @@ namespace Typesystem
             throw SoftwareViolationException(L"Attempt to serialize a null pointer to binary!", __WFILE__,__LINE__);
         }
 
-        //TODO: JOOT implement after dod-files have been updated
+        object->WriteToBlob(binary);
     }
 
     Dob::Typesystem::ObjectPtr 

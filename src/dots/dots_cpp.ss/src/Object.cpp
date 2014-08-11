@@ -113,25 +113,10 @@ namespace Typesystem
     }
 
     //
-    // CalculateBlobSize
-    //
-    Int32
-    Object::CalculateBlobSize() const
-    {
-        static Int32 initialSize = -1;
-        if (initialSize == -1)
-        {
-            initialSize = BlobOperations::GetInitialSize(ClassTypeId);
-        }
-
-        return initialSize;
-    }
-
-    //
     // WriteToBlob
     //
     void
-    Object::WriteToBlob(char * /*blob*/, char * & /*beginningOfUnused*/) const
+    Object::WriteToBlob(Safir::Dob::Typesystem::BinarySerialization& /*blob*/) const
     {
 
     }

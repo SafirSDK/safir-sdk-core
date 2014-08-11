@@ -506,21 +506,6 @@ namespace Typesystem
         virtual const ContainerBase & GetMember(const int member, const int index) const
         {if (IsNull()) throw NullException(L"Object is null",__WFILE__,__LINE__); return m_pObject->GetMember(member,index);}
 
-        /**
-         * @name Blob serialization/deserialization part.
-         * These functions are for internal use only!
-         * Their names and functionality are likely to change in the near future!
-         */
-        /** @{ */
-
-        /**
-         * Calculate the size of the blob-serialized form of the contained object.
-         *
-         * @return The needed size in bytes. 0 if the container is null.
-         */
-        Int32 CalculateBlobSize() const {if (IsNull()) return 0; else return m_pObject->CalculateBlobSize();}
-
-        /** @} */
     private:
         virtual const ObjectPtr GetObjectPointer() const {return boost::static_pointer_cast<Object>(m_pObject);}
         virtual void SetObjectPointer(const ObjectPtr ptr)
