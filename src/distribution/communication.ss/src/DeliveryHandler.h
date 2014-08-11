@@ -138,7 +138,10 @@ namespace Com
             return m_numberOfUndeliveredMessages;
         }
 
+#ifndef SAFIR_TEST
     private:
+#endif
+
         typedef boost::unordered_map<int64_t, ReceiveData>  ReceiverMap;
 
         struct RecvData

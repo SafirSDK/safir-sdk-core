@@ -44,11 +44,11 @@ int main(int argc, char* argv[])
             MessageQueueTest test;
             test.Run();
         }
-//        else if (run=="DeliveryHandlerTest")
-//        {
-//            DeliveryHandlerTest test;
-//            test.Run();
-//        }
+        else if (run=="DeliveryHandlerTest")
+        {
+            DeliveryHandlerTest test;
+            test.Run();
+        }
         else if (run=="ReaderWriterTest")
         {
             ReaderWriterTest test;
@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
     else //run all tests
     {
         {(MessageQueueTest()).Run();}
-//        //{(DeliveryHandlerTest()).Run();}
+        {(DeliveryHandlerTest()).Run();}
         {(ReaderWriterTest()).Run();}
         {(HeartbeatSenderTest()).Run();}
         {(AckedDataSenderTest()).Run();}
