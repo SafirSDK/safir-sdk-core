@@ -5,7 +5,7 @@ file(STRINGS ${atomic_path} FOUND_COMMENTS
 
 list(LENGTH FOUND_COMMENTS NUM_COMMENTS)
 
-if(NOT NUM_COMMENTS EQUAL 2)
+if(NOT NUM_COMMENTS EQUAL 3)
   message (FATAL_ERROR 
     "${atomic_path} does not appear to be patched.\n"
     "Please follow the included instructions for patching your Boost headers.\n"
