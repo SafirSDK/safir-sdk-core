@@ -109,20 +109,20 @@ function (SAFIR_INSTALL)
       if (INST_TEST_SUITE)
         INSTALL(FILES $<TARGET_FILE_DIR:${target}>/${target}.pdb
           DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
-          CONFIGURATION RelWithDebInfo
+          CONFIGURATIONS RelWithDebInfo
           COMPONENT Test)
         INSTALL(FILES $<TARGET_FILE_DIR:${target}>/${target}${CMAKE_DEBUG_POSTFIX}.pdb
           DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
-          CONFIGURATION Debug
+          CONFIGURATIONS Debug
           COMPONENT Test)
       else()
         INSTALL(FILES $<TARGET_FILE_DIR:${target}>/${target}.pdb
           DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
-          CONFIGURATION RelWithDebInfo
+          CONFIGURATIONS RelWithDebInfo
           COMPONENT Development)
         INSTALL(FILES $<TARGET_FILE_DIR:${target}>/${target}${CMAKE_DEBUG_POSTFIX}.pdb
           DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
-          CONFIGURATION Debug
+          CONFIGURATIONS Debug
           COMPONENT Development)
       endif()
     endif()
