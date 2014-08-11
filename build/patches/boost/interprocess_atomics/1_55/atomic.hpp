@@ -157,13 +157,26 @@ inline boost::uint32_t atomic_dec32(volatile boost::uint32_t *mem)
 
 //! Atomically read an boost::uint32_t from memory
 inline boost::uint32_t atomic_read32(volatile boost::uint32_t *mem)
-{  return *mem;   }
+{
+   //Patched for Safir SDK Core
+   const boost::uint32_t val = *mem;
+   asm volatile ( "" ::: "memory" );
+   return val;
+}
 
 //! Atomically set an boost::uint32_t in memory
 //! "mem": pointer to the object
 //! "param": val value that the object will assume
 inline void atomic_write32(volatile boost::uint32_t *mem, boost::uint32_t val)
-{  *mem = val; }
+{
+   //Patched for Safir SDK Core
+   asm volatile
+   (
+      "xchgl %0, %1"
+      : "+r" (val), "+m" (*mem)
+      :: "memory"
+   );
+}
 
 }  //namespace ipcdetail{
 }  //namespace interprocess{
