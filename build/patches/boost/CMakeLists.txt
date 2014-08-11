@@ -8,3 +8,4 @@ endif()
 
 add_subdirectory("tmp_dir_helpers")
 add_subdirectory("has_member_function_callable_with")
+add_subdirectory("interprocess_atomics")
