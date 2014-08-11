@@ -53,6 +53,9 @@ inline boost::uint32_t atomic_cas32
 
 #include <boost/interprocess/detail/win32_api.hpp>
 
+extern "C" void _ReadWriteBarrier(void);
+#pragma intrinsic(_ReadWriteBarrier)
+
 namespace boost{
 namespace interprocess{
 namespace ipcdetail{
@@ -68,12 +71,6 @@ inline boost::uint32_t atomic_dec32(volatile boost::uint32_t *mem)
 //! Returns the old value pointed to by mem
 inline boost::uint32_t atomic_inc32(volatile boost::uint32_t *mem)
 {  return winapi::interlocked_increment(reinterpret_cast<volatile long*>(mem))-1;  }
-
-namespace winapi
-{
-extern "C" void _ReadWriteBarrier(void);
-#pragma intrinsic(_ReadWriteBarrier)
-}
 
 //! Atomically read an boost::uint32_t from memory
 inline boost::uint32_t atomic_read32(volatile boost::uint32_t *mem)
