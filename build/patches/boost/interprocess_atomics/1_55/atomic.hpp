@@ -534,7 +534,10 @@ inline boost::uint32_t atomic_dec32(volatile boost::uint32_t *mem)
 
 //! Atomically read an boost::uint32_t from memory
 inline boost::uint32_t atomic_read32(volatile boost::uint32_t *mem)
-{  return *mem;   }
+{ 
+   //Patched for Safir SDK Core
+   return __atomic_load_n(mem, __ATOMIC_SEQ_CST); 
+}
 
 //! Compare an boost::uint32_t's value with "cmp".
 //! If they are the same swap the value with "with"
@@ -550,7 +553,10 @@ inline boost::uint32_t atomic_cas32
 //! "mem": pointer to the object
 //! "param": val value that the object will assume
 inline void atomic_write32(volatile boost::uint32_t *mem, boost::uint32_t val)
-{  *mem = val; }
+{
+   //Patched for Safir SDK Core
+   __atomic_store_n(mem, val, __ATOMIC_SEQ_CST); 
+}
 
 }  //namespace ipcdetail{
 }  //namespace interprocess{
