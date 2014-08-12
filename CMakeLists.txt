@@ -1,3 +1,6 @@
+
+PROJECT(safir_sdk_core CXX C)
+
 #We need a very recent cmake on windows. The reason is that test property
 #and install generator expressions are only supported in cmake 3.
 if(MSVC)
@@ -5,8 +8,6 @@ if(MSVC)
 else()
   cmake_minimum_required(VERSION 2.8.12)
 endif()
-
-PROJECT(safir_sdk_core CXX C)
 
 
 #TODO: !!
