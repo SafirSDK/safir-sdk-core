@@ -95,16 +95,14 @@ namespace SP
         void Stop();
 
         /**
-         * Get the raw node statistics.
+         * Get a subscriber object that will provide the raw node statistics.
          *
          * Only available if you've instantiated SystemPicture with slave_tag.
          */
         RawStatisticsSubscriber& GetRawStatistics() const;
 
         /** 
-         * Get the system picture state produced by System Picture
-         *
-         * Only available if you've instantiated SystemPicture with slave_tag.
+         * Get a subscriber object that will provide the system picture state produced by System Picture
          */
         SystemStateSubscriber& GetSystemState() const;
     private:

@@ -113,6 +113,10 @@ namespace SP
                                                                             *m_coordinator, 
                                                                             MASTER_LOCAL_STATE_NAME,
                                                                             boost::chrono::seconds(1)))
+            //TODO: this should be rewritten to not use the IPC, maybe be more event driven
+            , m_stateSubscriberLocal(Safir::make_unique<LocalSubscriber<Safir::Utilities::Internal::IpcSubscriber,
+                                                                        SystemStateSubscriber,
+                                                                        SystemStateCreator>>(MASTER_LOCAL_STATE_NAME))
             , m_statePublisherRemote(Safir::make_unique<StatePublisherRemote>(ioService, 
                                                                               communication, 
                                                                               nodeTypes,
@@ -185,9 +189,7 @@ namespace SP
         std::unique_ptr<RawHandler> m_rawHandler;
 
         std::unique_ptr<RawPublisherLocal> m_rawPublisherLocal;
-        std::unique_ptr<LocalSubscriber<Safir::Utilities::Internal::IpcSubscriber,
-                                        RawStatisticsSubscriber,
-                                        RawStatisticsCreator>> m_rawSubscriberLocal;
+        std::unique_ptr<RawStatisticsSubscriber> m_rawSubscriberLocal;
 
         std::unique_ptr<RawPublisherRemote> m_rawPublisherRemote;
         std::unique_ptr<RemoteSubscriber<Com::Communication, RawHandler>> m_rawSubscriberRemote;
@@ -195,9 +197,7 @@ namespace SP
         std::unique_ptr<Coordinator> m_coordinator;
 
         std::unique_ptr<StatePublisherLocal> m_statePublisherLocal;
-        std::unique_ptr<LocalSubscriber<Safir::Utilities::Internal::IpcSubscriber,
-                                        SystemStateSubscriber,
-                                        SystemStateCreator>> m_stateSubscriberLocal;
+        std::unique_ptr<SystemStateSubscriber> m_stateSubscriberLocal;
 
         std::unique_ptr<StatePublisherRemote> m_statePublisherRemote;
         std::unique_ptr<RemoteSubscriber<Com::Communication, Coordinator>> m_stateSubscriberRemote;
