@@ -77,7 +77,7 @@ inline boost::uint32_t atomic_read32(volatile boost::uint32_t *mem)
 {
     //Patched for Safir SDK Core
     const boost::uint32_t val = *mem;
-    winapi::_ReadWriteBarrier();
+    _ReadWriteBarrier();
     return val;
 }
 
