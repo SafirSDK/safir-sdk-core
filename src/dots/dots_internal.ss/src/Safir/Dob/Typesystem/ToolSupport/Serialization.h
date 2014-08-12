@@ -55,7 +55,7 @@ namespace ToolSupport
      */
     inline void BinaryToBase64(const char* binary, size_t size, std::ostringstream& base64)
     {
-        std::string bin(binary, size); //Improvement: fix implementation to accept 'const char*' and avoid this copying
+        std::vector<char> bin(binary, binary + size); //Improvement: fix implementation to accept 'const char*' and avoid this copying
         base64<<Internal::SerializationUtils::ToBase64(bin);
     }
 
@@ -68,9 +68,11 @@ namespace ToolSupport
      */
     inline void Base64ToBinary(const std::string& base64Str, std::vector<char>& binary)
     {
-        std::string bin;
-        Internal::SerializationUtils::FromBase64(base64Str, bin); //Improvement: fix implementation to accept vector and avoid this copying
-        binary.insert(binary.begin(), bin.begin(), bin.end());
+        const bool ret = Internal::SerializationUtils::FromBase64(base64Str, binary);
+        if (!ret)
+        {
+            throw Safir::Dob::Typesystem::ToolSupport::ParseError("Failed to decode the Base64 data","","",100101);
+        }
     }
 
     /**

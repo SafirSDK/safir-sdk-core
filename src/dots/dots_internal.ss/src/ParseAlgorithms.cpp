@@ -247,7 +247,7 @@ namespace ToolSupport
                 return false; //dont know about enum types here
             case BinaryMemberType:
             {
-                if (!SerializationUtils::FromBase64(val, result.stringVal))
+                if (!SerializationUtils::FromBase64(val, result.binaryVal))
                 {
                     return false;
                 }

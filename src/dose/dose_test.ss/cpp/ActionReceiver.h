@@ -152,18 +152,21 @@ private:
                 boost::static_pointer_cast<DoseTest::Action>
                 (Safir::Dob::Typesystem::Serialization::ToObject(m_data));
 
-            //std::wcout << "Got an action " << std::endl;
+            std::wcout << "Got action '" << DoseTest::ActionEnum::ToString(action->ActionKind()) << "'" << std::endl;
             
             const bool actionAfterAck = action->ActionKind() == DoseTest::ActionEnum::Sleep;
 
+            std::wcout << "Got actionAfterAck = " << actionAfterAck << std::endl;
+
             if (!actionAfterAck)
             {
+                std::wcout << "Performing action" << std::endl;
                 m_actionCallback(action);
             }
 
             try
             {
-                //std::wcout << "writing ok" << std::endl;
+                std::wcout << "writing ok" << std::endl;
                 boost::asio::write(*m_socket, boost::asio::buffer("ok", 3));
             }
             catch (const boost::system::system_error&)
@@ -179,6 +182,7 @@ private:
 
             if (actionAfterAck)
             {
+                std::wcout << "Performing action" << std::endl;
                 m_actionCallback(action);
             }
         }

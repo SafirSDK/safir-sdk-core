@@ -54,16 +54,16 @@ namespace Internal
 {
 namespace SerializationUtils
 {
-    inline std::string ToBase64(const std::string& bin)
+    inline std::string ToBase64(const std::vector<char>& bin)
     {
-        typedef boost::archive::iterators::insert_linebreaks< boost::archive::iterators::base64_from_binary< boost::archive::iterators::transform_width<std::string::const_iterator,6,8> >, 72 > it_base64_t;
+        typedef boost::archive::iterators::insert_linebreaks< boost::archive::iterators::base64_from_binary< boost::archive::iterators::transform_width<std::vector<char>::const_iterator,6,8> >, 72 > it_base64_t;
         unsigned int writePaddChars=(3-bin.size()%3)%3;
         std::string base64(it_base64_t(bin.begin()),it_base64_t(bin.end()));
         base64.append(writePaddChars,'=');
         return base64;
     }
 
-    inline bool FromBase64(std::string base64, std::string& bin)
+    inline bool FromBase64(std::string base64, std::vector<char>& bin)
     {
         try
         {
@@ -350,7 +350,7 @@ namespace SerializationUtils
         case BinaryMemberType:
         {
             Trim(memberContent.data());
-            std::string bin;
+            std::vector<char> bin;
             if (!FromBase64(memberContent.data(), bin))
             {
                 std::ostringstream os;
@@ -360,7 +360,10 @@ namespace SerializationUtils
             SerializationUtils::CreateSpaceForDynamicMember(blobLayout, blob, beginningOfUnused, bin.size());
             char* writeBinary=beginningOfUnused;
             blobLayout.CreateBinaryMember(&blob[0], static_cast<Size>(bin.size()), memIx, arrIx, false, beginningOfUnused);
-            memcpy(writeBinary, &bin[0], bin.size());
+            if (!bin.empty())
+            {
+                memcpy(writeBinary, &bin[0], bin.size());
+            }
             blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
         }
             break;
