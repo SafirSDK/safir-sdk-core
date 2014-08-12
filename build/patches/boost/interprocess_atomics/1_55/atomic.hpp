@@ -168,7 +168,7 @@ inline boost::uint32_t atomic_read32(volatile boost::uint32_t *mem)
 {
    //Patched for Safir SDK Core
    const boost::uint32_t val = *mem;
-   asm volatile ( "" ::: "memory" );
+   __asm__ __volatile__ ( "" ::: "memory" );
    return val;
 }
 
@@ -178,7 +178,7 @@ inline boost::uint32_t atomic_read32(volatile boost::uint32_t *mem)
 inline void atomic_write32(volatile boost::uint32_t *mem, boost::uint32_t val)
 {
    //Patched for Safir SDK Core
-   asm volatile
+   __asm__ __volatile__
    (
       "xchgl %0, %1"
       : "+r" (val), "+m" (*mem)
