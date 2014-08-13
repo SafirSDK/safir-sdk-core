@@ -87,6 +87,10 @@ function (SAFIR_INSTALL)
     ############### C/C++ ####################
     if ("${target_type}" STREQUAL "SHARED_LIBRARY")
       set(export EXPORT SafirSDKCore)
+      set(debug_suffix ${CMAKE_DEBUG_POSTFIX})
+    else()
+      unset(export)
+      unset(debug_suffix)
     endif()
 
     #if the target is parto of the test suite we use the Test component
@@ -111,7 +115,7 @@ function (SAFIR_INSTALL)
           DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
           CONFIGURATIONS RelWithDebInfo
           COMPONENT Test)
-        INSTALL(FILES $<TARGET_FILE_DIR:${target}>/${target}${CMAKE_DEBUG_POSTFIX}.pdb
+        INSTALL(FILES $<TARGET_FILE_DIR:${target}>/${target}${debug_suffix}.pdb
           DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
           CONFIGURATIONS Debug
           COMPONENT Test)
@@ -120,7 +124,7 @@ function (SAFIR_INSTALL)
           DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
           CONFIGURATIONS RelWithDebInfo
           COMPONENT Development)
-        INSTALL(FILES $<TARGET_FILE_DIR:${target}>/${target}${CMAKE_DEBUG_POSTFIX}.pdb
+        INSTALL(FILES $<TARGET_FILE_DIR:${target}>/${target}${debug_suffix}.pdb
           DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
           CONFIGURATIONS Debug
           COMPONENT Development)
