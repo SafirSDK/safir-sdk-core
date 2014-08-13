@@ -30,6 +30,7 @@
 #include "StatePublisherRemote.h"
 #include "LocalSubscriber.h"
 #include "RemoteSubscriber.h"
+#include "StateSubscriberMaster.h"
 #include "MessageWrapperCreators.h"
 #include <Safir/Dob/Internal/Communication.h>
 #include <Safir/Dob/Internal/SystemPicture.h>
@@ -97,8 +98,8 @@ namespace SP
                                                                           *m_rawHandler,
                                                                           boost::chrono::seconds(30)))
             , m_rawSubscriberRemote(Safir::make_unique<RemoteSubscriber<Com::Communication, RawHandler>>(communication, 
-                                                                            MASTER_REMOTE_RAW_NAME, 
-                                                                            *m_rawHandler))
+                                                                                                         MASTER_REMOTE_RAW_NAME, 
+                                                                                                         *m_rawHandler))
             , m_coordinator(Safir::make_unique<Coordinator>(ioService, 
                                                             communication,
                                                             name,
@@ -113,10 +114,8 @@ namespace SP
                                                                             *m_coordinator, 
                                                                             MASTER_LOCAL_STATE_NAME,
                                                                             boost::chrono::seconds(1)))
-            //TODO: this should be rewritten to not use the IPC, maybe be more event driven
-            , m_stateSubscriberLocal(Safir::make_unique<LocalSubscriber<Safir::Utilities::Internal::IpcSubscriber,
-                                                                        SystemStateSubscriber,
-                                                                        SystemStateCreator>>(MASTER_LOCAL_STATE_NAME))
+            , m_stateSubscriberLocal(Safir::make_unique<StateSubscriberMaster>(ioService,
+                                                                               *m_coordinator))
             , m_statePublisherRemote(Safir::make_unique<StatePublisherRemote>(ioService, 
                                                                               communication, 
                                                                               nodeTypes,

@@ -135,6 +135,13 @@ namespace SP
             }));
         }
 
+        void SetStateChangedCallback(const std::function<void(const SystemStateMessage& data)>& callback)
+        {
+            m_strand.dispatch([this,callback]
+                              {
+                                  m_stateChangedCallback = callback;
+                              });
+        }
 
         //used to send state message
         //extraSpace adds bytes at the end of the buffer, e.g. for adding a crc
@@ -365,10 +372,16 @@ namespace SP
                 }
             }
 
+            if (m_stateChangedCallback != nullptr)
+            {
+                m_stateChangedCallback(m_stateMessage);
+            }
+
             m_lastStatisticsDirty = false;
             return true;
         }
 
+        
         mutable boost::asio::strand m_strand;
         CommunicationT& m_communication;
 
@@ -376,6 +389,8 @@ namespace SP
 
         RawStatistics m_lastStatistics;
         bool m_lastStatisticsDirty = true;
+
+        std::function<void(const SystemStateMessage& data)> m_stateChangedCallback;
 
         SystemStateMessage m_stateMessage;
         
