@@ -221,6 +221,11 @@ namespace SP
                         m_rawHandler.SetDeadNode(m_lastStatistics.Id(i));
                     }
                 }
+
+                if (m_stateChangedCallback != nullptr)
+                {
+                    m_stateChangedCallback(m_stateMessage);
+                }
             });
         }
 
