@@ -25,7 +25,6 @@
 #define _SAFIR_COM_ACKED_DATA_SENDER_TEST_H_
 
 #include "fwd.h"
-#include <atomic>
 
 class AckedDataSenderTest
 {

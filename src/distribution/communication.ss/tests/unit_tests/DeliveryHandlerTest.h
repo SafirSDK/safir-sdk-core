@@ -24,7 +24,6 @@
 #ifndef _SAFIR_COM_DELIVERY_HANDLER_TEST_H_
 #define _SAFIR_COM_DELIVERY_HANDLER_TEST_H_
 
-#include <atomic>
 #include "fwd.h"
 
 class DeliveryHandlerTest
@@ -114,7 +113,7 @@ public:
                 const char* payload=msg+fragmentOffset;
 
                 Com::MessageHeader header(id, 1, 0, Com::MultiReceiverSendMethod, seq, strlen(msg), fragmentSize, 4, frag, fragmentOffset);
-                header.crc=Com::CalculateCrc32(payload, fragmentSize);
+                header.crc=Com::CalculateCrc32(payload, static_cast<size_t>(fragmentSize));
                 if (frag==3)
                     header.crc=Com::CalculateCrc32(msg, strlen(msg));
                 dh.ReceivedApplicationData(&header, payload);
@@ -142,7 +141,7 @@ private:
     {
         void Send(const boost::shared_ptr<Com::Ack>& ack,
                   boost::asio::ip::udp::socket& /*socket*/,
-                  const boost::asio::ip::udp::endpoint& to)
+                  const boost::asio::ip::udp::endpoint& /*to*/)
         {
             //send ack
             acked[ack->commonHeader.receiverId]=ack->sequenceNumber;
@@ -152,14 +151,14 @@ private:
     typedef Com::Writer<Com::Ack, DeliveryHandlerTest::TestSendPolicy> TestWriter;
 
 
-    void OnRecv(int64_t fromNodeId, int64_t fromNodeType, const boost::shared_ptr<char[]>& data, size_t size)
+    void OnRecv(int64_t fromNodeId, int64_t /*fromNodeType*/, const boost::shared_ptr<char[]>& data, size_t size)
     {
         std::string msg(data.get(), size);
         std::cout<<"OnRecv: "<<msg<<std::endl;
         received[fromNodeId]++;
     }
 
-    void GotReceiveFrom(int64_t fromNodeId)
+    void GotReceiveFrom(int64_t /*fromNodeId*/)
     {
         //std::cout<<"GotReceiveFrom "<<fromNodeId<<std::endl;
     }

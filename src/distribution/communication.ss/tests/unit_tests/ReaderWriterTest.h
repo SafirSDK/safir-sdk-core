@@ -33,6 +33,15 @@ class ReaderWriterTest
 public:
     void Run()
     {
+        std::atomic_uint go{0};
+        auto SetReady=[&]{go=1;};
+        auto WaitUntilReady=[&]
+        {
+            while(go==0)
+                Wait(20);
+            go=0;
+        };
+
         boost::asio::io_service io;
         auto work=boost::make_shared<boost::asio::io_service::work>(io);
         boost::thread_group threads;
@@ -44,7 +53,7 @@ public:
         //--------------------------
         // Setup
         //--------------------------
-        Com::Reader reader(io, "127.0.0.1:10000", "239.192.1.1:11000", [=](const char* d, size_t s){return Recv(d,s);}, [=]{return IsReady();});
+        Com::Reader reader(io, "127.0.0.1:10000", "239.192.1.1:11000", [=](const char* d, size_t s){return Recv(d,s);}, [=]{return IsReaderReady();});
         reader.Start();
         Com::Writer<int> writer(io, 4, "239.192.1.1:11000");
         auto endpoint=Com::Utilities::CreateEndpoint("127.0.0.1:10000");
@@ -57,63 +66,94 @@ public:
 
         //Unicast tests
         SendUnicast(1);
-        SendUnicast(2);
-        Wait(1000);
+        WaitUntilNotEmpty(__LINE__);
+        CHECKMSG(received.front()==1, (received.empty() ? -1 : received.front()));
+        received.pop();
 
-        SetReady(false);
+        SendUnicast(2);
+        WaitUntilNotEmpty(__LINE__);
+        CHECKMSG(received.front()==2, (received.empty() ? -1 : received.front()));
+        received.pop();
+
+        SetReaderReady(false);
         SendUnicast(3); //after this send reader will be blocked
 
-        CHECK(received.front()==1);
+        WaitUntilNotEmpty(__LINE__);
+        CHECKMSG(received.front()==3, (received.empty() ? -1 : received.front()));
         received.pop();
-        CHECK(received.front()==2);
-        received.pop();
-        Wait(1000);
-        CHECK(received.front()==3);
-        received.pop();
-        CHECK(received.empty());
+
+        io.post([&]{SetReady();});
+        WaitUntilReady();
+
+        CHECKMSG(received.empty(), received.size());
 
         SendUnicast(4);
         SendUnicast(5);
-        Wait(1000);
-        CHECK(received.empty());
 
-        SetReady(true);
-        Wait(1000);
-        CHECK(received.front()==4);
+        io.post([&]{SetReady();});
+        WaitUntilReady();
+
+        Wait(1000); //reader shall be blocked.
+
+        CHECKMSG(received.empty(), received.size());
+
+        SetReaderReady(true);
+
+        WaitUntilNotEmpty(__LINE__);
+        CHECKMSG(received.front()==4, (received.empty() ? -1 : received.front()));
         received.pop();
-        CHECK(received.front()==5);
+
+        WaitUntilNotEmpty(__LINE__);
+        CHECKMSG(received.front()==5, (received.empty() ? -1 : received.front()));
         received.pop();
-        CHECK(received.empty());
+
+        CHECKMSG(received.empty(), received.size());
 
         //Multicast tests
         SendMulticast(1);
+        WaitUntilNotEmpty(__LINE__);
+        CHECKMSG(received.front()==1, (received.empty() ? -1 : received.front()));
+        received.pop();
+
         SendMulticast(2);
-        Wait(1000);
+        WaitUntilNotEmpty(__LINE__);
+        CHECKMSG(received.front()==2, (received.empty() ? -1 : received.front()));
+        received.pop();
 
-        SetReady(false);
+
+        SetReaderReady(false);
+
         SendMulticast(3); //after this send reader will be blocked
+        WaitUntilNotEmpty(__LINE__);
+        CHECKMSG(received.front()==3, (received.empty() ? -1 : received.front()));
+        received.pop();
 
-        CHECK(received.front()==1);
-        received.pop();
-        CHECK(received.front()==2);
-        received.pop();
-        Wait(1000);
-        CHECK(received.front()==3);
-        received.pop();
-        CHECK(received.empty());
+        CHECKMSG(received.empty(), received.size());
 
         SendMulticast(4);
         SendMulticast(5);
-        Wait(1000);
-        CHECK(received.empty());
 
-        SetReady(true);
+        io.post([&]{SetReady();});
+        WaitUntilReady();
+
         Wait(1000);
-        CHECK(received.front()==4);
+
+        CHECKMSG(received.empty(), received.size());
+
+        SetReaderReady(true);
+
+        WaitUntilNotEmpty(__LINE__);
+        CHECKMSG(received.front()==4, (received.empty() ? -1 : received.front()));
         received.pop();
-        CHECK(received.front()==5);
+
+        WaitUntilNotEmpty(__LINE__);
+        CHECKMSG(received.front()==5, (received.empty() ? -1 : received.front()));
         received.pop();
-        CHECK(received.empty());
+
+        CHECKMSG(received.empty(), received.size());
+
+        io.post([&]{SetReady();});
+        WaitUntilReady();
 
         reader.Stop();
         work.reset();
@@ -126,13 +166,27 @@ private:
     static std::queue<int> received;
     static bool isReady;
 
-    bool IsReady() const
+    void WaitUntilNotEmpty(int line) const
+    {
+        for (int i=0; i<100; ++i)
+        {
+            {
+                boost::mutex::scoped_lock lock(mutex);
+                if (!received.empty())
+                    return;
+            }
+            Wait(50);
+        }
+        std::cout<<"Wait forever at "<<line<<std::endl;
+    }
+
+    bool IsReaderReady() const
     {
         boost::mutex::scoped_lock lock(mutex);
         return isReady;
     }
 
-    void SetReady(bool val)
+    void SetReaderReady(bool val)
     {
         boost::mutex::scoped_lock lock(mutex);
         isReady=val;
