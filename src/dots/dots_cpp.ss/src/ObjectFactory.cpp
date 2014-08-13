@@ -26,6 +26,7 @@
 #include <Safir/Dob/Typesystem/Exceptions.h>
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Typesystem/Internal/InternalOperations.h>
+#include <Safir/Dob/Typesystem/Internal/Kernel.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <boost/thread/mutex.hpp>
 #include <boost/bind.hpp>
@@ -87,7 +88,10 @@ namespace Typesystem
         }
 
         //invoke the function
-        return it->second(blob);
+        Int64 handle=DotsC_CreateBlobReader(blob);
+        ObjectPtr obj=it->second(handle);
+        DotsC_DeleteBlobReader(handle);
+        return obj;
     }
 
     ObjectPtr
@@ -110,7 +114,7 @@ namespace Typesystem
         }
 
         //invoke the function
-        return it->second(NULL);
+        return it->second(0);
     }
 
     bool 

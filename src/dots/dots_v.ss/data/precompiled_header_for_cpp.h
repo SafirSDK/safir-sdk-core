@@ -24,6 +24,7 @@
 #ifndef __DOTS_GENERATED_PRECOMPILED_HEADER_H__
 #define __DOTS_GENERATED_PRECOMPILED_HEADER_H__
 
+#include <Safir/Dob/Typesystem/Internal/Kernel.h>
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
 #include <Safir/Dob/Typesystem/Object.h>
@@ -39,7 +40,6 @@
 #include <Safir/Dob/Typesystem/Members.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/Typesystem/Utilities.h>
-#include <Safir/Dob/Typesystem/BlobOperations.h>
 #include <Safir/Dob/Typesystem/LibraryExceptions.h>
 #include <Safir/Dob/Typesystem/ArrayContainer.h>
 

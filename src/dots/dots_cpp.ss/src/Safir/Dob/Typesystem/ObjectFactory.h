@@ -87,9 +87,9 @@ namespace Typesystem
         /**
          * Function signature of the create callback function.
          * This is the signature of the function that the object factory will call to create the object.
-         * If blob == NULL then just create an empty object.
+         * If handle == 0 then just create an empty object.
          */
-        typedef ObjectPtr (*CreateObjectCallback)(char const * const blob);
+        typedef ObjectPtr (*CreateObjectCallback)(Int64 handle);
 
         /**
          * Register a class with the object factory.

@@ -117,10 +117,11 @@ namespace
         ts::BlobReader<RepositoryShm> reader;
         DotsC_MemberIndex member;
         DotsC_Int32 index;
+        bool valueMode; //if false, key is read instead of value
 
         ReaderState(const char* blob)
             :reader(RepositoryKeeper::GetRepository(), blob)
-            ,member(0), index(0)
+            ,member(0), index(0), valueMode(true)
         {
         }
 
@@ -136,10 +137,11 @@ namespace
         DotsC_MemberIndex member;
         DotsC_Int32 index;
         bool changed;
+        bool valueMode; //if false, key is written instead of value
 
         WriterState(DotsC_TypeId typeId)
             :writer(RepositoryKeeper::GetRepository(), typeId)
-            ,member(0), index(0), changed(false)
+            ,member(0), index(0), changed(false), valueMode(true)
         {
         }
 
@@ -953,6 +955,12 @@ void DotsC_SetReadCursor(DotsC_Handle reader, DotsC_MemberIndex member, DotsC_In
     rs->index=valueIndex;
 }
 
+void DotsC_SetReadValueMode(DotsC_Handle reader, bool valueMode)
+{
+    ReaderState* rs=ReaderState::FromHandle(reader);
+    rs->valueMode=valueMode;
+}
+
 void DotsC_ReadMemberStatus(DotsC_Handle reader, bool& isNull, bool& isChanged)
 {
     ReaderState* rs=ReaderState::FromHandle(reader);
@@ -960,31 +968,31 @@ void DotsC_ReadMemberStatus(DotsC_Handle reader, bool& isNull, bool& isChanged)
 }
 
 
-void DotsC_ReadInt32Member(DotsC_Handle reader, bool key, DotsC_Int32& val)
+void DotsC_ReadInt32Member(DotsC_Handle reader, DotsC_Int32& val)
 {
     ReaderState* rs=ReaderState::FromHandle(reader);
-    if (key)
+    if (rs->valueMode)
+    {
+        bool isNull=false, isChanged=true;
+        rs->reader.ReadValue(rs->member, rs->index, val, isNull, isChanged);
+    }
+    else
     {
         val=rs->reader.ReadKey<DotsC_Int32>(rs->member, rs->index);
     }
-    else
-    {
-        bool isNull=false, isChanged=true;
-        rs->reader.ReadValue(rs->member, rs->index, val, isNull, isChanged);
-    }
 }
 
-void DotsC_ReadInt64Member(DotsC_Handle reader, bool key, DotsC_Int64& val)
+void DotsC_ReadInt64Member(DotsC_Handle reader, DotsC_Int64& val)
 {
     ReaderState* rs=ReaderState::FromHandle(reader);
-    if (key)
-    {
-        val=rs->reader.ReadKey<DotsC_Int64>(rs->member, rs->index);
-    }
-    else
+    if (rs->valueMode)
     {
         bool isNull=false, isChanged=true;
         rs->reader.ReadValue(rs->member, rs->index, val, isNull, isChanged);
+    }
+    else
+    {
+        val=rs->reader.ReadKey<DotsC_Int64>(rs->member, rs->index);
     }
 }
 
@@ -1002,57 +1010,57 @@ void DotsC_ReadFloat64Member(DotsC_Handle reader, DotsC_Float64& val)
     rs->reader.ReadValue(rs->member, rs->index, val, isNull, isChanged);
 }
 
-void DotsC_ReadBoolMember(DotsC_Handle reader, bool& val)
+void DotsC_ReadBooleanMember(DotsC_Handle reader, bool& val)
 {
     ReaderState* rs=ReaderState::FromHandle(reader);
     bool isNull=false, isChanged=true;
     rs->reader.ReadValue(rs->member, rs->index, val, isNull, isChanged);
 }
 
-void DotsC_ReadStringMember(DotsC_Handle reader, bool key, const char*& val)
+void DotsC_ReadStringMember(DotsC_Handle reader, const char*& val)
 {
     ReaderState* rs=ReaderState::FromHandle(reader);
-    if (key)
-    {
-        val=rs->reader.ReadKey<const char*>(rs->member, rs->index);
-    }
-    else
+    if (rs->valueMode)
     {
         bool isNull=false, isChanged=true;
         rs->reader.ReadValue(rs->member, rs->index, val, isNull, isChanged);
     }
+    else
+    {
+        val=rs->reader.ReadKey<const char*>(rs->member, rs->index);
+    }
 }
 
-void DotsC_ReadHashMember(DotsC_Handle reader, bool key, DotsC_Int64& val, const char*& optionalStr)
+void DotsC_ReadHashMember(DotsC_Handle reader, DotsC_Int64& val, const char*& optionalStr)
 {
     ReaderState* rs=ReaderState::FromHandle(reader);
     std::pair<DotsC_Int64, const char*> hash;
-    if (key)
-    {
-        hash=rs->reader.ReadKey< std::pair<DotsC_Int64, const char*> >(rs->member, rs->index);
-    }
-    else
+    if (rs->valueMode)
     {
         bool isNull=false, isChanged=true;
         rs->reader.ReadValue(rs->member, rs->index, hash, isNull, isChanged);
+    }
+    else
+    {
+        hash=rs->reader.ReadKey< std::pair<DotsC_Int64, const char*> >(rs->member, rs->index);
     }
 
     val=hash.first;
     optionalStr=hash.second;
 }
 
-void DotsC_ReadEntityIdMember(DotsC_Handle reader, bool key, DotsC_EntityId& val, const char*& optionalStr)
+void DotsC_ReadEntityIdMember(DotsC_Handle reader, DotsC_EntityId& val, const char*& optionalStr)
 {
     ReaderState* rs=ReaderState::FromHandle(reader);
     std::pair<DotsC_EntityId, const char*> eid;
-    if (key)
-    {
-        eid=rs->reader.ReadKey< std::pair<DotsC_EntityId, const char*> >(rs->member, rs->index);
-    }
-    else
+    if (rs->valueMode)
     {
         bool isNull=false, isChanged=true;
         rs->reader.ReadValue(rs->member, rs->index, eid, isNull, isChanged);
+    }
+    else
+    {
+        eid=rs->reader.ReadKey< std::pair<DotsC_EntityId, const char*> >(rs->member, rs->index);
     }
 
     val=eid.first;
@@ -1094,7 +1102,13 @@ void DotsC_SetWriteCursor(DotsC_Handle writer, DotsC_MemberIndex member, DotsC_I
     ws->changed=false;
 }
 
-void DotsC_SetMemberStatus(DotsC_Handle writer, bool isNull, bool isChanged)
+void DotsC_SetWriteValueMode(DotsC_Handle writer, bool valueMode)
+{
+    WriterState* ws=WriterState::FromHandle(writer);
+    ws->valueMode=valueMode;
+}
+
+void DotsC_WriteMemberStatus(DotsC_Handle writer, bool isNull, bool isChanged)
 {
     WriterState* ws=WriterState::FromHandle(writer);
     ws->changed=isChanged;
@@ -1104,96 +1118,96 @@ void DotsC_SetMemberStatus(DotsC_Handle writer, bool isNull, bool isChanged)
     }
 }
 
-void DotsC_SetInt32Member(DotsC_Handle writer, DotsC_Int32 val, bool key)
+void DotsC_WriteInt32Member(DotsC_Handle writer, DotsC_Int32 val)
 {
     WriterState* ws=WriterState::FromHandle(writer);
-    if (key)
-    {
-        ws->writer.WriteKey(ws->member, val);
-    }
-    else
+    if (ws->valueMode)
     {
         ws->writer.WriteValue(ws->member, ws->index, val, false, ws->changed);
     }
-}
-
-void DotsC_SetInt64Member(DotsC_Handle writer, DotsC_Int64 val, bool key)
-{
-    WriterState* ws=WriterState::FromHandle(writer);
-    if (key)
+    else
     {
         ws->writer.WriteKey(ws->member, val);
     }
-    else
+}
+
+void DotsC_WriteInt64Member(DotsC_Handle writer, DotsC_Int64 val)
+{
+    WriterState* ws=WriterState::FromHandle(writer);
+    if (ws->valueMode)
     {
         ws->writer.WriteValue(ws->member, ws->index, val, false, ws->changed);
     }
+    else
+    {
+        ws->writer.WriteKey(ws->member, val);
+    }
 }
 
-void DotsC_SetFloat32Member(DotsC_Handle writer, DotsC_Float32 val)
+void DotsC_WriteFloat32Member(DotsC_Handle writer, DotsC_Float32 val)
 {
     WriterState* ws=WriterState::FromHandle(writer);
     ws->writer.WriteValue(ws->member, ws->index, val, false, ws->changed);
 }
 
-void DotsC_SetFloat64Member(DotsC_Handle writer, DotsC_Float64 val)
+void DotsC_WriteFloat64Member(DotsC_Handle writer, DotsC_Float64 val)
 {
     WriterState* ws=WriterState::FromHandle(writer);
     ws->writer.WriteValue(ws->member, ws->index, val, false, ws->changed);
 }
 
-void DotsC_SetBoolMember(DotsC_Handle writer, bool val)
+void DotsC_WriteBooleanMember(DotsC_Handle writer, bool val)
 {
     WriterState* ws=WriterState::FromHandle(writer);
     ws->writer.WriteValue(ws->member, ws->index, val, false, ws->changed);
 }
 
-void DotsC_SetStringMember(DotsC_Handle writer, const char* val, bool key)
+void DotsC_WriteStringMember(DotsC_Handle writer, const char* val)
 {
     WriterState* ws=WriterState::FromHandle(writer);
-    if (key)
-    {
-        ws->writer.WriteKey(ws->member, val);
-    }
-    else
+    if (ws->valueMode)
     {
         ws->writer.WriteValue(ws->member, ws->index, val, false, ws->changed);
     }
+    else
+    {
+        ws->writer.WriteKey(ws->member, val);
+    }
 }
 
-void DotsC_SetHashedMember(DotsC_Handle writer, DotsC_Int64 hash, const char* str, bool key)
+void DotsC_WriteHashedMember(DotsC_Handle writer, DotsC_Int64 hash, const char* str)
 {
     WriterState* ws=WriterState::FromHandle(writer);
-    if (key)
-    {
-        ws->writer.WriteKey(ws->member, std::make_pair(hash, str));
-    }
-    else
+    if (ws->valueMode)
     {
         ws->writer.WriteValue(ws->member, ws->index, std::make_pair(hash, str), false, ws->changed);
     }
+    else
+    {
+        ws->writer.WriteKey(ws->member, std::make_pair(hash, str));
+    }
 }
 
-void DotsC_SetEntityIdMember(DotsC_Handle writer, const DotsC_EntityId& val, const char* instanceString, bool key)
+void DotsC_WriteEntityIdMember(DotsC_Handle writer, const DotsC_EntityId& val, const char* instanceString)
 {
     WriterState* ws=WriterState::FromHandle(writer);
-    if (key)
-    {
-        ws->writer.WriteKey(ws->member, std::make_pair(val, instanceString));
-    }
-    else
+    if (ws->valueMode)
     {
         ws->writer.WriteValue(ws->member, ws->index, std::make_pair(val, instanceString), false, ws->changed);
     }
+    else
+    {
+        ws->writer.WriteKey(ws->member, std::make_pair(val, instanceString));
+    }
 }
 
-void DotsC_SetBinaryMember(DotsC_Handle writer, const char* val, DotsC_Int32 size)
+void DotsC_WriteBinaryMember(DotsC_Handle writer, const char* val, DotsC_Int32 size)
 {
     WriterState* ws=WriterState::FromHandle(writer);
     ws->writer.WriteValue(ws->member, ws->index, std::make_pair(val, size), false, ws->changed);
 }
 
-void DotsC_SetObjectMember(DotsC_Handle writer, const char* blob)
+void DotsC_WriteObjectMember(DotsC_Handle writer, const char* blob)
 {
     WriterState* ws=WriterState::FromHandle(writer);
     ws->writer.WriteValue(ws->member, ws->index, std::make_pair(blob, DotsC_GetSize(blob)), false, ws->changed);

@@ -199,7 +199,13 @@ namespace Typesystem
             throw SoftwareViolationException(L"Attempt to serialize a null pointer to binary!", __WFILE__,__LINE__);
         }
 
-        object->WriteToBlob(binary);
+
+        DotsC_Handle handle=DotsC_CreateBlobWriter(object->GetTypeId());
+        object->WriteToBlob(handle);
+        DotsC_Int32 size=DotsC_CalculateBlobSize(handle);
+        binary.resize(static_cast<size_t>(size));
+        DotsC_WriteBlob(handle, &binary[0]);
+        DotsC_DeleteBlobWriter(handle);
     }
 
     Dob::Typesystem::ObjectPtr 

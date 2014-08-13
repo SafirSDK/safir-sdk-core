@@ -478,10 +478,9 @@ namespace @_NAMESPACEV_@
                                                                         const Safir::Dob::Typesystem::ArrayIndex index);
         virtual const Safir::Dob::Typesystem::ContainerBase & GetMember(const Safir::Dob::Typesystem::MemberIndex member,
                                                                         const Safir::Dob::Typesystem::ArrayIndex index) const;
-
-        virtual Safir::Dob::Typesystem::Int32 CalculateBlobSize() const;
-        virtual void WriteToBlob(char * blob, char * & beginningOfUnused) const;
-        explicit @_CLASS_@(char const * const blob);
+       
+        virtual void WriteToBlob(Safir::Dob::Typesystem::Int64 handle) const;
+        explicit @_CLASS_@(Safir::Dob::Typesystem::Int64 handle);
 
     private:
 

@@ -431,7 +431,6 @@ namespace @_NAMESPACEV_@
 @@-- CLASS
 @@--
 #include <precompiled_header_for_cpp.h>
-#include <Safir/Dob/Typesystem/BlobOperations.h>
 #include <@_REPLACE_ALL(\./\/):UNIT_@.h>
 #include <dll_imports.h>
 
@@ -454,15 +453,15 @@ namespace @_NAMESPACEV_@
     //this can never be called directly by anyone (since it is anonymous)
     namespace
     {
-        Safir::Dob::Typesystem::ObjectPtr CreateObject(char const * const blob)
+        Safir::Dob::Typesystem::ObjectPtr CreateObject(Safir::Dob::Typesystem::Int64 handle)
         {
-            if (blob == NULL)
+            if (handle == 0)
             {
                 return Safir::Dob::Typesystem::ObjectPtr(new @_CLASS_@());
             }
             else
             {
-                return Safir::Dob::Typesystem::ObjectPtr(new @_CLASS_@(blob));
+                return Safir::Dob::Typesystem::ObjectPtr(new @_CLASS_@(handle));
             }
         }
         const bool registered =
@@ -488,8 +487,6 @@ namespace @_NAMESPACEV_@
 @@END_IF@@
 @@END_TABLE@@
 
-    static Safir::Dob::Typesystem::Int32  initialSize = -1;
-
     static void Init()
     {
 @@TABLE@@
@@ -509,7 +506,6 @@ namespace @_NAMESPACEV_@
 
 @@END_IF@@
 @@END_TABLE@@
-        initialSize   = Safir::Dob::Typesystem::BlobOperations::GetInitialSize(@_CLASS_@::ClassTypeId);
         isInitialised = true;
     }
 
@@ -547,8 +543,8 @@ namespace @_NAMESPACEV_@
 @@END_TABLE@@
     }
 
-    @_CLASS_@::@_CLASS_@(char const * const blob):
-        @_BASECLASS_@(blob)
+    @_CLASS_@::@_CLASS_@(Safir::Dob::Typesystem::Int64 handle):
+        @_BASECLASS_@(handle)
 @@TABLE@@
 @@IF@@ @_EXIST:MEMBER_@
 @@IF@@ @_EXIST:MEMBERISARRAY_@
@@ -558,9 +554,13 @@ namespace @_NAMESPACEV_@
 @@END_TABLE@@
     {
         if (!isInitialised) Init();
-@@TABLE@@
 @@IF@@ @_EXIST:MEMBER_@
+		bool isNull, isChanged;	
+@@END_IF@@
 
+@@TABLE@@
+@@IF@@ @_EXIST:MEMBER_@	
+	//@_MEMBER_@
 @@IF@@ @_EXIST:MEMBERISARRAY_@
 @@IF@@ (@_UNIFORM_MEMBERTYPE_@ = String) or (@_UNIFORM_MEMBERTYPE_@ = Boolean)
         for (Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@ContainerArray::iterator it = m_@_MEMBER_@Member.begin();
@@ -571,98 +571,47 @@ namespace @_NAMESPACEV_@
 @@END_IF@@
              it != m_@_MEMBER_@Member.end(); ++it)
         {
+	    
             Safir::Dob::Typesystem::BlobOperations::Get(*it,blob,@_LOWER:MEMBER_@MemberIndex,static_cast<Safir::Dob::Typesystem::ArrayIndex>(std::distance(m_@_MEMBER_@Member.begin(),it)));
         }
 @@ELSE@@
-        Safir::Dob::Typesystem::BlobOperations::Get(m_@_MEMBER_@Member, blob, @_LOWER:MEMBER_@MemberIndex, 0);
-@@END_IF@@
-@@END_IF@@
-@@END_TABLE@@
-    }
-
-    Safir::Dob::Typesystem::Int32
-    @_CLASS_@::CalculateBlobSize() const
-    {
-        if (!isInitialised) Init();
-
-        Safir::Dob::Typesystem::Int32 size = @_BASECLASS_@::CalculateBlobSize() + initialSize;
-@@TABLE@@
-@@IF@@ @_EXIST:MEMBER_@
-
-        //@_MEMBER_@
-@@IF@@ @_EXIST:MEMBERISARRAY_@ and ((@_UNIFORM_MEMBERTYPE_@ = String) or (@_UNIFORM_MEMBERTYPE_@ = Object) or (@_UNIFORM_MEMBERTYPE_@ = Binary) or (@_UNIFORM_MEMBERTYPE_@ = InstanceId) or (@_UNIFORM_MEMBERTYPE_@ = EntityId) or (@_UNIFORM_MEMBERTYPE_@ = ChannelId) or (@_UNIFORM_MEMBERTYPE_@ = HandlerId))
+	DotsC_SetReadCursor(handle, @_LOWER:MEMBER_@MemberIndex, 0);
+	DotsC_SetReadValueMode(handle, true); //valueMode
+	DotsC_ReadMemberStatus(handle, isNull, isChanged);
+	m_@_MEMBER_@Member.SetChanged(isChanged);
+	if (isNull)
+	{
+		m_@_MEMBER_@Member.SetNull();
+	}
+	else
+	{
 @@IF@@ (@_UNIFORM_MEMBERTYPE_@ = String)
-        for (Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@ContainerArray::const_iterator it = m_@_MEMBER_@Member.begin();
-             it != m_@_MEMBER_@Member.end(); ++it)
-        {
-            size += it->Utf8StringLength();
-        }
-@@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = Binary)
-        for (@_MEMBERTYPE_@ContainerArray::const_iterator it = m_@_MEMBER_@Member.begin();
-             it != m_@_MEMBER_@Member.end(); ++it)
-        {
-            if (!it->IsNull())
-            {
-                size += static_cast<Safir::Dob::Typesystem::Int32>(it->GetVal().size());
-            }
-        }
-@@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = InstanceId or @_UNIFORM_MEMBERTYPE_@ = ChannelId or @_UNIFORM_MEMBERTYPE_@ = HandlerId)
-        for (@_MEMBERTYPE_@ContainerArray::const_iterator it = m_@_MEMBER_@Member.begin();
-             it != m_@_MEMBER_@Member.end(); ++it)
-        {
-            if (!it->IsNull() && !it->GetVal().GetRawString().empty())
-            {
-                size += 8 + 4 + it->GetVal().Utf8StringLength();
-            }
-        }
-@@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = EntityId)
-        for (@_MEMBERTYPE_@ContainerArray::const_iterator it = m_@_MEMBER_@Member.begin();
-             it != m_@_MEMBER_@Member.end(); ++it)
-        {
-            if (!it->IsNull() && !it->GetVal().GetInstanceId().GetRawString().empty())
-            {
-                size += 16 + 4 + it->GetVal().GetInstanceId().Utf8StringLength();
-            }
-        }
+	      const char* val;
+	      DotsC_ReadStringMember(handle, val);
+	      m_@_MEMBER_@Member.SetVal(Safir::Dob::Typesystem::Utilities::ToWstring(val));
+@@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = Enumeration)
+	      DotsC_Int32 val;
+	      DotsC_ReadInt32Member(handle, val);
+	      m_@_MEMBER_@Member.SetVal(val);
 @@ELSE@@
-        for (@_MEMBERTYPE_@ContainerArray::const_iterator it = m_@_MEMBER_@Member.begin();
-             it != m_@_MEMBER_@Member.end(); ++it)
-        {
-            size += it->CalculateBlobSize();
-        }
-@@END_IF@@
-@@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = String)
-        size += m_@_MEMBER_@Member.Utf8StringLength();
-@@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = Object)
-        size += m_@_MEMBER_@Member.CalculateBlobSize();
-@@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = Binary)
-        if (!m_@_MEMBER_@Member.IsNull())
-        {
-            size += static_cast<Safir::Dob::Typesystem::Int32>(m_@_MEMBER_@Member.GetVal().size());
-        }
-@@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = InstanceId or @_UNIFORM_MEMBERTYPE_@ = ChannelId or @_UNIFORM_MEMBERTYPE_@ = HandlerId)
-        if (!m_@_MEMBER_@Member.IsNull() && !m_@_MEMBER_@Member.GetVal().GetRawString().empty())
-        {
-            size += 8 + 4 + m_@_MEMBER_@Member.GetVal().Utf8StringLength();
-        }
-@@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = EntityId)
-        if (!m_@_MEMBER_@Member.IsNull() && !m_@_MEMBER_@Member.GetVal().GetInstanceId().GetRawString().empty())
-        {
-            size += 16 + 4 + m_@_MEMBER_@Member.GetVal().GetInstanceId().Utf8StringLength();
-        }
+	      DotsC_@_UNIFORM_MEMBERTYPE_@ val;
+	      DotsC_Read@_UNIFORM_MEMBERTYPE_@Member(handle, val);
+	      m_@_MEMBER_@Member.SetVal(val);       
+@@END_IF@@		
+	}
 @@END_IF@@
 @@END_IF@@
-@@END_TABLE@@
 
-        return size;
+@@END_TABLE@@
     }
 
     void
-    @_CLASS_@::WriteToBlob(char * blob, char * & beginningOfUnused) const
+    @_CLASS_@::WriteToBlob(Safir::Dob::Typesystem::Int64 handle) const
     {
         if (!isInitialised) Init();
 
-        @_BASECLASS_@::WriteToBlob(blob,beginningOfUnused);
+        @_BASECLASS_@::WriteToBlob(handle);
+        
 @@TABLE@@
 @@IF@@ @_EXIST:MEMBER_@
 
@@ -696,16 +645,26 @@ namespace @_NAMESPACEV_@
             Safir::Dob::Typesystem::BlobOperations::Set(*it,blob,@_LOWER:MEMBER_@MemberIndex,static_cast<Safir::Dob::Typesystem::ArrayIndex>(std::distance(m_@_MEMBER_@Member.begin(),it)));
 @@END_IF@@
         }
-@@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = String)
-        if (!m_@_MEMBER_@Member.IsNull() && m_@_MEMBER_@Member.GetVal().length() > static_cast<size_t>(@_MEMBER_@MaxStringLength()))
-        {
-            throw Safir::Dob::Typesystem::IllegalValueException(L"The string member is longer than what is specified in the dou file",__WFILE__,__LINE__);
-        }
-        Safir::Dob::Typesystem::BlobOperations::Set(m_@_MEMBER_@Member,blob,beginningOfUnused,@_LOWER:MEMBER_@MemberIndex,0);
+@@ELSE@@
+	DotsC_SetWriteCursor(handle, @_LOWER:MEMBER_@MemberIndex, 0);
+	DotsC_SetWriteValueMode(handle, true); //valueMode
+	DotsC_WriteMemberStatus(handle, m_@_MEMBER_@Member.IsNull(), m_@_MEMBER_@Member.IsChanged());
+	if (!m_@_MEMBER_@Member.IsNull())
+	{
+@@IF@@ (@_UNIFORM_MEMBERTYPE_@ = String)
+	if (m_@_MEMBER_@Member.GetVal().length() > static_cast<size_t>(@_MEMBER_@MaxStringLength()))
+	{
+	    throw Safir::Dob::Typesystem::IllegalValueException(L"The string member is longer than what is specified in the dou file",__WFILE__,__LINE__);
+	}
+
+	const char* str=Safir::Dob::Typesystem::Utilities::ToUtf8(m_@_MEMBER_@Member.GetVal()).c_str();
+	DotsC_WriteStringMember(handle, str);
 @@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = Object) or (@_UNIFORM_MEMBERTYPE_@ = Binary) or (@_UNIFORM_MEMBERTYPE_@ = InstanceId) or (@_UNIFORM_MEMBERTYPE_@ = EntityId) or (@_UNIFORM_MEMBERTYPE_@ = ChannelId) or (@_UNIFORM_MEMBERTYPE_@ = HandlerId)
         Safir::Dob::Typesystem::BlobOperations::Set(m_@_MEMBER_@Member,blob,beginningOfUnused,@_LOWER:MEMBER_@MemberIndex,0);
 @@ELSE@@
-        Safir::Dob::Typesystem::BlobOperations::Set(m_@_MEMBER_@Member,blob,@_LOWER:MEMBER_@MemberIndex,0);
+        DotsC_Write@_UNIFORM_MEMBERTYPE_@Member(handle, m_MyInt32Member.GetVal());
+@@END_IF@@
+	}
 @@END_IF@@
 @@END_IF@@
 @@END_TABLE@@

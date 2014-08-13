@@ -42,15 +42,15 @@ namespace Typesystem
     //this can never be called directly by anyone (since it is anonymous)
     namespace
     {
-        ObjectPtr CreateObject(char const * const blob)
+        ObjectPtr CreateObject(Safir::Dob::Typesystem::Int64 handle)
         {
-            if (blob == NULL)
+            if (handle == 0)
             {
                 return ObjectPtr(new Object());
             }
             else
             {
-                return ObjectPtr(new Object(blob));
+                return ObjectPtr(new Object(handle));
             }
         }
         const bool registered =
@@ -116,7 +116,7 @@ namespace Typesystem
     // WriteToBlob
     //
     void
-    Object::WriteToBlob(Safir::Dob::Typesystem::BinarySerialization& /*blob*/) const
+    Object::WriteToBlob(Safir::Dob::Typesystem::Int64 /*handle*/) const
     {
 
     }
@@ -124,7 +124,7 @@ namespace Typesystem
     //
     // Construct from blob
     //
-    Object::Object(char const * const /*blob*/)
+    Object::Object(Safir::Dob::Typesystem::Int64 /*handle*/)
     {
 
     }
