@@ -58,15 +58,19 @@
       </Object>
     </DoseTest.Action>
     <DoseTest.Action index="1">
+      <ActionKind>Sleep</ActionKind>
+      <SleepDuration>1</SleepDuration>
+    </DoseTest.Action>
+    <DoseTest.Action index="2">
       <ActionKind>Close</ActionKind>
       <Partner>2</Partner>
     </DoseTest.Action>
-    <DoseTest.Action index="2">
+    <DoseTest.Action index="3">
       <ActionKind>Open</ActionKind>
       <Partner>2</Partner>
       <Context>1</Context>
     </DoseTest.Action>
-    <DoseTest.Action index="3">
+    <DoseTest.Action index="4">
       <ActionKind>SendMessage</ActionKind>
       <Partner>2</Partner>
       <Consumer>0</Consumer>

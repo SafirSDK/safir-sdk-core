@@ -89,5 +89,9 @@
         <instanceId>678</instanceId>
       </EntityId>
     </DoseTest.Action>
+    <DoseTest.Action index="6">
+      <ActionKind>Sleep</ActionKind>
+      <SleepDuration>1</SleepDuration>
+    </DoseTest.Action>
   </TestActions>
 </DoseTest.Items.TestCase>
