@@ -1031,7 +1031,7 @@ void DotsC_ReadStringMember(DotsC_Handle reader, const char*& val)
     }
 }
 
-void DotsC_ReadHashMember(DotsC_Handle reader, DotsC_Int64& val, const char*& optionalStr)
+void DotsC_ReadHashedMember(DotsC_Handle reader, DotsC_Int64& val, const char*& optionalStr)
 {
     ReaderState* rs=ReaderState::FromHandle(reader);
     std::pair<DotsC_Int64, const char*> hash;

@@ -608,7 +608,7 @@ extern "C"
     DOTS_KERNEL_API void DotsC_ReadFloat64Member(DotsC_Handle reader, DotsC_Float64& val);
     DOTS_KERNEL_API void DotsC_ReadBooleanMember(DotsC_Handle reader, bool& val);
     DOTS_KERNEL_API void DotsC_ReadStringMember(DotsC_Handle reader, const char*& val);
-    DOTS_KERNEL_API void DotsC_ReadHashMember(DotsC_Handle reader, DotsC_Int64& val, const char*& optionalStr);
+    DOTS_KERNEL_API void DotsC_ReadHashedMember(DotsC_Handle reader, DotsC_Int64& val, const char*& optionalStr);
     DOTS_KERNEL_API void DotsC_ReadEntityIdMember(DotsC_Handle reader, DotsC_EntityId& val, const char*& optionalStr);
     DOTS_KERNEL_API void DotsC_ReadBinaryMember(DotsC_Handle reader, const char*& val, DotsC_Int32& size);
     DOTS_KERNEL_API void DotsC_ReadObjectMember(DotsC_Handle reader, const char*& val);
