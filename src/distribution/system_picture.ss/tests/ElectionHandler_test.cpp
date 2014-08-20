@@ -142,31 +142,34 @@ public:
     }
 
 
-    bool SendToNode(const int64_t nodeId, 
-                    const int64_t /*nodeTypeId*/, 
-                    const boost::shared_ptr<char[]>& data,
-                    const size_t size, 
-                    const int64_t /*dataTypeIdentifier*/,
-                    const bool ack)
+    bool Send(const int64_t nodeId, 
+              const int64_t nodeTypeId, 
+              const boost::shared_ptr<char[]>& data,
+              const size_t size, 
+              const int64_t /*dataTypeIdentifier*/,
+              const bool ack)
     {
-        SAFE_BOOST_TEST_MESSAGE("SendToNode " << id << " -> " << nodeId);
+        if (nodeId == 0)
+        {
+            SAFE_BOOST_TEST_MESSAGE("SendToNodeType from node " << id << " -> node type " << nodeTypeId);
+        }
+        else
+        {
+            SAFE_BOOST_TEST_MESSAGE("SendToNode " << id << " -> " << nodeId);
+        }
+
         SAFE_BOOST_CHECK(ack);
 
         SAFE_BOOST_CHECK_NE(nodeId, id); //not to ourselves!
-
-        return Connector::Instance().SendTo(nodeId,id,data,size);
-    }
-
-    bool SendToNodeType(const int64_t nodeTypeId,
-                        const boost::shared_ptr<char[]>& data, 
-                        const size_t size, 
-                        const int64_t /*dataTypeIdentifier*/, 
-                        const bool ack)
-    {
-        SAFE_BOOST_TEST_MESSAGE("SendToNodeType from node " << id << " -> node type " << nodeTypeId);
-        SAFE_BOOST_CHECK(ack);
-
-        return Connector::Instance().SendAll(id,data,size);
+        
+        if (nodeId == 0)
+        {
+            return Connector::Instance().SendAll(id,data,size);
+        }
+        else
+        {
+            return Connector::Instance().SendTo(nodeId,id,data,size);
+        }
     }
 
     boost::asio::io_service& ioService;

@@ -144,7 +144,7 @@ namespace SP
 
                 for (auto id: toNodeTypes)
                 {
-                    const bool sent = m_communication.SendToNodeType(id, std::move(data), size, m_senderId, true);
+                    const bool sent = m_communication.Send(0, id, std::move(data), size, m_senderId, true);
                     if (!sent)
                     {
                         lllog(7) << "RawPublisherRemote: Overflow when sending to node type " 

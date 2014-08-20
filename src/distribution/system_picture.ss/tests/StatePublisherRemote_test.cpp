@@ -67,12 +67,14 @@ public:
 class Communication
 {
 public:
-    bool SendToNodeType(int64_t nodeTypeId, 
-                        const boost::shared_ptr<char[]>& data, 
-                        size_t size, 
-                        int64_t /*dataTypeIdentifier*/,
-                        bool acked)
+    bool Send(int64_t nodeId,
+              int64_t nodeTypeId, 
+              const boost::shared_ptr<char[]>& data, 
+              size_t size, 
+              int64_t /*dataTypeIdentifier*/,
+              bool acked)
     {
+        BOOST_CHECK(nodeId == 0);
         BOOST_CHECK(acked);
         BOOST_CHECK(size == gsize);
         BOOST_CHECK(0 == strcmp(data.get(), "123456789"));

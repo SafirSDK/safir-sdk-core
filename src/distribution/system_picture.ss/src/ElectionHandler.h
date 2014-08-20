@@ -398,12 +398,12 @@ namespace SP
                     boost::shared_ptr<char[]> data = boost::make_shared<char[]>(size);
                     aliveMsg.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
                 
-                    const bool sent = m_communication.SendToNode(it.first, 
-                                                                 it.second.first, 
-                                                                 std::move(data),
-                                                                 size, 
-                                                                 m_receiverId, 
-                                                                 true);
+                    const bool sent = m_communication.Send(it.first, 
+                                                           it.second.first, 
+                                                           std::move(data),
+                                                           size, 
+                                                           m_receiverId, 
+                                                           true);
                 
                     if (!sent)
                     {
@@ -426,7 +426,7 @@ namespace SP
                     boost::shared_ptr<char[]> data = boost::make_shared<char[]>(size);
                     victoryMsg.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
                 
-                    const bool sent = m_communication.SendToNodeType(it, std::move(data), size, m_receiverId, true);
+                    const bool sent = m_communication.Send(0, it, std::move(data), size, m_receiverId, true);
 
                     if (!sent)
                     {
@@ -449,7 +449,7 @@ namespace SP
                     boost::shared_ptr<char[]> data = boost::make_shared<char[]>(size);
                     message.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
 
-                    const bool sent = m_communication.SendToNodeType(it, std::move(data), size, m_receiverId, true);
+                    const bool sent = m_communication.Send(0, it, std::move(data), size, m_receiverId, true);
                     if (!sent)
                     {
                         lllog(7) << "SP: Coordinator: Overflow when sending INQUIRY to node type " 
