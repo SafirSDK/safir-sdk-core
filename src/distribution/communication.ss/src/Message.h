@@ -57,9 +57,13 @@ namespace Com
     static const int64_t AckType=-6769271806353797703; //Hash for 'Communication.Ack'
     static const int64_t ControlDataType=186858702748131856; //Hash for 'Communication.ControlData'
 
-    //Send methods
-    static const uint16_t SingleReceiverSendMethod=0;
-    static const uint16_t MultiReceiverSendMethod=1;
+    //Send method
+    static const uint8_t SingleReceiverSendMethod=0;
+    static const uint8_t MultiReceiverSendMethod=1;
+
+    //Delivery guarantee
+    static const uint8_t Unacked=0;
+    static const uint8_t Acked=1;
 
     inline uint32_t CalculateCrc32(const char* data, size_t size)
     {
@@ -106,11 +110,13 @@ namespace Com
     {
         CommonHeader commonHeader;
         uint64_t sequenceNumber;
-        uint16_t sendMethod; //tells if the ack is for unicast or multicast serie
+        uint8_t sendMethod; //tells if message being acked was sent to one or many receivers (different sequence numbers)
+        uint8_t deliveryGuarantee; //Always 0 since an ack itself is not unacked
         Ack(int64_t senderId_, int64_t receiverId_, uint64_t sequenceNumber_, uint16_t serie)
             :commonHeader(senderId_, receiverId_, AckType)
             ,sequenceNumber(sequenceNumber_)
             ,sendMethod(serie)
+            ,deliveryGuarantee(Unacked)
         {
         }
     };
@@ -119,7 +125,8 @@ namespace Com
     {
         CommonHeader commonHeader;
         uint32_t crc;
-        uint16_t sendMethod;
+        uint8_t sendMethod;
+        uint8_t deliveryGuarantee;
         uint64_t sequenceNumber;
         size_t totalContentSize;
         size_t fragmentContentSize;
@@ -130,7 +137,8 @@ namespace Com
         MessageHeader(int64_t senderId_,
                       int64_t receiverId_,
                       int64_t dataType_ ,
-                      uint16_t sendMethod_,
+                      uint8_t sendMethod_,
+                      uint8_t deliveryGuarantee_,
                       uint64_t sequenceNumber_,
                       size_t totalContentSize_,
                       size_t fragmentContentSize_,
@@ -140,6 +148,7 @@ namespace Com
             :commonHeader(senderId_, receiverId_, dataType_)
             ,crc(0)
             ,sendMethod(sendMethod_)
+            ,deliveryGuarantee(deliveryGuarantee_)
             ,sequenceNumber(sequenceNumber_)
             ,totalContentSize(totalContentSize_)
             ,fragmentContentSize(fragmentContentSize_)
@@ -157,7 +166,7 @@ namespace Com
     struct Receiver
     {
         int64_t id;
-        uint16_t sendMethod;
+        uint8_t sendMethod;
         uint64_t sequenceNumber;
         Receiver() : id(0), sendMethod(MultiReceiverSendMethod), sequenceNumber(0){}
         Receiver(int64_t id_, uint16_t sendMethod_, uint64_t sequenceNumber_)
@@ -182,7 +191,7 @@ namespace Com
                  const int64_t& dataType,
                  const boost::shared_ptr<char[]>& message_,
                  size_t messageSize)
-            :header(id, 0, dataType, SingleReceiverSendMethod, 0, messageSize, messageSize, 1, 0, 0)
+            :header(id, 0, dataType, SingleReceiverSendMethod, Acked, 0, messageSize, messageSize, 1, 0, 0)
             ,message(message_)
             ,fragment(message.get())
             ,sendToAllSystemNodes(true)
@@ -195,7 +204,7 @@ namespace Com
                  size_t messageSize,
                  const char* fragment_,
                  size_t fragmentSize)
-            :header(id, 0, dataType, SingleReceiverSendMethod, 0, messageSize, fragmentSize, 1, 0, static_cast<size_t>(fragment_-message_.get()))
+            :header(id, 0, dataType, SingleReceiverSendMethod, Acked, 0, messageSize, fragmentSize, 1, 0, static_cast<size_t>(fragment_-message_.get()))
             ,message(message_)
             ,fragment(fragment_)
             ,sendToAllSystemNodes(true)

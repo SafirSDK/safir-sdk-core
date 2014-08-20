@@ -46,7 +46,7 @@ namespace Internal
 namespace Com
 {
     /**
-     * @brief AckedDataSender keeps a send queue of messages. It will keep track of received Ack's and free the
+     * @brief DataSender keeps a send queue of messages. It will keep track of received Ack's and free the
      * messageQueue item when all ack's have been received. The class is also responsible for retransmission of
      * messages that have not been acked.
      */
@@ -54,11 +54,11 @@ namespace Com
     typedef std::function<void(int64_t toNodeId)> RetransmitTo;
     typedef std::function<void(int64_t nodeTypeId)> QueueNotFull;
 
-    template <class WriterType>
-    class AckedDataSenderBasic : private WriterType
+    template <class WriterType, uint64_t DeliveryGuarantee>
+    class DataSenderBasic : private WriterType
     {
     public:
-        AckedDataSenderBasic(boost::asio::io_service& ioService,
+        DataSenderBasic(boost::asio::io_service& ioService,
                              int64_t nodeTypeId,
                              int64_t nodeId,
                              int ipVersion,
@@ -78,7 +78,6 @@ namespace Com
             ,m_queueNotFullNotification()
             ,m_queueNotFullNotificationLimit(0)
         {
-            //TODO: use initialization instead. This is due to problems with VS2013
             m_sendQueueSize=0;
             m_notifyQueueNotFull=false;
         }
@@ -162,9 +161,10 @@ namespace Com
                 {
                     const char* fragment=msg.get()+frag*FragmentDataSize;
                     UserDataPtr userData(new UserData(m_nodeId, dataTypeIdentifier, msg, size, fragment, FragmentDataSize));
+                    userData->header.deliveryGuarantee=DeliveryGuarantee;
                     userData->header.crc=crc;
-                    userData->header.numberOfFragments=static_cast<unsigned short>(totalNumberOfFragments);
-                    userData->header.fragmentNumber=static_cast<unsigned short>(frag);
+                    userData->header.numberOfFragments=static_cast<uint16_t>(totalNumberOfFragments);
+                    userData->header.fragmentNumber=static_cast<uint16_t>(frag);
                     if (toId!=0)
                     {
                         userData->header.commonHeader.receiverId=toId;
@@ -178,9 +178,10 @@ namespace Com
                 {
                     const char* fragment=msg.get()+numberOfFullFragments*FragmentDataSize;
                     UserDataPtr userData(new UserData(m_nodeId, dataTypeIdentifier, msg, size, fragment, restSize));
+                    userData->header.deliveryGuarantee=DeliveryGuarantee;
                     userData->header.crc=crc;
-                    userData->header.numberOfFragments=static_cast<unsigned short>(totalNumberOfFragments);
-                    userData->header.fragmentNumber=static_cast<unsigned short>(totalNumberOfFragments-1);
+                    userData->header.numberOfFragments=static_cast<uint16_t>(totalNumberOfFragments);
+                    userData->header.fragmentNumber=static_cast<uint16_t>(totalNumberOfFragments-1);
                     if (toId!=0)
                     {
                         userData->header.commonHeader.receiverId=toId;
@@ -215,7 +216,7 @@ namespace Com
                         //here we have something unacked from the node
                         if (recvIt->second.sendMethod==ack.sendMethod && recvIt->second.sequenceNumber<=ack.sequenceNumber)
                         {
-                            ud->receivers.erase(recvIt); //This meDiscovererTestssage is now acked, remove from list of still unacked
+                            ud->receivers.erase(recvIt); //This message is now acked, remove from list of still unacked
                         }
                     }
                 }
@@ -365,8 +366,15 @@ namespace Com
                     }
                 }
 
-                ud->sendTime=boost::chrono::steady_clock::now();
-                m_sendQueue.step_unhandled();
+                if (DeliveryGuarantee==Acked)
+                {
+                    ud->sendTime=boost::chrono::steady_clock::now();
+                    m_sendQueue.step_unhandled();
+                }
+                else
+                {
+                    m_sendQueue.dequeue();
+                }
             }
         }
 
@@ -559,7 +567,8 @@ namespace Com
         }
     };
 
-    typedef AckedDataSenderBasic< Writer<UserData> > AckedDataSender;
+    typedef DataSenderBasic< Writer<UserData>, Acked > AckedDataSender;
+    typedef DataSenderBasic< Writer<UserData>, Unacked > UnackedDataSender;
 }
 }
 }

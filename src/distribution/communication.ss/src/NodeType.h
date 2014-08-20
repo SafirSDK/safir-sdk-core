@@ -26,7 +26,7 @@
 
 #include <map>
 #include <boost/asio.hpp>
-#include "AckedDataSender.h"
+#include "DataSender.h"
 #include "HeartbeatSender.h"
 
 namespace Safir
@@ -59,6 +59,7 @@ namespace Com
             ,m_useMulticast(useMulticast)
             ,m_heartbeatSender(ioService, thisNodeId, m_ipVersion, McAddr(m_multicastAddress, m_useMulticast), heartbeatInterval)
             ,m_ackedDataSender(ioService, m_id, thisNodeId, m_ipVersion, McAddr(m_multicastAddress, m_useMulticast), retryTimeout)
+            ,m_unackedDataSender(ioService, m_id, thisNodeId, m_ipVersion, McAddr(m_multicastAddress, m_useMulticast), retryTimeout)
         {
         }
 
@@ -72,8 +73,12 @@ namespace Com
 
         HeartbeatSender& GetHeartbeatSender() {return m_heartbeatSender;}
         const HeartbeatSender& GetHeartbeatSender() const {return m_heartbeatSender;}
+
         AckedDataSender& GetAckedDataSender() {return m_ackedDataSender;}
         const AckedDataSender& GetAckedDataSender() const {return m_ackedDataSender;}
+
+        UnackedDataSender& GetUnackedDataSender() {return m_unackedDataSender;}
+        const UnackedDataSender& GetUnackedDataSender() const {return m_unackedDataSender;}
 
     private:
         int64_t m_thisNodeId;
@@ -87,6 +92,7 @@ namespace Com
 
         HeartbeatSender m_heartbeatSender;
         AckedDataSender m_ackedDataSender;
+        UnackedDataSender m_unackedDataSender;
 
         static std::string McAddr(const std::string& addr, bool use){return use ? addr : "";}
     };

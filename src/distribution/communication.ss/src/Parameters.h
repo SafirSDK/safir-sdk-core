@@ -37,7 +37,7 @@ namespace Com
         //Size of a fragment, if total message is bigger the message will be sent at more than one fragment
         static const size_t FragmentSize=50000;
 
-        //Size of the send queue, number of outstanding unacked messages
+        //Size of the send queue, number of outstanding messages
         static const size_t SendQueueSize = 50;
 
         //Max number of messages that can be sent in sequence before waiting for ack.

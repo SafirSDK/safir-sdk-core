@@ -38,10 +38,10 @@
 #include "../../src/Node.h"
 #include "../../src/DeliveryHandler.h"
 #include "../../src/HeartbeatSender.h"
-#include "../../src/Reader.h"
+#include "../../src/DataReceiver.h"
 #include "../../src/Writer.h"
 #include "../../src/Discoverer.h"
-#include "../../src/AckedDataSender.h"
+#include "../../src/DataSender.h"
 
 #ifdef _MSC_VER
 #pragma warning(disable:4127) //Get rid of warning that this if-expression is constant (comparing two constants)

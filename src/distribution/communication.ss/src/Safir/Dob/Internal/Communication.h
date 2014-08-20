@@ -164,9 +164,8 @@ namespace Com
          *
          * @param callback [in] - Callback function.
          * @param percentFreeLimit [in] - Threshold value given in percent of the total capacity of the send queue.
-         * @param ackedQueue [in] - If true the callback is intended for acked sends, if false the callback in intended for unacked sends.
          */
-        void SetQueueNotFullCallback(const QueueNotFull& callback, int freePartThreshold, bool ackedQueue);
+        void SetQueueNotFullCallback(const QueueNotFull& callback, int freePartThreshold);
 
         /**
          * Set callback for receive data for a specific data type. Can be called multiple times with different dataTypeIdentifier.
@@ -227,34 +226,28 @@ namespace Com
         void InjectNode(const std::string& name, int64_t id, int64_t nodeTypeId, const std::string& dataAddress);
 
         /**
-         * Send data to a specific node. If the specified node is not a system node, the message is silently ignored and the return value will be 'true'.
+         * Send data to system nodes. Can either send to a specific node or to all nodes within a node type.
          *
-         * @param nodeId [in] - Id of the receiver node.
-         * @param nodeTypeId [in] - NodeTypeId of the receiver node.
-         * @param data [in] - Pointer to the data that shall be sent.
+         * @param nodeId [in] - Id of specific receiver node. Shall be 0 when sending to all nodes in a node type.
+         * @param nodeTypeId [in] - Receiver node type, or if nodeId is 0 the node type of the specified node.
+         * @param data [in] - ointer to the data that shall be sent.
          * @param size [in] - Size of data.
          * @param dataTypeIdentifier [in] - Custom identifier specifying which type of data. Only data receivers added with the same identifier will get the data.
-         * @param ack [in] - If true communication will assure delivery by requesting all receivers to acknowledge the reception of the data.
-         * @return True if data could be added to send queue. False if send queue is full, in that case try again later.
+         * @param deliveryGuarantee [in] - If true communication will assure delivery by requesting all receivers to acknowledge the reception of the data. Will also perform retransmits if necessary.
+         * @return When sending with delivery guarantee, true is returned if data could be added to send queue. False if send queue is full, in that case try again later. If sending without delivery
+         *          guarantee true is always returned.
          */
-        bool SendToNode(int64_t nodeId, int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, int64_t dataTypeIdentifier, bool ack);
+        bool Send(int64_t nodeId,
+                  int64_t nodeTypeId,
+                  const boost::shared_ptr<char[]>& data,
+                  size_t size,
+                  int64_t dataTypeIdentifier,
+                  bool deliveryGuarantee);
 
         /**
-         * Send data to all nodes of a specific node type. If the specified node type does not exist, the message is silently ignored and the return value will be 'true'.
-         *
-         * @param nodeTypeId [in] - Id of the node type to send to.
-         * @param data [in] - Pointer to the data that shall be sent.
-         * @param size [in] - Size of data.
-         * @param dataTypeIdentifier [in] - Custom identifier specifying which type of data. Only data receivers added with the same identifier will get the data.
-         * @param ack [in] - If true communication will assure delivery by requesting all receivers to acknowledge the reception of the data.
-         * @return True if data could be added to send queue. False if send queue is full, in that case try again later.
-         */
-        bool SendToNodeType(int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, int64_t dataTypeIdentifier, bool ack);
-
-        /**
-         * Get the number of messages in a node types send queue.
+         * Get the number of messages in a node types acked send queue.
          * @param nodeTypeId [in] - Node type.
-         * @return Number of messages.
+         * @return Number of messages in the acked send queue.
          */
         size_t NumberOfQueuedMessages(int64_t nodeTypeId) const;
 

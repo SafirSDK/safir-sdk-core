@@ -377,8 +377,8 @@ int main(int argc, char * argv[])
     com->SetNewNodeCallback([=](const std::string& name, int64_t nodeId, int64_t nodeTypeId, const std::string& ca, const std::string& da)
                             {sp->NewNode(name, nodeId, nodeTypeId, ca);});
 
-    com->SetQueueNotFullCallback([&](int64_t){queueFullSem.Notify();}, 100, true); //50% free queue space before we get notification, acked
-    com->SetQueueNotFullCallback([&](int64_t){queueFullSem.Notify();}, 100, false); //50% free queue space before we get notification, unacked
+    com->SetQueueNotFullCallback([&](int64_t){queueFullSem.Notify();}, 100); //50% free queue space before we get notification, acked
+    com->SetQueueNotFullCallback([&](int64_t){queueFullSem.Notify();}, 100); //50% free queue space before we get notification, unacked
 
     boost::thread_group threads;
     for (int i = 0; i < 9; ++i)
@@ -415,7 +415,7 @@ int main(int argc, char * argv[])
 
         for (auto& nt : nodeTypes.Map())
         {
-            while (!com->SendToNodeType(nt.second.id, data, cmd.messageSize, 0, true))
+            while (!com->Send(0, nt.second.id, data, cmd.messageSize, 0, true))
             {
                 ++numberOfOverflows;
                 queueFullSem.Wait();
@@ -424,7 +424,7 @@ int main(int argc, char * argv[])
 
 //        for (auto nodeId : nodes)
 //        {
-//            while (!com->SendToNode(nodeId, myNodeTypeId, data, cmd.messageSize, 0))
+//            while (!com->Send(nodeId, myNodeTypeId, data, cmd.messageSize, 0, true))
 //            {
 //                ++numberOfOverflows;
 //                queueFullSem.Wait();

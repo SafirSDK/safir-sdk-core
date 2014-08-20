@@ -26,7 +26,7 @@
 
 #include "fwd.h"
 
-class AckedDataSenderTest
+class DataSenderTest
 {
 public:
     void Run()
@@ -100,7 +100,7 @@ public:
         });
 
         threads.join_all();
-        std::cout<<"AckedDataSenderTest tests passed"<<std::endl;
+        std::cout<<"DataSenderTest tests passed"<<std::endl;
     }
 
 private:
@@ -123,8 +123,8 @@ private:
         }
     };
 
-    typedef Com::Writer<Com::UserData, AckedDataSenderTest::TestSendPolicy> TestWriter;
-    typedef Com::AckedDataSenderBasic<TestWriter> AckedSender;
+    typedef Com::Writer<Com::UserData, DataSenderTest::TestSendPolicy> TestWriter;
+    typedef Com::DataSenderBasic<TestWriter, Com::Acked> AckedSender;
 
     void OnQueueNotFull()
     {
@@ -139,8 +139,8 @@ private:
     }
 };
 
-boost::mutex AckedDataSenderTest::mutex;
-std::map<unsigned short, int> AckedDataSenderTest::received;
-std::queue< boost::shared_ptr<Com::UserData> > AckedDataSenderTest::sent;
+boost::mutex DataSenderTest::mutex;
+std::map<unsigned short, int> DataSenderTest::received;
+std::queue< boost::shared_ptr<Com::UserData> > DataSenderTest::sent;
 
 #endif

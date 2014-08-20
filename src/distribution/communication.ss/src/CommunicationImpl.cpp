@@ -112,14 +112,11 @@ namespace Com
         m_reader.Strand().post([=]{m_deliveryHandler.SetReceiver(callback, dataTypeIdentifier);});
     }
 
-    void CommunicationImpl::SetQueueNotFullCallback(const QueueNotFull& callback, int freePartThreshold, bool ackedQueue)
+    void CommunicationImpl::SetQueueNotFullCallback(const QueueNotFull& callback, int freePartThreshold)
     {
         for (auto& vt : m_nodeTypes)
         {
-            if (ackedQueue)
-                vt.second->GetAckedDataSender().SetNotFullCallback(callback, freePartThreshold);
-            //else
-                //TODO: unacked datasender
+            vt.second->GetAckedDataSender().SetNotFullCallback(callback, freePartThreshold);
         }
     }
 
@@ -157,7 +154,7 @@ namespace Com
 
         //We do post here to be sure the AddNode job will be executed before IncludeNode. Otherwize we
         //risk losing a node.
-        //We also do the ackedDataSender inside readerStrand since
+        //We also do the DataSender inside readerStrand since
         //it only through the deliveryHandler we can lookup nodeTypeId from a nodeId. Since this a a very low frequent operaton this is ok.
         m_reader.Strand().post([=]
         {
@@ -205,14 +202,18 @@ namespace Com
         IncludeNode(id);
     }
 
-    bool CommunicationImpl::SendToNode(int64_t nodeId, int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, int64_t dataTypeIdentifier, bool /*ack*/)
-    {
-        return GetNodeType(nodeTypeId).GetAckedDataSender().AddToSendQueue(nodeId, data, size, dataTypeIdentifier);
-    }
 
-    bool CommunicationImpl::SendToNodeType(int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, int64_t dataTypeIdentifier, bool /*ack*/)
+    bool CommunicationImpl::Send(int64_t nodeId, int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, int64_t dataTypeIdentifier, bool deliveryGuarantee)
     {
-        return GetNodeType(nodeTypeId).GetAckedDataSender().AddToSendQueue(0, data, size, dataTypeIdentifier);
+        if (deliveryGuarantee)
+        {
+            return GetNodeType(nodeTypeId).GetAckedDataSender().AddToSendQueue(nodeId, data, size, dataTypeIdentifier);
+        }
+        else
+        {
+            //TODO: dataSender send unacked
+            return true;
+        }
     }
 
     size_t CommunicationImpl::NumberOfQueuedMessages(int64_t nodeTypeId) const

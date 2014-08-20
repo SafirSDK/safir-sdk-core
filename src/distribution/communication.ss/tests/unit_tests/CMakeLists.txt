@@ -19,11 +19,10 @@ if (MSVC)
 endif()
 
 add_executable(unit_tests ${sources} ${headers} ${PROTO_SRCS} ${PROTO_HDRS} ../../src/MessageQueue.h
-                ../../src/DeliveryHandler.h ../../src/AckedDataSender.h
+                ../../src/DeliveryHandler.h ../../src/DataSender.h
                 ../../src/Node.h ../../src/NodeType.h
                 ../../src/Writer.h ../../src/HeartbeatSender.h
-                ../../src/Reader.h ../../src/Reader.cpp
-                ../../src/Discoverer.h ../../src/Utilities.h)
+                ../../src/DataReceiver.h ../../src/Discoverer.h ../../src/Utilities.h)
 
 TARGET_LINK_LIBRARIES(unit_tests ${PROTOBUF_LITE_LIBRARIES})
 
@@ -41,8 +40,8 @@ SET_SAFIR_TEST_PROPERTIES(ReaderWriterTest 360)
 ADD_TEST(HeartbeatSenderTest unit_tests HeartbeatSenderTest)
 SET_SAFIR_TEST_PROPERTIES(HeartbeatSenderTest 120)
 
-ADD_TEST(AckedDataSenderTest unit_tests AckedDataSenderTest)
-SET_SAFIR_TEST_PROPERTIES(AckedDataSenderTest 120)
+ADD_TEST(DataSenderTest unit_tests DataSenderTest)
+SET_SAFIR_TEST_PROPERTIES(DataSenderTest 120)
 
 #ADD_TEST(DeliveryHandlerTest unit_tests DeliveryHandlerTest)
 #SET_SAFIR_TEST_PROPERTIES(DeliveryHandlerTest 120)

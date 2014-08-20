@@ -30,11 +30,11 @@
 #include <boost/function.hpp>
 #include "NodeType.h"
 #include "Node.h"
-#include "Reader.h"
+#include "DataReceiver.h"
 #include "DeliveryHandler.h"
 #include "Writer.h"
 #include "Discoverer.h"
-#include "AckedDataSender.h"
+#include "DataSender.h"
 #include "HeartbeatSender.h"
 
 namespace Safir
@@ -65,7 +65,7 @@ namespace Com
         void SetNewNodeCallback(const NewNode& callback);
         void SetGotReceiveFromCallback(const GotReceiveFrom& callback);
         void SetRetransmitToCallback(const RetransmitTo& callback);
-        void SetQueueNotFullCallback(const QueueNotFull& callback, int freePartThreshold, bool ackedQueue);
+        void SetQueueNotFullCallback(const QueueNotFull& callback, int freePartThreshold);
         void SetDataReceiver(const ReceiveData& callback, int64_t dataTypeIdentifier);
 
         void InjectSeeds(const std::vector<std::string>& seeds);
@@ -77,8 +77,12 @@ namespace Com
         void ExcludeNode(int64_t nodeId);
         void InjectNode(const std::string& name, int64_t id, int64_t nodeTypeId, const std::string& dataAddress);
 
-        bool SendToNode(int64_t nodeId, int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, int64_t dataTypeIdentifier, bool ack);
-        bool SendToNodeType(int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, int64_t dataTypeIdentifier, bool ack);
+        bool Send(int64_t nodeId,
+                  int64_t nodeTypeId,
+                  const boost::shared_ptr<char[]>& data,
+                  size_t size,
+                  int64_t dataTypeIdentifier,
+                  bool deliveryGuarantee);
 
         size_t NumberOfQueuedMessages(int64_t nodeTypeId) const;
 
@@ -99,7 +103,7 @@ namespace Com
         //main components of communication
         Discoverer m_discoverer;
         DeliveryHandler m_deliveryHandler;
-        Reader m_reader;
+        DataReceiver m_reader;
 
         bool OnRecv(const char* data, size_t size); //returns true if it is ok to call OnRecv again, false if flooded with received messages
         void OnNewNode(const Node& node);

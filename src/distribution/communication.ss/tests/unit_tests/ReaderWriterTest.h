@@ -53,7 +53,7 @@ public:
         //--------------------------
         // Setup
         //--------------------------
-        Com::Reader reader(io, "127.0.0.1:10000", "239.192.1.1:11000", [=](const char* d, size_t s){return Recv(d,s);}, [=]{return IsReaderReady();});
+        Com::DataReceiver reader(io, "127.0.0.1:10000", "239.192.1.1:11000", [=](const char* d, size_t s){return Recv(d,s);}, [=]{return IsReaderReady();});
         reader.Start();
         Com::Writer<int> writer(io, 4, "239.192.1.1:11000");
         auto endpoint=Com::Utilities::CreateEndpoint("127.0.0.1:10000");
@@ -168,7 +168,7 @@ private:
 
     void WaitUntilNotEmpty(int line) const
     {
-        for (int i=0; i<100; ++i)
+        for (int i=0; i<1000; ++i)
         {
             {
                 boost::mutex::scoped_lock lock(mutex);

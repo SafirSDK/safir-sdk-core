@@ -25,7 +25,7 @@
 #include "MessageQueueTest.h"
 #include "HeartbeatSenderTest.h"
 #include "DeliveryHandlerTest.h"
-#include "AckedDataSenderTest.h"
+#include "DataSenderTest.h"
 #include "DiscovererTest.h"
 
 
@@ -59,9 +59,9 @@ int main(int argc, char* argv[])
             HeartbeatSenderTest test;
             test.Run();
         }
-        else if (run=="AckedDataSenderTest")
+        else if (run=="DataSenderTest")
         {
-            AckedDataSenderTest test;
+            DataSenderTest test;
             test.Run();
         }
         else if (run=="DiscovererTest")
@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
         {(DeliveryHandlerTest()).Run();}
         {(ReaderWriterTest()).Run();}
         {(HeartbeatSenderTest()).Run();}
-        {(AckedDataSenderTest()).Run();}
+        {(DataSenderTest()).Run();}
         {(DiscovererTest()).Run();}
 
         //if we get here all tests passed without errors

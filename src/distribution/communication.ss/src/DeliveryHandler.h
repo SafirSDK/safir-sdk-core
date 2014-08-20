@@ -92,10 +92,10 @@ namespace Com
             m_gotRecvFrom(header->commonHeader.senderId); //report that we are receivinga intact data from the node
 
             bool sendAck=HandleMessage(header, payload, senderIt->second);
-            Deliver(senderIt->second, header->sendMethod); //if something is now fully received, deliver it to application
+            Deliver(senderIt->second, header); //if something is now fully received, deliver it to application
             if (sendAck)
             {
-                auto ackPtr=boost::make_shared<Ack>(m_myId, header->commonHeader.senderId, senderIt->second.channel[header->sendMethod].lastInSequence, header->sendMethod);
+                auto ackPtr=boost::make_shared<Ack>(m_myId, header->commonHeader.senderId, senderIt->second.GetChannel(header).lastInSequence, header->sendMethod);
                 WriterType::SendTo(ackPtr, senderIt->second.endpoint);
             }
         }
@@ -189,15 +189,17 @@ namespace Com
         struct NodeInfo
         {
             Node node;
-            std::vector<Channel> channel;
+            std::vector<Channel> channel_;
             boost::asio::ip::udp::endpoint endpoint;
 
             NodeInfo(const Node& node_)
                 :node(node_)
-                ,channel(2) //two channels, one for each sendMethod
+                ,channel_(4) //4 channels: unacked_singel, unacked_multi, acked_single, acked_multi
                 ,endpoint(Utilities::CreateEndpoint(node.unicastAddress))
             {
             }
+
+            Channel& GetChannel(const MessageHeader* header) {return channel_[static_cast<size_t>(2*header->deliveryGuarantee+header->sendMethod)];}
         };
         typedef std::map<int64_t, NodeInfo> NodeInfoMap;
 
@@ -211,7 +213,7 @@ namespace Com
 
         void Insert(const MessageHeader* header, const char* payload, NodeInfo& ni)
         {
-            Channel& ch=ni.channel[header->sendMethod];
+            Channel& ch=ni.GetChannel(header);
             size_t currentIndex, firstIndex, lastIndex;
             CalculateIndices(ch.lastInSequence, header, currentIndex, firstIndex, lastIndex);
             RecvData& recvData=ch.queue[currentIndex];
@@ -284,7 +286,7 @@ namespace Com
 
         void ForceInsert(const MessageHeader* header, const char* payload, NodeInfo& ni)
         {
-            Channel& ch=ni.channel[header->sendMethod];
+            Channel& ch=ni.GetChannel(header);
             ch.lastInSequence=header->sequenceNumber-1; //we pretend this was exactly what we expected to get
             //Clear the queue, should not be necessary as long as we dont let excluded nodes come back.
             for (size_t i=0; i<Parameters::ReceiverWindowSize; ++i)
@@ -302,37 +304,69 @@ namespace Com
                       (header->sendMethod==SingleReceiverSendMethod ? L"Unicast" : L"Multicast")<<
                       L", seq: "<<header->sequenceNumber<<std::endl;
 
-            Channel& ch=ni.channel[header->sendMethod];
+            Channel& ch=ni.GetChannel(header);
 
-            if (ch.lastInSequence==0) //first time we receive anything, we accept any seqNo and start counting from there
+            if (header->deliveryGuarantee==Acked)
             {
-                if (header->fragmentNumber==0) //we cannot start in the middle of a fragmented message
+                if (ch.lastInSequence==0) //first time we receive anything, we accept any seqNo and start counting from there
                 {
-                    ForceInsert(header, payload, ni);
+                    if (header->fragmentNumber==0) //we cannot start in the middle of a fragmented message
+                    {
+                        ForceInsert(header, payload, ni);
+                    }
+                    //else we must wait for beginning of a new message before we start
                 }
-                //else we must wait for beginning of a new message before we start
-            }
-            else if (header->sequenceNumber<=ch.lastInSequence)
-            {
-                lllog(8)<<L"COM: Recv duplicated message in order. Seq: "<<header->sequenceNumber<<L" from node "<<ni.node.name.c_str()<<std::endl;
-            }
-            else if (header->sequenceNumber<=ch.lastInSequence+Parameters::ReceiverWindowSize)
-            {
-                //The Normal case:
-                //This is something within our receive window, maybe it is out of order but in that case the gaps will eventually be filled in
-                //when sender retransmits non-acked messages.
-                Insert(header, payload, ni);
-            }
-            else //lost messages, got something too far ahead
-            {
-                //This can occur if the senders send window i bigger than the receivers receive window. If everything is working as expected we can just ignore this message.
-                //Sooner or later the sender must retransmit all non-acked messages, and in time this message will come into our receive window.
-                lllog(8)<<L"COM: Received Seq: "<<header->sequenceNumber<<" wich means that we have lost a message. LastInSequence="<<ch.lastInSequence<<std::endl;
-                std::wcout<<L"COM: Received Seq: "<<header->sequenceNumber<<" wich means that we have lost a message. LastInSequence="<<ch.lastInSequence<<std::endl;
-                return false; //this message is not handled, dont send ack
-            }
+                else if (header->sequenceNumber<=ch.lastInSequence)
+                {
+                    lllog(8)<<L"COM: Recv duplicated message in order. Seq: "<<header->sequenceNumber<<L" from node "<<ni.node.name.c_str()<<std::endl;
+                }
+                else if (header->sequenceNumber<=ch.lastInSequence+Parameters::ReceiverWindowSize)
+                {
+                    //The Normal case:
+                    //This is something within our receive window, maybe it is out of order but in that case the gaps will eventually be filled in
+                    //when sender retransmits non-acked messages.
+                    Insert(header, payload, ni);
+                }
+                else //lost messages, got something too far ahead
+                {
+                    //This can occur if the senders send window i bigger than the receivers receive window. If everything is working as expected we can just ignore this message.
+                    //Sooner or later the sender must retransmit all non-acked messages, and in time this message will come into our receive window.
+                    lllog(8)<<L"COM: Received Seq: "<<header->sequenceNumber<<" wich means that we have lost a message. LastInSequence="<<ch.lastInSequence<<std::endl;
+                    std::wcout<<L"COM: Received Seq: "<<header->sequenceNumber<<" wich means that we have lost a message. LastInSequence="<<ch.lastInSequence<<std::endl;
+                    return false; //this message is not handled, dont send ack
+                }
 
-            return true; // all messages except lost message when the received is too far ahead of us, must be acked.
+                return true; // all messages except lost message when the received is too far ahead of us, must be acked
+            }
+            else //unacked
+            {
+                if (header->sequenceNumber==ch.lastInSequence+1)
+                {
+                    Insert(header, payload, ni); //message received in correct order, just insert
+                }
+                else if (header->sequenceNumber>ch.lastInSequence)
+                {
+                    //this is a message with bigger seq but we have missed something inbetween
+                    //reset receive queue, since theres nothing old we want to keep any longer
+                    for (size_t i=0; i<ch.queue.Size(); ++i)
+                    {
+                        ch.queue[i].Clear();
+                    }
+
+                    if (header->fragmentNumber==0)
+                    {
+                        //this is something that we want to keep
+                        ch.lastInSequence=header->sequenceNumber-1;
+                        Insert(header, payload, ni);
+                    }
+                    else
+                    {
+                        //in the middle of a fragmented message, nothing we want to keep. Set lastInSeq to match with the beginning of next new message
+                        ch.lastInSequence=header->sequenceNumber+header->numberOfFragments-header->fragmentNumber-1; //calculate nextStartOfNewMessage-1
+                    }
+                }
+                return false;
+            }
         }
 
         void CalculateIndices(uint64_t lastSeq, const MessageHeader* header,
@@ -344,9 +378,9 @@ namespace Com
             lastIndex=std::min(Parameters::ReceiverWindowSize-1, currentIndex+header->numberOfFragments-header->fragmentNumber-1);
         }
 
-        void Deliver(NodeInfo& ni, uint16_t sendMethod)
+        void Deliver(NodeInfo& ni, const MessageHeader* header)
         {
-            Channel& ch=ni.channel[sendMethod];
+            Channel& ch=ni.GetChannel(header);
 
             for (size_t i=0; i<ch.queue.Size(); ++i)
             {
