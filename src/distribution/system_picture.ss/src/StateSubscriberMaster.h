@@ -60,7 +60,7 @@ namespace SP
                                                 });
         }
 
-        void Start(boost::asio::io_service& ioService,
+        void Start(boost::asio::io_service& /*ioService*/,
                    const std::function<void (const SystemState& data)>& dataCallback) override
         {
             m_strand.dispatch([this, dataCallback]

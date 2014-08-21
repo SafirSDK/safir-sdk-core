@@ -37,6 +37,10 @@
 #include "Parameters.h"
 #include "Writer.h"
 
+#ifdef _MSC_VER
+#pragma warning (disable: 4127)
+#endif
+
 namespace Safir
 {
 namespace Dob
@@ -573,5 +577,9 @@ namespace Com
 }
 }
 }
+
+#ifdef _MSC_VER
+#pragma warning (default: 4127)
+#endif
 
 #endif

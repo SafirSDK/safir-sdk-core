@@ -105,14 +105,15 @@ public:
         {
             const char* msg="ABCDEFGH";
             uint64_t seq=2+frag;
-            const auto fragmentSize=2;
+            const size_t fragmentSize=2;
+            const uint16_t numberOfFragments=4;
 
             for (int64_t id=2; id<=4; ++id)
             {
                 size_t fragmentOffset=2*frag;
                 const char* payload=msg+fragmentOffset;
 
-                Com::MessageHeader header(id, 1, 0, Com::MultiReceiverSendMethod, Com::Acked, seq, strlen(msg), fragmentSize, 4, frag, fragmentOffset);
+                Com::MessageHeader header(id, 1, 0, Com::MultiReceiverSendMethod, Com::Acked, seq, strlen(msg), fragmentSize, numberOfFragments, static_cast<uint16_t>(frag), fragmentOffset);
                 header.crc=Com::CalculateCrc32(payload, static_cast<size_t>(fragmentSize));
                 if (frag==3)
                     header.crc=Com::CalculateCrc32(msg, strlen(msg));

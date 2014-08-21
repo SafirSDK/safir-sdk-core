@@ -58,7 +58,7 @@ public:
         Com::Writer<int> writer(io, 4, "239.192.1.1:11000");
         auto endpoint=Com::Utilities::CreateEndpoint("127.0.0.1:10000");
         auto SendUnicast=[&](int i){writer.SendTo(boost::make_shared<int>(i), endpoint);};
-        auto SendMulticast=[&](int i){writer.SendMulticast(boost::make_shared<int>(i));};
+        //auto SendMulticast=[&](int i){writer.SendMulticast(boost::make_shared<int>(i));};
 
         //--------------------------
         // Test starts
@@ -110,7 +110,7 @@ public:
         CHECKMSG(received.empty(), received.size());
 
         //Multicast tests
-        SendMulticast(1);
+/*        SendMulticast(1);
         WaitUntilNotEmpty(__LINE__);
         CHECKMSG(received.front()==1, (received.empty() ? -1 : received.front()));
         received.pop();
@@ -153,7 +153,7 @@ public:
         CHECKMSG(received.empty(), received.size());
 
         io.post([&]{SetReady();});
-        WaitUntilReady();
+        WaitUntilReady();*/
 
         reader.Stop();
         work.reset();

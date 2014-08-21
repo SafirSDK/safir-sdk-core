@@ -112,7 +112,7 @@ namespace Com
         uint64_t sequenceNumber;
         uint8_t sendMethod; //tells if message being acked was sent to one or many receivers (different sequence numbers)
         uint8_t deliveryGuarantee; //Always 0 since an ack itself is not unacked
-        Ack(int64_t senderId_, int64_t receiverId_, uint64_t sequenceNumber_, uint16_t serie)
+        Ack(int64_t senderId_, int64_t receiverId_, uint64_t sequenceNumber_, uint8_t serie)
             :commonHeader(senderId_, receiverId_, AckType)
             ,sequenceNumber(sequenceNumber_)
             ,sendMethod(serie)
@@ -169,7 +169,7 @@ namespace Com
         uint8_t sendMethod;
         uint64_t sequenceNumber;
         Receiver() : id(0), sendMethod(MultiReceiverSendMethod), sequenceNumber(0){}
-        Receiver(int64_t id_, uint16_t sendMethod_, uint64_t sequenceNumber_)
+        Receiver(int64_t id_, uint8_t sendMethod_, uint64_t sequenceNumber_)
             :id(id_)
             ,sendMethod(sendMethod_)
             ,sequenceNumber(sequenceNumber_)
