@@ -64,6 +64,9 @@ namespace SP
     class DISTRIBUTION_SYSTEM_PICTURE_API SystemState
     {
     public:
+
+        SystemState() {/*TODO Lars implement this*/ }
+
         int64_t ElectedId() const;
         int64_t ElectionId() const;
         
