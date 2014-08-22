@@ -58,7 +58,6 @@ std::wostream& operator<<(std::wostream& out, const boost::program_options::opti
     return out << ostr.str().c_str();
 }
 
-
 class ProgramOptions
 {
 public:
@@ -155,6 +154,11 @@ private:
 
 };
 
+void ChangedSystemState(const Safir::Dob::Internal::SP::SystemState& data)
+{
+    std::wcout << "Got new system state from SP! The number of nodes are " << data.Size() << std::endl;
+
+}
 
 int main(int argc, char * argv[])
 {
@@ -217,8 +221,10 @@ int main(int argc, char * argv[])
                                                std::move(spNodeTypes));
 
 
-    communication.Start();
+    // Start subscription to system state changes from SP
+    sp.GetSystemState().Start(ioService, ChangedSystemState);
 
+    communication.Start();
 
 
     boost::asio::signal_set signalSet(ioService);
@@ -243,6 +249,7 @@ int main(int argc, char * argv[])
                                SEND_SYSTEM_LOG(Error,
                                                << "Got a signals error: " << error);
                            }
+                           sp.GetSystemState().Stop();
                            sp.Stop();
                            communication.Stop();
                            work.reset();
