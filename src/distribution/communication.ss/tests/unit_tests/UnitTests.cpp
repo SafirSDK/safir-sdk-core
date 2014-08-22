@@ -21,7 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include "ReaderWriterTest.h"
+#include "DataReceiverTest.h"
 #include "MessageQueueTest.h"
 #include "HeartbeatSenderTest.h"
 #include "DeliveryHandlerTest.h"
@@ -49,9 +49,9 @@ int main(int argc, char* argv[])
             DeliveryHandlerTest test;
             test.Run();
         }
-        else if (run=="ReaderWriterTest")
+        else if (run=="DataReceiverTest")
         {
-            ReaderWriterTest test;
+            DataReceiverTest test;
             test.Run();
         }
         else if (run=="HeartbeatSenderTest")
@@ -69,11 +69,7 @@ int main(int argc, char* argv[])
             DiscovererTest test;
             test.Run();
         }
-//        else
-//        {
-//            std::cout<<"Valid test case args are: MessageQueueTest, DeliveryHandlerTest, ReaderTest, WriterTest, HeartbeatSenderTest, DiscovererTest"<<std::endl;
-//            return 0;
-//        }
+
         std::cout<<"================================="<<std::endl;
         std::cout<<"All tests passed!"<<std::endl;
         std::cout<<"================================="<<std::endl;
@@ -82,7 +78,7 @@ int main(int argc, char* argv[])
     {
         {(MessageQueueTest()).Run();}
         {(DeliveryHandlerTest()).Run();}
-        {(ReaderWriterTest()).Run();}
+        {(DataReceiverTest()).Run();}
         {(HeartbeatSenderTest()).Run();}
         {(DataSenderTest()).Run();}
         {(DiscovererTest()).Run();}

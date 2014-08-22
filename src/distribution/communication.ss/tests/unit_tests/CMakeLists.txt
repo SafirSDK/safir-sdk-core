@@ -34,11 +34,11 @@ enable_testing()
 ADD_TEST(MessageQueueTest unit_tests MessageQueueTest)
 SET_SAFIR_TEST_PROPERTIES(MessageQueueTest 120)
 
-ADD_TEST(ReaderWriterTest unit_tests ReaderWriterTest)
-SET_SAFIR_TEST_PROPERTIES(ReaderWriterTest 360)
-
 ADD_TEST(HeartbeatSenderTest unit_tests HeartbeatSenderTest)
 SET_SAFIR_TEST_PROPERTIES(HeartbeatSenderTest 120)
+
+ADD_TEST(DataReceiverTest unit_tests DataReceiverTest)
+SET_SAFIR_TEST_PROPERTIES(DataReceiverTest 360)
 
 ADD_TEST(DataSenderTest unit_tests DataSenderTest)
 SET_SAFIR_TEST_PROPERTIES(DataSenderTest 120)
