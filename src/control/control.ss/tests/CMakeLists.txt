@@ -9,6 +9,6 @@ FIND_PACKAGE(Boost COMPONENTS timer thread filesystem program_options system)
 FIND_PACKAGE(PythonInterp)
 
 ENABLE_TESTING()
-ADD_SUBDIRECTORY(Config_test)
+ADD_SUBDIRECTORY(unit_tests/Config_test)
 
 
