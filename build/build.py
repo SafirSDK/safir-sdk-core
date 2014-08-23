@@ -27,6 +27,7 @@ from __future__ import print_function
 import os, glob, sys, subprocess, platform, xml.dom.minidom, re, time, shutil, argparse
 import locale, codecs
 from xml.sax.saxutils import escape
+import stage_dependencies
 
 
 #a few constants
@@ -730,6 +731,11 @@ def main():
     builder.setup_build_environment()
 
     builder.build(".")
+    
+    #try:
+    #    stage_dependencies.stage_dependencies(logger, builder.stage)
+    #except stage_dependencies.StagingError as e:
+    #    raise FatalError("Error while copying dependencies to staging area: " + str(e))
 
     return (builder.total_tests, builder.failed_tests)
 
