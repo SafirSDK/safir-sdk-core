@@ -264,10 +264,10 @@ def parse_command_line(builder):
                         help="Set up and use environment variables for a Jenkins automated build." +
                              "TODO: what else does it do?")
 
-    parser.add_argument("--stage",
+    parser.add_argument("--package",
                         action="store_true",
                         default=False,
-                        help="Install everything to a staging area")
+                        help="Install everything to a staging area and create a package")
 
     parser.add_argument("--skip-tests",
                         action = "store_true",
@@ -290,7 +290,7 @@ def parse_command_line(builder):
     logger = Logger("Brief" if arguments.verbose == 0 else "Verbose")
 
     if arguments.jenkins:
-        arguments.stage = True
+        arguments.package = True
         builder.setenv_jenkins()
 
     msg = builder.handle_command_line_arguments(arguments)
@@ -338,7 +338,7 @@ class BuilderBase(object):
                 
         self.skip_tests = arguments.skip_tests
 
-        self.stage = os.path.join(os.getcwd(),"stage") if arguments.stage else None
+        self.stagedir = os.path.join(os.getcwd(),"stage") if arguments.package else None
 
         return self.handle_command_line_arguments_internal(arguments)
 
@@ -368,13 +368,21 @@ class BuilderBase(object):
             os.chdir(config)
 
             self.__build_internal(directory,
-                                  os.pardir if olddir else ".",
+                                  os.pardir,
                                   config)
             os.chdir(olddir)
 
-        if self.stage:
-            logger.log("Building installation package", "brief")
-            self.stage_package()
+    def package(self):
+        if self.stagedir is None:
+            return
+
+        try:
+            stage_dependencies.stage_dependencies(logger, self.stagedir)
+        except stage_dependencies.StagingError as e:
+            raise FatalError("Error while copying dependencies to staging area: " + str(e))
+
+        logger.log("Building installation package", "header")
+        self.stage_package()
 
     def __configure(self, directory, srcdir, config):
 
@@ -406,7 +414,7 @@ class BuilderBase(object):
             self.test(directory)
             translate_results_to_junit(config)
 
-        if self.stage:
+        if self.stagedir:
             logger.log("   + installing to staging area", "brief")
             self.stage_install(directory)
 
@@ -416,7 +424,7 @@ class BuilderBase(object):
                     "-DCOMPONENT="+ component,
                     "-P", "cmake_install.cmake")
             env = os.environ.copy()
-            env["DESTDIR"] = os.path.join(self.stage,component)
+            env["DESTDIR"] = os.path.join(self.stagedir,component)
             self._run_command(command,
                                "Staged install " + component, directory, env = env)
     def stage_package(self):
@@ -731,11 +739,8 @@ def main():
     builder.setup_build_environment()
 
     builder.build(".")
-    
-    #try:
-    #    stage_dependencies.stage_dependencies(logger, builder.stage)
-    #except stage_dependencies.StagingError as e:
-    #    raise FatalError("Error while copying dependencies to staging area: " + str(e))
+    builder.package()
+        
 
     return (builder.total_tests, builder.failed_tests)
 
