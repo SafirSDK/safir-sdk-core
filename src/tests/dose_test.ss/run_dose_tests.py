@@ -114,6 +114,9 @@ class Parameters:
         self.autostart_jenkins_slave = options.autostart_slave or (options.jenkins and self.multinode)
 
         if options.jenkins:
+            #disable the slow debug heap on windows
+            if sys.platform == "win32":
+                os.environ["_NO_DEBUG_HEAP"] = "1"
             #WORKSPACE = os.environ.get("WORKSPACE")
             #if not WORKSPACE:
             #    print "Environment variable WORKSPACE is not set, is this really a Jenkins build?!"
