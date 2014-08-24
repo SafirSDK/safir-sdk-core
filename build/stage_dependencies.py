@@ -76,98 +76,7 @@ def copy_tree(srcdir, dstdir):
         else:
             mkdir(dstdir)
             copy_file(srcfname, dstdir)
-"""
 
-def find_dll(names):
-    for name in names:
-        for path in PATH:
-            if not SAFIR_RUNTIME in path:
-                fn = os.path.join(path,name)
-                if os.path.isfile(fn):
-                    return path
-    log("could not find " + str(names))
-
-def copy_dll(name, alternatives = None, Log_Error = True):
-    for path in PATH:
-        if not SAFIR_RUNTIME in path:
-            fn = os.path.join(path,name)
-            if os.path.isfile(fn):
-                copy_file(fn, DLL_DESTINATION)
-                return True
-    if alternatives is not None:
-        for alt in alternatives:
-            res = copy_dll(alt, None, False)
-            if res:
-                return True
-    if Log_Error:
-       logError("could not find "+ name)
-    return False
-
-def copy_exe(name, alternatives = None, Log_Error = True):
-    copy_dll(name,alternatives,Log_Error)
-
-def copy_lib(name, alternatives = None, Log_Error = True):
-    for path in PATH:
-        if not SAFIR_RUNTIME in path:
-            fn = os.path.join(path,name)
-            if os.path.isfile(fn):
-                copy_file(fn, SDK_LIB_DESTINATION)
-                return True
-            fn = os.path.join(path,"../lib", name)
-            if os.path.isfile(fn):
-                copy_file(fn, SDK_LIB_DESTINATION)
-                return True
-    if alternatives is not None:
-        for alt in alternatives:
-            res = copy_lib(alt, None, False)
-            if res:
-                return True
-    if Log_Error:
-       logError("could not find "+ name)
-    return False
-
-
-
-def copy_qt_dlls(dir):
-    #""Try to copy a bunch of qt files. This is a mismash of qt4 and qt5 stuff,
-    but since QTDIR should only contain one qt version, this should work.
-    The stuff that is marked as for qt4 are the ones that are needed for Qt4,
-    all others are for qt5.""#
-
-    names = ("Qt5Core.dll",
-             "Qt5Widgets.dll",
-             "Qt5Gui.dll",
-             "LibGLESv2.dll",
-             "LibEGL.dll",
-             "icudt51.dll",
-             "icuin51.dll",
-             "icuuc51.dll",
-             "QtCore4.dll",  #for qt4
-             "QtGui4.dll")  #for qt4
-
-    for file in names:
-        path = os.path.join(dir, "bin", file)
-        if os.path.isfile(path):
-            log (" " + file)
-            copy_file(path, DLL_DESTINATION)
-
-    qwindows = os.path.join(dir, "plugins", "platforms", "qwindows.dll")
-    if os.path.isfile(qwindows):
-        log (" qwindows.dll")
-        platforms = os.path.join(DLL_DESTINATION, "platforms")
-        mkdir(platforms)
-        copy_file(qwindows, platforms)
-        
-
-
-
-def copy_headers(dir,files):
-    if not os.path.isdir(dir):
-        logError("ERROR! " + dir + " is not a directory")
-        return
-    for file in files:
-        copy_file(os.path.join(dir,file),HEADER_DESTINATION)
-"""
 class __WindowsStager(object):
     def __init__(self, logger, stage):
         self.logger = logger
@@ -175,6 +84,17 @@ class __WindowsStager(object):
         self.LIB_DESTINATION = os.path.join(stage, "Development", "Program Files", "safir_sdk_core", "lib")
         self.DLL_DESTINATION = os.path.join(stage, "Runtime", "Program Files", "safir_sdk_core", "bin")
         self.HEADER_DESTINATION = os.path.join(stage, "Development", "Program Files", "safir_sdk_core", "include")
+
+    def __copy_dll(self, name):
+        for path in os.environ.get("PATH").split(os.pathsep):    
+            fn = os.path.join(path,name)
+            if os.path.isfile(fn):
+                copy_file(fn, self.DLL_DESTINATION)
+                return
+        raise StagingError("Could not find "+ name)
+
+    def __copy_exe(self,name):
+        self.__copy_dll(name)
 
     def __copy_boost(self):
         self.logger.log("Copying boost stuff", "detail")
@@ -199,28 +119,33 @@ class __WindowsStager(object):
         self.__copy_boost_libs(boost_lib_dir, boost_libraries)
         self.__copy_boost_dlls(boost_lib_dir, boost_libraries)
         self.__copy_header_dir(os.path.join(boost_dir, "boost"))
+
+    def __copy_qt(self):
+        self.logger.log("Copying the Qt runtime", "detail")
+        qt_dir = os.environ.get("QTDIR")
+        if qt_dir is None:
+            raise StagingError("QTDIR is not set! Cannot find Qt dlls!")
+        else:
+            self.__copy_qt_dlls(qt_dir)
+    
+    def __copy_jom(self):
+        self.logger.log("Copying jom.exe")
+        self.__copy_exe("jom.exe")
         
     def run(self):
         self.__copy_boost()
-        
+        self.__copy_qt()
+        self.__copy_jom()
     """
         ############
-        qt_dir = os.environ.get("QTDIR")
-        if qt_dir is None:
-            logError("QTDIR is not set! Will not copy qt stuff")
-        else:
-            log("Copying the Qt runtime dlls from " + qt_dir)
-            copy_qt_dlls(qt_dir)
 
-        ############
+        ############ TODO: remove or re-add
         log("Copying Ada stuff - GNAT runtime")
         copy_dll("libgnat-2013.dll", Log_Error = False)
         copy_dll("libgnarl-2013.dll", Log_Error = False)
         copy_dll("libgcc_s_dw2-1.dll", Log_Error = False)
 
         ###########
-        log("Copying jom.exe")
-        copy_exe("jom.exe")
     """
     def __copy_header_dir(self, dir):
         if not os.path.isdir(dir):
@@ -245,7 +170,39 @@ class __WindowsStager(object):
             match = file_name_filter.match(file)
             if match is not None and match.group(1) in libraries:
                 copy_file(os.path.join(dir,file), self.DLL_DESTINATION)     
-                
+           
+    def __copy_qt_dlls(self, dir):
+        """
+        Try to copy a bunch of qt files. This is a mismash of qt4 and qt5 stuff,
+        but since QTDIR should only contain one qt version, this should work.
+        The stuff that is marked as for qt4 are the ones that are needed for Qt4,
+        all others are for qt5.
+        """
+
+        names = ("Qt5Core.dll",
+                 "Qt5Widgets.dll",
+                 "Qt5Gui.dll",
+                 "LibGLESv2.dll",
+                 "LibEGL.dll",
+                 "icudt51.dll",
+                 "icuin51.dll",
+                 "icuuc51.dll",
+                 "QtCore4.dll",  #for qt4
+                 "QtGui4.dll")  #for qt4
+
+        for file in names:
+            path = os.path.join(dir, "bin", file)
+            if os.path.isfile(path):
+                self.logger.log (" Copying " + file, "detail")
+                copy_file(path, self.DLL_DESTINATION)
+
+        qwindows = os.path.join(dir, "plugins", "platforms", "qwindows.dll")
+        if os.path.isfile(qwindows):
+            self.logger.log (" Copying qwindows.dll", "detail")
+            platforms = os.path.join(self.DLL_DESTINATION, "platforms")
+            mkdir(platforms)
+            copy_file(qwindows, platforms)
+     
 def stage_dependencies(logger, stage):
     """
     Throws StagingError if something goes wrong.
