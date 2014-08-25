@@ -139,8 +139,6 @@ Section "Runtime" SecRuntime
   SetOutPath "$APPDATA\safir_sdk_core\config"
   File "${StageDirRuntime}\docs\example_configuration\*.ini"
 
-  ;TODO Qt embed
-  ;TODO embed more?
   ;TODO start menu (config links with notepad, dobmake, docs, etc)
 
   ;Add to PATH
