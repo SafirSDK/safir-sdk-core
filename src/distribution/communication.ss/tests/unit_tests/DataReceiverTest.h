@@ -33,15 +33,6 @@ class DataReceiverTest
 public:
     void Run()
     {
-//        std::atomic_uint go{0};
-//        auto SetReady=[&]{go=1;};
-//        auto WaitUntilReady=[&]
-//        {
-//            while(go==0)
-//                Wait(20);
-//            go=0;
-//        };
-
         boost::asio::io_service io;
         auto work=boost::make_shared<boost::asio::io_service::work>(io);
         boost::thread_group threads;
@@ -56,12 +47,14 @@ public:
         receiver.reset(new TestDataReceiver(io, "127.0.0.1:10000", "239.192.1.1:11000", [=](const char* d, size_t s){return Recv(d,s);}, [=]{return IsReaderReady();}));
         receiver->Start();
 
+        std::cout<<"line "<<__LINE__<<std::endl;
         //--------------------------
         // Unicast tests
         //--------------------------        
         SendUnicast(1);
         SendUnicast(2);
         SendUnicast(3);
+        std::cout<<"line "<<__LINE__<<std::endl;
         for(;;)
         {
             Wait(200);
@@ -71,21 +64,27 @@ public:
                     break;
             }
         }
+        std::cout<<"line "<<__LINE__<<std::endl;
 
         SetReaderReady(false);
         SendUnicast(4); //will also be sent
         SendUnicast(5); //will not be sent until SetReaderReady(true)
         Wait(2000); //If the '5' has still not been received after this time, we can assume it will never come, just as expected.
 
+        std::cout<<"line "<<__LINE__<<std::endl;
         for(;;)
         {
             Wait(200);
             {
                 boost::mutex::scoped_lock lock(mutex);
                 if (received.size()==4)
+                {
+                    std::cout<<"line "<<__LINE__<<std::endl;
                     break;
+                }
             }
         }
+        std::cout<<"line "<<__LINE__<<std::endl;
 
         //Check that all is as expected
         {
@@ -100,18 +99,25 @@ public:
             received.pop();
             CHECK(received.empty()); //now it must be empty otherwize the '5' has arrived.
         }
+        std::cout<<"line "<<__LINE__<<std::endl;
 
         SetReaderReady(true); //receiver is ready again, now the '5' is expected to arrive
 
+        std::cout<<"line "<<__LINE__<<std::endl;
         for(;;)
         {
             Wait(200);
             {
                 boost::mutex::scoped_lock lock(mutex);
                 if (!received.empty())
+                {
+                    std::cout<<"line "<<__LINE__<<std::endl;
                     break;
+                }
             }
         }
+
+        std::cout<<"line "<<__LINE__<<std::endl;
 
         //Check that all is as expected
         {
@@ -120,6 +126,8 @@ public:
             received.pop();
             CHECK(received.empty());
         }
+
+        std::cout<<"line "<<__LINE__<<std::endl;
 
         //--------------------------
         // Multicast tests
@@ -127,31 +135,45 @@ public:
         SendMulticast(1);
         SendMulticast(2);
         SendMulticast(3);
+
+        std::cout<<"MULTICAST_TEST line "<<__LINE__<<std::endl;
+        std::cout<<"line "<<__LINE__<<std::endl;
+
         for(;;)
         {
             Wait(200);
             {
                 boost::mutex::scoped_lock lock(mutex);
                 if (received.size()==3)
+                {
+                    std::cout<<"line "<<__LINE__<<std::endl;
                     break;
+                }
             }
         }
 
+        std::cout<<"line "<<__LINE__<<std::endl;
         SetReaderReady(false);
         SendMulticast(4); //will also be sent
         SendMulticast(5); //will not be sent until SetReaderReady(true)
+        std::cout<<"line "<<__LINE__<<std::endl;
         Wait(2000); //If the '5' has still not been received after this time, we can assume it will never come, just as expected.
 
+        std::cout<<"line "<<__LINE__<<std::endl;
         for(;;)
         {
             Wait(200);
             {
                 boost::mutex::scoped_lock lock(mutex);
                 if (received.size()==4)
+                {
+                    std::cout<<"line "<<__LINE__<<std::endl;
                     break;
+                }
             }
         }
 
+        std::cout<<"line "<<__LINE__<<std::endl;
         //Check that all is as expected
         {
             boost::mutex::scoped_lock lock(mutex);
@@ -165,8 +187,9 @@ public:
             received.pop();
             CHECK(received.empty()); //now it must be empty otherwize the '5' has arrived.
         }
-
+        std::cout<<"line "<<__LINE__<<std::endl;
         SetReaderReady(true); //receiver is ready again, now the '5' is expected to arrive
+        std::cout<<"line "<<__LINE__<<std::endl;
 
         for(;;)
         {
@@ -174,9 +197,14 @@ public:
             {
                 boost::mutex::scoped_lock lock(mutex);
                 if (!received.empty())
+                {
+                    std::cout<<"line "<<__LINE__<<std::endl;
                     break;
+                }
             }
         }
+
+        std::cout<<"line "<<__LINE__<<std::endl;
 
         //Check that all is as expected
         {
@@ -186,10 +214,13 @@ public:
             CHECK(received.empty());
         }
 
+        std::cout<<"line "<<__LINE__<<std::endl;
+
         receiver->Stop();
         work.reset();
         running=false;
         threads.join_all();
+        std::cout<<"line "<<__LINE__<<std::endl;
         receiver.reset();
         std::cout<<"DataReceiverTest tests passed"<<std::endl;
     }
