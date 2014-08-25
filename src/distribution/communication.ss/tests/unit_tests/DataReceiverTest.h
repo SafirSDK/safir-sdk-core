@@ -32,7 +32,7 @@ class DataReceiverTest
 {
 public:
     void Run()
-    {
+    {               
         boost::asio::io_service io;
         auto work=boost::make_shared<boost::asio::io_service::work>(io);
         boost::thread_group threads;
@@ -242,18 +242,19 @@ private:
         {
             CHECK(bufSize>=sizeof(int));
             bool unicast=(socket->local_endpoint().port()==10000);
-            std::queue<int>& sendQueue=unicast ? sentUnicast : sentMulticast;
-            bool received=false;
-            receiver->Strand().get_io_service().post([&, buf, completionHandler]
+            std::queue<int>* sendQueue=unicast ? &sentUnicast : &sentMulticast;
+            receiver->Strand().get_io_service().post([&, sendQueue, buf, completionHandler]
             {
+                bool received=false;
+
                 while (running)
                 {
                     {
                         boost::mutex::scoped_lock lock(mutex);
-                        if (!sendQueue.empty())
+                        if (!sendQueue->empty())
                         {
-                            memcpy(buf, reinterpret_cast<const char*>(&(sendQueue.front())), sizeof(int));
-                            sendQueue.pop();
+                            memcpy(buf, reinterpret_cast<const char*>(&(sendQueue->front())), sizeof(int));
+                            sendQueue->pop();
                             received=true;
                             break;
                         }
