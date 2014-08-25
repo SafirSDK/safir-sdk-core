@@ -1,1 +1,2 @@
 add_subdirectory(pathed)
+add_subdirectory(gactool)
