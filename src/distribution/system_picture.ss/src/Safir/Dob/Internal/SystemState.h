@@ -138,19 +138,27 @@ namespace SP
 #pragma warning (pop)
 #endif
 
+    /**
+     * Interface to an object that allows or subscriptions to system state objects.
+     *
+     * This interface is not intended for users to implement. Instead use the SystemPicture 
+     * class to obtain an instance of a class that implements this interface.
+     */
     class SystemStateSubscriber
     {
     public:
         typedef SystemState DataWrapper;
 
+        /** Start a subscription to system states. */
         virtual void Start(boost::asio::io_service& ioService,
                            const std::function<void (const SystemState& data)>& dataCallback) = 0;
 
+        /** Stop the subscription. */
         virtual void Stop() = 0;
     };
 
 
-
+    /** Output operator for SystemStates. */
     static inline std::wostream& operator<<(std::wostream& out, const SystemState& state)
     {
         state.Print(out);

@@ -140,7 +140,7 @@ namespace SP
         std::unique_ptr<const SystemStateMessage> m_message;
     };
 
-    SystemState::SystemState():m_impl(nullptr) {}
+    SystemState::SystemState() {}
 
     void SystemState::CheckValid() const
     {
