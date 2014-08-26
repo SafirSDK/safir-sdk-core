@@ -89,8 +89,12 @@ public:
         }
         std::cout<<"line "<<__LINE__<<std::endl;
 
+        hb1.Stop();
+        hb2.Stop();
+
+        std::cout<<"line "<<__LINE__<<std::endl;
+
         work.reset();
-        io.stop();
         threads.join_all();
         std::cout<<"HeartBeatSender tests passed"<<std::endl;
     }

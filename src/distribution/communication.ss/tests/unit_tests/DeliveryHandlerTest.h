@@ -140,7 +140,6 @@ public:
 
         std::cout<<"line "<<__LINE__<<std::endl;
         work.reset();
-        io.stop();
         threads.join_all();
         std::cout<<"DeliveryHandler tests passed"<<std::endl;
     }

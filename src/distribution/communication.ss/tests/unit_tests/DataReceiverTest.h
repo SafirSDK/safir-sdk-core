@@ -223,7 +223,6 @@ public:
         running=false;
         threads.join_all();
         std::cout<<"line "<<__LINE__<<std::endl;
-        receiver.reset();
         std::cout<<"DataReceiverTest tests passed"<<std::endl;
     }
 

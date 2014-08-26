@@ -88,7 +88,6 @@ public:
         //-----------
         work.reset();
         threads.join_all();
-        io.stop();
 
         bool passed=false;
         {
@@ -237,10 +236,8 @@ public:
         //-----------
         // shutdown
         //-----------
-        discoverState.clear();
         work.reset();
         threads.join_all();
-        io.stop();
 
         std::cout<<"HandleDiscover tests passed"<<std::endl;
     }
