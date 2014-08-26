@@ -32,7 +32,9 @@ class DataReceiverTest
 {
 public:
     void Run()
-    {               
+    {
+        std::cout<<"DataReceiverTest started"<<std::endl;
+
         boost::asio::io_service io;
         auto work=boost::make_shared<boost::asio::io_service::work>(io);
         boost::thread_group threads;

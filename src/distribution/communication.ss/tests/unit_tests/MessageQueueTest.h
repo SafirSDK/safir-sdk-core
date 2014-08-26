@@ -31,7 +31,7 @@ class MessageQueueTest
 public:
     void Run()
     {
-        std::cout<<"Trace: "<<__LINE__<<std::endl;
+        std::cout<<"MessageQueue started"<<std::endl;
 
         typedef Com::MessageQueue<std::string> MQ;
         MQ mq(5);
@@ -152,7 +152,7 @@ public:
         //--------------------------------
         // Circular array
         //--------------------------------
-        std::cout<<"Trace: "<<__LINE__<<std::endl;
+        std::cout<<"CircularArray started"<<std::endl;
 
         Com::CircularArray<std::string> arr(5);
         arr[0]="Kalle";

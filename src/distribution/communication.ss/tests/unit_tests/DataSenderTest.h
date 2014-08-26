@@ -31,6 +31,8 @@ class DataSenderTest
 public:
     void Run()
     {
+        std::cout<<"DataSenderTest started"<<std::endl;
+
         std::atomic_uint go{0};
         auto SetReady=[&]{go=1;};
         auto WaitUntilReady=[&]
@@ -48,6 +50,8 @@ public:
             threads.create_thread([&]{io.run();});
         }
 
+        std::cout<<"line "<<__LINE__<<std::endl;
+
         //-------------------
         // Tests
         //-------------------
@@ -60,8 +64,10 @@ public:
         sender.IncludeNode(2);
         sender.IncludeNode(3);
 
+        std::cout<<"line "<<__LINE__<<std::endl;
         sender.m_strand.post([&]{CHECK(sender.m_nodes.size()==2);});
 
+        std::cout<<"line "<<__LINE__<<std::endl;
         sender.AddNode(4, "127.0.0.1:4");
         sender.AddNode(5, "127.0.0.1:5");
 
@@ -75,6 +81,8 @@ public:
             SetReady();
         });
 
+        std::cout<<"line "<<__LINE__<<std::endl;
+
         WaitUntilReady();
 
         sender.RemoveNode(4);
@@ -82,8 +90,10 @@ public:
 
         sender.m_strand.post([&]{CHECK(sender.m_nodes.size()==2);});
 
+        std::cout<<"line "<<__LINE__<<std::endl;
         sender.AddToSendQueue(0, MakeShared("1"), 1, 1);
 
+        std::cout<<"line "<<__LINE__<<std::endl;
         sender.m_strand.post([&]
         {
             boost::mutex::scoped_lock lock(mutex);
@@ -93,11 +103,14 @@ public:
             CHECKMSG(sender.SendQueueSize()==1, sender.SendQueueSize());
         });
 
+        std::cout<<"line "<<__LINE__<<std::endl;
         sender.m_strand.post([&]
         {
             sender.Stop();
             work.reset();
         });
+
+        std::cout<<"line "<<__LINE__<<std::endl;
 
         threads.join_all();
         std::cout<<"DataSenderTest tests passed"<<std::endl;

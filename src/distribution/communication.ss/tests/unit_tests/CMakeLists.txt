@@ -32,19 +32,19 @@ endif()
 
 enable_testing()
 ADD_TEST(MessageQueueTest unit_tests MessageQueueTest)
-SET_SAFIR_TEST_PROPERTIES(MessageQueueTest 120)
+SET_SAFIR_TEST_PROPERTIES(MessageQueueTest 360)
 
 ADD_TEST(HeartbeatSenderTest unit_tests HeartbeatSenderTest)
-SET_SAFIR_TEST_PROPERTIES(HeartbeatSenderTest 120)
+SET_SAFIR_TEST_PROPERTIES(HeartbeatSenderTest 360)
 
 ADD_TEST(DataReceiverTest unit_tests DataReceiverTest)
 SET_SAFIR_TEST_PROPERTIES(DataReceiverTest 360)
 
 ADD_TEST(DataSenderTest unit_tests DataSenderTest)
-SET_SAFIR_TEST_PROPERTIES(DataSenderTest 120)
+SET_SAFIR_TEST_PROPERTIES(DataSenderTest 360)
 
-#ADD_TEST(DeliveryHandlerTest unit_tests DeliveryHandlerTest)
-#SET_SAFIR_TEST_PROPERTIES(DeliveryHandlerTest 120)
+ADD_TEST(DeliveryHandlerTest unit_tests DeliveryHandlerTest)
+SET_SAFIR_TEST_PROPERTIES(DeliveryHandlerTest 360)
 
 ADD_TEST(DiscovererTest unit_tests DiscovererTest)
 SET_SAFIR_TEST_PROPERTIES(DiscovererTest 360)

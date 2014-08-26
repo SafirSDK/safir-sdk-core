@@ -31,6 +31,7 @@ class HeartbeatSenderTest
 public:
     void Run()
     {
+        std::cout<<"HeartBeatSender started"<<std::endl;
         const int Interval=1000;
         boost::asio::io_service io;
         auto work=boost::make_shared<boost::asio::io_service::work>(io);
@@ -40,6 +41,8 @@ public:
         {
             threads.create_thread([&]{io.run();});
         }
+
+        std::cout<<"line "<<__LINE__<<std::endl;
 
         //Multicast enabled HeartbeatSender
         Com::HeartbeatSenderBasic<HeartbeatSenderTest::TestWriter> hb1(io, 100, 4, "239.192.1.1:11000", Interval);
@@ -51,6 +54,8 @@ public:
             CHECK(received[11000]>last11000);
             last11000=received[11000];
         }
+
+        std::cout<<"line "<<__LINE__<<std::endl;
 
         hb1.AddNode(10001, "127.0.0.1:10001");
         hb1.AddNode(10002, "127.0.0.1:10002");
@@ -64,10 +69,12 @@ public:
             CHECK(received.find(10002)==received.end());
         }
 
+        std::cout<<"line "<<__LINE__<<std::endl;
         //Only unicast enabled HeartbeatSender
         Com::HeartbeatSenderBasic<HeartbeatSenderTest::TestWriter> hb2(io, 100, 4, "", Interval);
         hb2.Start();
 
+        std::cout<<"line "<<__LINE__<<std::endl;
         hb2.AddNode(10003, "127.0.0.1:10003");
         hb2.AddNode(10004, "127.0.0.1:10004");
         int last10003=0;
@@ -80,6 +87,7 @@ public:
             CHECK(received[10004]>last10004);
             last10004=received[10004];
         }
+        std::cout<<"line "<<__LINE__<<std::endl;
 
         work.reset();
         io.stop();

@@ -31,6 +31,8 @@ class DeliveryHandlerTest
 public:
     void Run()
     {
+        std::cout<<"DeliveryHandler started"<<std::endl;
+
         std::atomic_uint go{0};
         auto SetReady=[&]{go=1;};
         auto WaitUntilReady=[&]
@@ -54,6 +56,8 @@ public:
         dh.SetGotRecvCallback([=](int64_t id){GotReceiveFrom(id);});
         dh.SetReceiver([=](int64_t n, int64_t nt, const boost::shared_ptr<char[]>& d, size_t s){OnRecv(n, nt, d, s);}, 0);
 
+        std::cout<<"line "<<__LINE__<<std::endl;
+
         for (int64_t id=2; id<=4; ++id)
         {
             received[id]=0;
@@ -64,10 +68,12 @@ public:
         dh.AddNode(Com::Node("3", 3, 1, "127.0.0.1:3", "", true));
         dh.AddNode(Com::Node("4", 4, 1, "127.0.0.1:4", "", true));
 
+        std::cout<<"line "<<__LINE__<<std::endl;
         dh.IncludeNode(2);
         dh.IncludeNode(3);
         dh.IncludeNode(4);
 
+        std::cout<<"line "<<__LINE__<<std::endl;
         CHECK(dh.NumberOfUndeliveredMessages()==0);
 
 //        MessageHeader(int64_t senderId_,
@@ -91,15 +97,19 @@ public:
             dh.ReceivedApplicationData(&header, payload);
         }
 
+        std::cout<<"line "<<__LINE__<<std::endl;
+
         dh.m_deliverStrand.post([&]{SetReady();});
         WaitUntilReady();
 
+        std::cout<<"line "<<__LINE__<<std::endl;
         for (int64_t id=2; id<=4; ++id)
         {
             CHECK(received[id]==1);
             CHECK(acked[id]==1);
         }
 
+        std::cout<<"line "<<__LINE__<<std::endl;
         //Send fragmented message
         for (int frag=0; frag<4; ++frag)
         {
@@ -121,11 +131,14 @@ public:
             }
         }
 
+        std::cout<<"line "<<__LINE__<<std::endl;
         dh.m_deliverStrand.post([&]{SetReady();});
         WaitUntilReady();
 
+        std::cout<<"line "<<__LINE__<<std::endl;
         DumpReceived();
 
+        std::cout<<"line "<<__LINE__<<std::endl;
         work.reset();
         io.stop();
         threads.join_all();
