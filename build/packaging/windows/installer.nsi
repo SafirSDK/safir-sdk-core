@@ -143,6 +143,9 @@ Section "Runtime" SecRuntime
 
   ;Add to PATH
   nsExec::ExecToLog '"$INSTDIR\installer_utils\pathed" "/MACHINE" "/APPEND" "$INSTDIR\bin"'
+  
+  ;Add assemblies to GAC
+  nsExec::ExecToLog '"$INSTDIR\installer_utils\gactool" "--install" "$INSTDIR\dotnet"'
 
   ;Store installation folder
   WriteRegStr HKCU "Software\Safir SDK Core" "" $INSTDIR
@@ -234,6 +237,9 @@ Section "Uninstall"
   ;remove from PATH
   nsExec::ExecToLog '"$INSTDIR\installer_utils\pathed" "/MACHINE" "/REMOVE" "$INSTDIR\bin"'
 
+  ;remove assemblies from GAC
+  nsExec::ExecToLog '"$INSTDIR\installer_utils\gactool" "--uninstall" "$INSTDIR\dotnet"'
+  
   ; We blindly remove everything from the installation dir. This might blow up if someone decides to 
   ; install to a path with other stuff in it, e.g. C:\ (yes, we'd try to remove everything from c:\...).
   ;Also, we try twice, in case f-ing windows doesn't let us delete the files the first time round...
