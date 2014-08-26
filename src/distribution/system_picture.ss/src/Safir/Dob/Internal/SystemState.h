@@ -56,7 +56,11 @@ namespace SP
 
 
     /** 
-     * This is an interface the System State information produced by System Picture.
+     * This is an interface to the System State information produced by System Picture.
+     *
+     * The object contains all nodes that System Picture currently thinks is part of the 
+     * system. Nodes that are being excluded from the system will be marked as dead for 
+     * _a while_ (a few minutes), before they are removed completely.
      *
      * Use functionality in SystemPicture class to get an instance to one
      * of these objects.
@@ -64,26 +68,62 @@ namespace SP
     class DISTRIBUTION_SYSTEM_PICTURE_API SystemState
     {
     public:
+        /** 
+         * Default constructor.
+         *
+         * This constructor will create an "invalid" object, where the only guarantee
+         * is that Size() will return 0. All other member functions yield undefined behavior.
+         */
+        SystemState();
 
-        SystemState() {/*TODO Lars implement this*/ }
-
+        /**
+         * Get the node id of the elected node.
+         */
         int64_t ElectedId() const;
+
+        /**
+         * Get the id of the current election. Each election has a unique identifier, so 
+         * this id can be used to determine if a new election has taken place.
+         */
         int64_t ElectionId() const;
         
+        /** 
+         * Get the number of nodes in the system state. 
+         *
+         * The methods below expect an index that is in the range 0 to Size() - 1. Indexing 
+         * outside that range causes undefined behavior.
+         */
         int Size() const;
 
-        //Static fields
+        /** Get the name of the node. */
         const std::string& Name(const int index) const;
+
+        /** Get the node id of the node. */
         int64_t Id(const int index) const;
+
+        /** Get the node type id of the node. */
         int64_t NodeTypeId(const int index) const;
+
+        /** Get the address of the control channel of this node. */
         const std::string& ControlAddress(const int index) const;
+
+        /** Get the address of the data channel of this node. */
         const std::string& DataAddress(const int index) const;
+
+        /** 
+         * Check whether the node has been declared as dead (or excluded) recently.
+         *
+         * After a while dead nodes will be removed from the list of nodes.
+         */
         bool IsDead(const int index) const;
 
-        void Print(std::wostream&) const;
+        /** Print the contents of the object to the output stream. */
+        void Print(std::wostream& out) const;
 
     private:
         friend class SystemStateCreator;
+
+        void CheckValid() const;
 
         class Impl;
 
