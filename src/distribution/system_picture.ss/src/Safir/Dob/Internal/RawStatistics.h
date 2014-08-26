@@ -67,7 +67,6 @@ namespace SP
         //Create an empty statistics object (Valid will return false)
         //all other methods will yield undefined behaviour
         RawStatistics();
-        ~RawStatistics();
 
         bool Valid() const {return m_impl != nullptr;};
 
@@ -123,6 +122,12 @@ namespace SP
 #pragma warning (pop)
 #endif
 
+    /**
+     * Interface to an object that allows or subscriptions to raw statistics objects.
+     *
+     * This interface is not intended for users to implement. Instead use the SystemPicture 
+     * class to obtain an instance of a class that implements this interface.
+     */
     class RawStatisticsSubscriber
     {
     public:
@@ -134,7 +139,7 @@ namespace SP
         virtual void Stop() = 0;
     };
 
-
+    /** Output operator for RawStatistics. */
     static inline std::wostream& operator<<(std::wostream& out, const RawStatistics& statistics)
     {
         statistics.Print(out);

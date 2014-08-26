@@ -140,20 +140,39 @@ namespace SP
         std::unique_ptr<const SystemStateMessage> m_message;
     };
 
+    SystemState::SystemState() {}
 
-    int64_t SystemState::ElectedId() const {return m_impl->ElectedId();}
-    int64_t SystemState::ElectionId() const {return m_impl->ElectionId();}
-    
-    int SystemState::Size() const {return m_impl->Size();}
-    
-    const std::string& SystemState::Name(const int index) const {return m_impl->Name(index);}
-    int64_t SystemState::Id(const int index) const {return m_impl->Id(index);}
-    int64_t SystemState::NodeTypeId(const int index) const {return m_impl->NodeTypeId(index);}
-    const std::string& SystemState::ControlAddress(const int index) const {return m_impl->ControlAddress(index);}
-    const std::string& SystemState::DataAddress(const int index) const {return m_impl->DataAddress(index);}
-    bool SystemState::IsDead(const int index) const {return m_impl->IsDead(index);}
+    void SystemState::CheckValid() const
+    {
+        if (m_impl == nullptr)
+        {
+            throw std::logic_error("Invalid use of default constructed SystemState object");
+        }
+    }
 
-    void SystemState::Print(std::wostream& out) const {m_impl->Print(out);}
+    int64_t SystemState::ElectedId() const {CheckValid(); return m_impl->ElectedId(); }
+    int64_t SystemState::ElectionId() const {CheckValid(); return m_impl->ElectionId();}
+    
+    int SystemState::Size() const 
+    {
+        if (m_impl == nullptr)
+        {
+            return 0;
+        }
+        else
+        {
+            return m_impl->Size();
+        }
+    }
+    
+    const std::string& SystemState::Name(const int index) const {CheckValid(); return m_impl->Name(index);}
+    int64_t SystemState::Id(const int index) const {CheckValid(); return m_impl->Id(index);}
+    int64_t SystemState::NodeTypeId(const int index) const {CheckValid(); return m_impl->NodeTypeId(index);}
+    const std::string& SystemState::ControlAddress(const int index) const {CheckValid(); return m_impl->ControlAddress(index);}
+    const std::string& SystemState::DataAddress(const int index) const {CheckValid(); return m_impl->DataAddress(index);}
+    bool SystemState::IsDead(const int index) const {CheckValid(); return m_impl->IsDead(index);}
+
+    void SystemState::Print(std::wostream& out) const {CheckValid(); m_impl->Print(out);}
     
     SystemState SystemStateCreator::Create(std::unique_ptr<SystemStateMessage> message)
     {
