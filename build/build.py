@@ -533,6 +533,10 @@ class VisualStudioBuilder(BuilderBase):
         return configs
 
     def setenv_jenkins_internal(self):
+        #disable the slow debug heap on windows
+        if sys.platform == "win32":
+            os.environ["_NO_DEBUG_HEAP"] = "1"
+
         #os.environ["PATH"] = os.environ.get("PATH") + os.pathsep + os.path.join(os.environ.get("SAFIR_RUNTIME"),"bin")
 
         #set up K: drive:
@@ -544,7 +548,6 @@ class VisualStudioBuilder(BuilderBase):
         #logger.log("'subst /d k:' exited with return code " + str(ret),"command")
         #subprocess.call(("subst","k:",bindir))
         #logger.log("'subst k:" + bindir + "' exited with return code " + str(ret),"output")
-        pass
 
     def __find_vcvarsall(self):
         install_dirs = {"VS120COMNTOOLS" : "2013",

@@ -87,13 +87,13 @@ class Parameters:
                           help="Do not run java partners")
         parser.add_option("--lang0", action="store",dest="lang0",default="cpp",
                           help="Which partner 0 to run. [default: %default]. "
-                          "If --jenkins is specified the lang0 environment variable will override this.")
+                          "If --jenkins is specified the Languages environment variable will override this.")
         parser.add_option("--lang1", action="store",dest="lang1",default="cpp",
                           help="Which partner 1 to run. [default: %default]. "
-                          "If --jenkins is specified the lang1 environment variable will override this.")
+                          "If --jenkins is specified the Languages environment variable will override this.")
         parser.add_option("--lang2", action="store",dest="lang2",default="cpp",
                           help="Which partner 2 to run. [default: %default]. "
-                          "If --jenkins is specified the lang2 environment variable will override this.")
+                          "If --jenkins is specified the Languages environment variable will override this.")
 
         (options,args) = parser.parse_args()
 
@@ -114,9 +114,6 @@ class Parameters:
         self.autostart_jenkins_slave = options.autostart_slave or (options.jenkins and self.multinode)
 
         if options.jenkins:
-            #disable the slow debug heap on windows
-            if sys.platform == "win32":
-                os.environ["_NO_DEBUG_HEAP"] = "1"
             #WORKSPACE = os.environ.get("WORKSPACE")
             #if not WORKSPACE:
             #    print "Environment variable WORKSPACE is not set, is this really a Jenkins build?!"
@@ -131,15 +128,14 @@ class Parameters:
             #os.environ["PATH"] = os.environ.get("PATH") + separator + os.path.join(os.environ.get("SAFIR_RUNTIME"),"bin")
         
             #Get env variables if they're set
-            tmp = os.environ.get("lang0")
-            if tmp is not None:
-                self.lang0 = tmp;
-            tmp = os.environ.get("lang1")
-            if tmp is not None:
-                self.lang1 = tmp;
-            tmp = os.environ.get("lang2")
-            if tmp is not None:
-                self.lang2 = tmp;
+            langs= os.environ.get("Languages")
+            if langs is not None:
+                splitlangs = langs.split("-")
+                if len(splitlangs) != 3:
+                    raise Exception("Invalid format of Languages environment variable: " + langs)
+                self.lang0 = splitlangs[0]
+                self.lang1 = splitlangs[1]
+                self.lang2 = splitlangs[2]
         
             #make stdout unbuffered
             sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
@@ -178,7 +174,7 @@ class Parameters:
         self.dose_test_cpp_cmd = ("dose_test_cpp",)
         #self.dose_test_ada_cmd = ("dose_test_ada",)
         #self.dose_test_ada_exe_name = self.dose_test_ada_cmd[0] + (".exe" if sys.platform == "win32" else "")
-        #self.dose_test_dotnet_cmd = ("dose_test_dotnet.exe",)
+        self.dose_test_dotnet_cmd = ("dose_test_dotnet.exe",)
         #self.dose_test_java_cmd = ("java", "-Xcheck:jni", "-Xfuture", "-jar", 
         #                           "dose_test_java.jar")
         
@@ -458,7 +454,7 @@ class Runner:
             #    self.__launchProcess("dose_test_ada." + str(i), parameters.dose_test_ada_cmd + (str(i),))
             #else:
             #    print "Not running ada partner. dose_test_ada_exe_name is", parameters.dose_test_ada_exe_name
-            #self.__launchProcess("dose_test_dotnet." + str(i), parameters.dose_test_dotnet_cmd + (str(i),))
+            self.__launchProcess("dose_test_dotnet." + str(i), parameters.dose_test_dotnet_cmd + (str(i),))
             #if not parameters.no_java:
             #    self.__launchProcess("dose_test_java." + str(i), parameters.dose_test_java_cmd + (str(i),))
 
