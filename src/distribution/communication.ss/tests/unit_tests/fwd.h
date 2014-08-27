@@ -51,6 +51,8 @@
 #define CHECKMSG(expr, msg) {if (!(expr)) { std::cout<<"Test failed! Line: "<<__LINE__<<", expr: "<< #expr <<", msg: "<<msg<<std::endl; exit(1);}}
 #define CHECKINF(expr, msg) {if (!(expr)) { std::cout<<"Test failed! Line: "<<__LINE__<<", expr: "<< #expr <<", msg: " ## msg << std::endl; exit(1);}}
 
+#define TRACELINE {std::cout<<"line "<<__LINE__<<std::endl;}
+
 namespace Com = Safir::Dob::Internal::Com;
 
 void Wait(int millis) {boost::this_thread::sleep_for(boost::chrono::milliseconds(millis));}

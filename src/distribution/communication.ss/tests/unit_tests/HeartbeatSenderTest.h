@@ -29,7 +29,7 @@
 class HeartbeatSenderTest
 {
 public:
-    void Run()
+    static void Run()
     {
         std::cout<<"HeartBeatSender started"<<std::endl;
         const int Interval=1000;
@@ -42,7 +42,7 @@ public:
             threads.create_thread([&]{io.run();});
         }
 
-        std::cout<<"line "<<__LINE__<<std::endl;
+        TRACELINE
 
         //Multicast enabled HeartbeatSender
         Com::HeartbeatSenderBasic<HeartbeatSenderTest::TestWriter> hb1(io, 100, 4, "239.192.1.1:11000", Interval);
@@ -55,7 +55,7 @@ public:
             last11000=received[11000];
         }
 
-        std::cout<<"line "<<__LINE__<<std::endl;
+        TRACELINE
 
         hb1.AddNode(10001, "127.0.0.1:10001");
         hb1.AddNode(10002, "127.0.0.1:10002");
@@ -69,12 +69,12 @@ public:
             CHECK(received.find(10002)==received.end());
         }
 
-        std::cout<<"line "<<__LINE__<<std::endl;
+        TRACELINE
         //Only unicast enabled HeartbeatSender
         Com::HeartbeatSenderBasic<HeartbeatSenderTest::TestWriter> hb2(io, 100, 4, "", Interval);
         hb2.Start();
 
-        std::cout<<"line "<<__LINE__<<std::endl;
+        TRACELINE
         hb2.AddNode(10003, "127.0.0.1:10003");
         hb2.AddNode(10004, "127.0.0.1:10004");
         int last10003=0;
@@ -87,12 +87,12 @@ public:
             CHECK(received[10004]>last10004);
             last10004=received[10004];
         }
-        std::cout<<"line "<<__LINE__<<std::endl;
+        TRACELINE
 
         hb1.Stop();
         hb2.Stop();
 
-        std::cout<<"line "<<__LINE__<<std::endl;
+        TRACELINE
 
         work.reset();
         threads.join_all();

@@ -38,56 +38,45 @@ int main(int argc, char* argv[])
 
     if (argc>1)
     {
-        std::string run(argv[1]);
-        if (run=="MessageQueueTest")
+        std::string testcase(argv[1]);
+        if (testcase=="MessageQueueTest")
         {
-            MessageQueueTest test;
-            test.Run();
+            MessageQueueTest::Run();
         }
-        else if (run=="DeliveryHandlerTest")
+        else if (testcase=="DeliveryHandlerTest")
         {
-            DeliveryHandlerTest test;
-            test.Run();
+            DeliveryHandlerTest::Run();
         }
-        else if (run=="DataReceiverTest")
+        else if (testcase=="DataReceiverTest")
         {
-            DataReceiverTest test;
-            test.Run();
+            DataReceiverTest::Run();
         }
-        else if (run=="HeartbeatSenderTest")
+        else if (testcase=="HeartbeatSenderTest")
         {
-            HeartbeatSenderTest test;
-            test.Run();
+            HeartbeatSenderTest::Run();
         }
-        else if (run=="DataSenderTest")
+        else if (testcase=="DataSenderTest")
         {
-            DataSenderTest test;
-            test.Run();
+            DataSenderTest::Run();
         }
-        else if (run=="DiscovererTest")
+        else if (testcase=="DiscovererTest")
         {
-            DiscovererTest test;
-            test.Run();
+            DiscovererTest::Run();
         }
-
-        std::cout<<"================================="<<std::endl;
-        std::cout<<"All tests passed!"<<std::endl;
-        std::cout<<"================================="<<std::endl;
     }
     else //run all tests
     {
-        {(MessageQueueTest()).Run();}
-        {(DeliveryHandlerTest()).Run();}
-        {(DataReceiverTest()).Run();}
-        {(HeartbeatSenderTest()).Run();}
-        {(DataSenderTest()).Run();}
-        {(DiscovererTest()).Run();}
-
-        //if we get here all tests passed without errors
-        std::cout<<"================================="<<std::endl;
-        std::cout<<"All tests passed!"<<std::endl;
-        std::cout<<"================================="<<std::endl;
+        MessageQueueTest::Run();
+        HeartbeatSenderTest::Run();
+        DataReceiverTest::Run();
+        DataSenderTest::Run();
+        DeliveryHandlerTest::Run();
+        DiscovererTest::Run();
     }
+
+    std::cout<<"================================="<<std::endl;
+    std::cout<<"All tests passed!"<<std::endl;
+    std::cout<<"================================="<<std::endl;
     return 0;
 }
 

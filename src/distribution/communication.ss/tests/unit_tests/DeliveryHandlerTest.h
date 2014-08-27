@@ -29,7 +29,7 @@
 class DeliveryHandlerTest
 {
 public:
-    void Run()
+    static void Run()
     {
         std::cout<<"DeliveryHandler started"<<std::endl;
 
@@ -53,10 +53,10 @@ public:
         }
 
         Com::DeliveryHandlerBasic<DeliveryHandlerTest::TestWriter> dh(io, 1, 4);
-        dh.SetGotRecvCallback([=](int64_t id){GotReceiveFrom(id);});
-        dh.SetReceiver([=](int64_t n, int64_t nt, const boost::shared_ptr<char[]>& d, size_t s){OnRecv(n, nt, d, s);}, 0);
+        dh.SetGotRecvCallback([=](int64_t id){DeliveryHandlerTest::GotReceiveFrom(id);});
+        dh.SetReceiver([=](int64_t n, int64_t nt, const boost::shared_ptr<char[]>& d, size_t s){DeliveryHandlerTest::OnRecv(n, nt, d, s);}, 0);
 
-        std::cout<<"line "<<__LINE__<<std::endl;
+        TRACELINE
 
         for (int64_t id=2; id<=4; ++id)
         {
@@ -68,12 +68,12 @@ public:
         dh.AddNode(Com::Node("3", 3, 1, "127.0.0.1:3", "", true));
         dh.AddNode(Com::Node("4", 4, 1, "127.0.0.1:4", "", true));
 
-        std::cout<<"line "<<__LINE__<<std::endl;
+        TRACELINE
         dh.IncludeNode(2);
         dh.IncludeNode(3);
         dh.IncludeNode(4);
 
-        std::cout<<"line "<<__LINE__<<std::endl;
+        TRACELINE
         CHECK(dh.NumberOfUndeliveredMessages()==0);
 
 //        MessageHeader(int64_t senderId_,
@@ -97,19 +97,19 @@ public:
             dh.ReceivedApplicationData(&header, payload);
         }
 
-        std::cout<<"line "<<__LINE__<<std::endl;
+        TRACELINE
 
         dh.m_deliverStrand.post([&]{SetReady();});
         WaitUntilReady();
 
-        std::cout<<"line "<<__LINE__<<std::endl;
+        TRACELINE
         for (int64_t id=2; id<=4; ++id)
         {
             CHECK(received[id]==1);
             CHECK(acked[id]==1);
         }
 
-        std::cout<<"line "<<__LINE__<<std::endl;
+        TRACELINE
         //Send fragmented message
         for (int frag=0; frag<4; ++frag)
         {
@@ -131,14 +131,14 @@ public:
             }
         }
 
-        std::cout<<"line "<<__LINE__<<std::endl;
+        TRACELINE
         dh.m_deliverStrand.post([&]{SetReady();});
         WaitUntilReady();
 
-        std::cout<<"line "<<__LINE__<<std::endl;
+        TRACELINE
         DumpReceived();
 
-        std::cout<<"line "<<__LINE__<<std::endl;
+        TRACELINE
         work.reset();
         threads.join_all();
         std::cout<<"DeliveryHandler tests passed"<<std::endl;
@@ -164,19 +164,19 @@ private:
     typedef Com::Writer<Com::Ack, DeliveryHandlerTest::TestSendPolicy> TestWriter;
 
 
-    void OnRecv(int64_t fromNodeId, int64_t /*fromNodeType*/, const boost::shared_ptr<char[]>& data, size_t size)
+    static void OnRecv(int64_t fromNodeId, int64_t /*fromNodeType*/, const boost::shared_ptr<char[]>& data, size_t size)
     {
         std::string msg(data.get(), size);
         std::cout<<"OnRecv: "<<msg<<std::endl;
         received[fromNodeId]++;
     }
 
-    void GotReceiveFrom(int64_t /*fromNodeId*/)
+    static void GotReceiveFrom(int64_t /*fromNodeId*/)
     {
         //std::cout<<"GotReceiveFrom "<<fromNodeId<<std::endl;
     }
 
-    void DumpReceived()
+    static void DumpReceived()
     {
         for (auto& vt : received)
         {

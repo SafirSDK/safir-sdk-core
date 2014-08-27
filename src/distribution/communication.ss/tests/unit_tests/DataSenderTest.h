@@ -29,7 +29,7 @@
 class DataSenderTest
 {
 public:
-    void Run()
+    static void Run()
     {
         std::cout<<"DataSenderTest started"<<std::endl;
 
@@ -50,24 +50,24 @@ public:
             threads.create_thread([&]{io.run();});
         }
 
-        std::cout<<"line "<<__LINE__<<std::endl;
+        TRACELINE
 
         //-------------------
         // Tests
         //-------------------
         AckedSender sender(io, 1, 1, 4, "224.90.90.241:10000", 500); //ntId, nId, ipV, mc, waitForAck
-        sender.SetRetransmitCallback([&](int64_t id){std::cout<<"Retransmit to "<<id<<std::endl;});
-        sender.SetNotFullCallback([&](int64_t id){std::cout<<"QueueNotFull nodeType "<<id<<std::endl;}, 50);
+        sender.SetRetransmitCallback([=](int64_t id){std::cout<<"Retransmit to "<<id<<std::endl;});
+        sender.SetNotFullCallback([=](int64_t id){std::cout<<"QueueNotFull nodeType "<<id<<std::endl;}, 50);
         sender.Start();
         sender.AddNode(2, "127.0.0.1:2");
         sender.AddNode(3, "127.0.0.1:3");
         sender.IncludeNode(2);
         sender.IncludeNode(3);
 
-        std::cout<<"line "<<__LINE__<<std::endl;
+        TRACELINE
         sender.m_strand.post([&]{CHECK(sender.m_nodes.size()==2);});
 
-        std::cout<<"line "<<__LINE__<<std::endl;
+        TRACELINE
         sender.AddNode(4, "127.0.0.1:4");
         sender.AddNode(5, "127.0.0.1:5");
 
@@ -81,7 +81,7 @@ public:
             SetReady();
         });
 
-        std::cout<<"line "<<__LINE__<<std::endl;
+        TRACELINE
 
         WaitUntilReady();
 
@@ -90,10 +90,10 @@ public:
 
         sender.m_strand.post([&]{CHECK(sender.m_nodes.size()==2);});
 
-        std::cout<<"line "<<__LINE__<<std::endl;
+        TRACELINE
         sender.AddToSendQueue(0, MakeShared("1"), 1, 1);
 
-        std::cout<<"line "<<__LINE__<<std::endl;
+        TRACELINE
         sender.m_strand.post([&]
         {
             boost::mutex::scoped_lock lock(mutex);
@@ -103,14 +103,14 @@ public:
             CHECKMSG(sender.SendQueueSize()==1, sender.SendQueueSize());
         });
 
-        std::cout<<"line "<<__LINE__<<std::endl;
+        TRACELINE
         sender.m_strand.post([&]
         {
             sender.Stop();
             work.reset();
         });
 
-        std::cout<<"line "<<__LINE__<<std::endl;
+        TRACELINE
 
         threads.join_all();
         std::cout<<"DataSenderTest tests passed"<<std::endl;
@@ -139,13 +139,13 @@ private:
     typedef Com::Writer<Com::UserData, DataSenderTest::TestSendPolicy> TestWriter;
     typedef Com::DataSenderBasic<TestWriter, Com::Acked> AckedSender;
 
-    void OnQueueNotFull()
+    static void OnQueueNotFull()
     {
         std::cout<<"callback OnQueueNotFull"<<std::endl;
 
     }
 
-    void OnRetransmit(int64_t /*toId*/)
+    static void OnRetransmit(int64_t /*toId*/)
     {
         std::cout<<"callback OnRetransmit"<<std::endl;
 

@@ -29,7 +29,7 @@
 class MessageQueueTest
 {
 public:
-    void Run()
+    static void Run()
     {
         std::cout<<"MessageQueue started"<<std::endl;
 
@@ -43,7 +43,7 @@ public:
         mq.enqueue("c");
         mq.enqueue("d");
 
-        std::cout<<"Trace: "<<__LINE__<<std::endl;
+        TRACELINE
 
         CHECK(mq.size()==4);
         CHECK(mq.has_unhandled());
@@ -62,7 +62,7 @@ public:
         CHECK(mq.full());
         //mq.DumpInfo(std::cout);
 
-        std::cout<<"Trace: "<<__LINE__<<std::endl;
+        TRACELINE
 
         mq.dequeue();
 
@@ -80,7 +80,7 @@ public:
         mq.enqueue("f");
         mq.enqueue("g");
 
-        std::cout<<"Trace: "<<__LINE__<<std::endl;
+        TRACELINE
 
         CHECK(mq.first_unhandled_index()==1);
         CHECK(mq.size()==5);
@@ -165,9 +165,6 @@ public:
 
         std::cout<<"CircularArray tests passed"<<std::endl;
     }
-
-private:
-
 };
 
 #endif

@@ -32,7 +32,7 @@
 class DiscoverToSeed
 {
 public:
-    void Run()
+    static void Run()
     {
         std::cout<<"SendDiscoverToSeed started"<<std::endl;
         boost::asio::io_service io;
@@ -43,7 +43,7 @@ public:
             threads.create_thread([&]{io.run();});
         }
 
-        std::cout<<"line "<<__LINE__<<std::endl;
+        TRACELINE
         //----------------------
         // Test
         //----------------------
@@ -53,27 +53,27 @@ public:
         Discoverer n1(io, CreateNode(1), [&](const Com::Node&){});
         Discoverer n2(io, CreateNode(2), [&](const Com::Node&){});
 
-        std::cout<<"line "<<__LINE__<<std::endl;
+        TRACELINE
         s0.m_timeoutInterval={100, 200};
         s1.m_timeoutInterval={100, 200};
         n0.m_timeoutInterval={100, 200};
         n1.m_timeoutInterval={100, 200};
         n2.m_timeoutInterval={100, 200};
 
-        std::cout<<"line "<<__LINE__<<std::endl;
+        TRACELINE
         std::vector<std::string> seeds{"127.0.0.1:10100", "127.0.0.1:10200"};
         n0.AddSeeds(seeds);
         n1.AddSeeds(seeds);
         n2.AddSeeds(seeds);
 
-        std::cout<<"line "<<__LINE__<<std::endl;
+        TRACELINE
         s0.Start();
         n0.Start();
         n1.Start();
         n2.Start();
         s1.Start();
 
-        std::cout<<"line "<<__LINE__<<std::endl;
+        TRACELINE
         Wait(3000);
 
         s0.Stop();
@@ -82,7 +82,7 @@ public:
         n2.Stop();
         s1.Stop();
 
-        std::cout<<"line "<<__LINE__<<std::endl;
+        TRACELINE
         //-----------
         // shutdown
         //-----------
@@ -146,7 +146,7 @@ std::map<int64_t, int> DiscoverToSeed::discoversSentToSeed200;
 class HandleDiscover
 {
 public:
-    void Run()
+    static void Run()
     {
         std::cout<<"HandleDiscover started"<<std::endl;
 
@@ -165,7 +165,7 @@ public:
         discoverState.insert(std::make_pair(10001, Info(10001, io)));
         discoverState.insert(std::make_pair(10002, Info(10002, io)));
 
-        std::cout<<"line "<<__LINE__<<std::endl;
+        TRACELINE
         auto Deliver=[&]()
         {
             boost::mutex::scoped_lock lock(mutex);
@@ -183,7 +183,7 @@ public:
         discoverState[10000].discover->Start();
         discoverState[10001].discover->Start();
 
-        std::cout<<"line "<<__LINE__<<std::endl;
+        TRACELINE
         Wait(1000); //this is way more than the send discover timer, so hereafter we should have got a discover
         Deliver();
 
@@ -193,13 +193,13 @@ public:
         Wait(1000);
         Deliver();
 
-        std::cout<<"line "<<__LINE__<<std::endl;
+        TRACELINE
         CHECK(discoverState[10000].sentNodeInfoTo.size()>0);
         CHECK(discoverState[10000].sentNodeInfoTo.back()==10001);
 
         discoverState[10002].discover->Start();
 
-        std::cout<<"line "<<__LINE__<<std::endl;
+        TRACELINE
         Wait(500);
         for (int i=0; i<10; ++i)
         {
@@ -207,14 +207,14 @@ public:
             Wait(200);
         }
 
-        std::cout<<"line "<<__LINE__<<std::endl;
+        TRACELINE
         for (auto&& vt : discoverState)
         {
             vt.second.discover->Stop();
             CHECK(vt.second.recvQueue.empty());
             CHECK(vt.second.newNodes.size()==2);
         }
-        std::cout<<"line "<<__LINE__<<std::endl;
+        TRACELINE
 
         //check that 10000 has got discover and nodeInfo from both the others
         CHECK(std::find(discoverState[10000].sentDiscoverTo.begin(), discoverState[10000].sentDiscoverTo.end(), 10001)!=discoverState[10000].sentDiscoverTo.end());
@@ -232,12 +232,14 @@ public:
         CHECK(std::find(discoverState[10002].sentNodeInfoTo.begin(), discoverState[10002].sentNodeInfoTo.end(), 10000)!=discoverState[10002].sentNodeInfoTo.end());
         CHECK(std::find(discoverState[10002].sentNodeInfoTo.begin(), discoverState[10002].sentNodeInfoTo.end(), 10001)!=discoverState[10002].sentNodeInfoTo.end());
 
-        std::cout<<"line "<<__LINE__<<std::endl;
+        TRACELINE
         //-----------
         // shutdown
         //-----------
         work.reset();
         threads.join_all();
+
+        discoverState.clear(); //this step is important because discoverState has references to the io_service in this scope.
 
         std::cout<<"HandleDiscover tests passed"<<std::endl;
     }
@@ -347,10 +349,10 @@ std::map<int64_t, HandleDiscover::Info> HandleDiscover::discoverState;
 
 struct DiscovererTest
 {
-    void Run()
+    static void Run()
     {
-        DiscoverToSeed().Run();
-        HandleDiscover().Run();
+        DiscoverToSeed::Run();
+        HandleDiscover::Run();
     }
 };
 
