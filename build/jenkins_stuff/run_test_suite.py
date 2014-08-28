@@ -151,7 +151,7 @@ class WindowsInstaller(object):
 
     def run_test_suite(self):
         log("Launching test suite")
-        result = subprocess.call(("run_dose_tests.py",), shell = True)
+        result = subprocess.call(("run_dose_tests.py","--jenkins"), shell = True)
 
         if result != 0:
             raise SetupError("Test suite failed. Returncode = " + str(result))
