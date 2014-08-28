@@ -143,9 +143,13 @@ Section "Runtime" SecRuntime
 
   ;Add to PATH
   nsExec::ExecToLog '"$INSTDIR\installer_utils\pathed" "/MACHINE" "/APPEND" "$INSTDIR\bin"'
-  
-  ;Add assemblies to GAC
-  nsExec::ExecToLog '"$INSTDIR\installer_utils\gactool" "--install" "$INSTDIR\dotnet"'
+  ;Add assemblies to GAC.
+  ;This only happens here if we're not installing the test suite,
+  ;otherwise we wait until the assemblies from the test suite
+  ;have been installed before we run gactool).  
+  ${If} $option_testSuite == "0"
+    nsExec::ExecToLog '"$INSTDIR\installer_utils\gactool" "--install" "$INSTDIR\dotnet"'
+  ${EndIf}
 
   ;Store installation folder
   WriteRegStr HKCU "Software\Safir SDK Core" "" $INSTDIR
@@ -186,7 +190,9 @@ Section /o "Test suite" SecTest
   SetOutPath "$INSTDIR"
 
   File /r "${StageDirTest}\*"
-
+  
+  #Install to assemblies to GAC (see also above)
+  nsExec::ExecToLog '"$INSTDIR\installer_utils\gactool" "--install" "$INSTDIR\dotnet"'
 SectionEnd
 
 ;--------------------------------
