@@ -47,7 +47,7 @@ class WindowsInstaller(object):
         return os.path.isfile(self.uninstaller)
 
     def uninstall(self):
-        if not self.uninstaller_exists()
+        if not self.uninstaller_exists():
             raise SetupError("No uninstaller found!")
 
         log ("Running uninstaller:", self.uninstaller)
