@@ -131,26 +131,21 @@ int main(int argc, char * argv[])
     signals.add(SIGTERM);
 #endif
 
-    Safir::Dob::Internal::SP::SystemPicture sp(Safir::Dob::Internal::SP::slave_tag);
-    
-    auto& rawSub = sp.GetRawStatistics();
-    auto& stateSub = sp.GetSystemState();
+    Safir::Dob::Internal::SP::SystemPicture sp(Safir::Dob::Internal::SP::slave_tag, ioService);
     
     if (options.raw)
     {
-        rawSub.Start(ioService,
-                      [](const Safir::Dob::Internal::SP::RawStatistics& data)
-                      {                  
-                          std::wcout << data << std::endl;
-                      });
+        sp.StartRawSubscription([](const Safir::Dob::Internal::SP::RawStatistics& data)
+                                {                  
+                                    std::wcout << data << std::endl;
+                                });
     }
     else
     {
-        stateSub.Start(ioService,
-                        [](const Safir::Dob::Internal::SP::SystemState& data)
-                        {                  
-                            std::wcout << data << std::endl;
-                        });
+        sp.StartStateSubscription([](const Safir::Dob::Internal::SP::SystemState& data)
+                                  {                  
+                                      std::wcout << data << std::endl;
+                                  });
     }
 
     signals.async_wait([&](const boost::system::error_code& error,
@@ -160,8 +155,7 @@ int main(int argc, char * argv[])
                            {
                                lllog(0) << "Got a signals error: " << error << std::endl;
                            }
-                           rawSub.Stop();
-                           stateSub.Stop();
+                           sp.Stop();
                            wk.reset();
                        });
 

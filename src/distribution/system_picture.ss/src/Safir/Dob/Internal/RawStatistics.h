@@ -122,23 +122,6 @@ namespace SP
 #pragma warning (pop)
 #endif
 
-    /**
-     * Interface to an object that allows or subscriptions to raw statistics objects.
-     *
-     * This interface is not intended for users to implement. Instead use the SystemPicture 
-     * class to obtain an instance of a class that implements this interface.
-     */
-    class RawStatisticsSubscriber
-    {
-    public:
-        typedef RawStatistics DataWrapper;
-
-        virtual void Start(boost::asio::io_service& ioService,
-                           const std::function<void (const RawStatistics& data)>& dataCallback) = 0;
-
-        virtual void Stop() = 0;
-    };
-
     /** Output operator for RawStatistics. */
     static inline std::wostream& operator<<(std::wostream& out, const RawStatistics& statistics)
     {

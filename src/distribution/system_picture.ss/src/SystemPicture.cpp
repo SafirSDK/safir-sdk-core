@@ -79,7 +79,8 @@ namespace SP
              const std::string& controlAddress,
              const std::string& dataAddress,
              const std::map<int64_t, NodeType>& nodeTypes)
-            : m_rawHandler(Safir::make_unique<RawHandler>(ioService,
+            : m_ioService(ioService)
+            , m_rawHandler(Safir::make_unique<RawHandler>(ioService,
                                                           communication,
                                                           name,
                                                           id,
@@ -134,14 +135,15 @@ namespace SP
         /** 
          * Construct a slave SystemPicture.
          */
-        Impl()
-            : m_rawSubscriberLocal(Safir::make_unique<LocalSubscriber<Safir::Utilities::Internal::IpcSubscriber,
+        explicit Impl(boost::asio::io_service& ioService)
+            : m_ioService(ioService)
+            , m_rawSubscriberLocal(Safir::make_unique<LocalSubscriber<Safir::Utilities::Internal::IpcSubscriber,
                                                                       RawStatisticsSubscriber,
                                                                       RawStatisticsCreator>>(MASTER_LOCAL_RAW_NAME))
             , m_stateSubscriberLocal(Safir::make_unique<LocalSubscriber<Safir::Utilities::Internal::IpcSubscriber,
                                                                         SystemStateSubscriber,
                                                                         SystemStateCreator>>(MASTER_LOCAL_STATE_NAME))
-            , m_stopped(true) //not really started in this case...
+            , m_stopped(false)
         {
 
         }
@@ -161,29 +163,46 @@ namespace SP
             const bool was_stopped = m_stopped.exchange(true);
             if (!was_stopped)
             {
-                //only masters have anything that needs stopping.
-                m_rawHandler->Stop();
-                m_rawPublisherLocal->Stop();
-                m_statePublisherLocal->Stop();
-                m_rawPublisherRemote->Stop();
-                m_statePublisherRemote->Stop();
-                m_coordinator->Stop();
+                //Are we a master?
+                if (m_rawHandler != nullptr)
+                {
+                    m_rawHandler->Stop();
+                    m_rawPublisherLocal->Stop();
+                    m_statePublisherLocal->Stop();
+                    m_rawPublisherRemote->Stop();
+                    m_statePublisherRemote->Stop();
+                    m_coordinator->Stop();
+                }
+                else
+                {
+                    m_rawPublisherLocal->Stop();
+                    m_statePublisherLocal->Stop();
+                }
+
             }
         }
         
-        //Only valid for slaves
-        RawStatisticsSubscriber& GetRawStatistics() const
+        void StartRawSubscription(const std::function<void (const RawStatistics& data)>& dataCallback)
         {
-            return *m_rawSubscriberLocal;
+            if (m_stopped)
+            {
+                throw std::logic_error("SystemPicture has already been stopped");
+            }
+            m_rawSubscriberLocal->Start(m_ioService, dataCallback);
         }
 
-        SystemStateSubscriber& GetSystemState() const
+        void StartStateSubscription(const std::function<void (const SystemState& data)>& dataCallback)
         {
-            return *m_stateSubscriberLocal;
+            if (m_stopped)
+            {
+                throw std::logic_error("SystemPicture has already been stopped");
+            }
+            m_stateSubscriberLocal->Start(m_ioService, dataCallback);
         }
 
         
     private:
+        boost::asio::io_service& m_ioService;
         
         std::unique_ptr<RawHandler> m_rawHandler;
 
@@ -225,8 +244,9 @@ namespace SP
 
     }
 
-    SystemPicture::SystemPicture(slave_tag_t)
-        : m_impl(Safir::make_unique<Impl>())
+    SystemPicture::SystemPicture(slave_tag_t,
+                                 boost::asio::io_service& ioService)
+        : m_impl(Safir::make_unique<Impl>(ioService))
     {
 
     }
@@ -241,16 +261,14 @@ namespace SP
         m_impl->Stop();
     }
 
-    RawStatisticsSubscriber& 
-    SystemPicture::GetRawStatistics() const
+    void SystemPicture::StartRawSubscription(const std::function<void (const RawStatistics& data)>& dataCallback)
     {
-        return m_impl->GetRawStatistics();
+        m_impl->StartRawSubscription(dataCallback);
     }
 
-    SystemStateSubscriber&
-    SystemPicture::GetSystemState() const
+    void SystemPicture::StartStateSubscription(const std::function<void (const SystemState& data)>& dataCallback)
     {
-        return m_impl->GetSystemState();
+        m_impl->StartStateSubscription(dataCallback);
     }
 
 

@@ -26,6 +26,7 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/MakeUnique.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
+#include "SubscriberInterfaces.h"
 #include <functional>
 #include <boost/asio.hpp>
 #include "CrcUtils.h"
@@ -46,14 +47,31 @@ namespace SP
     public:
         explicit LocalSubscriber(const char* const name)
             : m_name (name)
+            , m_stopped(false)
         {
 
         }
+
+        ~LocalSubscriber()
+        {
+            if (!m_stopped)
+            {
+                SEND_SYSTEM_LOG(Error,
+                                << "You have to call Stop before destroying object");
+                abort();
+            }
+        }
+
         //callback will be delivered on one strand.
         //but Start and Stop are not MT safe, please only call one at a time.
         void Start(boost::asio::io_service& ioService,
                    const std::function<void (const typename SubscriberInterfaceT::DataWrapper& data)>& dataCallback) override
         {
+            if (m_stopped)
+            {
+                throw std::logic_error("LocalSubscriber already stopped");
+            }
+
             if (m_subscriber != nullptr)
             {
                 throw std::logic_error("LocalSubscriber already started");
@@ -73,16 +91,21 @@ namespace SP
 
         void Stop() override
         {
-            if (m_subscriber != nullptr)
+            const bool was_stopped = m_stopped.exchange(true);
+            if (!was_stopped)
             {
                 m_subscriber->Disconnect();
-                m_subscriber.reset();
             }
         }
 
     private:
         void DataReceived(const char* const data, size_t size)
         {
+            if (m_stopped)
+            {
+                return;
+            }
+
 #ifdef CHECK_CRC
             size -= sizeof(int); //remove the crc from size
             int expected;
@@ -113,6 +136,7 @@ namespace SP
 
         std::function<void (const typename SubscriberInterfaceT::DataWrapper& data)> m_dataCallback;
         std::unique_ptr<IpcSubscriberT> m_subscriber;
+        std::atomic<bool> m_stopped;
     };
 
     

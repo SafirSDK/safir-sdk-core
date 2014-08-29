@@ -46,7 +46,6 @@ private:
     void UpdatedState(const Safir::Dob::Internal::SP::SystemState& data);
     boost::asio::io_service& m_ioService;
     Safir::Dob::Internal::SP::SystemPicture m_systemPicture;
-    Safir::Dob::Internal::SP::SystemStateSubscriber& m_systemStateSubscriber;
 };
 
 

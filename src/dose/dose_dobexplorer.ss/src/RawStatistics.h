@@ -50,7 +50,6 @@ private:
     
     boost::asio::io_service& m_ioService;
     Safir::Dob::Internal::SP::SystemPicture m_systemPicture;
-    Safir::Dob::Internal::SP::RawStatisticsSubscriber& m_rawStatisticsSubscriber;
 
     //the last data we received.
     Safir::Dob::Internal::SP::RawStatistics m_statistics;

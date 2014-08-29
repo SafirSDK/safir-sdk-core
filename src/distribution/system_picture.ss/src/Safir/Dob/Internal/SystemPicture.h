@@ -83,28 +83,22 @@ namespace SP
                       const std::string& dataAddress,
                       const std::map<int64_t, NodeType>& nodeTypes);
 
-        explicit SystemPicture(slave_tag_t);
+        explicit SystemPicture(slave_tag_t, 
+                               boost::asio::io_service& ioService);
 
         ~SystemPicture();
 
         /** 
          * Stop the internal workings of this class. 
-         * Must be called before destroying the object if you've instantiated
-         * SystemPicture with a master_tag
+         * Must be called before destroying the object.
          */
         void Stop();
 
-        /**
-         * Get a subscriber object that will provide the raw node statistics.
-         *
-         * Only available if you've instantiated SystemPicture with slave_tag.
-         */
-        RawStatisticsSubscriber& GetRawStatistics() const;
 
-        /** 
-         * Get a subscriber object that will provide the system picture state produced by System Picture
-         */
-        SystemStateSubscriber& GetSystemState() const;
+        void StartRawSubscription(const std::function<void (const RawStatistics& data)>& dataCallback);
+
+        void StartStateSubscription(const std::function<void (const SystemState& data)>& dataCallback);
+
     private:
         class Impl;
 
