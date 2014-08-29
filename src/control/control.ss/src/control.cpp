@@ -178,11 +178,11 @@ int main(int argc, char * argv[])
     for (const auto& nt: options.config.GetNodeTypes())
     {
         commNodeTypes.push_back({nt.id, 
-                    nt.name, 
-                    nt.multicastAddressControl, 
-                    nt.multicastAddressData,
-                    nt.heartbeatInterval,
-                    nt.retryTimeout});
+                                 nt.name,
+                                 nt.multicastAddressControl,
+                                 nt.multicastAddressData,
+                                 nt.heartbeatInterval,
+                                 nt.retryTimeout});
     }
     
     Safir::Dob::Internal::Com::Communication communication(Safir::Dob::Internal::Com::controlModeTag,
@@ -222,7 +222,7 @@ int main(int argc, char * argv[])
 
 
     // Start subscription to system state changes from SP
-    sp.GetSystemState().Start(ioService, ChangedSystemState);
+    sp.StartStateSubscription(ChangedSystemState);
 
     communication.Start();
 
@@ -249,7 +249,6 @@ int main(int argc, char * argv[])
                                SEND_SYSTEM_LOG(Error,
                                                << "Got a signals error: " << error);
                            }
-                           sp.GetSystemState().Stop();
                            sp.Stop();
                            communication.Stop();
                            work.reset();
