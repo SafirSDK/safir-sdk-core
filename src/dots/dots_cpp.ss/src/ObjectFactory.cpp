@@ -70,7 +70,7 @@ namespace Typesystem
         {
             throw SoftwareViolationException(L"Cannot create object from NULL blob!",__WFILE__,__LINE__);
         }
-        const TypeId typeId = Internal::GetTypeId(blob);
+        const TypeId typeId = DotsC_GetTypeId(blob);
         CallbackMap::const_iterator it = m_CallbackMap.find(typeId);
         if (it == m_CallbackMap.end())
         {

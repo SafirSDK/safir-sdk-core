@@ -36,57 +36,6 @@ namespace Typesystem
 namespace Internal
 {
     /**
-     * Get type id of blob.
-     *
-     * @param blob [in] - The blob to read type id from.
-     * @return TypeId of the blob.
-     */
-    TypeId GetTypeId(const char* blob);
-
-    /**
-     * Get size of a blob.
-     *
-     * @param blob [in] - The blob to read size of.
-     * @return  Size of blob.
-     */
-    Int32 GetSize(const char* blob);
-
-    /**
-     * Set all changed flags in the blob.
-     *
-     * @param blob [in] - The blob to modify.
-     * @param changed [in] - The value to set the change flags to.
-     */
-//    DOTS_CPP_API void SetChanged(char * const blob, const bool changed);
-
-    /**
-     * Set the change flag on a member in blob. 
-     *
-     * This operation is not recursive (hence the "Here" bit).
-     *
-     * @param blob [in] - The blob to modify.
-     * @param [in] member - The member to be set.
-     * @param [in] index - Array index in member to set. Shall be 0 if the member is not an array.
-     * @param changed [in] - The value to set the change flag to.
-     */
-//    DOTS_CPP_API void SetChangedHere(char* const blob,
-//                                 const Dob::Typesystem::MemberIndex member,
-//                                 const Dob::Typesystem::ArrayIndex index,
-//                                 const bool changed);
-
-    /**
-     * Compare two blobs and set the change flags.
-     *
-     * Change flags are set in "mine" on all members that have
-     * changed between "base" and "mine".
-     *
-     * @param base [in] - Original to compare.
-     * @param mine [in,out] - Compare to this and set change flags.
-     */
-//    DOTS_CPP_API void Diff(char const * const base,
-//                       char * const mine);
-
-    /**
      * Generate a 64 bit hash from a string.
      */
     DOTS_CPP_API Int64 Generate64BitHash(const std::wstring & str);

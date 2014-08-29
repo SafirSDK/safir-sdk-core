@@ -36,39 +36,6 @@ namespace Typesystem
 {
 namespace Internal
 {
-//    //Sets all changed flags in the blob to false
-//    void SetChanged(char * const blob, const bool changed)
-//    {
-//        DotsC_SetChanged(blob, changed);
-//    }
-
-//    void SetChangedHere(char* const blob,
-//                        const Dob::Typesystem::MemberIndex member,
-//                        const Dob::Typesystem::ArrayIndex index,
-//                        const bool changed)
-//    {
-//        DotsC_SetChangedHere(blob,member,index,changed);
-//    }
-
-//    //Compare the two blobs and set the change flags in "mine" on all members that have
-//    //changed between "base" and "mine".
-//    void Diff(char const * const base,
-//              char * const mine)
-//    {
-//        DotsC_SetChangedSinceLastRead(base,mine);
-//        //TODO: rename the function in DOTS.
-//    }
-
-    TypeId GetTypeId(const char* blob)
-    {
-        return DotsC_GetTypeId(blob);
-    }
-
-    Int32 GetSize(const char* blob)
-    {
-        return DotsC_GetSize(blob);
-    }
-
     Int64 Generate64BitHash(const std::wstring & str)
     {
         if (str.empty())

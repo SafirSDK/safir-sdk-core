@@ -101,7 +101,7 @@ namespace Typesystem
             }
         }
     protected:
-        friend class BlobOperations;
+        friend class Safir::Dob::Typesystem::Internal::BlobOperations;
 
          /**
          * Copy assignment operator.
