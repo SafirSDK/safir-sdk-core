@@ -44,7 +44,7 @@ class WindowsInstaller(object):
         self.installer = installer[0]
 
     def uninstaller_exists(self):
-        return os.path.isfile(self.uninstaller):
+        return os.path.isfile(self.uninstaller)
 
     def uninstall(self):
         if not self.uninstaller_exists()
