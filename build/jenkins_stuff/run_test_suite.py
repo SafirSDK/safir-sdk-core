@@ -43,19 +43,18 @@ class WindowsInstaller(object):
             raise SetupError("Unexpected number of installers: "+ str(installer))
         self.installer = installer[0]
 
-                
-    def uninstall(self, quiet = False):
-        if not os.path.isfile(self.uninstaller):
-            if quiet:
-                return
-            else:
-                raise SetupError("No uninstaller found!")
-        
+    def uninstaller_exists(self):
+        return os.path.isfile(self.uninstaller):
+
+    def uninstall(self):
+        if not self.uninstaller_exists()
+            raise SetupError("No uninstaller found!")
+
         log ("Running uninstaller:", self.uninstaller)
         result = subprocess.call((self.uninstaller, "/S"))
         if result != 0:
             raise SetupError("Uninstaller failed (" + str(result) + ")!")
-        
+
         #Wait for uninstaller to complete by polling for install directory...
         starttime = time.clock()
         while True:
@@ -64,12 +63,13 @@ class WindowsInstaller(object):
             if time.clock() - starttime > 10*60: # 10 minutes
                 break
             time.sleep(1.0)
-            
+
         if os.path.isdir(self.installpath):
             raise SetupError("Installer dir still exists after uninstallation! Contents:\n" + str(os.listdir(self.installpath)))
         if os.path.exists(self.installpath):
             raise SetupError("Installer dir does not seem to be a directory!")
-            
+        return True
+
     def install(self):
         log ("Running installer:", self.installer)
 
@@ -82,7 +82,7 @@ class WindowsInstaller(object):
         #we get out of here immediately if we're not running debug.
         if os.environ.get("Config") != "DebugOnly":
             return
-        
+
         #Work out studio version and bitness from installer name
         match = re.search(r"SafirSDKCore-VS([0-9]*)-([0-9]*)bit-DebugOnly.exe", self.installer)
         vs_version = match.group(1)
@@ -105,8 +105,8 @@ class WindowsInstaller(object):
             raise SetupError("The debug runtime directory seems to be missing: " + debugcrt_path)
 
         os.environ["PATH"] += os.pathsep + debugcrt_path
-                                           
-        
+
+
     def check_installation(self):
         if not os.path.isdir(self.installpath):
             raise SetupError("Installation directory does not exist!")
@@ -163,15 +163,21 @@ def main():
 
     installer = WindowsInstaller()
 
-    try:
-        installer.uninstall(quiet = True)
+    if installer.uninstaller_exists():
+        log("Uninstaller present: It looks like Safir SDK Core is already installed! Will uninstall and return a failure.")
+        installer.uninstall()
+        return 1
 
+    try:
         installer.install()
         installer.check_installation()
         installer.run_test_suite()
-        
+
     except SetupError as e:
         log ("Error: " + str(e))
+        return 1
+    except Exception as e:
+        log ("Caught exception: " + str(e))
         return 1
     finally:
         try:
