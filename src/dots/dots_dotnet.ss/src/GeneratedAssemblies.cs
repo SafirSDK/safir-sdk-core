@@ -105,17 +105,25 @@ namespace Safir.Dob.Typesystem
             }
             else
             {
+                //try assemblies loaded into the system first.
+                var type = System.Type.GetType(typeName, false);
+                if (type != null)
+                {
+                    return type;
+                }
+
+                //then try the ones we loaded through typesystem.ini
                 foreach (Assembly ass in m_assemblies)
                 {
-                    System.Type t = ass.GetType(typeName, false);
-                    if (t != null)
+                    type = ass.GetType(typeName, false);
+                    if (type != null)
                     {
-                        return t;
+                        return type;
                     }
                 }
             }
 
-            throw new IllegalValueException("Could find type " + typeName + " in any of the loaded assemblies!");
+            throw new IllegalValueException("Couldn't find type " + typeName + " in any of the loaded assemblies!");
         }
 
         //this needs to be synchronized since it accesses and modifies the cache
