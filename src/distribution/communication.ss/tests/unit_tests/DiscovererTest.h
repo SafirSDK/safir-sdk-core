@@ -161,76 +161,96 @@ public:
         //----------------------
         // Test
         //----------------------
-        discoverState.insert(std::make_pair(10000, Info(10000, io)));
-        discoverState.insert(std::make_pair(10001, Info(10001, io)));
-        discoverState.insert(std::make_pair(10002, Info(10002, io)));
-
-        TRACELINE
-        auto Deliver=[&]()
         {
             boost::mutex::scoped_lock lock(mutex);
-            for (auto& vt : discoverState)
-            {
-                auto& dp=vt.second.discover;
-                HandleDiscover::Deliver(*dp, vt.first);
-            }
-        };
+            discoverState.insert(std::make_pair(10000, Info(10000, io)));
+            discoverState.insert(std::make_pair(10001, Info(10001, io)));
+            discoverState.insert(std::make_pair(10002, Info(10002, io)));
+        }
+
+        TRACELINE
 
         std::vector<std::string> seeds{"127.0.0.1:10000"};
-        discoverState[10001].discover->AddSeeds(seeds);
-        discoverState[10002].discover->AddSeeds(seeds);
-
-        discoverState[10000].discover->Start();
-        discoverState[10001].discover->Start();
-
-        TRACELINE
-        Wait(1000); //this is way more than the send discover timer, so hereafter we should have got a discover
-        Deliver();
-
-        CHECK(discoverState[10001].sentDiscoverTo.size()>0);
-        CHECK(discoverState[10001].sentDiscoverTo.back()==10000);
-
-        Wait(1000);
-        Deliver();
+        {
+            boost::mutex::scoped_lock lock(mutex);
+            discoverState[10001].discover->AddSeeds(seeds);
+            discoverState[10002].discover->AddSeeds(seeds);
+            discoverState[10000].discover->Start();
+            discoverState[10001].discover->Start();
+        }
 
         TRACELINE
-        CHECK(discoverState[10000].sentNodeInfoTo.size()>0);
-        CHECK(discoverState[10000].sentNodeInfoTo.back()==10001);
 
-        discoverState[10002].discover->Start();
-
-        TRACELINE
-        Wait(500);
-        for (int i=0; i<10; ++i)
+        //Wait unti node 1000 and 1001 have found each other
+        for (int i=0; i<50; ++i)
         {
             Deliver();
-            Wait(200);
+            {
+                boost::mutex::scoped_lock lock(mutex);
+                if (discoverState[10000].newNodes.size()==1 &&
+                    discoverState[10001].newNodes.size()==1)
+                    break;
+            }
+            TRACELINE
+            Wait(500);
         }
 
         TRACELINE
-        for (auto&& vt : discoverState)
+
+        //now start a third node
         {
-            vt.second.discover->Stop();
-            CHECK(vt.second.recvQueue.empty());
-            CHECK(vt.second.newNodes.size()==2);
+            boost::mutex::scoped_lock lock(mutex);
+            discoverState[10002].discover->Start();
         }
+
         TRACELINE
 
-        //check that 10000 has got discover and nodeInfo from both the others
-        CHECK(std::find(discoverState[10000].sentDiscoverTo.begin(), discoverState[10000].sentDiscoverTo.end(), 10001)!=discoverState[10000].sentDiscoverTo.end());
-        CHECK(std::find(discoverState[10000].sentDiscoverTo.begin(), discoverState[10000].sentDiscoverTo.end(), 10002)!=discoverState[10000].sentDiscoverTo.end());
-        CHECK(std::find(discoverState[10000].sentNodeInfoTo.begin(), discoverState[10000].sentNodeInfoTo.end(), 10001)!=discoverState[10000].sentNodeInfoTo.end());
-        CHECK(std::find(discoverState[10000].sentNodeInfoTo.begin(), discoverState[10000].sentNodeInfoTo.end(), 10002)!=discoverState[10000].sentNodeInfoTo.end());
-        //check that 10001 has got discover and nodeInfo from both the others
-        CHECK(std::find(discoverState[10001].sentDiscoverTo.begin(), discoverState[10001].sentDiscoverTo.end(), 10000)!=discoverState[10001].sentDiscoverTo.end());
-        CHECK(std::find(discoverState[10001].sentDiscoverTo.begin(), discoverState[10001].sentDiscoverTo.end(), 10002)!=discoverState[10001].sentDiscoverTo.end());
-        CHECK(std::find(discoverState[10001].sentNodeInfoTo.begin(), discoverState[10001].sentNodeInfoTo.end(), 10000)!=discoverState[10001].sentNodeInfoTo.end());
-        CHECK(std::find(discoverState[10001].sentNodeInfoTo.begin(), discoverState[10001].sentNodeInfoTo.end(), 10002)!=discoverState[10001].sentNodeInfoTo.end());
-        //check that 10002 has got discover and nodeInfo from both the others
-        CHECK(std::find(discoverState[10002].sentDiscoverTo.begin(), discoverState[10002].sentDiscoverTo.end(), 10000)!=discoverState[10002].sentDiscoverTo.end());
-        CHECK(std::find(discoverState[10002].sentDiscoverTo.begin(), discoverState[10002].sentDiscoverTo.end(), 10001)!=discoverState[10002].sentDiscoverTo.end());
-        CHECK(std::find(discoverState[10002].sentNodeInfoTo.begin(), discoverState[10002].sentNodeInfoTo.end(), 10000)!=discoverState[10002].sentNodeInfoTo.end());
-        CHECK(std::find(discoverState[10002].sentNodeInfoTo.begin(), discoverState[10002].sentNodeInfoTo.end(), 10001)!=discoverState[10002].sentNodeInfoTo.end());
+        //Wait until all nodes have found each other
+        for (int i=0; i<50; ++i)
+        {
+            Deliver();
+            {
+                boost::mutex::scoped_lock lock(mutex);
+                if (discoverState[10000].newNodes.size()==2 &&
+                    discoverState[10001].newNodes.size()==2 &&
+                    discoverState[10002].newNodes.size()==2)
+                    break;
+            }
+            TRACELINE
+            Wait(500);
+        }
+
+        TRACELINE
+
+        //Stop all discoverers
+        {
+            boost::mutex::scoped_lock lock(mutex);
+            discoverState[10000].discover->Stop();
+            discoverState[10001].discover->Stop();
+            discoverState[10002].discover->Stop();
+        }
+
+        TRACELINE
+
+        {
+            boost::mutex::scoped_lock lock(mutex);
+
+            //check that 10000 has got discover and nodeInfo from both the others
+            CHECK(std::find(discoverState[10000].sentDiscoverTo.begin(), discoverState[10000].sentDiscoverTo.end(), 10001)!=discoverState[10000].sentDiscoverTo.end());
+            CHECK(std::find(discoverState[10000].sentDiscoverTo.begin(), discoverState[10000].sentDiscoverTo.end(), 10002)!=discoverState[10000].sentDiscoverTo.end());
+            CHECK(std::find(discoverState[10000].sentNodeInfoTo.begin(), discoverState[10000].sentNodeInfoTo.end(), 10001)!=discoverState[10000].sentNodeInfoTo.end());
+            CHECK(std::find(discoverState[10000].sentNodeInfoTo.begin(), discoverState[10000].sentNodeInfoTo.end(), 10002)!=discoverState[10000].sentNodeInfoTo.end());
+            //check that 10001 has got discover and nodeInfo from both the others
+            CHECK(std::find(discoverState[10001].sentDiscoverTo.begin(), discoverState[10001].sentDiscoverTo.end(), 10000)!=discoverState[10001].sentDiscoverTo.end());
+            CHECK(std::find(discoverState[10001].sentDiscoverTo.begin(), discoverState[10001].sentDiscoverTo.end(), 10002)!=discoverState[10001].sentDiscoverTo.end());
+            CHECK(std::find(discoverState[10001].sentNodeInfoTo.begin(), discoverState[10001].sentNodeInfoTo.end(), 10000)!=discoverState[10001].sentNodeInfoTo.end());
+            CHECK(std::find(discoverState[10001].sentNodeInfoTo.begin(), discoverState[10001].sentNodeInfoTo.end(), 10002)!=discoverState[10001].sentNodeInfoTo.end());
+            //check that 10002 has got discover and nodeInfo from both the others
+            CHECK(std::find(discoverState[10002].sentDiscoverTo.begin(), discoverState[10002].sentDiscoverTo.end(), 10000)!=discoverState[10002].sentDiscoverTo.end());
+            CHECK(std::find(discoverState[10002].sentDiscoverTo.begin(), discoverState[10002].sentDiscoverTo.end(), 10001)!=discoverState[10002].sentDiscoverTo.end());
+            CHECK(std::find(discoverState[10002].sentNodeInfoTo.begin(), discoverState[10002].sentNodeInfoTo.end(), 10000)!=discoverState[10002].sentNodeInfoTo.end());
+            CHECK(std::find(discoverState[10002].sentNodeInfoTo.begin(), discoverState[10002].sentNodeInfoTo.end(), 10001)!=discoverState[10002].sentNodeInfoTo.end());
+        }
 
         TRACELINE
         //-----------
@@ -239,7 +259,10 @@ public:
         work.reset();
         threads.join_all();
 
-        discoverState.clear(); //this step is important because discoverState has references to the io_service in this scope.
+        {
+            boost::mutex::scoped_lock lock(mutex);
+            discoverState.clear(); //this step is important because discoverState has references to the io_service in this scope.
+        }
 
         std::cout<<"HandleDiscover tests passed"<<std::endl;
     }
@@ -323,6 +346,16 @@ private:
         }
     };
     static std::map<int64_t, HandleDiscover::Info> discoverState;
+
+    static void Deliver()
+    {
+        boost::mutex::scoped_lock lock(mutex);
+        for (auto& vt : discoverState)
+        {
+            auto& dp=vt.second.discover;
+            HandleDiscover::Deliver(*dp, vt.first);
+        }
+    }
 
     static void Deliver(Discoverer& discoverer, int64_t id)
     {
