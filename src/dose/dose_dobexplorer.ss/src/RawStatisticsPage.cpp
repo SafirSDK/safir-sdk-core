@@ -25,7 +25,7 @@
 #define QT_DISABLE_DEPRECATED_BEFORE 0x000000
 
 #include "common_header.h"
-#include "RawStatistics.h"
+#include "RawStatisticsPage.h"
 #include <iostream>
 #include <set>
 #include <boost/make_shared.hpp>
@@ -102,7 +102,7 @@ namespace
 
 }
 
-RawStatistics::RawStatistics(boost::asio::io_service& ioService, QWidget* /*parent*/)
+RawStatisticsPage::RawStatisticsPage(boost::asio::io_service& ioService, QWidget* /*parent*/)
     : m_ioService(ioService)
     , m_systemPicture(Safir::Dob::Internal::SP::slave_tag, 
                       ioService)
@@ -125,13 +125,13 @@ RawStatistics::RawStatistics(boost::asio::io_service& ioService, QWidget* /*pare
     tableSplitter->setStretchFactor(1,1);
 }
 
-RawStatistics::~RawStatistics()
+RawStatisticsPage::~RawStatisticsPage()
 {
     m_systemPicture.Stop();
 }
 
 
-void RawStatistics::UpdatedStatistics(const Safir::Dob::Internal::SP::RawStatistics& data)
+void RawStatisticsPage::UpdatedStatistics(const Safir::Dob::Internal::SP::RawStatistics& data)
 {
     m_statistics = data;
 
@@ -149,7 +149,7 @@ void RawStatistics::UpdatedStatistics(const Safir::Dob::Internal::SP::RawStatist
 }
 
 
-void RawStatistics::UpdateLocalTable()
+void RawStatisticsPage::UpdateLocalTable()
 {
     //starts off containing all ids in the statistics message
     //but in the first loop we remove all that we already have in the table
@@ -219,7 +219,7 @@ void RawStatistics::UpdateLocalTable()
 }
 
 
-void RawStatistics::LocalTableSelectionChanged()
+void RawStatisticsPage::LocalTableSelectionChanged()
 {
     if (m_statistics.Valid())
     {
@@ -231,7 +231,7 @@ void RawStatistics::LocalTableSelectionChanged()
     }
 }
 
-void RawStatistics::UpdateRemoteTable()
+void RawStatisticsPage::UpdateRemoteTable()
 {
     const auto selection = localTable->selectedItems();
     if (selection.empty())

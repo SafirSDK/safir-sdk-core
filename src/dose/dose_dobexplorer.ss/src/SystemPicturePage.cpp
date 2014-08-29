@@ -25,7 +25,7 @@
 #define QT_DISABLE_DEPRECATED_BEFORE 0x000000
 
 #include "common_header.h"
-#include "SystemPicture.h"
+#include "SystemPicturePage.h"
 #include <iostream>
 #include <set>
 
@@ -86,7 +86,7 @@ namespace
 
 }
 
-SystemPicture::SystemPicture(boost::asio::io_service& ioService, QWidget* /*parent*/)
+SystemPicturePage::SystemPicturePage(boost::asio::io_service& ioService, QWidget* /*parent*/)
     : m_ioService(ioService)
     , m_systemPicture(Safir::Dob::Internal::SP::slave_tag,
                       ioService)
@@ -101,12 +101,12 @@ SystemPicture::SystemPicture(boost::asio::io_service& ioService, QWidget* /*pare
     systemTable->sortItems(COLUMN_NAME);
 }
 
-SystemPicture::~SystemPicture()
+SystemPicturePage::~SystemPicturePage()
 {
     m_systemPicture.Stop();
 }
 
-void SystemPicture::UpdatedState(const Safir::Dob::Internal::SP::SystemState& data)
+void SystemPicturePage::UpdatedState(const Safir::Dob::Internal::SP::SystemState& data)
 {
     SetText(electedId,data.ElectedId());
     
@@ -116,7 +116,7 @@ void SystemPicture::UpdatedState(const Safir::Dob::Internal::SP::SystemState& da
 }
 
 
-void SystemPicture::UpdateSystemTable(const Safir::Dob::Internal::SP::SystemState& statistics)
+void SystemPicturePage::UpdateSystemTable(const Safir::Dob::Internal::SP::SystemState& statistics)
 {
     //starts off containing all ids in the statistics message
     //but in the first loop we remove all that we already have in the table

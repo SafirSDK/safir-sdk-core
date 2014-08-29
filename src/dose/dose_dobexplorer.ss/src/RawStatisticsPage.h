@@ -24,22 +24,22 @@
 #ifndef __DOBEXPLORER_RAW_STATISTICS_H__
 #define __DOBEXPLORER_RAW_STATISTICS_H__
 #include "common_header.h"
-#include "ui_RawStatistics.h"
+#include "ui_RawStatisticsPage.h"
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/asio.hpp>
 #include <Safir/Dob/Internal/SystemPicture.h>
 
-class RawStatistics :
+class RawStatisticsPage :
   public QWidget,
-  private Ui::RawStatistics,
+  private Ui::RawStatisticsPage,
   private boost::noncopyable
 {
     Q_OBJECT
 
 public:
-    RawStatistics(boost::asio::io_service& ioService, QWidget *parent = 0);
-    ~RawStatistics();
+    RawStatisticsPage(boost::asio::io_service& ioService, QWidget *parent = 0);
+    ~RawStatisticsPage();
 public slots:
     void LocalTableSelectionChanged();
 private:

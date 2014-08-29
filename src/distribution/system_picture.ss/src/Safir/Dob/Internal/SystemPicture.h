@@ -94,9 +94,20 @@ namespace SP
          */
         void Stop();
 
-
+        /** 
+         * Start a subscription to raw information.
+         *
+         * Call Stop to end all subscriptions.
+         * Note that it is not possible to call Start again after a Stop call.
+         */
         void StartRawSubscription(const std::function<void (const RawStatistics& data)>& dataCallback);
 
+        /** 
+         * Start a subscription to system state information.
+         *
+         * Call Stop to end all subscriptions.
+         * Note that it is not possible to call Start again after a Stop call.
+         */
         void StartStateSubscription(const std::function<void (const SystemState& data)>& dataCallback);
 
     private:

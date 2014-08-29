@@ -24,22 +24,22 @@
 #ifndef __DOBEXPLORER_SYSTEM_PICTURE_H__
 #define __DOBEXPLORER_SYSTEM_PICTURE_H__
 #include "common_header.h"
-#include "ui_SystemPicture.h"
+#include "ui_SystemPicturePage.h"
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/asio.hpp>
 #include <Safir/Dob/Internal/SystemPicture.h>
 
-class SystemPicture :
+class SystemPicturePage :
   public QWidget,
-  private Ui::SystemPicture,
+  private Ui::SystemPicturePage,
   private boost::noncopyable
 {
     Q_OBJECT
 
 public:
-    SystemPicture(boost::asio::io_service& ioService, QWidget *parent = 0);
-    ~SystemPicture();
+    SystemPicturePage(boost::asio::io_service& ioService, QWidget *parent = 0);
+    ~SystemPicturePage();
 private:
     void UpdateSystemTable(const Safir::Dob::Internal::SP::SystemState& statistics);
 

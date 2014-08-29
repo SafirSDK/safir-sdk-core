@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SystemPicture</class>
- <widget class="QWidget" name="SystemPicture">
+ <class>SystemPicturePage</class>
+ <widget class="QWidget" name="SystemPicturePage">
   <property name="geometry">
    <rect>
     <x>0</x>
