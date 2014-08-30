@@ -38,7 +38,8 @@ THE SOFTWARE.
                     <xsl:variable name="duration" select="Results/NamedMeasurement[@name='Execution Time']/Value"/>
                     <xsl:variable name="status" select="@Status"/>
                     <xsl:variable name="output" select="Results/Measurement/Value"/>
-                    <xsl:variable name="className" select="substring(Path, 3)"/>
+                    <!--<xsl:variable name="className" select="substring(Path, 3)"/>-->
+                    <xsl:variable name="className" select="Path"/>
                     <testcase classname="{$className}"
                               name="{$testName}"
                               time="{$duration}">
