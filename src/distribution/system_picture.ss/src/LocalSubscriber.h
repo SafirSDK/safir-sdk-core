@@ -30,6 +30,7 @@
 #include <functional>
 #include <boost/asio.hpp>
 #include "CrcUtils.h"
+#include <atomic>
 
 namespace Safir
 {
