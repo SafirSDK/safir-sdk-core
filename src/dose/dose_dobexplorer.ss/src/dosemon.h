@@ -36,7 +36,6 @@ class DoseMon : public QWidget, private Ui::DoseMonDlg
 
 public:
     DoseMon(QWidget *parent = 0);
-    ~DoseMon();
 
 public slots:
     void TreeItemActivated ( QTreeWidgetItem * item, int column );
@@ -45,6 +44,7 @@ public slots:
     void UpdateTreeWidget();
 
 private:
+    void closeEvent(QCloseEvent* event) override;
     void AddConnection(const Safir::Dob::Internal::Connection & connection,
                        std::set<QString>& localConnectionNames,
                        std::set<QString>& remoteConnectionNames);

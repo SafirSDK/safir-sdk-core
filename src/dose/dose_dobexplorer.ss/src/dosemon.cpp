@@ -88,15 +88,28 @@ DoseMon::DoseMon(QWidget * /*parent*/)
     AddEntitesToTreeWidget();
 }
 
-DoseMon::~DoseMon()
+
+void DoseMon::closeEvent(QCloseEvent* event)
 {
     while (tabWidget->count() != 0)
     {
         QWidget* w = tabWidget->widget(0);
-        tabWidget->removeTab(0);
-        delete w;
+        QCloseEvent evt;
+        QCoreApplication::sendEvent(w,&evt);
+        if (evt.isAccepted())
+        {
+            tabWidget->removeTab(0);
+            delete w;
+        }
+        else
+        {
+            event->ignore();
+            return;
+        }
     }
+    event->accept();
 }
+
 
 bool DoseMon::ActivateTab(const QString& name)
 {
