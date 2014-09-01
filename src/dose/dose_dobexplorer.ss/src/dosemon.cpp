@@ -62,26 +62,19 @@ DoseMon::DoseMon(QWidget * /*parent*/)
 {
     setupUi(this); // this sets up GUI
 
-    //    treeWidget->setSortingEnabled(true);
-    //treeWidget->sortByColumn(0,Qt::AscendingOrder);
-
     while (tabWidget->currentIndex() != -1)
     {
         tabWidget->removeTab(tabWidget->currentIndex());
     }
 
-    QPushButton * closeButton = new QPushButton("X");
-    tabWidget->setCornerWidget(closeButton);
-    //int newTab = tabWidget->addTab(new MemGraph(this),"Memory");
-    //tabWidget->setTabToolTip(newTab,tabWidget->widget(newTab)->toolTip());
-    
+    tabWidget->setTabsClosable(true);
+    connect(tabWidget,
+            SIGNAL(tabCloseRequested(int)),
+            this,
+            SLOT(CloseTab(int)));
+
     int newTab = tabWidget->addTab(new About(this),"About");
     tabWidget->setTabToolTip(newTab,tabWidget->widget(newTab)->toolTip());
-
-    connect(closeButton,
-            SIGNAL(clicked()),
-            this,
-            SLOT(CloseCurrentTab()));
 
     connect(treeWidget,
             SIGNAL(itemActivated(QTreeWidgetItem*,int)),
@@ -91,10 +84,6 @@ DoseMon::DoseMon(QWidget * /*parent*/)
     connect(&m_updateTimer,SIGNAL(timeout()), this, SLOT(UpdateTreeWidget()));
     m_updateTimer.start(3000);
     UpdateTreeWidget();
-
-    connect(&m_ioServicePollTimer,SIGNAL(timeout()), this, SLOT(PollIoService()));
-    m_ioServicePollTimer.start(100);
-    PollIoService();
 
     AddEntitesToTreeWidget();
 }
@@ -107,9 +96,6 @@ DoseMon::~DoseMon()
         tabWidget->removeTab(0);
         delete w;
     }
-
-    //make sure we let all pending jobs run before exiting.
-    m_ioService.run();
 }
 
 bool DoseMon::ActivateTab(const QString& name)
@@ -160,11 +146,11 @@ void DoseMon::TreeItemActivated ( QTreeWidgetItem * item, int /*column*/ )
     }
     else if (item->text(0) == "Raw Node Statistics")
     {
-        newTab = tabWidget->addTab(new RawStatisticsPage(m_ioService, this),"Raw Node Statistics");
+        newTab = tabWidget->addTab(new RawStatisticsPage(this),"Raw Node Statistics");
     }
     else if (item->text(0) == "System Picture")
     {
-        newTab = tabWidget->addTab(new SystemPicturePage(m_ioService, this),"System Picture");
+        newTab = tabWidget->addTab(new SystemPicturePage(this),"System Picture");
     }
     else if (item->parent() == NULL)
     {
@@ -196,11 +182,16 @@ void DoseMon::TreeItemActivated ( QTreeWidgetItem * item, int /*column*/ )
 }
 
 
-void DoseMon::CloseCurrentTab()
+void DoseMon::CloseTab(int index)
 {
-    QWidget * currentTab = tabWidget->currentWidget();
-    tabWidget->removeTab(tabWidget->currentIndex());
-    delete currentTab;
+    QWidget * widget = tabWidget->widget(index);
+    QCloseEvent event;
+    QCoreApplication::sendEvent(widget,&event);
+    if (event.isAccepted())
+    {
+        tabWidget->removeTab(index);
+        delete widget;
+    }
 }
 
 
@@ -369,8 +360,3 @@ void DoseMon::UpdateTreeWidget()
     remoteConnectionItem->sortChildren(0, Qt::AscendingOrder);
 }
 
-void DoseMon::PollIoService()
-{
-    m_ioService.poll_one();
-    m_ioService.reset();
-}

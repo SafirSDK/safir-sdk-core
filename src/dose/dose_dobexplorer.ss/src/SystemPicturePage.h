@@ -38,13 +38,20 @@ class SystemPicturePage :
     Q_OBJECT
 
 public:
-    SystemPicturePage(boost::asio::io_service& ioService, QWidget *parent = 0);
-    ~SystemPicturePage();
+    explicit SystemPicturePage(QWidget *parent = 0);
+
+public slots:
+    void PollIoService();
+
 private:
+    void closeEvent(QCloseEvent* event) override;
     void UpdateSystemTable(const Safir::Dob::Internal::SP::SystemState& statistics);
 
     void UpdatedState(const Safir::Dob::Internal::SP::SystemState& data);
-    boost::asio::io_service& m_ioService;
+
+    boost::asio::io_service m_ioService;
+    QTimer m_ioServicePollTimer;
+
     Safir::Dob::Internal::SP::SystemPicture m_systemPicture;
 };
 

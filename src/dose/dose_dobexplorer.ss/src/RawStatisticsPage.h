@@ -38,17 +38,22 @@ class RawStatisticsPage :
     Q_OBJECT
 
 public:
-    RawStatisticsPage(boost::asio::io_service& ioService, QWidget *parent = 0);
-    ~RawStatisticsPage();
+    explicit RawStatisticsPage(QWidget *parent = 0);
+
 public slots:
+    void PollIoService();
     void LocalTableSelectionChanged();
+
 private:
+    void closeEvent(QCloseEvent* event) override;
     void UpdatedStatistics(const Safir::Dob::Internal::SP::RawStatistics& data);
 
     void UpdateLocalTable();
     void UpdateRemoteTable();
     
-    boost::asio::io_service& m_ioService;
+    boost::asio::io_service m_ioService;
+    QTimer m_ioServicePollTimer;
+
     Safir::Dob::Internal::SP::SystemPicture m_systemPicture;
 
     //the last data we received.

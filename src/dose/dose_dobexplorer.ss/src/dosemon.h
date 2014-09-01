@@ -41,10 +41,9 @@ public:
 public slots:
     void TreeItemActivated ( QTreeWidgetItem * item, int column );
 
-    void CloseCurrentTab();
+    void CloseTab(int index);
     void UpdateTreeWidget();
 
-    void PollIoService();
 private:
     void AddConnection(const Safir::Dob::Internal::Connection & connection,
                        std::set<QString>& localConnectionNames,
@@ -53,9 +52,6 @@ private:
     void AddEntitesToTreeWidget();
 
     QTimer m_updateTimer;
-
-    boost::asio::io_service m_ioService;
-    QTimer m_ioServicePollTimer;
 };
 
 

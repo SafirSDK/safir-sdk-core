@@ -86,10 +86,9 @@ namespace
 
 }
 
-SystemPicturePage::SystemPicturePage(boost::asio::io_service& ioService, QWidget* /*parent*/)
-    : m_ioService(ioService)
-    , m_systemPicture(Safir::Dob::Internal::SP::subscriber_tag,
-                      ioService)
+SystemPicturePage::SystemPicturePage( QWidget* /*parent*/)
+    : m_systemPicture(Safir::Dob::Internal::SP::subscriber_tag,
+                      m_ioService)
 {
     m_systemPicture.StartStateSubscription([this](const Safir::Dob::Internal::SP::SystemState& state)
                                            {UpdatedState(state);});
@@ -99,11 +98,22 @@ SystemPicturePage::SystemPicturePage(boost::asio::io_service& ioService, QWidget
     systemTable->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
     systemTable->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
     systemTable->sortItems(COLUMN_NAME);
+
+    connect(&m_ioServicePollTimer,SIGNAL(timeout()), this, SLOT(PollIoService()));
+    m_ioServicePollTimer.start(100);
+    PollIoService();
 }
 
-SystemPicturePage::~SystemPicturePage()
+
+void SystemPicturePage::closeEvent(QCloseEvent* event)
 {
     m_systemPicture.Stop();
+
+    //run the ioservice until all SystemPicture stuff is completed.
+    m_ioService.reset();
+    m_ioService.run();
+
+    event->accept();
 }
 
 void SystemPicturePage::UpdatedState(const Safir::Dob::Internal::SP::SystemState& data)
@@ -198,3 +208,8 @@ void SystemPicturePage::UpdateSystemTable(const Safir::Dob::Internal::SP::System
     }
 }
 
+void SystemPicturePage::PollIoService()
+{
+    m_ioService.poll_one();
+    m_ioService.reset();
+}

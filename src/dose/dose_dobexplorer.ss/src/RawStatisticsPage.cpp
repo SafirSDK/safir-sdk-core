@@ -102,10 +102,9 @@ namespace
 
 }
 
-RawStatisticsPage::RawStatisticsPage(boost::asio::io_service& ioService, QWidget* /*parent*/)
-    : m_ioService(ioService)
-    , m_systemPicture(Safir::Dob::Internal::SP::subscriber_tag, 
-                      ioService)
+RawStatisticsPage::RawStatisticsPage(QWidget* /*parent*/)
+    : m_systemPicture(Safir::Dob::Internal::SP::subscriber_tag, 
+                      m_ioService)
 {
     m_systemPicture.StartRawSubscription([this](const Safir::Dob::Internal::SP::RawStatistics& data)
                                          {UpdatedStatistics(data);});
@@ -123,11 +122,22 @@ RawStatisticsPage::RawStatisticsPage(boost::asio::io_service& ioService, QWidget
 
     tableSplitter->setStretchFactor(0,2);
     tableSplitter->setStretchFactor(1,1);
+
+    connect(&m_ioServicePollTimer,SIGNAL(timeout()), this, SLOT(PollIoService()));
+    m_ioServicePollTimer.start(100);
+    PollIoService();
 }
 
-RawStatisticsPage::~RawStatisticsPage()
+
+void RawStatisticsPage::closeEvent(QCloseEvent* event)
 {
     m_systemPicture.Stop();
+
+    //run the ioservice until all SystemPicture stuff is completed.
+    m_ioService.reset();
+    m_ioService.run();
+
+    event->accept();
 }
 
 
@@ -322,4 +332,10 @@ void RawStatisticsPage::UpdateRemoteTable()
         }
 
     }
+}
+
+void RawStatisticsPage::PollIoService()
+{
+    m_ioService.poll_one();
+    m_ioService.reset();
 }
