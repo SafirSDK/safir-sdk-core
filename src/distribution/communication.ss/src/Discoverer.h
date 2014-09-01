@@ -96,7 +96,8 @@ namespace Com
 
         void HandleReceivedDiscover(const CommunicationMessage_Discover& msg)
         {
-            lllog(DiscovererLogLevel)<<L"COM: Received discover from "<<msg.from().name().c_str()<<" ["<<msg.from().node_id()<<"]"<<std::endl;
+            lllog(DiscovererLogLevel)<<L"COM["<<m_me.nodeId<<L"]: Received discover from "<<msg.from().name().c_str()<<" ["<<msg.from().node_id()<<"]"<<std::endl;
+
             m_strand.dispatch([=]
             {
                 if (!m_running)
@@ -107,7 +108,7 @@ namespace Com
                 if (msg.from().node_id()==m_me.nodeId)
                 {
                     //discover from myself, remove seed
-                    lllog(DiscovererLogLevel)<<L"COM: Received discover from myself. Remove from seed list"<<std::endl;
+                    lllog(DiscovererLogLevel)<<L"COM["<<m_me.nodeId<<L"]: Received discover from myself. Remove from seed list"<<std::endl;
                     m_seeds.erase(msg.sent_to_id());
                     return;
                 }
@@ -116,7 +117,7 @@ namespace Com
                 {
                     //new node
                     AddNewNode(msg.from());
-                    UpdateIncompleteNodes(msg.from().node_id(), 0, 0);
+                    UpdateIncompleteNodes(msg.from().node_id(), 0, 0);  //setting numberOfPackets=0 indicates that we still havent got a nodeInfo, just a discover
                 }
 
                 SendNodeInfo(msg.from().node_id(), msg.sent_to_id(), Utilities::CreateEndpoint(msg.from().control_address()));
@@ -125,7 +126,7 @@ namespace Com
 
         void HandleReceivedNodeInfo(const CommunicationMessage_NodeInfo& msg)
         {
-            lllog(DiscovererLogLevel)<<L"COM: Received node info from "<<(msg.has_sent_from_node() ? msg.sent_from_node().name().c_str() : "<NotPresent>")<<", numNodes="<<msg.nodes().size()<<std::endl;
+            lllog(DiscovererLogLevel)<<L"COM["<<m_me.nodeId<<L"]: Received node info from "<<(msg.has_sent_from_node() ? msg.sent_from_node().name().c_str() : "<NotPresent>")<<", numNodes="<<msg.nodes().size()<<std::endl;
 
             m_strand.dispatch([=]
             {
@@ -156,12 +157,12 @@ namespace Com
                     {
                         if (nit->node_id()==0 && nit->name()=="seed")
                         {
-                            lllog(DiscovererLogLevel)<<L"COM: Received seed from other node. Address to seed: "<<nit->control_address().c_str()<<std::endl;
+                            lllog(DiscovererLogLevel)<<L"COM["<<m_me.nodeId<<L"]: Received seed from other node. Address to seed: "<<nit->control_address().c_str()<<std::endl;
                             AddSeed(nit->control_address());
                         }
                         else if (IsNewNode(nit->node_id()))
                         {
-                            lllog(DiscovererLogLevel)<<L"COM: Reported node: "<<nit->name().c_str()<<L" ["<<nit->node_id()<<L"]"<<std::endl;
+                            lllog(DiscovererLogLevel)<<L"COM["<<m_me.nodeId<<L"]: Reported node: "<<nit->name().c_str()<<L" ["<<nit->node_id()<<L"]"<<std::endl;
                             AddReportedNode(*nit);
                             //TODO: If not very busy, we can send discover right away instead of waiting for timer.
                         }
@@ -173,7 +174,7 @@ namespace Com
 #ifndef SAFIR_TEST
     private:
 #endif
-        static const int DiscovererLogLevel=9;
+        static const int DiscovererLogLevel=2;
         bool m_running {false};
 
         //Constant defining how many nodes that can be sent in a singel NodeInfo message without risking that fragmentSize is exceeded.
@@ -210,14 +211,14 @@ namespace Com
             for (auto it=m_seeds.cbegin(); it!=m_seeds.cend(); ++it)
             {
                 cm.mutable_discover()->set_sent_to_id(it->first);
-                lllog(DiscovererLogLevel)<<L"Send discover to seed: "<<it->second.controlAddress.c_str()<<std::endl;
+                lllog(DiscovererLogLevel)<<L"COM["<<m_me.nodeId<<L"]: Send discover to seed: "<<it->second.controlAddress.c_str()<<std::endl;
                 SendMessageTo(cm, Utilities::CreateEndpoint(it->second.controlAddress));
             }
 
             for (auto it=m_reportedNodes.cbegin(); it!=m_reportedNodes.cend(); ++it)
             {
                 cm.mutable_discover()->set_sent_to_id(it->first);
-                lllog(DiscovererLogLevel)<<L"Send discover to node I've heard about: "<<it->second.name.c_str()<<L", id="<<it->second.nodeId<<std::endl;
+                lllog(DiscovererLogLevel)<<L"COM["<<m_me.nodeId<<L"]: Send discover to node I've heard about: "<<it->second.name.c_str()<<L", id="<<it->second.nodeId<<std::endl;
                 SendMessageTo(cm, Utilities::CreateEndpoint(it->second.controlAddress));
             }
 
@@ -227,7 +228,7 @@ namespace Com
                 assert(nodeIt!=m_nodes.cend());
                 const Node& node=nodeIt->second;
                 cm.mutable_discover()->set_sent_to_id(node.nodeId);
-                lllog(DiscovererLogLevel)<<L"Resend discover to node I havent got all nodeInfo from: "<<node.name.c_str()<<L", id="<<node.nodeId<<std::endl;
+                lllog(DiscovererLogLevel)<<L"COM["<<m_me.nodeId<<L"]: Resend discover to node I havent got all nodeInfo from: "<<node.name.c_str()<<L", id="<<node.nodeId<<std::endl;
                 SendMessageTo(cm, Utilities::CreateEndpoint(node.controlAddress));
             }
         }
@@ -298,7 +299,7 @@ namespace Com
 
             assert(packetNumber==numberOfPackets);
 
-            lllog(DiscovererLogLevel)<<"Send "<<packetNumber<<" NodeInfo messages to id="<<toId<<std::endl;
+            lllog(DiscovererLogLevel)<<L"COM["<<m_me.nodeId<<L"]: Send "<<packetNumber<<" NodeInfo messages to id="<<toId<<std::endl;
         }
 
         void SendMessageTo(const CommunicationMessage& cm, const boost::asio::ip::udp::endpoint& toEndpoint)
@@ -319,11 +320,13 @@ namespace Com
         //incomplete nodes are nodes we have heard from but still haven't got all the nodeInfo messages from
         bool UpdateIncompleteNodes(int64_t id, size_t numberOfPackets, size_t packetNumber)
         {
+            //note: numberOfPackets=0 means that we received a discover and maybe still havent got any nodeInfo at all from that node
+
             if (numberOfPackets==1 && packetNumber==0)
             {
                 //this is the most common case, all of the nodes nodeInfo fits in one packet
                 m_incompletedNodes.erase(id); //normally it shoulnt be in incomplete list, but it can happen if number of nodes decreased and now fits in one packet
-                lllog(DiscovererLogLevel)<<L"COM: All nodeInfo from "<<id<<L" have been received"<<std::endl;
+                lllog(DiscovererLogLevel)<<L"COM["<<m_me.nodeId<<L"]: All nodeInfo from "<<id<<L" have been received"<<std::endl;
                 return true;
             }
 
@@ -341,7 +344,7 @@ namespace Com
                     else
                     {
                         //if v is empty we still havent got any nodeInfo at all and is not completed. The case when we just receives Discover but no NodeInfo
-                        lllog(DiscovererLogLevel)<<L"COM: We haven't got all nodeInfo yet from "<<id<<std::endl;
+                        lllog(DiscovererLogLevel)<<L"COM["<<m_me.nodeId<<L"]: We haven't got all nodeInfo yet from "<<id<<std::endl;
                         return false;
                     }
                 }
@@ -365,20 +368,21 @@ namespace Com
                 {
                     if (!(*valIt))
                     {
-                        lllog(DiscovererLogLevel)<<L"COM: We still haven't got all nodeInfo from "<<id<<std::endl;
+                        lllog(DiscovererLogLevel)<<L"COM["<<m_me.nodeId<<L"]: We still haven't got all nodeInfo from "<<id<<std::endl;
                         return false; //not completed yet since there are packets we havent got
                     }
                 }
 
                 //we get here if all have been received and node is completed
                 m_incompletedNodes.erase(id);
-                lllog(DiscovererLogLevel)<<L"COM: All nodeInfo from "<<id<<L" have been received"<<std::endl;
+                lllog(DiscovererLogLevel)<<L"COM["<<m_me.nodeId<<L"]: All nodeInfo from "<<id<<L" have been received"<<std::endl;
                 return true;
             }
             else //we have never talked to this node before
             {
                 //fist time we talk to this node, the case when its immediately completed is handled first in this method (numberOfPackets=1 and packetNumber=0)
                 //so if we get here we just received a Discover or a we still havent received all nodeInfo since it didn't fit in one packet
+                lllog(DiscovererLogLevel)<<L"COM["<<m_me.nodeId<<L"]: Add incomplete node with id"<<id<<L". NumberOfPackets: "<<numberOfPackets<<L", packetNumber: "<<packetNumber<<std::endl;
                 std::vector<bool> v(numberOfPackets, false);
                 if (packetNumber<v.size())
                 {
@@ -404,7 +408,7 @@ namespace Com
 
         void AddReportedNode(const CommunicationMessage_Node& node)
         {
-            lllog(DiscovererLogLevel)<<L"COM: Got report about node "<<node.name().c_str()<<L" ["<<node.node_id()<<L"]"<<std::endl;
+            lllog(DiscovererLogLevel)<<L"COM["<<m_me.nodeId<<L"]: Got report about node "<<node.name().c_str()<<L" ["<<node.node_id()<<L"]"<<std::endl;
 
             //insert in reported node map
             Node n(node.name(), node.node_id(), node.node_type_id(), node.control_address(), node.data_address(), true);
@@ -418,7 +422,7 @@ namespace Com
                 uint64_t id=LlufId_Generate64(seed.c_str());
                 Node s("seed", id, 0, seed, "", true);
                 m_seeds.insert(std::make_pair(id, s));
-                lllog(DiscovererLogLevel)<<L"COM: Add seed "<<seed.c_str()<<std::endl;
+                lllog(DiscovererLogLevel)<<L"COM["<<m_me.nodeId<<L"]: Add seed "<<seed.c_str()<<std::endl;
             }
             //else trying to seed myself
 

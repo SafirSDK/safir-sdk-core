@@ -377,7 +377,9 @@ namespace Com
                 }
                 else
                 {
+                    //if unacked, then immediately remove message from queue. Don't wait for ack.
                     m_sendQueue.dequeue();
+                    --m_sendQueueSize;
                 }
             }
         }

@@ -47,12 +47,12 @@ namespace Com
      */
     struct NodeTypeDefinition
     {
-        int64_t id;              //node type id
-        std::string name;               //unique readable name
-        std::string controlMulticastAddress;   //multicast address including port number, 'address:port' empty string if not multicast enabled
-        std::string dataMulticastAddress;   //multicast address including port number, 'address:port' empty string if not multicast enabled
-        int heartbeatInterval;          //time between heartbeats
-        int retryTimeout;               //time to wait before retransmitting unacked data
+        int64_t id;                             //node type id
+        std::string name;                       //unique readable name
+        std::string controlMulticastAddress;    //multicast address including port number, 'address:port' empty string if not multicast enabled
+        std::string dataMulticastAddress;       //multicast address including port number, 'address:port' empty string if not multicast enabled
+        int heartbeatInterval;                  //time between heartbeats (milliseconds)
+        int retryTimeout;                       //time to wait before retransmitting data (milliseconds)
     };
 
     //Callbacks functions used in Communications public interface.
@@ -133,7 +133,8 @@ namespace Com
 
         /**
          * Set callback for notification of new discovered nodes. Must be called before calling Start.
-         * Only useful if created with ControlModeTag
+         * If created with DataModeTag this callback will be triggered immediately from within InjectNode.
+         * I.e when calling InjectNode, this callback will be called before InjectNode returns.
          *
          * @param callback [in] - Callback function.
          */

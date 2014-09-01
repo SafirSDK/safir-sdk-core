@@ -164,6 +164,7 @@ namespace Com
 
             auto& nodeType=GetNodeType(node->nodeTypeId);
             nodeType.GetAckedDataSender().IncludeNode(id);
+            nodeType.GetUnackedDataSender().IncludeNode(id);
             m_deliveryHandler.IncludeNode(id);
         });
     }
@@ -185,6 +186,7 @@ namespace Com
 
             auto& nodeType=GetNodeType(node->nodeTypeId);
             nodeType.GetAckedDataSender().RemoveNode(id);
+            nodeType.GetUnackedDataSender().RemoveNode(id);
             nodeType.GetHeartbeatSender().RemoveNode(id);
             m_deliveryHandler.RemoveNode(id);
         });
@@ -195,13 +197,9 @@ namespace Com
         lllog(6)<<L"COM: Inject node '"<<name.c_str()<<L"' ["<<id<<L"]"<<std::endl;
 
         Node node(name, id, nodeTypeId, "", dataAddress, false);
-        auto& nodeType=GetNodeType(node.nodeTypeId);
-        nodeType.GetAckedDataSender().AddNode(node.nodeId, node.unicastAddress);
-        nodeType.GetHeartbeatSender().AddNode(node.nodeId, node.unicastAddress);
-        m_reader.Strand().dispatch([this, node]{m_deliveryHandler.AddNode(node);});
+        OnNewNode(node);
         IncludeNode(id);
     }
-
 
     bool CommunicationImpl::Send(int64_t nodeId, int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, int64_t dataTypeIdentifier, bool deliveryGuarantee)
     {
@@ -211,8 +209,7 @@ namespace Com
         }
         else
         {
-            //TODO: dataSender send unacked
-            return true;
+            return GetNodeType(nodeTypeId).GetUnackedDataSender().AddToSendQueue(nodeId, data, size, dataTypeIdentifier);
         }
     }
 
@@ -235,6 +232,7 @@ namespace Com
 
         auto& nodeType=GetNodeType(node.nodeTypeId);
         nodeType.GetAckedDataSender().AddNode(node.nodeId, node.unicastAddress);
+        nodeType.GetUnackedDataSender().AddNode(node.nodeId, node.unicastAddress);
         nodeType.GetHeartbeatSender().AddNode(node.nodeId, node.unicastAddress);
         m_reader.Strand().dispatch([this, node]{m_deliveryHandler.AddNode(node);});
 
