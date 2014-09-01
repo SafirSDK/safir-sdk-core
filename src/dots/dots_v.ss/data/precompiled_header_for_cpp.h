@@ -25,6 +25,7 @@
 #define __DOTS_GENERATED_PRECOMPILED_HEADER_H__
 
 #include <Safir/Dob/Typesystem/Internal/Kernel.h>
+#include <Safir/Dob/Typesystem/Internal/BlobOperations.h>
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
 #include <Safir/Dob/Typesystem/Object.h>
