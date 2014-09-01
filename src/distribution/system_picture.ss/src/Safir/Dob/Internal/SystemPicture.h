@@ -60,8 +60,8 @@ namespace SP
     struct master_tag_t {};
     const master_tag_t master_tag = master_tag_t();
 
-    struct slave_tag_t {};
-    const slave_tag_t slave_tag = slave_tag_t();
+    struct subscriber_tag_t {};
+    const subscriber_tag_t subscriber_tag = subscriber_tag_t();
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -73,6 +73,11 @@ namespace SP
         : private boost::noncopyable
     {
     public:
+        /** 
+         * Constructor for creating a master instance of SystemPicture.
+         *
+         * This is meant to be used in the Control executable.
+         */
         SystemPicture(master_tag_t,
                       boost::asio::io_service& ioService,
                       Com::Communication& communication,
@@ -83,9 +88,16 @@ namespace SP
                       const std::string& dataAddress,
                       const std::map<int64_t, NodeType>& nodeTypes);
 
-        explicit SystemPicture(slave_tag_t, 
-                               boost::asio::io_service& ioService);
+        /** 
+         * Constructor for creating a subscriber instance of SystemPicture.
+         *
+         * This is meant to be used in applications that just want to subscribe
+         * to the system picture information, such as dobexplorer.
+         */
+        SystemPicture(subscriber_tag_t, 
+                      boost::asio::io_service& ioService);
 
+        /** Destructor. */
         ~SystemPicture();
 
         /** 

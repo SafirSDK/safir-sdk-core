@@ -244,7 +244,7 @@ namespace SP
 
     }
 
-    SystemPicture::SystemPicture(slave_tag_t,
+    SystemPicture::SystemPicture(subscriber_tag_t,
                                  boost::asio::io_service& ioService)
         : m_impl(Safir::make_unique<Impl>(ioService))
     {

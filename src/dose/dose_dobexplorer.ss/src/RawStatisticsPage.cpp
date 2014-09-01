@@ -104,7 +104,7 @@ namespace
 
 RawStatisticsPage::RawStatisticsPage(boost::asio::io_service& ioService, QWidget* /*parent*/)
     : m_ioService(ioService)
-    , m_systemPicture(Safir::Dob::Internal::SP::slave_tag, 
+    , m_systemPicture(Safir::Dob::Internal::SP::subscriber_tag, 
                       ioService)
 {
     m_systemPicture.StartRawSubscription([this](const Safir::Dob::Internal::SP::RawStatistics& data)

@@ -131,7 +131,7 @@ int main(int argc, char * argv[])
     signals.add(SIGTERM);
 #endif
 
-    Safir::Dob::Internal::SP::SystemPicture sp(Safir::Dob::Internal::SP::slave_tag, ioService);
+    Safir::Dob::Internal::SP::SystemPicture sp(Safir::Dob::Internal::SP::subscriber_tag, ioService);
     
     if (options.raw)
     {

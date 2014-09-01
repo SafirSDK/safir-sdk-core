@@ -88,7 +88,7 @@ namespace
 
 SystemPicturePage::SystemPicturePage(boost::asio::io_service& ioService, QWidget* /*parent*/)
     : m_ioService(ioService)
-    , m_systemPicture(Safir::Dob::Internal::SP::slave_tag,
+    , m_systemPicture(Safir::Dob::Internal::SP::subscriber_tag,
                       ioService)
 {
     m_systemPicture.StartStateSubscription([this](const Safir::Dob::Internal::SP::SystemState& state)
