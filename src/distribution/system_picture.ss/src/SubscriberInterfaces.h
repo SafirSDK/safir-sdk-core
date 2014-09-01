@@ -45,8 +45,7 @@ namespace SP
     public:
         typedef RawStatistics DataWrapper;
 
-        virtual void Start(boost::asio::io_service& ioService,
-                           const std::function<void (const RawStatistics& data)>& dataCallback) = 0;
+        virtual void Start(const std::function<void (const RawStatistics& data)>& dataCallback) = 0;
 
         virtual void Stop() = 0;
     };
@@ -63,8 +62,7 @@ namespace SP
         typedef SystemState DataWrapper;
 
         /** Start a subscription to system states. */
-        virtual void Start(boost::asio::io_service& ioService,
-                           const std::function<void (const SystemState& data)>& dataCallback) = 0;
+        virtual void Start(const std::function<void (const SystemState& data)>& dataCallback) = 0;
 
         /** Stop the subscription. */
         virtual void Stop() = 0;

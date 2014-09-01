@@ -60,8 +60,7 @@ namespace SP
                                                 });
         }
 
-        void Start(boost::asio::io_service& /*ioService*/,
-                   const std::function<void (const SystemState& data)>& dataCallback) override
+        void Start(const std::function<void (const SystemState& data)>& dataCallback) override
         {
             m_strand.dispatch([this, dataCallback]
                               {
@@ -76,23 +75,13 @@ namespace SP
 
         void Stop() override
         {
-            
+            m_strand.dispatch([this]
+                              {
+                                  m_dataCallback = nullptr;
+                              });
         }
 
     private:
-        /*        void DataReceived(const char* const data, size_t size)
-        {
-
-            auto msg = Safir::make_unique<typename WrapperCreatorT::WrappedType>();
-        
-            const bool parseResult = msg->ParseFromArray(data, static_cast<int>(size));
-
-            if (!parseResult)
-            {
-                throw std::logic_error("StateSubscriberMaster: Failed to parse message");
-            }
-            m_dataCallback(WrapperCreatorT::Create(std::move(msg)));
-            }*/
 
         std::function<void (const SystemState& data)> m_dataCallback;
         boost::asio::strand m_strand;

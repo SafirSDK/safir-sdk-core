@@ -46,67 +46,44 @@ namespace SP
         : public SubscriberInterfaceT
     {
     public:
-        explicit LocalSubscriber(const char* const name)
-            : m_name (name)
-            , m_stopped(false)
+        LocalSubscriber(boost::asio::io_service& ioService,
+                        const char* const name)
+            : m_strand(ioService)
+            , m_name (name)
+            , m_subscriber(ioService,
+                           m_name,
+                           m_strand.wrap([this](const char* const data, size_t size)
+                                         {
+                                             DataReceived(data,size);
+                                         }))
+
         {
 
-        }
-
-        ~LocalSubscriber()
-        {
-            if (!m_stopped)
-            {
-                SEND_SYSTEM_LOG(Error,
-                                << "You have to call Stop before destroying object");
-                abort();
-            }
         }
 
         //callback will be delivered on one strand.
-        //but Start and Stop are not MT safe, please only call one at a time.
-        void Start(boost::asio::io_service& ioService,
-                   const std::function<void (const typename SubscriberInterfaceT::DataWrapper& data)>& dataCallback) override
+        void Start(const std::function<void (const typename SubscriberInterfaceT::DataWrapper& data)>& dataCallback) override
         {
-            if (m_stopped)
-            {
-                throw std::logic_error("LocalSubscriber already stopped");
-            }
+            m_strand.dispatch([this, dataCallback]
+                              {
+                                  m_dataCallback = dataCallback;
 
-            if (m_subscriber != nullptr)
-            {
-                throw std::logic_error("LocalSubscriber already started");
-            }
-
-            m_dataCallback = dataCallback;
-            
-            m_subscriber = Safir::make_unique<IpcSubscriberT>
-                (ioService,
-                 m_name,
-                 [this](const char* const data, size_t size)
-                 {
-                     DataReceived(data,size);
-                 });
-            m_subscriber->Connect();
+                                  m_subscriber.Connect();
+                              });
         }
 
         void Stop() override
         {
-            const bool was_stopped = m_stopped.exchange(true);
-            if (!was_stopped)
-            {
-                m_subscriber->Disconnect();
-            }
+            m_strand.dispatch([this]
+                              {
+                                  m_subscriber.Disconnect();
+                              });
         }
 
     private:
+        //called in strand
         void DataReceived(const char* const data, size_t size)
         {
-            if (m_stopped)
-            {
-                return;
-            }
-
 #ifdef CHECK_CRC
             size -= sizeof(int); //remove the crc from size
             int expected;
@@ -121,7 +98,7 @@ namespace SP
 #endif
 
             auto msg = Safir::make_unique<typename WrapperCreatorT::WrappedType>();
-        
+
             const bool parseResult = msg->ParseFromArray(data, static_cast<int>(size));
 
             if (!parseResult)
@@ -133,16 +110,15 @@ namespace SP
 
         //Order/sync is guaranteed by IpcSubscribers delivery order guarantee.
 
+        boost::asio::io_service::strand m_strand;
         const std::string m_name;
 
         std::function<void (const typename SubscriberInterfaceT::DataWrapper& data)> m_dataCallback;
-        std::unique_ptr<IpcSubscriberT> m_subscriber;
-        std::atomic<bool> m_stopped;
+        IpcSubscriberT m_subscriber;
     };
 
-    
-}
-}
-}
-}
 
+}
+}
+}
+}

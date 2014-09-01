@@ -56,7 +56,7 @@ std::unique_ptr<NodeStatisticsMessage> GetProtobuf()
     msg->set_control_address("asdfasdf");
     msg->set_data_address("foobar");
     msg->set_election_id(91);
-    
+
     return std::move(msg);
 }
 
@@ -69,28 +69,27 @@ int disconnect_calls = 0;
 class Subscriber
 {
 public:
-    Subscriber(boost::asio::io_service&, 
+    Subscriber(boost::asio::io_service&,
                const std::string& name,
                const std::function<void(const char* const data, const size_t size)>& callback)
     {
         dataCallback = callback;
         BOOST_CHECK(name == "foo");
     }
+
     void Connect() {++connect_calls;}
     void Disconnect() {++disconnect_calls;}
-    
+
 };
 
 BOOST_AUTO_TEST_CASE( send_one )
 {
-    LocalSubscriber<::Subscriber, RawStatisticsSubscriber, RawStatisticsCreator> subscriber("foo");
-    
-    //we don't actually use the ioservice, but it is needed to be passed along to the tested classes.
     boost::asio::io_service ioService;
 
+    LocalSubscriber<::Subscriber, RawStatisticsSubscriber, RawStatisticsCreator> subscriber(ioService, "foo");
+
     int dataReceived = 0;
-    subscriber.Start(ioService,
-                     [&](const RawStatistics& r)
+    subscriber.Start([&](const RawStatistics& r)
                      {
                          ++dataReceived;
 
@@ -121,11 +120,10 @@ BOOST_AUTO_TEST_CASE( send_one )
     dataCallback(data.get(),size);
 
     subscriber.Stop();
+    ioService.run();
 
     BOOST_CHECK(connect_calls == 1);
     BOOST_CHECK(disconnect_calls == 1);
     BOOST_CHECK(dataReceived == 1);
 
 }
-
-
