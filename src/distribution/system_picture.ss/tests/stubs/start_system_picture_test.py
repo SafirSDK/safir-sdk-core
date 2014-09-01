@@ -54,7 +54,7 @@ def mkdir(newdir):
             os.mkdir(newdir)
 
 def launch_control(number, debug):
-    command = (safir_control,) + ("--name",    "Node_{0:03d}".format(number), 
+    command = (control_stub,) + ("--name",    "Node_{0:03d}".format(number), 
                                   "--control-address", "127.0.0.1:33{0:03d}".format(number),
                                   "--data-address", "127.0.0.1:43{0:03d}".format(number),
                                   "--seed",    "127.0.0.1:33000")
@@ -80,15 +80,15 @@ if SAFIR_RUNTIME is None or not os.path.isdir(SAFIR_RUNTIME):
     sys.exit(1)
 SAFIR_RUNTIME = os.path.normpath(SAFIR_RUNTIME)
 
-safir_control = os.path.join(SAFIR_RUNTIME,"bin","safir_control")
+control_stub = os.path.join(SAFIR_RUNTIME,"bin","control_stub")
 
-parser = argparse.ArgumentParser(description='Run a lot of safir_control')
+parser = argparse.ArgumentParser(description='Run a lot of control_stub')
 parser.add_argument('--number', '-n', dest="num", action='store', type=int,
                     default=10,
                     help='Number of controls to run')
 parser.add_argument('--terminate', '-t', dest='terminate', action='store_true',
                     default=False,
-                    help='randomly terminate safir_controls every 60 seconds')
+                    help='randomly terminate control_stubs every 60 seconds')
 parser.add_argument('--skip-0', '-s', dest='skip', action='store_true',
                     default=False,
                     help='Dont start Node 0')
