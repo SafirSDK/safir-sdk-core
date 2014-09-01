@@ -714,16 +714,20 @@ def translate_results_to_junit(suite_name):
                     meas = child.getElementsByTagName("Measurement")[0]
 
                     junitfile.write("  <testcase name=\"" + testName + "\" classname=\"" +
-                                    suite_name + "\" time=\"" + str(executionTime) + "\"")
+                                    suite_name + "\" time=\"" + str(executionTime) + "\">\n")
+                    output = escape(getText(meas.getElementsByTagName("Value")[0].childNodes))
                     if testStatus == "passed":
                         """success"""
-                        junitfile.write("/>\n")
+                        junitfile.write("<system-out>" +
+                                        output +
+                                        "\n</system-out>\n")
                     else:
                         """failure"""
-                        output = escape(getText(meas.getElementsByTagName("Value")[0].childNodes))
-                        junitfile.write(">\n    <error message=\"" + exitCode + "(" + exitValue +  ")\">" +
+
+                        junitfile.write("<error message=\"" + exitCode + "(" + exitValue +  ")\">" +
                                         output +
-                                        "\n</error>\n  </testcase>\n")
+                                        "\n</error>\n")
+                    junitfile.write("  </testcase>\n")
         junitfile.write("</testsuite>")
 
 
