@@ -61,10 +61,13 @@ build_dir        src/dots/dots_v.ss                        RelWithDebInfo
 build_dir        src/dots/dots_depends.ss                  RelWithDebInfo
 
 #Control
+build_dir        src/control/control_utils.ss/src          RelWithDebInfo 
 build_dir        src/control/control.ss/src                RelWithDebInfo
 
 #Control unit tests
+run_test_suite   src/control/control_utils.ss/tests        control_utils_tests
 run_test_suite   src/control/control.ss/tests              control_tests
+
 
 #COPY DOB FILES
 copy_dob_files   src/dose/dose_dou.ss/data                 safir_core

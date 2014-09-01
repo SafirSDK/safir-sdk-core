@@ -21,7 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include "../../../src/Config.h"
+#include <Safir/Dob/Internal/ControlConfig.h>
 
 #include <iostream>
 #include <math.h>

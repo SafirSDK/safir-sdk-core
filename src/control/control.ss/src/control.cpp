@@ -27,11 +27,11 @@
 #include <Safir/Utilities/Internal/MakeUnique.h>
 #include <Safir/Dob/Internal/SystemPicture.h>
 #include <Safir/Utilities/Internal/Id.h>
+#include <Safir/Dob/Internal/ControlConfig.h>
 #include <iostream>
 #include <map>
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
-#include "Config.h"
 
 //disable warnings in boost
 #if defined _MSC_VER

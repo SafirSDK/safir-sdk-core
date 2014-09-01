@@ -1,6 +1,6 @@
 FILE(GLOB sources *.cpp)
 
-ADD_EXECUTABLE(Config_test ${sources} ../../../src/Config.h ../../../src/Config.cpp)
+ADD_EXECUTABLE(Config_test ${sources})
 
 IF (NOT MSVC)
   TARGET_LINK_LIBRARIES(Config_test dots_internal lluf_id lluf_utils lluf_config ${Boost_LIBRARIES})
