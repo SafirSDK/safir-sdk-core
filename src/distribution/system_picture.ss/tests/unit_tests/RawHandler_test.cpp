@@ -21,7 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include "../src/RawHandler.h"
+#include "../../src/RawHandler.h"
 #include <boost/thread.hpp>
 #include <set>
 

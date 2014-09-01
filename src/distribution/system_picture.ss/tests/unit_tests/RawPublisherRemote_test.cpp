@@ -22,32 +22,43 @@
 *
 ******************************************************************************/
 #include <Safir/Utilities/Internal/MakeUnique.h>
-#include "../src/StatePublisherRemote.h"
+#include <Safir/Dob/Internal/RawStatistics.h>
+#include "../../src/RawPublisherRemote.h"
 
-#define BOOST_TEST_MODULE StatePublisherRemoteTest
+#define BOOST_TEST_MODULE RawPublisherRemoteTest
 #include <boost/test/unit_test.hpp>
 
 
 using namespace Safir::Dob::Internal::SP;
-
-boost::asio::io_service ioService;
 
 
 int numPerform = 0;
 int numSend10 = 0;
 int numSend20 = 0;
 size_t gsize = 0;
+StatisticsCallback cb1;
+StatisticsCallback cb2;
+
 class Handler
 {
 public:
-    void PerformOnStateMessage(const std::function<void(std::unique_ptr<char []> data, 
-                                                        const size_t size)> & fn,
-                               const size_t extraSpace,
-                               const bool onlyOwnState) const
+    void AddNodesChangedCallback(const StatisticsCallback& callback)
     {
-        BOOST_CHECK(onlyOwnState == true);
+        cb1 = callback;
+    }
+
+    void AddElectionIdChangedCallback(const StatisticsCallback& callback)
+    {
+        cb2 = callback;
+    }
+
+
+    void PerformOnMyStatisticsMessage(const std::function<void(std::unique_ptr<char []> data, 
+                                                               const size_t size)> & fn,
+                                      const size_t extraSpace) const
+    {
         BOOST_CHECK(extraSpace == 0 || extraSpace == sizeof(int32_t));
-        std::wcout << "Perform" << std::endl;
+        std::wcout << "Perform " << numPerform << std::endl;
         const size_t size = 10 + extraSpace;
         auto data = std::unique_ptr<char[]>(new char[size]);
         strcpy(data.get(),"123456789");
@@ -78,7 +89,7 @@ public:
         BOOST_CHECK(acked);
         BOOST_CHECK(size == gsize);
         BOOST_CHECK(0 == strcmp(data.get(), "123456789"));
-        std::wcout << "Send" << std::endl;
+        std::wcout << "Send " << nodeTypeId << std::endl;
         BOOST_CHECK(nodeTypeId == 10 || nodeTypeId == 20);
         if (nodeTypeId == 10)
         {
@@ -98,18 +109,60 @@ BOOST_AUTO_TEST_CASE( send_ten )
 {
     Handler h;
     Communication communication;
+    boost::asio::io_service ioService;
+
 
     std::map<int64_t, NodeType> nodeTypes;
     nodeTypes.insert(std::make_pair(10, NodeType(10,"mupp",false,boost::chrono::seconds(1),10,boost::chrono::seconds(1))));
     nodeTypes.insert(std::make_pair(20, NodeType(20,"tupp",true,boost::chrono::seconds(1),22,boost::chrono::seconds(1))));
-    
-    StatePublisherRemoteBasic<::Handler, ::Communication> publisher
+
+    RawPublisherRemoteBasic<::Handler, ::Communication> publisher
         (ioService,communication,nodeTypes,"foo",h,boost::chrono::milliseconds(10));
-     
+    
     h.stopCall = [&]{publisher.Stop();};
     ioService.run();
     
+    BOOST_CHECK(numPerform == 10);
+    BOOST_CHECK(numSend10 == 5);
+    BOOST_CHECK(numSend20 == 10);
+}
 
+
+
+BOOST_AUTO_TEST_CASE( callbacks )
+{
+    numPerform = 0;
+    numSend10 = 0;
+    numSend20 = 0;
+    std::wcout << "testing callbacks" << std::endl;
+    Handler h;
+    Communication communication;
+    boost::asio::io_service ioService;
+
+
+    std::map<int64_t, NodeType> nodeTypes;
+    nodeTypes.insert(std::make_pair(10, NodeType(10,"mupp",false,boost::chrono::seconds(1),10,boost::chrono::seconds(1))));
+    nodeTypes.insert(std::make_pair(20, NodeType(20,"tupp",true,boost::chrono::seconds(1),22,boost::chrono::seconds(1))));
+
+    RawPublisherRemoteBasic<::Handler, ::Communication> publisher
+        (ioService,communication,nodeTypes,"foo",h,boost::chrono::hours(10));
+    
+    h.stopCall = [&]{publisher.Stop();};
+
+    cb1(RawStatistics());
+    cb1(RawStatistics());
+    cb1(RawStatistics());
+    cb1(RawStatistics());
+    cb1(RawStatistics());
+    cb2(RawStatistics());
+    cb2(RawStatistics());
+    cb2(RawStatistics());
+    cb2(RawStatistics());
+    cb1(RawStatistics());
+    cb2(RawStatistics());
+
+    ioService.run();
+    
     BOOST_CHECK(numPerform == 10);
     BOOST_CHECK(numSend10 == 10);
     BOOST_CHECK(numSend20 == 10);

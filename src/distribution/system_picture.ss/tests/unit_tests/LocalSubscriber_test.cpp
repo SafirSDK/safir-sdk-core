@@ -36,8 +36,8 @@
 #pragma warning (pop)
 #endif
 
-#include "../src/LocalSubscriber.h"
-#include "../src/MessageWrapperCreators.h"
+#include "../../src/LocalSubscriber.h"
+#include "../../src/MessageWrapperCreators.h"
 
 
 #define BOOST_TEST_MODULE LocalSubscriberTest

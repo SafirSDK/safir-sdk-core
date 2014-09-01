@@ -22,7 +22,7 @@
 *
 ******************************************************************************/
 #include <Safir/Utilities/Internal/MakeUnique.h>
-#include "../src/RemoteSubscriber.h"
+#include "../../src/RemoteSubscriber.h"
 #include <Safir/Utilities/Internal/MakeUnique.h>
 
 

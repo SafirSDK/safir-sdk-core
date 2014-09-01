@@ -22,7 +22,7 @@
 *
 ******************************************************************************/
 #include <Safir/Dob/Internal/SystemState.h>
-#include "../src/MessageWrapperCreators.h"
+#include "../../src/MessageWrapperCreators.h"
 #include <Safir/Utilities/Internal/MakeUnique.h>
 #include <boost/lexical_cast.hpp>
 

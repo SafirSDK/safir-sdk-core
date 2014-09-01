@@ -21,8 +21,8 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include "../src/Coordinator.h"
-#include "../src/MessageWrapperCreators.h"
+#include "../../src/Coordinator.h"
+#include "../../src/MessageWrapperCreators.h"
 #include <Safir/Utilities/Internal/MakeUnique.h>
 #include <memory>
 

@@ -44,7 +44,7 @@ build_dir        src/distribution/system_picture.ss/src        RelWithDebInfo De
 
 #Distribution unit tests
 run_test_suite   src/distribution/communication.ss/tests/unit_tests     communication_unit_tests
-run_test_suite   src/distribution/system_picture.ss/tests      system_picture_tests
+run_test_suite   src/distribution/system_picture.ss/tests/unit_tests    system_picture_tests
 
 #DOTS
 build_dir        src/dots/dots_internal.ss/src             RelWithDebInfo   Debug
