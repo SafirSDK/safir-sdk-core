@@ -62,13 +62,13 @@ namespace SP
 
 
     using namespace Safir::Utilities::Internal;
-    
+
     class SystemPicture::Impl
         : private boost::noncopyable
     {
     public:
 
-        /** 
+        /**
          * Construct a master SystemPicture.
          */
         Impl(boost::asio::io_service& ioService,
@@ -88,20 +88,20 @@ namespace SP
                                                           controlAddress,
                                                           dataAddress,
                                                           nodeTypes))
-            , m_rawPublisherLocal(Safir::make_unique<RawPublisherLocal>(ioService, 
-                                                                        *m_rawHandler, 
+            , m_rawPublisherLocal(Safir::make_unique<RawPublisherLocal>(ioService,
+                                                                        *m_rawHandler,
                                                                         MASTER_LOCAL_RAW_NAME,
                                                                         boost::chrono::seconds(1)))
             , m_rawPublisherRemote(Safir::make_unique<RawPublisherRemote>(ioService,
                                                                           communication,
-                                                                          nodeTypes, 
-                                                                          MASTER_REMOTE_RAW_NAME, 
+                                                                          nodeTypes,
+                                                                          MASTER_REMOTE_RAW_NAME,
                                                                           *m_rawHandler,
                                                                           boost::chrono::seconds(30)))
-            , m_rawSubscriberRemote(Safir::make_unique<RemoteSubscriber<Com::Communication, RawHandler>>(communication, 
-                                                                                                         MASTER_REMOTE_RAW_NAME, 
+            , m_rawSubscriberRemote(Safir::make_unique<RemoteSubscriber<Com::Communication, RawHandler>>(communication,
+                                                                                                         MASTER_REMOTE_RAW_NAME,
                                                                                                          *m_rawHandler))
-            , m_coordinator(Safir::make_unique<Coordinator>(ioService, 
+            , m_coordinator(Safir::make_unique<Coordinator>(ioService,
                                                             communication,
                                                             name,
                                                             id,
@@ -111,20 +111,20 @@ namespace SP
                                                             nodeTypes,
                                                             MASTER_REMOTE_ELECTION_NAME,
                                                             *m_rawHandler))
-            , m_statePublisherLocal(Safir::make_unique<StatePublisherLocal>(ioService, 
-                                                                            *m_coordinator, 
+            , m_statePublisherLocal(Safir::make_unique<StatePublisherLocal>(ioService,
+                                                                            *m_coordinator,
                                                                             MASTER_LOCAL_STATE_NAME,
                                                                             boost::chrono::seconds(1)))
             , m_stateSubscriberLocal(Safir::make_unique<StateSubscriberMaster>(ioService,
                                                                                *m_coordinator))
-            , m_statePublisherRemote(Safir::make_unique<StatePublisherRemote>(ioService, 
-                                                                              communication, 
+            , m_statePublisherRemote(Safir::make_unique<StatePublisherRemote>(ioService,
+                                                                              communication,
                                                                               nodeTypes,
-                                                                              MASTER_REMOTE_STATE_NAME, 
+                                                                              MASTER_REMOTE_STATE_NAME,
                                                                               *m_coordinator,
                                                                               boost::chrono::seconds(1)))
             , m_stateSubscriberRemote(Safir::make_unique<RemoteSubscriber<Com::Communication,Coordinator>>
-                                      (communication, 
+                                      (communication,
                                        MASTER_REMOTE_STATE_NAME,
                                        *m_coordinator))
             , m_stopped(false)
@@ -132,8 +132,33 @@ namespace SP
 
         }
 
-        /** 
+        /**
          * Construct a slave SystemPicture.
+         */
+        explicit Impl(boost::asio::io_service& ioService,
+                      Com::Communication& communication,
+                      const std::string& name,
+                      const int64_t id,
+                      const int64_t nodeTypeId,
+                      const std::string& dataAddress,
+                      const std::map<int64_t, NodeType>& nodeTypes)
+            : m_ioService(ioService)
+            , m_rawHandler(Safir::make_unique<RawHandler>(ioService,
+                                                          communication,
+                                                          name,
+                                                          id,
+                                                          nodeTypeId,
+                                                          "",
+                                                          dataAddress,
+                                                          nodeTypes))
+            , m_stopped(false)
+        {
+
+        }
+
+
+        /**
+         * Construct a subscriber SystemPicture.
          */
         explicit Impl(boost::asio::io_service& ioService)
             : m_ioService(ioService)
@@ -181,7 +206,7 @@ namespace SP
 
             }
         }
-        
+
         void StartRawSubscription(const std::function<void (const RawStatistics& data)>& dataCallback)
         {
             if (m_stopped)
@@ -200,10 +225,10 @@ namespace SP
             m_stateSubscriberLocal->Start(m_ioService, dataCallback);
         }
 
-        
+
     private:
         boost::asio::io_service& m_ioService;
-        
+
         std::unique_ptr<RawHandler> m_rawHandler;
 
         std::unique_ptr<RawPublisherLocal> m_rawPublisherLocal;
@@ -222,7 +247,7 @@ namespace SP
 
         std::atomic<bool> m_stopped;
     };
-    
+
     SystemPicture::SystemPicture(master_tag_t,
                                  boost::asio::io_service& ioService,
                                  Com::Communication& communication,
@@ -232,14 +257,33 @@ namespace SP
                                  const std::string& controlAddress,
                                  const std::string& dataAddress,
                                  const std::map<int64_t, NodeType>& nodeTypes)
-    : m_impl(Safir::make_unique<Impl>(ioService,
-                                    communication,
-                                    name,
-                                    id,
-                                    nodeTypeId,
-                                    controlAddress,
-                                    dataAddress,
-                                    nodeTypes))
+        : m_impl(Safir::make_unique<Impl>(ioService,
+                                          communication,
+                                          name,
+                                          id,
+                                          nodeTypeId,
+                                          controlAddress,
+                                          dataAddress,
+                                          nodeTypes))
+    {
+
+    }
+
+    SystemPicture::SystemPicture(slave_tag_t,
+                                 boost::asio::io_service& ioService,
+                                 Com::Communication& communication,
+                                 const std::string& name,
+                                 const int64_t id,
+                                 const int64_t nodeTypeId,
+                                 const std::string& dataAddress,
+                                 const std::map<int64_t, NodeType>& nodeTypes)
+        : m_impl(Safir::make_unique<Impl>(ioService,
+                                          communication,
+                                          name,
+                                          id,
+                                          nodeTypeId,
+                                          dataAddress,
+                                          nodeTypes))
     {
 
     }
