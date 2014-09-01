@@ -151,6 +151,9 @@ namespace SP
                                                           "",
                                                           dataAddress,
                                                           nodeTypes))
+            , m_stateSubscriberLocal(Safir::make_unique<LocalSubscriber<Safir::Utilities::Internal::IpcSubscriber,
+                                                                        SystemStateSubscriber,
+                                                                        SystemStateCreator>>(MASTER_LOCAL_STATE_NAME))
             , m_stopped(false)
         {
 
@@ -213,6 +216,12 @@ namespace SP
             {
                 throw std::logic_error("SystemPicture has already been stopped");
             }
+
+            if (m_rawSubscriberLocal == nullptr)
+            {
+                throw std::logic_error("Raw Subscriptions are not available in this SystemPicture instance");
+            }
+
             m_rawSubscriberLocal->Start(m_ioService, dataCallback);
         }
 
@@ -222,6 +231,12 @@ namespace SP
             {
                 throw std::logic_error("SystemPicture has already been stopped");
             }
+
+            if (m_stateSubscriberLocal == nullptr)
+            {
+                throw std::logic_error("State Subscriptions are not available in this SystemPicture instance");
+            }
+
             m_stateSubscriberLocal->Start(m_ioService, dataCallback);
         }
 
