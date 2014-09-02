@@ -36,22 +36,15 @@ int numPerform = 0;
 int numSend10 = 0;
 int numSend20 = 0;
 size_t gsize = 0;
-StatisticsCallback cb1;
-StatisticsCallback cb2;
+StatisticsCallback cb;
 
 class Handler
 {
 public:
-    void AddNodesChangedCallback(const StatisticsCallback& callback)
+    void AddRawChangedCallback(const StatisticsCallback& callback)
     {
-        cb1 = callback;
+        cb = callback;
     }
-
-    void AddElectionIdChangedCallback(const StatisticsCallback& callback)
-    {
-        cb2 = callback;
-    }
-
 
     void PerformOnMyStatisticsMessage(const std::function<void(std::unique_ptr<char []> data, 
                                                                const size_t size)> & fn,
@@ -149,23 +142,24 @@ BOOST_AUTO_TEST_CASE( callbacks )
     
     h.stopCall = [&]{publisher.Stop();};
 
-    cb1(RawStatistics());
-    cb1(RawStatistics());
-    cb1(RawStatistics());
-    cb1(RawStatistics());
-    cb1(RawStatistics());
-    cb2(RawStatistics());
-    cb2(RawStatistics());
-    cb2(RawStatistics());
-    cb2(RawStatistics());
-    cb1(RawStatistics());
-    cb2(RawStatistics());
+    cb(RawStatistics(), RawChanges(RawChanges::NODES_CHANGED));
+    cb(RawStatistics(), RawChanges(RawChanges::NODES_CHANGED));
+    cb(RawStatistics(), RawChanges(RawChanges::NODES_CHANGED));
+    cb(RawStatistics(), RawChanges(RawChanges::NODES_CHANGED));
+    cb(RawStatistics(), RawChanges(RawChanges::NODES_CHANGED));
+    cb(RawStatistics(), RawChanges(RawChanges::ELECTION_ID_CHANGED));
+    cb(RawStatistics(), RawChanges(RawChanges::ELECTION_ID_CHANGED));
+    cb(RawStatistics(), RawChanges(RawChanges::ELECTION_ID_CHANGED));
+    cb(RawStatistics(), RawChanges(RawChanges::ELECTION_ID_CHANGED));
+    cb(RawStatistics(), RawChanges(RawChanges::NODES_CHANGED));
+    cb(RawStatistics(), RawChanges(RawChanges::ELECTION_ID_CHANGED));
 
     ioService.run();
     
-    BOOST_CHECK(numPerform == 10);
-    BOOST_CHECK(numSend10 == 10);
-    BOOST_CHECK(numSend20 == 10);
+    BOOST_CHECK_EQUAL(numPerform, 10);
+    BOOST_CHECK_EQUAL(numSend10, 10);
+    BOOST_CHECK_EQUAL(numSend20, 10);
 }
+
 
 

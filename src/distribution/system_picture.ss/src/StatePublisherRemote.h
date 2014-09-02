@@ -24,6 +24,7 @@
 #pragma once
 
 #include <Safir/Dob/Internal/Communication.h>
+#include <Safir/Dob/Internal/SystemPictureDefs.h>
 #include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Utilities/Internal/AsioPeriodicTimer.h>
 #include <Safir/Utilities/Internal/SystemLog.h>

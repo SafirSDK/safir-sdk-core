@@ -36,6 +36,7 @@
 #include <map>
 #include <set>
 #include "ElectionHandler.h"
+#include "RawChanges.h"
 
 #ifdef _MSC_VER
 #  pragma warning (push)
@@ -64,7 +65,7 @@ namespace Internal
 
 namespace SP
 {
-    
+
 
     template <class CommunicationT, class RawHandlerT, class ElectionHandlerT>
     class CoordinatorBasic
@@ -80,7 +81,7 @@ namespace SP
                          const std::string& dataAddress,
                          const std::map<int64_t, NodeType>& nodeTypes,
                          const char* const receiverId,
-                         RawHandlerT& rawHandler)        
+                         RawHandlerT& rawHandler)
             : m_strand (ioService)
             , m_communication(communication)
             , m_electionHandler(ioService,
@@ -98,7 +99,7 @@ namespace SP
                                     {
                                         m_ownElectionId = 0;
                                     }
-                                    
+
                                     m_rawHandler.SetElectionId(nodeId, electionId);
                                 })
             , m_name(name)
@@ -110,7 +111,7 @@ namespace SP
             , m_rawHandler(rawHandler)
         {
             m_stateMessage.set_elected_id(0); //our state message is not valid until we have a real id set.
-            
+
             rawHandler.AddRawChangedCallback(m_strand.wrap([this](const RawStatistics& statistics,
                                                                   const RawChanges flags)
             {
@@ -125,7 +126,7 @@ namespace SP
                     {
                         UpdateMyState();
                     }
-                    
+
                     if (flags.NodesChanged())
                     {
                         m_electionHandler.NodesChanged(std::move(statistics));
@@ -146,7 +147,7 @@ namespace SP
         //extraSpace adds bytes at the end of the buffer, e.g. for adding a crc
         //if onlyOwnState is true the callback will only be called if we're elected
         //and have a valid own system state that is ok to send.
-        void PerformOnStateMessage(const std::function<void(std::unique_ptr<char []> data, 
+        void PerformOnStateMessage(const std::function<void(std::unique_ptr<char []> data,
                                                             const size_t size)> & fn,
                                    const size_t extraSpace,
                                    const bool onlyOwnState)
@@ -167,7 +168,7 @@ namespace SP
                 {
                     return;
                 }
-                              
+
                 const size_t size = m_stateMessage.ByteSize() + extraSpace;
                 auto data = std::unique_ptr<char[]>(new char[size]);
                 m_stateMessage.SerializeWithCachedSizesToArray
@@ -175,17 +176,19 @@ namespace SP
                 fn(std::move(data), size);
             });
         }
-        
+
         //new incoming system state from elected coordinator
-        void NewRemoteData(const int64_t from, 
-                           const boost::shared_ptr<char[]>& data, 
+        void NewRemoteData(const int64_t from,
+                           const boost::shared_ptr<char[]>& data,
                            const size_t size)
         {
             m_strand.dispatch([this,from,data,size]
             {
                 if (!m_electionHandler.IsElected(from))
                 {
-                    SEND_SYSTEM_LOG(Informational, << "SystemPicture (in node " << m_id << ") got a new system state (from node "
+                    SEND_SYSTEM_LOG(Informational, 
+                                    << "SystemPicture (in node " << m_id 
+                                    << ") got a new system state (from node "
                                     << from << ") from a node that is not elected. Discarding.");
                     return;
                 }
@@ -197,23 +200,27 @@ namespace SP
                 if (m_stateMessage.election_id() == 0 ||
                     m_ownElectionId != 0)
                 {
-                    SEND_SYSTEM_LOG(Alert, << "Got a State message with election id " << m_stateMessage.election_id() <<
+                    SEND_SYSTEM_LOG(Alert, 
+                                    << "Got a State message with election id " 
+                                    << m_stateMessage.election_id() <<
                                     " while m_ownElectionId was " << m_ownElectionId);
                     throw std::logic_error("Incorrect ElectionIds!");
                 }
-                
+
                 const auto deadNodes = GetDeadNodeIds(m_stateMessage);
-                
-                //Note: never do exclude on a node that is not one that we have 
+
+                //Note: never do exclude on a node that is not one that we have
                 //received NewNode for, i.e. is in m_lastStatistics top level.
                 for (int i = 0; i < m_lastStatistics.Size(); ++i)
                 {
                     //if we haven't marked the node as dead and electee doesnt think the node
                     //is part of the system we want to exclude the node
-                    if (!m_lastStatistics.IsDead(i) && deadNodes.find(m_lastStatistics.Id(i)) != deadNodes.end())
+                    if (!m_lastStatistics.IsDead(i) && 
+                        deadNodes.find(m_lastStatistics.Id(i)) != deadNodes.end())
                     {
-                        lllog (4) << "Elected coordinator thinks that node " << m_lastStatistics.Name(i).c_str()
-                                  << " with id " << m_lastStatistics.Id(i) 
+                        lllog (4) << "Elected coordinator thinks that node " 
+                                  << m_lastStatistics.Name(i).c_str()
+                                  << " with id " << m_lastStatistics.Id(i)
                                   << " is dead, so I'll mark him as dead." << std::endl;
 
                         m_communication.ExcludeNode(m_lastStatistics.Id(i));
@@ -284,7 +291,7 @@ namespace SP
                 lllog(7) << "SP: Last statistics is not dirty, no need to update." << std::endl;
                 return true;
             }
-        
+
             if (!m_lastStatistics.Valid())
             {
                 lllog(7) << "SP: No valid raw data yet, not updating my state" << std::endl;
@@ -302,7 +309,7 @@ namespace SP
 
                 if (!m_lastStatistics.HasRemoteStatistics(i))
                 {
-                    lllog(7) << "SP: No remote RAW data received from node " 
+                    lllog(7) << "SP: No remote RAW data received from node "
                              << m_lastStatistics.Id(i) << ", not updating my state" << std::endl;
                     return false;
                 }
@@ -311,7 +318,8 @@ namespace SP
                 if (remote.ElectionId() != m_ownElectionId)
                 {
                     lllog(7) << "SP: Remote RAW data from node "
-                             << m_lastStatistics.Id(i) << " has wrong election id (" << remote.ElectionId() << "), not updating my state." << std::endl;
+                             << m_lastStatistics.Id(i) << " has wrong election id (" 
+                             << remote.ElectionId() << "), not updating my state." << std::endl;
                     return false;
                 }
             }
@@ -331,9 +339,9 @@ namespace SP
             node->set_control_address(m_controlAddress);
             node->set_data_address(m_dataAddress);
             node->set_is_dead(false);
-                
+
             //This code will ignore the case where we for some reason have a RAW from another node
-            //that says that we are dead. If that is the case it will stop sending data to us and 
+            //that says that we are dead. If that is the case it will stop sending data to us and
             //we will mark him as dead eventually.
             //He should also start a new election, and the thing should resolve itself.
 
@@ -342,7 +350,7 @@ namespace SP
 
             //tell rawhandler about nodes that other nodes consider dead
             //while we also build our new system state message
-            //Note: never do exclude on a node that is not one that we have 
+            //Note: never do exclude on a node that is not one that we have
             //received NewNode for, i.e. is in m_lastStatistics top level.
             for (int i = 0; i < m_lastStatistics.Size(); ++i)
             {
@@ -352,14 +360,14 @@ namespace SP
                     deadNodes.find(m_lastStatistics.Id(i)) != deadNodes.end())
                 {
                     lllog (4) << "Someone thinks that node " << m_lastStatistics.Name(i).c_str()
-                              << " with id " << m_lastStatistics.Id(i) 
+                              << " with id " << m_lastStatistics.Id(i)
                               << " is dead, so I'll mark him as dead and spread the word in the SystemState." << std::endl;
                     m_communication.ExcludeNode(m_lastStatistics.Id(i));
                     m_rawHandler.SetDeadNode(m_lastStatistics.Id(i));
                     justKilled = true;
                 }
 
-                //add nodes that are not dead or were just killed or 
+                //add nodes that are not dead or were just killed or
                 //that have been dead a short while
                 if (!m_lastStatistics.IsDead(i) ||
                     justKilled ||
@@ -385,7 +393,7 @@ namespace SP
             return true;
         }
 
-        
+
         mutable boost::asio::strand m_strand;
         CommunicationT& m_communication;
 
@@ -397,7 +405,7 @@ namespace SP
         std::function<void(const SystemStateMessage& data)> m_stateChangedCallback;
 
         SystemStateMessage m_stateMessage;
-        
+
         const std::string m_name;
         const int64_t m_id;
         const int64_t m_nodeTypeId;
@@ -414,7 +422,7 @@ namespace SP
 
     class RawStatistics;
     class SystemState;
-    
+
 
     typedef CoordinatorBasic<Com::Communication, RawHandler, ElectionHandler> Coordinator;
 }

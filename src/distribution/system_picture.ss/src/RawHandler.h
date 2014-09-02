@@ -70,7 +70,7 @@ namespace SP
     //forward declaration
     class RawStatistics;
 
-    typedef std::function<void(const RawStatistics& statistics, 
+    typedef std::function<void(const RawStatistics& statistics,
                                const RawChanges& flags)> StatisticsCallback;
 
     template<class CommunicationT>
@@ -91,7 +91,7 @@ namespace SP
             , m_id(id)
             , m_nodeTypes(nodeTypes)
             , m_strand(ioService)
-            , m_checkDeadNodesTimer(ioService, 
+            , m_checkDeadNodesTimer(ioService,
                                     CalculateDeadCheckPeriod(nodeTypes),
                                     m_strand.wrap([this](const boost::system::error_code& error)
                                                   {
@@ -99,7 +99,7 @@ namespace SP
                                                       {
                                                           return;
                                                       }
-                                                      
+
                                                       CheckDeadNodes(error);
                                                   }))
             , m_stopped(false)
@@ -110,29 +110,33 @@ namespace SP
             m_allStatisticsMessage.set_node_type_id(nodeTypeId);
             m_allStatisticsMessage.set_control_address(controlAddress);
             m_allStatisticsMessage.set_data_address(dataAddress);
-            
+
             communication.SetNewNodeCallback(m_strand.wrap([this](const std::string& name,
-                                                                  const int64_t id, 
+                                                                  const int64_t id,
                                                                   const int64_t nodeTypeId,
                                                                   const std::string& controlAddress,
                                                                   const std::string& dataAddress)
                                                            {
-                                                               NewNode(name,id,nodeTypeId,controlAddress,dataAddress);
+                                                               NewNode(name,
+                                                                       id,
+                                                                       nodeTypeId,
+                                                                       controlAddress,
+                                                                       dataAddress);
                                                            }));
-            
+
             communication.SetGotReceiveFromCallback(m_strand.wrap([this](int64_t id)
                                                                   {
                                                                       GotReceive(id);
                                                                   }));
-            
+
             communication.SetRetransmitToCallback(m_strand.wrap([this](int64_t id)
                                                                 {
                                                                     Retransmit(id);
                                                                 }));
             m_checkDeadNodesTimer.Start();
         }
-        
-        
+
+
         void Stop()
         {
             const bool was_stopped = m_stopped.exchange(true);
@@ -144,17 +148,17 @@ namespace SP
                                   });
             }
         }
-        
+
 
         //extraSpace adds bytes at the end of the buffer, e.g. for adding a crc
-        void PerformOnMyStatisticsMessage(const std::function<void(const boost::shared_ptr<char[]>& data, 
+        void PerformOnMyStatisticsMessage(const std::function<void(const boost::shared_ptr<char[]>& data,
                                                                    const size_t size)> & fn,
                                           const size_t extraSpace) const
         {
             m_strand.dispatch([this,fn,extraSpace]
             {
                 //With newer protobuf (>= 2.5.0) we can be clever
-                //we just get the remote statistics out of the way before serializing a 
+                //we just get the remote statistics out of the way before serializing a
                 //a "my statistics" message, and afterwards we put them back
                 std::vector<NodeStatisticsMessage*> remotes;
 
@@ -164,7 +168,8 @@ namespace SP
                     //which we don't want to do. So we manually push a nullptr in those cases
                     if (m_allStatisticsMessage.node_info(i).has_remote_statistics())
                     {
-                        remotes.push_back(m_allStatisticsMessage.mutable_node_info(i)->release_remote_statistics());
+                        remotes.push_back(m_allStatisticsMessage.mutable_node_info(i)->
+                                          release_remote_statistics());
                     }
                     else
                     {
@@ -176,8 +181,9 @@ namespace SP
 
                 auto data = boost::make_shared<char[]>(size);
 
-                m_allStatisticsMessage.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
-        
+                m_allStatisticsMessage.SerializeWithCachedSizesToArray
+                    (reinterpret_cast<google::protobuf::uint8*>(data.get()));
+
                 for (size_t i = 0; i < remotes.size(); ++i)
                 {
                     m_allStatisticsMessage.mutable_node_info(static_cast<int>(i))->
@@ -191,7 +197,7 @@ namespace SP
         }
 
 
-        void PerformOnAllStatisticsMessage(const std::function<void(std::unique_ptr<char []> data, 
+        void PerformOnAllStatisticsMessage(const std::function<void(std::unique_ptr<char []> data,
                                                                     const size_t size)> & fn,
                                            const size_t extraSpace) const
         {
@@ -205,33 +211,34 @@ namespace SP
                               });
         }
 
-        
+
         void NewRemoteData(const int64_t from, const boost::shared_ptr<char[]>& data, const size_t size)
         {
             lllog(9) << "SP: UpdateRemoteStatistics for node " << from << std::endl;
             m_strand.dispatch([this,from,data,size]
             {
                 auto findIt = m_nodeTable.find(from);
-            
+
                 if (findIt == m_nodeTable.end())
                 {
                     throw std::logic_error("UpdateRemoteStatistics from unknown node");
                 }
                 NodeInfo& node = findIt->second; //alias the iterator
-            
+
                 if (node.nodeInfo->is_dead())
                 {
                     lllog(8) << "SP: UpdateRemoteStatistics from dead node, ignoring." << std::endl;
                     return;
                 }
 
-                const bool parseResult = node.nodeInfo->mutable_remote_statistics()->ParseFromArray(data.get(),static_cast<int>(size));
+                const bool parseResult = node.nodeInfo->mutable_remote_statistics()->
+                    ParseFromArray(data.get(),static_cast<int>(size));
 
                 if (!parseResult)
                 {
                     SEND_SYSTEM_LOG(Error,
-                                    << "Failed to parse remote data from " 
-                                    << node.nodeInfo->name().c_str() 
+                                    << "Failed to parse remote data from "
+                                    << node.nodeInfo->name().c_str()
                                     << " (id = " << from << ", size = " << size << ")");
                     throw std::logic_error("Failed to parse remote data!");
                 }
@@ -240,7 +247,7 @@ namespace SP
             });
         }
 
-        /** 
+        /**
          * Add a callback that will be called whenever the raw data is changed
          * as a result of receiving new raw data from other node.
          *
@@ -260,7 +267,7 @@ namespace SP
             m_strand.dispatch([this, id]
                               {
                                   auto findIt = m_nodeTable.find(id);
-            
+
                                   if (findIt == m_nodeTable.end())
                                   {
                                       throw std::logic_error("SetDeadNode on unknown node");
@@ -273,7 +280,7 @@ namespace SP
         {
             m_strand.dispatch([this, nodeId, electionId]
                               {
-                                  lllog(7) << "SP: Election Id " << electionId 
+                                  lllog(7) << "SP: Election Id " << electionId
                                            << " set in RawHandler." << std::endl;
 
                                   m_allStatisticsMessage.set_election_id(electionId);
@@ -287,7 +294,8 @@ namespace SP
         }
 
     private:
-        static boost::chrono::steady_clock::duration CalculateDeadCheckPeriod(const std::map<int64_t, NodeType>& nodeTypes)
+        static boost::chrono::steady_clock::duration CalculateDeadCheckPeriod(const std::map<int64_t, 
+                                                                              NodeType>& nodeTypes)
         {
             boost::chrono::steady_clock::duration result = boost::chrono::seconds(1);
             for (const auto& node: nodeTypes)
@@ -322,7 +330,7 @@ namespace SP
             {
                 throw std::logic_error("Got a new node that I already had");
             }
-        
+
             if (m_nodeTypes.find(nodeTypeId) == m_nodeTypes.end())
             {
                 throw std::logic_error("Got a new node with a node type id that I dont know about!");
@@ -335,18 +343,18 @@ namespace SP
             newNode->set_node_type_id(nodeTypeId);
             newNode->set_control_address(controlAddress);
             newNode->set_data_address(dataAddress);
-        
+
             newNode->set_is_dead(false);
             newNode->set_is_long_gone(false);
             newNode->set_receive_count(0);
             newNode->set_retransmit_count(0);
-        
+
             m_communication.IncludeNode(id);
 
-            PostRawChangedCallback(RawChanges(RawChanges::NEW_REMOTE_DATA | RawChanges::NODES_CHANGED));
+            PostRawChangedCallback(RawChanges(RawChanges::NODES_CHANGED));
         }
 
-        
+
         //Must be called in strand!
         void GotReceive(int64_t id)
         {
@@ -354,19 +362,19 @@ namespace SP
             lllog(9) << "SP: GotReceive from node with id " << id <<", time = " << now << std::endl;
 
             const auto findIt = m_nodeTable.find(id);
-        
+
             if (findIt == m_nodeTable.end())
             {
                 throw std::logic_error("GotReceive from unknown node");
             }
             NodeInfo& node = findIt->second; //alias the iterator
-        
+
             if (node.nodeInfo->is_dead())
             {
                 lllog(8) << "SP: GotReceive from dead node, ignoring." << std::endl;
                 return;
             }
-        
+
             node.nodeInfo->set_receive_count(node.nodeInfo->receive_count() + 1);
             node.lastReceiveTime = now;
         }
@@ -375,21 +383,21 @@ namespace SP
         void Retransmit(int64_t id)
         {
             lllog(9) << "SP: Retransmit to node with id " << id <<  std::endl;
-        
+
             const auto findIt = m_nodeTable.find(id);
-        
+
             if (findIt == m_nodeTable.end())
             {
                 throw std::logic_error("Retransmit to unknown node");
             }
             NodeInfo& node = findIt->second; //alias the iterator
-        
+
             if (node.nodeInfo->is_dead())
             {
                 lllog(8) << "SP: Retransmit to dead node, ignoring." << std::endl;
                 return;
             }
-        
+
             node.nodeInfo->set_retransmit_count(node.nodeInfo->retransmit_count() + 1);
         }
 
@@ -409,28 +417,28 @@ namespace SP
 
             bool somethingChanged = false;
 
-            for (auto& pair : m_nodeTable)            
+            for (auto& pair : m_nodeTable)
             {
                 const auto threshold = now - m_nodeTypes.at(pair.second.nodeInfo->node_type_id()).deadTimeout;
-            
+
                 if (!pair.second.nodeInfo->is_dead() && pair.second.lastReceiveTime < threshold)
                 {
-                    lllog(4) << "SP: Node " << pair.second.nodeInfo->name().c_str() 
-                             << " with id " << pair.second.nodeInfo->id() 
+                    lllog(4) << "SP: Node " << pair.second.nodeInfo->name().c_str()
+                             << " with id " << pair.second.nodeInfo->id()
                              << " was marked as dead" << std::endl;
-                
+
                     pair.second.nodeInfo->set_is_dead(true);
-                
+
                     m_communication.ExcludeNode(pair.second.nodeInfo->id());
 
                     somethingChanged = true;
                 }
-                else if (pair.second.nodeInfo->is_dead() && 
+                else if (pair.second.nodeInfo->is_dead() &&
                          pair.second.lastReceiveTime < clearThreshold &&
                          !pair.second.nodeInfo->is_long_gone())
                 {
-                    lllog(4) << "SP: Node " << pair.second.nodeInfo->name().c_str() 
-                             << " with id " << pair.second.nodeInfo->id() 
+                    lllog(4) << "SP: Node " << pair.second.nodeInfo->name().c_str()
+                             << " with id " << pair.second.nodeInfo->id()
                              << " has been dead for five minutes, clearing data." << std::endl;
                     pair.second.nodeInfo->set_is_long_gone(true);
                     pair.second.nodeInfo->clear_remote_statistics();
@@ -439,7 +447,6 @@ namespace SP
 
             if (somethingChanged)
             {
-                //TODO: there used to be NEW_REMOTE_DATA here as well, strange?!
                 PostRawChangedCallback(RawChanges(RawChanges::NODES_CHANGED));
             }
         }
@@ -447,14 +454,15 @@ namespace SP
 
 
 
-        /** 
-         * Post a copy of the data on the ioservice 
+        /**
+         * Post a copy of the data on the ioservice
          *
          * must be called in strand
          */
         void PostRawChangedCallback(const RawChanges& flags)
         {
-            const auto copy = RawStatisticsCreator::Create(Safir::make_unique<NodeStatisticsMessage>(m_allStatisticsMessage));
+            const auto copy = RawStatisticsCreator::Create
+                (Safir::make_unique<NodeStatisticsMessage>(m_allStatisticsMessage));
             for (const auto& cb : m_rawChangedCallbacks)
             {
                 m_ioService.post([cb,copy,flags]{cb(copy,flags);});
@@ -480,7 +488,7 @@ namespace SP
         mutable boost::asio::strand m_strand;
 
         Safir::Utilities::Internal::AsioPeriodicTimer m_checkDeadNodesTimer;
-        
+
         NodeTable m_nodeTable;
         mutable NodeStatisticsMessage m_allStatisticsMessage;
 
@@ -496,5 +504,3 @@ namespace SP
 }
 }
 }
-
-

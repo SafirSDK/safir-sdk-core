@@ -58,8 +58,8 @@ namespace SP
         {
             out << std::boolalpha
                 << "NewRemoteData = " << NewRemoteData()
-                << "NodesChanged = " << NodesChanged() 
-                << "ElectionIdChanged = " << ElectionIdChanged();
+                << ", NodesChanged = " << NodesChanged() 
+                << ", ElectionIdChanged = " << ElectionIdChanged();
         }
 
     private:
