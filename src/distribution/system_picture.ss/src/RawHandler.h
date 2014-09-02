@@ -30,6 +30,7 @@
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/MakeUnique.h>
 #include "MessageWrapperCreators.h"
+#include "RawChanges.h"
 #include <boost/asio.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/chrono.hpp>
@@ -37,6 +38,7 @@
 #include <string>
 #include <unordered_map>
 #include <functional>
+
 
 #ifdef _MSC_VER
 #  pragma warning (push)
@@ -68,7 +70,8 @@ namespace SP
     //forward declaration
     class RawStatistics;
 
-    typedef std::function<void(const RawStatistics& statistics)> StatisticsCallback;
+    typedef std::function<void(const RawStatistics& statistics, 
+                               const RawChanges& flags)> StatisticsCallback;
 
     template<class CommunicationT>
     class RawHandlerBasic
@@ -233,39 +236,9 @@ namespace SP
                     throw std::logic_error("Failed to parse remote data!");
                 }
 
-                PostRawChangedCallback();
+                PostRawChangedCallback(RawChanges(RawChanges::NEW_REMOTE_DATA));
             });
         }
-
-
-        /** 
-         * Add a callback that will be called whenever a new node is discovered,
-         * or is declared as dead.
-         *
-         * Will always be posted! data will be a copy
-         */
-        void AddNodesChangedCallback(const StatisticsCallback& callback)
-        {
-            m_strand.dispatch([this, callback]
-                              {
-                                  m_nodesChangedCallbacks.push_back(callback);
-                              });
-        }
-
-
-        /** 
-         * Add a callback that will be called whenever a new election id is set.
-         *
-         * Will always be posted! data will be a copy
-         */
-        void AddElectionIdChangedCallback(const StatisticsCallback& callback)
-        {
-            m_strand.dispatch([this, callback]
-                              {
-                                  m_electionIdChangedCallbacks.push_back(callback);
-                              });
-        }
-
 
         /** 
          * Add a callback that will be called whenever the raw data is changed
@@ -308,7 +281,7 @@ namespace SP
                                   if (nodeId != m_id)
                                   {
                                       lllog(7) << "SP: Triggering sending of raw to other nodes" << std::endl;
-                                      PostElectionIdChangedCallback();
+                                      PostRawChangedCallback(RawChanges(RawChanges::ELECTION_ID_CHANGED));
                                   }
                               });
         }
@@ -370,8 +343,7 @@ namespace SP
         
             m_communication.IncludeNode(id);
 
-            PostNodesChangedCallback(); //TODO: should we really do double callbacks?!
-            PostRawChangedCallback();
+            PostRawChangedCallback(RawChanges(RawChanges::NEW_REMOTE_DATA | RawChanges::NODES_CHANGED));
         }
 
         
@@ -467,10 +439,12 @@ namespace SP
 
             if (somethingChanged)
             {
-                PostNodesChangedCallback(); //TODO double callbacks?
-                PostRawChangedCallback();
+                //TODO: there used to be NEW_REMOTE_DATA here as well, strange?!
+                PostRawChangedCallback(RawChanges(RawChanges::NODES_CHANGED));
             }
         }
+
+
 
 
         /** 
@@ -478,42 +452,12 @@ namespace SP
          *
          * must be called in strand
          */
-        void PostNodesChangedCallback()
-        {
-            const auto copy = RawStatisticsCreator::Create(Safir::make_unique<NodeStatisticsMessage>(m_allStatisticsMessage));
-            for (const auto& cb : m_nodesChangedCallbacks)
-            {
-                m_ioService.post([cb,copy]{cb(copy);});
-            }
-        }
-
-
-        /** 
-         * Post a copy of the data on the ioservice 
-         *
-         * must be called in strand
-         */
-        void PostElectionIdChangedCallback()
-        {
-            const auto copy = RawStatisticsCreator::Create(Safir::make_unique<NodeStatisticsMessage>(m_allStatisticsMessage));
-            for (const auto& cb : m_electionIdChangedCallbacks)
-            {
-                m_ioService.post([cb,copy]{cb(copy);});
-            }
-        }
-
-
-        /** 
-         * Post a copy of the data on the ioservice 
-         *
-         * must be called in strand
-         */
-        void PostRawChangedCallback()
+        void PostRawChangedCallback(const RawChanges& flags)
         {
             const auto copy = RawStatisticsCreator::Create(Safir::make_unique<NodeStatisticsMessage>(m_allStatisticsMessage));
             for (const auto& cb : m_rawChangedCallbacks)
             {
-                m_ioService.post([cb,copy]{cb(copy);});
+                m_ioService.post([cb,copy,flags]{cb(copy,flags);});
             }
         }
 

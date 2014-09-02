@@ -318,7 +318,8 @@ public:
                         const std::map<int64_t, NodeType>& /*nodeTypes*/,
                         const char* const /*receiverId*/,
                         const std::function<void(const int64_t nodeId,
-                                                 const int64_t electionId)>& electionCompleteCallback_)
+                                                 const int64_t electionId,
+                                                 const bool alone)>& electionCompleteCallback_)
         : id(id_)
         , electionCompleteCallback(electionCompleteCallback_)
     {
@@ -352,7 +353,8 @@ public:
     bool nodesChangedCalled = false;
 
     const std::function<void(const int64_t nodeId,
-                             const int64_t electionId)> electionCompleteCallback;
+                             const int64_t electionId,
+                             const bool alone)> electionCompleteCallback;
 
 
     static ElectionHandlerStub* lastInstance;
@@ -444,7 +446,7 @@ BOOST_AUTO_TEST_CASE( election_id_propagation )
     BOOST_CHECK_EQUAL(rh.electedId,0);
     BOOST_CHECK_EQUAL(rh.electionId,0);
 
-    ElectionHandlerStub::lastInstance->electionCompleteCallback(111,100);
+    ElectionHandlerStub::lastInstance->electionCompleteCallback(111,100, false);
     ioService.run();
     BOOST_CHECK_EQUAL(rh.electedId,111);
     BOOST_CHECK_EQUAL(rh.electionId,100);

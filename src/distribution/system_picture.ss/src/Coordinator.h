@@ -111,26 +111,25 @@ namespace SP
         {
             m_stateMessage.set_elected_id(0); //our state message is not valid until we have a real id set.
             
-            rawHandler.AddNodesChangedCallback(m_strand.wrap([this](const RawStatistics& statistics)
+            rawHandler.AddRawChangedCallback(m_strand.wrap([this](const RawStatistics& statistics,
+                                                                  const RawChanges flags)
             {
-                lllog(9) << "SP: Coordinator got new nodes change callback" << std::endl;
-                m_lastStatistics = statistics;
-                m_lastStatisticsDirty = true;
-                if (m_electionHandler.IsElected())
+                if (flags.NewRemoteData() || flags.NodesChanged())
                 {
-                    UpdateMyState();
-                }
-                m_electionHandler.NodesChanged(std::move(statistics));
-            }));
+                    lllog(9) << "SP: Coordinator got new raw data (" << flags << ")" << std::endl;
 
-            rawHandler.AddRawChangedCallback(m_strand.wrap([this](const RawStatistics& statistics)
-            {
-                lllog(9) << "SP: Coordinator got new raw data" << std::endl;
-                m_lastStatistics = statistics;
-                m_lastStatisticsDirty = true;
-                if (m_electionHandler.IsElected())
-                {
-                    UpdateMyState();
+                    m_lastStatistics = statistics;
+                    m_lastStatisticsDirty = true;
+
+                    if (m_electionHandler.IsElected())
+                    {
+                        UpdateMyState();
+                    }
+                    
+                    if (flags.NodesChanged())
+                    {
+                        m_electionHandler.NodesChanged(std::move(statistics));
+                    }
                 }
             }));
         }

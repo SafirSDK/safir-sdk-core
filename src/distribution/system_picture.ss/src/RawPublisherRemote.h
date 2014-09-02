@@ -68,16 +68,14 @@ namespace SP
         {
             SchedulePublishTimer(period, m_allNodeTypes);
 
-            rawHandler.AddNodesChangedCallback(m_strand.wrap([this](const RawStatistics&)
+            rawHandler.AddRawChangedCallback(m_strand.wrap([this](const RawStatistics&, 
+                                                                  const RawChanges flags)
                                                              {
-                                                                 Publish(m_allNodeTypes);
-                                                             }));
-
-            rawHandler.AddElectionIdChangedCallback(m_strand.wrap([this](const RawStatistics&)
-                                                                  {
-                                                                      Publish(m_allNodeTypes);
-                                                                  }));
-            
+                                                                 if (flags.NodesChanged() || flags.ElectionIdChanged())
+                                                                 {
+                                                                     Publish(m_allNodeTypes);
+                                                                 }
+                                                             }));            
         }
 
         void Stop()

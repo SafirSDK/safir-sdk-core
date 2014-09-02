@@ -22,8 +22,8 @@
 *
 ******************************************************************************/
 
-#include "Coordinator.h"
 #include "RawHandler.h"
+#include "Coordinator.h"
 #include "RawPublisherLocal.h"
 #include "RawPublisherRemote.h"
 #include "StatePublisherLocal.h"
