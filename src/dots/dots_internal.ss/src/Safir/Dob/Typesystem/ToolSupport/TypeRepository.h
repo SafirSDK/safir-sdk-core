@@ -429,7 +429,7 @@ namespace ToolSupport
 
         /**
          * @brief If this property mapping is of type MappedToParameter, use GetMappingKind() to check that, this method returns a pair containing
-         * parameter description and parameter index. If member is mapped to a whole array, parameterIndex is set to -1.
+         * parameter description and parameter index. If member is mapped to a whole array the parameterIndex is not valid.
          * @return
          */
         virtual std::pair<const ParameterDescription*, int /*paramIndex*/> GetParameter() const=0;

@@ -104,94 +104,92 @@ namespace Internal
             BlobWriter<RepositoryType> writer(m_repository, typeId);
 
             boost::optional<boost::property_tree::ptree&> members=content.get_child_optional("members");
-            if (!members)
+            if (members)
             {
-                return typeId; //this is ok, a class with no members
-            }
-
-            for (boost::property_tree::ptree::iterator memIt=members->begin(); memIt!=members->end(); ++memIt)
-            {
-                if (memIt->first!="member")
+                for (boost::property_tree::ptree::iterator memIt=members->begin(); memIt!=members->end(); ++memIt)
                 {
-                    std::ostringstream os;
-                    os<<"Unexpected element '"<<memIt->first<<"'. Only <member> is valid at this level.";
-                    throw ParseError("UglyXmlToBlobSerializer serialization error", os.str(), "", 127);
-                }
-
-                boost::optional<std::string> memberName=memIt->second.get_optional<std::string>("name");
-                if (!memberName)
-                {
-                    throw ParseError("UglyXmlToBlobSerializer serialization error", "Missing member name. Expecting element <name>.", "", 128);
-                }
-
-                SerializationUtils::Trim(*memberName);
-                int memIx=cd->GetMemberIndex(*memberName);
-                if (memIx<0)
-                {
-                    std::ostringstream os;
-                    os<<"Failed to serialize xml to binary. The class '"<<cd->GetName()<<"' does not contain a member named '"<<*memberName<<"'";
-                    throw ParseError("UglyXmlToBlobSerializer serialization error", os.str(), "", 129);
-                }
-
-                const MemberDescriptionType* md=cd->GetMember(memIx);
-
-                if (md->GetCollectionType()!=ArrayCollectionType)
-                {
-                    try
-                    {
-                        SetMember(md, memIx, 0, memIt->second, writer);
-                    }
-                    catch (const boost::property_tree::ptree_error&)
+                    if (memIt->first!="member")
                     {
                         std::ostringstream os;
-                        os<<"Failed to serialize member '"<<cd->GetName()<<"."<<md->GetName()<<"' from xml to binary. Type is incorrect.";
-                        throw ParseError("UglyXmlToBlobSerializer serialization error", os.str(), "", 130);
-                    }
-                }
-                else
-                {
-                    boost::optional<boost::property_tree::ptree&> arrayElements=memIt->second.get_child_optional("arrayElements");
-                    if (!arrayElements)
-                    {
-                        continue; //this is ok, no elements in array
+                        os<<"Unexpected element '"<<memIt->first<<"'. Only <member> is valid at this level.";
+                        throw ParseError("UglyXmlToBlobSerializer serialization error", os.str(), "", 127);
                     }
 
-                    int arrayIndex=0;
-                    for (boost::property_tree::ptree::iterator arrIt=arrayElements->begin(); arrIt!=arrayElements->end(); ++arrIt)
+                    boost::optional<std::string> memberName=memIt->second.get_optional<std::string>("name");
+                    if (!memberName)
                     {
-                        if (arrIt->first!="arrayElement")
-                        {
-                            std::ostringstream os;
-                            os<<"Failed to serialize array member '"<<cd->GetName()<<"."<<md->GetName()<<"' index="<<arrayIndex<<" from xml to binary. Expecting element <arrayElement>, not "<<arrIt->first;
-                            throw ParseError("UglyXmlToBlobSerializer serialization error", os.str(), "", 131);
-                        }
+                        throw ParseError("UglyXmlToBlobSerializer serialization error", "Missing member name. Expecting element <name>.", "", 128);
+                    }
 
-                        boost::optional<std::string> index=arrIt->second.get_optional<std::string>("index");
-                        if (index) //arrayIndex explicit specified
-                        {
-                            SerializationUtils::Trim(*index);
-                            arrayIndex=boost::lexical_cast<int>(*index);
-                        }
+                    SerializationUtils::Trim(*memberName);
+                    int memIx=cd->GetMemberIndex(*memberName);
+                    if (memIx<0)
+                    {
+                        std::ostringstream os;
+                        os<<"Failed to serialize xml to binary. The class '"<<cd->GetName()<<"' does not contain a member named '"<<*memberName<<"'";
+                        throw ParseError("UglyXmlToBlobSerializer serialization error", os.str(), "", 129);
+                    }
 
-                        if (md->GetArraySize()<=arrayIndex)
-                        {
-                            std::ostringstream os;
-                            os<<"Failed to serialize array member '"<<cd->GetName()<<"."<<md->GetName()<<"' with index="<<arrayIndex<<" from xml to binary. Index out of range. ArraySize is "<<md->GetArraySize();
-                            throw ParseError("UglyXmlToBlobSerializer serialization error", os.str(), "", 132);
-                        }
+                    const MemberDescriptionType* md=cd->GetMember(memIx);
 
+                    if (md->GetCollectionType()!=ArrayCollectionType)
+                    {
                         try
                         {
-                            SetMember(md, memIx, arrayIndex, arrIt->second, writer);
+                            SetMember(md, memIx, 0, memIt->second, writer);
                         }
                         catch (const boost::property_tree::ptree_error&)
                         {
                             std::ostringstream os;
-                            os<<"Failed to serialize array member '"<<cd->GetName()<<"."<<md->GetName()<<"' with index="<<arrayIndex<<" from xml to binary. Type is incorrect.";
-                            throw ParseError("UglyXmlToBlobSerializer serialization error", os.str(), "", 133);
+                            os<<"Failed to serialize member '"<<cd->GetName()<<"."<<md->GetName()<<"' from xml to binary. Type is incorrect.";
+                            throw ParseError("UglyXmlToBlobSerializer serialization error", os.str(), "", 130);
+                        }
+                    }
+                    else
+                    {
+                        boost::optional<boost::property_tree::ptree&> arrayElements=memIt->second.get_child_optional("arrayElements");
+                        if (!arrayElements)
+                        {
+                            continue; //this is ok, no elements in array
                         }
 
-                        ++arrayIndex;
+                        int arrayIndex=0;
+                        for (boost::property_tree::ptree::iterator arrIt=arrayElements->begin(); arrIt!=arrayElements->end(); ++arrIt)
+                        {
+                            if (arrIt->first!="arrayElement")
+                            {
+                                std::ostringstream os;
+                                os<<"Failed to serialize array member '"<<cd->GetName()<<"."<<md->GetName()<<"' index="<<arrayIndex<<" from xml to binary. Expecting element <arrayElement>, not "<<arrIt->first;
+                                throw ParseError("UglyXmlToBlobSerializer serialization error", os.str(), "", 131);
+                            }
+
+                            boost::optional<std::string> index=arrIt->second.get_optional<std::string>("index");
+                            if (index) //arrayIndex explicit specified
+                            {
+                                SerializationUtils::Trim(*index);
+                                arrayIndex=boost::lexical_cast<int>(*index);
+                            }
+
+                            if (md->GetArraySize()<=arrayIndex)
+                            {
+                                std::ostringstream os;
+                                os<<"Failed to serialize array member '"<<cd->GetName()<<"."<<md->GetName()<<"' with index="<<arrayIndex<<" from xml to binary. Index out of range. ArraySize is "<<md->GetArraySize();
+                                throw ParseError("UglyXmlToBlobSerializer serialization error", os.str(), "", 132);
+                            }
+
+                            try
+                            {
+                                SetMember(md, memIx, arrayIndex, arrIt->second, writer);
+                            }
+                            catch (const boost::property_tree::ptree_error&)
+                            {
+                                std::ostringstream os;
+                                os<<"Failed to serialize array member '"<<cd->GetName()<<"."<<md->GetName()<<"' with index="<<arrayIndex<<" from xml to binary. Type is incorrect.";
+                                throw ParseError("UglyXmlToBlobSerializer serialization error", os.str(), "", 133);
+                            }
+
+                            ++arrayIndex;
+                        }
                     }
                 }
             }

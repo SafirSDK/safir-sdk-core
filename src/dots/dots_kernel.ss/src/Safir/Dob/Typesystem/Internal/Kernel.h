@@ -308,6 +308,7 @@ extern "C"
                                                        DotsC_Int32 & classMemberReferenceSize); //out
 
     //Todo: Impelement and consider remove  PropertyParam-methods
+    //paramValueIndex [out] - if mapped to whole collection this value will be -1, else it is a valid index.
     DOTS_KERNEL_API void DotsC_GetPropertyParameterReference(const DotsC_TypeId typeId,
                                                        const DotsC_TypeId propertyId,
                                                        const DotsC_MemberIndex member,
@@ -319,7 +320,7 @@ extern "C"
     //* Serialization
     //************************************************************************************
 
-    // Function:    DotsC_BlobToXml
+    // Function:    DotsC_BlobToXmlblob
     // Parameters:  xmlDest     -   result of serialization, will be a xml string. Out parameter
     //              blobSource  -   blob to serialize
     //              bufSize     -   size of xmlDest. string is null terminated.

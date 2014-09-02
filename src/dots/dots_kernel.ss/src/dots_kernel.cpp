@@ -678,12 +678,16 @@ void DotsC_GetPropertyParameterReference(const DotsC_TypeId classTypeId,
     const PropertyMappingDescriptionShm* pmd=cd->GetPropertyMapping(propertyTypeId, isInherited);
     const MemberMappingDescriptionShm* mm=pmd->GetMemberMapping(propertyMember);
     std::pair<const ParameterDescriptionShm*, int> param=mm->GetParameter();
+
     for (DotsC_ParameterIndex pix=0; pix<cd->GetNumberOfParameters(); ++pix)
     {
         if (cd->GetParameter(pix)==param.first)
         {
             paramId=pix;
             paramValueIndex=param.second;
+
+            DotsC_CollectionType collectionType=pmd->GetProperty()->GetMember(propertyMember)->GetCollectionType();
+            paramValueIndex=collectionType==SingleValueCollectionType ? param.second : -1;
         }
     }
 }

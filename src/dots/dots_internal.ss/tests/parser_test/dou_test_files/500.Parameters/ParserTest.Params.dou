@@ -22,6 +22,14 @@
         </parameter>
         
         <parameter>
+            <name>ObjectParameter</name>
+            <type>Object</type>
+            <object>
+                <name>Object</name>
+            </object>
+        </parameter>
+        
+        <parameter>
             <name>ObjParam2</name>
             <type>ParserTest.MyEntity</type>
             <ParserTest.MyEntity>
