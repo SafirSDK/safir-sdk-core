@@ -156,8 +156,7 @@ private:
 
 void ChangedSystemState(const Safir::Dob::Internal::SP::SystemState& data)
 {
-    std::wcout << "Got new system state from SP! The number of nodes are " << data.Size() << std::endl;
-
+    std::wcout << "Control got new system state from SP! The number of nodes are " << data.Size() << std::endl;
 }
 
 int main(int argc, char * argv[])
