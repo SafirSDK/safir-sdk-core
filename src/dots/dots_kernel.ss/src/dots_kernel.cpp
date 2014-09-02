@@ -255,6 +255,12 @@ const char* DotsC_GetTypeName(const DotsC_TypeId typeId)
     return TypeUtilities::GetTypeName(RepositoryKeeper::GetRepository(), typeId);
 }
 
+const char* DotsC_MemberTypeName(DotsC_MemberType memberType)
+{
+    Init();
+    return TypeUtilities::GetTypeName(memberType);
+}
+
 
 DotsC_Int32 DotsC_GetNumberOfEnumerationValues(const DotsC_TypeId enumId)
 {

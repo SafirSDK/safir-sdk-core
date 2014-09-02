@@ -87,6 +87,25 @@ namespace Parameters
         return Utilities::ToWstring(parameterName);
     }
 
+    std::wstring GetTypeName(const Dob::Typesystem::TypeId typeId, const Dob::Typesystem::ParameterIndex parameter)
+    {
+        DotsC_MemberType memberType;
+        const char* parameterName;
+        DotsC_TypeId complexTypeId;
+        DotsC_CollectionType collectionType;
+        DotsC_Int32 numberOfValues;
+        DotsC_GetParameterInfo(typeId, parameter, memberType, parameterName, complexTypeId, collectionType, numberOfValues);
+
+        if (memberType==ObjectMemberType || memberType==EnumerationMemberType)
+        {
+            return Safir::Dob::Typesystem::Utilities::ToWstring(DotsC_GetTypeName(complexTypeId));
+        }
+        else
+        {
+            return Safir::Dob::Typesystem::Utilities::ToWstring(DotsC_MemberTypeName(memberType));
+        }
+    }
+
     MemberType
     GetType(const TypeId typeId,
             const ParameterIndex parameter)

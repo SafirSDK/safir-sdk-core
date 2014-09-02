@@ -88,6 +88,31 @@ namespace Members
         }
     }
 
+    std::wstring GetTypeName(const Dob::Typesystem::TypeId typeId, const Dob::Typesystem::MemberIndex member)
+    {
+        DotsC_MemberType memberType;
+        const char* memberName;
+        DotsC_TypeId complexType;
+        DotsC_Int32 stringLength;
+        DotsC_CollectionType collectionType;
+        DotsC_Int32 arraySize;
+        DotsC_GetMemberInfo(typeId, member, memberType, memberName, complexType, stringLength, collectionType, arraySize);
+
+        if (memberName == NULL)
+        {
+            throw IllegalValueException(L"There is no such type or member defined", __WFILE__, __LINE__);
+        }
+
+        if (memberType==ObjectMemberType || memberType==EnumerationMemberType)
+        {
+            return Safir::Dob::Typesystem::Utilities::ToWstring(DotsC_GetTypeName(complexType));
+        }
+        else
+        {
+            return Safir::Dob::Typesystem::Utilities::ToWstring(DotsC_MemberTypeName(memberType));
+        }
+    }
+
     TypeId  
     GetTypeId(const TypeId typeId, 
                       const MemberIndex member)

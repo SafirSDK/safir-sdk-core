@@ -281,13 +281,13 @@ void Test_Int32()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Int32MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " <<lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " <<lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " << Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    MT1->Int32MemberMemberIndex())<<std::endl;
 
@@ -441,13 +441,13 @@ void Test_Int64()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Int64MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::Int64MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId, DotsTest::MemberTypes::Int64MemberMemberIndex()) <<std::endl;
@@ -592,13 +592,13 @@ void Test_Float32()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Float32MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                        DotsTest::MemberTypes::Float32MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -746,13 +746,13 @@ void Test_Float64()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Float64MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                        DotsTest::MemberTypes::Float64MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -899,13 +899,13 @@ void Test_Boolean()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::BooleanMemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::BooleanMemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -1060,13 +1060,13 @@ void Test_Enumeration()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::EnumerationMemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::EnumerationMemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -1267,13 +1267,13 @@ void Test_String()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::StringMemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::StringMemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -1432,13 +1432,13 @@ void Test_EntityId()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::EntityIdMemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::EntityIdMemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -1586,13 +1586,13 @@ void Test_TypeId()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::TypeIdMemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::TypeIdMemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -1749,13 +1749,13 @@ void Test_InstanceId()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::InstanceIdMemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::InstanceIdMemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -1901,13 +1901,13 @@ void Test_ChannelId()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::ChannelIdMemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::ChannelIdMemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -2055,13 +2055,13 @@ void Test_HandlerId()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::HandlerIdMemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::HandlerIdMemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -2208,13 +2208,13 @@ void Test_Object()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::ObjectMemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::ObjectMemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -2371,13 +2371,13 @@ void Test_Binary()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::BinaryMemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::BinaryMemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -2520,13 +2520,13 @@ void Test_TestClass()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::TestClassMemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::TestClassMemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -2689,13 +2689,13 @@ void Test_Ampere32()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Ampere32MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::Ampere32MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -2842,13 +2842,13 @@ void Test_CubicMeter32()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::CubicMeter32MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::CubicMeter32MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -2996,13 +2996,13 @@ void Test_Hertz32()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Hertz32MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::Hertz32MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -3149,13 +3149,13 @@ void Test_Joule32()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Joule32MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::Joule32MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -3302,13 +3302,13 @@ void Test_Kelvin32()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Kelvin32MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::Kelvin32MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -3455,13 +3455,13 @@ void Test_Kilogram32()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Kilogram32MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::Kilogram32MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -3608,13 +3608,13 @@ void Test_Meter32()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Meter32MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::Meter32MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -3761,13 +3761,13 @@ void Test_MeterPerSecond32()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::MeterPerSecond32MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::MeterPerSecond32MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -3914,13 +3914,13 @@ void Test_MeterPerSecondSquared32()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::MeterPerSecondSquared32MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::MeterPerSecondSquared32MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -4067,13 +4067,13 @@ void Test_Newton32()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Newton32MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::Newton32MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -4220,13 +4220,13 @@ void Test_Pascal32()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Pascal32MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::Pascal32MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -4373,13 +4373,13 @@ void Test_Radian32()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Radian32MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::Radian32MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -4526,13 +4526,13 @@ void Test_RadianPerSecond32()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::RadianPerSecond32MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::RadianPerSecond32MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -4679,13 +4679,13 @@ void Test_RadianPerSecondSquared32()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::RadianPerSecondSquared32MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::RadianPerSecondSquared32MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -4832,13 +4832,13 @@ void Test_Second32()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Second32MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::Second32MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -4985,13 +4985,13 @@ void Test_SquareMeter32()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::SquareMeter32MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::SquareMeter32MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -5138,13 +5138,13 @@ void Test_Steradian32()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Steradian32MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::Steradian32MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -5291,13 +5291,13 @@ void Test_Volt32()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Volt32MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::Volt32MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -5443,13 +5443,13 @@ void Test_Watt32()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Watt32MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::Watt32MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -5596,13 +5596,13 @@ void Test_Ampere64()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Ampere64MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::Ampere64MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -5749,13 +5749,13 @@ void Test_CubicMeter64()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::CubicMeter64MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::CubicMeter64MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -5902,13 +5902,13 @@ void Test_Hertz64()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Hertz64MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::Hertz64MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -6055,13 +6055,13 @@ void Test_Joule64()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Joule64MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::Joule64MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -6208,13 +6208,13 @@ void Test_Kelvin64()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Kelvin64MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::Kelvin64MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -6361,13 +6361,13 @@ void Test_Kilogram64()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Kilogram64MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::Kilogram64MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -6514,13 +6514,13 @@ void Test_Meter64()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Meter64MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::Meter64MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -6667,13 +6667,13 @@ void Test_MeterPerSecond64()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::MeterPerSecond64MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::MeterPerSecond64MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -6820,13 +6820,13 @@ void Test_MeterPerSecondSquared64()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::MeterPerSecondSquared64MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::MeterPerSecondSquared64MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -6973,13 +6973,13 @@ void Test_Newton64()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Newton64MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::Newton64MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -7126,13 +7126,13 @@ void Test_Pascal64()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Pascal64MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::Pascal64MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -7279,13 +7279,13 @@ void Test_Radian64()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Radian64MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::Radian64MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -7432,13 +7432,13 @@ void Test_RadianPerSecond64()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::RadianPerSecond64MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::RadianPerSecond64MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -7585,13 +7585,13 @@ void Test_RadianPerSecondSquared64()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::RadianPerSecondSquared64MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::RadianPerSecondSquared64MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -7738,13 +7738,13 @@ void Test_Second64()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Second64MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::Second64MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -7891,13 +7891,13 @@ void Test_SquareMeter64()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::SquareMeter64MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::SquareMeter64MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -8044,13 +8044,13 @@ void Test_Steradian64()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Steradian64MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::Steradian64MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -8197,13 +8197,13 @@ void Test_Volt64()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Volt64MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::Volt64MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,
@@ -8350,13 +8350,13 @@ void Test_Watt64()
     const char*                         lMN;
     Safir::Dob::Typesystem::TypeId      lMTId;
     Safir::Dob::Typesystem::Int32       lSL;
-    bool                                liA;
+    Safir::Dob::Typesystem::CollectionType lCT;
     Safir::Dob::Typesystem::Int32       lAL;
     Safir::Dob::Typesystem::Members::GetInfo(DotsTest::MemberArrays::ClassTypeId, DotsTest::MemberArrays::Watt64MemberMemberIndex(),
-                                             lMT, lMN, lMTId, lSL, liA, lAL );
+                                             lMT, lMN, lMTId, lSL, lCT, lAL );
 
     std::wcout<<"----Members---- " <<std::endl;
-    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << liA << "," << lAL <<std::endl;
+    std::wcout<<"GetInfo: " << lMT << "," << lMN << "," << lMTId<< "," << lSL << "," << lCT << "," << lAL <<std::endl;
     std::wcout<<"GetName: " <<Safir::Dob::Typesystem::Members::GetName(DotsTest::MemberTypes::ClassTypeId,
                                                                                    DotsTest::MemberTypes::Watt64MemberMemberIndex())<<std::endl;
     std::wcout<<"GetTypeName: " <<Safir::Dob::Typesystem::Members::GetTypeName(DotsTest::MemberTypes::ClassTypeId,

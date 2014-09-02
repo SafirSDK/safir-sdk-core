@@ -80,6 +80,18 @@ namespace Members
                                   const Dob::Typesystem::MemberIndex member);
 
     /**
+     * Get the type name of the specified member as it was defined in the xml description.
+     *
+     * @param typeId [in] - TypeId of class or property.
+     * @param member [in] - Index of member.
+     * @return Member type name.
+     * @throws IllegalValueException There is no such type defined or there is no such member
+     *                               in the type.
+     */
+    DOTS_CPP_API std::wstring GetTypeName(  const Dob::Typesystem::TypeId typeId,
+                                            const Dob::Typesystem::MemberIndex member);
+
+    /**
      * Get type id of object or enumeration member.
      *
      * If a member is of type object or enumeration, this method can be used to get the

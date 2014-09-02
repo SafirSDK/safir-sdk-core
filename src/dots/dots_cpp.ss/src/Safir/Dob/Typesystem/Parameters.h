@@ -87,6 +87,16 @@ namespace Typesystem
                                             const Dob::Typesystem::ParameterIndex parameter);
 
         /**
+         * Get the type name of the specified member as it was defined in the xml description.
+         *
+         * @param typeId [in] - TypeId of class.
+         * @param member [in] - Index of parameter.
+         * @return Parameter type name.
+         */
+        DOTS_CPP_API std::wstring GetTypeName(  const Dob::Typesystem::TypeId typeId,
+                                                const Dob::Typesystem::ParameterIndex parameter);
+
+        /**
          * Get the type of a parameter.
          *
          * If the parameter does not exist the returned value is undefined. Use

@@ -134,6 +134,12 @@ extern "C"
     // Comments:    Gets the name associated with the specified type id
     DOTS_KERNEL_API const char* DotsC_GetTypeName(DotsC_TypeId typeId);
 
+    // Function:    DotsC_MemberTypeName
+    // Parameters:  memberType - member type to convert to readable name as defined in dou-files.
+    // Returns:     name of member type
+    // Comments:    Gets the name associated with the specified member type, as it is defined in dou-files.
+    DOTS_KERNEL_API const char* DotsC_MemberTypeName(DotsC_MemberType memberType);
+
     // Function:    DotsC_GetNumberOfEnumerationValues
     // Parameters:  enumId -    id of enum type
     // Returns:     Number of enumeration values. -1 is returned if the type does not exist.
