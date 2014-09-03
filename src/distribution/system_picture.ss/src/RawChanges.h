@@ -47,18 +47,18 @@ namespace SP
         RawChanges(const int flags)
             : m_flags(flags)
         {
-            
+
         }
 
-        bool NewRemoteData() const {return m_flags & NEW_REMOTE_DATA;}
-        bool NodesChanged() const {return m_flags & NODES_CHANGED;}
-        bool ElectionIdChanged() const {return m_flags & ELECTION_ID_CHANGED;}
+        bool NewRemoteData() const {return m_flags & NEW_REMOTE_DATA != 0;}
+        bool NodesChanged() const {return m_flags & NODES_CHANGED != 0;}
+        bool ElectionIdChanged() const {return m_flags & ELECTION_ID_CHANGED != 0;}
 
         void Print(std::wostream& out) const
         {
             out << std::boolalpha
                 << "NewRemoteData = " << NewRemoteData()
-                << ", NodesChanged = " << NodesChanged() 
+                << ", NodesChanged = " << NodesChanged()
                 << ", ElectionIdChanged = " << ElectionIdChanged();
         }
 
@@ -75,5 +75,3 @@ namespace SP
 }
 }
 }
-
-
