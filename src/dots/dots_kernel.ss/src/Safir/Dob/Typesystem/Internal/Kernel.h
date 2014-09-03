@@ -45,6 +45,7 @@ extern "C"
 {
     typedef void (*DotsC_BytePointerDeleter)(char * &);
     typedef DotsC_Int64 DotsC_Handle;
+    typedef enum {ValueMode=0, KeyMode} KeyValMode;
 
     //********************************************************
     //* Static type information operations
@@ -307,13 +308,13 @@ extern "C"
                                                        const DotsC_Int32 * & classMemberReference, //out
                                                        DotsC_Int32 & classMemberReferenceSize); //out
 
-    //Todo: Impelement and consider remove  PropertyParam-methods
-    //paramValueIndex [out] - if mapped to whole collection this value will be -1, else it is a valid index.
+    //Todo: Impelement and consider remove  PropertyParam-methods    
     DOTS_KERNEL_API void DotsC_GetPropertyParameterReference(const DotsC_TypeId typeId,
-                                                       const DotsC_TypeId propertyId,
-                                                       const DotsC_MemberIndex member,
-                                                       DotsC_ParameterIndex& paramId, //out
-                                                       DotsC_Int32& paramValueIndex); //out
+                                                             const DotsC_TypeId propertyId,
+                                                             const DotsC_MemberIndex member,
+                                                             const DotsC_Int32 index,
+                                                             DotsC_ParameterIndex& paramId, //out
+                                                             DotsC_Int32& paramValueIndex); //out
 
 
     //************************************************************************************
@@ -441,6 +442,7 @@ extern "C"
     DOTS_KERNEL_API void DotsC_GetEnumerationParameter(const DotsC_TypeId typeId,
                                                        const DotsC_ParameterIndex parameter,
                                                        const DotsC_Int32 index,
+                                                       const KeyValMode keyValMode,
                                                        DotsC_EnumerationValue & val);
 
     // Function:    DotsC_GetInt32Parameter
@@ -454,6 +456,7 @@ extern "C"
     DOTS_KERNEL_API void DotsC_GetInt32Parameter(const DotsC_TypeId typeId,
                                                  const DotsC_ParameterIndex parameter,
                                                  const DotsC_Int32 index,
+                                                 const KeyValMode keyValMode,
                                                  DotsC_Int32 & val);
 
     // Function:    DotsC_GetInt64Parameter
@@ -466,6 +469,7 @@ extern "C"
     DOTS_KERNEL_API void DotsC_GetInt64Parameter(const DotsC_TypeId typeId,
                                                  const DotsC_ParameterIndex parameter,
                                                  const DotsC_Int32 index,
+                                                 const KeyValMode keyValMode,
                                                  DotsC_Int64 & val);
 
     // Function:    DotsC_GetFloat32Parameter
@@ -501,6 +505,7 @@ extern "C"
     DOTS_KERNEL_API void DotsC_GetStringParameter(const DotsC_TypeId typeId,
                                                   const DotsC_ParameterIndex parameter,
                                                   const DotsC_Int32 index,
+                                                  const KeyValMode keyValMode,
                                                   const char * & val);
 
     // Function:    DotsC_GetTypeIdParameter
@@ -513,6 +518,7 @@ extern "C"
     DOTS_KERNEL_API void DotsC_GetTypeIdParameter(const DotsC_TypeId typeId,
                                                   const DotsC_ParameterIndex parameter,
                                                   const DotsC_Int32 index,
+                                                  const KeyValMode keyValMode,
                                                   DotsC_TypeId & val);
 
     // Function:    DotsC_GetHashedIdParameter
@@ -526,6 +532,7 @@ extern "C"
     DOTS_KERNEL_API void DotsC_GetHashedIdParameter(const DotsC_TypeId typeId,
                                                     const DotsC_ParameterIndex parameter,
                                                     const DotsC_Int32 index,
+                                                    const KeyValMode keyValMode,
                                                     DotsC_Int64 & hashVal,
                                                     const char * & strVal);
 
@@ -541,6 +548,7 @@ extern "C"
     DOTS_KERNEL_API void DotsC_GetEntityIdParameter(const DotsC_TypeId typeId,
                                                     const DotsC_ParameterIndex parameter,
                                                     const DotsC_Int32 index,
+                                                    const KeyValMode keyValMode,
                                                     DotsC_EntityId & entityId,
                                                     const char * & instanceIdStr);
 
@@ -607,7 +615,7 @@ extern "C"
     DOTS_KERNEL_API DotsC_Int32 DotsC_GetNumberOfMemberValues(DotsC_Handle reader, DotsC_MemberIndex member);
 
     DOTS_KERNEL_API void DotsC_SetReadCursor(DotsC_Handle reader, DotsC_MemberIndex member, DotsC_Int32 valueIndex);
-    DOTS_KERNEL_API void DotsC_SetReadValueMode(DotsC_Handle reader, bool valueMode);
+    DOTS_KERNEL_API void DotsC_SetReadMode(DotsC_Handle reader, KeyValMode keyValMode);
     DOTS_KERNEL_API void DotsC_ReadMemberStatus(DotsC_Handle reader, bool& isNull, bool& isChanged);
     DOTS_KERNEL_API void DotsC_ReadInt32Member(DotsC_Handle reader, DotsC_Int32& val);
     DOTS_KERNEL_API void DotsC_ReadInt64Member(DotsC_Handle reader, DotsC_Int64& val);
@@ -630,7 +638,7 @@ extern "C"
      */
     DOTS_KERNEL_API DotsC_Handle DotsC_CreateBlobWriter(DotsC_TypeId typeId);
     DOTS_KERNEL_API void DotsC_SetWriteCursor(DotsC_Handle writer, DotsC_MemberIndex member, DotsC_Int32 arrayIndex);
-    DOTS_KERNEL_API void DotsC_SetWriteValueMode(DotsC_Handle writer, bool valueMode);
+    DOTS_KERNEL_API void DotsC_SetWriteMode(DotsC_Handle writer, KeyValMode keyValMode);
 
     DOTS_KERNEL_API void DotsC_WriteMemberStatus(DotsC_Handle writer, bool isNull, bool isChanged);
     DOTS_KERNEL_API void DotsC_WriteInt32Member(DotsC_Handle writer, DotsC_Int32 val);

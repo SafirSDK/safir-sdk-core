@@ -241,7 +241,7 @@ Test ToValue (MySecond): 1
 ----Members---- 
 GetInfo: ENUMERATIONMEMBERTYPE,EnumerationMember,7765043459684641017,-1,Array,2
 GetName: EnumerationMember
-GetTypeName: Enumeration
+GetTypeName: DotsTest.TestEnum
 GetTypeId: 7765043459684641017
 ----Parameters---- 
 GetName: EnumerationParameter
@@ -532,7 +532,7 @@ Array Size Ok: true
 ----Members---- 
 GetInfo: OBJECTMEMBERTYPE,TestClassMember,6091706122362893070,-1,Array,2
 GetName: TestClassMember
-GetTypeName: Object
+GetTypeName: DotsTest.TestItem
 GetTypeId: 6091706122362893070
 ----Parameters---- 
 GetName: TestClassParameter

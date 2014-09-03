@@ -74,7 +74,7 @@ namespace Internal
                         const Dob::Typesystem::ArrayIndex index)
     {
         DotsC_SetWriteCursor(handle, member, index);
-        DotsC_SetWriteValueMode(handle, true);
+        DotsC_SetWriteMode(handle, ValueMode);
         DotsC_WriteMemberStatus(handle, value.m_bIsNull, value.m_bIsChanged);
         if (!value.m_bIsNull)
         {
@@ -89,8 +89,8 @@ namespace Internal
                         const Dob::Typesystem::ArrayIndex index)
     {
         DotsC_SetReadCursor(handle, member, index);
-        DotsC_SetReadValueMode(handle, true);
-        DotsC_ReadMemberStatus(handle, value.m_bIsNull, value.m_bIsNull);
+        DotsC_SetReadMode(handle, ValueMode);
+        DotsC_ReadMemberStatus(handle, value.m_bIsNull, value.m_bIsChanged);
         if (!value.m_bIsNull)
         {
             DotsC_ReadBooleanMember(handle, value.m_Value);
@@ -104,7 +104,7 @@ namespace Internal
                         const Dob::Typesystem::ArrayIndex index)
     {
         DotsC_SetWriteCursor(handle, member, index);
-        DotsC_SetWriteValueMode(handle, true);
+        DotsC_SetWriteMode(handle, ValueMode);
         DotsC_WriteMemberStatus(handle, value.m_bIsNull, value.m_bIsChanged);
         if (!value.m_bIsNull)
         {
@@ -119,8 +119,8 @@ namespace Internal
                         const Dob::Typesystem::ArrayIndex index)
     {
         DotsC_SetReadCursor(handle, member, index);
-        DotsC_SetReadValueMode(handle, true);
-        DotsC_ReadMemberStatus(handle, value.m_bIsNull, value.m_bIsNull);
+        DotsC_SetReadMode(handle, ValueMode);
+        DotsC_ReadMemberStatus(handle, value.m_bIsNull, value.m_bIsChanged);
         if (!value.m_bIsNull)
         {
             DotsC_ReadInt32Member(handle, value.m_Value);
@@ -134,7 +134,7 @@ namespace Internal
                         const Dob::Typesystem::ArrayIndex index)
     {
         DotsC_SetWriteCursor(handle, member, index);
-        DotsC_SetWriteValueMode(handle, true);
+        DotsC_SetWriteMode(handle, ValueMode);
         DotsC_WriteMemberStatus(handle, value.m_bIsNull, value.m_bIsChanged);
         if (!value.m_bIsNull)
         {
@@ -149,8 +149,8 @@ namespace Internal
                         const Dob::Typesystem::ArrayIndex index)
     {
         DotsC_SetReadCursor(handle, member, index);
-        DotsC_SetReadValueMode(handle, true);
-        DotsC_ReadMemberStatus(handle, value.m_bIsNull, value.m_bIsNull);
+        DotsC_SetReadMode(handle, ValueMode);
+        DotsC_ReadMemberStatus(handle, value.m_bIsNull, value.m_bIsChanged);
         if (!value.m_bIsNull)
         {
             DotsC_ReadInt32Member(handle, value.m_Value);
@@ -164,7 +164,7 @@ namespace Internal
                         const Dob::Typesystem::ArrayIndex index)
     {
         DotsC_SetWriteCursor(handle, member, index);
-        DotsC_SetWriteValueMode(handle, true);
+        DotsC_SetWriteMode(handle, ValueMode);
         DotsC_WriteMemberStatus(handle, value.m_bIsNull, value.m_bIsChanged);
         if (!value.m_bIsNull)
         {
@@ -179,8 +179,8 @@ namespace Internal
                         const Dob::Typesystem::ArrayIndex index)
     {
         DotsC_SetReadCursor(handle, member, index);
-        DotsC_SetReadValueMode(handle, true);
-        DotsC_ReadMemberStatus(handle, value.m_bIsNull, value.m_bIsNull);
+        DotsC_SetReadMode(handle, ValueMode);
+        DotsC_ReadMemberStatus(handle, value.m_bIsNull, value.m_bIsChanged);
         if (!value.m_bIsNull)
         {
             DotsC_ReadInt64Member(handle, value.m_Value);
@@ -194,7 +194,7 @@ namespace Internal
                         const Dob::Typesystem::ArrayIndex index)
     {
         DotsC_SetWriteCursor(handle, member, index);
-        DotsC_SetWriteValueMode(handle, true);
+        DotsC_SetWriteMode(handle, ValueMode);
         DotsC_WriteMemberStatus(handle, value.m_bIsNull, value.m_bIsChanged);
         if (!value.m_bIsNull)
         {
@@ -209,8 +209,8 @@ namespace Internal
                         const Dob::Typesystem::ArrayIndex index)
     {
         DotsC_SetReadCursor(handle, member, index);
-        DotsC_SetReadValueMode(handle, true);
-        DotsC_ReadMemberStatus(handle, value.m_bIsNull, value.m_bIsNull);
+        DotsC_SetReadMode(handle, ValueMode);
+        DotsC_ReadMemberStatus(handle, value.m_bIsNull, value.m_bIsChanged);
         if (!value.m_bIsNull)
         {
             DotsC_ReadFloat32Member(handle, value.m_Value);
@@ -224,7 +224,7 @@ namespace Internal
                         const Dob::Typesystem::ArrayIndex index)
     {
         DotsC_SetWriteCursor(handle, member, index);
-        DotsC_SetWriteValueMode(handle, true);
+        DotsC_SetWriteMode(handle, ValueMode);
         DotsC_WriteMemberStatus(handle, value.m_bIsNull, value.m_bIsChanged);
         if (!value.m_bIsNull)
         {
@@ -239,8 +239,8 @@ namespace Internal
                         const Dob::Typesystem::ArrayIndex index)
     {
         DotsC_SetReadCursor(handle, member, index);
-        DotsC_SetReadValueMode(handle, true);
-        DotsC_ReadMemberStatus(handle, value.m_bIsNull, value.m_bIsNull);
+        DotsC_SetReadMode(handle, ValueMode);
+        DotsC_ReadMemberStatus(handle, value.m_bIsNull, value.m_bIsChanged);
         if (!value.m_bIsNull)
         {
             DotsC_ReadFloat64Member(handle, value.m_Value);
@@ -254,7 +254,7 @@ namespace Internal
                         const Dob::Typesystem::ArrayIndex index)
     {
         DotsC_SetWriteCursor(handle, member, index);
-        DotsC_SetWriteValueMode(handle, true);
+        DotsC_SetWriteMode(handle, ValueMode);
         DotsC_WriteMemberStatus(handle, value.m_bIsNull, value.m_bIsChanged);
         if (!value.m_bIsNull)
         {
@@ -273,8 +273,8 @@ namespace Internal
                         const Dob::Typesystem::ArrayIndex index)
     {
         DotsC_SetReadCursor(handle, member, index);
-        DotsC_SetReadValueMode(handle, true);
-        DotsC_ReadMemberStatus(handle, value.m_bIsNull, value.m_bIsNull);
+        DotsC_SetReadMode(handle, ValueMode);
+        DotsC_ReadMemberStatus(handle, value.m_bIsNull, value.m_bIsChanged);
         if (!value.m_bIsNull)
         {
             DotsC_EntityId eid;
@@ -298,7 +298,7 @@ namespace Internal
                         const Dob::Typesystem::ArrayIndex index)
     {
         DotsC_SetWriteCursor(handle, member, index);
-        DotsC_SetWriteValueMode(handle, true);
+        DotsC_SetWriteMode(handle, ValueMode);
         DotsC_WriteMemberStatus(handle, value.m_bIsNull, value.m_bIsChanged);
         if (!value.m_bIsNull)
         {
@@ -314,8 +314,8 @@ namespace Internal
                         const Dob::Typesystem::ArrayIndex index)
     {
         DotsC_SetReadCursor(handle, member, index);
-        DotsC_SetReadValueMode(handle, true);
-        DotsC_ReadMemberStatus(handle, value.m_bIsNull, value.m_bIsNull);
+        DotsC_SetReadMode(handle, ValueMode);
+        DotsC_ReadMemberStatus(handle, value.m_bIsNull, value.m_bIsChanged);
         if (!value.m_bIsNull)
         {
             Safir::Dob::Typesystem::Int64 hash;
@@ -339,7 +339,7 @@ namespace Internal
                         const Dob::Typesystem::ArrayIndex index)
     {
         DotsC_SetWriteCursor(handle, member, index);
-        DotsC_SetWriteValueMode(handle, true);
+        DotsC_SetWriteMode(handle, ValueMode);
         DotsC_WriteMemberStatus(handle, value.m_bIsNull, value.m_bIsChanged);
         if (!value.m_bIsNull)
         {
@@ -355,8 +355,8 @@ namespace Internal
                         const Dob::Typesystem::ArrayIndex index)
     {
         DotsC_SetReadCursor(handle, member, index);
-        DotsC_SetReadValueMode(handle, true);
-        DotsC_ReadMemberStatus(handle, value.m_bIsNull, value.m_bIsNull);
+        DotsC_SetReadMode(handle, ValueMode);
+        DotsC_ReadMemberStatus(handle, value.m_bIsNull, value.m_bIsChanged);
         if (!value.m_bIsNull)
         {
             Safir::Dob::Typesystem::Int64 hash;
@@ -382,7 +382,7 @@ namespace Internal
                         const Dob::Typesystem::ArrayIndex index)
     {
         DotsC_SetWriteCursor(handle, member, index);
-        DotsC_SetWriteValueMode(handle, true);
+        DotsC_SetWriteMode(handle, ValueMode);
         DotsC_WriteMemberStatus(handle, value.m_bIsNull, value.m_bIsChanged);
         if (!value.m_bIsNull)
         {
@@ -398,8 +398,8 @@ namespace Internal
                         const Dob::Typesystem::ArrayIndex index)
     {
         DotsC_SetReadCursor(handle, member, index);
-        DotsC_SetReadValueMode(handle, true);
-        DotsC_ReadMemberStatus(handle, value.m_bIsNull, value.m_bIsNull);
+        DotsC_SetReadMode(handle, ValueMode);
+        DotsC_ReadMemberStatus(handle, value.m_bIsNull, value.m_bIsChanged);
         if (!value.m_bIsNull)
         {
             Safir::Dob::Typesystem::Int64 hash;
@@ -423,7 +423,7 @@ namespace Internal
                         const Dob::Typesystem::ArrayIndex index)
     {
         DotsC_SetWriteCursor(handle, member, index);
-        DotsC_SetWriteValueMode(handle, true);
+        DotsC_SetWriteMode(handle, ValueMode);
         DotsC_WriteMemberStatus(handle, value.m_bIsNull, value.m_bIsChanged);
         if (!value.m_bIsNull)
         {
@@ -438,8 +438,8 @@ namespace Internal
                         const Dob::Typesystem::ArrayIndex index)
     {
         DotsC_SetReadCursor(handle, member, index);
-        DotsC_SetReadValueMode(handle, true);
-        DotsC_ReadMemberStatus(handle, value.m_bIsNull, value.m_bIsNull);
+        DotsC_SetReadMode(handle, ValueMode);
+        DotsC_ReadMemberStatus(handle, value.m_bIsNull, value.m_bIsChanged);
         if (!value.m_bIsNull)
         {
             const char* str;
@@ -457,7 +457,7 @@ namespace Internal
                         const Dob::Typesystem::ArrayIndex index)
     {
         DotsC_SetWriteCursor(handle, member, index);
-        DotsC_SetWriteValueMode(handle, true);
+        DotsC_SetWriteMode(handle, ValueMode);
         DotsC_WriteMemberStatus(handle, object.IsNull(), object.IsChanged());
         if (!object.IsNull())
         {
@@ -478,7 +478,7 @@ namespace Internal
     {
         bool isNull;
         DotsC_SetReadCursor(handle, member, index);
-        DotsC_SetReadValueMode(handle, true);
+        DotsC_SetReadMode(handle, ValueMode);
         DotsC_ReadMemberStatus(handle, isNull, object.m_bIsChanged);
 
         if (!isNull)
@@ -499,7 +499,7 @@ namespace Internal
                             const Dob::Typesystem::ArrayIndex index)
     {
         DotsC_SetWriteCursor(handle, member, index);
-        DotsC_SetWriteValueMode(handle, true);
+        DotsC_SetWriteMode(handle, ValueMode);
         DotsC_WriteMemberStatus(handle, binary.IsNull(), binary.IsChanged());
         if (!binary.IsNull())
         {
@@ -514,7 +514,7 @@ namespace Internal
                             const Dob::Typesystem::ArrayIndex index)
     {
         DotsC_SetReadCursor(handle, member, index);
-        DotsC_SetReadValueMode(handle, true);
+        DotsC_SetReadMode(handle, ValueMode);
         DotsC_ReadMemberStatus(handle, binary.m_bIsNull, binary.m_bIsChanged);
         if (!binary.m_bIsNull)
         {

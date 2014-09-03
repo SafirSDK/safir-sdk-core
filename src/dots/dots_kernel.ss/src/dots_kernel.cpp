@@ -117,11 +117,11 @@ namespace
         ts::BlobReader<RepositoryShm> reader;
         DotsC_MemberIndex member;
         DotsC_Int32 index;
-        bool valueMode; //if false, key is read instead of value
+        KeyValMode keyValMode;
 
         ReaderState(const char* blob)
             :reader(RepositoryKeeper::GetRepository(), blob)
-            ,member(0), index(0), valueMode(true)
+            ,member(0), index(0), keyValMode(ValueMode)
         {
         }
 
@@ -137,11 +137,11 @@ namespace
         DotsC_MemberIndex member;
         DotsC_Int32 index;
         bool changed;
-        bool valueMode; //if false, key is written instead of value
+        KeyValMode keyValMode;
 
         WriterState(DotsC_TypeId typeId)
             :writer(RepositoryKeeper::GetRepository(), typeId)
-            ,member(0), index(0), changed(false), valueMode(true)
+            ,member(0), index(0), changed(false), keyValMode(ValueMode)
         {
         }
 
@@ -335,8 +335,7 @@ DotsC_Int32 DotsC_GetNumberOfMembers(const DotsC_TypeId typeId)
     return -1;
 }
 
-DotsC_MemberIndex DotsC_GetMemberId(const DotsC_TypeId typeId,
-                              const char* const memberName)
+DotsC_MemberIndex DotsC_GetMemberId(const DotsC_TypeId typeId, const char* const memberName)
 {
     Init();
     {
@@ -670,6 +669,7 @@ void DotsC_GetClassMemberReference(const DotsC_TypeId classTypeId,
 void DotsC_GetPropertyParameterReference(const DotsC_TypeId classTypeId,
                                          const DotsC_TypeId propertyTypeId,
                                          const DotsC_MemberIndex propertyMember,
+                                         const DotsC_Int32 index,
                                          DotsC_ParameterIndex& paramId, //out
                                          DotsC_Int32& paramValueIndex) //out
 {
@@ -683,11 +683,9 @@ void DotsC_GetPropertyParameterReference(const DotsC_TypeId classTypeId,
     {
         if (cd->GetParameter(pix)==param.first)
         {
-            paramId=pix;
-            paramValueIndex=param.second;
-
             DotsC_CollectionType collectionType=pmd->GetProperty()->GetMember(propertyMember)->GetCollectionType();
-            paramValueIndex=collectionType==SingleValueCollectionType ? param.second : -1;
+            paramId=pix;
+            paramValueIndex=collectionType==SingleValueCollectionType ? param.second : index;
         }
     }
 }
@@ -822,28 +820,46 @@ void DotsC_GetBooleanParameter(const DotsC_TypeId typeId, const DotsC_ParameterI
     val=pd->GetBoolValue(index);
 }
 
-void DotsC_GetEnumerationParameter(const DotsC_TypeId typeId,
-                                   const DotsC_ParameterIndex parameter,
-                                   const DotsC_Int32 index,
-                                   DotsC_EnumerationValue& val)
+void DotsC_GetEnumerationParameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_Int32 index, const KeyValMode keyValMode, DotsC_EnumerationValue& val)
 {
     Init();
     const ParameterDescriptionShm* const pd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
-    val=pd->GetInt32Value(index);
+    if (keyValMode==ValueMode)
+    {
+        val=pd->GetInt32Value(index);
+    }
+    else
+    {
+        val=pd->GetInt32Key(index);
+    }
 }
 
-void DotsC_GetInt32Parameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_Int32 index, DotsC_Int32& val)
+void DotsC_GetInt32Parameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_Int32 index, const KeyValMode keyValMode, DotsC_Int32& val)
 {
     Init();
     const ParameterDescriptionShm* const pd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
-    val=pd->GetInt32Value(index);
+    if (keyValMode==ValueMode)
+    {
+        val=pd->GetInt32Value(index);
+    }
+    else
+    {
+        val=pd->GetInt32Key(index);
+    }
 }
 
-void DotsC_GetInt64Parameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_Int32 index, DotsC_Int64& val)
+void DotsC_GetInt64Parameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_Int32 index, const KeyValMode keyValMode, DotsC_Int64& val)
 {
     Init();
     const ParameterDescriptionShm* const pd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
-    val=pd->GetInt64Value(index);
+    if (keyValMode==ValueMode)
+    {
+        val=pd->GetInt64Value(index);
+    }
+    else
+    {
+        val=pd->GetInt64Key(index);
+    }
 }
 
 void DotsC_GetFloat32Parameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_Int32 index, DotsC_Float32& val)
@@ -860,29 +876,45 @@ void DotsC_GetFloat64Parameter(const DotsC_TypeId typeId, const DotsC_ParameterI
     val=pd->GetFloat64Value(index);
 }
 
-void DotsC_GetStringParameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_Int32 index, const char* &val)
+void DotsC_GetStringParameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_Int32 index, const KeyValMode keyValMode, const char* &val)
 {
     Init();
     const ParameterDescriptionShm* const pd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
-    val=pd->GetStringValue(index);
+    if (keyValMode==ValueMode)
+    {
+        val=pd->GetStringValue(index);
+    }
+    else
+    {
+        val=pd->GetStringKey(index);
+    }
 }
 
-void DotsC_GetTypeIdParameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_Int32 index, DotsC_TypeId& val)
+void DotsC_GetTypeIdParameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_Int32 index, const KeyValMode keyValMode, DotsC_TypeId& val)
 {
     Init();
     const ParameterDescriptionShm* const pd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
     val=pd->GetInt64Value(index);
+    if (keyValMode==ValueMode)
+    {
+        val=pd->GetInt64Value(index);
+    }
+    else
+    {
+        val=pd->GetInt64Key(index);
+    }
 }
 
 void DotsC_GetHashedIdParameter(const DotsC_TypeId typeId,
                                 const DotsC_ParameterIndex parameter,
                                 const DotsC_Int32 index,
+                                const KeyValMode keyValMode,
                                 DotsC_Int64 & hashVal,
                                 const char* & strVal)
 {
     Init();
     const ParameterDescriptionShm* const pd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
-    std::pair<DotsC_Int64, const char*> val=pd->GetHashedValue(index);
+    std::pair<DotsC_Int64, const char*> val=(keyValMode==ValueMode) ? pd->GetHashedValue(index) : pd->GetHashedKey(index);
     hashVal=val.first;
     strVal=val.second;
 }
@@ -890,15 +922,26 @@ void DotsC_GetHashedIdParameter(const DotsC_TypeId typeId,
 void DotsC_GetEntityIdParameter(const DotsC_TypeId typeId,
                                 const DotsC_ParameterIndex parameter,
                                 const DotsC_Int32 index,
+                                const KeyValMode keyValMode,
                                 DotsC_EntityId & entityId,
                                 const char* & instanceIdStr)
 {
     Init();
     const ParameterDescriptionShm* const pd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
-    entityId.typeId=pd->GetInt64Value(index);
-    std::pair<DotsC_Int64, const char*> hashVal=pd->GetHashedValue(index);
-    entityId.instanceId=hashVal.first;
-    instanceIdStr=hashVal.second;
+    if (keyValMode==ValueMode)
+    {
+        entityId.typeId=pd->GetInt64Value(index);
+        std::pair<DotsC_Int64, const char*> hashVal=pd->GetHashedValue(index);
+        entityId.instanceId=hashVal.first;
+        instanceIdStr=hashVal.second;
+    }
+    else
+    {
+        entityId.typeId=pd->GetInt64Key(index);
+        std::pair<DotsC_Int64, const char*> hashVal=pd->GetHashedKey(index);
+        entityId.instanceId=hashVal.first;
+        instanceIdStr=hashVal.second;
+    }
 }
 
 void DotsC_GetObjectParameter(const DotsC_TypeId typeId,
@@ -965,10 +1008,10 @@ void DotsC_SetReadCursor(DotsC_Handle reader, DotsC_MemberIndex member, DotsC_In
     rs->index=valueIndex;
 }
 
-void DotsC_SetReadValueMode(DotsC_Handle reader, bool valueMode)
+void DotsC_SetReadMode(DotsC_Handle reader, KeyValMode keyValMode)
 {
     ReaderState* rs=ReaderState::FromHandle(reader);
-    rs->valueMode=valueMode;
+    rs->keyValMode=keyValMode;
 }
 
 void DotsC_ReadMemberStatus(DotsC_Handle reader, bool& isNull, bool& isChanged)
@@ -981,7 +1024,7 @@ void DotsC_ReadMemberStatus(DotsC_Handle reader, bool& isNull, bool& isChanged)
 void DotsC_ReadInt32Member(DotsC_Handle reader, DotsC_Int32& val)
 {
     ReaderState* rs=ReaderState::FromHandle(reader);
-    if (rs->valueMode)
+    if (rs->keyValMode==ValueMode)
     {
         bool isNull=false, isChanged=true;
         rs->reader.ReadValue(rs->member, rs->index, val, isNull, isChanged);
@@ -995,7 +1038,7 @@ void DotsC_ReadInt32Member(DotsC_Handle reader, DotsC_Int32& val)
 void DotsC_ReadInt64Member(DotsC_Handle reader, DotsC_Int64& val)
 {
     ReaderState* rs=ReaderState::FromHandle(reader);
-    if (rs->valueMode)
+    if (rs->keyValMode==ValueMode)
     {
         bool isNull=false, isChanged=true;
         rs->reader.ReadValue(rs->member, rs->index, val, isNull, isChanged);
@@ -1030,7 +1073,7 @@ void DotsC_ReadBooleanMember(DotsC_Handle reader, bool& val)
 void DotsC_ReadStringMember(DotsC_Handle reader, const char*& val)
 {
     ReaderState* rs=ReaderState::FromHandle(reader);
-    if (rs->valueMode)
+    if (rs->keyValMode==ValueMode)
     {
         bool isNull=false, isChanged=true;
         rs->reader.ReadValue(rs->member, rs->index, val, isNull, isChanged);
@@ -1045,7 +1088,7 @@ void DotsC_ReadHashedMember(DotsC_Handle reader, DotsC_Int64& val, const char*& 
 {
     ReaderState* rs=ReaderState::FromHandle(reader);
     std::pair<DotsC_Int64, const char*> hash;
-    if (rs->valueMode)
+    if (rs->keyValMode==ValueMode)
     {
         bool isNull=false, isChanged=true;
         rs->reader.ReadValue(rs->member, rs->index, hash, isNull, isChanged);
@@ -1063,7 +1106,7 @@ void DotsC_ReadEntityIdMember(DotsC_Handle reader, DotsC_EntityId& val, const ch
 {
     ReaderState* rs=ReaderState::FromHandle(reader);
     std::pair<DotsC_EntityId, const char*> eid;
-    if (rs->valueMode)
+    if (rs->keyValMode==ValueMode)
     {
         bool isNull=false, isChanged=true;
         rs->reader.ReadValue(rs->member, rs->index, eid, isNull, isChanged);
@@ -1112,10 +1155,10 @@ void DotsC_SetWriteCursor(DotsC_Handle writer, DotsC_MemberIndex member, DotsC_I
     ws->changed=false;
 }
 
-void DotsC_SetWriteValueMode(DotsC_Handle writer, bool valueMode)
+void DotsC_SetWriteMode(DotsC_Handle writer, KeyValMode keyValMode)
 {
     WriterState* ws=WriterState::FromHandle(writer);
-    ws->valueMode=valueMode;
+    ws->keyValMode=keyValMode;
 }
 
 void DotsC_WriteMemberStatus(DotsC_Handle writer, bool isNull, bool isChanged)
@@ -1131,7 +1174,7 @@ void DotsC_WriteMemberStatus(DotsC_Handle writer, bool isNull, bool isChanged)
 void DotsC_WriteInt32Member(DotsC_Handle writer, DotsC_Int32 val)
 {
     WriterState* ws=WriterState::FromHandle(writer);
-    if (ws->valueMode)
+    if (ws->keyValMode==ValueMode)
     {
         ws->writer.WriteValue(ws->member, ws->index, val, false, ws->changed);
     }
@@ -1144,7 +1187,7 @@ void DotsC_WriteInt32Member(DotsC_Handle writer, DotsC_Int32 val)
 void DotsC_WriteInt64Member(DotsC_Handle writer, DotsC_Int64 val)
 {
     WriterState* ws=WriterState::FromHandle(writer);
-    if (ws->valueMode)
+    if (ws->keyValMode==ValueMode)
     {
         ws->writer.WriteValue(ws->member, ws->index, val, false, ws->changed);
     }
@@ -1175,7 +1218,7 @@ void DotsC_WriteBooleanMember(DotsC_Handle writer, bool val)
 void DotsC_WriteStringMember(DotsC_Handle writer, const char* val)
 {
     WriterState* ws=WriterState::FromHandle(writer);
-    if (ws->valueMode)
+    if (ws->keyValMode==ValueMode)
     {
         ws->writer.WriteValue(ws->member, ws->index, val, false, ws->changed);
     }
@@ -1188,7 +1231,7 @@ void DotsC_WriteStringMember(DotsC_Handle writer, const char* val)
 void DotsC_WriteHashedMember(DotsC_Handle writer, DotsC_Int64 hash, const char* str)
 {
     WriterState* ws=WriterState::FromHandle(writer);
-    if (ws->valueMode)
+    if (ws->keyValMode==ValueMode)
     {
         ws->writer.WriteValue(ws->member, ws->index, std::make_pair(hash, str), false, ws->changed);
     }
@@ -1201,7 +1244,7 @@ void DotsC_WriteHashedMember(DotsC_Handle writer, DotsC_Int64 hash, const char* 
 void DotsC_WriteEntityIdMember(DotsC_Handle writer, const DotsC_EntityId& val, const char* instanceString)
 {
     WriterState* ws=WriterState::FromHandle(writer);
-    if (ws->valueMode)
+    if (ws->keyValMode==ValueMode)
     {
         ws->writer.WriteValue(ws->member, ws->index, std::make_pair(val, instanceString), false, ws->changed);
     }
