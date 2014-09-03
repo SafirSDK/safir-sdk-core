@@ -54,9 +54,9 @@ namespace SP
 #pragma warning (disable: 4251)
 #endif
 
-    /** 
+    /**
      * This is an interface into the statistics that a SystemPicture instance
-     * collects on the local node and receives from the remote nodes. 
+     * collects on the local node and receives from the remote nodes.
      *
      * Use functionality in SystemPicture class to get an instance to one
      * of these objects.
@@ -78,7 +78,7 @@ namespace SP
 
         //last election id
         int64_t ElectionId() const;
-        
+
         int Size() const;
 
         //Static fields
@@ -132,4 +132,3 @@ namespace SP
 }
 }
 }
-

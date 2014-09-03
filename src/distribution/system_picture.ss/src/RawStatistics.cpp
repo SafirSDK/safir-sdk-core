@@ -41,8 +41,8 @@
 
 namespace
 {
-    void PrintMessage(const Safir::Dob::Internal::SP::NodeStatisticsMessage& msg, 
-                      std::wostream& out, 
+    void PrintMessage(const Safir::Dob::Internal::SP::NodeStatisticsMessage& msg,
+                      std::wostream& out,
                       const unsigned int level = 0)
     {
         if (level > 1)
@@ -70,8 +70,8 @@ namespace
             {
                 out << "    ";
             }
-            out << node.name().c_str() 
-                       << "@" << node.control_address().c_str() 
+            out << node.name().c_str()
+                       << "@" << node.control_address().c_str()
                        << " (" << node.id() << ")";
             if (node.is_dead())
             {
@@ -81,7 +81,7 @@ namespace
             {
                 out << "\n" << indent << "        recv = " << node.receive_count() << ", retransmit = " << node.retransmit_count();
             }
-            
+
             if (node.has_remote_statistics())
             {
                 PrintMessage(node.remote_statistics(), out, level + 1);
@@ -246,8 +246,8 @@ namespace SP
     const std::string& RawStatistics::ControlAddress() const {return m_impl->ControlAddress();}
     const std::string& RawStatistics::DataAddress() const {return m_impl->DataAddress();}
 
-    int64_t RawStatistics::ElectionId() const {return m_impl->ElectionId();}    
-    
+    int64_t RawStatistics::ElectionId() const {return m_impl->ElectionId();}
+
     int RawStatistics::Size() const {return m_impl->Size();}
 
     const std::string& RawStatistics::Name(const int index) const {return m_impl->Name(index);}
@@ -255,15 +255,15 @@ namespace SP
     int64_t RawStatistics::NodeTypeId(const int index) const {return m_impl->NodeTypeId(index);}
     const std::string& RawStatistics::ControlAddress(const int index) const {return m_impl->ControlAddress(index);}
     const std::string& RawStatistics::DataAddress(const int index) const {return m_impl->DataAddress(index);}
-    
+
     bool RawStatistics::IsDead(const int index) const {return m_impl->IsDead(index);}
     bool RawStatistics::IsLongGone(const int index) const {return m_impl->IsLongGone(index);}
     uint32_t RawStatistics::ReceiveCount(const int index) const {return m_impl->ReceiveCount(index);}
     uint32_t RawStatistics::RetransmitCount(const int index) const {return m_impl->RetransmitCount(index);}
-    
+
     bool RawStatistics::HasRemoteStatistics(const int index) const {return m_impl->HasRemoteStatistics(index);}
     RawStatistics RawStatistics::RemoteStatistics(const int index) const {return m_impl->RemoteStatistics(index);}
-    
+
     void RawStatistics::Print(std::wostream& out) const {m_impl->Print(out);}
 
     RawStatistics RawStatisticsCreator::Create(std::unique_ptr<NodeStatisticsMessage> message)
@@ -274,5 +274,3 @@ namespace SP
 }
 }
 }
-
-
