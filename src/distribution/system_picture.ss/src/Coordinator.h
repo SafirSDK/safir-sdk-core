@@ -186,8 +186,8 @@ namespace SP
             {
                 if (!m_electionHandler.IsElected(from))
                 {
-                    SEND_SYSTEM_LOG(Informational, 
-                                    << "SystemPicture (in node " << m_id 
+                    SEND_SYSTEM_LOG(Informational,
+                                    << "SystemPicture (in node " << m_id
                                     << ") got a new system state (from node "
                                     << from << ") from a node that is not elected. Discarding.");
                     return;
@@ -200,8 +200,8 @@ namespace SP
                 if (m_stateMessage.election_id() == 0 ||
                     m_ownElectionId != 0)
                 {
-                    SEND_SYSTEM_LOG(Alert, 
-                                    << "Got a State message with election id " 
+                    SEND_SYSTEM_LOG(Alert,
+                                    << "Got a State message with election id "
                                     << m_stateMessage.election_id() <<
                                     " while m_ownElectionId was " << m_ownElectionId);
                     throw std::logic_error("Incorrect ElectionIds!");
@@ -215,10 +215,10 @@ namespace SP
                 {
                     //if we haven't marked the node as dead and electee doesnt think the node
                     //is part of the system we want to exclude the node
-                    if (!m_lastStatistics.IsDead(i) && 
+                    if (!m_lastStatistics.IsDead(i) &&
                         deadNodes.find(m_lastStatistics.Id(i)) != deadNodes.end())
                     {
-                        lllog (4) << "Elected coordinator thinks that node " 
+                        lllog (4) << "Elected coordinator thinks that node "
                                   << m_lastStatistics.Name(i).c_str()
                                   << " with id " << m_lastStatistics.Id(i)
                                   << " is dead, so I'll mark him as dead." << std::endl;
@@ -318,13 +318,11 @@ namespace SP
                 if (remote.ElectionId() != m_ownElectionId)
                 {
                     lllog(7) << "SP: Remote RAW data from node "
-                             << m_lastStatistics.Id(i) << " has wrong election id (" 
+                             << m_lastStatistics.Id(i) << " has wrong election id ("
                              << remote.ElectionId() << "), not updating my state." << std::endl;
                     return false;
                 }
             }
-
-
 
             m_stateMessage.set_elected_id(m_id);
             m_stateMessage.set_election_id(m_ownElectionId);
@@ -361,7 +359,8 @@ namespace SP
                 {
                     lllog (4) << "Someone thinks that node " << m_lastStatistics.Name(i).c_str()
                               << " with id " << m_lastStatistics.Id(i)
-                              << " is dead, so I'll mark him as dead and spread the word in the SystemState." << std::endl;
+                              << " is dead, so I'll mark him as dead and spread the word in the SystemState."
+                              << std::endl;
                     m_communication.ExcludeNode(m_lastStatistics.Id(i));
                     m_rawHandler.SetDeadNode(m_lastStatistics.Id(i));
                     justKilled = true;
