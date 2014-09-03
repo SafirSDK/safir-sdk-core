@@ -47,8 +47,6 @@ namespace Internal
     class AsioPeriodicTimer
         : private boost::noncopyable
     {
-
-
     public:
         AsioPeriodicTimer(boost::asio::io_service& ioService,
                           const boost::chrono::steady_clock::duration& period,
@@ -63,7 +61,7 @@ namespace Internal
         }
 
         /**
-         * Start the timer. 
+         * Start the timer.
          * Thread safe, and multiple calls will be ignored.
          */
         void Start()
@@ -80,7 +78,7 @@ namespace Internal
         }
 
         /**
-         * Start the timer. 
+         * Stop the timer.
          * Thread safe, and multiple calls will be ignored.
          */
         void Stop()
@@ -97,7 +95,7 @@ namespace Internal
         }
 
     private:
-        
+
         void Timeout(const boost::system::error_code& error)
         {
             if (!m_started)
@@ -111,7 +109,7 @@ namespace Internal
             {
                 m_timer.expires_from_now(m_period);
             }
-            
+
             m_handler(error);
 
             if (!error)
@@ -139,4 +137,3 @@ namespace Internal
 }
 
 #endif
-
