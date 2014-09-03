@@ -68,14 +68,14 @@ namespace SP
         {
             SchedulePublishTimer(period, m_allNodeTypes);
 
-            rawHandler.AddRawChangedCallback(m_strand.wrap([this](const RawStatistics&, 
+            rawHandler.AddRawChangedCallback(m_strand.wrap([this](const RawStatistics&,
                                                                   const RawChanges flags)
-                                                             {
-                                                                 if (flags.NodesChanged() || flags.ElectionIdChanged())
-                                                                 {
-                                                                     Publish(m_allNodeTypes);
-                                                                 }
-                                                             }));            
+            {
+                if (flags.NodesChanged() || flags.ElectionIdChanged())
+                {
+                    Publish(m_allNodeTypes);
+                }
+            }));
         }
 
         void Stop()
@@ -101,7 +101,7 @@ namespace SP
             }
 
             m_timer.cancel();
-            m_timer.expires_from_now(delay); 
+            m_timer.expires_from_now(delay);
             m_timer.async_wait(m_strand.wrap([this, toNodeTypes](const boost::system::error_code& error)
             {
                 if (!error)
@@ -110,7 +110,7 @@ namespace SP
                 }
             }));
         }
-        
+
         //must be called in strand
         //if empty set is passed to this function we send to all node types
         void Publish(const std::set<int64_t>& toNodeTypes)
@@ -125,14 +125,16 @@ namespace SP
             //start by scheduling next timer to send to all nodes.
             //this will be cancelled if we need to do a resend due to overflow below.
             SchedulePublishTimer(m_period, m_allNodeTypes);
-            
+
 #ifdef CHECK_CRC
             const int crcBytes = sizeof(int);
 #else
             const int crcBytes = 0;
 #endif
 
-            m_rawHandler.PerformOnMyStatisticsMessage([this,crcBytes,toNodeTypes](const boost::shared_ptr<char[]>& data, const size_t size)
+            m_rawHandler.PerformOnMyStatisticsMessage([this,crcBytes,toNodeTypes]
+                                                      (const boost::shared_ptr<char[]>& data,
+                                                       const size_t size)
             {
 #ifdef CHECK_CRC
                 const int crc = GetCrc32(data.get(), size - crcBytes);
@@ -145,7 +147,7 @@ namespace SP
                     const bool sent = m_communication.Send(0, id, std::move(data), size, m_senderId, true);
                     if (!sent)
                     {
-                        lllog(7) << "RawPublisherRemote: Overflow when sending to node type " 
+                        lllog(7) << "RawPublisherRemote: Overflow when sending to node type "
                                  << m_nodeTypes.find(id)->second.name.c_str() << std::endl;
                         overflowNodes.insert(id);
                     }
@@ -175,5 +177,3 @@ namespace SP
 }
 }
 }
-
-

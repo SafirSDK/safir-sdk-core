@@ -285,11 +285,7 @@ namespace SP
 
                                   m_allStatisticsMessage.set_election_id(electionId);
 
-                                  if (nodeId != m_id)
-                                  {
-                                      lllog(7) << "SP: Triggering sending of raw to other nodes" << std::endl;
-                                      PostRawChangedCallback(RawChanges(RawChanges::ELECTION_ID_CHANGED));
-                                  }
+                                  PostRawChangedCallback(RawChanges(RawChanges::ELECTION_ID_CHANGED));
                               });
         }
 
@@ -461,6 +457,7 @@ namespace SP
          */
         void PostRawChangedCallback(const RawChanges& flags)
         {
+            lllog(7) << "SP: PostRawChangedCallback " << flags << std::endl;
             const auto copy = RawStatisticsCreator::Create
                 (Safir::make_unique<NodeStatisticsMessage>(m_allStatisticsMessage));
             for (const auto& cb : m_rawChangedCallbacks)

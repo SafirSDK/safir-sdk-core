@@ -115,22 +115,19 @@ namespace SP
             rawHandler.AddRawChangedCallback(m_strand.wrap([this](const RawStatistics& statistics,
                                                                   const RawChanges flags)
             {
-                if (flags.NewRemoteData() || flags.NodesChanged())
+                lllog(9) << "SP: Coordinator got new raw data (" << flags << ")" << std::endl;
+
+                m_lastStatistics = statistics;
+                m_lastStatisticsDirty = true;
+
+                if (m_electionHandler.IsElected())
                 {
-                    lllog(9) << "SP: Coordinator got new raw data (" << flags << ")" << std::endl;
+                    UpdateMyState();
+                }
 
-                    m_lastStatistics = statistics;
-                    m_lastStatisticsDirty = true;
-
-                    if (m_electionHandler.IsElected())
-                    {
-                        UpdateMyState();
-                    }
-
-                    if (flags.NodesChanged())
-                    {
-                        m_electionHandler.NodesChanged(std::move(statistics));
-                    }
+                if (flags.NodesChanged())
+                {
+                    m_electionHandler.NodesChanged(std::move(statistics));
                 }
             }));
         }
