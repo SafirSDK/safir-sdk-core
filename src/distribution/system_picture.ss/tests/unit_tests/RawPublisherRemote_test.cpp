@@ -46,7 +46,7 @@ public:
         cb = callback;
     }
 
-    void PerformOnMyStatisticsMessage(const std::function<void(std::unique_ptr<char []> data, 
+    void PerformOnMyStatisticsMessage(const std::function<void(std::unique_ptr<char []> data,
                                                                const size_t size)> & fn,
                                       const size_t extraSpace) const
     {
@@ -72,15 +72,16 @@ class Communication
 {
 public:
     bool Send(int64_t nodeId,
-              int64_t nodeTypeId, 
-              const boost::shared_ptr<char[]>& data, 
-              size_t size, 
+              int64_t nodeTypeId,
+              const boost::shared_ptr<char[]>& data,
+              size_t size,
               int64_t /*dataTypeIdentifier*/,
               bool acked)
     {
         BOOST_CHECK(nodeId == 0);
         BOOST_CHECK(acked);
         BOOST_CHECK(size == gsize);
+        BOOST_CHECK(data != nullptr);
         BOOST_CHECK(0 == strcmp(data.get(), "123456789"));
         std::wcout << "Send " << nodeTypeId << std::endl;
         BOOST_CHECK(nodeTypeId == 10 || nodeTypeId == 20);
@@ -111,10 +112,10 @@ BOOST_AUTO_TEST_CASE( send_ten )
 
     RawPublisherRemoteBasic<::Handler, ::Communication> publisher
         (ioService,communication,nodeTypes,"foo",h,boost::chrono::milliseconds(10));
-    
+
     h.stopCall = [&]{publisher.Stop();};
     ioService.run();
-    
+
     BOOST_CHECK(numPerform == 10);
     BOOST_CHECK(numSend10 == 5);
     BOOST_CHECK(numSend20 == 10);
@@ -139,7 +140,7 @@ BOOST_AUTO_TEST_CASE( callbacks )
 
     RawPublisherRemoteBasic<::Handler, ::Communication> publisher
         (ioService,communication,nodeTypes,"foo",h,boost::chrono::hours(10));
-    
+
     h.stopCall = [&]{publisher.Stop();};
 
     cb(RawStatistics(), RawChanges(RawChanges::NODES_CHANGED));
@@ -155,11 +156,8 @@ BOOST_AUTO_TEST_CASE( callbacks )
     cb(RawStatistics(), RawChanges(RawChanges::ELECTION_ID_CHANGED));
 
     ioService.run();
-    
+
     BOOST_CHECK_EQUAL(numPerform, 10);
     BOOST_CHECK_EQUAL(numSend10, 10);
     BOOST_CHECK_EQUAL(numSend20, 10);
 }
-
-
-

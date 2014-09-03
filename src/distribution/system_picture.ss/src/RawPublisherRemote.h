@@ -133,18 +133,21 @@ namespace SP
 #endif
 
             m_rawHandler.PerformOnMyStatisticsMessage([this,crcBytes,toNodeTypes]
-                                                      (const boost::shared_ptr<char[]>& data,
+                                                      (std::unique_ptr<char[]> d,
                                                        const size_t size)
             {
+                //we need to move the data into a shared_ptr
+                boost::shared_ptr<char[]> data(std::move(d));
 #ifdef CHECK_CRC
                 const int crc = GetCrc32(data.get(), size - crcBytes);
                 memcpy(data.get() + size - crcBytes, &crc, sizeof(int));
 #endif
                 std::set<int64_t> overflowNodes;
 
+
                 for (auto id: toNodeTypes)
                 {
-                    const bool sent = m_communication.Send(0, id, std::move(data), size, m_senderId, true);
+                    const bool sent = m_communication.Send(0, id, data, size, m_senderId, true);
                     if (!sent)
                     {
                         lllog(7) << "RawPublisherRemote: Overflow when sending to node type "

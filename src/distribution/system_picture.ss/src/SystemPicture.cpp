@@ -45,6 +45,7 @@
 namespace
 {
     const char* const MASTER_LOCAL_RAW_NAME = "SYSTEM_PICTURE_MASTER_RAW";
+    const char* const SLAVE_LOCAL_RAW_NAME = "SYSTEM_PICTURE_SLAVE_RAW";
     const char* const MASTER_LOCAL_STATE_NAME = "SYSTEM_PICTURE_MASTER_STATE";
     const char* const MASTER_REMOTE_RAW_NAME = "SP_RAW";
     const char* const MASTER_REMOTE_STATE_NAME = "SP_STATE";
@@ -90,16 +91,18 @@ namespace SP
             , m_rawPublisherLocal(Safir::make_unique<RawPublisherLocal>(ioService,
                                                                         *m_rawHandler,
                                                                         MASTER_LOCAL_RAW_NAME,
-                                                                        boost::chrono::seconds(1)))
+                                                                        boost::chrono::seconds(1),
+                                                                        true))
             , m_rawPublisherRemote(Safir::make_unique<RawPublisherRemote>(ioService,
                                                                           communication,
                                                                           nodeTypes,
                                                                           MASTER_REMOTE_RAW_NAME,
                                                                           *m_rawHandler,
                                                                           boost::chrono::seconds(30)))
-            , m_rawSubscriberRemote(Safir::make_unique<RemoteSubscriber<Com::Communication, RawHandler>>(communication,
-                                                                                                         MASTER_REMOTE_RAW_NAME,
-                                                                                                         *m_rawHandler))
+            , m_rawSubscriberRemote(Safir::make_unique<RemoteSubscriber<Com::Communication, RawHandler>>
+                                    (communication,
+                                     MASTER_REMOTE_RAW_NAME,
+                                     *m_rawHandler))
             , m_coordinator(Safir::make_unique<Coordinator>(ioService,
                                                             communication,
                                                             name,

@@ -151,7 +151,7 @@ namespace SP
 
 
         //extraSpace adds bytes at the end of the buffer, e.g. for adding a crc
-        void PerformOnMyStatisticsMessage(const std::function<void(const boost::shared_ptr<char[]>& data,
+        void PerformOnMyStatisticsMessage(const std::function<void(std::unique_ptr<char[]> data,
                                                                    const size_t size)> & fn,
                                           const size_t extraSpace) const
         {
@@ -179,7 +179,7 @@ namespace SP
 
                 const size_t size = m_allStatisticsMessage.ByteSize() + extraSpace;
 
-                auto data = boost::make_shared<char[]>(size);
+                auto data = std::unique_ptr<char[]>(new char[size]);
 
                 m_allStatisticsMessage.SerializeWithCachedSizesToArray
                     (reinterpret_cast<google::protobuf::uint8*>(data.get()));
@@ -191,7 +191,7 @@ namespace SP
                 }
 
                 //call the function object with the produced data.
-                fn (data, size);
+                fn (std::move(data), size);
             });
 
         }

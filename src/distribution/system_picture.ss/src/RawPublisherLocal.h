@@ -46,18 +46,23 @@ namespace SP
     class RawPublisherLocalBasic
     {
     public:
+        /**
+         * The all parameter controls whether remote raw data is sent or just our own data.
+         */
         RawPublisherLocalBasic(boost::asio::io_service& ioService,
                                RawHandlerT& rawHandler,
                                const char* const name,
-                               const boost::chrono::steady_clock::duration& period)
+                               const boost::chrono::steady_clock::duration& period,
+                               const bool all)
             : m_rawHandler(rawHandler)
             , m_publisher(ioService,name)
-            , m_publishTimer(ioService, 
+            , m_publishTimer(ioService,
                              period,
                              [this](const boost::system::error_code& error)
                              {
                                  Publish(error);
                              })
+            , m_all(all)
         {
             m_publishTimer.Start();
             m_publisher.Start();
@@ -87,20 +92,30 @@ namespace SP
             const int crcBytes = 0;
 #endif
 
-            m_rawHandler.PerformOnAllStatisticsMessage([this,crcBytes](std::unique_ptr<char[]> data, const size_t size)
-                                                       {
+            const auto sender = [this,crcBytes](std::unique_ptr<char[]> data,
+                                                const size_t size)
+                {
 #ifdef CHECK_CRC
-                                                           const int crc = GetCrc32(data.get(), size - crcBytes);
-                                                           memcpy(data.get() + size - crcBytes, &crc, sizeof(int));
+                    const int crc = GetCrc32(data.get(), size - crcBytes);
+                    memcpy(data.get() + size - crcBytes, &crc, sizeof(int));
 #endif
-                                                           m_publisher.Send(std::move(data), static_cast<uint32_t>(size));
-                                                       },
-                                                       crcBytes);
+                    m_publisher.Send(std::move(data), static_cast<uint32_t>(size));
+                };
+
+            if (m_all)
+            {
+                m_rawHandler.PerformOnAllStatisticsMessage(sender, crcBytes);
+            }
+            else
+            {
+                m_rawHandler.PerformOnMyStatisticsMessage(sender, crcBytes);
+            }
         }
-        
+
         RawHandlerT& m_rawHandler;
         IpcPublisherT m_publisher;
         Safir::Utilities::Internal::AsioPeriodicTimer m_publishTimer;
+        const bool m_all;
     };
 
     typedef RawPublisherLocalBasic<RawHandler, Safir::Utilities::Internal::IpcPublisher> RawPublisherLocal;
@@ -108,4 +123,3 @@ namespace SP
 }
 }
 }
-
