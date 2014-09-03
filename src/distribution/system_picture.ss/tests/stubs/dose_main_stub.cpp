@@ -1,8 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2012 (http://safir.sourceforge.net)
+* Copyright Saab AB, 2014 (http://safir.sourceforge.net)
 *
-* Created by: Lars Hagström / lars.hagstrom@consoden.se
+* Created by: Anders Widén / anders.widen@consoden.se
 *
 *******************************************************************************
 *
@@ -34,14 +34,14 @@
 
 //disable warnings in boost
 #if defined _MSC_VER
-  #pragma warning (push)
-  #pragma warning (disable : 4100)
+#  pragma warning (push)
+#  pragma warning (disable : 4100)
 #endif
 
 #include <boost/program_options.hpp>
 
 #if defined _MSC_VER
-  #pragma warning (pop)
+#  pragma warning (pop)
 #endif
 
 
@@ -67,15 +67,9 @@ public:
         options_description options("Options");
         options.add_options()
             ("help,h", "show help message")
-            ("control-address,c",
-             value<std::string>(&controlAddress)->default_value("0.0.0.0:30000"),
-             "Address and port of the control channel")
             ("data-address,d",
              value<std::string>(&dataAddress)->default_value("0.0.0.0:40000"),
              "Address and port of the data channel")
-            ("seed,s",
-             value<std::vector<std::string> >(&seeds),
-             "Seed address (can be specified multiple times). Pairs of address:port to control channel.")
             ("name,n",
              value<std::string>(&name)->default_value("<not set>", ""),
              "A nice name for the node, for presentation purposes only")
@@ -104,31 +98,29 @@ public:
             return;
         }
 
-
         parseOk = true;
     }
+
     bool parseOk;
 
-    std::string controlAddress;
     std::string dataAddress;
-    std::vector<std::string> seeds;
     boost::int64_t id;
     std::string name;
 private:
     static void ShowHelp(const boost::program_options::options_description& desc)
     {
         std::wcout << std::boolalpha
-                   << "Usage: control_stub [OPTIONS]\n"
+                   << "Usage: dose_main_stub [OPTIONS]\n"
                    << desc << "\n"
                    << std::endl;
-    }
+}
 
 };
 
 void ChangedSystemState(const Safir::Dob::Internal::SP::SystemState& data)
 {
-    std::wcout << "Got new system state from SP! The number of nodes are " << data.Size() << std::endl;
-
+    std::wcout << "dose_main got new system state from SP! The number of nodes are "
+               << data.Size() << std::endl;
 }
 
 int main(int argc, char * argv[])
@@ -141,7 +133,7 @@ int main(int argc, char * argv[])
 
     boost::asio::io_service ioService;
 
-    //make some work to stop io_service from exiting.
+    // Make some work to stop io_service from exiting.
     auto work = Safir::make_unique<boost::asio::io_service::work>(ioService);
 
     std::vector<Safir::Dob::Internal::Com::NodeTypeDefinition> commNodeTypes;
@@ -179,26 +171,23 @@ int main(int argc, char * argv[])
 
 
 
-    Safir::Dob::Internal::Com::Communication communication(Safir::Dob::Internal::Com::controlModeTag,
+    Safir::Dob::Internal::Com::Communication communication(Safir::Dob::Internal::Com::dataModeTag,
                                                            ioService,
                                                            options.name,
                                                            options.id,
                                                            1,
-                                                           options.controlAddress,
                                                            options.dataAddress,
                                                            commNodeTypes);
 
-    communication.InjectSeeds(options.seeds);
 
 
 
-    Safir::Dob::Internal::SP::SystemPicture sp(Safir::Dob::Internal::SP::master_tag,
+    Safir::Dob::Internal::SP::SystemPicture sp(Safir::Dob::Internal::SP::slave_tag,
                                                ioService,
                                                communication,
                                                options.name,
                                                options.id,
                                                1,
-                                               options.controlAddress,
                                                options.dataAddress,
                                                std::move(spNodeTypes));
 

@@ -4,11 +4,18 @@ project(system_picture_test_stubs CXX)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
-ADD_EXECUTABLE(control_stub sp_control.cpp)
-
 FIND_PACKAGE(Boost COMPONENTS program_options thread system)
 
+ADD_EXECUTABLE(control_stub sp_control.cpp)
+ADD_EXECUTABLE(dose_main_stub dose_main_stub.cpp)
+
 TARGET_LINK_LIBRARIES(control_stub
+  optimized system_picture
+  debug system_picture${CMAKE_DEBUG_POSTFIX}
+  optimized communication
+  debug communication${CMAKE_DEBUG_POSTFIX})
+
+TARGET_LINK_LIBRARIES(dose_main_stub
   optimized system_picture
   debug system_picture${CMAKE_DEBUG_POSTFIX}
   optimized communication
@@ -20,9 +27,14 @@ if (NOT MSVC)
     lluf_utils
     lluf_config
     ${Boost_LIBRARIES})
+  TARGET_LINK_LIBRARIES(dose_main_stub
+    lluf_id
+    lluf_utils
+    lluf_config
+    ${Boost_LIBRARIES})
 endif()
 
-INSTALL(TARGETS control_stub
+INSTALL(TARGETS control_stub dose_main_stub
         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
         LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
         ARCHIVE DESTINATION ${SAFIR_SDK}/lib)

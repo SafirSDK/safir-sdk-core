@@ -93,6 +93,9 @@ namespace SP
                                                                         MASTER_LOCAL_RAW_NAME,
                                                                         boost::chrono::seconds(1),
                                                                         true))
+            , m_rawSubscriberLocal(Safir::make_unique<LocalSubscriber<Safir::Utilities::Internal::IpcSubscriber,
+                                                                      RawStatisticsSubscriber,
+                                                                      RawStatisticsCreator>>(ioService, SLAVE_LOCAL_RAW_NAME))
             , m_rawPublisherRemote(Safir::make_unique<RawPublisherRemote>(ioService,
                                                                           communication,
                                                                           nodeTypes,
@@ -131,6 +134,12 @@ namespace SP
                                        *m_coordinator))
             , m_stopped(false)
         {
+            //when we're in master mode we set up a subscription to raw data from the slave
+            m_rawSubscriberLocal->Start([](const RawStatistics& data)
+                                        {
+                                            lllog(5) << "SP: Got raw data from slave!\n" << data << std::endl;
+                                        });
+
 
         }
 
@@ -152,6 +161,11 @@ namespace SP
                                                           "",
                                                           dataAddress,
                                                           nodeTypes))
+            , m_rawPublisherLocal(Safir::make_unique<RawPublisherLocal>(ioService,
+                                                                        *m_rawHandler,
+                                                                        SLAVE_LOCAL_RAW_NAME,
+                                                                        boost::chrono::seconds(1),
+                                                                        false))
             , m_stateSubscriberLocal(Safir::make_unique<LocalSubscriber<Safir::Utilities::Internal::IpcSubscriber,
                                                                         SystemStateSubscriber,
                                                                         SystemStateCreator>>(ioService, MASTER_LOCAL_STATE_NAME))

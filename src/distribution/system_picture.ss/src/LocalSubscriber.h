@@ -65,11 +65,15 @@ namespace SP
         void Start(const std::function<void (const typename SubscriberInterfaceT::DataWrapper& data)>& dataCallback) override
         {
             m_strand.dispatch([this, dataCallback]
-                              {
-                                  m_dataCallback = dataCallback;
+            {
+                if (m_dataCallback != nullptr)
+                {
+                    throw std::logic_error("LocalSubscriber: Start has already been called!");
+                }
+                m_dataCallback = dataCallback;
 
-                                  m_subscriber.Connect();
-                              });
+                m_subscriber.Connect();
+            });
         }
 
         void Stop() override
