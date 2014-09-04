@@ -225,7 +225,7 @@ BOOST_AUTO_TEST_CASE( nodes_changed_add_callback )
                                    CheckStatisticsCommon(statistics);
 
                                    BOOST_CHECK(flags.NodesChanged());
-                                   BOOST_CHECK(!flags.NewRemoteData());
+                                   BOOST_CHECK(!flags.NewRemoteStatistics());
                                    BOOST_CHECK(!flags.ElectionIdChanged());
 
                                    BOOST_CHECK(!statistics.IsDead(0));
@@ -258,7 +258,7 @@ BOOST_AUTO_TEST_CASE( nodes_changed_removed_callback )
                                    CheckStatisticsCommon(statistics);
 
                                    BOOST_CHECK(flags.NodesChanged());
-                                   BOOST_CHECK(!flags.NewRemoteData());
+                                   BOOST_CHECK(!flags.NewRemoteStatistics());
                                    BOOST_CHECK(!flags.ElectionIdChanged());
 
                                    BOOST_CHECK(statistics.DataReceiveCount(0) == 0);
@@ -351,7 +351,7 @@ BOOST_AUTO_TEST_CASE( raw_changed_callback )
                                    if (cbCalls == 1)
                                    {
                                        BOOST_CHECK(flags.NodesChanged());
-                                       BOOST_CHECK(!flags.NewRemoteData());
+                                       BOOST_CHECK(!flags.NewRemoteStatistics());
 
                                        BOOST_CHECK(!statistics.IsDead(0));
                                        BOOST_CHECK(!statistics.HasRemoteStatistics(0));
@@ -359,7 +359,7 @@ BOOST_AUTO_TEST_CASE( raw_changed_callback )
                                    else if (cbCalls == 2)
                                    {
                                        BOOST_CHECK(!flags.NodesChanged());
-                                       BOOST_CHECK(flags.NewRemoteData());
+                                       BOOST_CHECK(flags.NewRemoteStatistics());
 
                                        BOOST_CHECK(!statistics.IsDead(0));
                                        BOOST_CHECK(statistics.HasRemoteStatistics(0));
@@ -368,7 +368,7 @@ BOOST_AUTO_TEST_CASE( raw_changed_callback )
                                    else
                                    {
                                        BOOST_CHECK(flags.NodesChanged());
-                                       BOOST_CHECK(!flags.NewRemoteData());
+                                       BOOST_CHECK(!flags.NewRemoteStatistics());
 
                                        BOOST_CHECK(statistics.IsDead(0));
                                        BOOST_CHECK(statistics.HasRemoteStatistics(0));
@@ -380,7 +380,7 @@ BOOST_AUTO_TEST_CASE( raw_changed_callback )
     const size_t size = msg->ByteSize();
     auto data = boost::make_shared<char[]>(size);
     msg->SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
-    rh.NewRemoteData(11,data,size);
+    rh.NewRemoteStatistics(11,data,size);
 
     BOOST_CHECK_NO_THROW(ioService.run());
     BOOST_CHECK_EQUAL(cbCalls, 3);
@@ -396,7 +396,7 @@ BOOST_AUTO_TEST_CASE( election_id_changed_callback)
                              {
                                  ++cbCalls;
 
-                                 BOOST_CHECK(!flags.NewRemoteData());
+                                 BOOST_CHECK(!flags.NewRemoteStatistics());
                                  if (cbCalls == 1)
                                  {
                                      BOOST_CHECK(flags.NodesChanged());
@@ -431,7 +431,7 @@ BOOST_AUTO_TEST_CASE( set_dead_node )
                                    ++cbCalls;
 
                                    BOOST_CHECK(flags.NodesChanged());
-                                   BOOST_CHECK(!flags.NewRemoteData());
+                                   BOOST_CHECK(!flags.NewRemoteStatistics());
                                    BOOST_CHECK(!flags.ElectionIdChanged());
 
                                    if (cbCalls == 1)
@@ -465,7 +465,7 @@ BOOST_AUTO_TEST_CASE( perform_on_all )
     const size_t size = msg->ByteSize();
     auto data = boost::make_shared<char[]>(size);
     msg->SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
-    rh.NewRemoteData(11,data,size);
+    rh.NewRemoteStatistics(11,data,size);
 
     rh.PerformOnAllStatisticsMessage([&](std::unique_ptr<char[]> data,
                                          const size_t size)
@@ -492,7 +492,7 @@ BOOST_AUTO_TEST_CASE( perform_on_my )
     const size_t size = msg->ByteSize();
     auto data = boost::make_shared<char[]>(size);
     msg->SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
-    rh.NewRemoteData(11,data,size);
+    rh.NewRemoteStatistics(11,data,size);
 
     rh.PerformOnMyStatisticsMessage([&](boost::shared_ptr<char[]> data,
                                          const size_t size)

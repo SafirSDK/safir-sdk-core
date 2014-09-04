@@ -534,7 +534,7 @@ BOOST_AUTO_TEST_CASE( propagate_state_from_other )
     state.SerializeWithCachedSizesToArray
         (reinterpret_cast<google::protobuf::uint8*>(data.get()));
 
-    coordinator.NewRemoteData(1001,data,size);
+    coordinator.NewRemoteStatistics(1001,data,size);
     bool callbackCalled = false;
 
     coordinator.PerformOnStateMessage([&callbackCalled](std::unique_ptr<char []> /*data*/,
@@ -596,7 +596,7 @@ BOOST_AUTO_TEST_CASE( remote_from_other_with_dead )
     state.SerializeWithCachedSizesToArray
         (reinterpret_cast<google::protobuf::uint8*>(data.get()));
 
-    coordinator.NewRemoteData(1001,data,size);
+    coordinator.NewRemoteStatistics(1001,data,size);
 
     ioService.run();
 

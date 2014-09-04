@@ -30,7 +30,7 @@ using namespace Safir::Dob::Internal::SP;
 BOOST_AUTO_TEST_CASE( no_flags )
 {
     RawChanges flags(0);
-    BOOST_CHECK(!flags.NewRemoteData());
+    BOOST_CHECK(!flags.NewRemoteStatistics());
     BOOST_CHECK(!flags.NodesChanged());
     BOOST_CHECK(!flags.ElectionIdChanged());
 }
@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE( no_flags )
 BOOST_AUTO_TEST_CASE( new_remote )
 {
     RawChanges flags(RawChanges::NEW_REMOTE_DATA);
-    BOOST_CHECK(flags.NewRemoteData());
+    BOOST_CHECK(flags.NewRemoteStatistics());
     BOOST_CHECK(!flags.NodesChanged());
     BOOST_CHECK(!flags.ElectionIdChanged());
 }
@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE( new_remote )
 BOOST_AUTO_TEST_CASE( nodes_changed )
 {
     RawChanges flags(RawChanges::NODES_CHANGED);
-    BOOST_CHECK(!flags.NewRemoteData());
+    BOOST_CHECK(!flags.NewRemoteStatistics());
     BOOST_CHECK(flags.NodesChanged());
     BOOST_CHECK(!flags.ElectionIdChanged());
 }
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE( nodes_changed )
 BOOST_AUTO_TEST_CASE( election_id_changed )
 {
     RawChanges flags(RawChanges::ELECTION_ID_CHANGED);
-    BOOST_CHECK(!flags.NewRemoteData());
+    BOOST_CHECK(!flags.NewRemoteStatistics());
     BOOST_CHECK(!flags.NodesChanged());
     BOOST_CHECK(flags.ElectionIdChanged());
 }
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE( election_id_changed )
 BOOST_AUTO_TEST_CASE( two_set )
 {
     RawChanges flags(RawChanges::ELECTION_ID_CHANGED | RawChanges::NEW_REMOTE_DATA);
-    BOOST_CHECK(flags.NewRemoteData());
+    BOOST_CHECK(flags.NewRemoteStatistics());
     BOOST_CHECK(!flags.NodesChanged());
     BOOST_CHECK(flags.ElectionIdChanged());
 }
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE( three_set )
     RawChanges flags(RawChanges::NEW_REMOTE_DATA |
                      RawChanges::NODES_CHANGED |
                      RawChanges::ELECTION_ID_CHANGED);
-    BOOST_CHECK(flags.NewRemoteData());
+    BOOST_CHECK(flags.NewRemoteStatistics());
     BOOST_CHECK(flags.NodesChanged());
     BOOST_CHECK(flags.ElectionIdChanged());
 }

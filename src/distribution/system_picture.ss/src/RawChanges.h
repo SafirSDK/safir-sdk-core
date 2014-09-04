@@ -50,14 +50,14 @@ namespace SP
 
         }
 
-        bool NewRemoteData() const {return (m_flags & NEW_REMOTE_DATA) != 0;}
+        bool NewRemoteStatistics() const {return (m_flags & NEW_REMOTE_DATA) != 0;}
         bool NodesChanged() const {return (m_flags & NODES_CHANGED) != 0;}
         bool ElectionIdChanged() const {return (m_flags & ELECTION_ID_CHANGED) != 0;}
 
         void Print(std::wostream& out) const
         {
             out << std::boolalpha
-                << "NewRemoteData = " << NewRemoteData()
+                << "NewRemoteStatistics = " << NewRemoteStatistics()
                 << ", NodesChanged = " << NodesChanged()
                 << ", ElectionIdChanged = " << ElectionIdChanged();
         }

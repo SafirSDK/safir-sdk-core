@@ -55,9 +55,9 @@ int updates = 0;
 class Handler
 {
 public:
-    void NewRemoteData(const int64_t from, 
-                       const boost::shared_ptr<char[]>& data,
-                       const size_t size)
+    void NewRemoteStatistics(const int64_t from, 
+                             const boost::shared_ptr<char[]>& data,
+                             const size_t size)
     {
         ++updates;
         BOOST_CHECK(from == 1);

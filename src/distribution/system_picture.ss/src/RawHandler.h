@@ -214,7 +214,7 @@ namespace SP
         }
 
 
-        void NewRemoteData(const int64_t from, const boost::shared_ptr<char[]>& data, const size_t size)
+        void NewRemoteStatistics(const int64_t from, const boost::shared_ptr<char[]>& data, const size_t size)
         {
             lllog(9) << "SP: UpdateRemoteStatistics for node " << from << std::endl;
             m_strand.dispatch([this,from,data,size]

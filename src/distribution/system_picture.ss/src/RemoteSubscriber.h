@@ -74,7 +74,7 @@ namespace SP
                 throw std::logic_error("CRC check failed!");
             }
 #endif
-            m_receiver.NewRemoteData(from, data, size);
+            m_receiver.NewRemoteStatistics(from, data, size);
         }
 
         ReceiverT& m_receiver;
