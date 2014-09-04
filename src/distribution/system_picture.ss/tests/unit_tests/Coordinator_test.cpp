@@ -32,7 +32,7 @@
 #pragma warning (disable: 4127)
 #endif
 
-#include "NodeStatisticsMessage.pb.h"
+#include "RawStatisticsMessage.pb.h"
 
 #ifdef _MSC_VER
 #pragma warning (pop)
@@ -45,7 +45,7 @@ using namespace Safir::Dob::Internal::SP;
 
 RawStatistics GetRawWithOneNode()
 {
-    auto msg = Safir::make_unique<NodeStatisticsMessage>();
+    auto msg = Safir::make_unique<RawStatisticsMessage>();
 
     msg->set_name("myself");
     msg->set_id(1000);
@@ -68,7 +68,7 @@ RawStatistics GetRawWithOneNode()
 
 RawStatistics GetRawWithTwoNodes()
 {
-    auto msg = Safir::make_unique<NodeStatisticsMessage>();
+    auto msg = Safir::make_unique<RawStatisticsMessage>();
 
     msg->set_name("myself");
     msg->set_id(1000);
@@ -101,7 +101,7 @@ RawStatistics GetRawWithTwoNodes()
 
 RawStatistics GetRawWithOneNodeAndRemoteRaw()
 {
-    auto msg = Safir::make_unique<NodeStatisticsMessage>();
+    auto msg = Safir::make_unique<RawStatisticsMessage>();
 
     msg->set_name("myself");
     msg->set_id(1000);
@@ -138,7 +138,7 @@ RawStatistics GetRawWithOneNodeAndRemoteRaw()
 
 RawStatistics GetRawWithTwoNodesAndRemoteRaw(bool oneDead, bool longGone)
 {
-    auto msg = Safir::make_unique<NodeStatisticsMessage>();
+    auto msg = Safir::make_unique<RawStatisticsMessage>();
 
     msg->set_name("myself");
     msg->set_id(1000);

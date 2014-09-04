@@ -11,16 +11,16 @@ FIND_PACKAGE(Protobuf REQUIRED)
 
 
 FILE(GLOB_RECURSE headers *.h)
-SET(sources 
-  SystemPicture.cpp 
+SET(sources
+  SystemPicture.cpp
   RawStatistics.cpp
   SystemState.cpp
   )
 
 INCLUDE_DIRECTORIES(${PROTOBUF_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 
-PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS 
-  NodeStatisticsMessage.proto 
+PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS
+  RawStatisticsMessage.proto
   SystemStateMessage.proto
   ElectionMessage.proto)
 
@@ -30,13 +30,13 @@ endif()
 
 add_library(system_picture SHARED ${sources} ${headers} ${PROTO_SRCS} ${PROTO_HDRS})
 
-TARGET_LINK_LIBRARIES(system_picture 
+TARGET_LINK_LIBRARIES(system_picture
   optimized communication
   debug communication${CMAKE_DEBUG_POSTFIX}
   ${PROTOBUF_LITE_LIBRARIES})
 
 if (NOT MSVC)
-  TARGET_LINK_LIBRARIES(system_picture 
+  TARGET_LINK_LIBRARIES(system_picture
     lluf_id
     lluf_utils
     lluf_startup_synchronizer
@@ -49,7 +49,7 @@ endif()
 FIND_PACKAGE(Boost COMPONENTS program_options)
 
 add_executable(system_picture_listener system_picture_listener.cpp)
-target_link_libraries(system_picture_listener 
+target_link_libraries(system_picture_listener
   optimized system_picture
   debug system_picture${CMAKE_DEBUG_POSTFIX}
   ${Boost_LIBRARIES})

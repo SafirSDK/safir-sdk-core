@@ -46,7 +46,7 @@
 #  pragma warning (disable: 4127)
 #endif
 
-#include "NodeStatisticsMessage.pb.h"
+#include "RawStatisticsMessage.pb.h"
 
 #ifdef _MSC_VER
 #pragma warning (pop)
@@ -160,7 +160,7 @@ namespace SP
                 //With newer protobuf (>= 2.5.0) we can be clever
                 //we just get the remote statistics out of the way before serializing a
                 //a "my statistics" message, and afterwards we put them back
-                std::vector<NodeStatisticsMessage*> remotes;
+                std::vector<RawStatisticsMessage*> remotes;
 
                 for (int i = 0; i < m_allStatisticsMessage.node_info_size(); ++i)
                 {
@@ -460,7 +460,7 @@ namespace SP
         {
             lllog(7) << "SP: PostRawChangedCallback " << flags << std::endl;
             const auto copy = RawStatisticsCreator::Create
-                (Safir::make_unique<NodeStatisticsMessage>(m_allStatisticsMessage));
+                (Safir::make_unique<RawStatisticsMessage>(m_allStatisticsMessage));
             for (const auto& cb : m_rawChangedCallbacks)
             {
                 m_ioService.post([cb,copy,flags]{cb(copy,flags);});
@@ -470,11 +470,11 @@ namespace SP
 
         struct NodeInfo
         {
-            explicit NodeInfo(NodeStatisticsMessage_NodeInfo* const nodeInfo_)
+            explicit NodeInfo(RawStatisticsMessage_NodeInfo* const nodeInfo_)
                 : lastReceiveTime(boost::chrono::steady_clock::now()),nodeInfo(nodeInfo_) {}
 
             boost::chrono::steady_clock::time_point lastReceiveTime;
-            NodeStatisticsMessage_NodeInfo* nodeInfo;
+            RawStatisticsMessage_NodeInfo* nodeInfo;
         };
         typedef std::unordered_map<int64_t, NodeInfo> NodeTable;
 
@@ -488,7 +488,7 @@ namespace SP
         Safir::Utilities::Internal::AsioPeriodicTimer m_checkDeadNodesTimer;
 
         NodeTable m_nodeTable;
-        mutable NodeStatisticsMessage m_allStatisticsMessage;
+        mutable RawStatisticsMessage m_allStatisticsMessage;
 
         std::vector<StatisticsCallback> m_nodesChangedCallbacks;
         std::vector<StatisticsCallback> m_electionIdChangedCallbacks;

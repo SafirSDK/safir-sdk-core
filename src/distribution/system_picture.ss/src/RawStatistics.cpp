@@ -32,7 +32,7 @@
 #pragma warning (disable: 4127)
 #endif
 
-#include "NodeStatisticsMessage.pb.h"
+#include "RawStatisticsMessage.pb.h"
 
 #ifdef _MSC_VER
 #pragma warning (pop)
@@ -41,13 +41,13 @@
 
 namespace
 {
-    void PrintMessage(const Safir::Dob::Internal::SP::NodeStatisticsMessage& msg,
+    void PrintMessage(const Safir::Dob::Internal::SP::RawStatisticsMessage& msg,
                       std::wostream& out,
                       const unsigned int level = 0)
     {
         if (level > 1)
         {
-            throw std::logic_error("Too many levels in NodeStatisticsMessage!");
+            throw std::logic_error("Too many levels in RawStatisticsMessage!");
         }
 
         const std::wstring indent = level == 0 ? L"" : L"    ";
@@ -108,8 +108,8 @@ namespace SP
         : private boost::noncopyable
     {
     public:
-        Impl(const NodeStatisticsMessage& message,
-             std::shared_ptr<const NodeStatisticsMessage> owner)
+        Impl(const RawStatisticsMessage& message,
+             std::shared_ptr<const RawStatisticsMessage> owner)
             : m_message(message)
             , m_owner(std::move(owner))
         {
@@ -228,14 +228,14 @@ namespace SP
     private:
         friend class RawStatisticsCreator;
 
-        static RawStatistics Create(std::unique_ptr<NodeStatisticsMessage> message)
+        static RawStatistics Create(std::unique_ptr<RawStatisticsMessage> message)
         {
-            std::shared_ptr<NodeStatisticsMessage> msg(std::move(message));
+            std::shared_ptr<RawStatisticsMessage> msg(std::move(message));
             return RawStatistics(std::make_shared<Impl>(*msg.get(), msg));
         }
 
-        const NodeStatisticsMessage& m_message;
-        const std::shared_ptr<const NodeStatisticsMessage> m_owner;
+        const RawStatisticsMessage& m_message;
+        const std::shared_ptr<const RawStatisticsMessage> m_owner;
     };
 
     RawStatistics::RawStatistics() {}
@@ -266,7 +266,7 @@ namespace SP
 
     void RawStatistics::Print(std::wostream& out) const {m_impl->Print(out);}
 
-    RawStatistics RawStatisticsCreator::Create(std::unique_ptr<NodeStatisticsMessage> message)
+    RawStatistics RawStatisticsCreator::Create(std::unique_ptr<RawStatisticsMessage> message)
     {
         return RawStatistics::Impl::Create(std::move(message));
     }

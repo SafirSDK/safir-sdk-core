@@ -282,9 +282,9 @@ BOOST_AUTO_TEST_CASE( nodes_changed_removed_callback )
     BOOST_CHECK_EQUAL(cbCalls, 2);
 }
 
-std::unique_ptr<NodeStatisticsMessage> GetProtobuf()
+std::unique_ptr<RawStatisticsMessage> GetProtobuf()
 {
-    auto msg = Safir::make_unique<NodeStatisticsMessage>();
+    auto msg = Safir::make_unique<RawStatisticsMessage>();
 
     msg->set_name("foo");
     msg->set_id(110);
@@ -461,7 +461,7 @@ BOOST_AUTO_TEST_CASE( perform_on_all )
     rh.PerformOnAllStatisticsMessage([&](std::unique_ptr<char[]> data,
                                          const size_t size)
                                      {
-                                         auto msg = Safir::make_unique<NodeStatisticsMessage>();
+                                         auto msg = Safir::make_unique<RawStatisticsMessage>();
                                          msg->ParseFromArray(data.get(),static_cast<int>(size));
                                          auto statistics = RawStatisticsCreator::Create(std::move(msg));
                                          CheckStatisticsCommon(statistics);
@@ -488,7 +488,7 @@ BOOST_AUTO_TEST_CASE( perform_on_my )
     rh.PerformOnMyStatisticsMessage([&](boost::shared_ptr<char[]> data,
                                          const size_t size)
                                      {
-                                         auto msg = Safir::make_unique<NodeStatisticsMessage>();
+                                         auto msg = Safir::make_unique<RawStatisticsMessage>();
                                          msg->ParseFromArray(data.get(),static_cast<int>(size));
                                          auto statistics = RawStatisticsCreator::Create(std::move(msg));
                                          CheckStatisticsCommon(statistics);
