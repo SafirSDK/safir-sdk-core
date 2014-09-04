@@ -85,7 +85,8 @@ namespace SP
                         const int64_t nodeTypeId,
                         const std::string& controlAddress,
                         const std::string& dataAddress,
-                        const std::map<int64_t, NodeType>& nodeTypes)
+                        const std::map<int64_t, NodeType>& nodeTypes,
+                        const bool master)
             : m_ioService(ioService)
             , m_communication(communication)
             , m_id(id)
@@ -102,6 +103,7 @@ namespace SP
 
                                                       CheckDeadNodes(error);
                                                   }))
+            , m_master(master)
             , m_stopped(false)
         {
             //set up some info about ourselves in our message
@@ -342,8 +344,10 @@ namespace SP
 
             newNode->set_is_dead(false);
             newNode->set_is_long_gone(false);
-            newNode->set_receive_count(0);
-            newNode->set_retransmit_count(0);
+            newNode->set_control_receive_count(0);
+            newNode->set_control_retransmit_count(0);
+            newNode->set_data_receive_count(0);
+            newNode->set_data_retransmit_count(0);
 
             m_communication.IncludeNode(id);
 
@@ -372,7 +376,15 @@ namespace SP
                 return;
             }
 
-            node.nodeInfo->set_receive_count(node.nodeInfo->receive_count() + 1);
+            if (m_master)
+            {
+                node.nodeInfo->set_control_receive_count(node.nodeInfo->control_receive_count() + 1);
+            }
+            else
+            {
+                node.nodeInfo->set_data_receive_count(node.nodeInfo->data_receive_count() + 1);
+            }
+
             node.lastReceiveTime = now;
         }
 
@@ -395,7 +407,14 @@ namespace SP
                 return;
             }
 
-            node.nodeInfo->set_retransmit_count(node.nodeInfo->retransmit_count() + 1);
+            if (m_master)
+            {
+                node.nodeInfo->set_control_retransmit_count(node.nodeInfo->control_retransmit_count() + 1);
+            }
+            else
+            {
+                node.nodeInfo->set_data_retransmit_count(node.nodeInfo->data_retransmit_count() + 1);
+            }
         }
 
         //Must be called in strand!
@@ -494,6 +513,7 @@ namespace SP
         std::vector<StatisticsCallback> m_electionIdChangedCallbacks;
         std::vector<StatisticsCallback> m_rawChangedCallbacks;
 
+        const bool m_master; //true if running in SystemPicture master instance
         std::atomic<bool> m_stopped;
     };
 

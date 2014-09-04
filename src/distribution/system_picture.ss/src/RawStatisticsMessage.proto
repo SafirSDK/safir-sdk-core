@@ -15,12 +15,14 @@ message RawStatisticsMessage
 
         required bool is_dead = 6;
         required bool is_long_gone = 7; //node has been dead for 5 minutes or more
-        required uint32 receive_count = 8;
-        required uint32 retransmit_count = 9;
+        required uint32 control_receive_count = 8;
+        required uint32 control_retransmit_count = 9;
+        required uint32 data_receive_count = 10;
+        required uint32 data_retransmit_count = 11;
 
         //if this message is a node-local SP to SP message (e.g. between control and dose_main and dobexplorer)
         //it will contain all the node statistics received from other nodes.
-        optional RawStatisticsMessage remote_statistics = 10;
+        optional RawStatisticsMessage remote_statistics = 12;
     }
 
     //TODO: how do we stop this message from growing infinitely when there are lots of

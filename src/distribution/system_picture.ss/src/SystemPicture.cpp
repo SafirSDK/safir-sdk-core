@@ -87,7 +87,8 @@ namespace SP
                                                           nodeTypeId,
                                                           controlAddress,
                                                           dataAddress,
-                                                          nodeTypes))
+                                                          nodeTypes,
+                                                          true))
             , m_rawPublisherLocal(Safir::make_unique<RawPublisherLocal>(ioService,
                                                                         *m_rawHandler,
                                                                         MASTER_LOCAL_RAW_NAME,
@@ -160,7 +161,8 @@ namespace SP
                                                           nodeTypeId,
                                                           "",
                                                           dataAddress,
-                                                          nodeTypes))
+                                                          nodeTypes,
+                                                          false))
             , m_rawPublisherLocal(Safir::make_unique<RawPublisherLocal>(ioService,
                                                                         *m_rawHandler,
                                                                         SLAVE_LOCAL_RAW_NAME,

@@ -88,7 +88,7 @@ using namespace Safir::Dob::Internal::SP;
 struct Fixture
 {
     Fixture()
-        : rh (ioService,comm,"plopp",10,100,"asdfasdf","qwerty",GetNodeTypes())
+        : rh (ioService,comm,"plopp",10,100,"asdfasdf","qwerty",GetNodeTypes(),true)
     {
         BOOST_TEST_MESSAGE( "setup fixture" );
     }
@@ -229,8 +229,10 @@ BOOST_AUTO_TEST_CASE( nodes_changed_add_callback )
                                    BOOST_CHECK(!flags.ElectionIdChanged());
 
                                    BOOST_CHECK(!statistics.IsDead(0));
-                                   BOOST_CHECK(statistics.ReceiveCount(0) == 0);
-                                   BOOST_CHECK(statistics.RetransmitCount(0) == 0);
+                                   BOOST_CHECK(statistics.ControlReceiveCount(0) == 0);
+                                   BOOST_CHECK(statistics.ControlRetransmitCount(0) == 0);
+                                   BOOST_CHECK(statistics.DataReceiveCount(0) == 0);
+                                   BOOST_CHECK(statistics.DataRetransmitCount(0) == 0);
                                    BOOST_CHECK(!statistics.HasRemoteStatistics(0));
 
                                });
@@ -259,17 +261,20 @@ BOOST_AUTO_TEST_CASE( nodes_changed_removed_callback )
                                    BOOST_CHECK(!flags.NewRemoteData());
                                    BOOST_CHECK(!flags.ElectionIdChanged());
 
+                                   BOOST_CHECK(statistics.DataReceiveCount(0) == 0);
+                                   BOOST_CHECK(statistics.DataRetransmitCount(0) == 0);
+
                                    if (cbCalls == 1)
                                    {
                                        BOOST_CHECK(!statistics.IsDead(0));
-                                       BOOST_CHECK(statistics.ReceiveCount(0) == 0);
-                                       BOOST_CHECK(statistics.RetransmitCount(0) == 0);
+                                       BOOST_CHECK(statistics.ControlReceiveCount(0) == 0);
+                                       BOOST_CHECK(statistics.ControlRetransmitCount(0) == 0);
                                    }
                                    else
                                    {
                                        BOOST_CHECK(statistics.IsDead(0));
-                                       BOOST_CHECK(statistics.ReceiveCount(0) == 3);
-                                       BOOST_CHECK(statistics.RetransmitCount(0) == 1);
+                                       BOOST_CHECK(statistics.ControlReceiveCount(0) == 3);
+                                       BOOST_CHECK(statistics.ControlRetransmitCount(0) == 1);
                                    }
                                });
     comm.newNodeCb("asdf",11,10,"asdffff","asdfqqqq");
@@ -302,8 +307,10 @@ std::unique_ptr<RawStatisticsMessage> GetProtobuf()
     node->set_data_address(":flopp");
     node->set_is_dead(false);
     node->set_is_long_gone(false);
-    node->set_receive_count(1000);
-    node->set_retransmit_count(100);
+    node->set_control_receive_count(1000);
+    node->set_control_retransmit_count(100);
+    node->set_data_receive_count(5000);
+    node->set_data_retransmit_count(500);
     return std::move(msg);
 }
 
@@ -323,8 +330,10 @@ void CheckRemotesCommon(const RawStatistics& remote)
     BOOST_CHECK_EQUAL(remote.DataAddress(0), ":flopp");
     BOOST_CHECK(!remote.IsDead(0));
     BOOST_CHECK(!remote.IsLongGone(0));
-    BOOST_CHECK(remote.ReceiveCount(0) == 1000);
-    BOOST_CHECK(remote.RetransmitCount(0) == 100);
+    BOOST_CHECK(remote.ControlReceiveCount(0) == 1000);
+    BOOST_CHECK(remote.ControlRetransmitCount(0) == 100);
+    BOOST_CHECK(remote.DataReceiveCount(0) == 5000);
+    BOOST_CHECK(remote.DataRetransmitCount(0) == 500);
 }
 
 BOOST_AUTO_TEST_CASE( raw_changed_callback )

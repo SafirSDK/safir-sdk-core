@@ -72,8 +72,10 @@ std::unique_ptr<RawStatisticsMessage> GetProtobuf(bool empty,bool recursive)
         node->set_data_address(iAsStr + ":flopp");
         node->set_is_dead(i%2==0);
         node->set_is_long_gone(i%2==1);
-        node->set_receive_count(i + 1000);
-        node->set_retransmit_count(100 + i);
+        node->set_control_receive_count(i + 1000);
+        node->set_control_retransmit_count(100 + i);
+        node->set_data_receive_count(i + 5000);
+        node->set_data_retransmit_count(500 + i);
 
         if (recursive)
         {
@@ -98,14 +100,15 @@ std::unique_ptr<RawStatisticsMessage> GetProtobuf(bool empty,bool recursive)
                 rnode->set_data_address(iAsStr + ":flopp" + jAsStr);
                 rnode->set_is_dead((i + j)%2==0);
                 rnode->set_is_long_gone((i + j)%2==1);
-                rnode->set_receive_count(i*j + 1000);
-                rnode->set_retransmit_count(100 + i*j);
-        
+                rnode->set_control_receive_count(i*j + 1000);
+                rnode->set_control_retransmit_count(100 + i*j);
+                rnode->set_data_receive_count(i*j + 5000);
+                rnode->set_data_retransmit_count(500 + i*j);
             }
         }
 
     }
-    
+
     return std::move(msg);
 
 }
@@ -118,7 +121,7 @@ BOOST_AUTO_TEST_CASE( test_invalid )
     BOOST_CHECK(!r.Valid());
     BOOST_CHECK(!r2.Valid());
 }
-        
+
 BOOST_AUTO_TEST_CASE( test_empty )
 {
     const auto r = RawStatisticsCreator::Create(GetProtobuf(true,false));
@@ -127,7 +130,7 @@ BOOST_AUTO_TEST_CASE( test_empty )
     r2=r;
     BOOST_CHECK(r.Valid());
     BOOST_CHECK(r2.Valid());
-    
+
     BOOST_CHECK(r.Size() == 0);
 }
 
@@ -142,23 +145,25 @@ BOOST_AUTO_TEST_CASE( test_one_level )
     BOOST_CHECK(r.ControlAddress() == "asdfasdf");
     BOOST_CHECK(r.DataAddress() == "foobar");
     BOOST_CHECK(r.ElectionId() == 91);
-    
+
     BOOST_CHECK(r.Size() == 5);
-    
+
     for (int i = 0; i < 5; ++i)
     {
         BOOST_CHECK(r.Name(i) == boost::lexical_cast<std::string>(i));
-        
+
         BOOST_CHECK(r.Id(i) == i);
         BOOST_CHECK(r.NodeTypeId(i) == i + 100);
         BOOST_CHECK(r.ControlAddress(i) == boost::lexical_cast<std::string>(i) + ":fobar!");
         BOOST_CHECK(r.DataAddress(i) == boost::lexical_cast<std::string>(i) + ":flopp");
         BOOST_CHECK(r.IsDead(i) == (i%2==0));
         BOOST_CHECK(r.IsLongGone(i) == (i%2==1));
-        BOOST_CHECK(r.ReceiveCount(i) == static_cast<uint32_t>(i + 1000));
-        BOOST_CHECK(r.RetransmitCount(i) == static_cast<uint32_t>(100 + i));
+        BOOST_CHECK(r.ControlReceiveCount(i) == static_cast<uint32_t>(i + 1000));
+        BOOST_CHECK(r.ControlRetransmitCount(i) == static_cast<uint32_t>(100 + i));
+        BOOST_CHECK(r.DataReceiveCount(i) == static_cast<uint32_t>(i + 5000));
+        BOOST_CHECK(r.DataRetransmitCount(i) == static_cast<uint32_t>(500 + i));
         BOOST_CHECK(!r.HasRemoteStatistics(i));
-        
+
     }
 }
 
@@ -166,11 +171,11 @@ BOOST_AUTO_TEST_CASE( test_two_levels )
 {
     const auto r = RawStatisticsCreator::Create(GetProtobuf(false,true));
     BOOST_CHECK(r.Size() == 5);
-    
+
     for (int i = 0; i < 5; ++i)
     {
         const auto iAsStr = boost::lexical_cast<std::string>(i);
-        
+
         BOOST_CHECK(r.HasRemoteStatistics(i));
         const auto remote = r.RemoteStatistics(i);
         BOOST_CHECK(remote.Valid());
@@ -180,26 +185,26 @@ BOOST_AUTO_TEST_CASE( test_two_levels )
         BOOST_CHECK(remote.ControlAddress() == "asdfasdf" + iAsStr);
         BOOST_CHECK(remote.DataAddress() == "foobar" + iAsStr);
         BOOST_CHECK(remote.ElectionId() == 91 + i);
-        
+
         BOOST_CHECK(remote.Size() == 5);
         for (int j = 0; j < 5; ++j)
         {
             const auto jAsStr = boost::lexical_cast<std::string>(j);
-            
+
             BOOST_CHECK(remote.Name(j) == iAsStr + jAsStr);
-            
+
             BOOST_CHECK(remote.Id(j) == i*j);
             BOOST_CHECK(remote.NodeTypeId(j) == i*j + 100);
             BOOST_CHECK(remote.ControlAddress(j) == iAsStr + ":fobar!" + jAsStr);
             BOOST_CHECK(remote.DataAddress(j) == iAsStr + ":flopp" + jAsStr);
             BOOST_CHECK(remote.IsDead(j) == ((i+j)%2==0));
             BOOST_CHECK(remote.IsLongGone(j) == ((i+j)%2==1));
-            BOOST_CHECK(remote.ReceiveCount(j) == static_cast<uint32_t>(i*j + 1000));
-            BOOST_CHECK(remote.RetransmitCount(j) == static_cast<uint32_t>(100 + i*j));
+            BOOST_CHECK(remote.ControlReceiveCount(j) == static_cast<uint32_t>(i*j + 1000));
+            BOOST_CHECK(remote.ControlRetransmitCount(j) == static_cast<uint32_t>(100 + i*j));
+            BOOST_CHECK(remote.DataReceiveCount(j) == static_cast<uint32_t>(i*j + 5000));
+            BOOST_CHECK(remote.DataRetransmitCount(j) == static_cast<uint32_t>(500 + i*j));
             BOOST_CHECK(!remote.HasRemoteStatistics(j));
         }
-        
+
     }
 }
-
-

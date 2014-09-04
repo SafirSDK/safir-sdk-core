@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>414</width>
-    <height>647</height>
+    <width>804</width>
+    <height>726</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -139,18 +139,34 @@
       </column>
       <column>
        <property name="text">
-        <string># Recv</string>
+        <string># RecvCtrl</string>
        </property>
        <property name="toolTip">
-        <string>Number of packets received from this node.</string>
+        <string>Number of control packets received from this node.</string>
        </property>
       </column>
       <column>
        <property name="text">
-        <string># Retry</string>
+        <string># RetryCtrl</string>
        </property>
        <property name="toolTip">
-        <string>Number of retransmitted packets to this node.</string>
+        <string>Number of control packets retransmitted to this node.</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string># RecvData</string>
+       </property>
+       <property name="toolTip">
+        <string>Number of data packets received from this node.</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string># RetryData</string>
+       </property>
+       <property name="toolTip">
+        <string>Number of data packets retransmitted to this node.</string>
        </property>
       </column>
      </widget>
@@ -212,18 +228,34 @@
       </column>
       <column>
        <property name="text">
-        <string># Recv</string>
+        <string># RecvCtrl</string>
        </property>
        <property name="toolTip">
-        <string>Number of packets received from this node.</string>
+        <string>Number of control packets received from this node.</string>
        </property>
       </column>
       <column>
        <property name="text">
-        <string># Retry</string>
+        <string># RetryCtrl</string>
        </property>
        <property name="toolTip">
-        <string>Number of retransmitted packets to this node.</string>
+        <string>Number of control packets retransmitted to this node.</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string># RecvData</string>
+       </property>
+       <property name="toolTip">
+        <string>Number of data packets received from this node.</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string># RetryData</string>
+       </property>
+       <property name="toolTip">
+        <string>Number of data packets retransmitted to this node</string>
        </property>
       </column>
      </widget>

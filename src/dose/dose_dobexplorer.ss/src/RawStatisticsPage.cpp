@@ -38,8 +38,10 @@ namespace
         COLUMN_NODE_TYPE,
         COLUMN_CONTROL_ADDRESS,
         COLUMN_DATA_ADDRESS,
-        COLUMN_RECEIVE_COUNT,
-        COLUMN_RETRANSMIT_COUNT,
+        COLUMN_CONTROL_RECEIVE_COUNT,
+        COLUMN_CONTROL_RETRANSMIT_COUNT,
+        COLUMN_DATA_RECEIVE_COUNT,
+        COLUMN_DATA_RETRANSMIT_COUNT,
 
         NUM_COLUMNS
     };
@@ -65,7 +67,7 @@ namespace
         {
             widget->setText(str);
         }
-        
+
     }
 
     template <class T>
@@ -103,7 +105,7 @@ namespace
 }
 
 RawStatisticsPage::RawStatisticsPage(QWidget* /*parent*/)
-    : m_systemPicture(Safir::Dob::Internal::SP::subscriber_tag, 
+    : m_systemPicture(Safir::Dob::Internal::SP::subscriber_tag,
                       m_ioService)
 {
     m_systemPicture.StartRawSubscription([this](const Safir::Dob::Internal::SP::RawStatistics& data)
@@ -148,11 +150,11 @@ void RawStatisticsPage::UpdatedStatistics(const Safir::Dob::Internal::SP::RawSta
     SetText(name,data.Name());
     SetText(address,data.ControlAddress());
     SetText(id,data.Id());
-    
+
     localTable->setSortingEnabled(false);
     UpdateLocalTable();
     localTable->setSortingEnabled(true);
-    
+
     remoteTable->setSortingEnabled(false);
     UpdateRemoteTable();
     remoteTable->setSortingEnabled(true);
@@ -178,12 +180,18 @@ void RawStatisticsPage::UpdateLocalTable()
         }
         else
         {
-            SetText(localTable->item(row,COLUMN_RECEIVE_COUNT),
-                    m_statistics.ReceiveCount(findIt->second));
-            
-            SetText(localTable->item(row,COLUMN_RETRANSMIT_COUNT),
-                    m_statistics.RetransmitCount(findIt->second));
-            
+            SetText(localTable->item(row,COLUMN_CONTROL_RECEIVE_COUNT),
+                    m_statistics.ControlReceiveCount(findIt->second));
+
+            SetText(localTable->item(row,COLUMN_CONTROL_RETRANSMIT_COUNT),
+                    m_statistics.ControlRetransmitCount(findIt->second));
+
+            SetText(localTable->item(row,COLUMN_DATA_RECEIVE_COUNT),
+                    m_statistics.DataReceiveCount(findIt->second));
+
+            SetText(localTable->item(row,COLUMN_DATA_RETRANSMIT_COUNT),
+                    m_statistics.DataRetransmitCount(findIt->second));
+
             ids.erase(id);
 
             if (m_statistics.IsDead(findIt->second))
@@ -215,11 +223,18 @@ void RawStatisticsPage::UpdateLocalTable()
                             new QTableWidgetItem(QString::fromUtf8(m_statistics.DataAddress(it->second).c_str())));
 
         localTable->setItem(row,
-                             COLUMN_RECEIVE_COUNT,
-                             new QTableWidgetItem(QString::number(m_statistics.ReceiveCount(it->second))));
+                             COLUMN_CONTROL_RECEIVE_COUNT,
+                             new QTableWidgetItem(QString::number(m_statistics.ControlReceiveCount(it->second))));
         localTable->setItem(row,
-                             COLUMN_RETRANSMIT_COUNT,
-                             new QTableWidgetItem(QString::number(m_statistics.RetransmitCount(it->second))));
+                             COLUMN_CONTROL_RETRANSMIT_COUNT,
+                             new QTableWidgetItem(QString::number(m_statistics.ControlRetransmitCount(it->second))));
+
+        localTable->setItem(row,
+                             COLUMN_DATA_RECEIVE_COUNT,
+                             new QTableWidgetItem(QString::number(m_statistics.DataReceiveCount(it->second))));
+        localTable->setItem(row,
+                             COLUMN_DATA_RETRANSMIT_COUNT,
+                             new QTableWidgetItem(QString::number(m_statistics.DataRetransmitCount(it->second))));
 
         if (m_statistics.IsDead(it->second))
         {
@@ -280,12 +295,18 @@ void RawStatisticsPage::UpdateRemoteTable()
                     }
                     else
                     {
-                        SetText(remoteTable->item(row,COLUMN_RECEIVE_COUNT),
-                                statistics.ReceiveCount(findIt->second));
-            
-                        SetText(remoteTable->item(row,COLUMN_RETRANSMIT_COUNT),
-                                statistics.RetransmitCount(findIt->second));
-            
+                        SetText(remoteTable->item(row,COLUMN_CONTROL_RECEIVE_COUNT),
+                                statistics.ControlReceiveCount(findIt->second));
+
+                        SetText(remoteTable->item(row,COLUMN_CONTROL_RETRANSMIT_COUNT),
+                                statistics.ControlRetransmitCount(findIt->second));
+
+                        SetText(remoteTable->item(row,COLUMN_DATA_RECEIVE_COUNT),
+                                statistics.DataReceiveCount(findIt->second));
+
+                        SetText(remoteTable->item(row,COLUMN_DATA_RETRANSMIT_COUNT),
+                                statistics.DataRetransmitCount(findIt->second));
+
                         ids.erase(id);
 
                         if (statistics.IsDead(findIt->second))
@@ -317,11 +338,17 @@ void RawStatisticsPage::UpdateRemoteTable()
                                          new QTableWidgetItem(QString::fromUtf8(statistics.DataAddress(it->second).c_str())));
 
                     remoteTable->setItem(row,
-                                         COLUMN_RECEIVE_COUNT,
-                                         new QTableWidgetItem(QString::number(statistics.ReceiveCount(it->second))));
+                                         COLUMN_CONTROL_RECEIVE_COUNT,
+                                         new QTableWidgetItem(QString::number(statistics.ControlReceiveCount(it->second))));
                     remoteTable->setItem(row,
-                                         COLUMN_RETRANSMIT_COUNT,
-                                         new QTableWidgetItem(QString::number(statistics.RetransmitCount(it->second))));
+                                         COLUMN_CONTROL_RETRANSMIT_COUNT,
+                                         new QTableWidgetItem(QString::number(statistics.ControlRetransmitCount(it->second))));
+                    remoteTable->setItem(row,
+                                         COLUMN_DATA_RECEIVE_COUNT,
+                                         new QTableWidgetItem(QString::number(statistics.DataReceiveCount(it->second))));
+                    remoteTable->setItem(row,
+                                         COLUMN_DATA_RETRANSMIT_COUNT,
+                                         new QTableWidgetItem(QString::number(statistics.DataRetransmitCount(it->second))));
 
                     if (statistics.IsDead(it->second))
                     {
