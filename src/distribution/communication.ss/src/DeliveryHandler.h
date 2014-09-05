@@ -103,6 +103,13 @@ namespace Com
         //Add a node
         void AddNode(const Node& node)
         {
+            if (GetNode(node.nodeId)!=nullptr)
+            {
+                std::ostringstream os;
+                os<<"COM: Duplicated call to DeliveryHandler.AddNode with same nodeId! Node: "<<node.name<<" ["<<node.nodeId<<"]";
+                throw std::logic_error(os.str());
+            }
+
             //Always called from readStrand
             m_nodes.insert(std::make_pair(node.nodeId, NodeInfo(node)));
         }
@@ -153,7 +160,6 @@ namespace Com
             uint16_t numberOfFragments;
             boost::shared_ptr<char[]> data;
             size_t dataSize;
-            uint32_t crc;
 
             RecvData()
                 :free(true)
@@ -163,7 +169,6 @@ namespace Com
                 ,numberOfFragments(0)
                 ,data()
                 ,dataSize(0)
-                ,crc(0)
             {
             }
 
@@ -252,7 +257,6 @@ namespace Com
             recvData.fragmentNumber=header->fragmentNumber;
             recvData.sequenceNumber=header->sequenceNumber;
             recvData.dataType=header->commonHeader.dataType;
-            recvData.crc=header->crc;
 
             //Check if buffer is not created for us. In the case the message is fragmented
             //another fragment may already have arrived and the buffer is created.
@@ -391,21 +395,6 @@ namespace Com
                     ch.lastInSequence=rd.sequenceNumber;
                     if (rd.fragmentNumber+1==rd.numberOfFragments)
                     {
-                        //check crc
-                        uint32_t crc=CalculateCrc32(rd.data.get(), rd.dataSize);
-                        if (crc!=rd.crc)
-                        {
-                            std::ostringstream os;
-                            os<<"COM: Received data from node "<<ni.node.name<<" with bad CRC. Got "<<crc<<" but expected "<<rd.crc<<std::endl;
-                            os<<"Fragments: "<<rd.numberOfFragments<<", no: "<<rd.fragmentNumber<<std::endl;
-                            os<<"Seq: "<<rd.sequenceNumber<<std::endl;
-                            os<<"DataType: "<<rd.dataType<<std::endl;
-                            os<<"Size: "<<rd.dataSize<<std::endl;
-                            SEND_SYSTEM_LOG(Error, <<os.str().c_str());
-                            //hexdump(rd.data.get(), 0, rd.dataSize);
-                            throw std::logic_error(os.str());
-                        }
-
                         //last fragment has been received, we can deliver this message to application
                         auto fromId=ni.node.nodeId;
                         auto fromNodeType=ni.node.nodeTypeId;

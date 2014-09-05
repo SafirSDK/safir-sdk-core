@@ -93,7 +93,6 @@ public:
             auto payload="hello";
             auto size=strlen(payload);
             Com::MessageHeader header(id, 1, 0, Com::MultiReceiverSendMethod, Com::Acked, 1, size, size, 1, 0, 0);
-            header.crc=Com::CalculateCrc32(payload, size);
             dh.ReceivedApplicationData(&header, payload);
         }
 
@@ -124,9 +123,6 @@ public:
                 const char* payload=msg+fragmentOffset;
 
                 Com::MessageHeader header(id, 1, 0, Com::MultiReceiverSendMethod, Com::Acked, seq, strlen(msg), fragmentSize, numberOfFragments, static_cast<uint16_t>(frag), fragmentOffset);
-                header.crc=Com::CalculateCrc32(payload, static_cast<size_t>(fragmentSize));
-                if (frag==3)
-                    header.crc=Com::CalculateCrc32(msg, strlen(msg));
                 dh.ReceivedApplicationData(&header, payload);
             }
         }

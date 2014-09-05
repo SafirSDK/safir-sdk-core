@@ -160,7 +160,11 @@ namespace Com
         {
             lllog(6)<<L"COM: Execute IncludeNode id="<<id<<std::endl;
             auto node=m_deliveryHandler.GetNode(id);
-            assert(node!=nullptr);
+
+            if (node==nullptr)
+            {
+                throw std::logic_error(std::string("COM: IncludeNode unknown or excluded node. NodeId: ")+boost::lexical_cast<std::string>(id));
+            }
 
             auto& nodeType=GetNodeType(node->nodeTypeId);
             nodeType.GetAckedDataSender().IncludeNode(id);

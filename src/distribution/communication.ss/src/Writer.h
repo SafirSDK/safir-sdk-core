@@ -28,6 +28,7 @@
 #include <boost/noncopyable.hpp>
 #include <boost/asio.hpp>
 #include <boost/function.hpp>
+#include <boost/crc.hpp>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include "Message.h"
@@ -48,8 +49,14 @@ namespace Com
                   boost::asio::ip::udp::socket& socket,
                   const boost::asio::ip::udp::endpoint& to)
         {
-            socket.async_send_to(boost::asio::buffer(static_cast<const void*>(val.get()), sizeof(T)),
-                                 to,
+            //calculate crc and add it last in sendBuffer
+            boost::crc_32_type crc;
+            crc.process_bytes(static_cast<const void*>(val.get()), sizeof(T));
+            uint32_t crc32=crc.checksum();
+            std::vector< boost::asio::const_buffer > bufs;
+            bufs.push_back(boost::asio::buffer(static_cast<const void*>(val.get()), sizeof(T)));
+            bufs.push_back(boost::asio::buffer(reinterpret_cast<const char*>(&crc32), sizeof(uint32_t)));
+            socket.async_send_to(bufs, to,
                                  [val](const boost::system::error_code& error, size_t){if (error) std::cout<<"Send failed, error "<<error.message().c_str()<<std::endl;});
         }
     };
@@ -61,10 +68,17 @@ namespace Com
                   boost::asio::ip::udp::socket& socket,
                   const boost::asio::ip::udp::endpoint& to)
         {
-            std::vector< boost::asio::const_buffer > bufs;
             const char* header=reinterpret_cast<const char*>(&(val->header));
+
+            //calculate crc and add it last in sendBuffer
+            boost::crc_32_type crc;
+            crc.process_bytes(static_cast<const void*>(header), MessageHeaderSize);
+            crc.process_bytes(static_cast<const void*>(val->fragment), val->header.fragmentContentSize);
+            uint32_t crc32=crc.checksum();
+            std::vector< boost::asio::const_buffer > bufs;
             bufs.push_back(boost::asio::buffer(header, MessageHeaderSize));
             bufs.push_back(boost::asio::buffer(val->fragment, val->header.fragmentContentSize));
+            bufs.push_back(boost::asio::buffer(reinterpret_cast<const char*>(&crc32), sizeof(uint32_t)));
             socket.async_send_to(bufs, to, [val](const boost::system::error_code& error, size_t){if (error) std::cout<<"Send UserData failed, error "<<error.message().c_str()<<std::endl;});
         }
     };

@@ -161,7 +161,6 @@ namespace Com
          * at least the specified percent of the send queue is free.
          * Note that callback will only be received if user called a Send method that returned false. If the send queue has been full but
          * no attempt was made to send anything while it was full, no notification will be made.
-         * This method may be called twice to set up one callback for acked sends and one for unacked sends.
          *
          * @param callback [in] - Callback function.
          * @param percentFreeLimit [in] - Threshold value given in percent of the total capacity of the send queue.
@@ -231,7 +230,7 @@ namespace Com
          *
          * @param nodeId [in] - Id of specific receiver node. Shall be 0 when sending to all nodes in a node type.
          * @param nodeTypeId [in] - Receiver node type, or if nodeId is 0 the node type of the specified node.
-         * @param data [in] - ointer to the data that shall be sent.
+         * @param data [in] - pointer to the data that shall be sent.
          * @param size [in] - Size of data.
          * @param dataTypeIdentifier [in] - Custom identifier specifying which type of data. Only data receivers added with the same identifier will get the data.
          * @param deliveryGuarantee [in] - If true communication will assure delivery by requesting all receivers to acknowledge the reception of the data. Will also perform retransmits if necessary.

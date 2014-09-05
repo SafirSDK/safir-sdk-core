@@ -24,6 +24,7 @@
 #ifndef _SAFIR_COM_READER_TEST_H_
 #define _SAFIR_COM_READERTEST_H_
 
+#include <boost/crc.hpp>
 #include "fwd.h"
 
 inline boost::shared_ptr<int> Int(int i) {return boost::make_shared<int>(i);}
@@ -244,7 +245,7 @@ private:
                           boost::asio::ip::udp::socket* socket,
                           const boost::function< void(const boost::system::error_code&, size_t) >& completionHandler)
         {
-            CHECK(bufSize>=sizeof(int));
+            CHECK(bufSize>=sizeof(int)+sizeof(uint32_t)); //int and checksum
             bool unicast=(socket->local_endpoint().port()==10000);
             std::queue<int>* sendQueue=unicast ? &sentUnicast : &sentMulticast;
             receiver->Strand().get_io_service().post([&, sendQueue, buf, completionHandler]
@@ -260,6 +261,12 @@ private:
                             memcpy(buf, reinterpret_cast<const char*>(&(sendQueue->front())), sizeof(int));
                             sendQueue->pop();
                             received=true;
+
+                            //calc crc
+                            boost::crc_32_type crc;
+                            crc.process_bytes(static_cast<const void*>(buf), sizeof(int));
+                            uint32_t checksum=crc.checksum();
+                            memcpy(buf+sizeof(int), reinterpret_cast<const char*>(&checksum), sizeof(checksum));
                             break;
                         }
                     }
@@ -268,7 +275,7 @@ private:
 
                 if (received)
                 {
-                    completionHandler(boost::system::error_code(), sizeof(int));
+                    completionHandler(boost::system::error_code(), sizeof(int)+sizeof(uint32_t));
                 }
             });
         }

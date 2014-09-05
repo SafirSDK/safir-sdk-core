@@ -89,6 +89,13 @@ namespace Com
         {
             m_strand.dispatch([=]
             {
+                if (m_nodes.find(id)!=m_nodes.end())
+                {
+                    std::ostringstream os;
+                    os<<"COM: Duplicated call to HeartbeatSender.AddNode with same nodeId! NodeId: "<<id<<", address: "<<address;
+                    throw std::logic_error(os.str());
+                }
+
                 m_nodes.emplace(id, Utilities::CreateEndpoint(address));
             });
         }

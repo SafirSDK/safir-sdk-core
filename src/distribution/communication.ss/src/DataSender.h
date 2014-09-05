@@ -159,14 +159,11 @@ namespace Com
                     return;
                 }
 
-                uint32_t crc=CalculateCrc32(msg.get(), size);
-
                 for (size_t frag=0; frag<numberOfFullFragments; ++frag)
                 {
                     const char* fragment=msg.get()+frag*FragmentDataSize;
                     UserDataPtr userData(new UserData(m_nodeId, dataTypeIdentifier, msg, size, fragment, FragmentDataSize));
                     userData->header.deliveryGuarantee=DeliveryGuarantee;
-                    userData->header.crc=crc;
                     userData->header.numberOfFragments=static_cast<uint16_t>(totalNumberOfFragments);
                     userData->header.fragmentNumber=static_cast<uint16_t>(frag);
                     if (toId!=0)
@@ -183,7 +180,6 @@ namespace Com
                     const char* fragment=msg.get()+numberOfFullFragments*FragmentDataSize;
                     UserDataPtr userData(new UserData(m_nodeId, dataTypeIdentifier, msg, size, fragment, restSize));
                     userData->header.deliveryGuarantee=DeliveryGuarantee;
-                    userData->header.crc=crc;
                     userData->header.numberOfFragments=static_cast<uint16_t>(totalNumberOfFragments);
                     userData->header.fragmentNumber=static_cast<uint16_t>(totalNumberOfFragments-1);
                     if (toId!=0)
@@ -235,6 +231,13 @@ namespace Com
         {
             m_strand.dispatch([=]
             {
+                if (m_nodes.find(id)!=m_nodes.end())
+                {
+                    std::ostringstream os;
+                    os<<"COM: Duplicated call to DataSender.AddNode with same nodeId! NodeId: "<<id<<", address: "<<address;
+                    throw std::logic_error(os.str());
+                }
+
                 NodeInfo ni;
                 ni.endpoint=Utilities::CreateEndpoint(address);
                 ni.lastSentSeqNo=0;

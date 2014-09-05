@@ -148,31 +148,55 @@ namespace Com
                                      }));
         }
 
+        bool ValidCrc(const char* buf, size_t size)
+        {
+            boost::crc_32_type crc;
+            crc.process_bytes(static_cast<const void*>(buf), size-sizeof(uint32_t));
+            uint32_t checksum=*reinterpret_cast<const uint32_t*>(buf+size-sizeof(uint32_t));
+            return checksum==crc.checksum();
+        }
+
         void HandleReceive(const boost::system::error_code& error, size_t bytesRecv, char* buf, boost::asio::ip::udp::socket* socket)
         {
+            //if we have got at stop-order just return and dont start a new read
             if (!m_running)
             {
                 return;
             }
 
-            if (!error)
-            {
-                if (m_onRecv(buf, bytesRecv))
-                {
-                    //receiver is keeping up with our pace, continue to read incoming messages
-                    AsyncReceive(buf, socket);
-                }
-                else
-                {
-                    // we must wait for a while before delivering more messages
-                    lllog(7)<<"COM: Reader has to wait for application to handle delivered messages"<<std::endl;
-                    SetWakeUpTimer(buf, socket);
-                }
-            }
-            else
+            //if an error occured, log the error and stop
+            if (error)
             {
                 std::cout<<"Read failed, error "<<error.message().c_str()<<std::endl;
                 SEND_SYSTEM_LOG(Error, <<"Read failed, error "<<error.message().c_str());
+                return;
+            }
+
+            bool receiverReady=true;
+
+            if (ValidCrc(buf, bytesRecv))
+            {
+                //received message with correct checksum
+                receiverReady=m_onRecv(buf, bytesRecv-sizeof(uint32_t)); //Remove the crc from size. Will return true if it is ready to handle a new message immediately
+            }
+            else
+            {
+                //received message with invalid checksum. Throw away the message and then continue as normal.
+                std::cout<<"COM: Received message with bad CRC. Throw away and continue."<<std::endl;
+                lllog(7)<<"COM: Received message with bad CRC. Throw away and continue."<<std::endl;
+                receiverReady=m_isReceiverReady(); //explicitly ask if receiver is ready to handle incoming data
+            }
+
+            if (receiverReady)
+            {
+                //receiver is keeping up with our pace, continue to read incoming messages
+                AsyncReceive(buf, socket);
+            }
+            else
+            {
+                // we must wait for a while before delivering more messages
+                lllog(7)<<"COM: Reader has to wait for application to handle delivered messages"<<std::endl;
+                SetWakeUpTimer(buf, socket);
             }
         }
 

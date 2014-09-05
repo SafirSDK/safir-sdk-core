@@ -37,7 +37,6 @@
 #pragma warning (disable: 4127)
 #endif
 
-#include <boost/crc.hpp>
 #include "CommunicationMessage.pb.h"
 
 #ifdef _MSC_VER
@@ -64,13 +63,6 @@ namespace Com
     //Delivery guarantee
     static const uint8_t Unacked=0;
     static const uint8_t Acked=1;
-
-    inline uint32_t CalculateCrc32(const char* data, size_t size)
-    {
-        boost::crc_32_type crc;
-        crc.process_bytes(data, size);
-        return crc.checksum();
-    }
 
     inline void hexdump(const char* data, size_t first, size_t last)
     {
@@ -124,7 +116,6 @@ namespace Com
     struct MessageHeader
     {
         CommonHeader commonHeader;
-        uint32_t crc;
         uint8_t sendMethod;
         uint8_t deliveryGuarantee;
         uint64_t sequenceNumber;
@@ -146,7 +137,6 @@ namespace Com
                       uint16_t fragmentNumber_,
                       size_t fragmentOffset_)
             :commonHeader(senderId_, receiverId_, dataType_)
-            ,crc(0)
             ,sendMethod(sendMethod_)
             ,deliveryGuarantee(deliveryGuarantee_)
             ,sequenceNumber(sequenceNumber_)
