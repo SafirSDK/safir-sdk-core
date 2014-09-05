@@ -2,10 +2,10 @@ option optimize_for = LITE_RUNTIME;
 
 package Safir.Dob.Internal.SP;
 
-message NodeStatisticsMessage
+message RawStatisticsMessage
 {
-    message NodeInfo 
-    {       
+    message NodeInfo
+    {
         //This info is about other nodes that this node talks to
         required string name = 1;
         required sfixed64 id = 2;
@@ -15,18 +15,20 @@ message NodeStatisticsMessage
 
         required bool is_dead = 6;
         required bool is_long_gone = 7; //node has been dead for 5 minutes or more
-        required uint32 receive_count = 8;
-        required uint32 retransmit_count = 9;
+        required uint32 control_receive_count = 8;
+        required uint32 control_retransmit_count = 9;
+        required uint32 data_receive_count = 10;
+        required uint32 data_retransmit_count = 11;
 
         //if this message is a node-local SP to SP message (e.g. between control and dose_main and dobexplorer)
         //it will contain all the node statistics received from other nodes.
-        optional NodeStatisticsMessage remote_statistics = 10;
+        optional RawStatisticsMessage remote_statistics = 12;
     }
-    
+
     //TODO: how do we stop this message from growing infinitely when there are lots of
     //nodes that have started and stopped?
 
-    
+
     //information about myself
     required string name = 1;
     required sfixed64 id = 2;
@@ -34,11 +36,9 @@ message NodeStatisticsMessage
     required string control_address = 4; //The address of the node's control socket
     required string data_address = 5; //The address of the node's data socket
 
-    //which, if any, election_id was sent out by the elected coordinator in his VICTORY message    
+    //which, if any, election_id was sent out by the elected coordinator in his VICTORY message
     optional sfixed64 election_id = 6;
-    
+
     repeated NodeInfo node_info = 7;
 
 }
-
-

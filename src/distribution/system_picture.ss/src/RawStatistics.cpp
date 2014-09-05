@@ -32,7 +32,7 @@
 #pragma warning (disable: 4127)
 #endif
 
-#include "NodeStatisticsMessage.pb.h"
+#include "RawStatisticsMessage.pb.h"
 
 #ifdef _MSC_VER
 #pragma warning (pop)
@@ -41,13 +41,13 @@
 
 namespace
 {
-    void PrintMessage(const Safir::Dob::Internal::SP::NodeStatisticsMessage& msg,
+    void PrintMessage(const Safir::Dob::Internal::SP::RawStatisticsMessage& msg,
                       std::wostream& out,
                       const unsigned int level = 0)
     {
         if (level > 1)
         {
-            throw std::logic_error("Too many levels in NodeStatisticsMessage!");
+            throw std::logic_error("Too many levels in RawStatisticsMessage!");
         }
 
         const std::wstring indent = level == 0 ? L"" : L"    ";
@@ -79,7 +79,11 @@ namespace
             }
             else
             {
-                out << "\n" << indent << "        recv = " << node.receive_count() << ", retransmit = " << node.retransmit_count();
+                out << "\n" << indent << "        "
+                    <<"ctrlRecv = " << node.control_receive_count() << ", "
+                    <<"ctrlRetry = " << node.control_retransmit_count() << ", "
+                    <<"dataRecv = " << node.data_receive_count() << ", "
+                    <<"dataRetry = " << node.data_retransmit_count();
             }
 
             if (node.has_remote_statistics())
@@ -108,8 +112,8 @@ namespace SP
         : private boost::noncopyable
     {
     public:
-        Impl(const NodeStatisticsMessage& message,
-             std::shared_ptr<const NodeStatisticsMessage> owner)
+        Impl(const RawStatisticsMessage& message,
+             std::shared_ptr<const RawStatisticsMessage> owner)
             : m_message(message)
             , m_owner(std::move(owner))
         {
@@ -193,15 +197,26 @@ namespace SP
             return m_message.node_info(index).is_long_gone();
         }
 
-        uint32_t ReceiveCount(const int index) const
+        uint32_t ControlReceiveCount(const int index) const
         {
-            return m_message.node_info(index).receive_count();
+            return m_message.node_info(index).control_receive_count();
         }
 
-        uint32_t RetransmitCount(const int index) const
+        uint32_t ControlRetransmitCount(const int index) const
         {
-            return m_message.node_info(index).retransmit_count();
+            return m_message.node_info(index).control_retransmit_count();
         }
+
+        uint32_t DataReceiveCount(const int index) const
+        {
+            return m_message.node_info(index).data_receive_count();
+        }
+
+        uint32_t DataRetransmitCount(const int index) const
+        {
+            return m_message.node_info(index).data_retransmit_count();
+        }
+
 
         bool HasRemoteStatistics(const int index) const
         {
@@ -228,14 +243,14 @@ namespace SP
     private:
         friend class RawStatisticsCreator;
 
-        static RawStatistics Create(std::unique_ptr<NodeStatisticsMessage> message)
+        static RawStatistics Create(std::unique_ptr<RawStatisticsMessage> message)
         {
-            std::shared_ptr<NodeStatisticsMessage> msg(std::move(message));
+            std::shared_ptr<RawStatisticsMessage> msg(std::move(message));
             return RawStatistics(std::make_shared<Impl>(*msg.get(), msg));
         }
 
-        const NodeStatisticsMessage& m_message;
-        const std::shared_ptr<const NodeStatisticsMessage> m_owner;
+        const RawStatisticsMessage& m_message;
+        const std::shared_ptr<const RawStatisticsMessage> m_owner;
     };
 
     RawStatistics::RawStatistics() {}
@@ -258,15 +273,17 @@ namespace SP
 
     bool RawStatistics::IsDead(const int index) const {return m_impl->IsDead(index);}
     bool RawStatistics::IsLongGone(const int index) const {return m_impl->IsLongGone(index);}
-    uint32_t RawStatistics::ReceiveCount(const int index) const {return m_impl->ReceiveCount(index);}
-    uint32_t RawStatistics::RetransmitCount(const int index) const {return m_impl->RetransmitCount(index);}
+    uint32_t RawStatistics::ControlReceiveCount(const int index) const {return m_impl->ControlReceiveCount(index);}
+    uint32_t RawStatistics::ControlRetransmitCount(const int index) const {return m_impl->ControlRetransmitCount(index);}
+    uint32_t RawStatistics::DataReceiveCount(const int index) const {return m_impl->DataReceiveCount(index);}
+    uint32_t RawStatistics::DataRetransmitCount(const int index) const {return m_impl->DataRetransmitCount(index);}
 
     bool RawStatistics::HasRemoteStatistics(const int index) const {return m_impl->HasRemoteStatistics(index);}
     RawStatistics RawStatistics::RemoteStatistics(const int index) const {return m_impl->RemoteStatistics(index);}
 
     void RawStatistics::Print(std::wostream& out) const {m_impl->Print(out);}
 
-    RawStatistics RawStatisticsCreator::Create(std::unique_ptr<NodeStatisticsMessage> message)
+    RawStatistics RawStatisticsCreator::Create(std::unique_ptr<RawStatisticsMessage> message)
     {
         return RawStatistics::Impl::Create(std::move(message));
     }

@@ -36,13 +36,13 @@ namespace Internal
 namespace SP
 {
     //forward declaration
-    class NodeStatisticsMessage;
+    class RawStatisticsMessage;
     class SystemStateMessage;
 
     class RawStatisticsCreator
     {
     public:
-        typedef NodeStatisticsMessage WrappedType;
+        typedef RawStatisticsMessage WrappedType;
 
         static RawStatistics Create(std::unique_ptr<WrappedType> message);
 

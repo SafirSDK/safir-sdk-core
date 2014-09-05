@@ -35,7 +35,7 @@
 #  pragma warning (disable: 4127)
 #endif
 
-#include "NodeStatisticsMessage.pb.h"
+#include "RawStatisticsMessage.pb.h"
 
 #ifdef _MSC_VER
 #  pragma warning (pop)
@@ -70,8 +70,8 @@ public:
         boost::lock_guard<boost::recursive_mutex> lck(m_mutex);
         m_allComms.insert(std::make_pair(id,comm));
     }
-    
-    void Reset() 
+
+    void Reset()
     {
         boost::lock_guard<boost::recursive_mutex> lck(m_mutex);
         m_allComms.clear();
@@ -88,7 +88,7 @@ public:
                 const int64_t sender,
                 const boost::shared_ptr<char[]>& data,
                 const size_t size);
-              
+
     bool SendAll(const int64_t sender,
                  const boost::shared_ptr<char[]>& data,
                  const size_t size);
@@ -142,10 +142,10 @@ public:
     }
 
 
-    bool Send(const int64_t nodeId, 
-              const int64_t nodeTypeId, 
+    bool Send(const int64_t nodeId,
+              const int64_t nodeTypeId,
               const boost::shared_ptr<char[]>& data,
-              const size_t size, 
+              const size_t size,
               const int64_t /*dataTypeIdentifier*/,
               const bool ack)
     {
@@ -161,7 +161,7 @@ public:
         SAFE_BOOST_CHECK(ack);
 
         SAFE_BOOST_CHECK_NE(nodeId, id); //not to ourselves!
-        
+
         if (nodeId == 0)
         {
             return Connector::Instance().SendAll(id,data,size);
@@ -176,7 +176,7 @@ public:
     const int64_t id;
 
     ReceiveData receiveDataCb;
-    
+
 };
 
 
@@ -195,16 +195,16 @@ bool Connector::SendTo(const int64_t nodeId,
     {
         return false;
     }
-    
+
     boost::lock_guard<boost::recursive_mutex> lck(m_mutex);
-    
+
     for (auto&& comm: m_allComms)
     {
         if (comm.second == nullptr)
         {
             continue;
         }
-        
+
         //send to the intended node
         if (comm.first == nodeId)
         {
@@ -213,14 +213,14 @@ bool Connector::SendTo(const int64_t nodeId,
             return true;
         }
     }
-    
+
     SAFE_BOOST_FAIL("Invalid node id!");
     return true;
 }
 
 
 bool Connector::SendAll(const int64_t sender,
-                        const boost::shared_ptr<char[]>& data, 
+                        const boost::shared_ptr<char[]>& data,
                         const size_t size)
 {
     if (!DeliverMessage())
@@ -246,7 +246,7 @@ bool Connector::SendAll(const int64_t sender,
             comm.second->receiveDataCb(sender,10,data,size);
         }
     }
-    
+
     return true;
 }
 
@@ -263,7 +263,7 @@ struct Node
              id_,
              GetNodeTypes(),
              "not used",
-             [this](const int64_t nodeId, 
+             [this](const int64_t nodeId,
                     const int64_t electionId)
              {
                  ElectionComplete(nodeId,electionId);
@@ -273,7 +273,7 @@ struct Node
     {
         SAFE_BOOST_TEST_MESSAGE("Create node " << id);
     }
-    
+
     ~Node()
     {
         SAFE_BOOST_TEST_MESSAGE("Destroy node");
@@ -303,7 +303,7 @@ struct Node
     int64_t electionId;
 
     bool removed = false;
-    
+
 };
 
 struct Fixture
@@ -327,7 +327,7 @@ struct Fixture
         nodes.push_back(Safir::make_unique<Node>(ioService,nextNodeId));
         ++nextNodeId;
     }
-    
+
     ~Fixture()
     {
         SAFE_BOOST_TEST_MESSAGE("teardown fixture");
@@ -376,7 +376,7 @@ struct Fixture
 
     void SendNodesChanged()
     {
-        auto msg = Safir::make_unique<NodeStatisticsMessage>();
+        auto msg = Safir::make_unique<RawStatisticsMessage>();
         for(auto&& node: nodes)
         {
 
@@ -391,7 +391,7 @@ struct Fixture
             }
 
         }
-        
+
         const auto raw = RawStatisticsCreator::Create(std::move(msg));
         for(auto&& node: nodes)
         {
@@ -401,25 +401,25 @@ struct Fixture
             }
 
             node->eh.NodesChanged(raw);
-        }        
+        }
     }
 
     void RunIoService(int numThreads = 1)
     {
         ioService.reset();
-        
+
         boost::thread_group threads;
         for (int i = 0; i < numThreads - 1; ++i)
         {
             threads.create_thread([this]{ioService.run();});
         }
-        
+
         ioService.run();
         threads.join_all();
     }
 
     boost::asio::io_service ioService;
-    
+
     int nextNodeId = 10;
     std::vector<std::unique_ptr<Node>> nodes;
 };
@@ -582,7 +582,7 @@ BOOST_AUTO_TEST_CASE( lots_of_nodes )
     {
         SAFE_BOOST_CHECK(!nodes[i]->eh.IsElected());
     }
-    
+
     RunIoService(10);
 
     for (int i = 0; i < numNodes - 1; ++i)
@@ -656,7 +656,7 @@ BOOST_AUTO_TEST_CASE( remove_during_election )
     {
         AddNode();
     }
-    
+
     SendNodesChanged();
 
 
@@ -665,8 +665,8 @@ BOOST_AUTO_TEST_CASE( remove_during_election )
     {
         threads.create_thread([this]{ioService.run();});
     }
-    
-    //will keep node 0 and 1    
+
+    //will keep node 0 and 1
     for (int i = numNodes - 1; i > 1; --i)
     {
         RemoveNode(i);
@@ -685,4 +685,3 @@ BOOST_AUTO_TEST_CASE( remove_during_election )
 
 
 BOOST_AUTO_TEST_SUITE_END()
-

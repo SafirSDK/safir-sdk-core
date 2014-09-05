@@ -40,7 +40,7 @@
 
 namespace
 {
-    void PrintMessage(const Safir::Dob::Internal::SP::SystemStateMessage& msg, 
+    void PrintMessage(const Safir::Dob::Internal::SP::SystemStateMessage& msg,
                       std::wostream& out)
     {
         out << "--------------------------------------------";
@@ -52,8 +52,8 @@ namespace
                 << (node.is_dead() ? "D" : " ")
                 << (msg.elected_id() == node.id() ? "E" : " ")
                 << " "
-                << node.name().c_str() 
-                << "@" << node.control_address().c_str() 
+                << node.name().c_str()
+                << "@" << node.control_address().c_str()
                 << " (id = " << node.id() << ", type = " << node.node_type_id() << ")";
         }
         out << std::flush;
@@ -88,7 +88,7 @@ namespace SP
         {
             return m_message->election_id();
         }
-        
+
         int Size() const
         {
             return m_message->node_info_size();
@@ -152,8 +152,8 @@ namespace SP
 
     int64_t SystemState::ElectedId() const {CheckValid(); return m_impl->ElectedId(); }
     int64_t SystemState::ElectionId() const {CheckValid(); return m_impl->ElectionId();}
-    
-    int SystemState::Size() const 
+
+    int SystemState::Size() const
     {
         if (m_impl == nullptr)
         {
@@ -164,7 +164,7 @@ namespace SP
             return m_impl->Size();
         }
     }
-    
+
     const std::string& SystemState::Name(const int index) const {CheckValid(); return m_impl->Name(index);}
     int64_t SystemState::Id(const int index) const {CheckValid(); return m_impl->Id(index);}
     int64_t SystemState::NodeTypeId(const int index) const {CheckValid(); return m_impl->NodeTypeId(index);}
@@ -173,7 +173,7 @@ namespace SP
     bool SystemState::IsDead(const int index) const {CheckValid(); return m_impl->IsDead(index);}
 
     void SystemState::Print(std::wostream& out) const {CheckValid(); m_impl->Print(out);}
-    
+
     SystemState SystemStateCreator::Create(std::unique_ptr<SystemStateMessage> message)
     {
         return SystemState::Impl::Create(std::move(message));
@@ -182,5 +182,3 @@ namespace SP
 }
 }
 }
-
-

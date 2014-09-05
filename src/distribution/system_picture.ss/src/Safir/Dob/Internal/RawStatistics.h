@@ -91,8 +91,10 @@ namespace SP
         //status fields
         bool IsDead(const int index) const;
         bool IsLongGone(const int index) const;
-        uint32_t ReceiveCount(const int index) const;
-        uint32_t RetransmitCount(const int index) const;
+        uint32_t ControlReceiveCount(const int index) const;
+        uint32_t ControlRetransmitCount(const int index) const;
+        uint32_t DataReceiveCount(const int index) const;
+        uint32_t DataRetransmitCount(const int index) const;
         /**
          * Check if we have any remote statistics.
          */

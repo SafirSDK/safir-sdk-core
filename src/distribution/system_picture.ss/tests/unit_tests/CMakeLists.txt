@@ -10,7 +10,7 @@ FIND_PACKAGE(Protobuf REQUIRED)
 INCLUDE_DIRECTORIES(${PROTOBUF_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS 
-  ../../src/NodeStatisticsMessage.proto 
+  ../../src/RawStatisticsMessage.proto 
   ../../src/SystemStateMessage.proto
   ../../src/ElectionMessage.proto)
 

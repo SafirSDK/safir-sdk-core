@@ -30,7 +30,7 @@
 #pragma warning (disable: 4127)
 #endif
 
-#include "NodeStatisticsMessage.pb.h"
+#include "RawStatisticsMessage.pb.h"
 
 #ifdef _MSC_VER
 #pragma warning (pop)
@@ -46,9 +46,9 @@
 using namespace Safir::Dob::Internal::SP;
 
 
-std::unique_ptr<NodeStatisticsMessage> GetProtobuf()
+std::unique_ptr<RawStatisticsMessage> GetProtobuf()
 {
-    auto msg = Safir::make_unique<NodeStatisticsMessage>();
+    auto msg = Safir::make_unique<RawStatisticsMessage>();
 
     msg->set_name("foo");
     msg->set_id(10);

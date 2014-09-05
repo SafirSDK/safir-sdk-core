@@ -87,7 +87,8 @@ namespace SP
                                                           nodeTypeId,
                                                           controlAddress,
                                                           dataAddress,
-                                                          nodeTypes))
+                                                          nodeTypes,
+                                                          true))
             , m_rawPublisherLocal(Safir::make_unique<RawPublisherLocal>(ioService,
                                                                         *m_rawHandler,
                                                                         MASTER_LOCAL_RAW_NAME,
@@ -135,10 +136,10 @@ namespace SP
             , m_stopped(false)
         {
             //when we're in master mode we set up a subscription to raw data from the slave
-            m_rawSubscriberLocal->Start([](const RawStatistics& data)
-                                        {
-                                            lllog(5) << "SP: Got raw data from slave!\n" << data << std::endl;
-                                        });
+            m_rawSubscriberLocal->Start([this](const RawStatistics& data)
+            {
+                m_rawHandler->NewDataChannelStatistics(data);
+            });
 
 
         }
@@ -160,7 +161,8 @@ namespace SP
                                                           nodeTypeId,
                                                           "",
                                                           dataAddress,
-                                                          nodeTypes))
+                                                          nodeTypes,
+                                                          false))
             , m_rawPublisherLocal(Safir::make_unique<RawPublisherLocal>(ioService,
                                                                         *m_rawHandler,
                                                                         SLAVE_LOCAL_RAW_NAME,
@@ -168,7 +170,8 @@ namespace SP
                                                                         false))
             , m_stateSubscriberLocal(Safir::make_unique<LocalSubscriber<Safir::Utilities::Internal::IpcSubscriber,
                                                                         SystemStateSubscriber,
-                                                                        SystemStateCreator>>(ioService, MASTER_LOCAL_STATE_NAME))
+                                                                        SystemStateCreator>>(ioService,
+                                                                                             MASTER_LOCAL_STATE_NAME))
             , m_stopped(false)
         {
 
@@ -181,10 +184,12 @@ namespace SP
         explicit Impl(boost::asio::io_service& ioService)
             : m_rawSubscriberLocal(Safir::make_unique<LocalSubscriber<Safir::Utilities::Internal::IpcSubscriber,
                                                                       RawStatisticsSubscriber,
-                                                                      RawStatisticsCreator>>(ioService, MASTER_LOCAL_RAW_NAME))
+                                                                      RawStatisticsCreator>>(ioService,
+                                                                                             MASTER_LOCAL_RAW_NAME))
             , m_stateSubscriberLocal(Safir::make_unique<LocalSubscriber<Safir::Utilities::Internal::IpcSubscriber,
                                                                         SystemStateSubscriber,
-                                                                        SystemStateCreator>>(ioService, MASTER_LOCAL_STATE_NAME))
+                                                                        SystemStateCreator>>(ioService,
+                                                                                             MASTER_LOCAL_STATE_NAME))
             , m_stopped(false)
         {
 

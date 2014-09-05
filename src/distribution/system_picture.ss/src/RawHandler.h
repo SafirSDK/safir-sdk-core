@@ -46,7 +46,7 @@
 #  pragma warning (disable: 4127)
 #endif
 
-#include "NodeStatisticsMessage.pb.h"
+#include "RawStatisticsMessage.pb.h"
 
 #ifdef _MSC_VER
 #pragma warning (pop)
@@ -85,7 +85,8 @@ namespace SP
                         const int64_t nodeTypeId,
                         const std::string& controlAddress,
                         const std::string& dataAddress,
-                        const std::map<int64_t, NodeType>& nodeTypes)
+                        const std::map<int64_t, NodeType>& nodeTypes,
+                        const bool master)
             : m_ioService(ioService)
             , m_communication(communication)
             , m_id(id)
@@ -102,6 +103,7 @@ namespace SP
 
                                                       CheckDeadNodes(error);
                                                   }))
+            , m_master(master)
             , m_stopped(false)
         {
             //set up some info about ourselves in our message
@@ -160,7 +162,7 @@ namespace SP
                 //With newer protobuf (>= 2.5.0) we can be clever
                 //we just get the remote statistics out of the way before serializing a
                 //a "my statistics" message, and afterwards we put them back
-                std::vector<NodeStatisticsMessage*> remotes;
+                std::vector<RawStatisticsMessage*> remotes;
 
                 for (int i = 0; i < m_allStatisticsMessage.node_info_size(); ++i)
                 {
@@ -211,23 +213,22 @@ namespace SP
                               });
         }
 
-
-        void NewRemoteData(const int64_t from, const boost::shared_ptr<char[]>& data, const size_t size)
+        void NewRemoteStatistics(const int64_t from, const boost::shared_ptr<char[]>& data, const size_t size)
         {
-            lllog(9) << "SP: UpdateRemoteStatistics for node " << from << std::endl;
+            lllog(9) << "SP: NewRemoteStatistics for node " << from << std::endl;
             m_strand.dispatch([this,from,data,size]
             {
                 auto findIt = m_nodeTable.find(from);
 
                 if (findIt == m_nodeTable.end())
                 {
-                    throw std::logic_error("UpdateRemoteStatistics from unknown node");
+                    throw std::logic_error("NewRemoteStatistics from unknown node");
                 }
                 NodeInfo& node = findIt->second; //alias the iterator
 
                 if (node.nodeInfo->is_dead())
                 {
-                    lllog(8) << "SP: UpdateRemoteStatistics from dead node, ignoring." << std::endl;
+                    lllog(8) << "SP: NewRemoteStatistics from dead node, ignoring." << std::endl;
                     return;
                 }
 
@@ -243,7 +244,55 @@ namespace SP
                     throw std::logic_error("Failed to parse remote data!");
                 }
 
-                PostRawChangedCallback(RawChanges(RawChanges::NEW_REMOTE_DATA));
+                PostRawChangedCallback(RawChanges(RawChanges::NEW_REMOTE_STATISTICS));
+            });
+        }
+
+        void NewDataChannelStatistics(const RawStatistics& data)
+        {
+            if (!m_master)
+            {
+                throw std::logic_error("Only Master should be able to receive DataChannelStatistics");
+            }
+
+            lllog(9) << "SP: NewDataChannelStatistics" << std::endl;
+            m_strand.dispatch([this,data]
+            {
+                int changes = 0;
+                for (int i = 0; i < data.Size(); ++i)
+                {
+                    if (data.Id(i) == m_id)
+                    {
+                        throw std::logic_error("DataChannelStatistics contained own node!");
+                    }
+
+                    auto findIt = m_nodeTable.find(data.Id(i));
+
+                    if (findIt == m_nodeTable.end())
+                    {
+                        throw std::logic_error("DataChannelStatistics from unknown node");
+                    }
+                    NodeInfo& node = findIt->second; //alias the iterator
+
+                    //Check if data channel is dead and control channel is not.
+                    //In that case we want to kill our own channel (TODO: is this right?)
+                    if (data.IsDead(i) && !node.nodeInfo->is_dead())
+                    {
+                        node.nodeInfo->set_is_dead(true);
+                        m_communication.ExcludeNode(data.Id(i));
+                        changes |= RawChanges::NODES_CHANGED;
+                    }
+
+                    node.nodeInfo->set_data_receive_count(data.DataReceiveCount(i));
+                    node.nodeInfo->set_data_retransmit_count(data.DataRetransmitCount(i));
+
+                    changes |= RawChanges::NEW_DATA_CHANNEL_STATISTICS;
+                }
+
+                if (changes != 0)
+                {
+                    PostRawChangedCallback(changes);
+                }
             });
         }
 
@@ -342,8 +391,10 @@ namespace SP
 
             newNode->set_is_dead(false);
             newNode->set_is_long_gone(false);
-            newNode->set_receive_count(0);
-            newNode->set_retransmit_count(0);
+            newNode->set_control_receive_count(0);
+            newNode->set_control_retransmit_count(0);
+            newNode->set_data_receive_count(0);
+            newNode->set_data_retransmit_count(0);
 
             m_communication.IncludeNode(id);
 
@@ -361,6 +412,7 @@ namespace SP
 
             if (findIt == m_nodeTable.end())
             {
+                lllog(0) << "Got Receive from unknown node " << id << std::endl;
                 throw std::logic_error("GotReceive from unknown node");
             }
             NodeInfo& node = findIt->second; //alias the iterator
@@ -371,7 +423,15 @@ namespace SP
                 return;
             }
 
-            node.nodeInfo->set_receive_count(node.nodeInfo->receive_count() + 1);
+            if (m_master)
+            {
+                node.nodeInfo->set_control_receive_count(node.nodeInfo->control_receive_count() + 1);
+            }
+            else
+            {
+                node.nodeInfo->set_data_receive_count(node.nodeInfo->data_receive_count() + 1);
+            }
+
             node.lastReceiveTime = now;
         }
 
@@ -394,7 +454,14 @@ namespace SP
                 return;
             }
 
-            node.nodeInfo->set_retransmit_count(node.nodeInfo->retransmit_count() + 1);
+            if (m_master)
+            {
+                node.nodeInfo->set_control_retransmit_count(node.nodeInfo->control_retransmit_count() + 1);
+            }
+            else
+            {
+                node.nodeInfo->set_data_retransmit_count(node.nodeInfo->data_retransmit_count() + 1);
+            }
         }
 
         //Must be called in strand!
@@ -459,7 +526,7 @@ namespace SP
         {
             lllog(7) << "SP: PostRawChangedCallback " << flags << std::endl;
             const auto copy = RawStatisticsCreator::Create
-                (Safir::make_unique<NodeStatisticsMessage>(m_allStatisticsMessage));
+                (Safir::make_unique<RawStatisticsMessage>(m_allStatisticsMessage));
             for (const auto& cb : m_rawChangedCallbacks)
             {
                 m_ioService.post([cb,copy,flags]{cb(copy,flags);});
@@ -469,11 +536,11 @@ namespace SP
 
         struct NodeInfo
         {
-            explicit NodeInfo(NodeStatisticsMessage_NodeInfo* const nodeInfo_)
+            explicit NodeInfo(RawStatisticsMessage_NodeInfo* const nodeInfo_)
                 : lastReceiveTime(boost::chrono::steady_clock::now()),nodeInfo(nodeInfo_) {}
 
             boost::chrono::steady_clock::time_point lastReceiveTime;
-            NodeStatisticsMessage_NodeInfo* nodeInfo;
+            RawStatisticsMessage_NodeInfo* nodeInfo;
         };
         typedef std::unordered_map<int64_t, NodeInfo> NodeTable;
 
@@ -487,12 +554,13 @@ namespace SP
         Safir::Utilities::Internal::AsioPeriodicTimer m_checkDeadNodesTimer;
 
         NodeTable m_nodeTable;
-        mutable NodeStatisticsMessage m_allStatisticsMessage;
+        mutable RawStatisticsMessage m_allStatisticsMessage;
 
         std::vector<StatisticsCallback> m_nodesChangedCallbacks;
         std::vector<StatisticsCallback> m_electionIdChangedCallbacks;
         std::vector<StatisticsCallback> m_rawChangedCallbacks;
 
+        const bool m_master; //true if running in SystemPicture master instance
         std::atomic<bool> m_stopped;
     };
 

@@ -30,6 +30,7 @@
 #include <iostream>
 #include <map>
 #include <boost/asio.hpp>
+#include <boost/asio/steady_timer.hpp>
 #include <boost/thread.hpp>
 
 //disable warnings in boost
@@ -117,11 +118,7 @@ private:
 
 };
 
-void ChangedSystemState(const Safir::Dob::Internal::SP::SystemState& data)
-{
-    std::wcout << "dose_main got new system state from SP! The number of nodes are "
-               << data.Size() << std::endl;
-}
+
 
 int main(int argc, char * argv[])
 {
@@ -191,9 +188,38 @@ int main(int argc, char * argv[])
                                                options.dataAddress,
                                                std::move(spNodeTypes));
 
+    std::set<int64_t> injectedNodes = {options.id}; //consider ourselves already injected
+    boost::asio::io_service::strand injectStrand(ioService);
 
     // Start subscription to system state changes from SP
-    sp.StartStateSubscription(ChangedSystemState);
+    sp.StartStateSubscription(injectStrand.wrap
+        ([options, &communication, &injectedNodes](const Safir::Dob::Internal::SP::SystemState& data)
+         {
+             for (int i = 0; i < data.Size(); ++i)
+             {
+                 //don't inject already injected nodes
+                 if (injectedNodes.find(data.Id(i)) != injectedNodes.end())
+                 {
+                     continue;
+                 }
+                 lllog(5) << "Injecting node " << data.Name(i) << "(" << data.Id(i) << ")" << std::endl;
+                 communication.InjectNode(data.Name(i),
+                                          data.Id(i),
+                                          data.NodeTypeId(i),
+                                          data.DataAddress(i));
+
+                 injectedNodes.insert(data.Id(i));
+             }
+         }));
+
+    communication.SetDataReceiver([](int64_t fromNodeId, 
+                                     int64_t fromNodeType, 
+                                     const boost::shared_ptr<char[]>& data, 
+                                     size_t size)
+                                  {
+                                      //discard data...
+                                  },
+                                  1000100222);
 
     communication.Start();
 
@@ -227,6 +253,29 @@ int main(int argc, char * argv[])
                        );
 
 
+
+    boost::asio::steady_timer sendTimer(ioService);
+
+    const std::function<void(const boost::system::error_code& error)> send = 
+        [&communication, &sendTimer, &send](const boost::system::error_code& error)
+        {
+            if (error)
+            {
+                return;
+            }
+
+            const size_t size = 10;
+            const boost::shared_ptr<char[]> data(new char[size]);
+            memcpy(data.get(), "1234567890",size);
+            communication.Send(0,1,data,size,1000100222,true);
+            communication.Send(0,2,data,size,1000100222,true);
+
+            sendTimer.expires_from_now(boost::chrono::milliseconds(100));
+            sendTimer.async_wait(send);
+        };
+
+    sendTimer.expires_from_now(boost::chrono::milliseconds(10));
+    sendTimer.async_wait(send);
 
     boost::thread_group threads;
     for (int i = 0; i < 9; ++i)

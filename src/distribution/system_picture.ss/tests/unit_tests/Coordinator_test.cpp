@@ -32,7 +32,7 @@
 #pragma warning (disable: 4127)
 #endif
 
-#include "NodeStatisticsMessage.pb.h"
+#include "RawStatisticsMessage.pb.h"
 
 #ifdef _MSC_VER
 #pragma warning (pop)
@@ -45,7 +45,7 @@ using namespace Safir::Dob::Internal::SP;
 
 RawStatistics GetRawWithOneNode()
 {
-    auto msg = Safir::make_unique<NodeStatisticsMessage>();
+    auto msg = Safir::make_unique<RawStatisticsMessage>();
 
     msg->set_name("myself");
     msg->set_id(1000);
@@ -68,7 +68,7 @@ RawStatistics GetRawWithOneNode()
 
 RawStatistics GetRawWithTwoNodes()
 {
-    auto msg = Safir::make_unique<NodeStatisticsMessage>();
+    auto msg = Safir::make_unique<RawStatisticsMessage>();
 
     msg->set_name("myself");
     msg->set_id(1000);
@@ -101,7 +101,7 @@ RawStatistics GetRawWithTwoNodes()
 
 RawStatistics GetRawWithOneNodeAndRemoteRaw()
 {
-    auto msg = Safir::make_unique<NodeStatisticsMessage>();
+    auto msg = Safir::make_unique<RawStatisticsMessage>();
 
     msg->set_name("myself");
     msg->set_id(1000);
@@ -138,7 +138,7 @@ RawStatistics GetRawWithOneNodeAndRemoteRaw()
 
 RawStatistics GetRawWithTwoNodesAndRemoteRaw(bool oneDead, bool longGone)
 {
-    auto msg = Safir::make_unique<NodeStatisticsMessage>();
+    auto msg = Safir::make_unique<RawStatisticsMessage>();
 
     msg->set_name("myself");
     msg->set_id(1000);
@@ -484,7 +484,7 @@ BOOST_AUTO_TEST_CASE( simple_state_production )
     BOOST_CHECK(ElectionHandlerStub::lastInstance->nodesChangedCalled);
     BOOST_CHECK(!callbackCalled);
 
-    rh.rawCb(GetRawWithOneNodeAndRemoteRaw(),RawChanges(RawChanges::NEW_REMOTE_DATA));
+    rh.rawCb(GetRawWithOneNodeAndRemoteRaw(),RawChanges(RawChanges::NEW_REMOTE_STATISTICS));
 
     SystemStateMessage stateMessage;
     coordinator.PerformOnStateMessage([&callbackCalled,&stateMessage](std::unique_ptr<char []> data,
@@ -534,7 +534,7 @@ BOOST_AUTO_TEST_CASE( propagate_state_from_other )
     state.SerializeWithCachedSizesToArray
         (reinterpret_cast<google::protobuf::uint8*>(data.get()));
 
-    coordinator.NewRemoteData(1001,data,size);
+    coordinator.NewRemoteStatistics(1001,data,size);
     bool callbackCalled = false;
 
     coordinator.PerformOnStateMessage([&callbackCalled](std::unique_ptr<char []> /*data*/,
@@ -596,7 +596,7 @@ BOOST_AUTO_TEST_CASE( remote_from_other_with_dead )
     state.SerializeWithCachedSizesToArray
         (reinterpret_cast<google::protobuf::uint8*>(data.get()));
 
-    coordinator.NewRemoteData(1001,data,size);
+    coordinator.NewRemoteStatistics(1001,data,size);
 
     ioService.run();
 
@@ -684,7 +684,7 @@ BOOST_AUTO_TEST_CASE( remote_reports_dead )
     BOOST_CHECK(rh.deadNodes.empty());
 
 
-    rh.rawCb(GetRawWithTwoNodesAndRemoteRaw(true,false),RawChanges(RawChanges::NEW_REMOTE_DATA));
+    rh.rawCb(GetRawWithTwoNodesAndRemoteRaw(true,false),RawChanges(RawChanges::NEW_REMOTE_STATISTICS));
 
     callbackCalled = false;
     coordinator.PerformOnStateMessage([&callbackCalled,&stateMessage](std::unique_ptr<char []> data,
@@ -725,7 +725,7 @@ BOOST_AUTO_TEST_CASE( ignore_long_gone_nodes )
     ElectionHandlerStub::lastInstance->electionCompleteCallback(1000,100);
 
     rh.rawCb(GetRawWithTwoNodesAndRemoteRaw(true,true),
-             RawChanges(RawChanges::NODES_CHANGED | RawChanges::NEW_REMOTE_DATA));
+             RawChanges(RawChanges::NODES_CHANGED | RawChanges::NEW_REMOTE_STATISTICS));
 
     bool callbackCalled = false;
     SystemStateMessage stateMessage;
