@@ -213,23 +213,22 @@ namespace SP
                               });
         }
 
-
         void NewRemoteStatistics(const int64_t from, const boost::shared_ptr<char[]>& data, const size_t size)
         {
-            lllog(9) << "SP: UpdateRemoteStatistics for node " << from << std::endl;
+            lllog(9) << "SP: NewRemoteStatistics for node " << from << std::endl;
             m_strand.dispatch([this,from,data,size]
             {
                 auto findIt = m_nodeTable.find(from);
 
                 if (findIt == m_nodeTable.end())
                 {
-                    throw std::logic_error("UpdateRemoteStatistics from unknown node");
+                    throw std::logic_error("NewRemoteStatistics from unknown node");
                 }
                 NodeInfo& node = findIt->second; //alias the iterator
 
                 if (node.nodeInfo->is_dead())
                 {
-                    lllog(8) << "SP: UpdateRemoteStatistics from dead node, ignoring." << std::endl;
+                    lllog(8) << "SP: NewRemoteStatistics from dead node, ignoring." << std::endl;
                     return;
                 }
 
@@ -245,7 +244,55 @@ namespace SP
                     throw std::logic_error("Failed to parse remote data!");
                 }
 
-                PostRawChangedCallback(RawChanges(RawChanges::NEW_REMOTE_DATA));
+                PostRawChangedCallback(RawChanges(RawChanges::NEW_REMOTE_STATISTICS));
+            });
+        }
+
+        void NewDataChannelStatistics(const RawStatistics& data)
+        {
+            if (!m_master)
+            {
+                throw std::logic_error("Only Master should be able to receive DataChannelStatistics");
+            }
+
+            lllog(9) << "SP: NewDataChannelStatistics" << std::endl;
+            m_strand.dispatch([this,data]
+            {
+                int changes = 0;
+                for (int i = 0; i < data.Size(); ++i)
+                {
+                    if (data.Id(i) == m_id)
+                    {
+                        throw std::logic_error("DataChannelStatistics contained own node!");
+                    }
+
+                    auto findIt = m_nodeTable.find(data.Id(i));
+
+                    if (findIt == m_nodeTable.end())
+                    {
+                        throw std::logic_error("DataChannelStatistics from unknown node");
+                    }
+                    NodeInfo& node = findIt->second; //alias the iterator
+
+                    //Check if data channel is dead and control channel is not.
+                    //In that case we want to kill our own channel (TODO: is this right?)
+                    if (data.IsDead(i) && !node.nodeInfo->is_dead())
+                    {
+                        node.nodeInfo->set_is_dead(true);
+                        m_communication.ExcludeNode(data.Id(i));
+                        changes |= RawChanges::NODES_CHANGED;
+                    }
+
+                    node.nodeInfo->set_data_receive_count(data.DataReceiveCount(i));
+                    node.nodeInfo->set_data_retransmit_count(data.DataRetransmitCount(i));
+
+                    changes |= RawChanges::NEW_DATA_CHANNEL_STATISTICS;
+                }
+
+                if (changes != 0)
+                {
+                    PostRawChangedCallback(changes);
+                }
             });
         }
 

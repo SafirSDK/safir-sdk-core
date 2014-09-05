@@ -39,9 +39,10 @@ namespace SP
     public:
         enum Flags
         {
-            NEW_REMOTE_DATA = 0x1,
-            NODES_CHANGED = 0x2,
-            ELECTION_ID_CHANGED = 0x4,
+            NEW_REMOTE_STATISTICS = 0x1,
+            NEW_DATA_CHANNEL_STATISTICS = 0x2,
+            NODES_CHANGED = 0x4,
+            ELECTION_ID_CHANGED = 0x8,
         };
 
         RawChanges(const int flags)
@@ -50,7 +51,8 @@ namespace SP
 
         }
 
-        bool NewRemoteStatistics() const {return (m_flags & NEW_REMOTE_DATA) != 0;}
+        bool NewRemoteStatistics() const {return (m_flags & NEW_REMOTE_STATISTICS) != 0;}
+        bool NewDataChannelStatistics() const {return (m_flags & NEW_DATA_CHANNEL_STATISTICS) != 0;}
         bool NodesChanged() const {return (m_flags & NODES_CHANGED) != 0;}
         bool ElectionIdChanged() const {return (m_flags & ELECTION_ID_CHANGED) != 0;}
 
@@ -58,6 +60,7 @@ namespace SP
         {
             out << std::boolalpha
                 << "NewRemoteStatistics = " << NewRemoteStatistics()
+                << ", NewDataChannelStatistics = " << NewDataChannelStatistics()
                 << ", NodesChanged = " << NodesChanged()
                 << ", ElectionIdChanged = " << ElectionIdChanged();
         }

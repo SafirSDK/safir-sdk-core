@@ -484,7 +484,7 @@ BOOST_AUTO_TEST_CASE( simple_state_production )
     BOOST_CHECK(ElectionHandlerStub::lastInstance->nodesChangedCalled);
     BOOST_CHECK(!callbackCalled);
 
-    rh.rawCb(GetRawWithOneNodeAndRemoteRaw(),RawChanges(RawChanges::NEW_REMOTE_DATA));
+    rh.rawCb(GetRawWithOneNodeAndRemoteRaw(),RawChanges(RawChanges::NEW_REMOTE_STATISTICS));
 
     SystemStateMessage stateMessage;
     coordinator.PerformOnStateMessage([&callbackCalled,&stateMessage](std::unique_ptr<char []> data,
@@ -684,7 +684,7 @@ BOOST_AUTO_TEST_CASE( remote_reports_dead )
     BOOST_CHECK(rh.deadNodes.empty());
 
 
-    rh.rawCb(GetRawWithTwoNodesAndRemoteRaw(true,false),RawChanges(RawChanges::NEW_REMOTE_DATA));
+    rh.rawCb(GetRawWithTwoNodesAndRemoteRaw(true,false),RawChanges(RawChanges::NEW_REMOTE_STATISTICS));
 
     callbackCalled = false;
     coordinator.PerformOnStateMessage([&callbackCalled,&stateMessage](std::unique_ptr<char []> data,
@@ -725,7 +725,7 @@ BOOST_AUTO_TEST_CASE( ignore_long_gone_nodes )
     ElectionHandlerStub::lastInstance->electionCompleteCallback(1000,100);
 
     rh.rawCb(GetRawWithTwoNodesAndRemoteRaw(true,true),
-             RawChanges(RawChanges::NODES_CHANGED | RawChanges::NEW_REMOTE_DATA));
+             RawChanges(RawChanges::NODES_CHANGED | RawChanges::NEW_REMOTE_STATISTICS));
 
     bool callbackCalled = false;
     SystemStateMessage stateMessage;
