@@ -184,7 +184,7 @@ MACRO(INSTALL_DEBUG_INFO target)
     #allow the use of get_target_property LOCATION in
     #newer cmake versions.
     if (NOT CMAKE_VERSION VERSION_LESS "3.0.0")
-      cmake_policy(SET CMP0026 NEW)
+      cmake_policy(SET CMP0026 OLD)
     endif()
 
     #the problem here is to find out where the pdb file is located. It is located next to the binary
