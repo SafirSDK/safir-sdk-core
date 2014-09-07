@@ -27,6 +27,29 @@ ali
 obj
 interface
 
+#MSVC stuff
+*embed.manifest
+*embed.manifest.res
+*.exe.manifest
+*.dll.manifest
+*.intermediate.manifest
+*.ilk
+*.pdb
+*.lib
+*.exp
+*.resource.txt
+*.vcxproj
+*.vcxproj.filters
+*.sln
+*.suo
+*.sdf
+*.opensdf
+*.dir/
+x64/
+Debug/
+Release/
+RelWithDebInfo/
+
 #Qt stuff
 *_automoc.cpp
 moc_*.cpp
