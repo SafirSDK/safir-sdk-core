@@ -25,7 +25,17 @@
 #ifndef __ACTIONSENDER_H__
 #define __ACTIONSENDER_H__
 
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
+#endif
+
 #include <boost/asio.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
+
 #ifdef SendMessage
 #undef SendMessage
 #endif

@@ -28,10 +28,21 @@
 #include <cstdlib>
 #include <iostream>
 #include <boost/bind.hpp>
-#include <boost/asio.hpp>
 #include <Safir/Dob/Typesystem/BlobOperations.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <DoseTest/Action.h>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
+#endif
+
+#include <boost/asio.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
+
 
 class ActionReceiver
 {
