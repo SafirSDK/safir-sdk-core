@@ -30,17 +30,17 @@
 #include <boost/thread/once.hpp>
 #include <boost/thread/locks.hpp>
 #include <boost/thread/mutex.hpp>
-#include <boost/asio/io_service.hpp>
-#include <boost/asio/ip/udp.hpp>
-#include <boost/asio/ip/host_name.hpp>
 #include <boost/algorithm/string/replace.hpp>
 
 #if defined _MSC_VER
   #pragma warning (push)
-  #pragma warning (disable: 4244)
+  #pragma warning (disable: 4244 4267)
 #endif
 
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/asio/io_service.hpp>
+#include <boost/asio/ip/udp.hpp>
+#include <boost/asio/ip/host_name.hpp>
 
 #if defined _MSC_VER
   #pragma warning (pop)

@@ -537,18 +537,6 @@ class VisualStudioBuilder(BuilderBase):
         if sys.platform == "win32":
             os.environ["_NO_DEBUG_HEAP"] = "1"
 
-        #os.environ["PATH"] = os.environ.get("PATH") + os.pathsep + os.path.join(os.environ.get("SAFIR_RUNTIME"),"bin")
-
-        #set up K: drive:
-        #logger.log("Setting up K: drive using subst.exe","header")
-        #bindir = os.path.join(os.environ.get("SAFIR_RUNTIME"),"bin")
-        #if not os.path.isdir(bindir):
-        #    mkdir(bindir)
-        #ret = subprocess.call(("subst","/d", "k:"))
-        #logger.log("'subst /d k:' exited with return code " + str(ret),"command")
-        #subprocess.call(("subst","k:",bindir))
-        #logger.log("'subst k:" + bindir + "' exited with return code " + str(ret),"output")
-
     def __find_vcvarsall(self):
         install_dirs = {"VS120COMNTOOLS" : "2013",
                         "VS110COMNTOOLS" : "2012",
