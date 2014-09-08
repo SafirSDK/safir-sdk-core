@@ -33,9 +33,20 @@
 #include <Safir/Dob/ErrorResponse.h>
 #include "Consumer.h"
 #include <boost/function.hpp>
-#include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include "ActionReceiver.h"
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
+#endif
+
+#include <boost/asio.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
+
 
 class Dispatcher:
     public Safir::Dob::Dispatcher,

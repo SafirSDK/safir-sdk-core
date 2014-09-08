@@ -44,15 +44,15 @@
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Utilities/ProcessMonitor.h>
-#include <boost/asio.hpp>
 
 //disable warnings in boost
 #if defined _MSC_VER
   #pragma warning (push)
-  #pragma warning (disable : 4244)
+  #pragma warning (disable : 4244 4267)
 #endif
 
 #include <boost/thread.hpp>
+#include <boost/asio.hpp>
 
 #if defined _MSC_VER
   #pragma warning (pop)

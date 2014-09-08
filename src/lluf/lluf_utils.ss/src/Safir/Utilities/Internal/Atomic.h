@@ -29,6 +29,17 @@
 #include <boost/noncopyable.hpp>
 #include <atomic>
 
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable:4100)
+#endif
+
+#include <boost/atomic.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
+
 namespace Safir
 {
 namespace Utilities

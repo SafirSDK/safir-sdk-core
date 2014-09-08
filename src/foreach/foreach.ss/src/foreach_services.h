@@ -35,12 +35,21 @@
 #include <Safir/Dob/ErrorListResponse.h>
 #include <Safir/Dob/ResponseSender.h> 
 #include <Safir/Utilities/ForEach/ResponseType.h>
-#include <boost/asio.hpp>
 #include <boost/date_time/posix_time/posix_time_duration.hpp>
 #include <list>
 #include <map>
 #include <vector>
 
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
+#endif
+
+#include <boost/asio.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 namespace Safir
 {

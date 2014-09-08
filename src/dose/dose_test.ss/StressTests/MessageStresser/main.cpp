@@ -33,7 +33,6 @@
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <boost/lexical_cast.hpp>
 #include <boost/interprocess/exceptions.hpp>
-#include <boost/asio.hpp>
 #include <iostream>
 #include <Safir/Utilities/Internal/Atomic.h>
 #include <Safir/Utilities/AsioDispatcher.h>

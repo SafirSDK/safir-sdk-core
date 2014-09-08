@@ -33,13 +33,22 @@
 #include <map>
 #include <deque>
 #include <boost/array.hpp>
-#include <boost/asio.hpp>
 #include <boost/thread.hpp>
 #include <boost/function.hpp>
 #include "dose_main_waiting_states.h"
 #include "dose_main_thread_monitor.h"
-
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
+#endif
+
+#include <boost/asio.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 namespace Safir
 {

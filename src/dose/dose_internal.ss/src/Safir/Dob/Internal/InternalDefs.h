@@ -32,17 +32,8 @@
 #include <Safir/Dob/Internal/WrapAroundCounter.h>
 #include <Safir/Dob/Internal/LamportClocks.h>
 #include <Safir/Dob/Internal/ConsumerId.h>
-
-#ifdef _MSC_VER
-#pragma warning (push)
-#endif
-
 #include <boost/function.hpp>
 #include <boost/tuple/tuple.hpp>
-
-#ifdef _MSC_VER
-#pragma warning (pop)
-#endif
 
 namespace Safir
 {
