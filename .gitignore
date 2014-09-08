@@ -9,7 +9,7 @@
 
 #CMake stuff
 *.cmake
-CMakeLists.txt.user
+CMakeLists.txt.user*
 install_manifest.txt
 CMakeFiles
 *.rsp
@@ -60,6 +60,7 @@ moc_*.cxx_parameters
 qrc_*.cxx
 *.qrc.depends
 *.cbp
+*.autosave
 
 #protobuf
 *.pb.cc
