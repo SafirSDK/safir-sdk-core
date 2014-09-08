@@ -45,6 +45,8 @@
   #pragma warning (pop)
 #endif
 
+namespace SP = Safir::Dob::Internal::SP;
+namespace Com = Safir::Dob::Internal::Com;
 
 std::wostream& operator<<(std::wostream& out, const std::string& str)
 {
@@ -154,7 +156,7 @@ private:
 
 };
 
-void ChangedSystemState(const Safir::Dob::Internal::SP::SystemState& data)
+void ChangedSystemState(const SP::SystemState& data)
 {
     std::wcout << "Control got new system state from SP! The number of nodes are " << data.Size() << std::endl;
 }
@@ -172,7 +174,7 @@ int main(int argc, char * argv[])
     //make some work to stop io_service from exiting.
     auto work = Safir::make_unique<boost::asio::io_service::work>(ioService);
 
-    std::vector<Safir::Dob::Internal::Com::NodeTypeDefinition> commNodeTypes;
+    std::vector<Com::NodeTypeDefinition> commNodeTypes;
 
     for (const auto& nt: options.config.GetNodeTypes())
     {
@@ -184,40 +186,40 @@ int main(int argc, char * argv[])
                                  nt.retryTimeout});
     }
     
-    Safir::Dob::Internal::Com::Communication communication(Safir::Dob::Internal::Com::controlModeTag,
-                                                           ioService,
-                                                           options.name,
-                                                           options.id,
-                                                           options.nodeTypeId,
-                                                           options.controlAddress,
-                                                           options.dataAddress,
-                                                           commNodeTypes);
+    Com::Communication communication(Com::controlModeTag,
+                                     ioService,
+                                     options.name,
+                                     options.id,
+                                     options.nodeTypeId,
+                                     options.controlAddress,
+                                     options.dataAddress,
+                                     commNodeTypes);
     
     communication.InjectSeeds(options.seeds);
 
-    std::map<boost::int64_t, Safir::Dob::Internal::SP::NodeType> spNodeTypes;
+    std::map<boost::int64_t, SP::NodeType> spNodeTypes;
     
     for (const auto& nt: options.config.GetNodeTypes())
     {
-        spNodeTypes.insert(std::make_pair(nt.id, 
-                                          Safir::Dob::Internal::SP::NodeType(nt.id, 
-                                                                             nt.name, 
-                                                                             nt.isLight, 
-                                                                             boost::chrono::milliseconds(nt.heartbeatInterval),
-                                                                             nt.maxLostHeartbeats,
-                                                                             boost::chrono::milliseconds(nt.retryTimeout))));
+        spNodeTypes.insert(std::make_pair(nt.id,
+                                          SP::NodeType(nt.id,
+                                                       nt.name,
+                                                       nt.isLight,
+                                                       boost::chrono::milliseconds(nt.heartbeatInterval),
+                                                       nt.maxLostHeartbeats,
+                                                       boost::chrono::milliseconds(nt.retryTimeout))));
     }
 
 
-    Safir::Dob::Internal::SP::SystemPicture sp(Safir::Dob::Internal::SP::master_tag, 
-                                               ioService, 
-                                               communication,
-                                               options.name,
-                                               options.id,
-                                               options.nodeTypeId,
-                                               options.controlAddress,
-                                               options.dataAddress,
-                                               std::move(spNodeTypes));
+    SP::SystemPicture sp(SP::master_tag,
+                         ioService,
+                         communication,
+                         options.name,
+                         options.id,
+                         options.nodeTypeId,
+                         options.controlAddress,
+                         options.dataAddress,
+                         std::move(spNodeTypes));
 
 
     // Start subscription to system state changes from SP
