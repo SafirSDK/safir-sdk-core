@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include "SystemStateHandler.h"
+#include <set>
 
 namespace Safir
 {
@@ -33,30 +34,74 @@ namespace Control
 {
 
     SystemStateHandler::SystemStateHandler(boost::asio::io_service::strand& strand,
-                                           const NodeNewCb&                 nodeNewCb,
                                            const NodeUpCb&                  nodeUpCb,
-                                           const NodeDeadCb&                nodeDeadCb,
-                                           const CoordinatorElectedCb&      coordinatorElectedCb)
-        : m_strand(strand),
-          m_currentState(),
-          m_nodeNewCb(nodeNewCb),
-          m_nodeUpCb(nodeUpCb),
-          m_nodeDeadCb(nodeDeadCb),
-          m_coordinatorElectedCb(coordinatorElectedCb)
-    {
+                                           const NodeDownCb&                nodeDownCb)
 
+        : m_strand(strand),
+          m_systemState(),
+          m_nodeUpCb(nodeUpCb),
+          m_nodeDownCb(nodeDownCb)
+    {
     }
 
     void SystemStateHandler::SetNewState(const Safir::Dob::Internal::SP::SystemState& newState)
     {
-        for (int idx = 0; idx < newState.Size(); ++idx)
-        {
-            if (idx > m_currentState.Size())
-            {
-                m_nodeNewCb(idx);
-            }
+        std::set<int64_t> existingNodeIds;
 
-            // TODO Mera händelser här
+        for (int ix = 0; ix < newState.Size(); ++ix)
+        {
+            auto nodeId = newState.Id(ix);
+
+            existingNodeIds.insert(nodeId);
+
+            if (m_systemState.find(nodeId) == m_systemState.end())
+            {
+                // This is a node we haven't seen before
+
+                if (newState.IsDead(ix))
+                {
+                    // A new node that is marked as dead. Skip it!
+                    continue;
+                }
+
+
+                Node newNode {newState.Name(ix),
+                              newState.Id(ix),
+                              newState.NodeTypeId(ix),
+                              newState.ControlAddress(ix),
+                              newState.DataAddress(ix)};
+
+                m_systemState.insert({nodeId, newNode});
+                m_nodeUpCb(newNode);
+
+            }
+            else
+            {
+                // We already know about this node
+                if (!newState.IsDead(ix))
+                {
+                    // It is still alive
+                    continue;
+                }
+
+                // Node is dead
+                m_systemState.erase(nodeId);
+                m_nodeDownCb(nodeId);
+            }
+        }
+
+        // Check if we have any nodes that have disapeared from system state
+        for (auto pos = m_systemState.begin(); pos != m_systemState.end(); /*increment below*/)
+        {
+            if (existingNodeIds.find(pos->first) == existingNodeIds.end())
+            {
+                m_nodeDownCb(pos->first);
+                pos = m_systemState.erase(pos);
+            }
+            else
+            {
+                ++pos;
+            }
         }
     }
 }

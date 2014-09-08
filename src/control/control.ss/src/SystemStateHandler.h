@@ -35,6 +35,29 @@ namespace Internal
 {
 namespace Control
 {
+
+    struct Node
+    {
+        Node(const std::string& name_,
+             int64_t nodeId_,
+             int64_t nodeTypeId_,
+             const std::string& controlAddress_,
+             const std::string& dataAddress_)
+            : name(name_),
+              nodeId(nodeId_),
+              nodeTypeId(nodeTypeId_),
+              controlAddress(controlAddress_),
+              dataAddress(dataAddress_)
+        {
+        }
+
+        std::string         name;
+        int64_t             nodeId;
+        int64_t             nodeTypeId;
+        const std::string   controlAddress;
+        const std::string   dataAddress;
+    };
+
     /**
      * @brief The SystemStateHandler class holds the current system state. When a new
      * state is set this class figures out what has happened and the appropriate
@@ -43,17 +66,14 @@ namespace Control
     class SystemStateHandler
     {
     public:
-
-        typedef boost::function<void(const int index)> NodeNewCb;
-        typedef boost::function<void(const int index)> NodeUpCb;
-        typedef boost::function<void(const int index)> NodeDeadCb;
-        typedef boost::function<void(const int index)> CoordinatorElectedCb;
+        //TODO: beskriv exakta betydelsen controlkanal uppe
+        typedef boost::function<void(const Node& node)> NodeUpCb;
+        //TODO: beskriv exakta betydelsen nod nere, controlkanal och datakanal är nere eller kommer tas ner snart.
+        typedef boost::function<void(const int64_t nodeId)> NodeDownCb;
 
         explicit SystemStateHandler(boost::asio::io_service::strand& strand,
-                                    const NodeNewCb&                 nodeNewCb,
                                     const NodeUpCb&                  nodeUpCb,
-                                    const NodeDeadCb&                nodeDeadCb,
-                                    const CoordinatorElectedCb&      coordinatorElectedCb);
+                                    const NodeDownCb&                nodeDownCb);
 
         void SetNewState(const Safir::Dob::Internal::SP::SystemState& newState);
 
@@ -61,13 +81,10 @@ namespace Control
 
         boost::asio::io_service::strand& m_strand;
 
-        Safir::Dob::Internal::SP::SystemState m_currentState;
+        std::map<int64_t, Node> m_systemState;
 
-        NodeNewCb               m_nodeNewCb;
         NodeUpCb                m_nodeUpCb;
-        NodeDeadCb              m_nodeDeadCb;
-        CoordinatorElectedCb    m_coordinatorElectedCb;
-
+        NodeDownCb              m_nodeDownCb;
 
     };
 
