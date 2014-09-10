@@ -37,6 +37,7 @@
 #pragma warning (disable: 4127)
 #endif
 
+#include <boost/crc.hpp>
 #include "CommunicationMessage.pb.h"
 
 #ifdef _MSC_VER

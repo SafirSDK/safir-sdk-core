@@ -109,6 +109,7 @@ public:
         }
 
         TRACELINE
+
         //Send fragmented message
         for (int frag=0; frag<4; ++frag)
         {
@@ -127,18 +128,106 @@ public:
             }
         }
 
+        TRACELINE        
+
+        //---------------------------------------------
+        // Test unacked messages
+        //---------------------------------------------
+        //Send one non-fragmented message to each node
+        for (int64_t id=2; id<=4; ++id)
+        {
+            auto payload="hello";
+            auto size=strlen(payload);
+            Com::MessageHeader header(id, 1, 0, Com::MultiReceiverSendMethod, Com::Unacked, 10, size, size, 1, 0, 0);
+            dh.ReceivedApplicationData(&header, payload);
+        }
+        DumpNodeInfo(dh);
+
+        std::cout<<"========================="<<std::endl;
+        std::cout<<"Unacked fragmented"<<std::endl;
+        std::cout<<"========================="<<std::endl;
+        //Send fragmented message
+        for (int frag=0; frag<4; ++frag)
+        {
+            const char* msg="ABCDEFGH";
+            uint64_t seq=11+frag;
+            const size_t fragmentSize=2;
+            const uint16_t numberOfFragments=4;
+
+            for (int64_t id=2; id<=4; ++id)
+            {
+                size_t fragmentOffset=2*frag;
+                const char* payload=msg+fragmentOffset;
+
+                Com::MessageHeader header(id, 1, 0, Com::MultiReceiverSendMethod, Com::Unacked, seq, strlen(msg), fragmentSize, numberOfFragments, static_cast<uint16_t>(frag), fragmentOffset);
+                dh.ReceivedApplicationData(&header, payload);
+            }
+        }
+
         TRACELINE
+        DumpNodeInfo(dh);
+        DumpReceived();
+        TRACELINE
+
+        std::cout<<"========================="<<std::endl;
+        std::cout<<"Unacked missed fragment"<<std::endl;
+        std::cout<<"========================="<<std::endl;
+        //Send one fragment in the middle, the entire message is supposed to be ignored
+        //and expected seqNo should be the start of the next message.
+        {
+            const char* msg="12345678";
+            uint64_t seq=16;
+            const size_t fragmentSize=2;
+            const uint16_t numberOfFragments=4;
+            size_t fragmentOffset=2;
+            const char* payload=msg+fragmentOffset;
+
+            for (int64_t id=2; id<=4; ++id)
+            {
+                Com::MessageHeader header(id, 1, 0, Com::MultiReceiverSendMethod, Com::Unacked, seq, strlen(msg), fragmentSize, numberOfFragments, 1, fragmentOffset);
+                dh.ReceivedApplicationData(&header, payload);
+            }
+        }
+
+        TRACELINE
+        DumpNodeInfo(dh);
+        DumpReceived();
+        TRACELINE
+
+        std::cout<<"========================="<<std::endl;
+        std::cout<<"Unacked one non-fragmented"<<std::endl;
+        std::cout<<"========================="<<std::endl;
+        //Send one non-fragmented message to each node
+        for (int64_t id=2; id<=4; ++id)
+        {
+            auto payload="hello";
+            auto size=strlen(payload);
+            Com::MessageHeader header(id, 1, 0, Com::MultiReceiverSendMethod, Com::Unacked, 19, size, size, 1, 0, 0);
+            dh.ReceivedApplicationData(&header, payload);
+        }
+
         dh.m_deliverStrand.post([&]{SetReady();});
         WaitUntilReady();
 
         TRACELINE
+        DumpNodeInfo(dh);
         DumpReceived();
+        TRACELINE
+
+        for (int64_t id=2; id<=4; ++id)
+        {
+            CHECK(received[id]==5);
+            CHECK(acked[id]==5);
+            CHECK(dh.m_nodes.find(id)->second.channel[1].lastInSequence==19);
+        }
 
         TRACELINE
+
         work.reset();
         threads.join_all();
         std::cout<<"DeliveryHandler tests passed"<<std::endl;
     }
+
 
 private:
 
@@ -163,7 +252,7 @@ private:
     static void OnRecv(int64_t fromNodeId, int64_t /*fromNodeType*/, const boost::shared_ptr<char[]>& data, size_t size)
     {
         std::string msg(data.get(), size);
-        std::cout<<"OnRecv: "<<msg<<std::endl;
+        //std::cout<<"OnRecv from "<<fromNodeId<<": "<<msg<<std::endl;
         received[fromNodeId]++;
     }
 
@@ -177,6 +266,20 @@ private:
         for (auto& vt : received)
         {
             std::cout<<"node_"<<vt.first<<": received="<<vt.second<<", acked="<<acked[vt.first]<<std::endl;
+        }
+    }
+
+    static void DumpNodeInfo(Com::DeliveryHandlerBasic<DeliveryHandlerTest::TestWriter>& dh)
+    {
+        static std::vector<std::string> channels{"unacked_singel", "unacked_multi", "acked_single", "acked_multi"};
+        for (auto& ni : dh.m_nodes)
+        {
+            std::cout<<"Node: "<<ni.second.node.name<<std::endl;
+            for (size_t c=0; c<4; ++c)
+            {
+                auto& channel=ni.second.channel[c];
+                std::cout<<"    Channel: "<<channels[c]<<", lastInSeq: "<<channel.lastInSequence<<std::endl;
+            }
         }
     }
 };

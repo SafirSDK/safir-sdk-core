@@ -194,17 +194,37 @@ namespace Com
         struct NodeInfo
         {
             Node node;
-            std::vector<Channel> channel_;
+            std::vector<Channel> channel;
             boost::asio::ip::udp::endpoint endpoint;
 
             NodeInfo(const Node& node_)
                 :node(node_)
-                ,channel_(4) //4 channels: unacked_singel, unacked_multi, acked_single, acked_multi
+                ,channel(4) //4 channels: unacked_singel, unacked_multi, acked_single, acked_multi
                 ,endpoint(Utilities::CreateEndpoint(node.unicastAddress))
             {
             }
 
-            Channel& GetChannel(const MessageHeader* header) {return channel_[static_cast<size_t>(2*header->deliveryGuarantee+header->sendMethod)];}
+            Channel& GetChannel(const MessageHeader* header)
+            {
+                if (header->deliveryGuarantee==Unacked)
+                {
+                    if (header->sendMethod==SingleReceiverSendMethod)
+                        return channel[0];
+                    else
+                        return channel[1];
+
+                }
+                else
+                {
+                    if (header->sendMethod==SingleReceiverSendMethod)
+                        return channel[2];
+                    else
+                        return channel[3];
+
+                }
+
+                //return channel[static_cast<size_t>(2*header->deliveryGuarantee+header->sendMethod)];
+            }
         };
         typedef std::map<int64_t, NodeInfo> NodeInfoMap;
 
@@ -368,6 +388,12 @@ namespace Com
                         //in the middle of a fragmented message, nothing we want to keep. Set lastInSeq to match with the beginning of next new message
                         ch.lastInSequence=header->sequenceNumber+header->numberOfFragments-header->fragmentNumber-1; //calculate nextStartOfNewMessage-1
                     }
+
+                    lllog(8)<<L"COM: Recv unacked message with seqNo gap (i.e messages have been lost), received seqNo "<<header->sequenceNumber<<std::endl;
+                }
+                else
+                {
+                    lllog(8)<<L"COM: Recv unacked message too old seqNo, received seqNo "<<header->sequenceNumber<<L", expected "<<ch.lastInSequence+1<<std::endl;
                 }
                 return false;
             }
@@ -411,8 +437,6 @@ namespace Com
                             auto recvIt=m_receivers.find(dataType); //m_receivers shall be safe to use inside m_deliverStrand since it is not supposed to be modified after start
                             if (recvIt!=m_receivers.end())
                             {
-                                //unsigned int val=*reinterpret_cast<const unsigned int*>(dataPtr.get());
-                                //std::cout<<"deliver "<<seqNo<<", val="<<val<<std::endl;
                                 recvIt->second(fromId, fromNodeType, dataPtr, dataSize);
                             }
                             else
