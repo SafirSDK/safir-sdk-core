@@ -25,16 +25,17 @@
 #include <Safir/Utilities/Internal/AsioPeriodicTimer.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/MakeUnique.h>
-#include <boost/asio.hpp>
 #include <memory>
 
 //disable warnings in boost
 #if defined _MSC_VER
   #pragma warning (push)
   #pragma warning (disable : 4100)
+  #pragma warning (disable : 4267)
 #endif
 
 #include <boost/program_options.hpp>
+#include <boost/asio.hpp>
 
 #if defined _MSC_VER
   #pragma warning (pop)

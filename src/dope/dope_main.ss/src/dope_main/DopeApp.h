@@ -30,7 +30,6 @@
 #include <Safir/Dob/ResponseSender.h>
 #include "PersistenceHandler.h"
 #include <Safir/Application/Tracer.h>
-#include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
 #include <Safir/Utilities/AsioDispatcher.h>

@@ -27,8 +27,18 @@
 #include "ui_SystemPicturePage.h"
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/asio.hpp>
 #include <Safir/Dob/Internal/SystemPicture.h>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
+#endif
+
+#include <boost/asio.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 class SystemPicturePage :
   public QWidget,

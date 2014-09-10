@@ -24,8 +24,6 @@
 #ifndef __SAFIR_DOB_COMMUNICATION_READER_H__
 #define __SAFIR_DOB_COMMUNICATION_READER_H__
 
-#include <boost/asio.hpp>
-#include <boost/asio/steady_timer.hpp>
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 #include <boost/chrono.hpp>
@@ -33,6 +31,18 @@
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include "Parameters.h"
 #include "Node.h"
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
+#endif
+
+#include <boost/asio.hpp>
+#include <boost/asio/steady_timer.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 namespace Safir
 {

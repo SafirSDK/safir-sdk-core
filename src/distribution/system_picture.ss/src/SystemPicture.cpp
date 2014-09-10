@@ -37,10 +37,20 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/MakeUnique.h>
 #include <Safir/Utilities/Internal/IpcSubscriber.h>
-#include <boost/asio.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/thread.hpp>
 #include <memory>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
+#endif
+
+#include <boost/asio.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 namespace
 {

@@ -22,16 +22,28 @@
 *
 ******************************************************************************/
 #include "../../src/Safir/Utilities/Internal/IpcSubscriber.h"
-#include <boost/asio.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/thread.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/program_options.hpp>
 #include <Safir/Utilities/Internal/StringEncoding.h>
-using Safir::Utilities::Internal::ToUtf16;
 #include <stdlib.h>
 #include <iostream>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
+#endif
+
+#include <boost/asio.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
+
+using Safir::Utilities::Internal::ToUtf16;
+
 
 std::wostream& operator<<(std::wostream& out, const boost::program_options::options_description& opt)
 {

@@ -23,9 +23,19 @@
 ******************************************************************************/
 #include <Safir/Dob/Internal/Communication.h>
 #include <Safir/Utilities/Internal/Id.h>
-#include <boost/asio.hpp>
 #include <boost/lexical_cast.hpp>
 #include "CommunicationImpl.h"
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
+#endif
+
+#include <boost/asio.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 namespace Safir
 {

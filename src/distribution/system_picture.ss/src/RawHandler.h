@@ -31,7 +31,6 @@
 #include <Safir/Utilities/Internal/MakeUnique.h>
 #include "MessageWrapperCreators.h"
 #include "RawChanges.h"
-#include <boost/asio.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/chrono.hpp>
 #include <boost/noncopyable.hpp>
@@ -44,9 +43,11 @@
 #  pragma warning (push)
 #  pragma warning (disable: 4244)
 #  pragma warning (disable: 4127)
+#  pragma warning (disable: 4267)
 #endif
 
 #include "RawStatisticsMessage.pb.h"
+#include <boost/asio.hpp>
 
 #ifdef _MSC_VER
 #pragma warning (pop)

@@ -25,14 +25,24 @@
 #define __SAFIR_DOB_COMMUNICATION_HEARTBEAT_H__
 
 #include <boost/noncopyable.hpp>
-#include <boost/asio.hpp>
-#include <boost/asio/steady_timer.hpp>
 #include <boost/function.hpp>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include "Node.h"
 #include "Message.h"
 #include "Writer.h"
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
+#endif
+
+#include <boost/asio.hpp>
+#include <boost/asio/steady_timer.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 namespace Safir
 {

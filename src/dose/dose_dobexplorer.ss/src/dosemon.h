@@ -28,7 +28,17 @@
 #include <set>
 #include <Safir/Dob/Internal/InternalFwd.h>
 #include <Safir/Dob/Internal/StateDeleter.h>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
+#endif
+
 #include <boost/asio.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 class DoseMon : public QWidget, private Ui::DoseMonDlg
 {

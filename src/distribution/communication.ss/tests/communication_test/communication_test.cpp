@@ -1,7 +1,6 @@
 #include <iostream>
 #include <limits>
 #include <chrono>
-#include <boost/asio.hpp>
 #include <boost/function.hpp>
 #include <boost/thread.hpp>
 #include <boost/program_options.hpp>
@@ -9,6 +8,17 @@
 #include <boost/crc.hpp>
 #include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Dob/Internal/Communication.h>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
+#endif
+
+#include <boost/asio.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 // ./communication_test -a 127.0.0.1:10001 -m 224.90.90.241:10000 -w 2 -n 10000 -s 127.0.0.1:10000
 

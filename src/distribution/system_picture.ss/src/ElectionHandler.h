@@ -30,8 +30,6 @@
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
-#include <boost/asio.hpp>
-#include <boost/asio/steady_timer.hpp>
 #include <functional>
 #include <limits>
 #include <atomic>
@@ -44,9 +42,12 @@
 #  pragma warning (push)
 #  pragma warning (disable: 4244)
 #  pragma warning (disable: 4127)
+#  pragma warning (disable: 4267)
 #endif
 
 #include "ElectionMessage.pb.h"
+#include <boost/asio.hpp>
+#include <boost/asio/steady_timer.hpp>
 
 #ifdef _MSC_VER
 #  pragma warning (pop)

@@ -29,7 +29,6 @@
 
 #include <Safir/Utilities/Internal/IpcPublisher.h>
 #include <Safir/Utilities/Internal/StringEncoding.h>
-#include <boost/asio.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/thread.hpp>
@@ -38,6 +37,18 @@
 #include <stdlib.h>
 #include <string>
 #include <iostream>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
+#endif
+
+#include <boost/asio.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
+
 
 std::wostream& operator<<(std::wostream& out, const boost::program_options::options_description& opt)
 {

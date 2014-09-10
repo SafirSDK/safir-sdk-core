@@ -29,16 +29,16 @@
 #include <Safir/Utilities/Internal/Id.h>
 #include <iostream>
 #include <map>
-#include <boost/asio.hpp>
 #include <boost/thread.hpp>
 
 //disable warnings in boost
 #if defined _MSC_VER
   #pragma warning (push)
-  #pragma warning (disable : 4100)
+  #pragma warning (disable : 4100 4267)
 #endif
 
 #include <boost/program_options.hpp>
+#include <boost/asio.hpp>
 
 #if defined _MSC_VER
   #pragma warning (pop)

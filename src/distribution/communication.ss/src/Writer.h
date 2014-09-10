@@ -26,12 +26,22 @@
 
 #include <map>
 #include <boost/noncopyable.hpp>
-#include <boost/asio.hpp>
 #include <boost/function.hpp>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include "Message.h"
 #include "Utilities.h"
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
+#endif
+
+#include <boost/asio.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 namespace Safir
 {

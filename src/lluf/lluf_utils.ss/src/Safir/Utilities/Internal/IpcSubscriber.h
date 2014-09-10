@@ -24,7 +24,6 @@
 #ifndef __LLUF_IPC_SUBSCRIBER_H__
 #define __LLUF_IPC_SUBSCRIBER_H__
 
-#include <boost/asio.hpp>
 #include <boost/cstdint.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
@@ -34,6 +33,18 @@
 #include <boost/system/error_code.hpp>
 #include <Safir/Utilities/Internal/AsioPeriodicTimer.h>
 #include <Safir/Utilities/Internal/IpcName.h>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
+#endif
+
+#include <boost/asio.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
+
 
 namespace Safir
 {

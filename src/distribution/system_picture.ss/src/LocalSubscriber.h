@@ -28,9 +28,19 @@
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include "SubscriberInterfaces.h"
 #include <functional>
-#include <boost/asio.hpp>
 #include "CrcUtils.h"
 #include <atomic>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
+#endif
+
+#include <boost/asio.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 namespace Safir
 {

@@ -29,8 +29,18 @@
 #include <Safir/Dob/Connection.h>
 #include <Safir/Application/Tracer.h>
 #include <Safir/Utilities/AsioDispatcher.h>
-#include <boost/asio.hpp>
 #include <boost/noncopyable.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
+#endif
+
+#include <boost/asio.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 /**
  * Abstract base class for all persistence backends.

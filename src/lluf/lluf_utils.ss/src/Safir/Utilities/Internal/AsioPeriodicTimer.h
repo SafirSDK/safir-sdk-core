@@ -26,9 +26,19 @@
 
 #include <atomic>
 #include <functional>
-#include <boost/asio.hpp>
 #include <boost/noncopyable.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
+#endif
+
+#include <boost/asio.hpp>
 #include <boost/asio/steady_timer.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 namespace Safir
 {

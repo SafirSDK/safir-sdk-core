@@ -26,7 +26,6 @@
 
 #include <set>
 #include <boost/cstdint.hpp>
-#include <boost/asio.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
 #include <boost/enable_shared_from_this.hpp>
@@ -35,6 +34,18 @@
 #include <boost/filesystem.hpp>
 
 #include <Safir/Utilities/Internal/IpcSession.h>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
+#endif
+
+#include <boost/asio.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
+
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
 #  include <Safir/Utilities/Internal/IpcAcceptorWin32.h>

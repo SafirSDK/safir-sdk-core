@@ -26,7 +26,6 @@
 
 #include <set>
 #include <boost/noncopyable.hpp>
-#include <boost/asio.hpp>
 #include <boost/function.hpp>
 #include "NodeType.h"
 #include "Node.h"
@@ -36,6 +35,17 @@
 #include "Discoverer.h"
 #include "DataSender.h"
 #include "HeartbeatSender.h"
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
+#endif
+
+#include <boost/asio.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 namespace Safir
 {

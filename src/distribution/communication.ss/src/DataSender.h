@@ -27,8 +27,6 @@
 #include <map>
 #include <atomic>
 #include <boost/noncopyable.hpp>
-#include <boost/asio.hpp>
-#include <boost/asio/steady_timer.hpp>
 #include <boost/function.hpp>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
@@ -36,6 +34,19 @@
 #include "MessageQueue.h"
 #include "Parameters.h"
 #include "Writer.h"
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
+#endif
+
+#include <boost/asio.hpp>
+#include <boost/asio/steady_timer.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
+
 
 #ifdef _MSC_VER
 #pragma warning (disable: 4127)
