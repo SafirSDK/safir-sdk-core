@@ -39,9 +39,9 @@
 #endif
 
 #if defined(LLUF_CRASH_REPORTER_LINUX)
-#include "client/linux/handler/exception_handler.h"
+#include <breakpad/client/linux/handler/exception_handler.h>
 #else
-#include "client/windows/handler/exception_handler.h"
+#include <client/windows/handler/exception_handler.h>
 #include "Windows.h"
 #endif
 
