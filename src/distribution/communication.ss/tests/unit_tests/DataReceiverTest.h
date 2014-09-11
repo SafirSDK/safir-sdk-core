@@ -24,8 +24,20 @@
 #ifndef _SAFIR_COM_READER_TEST_H_
 #define _SAFIR_COM_READERTEST_H_
 
-#include <boost/crc.hpp>
 #include "fwd.h"
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4244)
+#pragma warning (disable: 4245)
+#endif
+
+#include <boost/crc.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
+
 
 inline boost::shared_ptr<int> Int(int i) {return boost::make_shared<int>(i);}
 

@@ -5,16 +5,18 @@
 #include <boost/thread.hpp>
 #include <boost/program_options.hpp>
 #include <boost/make_shared.hpp>
-#include <boost/crc.hpp>
 #include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Dob/Internal/Communication.h>
 
 #ifdef _MSC_VER
 #pragma warning (push)
 #pragma warning (disable: 4267)
+#pragma warning (disable: 4244)
+#pragma warning (disable: 4245)
 #endif
 
 #include <boost/asio.hpp>
+#include <boost/crc.hpp>
 
 #ifdef _MSC_VER
 #pragma warning (pop)
