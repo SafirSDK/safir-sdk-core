@@ -8,9 +8,7 @@ FIND_PATH(BREAKPAD_INCLUDE_DIRECTORY
   NAMES
     client/linux/handler/exception_handler.h
   PATHS
-    /usr/include
     /usr/include/breakpad
-    /usr/local/include
     /usr/local/include/breakpad)
 
 FIND_LIBRARY(BREAKPAD_LIBRARY
@@ -35,11 +33,13 @@ if (NOT BREAKPAD_FOUND)
 
   set(BREAKPAD_INCLUDE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/google-breakpad/src/src)
 
+  set(BREAKPAD_LIBRARY breakpad_client)
+
   if (MSVC)
-    set(BREAKPAD_LIBRARY ${CMAKE_CURRENT_BINARY_DIR}/google-breakpad/bin/breakpad_client.lib)
+    link_directories(${CMAKE_CURRENT_BINARY_DIR}/google-breakpad/bin/)
   else()
     #TODO: needed? set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-local-typedefs")
-    set(BREAKPAD_LIBRARY ${CMAKE_CURRENT_BINARY_DIR}/google-breakpad/src/src/client/linux/libbreakpad.a)
+    link_directories(${CMAKE_CURRENT_BINARY_DIR}/google-breakpad/src/src/client/linux/)
   endif()
 endif()
 
