@@ -25,8 +25,18 @@
 #define __SAFIR_DOB_COMMUNICATION_UTILIITIES_H__
 
 #include <string>
-#include <boost/asio/ip/udp.hpp>
 #include <boost/lexical_cast.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
+#endif
+
+#include <boost/asio/ip/udp.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 namespace Safir
 {

@@ -26,12 +26,22 @@
 
 #include <boost/function.hpp>
 #include <boost/random.hpp>
-#include <boost/asio/steady_timer.hpp>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/Id.h>
 #include "Parameters.h"
 #include "Node.h"
 #include "Message.h"
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
+#endif
+
+#include <boost/asio/steady_timer.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 namespace Safir
 {
