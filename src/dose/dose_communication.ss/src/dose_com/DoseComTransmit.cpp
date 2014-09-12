@@ -410,12 +410,13 @@ static THREAD_API Ack_Thread(void *)
         {
             ACE_Guard<ACE_Thread_Mutex> lck(g_threadLock);
 
-            if(*pDbg>=5)
+            //TODO: AIWI
+            //if(*pDbg>=5)
             PrintDbg("+++ AckThread() MsgTyp=%s DoseId=%d "
-                    "Seq=%d FrNum=%X qIx=%u Put=%u\n",
+                    "Seq=%d FrNum=%d Info=%d qIx=%u Put=%u\n",
                     (UdpMsg.MsgType == MSG_TYPE_ACK) ? "ACK" : "NACK",
                     UdpMsg.DoseIdFrom, UdpMsg.SequenceNumber,
-                    UdpMsg.FragmentNumber, UdpMsg.TxQueueNumber, g_Ack_Put_ix);
+                    UdpMsg.FragmentNumber, UdpMsg.Info, UdpMsg.TxQueueNumber, g_Ack_Put_ix);
 
             // Got an ack, put on the Queue, Wakeup
             g_Ack_Queue[g_Ack_Put_ix].MsgType        = UdpMsg.MsgType;
@@ -1222,20 +1223,49 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
             {
                 // Check if this node considers the nacked fragment to have been
                 // sent but not acked
+                PrintDbg("TxThread[%d] Got NACK to a fragmented message. Check if the requested SeqNr/FragNr are within the sliding window\n", qIx);
 
                 bool expectedFragmentNbrIsWithinWindow = false;
                 dcom_ushort16 ixToAck = TxQ[qIx].GetIxToAck;
-
-                if (TxQ[qIx].TxMsgArr[ixToAck].SequenceNumber == g_Ack_Queue[g_Ack_Get_ix].SequenceNumber)
+                for(;;)
                 {
-                    // The sequence number is within the sliding window. Now check if the expected fragment is
-                    // within the sliding window at fragment level.
-                    dcom_ushort16 expectedFragment = g_Ack_Queue[g_Ack_Get_ix].Info;
+                    if ((ixToAck == TxQ[qIx].GetIxToSend &&
+                        TxQ[qIx].TxMsgArr[ixToAck].bIsFragmented &&
+                        TxQ[qIx].TxMsgArr[ixToAck].IsTransmitting) ||
+                        ixToAck != TxQ[qIx].GetIxToSend)
+                    {
+                        if (TxQ[qIx].TxMsgArr[ixToAck].SequenceNumber == g_Ack_Queue[g_Ack_Get_ix].SequenceNumber)
+                        {
+                            PrintDbg("SeqNr %d is within sliding window. Now check FragNr. ExpectedFragNr=%d NotAckedFragNr=%d SentFragNr=%d\n",
+                                     TxQ[qIx].TxMsgArr[ixToAck].SequenceNumber, g_Ack_Queue[g_Ack_Get_ix].Info, TxQ[qIx].TxMsgArr[ixToAck].NotAckedFragment,
+                                     TxQ[qIx].TxMsgArr[ixToAck].SentFragment);
 
-                    if (expectedFragment >= TxQ[qIx].TxMsgArr[ixToAck].NotAckedFragment &&
-                        expectedFragment <= TxQ[qIx].TxMsgArr[ixToAck].SentFragment)
-                    {                        
-                        expectedFragmentNbrIsWithinWindow = true;     
+                            // The sequence number is within the sliding window. Now check if the expected fragment is
+                            // within the sliding window at fragment level.
+                            dcom_ushort16 expectedFragment = g_Ack_Queue[g_Ack_Get_ix].Info;
+
+                            if (expectedFragment >= TxQ[qIx].TxMsgArr[ixToAck].NotAckedFragment &&
+                                expectedFragment <= TxQ[qIx].TxMsgArr[ixToAck].SentFragment)
+                            {
+                                expectedFragmentNbrIsWithinWindow = true;
+                            }
+                            break;
+                        }
+                    }
+
+                    // Don't step beyond GetIxToSend
+                    if (ixToAck == TxQ[qIx].GetIxToSend)
+                    {
+                        break;
+                    }
+
+                    if((ixToAck + 1) >= MAX_XMIT_QUEUE)
+                    {
+                        ixToAck = 0;
+                    }
+                    else
+                    {
+                        ++ixToAck;
                     }
                 }
 
@@ -1256,8 +1286,8 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
                     // traffic from this node. This makes the other nodes to mark the sequence number from this node as invalid.
                     // I KNOW, THIS IS REAL UGLY!!!! We have tried to track down the bug without success. Our failure is, at least partly,
                     // caused by the bad design and the complexity of dose_com. Hopefully we can throw it out soon ...
-                    PrintErr(0, "TxThread[%d] Fatal error: Got a NACK for a fragmented message with an expected fragment nbr that is already acked!\n"
-                                "Outgoing traffic from this node is temporarily stopped to force a resync.\n");
+
+                    PrintErr(0, "TxThread[%d] Got a NACK with an expected fragment that is already acked!\n", qIx);
                     g_pShm->InhibitOutgoingTraffic = true;
                     DoseOs::Sleep(4000);
                     g_pShm->InhibitOutgoingTraffic = false;
@@ -1281,6 +1311,7 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
                 PrintDbg("#-  IS IMPLEMENTED Got an Nack Seq=%d Info=%d\n",
                         SequenceNum, g_Ack_Queue[g_Ack_Get_ix].Info );
 
+                PrintDbg("TxThread[%d] Got NACK to a non fragmented message. Check if the requested SeqNr is within the sliding window\n", qIx);
 
                 // Check if this node considers the nacked message to have been
                 // sent but not acked
@@ -1289,6 +1320,8 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
                 dcom_ushort16 ixToAck = TxQ[qIx].GetIxToAck;
                 while (ixToAck != TxQ[qIx].GetIxToSend)
                 {
+                    PrintDbg("Sliding window SeqNr=%d Requested SeqNr=%d\n", TxQ[qIx].TxMsgArr[ixToAck].SequenceNumber, g_Ack_Queue[g_Ack_Get_ix].Info);
+
                     if (TxQ[qIx].TxMsgArr[ixToAck].SequenceNumber == g_Ack_Queue[g_Ack_Get_ix].Info)
                     {
                         expectedSeqNbrIsWithinWindow = true;
@@ -1320,8 +1353,8 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
                     // traffic from this node. This makes the other nodes to mark the sequence number from this node as invalid.
                     // I KNOW, THIS IS REAL UGLY!!!! We have tried to track down the bug without success. Our failure is, at least partly,
                     // caused by the bad design and the complexity of dose_com. Hopefully we can throw it out soon ...
-                    PrintErr(0, "TxThread[%d] Fatal error: Got a NACK for an unfragmented message with an expected sequence nbr that is already acked!\n"
-                                "Outgoing traffic from this node is temporarily stopped to force a resync.\n");
+
+                    PrintErr(0, "TxThread[%d] Got a NACK with an expected message that is already acked!\n", qIx);
                     g_pShm->InhibitOutgoingTraffic = true;
                     DoseOs::Sleep(4000);
                     g_pShm->InhibitOutgoingTraffic = false;                
