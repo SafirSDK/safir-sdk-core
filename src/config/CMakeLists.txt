@@ -10,6 +10,11 @@ else()
   set(DEFAULT_DOU_DIRECTORY "C:/Program Files/Safir SDK Core/${SAFIR_INSTALL_DESTINATION_DOU_BASE}")
 endif()
 
+#TODO: what is it with the C:/Program Files... above? why not use CMAKE_INSTALL_PREFIX?
+
+set(DEFAULT_JAVA_SEARCH_PATH "${CMAKE_INSTALL_PREFIX}/${SAFIR_INSTALL_DESTINATION_JAR}")
+
+
 configure_file(typesystem.ini.in
   "${CMAKE_CURRENT_BINARY_DIR}/typesystem.ini" @ONLY)
 

@@ -1,7 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2004-2014 (http://safir.sourceforge.net)
-* 
+*
 * Created by: Joel Ottosson / stjoot
 *
 *******************************************************************************
@@ -45,7 +45,7 @@
 
 using namespace Safir::Dob::Typesystem::Internal;
 
-namespace 
+namespace
 {
     typedef Safir::Dob::Typesystem::ToolSupport::MemberStatus Status;
 
@@ -55,7 +55,7 @@ namespace
         ptr=NULL;
     }
 
-    void DeleteGeneratedLibraryList(DotsC_GeneratedLibrary* list, 
+    void DeleteGeneratedLibraryList(DotsC_GeneratedLibrary* list,
                                     const DotsC_Int32 size)
     {
         for (int i = 0; i < size; ++i)
@@ -63,10 +63,10 @@ namespace
             delete [] list[i].name;
             delete [] list[i].cppLibraryName;
             delete [] list[i].cppLibraryLocation;
-            
+
             delete [] list[i].javaJarName;
             delete [] list[i].javaJarLocation;
-            
+
             delete [] list[i].dotnetAssemblyName;
             delete [] list[i].dotnetAssemblyLocation;
         }
@@ -367,7 +367,7 @@ void DotsC_SetChangedSinceLastRead(const char* const lastRead,
 DotsC_Int32 DotsC_GetNumberOfMembers(const DotsC_TypeId typeId)
 {
     Init();
-    {       
+    {
         const ClassDescriptionShm* cd=RepositoryKeeper::GetRepository()->GetClass(typeId);
         if (cd!=NULL)
         {
@@ -1583,7 +1583,7 @@ void DotsC_GetClassMemberReference(const DotsC_TypeId typeId,
     classMemberReference=NULL;
     classMemberReferenceSize=0;
 
-    bool isInherited;    
+    bool isInherited;
     const PropertyMappingDescriptionShm* pmd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetPropertyMapping(propertyId, isInherited);
 
     if (pmd==NULL)
@@ -1981,23 +1981,23 @@ void DotsC_GetGeneratedLibraryList(DotsC_GeneratedLibrary*& generatedLibraries,
              it != ptree.end(); ++it)
         {
             const bool isSection = !it->second.empty();
-        
+
             if (isSection)
             {
                 ++size;
             }
         }
-    
-        //allocate our array. 
+
+        //allocate our array.
         generatedLibraries = new DotsC_GeneratedLibrary[size];
         deleter = DeleteGeneratedLibraryList;
-        
+
         int i = 0;
         for (boost::property_tree::ptree::const_iterator it = ptree.begin();
              it != ptree.end(); ++it)
         {
             const bool isSection = !it->second.empty();
-        
+
             if (isSection)
             {
                 const std::string module = it->first;
@@ -2014,7 +2014,8 @@ void DotsC_GetGeneratedLibraryList(DotsC_GeneratedLibrary*& generatedLibraries,
                 generatedLibraries[i].dotnetAssemblyName = CopyStringToNew("safir_generated-" + module + "-dotnet");
                 generatedLibraries[i].javaJarName = CopyStringToNew("safir_generated-" + module + "-java.jar");
 
-                const boost::optional<std::string> cpp_library_location = it->second.get_optional<std::string>("cpp_library_location");
+                const boost::optional<std::string> cpp_library_location =
+                    it->second.get_optional<std::string>("cpp_library_location");
                 if (cpp_library_location)
                 {
                     generatedLibraries[i].cppLibraryLocation = CopyStringToNew(cpp_library_location.get());
@@ -2024,7 +2025,8 @@ void DotsC_GetGeneratedLibraryList(DotsC_GeneratedLibrary*& generatedLibraries,
                     generatedLibraries[i].cppLibraryLocation = NULL;
                 }
 
-                const boost::optional<std::string> dotnet_assembly_location = it->second.get_optional<std::string>("dotnet_assembly_location");
+                const boost::optional<std::string> dotnet_assembly_location =
+                    it->second.get_optional<std::string>("dotnet_assembly_location");
                 if (dotnet_assembly_location)
                 {
                     generatedLibraries[i].dotnetAssemblyLocation = CopyStringToNew(dotnet_assembly_location.get());
@@ -2034,7 +2036,8 @@ void DotsC_GetGeneratedLibraryList(DotsC_GeneratedLibrary*& generatedLibraries,
                     generatedLibraries[i].dotnetAssemblyLocation = NULL;
                 }
 
-                const boost::optional<std::string> java_jar_location = it->second.get_optional<std::string>("java_jar_location");
+                const boost::optional<std::string> java_jar_location =
+                    it->second.get_optional<std::string>("java_jar_location");
                 if (java_jar_location)
                 {
                     generatedLibraries[i].javaJarLocation = CopyStringToNew(java_jar_location.get());
