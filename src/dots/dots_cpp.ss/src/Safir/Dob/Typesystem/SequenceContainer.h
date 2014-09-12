@@ -44,6 +44,7 @@ namespace Typesystem
 
         explicit SequencePodType(const T& val)
             :m_val(val)
+            ,m_isChanged(false)
         {
         }
 
@@ -62,11 +63,15 @@ namespace Typesystem
         friend class SequenceContainer<ContainedType>;
         ContainedType m_val;
         bool m_isChanged;
+
+        bool IsChanged() const {return m_isChanged;}
     };
     //-----------------------------
 
     template <class T>
-    class SequenceContainer
+    class SequenceContainer :
+            public ContainerBase,
+            private std::vector< SequencePodType<T> >
     {
     public:
 
@@ -83,27 +88,26 @@ namespace Typesystem
          */
         SequenceContainer()
             :m_isNull(false)
-            ,m_isChanged(false)
         {
         }
 
         //implementation of pure virtual in ContainerBase.
-        bool IsNull() const
+        virtual bool IsNull() const
         {
             return m_isNull;
         }
 
         //implementation of pure virtual in ContainerBase.
-        void SetNull()
+        virtual void SetNull()
         {
-            m_values.clear();
+            clear();
             m_isNull=true;
-            m_isChanged=true;
+            m_bIsChanged=true;
         }
 
-        bool IsChanged() const
+        virtual bool IsChanged() const
         {
-            if (m_isChanged)
+            if (m_bIsChanged)
             {
                 return true;
             }
@@ -117,15 +121,12 @@ namespace Typesystem
             return false;
         }
 
-        void SetChanged(const bool changed)
+        virtual void SetChanged(const bool changed)
         {
-            if (changed)
+            m_bIsChanged=changed;
+
+            if (!changed)
             {
-                m_isChanged=true;
-            }
-            else
-            {
-                m_isChanged=false;
                 for (iterator it=begin(); it!=end(); ++it)
                 {
                     it->m_isChanged=false;
@@ -133,33 +134,56 @@ namespace Typesystem
             }
         }
 
-        iterator begin() {return m_values.begin();}
-        iterator end() {return m_values.end();}
-        const_iterator begin() const {return m_values.begin();}
-        const_iterator end() const {return m_values.end();}
-        size_t size() const {return m_values.size();}
-        bool empty() const {return m_values.empty();}
-        void clear() {m_values.clear();}
+        using StorageType::front;
+        using StorageType::back;
+        using StorageType::size;
+        using StorageType::clear;
+        using StorageType::empty;
+        using StorageType::begin;
+        using StorageType::end;
+        using StorageType::operator[];
 
         void push_back(const ContainedType& val)
         {
-            m_values.push_back(PodType(val));
+            m_bIsChanged=true;
+            StorageType::push_back(PodType(val));
         }
 
-        const ContainedType& operator[](size_t index) const
+        iterator erase(iterator first, iterator last)
         {
-            return m_values[index];
+            m_bIsChanged=true;
+            return StorageType::erase(first, last);
         }
 
-        PodType& operator[](size_t index)
+        iterator erase(iterator position)
         {
-            return m_values[index];
+            m_bIsChanged=true;
+            return StorageType::erase(position);
+        }
+
+        void erase_at(size_t index)
+        {
+            erase(begin()+index);
+        }
+
+        iterator insert(iterator position, const ContainedType& val)
+        {
+            m_bIsChanged=true;
+            return StorageType::insert(position, PodType(val));
+        }
+
+        void insert_at(size_t index, const ContainedType& value)
+        {
+            insert(begin()+index, value);
+        }
+
+        virtual void Copy(const ContainerBase& /*that*/)
+        {
+
         }
 
     private:
         bool m_isNull;
-        bool m_isChanged;
-        StorageType m_values;
     };
 }
 }
