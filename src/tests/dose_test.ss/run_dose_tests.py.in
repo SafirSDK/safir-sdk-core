@@ -100,7 +100,7 @@ class Parameters:
         self.lang0 = options.lang0
         self.lang1 = options.lang1
         self.lang2 = options.lang2
-        
+
         self.multinode = options.multinode
         self.slave = options.slave
         self.standalone = not options.multinode and not options.slave
@@ -114,19 +114,9 @@ class Parameters:
         self.autostart_jenkins_slave = options.autostart_slave or (options.jenkins and self.multinode)
 
         if options.jenkins:
-            #WORKSPACE = os.environ.get("WORKSPACE")
-            #if not WORKSPACE:
-            #    print "Environment variable WORKSPACE is not set, is this really a Jenkins build?!"
-            #    sys.exit(1)
-            #os.environ["SAFIR_RUNTIME"] = os.path.join(WORKSPACE,"safir","runtime")
-            #if sys.platform.startswith("linux"):
-            #    LD_LIBRARY_PATH = (os.environ.get("LD_LIBRARY_PATH") + ":") if os.environ.get("LD_LIBRARY_PATH") else ""
-            #    os.environ["LD_LIBRARY_PATH"] = LD_LIBRARY_PATH + os.path.join(os.environ.get("SAFIR_RUNTIME"),"lib")
-            #    separator = ":"
-            #else:
-            #    separator = ";"
-            #os.environ["PATH"] = os.environ.get("PATH") + separator + os.path.join(os.environ.get("SAFIR_RUNTIME"),"bin")
-        
+            #make stdout unbuffered for more direct output in jenkins log
+            sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+
             #Get env variables if they're set
             langs= os.environ.get("Languages")
             if langs is not None:
@@ -136,48 +126,28 @@ class Parameters:
                 self.lang0 = splitlangs[0]
                 self.lang1 = splitlangs[1]
                 self.lang2 = splitlangs[2]
-        
-            #make stdout unbuffered
-            sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
 
-        # ConfigParser wants a section header so add a dummy one.
-        typesystem_ini = '[root]\n' + subprocess.check_output(("safir_show_config", "--typesystem"))
-        config = ConfigParser.ConfigParser()
-        config.readfp(StringIO(typesystem_ini))
+        #Get the default dou directory and set it as an environment variable that can be
+        #picked up by the typesystem.ini that belongs to the test suite.
+        os.environ["SAFIR_TEST_SUITE_DOU_DIRECTORY"] = "@DEFAULT_DOU_DIRECTORY@"
 
-        #Get the default dou directory and set it as an environment variable that can be picked up
-        #by the typesystem.ini that belongs to the test suite.
-        directory = config.get("root","default_dou_directory")
-        os.environ["SAFIR_TEST_SUITE_DOU_DIRECTORY"] = directory
-
-        #Now walk up the path and try to find the test_data directory.
-        while not os.path.isdir(os.path.join(directory, "test_data")):
-            parent = os.path.abspath(os.path.join(directory, os.pardir))
-            if parent == directory:
-                raise Exception ("Failed to find test_data directory")
-            directory = parent
-
-        self.test_data_directory = os.path.join(directory, "test_data")
+        self.test_data_directory = "@TEST_DATA_DIRECTORY@"
         print self.test_data_directory
-
-        #self.SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
-        #if not self.SAFIR_RUNTIME:
-        #    print "Cannot run without SAFIR_RUNTIME being set. Consider using --jenkins if this is a Jenkins build"
-        #    sys.exit(1)
 
         #Set up to use our own test configuration
         os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(self.test_data_directory, "dose", "test_config", "standalone")
 
         self.dose_main_cmd = ("dose_main",)
         self.foreach_cmd = ("foreach",)
-        
+
         self.dose_test_cpp_cmd = ("dose_test_cpp",)
         #self.dose_test_ada_cmd = ("dose_test_ada",)
         #self.dose_test_ada_exe_name = self.dose_test_ada_cmd[0] + (".exe" if sys.platform == "win32" else "")
         self.dose_test_dotnet_cmd = ("dose_test_dotnet.exe",)
-        #self.dose_test_java_cmd = ("java", "-Xcheck:jni", "-Xfuture", "-jar", 
-        #                           "dose_test_java.jar")
-        
+        #TODO: the java path below!
+        self.dose_test_java_cmd = ("java", "-Xcheck:jni", "-Xfuture", "-jar",
+                                   os.path.join("@DEFAULT_JAVA_SEARCH_PATH@","dose_test_java.jar"))
+
         self.testcases_path = os.path.join(self.test_data_directory, "dose", "testcases")
         self.dose_test_sequencer_cmd = ("dose_test_sequencer",
                                         "-d",
@@ -188,27 +158,27 @@ class Parameters:
                                         #"--first", "1",
                                         #"--last", "1"
                                         )
-        
+
         self.expected_output_path = os.path.join(self.test_data_directory,
                                                  "dose",
                                                  "output_multinode" if self.multinode else "output_standalone")
         # self.parameters_path = os.path.join(self.SAFIR_RUNTIME,
-        #                                     "data", 
-        #                                     "text", 
-        #                                     "dots", 
-        #                                     "classes", 
-        #                                     "safir_core", 
+        #                                     "data",
+        #                                     "text",
+        #                                     "dots",
+        #                                     "classes",
+        #                                     "safir_core",
         #                                     "config")
 
-        # self.PersistenceParameters_path = os.path.join(self.parameters_path, 
+        # self.PersistenceParameters_path = os.path.join(self.parameters_path,
         #                                                "Safir.Dob.PersistenceParameters.dou")
-        # self.NodeParameters_path = os.path.join(self.parameters_path, 
+        # self.NodeParameters_path = os.path.join(self.parameters_path,
         #                                         "Safir.Dob.NodeParameters.dou")
-        # self.ThisNodeParameters_path = os.path.join(self.parameters_path, 
+        # self.ThisNodeParameters_path = os.path.join(self.parameters_path,
         #                                             "Safir.Dob.ThisNodeParameters.dou")
-        # self.QueueParameters_path = os.path.join(self.parameters_path, 
+        # self.QueueParameters_path = os.path.join(self.parameters_path,
         #                                          "Safir.Dob.QueueParameters.dou")
-        # self.DistributionChannelParameters_path = os.path.join(self.parameters_path, 
+        # self.DistributionChannelParameters_path = os.path.join(self.parameters_path,
         #                                          "Safir.Dob.DistributionChannelParameters.dou")
 
         # self.test_parameters_path = os.path.join(self.SAFIR_RUNTIME,
@@ -245,7 +215,7 @@ def getText(nodelist):
 #     shutil.copy2(parameters.ThisNodeParameters_path, parameters.tempdir)
 #     shutil.copy2(parameters.QueueParameters_path, parameters.tempdir)
 #     shutil.copy2(parameters.DistributionChannelParameters_path, parameters.tempdir)
-    
+
 #     # Update PersistenceParameters
 #     dom = xml.dom.minidom.parse(parameters.PersistenceParameters_path)
 #     for param in dom.getElementsByTagName("parameter"):
@@ -306,12 +276,12 @@ class Results:
                 """failure"""
                 print " -",name, "failed!"
                 self.num_tc_failed += 1
-                junitfile.write(">\n    <error message=\"Failed\">" + 
+                junitfile.write(">\n    <error message=\"Failed\">" +
                                 output +
                                 "\n</error>\n  </testcase>\n")
             junitfile.write("</testsuite>")
         return expr
-    
+
     def split(self,data):
         result = dict()
         split_data = data.split("==========================================================================\n")
@@ -322,7 +292,7 @@ class Results:
             number = int(chunk_lines[0].replace("TESTCASE ",""))
             result[number] = chunk_lines
         return result
-    
+
     def create_tc_dict(self,parameters):
         testfilenames = os.listdir(parameters.testcases_path)
         testcases = dict()
@@ -332,8 +302,8 @@ class Results:
             if match:
                 testcases[int(match.group(1))] = match.group(1) + "-" + match.group(2)
         return testcases
-    
-    
+
+
     def write_diff(self,tcname, tcno, diff0, diff1, diff2):
         res = len(diff0) == 0 and len(diff1) == 0 and len(diff2) == 0
         output = ""
@@ -345,10 +315,10 @@ class Results:
                 output += "Partner 1 diff:\n" + escape("".join(diff1)) + "\n\n"
             if len(diff2) != 0:
                 output += "Partner 2 diff:\n" + escape("".join(diff2)) + "\n\n"
-            
+
         self.write_test_result(res, tcname, output)
         return res
-    
+
     def check_output(self,parameters):
         print "** Parsing test output"
         resdir = glob.glob("run0-*")
@@ -360,31 +330,31 @@ class Results:
             print str(resdir)
             return
         resdir = resdir[0]
-    
+
         tcnames = self.create_tc_dict(parameters)
-    
+
         output = list((None,None,None))
         expected_output = list((None,None,None))
         alltc = list((None,None,None))
-    
+
         for partner in range(3):
             filename = "partner" + str(partner) + ".txt"
             with open(os.path.join(resdir,filename)) as file:
                 output[partner] = self.split(file.read())
             with open(os.path.join(parameters.expected_output_path,filename)) as file:
                 expected_output[partner] = self.split(file.read())
-    
+
         tcnos = list(set(expected_output[0].keys()))
         tcnos.sort()
-        self.write_test_result(len (set(tcnos) - set(output[0].keys())) == 0, 
-                               "all_tests_performed", 
+        self.write_test_result(len (set(tcnos) - set(output[0].keys())) == 0,
+                               "all_tests_performed",
                                "The following tests appear to not have been run: "+
                                str(sorted(list(set(tcnos) - set(output[0].keys())))))
-        self.write_test_result(len (set(output[0].keys())- set(tcnos)) == 0, 
-                               "all_tests_have_results", 
+        self.write_test_result(len (set(output[0].keys())- set(tcnos)) == 0,
+                               "all_tests_have_results",
                                "The following tests appear to not to be listed in expected outputs: "+
                                str(sorted(list(set(output[0].keys())- set(tcnos)))))
-    
+
         for tc in tcnos:
             if tc not in output[0]:
                 self.write_test_result(False,
@@ -396,11 +366,11 @@ class Results:
             diff2 = list(difflib.unified_diff(expected_output[2][tc],output[2][tc]))
             self.write_diff(tcnames[tc], tc, diff0, diff1, diff2)
             self.num_tc_performed += 1
-            
+
 
 def preexec(): # Don't forward signals.
     os.setpgrp()
-        
+
 class Runner:
     def __init__(self):
         self.procs = dict()
@@ -412,13 +382,13 @@ class Runner:
             output = None
         cf = 0
         if sys.platform == "win32":
-            proc = subprocess.Popen(cmd, 
-                                    stdout = output, 
+            proc = subprocess.Popen(cmd,
+                                    stdout = output,
                                     stderr = subprocess.STDOUT,
                                     creationflags = subprocess.CREATE_NEW_PROCESS_GROUP)
         else:
-            proc = subprocess.Popen(cmd, 
-                                    stdout = output, 
+            proc = subprocess.Popen(cmd,
+                                    stdout = output,
                                     stderr = subprocess.STDOUT,
                                     preexec_fn = preexec)
 
@@ -430,7 +400,7 @@ class Runner:
         sys.path.append(os.path.join(parameters.test_data_directory,"python"))
         from syslog_server import SyslogServer
         self.syslog = SyslogServer("safir_show_config") #This should be in the PATH here, so no need to give full path
-        
+
         if parameters.standalone:
             partners = (0,1,2)
         elif parameters.multinode:
@@ -440,8 +410,8 @@ class Runner:
 
         print "** Starting dose_main and partners", str(partners)
         #if we're a slave we log to stdout, not file
-        self.dose_main = self.__launchProcess("dose_main", 
-                                              parameters.dose_main_cmd, 
+        self.dose_main = self.__launchProcess("dose_main",
+                                              parameters.dose_main_cmd,
                                               stdoutToFile = not parameters.slave)
 
         if not parameters.slave:
@@ -455,8 +425,8 @@ class Runner:
             #else:
             #    print "Not running ada partner. dose_test_ada_exe_name is", parameters.dose_test_ada_exe_name
             self.__launchProcess("dose_test_dotnet." + str(i), parameters.dose_test_dotnet_cmd + (str(i),))
-            #if not parameters.no_java:
-            #    self.__launchProcess("dose_test_java." + str(i), parameters.dose_test_java_cmd + (str(i),))
+            if not parameters.no_java:
+                self.__launchProcess("dose_test_java." + str(i), parameters.dose_test_java_cmd + (str(i),))
 
     def __kill(self, name, proc):
         try:
@@ -482,7 +452,7 @@ class Runner:
         self.__kill("dose_main", self.dose_main)
 
         #Processes have up to 10 seconds to exit from the stop order
-        future = time.time() + 10 #ten seconds                
+        future = time.time() + 10 #ten seconds
         for name, (proc,output) in self.procs.iteritems():
             while time.time() < future:
                 if proc.poll() is not None:
@@ -499,18 +469,18 @@ class Runner:
                 print "", name, "exited with returncode", proc.returncode
             if output is not None:
                 output.close()
-                
+
         #check that syslog output is empty
         syslog_data = self.syslog.get_data(10) # wait for 10 seconds to collect any output
         results.write_test_result(len(syslog_data) == 0,
                                   "syslog_output",
                                   "syslog is not empty:\n" + xml.sax.saxutils.quoteattr(syslog_data))
-        
+
     def run_sequencer(self,parameters):
         print "** Running test sequencer with languages set to", parameters.lang0, parameters.lang1, parameters.lang2
         print "---- Output from dose_test_sequencer: ----"
-        sequencer = self.__launchProcess("dose_test_sequencer", 
-                                         parameters.dose_test_sequencer_cmd, 
+        sequencer = self.__launchProcess("dose_test_sequencer",
+                                         parameters.dose_test_sequencer_cmd,
                                          stdoutToFile = False)
         sequencer.wait()
         print "------------------------------------------"
@@ -528,23 +498,23 @@ class JenkinsInterface:
                 print "No JENKINS_URL found"
                 sys.exit(1)
         print "Using jenkins server",self.server
-            
+
         cliurl = self.server + "/jnlpJars/jenkins-cli.jar"
         #print "will download jenkins-cli.jar using url", cliurl
         self.clijar = os.path.join(parameters.tempdir,"jenkins-cli.jar")
         urllib.urlretrieve(cliurl,self.clijar)
-        
+
     def __run_command(self,cmd,input = None):
         args = list()
         args += ("java","-jar",self.clijar,"-s",self.server)
-        
+
         if type(cmd) is str:
             args.append(cmd)
         else:
             args += cmd
 
-        proc = subprocess.Popen(args, 
-                                stdout = subprocess.PIPE, 
+        proc = subprocess.Popen(args,
+                                stdout = subprocess.PIPE,
                                 stderr = subprocess.STDOUT,
                                 stdin = None if input is None else subprocess.PIPE)
         res = proc.communicate(input)
@@ -553,7 +523,7 @@ class JenkinsInterface:
         else:
             print res[0]
             raise Exception("Failed to run jenkins command", str(args))
-        
+
     def __run_groovy(self,script):
         return self.__run_command(("groovy","="),script)
 
@@ -564,7 +534,7 @@ class JenkinsInterface:
         return self.__run_command("who-am-i")
 
     def list_jobs(self):
-        output = self.__run_groovy("import hudson.model.*\n" + 
+        output = self.__run_groovy("import hudson.model.*\n" +
                                    "for(item in Hudson.instance.items) {println(item.name)}")
         jobs = output.splitlines()
         return jobs
@@ -627,7 +597,7 @@ class JenkinsInterface:
         script = script.replace("JOB_NAME",job)
         print self.__run_groovy(script)
 
-    
+
     def terminate_dose_main(self,job):
         """Send a SIGTERM to dose main, to let the slave script end nicely"""
         script = """
@@ -644,7 +614,7 @@ class JenkinsInterface:
         script = script.replace("JOB_NAME",job)
         self.__run_groovy(script)
 
-            
+
 class JenkinsController:
     def __init__(self,parameters):
         self.interface = JenkinsInterface(parameters)
@@ -697,7 +667,7 @@ def main():
     except:
         print "exception occurred!"
         traceback.print_exc()
-    
+
     runner.killprocs(results)
     if parameters.autostart_jenkins_slave:
         jenkinsController.stop_slave()

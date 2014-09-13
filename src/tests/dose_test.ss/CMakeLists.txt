@@ -6,7 +6,7 @@ ADD_SUBDIRECTORY(dotnet)
 ADD_SUBDIRECTORY(java)
 
 #TODO if (SAFIR_ADA_SUPPORT)
-#TODO  ADD_SUBDIRECTORY(ada)      
+#TODO  ADD_SUBDIRECTORY(ada)
 #TODO endif ()
 
 
@@ -14,14 +14,33 @@ ADD_SUBDIRECTORY(java)
 ADD_SUBDIRECTORY(Sequencer)
 ADD_SUBDIRECTORY(StressTests)
 
-INSTALL(PROGRAMS run_dose_tests.py
+if (UNIX)
+  set(DEFAULT_DOU_DIRECTORY "${CMAKE_INSTALL_PREFIX}/${SAFIR_INSTALL_DESTINATION_DOU_BASE}")
+  set(DEFAULT_JAVA_SEARCH_PATH "${CMAKE_INSTALL_PREFIX}/${SAFIR_INSTALL_DESTINATION_JAR}")
+  set(TEST_DATA_DIRECTORY "${CMAKE_INSTALL_PREFIX}/${SAFIR_INSTALL_DESTINATION_TEST_DATA}")
+else()
+  set(DEFAULT_DOU_DIRECTORY "C:/Program Files/Safir SDK Core/${SAFIR_INSTALL_DESTINATION_DOU_BASE}")
+  set(DEFAULT_JAVA_SEARCH_PATH "C:/Program Files/Safir SDK Core/${SAFIR_INSTALL_DESTINATION_JAR}")
+  set(TEST_DATA_DIRECTORY "C:/Program Files/Safir SDK Core/${SAFIR_INSTALL_DESTINATION_TEST_DATA}")
+endif()
+
+
+
+#The reason for the C:/Program... stuff above is that the CMAKE_INSTALL_PREFIX contains
+#"safir_sdk_core" instead of "Safir SDK Core", which is not where we install by default.
+#Maybe it is possible to find some better way of doing this...
+#TODO: this is in src/config/CMakeLists.txt as well. Fix somehow?
+
+configure_file(run_dose_tests.py.in
+  "${CMAKE_CURRENT_BINARY_DIR}/run_dose_tests.py" @ONLY)
+
+INSTALL(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/run_dose_tests.py
   DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
   COMPONENT Test)
 
-
 INSTALL(
-  DIRECTORY 
-    testcases 
+  DIRECTORY
+    testcases
     output_standalone
     output_multinode
     test_config
