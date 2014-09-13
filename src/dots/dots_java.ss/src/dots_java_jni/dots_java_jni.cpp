@@ -36,7 +36,6 @@
 #endif
 
 #include <Safir/Utilities/Internal/ConfigReader.h>
-#include <Safir/Utilities/Internal/SystemLog.h>
 #include <iostream>
 #include <vector>
 #include <assert.h>
@@ -1676,11 +1675,6 @@ JNIEXPORT jobjectArray JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_Ge
         if (!jarPath.empty())
         {
             libraries.push_back(jarPath.make_preferred().string());
-        }
-        else
-        {
-            SEND_SYSTEM_LOG(Warning, << "Failed to find path of " << generatedLibraries[i].javaJarName
-                            << ". Make sure that this jar is in the CLASSPATH, or update your typesystem.ini");
         }
     }
 
