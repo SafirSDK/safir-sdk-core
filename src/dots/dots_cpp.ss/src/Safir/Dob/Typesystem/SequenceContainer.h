@@ -25,7 +25,11 @@
 
 #include <typeinfo>
 #include <vector>
-#include "ContainerBase.h"
+#include <Safir/Dob/Typesystem/EntityId.h>
+#include <Safir/Dob/Typesystem/Utilities.h>
+#include <Safir/Dob/Typesystem/ChannelId.h>
+#include <Safir/Dob/Typesystem/HandlerId.h>
+#include <Safir/Dob/Typesystem/ContainerBase.h>
 
 namespace Safir
 {
@@ -37,27 +41,29 @@ namespace Typesystem
 
     template <class T> class SequenceContainer; //forward declaration
     template <class T>
-    class SequencePodType
+    class SequenceItemProxy
     {
     public:
         typedef T ContainedType;
 
-        explicit SequencePodType(const T& val)
+        explicit SequenceItemProxy(const T& val)
             :m_val(val)
             ,m_isChanged(false)
         {
         }
 
+        void SetVal(const ContainedType& val)  {m_val=val; m_isChanged=true;}
+        const ContainedType GetVal() const {return m_val;}
         operator ContainedType() const {return m_val;}
-        void operator= (const ContainedType& val) {m_val=val; m_isChanged=true;}
-        SequencePodType& operator++ () {++m_val;return *this;}
+        void operator= (const ContainedType& val) {SetVal(val);}
+        SequenceItemProxy& operator++ () {++m_val;return *this;}
         void operator++ (int) {++m_val;}
-        SequencePodType& operator-- () {--m_val;return *this;}
+        SequenceItemProxy& operator-- () {--m_val;return *this;}
         void operator-- (int) {--m_val;}
-        SequencePodType& operator+= (const ContainedType& val) {m_val+=val;return *this;}
-        SequencePodType& operator-= (const ContainedType& val) {m_val-=val;return *this;}
-        SequencePodType& operator*= (const ContainedType& val) {m_val*=val;return *this;}
-        SequencePodType& operator/= (const ContainedType& val) {m_val/=val;return *this;}
+        SequenceItemProxy& operator+= (const ContainedType& val) {m_val+=val;return *this;}
+        SequenceItemProxy& operator-= (const ContainedType& val) {m_val-=val;return *this;}
+        SequenceItemProxy& operator*= (const ContainedType& val) {m_val*=val;return *this;}
+        SequenceItemProxy& operator/= (const ContainedType& val) {m_val/=val;return *this;}
 
     private:
         friend class SequenceContainer<ContainedType>;
@@ -66,18 +72,39 @@ namespace Typesystem
 
         bool IsChanged() const {return m_isChanged;}
     };
+
+    inline bool operator==(const SequenceItemProxy<ChannelId>& first, const ChannelId& second)
+    {return second == first;}
+    inline bool operator!=(const SequenceItemProxy<ChannelId>& first, const ChannelId& second)
+    {return second != first;}
+
+    inline bool operator==(const SequenceItemProxy<HandlerId>& first, const HandlerId& second)
+    {return second == first;}
+    inline bool operator!=(const SequenceItemProxy<HandlerId>& first, const HandlerId& second)
+    {return second != first;}
+
+    inline bool operator==(const SequenceItemProxy<InstanceId>& first, const InstanceId& second)
+    {return second == first;}
+    inline bool operator!=(const SequenceItemProxy<InstanceId>& first, const InstanceId& second)
+    {return second != first;}
+
+    inline bool operator==(const SequenceItemProxy<EntityId>& first, const EntityId& second)
+    {return second == first;}
+    inline bool operator!=(const SequenceItemProxy<EntityId>& first, const EntityId& second)
+    {return second != first;}
+
     //-----------------------------
 
     template <class T>
     class SequenceContainer :
             public ContainerBase,
-            private std::vector< SequencePodType<T> >
+            private std::vector< SequenceItemProxy<T> >
     {
     public:
 
         typedef T ContainedType;
-        typedef SequencePodType<ContainedType> PodType;
-        typedef std::vector<PodType> StorageType;
+        typedef SequenceItemProxy<ContainedType> Item;
+        typedef std::vector<Item> StorageType;
         typedef typename StorageType::iterator iterator;
         typedef typename StorageType::const_iterator const_iterator;
 
@@ -87,7 +114,7 @@ namespace Typesystem
          * Construct a container that is not changed.
          */
         SequenceContainer()
-            :m_isNull(false)
+            :m_isNull(true)
         {
         }
 
@@ -141,12 +168,13 @@ namespace Typesystem
         using StorageType::empty;
         using StorageType::begin;
         using StorageType::end;
-        using StorageType::operator[];
+        using StorageType::operator [];
 
         void push_back(const ContainedType& val)
         {
+            m_isNull=false;
             m_bIsChanged=true;
-            StorageType::push_back(PodType(val));
+            StorageType::push_back(Item(val));
         }
 
         iterator erase(iterator first, iterator last)
@@ -169,7 +197,7 @@ namespace Typesystem
         iterator insert(iterator position, const ContainedType& val)
         {
             m_bIsChanged=true;
-            return StorageType::insert(position, PodType(val));
+            return StorageType::insert(position, Item(val));
         }
 
         void insert_at(size_t index, const ContainedType& value)
