@@ -25,6 +25,7 @@
 
 #include <typeinfo>
 #include <vector>
+#include <boost/container/vector.hpp>
 #include <Safir/Dob/Typesystem/EntityId.h>
 #include <Safir/Dob/Typesystem/Utilities.h>
 #include <Safir/Dob/Typesystem/ChannelId.h>
@@ -37,75 +38,13 @@ namespace Dob
 {
 namespace Typesystem
 {
-    //----------------------------------------
-
-    template <class T> class SequenceContainer; //forward declaration
     template <class T>
-    class SequenceItemProxy
-    {
-    public:
-        typedef T ContainedType;
-
-        explicit SequenceItemProxy(const T& val)
-            :m_val(val)
-            ,m_isChanged(false)
-        {
-        }
-
-        void SetVal(const ContainedType& val)  {m_val=val; m_isChanged=true;}
-        const ContainedType GetVal() const {return m_val;}
-        operator ContainedType() const {return m_val;}
-        void operator= (const ContainedType& val) {SetVal(val);}
-        SequenceItemProxy& operator++ () {++m_val;return *this;}
-        void operator++ (int) {++m_val;}
-        SequenceItemProxy& operator-- () {--m_val;return *this;}
-        void operator-- (int) {--m_val;}
-        SequenceItemProxy& operator+= (const ContainedType& val) {m_val+=val;return *this;}
-        SequenceItemProxy& operator-= (const ContainedType& val) {m_val-=val;return *this;}
-        SequenceItemProxy& operator*= (const ContainedType& val) {m_val*=val;return *this;}
-        SequenceItemProxy& operator/= (const ContainedType& val) {m_val/=val;return *this;}
-
-    private:
-        friend class SequenceContainer<ContainedType>;
-        ContainedType m_val;
-        bool m_isChanged;
-
-        bool IsChanged() const {return m_isChanged;}
-    };
-
-    inline bool operator==(const SequenceItemProxy<ChannelId>& first, const ChannelId& second)
-    {return second == first;}
-    inline bool operator!=(const SequenceItemProxy<ChannelId>& first, const ChannelId& second)
-    {return second != first;}
-
-    inline bool operator==(const SequenceItemProxy<HandlerId>& first, const HandlerId& second)
-    {return second == first;}
-    inline bool operator!=(const SequenceItemProxy<HandlerId>& first, const HandlerId& second)
-    {return second != first;}
-
-    inline bool operator==(const SequenceItemProxy<InstanceId>& first, const InstanceId& second)
-    {return second == first;}
-    inline bool operator!=(const SequenceItemProxy<InstanceId>& first, const InstanceId& second)
-    {return second != first;}
-
-    inline bool operator==(const SequenceItemProxy<EntityId>& first, const EntityId& second)
-    {return second == first;}
-    inline bool operator!=(const SequenceItemProxy<EntityId>& first, const EntityId& second)
-    {return second != first;}
-
-    //-----------------------------
-
-    template <class T>
-    class SequenceContainer :
-            public ContainerBase,
-            private std::vector< SequenceItemProxy<T> >
+    class SequenceContainer : public ContainerBase
     {
     public:
 
         typedef T ContainedType;
-        typedef SequenceItemProxy<ContainedType> Item;
-        typedef std::vector<Item> StorageType;
-        typedef typename StorageType::iterator iterator;
+        typedef boost::container::vector<T> StorageType;  //we use boost version instead of std because we want to be able to use vector<bool> without warnings and errors.
         typedef typename StorageType::const_iterator const_iterator;
 
         /**
@@ -115,94 +54,75 @@ namespace Typesystem
          */
         SequenceContainer()
             :m_isNull(true)
+            ,m_values()
         {
         }
 
         //implementation of pure virtual in ContainerBase.
-        virtual bool IsNull() const
-        {
-            return m_isNull;
-        }
+        virtual bool IsNull() const {return m_isNull;}
 
         //implementation of pure virtual in ContainerBase.
         virtual void SetNull()
         {
-            clear();
+            m_values.clear();
             m_isNull=true;
             m_bIsChanged=true;
         }
 
-        virtual bool IsChanged() const
+        virtual bool IsChanged() const {return m_bIsChanged;}
+
+        virtual void SetChanged(const bool changed) {m_bIsChanged=changed;}
+
+        size_t size() const {return m_values.size();}
+
+        bool empty() const {return m_values.empty();}
+
+        const ContainedType& front() const {return m_values.front();}
+
+        const ContainedType& back() const {return m_values.back();}
+
+        const_iterator begin() const {return m_values.begin();}
+
+        const_iterator end() const {return m_values.end();}
+
+        void clear()
         {
-            if (m_bIsChanged)
-            {
-                return true;
-            }
-
-            for (const_iterator it=begin(); it!=end(); ++it)
-            {
-                if (it->m_isChanged)
-                    return true;
-            }
-
-            return false;
+            m_bIsChanged=true;
+            m_values.clear();
         }
 
-        virtual void SetChanged(const bool changed)
+        const ContainedType& operator [](size_t index) const
         {
-            m_bIsChanged=changed;
-
-            if (!changed)
-            {
-                for (iterator it=begin(); it!=end(); ++it)
-                {
-                    it->m_isChanged=false;
-                }
-            }
+            return m_values[index];
         }
 
-        using StorageType::front;
-        using StorageType::back;
-        using StorageType::size;
-        using StorageType::clear;
-        using StorageType::empty;
-        using StorageType::begin;
-        using StorageType::end;
-        using StorageType::operator [];
+        void SetVal(size_t index, const ContainedType& val)
+        {
+            m_bIsChanged=true;
+            m_values[index]=val;
+        }
+
+        const ContainedType& GetVal(size_t index) const
+        {
+            return m_values[index];
+        }
 
         void push_back(const ContainedType& val)
         {
             m_isNull=false;
             m_bIsChanged=true;
-            StorageType::push_back(Item(val));
-        }
-
-        iterator erase(iterator first, iterator last)
-        {
-            m_bIsChanged=true;
-            return StorageType::erase(first, last);
-        }
-
-        iterator erase(iterator position)
-        {
-            m_bIsChanged=true;
-            return StorageType::erase(position);
+            m_values.push_back(val);
         }
 
         void erase_at(size_t index)
         {
-            erase(begin()+index);
-        }
-
-        iterator insert(iterator position, const ContainedType& val)
-        {
             m_bIsChanged=true;
-            return StorageType::insert(position, Item(val));
+            m_values.erase(m_values.begin()+index);
         }
 
         void insert_at(size_t index, const ContainedType& value)
         {
-            insert(begin()+index, value);
+            m_values.insert(m_values.begin()+index, value);
         }
 
         virtual void Copy(const ContainerBase& /*that*/)
@@ -212,6 +132,7 @@ namespace Typesystem
 
     private:
         bool m_isNull;
+        StorageType m_values;
     };
 }
 }
