@@ -1,6 +1,6 @@
 function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
     cmake_parse_arguments(_cs "LIBRARY;EXE;WINEXE" "SIGN" "SOURCES;RESOURCES;REFERENCES;LIBRARY_PATHS" ${ARGN})
-    
+
     if (NOT _cs_LIBRARY AND NOT _cs_EXE AND NOT _cs_WINEXE)
       message(FATAL_ERROR "ADD_CSHARP_ASSEMBLY: TARGET_KIND not specified!")
     endif()
@@ -30,14 +30,14 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
       set (_cs_target_kind winexe)
     endif()
 
-    #on msvc the debug files will be named MyAssembly.pdb, but with mono they will be 
+    #on msvc the debug files will be named MyAssembly.pdb, but with mono they will be
     #named MyAssembly.dll.mdb
     if (CSHARP_IS_MONO)
       set (_cs_debug_file "${_cs_target}.mdb")
     else()
       set (_cs_debug_file "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.pdb")
     endif()
-    
+
     foreach(resx_file ${_cs_RESOURCES})
       if (resx_file STREQUAL "PREFIX")
         set(get_resource_prefix True)
@@ -54,7 +54,13 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
         get_filename_component(base_name ${resx_file} NAME_WE)
         set (resources_file "${CMAKE_CURRENT_BINARY_DIR}/${resource_prefix}${base_name}.resources")
         set (_cs_resources_files ${_cs_resources_files} ${resources_file})
-        file (TO_NATIVE_PATH ${resources_file} resources_file_native)
+        if (WIN32)
+          file (TO_NATIVE_PATH ${resources_file} resources_file_native)
+        else()
+          set (resources_file_native ${resources_file})
+        endif()
+
+
         set (_cs_resources_cmd "${_cs_resources_cmd} -res:\"${resources_file_native}\"")
 
         ADD_CUSTOM_COMMAND(OUTPUT ${resources_file}
@@ -110,12 +116,12 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
                                   ${_cs_lib_arg}
                                   ${_cs_resources_cmd}
                                   ${_cs_sources_spaced}")
-    
+
     #Log contents if needed
     if (NOT $ENV{VERBOSE} STREQUAL "")
       FILE(READ ${response_file} response_file_contents)
       MESSAGE("Contents of ${response_file} is ${response_file_contents}")
-    endif()   
+    endif()
 
 
     add_custom_command (
@@ -147,7 +153,7 @@ endfunction()
 
 function(INSTALL_CSHARP_ASSEMBLY)
     cmake_parse_arguments(_cs "TEST_SUITE" "TARGET;DESTINATION" "" ${ARGN})
-    
+
     if (NOT "${_cs_UNPARSED_ARGUMENTS}" STREQUAL "")
       message(FATAL_ERROR "Unknown argument to INSTALL_CSHARP_ASSEMBLY '${_cs_UNPARSED_ARGUMENTS}'")
     endif()
@@ -197,4 +203,3 @@ function(INSTALL_CSHARP_ASSEMBLY)
 
 
 endfunction()
-
