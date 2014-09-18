@@ -160,21 +160,6 @@ set(CMAKE_REQUIRED_DEFINITIONS
   -DBOOST_CHRONO_HEADER_ONLY
   -DBOOST_DATE_TIME_NO_LIB)
 
-if(MSVC)
-   #We have a weird issue which causes a buffer overrun error when using Visual Studio 2013
-   #and Boost 1.55 in 64 bit and release builds.
-   #Don't know if this is a bug in our code or in the compiler or in boost.
-   #The workaround below disables some optimizations and all inlining in release builds
-   #which appears to resolve the problem.
-   if(MSVC_VERSION EQUAL 1800 AND Boost_VERSION EQUAL 105500 AND CMAKE_SIZEOF_VOID_P EQUAL 8)
-     STRING(REGEX REPLACE "/Ob1" "/Ob0" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
-     STRING(REGEX REPLACE "/O2" "/O1" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
-     STRING(REGEX REPLACE "/Ob1" "/Ob0" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
-     STRING(REGEX REPLACE "/O2" "/O1" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
-   endif()
-endif()
-
-
 #Let ctest output stdout on failure by default.
 set(CTEST_OUTPUT_ON_FAILURE ON)
 
