@@ -5,11 +5,10 @@ ADD_EXECUTABLE(RequestPingPong ${sources} ${headers})
 
 
 TARGET_LINK_LIBRARIES(RequestPingPong PRIVATE
-  dose_cpp 
-  safir_generated-DoseTest-cpp 
+  dose_cpp
+  safir_generated-DoseTest-cpp
   ${Boost_PROGRAM_OPTIONS_LIBRARY}
   ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY})
 
-
-#TODO: install
+SAFIR_INSTALL(TARGETS RequestPingPong TEST_SUITE)
