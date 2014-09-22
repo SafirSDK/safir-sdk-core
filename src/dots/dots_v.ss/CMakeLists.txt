@@ -1,15 +1,13 @@
 FILE(GLOB dod_files data/*.dod)
 
-#TODO: install dod files and other needed things
-
-INSTALL(FILES 
-  ${dod_files} 
+INSTALL(FILES
+  ${dod_files}
   DESTINATION ${SAFIR_INSTALL_DESTINATION_GENERATION}/dod
   COMPONENT Development)
 
 #TODO  data/dots_unit.xsd
 
-INSTALL(FILES 
+INSTALL(FILES
           data/precompiled_header_for_cpp.h
           data/precompiled_header_for_cpp.cpp
 #          data/dots_generated_ada.gpr_template
@@ -18,13 +16,15 @@ INSTALL(FILES
         DESTINATION ${SAFIR_INSTALL_DESTINATION_GENERATION}/cpp
         COMPONENT Development)
 
-INSTALL(FILES 
+#TODO versioning of the dots_generated assemblies?
+
+INSTALL(FILES
 #          data/AssemblyInfo.cs TODO?
           data/dots_generated-dotnet.snk
         DESTINATION ${SAFIR_INSTALL_DESTINATION_GENERATION}/dotnet
         COMPONENT Development)
 
-INSTALL(FILES 
+INSTALL(FILES
           data/Manifest.txt.in
         DESTINATION ${SAFIR_INSTALL_DESTINATION_GENERATION}/java
         COMPONENT Development)
@@ -34,7 +34,7 @@ INSTALL(FILES
 #INSTALL(DIRECTORY
 #          data/dobmake_config
 #        DESTINATION ${SAFIR_SDK}/dots/dots_generated)
-     
+
 INSTALL(PROGRAMS
   dots_v.py
   DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}

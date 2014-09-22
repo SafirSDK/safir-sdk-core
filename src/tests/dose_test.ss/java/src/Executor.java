@@ -113,13 +113,8 @@ class Executor implements
 
                 try {
                     m_controlConnection.dispatch();
-                } /* TODO:
-                     catch (com.saabgroup.safir.dob.typesystem.Exception exc)
-                     {
-                     Logger.instance().println("Caught Exception when Dispatching controlConnection: " +
-                     com.saabgroup.safir.dob.typesystem.Operations.getName(exc.getTypeId()));
-                     System.out.println("Exception info: " + exc);
-                     }*/ catch (com.saabgroup.safir.dob.typesystem.FundamentalException exc) {
+                }
+                catch (com.saabgroup.safir.dob.typesystem.FundamentalException exc) {
                     Logger.instance().println("Caught FundamentalException when Dispatching controlConnection: "
                                               + com.saabgroup.safir.dob.typesystem.Operations.getName(exc.getTypeId()));
                     System.out.println("Exception info: " + exc);
