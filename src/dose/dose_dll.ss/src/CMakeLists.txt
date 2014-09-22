@@ -10,7 +10,8 @@ ADD_LIBRARY(dose_dll SHARED ${sources} ${headers})
 #Make our INTERNAL headers available to other parts of Core.
 target_include_directories(dose_dll PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
-TARGET_LINK_LIBRARIES(dose_dll PRIVATE 
+TARGET_LINK_LIBRARIES(dose_dll PRIVATE
+  lluf_utils
   dose_internal
   ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY})

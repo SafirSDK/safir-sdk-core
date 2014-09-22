@@ -1678,10 +1678,6 @@ JNIEXPORT jobjectArray JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_Ge
         }
     }
 
-    //TODO: should we try to automatically locate jars, so that they work
-    //like cpp libraries that are loaded from PATH as fallback?
-    //Currently jars are only loaded if full location is given.
-
     jobjectArray stringArray = env->NewObjectArray(static_cast<jsize>(libraries.size()),
                                                    env->FindClass("java/lang/String"),
                                                    env->NewStringUTF(""));

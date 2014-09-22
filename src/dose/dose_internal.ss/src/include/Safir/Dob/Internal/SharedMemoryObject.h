@@ -264,7 +264,6 @@ namespace Internal
         {
             typedef typename std::pair<const T,U> value_type;
 
-            //TODO: remove map and add unordered_map!!!
             typedef typename boost::interprocess::map
             <
                 T,
