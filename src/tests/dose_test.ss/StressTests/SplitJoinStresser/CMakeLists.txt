@@ -5,19 +5,18 @@ if (ACE_FOUND)
 
   FILE(GLOB headers *.h)
   FILE(GLOB sources *.cpp)
-  
-  ADD_EXECUTABLE(SplitJoinStresser ${sources} ${headers})
-  
-  #FIND_PACKAGE(Boost COMPONENTS program_options)
-  
-#  TARGET_LINK_LIBRARIES(SplitJoinStresser PRIVATE ${ACE_LIBRARY})
-  
-#  TARGET_LINK_LIBRARIES(SplitJoinStresser PRIVATE dose_cpp ${Boost_LIBRARIES})
 
-  #TODO: install
-  
+  ADD_EXECUTABLE(SplitJoinStresser ${sources} ${headers})
+
+  TARGET_LINK_LIBRARIES(SplitJoinStresser PRIVATE
+    dose_cpp
+    safir_generated-DoseTest-cpp
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    ${ACE_LIBRARY})
+
+  SAFIR_INSTALL(TARGETS SplitJoinStresser TEST_SUITE)
+
 else()
   MESSAGE(STATUS "ACE library was not found, not building SplitJoinStresser")
 
 endif()
-
