@@ -315,21 +315,6 @@ namespace Safir.Dob.Typesystem.Internal
                                                      System.Int32 bufSize,
                                                      out System.Int32 resultSize);
 
-#if FUNC_PTR_WORKAROUND
-        //XmlToBlob
-        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-        internal static extern void DotsC_XmlToBlob(out System.IntPtr blobDest,
-                                                    out System.IntPtr dummy,
-                                                    System.IntPtr val);
-
-        //JsonToBlob
-        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-        internal static extern void DotsC_JsonToBlob(out System.IntPtr blobDest,
-                                                     out System.IntPtr dummy,
-                                                     System.IntPtr val);
-
-
-#else
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal delegate void DotsC_BytePointerDeleter(ref System.IntPtr ptr);
 
@@ -344,8 +329,6 @@ namespace Safir.Dob.Typesystem.Internal
         internal static extern void DotsC_JsonToBlob(out System.IntPtr blobDest,
                                                     out DotsC_BytePointerDeleter deleter,
                                                     System.IntPtr val);
-#endif
-
 
 
         //CalculateBase64BufferSize
@@ -1170,15 +1153,6 @@ namespace Safir.Dob.Typesystem.Internal
                                                        System.IntPtr description);
 
 
-        //TODO: re-add this when MONO has fixed their bug
-#if FUNC_PTR_WORKAROUND
-        [DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void DotsC_GetAndClearException(out System.Int64 exceptionId,
-                                                               out System.IntPtr description,
-                                                               out System.IntPtr dummy,
-                                                               out byte wasSet);
-
-#else
         //DotsC_GetAndClearException
         [DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void DotsC_GetAndClearException(out System.Int64 exceptionId,
@@ -1186,7 +1160,6 @@ namespace Safir.Dob.Typesystem.Internal
                                                                out DotsC_BytePointerDeleter deleter,
                                                                out byte wasSet);
 
-#endif
         //DotsC_PeekAtException
         [DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void DotsC_PeekAtException(out System.Int64 exceptionId);

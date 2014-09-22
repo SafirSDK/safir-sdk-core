@@ -131,11 +131,7 @@ namespace Safir.Dob.Typesystem
         {
             IntPtr blob;
             System.IntPtr sp = Internal.InternalOperations.CStringOf(xml);
-#if FUNC_PTR_WORKAROUND
-            System.IntPtr deleter;
-#else
             Internal.Kernel.DotsC_BytePointerDeleter deleter;
-#endif
             Kernel.DotsC_XmlToBlob(out blob, out deleter, sp);
             Marshal.FreeHGlobal(sp);
             if (blob == System.IntPtr.Zero)
@@ -144,11 +140,7 @@ namespace Safir.Dob.Typesystem
             }
             Object obj = ObjectFactory.Instance.CreateObject(blob);
 
-#if FUNC_PTR_WORKAROUND
-            Internal.Kernel.DotsC_DeleteBlob(ref blob);
-#else
             deleter(ref blob);
-#endif
             return obj;
         }
 
@@ -251,11 +243,7 @@ namespace Safir.Dob.Typesystem
         {
             IntPtr blob;
             System.IntPtr sp = Internal.InternalOperations.CStringOf(json);
-#if FUNC_PTR_WORKAROUND
-            System.IntPtr deleter;
-#else
             Internal.Kernel.DotsC_BytePointerDeleter deleter;
-#endif
             Kernel.DotsC_JsonToBlob(out blob, out deleter, sp);
             Marshal.FreeHGlobal(sp);
             if (blob == System.IntPtr.Zero)
@@ -264,11 +252,7 @@ namespace Safir.Dob.Typesystem
             }
             Object obj = ObjectFactory.Instance.CreateObject(blob);
 
-#if FUNC_PTR_WORKAROUND
-            Internal.Kernel.DotsC_DeleteBlob(ref blob);
-#else
             deleter(ref blob);
-#endif
             return obj;
         }
 

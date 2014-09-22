@@ -622,15 +622,7 @@ namespace Safir.Dob
         internal static extern void DoseC_GetHandlerId(System.IntPtr state,
                                                        out System.Int64 handlerId,
                                                        out byte success);
-                //TODO: re-add this when MONO has fixed their bug. See
-#if FUNC_PTR_WORKAROUND
-        //DoseC_GetConnectionInfo
-        [DllImport(DOSE_DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void DoseC_GetConnectionInfo(System.IntPtr state,
-                                                            out System.IntPtr blob,
-                                                            out System.IntPtr dummy,
-                                                            out byte success);
-#else
+
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal delegate void DoseC_BlobDeleter(ref System.IntPtr ptr);
 
@@ -640,7 +632,6 @@ namespace Safir.Dob
                                                             out System.IntPtr blob,
                                                             out DoseC_BlobDeleter deleter,
                                                             out byte success);
-#endif
 
         //DoseC_GetTopTimestamp
         [DllImport(DOSE_DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
@@ -668,17 +659,6 @@ namespace Safir.Dob
                                                        out System.Int32 queueSize,
                                                        out byte success);
 
-#if FUNC_PTR_WORKAROUND
-        //DoseC_Diff
-        [DllImport(DOSE_DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void DoseC_Diff(System.IntPtr previousState,
-                                               System.IntPtr currentState,
-                                               byte wantCurrent,
-                                               byte timestampDiff,
-                                               out System.IntPtr diffBlob,
-                                               out System.IntPtr dummy,
-                                               out byte success);
-#else
         //DoseC_Diff
         [DllImport(DOSE_DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void DoseC_Diff(System.IntPtr previousState,
@@ -688,8 +668,6 @@ namespace Safir.Dob
                                                out System.IntPtr diffBlob,
                                                out DoseC_BlobDeleter deleter,
                                                out byte success);
-#endif
-
 
         //DoseC_AddReference
         [DllImport(DOSE_DLL_NAME, CallingConvention = CallingConvention.Cdecl)]

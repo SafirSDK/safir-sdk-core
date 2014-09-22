@@ -117,22 +117,13 @@ namespace Safir.Dob.Typesystem
             byte wasSetByte;
             System.Int64 exceptionId;
             System.IntPtr description;
-            //TODO: remove workaround when MONO has fixed their problem
-#if FUNC_PTR_WORKAROUND
-            System.IntPtr deleter;
-#else
             Internal.Kernel.DotsC_BytePointerDeleter deleter;
-#endif
             Internal.Kernel.DotsC_GetAndClearException(out exceptionId, out description, out deleter, out wasSetByte);
             bool wasSet = Internal.InternalOperations.BoolOf(wasSetByte);
             if (wasSet)
             {
                 string desc = Internal.InternalOperations.StringOf(description);
-#if FUNC_PTR_WORKAROUND
-                Internal.Kernel.DotsC_DeleteBlob(ref description);
-#else
                 deleter(ref description);
-#endif
                 if (exceptionId == 0)
                 {
                     throw new System.Exception(desc);
