@@ -55,9 +55,6 @@ namespace Sate
             //
             InitializeComponent();
 
-            //
-            // TODO: Add any constructor code after InitializeComponent call
-            //
             this.richEdit=richEdit;
         }
 

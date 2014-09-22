@@ -154,8 +154,7 @@ namespace Safir.Dob.Typesystem
         {
             System.Int64 exceptionId;
             Internal.Kernel.DotsC_PeekAtException(out exceptionId);
-            return exceptionTypeId == exceptionId;
-            //TODO: use IsOfType when it works for exceptions
+            return Internal.InternalOperations.BoolOf(Internal.Kernel.DotsC_IsOfType(exceptionId, exceptionTypeId));
         }
 
         // Static, VOLATILE variable to store single instance

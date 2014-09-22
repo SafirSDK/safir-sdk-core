@@ -53,9 +53,6 @@ namespace Sate
             //
             InitializeComponent();
 
-            //
-            // TODO: Add any constructor code after InitializeComponent call
-            //
         }
 
         public int Delay

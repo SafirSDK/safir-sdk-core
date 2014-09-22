@@ -59,9 +59,6 @@ namespace Sate
             //
             InitializeComponent();
 
-            //
-            // TODO: Add any constructor code after InitializeComponent call
-            //
             this.typeId=typeId;
             this.listBox1.DoubleClick+=new EventHandler(listBox1_DoubleClick);
 
