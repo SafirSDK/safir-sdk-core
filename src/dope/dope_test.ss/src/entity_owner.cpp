@@ -40,15 +40,15 @@ public:
     virtual void OnStopOrder() {m_ioService.stop();}
 private:
     boost::asio::io_service& m_ioService;
-    
+
 };
 
-class EntityOwner 
+class EntityOwner
     : public Safir::Dob::EntityHandlerInjection
 {
 public:
     explicit EntityOwner(boost::asio::io_service& ioService)
-        : m_ioService(ioService) 
+        : m_ioService(ioService)
         , m_gotAllSmall(false)
         , m_gotAllBig(false)
     {
@@ -137,7 +137,7 @@ private:
     virtual void OnInjectedNewEntity(const Safir::Dob::InjectedEntityProxy injectedEntityProxy)
     {
         //output only the first 200 chars of the xml
-        std::wcout << "OnInjectedNewEntity " 
+        std::wcout << "OnInjectedNewEntity "
                    << injectedEntityProxy.GetEntityId() << ": "
                    << Safir::Dob::Typesystem::Serialization::ToXml(injectedEntityProxy.GetInjectionBlob()).substr(0,200)
                    << std::endl;
@@ -179,16 +179,16 @@ int main(int argc, char* argv[])
 
     const bool set = args[0] == "set";
     const bool update = args[0] == "update";
-        
+
     try
     {
         const std::wstring nameCommonPart = L"C++";
         const std::wstring nameInstancePart = L"1";
 
         boost::asio::io_service ioService;
-            
+
         StopHandler stopHandler(ioService);
-        
+
         Safir::Dob::Connection connection;
 
         Safir::Utilities::AsioDispatcher dispatcher(connection,ioService);
@@ -198,7 +198,7 @@ int main(int argc, char* argv[])
                         0, // Context
                         &stopHandler,
                         &dispatcher);
-        
+
         EntityOwner owner(ioService);
         if (set)
         {
@@ -209,7 +209,7 @@ int main(int argc, char* argv[])
         {
             boost::asio::io_service::work keepRunning(ioService);
             ioService.run();
-            
+
             if (update)
             {
                 owner.UpdateSmall();
@@ -234,4 +234,3 @@ int main(int argc, char* argv[])
     //std::cin.get();
     return 0;
 }
-

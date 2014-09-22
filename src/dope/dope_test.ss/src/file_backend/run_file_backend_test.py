@@ -74,7 +74,7 @@ for pair in arguments.safir_generated_paths.split(";"):
     (name,value) = pair.split("=")
     print("Setting environment variable", name, "to", value)
     os.environ[name] = value
-            
+
 
 config_str = subprocess.check_output((arguments.safir_show_config, "--locations"),universal_newlines=True)
 #ConfigParser wants a section header so add a dummy one.
@@ -190,7 +190,7 @@ log("update the entities")
 
 env = TestEnv(arguments.dose_main, arguments.dope_main, arguments.safir_show_config)
 with TestEnvStopper(env):
-    #remove all bin files (that have been loaded by dope by now), so 
+    #remove all bin files (that have been loaded by dope by now), so
     #that we can wait for all entities to be written again
     for f in glob.glob(os.path.join(file_storage_path,"DopeTest.*.bin")):
         remove(f)
@@ -222,7 +222,7 @@ syslog_output = env.Syslog()
 if len(syslog_output) != 0:
     log("Unexpected syslog output:\n" + syslog_output)
     sys.exit(1)
-    
+
 output = env.Output("entity_owner")
 if output.count("name is changed") != 100:
     log("could not find the right number of updated SmallEntity in output")
