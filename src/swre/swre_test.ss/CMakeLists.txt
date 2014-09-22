@@ -6,8 +6,8 @@ add_subdirectory(tracer_dotnet)
 add_subdirectory(swreport_dotnet)
 
 #if (SAFIR_ADA_SUPPORT)
-#TODO    add_subdirectory(tracer_ada)
-#TODO    add_subdirectory(swreport_ada)
+#add_subdirectory(tracer_ada)
+#add_subdirectory(swreport_ada)
 #endif()
 
 add_subdirectory(tracer_java)

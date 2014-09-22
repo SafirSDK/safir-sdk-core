@@ -4,13 +4,12 @@ SET(CMAKE_DEBUG_POSTFIX "")
 
 ADD_LIBRARY(lluf_id SHARED lluf_id.cpp md5.c md5.h)
 
-TARGET_LINK_LIBRARIES(lluf_id PRIVATE 
+TARGET_LINK_LIBRARIES(lluf_id PRIVATE
   lluf_utils
   ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY})
 
 SAFIR_INSTALL(TARGETS lluf_id)
 
-#TODO
 # INSTALL(FILES ../data/lluf_id.gpr
 #         DESTINATION ${SAFIR_SDK}/ada/)

@@ -20,6 +20,5 @@ TARGET_LINK_LIBRARIES(dots_kernel PRIVATE
 
 SAFIR_INSTALL(TARGETS dots_kernel)
 
-#TODO
 # INSTALL(FILES ../data/dots_kernel.gpr
 #         DESTINATION ${SAFIR_SDK}/ada/)

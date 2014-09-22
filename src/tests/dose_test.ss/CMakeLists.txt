@@ -5,9 +5,9 @@ ADD_SUBDIRECTORY(dotnet)
 
 ADD_SUBDIRECTORY(java)
 
-#TODO if (SAFIR_ADA_SUPPORT)
-#TODO  ADD_SUBDIRECTORY(ada)
-#TODO endif ()
+#if (SAFIR_ADA_SUPPORT)
+# ADD_SUBDIRECTORY(ada)
+#endif ()
 
 
 
