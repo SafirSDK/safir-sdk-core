@@ -24,7 +24,7 @@
 #
 ###############################################################################
 from __future__ import print_function
-import subprocess, os, time, sys, shutil, glob, argparse
+import subprocess, os, time, sys, shutil, glob, argparse, re
 from testenv import TestEnv, TestEnvStopper
 
 try:
@@ -42,7 +42,7 @@ def log(data):
     sys.stdout.flush()
 
 def remove(filename):
-    for i in range (10):
+    for i in range (NUM_BIG):
         try:
             os.remove(filename)
             break
@@ -86,11 +86,17 @@ file_storage_path = os.path.join(config.get('root','lock_file_directory'),"..","
 
 rmdir(file_storage_path)
 
+log("Find out how many entities entity_owner will set")
+num_str = subprocess.check_output((arguments.entity_owner,"num"), universal_newlines=True)
+NUM_SMALL = int(re.search(r"NUM_SMALL = ([0-9]+)",num_str).group(1))
+NUM_BIG = int(re.search(r"NUM_BIG = ([0-9]+)",num_str).group(1))
+log("NUM_SMALL = " + str(NUM_SMALL) + " and NUM_BIG = " + str(NUM_BIG))
+
 log("Set a bunch of entities")
 env = TestEnv(arguments.dose_main, arguments.dope_main, arguments.safir_show_config)
 with TestEnvStopper(env):
     env.launchProcess("entity_owner", (arguments.entity_owner,"set")).wait()
-    while(len(glob.glob(os.path.join(file_storage_path,"DopeTest.*.bin"))) != 110):
+    while(len(glob.glob(os.path.join(file_storage_path,"DopeTest.*.bin"))) != NUM_SMALL + NUM_BIG):
         time.sleep(0.1)
         if not env.ProcessDied():
             log("Some process exited with an unexpected value")
@@ -121,15 +127,15 @@ if len(syslog_output) != 0:
     sys.exit(1)
 
 output = env.Output("entity_owner")
-if output.count("OnInjectedNewEntity") != 110:
+if output.count("OnInjectedNewEntity") != NUM_SMALL + NUM_BIG:
     log("could not find the right number of 'OnInjectedNewEntity' in output")
     sys.exit(1)
 
-if output.count("<DopeTest.SmallEntity>") != 100:
+if output.count("<DopeTest.SmallEntity>") != NUM_SMALL:
     log("could not find the right number of 'DopeTest.SmallEntity' in output")
     sys.exit(1)
 
-if output.count("<DopeTest.BigEntity>") != 10:
+if output.count("<DopeTest.BigEntity>") != NUM_BIG:
     log("could not find the right number of 'DopeTest.BigEntity' in output")
     sys.exit(1)
 
@@ -142,7 +148,7 @@ log("Convert binaries to xml")
 #files are automatically chosen by parameter setting
 subprocess.call(arguments.dope_bin2xml)
 
-if len(glob.glob(os.path.join(file_storage_path,"DopeTest.*.xml"))) != 110:
+if len(glob.glob(os.path.join(file_storage_path,"DopeTest.*.xml"))) != NUM_SMALL + NUM_BIG:
     log("dope_bin2xml appears to have failed")
     sys.exit(1)
 
@@ -166,19 +172,19 @@ if len(syslog_output) != 0:
     sys.exit(1)
 
 output = env.Output("entity_owner")
-if output.count("OnInjectedNewEntity") != 110:
+if output.count("OnInjectedNewEntity") != NUM_SMALL + NUM_BIG:
     log("could not find the right number of 'OnInjectedNewEntity' in output")
     sys.exit(1)
 
-if output.count("<DopeTest.SmallEntity>") != 100:
+if output.count("<DopeTest.SmallEntity>") != NUM_SMALL:
     log("could not find the right number of 'DopeTest.SmallEntity' in output")
     sys.exit(1)
 
-if output.count("<DopeTest.BigEntity>") != 10:
+if output.count("<DopeTest.BigEntity>") != NUM_BIG:
     log("could not find the right number of 'DopeTest.BigEntity' in output")
     sys.exit(1)
 
-if len(glob.glob(os.path.join(file_storage_path,"DopeTest.*.bin"))) != 110:
+if len(glob.glob(os.path.join(file_storage_path,"DopeTest.*.bin"))) != NUM_SMALL + NUM_BIG:
     log("Unexpected bin files found!")
     sys.exit(1)
 
@@ -197,7 +203,7 @@ with TestEnvStopper(env):
 
     env.launchProcess("entity_owner", (arguments.entity_owner,"update")).wait()
 
-    while(len(glob.glob(os.path.join(file_storage_path,"DopeTest.*.bin"))) != 110):
+    while(len(glob.glob(os.path.join(file_storage_path,"DopeTest.*.bin"))) != NUM_SMALL + NUM_BIG):
         time.sleep(0.1)
 
 if not env.ReturnCodesOk():
@@ -224,11 +230,11 @@ if len(syslog_output) != 0:
     sys.exit(1)
 
 output = env.Output("entity_owner")
-if output.count("name is changed") != 100:
+if output.count("name is changed") != NUM_SMALL:
     log("could not find the right number of updated SmallEntity in output")
     sys.exit(1)
 
-if output.count("99999999") != 10:
+if output.count("99999999") != NUM_BIG:
     log("could not find the right number of updated BigEntity in output")
     sys.exit(1)
 

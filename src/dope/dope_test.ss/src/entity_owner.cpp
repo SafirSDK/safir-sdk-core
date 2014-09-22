@@ -31,6 +31,15 @@
 #include <DopeTest/BigEntity.h>
 #include <boost/lexical_cast.hpp>
 
+#ifdef NDEBUG
+const int NUM_SMALL=100;
+const int NUM_BIG=10;
+#else
+const int NUM_SMALL=10;
+const int NUM_BIG=2;
+#endif
+
+
 class StopHandler :
     public Safir::Dob::StopHandler
 {
@@ -65,7 +74,7 @@ public:
 
     void SetSmall()
     {
-        for (int i = 0; i < 100; ++i)
+        for (int i = 0; i < NUM_SMALL; ++i)
         {
             DopeTest::SmallEntityPtr ent = DopeTest::SmallEntity::Create();
             ent->Name() = L"testelitest";
@@ -95,7 +104,7 @@ public:
 
     void SetBig()
     {
-        for (int i = 0; i < 10; ++i)
+        for (int i = 0; i < NUM_BIG; ++i)
         {
             DopeTest::BigEntityPtr ent = DopeTest::BigEntity::Create();
             for (int j = 0; j < DopeTest::BigEntity::NumberArraySize(); ++j)
@@ -170,11 +179,19 @@ private:
 
 int main(int argc, char* argv[])
 {
+
     std::vector<std::string> args(argv+1, argv+argc);
-    if (args.size() != 1 || (args[0] != "set" && args[0] != "accept" && args[0] != "update"))
+    if (args.size() != 1 || (args[0] != "set" && args[0] != "accept" && args[0] != "update" && args[0] != "num"))
     {
         std::wcout << "Arg must be either set, accept or update" << std::endl;
         return 1;
+    }
+
+    if (args[0] == "num")
+    {
+        std::wcout << "NUM_SMALL = " << NUM_SMALL << std::endl;
+        std::wcout << "NUM_BIG = " << NUM_BIG << std::endl;
+        return 0;
     }
 
     const bool set = args[0] == "set";
