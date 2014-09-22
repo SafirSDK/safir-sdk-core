@@ -215,6 +215,176 @@ namespace Typesystem
         bool m_isNull;
         StorageType m_values;
     };
+
+    /**
+     * @name Basic type container typedefs
+     */
+    /** @{ */
+
+
+    /** A container containing string values */
+    typedef SequenceContainer<std::wstring> StringSequenceContainer;
+
+    /** A container containing boolean values */
+    typedef SequenceContainer<bool> BooleanSequenceContainer;
+
+    /** A container containing 32 bit integer values */
+    typedef SequenceContainer<Int32> Int32SequenceContainer;
+
+    /** A container containing 64 bit integer values */
+    typedef SequenceContainer<Int64> Int64SequenceContainer;
+
+    /** A container containing 32 bit floating point values */
+    typedef SequenceContainer<Float32> Float32SequenceContainer;
+
+    /** A container containing 64 bit floating point values */
+    typedef SequenceContainer<Float64> Float64SequenceContainer;
+
+    /** A container containing TypeId values */
+    typedef SequenceContainer<TypeId> TypeIdSequenceContainer;
+
+    /** A container containing InstanceId values */
+    typedef SequenceContainer<InstanceId> InstanceIdSequenceContainer;
+
+    /** A container containing EntityId values */
+    typedef SequenceContainer<EntityId> EntityIdSequenceContainer;
+
+    /** A container containing ChannelId values */
+    typedef SequenceContainer<ChannelId> ChannelIdSequenceContainer;
+
+    /** A container containing HandlerId values */
+    typedef SequenceContainer<HandlerId> HandlerIdSequenceContainer;
+
+    /** A container containing HandlerId values */
+    typedef SequenceContainer<Binary> BinarySequenceContainer;
+
+    /** @} */
+
+    //--------------------------------------------------
+    // SI-types (32-bits)
+    //--------------------------------------------------
+    namespace Si32
+    {
+        /** A container containing 32 bit Ampere values */
+        typedef SequenceContainer<Ampere> AmpereSequenceContainer;
+
+        /** A container containing 32 bit CubicMeter values */
+        typedef SequenceContainer<CubicMeter> CubicMeterSequenceContainer;
+
+        /** A container containing 32 bit Hertz values */
+        typedef SequenceContainer<Hertz> HertzSequenceContainer;
+
+        /** A container containing 32 bit Joule values */
+        typedef SequenceContainer<Joule> JouleSequenceContainer;
+
+        /** A container containing 32 bit Kelvin values */
+        typedef SequenceContainer<Kelvin> KelvinSequenceContainer;
+
+        /** A container containing 32 bit Kilogram values */
+        typedef SequenceContainer<Kilogram> KilogramSequenceContainer;
+
+        /** A container containing 32 bit Meter values */
+        typedef SequenceContainer<Meter> MeterSequenceContainer;
+
+        /** A container containing 32 bit MeterPerSecond values */
+        typedef SequenceContainer<MeterPerSecond> MeterPerSecondSequenceContainer;
+
+        /** A container containing 32 bit MeterPerSecondSquared values */
+        typedef SequenceContainer<MeterPerSecondSquared> MeterPerSecondSquaredSequenceContainer;
+
+        /** A container containing 32 bit Newton values */
+        typedef SequenceContainer<Newton> NewtonSequenceContainer;
+
+        /** A container containing 32 bit Pascal values */
+        typedef SequenceContainer<Pascal> PascalSequenceContainer;
+
+        /** A container containing 32 bit Radian values */
+        typedef SequenceContainer<Radian> RadianSequenceContainer;
+
+        /** A container containing 32 bit RadianPerSecond values */
+        typedef SequenceContainer<RadianPerSecond> RadianPerSecondSequenceContainer;
+
+        /** A container containing 32 bit RadianPerSecondSquared values */
+        typedef SequenceContainer<RadianPerSecondSquared> RadianPerSecondSquaredSequenceContainer;
+
+        /** A container containing 32 bit Second values */
+        typedef SequenceContainer<Second> SecondSequenceContainer;
+
+        /** A container containing 32 bit SquareMeter values */
+        typedef SequenceContainer<SquareMeter> SquareMeterSequenceContainer;
+
+        /** A container containing 32 bit Steradian values */
+        typedef SequenceContainer<Steradian> SteradianSequenceContainer;
+
+        /** A container containing 32 bit Volt values */
+        typedef SequenceContainer<Volt> VoltSequenceContainer;
+
+        /** A container containing 32 bit Watt values */
+        typedef SequenceContainer<Watt> WattSequenceContainer;
+    }
+
+    //--------------------------------------------------
+    // SI-types (64-bits)
+    //--------------------------------------------------
+    namespace Si64
+    {
+        /** A container containing 64 bit Ampere values */
+        typedef SequenceContainer<Ampere> AmpereSequenceContainer;
+
+        /** A container containing 64 bit CubicMeter values */
+        typedef SequenceContainer<CubicMeter> CubicMeterSequenceContainer;
+
+        /** A container containing 64 bit Hertz values */
+        typedef SequenceContainer<Hertz> HertzSequenceContainer;
+
+        /** A container containing 64 bit Joule values */
+        typedef SequenceContainer<Joule> JouleSequenceContainer;
+
+        /** A container containing 64 bit Kelvin values */
+        typedef SequenceContainer<Kelvin> KelvinSequenceContainer;
+
+        /** A container containing 64 bit Kilogram values */
+        typedef SequenceContainer<Kilogram> KilogramSequenceContainer;
+
+        /** A container containing 64 bit Meter values */
+        typedef SequenceContainer<Meter> MeterSequenceContainer;
+
+        /** A container containing 64 bit MeterPerSecond values */
+        typedef SequenceContainer<MeterPerSecond> MeterPerSecondSequenceContainer;
+
+        /** A container containing 64 bit MeterPerSecondSquared values */
+        typedef SequenceContainer<MeterPerSecondSquared> MeterPerSecondSquaredSequenceContainer;
+
+        /** A container containing 64 bit Newton values */
+        typedef SequenceContainer<Newton> NewtonSequenceContainer;
+
+        /** A container containing 64 bit Pascal values */
+        typedef SequenceContainer<Pascal> PascalSequenceContainer;
+
+        /** A container containing 64 bit Radian values */
+        typedef SequenceContainer<Radian> RadianSequenceContainer;
+
+        /** A container containing 64 bit RadianPerSecond values */
+        typedef SequenceContainer<RadianPerSecond> RadianPerSecondSequenceContainer;
+
+        /** A container containing 64 bit RadianPerSecondSquared values */
+        typedef SequenceContainer<RadianPerSecondSquared> RadianPerSecondSquaredSequenceContainer;
+
+        /** A container containing 64 bit Second values */
+        typedef SequenceContainer<Second> SecondSequenceContainer;
+
+        /** A container containing 64 bit SquareMeter values */
+        typedef SequenceContainer<SquareMeter> SquareMeterSequenceContainer;
+
+        /** A container containing 64 bit Steradian values */
+        typedef SequenceContainer<Steradian> SteradianSequenceContainer;
+
+        /** A container containing 64 bit Volt values */
+        typedef SequenceContainer<Volt> VoltSequenceContainer;
+
+        /** A container containing 64 bit Watt values */
+        typedef SequenceContainer<Watt> WattSequenceContainer;
+    }
 }
 }
 }
