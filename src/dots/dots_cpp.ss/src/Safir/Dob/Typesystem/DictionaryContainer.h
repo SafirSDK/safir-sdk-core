@@ -52,8 +52,9 @@ namespace Typesystem
     public:
 
         typedef KeyT KeyType;
-        typedef ValT ValType;
-        typedef boost::unordered_map<KeyType, ValType> StorageType;  //we use boost version instead of std because we want to be able to use vector<bool> without warnings and errors.
+        typedef ValT ValueContainerType;
+        typedef typename ValueContainerType::ContainedType ContainedType;
+        typedef boost::unordered_map<KeyType, ValueContainerType> StorageType;  //we use boost version instead of std because we want to be able to use vector<bool> without warnings and errors.
         typedef typename StorageType::const_iterator const_iterator;
         typedef typename StorageType::value_type value_type;
 
@@ -112,11 +113,11 @@ namespace Typesystem
         virtual void SetChanged(const bool changed)
         {
             m_bIsChanged=changed;
-            if (!changed)
+            if (changed)
             {
                 for (typename StorageType::iterator it=m_values.begin(); it!=m_values.end(); ++it)
                 {
-                    it->second.SetChanged(false);
+                    it->second.SetChanged(changed);
                 }
             }
         }
@@ -155,20 +156,30 @@ namespace Typesystem
             m_values.clear();
         }
 
-        void insert(const value_type& val)
+
+        void Insert(const KeyType& key, const ContainedType& val)
         {
             m_bIsChanged=true;
-            m_values.insert(val);
+            ValueContainerType container;
+            container.SetVal(val);
+            container.SetChanged(true);
+            m_values.insert(value_type(key, container));
         }
 
-        void insert(const KeyType& key, const ValType& val)
+        size_t erase(const KeyType& key)
         {
-            insert(value_type(key, val));
+            m_bIsChanged=true;
+            return m_values.erase(key);
+        }
+
+        const_iterator find(const KeyType& key) const
+        {
+            return m_values.find(key);
         }
 
         bool Exist(const KeyType& key) const
         {
-            return m_values.find(key)!=m_values.end();
+            return find(key)!=end();
         }
 
         /**
@@ -176,7 +187,7 @@ namespace Typesystem
          * @param index [in] - Index of the value to get.
          * @return Const reference to a value.
          */
-        const ValType& operator [](const KeyType& key) const
+        const ValueContainerType& operator [](const KeyType& key) const
         {
             const_iterator it= m_values.find(key);
             if (it!=m_values.end())
