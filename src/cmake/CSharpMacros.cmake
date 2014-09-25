@@ -63,8 +63,18 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
 
         set (_cs_resources_cmd "${_cs_resources_cmd} -res:\"${resources_file_native}\"")
 
+        #if we're not verbose we redirect output to null.
+        if ("$ENV{VERBOSE}" STREQUAL "")
+          if (WIN32)
+            set(redirect_output > /nul)
+          else()
+            set(redirect_output > /dev/null)
+          endif()
+        endif()
+
+
         ADD_CUSTOM_COMMAND(OUTPUT ${resources_file}
-          COMMAND ${RESGEN_EXECUTABLE} ARGS ${resx_file} ${resources_file_native}
+          COMMAND ${RESGEN_EXECUTABLE} ARGS ${resx_file} ${resources_file_native} ${redirect_output}
           DEPENDS ${resx_file}
           WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${working_directory}
           )
@@ -118,8 +128,8 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
                                   ${_cs_sources_spaced}")
 
     #Log contents if needed
-    if (NOT $ENV{VERBOSE} STREQUAL "")
-      FILE(READ ${response_file} response_file_contents)
+    if (NOT "$ENV{VERBOSE}" STREQUAL "")
+      FILE(READ "${response_file}" response_file_contents)
       MESSAGE("Contents of ${response_file} is ${response_file_contents}")
     endif()
 
