@@ -1285,15 +1285,14 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
                 {
                     // We got a NACK for a fragment but the fragment that are expected by the receiver is not within our
                     // fragment sliding window.
-                    // This is an "impossible" case probably caused by a bug. The solution for now is to inhibit all outgoing
-                    // traffic from this node. This makes the other nodes to mark the sequence number from this node as invalid.
-                    // I KNOW, THIS IS REAL UGLY!!!! We have tried to track down the bug without success. Our failure is, at least partly,
-                    // caused by the bad design and the complexity of dose_com. Hopefully we can throw it out soon ...
+                    // This is an "impossible" case probably caused by a bug. The solution for now is to simulate that this
+                    // node loses contact with all other nodes, in order to force a resynchronization.
 
-                    PrintErr(0, "TxThread[%d] Got a NACK with an expected fragment that is already acked!\n", qIx);
+                    PrintErr(0, "TxThread[%d] Got a NACK with an expected fragment that is already acked! Simulating a node disconnect in order to force resynchronization\n", qIx);
 
                     g_pShm->InhibitOutgoingTraffic = true;
-                    DoseOs::Sleep(4000);
+                    DoseOs::Sleep(6000);
+                    CNodeStatus::CheckTimedOutNodes(true); // make this node treat all other nodes as down
                     g_pShm->InhibitOutgoingTraffic = false;
                 }
 
@@ -1352,15 +1351,16 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
                 }
                 else
                 {
-                    // We got a NACK but the message that are expected by the receiver is not within our sliding window.
-                    // This is an "impossible" case probably caused by a bug. The solution for now is to inhibit all outgoing
-                    // traffic from this node. This makes the other nodes to mark the sequence number from this node as invalid.
-                    // I KNOW, THIS IS REAL UGLY!!!! We have tried to track down the bug without success. Our failure is, at least partly,
-                    // caused by the bad design and the complexity of dose_com. Hopefully we can throw it out soon ...
+                    // We got a NACK for a message but the message that are expected by the receiver is not within our
+                    // message sliding window.
+                    // This is an "impossible" case probably caused by a bug. The solution for now is to simulate that this
+                    // node loses contact with all other nodes, in order to force a resynchronization.
 
-                    PrintErr(0, "TxThread[%d] Got a NACK with an expected message that is already acked!\n", qIx);
+                    PrintErr(0, "TxThread[%d] Got a NACK with an expected message that is already acked! Simulating a node disconnect in order to force resynchronization\n", qIx);
+
                     g_pShm->InhibitOutgoingTraffic = true;
-                    DoseOs::Sleep(4000);
+                    DoseOs::Sleep(6000);
+                    CNodeStatus::CheckTimedOutNodes(true); // make this node treat all other nodes as down
                     g_pShm->InhibitOutgoingTraffic = false;                
                 }
 

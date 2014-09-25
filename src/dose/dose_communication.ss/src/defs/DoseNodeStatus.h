@@ -143,7 +143,7 @@ public:
     static int  UpdateNode_Up(dcom_uchar8 NodeId,
                             dcom_ulong32 IpAddr_nw, dcom_ulong32 TimeStamp);
 
-    static int  CheckTimedOutNodes(void);
+    static int  CheckTimedOutNodes(bool forceTimeout);
 
     static int  GetNodeInfo(dcom_ushort16 NodeId, dcom_ulong32 *pIpAddr,
                             dcom_ulong32 *pNodeStatus);
