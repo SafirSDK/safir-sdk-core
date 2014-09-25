@@ -38,6 +38,8 @@
 #include "DoseComReceive.h"
 #include "../defs/DoseNodeStatus.h"
 #include "PrintError.h"
+#include <ace/Thread_Mutex.h>
+#include <ace/Guard_T.h>
 
 static unsigned long g_TickPrev = 0;
 
@@ -399,13 +401,16 @@ int CNodeStatus::UpdateNode_Up(unsigned char DoseId,
 * Returns: Number of changed nodes
 *
 *****************************************************************/
-int CNodeStatus::CheckTimedOutNodes(void)
+static ACE_Thread_Mutex checkTimedOutNodesLock;
+
+int CNodeStatus::CheckTimedOutNodes(bool forceTimeout)
 {
     int     jj;
     int     ChangeCount = 0;
     dcom_ulong32   dwCurrentTime;
     dcom_ulong32   TickNow;
 
+    ACE_Guard<ACE_Thread_Mutex> lck(checkTimedOutNodesLock);
 
     //if(*pDbg>3) PrintDbg("CheckTimedOutNodes()\n");
 
@@ -420,7 +425,8 @@ int CNodeStatus::CheckTimedOutNodes(void)
          || (g_pNodeStatusTable[jj].Status == NODESTATUS_NEW) )
         {
             if((dwCurrentTime - g_pNodeStatusTable[jj].LatestTime)
-                            > KEEP_ALIVE_TIMEOUT)
+                            > KEEP_ALIVE_TIMEOUT
+                    || forceTimeout)
             {
                 if(*pDbg>2)
                     PrintDbg("*** A node timed out. IP=%u.%u.%u.%u\n",

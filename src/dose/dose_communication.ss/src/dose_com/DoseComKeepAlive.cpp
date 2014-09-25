@@ -604,7 +604,7 @@ Check_Timeout:
             if(TxRxSock.AreThereAnyPendingRxMessages())
                 continue; // Get all msg before check timeout
 
-            CNodeStatus::CheckTimedOutNodes();
+            CNodeStatus::CheckTimedOutNodes(false);
 
             dwPreviosCheckTime = dwCurrentTime;
         }
