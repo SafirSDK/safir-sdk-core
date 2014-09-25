@@ -9,6 +9,7 @@ set(CMAKE_REQUIRED_LIBRARIES ${Boost_LIBRARIES})
 
 set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${Boost_LIBRARIES})
 
+add_subdirectory(container_destroyers)
 add_subdirectory(interprocess_atomics)
 add_subdirectory(boost_iostreams_flushing)
 add_subdirectory(offset_ptr)
