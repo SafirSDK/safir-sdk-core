@@ -1,8 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2008-2013 (http://safir.sourceforge.net)
 *
-* Created by: Lars Hagström / stlrha
+* Created by: Lars HagstrÃ¶m / stlrha
 *
 *******************************************************************************
 *
@@ -21,16 +21,34 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
+#ifndef __DOBEXPLORER_COMMON_HEADER_H__
+#define __DOBEXPLORER_COMMON_HEADER_H__
+
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning (disable: 4127)
-#pragma warning (disable: 4512)
+#pragma warning (disable: 4244)
 #endif
 
+//need to do this to allow for both qt4 and qt5
 #include <QtGui>
+#if QT_VERSION >= 0x050000
+#  include <QtCore/qstring.h>
+#  include <QtWidgets>
+#endif
 
 #ifdef _MSC_VER
 #pragma warning(pop)
 
 #pragma warning (disable: 4355)
+#endif
+
+//Define a dummy class to avoid "moc" warning about this file not containing any QObjects.
+//The cmake setup currently runs moc on all .h files.
+class Dummy
+    : public QObject
+{
+    Q_OBJECT
+};
+
 #endif
