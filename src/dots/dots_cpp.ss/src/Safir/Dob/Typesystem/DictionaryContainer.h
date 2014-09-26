@@ -47,7 +47,8 @@ namespace Typesystem
      * does not have change flags and can not be null.
      */
     template <class KeyT, class ValT>
-    class DictionaryContainer : public ContainerBase
+    class DictionaryContainer : public ContainerBase,
+                                private boost::unordered_map<KeyT, ValT>
     {
     public:
 
@@ -65,7 +66,6 @@ namespace Typesystem
          */
         DictionaryContainer()
             :m_isNull(true)
-            ,m_values()
         {
         }
 
@@ -80,10 +80,17 @@ namespace Typesystem
          */
         virtual void SetNull()
         {
-            m_values.clear();
+            StorageType::clear();
             m_isNull=true;
             m_bIsChanged=true;
         }
+
+        using StorageType::begin;
+        using StorageType::end;
+        using StorageType::find;
+        using StorageType::operator[];
+        using StorageType::size;
+        using StorageType::empty;
 
         /**
          * @brief IsChanged - Check if the sequence has changed.
@@ -96,14 +103,13 @@ namespace Typesystem
                 return true; //top level change flag is set
             }
 
-            for (const_iterator it=m_values.begin(); it!=m_values.end(); ++it)
+            for (const_iterator it=begin(); it!=end(); ++it)
             {
                 if (it->second.IsChanged()) //a value container has changed flag set
                     return true;
             }
 
             return false; //if we get here nothing is changed
-
         }
 
         /**
@@ -113,38 +119,14 @@ namespace Typesystem
         virtual void SetChanged(const bool changed)
         {
             m_bIsChanged=changed;
-            if (changed)
+            if (!changed)
             {
-                for (typename StorageType::iterator it=m_values.begin(); it!=m_values.end(); ++it)
+                for (typename StorageType::iterator it=begin(); it!=end(); ++it)
                 {
                     it->second.SetChanged(changed);
                 }
             }
         }
-
-        /**
-         * @brief size - Get the size of the sequence, i.e number of contained values.
-         * @return The number of values in the sequence.
-         */
-        size_t size() const {return m_values.size();}
-
-        /**
-         * @brief empty - Check if sequence is empty.
-         * @return True if sequence is empty, else false.
-         */
-        bool empty() const {return m_values.empty();}
-
-        /**
-         * @brief begin - Get const_iterator pointing to the first element in the sequence.
-         * @return const_iterator.
-         */
-        const_iterator begin() const {return m_values.begin();}
-
-        /**
-         * @brief end - Get const_iterator pointing past the last element in the sequence.
-         * @return const_iterator.
-         */
-        const_iterator end() const {return m_values.end();}
 
         /**
          * @brief clear - Clear the sequence, i.e remove all values. After a call to clear
@@ -153,7 +135,7 @@ namespace Typesystem
         void clear()
         {
             m_bIsChanged=true;
-            m_values.clear();
+            StorageType::clear();
         }
 
 
@@ -163,39 +145,18 @@ namespace Typesystem
             ValueContainerType container;
             container.SetVal(val);
             container.SetChanged(true);
-            m_values.insert(value_type(key, container));
+            StorageType::insert(value_type(key, container));
         }
 
         size_t erase(const KeyType& key)
         {
             m_bIsChanged=true;
-            return m_values.erase(key);
-        }
-
-        const_iterator find(const KeyType& key) const
-        {
-            return m_values.find(key);
+            return StorageType::erase(key);
         }
 
         bool Exist(const KeyType& key) const
         {
             return find(key)!=end();
-        }
-
-        /**
-         * @brief operator [] - Get const reference to the value with specified index.
-         * @param index [in] - Index of the value to get.
-         * @return Const reference to a value.
-         */
-        const ValueContainerType& operator [](const KeyType& key) const
-        {
-            const_iterator it= m_values.find(key);
-            if (it!=m_values.end())
-            {
-                return it->second;
-            }
-
-            throw std::logic_error("Key does not exist!");
         }
 
         /**
@@ -210,7 +171,6 @@ namespace Typesystem
 
     private:
         bool m_isNull;
-        StorageType m_values;
     };
 }
 }
