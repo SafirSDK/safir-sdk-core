@@ -29,6 +29,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows.Forms;
 using System.Data;
+using System.IO;
 
 namespace Sate
 {
@@ -1995,8 +1996,8 @@ namespace Sate
             OpenFileDialog of = new OpenFileDialog();
             of.AddExtension = true;
             of.Filter = "DOU files (*.dou)|*.dou|All files (*.*)|*.*";
-
-            //TODO: set some sensible Initial directory? This used to be in the tower...
+            of.InitialDirectory = Path.GetDirectoryName(Path.GetDirectoryName
+                (Safir.Dob.Typesystem.Internal.InternalOperations.GetDouFilePath(Safir.Dob.Entity.ClassTypeId)));
 
             if (of.ShowDialog() == DialogResult.OK)
             {
