@@ -5,8 +5,6 @@ INSTALL(FILES
   DESTINATION ${SAFIR_INSTALL_DESTINATION_GENERATION}/dod
   COMPONENT Development)
 
-#TODO  data/dots_unit.xsd
-
 INSTALL(FILES
           data/precompiled_header_for_cpp.h
           data/precompiled_header_for_cpp.cpp

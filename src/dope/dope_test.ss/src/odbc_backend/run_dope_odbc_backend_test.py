@@ -327,7 +327,7 @@ try:
         #problem is that dope is rewriting them...
         while count_binares(parameters) != 0:
             delete_binary(parameters)
-            time.sleep(1) #TODO don't rely on timing!
+            time.sleep(1)
 
         env.launchProcess("entity_owner", (owner_path,"update")).wait()
 

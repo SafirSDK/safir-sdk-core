@@ -247,7 +247,6 @@ include_directories(lluf/lluf_build_helpers.ss/src)
 ADD_DEFINITIONS(-DSAFIR_NO_AUTOLINK)
 
 
-#TODO: make this setting available from ccmake et al
 #
 # Set up .NET compilation
 #
@@ -309,5 +308,4 @@ INSTALL(FILES
 
 
 
-#TODO: install users guide in doc?
-#TODO: install requirements in doc?
+#TODO: Add links to documentation in installed package.
