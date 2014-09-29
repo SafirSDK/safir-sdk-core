@@ -213,8 +213,7 @@ static int Send_AckMsg( CIpmSocket *pTxSock, DOSE_UDP_ACK_MSG *pTxAckMsg,
     pTxAckMsg->TxMsgArray_Ix  = TxMsgArray_Ix;
     pTxAckMsg->Info           = Info;
 
-    //TODO:AIWI test
-    //if(*pDbg>=5)
+    if(*pDbg>=5)
     {
         if(pTxAckMsg->MsgType == MSG_TYPE_ACK)
             PrintDbg("*-  RxThread[%d] Send ACK: DoseId=%d %s"

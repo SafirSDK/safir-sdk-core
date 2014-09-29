@@ -248,6 +248,10 @@ typedef volatile struct
     volatile dcom_ushort16 GetIxToAck;     // See comment above
     volatile dcom_ushort16 GetIxToSend;            // See comment above
 
+    volatile dcom_ushort16 GetIxToSendHighWatermark; // GetIxToSend is "backed" to GetIxToAck when a nack is received
+                                                     // so this variable is needed to be able to figure out if there
+                                                     // is a chance that the nacked message will ever be sent again.
+
     volatile dcom_ushort16 MaxUsedQueueLength;
 
     // wA/wT tells us if Application/TxThread writes the data
@@ -410,8 +414,7 @@ static THREAD_API Ack_Thread(void *)
         {
             ACE_Guard<ACE_Thread_Mutex> lck(g_threadLock);
 
-            //TODO: AIWI
-            //if(*pDbg>=5)
+            if(*pDbg>=5)
             PrintDbg("+++ AckThread() MsgTyp=%s DoseId=%d "
                     "Seq=%d FrNum=%d Info=%d qIx=%u Put=%u\n",
                     (UdpMsg.MsgType == MSG_TYPE_ACK) ? "ACK" : "NACK",
@@ -488,6 +491,8 @@ void SetIndexToSend(int qIx, dcom_ushort16 toIndex)
     int prevIxToSend = TxQ[qIx].GetIxToSend;
     TxQ[qIx].GetIxToSend = toIndex;
 
+    TxQ[qIx].GetIxToSendHighWatermark = TxQ[qIx].GetIxToSend;
+
     //Calculate current number of sent items, i.e used sliding window
     int currentNumberOfSent = CalculateCurrentSendAhead(qIx);
     
@@ -522,6 +527,8 @@ void IncreaseIndexToSend(int qIx)
     {
             TxQ[qIx].GetIxToSend++;
     }
+
+    TxQ[qIx].GetIxToSendHighWatermark = TxQ[qIx].GetIxToSend;
 
     //Calculate current number of sent items, i.e used sliding window
     int currentNumberOfSent = CalculateCurrentSendAhead(qIx);
@@ -1226,7 +1233,6 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
             {
                 // Check if this node considers the nacked fragment to have been
                 // sent but not acked
-                PrintDbg("TxThread[%d] Got NACK to a fragmented message. Check if the requested SeqNr/FragNr are within the sliding window\n", qIx);
 
                 bool expectedFragmentNbrIsWithinWindow = false;
                 dcom_ushort16 ixToAck = TxQ[qIx].GetIxToAck;
@@ -1235,14 +1241,10 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
                     if ((ixToAck == TxQ[qIx].GetIxToSend &&
                         TxQ[qIx].TxMsgArr[ixToAck].bIsFragmented &&
                         TxQ[qIx].TxMsgArr[ixToAck].IsTransmitting) ||
-                        ixToAck != TxQ[qIx].GetIxToSend)
+                        ixToAck != TxQ[qIx].GetIxToSendHighWatermark)
                     {
                         if (TxQ[qIx].TxMsgArr[ixToAck].SequenceNumber == g_Ack_Queue[g_Ack_Get_ix].SequenceNumber)
                         {
-                            PrintDbg("SeqNr %d is within sliding window. Now check FragNr. ExpectedFragNr=%d NotAckedFragNr=%d SentFragNr=%d\n",
-                                     TxQ[qIx].TxMsgArr[ixToAck].SequenceNumber, g_Ack_Queue[g_Ack_Get_ix].Info, TxQ[qIx].TxMsgArr[ixToAck].NotAckedFragment,
-                                     TxQ[qIx].TxMsgArr[ixToAck].SentFragment);
-
                             // The sequence number is within the sliding window. Now check if the expected fragment is
                             // within the sliding window at fragment level.
                             dcom_ushort16 expectedFragment = g_Ack_Queue[g_Ack_Get_ix].Info;
@@ -1256,8 +1258,8 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
                         }
                     }
 
-                    // Don't step beyond GetIxToSend
-                    if (ixToAck == TxQ[qIx].GetIxToSend)
+                    // Don't step beyond what we have actually sent
+                    if (ixToAck == TxQ[qIx].GetIxToSendHighWatermark)
                     {
                         break;
                     }
@@ -1314,17 +1316,13 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
                 PrintDbg("#-  IS IMPLEMENTED Got an Nack Seq=%d Info=%d\n",
                         SequenceNum, g_Ack_Queue[g_Ack_Get_ix].Info );
 
-                PrintDbg("TxThread[%d] Got NACK to a non fragmented message. Check if the requested SeqNr is within the sliding window\n", qIx);
-
                 // Check if this node considers the nacked message to have been
                 // sent but not acked
 
                 bool expectedSeqNbrIsWithinWindow = false;
                 dcom_ushort16 ixToAck = TxQ[qIx].GetIxToAck;
-                while (ixToAck != TxQ[qIx].GetIxToSend)
+                while (ixToAck != TxQ[qIx].GetIxToSendHighWatermark)
                 {
-                    PrintDbg("Sliding window SeqNr=%d Requested SeqNr=%d\n", TxQ[qIx].TxMsgArr[ixToAck].SequenceNumber, g_Ack_Queue[g_Ack_Get_ix].Info);
-
                     if (TxQ[qIx].TxMsgArr[ixToAck].SequenceNumber == g_Ack_Queue[g_Ack_Get_ix].Info)
                     {
                         expectedSeqNbrIsWithinWindow = true;
