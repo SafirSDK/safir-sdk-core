@@ -144,7 +144,6 @@ class Parameters:
         #self.dose_test_ada_cmd = ("dose_test_ada",)
         #self.dose_test_ada_exe_name = self.dose_test_ada_cmd[0] + (".exe" if sys.platform == "win32" else "")
         self.dose_test_dotnet_cmd = ("dose_test_dotnet.exe",)
-        #TODO: the java path below!
         self.dose_test_java_cmd = ("java", "-Xcheck:jni", "-Xfuture", "-jar",
                                    os.path.join("@DEFAULT_JAVA_SEARCH_PATH@","dose_test_java.jar"))
 
