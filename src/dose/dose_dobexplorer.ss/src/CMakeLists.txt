@@ -13,6 +13,8 @@ project(dobexplorer C CXX) #FindQt needs C
 
 INCLUDE("$ENV{SAFIR_SDK}/data/build/cmake_settings.txt")
 
+ADD_DEFINITIONS(-DWIN32_LEAN_AND_MEAN)
+
 FILE(GLOB ui *.ui)
 FILE(GLOB sources *.cpp)
 FILE(GLOB headers [!ui_]*.h)
