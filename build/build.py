@@ -251,10 +251,6 @@ class Logger(object):
         self.log("","output")
         return "\n".join(output)
 
-def check_environment():
-    pass
-    #TODO check cmake?! and other needed stuff
-
 
 def parse_command_line(builder):
     parser = argparse.ArgumentParser()
@@ -335,7 +331,7 @@ class BuilderBase(object):
                 logger.log("Using Config 'DebugOnly', building everything in Debug only.")
                 self.configs = ("Debug",)
                 self.debug_only = True
-                
+
         self.skip_tests = arguments.skip_tests
 
         self.stagedir = os.path.join(os.getcwd(),"stage") if arguments.package else None
@@ -406,7 +402,7 @@ class BuilderBase(object):
                    "--build", ".",
                    "--") + self.generator_specific_build_cmds()
 
-        
+
         self._run_command(command,
                            "Build " + config, directory)
         if not self.skip_tests:
@@ -628,7 +624,7 @@ class VisualStudioBuilder(BuilderBase):
             command += ("/DDEBUGONLY",)
 
         command += (os.path.join("build","packaging","windows","installer.nsi"),)
-        
+
         self._run_command(command, "Packaging ", "TODO")
 
 class UnixGccBuilder(BuilderBase):
@@ -730,12 +726,11 @@ def get_builder():
 def main():
     builder = get_builder()
     parse_command_line(builder)
-    check_environment()
     builder.setup_build_environment()
 
     builder.build(".")
     builder.package()
-        
+
 
     return (builder.total_tests, builder.failed_tests)
 

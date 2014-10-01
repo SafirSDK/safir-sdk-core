@@ -652,7 +652,6 @@ def main():
         jenkinsController = JenkinsController(parameters)
         jenkinsController.start_slave()
 
-    #TODO UpdateConfig(parameters)
     runner = Runner()
     results = Results()
 
@@ -671,8 +670,6 @@ def main():
     runner.killprocs(results)
     if parameters.autostart_jenkins_slave:
         jenkinsController.stop_slave()
-
-    #TODO RestoreConfig(parameters)
 
     if completed:
         results.check_output(parameters)
