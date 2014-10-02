@@ -525,6 +525,126 @@ namespace Internal
             memcpy(&(binary.m_Value[0]), val, binary.m_Value.size());
         }
     }
+
+    //-------------------------------------------------------------
+    // Get value operations
+    //-------------------------------------------------------------
+    void GetBoolean(bool& val,
+                    Safir::Dob::Typesystem::Int64 handle,
+                    const Dob::Typesystem::MemberIndex member,
+                    const Dob::Typesystem::ArrayIndex valueIndex,
+                    int mode)
+    {
+
+    }
+
+    void GetEnumeration(Safir::Dob::Typesystem::Int32& val,
+                        Safir::Dob::Typesystem::Int64 handle,
+                        const Dob::Typesystem::MemberIndex member,
+                        const Dob::Typesystem::ArrayIndex valueIndex,
+                        int mode)
+    {
+
+    }
+
+    void GetInt32(Safir::Dob::Typesystem::Int32& val,
+                  Safir::Dob::Typesystem::Int64 handle,
+                  const Dob::Typesystem::MemberIndex member,
+                  const Dob::Typesystem::ArrayIndex valueIndex,
+                  int mode)
+    {
+
+    }
+
+    void GetInt64(Safir::Dob::Typesystem::Int64& val,
+                  Safir::Dob::Typesystem::Int64 handle,
+                  const Dob::Typesystem::MemberIndex member,
+                  const Dob::Typesystem::ArrayIndex valueIndex,
+                  int mode)
+    {
+
+    }
+
+    void GetFloat32(Safir::Dob::Typesystem::Float32 & val,
+                    Safir::Dob::Typesystem::Int64 handle,
+                    const Dob::Typesystem::MemberIndex member,
+                    const Dob::Typesystem::ArrayIndex valueIndex,
+                    int mode)
+    {
+
+    }
+
+    void GetFloat64(Safir::Dob::Typesystem::Float64& val,
+                    Safir::Dob::Typesystem::Int64 handle,
+                    const Dob::Typesystem::MemberIndex member,
+                    const Dob::Typesystem::ArrayIndex valueIndex,
+                    int mode)
+    {
+
+    }
+
+    void GetString(std::wstring& val,
+                   Safir::Dob::Typesystem::Int64 handle,
+                   const Dob::Typesystem::MemberIndex member,
+                   const Dob::Typesystem::ArrayIndex valueIndex,
+                   int mode)
+    {
+
+    }
+
+    void GetInstanceId(Safir::Dob::Typesystem::InstanceId& val,
+                       Safir::Dob::Typesystem::Int64 handle,
+                       const Dob::Typesystem::MemberIndex member,
+                       const Dob::Typesystem::ArrayIndex valueIndex,
+                       int mode)
+    {
+
+    }
+
+    void GetHandlerId(Safir::Dob::Typesystem::HandlerId& val,
+                      Safir::Dob::Typesystem::Int64 handle,
+                      const Dob::Typesystem::MemberIndex member,
+                      const Dob::Typesystem::ArrayIndex valueIndex,
+                      int mode)
+    {
+
+    }
+
+    void GetChannelId(Safir::Dob::Typesystem::ChannelId& val,
+                      Safir::Dob::Typesystem::Int64 handle,
+                      const Dob::Typesystem::MemberIndex member,
+                      const Dob::Typesystem::ArrayIndex valueIndex,
+                      int mode)
+    {
+
+    }
+
+    void GetEntityId(Safir::Dob::Typesystem::EntityId& val,
+                     Safir::Dob::Typesystem::Int64 handle,
+                     const Dob::Typesystem::MemberIndex member,
+                     const Dob::Typesystem::ArrayIndex valueIndex,
+                     int mode)
+    {
+
+    }
+
+    void GetObject(Safir::Dob::Typesystem::ObjectPtr& val,
+                   Safir::Dob::Typesystem::Int64 handle,
+                   const Dob::Typesystem::MemberIndex member,
+                   const Dob::Typesystem::ArrayIndex valueIndex,
+                   int mode)
+    {
+
+    }
+
+    void GetBinary(Safir::Dob::Typesystem::Binary& val,
+                   Safir::Dob::Typesystem::Int64 handle,
+                   const Dob::Typesystem::MemberIndex member,
+                   const Dob::Typesystem::ArrayIndex valueIndex,
+                   int mode)
+    {
+
+    }
 }
 }
 }
