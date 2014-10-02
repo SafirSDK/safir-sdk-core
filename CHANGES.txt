@@ -1,4 +1,17 @@
+-----------------------------------------------------------------------------------------------------------------------
+2014-10-01 version 4.4.1:
+-----------------------------------------------------------------------------------------------------------------------
+
+This release fixes the following tickets (see http://safir.sourceforge.net for details):
+
+#73   Using node number 8, 16 or 32 makes the node communication to get stuck.
+#199  Support Qt5 in Dobexplorer for Safir SDK Core 4.4.
+#200  False trigging of the sequence number "rescue" mechanism.
+#201  Mitigate potential problem with lock free structures in dose_com.
+
+-----------------------------------------------------------------------------------------------------------------------
 2013-06-25 version 4.4:
+-----------------------------------------------------------------------------------------------------------------------
 
 This release is intended to implement the "First Step" chapter from the paper "Readonly installation of Safir SDK Core" (https://projekt.consoden.se/safir/job/Whitepapers/lastSuccessfulBuild/artifact/readonly_install.html).
 
@@ -18,12 +31,3 @@ Bugfixes:
   * dots_generated shared library loading on Linux
   * static evaluation order bugfix in dots_cpp
   * remove unused function DotsC_BinaryDump
-
-2014-10-01 version 4.4.1:
-
-Bugfixes:
-  * Ticket #73  Using node number 8, 16 or 32 makes the node communication to get stuck.
-  * Ticket #199 Support Qt5 in Dobexplorer for Safir SDK Core 4.4. 
-  * Ticket #200 False trigging of the sequence number "rescue" mechanism.
-  * Ticket #201 Mitigate potential problem with lock free structures in dose_com.
-
