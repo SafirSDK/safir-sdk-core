@@ -16,4 +16,5 @@ run_test_suite   src/dose/dose_main.ss/tests                     dose_main_tests
 #python classes for test_support is needed by dose tests.
 build_dir        src/tests/test_support                          RelWithDebInfo
 build_dir        src/dose/dose_test.ss                           RelWithDebInfo
+build_dir        src/distribution/communication.ss/tests/communication_test                           RelWithDebInfo
 run_test_suite   src/dope/dope_test.ss/src/file_backend          dope_file_backend
