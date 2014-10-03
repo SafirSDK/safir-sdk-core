@@ -609,7 +609,7 @@ namespace Typesystem
                 DotsC_ParameterIndex paramIndex;
                 DotsC_Int32 valueIndex;
                 DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, index, paramIndex, valueIndex);
-                DotsC_GetEnumerationParameter(object->GetTypeId(), paramIndex, valueIndex, ValueMode, value);
+                DotsC_GetEnumerationParameter(object->GetTypeId(), paramIndex, valueIndex, DotsC_ValueMode, value);
             }
             break;
 
@@ -732,7 +732,7 @@ namespace Typesystem
                 DotsC_ParameterIndex paramIndex;
                 DotsC_Int32 valueIndex;
                 DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, index, paramIndex, valueIndex);
-                DotsC_GetInt32Parameter(object->GetTypeId(), paramIndex, valueIndex, ValueMode, value);
+                DotsC_GetInt32Parameter(object->GetTypeId(), paramIndex, valueIndex, DotsC_ValueMode, value);
             }
             break;
 
@@ -855,7 +855,7 @@ namespace Typesystem
                 DotsC_ParameterIndex paramIndex;
                 DotsC_Int32 valueIndex;
                 DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, index, paramIndex, valueIndex);
-                DotsC_GetInt64Parameter(object->GetTypeId(), paramIndex, valueIndex, ValueMode, value);
+                DotsC_GetInt64Parameter(object->GetTypeId(), paramIndex, valueIndex, DotsC_ValueMode, value);
             }
             break;
 
@@ -1229,7 +1229,7 @@ namespace Typesystem
                 DotsC_ParameterIndex paramIndex;
                 DotsC_Int32 valueIndex;
                 DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, index, paramIndex, valueIndex);
-                DotsC_GetHashedIdParameter(object->GetTypeId(), paramIndex, valueIndex, ValueMode, hashVal, instanceIdStr);
+                DotsC_GetHashedIdParameter(object->GetTypeId(), paramIndex, valueIndex, DotsC_ValueMode, hashVal, instanceIdStr);
 
                 if (instanceIdStr == NULL)
                 {
@@ -1365,7 +1365,7 @@ namespace Typesystem
                 DotsC_ParameterIndex paramIndex;
                 DotsC_Int32 valueIndex;
                 DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, index, paramIndex, valueIndex);
-                DotsC_GetEntityIdParameter(object->GetTypeId(), paramIndex, valueIndex, ValueMode, eid, instanceIdStr);
+                DotsC_GetEntityIdParameter(object->GetTypeId(), paramIndex, valueIndex, DotsC_ValueMode, eid, instanceIdStr);
 
                 if (instanceIdStr == NULL)
                 {
@@ -1500,7 +1500,7 @@ namespace Typesystem
                 DotsC_ParameterIndex paramIndex;
                 DotsC_Int32 valueIndex;
                 DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, index, paramIndex, valueIndex);
-                DotsC_GetHashedIdParameter(object->GetTypeId(), paramIndex, valueIndex, ValueMode, hashVal, channelIdStr);
+                DotsC_GetHashedIdParameter(object->GetTypeId(), paramIndex, valueIndex, DotsC_ValueMode, hashVal, channelIdStr);
 
                 if (channelIdStr == NULL)
                 {
@@ -1636,7 +1636,7 @@ namespace Typesystem
                 DotsC_ParameterIndex paramIndex;
                 DotsC_Int32 valueIndex;
                 DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, index, paramIndex, valueIndex);
-                DotsC_GetHashedIdParameter(object->GetTypeId(), paramIndex, valueIndex, ValueMode, hashVal, handlerIdStr);
+                DotsC_GetHashedIdParameter(object->GetTypeId(), paramIndex, valueIndex, DotsC_ValueMode, hashVal, handlerIdStr);
 
                 if (handlerIdStr == NULL)
                 {
@@ -1772,7 +1772,7 @@ namespace Typesystem
                 DotsC_ParameterIndex paramIndex;
                 DotsC_Int32 valueIndex;
                 DotsC_GetPropertyParameterReference(object->GetTypeId(), propertyId, member, index, paramIndex, valueIndex);
-                DotsC_GetStringParameter(object->GetTypeId(), paramIndex, valueIndex, ValueMode, str);
+                DotsC_GetStringParameter(object->GetTypeId(), paramIndex, valueIndex, DotsC_ValueMode, str);
                 value = Utilities::ToWstring(str);
             }
             break;

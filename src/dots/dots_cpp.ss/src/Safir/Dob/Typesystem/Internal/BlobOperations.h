@@ -30,6 +30,7 @@
 #include <Safir/Dob/Typesystem/ValueContainers.h>
 #include <Safir/Dob/Typesystem/EnumerationContainerBase.h>
 #include <Safir/Dob/Typesystem/ObjectContainer.h>
+#include <Safir/Dob/Typesystem/SequenceContainer.h>
 
 namespace Safir
 {
@@ -54,8 +55,8 @@ namespace Internal
     class DOTS_CPP_API BlobOperations
     {
     public:
-        static const int ValueModeTag=0;
-        static const int KeyModeTag=0;
+
+        enum KeyValueMode {KeyMode, ValueMode};
 
         /**
         * Extract the TypeId from a blob
@@ -81,7 +82,7 @@ namespace Internal
          * @param [in] handle - Handle to a BlobReader.
          * @return True if any member has changed.
          */
-         static bool IsChanged(Safir::Dob::Typesystem::Int64 handle);
+//         static bool IsChanged(Safir::Dob::Typesystem::Int64 handle);
 
         /**
          * @name Value operations on Blobs.
@@ -96,9 +97,9 @@ namespace Internal
          * @param [in] index - Array index in member to check. Shall be 0 if the member is not an array.
          * @return true if member is changed.
          */
-        static bool IsChanged(Safir::Dob::Typesystem::Int64 handle,
-                              const Dob::Typesystem::MemberIndex member,
-                              const Dob::Typesystem::ArrayIndex index);
+//        static bool IsChanged(Safir::Dob::Typesystem::Int64 handle,
+//                              const Dob::Typesystem::MemberIndex member,
+//                              const Dob::Typesystem::ArrayIndex index);
     
 
 
@@ -532,509 +533,79 @@ namespace Internal
                         const Dob::Typesystem::ArrayIndex index);
 
         //---------------------------------------------------------
-        // Sequence containers
-        //---------------------------------------------------------
-        /**
-         * Set a boolean in a blob.
-         *
-         * If the container is null then the member will be set to null in the blob.
-         * The change flag from the container will be set in the blob.
-         *
-         * @param [in] value - The container whose values to use.
-         * @param [in] handle - Handle to a BlobWriter.
-         * @param [in] member - The member to be set.
-         * @param [in] index - Array index in member to set. Shall be 0 if the member is not an array.
-         */
-        static void Set(const BooleanSequenceContainer & value,
-                        Safir::Dob::Typesystem::Int64 handle,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index);
-
-        /**
-         * Get a boolean from a blob.
-         *
-         * This method will get the member and the associated isNull and isChange values from a blob and
-         * put them in the container.
-         *
-         * @param [out] value - The container in which to put the values.
-         * @param [in] handle - Handle to a BlobReader.
-         * @param [in] member - The member to get.
-         * @param [in] index - Array index in member to get. Shall be 0 if the member is not an array.
-         */
-        static void Get(BooleanSequenceContainer & value,
-                        Safir::Dob::Typesystem::Int64 handle,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index);
-
-        /**
-         * Set an enumeration in a blob.
-         *
-         * If the container is null then the member will be set to null in the blob.
-         * The change flag from the container will be set in the blob.
-         *
-         * @param [in] value - The container whose values to use.
-         * @param [in] handle - Handle to a BlobWriter.
-         * @param [in] member - The member to be set.
-         * @param [in] index - Array index in member to set. Shall be 0 if the member is not an array.
-         */
-        static void Set(const EnumerationSequenceContainerBase & value,
-                        Safir::Dob::Typesystem::Int64 handle,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index);
-
-        /**
-         * Get an enumeration from a blob.
-         *
-         * This method will get the member and the associated isNull and isChange values from a blob and
-         * put them in the container.
-         *
-         * @param [out] value - The container in which to put the values.
-         * @param [in] handle - Handle to a BlobReader.
-         * @param [in] member - The member to get.
-         * @param [in] index - Array index in member to get. Shall be 0 if the member is not an array.
-         */
-        static void Get(EnumerationSequenceContainerBase & value,
-                        Safir::Dob::Typesystem::Int64 handle,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index);
-
-
-        /**
-         * Set an Int32 in a blob.
-         *
-         * If the container is null then the member will be set to null in the blob.
-         * The change flag from the container will be set in the blob.
-         *
-         * @param [in] value - The container whose values to use.
-         * @param [in] handle - Handle to a BlobWriter.
-         * @param [in] member - The member to be set.
-         * @param [in] index - Array index in member to set. Shall be 0 if the member is not an array.
-         */
-        static void Set(const Int32SequenceContainer & value,
-                        Safir::Dob::Typesystem::Int64 handle,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index);
-
-        /**
-         * Get an Int32 from a blob.
-         *
-         * This method will get the member and the associated isNull and isChange values from a blob and
-         * put them in the container.
-         *
-         * @param [out] value - The container in which to put the values.
-         * @param [in] handle - Handle to a BlobReader.
-         * @param [in] member - The member to get.
-         * @param [in] index - Array index in member to get. Shall be 0 if the member is not an array.
-         */
-        static void Get(Int32SequenceContainer & value,
-                        Safir::Dob::Typesystem::Int64 handle,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index);
-
-
-        /**
-         * Set an Int64 in a blob.
-         *
-         * If the container is null then the member will be set to null in the blob.
-         * The change flag from the container will be set in the blob.
-         *
-         * @param [in] value - The container whose values to use.
-         * @param [in] handle - Handle to a BlobWriter.
-         * @param [in] member - The member to be set.
-         * @param [in] index - Array index in member to set. Shall be 0 if the member is not an array.
-         */
-        static void Set(const Int64SequenceContainer & value,  //will be used on TypeIdContainers too
-                        Safir::Dob::Typesystem::Int64 handle,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index);
-
-        /**
-         * Get an Int64 from a blob.
-         *
-         * This method will get the member and the associated isNull and isChange values from a blob and
-         * put them in the container.
-         *
-         * @param [out] value - The container in which to put the values.
-         * @param [in] handle - Handle to a BlobReader.
-         * @param [in] member - The member to get.
-         * @param [in] index - Array index in member to get. Shall be 0 if the member is not an array.
-         */
-        static void Get(Int64SequenceContainer & value,
-                        Safir::Dob::Typesystem::Int64 handle,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index);
-
-
-        /**
-         * Set a Float32 in a blob.
-         *
-         * If the container is null then the member will be set to null in the blob.
-         * The change flag from the container will be set in the blob.
-         *
-         * @param [in] value - The container whose values to use.
-         * @param [in] handle - Handle to a BlobWriter.
-         * @param [in] member - The member to be set.
-         * @param [in] index - Array index in member to set. Shall be 0 if the member is not an array.
-         */
-        static void Set(const Float32SequenceContainer & value,
-                        Safir::Dob::Typesystem::Int64 handle,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index);
-
-        /**
-         * Get a Float32 from a blob.
-         *
-         * This method will get the member and the associated isNull and isChange values from a blob and
-         * put them in the container.
-         *
-         * @param [out] value - The container in which to put the values.
-         * @param [in] handle - Handle to a BlobReader.
-         * @param [in] member - The member to get.
-         * @param [in] index - Array index in member to get. Shall be 0 if the member is not an array.
-         */
-        static void Get(Float32SequenceContainer & value,
-                        Safir::Dob::Typesystem::Int64 handle,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index);
-
-
-        /**
-         * Set a Float64 in a blob.
-         *
-         * If the container is null then the member will be set to null in the blob.
-         * The change flag from the container will be set in the blob.
-         *
-         * @param [in] value - The container whose values to use.
-         * @param [in] handle - Handle to a BlobWriter.
-         * @param [in] member - The member to be set.
-         * @param [in] index - Array index in member to set. Shall be 0 if the member is not an array.
-         */
-        static void Set(const Float64SequenceContainer & value,
-                        Safir::Dob::Typesystem::Int64 handle,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index);
-
-        /**
-         * Get a Float64 from a blob.
-         *
-         * This method will get the member and the associated isNull and isChange values from a blob and
-         * put them in the container.
-         *
-         * @param [out] value - The container in which to put the values.
-         * @param [in] handle - Handle to a BlobReader.
-         * @param [in] member - The member to get.
-         * @param [in] index - Array index in member to get. Shall be 0 if the member is not an array.
-         */
-        static void Get(Float64SequenceContainer & value,
-                        Safir::Dob::Typesystem::Int64 handle,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index);
-
-        /**
-         * Set an InstanceId in a blob.
-         *
-         * If the container is null then the member will be set to null in the blob.
-         * The change flag from the container will be set in the blob.
-         *
-         * @param [in] value - The container whose values to use.
-         * @param [in] handle - Handle to a BlobWriter.
-         * @param [in] member - The member to be set.
-         * @param [in] index - Array index in member to set. Shall be 0 if the member is not an array.
-         */
-        static void Set(const InstanceIdSequenceContainer & value,
-                        Safir::Dob::Typesystem::Int64 handle,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index);
-
-        /**
-         * Get an InstanceId from a blob.
-         *
-         * This method will get the member and the associated isNull and isChange values from a blob and
-         * put them in the container.
-         *
-         * @param [out] value - The container in which to put the values.
-         * @param [in] handle - Handle to a BlobReader.
-         * @param [in] member - The member to get.
-         * @param [in] index - Array index in member to get. Shall be 0 if the member is not an array.
-         */
-        static void Get(InstanceIdSequenceContainer & value,
-                        Safir::Dob::Typesystem::Int64 handle,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index);
-
-        /**
-         * Set an EntityId in a blob.
-         *
-         * If the container is null then the member will be set to null in the blob.
-         * The change flag from the container will be set in the blob.
-         *
-         * @param [in] value - The container whose values to use.
-         * @param [in] handle - Handle to a BlobWriter.
-         * @param [in] member - The member to be set.
-         * @param [in] index - Array index in member to set. Shall be 0 if the member is not an array.
-         */
-        static void Set(const EntityIdSequenceContainer & value,
-                        Safir::Dob::Typesystem::Int64 handle,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index);
-
-        /**
-         * Get an EntityId from a blob.
-         *
-         * This method will get the member and the associated isNull and isChange values from a blob and
-         * put them in the container.
-         *
-         * @param [out] value - The container in which to put the values.
-         * @param [in] handle - Handle to a BlobReader.
-         * @param [in] member - The member to get.
-         * @param [in] index - Array index in member to get. Shall be 0 if the member is not an array.
-         */
-        static void Get(EntityIdSequenceContainer & value,
-                        Safir::Dob::Typesystem::Int64 handle,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index);
-
-        /**
-         * Set an ChannelId in a blob.
-         *
-         * If the container is null then the member will be set to null in the blob.
-         * The change flag from the container will be set in the blob.
-         *
-         * @param [in] value - The container whose values to use.
-         * @param [in] handle - Handle to a BlobWriter.
-         * @param [in] member - The member to be set.
-         * @param [in] index - Array index in member to set. Shall be 0 if the member is not an array.
-         */
-        static void Set(const ChannelIdSequenceContainer & value,
-                        Safir::Dob::Typesystem::Int64 handle,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index);
-
-        /**
-         * Get an ChannelId from a blob.
-         *
-         * This method will get the member and the associated isNull and isChange values from a blob and
-         * put them in the container.
-         *
-         * @param [out] value - The container in which to put the values.
-         * @param [in] handle - Handle to a BlobReader.
-         * @param [in] member - The member to get.
-         * @param [in] index - Array index in member to get. Shall be 0 if the member is not an array.
-         */
-        static void Get(ChannelIdSequenceContainer & value,
-                        Safir::Dob::Typesystem::Int64 handle,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index);
-
-        /**
-         * Set an HandlerId in a blob.
-         *
-         * If the container is null then the member will be set to null in the blob.
-         * The change flag from the container will be set in the blob.
-         *
-         * @param [in] value - The container whose values to use.
-         * @param [in] handle - Handle to a BlobWriter.
-         * @param [in] member - The member to be set.
-         * @param [in] index - Array index in member to set. Shall be 0 if the member is not an array.
-         */
-        static void Set(const HandlerIdSequenceContainer & value,
-                        Safir::Dob::Typesystem::Int64 handle,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index);
-
-        /**
-         * Get an HandlerId from a blob.
-         *
-         * This method will get the member and the associated isNull and isChange values from a blob and
-         * put them in the container.
-         *
-         * @param [out] value - The container in which to put the values.
-         * @param [in] handle - Handle to a BlobReader.
-         * @param [in] member - The member to get.
-         * @param [in] index - Array index in member to get. Shall be 0 if the member is not an array.
-         */
-        static void Get(HandlerIdSequenceContainer & value,
-                        Safir::Dob::Typesystem::Int64 handle,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index);
-
-        /**
-         * Set a string in a blob.
-         *
-         * If the container is null then the member will be set to null in the blob.
-         * The change flag from the container will be set in the blob.
-         *
-         * @param [in] value - The container whose values to use.
-         * @param [in] handle - Handle to a BlobWriter.
-         * @param [in] member - The member to be set.
-         * @param [in] index - Array index in member to set. Shall be 0 if the member is not an array.
-         */
-        static void Set(const StringSequenceContainer & value,
-                        Safir::Dob::Typesystem::Int64 handle,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index);
-
-        /**
-         * Get a string from a blob.
-         *
-         * This method will get the member and the associated isNull and isChange values from a blob and
-         * put them in the container.
-         *
-         * @param [out] value - The container in which to put the values.
-         * @param [in] handle - Handle to a BlobReader.
-         * @param [in] member - The member to get.
-         * @param [in] index - Array index in member to get. Shall be 0 if the member is not an array.
-         */
-        static void Get(StringSequenceContainer & value,
-                        Safir::Dob::Typesystem::Int64 handle,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index);
-
-
-        /**
-         * Set an Object in a blob.
-         *
-         * If the container is null then the member will be set to null in the blob.
-         * The change flag from the container will be set in the blob.
-         *
-         * @param [in] object - The container whose values to use.
-         * @param [in] handle - Handle to a BlobWriter.
-         * @param [in] member - The member to be set.
-         * @param [in] index - Array index in member to set. Shall be 0 if the member is not an array.
-         */
-        static void Set(const ObjectSequenceContainerBase & object,
-                        Safir::Dob::Typesystem::Int64 handle,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index);
-
-        /**
-         * Get an Object from a blob.
-         *
-         * This method will get the member and the associated isNull and isChange values from a blob and
-         * put them in the container.
-         *
-         * @param [out] object - The container in which to put the values.
-         * @param [in] handle - Handle to a BlobReader.
-         * @param [in] member - The member to get.
-         * @param [in] index - Array index in member to get. Shall be 0 if the member is not an array.
-         */
-        static void Get(ObjectSequenceContainerBase & object,
-                        Safir::Dob::Typesystem::Int64 handle,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index);
-
-        /**
-         * Set Binary in a blob.
-         *
-         * If the container is null then the member will be set to null in the blob.
-         * The change flag from the container will be set in the blob.
-         *
-         * @param [in] binary - The container whose values to use.
-         * @param [in] handle - Handle to a BlobWriter.
-         * @param [in] member - The member to be set.
-         * @param [in] index - Array index in member to set. Shall be 0 if the member is not an array.
-         */
-        static void Set(const BinarySequenceContainer & binary,
-                        Safir::Dob::Typesystem::Int64 handle,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index);
-
-        /**
-         * Get Binary from a blob.
-         *
-         * This method will get the member and the associated isNull and isChange values from a blob and
-         * put them in the container.
-         *
-         * @param [out] binary - The container in which to put the values.
-         * @param [in] handle - Handle to a BlobReader.
-         * @param [in] member - The member to get.
-         * @param [in] index - Array index in member to get. Shall be 0 if the member is not an array.
-         */
-        static void Get(BinarySequenceContainer & binary,
-                        Safir::Dob::Typesystem::Int64 handle,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index);
-
-        //---------------------------------------------------------
         // Get values
         //--------------------------------------------------------
-        static void GetBoolean(bool& val,
-                               Safir::Dob::Typesystem::Int64 handle,
-                               const Dob::Typesystem::MemberIndex member,
-                               const Dob::Typesystem::ArrayIndex valueIndex,
-                               int mode);
+        static void Get(bool& val,
+                        Safir::Dob::Typesystem::Int64 handle,
+                        const Dob::Typesystem::MemberIndex member,
+                        const Dob::Typesystem::ArrayIndex valueIndex,
+                        KeyValueMode mode);
 
-        static void GetEnumeration(Safir::Dob::Typesystem::Int32& val,
-                                   Safir::Dob::Typesystem::Int64 handle,
-                                   const Dob::Typesystem::MemberIndex member,
-                                   const Dob::Typesystem::ArrayIndex valueIndex,
-                                   int mode);
+        static void Get(Safir::Dob::Typesystem::Int32& val,
+                        Safir::Dob::Typesystem::Int64 handle,
+                        const Dob::Typesystem::MemberIndex member,
+                        const Dob::Typesystem::ArrayIndex valueIndex,
+                        KeyValueMode mode);
 
-        static void GetInt32(Safir::Dob::Typesystem::Int32& val,
-                             Safir::Dob::Typesystem::Int64 handle,
-                             const Dob::Typesystem::MemberIndex member,
-                             const Dob::Typesystem::ArrayIndex valueIndex,
-                             int mode);
+        static void Get(Safir::Dob::Typesystem::Int64& val,
+                        Safir::Dob::Typesystem::Int64 handle,
+                        const Dob::Typesystem::MemberIndex member,
+                        const Dob::Typesystem::ArrayIndex valueIndex,
+                        KeyValueMode mode);
 
-        static void GetInt64(Safir::Dob::Typesystem::Int64& val,
-                             Safir::Dob::Typesystem::Int64 handle,
-                             const Dob::Typesystem::MemberIndex member,
-                             const Dob::Typesystem::ArrayIndex valueIndex,
-                             int mode);
+        static void Get(Safir::Dob::Typesystem::Float32 & val,
+                        Safir::Dob::Typesystem::Int64 handle,
+                        const Dob::Typesystem::MemberIndex member,
+                        const Dob::Typesystem::ArrayIndex valueIndex,
+                        KeyValueMode mode);
 
-        static void GetFloat32(Safir::Dob::Typesystem::Float32 & val,
-                               Safir::Dob::Typesystem::Int64 handle,
-                               const Dob::Typesystem::MemberIndex member,
-                               const Dob::Typesystem::ArrayIndex valueIndex,
-                               int mode);
+        static void Get(Safir::Dob::Typesystem::Float64& val,
+                        Safir::Dob::Typesystem::Int64 handle,
+                        const Dob::Typesystem::MemberIndex member,
+                        const Dob::Typesystem::ArrayIndex valueIndex,
+                        KeyValueMode mode);
 
-        static void GetFloat64(Safir::Dob::Typesystem::Float64& val,
-                               Safir::Dob::Typesystem::Int64 handle,
-                               const Dob::Typesystem::MemberIndex member,
-                               const Dob::Typesystem::ArrayIndex valueIndex,
-                               int mode);
+        static void Get(std::wstring& val,
+                        Safir::Dob::Typesystem::Int64 handle,
+                        const Dob::Typesystem::MemberIndex member,
+                        const Dob::Typesystem::ArrayIndex valueIndex,
+                        KeyValueMode mode);
 
-        static void GetString(std::wstring& val,
-                              Safir::Dob::Typesystem::Int64 handle,
-                              const Dob::Typesystem::MemberIndex member,
-                              const Dob::Typesystem::ArrayIndex valueIndex,
-                              int mode);
+        static void Get(Safir::Dob::Typesystem::InstanceId& val,
+                        Safir::Dob::Typesystem::Int64 handle,
+                        const Dob::Typesystem::MemberIndex member,
+                        const Dob::Typesystem::ArrayIndex valueIndex,
+                        KeyValueMode mode);
 
-        static void GetInstanceId(Safir::Dob::Typesystem::InstanceId& val,
-                                  Safir::Dob::Typesystem::Int64 handle,
-                                  const Dob::Typesystem::MemberIndex member,
-                                  const Dob::Typesystem::ArrayIndex valueIndex,
-                                  int mode);
+        static void Get(Safir::Dob::Typesystem::HandlerId& val,
+                        Safir::Dob::Typesystem::Int64 handle,
+                        const Dob::Typesystem::MemberIndex member,
+                        const Dob::Typesystem::ArrayIndex valueIndex,
+                        KeyValueMode mode);
 
-        static void GetHandlerId(Safir::Dob::Typesystem::HandlerId& val,
-                                 Safir::Dob::Typesystem::Int64 handle,
-                                 const Dob::Typesystem::MemberIndex member,
-                                 const Dob::Typesystem::ArrayIndex valueIndex,
-                                 int mode);
+        static void Get(Safir::Dob::Typesystem::ChannelId& val,
+                        Safir::Dob::Typesystem::Int64 handle,
+                        const Dob::Typesystem::MemberIndex member,
+                        const Dob::Typesystem::ArrayIndex valueIndex,
+                        KeyValueMode mode);
 
-        static void GetChannelId(Safir::Dob::Typesystem::ChannelId& val,
-                                 Safir::Dob::Typesystem::Int64 handle,
-                                 const Dob::Typesystem::MemberIndex member,
-                                 const Dob::Typesystem::ArrayIndex valueIndex,
-                                 int mode);
+        static void Get(Safir::Dob::Typesystem::EntityId& val,
+                        Safir::Dob::Typesystem::Int64 handle,
+                        const Dob::Typesystem::MemberIndex member,
+                        const Dob::Typesystem::ArrayIndex valueIndex,
+                        KeyValueMode mode);
 
-        static void GetEntityId(Safir::Dob::Typesystem::EntityId& val,
-                                Safir::Dob::Typesystem::Int64 handle,
-                                const Dob::Typesystem::MemberIndex member,
-                                const Dob::Typesystem::ArrayIndex valueIndex,
-                                int mode);
+        static void Get(Safir::Dob::Typesystem::ObjectPtr& val,
+                        Safir::Dob::Typesystem::Int64 handle,
+                        const Dob::Typesystem::MemberIndex member,
+                        const Dob::Typesystem::ArrayIndex valueIndex,
+                        KeyValueMode mode);
 
-        static void GetObject(Safir::Dob::Typesystem::ObjectPtr& val,
-                              Safir::Dob::Typesystem::Int64 handle,
-                              const Dob::Typesystem::MemberIndex member,
-                              const Dob::Typesystem::ArrayIndex valueIndex,
-                              int mode);
-
-        static void GetBinary(Safir::Dob::Typesystem::Binary& val,
-                              Safir::Dob::Typesystem::Int64 handle,
-                              const Dob::Typesystem::MemberIndex member,
-                              const Dob::Typesystem::ArrayIndex valueIndex,
-                              int mode);
+        static void Get(Safir::Dob::Typesystem::Binary& val,
+                        Safir::Dob::Typesystem::Int64 handle,
+                        const Dob::Typesystem::MemberIndex member,
+                        const Dob::Typesystem::ArrayIndex valueIndex,
+                        KeyValueMode mode);
     };
 }
 }

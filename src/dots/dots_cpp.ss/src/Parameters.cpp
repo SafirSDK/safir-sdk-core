@@ -151,7 +151,7 @@ namespace Parameters
                    const Dob::Typesystem::ArrayIndex index)
     {
         Int32 i;
-        DotsC_GetEnumerationParameter(typeId, parameter, index, ValueMode, i);
+        DotsC_GetEnumerationParameter(typeId, parameter, index, DotsC_ValueMode, i);
         return i;
     }
 
@@ -161,7 +161,7 @@ namespace Parameters
              const Dob::Typesystem::ArrayIndex index)
     {
         Int32 i;
-        DotsC_GetInt32Parameter(typeId, parameter, index, ValueMode, i);
+        DotsC_GetInt32Parameter(typeId, parameter, index, DotsC_ValueMode, i);
         return i;
     }
 
@@ -171,7 +171,7 @@ namespace Parameters
              const Dob::Typesystem::ArrayIndex index)
     {
         Int64 i;
-        DotsC_GetInt64Parameter(typeId, parameter, index, ValueMode, i);
+        DotsC_GetInt64Parameter(typeId, parameter, index, DotsC_ValueMode, i);
         return i;
     }
 
@@ -201,7 +201,7 @@ namespace Parameters
               const Dob::Typesystem::ArrayIndex index)
     {
         TypeId t;
-        DotsC_GetTypeIdParameter(typeId, parameter, index, ValueMode, t);
+        DotsC_GetTypeIdParameter(typeId, parameter, index, DotsC_ValueMode, t);
         return t;
     }
 
@@ -212,7 +212,7 @@ namespace Parameters
     {
         Int64 hashVal;
         const char * strVal;
-        DotsC_GetHashedIdParameter(typeId, parameter, index, ValueMode, hashVal, strVal);
+        DotsC_GetHashedIdParameter(typeId, parameter, index, DotsC_ValueMode, hashVal, strVal);
         if (strVal == NULL)
         {
             return InstanceId(hashVal);
@@ -230,7 +230,7 @@ namespace Parameters
     {
         DotsC_EntityId eid;
         const char * instanceIdStr;
-        DotsC_GetEntityIdParameter(typeId, parameter, index, ValueMode, eid, instanceIdStr);
+        DotsC_GetEntityIdParameter(typeId, parameter, index, DotsC_ValueMode, eid, instanceIdStr);
         if(instanceIdStr==NULL)
         {
             return EntityId(eid.typeId,InstanceId(eid.instanceId));
@@ -249,7 +249,7 @@ namespace Parameters
     {
         Int64 hashVal;
         const char * strVal;
-        DotsC_GetHashedIdParameter(typeId, parameter, index, ValueMode, hashVal, strVal);
+        DotsC_GetHashedIdParameter(typeId, parameter, index, DotsC_ValueMode, hashVal, strVal);
         if (strVal == NULL)
         {
             return ChannelId(hashVal);
@@ -268,7 +268,7 @@ namespace Parameters
     {
         Int64 hashVal;
         const char * strVal;
-        DotsC_GetHashedIdParameter(typeId, parameter, index, ValueMode, hashVal, strVal);
+        DotsC_GetHashedIdParameter(typeId, parameter, index, DotsC_ValueMode, hashVal, strVal);
         if (strVal == NULL)
         {
             return HandlerId(hashVal);
@@ -286,7 +286,7 @@ namespace Parameters
               const Dob::Typesystem::ArrayIndex index)
     {
         const char* tmp;
-        DotsC_GetStringParameter(typeId, parameter, index, ValueMode, tmp);
+        DotsC_GetStringParameter(typeId, parameter, index, DotsC_ValueMode, tmp);
         return Utilities::ToWstring(tmp);
     }
 
