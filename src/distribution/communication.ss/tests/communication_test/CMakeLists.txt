@@ -23,3 +23,9 @@ if (NOT MSVC)
     TARGET_LINK_LIBRARIES(communication_test lluf_id lluf_utils ${Boost_LIBRARIES})
 endif()
 
+INSTALL(TARGETS communication_test
+        RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
+        LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
+        ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
+
+INSTALL_DEBUG_INFO(communication_test)
