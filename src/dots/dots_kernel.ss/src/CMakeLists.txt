@@ -9,7 +9,7 @@ ADD_LIBRARY(dots_kernel SHARED ${sources} include/Safir/Dob/Typesystem/Internal/
 #Make our INTERNAL headers available to other parts of Core.
 target_include_directories(dots_kernel PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
-TARGET_LINK_LIBRARIES(dots_kernel PRIVATE 
+TARGET_LINK_LIBRARIES(dots_kernel PRIVATE
   dots_internal
   lluf_utils
   lluf_crash_reporter
@@ -17,6 +17,10 @@ TARGET_LINK_LIBRARIES(dots_kernel PRIVATE
   ${Boost_FILESYSTEM_LIBRARY}
   ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY})
+
+if (UNIX)
+  TARGET_LINK_LIBRARIES(dots_kernel PRIVATE rt)
+endif()
 
 SAFIR_INSTALL(TARGETS dots_kernel)
 
