@@ -185,6 +185,10 @@ function(add_library NAME)
 
   #call the real add_library function
   _add_library(${NAME} ${ARGN})
+
+  #Set library versions
+  set_property(TARGET ${NAME} PROPERTY VERSION "6.0.0")
+  set_property(TARGET ${NAME} PROPERTY SOVERSION 6)
 endfunction()
 
 # Set up properties on tests

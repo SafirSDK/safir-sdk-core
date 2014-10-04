@@ -1,6 +1,7 @@
 #Binaries
 *.jar
 *.so
+*.so.[0-9]*
 *.exe
 *.csexe
 *.dll
