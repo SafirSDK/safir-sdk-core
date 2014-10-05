@@ -606,6 +606,81 @@ namespace Internal
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex valueIndex,
                         KeyValueMode mode);
+
+        //---------------------------------------------------------
+        // Set values
+        //--------------------------------------------------------
+        static void Set(bool val,
+                        Safir::Dob::Typesystem::Int64 handle,
+                        const Dob::Typesystem::MemberIndex member,
+                        const Dob::Typesystem::ArrayIndex valueIndex,
+                        KeyValueMode mode);
+
+        static void Set(Safir::Dob::Typesystem::Int32 val,
+                        Safir::Dob::Typesystem::Int64 handle,
+                        const Dob::Typesystem::MemberIndex member,
+                        const Dob::Typesystem::ArrayIndex valueIndex,
+                        KeyValueMode mode);
+
+        static void Set(Safir::Dob::Typesystem::Int64 val,
+                        Safir::Dob::Typesystem::Int64 handle,
+                        const Dob::Typesystem::MemberIndex member,
+                        const Dob::Typesystem::ArrayIndex valueIndex,
+                        KeyValueMode mode);
+
+        static void Set(Safir::Dob::Typesystem::Float32 val,
+                        Safir::Dob::Typesystem::Int64 handle,
+                        const Dob::Typesystem::MemberIndex member,
+                        const Dob::Typesystem::ArrayIndex valueIndex,
+                        KeyValueMode mode);
+
+        static void Set(Safir::Dob::Typesystem::Float64 val,
+                        Safir::Dob::Typesystem::Int64 handle,
+                        const Dob::Typesystem::MemberIndex member,
+                        const Dob::Typesystem::ArrayIndex valueIndex,
+                        KeyValueMode mode);
+
+        static void Set(const std::wstring& val,
+                        Safir::Dob::Typesystem::Int64 handle,
+                        const Dob::Typesystem::MemberIndex member,
+                        const Dob::Typesystem::ArrayIndex valueIndex,
+                        KeyValueMode mode);
+
+        static void Set(const Safir::Dob::Typesystem::InstanceId& val,
+                        Safir::Dob::Typesystem::Int64 handle,
+                        const Dob::Typesystem::MemberIndex member,
+                        const Dob::Typesystem::ArrayIndex valueIndex,
+                        KeyValueMode mode);
+
+        static void Set(const Safir::Dob::Typesystem::HandlerId& val,
+                        Safir::Dob::Typesystem::Int64 handle,
+                        const Dob::Typesystem::MemberIndex member,
+                        const Dob::Typesystem::ArrayIndex valueIndex,
+                        KeyValueMode mode);
+
+        static void Set(const Safir::Dob::Typesystem::ChannelId& val,
+                        Safir::Dob::Typesystem::Int64 handle,
+                        const Dob::Typesystem::MemberIndex member,
+                        const Dob::Typesystem::ArrayIndex valueIndex,
+                        KeyValueMode mode);
+
+        static void Set(const Safir::Dob::Typesystem::EntityId& val,
+                        Safir::Dob::Typesystem::Int64 handle,
+                        const Dob::Typesystem::MemberIndex member,
+                        const Dob::Typesystem::ArrayIndex valueIndex,
+                        KeyValueMode mode);
+
+        static void Set(const Safir::Dob::Typesystem::ObjectPtr& val,
+                        Safir::Dob::Typesystem::Int64 handle,
+                        const Dob::Typesystem::MemberIndex member,
+                        const Dob::Typesystem::ArrayIndex valueIndex,
+                        KeyValueMode mode);
+
+        static void Set(const Safir::Dob::Typesystem::Binary& val,
+                        Safir::Dob::Typesystem::Int64 handle,
+                        const Dob::Typesystem::MemberIndex member,
+                        const Dob::Typesystem::ArrayIndex valueIndex,
+                        KeyValueMode mode);
     };
 }
 }
