@@ -147,6 +147,7 @@ function (SAFIR_INSTALL_PYTHON)
 
   if (NOT MSVC)
     STRING(REGEX REPLACE "\\.py$" "" _stripped_name "${INST_SCRIPT}")
+    GET_FILENAME_COMPONENT(_stripped_name ${_stripped_name} NAME)
     SET(_RENAME_ARG RENAME ${_stripped_name})
   endif()
 
