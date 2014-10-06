@@ -409,7 +409,7 @@ int CNodeStatus::CheckTimedOutNodes(bool forceTimeout)
     dcom_ulong32   dwCurrentTime;
     dcom_ulong32   TickNow;
 
-    boost::lock_guard<boost::mutex> lck(checkTimedOutNodesLock);
+    boost::mutex::scoped_lock lck(checkTimedOutNodesLock);
 
     //if(*pDbg>3) PrintDbg("CheckTimedOutNodes()\n");
 

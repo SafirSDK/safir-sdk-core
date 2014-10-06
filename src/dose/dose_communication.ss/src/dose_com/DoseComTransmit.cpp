@@ -76,9 +76,7 @@
 #include "../defs/DoseCom_Interface.h"  // to get an error code
 
 #include <boost/thread/mutex.hpp>
-#include <Safir/Dob/Internal/Atomic.h>
-
-namespace Atomics = Safir::Dob::Internal::Atomics;
+#include <boost/atomic.hpp>
 
 //--------------------
 // Externals
@@ -305,7 +303,7 @@ typedef volatile struct
 
     // incremented by DOSE_Xmit_msg() when overflow
     // cleared by Xmit_Thread() when free entries in Queue
-    boost::uint32_t TransmitQueueOverflow;
+    boost::atomic<boost::uint32_t> TransmitQueueOverflow;
 
     volatile dcom_uchar8   bSendQueueNotOverflow;
 
@@ -370,7 +368,7 @@ static THREAD_API Ack_Thread(void *)
         // there is more space.
         for (;;)
         {
-            boost::lock_guard<boost::mutex> lck(g_threadLock);
+            boost::mutex::scoped_lock lck(g_threadLock);
             
             if(
                     ( (g_Ack_Get_ix - g_Ack_Put_ix) == 1)
@@ -411,7 +409,7 @@ static THREAD_API Ack_Thread(void *)
 
         if((UdpMsg.MsgType == MSG_TYPE_ACK) || (UdpMsg.MsgType == MSG_TYPE_NACK))
         {
-            boost::lock_guard<boost::mutex> lck(g_threadLock);
+            boost::mutex::scoped_lock lck(g_threadLock);
 
             if(*pDbg>=5)
             PrintDbg("+++ AckThread() MsgTyp=%s DoseId=%d "
@@ -660,15 +658,15 @@ static bool CleanUp_After_Msg_Ignored(int qIx, int TxMsgArrIx)
     //----------------------------------------------------------
     // Shall we send a 'QueueOverflow' condition has ended event
     //-----------------------------------------------------------
-    if(Atomics::atomic_read32(&TxQ[qIx].TransmitQueueOverflow) > 0)
+    if(TxQ[qIx].TransmitQueueOverflow.load() > 0)
     {
         if(*pDbg>4)
             PrintDbg("#   Decrementing TransmitQueueOverflow (%d) from %d\n",
-                    qIx,Atomics::atomic_read32(&TxQ[qIx].TransmitQueueOverflow));
+                    qIx, TxQ[qIx].TransmitQueueOverflow.load());
 
-        Atomics::atomic_dec32(&TxQ[qIx].TransmitQueueOverflow);
+        TxQ[qIx].TransmitQueueOverflow--;
 
-        if(Atomics::atomic_read32(&TxQ[qIx].TransmitQueueOverflow) == 0)
+        if(TxQ[qIx].TransmitQueueOverflow.load() == 0)
         {
             TxQ[qIx].bSendQueueNotOverflow = 1;
         }
@@ -780,15 +778,15 @@ static int CleanUp_After_Msg_Completed(int qIx)
     //----------------------------------------------------------
     // Shall we send a 'QueueOverflow' condition has ended event
     //-----------------------------------------------------------
-    if(Atomics::atomic_read32(&TxQ[qIx].TransmitQueueOverflow) > 0)
+    if(TxQ[qIx].TransmitQueueOverflow.load() > 0)
     {
         if(*pDbg>4)
             PrintDbg("#   Decrementing TransmitQueueOverflow (%d) from %d\n",
-                    qIx,Atomics::atomic_read32(&TxQ[qIx].TransmitQueueOverflow));
+                    qIx, TxQ[qIx].TransmitQueueOverflow.load());
 
-        Atomics::atomic_dec32(&TxQ[qIx].TransmitQueueOverflow);
+        TxQ[qIx].TransmitQueueOverflow--;
 
-        if(Atomics::atomic_read32(&TxQ[qIx].TransmitQueueOverflow) == 0)
+        if(TxQ[qIx].TransmitQueueOverflow.load() == 0)
         {
             TxQ[qIx].bSendQueueNotOverflow = 1;
         }
@@ -1846,7 +1844,7 @@ static THREAD_API TxThread(void *)
         qIx = 0;
         while(qIx < NUM_TX_QUEUES)
         {
-            boost::lock_guard<boost::mutex> lck(g_threadLock);
+            boost::mutex::scoped_lock lck(g_threadLock);
 
             // There could be the following jobs:
             // 1) Timeout when waiting for Ack
@@ -2763,7 +2761,7 @@ int CDoseComTransmit::Xmit_Msg(const char *pMsg, dcom_ulong32 MsgLength,
                                dcom_uchar8 PoolDistribution, dcom_uchar8 bUseAck,
                                int Priority, int Destination)
 {
-    boost::lock_guard<boost::mutex> lck(g_threadLock);
+    boost::mutex::scoped_lock lck(g_threadLock);
 
     // Check if we should simulate a stop in the outgoing traffic
     if (g_pShm->InhibitOutgoingTraffic)
@@ -2911,7 +2909,7 @@ int CDoseComTransmit::Xmit_Msg(const char *pMsg, dcom_ulong32 MsgLength,
                 PrintDbg(">   Xmit_Msg() Overflow in XmitQueue for PD_ISCOMPLETE\n");
 
                 // Want some free entries before signaling
-                Atomics::atomic_write32(&TxQ[Qix].TransmitQueueOverflow, XMIT_QUEUE_HYSTERISIS); //  [B]
+                TxQ[Qix].TransmitQueueOverflow.store(XMIT_QUEUE_HYSTERISIS); //  [B]
 
                 MightBeOverFlow = 1;
             }
@@ -2925,7 +2923,7 @@ int CDoseComTransmit::Xmit_Msg(const char *pMsg, dcom_ulong32 MsgLength,
 //          DoseOs::Sleep(2000); // force error
 //#endif
             //Want 2 free entries be fore signalling
-            Atomics::atomic_write32(&TxQ[Qix].TransmitQueueOverflow, XMIT_QUEUE_HYSTERISIS);      // [B]
+            TxQ[Qix].TransmitQueueOverflow.store(XMIT_QUEUE_HYSTERISIS);      // [B]
 
             //if(*pDbg>1)
             //   PrintDbg(">   Xmit_Msg()           After Sleep P/G=%u/%u\n",
@@ -2986,7 +2984,7 @@ int CDoseComTransmit::Xmit_Msg(const char *pMsg, dcom_ulong32 MsgLength,
                                 " PD_ISCOMPLETE ******\n");
 
                     //Want some free entries before signaling
-                     Atomics::atomic_write32(&TxQ[Qix].TransmitQueueOverflow, XMIT_QUEUE_HYSTERISIS); //[D]
+                     TxQ[Qix].TransmitQueueOverflow.store(XMIT_QUEUE_HYSTERISIS); //[D]
 
                     g_pTxStatistics[Qix].CountTxOverflow++;
                     g_pShm->Statistics.TransmitQueueFullCount++;
@@ -2998,7 +2996,7 @@ int CDoseComTransmit::Xmit_Msg(const char *pMsg, dcom_ulong32 MsgLength,
             {
                 //Sleep(2000); // force error
                 //Want some free entries be fore signalling
-                Atomics::atomic_write32(&TxQ[Qix].TransmitQueueOverflow, XMIT_QUEUE_HYSTERISIS);     // [D]
+                TxQ[Qix].TransmitQueueOverflow.store(XMIT_QUEUE_HYSTERISIS);     // [D]
 
                 g_pTxStatistics[Qix].CountTxOverflow++;
                 g_pShm->Statistics.TransmitQueueFullCount++;
