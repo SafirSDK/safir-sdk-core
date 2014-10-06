@@ -33,9 +33,9 @@ INSTALL(FILES
 #          data/dobmake_config
 #        DESTINATION ${SAFIR_SDK}/dots/dots_generated)
 
-INSTALL(PROGRAMS
-  dots_v.py
-  DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
+
+SAFIR_INSTALL_PYTHON(SCRIPT dots_v.py
   COMPONENT Development)
+
 
 #TODO        data/dobmake.py

@@ -134,6 +134,29 @@ function (SAFIR_INSTALL)
 endfunction()
 
 
+#
+# This function will install a python script into the bin directory.
+# If it is a *nix system the script will have ".py" stripped from its name.
+#
+function (SAFIR_INSTALL_PYTHON)
+  cmake_parse_arguments(INST "" "SCRIPT;COMPONENT" "" ${ARGN})
+
+  if (NOT "${INST_UNPARSED_ARGUMENTS}" STREQUAL "")
+    message(FATAL_ERROR "Unknown argument to SAFIR_INSTALL_PYTHON '${INST_UNPARSED_ARGUMENTS}'")
+  endif()
+
+  if (NOT MSVC)
+    STRING(REGEX REPLACE "\\.py$" "" _stripped_name "${INST_SCRIPT}")
+    SET(_RENAME_ARG RENAME ${_stripped_name})
+  endif()
+
+  INSTALL(PROGRAMS ${INST_SCRIPT}
+    DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
+    COMPONENT ${INST_COMPONENT}
+    ${_RENAME_ARG})
+endfunction()
+
+
 if (UNIX)
   set(PATH_SEPARATOR ":")
 else()

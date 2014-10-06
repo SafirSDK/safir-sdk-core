@@ -34,8 +34,7 @@ endif()
 configure_file(run_dose_tests.py.in
   "${CMAKE_CURRENT_BINARY_DIR}/run_dose_tests.py" @ONLY)
 
-INSTALL(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/run_dose_tests.py
-  DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
+SAFIR_INSTALL_PYTHON(SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/run_dose_tests.py
   COMPONENT Test)
 
 INSTALL(
