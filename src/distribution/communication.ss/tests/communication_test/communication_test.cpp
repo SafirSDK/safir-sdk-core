@@ -34,6 +34,7 @@ public:
         ,seeds()
         ,nsend(0)
         ,nrecv(0)
+        ,accumulatedRecv(false)
         ,messageSize(1000)
     {
         boost::program_options::options_description desc("Command line options");
@@ -43,9 +44,9 @@ public:
                 ("node-type,t", boost::program_options::value<std::string>(), "Node type nt0(unicast only), nt1 or nt2, defaults to nt0'.")
                 ("await,w", boost::program_options::value<int>(), "Wait for specified number of other nodes before start sending data")
                 ("seed,s", boost::program_options::value< std::vector<std::string> >()->multitoken(), "Seed addresses on format 'address:port'")
-                ("nmsg,n", boost::program_options::value<unsigned int>(), "Number of messages to send and receive. Equal to set both nsend and nsend to the same value")
-                ("nsend", boost::program_options::value<unsigned int>(), "Number of messages to send, default unlimited")
-                ("nrecv", boost::program_options::value<unsigned int>(), "Number of messages to receive from a singel node, default unlimited")
+                ("nmsg,n", boost::program_options::value<unsigned int>(), "Number of messages to send and receive to and from each other node.")
+                ("nsend", boost::program_options::value<unsigned int>(), "Number of messages to send to every other node, default unlimited")
+                ("nrecv", boost::program_options::value<unsigned int>(), "Number of messages to receive from all otherl nodes (accumulated), default unlimited")
                 ("size", boost::program_options::value<size_t>(), "Size of data packets, default is 1000 bytes");
         boost::program_options::variables_map vm;
         boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
@@ -84,6 +85,7 @@ public:
         if (vm.count("nrecv"))
         {
             nrecv=vm["nrecv"].as<unsigned int>();
+            accumulatedRecv=true;
         }
         if (vm.count("size"))
         {
@@ -103,6 +105,7 @@ public:
     std::vector<std::string> seeds;
     unsigned int nsend;
     unsigned int nrecv;
+    bool accumulatedRecv;
     size_t messageSize;
 };
 
@@ -177,7 +180,6 @@ public:
         {
             m_cond.wait(lock);
         }
-        m_count=m_initialValue;
     }
 
     void Notify()
@@ -214,14 +216,16 @@ class Sp : private boost::noncopyable
 {
 public:
 
-    Sp(unsigned int numRecv,
+    Sp(unsigned int numRecv, bool accumulated,
        const std::function< void(int64_t) >& includeNode,
        const std::function< void(int64_t) >& reportNodeFinished)
         :m_nodeTypes()
         ,m_nodeNames()
         ,m_recvCount()
+        ,m_totalRecvCount(0)
         ,m_retransmitCount(0)
         ,m_numRecv(numRecv)
+        ,m_accumulated(accumulated)
         ,m_includeNode(includeNode)
         ,m_reportNodeFinished(reportNodeFinished)
     {        
@@ -245,7 +249,7 @@ public:
 
         if (m_numRecv==0)
         {
-            std::cout<<"Received all messages from node "<<m_nodeNames[nodeId]<<std::endl;
+            std::cout<<"No messages to be received from node"<<m_nodeNames[nodeId]<<std::endl;
             m_reportNodeFinished(nodeId);
         }
     }
@@ -276,6 +280,8 @@ public:
         {
             std::cout<<"Bad CRC! size="<<size<<std::endl;
         }
+
+        ++m_totalRecvCount;
         unsigned int& rc=m_recvCount[id];
         unsigned int sendCount=*reinterpret_cast<const unsigned int*>(msg.get());
 
@@ -294,16 +300,17 @@ public:
         {
             std::cout<<"Recveived "<<sendCount<<", expected to get "<<rc<<std::endl;
             exit(1);
-            //m_recvCount[id]=sendCount;
         }
 
-        if (rc%1000==0)
-        {
-            std::cout<<"Recv from "<<m_nodeNames[id]<<", count="<<m_recvCount[id]<<std::endl;
-        }
         if (rc==m_numRecv)
         {
             std::cout<<"Received all messages from node "<<m_nodeNames[id]<<std::endl;
+            m_reportNodeFinished(id);
+        }
+
+        if (m_accumulated && m_totalRecvCount>=m_numRecv)
+        {
+            std::cout<<"Total number of messages received"<<std::endl;
             m_reportNodeFinished(id);
         }
     }
@@ -322,8 +329,10 @@ private:
     NodeTypes m_nodeTypes;
     std::map<int64_t, std::string> m_nodeNames;
     std::map<int64_t, unsigned int> m_recvCount;
+    unsigned int m_totalRecvCount;
     unsigned int m_retransmitCount;
     unsigned int m_numRecv;
+    bool m_accumulated;
     std::function< void(int64_t) > m_includeNode;
     std::function< void(int64_t) > m_reportNodeFinished;
 };
@@ -348,7 +357,7 @@ int main(int argc, char * argv[])
 
     std::set<int64_t> nodes;
     boost::shared_ptr<Safir::Dob::Internal::Com::Communication> com;
-    boost::shared_ptr<Sp> sp(new Sp(cmd.nrecv,
+    boost::shared_ptr<Sp> sp(new Sp(cmd.nrecv, cmd.accumulatedRecv,
     [&](int64_t id)
     {
         nodes.insert(id);
