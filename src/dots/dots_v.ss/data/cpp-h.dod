@@ -280,6 +280,7 @@ namespace @_NAMESPACEV_@
 #include <Safir/Dob/Typesystem/Object.h>
 #include <Safir/Dob/Typesystem/ObjectContainer.h>
 #include <Safir/Dob/Typesystem/ArrayContainer.h>
+#include <Safir/Dob/Typesystem/SequenceContainer.h>
 #include <Safir/Dob/Typesystem/ContainerProxies.h>
 
 @@TABLE@@
@@ -315,6 +316,7 @@ namespace @_NAMESPACEV_@
 
     typedef Safir::Dob::Typesystem::ObjectContainerImpl<@_CLASS_@> @_CLASS_@Container;
     typedef Safir::Dob::Typesystem::ArrayContainer<@_CLASS_@Container> @_CLASS_@ContainerArray;
+    typedef Safir::Dob::Typesystem::SequenceContainer<@_CLASS_@Container> @_CLASS_@SequenceContainer;
 
 @@IF@@ @_EXIST:CLASSSUMMARY_@
     /**
@@ -439,6 +441,17 @@ namespace @_NAMESPACEV_@
         const @_MEMBERTYPE_@ContainerArray & @_MEMBER_@() const;
         @_MEMBERTYPE_@ContainerArray & @_MEMBER_@();
 @@END_IF@@
+@@ --- Sequence ---
+@@ELSIF@@ @_EXIST:MEMBERISSEQUENCE_@
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+        /**
+         * @_REPLACE_ALL(\n/\n         * ):MEMBERSUMMARY_@
+         */
+@@END_IF@@
+        const @_MEMBERTYPE_@SequenceContainer & @_MEMBER_@() const;
+        @_MEMBERTYPE_@SequenceContainer & @_MEMBER_@();
+
+@@ --- Singel value ---
 @@ELSE@@
 @@IF@@ @_EXIST:MEMBERSUMMARY_@
         /**
@@ -499,6 +512,8 @@ namespace @_NAMESPACEV_@
 @@ELSE@@
         @_MEMBERTYPE_@ContainerArray m_@_MEMBER_@Member;
 @@END_IF@@
+@@ELSIF@@ @_EXIST:MEMBERISSEQUENCE_@
+        @_MEMBERTYPE_@SequenceContainer m_@_MEMBER_@Member;
 @@ELSE@@
 @@IF@@ (@_UNIFORM_MEMBERTYPE_@ = String) or (@_UNIFORM_MEMBERTYPE_@ = Boolean)
         Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@Container m_@_MEMBER_@Member;

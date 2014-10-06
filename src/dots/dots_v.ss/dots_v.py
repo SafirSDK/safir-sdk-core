@@ -70,7 +70,7 @@ class Dou(object):
 
 class DouMember(object):
     
-    def __init__(self, summary, name, type, maxLength, array, arraySize, arraySizeRef):
+    def __init__(self, summary, name, type, maxLength, array, arraySize, arraySizeRef, sequence, dictionary_type):
         self.summary = summary
         self.name = name
         self.type = type
@@ -78,6 +78,8 @@ class DouMember(object):
         self.array = array
         self.arraySize = arraySize
         self.arraySizeRef = arraySizeRef
+        self.sequence = sequence
+        self.dictionary_type = dictionary_type
 
 class DouCreateRoutine(object):
     
@@ -109,13 +111,14 @@ class DouCreateRoutineValue(object):
         
 class DouParameter(object):
     
-    def __init__(self, summary, name, type, value, arrayElements):
+    def __init__(self, summary, name, type, array, sequence, dictionary_type):
         self.summary = summary
         self.name = name
         self.type = type
-        self.value = value
-        self.arrayElements = arrayElements
-        
+        self.array = array
+        self.sequence = sequence
+        self.dictionary_type = dictionary_type
+
 def readTextPropery(xml_root, element):
     if (element.find("/") != -1):
         # Has subtags, prefix all of them
@@ -133,7 +136,6 @@ def dou_uniform_translate(typename):
     if typename == "Class" : typename = "Object"
     return typename
 
-
 def dou_uniform_lookup_init(dou_uniform_lookup_cache, dou_file_lookup_cache, dou_xml_lookup_cache, dou_file_root):
     for path, dirs, files in os.walk(dou_file_root): # Walk directory tree
         for file in files:
@@ -147,13 +149,10 @@ def dou_uniform_lookup_init(dou_uniform_lookup_cache, dou_file_lookup_cache, dou
                 dou_file_lookup_cache[file] = os.path.join(path, file)
                 dou_xml_lookup_cache[os.path.join(path, file)] = dou_xml
 
-
 def dou_uniform_lookup(gSession, typename):
     if typename in gSession.dou_uniform_lookup_cache: return gSession.dou_uniform_lookup_cache[typename]
-                
     print("** ERROR - Cannot match dou type", typename, file=sys.stderr)
     return "** ERROR - Cannot match dou type"
-
 
 # We only need to call this once per dod file (if Namespace prefixes are used) 
 # since it does not differ between dou files
@@ -166,7 +165,7 @@ def namespace_prefix_init(gSession):
             file_suffix):
         # The dict has already been initialized for this file suffix, leave it
         return
-    
+
     gSession.namespace_prefixes.clear()
     gSession.namespace_prefixes["¤¤Namespace_Prefix_File_Suffix¤¤"] = file_suffix
     
@@ -230,7 +229,8 @@ def seek_member_in_base_class(gSession, seek_name, baseClass):
                                 readTextPropery(m, "maxLength"), \
                                 readTextPropery(m, "array"), \
                                 readTextPropery(m, "arraySize"), \
-                                m.find("{urn:safir-dots-unit}arraySizeRef") is not None)
+                                m.find("{urn:safir-dots-unit}arraySizeRef") is not None, \
+                                False, "")
                         
                     seek_member_in_base_class_cache[(seek_name, baseClass)] = found_member
                     return found_member
@@ -291,13 +291,17 @@ def parse_dou(gSession, dou_xmlfile):
             m_array = readTextPropery(m, "array")
             m_arraySize = readTextPropery(m, "arraySize")
             m_arraySizeRef = m.find("{urn:safir-dots-unit}arraySizeRef") is not None
+            m_sequence = readTextPropery(m, "sequence") is not None
+            m_dictionary = readTextPropery(m, "dictionary")
             parsed.members.append( DouMember( summary_formatter(readTextPropery(m, "summary")), \
                                         m_name, \
                                         m_type, \
                                         readTextPropery(m, "maxLength"), \
                                         m_array, \
                                         m_arraySize,
-                                        m_arraySizeRef) )
+                                        m_arraySizeRef,
+                                        m_sequence,
+                                        m_dictionary) )
             member_name_to_type_lookup[m_name] = m_type
             member_name_to_is_array_lookup[m_name] = (m_arraySize is not None or m_array is not None or m_arraySizeRef)
             
@@ -436,24 +440,24 @@ def parse_dou(gSession, dou_xmlfile):
 
     parameters = xml_root.find("{urn:safir-dots-unit}parameters")
     if parameters is not None:
-        for p in parameters:
-            arrayElements = []
-            aes = p.find(".//{urn:safir-dots-unit}arrayElements")
-            if not aes is None:
-                for ae in aes:
-                    arrayElements.append(ae.text)
-        
+        for p in parameters:            
             m_type = readTextPropery(p, "type")
+            is_array = readTextPropery(p, "arrayElements") is not None
+            is_sequence = readTextPropery(p, "sequence") is not None
+            is_dict = p.find("{urn:safir-dots-unit}dictionary")
+            dict_type = None
+            if is_dict is not None:
+              dict_type = is_dict.attrib["keyType"]
+
             parsed.parameters.append( DouParameter( summary_formatter(readTextPropery(p, "summary")), \
                                         readTextPropery(p, "name"), \
                                         m_type, \
-                                        readTextPropery(p, "value"), \
-                                        arrayElements) )
+                                        is_array, is_sequence, dict_type) )
 
-            if len(arrayElements) > 0: 
+            if is_array: 
                 parsed.unique_dependencies.append(gSession.dod_types[gSession.dod_parameters["Index_Type"]].dependency)
 
-            if not (m_type in gSession.dod_types): 
+            if not (m_type in gSession.dod_types):
                 # This is a dou defined object
                 uniform_type = dou_uniform_lookup(gSession, m_type)
                 gSession.dod_types[m_type] = DodType(m_type, m_type, uniform_type, type_formatter(gSession, 
@@ -790,6 +794,9 @@ def process_at_variable_lookup(gSession, var, dou, table_line, parent_table_line
     elif var == "MEMBERTYPE" : return gSession.dod_types[dou.members[index].type].generated
     elif var == "MEMBERISSTRING" : return member_is_string(dou, table_line)
     elif var == "MEMBERISARRAY" : return member_is_array(dou, table_line)
+    elif var == "MEMBERISSEQUENCE" : return member_is_sequence(dou, table_line)
+    elif var == "MEMBERISDICTIONARY" : return member_is_dictionary(dou, table_line)
+    elif var == "MEMBERDICTIONARYTYPE" : return dou.members[table_line - 1].dictionary_type
     elif var == "PARAMETER" : return member_formatter(gSession, dou.parameters[index].name)
     elif var == "PARAMETER'LENGTH" : return get_iterator_length("PARAMETER", dou, 0, 0)
     elif var == "XMLPARAMETER" : return dou.parameters[index].name
@@ -798,6 +805,9 @@ def process_at_variable_lookup(gSession, var, dou, table_line, parent_table_line
     elif var == "UNIFORM_PARAMETERTYPE" : return gSession.dod_types[dou.parameters[index].type].uniform_type
     elif var == "PARAMETERTYPE" : return gSession.dod_types[dou.parameters[index].type].generated
     elif var == "PARAMETERISARRAY" : return parameter_is_array(dou, table_line)
+    elif var == "PARAMETERISSEQUENCE" : return parameter_is_sequence(dou, table_line)
+    elif var == "PARAMETERISDICTIONARY" : return parameter_is_dictionary(dou, table_line)
+    elif var == "PARAMETERDICTIONARYTYPE" : return dou.parameters[table_line - 1].dictionary_type
     elif var == "TYPEID" : 
         if dou.name == "": return ""
         return str(md5_first64(dou.name))
@@ -867,11 +877,23 @@ def create_value_parameter_inline(dou, table_line, parent_table_line):
     return dou.createRoutines[parent_table_line - 1].values[table_line - 1].inline
     
 def parameter_is_array(dou, table_line):
-    return trim_false(len(dou.parameters) > 0 and len(dou.parameters[table_line - 1].arrayElements) > 0)
+    return trim_false(len(dou.parameters) > 0 and dou.parameters[table_line - 1].array)
+  
+def parameter_is_sequence(dou, table_line):
+    return trim_false(len(dou.parameters) > 0 and dou.parameters[table_line - 1].sequence)
+
+def parameter_is_dictionary(dou, table_line):
+    return trim_false(len(dou.parameters) > 0 and (dou.parameters[table_line - 1].dictionary_type is not None))
 
 def member_is_array(dou, table_line):
     return trim_false(len(dou.members) > 0 and ((dou.members[table_line - 1].arraySize is not None) or (dou.members[table_line - 1].array is not None) or dou.members[table_line - 1].arraySizeRef))
     
+def member_is_sequence(dou, table_line):
+    return trim_false(len(dou.members) > 0 and dou.members[table_line - 1].sequence)
+
+def member_is_dictionary(dou, table_line):
+    return trim_false(len(dou.members) > 0 and (dou.members[table_line - 1].dictionary_type is not None))
+  
 def member_is_string(dou, table_line):
     return trim_false(len(dou.members) > 0 and dou.members[table_line - 1].type == "String")
 
@@ -887,12 +909,16 @@ def process_at_exist(at_string, dou, table_line, parent_table_line):
     if var == "MEMBER": return len(dou.members) > 0
     elif var == "MEMBERISSTRING" : return member_is_string(dou, table_line)
     elif var == "MEMBERISARRAY" : return member_is_array(dou, table_line)
+    elif var == "MEMBERISSEQUENCE" : return member_is_sequence(dou, table_line)
+    elif var == "MEMBERISDICTIONARY" : return member_is_dictionary(dou, table_line)
     elif var == "MEMBERSUMMARY": return len(dou.members) > 0 and dou.members[table_line - 1].summary is not None and len(dou.members[table_line - 1].summary) > 0
     elif var == "CLASSSUMMARY": return dou.summary is not None and len(dou.summary) > 0
     elif var == "DEPENDENCY": return len(dou.unique_dependencies) > 0
     elif var == "PARAMETER": return len(dou.parameters) > 0
     elif var == "PARAMETERSUMMARY": return len(dou.parameters) > 0 and dou.parameters[table_line - 1].summary is not None and len(dou.parameters[table_line - 1].summary) > 0
     elif var == "PARAMETERISARRAY" : return parameter_is_array(dou, table_line)
+    elif var == "PARAMETERISSEQUENCE" : return parameter_is_sequence(dou, table_line)
+    elif var == "PARAMETERISDICTIONARY" : return parameter_is_dictionary(dou, table_line)
     elif var == "CREATEROUTINE": return len(dou.createRoutines) > 0
     elif var == "CREATEROUTINESUMMARY": return len(dou.createRoutines) > 0 and dou.createRoutines[table_line - 1].summary is not None and len(dou.createRoutines[table_line - 1].summary) > 0
     elif var == "CREATEPARAMETER": 
