@@ -167,9 +167,6 @@ namespace Typesystem
          */
         ObjectContainerBase & operator=(const ObjectContainerBase & other)
         {ContainerBase::operator =(other); return *this;}
-
-    private:
-        virtual ObjectPtr& GetRawObjectPtr() = 0;
     };
 
     /**
@@ -371,7 +368,6 @@ namespace Typesystem
         virtual void ResetObjectPointer(){m_pObject.reset();}
     private:
         T_Ptr m_pObject;
-        virtual ObjectPtr& GetRawObjectPtr() {return m_pObject;}
     };
 
     /**

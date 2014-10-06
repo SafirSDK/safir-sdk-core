@@ -536,72 +536,96 @@ namespace Internal
         // Get values
         //--------------------------------------------------------
         static void Get(bool& val,
+                        bool& isNull,
+                        bool& isChanged,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex valueIndex,
                         KeyValueMode mode);
 
         static void Get(Safir::Dob::Typesystem::Int32& val,
+                        bool& isNull,
+                        bool& isChanged,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex valueIndex,
                         KeyValueMode mode);
 
         static void Get(Safir::Dob::Typesystem::Int64& val,
+                        bool& isNull,
+                        bool& isChanged,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex valueIndex,
                         KeyValueMode mode);
 
         static void Get(Safir::Dob::Typesystem::Float32& val,
+                        bool& isNull,
+                        bool& isChanged,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex valueIndex,
                         KeyValueMode mode);
 
         static void Get(Safir::Dob::Typesystem::Float64& val,
+                        bool& isNull,
+                        bool& isChanged,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex valueIndex,
                         KeyValueMode mode);
 
         static void Get(std::wstring& val,
+                        bool& isNull,
+                        bool& isChanged,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex valueIndex,
                         KeyValueMode mode);
 
         static void Get(Safir::Dob::Typesystem::InstanceId& val,
+                        bool& isNull,
+                        bool& isChanged,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex valueIndex,
                         KeyValueMode mode);
 
         static void Get(Safir::Dob::Typesystem::HandlerId& val,
+                        bool& isNull,
+                        bool& isChanged,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex valueIndex,
                         KeyValueMode mode);
 
         static void Get(Safir::Dob::Typesystem::ChannelId& val,
+                        bool& isNull,
+                        bool& isChanged,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex valueIndex,
                         KeyValueMode mode);
 
         static void Get(Safir::Dob::Typesystem::EntityId& val,
+                        bool& isNull,
+                        bool& isChanged,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex valueIndex,
                         KeyValueMode mode);
 
         static void Get(Safir::Dob::Typesystem::ObjectPtr& val,
+                        bool& isNull,
+                        bool& isChanged,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex valueIndex,
                         KeyValueMode mode);
 
         static void Get(Safir::Dob::Typesystem::Binary& val,
+                        bool& isNull,
+                        bool& isChanged,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex valueIndex,
