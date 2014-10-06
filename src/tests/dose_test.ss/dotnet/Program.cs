@@ -40,6 +40,7 @@ namespace dose_test_dotnet
             {
                 Logger.Instance.WriteLine("Caught Exception! Contents of exception is:");
                 Logger.Instance.WriteLine(e);
+                return 12;
             }
             finally
             {

@@ -76,7 +76,7 @@ namespace Internal
             {
                 SEND_SYSTEM_LOG(Error, <<"Could not read dots_shared_memory_size from typesystem.ini");
                 std::cout<<"Could not read dots_shared_memory_size from typesystem.ini"<<std::endl;
-                exit(1);
+                exit(21);
             }
 
             //get all dou directory strings
@@ -91,7 +91,7 @@ namespace Internal
                 {
                     SEND_SYSTEM_LOG(Error, <<"Dir not found");
                     std::cout<<"dou_directory '"+douDirectory.string()+"' in typesystem.ini does not appear to be a directory"<<std::endl;
-                    exit(1);
+                    exit(22);
                 }
 
                 directories.push_back(douDirectory);

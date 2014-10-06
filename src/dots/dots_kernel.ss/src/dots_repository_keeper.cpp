@@ -65,7 +65,7 @@ namespace Internal
         {
             SEND_SYSTEM_LOG(Error,  << "Loading of dots_kernel failed with ... exception.");
         }
-        exit(1);
+        exit(20);
     }
 
     bool RepositoryKeeper::RepositoryCreatedByThisProcess()
