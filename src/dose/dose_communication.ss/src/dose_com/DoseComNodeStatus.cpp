@@ -38,8 +38,7 @@
 #include "DoseComReceive.h"
 #include "../defs/DoseNodeStatus.h"
 #include "PrintError.h"
-#include <ace/Thread_Mutex.h>
-#include <ace/Guard_T.h>
+#include <boost/thread/mutex.hpp>
 
 static unsigned long g_TickPrev = 0;
 
@@ -401,7 +400,7 @@ int CNodeStatus::UpdateNode_Up(unsigned char DoseId,
 * Returns: Number of changed nodes
 *
 *****************************************************************/
-static ACE_Thread_Mutex checkTimedOutNodesLock;
+static boost::mutex checkTimedOutNodesLock;
 
 int CNodeStatus::CheckTimedOutNodes(bool forceTimeout)
 {
@@ -410,7 +409,7 @@ int CNodeStatus::CheckTimedOutNodes(bool forceTimeout)
     dcom_ulong32   dwCurrentTime;
     dcom_ulong32   TickNow;
 
-    ACE_Guard<ACE_Thread_Mutex> lck(checkTimedOutNodesLock);
+    boost::lock_guard<boost::mutex> lck(checkTimedOutNodesLock);
 
     //if(*pDbg>3) PrintDbg("CheckTimedOutNodes()\n");
 

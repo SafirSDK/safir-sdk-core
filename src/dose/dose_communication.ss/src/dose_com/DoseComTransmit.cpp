@@ -75,8 +75,7 @@
 #include "../defs/DoseNodeStatus.h"
 #include "../defs/DoseCom_Interface.h"  // to get an error code
 
-#include <ace/Thread_Mutex.h>
-#include <ace/Guard_T.h>
+#include <boost/thread/mutex.hpp>
 #include <Safir/Dob/Internal/Atomic.h>
 
 namespace Atomics = Safir::Dob::Internal::Atomics;
@@ -117,7 +116,7 @@ extern volatile int * volatile pDbg;
 
 // We really don't rely on the lock free approach taken for the original design. This lock is
 // used to protect the different threads from concurrent access to the transmit queues.
-static ACE_Thread_Mutex g_threadLock;
+static boost::mutex g_threadLock;
 
 volatile static DOSE_SHARED_DATA_S *g_pShm;
 volatile static NODESTATUS_TABLE *g_pNodeStatusTable;
@@ -371,7 +370,7 @@ static THREAD_API Ack_Thread(void *)
         // there is more space.
         for (;;)
         {
-            ACE_Guard<ACE_Thread_Mutex> lck(g_threadLock);
+            boost::lock_guard<boost::mutex> lck(g_threadLock);
             
             if(
                     ( (g_Ack_Get_ix - g_Ack_Put_ix) == 1)
@@ -412,7 +411,7 @@ static THREAD_API Ack_Thread(void *)
 
         if((UdpMsg.MsgType == MSG_TYPE_ACK) || (UdpMsg.MsgType == MSG_TYPE_NACK))
         {
-            ACE_Guard<ACE_Thread_Mutex> lck(g_threadLock);
+            boost::lock_guard<boost::mutex> lck(g_threadLock);
 
             if(*pDbg>=5)
             PrintDbg("+++ AckThread() MsgTyp=%s DoseId=%d "
@@ -1847,7 +1846,7 @@ static THREAD_API TxThread(void *)
         qIx = 0;
         while(qIx < NUM_TX_QUEUES)
         {
-            ACE_Guard<ACE_Thread_Mutex> lck(g_threadLock);
+            boost::lock_guard<boost::mutex> lck(g_threadLock);
 
             // There could be the following jobs:
             // 1) Timeout when waiting for Ack
@@ -2764,7 +2763,7 @@ int CDoseComTransmit::Xmit_Msg(const char *pMsg, dcom_ulong32 MsgLength,
                                dcom_uchar8 PoolDistribution, dcom_uchar8 bUseAck,
                                int Priority, int Destination)
 {
-    ACE_Guard<ACE_Thread_Mutex> lck(g_threadLock);
+    boost::lock_guard<boost::mutex> lck(g_threadLock);
 
     // Check if we should simulate a stop in the outgoing traffic
     if (g_pShm->InhibitOutgoingTraffic)
