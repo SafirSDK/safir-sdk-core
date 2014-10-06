@@ -294,7 +294,7 @@ public:
         {
             std::cout<<"Recveived "<<sendCount<<", expected to get "<<rc<<std::endl;
             exit(1);
-            m_recvCount[id]=sendCount;
+            //m_recvCount[id]=sendCount;
         }
 
         if (rc%1000==0)
@@ -361,7 +361,7 @@ int main(int argc, char * argv[])
      },
     [&](int64_t id)
     {
-        std::cout<<"nofify stop cond"<<std::endl;
+        std::cout<<"nofify stop cond id "<<id<<std::endl;
         stopCondition.Notify();
     }));
 
@@ -383,10 +383,10 @@ int main(int argc, char * argv[])
                                                            cmd.unicastAddress,
                                                            nodeTypes.ToVector()));
 
-    com->SetDataReceiver([=](int64_t fromNode, int64_t fromNodeType, const boost::shared_ptr<char[]>& msg, size_t size){sp->OnRecv(fromNode, msg, size);}, 0);
+    com->SetDataReceiver([=](int64_t fromNode, int64_t /*fromNodeType*/, const boost::shared_ptr<char[]>& msg, size_t size){sp->OnRecv(fromNode, msg, size);}, 0);
     com->SetGotReceiveFromCallback([=](int64_t id){sp->GotReceive(id);});
     com->SetRetransmitToCallback([=](int64_t id){sp->Retransmit(id);});
-    com->SetNewNodeCallback([=](const std::string& name, int64_t nodeId, int64_t nodeTypeId, const std::string& ca, const std::string& da)
+    com->SetNewNodeCallback([=](const std::string& name, int64_t nodeId, int64_t nodeTypeId, const std::string& ca, const std::string& /*da*/)
                             {sp->NewNode(name, nodeId, nodeTypeId, ca);});
 
     com->SetQueueNotFullCallback([&](int64_t){queueFullSem.Notify();}, 100); //50% free queue space before we get notification, acked
