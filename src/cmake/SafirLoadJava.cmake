@@ -17,11 +17,13 @@ if (Java_Development_FOUND AND Java_Runtime_FOUND)
       INCLUDE(UseJava)
     endif()
 
-	SET(CMAKE_JAVA_COMPILE_FLAGS -encoding UTF-8 -source 1.6)
+    #TODO: is this really what we want to do? Is this going to be exported
+    #to our users? If so, BAAAAD....
+    SET(CMAKE_JAVA_COMPILE_FLAGS -encoding UTF-8 -source 1.6 -Xlint:-options)
   else()
     SET(Java_FOUND Java-NOTFOUND)
   endif()
-  unset(Java_Development_FOUND)  
+  unset(Java_Development_FOUND)
   unset(Java_Runtime_FOUND)
 else()
   SET(Java_FOUND Java-NOTFOUND)
@@ -32,7 +34,7 @@ endif()
 
 #TODO: javadoc?
 
-function (SAFIR_JAVAH) 
+function (SAFIR_JAVAH)
   cmake_parse_arguments(_javah "" "JAR;CLASS;OUTPUT_DIR" "OUTPUT_FILES" ${ARGN})
 
   if (NOT _javah_JAR)
@@ -60,17 +62,17 @@ function (SAFIR_JAVAH)
   endforeach()
 
   get_target_property(_javah_jar_file ${_javah_JAR} JAR_FILE)
-  
-  ADD_CUSTOM_COMMAND(OUTPUT 
+
+  ADD_CUSTOM_COMMAND(OUTPUT
     ${_javah_outputs}
-    
+
     COMMAND ${Java_JAVAH_EXECUTABLE} -classpath $<TARGET_PROPERTY:${_javah_JAR},JAR_FILE> ${_javah_CLASS}
-    
+
     DEPENDS ${_javah_jar_file}
     WORKING_DIRECTORY ${_javah_OUTPUT_DIR}
-    
+
     COMMENT "Generating javah header files from ${_javah_JAR}")
-  
+
   ADD_CUSTOM_TARGET(${_javah_JAR}_javah DEPENDS
     ${_javah_outputs})
 endfunction()
