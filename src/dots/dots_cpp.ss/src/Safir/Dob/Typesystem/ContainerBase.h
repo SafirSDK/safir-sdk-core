@@ -105,9 +105,6 @@ namespace Typesystem
          */
         virtual void Copy(const ContainerBase & that) = 0;
     protected:
-        friend class Safir::Dob::Typesystem::Internal::BlobOperations;
-        //BlobOperations is allowed to access the m_bIsChanged field directly
-
         /**
         * Copy assignment operator.
         *

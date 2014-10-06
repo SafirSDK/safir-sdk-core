@@ -110,12 +110,10 @@ namespace Typesystem
         }
 
     private:
-        /** BlobOperations is allowed to access the m_Value and m_bIsNull fields
-            directly for serialization and deserialization purposes. */
-        friend class Safir::Dob::Typesystem::Internal::BlobOperations;
-
         bool m_bIsNull;
         T m_Value;
+
+        friend class Safir::Dob::Typesystem::Internal::BlobOperations;
     };
 
     /**
@@ -241,8 +239,6 @@ namespace Typesystem
         /** @} */
 
     private:
-        /** BlobOperations is allowed to access the m_bIsNull, m_Value and m_CachedUtf8String fields
-            directly for serialization and deserialization purposes. */
         friend class Safir::Dob::Typesystem::Internal::BlobOperations;
 
         bool m_bIsNull;
@@ -310,8 +306,6 @@ namespace Typesystem
         }
 
     private:
-        /** BlobOperations is allowed to access the m_Value and m_bIsNull fields
-            directly for serialization and deserialization purposes. */
         friend class Safir::Dob::Typesystem::Internal::BlobOperations;
 
         bool m_bIsNull;

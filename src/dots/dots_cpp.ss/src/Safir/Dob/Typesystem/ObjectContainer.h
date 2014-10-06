@@ -21,10 +21,8 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-
 #ifndef __DOTS_OBJECT_CONTAINER_H__
 #define __DOTS_OBJECT_CONTAINER_H__
-
 
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Typesystem/ContainerBase.h>
@@ -159,6 +157,8 @@ namespace Typesystem
 
         /** @} */
     protected:
+        friend class Safir::Dob::Typesystem::Internal::BlobOperations;
+
         /**
          * Copy assignment operator.
          *
@@ -167,6 +167,9 @@ namespace Typesystem
          */
         ObjectContainerBase & operator=(const ObjectContainerBase & other)
         {ContainerBase::operator =(other); return *this;}
+
+    private:
+        virtual ObjectPtr& GetRawObjectPtr() = 0;
     };
 
     /**
@@ -367,8 +370,8 @@ namespace Typesystem
         }
         virtual void ResetObjectPointer(){m_pObject.reset();}
     private:
-
         T_Ptr m_pObject;
+        virtual ObjectPtr& GetRawObjectPtr() {return m_pObject;}
     };
 
     /**

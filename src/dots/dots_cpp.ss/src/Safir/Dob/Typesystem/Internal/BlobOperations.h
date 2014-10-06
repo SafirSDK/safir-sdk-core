@@ -122,7 +122,7 @@ namespace Internal
          * @param [in] member - The member to be set.
          * @param [in] index - Array index in member to set. Shall be 0 if the member is not an array.
          */
-        static void Set(const BooleanContainer & value,
+        static void Set(const BooleanContainer& value,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex index);
@@ -138,7 +138,7 @@ namespace Internal
          * @param [in] member - The member to get.
          * @param [in] index - Array index in member to get. Shall be 0 if the member is not an array.
          */
-        static void Get(BooleanContainer & value,
+        static void Get(BooleanContainer& value,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex index);
@@ -154,7 +154,7 @@ namespace Internal
          * @param [in] member - The member to be set.
          * @param [in] index - Array index in member to set. Shall be 0 if the member is not an array.
          */
-        static void Set(const EnumerationContainerBase & value,
+        static void Set(const EnumerationContainerBase& value,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex index);
@@ -170,7 +170,7 @@ namespace Internal
          * @param [in] member - The member to get.
          * @param [in] index - Array index in member to get. Shall be 0 if the member is not an array.
          */
-        static void Get(EnumerationContainerBase & value,
+        static void Get(EnumerationContainerBase& value,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex index);
@@ -187,7 +187,7 @@ namespace Internal
          * @param [in] member - The member to be set.
          * @param [in] index - Array index in member to set. Shall be 0 if the member is not an array.
          */
-        static void Set(const Int32Container & value,
+        static void Set(const Int32Container& value,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex index);
@@ -203,7 +203,7 @@ namespace Internal
          * @param [in] member - The member to get.
          * @param [in] index - Array index in member to get. Shall be 0 if the member is not an array.
          */
-        static void Get(Int32Container & value,
+        static void Get(Int32Container& value,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex index);
@@ -220,7 +220,7 @@ namespace Internal
          * @param [in] member - The member to be set.
          * @param [in] index - Array index in member to set. Shall be 0 if the member is not an array.
          */
-        static void Set(const Int64Container & value,  //will be used on TypeIdContainers too
+        static void Set(const Int64Container& value,  //will be used on TypeIdContainers too
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex index);
@@ -236,7 +236,7 @@ namespace Internal
          * @param [in] member - The member to get.
          * @param [in] index - Array index in member to get. Shall be 0 if the member is not an array.
          */
-        static void Get(Int64Container & value,
+        static void Get(Int64Container& value,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex index);
@@ -253,7 +253,7 @@ namespace Internal
          * @param [in] member - The member to be set.
          * @param [in] index - Array index in member to set. Shall be 0 if the member is not an array.
          */
-        static void Set(const Float32Container & value,
+        static void Set(const Float32Container& value,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex index);
@@ -269,7 +269,7 @@ namespace Internal
          * @param [in] member - The member to get.
          * @param [in] index - Array index in member to get. Shall be 0 if the member is not an array.
          */
-        static void Get(Float32Container & value,
+        static void Get(Float32Container& value,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex index);
@@ -286,7 +286,7 @@ namespace Internal
          * @param [in] member - The member to be set.
          * @param [in] index - Array index in member to set. Shall be 0 if the member is not an array.
          */
-        static void Set(const Float64Container & value,
+        static void Set(const Float64Container& value,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex index);
@@ -302,7 +302,7 @@ namespace Internal
          * @param [in] member - The member to get.
          * @param [in] index - Array index in member to get. Shall be 0 if the member is not an array.
          */
-        static void Get(Float64Container & value,
+        static void Get(Float64Container& value,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex index);
@@ -318,7 +318,7 @@ namespace Internal
          * @param [in] member - The member to be set.
          * @param [in] index - Array index in member to set. Shall be 0 if the member is not an array.
          */
-        static void Set(const InstanceIdContainer & value,
+        static void Set(const InstanceIdContainer& value,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex index);
@@ -334,7 +334,7 @@ namespace Internal
          * @param [in] member - The member to get.
          * @param [in] index - Array index in member to get. Shall be 0 if the member is not an array.
          */
-        static void Get(InstanceIdContainer & value,
+        static void Get(InstanceIdContainer& value,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex index);
@@ -350,7 +350,7 @@ namespace Internal
          * @param [in] member - The member to be set.
          * @param [in] index - Array index in member to set. Shall be 0 if the member is not an array.
          */
-        static void Set(const EntityIdContainer & value,
+        static void Set(const EntityIdContainer& value,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex index);
@@ -366,7 +366,7 @@ namespace Internal
          * @param [in] member - The member to get.
          * @param [in] index - Array index in member to get. Shall be 0 if the member is not an array.
          */
-        static void Get(EntityIdContainer & value,
+        static void Get(EntityIdContainer& value,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex index);
@@ -382,7 +382,7 @@ namespace Internal
          * @param [in] member - The member to be set.
          * @param [in] index - Array index in member to set. Shall be 0 if the member is not an array.
          */
-        static void Set(const ChannelIdContainer & value,
+        static void Set(const ChannelIdContainer& value,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex index);
@@ -398,7 +398,7 @@ namespace Internal
          * @param [in] member - The member to get.
          * @param [in] index - Array index in member to get. Shall be 0 if the member is not an array.
          */
-        static void Get(ChannelIdContainer & value,
+        static void Get(ChannelIdContainer& value,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex index);
@@ -414,7 +414,7 @@ namespace Internal
          * @param [in] member - The member to be set.
          * @param [in] index - Array index in member to set. Shall be 0 if the member is not an array.
          */
-        static void Set(const HandlerIdContainer & value,
+        static void Set(const HandlerIdContainer& value,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex index);
@@ -430,7 +430,7 @@ namespace Internal
          * @param [in] member - The member to get.
          * @param [in] index - Array index in member to get. Shall be 0 if the member is not an array.
          */
-        static void Get(HandlerIdContainer & value,
+        static void Get(HandlerIdContainer& value,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex index);
@@ -446,7 +446,7 @@ namespace Internal
          * @param [in] member - The member to be set.
          * @param [in] index - Array index in member to set. Shall be 0 if the member is not an array.
          */
-        static void Set(const StringContainer & value,
+        static void Set(const StringContainer& value,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex index);
@@ -462,7 +462,7 @@ namespace Internal
          * @param [in] member - The member to get.
          * @param [in] index - Array index in member to get. Shall be 0 if the member is not an array.
          */
-        static void Get(StringContainer & value,
+        static void Get(StringContainer& value,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex index);
@@ -474,12 +474,12 @@ namespace Internal
          * If the container is null then the member will be set to null in the blob.
          * The change flag from the container will be set in the blob.
          *
-         * @param [in] object - The container whose values to use.
+         * @param [in] value - The container whose values to use.
          * @param [in] handle - Handle to a BlobWriter.
          * @param [in] member - The member to be set.
          * @param [in] index - Array index in member to set. Shall be 0 if the member is not an array.
          */
-        static void Set(const ObjectContainerBase & object,
+        static void Set(const ObjectContainerBase& value,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex index);
@@ -490,12 +490,12 @@ namespace Internal
          * This method will get the member and the associated isNull and isChange values from a blob and
          * put them in the container.
          *
-         * @param [out] object - The container in which to put the values.
+         * @param [out] value - The container in which to put the values.
          * @param [in] handle - Handle to a BlobReader.
          * @param [in] member - The member to get.
          * @param [in] index - Array index in member to get. Shall be 0 if the member is not an array.
          */
-        static void Get(ObjectContainerBase & object,
+        static void Get(ObjectContainerBase& value,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex index);
@@ -506,12 +506,12 @@ namespace Internal
          * If the container is null then the member will be set to null in the blob.
          * The change flag from the container will be set in the blob.
          *
-         * @param [in] binary - The container whose values to use.
+         * @param [in] value - The container whose values to use.
          * @param [in] handle - Handle to a BlobWriter.
          * @param [in] member - The member to be set.
          * @param [in] index - Array index in member to set. Shall be 0 if the member is not an array.
          */
-        static void Set(const BinaryContainer & binary,
+        static void Set(const BinaryContainer& value,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex index);
@@ -522,12 +522,12 @@ namespace Internal
          * This method will get the member and the associated isNull and isChange values from a blob and
          * put them in the container.
          *
-         * @param [out] binary - The container in which to put the values.
+         * @param [out] value - The container in which to put the values.
          * @param [in] handle - Handle to a BlobReader.
          * @param [in] member - The member to get.
          * @param [in] index - Array index in member to get. Shall be 0 if the member is not an array.
          */
-        static void Get(BinaryContainer & binary,
+        static void Get(BinaryContainer& value,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex index);
@@ -553,7 +553,7 @@ namespace Internal
                         const Dob::Typesystem::ArrayIndex valueIndex,
                         KeyValueMode mode);
 
-        static void Get(Safir::Dob::Typesystem::Float32 & val,
+        static void Get(Safir::Dob::Typesystem::Float32& val,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex valueIndex,
@@ -611,72 +611,96 @@ namespace Internal
         // Set values
         //--------------------------------------------------------
         static void Set(bool val,
+                        bool isNull,
+                        bool isChanged,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex valueIndex,
                         KeyValueMode mode);
 
         static void Set(Safir::Dob::Typesystem::Int32 val,
+                        bool isNull,
+                        bool isChanged,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex valueIndex,
                         KeyValueMode mode);
 
         static void Set(Safir::Dob::Typesystem::Int64 val,
+                        bool isNull,
+                        bool isChanged,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex valueIndex,
                         KeyValueMode mode);
 
         static void Set(Safir::Dob::Typesystem::Float32 val,
+                        bool isNull,
+                        bool isChanged,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex valueIndex,
                         KeyValueMode mode);
 
         static void Set(Safir::Dob::Typesystem::Float64 val,
+                        bool isNull,
+                        bool isChanged,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex valueIndex,
                         KeyValueMode mode);
 
         static void Set(const std::wstring& val,
+                        bool isNull,
+                        bool isChanged,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex valueIndex,
                         KeyValueMode mode);
 
         static void Set(const Safir::Dob::Typesystem::InstanceId& val,
+                        bool isNull,
+                        bool isChanged,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex valueIndex,
                         KeyValueMode mode);
 
         static void Set(const Safir::Dob::Typesystem::HandlerId& val,
+                        bool isNull,
+                        bool isChanged,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex valueIndex,
                         KeyValueMode mode);
 
         static void Set(const Safir::Dob::Typesystem::ChannelId& val,
+                        bool isNull,
+                        bool isChanged,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex valueIndex,
                         KeyValueMode mode);
 
         static void Set(const Safir::Dob::Typesystem::EntityId& val,
+                        bool isNull,
+                        bool isChanged,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex valueIndex,
                         KeyValueMode mode);
 
         static void Set(const Safir::Dob::Typesystem::ObjectPtr& val,
+                        bool isNull,
+                        bool isChanged,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex valueIndex,
                         KeyValueMode mode);
 
         static void Set(const Safir::Dob::Typesystem::Binary& val,
+                        bool isNull,
+                        bool isChanged,
                         Safir::Dob::Typesystem::Int64 handle,
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex valueIndex,
