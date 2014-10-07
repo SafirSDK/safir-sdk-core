@@ -352,7 +352,7 @@ int main(int argc, char * argv[])
     auto work=boost::make_shared<boost::asio::io_service::work>(ioService);
     int numberOfDiscoveredNodes=0;
     boost::barrier startBarrier(2);
-    Semaphore stopCondition(cmd.await);
+    Semaphore stopCondition(cmd.accumulatedRecv ? 1 : cmd.await); //if accumulated only one node will report finished, the one posting the last message.
     Semaphore queueFullSem(1);
 
     std::set<int64_t> nodes;
