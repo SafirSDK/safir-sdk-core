@@ -13,11 +13,3 @@ ADD_CSHARP_ASSEMBLY(sate WINEXE
 
 SAFIR_INSTALL(TARGETS sate)
 
-if(UNIX)
-  configure_file(run_sate.sh.in "${CMAKE_CURRENT_BINARY_DIR}/run_sate.sh" @ONLY)
-
-  install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/run_sate.sh
-    DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
-    RENAME sate)
-endif()
-

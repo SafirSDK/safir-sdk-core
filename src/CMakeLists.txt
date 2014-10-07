@@ -28,14 +28,12 @@ if (UNIX)
     endif()
 endif()
 ###########
-
 function (SAFIR_INSTALL)
   cmake_parse_arguments(INST "TEST_SUITE" "" "TARGETS" ${ARGN})
 
   if (NOT "${INST_UNPARSED_ARGUMENTS}" STREQUAL "")
     message(FATAL_ERROR "Unknown argument to SAFIR_INSTALL '${INST_UNPARSED_ARGUMENTS}'")
   endif()
-
 
   foreach (target ${INST_TARGETS})
     get_target_property(target_type ${target} TYPE)
@@ -50,17 +48,26 @@ function (SAFIR_INSTALL)
           unset (TEST_SUITE)
         endif()
 
+        #by default assemblies get installed here
+        set(destination ${SAFIR_INSTALL_DESTINATION_CSHARP})
+
+        #except exes on windows
         get_property(ASSEMBLY_KIND TARGET ${target} PROPERTY TARGET_KIND)
-        if (ASSEMBLY_KIND STREQUAL "library")
-          set(destination ${SAFIR_INSTALL_DESTINATION_CSHARP_DLL})
-        else()
+        if (WIN32 AND NOT ASSEMBLY_KIND STREQUAL "library")
           set(destination ${SAFIR_INSTALL_DESTINATION_BIN})
         endif()
 
         INSTALL_CSHARP_ASSEMBLY(TARGET ${target}
           DESTINATION ${destination}
           ${TEST_SUITE})
-        return()
+
+        #and on unix systems we want a little shell script in bin to launch exes with
+        if (UNIX AND NOT ASSEMBLY_KIND STREQUAL "library")
+          #we need the assembly file name, so we get the full path first
+          get_property(assembly_file TARGET ${target} PROPERTY ASSEMBLY_FILE)
+          get_filename_component(assembly_file ${assembly_file} NAME) #and strip the path off
+          FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${target} "#!/bin/sh\nexec /usr/bin/mono $MONO_OPTIONS ${CMAKE_INSTALL_PREFIX}/${SAFIR_INSTALL_DESTINATION_CSHARP}/${assembly_file} $@")
+        endif()
       endif()
 
       #################### Java ########################
@@ -79,55 +86,58 @@ function (SAFIR_INSTALL)
             DESTINATION ${SAFIR_INSTALL_DESTINATION_JAR}
             COMPONENT ${component})
         endif()
-        return()
       endif()
-      message(FATAL_ERROR "The target ${target} does not appear to be either a java or dotnte target, cannot use SAFIR_INSTALL.")
-    endif()
 
-    ############### C/C++ ####################
-    if ("${target_type}" STREQUAL "SHARED_LIBRARY")
-      set(export EXPORT SafirSDKCore)
-      set(debug_suffix ${CMAKE_DEBUG_POSTFIX})
-    else()
-      unset(export)
-      unset(debug_suffix)
-    endif()
+      if (NOT jar_file AND NOT assembly_file)
+        message(FATAL_ERROR "The target ${target} does not appear to be either a java or dotnet target, cannot use SAFIR_INSTALL.")
+      endif()
+    else() #Not a dotnet or java thing
 
-    #if the target is parto of the test suite we use the Test component
-    if (INST_TEST_SUITE)
-      INSTALL(TARGETS ${target}
-        ${export}
-        RUNTIME DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN} COMPONENT Test
-        LIBRARY DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT Test
-        ARCHIVE DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT Test)
-    else()
-      INSTALL(TARGETS ${target}
-        ${export}
-        RUNTIME DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN} COMPONENT Runtime
-        LIBRARY DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT Runtime
-        ARCHIVE DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT Development)
-    endif()
-
-    # Install pdb files on windows
-    if(MSVC)
-      if (INST_TEST_SUITE)
-        INSTALL(FILES $<TARGET_FILE_DIR:${target}>/${target}.pdb
-          DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
-          CONFIGURATIONS RelWithDebInfo
-          COMPONENT Test)
-        INSTALL(FILES $<TARGET_FILE_DIR:${target}>/${target}${debug_suffix}.pdb
-          DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
-          CONFIGURATIONS Debug
-          COMPONENT Test)
+      ############### C/C++ ####################
+      if ("${target_type}" STREQUAL "SHARED_LIBRARY")
+        set(export EXPORT SafirSDKCore)
+        set(debug_suffix ${CMAKE_DEBUG_POSTFIX})
       else()
-        INSTALL(FILES $<TARGET_FILE_DIR:${target}>/${target}.pdb
-          DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
-          CONFIGURATIONS RelWithDebInfo
-          COMPONENT Development)
-        INSTALL(FILES $<TARGET_FILE_DIR:${target}>/${target}${debug_suffix}.pdb
-          DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
-          CONFIGURATIONS Debug
-          COMPONENT Development)
+        unset(export)
+        unset(debug_suffix)
+      endif()
+
+      #if the target is parto of the test suite we use the Test component
+      if (INST_TEST_SUITE)
+        INSTALL(TARGETS ${target}
+          ${export}
+          RUNTIME DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN} COMPONENT Test
+          LIBRARY DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT Test
+          ARCHIVE DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT Test)
+      else()
+        INSTALL(TARGETS ${target}
+          ${export}
+          RUNTIME DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN} COMPONENT Runtime
+          LIBRARY DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT Runtime
+          ARCHIVE DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT Development)
+      endif()
+
+      # Install pdb files on windows
+      if(MSVC)
+        if (INST_TEST_SUITE)
+          INSTALL(FILES $<TARGET_FILE_DIR:${target}>/${target}.pdb
+            DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
+            CONFIGURATIONS RelWithDebInfo
+            COMPONENT Test)
+          INSTALL(FILES $<TARGET_FILE_DIR:${target}>/${target}${debug_suffix}.pdb
+            DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
+            CONFIGURATIONS Debug
+            COMPONENT Test)
+        else()
+          INSTALL(FILES $<TARGET_FILE_DIR:${target}>/${target}.pdb
+            DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
+            CONFIGURATIONS RelWithDebInfo
+            COMPONENT Development)
+          INSTALL(FILES $<TARGET_FILE_DIR:${target}>/${target}${debug_suffix}.pdb
+            DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
+            CONFIGURATIONS Debug
+            COMPONENT Development)
+        endif()
       endif()
     endif()
   endforeach()
