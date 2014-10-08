@@ -31,6 +31,7 @@
 #include <Safir/Dob/Typesystem/ChannelId.h>
 #include <Safir/Dob/Typesystem/HandlerId.h>
 #include <Safir/Dob/Typesystem/ContainerBase.h>
+#include <Safir/Dob/Typesystem/Object.h>
 
 namespace Safir
 {
@@ -255,8 +256,11 @@ namespace Typesystem
     /** A container containing HandlerId values */
     typedef SequenceContainer<HandlerId> HandlerIdSequenceContainer;
 
-    /** A container containing HandlerId values */
+    /** A container containing Binary values */
     typedef SequenceContainer<Binary> BinarySequenceContainer;
+
+    /** A container containing Object values */
+    typedef SequenceContainer<ObjectPtr> ObjectSequenceContainer;
 
     /** @} */
 

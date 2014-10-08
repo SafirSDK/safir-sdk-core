@@ -34,9 +34,11 @@
 #include <Safir/Dob/Typesystem/LibraryExceptions.h>
 #include <DotsTest/ParameterTypes.h>
 #include <DotsTest/ParameterArrays.h>
+#include <DotsTest/ParameterSequences.h>
 #include <DotsTest/EmptyObject.h>
 #include <DotsTest/MemberTypes.h>
 #include <DotsTest/MemberArrays.h>
+#include <DotsTest/MemberSequences.h>
 #include <DotsTest/MemberItems.h>
 #include <DotsTest/MemberItemsArray.h>
 #include <DotsTest/MemberTypesProperty.h>
@@ -49,6 +51,8 @@
 #include <Safir/Dob/Typesystem/Internal/InternalOperations.h>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/filesystem/operations.hpp>
+
+namespace ts = Safir::Dob::Typesystem;
 
 std::wstring CollectionTypeStr(Safir::Dob::Typesystem::CollectionType ct)
 {
@@ -193,6 +197,7 @@ static DotsTest::MemberTypesPtr MT1;
 static DotsTest::MemberTypesPtr MT2;
 static DotsTest::MemberArraysPtr MA1;
 static DotsTest::MemberArraysPtr MA2;
+static DotsTest::MemberSequencesPtr MS1;
 static DotsTest::MemberItemsPtr MI;
 static DotsTest::MemberItemsArrayPtr MIA;
 static DotsTest::EmptyObjectPtr EO;
@@ -8647,6 +8652,68 @@ void Test_GetDouFilePath()
               L"DotsTest.MemberTypesProperty.dou");
 }
 
+void TestSequences()
+{
+    Header(L"Sequences");
+
+    std::wcout<<std::boolalpha;
+    std::wcout<<L"IsNull "<<MS1->Int32Member().IsNull()<<std::endl;
+    std::wcout<<L"IsChanged "<<MS1->Int32Member().IsChanged()<<std::endl;
+
+    DotsTest::TestItemPtr testItem1=DotsTest::TestItem::Create();
+    testItem1->MyInt()=123;
+    DotsTest::TestItemPtr testItem2=DotsTest::TestItem::Create();
+    testItem2->MyInt()=456;
+
+    MS1->Int32Member().push_back(10);
+    MS1->Int32Member().push_back(30);    
+    MS1->Float32Member().push_back(10.1);
+    MS1->Float32Member().push_back(30.3);
+    MS1->EnumerationMember().push_back(DotsTest::TestEnum::MyFirst);
+    MS1->EnumerationMember().push_back(DotsTest::TestEnum::MySecond);
+    MS1->TestClassMember().push_back(testItem1);
+    MS1->TestClassMember().push_back(testItem2);
+
+    for (Safir::Dob::Typesystem::Int32SequenceContainer::const_iterator it=MS1->Int32Member().begin(); it!=MS1->Int32Member().end(); ++it)
+    {
+        std::wcout<<*it<<std::endl;
+    }
+
+    Safir::Dob::Typesystem::BinarySerialization bin;
+    Safir::Dob::Typesystem::Serialization::ToBinary(MS1, bin);
+    ts::ObjectPtr op=ts::Serialization::ToObject(bin);
+    DotsTest::MemberSequencesPtr ms=boost::dynamic_pointer_cast<DotsTest::MemberSequences>(op);
+
+    for (Safir::Dob::Typesystem::Int32SequenceContainer::const_iterator it=ms->Int32Member().begin(); it!=ms->Int32Member().end(); ++it)
+    {
+        std::wcout<<*it<<std::endl;
+    }
+
+    std::wcout<<L"------ ToXml -----"<<std::endl;
+    std::wstring xml=ts::Serialization::ToXml(ms);
+    std::wcout<<xml<<std::endl;
+
+    std::wcout<<L"------ ToJson -----"<<std::endl;
+    std::wstring json=ts::Serialization::ToJson(ms);
+    std::wcout<<json<<std::endl;
+
+
+    std::wcout<<std::boolalpha;
+    std::wcout<<L"IsNull "<<MS1->Int32Member().IsNull()<<std::endl;
+    std::wcout<<L"IsChanged "<<MS1->Int32Member().IsChanged()<<std::endl;
+
+    std::wcout<<L"------ clear -----"<<std::endl;
+    MS1->Int32Member().clear();
+    std::wcout<<L"IsNull "<<MS1->Int32Member().IsNull()<<std::endl;
+    std::wcout<<L"IsChanged "<<MS1->Int32Member().IsChanged()<<std::endl;
+
+    std::wcout<<L"Int32ParameterSequence"<<std::endl;
+    for (int i=0; i<DotsTest::ParameterSequences::Int32ParameterSequenceSize(); ++i)
+    {
+        std::wcout<<L"  ["<<i<<L"] = "<<DotsTest::ParameterSequences::Int32Parameter(i)<<std::endl;
+    }
+}
+
 int main(int /*argc*/, char* /*argv*/[])
 {
     std::wcout << std::boolalpha;
@@ -8655,12 +8722,16 @@ int main(int /*argc*/, char* /*argv*/[])
     MT2 = DotsTest::MemberTypes::Create();
     MA1 = DotsTest::MemberArrays::Create();
     MA2 = DotsTest::MemberArrays::Create();
+    MS1 = DotsTest::MemberSequences::Create();
     MI = DotsTest::MemberItems::Create();
     MIA = DotsTest::MemberItemsArray::Create();
     EO = DotsTest::EmptyObject::Create();
 
     try
     {
+        TestSequences();
+        return 0;
+
         Test_Has_Property();
         Test_GetName();
         Test_GetNumberOfMembers();
