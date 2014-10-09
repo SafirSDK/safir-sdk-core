@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
@@ -23,9 +23,7 @@
 # along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-
-""" This is a python 2.x script! Will not work on python 3.x, currently. """
-
+from __future__ import print_function
 import sys, subprocess, os, shutil, difflib, time, xml.dom.minidom, glob, re, traceback, stat, signal
 from xml.sax.saxutils import escape
 
@@ -39,13 +37,21 @@ try:
 except ImportError:
     from io import StringIO
 
+try:
+    import urllib.request as urllib
+except ImportError:
+    import urllib
+
+def log(*args, **kwargs):
+    print(*args, **kwargs)
+    sys.stdout.flush()
 
 def rmdir(directory):
     if os.path.exists(directory):
         try:
             shutil.rmtree(directory)
         except OSError:
-            print "Failed to remove directory, will retry"
+            log("Failed to remove directory, will retry")
             time.sleep(0.2)
             shutil.rmtree(directory)
 
@@ -108,7 +114,7 @@ class Parameters:
         self.no_java = options.no_java
 
         if options.autostart_slave and not self.multinode:
-            print "--autostart-slave can only be used together with --multinode"
+            log("--autostart-slave can only be used together with --multinode")
             sys.exit(1)
 
         self.autostart_jenkins_slave = options.autostart_slave or (options.jenkins and self.multinode)
@@ -133,7 +139,7 @@ class Parameters:
         os.environ["SAFIR_TEST_SUITE_DOU_DIRECTORY"] = "@DEFAULT_DOU_DIRECTORY@" 
 
         self.test_data_directory = "@TEST_DATA_DIRECTORY@" #This path is set by cmake during configuration/installation.
-        print self.test_data_directory
+        log(self.test_data_directory)
 
         #Set up to use our own test configuration
         os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(self.test_data_directory, "dose", "test_config", "standalone")
@@ -208,7 +214,7 @@ def getText(nodelist):
     return ''.join(rc)
 
 # def UpdateConfig(parameters):
-#     print "** Updating configuration files"
+#     log "** Updating configuration files"
 #     #backup dou files to temporary directory
 #     shutil.copy2(parameters.PersistenceParameters_path, parameters.tempdir)
 #     shutil.copy2(parameters.NodeParameters_path, parameters.tempdir)
@@ -254,7 +260,7 @@ def getText(nodelist):
 #         shutil.copy2(parameters.test_multinode_DistributionChannelParameters_path, parameters.parameters_path)
 
 # def RestoreConfig(parameters):
-#     print "** Restoring configuration files"
+#     log "** Restoring configuration files"
 #     #restore dou files from temporary directory
 #     dous = glob.glob(os.path.join(parameters.tempdir,"*.dou"))
 #     for dou in dous:
@@ -274,7 +280,7 @@ class Results:
                 junitfile.write("/>\n")
             else:
                 """failure"""
-                print " -",name, "failed!"
+                log(" -",name, "failed!")
                 self.num_tc_failed += 1
                 junitfile.write(">\n    <error message=\"Failed\">" +
                                 output +
@@ -320,14 +326,14 @@ class Results:
         return res
 
     def check_output(self,parameters):
-        print "** Parsing test output"
+        log("** Parsing test output")
         resdir = glob.glob("run0-*")
         if len(resdir) == 0:
-            print "No output directories found, cannot parse output!"
+            log("No output directories found, cannot parse output!")
             return
         elif len(resdir) != 1:
-            print "Spurious directories where I am running, cannot parse output!"
-            print str(resdir)
+            log("Spurious directories where I am running, cannot parse output!")
+            log(str(resdir))
             return
         resdir = resdir[0]
 
@@ -408,7 +414,7 @@ class Runner:
         else: #slave
             partners = (2,)
 
-        print "** Starting dose_main and partners", str(partners)
+        log("** Starting dose_main and partners", str(partners))
         #if we're a slave we log to stdout, not file
         self.dose_main = self.__launchProcess("dose_main",
                                               parameters.dose_main_cmd,
@@ -420,17 +426,17 @@ class Runner:
         for i in partners:
             self.__launchProcess("dose_test_cpp." + str(i), parameters.dose_test_cpp_cmd + (str(i),))
             #if os.path.isfile(parameters.dose_test_ada_exe_name): #only run ada if it exists
-            #    print "dose_test_ada_exe_name is", parameters.dose_test_ada_exe_name
+            #    log "dose_test_ada_exe_name is", parameters.dose_test_ada_exe_name
             #    self.__launchProcess("dose_test_ada." + str(i), parameters.dose_test_ada_cmd + (str(i),))
             #else:
-            #    print "Not running ada partner. dose_test_ada_exe_name is", parameters.dose_test_ada_exe_name
+            #    log "Not running ada partner. dose_test_ada_exe_name is", parameters.dose_test_ada_exe_name
             self.__launchProcess("dose_test_dotnet." + str(i), parameters.dose_test_dotnet_cmd + (str(i),))
             if not parameters.no_java:
                 self.__launchProcess("dose_test_java." + str(i), parameters.dose_test_java_cmd + (str(i),))
 
     def __kill(self, name, proc):
         try:
-#            print "Terminating", name
+#            log "Terminating", name
             if sys.platform == "win32":
                 #can't send CTRL_C_EVENT to processes started with subprocess, unfortunately
                 proc.send_signal(signal.CTRL_BREAK_EVENT)
@@ -438,11 +444,11 @@ class Runner:
                 proc.terminate()
             for i in range (100):
                 if proc.poll() is not None:
-#                    print " Terminate successful"
+#                    log " Terminate successful"
                     return
                 time.sleep(0.1)
             if proc.poll() is None:
-                print "Killing", name
+                log("Killing", name)
                 proc.kill()
                 proc.wait()
         except OSError:
@@ -453,7 +459,7 @@ class Runner:
 
         #Processes have up to 10 seconds to exit from the stop order
         future = time.time() + 10 #ten seconds
-        for name, (proc,output) in self.procs.iteritems():
+        for name, (proc,output) in self.procs.items():
             while time.time() < future:
                 if proc.poll() is not None:
                     break;
@@ -466,7 +472,7 @@ class Runner:
                                       name + ".returncode",
                                       "Process exited with return code " + str(proc.returncode) + ", expected 0")
             if proc.returncode != 0:
-                print "", name, "exited with returncode", proc.returncode
+                log("", name, "exited with returncode", proc.returncode)
             if output is not None:
                 output.close()
 
@@ -477,30 +483,29 @@ class Runner:
                                   "syslog is not empty:\n" + xml.sax.saxutils.quoteattr(syslog_data))
 
     def run_sequencer(self,parameters):
-        print "** Running test sequencer with languages set to", parameters.lang0, parameters.lang1, parameters.lang2
-        print "---- Output from dose_test_sequencer: ----"
+        log("** Running test sequencer with languages set to", parameters.lang0, parameters.lang1, parameters.lang2)
+        log("---- Output from dose_test_sequencer: ----")
         sequencer = self.__launchProcess("dose_test_sequencer",
                                          parameters.dose_test_sequencer_cmd,
                                          stdoutToFile = False)
         sequencer.wait()
-        print "------------------------------------------"
+        log("------------------------------------------")
 
     def wait_for_dose_main(self):
         self.dose_main.wait()
 
 class JenkinsInterface:
     def __init__(self, parameters):
-        import urllib
         self.server = os.environ.get("JENKINS_URL_OVERRIDE")
         if self.server is None:
             self.server = os.environ.get("JENKINS_URL")
             if self.server is None:
-                print "No JENKINS_URL found"
+                log("No JENKINS_URL found")
                 sys.exit(1)
-        print "Using jenkins server",self.server
+        log("Using jenkins server",self.server)
 
         cliurl = self.server + "/jnlpJars/jenkins-cli.jar"
-        #print "will download jenkins-cli.jar using url", cliurl
+        #log "will download jenkins-cli.jar using url", cliurl
         self.clijar = os.path.join(parameters.tempdir,"jenkins-cli.jar")
         urllib.urlretrieve(cliurl,self.clijar)
 
@@ -521,7 +526,7 @@ class JenkinsInterface:
         if proc.returncode == 0:
             return res[0]
         else:
-            print res[0]
+            log(res[0])
             raise Exception("Failed to run jenkins command", str(args))
 
     def __run_groovy(self,script):
@@ -595,7 +600,7 @@ class JenkinsInterface:
                  println ("end log")
                  """
         script = script.replace("JOB_NAME",job)
-        print self.__run_groovy(script)
+        log(self.__run_groovy(script))
 
 
     def terminate_dose_main(self,job):
@@ -621,24 +626,24 @@ class JenkinsController:
         self.job_name = "multinode-test-slave-1"
         auth = self.interface.who_am_i()
         if auth.find("authenticated") == -1:
-            print "Failed to authenticate using ssh keys, please check that keys are set up correctly"
-            print auth
+            log("Failed to authenticate using ssh keys, please check that keys are set up correctly")
+            log(auth)
             sys.exit(1)
 
     def start_slave(self):
-        print " * Starting slave"
+        log(" * Starting slave")
         self.interface.wait_for_job(self.job_name)
         self.interface.build(self.job_name)
 
     def stop_slave(self):
         try:
-            print " * Stopping slave"
+            log(" * Stopping slave")
             self.interface.terminate_dose_main(self.job_name)
             self.interface.wait_for_job(self.job_name,60)
             self.interface.cancel_job(self.job_name)
             self.interface.wait_for_job(self.job_name)
         except:
-            print "Failed to stop slave!"
+            log("Failed to stop slave!")
 
 
 def main():
@@ -664,7 +669,7 @@ def main():
             runner.run_sequencer(parameters)
             completed = True
     except:
-        print "exception occurred!"
+        log("exception occurred!")
         traceback.print_exc()
 
     runner.killprocs(results)
@@ -675,12 +680,12 @@ def main():
         results.check_output(parameters)
 
         if results.num_tc_failed == 0:
-            print "== All tests were successful!!"
+            log("== All tests were successful!!")
         else:
-            print "!!",results.num_tc_failed, "testcases appear to have failed!"
+            log("!!",results.num_tc_failed, "testcases appear to have failed!")
 
         if results.num_tc_performed<20:
-            print "!! Less than 20 testcases seem to have been performed, this is a sign of trouble!"
+            log("!! Less than 20 testcases seem to have been performed, this is a sign of trouble!")
             return 1
 
     return 0
