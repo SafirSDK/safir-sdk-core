@@ -111,7 +111,10 @@ namespace Com
             m_socket.set_option(boost::asio::ip::udp::socket::reuse_address(true));
         }
 
-        Writer(boost::asio::io_service& ioService, int protocol, const std::string& multicastAddress)
+        Writer(boost::asio::io_service& ioService,
+               int protocol,
+               const std::string& localIf,
+               const std::string& multicastAddress)
             :m_socket(ioService, Utilities::Protocol(protocol))
             ,m_multicastEndpoint(Utilities::CreateEndpoint(multicastAddress))
             ,m_multicastEnabled(!multicastAddress.empty())
@@ -119,6 +122,7 @@ namespace Com
             m_socket.set_option(boost::asio::ip::udp::socket::reuse_address(true));
             if (m_multicastEnabled)
             {
+                m_socket.set_option(boost::asio::ip::multicast::outbound_interface(Utilities::CreateEndpoint(localIf).address().to_v4())); //TODO: Test this code with IP6 and figure out how to specify outbound_if for ip6
                 m_socket.set_option(boost::asio::ip::multicast::enable_loopback(true));
                 m_socket.set_option(boost::asio::ip::multicast::join_group(m_multicastEndpoint.address()));
             }

@@ -52,6 +52,7 @@ namespace Com
     public:
         NodeType(boost::asio::io_service& ioService,
                  int64_t thisNodeId,
+                 const std::string& localIf,
                  bool useMulticast,
                  int64_t id,
                  const std::string &name,
@@ -67,9 +68,9 @@ namespace Com
             ,m_heartbeatInterval(heartbeatInterval)
             ,m_retryTimeout(retryTimeout)
             ,m_useMulticast(useMulticast)
-            ,m_heartbeatSender(ioService, thisNodeId, m_ipVersion, McAddr(m_multicastAddress, m_useMulticast), heartbeatInterval)
-            ,m_ackedDataSender(ioService, m_id, thisNodeId, m_ipVersion, McAddr(m_multicastAddress, m_useMulticast), retryTimeout)
-            ,m_unackedDataSender(ioService, m_id, thisNodeId, m_ipVersion, McAddr(m_multicastAddress, m_useMulticast), retryTimeout)
+            ,m_heartbeatSender(ioService, thisNodeId, m_ipVersion, localIf, McAddr(m_multicastAddress, m_useMulticast), heartbeatInterval)
+            ,m_ackedDataSender(ioService, m_id, thisNodeId, m_ipVersion, localIf, McAddr(m_multicastAddress, m_useMulticast), retryTimeout)
+            ,m_unackedDataSender(ioService, m_id, thisNodeId, m_ipVersion, localIf, McAddr(m_multicastAddress, m_useMulticast), retryTimeout)
         {
         }
 

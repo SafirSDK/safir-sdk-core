@@ -45,7 +45,7 @@ public:
         TRACELINE
 
         //Multicast enabled HeartbeatSender
-        Com::HeartbeatSenderBasic<HeartbeatSenderTest::TestWriter> hb1(io, 100, 4, "239.192.1.1:11000", Interval);
+        Com::HeartbeatSenderBasic<HeartbeatSenderTest::TestWriter> hb1(io, 100, 4, "127.0.0.1:10000", "239.192.1.1:11000", Interval);
         hb1.Start();
         int last11000=0;
         Wait(Interval+200);
@@ -71,7 +71,7 @@ public:
 
         TRACELINE
         //Only unicast enabled HeartbeatSender
-        Com::HeartbeatSenderBasic<HeartbeatSenderTest::TestWriter> hb2(io, 100, 4, "", Interval);
+        Com::HeartbeatSenderBasic<HeartbeatSenderTest::TestWriter> hb2(io, 100, 4, "127.0.0.1:10000", "", Interval);
         hb2.Start();
 
         TRACELINE

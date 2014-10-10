@@ -56,15 +56,11 @@ namespace
                                               const std::string& dataAddress,
                                               const std::vector<NodeTypeDefinition>& nodeTypes)
     {
-        int ipVersion=4;
-        if (isControlInstance)
-        {
-            ipVersion=Utilities::Protocol(controlAddress);
-        }
-        else
-        {
-            ipVersion=Utilities::Protocol(dataAddress);
-        }
+        //find address of local interface to use
+        const std::string localIf=(isControlInstance ? controlAddress : dataAddress);
+
+        //find out if we are using ip4 or ip6
+        const int ipVersion=Utilities::Protocol(localIf);
 
         //find own node type and check if we are multicast enabled
         auto nodeTypeIt=std::find_if(nodeTypes.cbegin(), nodeTypes.cend(), [=](const NodeTypeDefinition& n){return n.id==nodeTypeId;});
@@ -80,7 +76,7 @@ namespace
         {
             const std::string& mc=isControlInstance ? nt.controlMulticastAddress : nt.dataMulticastAddress;
             bool useMulticast=(thisNodeIsMulticastEnabled && !mc.empty());
-            auto ptr=boost::make_shared<Safir::Dob::Internal::Com::NodeType>(ioService, nodeId, useMulticast, nt.id, nt.name, mc, ipVersion, nt.heartbeatInterval, nt.retryTimeout);
+            auto ptr=boost::make_shared<Safir::Dob::Internal::Com::NodeType>(ioService, nodeId, localIf, useMulticast, nt.id, nt.name, mc, ipVersion, nt.heartbeatInterval, nt.retryTimeout);
             nodeTypeMap.insert(NodeTypeMap::value_type(nt.id, ptr));
         }
 

@@ -77,9 +77,10 @@ namespace Com
                              int64_t nodeTypeId,
                              int64_t nodeId,
                              int ipVersion,
+                             const std::string& localIf,
                              const std::string& multicastAddress,
                              int waitForAckTimeout)
-            :WriterType(ioService, ipVersion, multicastAddress)
+            :WriterType(ioService, ipVersion, localIf, multicastAddress)
             ,m_strand(ioService)
             ,m_nodeTypeId(nodeTypeId)
             ,m_nodeId(nodeId)

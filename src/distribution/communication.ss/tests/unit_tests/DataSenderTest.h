@@ -48,7 +48,7 @@ public:
         //-------------------
         // Tests
         //-------------------
-        AckedSender sender(io, 1, 1, 4, "224.90.90.241:10000", 500); //ntId, nId, ipV, mc, waitForAck
+        AckedSender sender(io, 1, 1, 4, "127.0.0.1:10000", "224.90.90.241:10000", 500); //ntId, nId, ipV, mc, waitForAck
 
         std::atomic_uint go{0};
         auto WaitUntilReady=[&]
@@ -192,7 +192,7 @@ public:
         //-------------------
         // Tests
         //-------------------
-        UnackedDataSender sender(io, 1, 1, 4, "224.90.90.241:10000", 500); //ntId, nId, ipV, mc, waitForAck
+        UnackedDataSender sender(io, 1, 1, 4, "127.0.0.1:10000", "224.90.90.241:10000", 500); //ntId, nId, ipV, mc, waitForAck
 
         std::atomic_uint go{0};
         auto WaitUntilReady=[&]

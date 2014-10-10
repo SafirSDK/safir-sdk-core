@@ -63,9 +63,10 @@ namespace Com
         HeartbeatSenderBasic(boost::asio::io_service& ioService,
                              int64_t myNodeId,
                              int ipVersion,
+                             const std::string& localIf,
                              const std::string& multicast,
                              int heartbeatInterval)
-            :WriterType(ioService, ipVersion, multicast)
+            :WriterType(ioService, ipVersion, localIf, multicast)
             ,m_strand(ioService)
             ,m_heartbeatTimer(ioService)
             ,m_heartbeat(new Heartbeat(myNodeId))

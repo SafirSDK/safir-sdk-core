@@ -94,10 +94,10 @@ namespace Com
                 m_multicastSocket->set_option(boost::asio::ip::udp::socket::reuse_address(true));
                 m_multicastSocket->set_option(boost::asio::ip::multicast::enable_loopback(true));
                 m_multicastSocket->set_option(boost::asio::ip::multicast::join_group(mcEndpoint.address()));
-                BindSocket(m_multicastSocket, multicastIpVersion, mcEndpoint.port());
+                m_multicastSocket->bind(mcEndpoint);
             }
 
-            BindSocket(m_socket, unicastIpVersion, unicastEndpoint.port());
+            m_socket->bind(unicastEndpoint);
         }
 
         void Start()
@@ -207,20 +207,6 @@ namespace Com
                 // we must wait for a while before delivering more messages
                 lllog(7)<<"COM: Reader has to wait for application to handle delivered messages"<<std::endl;
                 SetWakeUpTimer(buf, socket);
-            }
-        }
-
-        void BindSocket(boost::shared_ptr<boost::asio::ip::udp::socket>& socket, int ipv, unsigned short port)
-        {
-            if (ipv==4)
-            {
-                boost::asio::ip::udp::endpoint listenEp(boost::asio::ip::address_v4::from_string("0.0.0.0"), port);
-                socket->bind(listenEp);
-            }
-            else
-            {
-                boost::asio::ip::udp::endpoint listenEp(boost::asio::ip::address_v6::from_string("0.0.0.0"), port);
-                socket->bind(listenEp);
             }
         }
 
