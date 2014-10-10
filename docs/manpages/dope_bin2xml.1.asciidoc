@@ -10,12 +10,16 @@ dope_bin2xml - convert persisted entities to xml
 
 SYNOPSIS
 --------
-*dope_bin2xml* TODO
+*dope_bin2xml* ['OPTIONS']
 
 DESCRIPTION
 -----------
 Use dope_bin2xml to convert persisted entities from binary format to xml format. Can be
 used both on entities stored in a database and in files.
+
+OPTIONS
+-------
+Please check dope_bin2xml --help for information on options.
 
 
 RESOURCES
