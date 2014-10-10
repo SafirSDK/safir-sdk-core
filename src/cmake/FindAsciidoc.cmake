@@ -35,12 +35,14 @@ function(ADD_ASCIIDOC_MANPAGE TARGET)
     endif()
 
     set(_ad_SOURCE_NAME ${CMAKE_CURRENT_SOURCE_DIR}/${TARGET}.asciidoc)
+    set(_ad_COPIED_NAME ${CMAKE_CURRENT_BINARY_DIR}/${TARGET}.asciidoc.copied)
     set(_ad_INTERMEDIATE_NAME ${CMAKE_CURRENT_BINARY_DIR}/${TARGET})
     set(_ad_TARGET_NAME ${CMAKE_CURRENT_BINARY_DIR}/${TARGET}.gz)
 
     add_custom_command(
-      OUTPUT ${_ad_TARGET_NAME}
-      COMMAND ${A2X_EXECUTABLE} --doctype manpage --format manpage ${_ad_SOURCE_NAME}
+      OUTPUT ${_ad_TARGET_NAME} ${_ad_COPIED_NAME}
+      COMMAND ${CMAKE_COMMAND} -E copy ${_ad_SOURCE_NAME} ${_ad_COPIED_NAME}
+      COMMAND ${A2X_EXECUTABLE} --doctype manpage --format manpage ${_ad_COPIED_NAME}
       COMMAND ${GZIP_EXECUTABLE} -f ${_ad_INTERMEDIATE_NAME}
       DEPENDS ${_ad_SOURCE_NAME}
       COMMENT "Generating man page ${TARGET}")
