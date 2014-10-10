@@ -1,0 +1,18 @@
+SATE(1)
+=======
+:doctype: manpage
+
+
+NAME
+----
+sate - Safir Application Tester
+
+
+SYNOPSIS
+--------
+*sate*
+
+DESCRIPTION
+-----------
+Sate is a tool for testing Safir applications. It can be used to perform most operations on Dob objects.
+
