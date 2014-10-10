@@ -13,3 +13,4 @@ ADD_CSHARP_ASSEMBLY(sate WINEXE
 
 SAFIR_INSTALL(TARGETS sate)
 
+#TODO: should sate only be part of the Development component?

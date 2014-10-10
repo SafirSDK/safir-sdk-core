@@ -41,7 +41,7 @@ function(ADD_ASCIIDOC_MANPAGE TARGET)
     add_custom_command(
       OUTPUT ${_ad_TARGET_NAME}
       COMMAND ${A2X_EXECUTABLE} --doctype manpage --format manpage ${_ad_SOURCE_NAME}
-      COMMAND ${GZIP_EXECUTABLE} ${_ad_INTERMEDIATE_NAME}
+      COMMAND ${GZIP_EXECUTABLE} -f ${_ad_INTERMEDIATE_NAME}
       DEPENDS ${_ad_SOURCE_NAME}
       COMMENT "Generating man page ${TARGET}")
 

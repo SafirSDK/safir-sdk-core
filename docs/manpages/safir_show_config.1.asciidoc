@@ -1,20 +1,20 @@
-SATE(1)
-=======
+SAFIR_SHOW_CONFIG(1)
+====================
 :doctype: manpage
 
 
 NAME
 ----
-sate - Safir Application Tester
+safir_show_config - Show the contents of the Safir .ini files
 
 
 SYNOPSIS
 --------
-*sate*
+*safir_show_config* TODO
 
 DESCRIPTION
 -----------
-Sate is a tool for testing Safir applications. It can be used to perform most operations on Dob objects.
+Use this tool to show the contents of the Safir SDK Core .ini files, and to see how they are interpreted.
 
 
 RESOURCES

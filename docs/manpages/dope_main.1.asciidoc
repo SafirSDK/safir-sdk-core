@@ -1,20 +1,20 @@
-SATE(1)
-=======
+DOPE_MAIN(1)
+============
 :doctype: manpage
 
 
 NAME
 ----
-sate - Safir Application Tester
+dope_main - Safir object persistence service
 
 
 SYNOPSIS
 --------
-*sate*
+*dope_main*
 
 DESCRIPTION
 -----------
-Sate is a tool for testing Safir applications. It can be used to perform most operations on Dob objects.
+dope_main is the service in Safir SDK Core that provides persistent storage of entities.
 
 
 RESOURCES

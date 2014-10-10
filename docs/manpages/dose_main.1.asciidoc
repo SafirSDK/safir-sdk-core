@@ -1,20 +1,20 @@
-SATE(1)
-=======
+DOSE_MAIN(1)
+============
 :doctype: manpage
 
 
 NAME
 ----
-sate - Safir Application Tester
+dose_main - Safir object distribution service
 
 
 SYNOPSIS
 --------
-*sate*
+*dose_main*
 
 DESCRIPTION
 -----------
-Sate is a tool for testing Safir applications. It can be used to perform most operations on Dob objects.
+dose_main is the service in Safir SDK Core that distributes objects within and between nodes.
 
 
 RESOURCES

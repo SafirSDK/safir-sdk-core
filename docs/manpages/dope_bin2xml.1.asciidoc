@@ -1,20 +1,21 @@
-SATE(1)
-=======
+DOPE_BIN2XML(1)
+===============
 :doctype: manpage
 
 
 NAME
 ----
-sate - Safir Application Tester
+dope_bin2xml - convert persisted entities to xml
 
 
 SYNOPSIS
 --------
-*sate*
+*dope_bin2xml* TODO
 
 DESCRIPTION
 -----------
-Sate is a tool for testing Safir applications. It can be used to perform most operations on Dob objects.
+Use dope_bin2xml to convert persisted entities from binary format to xml format. Can be
+used both on entities stored in a database and in files.
 
 
 RESOURCES
