@@ -28,6 +28,7 @@ namespace dose_test_dotnet
     {
         static int Main(string[] args)
         {
+            System.Console.WriteLine("Starting CrashReporter");
             Safir.Application.CrashReporter.Start();
 
             System.Console.WriteLine("Starting");
