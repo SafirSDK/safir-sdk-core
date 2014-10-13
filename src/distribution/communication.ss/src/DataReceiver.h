@@ -79,6 +79,7 @@ namespace Com
 
             m_socket.reset(new boost::asio::ip::udp::socket(ioService));
             m_socket->open(unicastEndpoint.protocol());
+            m_socket->bind(unicastEndpoint);
 
             if (!multicastAddress.empty())
             {
@@ -93,11 +94,12 @@ namespace Com
                 m_multicastSocket->open(mcEndpoint.protocol());
                 m_multicastSocket->set_option(boost::asio::ip::udp::socket::reuse_address(true));
                 m_multicastSocket->set_option(boost::asio::ip::multicast::enable_loopback(true));
-                m_multicastSocket->set_option(boost::asio::ip::multicast::join_group(mcEndpoint.address()));
                 m_multicastSocket->bind(mcEndpoint);
+
+                //to join mcGroup with specific interface, the address must be a IPv4. Bug report https://svn.boost.org/trac/boost/ticket/3247
+                m_multicastSocket->set_option(boost::asio::ip::multicast::join_group(mcEndpoint.address().to_v4(), unicastEndpoint.address().to_v4()));
             }
 
-            m_socket->bind(unicastEndpoint);
         }
 
         void Start()
