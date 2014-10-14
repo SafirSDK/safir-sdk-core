@@ -49,7 +49,7 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
     endif()
   endif()
 
-  # 
+  #
   # Dependency resolution
   #
   # Create custom targets dummy that we just use to have somewhere to put the dependencies.
@@ -129,15 +129,15 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
     foreach(key ${java_namespace_keys})
       string (REGEX REPLACE "^${key}" "${java_namespace_${key}_replacement}" namespace ${namespace})
     endforeach()
-    
+
 
     string (TOLOWER ${namespace} java_namespace)
     string (REPLACE "." "/" java_path ${java_namespace})
     set (java_files ${java_files} "${CMAKE_CURRENT_BINARY_DIR}/generated_code/java/src/${java_path}/${java_base_name}.java")
   endforeach()
 
-  ##############  
-  
+  ##############
+
 
   #TODO: fix the paths below!
   #
@@ -156,7 +156,7 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
   endforeach()
 
   FIND_PACKAGE(PythonInterp)
-  
+
   if (SAFIR_EXTERNAL_BUILD)
     set(dots_v_path "${SAFIR_SDK_CORE_EXECUTABLES_DIR/dots_v.py")
     set(dod_directory "${SAFIR_SDK_CORE_GENERATION_DIR}/dod/")
@@ -167,13 +167,13 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
 
   FILE(GLOB dod_files ${dod_directory} *.dod)
 
-  SET(dots_v_command ${PYTHON_EXECUTABLE} 
+  SET(dots_v_command ${PYTHON_EXECUTABLE}
     ${dots_v_path}
-    --dod-files=${dod_directory} 
-    --dependencies ${DOTS_V_DEPS} 
+    --dod-files=${dod_directory}
+    --dependencies ${DOTS_V_DEPS}
     --library-name ${GEN_NAME}
     --output-path=generated_code)
-  
+
   ADD_CUSTOM_COMMAND(
     OUTPUT ${cpp_files} ${java_files} ${dotnet_files}
 
@@ -189,28 +189,28 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
   #See http://public.kitware.com/Bug/view.php?id=12311
   add_custom_target(safir_generated-${GEN_NAME}-code ALL DEPENDS ${cpp_files} ${java_files} ${dotnet_files})
   #############
-  
+
   #
   # Build CPP
   #
   ADD_LIBRARY(safir_generated-${GEN_NAME}-cpp SHARED ${cpp_files}) #TODO headers?
-  
+
   target_include_directories(safir_generated-${GEN_NAME}-cpp
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated_code/cpp/include>)
 
   #include path for precompiled_header_for_cpp.h
   if (SAFIR_EXTERNAL_BUILD)
     target_include_directories(safir_generated-${GEN_NAME}-cpp
-      PRIVATE 
+      PRIVATE
       ${SAFIR_SDK_CORE_GENERATION_DIR}/cpp
       ${SAFIR_SDK_CORE_INCLUDE_DIRS})
   else()
     target_include_directories(safir_generated-${GEN_NAME}-cpp
       PRIVATE ${safir_sdk_core_SOURCE_DIR}/src/dots/dots_v.ss/data)
   endif()
-  
-  
-  target_link_libraries(safir_generated-${GEN_NAME}-cpp 
+
+
+  target_link_libraries(safir_generated-${GEN_NAME}-cpp
     dots_cpp
     dots_internal
     dots_kernel
@@ -235,7 +235,7 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
 
     FOREACH (DEP ${GEN_DEPENDENCIES})
       SET(include_jars ${include_jars} safir_generated-${DEP}-java)
-      set(SAFIR_GENERATED_JAVA_MANIFEST_CLASSPATH 
+      set(SAFIR_GENERATED_JAVA_MANIFEST_CLASSPATH
         "${SAFIR_GENERATED_JAVA_MANIFEST_CLASSPATH} safir_generated-${DEP}-java.jar")
     ENDFOREACH()
 
@@ -306,15 +306,18 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
     INSTALL(TARGETS safir_generated-${GEN_NAME}-cpp
       EXPORT SafirSDKCore
       RUNTIME DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN} COMPONENT ${component_runtime}
-      LIBRARY DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT ${component_runtime}
+      LIBRARY DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT ${component_runtime} NAMELINK_SKIP
       ARCHIVE DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT ${component_development})
 
-    INSTALL(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated_code/cpp/include/ 
+    INSTALL(TARGETS ${target}
+      LIBRARY DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT ${component_development} NAMELINK_ONLY)
+
+    INSTALL(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated_code/cpp/include/
       DESTINATION ${SAFIR_INSTALL_DESTINATION_INCLUDE}
       COMPONENT ${component_development}
       PATTERN ".svn" EXCLUDE
       PATTERN "*~" EXCLUDE)
-    
+
     INSTALL(FILES ${dou_files} ${dom_files} ${namespace_files}
       DESTINATION ${SAFIR_INSTALL_DESTINATION_DOU_BASE}/${GEN_NAME}
       COMPONENT ${component_runtime})
@@ -322,12 +325,12 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
     #TODO: components!
     if (Java_FOUND)
         get_target_property(install_files safir_generated-${GEN_NAME}-java INSTALL_FILES)
-        
+
         if (install_files)
-          INSTALL(FILES ${install_files} 
+          INSTALL(FILES ${install_files}
             DESTINATION ${SAFIR_INSTALL_DESTINATION_JAR}
             COMPONENT ${component_runtime})
-        endif()        
+        endif()
     endif()
 
     if (CSHARP_FOUND)
@@ -354,11 +357,3 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
   ##############
 
 ENDFUNCTION()
-
-
-
-
-
-
-
-
