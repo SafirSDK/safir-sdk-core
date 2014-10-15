@@ -49,9 +49,6 @@
       <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
        <bool>false</bool>
       </attribute>
-      <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
-       <bool>false</bool>
-      </attribute>
       <column>
        <property name="text">
         <string>Show</string>
@@ -64,27 +61,27 @@
       </column>
       <column>
        <property name="text">
-        <string>Number of States</string>
+        <string>#States</string>
        </property>
       </column>
       <column>
        <property name="text">
-        <string>Downgraded</string>
+        <string>#Downgraded</string>
        </property>
       </column>
       <column>
        <property name="text">
-        <string>Real states</string>
+        <string>#Real</string>
        </property>
       </column>
       <column>
        <property name="text">
-        <string>Ghost states</string>
+        <string>#Ghosts</string>
        </property>
       </column>
       <column>
        <property name="text">
-        <string>Injection states</string>
+        <string>#Injection</string>
        </property>
       </column>
      </widget>
@@ -124,7 +121,7 @@
       </column>
       <column>
        <property name="text">
-        <string># Subscribers</string>
+        <string>#Subscribers</string>
        </property>
       </column>
      </widget>

@@ -57,6 +57,11 @@ void MemGraph::Timeout()
     m_timer.start(static_cast<int>(updatePeriod->value()*1000));
     const size_t free = GetSharedMemory().get_free_memory();
 
+    std::ostringstream ostr;
+    ostr.precision(2);
+    ostr << static_cast<float>((m_capacity-free)/(double)m_capacity)*100 << " %" << " (" << (m_capacity-free)/1048576 << "/" << m_capacity/1048576 << "Mb)";
+
+    memLabel->setText(ostr.str().c_str());
     graph->AddData(QDateTime::currentDateTime(),static_cast<float>((m_capacity-free)/(double)m_capacity));
 }
 

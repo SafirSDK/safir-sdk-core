@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2008 (http://www.safirsdk.com)
 *
-* Created by: Lars Hagström / stlrha
+* Created by: Lars HagstrÃ¶m / stlrha
 *
 *******************************************************************************
 *
@@ -30,6 +30,7 @@
 #include "nodestatus.h"
 #include "dosecominfo.h"
 #include "connectionstats.h"
+#include "numberofentities.h"
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Typesystem/Utilities.h>
 #include <Safir/Dob/Entity.h>
@@ -105,6 +106,10 @@ void DoseMon::TreeItemActivated ( QTreeWidgetItem * item, int /*column*/ )
     else if (item->text(0) == "DoseCom Info")
     {
         newTab = tabWidget->addTab(new DoseComInfo(this),"DoseCom Info");
+    }
+    else if (item->text(0) == "Entity Statistics")
+    {
+        newTab = tabWidget->addTab(new NumberOfEntities(this),"Entity Statistics");
     }
     else if (item->parent() == NULL)
     {

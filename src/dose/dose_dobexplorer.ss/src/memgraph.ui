@@ -1,36 +1,44 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <author>Lars Hagström</author>
  <class>MemoryGraph</class>
- <widget class="QWidget" name="MemoryGraph" >
-  <property name="geometry" >
+ <widget class="QWidget" name="MemoryGraph">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>388</width>
-    <height>317</height>
+    <width>518</width>
+    <height>379</height>
    </rect>
   </property>
-  <property name="maximumSize" >
+  <property name="maximumSize">
    <size>
     <width>10000</width>
     <height>10000</height>
    </size>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>Dob shared memory usage</string>
   </property>
-  <property name="autoFillBackground" >
+  <property name="autoFillBackground">
    <bool>true</bool>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" >
+  <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout" >
+    <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <spacer name="horizontalSpacer_2" >
-       <property name="orientation" >
+      <widget class="QLabel" name="memLabel">
+       <property name="text">
+        <string>mem</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
-       <property name="sizeHint" stdset="0" >
+       <property name="sizeHint" stdset="0">
         <size>
          <width>40</width>
          <height>20</height>
@@ -39,43 +47,43 @@
       </spacer>
      </item>
      <item>
-      <widget class="QLabel" name="label_2" >
-       <property name="text" >
+      <widget class="QLabel" name="label_2">
+       <property name="text">
         <string>History</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QDoubleSpinBox" name="historyLength" >
-       <property name="prefix" >
+      <widget class="QDoubleSpinBox" name="historyLength">
+       <property name="prefix">
         <string/>
        </property>
-       <property name="suffix" >
+       <property name="suffix">
         <string> min</string>
        </property>
-       <property name="decimals" >
+       <property name="decimals">
         <number>0</number>
        </property>
-       <property name="minimum" >
+       <property name="minimum">
         <double>1.000000000000000</double>
        </property>
-       <property name="maximum" >
+       <property name="maximum">
         <double>172800.000000000000000</double>
        </property>
-       <property name="singleStep" >
+       <property name="singleStep">
         <double>10.000000000000000</double>
        </property>
-       <property name="value" >
+       <property name="value">
         <double>20.000000000000000</double>
        </property>
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer" >
-       <property name="orientation" >
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
-       <property name="sizeHint" stdset="0" >
+       <property name="sizeHint" stdset="0">
         <size>
          <width>40</width>
          <height>20</height>
@@ -84,37 +92,37 @@
       </spacer>
      </item>
      <item>
-      <widget class="QLabel" name="label" >
-       <property name="text" >
+      <widget class="QLabel" name="label">
+       <property name="text">
         <string>Update Period</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QDoubleSpinBox" name="updatePeriod" >
-       <property name="suffix" >
+      <widget class="QDoubleSpinBox" name="updatePeriod">
+       <property name="suffix">
         <string> s</string>
        </property>
-       <property name="decimals" >
+       <property name="decimals">
         <number>0</number>
        </property>
-       <property name="minimum" >
+       <property name="minimum">
         <double>1.000000000000000</double>
        </property>
-       <property name="maximum" >
+       <property name="maximum">
         <double>10000.000000000000000</double>
        </property>
-       <property name="value" >
+       <property name="value">
         <double>3.000000000000000</double>
        </property>
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer_3" >
-       <property name="orientation" >
+      <spacer name="horizontalSpacer_3">
+       <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
-       <property name="sizeHint" stdset="0" >
+       <property name="sizeHint" stdset="0">
         <size>
          <width>40</width>
          <height>20</height>
@@ -125,69 +133,69 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2" >
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="GraphWidget" name="graph" >
-       <property name="sizePolicy" >
-        <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+      <widget class="GraphWidget" name="graph">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <property name="minimumSize" >
+       <property name="minimumSize">
         <size>
          <width>100</width>
          <height>100</height>
         </size>
        </property>
-       <property name="maximumSize" >
+       <property name="maximumSize">
         <size>
          <width>10000</width>
          <height>10000</height>
         </size>
        </property>
-       <property name="frameShape" >
+       <property name="frameShape">
         <enum>QFrame::StyledPanel</enum>
        </property>
-       <property name="frameShadow" >
+       <property name="frameShadow">
         <enum>QFrame::Sunken</enum>
        </property>
       </widget>
      </item>
      <item>
-      <layout class="QVBoxLayout" name="verticalLayout_2" >
+      <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="QLabel" name="scalePercent" >
-         <property name="minimumSize" >
+        <widget class="QLabel" name="scalePercent">
+         <property name="minimumSize">
           <size>
            <width>40</width>
            <height>0</height>
           </size>
          </property>
-         <property name="text" >
+         <property name="text">
           <string>100 %</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QSlider" name="verticalScale" >
-         <property name="minimum" >
+        <widget class="QSlider" name="verticalScale">
+         <property name="minimum">
           <number>1</number>
          </property>
-         <property name="maximum" >
+         <property name="maximum">
           <number>100</number>
          </property>
-         <property name="value" >
+         <property name="value">
           <number>100</number>
          </property>
-         <property name="orientation" >
+         <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="label_3" >
-         <property name="text" >
+        <widget class="QLabel" name="label_3">
+         <property name="text">
           <string>  0 %</string>
          </property>
         </widget>
