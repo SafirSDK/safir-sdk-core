@@ -1,8 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2008 (http://www.safirsdk.com)
+* Copyright Saab AB, 2008-2013 (http://safir.sourceforge.net)
 *
-* Created by: Lars Hagström / stlrha
+* Created by: Lars HagstrÃ¶m / stlrha
 *
 *******************************************************************************
 *
@@ -33,11 +33,11 @@ class GraphWidget : public QFrame
 public:
     GraphWidget(QWidget *parent = 0);
 
-    void AddData(const QDateTime& time, const float value);
+    void AddData(const QDateTime& time, const double value);
 
     void SetHistoryLength(const int seconds);
 
-    void SetVerticalScale(const float scale);
+    void SetVerticalScale(const double scale);
 
 protected:
     void paintEvent(QPaintEvent* event);
@@ -46,11 +46,11 @@ private:
     void PurgeOldData();
 
 
-    typedef std::map<QDateTime, float> PlotData;
+    typedef std::map<QDateTime, double> PlotData;
 
     PlotData m_data;
     int m_historySeconds;
-    float m_scale;
+    double m_scale;
 };
 
 
