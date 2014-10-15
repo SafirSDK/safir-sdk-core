@@ -94,10 +94,10 @@ namespace Com
                 m_multicastSocket->open(mcEndpoint.protocol());
                 m_multicastSocket->set_option(boost::asio::ip::udp::socket::reuse_address(true));
                 m_multicastSocket->set_option(boost::asio::ip::multicast::enable_loopback(true));
-                m_multicastSocket->bind(mcEndpoint);
 
                 //to join mcGroup with specific interface, the address must be a IPv4. Bug report https://svn.boost.org/trac/boost/ticket/3247
-                m_multicastSocket->set_option(boost::asio::ip::multicast::join_group(mcEndpoint.address().to_v4(), unicastEndpoint.address().to_v4()));
+                m_multicastSocket->bind(boost::asio::ip::udp::endpoint(boost::asio::ip::address_v4::any(), mcEndpoint.port())); //bind to all interfaces and the multicast port
+                m_multicastSocket->set_option(boost::asio::ip::multicast::join_group(mcEndpoint.address().to_v4(), unicastEndpoint.address().to_v4())); //join group on specific interface
             }
 
         }
