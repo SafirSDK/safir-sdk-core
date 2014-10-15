@@ -34,12 +34,12 @@ namespace Control
 {
 
     SystemStateHandler::SystemStateHandler(boost::asio::io_service::strand& strand,
-                                           const NodeUpCb&                  nodeUpCb,
+                                           const NodeIncludedCb&            nodeIncludedCb,
                                            const NodeDownCb&                nodeDownCb)
 
         : m_strand(strand),
           m_systemState(),
-          m_nodeUpCb(nodeUpCb),
+          m_nodeIncludedCb(nodeIncludedCb),
           m_nodeDownCb(nodeDownCb)
     {
     }
@@ -72,7 +72,7 @@ namespace Control
                               newState.DataAddress(ix)};
 
                 m_systemState.insert({nodeId, newNode});
-                m_nodeUpCb(newNode);
+                m_nodeIncludedCb(newNode);
 
             }
             else

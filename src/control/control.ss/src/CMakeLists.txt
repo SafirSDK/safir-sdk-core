@@ -4,6 +4,10 @@ project(control CXX)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
+ADD_SUBDIRECTORY(boost-process)
+
+INCLUDE_DIRECTORIES(. boost-process/src)
+
 FILE(GLOB headers *.h)
 FILE(GLOB sources *.cpp)
 
@@ -25,6 +29,8 @@ if (NOT MSVC)
     lluf_config
     ${Boost_LIBRARIES})
 endif()
+
+add_dependencies(safir_control boost-process)
 
 INSTALL(TARGETS safir_control
         RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin

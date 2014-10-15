@@ -45,6 +45,9 @@
 #  pragma warning (pop)
 #endif
 
+#include "boost/process.hpp"
+#include "boost/process/mitigate.hpp"
+
 namespace SP = Safir::Dob::Internal::SP;
 namespace Com = Safir::Dob::Internal::Com;
 
@@ -227,6 +230,19 @@ int main(int argc, char * argv[])
 
     communication.Start();
 
+    // Start dose_main
+    // TODO: Hur hitta binärer?
+    // TODO: Hur hantera environment? (Ärvs automatiskt på Windows men inte för Posix)
+    boost::system::error_code ec;
+    boost::process::child dose_main =
+            boost::process::execute(
+                boost::process::initializers::run_exe("dose_main_stub"),
+                boost::process::initializers::set_on_error(ec),
+                boost::process::initializers::inherit_env());
+    if (ec)
+    {
+        std::cout << "Error run_exe: " << ec.message() << std::endl;
+    }
 
     boost::asio::signal_set signalSet(ioService);
     
