@@ -24,6 +24,7 @@
 #ifndef ENTITYSTATS_H
 #define ENTITYSTATS_H
 #include "common_header.h"
+#include "internalfunctions.h"
 #include "ui_entitystats.h"
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Internal/InternalFwd.h>
@@ -34,24 +35,23 @@ struct Arguments;
 
 class EntityStats :
   public QWidget,
-  private Ui::EntityStatistics
+  private Ui::EntityStatistics,
+  private Safir::Dob::Internal::IStatisticsCollector
 {
     Q_OBJECT
 
 public:
     EntityStats(QWidget *parent, const Safir::Dob::Typesystem::TypeId typeId);
 
+    // override Safir::Dob::Internal::IStatisticsCollector
     void ProcessState(const Safir::Dob::Typesystem::Int64 instance,
                       const Safir::Dob::Internal::StateSharedPtr& statePtr,
-                      Arguments& arguments);
+                      Safir::Dob::Internal::Arguments& arguments);
 
-    void AddContextRow(Safir::Dob::Internal::EntityType& entityType, Arguments& argumentsXS);
-
-    void InitRemoveInstances(Arguments& arguments);
-
+    void AddContextRow(Safir::Dob::Internal::EntityType& entityType, Safir::Dob::Internal::Arguments& argumentsXS);
+    void InitRemoveInstances(Safir::Dob::Internal::Arguments& arguments);
     void RemoveInstances();
-
-    void AddContextGlobalData(Arguments& arguments);
+    void AddContextGlobalData(Safir::Dob::Internal::Arguments& arguments);
 
 public slots:
     void UpdateStatistics();

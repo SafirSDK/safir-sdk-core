@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>NumberOfEntities</class>
+ <widget class="QWidget" name="NumberOfEntities">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>526</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Node Statuses</string>
+  </property>
+  <layout class="QHBoxLayout">
+   <item>
+    <widget class="QTableWidget" name="entityTable">
+     <property name="editTriggers">
+      <set>QAbstractItemView::NoEditTriggers</set>
+     </property>
+     <property name="sortingEnabled">
+      <bool>true</bool>
+     </property>
+     <attribute name="horizontalHeaderCascadingSectionResizes">
+      <bool>false</bool>
+     </attribute>
+     <attribute name="horizontalHeaderDefaultSectionSize">
+      <number>100</number>
+     </attribute>
+     <attribute name="horizontalHeaderMinimumSectionSize">
+      <number>19</number>
+     </attribute>
+     <column>
+      <property name="text">
+       <string>Name</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>#States</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>#Downgraded</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>#Subscribers</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>#Real</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>#Ghosts</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>#Injections</string>
+      </property>
+     </column>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

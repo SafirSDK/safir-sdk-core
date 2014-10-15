@@ -67,6 +67,11 @@
       </item>
       <item>
        <property name="text">
+        <string>Entity Statistics</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
         <string>Node Statuses</string>
        </property>
        <property name="toolTip">
