@@ -59,10 +59,10 @@ void MemGraph::Timeout()
 
     std::ostringstream ostr;
     ostr.precision(2);
-    ostr << static_cast<float>((m_capacity-free)/(double)m_capacity)*100 << " %" << " (" << (m_capacity-free)/1048576 << "/" << m_capacity/1048576 << "Mb)";
+    ostr << static_cast<double>((m_capacity-free)/(double)m_capacity)*100 << " %" << " (" << (m_capacity-free)/1048576 << "/" << m_capacity/1048576 << "Mb)";
 
     memLabel->setText(ostr.str().c_str());
-    graph->AddData(QDateTime::currentDateTime(),static_cast<float>((m_capacity-free)/(double)m_capacity));
+    graph->AddData(QDateTime::currentDateTime(),static_cast<double>((m_capacity-free)/(double)m_capacity));
 }
 
 void MemGraph::PeriodChanged(double newPeriod)
@@ -76,5 +76,5 @@ void MemGraph::ScaleChanged(int newValue)
     std::ostringstream ostr;
     ostr << newValue << " %";
     scalePercent->setText(ostr.str().c_str());
-    graph->SetVerticalScale(static_cast<float>(newValue/100.0));
+    graph->SetVerticalScale(static_cast<double>(newValue/100.0));
 }
