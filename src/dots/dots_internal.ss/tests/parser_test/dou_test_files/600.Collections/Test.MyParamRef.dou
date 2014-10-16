@@ -27,14 +27,27 @@
             </valueRef>
         </parameter>
 
-        <!--parameter>
+        <parameter>
             <name>SequenceParam</name>
             <type>Int32</type>
             <sequence>
                 <value>1</value>
                 <value>2</value>
-                <value>2</value>
+                <valueRef>
+                    <name>Test.MyParamRef.IntArrayParam</name>
+                    <index>2</index>
+                </valueRef>           
+                <value>4</value>
             </sequence>
+        </parameter>
+
+        <parameter>
+            <name>IntRefIntoSequence</name>
+            <type>Int32</type>
+            <valueRef>
+                <name>Test.MyParamRef.SequenceParam</name>
+                <index>2</index>
+            </valueRef>
         </parameter>
 
         <parameter>
@@ -175,7 +188,7 @@
                     </ParserTest.MyEntity>
                 </entry>
             </dictionary>
-        </parameter-->
+        </parameter>
      
     </parameters>
 

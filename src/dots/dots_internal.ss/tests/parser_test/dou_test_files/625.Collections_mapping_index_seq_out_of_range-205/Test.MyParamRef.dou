@@ -30,8 +30,9 @@
             <name>SequenceRefParam</name>
             <type>Int32</type>
             <valueRef>
-		<name>Test.MyParam.SequenceParam</name>
-	    </valueRef>
+              <name>Test.MyParam.SequenceParam</name>
+              <index>1</index>
+            </valueRef>
         </parameter>
             
 	

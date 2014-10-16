@@ -134,8 +134,8 @@
             <array>
                 <value>1</value>
                 <valueRef>
-                    <name>Test.MyParam.SequenceParam</name>
-                    <index>1</index>
+                    <name>Test.MyParam.SequenceParam</name> 
+                    <index>10</index>
                 </valueRef>
                 <value>2</value>
             </array>

@@ -241,11 +241,12 @@ namespace ToolSupport
             break;
 
         case ArrayCollectionType:
+        case SequenceCollectionType:
         {
             if (key.empty())
             {
                 std::ostringstream os;
-                os<<"Array parameter '"<<pd->qualifiedName<<"' is missing index element in reference";
+                os<<"Referenced parameter '"<<pd->qualifiedName<<"' has collectionType="<<BasicTypeOperations::CollectionTypeToString(pd->GetCollectionType())<<". An index element is required in the reference";
                 throw std::invalid_argument(os.str());
             }
 
@@ -255,7 +256,7 @@ namespace ToolSupport
                 if (index<0 || index>=pd->GetNumberOfValues())
                 {
                     std::ostringstream os;
-                    os<<"Array parameter reference out of range. Index="<<index<<"' but the parameter '"<<pd->qualifiedName<<"' only has "<<pd->GetNumberOfValues()<<" values.";
+                    os<<"Parameter reference out of range. Index="<<index<<"' but the parameter '"<<pd->qualifiedName<<"' only has "<<pd->GetNumberOfValues()<<" values.";
                     throw std::invalid_argument(os.str());
                 }
                 return index;
@@ -270,7 +271,6 @@ namespace ToolSupport
             break;
 
         case SingleValueCollectionType:
-        case SequenceCollectionType:
         {
             if (!key.empty())
             {
@@ -1096,7 +1096,7 @@ namespace ToolSupport
         catch (const std::exception& err)
         {
             std::ostringstream ss;
-            ss<<"The specified key/index in parameter valueRef parameter='"<<ref.parameterName<<"' and key/index='"<<ref.parameterKey<<"' can't be resolved. Referenced from parameter: "<<referencing->GetName()<<". "<<err.what();
+            ss<<"The specified key/index in parameter valueRef parameter='"<<ref.parameterName<<"' and key/index='"<<ref.parameterKey<<"' can't be resolved. Referenced from parameter: "<<referencing->qualifiedName<<". "<<err.what();
             throw ParseError("Invalid parameter reference", ss.str(), cd->FileName(), 203);
         }
 
