@@ -10,9 +10,11 @@ license=('GPL3')
 groups=()
 depends=('boost' 'unixodbc' 'qt5-base' 'cmake' 'python' 'mono' 'java-environment>=6' 'google-breakpad-svn')
 makedepends=('git' 'subversion' 'doxygen' 'graphviz')
-install=
-source=("$pkgname"::'git+https://github.com/SafirSDK/safir_sdk_core.git#branch=logan')
-sha1sums=('SKIP')
+install=install
+source=("$pkgname"::'git+https://github.com/SafirSDK/safir_sdk_core.git#branch=logan'
+        'safir-sdk-core.tmpfiles')
+sha1sums=('SKIP'
+          '6b04e1a9f81800fd15bacaa511f0f43543799431')
 backup=('etc/safir_sdk_core/typesystem.ini' 'etc/safir_sdk_core/logging.ini' 'etc/safir_sdk_core/locations.ini')
 
 pkgver() {
@@ -38,9 +40,10 @@ package() {
 
   make DESTDIR="$pkgdir/" install
 
+  install -Dm644 "$srcdir/safir-sdk-core.tmpfiles" "$pkgdir/usr/lib/tmpfiles.d/safir-sdk-core.conf"
   #Create directories
-  install -d -m 777 $pkgdir/var/run/safir_sdk_core
-  install -d -m 777 $pkgdir/var/log/safir_sdk_core
+  #install -d -m 777 $pkgdir/var/run/safir_sdk_core
+  install -d -m 775 $pkgdir/var/log/safir_sdk_core
 
   # install assemblies into Mono's GAC
   for file in $pkgdir/usr/lib/safir_sdk_core/*.dll
