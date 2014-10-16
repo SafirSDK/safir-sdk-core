@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
 *
-* Created by: Lars Hagström / stlrha
+* Created by: Lars HagstrÃ¶m / stlrha
 *
 *******************************************************************************
 *
@@ -37,21 +37,28 @@ namespace Internal
     {
         m_timerId = TimerHandler::Instance().RegisterTimeoutHandler(L"End States Timer", *this);
 
+        double timeout = GetUtcTime() + 60.0;
         TimerInfoPtr timerInfo(new EmptyTimerInfo(m_timerId));
         TimerHandler::Instance().Set(Discard,
                                      timerInfo,
-                                     GetUtcTime() + 60.0); //time out in 60 seconds
+                                     timeout); //time out in 60 seconds
+
+        lllerr << "Setting end states timer to " << timeout << std::endl;
     }
 
 
     void EndStatesHandler::HandleTimeout(const TimerInfoPtr& timer)
     {
+        double timeout = GetUtcTime() + 60.0;
+
         //TimerInfoPtr timerInfo(new EmptyTimerInfo(m_timerId));
         TimerHandler::Instance().Set(Discard,
                                      timer,
-                                     GetUtcTime() + 60.0); //time out again in 60 seconds
+                                     timeout); //time out again in 60 seconds
 
         Safir::Dob::Internal::EndStates::Instance().HandleTimeout();
+
+        lllerr << "End states timer triggered! Setting new timeout to " << timeout << std::endl;
     }
 }
 }
