@@ -4,6 +4,7 @@ post_install() {
   fi
 
   chown root.safirusers var/log/safir_sdk_core
+  chown root.safirusers var/lib/safir_sdk_core/dump
   systemd-tmpfiles --create safir-sdk-core.conf
 }
 
