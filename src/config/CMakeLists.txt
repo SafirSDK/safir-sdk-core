@@ -1,6 +1,6 @@
 if (UNIX)
   set(DEFAULT_LOCK_FILE_DIRECTORY /var/run/safir_sdk_core/locks/)
-  set(DEFAULT_CRASH_DUMP_DIRECTORY /var/run/safir_sdk_core/dump/)
+  set(DEFAULT_CRASH_DUMP_DIRECTORY /var/lib/safir_sdk_core/dump/)
   set(DEFAULT_LOG_DIRECTORY /var/log/safir_sdk_core/)
   set(DEFAULT_DOU_DIRECTORY "${CMAKE_INSTALL_PREFIX}/${SAFIR_INSTALL_DESTINATION_DOU_BASE}")
   set(DEFAULT_JAVA_SEARCH_PATH "${CMAKE_INSTALL_PREFIX}/${SAFIR_INSTALL_DESTINATION_JAR}")

@@ -1,14 +1,14 @@
 post_install() {
-  if [ -z "$(grep ^proxy: /etc/group)" ]; then
-    groupadd safir &>/dev/null
+  if [ -z "$(grep ^safirusers: /etc/group)" ]; then
+    groupadd --system safirusers &>/dev/null
   fi
 
-  chown root.safir var/log/safir_sdk_core
+  chown root.safirusers var/log/safir_sdk_core
   systemd-tmpfiles --create safir-sdk-core.conf
 }
 
 pre_remove() {
-  if [ ! -z "$(grep ^proxy: /etc/group)" ]; then
-    groupdel safir &>/dev/null
+  if [ ! -z "$(grep ^safirusers: /etc/group)" ]; then
+    groupdel safirusers &>/dev/null
   fi
 }
