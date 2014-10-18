@@ -9,10 +9,6 @@ post_install() {
 }
 
 pre_remove() {
-  if [ ! -z "$(grep ^safirusers: /etc/group)" ]; then
-    groupdel safirusers &>/dev/null
-  fi
-
   rm -rf var/log/safir_sdk_core
   rm -rf var/lib/safir_sdk_core
   rm -rf var/run/safir_sdk_core
