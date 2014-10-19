@@ -3,8 +3,8 @@ post_install() {
     groupadd --system safirusers &>/dev/null
   fi
 
-  chown root.safirusers var/log/safir_sdk_core
-  chown root.safirusers var/lib/safir_sdk_core
+  chown root:safirusers var/log/safir_sdk_core
+  chown root:safirusers var/lib/safir_sdk_core
   systemd-tmpfiles --create safir-sdk-core.conf
 }
 
