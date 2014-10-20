@@ -2,10 +2,11 @@ if (NOT Java_FOUND)
   return()
 endif()
 
-ADD_JAR(tracer_sender_java 
+ADD_JAR(tracer_sender_java
   SOURCES Sender.java
   INCLUDE_JARS swre_application_java
   ENTRY_POINT Sender
+  VERSION ${SAFIR_VERSION_STRING}
   MANIFEST ${CMAKE_CURRENT_SOURCE_DIR}/Manifest.txt)
 
 ADD_TEST(NAME tracer_java

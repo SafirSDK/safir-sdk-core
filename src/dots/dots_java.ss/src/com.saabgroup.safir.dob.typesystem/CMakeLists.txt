@@ -1,6 +1,8 @@
 file(GLOB_RECURSE sources src/*.java)
 
-ADD_JAR(dots_java SOURCES ${sources})
+ADD_JAR(dots_java
+  SOURCES ${sources}
+  VERSION ${SAFIR_VERSION_STRING})
 
 SAFIR_INSTALL(TARGETS dots_java)
 

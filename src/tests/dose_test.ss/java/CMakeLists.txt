@@ -14,6 +14,7 @@ ADD_JAR(dose_test_java
   safir_generated-Core-java
   dots_java
   ENTRY_POINT Program
+  VERSION ${SAFIR_VERSION_STRING}
   MANIFEST ${CMAKE_CURRENT_SOURCE_DIR}/Manifest.txt)
 
 SAFIR_INSTALL(TARGETS dose_test_java)

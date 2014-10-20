@@ -1,6 +1,8 @@
 file(GLOB_RECURSE sources src/*.java)
 
-ADD_JAR(logging_java SOURCES ${sources})
+ADD_JAR(logging_java
+  SOURCES ${sources}
+  VERSION ${SAFIR_VERSION_STRING})
 
 SAFIR_INSTALL(TARGETS logging_java)
 
