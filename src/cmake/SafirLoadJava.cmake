@@ -17,9 +17,7 @@ if (Java_Development_FOUND AND Java_Runtime_FOUND)
       INCLUDE(UseJava)
     endif()
 
-    #TODO: is this really what we want to do? Is this going to be exported
-    #to our users? If so, BAAAAD....
-    SET(CMAKE_JAVA_COMPILE_FLAGS -encoding UTF-8 -source 1.6 -Xlint:-options)
+    SET(CMAKE_JAVA_COMPILE_FLAGS -encoding UTF-8)
   else()
     SET(Java_FOUND Java-NOTFOUND)
   endif()
