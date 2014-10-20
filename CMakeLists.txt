@@ -55,6 +55,8 @@ INSTALL(DIRECTORY include/ DESTINATION ${SAFIR_INSTALL_DESTINATION_INCLUDE}
   PATTERN ".svn" EXCLUDE
   PATTERN "*~" EXCLUDE)
 
+#TODO: create a version.h file and install it. Not sure how to do it best...
+
 set(CTEST_FULL_OUTPUT 1)
 ENABLE_TESTING()
 
