@@ -110,8 +110,12 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
     FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/version.cs
       "[assembly: System.Reflection.AssemblyVersion(\"${SAFIR_VERSION_STRING}.0\")]")
 
+    #add version.cs to the list of sources, but remove it again if it was already there...
+    LIST(APPEND _cs_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/version.cs)
+    LIST(REMOVE_DUPLICATES _cs_SOURCES)
+
     SET (response_file ${CMAKE_CURRENT_BINARY_DIR}/command_line_${TARGET_NAME}.rsp)
-    foreach(src ${_cs_SOURCES} ${CMAKE_CURRENT_BINARY_DIR}/version.cs)
+    foreach(src ${_cs_SOURCES})
       if (WIN32)
         file (TO_NATIVE_PATH ${src} _cs_source_native)
         set (_cs_sources_native ${_cs_sources_native} "${_cs_source_native}")
