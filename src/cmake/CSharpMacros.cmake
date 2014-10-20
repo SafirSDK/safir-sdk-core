@@ -107,8 +107,11 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
       set(_cs_lib_arg "${_cs_lib_arg}\"${path}\",")
     endforeach()
 
+    FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/version.cs
+      "[assembly: System.Reflection.AssemblyVersion(\"${SAFIR_VERSION_STRING}.0\")]")
+
     SET (response_file ${CMAKE_CURRENT_BINARY_DIR}/command_line_${TARGET_NAME}.rsp)
-    foreach(src ${_cs_SOURCES})
+    foreach(src ${_cs_SOURCES} ${CMAKE_CURRENT_BINARY_DIR}/version.cs)
       if (WIN32)
         file (TO_NATIVE_PATH ${src} _cs_source_native)
         set (_cs_sources_native ${_cs_sources_native} "${_cs_source_native}")

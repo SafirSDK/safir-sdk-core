@@ -26,27 +26,18 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-// General Information about an assembly is controlled through the following 
+// General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Software Reports")]
-[assembly: AssemblyDescription("Supports sending software reports and receiving Program Info commands")]
+[assembly: AssemblyTitle("Safir.SwReports.dll")]
+[assembly: AssemblyDescription("Supports sending software reports from dotnet")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("SaabTech")]
-[assembly: AssemblyProduct("Safir")]
-[assembly: AssemblyCopyright("Copyright © SaabTech 2006")]
+[assembly: AssemblyCompany("Saab AB")]
+[assembly: AssemblyProduct("Safir SDK Core")]
+[assembly: AssemblyCopyright("Copyright Saab AB 2006-2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
-// Version information for an assembly consists of the following four values:
-//
-//      Major Version
-//      Minor Version 
-//      Build Number
-//      Revision
-//
-// You can specify all the values or you can default the Revision and Build Numbers 
-// by using the '*' as shown below:
-[assembly: AssemblyVersion("0.5.0.0")]
-
 [assembly: ComVisibleAttribute(false)]
+
+//Note: Version information is set by CMake build system

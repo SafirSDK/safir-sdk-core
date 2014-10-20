@@ -31,25 +31,14 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 //
 [assembly: AssemblyTitle( "Safir.Time" )]
-[assembly: AssemblyDescription( "Time in Safir" )]
+[assembly: AssemblyDescription( "Dotnet time interfaces for Safir" )]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany( "SaabTech" )]
-[assembly: AssemblyProduct( "Safir" )]
-[assembly: AssemblyCopyright( "Copyright © SaabTech 2006" )]
+[assembly: AssemblyCompany( "Saab AB" )]
+[assembly: AssemblyProduct( "Safir SDK Core" )]
+[assembly: AssemblyCopyright( "Copyright © SaabTech 2006-2014" )]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
-//
-// Version information for an assembly consists of the following four values:
-//
-//      Major Version
-//      Minor Version
-//      Build Number
-//      Revision
-//
-// You can specify all the values or you can default the Revision and Build Numbers
-// by using the '*' as shown below:
-
-[assembly: AssemblyVersion( "1.0.0.0" )]
-
 [assembly: ComVisibleAttribute( false )]
+
+//Note: Version information is set by CMake build system
