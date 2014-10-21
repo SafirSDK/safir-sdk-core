@@ -8,7 +8,6 @@ ADD_JAR(swre_application_java
   safir_generated-Core-java
   dots_java
   logging_java
-  VERSION ${SAFIR_VERSION_STRING}
   MANIFEST ${CMAKE_CURRENT_SOURCE_DIR}/Manifest.txt)
 
 SAFIR_INSTALL(TARGETS swre_application_java)

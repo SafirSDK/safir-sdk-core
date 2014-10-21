@@ -6,7 +6,6 @@ ADD_JAR(swreport_sender_java
   SOURCES Sender.java
   INCLUDE_JARS swre_reports_java
   ENTRY_POINT Sender
-  VERSION ${SAFIR_VERSION_STRING}
   MANIFEST ${CMAKE_CURRENT_SOURCE_DIR}/Manifest.txt)
 
 ADD_TEST(NAME swreport_java

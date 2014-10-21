@@ -1,8 +1,7 @@
 file(GLOB_RECURSE sources src/*.java)
 
 ADD_JAR(dose_test_util_java
-  SOURCES ${sources}
-  VERSION ${SAFIR_VERSION_STRING})
+  SOURCES ${sources})
 
 SAFIR_INSTALL(TARGETS dose_test_util_java TEST_SUITE)
 

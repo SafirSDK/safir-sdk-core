@@ -6,7 +6,6 @@ ADD_JAR(douf_test_java
   SOURCES src/Test.java
   INCLUDE_JARS douf_java
   ENTRY_POINT Test
-  VERSION ${SAFIR_VERSION_STRING}
   MANIFEST ${CMAKE_CURRENT_SOURCE_DIR}/Manifest.txt)
 
 ADD_TEST(NAME TimeProvider_java_test
