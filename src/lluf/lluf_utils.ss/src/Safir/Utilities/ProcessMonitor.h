@@ -27,6 +27,7 @@
 #include <Safir/Utilities/Internal/UtilsExportDefs.h>
 #include <Safir/Utilities/ProcessInfo.h>
 #include <boost/function.hpp>
+#include <boost/asio.hpp>
 #include <boost/shared_ptr.hpp>
 
 namespace Safir
@@ -35,24 +36,17 @@ namespace Utilities
 {
     class ProcessMonitorImpl;
 
-    class LLUF_UTILS_API ProcessMonitor 
+    class LLUF_UTILS_API ProcessMonitor
     {
     public:
-        typedef boost::function<void(const pid_t pid)> OnTerminateCb;
-
-        ProcessMonitor();
-        ~ProcessMonitor();
-
         /**
-         * Init the ProcessMonitor.
+         * Constructor.
          *
-         * This method must be called first thing and before any call to StartMonitorPid or StopMonitorPid.
-         *
-         * @param [in] callback The function to be called when a monitored process exists. Note that this function
-         *                      is executed in ProcessMonitor's own thread.
+         * @param [in] ioService The io_service that will be used for monitoring processes.
+         * @param [in] callback Callback that will be invoked when a process terminates.
          */
-        void Init(const OnTerminateCb& callback);
-        
+        ProcessMonitor(boost::asio::io_service& ioService,
+                       const boost::function<void(const pid_t pid)>& callback);
 
         /**
          * Start monitor the given PID.
@@ -64,17 +58,17 @@ namespace Utilities
         /**
          * Stop monitor the given PID.
          *
-         * @param [in] pid  The PID which we want to stop monitor.
+         * @param [in] pid  The PID to stop monitoring.
          */
         void StopMonitorPid(const pid_t pid);
-        
+
     private:
 
 #ifdef _MSC_VER
 #pragma warning (push)
 #pragma warning (disable: 4251)
 #endif
-        
+
         boost::shared_ptr<ProcessMonitorImpl> m_impl;
 
 #ifdef _MSC_VER
@@ -86,4 +80,3 @@ namespace Utilities
 }
 
 #endif
-

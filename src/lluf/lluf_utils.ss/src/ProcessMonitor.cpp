@@ -22,7 +22,6 @@
 *
 ******************************************************************************/
 #include <Safir/Utilities/ProcessMonitor.h>
-#include "ProcessMonitorImpl.h"
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
 #  include "ProcessMonitorWin32.h"
 #elif defined(linux) || defined(__linux) || defined(__linux__)
@@ -33,34 +32,14 @@ namespace Safir
 {
 namespace Utilities
 {
-    
-    ProcessMonitor::ProcessMonitor()
-    {
-    }
-    
-    
-    ProcessMonitor::~ProcessMonitor()
-    {
-        m_impl->StopThread();
-        m_impl.reset();
-    }
-    
-    void 
-    ProcessMonitor::Init(const OnTerminateCb& callback)
-    {
-        if (m_impl != NULL)
-        {
-            throw std::logic_error("ProcessMonitor already initialized!");
-        }
-#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-        m_impl.reset(new ProcessMonitorWin32(callback));
-#elif defined(linux) || defined(__linux) || defined(__linux__)
-        m_impl.reset(new ProcessMonitorLinux(callback));
-#endif
 
-        m_impl->StartThread();
+    ProcessMonitor::ProcessMonitor(boost::asio::io_service& ioService,
+                                   const boost::function<void(const pid_t pid)>& callback)
+        : m_impl(new ProcessMonitorImpl(ioService,callback))
+    {
+
     }
-    
+
 
     void
     ProcessMonitor::StartMonitorPid(const pid_t pid)
@@ -69,12 +48,12 @@ namespace Utilities
         {
             throw std::logic_error("ProcessMonitor not initialized!");
         }
-        
+
         m_impl->StartMonitorPid(pid);
     }
-    
-    
-    void 
+
+
+    void
     ProcessMonitor::StopMonitorPid(const pid_t pid)
     {
         if (m_impl == NULL)
@@ -86,5 +65,3 @@ namespace Utilities
     }
 }
 }
-
-
