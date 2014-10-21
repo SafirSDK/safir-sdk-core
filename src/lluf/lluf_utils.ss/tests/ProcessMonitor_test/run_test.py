@@ -24,7 +24,7 @@
 #
 ###############################################################################
 from __future__ import print_function
-import subprocess, os, time, sys
+import subprocess, os, time, sys, random
 
 #start two sleepers
 #start the listener
@@ -41,37 +41,41 @@ else:
 ProcessMonitor_test = os.path.join(exe_path,"ProcessMonitor_test")
 Sleeper = os.path.join(exe_path,"Sleeper")
 
-#start two sleepers
-sleeper1 = subprocess.Popen((Sleeper,"1"))
-sleeper2 = subprocess.Popen((Sleeper,"1"))
+#start a bunch of sleepers
+sleepers = list()
+pids = list()
+for which in range(0,100):
+    proc = subprocess.Popen((Sleeper,str(random.random() + 0.5)))
+    pids.append(str(proc.pid))
+    sleepers.append(proc)
 
-listener = subprocess.Popen((ProcessMonitor_test,
-                             str(sleeper1.pid),
-                             str(sleeper2.pid)),
+listener = subprocess.Popen(list((ProcessMonitor_test,))+ pids,
                             stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT,
                             universal_newlines=True)
-sleeper1.wait()
-sleeper2.wait()
+for sleeper in sleepers:
+    sleeper.wait()
+
 result = listener.communicate()[0]
-print("listener should be waiting for pids", sleeper1.pid, sleeper2.pid)
+print("listener should be waiting for pids", pids)
 print(result)
 
-if result.find("Process with pid " + str(sleeper1.pid) + " exited.") == -1:
-    print("ProcessMonitor appears to have missed termination of process with pid", sleeper1.pid)
-    sys.exit(1)
+errors = 0
+for sleeper in sleepers:
+    if result.find("Process with pid " + str(sleeper.pid) + " exited.") == -1:
+        print("ProcessMonitor appears to have missed termination of process with pid", sleeper.pid)
+        errors += 1
 
-if result.find("Process with pid " + str(sleeper2.pid) + " exited.") == -1:
-    print("ProcessMonitor appears to have missed termination of process with pid", sleeper2.pid)
-    sys.exit(1)
-
-if result.count("Process with pid") != 2:
+if result.count("Process with pid") != len(sleepers):
     print("Too many terminated processes! Expected two!")
-    sys.exit(1)
+    errors += 1
 
 if listener.returncode != 0:
     print("Unexpected return code from listener:",listener.returncode)
-    sys.exit(1)
+    errors += 1
 
-print("success")
-sys.exit(0)
+if errors == 0:
+    print("success")
+else:
+    print("failed")
+sys.exit(errors)
