@@ -1,7 +1,7 @@
 /* ****************************************************************************
 *
 * Copyright Saab AB, 2014 (http://safir.sourceforge.net)
-* 
+*
 * Created by: Lars Hagström / stlrha
 *
 *******************************************************************************
@@ -74,17 +74,20 @@ namespace Safir.Dob.Typesystem
             for (int i = 0; i < size; ++i)
             {
                 System.IntPtr iterator =
-                    (System.IntPtr)(generatedLibraries.ToInt64() + 
+                    (System.IntPtr)(generatedLibraries.ToInt64() +
                                     i * Marshal.SizeOf(typeof(Kernel.DotsC_GeneratedLibrary)));
                 lib = (Kernel.DotsC_GeneratedLibrary)Marshal.PtrToStructure(iterator, typeof(Kernel.DotsC_GeneratedLibrary));
-                
+
                 if (!lib.library)
                 {
                     System.Console.WriteLine("Not loading " + lib.dotnetAssemblyName + ", since it is an override.");
                 }
                 else if (string.IsNullOrEmpty(lib.dotnetAssemblyLocation))
                 {
-                    m_assemblies.Add(System.Reflection.Assembly.Load(lib.dotnetAssemblyName + ", version=0.0.0.0, Culture=neutral, PublicKeyToken=40df165d3a3cadbc"));
+                    //TODO: Update the version!
+                    m_assemblies.Add(System.Reflection.Assembly.Load
+                                     (lib.dotnetAssemblyName +
+                                      ", version=6.0.0.0, Culture=neutral, PublicKeyToken=40df165d3a3cadbc"));
                     //TODO: what is the correct thing to do here?
                 }
                 else
@@ -143,7 +146,7 @@ namespace Safir.Dob.Typesystem
                 foreach(System.Int64 tid in m_typeCache.Keys)
                 {
                     if (which == i)
-                    {                        
+                    {
                         m_typeCache.Remove(tid);
                         break;
                     }
@@ -164,10 +167,10 @@ namespace Safir.Dob.Typesystem
 
         private Dictionary<System.Int64, System.Type> m_typeCache =
             new Dictionary<System.Int64, System.Type>();
-        
+
         private List<Assembly> m_assemblies = new List<Assembly>();
 
         private System.Random m_random = new System.Random();
     }
-        
+
 }
