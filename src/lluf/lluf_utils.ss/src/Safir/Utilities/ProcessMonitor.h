@@ -48,6 +48,8 @@ namespace Utilities
         ProcessMonitor(boost::asio::io_service& ioService,
                        const boost::function<void(const pid_t pid)>& callback);
 
+        void Stop();
+
         /**
          * Start monitor the given PID.
          *

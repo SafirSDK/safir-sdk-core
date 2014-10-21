@@ -40,6 +40,10 @@ namespace Utilities
 
     }
 
+    void ProcessMonitor::Stop()
+    {
+        m_impl->Stop();
+    }
 
     void
     ProcessMonitor::StartMonitorPid(const pid_t pid)

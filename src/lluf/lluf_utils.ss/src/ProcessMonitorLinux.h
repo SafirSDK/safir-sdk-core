@@ -1,8 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
+* Copyright Saab AB, 2014 (http://safir.sourceforge.net)
 *
-* Created by: Jonas Thor / stjth
+* Created by: Lars Hagström / lars.hagstrom@consoden.se
 *
 *******************************************************************************
 *
@@ -21,8 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __PROCESS_MONITOR_LINUX_H__
-#define __PROCESS_MONITOR_LINUX_H__
+#pragma once
 
 #if defined(linux) || defined(__linux) || defined(__linux__)
 
@@ -53,8 +52,11 @@ namespace Utilities
     public:
         ProcessMonitorImpl(boost::asio::io_service& ioService,
                            const boost::function<void(const pid_t pid)>& callback);
-        ~ProcessMonitorImpl();
+
+        void Stop();
 #if 0
+        ~ProcessMonitorImpl();
+
         //StartMonitorPid and StopMonitorPid induces the io_service to call this
         //to change the monitored pids on the io_service thread.
         void ChangeMonitoredPids();
@@ -66,18 +68,32 @@ namespace Utilities
         void StopThread();
 
 #endif
-        void StartMonitorPid(const pid_t pid);
-        void StopMonitorPid(const pid_t pid);
+        void StartMonitorPid(const pid_t pid)
+        {
+            m_strand.dispatch(boost::bind(&ProcessMonitorImpl::StartMonitorPidInternal,this,pid));
+        }
+
+        void StopMonitorPid(const pid_t pid)
+        {
+            m_strand.dispatch(boost::bind(&ProcessMonitorImpl::StopMonitorPidInternal,this,pid));
+        }
 #if 0
         void Run(); // Thread loop
 #endif
     private:
-#if 0
+        void StartMonitorPidInternal(const pid_t pid);
+        void StopMonitorPidInternal(const pid_t pid);
+
+
         // Client callback
-        ProcessMonitor::OnTerminateCb m_callback;
+        boost::function<void(const pid_t pid)> m_callback;
 
         //The io_service we use to listen to inotify events and to schedule timers
-        boost::asio::io_service m_ioService;
+        boost::asio::io_service& m_ioService;
+
+        boost::asio::io_service::strand m_strand;
+
+#if 0
 
         //asio object that wraps the inotify file descriptor
         boost::asio::posix::stream_descriptor m_inotifyStream;
@@ -122,5 +138,4 @@ namespace Utilities
 }
 }
 
-#endif
 #endif
