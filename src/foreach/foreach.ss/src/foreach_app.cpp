@@ -42,11 +42,11 @@ namespace Safir
 {
 namespace Utilities
 {
-namespace ForEach  
+namespace ForEach
 {
 
     const Safir::Dob::Typesystem::Int32 ComposeMinusOneContext(const Safir::Dob::Typesystem::Int32 context)
-    {        
+    {
         return (context + 1000000) * -1;
     }
 
@@ -85,7 +85,7 @@ namespace ForEach
                     ++inst;
                 }
             }
-            
+
             if (context == 0)
             {
                 Safir::Application::TracerBackdoor::Start(m_context[0]->m_connection);
@@ -103,7 +103,11 @@ namespace ForEach
         boost::asio::io_service::work keepRunning(m_ioService);
         m_ioService.run();
 
-        m_context.clear();
+        for (ContextVector::reverse_iterator it = m_context.rbegin();
+             it != m_context.rend(); ++it)
+        {
+            (*it)->m_connection.Close();
+        }
 
         return 0;
     }
@@ -113,7 +117,7 @@ namespace ForEach
     {
         Safir::Application::TracerBackdoor::Stop();
         m_ioService.stop();
-    } 
+    }
 }
 }
 }
