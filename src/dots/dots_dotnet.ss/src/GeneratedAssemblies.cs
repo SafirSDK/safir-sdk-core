@@ -84,15 +84,16 @@ namespace Safir.Dob.Typesystem
                 }
                 else if (string.IsNullOrEmpty(lib.dotnetAssemblyLocation))
                 {
-                    //TODO: Update the version!
                     m_assemblies.Add(System.Reflection.Assembly.Load
                                      (lib.dotnetAssemblyName +
-                                      ", version=6.0.0.0, Culture=neutral, PublicKeyToken=40df165d3a3cadbc"));
-                    //TODO: what is the correct thing to do here?
+                                      ", version=" + BuildInfo.Version +
+                                      ", Culture=neutral, PublicKeyToken=40df165d3a3cadbc"));
+                    //TODO: Do we need to allow for assemblies signed with some other key?
                 }
                 else
                 {
-                    m_assemblies.Add(System.Reflection.Assembly.LoadFile(lib.dotnetAssemblyLocation + "/" + lib.dotnetAssemblyName + ".dll"));
+                    m_assemblies.Add(System.Reflection.Assembly.LoadFile
+                                     (lib.dotnetAssemblyLocation + "/" + lib.dotnetAssemblyName + ".dll"));
                 }
             }
 

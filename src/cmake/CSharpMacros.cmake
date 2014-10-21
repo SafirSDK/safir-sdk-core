@@ -110,7 +110,8 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
 
     if (NOT _cs_NOVERSION)
       FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/version.cs
-        "[assembly: System.Reflection.AssemblyVersion(\"${SAFIR_VERSION_STRING}.0\")]")
+        "[assembly: System.Reflection.AssemblyVersion(\"${SAFIR_VERSION_STRING}.0\")]\n"
+        "internal class BuildInfo {public const string Version = \"${SAFIR_VERSION_STRING}.0\";}")
 
       #add version.cs to the list of sources, but remove it again if it was already there...
       LIST(APPEND _cs_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/version.cs)
