@@ -7,9 +7,12 @@
         <parameter>
             <name>ObjDict</name>
             <type>ParserTest.MyEntity</type>
-            <dictionary keyType="ParserTest.MyColorEnum">
+            <dictionary keyType="EntityId">
                 <entry>
-                    <key>Black</key>
+                    <key>
+                        <name>ParserTest.MyFerrari</name>
+                        <instanceId>first</instanceId>
+                    </key>
                     <ParserTest.MyEntity>
                         <MySequence>
                             <ParserTest.MyEntity>
@@ -21,13 +24,6 @@
                                 <MyInt>2</MyInt>
                             </ParserTest.MyEntity>
                         </MySequence>
-                    </ParserTest.MyEntity>
-                </entry>
-                <entry>
-                    <key>Black</key>
-                    <ParserTest.MyEntity>
-                         <MyColorEnum>Grey</MyColorEnum>
-                        <MyInt>123</MyInt>
                     </ParserTest.MyEntity>
                 </entry>
             </dictionary>

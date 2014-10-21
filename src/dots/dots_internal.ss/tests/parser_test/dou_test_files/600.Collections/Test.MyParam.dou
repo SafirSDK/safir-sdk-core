@@ -35,19 +35,19 @@
         </parameter>
 
         <parameter>
-            <name>SequenceParam</name>
+            <name>ArrayParam</name>
             <type>Int32</type>
-            <sequence>
+            <array>
                 <value>1</value>
                 <value>2</value>
                 <value>2</value>
-            </sequence>
-        </parameter>
+            </array>
+        </array>
 
         <parameter>
-            <name>SequenceParamEntityId</name>
+            <name>ArrayParamEntityId</name>
             <type>EntityId</type>
-            <sequence>
+            <array>
                 <entityId>
                     <name>Safir.Dob.Entity</name>
                     <instanceId>first</instanceId>
@@ -60,13 +60,13 @@
                     <name>Safir.Dob.Entity</name>
                     <instanceId>2</instanceId>
                 </entityId>
-            </sequence>
+            </array>
         </parameter>
 
         <parameter>
-            <name>SequenceParamObj</name>
+            <name>ArrayParamObj</name>
             <type>ParserTest.MyEntity</type>
-            <sequence>
+            <array>
                 <ParserTest.MyEntity>
                     <MySequence>
                         <ParserTest.MyEntity>
@@ -83,7 +83,7 @@
                     <MyColorEnum>Grey</MyColorEnum>
                     <MyInt>123</MyInt>
                 </ParserTest.MyEntity>
-            </sequence>
+            </array>
         </parameter>
 
 

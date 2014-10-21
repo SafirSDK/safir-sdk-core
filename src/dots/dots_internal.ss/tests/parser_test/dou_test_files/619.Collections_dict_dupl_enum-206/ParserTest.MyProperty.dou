@@ -9,24 +9,6 @@
             <type>ParserTest.MyEntity</type>
             <array/>
         </member>
-        
-        <member>
-            <name>SequencePropertyValue</name>
-            <type>ParserTest.MyEntity</type>
-            <sequence/>
-        </member>
-        
-        <member>
-            <name>DictionaryPropertyValue</name>
-            <type>EntityId</type>
-            <dictionary>String</dictionary>
-        </member>
-        
-        <member>
-            <name>ArrayIntPropertyValue</name>
-            <type>Int32</type>
-            <array/>
-        </member>
-        
+      
     </members>
 </property>

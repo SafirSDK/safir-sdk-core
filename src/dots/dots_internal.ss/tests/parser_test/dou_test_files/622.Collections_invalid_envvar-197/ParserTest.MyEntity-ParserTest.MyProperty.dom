@@ -5,154 +5,31 @@
     <property>ParserTest.MyProperty</property>
 
     <memberMapping>
-      
-        <member>
-            <propertyMember>TypeIdVal</propertyMember>
-            <value>ParserTest.MyColorEnum</value>
-        </member>
-        
-        <member>
-            <propertyMember>EntityIdVal</propertyMember>
-            <entityId>
-                <name>Safir.Dob.Entity</name>
-                <instanceId>123</instanceId>
-            </entityId>
-        </member>
-        
-        <member>
-            <propertyMember>MyColorEnumVal</propertyMember>
-            <value>White</value>
-        </member>
-        
+       
         <member>
             <propertyMember>ArrayPropertyValue</propertyMember>
             <array>
-                <ParserTest.MyEntity>
-                    <MyColorEnum>Grey</MyColorEnum>
-                    <MyInt>123</MyInt>
-                </ParserTest.MyEntity>
-                
-                <ParserTest.MyEntity>
-                    <MyColorEnum>Black</MyColorEnum>
-                    <MyInt>456</MyInt>
-                </ParserTest.MyEntity>
-            </array>
-        </member>
-        
-        <member>
-            <propertyMember>SequenceTypeIdValue</propertyMember>
-            <sequence>
-                <value>Object</value>
-                <value>ParserTest.MyEntity</value>
-                <value>ParserTest.MyProperty</value>
-            </sequence>
-        </member>
-        
-        <member>
-            <propertyMember>SequenceEntityIdValue</propertyMember>
-            <sequence>
-                <entityId>
-                    <name>Safir.Dob.Entity</name>
-                    <instanceId>123</instanceId>
-                    </entityId>
-                <entityId>
-                    <name>ParserTest.MyEntity</name>
-                    <instanceId>inst</instanceId>
-                </entityId>
-            </sequence>
-        </member>
-        
-        <member>
-            <propertyMember>SequencePropertyValue</propertyMember>
-            <sequence>
                 <ParserTest.MyEntity>
                     <MyColorEnum>Grey</MyColorEnum>
                     <MyInt>1</MyInt>
                 </ParserTest.MyEntity>
                 
                 <valueRef>
-                    <name>Test.MyParam.DictionaryParam4</name>
-                    <key>
-                        <name>ParserTest.MyEntity</name>
-                        <instanceId>2</instanceId>
-                    </key>
+                    <name>Test.MyParam.ObjDict</name>
+                    <key>123</key>
                 </valueRef>
                 
                 <ParserTest.MyEntity>
                     <MyColorEnum>Black</MyColorEnum>
                     <MyInt>2</MyInt>
                 </ParserTest.MyEntity>
-            </sequence>
-        </member>
-        
-         <member>
-            <propertyMember>DictionaryPropertyValue</propertyMember>
-            <dictionary>
-                <entry>
-                    <key>First</key>
-                    <entityId>
-                        <name>Safir.Dob.Entity</name>
-                        <instanceId>123</instanceId>
-                    </entityId>
-                </entry>
-                <entry>
-                    <key>Second</key>
-                    <entityId>
-                        <name>ParserTest.MyEntity</name>
-                        <instanceId>my instance</instanceId>
-                    </entityId>
-                </entry>
-            </dictionary>
-        </member>
-        
-        <member>
-            <propertyMember>DictionaryEntityIdKey</propertyMember>
-            <dictionary>
-                <entry>
-                    <value>First</value>
-                    <key>
-                        <name>Safir.Dob.Entity</name>
-                        <instanceId>123</instanceId>
-                    </key>
-                </entry>
-                <entry>
-                    <value>Second</value>
-                    <key>
-                        <name>ParserTest.MyEntity</name>
-                        <instanceId>my instance</instanceId>
-                    </key>
-                </entry>
-            </dictionary>
-        </member>
-        
-        <member>
-            <propertyMember>ArrayIntPropertyValue</propertyMember>
-            <array>
-                <value>$(slurp)</value>
-                <valueRef>
-                    <name>Test.MyParam.IntPar</name>
-                </valueRef>
-                <value>2</value>
             </array>
-        </member> 
-        
-        <member>
-            <propertyMember>DictionaryEnumObject</propertyMember>
-            <dictionary>
-                <entry>
-                    <key>White</key>
-                    <Object type="ParserTest.MyEntity">
-                        <MyColorEnum>Black</MyColorEnum>
-                        <MyInt>2</MyInt>
-                    </Object>
-                </entry>
-                <entry>
-                    <key>Grey</key>
-                    <Object/>
-                </entry>
-            </dictionary>
         </member>
-        
+      
+        <member>
+            <propertyMember>IntPropertyValue</propertyMember>
+            <value>$(slurp)</value>
+        </member>
     </memberMapping>
 
 </propertyMapping>

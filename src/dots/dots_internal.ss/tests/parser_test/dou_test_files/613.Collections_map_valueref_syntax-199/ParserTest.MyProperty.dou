@@ -5,25 +5,10 @@
     <members>
         
         <member>
-            <name>TypeIdVal</name>
-            <type>TypeId</type>            
-        </member>
-        
-        <member>
-            <name>EntityIdVal</name>
-            <type>EntityId</type>            
-        </member>
-        
-        <member>
-            <name>MyColorEnumVal</name>
-            <type>ParserTest.MyColorEnum</type>            
-        </member>
-        
-        <member>
             <name>ArrayPropertyValue</name>
             <type>ParserTest.MyEntity</type>
             <array/>
-        </member>
+        </member>               
         
         <member>
             <name>ArrayIntPropertyValue</name>

@@ -794,7 +794,15 @@ namespace ToolSupport
 
     template<> struct ParseAlgorithm<Elements::ParameterSequence>
     {
-        void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const {state.lastInsertedClass->ownParameters.back()->collectionType=SequenceCollectionType;}
+        //void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const {state.lastInsertedClass->ownParameters.back()->collectionType=SequenceCollectionType;}
+
+        void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const
+        {
+            ParameterDescriptionLocalPtr& def=state.lastInsertedClass->ownParameters.back();
+            std::ostringstream os;
+            os<<"The parameter '"<<def->qualifiedName<<"' has collectionType=Sequence. It is not supported, use array instead. (Same syntax but <array> instead of <sequence>)";
+            throw ParseError("Sequence parameters not supported", os.str(), state.currentPath, 203);
+        }
     };
 
     template<> struct ParseAlgorithm<Elements::ParameterDictionary>
@@ -1215,7 +1223,7 @@ namespace ToolSupport
                 const MemberDescriptionLocal* propMem=pdm->property->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
                 std::ostringstream ss;
                 ss<<"The propertyMapping of the dictionary property member '"<<pdm->property->name<<"."<<propMem->name<<"' for class  '"<<pdm->class_->name<<"' has no key specified.";
-                throw ParseError("Missing key", ss.str(), state.currentPath, 189);
+                throw ParseError("Missing key", ss.str(), state.currentPath, 189); //Cant happen until we support dictionary propertyMembers
             }
             catch (const std::exception& envVar)
             {
@@ -1223,7 +1231,7 @@ namespace ToolSupport
                 const MemberDescriptionLocal* propMem=pdm->property->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
                 std::ostringstream os;
                 os<<"Failed to expand environment variable in propertyMapping of '"<<pdm->property->name<<"."<<propMem->name<<"' for class  '"<<pdm->class_->name<<". "<<envVar.what();
-                throw ParseError("Invalid dictionary key", os.str(), state.currentPath, 190);
+                throw ParseError("Invalid dictionary key", os.str(), state.currentPath, 190); //Cant happen until we support dictionary propertyMembers
             }
 
             //parse key
@@ -1237,7 +1245,7 @@ namespace ToolSupport
                 const MemberDescriptionLocal* propMem=pdm->property->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
                 std::ostringstream os;
                 os<<"The key '"<<key<<"' doesn't match the type "<<TypeUtilities::GetTypeName(def->keyType)<<" for propertyMapping of '"<<pdm->property->name<<"."<<propMem->name<<"' for class  '"<<pdm->class_->name<<"' has no key specified.";
-                throw ParseError("Invalid dictionary key", os.str(), state.currentPath, 191);
+                throw ParseError("Invalid dictionary key", os.str(), state.currentPath, 191); //Cant happen until we support dictionary propertyMembers
             }
 
             def->values.push_back(val);

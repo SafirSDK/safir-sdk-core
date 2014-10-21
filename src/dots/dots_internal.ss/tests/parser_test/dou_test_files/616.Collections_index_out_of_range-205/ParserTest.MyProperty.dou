@@ -9,6 +9,7 @@
             <type>ParserTest.MyEntity</type>
             <array/>
         </member>
-      
+       
+        
     </members>
 </property>

@@ -2,7 +2,7 @@
 <class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <summary>Contains the definition of a distribution channel name.</summary>
     <name>ParserTest.MyEntity</name>
-    <baseClass>Object</baseClass>
+    <baseClass>Safir.Dob.Entity</baseClass>
     <members>
         <member>
             <name>MyInt</name>
@@ -34,4 +34,12 @@
         </member>      
         
     </members>
+
+    <parameters>
+        <parameter>
+            <name>Par</name>
+            <type>String</type>
+            <value>hello</value>
+        </parameter>
+    </parameters>
 </class>
