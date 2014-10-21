@@ -4,6 +4,7 @@ if (NOT WIN32)
 endif()
 
 ADD_CSHARP_ASSEMBLY(pathed EXE
+  NOVERSION
   SIGN ${safir_sdk_core_SOURCE_DIR}/build/config/sdk/data/build/safirkey.snk
   SOURCES pathed.cs AppVersion.cs AssemblyInfo.cs InputArgs.cs StringList.cs)
 

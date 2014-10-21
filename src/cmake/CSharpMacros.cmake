@@ -1,5 +1,6 @@
 function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
-    cmake_parse_arguments(_cs "LIBRARY;EXE;WINEXE" "SIGN" "SOURCES;RESOURCES;REFERENCES;LIBRARY_PATHS" ${ARGN})
+    cmake_parse_arguments(_cs
+      "LIBRARY;EXE;WINEXE;NOVERSION" "SIGN" "SOURCES;RESOURCES;REFERENCES;LIBRARY_PATHS" ${ARGN})
 
     if (NOT _cs_LIBRARY AND NOT _cs_EXE AND NOT _cs_WINEXE)
       message(FATAL_ERROR "ADD_CSHARP_ASSEMBLY: TARGET_KIND not specified!")
@@ -107,12 +108,14 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
       set(_cs_lib_arg "${_cs_lib_arg}\"${path}\",")
     endforeach()
 
-    FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/version.cs
-      "[assembly: System.Reflection.AssemblyVersion(\"${SAFIR_VERSION_STRING}.0\")]")
+    if (NOT _cs_NOVERSION)
+      FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/version.cs
+        "[assembly: System.Reflection.AssemblyVersion(\"${SAFIR_VERSION_STRING}.0\")]")
 
-    #add version.cs to the list of sources, but remove it again if it was already there...
-    LIST(APPEND _cs_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/version.cs)
-    LIST(REMOVE_DUPLICATES _cs_SOURCES)
+      #add version.cs to the list of sources, but remove it again if it was already there...
+      LIST(APPEND _cs_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/version.cs)
+      LIST(REMOVE_DUPLICATES _cs_SOURCES)
+    endif()
 
     SET (response_file ${CMAKE_CURRENT_BINARY_DIR}/command_line_${TARGET_NAME}.rsp)
     foreach(src ${_cs_SOURCES})
