@@ -29,14 +29,14 @@
 
 //disable warnings in boost
 #if defined _MSC_VER
-  #pragma warning (push)
-  #pragma warning (disable : 4244)
+#  pragma warning (push)
+#  pragma warning (disable : 4244)
 #endif
 
 #include <boost/thread.hpp>
 
 #if defined _MSC_VER
-  #pragma warning (pop)
+#  pragma warning (pop)
 #endif
 
 void callback(const pid_t pid)
@@ -51,27 +51,37 @@ int main(int argc, char** argv)
 
     { //scope for the temporary variables
         const std::vector<std::string> pidStrings(argv + 1, argv + argc);
-        
+
         for(std::vector<std::string>::const_iterator it = pidStrings.begin();
-            it != pidStrings.end(); ++it) 
+            it != pidStrings.end(); ++it)
         {
             pids.insert(boost::lexical_cast<pid_t>(*it));
         }
     }
-    
-    Safir::Utilities::ProcessMonitor monitor;
 
-    monitor.Init(callback);
+    boost::asio::io_service ioService;
+
+    Safir::Utilities::ProcessMonitor monitor(ioService, callback, boost::chrono::milliseconds(50));
 
     for(std::set<pid_t>::iterator it = pids.begin(); it != pids.end(); ++it)
     {
         monitor.StartMonitorPid(*it);
     }
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
-    monitor.StopMonitorPid(*pids.begin());
 
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(400));
+    boost::thread thread(boost::bind(&boost::asio::io_service::run,&ioService));
+
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(200));
+
+    for(std::set<pid_t>::iterator it = pids.begin(); it != pids.end(); ++it)
+    {
+        monitor.StopMonitorPid(*it);
+    }
+
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(1000));
+
+    monitor.Stop();
+    ioService.run();
+    thread.join();
 
     return 0;
 }
-

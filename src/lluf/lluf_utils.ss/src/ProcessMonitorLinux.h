@@ -48,7 +48,8 @@ namespace Utilities
     {
     public:
         ProcessMonitorImpl(boost::asio::io_service& ioService,
-                           const boost::function<void(const pid_t pid)>& callback);
+                           const boost::function<void(const pid_t pid)>& callback,
+                           const boost::chrono::steady_clock::duration& pollPeriod);
 
         void Stop();
 #if 0

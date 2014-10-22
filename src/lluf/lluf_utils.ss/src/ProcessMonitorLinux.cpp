@@ -46,6 +46,7 @@ namespace Safir
 {
 namespace Utilities
 {
+#if 0
     // Will throw std::runtime_error if pid was not found
     boost::filesystem::path GetProcPathForPid(const pid_t pid)
     {
@@ -74,14 +75,15 @@ namespace Utilities
 
         return boost::filesystem::canonical(path);
     }
-
+#endif
 
     ProcessMonitorImpl::ProcessMonitorImpl(boost::asio::io_service& ioService,
-                                           const boost::function<void(const pid_t pid)>& callback)
+                                           const boost::function<void(const pid_t pid)>& callback,
+                                           const boost::chrono::steady_clock::duration& pollPeriod)
         : m_callback(callback)
         , m_ioService(ioService)
         , m_strand(ioService)
-        , m_pollPeriod(boost::chrono::seconds(1))
+        , m_pollPeriod(pollPeriod)
         , m_pollTimer(ioService)
           //, m_inotifyStream(m_ioService)
           //        , m_timerStarted(false)

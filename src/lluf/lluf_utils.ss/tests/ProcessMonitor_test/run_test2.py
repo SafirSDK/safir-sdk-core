@@ -43,7 +43,7 @@ for which in range(0,100):
     pids.append(str(proc.pid))
     sleepers.append(proc)
 
-listener = subprocess.Popen(list((ProcessMonitor_test2,))+ pids,
+listener = subprocess.Popen(list((ProcessMonitor_test2,)) + pids,
                             stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT,
                             universal_newlines=True)

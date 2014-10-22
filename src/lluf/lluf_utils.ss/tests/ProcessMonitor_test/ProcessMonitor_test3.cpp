@@ -34,7 +34,9 @@
 struct Fixture
 {
     Fixture()
-        : monitor(ioService, boost::bind(&Fixture::TerminatedCb,this,_1))
+        : monitor(ioService,
+                  boost::bind(&Fixture::TerminatedCb,this,_1),
+                  boost::chrono::milliseconds(20)) //high polling rate to speed up tests.
     {
         BOOST_TEST_MESSAGE("setup fixture");
     }
@@ -44,11 +46,10 @@ struct Fixture
         BOOST_TEST_MESSAGE("teardown fixture");
         Stop();
 
-        for (std::vector<pid_t>::iterator it = sleepers.begin();
+        for (std::set<pid_t>::iterator it = sleepers.begin();
              it != sleepers.end(); ++it)
         {
-            int status;
-            if (-1 == waitpid(*it, &status,0))
+            if (-1 == waitpid(*it, NULL,0))
             {
                 perror("waitpid");
             }
@@ -88,9 +89,29 @@ struct Fixture
             execl("./Sleeper", "Sleeper", boost::lexical_cast<std::string>(duration).c_str(), NULL);
             throw std::logic_error(std::string("execl failed: ") + strerror(errno));
         default:
-            sleepers.push_back(pid);
+            sleepers.insert(pid);
             return pid;
         }
+    }
+
+    void WaitSleeper(const pid_t pid)
+    {
+        if (-1 == waitpid(pid, NULL,0))
+        {
+            perror("waitpid");
+        }
+        sleepers.erase(pid);
+    }
+
+    void WaitAny()
+    {
+        int status;
+        const pid_t pid = wait(&status);
+        if (pid == -1)
+        {
+            perror("wait");
+        }
+        sleepers.erase(pid);
     }
 
     boost::asio::io_service ioService;
@@ -107,7 +128,7 @@ private:
     std::vector<pid_t> terminatedPids;
     mutable boost::mutex mutex;
 
-    std::vector<pid_t> sleepers;
+    std::set<pid_t> sleepers;
 };
 
 BOOST_FIXTURE_TEST_SUITE( s, Fixture )
@@ -126,7 +147,7 @@ BOOST_AUTO_TEST_CASE(monitor_0)
     monitor.StartMonitorPid(0);
     while(TerminatedPids().empty())
     {
-
+        boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
     }
     monitor.Stop();
     std::vector<pid_t> terminatedPids = TerminatedPids();
@@ -141,7 +162,7 @@ BOOST_AUTO_TEST_CASE(monitor_0_twice)
     monitor.StartMonitorPid(0);
     while(TerminatedPids().empty())
     {
-
+        boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
     }
     monitor.Stop();
 
@@ -184,7 +205,7 @@ BOOST_AUTO_TEST_CASE(monitor_self_and_0)
     monitor.StartMonitorPid(0);
     while(TerminatedPids().empty())
     {
-
+        boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
     }
     Stop();
 
@@ -197,13 +218,12 @@ BOOST_AUTO_TEST_CASE(monitor_sleeper)
 {
     RunIoService();
     const pid_t pid = LaunchSleeper(0.5);
-    std::wcout << "LaunchSleeper: pid = " << pid << std::endl;
     monitor.StartMonitorPid(pid);
 
-    waitpid(pid, NULL,0);
+    WaitSleeper(pid);
     while(TerminatedPids().empty())
     {
-
+        boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
     }
 
     Stop();
@@ -220,13 +240,39 @@ BOOST_AUTO_TEST_CASE(stop_monitor)
     monitor.StartMonitorPid(pid);
     monitor.StopMonitorPid(pid);
 
-    waitpid(pid, NULL,0);
+    WaitSleeper(pid);
     boost::this_thread::sleep_for(boost::chrono::milliseconds(500));
 
     Stop();
 
     std::vector<pid_t> terminatedPids = TerminatedPids();
     BOOST_CHECK_EQUAL(terminatedPids.size(), 0);
+}
+
+
+BOOST_AUTO_TEST_CASE(many_sleepers)
+{
+    RunIoService();
+    for (int i = 0; i < 100; ++i)
+    {
+        const pid_t pid = LaunchSleeper(0.3);
+        monitor.StartMonitorPid(pid);
+    }
+
+    for (int i = 0; i < 100; ++i)
+    {
+        WaitAny();
+    }
+
+    while(TerminatedPids().size() != 100)
+    {
+        boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+    }
+
+    Stop();
+
+    std::vector<pid_t> terminatedPids = TerminatedPids();
+    BOOST_CHECK_EQUAL(terminatedPids.size(), 100);
 }
 
 

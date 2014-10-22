@@ -29,26 +29,32 @@
 
 //disable warnings in boost
 #if defined _MSC_VER
-  #pragma warning (push)
-  #pragma warning (disable : 4244)
+#  pragma warning (push)
+#  pragma warning (disable : 4244)
 #endif
 
 #include <boost/thread.hpp>
 
 #if defined _MSC_VER
-  #pragma warning (pop)
+#  pragma warning (pop)
 #endif
 
-//we assume that the callback occurs from the same thread every time, so no need to lock.
+void callback(const pid_t pid);
+
+boost::asio::io_service ioService;
+Safir::Utilities::ProcessMonitor monitor(ioService, callback, boost::chrono::milliseconds(50));
+
+boost::mutex mtx;
 std::set<pid_t> pids;
 
 void callback(const pid_t pid)
 {
+    boost::lock_guard<boost::mutex> lck(mtx);
     std::wcout << "Process with pid " << pid << " exited." << std::endl;
     pids.erase(pid);
-    if(pids.empty()) 
+    if(pids.empty())
     {
-        exit(0);
+        monitor.Stop();
     }
 }
 
@@ -57,25 +63,22 @@ int main(int argc, char** argv)
 {
     { //scope for the temporary variables
         const std::vector<std::string> pidStrings(argv + 1, argv + argc);
-        
+
         for(std::vector<std::string>::const_iterator it = pidStrings.begin();
-            it != pidStrings.end(); ++it) 
+            it != pidStrings.end(); ++it)
         {
             pids.insert(boost::lexical_cast<pid_t>(*it));
         }
     }
-    
-    Safir::Utilities::ProcessMonitor monitor;
 
-    monitor.Init(callback);
+    boost::thread thread(boost::bind(&boost::asio::io_service::run,&ioService));
 
     for(std::set<pid_t>::iterator it = pids.begin(); it != pids.end(); ++it)
     {
         monitor.StartMonitorPid(*it);
     }
 
-    boost::this_thread::sleep_for(boost::chrono::seconds(120));
-
-    return 1;
+    ioService.run();
+    thread.join();
+    return pids.size();
 }
-
