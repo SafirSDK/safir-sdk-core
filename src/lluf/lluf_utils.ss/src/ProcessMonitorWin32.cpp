@@ -24,59 +24,60 @@
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
 
 #include "ProcessMonitorWin32.h"
-
+#if 0
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 
 #include <vector>
-
+#endif
 namespace Safir
 {
 namespace Utilities
 {
+#if 0
     //======================================================================
     //
-    // ProcessMonitorWin32Thread
-    // 
+    // ProcessMonitorImplThread
+    //
     //======================================================================
 
     const int MAX_PID_PER_THREAD = 63;
     const int MAX_EVENTS = 64;
 
-    
-    ProcessMonitorWin32Thread::ProcessMonitorWin32Thread(const HANDLE& event)
+
+    ProcessMonitorImplThread::ProcessMonitorImplThread(const HANDLE& event)
         : m_stop(false)
         , m_prevThreadEvent(event)
     {
         m_signalEvent = CreateEvent(NULL,false,false,NULL);
     }
-    
-    ProcessMonitorWin32Thread::~ProcessMonitorWin32Thread() 
+
+    ProcessMonitorImplThread::~ProcessMonitorImplThread()
     {
         CloseHandle(m_signalEvent);
     }
 
 
     void
-    ProcessMonitorWin32Thread::StartThread()
+    ProcessMonitorImplThread::StartThread()
     {
-        lllout << "ProcessMonitorWin32Thread::StartThread() - called... tid: " << boost::this_thread::get_id() << std::endl;
+        lllout << "ProcessMonitorImplThread::StartThread() - called... tid: " << boost::this_thread::get_id() << std::endl;
 
         if (m_thread != boost::thread())
         {
             return;
         }
-        
-        m_thread = boost::thread(boost::bind(&ProcessMonitorWin32Thread::Run,this));
 
-        lllout << "ProcessMonitorWin32Thread::StartThread() - done..." << std::endl;
+        m_thread = boost::thread(boost::bind(&ProcessMonitorImplThread::Run,this));
+
+        lllout << "ProcessMonitorImplThread::StartThread() - done..." << std::endl;
     }
 
-    
+
     void
-    ProcessMonitorWin32Thread::StopThread()
+    ProcessMonitorImplThread::StopThread()
     {
-        lllout << "ProcessMonitorWin32Thread::StopThread() - called... tid: " << boost::this_thread::get_id() << std::endl;
+        lllout << "ProcessMonitorImplThread::StopThread() - called... tid: " << boost::this_thread::get_id() << std::endl;
 
         if (m_thread != boost::thread())
         {
@@ -92,69 +93,69 @@ namespace Utilities
             }
         }
 
-        lllout << "ProcessMonitorWin32Thread::StopThread() - done..." << std::endl;
+        lllout << "ProcessMonitorImplThread::StopThread() - done..." << std::endl;
     }
 
     void
-    ProcessMonitorWin32Thread::StartMonitorPid(const pid_t pid)
+    ProcessMonitorImplThread::StartMonitorPid(const pid_t pid)
     {
-        lllout << "ProcessMonitorWin32Thread::StartMonitorPid() - called... tid: " << boost::this_thread::get_id() 
+        lllout << "ProcessMonitorImplThread::StartMonitorPid() - called... tid: " << boost::this_thread::get_id()
                << ". pid: " << std::endl;
         boost::lock_guard<boost::mutex> lck(m_mutex);
-        
+
 
         if (m_pids.size() < MAX_PID_PER_THREAD)
         {
             HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS,//PROCESS_QUERY_INFORMATION | PROCESS_VM_READ | SYNCHRONIZE,
-                                          FALSE, 
+                                          FALSE,
                                           (DWORD)pid );
-            
+
             if (hProcess != NULL)
             {
-                lllout << "ProcessMonitorWin32Thread::StartMonitorPid() - hProcess: " << hProcess << std::endl;
-                
+                lllout << "ProcessMonitorImplThread::StartMonitorPid() - hProcess: " << hProcess << std::endl;
+
                 m_pids.insert(std::make_pair(pid,hProcess));
-                
+
                 SetEvent(m_signalEvent);
             }
             else
             {
                 SEND_SYSTEM_LOG(Critical,
-                                << "ProcessMonitorWin32Thread::StartMonitorPid() - call to OpenProcess failed.");
+                                << "ProcessMonitorImplThread::StartMonitorPid() - call to OpenProcess failed.");
             }
         }
         else
         {
             if (m_nextThread == NULL)
             {
-                lllout << "ProcessMonitorWin32Thread::StartMonitorPid() - creating new ProcessMonitorWin32Thread. tid: " 
+                lllout << "ProcessMonitorImplThread::StartMonitorPid() - creating new ProcessMonitorImplThread. tid: "
                        << boost::this_thread::get_id() << std::endl;
-                
-                m_nextThread.reset(new ProcessMonitorWin32Thread(m_signalEvent));
+
+                m_nextThread.reset(new ProcessMonitorImplThread(m_signalEvent));
                 m_nextThread->StartThread();
             }
 
-            lllout << "ProcessMonitorWin32Thread::StartMonitorPid() - Sending to next thread. tid: " 
-                   << boost::this_thread::get_id() 
+            lllout << "ProcessMonitorImplThread::StartMonitorPid() - Sending to next thread. tid: "
+                   << boost::this_thread::get_id()
                    << ". pid: " << pid << std::endl;
 
             m_nextThread->StartMonitorPid(pid);
         }
     }
-    
+
     void
-    ProcessMonitorWin32Thread::StopMonitorPid(const pid_t pid)
+    ProcessMonitorImplThread::StopMonitorPid(const pid_t pid)
     {
-        lllout << "ProcessMonitorWin32Thread::StopMonitorPid() - called... tid: " << boost::this_thread::get_id() 
+        lllout << "ProcessMonitorImplThread::StopMonitorPid() - called... tid: " << boost::this_thread::get_id()
                << ". pid: " << pid << std::endl;
         boost::lock_guard<boost::mutex> lck(m_mutex);
 
         PidMap::iterator it = m_pids.find(pid);
-        
+
         if (it != m_pids.end())
         {
             CloseHandle((*it).second);
-            
+
             m_pids.erase(it);
             SetEvent(m_signalEvent);
         }
@@ -165,29 +166,29 @@ namespace Utilities
     }
 
 
-    void 
-    ProcessMonitorWin32Thread::GetTerminatedPids(std::vector<pid_t>& pids)
+    void
+    ProcessMonitorImplThread::GetTerminatedPids(std::vector<pid_t>& pids)
     {
         boost::lock_guard<boost::mutex> lck(m_mutex);
 
         std::swap(m_deadPids,pids);
-        
-        lllout << "ProcessMonitorWin32Thread::GetTerminatedPids() - m_deadPids.size(): " << m_deadPids.size() 
-               << ". pids.size(): " << pids.size() 
+
+        lllout << "ProcessMonitorImplThread::GetTerminatedPids() - m_deadPids.size(): " << m_deadPids.size()
+               << ". pids.size(): " << pids.size()
                << ". tid: " << boost::this_thread::get_id() << std::endl;
     }
 
-    void ProcessMonitorWin32Thread::Run()
+    void ProcessMonitorImplThread::Run()
     {
-        lllout << "ProcessMonitorWin32Thread::Run() - called...  tid: " << boost::this_thread::get_id() << std::endl;
-        
+        lllout << "ProcessMonitorImplThread::Run() - called...  tid: " << boost::this_thread::get_id() << std::endl;
+
         HANDLE  hEvents[MAX_EVENTS]; // array of handles for enabled events
 
         while(!m_stop)
         {
             hEvents[0] = m_signalEvent;
             int nrOfPids = 0;
-            
+
             std::vector<pid_t> pids;
 
             {
@@ -199,35 +200,35 @@ namespace Utilities
                     ++it)
                 {
                     ++nrOfPids;
-                    
+
                     hEvents[nrOfPids] = (*it).second;
                     pids.push_back((*it).first);
-                    
-                    lllout << "ProcessMonitorWin32Thread::Run() - adding pid: " << (*it).first 
-                           << ". tid: " << boost::this_thread::get_id() 
+
+                    lllout << "ProcessMonitorImplThread::Run() - adding pid: " << (*it).first
+                           << ". tid: " << boost::this_thread::get_id()
                            << std::endl;
                 }
             }
-            
+
             DWORD dwRet = WaitForMultipleObjects(nrOfPids + 1,hEvents,false,INFINITE);
 
-            lllout << "ProcessMonitorWin32Thread::Run() - dwRet: " << dwRet 
+            lllout << "ProcessMonitorImplThread::Run() - dwRet: " << dwRet
                    << ". nrOfPids: " << nrOfPids
-                   << ". tid: " << boost::this_thread::get_id() 
+                   << ". tid: " << boost::this_thread::get_id()
                    << std::endl;
 
             if (dwRet == WAIT_FAILED)
             {
                 const DWORD error = GetLastError();
                 SEND_SYSTEM_LOG(Critical,
-                                << "ProcessMonitorWin32Thread::Run() - WaitForMultipleObjects returned WAIT_FAILED!"
+                                << "ProcessMonitorImplThread::Run() - WaitForMultipleObjects returned WAIT_FAILED!"
                                 << " Error code = " << error);
 
                 LPVOID lpMsgBuf;
-                DWORD dw = GetLastError(); 
+                DWORD dw = GetLastError();
 
                 FormatMessage(
-                    FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+                    FORMAT_MESSAGE_ALLOCATE_BUFFER |
                     FORMAT_MESSAGE_FROM_SYSTEM,
                     NULL,
                     dw,
@@ -243,25 +244,25 @@ namespace Utilities
             else if (dwRet > 0)
             {
                 const pid_t pid  = pids[dwRet - 1];
-                
-                lllout << "ProcessMonitorWin32Thread::Run() - died: " << pid 
-                       << ". tid: " << boost::this_thread::get_id() 
+
+                lllout << "ProcessMonitorImplThread::Run() - died: " << pid
+                       << ". tid: " << boost::this_thread::get_id()
                        << std::endl;
 
                 boost::lock_guard<boost::mutex> lck(m_mutex);
 
                 m_deadPids.push_back(pid);
-                
+
 
                 PidMap::iterator it = m_pids.find(pid);
-        
+
                 if (it != m_pids.end())
                 {
                     CloseHandle((*it).second);
 
                     m_pids.erase(pid);
                 }
-                
+
                 SetEvent(m_prevThreadEvent);
             }
             else if (dwRet == 0)
@@ -271,59 +272,64 @@ namespace Utilities
                     m_nextThread->GetTerminatedPids(m_deadPids);
                 }
 
-                lllout << "ProcessMonitorWin32Thread::Run() - m_deadPids.size(): " << m_deadPids.size() 
-                       << ". tid: " << boost::this_thread::get_id() 
+                lllout << "ProcessMonitorImplThread::Run() - m_deadPids.size(): " << m_deadPids.size()
+                       << ". tid: " << boost::this_thread::get_id()
                        << std::endl;
-                
+
                 if (m_deadPids.size() > 0)
                 {
                     SetEvent(m_prevThreadEvent);
                 }
             }
         }
-        
 
-        lllout << "ProcessMonitorWin32Thread::Run() - about to stop...  tid: " << boost::this_thread::get_id() << std::endl;
+
+        lllout << "ProcessMonitorImplThread::Run() - about to stop...  tid: " << boost::this_thread::get_id() << std::endl;
     }
 
-    
+#endif
+
     //======================================================================
     //
-    // ProcessMonitorWin32
-    // 
+    // ProcessMonitorImpl
+    //
     //======================================================================
-    
-    ProcessMonitorWin32::ProcessMonitorWin32(const ProcessMonitor::OnTerminateCb& callback)
+
+    ProcessMonitorImpl::ProcessMonitorImpl(boost::asio::io_service& ioService,
+                                             const boost::function<void(const pid_t pid)>& callback,
+                                             const boost::chrono::steady_clock::duration& /*pollPeriod*/)
         : m_callback(callback)
-        , m_stop(false)
+        , m_ioService(ioService)
+        , m_strand(ioService)
     {
-        m_signalEvent = CreateEvent(NULL,false,false,NULL);
+        //m_signalEvent = CreateEvent(NULL,false,false,NULL);
     }
-    
-    ProcessMonitorWin32::~ProcessMonitorWin32() 
+
+#if 0
+    ProcessMonitorImpl::~ProcessMonitorImpl()
     {
         CloseHandle(m_signalEvent);
     }
 
     void
-    ProcessMonitorWin32::StartThread()
+    ProcessMonitorImpl::StartThread()
     {
-        lllout << "ProcessMonitorWin32::StartThread() - called... tid: " << boost::this_thread::get_id() << std::endl;
+        lllout << "ProcessMonitorImpl::StartThread() - called... tid: " << boost::this_thread::get_id() << std::endl;
 
         if (m_thread != boost::thread())
         {
             return;
         }
-        
-        m_thread = boost::thread(boost::bind(&ProcessMonitorWin32::Run,this));
 
-        lllout << "ProcessMonitorWin32::StartThread() - done..." << std::endl;
+        m_thread = boost::thread(boost::bind(&ProcessMonitorImpl::Run,this));
+
+        lllout << "ProcessMonitorImpl::StartThread() - done..." << std::endl;
     }
-    
+
     void
-    ProcessMonitorWin32::StopThread()
+    ProcessMonitorImpl::StopThread()
     {
-        lllout << "ProcessMonitorWin32::StopThread() - called... tid: " << boost::this_thread::get_id() << std::endl;
+        lllout << "ProcessMonitorImpl::StopThread() - called... tid: " << boost::this_thread::get_id() << std::endl;
 
         if (m_thread != boost::thread())
         {
@@ -339,19 +345,20 @@ namespace Utilities
             }
         }
 
-        lllout << "ProcessMonitorWin32::StopThread() - done..." << std::endl;
+        lllout << "ProcessMonitorImpl::StopThread() - done..." << std::endl;
     }
-    
-        
+#endif
+
     void
-    ProcessMonitorWin32::StartMonitorPid(const pid_t pid)
+    ProcessMonitorImpl::StartMonitorPid(const pid_t pid)
     {
-        lllout << "ProcessMonitorWin32::StartMonitorPid() - called... tid: " << boost::this_thread::get_id() 
+#if 0
+        lllout << "ProcessMonitorImpl::StartMonitorPid() - called... tid: " << boost::this_thread::get_id()
                << ". pid: " << std::endl;
         boost::lock_guard<boost::mutex> lck(m_mutex);
-        
+
         PidSet::iterator it = m_pids.find(pid);
-        
+
         if (it == m_pids.end())
         {
             m_pids.insert(pid);
@@ -359,55 +366,58 @@ namespace Utilities
             if (m_nextThread == NULL)
             {
                 // Create a "child" thread which will handle the monitor of the pid.
-                m_nextThread.reset(new ProcessMonitorWin32Thread(m_signalEvent));
+                m_nextThread.reset(new ProcessMonitorImplThread(m_signalEvent));
                 m_nextThread->StartThread();
             }
-            
+
             m_nextThread->StartMonitorPid(pid);
         }
+#endif
     }
 
 
     void
-    ProcessMonitorWin32::StopMonitorPid(const pid_t pid)
+    ProcessMonitorImpl::StopMonitorPid(const pid_t pid)
     {
-        lllout << "ProcessMonitorWin32::StopMonitorPid() - called... tid: " << boost::this_thread::get_id() 
+#if 0
+        lllout << "ProcessMonitorImpl::StopMonitorPid() - called... tid: " << boost::this_thread::get_id()
                << ". pid: " << pid << std::endl;
         boost::lock_guard<boost::mutex> lck(m_mutex);
 
         PidSet::iterator it = m_pids.find(pid);
-        
+
         if (it != m_pids.end())
         {
             m_pids.erase(it);
 
             m_nextThread->StopMonitorPid(pid);
         }
+#endif
     }
-
-    void ProcessMonitorWin32::Run()
+#if 0
+    void ProcessMonitorImpl::Run()
     {
-        lllout << "ProcessMonitorWin32::Run() - called...  tid: " << boost::this_thread::get_id() << std::endl;
-        
+        lllout << "ProcessMonitorImpl::Run() - called...  tid: " << boost::this_thread::get_id() << std::endl;
+
         HANDLE  hEvents[MAX_EVENTS]; // array of handles for enabled events
-        
+
         while(!m_stop)
         {
             hEvents[0] = m_signalEvent;
-            
+
             DWORD dwRet = WaitForMultipleObjects(1,hEvents,false,INFINITE);
 
-            lllout << "ProcessMonitorWin32::Run() - dwRet: " << dwRet << std::endl;
+            lllout << "ProcessMonitorImpl::Run() - dwRet: " << dwRet << std::endl;
 
             if (dwRet == 0)
             {
                 std::vector<pid_t> deadPids;
-                
+
                 if (m_nextThread)
                 {
                     m_nextThread->GetTerminatedPids(deadPids);
                 }
-                
+
                 for(std::vector<pid_t>::iterator it = deadPids.begin();
                     it != deadPids.end();
                     ++it)
@@ -415,14 +425,15 @@ namespace Utilities
                     boost::lock_guard<boost::mutex> lck(m_mutex);
                     m_pids.erase((*it));
 
-                    lllout << "ProcessMonitorWin32::Run() - died: " << (*it) << std::endl;
+                    lllout << "ProcessMonitorImpl::Run() - died: " << (*it) << std::endl;
                     m_callback((*it));
                 }
             }
         }
-        
-        lllout << "ProcessMonitorWin32::Run() - about to stop...  tid: " << boost::this_thread::get_id() << std::endl;
+
+        lllout << "ProcessMonitorImpl::Run() - about to stop...  tid: " << boost::this_thread::get_id() << std::endl;
     }
+#endif
 }
 }
 

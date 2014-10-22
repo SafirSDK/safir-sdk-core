@@ -21,14 +21,11 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __PROCESS_MONITOR_WIN32_H__
-#define __PROCESS_MONITOR_WIN32_H__
+#pragma once
 
-#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-
-#include "ProcessMonitorImpl.h"
 #include <Safir/Utilities/ProcessMonitor.h>
 
+#if 0
 #include <windows.h>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp>
@@ -36,11 +33,13 @@
 #include <map>
 #include <vector>
 #include <set>
+#endif
 
 namespace Safir
 {
 namespace Utilities
 {
+#if 0
     class ProcessMonitorWin32Thread
     {
     public:
@@ -49,45 +48,47 @@ namespace Utilities
 
         void StartThread();
         void StopThread();
-        
+
         void StartMonitorPid(const pid_t pid);
         void StopMonitorPid(const pid_t pid);
 
         void GetTerminatedPids(std::vector<pid_t>& pids);
 
     private:
-        void Run(); // Thread loop        
+        void Run(); // Thread loop
 
         boost::thread m_thread;
         bool m_stop;
-        
+
         // Supervised pids
         typedef std::map<pid_t, HANDLE, std::less<pid_t> > PidMap;
         PidMap m_pids;
-        
+
         std::vector<pid_t> m_deadPids;
-        
+
         boost::mutex m_mutex;
-        
+
         HANDLE m_prevThreadEvent;
 
         HANDLE m_signalEvent;
         boost::shared_ptr<ProcessMonitorWin32Thread> m_nextThread;
     };
+#endif
 
-
-    class ProcessMonitorWin32 : public ProcessMonitorImpl
+    class ProcessMonitorImpl
     {
     public:
-        explicit ProcessMonitorWin32(const ProcessMonitor::OnTerminateCb& callback);
-        ~ProcessMonitorWin32();
+        explicit ProcessMonitorImpl(boost::asio::io_service& ioService,
+                                    const boost::function<void(const pid_t pid)>& callback,
+                                    const boost::chrono::steady_clock::duration& pollPeriod);
+        //~ProcessMonitorImpl();
 
-        void StartThread();
-        void StopThread();
-        
+        void Stop();
+
         void StartMonitorPid(const pid_t pid);
         void StopMonitorPid(const pid_t pid);
     private:
+#if 0
         void Run(); // Thread loop
 
         // Client callback
@@ -95,22 +96,27 @@ namespace Utilities
 
         boost::thread m_thread;
         bool m_stop;
-        
+
         // Supervised pids
         typedef std::set<pid_t> PidSet;
         PidSet m_pids;
-        
+
         boost::mutex m_mutex;
-        
+
         HANDLE m_signalEvent;
 
         HANDLE m_nextThreadEvent;
         boost::shared_ptr<ProcessMonitorWin32Thread> m_nextThread;
+#endif
+
+        // Client callback
+        boost::function<void(const pid_t pid)> m_callback;
+
+        boost::asio::io_service& m_ioService;
+
+        boost::asio::io_service::strand m_strand;
     };
 
-    
-}
-}
 
-#endif
-#endif
+}
+}

@@ -23,8 +23,6 @@
 ******************************************************************************/
 #pragma once
 
-#if defined(linux) || defined(__linux) || defined(__linux__)
-
 #include <boost/asio.hpp>
 #include <boost/asio/steady_timer.hpp>
 #include <boost/bind.hpp>
@@ -75,4 +73,3 @@ namespace Utilities
 }
 }
 
-#endif
