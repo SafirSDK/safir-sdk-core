@@ -20,6 +20,16 @@
         </member>
         
         <member>
+            <name>MyEntityVal</name>
+            <type>ParserTest.MyEntity</type>            
+        </member>
+        
+        <member>
+            <name>MyIntVal</name>
+            <type>Int32</type>            
+        </member>
+
+        <member>
             <name>ArrayPropertyValue</name>
             <type>ParserTest.MyEntity</type>
             <array/>

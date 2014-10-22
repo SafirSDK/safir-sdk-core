@@ -111,12 +111,11 @@ class DouCreateRoutineValue(object):
         
 class DouParameter(object):
     
-    def __init__(self, summary, name, type, array, sequence, dictionary_type):
+    def __init__(self, summary, name, type, array, dictionary_type):
         self.summary = summary
         self.name = name
         self.type = type
         self.array = array
-        self.sequence = sequence
         self.dictionary_type = dictionary_type
 
 def readTextPropery(xml_root, element):
@@ -443,7 +442,6 @@ def parse_dou(gSession, dou_xmlfile):
         for p in parameters:            
             m_type = readTextPropery(p, "type")
             is_array = readTextPropery(p, "arrayElements") is not None
-            is_sequence = readTextPropery(p, "sequence") is not None
             is_dict = p.find("{urn:safir-dots-unit}dictionary")
             dict_type = None
             if is_dict is not None:
@@ -452,7 +450,7 @@ def parse_dou(gSession, dou_xmlfile):
             parsed.parameters.append( DouParameter( summary_formatter(readTextPropery(p, "summary")), \
                                         readTextPropery(p, "name"), \
                                         m_type, \
-                                        is_array, is_sequence, dict_type) )
+                                        is_array, dict_type) )
 
             if is_array: 
                 parsed.unique_dependencies.append(gSession.dod_types[gSession.dod_parameters["Index_Type"]].dependency)
@@ -805,7 +803,6 @@ def process_at_variable_lookup(gSession, var, dou, table_line, parent_table_line
     elif var == "UNIFORM_PARAMETERTYPE" : return gSession.dod_types[dou.parameters[index].type].uniform_type
     elif var == "PARAMETERTYPE" : return gSession.dod_types[dou.parameters[index].type].generated
     elif var == "PARAMETERISARRAY" : return parameter_is_array(dou, table_line)
-    elif var == "PARAMETERISSEQUENCE" : return parameter_is_sequence(dou, table_line)
     elif var == "PARAMETERISDICTIONARY" : return parameter_is_dictionary(dou, table_line)
     elif var == "PARAMETERDICTIONARYTYPE" : return dou.parameters[table_line - 1].dictionary_type
     elif var == "TYPEID" : 
@@ -878,9 +875,6 @@ def create_value_parameter_inline(dou, table_line, parent_table_line):
     
 def parameter_is_array(dou, table_line):
     return trim_false(len(dou.parameters) > 0 and dou.parameters[table_line - 1].array)
-  
-def parameter_is_sequence(dou, table_line):
-    return trim_false(len(dou.parameters) > 0 and dou.parameters[table_line - 1].sequence)
 
 def parameter_is_dictionary(dou, table_line):
     return trim_false(len(dou.parameters) > 0 and (dou.parameters[table_line - 1].dictionary_type is not None))

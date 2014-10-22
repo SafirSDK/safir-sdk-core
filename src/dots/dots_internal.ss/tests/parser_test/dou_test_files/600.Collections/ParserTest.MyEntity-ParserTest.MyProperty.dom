@@ -23,6 +23,25 @@
             <propertyMember>MyColorEnumVal</propertyMember>
             <value>White</value>
         </member>
+
+        <member>
+            <propertyMember>MyEntityVal</propertyMember>
+            <classMemberReference>
+                <classMember>MyDictionary</classMember>
+                <key>Black</key>
+            </classMemberReference>
+        </member>
+        
+        <member>
+            <propertyMember>MyIntVal</propertyMember>
+            <classMemberReference>
+                <classMember>MyDictionary</classMember>
+                <key>Black</key>
+                <classMemberReference>
+                    <classMember>MyInt</classMember>
+                </classMemberReference>    
+            </classMemberReference>
+        </member>
         
         <member>
             <propertyMember>ArrayPropertyValue</propertyMember>

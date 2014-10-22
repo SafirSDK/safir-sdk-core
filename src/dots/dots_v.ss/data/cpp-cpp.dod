@@ -862,46 +862,6 @@ namespace @_NAMESPACEV_@
 @@END_IF@@
     }
 @@END_IF@@
-
-@@--  SEQUENCE PARAMETERS
-@@ELSIF@@ @_EXIST:PARAMETERISSEQUENCE_@
-    Safir::Dob::Typesystem::Int32 @_PARAMETERCLASS_@::@_PARAMETER_@SequenceSize()
-    {
-        if (!isInitialised) Init();
-        return Safir::Dob::Typesystem::Parameters::GetArraySize(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex);
-    }
-
-@@IF@@ @_UNIFORM_PARAMETERTYPE_@=Object
-    @_PARAMETERTYPE_@Ptr @_PARAMETERCLASS_@::@_PARAMETER_@(const Safir::Dob::Typesystem::Int32 index)
-    {
-        if (!isInitialised) Init();
-
-        return boost::static_pointer_cast<@_PARAMETERTYPE_@>
-            (Safir::Dob::Typesystem::Parameters::GetObject(ClassTypeId,
-                                                           g_@_LOWER:PARAMETER_@ParameterIndex,
-                                                           index));
-    }
-@@ELSE@@
-@@IF@@ @_UNIFORM_PARAMETERTYPE_@=Enumeration
-    @_PARAMETERTYPE_@::Enumeration @_PARAMETERCLASS_@::@_PARAMETER_@(const Safir::Dob::Typesystem::Int32 index, const Safir::Dob::Typesystem::TypeId enumId)
-@@ELSIF@@ @_UNIFORM_PARAMETERTYPE_@=EntityId
-    const @_PARAMETERTYPE_@ @_PARAMETERCLASS_@::@_PARAMETER_@(const Safir::Dob::Typesystem::Int32 index)
-@@ELSIF@@ @_UNIFORM_PARAMETERTYPE_@=String
-    const @_PARAMETERTYPE_@ @_PARAMETERCLASS_@::@_PARAMETER_@(const Safir::Dob::Typesystem::Int32 index)
-@@ELSE@@
-    @_PARAMETERTYPE_@ @_PARAMETERCLASS_@::@_PARAMETER_@(const Safir::Dob::Typesystem::Int32 index)
-@@END_IF@@
-    {
-        if (!isInitialised) Init();
-@@IF@@ @_UNIFORM_PARAMETERTYPE_@=Enumeration
-        @_PARAMETERTYPE_@::CheckForMismatch(enumId);
-        Safir::Dob::Typesystem::Int32 evalue=Safir::Dob::Typesystem::Parameters::Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, index);
-        return static_cast< @_PARAMETERTYPE_@::Enumeration >(evalue);
-@@ELSE@@
-        return Safir::Dob::Typesystem::Parameters::Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, index);
-@@END_IF@@
-    }
-@@END_IF@@
 @@--  SINGLE PARAMETERS
 @@ELSE@@
 @@IF@@ @_UNIFORM_PARAMETERTYPE_@=Object

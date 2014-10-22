@@ -801,7 +801,7 @@ namespace ToolSupport
             ParameterDescriptionLocalPtr& def=state.lastInsertedClass->ownParameters.back();
             std::ostringstream os;
             os<<"The parameter '"<<def->qualifiedName<<"' has collectionType=Sequence. It is not supported, use array instead. (Same syntax but <array> instead of <sequence>)";
-            throw ParseError("Sequence parameters not supported", os.str(), state.currentPath, 203);
+            throw ParseError("Sequence parameters not supported", os.str(), state.currentPath, 210);
         }
     };
 
@@ -1048,29 +1048,43 @@ namespace ToolSupport
 
     template<> struct ParseAlgorithm<Elements::PropertyMemberIsSequence>
     {
-        void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const {state.lastInsertedProperty->members.back()->collectionType=SequenceCollectionType;}
+        //void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const {state.lastInsertedProperty->members.back()->collectionType=SequenceCollectionType;}
+
+        void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const
+        {
+            std::ostringstream os;
+            os<<"The member '"<<state.lastInsertedProperty->members.back()->GetName()<<"' in property '"<<state.lastInsertedProperty->GetName()<<"' has collectionType=Sequence wich is currently not supported.";
+            throw ParseError("Sequence propertyMembers not supported", os.str(), state.currentPath, 211);
+        }
     };
 
     template<> struct ParseAlgorithm<Elements::PropertyMemberIsDictionary>
     {
-        void operator()(boost::property_tree::ptree& pt, ParseState& state) const
+//        void operator()(boost::property_tree::ptree& pt, ParseState& state) const
+//        {
+//            state.lastInsertedProperty->members.back()->collectionType=DictionaryCollectionType;
+//            SerializationUtils::Trim(pt.data());
+
+//            if (!BasicTypeOperations::IsBasicTypeName(pt.data(), state.lastInsertedProperty->members.back()->keyType))
+//            {
+//                //Assume enumeration, check type later
+//                state.lastInsertedProperty->members.back()->keyType=EnumerationMemberType;
+//                state.lastInsertedProperty->members.back()->keyTypeId=TypeUtilities::CalculateTypeId(pt.data());
+//            }
+
+//            if (!ValidKeyType(state.lastInsertedProperty->members.back()->keyType))
+//            {
+//                std::ostringstream ss;
+//                ss<<"The specified type '"<<pt.data()<<"' is not valid as key in a dictionary. On member '"<<state.lastInsertedProperty->members.back()->name<<"' in class '"<<state.lastInsertedProperty->name<<"'"<<std::endl;
+//                throw ParseError("Invalid dictionary key type", ss.str(), state.currentPath, 192);
+//            }
+//        }
+
+        void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const
         {
-            state.lastInsertedProperty->members.back()->collectionType=DictionaryCollectionType;
-            SerializationUtils::Trim(pt.data());
-
-            if (!BasicTypeOperations::IsBasicTypeName(pt.data(), state.lastInsertedProperty->members.back()->keyType))
-            {
-                //Assume enumeration, check type later
-                state.lastInsertedProperty->members.back()->keyType=EnumerationMemberType;
-                state.lastInsertedProperty->members.back()->keyTypeId=TypeUtilities::CalculateTypeId(pt.data());
-            }
-
-            if (!ValidKeyType(state.lastInsertedProperty->members.back()->keyType))
-            {
-                std::ostringstream ss;
-                ss<<"The specified type '"<<pt.data()<<"' is not valid as key in a dictionary. On member '"<<state.lastInsertedProperty->members.back()->name<<"' in class '"<<state.lastInsertedProperty->name<<"'"<<std::endl;
-                throw ParseError("Invalid dictionary key type", ss.str(), state.currentPath, 192);
-            }
+            std::ostringstream os;
+            os<<"The member '"<<state.lastInsertedProperty->members.back()->GetName()<<"' in property '"<<state.lastInsertedProperty->GetName()<<"' has collectionType=Dictionary wich is currently not supported.";
+            throw ParseError("Dictionary propertyMembers not supported", os.str(), state.currentPath, 212);
         }
     };
 
