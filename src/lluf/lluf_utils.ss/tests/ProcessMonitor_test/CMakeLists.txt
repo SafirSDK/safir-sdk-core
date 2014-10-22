@@ -1,3 +1,4 @@
+ADD_EXECUTABLE(Sleeper Sleeper.cpp)
 
 ADD_EXECUTABLE(ProcessMonitor_test3
   ProcessMonitor_test3.cpp
@@ -6,6 +7,7 @@ ADD_EXECUTABLE(ProcessMonitor_test3
   ../../src/ProcessMonitorWin32.cpp )
 
 if(NOT MSVC)
+  TARGET_LINK_LIBRARIES (Sleeper ${Boost_LIBRARIES})
   TARGET_LINK_LIBRARIES(ProcessMonitor_test3 ${Boost_LIBRARIES})
 endif()
 
@@ -16,10 +18,8 @@ SET_SAFIR_TEST_PROPERTIES(ProcessMonitor_unittest 120)
 
 #ADD_EXECUTABLE(ProcessMonitor_test ProcessMonitor_test.cpp)
 #ADD_EXECUTABLE(ProcessMonitor_test2 ProcessMonitor_test2.cpp)
-#ADD_EXECUTABLE(Sleeper Sleeper.cpp)
 
 #IF (NOT MSVC)
-#  TARGET_LINK_LIBRARIES (Sleeper ${Boost_LIBRARIES})
 #  TARGET_LINK_LIBRARIES (ProcessMonitor_test lluf_utils ${Boost_LIBRARIES})
 #  TARGET_LINK_LIBRARIES (ProcessMonitor_test2 lluf_utils ${Boost_LIBRARIES})
 #ENDIF()

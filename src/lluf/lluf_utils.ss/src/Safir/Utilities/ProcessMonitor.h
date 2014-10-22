@@ -52,6 +52,7 @@ namespace Utilities
 
         /**
          * Start monitor the given PID.
+         * Multiple calls with the same pid will give only one callback
          *
          * @param [in] pid  The PID which we want to monitor.
          */
@@ -59,6 +60,8 @@ namespace Utilities
 
         /**
          * Stop monitor the given PID.
+         * One call to StopMonitorPid will stop monitoring the pid even if StartMonitorPid was
+         * called multiple times for that pid.
          *
          * @param [in] pid  The PID to stop monitoring.
          */

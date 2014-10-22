@@ -25,10 +25,10 @@
 
 #include "ProcessMonitorLinux.h"
 #include <Safir/Utilities/Internal/SystemLog.h>
-
-#if 0
 #include <boost/lexical_cast.hpp>
 #include <boost/filesystem.hpp>
+
+#if 0
 
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
@@ -46,36 +46,34 @@ namespace Safir
 {
 namespace Utilities
 {
-#if 0
-    bool GetPathForPid(const pid_t pid, std::string& path)
+    // Will throw std::runtime_error if pid was not found
+    boost::filesystem::path GetProcPathForPid(const pid_t pid)
     {
-        std::ostringstream os;
-
-        os << "/proc/" << pid << "/exe";
-
-        boost::filesystem::path bp(os.str());
-
-        lllout << "GetPathForPid() - is_symlink: " <<  boost::filesystem::is_symlink(bp) << std::endl;
-
-        if(boost::filesystem::is_symlink(bp))
+        boost::filesystem::path path = "/proc";
+        path /= boost::lexical_cast<std::string>(pid);
+        path /= "exe";
+        if (!boost::filesystem::exists(path))
         {
-            char buf[1025];
-            int len = readlink(os.str().c_str(),buf,1024);
+            throw std::runtime_error("Process with pid "
+                                     + boost::lexical_cast<std::string>(pid)
+                                     + " does not appear to exist.");
+        }
+        return path;
+    }
 
-            if (len != -1)
-            {
-                buf[len] = 0;
-
-                lllout << "GetPathForPid() - buf: " << buf << std::endl;
-
-                path = std::string(buf);
-                return true;
-            }
+    // Will throw std::runtime_error if path cannot be resolved,
+    // e.g. if the executable has been deleted.
+    // Note that this is a common occurrence during development, when the compiler
+    // overwrites binaries that may still be running.
+    boost::filesystem::path ResolveProcPath(const boost::filesystem::path& path)
+    {
+        if(!boost::filesystem::is_symlink(path))
+        {
+            throw std::runtime_error("Proc path does not appear to be a symlink: " + path.string());
         }
 
-        return false;
+        return boost::filesystem::canonical(path);
     }
-#endif
 
 
     ProcessMonitorImpl::ProcessMonitorImpl(boost::asio::io_service& ioService,
@@ -83,15 +81,51 @@ namespace Utilities
         : m_callback(callback)
         , m_ioService(ioService)
         , m_strand(ioService)
+        , m_pollPeriod(boost::chrono::seconds(1))
+        , m_pollTimer(ioService)
           //, m_inotifyStream(m_ioService)
           //        , m_timerStarted(false)
     {
-
+        m_pollTimer.expires_from_now(m_pollPeriod);
+        m_pollTimer.async_wait(m_strand.wrap(boost::bind(&ProcessMonitorImpl::Poll,this,_1)));
     }
 
 
     void ProcessMonitorImpl::Stop()
     {
+        m_strand.dispatch(boost::bind(&boost::asio::steady_timer::cancel,&m_pollTimer));
+    }
+
+    void ProcessMonitorImpl::Poll(const boost::system::error_code& error)
+    {
+        if (error)
+        {
+            return;
+        }
+
+        m_pollTimer.expires_from_now(m_pollPeriod);
+        m_pollTimer.async_wait(m_strand.wrap(boost::bind(&ProcessMonitorImpl::Poll,this,_1)));
+
+        using namespace boost::filesystem;
+
+        std::set<pid_t> missingPids = m_monitoredPids;
+
+        for (directory_iterator dit = directory_iterator("/proc");
+             dit != directory_iterator(); ++dit)
+        {
+            const std::string name = dit->path().filename().string();
+            if (name.find_first_not_of("0123456789") == std::string::npos)
+            {
+                missingPids.erase(boost::lexical_cast<pid_t>(name));
+            }
+        }
+
+        for(std::set<pid_t>::const_iterator it = missingPids.begin();
+            it != missingPids.end(); ++it)
+        {
+            m_monitoredPids.erase(*it);
+            m_ioService.post(boost::bind(m_callback,*it));
+        }
 
     }
 #if 0
@@ -370,44 +404,28 @@ namespace Utilities
     }
 
 
-    void
-    ProcessMonitorImpl::StartThread()
-    {
-        lllout << "ProcessMonitorImpl::StartThread() - called... tid: " << boost::this_thread::get_id() << std::endl;
-
-        if (m_thread.get_id() != boost::thread::id())
-        {
-            return;
-        }
-
-        m_thread = boost::thread(boost::bind(&ProcessMonitorImpl::Run,this));
-
-        lllout << "ProcessMonitorImpl::StartThread() - done..." << std::endl;
-    }
-
-
-    void
-    ProcessMonitorImpl::StopThread()
-    {
-        lllout << "ProcessMonitorImpl::StopThread() - called... tid: " << boost::this_thread::get_id() << std::endl;
-
-        if (m_thread.get_id() != boost::thread::id())
-        {
-            m_ioService.stop();
-
-            m_thread.join();
-            m_thread = boost::thread();
-        }
-
-        lllout << "ProcessMonitorImpl::StopThread() - done..." << std::endl;
-    }
 
 
 #endif
     void
     ProcessMonitorImpl::StartMonitorPidInternal(const pid_t pid)
     {
-        m_callback(pid);
+        m_monitoredPids.insert(pid);
+        /*        boost::filesystem::path procPath;
+        try
+        {
+            procPath = GetProcPathForPid(pid);
+        }
+        catch (const std::runtime_error& e)
+        {
+            //std::wcout << e.what() << std::endl;
+            m_callback(pid);
+            return;
+        }
+        std::wcout << "StartMonitorPidInternal: pid = " << pid
+        << ", path = " << ResolveProcPath(procPath).string().c_str() << std::endl;*/
+
+        //m_callback(pid);
         // Add lock
         // boost::lock_guard<boost::mutex> lck(m_mutex);
 
@@ -419,6 +437,7 @@ namespace Utilities
     void
     ProcessMonitorImpl::StopMonitorPidInternal(const pid_t pid)
     {
+        m_monitoredPids.erase(pid);
         // Add lock
         //boost::lock_guard<boost::mutex> lck(m_mutex);
 

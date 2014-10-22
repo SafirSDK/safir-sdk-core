@@ -26,15 +26,12 @@
 #if defined(linux) || defined(__linux) || defined(__linux__)
 
 #include <boost/asio.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/thread.hpp>
-#include <boost/thread/mutex.hpp>
-#include <list>
-#include <map>
+#include <boost/asio/steady_timer.hpp>
+#include <boost/bind.hpp>
+#include <boost/function.hpp>
 #include <set>
-#include <string>
-#include <sys/inotify.h>
-#include <sys/types.h>
+
+
 
 namespace Safir
 {
@@ -84,6 +81,7 @@ namespace Utilities
         void StartMonitorPidInternal(const pid_t pid);
         void StopMonitorPidInternal(const pid_t pid);
 
+        void Poll(const boost::system::error_code& error);
 
         // Client callback
         boost::function<void(const pid_t pid)> m_callback;
@@ -93,6 +91,8 @@ namespace Utilities
 
         boost::asio::io_service::strand m_strand;
 
+        const boost::chrono::steady_clock::duration m_pollPeriod;
+        boost::asio::steady_timer m_pollTimer;
 #if 0
 
         //asio object that wraps the inotify file descriptor
@@ -134,6 +134,7 @@ namespace Utilities
         boost::posix_time::ptime m_checkUntil;
         bool m_timerStarted;
 #endif
+        std::set<pid_t> m_monitoredPids;
     };
 }
 }

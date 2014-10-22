@@ -8,7 +8,7 @@ SET(NO_LIBRARY_POSTFIXES 1)
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
-FIND_PACKAGE(Boost COMPONENTS timer thread system unit_test_framework)
+FIND_PACKAGE(Boost COMPONENTS timer filesystem thread system unit_test_framework)
 
 FIND_PACKAGE(PythonInterp)
 
