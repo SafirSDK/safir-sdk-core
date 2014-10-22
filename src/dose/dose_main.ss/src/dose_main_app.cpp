@@ -65,7 +65,7 @@ namespace Internal
                 connection->Died();
             }
         }
-        
+
         void ProcessExited(const pid_t& pid)
         {
             Connections::Instance().ForEachConnectionPtr(boost::bind(SetDiedIfPidEquals,_1,pid));
@@ -74,8 +74,8 @@ namespace Internal
         void DumpFunc(const char* const dumpPath)
         {
             std::wostringstream ostr;
-            SEND_SYSTEM_LOG(Alert, 
-                            << "dose_main has generated a dump to:\n" 
+            SEND_SYSTEM_LOG(Alert,
+                            << "dose_main has generated a dump to:\n"
                             << dumpPath << "\n"
                             << "Please send this file to your nearest Dob developer, along with\n"
                             << "relevant information about what version of Safir SDK you are using");
@@ -91,17 +91,18 @@ namespace Internal
         m_poolHandler(m_ioService),
         m_pendingRegistrationHandler(m_ecom),
         m_ecom(m_ioService),
+        m_processMonitor(m_ioService,ProcessExited,boost::chrono::seconds(1)),
         m_HandleEvents_notified(0),
         m_DispatchOwnConnection_notified(0)
     {
         Safir::Utilities::CrashReporter::RegisterCallback(DumpFunc);
         Safir::Utilities::CrashReporter::Start();
-
-        m_processMonitor.Init(ProcessExited);
     }
 
     DoseApp::~DoseApp()
     {
+        m_processMonitor.Stop();
+
         if (m_memoryMonitorThread.get_id() != boost::thread::id())
         {
             m_memoryMonitorThread.interrupt();
@@ -145,7 +146,7 @@ namespace Internal
 
         //we want the io service to keep running for ever.
         boost::asio::io_service::work keepRunning(m_ioService);
-        
+
         m_ioService.run();
     }
 
@@ -171,7 +172,7 @@ namespace Internal
                 {
                     m_connectionOutEvent = 1;
                 }
-                
+
                 if (m_HandleEvents_notified == 0)
                 {
                     m_HandleEvents_notified = 1;
@@ -295,7 +296,7 @@ namespace Internal
         {
         case TooManyProcesses:
             {
-                SEND_SYSTEM_LOG(Critical, 
+                SEND_SYSTEM_LOG(Critical,
                                 << "Could not let new connection '" << connectionName.c_str()
                                 << "' from process with pid = " << pid
                                 << " connect since there are too many processes connected. "
@@ -335,50 +336,50 @@ namespace Internal
         InjectionKindTable::Initialize();
         NodeStatuses::Initialize();
         EntityTypes::Initialize(/*iAmDoseMain = */ true);
-        
+
         m_connectionHandler.Init(m_ecom,
                                  m_processInfoHandler,
                                  m_requestHandler,
                                  m_pendingRegistrationHandler,
                                  m_nodeHandler,
                                  m_persistHandler);
-        
+
         const bool otherNodesExistAtStartup =
             m_ecom.Init(boost::bind(&DoseApp::HandleIncomingData, this, _1, _2),
                         boost::bind(&DoseApp::QueueNotFull, this),
                         boost::bind(&DoseApp::NodeStatusChangedNotifier, this),
                         boost::bind(&DoseApp::StartPoolDistribution,this),
                         boost::bind(&DoseApp::RequestPoolDistribution,this, _1));
-        
+
         //we notify so that even if there were no new nodes we trigger
         //the call to MaybeSignal...() to start letting applications connect.
         //this also takes care of the case where we're running Standalone without
         //persistence.
         NodeStatusChangedNotifier();
-        
+
         m_messageHandler.Init(m_blockingHandler,m_ecom);
-        
+
         m_responseHandler.Init(m_blockingHandler, m_ecom);
         m_requestHandler.Init(m_blockingHandler, m_ecom, m_responseHandler);
-        
+
         m_ownConnection.Open(L"dose_main",L"own",0,NULL,this);
-        
+
         m_poolHandler.Init(m_blockingHandler,
                            m_ecom,
                            m_pendingRegistrationHandler,
                            m_persistHandler,
                            m_connectionHandler,
                            m_threadMonitor);
-        
-        
+
+
         m_processInfoHandler.Init(m_ecom,m_processMonitor);
-        
+
         m_nodeHandler.Init (m_ecom, m_requestHandler, m_poolHandler);
-        
+
         m_connectionThread = boost::thread(boost::bind(&DoseApp::ConnectionThread,this));
-        
+
         m_persistHandler.Init(m_ecom,m_connectionHandler,m_nodeHandler,otherNodesExistAtStartup);
-        
+
         m_memoryMonitorThread = boost::thread(&DoseApp::MemoryMonitorThread);
     }
 
@@ -498,7 +499,7 @@ namespace Internal
             {
                 const ConnectionPtr connection = Connections::Instance().GetConnection(ConnectionId(ThisNodeParameters::NodeNumber(), -1, *it));
                 m_messageHandler.DistributeMessages(connection);
-                
+
                 //If the connection is dead it might be a zombie that has been waiting for dosecom.
                 //signal it so that we try to finish removing it again.
                 if (connection->IsDead())
@@ -532,7 +533,7 @@ namespace Internal
         }
     }
 
- 
+
 
 
     //----------------------------------------------------------------
@@ -702,7 +703,7 @@ namespace Internal
 
     void DoseApp::MemoryMonitorThread()
     {
-        try 
+        try
         {
             MemoryMonitor monitor;
             for (;;)
@@ -720,4 +721,3 @@ namespace Internal
 }
 }
 }
-
