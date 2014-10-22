@@ -30,6 +30,7 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include "Parameters.h"
+#include "Message.h"
 #include "Node.h"
 
 #ifdef _MSC_VER
@@ -194,8 +195,15 @@ namespace Com
             else
             {
                 //received message with invalid checksum. Throw away the message and then continue as normal.
-                std::cout<<"COM: Received message with bad CRC. Throw away and continue."<<std::endl;
-                lllog(7)<<"COM: Received message with bad CRC. Throw away and continue."<<std::endl;
+                std::cout<<"COM: Received message with bad CRC, size="<<bytesRecv<<". Throw away and continue."<<std::endl;
+                lllog(7)<<"COM: Received message with bad CRC, size="<<bytesRecv<<". Throw away and continue."<<std::endl;
+
+                if (bytesRecv>CommonHeaderSize)
+                {
+                    const CommonHeader* commonHeader=reinterpret_cast<const CommonHeader*>(buf);
+                    std::cout<<"COM: If trying to parse despite CRC error: senerId="<<commonHeader->senderId<<", receiverId="<<commonHeader->receiverId<<", dataType="<<commonHeader->dataType<<std::endl;
+                    lllog(7)<<"COM: If trying to parse CRC error: senerId="<<commonHeader->senderId<<", receiverId="<<commonHeader->receiverId<<", dataType="<<commonHeader->dataType<<std::endl;
+                }
                 receiverReady=m_isReceiverReady(); //explicitly ask if receiver is ready to handle incoming data
             }
 

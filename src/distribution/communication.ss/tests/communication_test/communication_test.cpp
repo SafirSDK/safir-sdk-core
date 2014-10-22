@@ -36,6 +36,7 @@ public:
         ,nrecv(0)
         ,accumulatedRecv(false)
         ,messageSize(1000)
+        ,acked(true)
     {
         boost::program_options::options_description desc("Command line options");
         desc.add_options()
@@ -47,7 +48,8 @@ public:
                 ("nmsg,n", boost::program_options::value<unsigned int>(), "Number of messages to send and receive to and from each other node.")
                 ("nsend", boost::program_options::value<unsigned int>(), "Number of messages to send to every other node, default unlimited")
                 ("nrecv", boost::program_options::value<unsigned int>(), "Number of messages to receive from all otherl nodes (accumulated), default unlimited")
-                ("size", boost::program_options::value<size_t>(), "Size of data packets, default is 1000 bytes");
+                ("size", boost::program_options::value<size_t>(), "Size of data packets, default is 1000 bytes")
+                ("unacked", "Send unacked messages");
         boost::program_options::variables_map vm;
         boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
         boost::program_options::notify(vm);
@@ -91,11 +93,14 @@ public:
         {
             messageSize=vm["size"].as<size_t>();
         }
-
         if (nsend==0 && nrecv==0)
         {
             nsend=std::numeric_limits<int>::max();
             nrecv=std::numeric_limits<int>::max();
+        }
+        if (vm.count("unacked"))
+        {
+            acked=false;
         }
     }
 
@@ -107,6 +112,7 @@ public:
     unsigned int nrecv;
     bool accumulatedRecv;
     size_t messageSize;
+    bool acked;
 };
 
 class NodeTypes
@@ -122,7 +128,7 @@ public:
             n.name="nt"+boost::lexical_cast<std::string>(i);
             n.id=LlufId_Generate64(n.name.c_str());
             n.heartbeatInterval=1000+500*i;
-            n.retryTimeout=50;
+            n.retryTimeout=100;
             if (i>0)
             {
                 n.controlMulticastAddress=std::string("224.90.90.241:")+boost::lexical_cast<std::string>(11000+i);
@@ -166,9 +172,10 @@ private:
 class Semaphore
 {
 public:
-    Semaphore(int count)
+    Semaphore(int count, bool autoReset)
         :m_initialValue(count)
         ,m_count(m_initialValue)
+        ,m_reset(autoReset)
         ,m_mutex()
     {
     }
@@ -179,6 +186,11 @@ public:
         while (m_count>0)
         {
             m_cond.wait(lock);
+        }
+
+        if (m_reset)
+        {
+            m_count=m_initialValue;
         }
     }
 
@@ -192,6 +204,7 @@ public:
 private:
     const int m_initialValue;
     int m_count;
+    bool m_reset;
     boost::mutex m_mutex;
     boost::condition_variable m_cond;
 };
@@ -216,7 +229,7 @@ class Sp : private boost::noncopyable
 {
 public:
 
-    Sp(unsigned int numRecv, bool accumulated,
+    Sp(unsigned int numRecv, bool accumulated, bool acked,
        const std::function< void(int64_t) >& includeNode,
        const std::function< void(int64_t) >& reportNodeFinished)
         :m_nodeTypes()
@@ -226,6 +239,7 @@ public:
         ,m_retransmitCount(0)
         ,m_numRecv(numRecv)
         ,m_accumulated(accumulated)
+        ,m_acked(acked)
         ,m_includeNode(includeNode)
         ,m_reportNodeFinished(reportNodeFinished)
     {        
@@ -278,7 +292,7 @@ public:
     {
         if (!ValidCRC(msg, size))
         {
-            std::cout<<"Bad CRC! size="<<size<<std::endl;
+            std::cout<<"ComTest: Bad CRC! size="<<size<<std::endl;
         }
 
         ++m_totalRecvCount;
@@ -296,22 +310,25 @@ public:
             rc=sendCount;
         }
 
-        if (rc!=sendCount)
+        if (m_acked)
         {
-            std::cout<<"Recveived "<<sendCount<<", expected to get "<<rc<<std::endl;
-            exit(1);
-        }
+            if (rc!=sendCount)
+            {
+                std::cout<<"Recveived "<<sendCount<<", expected to get "<<rc<<std::endl;
+                exit(1);
+            }
 
-        if (rc==m_numRecv)
-        {
-            std::cout<<"Received all messages from node "<<m_nodeNames[id]<<std::endl;
-            m_reportNodeFinished(id);
-        }
+            if (rc==m_numRecv)
+            {
+                std::cout<<"Received all messages from node "<<m_nodeNames[id]<<std::endl;
+                m_reportNodeFinished(id);
+            }
 
-        if (m_accumulated && m_totalRecvCount>=m_numRecv)
-        {
-            std::cout<<"Total number of messages received"<<std::endl;
-            m_reportNodeFinished(id);
+            if (m_accumulated && m_totalRecvCount>=m_numRecv)
+            {
+                std::cout<<"Total number of messages received"<<std::endl;
+                m_reportNodeFinished(id);
+            }
         }
     }
 
@@ -333,6 +350,7 @@ private:
     unsigned int m_retransmitCount;
     unsigned int m_numRecv;
     bool m_accumulated;
+    bool m_acked;
     std::function< void(int64_t) > m_includeNode;
     std::function< void(int64_t) > m_reportNodeFinished;
 };
@@ -352,12 +370,12 @@ int main(int argc, char * argv[])
     auto work=boost::make_shared<boost::asio::io_service::work>(ioService);
     int numberOfDiscoveredNodes=0;
     boost::barrier startBarrier(2);
-    Semaphore stopCondition(cmd.accumulatedRecv ? 1 : cmd.await); //if accumulated only one node will report finished, the one posting the last message.
-    Semaphore queueFullSem(1);
+    Semaphore stopCondition(cmd.accumulatedRecv ? 1 : cmd.await, false); //if accumulated only one node will report finished, the one posting the last message.
+    Semaphore queueFullSem(1, true);
 
     std::set<int64_t> nodes;
     boost::shared_ptr<Safir::Dob::Internal::Com::Communication> com;
-    boost::shared_ptr<Sp> sp(new Sp(cmd.nrecv, cmd.accumulatedRecv,
+    boost::shared_ptr<Sp> sp(new Sp(cmd.nrecv, cmd.accumulatedRecv, cmd.acked,
     [&](int64_t id)
     {
         nodes.insert(id);
@@ -436,21 +454,23 @@ int main(int argc, char * argv[])
 
         for (auto& nt : nodeTypes.Map())
         {
-            while (!com->Send(0, nt.second.id, data, cmd.messageSize, 0, true))
+            if (cmd.acked)
             {
-                ++numberOfOverflows;
-                queueFullSem.Wait();
+                while (!com->Send(0, nt.second.id, data, cmd.messageSize, 0, true))
+                {
+                    ++numberOfOverflows;
+                    queueFullSem.Wait();
+                }
+            }
+            else
+            {
+                com->Send(0, nt.second.id, data, cmd.messageSize, 0, false);
+                if (sendCounter%50==0)
+                {
+                    boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
+                }
             }
         }
-
-//        for (auto nodeId : nodes)
-//        {
-//            while (!com->Send(nodeId, myNodeTypeId, data, cmd.messageSize, 0, true))
-//            {
-//                ++numberOfOverflows;
-//                queueFullSem.Wait();
-//            }
-//        }
 
         if (sendCounter%10000==0)
         {
@@ -459,13 +479,16 @@ int main(int argc, char * argv[])
     }
 
     std::cout<<"All messages posted to communication. Waiting for all to get delivered..."<<std::endl;
-    stopCondition.Wait();
-
-    for (auto& nt : nodeTypes.Map())
+    if (cmd.acked)
     {
-        while (com->NumberOfQueuedMessages(nt.second.id)>0)
+        stopCondition.Wait();
+
+        for (auto& nt : nodeTypes.Map())
         {
-            boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+            while (com->NumberOfQueuedMessages(nt.second.id)>0)
+            {
+                boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+            }
         }
     }
 
