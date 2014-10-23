@@ -5,7 +5,7 @@ ADD_EXECUTABLE(ProcessMonitor_test3
   ../../src/ProcessMonitor.cpp
   ../../src/ProcessMonitorLinux.cpp
   ../../src/ProcessMonitorWin32.cpp)
-set_target_properties(ProcessMonitor_test3 PROPERTIES COMPILE_DEFINITIONS " -D_lluf_utils_export_defs_h -Dlluf_utils_EXPORTS")
+
 
 ADD_EXECUTABLE(ProcessMonitor_test ProcessMonitor_test.cpp)
 ADD_EXECUTABLE(ProcessMonitor_test2 ProcessMonitor_test2.cpp)
@@ -15,6 +15,9 @@ if(NOT MSVC)
   TARGET_LINK_LIBRARIES(ProcessMonitor_test3 ${Boost_LIBRARIES})
   TARGET_LINK_LIBRARIES (ProcessMonitor_test lluf_utils ${Boost_LIBRARIES})
   TARGET_LINK_LIBRARIES (ProcessMonitor_test2 lluf_utils ${Boost_LIBRARIES})
+else()
+  set_target_properties(ProcessMonitor_test3 PROPERTIES
+    COMPILE_DEFINITIONS " -D_lluf_utils_export_defs_h -Dlluf_utils_EXPORTS")
 endif()
 
 ADD_TEST(ProcessMonitor_unittest ProcessMonitor_test3)

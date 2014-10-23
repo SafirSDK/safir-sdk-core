@@ -28,7 +28,6 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/filesystem.hpp>
 
-
 namespace Safir
 {
 namespace Utilities
@@ -39,6 +38,7 @@ namespace Utilities
         : m_callback(callback)
         , m_ioService(ioService)
         , m_strand(ioService)
+        , m_stopped(false)
         , m_pollPeriod(pollPeriod)
         , m_pollTimer(ioService)
     {
@@ -49,16 +49,19 @@ namespace Utilities
 
     void ProcessMonitorImpl::Stop()
     {
-        m_strand.dispatch(boost::bind(&boost::asio::steady_timer::cancel,&m_pollTimer));
+        const bool was_stopped = m_stopped.exchange(true);
+        if (!was_stopped)
+        {
+            m_strand.dispatch(boost::bind(&boost::asio::steady_timer::cancel,&m_pollTimer));
+        }
     }
 
     void ProcessMonitorImpl::Poll(const boost::system::error_code& error)
     {
-        if (error)
+        if (error || m_stopped)
         {
             return;
         }
-
         m_pollTimer.expires_from_now(m_pollPeriod);
         m_pollTimer.async_wait(m_strand.wrap(boost::bind(&ProcessMonitorImpl::Poll,this,_1)));
 

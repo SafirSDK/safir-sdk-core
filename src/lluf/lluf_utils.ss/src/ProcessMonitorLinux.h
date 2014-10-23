@@ -28,6 +28,7 @@
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
 #include <set>
+#include <boost/atomic.hpp>
 
 namespace Safir
 {
@@ -62,8 +63,8 @@ namespace Utilities
         boost::function<void(const pid_t pid)> m_callback;
 
         boost::asio::io_service& m_ioService;
-
         boost::asio::io_service::strand m_strand;
+        boost::atomic<bool> m_stopped;
 
         const boost::chrono::steady_clock::duration m_pollPeriod;
         boost::asio::steady_timer m_pollTimer;
