@@ -37,7 +37,7 @@ namespace Internal
     {
         m_timerId = TimerHandler::Instance().RegisterTimeoutHandler(L"End States Timer", *this);
 
-        double timeout = GetUtcTime() + 60.0;
+        ACE_Time_Value timeout = GetUtcTime() + ACE_Time_Value(5.0);
         TimerInfoPtr timerInfo(new EmptyTimerInfo(m_timerId));
         TimerHandler::Instance().Set(Discard,
                                      timerInfo,
@@ -49,7 +49,7 @@ namespace Internal
 
     void EndStatesHandler::HandleTimeout(const TimerInfoPtr& timer)
     {
-        double timeout = GetUtcTime() + 60.0;
+        ACE_Time_Value timeout = GetUtcTime() + ACE_Time_Value(5.0);
 
         //TimerInfoPtr timerInfo(new EmptyTimerInfo(m_timerId));
         TimerHandler::Instance().Set(Discard,

@@ -150,16 +150,20 @@ namespace Safir
             if (result)
             {
                 //successful send, wait for responses for 100ms
+                ACE_Time_Value timeout = GetUtcTime();
+                timeout+= 0.1;
                 TimerHandler::Instance().Set(Discard,
                     timerInfo,
-                    GetUtcTime() + 0.1); //time out in 100 milliseconds*/
+                    timeout); //time out in 100 milliseconds*/
             }
             else
             {
                 //failed to send (dosecom overflow), retry in 10ms
+                ACE_Time_Value timeout = GetUtcTime();
+                timeout+= 0.01;
                 TimerHandler::Instance().Set(Discard,
                     timerInfo,
-                    GetUtcTime() + 0.01); //time out in 10 milliseconds*/
+                    timeout); //time out in 10 milliseconds*/
             }
         }
 

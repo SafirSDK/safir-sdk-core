@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
 *
-* Created by: Anders Widén / stawi
+* Created by: Anders WidÃ©n / stawi
 *
 *******************************************************************************
 *
@@ -34,6 +34,7 @@
 #include <vector>
 #include <map>
 #include <ace/Event_Handler.h>
+#include <ace/Time_Value.h>
 
 #ifdef TimerId
 #undef TimerId
@@ -46,7 +47,9 @@ namespace Dob
 namespace Internal
 {
 
-    double GetUtcTime();
+    ACE_Time_Value GetUtcTime();
+
+    ACE_Time_Value GetMonotonicTime();
 
 
     typedef Safir::Dob::Typesystem::Int32 TimerId;
@@ -139,7 +142,7 @@ namespace Internal
 
         void Set(const SetPolicy policy,
                  const TimerInfoPtr & timerInfo,
-                 const double when);
+                 const ACE_Time_Value& when);
 
         //
         // Remove (all timers that match will be removed)
@@ -176,8 +179,8 @@ namespace Internal
         ~TimerHandler();
 
         //must use custom comparer to compare pointer contents rather than pointers.
-        typedef std::map<TimerInfoPtr,double, TimerInfoPtrLess> TimerTable;
-        typedef std::multimap<double,TimerTable::iterator> TimerQueue;
+        typedef std::map<TimerInfoPtr,ACE_Time_Value, TimerInfoPtrLess> TimerTable;
+        typedef std::multimap<ACE_Time_Value,TimerTable::iterator> TimerQueue;
         typedef std::vector<std::pair<std::wstring, TimeoutHandler *> > TimeoutHandlerTable;
 
         TimerTable m_timerTable;

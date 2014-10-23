@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
 *
-* Created by: Lars Hagström / stlrha
+* Created by: Lars HagstrÃ¶m / stlrha
 *
 *******************************************************************************
 *
@@ -297,19 +297,19 @@ namespace Internal
     void RequestHandler::StartTimer(const ConnectionPtr & sender, const DistributionData & request)
     {
         // Start timer
-        RequestTimerInfo timeoutInfo = RequestTimerInfo(sender->Id().m_id,
-                                                        request.GetRequestId(),
-                                                        request.GetTypeId(),
-                                                        request.GetHandlerId());
+//        RequestTimerInfo timeoutInfo = RequestTimerInfo(sender->Id().m_id,
+   //                                                     request.GetRequestId(),
+   //                                                     request.GetTypeId(),
+   //                                                     request.GetHandlerId());
 
-        const Dob::Typesystem::Si64::Second timeoutTime =
-            GetUtcTime() + GetTimeout(request.GetTypeId());
+ //       const Dob::Typesystem::Si64::Second timeoutTime =
+ //           GetUtcTime() + GetTimeout(request.GetTypeId());
 
-        TimerHandler::Instance().Set(Discard, //discard the timer if it is already set
-                                     TimerInfoPtr(new ReqTimer(
-                                                         RequestTimers::m_localReqTimerId,
-                                                         timeoutInfo)),
-                                                         timeoutTime);
+//        TimerHandler::Instance().Set(Discard, //discard the timer if it is already set
+//                                     TimerInfoPtr(new ReqTimer(
+//                                                         RequestTimers::m_localReqTimerId,
+//                                                         timeoutInfo)),
+//                                                         timeoutTime);
     }
 
 
@@ -586,13 +586,13 @@ namespace Internal
 
             RequestTimerInfo timeoutInfo = RequestTimerInfo(fromConnection->Id().m_id, reqId, request.GetTypeId(),request.GetHandlerId());
 
-            const Dob::Typesystem::Si64::Second timeoutTime = GetUtcTime() + deletedConnReqTimeout;
+//            const Dob::Typesystem::Si64::Second timeoutTime = GetUtcTime() + deletedConnReqTimeout;
 
-            TimerHandler::Instance().Set(Replace,
-                                         TimerInfoPtr(new ReqTimer
-                                                      (RequestTimers::m_localReqTimerId,
-                                                       timeoutInfo)),
-                                         timeoutTime);
+//            TimerHandler::Instance().Set(Replace,
+//                                         TimerInfoPtr(new ReqTimer
+//                                                      (RequestTimers::m_localReqTimerId,
+//                                                       timeoutInfo)),
+//                                         timeoutTime);
         }
     }
 
@@ -659,13 +659,13 @@ namespace Internal
                                                         request.GetTypeId(),
                                                         request.GetHandlerId());
 
-        const Dob::Typesystem::Si64::Second timeoutTime = GetUtcTime()
-            + GetTimeout(request.GetTypeId());
+ //       const Dob::Typesystem::Si64::Second timeoutTime = GetUtcTime()
+ //           + GetTimeout(request.GetTypeId());
 
-        TimerHandler::Instance().Set(Discard,   //discard if already set
-                                     TimerInfoPtr(new ReqTimer(RequestTimers::m_externalReqTimerId,
-                                                               timeoutInfo)),
-                                     timeoutTime);
+        //TimerHandler::Instance().Set(Discard,   //discard if already set
+          //                           TimerInfoPtr(new ReqTimer(RequestTimers::m_externalReqTimerId,
+            //                                                   timeoutInfo)),
+              //                       timeoutTime);
 
         // Set that dose_main is waiting for the receiver
         m_blockingHandler->Request().AddWaitingConnection(blockingConn,

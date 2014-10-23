@@ -197,7 +197,7 @@ namespace Internal
 
         ENSURE (findIt != m_pendingRegistrations.end(), << "PendingRegistrationHandler::SendRequest: Request id not found!");
 
-        const Safir::Dob::Typesystem::Si64::Second now = GetUtcTime();
+        const Safir::Dob::Typesystem::Si64::Second now = 0;//GetUtcTime();
 
         TimerInfoPtr timerInfo(new ResendPendingTimerInfo(m_timerId,requestId));
 
@@ -231,17 +231,17 @@ namespace Internal
                 findIt->second.nextRequestTime = now + 0.01;
             }
 
-            TimerHandler::Instance().Set(Discard,
-                                         timerInfo,
-                                         findIt->second.nextRequestTime);
+ //           TimerHandler::Instance().Set(Discard,
+ //                                        timerInfo,
+ //                                        findIt->second.nextRequestTime);
         }
         else
         {
             // If for some reason the timer for this pending request has fired but nextRequestTime
             // has not yet been reached, we must insert the timer again.
-            TimerHandler::Instance().Set(Discard,
-                                         timerInfo,
-                                         findIt->second.nextRequestTime);
+//            TimerHandler::Instance().Set(Discard,
+//                                         timerInfo,
+//                                         findIt->second.nextRequestTime);
         }
 
         //TODO: hook on to NotOverflow from doseCom instead of polling.

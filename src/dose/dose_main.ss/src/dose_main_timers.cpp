@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
 *
-* Created by: Anders Widén / stawi
+* Created by: Anders WidÃ©n / stawi
 *
 *******************************************************************************
 *
@@ -28,8 +28,17 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <boost/bind.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <ace/Time_Value.h>
 #include <ace/Reactor.h>
+#include <ace/High_Res_Timer.h>
+
+#if defined(linux) || defined(__linux) || defined(__linux__)
+#include <time.h>
+#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+#include <windows.h>
+#else
+#  error dose_main timers not supported on this plattform!
+#endif
+
 
 namespace Safir
 {
@@ -37,19 +46,44 @@ namespace Dob
 {
 namespace Internal
 {
-    static const boost::posix_time::ptime epoch(boost::gregorian::date(1970,1,1));
-    static const double fraction_multiplicator = pow(10.0,-boost::posix_time::time_duration::num_fractional_digits());
+    //static const boost::posix_time::ptime epoch(boost::gregorian::date(1970,1,1));
+    //static const double fraction_multiplicator = pow(10.0,-boost::posix_time::time_duration::num_fractional_digits());
 
-    double GetUtcTime()
+    ACE_Time_Value GetUtcTime()
     {
-        using namespace boost::posix_time;
+        return GetMonotonicTime();
 
-        const ptime now = microsec_clock::universal_time();
-        const time_duration diff = now - epoch;
-        const double foo =  diff.total_seconds() + diff.fractional_seconds() * fraction_multiplicator;
-        return foo;
+        //return ACE_High_Res_Timer::gettimeofday_hr();
+
+        //return ACE_High_Res_Timer::gettimeofday_hr();
+
+        //using namespace boost::posix_time;
+
+        //const ptime now = microsec_clock::universal_time();
+        //const time_duration diff = now - epoch;
+        //const double foo =  diff.total_seconds() + diff.fractional_seconds() * fraction_multiplicator;
+        //return foo;
     }
 
+    ACE_Time_Value GetMonotonicTime()
+    {        
+#if defined(linux) || defined(__linux) || defined(__linux__)
+
+        timespec_t t;
+
+        clock_gettime(CLOCK_MONOTONIC, &t);
+
+        return ACE_Time_Value(t);
+
+#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+
+        ULONGLONG t = GetTickCount64();
+
+        return ACE_Time_Value(t/1000, (t%1000) * 1000);
+
+#endif
+
+    }
 
     TimerInfoBase::TimerInfoBase(const TimerId timerId):
         m_timerId(timerId)
@@ -131,7 +165,7 @@ namespace Internal
 
     void TimerHandler::Set(const SetPolicy policy,
                            const TimerInfoPtr & timerInfo,
-                           const double when)
+                           const ACE_Time_Value& when)
     {
         switch (policy)
         {
@@ -319,17 +353,18 @@ namespace Internal
         }
         else
         {
-            const double delay = m_timerQueue.begin()->first - GetUtcTime();
+            const ACE_Time_Value delay = m_timerQueue.begin()->first - GetUtcTime();
 
-            if (delay < 0.0)
+            if (delay < ACE_Time_Value(0.0))
             {
                 return ACE_Time_Value::zero;
             }
             else
             {
-                double intpart;
-                const double frac = modf(delay,&intpart);
-                return ACE_Time_Value(static_cast<time_t>(intpart),static_cast<suseconds_t>(frac*1000000));
+                //double intpart;
+                //const double frac = modf(delay,&intpart);
+                //return ACE_Time_Value(static_cast<time_t>(intpart),static_cast<suseconds_t>(frac*1000000));
+                return delay;
             }
 
         }
@@ -345,7 +380,7 @@ namespace Internal
     {
         if (!m_timerQueue.empty())
         {
-            const double now = GetUtcTime();
+            const ACE_Time_Value now = GetUtcTime();
 
             TimerQueue::iterator theTimer = m_timerQueue.begin();
 

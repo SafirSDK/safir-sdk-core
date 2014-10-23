@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
 *
-* Created by: Lars Hagström / stlrha
+* Created by: Lars HagstrÃ¶m / stlrha
 *
 *******************************************************************************
 *
@@ -38,6 +38,8 @@
 #include <Safir/Utilities/Internal/PanicLogging.h>
 #include <Safir/Utilities/CrashReporter.h>
 #include <ace/Reactor.h>
+#include <ace/High_Res_Timer.h>
+#include <ace/Timer_Queue.h>
 #include <boost/bind.hpp>
 #include <iostream>
 #include "dose_main_timers.h"
@@ -117,6 +119,18 @@ namespace Internal
 
     int DoseApp::Run()
     {
+        ACE_High_Res_Timer::global_scale_factor();
+
+//        for (;;)
+//        {
+//            std::wcout << "Current high res timer:" << GetUtcTime().get_msec () << std::endl;
+
+//            ACE_OS::sleep(ACE_Time_Value(0,5000000));
+//            //boost::this_thread::sleep(boost::posix_time::seconds(5));
+//        }
+
+        ACE_Reactor::instance()->timer_queue()->gettimeofday(&GetMonotonicTime);
+
 #ifdef _MSC_VER
         // Set best possible timer resolution on windows
 
@@ -146,9 +160,11 @@ namespace Internal
 
         // Schedule a timer so that the main thread will kick the watchdog.
         TimerInfoPtr timerInfo(new EmptyTimerInfo(TimerHandler::Instance().RegisterTimeoutHandler(L"dose_main watchdog timer", *this)));
+        ACE_Time_Value timeout = GetUtcTime();
+        timeout += 5.0;
         TimerHandler::Instance().Set(Discard,
                                      timerInfo,
-                                     GetUtcTime() + 5.0);
+                                     timeout);
 
         // enter main loop
 #ifndef NDEBUG
@@ -313,9 +329,11 @@ namespace Internal
     {
         m_threadMonitor.KickWatchdog(m_mainThreadId);
 
+        ACE_Time_Value timeout = GetUtcTime();
+        timeout += 5.0;
         TimerHandler::Instance().Set(Discard,
                                      timer,
-                                     GetUtcTime() + 5.0);
+                                     timeout);
     }
 
     ConnectResult DoseApp::CanAddConnection(const std::string & connectionName, const pid_t pid, const long /*context*/)
