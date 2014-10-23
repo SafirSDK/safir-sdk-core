@@ -24,6 +24,7 @@
 #pragma once
 
 #include <Safir/Utilities/ProcessMonitor.h>
+#include <boost/bind.hpp>
 
 #if 0
 #include <windows.h>
@@ -85,9 +86,23 @@ namespace Utilities
 
         void Stop();
 
-        void StartMonitorPid(const pid_t pid);
-        void StopMonitorPid(const pid_t pid);
+
+        void StartMonitorPid(const pid_t pid)
+        {
+            m_strand.dispatch(boost::bind(&ProcessMonitorImpl::StartMonitorPidInternal,this,pid));
+        }
+
+        void StopMonitorPid(const pid_t pid)
+        {
+            m_strand.dispatch(boost::bind(&ProcessMonitorImpl::StopMonitorPidInternal,this,pid));
+        }
     private:
+        void StartMonitorPidInternal(const pid_t pid);
+        void StopMonitorPidInternal(const pid_t pid);
+
+        struct Process; //forward decl
+
+        void HandleEvent(const boost::shared_ptr<Process>& process, const boost::system::error_code& error);
 #if 0
         void Run(); // Thread loop
 
@@ -115,6 +130,24 @@ namespace Utilities
         boost::asio::io_service& m_ioService;
 
         boost::asio::io_service::strand m_strand;
+
+        struct Process
+        {
+            Process(boost::asio::io_service& ioService, HANDLE process, const pid_t pid_)
+                :handle(ioService, process)
+                ,pid(pid_)
+            {}
+            ~Process()
+            {
+                ::CloseHandle(handle.native_handle());
+            }
+
+            boost::asio::windows::object_handle handle;
+            const pid_t pid;
+        };
+        typedef std::map<pid_t, boost::shared_ptr<Process> > ProcessTable;
+
+        ProcessTable m_processes;
     };
 
 

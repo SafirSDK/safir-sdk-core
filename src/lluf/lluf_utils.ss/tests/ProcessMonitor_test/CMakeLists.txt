@@ -4,7 +4,8 @@ ADD_EXECUTABLE(ProcessMonitor_test3
   ProcessMonitor_test3.cpp
   ../../src/ProcessMonitor.cpp
   ../../src/ProcessMonitorLinux.cpp
-  ../../src/ProcessMonitorWin32.cpp )
+  ../../src/ProcessMonitorWin32.cpp)
+set_target_properties(ProcessMonitor_test3 PROPERTIES COMPILE_DEFINITIONS " -D_lluf_utils_export_defs_h -Dlluf_utils_EXPORTS")
 
 ADD_EXECUTABLE(ProcessMonitor_test ProcessMonitor_test.cpp)
 ADD_EXECUTABLE(ProcessMonitor_test2 ProcessMonitor_test2.cpp)

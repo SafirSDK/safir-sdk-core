@@ -26,7 +26,15 @@
 #include <boost/thread.hpp>
 #include <boost/lexical_cast.hpp>
 #include <vector>
+#include <set>
+
+#if defined(linux) || defined(__linux) || defined(__linux__)
+#  define PROCMON_LINUX
+#endif
+
+#ifdef PROCMON_LINUX
 #include <sys/wait.h>
+#endif
 
 #define BOOST_TEST_MODULE ProcessMonitorTest
 #include <boost/test/unit_test.hpp>
@@ -46,6 +54,7 @@ struct Fixture
         BOOST_TEST_MESSAGE("teardown fixture");
         Stop();
 
+#ifdef PROCMON_LINUX
         for (std::set<pid_t>::iterator it = sleepers.begin();
              it != sleepers.end(); ++it)
         {
@@ -54,6 +63,15 @@ struct Fixture
                 perror("waitpid");
             }
         }
+#else
+
+        for (std::map<pid_t,HANDLE>::iterator it = sleepers.begin();
+             it != sleepers.end(); ++it)
+        {
+            ::WaitForSingleObject(it->second,INFINITE);
+            ::CloseHandle(it->second);
+        }
+#endif
     }
 
 
@@ -80,6 +98,8 @@ struct Fixture
 
     pid_t LaunchSleeper(const double duration)
     {
+        BOOST_TEST_MESSAGE("LaunchSleeper " << duration);
+#ifdef PROCMON_LINUX
         const pid_t pid = fork();
         switch (pid)
         {
@@ -92,19 +112,48 @@ struct Fixture
             sleepers.insert(pid);
             return pid;
         }
+#else
+        STARTUPINFOA info={sizeof(info)};
+        PROCESS_INFORMATION processInfo;
+        if (::CreateProcessA(NULL, (LPSTR)(".\\Sleeper.exe " + boost::lexical_cast<std::string>(duration)).c_str(), NULL, NULL, TRUE, 0, NULL, NULL, &info, &processInfo))
+        //if (::CreateProcessA(NULL, (LPSTR)std::string(".\\Sleeper.exe ").c_str(), NULL, NULL, TRUE, 0, NULL, NULL, &info, &processInfo))
+        {
+            //::CloseHandle(processInfo.hThread);
+            sleepers.insert(std::make_pair(processInfo.dwProcessId,processInfo.hProcess));
+            BOOST_TEST_MESSAGE("  launched " << processInfo.dwProcessId);
+            return processInfo.dwProcessId;
+        }
+        else
+        {
+            throw std::logic_error("CreateProcess failed!");
+        }
+#endif
     }
 
     void WaitSleeper(const pid_t pid)
     {
+        BOOST_TEST_MESSAGE("WaitSleeper " << pid);
+#ifdef PROCMON_LINUX
         if (-1 == waitpid(pid, NULL,0))
         {
             perror("waitpid");
         }
+#else
+        std::map<pid_t,HANDLE>::iterator findIt = sleepers.find(pid);
+        if (findIt == sleepers.end())
+        {
+            throw std::logic_error("boohoo");
+        }
+        ::WaitForSingleObject(findIt->second, INFINITE);
+        ::CloseHandle(findIt->second);
+#endif
         sleepers.erase(pid);
     }
 
     void WaitAny()
     {
+        BOOST_TEST_MESSAGE("WaitAny");
+#ifdef PROCMON_LINUX
         int status;
         const pid_t pid = wait(&status);
         if (pid == -1)
@@ -112,6 +161,14 @@ struct Fixture
             perror("wait");
         }
         sleepers.erase(pid);
+#else
+        if (!sleepers.empty())
+        {
+            ::WaitForSingleObject(sleepers.begin()->second, INFINITE);
+            ::CloseHandle(sleepers.begin()->second);
+            sleepers.erase(sleepers.begin());
+        }
+#endif
     }
 
     boost::asio::io_service ioService;
@@ -128,7 +185,11 @@ private:
     std::vector<pid_t> terminatedPids;
     mutable boost::mutex mutex;
 
+#ifdef PROCMON_LINUX
     std::set<pid_t> sleepers;
+#else
+    std::map<pid_t,HANDLE> sleepers;
+#endif
 };
 
 BOOST_FIXTURE_TEST_SUITE( s, Fixture )
@@ -167,8 +228,12 @@ BOOST_AUTO_TEST_CASE(monitor_0_twice)
     monitor.Stop();
 
     std::vector<pid_t> terminatedPids = TerminatedPids();
-    BOOST_CHECK_EQUAL(terminatedPids.size(), 1);
+    BOOST_CHECK_LE(terminatedPids.size(), 2);
     BOOST_CHECK_EQUAL(terminatedPids.at(0), 0);
+    if (terminatedPids.size() == 2)
+    {
+        BOOST_CHECK_EQUAL(terminatedPids.at(0), 0);
+    }
 }
 
 BOOST_AUTO_TEST_CASE(monitor_self)
@@ -217,7 +282,7 @@ BOOST_AUTO_TEST_CASE(monitor_self_and_0)
 BOOST_AUTO_TEST_CASE(monitor_sleeper)
 {
     RunIoService();
-    const pid_t pid = LaunchSleeper(0.5);
+    const pid_t pid = LaunchSleeper(20);
     monitor.StartMonitorPid(pid);
 
     WaitSleeper(pid);
@@ -274,6 +339,5 @@ BOOST_AUTO_TEST_CASE(many_sleepers)
     std::vector<pid_t> terminatedPids = TerminatedPids();
     BOOST_CHECK_EQUAL(terminatedPids.size(), 100);
 }
-
 
 BOOST_AUTO_TEST_SUITE_END()

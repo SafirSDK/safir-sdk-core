@@ -27,9 +27,20 @@
 #include <Safir/Utilities/Internal/UtilsExportDefs.h>
 #include <Safir/Utilities/ProcessInfo.h>
 #include <boost/function.hpp>
-#include <boost/asio.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/chrono.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
+#endif
+
+#include <boost/asio.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
+
 
 namespace Safir
 {

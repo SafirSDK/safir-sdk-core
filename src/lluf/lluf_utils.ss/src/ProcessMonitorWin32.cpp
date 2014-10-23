@@ -305,6 +305,15 @@ namespace Utilities
         //m_signalEvent = CreateEvent(NULL,false,false,NULL);
     }
 
+    void ProcessMonitorImpl::Stop()
+    {
+        for(ProcessTable::iterator it = m_processes.begin();
+            it != m_processes.end(); ++it)
+        {
+            it->second->handle.cancel();
+        }
+    }
+
 #if 0
     ProcessMonitorImpl::~ProcessMonitorImpl()
     {
@@ -350,50 +359,59 @@ namespace Utilities
 #endif
 
     void
-    ProcessMonitorImpl::StartMonitorPid(const pid_t pid)
+    ProcessMonitorImpl::StartMonitorPidInternal(const pid_t pid)
     {
-#if 0
-        lllout << "ProcessMonitorImpl::StartMonitorPid() - called... tid: " << boost::this_thread::get_id()
-               << ". pid: " << std::endl;
-        boost::lock_guard<boost::mutex> lck(m_mutex);
-
-        PidSet::iterator it = m_pids.find(pid);
-
-        if (it == m_pids.end())
+        if (m_processes.find(pid) != m_processes.end())
         {
-            m_pids.insert(pid);
-
-            if (m_nextThread == NULL)
-            {
-                // Create a "child" thread which will handle the monitor of the pid.
-                m_nextThread.reset(new ProcessMonitorImplThread(m_signalEvent));
-                m_nextThread->StartThread();
-            }
-
-            m_nextThread->StartMonitorPid(pid);
+            //we're already watching this pid.
+            return;
         }
-#endif
+
+        HANDLE process = OpenProcess(PROCESS_ALL_ACCESS,//PROCESS_QUERY_INFORMATION | PROCESS_VM_READ | SYNCHRONIZE,
+                                     FALSE,
+                                     (DWORD)pid);
+
+        //if we can't get a handle to the process we assume that it is dead.
+        if (process == NULL)
+        {
+            m_ioService.post(boost::bind(m_callback,pid));
+            return;
+        }
+
+        boost::shared_ptr<Process> proc(new Process(m_ioService, process, pid));
+        m_processes.insert(std::make_pair(pid, proc));
+        proc->handle.async_wait(m_strand.wrap(boost::bind(&ProcessMonitorImpl::HandleEvent, this, proc, _1)));
+
     }
 
 
     void
-    ProcessMonitorImpl::StopMonitorPid(const pid_t pid)
+    ProcessMonitorImpl::StopMonitorPidInternal(const pid_t pid)
     {
-#if 0
-        lllout << "ProcessMonitorImpl::StopMonitorPid() - called... tid: " << boost::this_thread::get_id()
-               << ". pid: " << pid << std::endl;
-        boost::lock_guard<boost::mutex> lck(m_mutex);
-
-        PidSet::iterator it = m_pids.find(pid);
-
-        if (it != m_pids.end())
+        ProcessTable::iterator findIt = m_processes.find(pid);
+        if (findIt == m_processes.end())
         {
-            m_pids.erase(it);
-
-            m_nextThread->StopMonitorPid(pid);
+            //not monitoring this pid!
+            return;
         }
-#endif
+
+        findIt->second->handle.cancel();
+        m_processes.erase(findIt);
     }
+
+
+    void ProcessMonitorImpl::HandleEvent(const boost::shared_ptr<Process>& process,
+                                         const boost::system::error_code& error)
+    {
+        if (error)
+        {
+            return;
+        }
+
+        m_processes.erase(process->pid);
+        m_ioService.post(boost::bind(m_callback,process->pid));
+    }
+
 #if 0
     void ProcessMonitorImpl::Run()
     {

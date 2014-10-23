@@ -67,7 +67,7 @@ for sleeper in sleepers:
         errors += 1
 
 if result.count("Process with pid") != len(sleepers):
-    print("Too many terminated processes! Expected two!")
+    print("Too many terminated processes! Expected", len(sleepers)," processes!")
     errors += 1
 
 if listener.returncode != 0:
