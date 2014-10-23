@@ -24,6 +24,8 @@
 #include <Safir/Utilities/AsioDispatcher.h>
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/NotOpenException.h>
+#include <boost/chrono.hpp>
+#include <boost/asio/steady_timer.hpp>
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -41,9 +43,7 @@
 #include <Safir/Application/BackdoorCommand.h>
 #include <iostream>
 
-std::string gProgramName;
-
-const boost::posix_time::time_duration EXIT_TIMER_INTERVAL(boost::posix_time::milliseconds(100));
+const boost::chrono::steady_clock::duration EXIT_TIMER_DELAY(boost::chrono::milliseconds(100));
 
 class StopHandler
     : public Safir::Dob::StopHandler
@@ -55,7 +55,7 @@ public:
     virtual void OnStopOrder() {m_ioService.stop();}
 private:
     boost::asio::io_service& m_ioService;
-    
+
 };
 
 class MessageSender:
@@ -67,21 +67,20 @@ class MessageSender:
 void dummy() {}
 
 
-void PrintHelpAndExit(const boost::program_options::options_description & desc)
+void PrintHelpAndExit(const std::string& programName, const boost::program_options::options_description & desc)
 {
     std::ostringstream ostr;
     ostr << " " << desc;
 
     std::wcout
         << "Usage:" << std::endl
-        << " " << gProgramName.c_str() << " <options> command\n" << std::endl
+        << " " << programName.c_str() << " <options> command\n" << std::endl
         << ostr.str().c_str();
     exit(1);
 }
 
 int main(int argc, char* argv[])
 {
-    gProgramName = argv[0];
     boost::asio::io_service ioService;
     Safir::Dob::Connection connection;
     Safir::Utilities::AsioDispatcher dispatcher(connection, ioService);
@@ -129,7 +128,7 @@ int main(int argc, char* argv[])
     //if no args given, show help and exit
     if (argc == 1)
     {
-        PrintHelpAndExit(desc);
+        PrintHelpAndExit(argv[0], desc);
     }
 
     // read the options from the 2 sets of  args into the vm map.
@@ -141,7 +140,7 @@ int main(int argc, char* argv[])
     }
     catch (boost::program_options::error ex)
     {
-        PrintHelpAndExit(desc);
+        PrintHelpAndExit(argv[0], desc);
     }
 
     boost::program_options::notify(vm);
@@ -149,7 +148,7 @@ int main(int argc, char* argv[])
 
     if (vm.count("Help"))
     {
-        PrintHelpAndExit(desc);
+        PrintHelpAndExit(argv[0], desc);
     }
 
     if (vm.count("Command"))
@@ -172,7 +171,7 @@ int main(int argc, char* argv[])
     }
     else
     {
-        PrintHelpAndExit(desc);
+        PrintHelpAndExit(argv[0], desc);
     }
 
     if (vm.count("ConnectionName"))
@@ -189,7 +188,7 @@ int main(int argc, char* argv[])
     connection.Send(commandMsg, Safir::Dob::Typesystem::ChannelId(), &messageSender);
 
     //set a timer
-    boost::asio::deadline_timer timer(ioService,EXIT_TIMER_INTERVAL);
+    boost::asio::steady_timer timer(ioService,EXIT_TIMER_DELAY);
     timer.async_wait(boost::bind(dummy));
 
     //ioService will only run until the timer has timed out, since that is all the work

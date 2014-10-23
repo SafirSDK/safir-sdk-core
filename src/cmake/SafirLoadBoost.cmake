@@ -8,7 +8,17 @@ set(Boost_NO_BOOST_CMAKE ON)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_FIND_QUIETLY True)
 
-find_package(Boost COMPONENTS regex timer program_options filesystem thread system ${BOOST_REQUIRED_ON_WINDOWS} REQUIRED)
+find_package(Boost
+  COMPONENTS
+  regex
+  timer
+  program_options
+  filesystem
+  thread
+  system
+  unit_test_framework
+  ${BOOST_REQUIRED_ON_WINDOWS}
+  REQUIRED)
 
 include_directories(${Boost_INCLUDE_DIRS})
 #link_directories(${Boost_LIBRARY_DIRS})
@@ -48,7 +58,7 @@ ADD_DEFINITIONS(-DBOOST_DATE_TIME_NO_LIB)
 
 #Set up boost for any test code (i.e. CheckCXXSourceCompiles stuff)
 set(CMAKE_REQUIRED_INCLUDES ${Boost_INCLUDE_DIRS})
-set(CMAKE_REQUIRED_DEFINITIONS 
+set(CMAKE_REQUIRED_DEFINITIONS
   -DBOOST_ALL_DYN_LINK
   -DBOOST_FILESYSTEM_NO_DEPRECATED
   -DBOOST_SYSTEM_NO_DEPRECATED
@@ -59,7 +69,7 @@ set(CMAKE_REQUIRED_DEFINITIONS
 
 if(MSVC)
    #We have a weird issue which causes a buffer overrun error when using Visual Studio 2013
-   #and Boost 1.55 in 64 bit and release builds. 
+   #and Boost 1.55 in 64 bit and release builds.
    #Don't know if this is a bug in our code or in the compiler or in boost.
    #The workaround below disables some optimizations and all inlining in release builds
    #which appears to resolve the problem.

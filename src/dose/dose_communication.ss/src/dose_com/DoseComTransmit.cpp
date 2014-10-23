@@ -75,6 +75,8 @@
 #include "../defs/DoseNodeStatus.h"
 #include "../defs/DoseCom_Interface.h"  // to get an error code
 
+#include <boost/thread/mutex.hpp>
+
 //--------------------
 // Externals
 //--------------------
@@ -108,6 +110,10 @@ extern volatile int * volatile pDbg;
 //-------------------------------------------
 // Local static data
 //-------------------------------------------
+
+// We really don't rely on the lock free approach taken for the original design. This lock is
+// used to protect the different threads from concurrent access to the transmit queues.
+static boost::mutex g_threadLock;
 
 volatile static DOSE_SHARED_DATA_S *g_pShm;
 volatile static NODESTATUS_TABLE *g_pNodeStatusTable;
@@ -238,6 +244,10 @@ typedef volatile struct
     volatile dcom_ushort16 GetIxToAck;     // See comment above
     volatile dcom_ushort16 GetIxToSend;            // See comment above
 
+    volatile dcom_ushort16 GetIxToSendHighWatermark; // GetIxToSend is "backed" to GetIxToAck when a nack is received
+                                                     // so this variable is needed to be able to figure out if there
+                                                     // is a chance that the nacked message will ever be sent again.
+
     volatile dcom_ushort16 MaxUsedQueueLength;
 
     // wA/wT tells us if Application/TxThread writes the data
@@ -292,7 +302,9 @@ typedef volatile struct
 
     // incremented by DOSE_Xmit_msg() when overflow
     // cleared by Xmit_Thread() when free entries in Queue
-    volatile dcom_ushort16 TransmitQueueOverflow;
+    dcom_ushort16 TransmitQueueOverflow;
+
+    volatile dcom_uchar8   bSendQueueNotOverflow;
 
 } DOSE_TXQUEUE_S;
 
@@ -353,19 +365,28 @@ static THREAD_API Ack_Thread(void *)
 
         // Check if g_Ack_Queue[] is full. If so do not receive more until
         // there is more space.
-
-        while(
-                ( (g_Ack_Get_ix - g_Ack_Put_ix) == 1)
-                ||
-                ( (g_Ack_Get_ix == 0) && (g_Ack_Put_ix == (MAX_ACK_QUEUE-1)) )
-
-              )
+        for (;;)
         {
-            if(*pDbg>=5)
+            boost::mutex::scoped_lock lck(g_threadLock);
+            
+            if(
+                    ( (g_Ack_Get_ix - g_Ack_Put_ix) == 1)
+                    ||
+                    ( (g_Ack_Get_ix == 0) && (g_Ack_Put_ix == (MAX_ACK_QUEUE-1)) )
+                    
+                    )
             {
-                PrintDbg("+++ Ack_Thread(). g_Ack_Queue[] is full, sleeping 30 ms. Ackix=%u Putix=%u\n");
+                if(*pDbg>=5)
+                {
+                    PrintDbg("+++ Ack_Thread(). g_Ack_Queue[] is full, sleeping 30 ms. Ackix=%u Putix=%u\n");
+                }
+                lck.release();
+                DoseOs::Sleep(30);
             }
-            DoseOs::Sleep(30);
+            else
+            {
+                break;
+            }
         }
 
         result = RxSock.RecvFrom2((char *) &UdpMsg, sizeof(UdpMsg), NULL,0);
@@ -387,12 +408,14 @@ static THREAD_API Ack_Thread(void *)
 
         if((UdpMsg.MsgType == MSG_TYPE_ACK) || (UdpMsg.MsgType == MSG_TYPE_NACK))
         {
+            boost::mutex::scoped_lock lck(g_threadLock);
+
             if(*pDbg>=5)
             PrintDbg("+++ AckThread() MsgTyp=%s DoseId=%d "
-                    "Seq=%d FrNum=%X qIx=%u Put=%u\n",
+                    "Seq=%d FrNum=%d Info=%d qIx=%u Put=%u\n",
                     (UdpMsg.MsgType == MSG_TYPE_ACK) ? "ACK" : "NACK",
                     UdpMsg.DoseIdFrom, UdpMsg.SequenceNumber,
-                    UdpMsg.FragmentNumber, UdpMsg.TxQueueNumber, g_Ack_Put_ix);
+                    UdpMsg.FragmentNumber, UdpMsg.Info, UdpMsg.TxQueueNumber, g_Ack_Put_ix);
 
             // Got an ack, put on the Queue, Wakeup
             g_Ack_Queue[g_Ack_Put_ix].MsgType        = UdpMsg.MsgType;
@@ -464,6 +487,8 @@ void SetIndexToSend(int qIx, dcom_ushort16 toIndex)
     int prevIxToSend = TxQ[qIx].GetIxToSend;
     TxQ[qIx].GetIxToSend = toIndex;
 
+    TxQ[qIx].GetIxToSendHighWatermark = TxQ[qIx].GetIxToSend;
+
     //Calculate current number of sent items, i.e used sliding window
     int currentNumberOfSent = CalculateCurrentSendAhead(qIx);
     
@@ -498,6 +523,8 @@ void IncreaseIndexToSend(int qIx)
     {
             TxQ[qIx].GetIxToSend++;
     }
+
+    TxQ[qIx].GetIxToSendHighWatermark = TxQ[qIx].GetIxToSend;
 
     //Calculate current number of sent items, i.e used sliding window
     int currentNumberOfSent = CalculateCurrentSendAhead(qIx);
@@ -630,16 +657,17 @@ static bool CleanUp_After_Msg_Ignored(int qIx, int TxMsgArrIx)
     //----------------------------------------------------------
     // Shall we send a 'QueueOverflow' condition has ended event
     //-----------------------------------------------------------
-    if(TxQ[qIx].TransmitQueueOverflow)
+    if(TxQ[qIx].TransmitQueueOverflow > 0)
     {
         if(*pDbg>4)
             PrintDbg("#   Decrementing TransmitQueueOverflow (%d) from %d\n",
-                    qIx,TxQ[qIx].TransmitQueueOverflow);
-        if(--TxQ[qIx].TransmitQueueOverflow == 0)
-        {
-            WakeUp_QueueNotFull(qIx);
+                    qIx, TxQ[qIx].TransmitQueueOverflow);
 
-            if(*pDbg > 3) PrintDbg("#   Called WakeUp_QueueNotFull(%d)\n", qIx);
+        --TxQ[qIx].TransmitQueueOverflow;
+
+        if(TxQ[qIx].TransmitQueueOverflow == 0)
+        {
+            TxQ[qIx].bSendQueueNotOverflow = 1;
         }
     }
 
@@ -749,16 +777,17 @@ static int CleanUp_After_Msg_Completed(int qIx)
     //----------------------------------------------------------
     // Shall we send a 'QueueOverflow' condition has ended event
     //-----------------------------------------------------------
-    if(TxQ[qIx].TransmitQueueOverflow)
+    if(TxQ[qIx].TransmitQueueOverflow > 0)
     {
         if(*pDbg>4)
             PrintDbg("#   Decrementing TransmitQueueOverflow (%d) from %d\n",
-                    qIx,TxQ[qIx].TransmitQueueOverflow);
-        if(--TxQ[qIx].TransmitQueueOverflow == 0)
-        {
-            WakeUp_QueueNotFull(qIx);
+                    qIx, TxQ[qIx].TransmitQueueOverflow);
 
-            if(*pDbg > 3) PrintDbg("#   Called WakeUp_QueueNotFull(%d)\n", qIx);
+        --TxQ[qIx].TransmitQueueOverflow;
+
+        if(TxQ[qIx].TransmitQueueOverflow == 0)
+        {
+            TxQ[qIx].bSendQueueNotOverflow = 1;
         }
     }
 
@@ -1167,6 +1196,7 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
                          DoseIdFrom, SequenceNum,
                          (dcom_ulong32)(TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[0]>>32),
                          (dcom_ulong32)(TxQ[qIx].TxMsgArr[TxMsgArr_Ix].ExpAckBitMap64[0] & 0xFFFFFFFF));
+
             }
             else
             {
@@ -1199,17 +1229,41 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
 
                 bool expectedFragmentNbrIsWithinWindow = false;
                 dcom_ushort16 ixToAck = TxQ[qIx].GetIxToAck;
-
-                if (TxQ[qIx].TxMsgArr[ixToAck].SequenceNumber == g_Ack_Queue[g_Ack_Get_ix].SequenceNumber)
+                for(;;)
                 {
-                    // The sequence number is within the sliding window. Now check if the expected fragment is
-                    // within the sliding window at fragment level.
-                    dcom_ushort16 expectedFragment = g_Ack_Queue[g_Ack_Get_ix].Info;
+                    if ((ixToAck == TxQ[qIx].GetIxToSend &&
+                        TxQ[qIx].TxMsgArr[ixToAck].bIsFragmented &&
+                        TxQ[qIx].TxMsgArr[ixToAck].IsTransmitting) ||
+                        ixToAck != TxQ[qIx].GetIxToSendHighWatermark)
+                    {
+                        if (TxQ[qIx].TxMsgArr[ixToAck].SequenceNumber == g_Ack_Queue[g_Ack_Get_ix].SequenceNumber)
+                        {
+                            // The sequence number is within the sliding window. Now check if the expected fragment is
+                            // within the sliding window at fragment level.
+                            dcom_ushort16 expectedFragment = g_Ack_Queue[g_Ack_Get_ix].Info;
 
-                    if (expectedFragment >= TxQ[qIx].TxMsgArr[ixToAck].NotAckedFragment &&
-                        expectedFragment <= TxQ[qIx].TxMsgArr[ixToAck].SentFragment)
-                    {                        
-                        expectedFragmentNbrIsWithinWindow = true;     
+                            if (expectedFragment >= TxQ[qIx].TxMsgArr[ixToAck].NotAckedFragment &&
+                                expectedFragment <= TxQ[qIx].TxMsgArr[ixToAck].SentFragment)
+                            {
+                                expectedFragmentNbrIsWithinWindow = true;
+                            }
+                            break;
+                        }
+                    }
+
+                    // Don't step beyond what we have actually sent
+                    if (ixToAck == TxQ[qIx].GetIxToSendHighWatermark)
+                    {
+                        break;
+                    }
+
+                    if((ixToAck + 1) >= MAX_XMIT_QUEUE)
+                    {
+                        ixToAck = 0;
+                    }
+                    else
+                    {
+                        ++ixToAck;
                     }
                 }
 
@@ -1226,14 +1280,14 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
                 {
                     // We got a NACK for a fragment but the fragment that are expected by the receiver is not within our
                     // fragment sliding window.
-                    // This is an "impossible" case probably caused by a bug. The solution for now is to inhibit all outgoing
-                    // traffic from this node. This makes the other nodes to mark the sequence number from this node as invalid.
-                    // I KNOW, THIS IS REAL UGLY!!!! We have tried to track down the bug without success. Our failure is, at least partly,
-                    // caused by the bad design and the complexity of dose_com. Hopefully we can throw it out soon ...
-                    PrintErr(0, "TxThread[%d] Fatal error: Got a NACK for a fragmented message with an expected fragment nbr that is already acked!\n"
-                                "Outgoing traffic from this node is temporarily stopped to force a resync.\n");
+                    // This is an "impossible" case probably caused by a bug. The solution for now is to simulate that this
+                    // node loses contact with all other nodes, in order to force a resynchronization.
+
+                    PrintErr(0, "TxThread[%d] Got a NACK with an expected fragment that is already acked! Simulating a node disconnect in order to force resynchronization\n", qIx);
+
                     g_pShm->InhibitOutgoingTraffic = true;
-                    DoseOs::Sleep(4000);
+                    DoseOs::Sleep(6000);
+                    CNodeStatus::CheckTimedOutNodes(true); // make this node treat all other nodes as down
                     g_pShm->InhibitOutgoingTraffic = false;
                 }
 
@@ -1255,13 +1309,12 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
                 PrintDbg("#-  IS IMPLEMENTED Got an Nack Seq=%d Info=%d\n",
                         SequenceNum, g_Ack_Queue[g_Ack_Get_ix].Info );
 
-
                 // Check if this node considers the nacked message to have been
                 // sent but not acked
 
                 bool expectedSeqNbrIsWithinWindow = false;
                 dcom_ushort16 ixToAck = TxQ[qIx].GetIxToAck;
-                while (ixToAck != TxQ[qIx].GetIxToSend)
+                while (ixToAck != TxQ[qIx].GetIxToSendHighWatermark)
                 {
                     if (TxQ[qIx].TxMsgArr[ixToAck].SequenceNumber == g_Ack_Queue[g_Ack_Get_ix].Info)
                     {
@@ -1289,15 +1342,16 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
                 }
                 else
                 {
-                    // We got a NACK but the message that are expected by the receiver is not within our sliding window.
-                    // This is an "impossible" case probably caused by a bug. The solution for now is to inhibit all outgoing
-                    // traffic from this node. This makes the other nodes to mark the sequence number from this node as invalid.
-                    // I KNOW, THIS IS REAL UGLY!!!! We have tried to track down the bug without success. Our failure is, at least partly,
-                    // caused by the bad design and the complexity of dose_com. Hopefully we can throw it out soon ...
-                    PrintErr(0, "TxThread[%d] Fatal error: Got a NACK for an unfragmented message with an expected sequence nbr that is already acked!\n"
-                                "Outgoing traffic from this node is temporarily stopped to force a resync.\n");
+                    // We got a NACK for a message but the message that are expected by the receiver is not within our
+                    // message sliding window.
+                    // This is an "impossible" case probably caused by a bug. The solution for now is to simulate that this
+                    // node loses contact with all other nodes, in order to force a resynchronization.
+
+                    PrintErr(0, "TxThread[%d] Got a NACK with an expected message that is already acked! Simulating a node disconnect in order to force resynchronization\n", qIx);
+
                     g_pShm->InhibitOutgoingTraffic = true;
-                    DoseOs::Sleep(4000);
+                    DoseOs::Sleep(6000);
+                    CNodeStatus::CheckTimedOutNodes(true); // make this node treat all other nodes as down
                     g_pShm->InhibitOutgoingTraffic = false;                
                 }
 
@@ -1775,16 +1829,22 @@ static THREAD_API TxThread(void *)
             if(*pDbg > 5) PrintDbg("### TxThread() There might be more\n");
             bThereMightBeMore = FALSE;
         }
+
         //===========================================================
         // Scan all,Queues
         // qIx is incremented when there is nothing more on the Queue
         //===========================================================
         for(int jj=0 ; jj < NUM_TX_QUEUES ; jj++) // Clears counters
+        {
             TxQ[jj].LapCount = 0;
+            TxQ[jj].bSendQueueNotOverflow = 0;
+        }
 
         qIx = 0;
         while(qIx < NUM_TX_QUEUES)
         {
+            boost::mutex::scoped_lock lck(g_threadLock);
+
             // There could be the following jobs:
             // 1) Timeout when waiting for Ack
             // 2) The AckThread has received an Ack
@@ -2485,7 +2545,7 @@ Send_The_Message:
                     "#   TxThread[%d] NO Buffer allocated. Ptr is NULL\n",qIx);
 
                 // Improvement: better Recovery
-                DoseOs::Sleep(1000);
+                //DoseOs::Sleep(1000); // Can't have a sleep now that we have introduced g_threadLock.
 
                 // set next GetIxToSend
                 if((UseToSendIx + 1) >= MAX_XMIT_QUEUE) SetIndexToSend(qIx, 0);
@@ -2538,7 +2598,7 @@ Send_The_Message:
                         qIx, TxQ[qIx].PutIx, TxQ[qIx].GetIxToSend,
                         TxQ[qIx].GetIxToAck);
 
-                    DoseOs::Sleep(100);
+                    //DoseOs::Sleep(100); // Can't have a sleep now that we have introduced g_threadLock.
                 }
 
                 result = TxSock.SendTo2(DestIpAddr_nw, DestPort,
@@ -2551,7 +2611,7 @@ Send_The_Message:
                         (char *) &TxMsgHdr, pData, TxMsgHdr.FragmentNumber,
                         TxMsgHdr.SequenceNumber);
 
-                    DoseOs::Sleep(100);
+                    //DoseOs::Sleep(100); // Can't have a sleep now that we have introduced g_threadLock.
                 }
 
                 if(TxMsgHdr.bWantAck)
@@ -2647,6 +2707,18 @@ Send_The_Message:
                qIx++;
 
         } // end for(qIx)
+
+        for(int qix = 0; qix < NUM_TX_QUEUES ; ++qix)
+        {
+            if (TxQ[qix].bSendQueueNotOverflow)
+            {
+                WakeUp_QueueNotFull(qix);
+                TxQ[qix].bSendQueueNotOverflow = 0;
+
+                if(*pDbg > 3) PrintDbg("#   Called WakeUp_QueueNotFull(%d)\n", qix);
+            }
+        }
+
     } // end for(;;) // For ever
 #ifndef _MSC_VER //disable warning in msvc
     return 0;
@@ -2688,6 +2760,8 @@ int CDoseComTransmit::Xmit_Msg(const char *pMsg, dcom_ulong32 MsgLength,
                                dcom_uchar8 PoolDistribution, dcom_uchar8 bUseAck,
                                int Priority, int Destination)
 {
+    boost::mutex::scoped_lock lck(g_threadLock);
+
     // Check if we should simulate a stop in the outgoing traffic
     if (g_pShm->InhibitOutgoingTraffic)
     {
@@ -2713,7 +2787,7 @@ int CDoseComTransmit::Xmit_Msg(const char *pMsg, dcom_ulong32 MsgLength,
     static int bNextPdIsFirst = 1;
 
     if(*pDbg>2)
-        PrintDbg(">>> Xmit_Msg() entry Pd=%X Size=%d\n",
+        PrintDbg(">>> Xmit_Msg() lock protected entry Pd=%X Size=%d\n",
                 PoolDistribution,MsgLength);
 
     // PoolDistribution has value 1 for Data.
@@ -2909,7 +2983,7 @@ int CDoseComTransmit::Xmit_Msg(const char *pMsg, dcom_ulong32 MsgLength,
                                 " PD_ISCOMPLETE ******\n");
 
                     //Want some free entries before signaling
-                     TxQ[Qix].TransmitQueueOverflow = XMIT_QUEUE_HYSTERISIS;//[D]
+                     TxQ[Qix].TransmitQueueOverflow = XMIT_QUEUE_HYSTERISIS; //[D]
 
                     g_pTxStatistics[Qix].CountTxOverflow++;
                     g_pShm->Statistics.TransmitQueueFullCount++;

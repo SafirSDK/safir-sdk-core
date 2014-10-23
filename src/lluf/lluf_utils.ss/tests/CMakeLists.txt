@@ -6,4 +6,3 @@ ADD_SUBDIRECTORY(SystemLog_test)
 
 # Not really useful any longer. the test has a workaround for the bug...
 #ADD_SUBDIRECTORY(BoostSleep_test)
-

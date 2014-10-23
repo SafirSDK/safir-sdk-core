@@ -3,6 +3,8 @@ FILE(GLOB sources *.cpp)
 
 ADD_LIBRARY(dose_com SHARED ${sources} ${headers})
 
+ADD_DEFINITIONS(-DDOSE_COM_EXPORTS)
+
 if (WIN32)
   TARGET_LINK_LIBRARIES(dose_com PRIVATE ws2_32)
 endif()

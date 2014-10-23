@@ -38,6 +38,7 @@
 #include "DoseComReceive.h"
 #include "../defs/DoseNodeStatus.h"
 #include "PrintError.h"
+#include <boost/thread/mutex.hpp>
 
 static unsigned long g_TickPrev = 0;
 
@@ -399,13 +400,16 @@ int CNodeStatus::UpdateNode_Up(unsigned char DoseId,
 * Returns: Number of changed nodes
 *
 *****************************************************************/
-int CNodeStatus::CheckTimedOutNodes(void)
+static boost::mutex checkTimedOutNodesLock;
+
+int CNodeStatus::CheckTimedOutNodes(bool forceTimeout)
 {
     int     jj;
     int     ChangeCount = 0;
     dcom_ulong32   dwCurrentTime;
     dcom_ulong32   TickNow;
 
+    boost::mutex::scoped_lock lck(checkTimedOutNodesLock);
 
     //if(*pDbg>3) PrintDbg("CheckTimedOutNodes()\n");
 
@@ -420,7 +424,8 @@ int CNodeStatus::CheckTimedOutNodes(void)
          || (g_pNodeStatusTable[jj].Status == NODESTATUS_NEW) )
         {
             if((dwCurrentTime - g_pNodeStatusTable[jj].LatestTime)
-                            > KEEP_ALIVE_TIMEOUT)
+                            > KEEP_ALIVE_TIMEOUT
+                    || forceTimeout)
             {
                 if(*pDbg>2)
                     PrintDbg("*** A node timed out. IP=%u.%u.%u.%u\n",
