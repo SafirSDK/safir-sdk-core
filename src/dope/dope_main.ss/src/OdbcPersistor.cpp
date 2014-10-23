@@ -384,7 +384,7 @@ void OdbcPersistor::RestoreAll()
     Safir::Databases::Odbc::BinaryColumn binaryDataColumn(Safir::Dob::PersistenceParameters::BinaryDataColumnSize());
     Safir::Databases::Odbc::BinaryColumn binarySmallDataColumn(Safir::Dob::PersistenceParameters::BinarySmallDataColumnSize());
     
-    const boost::posix_time::ptime startTime = boost::posix_time::microsec_clock::universal_time();
+    const boost::chrono::steady_clock::time_point startTime = boost::chrono::steady_clock::now();
     
     bool done = false;
     while (!done)
@@ -573,7 +573,8 @@ void OdbcPersistor::RestoreAll()
     Disconnect(m_deleteConnection);
     Free(m_deleteConnection);
     m_debug << "RestoreAll completed" <<std::endl;
-    m_debug << restoredObjects.size() << " objects restored in time " << boost::posix_time::microsec_clock::universal_time() - startTime << std::endl;
+    m_debug << restoredObjects.size() << " objects restored in time " 
+            << boost::chrono::steady_clock::now() - startTime << std::endl;
 }
 
 
