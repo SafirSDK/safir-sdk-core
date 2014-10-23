@@ -43,7 +43,6 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    std::wcout << "argv[1] = " << argv[1] << std::endl;
     boost::this_thread::sleep_for(boost::chrono::milliseconds
         (static_cast<int>(boost::lexical_cast<double>(argv[1]) * 1000)));
     return 0;

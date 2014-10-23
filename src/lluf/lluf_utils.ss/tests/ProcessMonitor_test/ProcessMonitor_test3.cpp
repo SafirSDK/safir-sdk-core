@@ -77,11 +77,13 @@ struct Fixture
 
     void RunIoService()
     {
+        work.reset(new boost::asio::io_service::work(ioService));
         thread = boost::thread(boost::bind(&boost::asio::io_service::run, &ioService));
     }
 
     void Stop()
     {
+        work.reset();
         monitor.Stop();
         if (thread != boost::thread())
         {
@@ -98,7 +100,6 @@ struct Fixture
 
     pid_t LaunchSleeper(const double duration)
     {
-        BOOST_TEST_MESSAGE("LaunchSleeper " << duration);
 #ifdef PROCMON_LINUX
         const pid_t pid = fork();
         switch (pid)
@@ -116,11 +117,9 @@ struct Fixture
         STARTUPINFOA info={sizeof(info)};
         PROCESS_INFORMATION processInfo;
         if (::CreateProcessA(NULL, (LPSTR)(".\\Sleeper.exe " + boost::lexical_cast<std::string>(duration)).c_str(), NULL, NULL, TRUE, 0, NULL, NULL, &info, &processInfo))
-        //if (::CreateProcessA(NULL, (LPSTR)std::string(".\\Sleeper.exe ").c_str(), NULL, NULL, TRUE, 0, NULL, NULL, &info, &processInfo))
         {
-            //::CloseHandle(processInfo.hThread);
+            ::CloseHandle(processInfo.hThread);
             sleepers.insert(std::make_pair(processInfo.dwProcessId,processInfo.hProcess));
-            BOOST_TEST_MESSAGE("  launched " << processInfo.dwProcessId);
             return processInfo.dwProcessId;
         }
         else
@@ -132,7 +131,6 @@ struct Fixture
 
     void WaitSleeper(const pid_t pid)
     {
-        BOOST_TEST_MESSAGE("WaitSleeper " << pid);
 #ifdef PROCMON_LINUX
         if (-1 == waitpid(pid, NULL,0))
         {
@@ -152,7 +150,6 @@ struct Fixture
 
     void WaitAny()
     {
-        BOOST_TEST_MESSAGE("WaitAny");
 #ifdef PROCMON_LINUX
         int status;
         const pid_t pid = wait(&status);
@@ -170,7 +167,7 @@ struct Fixture
         }
 #endif
     }
-
+    boost::shared_ptr<boost::asio::io_service::work> work;
     boost::asio::io_service ioService;
     boost::thread thread;
 
@@ -201,6 +198,15 @@ BOOST_AUTO_TEST_CASE(create_destroy)
     BOOST_CHECK(TerminatedPids().empty());
 }
 
+BOOST_AUTO_TEST_CASE(stop_unknown)
+{
+    RunIoService();
+    monitor.StopMonitorPid(100);
+    work.reset();
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
+    Stop();
+    BOOST_CHECK(TerminatedPids().empty());
+}
 
 BOOST_AUTO_TEST_CASE(monitor_0)
 {
@@ -282,7 +288,7 @@ BOOST_AUTO_TEST_CASE(monitor_self_and_0)
 BOOST_AUTO_TEST_CASE(monitor_sleeper)
 {
     RunIoService();
-    const pid_t pid = LaunchSleeper(20);
+    const pid_t pid = LaunchSleeper(0.5);
     monitor.StartMonitorPid(pid);
 
     WaitSleeper(pid);
@@ -313,7 +319,6 @@ BOOST_AUTO_TEST_CASE(stop_monitor)
     std::vector<pid_t> terminatedPids = TerminatedPids();
     BOOST_CHECK_EQUAL(terminatedPids.size(), 0);
 }
-
 
 BOOST_AUTO_TEST_CASE(many_sleepers)
 {
