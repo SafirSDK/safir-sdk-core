@@ -161,7 +161,11 @@ struct Fixture
 #else
         if (!sleepers.empty())
         {
-            ::WaitForSingleObject(sleepers.begin()->second, INFINITE);
+            if (WAIT_OBJECT_0 != ::WaitForSingleObject(sleepers.begin()->second, INFINITE))
+            {
+                std::wcout << "Error in WaitForSingleObject" << std::endl;
+            }
+
             ::CloseHandle(sleepers.begin()->second);
             sleepers.erase(sleepers.begin());
         }
@@ -323,24 +327,30 @@ BOOST_AUTO_TEST_CASE(stop_monitor)
 BOOST_AUTO_TEST_CASE(many_sleepers)
 {
     RunIoService();
+
+    BOOST_TEST_MESSAGE("Launching sleepers");
     for (int i = 0; i < 100; ++i)
     {
         const pid_t pid = LaunchSleeper(0.3);
         monitor.StartMonitorPid(pid);
     }
 
+    BOOST_TEST_MESSAGE("Waiting for exit");
     for (int i = 0; i < 100; ++i)
     {
         WaitAny();
     }
 
+    BOOST_TEST_MESSAGE("Waiting for term");
     while(TerminatedPids().size() != 100)
     {
         boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
     }
 
+    BOOST_TEST_MESSAGE("Stopping");
     Stop();
 
+    BOOST_TEST_MESSAGE("Checking result");
     std::vector<pid_t> terminatedPids = TerminatedPids();
     BOOST_CHECK_EQUAL(terminatedPids.size(), 100);
 }
