@@ -9,7 +9,7 @@ if (WIN32)
   TARGET_LINK_LIBRARIES(dose_com PRIVATE ws2_32)
 endif()
 
-TARGET_LINK_LIBRARIES(dose_com PRIVATE lluf_utils)
+TARGET_LINK_LIBRARIES(dose_com PRIVATE lluf_utils ${Boost_SYSTEM_LIBRARY})
 
 target_include_directories(dose_com PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../defs>)
 target_include_directories(dose_com PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
