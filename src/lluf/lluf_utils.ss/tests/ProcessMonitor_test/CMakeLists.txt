@@ -41,6 +41,6 @@ ADD_TEST(NAME ProcessMonitor_unittest COMMAND ProcessMonitor_test3)
 ADD_TEST(NAME ProcessMonitor_monitor COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
 ADD_TEST(NAME ProcessMonitor_stop COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test2.py)
 
-SET_SAFIR_TEST_PROPERTIES(TEST ProcessMonitor_unittest)
+SET_SAFIR_TEST_PROPERTIES(TEST ProcessMonitor_unittest TIMEOUT 240)
 SET_SAFIR_TEST_PROPERTIES(TEST ProcessMonitor_monitor)
 SET_SAFIR_TEST_PROPERTIES(TEST ProcessMonitor_stop)
