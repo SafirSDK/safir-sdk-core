@@ -31,6 +31,7 @@
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
+#include <boost/chrono.hpp>
 
 namespace Safir
 {
@@ -64,8 +65,11 @@ namespace Internal
     {
         try
         {
-            // We use the parameter DoseMainThreadWatchdogTimeout divided by 4 to determine how long to wait for a single lock. 
-            const boost::posix_time::seconds lockTimeout(Safir::Dob::NodeParameters::DoseMainThreadWatchdogTimeout() / 4);
+            // We use the parameter DoseMainThreadWatchdogTimeout divided
+            //by 4 to determine how long to wait for a single lock.
+            const boost::chrono::milliseconds
+                lockTimeout(static_cast<int>
+                            (Safir::Dob::NodeParameters::DoseMainThreadWatchdogTimeout() / 4.0 * 1000.0));
 
             // Wait for the shared memory to be initialized
             for (;;)
@@ -95,14 +99,14 @@ namespace Internal
                             if (m_loggingIsEnabled)
                             {
                                 SEND_SYSTEM_LOG(Alert,
-                                                << "Have tried " << lockTimeout.total_seconds()
-                                                << " seconds to get an exclusive lock (type lock or registration container) "
+                                                << "Have tried for " << lockTimeout
+                                                << " to get an exclusive lock (type lock or registration container) "
                                                 << "for type " << Typesystem::Operations::GetName(*it)
                                                 << " in context " << context << ". Probably an application has "
                                                 << "terminated in an improper way leaving a locked lock behind!");
                             }
                             serviceLocksOk = false;
-                        }                    
+                        }
                     }
                 }
 
@@ -118,8 +122,8 @@ namespace Internal
                             if (m_loggingIsEnabled)
                             {
                                 SEND_SYSTEM_LOG(Alert,
-                                                << "Have tried " << lockTimeout.total_seconds()
-                                                << " seconds to get an exclusive lock (type lock, registration container lock or entity container lock) "
+                                                << "Have tried for " << lockTimeout
+                                                << " to get an exclusive lock (type lock, registration container lock or entity container lock) "
                                                 << "for type " << Typesystem::Operations::GetName(*it)
                                                 << " in context " << context << ". Probably an application has "
                                                 << "terminated in an improper way leaving a locked lock behind!");
@@ -127,14 +131,14 @@ namespace Internal
                             entityLocksOk = false;
                         }
                     }
-                } 
+                }
 
                 if (!serviceLocksOk || !entityLocksOk)
                 {
                     if (Safir::Dob::NodeParameters::TerminateDoseMainWhenUnrecoverableError())
                     {
                         SEND_SYSTEM_LOG(Alert,
-                                        << "One or more shared memory locks are abandoned in a locked state!! " 
+                                        << "One or more shared memory locks are abandoned in a locked state!! "
                                         << "Parameter TerminateDoseMainWhenUnrecoverableError is set to true"
                                         << " so dose_main will now be terminated!!");
 
@@ -145,11 +149,11 @@ namespace Internal
                     else if (m_loggingIsEnabled)
                     {
                         SEND_SYSTEM_LOG(Alert,
-                                        << "One or more shared memory locks are abandoned in a locked state!! " 
+                                        << "One or more shared memory locks are abandoned in a locked state!! "
                                         << "Parameter TerminateDoseMainWhenUnrecoverableError is set to false"
                                         << " so dose_main will not be terminated!!");
                         m_loggingIsEnabled = false;
-                    } 
+                    }
                 }
             }
         }

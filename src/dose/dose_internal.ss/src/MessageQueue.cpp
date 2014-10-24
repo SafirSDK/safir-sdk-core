@@ -24,7 +24,6 @@
 
 #include <Safir/Dob/Internal/MessageQueue.h>
 #include <Safir/Dob/Internal/StateDeleter.h>
-#include <Safir/Dob/Internal/TimeRegistration.h>
 #include <Safir/Dob/Internal/ScopeExit.h>
 
 namespace Safir

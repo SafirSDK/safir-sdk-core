@@ -298,7 +298,7 @@ namespace Internal
 
         if (it != m_states.end() && it->second.IsDowngraded())
         {
-            // New objects are created "released" and "Downgraded" for a short 
+            // New objects are created "released" and "Downgraded" for a short
             // while therefore we must compare pointers as well
             StateSharedPtr pState = it->second.GetIncludeWeak();
             if((pState == 0) || (pState.get() == pSharedMemoryObject))
@@ -402,7 +402,7 @@ namespace Internal
             {
                 // Lock State
                 boost::interprocess::scoped_lock<State::StateLock> stateLock(statePtr->m_lock);
-                        
+
                 statePtr->AddSubscription(metaIt->first,
                                           false,                // don't mark as dirty
                                           false,
@@ -601,7 +601,7 @@ namespace Internal
                 }
             } // state lock released here
         }
-    } 
+    }
 
     const StateSharedPtr
     StateContainer::GetFirstExistingState(const bool includeReleasedStates, States::iterator& it) const
@@ -689,12 +689,12 @@ namespace Internal
         }
     }
 
-    bool StateContainer::CanAcquireContainerWriterLock(const boost::posix_time::seconds& lockTimeout)
+    bool StateContainer::CanAcquireContainerWriterLock(const boost::chrono::steady_clock::duration& lockTimeout)
     {
         // Get writer lock
         ScopedStateContainerRwLock wlock(m_stateReaderWriterlock,
-                                         boost::posix_time::second_clock::universal_time() + lockTimeout);
-        if (wlock)
+                                         boost::interprocess::defer_lock);
+        if (steady_try_lock_for(wlock,lockTimeout))
         {
             return true;
         }
@@ -706,4 +706,3 @@ namespace Internal
 }
 }
 }
-
