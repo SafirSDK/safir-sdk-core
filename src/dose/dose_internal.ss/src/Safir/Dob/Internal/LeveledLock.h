@@ -130,7 +130,7 @@ namespace Internal
      * a lock() and an unlock() method.
      */
     template <typename Lock, unsigned short level, unsigned short masterLevel>
-    class LeveledLock : public LeveledLockBase<level, masterLevel>
+    class LeveledLock : private LeveledLockBase<level, masterLevel>
     {
     public:
         inline void lock()
@@ -168,7 +168,7 @@ namespace Internal
      */
     template<unsigned short level, unsigned short masterLevel>
     class LeveledLock<boost::interprocess::interprocess_upgradable_mutex, level, masterLevel>
-        : public LeveledLockBase<level, masterLevel>
+        : private LeveledLockBase<level, masterLevel>
     {
     public:
         inline void lock()
@@ -236,7 +236,7 @@ namespace Internal
      */
     template<unsigned short level, unsigned short masterLevel>
     class LeveledLock<boost::shared_mutex, level, masterLevel>
-        : public LeveledLockBase<level, masterLevel>
+        : private LeveledLockBase<level, masterLevel>
     {
     public:
         inline void lock()
@@ -296,29 +296,21 @@ namespace Internal
     bool steady_try_lock_for(lock_type& lock, const boost::chrono::steady_clock::duration& rel_time)
     {
         const boost::chrono::steady_clock::time_point abs_time = boost::chrono::steady_clock::now() + rel_time;
-        bool locked;
         for(;;)
         {
-            locked = lock.try_lock();
+            const bool locked = lock.try_lock();
             if (locked)
             {
-                break;
+                return true;
             }
 
             if (boost::chrono::steady_clock::now() > abs_time)
             {
-                break;
+                return false;
             }
 
             boost::this_thread::yield();
         }
-
-        if (locked)
-        {
-            lock.mutex()->AddLevel();
-        }
-
-        return locked;
     }
 }
 }
