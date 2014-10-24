@@ -292,6 +292,13 @@ namespace ToolSupport
          * @return Parameter key as a pair containing a hash and optionally a string that can be NULL.
          */
         virtual std::pair<DotsC_Int64, const char*> GetHashedKey(int index) const=0; //instanceId, channelId, handlerId
+
+        /**
+         * @brief GetIndexByUnifiedKey - Get corresponding index to a dictionary key. Only applicable when collectionType is Dictionary.
+         * @param unifiedKey [in] - Dictionary key on unified format. See TypeUtilities::ToUnifiedDictionaryKey for conversion.
+         * @return Index of the parameter key/val.
+         */
+        virtual int GetIndexByUnifiedKey(DotsC_Int64 unifiedKey) const=0;
     };
 
     /**

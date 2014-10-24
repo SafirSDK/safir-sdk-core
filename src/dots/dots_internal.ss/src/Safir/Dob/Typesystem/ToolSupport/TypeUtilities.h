@@ -244,6 +244,22 @@ namespace TypeUtilities
         assert(pd->GetCollectionType()==DictionaryCollectionType);
         return Internal::BasicTypeOperations::DictionaryKeyToIndexHelper<ParameterDescriptionT, KeyT>::Index(pd, key);
     }
+
+    /**
+     * @brief ToUnifiedDictionaryKey - Convert all keys to an int64 that is the internal key format.
+     * @param key
+     * @return Int64 representation of a dictionary key
+     */
+    DotsC_Int64 ToUnifiedDictionaryKey(DotsC_Int64 key) {return key;}
+    DotsC_Int64 ToUnifiedDictionaryKey(DotsC_Int32 key) {return static_cast<DotsC_Int64>(key);}
+    DotsC_Int64 ToUnifiedDictionaryKey(const std::string& key) {return LlufId_Generate64(name.c_str());}
+    DotsC_Int64 ToUnifiedDictionaryKey(const DotsC_EntityId& key)
+    {
+        std::ostringstream os;
+        os<<key.typeId<<key.instanceId;
+        return LlufId_Generate64(os.str().c_str());
+    }
+
 }
 }
 }

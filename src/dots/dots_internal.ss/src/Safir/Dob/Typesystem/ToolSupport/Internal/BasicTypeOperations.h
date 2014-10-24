@@ -423,7 +423,6 @@ namespace BasicTypeOperations
             return -1;
         }
     };
-
 }
 }
 }
