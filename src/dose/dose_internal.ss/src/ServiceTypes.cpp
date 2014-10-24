@@ -245,11 +245,10 @@ namespace Internal
 
     bool ServiceTypes::CanAcquireContainerWriterLock(const Typesystem::TypeId             typeId,
                                                      const ContextId                      contextId,
-                                                     const boost::posix_time::seconds&    lockTimeout)
+                                                     const boost::chrono::steady_clock::duration& lockTimeout)
     {
         return GetType(typeId).CanAcquireContainerWriterLock(contextId, lockTimeout);
     }
 }
 }
 }
-

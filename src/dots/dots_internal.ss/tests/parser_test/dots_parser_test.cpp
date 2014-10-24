@@ -11,7 +11,6 @@
 
 #include <iostream>
 #include <set>
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/timer.hpp>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeParser.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Serialization.h>

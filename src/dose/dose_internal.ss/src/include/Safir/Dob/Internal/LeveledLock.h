@@ -95,7 +95,7 @@ namespace Internal
         {
             ENSURE(LeveledLockHelper::Instance().GetNumberOfHeldLocks() < 5,
                    << "The number of current held locks exceeds the expected limit. "
-                   << "Please change the expected limit if you have made code changes that justify this."); 
+                   << "Please change the expected limit if you have made code changes that justify this.");
 
             const unsigned short lowest_held_level = LeveledLockHelper::Instance().GetLowestHeldLevel();
 
@@ -130,10 +130,9 @@ namespace Internal
      * a lock() and an unlock() method.
      */
     template <typename Lock, unsigned short level, unsigned short masterLevel>
-    class LeveledLock : LeveledLockBase<level, masterLevel>
+    class LeveledLock : public LeveledLockBase<level, masterLevel>
     {
     public:
-
         inline void lock()
         {
             LeveledLockBase<level, masterLevel>::AddLevel();
@@ -146,14 +145,17 @@ namespace Internal
             m_lock.unlock();
         }
 
-        inline bool timed_lock(const boost::posix_time::ptime& abs_time)
+        inline bool try_lock()
         {
-            bool locked = m_lock.timed_lock(abs_time);
-            if (locked)
+            if (m_lock.try_lock())
             {
                 LeveledLockBase<level, masterLevel>::AddLevel();
+                return true;
             }
-            return locked;
+            else
+            {
+                return false;
+            }
         }
 
     private:
@@ -166,10 +168,9 @@ namespace Internal
      */
     template<unsigned short level, unsigned short masterLevel>
     class LeveledLock<boost::interprocess::interprocess_upgradable_mutex, level, masterLevel>
-        : LeveledLockBase<level, masterLevel>
+        : public LeveledLockBase<level, masterLevel>
     {
     public:
-
         inline void lock()
         {
             LeveledLockBase<level, masterLevel>::AddLevel();
@@ -212,14 +213,17 @@ namespace Internal
             m_lock.unlock_upgradable_and_lock();
         }
 
-        inline bool timed_lock(const boost::posix_time::ptime& abs_time)
+        inline bool try_lock()
         {
-            bool locked = m_lock.timed_lock(abs_time);
-            if (locked)
+            if (m_lock.try_lock())
             {
                 LeveledLockBase<level, masterLevel>::AddLevel();
+                return true;
             }
-            return locked;
+            else
+            {
+                return false;
+            }
         }
 
     private:
@@ -232,7 +236,7 @@ namespace Internal
      */
     template<unsigned short level, unsigned short masterLevel>
     class LeveledLock<boost::shared_mutex, level, masterLevel>
-        : LeveledLockBase<level, masterLevel>
+        : public LeveledLockBase<level, masterLevel>
     {
     public:
         inline void lock()
@@ -258,7 +262,7 @@ namespace Internal
             LeveledLockBase<level, masterLevel>::RemoveLevel();
             m_lock.unlock_upgrade();
         }
-        
+
         inline void lock_shared()
         {
             LeveledLockBase<level, masterLevel>::AddLevel();
@@ -270,7 +274,7 @@ namespace Internal
             LeveledLockBase<level, masterLevel>::RemoveLevel();
             m_lock.unlock_shared();
         }
-        
+
         inline void unlock_and_lock_upgrade()
         {
             // Need no level check for lock demotion.
@@ -282,10 +286,40 @@ namespace Internal
             // Need no level check for lock promotion.
             m_lock.unlock_upgrade_and_lock();
         }
-        
+
     private:
-        boost::shared_mutex m_lock;        
+        boost::shared_mutex m_lock;
     };
+
+
+    template <class lock_type>
+    bool steady_try_lock_for(lock_type& lock, const boost::chrono::steady_clock::duration& rel_time)
+    {
+        const boost::chrono::steady_clock::time_point abs_time = boost::chrono::steady_clock::now() + rel_time;
+        bool locked;
+        for(;;)
+        {
+            locked = lock.try_lock();
+            if (locked)
+            {
+                break;
+            }
+
+            if (boost::chrono::steady_clock::now() > abs_time)
+            {
+                break;
+            }
+
+            boost::this_thread::yield();
+        }
+
+        if (locked)
+        {
+            lock.mutex()->AddLevel();
+        }
+
+        return locked;
+    }
 }
 }
 }

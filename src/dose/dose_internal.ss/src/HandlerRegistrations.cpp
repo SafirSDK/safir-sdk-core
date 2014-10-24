@@ -161,7 +161,7 @@ namespace Internal
         if (!currentRegState.IsNoState())
         {
             ENSURE(currentRegState.GetRegistrationTime() < regTime,
-                   << "Local registration using a timestamp that is less or equal compared to the timestamp for the current registration");  
+                   << "Local registration using a timestamp that is less or equal compared to the timestamp for the current registration");
         }
 
         if (!currentRegState.IsNoState() && currentRegState.IsRegistered())
@@ -290,7 +290,7 @@ namespace Internal
         // We have an accepted registration state
 
         ConnectionPtr currentRegisterer;
-        const Dob::Typesystem::HandlerId handlerId = remoteRegistrationState.GetHandlerId(); 
+        const Dob::Typesystem::HandlerId handlerId = remoteRegistrationState.GetHandlerId();
 
         if (!currentRegState.IsNoState() && currentRegState.IsRegistered())
         {
@@ -360,7 +360,7 @@ namespace Internal
             return;
         }
 
-        
+
         UnregisterInternal(connection,
                            statePtr->GetRealState().GetHandlerId(),
                            explicitUnregister,
@@ -503,7 +503,7 @@ namespace Internal
     {
         SubscriptionId subscriptionId(ConnectionConsumerPair(connection, consumer), m_subscriptionType, 0);
 
-        return m_registrations.HasSubscription(subscriptionId);     
+        return m_registrations.HasSubscription(subscriptionId);
     }
 
     void HandlerRegistrations::IsRegisteredInternal(const StateSharedPtr&   statePtr,
@@ -571,7 +571,7 @@ namespace Internal
                                                false);  // No need to include already released states
         }
 
-        
+
     }
 
     void HandlerRegistrations::RevokeEntity(const StateSharedPtr&                statePtr,
@@ -699,7 +699,7 @@ namespace Internal
             // We are only concerned with ghosts that are "older" that the currentRegisterTime.
             return;
         }
-     
+
         DistributionData newRealState(no_state_tag);
 
         newRealState = realState.GetEntityStateCopy(true);  // include blob
@@ -748,7 +748,7 @@ namespace Internal
         connection->AddInjectionHandler(m_typeId, handlerId, consumer);
     }
 
-    void HandlerRegistrations::RemoveRegistration(const ConnectionPtr& connection, 
+    void HandlerRegistrations::RemoveRegistration(const ConnectionPtr& connection,
         const Dob::Typesystem::HandlerId& handlerId)
     {
         if (connection->IsLocal())
@@ -781,7 +781,7 @@ namespace Internal
         {
             return true;
         }
-        
+
         const LamportTimestamp currentRegTime = currentRegState.GetRegistrationTime();
         const LamportTimestamp newRegTime = newRegState.GetRegistrationTime();
 
@@ -798,7 +798,7 @@ namespace Internal
         return newRegState.GetRegistrationStateKind() > currentRegState.GetRegistrationStateKind();
     }
 
-    bool HandlerRegistrations::CanAcquireContainerWriterLock(const boost::posix_time::seconds& lockTimeout) const
+    bool HandlerRegistrations::CanAcquireContainerWriterLock(const boost::chrono::steady_clock::duration& lockTimeout) const
     {
         return m_registrations.CanAcquireContainerWriterLock(lockTimeout);
     }
@@ -806,4 +806,3 @@ namespace Internal
 }
 }
 }
-

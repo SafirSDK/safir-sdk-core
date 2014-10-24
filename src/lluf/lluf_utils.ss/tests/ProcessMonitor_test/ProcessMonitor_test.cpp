@@ -81,5 +81,5 @@ int main(int argc, char** argv)
 
     ioService.run();
     thread.join();
-    return pids.size();
+    return static_cast<int>(pids.size());
 }

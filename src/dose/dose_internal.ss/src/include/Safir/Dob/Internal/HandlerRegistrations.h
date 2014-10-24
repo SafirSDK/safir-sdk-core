@@ -128,7 +128,7 @@ namespace Internal
         /** @} */
 
         // This method just  tries to acquire the container lock as a writer.
-        bool CanAcquireContainerWriterLock(const boost::posix_time::seconds& lockTimeout) const;
+        bool CanAcquireContainerWriterLock(const boost::chrono::steady_clock::duration& lockTimeout) const;
 
     private:
 
@@ -209,12 +209,12 @@ namespace Internal
                                       const Dob::Typesystem::HandlerId&   handlerId,
                                       const ConsumerId&                   consumer);
 
-        void RemoveRegistration(const ConnectionPtr& connection, 
+        void RemoveRegistration(const ConnectionPtr& connection,
                                 const Dob::Typesystem::HandlerId& handlerId);
 
         static bool NewRegStateIsAccepted(const DistributionData& currentRegState,
                                           const DistributionData& newRegState);
-                                          
+
 
         friend void StatisticsCollector(HandlerRegistrations&, void*);
     };
@@ -222,5 +222,3 @@ namespace Internal
 }
 }
 #endif
-
-

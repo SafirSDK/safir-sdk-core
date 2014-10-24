@@ -124,7 +124,7 @@ private:
     const int m_stopTc;
 
     SequencerStates::State m_state;
-    boost::posix_time::ptime m_lastCleanupTime;
+    boost::chrono::steady_clock::time_point m_lastCleanupTime;
 
     const Languages m_languages;
     const bool m_noTimeout;

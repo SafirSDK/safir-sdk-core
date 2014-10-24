@@ -229,8 +229,8 @@ namespace Internal
         bool IncrementIterator(StateContainer::Iterator& iterator, const ContextId context) const
         {return m_entityStates[context].IncrementIterator(iterator);}
 
-        bool CanAcquireContainerWriterLock(const ContextId                   contextId,
-                                           const boost::posix_time::seconds& lockTimeout);
+        bool CanAcquireContainerWriterLock(const ContextId contextId,
+                                           const boost::chrono::steady_clock::duration& lockTimeout);
 
     private:
         Typesystem::TypeId            m_typeId;
@@ -254,7 +254,7 @@ namespace Internal
         // the whole type.
         typedef Safir::Dob::Internal::LeveledLock<boost::interprocess::interprocess_mutex,
                                                   TYPE_LOCK_LEVEL, NO_MASTER_LEVEL_REQUIRED> TypeLock;
-        
+
         typedef ShmArray<TypeLock> TypeLockVector;
         TypeLockVector m_typeLocks;
 
@@ -403,4 +403,3 @@ namespace Internal
 }
 }
 #endif
-

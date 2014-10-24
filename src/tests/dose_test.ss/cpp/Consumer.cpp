@@ -46,21 +46,21 @@
 #include <Safir/Dob/OverflowException.h>
 #include <Safir/Dob/Typesystem/Members.h>
 #include <boost/bind.hpp>
+#include <boost/chrono.hpp>
 #include "Logger.h"
 #include <cctype>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 
 #if defined _MSC_VER
-  #pragma warning (push)
-  #pragma warning (disable: 4244)
-#endif
-#include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/thread.hpp>
-#if defined _MSC_VER
-  #pragma warning (pop)
+#  pragma warning (push)
+#  pragma warning (disable: 4244)
 #endif
 
-static const double fraction_multiplicator = pow(10.0,-boost::posix_time::time_duration::num_fractional_digits());
+#include <boost/thread.hpp>
+
+#if defined _MSC_VER
+#  pragma warning (pop)
+#endif
 
 const std::wstring PREFIX = L"Consumer ";
 
@@ -795,7 +795,7 @@ void Consumer::ExecuteAction(DoseTest::ActionPtr action)
         //only becomes true if RepeatUntilOverflow is true
         bool repeat = !action->RepeatUntilOverflow().IsNull() && action->RepeatUntilOverflow().GetVal();
 
-        const boost::posix_time::ptime actionStartTime = boost::posix_time::microsec_clock::universal_time();
+        const boost::chrono::steady_clock::time_point actionStartTime = boost::chrono::steady_clock::now();
         unsigned long repeats = 0;
 
         do //while repeat
@@ -1037,8 +1037,8 @@ void Consumer::ExecuteAction(DoseTest::ActionPtr action)
                 case DoseTest::ActionEnum::InjectChanges:
                     {
                         Safir::Dob::Typesystem::Int64 timestamp =  GetTimestamp(action);
-                        std::wcout << "InjectChanges: " 
-                                   << Safir::Dob::Typesystem::Serialization::ToXml(action->Object()) 
+                        std::wcout << "InjectChanges: "
+                                   << Safir::Dob::Typesystem::Serialization::ToXml(action->Object())
                                    << " with timestamp " << timestamp << std::endl;
                         Safir::Dob::ConnectionAspectInjector(m_connection).InjectChanges
                             (boost::static_pointer_cast<Safir::Dob::Entity>(action->Object().GetPtr()),
@@ -1168,7 +1168,7 @@ void Consumer::ExecuteAction(DoseTest::ActionPtr action)
                             << Safir::Dob::Typesystem::Operations::GetName(action->TypeId())
                             << ", handler = " << action->Handler()
                             << "): "
-                            << Safir::Dob::Typesystem::Operations::GetEnumerationValueName(Safir::Dob::InstanceIdPolicy::EnumerationTypeId, 
+                            << Safir::Dob::Typesystem::Operations::GetEnumerationValueName(Safir::Dob::InstanceIdPolicy::EnumerationTypeId,
                             m_connection.GetInstanceIdPolicy(action->TypeId(), action->Handler()))
                             << std::endl;
                     }
@@ -1256,11 +1256,10 @@ void Consumer::ExecuteAction(DoseTest::ActionPtr action)
 
                 if (repeat)
                 {
-                    const boost::posix_time::ptime now = boost::posix_time::microsec_clock::universal_time();
-                    const boost::posix_time::time_duration diff = now - actionStartTime;
-                    const double secs =  diff.total_seconds() + diff.fractional_seconds() * fraction_multiplicator;
+                    const boost::chrono::steady_clock::duration diff =
+                        boost::chrono::steady_clock::now() - actionStartTime;
 
-                    std::wcout << "Time elapsed before I got an overflow was " <<secs << std::endl;
+                    std::wcout << "Time elapsed before I got an overflow was " << diff << std::endl;
                     std::wcout << "I managed to send " << repeats << " times."<< std::endl;
                 }
                 repeat = false;
