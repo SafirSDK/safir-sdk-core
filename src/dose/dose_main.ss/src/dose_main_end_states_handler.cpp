@@ -37,28 +37,21 @@ namespace Internal
     {
         m_timerId = TimerHandler::Instance().RegisterTimeoutHandler(L"End States Timer", *this);
 
-        ACE_Time_Value timeout = GetUtcTime() + ACE_Time_Value(5.0);
         TimerInfoPtr timerInfo(new EmptyTimerInfo(m_timerId));
         TimerHandler::Instance().Set(Discard,
                                      timerInfo,
-                                     timeout); //time out in 60 seconds
-
-        lllerr << "Setting end states timer to " << timeout << std::endl;
+                                     GetMonotonicTime() + ACE_Time_Value(60)); //time out in 60 seconds
     }
 
 
     void EndStatesHandler::HandleTimeout(const TimerInfoPtr& timer)
     {
-        ACE_Time_Value timeout = GetUtcTime() + ACE_Time_Value(5.0);
-
         //TimerInfoPtr timerInfo(new EmptyTimerInfo(m_timerId));
         TimerHandler::Instance().Set(Discard,
                                      timer,
-                                     timeout); //time out again in 60 seconds
+                                     GetMonotonicTime() + ACE_Time_Value(60)); //time out again in 60 seconds
 
         Safir::Dob::Internal::EndStates::Instance().HandleTimeout();
-
-        lllerr << "End states timer triggered! Setting new timeout to " << timeout << std::endl;
     }
 }
 }

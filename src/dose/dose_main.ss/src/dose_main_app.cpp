@@ -38,7 +38,6 @@
 #include <Safir/Utilities/Internal/PanicLogging.h>
 #include <Safir/Utilities/CrashReporter.h>
 #include <ace/Reactor.h>
-#include <ace/High_Res_Timer.h>
 #include <ace/Timer_Queue.h>
 #include <boost/bind.hpp>
 #include <iostream>
@@ -119,16 +118,7 @@ namespace Internal
 
     int DoseApp::Run()
     {
-        ACE_High_Res_Timer::global_scale_factor();
-
-//        for (;;)
-//        {
-//            std::wcout << "Current high res timer:" << GetUtcTime().get_msec () << std::endl;
-
-//            ACE_OS::sleep(ACE_Time_Value(0,5000000));
-//            //boost::this_thread::sleep(boost::posix_time::seconds(5));
-//        }
-
+        // Instruct the ACE timer queue to use a monotonic increasing time
         ACE_Reactor::instance()->timer_queue()->gettimeofday(&GetMonotonicTime);
 
 #ifdef _MSC_VER
@@ -160,11 +150,9 @@ namespace Internal
 
         // Schedule a timer so that the main thread will kick the watchdog.
         TimerInfoPtr timerInfo(new EmptyTimerInfo(TimerHandler::Instance().RegisterTimeoutHandler(L"dose_main watchdog timer", *this)));
-        ACE_Time_Value timeout = GetUtcTime();
-        timeout += 5.0;
         TimerHandler::Instance().Set(Discard,
                                      timerInfo,
-                                     timeout);
+                                     GetMonotonicTime() + ACE_Time_Value(5));
 
         // enter main loop
 #ifndef NDEBUG
@@ -329,11 +317,9 @@ namespace Internal
     {
         m_threadMonitor.KickWatchdog(m_mainThreadId);
 
-        ACE_Time_Value timeout = GetUtcTime();
-        timeout += 5.0;
         TimerHandler::Instance().Set(Discard,
                                      timer,
-                                     timeout);
+                                     GetMonotonicTime() + ACE_Time_Value(5));
     }
 
     ConnectResult DoseApp::CanAddConnection(const std::string & connectionName, const pid_t pid, const long /*context*/)

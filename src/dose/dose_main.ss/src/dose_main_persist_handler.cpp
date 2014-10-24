@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
 *
-* Created by: Lars Hagström / stlrha
+* Created by: Lars HagstrÃ¶m / stlrha
 *
 *******************************************************************************
 *
@@ -150,20 +150,16 @@ namespace Safir
             if (result)
             {
                 //successful send, wait for responses for 100ms
-                ACE_Time_Value timeout = GetUtcTime();
-                timeout+= 0.1;
                 TimerHandler::Instance().Set(Discard,
                     timerInfo,
-                    timeout); //time out in 100 milliseconds*/
+                    GetMonotonicTime() + ACE_Time_Value(0, 100000)); //time out in 100 milliseconds*/
             }
             else
             {
                 //failed to send (dosecom overflow), retry in 10ms
-                ACE_Time_Value timeout = GetUtcTime();
-                timeout+= 0.01;
                 TimerHandler::Instance().Set(Discard,
                     timerInfo,
-                    timeout); //time out in 10 milliseconds*/
+                    GetMonotonicTime() + ACE_Time_Value(0, 10000)); //time out in 10 milliseconds*/
             }
         }
 

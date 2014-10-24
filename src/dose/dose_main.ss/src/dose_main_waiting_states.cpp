@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2008 (http://www.safirsdk.com)
 *
-* Created by: Lars Hagström / stlrha
+* Created by: Lars HagstrÃ¶m / stlrha
 *
 *******************************************************************************
 *
@@ -38,12 +38,12 @@ namespace Internal
         m_isPerforming(false),
         m_lastSize(0)
     {
-//        m_timerId = TimerHandler::Instance().RegisterTimeoutHandler(L"Waiting States Timer", *this);
+        m_timerId = TimerHandler::Instance().RegisterTimeoutHandler(L"Waiting States Timer", *this);
 
-//        TimerInfoPtr timerInfo(new EmptyTimerInfo(m_timerId));
-//        TimerHandler::Instance().Set(Discard,
-//                                     timerInfo,
-//                                     GetUtcTime() + 60.0*5); //time out in 5 minutes
+        TimerInfoPtr timerInfo(new EmptyTimerInfo(m_timerId));
+        TimerHandler::Instance().Set(Discard,
+                                     timerInfo,
+                                     GetMonotonicTime() + ACE_Time_Value(60) * 5); //time out in 5 minutes
     }
 
     void WaitingStates::Add(const DistributionData & state)
@@ -238,9 +238,9 @@ namespace Internal
     void WaitingStates::HandleTimeout(const TimerInfoPtr& timer)
     {
         //TimerInfoPtr timerInfo(new EmptyTimerInfo(m_timerId));
-//        TimerHandler::Instance().Set(Discard,
-//                                     timer,
-//                                     GetUtcTime() + 5*60.0); //time out again in 60 seconds
+        TimerHandler::Instance().Set(Discard,
+                                     timer,
+                                     GetMonotonicTime() + ACE_Time_Value(60) * 5); //time out again in 5 minutes
 
         const size_t size = m_waitingStateTable.size();
         if (size != 0 && size == m_lastSize)

@@ -53,7 +53,7 @@ namespace Dob
 {
 namespace Internal
 {
-    static const Dob::Typesystem::Si32::Second deletedConnReqTimeout = 0.5;
+static const ACE_Time_Value deletedConnReqTimeout(0, 500000); // 0.5 sec
 
     RequestHandler::RequestHandler()
     {
@@ -297,19 +297,19 @@ namespace Internal
     void RequestHandler::StartTimer(const ConnectionPtr & sender, const DistributionData & request)
     {
         // Start timer
-//        RequestTimerInfo timeoutInfo = RequestTimerInfo(sender->Id().m_id,
-   //                                                     request.GetRequestId(),
-   //                                                     request.GetTypeId(),
-   //                                                     request.GetHandlerId());
+        RequestTimerInfo timeoutInfo = RequestTimerInfo(sender->Id().m_id,
+                                                        request.GetRequestId(),
+                                                        request.GetTypeId(),
+                                                        request.GetHandlerId());
 
- //       const Dob::Typesystem::Si64::Second timeoutTime =
- //           GetUtcTime() + GetTimeout(request.GetTypeId());
+        const ACE_Time_Value timeoutTime =
+            GetMonotonicTime() + GetTimeout(request.GetTypeId());
 
-//        TimerHandler::Instance().Set(Discard, //discard the timer if it is already set
-//                                     TimerInfoPtr(new ReqTimer(
-//                                                         RequestTimers::m_localReqTimerId,
-//                                                         timeoutInfo)),
-//                                                         timeoutTime);
+        TimerHandler::Instance().Set(Discard, //discard the timer if it is already set
+                                     TimerInfoPtr(new ReqTimer(
+                                                         RequestTimers::m_localReqTimerId,
+                                                         timeoutInfo)),
+                                                         timeoutTime);
     }
 
 
@@ -586,13 +586,13 @@ namespace Internal
 
             RequestTimerInfo timeoutInfo = RequestTimerInfo(fromConnection->Id().m_id, reqId, request.GetTypeId(),request.GetHandlerId());
 
-//            const Dob::Typesystem::Si64::Second timeoutTime = GetUtcTime() + deletedConnReqTimeout;
+            const ACE_Time_Value timeoutTime = GetMonotonicTime() + deletedConnReqTimeout;
 
-//            TimerHandler::Instance().Set(Replace,
-//                                         TimerInfoPtr(new ReqTimer
-//                                                      (RequestTimers::m_localReqTimerId,
-//                                                       timeoutInfo)),
-//                                         timeoutTime);
+            TimerHandler::Instance().Set(Replace,
+                                         TimerInfoPtr(new ReqTimer
+                                                      (RequestTimers::m_localReqTimerId,
+                                                       timeoutInfo)),
+                                         timeoutTime);
         }
     }
 
@@ -659,13 +659,13 @@ namespace Internal
                                                         request.GetTypeId(),
                                                         request.GetHandlerId());
 
- //       const Dob::Typesystem::Si64::Second timeoutTime = GetUtcTime()
- //           + GetTimeout(request.GetTypeId());
+        const ACE_Time_Value timeoutTime = GetMonotonicTime()
+            + GetTimeout(request.GetTypeId());
 
-        //TimerHandler::Instance().Set(Discard,   //discard if already set
-          //                           TimerInfoPtr(new ReqTimer(RequestTimers::m_externalReqTimerId,
-            //                                                   timeoutInfo)),
-              //                       timeoutTime);
+        TimerHandler::Instance().Set(Discard,   //discard if already set
+                                     TimerInfoPtr(new ReqTimer(RequestTimers::m_externalReqTimerId,
+                                                               timeoutInfo)),
+                                     timeoutTime);
 
         // Set that dose_main is waiting for the receiver
         m_blockingHandler->Request().AddWaitingConnection(blockingConn,
@@ -715,8 +715,7 @@ namespace Internal
         }
     }
 
-    Dob::Typesystem::Si64::Second
-    RequestHandler::GetTimeout(const Safir::Dob::Typesystem::TypeId typeId) const
+    ACE_Time_Value RequestHandler::GetTimeout(const Safir::Dob::Typesystem::TypeId typeId) const
     {
         TimeoutTable::iterator findIt = m_timeoutTable.find(typeId);
         if (findIt != m_timeoutTable.end())
@@ -725,7 +724,7 @@ namespace Internal
         }
         //nope, it wasnt in the table, we need to get the value and insert it.
 
-        Dob::Typesystem::Si64::Second timeout = 10.0;
+        ACE_Time_Value timeout(10,0);
         try
         {
             bool hasProperty, isInherited;
@@ -736,7 +735,7 @@ namespace Internal
                 Typesystem::ObjectPtr obj =
                     Typesystem::ObjectFactory::Instance().CreateObject(typeId);
 
-                timeout = RequestTimeoutOverrideProperty::GetTimeout(obj);
+                timeout.set(RequestTimeoutOverrideProperty::GetTimeout(obj));
             }
             else if (Typesystem::Operations::HasProperty
                 (typeId, RequestTimeoutProperty::ClassTypeId))
@@ -744,7 +743,7 @@ namespace Internal
                 Typesystem::ObjectPtr obj =
                     Typesystem::ObjectFactory::Instance().CreateObject(typeId);
 
-                timeout = RequestTimeoutProperty::GetTimeout(obj);
+                timeout.set(RequestTimeoutProperty::GetTimeout(obj));
             }
             else
             {

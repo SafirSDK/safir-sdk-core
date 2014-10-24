@@ -23,13 +23,10 @@
 ******************************************************************************/
 
 #include "dose_main_timers.h"
-#include <cmath>
 #include <iostream>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <boost/bind.hpp>
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <ace/Reactor.h>
-#include <ace/High_Res_Timer.h>
 
 #if defined(linux) || defined(__linux) || defined(__linux__)
 #include <time.h>
@@ -39,31 +36,12 @@
 #  error dose_main timers not supported on this plattform!
 #endif
 
-
 namespace Safir
 {
 namespace Dob
 {
 namespace Internal
 {
-    //static const boost::posix_time::ptime epoch(boost::gregorian::date(1970,1,1));
-    //static const double fraction_multiplicator = pow(10.0,-boost::posix_time::time_duration::num_fractional_digits());
-
-    ACE_Time_Value GetUtcTime()
-    {
-        return GetMonotonicTime();
-
-        //return ACE_High_Res_Timer::gettimeofday_hr();
-
-        //return ACE_High_Res_Timer::gettimeofday_hr();
-
-        //using namespace boost::posix_time;
-
-        //const ptime now = microsec_clock::universal_time();
-        //const time_duration diff = now - epoch;
-        //const double foo =  diff.total_seconds() + diff.fractional_seconds() * fraction_multiplicator;
-        //return foo;
-    }
 
     ACE_Time_Value GetMonotonicTime()
     {        
@@ -181,14 +159,12 @@ namespace Internal
                 }
                 else
                 {
-                    bool removedSomething = false;
                     //remove old timer
                     TimerQueue::iterator findItInQueue = m_timerQueue.find(findIt->second);
                     for (TimerQueue::iterator it = findItInQueue; it != m_timerQueue.end(); ++it)
                     {
                         if (it->second == findIt)
                         {
-                            removedSomething = true;
                             m_timerQueue.erase(it);
                             break;
                         }
@@ -198,7 +174,6 @@ namespace Internal
                             break;
                         }
                     }
-                    assert(removedSomething);
 
                     //add new timer
                     findIt->second = when;
@@ -227,14 +202,12 @@ namespace Internal
 
         if (findIt != m_timerTable.end())
         {
-            bool removedSomething = false;
             //remove old timer
             TimerQueue::iterator findItInQueue = m_timerQueue.find(findIt->second);
             for (TimerQueue::iterator it = findItInQueue; it != m_timerQueue.end(); ++it)
             {
                 if (it->second == findIt)
                 {
-                    removedSomething = true;
                     m_timerQueue.erase(it);
                     m_timerTable.erase(findIt);
                     break;
@@ -245,7 +218,6 @@ namespace Internal
                     break;
                 }
             }
-            assert(removedSomething);
             ScheduleTimer();
         }
     }
@@ -260,14 +232,12 @@ namespace Internal
 
         if (findIt != m_timerTable.end())
         {
-            bool removedSomething = false;
             //remove old timer
             TimerQueue::iterator findItInQueue = m_timerQueue.find(findIt->second);
             for (TimerQueue::iterator it = findItInQueue; it != m_timerQueue.end(); ++it)
             {
                 if (it->second == findIt)
                 {
-                    removedSomething = true;
                     m_timerQueue.erase(it);
                     m_timerTable.erase(findIt);
                     break;
@@ -278,7 +248,6 @@ namespace Internal
                     break;
                 }
             }
-            assert(removedSomething);
             ScheduleTimer();
         }
     }
@@ -291,14 +260,12 @@ namespace Internal
         {
             if (it->first->GetTimerId() == timerId)
             {
-                bool removedSomething = false;
                 //remove from queue
                 TimerQueue::iterator findItInQueue = m_timerQueue.find(it->second);
                 for (TimerQueue::iterator it2 = findItInQueue; it2 != m_timerQueue.end(); ++it2)
                 {
                     if (it2->second == it)
                     {
-                        removedSomething = true;
                         m_timerQueue.erase(it2);
                         break;
                     }
@@ -308,7 +275,6 @@ namespace Internal
                         break;
                     }
                 }
-                assert(removedSomething);
 
                 if (it == m_timerTable.begin())
                 {
@@ -353,17 +319,14 @@ namespace Internal
         }
         else
         {
-            const ACE_Time_Value delay = m_timerQueue.begin()->first - GetUtcTime();
+            const ACE_Time_Value delay = m_timerQueue.begin()->first - GetMonotonicTime();
 
-            if (delay < ACE_Time_Value(0.0))
+            if (delay < ACE_Time_Value::zero)
             {
                 return ACE_Time_Value::zero;
             }
             else
             {
-                //double intpart;
-                //const double frac = modf(delay,&intpart);
-                //return ACE_Time_Value(static_cast<time_t>(intpart),static_cast<suseconds_t>(frac*1000000));
                 return delay;
             }
 
@@ -380,14 +343,12 @@ namespace Internal
     {
         if (!m_timerQueue.empty())
         {
-            const ACE_Time_Value now = GetUtcTime();
+            const ACE_Time_Value now = GetMonotonicTime();
 
             TimerQueue::iterator theTimer = m_timerQueue.begin();
 
             if (theTimer->first < now)
             {
-                //lllerr << "Timer " << theTimer->second->first->GetTimerId() << " timed out"<<std::endl;
-
                 TimerId timerId = theTimer->second->first->GetTimerId();
                 TimerInfoPtr timerInfo = theTimer->second->first;
 
@@ -400,23 +361,6 @@ namespace Internal
         ScheduleTimer();
         return 0;
     }
-
-    /*
-    //--------------------
-    // TimerInfo
-    //--------------------
-    long TimerInfo::m_lastTimerId = 0;
-    TimerInfo::TimerInfo():
-        m_timerId(++m_lastTimerId)
-    {
-        //std::wcout << "Created timer with id = " << m_timerId <<std::endl;
-    }
-
-    TimerInfo::~TimerInfo()
-    {
-
-    }
-*/
 }
 }
 }

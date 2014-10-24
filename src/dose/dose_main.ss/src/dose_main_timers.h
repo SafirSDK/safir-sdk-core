@@ -46,11 +46,9 @@ namespace Dob
 {
 namespace Internal
 {
-
-    ACE_Time_Value GetUtcTime();
-
+    // Retreive a time from a monotonic increasing clock.
+    // The returned time is the elapsed time from some unspecified start time.
     ACE_Time_Value GetMonotonicTime();
-
 
     typedef Safir::Dob::Typesystem::Int32 TimerId;
 

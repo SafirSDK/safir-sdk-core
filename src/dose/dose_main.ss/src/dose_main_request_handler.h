@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
 *
-* Created by: Lars Hagström / stlrha
+* Created by: Lars HagstrÃ¶m / stlrha
 *
 *******************************************************************************
 *
@@ -27,6 +27,7 @@
 
 #include "dose_main_timers.h"
 #include <Safir/Dob/ErrorResponse.h>
+#include <ace/Time_Value.h>
 #include <deque>
 
 namespace Safir
@@ -109,8 +110,8 @@ namespace Internal
 
         PendingRequestTable m_pendingRequests;
 
-        Dob::Typesystem::Si64::Second GetTimeout(const Safir::Dob::Typesystem::TypeId typeId) const;
-        typedef unordered_map<Typesystem::TypeId, Typesystem::Si64::Second> TimeoutTable;
+        ACE_Time_Value GetTimeout(const Safir::Dob::Typesystem::TypeId typeId) const;
+        typedef unordered_map<Typesystem::TypeId, ACE_Time_Value> TimeoutTable;
         mutable TimeoutTable m_timeoutTable;
 
         ExternNodeCommunication* m_ecom;

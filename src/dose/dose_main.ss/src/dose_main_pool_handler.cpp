@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
 *
-* Created by: Lars Hagström / stlrha
+* Created by: Lars HagstrÃ¶m / stlrha
 *
 *******************************************************************************
 *
@@ -60,7 +60,7 @@ namespace Internal
         m_connectionHandler(NULL),
         m_threadMonitor(NULL),
         m_stateSubscriptionConnections(Safir::Dob::NodeParameters::NumberOfContexts()),
-        m_pdThreadHandle(NULL)
+        m_pdThreadHandle()
     {
         m_stateDispatcher.reset(new StateDispatcher(boost::bind(&PoolHandler::DistributeStates,this)));
     }

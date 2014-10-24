@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
 *
-* Created by: Lars Hagström / stlrha
+* Created by: Lars HagstrÃ¶m / stlrha
 *
 *******************************************************************************
 *
@@ -197,7 +197,7 @@ namespace Internal
 
         ENSURE (findIt != m_pendingRegistrations.end(), << "PendingRegistrationHandler::SendRequest: Request id not found!");
 
-        const Safir::Dob::Typesystem::Si64::Second now = 0;//GetUtcTime();
+        const ACE_Time_Value now = GetMonotonicTime();
 
         TimerInfoPtr timerInfo(new ResendPendingTimerInfo(m_timerId,requestId));
 
@@ -223,25 +223,25 @@ namespace Internal
             {
                 // Set the first timeout to now + 1.0, the second to now + 1.5, and so on. This is to handle
                 // any node that for some reason is permanently slow.
-                findIt->second.nextRequestTime = now + 1.0 + findIt->second.nbrOfSentRequests * 0.5;
+                findIt->second.nextRequestTime = now + ACE_Time_Value(1) + findIt->second.nbrOfSentRequests * ACE_Time_Value(0, 500000);
                 ++findIt->second.nbrOfSentRequests;
             }
             else
             {
-                findIt->second.nextRequestTime = now + 0.01;
+                findIt->second.nextRequestTime = now + ACE_Time_Value(0, 10000);
             }
 
- //           TimerHandler::Instance().Set(Discard,
- //                                        timerInfo,
- //                                        findIt->second.nextRequestTime);
+            TimerHandler::Instance().Set(Discard,
+                                         timerInfo,
+                                         findIt->second.nextRequestTime);
         }
         else
         {
             // If for some reason the timer for this pending request has fired but nextRequestTime
             // has not yet been reached, we must insert the timer again.
-//            TimerHandler::Instance().Set(Discard,
-//                                         timerInfo,
-//                                         findIt->second.nextRequestTime);
+            TimerHandler::Instance().Set(Discard,
+                                         timerInfo,
+                                         findIt->second.nextRequestTime);
         }
 
         //TODO: hook on to NotOverflow from doseCom instead of polling.

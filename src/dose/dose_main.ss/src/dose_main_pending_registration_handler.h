@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2007-2008 (http://www.safirsdk.com)
 *
-* Created by: Lars Hagström / stlrha
+* Created by: Lars HagstrÃ¶m / stlrha
 *
 *******************************************************************************
 *
@@ -32,6 +32,8 @@
 #include "dose_main_communication.h"
 #include "dose_main_node_handler.h"
 #include <bitset>
+#include <ace/Time_Value.h>
+
 namespace Safir
 {
 namespace Dob
@@ -85,7 +87,7 @@ namespace Internal
             ConnectionId connectionId;
             Dob::Typesystem::TypeId typeId;
             Dob::Typesystem::HandlerId handlerId;
-            double nextRequestTime;
+            ACE_Time_Value nextRequestTime;
             unsigned int nbrOfSentRequests;
             LamportTimestamp lastRequestTimestamp;
             std::bitset<NUM_NODES> acceptedNodes;
