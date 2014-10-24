@@ -25,6 +25,7 @@
 
 #include <Safir/Utilities/ProcessMonitor.h>
 #include <boost/bind.hpp>
+#include <boost/asio.hpp>
 
 namespace Safir
 {
