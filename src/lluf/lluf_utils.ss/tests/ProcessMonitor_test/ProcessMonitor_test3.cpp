@@ -126,7 +126,7 @@ struct Fixture
         case -1:
             throw std::logic_error(std::string("fork failed: ") + strerror(errno));
         case 0:
-            execl("./Sleeper", "Sleeper", boost::lexical_cast<std::string>(duration).c_str(), NULL);
+            execl("./ProcessMonitorSleeper", "ProcessMonitorSleeper", boost::lexical_cast<std::string>(duration).c_str(), NULL);
             throw std::logic_error(std::string("execl failed: ") + strerror(errno));
         default:
             sleepers.insert(pid);
@@ -135,7 +135,7 @@ struct Fixture
 #else
         STARTUPINFOA info={sizeof(info)};
         PROCESS_INFORMATION processInfo;
-        if (::CreateProcessA(NULL, (LPSTR)(".\\Sleeper.exe " + boost::lexical_cast<std::string>(duration)).c_str(), NULL, NULL, TRUE, 0, NULL, NULL, &info, &processInfo))
+        if (::CreateProcessA(NULL, (LPSTR)(".\\ProcessMonitorSleeper.exe " + boost::lexical_cast<std::string>(duration)).c_str(), NULL, NULL, TRUE, 0, NULL, NULL, &info, &processInfo))
         {
             ::CloseHandle(processInfo.hThread);
             sleepers.insert(std::make_pair(processInfo.dwProcessId,processInfo.hProcess));
