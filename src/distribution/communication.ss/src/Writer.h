@@ -65,8 +65,8 @@ namespace Com
             std::vector< boost::asio::const_buffer > bufs;
             bufs.push_back(boost::asio::buffer(static_cast<const void*>(val.get()), sizeof(T)));
             bufs.push_back(boost::asio::buffer(reinterpret_cast<const char*>(&crc32), sizeof(uint32_t)));
-            socket.async_send_to(bufs, to,
-                                 [val](const boost::system::error_code& error, size_t){if (error) std::cout<<"Send failed, error "<<error.message().c_str()<<std::endl;});
+            socket.send_to(bufs, to);
+            //socket.async_send_to(bufs, to, [val](const boost::system::error_code& error, size_t){if (error) std::cout<<"Send failed, error "<<error.message().c_str()<<std::endl;});
         }
     };
 
@@ -88,7 +88,8 @@ namespace Com
             bufs.push_back(boost::asio::buffer(header, MessageHeaderSize));
             bufs.push_back(boost::asio::buffer(val->fragment, val->header.fragmentContentSize));
             bufs.push_back(boost::asio::buffer(reinterpret_cast<const char*>(&crc32), sizeof(uint32_t)));
-            socket.async_send_to(bufs, to, [val](const boost::system::error_code& error, size_t){if (error) std::cout<<"Send UserData failed, error "<<error.message().c_str()<<std::endl;});
+            socket.send_to(bufs, to);
+            //socket.async_send_to(bufs, to, [val](const boost::system::error_code& error, size_t){if (error) std::cout<<"Send UserData failed, error "<<error.message().c_str()<<std::endl;});
         }
     };
 

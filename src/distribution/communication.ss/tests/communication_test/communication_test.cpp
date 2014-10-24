@@ -36,6 +36,7 @@ public:
         ,nrecv(0)
         ,accumulatedRecv(false)
         ,messageSize(1000)
+        ,threadCount(10)
         ,acked(true)
     {
         boost::program_options::options_description desc("Command line options");
@@ -49,6 +50,7 @@ public:
                 ("nsend", boost::program_options::value<unsigned int>(), "Number of messages to send to every other node, default unlimited")
                 ("nrecv", boost::program_options::value<unsigned int>(), "Number of messages to receive from all otherl nodes (accumulated), default unlimited")
                 ("size", boost::program_options::value<size_t>(), "Size of data packets, default is 1000 bytes")
+                ("thread-count", boost::program_options::value<unsigned int>(), "Number of threads to run io_service, default is 10 threads")
                 ("unacked", "Send unacked messages");
         boost::program_options::variables_map vm;
         boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
@@ -93,6 +95,10 @@ public:
         {
             messageSize=vm["size"].as<size_t>();
         }
+        if (vm.count("thread-count"))
+        {
+            threadCount=vm["thread-count"].as<unsigned int>();
+        }
         if (nsend==0 && nrecv==0)
         {
             nsend=std::numeric_limits<int>::max();
@@ -112,6 +118,7 @@ public:
     unsigned int nrecv;
     bool accumulatedRecv;
     size_t messageSize;
+    unsigned int threadCount;
     bool acked;
 };
 
@@ -420,7 +427,7 @@ int main(int argc, char * argv[])
     com->SetQueueNotFullCallback([&](int64_t){queueFullSem.Notify();}, 100); //50% free queue space before we get notification, unacked
 
     boost::thread_group threads;
-    for (int i = 0; i < 9; ++i)
+    for (unsigned int i=0; i<cmd.threadCount; ++i)
     {
         threads.create_thread([&]{ioService.run();});
     }
