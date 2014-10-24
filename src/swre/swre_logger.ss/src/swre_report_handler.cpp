@@ -53,8 +53,7 @@ namespace Swre
         m_logFile(),
         m_logFilePath(),
         m_oldLogFilePath(),
-        m_maxFileSize(500000000), // bytes
-        m_checkFileSizeTime(60000) // milliseconds
+        m_maxFileSize(500000000) // bytes
     {
         ACE_OS::socket_init();
         if (0 != m_socket.open(ACE_INET_Addr((unsigned short)31221)))
@@ -143,8 +142,8 @@ namespace Swre
                 // Start supervision of log file size
                 reactor()->schedule_timer(this,
                                           NULL,
-                                          Safir::Time::AceTimeConverter::ToAceTime(m_checkFileSizeTime),
-                                          Safir::Time::AceTimeConverter::ToAceTime(m_checkFileSizeTime));
+                                          ACE_Time_Value(60),
+                                          ACE_Time_Value(60));
             }
             return true;
         }

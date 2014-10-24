@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2011 (http://www.safirsdk.com)
 *
-* Created by: Anders Widén / aiwi
+* Created by: Anders WidÃ©n / aiwi
 *
 *******************************************************************************
 *
@@ -85,7 +85,13 @@ namespace Internal
 
             for (;;)
             {
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+                // Fix for windows: Use os call to circumvent problem with system time adjustments
+                ::Sleep((watchdogTimeout/4 * 1000) ;
+#else
                 boost::this_thread::sleep(watchdogTimeout/4);
+#endif
+
 
                 const boost::posix_time::ptime now = boost::posix_time::second_clock::universal_time();
 
@@ -131,8 +137,12 @@ namespace Internal
                                     lllerr << ostr.str().c_str();
                                     Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
 
-                                    boost::this_thread::sleep(boost::get_system_time() + boost::posix_time::seconds(5));
-
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+                                    // Fix for windows: Use os call to circumvent problem with system time adjustments
+                                    ::Sleep(5000);
+#else
+                                    boost::this_thread::sleep(boost::posix_time::seconds(5));
+#endif
                                     exit(1); // Terminate dose_main!!!!
                                 }
                                 else if (!it->second.errorLogIsGenerated)

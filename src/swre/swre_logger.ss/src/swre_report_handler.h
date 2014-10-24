@@ -29,7 +29,6 @@
 #include <ace/config.h>
 #include <ace/Event_Handler.h>
 #include <ace/Reactor.h>
-#include <boost/date_time/posix_time/posix_time_duration.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <ace/SOCK_Dgram.h>
@@ -126,8 +125,6 @@ private:
     boost::filesystem::path      m_logFilePath;
     boost::filesystem::path      m_oldLogFilePath;
     boost::uintmax_t              m_maxFileSize;
-
-    boost::posix_time::milliseconds m_checkFileSizeTime;
 
     Safir::Dob::SecondaryConnection m_Connection;
     ACE_SOCK_Dgram m_socket;

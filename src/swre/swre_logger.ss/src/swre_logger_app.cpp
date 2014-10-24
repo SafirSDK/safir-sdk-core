@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2006-2008 (http://www.safirsdk.com)
 *
-* Created by: Anders Widén / stawi
+* Created by: Anders WidÃ©n / stawi
 *
 *******************************************************************************
 *
@@ -44,14 +44,41 @@
 #include <Safir/Dob/NotOpenException.h>
 #include <Safir/Time/AceTimeConverter.h>
 
+#include <ace/Timer_Queue.h>
+
 #include <sstream>
 #include <vector>
 #include <map>
+
+#if defined(linux) || defined(__linux) || defined(__linux__)
+#include <time.h>
+#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+#include <windows.h>
+#endif
 
 namespace Safir
 {
 namespace Swre
 {
+
+    ACE_Time_Value GetMonotonicTime()
+    {
+#if defined(linux) || defined(__linux) || defined(__linux__)
+
+        timespec_t t;
+
+        clock_gettime(CLOCK_MONOTONIC, &t);
+
+        return ACE_Time_Value(t);
+
+#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+
+        ULONGLONG t = GetTickCount64();
+
+        return ACE_Time_Value(t/1000, (t%1000) * 1000);
+
+#endif
+    }
 
     //swre_logger uses context 0 to connect to the dob. The strange looking negative number
     //is a way to indicate that this is a connection with special privileges.
@@ -67,37 +94,30 @@ LoggerApp::LoggerApp()
     // Start supervision of dump directory
     reactor()->schedule_timer(this,
                               NULL,
-                              Safir::Time::AceTimeConverter::ToAceTime(boost::posix_time::seconds(1)),
-                              Safir::Time::AceTimeConverter::ToAceTime(boost::posix_time::minutes(10)));
-    
-};
+                              ACE_Time_Value(1),
+                              ACE_Time_Value(600));
+}
 
 //-----------------------------------------------------------------------------
 LoggerApp::~LoggerApp()
 {
     reactor()->cancel_timer(this);
     m_Connection.Close();
-};
+}
 
 //-----------------------------------------------------------------------------
 void LoggerApp::OnStopOrder()
 {
     m_reportHandler.Stop();
     ACE_Reactor::end_event_loop();
-};
-
-//-----------------------------------------------------------------------------
-/*void LoggerApp::OnEvent(const osin::EventId& id)
-{
-   if (id == m_dispatchEvent.IdOf())
-   {
-      m_Connection.Dispatch();
-   }
-} */
+}
 
 //-----------------------------------------------------------------------------
 int LoggerApp::Run(const std::vector<std::string> & args)
 {
+    // Instruct the ACE timer queue to use a monotonic increasing time
+    ACE_Reactor::instance()->timer_queue()->gettimeofday(&GetMonotonicTime);
+
     static int inst = 0;
 
     for (;;)

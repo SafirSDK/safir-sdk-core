@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2012 (http://www.safirsdk.com)
 *
-* Created by: Anders Widén / aiwi
+* Created by: Anders WidÃ©n / aiwi
 *
 *******************************************************************************
 *
@@ -41,12 +41,17 @@
   #pragma warning (pop)
 #endif
 
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+#include <windows.h>
+#endif
+
 namespace Safir
 {
 namespace Dob
 {
 namespace Internal
 {
+
     LockMonitor::LockMonitor()
         :  m_serviceTypeIds(),
            m_entityTypeIds(),
@@ -83,14 +88,25 @@ namespace Internal
                     Safir::Dob::Internal::EntityTypes::IsInitialized())
                 {
                     break;
-                }
+                }                
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+                // Fix for windows: Use os call to circumvent problem with system time adjustments
+                ::Sleep(10);
+#else
                 boost::this_thread::sleep(boost::posix_time::milliseconds(10));
+#endif
             }
 
             for (;;)
             {
-
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+                // Fix for windows: Use os call to circumvent problem with system time adjustments
+                ::Sleep(15000);
+#else
                 boost::this_thread::sleep(boost::posix_time::seconds(15));
+#endif
+
+
 
                 bool serviceLocksOk = true;
                 for (Dob::Typesystem::TypeIdVector::const_iterator it = m_serviceTypeIds.begin();
@@ -153,8 +169,12 @@ namespace Internal
                         lllerr << ostr.str().c_str();
                         Safir::Utilities::Internal::PanicLogging::Log(ostr.str());
 
-                        boost::this_thread::sleep(boost::get_system_time() + boost::posix_time::seconds(5));
-
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+                // Fix for windows: Use os call to circumvent problem with system time adjustments
+                        ::Sleep(5000);
+#else
+                        boost::this_thread::sleep(boost::posix_time::seconds(5));
+#endif
                         abort(); // Terminate dose_main!!!!
                     }
                     else if (m_loggingIsEnabled)
