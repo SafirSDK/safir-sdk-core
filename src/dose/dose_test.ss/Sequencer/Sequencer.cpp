@@ -124,7 +124,7 @@ Sequencer::Sequencer(const int startTc,
     m_currentActionNo(0),
     m_stopTc(stopTc),
     m_state(SequencerStates::Created),
-    m_lastCleanupTime(boost::posix_time::second_clock::universal_time()),
+    m_lastCleanupTime(boost::chrono::steady_clock::now()),
     m_languages(languages),
     m_noTimeout(noTimeout),
     m_isDumpRequested(false),
@@ -250,7 +250,7 @@ void Sequencer::SetState(const SequencerStates::State newState)
     m_state = newState;
     if (newState == SequencerStates::CleaningUpTestcase)
     {
-        m_lastCleanupTime = boost::posix_time::second_clock::universal_time();
+        m_lastCleanupTime = boost::chrono::steady_clock::now();
     }
 }
 
@@ -259,8 +259,8 @@ void Sequencer::Tick()
     //std::wcout << "Tick!" << std::endl;
     if (!m_noTimeout)
     {
-        const boost::posix_time::ptime now = boost::posix_time::second_clock::universal_time();
-        if (now - m_lastCleanupTime > boost::posix_time::minutes(10))
+        const boost::chrono::steady_clock::time_point now = boost::chrono::steady_clock::now();
+        if (now - m_lastCleanupTime > boost::chrono::minutes(10))
         {
             std::wcout << "TIMEOUT: Sequencer has not been in CleaningUpTestcase state for 10 minutes!"
                        << "Maybe a partner crashed? "
