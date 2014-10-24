@@ -25,7 +25,17 @@
 
 #include <Safir/Utilities/ProcessMonitor.h>
 #include <boost/bind.hpp>
+
+#ifdef _MSC_VER
+#  pragma warning (push)
+#  pragma warning (disable: 4267)
+#endif
+
 #include <boost/asio.hpp>
+
+#ifdef _MSC_VER
+#  pragma warning (pop)
+#endif
 
 namespace Safir
 {
