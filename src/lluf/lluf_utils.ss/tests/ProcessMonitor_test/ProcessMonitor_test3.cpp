@@ -241,7 +241,7 @@ BOOST_AUTO_TEST_CASE(monitor_0)
     }
     monitor.Stop();
     std::vector<pid_t> terminatedPids = TerminatedPids();
-    BOOST_CHECK_EQUAL(terminatedPids.size(), 1);
+    BOOST_CHECK_EQUAL(terminatedPids.size(), 1U);
     BOOST_CHECK_EQUAL(terminatedPids.at(0), 0);
 }
 
@@ -257,8 +257,8 @@ BOOST_AUTO_TEST_CASE(monitor_0_twice)
     monitor.Stop();
 
     std::vector<pid_t> terminatedPids = TerminatedPids();
-    BOOST_CHECK_LE(terminatedPids.size(), 2);
-    BOOST_CHECK_EQUAL(terminatedPids.at(0), 0);
+    BOOST_CHECK_LE(terminatedPids.size(), 2U);
+    BOOST_CHECK_EQUAL(terminatedPids.at(0), 0U);
     if (terminatedPids.size() == 2)
     {
         BOOST_CHECK_EQUAL(terminatedPids.at(0), 0);
@@ -304,7 +304,7 @@ BOOST_AUTO_TEST_CASE(monitor_self_and_0)
     Stop();
 
     std::vector<pid_t> terminatedPids = TerminatedPids();
-    BOOST_CHECK_EQUAL(terminatedPids.size(), 1);
+    BOOST_CHECK_EQUAL(terminatedPids.size(), 1U);
     BOOST_CHECK_EQUAL(terminatedPids.at(0), 0);
 }
 
@@ -323,7 +323,7 @@ BOOST_AUTO_TEST_CASE(monitor_sleeper)
     Stop();
 
     std::vector<pid_t> terminatedPids = TerminatedPids();
-    BOOST_CHECK_EQUAL(terminatedPids.size(), 1);
+    BOOST_CHECK_EQUAL(terminatedPids.size(), 1U);
     BOOST_CHECK_EQUAL(terminatedPids.at(0), pid);
 }
 
@@ -347,10 +347,12 @@ BOOST_AUTO_TEST_CASE(many_sleepers)
 {
     RunIoService();
 
+    std::set<pid_t> pids;
     BOOST_TEST_MESSAGE("Launching sleepers");
     for (int i = 0; i < 100; ++i)
     {
         const pid_t pid = LaunchSleeper(0.3);
+        pids.insert(pid);
         monitor.StartMonitorPid(pid);
     }
 
@@ -370,8 +372,14 @@ BOOST_AUTO_TEST_CASE(many_sleepers)
     Stop();
 
     BOOST_TEST_MESSAGE("Checking result");
-    std::vector<pid_t> terminatedPids = TerminatedPids();
-    BOOST_CHECK_EQUAL(terminatedPids.size(), 100);
+    const std::vector<pid_t> terminatedPids = TerminatedPids();
+    BOOST_CHECK_EQUAL(terminatedPids.size(), 100U);
+    for (std::vector<pid_t>::const_iterator it = terminatedPids.begin();
+         it != terminatedPids.end(); ++it)
+    {
+        pids.erase(*it);
+    }
+    BOOST_CHECK(pids.empty());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
