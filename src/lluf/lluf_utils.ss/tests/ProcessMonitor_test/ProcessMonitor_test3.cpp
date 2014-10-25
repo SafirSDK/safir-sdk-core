@@ -258,7 +258,7 @@ BOOST_AUTO_TEST_CASE(monitor_0_twice)
 
     std::vector<pid_t> terminatedPids = TerminatedPids();
     BOOST_CHECK_LE(terminatedPids.size(), 2U);
-    BOOST_CHECK_EQUAL(terminatedPids.at(0), 0U);
+    BOOST_CHECK_EQUAL(terminatedPids.at(0), 0);
     if (terminatedPids.size() == 2)
     {
         BOOST_CHECK_EQUAL(terminatedPids.at(0), 0);
@@ -340,7 +340,7 @@ BOOST_AUTO_TEST_CASE(stop_monitor)
     Stop();
 
     std::vector<pid_t> terminatedPids = TerminatedPids();
-    BOOST_CHECK_EQUAL(terminatedPids.size(), 0);
+    BOOST_CHECK_EQUAL(terminatedPids.size(), 0U);
 }
 
 BOOST_AUTO_TEST_CASE(many_sleepers)
