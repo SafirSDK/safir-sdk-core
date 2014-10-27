@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 2.6)
 
 PROJECT (swre_logger)
 
+if (MSVC)
+    ADD_DEFINITIONS(-D_WIN32_WINNT=0x0600)
+    ADD_DEFINITIONS(-DWIN32_LEAN_AND_MEAN)
+endif()
+
 INCLUDE($ENV{SAFIR_SDK}/data/build/cmake_settings.txt)
 
 FILE(GLOB headers *.h)
