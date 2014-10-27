@@ -87,7 +87,7 @@ namespace Internal
             {
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
                 // Fix for windows: Use os call to circumvent problem with system time adjustments
-                ::Sleep((watchdogTimeout/4 * 1000) ;
+                ::Sleep(watchdogTimeout.total_milliseconds()/4) ;
 #else
                 boost::this_thread::sleep(watchdogTimeout/4);
 #endif
