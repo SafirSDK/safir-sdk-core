@@ -251,8 +251,32 @@ class Logger(object):
         self.log("","output")
         return "\n".join(output)
 
+def add_win32_options(parser):
+    parser.add_argument("--use-studio",
+                        help="The visual studio to use for building, can be '2010', '2012' or '2013'")
+    if is_64_bit():
+        parser.add_argument("--32-bit",
+                            action="store_true",
+                            dest="build_32_bit",
+                            default=False,
+                            help="Build a 32 bit system even though this machine is 64 bit.")
+    parser.add_argument("--configs",
+                        default=("Debug", "RelWithDebInfo"),
+                        nargs='*',
+                        choices=known_configs,
+                        help="The configurations to build. Debug and RelWithDebInfo is the default.")
 
-def parse_command_line(builder):
+def add_linux_options(parser):
+    parser.add_argument("--config",
+                        dest="configs",
+                        nargs=1,
+                        default=("RelWithDebInfo",),
+                        choices=known_configs,
+                        help="The configuration to build. RelWithDebInfo is the default.")
+
+
+
+def parse_command_line():
     parser = argparse.ArgumentParser()
     parser.add_argument("--jenkins",
                         action="store_true",
@@ -263,7 +287,8 @@ def parse_command_line(builder):
     parser.add_argument("--package",
                         action="store_true",
                         default=False,
-                        help="Install everything to a staging area and create a package")
+                        help="Build everything and one or more packages. This option may cause all "
+                        + "other options to be ignored...")
 
     parser.add_argument("--skip-tests",
                         action = "store_true",
@@ -274,7 +299,11 @@ def parse_command_line(builder):
                         default=0,
                         help="Print more stuff about what is going on. Use twice to get very verbose output.")
 
-    builder.setup_command_line_arguments(parser)
+    if sys.platform.startswith("linux"):
+        add_linux_options(parser)
+    else:
+        add_win32_options(parser)
+
     arguments = parser.parse_args()
 
     if arguments.jenkins:
@@ -287,16 +316,11 @@ def parse_command_line(builder):
 
     if arguments.jenkins:
         arguments.package = True
-        builder.setenv_jenkins()
 
-    msg = builder.handle_command_line_arguments(arguments)
-    if msg is not None:
-        print("Failed to parse command line:", msg)
-        parser.print_help()
-        sys.exit(1)
+    return arguments
 
 class BuilderBase(object):
-    def __init__(self):
+    def __init__(self, arguments):
         #We need to limit ourselves a little bit in how
         #many parallel jobs we perform. Each job may use
         #up to 400Mb of memory.
@@ -315,14 +339,9 @@ class BuilderBase(object):
 
         self.install_prefix = None #derived classes can override
 
-    def setup_build_environment(self):
-        pass
+        self.__handle_command_line_arguments(arguments)
 
-    def setup_command_line_arguments(self,parser):
-        #Child is expected to set up an argument "configs"
-        self.setup_command_line_arguments_internal(parser)
-
-    def handle_command_line_arguments(self,arguments):
+    def __handle_command_line_arguments(self,arguments):
         self.configs = arguments.configs
 
         self.debug_only = False
@@ -336,42 +355,20 @@ class BuilderBase(object):
 
         self.stagedir = os.path.join(os.getcwd(),"stage") if arguments.package else None
 
-        return self.handle_command_line_arguments_internal(arguments)
-
-    def setenv_jenkins_internal(self):
-        raise Exception("Not implemented! This is an abstract method")
-
-    def setenv_jenkins(self):
-        WORKSPACE = os.environ.get("WORKSPACE")
-        if not WORKSPACE:
-            die("Environment variable WORKSPACE is not set, is this really a Jenkins build?!")
-        #ADA_PROJECT_PATH = (os.environ.get("ADA_PROJECT_PATH") + os.pathsep) if os.environ.get("ADA_PROJECT_PATH") else ""
-        #os.environ["ADA_PROJECT_PATH"] = ADA_PROJECT_PATH + os.path.join(os.environ.get("SAFIR_SDK"),"ada")
-        #java path gets set by jenkins
-
-        #set database from label environment variable
-        #label = os.environ.get("label")
-        #if label is not None:
-        #    os.environ["DATABASE_NAME"] = label.replace("-","")
-
-        #Call the platform specific setenv
-        self.setenv_jenkins_internal()
-
-    def build(self, directory):
+    def build(self):
         for config in self.configs:
             olddir = os.getcwd()
             mkdir(config)
             os.chdir(config)
 
-            self.__build_internal(directory,
-                                  os.pardir,
+            self.__build_internal(os.pardir,
                                   config)
             os.chdir(olddir)
 
-    def package(self):
-        if self.stagedir is None:
-            return
+        if self.stagedir is not None:
+            self.__package()
 
+    def __package(self):
         try:
             stage_dependencies.stage_dependencies(logger, self.stagedir)
         except stage_dependencies.StagingError as e:
@@ -380,7 +377,7 @@ class BuilderBase(object):
         logger.log("Building installation package", "header")
         self.stage_package()
 
-    def __configure(self, directory, srcdir, config):
+    def __configure(self, srcdir, config):
 
         command = (cmake(),
                    "-G", self.cmake_generator,
@@ -391,12 +388,12 @@ class BuilderBase(object):
 
         command += (srcdir,)
         self._run_command(command,
-                           "Configure for " + config + " build", directory)
+                           "Configure for " + config + " build")
 
-    def __build_internal(self, directory, srcdir, config):
+    def __build_internal(self, srcdir, config):
         logger.log(" - in config " + config, "brief")
 
-        self.__configure(directory, srcdir, config)
+        self.__configure(srcdir, config)
 
         command = (cmake(),
                    "--build", ".",
@@ -404,17 +401,17 @@ class BuilderBase(object):
 
 
         self._run_command(command,
-                           "Build " + config, directory)
+                           "Build " + config)
         if not self.skip_tests:
             logger.log("   + testing", "brief")
-            self.test(directory)
+            self.test()
             translate_results_to_junit(config)
 
         if self.stagedir:
             logger.log("   + installing to staging area", "brief")
-            self.stage_install(directory)
+            self.__stage_install()
 
-    def stage_install(self, directory):
+    def __stage_install(self):
         for component in ("Runtime", "Development", "Test"):
             command = (cmake(),
                     "-DCOMPONENT="+ component,
@@ -422,12 +419,12 @@ class BuilderBase(object):
             env = os.environ.copy()
             env["DESTDIR"] = os.path.join(self.stagedir,component)
             self._run_command(command,
-                               "Staged install " + component, directory, env = env)
+                               "Staged install " + component, env = env)
     def stage_package(self):
         logger.log(" ! Packaging not implemented in this builder !","brief")
 
-    def test(self, directory):
-        """run ctest in a directory"""
+    def test(self):
+        """run ctest in current directory"""
         if not os.path.isfile("DartConfiguration.tcl"):
             dummyfile = open("DartConfiguration.tcl","w")
             dummyfile.close()
@@ -436,21 +433,21 @@ class BuilderBase(object):
                                     "-V",
                                     "-T", "Test",
                                     "--no-compress-output"),
-                                    "Test", directory, allow_fail = True)
+                                    "Test", allow_fail = True)
         self.interpret_test_output(output)
 
 
-    def _run_command(self, cmd, description, what, allow_fail = False, env = None):
+    def _run_command(self, cmd, description, allow_fail = False, env = None):
         """Run a command"""
 
-        logger.log(description + " " + what, "command_description")
+        logger.log(description, "command_description")
         logger.log(" ".join(cmd), "command")
 
         process = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env = env)
         output = logger.log_output(process)
         if process.returncode != 0:
             if not allow_fail:
-                die("Failed to run '" + " ".join(cmd) + "' for " + what)
+                die("Failed to run '" + " ".join(cmd) + "' in " + os.getcwd())
             else:
                 logger.log("This command failed, but failure of this particular command " +
                            "is non-fatal to the build process, so I'm continuing")
@@ -475,8 +472,8 @@ class BuilderBase(object):
 
 
 class VisualStudioBuilder(BuilderBase):
-    def __init__(self):
-        super(VisualStudioBuilder, self).__init__()
+    def __init__(self, arguments):
+        super(VisualStudioBuilder, self).__init__(arguments)
 
         self.install_target = "Install"
 
@@ -489,28 +486,14 @@ class VisualStudioBuilder(BuilderBase):
             self.cmake_generator = "NMake Makefiles"
             self.have_jom = False
 
+        self.__handle_command_line_arguments(arguments)
+
+        self.__setup_build_environment()
     @staticmethod
     def can_use():
         return sys.platform == "win32"
 
-    def setup_command_line_arguments_internal(self,parser):
-        parser.add_argument("--use-studio",
-                            help="The visual studio to use for building, can be '2010', '2012' or '2013'")
-        if is_64_bit():
-            parser.add_argument("--32-bit",
-                                action="store_true",
-                                dest="build_32_bit",
-                                default=False,
-                                help="Build a 32 bit system even though this machine is 64 bit.")
-        parser.add_argument("--configs",
-                            default=("Debug", "RelWithDebInfo"),
-                            nargs='*',
-                            choices=known_configs,
-                            help="The configurations to build. Debug and RelWithDebInfo is the default.")
-
-
-
-    def handle_command_line_arguments_internal(self,arguments):
+    def __handle_command_line_arguments(self,arguments):
         self.use_studio = arguments.use_studio
 
         if not is_64_bit() or arguments.build_32_bit:
@@ -524,14 +507,6 @@ class VisualStudioBuilder(BuilderBase):
             return ("/nologo", "/j", str(self.num_jobs))
         else:
             return ("/nologo",)
-
-    def filter_configs(self, configs):
-        return configs
-
-    def setenv_jenkins_internal(self):
-        #disable the slow debug heap on windows
-        if sys.platform == "win32":
-            os.environ["_NO_DEBUG_HEAP"] = "1"
 
     def __find_vcvarsall(self):
         install_dirs = {"VS120COMNTOOLS" : "2013",
@@ -576,7 +551,7 @@ class VisualStudioBuilder(BuilderBase):
             die ("Failed to fetch environment variables out of vcvarsall.bat: " + output)
         return output
 
-    def setup_build_environment(self):
+    def __setup_build_environment(self):
         """Find vcvarsall.bat and load the relevant environment variables from it.
         This function is inspired (but not copied, for licensing reasons) by the one in python distutils2 msvc9compiler.py"""
         vcvarsall = self.__find_vcvarsall()
@@ -628,8 +603,8 @@ class VisualStudioBuilder(BuilderBase):
         self._run_command(command, "Packaging ", "TODO")
 
 class UnixGccBuilder(BuilderBase):
-    def __init__(self):
-        super(UnixGccBuilder, self).__init__()
+    def __init__(self, arguments):
+        super(UnixGccBuilder, self).__init__(arguments)
 
         #ada builds (with gnatmake) will look at environment variable that is
         #defined on windows to determine parallellism. Define it on linux too.
@@ -643,27 +618,8 @@ class UnixGccBuilder(BuilderBase):
     def can_use():
         return sys.platform.startswith("linux")
 
-    def setup_command_line_arguments_internal(self,parser):
-        parser.add_argument("--config",
-                            dest="configs",
-                            nargs=1,
-                            default=("RelWithDebInfo",),
-                            choices=known_configs,
-                            help="The configuration to build. RelWithDebInfo is the default.")
-
-
-
-    def handle_command_line_arguments_internal(self,arguments):
-        pass
-
-
     def generator_specific_build_cmds(self):
         return ( "-j", str(self.num_jobs))
-
-    def setenv_jenkins_internal(self):
-        #LD_LIBRARY_PATH = (os.environ.get("LD_LIBRARY_PATH") + ":") if os.environ.get("LD_LIBRARY_PATH") else ""
-        #os.environ["LD_LIBRARY_PATH"] = LD_LIBRARY_PATH + os.path.join(os.environ.get("SAFIR_RUNTIME"),"lib")
-        pass
 
 def getText(nodelist):
     rc = []
@@ -715,22 +671,19 @@ def translate_results_to_junit(suite_name):
         junitfile.write("</testsuite>")
 
 
-def get_builder():
+def get_builder(arguments):
     if VisualStudioBuilder.can_use():
-        return VisualStudioBuilder()
+        return VisualStudioBuilder(arguments)
     elif UnixGccBuilder.can_use():
-        return UnixGccBuilder()
+        return UnixGccBuilder(arguments)
     else:
         die("Failed to work out what builder to use!")
 
 def main():
-    builder = get_builder()
-    parse_command_line(builder)
-    builder.setup_build_environment()
+    arguments = parse_command_line()
+    builder = get_builder(arguments)
 
-    builder.build(".")
-    builder.package()
-
+    builder.build()
 
     return (builder.total_tests, builder.failed_tests)
 
