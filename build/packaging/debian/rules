@@ -1,0 +1,31 @@
+#!/usr/bin/make -f
+
+#upstream recommends NDEBUG for release builds!
+export CPPFLAGS += -DNDEBUG
+
+%:
+	dh $@ --parallel
+
+override_dh_auto_install: install_runtime install_development install_testsuite
+
+install_runtime: export DESTDIR=$(shell pwd)/debian/safir-sdk-core
+install_runtime:
+	#run cmake install
+	cd obj-$(DEB_BUILD_MULTIARCH) && /usr/bin/cmake -DCOMPONENT=Runtime -P cmake_install.cmake
+
+	#copy example configuration to /etc
+	dh_install debian/safir-sdk-core/usr/share/doc/safir_sdk_core/example_configuration/*.ini etc/safir_sdk_core
+
+	#create some needed directories and set permissions
+	mkdir -p debian/safir-sdk-core/var/lib/safir_sdk_core
+	chmod 775 debian/safir-sdk-core/var/lib/safir_sdk_core
+	mkdir -p debian/safir-sdk-core/var/log/safir_sdk_core
+	chmod 775 debian/safir-sdk-core/var/log/safir_sdk_core
+
+install_development: export DESTDIR=$(shell pwd)/debian/safir-sdk-core-dev
+install_development:
+	cd obj-$(DEB_BUILD_MULTIARCH) && /usr/bin/cmake -DCOMPONENT=Development -P cmake_install.cmake
+
+install_testsuite: export DESTDIR=$(shell pwd)/debian/safir-sdk-core-testsuite
+install_testsuite:
+	cd obj-$(DEB_BUILD_MULTIARCH) && /usr/bin/cmake -DCOMPONENT=Test -P cmake_install.cmake

@@ -1,0 +1,11 @@
+#package is not meant for inclusion in debian at this time
+safir-sdk-core-testsuite: new-package-should-close-itp-bug
+
+#the testsuite package contains a lot of undocumented binaries, but it is really just for internal usage.
+safir-sdk-core-testsuite: binary-without-manpage *
+
+#testsuite package contains both dev and non-dev parts of some libraries
+safir-sdk-core-testsuite: non-dev-pkg-with-shlib-symlink *
+
+#This would just get too tiresome... Safir SDK Core contains so many libraries that this is unfeasable.
+safir-sdk-core-testsuite: package-name-doesnt-match-sonames *

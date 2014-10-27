@@ -1,0 +1,39 @@
+Source: safir-sdk-core
+Maintainer: Lars Hagström <lars@foldspace.nu>
+Section: misc
+Priority: optional
+Standards-Version: 3.9.5
+Build-Depends: debhelper (>= 9), cmake (>= 2.8.12), python (>= 2.7.0), default-jdk
+
+Package: safir-sdk-core
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, python (>= 2.7.0)
+Description: TODO
+ Safir SDK Core is a middleware and platform for creation of 
+ distributed soft real-time systems. It is Scalable, Reliable, 
+ Portable, and last but not least, it is Open!
+ Safir SDK Core is based on modern architectural principles 
+ and has a solid foundation in more than 20 years of 
+ development of distributed systems at Saab AB.
+
+Package: safir-sdk-core-dev
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, python (>= 2.7.0), safir-sdk-core
+Description: TODO
+ Safir SDK Core is a middleware and platform for creation of 
+ distributed soft real-time systems. It is Scalable, Reliable, 
+ Portable, and last but not least, it is Open!
+ Safir SDK Core is based on modern architectural principles 
+ and has a solid foundation in more than 20 years of 
+ development of distributed systems at Saab AB.
+
+Package: safir-sdk-core-testsuite
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, python (>= 2.7.0), safir-sdk-core
+Description: TODO
+ Safir SDK Core is a middleware and platform for creation of 
+ distributed soft real-time systems. It is Scalable, Reliable, 
+ Portable, and last but not least, it is Open!
+ Safir SDK Core is based on modern architectural principles 
+ and has a solid foundation in more than 20 years of 
+ development of distributed systems at Saab AB.

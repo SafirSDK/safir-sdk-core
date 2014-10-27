@@ -1,0 +1,5 @@
+Files: *
+Copyright: 2004-2014 Saab AB
+License: /usr/share/common-licenses/GPL-3
+Comment: There are some source files that have a different license, they have a COPYING file next to them, or license information in the header.
+TODO: List the files with other copyrights! Not only here but in our main license info it is needed.
