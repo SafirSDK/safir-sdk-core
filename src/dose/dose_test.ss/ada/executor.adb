@@ -40,6 +40,7 @@ with Unchecked_Conversion;
 with Interfaces.C;
 with Ada.Strings.Wide_Fixed;
 with Ada.Strings.Wide_Unbounded;
+with Ada.Streams;
 with Ada.Exceptions; use Ada.Exceptions;
 with GNAT.Sockets; use GNAT.Sockets;
 with GNAT.Command_Line;
