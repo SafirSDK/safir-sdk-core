@@ -73,6 +73,9 @@ public:
                const std::string& name,
                const std::function<void(const char* const data, const size_t size)>& callback)
     {
+        connect_calls = 0;
+        disconnect_calls = 0;
+
         dataCallback = callback;
         BOOST_CHECK(name == "foo");
     }
@@ -122,8 +125,125 @@ BOOST_AUTO_TEST_CASE( send_one )
     subscriber.Stop();
     ioService.run();
 
-    BOOST_CHECK(connect_calls == 1);
-    BOOST_CHECK(disconnect_calls == 1);
-    BOOST_CHECK(dataReceived == 1);
+    BOOST_CHECK_EQUAL(connect_calls, 1);
+    BOOST_CHECK_EQUAL(disconnect_calls, 1);
+    BOOST_CHECK_EQUAL(dataReceived, 1);
 
+}
+
+
+BOOST_AUTO_TEST_CASE( two_subscribers )
+{
+    boost::asio::io_service ioService;
+
+    LocalSubscriber<::Subscriber, RawStatisticsSubscriber, RawStatisticsCreator> subscriber(ioService, "foo");
+
+    int dataReceived = 0;
+    subscriber.Start([&](const RawStatistics& r)
+                     {
+                         ++dataReceived;
+
+                         BOOST_CHECK(r.Valid());
+                         BOOST_CHECK(r.Name() == "foo");
+                         BOOST_CHECK(r.Id() == 10);
+                         BOOST_CHECK(r.NodeTypeId() == 190);
+                         BOOST_CHECK(r.ControlAddress() == "asdfasdf");
+                         BOOST_CHECK(r.DataAddress() == "foobar");
+                         BOOST_CHECK(r.ElectionId() == 91);
+                     });
+
+    subscriber.AddSubscriber([&](const RawStatistics& r)
+                             {
+                                 ++dataReceived;
+
+                                 BOOST_CHECK(r.Valid());
+                                 BOOST_CHECK(r.Name() == "foo");
+                                 BOOST_CHECK(r.Id() == 10);
+                                 BOOST_CHECK(r.NodeTypeId() == 190);
+                                 BOOST_CHECK(r.ControlAddress() == "asdfasdf");
+                                 BOOST_CHECK(r.DataAddress() == "foobar");
+                                 BOOST_CHECK(r.ElectionId() == 91);
+                             });
+
+
+#ifdef CHECK_CRC
+    const int crcBytes = sizeof(int);
+#else
+    const int crcBytes = 0;
+#endif
+    const auto pbuf = GetProtobuf();
+    const size_t size = pbuf->ByteSize() + crcBytes;
+    auto data = std::unique_ptr<char[]>(new char[size]);
+    pbuf->SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
+#ifdef CHECK_CRC
+    const int crc = GetCrc32(data.get(), size - crcBytes);
+    memcpy(data.get() + size - crcBytes, &crc, sizeof(int));
+#endif
+
+    dataCallback(data.get(),size);
+
+    subscriber.Stop();
+    ioService.run();
+
+    BOOST_CHECK_EQUAL(connect_calls, 1);
+    BOOST_CHECK_EQUAL(disconnect_calls, 1);
+    BOOST_CHECK_EQUAL(dataReceived, 2);
+}
+
+BOOST_AUTO_TEST_CASE( add_before_start )
+{
+    boost::asio::io_service ioService;
+
+    LocalSubscriber<::Subscriber, RawStatisticsSubscriber, RawStatisticsCreator> subscriber(ioService, "foo");
+
+    int dataReceived = 0;
+    subscriber.AddSubscriber([&](const RawStatistics& r)
+                     {
+                         ++dataReceived;
+
+                         BOOST_CHECK(r.Valid());
+                         BOOST_CHECK(r.Name() == "foo");
+                         BOOST_CHECK(r.Id() == 10);
+                         BOOST_CHECK(r.NodeTypeId() == 190);
+                         BOOST_CHECK(r.ControlAddress() == "asdfasdf");
+                         BOOST_CHECK(r.DataAddress() == "foobar");
+                         BOOST_CHECK(r.ElectionId() == 91);
+                     });
+
+    subscriber.Start([&](const RawStatistics& r)
+                             {
+                                 ++dataReceived;
+
+                                 BOOST_CHECK(r.Valid());
+                                 BOOST_CHECK(r.Name() == "foo");
+                                 BOOST_CHECK(r.Id() == 10);
+                                 BOOST_CHECK(r.NodeTypeId() == 190);
+                                 BOOST_CHECK(r.ControlAddress() == "asdfasdf");
+                                 BOOST_CHECK(r.DataAddress() == "foobar");
+                                 BOOST_CHECK(r.ElectionId() == 91);
+                             });
+
+
+#ifdef CHECK_CRC
+    const int crcBytes = sizeof(int);
+#else
+    const int crcBytes = 0;
+#endif
+    const auto pbuf = GetProtobuf();
+    const size_t size = pbuf->ByteSize() + crcBytes;
+    auto data = std::unique_ptr<char[]>(new char[size]);
+    pbuf->SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
+#ifdef CHECK_CRC
+    const int crc = GetCrc32(data.get(), size - crcBytes);
+    memcpy(data.get() + size - crcBytes, &crc, sizeof(int));
+#endif
+
+    dataCallback(data.get(),size);
+
+    subscriber.Stop();
+    ioService.run();
+
+    BOOST_CHECK_EQUAL(connect_calls, 1);
+    BOOST_CHECK_EQUAL(disconnect_calls, 1);
+    BOOST_CHECK_EQUAL(dataReceived, 2);
 }

@@ -32,14 +32,14 @@
 #include <atomic>
 
 #ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable: 4267)
+#  pragma warning (push)
+#  pragma warning (disable: 4267)
 #endif
 
 #include <boost/asio.hpp>
 
 #ifdef _MSC_VER
-#pragma warning (pop)
+#  pragma warning (pop)
 #endif
 
 namespace Safir
@@ -56,6 +56,8 @@ namespace SP
         : public SubscriberInterfaceT
     {
     public:
+        typedef std::function<void (const typename SubscriberInterfaceT::DataWrapper& data)> DataCallback;
+
         LocalSubscriber(boost::asio::io_service& ioService,
                         const char* const name)
             : m_strand(ioService)
@@ -66,23 +68,28 @@ namespace SP
                                          {
                                              DataReceived(data,size);
                                          }))
-
         {
 
         }
 
-        //callback will be delivered on one strand.
-        void Start(const std::function<void (const typename SubscriberInterfaceT::DataWrapper& data)>& dataCallback) override
+
+        void Start(const DataCallback& dataCallback) override
+        {
+            AddSubscriber(dataCallback);
+        }
+
+        void AddSubscriber(const DataCallback& dataCallback)
         {
             m_strand.dispatch([this, dataCallback]
             {
-                if (m_dataCallback != nullptr)
-                {
-                    throw std::logic_error("LocalSubscriber: Start has already been called!");
-                }
-                m_dataCallback = dataCallback;
+                const bool needConnect = m_dataCallbacks.empty();
 
-                m_subscriber.Connect();
+                m_dataCallbacks.push_back(dataCallback);
+
+                if (needConnect)
+                {
+                    m_subscriber.Connect();
+                }
             });
         }
 
@@ -91,6 +98,7 @@ namespace SP
             m_strand.dispatch([this]
                               {
                                   m_subscriber.Disconnect();
+                                  m_dataCallbacks.clear();
                               });
         }
 
@@ -119,7 +127,11 @@ namespace SP
             {
                 throw std::logic_error("LocalSubscriber: Failed to parse message");
             }
-            m_dataCallback(WrapperCreatorT::Create(std::move(msg)));
+            const auto wrapped = WrapperCreatorT::Create(std::move(msg));
+            for (const auto cb : m_dataCallbacks)
+            {
+                cb(wrapped);
+            }
         }
 
         //Order/sync is guaranteed by IpcSubscribers delivery order guarantee.
@@ -127,7 +139,7 @@ namespace SP
         boost::asio::io_service::strand m_strand;
         const std::string m_name;
 
-        std::function<void (const typename SubscriberInterfaceT::DataWrapper& data)> m_dataCallback;
+        std::vector<DataCallback> m_dataCallbacks;
         IpcSubscriberT m_subscriber;
     };
 
