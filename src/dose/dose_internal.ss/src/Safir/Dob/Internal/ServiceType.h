@@ -100,8 +100,8 @@ namespace Internal
 
         /** @} */
 
-        bool CanAcquireContainerWriterLock(const ContextId                   contextId,
-                                           const boost::posix_time::seconds& lockTimeout);
+        bool CanAcquireContainerWriterLock(const ContextId contextId,
+                                           const boost::chrono::steady_clock::duration& lockTimeout);
 
     private:
         Typesystem::TypeId m_typeId;
@@ -117,11 +117,9 @@ namespace Internal
         typedef ShmArray<TypeLock> TypeLockVector;
         TypeLockVector m_typeLocks;
 
-        //mutable TypeLock m_typeLock;
         typedef boost::interprocess::scoped_lock<TypeLock> ScopedTypeLock;
     };
 }
 }
 }
 #endif
-

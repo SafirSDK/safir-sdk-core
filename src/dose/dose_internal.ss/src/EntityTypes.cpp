@@ -470,7 +470,7 @@ namespace Internal
     {
         EntityIterator iterator;
 
-        iterator.m_connectionContext = connectionContext; 
+        iterator.m_connectionContext = connectionContext;
 
         if (includeSubclasses)
         {
@@ -543,11 +543,10 @@ namespace Internal
 
     bool EntityTypes::CanAcquireContainerWriterLock(const Typesystem::TypeId             typeId,
                                                     const ContextId                      contextId,
-                                                    const boost::posix_time::seconds&    lockTimeout)
+                                                    const boost::chrono::steady_clock::duration&    lockTimeout)
     {
         return GetType(typeId).CanAcquireContainerWriterLock(contextId, lockTimeout);
     }
 }
 }
 }
-

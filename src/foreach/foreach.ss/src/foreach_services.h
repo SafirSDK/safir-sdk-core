@@ -33,9 +33,8 @@
 #include <Safir/Dob/ConnectionAspectMisc.h>
 #include <Safir/Dob/Consumer.h>
 #include <Safir/Dob/ErrorListResponse.h>
-#include <Safir/Dob/ResponseSender.h> 
+#include <Safir/Dob/ResponseSender.h>
 #include <Safir/Utilities/ForEach/ResponseType.h>
-#include <boost/date_time/posix_time/posix_time_duration.hpp>
 #include <list>
 #include <map>
 #include <vector>
@@ -60,7 +59,7 @@ namespace Safir
             typedef std::vector<Safir::Utilities::ForEach::TransactionTableEntry> TransactionTable;
             typedef std::map<Safir::Dob::ResponseSenderPtr, Safir::Utilities::ForEach::RequestSpecificDataPtr> RequestMap;
             typedef std::vector<Safir::Utilities::ForEach::RequestSpecificDataPtr> RequestVector;
-            /** 
+            /**
             * Defines a service. This class handles the registration
             * of the service and processes requests.
             */
@@ -82,7 +81,7 @@ namespace Safir
                 */
                 ~Services();
 
-                /** 
+                /**
                 * Initiates this class. Creates a secondary DOB
                 * connection and registeres the service.
                 */
@@ -91,7 +90,7 @@ namespace Safir
 
                 void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId     typeId,
                                            const Safir::Dob::Typesystem::HandlerId& handlerId);
-     
+
                 void OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRequestProxy,
                                       Safir::Dob::ResponseSenderPtr   responseSender);
 
@@ -101,8 +100,8 @@ namespace Safir
 
                 // Overrides Safir::Application::Backdoor, for more information see baseclass
                 void HandleCommand(const std::vector<std::wstring>& cmdTokens);
-                std::wstring GetHelpText(); 
-                
+                std::wstring GetHelpText();
+
             private:
                 void SendQueuedRequests();
 
@@ -110,7 +109,7 @@ namespace Safir
 
                 // This class uses this secondary connection for DOB calls.
                 Safir::Dob::SecondaryConnection m_connection;
-                
+
                 // Tracer.
                 Safir::Application::Tracer m_debug;
 
@@ -131,7 +130,7 @@ namespace Safir
                 void ScheduleNextRequest(Safir::Utilities::ForEach::RequestSpecificDataPtr requestSpecificData, bool addToQueue);
 
                 // Overflow setting for the backdoor
-                bool m_backdoorOverflow;        
+                bool m_backdoorOverflow;
 #if NOT_YET
                 // Backdoor keeper, to handle program interface commands
                 Safir::Application::BackdoorKeeper m_backdoorKeeper;

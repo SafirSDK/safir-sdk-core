@@ -75,7 +75,7 @@ namespace Internal
             std::wostringstream ostr;
             ostr << "Entity " << Typesystem::Operations::GetName(m_typeId) <<
                     ", which is ContextShared, can only be registered from context 0.";
-            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);         
+            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
         }
 
         bool result = true;
@@ -118,14 +118,14 @@ namespace Internal
             if (handlerId == Dob::Typesystem::HandlerId::ALL_HANDLERS)
             {
                 m_handlerRegistrations[context].UnregisterAll(connection,
-                                                              true);  // true => explicit unregister            
+                                                              true);  // true => explicit unregister
             }
             else
             {
                 m_handlerRegistrations[context].Unregister(connection, handlerId);
             }
         }
-        
+
         CleanGhosts(handlerId, context);
     }
 
@@ -149,7 +149,7 @@ namespace Internal
         {
             ScopedTypeLock lck(m_typeLocks[context]);
 
-            RegisterTime regTime = registrationState.GetRegistrationTime();                        
+            RegisterTime regTime = registrationState.GetRegistrationTime();
             m_entityStates[context].ForEachState(boost::bind(&EntityType::RemoveGhost,
                                                                  this,
                                                                  _2,
@@ -157,7 +157,7 @@ namespace Internal
                                                                  boost::cref(regTime)),
                                                                 false); // false => Do not include released states
 
-            m_handlerRegistrations[context].RemoteSetRegistrationState(connection, registrationState);                        
+            m_handlerRegistrations[context].RemoteSetRegistrationState(connection, registrationState);
         }
         CleanGhosts(handlerId, context);
     }
@@ -228,7 +228,7 @@ namespace Internal
             std::wostringstream ostr;
             ostr << "Entity " << Typesystem::Operations::GetName(m_typeId) <<
                     ", which is ContextShared, can only be set from context 0.";
-            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);            
+            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
         }
 
         ScopedTypeLock lck(m_typeLocks[context]);
@@ -272,7 +272,7 @@ namespace Internal
             std::wostringstream ostr;
             ostr << "Entity " << Typesystem::Operations::GetName(m_typeId) <<
                     ", which is ContextShared, can only be deleted from context 0.";
-            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);            
+            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
         }
 
         ScopedTypeLock lck(m_typeLocks[context]);
@@ -317,7 +317,7 @@ namespace Internal
             std::wostringstream ostr;
             ostr << "Entity " << Typesystem::Operations::GetName(m_typeId) <<
                     ", which is ContextShared, can only be injected from context 0.";
-            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);            
+            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
         }
 
         ScopedTypeLock lck(m_typeLocks[context]);
@@ -348,7 +348,7 @@ namespace Internal
             std::wostringstream ostr;
             ostr << "Entity " << Typesystem::Operations::GetName(m_typeId) <<
                     ", which is ContextShared, can only be deleteInjected from context 0.";
-            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);            
+            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
         }
 
         ScopedTypeLock lck(m_typeLocks[context]);
@@ -372,7 +372,7 @@ namespace Internal
         if (m_typeIsContextShared)
         {
             ENSURE(context == 0, << "Entity " << Typesystem::Operations::GetName(m_typeId) <<
-                    ", which is ContextShared, can only be accepted from context 0.");          
+                    ", which is ContextShared, can only be accepted from context 0.");
         }
 
         ScopedTypeLock lck(m_typeLocks[context]);
@@ -404,7 +404,7 @@ namespace Internal
             std::wostringstream ostr;
             ostr << "SetInjection for Entity " << Typesystem::Operations::GetName(m_typeId) <<
                     ", which is ContextShared, is not allowed from context " << context << "!";
-            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);            
+            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
         }
 
         ScopedTypeLock lck(m_typeLocks[context]);
@@ -436,7 +436,7 @@ namespace Internal
             std::wostringstream ostr;
             ostr << "DeleteInjection for Entity " << Typesystem::Operations::GetName(m_typeId) <<
                     ", which is ContextShared, is not allowed from context 0.";
-            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);            
+            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
         }
 
         ScopedTypeLock lck(m_typeLocks[context]);
@@ -454,7 +454,7 @@ namespace Internal
 
     void EntityType::RemoteSetInjectionEntityState(const DistributionData& entityState)
     {
-        
+
         const ContextId context = entityState.GetSenderId().m_contextId;
 
         if (m_typeIsContextShared)
@@ -617,7 +617,7 @@ namespace Internal
                                                              this,
                                                              _2,
                                                              boost::ref(realState)),
-                                                 true); // true => include released states. 
+                                                 true); // true => include released states.
 
         if (realState.IsNoState())
         {
@@ -654,7 +654,7 @@ namespace Internal
         {
             mostRecentRegisterTime = realState.GetRegistrationTime();
         }
-    }   
+    }
 
     void EntityType::RemoveGhost(const StateSharedPtr&              statePtr,
                                  const Dob::Typesystem::HandlerId&  handlerId,
@@ -676,11 +676,11 @@ namespace Internal
 
         if (realState.GetRegistrationTime() < mostRecentRegisterTime)
         {
-            statePtr->SetReleased(true); 
+            statePtr->SetReleased(true);
             DistributionData newRealState(no_state_tag);
             newRealState = realState.GetEntityStateCopy(false); //we dont want the blob, since this is a delete.
 
-            //This is a ghost and has no owner. So probably it would be more correct to set explicitly deleted to false. 
+            //This is a ghost and has no owner. So probably it would be more correct to set explicitly deleted to false.
             //But this is a quick-fix to make DOPE react and delete this entity permanently without bigger changes.
             newRealState.SetExplicitlyDeleted(true);
 
@@ -702,7 +702,7 @@ namespace Internal
 
     void EntityType::CleanGhosts(const Dob::Typesystem::HandlerId&  handlerId,
                                  const ContextId                    context)
-    {       
+    {
         ScopedTypeLock lck(m_typeLocks[context]);
 
         HandlerSet handlers;
@@ -719,7 +719,7 @@ namespace Internal
 
         //Go through all handlers, one by one, and clean old ghosts.
         for (HandlerSet::const_iterator it = handlers.begin(); it!=handlers.end(); ++it)
-        {               
+        {
             RegisterTime mostRecentRegisterTime;
 
             // Make a first pass to find the most recent registration time for a ghost.
@@ -839,7 +839,7 @@ namespace Internal
             case HandlerNotRegistered:
             {
                 std::wostringstream ostr;
-                ostr << "SetEntity called with handler that is not previously registered. (typeId = " 
+                ostr << "SetEntity called with handler that is not previously registered. (typeId = "
                      << Typesystem::Operations::GetName(m_typeId)
                      << ", connId = " << connection->Id()
                      << ", handlerId = " << handlerId << ")";
@@ -851,7 +851,7 @@ namespace Internal
             case InstanceOwnedByOtherHandler:
             {
                 std::wostringstream ostr;
-                ostr << "SetEntity not allowed, instance owned by another handler. (typeId = " 
+                ostr << "SetEntity not allowed, instance owned by another handler. (typeId = "
                      << Typesystem::Operations::GetName(m_typeId)
                      << ", instanceId = " << instanceId
                      << ", handlerId = " << handlerId << ")";
@@ -863,7 +863,7 @@ namespace Internal
             case InstanceIsGhost:
             {
                 std::wostringstream ostr;
-                ostr << "SetEntity not allowed, persistence exists. (typeId = " 
+                ostr << "SetEntity not allowed, persistence exists. (typeId = "
                      << Typesystem::Operations::GetName(m_typeId)
                      << ", instanceId = " << instanceId
                      << ", handlerId = " << handlerId << ")";
@@ -906,7 +906,7 @@ namespace Internal
             case HandlerNotRegistered:
             {
                 std::wostringstream ostr;
-                ostr << "DeleteEntity called with handler that is not previously registered. (typeId = " 
+                ostr << "DeleteEntity called with handler that is not previously registered. (typeId = "
                      << Typesystem::Operations::GetName(m_typeId)
                      << ", connId = " << connection->Id()
                      << ", handlerId = " << handlerId << ")";
@@ -917,7 +917,7 @@ namespace Internal
             case InstanceOwnedByOtherHandler:
             {
                 std::wostringstream ostr;
-                ostr << "DeleteEntity not allowed, instance owned by another handler. (typeId = " 
+                ostr << "DeleteEntity not allowed, instance owned by another handler. (typeId = "
                      << Typesystem::Operations::GetName(m_typeId)
                      << ", instanceId = " << instanceId
                      << ", handlerId = " << handlerId << ")";
@@ -928,7 +928,7 @@ namespace Internal
             case InstanceIsGhost:
             {
                 std::wostringstream ostr;
-                ostr << "DeleteEntity not allowed, persistence exists. (typeId = " 
+                ostr << "DeleteEntity not allowed, persistence exists. (typeId = "
                      << Typesystem::Operations::GetName(m_typeId)
                      << ", instanceId = " << instanceId
                      << ", handlerId = " << handlerId << ")";
@@ -1284,7 +1284,7 @@ namespace Internal
                 statePtr->SetConsumer(ConsumerId(NULL, static_cast<short>(0))); //dummy consumer
 
                 // The released end state must be saved "a while".
-                EndStates::Instance().Add(statePtr);                
+                EndStates::Instance().Add(statePtr);
             }
         }
     }
@@ -1317,7 +1317,7 @@ namespace Internal
             case HandlerNotRegistered:
             {
                 std::wostringstream ostr;
-                ostr << "SetEntity (in an OnInjected... callback) called with handler that is not previously registered. (typeId = " 
+                ostr << "SetEntity (in an OnInjected... callback) called with handler that is not previously registered. (typeId = "
                      << Typesystem::Operations::GetName(m_typeId)
                      << ", connId = " << connection->Id()
                      << ", handlerId = " << handlerId << ")";
@@ -1329,7 +1329,7 @@ namespace Internal
             case InstanceOwnedByOtherHandler:
             {
                 std::wostringstream ostr;
-                ostr << "SetEntity (in an OnInjected... callback) not allowed, instance owned by another handler. (typeId = " 
+                ostr << "SetEntity (in an OnInjected... callback) not allowed, instance owned by another handler. (typeId = "
                      << Typesystem::Operations::GetName(m_typeId)
                      << ", instanceId = " << instanceId
                      << ", handlerId = " << handlerId << ")";
@@ -1380,7 +1380,7 @@ namespace Internal
             case HandlerNotRegistered:
             {
                 std::wostringstream ostr;
-                ostr << "DeleteEntity (in an OnInjected... callback) called with handler that is not previously registered. (typeId = " 
+                ostr << "DeleteEntity (in an OnInjected... callback) called with handler that is not previously registered. (typeId = "
                      << Typesystem::Operations::GetName(m_typeId)
                      << ", connId = " << connection->Id()
                      << ", handlerId = " << handlerId << ")";
@@ -1391,7 +1391,7 @@ namespace Internal
             case InstanceOwnedByOtherHandler:
             {
                 std::wostringstream ostr;
-                ostr << "DeleteEntity (in an OnInjected... callback) not allowed, instance owned by another handler. (typeId = " 
+                ostr << "DeleteEntity (in an OnInjected... callback) not allowed, instance owned by another handler. (typeId = "
                      << Typesystem::Operations::GetName(m_typeId)
                      << ", instanceId = " << instanceId
                      << ", handlerId = " << handlerId << ")";
@@ -1469,10 +1469,10 @@ namespace Internal
     void EntityType::RemoteSetDeleteEntityStateInternal(const DistributionData&         remoteEntity,
                                                         const StateSharedPtr&           statePtr,
                                                         RemoteSetResult& result)
-    {     
+    {
         result = RemoteSetAccepted;
 
-        bool needToCheckRegistrationState = true;        
+        bool needToCheckRegistrationState = true;
 
         DistributionData localEntity = statePtr->GetRealState();
 
@@ -1495,7 +1495,7 @@ namespace Internal
                     result = RemoteSetNeedRegistration;
                     return;
                 }
-                
+
                 //if localEntity is a ghost, then just delete it the normal way.
             }
             else
@@ -1646,7 +1646,7 @@ namespace Internal
                                                                            true); // true => include released states
 
             // Get  a better name
-            const StateSharedPtr& regStatePtr = lockedRegStateResult.first;            
+            const StateSharedPtr& regStatePtr = lockedRegStateResult.first;
 
             if (regStatePtr == NULL ||
                 regStatePtr->GetRealState().IsNoState() ||
@@ -2140,15 +2140,15 @@ namespace Internal
         }
     }
 
-    bool EntityType::CanAcquireContainerWriterLock(const ContextId                   contextId,
-                                                   const boost::posix_time::seconds& lockTimeout)
+    bool EntityType::CanAcquireContainerWriterLock(const ContextId contextId,
+                                                   const boost::chrono::steady_clock::duration& lockTimeout)
     {
         bool okToAcquireLock = true;
 
         ScopedTypeLock lck(m_typeLocks[contextId],
-                           boost::posix_time::second_clock::universal_time() + lockTimeout);
+                           boost::interprocess::defer_lock);
 
-        if (!lck)
+        if (!steady_try_lock_for(lck,lockTimeout))
         {
             // Can't acquire the type level lock.
             return false;  // *** RETURN ***

@@ -28,6 +28,7 @@
 #include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
 #include <iostream>
+#include <boost/asio/steady_timer.hpp>
 
 //disable stupid incorrect microsoft warning.
 #ifdef _MSC_VER
@@ -38,20 +39,20 @@ class App
     : public Safir::Dob::StopHandler
 {
 public:
-    App() 
+    App()
          : m_dispatcher(m_connection, m_ioService)
-         , m_timer(m_ioService, boost::posix_time::milliseconds(10))
+         , m_timer(m_ioService, boost::chrono::milliseconds(10))
          , m_razor(L"Razor")
-         , m_rb(L"Rymd-B\u00f6rje") //ö 
+         , m_rb(L"Rymd-B\u00f6rje") //ö
     {}
-        
+
         void OnStopOrder() {m_ioService.stop();}
-            
+
     void Run()
     {
         for (int i = 0; i < 1000; ++i) //allow max 1000 instances
         {
-            try 
+            try
             {
                 m_connection.Open(L"sender",boost::lexical_cast<std::wstring>(i),0,this,&m_dispatcher);
                 break; //connected, stop trying
@@ -73,7 +74,7 @@ public:
     void Timeout()
     {
         static int i = 0;
-        m_timer.expires_at(m_timer.expires_at() + boost::posix_time::milliseconds(10));
+        m_timer.expires_from_now(boost::chrono::milliseconds(10));
         m_timer.async_wait(boost::bind(&App::Timeout, this));
         m_razor << "foo" << "bar" << 1234 << std::endl;
         m_rb << "blahonga, " << "blahonga, " << "blahonga" << std::endl;
@@ -87,7 +88,7 @@ private:
     Safir::Dob::Connection m_connection;
     Safir::Utilities::AsioDispatcher m_dispatcher;
 
-    boost::asio::deadline_timer m_timer;
+    boost::asio::steady_timer m_timer;
 
     Safir::Application::Tracer m_razor;
     Safir::Application::Tracer m_rb;
@@ -108,7 +109,3 @@ int main()
         return 1;
     }
 }
-
-
-
-

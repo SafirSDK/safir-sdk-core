@@ -1,1 +1,2 @@
-TODO
+This patch just tries to use the destroyer in some way that would trigger the error.
+I have not really understood how the destroyer is meant to work, just found a way to trigger the error...
