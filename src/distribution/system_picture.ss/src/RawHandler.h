@@ -312,6 +312,11 @@ namespace SP
         }
 
 
+        /**
+         * Mark a node as dead in the raw data.
+         *
+         * Use this to mark a node that has just been excluded as dead.
+         **/
         void SetDeadNode(const int64_t id)
         {
             m_strand.dispatch([this, id]
@@ -323,6 +328,29 @@ namespace SP
                                       throw std::logic_error("SetDeadNode on unknown node");
                                   }
                                   findIt->second.nodeInfo->set_is_dead(true);
+                              });
+        }
+
+        /**
+         * Tell RawHandler about nodes that have recently been declared as dead by the
+         * master (i.e. the Control exe).
+         *
+         * This function is only expected to be called on the slave (i.e. the dose_main
+         * exe).
+         */
+        void RecentlyDeadNodes(std::vector<int64_t> nodeIds)
+        {
+            m_strand.dispatch([this, nodeIds]
+                              {
+                                  for (auto id : nodeIds)
+                                  {
+                                      auto findIt = m_nodeTable.find(id);
+                                      if (!findIt->second.nodeInfo->is_dead())
+                                      {
+                                          findIt->second.nodeInfo->set_is_dead(true);
+                                          m_communication.ExcludeNode(id);
+                                      }
+                                  }
                               });
         }
 
@@ -340,7 +368,7 @@ namespace SP
         }
 
     private:
-        static boost::chrono::steady_clock::duration CalculateDeadCheckPeriod(const std::map<int64_t, 
+        static boost::chrono::steady_clock::duration CalculateDeadCheckPeriod(const std::map<int64_t,
                                                                               NodeType>& nodeTypes)
         {
             boost::chrono::steady_clock::duration result = boost::chrono::seconds(1);

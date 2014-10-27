@@ -178,13 +178,31 @@ namespace SP
                                                                         SLAVE_LOCAL_RAW_NAME,
                                                                         boost::chrono::seconds(1),
                                                                         false))
-            , m_stateSubscriberLocal(Safir::make_unique<LocalSubscriber<Safir::Utilities::Internal::IpcSubscriber,
-                                                                        SystemStateSubscriber,
-                                                                        SystemStateCreator>>(ioService,
-                                                                                             MASTER_LOCAL_STATE_NAME))
             , m_stopped(false)
         {
+            auto stateSubscriberLocal = Safir::make_unique<LocalSubscriber<Safir::Utilities::Internal::IpcSubscriber,
+                                                                           SystemStateSubscriber,
+                                                                           SystemStateCreator>>(ioService,
+                                                                                                MASTER_LOCAL_STATE_NAME);
 
+            stateSubscriberLocal->AddSubscriber([&](const SystemState& ss)
+                {
+                    std::vector<int64_t> deadNodes;
+                    for (int i = 0; i < ss.Size(); ++i)
+                    {
+                        if (ss.IsDead(i))
+                        {
+                            deadNodes.push_back(ss.Id(i));
+                        }
+                    }
+
+                    if(!deadNodes.empty())
+                    {
+                        m_rawHandler->RecentlyDeadNodes(std::move(deadNodes));
+                    }
+                });
+
+            m_stateSubscriberLocal = std::move(stateSubscriberLocal);
         }
 
 
