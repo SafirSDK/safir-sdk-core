@@ -262,6 +262,10 @@ namespace SP
                 int changes = 0;
                 for (int i = 0; i < data.Size(); ++i)
                 {
+                    //Raw data is not meant to contain info about this node, if we get
+                    //this data there is some serious system configuration error.
+                    //What is happening is that the exe that is transmitting raw data over
+                    //ipc to us believes that it is running in another node than we are!
                     if (data.Id(i) == m_id)
                     {
                         throw std::logic_error("DataChannelStatistics contained own node!");
@@ -340,6 +344,8 @@ namespace SP
          */
         void RecentlyDeadNodes(std::vector<int64_t> nodeIds)
         {
+            //TODO: should we detect that we're not receiving these and then
+            //deduce that control has died?
             m_strand.dispatch([this, nodeIds]
                               {
                                   for (auto id : nodeIds)

@@ -125,12 +125,6 @@ private:
 
 };
 
-void ChangedSystemState(const Safir::Dob::Internal::SP::SystemState& data)
-{
-    std::wcout << "Got new system state from SP! The number of nodes are " << data.Size() << std::endl;
-
-}
-
 int main(int argc, char * argv[])
 {
     const ProgramOptions options(argc, argv);
@@ -204,7 +198,12 @@ int main(int argc, char * argv[])
 
 
     // Start subscription to system state changes from SP
-    sp.StartStateSubscription(ChangedSystemState);
+    sp.StartStateSubscription([](const Safir::Dob::Internal::SP::SystemState& data)
+                              {
+
+                              });
+
+
 
     communication.Start();
 

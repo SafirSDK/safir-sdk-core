@@ -203,7 +203,9 @@ int main(int argc, char * argv[])
                  {
                      continue;
                  }
-                 lllog(5) << "Injecting node " << data.Name(i) << "(" << data.Id(i) << ")" << std::endl;
+                 lllog(5) << "Injecting node " << data.Name(i) << "(" << data.Id(i)
+                          << ") of type " << data.NodeTypeId(i)
+                          << " with address " << data.DataAddress(i) << std::endl;
                  communication.InjectNode(data.Name(i),
                                           data.Id(i),
                                           data.NodeTypeId(i),
@@ -213,16 +215,52 @@ int main(int argc, char * argv[])
              }
          }));
 
-    communication.SetDataReceiver([](int64_t fromNodeId, 
-                                     int64_t fromNodeType, 
-                                     const boost::shared_ptr<char[]>& data, 
-                                     size_t size)
+    communication.SetDataReceiver([](const int64_t fromNodeId,
+                                     const int64_t fromNodeType,
+                                     const boost::shared_ptr<char[]>& data,
+                                     const size_t size)
                                   {
-                                      //discard data...
+                                      if (size != 10000)
+                                      {
+                                          throw std::logic_error("Received incorrectly sized data!");
+                                      }
+                                      for (size_t i = 0; i < size; ++i)
+                                      {
+                                          if (data[i] != 3)
+                                          {
+                                              throw std::logic_error("Received corrupt data!");
+                                          }
+                                      }
+
                                   },
                                   1000100222);
 
     communication.Start();
+
+
+    boost::asio::steady_timer sendTimer(ioService);
+
+    const std::function<void(const boost::system::error_code& error)> send =
+        [&communication, &sendTimer, &send](const boost::system::error_code& error)
+        {
+            if (error)
+            {
+                return;
+            }
+
+            const size_t size = 10000;
+            const boost::shared_ptr<char[]> data(new char[size]);
+            memset(data.get(), 3, size);
+            //send the data to both node types.
+            communication.Send(0,1,data,size,1000100222,true);
+            communication.Send(0,2,data,size,1000100222,true);
+
+            sendTimer.expires_from_now(boost::chrono::milliseconds(10));
+            sendTimer.async_wait(send);
+        };
+
+    sendTimer.expires_from_now(boost::chrono::milliseconds(10));
+    sendTimer.async_wait(send);
 
 
     boost::asio::signal_set signalSet(ioService);
@@ -238,7 +276,7 @@ int main(int argc, char * argv[])
     signalSet.add(SIGTERM);
 #endif
 
-    signalSet.async_wait([&sp,&work,&communication,&signalSet](const boost::system::error_code& error,
+    signalSet.async_wait([&sp,&work,&communication,&signalSet,&sendTimer](const boost::system::error_code& error,
                                                            const int signal_number)
                        {
                            lllog(3) << "Got signal " << signal_number << std::endl;
@@ -249,34 +287,13 @@ int main(int argc, char * argv[])
                            }
                            sp.Stop();
                            communication.Stop();
+                           sendTimer.cancel();
                            work.reset();
                        }
                        );
 
 
 
-    boost::asio::steady_timer sendTimer(ioService);
-
-    const std::function<void(const boost::system::error_code& error)> send = 
-        [&communication, &sendTimer, &send](const boost::system::error_code& error)
-        {
-            if (error)
-            {
-                return;
-            }
-
-            const size_t size = 10;
-            const boost::shared_ptr<char[]> data(new char[size]);
-            memcpy(data.get(), "1234567890",size);
-            communication.Send(0,1,data,size,1000100222,true);
-            communication.Send(0,2,data,size,1000100222,true);
-
-            sendTimer.expires_from_now(boost::chrono::milliseconds(100));
-            sendTimer.async_wait(send);
-        };
-
-    sendTimer.expires_from_now(boost::chrono::milliseconds(10));
-    sendTimer.async_wait(send);
 
     boost::thread_group threads;
     for (int i = 0; i < 9; ++i)
