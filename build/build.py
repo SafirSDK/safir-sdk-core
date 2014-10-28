@@ -168,7 +168,8 @@ class Logger(object):
         self.__last_tag = None
 
         self.__buildlog = codecs.open("buildlog.html", mode = "w", encoding = "utf-8")
-        self.__buildlog.write("<html><head><title>Safir SDK Core Build Log</title><meta http-equiv=\"refresh\" content=\"10\" ></head>\n")
+        self.__buildlog.write("<html><head><title>Safir SDK Core Build Log"
+                              + "</title><meta http-equiv=\"refresh\" content=\"10\" ></head>\n")
         self.__buildlog.write("<body>\n")
         self.__buildlog.write("<h1>Safir SDK Core Build Log</h1>")
         self.__buildlog.write("<b>Command line:</b> " + " ".join(sys.argv) + "<br/>")
@@ -533,7 +534,8 @@ class VisualStudioBuilder(BuilderBase):
                 self.used_studio = version
                 break
         if env is None:
-            die ("Failed to find Visual Studio install dir, checked the following environment variables: " + str(install_dirs))
+            die ("Failed to find Visual Studio install dir, "
+                 + "checked the following environment variables: " + str(install_dirs))
         result = os.path.join(env,os.pardir,os.pardir,"VC","vcvarsall.bat")
         if not os.path.isfile(result):
             die("No such file: " + result)
@@ -552,8 +554,12 @@ class VisualStudioBuilder(BuilderBase):
         return output
 
     def __setup_build_environment(self):
-        """Find vcvarsall.bat and load the relevant environment variables from it.
-        This function is inspired (but not copied, for licensing reasons) by the one in python distutils2 msvc9compiler.py"""
+        """
+        Find vcvarsall.bat and load the relevant environment variables from it.  This function
+        is inspired (but not copied, for licensing reasons) by the one in python
+        distutils2 msvc9compiler.py
+        """
+
         vcvarsall = self.__find_vcvarsall()
 
         #use uppercase only in this variable!
@@ -583,7 +589,8 @@ class VisualStudioBuilder(BuilderBase):
                 if os.environ.get(name) is None:
                     logger.log("Will set '" + name + "' to '" + value + "'", "detail")
                 else:
-                    logger.log("Will change '" + name + "' from '" + os.environ.get(name) + "' to '" + value + "'", "detail")
+                    logger.log("Will change '" + name + "' from '" + os.environ.get(name)
+                               + "' to '" + value + "'", "detail")
                 os.environ[name] = value
                 found_variables.add(name)
 
@@ -749,7 +756,6 @@ if hasattr(os,"nice"):
         logger.log("Failed to set process niceness: " + str(e))
 
 try:
-
     (tests, failed) = main()
     logger.log("Result", "header")
     logger.log("Build completed successfully!")
