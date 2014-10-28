@@ -621,6 +621,52 @@ class UnixGccBuilder(BuilderBase):
     def generator_specific_build_cmds(self):
         return ( "-j", str(self.num_jobs))
 
+#this builder has nothing in common with the other builders, really.
+class DebianBuilder(object):
+    def __init__(self, arguments):
+        #super(DebianBuilder, self).__init__(arguments)
+
+        #ada builds (with gnatmake) will look at environment variable that is
+        #defined on windows to determine parallellism. Define it on linux too.
+        #os.environ["NUMBER_OF_PROCESSORS"] = str(self.num_jobs)
+
+        #this builder doesnt support exposing test results.
+        self.total_tests = -1
+        self.failed_tests = -1
+
+    @staticmethod
+    def can_use():
+        return sys.platform.startswith("linux") and \
+            platform.linux_distribution()[0] in ("debian", "Ubuntu")
+
+    def __run(self, cmd, description):
+        """Run a command"""
+
+        logger.log(description, "command_description")
+        logger.log(" ".join(cmd), "command")
+
+        process = subprocess.Popen(cmd,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        output = logger.log_output(process)
+        if process.returncode != 0:
+            die("Failed to run '" + " ".join(cmd) + "' in " + os.getcwd())
+
+        return output
+
+    def build(self):
+        #TODO: what about the versions here?
+        remove("tmp")
+        mkdir("tmp")
+        self.__run(("/usr/bin/git", "archive", "HEAD",
+                    "--prefix", "safir-sdk-core_6.0/",
+                    "-o", "tmp/safir-sdk-core_6.0.orig.tar"),
+                   "creating tar archive")
+        self.__run(("/bin/bzip2", "tmp/safir-sdk-core_6.0.orig.tar"), "compressing archive")
+        os.chdir("tmp")
+        self.__run(("/bin/tar", "xvfj", "safir-sdk-core_6.0.orig.tar.bz2"), "extracting archive")
+        os.chdir("safir-sdk-core_6.0")
+        shutil.copytree(os.path.join("build", "packaging", "debian"), "debian")
+        self.__run(("debuild", "--prepend-path", "/usr/lib/ccache/", "-us", "-uc"), "building packages")
+    
 def getText(nodelist):
     rc = []
     for node in nodelist:
@@ -674,6 +720,8 @@ def translate_results_to_junit(suite_name):
 def get_builder(arguments):
     if VisualStudioBuilder.can_use():
         return VisualStudioBuilder(arguments)
+    elif arguments.package and DebianBuilder.can_use():
+        return DebianBuilder(arguments)
     elif UnixGccBuilder.can_use():
         return UnixGccBuilder(arguments)
     else:
@@ -705,7 +753,9 @@ try:
     (tests, failed) = main()
     logger.log("Result", "header")
     logger.log("Build completed successfully!")
-    if tests == 0:
+    if tests == -1:
+        pass
+    elif tests == 0:
         logger.log("No tests were performed")
     elif failed == 0:
         logger.log("All tests ran successfully!")
@@ -718,6 +768,6 @@ except FatalError as e:
     logger.log(str(e), "output")
     logger.log(str(e), "brief")
     result = 1
-
+    
 logger.close()
 sys.exit(result)
