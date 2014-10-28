@@ -345,7 +345,7 @@ namespace SP
                                   for (auto id : nodeIds)
                                   {
                                       auto findIt = m_nodeTable.find(id);
-                                      if (!findIt->second.nodeInfo->is_dead())
+                                      if (findIt != m_nodeTable.end() && !findIt->second.nodeInfo->is_dead())
                                       {
                                           findIt->second.nodeInfo->set_is_dead(true);
                                           m_communication.ExcludeNode(id);

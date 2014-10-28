@@ -457,6 +457,41 @@ BOOST_AUTO_TEST_CASE( set_dead_node )
     BOOST_CHECK_EQUAL(cbCalls, 2);
 }
 
+BOOST_AUTO_TEST_CASE( recently_dead_nodes )
+{
+    int cbCalls = 0;
+    rh.AddRawChangedCallback([&](const RawStatistics& statistics,
+                                 const RawChanges& flags)
+                               {
+                                   ++cbCalls;
+
+                                   BOOST_CHECK(flags.NodesChanged());
+                                   BOOST_CHECK(!flags.NewRemoteStatistics());
+                                   BOOST_CHECK(!flags.ElectionIdChanged());
+
+                                   if (cbCalls == 1)
+                                   {
+                                       BOOST_CHECK_EQUAL(statistics.Size(), 1);
+                                       BOOST_CHECK(!statistics.IsDead(0));
+                                   }
+                                   else if (cbCalls == 2)
+                                   {
+                                       BOOST_CHECK_EQUAL(statistics.Size(), 2);
+                                       BOOST_CHECK(statistics.IsDead(0));
+                                       BOOST_CHECK(!statistics.IsDead(1));
+                                   }
+                               });
+    comm.newNodeCb("asdf",11,10,"asdffff","asdfqqqq");
+    rh.RecentlyDeadNodes({11,100,2900});
+
+    //triggers another callback so that we get to check the SetDeadNode result.
+    comm.newNodeCb("asdf",12,10,"asdffff","asdfqqqq");
+
+    rh.Stop();
+    BOOST_CHECK_NO_THROW(ioService.run());
+    BOOST_CHECK_EQUAL(cbCalls, 2);
+}
+
 BOOST_AUTO_TEST_CASE( perform_on_all )
 {
     comm.newNodeCb("asdf",11,10,"asdffff","asdfqqqq");
