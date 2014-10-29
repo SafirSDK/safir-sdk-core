@@ -236,6 +236,11 @@ void RawStatisticsPage::UpdateLocalTable()
                              COLUMN_DATA_RETRANSMIT_COUNT,
                              new QTableWidgetItem(QString::number(m_statistics.DataRetransmitCount(it->second))));
 
+        for (int column = 0; column < NUM_COLUMNS; ++column)
+        {
+            localTable->item(row, column)->setToolTip("Node is alive");
+        }
+
         if (m_statistics.IsDead(it->second))
         {
             SetDead(localTable,row);
@@ -276,6 +281,16 @@ void RawStatisticsPage::UpdateRemoteTable()
         {
             if (id == m_statistics.Id(i))
             {
+                if(!m_statistics.HasRemoteStatistics(i))
+                {
+                    remoteTable->setRowCount(0);
+                    remoteTable->setEnabled(false);
+                    remoteTable->setToolTip("There is no remote data for the selected node");
+                    return;
+                }
+                remoteTable->setEnabled(true);
+                remoteTable->setToolTip("");
+
                 const auto statistics = m_statistics.RemoteStatistics(i);
 
                 //starts off containing all ids in the statistics message
@@ -349,6 +364,12 @@ void RawStatisticsPage::UpdateRemoteTable()
                     remoteTable->setItem(row,
                                          COLUMN_DATA_RETRANSMIT_COUNT,
                                          new QTableWidgetItem(QString::number(statistics.DataRetransmitCount(it->second))));
+
+                    for (int column = 0; column < NUM_COLUMNS; ++column)
+                    {
+                        remoteTable->item(row, column)->setToolTip("Node is alive");
+                    }
+
 
                     if (statistics.IsDead(it->second))
                     {

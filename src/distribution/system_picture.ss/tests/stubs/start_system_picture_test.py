@@ -53,19 +53,39 @@ def mkdir(newdir):
         if tail:
             os.mkdir(newdir)
 
-def launch_control(number, debug):
-    command = (control_stub,) + ("--name",    "Node_{0:03d}".format(number), 
+def launch_control(number, id, debug):
+    command = (control_stub,) + ("--name",    "Node_{0:03d}".format(number),
                                   "--control-address", "127.0.0.1:33{0:03d}".format(number),
                                   "--data-address", "127.0.0.1:43{0:03d}".format(number),
-                                  "--seed",    "127.0.0.1:33000")
+                                  "--seed",    "127.0.0.1:33000",
+                                  "--force-id", str(id))
 
     if debug:
         command = ("gdb", "--batch" , "--ex", "run", "--ex", "bt", "--args") + command
-            
+
     print (command)
     e = os.environ.copy()
     e["SAFIR_INSTANCE"] = str(number+1000)
-    output = open("Node_{0:03d}.output.txt".format(number),"w")
+    output = open("control_{0:03d}.output.txt".format(number),"w")
+    c = subprocess.Popen(command,
+                         stdout = output,
+                         stderr = subprocess.STDOUT,
+                         stdin = subprocess.PIPE if debug else None,
+                         env = e)
+    return c
+
+def launch_dose_main(number, id, debug):
+    command = (dose_main_stub,) + ("--name", "Node_{0:03d}".format(number),
+                                   "--data-address", "127.0.0.1:43{0:03d}".format(number),
+                                   "--force-id", str(id))
+
+    if debug:
+        command = ("gdb", "--batch" , "--ex", "run", "--ex", "bt", "--args") + command
+
+    print (command)
+    e = os.environ.copy()
+    e["SAFIR_INSTANCE"] = str(number+1000)
+    output = open("main_{0:03d}.output.txt".format(number),"w")
     c = subprocess.Popen(command,
                          stdout = output,
                          stderr = subprocess.STDOUT,
@@ -74,6 +94,23 @@ def launch_control(number, debug):
     return c
 
 
+def launch_node(number,debug):
+    id = random.getrandbits(63)
+    control = launch_control(number, id, debug)
+    main = launch_dose_main(number, id, debug)
+    return (number,control,main)
+
+
+def stop(proc):
+    proc.terminate()
+    for i in range(300): #30 seconds
+        if proc.poll() is not None:
+            return
+        time.sleep(0.1)
+    proc.kill()
+    proc.wait()
+    return
+
 SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
 if SAFIR_RUNTIME is None or not os.path.isdir(SAFIR_RUNTIME):
     print("SAFIR_RUNTIME must be set")
@@ -81,6 +118,7 @@ if SAFIR_RUNTIME is None or not os.path.isdir(SAFIR_RUNTIME):
 SAFIR_RUNTIME = os.path.normpath(SAFIR_RUNTIME)
 
 control_stub = os.path.join(SAFIR_RUNTIME,"bin","control_stub")
+dose_main_stub = os.path.join(SAFIR_RUNTIME,"bin","dose_main_stub")
 
 parser = argparse.ArgumentParser(description='Run a lot of control_stub')
 parser.add_argument('--number', '-n', dest="num", action='store', type=int,
@@ -99,29 +137,33 @@ parser.add_argument('--gdb', '-d', dest='debug', action='store_true',
 
 args = parser.parse_args()
 
-rmdir("start_many_output")
-mkdir("start_many_output")
-os.chdir("start_many_output")
+rmdir("/tmp/start_many_output")
+mkdir("/tmp/start_many_output")
+os.chdir("/tmp/start_many_output")
 
-controls = list()
+nodes = list()
 
 try:
     for i in range (1 if args.skip else 0 ,args.num):
-        controls.append((i,launch_control(i, args.debug)))
+        nodes.append(launch_node(i, args.debug))
 
     killtime = time.time()
     while True:
         time.sleep(1.0)
-        living_controls = list()
-        for i, control in controls:
-            if control.poll() is None:
-                living_controls.append((i,control))
+        living = list()
+        for i, control, main in nodes:
+            if control.poll() is None and main.poll() is None:
+                living.append((i,control,main))
             else:
-                print ("Control",i,"exited with return code", control.returncode)
-        controls = living_controls
+                if control.poll() is not None:
+                    print ("Control",i,"exited with return code", control.returncode)
+                    stop(main)
+                    print ("Killed dose_main, and got return code", main.returncode)
 
-        if len(controls) != args.num - (1 if args.skip else 0):
-            print ("Unexpected number of living controls:", len(controls))
+        nodes = living
+
+        if len(nodes) != args.num - (1 if args.skip else 0):
+            print ("Unexpected number of living nodes:", len(nodes))
 
         if not args.terminate:
             continue
@@ -129,23 +171,28 @@ try:
         if killtime + 60 < time.time():
             killtime = time.time()
             #choose one to stop
-            index = random.randint(1,len(controls)-1)
-            i, control = controls.pop(index)
+            index = random.randint(1,len(nodes)-1)
+            i, control, main = nodes.pop(index)
             print ("Stopping", i)
-            control.terminate()
-            control.wait()
+            stop(control)
+            stop(main)
             if control.returncode != 0:
-                print ("RETURN CODE",control.returncode)
-            controls.append((i,launch_control(i, args.debug)))
+                print ("CONTROL RETURN CODE",control.returncode)
+            if main.returncode != 0:
+                print ("DOSE_MAIN RETURN CODE",main.returncode)
+
+            nodes.append(launch_node(i, args.debug))
 except KeyboardInterrupt:
     pass
 except:
     traceback.print_exc()
 print ("Killing all controls")
-for i, control in controls:
+for i, control, main in nodes:
     try:
-        control.kill()
-        control.wait()
+        stop(main)
     except ProcessLookupError:
         pass
-
+    try:
+        stop(control)
+    except ProcessLookupError:
+        pass

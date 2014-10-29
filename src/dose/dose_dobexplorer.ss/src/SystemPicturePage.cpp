@@ -50,7 +50,7 @@ namespace
         {
             widget->setText(str);
         }
-        
+
     }
 
     template <class T>
@@ -119,12 +119,45 @@ void SystemPicturePage::closeEvent(QCloseEvent* event)
 void SystemPicturePage::UpdatedState(const Safir::Dob::Internal::SP::SystemState& data)
 {
     SetText(electedId,data.ElectedId());
-    
+
     systemTable->setSortingEnabled(false);
     UpdateSystemTable(data);
     systemTable->setSortingEnabled(true);
 }
 
+void UpdateRowState(QTableWidget* systemTable,
+                    const int row,
+                    const bool isElected,
+                    const bool isDead)
+{
+    QColor expectedColor = Qt::transparent;
+    QString tooltip = "Node is alive";
+
+    if (isElected && isDead)
+    {
+        expectedColor = QColor(240,100,100);
+        tooltip = "Elected coordinator is dead!";
+    }
+    else if (isElected)
+    {
+        expectedColor = QColor(230,115,57);
+        tooltip = "Elected coordinator";
+    }
+    else if (isDead)
+    {
+        expectedColor = QColor(200,200,200);
+        tooltip = "Node died recently";
+    }
+
+    if (systemTable->item(row, COLUMN_NAME)->background() != expectedColor)
+    {
+        for (int column = 0; column < NUM_COLUMNS; ++column)
+        {
+            systemTable->item(row, column)->setBackground(expectedColor);
+            systemTable->item(row, column)->setToolTip(tooltip);
+        }
+    }
+}
 
 void SystemPicturePage::UpdateSystemTable(const Safir::Dob::Internal::SP::SystemState& statistics)
 {
@@ -145,6 +178,11 @@ void SystemPicturePage::UpdateSystemTable(const Safir::Dob::Internal::SP::System
         else
         {
             ids.erase(id);
+
+            UpdateRowState(systemTable,
+                           row,
+                           id == statistics.ElectedId(), //isElected
+                           statistics.IsDead(findIt->second)); //isDead
         }
     }
 
@@ -169,41 +207,10 @@ void SystemPicturePage::UpdateSystemTable(const Safir::Dob::Internal::SP::System
                              COLUMN_DATA_ADDRESS,
                              new QTableWidgetItem(QString::fromUtf8(statistics.DataAddress(it->second).c_str())));
 
-        //set elected coordinator 
-        if (it->first == statistics.ElectedId())
-        {
-            if (systemTable->item(row, COLUMN_NAME)->background() != QColor(230,115,57))
-            {
-                for (int column = 0; column < NUM_COLUMNS; ++column)
-                {
-                    systemTable->item(row, column)->setBackground(QColor(230,115,57));
-                    systemTable->item(row, column)->setToolTip("Elected coordinator");
-                }
-            }
-        }
-        else if (statistics.IsDead(it->second))
-        {
-            if (systemTable->item(row, COLUMN_NAME)->background() != QColor(200,200,200))
-            {
-                for (int column = 0; column < NUM_COLUMNS; ++column)
-                {
-                    systemTable->item(row, column)->setBackground(QColor(200,200,200));
-                    systemTable->item(row, column)->setToolTip("Node is dead");
-                }
-            }
-        }
-        else
-        {
-            if (systemTable->item(row, COLUMN_NAME)->background() != Qt::transparent)
-            {
-                for (int column = 0; column < NUM_COLUMNS; ++column)
-                {
-                    systemTable->item(row, column)->setBackground(Qt::transparent);
-                    systemTable->item(row, column)->setToolTip("");
-                }
-            }
-
-        }
+        UpdateRowState(systemTable,
+                       row,
+                       it->first == statistics.ElectedId(), //isElected
+                       statistics.IsDead(it->second)); //isDead
 
     }
 }
