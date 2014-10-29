@@ -209,13 +209,16 @@ namespace ToolSupport
                     break;
 
                 case EntityIdMemberType:
-                    index=TypeUtilities::GetDictionaryIndexFromKey(pd, std::make_pair(vd.key.int64, vd.key.hash));
+                {
+                    DotsC_EntityId eidKey={vd.key.int64, vd.key.hash};
+                    index=TypeUtilities::GetDictionaryIndexFromKey(pd, eidKey);
+                }
                     break;
 
                 case InstanceIdMemberType:
                 case HandlerIdMemberType:
                 case ChannelIdMemberType:
-                    index=TypeUtilities::GetDictionaryIndexFromKey(pd, std::make_pair(vd.key.hash, static_cast<const char*>(NULL)));
+                    index=TypeUtilities::GetDictionaryIndexFromKey(pd, vd.key.hash);
                     break;
 
                 default:
@@ -523,47 +526,14 @@ namespace ToolSupport
         return true;
     }
 
-    bool EqualKey(const ValueDefinition& lhs, const ValueDefinition& rhs, DotsC_MemberType keyType)
+    void ThrowDictionaryKeyDuplicates(const ParseState& state, const ParameterDescriptionLocal* pd, int keyIndex)
     {
-        switch(keyType)
-        {
-        case Int32MemberType:
-            return lhs.key.int32==rhs.key.int32;
-        case Int64MemberType:
-            return lhs.key.int64==rhs.key.int64;
-        case EntityIdMemberType:
-            return lhs.key.int64==rhs.key.int64 && lhs.key.hash==rhs.key.hash;
-        case TypeIdMemberType:
-            return lhs.key.int64==rhs.key.int64;
-        case InstanceIdMemberType:
-        case ChannelIdMemberType:
-        case HandlerIdMemberType:
-            return lhs.key.hash==rhs.key.hash;
-        case StringMemberType:
-            return lhs.key.str==rhs.key.str;
-        case EnumerationMemberType:
-            return lhs.key.str==rhs.key.str; //enums will also have
-        default: //not valid key type, could not happen here
-            return false;
-        }
-    }
-
-    void CheckDictionaryKeyDuplicates(const RepositoryLocal* rep, const ParameterDescriptionLocal* pd)
-    {
-        for (ParameterValues::const_iterator it=pd->values.begin(); it!=pd->values.end(); ++it)
-        {
-            size_t count=std::count_if(it+1, pd->values.end(), boost::bind(EqualKey, _1, *it, pd->GetKeyType()));
-            if (count>0)
-            {
-                std::ostringstream os;
-                Internal::ToStringHelper<TypeRepository> strHelp(rep);
-                int index=static_cast<int>(std::distance(pd->values.begin(), it));
-                os<<"The dictionary parameter '"<<pd->qualifiedName<<"' contains duplicated key '";
-                strHelp.ParameterKeyToString(pd, index, os);
-                os<<"'. Keys must be unique.";
-                throw std::invalid_argument(os.str());
-            }
-        }
+        std::ostringstream os;
+        Internal::ToStringHelper<TypeRepository> strHelp(state.repository.get());
+        os<<"The dictionary parameter '"<<pd->qualifiedName<<"' contains duplicated key '";
+        strHelp.ParameterKeyToString(pd, keyIndex, os);
+        os<<"'. Keys must be unique.";
+        throw ParseError("Duplicated dictionary key", os.str(), state.currentPath, 206);
     }
 
     template <class Key, class Val>
@@ -750,21 +720,64 @@ namespace ToolSupport
         if (pd->GetCollectionType()!=DictionaryCollectionType)
             return; //not a dictionary
 
-        if (pd->GetKeyType()==TypeIdMemberType)
+        switch(pd->GetKeyType())
         {
-            //Verify that typeId parameters contains values that are existing typeIds.
+        case Int32MemberType:
+        {
             for (int index=0; index<pd->GetNumberOfValues(); ++index)
             {
                 const ValueDefinition& v=pd->Value(static_cast<size_t>(index));
-                if (!BasicTypeOperations::ValidTypeId(state.repository.get(), v.key.int64))
+                if (!pd->unifiedKeyToIndex.insert(std::pair<DotsC_Int64, int>(TypeUtilities::ToUnifiedDictionaryKey(v.key.int32), index)).second)
                 {
-                    std::ostringstream os;
-                    os<<"The parameter "<<pd->GetName()<<" has an invalid key. The specified typeId is not a type. (Hint its the "<<index+1<<":th dictionary entry in the parameter)";
-                    throw ParseError("Invalid TypeId key", os.str(), state.currentPath, 202);
+                    ThrowDictionaryKeyDuplicates(state, pd, index);
+
                 }
             }
         }
-        else if (pd->GetKeyType()==EntityIdMemberType)
+            break;
+
+        case Int64MemberType:
+        {
+            for (int index=0; index<pd->GetNumberOfValues(); ++index)
+            {
+                const ValueDefinition& v=pd->Value(static_cast<size_t>(index));
+                if (!pd->unifiedKeyToIndex.insert(std::pair<DotsC_Int64, int>(TypeUtilities::ToUnifiedDictionaryKey(v.key.int64), index)).second)
+                {
+                    ThrowDictionaryKeyDuplicates(state, pd, index);
+                }
+            }
+        }
+            break;
+
+        case InstanceIdMemberType:
+        case ChannelIdMemberType:
+        case HandlerIdMemberType:
+        {
+            for (int index=0; index<pd->GetNumberOfValues(); ++index)
+            {
+                const ValueDefinition& v=pd->Value(static_cast<size_t>(index));
+                if (!pd->unifiedKeyToIndex.insert(std::pair<DotsC_Int64, int>(TypeUtilities::ToUnifiedDictionaryKey(v.key.hash), index)).second)
+                {
+                    ThrowDictionaryKeyDuplicates(state, pd, index);
+                }
+            }
+        }
+            break;
+
+        case StringMemberType:
+        {
+            for (int index=0; index<pd->GetNumberOfValues(); ++index)
+            {
+                const ValueDefinition& v=pd->Value(static_cast<size_t>(index));
+                if (!pd->unifiedKeyToIndex.insert(std::pair<DotsC_Int64, int>(TypeUtilities::ToUnifiedDictionaryKey(v.key.str), index)).second)
+                {
+                    ThrowDictionaryKeyDuplicates(state, pd, index);
+                }
+            }
+        }
+            break;
+
+        case EntityIdMemberType:
         {
             //Verify that EntityId parameters contains values that are existing class type.
             for (int index=0; index<pd->GetNumberOfValues(); ++index)
@@ -784,9 +797,38 @@ namespace ToolSupport
                     os<<"The parameter "<<pd->GetName()<<" has an invalid key. The class '"<<tmpCd->GetName()<<"' is not a subtype of Safir.Dob.Entity";
                     throw ParseError("Invalid EntityId key", os.str(), state.currentPath, 53);
                 }
+
+                DotsC_EntityId eidKey={v.key.int64, v.key.hash};
+                if (!pd->unifiedKeyToIndex.insert(std::pair<DotsC_Int64, int>(TypeUtilities::ToUnifiedDictionaryKey(eidKey), index)).second)
+                {
+                    ThrowDictionaryKeyDuplicates(state, pd, index);
+                }
             }
         }
-        else if (pd->GetKeyType()==EnumerationMemberType)
+            break;
+
+        case TypeIdMemberType:
+        {
+            //Verify that typeId parameters contains values that are existing typeIds.
+            for (int index=0; index<pd->GetNumberOfValues(); ++index)
+            {
+                const ValueDefinition& v=pd->Value(static_cast<size_t>(index));
+                if (!BasicTypeOperations::ValidTypeId(state.repository.get(), v.key.int64))
+                {
+                    std::ostringstream os;
+                    os<<"The parameter "<<pd->GetName()<<" has an invalid key. The specified typeId is not a type. (Hint its the "<<index+1<<":th dictionary entry in the parameter)";
+                    throw ParseError("Invalid TypeId key", os.str(), state.currentPath, 202);
+                }
+
+                if (!pd->unifiedKeyToIndex.insert(std::pair<DotsC_Int64, int>(TypeUtilities::ToUnifiedDictionaryKey(v.key.int64), index)).second)
+                {
+                    ThrowDictionaryKeyDuplicates(state, pd, index);
+                }
+            }
+        }
+            break;
+
+        case EnumerationMemberType:
         {
             //Verify that enum parameter key is valid according to the specified enum type.
             const EnumDescription* ed=state.repository->GetEnum(pd->GetKeyTypeId());
@@ -801,24 +843,26 @@ namespace ToolSupport
             //Check value
             for (int index=0; index<pd->GetNumberOfValues(); ++index)
             {
-                ValueDefinition& val=pd->MutableValue(static_cast<size_t>(index));
-                val.key.int32=ed->GetIndexOfValue(val.key.str);
-                if (val.key.int32<0)
+                ValueDefinition& v=pd->MutableValue(static_cast<size_t>(index));
+                v.key.int32=ed->GetIndexOfValue(v.key.str);
+                if (v.key.int32<0)
                 {
                     std::ostringstream os;
-                    os<<"The parameter "<<pd->GetName()<<" has an invalid key '"<<val.key.str<<"'. Expected to be an enum value of type "<<ed->GetName();
+                    os<<"The parameter "<<pd->GetName()<<" has an invalid key '"<<v.key.str<<"'. Expected to be an enum value of type "<<ed->GetName();
                     throw ParseError("Invalid key", os.str(), state.currentPath, 196);
+                }
+
+                if (!pd->unifiedKeyToIndex.insert(std::pair<DotsC_Int64, int>(TypeUtilities::ToUnifiedDictionaryKey(v.key.int32), index)).second)
+                {
+                    ThrowDictionaryKeyDuplicates(state, pd, index);
                 }
             }
         }
+            break;
 
-        try
-        {
-            CheckDictionaryKeyDuplicates(state.repository.get(), pd);
-        }
-        catch (const std::exception& err)
-        {
-            throw ParseError("Duplicated dictionary key", err.what(), state.currentPath, 206);
+        default:
+            //Invalid key type is already handled with error code 188
+            throw std::logic_error(std::string("Invalid key type should have been detected before (errorCode 188). Error in parameter: ")+pd->qualifiedName);
         }
     }
 
@@ -937,6 +981,9 @@ namespace ToolSupport
             }
         }
 
+        //TODO Test
+        VerifyParameterKeys(state);
+
         //Resolve parameter to parameter references
         ResolveParamToParamRefs(state);
 
@@ -944,7 +991,7 @@ namespace ToolSupport
         ResolveReferences(state);
 
         //Verify that parameter with memberType typeId, entityId or enum is referencing valid types.
-        VerifyParameterTypes(state);
+        VerifyParameterValues(state);
 
         //Deserialize xml objects
         DeserializeObjects(state);
@@ -1408,7 +1455,20 @@ namespace ToolSupport
         }
     }
 
-    void DouCompletionAlgorithm::VerifyParameterTypes(const ParseState& state)
+    void DouCompletionAlgorithm::VerifyParameterKeys(const ParseState& state)
+    {
+        //loop through all parameters and verify all TypeId, EntityId, and Enum
+        for (boost::unordered_map<std::string, ParameterDescriptionLocal*>::iterator parIt=state.repository->m_parameters.begin();
+             parIt!=state.repository->m_parameters.end(); ++parIt)
+        {
+            ParameterDescriptionLocal* pd=parIt->second;
+            state.currentPath=pd->qualifiedName.substr(0, pd->qualifiedName.rfind(".")+1)+"dou";
+            VerifyParameterKey(state, pd);
+        }
+
+    }
+
+    void DouCompletionAlgorithm::VerifyParameterValues(const ParseState& state)
     {
         //loop through all parameters and verify all TypeId, EntityId, and Enum
         for (boost::unordered_map<std::string, ParameterDescriptionLocal*>::iterator parIt=state.repository->m_parameters.begin();
@@ -1417,7 +1477,6 @@ namespace ToolSupport
             ParameterDescriptionLocal* pd=parIt->second;
             state.currentPath=pd->qualifiedName.substr(0, pd->qualifiedName.rfind(".")+1)+"dou";
             VerifyParameterValue(state, pd);
-            VerifyParameterKey(state, pd);
         }
     }
 

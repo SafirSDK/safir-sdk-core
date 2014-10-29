@@ -176,6 +176,7 @@ namespace Internal
         ,m_typeId(pd->GetTypeId())
         ,m_keyTypeId(pd->GetKeyTypeId())
         ,m_values(shm->get_segment_manager())
+        ,m_unifiedKeyToIndex(std::less<const DotsC_Int64>(), shm->get_segment_manager())
     {
         switch(m_memberType)
         {
@@ -450,6 +451,9 @@ namespace Internal
             default:
                 break;
             }
+
+            //copy unified key to index map
+            m_unifiedKeyToIndex.insert(pd->UnifiedKeyToIndexMap().begin(), pd->UnifiedKeyToIndexMap().end());
         }
     }
 }

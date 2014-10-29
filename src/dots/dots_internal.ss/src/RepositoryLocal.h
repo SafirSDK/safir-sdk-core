@@ -257,6 +257,21 @@ namespace ToolSupport
             return std::make_pair(val.key.hash, val.key.str.empty() ? NULL : val.key.str.c_str());
         }
 
+        virtual int GetIndexByUnifiedKey(DotsC_Int64 unifiedKey) const
+        {
+            std::map<DotsC_Int64, int>::const_iterator it=unifiedKeyToIndex.find(unifiedKey);
+            if (it!=unifiedKeyToIndex.end())
+            {
+                return it->second;
+            }
+            return -1;
+        }
+
+        virtual const std::map<DotsC_Int64, int>& UnifiedKeyToIndexMap() const
+        {
+            return unifiedKeyToIndex;
+        }
+
         const ValueDefinition& Value(size_t index) const
         {
             const ValueDefinition* v=&values[index];
@@ -284,9 +299,10 @@ namespace ToolSupport
         bool hidden;   //Some parameters are derived from propertyMapping values. The parser will automatically generate a
                         //hidden parameter for those values. All explicitly declared parameters will have hidden=false.
         ParameterValues values;
+        std::map<DotsC_Int64, int> unifiedKeyToIndex; //only valid if collectionType=Dictionary
 
         DotsC_TypeId typeId; //TypeId belonging to the value of this parameter. Only valid if parameter is object or enum.
-        DotsC_TypeId keyTypeId;
+        DotsC_TypeId keyTypeId; //TypeId belonging to the key. Only valid if key is enumeration.
     };
     typedef boost::shared_ptr<ParameterDescriptionLocal> ParameterDescriptionLocalPtr;
 

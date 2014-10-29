@@ -25,6 +25,7 @@
 #define __DOTS_INTERNAL_TYPE_REPOSITORY_H__
 
 #include <set>
+#include <map>
 #include <string>
 #include <Safir/Dob/Typesystem/LanguageInterfaceDefs.h>
 #include <Safir/Utilities/Internal/Id.h>
@@ -296,9 +297,16 @@ namespace ToolSupport
         /**
          * @brief GetIndexByUnifiedKey - Get corresponding index to a dictionary key. Only applicable when collectionType is Dictionary.
          * @param unifiedKey [in] - Dictionary key on unified format. See TypeUtilities::ToUnifiedDictionaryKey for conversion.
-         * @return Index of the parameter key/val.
+         * @return Index of the parameter key/val. If key does not exist -1 is returned.
          */
         virtual int GetIndexByUnifiedKey(DotsC_Int64 unifiedKey) const=0;
+
+        /**
+         * @brief UnifiedKeyToIndexMap - FOR INTERNAL USAGE ONLY. Only needed by dots_kernel when copying localRepo to sharem memory.
+         * A dummy implementation should do if the repository is not going to be copied by dots_kernel. Normal usage should use GetIndexByUnifiedKey.
+         * @return Map from unified key to index.
+         */
+        virtual const std::map<DotsC_Int64, int>& UnifiedKeyToIndexMap() const=0;
     };
 
     /**

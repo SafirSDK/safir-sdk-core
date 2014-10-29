@@ -61,7 +61,7 @@ namespace Internal
     //-------------------------------------------
     //MapShm
     //-------------------------------------------
-    template <class Val, class Key=DotsC_TypeId>
+    template <class Val, class Key=DotsC_Int64>
     struct MapShm
     {
         typedef std::pair<const Key, Val> ValueType;
@@ -375,6 +375,16 @@ namespace Internal
             return std::make_pair(v.key.hash, v.stringKey.empty() ? NULL : v.stringKey.c_str());
         }
 
+        virtual int GetIndexByUnifiedKey(DotsC_Int64 unifiedKey) const
+        {
+            MapShm<int>::Type::const_iterator it=m_unifiedKeyToIndex.find(unifiedKey);
+            if (it!=m_unifiedKeyToIndex.end())
+            {
+                return it->second;
+            }
+            return -1;
+        }
+
     private:
         StringShm m_name;
         StringShm m_qualifiedName;
@@ -385,6 +395,7 @@ namespace Internal
         DotsC_TypeId m_typeId; //enum or objects type
         DotsC_TypeId m_keyTypeId;
         ParameterValuesShm m_values;
+        MapShm<int>::Type m_unifiedKeyToIndex;
     };
     typedef MapShm<ParameterDescriptionShm, StringShm>::Type ParameterMapShm;
     typedef boost::interprocess::offset_ptr<const ParameterDescriptionShm> ParameterDescriptionShmPtr;

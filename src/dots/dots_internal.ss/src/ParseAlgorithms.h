@@ -1999,7 +1999,8 @@ namespace ToolSupport
         void ResolveCreateRoutineParams(const ParseState& state, const ParseState::ParameterReference<CreateRoutineDescriptionLocal>& ref);
         void HandleCreateRoutines(const ParseState& state, ClassDescriptionLocal* cd);
         void CalculateEnumChecksums(const ParseState& state);
-        void VerifyParameterTypes(const ParseState& state);
+        void VerifyParameterKeys(const ParseState& state);
+        void VerifyParameterValues(const ParseState& state);
         void CalculateClassSize(const ParseState& state, ClassDescriptionLocal* cd);
     };
 
