@@ -102,14 +102,16 @@ def launch_node(number,debug):
 
 
 def stop(proc):
-    proc.terminate()
-    for i in range(300): #30 seconds
-        if proc.poll() is not None:
-            return
-        time.sleep(0.1)
-    proc.kill()
-    proc.wait()
-    return
+    try:
+        proc.terminate()
+        for i in range(300): #30 seconds
+            if proc.poll() is not None:
+                return
+            time.sleep(0.1)
+        proc.kill()
+        proc.wait()
+    except ProcessLookupError:
+        pass
 
 SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
 if SAFIR_RUNTIME is None or not os.path.isdir(SAFIR_RUNTIME):
@@ -156,9 +158,13 @@ try:
                 living.append((i,control,main))
             else:
                 if control.poll() is not None:
-                    print ("Control",i,"exited with return code", control.returncode)
+                    print ("control",i,"exited with return code", control.returncode)
                     stop(main)
                     print ("Killed dose_main, and got return code", main.returncode)
+                if main.poll() is not None:
+                    print ("dose_main",i,"exited with return code", control.returncode)
+                    stop(control)
+                    print ("Killed control, and got return code", main.returncode)
 
         nodes = living
 
@@ -169,7 +175,7 @@ try:
             continue
 
         if killtime + 60 < time.time():
-            killtime = time.time()
+            killtime = time.time() + 600
             #choose one to stop
             index = random.randint(1,len(nodes)-1)
             i, control, main = nodes.pop(index)
