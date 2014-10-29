@@ -10,6 +10,9 @@ override_dh_auto_install: install_runtime install_development install_testsuite
 
 install_runtime: export DESTDIR=$(shell pwd)/debian/safir-sdk-core
 install_runtime:
+	pwd
+	ls -l
+	env
 	#run cmake install
 	cd obj-$(DEB_BUILD_MULTIARCH) && /usr/bin/cmake -DCOMPONENT=Runtime -P cmake_install.cmake
 
