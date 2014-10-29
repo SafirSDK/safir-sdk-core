@@ -14,7 +14,7 @@ install_runtime:
 	ls -l
 	env
 	#run cmake install
-	cd obj-$(DEB_BUILD_MULTIARCH) && /usr/bin/cmake -DCOMPONENT=Runtime -P cmake_install.cmake
+	cd obj-$(DEB_BUILD_GNU_TYPE) && /usr/bin/cmake -DCOMPONENT=Runtime -P cmake_install.cmake
 
 	#copy example configuration to /etc
 	dh_install debian/safir-sdk-core/usr/share/doc/safir_sdk_core/example_configuration/*.ini etc/safir_sdk_core
@@ -27,8 +27,8 @@ install_runtime:
 
 install_development: export DESTDIR=$(shell pwd)/debian/safir-sdk-core-dev
 install_development:
-	cd obj-$(DEB_BUILD_MULTIARCH) && /usr/bin/cmake -DCOMPONENT=Development -P cmake_install.cmake
+	cd obj-$(DEB_BUILD_GNU_TYPE) && /usr/bin/cmake -DCOMPONENT=Development -P cmake_install.cmake
 
 install_testsuite: export DESTDIR=$(shell pwd)/debian/safir-sdk-core-testsuite
 install_testsuite:
-	cd obj-$(DEB_BUILD_MULTIARCH) && /usr/bin/cmake -DCOMPONENT=Test -P cmake_install.cmake
+	cd obj-$(DEB_BUILD_GNU_TYPE) && /usr/bin/cmake -DCOMPONENT=Test -P cmake_install.cmake
