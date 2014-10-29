@@ -680,7 +680,7 @@ class DebianBuilder(object):
         os.chdir("safir-sdk-core_6.0")
         shutil.copytree(os.path.join("build", "packaging", "debian"), "debian")
         self.__run(("debuild", "--prepend-path", "/usr/lib/ccache/", "-us", "-uc"), "building packages")
-
+        translate_results_to_junit("debhelper")
 def getText(nodelist):
     rc = []
     for node in nodelist:
