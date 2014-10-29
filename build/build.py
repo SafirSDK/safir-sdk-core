@@ -181,25 +181,32 @@ class Logger(object):
         self.__buildlog.write("\n</body>\n")
         self.__buildlog.close()
 
+    def __print(self,data):
+        if sys.version_info[0] < 3:
+            data = data.encode("utf-8")
+        sys.stdout.write(data)
+        sys.stdout.write("\n")
+        sys.stdout.flush()
+
     def __log_stdout(self, data, tag):
         if tag not in Logger.Tags:
             die("unknown logging tag")
-
+        #data = data.encode("utf-8")
         if self.__log_level == "Brief":
             if tag == "header" or tag == "normal" or tag == "brief":
-                print(data)
+                self.__print(data)
         elif self.__log_level == "Verbose":
             if tag == "brief":
                 pass
             elif tag == "header":
-                print("\n==== " + data + " ====")
+                self.__print("\n==== " + data + " ====")
             elif tag == "command_description":
-                print("+ " + data + ": ")
+                self.__print("+ " + data + ": ")
             elif tag == "command":
-                print("'" + data + "'")
+                self.__print("'" + data + "'")
             else:
-                print(data)
-        sys.stdout.flush()
+                self.__print(data)
+
 
     def __log_file(self, data, tag):
         log = self.__buildlog
@@ -673,7 +680,7 @@ class DebianBuilder(object):
         os.chdir("safir-sdk-core_6.0")
         shutil.copytree(os.path.join("build", "packaging", "debian"), "debian")
         self.__run(("debuild", "--prepend-path", "/usr/lib/ccache/", "-us", "-uc"), "building packages")
-    
+
 def getText(nodelist):
     rc = []
     for node in nodelist:
@@ -774,6 +781,6 @@ except FatalError as e:
     logger.log(str(e), "output")
     logger.log(str(e), "brief")
     result = 1
-    
+
 logger.close()
 sys.exit(result)
