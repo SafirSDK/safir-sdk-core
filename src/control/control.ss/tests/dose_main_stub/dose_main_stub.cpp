@@ -40,6 +40,7 @@
 
 #include <boost/program_options.hpp>
 #include <boost/asio.hpp>
+#include <boost/asio/steady_timer.hpp>
 
 #if defined _MSC_VER
 #  pragma warning (pop)
@@ -187,7 +188,13 @@ int main(int argc, char * argv[])
         return 1;
     }
 
+    bool running {true};
+
     boost::asio::io_service ioService;
+
+    boost::asio::strand strand{ioService};
+
+    boost::asio::steady_timer timer{ioService};
 
     // Make some work to stop io_service from exiting.
     auto work = Safir::make_unique<boost::asio::io_service::work>(ioService);
@@ -256,8 +263,8 @@ int main(int argc, char * argv[])
     signalSet.add(SIGTERM);
 #endif
 
-    signalSet.async_wait([&sp,&work,&communication,&signalSet](const boost::system::error_code& error,
-                                                           const int signal_number)
+    signalSet.async_wait(strand.wrap([&sp,&work,&communication,&signalSet,&running](const boost::system::error_code& error,
+                                                                        const int signal_number)
                        {
                            lllog(3) << "Got signal " << signal_number << std::endl;
                            if (error)
@@ -268,10 +275,33 @@ int main(int argc, char * argv[])
                            sp.Stop();
                            communication.Stop();
                            work.reset();
+                           running = false;
                        }
-                       );
+                       ));
 
 
+    timer.expires_from_now(boost::chrono::milliseconds(5000));
+
+    std::function<void (const boost::system::error_code&)> onTimeout =
+            [&running, &timer, &strand, &onTimeout, &communication](const boost::system::error_code& error)
+            {
+               if (!running)
+               {
+                   return;
+               }
+
+               if (error)
+               {
+                   std::wcout << "OnTimeout error!" << std::endl;
+               }
+
+               communication.Send()
+
+               timer.expires_from_now(boost::chrono::milliseconds(5000));
+               timer.async_wait(strand.wrap(onTimeout));
+            };
+
+    timer.async_wait(strand.wrap(onTimeout));
 
     boost::thread_group threads;
     for (int i = 0; i < 9; ++i)
