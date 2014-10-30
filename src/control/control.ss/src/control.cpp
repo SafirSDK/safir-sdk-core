@@ -234,8 +234,8 @@ int main(int argc, char * argv[])
     // TODO: Hur hitta binärer?
     // TODO: Hur hantera environment? (Ärvs automatiskt på Windows men inte för Posix)
     boost::system::error_code ec;
-    boost::process::child dose_main =
-            boost::process::execute(
+    //boost::process::child dose_main =
+    boost::process::execute(
                 boost::process::initializers::run_exe("dose_main_stub"),
                 boost::process::initializers::set_on_error(ec),
                 boost::process::initializers::inherit_env());
