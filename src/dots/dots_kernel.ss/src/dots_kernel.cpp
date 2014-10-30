@@ -967,6 +967,35 @@ void DotsC_GetBinaryParameter(const DotsC_TypeId typeId,
     size=static_cast<DotsC_Int32>(binary.second);
 }
 
+DotsC_Int32 DotsC_DictionaryInt32KeyToIndex(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_Int32 key)
+{
+    Init();
+    const ParameterDescriptionShm* const pd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
+    return ts::TypeUtilities::GetDictionaryIndexFromKey(pd, key);
+}
+
+DotsC_Int32 DotsC_DictionaryInt64KeyToIndex(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_Int64 key)
+{
+    Init();
+    const ParameterDescriptionShm* const pd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
+    return ts::TypeUtilities::GetDictionaryIndexFromKey(pd, key);
+}
+
+DotsC_Int32 DotsC_DictionaryStringKeyToIndex(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const char* key)
+{
+    Init();
+    const ParameterDescriptionShm* const pd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
+    return ts::TypeUtilities::GetDictionaryIndexFromKey(pd, key);
+}
+
+DotsC_Int32 DotsC_DictionaryEntityIdKeyToIndex(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_EntityId key)
+{
+    Init();
+    const ParameterDescriptionShm* const pd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
+    return ts::TypeUtilities::GetDictionaryIndexFromKey(pd, key);
+}
+
+
 //********************************************************
 //* Base operations on blobs
 //********************************************************
