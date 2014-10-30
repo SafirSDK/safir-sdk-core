@@ -1,10 +1,34 @@
 cmake_minimum_required(VERSION 2.8)
 
-PROJECT (control_utils NONE)
+PROJECT (control_utils CXX C) #C is needed by FindProtobuf
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
+
+FIND_PACKAGE(Protobuf REQUIRED)
+
+FILE(GLOB proto_files *.proto)
+
+INCLUDE_DIRECTORIES(${PROTOBUF_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
+
+PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${proto_files})
+
+if (MSVC)
+  SET_SOURCE_FILES_PROPERTIES(${PROTO_SRCS} PROPERTIES COMPILE_FLAGS "/wd4127 /wd4244 /wd4267")
+endif()
+
+ADD_LIBRARY(control_utils SHARED ${PROTO_SRCS} ${PROTO_HDRS})
+
+TARGET_LINK_LIBRARIES(control_utils ${PROTOBUF_LITE_LIBRARIES})
+
+INSTALL(FILES ${PROTO_HDRS} DESTINATION ${SAFIR_SDK}/include/Safir/Dob/Internal)
 
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE
         PATTERN "*~" EXCLUDE)
 
+INSTALL(TARGETS control_utils
+        RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
+        LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
+        ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
+
+INSTALL_DEBUG_INFO(control_utils)
