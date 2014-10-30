@@ -91,7 +91,7 @@ public:
 
         bool passed=false;
         {
-            boost::mutex::scoped_lock lock(mutex);            
+            boost::mutex::scoped_lock lock(mutex);
             passed= discoversSentToSeed100[0]>1 && discoversSentToSeed100[1]>1 && discoversSentToSeed100[2]>1 &&
                     discoversSentToSeed200[0]>1 && discoversSentToSeed200[1]>1 && discoversSentToSeed200[2]>1;
         }
@@ -114,9 +114,9 @@ private:
 
     struct TestSendPolicy
     {
-        void Send(const Com::UserDataPtr val,
-                  boost::asio::ip::udp::socket& /*socket*/,
-                  const boost::asio::ip::udp::endpoint& to)
+        void SendTo(const Com::UserDataPtr& val,
+                    boost::asio::ip::udp::socket& /*socket*/,
+                    const boost::asio::ip::udp::endpoint& to)
         {
             boost::mutex::scoped_lock lock(mutex);
             Com::CommunicationMessage cm;
@@ -305,9 +305,9 @@ private:
 
     struct TestSendPolicy
     {
-        void Send(const Com::UserDataPtr val,
-                  boost::asio::ip::udp::socket& /*socket*/,
-                  const boost::asio::ip::udp::endpoint& to)
+        void SendTo(const Com::UserDataPtr val,
+                    boost::asio::ip::udp::socket& /*socket*/,
+                    const boost::asio::ip::udp::endpoint& to)
         {
             boost::mutex::scoped_lock lock(mutex);
             Com::CommunicationMessage cm;

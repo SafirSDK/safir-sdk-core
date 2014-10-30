@@ -48,7 +48,7 @@ public:
         //-------------------
         // Tests
         //-------------------
-        AckedSender sender(io, 1, 1, 4, "127.0.0.1:10000", "224.90.90.241:10000", 500); //ntId, nId, ipV, mc, waitForAck
+        AckedSender sender(io, 1, 1, "127.0.0.1:10000", "224.90.90.241:10000", 500); //ntId, nId, ipV, mc, waitForAck
 
         std::atomic_uint go{0};
         auto WaitUntilReady=[&]
@@ -139,14 +139,17 @@ private:
     struct TestSendPolicy
     {
         void Send(const boost::shared_ptr<Com::UserData>& val,
-                  boost::asio::ip::udp::socket& /*socket*/,
-                  const boost::asio::ip::udp::endpoint& to)
+                  boost::asio::ip::udp::socket& socket,
+                  boost::function<void(const boost::system::error_code& error, size_t)> completionHandler)
         {
             boost::mutex::scoped_lock lock(mutex);
             std::string s(val->fragment, val->fragment+val->header.fragmentContentSize);
             std::string ss(val->fragment, val->header.fragmentContentSize);
-            std::cout<<"Writer.Send to_port: "<<to.port()<<", seq: "<<val->header.sequenceNumber<<", data: '"<<s<<"', '"<<ss<<"'"<<std::endl;
+            std::cout<<"Writer.Send to_port: "<<socket.remote_endpoint().port()<<", seq: "<<val->header.sequenceNumber<<", data: '"<<s<<"', '"<<ss<<"'"<<std::endl;
             sent.push(val);
+
+            boost::system::error_code ec;
+            completionHandler(ec, sizeof(Com::Heartbeat));
         }
     };
 
@@ -192,7 +195,7 @@ public:
         //-------------------
         // Tests
         //-------------------
-        UnackedDataSender sender(io, 1, 1, 4, "127.0.0.1:10000", "224.90.90.241:10000", 500); //ntId, nId, ipV, mc, waitForAck
+        UnackedDataSender sender(io, 1, 1, "127.0.0.1:10000", "224.90.90.241:10000", 500); //ntId, nId, ipV, mc, waitForAck
 
         std::atomic_uint go{0};
         auto WaitUntilReady=[&]
@@ -282,14 +285,17 @@ private:
     struct TestSendPolicy
     {
         void Send(const boost::shared_ptr<Com::UserData>& val,
-                  boost::asio::ip::udp::socket& /*socket*/,
-                  const boost::asio::ip::udp::endpoint& to)
+                  boost::asio::ip::udp::socket& socket,
+                  boost::function<void(const boost::system::error_code& error, size_t)> completionHandler)
         {
             boost::mutex::scoped_lock lock(mutex);
             std::string s(val->fragment, val->fragment+val->header.fragmentContentSize);
             std::string ss(val->fragment, val->header.fragmentContentSize);
-            std::cout<<"Writer.Send to_port: "<<to.port()<<", seq: "<<val->header.sequenceNumber<<", data: '"<<s<<"', '"<<ss<<"'"<<std::endl;
+            std::cout<<"Writer.Send to_port: "<<socket.remote_endpoint().port()<<", seq: "<<val->header.sequenceNumber<<", data: '"<<s<<"', '"<<ss<<"'"<<std::endl;
             sent.push(val);
+
+            boost::system::error_code ec;
+            completionHandler(ec, sizeof(Com::Heartbeat));
         }
     };
 

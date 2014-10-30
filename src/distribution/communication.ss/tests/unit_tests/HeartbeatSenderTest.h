@@ -45,7 +45,7 @@ public:
         TRACELINE
 
         //Multicast enabled HeartbeatSender
-        Com::HeartbeatSenderBasic<HeartbeatSenderTest::TestWriter> hb1(io, 100, 4, "127.0.0.1:10000", "239.192.1.1:11000", Interval);
+        Com::HeartbeatSenderBasic<HeartbeatSenderTest::TestWriter> hb1(io, 100, "127.0.0.1:10000", "239.192.1.1:11000", Interval);
         hb1.Start();
         int last11000=0;
         Wait(Interval+200);
@@ -71,7 +71,7 @@ public:
 
         TRACELINE
         //Only unicast enabled HeartbeatSender
-        Com::HeartbeatSenderBasic<HeartbeatSenderTest::TestWriter> hb2(io, 100, 4, "127.0.0.1:10000", "", Interval);
+        Com::HeartbeatSenderBasic<HeartbeatSenderTest::TestWriter> hb2(io, 100, "127.0.0.1:10000", "", Interval);
         hb2.Start();
 
         TRACELINE
@@ -106,19 +106,22 @@ private:
     struct TestSendPolicy
     {
         void Send(const boost::shared_ptr<Com::Heartbeat>& /*val*/,
-                  boost::asio::ip::udp::socket& /*socket*/,
-                  const boost::asio::ip::udp::endpoint& to)
+                  boost::asio::ip::udp::socket& socket,
+                  boost::function<void(const boost::system::error_code& error, size_t)> completionHandler)
         {
             boost::mutex::scoped_lock lock(mutex);
-            auto it=HeartbeatSenderTest::received.find(to.port());
+            auto it=HeartbeatSenderTest::received.find(socket.remote_endpoint().port());
             if (it!=HeartbeatSenderTest::received.end())
             {
                 ++(it->second);
             }
             else
             {
-                HeartbeatSenderTest::received.insert(std::make_pair(to.port(), 1));
+                HeartbeatSenderTest::received.insert(std::make_pair(socket.remote_endpoint().port(), 1));
             }
+
+            boost::system::error_code ec;
+            completionHandler(ec, sizeof(Com::Heartbeat));
         }
     };
 

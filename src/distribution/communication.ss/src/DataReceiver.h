@@ -64,13 +64,13 @@ namespace Com
     {
     public:
 
-        DataReceiverType(boost::asio::io_service& ioService,
+        DataReceiverType(boost::asio::io_service::strand& readStrand,
                          const std::string& unicastAddress,
                          const std::string& multicastAddress,
                          const std::function<bool(const char*, size_t)>& onRecv,
                          const std::function<bool(void)>& isReceiverIsReady)
-            :m_strand(ioService)
-            ,m_timer(ioService, boost::chrono::milliseconds(10))
+            :m_strand(readStrand)
+            ,m_timer(readStrand.get_io_service(), boost::chrono::milliseconds(10))
             ,m_onRecv(onRecv)
             ,m_isReceiverReady(isReceiverIsReady)
             ,m_running(false)
@@ -78,7 +78,7 @@ namespace Com
             int unicastIpVersion;
             auto unicastEndpoint=Utilities::CreateEndpoint(unicastAddress, unicastIpVersion);
 
-            m_socket.reset(new boost::asio::ip::udp::socket(ioService));
+            m_socket.reset(new boost::asio::ip::udp::socket(m_strand.get_io_service()));
             m_socket->open(unicastEndpoint.protocol());
             m_socket->bind(unicastEndpoint);
 
@@ -91,7 +91,7 @@ namespace Com
                 {
                     throw std::logic_error("Unicast address and multicast address is not in same format (IPv4 and IPv6)");
                 }
-                m_multicastSocket.reset(new boost::asio::ip::udp::socket(ioService));
+                m_multicastSocket.reset(new boost::asio::ip::udp::socket(m_strand.get_io_service()));
                 m_multicastSocket->open(mcEndpoint.protocol());
                 m_multicastSocket->set_option(boost::asio::ip::udp::socket::reuse_address(true));
                 m_multicastSocket->set_option(boost::asio::ip::multicast::enable_loopback(true));
@@ -134,12 +134,10 @@ namespace Com
             });
         }
 
-        boost::asio::io_service::strand& Strand() {return m_strand;}
-
 #ifndef SAFIR_TEST
     private:
 #endif
-        boost::asio::io_service::strand m_strand;
+        boost::asio::io_service::strand& m_strand;
         boost::asio::steady_timer m_timer;
         std::function<bool(const char*, size_t)> m_onRecv;
         std::function<bool(void)> m_isReceiverReady;

@@ -41,10 +41,8 @@ namespace Com
         static const size_t SendQueueSize = 50;
 
         //Max number of messages that can be sent in sequence before waiting for ack.
-        static const size_t SenderWindowSize=10;
-
         //Max number of messages out of order that are saved
-        static const size_t ReceiverWindowSize=10;
+        static const size_t SlidingWindowSize=10;
 
         //Max number of undelivered messages to application allowed before slowing down receiver
         static const size_t MaxNumberOfUndelivered=10;

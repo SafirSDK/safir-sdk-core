@@ -55,12 +55,13 @@ public:
         {
             threads.create_thread([&]{io.run();});
         }
+        boost::asio::io_service::strand strand(io);
 
         //--------------------------
         // Setup
         //--------------------------
         TRACELINE
-        receiver.reset(new TestDataReceiver(io, "127.0.0.1:10000", "239.192.1.1:11000", [=](const char* d, size_t s){return DataReceiverTest::Recv(d,s);}, [=]{return DataReceiverTest::IsReaderReady();}));
+        receiver.reset(new TestDataReceiver(strand, "127.0.0.1:10000", "239.192.1.1:11000", [=](const char* d, size_t s){return DataReceiverTest::Recv(d,s);}, [=]{return DataReceiverTest::IsReaderReady();}));
         TRACELINE
         receiver->Start();
 
@@ -262,7 +263,7 @@ private:
             CHECK(bufSize>=sizeof(int)+sizeof(uint32_t)); //int and checksum
             bool unicast=(socket->local_endpoint().port()==10000);
             std::queue<int>* sendQueue=unicast ? &sentUnicast : &sentMulticast;
-            receiver->Strand().get_io_service().post([&, sendQueue, buf, completionHandler]
+            receiver->m_strand.get_io_service().post([&, sendQueue, buf, completionHandler]
             {
                 bool received=false;
 

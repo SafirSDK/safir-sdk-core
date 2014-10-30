@@ -55,25 +55,27 @@ namespace Com
     /**
      * This class is sending periodic heart beats to all other system nodes.
      */
-
     template <class WriterType>
-    class HeartbeatSenderBasic : private WriterType
+    class HeartbeatSenderBasic
     {
     public:
         HeartbeatSenderBasic(boost::asio::io_service& ioService,
                              int64_t myNodeId,
-                             int ipVersion,
                              const std::string& localIf,
                              const std::string& multicast,
                              int heartbeatInterval)
-            :WriterType(ioService, ipVersion, localIf, multicast)
-            ,m_strand(ioService)
+            :m_strand(ioService)
             ,m_heartbeatTimer(ioService)
             ,m_heartbeat(new Heartbeat(myNodeId))
             ,m_interval(heartbeatInterval)
+            ,m_useMulticast(!multicast.empty())
             ,m_nodes()
             ,m_running(false)
         {
+            if (m_useMulticast)
+            {
+                m_nodes.emplace(0, WriterType(m_strand, localIf, multicast));
+            }
         }
 
         void Start()
@@ -98,6 +100,11 @@ namespace Com
         //Add a node and starts sending heartbeats
         void AddNode(int64_t id, const std::string address)
         {
+            if (m_useMulticast)
+            {
+                return; //we dont need node information since we just send multicast heartbeats
+            }
+
             m_strand.dispatch([=]
             {
                 if (m_nodes.find(id)!=m_nodes.end())
@@ -107,7 +114,7 @@ namespace Com
                     throw std::logic_error(os.str());
                 }
 
-                m_nodes.emplace(id, Utilities::CreateEndpoint(address));
+                m_nodes.emplace(id, WriterType(m_strand, "", address));
             });
         }
 
@@ -124,23 +131,17 @@ namespace Com
         boost::asio::steady_timer m_heartbeatTimer;
         boost::shared_ptr<Heartbeat> m_heartbeat;
         int m_interval;
-        std::map<int64_t, boost::asio::ip::udp::endpoint> m_nodes;
+        bool m_useMulticast;
+        std::map<int64_t, WriterType > m_nodes;
         bool m_running;
 
         void OnTimeout()
         {
             if (m_running)
             {
-                if (WriterType::IsMulticastEnabled())
+                for (auto& vt : m_nodes)
                 {
-                    WriterType::SendMulticast(m_heartbeat);
-                }
-                else
-                {
-                    for (auto& vt : m_nodes)
-                    {
-                        WriterType::SendTo(m_heartbeat, vt.second);
-                    }
+                    vt.second.Send(m_heartbeat);
                 }
 
                 m_heartbeatTimer.expires_from_now(boost::chrono::milliseconds(m_interval));

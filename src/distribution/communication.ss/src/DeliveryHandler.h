@@ -60,13 +60,13 @@ namespace Com
     typedef std::function<void(int64_t fromNodeId)> GotReceiveFrom;
 
     template <class WriterType>
-    class DeliveryHandlerBasic : private WriterType
+    class DeliveryHandlerBasic
     {
     public:
-        DeliveryHandlerBasic(boost::asio::io_service& ioService, int64_t myNodeId, int ipVersion)
-            :WriterType(ioService, ipVersion)
+        DeliveryHandlerBasic(boost::asio::io_service::strand& readStrand, int64_t myNodeId)
+            :m_readStrand(readStrand)
+            ,m_deliverStrand(readStrand.get_io_service())
             ,m_myId(myNodeId)
-            ,m_deliverStrand(ioService)
             ,m_nodes()
             ,m_receivers()
             ,m_gotRecvFrom()
@@ -94,7 +94,7 @@ namespace Com
 
             if (senderIt==m_nodes.end() || !senderIt->second.node.systemNode)
             {
-                lllog(4)<<L"COM: Received data from unknown node or a non system node with id="<<header->commonHeader.senderId<<std::endl;
+                lllog(8)<<L"COM: Received data from unknown node or a non system node with id="<<header->commonHeader.senderId<<std::endl;
                 return;
             }
 
@@ -106,7 +106,7 @@ namespace Com
             if (sendAck)
             {
                 auto ackPtr=boost::make_shared<Ack>(m_myId, header->commonHeader.senderId, senderIt->second.GetChannel(header).lastInSequence, header->sendMethod);
-                WriterType::SendTo(ackPtr, senderIt->second.endpoint);
+                senderIt->second.writer->Send(ackPtr);
             }
         }
 
@@ -121,7 +121,8 @@ namespace Com
             }
 
             //Always called from readStrand
-            m_nodes.insert(std::make_pair(node.nodeId, NodeInfo(node)));
+            auto it=m_nodes.emplace(node.nodeId, NodeInfo(node)).first;
+            it->second.writer.reset(new WriterType(m_readStrand, "", node.unicastAddress));
         }
 
         //Make node included. If excluded it is also removed.
@@ -196,7 +197,7 @@ namespace Com
             CircularArray<RecvData> queue;
             Channel()
                 :lastInSequence(0)
-                ,queue(Parameters::ReceiverWindowSize)
+                ,queue(Parameters::SlidingWindowSize)
             {
             }
         };
@@ -205,12 +206,12 @@ namespace Com
         {
             Node node;
             std::vector<Channel> channel;
-            boost::asio::ip::udp::endpoint endpoint;
+            std::unique_ptr<WriterType> writer;
 
             NodeInfo(const Node& node_)
                 :node(node_)
                 ,channel(4) //4 channels: unacked_singel, unacked_multi, acked_single, acked_multi
-                ,endpoint(Utilities::CreateEndpoint(node.unicastAddress))
+                ,writer()
             {
             }
 
@@ -232,14 +233,13 @@ namespace Com
                         return channel[3];
 
                 }
-
-                //return channel[static_cast<size_t>(2*header->deliveryGuarantee+header->sendMethod)];
             }
         };
         typedef std::map<int64_t, NodeInfo> NodeInfoMap;
 
+        boost::asio::io_service::strand m_readStrand; //same strand that receives data
+        boost::asio::io_service::strand m_deliverStrand; //for delivering data to application
         int64_t m_myId;
-        boost::asio::strand m_deliverStrand; //for delivering data to application
         std::atomic_uint m_numberOfUndeliveredMessages;
 
         NodeInfoMap m_nodes;
@@ -323,7 +323,7 @@ namespace Com
             Channel& ch=ni.GetChannel(header);
             ch.lastInSequence=header->sequenceNumber-1; //we pretend this was exactly what we expected to get
             //Clear the queue, should not be necessary as long as we dont let excluded nodes come back.
-            for (size_t i=0; i<Parameters::ReceiverWindowSize; ++i)
+            for (size_t i=0; i<Parameters::SlidingWindowSize; ++i)
             {
                 ch.queue[i].Clear();
             }
@@ -354,7 +354,7 @@ namespace Com
                 {
                     lllog(8)<<L"COM: Recv duplicated message in order. Seq: "<<header->sequenceNumber<<L" from node "<<ni.node.name.c_str()<<std::endl;
                 }
-                else if (header->sequenceNumber<=ch.lastInSequence+Parameters::ReceiverWindowSize)
+                else if (header->sequenceNumber<=ch.lastInSequence+Parameters::SlidingWindowSize)
                 {
                     //The Normal case:
                     //This is something within our receive window, maybe it is out of order but in that case the gaps will eventually be filled in
@@ -415,7 +415,7 @@ namespace Com
             currentIndex=static_cast<size_t>(header->sequenceNumber-lastSeq-1);
             int first=static_cast<int>(currentIndex)-header->fragmentNumber;
             firstIndex=static_cast<size_t>( std::max(0, first) );
-            lastIndex=std::min(Parameters::ReceiverWindowSize-1, currentIndex+header->numberOfFragments-header->fragmentNumber-1);
+            lastIndex=std::min(Parameters::SlidingWindowSize-1, currentIndex+header->numberOfFragments-header->fragmentNumber-1);
         }
 
         void Deliver(NodeInfo& ni, const MessageHeader* header)
