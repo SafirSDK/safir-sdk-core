@@ -43,11 +43,11 @@ class WindowsInstaller(object):
             raise SetupError("Unexpected number of installers: "+ str(installer))
         self.installer = installer[0]
 
-    def uninstaller_exists(self):
+    def can_uninstall(self):
         return os.path.isfile(self.uninstaller)
 
     def uninstall(self):
-        if not self.uninstaller_exists():
+        if not self.can_uninstall():
             raise SetupError("No uninstaller found!")
 
         log ("Running uninstaller:", self.uninstaller)
@@ -65,7 +65,8 @@ class WindowsInstaller(object):
             time.sleep(1.0)
 
         if os.path.isdir(self.installpath):
-            raise SetupError("Installer dir still exists after uninstallation! Contents:\n" + str(os.listdir(self.installpath)))
+            raise SetupError("Installer dir still exists after uninstallation! Contents:\n"
+                             + str(os.listdir(self.installpath)))
         if os.path.exists(self.installpath):
             raise SetupError("Installer dir does not seem to be a directory!")
         return True
@@ -78,7 +79,7 @@ class WindowsInstaller(object):
         if result != 0:
             raise SetupError("Installer failed (" + str(result) + ")!")
 
-    def setup_debug_runtime(self):
+    def __setup_debug_runtime(self):
         #we get out of here immediately if we're not running debug.
         if os.environ.get("Config") != "DebugOnly":
             return
@@ -129,11 +130,12 @@ class WindowsInstaller(object):
         if output.find(binpath) == -1:
             raise SetupError("bin directory does not appear to have been added to PATH:\n" + output)
         if os.environ["PATH"].find(binpath) != -1:
-            raise SetupError("bin directory seems to have been added to PATH before installation!:\n" + os.environ["PATH"])
+            raise SetupError("bin directory seems to have been added to PATH before installation!:\n"
+                             + os.environ["PATH"])
         os.environ["PATH"] += os.pathsep + binpath
 
 
-        self.setup_debug_runtime()
+        self.__setup_debug_runtime()
 
         log("Running safir_show_config to test that exes can be run")
         proc = subprocess.Popen(("safir_show_config","--locations", "--typesystem", "--logging"),
@@ -142,36 +144,59 @@ class WindowsInstaller(object):
                                 universal_newlines = True)
         output = proc.communicate()[0]
         if proc.returncode != 0:
-            raise SetupError("Failed to run safir_show_config. returncode = " + str(proc.returncode) + "\nOutput:\n" + output)
+            raise SetupError("Failed to run safir_show_config. returncode = "
+                             + str(proc.returncode) + "\nOutput:\n" + output)
 
         if os.path.isdir(os.path.join(self.installpath,"include","boost")):
             raise SetupError("Found unexpected directory 'include/boost'")
         if os.path.isdir(os.path.join(self.installpath,"include","Safir")):
             raise SetupError("Found unexpected directory 'include/Safir'")
 
-    def run_test_suite(self):
-        log("Launching test suite")
-        result = subprocess.call(("run_dose_tests.py","--jenkins"), shell = True)
+class DebianInstaller(object):
+    def __init__(self):
+        pass
 
-        if result != 0:
-            raise SetupError("Test suite failed. Returncode = " + str(result))
+    def can_uninstall(self):
+        return False
+
+    def uninstall(self):
+        if not self.can_uninstall():
+            raise SetupError("No uninstaller found!")
+
+    def install(self):
+        log ("Running installer:", self.installer)
+
+    def check_installation(self):
+        pass
+
+def run_test_suite():
+    log("Launching test suite")
+    result = subprocess.call(("run_dose_tests.py","--jenkins"), shell = True)
+
+    if result != 0:
+        raise SetupError("Test suite failed. Returncode = " + str(result))
 
 def main():
-    if sys.platform != "win32":
-        log ("Only windows is supported so far")
-        sys.exit(0)
+    if sys.platform == "win32":
+        installer = WindowsInstaller()
+    elif sys.platform.startswith("linux") and \
+        platform.linux_distribution()[0] in ("debian", "Ubuntu"):
+        installer = DebianInstaller()
+    else:
+        log ("Platform", sys.platform, ",", platform.linux_distribution()," is not supported by this script")
+        return 1
 
-    installer = WindowsInstaller()
 
-    if installer.uninstaller_exists():
-        log("Uninstaller present: It looks like Safir SDK Core is already installed! Will uninstall and return a failure.")
+
+    if installer.can_uninstall():
+        log("It looks like Safir SDK Core is already installed! Will uninstall and return a failure.")
         installer.uninstall()
         return 1
 
     try:
         installer.install()
         installer.check_installation()
-        installer.run_test_suite()
+        run_test_suite()
 
     except SetupError as e:
         log ("Error: " + str(e))
