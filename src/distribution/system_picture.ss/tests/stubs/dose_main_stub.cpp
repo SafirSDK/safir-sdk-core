@@ -198,8 +198,8 @@ int main(int argc, char * argv[])
          {
              for (int i = 0; i < data.Size(); ++i)
              {
-                 //don't inject already injected nodes
-                 if (injectedNodes.find(data.Id(i)) != injectedNodes.end())
+                 //don't inject dead or already injected nodes
+                 if (data.IsDead(i) || injectedNodes.find(data.Id(i)) != injectedNodes.end())
                  {
                      continue;
                  }

@@ -273,9 +273,11 @@ namespace SP
 
                     auto findIt = m_nodeTable.find(data.Id(i));
 
+                    //dose_main might have injected nodes that no longer exist, or that
+                    //have yet to be discovered in control, so we ignore any mismatches.
                     if (findIt == m_nodeTable.end())
                     {
-                        throw std::logic_error("DataChannelStatistics from unknown node");
+                        continue;
                     }
                     NodeInfo& node = findIt->second; //alias the iterator
 
