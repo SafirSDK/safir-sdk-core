@@ -121,8 +121,9 @@ namespace Com
             }
 
             //Always called from readStrand
-            auto it=m_nodes.emplace(node.nodeId, NodeInfo(node)).first;
-            it->second.writer.reset(new WriterType(m_readStrand, "", node.unicastAddress));
+            NodeInfo ni(node);
+            ni.writer=boost::make_shared<WriterType>(m_readStrand, "", node.unicastAddress);
+            m_nodes.insert(std::make_pair(node.nodeId, ni));
         }
 
         //Make node included. If excluded it is also removed.
@@ -206,7 +207,7 @@ namespace Com
         {
             Node node;
             std::vector<Channel> channel;
-            std::unique_ptr<WriterType> writer;
+            boost::shared_ptr<WriterType> writer;
 
             NodeInfo(const Node& node_)
                 :node(node_)

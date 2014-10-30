@@ -28,6 +28,7 @@
 #include <atomic>
 #include <boost/noncopyable.hpp>
 #include <boost/function.hpp>
+#include <boost/make_shared.hpp>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include "Node.h"
@@ -98,7 +99,7 @@ namespace Com
 
             if (!multicastAddress.empty())
             {
-                m_multicastWriter.reset(new WriterType(m_strand, localIf, multicastAddress));
+                m_multicastWriter=boost::make_shared<WriterType>(m_strand, localIf, multicastAddress);
             }
         }
 
@@ -254,12 +255,12 @@ namespace Com
                     throw std::logic_error(os.str());
                 }
 
-                std::unique_ptr<WriterType> paa( new WriterType(m_strand, "", address) );
+                NodeInfo ni;
+                ni.systemNode=false;
+                ni.lastSentSeqNo=0;
+                ni.writer=boost::make_shared<WriterType>(m_strand, "", address);
 
-                auto it=m_nodes.emplace(std::make_pair(id, NodeInfo())).first;
-                it->second.systemNode=false;
-                it->second.lastSentSeqNo=0;
-                it->second.writer.reset(new WriterType(m_strand, "", address));
+                m_nodes.insert(std::make_pair(id, ni));
             });
         }
 
@@ -308,7 +309,7 @@ namespace Com
         {
             bool systemNode;
             uint64_t lastSentSeqNo;
-            std::unique_ptr<WriterType> writer;
+            boost::shared_ptr<WriterType> writer;
         };
         std::map<int64_t, NodeInfo> m_nodes;
 
