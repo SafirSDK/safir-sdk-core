@@ -44,10 +44,10 @@ public:
     void ProcessState(const Safir::Dob::Typesystem::Int64 instance,
         const Safir::Dob::Internal::StateSharedPtr& statePtr,
         Safir::Dob::Internal::Arguments& arguments);
-    void AddContextRow(Safir::Dob::Internal::EntityType& entityType, Safir::Dob::Internal::Arguments& argumentsXS) {};
-    void InitRemoveInstances(Safir::Dob::Internal::Arguments& arguments)  {};
+    void AddContextRow(Safir::Dob::Internal::EntityType&, Safir::Dob::Internal::Arguments&) {};
+    void InitRemoveInstances(Safir::Dob::Internal::Arguments&)  {};
     void RemoveInstances()  {};
-    void AddContextGlobalData(Safir::Dob::Internal::Arguments& arguments)  {};
+    void AddContextGlobalData(Safir::Dob::Internal::Arguments&)  {};
 
 
 public slots:
