@@ -26,6 +26,7 @@
 
 #include <boost/noncopyable.hpp>
 #include <boost/function.hpp>
+#include <boost/make_shared.hpp>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include "Node.h"
@@ -57,6 +58,7 @@ namespace Com
      */
     template <class WriterType>
     class HeartbeatSenderBasic
+            :private boost::noncopyable
     {
     public:
         HeartbeatSenderBasic(boost::asio::io_service& ioService,
@@ -74,7 +76,8 @@ namespace Com
         {
             if (m_useMulticast)
             {
-                m_nodes.emplace(0, WriterType(m_strand, localIf, multicast));
+                auto mcw=boost::make_shared<WriterType>(m_strand, localIf, multicast);
+                m_nodes.emplace(0, mcw);
             }
         }
 
@@ -114,7 +117,8 @@ namespace Com
                     throw std::logic_error(os.str());
                 }
 
-                m_nodes.emplace(id, WriterType(m_strand, "", address));
+                auto w=boost::make_shared<WriterType>(m_strand, "", address);
+                m_nodes.emplace(id, w);
             });
         }
 
@@ -132,7 +136,7 @@ namespace Com
         boost::shared_ptr<Heartbeat> m_heartbeat;
         int m_interval;
         bool m_useMulticast;
-        std::map<int64_t, WriterType > m_nodes;
+        std::map<int64_t, boost::shared_ptr<WriterType> > m_nodes;
         bool m_running;
 
         void OnTimeout()
@@ -141,7 +145,7 @@ namespace Com
             {
                 for (auto& vt : m_nodes)
                 {
-                    vt.second.Send(m_heartbeat);
+                    vt.second->Send(m_heartbeat);
                 }
 
                 m_heartbeatTimer.expires_from_now(boost::chrono::milliseconds(m_interval));

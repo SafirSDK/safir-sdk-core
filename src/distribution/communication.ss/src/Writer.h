@@ -137,7 +137,9 @@ namespace Com
      * Communication easier to test.
      */
     template <class T, class SendPolicy=BasicSendPolicy<T> >
-    class Writer : private SendPolicy
+    class Writer
+            :private SendPolicy
+            ,private boost::noncopyable
     {
     public:
         typedef boost::shared_ptr<T> Ptr;

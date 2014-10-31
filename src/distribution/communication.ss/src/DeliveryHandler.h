@@ -61,6 +61,7 @@ namespace Com
 
     template <class WriterType>
     class DeliveryHandlerBasic
+            :private boost::noncopyable
     {
     public:
         DeliveryHandlerBasic(boost::asio::io_service::strand& readStrand, int64_t myNodeId)

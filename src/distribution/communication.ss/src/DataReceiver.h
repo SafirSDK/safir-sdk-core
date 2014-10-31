@@ -60,7 +60,9 @@ namespace Com
      * by the application and in that case DataReceiver will sleep until callback isReceiverReady is returning true again.
      */
     template <class ReaderType>
-    class DataReceiverType : private ReaderType
+    class DataReceiverType
+            :private ReaderType
+            ,private boost::noncopyable
     {
     public:
 

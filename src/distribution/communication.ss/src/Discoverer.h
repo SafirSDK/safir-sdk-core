@@ -52,7 +52,8 @@ namespace Internal
 namespace Com
 {
     template <class WriterType>
-    class DiscovererBasic : private WriterType
+    class DiscovererBasic
+            :private WriterType
     {
     public:
 

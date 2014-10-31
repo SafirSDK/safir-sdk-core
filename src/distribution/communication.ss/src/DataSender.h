@@ -72,6 +72,7 @@ namespace Com
 
     template <class WriterType, uint64_t DeliveryGuarantee>
     class DataSenderBasic
+            :private boost::noncopyable
     {
     public:
         DataSenderBasic(boost::asio::io_service& ioService,
