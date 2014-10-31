@@ -51,9 +51,8 @@ public:
         {
             threads.create_thread([&]{io.run();});
         }
-        boost::asio::io_service::strand readStrand(io);
 
-        Com::DeliveryHandlerBasic<DeliveryHandlerTest::TestWriter> dh(readStrand, 1);
+        Com::DeliveryHandlerBasic<DeliveryHandlerTest::TestWriter> dh(io, 1, 4);
         dh.SetGotRecvCallback([=](int64_t id){DeliveryHandlerTest::GotReceiveFrom(id);});
         dh.SetReceiver([=](int64_t n, int64_t nt, const boost::shared_ptr<char[]>& d, size_t s){DeliveryHandlerTest::OnRecv(n, nt, d, s);}, 0);
 
@@ -129,7 +128,7 @@ public:
             }
         }
 
-        TRACELINE
+        TRACELINE        
 
         //---------------------------------------------
         // Test unacked messages
@@ -240,13 +239,10 @@ private:
     {
         void Send(const boost::shared_ptr<Com::Ack>& ack,
                   boost::asio::ip::udp::socket& /*socket*/,
-                  boost::function<void(const boost::system::error_code& error, size_t)> completionHandler)
+                  const boost::asio::ip::udp::endpoint& /*to*/)
         {
             //send ack
             acked[ack->commonHeader.receiverId]=ack->sequenceNumber;
-
-            boost::system::error_code ec;
-            completionHandler(ec, sizeof(Com::Heartbeat));
         }
     };
 

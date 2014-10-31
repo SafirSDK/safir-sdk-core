@@ -28,7 +28,6 @@
 #include <atomic>
 #include <boost/noncopyable.hpp>
 #include <boost/function.hpp>
-#include <boost/make_shared.hpp>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include "Node.h"
@@ -71,18 +70,18 @@ namespace Com
     typedef std::function<void(int64_t nodeTypeId)> QueueNotFull;
 
     template <class WriterType, uint64_t DeliveryGuarantee>
-    class DataSenderBasic
-            :private boost::noncopyable
+    class DataSenderBasic : private WriterType
     {
     public:
         DataSenderBasic(boost::asio::io_service& ioService,
                              int64_t nodeTypeId,
                              int64_t nodeId,
+                             int ipVersion,
                              const std::string& localIf,
                              const std::string& multicastAddress,
                              int waitForAckTimeout)
-            :m_strand(ioService)
-            ,m_multicastWriter()
+            :WriterType(ioService, ipVersion, localIf, multicastAddress)
+            ,m_strand(ioService)
             ,m_nodeTypeId(nodeTypeId)
             ,m_nodeId(nodeId)
             ,m_sendQueue(Parameters::SendQueueSize)
@@ -97,11 +96,6 @@ namespace Com
         {
             m_sendQueueSize=0;
             m_notifyQueueNotFull=false;
-
-            if (!multicastAddress.empty())
-            {
-                m_multicastWriter=boost::make_shared<WriterType>(m_strand, localIf, multicastAddress);
-            }
         }
 
         //Set notifier called every time something is retransmitted
@@ -257,10 +251,9 @@ namespace Com
                 }
 
                 NodeInfo ni;
-                ni.systemNode=false;
+                ni.endpoint=Utilities::CreateEndpoint(address);
                 ni.lastSentSeqNo=0;
-                ni.writer=boost::make_shared<WriterType>(m_strand, "", address);
-
+                ni.systemNode=false;
                 m_nodes.insert(std::make_pair(id, ni));
             });
         }
@@ -298,19 +291,18 @@ namespace Com
     private:
 #endif
         boost::asio::io_service::strand m_strand;
-        boost::shared_ptr<WriterType> m_multicastWriter;
         int64_t m_nodeTypeId;
         int64_t m_nodeId;
         MessageQueue<UserDataPtr> m_sendQueue;
         std::atomic_uint m_sendQueueSize;
         bool m_running;
-        int m_waitForAckTimeout;        
+        int m_waitForAckTimeout;
 
         struct NodeInfo
         {
             bool systemNode;
+            boost::asio::ip::udp::endpoint endpoint;
             uint64_t lastSentSeqNo;
-            boost::shared_ptr<WriterType> writer;
         };
         std::map<int64_t, NodeInfo> m_nodes;
 
@@ -329,7 +321,7 @@ namespace Com
             //must be called from writeStrand
 
             //Send all unhandled messges that are within our sender window
-            while (m_sendQueue.has_unhandled() && m_sendQueue.first_unhandled_index()<Parameters::SlidingWindowSize)
+            while (m_sendQueue.has_unhandled() && m_sendQueue.first_unhandled_index()<Parameters::SenderWindowSize)
             {
                 UserDataPtr& ud=m_sendQueue[m_sendQueue.first_unhandled_index()];
 
@@ -339,7 +331,7 @@ namespace Com
                     ud->header.sequenceNumber=m_lastSentMultiReceiverSeqNo;
                     ud->header.sendMethod=MultiReceiverSendMethod;
 
-                    if (m_multicastWriter) //this node and all the receivers are capable of sending and receiving multicast
+                    if (WriterType::IsMulticastEnabled()) //this node and all the receivers are capable of sending and receiving multicast
                     {
                         for (const auto& val : m_nodes)
                         {
@@ -353,14 +345,14 @@ namespace Com
 
                         if (ud->receivers.size()>0)
                         {
-                            m_multicastWriter->Send(ud);
+                            WriterType::SendMulticast(ud);
                         }
                     }
                     else //this node is not multicast enabled, only send unicast. However it's still a multiReceiver message and the multiReceiverSeqNo shall be used
                     {
-                        for (auto& val : m_nodes)
+                        for (const auto& val : m_nodes)
                         {
-                            val.second.writer->Send(ud);
+                            WriterType::SendTo(ud, val.second.endpoint);
                             ud->receivers.insert(std::make_pair(val.first, Receiver(val.first, MultiReceiverSendMethod, m_lastSentMultiReceiverSeqNo)));
                         }
                     }
@@ -381,7 +373,7 @@ namespace Com
                             r.id=recvIt->first;
                             r.sendMethod=SingleReceiverSendMethod;
                             r.sequenceNumber=n.lastSentSeqNo;
-                            n.writer->Send(ud);
+                            WriterType::SendTo(ud, n.endpoint);
                             ++recvIt;
                         }
                         else
@@ -449,7 +441,7 @@ namespace Com
                     ud->header.sendMethod=r.sendMethod; //always retransmit using unicast, but keep the original sendMethod.This is to specify correct sequence number serie.
                     ud->header.sequenceNumber=r.sequenceNumber;
 
-                    nodeIt->second.writer->Send(ud);
+                    WriterType::SendTo(ud, nodeIt->second.endpoint);
                     m_retransmitNotification(nodeIt->first);
                     lllog(6)<<L"COM: retransmitted  "<<(r.sendMethod==SingleReceiverSendMethod ? "SingleReceiverMessage" : "MultiReceiverMessage")<<", seq: "<<r.sequenceNumber<<" to "<<r.id<<std::endl;
                     ++recvIt;

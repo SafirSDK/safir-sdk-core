@@ -102,7 +102,6 @@ namespace Com
     private:
         ::google::protobuf::LogSilencer m_disableProtobufLogs;
         boost::asio::io_service& m_ioService;
-        boost::asio::io_service::strand m_readStrand;
         Node m_me;
         bool m_isControlInstance;
         NodeTypeMap m_nodeTypes;

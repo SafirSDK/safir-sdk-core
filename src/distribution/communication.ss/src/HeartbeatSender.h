@@ -26,7 +26,6 @@
 
 #include <boost/noncopyable.hpp>
 #include <boost/function.hpp>
-#include <boost/make_shared.hpp>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include "Node.h"
@@ -56,29 +55,25 @@ namespace Com
     /**
      * This class is sending periodic heart beats to all other system nodes.
      */
+
     template <class WriterType>
-    class HeartbeatSenderBasic
-            :private boost::noncopyable
+    class HeartbeatSenderBasic : private WriterType
     {
     public:
         HeartbeatSenderBasic(boost::asio::io_service& ioService,
                              int64_t myNodeId,
+                             int ipVersion,
                              const std::string& localIf,
                              const std::string& multicast,
                              int heartbeatInterval)
-            :m_strand(ioService)
+            :WriterType(ioService, ipVersion, localIf, multicast)
+            ,m_strand(ioService)
             ,m_heartbeatTimer(ioService)
             ,m_heartbeat(new Heartbeat(myNodeId))
             ,m_interval(heartbeatInterval)
-            ,m_useMulticast(!multicast.empty())
             ,m_nodes()
             ,m_running(false)
         {
-            if (m_useMulticast)
-            {
-                auto mcw=boost::make_shared<WriterType>(m_strand, localIf, multicast);
-                m_nodes.emplace(0, mcw);
-            }
         }
 
         void Start()
@@ -103,11 +98,6 @@ namespace Com
         //Add a node and starts sending heartbeats
         void AddNode(int64_t id, const std::string address)
         {
-            if (m_useMulticast)
-            {
-                return; //we dont need node information since we just send multicast heartbeats
-            }
-
             m_strand.dispatch([=]
             {
                 if (m_nodes.find(id)!=m_nodes.end())
@@ -117,8 +107,7 @@ namespace Com
                     throw std::logic_error(os.str());
                 }
 
-                auto w=boost::make_shared<WriterType>(m_strand, "", address);
-                m_nodes.emplace(id, w);
+                m_nodes.emplace(id, Utilities::CreateEndpoint(address));
             });
         }
 
@@ -135,17 +124,23 @@ namespace Com
         boost::asio::steady_timer m_heartbeatTimer;
         boost::shared_ptr<Heartbeat> m_heartbeat;
         int m_interval;
-        bool m_useMulticast;
-        std::map<int64_t, boost::shared_ptr<WriterType> > m_nodes;
+        std::map<int64_t, boost::asio::ip::udp::endpoint> m_nodes;
         bool m_running;
 
         void OnTimeout()
         {
             if (m_running)
             {
-                for (auto& vt : m_nodes)
+                if (WriterType::IsMulticastEnabled())
                 {
-                    vt.second->Send(m_heartbeat);
+                    WriterType::SendMulticast(m_heartbeat);
+                }
+                else
+                {
+                    for (auto& vt : m_nodes)
+                    {
+                        WriterType::SendTo(m_heartbeat, vt.second);
+                    }
                 }
 
                 m_heartbeatTimer.expires_from_now(boost::chrono::milliseconds(m_interval));
