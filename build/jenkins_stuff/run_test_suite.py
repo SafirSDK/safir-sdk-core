@@ -26,6 +26,13 @@
 from __future__ import print_function
 import os, glob, sys, subprocess, time, re, platform
 
+#try to import a package that we need for the debian installer
+#this will fail quietly on all other platforms, which is all right.
+try:
+    import apt
+except:
+    pass
+
 def log(*args, **kwargs):
     print(*args, **kwargs)
     sys.stdout.flush()
@@ -154,24 +161,74 @@ class WindowsInstaller(object):
 
 class DebianInstaller(object):
     def __init__(self):
-        pass
+        self.packages = ("safir-sdk-core", "safir-sdk-core-dev", "safir-sdk-core-testsuite")
 
+    def __is_installed(self, package_name, cache = None):
+        if cache is None:
+            cache = apt.cache.Cache()
+
+        return cache.has_key(package_name) and \
+          cache[package_name].is_installed
+          
     def can_uninstall(self):
-        return False
+        cache = apt.cache.Cache()
+        for pkg in self.packages:
+            if self.__is_installed(pkg, cache):
+                return True
+        return False;
 
     def uninstall(self):
         if not self.can_uninstall():
-            raise SetupError("No uninstaller found!")
-
+            raise SetupError("Cannot uninstall! Packages are not installed!")
+        
+        cmd = ["sudo", "--non-interactive", "apt-get", "--yes", "purge"]
+        for pkg in self.packages:
+            if self.__is_installed(pkg):
+                cmd.append(pkg)
+               
+        
+        proc = subprocess.Popen(cmd,
+                                stdout = subprocess.PIPE,
+                                stderr = subprocess.STDOUT)
+        output = proc.communicate()[0]
+        if proc.returncode != 0:
+            raise SetupError("Failed to run apt-get purge. returncode = "
+                             + str(proc.returncode) + "\nOutput:\n" + output)
+            
+        
     def install(self):
-        log ("No installation implemented")
+        runtime = glob.glob("safir-sdk-core_*.deb")
+        if len(runtime) != 1:
+            raise SetupError("Unexpected number of installers: "+ str(installer))
+
+        testsuite = glob.glob("safir-sdk-core-testsuite_*.deb")
+        if len(testsuite) != 1:
+            raise SetupError("Unexpected number of installers: "+ str(installer))
+
+        proc = subprocess.Popen(("sudo", "dpkg", "--install", runtime[0], testsuite[0]),
+                                stdout = subprocess.PIPE,
+                                stderr = subprocess.STDOUT)
+        output = proc.communicate()[0]
+        if proc.returncode != 0:
+            raise SetupError("Failed to run dpkg --install. returncode = "
+                             + str(proc.returncode) + "\nOutput:\n" + output)
+    
 
     def check_installation(self):
-        pass
+        proc = subprocess.Popen(("safir_show_config","--locations", "--typesystem", "--logging"),
+                                stdout = subprocess.PIPE,
+                                stderr = subprocess.STDOUT,
+                                universal_newlines = True)
+        output = proc.communicate()[0]
+        if proc.returncode != 0:
+            raise SetupError("Failed to run safir_show_config. returncode = "
+                             + str(proc.returncode) + "\nOutput:\n" + output)
 
+        #TODO: check some files and their locations
+        
 def run_test_suite():
     log("Launching test suite")
-    result = subprocess.call(("run_dose_tests.py","--jenkins"), shell = True)
+    result = subprocess.call(("run_dose_tests" + ".py" if sys.platform == "win32" else "","--jenkins"), shell = True)
 
     if result != 0:
         raise SetupError("Test suite failed. Returncode = " + str(result))
