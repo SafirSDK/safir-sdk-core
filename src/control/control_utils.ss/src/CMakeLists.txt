@@ -4,6 +4,8 @@ PROJECT (control_utils CXX C) #C is needed by FindProtobuf
 
 INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
+FILE(GLOB_RECURSE headers *.h)
+
 FIND_PACKAGE(Protobuf REQUIRED)
 
 FILE(GLOB proto_files *.proto)
@@ -19,8 +21,6 @@ endif()
 ADD_LIBRARY(control_utils SHARED ${PROTO_SRCS} ${PROTO_HDRS})
 
 TARGET_LINK_LIBRARIES(control_utils ${PROTOBUF_LITE_LIBRARIES})
-
-INSTALL(FILES ${PROTO_HDRS} DESTINATION ${SAFIR_SDK}/include/Safir/Dob/Internal)
 
 INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
         PATTERN ".svn" EXCLUDE
