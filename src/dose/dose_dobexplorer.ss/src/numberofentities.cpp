@@ -101,7 +101,7 @@ void NumberOfEntities::GetEntities()
         {
             const std::wstring name = GetName(*it);
             entityTable->insertRow(i);
-            QTableWidgetItem *item = new QTableWidgetItem(QString::fromStdWString(name));
+            QTableWidgetItem *item = new QTableWidgetItem(ToUtf8(name).c_str());
             item->setData(Qt::UserRole, static_cast<qlonglong>(*it));
             entityTable->setItem(i, NAME_COLUMN, item);
             entityTable->setItem(i, CONTEXT_NUM_STATES_COLUMN, new QTableWidgetItem());
