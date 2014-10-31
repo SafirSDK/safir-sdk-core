@@ -119,7 +119,99 @@ private:
 
 };
 
+class SystemStateHandler
+{
+public:
+    SystemStateHandler(boost::asio::io_service& ioService,
+                       const int64_t id,
+                       Safir::Dob::Internal::Com::Communication& communication)
+        : m_strand(ioService)
+        , m_injectedNodes({id}) //consider ourselves already injected
+        , m_communication(communication)
+    {
 
+    }
+
+    void NewState(const Safir::Dob::Internal::SP::SystemState& data)
+    {
+        m_strand.dispatch([this,data]
+                          {
+                              CheckState(data);
+                              InjectNodes(data);
+                          });
+    }
+
+private:
+    void InjectNodes(const Safir::Dob::Internal::SP::SystemState& data)
+    {
+        for (int i = 0; i < data.Size(); ++i)
+        {
+            //don't inject dead or already injected nodes
+            if (data.IsDead(i) || m_injectedNodes.find(data.Id(i)) != m_injectedNodes.end())
+            {
+                continue;
+            }
+
+            lllog(5) << "Injecting node " << data.Name(i) << "(" << data.Id(i)
+                     << ") of type " << data.NodeTypeId(i)
+                     << " with address " << data.DataAddress(i) << std::endl;
+
+            m_communication.InjectNode(data.Name(i),
+                                       data.Id(i),
+                                       data.NodeTypeId(i),
+                                       data.DataAddress(i));
+
+            m_injectedNodes.insert(data.Id(i));
+        }
+    }
+
+    void CheckState(const Safir::Dob::Internal::SP::SystemState& data)
+    {
+        if (!m_states.empty())
+        {
+            const Safir::Dob::Internal::SP::SystemState last = m_states.front();
+
+            //find nodes that have disappeared
+            for (int i = 0; i < last.Size(); ++i)
+            {
+                bool found = false;
+                for (int j = 0; j < data.Size(); ++j)
+                {
+                    if (last.Id(i) == data.Id(j))
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found && !last.IsDead(i))
+                {
+                    std::wcout << "Node " << last.Id(i) << " could not be found in current SS" << std::endl;
+                    std::wcout << "Last: \n" << last << "\nCurrent:\n"<< data <<std::endl;
+                    throw std::logic_error("Node has gone missing without being dead first!");
+                }
+            }
+
+            //find nodes that have reappeared
+            /*        for (const auto& oldState : m_states)
+                      {
+
+                      }*/
+        }
+
+        m_states.push_front(data);
+        while (m_states.size() > 10)
+        {
+            m_states.pop_back();
+        }
+    }
+
+    boost::asio::io_service::strand m_strand;
+    std::set<int64_t> m_injectedNodes;
+    Safir::Dob::Internal::Com::Communication& m_communication;
+
+    std::deque<Safir::Dob::Internal::SP::SystemState> m_states;
+};
 
 int main(int argc, char * argv[])
 {
@@ -189,31 +281,10 @@ int main(int argc, char * argv[])
                                                options.dataAddress,
                                                std::move(spNodeTypes));
 
-    std::set<int64_t> injectedNodes = {options.id}; //consider ourselves already injected
-    boost::asio::io_service::strand injectStrand(ioService);
+    SystemStateHandler ssh(ioService, options.id, communication);
 
     // Start subscription to system state changes from SP
-    sp.StartStateSubscription(injectStrand.wrap
-        ([options, &communication, &injectedNodes](const Safir::Dob::Internal::SP::SystemState& data)
-         {
-             for (int i = 0; i < data.Size(); ++i)
-             {
-                 //don't inject dead or already injected nodes
-                 if (data.IsDead(i) || injectedNodes.find(data.Id(i)) != injectedNodes.end())
-                 {
-                     continue;
-                 }
-                 lllog(5) << "Injecting node " << data.Name(i) << "(" << data.Id(i)
-                          << ") of type " << data.NodeTypeId(i)
-                          << " with address " << data.DataAddress(i) << std::endl;
-                 communication.InjectNode(data.Name(i),
-                                          data.Id(i),
-                                          data.NodeTypeId(i),
-                                          data.DataAddress(i));
-
-                 injectedNodes.insert(data.Id(i));
-             }
-         }));
+    sp.StartStateSubscription([&ssh](const Safir::Dob::Internal::SP::SystemState& data){ssh.NewState(data);});
 
     communication.SetDataReceiver([](const int64_t fromNodeId,
                                      const int64_t fromNodeType,
