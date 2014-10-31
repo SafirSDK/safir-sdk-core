@@ -164,7 +164,7 @@ class DebianInstaller(object):
             raise SetupError("No uninstaller found!")
 
     def install(self):
-        log ("Running installer:", self.installer)
+        log ("No installation implemented")
 
     def check_installation(self):
         pass
