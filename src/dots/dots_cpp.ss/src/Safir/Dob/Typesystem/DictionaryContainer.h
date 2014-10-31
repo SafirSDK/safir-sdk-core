@@ -65,24 +65,22 @@ namespace Typesystem
          * Construct a container that is not changed and not null.
          */
         DictionaryContainer()
-            :m_isNull(true)
         {
         }
 
         /**
-         * @brief IsNull - Check if the whole sequence is null.
-         * @return True if the sequence is null, else false.
+         * @brief IsNull - Since dictionaries cannot be null this will always return false.
+         * @return Always false
          */
-        virtual bool IsNull() const {return m_isNull;}
+        virtual bool IsNull() const {return false;}
 
         /**
-         * @brief SetNull - Set the whole sequence to null.
+         * @brief SetNull - Will always throw an exception. Dictionaries can't be null. If the intention is to remove all the content
+         *                  use clear instead.
          */
         virtual void SetNull()
         {
-            StorageType::clear();
-            m_isNull=true;
-            m_bIsChanged=true;
+            throw SoftwareViolationException(L"Dictionaries can't be null.", __WFILE__, __LINE__);
         }
 
         using StorageType::begin;
@@ -168,9 +166,6 @@ namespace Typesystem
         {
             //TODO
         }
-
-    private:
-        bool m_isNull;
     };
 }
 }

@@ -441,7 +441,7 @@ def parse_dou(gSession, dou_xmlfile):
     if parameters is not None:
         for p in parameters:            
             m_type = readTextPropery(p, "type")
-            is_array = readTextPropery(p, "arrayElements") is not None
+            is_array = readTextPropery(p, "arrayElements") is not None or readTextPropery(p, "array") is not None
             is_dict = p.find("{urn:safir-dots-unit}dictionary")
             dict_type = None
             if is_dict is not None:
@@ -794,7 +794,8 @@ def process_at_variable_lookup(gSession, var, dou, table_line, parent_table_line
     elif var == "MEMBERISARRAY" : return member_is_array(dou, table_line)
     elif var == "MEMBERISSEQUENCE" : return member_is_sequence(dou, table_line)
     elif var == "MEMBERISDICTIONARY" : return member_is_dictionary(dou, table_line)
-    elif var == "MEMBERDICTIONARYTYPE" : return dou.members[table_line - 1].dictionary_type
+    elif var == "MEMBERDICTIONARYTYPE" : return gSession.dod_types[dou.members[table_line - 1].dictionary_type].generated
+    elif var == "UNIFORM_MEMBERDICTIONARYTYPE" : return gSession.dod_types[dou.members[table_line - 1].dictionary_type].uniform_type
     elif var == "PARAMETER" : return member_formatter(gSession, dou.parameters[index].name)
     elif var == "PARAMETER'LENGTH" : return get_iterator_length("PARAMETER", dou, 0, 0)
     elif var == "XMLPARAMETER" : return dou.parameters[index].name
@@ -804,7 +805,8 @@ def process_at_variable_lookup(gSession, var, dou, table_line, parent_table_line
     elif var == "PARAMETERTYPE" : return gSession.dod_types[dou.parameters[index].type].generated
     elif var == "PARAMETERISARRAY" : return parameter_is_array(dou, table_line)
     elif var == "PARAMETERISDICTIONARY" : return parameter_is_dictionary(dou, table_line)
-    elif var == "PARAMETERDICTIONARYTYPE" : return dou.parameters[table_line - 1].dictionary_type
+    elif var == "PARAMETERDICTIONARYTYPE" : return gSession.dod_types[dou.parameters[table_line - 1].dictionary_type].generated
+    elif var == "UNIFORM_PARAMETERDICTIONARYTYPE" : return gSession.dod_types[dou.parameters[table_line - 1].dictionary_type].uniform_type
     elif var == "TYPEID" : 
         if dou.name == "": return ""
         return str(md5_first64(dou.name))

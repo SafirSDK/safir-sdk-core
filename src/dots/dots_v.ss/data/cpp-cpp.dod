@@ -557,6 +557,7 @@ namespace @_NAMESPACEV_@
 @@TABLE@@
 @@IF@@ @_EXIST:MEMBER_@
 
+@@ --- Array member ---
 @@IF@@ @_EXIST:MEMBERISARRAY_@
 @@IF@@ (@_UNIFORM_MEMBERTYPE_@ = String) or (@_UNIFORM_MEMBERTYPE_@ = Boolean)
         for (Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@ContainerArray::iterator it = m_@_MEMBER_@Member.begin();
@@ -569,6 +570,7 @@ namespace @_NAMESPACEV_@
         {
             Safir::Dob::Typesystem::Internal::BlobOperations::Get(*it, handle, g_@_LOWER:MEMBER_@MemberIndex, static_cast<Safir::Dob::Typesystem::ArrayIndex>(std::distance(m_@_MEMBER_@Member.begin(),it)));
         }
+@@ --- Sequence member ---
 @@ELSIF@@ @_EXIST:MEMBERISSEQUENCE_@
         for (int valueIndex=0; valueIndex<DotsC_GetNumberOfMemberValues(handle, g_@_LOWER:MEMBER_@MemberIndex); ++valueIndex)
         {
@@ -587,8 +589,29 @@ namespace @_NAMESPACEV_@
             m_@_MEMBER_@Member.push_back(seqVal);
 @@END_IF@@
         }
+@@ --- Dictionary member ---
 @@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
-	//DICTIONARY m_@_MEMBER_@Member
+        for (int valueIndex=0; valueIndex<DotsC_GetNumberOfMemberValues(handle, g_@_LOWER:MEMBER_@MemberIndex); ++valueIndex)
+        {
+            bool isNull, isChanged;
+@@IF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@=Enumeration
+            Safir::Dob::Typesystem::Int32 ordinal;
+            Safir::Dob::Typesystem::Internal::BlobOperations::Get(ordinal, isNull, isChanged, handle, g_@_LOWER:MEMBER_@MemberIndex, valueIndex, Safir::Dob::Typesystem::Internal::BlobOperations::KeyMode);
+            @_MEMBERTYPE_@::Enumeration key=static_cast<@_MEMBERTYPE_@::Enumeration>(ordinal);
+@@ELSE@@
+            @_MEMBERDICTIONARYTYPE_@ key;
+            Safir::Dob::Typesystem::Internal::BlobOperations::Get(key, isNull, isChanged, handle, g_@_LOWER:MEMBER_@MemberIndex, valueIndex, Safir::Dob::Typesystem::Internal::BlobOperations::KeyMode);
+@@END_IF@@
+            if (isNull)
+            {
+                m_@_MEMBER_@Member[key].SetChanged(isChanged);
+            }
+            else
+            {
+                Safir::Dob::Typesystem::Internal::BlobOperations::Get(m_@_MEMBER_@Member[key], handle, g_@_LOWER:MEMBER_@MemberIndex, 0);
+            }
+        }
+@@ --- Single member ---
 @@ELSE@@
         Safir::Dob::Typesystem::Internal::BlobOperations::Get(m_@_MEMBER_@Member, handle, g_@_LOWER:MEMBER_@MemberIndex, 0);
 @@END_IF@@
@@ -606,6 +629,7 @@ namespace @_NAMESPACEV_@
 @@IF@@ @_EXIST:MEMBER_@
 
         //@_MEMBER_@
+@@ --- Array member ---
 @@IF@@ @_EXIST:MEMBERISARRAY_@
         if (m_@_MEMBER_@Member.size() != @_MEMBER_@ArraySize())
         {
@@ -630,6 +654,7 @@ namespace @_NAMESPACEV_@
 @@END_IF@@
             Safir::Dob::Typesystem::Internal::BlobOperations::Set(*it, handle, g_@_LOWER:MEMBER_@MemberIndex, static_cast<Safir::Dob::Typesystem::ArrayIndex>(std::distance(m_@_MEMBER_@Member.begin(),it)));
         }
+@@ --- Sequence member ---
 @@ELSIF@@ @_EXIST:MEMBERISSEQUENCE_@
         for (size_t valueIndex=0; valueIndex<m_@_MEMBER_@Member.size(); ++valueIndex)
         {
@@ -659,8 +684,33 @@ namespace @_NAMESPACEV_@
                                                                   Safir::Dob::Typesystem::Internal::BlobOperations::ValueMode);
 @@END_IF@@
         }
+@@ --- Dictionary member ---
 @@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
-	//DICTIONARY m_@_MEMBER_@Member
+@@IF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@=Enumeration
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+        for (Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@::Enumeration, @_MEMBERTYPE_@::EnumerationContainer>::const_iterator it=m_@_MEMBER_@Member.begin();
+             it!=m_@_MEMBER_@Member.end(); ++it)
+@@ELSE@@
+        for (Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@::Enumeration, @_MEMBERTYPE_@Container>::const_iterator it=m_@_MEMBER_@Member.begin();
+             it!=m_@_MEMBER_@Member.end(); ++it)
+@@END_IF@@
+@@ELSE@@    
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+        for (Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@::EnumerationContainer>::const_iterator it=m_@_MEMBER_@Member.begin();
+             it!=m_@_MEMBER_@Member.end(); ++it)
+@@ELSE@@
+        for (Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@Container>::const_iterator it=m_@_MEMBER_@Member.begin();
+             it!=m_@_MEMBER_@Member.end(); ++it)
+@@END_IF@@
+@@END_IF@@
+	    {
+            Safir::Dob::Typesystem::Internal::BlobOperations::Set(it->first, it->second.IsNull(), it->second.IsChanged(), handle, g_@_LOWER:MEMBER_@MemberIndex, 0, Safir::Dob::Typesystem::Internal::BlobOperations::KeyMode);
+            if (!it->second.IsNull())
+            {
+                Safir::Dob::Typesystem::Internal::BlobOperations::Set(it->second, handle, g_@_LOWER:MEMBER_@MemberIndex, 0);
+            }
+         }
+@@ --- Single member ---
 @@ELSE@@
 @@IF@@ (@_UNIFORM_MEMBERTYPE_@ = String)
         if (!m_@_MEMBER_@Member.IsNull() && m_@_MEMBER_@Member.GetVal().length() > static_cast<size_t>(@_MEMBER_@MaxStringLength()))
@@ -796,6 +846,48 @@ namespace @_NAMESPACEV_@
     const @_MEMBERTYPE_@SequenceContainer & @_MEMBERCLASS_@::@_MEMBER_@() const {return m_@_MEMBER_@Member;}
     @_MEMBERTYPE_@SequenceContainer & @_MEMBERCLASS_@::@_MEMBER_@() {return m_@_MEMBER_@Member;}
 @@END_IF@@
+@@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
+@@IF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@=Enumeration
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+    const Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@::Enumeration, @_MEMBERTYPE_@::EnumerationContainer>& @_MEMBERCLASS_@::@_MEMBER_@() const
+    {
+        return m_@_MEMBER_@Member;
+    }
+    Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@::Enumeration, @_MEMBERTYPE_@::EnumerationContainer>& @_MEMBERCLASS_@::@_MEMBER_@()
+    {
+        return m_@_MEMBER_@Member;
+    }
+@@ELSE@@
+    const Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@::Enumeration, @_MEMBERTYPE_@Container>& @_MEMBERCLASS_@::@_MEMBER_@() const
+    {
+        return m_@_MEMBER_@Member;
+    }
+    Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@::Enumeration, @_MEMBERTYPE_@Container>& @_MEMBERCLASS_@::@_MEMBER_@()
+    {
+        return m_@_MEMBER_@Member;
+    }
+@@END_IF@@
+@@ELSE@@    
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+    const Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@::EnumerationContainer>& @_MEMBERCLASS_@::@_MEMBER_@() const
+    {
+        return m_@_MEMBER_@Member;
+    }
+    Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@::EnumerationContainer>& @_MEMBERCLASS_@::@_MEMBER_@()
+    {
+        return m_@_MEMBER_@Member;
+    }
+@@ELSE@@
+    const Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@Container>& @_MEMBERCLASS_@::@_MEMBER_@() const
+    {
+        return m_@_MEMBER_@Member;
+    }
+    Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@Container>& @_MEMBERCLASS_@::@_MEMBER_@()
+    {
+        return m_@_MEMBER_@Member;
+    }
+@@END_IF@@
+@@END_IF@@
 @@ELSE@@
 @@IF@@ (@_UNIFORM_MEMBERTYPE_@ = String) or (@_UNIFORM_MEMBERTYPE_@ = Boolean)
     const Safir::Dob::Typesystem::ContainerProxy<Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@Container> @_MEMBERCLASS_@::@_MEMBER_@() const 
@@ -824,6 +916,7 @@ namespace @_NAMESPACEV_@
 @@IF@@ @_EXIST:PARAMETER_@
 
     //@_PARAMETER_@
+@@--  ARRAY PARAMETERS
 @@IF@@ @_EXIST:PARAMETERISARRAY_@
     Safir::Dob::Typesystem::ArrayIndex @_PARAMETERCLASS_@::@_PARAMETER_@ArraySize()
     {
@@ -862,6 +955,84 @@ namespace @_NAMESPACEV_@
 @@END_IF@@
     }
 @@END_IF@@
+@@--  DICTIONARY PARAMETERS
+@@ELSIF@@ @_EXIST:PARAMETERISDICTIONARY_@
+
+
+@@IF@@ @_UNIFORM_PARAMETERDICTIONARYTYPE_@=Enumeration
+@@IF@@ @_UNIFORM_PARAMETERTYPE_@=Enumeration
+    @_PARAMETERTYPE_@::Enumeration @_PARAMETERCLASS_@::@_PARAMETER_@(const @_PARAMETERDICTIONARYTYPE_@::Enumeration& key)
+    {
+        if (!isInitialised) Init();
+        Safir::Dob::Typesystem::Int32 index=Safir::Dob::Typesystem::Parameters::DictionaryKeyToIndex(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, static_cast<Safir::Dob::Typesystem::Int32>(key));
+        if (index<0)
+        {
+            throw "something";
+        }
+        return static_cast<@_PARAMETERTYPE_@::Enumeration>(Safir::Dob::Typesystem::Parameters::GetEnumeration(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, index));
+    }
+@@ELSIF@@ (@_UNIFORM_PARAMETERTYPE_@ = Object)
+    @_PARAMETERTYPE_@Ptr @_PARAMETERCLASS_@::@_PARAMETER_@(const @_PARAMETERDICTIONARYTYPE_@::Enumeration& key)
+    {
+        if (!isInitialised) Init();
+        Safir::Dob::Typesystem::Int32 index=Safir::Dob::Typesystem::Parameters::DictionaryKeyToIndex(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, static_cast<Safir::Dob::Typesystem::Int32>(key));
+        if (index<0)
+        {
+            throw "something";
+        }
+        return boost::static_pointer_cast<@_PARAMETERTYPE_@>(Safir::Dob::Typesystem::Parameters::GetObject(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, index));
+    }
+@@ELSE@@
+    @_PARAMETERTYPE_@ @_PARAMETERCLASS_@::@_PARAMETER_@(const @_PARAMETERDICTIONARYTYPE_@::Enumeration& key)
+    {
+        if (!isInitialised) Init();
+        Safir::Dob::Typesystem::Int32 index=Safir::Dob::Typesystem::Parameters::DictionaryKeyToIndex(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, static_cast<Safir::Dob::Typesystem::Int32>(key));
+        if (index<0)
+        {
+            throw "something";
+        }
+        return Safir::Dob::Typesystem::Parameters::Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, index);
+    }
+@@END_IF@@
+@@ELSE@@    
+@@IF@@ @_UNIFORM_PARAMETERTYPE_@=Enumeration
+    @_PARAMETERTYPE_@::Enumeration @_PARAMETERCLASS_@::@_PARAMETER_@(const @_PARAMETERDICTIONARYTYPE_@& key)
+    {
+        if (!isInitialised) Init();
+        Safir::Dob::Typesystem::Int32 index=Safir::Dob::Typesystem::Parameters::DictionaryKeyToIndex(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, key);
+        if (index<0)
+        {
+            throw "something";
+        }
+        return static_cast<@_PARAMETERTYPE_@::Enumeration>(Safir::Dob::Typesystem::Parameters::GetEnumeration(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, index));
+    }
+@@ELSIF@@ (@_UNIFORM_PARAMETERTYPE_@ = Object)
+    @_PARAMETERTYPE_@Ptr @_PARAMETERCLASS_@::@_PARAMETER_@(const @_PARAMETERDICTIONARYTYPE_@& key)
+    {
+        if (!isInitialised) Init();
+        Safir::Dob::Typesystem::Int32 index=Safir::Dob::Typesystem::Parameters::DictionaryKeyToIndex(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, key);
+        if (index<0)
+        {
+            throw "something";
+        }
+        return boost::static_pointer_cast<@_PARAMETERTYPE_@>(Safir::Dob::Typesystem::Parameters::GetObject(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, index));
+    }
+@@ELSE@@
+    @_PARAMETERTYPE_@ @_PARAMETERCLASS_@::@_PARAMETER_@(const @_PARAMETERDICTIONARYTYPE_@& key)
+    {
+        if (!isInitialised) Init();
+        Safir::Dob::Typesystem::Int32 index=Safir::Dob::Typesystem::Parameters::DictionaryKeyToIndex(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, key);
+        if (index<0)
+        {
+            throw "something";
+        }
+        return Safir::Dob::Typesystem::Parameters::Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, index);
+    }
+@@END_IF@@
+@@END_IF@@
+
+
+
 @@--  SINGLE PARAMETERS
 @@ELSE@@
 @@IF@@ @_UNIFORM_PARAMETERTYPE_@=Object

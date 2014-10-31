@@ -60,25 +60,23 @@ namespace Typesystem
          * Construct a container that is not changed and not null.
          */
         SequenceContainer()
-            :m_isNull(true)
-            ,m_values()
+            :m_values()
         {
         }
 
         /**
-         * @brief IsNull - Check if the whole sequence is null.
-         * @return True if the sequence is null, else false.
+         * @brief IsNull - Since sequences cannot be null this will always return false.
+         * @return Always false
          */
-        virtual bool IsNull() const {return m_isNull;}
+        virtual bool IsNull() const {return false;}
 
         /**
-         * @brief SetNull - Set the whole sequence to null.
+         * @brief SetNull - Will always throw an exception. Sequences can't be null. If the intention is to remove all the content
+         *                  use clear instead.
          */
         virtual void SetNull()
         {
-            m_values.clear();
-            m_isNull=true;
-            m_bIsChanged=true;
+            throw SoftwareViolationException(L"Sequences can't be null.", __WFILE__, __LINE__);
         }
 
         /**
@@ -156,7 +154,6 @@ namespace Typesystem
          */
         void push_back(const ContainedType& val)
         {
-            m_isNull=false;
             m_bIsChanged=true;
             m_values.push_back(val);
         }
@@ -213,7 +210,6 @@ namespace Typesystem
         }
 
     private:
-        bool m_isNull;
         StorageType m_values;
     };
 
