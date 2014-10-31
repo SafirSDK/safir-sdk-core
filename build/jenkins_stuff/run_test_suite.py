@@ -24,7 +24,7 @@
 #
 ###############################################################################
 from __future__ import print_function
-import os, glob, sys, subprocess, time, re
+import os, glob, sys, subprocess, time, re, platform
 
 def log(*args, **kwargs):
     print(*args, **kwargs)
