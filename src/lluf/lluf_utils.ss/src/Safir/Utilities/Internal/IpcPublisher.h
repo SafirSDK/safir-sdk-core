@@ -73,7 +73,6 @@ namespace Internal
         IpcPublisherImpl(boost::asio::io_service&   ioService,
                          const std::string&         name)
             : m_strand(ioService),
-              m_ioService(ioService),
               m_acceptor(boost::make_shared<Acceptor>(m_strand,
                                                       name,
                                                       [this](typename Acceptor::StreamPtr streamPtr)
@@ -153,7 +152,6 @@ namespace Internal
         typedef boost::shared_ptr<Acceptor> AcceptorPtr;
 
         boost::asio::io_service::strand     m_strand;
-        boost::asio::io_service&            m_ioService;
         AcceptorPtr                         m_acceptor;
         std::set<SessionPtr>                m_sessions;
 
