@@ -35,18 +35,19 @@
 //disable warnings in boost
 #if defined _MSC_VER
 #  pragma warning (push)
-#  pragma warning (disable : 4100 4267)
+#  pragma warning (disable : 4100 4267 4251)
 #endif
 
 #include <boost/program_options.hpp>
 #include <boost/asio.hpp>
+#include "boost/process.hpp"
+#include "boost/process/mitigate.hpp"
 
 #if defined _MSC_VER
 #  pragma warning (pop)
 #endif
 
-#include "boost/process.hpp"
-#include "boost/process/mitigate.hpp"
+
 
 namespace SP = Safir::Dob::Internal::SP;
 namespace Com = Safir::Dob::Internal::Com;
