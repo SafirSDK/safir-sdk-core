@@ -119,7 +119,7 @@ void NumberOfEntities::GetEntities()
 
 }
 
-void NumberOfEntities::ProcessState(const Safir::Dob::Typesystem::Int64 instance,
+void NumberOfEntities::ProcessState(const Safir::Dob::Typesystem::Int64 /*instance*/,
                                 const Safir::Dob::Internal::StateSharedPtr& statePtr,
                                Safir::Dob::Internal::Arguments& arguments)
 {

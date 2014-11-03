@@ -125,7 +125,7 @@ void Safir::Dob::Internal::StatisticsCollector(Safir::Dob::Internal::State& stat
     }
 
 
-    arguments.numSubscribers = state.m_subscriptions.size();
+    arguments.numSubscribers = static_cast<int>(state.m_subscriptions.size());
 }
 
 void Safir::Dob::Internal::StatisticsCollector(Safir::Dob::Internal::StateContainer& stateContainer, void* arg)

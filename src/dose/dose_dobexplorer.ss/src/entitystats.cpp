@@ -75,7 +75,7 @@ EntityStats::EntityStats(QWidget * /*parent*/, const Safir::Dob::Typesystem::Typ
 }
 
 
-void EntityStats::AddContextRow(Safir::Dob::Internal::EntityType& entityType, Safir::Dob::Internal::Arguments& arguments)
+void EntityStats::AddContextRow(Safir::Dob::Internal::EntityType& /*entityType*/, Safir::Dob::Internal::Arguments& arguments)
 {
     if (Safir::Dob::Internal::ContextSharedTable::Instance().IsContextShared(arguments.typeId))
     {
