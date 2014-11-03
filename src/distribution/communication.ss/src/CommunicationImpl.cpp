@@ -51,14 +51,15 @@ namespace Com
                                          const NodeTypeMap& nodeTypes)
         :m_disableProtobufLogs()
         ,m_ioService(ioService)
+        ,m_receiveStrand(ioService)
         ,m_me(nodeName, nodeId, nodeTypeId, controlAddress, dataAddress, isControlInstance)
         ,m_isControlInstance(isControlInstance)
         ,m_nodeTypes(nodeTypes)
         ,m_onNewNode()
         ,m_gotRecv()
         ,m_discoverer(m_ioService, m_me, [=](const Node& n){OnNewNode(n);})
-        ,m_deliveryHandler(m_ioService, m_me.nodeId, Utilities::Protocol(m_me.unicastAddress))
-        ,m_reader(ioService, m_me.unicastAddress, m_nodeTypes[nodeTypeId]->MulticastAddress(),
+        ,m_deliveryHandler(m_receiveStrand, m_me.nodeId, Utilities::Protocol(m_me.unicastAddress))
+        ,m_reader(m_receiveStrand, m_me.unicastAddress, m_nodeTypes[nodeTypeId]->MulticastAddress(),
                     [=](const char* d, size_t s){return OnRecv(d,s);},
                     [=](){return m_deliveryHandler.NumberOfUndeliveredMessages()<Parameters::MaxNumberOfUndelivered;})
     {
@@ -92,7 +93,7 @@ namespace Com
 
     void CommunicationImpl::SetGotReceiveFromCallback(const GotReceiveFrom& callback)
     {
-        m_reader.Strand().dispatch([=]
+        m_receiveStrand.dispatch([=]
         {
             m_gotRecv=callback;
             m_deliveryHandler.SetGotRecvCallback(callback);
@@ -109,7 +110,7 @@ namespace Com
 
     void CommunicationImpl::SetDataReceiver(const ReceiveData& callback, int64_t dataTypeIdentifier)
     {
-        m_reader.Strand().post([=]{m_deliveryHandler.SetReceiver(callback, dataTypeIdentifier);});
+        m_receiveStrand.post([=]{m_deliveryHandler.SetReceiver(callback, dataTypeIdentifier);});
     }
 
     void CommunicationImpl::SetQueueNotFullCallback(const QueueNotFull& callback, int freePartThreshold)
@@ -122,6 +123,7 @@ namespace Com
 
     void CommunicationImpl::Start()
     {
+        m_deliveryHandler.Start();
         m_reader.Start();
         for (auto& vt : m_nodeTypes)
         {
@@ -137,6 +139,7 @@ namespace Com
     void CommunicationImpl::Stop()
     {
         m_reader.Stop();
+        m_deliveryHandler.Stop();
         for (auto& vt : m_nodeTypes)
         {
             vt.second->GetHeartbeatSender().Stop();
@@ -156,7 +159,7 @@ namespace Com
         //risk losing a node.
         //We also do the DataSender inside readerStrand since
         //it only through the deliveryHandler we can lookup nodeTypeId from a nodeId. Since this a a very low frequent operaton this is ok.
-        m_reader.Strand().post([=]
+        m_receiveStrand.post([=]
         {
             lllog(6)<<L"COM: Execute IncludeNode id="<<id<<std::endl;
             auto node=m_deliveryHandler.GetNode(id);
@@ -177,7 +180,7 @@ namespace Com
     {
         lllog(6)<<L"COM: ExcludeNode "<<id<<std::endl;
 
-        m_reader.Strand().post([=]
+        m_receiveStrand.post([=]
         {
             lllog(6)<<L"COM: Execute ExcludeNode id="<<id<<std::endl;
             auto node=m_deliveryHandler.GetNode(id);
@@ -238,7 +241,7 @@ namespace Com
         nodeType.GetAckedDataSender().AddNode(node.nodeId, node.unicastAddress);
         nodeType.GetUnackedDataSender().AddNode(node.nodeId, node.unicastAddress);
         nodeType.GetHeartbeatSender().AddNode(node.nodeId, node.unicastAddress);
-        m_reader.Strand().dispatch([this, node]{m_deliveryHandler.AddNode(node);});
+        m_receiveStrand.dispatch([this, node]{m_deliveryHandler.AddNode(node);});
 
         //callback to host application
         m_onNewNode(node.name, node.nodeId, node.nodeTypeId, node.controlAddress, node.dataAddress);

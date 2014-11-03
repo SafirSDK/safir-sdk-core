@@ -43,6 +43,7 @@
 #endif
 
 #include <boost/asio.hpp>
+#include <boost/asio/steady_timer.hpp>
 
 #ifdef _MSC_VER
 #pragma warning (pop)
@@ -63,16 +64,38 @@ namespace Com
     class DeliveryHandlerBasic : private WriterType
     {
     public:
-        DeliveryHandlerBasic(boost::asio::io_service& ioService, int64_t myNodeId, int ipVersion)
-            :WriterType(ioService, ipVersion)
+        DeliveryHandlerBasic(boost::asio::io_service::strand& receiveStrand, int64_t myNodeId, int ipVersion)
+            :WriterType(receiveStrand.get_io_service(), ipVersion)
+            ,m_running(false)
             ,m_myId(myNodeId)
-            ,m_deliverStrand(ioService)
+            ,m_receiveStrand(receiveStrand)
+            ,m_deliverStrand(receiveStrand.get_io_service())
+            ,m_sendAckTimer(receiveStrand.get_io_service())
             ,m_nodes()
             ,m_receivers()
             ,m_gotRecvFrom()
         {
             //TODO: use initialization instead. This is due to problems with VS2013
             m_numberOfUndeliveredMessages=0;
+        }
+
+        void Start()
+        {
+            m_receiveStrand.dispatch([=]
+            {
+                m_running=true;
+                OnAckTimeout();
+            });
+        }
+
+        void Stop()
+        {
+            m_receiveStrand.dispatch([=]
+            {
+                m_running=false;
+                m_sendAckTimer.cancel();
+            });
+
         }
 
         //Received data to be delivered up to the application. Everythin must be called from readStrand.
@@ -101,9 +124,9 @@ namespace Com
             lllog(8)<<L"COM: Received AppData from "<<header->commonHeader.senderId<<std::endl;
             m_gotRecvFrom(header->commonHeader.senderId); //report that we are receivinga intact data from the node
 
-            bool sendAck=HandleMessage(header, payload, senderIt->second);
+            bool ackNow=HandleMessage(header, payload, senderIt->second);
             Deliver(senderIt->second, header); //if something is now fully received, deliver it to application
-            if (sendAck)
+            if (ackNow)
             {
                 auto ackPtr=boost::make_shared<Ack>(m_myId, header->commonHeader.senderId, senderIt->second.GetChannel(header).lastInSequence, header->sendMethod);
                 WriterType::SendTo(ackPtr, senderIt->second.endpoint);
@@ -193,58 +216,99 @@ namespace Com
         struct Channel
         {
             uint64_t lastInSequence; //last sequence number that was moved out of the queue. seq(queue[0])-1
+            uint64_t lastAcked; //last sequence number that has been acked
             CircularArray<RecvData> queue;
             Channel()
                 :lastInSequence(0)
-                ,queue(Parameters::ReceiverWindowSize)
+                ,lastAcked(0)
+                ,queue(Parameters::SlidingWindowSize)
             {
             }
+
+            int NumberOfUnacked() const {return static_cast<int>(lastInSequence-lastAcked);}
         };
 
         struct NodeInfo
         {
             Node node;
-            std::vector<Channel> channel;
             boost::asio::ip::udp::endpoint endpoint;
+
+            Channel unackedSingleReceiverChannel;
+            Channel unackedMultiReceiverChannel;
+            Channel ackedSingleReceiverChannel;
+            Channel ackedMultiReceiverChannel;
 
             NodeInfo(const Node& node_)
                 :node(node_)
-                ,channel(4) //4 channels: unacked_singel, unacked_multi, acked_single, acked_multi
                 ,endpoint(Utilities::CreateEndpoint(node.unicastAddress))
             {
             }
 
             Channel& GetChannel(const MessageHeader* header)
             {
-                if (header->deliveryGuarantee==Unacked)
+                if (header->deliveryGuarantee==Acked)
                 {
                     if (header->sendMethod==SingleReceiverSendMethod)
-                        return channel[0];
+                        return ackedSingleReceiverChannel;
                     else
-                        return channel[1];
-
+                        return ackedMultiReceiverChannel;
                 }
-                else
+                else //Unacked
                 {
                     if (header->sendMethod==SingleReceiverSendMethod)
-                        return channel[2];
+                        return unackedSingleReceiverChannel;
                     else
-                        return channel[3];
-
+                        return unackedMultiReceiverChannel;
                 }
-
-                //return channel[static_cast<size_t>(2*header->deliveryGuarantee+header->sendMethod)];
             }
         };
         typedef std::map<int64_t, NodeInfo> NodeInfoMap;
 
+        bool m_running;
         int64_t m_myId;
+        boost::asio::strand& m_receiveStrand; //for sending acks, same strand as all public methods are supposed to be called from
         boost::asio::strand m_deliverStrand; //for delivering data to application
         std::atomic_uint m_numberOfUndeliveredMessages;
+        boost::asio::steady_timer m_sendAckTimer;
 
         NodeInfoMap m_nodes;
         ReceiverMap m_receivers;
         GotReceiveFrom m_gotRecvFrom;
+
+        void OnAckTimeout()
+        {
+            if (!m_running)
+            {
+                return;
+            }
+
+            //Ack everything that is unacked so far
+            for (auto& vt : m_nodes)
+            {
+                NodeInfo& ni=vt.second;
+                if (ni.ackedSingleReceiverChannel.NumberOfUnacked()>0)
+                {
+                    SendAck(ni, SingleReceiverSendMethod);
+                }
+
+                if (ni.ackedMultiReceiverChannel.NumberOfUnacked()>0)
+                {
+                    SendAck(ni, MultiReceiverSendMethod);
+                }
+            }
+
+            //Restart timer
+            m_sendAckTimer.expires_from_now(boost::chrono::milliseconds(50));
+            m_sendAckTimer.async_wait(m_receiveStrand.wrap([=](const boost::system::error_code& /*error*/){OnAckTimeout();}));
+        }
+
+        void SendAck(NodeInfo& ni, uint8_t sendMethod)
+        {
+            Channel& c=(sendMethod==SingleReceiverSendMethod) ? ni.ackedSingleReceiverChannel : ni.ackedMultiReceiverChannel;
+            auto ackPtr=boost::make_shared<Ack>(m_myId, ni.node.nodeId, c.lastInSequence, sendMethod);
+            WriterType::SendTo(ackPtr, ni.endpoint);
+            c.lastAcked=c.lastInSequence;
+        }
 
         void Insert(const MessageHeader* header, const char* payload, NodeInfo& ni)
         {
@@ -323,7 +387,7 @@ namespace Com
             Channel& ch=ni.GetChannel(header);
             ch.lastInSequence=header->sequenceNumber-1; //we pretend this was exactly what we expected to get
             //Clear the queue, should not be necessary as long as we dont let excluded nodes come back.
-            for (size_t i=0; i<Parameters::ReceiverWindowSize; ++i)
+            for (size_t i=0; i<Parameters::SlidingWindowSize; ++i)
             {
                 ch.queue[i].Clear();
             }
@@ -332,6 +396,7 @@ namespace Com
             Insert(header, payload, ni);
         }
 
+        //Return true if ack shall be sent immediately.
         bool HandleMessage(const MessageHeader* header, const char* payload, NodeInfo& ni)
         {
             lllog(8)<<L"COM: recv from: "<<ni.node.nodeId<<L", sendMethod: "<<
@@ -347,19 +412,28 @@ namespace Com
                     if (header->fragmentNumber==0) //we cannot start in the middle of a fragmented message
                     {
                         ForceInsert(header, payload, ni);
+                        return true; //as a welcome present we send an ack immediately the first time :)
                     }
                     //else we must wait for beginning of a new message before we start
+                    return false; //no ack to send
                 }
                 else if (header->sequenceNumber<=ch.lastInSequence)
                 {
                     lllog(8)<<L"COM: Recv duplicated message in order. Seq: "<<header->sequenceNumber<<L" from node "<<ni.node.name.c_str()<<std::endl;
+                    return true; //maybe an ack is lost and the sender has started to resend.
                 }
-                else if (header->sequenceNumber<=ch.lastInSequence+Parameters::ReceiverWindowSize)
+                else if (header->sequenceNumber==ch.lastInSequence+1)
                 {
-                    //The Normal case:
-                    //This is something within our receive window, maybe it is out of order but in that case the gaps will eventually be filled in
+                    //The Normal case: Message in correct order
+                    Insert(header, payload, ni);
+                    return ch.NumberOfUnacked()>=Parameters::SlidingWindowSize/4; //if half the senders window is unacked, send ack now
+                }
+                else if (header->sequenceNumber<=ch.lastInSequence+Parameters::SlidingWindowSize)
+                {
+                    //This is something within our receive window but out of order, the gaps will eventually be filled in
                     //when sender retransmits non-acked messages.
                     Insert(header, payload, ni);
+                    return true; //we ack evertying we have in order so far.
                 }
                 else //lost messages, got something too far ahead
                 {
@@ -367,10 +441,8 @@ namespace Com
                     //Sooner or later the sender must retransmit all non-acked messages, and in time this message will come into our receive window.
                     lllog(8)<<L"COM: Received Seq: "<<header->sequenceNumber<<" wich means that we have lost a message. LastInSequence="<<ch.lastInSequence<<std::endl;
                     std::wcout<<L"COM: Received Seq: "<<header->sequenceNumber<<" wich means that we have lost a message. LastInSequence="<<ch.lastInSequence<<std::endl;
-                    return false; //this message is not handled, dont send ack
-                }
-
-                return true; // all messages except lost message when the received is too far ahead of us, must be acked
+                    return false; //we dont ack messages we are not supposed to get
+                }                                
             }
             else //unacked
             {
@@ -415,7 +487,7 @@ namespace Com
             currentIndex=static_cast<size_t>(header->sequenceNumber-lastSeq-1);
             int first=static_cast<int>(currentIndex)-header->fragmentNumber;
             firstIndex=static_cast<size_t>( std::max(0, first) );
-            lastIndex=std::min(Parameters::ReceiverWindowSize-1, currentIndex+header->numberOfFragments-header->fragmentNumber-1);
+            lastIndex=std::min(Parameters::SlidingWindowSize-1, currentIndex+header->numberOfFragments-header->fragmentNumber-1);
         }
 
         void Deliver(NodeInfo& ni, const MessageHeader* header)
@@ -465,7 +537,7 @@ namespace Com
                     if (lastInQueue.dataSize>0 && lastInQueue.fragmentNumber<lastInQueue.numberOfFragments-1)
                     {
                         //lastInQueue has allocated buffer and is not the last fragment of the message
-                        //remember if windowSize=1 then lastInQueue==rd, so we have to copy data before clearing rd if we need to to
+                        //remember if windowSize=1 then lastInQueue==rd, so we have to copy data before clearing rd
                         boost::shared_ptr<char[]> data=lastInQueue.data;
                         size_t dataSize=lastInQueue.dataSize;
                         uint16_t numberOfFragments=lastInQueue.numberOfFragments;

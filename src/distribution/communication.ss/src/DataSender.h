@@ -216,7 +216,7 @@ namespace Com
             lllog(8)<<L"COM: got Ack from "<<ack.commonHeader.senderId<<std::endl;
 
             //Will only check ack against sent messages. If an ack is received for a message that is still unsent, that ack will be ignored.
-            m_strand.dispatch([this, ack]
+            m_strand.dispatch([=]
             {
                 //Update queue
                 for (size_t i=0; i<m_sendQueue.first_unhandled_index(); ++i)
@@ -321,7 +321,7 @@ namespace Com
             //must be called from writeStrand
 
             //Send all unhandled messges that are within our sender window
-            while (m_sendQueue.has_unhandled() && m_sendQueue.first_unhandled_index()<Parameters::SenderWindowSize)
+            while (m_sendQueue.has_unhandled() && m_sendQueue.first_unhandled_index()<Parameters::SlidingWindowSize)
             {
                 UserDataPtr& ud=m_sendQueue[m_sendQueue.first_unhandled_index()];
 

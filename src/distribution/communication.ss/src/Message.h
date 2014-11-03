@@ -104,12 +104,12 @@ namespace Com
         CommonHeader commonHeader;
         uint64_t sequenceNumber;
         uint8_t sendMethod; //tells if message being acked was sent to one or many receivers (different sequence numbers)
-        uint8_t deliveryGuarantee; //Always 0 since an ack itself is not unacked
+        uint8_t ackUntil; //if 1 all messages until this seqNo is acked, if 0 just the specified seqNo is acked.
         Ack(int64_t senderId_, int64_t receiverId_, uint64_t sequenceNumber_, uint8_t sendMethod_)
             :commonHeader(senderId_, receiverId_, AckType)
             ,sequenceNumber(sequenceNumber_)
             ,sendMethod(sendMethod_)
-            ,deliveryGuarantee(Unacked)
+            ,ackUntil(1)
         {
         }
     };
