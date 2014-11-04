@@ -1161,20 +1161,31 @@ namespace ToolSupport
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
             state.lastInsertedClass->members.back()->collectionType=DictionaryCollectionType;
-            SerializationUtils::Trim(pt.data());
 
-            if (!BasicTypeOperations::IsBasicTypeName(pt.data(), state.lastInsertedClass->members.back()->keyType))
+            try
             {
-                //Assume enumeration, check type later
-                state.lastInsertedClass->members.back()->keyType=EnumerationMemberType;
-                state.lastInsertedClass->members.back()->keyTypeId=TypeUtilities::CalculateTypeId(pt.data());
-            }
+                std::string keyType=pt.get<std::string>("<xmlattr>.keyType");
+                SerializationUtils::Trim(keyType);
 
-            if (!ValidKeyType(state.lastInsertedClass->members.back()->keyType))
+                if (!BasicTypeOperations::IsBasicTypeName(keyType, state.lastInsertedClass->members.back()->keyType))
+                {
+                    //Assume enumeration, check type later
+                    state.lastInsertedClass->members.back()->keyType=EnumerationMemberType;
+                    state.lastInsertedClass->members.back()->keyTypeId=TypeUtilities::CalculateTypeId(keyType);
+                }
+
+                if (!ValidKeyType(state.lastInsertedClass->members.back()->keyType))
+                {
+                    std::ostringstream ss;
+                    ss<<"The specified type '"<<keyType<<"' is not valid as key in a dictionary. On member '"<<state.lastInsertedClass->members.back()->name<<"' in class '"<<state.lastInsertedClass->name<<"'"<<std::endl;
+                    throw ParseError("Invalid dictionary key type", ss.str(), state.currentPath, 182);
+                }
+            }
+            catch (const boost::property_tree::ptree_error&)
             {
                 std::ostringstream ss;
-                ss<<"The specified type '"<<pt.data()<<"' is not valid as key in a dictionary. On member '"<<state.lastInsertedClass->members.back()->name<<"' in class '"<<state.lastInsertedClass->name<<"'"<<std::endl;
-                throw ParseError("Invalid dictionary key type", ss.str(), state.currentPath, 182);
+                ss<<"The dictionary member '"<<state.lastInsertedClass->name<<"."<<state.lastInsertedClass->members.back()->name<<"' is missing the keyType-attribute."<<std::endl;
+                throw ParseError("Missing keyType attribute", ss.str(), state.currentPath, 213);
             }
         }
     };

@@ -24,7 +24,7 @@
         <member>
             <name>MyDictionary</name>
             <type>ParserTest.MyEntity</type>
-            <dictionary>ParserTest.MyColorEnum</dictionary>
+            <dictionary keyType="ParserTest.MyColorEnum"/>
         </member>
 
         <member>

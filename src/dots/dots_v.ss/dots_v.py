@@ -291,7 +291,11 @@ def parse_dou(gSession, dou_xmlfile):
             m_arraySize = readTextPropery(m, "arraySize")
             m_arraySizeRef = m.find("{urn:safir-dots-unit}arraySizeRef") is not None
             m_sequence = readTextPropery(m, "sequence") is not None
-            m_dictionary = readTextPropery(m, "dictionary")
+            m_dictionary = None
+            is_dict = m.find("{urn:safir-dots-unit}dictionary")            
+            if is_dict is not None:
+              m_dictionary = is_dict.attrib["keyType"]
+              
             parsed.members.append( DouMember( summary_formatter(readTextPropery(m, "summary")), \
                                         m_name, \
                                         m_type, \

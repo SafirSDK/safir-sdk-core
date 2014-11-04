@@ -68,7 +68,7 @@ namespace ToolSupport
 
         typedef Element<Elements::ArraySize, OptionalOne > ArraySize;
         typedef Element<Elements::ArraySizeRef, OptionalOne, boost::mpl::vector<IgnoreAny> > ArraySizeRef;
-        typedef Element<Elements::Dictionary, OptionalOne > Dictionary;
+        typedef Element<Elements::Dictionary, OptionalOne, boost::mpl::vector<Ignore<Elements::XmlAttribute> > > Dictionary;
         typedef Element<Elements::Sequence, OptionalOne > Sequence;
 
         typedef Element<Elements::MaxLength, OptionalOne > MaxLength;
