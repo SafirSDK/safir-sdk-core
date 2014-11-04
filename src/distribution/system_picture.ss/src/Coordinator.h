@@ -464,7 +464,7 @@ namespace SP
                 const auto& remote = dn.second.first;
                 const int index = dn.second.second;
 
-                lllog(5) << "SP: Adding recently dead node " << remote.Name(index).c_str()
+                lllog(8) << "SP: Adding recently dead node " << remote.Name(index).c_str()
                          << " (" << remote.Id(index) << ")" << std::endl;
 
                 auto node = m_stateMessage.add_node_info();
