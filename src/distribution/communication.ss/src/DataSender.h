@@ -74,12 +74,13 @@ namespace Com
     {
     public:
         DataSenderBasic(boost::asio::io_service& ioService,
-                             int64_t nodeTypeId,
-                             int64_t nodeId,
-                             int ipVersion,
-                             const std::string& localIf,
-                             const std::string& multicastAddress,
-                             int waitForAckTimeout)
+                        int64_t nodeTypeId,
+                        int64_t nodeId,
+                        int ipVersion,
+                        const std::string& localIf,
+                        const std::string& multicastAddress,
+                        int waitForAckTimeout,
+                        size_t fragmentSize)
             :WriterType(ioService, ipVersion, localIf, multicastAddress)
             ,m_strand(ioService)
             ,m_nodeTypeId(nodeTypeId)
@@ -87,6 +88,7 @@ namespace Com
             ,m_sendQueue(Parameters::SendQueueSize)
             ,m_running(false)
             ,m_waitForAckTimeout(waitForAckTimeout)
+            ,m_fragmentDataSize(fragmentSize-MessageHeaderSize)
             ,m_nodes()
             ,m_lastSentMultiReceiverSeqNo(0)
             ,m_resendTimer(ioService)
@@ -139,8 +141,8 @@ namespace Com
         bool AddToSendQueue(int64_t toId, const boost::shared_ptr<char[]>& msg, size_t size, int64_t dataTypeIdentifier)
         {
             //calculate number of fragments
-            size_t numberOfFullFragments=size/FragmentDataSize;
-            size_t restSize=size%FragmentDataSize;
+            size_t numberOfFullFragments=size/m_fragmentDataSize;
+            size_t restSize=size%m_fragmentDataSize;
             size_t totalNumberOfFragments=numberOfFullFragments+(restSize>0 ? 1 : 0);
 
             if (++m_sendQueueSize<=Parameters::SendQueueSize)
@@ -173,8 +175,8 @@ namespace Com
 
                 for (size_t frag=0; frag<numberOfFullFragments; ++frag)
                 {
-                    const char* fragment=msg.get()+frag*FragmentDataSize;
-                    UserDataPtr userData(new UserData(m_nodeId, dataTypeIdentifier, msg, size, fragment, FragmentDataSize));
+                    const char* fragment=msg.get()+frag*m_fragmentDataSize;
+                    UserDataPtr userData(new UserData(m_nodeId, dataTypeIdentifier, msg, size, fragment, m_fragmentDataSize));
                     userData->header.deliveryGuarantee=DeliveryGuarantee;
                     userData->header.numberOfFragments=static_cast<uint16_t>(totalNumberOfFragments);
                     userData->header.fragmentNumber=static_cast<uint16_t>(frag);
@@ -189,7 +191,7 @@ namespace Com
 
                 if (restSize>0)
                 {
-                    const char* fragment=msg.get()+numberOfFullFragments*FragmentDataSize;
+                    const char* fragment=msg.get()+numberOfFullFragments*m_fragmentDataSize;
                     UserDataPtr userData(new UserData(m_nodeId, dataTypeIdentifier, msg, size, fragment, restSize));
                     userData->header.deliveryGuarantee=DeliveryGuarantee;
                     userData->header.numberOfFragments=static_cast<uint16_t>(totalNumberOfFragments);
@@ -290,6 +292,13 @@ namespace Com
 #ifndef SAFIR_TEST
     private:
 #endif
+        struct NodeInfo
+        {
+            bool systemNode;
+            boost::asio::ip::udp::endpoint endpoint;
+            uint64_t lastSentSeqNo;
+        };
+
         boost::asio::io_service::strand m_strand;
         int64_t m_nodeTypeId;
         int64_t m_nodeId;
@@ -297,23 +306,14 @@ namespace Com
         std::atomic_uint m_sendQueueSize;
         bool m_running;
         int m_waitForAckTimeout;
-
-        struct NodeInfo
-        {
-            bool systemNode;
-            boost::asio::ip::udp::endpoint endpoint;
-            uint64_t lastSentSeqNo;
-        };
+        size_t m_fragmentDataSize; //size of a fragments data part, excluding header size.
         std::map<int64_t, NodeInfo> m_nodes;
-
         uint64_t m_lastSentMultiReceiverSeqNo; // used both for multicast and unicast as long as the message is a multireceiver message
         boost::asio::steady_timer m_resendTimer;
         RetransmitTo m_retransmitNotification;
         QueueNotFull m_queueNotFullNotification;
         size_t m_queueNotFullNotificationLimit; //below number of used slots. NOT percent.
         std::atomic_bool m_notifyQueueNotFull;
-
-        static const size_t FragmentDataSize=Parameters::FragmentSize-MessageHeaderSize; //size of a fragments data part, excluding header size.
 
         //Send new messages in sendQueue. No retransmits sent here.
         void HandleSendQueue()

@@ -33,8 +33,6 @@ public:
     {
         std::cout<<"AckedDataSenderTest started"<<std::endl;
 
-
-
         boost::asio::io_service io;
         auto work=boost::make_shared<boost::asio::io_service::work>(io);
         boost::thread_group threads;
@@ -48,7 +46,7 @@ public:
         //-------------------
         // Tests
         //-------------------
-        AckedSender sender(io, 1, 1, 4, "127.0.0.1:10000", "224.90.90.241:10000", 500); //ntId, nId, ipV, mc, waitForAck
+        AckedSender sender(io, 1, 1, 4, "127.0.0.1:10000", "224.90.90.241:10000", 500, Com::MessageHeaderSize+3); //ntId, nId, ipV, mc, waitForAck, fragmentSize
 
         std::atomic_uint go{0};
         auto WaitUntilReady=[&]
@@ -95,26 +93,66 @@ public:
         sender.m_strand.post([&]{CHECK(sender.m_nodes.size()==2);});
 
         TRACELINE
-        sender.AddToSendQueue(0, MakeShared("1"), 1, 1);
+        sender.AddToSendQueue(0, MakeShared("1"), 1, 1); //toId, data, size, dataType
+        sender.AddToSendQueue(0, MakeShared("2"), 1, 1);
+        sender.AddToSendQueue(0, MakeShared("3"), 1, 1);
+
 
         TRACELINE
         sender.m_strand.post([&]
         {
+            sender.DumpSendQueue();
+
             boost::mutex::scoped_lock lock(mutex);
             CHECK(sent.size()>0);
             std::string ss(sent.front()->fragment, sent.front()->header.fragmentContentSize);
-            CHECK(ss=="1");
-            CHECKMSG(sender.SendQueueSize()==1, sender.SendQueueSize());
+            CHECK(GetSentData(0)=="1");
+            CHECK(GetSentData(1)=="2");
+            CHECK(GetSentData(2)=="3");
+            CHECKMSG(sender.SendQueueSize()==3, sender.SendQueueSize());
         });
 
+        TRACELINE
         WaitUntilReady();
-        sender.HandleAck(Com::Ack(2, 1, 1, Com::MultiReceiverSendMethod));
+        sender.HandleAck(Com::Ack(2, 1, 1, Com::MultiReceiverSendMethod));  //Ack(sender, receiver, seqNo, sendMethod)
+        sender.m_strand.post([&]{CHECKMSG(sender.SendQueueSize()==3, sender.SendQueueSize());});
         WaitUntilReady();
-        sender.HandleAck(Com::Ack(3, 1, 1, Com::MultiReceiverSendMethod));
+        sender.m_strand.post([&]{sender.DumpSendQueue();});
+        WaitUntilReady();
+        sender.HandleAck(Com::Ack(3, 1, 3, Com::MultiReceiverSendMethod));
+        sender.m_strand.post([&]{CHECKMSG(sender.SendQueueSize()==2, sender.SendQueueSize());});
+        WaitUntilReady();
+        sender.m_strand.post([&]{sender.DumpSendQueue();});
+        WaitUntilReady();
+        sender.HandleAck(Com::Ack(2, 1, 3, Com::MultiReceiverSendMethod));
+        sender.m_strand.post([&]{CHECKMSG(sender.SendQueueSize()==0, sender.SendQueueSize());});
+        WaitUntilReady();
+        sender.m_strand.post([&]{sender.DumpSendQueue();});
+
+        TRACELINE
+        sent.clear(); //clear sent just for convenience
+
+        //Send fragmented message
+        {
+            std::string large="ABCDEFGHIJKLMNOPQRSTUVXYZ";
+            sender.AddToSendQueue(0, MakeShared(large), large.size(), 1);
+        }
+
+        TRACELINE
+        sender.m_strand.post([&]
+        {
+            sender.DumpSendQueue();
+            CHECKMSG(sender.SendQueueSize()==9, sender.SendQueueSize());
+        });
+
+        TRACELINE
+        sender.HandleAck(Com::Ack(2, 1, 12, Com::MultiReceiverSendMethod));
+        sender.HandleAck(Com::Ack(3, 1, 12, Com::MultiReceiverSendMethod));
+        WaitUntilReady();
 
         sender.m_strand.post([&]
         {
-            boost::mutex::scoped_lock lock(mutex);
+            sender.DumpSendQueue();
             CHECKMSG(sender.SendQueueSize()==0, sender.SendQueueSize());
         });
 
@@ -134,7 +172,13 @@ public:
 private:
 
     static boost::mutex mutex;
-    static std::queue< boost::shared_ptr<Com::UserData> > sent;
+    static std::vector< boost::shared_ptr<Com::UserData> > sent;
+
+    static std::string GetSentData(size_t index)
+    {
+        const auto& p=sent[index];
+        return std::string(p->fragment, p->header.fragmentContentSize);
+    }
 
     struct TestSendPolicy
     {
@@ -146,7 +190,7 @@ private:
             std::string s(val->fragment, val->fragment+val->header.fragmentContentSize);
             std::string ss(val->fragment, val->header.fragmentContentSize);
             std::cout<<"Writer.Send to_port: "<<to.port()<<", seq: "<<val->header.sequenceNumber<<", data: '"<<s<<"', '"<<ss<<"'"<<std::endl;
-            sent.push(val);
+            sent.push_back(val);
         }
     };
 
@@ -167,7 +211,7 @@ private:
 };
 
 boost::mutex AckedDataSenderTest::mutex;
-std::queue< boost::shared_ptr<Com::UserData> > AckedDataSenderTest::sent;
+std::vector< boost::shared_ptr<Com::UserData> > AckedDataSenderTest::sent;
 
 //------------------------------------
 // Unacked messages
@@ -192,7 +236,7 @@ public:
         //-------------------
         // Tests
         //-------------------
-        UnackedDataSender sender(io, 1, 1, 4, "127.0.0.1:10000", "224.90.90.241:10000", 500); //ntId, nId, ipV, mc, waitForAck
+        UnackedDataSender sender(io, 1, 1, 4, "127.0.0.1:10000", "224.90.90.241:10000", 500, 10); //ntId, nId, ipV, mc, waitForAck, fragmentSize
 
         std::atomic_uint go{0};
         auto WaitUntilReady=[&]

@@ -56,6 +56,7 @@ public:
         Com::DeliveryHandlerBasic<DeliveryHandlerTest::TestWriter> dh(strand, 1, 4);
         dh.SetGotRecvCallback([=](int64_t id){DeliveryHandlerTest::GotReceiveFrom(id);});
         dh.SetReceiver([=](int64_t n, int64_t nt, const boost::shared_ptr<char[]>& d, size_t s){DeliveryHandlerTest::OnRecv(n, nt, d, s);}, 0);
+        dh.Start();
 
         TRACELINE
 
@@ -88,7 +89,7 @@ public:
 //                      uint16_t fragmentNumber_,
 //                      size_t fragmentOffset_)
 
-        //Send one non-fragmented message to each node
+        //Send one non-fragmented from each node to node 1
         for (int64_t id=2; id<=4; ++id)
         {
             auto payload="hello";
@@ -99,6 +100,8 @@ public:
 
         TRACELINE
 
+        dh.m_receiveStrand.post([&]{SetReady();});
+        WaitUntilReady();
         dh.m_deliverStrand.post([&]{SetReady();});
         WaitUntilReady();
 
@@ -207,12 +210,15 @@ public:
             dh.ReceivedApplicationData(&header, payload);
         }
 
+        dh.m_receiveStrand.post([&]{SetReady();});
+        WaitUntilReady();
         dh.m_deliverStrand.post([&]{SetReady();});
         WaitUntilReady();
 
         TRACELINE
         DumpNodeInfo(dh);
         DumpReceived();
+        Wait(3000);
         TRACELINE
 
         for (int64_t id=2; id<=4; ++id)
@@ -224,6 +230,7 @@ public:
 
         TRACELINE
 
+        dh.Stop();
         work.reset();
         threads.join_all();
         std::cout<<"DeliveryHandler tests passed"<<std::endl;
@@ -240,9 +247,10 @@ private:
     {
         void Send(const boost::shared_ptr<Com::Ack>& ack,
                   boost::asio::ip::udp::socket& /*socket*/,
-                  const boost::asio::ip::udp::endpoint& /*to*/)
+                  const boost::asio::ip::udp::endpoint& to)
         {
             //send ack
+            std::cout<<"Send Ack to port "<<to.port()<<" with seq "<<ack->sequenceNumber<<std::endl;
             acked[ack->commonHeader.receiverId]=ack->sequenceNumber;
         }
     };
