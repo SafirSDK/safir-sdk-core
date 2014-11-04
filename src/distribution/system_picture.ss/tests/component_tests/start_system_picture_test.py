@@ -149,7 +149,7 @@ try:
     for i in range (1 if args.skip else 0 ,args.num):
         nodes.append(launch_node(i, args.debug))
 
-    killtime = time.time()
+    killtime = time.time() + 10 #kill first node in 10 seconds
     while True:
         time.sleep(1.0)
         living = list()
@@ -174,8 +174,8 @@ try:
         if not args.terminate:
             continue
 
-        if killtime + 60 < time.time():
-            killtime = time.time() + 600
+        if killtime < time.time():
+            killtime = time.time() + 10 #next one in 10 seconds
             #choose one to stop
             index = random.randint(1,len(nodes)-1)
             i, control, main = nodes.pop(index)

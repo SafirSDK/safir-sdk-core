@@ -89,7 +89,7 @@ namespace SP
                              const int64_t id,
                              const std::map<int64_t, NodeType>& nodeTypes,
                              const char* const receiverId,
-                             const std::function<void(const int64_t nodeId, 
+                             const std::function<void(const int64_t nodeId,
                                                       const int64_t electionId)>& electionCompleteCallback)
             : m_strand (ioService)
             , m_communication(communication)
@@ -115,29 +115,29 @@ namespace SP
             , m_sendMessageTimer(ioService)
             , m_electionCompleteCallback(electionCompleteCallback)
         {
-            communication.SetDataReceiver([this](const int64_t from, 
-                                                 const int64_t nodeTypeId, 
-                                                 const boost::shared_ptr<char[]>& data, 
+            communication.SetDataReceiver([this](const int64_t from,
+                                                 const int64_t nodeTypeId,
+                                                 const boost::shared_ptr<char[]>& data,
                                                  const size_t size)
                                           {
                                               GotData(from, nodeTypeId, data, size);
                                           },
                                           m_receiverId);
-            
+
             const auto aloneTimeout = CalculateAloneTimeout(nodeTypes);
             lllog(3) << "SP: AloneTimeout will be " << boost::chrono::duration_cast<boost::chrono::milliseconds>(aloneTimeout) << std::endl;
             lllog(3) << "SP: ElectionTimeout will be " << boost::chrono::duration_cast<boost::chrono::milliseconds>(m_electionTimeout) << std::endl;
-            m_electionTimer.expires_from_now(aloneTimeout); 
+            m_electionTimer.expires_from_now(aloneTimeout);
             m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
                                                      {
                                                          if (!error)
                                                          {
                                                              StartElection();
                                                          }
-                                                     }));                                      
+                                                     }));
         }
 
-        
+
         bool IsElected() const {return m_id == m_elected;}
         bool IsElected(const int64_t nodeId) const {return nodeId == m_elected;}
 
@@ -160,7 +160,7 @@ namespace SP
         }
 
     private:
-        /** Calculate the time to wait for other nodes to come up before assuming that 
+        /** Calculate the time to wait for other nodes to come up before assuming that
          * we're alone and proclaiming victory. */
         static boost::chrono::steady_clock::duration CalculateAloneTimeout(const std::map<int64_t, NodeType>& nodeTypes)
         {
@@ -214,10 +214,10 @@ namespace SP
         {
             //cancel any other pending elections
             m_electionTimer.cancel(); //
-        
+
             //This timeout is just to make sure that if several nodes come up at the same time
             //we will not start too many elections
-            m_electionTimer.expires_from_now(boost::chrono::milliseconds(100)); 
+            m_electionTimer.expires_from_now(boost::chrono::milliseconds(100));
             m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
             {
                 if (!!error)
@@ -225,7 +225,7 @@ namespace SP
                     return;
                 }
                 lllog(4) << "SP: Checking if I should start election" << std::endl;
-            
+
                 if (!m_lastStatistics.Valid())
                 {
                     lllog(4) << "SP: Haven't heard from any other nodes, electing myself!" << std::endl;
@@ -239,26 +239,28 @@ namespace SP
                 {
                     for (int i = 0; i < m_lastStatistics.Size(); ++i)
                     {
-                        lllog(7) << "SP:   know of node " << m_lastStatistics.Id(i) << (m_lastStatistics.IsDead(i) ? " which is dead" : "") << std::endl;
-                        
+                        lllog(7) << "SP:   know of node " << m_lastStatistics.Id(i)
+                                 << (m_lastStatistics.IsDead(i) ? " which is dead" : "") << std::endl;
+
                         if (m_lastStatistics.Id(i) == m_elected && !m_lastStatistics.IsDead(i))
                         {
                             if (m_elected > m_id)
                             {
-                                lllog(4) << "SP: Found elected node with higher id than me, not starting election!" << std::endl;
+                                lllog(4) << "SP: Found elected node with higher id than me, "
+                                         << "not starting election!" << std::endl;
                                 return;
                             }
                         }
                     }
                 }
-            
-            
+
+
                 lllog(4) << "SP: Starting election" << std::endl;
                 m_currentElectionId = LlufId_GenerateRandom64();
-            
+
                 m_pendingInquiries = m_nonLightNodeTypes;
                 SendPendingElectionMessages();
-            
+
                 m_electionTimer.expires_from_now(m_electionTimeout);
                 m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
                                                          {
@@ -270,14 +272,14 @@ namespace SP
             }));
         }
 
-        
+
         //must be called in strand
         void ElectionTimeout()
         {
             lllog(4) << "SP: There can be only one! Will send VICTORY to everyone!" << std::endl;
-            
+
             m_elected = m_id;
-            
+
             m_pendingVictories = m_nonLightNodeTypes;
             SendPendingElectionMessages();
 
@@ -286,17 +288,17 @@ namespace SP
 
 
         //not in strand
-        void GotData(const int64_t from, 
-                     const int64_t nodeTypeId, 
-                     const boost::shared_ptr<char[]>& data, 
+        void GotData(const int64_t from,
+                     const int64_t nodeTypeId,
+                     const boost::shared_ptr<char[]>& data,
                      size_t size)
         {
             ElectionMessage message;
             message.ParseFromArray(data.get(), static_cast<int>(size));
-            lllog(5) << "SP: Got ElectionMessage (" 
+            lllog(5) << "SP: Got ElectionMessage ("
                      << ToString(message.action())
-                     << ", " 
-                     << message.election_id() 
+                     << ", "
+                     << message.election_id()
                      << ") from " << from << std::endl;
 
             m_strand.dispatch([this,message,from, nodeTypeId]
@@ -318,10 +320,10 @@ namespace SP
                     lllog(5) << "SP Got ElectionMessage from a node that I dont know about!!! Discarding!" << std::endl;
                     return;
                 }
-                
+
                 switch (message.action())
                 {
-                case INQUIRY: 
+                case INQUIRY:
                     {
                         //if we got an inquiry from someone smaller than us we send an alive
                         //and start a new election
@@ -330,19 +332,19 @@ namespace SP
                             lllog(5) << "SP: Got an inquiry from someone smaller than us, sending alive and starting election" << std::endl;
                             m_pendingAlives[from] = std::make_pair(nodeTypeId, message.election_id());
                             SendPendingElectionMessages();
-                        
+
                             StartElection();
                         }
                     }
                     break;
-                
-                case ALIVE: 
+
+                case ALIVE:
                     {
                         //if we got an alive from someone bigger than us we abandon the election
                         if (from > m_id &&
                             message.election_id() == m_currentElectionId)
                         {
-                            lllog(5) << "SP: Got alive from someone bigger than me (" 
+                            lllog(5) << "SP: Got alive from someone bigger than me ("
                                      << from << "), abandoning election." << std::endl;
                             m_electionTimer.cancel();
                             m_pendingInquiries.clear();
@@ -351,7 +353,7 @@ namespace SP
                     }
                     break;
 
-                case VICTORY: 
+                case VICTORY:
                     {
                         if (from > m_id)
                         {
@@ -368,9 +370,9 @@ namespace SP
                         }
                         else //No! We're going to usurp him! restart election
                         {
-                            lllog(5) << "SP: Got victory from someone smaller than me (" 
+                            lllog(5) << "SP: Got victory from someone smaller than me ("
                                      << from << "), starting new election." << std::endl;
-                        
+
                             StartElection();
                         }
                     }
@@ -398,17 +400,17 @@ namespace SP
                     const auto size = aliveMsg.ByteSize();
                     boost::shared_ptr<char[]> data = boost::make_shared<char[]>(size);
                     aliveMsg.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
-                
-                    const bool sent = m_communication.Send(it.first, 
-                                                           it.second.first, 
+
+                    const bool sent = m_communication.Send(it.first,
+                                                           it.second.first,
                                                            std::move(data),
-                                                           size, 
-                                                           m_receiverId, 
+                                                           size,
+                                                           m_receiverId,
                                                            true);
-                
+
                     if (!sent)
                     {
-                        lllog(9) << "SP: Coordinator: Overflow when sending ALIVE to node " 
+                        lllog(9) << "SP: Coordinator: Overflow when sending ALIVE to node "
                                  << it.first << std::endl;
                         m_pendingAlives.insert(it);
                     }
@@ -426,12 +428,12 @@ namespace SP
                     const auto size = victoryMsg.ByteSize();
                     boost::shared_ptr<char[]> data = boost::make_shared<char[]>(size);
                     victoryMsg.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
-                
+
                     const bool sent = m_communication.Send(0, it, std::move(data), size, m_receiverId, true);
 
                     if (!sent)
                     {
-                        lllog(9) << "SP: Coordinator: Overflow when sending VICTORY to node type " 
+                        lllog(9) << "SP: Coordinator: Overflow when sending VICTORY to node type "
                                  << m_nodeTypes.find(it)->second.name.c_str() << std::endl;
                         m_pendingVictories.insert(it);
                     }
@@ -453,13 +455,13 @@ namespace SP
                     const bool sent = m_communication.Send(0, it, std::move(data), size, m_receiverId, true);
                     if (!sent)
                     {
-                        lllog(7) << "SP: Coordinator: Overflow when sending INQUIRY to node type " 
+                        lllog(7) << "SP: Coordinator: Overflow when sending INQUIRY to node type "
                                  << m_nodeTypes.find(it)->second.name.c_str() << std::endl;
                         m_pendingInquiries.insert(it);
                     }
                     else
                     {
-                        lllog(9) << "SP: Coordinator: sent INQUIRY to node type " 
+                        lllog(9) << "SP: Coordinator: sent INQUIRY to node type "
                                  << m_nodeTypes.find(it)->second.name.c_str() << std::endl;
                     }
                 }
@@ -468,7 +470,7 @@ namespace SP
             //Handle retry
             if (!m_pendingAlives.empty() || !m_pendingVictories.empty() || !m_pendingInquiries.empty())
             {
-                m_sendMessageTimer.expires_from_now(boost::chrono::milliseconds(10)); 
+                m_sendMessageTimer.expires_from_now(boost::chrono::milliseconds(10));
                 m_sendMessageTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
                                                             {
                                                                 if (!error)
@@ -483,7 +485,7 @@ namespace SP
         mutable boost::asio::strand m_strand;
         CommunicationT& m_communication;
         const uint64_t m_receiverId;
-        
+
         const int64_t m_id;
         const std::map<int64_t, NodeType> m_nodeTypes;
         const std::set<int64_t> m_nonLightNodeTypes;
@@ -500,19 +502,19 @@ namespace SP
 
         //a set of node type ids to which we want to send INQUIRY to, using m_currentElectionId
         std::set<int64_t> m_pendingInquiries;
-        
+
         //this is a list of the nodes that we need to send ALIVE messages to (key), along with the
-        //election id that came in the INQUIRY (value.second) and the nodeTypeId of the recipient 
+        //election id that came in the INQUIRY (value.second) and the nodeTypeId of the recipient
         //(value.first)
         std::map<int64_t, std::pair<int64_t, int64_t>> m_pendingAlives;
 
         //a set of node type ids to which we want to send VICTORY to, using m_currentElectionId
         std::set<int64_t> m_pendingVictories;
-        
+
         //callback to call on completed election
         const std::function<void(const int64_t nodeId, const int64_t electionId)> m_electionCompleteCallback;
 
-        
+
     };
 
 }
@@ -521,7 +523,7 @@ namespace SP
         //forward declaration.
         class Communication;
     }
-    
+
     namespace SP
     {
         typedef ElectionHandlerBasic<Com::Communication> ElectionHandler;

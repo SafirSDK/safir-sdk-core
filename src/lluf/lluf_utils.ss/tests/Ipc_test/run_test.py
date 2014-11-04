@@ -71,6 +71,10 @@ def wait_for_output(proc, output, n=1, exact_match=False):
 def send_cmd(proc, cmd):
     proc.stdin.write(cmd.encode("utf-8"))
     proc.stdin.flush()
+    
+def terminate(proc):
+    proc.kill()
+    proc.communicate()
 
 
 IpcPublisher = os.path.join(exe_path,"IpcPublisher")
@@ -98,7 +102,7 @@ if sub1_result.decode("utf-8").count("Kalle") != 5:
 if sub2_result.decode("utf-8").count("Kalle") != 5:
     test_failed("Subscriber 1 didn't receive the expected 5 messages!")
 
-publisher.kill()
+terminate(publisher)
 
 #########
 ## Test 2
@@ -125,8 +129,7 @@ if sub1_result.decode("utf-8").count("Kalle") != 5:
 if sub2_result.decode("utf-8").count("Kalle") != 5:
     test_failed("Subscriber 2 didn't receive the expected 5 messages!")
 
-publisher.kill()
-
+terminate(publisher)
 
 #########
 ## Test 3
@@ -139,7 +142,7 @@ send_cmd(subscriber, "CONNECT\n")
 wait_for_output(subscriber, "Trying to connect", exact_match=True)
 send_cmd(subscriber, "DISCONNECT\n")
 wait_for_output(subscriber, "Disconnected from publisher", exact_match=True)
-subscriber.kill()
+terminate(subscriber)
 
 # Launch a publisher and wait for it to start
 publisher = subprocess.Popen((IpcPublisher, "--message-delay", "10"), stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
@@ -161,8 +164,8 @@ wait_for_output(subscriber, "Kalle", exact_match=True)
 send_cmd(subscriber, "DISCONNECT\n")
 wait_for_output(subscriber, "Disconnected from publisher")
 
-publisher.kill()
-subscriber.kill()
+terminate(publisher)
+terminate(subscriber)
 
 
 #########
@@ -194,8 +197,8 @@ send_cmd(publisher, "STOP\n")
 wait_for_output(publisher, "Publisher is stopped", exact_match=True)
 wait_for_output(subscriber1, "Publisher disconnected", exact_match=True)
 
-publisher.kill()
-subscriber1.kill()
+terminate(publisher)
+terminate(subscriber1)
 
 
 #########
@@ -222,7 +225,7 @@ if sub1_result.decode("utf-8").count("Received msg with size 100000000") != 2:
 if sub2_result.decode("utf-8").count("Received msg with size 100000000") != 2:
     test_failed("Subscriber 2 didn't receive the expected 2 large messages!")
     
-publisher.kill()
+terminate(publisher)
 
 print("success")
 sys.exit(0)
