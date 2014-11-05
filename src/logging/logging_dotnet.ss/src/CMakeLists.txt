@@ -8,3 +8,8 @@ ADD_CSHARP_ASSEMBLY(Safir.Logging LIBRARY
   DLL_IMPORTS logging_library)
 
 SAFIR_INSTALL(TARGETS Safir.Logging)
+
+if (NOT MSVC)
+  INSTALL(FILES Safir.Logging.dll.config 
+    DESTINATION ${SAFIR_INSTALL_DESTINATION_CSHARP})
+endif()
