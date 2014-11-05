@@ -59,6 +59,7 @@ namespace Com
         const std::string dataAddress;
         const std::string unicastAddress; //will be controlAddress or dataAddress depending on the mode
         bool systemNode;
+        bool isSeed; //is the node a seed to this Communication instance.
 
         Node(const std::string& name_,
              int64_t nodeId_,
@@ -73,6 +74,7 @@ namespace Com
             ,dataAddress(dataAddress_)
             ,unicastAddress(isControlInstance ? controlAddress : dataAddress)
             ,systemNode(false)
+            ,isSeed(false)
         {
         }
 

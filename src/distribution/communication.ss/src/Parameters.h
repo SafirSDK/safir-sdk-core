@@ -38,7 +38,7 @@ namespace Com
         static const size_t FragmentSize=50000;
 
         //Size of the send queue, number of outstanding messages
-        static const size_t SendQueueSize = 50;
+        static const size_t SendQueueSize = 100;
 
         //Max number of messages that can be sent in sequence before waiting for ack.
         //Max number of messages out of order that are saved

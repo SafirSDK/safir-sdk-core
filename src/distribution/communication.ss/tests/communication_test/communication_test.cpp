@@ -135,7 +135,7 @@ public:
             n.name="nt"+boost::lexical_cast<std::string>(i);
             n.id=LlufId_Generate64(n.name.c_str());
             n.heartbeatInterval=1000+500*i;
-            n.retryTimeout=100;
+            n.retryTimeout=40;
             if (i>0)
             {
                 n.controlMulticastAddress=std::string("224.90.90.241:")+boost::lexical_cast<std::string>(11000+i);
@@ -472,11 +472,12 @@ int main(int argc, char * argv[])
             else
             {
                 com->Send(0, nt.second.id, data, cmd.messageSize, 0, false);
-                if (sendCounter%50==0)
-                {
-                    boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
-                }
             }
+        }
+
+        if (sendCounter%50==0)
+        {
+            boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
         }
 
         if (sendCounter%10000==0)

@@ -24,6 +24,7 @@
 #ifndef __SAFIR_DOB_COMMUNICATION_DISCOVERER_H__
 #define __SAFIR_DOB_COMMUNICATION_DISCOVERER_H__
 
+#include <set>
 #include <boost/function.hpp>
 #include <boost/random.hpp>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
@@ -106,7 +107,7 @@ namespace Com
 
         void HandleReceivedDiscover(const CommunicationMessage_Discover& msg)
         {
-            lllog(DiscovererLogLevel)<<L"COM["<<m_me.nodeId<<L"]: Received discover from "<<msg.from().name().c_str()<<" ["<<msg.from().node_id()<<"]"<<std::endl;
+            lllog(DiscovererLogLevel)<<L"COM["<<m_me.nodeId<<L"]: Received discover from "<<msg.from().name().c_str()<<L" ["<<msg.from().node_id()<<L"]"<<std::endl;
 
             m_strand.dispatch([=]
             {
@@ -123,10 +124,16 @@ namespace Com
                     return;
                 }
 
+                if (IsExcluded(msg.from().node_id()))
+                {
+                    lllog(DiscovererLogLevel)<<L"COM["<<m_me.nodeId<<L"]: Received discover from node that has been excluded. NodeId: "<<msg.from().node_id()<<std::endl;
+                    return;
+                }
+
                 if (IsNewNode(msg.from().node_id()))
                 {
                     //new node
-                    AddNewNode(msg.from());
+                    AddNewNode(msg.from(), false);
                     UpdateIncompleteNodes(msg.from().node_id(), 0, 0);  //setting numberOfPackets=0 indicates that we still havent got a nodeInfo, just a discover
                 }
 
@@ -149,12 +156,17 @@ namespace Com
                 if (msg.has_sent_from_node())
                 {
                     //we have now talked to this node, so it can be added as a real node and removed from seed and reported lists
-                    m_seeds.erase(msg.sent_from_id()); //must use sentFromId and not sent_from_node().id since sentFromId is generated from address when seeding.
+                    bool isSeed=m_seeds.erase(msg.sent_from_id())==1; //must use sentFromId and not sent_from_node().id since sentFromId is generated from address when seeding.
                     m_reportedNodes.erase(msg.sent_from_node().node_id());
 
                     if (IsNewNode(msg.sent_from_node().node_id()))
                     {
-                        AddNewNode(msg.sent_from_node());
+                        AddNewNode(msg.sent_from_node(), isSeed);
+                    }
+                    else
+                    {
+                        //maybe some other node reported this before we got this message. The mark it as seed in case it will be excluded sometime in future.
+                        m_nodes.find(msg.sent_from_node().node_id())->second.isSeed=isSeed;
                     }
 
                     UpdateIncompleteNodes(msg.sent_from_node().node_id(), msg.number_of_packets(), msg.packet_number());
@@ -165,18 +177,44 @@ namespace Com
                 {
                     if (nit->node_id()!=m_me.nodeId)
                     {
-                        if (nit->node_id()==0 && nit->name()=="seed")
+                        if (IsExcluded(nit->node_id()))
                         {
-                            lllog(DiscovererLogLevel)<<L"COM["<<m_me.nodeId<<L"]: Received seed from other node. Address to seed: "<<nit->control_address().c_str()<<std::endl;
-                            AddSeed(nit->control_address());
+                            lllog(DiscovererLogLevel)<<L"COM["<<m_me.nodeId<<L"]: Reported node: "<<nit->name().c_str()<<L" ["<<nit->node_id()<<L"]. Node is excluded by this node, throw away!"<<std::endl;
+                        }
+                        else if (nit->node_id()==0 && nit->name()=="seed")
+                        {
+                            if (!IsKnownSeedAddress(nit->control_address()))
+                            {
+                                lllog(DiscovererLogLevel)<<L"COM["<<m_me.nodeId<<L"]: Received seed from other node that we did not already have as seed. Address to seed: "<<nit->control_address().c_str()<<std::endl;
+                                AddSeed(nit->control_address());
+                            }
                         }
                         else if (IsNewNode(nit->node_id()))
                         {
                             lllog(DiscovererLogLevel)<<L"COM["<<m_me.nodeId<<L"]: Reported node: "<<nit->name().c_str()<<L" ["<<nit->node_id()<<L"]"<<std::endl;
                             AddReportedNode(*nit);
-                            //TODO: If not very busy, we can send discover right away instead of waiting for timer.
                         }
                     }
+                }
+            });
+        }
+
+        void ExlcludeNode(int64_t nodeId)
+        {
+            m_strand.dispatch([=]
+            {
+                m_excludedNodes.insert(nodeId);
+                m_reportedNodes.erase(nodeId);
+                m_incompletedNodes.erase(nodeId);
+
+                auto it=m_nodes.find(nodeId);
+                if (it!=m_nodes.end())
+                {
+                    if (it->second.isSeed) //if node is a seed, keep the address
+                    {
+                        AddSeed(it->second.controlAddress);
+                    }
+                    m_nodes.erase(it);
                 }
             });
         }
@@ -198,6 +236,7 @@ namespace Com
         NodeMap m_nodes{}; //known nodes
         NodeMap m_reportedNodes{}; //nodes only heard about from others, never talked to
         std::map<int64_t, std::vector<bool> > m_incompletedNodes{}; //talked to but still haven't received all node info from this node
+        std::set<int64_t> m_excludedNodes{};
 
         boost::asio::io_service::strand m_strand;
         Node m_me;
@@ -207,6 +246,8 @@ namespace Com
         std::pair<int, int> m_timeoutInterval{500, 3000};
 
         mutable boost::random::mt19937 m_randomGenerator;
+
+        bool IsExcluded(int64_t id) const {return m_excludedNodes.find(id)!=m_excludedNodes.cend();}
 
         void SendDiscover()
         {
@@ -280,7 +321,7 @@ namespace Com
                 }
             }
 
-            //Add all other nodes we have talked to. We dont send nodes that only have been reported, i.e we dont spread rumors
+            //Add all other nodes we have talked to and is not excluded. We dont send nodes that only have been reported, i.e we dont spread rumors
             for (auto nodeIt=m_nodes.cbegin(); nodeIt!=m_nodes.cend(); ++nodeIt)
             {
                 const Node& node=nodeIt->second;
@@ -403,11 +444,12 @@ namespace Com
             }
         }
 
-        void AddNewNode(const CommunicationMessage_Node& node)
+        void AddNewNode(const CommunicationMessage_Node& node, bool isSeed)
         {
             lllog(4)<<L"COM: Discoverer talked to new node "<<node.name().c_str()<<L" ["<<node.node_id()<<L"]"<<std::endl;
             //insert in node map
             Node n(node.name(), node.node_id(), node.node_type_id(), node.control_address(), node.data_address(), true);
+            n.isSeed=isSeed;
             m_nodes.insert(std::make_pair(n.nodeId, n));
 
             m_reportedNodes.erase(n.nodeId); //now when we actually have talked to the node we also remove from reported nodes
@@ -427,15 +469,26 @@ namespace Com
 
         void AddSeed(const std::string& seed)
         {
-            if (seed!=m_me.controlAddress)
+            if (seed!=m_me.controlAddress) //avoid seeding ourself
             {
                 uint64_t id=LlufId_Generate64(seed.c_str());
                 Node s("seed", id, 0, seed, "", true);
+                s.isSeed=true;
                 m_seeds.insert(std::make_pair(id, s));
                 lllog(DiscovererLogLevel)<<L"COM["<<m_me.nodeId<<L"]: Add seed "<<seed.c_str()<<std::endl;
             }
-            //else trying to seed myself
+        }
 
+        bool IsKnownSeedAddress(const std::string& seedAddress) const
+        {
+            for (const auto& vt : m_nodes)
+            {
+                if (vt.second.controlAddress==seedAddress)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         void OnTimeout(const boost::system::error_code& error)

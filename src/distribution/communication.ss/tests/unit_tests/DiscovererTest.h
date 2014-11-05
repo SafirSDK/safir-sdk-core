@@ -378,6 +378,104 @@ boost::mutex HandleDiscover::mutex;
 std::map<int64_t, HandleDiscover::Info> HandleDiscover::discoverState;
 
 //--------------------------------------
+//class DiscovererTest_
+//{
+//public:
+//    static void Run()
+//    {
+//        std::cout<<"DiscovererTest started"<<std::endl;
+
+//        boost::asio::io_service io;
+//        auto work=boost::make_shared<boost::asio::io_service::work>(io);
+//        boost::thread_group threads;
+//        for (int i = 0; i < 9; ++i)
+//        {
+//            threads.create_thread([&]{io.run();});
+//        }
+
+//        TRACELINE
+
+//        std::atomic_uint go{0};
+//        auto WaitUntilReady=[&](Com::Discoverer& d)
+//        {
+//            d.m_strand.post([&]{go=1;});
+
+//            while(go==0)
+//                Wait(20);
+//            go=0;
+//        };
+
+//        //-------------------
+//        // Tests
+//        //-------------------
+//        std::atomic_uint nodeCount1(0);
+//        std::atomic_uint nodeCount2(0);
+//        std::atomic_uint nodeCount3(0);
+//        std::atomic_uint nodeCount4(0);
+
+//        Com::Discoverer n1(io, CreateNode(1), [&](const Com::Node& n){std::cout<<"node_1: OnNewNode("<<n.nodeId<<")"<<std::endl;  ++nodeCount1;});
+//        Com::Discoverer n2(io, CreateNode(2), [&](const Com::Node& n){std::cout<<"node_2: OnNewNode("<<n.nodeId<<")"<<std::endl;  ++nodeCount2;});
+//        Com::Discoverer n3(io, CreateNode(3), [&](const Com::Node& n){std::cout<<"node_3: OnNewNode("<<n.nodeId<<")"<<std::endl;  ++nodeCount3;});
+//        Com::Discoverer n4(io, CreateNode(4), [&](const Com::Node& n){std::cout<<"node_4: OnNewNode("<<n.nodeId<<")"<<std::endl;  ++nodeCount4;});
+
+//        TRACELINE
+
+//        n1.AddSeed("127.0.0.1:10002");
+//        n2.AddSeed("127.0.0.1:10003");
+//        n3.AddSeed("127.0.0.1:10004");
+//        n4.AddSeed("127.0.0.1:10001");
+
+//        TRACELINE
+
+//        n1.Start();
+//        n2.Start();
+//        n3.Start();
+//        n4.Start();
+
+//        bool passed=false;
+
+//        for (int i=0; i<60; ++i)
+//        {
+//            if (nodeCount1==3 &&
+//                nodeCount2==3 &&
+//                nodeCount3==3 &&
+//                nodeCount4==3)
+//            {
+//                passed=true;
+//                break;
+//            }
+
+//            Wait(1000);
+//        }
+
+//        CHECK(passed);
+
+//        TRACELINE
+
+//        n1.Stop();
+//        n2.Stop();
+//        n3.Stop();
+//        n4.Stop();
+
+//        TRACELINE
+
+//        //-----------
+//        // shutdown
+//        //-----------
+//        work.reset();
+//        threads.join_all();
+
+//        std::cout<<"DiscovererTest passed"<<std::endl;
+//    }
+
+//private:
+//    static Com::Node CreateNode(int i)
+//    {
+//        return Com::Node(std::string("discoverer_")+boost::lexical_cast<std::string>(i), i, 1, std::string("127.0.0.1:")+boost::lexical_cast<std::string>(10000+i), "", true);
+//    }
+
+//};
+
 
 struct DiscovererTest
 {
