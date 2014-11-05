@@ -39,5 +39,7 @@ INSTALL(TARGETS control_stub dose_main_stub
         LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
         ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
 
-INSTALL(PROGRAMS start_system_picture_test.py
+INSTALL(PROGRAMS
+    start_system_picture_test.py
+    circular_restart.py
   DESTINATION ${SAFIR_RUNTIME}/bin)

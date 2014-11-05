@@ -22,7 +22,6 @@
 *
 ******************************************************************************/
 #include <Safir/Dob/Internal/Communication.h>
-#include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/MakeUnique.h>
 #include <Safir/Dob/Internal/SystemPicture.h>
@@ -78,7 +77,11 @@ public:
              "A nice name for the node, for presentation purposes only")
             ("force-id",
              value<boost::int64_t>(&id)->default_value(LlufId_GenerateRandom64(), ""),
-             "Override the automatically generated node id. For debugging/testing purposes only.");
+             "Override the automatically generated node id. For debugging/testing purposes only.")
+            ("suicide-trigger",
+             value<std::string>(&suicideTrigger),
+             "This node should exit gracefully a time after the node specified in suicideTrigger has exited");
+
 
         variables_map vm;
 
@@ -101,6 +104,8 @@ public:
             return;
         }
 
+        std::wcout << "Got suicide trigger '" << suicideTrigger << "'" << std::endl;
+
         parseOk = true;
     }
 
@@ -109,6 +114,7 @@ public:
     std::string dataAddress;
     boost::int64_t id;
     std::string name;
+    std::string suicideTrigger;
 private:
     static void ShowHelp(const boost::program_options::options_description& desc)
     {
@@ -125,12 +131,21 @@ class SystemStateHandler
 public:
     SystemStateHandler(boost::asio::io_service& ioService,
                        const int64_t id,
-                       Safir::Dob::Internal::Com::Communication& communication)
+                       Safir::Dob::Internal::Com::Communication& communication,
+                       const std::string& suicideTrigger)
         : m_strand(ioService)
         , m_injectedNodes({id}) //consider ourselves already injected
         , m_communication(communication)
+        , m_trigger(suicideTrigger)
+        , m_suicideTimer(ioService)
     {
 
+    }
+
+    //this must be called before io_services are started
+    void SetStopHandler(const std::function<void()>& fcn)
+    {
+        m_stopHandler = fcn;
     }
 
     void NewState(const Safir::Dob::Internal::SP::SystemState& data)
@@ -139,6 +154,13 @@ public:
                           {
                               CheckState(data);
                               InjectNodes(data);
+                              ConsiderSuicide(data);
+
+                              m_states.push_front(data);
+                              while (m_states.size() > 10)
+                              {
+                                  m_states.pop_back();
+                              }
                           });
     }
 
@@ -153,7 +175,7 @@ private:
                 continue;
             }
 
-            lllog(5) << "Injecting node " << data.Name(i) << "(" << data.Id(i)
+            std::wcout << "Injecting node " << data.Name(i) << "(" << data.Id(i)
                      << ") of type " << data.NodeTypeId(i)
                      << " with address " << data.DataAddress(i) << std::endl;
 
@@ -192,18 +214,60 @@ private:
                     throw std::logic_error("Node has gone missing without being dead first!");
                 }
             }
-
+            /* TODO
             //find nodes that have reappeared
-            /*        for (const auto& oldState : m_states)
-                      {
+            for (const auto& oldState : m_states)
+            {
 
-                      }*/
+            }*/
         }
 
-        m_states.push_front(data);
-        while (m_states.size() > 10)
+    }
+
+    void ConsiderSuicide(const Safir::Dob::Internal::SP::SystemState& data)
+    {
+        if (m_states.empty() || m_trigger.empty())
         {
-            m_states.pop_back();
+            return;
+        }
+
+        const Safir::Dob::Internal::SP::SystemState last = m_states.front();
+
+        //find nodes that have died
+        for (int i = 0; i < data.Size(); ++i)
+        {
+            //look for our trigger node
+            if (data.Name(i) != m_trigger)
+            {
+                continue;
+            }
+
+            //we're only interested if it is dead
+            if (!data.IsDead(i))
+            {
+                return;
+            }
+
+            //check if it was already dead
+            for (int j = 0; j < last.Size(); ++j)
+            {
+                if (last.Id(j) == data.Id(i) && last.IsDead(j))
+                {
+                    return;
+                }
+            }
+
+            std::wcout << "My trigger node (" << m_trigger << "), has just died, will schedule a suicide" << std::endl;
+
+            m_suicideTimer.expires_from_now(boost::chrono::seconds(10));
+            m_suicideTimer.async_wait([this](const boost::system::error_code& error)
+                                      {
+                                          if (!error)
+                                          {
+                                              std::wcout << "Committing suicide!" << std::endl;
+                                              m_stopHandler();
+                                          }
+                                      });
         }
     }
 
@@ -212,6 +276,10 @@ private:
     Safir::Dob::Internal::Com::Communication& m_communication;
 
     std::deque<Safir::Dob::Internal::SP::SystemState> m_states;
+
+    const std::string m_trigger;
+    boost::asio::steady_timer m_suicideTimer;
+    std::function<void()> m_stopHandler;
 };
 
 int main(int argc, char * argv[])
@@ -282,7 +350,7 @@ int main(int argc, char * argv[])
                                                options.dataAddress,
                                                std::move(spNodeTypes));
 
-    SystemStateHandler ssh(ioService, options.id, communication);
+    SystemStateHandler ssh(ioService, options.id, communication, options.suicideTrigger);
 
     // Start subscription to system state changes from SP
     sp.StartStateSubscription([&ssh](const Safir::Dob::Internal::SP::SystemState& data){ssh.NewState(data);});
@@ -348,24 +416,29 @@ int main(int argc, char * argv[])
     signalSet.add(SIGTERM);
 #endif
 
-    signalSet.async_wait([&sp,&work,&communication,&signalSet,&sendTimer](const boost::system::error_code& error,
-                                                           const int signal_number)
-                       {
-                           lllog(3) << "Got signal " << signal_number << std::endl;
-                           if (error)
-                           {
-                               SEND_SYSTEM_LOG(Error,
-                                               << "Got a signals error: " << error);
-                           }
-                           sp.Stop();
-                           communication.Stop();
-                           sendTimer.cancel();
-                           work.reset();
-                       }
-                       );
+    const auto stopFcn = [&sp, &communication, &sendTimer, &work]
+    {
+        sp.Stop();
+        communication.Stop();
+        sendTimer.cancel();
+        work.reset();
+    };
+
+    signalSet.async_wait([stopFcn](const boost::system::error_code& error,
+                                   const int signal_number)
+                         {
+                             std::wcout << "Got signal " << signal_number << std::endl;
+                             if (error)
+                             {
+                                 SEND_SYSTEM_LOG(Error,
+                                                 << "Got a signals error: " << error);
+                             }
+                             stopFcn();
+                         }
+                         );
 
 
-
+    ssh.SetStopHandler(stopFcn);
 
     boost::thread_group threads;
     for (int i = 0; i < 9; ++i)
@@ -377,6 +450,6 @@ int main(int argc, char * argv[])
 
     threads.join_all();
 
-    lllog(3) << "Exiting..." << std::endl;
+    std::wcout << "Exiting..." << std::endl;
     return 0;
 }
