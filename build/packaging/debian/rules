@@ -4,7 +4,7 @@
 export CPPFLAGS += -DNDEBUG
 
 %:
-	dh $@ --parallel
+	dh $@ --parallel --with=cli
 
 override_dh_auto_install: install_runtime install_development install_testsuite
 
