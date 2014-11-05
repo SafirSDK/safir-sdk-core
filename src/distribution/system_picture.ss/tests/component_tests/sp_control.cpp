@@ -198,7 +198,7 @@ int main(int argc, char * argv[])
 
 
     // Start subscription to system state changes from SP
-    sp.StartStateSubscription([](const Safir::Dob::Internal::SP::SystemState& data)
+    sp.StartStateSubscription([](const Safir::Dob::Internal::SP::SystemState& /*data*/)
                               {
 
                               });

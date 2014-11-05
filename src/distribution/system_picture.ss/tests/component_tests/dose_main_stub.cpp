@@ -29,6 +29,7 @@
 #include <Safir/Utilities/Internal/Id.h>
 #include <iostream>
 #include <map>
+#include <deque>
 #include <boost/thread.hpp>
 
 //disable warnings in boost
