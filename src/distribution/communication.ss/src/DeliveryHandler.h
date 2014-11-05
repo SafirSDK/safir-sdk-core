@@ -84,7 +84,7 @@ namespace Com
             m_receiveStrand.dispatch([=]
             {
                 m_running=true;
-                OnAckTimeout();
+                //OnAckTimeout();
             });
         }
 
@@ -275,40 +275,40 @@ namespace Com
         ReceiverMap m_receivers;
         GotReceiveFrom m_gotRecvFrom;
 
-        void OnAckTimeout()
-        {
-            if (!m_running)
-            {
-                return;
-            }
+//        void OnAckTimeout()
+//        {
+//            if (!m_running)
+//            {
+//                return;
+//            }
 
-            //Ack everything that is unacked so far
-            for (auto& vt : m_nodes)
-            {
-                NodeInfo& ni=vt.second;
-                if (ni.ackedSingleReceiverChannel.NumberOfUnacked()>0)
-                {
-                    SendAck(ni, SingleReceiverSendMethod);
-                }
+//            //Ack everything that is unacked so far
+//            for (auto& vt : m_nodes)
+//            {
+//                NodeInfo& ni=vt.second;
+//                if (ni.ackedSingleReceiverChannel.NumberOfUnacked()>0)
+//                {
+//                    SendAck(ni, SingleReceiverSendMethod);
+//                }
 
-                if (ni.ackedMultiReceiverChannel.NumberOfUnacked()>0)
-                {
-                    SendAck(ni, MultiReceiverSendMethod);
-                }
-            }
+//                if (ni.ackedMultiReceiverChannel.NumberOfUnacked()>0)
+//                {
+//                    SendAck(ni, MultiReceiverSendMethod);
+//                }
+//            }
 
-            //Restart timer
-            m_sendAckTimer.expires_from_now(boost::chrono::milliseconds(50));
-            m_sendAckTimer.async_wait(m_receiveStrand.wrap([=](const boost::system::error_code& /*error*/){OnAckTimeout();}));
-        }
+//            //Restart timer
+//            m_sendAckTimer.expires_from_now(boost::chrono::milliseconds(50));
+//            m_sendAckTimer.async_wait(m_receiveStrand.wrap([=](const boost::system::error_code& /*error*/){OnAckTimeout();}));
+//        }
 
-        void SendAck(NodeInfo& ni, uint8_t sendMethod)
-        {
-            Channel& c=(sendMethod==SingleReceiverSendMethod) ? ni.ackedSingleReceiverChannel : ni.ackedMultiReceiverChannel;
-            auto ackPtr=boost::make_shared<Ack>(m_myId, ni.node.nodeId, c.lastInSequence, sendMethod);
-            WriterType::SendTo(ackPtr, ni.endpoint);
-            c.lastAcked=c.lastInSequence;
-        }
+//        void SendAck(NodeInfo& ni, uint8_t sendMethod)
+//        {
+//            Channel& c=(sendMethod==SingleReceiverSendMethod) ? ni.ackedSingleReceiverChannel : ni.ackedMultiReceiverChannel;
+//            auto ackPtr=boost::make_shared<Ack>(m_myId, ni.node.nodeId, c.lastInSequence, sendMethod);
+//            WriterType::SendTo(ackPtr, ni.endpoint);
+//            c.lastAcked=c.lastInSequence;
+//        }
 
         void Insert(const MessageHeader* header, const char* payload, NodeInfo& ni)
         {
@@ -426,7 +426,7 @@ namespace Com
                 {
                     //The Normal case: Message in correct order
                     Insert(header, payload, ni);
-                    return ch.NumberOfUnacked()>=Parameters::SlidingWindowSize/4; //if half the senders window is unacked, send ack now
+                    return true; //ch.NumberOfUnacked()>=Parameters::SlidingWindowSize/4; //if half the senders window is unacked, send ack now
                 }
                 else if (header->sequenceNumber<=ch.lastInSequence+Parameters::SlidingWindowSize)
                 {
