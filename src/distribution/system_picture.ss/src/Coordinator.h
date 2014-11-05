@@ -205,7 +205,7 @@ namespace SP
                     throw std::logic_error("Incorrect ElectionIds!");
                 }
 
-                const auto deadNodes = GetRecentlyDeadNodes(m_stateMessage);
+                const auto deadNodes = GetDeadNodes(m_stateMessage);
 
                 //Note: never do exclude on a node that is not one that we have
                 //received NewNode for, i.e. is in m_lastStatistics top level.
@@ -240,7 +240,7 @@ namespace SP
         }
 
     private:
-        static std::set<int64_t> GetRecentlyDeadNodes(const SystemStateMessage& state)
+        static std::set<int64_t> GetDeadNodes(const SystemStateMessage& state)
         {
             std::set<int64_t> nodes;
             for (int i = 0; i < state.node_info_size(); ++i)
@@ -254,37 +254,29 @@ namespace SP
         }
 
 
-        static std::set<int64_t> GetDeadNodes(const RawStatistics& statistics)
-        {
-            std::set<int64_t> deadNodes;
-            for (int i = 0; i < statistics.Size(); ++i)
-            {
-                if (statistics.HasRemoteStatistics(i))
-                {
-                    const auto remote = statistics.RemoteStatistics(i);
-                    for (int j = 0; j < remote.Size(); ++j)
-                    {
-                        if (remote.IsDead(j))
-                        {
-                            deadNodes.insert(remote.Id(j));
-                        }
-                    }
-                }
-            }
-            return deadNodes;
-        }
-
-        static std::map<int64_t, std::pair<RawStatistics,int>> GetRecentlyDeadNodes(const RawStatistics& statistics)
+        static std::map<int64_t, std::pair<RawStatistics,int>> GetDeadNodes(const RawStatistics& statistics, 
+                                                                            const int64_t ownId)
         {
             std::map<int64_t, std::pair<RawStatistics,int>> deadNodes;
             for (int i = 0; i < statistics.Size(); ++i)
             {
+                if (statistics.IsDead(i))
+                {
+                    deadNodes.insert(std::make_pair(statistics.Id(i), std::make_pair(statistics,i)));
+                }
+
                 if (statistics.HasRemoteStatistics(i))
                 {
                     const auto remote = statistics.RemoteStatistics(i);
                     for (int j = 0; j < remote.Size(); ++j)
                     {
-                        if (remote.IsDead(j) && !remote.IsLongGone(j))
+                        //ignore what other nodes think of me
+                        if (remote.Id(j) == ownId)
+                        {
+                            continue;
+                        }
+
+                        if (remote.IsDead(j))
                         {
                             deadNodes.insert(std::make_pair(remote.Id(j), std::make_pair(remote,j)));
                         }
@@ -295,8 +287,9 @@ namespace SP
         }
 
 
+
         //must be called in strand
-        bool SystemStable()
+        bool SystemStable() const
         {
             //get all node ids that we've heard about so far
             std::set<int64_t> knownNodes({m_id}); //include ourselves...
@@ -392,11 +385,6 @@ namespace SP
                 return false;
             }
 
-            //we need to include recently dead nodes that we've only been told about by other nodes
-            //so we get a list of recently dead nodes that we might have to add later
-            // (we'll be removing stuff from this list as we go, below).
-            auto recentlyDeadNodes = GetRecentlyDeadNodes(m_lastStatistics);
-
             m_stateMessage.set_elected_id(m_id);
             m_stateMessage.set_election_id(m_ownElectionId);
 
@@ -416,11 +404,12 @@ namespace SP
             //we will mark him as dead eventually.
             //He should also start a new election, and the thing should resolve itself.
 
-            //get all nodes that someone considers to be dead
-            const std::set<int64_t> deadNodes = GetDeadNodes(m_lastStatistics);
+
+            //Get all dead nodes in a table
+            std::map<int64_t, std::pair<RawStatistics,int>> deadNodes = GetDeadNodes(m_lastStatistics, m_id);
 
             //tell rawhandler about nodes that other nodes consider dead
-            //while we also build our new system state message
+            //while we build our new system state message
             //Note: never do exclude on a node that is not one that we have
             //received NewNode for, i.e. is in m_lastStatistics top level.
             for (int i = 0; i < m_lastStatistics.Size(); ++i)
@@ -439,32 +428,25 @@ namespace SP
                     justKilled = true;
                 }
 
-                //add nodes that are not dead or were just killed or
-                //that have been dead a short while
-                if (!m_lastStatistics.IsDead(i) ||
-                    justKilled ||
-                    (m_lastStatistics.IsDead(i) && !m_lastStatistics.IsLongGone(i)))
-                {
-                    auto node = m_stateMessage.add_node_info();
-                    node->set_name(m_lastStatistics.Name(i));
-                    node->set_id(m_lastStatistics.Id(i));
-                    node->set_node_type_id(m_lastStatistics.NodeTypeId(i));
-                    node->set_control_address(m_lastStatistics.ControlAddress(i));
-                    node->set_data_address(m_lastStatistics.DataAddress(i));
+                auto node = m_stateMessage.add_node_info();
+                node->set_name(m_lastStatistics.Name(i));
+                node->set_id(m_lastStatistics.Id(i));
+                node->set_node_type_id(m_lastStatistics.NodeTypeId(i));
+                node->set_control_address(m_lastStatistics.ControlAddress(i));
+                node->set_data_address(m_lastStatistics.DataAddress(i));
 
-                    node->set_is_dead(justKilled || m_lastStatistics.IsDead(i));
+                node->set_is_dead(justKilled || m_lastStatistics.IsDead(i));
 
-                    recentlyDeadNodes.erase(m_lastStatistics.Id(i));
-                }
+                deadNodes.erase(m_lastStatistics.Id(i));
             }
 
-            //ok, time to add any of the recently dead nodes that haven't already been added
-            for (const auto& dn : recentlyDeadNodes)
+            //ok, time to add any of the dead nodes that haven't already been added
+            for (const auto& dn : deadNodes)
             {
                 const auto& remote = dn.second.first;
                 const int index = dn.second.second;
 
-                lllog(8) << "SP: Adding recently dead node " << remote.Name(index).c_str()
+                lllog(8) << "SP: Adding dead node " << remote.Name(index).c_str()
                          << " (" << remote.Id(index) << ")" << std::endl;
 
                 auto node = m_stateMessage.add_node_info();
