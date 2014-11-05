@@ -355,8 +355,8 @@ int main(int argc, char * argv[])
     // Start subscription to system state changes from SP
     sp.StartStateSubscription([&ssh](const Safir::Dob::Internal::SP::SystemState& data){ssh.NewState(data);});
 
-    communication.SetDataReceiver([](const int64_t fromNodeId,
-                                     const int64_t fromNodeType,
+    communication.SetDataReceiver([](const int64_t /*fromNodeId*/,
+                                     const int64_t /*fromNodeType*/,
                                      const boost::shared_ptr<char[]>& data,
                                      const size_t size)
                                   {
