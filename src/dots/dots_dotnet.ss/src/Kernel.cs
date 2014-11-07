@@ -34,7 +34,7 @@ namespace Safir.Dob.Typesystem.Internal
     /// </summary>
     internal class Id
     {
-        internal const string LLUF_ID_NAME = "lluf_id.dll";
+        internal const string LLUF_ID_NAME = "lluf_id";
 
         internal static Int64 Generate64BitHash(string str)
         {
@@ -59,7 +59,7 @@ namespace Safir.Dob.Typesystem.Internal
     /// </summary>
     internal class Kernel
     {
-        internal const string DOTS_KERNEL_NAME = "dots_kernel.dll";
+        internal const string DOTS_KERNEL_NAME = "dots_kernel";
 
         //********************************************************
         //* Base operations on blobs

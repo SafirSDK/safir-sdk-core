@@ -5,6 +5,7 @@
 *.exe
 *.csexe
 *.dll
+*.dll.config
 *.mdb
 *.pdb
 

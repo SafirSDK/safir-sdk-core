@@ -1,6 +1,6 @@
 function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
     cmake_parse_arguments(_cs
-      "LIBRARY;EXE;WINEXE;NOVERSION" "SIGN" "SOURCES;RESOURCES;REFERENCES;LIBRARY_PATHS" ${ARGN})
+      "LIBRARY;EXE;WINEXE;NOVERSION" "SIGN" "SOURCES;RESOURCES;REFERENCES;LIBRARY_PATHS;DLL_IMPORTS" ${ARGN})
 
     if (NOT _cs_LIBRARY AND NOT _cs_EXE AND NOT _cs_WINEXE)
       message(FATAL_ERROR "ADD_CSHARP_ASSEMBLY: TARGET_KIND not specified!")
@@ -154,6 +154,27 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
 
     ADD_CUSTOM_TARGET (${TARGET_NAME} ALL DEPENDS ${_cs_target})
 
+    #we need to write a dll map file for linux distros that split stuff into a -dev package
+    if (UNIX AND _cs_LIBRARY AND _cs_DLL_IMPORTS)
+      FILE(WRITE ${_cs_target}.config
+        "<configuration>\n")
+      foreach(dll IN LISTS _cs_DLL_IMPORTS)
+        FILE(APPEND ${_cs_target}.config
+          "  <dllmap dll=\"${dll}\" target=\"lib${dll}.so.${SAFIR_VERSION_MAJOR}\"/>\n")
+      endforeach()
+      FILE(APPEND ${_cs_target}.config
+        "</configuration>")
+
+      set_property(TARGET ${TARGET_NAME}
+        PROPERTY CONFIG_FILE ${_cs_target}.config)
+    endif()
+
+    #add dependencies to dll-imported stuff
+    foreach(dll IN LISTS _cs_DLL_IMPORTS)
+      add_dependencies(${TARGET_NAME} ${dll})
+    endforeach()
+
+
     #Set some properties on the target
     set_property(TARGET ${TARGET_NAME}
       PROPERTY ASSEMBLY_FILE ${_cs_target})
@@ -195,6 +216,7 @@ function(INSTALL_CSHARP_ASSEMBLY)
     get_property(_cs_TARGET_KIND TARGET ${_cs_TARGET} PROPERTY TARGET_KIND)
     get_property(_cs_DOC_FILE TARGET ${_cs_TARGET} PROPERTY DOC_FILE)
     get_property(_cs_DEBUG_INFO_FILE TARGET ${_cs_TARGET} PROPERTY DEBUG_INFO_FILE)
+    get_property(_cs_CONFIG_FILE TARGET ${_cs_TARGET} PROPERTY CONFIG_FILE)
 
     if (_cs_TEST_SUITE)
       set(_cs_COMPONENT_RUNTIME Test)
@@ -222,5 +244,9 @@ function(INSTALL_CSHARP_ASSEMBLY)
       DESTINATION ${_cs_DESTINATION}
       COMPONENT ${_cs_COMPONENT_DEVELOPMENT})
 
-
+    if (_cs_CONFIG_FILE)
+      install(FILES ${_cs_CONFIG_FILE}
+        DESTINATION ${destination}
+        COMPONENT ${_cs_COMPONENT_RUNTIME})
+    endif()
 endfunction()

@@ -44,8 +44,10 @@ function (SAFIR_INSTALL)
       if (assembly_file)
         if (INST_TEST_SUITE)
           set (TEST_SUITE "TEST_SUITE")
+          set (CONFIG_COMPONENT Test)
         else()
           unset (TEST_SUITE)
+          set (CONFIG_COMPONENT Runtime)
         endif()
 
         #by default assemblies get installed here
@@ -69,7 +71,8 @@ function (SAFIR_INSTALL)
           FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${target} "#!/bin/sh\nexec /usr/bin/mono $MONO_OPTIONS ${CMAKE_INSTALL_PREFIX}/${SAFIR_INSTALL_DESTINATION_CSHARP}/${assembly_file} $@")
           #and install it to bin directory
           install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${target}
-            DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN})
+            DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
+            COMPONENT ${CONFIG_COMPONENT})
         endif()
       endif()
 
