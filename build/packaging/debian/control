@@ -3,11 +3,11 @@ Maintainer: Lars Hagström <lars@foldspace.nu>
 Section: misc
 Priority: optional
 Standards-Version: 3.9.5
-Build-Depends: debhelper (>= 9), cmake (>= 2.8.12), python (>= 2.7.0), default-jdk, asciidoc, cli-common-dev (>= 0.5.7)
+Build-Depends: debhelper (>= 9), cmake (>= 2.8.12), python (>= 2.7.0), default-jdk, asciidoc, cli-common-dev (>= 0.5.7), javahelper
 
 Package: safir-sdk-core
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, ${cli:Depends}, python (>= 2.7.0)
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${cli:Depends}, ${java:Depends}, python (>= 2.7.0)
 Description: Distributed real-time system framework
  Safir SDK Core is a middleware and platform for creation of
  distributed soft real-time systems. It is Scalable, Reliable,
@@ -29,7 +29,7 @@ Description: Safir SDK Core development files
 
 Package: safir-sdk-core-testsuite
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, ${cli:Depends}, python (>= 2.7.0), safir-sdk-core
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${cli:Depends}, ${java:Depends}, python (>= 2.7.0), safir-sdk-core
 Description: Safir SDK Core test suite
  Safir SDK Core is a middleware and platform for creation of
  distributed soft real-time systems. It is Scalable, Reliable,
