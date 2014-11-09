@@ -8,7 +8,7 @@ if (NOT ASCIIDOC_FOUND)
   return()
 endif()
 
-add_asciidoc_manpage(sate.1 COMPONENT Development)
+add_asciidoc_manpage(sate.1 COMPONENT Runtime)
 add_asciidoc_manpage(dose_main.1 COMPONENT Runtime)
 add_asciidoc_manpage(dope_main.1 COMPONENT Runtime)
 add_asciidoc_manpage(dope_bin2xml.1 COMPONENT Runtime)
