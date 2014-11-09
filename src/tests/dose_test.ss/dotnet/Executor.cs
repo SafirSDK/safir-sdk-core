@@ -158,7 +158,7 @@ namespace dose_test_dotnet
             m_controlConnection.Close();
         }
 
-        const string DOSE_TEST_UTIL = "dose_test_util.dll";
+        const string DOSE_TEST_UTIL = "dose_test_util";
 
         [DllImport(DOSE_TEST_UTIL, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void InhibitOutgoingTraffic(byte inhibit,

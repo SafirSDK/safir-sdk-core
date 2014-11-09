@@ -33,7 +33,7 @@ namespace Safir.Dob
     {
         internal const System.Int32 DOSE_LANGUAGE_DOTNET = 2;
 
-        internal const string DOSE_DLL_NAME = "dose_dll.dll";
+        internal const string DOSE_DLL_NAME = "dose_dll";
 
         //---------------------------------------------------------------------
         // Delegates - using callingconvetion Cdecl instead of default stdcall
