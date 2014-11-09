@@ -155,7 +155,7 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
     ADD_CUSTOM_TARGET (${TARGET_NAME} ALL DEPENDS ${_cs_target})
 
     #we need to write a dll map file for linux distros that split stuff into a -dev package
-    if (UNIX AND _cs_LIBRARY AND _cs_DLL_IMPORTS)
+    if (UNIX AND _cs_DLL_IMPORTS)
       FILE(WRITE ${_cs_target}.config
         "<configuration>\n")
       foreach(dll IN LISTS _cs_DLL_IMPORTS)

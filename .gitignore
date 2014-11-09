@@ -3,7 +3,7 @@
 *.so
 *.so.[0-9]*
 *.exe
-*.csexe
+*.exe.config
 *.dll
 *.dll.config
 *.mdb
