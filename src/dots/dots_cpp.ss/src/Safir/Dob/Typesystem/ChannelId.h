@@ -25,6 +25,7 @@
 #ifndef __DOTS_CHANNEL_ID_H__
 #define __DOTS_CHANNEL_ID_H__
 
+#include <boost/functional/hash.hpp>
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Typesystem/Utilities.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
@@ -222,6 +223,10 @@ namespace Typesystem
 
     static inline std::wostream & operator << (std::wostream& out, const ChannelId& channelId)
     {return out << channelId.ToString();}
+
+    //Make it possible to use ChannelId as key in a dictionaries.
+    inline std::size_t hash_value(const Safir::Dob::Typesystem::ChannelId& val)
+    {return boost::hash<Int64>()(val.GetRawValue());}
 }
 }
 }

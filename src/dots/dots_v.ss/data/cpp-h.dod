@@ -488,15 +488,21 @@ namespace @_NAMESPACEV_@
 @@ --- Dictionary value ---
 @@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
 @@IF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@=Enumeration
-@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+@@IF@@ (@_UNIFORM_MEMBERTYPE_@ = String) or (@_UNIFORM_MEMBERTYPE_@ = Boolean)
+        const Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@::Enumeration, Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@Container>& @_MEMBER_@() const;
+        Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@::Enumeration, Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@Container>& @_MEMBER_@();
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
         const Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@::Enumeration, @_MEMBERTYPE_@::EnumerationContainer>& @_MEMBER_@() const;
         Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@::Enumeration, @_MEMBERTYPE_@::EnumerationContainer>& @_MEMBER_@();
 @@ELSE@@
         const Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@::Enumeration, @_MEMBERTYPE_@Container>& @_MEMBER_@() const;
         Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@::Enumeration, @_MEMBERTYPE_@Container>& @_MEMBER_@();
 @@END_IF@@
-@@ELSE@@    
-@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+@@ELSE@@
+@@IF@@ (@_UNIFORM_MEMBERTYPE_@ = String) or (@_UNIFORM_MEMBERTYPE_@ = Boolean)
+        const Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@Container>& @_MEMBER_@() const;
+        Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@Container>& @_MEMBER_@();
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
         const Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@::EnumerationContainer>& @_MEMBER_@() const;
         Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@::EnumerationContainer>& @_MEMBER_@();
 @@ELSE@@
@@ -575,13 +581,17 @@ namespace @_NAMESPACEV_@
 @@END_IF@@
 @@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
 @@IF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@=Enumeration
-@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+@@IF@@ (@_UNIFORM_MEMBERTYPE_@ = String) or (@_UNIFORM_MEMBERTYPE_@ = Boolean)
+        Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@::Enumeration, Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@Container> m_@_MEMBER_@Member;
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
         Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@::Enumeration, @_MEMBERTYPE_@::EnumerationContainer> m_@_MEMBER_@Member;
 @@ELSE@@
         Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@::Enumeration, @_MEMBERTYPE_@Container> m_@_MEMBER_@Member;
 @@END_IF@@
-@@ELSE@@    
-@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+@@ELSE@@
+@@IF@@ (@_UNIFORM_MEMBERTYPE_@ = String) or (@_UNIFORM_MEMBERTYPE_@ = Boolean)
+        Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@Container> m_@_MEMBER_@Member;
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
         Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@::EnumerationContainer> m_@_MEMBER_@Member;
 @@ELSE@@
         Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@Container> m_@_MEMBER_@Member;

@@ -26,10 +26,6 @@
 #include <typeinfo>
 #include <vector>
 #include <boost/unordered_map.hpp>
-#include <Safir/Dob/Typesystem/EntityId.h>
-#include <Safir/Dob/Typesystem/Utilities.h>
-#include <Safir/Dob/Typesystem/ChannelId.h>
-#include <Safir/Dob/Typesystem/HandlerId.h>
 #include <Safir/Dob/Typesystem/ContainerBase.h>
 
 #include <map>

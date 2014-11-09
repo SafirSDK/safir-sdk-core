@@ -597,7 +597,7 @@ namespace @_NAMESPACEV_@
 @@IF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@=Enumeration
             Safir::Dob::Typesystem::Int32 ordinal;
             Safir::Dob::Typesystem::Internal::BlobOperations::Get(ordinal, isNull, isChanged, handle, g_@_LOWER:MEMBER_@MemberIndex, valueIndex, Safir::Dob::Typesystem::Internal::BlobOperations::KeyMode);
-            @_MEMBERTYPE_@::Enumeration key=static_cast<@_MEMBERTYPE_@::Enumeration>(ordinal);
+            @_MEMBERDICTIONARYTYPE_@::Enumeration key=static_cast<@_MEMBERDICTIONARYTYPE_@::Enumeration>(ordinal);
 @@ELSE@@
             @_MEMBERDICTIONARYTYPE_@ key;
             Safir::Dob::Typesystem::Internal::BlobOperations::Get(key, isNull, isChanged, handle, g_@_LOWER:MEMBER_@MemberIndex, valueIndex, Safir::Dob::Typesystem::Internal::BlobOperations::KeyMode);
@@ -687,15 +687,21 @@ namespace @_NAMESPACEV_@
 @@ --- Dictionary member ---
 @@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
 @@IF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@=Enumeration
-@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+@@IF@@ (@_UNIFORM_MEMBERTYPE_@ = String) or (@_UNIFORM_MEMBERTYPE_@ = Boolean)
+        for (Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@::Enumeration, Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@Container>::const_iterator it=m_@_MEMBER_@Member.begin();
+             it!=m_@_MEMBER_@Member.end(); ++it)
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
         for (Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@::Enumeration, @_MEMBERTYPE_@::EnumerationContainer>::const_iterator it=m_@_MEMBER_@Member.begin();
              it!=m_@_MEMBER_@Member.end(); ++it)
 @@ELSE@@
         for (Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@::Enumeration, @_MEMBERTYPE_@Container>::const_iterator it=m_@_MEMBER_@Member.begin();
              it!=m_@_MEMBER_@Member.end(); ++it)
 @@END_IF@@
-@@ELSE@@    
-@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+@@ELSE@@
+@@IF@@ (@_UNIFORM_MEMBERTYPE_@ = String) or (@_UNIFORM_MEMBERTYPE_@ = Boolean)
+        for (Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@Container>::const_iterator it=m_@_MEMBER_@Member.begin();
+             it!=m_@_MEMBER_@Member.end(); ++it)
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
         for (Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@::EnumerationContainer>::const_iterator it=m_@_MEMBER_@Member.begin();
              it!=m_@_MEMBER_@Member.end(); ++it)
 @@ELSE@@
@@ -848,7 +854,16 @@ namespace @_NAMESPACEV_@
 @@END_IF@@
 @@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
 @@IF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@=Enumeration
-@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+@@IF@@ (@_UNIFORM_MEMBERTYPE_@ = String) or (@_UNIFORM_MEMBERTYPE_@ = Boolean)
+    const Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@::Enumeration, Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@Container>& @_MEMBERCLASS_@::@_MEMBER_@() const
+    {
+        return m_@_MEMBER_@Member;
+    }
+    Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@::Enumeration, Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@Container>& @_MEMBERCLASS_@::@_MEMBER_@()
+    {
+        return m_@_MEMBER_@Member;
+    }
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
     const Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@::Enumeration, @_MEMBERTYPE_@::EnumerationContainer>& @_MEMBERCLASS_@::@_MEMBER_@() const
     {
         return m_@_MEMBER_@Member;
@@ -867,8 +882,17 @@ namespace @_NAMESPACEV_@
         return m_@_MEMBER_@Member;
     }
 @@END_IF@@
-@@ELSE@@    
-@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+@@ELSE@@
+@@IF@@ (@_UNIFORM_MEMBERTYPE_@ = String) or (@_UNIFORM_MEMBERTYPE_@ = Boolean)
+    const Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@Container>& @_MEMBERCLASS_@::@_MEMBER_@() const
+    {
+        return m_@_MEMBER_@Member;
+    }
+    Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@Container>& @_MEMBERCLASS_@::@_MEMBER_@()
+    {
+        return m_@_MEMBER_@Member;
+    }
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
     const Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@::EnumerationContainer>& @_MEMBERCLASS_@::@_MEMBER_@() const
     {
         return m_@_MEMBER_@Member;

@@ -34,7 +34,6 @@
 #include <Safir/Dob/Typesystem/LibraryExceptions.h>
 #include <DotsTest/ParameterTypes.h>
 #include <DotsTest/ParameterArrays.h>
-#include <DotsTest/ParameterSequences.h>
 #include <DotsTest/EmptyObject.h>
 #include <DotsTest/MemberTypes.h>
 #include <DotsTest/MemberArrays.h>
@@ -8706,12 +8705,6 @@ void TestSequences()
     MS1->Int32Member().clear();
     std::wcout<<L"IsNull "<<MS1->Int32Member().IsNull()<<std::endl;
     std::wcout<<L"IsChanged "<<MS1->Int32Member().IsChanged()<<std::endl;
-
-    std::wcout<<L"Int32ParameterSequence"<<std::endl;
-    for (int i=0; i<DotsTest::ParameterSequences::Int32ParameterSequenceSize(); ++i)
-    {
-        std::wcout<<L"  ["<<i<<L"] = "<<DotsTest::ParameterSequences::Int32Parameter(i)<<std::endl;
-    }
 }
 
 int main(int /*argc*/, char* /*argv*/[])
@@ -8729,9 +8722,6 @@ int main(int /*argc*/, char* /*argv*/[])
 
     try
     {
-        TestSequences();
-        return 0;
-
         Test_Has_Property();
         Test_GetName();
         Test_GetNumberOfMembers();
