@@ -180,10 +180,13 @@ class DebianInstaller(object):
     def uninstall(self):
         if not self.can_uninstall():
             raise SetupError("Cannot uninstall! Packages are not installed!")
+
+        log ("Uninstalling packages: ")
         
         cmd = ["sudo", "--non-interactive", "apt-get", "--yes", "purge"]
         for pkg in self.packages:
             if self.__is_installed(pkg):
+                log (" ", pkg)
                 cmd.append(pkg)
                
         
@@ -205,6 +208,8 @@ class DebianInstaller(object):
         if len(testsuite) != 1:
             raise SetupError("Unexpected number of installers: "+ str(installer))
 
+        log ("Installing packages", runtime[0], "and", testsuite[0])
+
         proc = subprocess.Popen(("sudo", "dpkg", "--install", runtime[0], testsuite[0]),
                                 stdout = subprocess.PIPE,
                                 stderr = subprocess.STDOUT)
@@ -215,6 +220,7 @@ class DebianInstaller(object):
     
 
     def check_installation(self):
+        log("Running safir_show_config to test that exes can be run")
         proc = subprocess.Popen(("safir_show_config","--locations", "--typesystem", "--logging"),
                                 stdout = subprocess.PIPE,
                                 stderr = subprocess.STDOUT,
@@ -228,7 +234,10 @@ class DebianInstaller(object):
         
 def run_test_suite():
     log("Launching test suite")
-    result = subprocess.call(("run_dose_tests" + ".py" if sys.platform == "win32" else "","--jenkins"), shell = True)
+    if sys.platform == "win32":
+        result = subprocess.call(("run_dose_tests.py" ,"--jenkins"), shell = True)
+    else:
+        result = subprocess.call(("run_dose_tests","--jenkins"))
 
     if result != 0:
         raise SetupError("Test suite failed. Returncode = " + str(result))
