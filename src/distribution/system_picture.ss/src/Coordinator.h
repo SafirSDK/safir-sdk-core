@@ -254,7 +254,7 @@ namespace SP
         }
 
 
-        static std::map<int64_t, std::pair<RawStatistics,int>> GetDeadNodes(const RawStatistics& statistics, 
+        static std::map<int64_t, std::pair<RawStatistics,int>> GetDeadNodes(const RawStatistics& statistics,
                                                                             const int64_t ownId)
         {
             std::map<int64_t, std::pair<RawStatistics,int>> deadNodes;
@@ -295,10 +295,7 @@ namespace SP
             std::set<int64_t> knownNodes({m_id}); //include ourselves...
             for (int i = 0; i < m_lastStatistics.Size(); ++i)
             {
-                if (!m_lastStatistics.IsDead(i))
-                {
-                    knownNodes.insert(m_lastStatistics.Id(i));
-                }
+                knownNodes.insert(m_lastStatistics.Id(i));
             }
 
             //we want to loop over all nodes that we know of and
@@ -313,7 +310,7 @@ namespace SP
                 const auto& remote = m_lastStatistics.RemoteStatistics(i);
                 for (int j = 0; j < remote.Size(); ++j)
                 {
-                    //ignore nodes that the remote node believes is dead
+                    //ignore nodes that the remote node believe are dead
                     if (remote.IsDead(j))
                     {
                         continue;
@@ -322,6 +319,10 @@ namespace SP
                     if (knownNodes.find(remote.Id(j)) == knownNodes.end())
                     {
                         //found a live node that we don't know about!
+                        lllog(7) << "SP: Found node " << remote.Id(j) << "(" << remote.Name(j).c_str()
+                                 << ") that we don't know about but which node " << remote.Id()
+                                 << "(" << remote.Name().c_str() << ") believes is alive. " << std::endl;
+
                         return false;
                     }
                 }
@@ -382,8 +383,11 @@ namespace SP
             //check that all nodes that are known by other nodes are also known by us.
             if (!SystemStable())
             {
+                lllog(7) << "SP: System is not stable, not updating my state." << std::endl;
                 return false;
             }
+
+            lllog(7) << "SP: Passed all checks, updating my state." << std::endl;
 
             m_stateMessage.set_elected_id(m_id);
             m_stateMessage.set_election_id(m_ownElectionId);

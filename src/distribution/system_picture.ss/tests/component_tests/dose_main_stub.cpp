@@ -76,7 +76,7 @@ public:
              value<std::string>(&name)->default_value("<not set>", ""),
              "A nice name for the node, for presentation purposes only")
             ("force-id",
-             value<boost::int64_t>(&id)->default_value(LlufId_GenerateRandom64(), ""),
+             value<int64_t>(&id)->default_value(LlufId_GenerateRandom64(), ""),
              "Override the automatically generated node id. For debugging/testing purposes only.")
             ("suicide-trigger",
              value<std::string>(&suicideTrigger),
@@ -112,7 +112,7 @@ public:
     bool parseOk;
 
     std::string dataAddress;
-    boost::int64_t id;
+    int64_t id;
     std::string name;
     std::string suicideTrigger;
 private:
@@ -226,14 +226,14 @@ private:
 
     void ConsiderSuicide(const Safir::Dob::Internal::SP::SystemState& data)
     {
-        if (m_states.empty() || m_trigger.empty())
+        if (m_states.empty() || m_trigger.empty() || m_suicideScheduled)
         {
             return;
         }
 
-        const Safir::Dob::Internal::SP::SystemState last = m_states.front();
-
         //std::wcout << "Considering suicide" << std::endl;
+
+        bool triggered = false;
 
         //find nodes that have died
         for (int i = 0; i < data.Size(); ++i)
@@ -243,24 +243,41 @@ private:
             {
                 continue;
             }
-            //std::wcout << " Checking trigger node " << m_trigger.c_str() << std::endl;
 
             //we're only interested if it is dead
             if (!data.IsDead(i))
             {
-                return;
-            }
-            //std::wcout << " Trigger node is dead" << std::endl;
-            //check if it was already dead
-            for (int j = 0; j < last.Size(); ++j)
-            {
-                if (last.Id(j) == data.Id(i) && last.IsDead(j))
+                const auto res = m_triggerHistory.insert(std::make_pair(data.Id(i),false));
+                if (res.first->second)
                 {
-                    return;
+                    throw std::logic_error("Node status changed from dead to alive!");
                 }
+                continue;
             }
 
-            std::wcout << "My trigger node (" << m_trigger << "), has just died, will schedule a suicide" << std::endl;
+            //std::wcout << " Found dead trigger node" << std::endl;
+
+            //check if it was not known about
+            const auto findIt = m_triggerHistory.find(data.Id(i));
+            if (findIt == m_triggerHistory.end())
+            {
+                //most probably from a previous cycle, ignore it.
+                m_triggerHistory.insert(std::make_pair(data.Id(i),true));
+                continue;
+            }
+
+            //if it wasnt previously dead
+            if (!findIt->second)
+            {
+                findIt->second = true; //now known to be dead
+                triggered = true;
+                break;
+            }
+        }
+
+        if (triggered)
+        {
+            std::wcout << "My trigger node (" << m_trigger << "), has died, will schedule a suicide" << std::endl;
 
             m_suicideTimer.expires_from_now(boost::chrono::seconds(10));
             m_suicideTimer.async_wait([this](const boost::system::error_code& error)
@@ -271,7 +288,9 @@ private:
                                               m_stopHandler();
                                           }
                                       });
+            m_suicideScheduled = true;
         }
+
     }
 
     boost::asio::io_service::strand m_strand;
@@ -281,7 +300,10 @@ private:
     std::deque<Safir::Dob::Internal::SP::SystemState> m_states;
 
     const std::string m_trigger;
+    std::map<int64_t, bool> m_triggerHistory;
+
     boost::asio::steady_timer m_suicideTimer;
+    bool m_suicideScheduled = false;
     std::function<void()> m_stopHandler;
 };
 
@@ -299,7 +321,7 @@ int main(int argc, char * argv[])
     auto work = Safir::make_unique<boost::asio::io_service::work>(ioService);
 
     std::vector<Safir::Dob::Internal::Com::NodeTypeDefinition> commNodeTypes;
-    std::map<boost::int64_t, Safir::Dob::Internal::SP::NodeType> spNodeTypes;
+    std::map<int64_t, Safir::Dob::Internal::SP::NodeType> spNodeTypes;
 
     commNodeTypes.push_back({1,
                 "NodeTypeA",
