@@ -214,12 +214,6 @@ private:
                     throw std::logic_error("Node has gone missing without being dead first!");
                 }
             }
-            /* TODO
-            //find nodes that have reappeared
-            for (const auto& oldState : m_states)
-            {
-
-            }*/
         }
 
     }
