@@ -333,7 +333,12 @@ namespace SP
                                   {
                                       throw std::logic_error("SetDeadNode on unknown node");
                                   }
-                                  findIt->second.nodeInfo->set_is_dead(true);
+
+                                  if (!findIt->second.nodeInfo->is_dead())
+                                  {
+                                      findIt->second.nodeInfo->set_is_dead(true);
+                                      PostRawChangedCallback(RawChanges::NODES_CHANGED);
+                                  }
                               });
         }
 
@@ -350,6 +355,7 @@ namespace SP
             //deduce that control has died?
             m_strand.dispatch([this, nodeIds]
                               {
+                                  bool changed = false;
                                   for (auto id : nodeIds)
                                   {
                                       auto findIt = m_nodeTable.find(id);
@@ -357,7 +363,13 @@ namespace SP
                                       {
                                           findIt->second.nodeInfo->set_is_dead(true);
                                           m_communication.ExcludeNode(id);
+                                          changed = true;
                                       }
+                                  }
+
+                                  if (changed)
+                                  {
+                                      PostRawChangedCallback(RawChanges::NODES_CHANGED);
                                   }
                               });
         }

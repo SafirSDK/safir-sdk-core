@@ -233,6 +233,8 @@ private:
 
         const Safir::Dob::Internal::SP::SystemState last = m_states.front();
 
+        //std::wcout << "Considering suicide" << std::endl;
+
         //find nodes that have died
         for (int i = 0; i < data.Size(); ++i)
         {
@@ -241,13 +243,14 @@ private:
             {
                 continue;
             }
+            //std::wcout << " Checking trigger node " << m_trigger.c_str() << std::endl;
 
             //we're only interested if it is dead
             if (!data.IsDead(i))
             {
                 return;
             }
-
+            //std::wcout << " Trigger node is dead" << std::endl;
             //check if it was already dead
             for (int j = 0; j < last.Size(); ++j)
             {
@@ -395,11 +398,11 @@ int main(int argc, char * argv[])
             communication.Send(0,1,data,size,1000100222,true);
             communication.Send(0,2,data,size,1000100222,true);
 
-            sendTimer.expires_from_now(boost::chrono::milliseconds(10));
+            sendTimer.expires_from_now(boost::chrono::milliseconds(1000));
             sendTimer.async_wait(send);
         };
 
-    sendTimer.expires_from_now(boost::chrono::milliseconds(10));
+    sendTimer.expires_from_now(boost::chrono::milliseconds(1000));
     sendTimer.async_wait(send);
 
 
@@ -416,12 +419,13 @@ int main(int argc, char * argv[])
     signalSet.add(SIGTERM);
 #endif
 
-    const auto stopFcn = [&sp, &communication, &sendTimer, &work]
+    const auto stopFcn = [&sp, &communication, &sendTimer, &work, &signalSet]
     {
         sp.Stop();
         communication.Stop();
         sendTimer.cancel();
         work.reset();
+        signalSet.cancel();
     };
 
     signalSet.async_wait([stopFcn](const boost::system::error_code& error,
