@@ -6,7 +6,6 @@ export CPPFLAGS += -DNDEBUG
 #TODO: put stuff in a installcligac file for testsuite?
 #TODO: do we put the generated dlls in the gac?
 
-
 %:
 	dh $@ --parallel --with=cli
 
@@ -40,3 +39,7 @@ install_testsuite:
 override_dh_auto_test:
 	touch obj-$(DEB_BUILD_GNU_TYPE)/DartConfiguration.tcl
 	cd obj-$(DEB_BUILD_GNU_TYPE) && /usr/bin/ctest -V -T Test --no-compress-output
+
+
+override_dh_clideps:
+	pwd|grep -q " " && echo "Skipping dh_clideps since there is a space in pwd" || dh_clideps
