@@ -41,5 +41,6 @@ override_dh_auto_test:
 	cd obj-$(DEB_BUILD_GNU_TYPE) && /usr/bin/ctest -V -T Test --no-compress-output
 
 
+#TODO: remove this when cli-common-dev has fixed this bug
 override_dh_clideps:
 	pwd|grep -q " " && echo "Skipping dh_clideps since there is a space in pwd" || dh_clideps
