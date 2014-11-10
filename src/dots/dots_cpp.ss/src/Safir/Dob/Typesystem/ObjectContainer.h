@@ -383,6 +383,7 @@ namespace Typesystem
     public:
         /** Typedef for the contained smart pointer. */
         typedef boost::shared_ptr<Object> T_Ptr;
+        typedef T_Ptr ContainedType;
 
         /**
          * Default constructor.

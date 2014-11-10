@@ -1,0 +1,435 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit">
+    <name>DotsTest.MemberDictionaries</name>
+    <baseClass>Object</baseClass>
+    <members>
+        <!-- Dictionaries keyType=Int32 -->
+        <member>
+            <name>Int32Int32Member</name>
+            <type>Int32</type>
+            <dictionary keyType="Int32"/>
+        </member>
+        <member>
+            <name>Int32Int64Member</name>
+            <type>Int64</type>
+            <dictionary keyType="Int32"/>
+        </member>
+        <member>
+            <name>Int32StringMember</name>
+            <type>String</type>
+            <dictionary keyType="Int32"/>
+        </member>
+        <member>
+            <name>Int32Float32Member</name>
+            <type>Float32</type>
+            <dictionary keyType="Int32"/>
+        </member>
+        <member>
+            <name>Int32Float64Member</name>
+            <type>Float64</type>
+            <dictionary keyType="Int32"/>
+        </member>
+        <member>
+            <name>Int32TypeIdMember</name>
+            <type>TypeId</type>
+            <dictionary keyType="Int32"/>
+        </member>
+        <member>
+            <name>Int32InstanceIdMember</name>
+            <type>InstanceId</type>
+            <dictionary keyType="Int32"/>
+        </member>
+        <member>
+            <name>Int32ChannelIdMember</name>
+            <type>ChannelId</type>
+            <dictionary keyType="Int32"/>
+        </member>
+        <member>
+            <name>Int32HandlerIdMember</name>
+            <type>HandlerId</type>
+            <dictionary keyType="Int32"/>
+        </member>
+        <member>
+            <name>Int32EntityIdMember</name>
+            <type>EntityId</type>
+            <dictionary keyType="Int32"/>
+        </member>
+        <member>
+            <name>Int32BinaryMember</name>
+            <type>Binary</type>
+            <dictionary keyType="Int32"/>
+        </member>
+        <member>
+            <name>Int32EnumMember</name>
+            <type>DotsTest.TestEnum</type>
+            <dictionary keyType="Int32"/>
+        </member>
+        <member>
+            <name>Int32ObjectMember</name>
+            <type>Object</type>
+            <dictionary keyType="Int32"/>
+        </member>
+        <member>
+            <name>Int32ItemMember</name>
+            <type>DotsTest.MemberDictionaries</type>
+            <dictionary keyType="Int32"/>
+        </member>
+        <!-- Dictionaries keyType=Int64 -->
+        <member>
+            <name>Int64Int32Member</name>
+            <type>Int32</type>
+            <dictionary keyType="Int64"/>
+        </member>
+        <member>
+            <name>Int64Int64Member</name>
+            <type>Int64</type>
+            <dictionary keyType="Int64"/>
+        </member>
+        <member>
+            <name>Int64StringMember</name>
+            <type>String</type>
+            <dictionary keyType="Int64"/>
+        </member>
+        <member>
+            <name>Int64Float32Member</name>
+            <type>Float32</type>
+            <dictionary keyType="Int64"/>
+        </member>
+        <member>
+            <name>Int64Float64Member</name>
+            <type>Float64</type>
+            <dictionary keyType="Int64"/>
+        </member>
+        <member>
+            <name>Int64TypeIdMember</name>
+            <type>TypeId</type>
+            <dictionary keyType="Int64"/>
+        </member>
+        <member>
+            <name>Int64InstanceIdMember</name>
+            <type>InstanceId</type>
+            <dictionary keyType="Int64"/>
+        </member>
+        <member>
+            <name>Int64ChannelIdMember</name>
+            <type>ChannelId</type>
+            <dictionary keyType="Int64"/>
+        </member>
+        <member>
+            <name>Int64HandlerIdMember</name>
+            <type>HandlerId</type>
+            <dictionary keyType="Int64"/>
+        </member>
+        <member>
+            <name>Int64EntityIdMember</name>
+            <type>EntityId</type>
+            <dictionary keyType="Int64"/>
+        </member>
+        <member>
+            <name>Int64BinaryMember</name>
+            <type>Binary</type>
+            <dictionary keyType="Int64"/>
+        </member>
+        <member>
+            <name>Int64EnumMember</name>
+            <type>DotsTest.TestEnum</type>
+            <dictionary keyType="Int64"/>
+        </member>
+        <member>
+            <name>Int64ObjectMember</name>
+            <type>Object</type>
+            <dictionary keyType="Int64"/>
+        </member>
+        <member>
+            <name>Int64ItemMember</name>
+            <type>DotsTest.MemberDictionaries</type>
+            <dictionary keyType="Int64"/>
+        </member>        
+        <!-- Dictionaries keyType=TypeId -->
+        <member>
+            <name>TypeIdInt32Member</name>
+            <type>Int32</type>
+            <dictionary keyType="TypeId"/>
+        </member>
+        <member>
+            <name>TypeIdInt64Member</name>
+            <type>Int64</type>
+            <dictionary keyType="TypeId"/>
+        </member>
+        <member>
+            <name>TypeIdStringMember</name>
+            <type>String</type>
+            <dictionary keyType="TypeId"/>
+        </member>
+        <member>
+            <name>TypeIdFloat32Member</name>
+            <type>Float32</type>
+            <dictionary keyType="TypeId"/>
+        </member>
+        <member>
+            <name>TypeIdFloat64Member</name>
+            <type>Float64</type>
+            <dictionary keyType="TypeId"/>
+        </member>
+        <member>
+            <name>TypeIdTypeIdMember</name>
+            <type>TypeId</type>
+            <dictionary keyType="TypeId"/>
+        </member>
+        <member>
+            <name>TypeIdInstanceIdMember</name>
+            <type>InstanceId</type>
+            <dictionary keyType="TypeId"/>
+        </member>
+        <member>
+            <name>TypeIdChannelIdMember</name>
+            <type>ChannelId</type>
+            <dictionary keyType="TypeId"/>
+        </member>
+        <member>
+            <name>TypeIdHandlerIdMember</name>
+            <type>HandlerId</type>
+            <dictionary keyType="TypeId"/>
+        </member>
+        <member>
+            <name>TypeIdEntityIdMember</name>
+            <type>EntityId</type>
+            <dictionary keyType="TypeId"/>
+        </member>
+        <member>
+            <name>TypeIdBinaryMember</name>
+            <type>Binary</type>
+            <dictionary keyType="TypeId"/>
+        </member>
+        <member>
+            <name>TypeIdEnumMember</name>
+            <type>DotsTest.TestEnum</type>
+            <dictionary keyType="TypeId"/>
+        </member>
+        <member>
+            <name>TypeIdObjectMember</name>
+            <type>Object</type>
+            <dictionary keyType="TypeId"/>
+        </member>
+        <member>
+            <name>TypeIdItemMember</name>
+            <type>DotsTest.MemberDictionaries</type>
+            <dictionary keyType="TypeId"/>
+        </member>
+        <!-- Dictionaries keyType=TestEnum -->
+        <member>
+            <name>EnumInt32Member</name>
+            <type>Int32</type>
+            <dictionary keyType="DotsTest.TestEnum"/>
+        </member>
+        <member>
+            <name>EnumInt64Member</name>
+            <type>Int64</type>
+            <dictionary keyType="DotsTest.TestEnum"/>
+        </member>
+        <member>
+            <name>EnumStringMember</name>
+            <type>String</type>
+            <dictionary keyType="DotsTest.TestEnum"/>
+        </member>
+        <member>
+            <name>EnumFloat32Member</name>
+            <type>Float32</type>
+            <dictionary keyType="DotsTest.TestEnum"/>
+        </member>
+        <member>
+            <name>EnumFloat64Member</name>
+            <type>Float64</type>
+            <dictionary keyType="DotsTest.TestEnum"/>
+        </member>
+        <member>
+            <name>EnumTypeIdMember</name>
+            <type>TypeId</type>
+            <dictionary keyType="DotsTest.TestEnum"/>
+        </member>
+        <member>
+            <name>EnumInstanceIdMember</name>
+            <type>InstanceId</type>
+            <dictionary keyType="DotsTest.TestEnum"/>
+        </member>
+        <member>
+            <name>EnumChannelIdMember</name>
+            <type>ChannelId</type>
+            <dictionary keyType="DotsTest.TestEnum"/>
+        </member>
+        <member>
+            <name>EnumHandlerIdMember</name>
+            <type>HandlerId</type>
+            <dictionary keyType="DotsTest.TestEnum"/>
+        </member>
+        <member>
+            <name>EnumEntityIdMember</name>
+            <type>EntityId</type>
+            <dictionary keyType="DotsTest.TestEnum"/>
+        </member>
+        <member>
+            <name>EnumBinaryMember</name>
+            <type>Binary</type>
+            <dictionary keyType="DotsTest.TestEnum"/>
+        </member>
+        <member>
+            <name>EnumEnumMember</name>
+            <type>DotsTest.TestEnum</type>
+            <dictionary keyType="DotsTest.TestEnum"/>
+        </member>
+        <member>
+            <name>EnumObjectMember</name>
+            <type>Object</type>
+            <dictionary keyType="DotsTest.TestEnum"/>
+        </member>
+        <member>
+            <name>EnumItemMember</name>
+            <type>DotsTest.MemberDictionaries</type>
+            <dictionary keyType="DotsTest.TestEnum"/>
+        </member>
+        <!-- Dictionaries keyType=EntityId -->
+        <member>
+            <name>EntityIdInt32Member</name>
+            <type>Int32</type>
+            <dictionary keyType="EntityId"/>
+        </member>
+        <member>
+            <name>EntityIdInt64Member</name>
+            <type>Int64</type>
+            <dictionary keyType="EntityId"/>
+        </member>
+        <member>
+            <name>EntityIdStringMember</name>
+            <type>String</type>
+            <dictionary keyType="EntityId"/>
+        </member>
+        <member>
+            <name>EntityIdFloat32Member</name>
+            <type>Float32</type>
+            <dictionary keyType="EntityId"/>
+        </member>
+        <member>
+            <name>EntityIdFloat64Member</name>
+            <type>Float64</type>
+            <dictionary keyType="EntityId"/>
+        </member>
+        <member>
+            <name>EntityIdTypeIdMember</name>
+            <type>TypeId</type>
+            <dictionary keyType="EntityId"/>
+        </member>
+        <member>
+            <name>EntityIdInstanceIdMember</name>
+            <type>InstanceId</type>
+            <dictionary keyType="EntityId"/>
+        </member>
+        <member>
+            <name>EntityIdChannelIdMember</name>
+            <type>ChannelId</type>
+            <dictionary keyType="EntityId"/>
+        </member>
+        <member>
+            <name>EntityIdHandlerIdMember</name>
+            <type>HandlerId</type>
+            <dictionary keyType="EntityId"/>
+        </member>
+        <member>
+            <name>EntityIdEntityIdMember</name>
+            <type>EntityId</type>
+            <dictionary keyType="EntityId"/>
+        </member>
+        <member>
+            <name>EntityIdBinaryMember</name>
+            <type>Binary</type>
+            <dictionary keyType="EntityId"/>
+        </member>
+        <member>
+            <name>EntityIdEnumMember</name>
+            <type>DotsTest.TestEnum</type>
+            <dictionary keyType="EntityId"/>
+        </member>
+        <member>
+            <name>EntityIdbjectMember</name>
+            <type>Object</type>
+            <dictionary keyType="EntityId"/>
+        </member>
+        <member>
+            <name>EntityIdItemMember</name>
+            <type>DotsTest.MemberDictionaries</type>
+            <dictionary keyType="EntityId"/>
+        </member>
+        
+        <!-- Dictionaries keyType=InstanceId -->
+        <member>
+            <name>InstanceIdInt32Member</name>
+            <type>Int32</type>
+            <dictionary keyType="InstanceId"/>
+        </member>
+        <member>
+            <name>InstanceIdInt64Member</name>
+            <type>Int64</type>
+            <dictionary keyType="InstanceId"/>
+        </member>
+        <member>
+            <name>InstanceIdStringMember</name>
+            <type>String</type>
+            <dictionary keyType="InstanceId"/>
+        </member>
+        <member>
+            <name>InstanceIdFloat32Member</name>
+            <type>Float32</type>
+            <dictionary keyType="InstanceId"/>
+        </member>
+        <member>
+            <name>InstanceIdFloat64Member</name>
+            <type>Float64</type>
+            <dictionary keyType="InstanceId"/>
+        </member>
+        <member>
+            <name>InstanceIdTypeIdMember</name>
+            <type>TypeId</type>
+            <dictionary keyType="InstanceId"/>
+        </member>
+        <member>
+            <name>InstanceIdInstanceIdMember</name>
+            <type>InstanceId</type>
+            <dictionary keyType="InstanceId"/>
+        </member>
+        <member>
+            <name>InstanceIdChannelIdMember</name>
+            <type>ChannelId</type>
+            <dictionary keyType="InstanceId"/>
+        </member>
+        <member>
+            <name>InstanceIdHandlerIdMember</name>
+            <type>HandlerId</type>
+            <dictionary keyType="InstanceId"/>
+        </member>
+        <member>
+            <name>InstanceIdEntityIdMember</name>
+            <type>EntityId</type>
+            <dictionary keyType="InstanceId"/>
+        </member>
+        <member>
+            <name>InstanceIdBinaryMember</name>
+            <type>Binary</type>
+            <dictionary keyType="InstanceId"/>
+        </member>
+        <member>
+            <name>InstanceIdEnumMember</name>
+            <type>DotsTest.TestEnum</type>
+            <dictionary keyType="InstanceId"/>
+        </member>
+        <member>
+            <name>InstanceIdbjectMember</name>
+            <type>Object</type>
+            <dictionary keyType="InstanceId"/>
+        </member>
+        <member>
+            <name>InstanceIdItemMember</name>
+            <type>DotsTest.MemberDictionaries</type>
+            <dictionary keyType="InstanceId"/>
+        </member>        
+        
+    </members>
+</class>
