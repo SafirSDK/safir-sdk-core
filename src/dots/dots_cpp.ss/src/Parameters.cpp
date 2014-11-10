@@ -340,7 +340,7 @@ namespace Parameters
 
     const Int32 DictionaryKeyToIndex(const TypeId typeId,
                                      const ParameterIndex parameter,
-                                     const EntityId key)
+                                     const EntityId& key)
     {
         DotsC_EntityId eid={key.GetTypeId(), key.GetInstanceId().GetRawValue()};
         return DotsC_DictionaryEntityIdKeyToIndex(typeId, parameter, eid);
@@ -348,21 +348,21 @@ namespace Parameters
 
     const Int32 DictionaryKeyToIndex(const TypeId typeId,
                                      const ParameterIndex parameter,
-                                     const InstanceId key)
+                                     const InstanceId& key)
     {
         return DotsC_DictionaryInt64KeyToIndex(typeId, parameter, key.GetRawValue());
     }
 
     const Int32 DictionaryKeyToIndex(const TypeId typeId,
                                      const ParameterIndex parameter,
-                                     const HandlerId key)
+                                     const HandlerId& key)
     {
         return DotsC_DictionaryInt64KeyToIndex(typeId, parameter, key.GetRawValue());
     }
 
     const Int32 DictionaryKeyToIndex(const TypeId typeId,
                                      const ParameterIndex parameter,
-                                     const ChannelId key)
+                                     const ChannelId& key)
     {
         return DotsC_DictionaryInt64KeyToIndex(typeId, parameter, key.GetRawValue());
     }

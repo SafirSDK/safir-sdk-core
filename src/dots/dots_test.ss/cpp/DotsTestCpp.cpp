@@ -34,10 +34,12 @@
 #include <Safir/Dob/Typesystem/LibraryExceptions.h>
 #include <DotsTest/ParameterTypes.h>
 #include <DotsTest/ParameterArrays.h>
+#include <DotsTest/ParameterDictionaries.h>
 #include <DotsTest/EmptyObject.h>
 #include <DotsTest/MemberTypes.h>
 #include <DotsTest/MemberArrays.h>
 #include <DotsTest/MemberSequences.h>
+#include <DotsTest/MemberDictionaries.h>
 #include <DotsTest/MemberItems.h>
 #include <DotsTest/MemberItemsArray.h>
 #include <DotsTest/MemberTypesProperty.h>
@@ -8655,56 +8657,98 @@ void TestSequences()
 {
     Header(L"Sequences");
 
-    std::wcout<<std::boolalpha;
-    std::wcout<<L"IsNull "<<MS1->Int32Member().IsNull()<<std::endl;
-    std::wcout<<L"IsChanged "<<MS1->Int32Member().IsChanged()<<std::endl;
+    DotsTest::MemberSequencesPtr ms=DotsTest::MemberSequences::Create();
 
-    DotsTest::TestItemPtr testItem1=DotsTest::TestItem::Create();
-    testItem1->MyInt()=123;
-    DotsTest::TestItemPtr testItem2=DotsTest::TestItem::Create();
-    testItem2->MyInt()=456;
+    ms->Int32Member().push_back(20);
+    ms->Int32Member().push_back(30);
+    ms->Int32Member().InsertAt(0, 10);
+    ms->Int32Member().EraseAt(2);
 
-    MS1->Int32Member().push_back(10);
-    MS1->Int32Member().push_back(30);    
-    MS1->Float32Member().push_back(10.1);
-    MS1->Float32Member().push_back(30.3);
-    MS1->EnumerationMember().push_back(DotsTest::TestEnum::MyFirst);
-    MS1->EnumerationMember().push_back(DotsTest::TestEnum::MySecond);
-    MS1->TestClassMember().push_back(testItem1);
-    MS1->TestClassMember().push_back(testItem2);
+    ms->Int64Member().push_back(200);
+    ms->Int64Member().push_back(300);
+    ms->Int64Member().InsertAt(0, 100);
+    ms->Int64Member().EraseAt(2);
 
-    for (Safir::Dob::Typesystem::Int32SequenceContainer::const_iterator it=MS1->Int32Member().begin(); it!=MS1->Int32Member().end(); ++it)
-    {
-        std::wcout<<*it<<std::endl;
-    }
+    ms->Float32Member().push_back(2.2f);
+    ms->Float32Member().push_back(3.3f);
+    ms->Float32Member().InsertAt(0, 1.1f);
+    ms->Float32Member().EraseAt(2);
 
-    Safir::Dob::Typesystem::BinarySerialization bin;
-    Safir::Dob::Typesystem::Serialization::ToBinary(MS1, bin);
-    ts::ObjectPtr op=ts::Serialization::ToObject(bin);
-    DotsTest::MemberSequencesPtr ms=boost::dynamic_pointer_cast<DotsTest::MemberSequences>(op);
+    ms->Float64Member().push_back(22.22f);
+    ms->Float64Member().push_back(33.33f);
+    ms->Float64Member().InsertAt(0, 11.11f);
+    ms->Float64Member().EraseAt(2);
 
-    for (Safir::Dob::Typesystem::Int32SequenceContainer::const_iterator it=ms->Int32Member().begin(); it!=ms->Int32Member().end(); ++it)
-    {
-        std::wcout<<*it<<std::endl;
-    }
+    ms->BooleanMember().push_back(false);
+    ms->BooleanMember().push_back(false);
+    ms->BooleanMember().InsertAt(0, true);
+    ms->BooleanMember().EraseAt(2);
 
-    std::wcout<<L"------ ToXml -----"<<std::endl;
-    std::wstring xml=ts::Serialization::ToXml(ms);
-    std::wcout<<xml<<std::endl;
+    ms->EnumerationMember().push_back(DotsTest::TestEnum::MySecond);
+    ms->EnumerationMember().push_back(DotsTest::TestEnum::MyThird);
+    ms->EnumerationMember().InsertAt(0, DotsTest::TestEnum::MyFirst);
+    ms->EnumerationMember().EraseAt(2);
 
-    std::wcout<<L"------ ToJson -----"<<std::endl;
-    std::wstring json=ts::Serialization::ToJson(ms);
-    std::wcout<<json<<std::endl;
+    ms->StringMember().push_back(L"Bb");
+    ms->StringMember().push_back(L"Cc");
+    ms->StringMember().InsertAt(0, L"Aa");
+    ms->StringMember().EraseAt(2);
+
+    ms->TypeIdMember().push_back(DotsTest::MemberSequences::ClassTypeId);
+    ms->TypeIdMember().push_back(DotsTest::TestEnum::EnumerationTypeId);
+    ms->TypeIdMember().InsertAt(0, DotsTest::MemberDictionaries::ClassTypeId);
+    ms->TypeIdMember().EraseAt(2);
+
+//    std::wcout<<std::boolalpha;
+//    std::wcout<<L"IsNull "<<MS1->Int32Member().IsNull()<<std::endl;
+//    std::wcout<<L"IsChanged "<<MS1->Int32Member().IsChanged()<<std::endl;
+
+//    DotsTest::TestItemPtr testItem1=DotsTest::TestItem::Create();
+//    testItem1->MyInt()=123;
+//    DotsTest::TestItemPtr testItem2=DotsTest::TestItem::Create();
+//    testItem2->MyInt()=456;
+
+//    MS1->Int32Member().push_back(10);
+//    MS1->Int32Member().push_back(30);
+//    MS1->Float32Member().push_back(10.1);
+//    MS1->Float32Member().push_back(30.3);
+//    MS1->EnumerationMember().push_back(DotsTest::TestEnum::MyFirst);
+//    MS1->EnumerationMember().push_back(DotsTest::TestEnum::MySecond);
+//    MS1->TestClassMember().push_back(testItem1);
+//    MS1->TestClassMember().push_back(testItem2);
+
+//    for (Safir::Dob::Typesystem::Int32SequenceContainer::const_iterator it=MS1->Int32Member().begin(); it!=MS1->Int32Member().end(); ++it)
+//    {
+//        std::wcout<<*it<<std::endl;
+//    }
+
+//    Safir::Dob::Typesystem::BinarySerialization bin;
+//    Safir::Dob::Typesystem::Serialization::ToBinary(MS1, bin);
+//    ts::ObjectPtr op=ts::Serialization::ToObject(bin);
+//    DotsTest::MemberSequencesPtr ms=boost::dynamic_pointer_cast<DotsTest::MemberSequences>(op);
+
+//    for (Safir::Dob::Typesystem::Int32SequenceContainer::const_iterator it=ms->Int32Member().begin(); it!=ms->Int32Member().end(); ++it)
+//    {
+//        std::wcout<<*it<<std::endl;
+//    }
+
+//    std::wcout<<L"------ ToXml -----"<<std::endl;
+//    std::wstring xml=ts::Serialization::ToXml(ms);
+//    std::wcout<<xml<<std::endl;
+
+//    std::wcout<<L"------ ToJson -----"<<std::endl;
+//    std::wstring json=ts::Serialization::ToJson(ms);
+//    std::wcout<<json<<std::endl;
 
 
-    std::wcout<<std::boolalpha;
-    std::wcout<<L"IsNull "<<MS1->Int32Member().IsNull()<<std::endl;
-    std::wcout<<L"IsChanged "<<MS1->Int32Member().IsChanged()<<std::endl;
+//    std::wcout<<std::boolalpha;
+//    std::wcout<<L"IsNull "<<MS1->Int32Member().IsNull()<<std::endl;
+//    std::wcout<<L"IsChanged "<<MS1->Int32Member().IsChanged()<<std::endl;
 
-    std::wcout<<L"------ clear -----"<<std::endl;
-    MS1->Int32Member().clear();
-    std::wcout<<L"IsNull "<<MS1->Int32Member().IsNull()<<std::endl;
-    std::wcout<<L"IsChanged "<<MS1->Int32Member().IsChanged()<<std::endl;
+//    std::wcout<<L"------ clear -----"<<std::endl;
+//    MS1->Int32Member().clear();
+//    std::wcout<<L"IsNull "<<MS1->Int32Member().IsNull()<<std::endl;
+//    std::wcout<<L"IsChanged "<<MS1->Int32Member().IsChanged()<<std::endl;
 }
 
 int main(int /*argc*/, char* /*argv*/[])

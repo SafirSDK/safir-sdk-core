@@ -351,7 +351,7 @@ namespace Typesystem
          */
         DOTS_CPP_API const Int32 DictionaryKeyToIndex(const TypeId typeId,
                                                       const ParameterIndex parameter,
-                                                      const EntityId key);
+                                                      const EntityId& key);
 
         /**
          * Get the index of a Int32 dictionary key. The index can then be used with the Get-mehtods above to

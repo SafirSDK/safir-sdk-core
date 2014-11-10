@@ -755,6 +755,13 @@ namespace ToolSupport
 
             ParameterDescriptionLocalPtr& def=state.lastInsertedClass->ownParameters.back();
 
+            if (def->memberType==EntityIdMemberType) //entityId shall not use <value>-element
+            {
+                std::ostringstream os;
+                os<<"The parameter '"<<def->qualifiedName<<"' has type=EntityId and is not allowed to use the <value>-element. Use <entityId>-element instead.";
+                throw ParseError("Invalid parameter value", os.str(), state.currentPath, 214);
+            }
+
             if (def->collectionType!=DictionaryCollectionType) //dictionaries have ValueDef inserted at dictionaryEntry
             {
                 def->values.push_back(ValueDefinition()); //placeholder
