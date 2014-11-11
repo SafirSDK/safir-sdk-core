@@ -1,7 +1,7 @@
 #package is not meant for inclusion in debian at this time
 safir-sdk-core: new-package-should-close-itp-bug
 
-#package contains one library that needs to be loaded by unversioned name
+#package contains generated library and jni libraries that needs to be loaded by unversioned name
 safir-sdk-core: non-dev-pkg-with-shlib-symlink *
 
 #This would just get too tiresome... Safir SDK Core contains so many libraries that this is unfeasable.
