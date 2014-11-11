@@ -3,9 +3,6 @@
 #upstream recommends NDEBUG for release builds!
 export CPPFLAGS += -DNDEBUG
 
-#TODO: put stuff in a installcligac file for testsuite?
-#TODO: do we put the generated dlls in the gac?
-
 %:
 	dh $@ --parallel --with=cli
 

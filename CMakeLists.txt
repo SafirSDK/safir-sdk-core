@@ -62,3 +62,6 @@ ENABLE_TESTING()
 
 add_subdirectory(src)
 add_subdirectory(docs)
+
+
+#TODO: should dobexplorer be in dev package?
