@@ -2,12 +2,12 @@
 #so we never want the "d" suffix on debug builds, which is default on windows.
 SET(CMAKE_DEBUG_POSTFIX "")
 
-ADD_LIBRARY(dots_java_jni SHARED 
+ADD_LIBRARY(dots_java_jni SHARED
   dots_java_jni.cpp)
 
-TARGET_INCLUDE_DIRECTORIES(dots_java_jni PRIVATE 
-  ${JAVA_INCLUDE_PATH} 
-  ${JAVA_INCLUDE_PATH2} 
+TARGET_INCLUDE_DIRECTORIES(dots_java_jni PRIVATE
+  ${JAVA_INCLUDE_PATH}
+  ${JAVA_INCLUDE_PATH2}
   ${CMAKE_CURRENT_BINARY_DIR})
 
 #depend on the javah target to ensure we get our header files.
@@ -20,4 +20,4 @@ TARGET_LINK_LIBRARIES(dots_java_jni PRIVATE
   lluf_config
   ${Boost_FILESYSTEM_LIBRARY})
 
-SAFIR_INSTALL(TARGETS dots_java_jni)
+SAFIR_INSTALL(TARGETS dots_java_jni JNI)

@@ -29,7 +29,7 @@ if (UNIX)
 endif()
 ###########
 function (SAFIR_INSTALL)
-  cmake_parse_arguments(INST "TEST_SUITE" "" "TARGETS" ${ARGN})
+  cmake_parse_arguments(INST "TEST_SUITE;JNI" "" "TARGETS" ${ARGN})
 
   if (NOT "${INST_UNPARSED_ARGUMENTS}" STREQUAL "")
     message(FATAL_ERROR "Unknown argument to SAFIR_INSTALL '${INST_UNPARSED_ARGUMENTS}'")
@@ -108,7 +108,7 @@ function (SAFIR_INSTALL)
         unset(debug_suffix)
       endif()
 
-      #if the target is parto of the test suite we use the Test component
+      #if the target is part of the test suite we use the Test component
       if (INST_TEST_SUITE)
         INSTALL(TARGETS ${target}
           ${export}
@@ -121,7 +121,12 @@ function (SAFIR_INSTALL)
           RUNTIME DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN} COMPONENT Runtime
           LIBRARY DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT Runtime NAMELINK_SKIP
           ARCHIVE DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT Development)
-        if ("${target_type}" STREQUAL "SHARED_LIBRARY")
+        
+        #JNI libraries need to have their namelink installed as part of runtime instead of development.
+        if (INST_JNI)
+          INSTALL(TARGETS ${target}
+            LIBRARY DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT Runtime NAMELINK_ONLY)
+        elseif ("${target_type}" STREQUAL "SHARED_LIBRARY")
           INSTALL(TARGETS ${target}
             LIBRARY DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT Development NAMELINK_ONLY)
         endif()
