@@ -52,10 +52,14 @@ namespace
 
         const std::wstring indent = level == 0 ? L"" : L"    ";
 
-
         if (level == 0)
         {
-            out << indent << msg.name().c_str() << "@" << msg.control_address().c_str() << " (" << msg.id() << ")";
+            out << indent << msg.name().c_str() << "@" << msg.control_address().c_str() << " (" << msg.id() << "), "
+                << "Eid: " << (msg.has_election_id() ? msg.election_id() : 0);
+        }
+        else
+        {
+            out << "\n        " << indent << "Eid: " << (msg.has_election_id() ? msg.election_id() : 0);
         }
 
         for (int i = 0; i < msg.node_info_size(); ++i)

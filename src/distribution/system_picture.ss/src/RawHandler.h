@@ -374,9 +374,9 @@ namespace SP
                               });
         }
 
-        void SetElectionId(const int64_t nodeId, const int64_t electionId)
+        void SetElectionId(const int64_t /*nodeId*/, const int64_t electionId)
         {
-            m_strand.dispatch([this, nodeId, electionId]
+            m_strand.dispatch([this, electionId]
                               {
                                   lllog(7) << "SP: Election Id " << electionId
                                            << " set in RawHandler." << std::endl;
