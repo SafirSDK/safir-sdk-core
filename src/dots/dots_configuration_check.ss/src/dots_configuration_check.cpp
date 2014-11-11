@@ -40,6 +40,7 @@ public:
         ,details(false)
         ,typeName()
         ,paths()
+        ,typeIdLookup()
     {
         boost::program_options::options_description desc("Command line options");
         desc.add_options()
@@ -47,7 +48,8 @@ public:
                 ("summary,s", "Output a brief summary of the type system'")
                 ("details,d", "Output a full information about the entire type system")
                 ("type,t", boost::program_options::value<std::string>(), "Output info about a specific type")
-                ("path,p", boost::program_options::value< std::vector<std::string> >()->multitoken(), "Parse specified path(s) into a local memory type repository. If same type exists in more than one path, the latter wins.");
+                ("path,p", boost::program_options::value< std::vector<std::string> >()->multitoken(), "Parse specified path(s) into a local memory type repository. If same type exists in more than one path, the latter wins.")
+                ("type-id",boost::program_options::value<std::string>(), "If argument is a string the typeId is calculated. If argument is a numeric typeId or part of a typeId, the matching type name(s) are looked up." );
 
         boost::program_options::variables_map vm;
         boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
@@ -69,13 +71,66 @@ public:
         {
             paths=vm["path"].as< std::vector<std::string> >();
         }
+
+        if (vm.count("type-id"))
+        {
+            typeIdLookup=vm["type-id"].as<std::string>();
+        }
     }
 
     bool summary;
     bool details;
     std::string typeName;
     std::vector<std::string> paths;
+    std::string typeIdLookup;
 };
+
+void TypeIdLookup(const std::string& typeIdString, const std::map<std::string, DotsC_TypeId>& typeTable)
+{
+    DotsC_TypeId typeId;
+    bool numeric=true;
+    try
+    {
+        typeId=boost::lexical_cast<DotsC_TypeId>(typeIdString);
+    }
+    catch (const boost::bad_lexical_cast&)
+    {
+        typeId=Safir::Dob::Typesystem::ToolSupport::TypeUtilities::CalculateTypeId(typeIdString);
+        numeric=false;
+    }
+
+    if (numeric)
+    {
+        int numberOfMatches=0;
+        for (std::map<std::string, DotsC_TypeId>::const_iterator it=typeTable.begin(); it!=typeTable.end(); ++it)
+        {
+            std::string tmp=boost::lexical_cast<std::string>(it->second);
+            size_t found=tmp.find(typeIdString);
+            if (found!=std::string::npos)
+            {
+                std::cout<<it->first<<", typeId: "<<it->second<<std::endl;
+                ++numberOfMatches;
+            }
+        }
+
+        std::cout<<"Number of matches: "<<numberOfMatches<<std::endl;
+    }
+    else
+    {
+        std::map<std::string, DotsC_TypeId>::const_iterator it=typeTable.find(typeIdString);
+
+        if (it!=typeTable.end())
+        {
+            if (it->second!=typeId) throw std::logic_error("TypeIds supposed to match");
+
+            std::cout<<"The string '"<<typeIdString<<"' is an existing type and has typeId: "<<typeId<<std::endl;
+        }
+        else
+        {
+            std::cout<<"The string '"<<typeIdString<<"' is NOT an existing type. Calculated typeId: "<<typeId<<std::endl;
+        }
+    }
+}
 
 class CheckConfigurationDotsKernel
 {
@@ -93,6 +148,10 @@ public:
         else if (cmd.details)
         {
             ShowDetails();
+        }
+        else if (!cmd.typeIdLookup.empty())
+        {
+            TypeIdLookup(cmd.typeIdLookup);
         }
         else
         {
@@ -148,6 +207,21 @@ private:
         std::cout<<"===== Summary ====="<<std::endl;
         ShowSummary();
     }
+
+    static void TypeIdLookup(const std::string& typeIdString)
+    {
+        DotsC_Int32 numTypes=DotsC_NumberOfTypeIds();
+        DotsC_Int32 count=0;
+        std::vector<DotsC_TypeId> types(numTypes, 0);
+        DotsC_GetAllTypeIds(&types[0], numTypes, count);
+        std::map<std::string, DotsC_TypeId> typeTable;
+        for (std::vector<DotsC_TypeId>::const_iterator it=types.begin(); it!=types.end(); ++it)
+        {
+            std::string typeName=DotsC_GetTypeName(*it);
+            typeTable.insert(std::make_pair(typeName, *it));
+        }
+        ::TypeIdLookup(typeIdString, typeTable);
+    }
 };
 
 class CheckConfigurationLocal
@@ -189,6 +263,10 @@ public:
         {
             ShowDetails(rep);
         }
+        else if (!cmd.typeIdLookup.empty())
+        {
+            TypeIdLookup(rep, cmd.typeIdLookup);
+        }
         else //SimpleCheck, already succeeded if we get here
         {
             std::cout<<"Checking configuration..."<<std::endl;
@@ -221,6 +299,22 @@ private:
         std::cout<<os.str()<<std::endl;
         std::cout<<"===== Summary ====="<<std::endl;
         ShowSummary(rep);
+    }
+
+    static void TypeIdLookup(const RepPtr& rep, const std::string& typeIdString)
+    {
+        std::set<DotsC_TypeId> types;
+        rep->GetAllClassTypeIds(types);
+        rep->GetAllEnumTypeIds(types);
+        rep->GetAllExceptionTypeIds(types);
+        rep->GetAllPropertyTypeIds(types);
+        std::map<std::string, DotsC_TypeId> typeTable;
+        for (std::set<DotsC_TypeId>::const_iterator it=types.begin(); it!=types.end(); ++it)
+        {
+            std::string typeName=Safir::Dob::Typesystem::ToolSupport::TypeUtilities::GetTypeName(rep.get(), *it);
+            typeTable.insert(std::make_pair(typeName, *it));
+        }
+        ::TypeIdLookup(typeIdString, typeTable);
     }
 };
 
