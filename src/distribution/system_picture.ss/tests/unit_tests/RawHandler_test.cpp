@@ -441,6 +441,11 @@ BOOST_AUTO_TEST_CASE( set_dead_node )
                                    }
                                    else if (cbCalls == 2)
                                    {
+                                       BOOST_CHECK_EQUAL(statistics.Size(), 1);
+                                       BOOST_CHECK(statistics.IsDead(0));
+                                   }
+                                   else if (cbCalls == 3)
+                                   {
                                        BOOST_CHECK_EQUAL(statistics.Size(), 2);
                                        BOOST_CHECK(statistics.IsDead(0));
                                        BOOST_CHECK(!statistics.IsDead(1));
@@ -454,7 +459,7 @@ BOOST_AUTO_TEST_CASE( set_dead_node )
 
     rh.Stop();
     BOOST_CHECK_NO_THROW(ioService.run());
-    BOOST_CHECK_EQUAL(cbCalls, 2);
+    BOOST_CHECK_EQUAL(cbCalls, 3);
 }
 
 BOOST_AUTO_TEST_CASE( recently_dead_nodes )
@@ -476,6 +481,11 @@ BOOST_AUTO_TEST_CASE( recently_dead_nodes )
                                    }
                                    else if (cbCalls == 2)
                                    {
+                                       BOOST_CHECK_EQUAL(statistics.Size(), 1);
+                                       BOOST_CHECK(statistics.IsDead(0));
+                                   }
+                                   else if (cbCalls == 3)
+                                   {
                                        BOOST_CHECK_EQUAL(statistics.Size(), 2);
                                        BOOST_CHECK(statistics.IsDead(0));
                                        BOOST_CHECK(!statistics.IsDead(1));
@@ -489,7 +499,7 @@ BOOST_AUTO_TEST_CASE( recently_dead_nodes )
 
     rh.Stop();
     BOOST_CHECK_NO_THROW(ioService.run());
-    BOOST_CHECK_EQUAL(cbCalls, 2);
+    BOOST_CHECK_EQUAL(cbCalls, 3);
 }
 
 BOOST_AUTO_TEST_CASE( perform_on_all )
