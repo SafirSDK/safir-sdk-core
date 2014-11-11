@@ -33,12 +33,10 @@ namespace Internal
 namespace Control
 {
 
-    SystemStateHandler::SystemStateHandler(boost::asio::io_service::strand& strand,
-                                           const NodeIncludedCb&            nodeIncludedCb,
+    SystemStateHandler::SystemStateHandler(const NodeIncludedCb&            nodeIncludedCb,
                                            const NodeDownCb&                nodeDownCb)
 
-        : m_strand(strand),
-          m_systemState(),
+        : m_systemState(),
           m_nodeIncludedCb(nodeIncludedCb),
           m_nodeDownCb(nodeDownCb)
     {

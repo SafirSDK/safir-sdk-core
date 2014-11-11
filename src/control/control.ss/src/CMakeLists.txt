@@ -24,6 +24,7 @@ TARGET_LINK_LIBRARIES(safir_control
 if (NOT MSVC)
   TARGET_LINK_LIBRARIES(safir_control
     dots_internal
+    control_utils
     lluf_id
     lluf_utils
     lluf_config

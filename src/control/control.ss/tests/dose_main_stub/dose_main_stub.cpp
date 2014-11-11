@@ -28,6 +28,7 @@
 #include <Safir/Dob/Internal/SystemPicture.h>
 #include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Dob/Internal/ControlConfig.h>
+#include <Safir/Dob/Internal/DoseMainCmd.h>
 #include <iostream>
 #include <map>
 #include <boost/thread.hpp>
@@ -48,6 +49,7 @@
 
 namespace SP = Safir::Dob::Internal::SP;
 namespace Com = Safir::Dob::Internal::Com;
+namespace Control = Safir::Dob::Internal::Control;
 
 std::wostream& operator<<(std::wostream& out, const std::string& str)
 {
@@ -71,15 +73,9 @@ public:
         options_description options("Options");
         options.add_options()
                 ("help,h", "show help message")
-                ("control-address,c",
-                 value<std::string>(&controlAddress)->default_value("0.0.0.0:30000"),
-                 "Address and port of the control channel")
                 ("data-address,d",
                  value<std::string>(&dataAddress)->default_value("0.0.0.0:40000"),
                  "Address and port of the data channel")
-                ("seed,s",
-                 value<std::vector<std::string> >(&seeds),
-                 "Seed address (can be specified multiple times). Pairs of address:port to control channel.")
                 ("name,n",
                  value<std::string>(&name)->default_value("<not set>", ""),
                  "A nice name for the node, for presentation purposes only")
@@ -133,9 +129,7 @@ public:
     
     const Safir::Dob::Internal::Control::Config config;
 
-    std::string controlAddress;
     std::string dataAddress;
-    std::vector<std::string> seeds;
     boost::int64_t id;
     std::string name;
     std::string nodeType;
@@ -144,25 +138,19 @@ private:
     static void ShowHelp(const boost::program_options::options_description& desc)
     {
         std::wcout << std::boolalpha
-                   << "Usage: control [OPTIONS]\n"
+                   << "Usage: dose_main_stub [OPTIONS]\n"
                    << desc << "\n"
                    << "Examples:\n"
-                   << "  Listen to loopback address and ports 33000 and 43000.\n"
-                   << "    control --controlAddress='127.0.0.1:33000' --data-address='127.0.0.1:43000'\n"
+                   << "  Listen to loopback address and port 43000.\n"
+                   << "    dose_main_stub --data-address='127.0.0.1:43000'\n"
                    << "  As above, but all addresses.\n"
-                   << "    control --controlAddress='0.0.0.0:33000' --data-address='0.0.0.0:43000'\n"
+                   << "    dose_main_stub --data-address='0.0.0.0:43000'\n"
                    << "  Listen to ipv6 loopback.\n"
-                   << "    control --controlAddress='[::1]:33000' --data-address='[::1]:43000'\n"
+                   << "    dose_main_stub --data-address='[::1]:43000'\n"
                    << std::endl;
     }
 
 };
-
-// SP callback
-void ChangedSystemStateCb(const SP::SystemState& data)
-{
-    std::wcout << "dose_main got new system state from SP! The number of nodes are " << data.Size() << std::endl;
-}
 
 // Communication callbacks
 void QueueNotFullCb(int64_t nodeTypeId)
@@ -170,14 +158,12 @@ void QueueNotFullCb(int64_t nodeTypeId)
     std::wcout << "dose_main got queue not full indication for nodetypeId " << nodeTypeId << std::endl;
 }
 
-void ReceiveDataCb(int64_t fromNodeId,
-                   int64_t fromNodeType,
-                   const boost::shared_ptr<char[]>& data,
-                   size_t size)
+boost::shared_ptr<char[]> StrToPtr(const std::string& s)
 {
-    std::string msg(data.get(), size);
-    std::wcout << " dose_main received " << msg << " from Node Id " << fromNodeId
-               << " of Node Type " << fromNodeType << std::endl;
+    boost::shared_ptr<char[]> ptr(new char[s.length()]);
+
+    memcpy(ptr.get(), s.c_str(), s.length());
+    return ptr;
 }
 
 int main(int argc, char * argv[])
@@ -243,12 +229,75 @@ int main(int argc, char * argv[])
                          options.dataAddress,
                          std::move(spNodeTypes));
 
-
-    // Start subscription to system state changes from SP
-    sp.StartStateSubscription(ChangedSystemStateCb);
+    communication.SetDataReceiver([](int64_t fromNodeId,
+                                     int64_t fromNodeType,
+                                     const boost::shared_ptr<char[]>& data,
+                                     size_t size)
+                                    {
+                                        std::string msg(data.get(), size);
+                                        std::wcout << " dose_main_stub received " << msg << " from Node Id " << fromNodeId
+                                                   << " of Node Type " << fromNodeType << std::endl;
+                                    },
+                                    12345);
 
     communication.Start();
 
+    int64_t savedNodeTypeId;
+    int counter;
+
+    timer.expires_from_now(boost::chrono::milliseconds(2000));
+
+    std::function<void (const boost::system::error_code&)> onTimeout =
+            [&running, &timer, &strand, &onTimeout, &communication, &savedNodeTypeId, &counter]
+            (const boost::system::error_code& error)
+            {
+               if (!running)
+               {
+                   return;
+               }
+
+               if (error)
+               {
+                   std::wcout << "OnTimeout error!" << std::endl;
+               }
+
+               std::ostringstream output;
+               output << "Kalle" << counter;
+               ++counter;
+               communication.Send(0, // Not sending to specific node type
+                                  savedNodeTypeId,
+                                  StrToPtr(output.str()),
+                                  5,
+                                  12345,
+                                  true);
+
+               timer.expires_from_now(boost::chrono::milliseconds(2000));
+               timer.async_wait(strand.wrap(onTimeout));
+            };
+
+    Control::DoseMainCmdReceiver doseMainCmdReceiver(ioService,
+                                                     [&communication,
+                                                      &timer,
+                                                      &strand,
+                                                      &onTimeout,
+                                                      &savedNodeTypeId]
+                                                     (int64_t requestId,
+                                                      const std::string& nodeName,
+                                                      int64_t nodeId,
+                                                      int64_t nodeTypeId,
+                                                      const std::string& dataAddress)
+                                                     {
+                                                        communication.InjectNode(nodeName,
+                                                                                 nodeId,
+                                                                                 nodeTypeId,
+                                                                                 dataAddress);
+                                                        // save nodeTypeId
+                                                        savedNodeTypeId = nodeTypeId;
+
+                                                        timer.async_wait(strand.wrap(onTimeout));
+                                                     });
+
+    doseMainCmdReceiver.Start();
 
     boost::asio::signal_set signalSet(ioService);
     
@@ -263,8 +312,9 @@ int main(int argc, char * argv[])
     signalSet.add(SIGTERM);
 #endif
 
-    signalSet.async_wait(strand.wrap([&sp,&work,&communication,&signalSet,&running](const boost::system::error_code& error,
-                                                                        const int signal_number)
+    signalSet.async_wait(strand.wrap([&sp,&work,&communication,&signalSet,&running, &doseMainCmdReceiver]
+                                     (const boost::system::error_code& error,
+                                      const int signal_number)
                        {
                            lllog(3) << "Got signal " << signal_number << std::endl;
                            if (error)
@@ -274,34 +324,14 @@ int main(int argc, char * argv[])
                            }
                            sp.Stop();
                            communication.Stop();
+                           doseMainCmdReceiver.Stop();
                            work.reset();
                            running = false;
                        }
                        ));
 
 
-    timer.expires_from_now(boost::chrono::milliseconds(5000));
 
-    std::function<void (const boost::system::error_code&)> onTimeout =
-            [&running, &timer, &strand, &onTimeout, &communication](const boost::system::error_code& error)
-            {
-               if (!running)
-               {
-                   return;
-               }
-
-               if (error)
-               {
-                   std::wcout << "OnTimeout error!" << std::endl;
-               }
-
-               communication.Send()
-
-               timer.expires_from_now(boost::chrono::milliseconds(5000));
-               timer.async_wait(strand.wrap(onTimeout));
-            };
-
-    timer.async_wait(strand.wrap(onTimeout));
 
     boost::thread_group threads;
     for (int i = 0; i < 9; ++i)

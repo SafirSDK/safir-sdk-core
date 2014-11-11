@@ -81,15 +81,12 @@ namespace Control
         //TODO: beskriv exakta betydelsen nod nere, controlkanal och datakanal är nere eller kommer tas ner snart.
         typedef boost::function<void(const int64_t nodeId)> NodeDownCb;
 
-        explicit SystemStateHandler(boost::asio::io_service::strand& strand,
-                                    const NodeIncludedCb&            nodeIncludedCb,
+        explicit SystemStateHandler(const NodeIncludedCb&            nodeIncludedCb,
                                     const NodeDownCb&                nodeDownCb);
 
         void SetNewState(const Safir::Dob::Internal::SP::SystemState& newState);
 
     private:
-
-        boost::asio::io_service::strand& m_strand;
 
         std::map<int64_t, Node> m_systemState;
 

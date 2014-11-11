@@ -21,6 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
+#include "SystemStateHandler.h"
 #include <Safir/Dob/Internal/Communication.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
@@ -28,6 +29,7 @@
 #include <Safir/Dob/Internal/SystemPicture.h>
 #include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Dob/Internal/ControlConfig.h>
+#include <Safir/Dob/Internal/DoseMainCmd.h>
 #include <iostream>
 #include <map>
 #include <boost/thread.hpp>
@@ -47,10 +49,9 @@
 #  pragma warning (pop)
 #endif
 
-
-
 namespace SP = Safir::Dob::Internal::SP;
 namespace Com = Safir::Dob::Internal::Com;
+namespace Control = Safir::Dob::Internal::Control;
 
 std::wostream& operator<<(std::wostream& out, const std::string& str)
 {
@@ -160,10 +161,6 @@ private:
 
 };
 
-void ChangedSystemState(const SP::SystemState& data)
-{
-    std::wcout << "Control got new system state from SP! The number of nodes are " << data.Size() << std::endl;
-}
 
 int main(int argc, char * argv[])
 {
@@ -171,6 +168,25 @@ int main(int argc, char * argv[])
     if (!options.parseOk)
     {
         return 1;
+    }
+
+    // Start dose_main
+    // TODO: Hur hitta binärer?
+    // TODO: Hur hantera environment? (Ärvs automatiskt på Windows men inte för Posix)
+    // TODO: Skicka ett kommando till dose_main i stället för kommandoradsparameterar
+    std::ostringstream doseMainCmdLine;
+    doseMainCmdLine << "dose_main_stub --data-address " << options.dataAddress << " --name " << options.name
+                    << " --node-type " << options.nodeTypeId << " --force-id " << options.id;
+    boost::system::error_code ec;
+    //boost::process::child dose_main =
+    boost::process::execute(
+                boost::process::initializers::run_exe("dose_main_stub"),
+                boost::process::initializers::set_cmd_line(doseMainCmdLine.str()),
+                boost::process::initializers::set_on_error(ec),
+                boost::process::initializers::inherit_env());
+    if (ec)
+    {
+        std::cout << "Error run_exe: " << ec.message() << std::endl;
     }
 
     boost::asio::io_service ioService;
@@ -226,24 +242,28 @@ int main(int argc, char * argv[])
                          std::move(spNodeTypes));
 
 
+    Control::DoseMainCmdSender doseMainCmdSender(ioService);
+
+    Control::SystemStateHandler stateHandler([&doseMainCmdSender](const Control::Node& node)
+                                             {
+                                                 doseMainCmdSender.InjectNode(0, // request id currently not used
+                                                 node.name,
+                                                 node.nodeId,
+                                                 node.nodeTypeId,
+                                                 node.dataAddress);
+                                             },
+                                             [](const int64_t /*nodeId*/)
+                                             {
+                                                 // TODO: What to do here?
+                                             });
+
     // Start subscription to system state changes from SP
-    sp.StartStateSubscription(ChangedSystemState);
+    sp.StartStateSubscription([&stateHandler](const SP::SystemState& newState)
+                              {
+                                  stateHandler.SetNewState(newState);
+                              });
 
     communication.Start();
-
-    // Start dose_main
-    // TODO: Hur hitta binärer?
-    // TODO: Hur hantera environment? (Ärvs automatiskt på Windows men inte för Posix)
-    boost::system::error_code ec;
-    //boost::process::child dose_main =
-    boost::process::execute(
-                boost::process::initializers::run_exe("dose_main_stub"),
-                boost::process::initializers::set_on_error(ec),
-                boost::process::initializers::inherit_env());
-    if (ec)
-    {
-        std::cout << "Error run_exe: " << ec.message() << std::endl;
-    }
 
     boost::asio::signal_set signalSet(ioService);
     

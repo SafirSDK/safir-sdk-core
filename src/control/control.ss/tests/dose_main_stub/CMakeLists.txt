@@ -20,6 +20,7 @@ TARGET_LINK_LIBRARIES(dose_main_stub
 if (NOT MSVC)
   TARGET_LINK_LIBRARIES(dose_main_stub
     dots_internal
+    control_utils
     lluf_id
     lluf_utils
     lluf_config

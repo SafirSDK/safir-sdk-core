@@ -2,9 +2,12 @@ cmake_minimum_required(VERSION 2.8)
 
 PROJECT (control_utils CXX C) #C is needed by FindProtobuf
 
+INCLUDE_DIRECTORIES(.)
+
 INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
 FILE(GLOB_RECURSE headers *.h)
+FILE(GLOB sources *.cpp)
 
 FIND_PACKAGE(Protobuf REQUIRED)
 
@@ -18,7 +21,7 @@ if (MSVC)
   SET_SOURCE_FILES_PROPERTIES(${PROTO_SRCS} PROPERTIES COMPILE_FLAGS "/wd4127 /wd4244 /wd4267")
 endif()
 
-ADD_LIBRARY(control_utils SHARED ${PROTO_SRCS} ${PROTO_HDRS})
+ADD_LIBRARY(control_utils SHARED ${sources} ${headers} ${PROTO_SRCS} ${PROTO_HDRS})
 
 TARGET_LINK_LIBRARIES(control_utils ${PROTOBUF_LITE_LIBRARIES})
 

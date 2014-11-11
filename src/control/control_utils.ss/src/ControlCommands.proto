@@ -1,18 +1,22 @@
 option optimize_for = LITE_RUNTIME;
 
-package Safir.Dob.Internal.ControlUtil;
+package Safir.Dob.Internal.Control;
 
-message ControlCmdRequest {
-
-    enum CmdType {
-        InjectNodeCmd = 0;
-    }
-
-    required sfixed64 request_id = 1;
+message ControlCmd {
 
     // Inject node cmd
-    optional sfixed64 node_id = 2;
+    message InjectNodeCmd {
+        required string node_name = 1;
+        required sfixed64 node_id = 2;
+        required sfixed64 node_type_id = 3;
+        required string data_address = 4;        
     }
+
+   // Fields
+   required sfixed64 request_id = 1;
+   optional InjectNodeCmd inject_node_cmd = 2;
+   
+}
 
 message ControlCmdResponse {
     required sfixed64 request_id = 1;
