@@ -69,11 +69,12 @@ namespace Com
     typedef std::function<void(int64_t toNodeId)> RetransmitTo;
     typedef std::function<void(int64_t nodeTypeId)> QueueNotFull;
 
-    template <class WriterType, uint64_t DeliveryGuarantee>
+    template <class WriterType>
     class DataSenderBasic : private WriterType
     {
     public:
         DataSenderBasic(boost::asio::io_service& ioService,
+                        uint8_t deliveryGuarantee,
                         int64_t nodeTypeId,
                         int64_t nodeId,
                         int ipVersion,
@@ -83,6 +84,7 @@ namespace Com
                         size_t fragmentSize)
             :WriterType(ioService, ipVersion, localIf, multicastAddress)
             ,m_strand(ioService)
+            ,m_deliveryGuarantee(deliveryGuarantee)
             ,m_nodeTypeId(nodeTypeId)
             ,m_nodeId(nodeId)
             ,m_sendQueue(Parameters::SendQueueSize)
@@ -91,6 +93,7 @@ namespace Com
             ,m_fragmentDataSize(fragmentSize-MessageHeaderSize)
             ,m_nodes()
             ,m_lastSentMultiReceiverSeqNo(0)
+            ,m_lastAckRequestMultiReceiver(0)
             ,m_resendTimer(ioService)
             ,m_retransmitNotification()
             ,m_queueNotFullNotification()
@@ -177,13 +180,13 @@ namespace Com
                 {
                     const char* fragment=msg.get()+frag*m_fragmentDataSize;
                     UserDataPtr userData(new UserData(m_nodeId, dataTypeIdentifier, msg, size, fragment, m_fragmentDataSize));
-                    userData->header.deliveryGuarantee=DeliveryGuarantee;
+                    userData->header.deliveryGuarantee=m_deliveryGuarantee;
                     userData->header.numberOfFragments=static_cast<uint16_t>(totalNumberOfFragments);
                     userData->header.fragmentNumber=static_cast<uint16_t>(frag);
                     if (toId!=0)
                     {
                         userData->header.commonHeader.receiverId=toId;
-                        userData->sendToAllSystemNodes=false;
+                        userData->header.sendMethod=SingleReceiverSendMethod;
                         userData->receivers.insert(std::make_pair(toId, Receiver()));
                     }
                     m_sendQueue.enqueue(userData);
@@ -193,13 +196,13 @@ namespace Com
                 {
                     const char* fragment=msg.get()+numberOfFullFragments*m_fragmentDataSize;
                     UserDataPtr userData(new UserData(m_nodeId, dataTypeIdentifier, msg, size, fragment, restSize));
-                    userData->header.deliveryGuarantee=DeliveryGuarantee;
+                    userData->header.deliveryGuarantee=m_deliveryGuarantee;
                     userData->header.numberOfFragments=static_cast<uint16_t>(totalNumberOfFragments);
                     userData->header.fragmentNumber=static_cast<uint16_t>(totalNumberOfFragments-1);
                     if (toId!=0)
                     {
                         userData->header.commonHeader.receiverId=toId;
-                        userData->sendToAllSystemNodes=false;
+                        userData->header.sendMethod=SingleReceiverSendMethod;
                         userData->receivers.insert(std::make_pair(toId, Receiver()));
                     }
                     m_sendQueue.enqueue(userData);
@@ -300,6 +303,7 @@ namespace Com
         };
 
         boost::asio::io_service::strand m_strand;
+        uint8_t m_deliveryGuarantee;
         int64_t m_nodeTypeId;
         int64_t m_nodeId;
         MessageQueue<UserDataPtr> m_sendQueue;
@@ -309,11 +313,30 @@ namespace Com
         size_t m_fragmentDataSize; //size of a fragments data part, excluding header size.
         std::map<int64_t, NodeInfo> m_nodes;
         uint64_t m_lastSentMultiReceiverSeqNo; // used both for multicast and unicast as long as the message is a multireceiver message
+        uint64_t m_lastAckRequestMultiReceiver; //the last seq we have requested ack
         boost::asio::steady_timer m_resendTimer;
         RetransmitTo m_retransmitNotification;
         QueueNotFull m_queueNotFullNotification;
         size_t m_queueNotFullNotificationLimit; //below number of used slots. NOT percent.
         std::atomic_bool m_notifyQueueNotFull;
+
+        bool RequestAck() const
+        {
+
+            static const size_t AckThreshold=Parameters::SlidingWindowSize/2;
+
+            if (m_lastSentMultiReceiverSeqNo % AckThreshold==0)
+            {
+                return true;
+            }
+
+            if (m_sendQueue.first_unhandled_index()==m_sendQueue.size()-1)
+            {
+                return true;
+            }
+
+            return false;
+        }
 
         //Send new messages in sendQueue. No retransmits sent here.
         void HandleSendQueue()
@@ -324,12 +347,16 @@ namespace Com
             while (m_sendQueue.has_unhandled() && m_sendQueue.first_unhandled_index()<Parameters::SlidingWindowSize)
             {
                 UserDataPtr& ud=m_sendQueue[m_sendQueue.first_unhandled_index()];
+                ud->header.ackNow=0;
 
-                if (ud->sendToAllSystemNodes) //this is message that shall be sent to every system node
+                if (ud->header.sendMethod==MultiReceiverSendMethod) //this is message that shall be sent to every system node
                 {
                     ++m_lastSentMultiReceiverSeqNo;
                     ud->header.sequenceNumber=m_lastSentMultiReceiverSeqNo;
-                    ud->header.sendMethod=MultiReceiverSendMethod;
+                    if (RequestAck())
+                    {
+                        ud->header.ackNow=1;
+                    }
 
                     if (WriterType::IsMulticastEnabled()) //this node and all the receivers are capable of sending and receiving multicast
                     {
@@ -359,7 +386,7 @@ namespace Com
                 }
                 else //messages has a receiver list, send to them using unicast
                 {
-                    ud->header.sendMethod=SingleReceiverSendMethod;
+                    ud->header.ackNow=1; //for simplicity we request ack immediately for node specific messages
                     auto recvIt=ud->receivers.begin();
                     while (recvIt!=ud->receivers.end())
                     {
@@ -385,7 +412,7 @@ namespace Com
                     }
                 }
 
-                if (DeliveryGuarantee==Acked)
+                if (m_deliveryGuarantee==Acked)
                 {
                     ud->sendTime=boost::chrono::steady_clock::now();
                     m_sendQueue.step_unhandled();
@@ -440,6 +467,7 @@ namespace Com
                     const auto& r=recvIt->second;
                     ud->header.sendMethod=r.sendMethod; //always retransmit using unicast, but keep the original sendMethod.This is to specify correct sequence number serie.
                     ud->header.sequenceNumber=r.sequenceNumber;
+                    ud->header.ackNow=1; //request ack immediately for retransmitted messages
 
                     WriterType::SendTo(ud, nodeIt->second.endpoint);
                     m_retransmitNotification(nodeIt->first);
@@ -588,8 +616,7 @@ namespace Com
         }
     };
 
-    typedef DataSenderBasic< Writer<UserData>, Acked > AckedDataSender;
-    typedef DataSenderBasic< Writer<UserData>, Unacked > UnackedDataSender;
+    typedef DataSenderBasic< Writer<UserData> > DataSender;
 }
 }
 }

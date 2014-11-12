@@ -46,7 +46,7 @@ public:
         //-------------------
         // Tests
         //-------------------
-        AckedSender sender(io, 1, 1, 4, "127.0.0.1:10000", "224.90.90.241:10000", 500, Com::MessageHeaderSize+3); //ntId, nId, ipV, mc, waitForAck, fragmentSize
+        Sender sender(io, Com::Acked, 1, 1, 4, "127.0.0.1:10000", "224.90.90.241:10000", 500, Com::MessageHeaderSize+3); //ntId, nId, ipV, mc, waitForAck, fragmentSize
 
         std::atomic_uint go{0};
         auto WaitUntilReady=[&]
@@ -195,7 +195,7 @@ private:
     };
 
     typedef Com::Writer<Com::UserData, AckedDataSenderTest::TestSendPolicy> TestWriter;
-    typedef Com::DataSenderBasic<TestWriter, Com::Acked> AckedSender;
+    typedef Com::DataSenderBasic<TestWriter> Sender;
 
     static void OnQueueNotFull()
     {
@@ -236,7 +236,7 @@ public:
         //-------------------
         // Tests
         //-------------------
-        UnackedDataSender sender(io, 1, 1, 4, "127.0.0.1:10000", "224.90.90.241:10000", 500, 10); //ntId, nId, ipV, mc, waitForAck, fragmentSize
+        Sender sender(io, Com::Unacked, 1, 1, 4, "127.0.0.1:10000", "224.90.90.241:10000", 500, 10); //ntId, nId, ipV, mc, waitForAck, fragmentSize
 
         std::atomic_uint go{0};
         auto WaitUntilReady=[&]
@@ -338,7 +338,7 @@ private:
     };
 
     typedef Com::Writer<Com::UserData, UnackedDataSenderTest::TestSendPolicy> TestWriter;
-    typedef Com::DataSenderBasic<TestWriter, Com::Unacked> UnackedDataSender;
+    typedef Com::DataSenderBasic<TestWriter> Sender;
 
     static void OnQueueNotFull()
     {

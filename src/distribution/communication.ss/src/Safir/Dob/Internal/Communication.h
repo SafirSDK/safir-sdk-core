@@ -79,8 +79,9 @@ namespace Com
      * @brief The Communication class handles low level socket communication between nodes including discovering nodes,
      * message fragmentation and retranmits of lost packets and ordering of incoming data.
      *
-     * After construction all callbacks must be set before calling the Start method. Seeds can be injected at any time,
-     * even before Start method is called.
+     * After construction all callbacks must be set before calling the Start method. All callbacks will be made in a
+     * sequential manner, i.e the same callback will not be called concurrently.
+     * Seeds can be injected at any time, even before Start method is called.
      *
      * Nowhere in this class is 0 (zero) allowed as node Id.
      */

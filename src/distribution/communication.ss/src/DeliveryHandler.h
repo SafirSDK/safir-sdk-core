@@ -130,6 +130,11 @@ namespace Com
             {
                 auto ackPtr=boost::make_shared<Ack>(m_myId, header->commonHeader.senderId, senderIt->second.GetChannel(header).lastInSequence, header->sendMethod);
                 WriterType::SendTo(ackPtr, senderIt->second.endpoint);
+
+//                static uint32_t count=0;
+//                ++count;
+//                if (count%1000==0)
+//                    std::cout<<"Sent acks: "<<count<<std::endl;
             }
         }
 
@@ -412,7 +417,7 @@ namespace Com
                     if (header->fragmentNumber==0) //we cannot start in the middle of a fragmented message
                     {
                         ForceInsert(header, payload, ni);
-                        return true; //as a welcome present we send an ack immediately the first time :)
+                        return header->ackNow;
                     }
                     //else we must wait for beginning of a new message before we start
                     return false; //no ack to send
@@ -426,7 +431,7 @@ namespace Com
                 {
                     //The Normal case: Message in correct order
                     Insert(header, payload, ni);
-                    return true; //ch.NumberOfUnacked()>=Parameters::SlidingWindowSize/4; //if half the senders window is unacked, send ack now
+                    return header->ackNow;
                 }
                 else if (header->sequenceNumber<=ch.lastInSequence+Parameters::SlidingWindowSize)
                 {

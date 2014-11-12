@@ -69,8 +69,8 @@ namespace Com
             ,m_retryTimeout(retryTimeout)
             ,m_useMulticast(useMulticast)
             ,m_heartbeatSender(ioService, thisNodeId, m_ipVersion, localIf, McAddr(m_multicastAddress, m_useMulticast), heartbeatInterval)
-            ,m_ackedDataSender(ioService, m_id, thisNodeId, m_ipVersion, localIf, McAddr(m_multicastAddress, m_useMulticast), retryTimeout, Parameters::FragmentSize)
-            ,m_unackedDataSender(ioService, m_id, thisNodeId, m_ipVersion, localIf, McAddr(m_multicastAddress, m_useMulticast), retryTimeout, Parameters::FragmentSize)
+            ,m_ackedDataSender(ioService, Acked, m_id, thisNodeId, m_ipVersion, localIf, McAddr(m_multicastAddress, m_useMulticast), retryTimeout, Parameters::FragmentSize)
+            ,m_unackedDataSender(ioService, Unacked, m_id, thisNodeId, m_ipVersion, localIf, McAddr(m_multicastAddress, m_useMulticast), retryTimeout, Parameters::FragmentSize)
         {
         }
 
@@ -85,11 +85,11 @@ namespace Com
         HeartbeatSender& GetHeartbeatSender() {return m_heartbeatSender;}
         const HeartbeatSender& GetHeartbeatSender() const {return m_heartbeatSender;}
 
-        AckedDataSender& GetAckedDataSender() {return m_ackedDataSender;}
-        const AckedDataSender& GetAckedDataSender() const {return m_ackedDataSender;}
+        DataSender& GetAckedDataSender() {return m_ackedDataSender;}
+        const DataSender& GetAckedDataSender() const {return m_ackedDataSender;}
 
-        UnackedDataSender& GetUnackedDataSender() {return m_unackedDataSender;}
-        const UnackedDataSender& GetUnackedDataSender() const {return m_unackedDataSender;}
+        DataSender& GetUnackedDataSender() {return m_unackedDataSender;}
+        const DataSender& GetUnackedDataSender() const {return m_unackedDataSender;}
 
     private:
         int64_t m_thisNodeId;
@@ -102,8 +102,8 @@ namespace Com
         bool m_useMulticast;
 
         HeartbeatSender m_heartbeatSender;
-        AckedDataSender m_ackedDataSender;
-        UnackedDataSender m_unackedDataSender;
+        DataSender m_ackedDataSender;
+        DataSender m_unackedDataSender;
 
         static std::string McAddr(const std::string& addr, bool use){return use ? addr : "";}
     };

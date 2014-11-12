@@ -55,7 +55,9 @@ namespace Com
     //Constants
     static const int64_t HeartbeatType=-1113057794592031140; //Hash for 'Communication.Heartbeat'
     static const int64_t AckType=-6769271806353797703; //Hash for 'Communication.Ack'
+    static const int64_t AckRequestType=-3908639933957133038; //Hash for 'Communication.AckRequest'
     static const int64_t ControlDataType=186858702748131856; //Hash for 'Communication.ControlData'
+
 
     //Send method
     static const uint8_t SingleReceiverSendMethod=0;
@@ -103,15 +105,27 @@ namespace Com
     {
         CommonHeader commonHeader;
         uint64_t sequenceNumber;
-        uint8_t sendMethod; //tells if message being acked was sent to one or many receivers (different sequence numbers)
-        uint8_t ackUntil; //if 1 all messages until this seqNo is acked, if 0 just the specified seqNo is acked.
+        uint8_t sendMethod; //tells if message being acked was sent to one or many receivers (different sequence numbers)        
         Ack(int64_t senderId_, int64_t receiverId_, uint64_t sequenceNumber_, uint8_t sendMethod_)
             :commonHeader(senderId_, receiverId_, AckType)
             ,sequenceNumber(sequenceNumber_)
             ,sendMethod(sendMethod_)
-            ,ackUntil(1)
         {
         }
+    };
+
+    struct AckRequest
+    {
+        CommonHeader commonHeader;
+        uint64_t sequenceNumber; //last sent sequence number so far, makes it possible to NACK messages until this seqNo
+        uint8_t sendMethod; //tells wich sequence number serie that shall be acked
+        AckRequest(int64_t senderId_, int64_t receiverId_, uint64_t sequenceNumber_, uint8_t sendMethod_)
+            :commonHeader(senderId_, receiverId_, AckRequestType)
+            ,sequenceNumber(sequenceNumber_)
+            ,sendMethod(sendMethod_)
+        {
+        }
+
     };
 
     struct MessageHeader
@@ -125,6 +139,7 @@ namespace Com
         uint16_t numberOfFragments;
         uint16_t fragmentNumber;
         size_t fragmentOffset;
+        uint8_t ackNow;
 
         MessageHeader(int64_t senderId_,
                       int64_t receiverId_,
@@ -146,6 +161,7 @@ namespace Com
             ,numberOfFragments(numberOfFragments_)
             ,fragmentNumber(fragmentNumber_)
             ,fragmentOffset(fragmentOffset_)
+            ,ackNow(0)
         {
         }
     };
@@ -174,18 +190,16 @@ namespace Com
         MessageHeader header; //message header
         boost::shared_ptr<char[]> message; //This is to prevent  destruction of data before all fragments are sent
         const char* fragment; //This is what is sent in this UserData. If not fragmented these will be the same as payload and payloadSize
-        bool sendToAllSystemNodes; //send message to all system nodes, receivers will be filled with all system nodes to keep track of who should send ack
-        ReceiverMap receivers; //Set of receivers, can be filled with a receiver list, or if sendToAllSystemNodes it will be filled when its sent
+        ReceiverMap receivers; //Set of receivers, can be filled with a receiver list, or if MultiReceiverSendMethod it will be filled when its sent
         boost::chrono::steady_clock::time_point sendTime; //timestamp when this messages was last transmitted so we know when it's time to make retransmit
 
         UserData(const int64_t& id,
                  const int64_t& dataType,
                  const boost::shared_ptr<char[]>& message_,
                  size_t messageSize)
-            :header(id, 0, dataType, SingleReceiverSendMethod, Acked, 0, messageSize, messageSize, 1, 0, 0)
+            :header(id, 0, dataType, MultiReceiverSendMethod, Acked, 0, messageSize, messageSize, 1, 0, 0)
             ,message(message_)
             ,fragment(message.get())
-            ,sendToAllSystemNodes(true)
         {
         }
 
@@ -195,10 +209,9 @@ namespace Com
                  size_t messageSize,
                  const char* fragment_,
                  size_t fragmentSize)
-            :header(id, 0, dataType, SingleReceiverSendMethod, Acked, 0, messageSize, fragmentSize, 1, 0, static_cast<size_t>(fragment_-message_.get()))
+            :header(id, 0, dataType, MultiReceiverSendMethod, Acked, 0, messageSize, fragmentSize, 1, 0, static_cast<size_t>(fragment_-message_.get()))
             ,message(message_)
             ,fragment(fragment_)
-            ,sendToAllSystemNodes(true)
         {
         }
     };
