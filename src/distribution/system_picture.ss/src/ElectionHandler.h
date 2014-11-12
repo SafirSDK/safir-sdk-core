@@ -318,19 +318,18 @@ namespace SP
 
                         if (m_lastStatistics.IsDead(i))
                         {
-                            lllog(5) << "SP Got ElectionMessage from a node that is dead! Discarding!" << std::endl;
+                            lllog(5) << "SP: Got ElectionMessage from a node that is dead! Discarding!" << std::endl;
                             return;
                         }
 
                         break;
                     }
                 }
+
                 if (!found)
                 {
-                    //this could be a node that we have yet to discover.
-                    lllog(5) << "SP Got ElectionMessage from a node that I dont know about! Discarding!" << std::endl;
-                    throw std::logic_error("noooo");
-                    return;
+                    //this would indicate a threading error.
+                    throw std::logic_error("Got ElectionMessage from a node that I dont know about!");
                 }
 
                 switch (message.action())
