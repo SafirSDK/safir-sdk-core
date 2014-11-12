@@ -8699,56 +8699,78 @@ void TestSequences()
     ms->TypeIdMember().InsertAt(0, DotsTest::MemberDictionaries::ClassTypeId);
     ms->TypeIdMember().EraseAt(2);
 
-//    std::wcout<<std::boolalpha;
-//    std::wcout<<L"IsNull "<<MS1->Int32Member().IsNull()<<std::endl;
-//    std::wcout<<L"IsChanged "<<MS1->Int32Member().IsChanged()<<std::endl;
+    std::wcout<<L"------ ToXml -----"<<std::endl;
+    std::wstring xml=ts::Serialization::ToXml(ms);
+    std::wcout<<xml<<std::endl;
 
-//    DotsTest::TestItemPtr testItem1=DotsTest::TestItem::Create();
-//    testItem1->MyInt()=123;
-//    DotsTest::TestItemPtr testItem2=DotsTest::TestItem::Create();
-//    testItem2->MyInt()=456;
+    std::wcout<<L"------ ToJson -----"<<std::endl;
+    std::wstring json=ts::Serialization::ToJson(ms);
+    std::wcout<<json<<std::endl;
 
-//    MS1->Int32Member().push_back(10);
-//    MS1->Int32Member().push_back(30);
-//    MS1->Float32Member().push_back(10.1);
-//    MS1->Float32Member().push_back(30.3);
-//    MS1->EnumerationMember().push_back(DotsTest::TestEnum::MyFirst);
-//    MS1->EnumerationMember().push_back(DotsTest::TestEnum::MySecond);
-//    MS1->TestClassMember().push_back(testItem1);
-//    MS1->TestClassMember().push_back(testItem2);
+    Safir::Dob::Typesystem::BinarySerialization bin;
+    Safir::Dob::Typesystem::Serialization::ToBinary(ms, bin);
+    ts::ObjectPtr op=ts::Serialization::ToObject(bin);
+    DotsTest::MemberSequencesPtr ms2=boost::dynamic_pointer_cast<DotsTest::MemberSequences>(op);
 
-//    for (Safir::Dob::Typesystem::Int32SequenceContainer::const_iterator it=MS1->Int32Member().begin(); it!=MS1->Int32Member().end(); ++it)
+    std::wcout<<L"------ StringMember -----"<<std::endl;
+    std::wcout<<L"IsChanged "<<ms->StringMember().IsChanged()<<std::endl;
+    for (size_t i=0; i<ms->StringMember().size(); ++i)
+    {
+        std::wcout<<L"Equal: "<<(ms->StringMember().GetVal(i)==ms2->StringMember().GetVal(i))<<L", val: "<<ms->StringMember().GetVal(i)<<std::endl;
+    }
+}
+
+void TestDictionaries()
+{
+    Header(L"Dictionaries");
+
+    DotsTest::MemberDictionariesPtr md=DotsTest::MemberDictionaries::Create();
+
+    md->Int32StringMember()[10].SetVal(DotsTest::ParameterDictionaries::Int32StringParameter(10));
+    md->Int32StringMember()[20].SetVal(DotsTest::ParameterDictionaries::Int32StringParameter(20));
+
+    md->Int64BinaryMember()[100].SetVal(DotsTest::ParameterDictionaries::Int32BinaryParameter(10));
+    md->Int64BinaryMember()[200].SetVal(DotsTest::ParameterDictionaries::Int32BinaryParameter(20));
+
+    md->TypeIdEnumMember()[DotsTest::MemberDictionaries::ClassTypeId].SetVal(DotsTest::ParameterDictionaries::StringEnumParameter(L"Billy"));
+    md->TypeIdEnumMember()[DotsTest::MemberSequences::ClassTypeId].SetVal(DotsTest::ParameterDictionaries::StringEnumParameter(L"Svarre"));
+
+    md->EnumInstanceIdMember()[DotsTest::TestEnum::MyFirst].SetVal(DotsTest::ParameterDictionaries::EnumInstanceIdParameter(DotsTest::TestEnum::MyFirst));
+    md->EnumInstanceIdMember()[DotsTest::TestEnum::MySecond].SetVal(DotsTest::ParameterDictionaries::EnumInstanceIdParameter(DotsTest::TestEnum::MySecond));
+
+    md->InstanceIdEntityIdMember()[ts::InstanceId(L"FirstInstance")].SetVal(DotsTest::ParameterDictionaries::HandlerIdEntityIdParameter(ts::HandlerId(L"handlerOne")));
+    md->InstanceIdEntityIdMember()[ts::InstanceId(L"SecondInstance")].SetVal(DotsTest::ParameterDictionaries::HandlerIdEntityIdParameter(ts::HandlerId(2)));
+
+
+
+    std::wcout<<L"------ ToXml -----"<<std::endl;
+    std::wstring xml=ts::Serialization::ToXml(md);
+    std::wcout<<xml<<std::endl;
+
+    std::wcout<<L"------ ToJson -----"<<std::endl;
+    std::wstring json=ts::Serialization::ToJson(md);
+    std::wcout<<json<<std::endl;
+
+    Safir::Dob::Typesystem::BinarySerialization bin;
+    Safir::Dob::Typesystem::Serialization::ToBinary(md, bin);
+    ts::ObjectPtr op=ts::Serialization::ToObject(bin);
+    DotsTest::MemberDictionariesPtr md2=boost::dynamic_pointer_cast<DotsTest::MemberDictionaries>(op);
+
+    for (ts::DictionaryContainer<ts::InstanceId, ts::EntityIdContainer>::const_iterator it=md2->InstanceIdEntityIdMember().begin(); it!=md2->InstanceIdEntityIdMember().end(); ++it)
+    {
+        std::wcout<<it->first.ToString()<<L" = "<<it->second.GetVal().ToString()<<std::endl;
+    }
+
+//    for (ts::DictionaryContainer<ts::Int32, ts::StringContainer>::const_iterator it=md2->Int32StringMember().begin(); it!=md2->Int32StringMember().end(); ++it)
 //    {
-//        std::wcout<<*it<<std::endl;
+//        std::wcout<<it->first<<L" = "<<it->second.GetVal()<<std::endl;
 //    }
 
-//    Safir::Dob::Typesystem::BinarySerialization bin;
-//    Safir::Dob::Typesystem::Serialization::ToBinary(MS1, bin);
-//    ts::ObjectPtr op=ts::Serialization::ToObject(bin);
-//    DotsTest::MemberSequencesPtr ms=boost::dynamic_pointer_cast<DotsTest::MemberSequences>(op);
+//    std::wcout<<L"------ Int64BinaryMember -----"<<std::endl;
+//    std::wcout<<L"size: "<<md2->Int64BinaryMember().size()<<L", IsChanged: "<<md2->IsChanged()<<std::endl;
+//    std::string tmp(md2->Int64BinaryMember()[100].GetVal().begin(), md2->Int64BinaryMember()[100].GetVal().end());
+//    std::wcout<<tmp.c_str()<<std::endl;
 
-//    for (Safir::Dob::Typesystem::Int32SequenceContainer::const_iterator it=ms->Int32Member().begin(); it!=ms->Int32Member().end(); ++it)
-//    {
-//        std::wcout<<*it<<std::endl;
-//    }
-
-//    std::wcout<<L"------ ToXml -----"<<std::endl;
-//    std::wstring xml=ts::Serialization::ToXml(ms);
-//    std::wcout<<xml<<std::endl;
-
-//    std::wcout<<L"------ ToJson -----"<<std::endl;
-//    std::wstring json=ts::Serialization::ToJson(ms);
-//    std::wcout<<json<<std::endl;
-
-
-//    std::wcout<<std::boolalpha;
-//    std::wcout<<L"IsNull "<<MS1->Int32Member().IsNull()<<std::endl;
-//    std::wcout<<L"IsChanged "<<MS1->Int32Member().IsChanged()<<std::endl;
-
-//    std::wcout<<L"------ clear -----"<<std::endl;
-//    MS1->Int32Member().clear();
-//    std::wcout<<L"IsNull "<<MS1->Int32Member().IsNull()<<std::endl;
-//    std::wcout<<L"IsChanged "<<MS1->Int32Member().IsChanged()<<std::endl;
 }
 
 int main(int /*argc*/, char* /*argv*/[])
@@ -8766,70 +8788,72 @@ int main(int /*argc*/, char* /*argv*/[])
 
     try
     {
-        Test_Has_Property();
-        Test_GetName();
-        Test_GetNumberOfMembers();
-        Test_GetNumberOfParameters();
-        Test_Create_Routines();
-        Test_Int32();
-        Test_Int64();
-        Test_Float32();
-        Test_Float64();
-        Test_Boolean();
-        Test_Enumeration();
-        Test_String();
-        Test_EntityId();
-        Test_InstanceId();
-        Test_TypeId();
-        Test_ChannelId();
-        Test_HandlerId();
-        Test_Object();
-        Test_Binary();
-        Test_TestClass();
-        Test_Ampere32();
-        Test_CubicMeter32();
-        Test_Hertz32();
-        Test_Joule32();
-        Test_Kelvin32();
-        Test_Kilogram32();
-        Test_Meter32();
-        Test_MeterPerSecond32();
-        Test_MeterPerSecondSquared32();
-        Test_Newton32();
-        Test_Pascal32();
-        Test_Radian32();
-        Test_RadianPerSecond32();
-        Test_RadianPerSecondSquared32();
-        Test_Second32();
-        Test_SquareMeter32();
-        Test_Steradian32();
-        Test_Volt32();
-        Test_Watt32();
-        Test_Ampere64();
-        Test_CubicMeter64();
-        Test_Hertz64();
-        Test_Joule64();
-        Test_Kelvin64();
-        Test_Kilogram64();
-        Test_Meter64();
-        Test_MeterPerSecond64();
-        Test_MeterPerSecondSquared64();
-        Test_Newton64();
-        Test_Pascal64();
-        Test_Radian64();
-        Test_RadianPerSecond64();
-        Test_RadianPerSecondSquared64();
-        Test_Second64();
-        Test_SquareMeter64();
-        Test_Steradian64();
-        Test_Volt64();
-        Test_Watt64();
-        Test_TestException();
-        Test_LibraryExceptions();
-        Test_IsProperty();
-        Test_IsEnumeration();
-        Test_IsException();
-        Test_GetDouFilePath();
+//        Test_Has_Property();
+//        Test_GetName();
+//        Test_GetNumberOfMembers();
+//        Test_GetNumberOfParameters();
+//        Test_Create_Routines();
+//        Test_Int32();
+//        Test_Int64();
+//        Test_Float32();
+//        Test_Float64();
+//        Test_Boolean();
+//        Test_Enumeration();
+//        Test_String();
+//        Test_EntityId();
+//        Test_InstanceId();
+//        Test_TypeId();
+//        Test_ChannelId();
+//        Test_HandlerId();
+//        Test_Object();
+//        Test_Binary();
+//        Test_TestClass();
+//        Test_Ampere32();
+//        Test_CubicMeter32();
+//        Test_Hertz32();
+//        Test_Joule32();
+//        Test_Kelvin32();
+//        Test_Kilogram32();
+//        Test_Meter32();
+//        Test_MeterPerSecond32();
+//        Test_MeterPerSecondSquared32();
+//        Test_Newton32();
+//        Test_Pascal32();
+//        Test_Radian32();
+//        Test_RadianPerSecond32();
+//        Test_RadianPerSecondSquared32();
+//        Test_Second32();
+//        Test_SquareMeter32();
+//        Test_Steradian32();
+//        Test_Volt32();
+//        Test_Watt32();
+//        Test_Ampere64();
+//        Test_CubicMeter64();
+//        Test_Hertz64();
+//        Test_Joule64();
+//        Test_Kelvin64();
+//        Test_Kilogram64();
+//        Test_Meter64();
+//        Test_MeterPerSecond64();
+//        Test_MeterPerSecondSquared64();
+//        Test_Newton64();
+//        Test_Pascal64();
+//        Test_Radian64();
+//        Test_RadianPerSecond64();
+//        Test_RadianPerSecondSquared64();
+//        Test_Second64();
+//        Test_SquareMeter64();
+//        Test_Steradian64();
+//        Test_Volt64();
+//        Test_Watt64();
+//        Test_TestException();
+//        Test_LibraryExceptions();
+//        Test_IsProperty();
+//        Test_IsEnumeration();
+//        Test_IsException();
+//        Test_GetDouFilePath();
+//        TestSequences();
+        TestDictionaries();
     }
     catch (const Safir::Dob::Typesystem::FundamentalException & e)
     {

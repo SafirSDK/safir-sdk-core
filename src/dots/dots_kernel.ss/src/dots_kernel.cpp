@@ -134,14 +134,10 @@ namespace
     struct WriterState
     {
         ts::BlobWriter<RepositoryShm> writer;
-        DotsC_MemberIndex member;
-        DotsC_Int32 index;
-        bool changed;
-        DotsC_KeyValMode keyValMode;
+
 
         WriterState(DotsC_TypeId typeId)
             :writer(RepositoryKeeper::GetRepository(), typeId)
-            ,member(0), index(0), changed(false), keyValMode(DotsC_ValueMode)
         {
         }
 
@@ -1176,123 +1172,149 @@ DotsC_Handle DotsC_CreateBlobWriter(DotsC_TypeId typeId)
     return address;
 }
 
-void DotsC_SetWriteCursor(DotsC_Handle writer, DotsC_MemberIndex member, DotsC_Int32 arrayIndex)
+void DotsC_WriteInt32Member(DotsC_Handle writer, DotsC_Int32 val,
+                            bool isNull,
+                            bool isChanged,
+                            DotsC_MemberIndex member,
+                            DotsC_Int32 arrayIndex,
+                            DotsC_KeyValMode keyValMode)
 {
     WriterState* ws=WriterState::FromHandle(writer);
-    ws->member=member;
-    ws->index=arrayIndex;
-    ws->changed=false;
-}
-
-void DotsC_SetWriteMode(DotsC_Handle writer, DotsC_KeyValMode keyValMode)
-{
-    WriterState* ws=WriterState::FromHandle(writer);
-    ws->keyValMode=keyValMode;
-}
-
-void DotsC_WriteMemberStatus(DotsC_Handle writer, bool isNull, bool isChanged)
-{
-    WriterState* ws=WriterState::FromHandle(writer);
-    ws->changed=isChanged;
-    if (isNull) //if not null then WriteValue will be called from a DotsC_SetXXX instead
+    if (keyValMode==DotsC_ValueMode)
     {
-        ws->writer.WriteValue(ws->member, ws->index, 0, isNull, isChanged);
-    }
-}
-
-void DotsC_WriteInt32Member(DotsC_Handle writer, DotsC_Int32 val)
-{
-    WriterState* ws=WriterState::FromHandle(writer);
-    if (ws->keyValMode==DotsC_ValueMode)
-    {
-        ws->writer.WriteValue(ws->member, ws->index, val, false, ws->changed);
+        ws->writer.WriteValue(member, arrayIndex, val, isNull, isChanged);
     }
     else
     {
-        ws->writer.WriteKey(ws->member, val);
+        ws->writer.WriteKey(member, val);
     }
 }
 
-void DotsC_WriteInt64Member(DotsC_Handle writer, DotsC_Int64 val)
+void DotsC_WriteInt64Member(DotsC_Handle writer, DotsC_Int64 val,
+                            bool isNull,
+                            bool isChanged,
+                            DotsC_MemberIndex member,
+                            DotsC_Int32 arrayIndex,
+                            DotsC_KeyValMode keyValMode)
 {
     WriterState* ws=WriterState::FromHandle(writer);
-    if (ws->keyValMode==DotsC_ValueMode)
+    if (keyValMode==DotsC_ValueMode)
     {
-        ws->writer.WriteValue(ws->member, ws->index, val, false, ws->changed);
+        ws->writer.WriteValue(member, arrayIndex, val, isNull, isChanged);
     }
     else
     {
-        ws->writer.WriteKey(ws->member, val);
+        ws->writer.WriteKey(member, val);
     }
 }
 
-void DotsC_WriteFloat32Member(DotsC_Handle writer, DotsC_Float32 val)
+void DotsC_WriteFloat32Member(DotsC_Handle writer, DotsC_Float32 val,
+                              bool isNull,
+                              bool isChanged,
+                              DotsC_MemberIndex member,
+                              DotsC_Int32 arrayIndex,
+                              DotsC_KeyValMode)
 {
     WriterState* ws=WriterState::FromHandle(writer);
-    ws->writer.WriteValue(ws->member, ws->index, val, false, ws->changed);
+    ws->writer.WriteValue(member, arrayIndex, val, isNull, isChanged);
 }
 
-void DotsC_WriteFloat64Member(DotsC_Handle writer, DotsC_Float64 val)
+void DotsC_WriteFloat64Member(DotsC_Handle writer, DotsC_Float64 val,
+                              bool isNull,
+                              bool isChanged,
+                              DotsC_MemberIndex member,
+                              DotsC_Int32 arrayIndex,
+                              DotsC_KeyValMode)
 {
     WriterState* ws=WriterState::FromHandle(writer);
-    ws->writer.WriteValue(ws->member, ws->index, val, false, ws->changed);
+    ws->writer.WriteValue(member, arrayIndex, val, isNull, isChanged);
 }
 
-void DotsC_WriteBooleanMember(DotsC_Handle writer, bool val)
+void DotsC_WriteBooleanMember(DotsC_Handle writer, bool val,
+                              bool isNull,
+                              bool isChanged,
+                              DotsC_MemberIndex member,
+                              DotsC_Int32 arrayIndex,
+                              DotsC_KeyValMode)
 {
     WriterState* ws=WriterState::FromHandle(writer);
-    ws->writer.WriteValue(ws->member, ws->index, val, false, ws->changed);
+    ws->writer.WriteValue(member, arrayIndex, val, isNull, isChanged);
 }
 
-void DotsC_WriteStringMember(DotsC_Handle writer, const char* val)
+void DotsC_WriteStringMember(DotsC_Handle writer, const char* val,
+                             bool isNull,
+                             bool isChanged,
+                             DotsC_MemberIndex member,
+                             DotsC_Int32 arrayIndex,
+                             DotsC_KeyValMode keyValMode)
 {
     WriterState* ws=WriterState::FromHandle(writer);
-    if (ws->keyValMode==DotsC_ValueMode)
+    if (keyValMode==DotsC_ValueMode)
     {
-        ws->writer.WriteValue(ws->member, ws->index, val, false, ws->changed);
+        ws->writer.WriteValue(member, arrayIndex, val, isNull, isChanged);
     }
     else
     {
-        ws->writer.WriteKey(ws->member, val);
+        ws->writer.WriteKey(member, val);
     }
 }
 
-void DotsC_WriteHashedMember(DotsC_Handle writer, DotsC_Int64 hash, const char* str)
+void DotsC_WriteHashedMember(DotsC_Handle writer, DotsC_Int64 hash, const char* str,
+                             bool isNull,
+                             bool isChanged,
+                             DotsC_MemberIndex member,
+                             DotsC_Int32 arrayIndex,
+                             DotsC_KeyValMode keyValMode)
 {
     WriterState* ws=WriterState::FromHandle(writer);
-    if (ws->keyValMode==DotsC_ValueMode)
+    if (keyValMode==DotsC_ValueMode)
     {
-        ws->writer.WriteValue(ws->member, ws->index, std::make_pair(hash, str), false, ws->changed);
+        ws->writer.WriteValue(member, arrayIndex, std::make_pair(hash, str), isNull, isChanged);
     }
     else
     {
-        ws->writer.WriteKey(ws->member, std::make_pair(hash, str));
+        ws->writer.WriteKey(member, std::make_pair(hash, str));
     }
 }
 
-void DotsC_WriteEntityIdMember(DotsC_Handle writer, const DotsC_EntityId& val, const char* instanceString)
+void DotsC_WriteEntityIdMember(DotsC_Handle writer, const DotsC_EntityId& val, const char* instanceString,
+                               bool isNull,
+                               bool isChanged,
+                               DotsC_MemberIndex member,
+                               DotsC_Int32 arrayIndex,
+                               DotsC_KeyValMode keyValMode)
 {
     WriterState* ws=WriterState::FromHandle(writer);
-    if (ws->keyValMode==DotsC_ValueMode)
+    if (keyValMode==DotsC_ValueMode)
     {
-        ws->writer.WriteValue(ws->member, ws->index, std::make_pair(val, instanceString), false, ws->changed);
+        ws->writer.WriteValue(member, arrayIndex, std::make_pair(val, instanceString), isNull, isChanged);
     }
     else
     {
-        ws->writer.WriteKey(ws->member, std::make_pair(val, instanceString));
+        ws->writer.WriteKey(member, std::make_pair(val, instanceString));
     }
 }
 
-void DotsC_WriteBinaryMember(DotsC_Handle writer, const char* val, DotsC_Int32 size)
+void DotsC_WriteBinaryMember(DotsC_Handle writer, const char* val, DotsC_Int32 size,
+                             bool isNull,
+                             bool isChanged,
+                             DotsC_MemberIndex member,
+                             DotsC_Int32 arrayIndex,
+                             DotsC_KeyValMode)
 {
     WriterState* ws=WriterState::FromHandle(writer);
-    ws->writer.WriteValue(ws->member, ws->index, std::make_pair(val, size), false, ws->changed);
+    ws->writer.WriteValue(member, arrayIndex, std::make_pair(val, size), isNull, isChanged);
 }
 
-void DotsC_WriteObjectMember(DotsC_Handle writer, const char* blob)
+void DotsC_WriteObjectMember(DotsC_Handle writer, const char* blob,
+                             bool isNull,
+                             bool isChanged,
+                             DotsC_MemberIndex member,
+                             DotsC_Int32 arrayIndex,
+                             DotsC_KeyValMode)
 {
     WriterState* ws=WriterState::FromHandle(writer);
-    ws->writer.WriteValue(ws->member, ws->index, std::make_pair(blob, DotsC_GetSize(blob)), false, ws->changed);
+    ws->writer.WriteValue(member, arrayIndex, std::make_pair(blob, DotsC_GetSize(blob)), isNull, isChanged);
 }
 
 DotsC_Int32 DotsC_CalculateBlobSize(DotsC_Handle writer)

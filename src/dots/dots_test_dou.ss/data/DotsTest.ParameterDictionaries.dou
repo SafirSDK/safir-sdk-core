@@ -39,11 +39,11 @@
             <dictionary keyType="Int32">
                 <entry>
                     <key>10</key>
-                    <value>Safir®</value>
+                    <value>Safir</value>
                 </entry>
                 <entry>
                     <key>20</key>
-                    <value>®rifaS</value>
+                    <value>rifaS</value>
                 </entry>
             </dictionary>
         </parameter>
@@ -270,11 +270,11 @@
             <dictionary keyType="String">
                 <entry>
                     <key>Billy</key>
-                    <value>Safir®</value>
+                    <value>Safir</value>
                 </entry>
                 <entry>
                     <key>Svarre</key>
-                    <value>®rifaS</value>
+                    <value>rifaS</value>
                 </entry>
             </dictionary>
         </parameter>
@@ -501,11 +501,11 @@
             <dictionary keyType="DotsTest.TestEnum">
                 <entry>
                     <key>MyFirst</key>
-                    <value>Safir®</value>
+                    <value>Safir</value>
                 </entry>
                 <entry>
                     <key>MySecond</key>
-                    <value>®rifaS</value>
+                    <value>rifaS</value>
                 </entry>
             </dictionary>
         </parameter>
@@ -732,11 +732,11 @@
             <dictionary keyType="HandlerId">
                 <entry>
                     <key>handlerOne</key>
-                    <value>Safir®</value>
+                    <value>Safir</value>
                 </entry>
                 <entry>
                     <key>2</key>
-                    <value>®rifaS</value>
+                    <value>rifaS</value>
                 </entry>
             </dictionary>
         </parameter>
@@ -963,11 +963,11 @@
             <dictionary keyType="EntityId">
                 <entry>
                     <key><name>Safir.Dob.Entity</name><instanceId>first</instanceId></key>
-                    <value>Safir®</value>
+                    <value>Safir</value>
                 </entry>
                 <entry>
                     <key><name>Safir.Dob.Entity</name><instanceId>second</instanceId></key>
-                    <value>®rifaS</value>
+                    <value>rifaS</value>
                 </entry>
             </dictionary>
         </parameter>

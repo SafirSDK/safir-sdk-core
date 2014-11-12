@@ -650,21 +650,20 @@ extern "C"
      * @param typeId [in] - The type of blob to be written.
      * @return Handle to a new blob writer instance.
      */
-    DOTS_KERNEL_API DotsC_Handle DotsC_CreateBlobWriter(DotsC_TypeId typeId);
-    DOTS_KERNEL_API void DotsC_SetWriteCursor(DotsC_Handle writer, DotsC_MemberIndex member, DotsC_Int32 arrayIndex);
-    DOTS_KERNEL_API void DotsC_SetWriteMode(DotsC_Handle writer, DotsC_KeyValMode keyValMode);
+    DOTS_KERNEL_API DotsC_Handle DotsC_CreateBlobWriter(DotsC_TypeId typeId);    
 
     DOTS_KERNEL_API void DotsC_WriteMemberStatus(DotsC_Handle writer, bool isNull, bool isChanged);
-    DOTS_KERNEL_API void DotsC_WriteInt32Member(DotsC_Handle writer, DotsC_Int32 val);
-    DOTS_KERNEL_API void DotsC_WriteInt64Member(DotsC_Handle writer, DotsC_Int64 val);
-    DOTS_KERNEL_API void DotsC_WriteFloat32Member(DotsC_Handle writer, DotsC_Float32 val);
-    DOTS_KERNEL_API void DotsC_WriteFloat64Member(DotsC_Handle writer, DotsC_Float64 val);
-    DOTS_KERNEL_API void DotsC_WriteBooleanMember(DotsC_Handle writer, bool val);
-    DOTS_KERNEL_API void DotsC_WriteStringMember(DotsC_Handle writer, const char* val);
-    DOTS_KERNEL_API void DotsC_WriteHashedMember(DotsC_Handle writer, DotsC_Int64 hash, const char* str);
-    DOTS_KERNEL_API void DotsC_WriteEntityIdMember(DotsC_Handle writer, const DotsC_EntityId& val, const char* instanceString);
-    DOTS_KERNEL_API void DotsC_WriteBinaryMember(DotsC_Handle writer, const char* val, DotsC_Int32 size);
-    DOTS_KERNEL_API void DotsC_WriteObjectMember(DotsC_Handle writer, const char* blob);
+    DOTS_KERNEL_API void DotsC_WriteInt32Member(DotsC_Handle writer, DotsC_Int32 val, bool isNull, bool isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode);
+    DOTS_KERNEL_API void DotsC_WriteInt32Member(DotsC_Handle writer, DotsC_Int32 val, bool isNull, bool isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode);
+    DOTS_KERNEL_API void DotsC_WriteInt64Member(DotsC_Handle writer, DotsC_Int64 val, bool isNull, bool isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode);
+    DOTS_KERNEL_API void DotsC_WriteFloat32Member(DotsC_Handle writer, DotsC_Float32 val, bool isNull, bool isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode);
+    DOTS_KERNEL_API void DotsC_WriteFloat64Member(DotsC_Handle writer, DotsC_Float64 val, bool isNull, bool isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode);
+    DOTS_KERNEL_API void DotsC_WriteBooleanMember(DotsC_Handle writer, bool val, bool isNull, bool isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode);
+    DOTS_KERNEL_API void DotsC_WriteStringMember(DotsC_Handle writer, const char* val, bool isNull, bool isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode);
+    DOTS_KERNEL_API void DotsC_WriteHashedMember(DotsC_Handle writer, DotsC_Int64 hash, const char* str, bool isNull, bool isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode);
+    DOTS_KERNEL_API void DotsC_WriteEntityIdMember(DotsC_Handle writer, const DotsC_EntityId& val, const char* instanceString, bool isNull, bool isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode);
+    DOTS_KERNEL_API void DotsC_WriteBinaryMember(DotsC_Handle writer, const char* val, DotsC_Int32 size, bool isNull, bool isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode);
+    DOTS_KERNEL_API void DotsC_WriteObjectMember(DotsC_Handle writer, const char* blob, bool isNull, bool isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode);
 
     DOTS_KERNEL_API DotsC_Int32 DotsC_CalculateBlobSize(DotsC_Handle writer);
     DOTS_KERNEL_API void DotsC_WriteBlob(DotsC_Handle writer, char* blobDest);

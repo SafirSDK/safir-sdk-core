@@ -49,7 +49,7 @@ namespace
     {
         return (optionalStr==NULL) ? T(hash) : T(Safir::Dob::Typesystem::Utilities::ToWstring(optionalStr));
     }
-    }
+}
 
     TypeId BlobOperations::GetTypeId(char const * const blob)
     {
@@ -577,13 +577,7 @@ namespace
             throw std::logic_error("BlobOperation.Set(bool) called with mode=KeyMode. Only ValueMode is allowed for this type!");
         }
 
-        DotsC_SetWriteCursor(handle, member, valueIndex);
-        DotsC_SetWriteMode(handle, Conv(mode));
-        DotsC_WriteMemberStatus(handle, isNull, isChanged);
-        if (!isNull)
-        {
-            DotsC_WriteBooleanMember(handle, val);
-        }
+        DotsC_WriteBooleanMember(handle, val, isNull, isChanged, member, valueIndex, Conv(mode));
     }
 
     void BlobOperations::Set(Safir::Dob::Typesystem::Int32 val,
@@ -594,13 +588,7 @@ namespace
                              const Dob::Typesystem::ArrayIndex valueIndex,
                              KeyValueMode mode)
     {
-        DotsC_SetWriteCursor(handle, member, valueIndex);
-        DotsC_SetWriteMode(handle, Conv(mode));
-        DotsC_WriteMemberStatus(handle, isNull, isChanged);
-        if (!isNull)
-        {
-            DotsC_WriteInt32Member(handle, val);
-        }
+        DotsC_WriteInt32Member(handle, val, isNull, isChanged, member, valueIndex, Conv(mode));
     }
 
     void BlobOperations::Set(Safir::Dob::Typesystem::Int64 val,
@@ -611,13 +599,7 @@ namespace
                              const Dob::Typesystem::ArrayIndex valueIndex,
                              KeyValueMode mode)
     {
-        DotsC_SetWriteCursor(handle, member, valueIndex);
-        DotsC_SetWriteMode(handle, Conv(mode));
-        DotsC_WriteMemberStatus(handle, isNull, isChanged);
-        if (!isNull)
-        {
-            DotsC_WriteInt64Member(handle, val);
-        }
+        DotsC_WriteInt64Member(handle, val, isNull, isChanged, member, valueIndex, Conv(mode));
     }
 
     void BlobOperations::Set(Safir::Dob::Typesystem::Float32 val,
@@ -633,13 +615,7 @@ namespace
             throw std::logic_error("BlobOperation.Set(Float32) called with mode=KeyMode. Only ValueMode is allowed for this type!");
         }
 
-        DotsC_SetWriteCursor(handle, member, valueIndex);
-        DotsC_SetWriteMode(handle, Conv(mode));
-        DotsC_WriteMemberStatus(handle, isNull, isChanged);
-        if (!isNull)
-        {
-            DotsC_WriteFloat32Member(handle, val);
-        }
+        DotsC_WriteFloat32Member(handle, val, isNull, isChanged, member, valueIndex, Conv(mode));
     }
 
     void BlobOperations::Set(Safir::Dob::Typesystem::Float64 val,
@@ -655,13 +631,7 @@ namespace
             throw std::logic_error("BlobOperation.Set(Float64) called with mode=KeyMode. Only ValueMode is allowed for this type!");
         }
 
-        DotsC_SetWriteCursor(handle, member, valueIndex);
-        DotsC_SetWriteMode(handle, Conv(mode));
-        DotsC_WriteMemberStatus(handle, isNull, isChanged);
-        if (!isNull)
-        {
-            DotsC_WriteFloat64Member(handle, val);
-        }
+        DotsC_WriteFloat64Member(handle, val, isNull, isChanged, member, valueIndex, Conv(mode));
     }
 
     void BlobOperations::Set(const std::wstring& val,
@@ -672,13 +642,9 @@ namespace
                              const Dob::Typesystem::ArrayIndex valueIndex,
                              KeyValueMode mode)
     {
-        DotsC_SetWriteCursor(handle, member, valueIndex);
-        DotsC_SetWriteMode(handle, Conv(mode));
-        DotsC_WriteMemberStatus(handle, isNull, isChanged);
-        if (!isNull)
-        {
-            DotsC_WriteStringMember(handle, Safir::Dob::Typesystem::Utilities::ToUtf8(val).c_str());
-        }
+        std::string utf8=Safir::Dob::Typesystem::Utilities::ToUtf8(val);
+        DotsC_WriteStringMember(handle, utf8.c_str(),
+                                isNull, isChanged, member, valueIndex, Conv(mode));
     }
 
     void BlobOperations::Set(const Safir::Dob::Typesystem::InstanceId& val,
@@ -689,14 +655,9 @@ namespace
                              const Dob::Typesystem::ArrayIndex valueIndex,
                              KeyValueMode mode)
     {
-        DotsC_SetWriteCursor(handle, member, valueIndex);
-        DotsC_SetWriteMode(handle, Conv(mode));
-        DotsC_WriteMemberStatus(handle, isNull, isChanged);
-        if (!isNull)
-        {
-            const char* str=val.GetRawString().empty() ? NULL : Safir::Dob::Typesystem::Utilities::ToUtf8(val.GetRawString()).c_str();
-            DotsC_WriteHashedMember(handle, val.GetRawValue(), str);
-        }
+        std::string utf8=Safir::Dob::Typesystem::Utilities::ToUtf8(val.GetRawString());
+        const char* str=utf8.empty() ? NULL : utf8.c_str();
+        DotsC_WriteHashedMember(handle, val.GetRawValue(), str, isNull, isChanged, member, valueIndex, Conv(mode));
     }
 
     void BlobOperations::Set(const Safir::Dob::Typesystem::HandlerId& val,
@@ -707,14 +668,9 @@ namespace
                              const Dob::Typesystem::ArrayIndex valueIndex,
                              KeyValueMode mode)
     {
-        DotsC_SetWriteCursor(handle, member, valueIndex);
-        DotsC_SetWriteMode(handle, Conv(mode));
-        DotsC_WriteMemberStatus(handle, isNull, isChanged);
-        if (!isNull)
-        {
-            const char* str=val.GetRawString().empty() ? NULL : Safir::Dob::Typesystem::Utilities::ToUtf8(val.GetRawString()).c_str();
-            DotsC_WriteHashedMember(handle, val.GetRawValue(), str);
-        }
+        std::string utf8=Safir::Dob::Typesystem::Utilities::ToUtf8(val.GetRawString());
+        const char* str=utf8.empty() ? NULL : utf8.c_str();
+        DotsC_WriteHashedMember(handle, val.GetRawValue(), str, isNull, isChanged, member, valueIndex, Conv(mode));
     }
 
     void BlobOperations::Set(const Safir::Dob::Typesystem::ChannelId& val,
@@ -725,14 +681,9 @@ namespace
                              const Dob::Typesystem::ArrayIndex valueIndex,
                              KeyValueMode mode)
     {
-        DotsC_SetWriteCursor(handle, member, valueIndex);
-        DotsC_SetWriteMode(handle, Conv(mode));
-        DotsC_WriteMemberStatus(handle, isNull, isChanged);
-        if (!isNull)
-        {
-            const char* str=val.GetRawString().empty() ? NULL : Safir::Dob::Typesystem::Utilities::ToUtf8(val.GetRawString()).c_str();
-            DotsC_WriteHashedMember(handle, val.GetRawValue(), str);
-        }
+        std::string utf8=Safir::Dob::Typesystem::Utilities::ToUtf8(val.GetRawString());
+        const char* str=utf8.empty() ? NULL : utf8.c_str();
+        DotsC_WriteHashedMember(handle, val.GetRawValue(), str, isNull, isChanged, member, valueIndex, Conv(mode));
     }
 
     void BlobOperations::Set(const Safir::Dob::Typesystem::EntityId& val,
@@ -743,17 +694,12 @@ namespace
                              const Dob::Typesystem::ArrayIndex valueIndex,
                              KeyValueMode mode)
     {
-        DotsC_SetWriteCursor(handle, member, valueIndex);
-        DotsC_SetWriteMode(handle, Conv(mode));
-        DotsC_WriteMemberStatus(handle, isNull, isChanged);
-        if (!isNull)
-        {
-            const char* str=val.GetInstanceId().GetRawString().empty() ? NULL : Safir::Dob::Typesystem::Utilities::ToUtf8(val.GetInstanceId().GetRawString()).c_str();
-            DotsC_EntityId eid;
-            eid.instanceId = val.GetInstanceId().GetRawValue();
-            eid.typeId = val.GetTypeId();
-            DotsC_WriteEntityIdMember(handle, eid, str);
-        }
+        std::string utf8=Safir::Dob::Typesystem::Utilities::ToUtf8(val.GetInstanceId().GetRawString());
+        const char* str=utf8.empty() ? NULL : utf8.c_str();
+        DotsC_EntityId eid;
+        eid.instanceId = val.GetInstanceId().GetRawValue();
+        eid.typeId = val.GetTypeId();
+        DotsC_WriteEntityIdMember(handle, eid, str, isNull, isChanged, member, valueIndex, Conv(mode));
     }
 
     void BlobOperations::Set(const Safir::Dob::Typesystem::ObjectPtr& val,
@@ -769,18 +715,12 @@ namespace
             throw std::logic_error("BlobOperation.Set(Object) called with mode=KeyMode. Only ValueMode is allowed for this type!");
         }
 
-        DotsC_SetWriteCursor(handle, member, valueIndex);
-        DotsC_SetWriteMode(handle, Conv(mode));
-        DotsC_WriteMemberStatus(handle, isNull, isChanged);
-        if (!isNull)
-        {
-            Safir::Dob::Typesystem::Int64 objHandle=DotsC_CreateBlobWriter(val->GetTypeId());
-            val->WriteToBlob(objHandle);
-            Binary blob(static_cast<size_t>(DotsC_CalculateBlobSize(objHandle)));
-            DotsC_WriteBlob(objHandle,&blob[0]);
-            DotsC_DeleteBlobWriter(objHandle);
-            DotsC_WriteObjectMember(handle,&blob[0]);
-        }
+        Safir::Dob::Typesystem::Int64 objHandle=DotsC_CreateBlobWriter(val->GetTypeId());
+        val->WriteToBlob(objHandle);
+        Binary blob(static_cast<size_t>(DotsC_CalculateBlobSize(objHandle)));
+        DotsC_WriteBlob(objHandle,&blob[0]);
+        DotsC_DeleteBlobWriter(objHandle);
+        DotsC_WriteObjectMember(handle, &blob[0], isNull, isChanged, member, valueIndex, Conv(mode));
     }
 
     void BlobOperations::Set(const Safir::Dob::Typesystem::Binary& val,
@@ -796,14 +736,8 @@ namespace
             throw std::logic_error("BlobOperation.Set(Binary) called with mode=KeyMode. Only ValueMode is allowed for this type!");
         }
 
-        DotsC_SetWriteCursor(handle, member, valueIndex);
-        DotsC_SetWriteMode(handle, Conv(mode));
-        DotsC_WriteMemberStatus(handle, isNull, isChanged);
-        if (!isNull)
-        {
-            DotsC_WriteBinaryMember(handle,&(val[0]), static_cast<DotsC_Int32>(val.size()));
-        }
-}
+        DotsC_WriteBinaryMember(handle, &(val[0]), static_cast<DotsC_Int32>(val.size()), isNull, isChanged, member, valueIndex, Conv(mode));
+    }
 }
 }
 }

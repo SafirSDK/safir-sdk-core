@@ -1,3 +1,7 @@
+cmake_minimum_required(VERSION 2.8)
+
+project(dots_test CXX)
+
 INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
 FILE(GLOB sources *.cpp)
