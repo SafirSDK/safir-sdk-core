@@ -28,6 +28,7 @@
 #include <Safir/Dob/Internal/Connection.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
 #include <boost/shared_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
 #include <set>
 #include <boost/noncopyable.hpp>
 #include <vector>
