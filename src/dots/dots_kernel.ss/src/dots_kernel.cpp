@@ -114,14 +114,10 @@ namespace
 
     struct ReaderState
     {
-        ts::BlobReader<RepositoryShm> reader;
-        DotsC_MemberIndex member;
-        DotsC_Int32 index;
-        DotsC_KeyValMode keyValMode;
+        ts::BlobReader<RepositoryShm> reader;        
 
         ReaderState(const char* blob)
             :reader(RepositoryKeeper::GetRepository(), blob)
-            ,member(0), index(0), keyValMode(DotsC_ValueMode)
         {
         }
 
@@ -1026,141 +1022,125 @@ DotsC_Int32 DotsC_GetNumberOfMemberValues(DotsC_Handle reader, DotsC_MemberIndex
     return rs->reader.NumberOfValues(member);
 }
 
-void DotsC_SetReadCursor(DotsC_Handle reader, DotsC_MemberIndex member, DotsC_Int32 valueIndex)
+void DotsC_ReadInt32Member(DotsC_Handle reader, DotsC_Int32& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode)
 {
     ReaderState* rs=ReaderState::FromHandle(reader);
-    rs->member=member;
-    rs->index=valueIndex;
-}
-
-void DotsC_SetReadMode(DotsC_Handle reader, DotsC_KeyValMode keyValMode)
-{
-    ReaderState* rs=ReaderState::FromHandle(reader);
-    rs->keyValMode=keyValMode;
-}
-
-void DotsC_ReadMemberStatus(DotsC_Handle reader, bool& isNull, bool& isChanged)
-{
-    ReaderState* rs=ReaderState::FromHandle(reader);
-    rs->reader.ReadStatus(rs->member, rs->index, isNull, isChanged);
-}
-
-
-void DotsC_ReadInt32Member(DotsC_Handle reader, DotsC_Int32& val)
-{
-    ReaderState* rs=ReaderState::FromHandle(reader);
-    if (rs->keyValMode==DotsC_ValueMode)
+    if (keyValMode==DotsC_ValueMode)
     {
-        bool isNull=false, isChanged=true;
-        rs->reader.ReadValue(rs->member, rs->index, val, isNull, isChanged);
+        rs->reader.ReadValue(member, arrayIndex, val, isNull, isChanged);
     }
     else
     {
-        val=rs->reader.ReadKey<DotsC_Int32>(rs->member, rs->index);
+        isChanged=false;
+        isNull=false;
+        val=rs->reader.ReadKey<DotsC_Int32>(member, arrayIndex);
     }
 }
 
-void DotsC_ReadInt64Member(DotsC_Handle reader, DotsC_Int64& val)
+void DotsC_ReadInt64Member(DotsC_Handle reader, DotsC_Int64& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode)
 {
     ReaderState* rs=ReaderState::FromHandle(reader);
-    if (rs->keyValMode==DotsC_ValueMode)
+    if (keyValMode==DotsC_ValueMode)
     {
         bool isNull=false, isChanged=true;
-        rs->reader.ReadValue(rs->member, rs->index, val, isNull, isChanged);
+        rs->reader.ReadValue(member, arrayIndex, val, isNull, isChanged);
     }
     else
     {
-        val=rs->reader.ReadKey<DotsC_Int64>(rs->member, rs->index);
+        isChanged=false;
+        isNull=false;
+        val=rs->reader.ReadKey<DotsC_Int64>(member, arrayIndex);
     }
 }
 
-void DotsC_ReadFloat32Member(DotsC_Handle reader, DotsC_Float32& val)
+void DotsC_ReadFloat32Member(DotsC_Handle reader, DotsC_Float32& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode)
 {
     ReaderState* rs=ReaderState::FromHandle(reader);
-    bool isNull=false, isChanged=true;
-    rs->reader.ReadValue(rs->member, rs->index, val, isNull, isChanged);
+    rs->reader.ReadValue(member, arrayIndex, val, isNull, isChanged);
 }
 
-void DotsC_ReadFloat64Member(DotsC_Handle reader, DotsC_Float64& val)
+void DotsC_ReadFloat64Member(DotsC_Handle reader, DotsC_Float64& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode)
 {
     ReaderState* rs=ReaderState::FromHandle(reader);
-    bool isNull=false, isChanged=true;
-    rs->reader.ReadValue(rs->member, rs->index, val, isNull, isChanged);
+    rs->reader.ReadValue(member, arrayIndex, val, isNull, isChanged);
 }
 
-void DotsC_ReadBooleanMember(DotsC_Handle reader, bool& val)
+void DotsC_ReadBooleanMember(DotsC_Handle reader, bool& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode)
 {
     ReaderState* rs=ReaderState::FromHandle(reader);
-    bool isNull=false, isChanged=true;
-    rs->reader.ReadValue(rs->member, rs->index, val, isNull, isChanged);
+    rs->reader.ReadValue(member, arrayIndex, val, isNull, isChanged);
 }
 
-void DotsC_ReadStringMember(DotsC_Handle reader, const char*& val)
+void DotsC_ReadStringMember(DotsC_Handle reader, const char*& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode)
 {
     ReaderState* rs=ReaderState::FromHandle(reader);
-    if (rs->keyValMode==DotsC_ValueMode)
+    if (keyValMode==DotsC_ValueMode)
     {
         bool isNull=false, isChanged=true;
-        rs->reader.ReadValue(rs->member, rs->index, val, isNull, isChanged);
+        rs->reader.ReadValue(member, arrayIndex, val, isNull, isChanged);
     }
     else
     {
-        val=rs->reader.ReadKey<const char*>(rs->member, rs->index);
+        isChanged=false;
+        isNull=false;
+        val=rs->reader.ReadKey<const char*>(member, arrayIndex);
     }
 }
 
-void DotsC_ReadHashedMember(DotsC_Handle reader, DotsC_Int64& val, const char*& optionalStr)
+void DotsC_ReadHashedMember(DotsC_Handle reader, DotsC_Int64& val, const char*& optionalStr, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode)
 {
     ReaderState* rs=ReaderState::FromHandle(reader);
     std::pair<DotsC_Int64, const char*> hash;
-    if (rs->keyValMode==DotsC_ValueMode)
+    if (keyValMode==DotsC_ValueMode)
     {
         bool isNull=false, isChanged=true;
-        rs->reader.ReadValue(rs->member, rs->index, hash, isNull, isChanged);
+        rs->reader.ReadValue(member, arrayIndex, hash, isNull, isChanged);
     }
     else
     {
-        hash=rs->reader.ReadKey< std::pair<DotsC_Int64, const char*> >(rs->member, rs->index);
+        isChanged=false;
+        isNull=false;
+        hash=rs->reader.ReadKey< std::pair<DotsC_Int64, const char*> >(member, arrayIndex);
     }
 
     val=hash.first;
     optionalStr=hash.second;
 }
 
-void DotsC_ReadEntityIdMember(DotsC_Handle reader, DotsC_EntityId& val, const char*& optionalStr)
+void DotsC_ReadEntityIdMember(DotsC_Handle reader, DotsC_EntityId& val, const char*& optionalStr, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode)
 {
     ReaderState* rs=ReaderState::FromHandle(reader);
     std::pair<DotsC_EntityId, const char*> eid;
-    if (rs->keyValMode==DotsC_ValueMode)
+    if (keyValMode==DotsC_ValueMode)
     {
         bool isNull=false, isChanged=true;
-        rs->reader.ReadValue(rs->member, rs->index, eid, isNull, isChanged);
+        rs->reader.ReadValue(member, arrayIndex, eid, isNull, isChanged);
     }
     else
     {
-        eid=rs->reader.ReadKey< std::pair<DotsC_EntityId, const char*> >(rs->member, rs->index);
+        isChanged=false;
+        isNull=false;
+        eid=rs->reader.ReadKey< std::pair<DotsC_EntityId, const char*> >(member, arrayIndex);
     }
 
     val=eid.first;
     optionalStr=eid.second;
 }
 
-void DotsC_ReadBinaryMember(DotsC_Handle reader, const char*& val, DotsC_Int32& size)
+void DotsC_ReadBinaryMember(DotsC_Handle reader, const char*& val, DotsC_Int32& size, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode)
 {
     ReaderState* rs=ReaderState::FromHandle(reader);
-    bool isNull=false, isChanged=true;
     std::pair<const char*, DotsC_Int32> bin;
-    rs->reader.ReadValue(rs->member, rs->index, bin, isNull, isChanged);
+    rs->reader.ReadValue(member, arrayIndex, bin, isNull, isChanged);
     val=bin.first;
     size=bin.second;
 }
 
-void DotsC_ReadObjectMember(DotsC_Handle reader, const char*& val)
+void DotsC_ReadObjectMember(DotsC_Handle reader, const char*& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode)
 {
     ReaderState* rs=ReaderState::FromHandle(reader);
-    bool isNull=false, isChanged=true;
     std::pair<const char*, DotsC_Int32> bin;
-    rs->reader.ReadValue(rs->member, rs->index, bin, isNull, isChanged);
+    rs->reader.ReadValue(member, arrayIndex, bin, isNull, isChanged);
     val=bin.first;
 }
 
