@@ -161,7 +161,7 @@ try:
     #we need to kill the first node manually, after which the circle will start running...
     log("Stopping node 0")
     stop_node(*nodes[0])
-
+    expected = 0
 
     time.sleep(10)
 
@@ -175,6 +175,10 @@ try:
             else:
                 dead.append(i)
                 log ("Node", i, "is stopping")
+                if i != expected:
+                    log ("Unexpected node died!")
+                    time.sleep(1000000)
+                expected = (expected + 1) % args.total_nodes
                 stop_node(i, control, main)
 
         nodes = living

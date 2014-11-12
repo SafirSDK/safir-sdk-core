@@ -43,6 +43,8 @@
 
 using namespace Safir::Dob::Internal::SP;
 
+boost::shared_ptr<void> cs;
+
 RawStatistics GetRawWithOneNode()
 {
     auto msg = Safir::make_unique<RawStatisticsMessage>();
@@ -259,7 +261,8 @@ SystemStateMessage GetStateWithTwoNodes()
 
 
 typedef std::function<void(const RawStatistics& statistics,
-                           const RawChanges& flags)> StatisticsCallback;
+                           const RawChanges& flags,
+                           boost::shared_ptr<void> completionSignaller)> StatisticsCallback;
 
 
 class CommunicationStub
@@ -461,7 +464,7 @@ BOOST_AUTO_TEST_CASE( election_id_propagation )
 BOOST_AUTO_TEST_CASE( nodes_changed_propagation )
 {
     BOOST_CHECK(!ElectionHandlerStub::lastInstance->nodesChangedCalled);
-    rh.rawCb(GetRawWithOneNode(),RawChanges(RawChanges::NODES_CHANGED));
+    rh.rawCb(GetRawWithOneNode(),RawChanges(RawChanges::NODES_CHANGED), cs);
     ioService.run();
     BOOST_CHECK(ElectionHandlerStub::lastInstance->nodesChangedCalled);
 }
@@ -470,7 +473,7 @@ BOOST_AUTO_TEST_CASE( simple_state_production )
 {
     ElectionHandlerStub::lastInstance->electedId = 1000;
     ElectionHandlerStub::lastInstance->electionCompleteCallback(1000,100);
-    rh.rawCb(GetRawWithOneNode(),RawChanges(RawChanges::NODES_CHANGED));
+    rh.rawCb(GetRawWithOneNode(),RawChanges(RawChanges::NODES_CHANGED),cs);
     bool callbackCalled = false;
     coordinator.PerformOnStateMessage([&callbackCalled](std::unique_ptr<char []> /*data*/,
                                                         const size_t /*size*/)
@@ -484,7 +487,7 @@ BOOST_AUTO_TEST_CASE( simple_state_production )
     BOOST_CHECK(ElectionHandlerStub::lastInstance->nodesChangedCalled);
     BOOST_CHECK(!callbackCalled);
 
-    rh.rawCb(GetRawWithOneNodeAndRemoteRaw(),RawChanges(RawChanges::NEW_REMOTE_STATISTICS));
+    rh.rawCb(GetRawWithOneNodeAndRemoteRaw(),RawChanges(RawChanges::NEW_REMOTE_STATISTICS),cs);
 
     SystemStateMessage stateMessage;
     coordinator.PerformOnStateMessage([&callbackCalled,&stateMessage](std::unique_ptr<char []> data,
@@ -526,7 +529,7 @@ BOOST_AUTO_TEST_CASE( propagate_state_from_other )
 {
     ElectionHandlerStub::lastInstance->electedId = 1001;
     ElectionHandlerStub::lastInstance->electionCompleteCallback(1001,100);
-    rh.rawCb(GetRawWithOneNode(),RawChanges(RawChanges::NODES_CHANGED));
+    rh.rawCb(GetRawWithOneNode(),RawChanges(RawChanges::NODES_CHANGED),cs);
     auto state = GetStateWithOneNode();
 
     const size_t size = state.ByteSize();
@@ -588,7 +591,7 @@ BOOST_AUTO_TEST_CASE( remote_from_other_with_dead )
 {
     ElectionHandlerStub::lastInstance->electedId = 1001;
     ElectionHandlerStub::lastInstance->electionCompleteCallback(1001,100);
-    rh.rawCb(GetRawWithTwoNodes(),RawChanges(RawChanges::NODES_CHANGED));
+    rh.rawCb(GetRawWithTwoNodes(),RawChanges(RawChanges::NODES_CHANGED),cs);
     auto state = GetStateWithTwoNodes();
 
     const size_t size = state.ByteSize();
@@ -653,7 +656,7 @@ BOOST_AUTO_TEST_CASE( remote_reports_dead )
 {
     ElectionHandlerStub::lastInstance->electedId = 1000;
     ElectionHandlerStub::lastInstance->electionCompleteCallback(1000,100);
-    rh.rawCb(GetRawWithTwoNodesAndRemoteRaw(false,false),RawChanges(RawChanges::NODES_CHANGED));
+    rh.rawCb(GetRawWithTwoNodesAndRemoteRaw(false,false),RawChanges(RawChanges::NODES_CHANGED),cs);
 
     bool callbackCalled = false;
     SystemStateMessage stateMessage;
@@ -684,7 +687,7 @@ BOOST_AUTO_TEST_CASE( remote_reports_dead )
     BOOST_CHECK(rh.deadNodes.empty());
 
 
-    rh.rawCb(GetRawWithTwoNodesAndRemoteRaw(true,false),RawChanges(RawChanges::NEW_REMOTE_STATISTICS));
+    rh.rawCb(GetRawWithTwoNodesAndRemoteRaw(true,false),RawChanges(RawChanges::NEW_REMOTE_STATISTICS),cs);
 
     callbackCalled = false;
     coordinator.PerformOnStateMessage([&callbackCalled,&stateMessage](std::unique_ptr<char []> data,
@@ -725,7 +728,8 @@ BOOST_AUTO_TEST_CASE( ignore_long_gone_nodes )
     ElectionHandlerStub::lastInstance->electionCompleteCallback(1000,100);
 
     rh.rawCb(GetRawWithTwoNodesAndRemoteRaw(true,true),
-             RawChanges(RawChanges::NODES_CHANGED | RawChanges::NEW_REMOTE_STATISTICS));
+             RawChanges(RawChanges::NODES_CHANGED | RawChanges::NEW_REMOTE_STATISTICS),
+             cs);
 
     bool callbackCalled = false;
     SystemStateMessage stateMessage;

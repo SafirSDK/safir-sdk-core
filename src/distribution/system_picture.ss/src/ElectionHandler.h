@@ -244,7 +244,12 @@ namespace SP
 
                         if (m_lastStatistics.Id(i) == m_elected && !m_lastStatistics.IsDead(i))
                         {
-                            if (m_elected > m_id)
+                            //TODO: what do we do here?!
+                            //we need the remote node to have seen the same election as we did, otherwise
+                            //we may be in a situation where a reelection is needed.
+                            if (m_elected > m_id/* &&
+                                m_lastStatistics.HasRemoteStatistics(i) &&
+                                m_lastStatistics.RemoteStatistics(i).ElectionId() == m_lastStatistics.ElectionId()*/)
                             {
                                 lllog(4) << "SP: Found elected node with higher id than me, "
                                          << "not starting election!" << std::endl;
@@ -276,7 +281,8 @@ namespace SP
         //must be called in strand
         void ElectionTimeout()
         {
-            lllog(4) << "SP: There can be only one! Will send VICTORY to everyone!" << std::endl;
+            lllog(4) << "SP: There can be only one! Will send VICTORY ("
+                     << m_currentElectionId << ") to everyone!" << std::endl;
 
             m_elected = m_id;
 
@@ -303,21 +309,27 @@ namespace SP
 
             m_strand.dispatch([this,message,from, nodeTypeId]
             {
-
-                //Is this check really needed? Communication should guarantee these things, but maybe
-                //asio breaks those promises by queueing/stranding?
-                //This makes the remove_during_election test case work properly, anyway
                 bool found = false;
                 for (int i = 0; i < m_lastStatistics.Size(); ++i)
                 {
-                    if (m_lastStatistics.Id(i) == from && ! m_lastStatistics.IsDead(i))
+                    if (m_lastStatistics.Id(i) == from)
                     {
                         found = true;
+
+                        if (m_lastStatistics.IsDead(i))
+                        {
+                            lllog(5) << "SP Got ElectionMessage from a node that is dead! Discarding!" << std::endl;
+                            return;
+                        }
+
+                        break;
                     }
                 }
                 if (!found)
                 {
-                    lllog(5) << "SP Got ElectionMessage from a node that I dont know about!!! Discarding!" << std::endl;
+                    //this could be a node that we have yet to discover.
+                    lllog(5) << "SP Got ElectionMessage from a node that I dont know about! Discarding!" << std::endl;
+                    throw std::logic_error("noooo");
                     return;
                 }
 

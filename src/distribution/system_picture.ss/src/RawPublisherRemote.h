@@ -69,7 +69,8 @@ namespace SP
             SchedulePublishTimer(period, m_allNodeTypes);
 
             rawHandler.AddRawChangedCallback(m_strand.wrap([this](const RawStatistics&,
-                                                                  const RawChanges flags)
+                                                                  const RawChanges flags,
+                                                                  boost::shared_ptr<void> completionSignaller)
             {
                 if (flags.NodesChanged() || flags.ElectionIdChanged())
                 {

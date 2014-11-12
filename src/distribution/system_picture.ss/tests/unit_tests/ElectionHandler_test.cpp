@@ -379,7 +379,6 @@ struct Fixture
         auto msg = Safir::make_unique<RawStatisticsMessage>();
         for(auto&& node: nodes)
         {
-
             auto ni = msg->add_node_info();
             ni->set_id(node->id);
 
@@ -388,7 +387,6 @@ struct Fixture
                 ni->set_is_dead(true);
                 ni->set_is_long_gone(false);
             }
-
         }
 
         const auto raw = RawStatisticsCreator::Create(std::move(msg));

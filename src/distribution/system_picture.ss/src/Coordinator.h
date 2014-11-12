@@ -114,7 +114,8 @@ namespace SP
             m_stateMessage.set_elected_id(0); //our state message is not valid until we have a real id set.
 
             rawHandler.AddRawChangedCallback(m_strand.wrap([this](const RawStatistics& statistics,
-                                                                  const RawChanges flags)
+                                                                  const RawChanges flags,
+                                                                  boost::shared_ptr<void> completionSignaller)
             {
                 lllog(9) << "SP: Coordinator got new raw data (" << flags << ")" << std::endl;
 

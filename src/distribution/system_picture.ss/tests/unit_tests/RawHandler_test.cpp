@@ -219,7 +219,8 @@ BOOST_AUTO_TEST_CASE( nodes_changed_add_callback )
 {
     int cbCalls = 0;
     rh.AddRawChangedCallback([&](const RawStatistics& statistics,
-                                 const RawChanges& flags)
+                                 const RawChanges& flags,
+                                 boost::shared_ptr<void> completionSignaller)
                                {
                                    ++cbCalls;
                                    CheckStatisticsCommon(statistics);
@@ -252,7 +253,8 @@ BOOST_AUTO_TEST_CASE( nodes_changed_removed_callback )
 
     int cbCalls = 0;
     rh.AddRawChangedCallback([&](const RawStatistics& statistics,
-                                 const RawChanges& flags)
+                                 const RawChanges& flags,
+                                 boost::shared_ptr<void> completionSignaller)
                                {
                                    ++cbCalls;
                                    CheckStatisticsCommon(statistics);
@@ -341,7 +343,8 @@ BOOST_AUTO_TEST_CASE( raw_changed_callback )
     comm.excludeCb=[&]{rh.Stop();};
     int cbCalls = 0;
     rh.AddRawChangedCallback([&](const RawStatistics& statistics,
-                                 const RawChanges& flags)
+                                 const RawChanges& flags,
+                                 boost::shared_ptr<void> completionSignaller)
                                {
                                    ++cbCalls;
                                    CheckStatisticsCommon(statistics);
@@ -392,7 +395,8 @@ BOOST_AUTO_TEST_CASE( election_id_changed_callback)
     comm.excludeCb=[&]{rh.Stop();};
     int cbCalls = 0;
     rh.AddRawChangedCallback([&](const RawStatistics& statistics,
-                                 const RawChanges& flags)
+                                 const RawChanges& flags,
+                                 boost::shared_ptr<void> completionSignaller)
                              {
                                  ++cbCalls;
 
@@ -426,7 +430,8 @@ BOOST_AUTO_TEST_CASE( set_dead_node )
 {
     int cbCalls = 0;
     rh.AddRawChangedCallback([&](const RawStatistics& statistics,
-                                 const RawChanges& flags)
+                                 const RawChanges& flags,
+                                 boost::shared_ptr<void> completionSignaller)
                                {
                                    ++cbCalls;
 
@@ -466,7 +471,8 @@ BOOST_AUTO_TEST_CASE( recently_dead_nodes )
 {
     int cbCalls = 0;
     rh.AddRawChangedCallback([&](const RawStatistics& statistics,
-                                 const RawChanges& flags)
+                                 const RawChanges& flags,
+                                 boost::shared_ptr<void> completionSignaller)
                                {
                                    ++cbCalls;
 

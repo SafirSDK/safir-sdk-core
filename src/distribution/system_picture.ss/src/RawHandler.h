@@ -72,7 +72,8 @@ namespace SP
     class RawStatistics;
 
     typedef std::function<void(const RawStatistics& statistics,
-                               const RawChanges& flags)> StatisticsCallback;
+                               const RawChanges& flags,
+                               boost::shared_ptr<void> completionSignaller)> StatisticsCallback;
 
     template<class CommunicationT>
     class RawHandlerBasic
@@ -445,9 +446,10 @@ namespace SP
             newNode->set_data_receive_count(0);
             newNode->set_data_retransmit_count(0);
 
-            m_communication.IncludeNode(id);
-
-            PostRawChangedCallback(RawChanges(RawChanges::NODES_CHANGED));
+            //notify our users of the new node, and when they've returned we can
+            //let it in.
+            PostRawChangedCallback(RawChanges(RawChanges::NODES_CHANGED),
+                                   [this,id]{m_communication.IncludeNode(id);});
         }
 
 
@@ -571,14 +573,26 @@ namespace SP
          *
          * must be called in strand
          */
-        void PostRawChangedCallback(const RawChanges& flags)
+        void PostRawChangedCallback(const RawChanges& flags, const std::function<void()>& completionHandler = nullptr)
         {
             lllog(7) << "SP: PostRawChangedCallback " << flags << std::endl;
             const auto copy = RawStatisticsCreator::Create
                 (Safir::make_unique<RawStatisticsMessage>(m_allStatisticsMessage));
+
+            //this will create an object that will cause one and only one call to the completion handler
+            //when the last callback is complete.
+            boost::shared_ptr<void> completionCaller(static_cast<void*>(0),
+                                                     [completionHandler](void*)
+                                                     {
+                                                         if (completionHandler != nullptr)
+                                                         {
+                                                             completionHandler();
+                                                         }
+                                                     });
+
             for (const auto& cb : m_rawChangedCallbacks)
             {
-                m_ioService.post([cb,copy,flags]{cb(copy,flags);});
+                m_ioService.post([cb,copy,flags,completionCaller]{cb(copy,flags,completionCaller);});
             }
         }
 
@@ -605,8 +619,6 @@ namespace SP
         NodeTable m_nodeTable;
         mutable RawStatisticsMessage m_allStatisticsMessage;
 
-        std::vector<StatisticsCallback> m_nodesChangedCallbacks;
-        std::vector<StatisticsCallback> m_electionIdChangedCallbacks;
         std::vector<StatisticsCallback> m_rawChangedCallbacks;
 
         const bool m_master; //true if running in SystemPicture master instance

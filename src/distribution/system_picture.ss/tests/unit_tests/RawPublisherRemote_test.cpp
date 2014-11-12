@@ -142,18 +142,19 @@ BOOST_AUTO_TEST_CASE( callbacks )
         (ioService,communication,nodeTypes,"foo",h,boost::chrono::hours(10));
 
     h.stopCall = [&]{publisher.Stop();};
+    boost::shared_ptr<void> cs;
 
-    cb(RawStatistics(), RawChanges(RawChanges::NODES_CHANGED));
-    cb(RawStatistics(), RawChanges(RawChanges::NODES_CHANGED));
-    cb(RawStatistics(), RawChanges(RawChanges::NODES_CHANGED));
-    cb(RawStatistics(), RawChanges(RawChanges::NODES_CHANGED));
-    cb(RawStatistics(), RawChanges(RawChanges::NODES_CHANGED));
-    cb(RawStatistics(), RawChanges(RawChanges::ELECTION_ID_CHANGED));
-    cb(RawStatistics(), RawChanges(RawChanges::ELECTION_ID_CHANGED));
-    cb(RawStatistics(), RawChanges(RawChanges::ELECTION_ID_CHANGED));
-    cb(RawStatistics(), RawChanges(RawChanges::ELECTION_ID_CHANGED));
-    cb(RawStatistics(), RawChanges(RawChanges::NODES_CHANGED));
-    cb(RawStatistics(), RawChanges(RawChanges::ELECTION_ID_CHANGED));
+    cb(RawStatistics(), RawChanges(RawChanges::NODES_CHANGED), cs);
+    cb(RawStatistics(), RawChanges(RawChanges::NODES_CHANGED), cs);
+    cb(RawStatistics(), RawChanges(RawChanges::NODES_CHANGED), cs);
+    cb(RawStatistics(), RawChanges(RawChanges::NODES_CHANGED), cs);
+    cb(RawStatistics(), RawChanges(RawChanges::NODES_CHANGED), cs);
+    cb(RawStatistics(), RawChanges(RawChanges::ELECTION_ID_CHANGED), cs);
+    cb(RawStatistics(), RawChanges(RawChanges::ELECTION_ID_CHANGED), cs);
+    cb(RawStatistics(), RawChanges(RawChanges::ELECTION_ID_CHANGED), cs);
+    cb(RawStatistics(), RawChanges(RawChanges::ELECTION_ID_CHANGED), cs);
+    cb(RawStatistics(), RawChanges(RawChanges::NODES_CHANGED), cs);
+    cb(RawStatistics(), RawChanges(RawChanges::ELECTION_ID_CHANGED), cs);
 
     ioService.run();
 
