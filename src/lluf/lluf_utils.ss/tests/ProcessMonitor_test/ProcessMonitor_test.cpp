@@ -62,21 +62,20 @@ void callback(const pid_t pid)
 
 int main(int argc, char** argv)
 {
-    { //scope for the temporary variables
-        const std::vector<std::string> pidStrings(argv + 1, argv + argc);
+    const std::vector<std::string> pidStrings(argv + 1, argv + argc);
 
-        for(std::vector<std::string>::const_iterator it = pidStrings.begin();
-            it != pidStrings.end(); ++it)
-        {
-            pids.insert(boost::lexical_cast<pid_t>(*it));
-        }
+    for(std::vector<std::string>::const_iterator it = pidStrings.begin();
+        it != pidStrings.end(); ++it)
+    {
+        pids.insert(boost::lexical_cast<pid_t>(*it));
     }
 
     boost::thread thread(boost::bind(&boost::asio::io_service::run,&ioService));
 
-    for(std::set<pid_t>::iterator it = pids.begin(); it != pids.end(); ++it)
+    for(std::vector<std::string>::const_iterator it = pidStrings.begin();
+        it != pidStrings.end(); ++it)
     {
-        monitor.StartMonitorPid(*it);
+        monitor.StartMonitorPid(boost::lexical_cast<pid_t>(*it));
     }
 
     ioService.run();
