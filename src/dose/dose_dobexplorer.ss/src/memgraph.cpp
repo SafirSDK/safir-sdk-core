@@ -61,6 +61,12 @@ void MemGraph::Timeout()
 
     current->setText(QString::number(allocated / 1024 /1024));
     currentPercent->setText(QString::number(static_cast<int>(ratio * 100)));
+    
+    std::ostringstream ostr;
+    ostr.precision(2);
+    ostr << static_cast<double>((allocated)/(double)m_capacity)*100 << " %" << " (" << (allocated)/1048576 << "/" << m_capacity/1048576 << "Mb)";
+
+    memLabel->setText(ostr.str().c_str());
 }
 
 void MemGraph::PeriodChanged(double newPeriod)
