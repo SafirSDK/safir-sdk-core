@@ -150,9 +150,9 @@ namespace SP
                               });
         }
 
-        void NodesChanged(RawStatistics statistics)
+        void NodesChanged(RawStatistics statistics, boost::shared_ptr<void> completionSignaller)
         {
-            m_strand.dispatch([this, statistics]
+            m_strand.dispatch([this, statistics, completionSignaller]
                               {
                                   m_lastStatistics = std::move(statistics);
                                   StartElection();

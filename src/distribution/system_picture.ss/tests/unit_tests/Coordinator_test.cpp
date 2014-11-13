@@ -285,12 +285,6 @@ public:
         electionId = electionId_;
     }
 
-    /*    void AddNodesChangedCallback(const StatisticsCallback& callback)
-    {
-        BOOST_CHECK(nodesCb == nullptr);
-        nodesCb = callback;
-        }*/
-
     void AddRawChangedCallback(const StatisticsCallback& callback)
     {
         BOOST_CHECK(rawCb == nullptr);
@@ -337,7 +331,7 @@ public:
         return electedId == node;
     }
 
-    void NodesChanged(RawStatistics statistics)
+    void NodesChanged(RawStatistics statistics, boost::shared_ptr<void> completionSignaller)
     {
         nodesChangedCalled = true;
     }

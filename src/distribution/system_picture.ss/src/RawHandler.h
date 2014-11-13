@@ -449,7 +449,12 @@ namespace SP
             //notify our users of the new node, and when they've returned we can
             //let it in.
             PostRawChangedCallback(RawChanges(RawChanges::NODES_CHANGED),
-                                   [this,id]{m_communication.IncludeNode(id);});
+                                   [this,name,id]
+                                   {
+                                       lllog(4) << "SP: Calling IncludeNode for "
+                                                << name.c_str() << "(" << id << ")" << std::endl;
+                                       m_communication.IncludeNode(id);
+                                   });
         }
 
 

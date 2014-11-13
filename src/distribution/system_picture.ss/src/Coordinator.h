@@ -129,7 +129,7 @@ namespace SP
 
                 if (flags.NodesChanged())
                 {
-                    m_electionHandler.NodesChanged(std::move(statistics));
+                    m_electionHandler.NodesChanged(std::move(statistics), completionSignaller);
                 }
             }));
         }

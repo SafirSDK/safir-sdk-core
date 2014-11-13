@@ -389,6 +389,7 @@ struct Fixture
             }
         }
 
+        boost::shared_ptr<void> dummy;
         const auto raw = RawStatisticsCreator::Create(std::move(msg));
         for(auto&& node: nodes)
         {
@@ -397,7 +398,7 @@ struct Fixture
                 continue;
             }
 
-            node->eh.NodesChanged(raw);
+            node->eh.NodesChanged(raw,dummy);
         }
     }
 
