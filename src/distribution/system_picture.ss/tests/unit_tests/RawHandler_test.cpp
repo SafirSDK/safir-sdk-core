@@ -562,3 +562,36 @@ BOOST_AUTO_TEST_CASE( perform_on_my )
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+
+BOOST_AUTO_TEST_CASE(completion_signaller)
+{
+    int calls = 0;
+    boost::shared_ptr<void> p(static_cast<void*>(nullptr), [&calls](void*){++calls;});
+    BOOST_CHECK_EQUAL(p.use_count(), 1);
+    BOOST_CHECK_EQUAL(calls, 0);
+    p.reset();
+    BOOST_CHECK_EQUAL(p.use_count(), 0);
+    BOOST_CHECK_EQUAL(calls, 1);
+    p.reset();
+    BOOST_CHECK_EQUAL(p.use_count(), 0);
+    BOOST_CHECK_EQUAL(calls, 1);
+}
+
+
+BOOST_AUTO_TEST_CASE(completion_signaller_more)
+{
+    int calls = 0;
+    boost::shared_ptr<void> p(static_cast<void*>(nullptr), [&calls](void*){++calls;});
+    BOOST_CHECK_EQUAL(p.use_count(), 1);
+    BOOST_CHECK_EQUAL(calls, 0);
+    {
+        auto p2 = p;
+        BOOST_CHECK_EQUAL(p.use_count(), 2);
+        p.reset();
+        BOOST_CHECK_EQUAL(p.use_count(), 0);
+        BOOST_CHECK_EQUAL(p2.use_count(), 1);
+        BOOST_CHECK_EQUAL(calls, 0);
+    }
+    BOOST_CHECK_EQUAL(calls, 1);
+}
