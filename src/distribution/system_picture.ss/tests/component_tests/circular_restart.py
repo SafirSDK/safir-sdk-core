@@ -141,7 +141,9 @@ parser.add_argument('--nodes', '-n', action='store', type=int,
 parser.add_argument('--total-nodes', action='store', type=int,
                     default=10,
                     help='Total number of nodes that should run (if running this script on multiple computers)')
-
+parser.add_argument("--revolutions", type=int,
+                    default=3,
+                    help="Number of times to restart each node. 0 means run forever")
 args = parser.parse_args()
 
 rmdir("/tmp/circular_restart_output")
@@ -162,6 +164,7 @@ try:
     log("Stopping node 0")
     stop_node(*nodes[0])
     expected = 0
+    revolution = 0
 
     time.sleep(10)
 
@@ -180,18 +183,28 @@ try:
                     time.sleep(1000000)
                 expected = (expected + 1) % args.total_nodes
                 stop_node(i, control, main)
+                if expected == 0:
+                    revolution += 1
 
         nodes = living
 
         for i in dead:
-            log ("Restarting node", i)
-            nodes.append(launch_node(i,args.total_nodes))
+            if args.revolutions == 0 or revolution < args.revolutions:
+                log ("Restarting node", i)
+                nodes.append(launch_node(i,args.total_nodes))
+            else:
+                log("We've done our revolutions, not restarting node", i)
+
+        if len(nodes) == 0:
+            log("No nodes running, exiting")
+            break;
 
 except KeyboardInterrupt:
     pass
 except:
     traceback.print_exc()
-log ("Killing all controls")
+
+log ("Killing", len(nodes), "nodes")
 for i, control, main in nodes:
     try:
         stop(main)
