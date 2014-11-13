@@ -3,13 +3,13 @@ post_install() {
     groupadd --system safirusers &>/dev/null
   fi
 
-  chown root:safirusers var/log/safir_sdk_core
-  chown root:safirusers var/lib/safir_sdk_core
+  chown root:safirusers var/log/safir-sdk-core
+  chown root:safirusers var/lib/safir-sdk-core
   systemd-tmpfiles --create safir-sdk-core.conf
 }
 
 pre_remove() {
-  rm -rf var/log/safir_sdk_core
-  rm -rf var/lib/safir_sdk_core
-  rm -rf var/run/safir_sdk_core
+  rm -rf var/log/safir-sdk-core
+  rm -rf var/lib/safir-sdk-core
+  rm -rf var/run/safir-sdk-core
 }

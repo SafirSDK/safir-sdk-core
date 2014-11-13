@@ -80,13 +80,13 @@ def copy_tree(srcdir, dstdir):
 class __WindowsStager(object):
     def __init__(self, logger, stage):
         self.logger = logger
-        
-        self.LIB_DESTINATION = os.path.join(stage, "Development", "Program Files", "safir_sdk_core", "lib")
-        self.DLL_DESTINATION = os.path.join(stage, "Runtime", "Program Files", "safir_sdk_core", "bin")
-        self.HEADER_DESTINATION = os.path.join(stage, "Development", "Program Files", "safir_sdk_core", "include")
+
+        self.LIB_DESTINATION = os.path.join(stage, "Development", "Program Files", "safir-sdk-core", "lib")
+        self.DLL_DESTINATION = os.path.join(stage, "Runtime", "Program Files", "safir-sdk-core", "bin")
+        self.HEADER_DESTINATION = os.path.join(stage, "Development", "Program Files", "safir-sdk-core", "include")
 
     def __copy_dll(self, name):
-        for path in os.environ.get("PATH").split(os.pathsep):    
+        for path in os.environ.get("PATH").split(os.pathsep):
             fn = os.path.join(path,name)
             if os.path.isfile(fn):
                 copy_file(fn, self.DLL_DESTINATION)
@@ -99,10 +99,10 @@ class __WindowsStager(object):
     def __copy_boost(self):
         self.logger.log("Copying boost stuff", "detail")
         boost_dir = os.environ.get("BOOST_ROOT")
-        if boost_dir is None: 
+        if boost_dir is None:
             raise StagingError("Failed to find boost installation")
-        
-        # find lib dir    
+
+        # find lib dir
         boost_lib_dir = os.path.join(boost_dir, "lib");
         if not os.path.isdir(boost_lib_dir):
             raise StagingError("Failed to find boost lib dir")
@@ -127,11 +127,11 @@ class __WindowsStager(object):
             raise StagingError("QTDIR is not set! Cannot find Qt dlls!")
         else:
             self.__copy_qt_dlls(qt_dir)
-    
+
     def __copy_jom(self):
         self.logger.log("Copying jom.exe")
         self.__copy_exe("jom.exe")
-        
+
     def run(self):
         self.__copy_boost()
         self.__copy_qt()
@@ -161,7 +161,7 @@ class __WindowsStager(object):
             match = file_name_filter.match(file)
             if match is not None and match.group(1) in libraries:
                 copy_file(os.path.join(dir,file), self.LIB_DESTINATION)
-               
+
 
     def __copy_boost_dlls(self, dir, libraries):
         file_name_filter = re.compile(r"boost_(.*)-vc.*-mt-.*\.dll")
@@ -169,8 +169,8 @@ class __WindowsStager(object):
         for file in dirlist:
             match = file_name_filter.match(file)
             if match is not None and match.group(1) in libraries:
-                copy_file(os.path.join(dir,file), self.DLL_DESTINATION)     
-           
+                copy_file(os.path.join(dir,file), self.DLL_DESTINATION)
+
     def __copy_qt_dlls(self, dir):
         """
         Try to copy a bunch of qt files. This is a mismash of qt4 and qt5 stuff,
@@ -202,17 +202,15 @@ class __WindowsStager(object):
             platforms = os.path.join(self.DLL_DESTINATION, "platforms")
             mkdir(platforms)
             copy_file(qwindows, platforms)
-     
+
 def stage_dependencies(logger, stage):
     """
     Throws StagingError if something goes wrong.
     """
-    logger.log("Copying Safir SDK Core binary dependencies to staging area", "header") 
+    logger.log("Copying Safir SDK Core binary dependencies to staging area", "header")
     if sys.platform == "win32":
         stager = __WindowsStager(logger,stage)
         stager.run()
-    
+
     else:
         logger.log("Nothing to do...", "detail")
-    
-

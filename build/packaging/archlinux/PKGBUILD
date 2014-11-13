@@ -1,7 +1,7 @@
 # Maintainer: DonOregano <lars@foldspace.nu>
 
-pkgname=safir_sdk_core-git
-pkgver=logan_r2459.24646b8
+pkgname=safir-sdk-core-git
+pkgver=logan_r2567.d56d763
 pkgrel=1
 pkgdesc="Safir SDK Core is a middleware and platform for creation of distributed soft real-time systems. It is Scalable, Reliable, Portable, and last but not least, it is Open!"
 arch=('i686' 'x86_64' 'armv6h' 'armv7h')
@@ -15,7 +15,7 @@ source=("$pkgname"::'git+https://github.com/SafirSDK/safir_sdk_core.git#branch=l
         'safir-sdk-core.tmpfiles')
 sha1sums=('SKIP'
           'efdadf20b5fe5c5bbc84f131cdabef8a65c2e838')
-backup=('etc/safir_sdk_core/typesystem.ini' 'etc/safir_sdk_core/logging.ini' 'etc/safir_sdk_core/locations.ini')
+backup=('etc/safir-sdk-core/typesystem.ini' 'etc/safir-sdk-core/logging.ini' 'etc/safir-sdk-core/locations.ini')
 
 pkgver() {
   cd "$srcdir/$pkgname"
@@ -41,18 +41,18 @@ package() {
   make DESTDIR="$pkgdir/" install
 
   #Create directories
-  install -d -m 775 $pkgdir/var/log/safir_sdk_core
-  install -d -m 775 $pkgdir/var/lib/safir_sdk_core
+  install -d -m 775 $pkgdir/var/log/safir-sdk-core
+  install -d -m 775 $pkgdir/var/lib/safir-sdk-core
   install -Dm644 "$srcdir/safir-sdk-core.tmpfiles" "$pkgdir/usr/lib/tmpfiles.d/safir-sdk-core.conf"
 
   # install assemblies into Mono's GAC
-  for file in $pkgdir/usr/lib/safir_sdk_core/*.dll
+  for file in $pkgdir/usr/lib/safir-sdk-core/*.dll
   do
     gacutil -i $file -root "$pkgdir/usr/lib"
   done
 
-  #install configuration in /etc/safir_sdk_core
-  install -d -m 755 $pkgdir/etc/safir_sdk_core
-  install -m 644 -t $pkgdir/etc/safir_sdk_core $pkgdir/usr/share/doc/safir_sdk_core/example_configuration/*.ini
+  #install configuration in /etc/safir-sdk-core
+  install -d -m 755 $pkgdir/etc/safir-sdk-core
+  install -m 644 -t $pkgdir/etc/safir-sdk-core $pkgdir/usr/share/doc/safir-sdk-core/example_configuration/*.ini
 }
 

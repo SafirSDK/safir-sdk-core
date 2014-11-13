@@ -20,14 +20,14 @@ SetCompressor /SOLID lzma
 
 ;--------------------------------
 
- 
+
 Function .onInit
     ;Check windows version
     ${IfNot} ${AtLeastWin7}
         MessageBox MB_OK "Windows 7 or above required"
         Quit
     ${EndIf}
-  
+
     ;Set up command line for parsing
     var /GLOBAL cmdLineParams
     Push $R0
@@ -45,7 +45,7 @@ Function .onInit
     ; Initialise options
     Var /GLOBAL option_development
     Var /GLOBAL option_testSuite
-    
+
     StrCpy $option_development	  1
     StrCpy $option_testSuite	  0
 
@@ -53,7 +53,7 @@ Function .onInit
     Push $R0
     Call parseParameters
     Pop $R0
-    
+
 FunctionEnd
 
 ;--------------------------------
@@ -87,9 +87,9 @@ FunctionEnd
   OutFile "SafirSDKCore-VS${STUDIO}-${nameBitwidth}${debugonlyStr}.exe"
 
   ;Source directories created by build script
-  !define StageDirRuntime "..\..\..\stage\Runtime\Program Files\safir_sdk_core"
-  !define StageDirDevelopment "..\..\..\stage\Development\Program Files\safir_sdk_core"
-  !define StageDirTest "..\..\..\stage\Test\Program Files\safir_sdk_core"
+  !define StageDirRuntime "..\..\..\stage\Runtime\Program Files\safir-sdk-core"
+  !define StageDirDevelopment "..\..\..\stage\Development\Program Files\safir-sdk-core"
+  !define StageDirTest "..\..\..\stage\Test\Program Files\safir-sdk-core"
 
 
   ;Get installation folder from registry if available
@@ -97,8 +97,8 @@ FunctionEnd
 
   ;Request application privileges for Windows Vista
   RequestExecutionLevel admin
-  
-  
+
+
 ;--------------------------------
 ;Interface Settings
 
@@ -136,7 +136,7 @@ Section "Runtime" SecRuntime
   File /r "${StageDirRuntime}\*"
 
   SetShellVarContext all
-  SetOutPath "$APPDATA\safir_sdk_core\config"
+  SetOutPath "$APPDATA\safir-sdk-core\config"
   File "${StageDirRuntime}\docs\example_configuration\*.ini"
 
   ;TODO start menu (config links with notepad, dobmake, docs, etc)
@@ -146,7 +146,7 @@ Section "Runtime" SecRuntime
   ;Add assemblies to GAC.
   ;This only happens here if we're not installing the test suite,
   ;otherwise we wait until the assemblies from the test suite
-  ;have been installed before we run gactool).  
+  ;have been installed before we run gactool).
   ${If} $option_testSuite == "0"
     nsExec::ExecToLog '"$INSTDIR\installer_utils\gactool" "--install" "$INSTDIR\dotnet"'
   ${EndIf}
@@ -170,7 +170,7 @@ Section "Runtime" SecRuntime
                    "QuietUninstallString" "$\"$INSTDIR\Uninstall.exe$\" /S"
 
   ;TODO: show version!
-   
+
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
 
@@ -190,7 +190,7 @@ Section /o "Test suite" SecTest
   SetOutPath "$INSTDIR"
 
   File /r "${StageDirTest}\*"
-  
+
   #Install to assemblies to GAC (see also above)
   nsExec::ExecToLog '"$INSTDIR\installer_utils\gactool" "--install" "$INSTDIR\dotnet"'
 SectionEnd
@@ -206,14 +206,14 @@ Function parseParameters
     ${GetOptions} $cmdLineParams '/testsuite' $R0
     IfErrors +2 0
     StrCpy $option_testSuite 1
-    
-    
+
+
     ${If} $option_development == "0"
       SectionGetFlags ${SecDevelopment} $0
       IntOp $0 $0 ^ ${SF_SELECTED}
       SectionSetFlags ${SecDevelopment} $0
     ${EndIf}
-    
+
     ${If} $option_testSuite == "1"
       SectionGetFlags ${SecTest} $0
       IntOp $0 $0 ^ ${SF_SELECTED}
@@ -245,8 +245,8 @@ Section "Uninstall"
 
   ;remove assemblies from GAC
   nsExec::ExecToLog '"$INSTDIR\installer_utils\gactool" "--uninstall" "$INSTDIR\dotnet"'
-  
-  ; We blindly remove everything from the installation dir. This might blow up if someone decides to 
+
+  ; We blindly remove everything from the installation dir. This might blow up if someone decides to
   ; install to a path with other stuff in it, e.g. C:\ (yes, we'd try to remove everything from c:\...).
   ;Also, we try twice, in case f-ing windows doesn't let us delete the files the first time round...
   ; TODO: better way?
@@ -255,7 +255,7 @@ Section "Uninstall"
   RMDir /r "$INSTDIR"
 
   SetShellVarContext all
-  RMDir /r "$APPDATA\safir_sdk_core"
+  RMDir /r "$APPDATA\safir-sdk-core"
 
   DeleteRegKey HKCU "Software\Safir SDK Core"
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Safir SDK Core"
