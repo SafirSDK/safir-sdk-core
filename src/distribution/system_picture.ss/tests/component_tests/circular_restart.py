@@ -135,10 +135,13 @@ control_stub = os.path.join(SAFIR_RUNTIME,"bin","control_stub")
 dose_main_stub = os.path.join(SAFIR_RUNTIME,"bin","dose_main_stub")
 
 parser = argparse.ArgumentParser(description='Run a lot of control_stub')
-parser.add_argument('--nodes', '-n', action='store', type=int,
+parser.add_argument('--start',type=int,
+                    default = 0,
+                    help = "Node number of first node to start")
+parser.add_argument('--nodes', '-n', type=int,
                     default=10,
                     help='Number of controls to run')
-parser.add_argument('--total-nodes', action='store', type=int,
+parser.add_argument('--total-nodes', type=int,
                     default=10,
                     help='Total number of nodes that should run (if running this script on multiple computers)')
 parser.add_argument("--revolutions", type=int,
@@ -146,26 +149,27 @@ parser.add_argument("--revolutions", type=int,
                     help="Number of times to restart each node. 0 means run forever")
 args = parser.parse_args()
 
-rmdir("/tmp/circular_restart_output")
-mkdir("/tmp/circular_restart_output")
-os.chdir("/tmp/circular_restart_output")
+rmdir("circular_restart_output")
+mkdir("circular_restart_output")
+os.chdir("circular_restart_output")
 
 nodes = list()
 
 try:
     log("Starting some nodes")
-    for i in range (args.nodes):
+    for i in range (args.start, args.start + args.nodes):
         nodes.append(launch_node(i,args.total_nodes))
 
     log("Sleeping for a while to let the nodes start up")
     time.sleep(10)
 
     #we need to kill the first node manually, after which the circle will start running...
-    log("Stopping node 0")
-    stop_node(*nodes[0])
-    expected = 0
+    if args.start == 0:
+        log("Stopping node 0")
+        stop_node(*nodes[0])
+    expected = args.start
     revolution = 0
-
+    log("Expected is", expected)
     time.sleep(10)
 
     while True:
@@ -181,10 +185,11 @@ try:
                 if i != expected:
                     log ("Unexpected node died!")
                     time.sleep(1000000)
-                expected = (expected + 1) % args.total_nodes
-                stop_node(i, control, main)
-                if expected == 0:
+                if expected == args.start:
                     revolution += 1
+                expected = args.start + (expected + 1) % args.nodes
+                log("Next expected is", expected)
+                stop_node(i, control, main)
 
         nodes = living
 
