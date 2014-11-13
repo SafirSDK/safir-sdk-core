@@ -158,7 +158,7 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
   FIND_PACKAGE(PythonInterp)
 
   if (SAFIR_EXTERNAL_BUILD)
-    set(dots_v_path "${SAFIR_SDK_CORE_EXECUTABLES_DIR/dots_v.py")
+    set(dots_v_path "${SAFIR_SDK_CORE_EXECUTABLES_DIR}/dots_v") #TODO different on windows?
     set(dod_directory "${SAFIR_SDK_CORE_GENERATION_DIR}/dod/")
   else()
     set(dots_v_path "${safir_sdk_core_SOURCE_DIR}/src/dots/dots_v.ss/dots_v.py")
