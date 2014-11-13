@@ -8756,8 +8756,10 @@ void TestDictionaries()
     ts::ObjectPtr op=ts::Serialization::ToObject(bin);
     DotsTest::MemberDictionariesPtr md2=boost::dynamic_pointer_cast<DotsTest::MemberDictionaries>(op);
 
+    std::cout<<"-- Dictval--"<<std::endl;
     for (ts::DictionaryContainer<ts::InstanceId, ts::EntityIdContainer>::const_iterator it=md2->InstanceIdEntityIdMember().begin(); it!=md2->InstanceIdEntityIdMember().end(); ++it)
     {
+
         std::wcout<<it->first.ToString()<<L" = "<<it->second.GetVal().ToString()<<std::endl;
     }
 

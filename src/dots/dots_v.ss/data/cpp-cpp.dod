@@ -602,14 +602,7 @@ namespace @_NAMESPACEV_@
             @_MEMBERDICTIONARYTYPE_@ key;
             Safir::Dob::Typesystem::Internal::BlobOperations::Get(key, isNull, isChanged, handle, g_@_LOWER:MEMBER_@MemberIndex, valueIndex, Safir::Dob::Typesystem::Internal::BlobOperations::KeyMode);
 @@END_IF@@
-            if (isNull)
-            {
-                m_@_MEMBER_@Member[key].SetChanged(isChanged);
-            }
-            else
-            {
-                Safir::Dob::Typesystem::Internal::BlobOperations::Get(m_@_MEMBER_@Member[key], handle, g_@_LOWER:MEMBER_@MemberIndex, 0);
-            }
+            Safir::Dob::Typesystem::Internal::BlobOperations::Get(m_@_MEMBER_@Member[key], handle, g_@_LOWER:MEMBER_@MemberIndex, valueIndex);
         }
 @@ --- Single member ---
 @@ELSE@@
@@ -710,11 +703,8 @@ namespace @_NAMESPACEV_@
 @@END_IF@@
 @@END_IF@@
 	    {
-            Safir::Dob::Typesystem::Internal::BlobOperations::Set(it->first, it->second.IsNull(), it->second.IsChanged(), handle, g_@_LOWER:MEMBER_@MemberIndex, 0, Safir::Dob::Typesystem::Internal::BlobOperations::KeyMode);
-            if (!it->second.IsNull())
-            {
-                Safir::Dob::Typesystem::Internal::BlobOperations::Set(it->second, handle, g_@_LOWER:MEMBER_@MemberIndex, 0);
-            }
+            Safir::Dob::Typesystem::Internal::BlobOperations::Set(it->first, false, false, handle, g_@_LOWER:MEMBER_@MemberIndex, 0, Safir::Dob::Typesystem::Internal::BlobOperations::KeyMode);
+            Safir::Dob::Typesystem::Internal::BlobOperations::Set(it->second, handle, g_@_LOWER:MEMBER_@MemberIndex, 0);
          }
 @@ --- Single member ---
 @@ELSE@@
