@@ -417,7 +417,7 @@ namespace Com
                     if (header->fragmentNumber==0) //we cannot start in the middle of a fragmented message
                     {
                         ForceInsert(header, payload, ni);
-                        return header->ackNow;
+                        return header->ackNow==1;
                     }
                     //else we must wait for beginning of a new message before we start
                     return false; //no ack to send
@@ -431,7 +431,7 @@ namespace Com
                 {
                     //The Normal case: Message in correct order
                     Insert(header, payload, ni);
-                    return header->ackNow;
+                    return header->ackNow==1;
                 }
                 else if (header->sequenceNumber<=ch.lastInSequence+Parameters::SlidingWindowSize)
                 {
