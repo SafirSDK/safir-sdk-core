@@ -17,7 +17,7 @@ install_runtime:
 	cd obj-$(DEB_BUILD_GNU_TYPE) && /usr/bin/cmake -DCOMPONENT=Runtime -P cmake_install.cmake
 
 	#copy example configuration to /etc
-	dh_install debian/safir-sdk-core/usr/share/doc/safir_sdk_core/example_configuration/*.ini etc/safir_sdk_core
+	dh_install debian/safir-sdk-core/usr/share/doc/safir-sdk-core/example_configuration/*.ini etc/safir-sdk-core
 
 	#create some needed directories and set permissions
 	mkdir -p debian/safir-sdk-core/var/lib/safir-sdk-core
