@@ -24,7 +24,7 @@
 #
 ###############################################################################
 from __future__ import print_function
-import subprocess, os, time, sys, shutil, random, argparse, traceback
+import subprocess, os, time, sys, shutil, random, argparse, traceback, platform
 
 class Failure(Exception):
     pass
@@ -60,11 +60,11 @@ def mkdir(newdir):
         if tail:
             os.mkdir(newdir)
 
-def launch_control(number, previous, id, env):
+def launch_control(number, previous, id, env, ownip, seedip):
     command = (control_stub,) + ("--name",    "Node_{0:03d}".format(number),
-                                  "--control-address", "127.0.0.1:33{0:03d}".format(number),
-                                  "--data-address", "127.0.0.1:43{0:03d}".format(number),
-                                  "--seed", "127.0.0.1:33{0:03d}".format(previous),
+                                  "--control-address", ownip + ":33{0:03d}".format(number),
+                                  "--data-address", ownip + ":43{0:03d}".format(number),
+                                  "--seed", seedip + ":33{0:03d}".format(previous),
                                   "--force-id", str(id))
 
     output = open("control_{0:03d}.output.txt".format(number),"w")
@@ -74,9 +74,9 @@ def launch_control(number, previous, id, env):
                             env = env)
     return proc
 
-def launch_dose_main(number, previous, id, env):
+def launch_dose_main(number, previous, id, env, ownip):
     command = (dose_main_stub,) + ("--name", "Node_{0:03d}".format(number),
-                                   "--data-address", "127.0.0.1:43{0:03d}".format(number),
+                                   "--data-address", ownip + ":43{0:03d}".format(number),
                                    "--force-id", str(id),
                                    "--suicide-trigger", "Node_{0:03d}".format(previous))
 
@@ -88,16 +88,17 @@ def launch_dose_main(number, previous, id, env):
     return proc
 
 
-def launch_node(number, total):
+def launch_node(number, args):
     id = random.getrandbits(63)
 
-    previous = (number - 1) % total
+    previous = (number - 1) % args.total_nodes
+    seed = args.prev_ip if number == args.start else args.own_ip
     log("Launching node", number, "with previous set to", previous)
     env = os.environ.copy()
     env["SAFIR_INSTANCE"] = str(number+1000)
 
-    control = launch_control(number, previous, id, env)
-    main = launch_dose_main(number, previous, id, env)
+    control = launch_control(number, previous, id, env, args.own_ip, seed)
+    main = launch_dose_main(number, previous, id, env, args.own_ip)
     return (number,control,main)
 
 
@@ -145,8 +146,15 @@ parser.add_argument('--total-nodes', type=int,
                     default=10,
                     help='Total number of nodes that should run (if running this script on multiple computers)')
 parser.add_argument("--revolutions", type=int,
-                    default=3,
+                    default=0,
                     help="Number of times to restart each node. 0 means run forever")
+parser.add_argument("--own-ip",
+                    default="127.0.0.1",
+                    help="Ip adress to bind to")
+parser.add_argument("--prev-ip",
+                    default="127.0.0.1",
+                    help="Ip address of 'previous' set of nodes, used for seeding")
+
 args = parser.parse_args()
 
 rmdir("circular_restart_output")
@@ -158,7 +166,7 @@ nodes = list()
 try:
     log("Starting some nodes")
     for i in range (args.start, args.start + args.nodes):
-        nodes.append(launch_node(i,args.total_nodes))
+        nodes.append(launch_node(i,args))
 
     log("Sleeping for a while to let the nodes start up")
     time.sleep(10)
@@ -196,7 +204,7 @@ try:
         for i in dead:
             if args.revolutions == 0 or revolution < args.revolutions:
                 log ("Restarting node", i)
-                nodes.append(launch_node(i,args.total_nodes))
+                nodes.append(launch_node(i,args))
             else:
                 log("We've done our revolutions, not restarting node", i)
 
