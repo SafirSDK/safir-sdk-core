@@ -19,7 +19,7 @@
         <summary>Full path where the File storage backend stores its data. Use forward slashes as directory separator!</summary>
         <name>FileStoragePath</name>
         <type>String</type>
-        <value>@{TEMP}/safir_sdk_core/persistence/</value>
+        <value>@{TEMP}/safir-sdk-core/persistence/</value>
       </parameter>
      <parameter>
         <summary>The string to use for connection to the physical storage.</summary>
