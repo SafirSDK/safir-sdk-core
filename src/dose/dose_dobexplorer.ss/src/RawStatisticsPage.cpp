@@ -212,6 +212,8 @@ void RawStatisticsPage::UpdateLocalTable()
         localTable->setItem(row,
                             COLUMN_ID,
                             new QTableWidgetItem(QString::number(it->first)));
+        localTable->item(row,COLUMN_ID)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
+
         localTable->setItem(row,
                             COLUMN_NODE_TYPE,
                             new QTableWidgetItem(QString::number(m_statistics.NodeTypeId(it->second))));
@@ -342,6 +344,8 @@ void RawStatisticsPage::UpdateRemoteTable()
                     remoteTable->setItem(row,
                                          COLUMN_ID,
                                          new QTableWidgetItem(QString::number(it->first)));
+                    remoteTable->item(row,COLUMN_ID)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
+
                     remoteTable->setItem(row,
                                          COLUMN_NODE_TYPE,
                                          new QTableWidgetItem(QString::number(statistics.NodeTypeId(it->second))));
