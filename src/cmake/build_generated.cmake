@@ -16,11 +16,11 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
   # Work out if we're building the Safir SDK Core source tree or if
   # we're building a user library (i.e. external to Core).
   #
-  if (SAFIR_SDK_CORE_INSTALL_DIR AND safir_sdk_core_SOURCE_DIR)
+  if (SAFIR_SDK_CORE_INSTALL_DIR AND safir-sdk-core_SOURCE_DIR)
     MESSAGE(FATAL_ERROR "Please do not use find_package(SafirSDKCore) from within the Safir SDK Core build tree! What are you trying to do?!")
   elseif(SAFIR_SDK_CORE_INSTALL_DIR)
     set (SAFIR_EXTERNAL_BUILD True)
-  elseif(safir_sdk_core_SOURCE_DIR)
+  elseif(safir-sdk-core_SOURCE_DIR)
     set (SAFIR_EXTERNAL_BUILD False)
   else()
     MESSAGE(FATAL_ERROR "Could not work out whether this is an external or internal build. Did you follow the instructions in the users guide?")
@@ -161,8 +161,8 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
     set(dots_v_path "${SAFIR_SDK_CORE_EXECUTABLES_DIR}/dots_v") #TODO different on windows?
     set(dod_directory "${SAFIR_SDK_CORE_GENERATION_DIR}/dod/")
   else()
-    set(dots_v_path "${safir_sdk_core_SOURCE_DIR}/src/dots/dots_v.ss/dots_v.py")
-    set(dod_directory "${safir_sdk_core_SOURCE_DIR}/src/dots/dots_v.ss/data/")
+    set(dots_v_path "${safir-sdk-core_SOURCE_DIR}/src/dots/dots_v.ss/dots_v.py")
+    set(dod_directory "${safir-sdk-core_SOURCE_DIR}/src/dots/dots_v.ss/data/")
   endif()
 
   FILE(GLOB dod_files ${dod_directory} *.dod)
@@ -206,7 +206,7 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
       ${SAFIR_SDK_CORE_INCLUDE_DIRS})
   else()
     target_include_directories(safir_generated-${GEN_NAME}-cpp
-      PRIVATE ${safir_sdk_core_SOURCE_DIR}/src/dots/dots_v.ss/data)
+      PRIVATE ${safir-sdk-core_SOURCE_DIR}/src/dots/dots_v.ss/data)
   endif()
 
 
@@ -242,7 +242,7 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
     if (SAFIR_EXTERNAL_BUILD)
       set (manifest_path ${SAFIR_SDK_CORE_GENERATION_DIR}/java/Manifest.txt.in)
     else()
-      set (manifest_path ${safir_sdk_core_SOURCE_DIR}/src/dots/dots_v.ss/data/Manifest.txt.in)
+      set (manifest_path ${safir-sdk-core_SOURCE_DIR}/src/dots/dots_v.ss/data/Manifest.txt.in)
     endif()
 
     configure_file(${manifest_path} ${CMAKE_CURRENT_BINARY_DIR}/Manifest.generated.txt @ONLY)
@@ -273,7 +273,7 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
       set (snk_path ${SAFIR_SDK_CORE_GENERATION_DIR}/dotnet/dots_generated-dotnet.snk)
       set (lib_path_arg LIBRARY_PATHS ${SAFIR_SDK_CORE_CSHARP_LIBRARY_PATH})
     else()
-      set (snk_path ${safir_sdk_core_SOURCE_DIR}/src/dots/dots_v.ss/data/dots_generated-dotnet.snk)
+      set (snk_path ${safir-sdk-core_SOURCE_DIR}/src/dots/dots_v.ss/data/dots_generated-dotnet.snk)
     endif()
 
     #TODO key path!

@@ -27,7 +27,7 @@ endif()
 
 
 #The reason for the C:/Program... stuff above is that the CMAKE_INSTALL_PREFIX contains
-#"safir_sdk_core" instead of "Safir SDK Core", which is not where we install by default.
+#"safir-sdk-core" instead of "Safir SDK Core", which is not where we install by default.
 #Maybe it is possible to find some better way of doing this...
 #TODO: this is in src/config/CMakeLists.txt as well. Fix somehow?
 

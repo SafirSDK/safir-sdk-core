@@ -3,7 +3,7 @@ if (NOT CSHARP_FOUND)
 endif()
 
 ADD_CSHARP_ASSEMBLY(Safir.Logging LIBRARY
-  SIGN ${safir_sdk_core_SOURCE_DIR}/build/config/sdk/data/build/safirkey.snk
+  SIGN ${safir-sdk-core_SOURCE_DIR}/build/config/sdk/data/build/safirkey.snk
   SOURCES Log.cs AssemblyInfo.cs
   DLL_IMPORTS logging_library)
 

@@ -29,7 +29,7 @@ endif()
 ADD_TEST(NAME multiple_init COMMAND multiple_accesses)
 ADD_TEST(NAME multiple_accesses_after_init COMMAND multiple_accesses sleep)
 ADD_TEST(NAME multiple_serialization COMMAND multiple_serialization ${CMAKE_CURRENT_SOURCE_DIR}/obj.xml)
-ADD_TEST(NAME repository_compare COMMAND repository_compare ${safir_sdk_core_SOURCE_DIR}/src/safir_dou)
+ADD_TEST(NAME repository_compare COMMAND repository_compare ${safir-sdk-core_SOURCE_DIR}/src/safir_dou)
 
 SET_SAFIR_TEST_PROPERTIES(TEST multiple_init TIMEOUT 120)
 SET_SAFIR_TEST_PROPERTIES(TEST multiple_accesses_after_init TIMEOUT 120)

@@ -5,8 +5,8 @@ endif()
 
 
 FILE(GLOB_RECURSE headers
-  RELATIVE ${safir_sdk_core_SOURCE_DIR}/include
-  ${safir_sdk_core_SOURCE_DIR}/include/*.h
+  RELATIVE ${safir-sdk-core_SOURCE_DIR}/include
+  ${safir-sdk-core_SOURCE_DIR}/include/*.h
   )
 
 set(EXCLUDE_LIST
@@ -40,7 +40,7 @@ foreach(header ${headers})
                                -D HEADER_TO_CHECK=${header}
                                -D template=${CMAKE_CURRENT_SOURCE_DIR}/check_header.cpp.in
                                -P ${CMAKE_CURRENT_SOURCE_DIR}/configure_file.cmake
-      DEPENDS ${safir_sdk_core_SOURCE_DIR}/include/${header} check_header.cpp.in configure_file.cmake)
+      DEPENDS ${safir-sdk-core_SOURCE_DIR}/include/${header} check_header.cpp.in configure_file.cmake)
   endif()
 endforeach()
 

@@ -1,5 +1,4 @@
-
-PROJECT(safir_sdk_core CXX C)
+PROJECT(safir-sdk-core CXX C)
 
 #We need a very recent cmake on windows. The reason is that test property
 #and install generator expressions are only supported in cmake 3.

@@ -266,10 +266,10 @@ function (SET_SAFIR_TEST_PROPERTIES)
   endif()
 
   if (NOT PROP_CONFIG_OVERRIDE)
-    set(PROP_CONFIG_OVERRIDE "${safir_sdk_core_SOURCE_DIR}/src/tests/test_support/test_config")
+    set(PROP_CONFIG_OVERRIDE "${safir-sdk-core_SOURCE_DIR}/src/tests/test_support/test_config")
   endif()
 
-  set (pypath "$ENV{PYTHONPATH}${PATH_SEPARATOR}${safir_sdk_core_SOURCE_DIR}/src/tests/test_support/python")
+  set (pypath "$ENV{PYTHONPATH}${PATH_SEPARATOR}${safir-sdk-core_SOURCE_DIR}/src/tests/test_support/python")
   string(REGEX REPLACE "^${PATH_SEPARATOR}+" "" pypath ${pypath}) # remove any leading path separators
 
   #Add the library path to the environment
@@ -285,7 +285,7 @@ function (SET_SAFIR_TEST_PROPERTIES)
   SET_PROPERTY(TEST ${PROP_TEST}
     PROPERTY ENVIRONMENT
     "SAFIR_TEST_CONFIG_OVERRIDE=${PROP_CONFIG_OVERRIDE}"
-    "SAFIR_SOURCE_ROOT=${safir_sdk_core_SOURCE_DIR}/"
+    "SAFIR_SOURCE_ROOT=${safir-sdk-core_SOURCE_DIR}/"
     "CMAKE_CURRENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}"
     "CMAKE_CURRENT_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}"
     "PYTHONPATH=${pypath}"

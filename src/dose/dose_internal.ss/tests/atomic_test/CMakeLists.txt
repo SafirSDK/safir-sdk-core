@@ -1,5 +1,5 @@
 
-target_include_directories(signals_test PRIVATE ${safir_sdk_core_SOURCE_DIR}/src/include)
+target_include_directories(signals_test PRIVATE ${safir-sdk-core_SOURCE_DIR}/src/include)
 
 ADD_EXECUTABLE(Atomic_test atomic_test.cpp)
 

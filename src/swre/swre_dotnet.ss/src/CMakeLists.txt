@@ -3,7 +3,7 @@ if (NOT CSHARP_FOUND)
 endif()
 
 ADD_CSHARP_ASSEMBLY(Safir.SwReports LIBRARY
-  SIGN ${safir_sdk_core_SOURCE_DIR}/build/config/sdk/data/build/safirkey.snk
+  SIGN ${safir-sdk-core_SOURCE_DIR}/build/config/sdk/data/build/safirkey.snk
   SOURCES Library.cs backdoor.cs sw_reports.cs CrashReporter.cs Tracer.cs AssemblyInfo.cs
   REFERENCES Safir.Dob safir_generated-Core-dotnet Safir.Dob.Typesystem Safir.Logging
   DLL_IMPORTS swre_library)
