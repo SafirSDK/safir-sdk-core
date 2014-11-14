@@ -286,10 +286,10 @@ private:
         {
             Com::DeliveryHandlerBasic<DeliveryHandlerTest::TestWriter>::NodeInfo& ni=vt.second;
             std::cout<<"Node: "<<ni.node.name<<std::endl;
-            std::cout<<"    Channel: unacked_singel, lastInSeq: "<<ni.unackedSingleReceiverChannel.lastInSequence<<", lastAcked: "<<ni.unackedSingleReceiverChannel.lastAcked<<std::endl;
-            std::cout<<"    Channel: unacked_multi, lastInSeq: "<<ni.unackedMultiReceiverChannel.lastInSequence<<", lastAcked: "<<ni.unackedMultiReceiverChannel.lastAcked<<std::endl;
-            std::cout<<"    Channel: acked_single, lastInSeq: "<<ni.ackedSingleReceiverChannel.lastInSequence<<", lastAcked: "<<ni.ackedSingleReceiverChannel.lastAcked<<std::endl;
-            std::cout<<"    Channel: acked_multi, lastInSeq: "<<ni.ackedMultiReceiverChannel.lastInSequence<<", lastAcked: "<<ni.ackedMultiReceiverChannel.lastAcked<<std::endl;
+            std::cout<<"    Channel: unacked_singel, lastInSeq: "<<ni.unackedSingleReceiverChannel.lastInSequence<<", biggestSeq: "<<ni.unackedSingleReceiverChannel.biggestSequence<<std::endl;
+            std::cout<<"    Channel: unacked_multi, lastInSeq: "<<ni.unackedMultiReceiverChannel.lastInSequence<<", biggestSeq: "<<ni.unackedMultiReceiverChannel.biggestSequence<<std::endl;
+            std::cout<<"    Channel: acked_single, lastInSeq: "<<ni.ackedSingleReceiverChannel.lastInSequence<<", biggestSeq: "<<ni.ackedSingleReceiverChannel.biggestSequence<<std::endl;
+            std::cout<<"    Channel: acked_multi, lastInSeq: "<<ni.ackedMultiReceiverChannel.lastInSequence<<", biggestSeq: "<<ni.ackedMultiReceiverChannel.biggestSequence<<std::endl;
         }
     }
 };

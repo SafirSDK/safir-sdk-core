@@ -29,6 +29,7 @@
 #include <boost/cstdint.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/chrono.hpp>
+#include "Parameters.h"
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -105,11 +106,14 @@ namespace Com
     {
         CommonHeader commonHeader;
         uint64_t sequenceNumber;
-        uint8_t sendMethod; //tells if message being acked was sent to one or many receivers (different sequence numbers)        
+        uint8_t sendMethod; //tells if message being acked was sent to one or many receivers (different sequence numbers)
+        uint8_t numberOfMissing;
+        unsigned char missing[Parameters::SlidingWindowSize];
         Ack(int64_t senderId_, int64_t receiverId_, uint64_t sequenceNumber_, uint8_t sendMethod_)
             :commonHeader(senderId_, receiverId_, AckType)
             ,sequenceNumber(sequenceNumber_)
             ,sendMethod(sendMethod_)
+            ,numberOfMissing(0)
         {
         }
     };

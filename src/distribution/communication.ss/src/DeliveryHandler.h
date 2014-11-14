@@ -70,7 +70,6 @@ namespace Com
             ,m_myId(myNodeId)
             ,m_receiveStrand(receiveStrand)
             ,m_deliverStrand(receiveStrand.get_io_service())
-            ,m_sendAckTimer(receiveStrand.get_io_service())
             ,m_nodes()
             ,m_receivers()
             ,m_gotRecvFrom()
@@ -84,7 +83,6 @@ namespace Com
             m_receiveStrand.dispatch([=]
             {
                 m_running=true;
-                //OnAckTimeout();
             });
         }
 
@@ -93,7 +91,6 @@ namespace Com
             m_receiveStrand.dispatch([=]
             {
                 m_running=false;
-                m_sendAckTimer.cancel();
             });
 
         }
@@ -126,15 +123,10 @@ namespace Com
 
             bool ackNow=HandleMessage(header, payload, senderIt->second);
             Deliver(senderIt->second, header); //if something is now fully received, deliver it to application
+
             if (ackNow)
             {
-                auto ackPtr=boost::make_shared<Ack>(m_myId, header->commonHeader.senderId, senderIt->second.GetChannel(header).lastInSequence, header->sendMethod);
-                WriterType::SendTo(ackPtr, senderIt->second.endpoint);
-
-//                static uint32_t count=0;
-//                ++count;
-//                if (count%1000==0)
-//                    std::cout<<"Sent acks: "<<count<<std::endl;
+                SendAck(senderIt->second, header);
             }
         }
 
@@ -221,16 +213,14 @@ namespace Com
         struct Channel
         {
             uint64_t lastInSequence; //last sequence number that was moved out of the queue. seq(queue[0])-1
-            uint64_t lastAcked; //last sequence number that has been acked
+            uint64_t biggestSequence; //biggest sequence number recevived (within our window)
             CircularArray<RecvData> queue;
             Channel()
                 :lastInSequence(0)
-                ,lastAcked(0)
+                ,biggestSequence(0)
                 ,queue(Parameters::SlidingWindowSize)
             {
-            }
-
-            int NumberOfUnacked() const {return static_cast<int>(lastInSequence-lastAcked);}
+            }            
         };
 
         struct NodeInfo
@@ -274,46 +264,10 @@ namespace Com
         boost::asio::strand& m_receiveStrand; //for sending acks, same strand as all public methods are supposed to be called from
         boost::asio::strand m_deliverStrand; //for delivering data to application
         std::atomic_uint m_numberOfUndeliveredMessages;
-        boost::asio::steady_timer m_sendAckTimer;
 
         NodeInfoMap m_nodes;
         ReceiverMap m_receivers;
         GotReceiveFrom m_gotRecvFrom;
-
-//        void OnAckTimeout()
-//        {
-//            if (!m_running)
-//            {
-//                return;
-//            }
-
-//            //Ack everything that is unacked so far
-//            for (auto& vt : m_nodes)
-//            {
-//                NodeInfo& ni=vt.second;
-//                if (ni.ackedSingleReceiverChannel.NumberOfUnacked()>0)
-//                {
-//                    SendAck(ni, SingleReceiverSendMethod);
-//                }
-
-//                if (ni.ackedMultiReceiverChannel.NumberOfUnacked()>0)
-//                {
-//                    SendAck(ni, MultiReceiverSendMethod);
-//                }
-//            }
-
-//            //Restart timer
-//            m_sendAckTimer.expires_from_now(boost::chrono::milliseconds(50));
-//            m_sendAckTimer.async_wait(m_receiveStrand.wrap([=](const boost::system::error_code& /*error*/){OnAckTimeout();}));
-//        }
-
-//        void SendAck(NodeInfo& ni, uint8_t sendMethod)
-//        {
-//            Channel& c=(sendMethod==SingleReceiverSendMethod) ? ni.ackedSingleReceiverChannel : ni.ackedMultiReceiverChannel;
-//            auto ackPtr=boost::make_shared<Ack>(m_myId, ni.node.nodeId, c.lastInSequence, sendMethod);
-//            WriterType::SendTo(ackPtr, ni.endpoint);
-//            c.lastAcked=c.lastInSequence;
-//        }
 
         void Insert(const MessageHeader* header, const char* payload, NodeInfo& ni)
         {
@@ -356,6 +310,8 @@ namespace Com
             recvData.fragmentNumber=header->fragmentNumber;
             recvData.sequenceNumber=header->sequenceNumber;
             recvData.dataType=header->commonHeader.dataType;
+
+            ch.biggestSequence=std::max(recvData.sequenceNumber, ch.biggestSequence);
 
             //Check if buffer is not created for us. In the case the message is fragmented
             //another fragment may already have arrived and the buffer is created.
@@ -570,6 +526,35 @@ namespace Com
                     break;
                 }
             }
+        }
+
+        inline void SendAck(NodeInfo& ni, const MessageHeader* header)
+        {
+            Channel& ch=ni.GetChannel(header);
+            auto ackPtr=boost::make_shared<Ack>(m_myId, header->commonHeader.senderId, ch.lastInSequence, header->sendMethod);
+
+//            auto ackPtr=boost::make_shared<Ack>(m_myId, header->commonHeader.senderId, ch.biggestSequence, header->sendMethod);
+//            if (ch.biggestSequence>ch.lastInSequence)
+//            {
+//                //we got gaps in our receive sequence
+//                size_t biggestIndex=ch.biggestSequence-ch.lastInSequence-1; //index of the biggest seqNo we have
+//                for (size_t i=0; i<biggestIndex; ++i)
+//                {
+//                    if (ch.queue[i].free)
+//                    {
+//                        //this is a gap
+//                        ackPtr->missing[ackPtr->numberOfMissing]=ch.biggestSequence-(biggestIndex-i); //
+//                        ++(ackPtr->numberOfMissing);
+//                    }
+//                }
+//            }
+
+            WriterType::SendTo(ackPtr, ni.endpoint);
+
+            //                static uint32_t count=0;
+            //                ++count;
+            //                if (count%1000==0)
+            //                    std::cout<<"Sent acks: "<<count<<std::endl;
         }
 
         inline boost::shared_ptr<char[]> MakePtr(const char* data, size_t size)
