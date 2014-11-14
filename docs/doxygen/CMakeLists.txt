@@ -13,7 +13,7 @@ endif()
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
 
-FILE(GLOB_RECURSE headers ${safir_sdk_core_SOURCE_DIR}/include/*.h)
+FILE(GLOB_RECURSE headers ${safir-sdk-core_SOURCE_DIR}/include/*.h)
 
 add_custom_command(
   OUTPUT documentation_generated
