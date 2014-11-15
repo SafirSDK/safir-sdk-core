@@ -110,6 +110,7 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
 
     if (NOT _cs_NOVERSION)
       FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/version.cs
+        "//This is an automatically generated file.\n"
         "[assembly: System.Reflection.AssemblyVersion(\"${SAFIR_VERSION_STRING}.0\")]\n"
         "internal class BuildInfo {public const string Version = \"${SAFIR_VERSION_STRING}.0\";}")
 

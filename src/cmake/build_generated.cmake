@@ -30,7 +30,7 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
     #load compiler settings, csharp and java!
     include(${SAFIR_SDK_CORE_CMAKE_DIR}/SafirCompilerSettings.cmake)
     include(${SAFIR_SDK_CORE_DOTNET_SETTINGS})
-    include(${SAFIR_SDK_CORE_JAVA_SETTINGS})
+    #include(${SAFIR_SDK_CORE_JAVA_SETTINGS})
 
     #We need boost headers.
     set(Boost_FIND_QUIETLY True)

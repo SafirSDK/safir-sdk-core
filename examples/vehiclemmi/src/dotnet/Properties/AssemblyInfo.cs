@@ -25,30 +25,27 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-// General Information about an assembly is controlled through the following 
+// General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("VehicleMmiNet")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("VehicleMmiCsWinForms")]
+[assembly: AssemblyDescription("Example GUI for the vehicle app")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Saab AB")]
-[assembly: AssemblyProduct("VehicleMmiNet")]
-[assembly: AssemblyCopyright("Copyright © Saab AB 2008")]
+[assembly: AssemblyProduct("Safir SDK Core")]
+[assembly: AssemblyCopyright("Copyright Saab AB 2008-2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
-// Setting ComVisible to false makes the types in this assembly not visible 
-// to COM components.  If you need to access a type in this assembly from 
+// Setting ComVisible to false makes the types in this assembly not visible
+// to COM components.  If you need to access a type in this assembly from
 // COM, set the ComVisible attribute to true on that type.
 [assembly: ComVisible(false)]
-
-// The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("d8faeb7a-f250-4623-a754-0737126999c3")]
 
 // Version information for an assembly consists of the following four values:
 //
 //      Major Version
-//      Minor Version 
+//      Minor Version
 //      Build Number
 //      Revision
 //
