@@ -30,7 +30,7 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
     #load compiler settings, csharp and java!
     include(${SAFIR_SDK_CORE_CMAKE_DIR}/SafirCompilerSettings.cmake)
     include(${SAFIR_SDK_CORE_DOTNET_SETTINGS})
-    #include(${SAFIR_SDK_CORE_JAVA_SETTINGS})
+    include(${SAFIR_SDK_CORE_JAVA_SETTINGS})
 
     #We need boost headers.
     set(Boost_FIND_QUIETLY True)
@@ -233,8 +233,22 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
   #
   if (Java_FOUND)
 
+    #TODO: most of this will not work when building a second external jar (e.g. something
+    #that depends on Example. Probably true for other langs as well?
+    if (SAFIR_EXTERNAL_BUILD)
+      set (include_jars ${SAFIR_SDK_CORE_JAVA_DIR}/dots_java.jar)
+    else()
+      set (include_jars dots_java)
+    endif()
+    
     FOREACH (DEP ${GEN_DEPENDENCIES})
-      SET(include_jars ${include_jars} safir_generated-${DEP}-java)
+      if (SAFIR_EXTERNAL_BUILD)
+        list(APPEND include_jars ${SAFIR_SDK_CORE_JAVA_DIR}/safir_generated-${DEP}-java.jar)
+      else()
+        list(APPEND include_jars safir_generated-${DEP}-java)
+      endif()
+
+      #This gets put into the manifest file by configure_file below
       set(SAFIR_GENERATED_JAVA_MANIFEST_CLASSPATH
         "${SAFIR_GENERATED_JAVA_MANIFEST_CLASSPATH} safir_generated-${DEP}-java.jar")
     ENDFOREACH()
@@ -247,11 +261,9 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
 
     configure_file(${manifest_path} ${CMAKE_CURRENT_BINARY_DIR}/Manifest.generated.txt @ONLY)
 
-    #TODO: Manifest path!
-
     ADD_JAR(safir_generated-${GEN_NAME}-java
       SOURCES ${java_files}
-      INCLUDE_JARS dots_java ${include_jars}
+      INCLUDE_JARS ${include_jars}
       MANIFEST ${CMAKE_CURRENT_BINARY_DIR}/Manifest.generated.txt)
 
     add_dependencies(safir_generated-${GEN_NAME}-java safir_generated-${GEN_NAME}-code)
@@ -319,7 +331,6 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
       DESTINATION ${SAFIR_INSTALL_DESTINATION_DOU_BASE}/${GEN_NAME}
       COMPONENT ${component_runtime})
 
-    #TODO: components!
     if (Java_FOUND)
         get_target_property(install_files safir_generated-${GEN_NAME}-java INSTALL_FILES)
 
