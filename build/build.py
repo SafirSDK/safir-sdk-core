@@ -503,7 +503,7 @@ class BuilderBase(object):
             dummyfile.close()
 
         output = self.__run_command((ctest(),
-                                     "-T", "Test", "--output-on-failure", "--extra-verbose),
+                                     "-T", "Test", "--output-on-failure", "--extra-verbose"),
                                     "Test", directory, allow_fail = True)
         self.interpret_test_output(output)
 
