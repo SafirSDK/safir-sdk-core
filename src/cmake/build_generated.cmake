@@ -310,13 +310,15 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
     if (GEN_TEST_SUITE)
       set (component_runtime Test)
       set (component_development Test)
+      unset(GEN_export)
     else()
       set (component_runtime Runtime)
       set (component_development Development)
+      set (GEN_export EXPORT SafirSDKCore)
     endif()
 
     INSTALL(TARGETS safir_generated-${GEN_NAME}-cpp
-      EXPORT SafirSDKCore
+      ${GEN_export}
       RUNTIME DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN} COMPONENT ${component_runtime}
       LIBRARY DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT ${component_runtime}
       ARCHIVE DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT ${component_development})

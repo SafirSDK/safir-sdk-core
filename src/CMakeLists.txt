@@ -101,23 +101,28 @@ function (SAFIR_INSTALL)
 
       ############### C/C++ ####################
       if ("${target_type}" STREQUAL "SHARED_LIBRARY")
-        set(export EXPORT SafirSDKCore)
+        if (INST_TEST_SUITE)
+          unset(INST_export)
+        else()
+          set(INST_export EXPORT SafirSDKCore)
+        endif()
+        
         set(debug_suffix ${CMAKE_DEBUG_POSTFIX})
       else()
-        unset(export)
+        unset(INST_export)
         unset(debug_suffix)
       endif()
 
       #if the target is part of the test suite we use the Test component
       if (INST_TEST_SUITE)
         INSTALL(TARGETS ${target}
-          ${export}
+          ${INST_export}
           RUNTIME DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN} COMPONENT Test
           LIBRARY DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT Test
           ARCHIVE DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT Test)
       else()
         INSTALL(TARGETS ${target}
-          ${export}
+          ${INST_export}
           RUNTIME DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN} COMPONENT Runtime
           LIBRARY DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT Runtime NAMELINK_SKIP
           ARCHIVE DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT Development)
