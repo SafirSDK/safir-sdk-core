@@ -32,6 +32,7 @@
 #include <Safir/Dob/Typesystem/HandlerId.h>
 #include <Safir/Dob/Typesystem/ContainerBase.h>
 #include <Safir/Dob/Typesystem/Object.h>
+#include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 
 namespace Safir
 {
@@ -204,9 +205,23 @@ namespace Typesystem
          * @param that [in] - The object to copy into this.
          * @throws SoftwareViolationException If the types are not of the same kind.
          */
-        virtual void Copy(const ContainerBase& /*that*/)
+        virtual void Copy(const ContainerBase& that)
         {
-            //TODO
+            if (this != &that)
+            {
+                if (typeid(*this) != typeid(that))
+                {
+                    throw SoftwareViolationException(L"Invalid call to Copy, containers are not of same type",__WFILE__,__LINE__);
+                }
+
+                const SequenceContainer<ContainedType>& other=static_cast<const SequenceContainer<ContainedType>& >(that);
+
+                m_bIsChanged=other.m_bIsChanged;
+                for (typename StorageType::const_iterator it=other.m_values.begin(); it!=other.m_values.end(); ++it)
+                {
+                    m_values.push_back(Internal::SequenceCopyHelper<ContainedType>::Copy(*it));
+                }
+            }
         }
 
     private:

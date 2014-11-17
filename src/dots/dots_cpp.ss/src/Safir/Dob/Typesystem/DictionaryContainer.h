@@ -158,9 +158,27 @@ namespace Typesystem
          * @param that [in] - The object to copy into this.
          * @throws SoftwareViolationException If the types are not of the same kind.
          */
-        virtual void Copy(const ContainerBase& /*that*/)
+        virtual void Copy(const ContainerBase& that)
         {
-            //TODO
+            if (this != &that)
+            {
+                if (typeid(*this) != typeid(that))
+                {
+                    throw SoftwareViolationException(L"Invalid call to Copy, containers are not of same type",__WFILE__,__LINE__);
+                }
+
+                const DictionaryContainer<KeyType, ValueContainerType>& other=static_cast<const DictionaryContainer<KeyT, ValT>& >(that);
+
+                clear();
+                m_bIsChanged=other.m_bIsChanged;
+
+                for (DictionaryContainer<KeyType, ValueContainerType>::const_iterator it=other.begin(); it!=other.end(); ++it)
+                {
+                    ValueContainerType val;
+                    it->second.Copy(val);
+                    boost::unordered_map<KeyT, ValT>::insert(std::make_pair(it->first, val));
+                }
+            }
         }
     };
 }

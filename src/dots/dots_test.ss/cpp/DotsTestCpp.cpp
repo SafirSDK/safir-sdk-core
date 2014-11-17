@@ -8711,12 +8711,18 @@ void TestSequences()
     Safir::Dob::Typesystem::Serialization::ToBinary(ms, bin);
     ts::ObjectPtr op=ts::Serialization::ToObject(bin);
     DotsTest::MemberSequencesPtr ms2=boost::dynamic_pointer_cast<DotsTest::MemberSequences>(op);
+    DotsTest::MemberSequencesPtr ms3=boost::static_pointer_cast<DotsTest::MemberSequences>(ms2->Clone());
 
     std::wcout<<L"------ StringMember -----"<<std::endl;
-    std::wcout<<L"IsChanged "<<ms->StringMember().IsChanged()<<std::endl;
+    std::wcout<<L"IsChanged1 "<<ms->StringMember().IsChanged()<<std::endl;
+    std::wcout<<L"IsChanged2 "<<ms2->StringMember().IsChanged()<<std::endl;
+    std::wcout<<L"IsChanged3 "<<ms3->StringMember().IsChanged()<<std::endl;
     for (size_t i=0; i<ms->StringMember().size(); ++i)
     {
-        std::wcout<<L"Equal: "<<(ms->StringMember().GetVal(i)==ms2->StringMember().GetVal(i))<<L", val: "<<ms->StringMember().GetVal(i)<<std::endl;
+        std::wcout<<L"Val1: "<<ms->StringMember().GetVal(i)<<std::endl;
+        std::wcout<<L"Val2: "<<ms2->StringMember().GetVal(i)<<std::endl;
+        std::wcout<<L"Val3: "<<ms3->StringMember().GetVal(i)<<std::endl;
+        //std::wcout<<L"Equal: "<<(ms->StringMember().GetVal(i)==ms2->StringMember().GetVal(i))<<L", val: "<<ms->StringMember().GetVal(i)<<std::endl;
     }
 }
 
@@ -8755,6 +8761,7 @@ void TestDictionaries()
     Safir::Dob::Typesystem::Serialization::ToBinary(md, bin);
     ts::ObjectPtr op=ts::Serialization::ToObject(bin);
     DotsTest::MemberDictionariesPtr md2=boost::dynamic_pointer_cast<DotsTest::MemberDictionaries>(op);
+    DotsTest::MemberDictionariesPtr md3=boost::static_pointer_cast<DotsTest::MemberDictionaries>(md2->Clone());
 
     std::cout<<"-- Dictval--"<<std::endl;
     for (ts::DictionaryContainer<ts::InstanceId, ts::EntityIdContainer>::const_iterator it=md2->InstanceIdEntityIdMember().begin(); it!=md2->InstanceIdEntityIdMember().end(); ++it)
@@ -8763,10 +8770,21 @@ void TestDictionaries()
         std::wcout<<it->first.ToString()<<L" = "<<it->second.GetVal().ToString()<<std::endl;
     }
 
-//    for (ts::DictionaryContainer<ts::Int32, ts::StringContainer>::const_iterator it=md2->Int32StringMember().begin(); it!=md2->Int32StringMember().end(); ++it)
-//    {
-//        std::wcout<<it->first<<L" = "<<it->second.GetVal()<<std::endl;
-//    }
+    std::wcout<<L"MD1, IsChanged "<<md->Int32StringMember().IsChanged()<<std::endl;
+    for (ts::DictionaryContainer<ts::Int32, ts::StringContainer>::const_iterator it=md->Int32StringMember().begin(); it!=md->Int32StringMember().end(); ++it)
+    {
+        std::wcout<<it->first<<L" = "<<it->second.GetVal()<<L", isChanged="<<it->second.IsChanged()<<std::endl;
+    }
+    std::wcout<<L"MD2, IsChanged "<<md2->Int32StringMember().IsChanged()<<std::endl;
+    for (ts::DictionaryContainer<ts::Int32, ts::StringContainer>::const_iterator it=md2->Int32StringMember().begin(); it!=md2->Int32StringMember().end(); ++it)
+    {
+        std::wcout<<it->first<<L" = "<<it->second.GetVal()<<L", isChanged="<<it->second.IsChanged()<<std::endl;
+    }
+    std::wcout<<L"MD3, IsChanged "<<md3->Int32StringMember().IsChanged()<<std::endl;
+    for (ts::DictionaryContainer<ts::Int32, ts::StringContainer>::const_iterator it=md3->Int32StringMember().begin(); it!=md3->Int32StringMember().end(); ++it)
+    {
+        std::wcout<<it->first<<L" = "<<it->second.GetVal()<<L", isChanged="<<it->second.IsChanged()<<std::endl;
+    }
 
 //    std::wcout<<L"------ Int64BinaryMember -----"<<std::endl;
 //    std::wcout<<L"size: "<<md2->Int64BinaryMember().size()<<L", IsChanged: "<<md2->IsChanged()<<std::endl;
@@ -8854,7 +8872,7 @@ int main(int /*argc*/, char* /*argv*/[])
 //        Test_IsEnumeration();
 //        Test_IsException();
 //        Test_GetDouFilePath();
-//        TestSequences();
+        TestSequences();
         TestDictionaries();
     }
     catch (const Safir::Dob::Typesystem::FundamentalException & e)

@@ -27,7 +27,7 @@
 
 #include <string>
 #include <sstream>
-
+#include <boost/shared_ptr.hpp>
 #include <Safir/Dob/Typesystem/Defs.h>
 
 //Usage: ENSURE(foo == 10, << "foo had wrong value: " << foo);
@@ -48,6 +48,16 @@ namespace Internal
     {
         return expr;
     }
+
+    template <class T> struct SequenceCopyHelper
+    {
+       static T Copy(const T& val) {return val;}
+    };
+
+    template <class T> struct SequenceCopyHelper< boost::shared_ptr<T> >
+    {
+       static boost::shared_ptr<T> Copy(const boost::shared_ptr<T> & val) {return boost::static_pointer_cast<T>(val->Clone());}
+    };
 
 }
 }
