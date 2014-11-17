@@ -65,7 +65,7 @@ build_dir        src/control/control_utils.ss/src          RelWithDebInfo
 build_dir        src/control/control.ss/src                RelWithDebInfo
 
 #Control unit tests
-run_test_suite   src/control/control_utils.ss/tests        control_utils_tests
+run_test_suite   src/control/control_utils.ss/tests/unit_tests        control_utils_tests
 run_test_suite   src/control/control.ss/tests              control_tests
 
 
