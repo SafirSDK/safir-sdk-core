@@ -1,18 +1,13 @@
-cmake_minimum_required(VERSION 2.8)
-
-project(vehicleappjava Java)
-find_package(Java REQUIRED)
-
-INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
-INCLUDE(JavaMacros)
+if (NOT Java_FOUND)
+  return()
+endif()
 
 file(GLOB_RECURSE sources com/*.java)
 
-SET_JAVA_CLASSPATH(${SAFIR_RUNTIME}/bin/dose_java.jar ${SAFIR_RUNTIME}/bin/logging_java.jar)
+ADD_JAR(vehicleappjava
+  SOURCES ${sources}
+  INCLUDE_JARS ${SAFIR_SDK_CORE_JAVA_DIR}/logging_java.jar ${SAFIR_SDK_CORE_JAVA_DIR}/dose_java.jar safir_generated-Example-java
+  ENTRY_POINT VehicleAppJava
+  MANIFEST ${CMAKE_CURRENT_SOURCE_DIR}/Manifest.txt)
 
-SET(JAVA_MANIFEST ${CMAKE_CURRENT_SOURCE_DIR}/Manifest.txt)
 
-ADD_JAR(vehicleappjava "${sources}" ALL)
-
-INSTALL(FILES vehicleappjava.jar
-  DESTINATION ${SAFIR_RUNTIME}/bin)

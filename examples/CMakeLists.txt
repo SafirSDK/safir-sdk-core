@@ -27,6 +27,7 @@ endif()
 
 #load macros for building dotnet stuff with cmake
 include(${SAFIR_SDK_CORE_DOTNET_SETTINGS})
+include(${SAFIR_SDK_CORE_JAVA_SETTINGS})
 
 set (CSHARP_LIBRARY_PATHS "${SAFIR_SDK_CORE_CSHARP_LIBRARY_PATH}")
 
