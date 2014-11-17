@@ -622,7 +622,7 @@ namespace @_NAMESPACEV_@
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Typesystem/EnumerationContainerBase.h>
 #include <Safir/Dob/Typesystem/ArrayContainer.h>
-
+#include <Safir/Dob/Typesystem/SequenceContainer.h>
 #include <Safir/Utilities/Internal/VisibilityHelpers.h>
 
 @@TABLE@@

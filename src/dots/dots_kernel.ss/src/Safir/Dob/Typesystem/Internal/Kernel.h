@@ -628,6 +628,8 @@ extern "C"
 
     DOTS_KERNEL_API DotsC_Int32 DotsC_GetNumberOfMemberValues(DotsC_Handle readerHandleHandle, DotsC_MemberIndex member);
 
+    DOTS_KERNEL_API void DotsC_ReadMemberStatus(DotsC_Handle readerHandle, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex);
+
     DOTS_KERNEL_API void DotsC_ReadInt32Member(DotsC_Handle readerHandle, DotsC_Int32& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode);
     DOTS_KERNEL_API void DotsC_ReadInt64Member(DotsC_Handle readerHandle, DotsC_Int64& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode);
     DOTS_KERNEL_API void DotsC_ReadFloat32Member(DotsC_Handle readerHandle, DotsC_Float32& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode);

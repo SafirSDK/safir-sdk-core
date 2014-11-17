@@ -285,7 +285,6 @@ namespace Internal
                 entityState.GetMemberTimestamps()[member] = 0;
             }
         }
-
     }
 
 

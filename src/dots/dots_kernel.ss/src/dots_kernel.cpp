@@ -1001,6 +1001,13 @@ DotsC_Int32 DotsC_GetNumberOfMemberValues(DotsC_Handle readerHandle, DotsC_Membe
     return reader->NumberOfValues(member);
 }
 
+void DotsC_ReadMemberStatus(DotsC_Handle readerHandle, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex)
+{
+    Init();
+    Reader* reader=ReaderFromHandle(readerHandle);
+    reader->ReadStatus(member, arrayIndex, isNull, isChanged);
+}
+
 void DotsC_ReadInt32Member(DotsC_Handle readerHandle, DotsC_Int32& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode)
 {
     Init();
