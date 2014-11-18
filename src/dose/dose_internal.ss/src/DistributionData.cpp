@@ -26,10 +26,9 @@
 #include <Safir/Dob/Internal/StateDeleter.h>
 #include <Safir/Dob/Internal/InjectionKindTable.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
-#include <Safir/Dob/Typesystem/BlobOperations.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
-#include <Safir/Dob/Typesystem/BlobOperations.h>
 #include <Safir/Dob/Typesystem/Members.h>
+#include <Safir/Dob/Typesystem/Internal/BlobOperations.h>
 #include <Safir/Dob/Typesystem/Internal/InternalOperations.h>
 #include <boost/static_assert.hpp>
 
@@ -399,7 +398,7 @@ namespace Internal
                                        const Typesystem::ChannelId & channel,
                                        const char * const blob)
     {
-        const size_t blobSize=Dob::Typesystem::BlobOperations::GetSize(blob);
+        const size_t blobSize=Dob::Typesystem::Internal::BlobOperations::GetSize(blob);
 
         Allocate(sizeof(MessageHeader) + blobSize);
         Header & header = GetHeader();
@@ -428,7 +427,7 @@ namespace Internal
         size_t blobSize = 0;
         if (blob != NULL)
         {
-            blobSize = Dob::Typesystem::BlobOperations::GetSize(blob);
+            blobSize = Dob::Typesystem::Internal::BlobOperations::GetSize(blob);
         }
 
         int numTimestamps = 0;
@@ -581,7 +580,7 @@ namespace Internal
                                        const InternalRequestId requestId,
                                        const char * const blob)
     {
-        const size_t blobSize = Typesystem::BlobOperations::GetSize(blob);
+        const size_t blobSize = Typesystem::Internal::BlobOperations::GetSize(blob);
         Allocate(sizeof(RequestHeader) + blobSize);
 
         Header & header = GetHeader();
@@ -604,7 +603,7 @@ namespace Internal
                                        const Typesystem::InstanceId & instance,
                                        const char * const blob)
     {
-        const size_t blobSize = Typesystem::BlobOperations::GetSize(blob);
+        const size_t blobSize = Typesystem::Internal::BlobOperations::GetSize(blob);
         Allocate(sizeof(EntityCreateRequestHeader) + blobSize);
 
         Header & header = GetHeader();
@@ -629,7 +628,7 @@ namespace Internal
                                        const Typesystem::InstanceId & instance,
                                        const char * const blob)
     {
-        const size_t blobSize = Typesystem::BlobOperations::GetSize(blob);
+        const size_t blobSize = Typesystem::Internal::BlobOperations::GetSize(blob);
         Allocate(sizeof(EntityUpdateRequestHeader) + blobSize);
 
         Header & header = GetHeader();
@@ -670,7 +669,7 @@ namespace Internal
                                        const InternalRequestId req,
                                        const char * const blob)
     {
-        const size_t blobSize=Dob::Typesystem::BlobOperations::GetSize(blob);
+        const size_t blobSize=Dob::Typesystem::Internal::BlobOperations::GetSize(blob);
         Allocate(sizeof(ResponseHeader) + blobSize);
 
         Header & header = GetHeader();
@@ -703,22 +702,22 @@ namespace Internal
             return sizeof(Header);
 
         case Message:
-            return sizeof(MessageHeader) + Dob::Typesystem::BlobOperations::GetSize(GetBlob());
+            return sizeof(MessageHeader) + Dob::Typesystem::Internal::BlobOperations::GetSize(GetBlob());
 
         case Request_Service:
-            return sizeof (RequestHeader) + Dob::Typesystem::BlobOperations::GetSize(GetBlob());
+            return sizeof (RequestHeader) + Dob::Typesystem::Internal::BlobOperations::GetSize(GetBlob());
 
         case Request_EntityCreate:
-            return sizeof(EntityCreateRequestHeader) + Dob::Typesystem::BlobOperations::GetSize(GetBlob());
+            return sizeof(EntityCreateRequestHeader) + Dob::Typesystem::Internal::BlobOperations::GetSize(GetBlob());
 
         case Request_EntityUpdate:
-            return sizeof(EntityUpdateRequestHeader) + Dob::Typesystem::BlobOperations::GetSize(GetBlob());
+            return sizeof(EntityUpdateRequestHeader) + Dob::Typesystem::Internal::BlobOperations::GetSize(GetBlob());
 
         case Request_EntityDelete:
             return sizeof(EntityDeleteRequestHeader);
 
         case Response:
-            return sizeof(ResponseHeader) + Dob::Typesystem::BlobOperations::GetSize(GetBlob());
+            return sizeof(ResponseHeader) + Dob::Typesystem::Internal::BlobOperations::GetSize(GetBlob());
 
         case RegistrationState:
             return sizeof(RegistrationStateHeader) + GetRegistrationStateHeader().m_handlerStrSize;
@@ -728,7 +727,7 @@ namespace Internal
                 const size_t headersAndTimestamps = sizeof(EntityStateHeader) + GetEntityStateHeader().m_numTimestamps * sizeof (Typesystem::Int64);
                 if (HasBlob())
                 {
-                    return headersAndTimestamps + Dob::Typesystem::BlobOperations::GetSize(GetBlob());
+                    return headersAndTimestamps + Dob::Typesystem::Internal::BlobOperations::GetSize(GetBlob());
                 }
                 else
                 {
@@ -775,7 +774,7 @@ namespace Internal
         case Request_EntityCreate:
         case Request_EntityUpdate:
         case Response:
-            return Typesystem::BlobOperations::GetTypeId(GetBlob());
+            return Typesystem::Internal::BlobOperations::GetTypeId(GetBlob());
 
         case Action_PendingRegistrationRequest:
         case Action_PendingRegistrationResponse:
@@ -1027,7 +1026,7 @@ namespace Internal
 
             if (blob != NULL)
             {
-                blobSize = Dob::Typesystem::BlobOperations::GetSize(blob);
+                blobSize = Dob::Typesystem::Internal::BlobOperations::GetSize(blob);
             }
         }
 
@@ -1062,10 +1061,10 @@ namespace Internal
     {
         ENSURE(blob!=NULL, << "GetStateCopy: Blob is NULL! (when copying object " << GetTypeId() << ")");
 
-        const Typesystem::TypeId typeId = Dob::Typesystem::BlobOperations::GetTypeId(blob);
+        const Typesystem::TypeId typeId = Dob::Typesystem::Internal::BlobOperations::GetTypeId(blob);
         ENSURE (typeId == GetTypeId(), << "DistributionData::GetEntityStateCopy: TypeId mismatch!");
 
-        const size_t blobSize = Dob::Typesystem::BlobOperations::GetSize(blob);
+        const size_t blobSize = Dob::Typesystem::Internal::BlobOperations::GetSize(blob);
 
         int numTimestamps = 0;
         if (InjectionKindTable::Instance().IsInjectable(GetTypeId()))
@@ -1101,7 +1100,7 @@ namespace Internal
 
         char* blob = const_cast<char*>(GetBlob());
 
-        Typesystem::Internal::SetChanged(blob, changed);
+        Typesystem::Internal::BlobOperations::SetChanged(blob, changed);
     }
 
     void DistributionData::DecrementVersion()
@@ -1123,7 +1122,7 @@ namespace Internal
 
     char * DistributionData::GetBlobCopy() const
     {
-        return Dob::Typesystem::Internal::CreateCopy(GetBlob());
+        return Dob::Typesystem::Internal::BlobOperations::CreateCopy(GetBlob());
     }
 
 

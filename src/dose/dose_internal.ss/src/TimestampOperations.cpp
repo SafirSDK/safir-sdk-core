@@ -28,7 +28,7 @@
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/Typesystem/Operations.h>
-#include <Safir/Dob/Typesystem/BlobOperations.h>
+#include <Safir/Dob/Typesystem/Internal/BlobOperations.h>
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
 #include <Safir/Dob/Typesystem/Internal/InternalOperations.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
@@ -62,7 +62,7 @@ namespace Internal
             const char * memberName;
             Typesystem::TypeId memberTypeId;
             Typesystem::Int32 stringLength;
-            bool isArray;
+            Typesystem::CollectionType collectionType;
             Typesystem::Int32 arrayLength;
 
             Safir::Dob::Typesystem::Members::GetInfo(typeId,
@@ -71,7 +71,7 @@ namespace Internal
                                                      memberName,
                                                      memberTypeId,
                                                      stringLength,
-                                                     isArray,
+                                                     collectionType,
                                                      arrayLength);
 
             bool fromIsChanged = false;
@@ -269,7 +269,7 @@ namespace Internal
             bool isChanged = false;
             for (Typesystem::ArrayIndex index = 0; index < arraySize; ++index)
             {
-                if (Typesystem::BlobOperations::IsChanged(blob,member,index))
+                if (Typesystem::Internal::BlobOperations::IsChanged(blob,member,index))
                 {
                     isChanged = true;
                     break;
@@ -340,7 +340,7 @@ namespace Internal
                 const Typesystem::Int32 arraySize = Typesystem::Members::GetArraySize(typeId,member);
                 for (Typesystem::ArrayIndex index = 0; index < arraySize; ++index)
                 {
-                    Typesystem::Internal::SetChangedHere(inBlob,member,index,true);
+                    Typesystem::Internal::BlobOperations::SetChangedHere(inBlob,member,index,true);
                 }
             }
         }

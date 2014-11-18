@@ -1,8 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2006-2013 (http://safir.sourceforge.net)
-* 
-* Created by: Lars Hagström / stlrha
+* Copyright Saab AB, 2004-2014 (http://safir.sourceforge.net)
+*
+* Created by: Joel Ottosson / joot
 *
 *******************************************************************************
 *
@@ -15,15 +15,13 @@
 * Safir SDK Core is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
+* GNU General Public License for more Internals.
 *
 * You should have received a copy of the GNU General Public License
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-
-#ifndef __BLOBOPERATIONS_H__
-#define __BLOBOPERATIONS_H__
+#pragma once
 
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Typesystem/EntityId.h>
@@ -74,33 +72,21 @@ namespace Internal
         */
         static Int32 GetSize(char const * const blob);
 
-        /**
-         * Check if any member is changed.
-         *
-         * This method will recursively check if any member in the blob has its change flag set.
-         *
-         * @param [in] handle - Handle to a BlobReader.
-         * @return True if any member has changed.
-         */
-//         static bool IsChanged(Safir::Dob::Typesystem::Int64 handle);
 
-        /**
-         * @name Value operations on Blobs.
-         */
-        /** @{ */
-
-        /**
-         * Find out if a member is changed.
-         *
-         * @param [in] handle - Handle to a BlobReader.
-         * @param [in] member - The member to check.
-         * @param [in] index - Array index in member to check. Shall be 0 if the member is not an array.
-         * @return true if member is changed.
-         */
-//        static bool IsChanged(Safir::Dob::Typesystem::Int64 handle,
-//                              const Dob::Typesystem::MemberIndex member,
-//                              const Dob::Typesystem::ArrayIndex index);
-    
+        //REMOVE
+        static bool IsChanged(const char* blob);
+        static bool IsChanged(const char* blob,
+                              const Dob::Typesystem::MemberIndex member,
+                              const Dob::Typesystem::ArrayIndex index);
+        //REMOVE
+        static void SetChangedHere(char* blob,
+                                   const Dob::Typesystem::MemberIndex member,
+                                   const Dob::Typesystem::ArrayIndex index,
+                                   bool val);
+        //REMOVE
+        static bool SetChanged(const char* blob, bool val);
+        //REMOVE
+        static char* CreateCopy(const char* blob);
 
 
         /** @} */
@@ -734,5 +720,3 @@ namespace Internal
 }
 }
 }
-#endif
-

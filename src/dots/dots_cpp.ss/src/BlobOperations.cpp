@@ -1,8 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2006-2013 (http://safir.sourceforge.net)
+* Copyright Saab AB, 2004-2014 (http://safir.sourceforge.net)
 *
-* Created by: Lars Hagström / stlrha
+* Created by: Joel Ottosson / joot
 *
 *******************************************************************************
 *
@@ -15,13 +15,12 @@
 * Safir SDK Core is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
+* GNU General Public License for more Internals.
 *
 * You should have received a copy of the GNU General Public License
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-
 #include <Safir/Dob/Typesystem/Internal/BlobOperations.h>
 #include <Safir/Dob/Typesystem/Internal/Kernel.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
@@ -63,17 +62,27 @@ namespace
         return DotsC_GetSize(blob);
     }
 
-    //    bool BlobOperations::IsChanged(Safir::Dob::Typesystem::Int64 handle)
-    //    {
-    //        return false; //DotsC_IsAnythingChanged(blob);
-    //    }
+    bool BlobOperations::IsChanged(const char* /*blob*/) {return false;}
+    bool BlobOperations::IsChanged(const char* /*blob*/,
+                                   const Dob::Typesystem::MemberIndex /*member*/,
+                                   const Dob::Typesystem::ArrayIndex /*index*/)
+    {
+        //TODO: Remove
+        return false;
+    }
 
-    //    bool BlobOperations::IsChanged(Safir::Dob::Typesystem::Int64 handle,
-    //                              const Dob::Typesystem::MemberIndex member,
-    //                              const Dob::Typesystem::ArrayIndex index)
-    //    {
-    //        return false; //DotsC_IsChangedMember(blob, member, index);
-    //    }
+    void BlobOperations::SetChangedHere(char* /*blob*/,
+                                        const Dob::Typesystem::MemberIndex /*member*/,
+                                        const Dob::Typesystem::ArrayIndex /*index*/,
+                                        bool /*val*/)
+    {
+        //TODO: Remove
+    }
+
+    //REMOVE
+    void SetChanged(const char* , bool ) {}
+    //REMOVE
+    char* CreateCopy(const char* ) {return NULL;}
 
     /**********************************************************************
      *
