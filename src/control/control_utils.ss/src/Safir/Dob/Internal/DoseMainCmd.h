@@ -48,6 +48,13 @@ namespace Internal
 {
 namespace Control
 {
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4275)
+#pragma warning (disable: 4251)
+#endif
+
     /**
      * Class to be used by dose_main to receive commands from Control
      */
@@ -105,6 +112,11 @@ namespace Control
 
         boost::shared_ptr<Impl> m_impl;
     };
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
+
 }
 }
 }
