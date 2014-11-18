@@ -25,7 +25,7 @@
 
 #include <Safir/Utilities/Internal/VisibilityHelpers.h>
 
-#ifdef control_EXPORTS
+#ifdef control_utils_EXPORTS
 #  define CONTROL_UTILS_API SAFIR_HELPER_DLL_EXPORT
 #else
 #  define CONTROL_UTILS_API SAFIR_HELPER_DLL_IMPORT
