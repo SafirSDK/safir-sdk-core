@@ -25,6 +25,7 @@
 
 #include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Dob/Internal/SystemPictureDefs.h>
 #include <Safir/Dob/Internal/RawStatistics.h>
 #include <boost/noncopyable.hpp>
@@ -307,7 +308,7 @@ namespace SP
                      << message.election_id()
                      << ") from " << from << std::endl;
 
-            m_strand.dispatch([this,message,from, nodeTypeId]
+            m_strand.dispatch([this,message, from, nodeTypeId]
             {
                 bool found = false;
                 for (int i = 0; i < m_lastStatistics.Size(); ++i)
@@ -329,6 +330,13 @@ namespace SP
                 if (!found)
                 {
                     //this would indicate a threading error.
+                    SEND_SYSTEM_LOG(Alert,
+                                    << "Got ElectionMessage ("
+                                    << ToString(message.action())
+                                    << ", "
+                                    << message.election_id()
+                                    << ") << from an unknown node with id " << from);
+
                     throw std::logic_error("Got ElectionMessage from a node that I dont know about!");
                 }
 
