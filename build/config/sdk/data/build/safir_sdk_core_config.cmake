@@ -1,10 +1,10 @@
 # This file contains common settings for all Safir SDK Core components.
 # Do NOT use this file unless you are writing a component that is part
-# of the _Safir SDK Core_. We reserve the right to change this file 
+# of the _Safir SDK Core_. We reserve the right to change this file
 # without maintaining any sort of backward compatibility whatsoever.
 #
 # But please feel free to make a copy of your own and modify to your
-# needs (according to below license). 
+# needs (according to below license).
 #
 # Copyright (c) 2006-2013, Saab AB.
 # All rights reserved.
@@ -73,6 +73,7 @@ if (MSVC)
    LINK_DIRECTORIES(${SAFIR_SDK}/lib)
    ADD_DEFINITIONS(-DNOMINMAX)
    ADD_DEFINITIONS(-D_CRT_SECURE_NO_DEPRECATE -D_SCL_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE)
+   ADD_DEFINITIONS(-D_WINSOCK_DEPRECATED_NO_WARNINGS)
    ADD_DEFINITIONS(-D_UNICODE -DUNICODE)
    ADD_DEFINITIONS(-D_WIN32_WINNT=0x0501)
    ADD_DEFINITIONS(-DWIN32_LEAN_AND_MEAN)
@@ -97,11 +98,9 @@ endif ()
 # Add some more boost library versions that we want to be able to use,
 # just to try to be "future safe". This does not actually mean that we
 # support all these versions, see our release information for that info.
-set (Boost_ADDITIONAL_VERSIONS 
-  "1.40" "1.40.0" "1.41" "1.41.0" "1.42" "1.42.0" "1.43" "1.43.0" "1.44" "1.44.0" 
-  "1.45" "1.45.0" "1.46" "1.46.0" "1.47" "1.47.0" "1.48" "1.48.0" "1.49" "1.49.0" 
-  "1.50" "1.50.0" "1.51" "1.51.0" "1.52" "1.52.0" "1.53" "1.53.0" "1.54" "1.54.0" 
-  "1.55" "1.55.0" "1.56" "1.56.0" "1.57" "1.57.0" "1.58" "1.58.0" "1.59" "1.59.0") 
+set (Boost_ADDITIONAL_VERSIONS
+  "1.50.0" "1.51" "1.51.0" "1.52" "1.52.0" "1.53" "1.53.0" "1.54" "1.54.0"
+  "1.55" "1.55.0" "1.56" "1.56.0" "1.57" "1.57.0" "1.58" "1.58.0" "1.59" "1.59.0")
 
 set(Boost_NO_BOOST_CMAKE ON)
 set(Boost_USE_MULTITHREADED ON)
@@ -126,6 +125,10 @@ else()
 endif()
 set (Boost_FIND_QUIETLY 0)
 
+if (MSVC AND Boost_VERSION LESS 105600)
+  MESSAGE(FATAL_ERROR "Boost >= 1.56 required on Windows!")
+endif()
+
 #use dynamic linking with boost
 ADD_DEFINITIONS(-DBOOST_ALL_DYN_LINK)
 
@@ -148,7 +151,7 @@ endif()
 
 #Set up boost for any test code (i.e. CheckCXXSourceCompiles stuff)
 set(CMAKE_REQUIRED_INCLUDES ${Boost_INCLUDE_DIRS})
-set(CMAKE_REQUIRED_DEFINITIONS 
+set(CMAKE_REQUIRED_DEFINITIONS
   -DBOOST_ALL_DYN_LINK
   -DBOOST_FILESYSTEM_NO_DEPRECATED
   -DBOOST_SYSTEM_NO_DEPRECATED
@@ -156,21 +159,6 @@ set(CMAKE_REQUIRED_DEFINITIONS
   -DBOOST_THREAD_DONT_USE_DATETIME
   -DBOOST_CHRONO_HEADER_ONLY
   -DBOOST_DATE_TIME_NO_LIB)
-
-if(MSVC)
-   #We have a weird issue which causes a buffer overrun error when using Visual Studio 2013
-   #and Boost 1.55 in 64 bit and release builds. 
-   #Don't know if this is a bug in our code or in the compiler or in boost.
-   #The workaround below disables some optimizations and all inlining in release builds
-   #which appears to resolve the problem.
-   if(MSVC_VERSION EQUAL 1800 AND Boost_VERSION EQUAL 105500 AND CMAKE_SIZEOF_VOID_P EQUAL 8)
-     STRING(REGEX REPLACE "/Ob1" "/Ob0" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
-     STRING(REGEX REPLACE "/O2" "/O1" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
-     STRING(REGEX REPLACE "/Ob1" "/Ob0" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
-     STRING(REGEX REPLACE "/O2" "/O1" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
-   endif()
-endif()
-
 
 #Let ctest output stdout on failure by default.
 set(CTEST_OUTPUT_ON_FAILURE ON)
@@ -181,6 +169,12 @@ endif()
 
 MACRO(INSTALL_DEBUG_INFO target)
   if(MSVC)
+    #allow the use of get_target_property LOCATION in
+    #newer cmake versions.
+    if (NOT CMAKE_VERSION VERSION_LESS "3.0.0")
+      cmake_policy(SET CMP0026 OLD)
+    endif()
+
     #the problem here is to find out where the pdb file is located. It is located next to the binary
     #in some directory which either the nmake/jom builds create or that the studio creates.
 
@@ -195,11 +189,11 @@ MACRO(INSTALL_DEBUG_INFO target)
 
     STRING(REPLACE .dll .pdb relwithdebinfo_location ${relwithdebinfo_location})
     STRING(REPLACE .exe .pdb relwithdebinfo_location ${relwithdebinfo_location})
-    
+
     #Install the pdb files using the locations we just worked out.
     INSTALL(FILES ${debug_location} DESTINATION ${SAFIR_RUNTIME}/bin CONFIGURATIONS Debug)
     INSTALL(FILES ${relwithdebinfo_location} DESTINATION ${SAFIR_RUNTIME}/bin CONFIGURATIONS RelWithDebInfo)
-    
+
     UNSET(debug_location)
     UNSET(relwithdebinfo_location)
   endif()
@@ -226,7 +220,7 @@ else()
 endif()
 
 
-#work out if we've got a configuration on the command line or if 
+#work out if we've got a configuration on the command line or if
 #we're running in an IDE.
 if (CMAKE_CONFIGURATION_TYPES AND CMAKE_BUILD_TYPE)
     #MESSAGE("Both CMAKE_CONFIGURATION_TYPES and CMAKE_BUILD_TYPE are set! Using CMAKE_BUILD_TYPE as the CUSTOM_BUILD_TYPE")
@@ -238,14 +232,14 @@ elseif(CMAKE_CONFIGURATION_TYPES)
     else()
        SET(CUSTOM_BUILD_TYPE "$(OutDir)")
     endif()
-    
+
 elseif(CMAKE_BUILD_TYPE)
     SET(CUSTOM_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 else()
     SET(CUSTOM_BUILD_TYPE "Release")
 endif()
 
-#just use these variables to avoid some cmake warnings 
+#just use these variables to avoid some cmake warnings
 #(they're set in the build script)
 if(SAFIR_ADA_SUPPORT OR SAFIR_JAVA_SUPPORT)
 endif()
@@ -256,11 +250,11 @@ else()
   set(PATH_SEPARATOR ";")
 endif()
 
-#This function traverses up from PROJECT_SOURCE_DIR to find the root of the 
+#This function traverses up from PROJECT_SOURCE_DIR to find the root of the
 #source code tree. It looks for some special files in that directory.
 function (FIND_SAFIR_SDK_SOURCE_ROOT RESULT_VARIABLE)
   set (curdir ${PROJECT_SOURCE_DIR})
-  while (NOT EXISTS "${curdir}/INSTALL.Linux.txt" 
+  while (NOT EXISTS "${curdir}/INSTALL.Linux.txt"
       OR NOT EXISTS "${curdir}/INSTALL.Windows.txt")
     get_filename_component(parent ${curdir} PATH)
     if (parent STREQUAL curdir)
@@ -275,7 +269,7 @@ endfunction()
 
 #also accepts an optional second argument TIMEOUT which will set test timeout
 #in seconds
-function (SET_SAFIR_TEST_PROPERTIES TEST_NAME) 
+function (SET_SAFIR_TEST_PROPERTIES TEST_NAME)
   FIND_SAFIR_SDK_SOURCE_ROOT(SAFIR_SOURCE_ROOT)
   if (ARGV1)
     SET_TESTS_PROPERTIES(${TEST_NAME} PROPERTIES TIMEOUT ${ARGV1})
@@ -285,7 +279,7 @@ function (SET_SAFIR_TEST_PROPERTIES TEST_NAME)
   string(REGEX REPLACE "^${PATH_SEPARATOR}+" "" pypath ${pypath}) # remove any leading path separators
 
   SET_PROPERTY(TEST ${TEST_NAME}
-    PROPERTY ENVIRONMENT 
+    PROPERTY ENVIRONMENT
     "SAFIR_TEST_CONFIG_OVERRIDE=${SAFIR_SOURCE_ROOT}/src/tests/test_support/test_config"
     "PYTHONPATH=${pypath}")
 endfunction()

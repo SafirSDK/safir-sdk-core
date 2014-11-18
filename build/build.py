@@ -607,16 +607,6 @@ class VisualStudioBuilder(BuilderBase):
     def setenv_jenkins_internal(self):
         os.environ["PATH"] = os.environ.get("PATH") + os.pathsep + os.path.join(os.environ.get("SAFIR_RUNTIME"),"bin")
 
-        #set up K: drive:
-        logger.log("Setting up K: drive using subst.exe","header")
-        bindir = os.path.join(os.environ.get("SAFIR_RUNTIME"),"bin")
-        if not os.path.isdir(bindir):
-            mkdir(bindir)
-        ret = subprocess.call(("subst","/d", "k:"))
-        logger.log("'subst /d k:' exited with return code " + str(ret),"command")
-        subprocess.call(("subst","k:",bindir))
-        logger.log("'subst k:" + bindir + "' exited with return code " + str(ret),"output")
-
     def __find_vcvarsall(self):
         install_dirs = set(["VS120COMNTOOLS","VS110COMNTOOLS","VS100COMNTOOLS"])
         #we use set intersections so that we double check that the variable 

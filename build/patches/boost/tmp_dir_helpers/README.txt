@@ -18,14 +18,14 @@ Problem 1 fixed in:
 1.48 and 1.49 but the problem reappears in 1.50, to be fixed again in 1.54
 
 Problem 2 fixed in:
-Not yet fixed.
+1.56
 
 Problem 1 applies to:
 1.40 - 1.47 (maybe to versions before 1.40 as well)
 1.50 - 1.53
 
 Problem 2 applies to:
-1.54 -
+1.54 - 1.55
 
 
 Comment Problem 1:

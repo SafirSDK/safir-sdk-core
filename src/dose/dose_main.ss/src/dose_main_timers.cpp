@@ -27,7 +27,6 @@
 #include <iostream>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <boost/bind.hpp>
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #ifdef _MSC_VER
 

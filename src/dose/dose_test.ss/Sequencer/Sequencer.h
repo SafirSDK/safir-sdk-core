@@ -25,7 +25,6 @@
 #ifndef __DOSE_TEST_SEQUENCER_H__
 #define __DOSE_TEST_SEQUENCER_H__
 
-#include <boost/asio.hpp>
 #include <Safir/Dob/Connection.h>
 #include "PartnerState.h"
 #include <string>
@@ -35,25 +34,15 @@
 #include "ActionSender.h"
 #include "TestCaseReader.h"
 
-#if 0
-#include <DoseTest/TestConfigEnum.h>
-#include <iostream>
-#include <fstream>
-#include <list>
-
-#include <map>
-
-
-#if defined _MSC_VER
-  #pragma warning (push)
-  #pragma warning (disable : 4702)
-  #pragma warning (disable : 4127)
-#endif
-#include <boost/date_time/posix_time/posix_time.hpp>
-#if defined _MSC_VER
-  #pragma warning (pop)
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
 #endif
 
+#include <boost/asio.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
 #endif
 
 namespace SequencerStates
@@ -135,7 +124,7 @@ private:
     const int m_stopTc;
 
     SequencerStates::State m_state;
-    boost::posix_time::ptime m_lastCleanupTime;
+    boost::chrono::steady_clock::time_point m_lastCleanupTime;
 
     const Languages m_languages;
     const bool m_noTimeout;

@@ -129,9 +129,9 @@ namespace Internal
 
         // This method tries to acquire and release the container lock for the handler registration container
         // in all contexts.
-        bool CanAcquireContainerWriterLock(const Typesystem::TypeId             typeId,
-                                           const ContextId                      contextId,
-                                           const boost::posix_time::seconds&    lockTimeout);
+        bool CanAcquireContainerWriterLock(const Typesystem::TypeId typeId,
+                                           const ContextId contextId,
+                                           const boost::chrono::steady_clock::duration& lockTimeout);
 
         //Debug and statistics
         void DumpRegistrationSubscriptions() const;
@@ -161,4 +161,3 @@ namespace Internal
 }
 }
 #endif
-

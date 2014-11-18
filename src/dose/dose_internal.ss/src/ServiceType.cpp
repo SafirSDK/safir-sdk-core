@@ -58,7 +58,7 @@ namespace Internal
             std::wostringstream ostr;
             ostr << "Service " << Typesystem::Operations::GetName(m_typeId) <<
                     ", which is ContextShared, can only be registered from context 0.";
-            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);          
+            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
         }
 
         ScopedTypeLock lck(m_typeLocks[context]);
@@ -85,7 +85,7 @@ namespace Internal
             std::wostringstream ostr;
             ostr << "Service " << Typesystem::Operations::GetName(m_typeId) <<
                     ", which is ContextShared, can only be unregistered from context 0.";
-            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);          
+            throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
         }
 
         ScopedTypeLock lck(m_typeLocks[context]);
@@ -196,13 +196,13 @@ namespace Internal
                                                                consumer);
     }
 
-    bool ServiceType::CanAcquireContainerWriterLock(const ContextId                   contextId,
-                                                    const boost::posix_time::seconds& lockTimeout)
+    bool ServiceType::CanAcquireContainerWriterLock(const ContextId contextId,
+                                                    const boost::chrono::steady_clock::duration& lockTimeout)
     {
         ScopedTypeLock lck(m_typeLocks[contextId],
-                           boost::posix_time::second_clock::universal_time() + lockTimeout);
+                           boost::interprocess::defer_lock);
 
-        if (!lck)
+        if (!steady_try_lock_for(lck, lockTimeout))
         {
             // Can't acquire the type level lock.
             return false;  // *** RETURN ***
@@ -213,4 +213,3 @@ namespace Internal
 }
 }
 }
-

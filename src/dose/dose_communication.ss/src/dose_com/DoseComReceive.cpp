@@ -223,13 +223,13 @@ static int Send_AckMsg( CIpmSocket *pTxSock, DOSE_UDP_ACK_MSG *pTxAckMsg,
     {
         if(pTxAckMsg->MsgType == MSG_TYPE_ACK)
             PrintDbg("*-  RxThread[%d] Send ACK: DoseId=%d %s"
-                     " Seq=%u GetIx=%u FragmNum=%X\n",
+                     " Seq=%u GetIx=%u FragmNum=%d\n",
                         MyIx, pTxAckMsg->DoseIdFrom,
                         DoseOs::Inet_Ntoa(IpAddrFrom_nw),
                         SequenceNumber, TxMsgArray_Ix, pTxAckMsg->FragmentNumber);
         else //Nack
             PrintDbg("*-  RxThread[%d] Send NACK: DoseId=%d %s"
-                     " Seq=%u GetIx=%u FragmNum=%X ExpFragm=%X\n",
+                     " Seq=%u GetIx=%u FragmNum=%d ExpFragm=%d\n",
                         MyIx, pTxAckMsg->DoseIdFrom,
                         DoseOs::Inet_Ntoa(IpAddrFrom_nw),
                         SequenceNumber, TxMsgArray_Ix,

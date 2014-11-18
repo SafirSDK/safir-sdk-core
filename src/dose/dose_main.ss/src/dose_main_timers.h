@@ -28,12 +28,23 @@
 #include <Safir/Dob/Internal/Connection.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
 #include <boost/shared_ptr.hpp>
-#include <boost/asio.hpp>
-#include <boost/asio/steady_timer.hpp>
+#include <boost/scoped_ptr.hpp>
 #include <set>
 #include <boost/noncopyable.hpp>
 #include <vector>
 #include <map>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
+#endif
+
+#include <boost/asio.hpp>
+#include <boost/asio/steady_timer.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 namespace Safir
 {

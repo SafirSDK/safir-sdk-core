@@ -31,23 +31,25 @@ if sys.platform == "win32":
     exe_path = config_type if config_type else ""
 else:
     exe_path = "."
-    
+
 ProcessMonitor_test2 = os.path.join(exe_path,"ProcessMonitor_test2")
 Sleeper = os.path.join(exe_path,"Sleeper")
 
-#start two sleepers
-sleeper1 = subprocess.Popen((Sleeper,"120"))
-sleeper2 = subprocess.Popen((Sleeper,"120"))
+#start a bunch of sleepers
+sleepers = list()
+pids = list()
+for which in range(0,100):
+    proc = subprocess.Popen((Sleeper,"120"))
+    pids.append(str(proc.pid))
+    sleepers.append(proc)
 
-listener = subprocess.Popen((ProcessMonitor_test2,
-                             str(sleeper1.pid),
-                             str(sleeper2.pid)),
-                            stdout=subprocess.PIPE, 
+listener = subprocess.Popen(list((ProcessMonitor_test2,)) + pids,
+                            stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT,
                             universal_newlines=True)
 result = listener.communicate()[0]
-sleeper1.kill()
-sleeper2.kill()
+for sleeper in sleepers:
+    sleeper.kill()
 
 if result != "":
     print("ProcessMonitor_test2 exited with non-empty output!")

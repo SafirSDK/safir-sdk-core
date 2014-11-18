@@ -8,8 +8,18 @@
 #ifndef __DOSE_MAIN_SIGNAL_HANDLER_H__
 #define __DOSE_MAIN_SIGNAL_HANDLER_H__
 
-#include <boost/asio.hpp>
 #include <boost/shared_ptr.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
+#endif
+
+#include <boost/asio.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 namespace Safir
 {

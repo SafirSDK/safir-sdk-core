@@ -32,6 +32,7 @@
 #include "dosecominfo.h"
 #include "connectionstats.h"
 #include "loggingsettings.h"
+#include "numberofentities.h"
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Typesystem/Utilities.h>
 #include <Safir/Dob/Entity.h>
@@ -138,6 +139,10 @@ void DoseMon::TreeItemActivated ( QTreeWidgetItem * item, int /*column*/ )
     {
         newTab = tabWidget->addTab(new DoseComInfo(this),"DoseCom Info");
         tabWidget->setTabToolTip(newTab,tabWidget->widget(newTab)->toolTip());
+    }
+    else if (item->text(0) == "Entity Statistics")
+    {
+        newTab = tabWidget->addTab(new NumberOfEntities(this),"Entity Statistics");
     }
     else if (item->parent() == NULL)
     {

@@ -33,11 +33,11 @@
 #include <boost/iostreams/stream_buffer.hpp>
 #include <boost/iostreams/concepts.hpp>
 #include <boost/iostreams/categories.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/iostreams/device/file.hpp>
 #include <boost/iostreams/tee.hpp>
 #include <boost/thread/mutex.hpp>
 #include <iostream>
+#include <vector>
 
 #ifdef _MSC_VER
 #pragma warning (pop)
@@ -75,7 +75,7 @@ bool check(const std::string& filename)
 int main()
 {
     std::wofstream outputstream("output_fstream.txt");
-    
+
     typedef boost::iostreams::tee_device<boost::iostreams::wfile_sink, std::wostream> my_tee;
     my_tee tee(boost::iostreams::wfile_sink("output_file_sink.txt"),outputstream);
     boost::iostreams::filtering_wostreambuf buf;
@@ -87,7 +87,7 @@ int main()
     out << "blahonga blahonga blahonga!!!" << std::endl;
 
     int retval = 0;
-    
+
     if (!check("output_file_sink.txt"))
     {
         std::wcout << "boost::iostreams::wfile_sink does not appear to get flushed" << std::endl;
@@ -107,4 +107,3 @@ int main()
 
     return retval;
 }
-
