@@ -188,7 +188,6 @@ try:
             if control.poll() is None and main.poll() is None:
                 living.append((i,control,main))
             else:
-                dead.append(i)
                 log ("Node", i, "is stopping")
                 if i != expected:
                     log ("Unexpected node died!")
@@ -196,11 +195,12 @@ try:
                         log("  control died with exit code", control.returncode)
                     if main.poll() is not None:
                         log("  main died with exit code", main.returncode)
-                    time.sleep(1000000)
-                if expected == args.start:
-                    revolution += 1
-                expected = args.start + (expected + 1) % args.nodes
-                log("Next expected is", expected)
+                else:
+                    dead.append(i)
+                    if expected == args.start:
+                        revolution += 1
+                    expected = args.start + (expected + 1) % args.nodes
+                    log("Next expected is", expected)
                 stop_node(i, control, main)
 
         nodes = living
