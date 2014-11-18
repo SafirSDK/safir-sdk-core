@@ -364,6 +364,16 @@ INSTALL(FILES
   DESTINATION ${SAFIR_INSTALL_DESTINATION_CMAKE}
   COMPONENT Development)
 
+INSTALL(FILES
+  cmake/UseJavaWithManifest/README.txt
+  cmake/UseJavaWithManifest/Copyright.txt
+  cmake/UseJavaWithManifest/CMakeParseArguments.cmake
+  cmake/UseJavaWithManifest/UseJava.cmake
+  cmake/UseJavaWithManifest/UseJavaSymlinks.cmake
+  cmake/UseJavaWithManifest/UseJavaClassFilelist.cmake
+  DESTINATION ${SAFIR_INSTALL_DESTINATION_CMAKE}/UseJavaWithManifest
+  COMPONENT Development)
+
 
 
 #TODO: Add links to documentation in installed package.
