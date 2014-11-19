@@ -19,12 +19,12 @@ TARGET_LINK_LIBRARIES(safir_control
   optimized system_picture
   debug system_picture${CMAKE_DEBUG_POSTFIX}
   optimized communication
-  debug communication${CMAKE_DEBUG_POSTFIX})
+  debug communication${CMAKE_DEBUG_POSTFIX}
+  control_utils)
 
 if (NOT MSVC)
   TARGET_LINK_LIBRARIES(safir_control
-    dots_internal
-    control_utils
+    dots_internal   
     lluf_id
     lluf_utils
     lluf_config
