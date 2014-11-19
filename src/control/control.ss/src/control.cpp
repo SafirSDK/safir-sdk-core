@@ -174,9 +174,17 @@ int main(int argc, char * argv[])
     // TODO: Hur hitta binärer?
     // TODO: Hur hantera environment? (Ärvs automatiskt på Windows men inte för Posix)
     // TODO: Skicka ett kommando till dose_main i stället för kommandoradsparameterar
+
+#ifdef _MSC_VER
+    std::wostringstream doseMainCmdLine;
+    doseMainCmdLine << "dose_main_stub --data-address " << options.dataAddress << " --name " << options.name
+                    << " --node-type " << options.nodeTypeId << " --force-id " << options.id;
+#else
     std::ostringstream doseMainCmdLine;
     doseMainCmdLine << "dose_main_stub --data-address " << options.dataAddress << " --name " << options.name
                     << " --node-type " << options.nodeTypeId << " --force-id " << options.id;
+#endif
+
     boost::system::error_code ec;
     //boost::process::child dose_main =
     boost::process::execute(
