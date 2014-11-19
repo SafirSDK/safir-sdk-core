@@ -26,19 +26,13 @@
 #include <Safir/Dob/Internal/ControlUtilsExportDefs.h>
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
-
-#ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable: 4267)
-#endif
-
-#include <boost/asio.hpp>
-
-#ifdef _MSC_VER
-#pragma warning (pop)
-#endif
-
+#include <boost/noncopyable.hpp>
 #include <string>
+
+//forward declaration
+namespace boost { namespace asio {
+    class io_service;
+}}
 
 namespace Safir
 {
