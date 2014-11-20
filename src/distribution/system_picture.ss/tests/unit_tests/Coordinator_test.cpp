@@ -201,6 +201,67 @@ RawStatistics GetRawWithTwoNodesAndRemoteRaw(bool oneDead, bool longGone)
     return RawStatisticsCreator::Create(std::move(msg));
 }
 
+RawStatistics GetRawWithTwoNodesAndOneRemoteRaw()
+{
+    auto msg = Safir::make_unique<RawStatisticsMessage>();
+
+    msg->set_name("myself");
+    msg->set_id(1000);
+    msg->set_election_id(100);
+
+    //add node remote2
+    {
+        auto node = msg->add_node_info();
+
+        node->set_name("remote2");
+        node->set_id(1002);
+        node->set_is_dead(false);
+        node->set_is_long_gone(false);
+
+        auto remote = node->mutable_remote_statistics();
+
+        remote->set_name("remote2");
+        remote->set_id(1002);
+        remote->set_election_id(100);
+
+        auto rnode = remote->add_node_info();
+        rnode->set_name("myself");
+        rnode->set_id(1000);
+        rnode->set_is_dead(false);
+        rnode->set_is_long_gone(false);
+    }
+
+    //Add node remote1
+    {
+        auto node = msg->add_node_info();
+
+        node->set_name("remote1");
+        node->set_id(1001);
+        node->set_is_dead(false);
+        node->set_is_long_gone(false);
+
+        auto remote = node->mutable_remote_statistics();
+
+        remote->set_name("remote1");
+        remote->set_id(1001);
+        remote->set_election_id(100);
+
+        auto rnode = remote->add_node_info();
+        rnode->set_name("myself");
+        rnode->set_id(1000);
+        rnode->set_is_dead(false);
+        rnode->set_is_long_gone(false);
+
+        rnode = remote->add_node_info();
+        rnode->set_name("remote2");
+        rnode->set_id(1002);
+        rnode->set_is_dead(false);
+        rnode->set_is_long_gone(false);
+    }
+
+    return RawStatisticsCreator::Create(std::move(msg));
+}
+
 
 SystemStateMessage GetStateWithOneNode()
 {
@@ -498,7 +559,7 @@ BOOST_AUTO_TEST_CASE( simple_state_production )
     BOOST_REQUIRE(callbackCalled);
     BOOST_CHECK_EQUAL(stateMessage.elected_id(),1000);
     BOOST_CHECK_EQUAL(stateMessage.election_id(),100);
-    BOOST_CHECK_EQUAL(stateMessage.node_info_size(),2);
+    BOOST_REQUIRE_EQUAL(stateMessage.node_info_size(),2);
 
     BOOST_CHECK_EQUAL(stateMessage.node_info(0).name(),"myself");
     BOOST_CHECK_EQUAL(stateMessage.node_info(0).id(),1000);
@@ -560,8 +621,7 @@ BOOST_AUTO_TEST_CASE( propagate_state_from_other )
     BOOST_REQUIRE(callbackCalled);
     BOOST_CHECK_EQUAL(stateMessage.elected_id(),1001);
     BOOST_CHECK_EQUAL(stateMessage.election_id(),100);
-    BOOST_CHECK_EQUAL(stateMessage.node_info_size(),2);
-
+    BOOST_REQUIRE_EQUAL(stateMessage.node_info_size(),2);
 
     BOOST_CHECK_EQUAL(stateMessage.node_info(0).name(),"remote1");
     BOOST_CHECK_EQUAL(stateMessage.node_info(0).id(),1001);
@@ -623,7 +683,7 @@ BOOST_AUTO_TEST_CASE( remote_from_other_with_dead )
 
     BOOST_CHECK_EQUAL(stateMessage.elected_id(),1001);
     BOOST_CHECK_EQUAL(stateMessage.election_id(),100);
-    BOOST_CHECK_EQUAL(stateMessage.node_info_size(),3);
+    BOOST_REQUIRE_EQUAL(stateMessage.node_info_size(),3);
 
     BOOST_CHECK_EQUAL(stateMessage.node_info(0).name(),"remote1");
     BOOST_CHECK_EQUAL(stateMessage.node_info(0).id(),1001);
@@ -667,7 +727,7 @@ BOOST_AUTO_TEST_CASE( remote_reports_dead )
     ioService.run();
     BOOST_REQUIRE(callbackCalled);
     BOOST_CHECK_EQUAL(stateMessage.elected_id(),1000);
-    BOOST_CHECK_EQUAL(stateMessage.node_info_size(),3);
+    BOOST_REQUIRE_EQUAL(stateMessage.node_info_size(),3);
 
     BOOST_CHECK_EQUAL(stateMessage.node_info(0).id(),1000);
     BOOST_CHECK(!stateMessage.node_info(0).is_dead());
@@ -698,7 +758,7 @@ BOOST_AUTO_TEST_CASE( remote_reports_dead )
     ioService.run();
     BOOST_REQUIRE(callbackCalled);
     BOOST_CHECK_EQUAL(stateMessage.elected_id(),1000);
-    BOOST_CHECK_EQUAL(stateMessage.node_info_size(),3);
+    BOOST_REQUIRE_EQUAL(stateMessage.node_info_size(),3);
 
     BOOST_CHECK_EQUAL(stateMessage.node_info(0).id(),1000);
     BOOST_CHECK(!stateMessage.node_info(0).is_dead());
@@ -740,7 +800,7 @@ BOOST_AUTO_TEST_CASE( ignore_long_gone_flag )
     ioService.run();
     BOOST_REQUIRE(callbackCalled);
     BOOST_CHECK_EQUAL(stateMessage.elected_id(),1000);
-    BOOST_CHECK_EQUAL(stateMessage.node_info_size(),3);
+    BOOST_REQUIRE_EQUAL(stateMessage.node_info_size(),3);
 
     BOOST_CHECK_EQUAL(stateMessage.node_info(0).id(),1000);
     BOOST_CHECK(!stateMessage.node_info(0).is_dead());
@@ -756,5 +816,59 @@ BOOST_AUTO_TEST_CASE( ignore_long_gone_flag )
     BOOST_CHECK(rh.deadNodes.empty());
     BOOST_CHECK(comm.excludedNodes.empty());
 }
+
+/* This tc checks that a new remote node cannot make the coordinator produce a state
+   that is inconsistent with previous state*/
+BOOST_AUTO_TEST_CASE( state_sequence_consistent )
+{
+    ElectionHandlerStub::lastInstance->electedId = 1000;
+    ElectionHandlerStub::lastInstance->electionCompleteCallback(1000,100);
+    rh.rawCb(GetRawWithOneNodeAndRemoteRaw(),RawChanges(RawChanges::NODES_CHANGED),cs);
+    bool callbackCalled = false;
+    SystemStateMessage stateMessage;
+    coordinator.PerformOnStateMessage([&callbackCalled,&stateMessage](std::unique_ptr<char []> data,
+                                                                      const size_t size)
+                                      {
+                                          callbackCalled = true;
+                                          stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
+                                      },
+                                      0,
+                                      true);
+
+    ioService.run();
+    BOOST_REQUIRE(callbackCalled);
+    callbackCalled = false;
+
+    BOOST_REQUIRE_EQUAL(stateMessage.node_info_size(),2);
+    BOOST_CHECK_EQUAL(stateMessage.node_info(0).id(),1000);
+    BOOST_CHECK(!stateMessage.node_info(0).is_dead());
+    BOOST_CHECK_EQUAL(stateMessage.node_info(1).id(),1001);
+    BOOST_CHECK(!stateMessage.node_info(1).is_dead());
+
+    rh.rawCb(GetRawWithTwoNodesAndOneRemoteRaw(),
+             RawChanges(RawChanges::NEW_REMOTE_STATISTICS|RawChanges::NODES_CHANGED),cs);
+
+    coordinator.PerformOnStateMessage([&callbackCalled,&stateMessage](std::unique_ptr<char []> data,
+                                                                      const size_t size)
+                                      {
+                                          callbackCalled = true;
+                                          stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
+                                      },
+                                      0,
+                                      true);
+
+    ioService.reset();
+    ioService.run();
+    BOOST_REQUIRE(callbackCalled);
+    BOOST_REQUIRE_EQUAL(stateMessage.node_info_size(),2);
+    BOOST_CHECK_EQUAL(stateMessage.node_info(0).id(),1000);
+    BOOST_CHECK(!stateMessage.node_info(0).is_dead());
+    BOOST_CHECK_EQUAL(stateMessage.node_info(1).id(),1001);
+    BOOST_CHECK(!stateMessage.node_info(1).is_dead());
+
+    BOOST_CHECK(comm.excludedNodes.empty());
+    BOOST_CHECK(rh.deadNodes.empty());
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()
