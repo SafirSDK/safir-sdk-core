@@ -460,6 +460,9 @@ namespace SP
                         unknown.erase(remote.Id(j));
                     }
 
+                    //and we know about ourselves, obviously
+                    unknown.erase(remote.Id());
+
                     //remove them from ssNodes
                     for (const auto id : unknown)
                     {
@@ -483,6 +486,7 @@ namespace SP
                 node->set_node_type_id(m_lastStatistics.NodeTypeId(i));
                 node->set_control_address(m_lastStatistics.ControlAddress(i));
                 node->set_data_address(m_lastStatistics.DataAddress(i));
+                node->set_is_dead(false);
             }
 
             //ok, time to add all dead nodes

@@ -581,6 +581,7 @@ BOOST_AUTO_TEST_CASE( propagate_state_from_other )
     BOOST_CHECK(rh.deadNodes.empty());
 }
 
+
 BOOST_AUTO_TEST_CASE( remote_from_other_with_dead )
 {
     ElectionHandlerStub::lastInstance->electedId = 1001;
@@ -702,11 +703,11 @@ BOOST_AUTO_TEST_CASE( remote_reports_dead )
     BOOST_CHECK_EQUAL(stateMessage.node_info(0).id(),1000);
     BOOST_CHECK(!stateMessage.node_info(0).is_dead());
 
-    BOOST_CHECK_EQUAL(stateMessage.node_info(1).name(),"remote1");
-    BOOST_CHECK(stateMessage.node_info(1).is_dead());
+    BOOST_CHECK_EQUAL(stateMessage.node_info(1).name(),"remote2");
+    BOOST_CHECK(!stateMessage.node_info(1).is_dead());
 
-    BOOST_CHECK_EQUAL(stateMessage.node_info(2).name(),"remote2");
-    BOOST_CHECK(!stateMessage.node_info(2).is_dead());
+    BOOST_CHECK_EQUAL(stateMessage.node_info(2).name(),"remote1");
+    BOOST_CHECK(stateMessage.node_info(2).is_dead());
 
     BOOST_CHECK(rh.deadNodes.size() == 1);
     BOOST_CHECK(rh.deadNodes.find(1001) != rh.deadNodes.end());
@@ -716,7 +717,7 @@ BOOST_AUTO_TEST_CASE( remote_reports_dead )
 }
 
 
-BOOST_AUTO_TEST_CASE( ignore_long_gone_nodes )
+BOOST_AUTO_TEST_CASE( ignore_long_gone_flag )
 {
     ElectionHandlerStub::lastInstance->electedId = 1000;
     ElectionHandlerStub::lastInstance->electionCompleteCallback(1000,100);
@@ -739,7 +740,7 @@ BOOST_AUTO_TEST_CASE( ignore_long_gone_nodes )
     ioService.run();
     BOOST_REQUIRE(callbackCalled);
     BOOST_CHECK_EQUAL(stateMessage.elected_id(),1000);
-    BOOST_CHECK_EQUAL(stateMessage.node_info_size(),2);
+    BOOST_CHECK_EQUAL(stateMessage.node_info_size(),3);
 
     BOOST_CHECK_EQUAL(stateMessage.node_info(0).id(),1000);
     BOOST_CHECK(!stateMessage.node_info(0).is_dead());
@@ -747,6 +748,10 @@ BOOST_AUTO_TEST_CASE( ignore_long_gone_nodes )
     BOOST_CHECK_EQUAL(stateMessage.node_info(1).name(),"remote2");
     BOOST_CHECK_EQUAL(stateMessage.node_info(1).id(),1002);
     BOOST_CHECK(!stateMessage.node_info(1).is_dead());
+
+    BOOST_CHECK_EQUAL(stateMessage.node_info(2).name(),"remote1");
+    BOOST_CHECK_EQUAL(stateMessage.node_info(2).id(),1001);
+    BOOST_CHECK(stateMessage.node_info(2).is_dead());
 
     BOOST_CHECK(rh.deadNodes.empty());
     BOOST_CHECK(comm.excludedNodes.empty());

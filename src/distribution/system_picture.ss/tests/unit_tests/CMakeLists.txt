@@ -112,3 +112,6 @@ set_tests_properties(ElectionHandler_test PROPERTIES TIMEOUT 1200)
 
 add_test(ElectionHandler_test_with_overflows ElectionHandler_test --overflows)
 set_tests_properties(ElectionHandler_test_with_overflows PROPERTIES TIMEOUT 1200)
+
+add_test(Coordinator_test Coordinator_test)
+set_tests_properties(Coordinator_test PROPERTIES TIMEOUT 30)
