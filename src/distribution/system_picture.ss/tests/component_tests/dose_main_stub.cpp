@@ -23,6 +23,7 @@
 ******************************************************************************/
 #include <Safir/Dob/Internal/Communication.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
+#include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/MakeUnique.h>
 #include <Safir/Dob/Internal/SystemPicture.h>
 #include <Safir/Utilities/Internal/Id.h>
@@ -104,7 +105,7 @@ public:
             return;
         }
 
-        std::wcout << "Got suicide trigger '" << suicideTrigger << "'" << std::endl;
+        lllog(0) << "DM: Got suicide trigger '" << suicideTrigger << "'" << std::endl;
 
         parseOk = true;
     }
@@ -118,7 +119,7 @@ public:
 private:
     static void ShowHelp(const boost::program_options::options_description& desc)
     {
-        std::wcout << std::boolalpha
+        std::wcerr << std::boolalpha
                    << "Usage: dose_main_stub [OPTIONS]\n"
                    << desc << "\n"
                    << std::endl;
@@ -175,7 +176,7 @@ private:
                 continue;
             }
 
-            std::wcout << "Injecting node " << data.Name(i) << "(" << data.Id(i)
+            lllog(0) << "DM: Injecting node " << data.Name(i) << "(" << data.Id(i)
                      << ") of type " << data.NodeTypeId(i)
                      << " with address " << data.DataAddress(i) << std::endl;
 
@@ -209,8 +210,8 @@ private:
 
                 if (!found && !last.IsDead(i))
                 {
-                    std::wcout << "Node " << last.Id(i) << " could not be found in current SS" << std::endl;
-                    std::wcout << "Last: \n" << last << "\nCurrent:\n"<< data <<std::endl;
+                    lllog(0) << "DM: Node " << last.Id(i) << " could not be found in current SS" << std::endl;
+                    lllog(0) << "DM: Last: \n" << last << "\nCurrent:\n"<< data <<std::endl;
                     throw std::logic_error("Node has gone missing without being dead first!");
                 }
             }
@@ -225,7 +226,7 @@ private:
             return;
         }
 
-        //std::wcout << "Considering suicide" << std::endl;
+        //lllog(0) << "Considering suicide" << std::endl;
 
         bool triggered = false;
 
@@ -249,7 +250,7 @@ private:
                 continue;
             }
 
-            //std::wcout << " Found dead trigger node" << std::endl;
+            //lllog(0) << " Found dead trigger node" << std::endl;
 
             //check if it was not known about
             const auto findIt = m_triggerHistory.find(data.Id(i));
@@ -271,14 +272,14 @@ private:
 
         if (triggered)
         {
-            std::wcout << "My trigger node (" << m_trigger << "), has died, will schedule a suicide" << std::endl;
+            lllog(0) << "DM: My trigger node (" << m_trigger << "), has died, will schedule a suicide" << std::endl;
 
             m_suicideTimer.expires_from_now(boost::chrono::seconds(10));
             m_suicideTimer.async_wait([this](const boost::system::error_code& error)
                                       {
                                           if (!error)
                                           {
-                                              std::wcout << "Committing suicide!" << std::endl;
+                                              lllog(0) << "DM: Committing suicide!" << std::endl;
                                               m_stopHandler();
                                           }
                                       });
@@ -447,7 +448,7 @@ int main(int argc, char * argv[])
     signalSet.async_wait([stopFcn](const boost::system::error_code& error,
                                    const int signal_number)
                          {
-                             std::wcout << "Got signal " << signal_number << std::endl;
+                             lllog(0) << "DM: Got signal " << signal_number << std::endl;
                              if (error)
                              {
                                  SEND_SYSTEM_LOG(Error,
@@ -470,6 +471,6 @@ int main(int argc, char * argv[])
 
     threads.join_all();
 
-    std::wcout << "Exiting..." << std::endl;
+    lllog(0) << "DM: Exiting..." << std::endl;
     return 0;
 }

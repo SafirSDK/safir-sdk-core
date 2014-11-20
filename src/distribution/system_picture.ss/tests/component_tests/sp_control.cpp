@@ -224,7 +224,7 @@ int main(int argc, char * argv[])
     signalSet.async_wait([&sp,&work,&communication,&signalSet](const boost::system::error_code& error,
                                                            const int signal_number)
                        {
-                           lllog(3) << "Got signal " << signal_number << std::endl;
+                           lllog(3) << "CTRL: Got signal " << signal_number << std::endl;
                            if (error)
                            {
                                SEND_SYSTEM_LOG(Error,
@@ -248,6 +248,6 @@ int main(int argc, char * argv[])
 
     threads.join_all();
 
-    lllog(3) << "Exiting..." << std::endl;
+    lllog(3) << "CTRL: Exiting..." << std::endl;
     return 0;
 }
