@@ -335,7 +335,7 @@ namespace SP
                                     << ToString(message.action())
                                     << ", "
                                     << message.election_id()
-                                    << ") << from an unknown node with id " << from);
+                                    << ") from an unknown node with id " << from);
 
                     throw std::logic_error("Got ElectionMessage from a node that I dont know about!");
                 }
