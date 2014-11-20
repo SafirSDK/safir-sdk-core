@@ -23,6 +23,7 @@
 ******************************************************************************/
 #include <Safir/Dob/Internal/DoseMainCmd.h>
 #include <boost/thread.hpp>
+#include <boost/asio.hpp>
 
 #define BOOST_TEST_MODULE DoseMainCmdTest
 #include <boost/test/unit_test.hpp>
