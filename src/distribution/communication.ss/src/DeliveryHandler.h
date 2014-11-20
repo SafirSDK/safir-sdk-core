@@ -368,24 +368,31 @@ namespace Com
 
             if (header->deliveryGuarantee==Acked)
             {
-                if (ch.lastInSequence==0) //first time we receive anything, we accept any seqNo and start counting from there
+                if (ch.lastInSequence==0)
                 {
+                    //first time we receive anything, we accept any seqNo and start counting from there
+                    //however we cannot start in the middle of a fragmented message.
                     if (header->fragmentNumber==0) //we cannot start in the middle of a fragmented message
                     {
+                        //this is the first fragment of the message, keep it and start sequnceNumber from here.
                         ForceInsert(header, payload, ni);
                         return header->ackNow==1;
                     }
-                    //else we must wait for beginning of a new message before we start
-                    return false; //no ack to send
+                    else
+                    {
+                        //not the first fragment of the message, we have to wait for beginning of a new message before we start
+                        return false; //no ack to send
+                    }
                 }
                 else if (header->sequenceNumber<=ch.lastInSequence)
                 {
+                    //duplicated message, we must always ack this since it is possible that an ack is lost and the sender has started to resend.
                     lllog(8)<<L"COM: Recv duplicated message in order. Seq: "<<header->sequenceNumber<<L" from node "<<ni.node.name.c_str()<<std::endl;
-                    return true; //maybe an ack is lost and the sender has started to resend.
+                    return true;
                 }
                 else if (header->sequenceNumber==ch.lastInSequence+1)
                 {
-                    //The Normal case: Message in correct order
+                    //The Normal case: Message in correct order. Ack only if sender has requested an ack.
                     Insert(header, payload, ni);
                     return header->ackNow==1;
                 }
@@ -394,11 +401,12 @@ namespace Com
                     //This is something within our receive window but out of order, the gaps will eventually be filled in
                     //when sender retransmits non-acked messages.
                     Insert(header, payload, ni);
-                    return true; //we ack evertying we have in order so far.
+                    return true; //we ack evertying we have so far so that the sender becomes aware of the gaps
                 }
                 else //lost messages, got something too far ahead
                 {
-                    //This can occur if the senders send window i bigger than the receivers receive window. If everything is working as expected we can just ignore this message.
+                    //This can occur if the senders send window is bigger than the receivers receive window, and it should never happen.
+                    //If everything is working as expected we can just ignore this message, but still it is a logic error in the code!
                     //Sooner or later the sender must retransmit all non-acked messages, and in time this message will come into our receive window.
                     lllog(8)<<L"COM: Received Seq: "<<header->sequenceNumber<<" wich means that we have lost a message. LastInSequence="<<ch.lastInSequence<<std::endl;
                     std::wcout<<L"COM: Received Seq: "<<header->sequenceNumber<<" wich means that we have lost a message. LastInSequence="<<ch.lastInSequence<<std::endl;
@@ -532,24 +540,27 @@ namespace Com
         {
             Channel& ch=ni.GetChannel(header);
             auto ackPtr=boost::make_shared<Ack>(m_myId, header->commonHeader.senderId, ch.lastInSequence, header->sendMethod);
+            WriterType::SendTo(ackPtr, ni.endpoint);
 
+//            Channel& ch=ni.GetChannel(header);
 //            auto ackPtr=boost::make_shared<Ack>(m_myId, header->commonHeader.senderId, ch.biggestSequence, header->sendMethod);
-//            if (ch.biggestSequence>ch.lastInSequence)
+
+//            uint64_t seq=ch.biggestSequence;
+//            for (size_t i=0; i<Parameters::SlidingWindowSize; ++i)
 //            {
-//                //we got gaps in our receive sequence
-//                size_t biggestIndex=ch.biggestSequence-ch.lastInSequence-1; //index of the biggest seqNo we have
-//                for (size_t i=0; i<biggestIndex; ++i)
+//                if (seq>ch.lastInSequence)
 //                {
-//                    if (ch.queue[i].free)
-//                    {
-//                        //this is a gap
-//                        ackPtr->missing[ackPtr->numberOfMissing]=ch.biggestSequence-(biggestIndex-i); //
-//                        ++(ackPtr->numberOfMissing);
-//                    }
+//                    size_t index=seq-ch.lastInSequence-1;
+//                    ackPtr->missing[i]=(ch.queue[index].free ? 1 : 0);
+//                    --seq;
+//                }
+//                else
+//                {
+//                    ackPtr->missing[i]=0;
 //                }
 //            }
 
-            WriterType::SendTo(ackPtr, ni.endpoint);
+//            WriterType::SendTo(ackPtr, ni.endpoint);
 
             //                static uint32_t count=0;
             //                ++count;

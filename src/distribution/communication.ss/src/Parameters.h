@@ -42,7 +42,6 @@ namespace Com
 
         //Max number of messages that can be sent in sequence before waiting for ack.
         //Max number of messages out of order that are saved
-        //Not allowed to be bigger than 255 due to design of ack-message.
         static const size_t SlidingWindowSize=20;
 
         //Max number of undelivered messages to application allowed before slowing down receiver
