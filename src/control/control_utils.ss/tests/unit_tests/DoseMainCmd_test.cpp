@@ -43,7 +43,11 @@ BOOST_AUTO_TEST_CASE( send_inject_node )
     threads.create_thread([&pubIoService](){pubIoService.run();});
     threads.create_thread([&subIoService](){subIoService.run();});
 
+    std::wcout << "About to create cmdSender" << std::endl;
+
     DoseMainCmdSender cmdSender(pubIoService);
+
+    std::wcout << "About to create cmdReceiver" << std::endl;
 
     DoseMainCmdReceiver cmdReceiver(subIoService,
                                     [](int64_t requestId,
@@ -58,7 +62,10 @@ BOOST_AUTO_TEST_CASE( send_inject_node )
                                         BOOST_CHECK(nodeTypeId == 121212);
                                         BOOST_CHECK(dataAddress == "192.168.211.10");
                                     });
+
+    std::wcout << "cmdSender.Start()" << std::endl;
     cmdSender.Start();
+    std::wcout << "cmdReceiver.Start()" << std::endl;
     cmdReceiver.Start();
 
     // Sleep a while to let the sender and receiver connect

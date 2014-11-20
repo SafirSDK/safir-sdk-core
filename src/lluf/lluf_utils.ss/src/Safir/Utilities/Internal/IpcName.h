@@ -26,6 +26,7 @@
 
 #include <Safir/Utilities/Internal/ConfigReader.h>
 #include <boost/filesystem.hpp>
+#include <iostream>
 
 namespace Safir
 {
@@ -51,8 +52,15 @@ namespace Internal
     {
         using namespace boost::filesystem;
 
+        std::wcout << "GetIpcDirectory() called" << std::endl;
+
         Safir::Utilities::Internal::ConfigReader config;
+
+        std::wcout << "config object is constructed!" << std::endl;
+
         const path dir(config.Locations().get<std::string>("ipc_endpoints_directory"));
+
+        std::wcout << "dir object is constructed! string length is" << dir.string().length() << std::endl;
 
         if (!exists(dir))
         {
