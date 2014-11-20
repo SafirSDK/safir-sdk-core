@@ -254,7 +254,7 @@ namespace SP
             return nodes;
         }
 
-
+        /** Get all node ids that any node thinks is dead */
         static std::map<int64_t, std::pair<RawStatistics,int>> GetDeadNodes(const RawStatistics& statistics,
                                                                             const int64_t ownId)
         {
@@ -410,13 +410,14 @@ namespace SP
             //He should also start a new election, and the thing should resolve itself.
 
 
-            //Get all dead nodes in a table
-            std::map<int64_t, std::pair<RawStatistics,int>> deadNodes = GetDeadNodes(m_lastStatistics, m_id);
+            //get all nodes that anyone thinks are dead in a table
+            const auto deadNodes = GetDeadNodes(m_lastStatistics, m_id);
 
-            //tell rawhandler about nodes that other nodes consider dead
-            //while we build our new system state message
-            //Note: never do exclude on a node that is not one that we have
-            //received NewNode for, i.e. is in m_lastStatistics top level.
+            //this set will be filled with all live nodes that should be part of the system state
+            std::set<int64_t> ssNodes;
+
+            //Put all nodes that we know about in ssNodes, and
+            //exclude nodes that other nodes consider dead
             for (int i = 0; i < m_lastStatistics.Size(); ++i)
             {
                 bool justKilled = false;
@@ -433,19 +434,58 @@ namespace SP
                     justKilled = true;
                 }
 
+                //insert nodes that are alive
+                if(!m_lastStatistics.IsDead(i) && !justKilled)
+                {
+                    ssNodes.insert(m_lastStatistics.Id(i));
+                }
+            }
+
+            //now we need to remove nodes that are not fully connected to all other nodes from ssNodes
+            for (int i = 0; i < m_lastStatistics.Size(); ++i)
+            {
+                if (m_lastStatistics.IsDead(i))
+                {
+                    continue;
+                }
+
+                if (m_lastStatistics.HasRemoteStatistics(i))
+                {
+                    const auto remote = m_lastStatistics.RemoteStatistics(i);
+
+                    //get a set of all nodes that we know of, but that the remote does not know about
+                    auto unknown = ssNodes;
+                    for (int j = 0; j < remote.Size(); ++j)
+                    {
+                        unknown.erase(remote.Id(j));
+                    }
+
+                    //remove them from ssNodes
+                    for (const auto id : unknown)
+                    {
+                        ssNodes.erase(id);
+                    }
+                }
+            }
+
+            //Ok, now ssNodes should contain all nodes that we can see and that everyone else can see, and nothing else.
+            //Add all those nodes to the system state
+            for (int i = 0; i < m_lastStatistics.Size(); ++i)
+            {
+                if (ssNodes.find(m_lastStatistics.Id(i)) == ssNodes.end())
+                {
+                    continue;
+                }
+
                 auto node = m_stateMessage.add_node_info();
                 node->set_name(m_lastStatistics.Name(i));
                 node->set_id(m_lastStatistics.Id(i));
                 node->set_node_type_id(m_lastStatistics.NodeTypeId(i));
                 node->set_control_address(m_lastStatistics.ControlAddress(i));
                 node->set_data_address(m_lastStatistics.DataAddress(i));
-
-                node->set_is_dead(justKilled || m_lastStatistics.IsDead(i));
-
-                deadNodes.erase(m_lastStatistics.Id(i));
             }
 
-            //ok, time to add any of the dead nodes that haven't already been added
+            //ok, time to add all dead nodes
             for (const auto& dn : deadNodes)
             {
                 const auto& remote = dn.second.first;
