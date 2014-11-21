@@ -45,12 +45,19 @@ namespace Utilities
 namespace Internal
 {
 
+
     class LinuxAcceptor
         : public boost::enable_shared_from_this<LinuxAcceptor>
     {
     public:
         typedef boost::shared_ptr<boost::asio::local::stream_protocol::socket>  StreamPtr;
         typedef boost::function<void(StreamPtr)>                                StreamCreatedCallback;
+
+        std::string GetIpcPath()
+        {
+            std::wcout << "GetIpcPath called!" << std::endl;
+            return m_ipcPath;
+        }
 
         // The Acceptor class uses shared_from_this so remember to always access it via a shared pointer.
         LinuxAcceptor(boost::asio::io_service::strand& strand,
@@ -62,6 +69,7 @@ namespace Internal
               m_endpoint(m_ipcPath),
               m_acceptor(strand.get_io_service())
         {
+            std::wcout << "LinuxAcceptor constructor!" << std::endl;
         }
 
         void Start()
