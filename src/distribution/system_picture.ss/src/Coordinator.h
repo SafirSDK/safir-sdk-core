@@ -113,28 +113,25 @@ namespace SP
         {
             m_stateMessage.set_elected_id(0); //our state message is not valid until we have a real id set.
 
-            rawHandler.AddRawChangedCallback([this](const RawStatistics& statistics,
-                                                    const RawChanges flags,
-                                                    boost::shared_ptr<void> completionSignaller)
+            rawHandler.AddRawChangedCallback(m_strand.wrap([this](const RawStatistics& statistics,
+                                                                  const RawChanges flags,
+                                                                  boost::shared_ptr<void> completionSignaller)
             {
-                m_strand.post([this, statistics, flags, completionSignaller]
-                              {
-                                  lllog(9) << "SP: Coordinator got new raw data (" << flags << ")" << std::endl;
+                lllog(9) << "SP: Coordinator got new raw data (" << flags << ")" << std::endl;
 
-                                  m_lastStatistics = statistics;
-                                  m_lastStatisticsDirty = true;
+                m_lastStatistics = statistics;
+                m_lastStatisticsDirty = true;
 
-                                  if (m_electionHandler.IsElected())
-                                  {
-                                      UpdateMyState();
-                                  }
+                if (m_electionHandler.IsElected())
+                {
+                    UpdateMyState();
+                }
 
-                                  if (flags.NodesChanged())
-                                  {
-                                      m_electionHandler.NodesChanged(std::move(statistics), completionSignaller);
-                                  }
-                              });
-            });
+                if (flags.NodesChanged())
+                {
+                    m_electionHandler.NodesChanged(std::move(statistics), completionSignaller);
+                }
+            }));
         }
 
         void SetStateChangedCallback(const std::function<void(const SystemStateMessage& data)>& callback)
@@ -499,7 +496,7 @@ namespace SP
                 }
 
                 //remove the dead ones from lastLiveNodes
-                for(const auto d: died)
+                for (const auto d: died)
                 {
                     lastLiveNodes.erase(d);
                 }
