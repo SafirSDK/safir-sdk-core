@@ -60,7 +60,7 @@ namespace Internal
 
         const path dir(config.Locations().get<std::string>("ipc_endpoints_directory"));
 
-        std::wcout << "dir object is constructed! string length is " << dir.string().length() << std::endl;
+        std::wcout << "dir object is constructed! string length is" << dir.string().length() << std::endl;
 
         if (!exists(dir))
         {
@@ -86,10 +86,7 @@ namespace Internal
 
     const std::string GetIpcStreamId(const std::string& name)
     {
-        std::string s = (GetIpcDirectory() / (name + Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix())).string();
-        std::wcout << "GetStreamId: " << s.c_str() << std::endl;
-        return s;
-        //return (GetIpcDirectory() / (name + Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix())).string();
+        return (GetIpcDirectory() / (name + Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix())).string();
     }
 
 #endif
