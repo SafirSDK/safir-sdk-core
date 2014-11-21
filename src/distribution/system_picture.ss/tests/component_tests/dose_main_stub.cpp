@@ -250,13 +250,13 @@ private:
                 continue;
             }
 
-            //lllog(0) << " Found dead trigger node" << std::endl;
+            lllog(0) << "DM: Found dead trigger node " << data.Id(i) << std::endl;
 
             //check if it was not known about
             const auto findIt = m_triggerHistory.find(data.Id(i));
             if (findIt == m_triggerHistory.end())
             {
-                //most probably from a previous cycle, ignore it.
+                lllog(0) << "DM:  most probably from a previous cycle, ignore it." << std::endl;
                 m_triggerHistory.insert(std::make_pair(data.Id(i),true));
                 continue;
             }
@@ -264,6 +264,7 @@ private:
             //if it wasnt previously dead
             if (!findIt->second)
             {
+                lllog(0) << "DM:  was not previously dead, triggering" << std::endl;
                 findIt->second = true; //now known to be dead
                 triggered = true;
                 break;

@@ -191,6 +191,7 @@ try:
                 log ("Node", i, "is stopping")
                 if i != expected:
                     log ("Unexpected node died!")
+                    expected = -1
                     if control.poll() is not None:
                         log("  control died with exit code", control.returncode)
                     if main.poll() is not None:
