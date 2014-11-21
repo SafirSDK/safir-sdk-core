@@ -55,7 +55,7 @@ namespace Internal
 
         std::string GetIpcPath()
         {
-            std::wcout << "GetIpcPath called!" << std::endl;
+            std::wcout << "Called endpoint constructor with path: " << m_ipcPath.c_str() << std::endl;
             return m_ipcPath;
         }
 
@@ -66,7 +66,7 @@ namespace Internal
             : m_strand(strand),
               m_ipcPath(GetIpcStreamId(name)),
               m_callback(onStreamCreated),
-              m_endpoint(m_ipcPath),
+              m_endpoint(GetIpcPath()),
               m_acceptor(strand.get_io_service())
         {
             std::wcout << "LinuxAcceptor constructor!" << std::endl;
