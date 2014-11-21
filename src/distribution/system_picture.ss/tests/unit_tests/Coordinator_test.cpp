@@ -138,7 +138,7 @@ RawStatistics GetRawWithOneNodeAndRemoteRaw()
     return RawStatisticsCreator::Create(std::move(msg));
 }
 
-RawStatistics GetRawWithTwoNodesAndRemoteRaw(bool oneDead, bool longGone)
+RawStatistics GetRawWithTwoNodesAndRemoteRaw(bool iThinkANodeIsDead, bool remoteThinksANodeIsDead)
 {
     auto msg = Safir::make_unique<RawStatisticsMessage>();
 
@@ -151,8 +151,8 @@ RawStatistics GetRawWithTwoNodesAndRemoteRaw(bool oneDead, bool longGone)
 
     node->set_name("remote1");
     node->set_id(1001);
-    node->set_is_dead(oneDead && longGone);
-    node->set_is_long_gone(oneDead && longGone);
+    node->set_is_dead(iThinkANodeIsDead);
+    node->set_is_long_gone(false);
 
     auto remote = node->mutable_remote_statistics();
 
@@ -195,7 +195,7 @@ RawStatistics GetRawWithTwoNodesAndRemoteRaw(bool oneDead, bool longGone)
     rnode = remote->add_node_info();
     rnode->set_name("remote1");
     rnode->set_id(1001);
-    rnode->set_is_dead(oneDead && !longGone);
+    rnode->set_is_dead(remoteThinksANodeIsDead);
     rnode->set_is_long_gone(false);
 
     return RawStatisticsCreator::Create(std::move(msg));
@@ -742,7 +742,7 @@ BOOST_AUTO_TEST_CASE( remote_reports_dead )
     BOOST_CHECK(rh.deadNodes.empty());
 
 
-    rh.rawCb(GetRawWithTwoNodesAndRemoteRaw(true,false),RawChanges(RawChanges::NEW_REMOTE_STATISTICS),cs);
+    rh.rawCb(GetRawWithTwoNodesAndRemoteRaw(false,true),RawChanges(RawChanges::NEW_REMOTE_STATISTICS),cs);
 
     callbackCalled = false;
     coordinator.PerformOnStateMessage([&callbackCalled,&stateMessage](std::unique_ptr<char []> data,
@@ -756,6 +756,39 @@ BOOST_AUTO_TEST_CASE( remote_reports_dead )
 
     ioService.reset();
     ioService.run();
+    BOOST_REQUIRE(!callbackCalled);
+    BOOST_CHECK_EQUAL(stateMessage.elected_id(),1000);
+    BOOST_REQUIRE_EQUAL(stateMessage.node_info_size(),3);
+
+    BOOST_CHECK_EQUAL(stateMessage.node_info(0).id(),1000);
+    BOOST_CHECK(!stateMessage.node_info(0).is_dead());
+
+    BOOST_CHECK_EQUAL(stateMessage.node_info(1).name(),"remote1");
+    BOOST_CHECK(!stateMessage.node_info(1).is_dead());
+
+    BOOST_CHECK_EQUAL(stateMessage.node_info(2).name(),"remote2");
+    BOOST_CHECK(!stateMessage.node_info(2).is_dead());
+    BOOST_CHECK(rh.deadNodes.size() == 1);
+    BOOST_CHECK(rh.deadNodes.find(1001) != rh.deadNodes.end());
+
+    BOOST_CHECK(comm.excludedNodes.size() == 1);
+    BOOST_CHECK(comm.excludedNodes.find(1001) != comm.excludedNodes.end());
+
+    rh.rawCb(GetRawWithTwoNodesAndRemoteRaw(true,true),RawChanges(RawChanges::NEW_REMOTE_STATISTICS),cs);
+
+    callbackCalled = false;
+    coordinator.PerformOnStateMessage([&callbackCalled,&stateMessage](std::unique_ptr<char []> data,
+                                                                      const size_t size)
+                                      {
+                                          callbackCalled = true;
+                                          stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
+                                      },
+                                      0,
+                                      true);
+
+    ioService.reset();
+    ioService.run();
+
     BOOST_REQUIRE(callbackCalled);
     BOOST_CHECK_EQUAL(stateMessage.elected_id(),1000);
     BOOST_REQUIRE_EQUAL(stateMessage.node_info_size(),3);
@@ -763,11 +796,11 @@ BOOST_AUTO_TEST_CASE( remote_reports_dead )
     BOOST_CHECK_EQUAL(stateMessage.node_info(0).id(),1000);
     BOOST_CHECK(!stateMessage.node_info(0).is_dead());
 
-    BOOST_CHECK_EQUAL(stateMessage.node_info(1).name(),"remote2");
-    BOOST_CHECK(!stateMessage.node_info(1).is_dead());
+    BOOST_CHECK_EQUAL(stateMessage.node_info(1).name(),"remote1");
+    BOOST_CHECK(stateMessage.node_info(1).is_dead());
 
-    BOOST_CHECK_EQUAL(stateMessage.node_info(2).name(),"remote1");
-    BOOST_CHECK(stateMessage.node_info(2).is_dead());
+    BOOST_CHECK_EQUAL(stateMessage.node_info(2).name(),"remote2");
+    BOOST_CHECK(!stateMessage.node_info(2).is_dead());
 
     BOOST_CHECK(rh.deadNodes.size() == 1);
     BOOST_CHECK(rh.deadNodes.find(1001) != rh.deadNodes.end());

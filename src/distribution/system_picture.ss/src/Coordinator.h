@@ -113,25 +113,28 @@ namespace SP
         {
             m_stateMessage.set_elected_id(0); //our state message is not valid until we have a real id set.
 
-            rawHandler.AddRawChangedCallback(m_strand.wrap([this](const RawStatistics& statistics,
-                                                                  const RawChanges flags,
-                                                                  boost::shared_ptr<void> completionSignaller)
+            rawHandler.AddRawChangedCallback([this](const RawStatistics& statistics,
+                                                    const RawChanges flags,
+                                                    boost::shared_ptr<void> completionSignaller)
             {
-                lllog(9) << "SP: Coordinator got new raw data (" << flags << ")" << std::endl;
+                m_strand.post([this, statistics, flags, completionSignaller]
+                              {
+                                  lllog(9) << "SP: Coordinator got new raw data (" << flags << ")" << std::endl;
 
-                m_lastStatistics = statistics;
-                m_lastStatisticsDirty = true;
+                                  m_lastStatistics = statistics;
+                                  m_lastStatisticsDirty = true;
 
-                if (m_electionHandler.IsElected())
-                {
-                    UpdateMyState();
-                }
+                                  if (m_electionHandler.IsElected())
+                                  {
+                                      UpdateMyState();
+                                  }
 
-                if (flags.NodesChanged())
-                {
-                    m_electionHandler.NodesChanged(std::move(statistics), completionSignaller);
-                }
-            }));
+                                  if (flags.NodesChanged())
+                                  {
+                                      m_electionHandler.NodesChanged(std::move(statistics), completionSignaller);
+                                  }
+                              });
+            });
         }
 
         void SetStateChangedCallback(const std::function<void(const SystemStateMessage& data)>& callback)
@@ -338,6 +341,7 @@ namespace SP
         //must be called in strand
         bool UpdateMyState()
         {
+            lllog(8) << "SP: Entering UpdateMyState" << std::endl;
             if (!m_electionHandler.IsElected())
             {
                 return false;
@@ -388,63 +392,140 @@ namespace SP
                 return false;
             }
 
-            lllog(7) << "SP: Passed all checks, updating my state." << std::endl;
+            lllog(7) << "SP: Passed all checks, looking for dead nodes that "
+                     << "I need to exclude before updating my state" << std::endl;
 
-            m_stateMessage.set_elected_id(m_id);
-            m_stateMessage.set_election_id(m_ownElectionId);
+            //get all nodes that anyone thinks are dead in a table
+            //(we will be removing nodes from this table as we handle them below)
+            auto deadNodes = GetDeadNodes(m_lastStatistics, m_id);
 
-            m_stateMessage.clear_node_info(); //don't care about efficiency...
+            {
+                //Exclude nodes that we think are alive but someone else thinks are dead
+                //(the SetDeadNode will cause RawHandler to post another RawChangedEvent,
+                // so this function will be called again very soon, so we return out of
+                // this function after any changes.)
+                bool changes = false;
+                for (int i = 0; i < m_lastStatistics.Size(); ++i)
+                {
+                    if (!m_lastStatistics.IsDead(i) &&
+                        deadNodes.find(m_lastStatistics.Id(i)) != deadNodes.end())
+                    {
+                        lllog (4) << "SP: Someone thinks that node " << m_lastStatistics.Name(i).c_str()
+                                  << " with id " << m_lastStatistics.Id(i)
+                                  << " is dead, so I'll exclude him."
+                                  << std::endl;
+                        m_communication.ExcludeNode(m_lastStatistics.Id(i));
+                        m_rawHandler.SetDeadNode(m_lastStatistics.Id(i));
+                        changes = true;
+                    }
+                }
 
-            //add myself
-            auto node = m_stateMessage.add_node_info();
-            node->set_name(m_name);
-            node->set_id(m_id);
-            node->set_node_type_id(m_nodeTypeId);
-            node->set_control_address(m_controlAddress);
-            node->set_data_address(m_dataAddress);
-            node->set_is_dead(false);
+                if (changes)
+                {
+                    lllog(4) << "SP: At least one node was marked as dead, returning\n"
+                             << "SP: UpdateMyState will be called again very soon, "
+                             << "which will generate a new state" << std::endl;
+                    return false;
+                }
+            }
 
-            //This code will ignore the case where we for some reason have a RAW from another node
+            lllog(7) << "SP: Updating my state." << std::endl;
+
+            //Note: This code will ignore the case where we for some reason have a RAW from another node
             //that says that we are dead. If that is the case it will stop sending data to us and
             //we will mark him as dead eventually.
             //He should also start a new election, and the thing should resolve itself.
 
+            m_stateMessage.set_elected_id(m_id);
+            m_stateMessage.set_election_id(m_ownElectionId);
 
-            //get all nodes that anyone thinks are dead in a table
-            const auto deadNodes = GetDeadNodes(m_lastStatistics, m_id);
+            lllog(8) << "SP: Looking at last state" << std::endl;
 
-            //this set will be filled with all live nodes that should be part of the system state
-            std::set<int64_t> ssNodes;
-
-            //Put all nodes that we know about in ssNodes, and
-            //exclude nodes that other nodes consider dead
-            for (int i = 0; i < m_lastStatistics.Size(); ++i)
+            //get lists of dead and alive nodes in the last state, for future use.
+            //(remember that the last state might not have been produced by us)
+            std::map<int64_t, SystemStateMessage_NodeInfo*> lastLiveNodes;
+            std::set<int64_t> lastDeadNodes;
+            for (int i = 0; i < m_stateMessage.node_info_size(); ++i)
             {
-                bool justKilled = false;
-                //if we dont think them dead, but someone else does
-                if (!m_lastStatistics.IsDead(i) &&
-                    deadNodes.find(m_lastStatistics.Id(i)) != deadNodes.end())
+                if (m_stateMessage.node_info(i).is_dead())
                 {
-                    lllog (4) << "SP: Someone thinks that node " << m_lastStatistics.Name(i).c_str()
-                              << " with id " << m_lastStatistics.Id(i)
-                              << " is dead, so I'll mark him as dead and spread the word in the SystemState."
-                              << std::endl;
-                    m_communication.ExcludeNode(m_lastStatistics.Id(i));
-                    m_rawHandler.SetDeadNode(m_lastStatistics.Id(i));
-                    justKilled = true;
+                    lllog(8) << "SP:   Dead node " << m_stateMessage.node_info(i).name().c_str()
+                             << " (" << m_stateMessage.node_info(i).id() << ")" << std::endl;
+                    lastDeadNodes.insert(m_stateMessage.node_info(i).id());
                 }
-
-                //insert nodes that are alive
-                if(!m_lastStatistics.IsDead(i) && !justKilled)
+                else
                 {
-                    ssNodes.insert(m_lastStatistics.Id(i));
+                    lllog(8) << "SP:   Live node " << m_stateMessage.node_info(i).name().c_str()
+                             << " (" << m_stateMessage.node_info(i).id() << ")" << std::endl;
+                    lastLiveNodes.insert(std::make_pair(m_stateMessage.node_info(i).id(),
+                                                        m_stateMessage.mutable_node_info(i)));
                 }
             }
 
-            //now we need to remove nodes that are not fully connected to all other nodes from ssNodes
+            if (lastDeadNodes.find(m_id) != lastDeadNodes.end())
+            {
+                throw std::logic_error("We're dead in the last state! Not good at all!");
+            }
+
+            //check that we're in the last state (and alive), and insert us if we're not
+            if (lastLiveNodes.find(m_id) == lastLiveNodes.end())
+            {
+                lllog(8) << "SP: Adding own node to system state" << std::endl;
+
+                //add myself
+                auto node = m_stateMessage.add_node_info();
+                node->set_name(m_name);
+                node->set_id(m_id);
+                node->set_node_type_id(m_nodeTypeId);
+                node->set_control_address(m_controlAddress);
+                node->set_data_address(m_dataAddress);
+                node->set_is_dead(false);
+            }
+
+
+            {
+                std::set<int64_t> died;
+                //handle nodes that have died since last state
+                for (const auto& lln : lastLiveNodes)
+                {
+                    const auto findIt = deadNodes.find(lln.first);
+                    if (findIt != deadNodes.end())
+                    {
+                        lln.second->set_is_dead(true);
+                        deadNodes.erase(findIt);
+                        died.insert(lln.first);
+                        lllog(8) << "SP: Node " << lln.first << " has died since last state" << std::endl;
+                    }
+                }
+
+                //remove the dead ones from lastLiveNodes
+                for(const auto d: died)
+                {
+                    lastLiveNodes.erase(d);
+                }
+            }
+
+            //handle nodes that were dead already
+            for (const auto ldn : lastDeadNodes)
+            {
+                deadNodes.erase(ldn);
+            }
+
+            //Note that nodes that died since last are now in neither lastLiveNodes or lastDeadNodes,
+            //but that doesnt really matter, since we'll be using deadNodes to add dead nodes to
+            //systemState at the end of this fcn.
+
+            lllog(8) << "SP: Looking for new nodes that can be added to the system state" << std::endl;
+
+            //we need a list of new nodes that are fully connected, that we can add to the system state
+            std::set<int64_t> newNodes;
+
+            //first get all live nodes that can see all the currently alive nodes
             for (int i = 0; i < m_lastStatistics.Size(); ++i)
             {
-                if (m_lastStatistics.IsDead(i))
+                //skip nodes that are dead or that are already part of the system state
+                if (m_lastStatistics.IsDead(i) ||
+                    lastLiveNodes.find(m_lastStatistics.Id(i)) != lastLiveNodes.end())
                 {
                     continue;
                 }
@@ -453,32 +534,104 @@ namespace SP
                 {
                     const auto remote = m_lastStatistics.RemoteStatistics(i);
 
-                    //get a set of all nodes that we know of, but that the remote does not know about
-                    auto unknown = ssNodes;
+                    auto lln = lastLiveNodes;
                     for (int j = 0; j < remote.Size(); ++j)
                     {
-                        unknown.erase(remote.Id(j));
+                        lln.erase(remote.Id(j));
                     }
 
-                    //and we know about ourselves, obviously
-                    unknown.erase(remote.Id());
-
-                    //remove them from ssNodes
-                    for (const auto id : unknown)
+                    //if remote has seen all live nodes lln should be empty
+                    //(doesnt matter if they're dead, since that has already been handled)
+                    if (lln.empty())
                     {
-                        ssNodes.erase(id);
+                        lllog(8) << "SP:   Found a candidate " << m_lastStatistics.Name(i).c_str()
+                                 << " (" << m_lastStatistics.Id(i) << ")" << std::endl;
+
+                        newNodes.insert(m_lastStatistics.Id(i));
                     }
                 }
             }
 
-            //Ok, now ssNodes should contain all nodes that we can see and that everyone else can see, and nothing else.
-            //Add all those nodes to the system state
+            //then remove any nodes that the currently alive nodes cant see
             for (int i = 0; i < m_lastStatistics.Size(); ++i)
             {
-                if (ssNodes.find(m_lastStatistics.Id(i)) == ssNodes.end())
+                //skip nodes that are dead or that are not part of the system state
+                if (m_lastStatistics.IsDead(i) ||
+                    lastLiveNodes.find(m_lastStatistics.Id(i)) == lastLiveNodes.end())
                 {
                     continue;
                 }
+
+                if (m_lastStatistics.HasRemoteStatistics(i))
+                {
+                    const auto remote = m_lastStatistics.RemoteStatistics(i);
+
+                    auto seen = newNodes;
+
+                    for (int j = 0; j < remote.Size(); ++j)
+                    {
+                        seen.erase(remote.Id(j));
+                    }
+
+                    //any nodes left over in "seen" are nodes that remote cannot see.
+                    //remove them from newNodes
+                    for (const auto notSeen : seen)
+                    {
+                        lllog(8) << "SP:   Node " << m_lastStatistics.Id(i) << " cannot see node "
+                                 << notSeen << ", so we cannot add it to system state yet" << std::endl;
+
+                        newNodes.erase(notSeen);
+                    }
+                }
+            }
+
+            //and check that the new nodes can see each other!
+            for (int i = 0; i < m_lastStatistics.Size(); ++i)
+            {
+                //skip nodes that are dead or that are not new
+                if (m_lastStatistics.IsDead(i) ||
+                    newNodes.find(m_lastStatistics.Id(i)) == newNodes.end())
+                {
+                    continue;
+                }
+
+                if (m_lastStatistics.HasRemoteStatistics(i))
+                {
+                    const auto remote = m_lastStatistics.RemoteStatistics(i);
+
+                    auto seen = newNodes;
+
+                    seen.erase(m_lastStatistics.Id(i)); //remote can see itself...
+
+                    for (int j = 0; j < remote.Size(); ++j)
+                    {
+                        seen.erase(remote.Id(j));
+                    }
+
+                    //any nodes left over in "seen" are nodes that remote cannot see.
+                    //remove them from newNodes
+                    for (const auto notSeen : seen)
+                    {
+                        lllog(8) << "SP:   Node " << m_lastStatistics.Id(i) << " cannot see node "
+                                 << notSeen << ", so we cannot add it to system state yet" << std::endl;
+
+                        newNodes.erase(notSeen);
+                    }
+                }
+            }
+
+            //then we can go through and add them
+            for (int i = 0; i < m_lastStatistics.Size(); ++i)
+            {
+                //skip nodes that are dead or that are not new
+                if (m_lastStatistics.IsDead(i) ||
+                    newNodes.find(m_lastStatistics.Id(i)) == newNodes.end())
+                {
+                    continue;
+                }
+
+                lllog(4) << "SP: Adding new node " << m_lastStatistics.Name(i).c_str()
+                         << " (" << m_lastStatistics.Id(i) << ")" << std::endl;
 
                 auto node = m_stateMessage.add_node_info();
                 node->set_name(m_lastStatistics.Name(i));
@@ -489,7 +642,8 @@ namespace SP
                 node->set_is_dead(false);
             }
 
-            //ok, time to add all dead nodes
+
+            //and last but not least we add all dead nodes
             for (const auto& dn : deadNodes)
             {
                 const auto& remote = dn.second.first;
@@ -506,6 +660,8 @@ namespace SP
                 node->set_data_address(remote.DataAddress(index));
                 node->set_is_dead(true);
             }
+
+            lllog(8) << "SP: A new SystemState has been produced" << std::endl;
 
             if (m_stateChangedCallback != nullptr)
             {
