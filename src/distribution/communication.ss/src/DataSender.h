@@ -217,19 +217,73 @@ namespace Com
             //Will only check ack against sent messages. If an ack is received for a message that is still unsent, that ack will be ignored.
             m_strand.dispatch([=]
             {
+
                 //Update queue
                 for (size_t i=0; i<m_sendQueue.first_unhandled_index(); ++i)
                 {
                     UserDataPtr& ud=m_sendQueue[i];
                     if (ud->header.sendMethod==ack.sendMethod && ud->header.sequenceNumber<=ack.sequenceNumber)
                     {
-                        //This message is now acked, remove from list of still unacked
-                        ud->receivers.erase(ack.commonHeader.senderId);
+                        //calculate index in missing-array
+                        size_t index=static_cast<size_t>(ack.sequenceNumber-ud->header.sequenceNumber);
+                        if (ack.missing[index]==0)
+                        {
+                            //This message is now acked, remove from list of still unacked
+                            ud->receivers.erase(ack.commonHeader.senderId);
+                        }
+                        else
+                        {
+                            //the ack-sender is missing a message, a gap. Resend immediately
+                            if (ud->receivers.find(ack.commonHeader.senderId)!=ud->receivers.end())
+                            {
+                                RetransmitMessage(ud);
+                            }
+                            else
+                            {
+                                //receiver is missing a message that we dont expect it to be missing. Log all info we have
+                                auto nodeIt=m_nodes.find(ack.commonHeader.senderId);
+                                if (nodeIt==m_nodes.end())
+                                {
+                                    lllog(1)<<L"COM: got Ack from node we dont have. Maybe it has been excluded just before we received the ack-message. Ack sender id: "<<ack.commonHeader.senderId<<std::endl;
+                                }
+                                else if (!nodeIt->second.systemNode)
+                                {
+                                    lllog(1)<<L"COM: got Ack from node that is not a systemNode. Maybe it was excluded just before we received the ack-message. Ack sender id: "<<
+                                              ack.commonHeader.senderId<<std::endl;
+                                }
+                                else
+                                {
+                                    //this should never happen, a programming error. Receiver missing message that we think has already been acked.
+                                    std::wostringstream os;
+                                    os<<L"COM: Node["<<ack.commonHeader.senderId<<L"] is missing a message that has already been acked or we dont expect the node to get at all. "<<
+                                              SendMethodToString(ack.sendMethod).c_str()<<L" sequenceNumber: "<<ack.sequenceNumber;
+                                    lllog(1)<<os.str()<<std::endl;
+                                    SEND_SYSTEM_LOG(Error, <<os.str()<<std::endl);
+                                }
+                            }
+                        }
                     }
                 }
 
                 //Remove from beginning as long as all is acked
                 RemoveCompletedMessages();
+
+
+                //==================================================
+
+//                //Update queue
+//                for (size_t i=0; i<m_sendQueue.first_unhandled_index(); ++i)
+//                {
+//                    UserDataPtr& ud=m_sendQueue[i];
+//                    if (ud->header.sendMethod==ack.sendMethod && ud->header.sequenceNumber<=ack.sequenceNumber)
+//                    {
+//                        //This message is now acked, remove from list of still unacked
+//                        ud->receivers.erase(ack.commonHeader.senderId);
+//                    }
+//                }
+
+//                //Remove from beginning as long as all is acked
+//                RemoveCompletedMessages();
             });
         }
 
@@ -574,16 +628,16 @@ namespace Com
                     os<<"U ";
 
                 const auto& ud=m_sendQueue[i];
-                os<<"q["<<i<<"] "<<std::endl;
+                os<<"q["<<i<<"]"<<" ("<<SendMethodToString(ud->header.sendMethod)<<") sequenceNumber="<<ud->header.sequenceNumber<<std::endl;
                 if (ud->receivers.empty())
                 {
-                    os<<" No_Receivers"<<std::endl;
+                    os<<"    No_Receivers"<<std::endl;
                 }
                 else
                 {
                     for (auto id : ud->receivers)
                     {
-                        os<<"    recvId="<<id<<(ud->header.sendMethod==SingleReceiverSendMethod ? " uni seq=" : " mul seq=")<<ud->header.sequenceNumber<<std::endl;
+                        os<<"    recvId="<<id<<std::endl;
                     }
                 }
             }

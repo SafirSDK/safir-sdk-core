@@ -114,17 +114,18 @@ public:
 
         TRACELINE
         WaitUntilReady();
-        sender.HandleAck(Com::Ack(2, 1, 1, Com::MultiReceiverSendMethod));  //Ack(sender, receiver, seqNo, sendMethod)
+        sender.HandleAck(Ack(2, 1, 1, Com::MultiReceiverSendMethod));  //Ack(sender, receiver, seqNo, sendMethod)
         sender.m_strand.post([&]{CHECKMSG(sender.SendQueueSize()==3, sender.SendQueueSize());});
         WaitUntilReady();
         sender.m_strand.post([&]{sender.DumpSendQueue();});
         WaitUntilReady();
-        sender.HandleAck(Com::Ack(3, 1, 3, Com::MultiReceiverSendMethod));
+        sender.HandleAck(Ack(3, 1, 3, Com::MultiReceiverSendMethod));
+        sender.m_strand.post([&]{sender.DumpSendQueue();});
         sender.m_strand.post([&]{CHECKMSG(sender.SendQueueSize()==2, sender.SendQueueSize());});
         WaitUntilReady();
         sender.m_strand.post([&]{sender.DumpSendQueue();});
         WaitUntilReady();
-        sender.HandleAck(Com::Ack(2, 1, 3, Com::MultiReceiverSendMethod));
+        sender.HandleAck(Ack(2, 1, 3, Com::MultiReceiverSendMethod));
         sender.m_strand.post([&]{CHECKMSG(sender.SendQueueSize()==0, sender.SendQueueSize());});
         WaitUntilReady();
         sender.m_strand.post([&]{sender.DumpSendQueue();});
@@ -141,20 +142,60 @@ public:
         TRACELINE
         sender.m_strand.post([&]
         {
+            std::cout<<"--- SendQueue with fragmented message ---"<<std::endl;
             sender.DumpSendQueue();
             CHECKMSG(sender.SendQueueSize()==9, sender.SendQueueSize());
         });
 
-        TRACELINE
-        sender.HandleAck(Com::Ack(2, 1, 12, Com::MultiReceiverSendMethod));
-        sender.HandleAck(Com::Ack(3, 1, 12, Com::MultiReceiverSendMethod));
-        WaitUntilReady();
+        // now send queue looks like this waiting for both recv R2 and R3 to ack all messages:
+        // ----------------------------------------------------------------------------------------------------------------------------------------------------
+        // | seq 4 (R2,R3) | seq 5 (R2,R3) | seq 6 (R2,R3) | seq 7 (R2,R3) | seq 8 (R2,R3) | seq 9 (R2,R3) | seq 10 (R2,R3) | seq 11 (R2,R3) | seq 12 (R2,R3) |
+        // ----------------------------------------------------------------------------------------------------------------------------------------------------
 
-        sender.m_strand.post([&]
         {
-            sender.DumpSendQueue();
-            CHECKMSG(sender.SendQueueSize()==0, sender.SendQueueSize());
-        });
+            //R2 ack all except seq 8.
+            auto ack=Ack(2, 1, 12, Com::MultiReceiverSendMethod);
+            ack.missing[4]=1;  //index for seq 8 is calculated Ack.Seq-8, i.e 12-8=4
+            sender.HandleAck(ack);
+            sender.m_strand.post([&]{std::cout<<"R2 ack all but seq 8"<<std::endl; sender.DumpSendQueue(); });
+            sender.m_strand.post([&]{CHECKMSG(sender.SendQueueSize()==9, sender.SendQueueSize());});
+        }
+        // now send queue looks like this:
+        // ----------------------------------------------------------------------------------------------------------------------------
+        // | seq 4 (R3) | seq 5 (R3) | seq 6 (R3) | seq 7 (R3) | seq 8 (R2,R3) | seq 9 (R3) | seq 10 (R3) | seq 11 (R3) | seq 12 (R3) |
+        // ----------------------------------------------------------------------------------------------------------------------------
+        {
+            //R3 ack all except seq 10.
+            auto ack=Ack(3, 1, 12, Com::MultiReceiverSendMethod);
+            ack.missing[2]=1;  //index for seq 10 is calculated Ack.Seq-10, i.e 12-10=2
+            sender.HandleAck(ack);
+            sender.m_strand.post([&]{std::cout<<"R3 ack all but seq 10"<<std::endl; sender.DumpSendQueue();});
+            sender.m_strand.post([&]{CHECKMSG(sender.SendQueueSize()==5, sender.SendQueueSize());});
+        }
+        // now send queue looks like this:
+        // ------------------------------------------------------
+        // | seq 8 (R2) | seq 9 | seq 10 (R3) | seq 11 | seq 12 |
+        // ------------------------------------------------------
+
+        TRACELINE
+        sender.HandleAck(Ack(2, 1, 8, Com::MultiReceiverSendMethod));
+        sender.m_strand.post([&]{std::cout<<"R2 ack seq 8"<<std::endl; sender.DumpSendQueue();});
+        sender.m_strand.post([&]{CHECKMSG(sender.SendQueueSize()==3, sender.SendQueueSize());});
+        // now send queue looks like this:
+        // ---------------------------------
+        // | seq 10 (R3) | seq 11 | seq 12 |
+        // ---------------------------------
+
+        std::cout<<"*****Wait for resending 10 to R3"<<std::endl;
+        Wait(5000);
+
+        std::cout<<"*****Continue"<<std::endl;
+
+        sender.HandleAck(Ack(3, 1, 10, Com::MultiReceiverSendMethod));
+        sender.m_strand.post([&]{std::cout<<"R3 ack seq 10"<<std::endl; sender.DumpSendQueue();});
+
+        //now send queue is empty, when 10 is acked also 10, 11 and 12 are removed since they are already acked
+        sender.m_strand.post([&]{CHECKMSG(sender.SendQueueSize()==0, sender.SendQueueSize());});
 
         TRACELINE
         sender.m_strand.post([&]
@@ -173,6 +214,16 @@ private:
 
     static boost::mutex mutex;
     static std::vector< boost::shared_ptr<Com::UserData> > sent;
+
+    static Com::Ack Ack(int64_t sender, int64_t receiver, uint64_t seqNo, uint8_t sendMethod)
+    {
+        Com::Ack a(sender, receiver, seqNo, sendMethod);
+        for (size_t i=0; i<Com::Parameters::SlidingWindowSize; ++i)
+        {
+            a.missing[i]=0;
+        }
+        return a;
+    }
 
     static std::string GetSentData(size_t index)
     {

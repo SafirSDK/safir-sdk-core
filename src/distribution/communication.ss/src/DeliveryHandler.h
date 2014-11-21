@@ -538,29 +538,29 @@ namespace Com
 
         inline void SendAck(NodeInfo& ni, const MessageHeader* header)
         {
-            Channel& ch=ni.GetChannel(header);
-            auto ackPtr=boost::make_shared<Ack>(m_myId, header->commonHeader.senderId, ch.lastInSequence, header->sendMethod);
-            WriterType::SendTo(ackPtr, ni.endpoint);
-
 //            Channel& ch=ni.GetChannel(header);
-//            auto ackPtr=boost::make_shared<Ack>(m_myId, header->commonHeader.senderId, ch.biggestSequence, header->sendMethod);
-
-//            uint64_t seq=ch.biggestSequence;
-//            for (size_t i=0; i<Parameters::SlidingWindowSize; ++i)
-//            {
-//                if (seq>ch.lastInSequence)
-//                {
-//                    size_t index=seq-ch.lastInSequence-1;
-//                    ackPtr->missing[i]=(ch.queue[index].free ? 1 : 0);
-//                    --seq;
-//                }
-//                else
-//                {
-//                    ackPtr->missing[i]=0;
-//                }
-//            }
-
+//            auto ackPtr=boost::make_shared<Ack>(m_myId, header->commonHeader.senderId, ch.lastInSequence, header->sendMethod);
 //            WriterType::SendTo(ackPtr, ni.endpoint);
+
+            Channel& ch=ni.GetChannel(header);
+            auto ackPtr=boost::make_shared<Ack>(m_myId, header->commonHeader.senderId, ch.biggestSequence, header->sendMethod);
+
+            uint64_t seq=ch.biggestSequence;
+            for (size_t i=0; i<Parameters::SlidingWindowSize; ++i)
+            {
+                if (seq>ch.lastInSequence)
+                {
+                    size_t index=seq-ch.lastInSequence-1;
+                    ackPtr->missing[i]=(ch.queue[index].free ? 1 : 0);
+                    --seq;
+                }
+                else
+                {
+                    ackPtr->missing[i]=0;
+                }
+            }
+
+            WriterType::SendTo(ackPtr, ni.endpoint);
 
             //                static uint32_t count=0;
             //                ++count;

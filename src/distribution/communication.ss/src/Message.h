@@ -68,6 +68,11 @@ namespace Com
     static const uint8_t Unacked=0;
     static const uint8_t Acked=1;
 
+    //------------------------------------------------------------
+    //toString functions for convenience
+    //------------------------------------------------------------
+    inline std::string SendMethodToString(uint8_t sm) {return sm==SingleReceiverSendMethod ? "SingleReceiver" : "MultiReceiver";}
+    inline std::string DeliveryGuaranteeToString(uint8_t dg) {return dg==Acked ? "Acked" : "Unacked";}
     inline void hexdump(const char* data, size_t first, size_t last)
     {
         for (size_t i=first; i<last; ++i)
@@ -79,6 +84,8 @@ namespace Com
         }
         std::cout<<std::dec<<std::endl;
     }
+    //------------------------------------------------------------
+
 
     #pragma pack(push)
     #pragma pack(1)
