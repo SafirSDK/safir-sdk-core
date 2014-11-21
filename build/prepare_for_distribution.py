@@ -284,7 +284,8 @@ def windows():
     if not os.path.isdir(boost_lib_dir):
         boost_lib_dir = os.path.join(boost_dir, "stage", "lib");
 
-    boost_libraries = ("chrono",
+    boost_libraries = ("atomic",
+                       "chrono",
                        "date_time",
                        "filesystem",
                        "iostreams",
