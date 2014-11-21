@@ -32,7 +32,8 @@ endif()
   
 ENABLE_TESTING()
 
-add_test(DoseMainCmd_test DoseMainCmd_test)
+ADD_TEST(DoseMainCmd_test DoseMainCmd_test)
+SET_SAFIR_TEST_PROPERTIES(DoseMainCmd_test 240)
 
 ADD_SUBDIRECTORY(Config_test)
 
