@@ -359,7 +359,7 @@ namespace Com
             boost::shared_ptr<char[]> payload(new char[size]);
             google::protobuf::uint8* buf=reinterpret_cast<google::protobuf::uint8*>(const_cast<char*>(payload.get()));
             cm.SerializeWithCachedSizesToArray(buf);
-            UserDataPtr ud(new UserData(m_me.nodeId, ControlDataType, payload, static_cast<size_t>(size)));
+            UserDataPtr ud(new UserData(m_me.nodeId, 0, ControlDataType, payload, static_cast<size_t>(size)));
             WriterType::SendTo(ud, toEndpoint);
         }
 

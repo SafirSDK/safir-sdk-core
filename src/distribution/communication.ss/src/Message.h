@@ -24,7 +24,7 @@
 #ifndef __SAFIR_DOB_COMMUNICATION_MESSAGE_H__
 #define __SAFIR_DOB_COMMUNICATION_MESSAGE_H__
 
-#include <map>
+#include <set>
 #include <bitset>
 #include <boost/cstdint.hpp>
 #include <boost/shared_ptr.hpp>
@@ -68,6 +68,11 @@ namespace Com
     static const uint8_t Unacked=0;
     static const uint8_t Acked=1;
 
+    //------------------------------------------------------------
+    //toString functions for convenience
+    //------------------------------------------------------------
+    inline std::string SendMethodToString(uint8_t sm) {return sm==SingleReceiverSendMethod ? "SingleReceiver" : "MultiReceiver";}
+    inline std::string DeliveryGuaranteeToString(uint8_t dg) {return dg==Acked ? "Acked" : "Unacked";}
     inline void hexdump(const char* data, size_t first, size_t last)
     {
         for (size_t i=first; i<last; ++i)
@@ -79,6 +84,8 @@ namespace Com
         }
         std::cout<<std::dec<<std::endl;
     }
+    //------------------------------------------------------------
+
 
     #pragma pack(push)
     #pragma pack(1)
@@ -107,13 +114,11 @@ namespace Com
         CommonHeader commonHeader;
         uint64_t sequenceNumber;
         uint8_t sendMethod; //tells if message being acked was sent to one or many receivers (different sequence numbers)
-        uint8_t numberOfMissing;
-        unsigned char missing[Parameters::SlidingWindowSize];
+        unsigned char missing[Parameters::SlidingWindowSize]; //1 means missing, 0 not missing sequenceNumber is index 0, seqNo-1 is index 1 and so on.
         Ack(int64_t senderId_, int64_t receiverId_, uint64_t sequenceNumber_, uint8_t sendMethod_)
             :commonHeader(senderId_, receiverId_, AckType)
             ,sequenceNumber(sequenceNumber_)
             ,sendMethod(sendMethod_)
-            ,numberOfMissing(0)
         {
         }
     };
@@ -129,7 +134,6 @@ namespace Com
             ,sendMethod(sendMethod_)
         {
         }
-
     };
 
     struct MessageHeader
@@ -174,46 +178,35 @@ namespace Com
     static const size_t MessageHeaderSize=sizeof(MessageHeader);
 
     //This is for keeping track of ack's and not sent messages.
-    struct Receiver
-    {
-        int64_t id;
-        uint8_t sendMethod;
-        uint64_t sequenceNumber;
-        Receiver() : id(0), sendMethod(MultiReceiverSendMethod), sequenceNumber(0){}
-        Receiver(int64_t id_, uint8_t sendMethod_, uint64_t sequenceNumber_)
-            :id(id_)
-            ,sendMethod(sendMethod_)
-            ,sequenceNumber(sequenceNumber_)
-        {
-        }
-    };
-    typedef std::map<int64_t, Receiver> ReceiverMap;
+    typedef std::set<int64_t> Receivers;
 
     struct UserData
     {
         MessageHeader header; //message header
         boost::shared_ptr<char[]> message; //This is to prevent  destruction of data before all fragments are sent
         const char* fragment; //This is what is sent in this UserData. If not fragmented these will be the same as payload and payloadSize
-        ReceiverMap receivers; //Set of receivers, can be filled with a receiver list, or if MultiReceiverSendMethod it will be filled when its sent
+        Receivers receivers; //Set of receivers, can be filled with a receiver list, or if MultiReceiverSendMethod it will be filled when its sent
         boost::chrono::steady_clock::time_point sendTime; //timestamp when this messages was last transmitted so we know when it's time to make retransmit
 
-        UserData(const int64_t& id,
-                 const int64_t& dataType,
+        UserData(const int64_t senderId,
+                 const int64_t receiverId,
+                 const int64_t dataType,
                  const boost::shared_ptr<char[]>& message_,
                  size_t messageSize)
-            :header(id, 0, dataType, MultiReceiverSendMethod, Acked, 0, messageSize, messageSize, 1, 0, 0)
+            :header(senderId, receiverId, dataType, MultiReceiverSendMethod, Acked, 0, messageSize, messageSize, 1, 0, 0)
             ,message(message_)
             ,fragment(message.get())
         {
         }
 
-        UserData(const int64_t& id,
-                 const int64_t& dataType,
+        UserData(const int64_t senderId,
+                 const int64_t receiverId,
+                 const int64_t dataType,
                  const boost::shared_ptr<char[]>& message_,
                  size_t messageSize,
                  const char* fragment_,
                  size_t fragmentSize)
-            :header(id, 0, dataType, MultiReceiverSendMethod, Acked, 0, messageSize, fragmentSize, 1, 0, static_cast<size_t>(fragment_-message_.get()))
+            :header(senderId, receiverId, dataType, MultiReceiverSendMethod, Acked, 0, messageSize, fragmentSize, 1, 0, static_cast<size_t>(fragment_-message_.get()))
             ,message(message_)
             ,fragment(fragment_)
         {

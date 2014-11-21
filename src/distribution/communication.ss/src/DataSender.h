@@ -176,35 +176,29 @@ namespace Com
                     return;
                 }
 
+                const uint8_t sendMethod=(toId==0 ? MultiReceiverSendMethod : SingleReceiverSendMethod);
+
                 for (size_t frag=0; frag<numberOfFullFragments; ++frag)
                 {
                     const char* fragment=msg.get()+frag*m_fragmentDataSize;
-                    UserDataPtr userData(new UserData(m_nodeId, dataTypeIdentifier, msg, size, fragment, m_fragmentDataSize));
+                    UserDataPtr userData(new UserData(m_nodeId, toId, dataTypeIdentifier, msg, size, fragment, m_fragmentDataSize));
+                    userData->header.commonHeader.receiverId=toId;
+                    userData->header.sendMethod=sendMethod;
                     userData->header.deliveryGuarantee=m_deliveryGuarantee;
                     userData->header.numberOfFragments=static_cast<uint16_t>(totalNumberOfFragments);
                     userData->header.fragmentNumber=static_cast<uint16_t>(frag);
-                    if (toId!=0)
-                    {
-                        userData->header.commonHeader.receiverId=toId;
-                        userData->header.sendMethod=SingleReceiverSendMethod;
-                        userData->receivers.insert(std::make_pair(toId, Receiver()));
-                    }
                     m_sendQueue.enqueue(userData);
                 }
 
                 if (restSize>0)
                 {
                     const char* fragment=msg.get()+numberOfFullFragments*m_fragmentDataSize;
-                    UserDataPtr userData(new UserData(m_nodeId, dataTypeIdentifier, msg, size, fragment, restSize));
+                    UserDataPtr userData(new UserData(m_nodeId, toId, dataTypeIdentifier, msg, size, fragment, restSize));
+                    userData->header.commonHeader.receiverId=toId;
+                    userData->header.sendMethod=sendMethod;
                     userData->header.deliveryGuarantee=m_deliveryGuarantee;
                     userData->header.numberOfFragments=static_cast<uint16_t>(totalNumberOfFragments);
                     userData->header.fragmentNumber=static_cast<uint16_t>(totalNumberOfFragments-1);
-                    if (toId!=0)
-                    {
-                        userData->header.commonHeader.receiverId=toId;
-                        userData->header.sendMethod=SingleReceiverSendMethod;
-                        userData->receivers.insert(std::make_pair(toId, Receiver()));
-                    }
                     m_sendQueue.enqueue(userData);
                 }
 
@@ -223,23 +217,73 @@ namespace Com
             //Will only check ack against sent messages. If an ack is received for a message that is still unsent, that ack will be ignored.
             m_strand.dispatch([=]
             {
+
                 //Update queue
                 for (size_t i=0; i<m_sendQueue.first_unhandled_index(); ++i)
                 {
                     UserDataPtr& ud=m_sendQueue[i];
-                    auto recvIt=ud->receivers.find(ack.commonHeader.senderId);
-                    if (recvIt!=ud->receivers.end())
+                    if (ud->header.sendMethod==ack.sendMethod && ud->header.sequenceNumber<=ack.sequenceNumber)
                     {
-                        //here we have something unacked from the node
-                        if (recvIt->second.sendMethod==ack.sendMethod && recvIt->second.sequenceNumber<=ack.sequenceNumber)
+                        //calculate index in missing-array
+                        size_t index=static_cast<size_t>(ack.sequenceNumber-ud->header.sequenceNumber);
+                        if (ack.missing[index]==0)
                         {
-                            ud->receivers.erase(recvIt); //This message is now acked, remove from list of still unacked
+                            //This message is now acked, remove from list of still unacked
+                            ud->receivers.erase(ack.commonHeader.senderId);
+                        }
+                        else
+                        {
+                            //the ack-sender is missing a message, a gap. Resend immediately
+                            if (ud->receivers.find(ack.commonHeader.senderId)!=ud->receivers.end())
+                            {
+                                RetransmitMessage(ud);
+                            }
+                            else
+                            {
+                                //receiver is missing a message that we dont expect it to be missing. Log all info we have
+                                auto nodeIt=m_nodes.find(ack.commonHeader.senderId);
+                                if (nodeIt==m_nodes.end())
+                                {
+                                    lllog(1)<<L"COM: got Ack from node we dont have. Maybe it has been excluded just before we received the ack-message. Ack sender id: "<<ack.commonHeader.senderId<<std::endl;
+                                }
+                                else if (!nodeIt->second.systemNode)
+                                {
+                                    lllog(1)<<L"COM: got Ack from node that is not a systemNode. Maybe it was excluded just before we received the ack-message. Ack sender id: "<<
+                                              ack.commonHeader.senderId<<std::endl;
+                                }
+                                else
+                                {
+                                    //this should never happen, a programming error. Receiver missing message that we think has already been acked.
+                                    std::wostringstream os;
+                                    os<<L"COM: Node["<<ack.commonHeader.senderId<<L"] is missing a message that has already been acked or we dont expect the node to get at all. "<<
+                                              SendMethodToString(ack.sendMethod).c_str()<<L" sequenceNumber: "<<ack.sequenceNumber;
+                                    lllog(1)<<os.str()<<std::endl;
+                                    SEND_SYSTEM_LOG(Error, <<os.str()<<std::endl);
+                                }
+                            }
                         }
                     }
                 }
 
                 //Remove from beginning as long as all is acked
                 RemoveCompletedMessages();
+
+
+                //==================================================
+
+//                //Update queue
+//                for (size_t i=0; i<m_sendQueue.first_unhandled_index(); ++i)
+//                {
+//                    UserDataPtr& ud=m_sendQueue[i];
+//                    if (ud->header.sendMethod==ack.sendMethod && ud->header.sequenceNumber<=ack.sequenceNumber)
+//                    {
+//                        //This message is now acked, remove from list of still unacked
+//                        ud->receivers.erase(ack.commonHeader.senderId);
+//                    }
+//                }
+
+//                //Remove from beginning as long as all is acked
+//                RemoveCompletedMessages();
             });
         }
 
@@ -366,7 +410,7 @@ namespace Com
                             {
                                 //The node will get the message throuch the multicast message, we just add it to receiver list
                                 //to be able to track the ack
-                                ud->receivers.insert(std::make_pair(val.first, Receiver(val.first, MultiReceiverSendMethod, m_lastSentMultiReceiverSeqNo)));
+                                ud->receivers.insert(val.first);
                             }
                         }
 
@@ -379,36 +423,27 @@ namespace Com
                     {
                         for (const auto& val : m_nodes)
                         {
+                            ud->receivers.insert(val.first);
                             WriterType::SendTo(ud, val.second.endpoint);
-                            ud->receivers.insert(std::make_pair(val.first, Receiver(val.first, MultiReceiverSendMethod, m_lastSentMultiReceiverSeqNo)));
                         }
                     }
                 }
-                else //messages has a receiver list, send to them using unicast
+                else //messages has a specific receiver, send using unicast
                 {
                     ud->header.ackNow=1; //for simplicity we request ack immediately for node specific messages
-                    auto recvIt=ud->receivers.begin();
-                    while (recvIt!=ud->receivers.end())
+                    auto nodeIt=m_nodes.find(ud->header.commonHeader.receiverId);
+                    if (nodeIt!=m_nodes.end())
                     {
-                        auto nodeIt=m_nodes.find(recvIt->first);
-                        if (nodeIt!=m_nodes.end())
-                        {
-                            Receiver& r=recvIt->second;
-                            NodeInfo& n=nodeIt->second;
-                            ++n.lastSentSeqNo;
-                            ud->header.sequenceNumber=n.lastSentSeqNo;
-                            r.id=recvIt->first;
-                            r.sendMethod=SingleReceiverSendMethod;
-                            r.sequenceNumber=n.lastSentSeqNo;
-                            WriterType::SendTo(ud, n.endpoint);
-                            ++recvIt;
-                        }
-                        else
-                        {
-                            //Not a system node, remove from sendList
-                            lllog(8)<<L"COM: receiver does not exist, id:  "<<recvIt->first<<std::endl;
-                            ud->receivers.erase(recvIt++);  //post increment iterator
-                        }
+                        ud->receivers.insert(ud->header.commonHeader.receiverId);
+                        NodeInfo& n=nodeIt->second;
+                        ++n.lastSentSeqNo;
+                        ud->header.sequenceNumber=n.lastSentSeqNo;
+                        WriterType::SendTo(ud, n.endpoint);
+                    }
+                    else
+                    {
+                        //Not a system node, remove from sendList
+                        lllog(8)<<L"COM: receiver does not exist, id:  "<<ud->header.commonHeader.receiverId<<std::endl;
                     }
                 }
 
@@ -461,24 +496,23 @@ namespace Com
             auto recvIt=ud->receivers.begin();
             while (recvIt!=ud->receivers.end())
             {
-                const auto nodeIt=m_nodes.find(recvIt->first);
+                const auto nodeIt=m_nodes.find(*recvIt);
                 if (nodeIt!=m_nodes.end() && nodeIt->second.systemNode)
                 {
-                    const auto& r=recvIt->second;
-                    ud->header.sendMethod=r.sendMethod; //always retransmit using unicast, but keep the original sendMethod.This is to specify correct sequence number serie.
-                    ud->header.sequenceNumber=r.sequenceNumber;
                     ud->header.ackNow=1; //request ack immediately for retransmitted messages
 
                     WriterType::SendTo(ud, nodeIt->second.endpoint);
                     m_retransmitNotification(nodeIt->first);
-                    lllog(6)<<L"COM: retransmitted  "<<(r.sendMethod==SingleReceiverSendMethod ? "SingleReceiverMessage" : "MultiReceiverMessage")<<", seq: "<<r.sequenceNumber<<" to "<<r.id<<std::endl;
+                    lllog(6)<<L"COM: retransmitted  "<<(ud->header.sendMethod==SingleReceiverSendMethod ? "SingleReceiverMessage" : "MultiReceiverMessage")<<
+                              ", seq: "<<ud->header.sequenceNumber<<" to "<<*recvIt<<std::endl;
                     ++recvIt;
                 }
                 else
                 {
                     //node does not exist anymore or is not part of the system, dont wait for this node anymore
                     lllog(6)<<L"COM: Ignore retransmit to receiver that is not longer a system node  "<<
-                              (recvIt->second.sendMethod==SingleReceiverSendMethod ? "SingleReceiverMessage" : "MultiReceiverMessage")<<", seq: "<<recvIt->second.sequenceNumber<<" to "<<recvIt->first<<std::endl;
+                              (ud->header.sendMethod==SingleReceiverSendMethod ? "SingleReceiverMessage" : "MultiReceiverMessage")<<
+                              ", seq: "<<ud->header.sequenceNumber<<" to "<<*recvIt<<std::endl;
                     ud->receivers.erase(recvIt++);
                 }
             }
@@ -493,7 +527,7 @@ namespace Com
                 auto recvIt=ud->receivers.begin();
                 while (recvIt!=ud->receivers.end())
                 {
-                    auto nodeIt=m_nodes.find(recvIt->first);
+                    auto nodeIt=m_nodes.find(*recvIt);
                     if (nodeIt==m_nodes.end())
                     {
                         //receiver does not exist anymore, remove it from receiver list
@@ -594,17 +628,16 @@ namespace Com
                     os<<"U ";
 
                 const auto& ud=m_sendQueue[i];
-                os<<"q["<<i<<"] "<<std::endl;
+                os<<"q["<<i<<"]"<<" ("<<SendMethodToString(ud->header.sendMethod)<<") sequenceNumber="<<ud->header.sequenceNumber<<std::endl;
                 if (ud->receivers.empty())
                 {
-                    os<<" No_Receivers"<<std::endl;
+                    os<<"    No_Receivers"<<std::endl;
                 }
                 else
                 {
-                    for (auto it=ud->receivers.cbegin(); it!=ud->receivers.cend(); ++it)
+                    for (auto id : ud->receivers)
                     {
-                        const auto& r=it->second;
-                        os<<"    recvId="<<r.id<<(r.sendMethod==SingleReceiverSendMethod ? " uni seq=" : " mul seq=")<<r.sequenceNumber<<std::endl;
+                        os<<"    recvId="<<id<<std::endl;
                     }
                 }
             }
