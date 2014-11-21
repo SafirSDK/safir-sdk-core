@@ -82,36 +82,41 @@ ENABLE_TESTING()
 
 
 add_test(RawStatistics_test RawStatistics_test)
+SET_SAFIR_TEST_PROPERTIES(RawStatistics_test 30)
+
 add_test(SystemState_test SystemState_test)
+SET_SAFIR_TEST_PROPERTIES(SystemState_test 30)
 
 add_test(RawPublisherLocal_test RawPublisherLocal_test)
-set_tests_properties(RawPublisherLocal_test PROPERTIES TIMEOUT 30)
+SET_SAFIR_TEST_PROPERTIES(RawPublisherLocal_test 30)
 
 add_test(RawPublisherRemote_test RawPublisherRemote_test)
-set_tests_properties(RawPublisherRemote_test PROPERTIES TIMEOUT 30)
+SET_SAFIR_TEST_PROPERTIES(RawPublisherRemote_test 30)
 
 add_test(StatePublisherLocal_test StatePublisherLocal_test)
-set_tests_properties(StatePublisherLocal_test PROPERTIES TIMEOUT 30)
+SET_SAFIR_TEST_PROPERTIES(StatePublisherLocal_test 30)
 
 add_test(StatePublisherRemote_test StatePublisherRemote_test)
-set_tests_properties(StatePublisherRemote_test PROPERTIES TIMEOUT 30)
+SET_SAFIR_TEST_PROPERTIES(StatePublisherRemote_test 30)
 
 
 add_test(LocalSubscriber_test LocalSubscriber_test)
-add_test(RemoteSubscriber_test RemoteSubscriber_test)
+SET_SAFIR_TEST_PROPERTIES(LocalSubscriber_test 30)
 
+add_test(RemoteSubscriber_test RemoteSubscriber_test)
+SET_SAFIR_TEST_PROPERTIES(RemoteSubscriber_test 30)
 
 add_test(RawHandler_test RawHandler_test)
-set_tests_properties(RawHandler_test PROPERTIES TIMEOUT 30)
+SET_SAFIR_TEST_PROPERTIES(RawHandler_test 30)
 
 add_test(RawChanges_test RawChanges_test)
-set_tests_properties(RawChanges_test PROPERTIES TIMEOUT 30)
+SET_SAFIR_TEST_PROPERTIES(RawChanges_test 30)
 
 add_test(ElectionHandler_test ElectionHandler_test)
-set_tests_properties(ElectionHandler_test PROPERTIES TIMEOUT 1200)
+SET_SAFIR_TEST_PROPERTIES(ElectionHandler_test 1200)
 
 add_test(ElectionHandler_test_with_overflows ElectionHandler_test --overflows)
-set_tests_properties(ElectionHandler_test_with_overflows PROPERTIES TIMEOUT 1200)
+SET_SAFIR_TEST_PROPERTIES(ElectionHandler_test_with_overflows 1200)
 
 add_test(Coordinator_test Coordinator_test)
-set_tests_properties(Coordinator_test PROPERTIES TIMEOUT 30)
+SET_SAFIR_TEST_PROPERTIES(Coordinator_test 30)
