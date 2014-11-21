@@ -23,7 +23,17 @@
 ******************************************************************************/
 #include <Safir/Dob/Internal/DoseMainCmd.h>
 #include <boost/thread.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
+#endif
+
 #include <boost/asio.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 #define BOOST_TEST_MODULE DoseMainCmdTest
 #include <boost/test/unit_test.hpp>
