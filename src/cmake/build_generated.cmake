@@ -240,7 +240,7 @@ FUNCTION(BUILD_GENERATED_LIBRARY)
     else()
       set (include_jars dots_java)
     endif()
-    
+
     FOREACH (DEP ${GEN_DEPENDENCIES})
       if (SAFIR_EXTERNAL_BUILD)
         list(APPEND include_jars ${SAFIR_SDK_CORE_JAVA_DIR}/safir_generated-${DEP}-java.jar)
