@@ -100,6 +100,10 @@ class WindowsInstaller(object):
         if os.environ.get("Config") != "DebugOnly":
             return
 
+        #build machines should have debug runtime on them
+        if platform.node().find("-build") != -1:
+            return
+
         #Work out studio version and bitness from installer name
         match = re.search(r"SafirSDKCore-VS([0-9]*)-([0-9]*)bit-DebugOnly.exe", self.installer)
         vs_version = match.group(1)
