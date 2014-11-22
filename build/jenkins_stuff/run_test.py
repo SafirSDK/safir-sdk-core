@@ -78,10 +78,17 @@ class WindowsInstaller(object):
             raise SetupError("Installer dir does not seem to be a directory!")
         return True
 
-    def install(self):
+    def install(self, development, testsuite):
         log ("Running installer:", self.installer)
 
-        result = subprocess.call((self.installer, "/S", "/NODEVELOPMENT", "/TESTSUITE"))
+        cmd = (self.installer, "/S")
+
+        if not development:
+            cmd.append("/NODEVELOPMENT")
+        if testsuite:
+            cmd.append("/TESTSUITE")
+
+        result = subprocess.call(cmd)
 
         if result != 0:
             raise SetupError("Installer failed (" + str(result) + ")!")
@@ -199,18 +206,28 @@ class DebianInstaller(object):
                              + str(proc.returncode) + "\nOutput:\n" + output)
 
 
-    def install(self):
+    def install(self, development, testsuite):
         runtime = glob.glob("safir-sdk-core_*.deb")
         if len(runtime) != 1:
-            raise SetupError("Unexpected number of installers: "+ str(installer))
+            raise SetupError("Unexpected number of runtime packages: "+ str(pkg))
 
-        testsuite = glob.glob("safir-sdk-core-testsuite_*.deb")
-        if len(testsuite) != 1:
-            raise SetupError("Unexpected number of installers: "+ str(installer))
+        packages = (runtime,)
 
-        log ("Installing packages", runtime[0], "and", testsuite[0])
+        if development:
+            pkg = glob.glob("safir-sdk-core-dev_*.deb")
+            if len(pkg) != 1:
+                raise SetupError("Unexpected number of development packages: "+ str(pkg))
+            packages.append(pkg)
 
-        proc = subprocess.Popen(("sudo", "dpkg", "--install", runtime[0], testsuite[0]),
+        if testsuite:
+            pkg = glob.glob("safir-sdk-core-testsuite_*.deb")
+            if len(pkg) != 1:
+                raise SetupError("Unexpected number of testsuite packages: "+ str(pkg))
+            packages.append(pkg)
+
+        log ("Installing packages", packages)
+
+        proc = subprocess.Popen(("sudo", "dpkg", "--install") + packages,
                                 stdout = subprocess.PIPE,
                                 stderr = subprocess.STDOUT)
         output = proc.communicate()[0]
@@ -274,7 +291,10 @@ def main():
 
     try:
         if not args.skip_install:
-            installer.install()
+            development = args.test == "build-examples"
+            testsuite = args.test != "build-examples"
+            
+            installer.install(development,testsuite)
             installer.check_installation()
 
         if args.test == "standalone-tests":
