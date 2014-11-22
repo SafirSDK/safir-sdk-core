@@ -81,7 +81,7 @@ class WindowsInstaller(object):
     def install(self, development, testsuite):
         log ("Running installer:", self.installer)
 
-        cmd = (self.installer, "/S")
+        cmd = [self.installer, "/S"]
 
         if not development:
             cmd.append("/NODEVELOPMENT")
@@ -211,7 +211,7 @@ class DebianInstaller(object):
         if len(runtime) != 1:
             raise SetupError("Unexpected number of runtime packages: "+ str(pkg))
 
-        packages = (runtime,)
+        packages = [runtime,]
 
         if development:
             pkg = glob.glob("safir-sdk-core-dev_*.deb")
