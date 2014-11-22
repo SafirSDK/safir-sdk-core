@@ -24,7 +24,7 @@
 #
 ###############################################################################
 from __future__ import print_function
-import os, glob, sys, subprocess, time, re, platform
+import os, glob, sys, subprocess, time, re, platform, argparse
 
 #try to import a package that we need for the debian installer
 #this will fail quietly on all other platforms, which is all right.
@@ -169,7 +169,7 @@ class DebianInstaller(object):
 
         return cache.has_key(package_name) and \
           cache[package_name].is_installed
-          
+
     def can_uninstall(self):
         cache = apt.cache.Cache()
         for pkg in self.packages:
@@ -182,14 +182,14 @@ class DebianInstaller(object):
             raise SetupError("Cannot uninstall! Packages are not installed!")
 
         log ("Uninstalling packages: ")
-        
+
         cmd = ["sudo", "--non-interactive", "apt-get", "--yes", "purge"]
         for pkg in self.packages:
             if self.__is_installed(pkg):
                 log (" ", pkg)
                 cmd.append(pkg)
-               
-        
+
+
         proc = subprocess.Popen(cmd,
                                 stdout = subprocess.PIPE,
                                 stderr = subprocess.STDOUT)
@@ -197,8 +197,8 @@ class DebianInstaller(object):
         if proc.returncode != 0:
             raise SetupError("Failed to run apt-get purge. returncode = "
                              + str(proc.returncode) + "\nOutput:\n" + output)
-            
-        
+
+
     def install(self):
         runtime = glob.glob("safir-sdk-core_*.deb")
         if len(runtime) != 1:
@@ -217,7 +217,7 @@ class DebianInstaller(object):
         if proc.returncode != 0:
             raise SetupError("Failed to run dpkg --install. returncode = "
                              + str(proc.returncode) + "\nOutput:\n" + output)
-    
+
 
     def check_installation(self):
         log("Running safir_show_config to test that exes can be run")
@@ -230,8 +230,6 @@ class DebianInstaller(object):
             raise SetupError("Failed to run safir_show_config. returncode = "
                              + str(proc.returncode) + "\nOutput:\n" + output)
 
-        #TODO: check some files and their locations
-        
 def run_test_suite():
     log("Launching test suite")
     if sys.platform == "win32":
@@ -242,27 +240,48 @@ def run_test_suite():
     if result != 0:
         raise SetupError("Test suite failed. Returncode = " + str(result))
 
+def parse_command_line():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--skip-install", action="store_true",
+                        help="Skip the install step. Useful for running this script when "
+                             + " you've already installed Safir SDK Core")
+
+    parser.add_argument("--test", "-t",
+                        choices=["standalone-tests","build-examples"],
+                        help="Which test to perform")
+
+    arguments = parser.parse_args()
+
+    return arguments
+
 def main():
-    if sys.platform == "win32":
-        installer = WindowsInstaller()
-    elif sys.platform.startswith("linux") and \
-        platform.linux_distribution()[0] in ("debian", "Ubuntu"):
-        installer = DebianInstaller()
-    else:
-        log ("Platform", sys.platform, ",", platform.linux_distribution()," is not supported by this script")
-        return 1
+    args = parse_command_line()
 
+    if not args.skip_install:
+        if sys.platform == "win32":
+            installer = WindowsInstaller()
+        elif sys.platform.startswith("linux") and \
+            platform.linux_distribution()[0] in ("debian", "Ubuntu"):
+            installer = DebianInstaller()
+        else:
+            log ("Platform", sys.platform, ",", platform.linux_distribution()," is not supported by this script")
+            return 1
 
-
-    if installer.can_uninstall():
-        log("It looks like Safir SDK Core is already installed! Will uninstall and return a failure.")
-        installer.uninstall()
-        return 1
+        if installer.can_uninstall():
+            log("It looks like Safir SDK Core is already installed! Will uninstall and return a failure.")
+            installer.uninstall()
+            return 1
 
     try:
-        installer.install()
-        installer.check_installation()
-        run_test_suite()
+        if not args.skip_install:
+            installer.install()
+            installer.check_installation()
+
+        if args.test == "standalone-tests":
+            run_test_suite()
+        elif args.test == "build-examples":
+            log("Not implemented, yet")
+            return 1
 
     except SetupError as e:
         log ("Error: " + str(e))
@@ -271,11 +290,12 @@ def main():
         log ("Caught exception: " + str(e))
         return 1
     finally:
-        try:
-            installer.uninstall()
-        except SetupError as e:
-            log ("Error: " + str(e))
-            return 1
+        if not args.skip_install:
+            try:
+                installer.uninstall()
+            except SetupError as e:
+                log ("Error: " + str(e))
+                return 1
     return 0
 
 sys.exit(main())
