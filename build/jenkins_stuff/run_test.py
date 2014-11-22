@@ -262,7 +262,7 @@ def run_test_suite():
 
 def build_examples():
     os.chdir("examples")
-    result = subprocess.call((os.path.join("..","build","build.py"), "--jenkins"),
+    result = subprocess.call((os.path.join("..","build", "build.py"), "--jenkins", "--skip-tests"),
                              shell = sys.platform == "win32")
     if result != 0:
         raise SetupError("Build examples failed. Returncode = " + str(result))
