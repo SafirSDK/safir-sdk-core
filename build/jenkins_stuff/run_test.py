@@ -227,7 +227,7 @@ class DebianInstaller(object):
 
         log ("Installing packages", packages)
 
-        proc = subprocess.Popen(("sudo", "dpkg", "--install") + packages,
+        proc = subprocess.Popen(["sudo", "dpkg", "--install"] + packages,
                                 stdout = subprocess.PIPE,
                                 stderr = subprocess.STDOUT)
         output = proc.communicate()[0]
@@ -293,7 +293,7 @@ def main():
         if not args.skip_install:
             development = args.test == "build-examples"
             testsuite = args.test != "build-examples"
-            
+
             installer.install(development,testsuite)
             installer.check_installation()
 
