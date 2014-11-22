@@ -260,6 +260,13 @@ def run_test_suite():
     if result != 0:
         raise SetupError("Test suite failed. Returncode = " + str(result))
 
+def build_examples():
+    os.chdir("examples")
+    result = subprocess.call((os.path.join("..","build","build.py"), "--jenkins"),
+                             shell = sys.platform == "win32")
+    if result != 0:
+        raise SetupError("Build examples failed. Returncode = " + str(result))
+
 def parse_command_line():
     parser = argparse.ArgumentParser()
     parser.add_argument("--skip-install", action="store_true",
@@ -303,8 +310,7 @@ def main():
         if args.test == "standalone-tests":
             run_test_suite()
         elif args.test == "build-examples":
-            log("Not implemented, yet")
-            return 1
+            build_examples()
 
     except SetupError as e:
         log ("Error: " + str(e))
