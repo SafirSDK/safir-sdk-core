@@ -211,19 +211,19 @@ class DebianInstaller(object):
         if len(runtime) != 1:
             raise SetupError("Unexpected number of runtime packages: "+ str(pkg))
 
-        packages = [runtime,]
+        packages = [runtime[0],]
 
         if development:
             pkg = glob.glob("safir-sdk-core-dev_*.deb")
             if len(pkg) != 1:
                 raise SetupError("Unexpected number of development packages: "+ str(pkg))
-            packages.append(pkg)
+            packages.append(pkg[0])
 
         if testsuite:
             pkg = glob.glob("safir-sdk-core-testsuite_*.deb")
             if len(pkg) != 1:
                 raise SetupError("Unexpected number of testsuite packages: "+ str(pkg))
-            packages.append(pkg)
+            packages.append(pkg[0])
 
         log ("Installing packages", packages)
 
