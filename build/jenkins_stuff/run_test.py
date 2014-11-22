@@ -93,6 +93,8 @@ class WindowsInstaller(object):
         if result != 0:
             raise SetupError("Installer failed (" + str(result) + ")!")
 
+        self.development_installed = development
+
     def __setup_debug_runtime(self):
         #we get out of here immediately if we're not running debug.
         if os.environ.get("Config") != "DebugOnly":
@@ -161,10 +163,11 @@ class WindowsInstaller(object):
             raise SetupError("Failed to run safir_show_config. returncode = "
                              + str(proc.returncode) + "\nOutput:\n" + output)
 
-        if os.path.isdir(os.path.join(self.installpath,"include","boost")):
-            raise SetupError("Found unexpected directory 'include/boost'")
-        if os.path.isdir(os.path.join(self.installpath,"include","Safir")):
-            raise SetupError("Found unexpected directory 'include/Safir'")
+        if not self.development_installed:
+            if os.path.isdir(os.path.join(self.installpath,"include","boost")):
+                raise SetupError("Found unexpected directory 'include/boost'")
+            if os.path.isdir(os.path.join(self.installpath,"include","Safir")):
+                raise SetupError("Found unexpected directory 'include/Safir'")
 
 class DebianInstaller(object):
     def __init__(self):
