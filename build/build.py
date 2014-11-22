@@ -289,8 +289,7 @@ def parse_command_line():
     parser.add_argument("--jenkins",
                         action="store_true",
                         default=False,
-                        help="Set up and use environment variables for a Jenkins automated build." +
-                             "TODO: what else does it do?")
+                        help="Increase verbosity and obey build matrix variables.")
 
     parser.add_argument("--package",
                         action="store_true",
@@ -321,9 +320,6 @@ def parse_command_line():
 
     global logger
     logger = Logger("Brief" if arguments.verbose == 0 else "Verbose")
-
-    if arguments.jenkins:
-        arguments.package = True
 
     return arguments
 
