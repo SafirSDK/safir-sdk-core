@@ -107,7 +107,8 @@ class __WindowsStager(object):
         if not os.path.isdir(boost_lib_dir):
             raise StagingError("Failed to find boost lib dir")
 
-        boost_libraries = ("chrono", #we don't need this ourselves, but users may?
+        boost_libraries = ("atomic",
+                           "chrono", #we don't need this ourselves, but users may?
                            "date_time",
                            "filesystem",
                            "program_options",
