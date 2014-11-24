@@ -212,7 +212,7 @@ private:
                 {
                     lllog(0) << "DM: Node " << last.Id(i) << " could not be found in current SS" << std::endl;
                     lllog(0) << "DM: Last: \n" << last << "\nCurrent:\n"<< data <<std::endl;
-                    throw std::logic_error("Node has gone missing!");
+                    //TODO throw std::logic_error("Node has gone missing!");
                 }
             }
 
