@@ -62,6 +62,7 @@ void callback(const pid_t pid)
 
 int main(int argc, char** argv)
 {
+    std::wcout << "Starting" << std::endl;
     const std::vector<std::string> pidStrings(argv + 1, argv + argc);
 
     for(std::vector<std::string>::const_iterator it = pidStrings.begin();
@@ -69,16 +70,22 @@ int main(int argc, char** argv)
     {
         pids.insert(boost::lexical_cast<pid_t>(*it));
     }
+    std::wcout << "Got " << pids.size() << " pids to monitor" << std::endl;
 
+    std::wcout << "Starting thread" << std::endl;
     boost::thread thread(boost::bind(&boost::asio::io_service::run,&ioService));
 
+    std::wcout << "Adding pids to monitor" << std::endl;
     for(std::vector<std::string>::const_iterator it = pidStrings.begin();
         it != pidStrings.end(); ++it)
     {
         monitor.StartMonitorPid(boost::lexical_cast<pid_t>(*it));
     }
 
+    std::wcout << "Running io_service" << std::endl;
     ioService.run();
+    std::wcout << "Joining thread" << std::endl;
     thread.join();
+    std::wcout << "Done, pids remaining " << pids.size() << std::endl;
     return static_cast<int>(pids.size());
 }
