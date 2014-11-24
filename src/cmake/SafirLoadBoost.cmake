@@ -10,6 +10,7 @@ set(Boost_FIND_QUIETLY True)
 
 find_package(Boost
   COMPONENTS
+  atomic
   regex
   timer
   program_options
