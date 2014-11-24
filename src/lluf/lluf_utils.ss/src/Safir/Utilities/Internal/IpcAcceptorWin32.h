@@ -157,6 +157,10 @@ namespace Internal
                                     {
                                         // This is most likely caused by a normal Disconnect. Do nothing.
                                     }
+                                    else if (ec.value() == ERROR_PIPE_CONNECTED)
+                                    {
+                                        // Under certain circumstances (unclear what) we get this when the publisher i stopped. Do nothing.
+                                    }
                                     else
                                     {
                                         std::ostringstream ostr;
