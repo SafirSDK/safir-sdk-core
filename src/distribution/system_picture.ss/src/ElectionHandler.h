@@ -155,6 +155,8 @@ namespace SP
         {
             m_strand.dispatch([this, statistics, completionSignaller]
                               {
+                                  lllog(5) << "SP: ElectionHandler got new RawStatistics:\n"
+                                           << statistics << std::endl;
                                   m_lastStatistics = std::move(statistics);
                                   StartElection();
                               });
