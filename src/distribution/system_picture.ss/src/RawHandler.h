@@ -605,7 +605,7 @@ namespace SP
 
             for (const auto& cb : m_rawChangedCallbacks)
             {
-                m_ioService.post([cb,copy,flags,completionCaller]{cb(copy,flags,completionCaller);});
+                m_strand.post([cb,copy,flags,completionCaller]{cb(copy,flags,completionCaller);});
             }
         }
 
