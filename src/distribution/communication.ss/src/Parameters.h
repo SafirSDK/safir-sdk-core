@@ -49,6 +49,9 @@ namespace Com
 
         //Receive buffer size, must be at least FragmentSize
         static const size_t ReceiveBufferSize = 66000;
+
+        //This is the socket send and receive buffer. On Windows the default is 8192 wich is far too low.
+        static const int SocketBufferSize = 106496;
     }
 }
 }

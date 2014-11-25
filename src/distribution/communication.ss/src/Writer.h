@@ -110,6 +110,7 @@ namespace Com
             ,m_multicastEnabled(false)
         {
             m_socket.set_option(boost::asio::ip::udp::socket::reuse_address(true));
+            m_socket.set_option(boost::asio::socket_base::send_buffer_size(Parameters::SocketBufferSize));
         }
 
         Writer(boost::asio::io_service& ioService,
@@ -121,6 +122,7 @@ namespace Com
             ,m_multicastEnabled(!multicastAddress.empty())
         {
             m_socket.set_option(boost::asio::ip::udp::socket::reuse_address(true));
+            m_socket.set_option(boost::asio::socket_base::send_buffer_size(Parameters::SocketBufferSize));
             if (m_multicastEnabled)
             {
                 m_socket.set_option(boost::asio::ip::multicast::outbound_interface(Utilities::CreateEndpoint(localIf).address().to_v4())); //TODO: Test this code with IP6 and figure out how to specify outbound_if for ip6
