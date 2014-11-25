@@ -30,6 +30,7 @@
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/function.hpp>
+#include <boost/system/error_code.hpp>
 #include <Safir/Utilities/Internal/IpcName.h>
 
 #ifdef _MSC_VER
@@ -157,7 +158,7 @@ namespace Internal
                                     {
                                         // This is most likely caused by a normal Disconnect. Do nothing.
                                     }
-                                    else if (ec.value() == ERROR_PIPE_CONNECTED)
+                                    else if (ec.category() == boost::system::system_category() && ec.value() == ERROR_PIPE_CONNECTED)
                                     {
                                         // Under certain circumstances (unclear what) we get this when the publisher i stopped. Do nothing.
                                     }
