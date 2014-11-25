@@ -267,23 +267,6 @@ namespace Com
 
                 //Remove from beginning as long as all is acked
                 RemoveCompletedMessages();
-
-
-                //==================================================
-
-//                //Update queue
-//                for (size_t i=0; i<m_sendQueue.first_unhandled_index(); ++i)
-//                {
-//                    UserDataPtr& ud=m_sendQueue[i];
-//                    if (ud->header.sendMethod==ack.sendMethod && ud->header.sequenceNumber<=ack.sequenceNumber)
-//                    {
-//                        //This message is now acked, remove from list of still unacked
-//                        ud->receivers.erase(ack.commonHeader.senderId);
-//                    }
-//                }
-
-//                //Remove from beginning as long as all is acked
-//                RemoveCompletedMessages();
             });
         }
 
