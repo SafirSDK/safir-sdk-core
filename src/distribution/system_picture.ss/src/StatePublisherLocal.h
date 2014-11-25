@@ -52,7 +52,7 @@ namespace SP
                                  const boost::chrono::steady_clock::duration& period)
             : m_coordinator(coordinator)
             , m_publisher(ioService,name)
-            , m_publishTimer(ioService, 
+            , m_publishTimer(ioService,
                              period,
                              [this](const boost::system::error_code& error)
                              {
@@ -98,7 +98,7 @@ namespace SP
                                                 crcBytes,
                                                 false); //ok to send anyones state
         }
-        
+
         CoordinatorT& m_coordinator;
         IpcPublisherT m_publisher;
         Safir::Utilities::Internal::AsioPeriodicTimer m_publishTimer;
@@ -109,5 +109,3 @@ namespace SP
 }
 }
 }
-
-

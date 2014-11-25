@@ -546,7 +546,19 @@ namespace SP
 
             for (auto& pair : m_nodeTable)
             {
-                const auto threshold = now - m_nodeTypes.at(pair.second.nodeInfo->node_type_id()).deadTimeout;
+                auto tolerance = 1;
+                //We're more tolerant when nodes have just started, i.e. when we've received
+                //less than 10 packets from them
+                if ((m_master && pair.second.nodeInfo->control_receive_count() < 10) ||
+                    (!m_master && pair.second.nodeInfo->data_receive_count() < 10))
+                {
+                    lllog(4) << "SP: Extra tolerant towards new node " << pair.second.nodeInfo->name().c_str()
+                             << " with id " << pair.second.nodeInfo->id() << std::endl;
+                    tolerance = 2;
+                }
+
+                const auto threshold =
+                    now - m_nodeTypes.at(pair.second.nodeInfo->node_type_id()).deadTimeout * tolerance;
 
                 if (!pair.second.nodeInfo->is_dead() && pair.second.lastReceiveTime < threshold)
                 {

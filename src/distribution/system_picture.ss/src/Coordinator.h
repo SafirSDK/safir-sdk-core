@@ -159,15 +159,18 @@ namespace SP
 
                     if (!okToSend)
                     {
+                        lllog(8) << " - Not sending: System State not ok to send!" << std::endl;
                         return;
                     }
                 }
 
                 if (m_stateMessage.elected_id() == 0)
                 {
+                    lllog(8) << " - Not sending: System State contains no elected node!" << std::endl;
                     return;
                 }
 
+                lllog(8) << " - Sending!" << std::endl;
                 const size_t size = m_stateMessage.ByteSize() + extraSpace;
                 auto data = std::unique_ptr<char[]>(new char[size]);
                 m_stateMessage.SerializeWithCachedSizesToArray

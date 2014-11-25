@@ -82,12 +82,14 @@ namespace SP
         {
             m_strand.dispatch([this, dataCallback]
             {
+                lllog(9) << "SP: AddSubscriber" << std::endl;
                 const bool needConnect = m_dataCallbacks.empty();
 
                 m_dataCallbacks.push_back(dataCallback);
 
                 if (needConnect)
                 {
+                    lllog(9) << "SP: AddSubscriber calling Connect" << std::endl;
                     m_subscriber.Connect();
                 }
             });
@@ -106,6 +108,7 @@ namespace SP
         //called in strand
         void DataReceived(const char* const data, size_t size)
         {
+            lllog(9) << "SP: LocalSubscriber " << m_name.c_str() << " received new data" << std::endl;
 #ifdef CHECK_CRC
             size -= sizeof(int); //remove the crc from size
             int expected;
