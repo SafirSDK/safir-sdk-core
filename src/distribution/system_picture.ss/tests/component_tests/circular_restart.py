@@ -202,7 +202,7 @@ try:
                         revolution += 1
                     expected = args.start + (expected + 1) % args.nodes
                     log("Next expected is", expected)
-                stop_node(i, control, main)
+                    stop_node(i, control, main)
 
         nodes = living
 

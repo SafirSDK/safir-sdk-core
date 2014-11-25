@@ -153,6 +153,8 @@ public:
     {
         m_strand.dispatch([this,data]
                           {
+                              lllog(0) << "DM: Got new SystemState:\n" << data << std::endl;
+
                               CheckState(data);
                               InjectNodes(data);
                               ConsiderSuicide(data);
