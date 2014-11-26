@@ -37,6 +37,7 @@
 #include <string>
 #include <unordered_map>
 #include <functional>
+#include <set>
 
 
 #ifdef _MSC_VER
@@ -246,7 +247,29 @@ namespace SP
                     throw std::logic_error("Failed to parse remote data!");
                 }
 
-                PostRawChangedCallback(RawChanges(RawChanges::NEW_REMOTE_STATISTICS));
+                bool nodesChanged = false;
+                for (const auto& n: node.nodeInfo->remote_statistics().node_info())
+                {
+                    if (n.is_dead())
+                    {
+                        if (AddToMoreDeadNodes(n.id()))
+                        {
+                            nodesChanged = true;
+                        }
+                    }
+                }
+
+                for (const auto id: node.nodeInfo->remote_statistics().more_dead_nodes())
+                {
+                    if (AddToMoreDeadNodes(id))
+                    {
+                        nodesChanged = true;
+                    }
+
+                }
+
+                PostRawChangedCallback(RawChanges(RawChanges::NEW_REMOTE_STATISTICS |
+                                                  (nodesChanged ? RawChanges::NODES_CHANGED : 0)));
             });
         }
 
@@ -404,6 +427,22 @@ namespace SP
             return result + result / 10;
         }
 
+        //must be called in strand
+        bool AddToMoreDeadNodes(const int64_t id)
+        {
+            //if the node is one of our top-level nodes we don't want it in more_dead_nodes
+            if (m_nodeTable.find(id) != m_nodeTable.end())
+            {
+                return false;
+            }
+            const bool inserted = m_moreDeadNodes.insert(id).second;
+            if(inserted)
+            {
+                m_allStatisticsMessage.mutable_more_dead_nodes()->Add(id);
+            }
+            return inserted;
+        }
+
         //Must be called in strand!
         void NewNode(const std::string& name,
                      const int64_t id,
@@ -440,7 +479,6 @@ namespace SP
             newNode->set_data_address(dataAddress);
 
             newNode->set_is_dead(false);
-            newNode->set_is_long_gone(false);
             newNode->set_control_receive_count(0);
             newNode->set_control_retransmit_count(0);
             newNode->set_data_receive_count(0);
@@ -553,7 +591,7 @@ namespace SP
                     (!m_master && pair.second.nodeInfo->data_receive_count() < 10))
                 {
                     lllog(4) << "SP: Extra tolerant towards new node " << pair.second.nodeInfo->name().c_str()
-                             << " with id " << pair.second.nodeInfo->id() << std::endl;
+                             << " with id " << pair.first << std::endl;
                     tolerance = 2;
                 }
 
@@ -563,24 +601,52 @@ namespace SP
                 if (!pair.second.nodeInfo->is_dead() && pair.second.lastReceiveTime < threshold)
                 {
                     lllog(4) << "SP: Node " << pair.second.nodeInfo->name().c_str()
-                             << " with id " << pair.second.nodeInfo->id()
+                             << " with id " << pair.first
                              << " was marked as dead" << std::endl;
 
                     pair.second.nodeInfo->set_is_dead(true);
 
-                    m_communication.ExcludeNode(pair.second.nodeInfo->id());
+                    m_communication.ExcludeNode(pair.first);
 
                     somethingChanged = true;
                 }
                 else if (pair.second.nodeInfo->is_dead() &&
-                         pair.second.lastReceiveTime < clearThreshold &&
-                         !pair.second.nodeInfo->is_long_gone())
+                         pair.second.lastReceiveTime < clearThreshold)
                 {
                     lllog(4) << "SP: Node " << pair.second.nodeInfo->name().c_str()
-                             << " with id " << pair.second.nodeInfo->id()
+                             << " with id " << pair.first
                              << " has been dead for five minutes, clearing data." << std::endl;
-                    pair.second.nodeInfo->set_is_long_gone(true);
-                    pair.second.nodeInfo->clear_remote_statistics();
+
+                    //get id of last element in protobuf
+                    const auto lastId = m_allStatisticsMessage.node_info
+                        (m_allStatisticsMessage.node_info_size() - 1).id();
+
+                    //if we're not the last element in node_info we need to swap ourselves there
+                    if (lastId != pair.first)
+                    {
+                        auto swapTo = m_nodeTable.find(lastId);
+                        if (swapTo == m_nodeTable.end())
+                        {
+                            throw std::logic_error("Failed to find table entry to swap to!");
+                        }
+
+                        *pair.second.nodeInfo = *swapTo->second.nodeInfo;
+                        swapTo->second.nodeInfo = pair.second.nodeInfo;
+                        /*m_allStatisticsMessage.mutable_node_info().SwapElements
+                            (m_allStatisticsMessage.node_info_size() - 1,
+                            );*/
+                        //TODO: swap with last and erase
+
+                    }
+
+                    //remove node from table
+                    m_nodeTable.erase(pair.first);
+
+                    //now we can remove the last element
+                    m_allStatisticsMessage.mutable_node_info()->RemoveLast();
+
+                    AddToMoreDeadNodes(pair.first);
+                    //node was already dead, so no need to set somethingChanged
                 }
             }
 
@@ -643,6 +709,8 @@ namespace SP
 
         NodeTable m_nodeTable;
         mutable RawStatisticsMessage m_allStatisticsMessage;
+
+        std::set<int64_t> m_moreDeadNodes;
 
         std::vector<StatisticsCallback> m_rawChangedCallbacks;
 

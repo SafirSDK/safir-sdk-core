@@ -385,7 +385,6 @@ struct Fixture
             if (node->removed)
             {
                 ni->set_is_dead(true);
-                ni->set_is_long_gone(false);
             }
         }
 

@@ -71,7 +71,6 @@ std::unique_ptr<RawStatisticsMessage> GetProtobuf(bool empty,bool recursive)
         node->set_control_address(iAsStr + ":fobar!");
         node->set_data_address(iAsStr + ":flopp");
         node->set_is_dead(i%2==0);
-        node->set_is_long_gone(i%2==1);
         node->set_control_receive_count(i + 1000);
         node->set_control_retransmit_count(100 + i);
         node->set_data_receive_count(i + 5000);
@@ -99,15 +98,19 @@ std::unique_ptr<RawStatisticsMessage> GetProtobuf(bool empty,bool recursive)
                 rnode->set_control_address(iAsStr + ":fobar!" + jAsStr);
                 rnode->set_data_address(iAsStr + ":flopp" + jAsStr);
                 rnode->set_is_dead((i + j)%2==0);
-                rnode->set_is_long_gone((i + j)%2==1);
                 rnode->set_control_receive_count(i*j + 1000);
                 rnode->set_control_retransmit_count(100 + i*j);
                 rnode->set_data_receive_count(i*j + 5000);
                 rnode->set_data_retransmit_count(500 + i*j);
+
+                remote->mutable_more_dead_nodes()->Add(1000 + j);
             }
+
         }
 
     }
+
+    msg->mutable_more_dead_nodes()->Add(1200);
 
     return std::move(msg);
 
@@ -132,6 +135,7 @@ BOOST_AUTO_TEST_CASE( test_empty )
     BOOST_CHECK(r2.Valid());
 
     BOOST_CHECK(r.Size() == 0);
+    BOOST_CHECK(r.MoreDeadNodesSize() == 0);
 }
 
 
@@ -157,14 +161,15 @@ BOOST_AUTO_TEST_CASE( test_one_level )
         BOOST_CHECK(r.ControlAddress(i) == boost::lexical_cast<std::string>(i) + ":fobar!");
         BOOST_CHECK(r.DataAddress(i) == boost::lexical_cast<std::string>(i) + ":flopp");
         BOOST_CHECK(r.IsDead(i) == (i%2==0));
-        BOOST_CHECK(r.IsLongGone(i) == (i%2==1));
         BOOST_CHECK(r.ControlReceiveCount(i) == static_cast<uint32_t>(i + 1000));
         BOOST_CHECK(r.ControlRetransmitCount(i) == static_cast<uint32_t>(100 + i));
         BOOST_CHECK(r.DataReceiveCount(i) == static_cast<uint32_t>(i + 5000));
         BOOST_CHECK(r.DataRetransmitCount(i) == static_cast<uint32_t>(500 + i));
         BOOST_CHECK(!r.HasRemoteStatistics(i));
-
     }
+
+    BOOST_CHECK_EQUAL(r.MoreDeadNodesSize(), 1);
+    BOOST_CHECK_EQUAL(r.MoreDeadNodes(0), 1200);
 }
 
 BOOST_AUTO_TEST_CASE( test_two_levels )
@@ -187,6 +192,7 @@ BOOST_AUTO_TEST_CASE( test_two_levels )
         BOOST_CHECK(remote.ElectionId() == 91 + i);
 
         BOOST_CHECK(remote.Size() == 5);
+        BOOST_CHECK_EQUAL(remote.MoreDeadNodesSize(), 5);
         for (int j = 0; j < 5; ++j)
         {
             const auto jAsStr = boost::lexical_cast<std::string>(j);
@@ -198,13 +204,14 @@ BOOST_AUTO_TEST_CASE( test_two_levels )
             BOOST_CHECK(remote.ControlAddress(j) == iAsStr + ":fobar!" + jAsStr);
             BOOST_CHECK(remote.DataAddress(j) == iAsStr + ":flopp" + jAsStr);
             BOOST_CHECK(remote.IsDead(j) == ((i+j)%2==0));
-            BOOST_CHECK(remote.IsLongGone(j) == ((i+j)%2==1));
             BOOST_CHECK(remote.ControlReceiveCount(j) == static_cast<uint32_t>(i*j + 1000));
             BOOST_CHECK(remote.ControlRetransmitCount(j) == static_cast<uint32_t>(100 + i*j));
             BOOST_CHECK(remote.DataReceiveCount(j) == static_cast<uint32_t>(i*j + 5000));
             BOOST_CHECK(remote.DataRetransmitCount(j) == static_cast<uint32_t>(500 + i*j));
             BOOST_CHECK(!remote.HasRemoteStatistics(j));
+            BOOST_CHECK_EQUAL(remote.MoreDeadNodes(j), 1000 + j);
         }
-
     }
+    BOOST_CHECK_EQUAL(r.MoreDeadNodesSize(), 1);
+    BOOST_CHECK_EQUAL(r.MoreDeadNodes(0), 1200);
 }

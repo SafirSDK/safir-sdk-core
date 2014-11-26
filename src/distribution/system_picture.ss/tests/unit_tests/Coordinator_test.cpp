@@ -62,7 +62,6 @@ RawStatistics GetRawWithOneNode()
     node->set_control_address("remote1:control");
     node->set_data_address("remote1:data");
     node->set_is_dead(false);
-    node->set_is_long_gone(false);
 
     return RawStatisticsCreator::Create(std::move(msg));
 }
@@ -85,7 +84,6 @@ RawStatistics GetRawWithTwoNodes()
     node->set_control_address("remote1:control");
     node->set_data_address("remote1:data");
     node->set_is_dead(false);
-    node->set_is_long_gone(false);
 
 
     node = msg->add_node_info();
@@ -96,7 +94,6 @@ RawStatistics GetRawWithTwoNodes()
     node->set_control_address("remote2:control");
     node->set_data_address("remote2:data");
     node->set_is_dead(false);
-    node->set_is_long_gone(false);
 
     return RawStatisticsCreator::Create(std::move(msg));
 }
@@ -118,7 +115,6 @@ RawStatistics GetRawWithOneNodeAndRemoteRaw()
     node->set_control_address("remote1:control");
     node->set_data_address("remote1:data");
     node->set_is_dead(false);
-    node->set_is_long_gone(false);
 
     auto remote = node->mutable_remote_statistics();
 
@@ -132,7 +128,6 @@ RawStatistics GetRawWithOneNodeAndRemoteRaw()
     rnode->set_id(1000);
     rnode->set_node_type_id(10);
     rnode->set_is_dead(false);
-    rnode->set_is_long_gone(false);
 
 
     return RawStatisticsCreator::Create(std::move(msg));
@@ -152,7 +147,6 @@ RawStatistics GetRawWithTwoNodesAndRemoteRaw(bool iThinkANodeIsDead, bool remote
     node->set_name("remote1");
     node->set_id(1001);
     node->set_is_dead(iThinkANodeIsDead);
-    node->set_is_long_gone(false);
 
     auto remote = node->mutable_remote_statistics();
 
@@ -164,13 +158,11 @@ RawStatistics GetRawWithTwoNodesAndRemoteRaw(bool iThinkANodeIsDead, bool remote
     rnode->set_name("myself");
     rnode->set_id(1000);
     rnode->set_is_dead(false);
-    rnode->set_is_long_gone(false);
 
     rnode = remote->add_node_info();
     rnode->set_name("remote2");
     rnode->set_id(1002);
     rnode->set_is_dead(false);
-    rnode->set_is_long_gone(false);
 
     //add node remote2
     node = msg->add_node_info();
@@ -178,7 +170,6 @@ RawStatistics GetRawWithTwoNodesAndRemoteRaw(bool iThinkANodeIsDead, bool remote
     node->set_name("remote2");
     node->set_id(1002);
     node->set_is_dead(false);
-    node->set_is_long_gone(false);
 
     remote = node->mutable_remote_statistics();
 
@@ -190,13 +181,11 @@ RawStatistics GetRawWithTwoNodesAndRemoteRaw(bool iThinkANodeIsDead, bool remote
     rnode->set_name("myself");
     rnode->set_id(1000);
     rnode->set_is_dead(false);
-    rnode->set_is_long_gone(false);
 
     rnode = remote->add_node_info();
     rnode->set_name("remote1");
     rnode->set_id(1001);
     rnode->set_is_dead(remoteThinksANodeIsDead);
-    rnode->set_is_long_gone(false);
 
     return RawStatisticsCreator::Create(std::move(msg));
 }
@@ -216,7 +205,6 @@ RawStatistics GetRawWithTwoNodesAndOneRemoteRaw()
         node->set_name("remote2");
         node->set_id(1002);
         node->set_is_dead(false);
-        node->set_is_long_gone(false);
 
         auto remote = node->mutable_remote_statistics();
 
@@ -228,7 +216,6 @@ RawStatistics GetRawWithTwoNodesAndOneRemoteRaw()
         rnode->set_name("myself");
         rnode->set_id(1000);
         rnode->set_is_dead(false);
-        rnode->set_is_long_gone(false);
     }
 
     //Add node remote1
@@ -238,7 +225,6 @@ RawStatistics GetRawWithTwoNodesAndOneRemoteRaw()
         node->set_name("remote1");
         node->set_id(1001);
         node->set_is_dead(false);
-        node->set_is_long_gone(false);
 
         auto remote = node->mutable_remote_statistics();
 
@@ -250,13 +236,11 @@ RawStatistics GetRawWithTwoNodesAndOneRemoteRaw()
         rnode->set_name("myself");
         rnode->set_id(1000);
         rnode->set_is_dead(false);
-        rnode->set_is_long_gone(false);
 
         rnode = remote->add_node_info();
         rnode->set_name("remote2");
         rnode->set_id(1002);
         rnode->set_is_dead(false);
-        rnode->set_is_long_gone(false);
     }
 
     return RawStatisticsCreator::Create(std::move(msg));
@@ -809,7 +793,7 @@ BOOST_AUTO_TEST_CASE( remote_reports_dead )
     BOOST_CHECK(comm.excludedNodes.find(1001) != comm.excludedNodes.end());
 }
 
-
+//TODO: what does this test do now?
 BOOST_AUTO_TEST_CASE( ignore_long_gone_flag )
 {
     ElectionHandlerStub::lastInstance->electedId = 1000;

@@ -90,7 +90,6 @@ namespace SP
 
         //status fields
         bool IsDead(const int index) const;
-        bool IsLongGone(const int index) const;
         uint32_t ControlReceiveCount(const int index) const;
         uint32_t ControlRetransmitCount(const int index) const;
         uint32_t DataReceiveCount(const int index) const;
@@ -106,6 +105,9 @@ namespace SP
          * Throws std::logic_error on error
          */
         RawStatistics RemoteStatistics(const int index) const;
+
+        int MoreDeadNodesSize() const;
+        int64_t MoreDeadNodes(const int i) const;
 
         void Print(std::wostream&) const;
 

@@ -643,7 +643,7 @@ namespace SP
             }
 
 
-            //and last but not least we add all dead nodes
+            //and we add all nodes that remain in deadNodes
             for (const auto& dn : deadNodes)
             {
                 const auto& remote = dn.second.first;
@@ -659,6 +659,31 @@ namespace SP
                 node->set_control_address(remote.ControlAddress(index));
                 node->set_data_address(remote.DataAddress(index));
                 node->set_is_dead(true);
+            }
+
+            //Last of all we have to add the nodes that are in more_dead_nodes that we
+            //haven't already added
+            std::set<int64_t> addedDeadNodes;
+            for (int i = 0; i < m_stateMessage.node_info_size(); ++i)
+            {
+                if (m_stateMessage.node_info(i).is_dead())
+                {
+                    addedDeadNodes.insert(m_stateMessage.node_info(i).id());
+                }
+            }
+
+            for (int i = 0; i < m_lastStatistics.MoreDeadNodesSize(); ++i)
+            {
+                if (addedDeadNodes.find(m_lastStatistics.MoreDeadNodes(i)) == addedDeadNodes.end())
+                {
+                    auto node = m_stateMessage.add_node_info();
+                    node->set_name("<unknown>");
+                    node->set_id(m_lastStatistics.MoreDeadNodes(i));
+                    node->set_node_type_id(0);
+                    node->set_control_address("");
+                    node->set_data_address("");
+                    node->set_is_dead(true);
+                }
             }
 
             lllog(8) << "SP: A new SystemState has been produced" << std::endl;

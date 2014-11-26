@@ -196,11 +196,6 @@ namespace SP
             return m_message.node_info(index).is_dead();
         }
 
-        bool IsLongGone(const int index) const
-        {
-            return m_message.node_info(index).is_long_gone();
-        }
-
         uint32_t ControlReceiveCount(const int index) const
         {
             return m_message.node_info(index).control_receive_count();
@@ -237,6 +232,16 @@ namespace SP
             {
                 throw std::logic_error("No remote statistics available!");
             }
+        }
+
+        int MoreDeadNodesSize() const
+        {
+            return m_message.more_dead_nodes_size();
+        }
+
+        int64_t MoreDeadNodes(const int i) const
+        {
+            return m_message.more_dead_nodes(i);
         }
 
         void Print(std::wostream& out) const
@@ -276,7 +281,6 @@ namespace SP
     const std::string& RawStatistics::DataAddress(const int index) const {return m_impl->DataAddress(index);}
 
     bool RawStatistics::IsDead(const int index) const {return m_impl->IsDead(index);}
-    bool RawStatistics::IsLongGone(const int index) const {return m_impl->IsLongGone(index);}
     uint32_t RawStatistics::ControlReceiveCount(const int index) const {return m_impl->ControlReceiveCount(index);}
     uint32_t RawStatistics::ControlRetransmitCount(const int index) const {return m_impl->ControlRetransmitCount(index);}
     uint32_t RawStatistics::DataReceiveCount(const int index) const {return m_impl->DataReceiveCount(index);}
@@ -284,6 +288,9 @@ namespace SP
 
     bool RawStatistics::HasRemoteStatistics(const int index) const {return m_impl->HasRemoteStatistics(index);}
     RawStatistics RawStatistics::RemoteStatistics(const int index) const {return m_impl->RemoteStatistics(index);}
+
+    int RawStatistics::MoreDeadNodesSize() const {return m_impl->MoreDeadNodesSize();}
+    int64_t RawStatistics::MoreDeadNodes(const int i) const {return m_impl->MoreDeadNodes(i);}
 
     void RawStatistics::Print(std::wostream& out) const {m_impl->Print(out);}
 

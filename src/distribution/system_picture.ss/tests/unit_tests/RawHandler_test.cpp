@@ -212,7 +212,6 @@ void CheckStatisticsCommon(const RawStatistics& statistics)
     BOOST_CHECK_EQUAL(statistics.NodeTypeId(0), 10);
     BOOST_CHECK_EQUAL(statistics.ControlAddress(0), "asdffff");
     BOOST_CHECK_EQUAL(statistics.DataAddress(0), "asdfqqqq");
-    BOOST_CHECK(!statistics.IsLongGone(0));
 }
 
 BOOST_AUTO_TEST_CASE( nodes_changed_add_callback )
@@ -308,7 +307,6 @@ std::unique_ptr<RawStatisticsMessage> GetProtobuf()
     node->set_control_address(":fobar!");
     node->set_data_address(":flopp");
     node->set_is_dead(false);
-    node->set_is_long_gone(false);
     node->set_control_receive_count(1000);
     node->set_control_retransmit_count(100);
     node->set_data_receive_count(5000);
@@ -331,7 +329,6 @@ void CheckRemotesCommon(const RawStatistics& remote)
     BOOST_CHECK_EQUAL(remote.ControlAddress(0), ":fobar!");
     BOOST_CHECK_EQUAL(remote.DataAddress(0), ":flopp");
     BOOST_CHECK(!remote.IsDead(0));
-    BOOST_CHECK(!remote.IsLongGone(0));
     BOOST_CHECK(remote.ControlReceiveCount(0) == 1000);
     BOOST_CHECK(remote.ControlRetransmitCount(0) == 100);
     BOOST_CHECK(remote.DataReceiveCount(0) == 5000);

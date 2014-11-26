@@ -212,13 +212,49 @@ private:
 
                 if (!found)
                 {
-                    lllog(0) << "DM: Node " << last.Id(i) << " could not be found in current SS" << std::endl;
-                    lllog(0) << "DM: Last: \n" << last << "\nCurrent:\n"<< data <<std::endl;
-                    //TODO throw std::logic_error("Node has gone missing!");
+                    lllog(0) << "DM: Node " << last.Id(i) << " could not be found in current SS\n"
+                             << "DM: Last: \n" << last << "\nCurrent:\n"<< data <<std::endl;
+                    throw std::logic_error("Node has gone missing!");
                 }
             }
 
-            //TODO find nodes that have been resurrected!
+            //find nodes that have been resurrected
+            for (int i = 0; i < data.Size(); ++i)
+            {
+                //only interested in live nodes
+                if (data.IsDead(i))
+                {
+                    return;
+                }
+
+                for (int j = 0; j < last.Size(); ++j)
+                {
+                    if (last.Id(j) == data.Id(i))
+                    {
+                        if (last.IsDead(j))
+                        {
+                            lllog(0) << "DM: Node " << data.Id(i) << " was dead in last state!\n"
+                                     << "DM: Last: \n" << last << "\nCurrent:\n"<< data <<std::endl;
+                            throw std::logic_error("Node has been resurrected!");
+
+                        }
+                        break;
+                    }
+                }
+            }
+
+            //find duplicates
+            std::set<int64_t> ids;
+            for (int i = 0; i < data.Size(); ++i)
+            {
+                if (!ids.insert(data.Id(i)).second)
+                {
+                    lllog(0) << "DM: Node " << data.Id(i) << " is duplicated in the System State!\n"
+                             << "DM: State:\n"<< data <<std::endl;
+                    throw std::logic_error("Duplicate node in state!");
+                }
+            }
+
         }
 
     }

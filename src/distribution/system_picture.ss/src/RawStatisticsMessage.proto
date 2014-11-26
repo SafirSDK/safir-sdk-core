@@ -14,20 +14,15 @@ message RawStatisticsMessage
         required string data_address = 5; //The address and port of the node's data socket
 
         required bool is_dead = 6;
-        required bool is_long_gone = 7; //node has been dead for 5 minutes or more
-        required uint32 control_receive_count = 8;
-        required uint32 control_retransmit_count = 9;
-        required uint32 data_receive_count = 10;
-        required uint32 data_retransmit_count = 11;
+        required uint32 control_receive_count = 7;
+        required uint32 control_retransmit_count = 8;
+        required uint32 data_receive_count = 9;
+        required uint32 data_retransmit_count = 10;
 
         //if this message is a node-local SP to SP message (e.g. between control and dose_main and dobexplorer)
         //it will contain all the node statistics received from other nodes.
-        optional RawStatisticsMessage remote_statistics = 12;
+        optional RawStatisticsMessage remote_statistics = 11;
     }
-
-    //TODO: how do we stop this message from growing infinitely when there are lots of
-    //nodes that have started and stopped?
-
 
     //information about myself
     required string name = 1;
@@ -41,4 +36,9 @@ message RawStatisticsMessage
 
     repeated NodeInfo node_info = 7;
 
+    //This list contains dead nodes that we have removed from the node_info list
+    //and that we have been told about by other nodes.
+    repeated sfixed64 more_dead_nodes = 8;
+
+    //TODO: Add some support for clearing the more_dead_nodes list
 }

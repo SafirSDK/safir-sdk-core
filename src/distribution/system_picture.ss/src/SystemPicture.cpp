@@ -21,7 +21,6 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-
 #include "RawHandler.h"
 #include "Coordinator.h"
 #include "RawPublisherLocal.h"
