@@ -25,7 +25,7 @@
 #include "MessageProxyImpl.h"
 
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
-#include <Safir/Dob/Typesystem/BlobOperations.h>
+#include <Safir/Dob/Typesystem/Internal/BlobOperations.h>
 #include <Safir/Dob/Typesystem/LibraryExceptions.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Dob/Internal/Interface.h>
@@ -48,7 +48,7 @@ namespace Internal
     const Dob::Typesystem::TypeId
     MessageProxyImpl::GetTypeId() const
     {
-        return Typesystem::BlobOperations::GetTypeId(m_messageBlob);
+        return Typesystem::Internal::BlobOperations::GetTypeId(m_messageBlob);
     }
 
     const Dob::MessagePtr

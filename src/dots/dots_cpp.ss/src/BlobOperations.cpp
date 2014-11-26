@@ -80,9 +80,11 @@ namespace
     }
 
     //REMOVE
-    void SetChanged(const char* , bool ) {}
+    void BlobOperations::SetChanged(const char* , bool ) {}
     //REMOVE
-    char* CreateCopy(const char* ) {return NULL;}
+    char* BlobOperations::CreateCopy(const char* ) {return NULL;}
+    void BlobOperations::Delete(char* &) {}
+    void BlobOperations::Diff(const char*, char* &) {}
 
     /**********************************************************************
      *

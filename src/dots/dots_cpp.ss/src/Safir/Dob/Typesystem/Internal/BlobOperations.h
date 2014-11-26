@@ -84,9 +84,11 @@ namespace Internal
                                    const Dob::Typesystem::ArrayIndex index,
                                    bool val);
         //REMOVE
-        static bool SetChanged(const char* blob, bool val);
+        static void SetChanged(const char* blob, bool val);
         //REMOVE
         static char* CreateCopy(const char* blob);
+        static void Delete(char* & blob);
+        static void Diff(const char* pref, char* & diff);
 
 
         /** @} */

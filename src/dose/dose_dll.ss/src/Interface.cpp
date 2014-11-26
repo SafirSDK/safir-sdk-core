@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 
+#include <Safir/Dob/Typesystem/Internal/BlobOperations.h>
 #include <Safir/Dob/Typesystem/Internal/InternalOperations.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Dob/Typesystem/LibraryExceptions.h>
@@ -1138,8 +1139,8 @@ void DoseC_GetConnectionInfo(const char* const state,
 
         Safir::Dob::Typesystem::BinarySerialization binary;
         Safir::Dob::Typesystem::Serialization::ToBinary(connInfo,binary);
-        blob = Safir::Dob::Typesystem::Internal::CreateCopy(&binary[0]);
-        deleter = Safir::Dob::Typesystem::Internal::Delete;
+        blob = Safir::Dob::Typesystem::Internal::BlobOperations::CreateCopy(&binary[0]);
+        deleter = Safir::Dob::Typesystem::Internal::BlobOperations::Delete;
 
         success = true;
     }
@@ -1233,7 +1234,7 @@ void DoseC_Diff(const char* const previousState,
     lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     diffBlob = NULL;
-    deleter = Safir::Dob::Typesystem::Internal::Delete;
+    deleter = Safir::Dob::Typesystem::Internal::BlobOperations::Delete;
     try
     {
         const DistributionData previous = DistributionData::ConstConstructor(new_data_tag_t(), previousState);
@@ -1241,11 +1242,11 @@ void DoseC_Diff(const char* const previousState,
 
         if (wantCurrent)
         {
-            diffBlob = Safir::Dob::Typesystem::Internal::CreateCopy(current.GetBlob());
+            diffBlob = Safir::Dob::Typesystem::Internal::BlobOperations::CreateCopy(current.GetBlob());
 
             if (!previous.IsCreated())
             {
-                Safir::Dob::Typesystem::Internal::SetChanged(diffBlob,true);
+                Safir::Dob::Typesystem::Internal::BlobOperations::SetChanged(diffBlob,true);
             }
             else
             {
@@ -1256,17 +1257,17 @@ void DoseC_Diff(const char* const previousState,
                 else
                 {
                     //ordinary blob diff
-                    Safir::Dob::Typesystem::Internal::Diff(previous.GetBlob(),diffBlob);
+                    Safir::Dob::Typesystem::Internal::BlobOperations::Diff(previous.GetBlob(),diffBlob);
                 }
             }
         }
         else //wantPrevious
         {
-            diffBlob = Safir::Dob::Typesystem::Internal::CreateCopy(previous.GetBlob());
+            diffBlob = Safir::Dob::Typesystem::Internal::BlobOperations::CreateCopy(previous.GetBlob());
 
             if (!current.IsCreated())
             {
-                Safir::Dob::Typesystem::Internal::SetChanged(diffBlob,true);
+                Safir::Dob::Typesystem::Internal::BlobOperations::SetChanged(diffBlob,true);
             }
             else
             {
@@ -1277,7 +1278,7 @@ void DoseC_Diff(const char* const previousState,
                 else
                 {
                     //ordinary blob diff
-                    Safir::Dob::Typesystem::Internal::Diff(current.GetBlob(),diffBlob);
+                    Safir::Dob::Typesystem::Internal::BlobOperations::Diff(current.GetBlob(),diffBlob);
                 }
             }
         }

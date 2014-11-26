@@ -34,7 +34,7 @@
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
 #include <Safir/Logging/Log.h>
 #include <Safir/Dob/ConnectionAspectInjector.h>
-#include <Safir/Dob/Typesystem/BlobOperations.h>
+#include <Safir/Dob/Typesystem/Internal/BlobOperations.h>
 #include <Safir/Dob/NotOpenException.h>
 
 //Dope uses context 0 to connect to the dob. The strange looking negative number
@@ -249,7 +249,7 @@ PersistenceHandler::HandleEntity(const Safir::Dob::EntityProxy & entityProxy, co
     m_debug << "Got entity " << entityProxy.GetEntityId() << ", will try to persist it" << std::endl;
     const char * blob = entityProxy.GetBlob();
     Safir::Dob::Typesystem::BinarySerialization bin = 
-    std::vector<char>(blob,blob+Safir::Dob::Typesystem::BlobOperations::GetSize(blob));
+    std::vector<char>(blob,blob+Safir::Dob::Typesystem::Internal::BlobOperations::GetSize(blob));
 
     Store(entityProxy.GetEntityId(), entityProxy.GetOwner(), bin, update);
 }

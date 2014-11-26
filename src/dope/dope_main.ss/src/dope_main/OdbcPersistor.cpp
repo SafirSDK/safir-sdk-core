@@ -31,7 +31,6 @@
 #include <Safir/Dob/PersistenceParameters.h>
 #include <Safir/Logging/Log.h>
 #include <Safir/Databases/Odbc/Exception.h>
-#include <Safir/Dob/Typesystem/BlobOperations.h>
 #include <Safir/Dob/ConnectionAspectInjector.h>
 
 #ifdef _MSC_VER
