@@ -78,7 +78,23 @@ namespace Internal
 
     const std::string GetIpcStreamId(const std::string& name)
     {
-        return (GetIpcDirectory() / (name + Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix())).string();
+        std::string s = (GetIpcDirectory() /
+                        (name + Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix())).string();
+
+        // Reading unix(7), it is indicated that <sys/un.h> defines a symbol UNIX_PATH_MAX, but that is
+        // not the case. Including the header where the symbol is actually defined gives
+        // other errors. We define it ourself instead (108 seems to be used on most Linuxes)
+        const unsigned int unixPathMax = 108;
+
+        if (s.length() > unixPathMax - 1)
+        {
+            std::ostringstream ostr;
+            ostr << "UNIX domain socket path to long. Max length is "  << unixPathMax - 1
+                 <<  " (Including terminating null character) Path: " << s << std::endl;
+            throw std::logic_error(ostr.str());
+        }
+
+        return s;
     }
 
 #endif
