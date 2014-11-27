@@ -272,7 +272,6 @@ namespace SP
                     {
                         nodesChanged = true;
                     }
-
                 }
 
                 PostRawChangedCallback(RawChanges(RawChanges::NEW_REMOTE_STATISTICS |
@@ -437,6 +436,10 @@ namespace SP
         //must be called in strand
         bool AddToMoreDeadNodes(const int64_t id)
         {
+            if (id == 0)
+            {
+                throw std::logic_error("Unexpected id in AddToMoreDeadNodes");
+            }
             //if the node is one of our top-level nodes we don't want it in more_dead_nodes
             if (m_nodeTable.find(id) != m_nodeTable.end())
             {
@@ -651,13 +654,15 @@ namespace SP
                         lastEntry->second.nodeInfo = m_allStatisticsMessage.mutable_node_info(swapIndex);
                     }
 
+                    const auto id = pair.first;
+
                     //remove node from table
                     m_nodeTable.erase(pair.first);
 
                     //now we can remove the last element
                     m_allStatisticsMessage.mutable_node_info()->RemoveLast();
 
-                    AddToMoreDeadNodes(pair.first);
+                    AddToMoreDeadNodes(id);
                     //node was already dead, so no need to set somethingChanged
 
                     //we've just modified the table that we're looping through, so

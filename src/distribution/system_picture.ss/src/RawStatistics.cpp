@@ -99,6 +99,13 @@ namespace
                 out << indent << "        [No remote statistics received yet]";
             }
         }
+
+        out << "\nMore Dead Nodes: ";
+        for (int i = 0; i < msg.more_dead_nodes_size(); ++i)
+        {
+            out << msg.more_dead_nodes(i) << " ";
+        }
+
         out << std::flush;
     }
 }
