@@ -84,7 +84,7 @@ public:
 class Publisher
 {
 public:
-    Publisher(boost::asio::io_service&, const std::string&)
+    Publisher(boost::asio::io_service&, const std::string&, void*, void*)
     {
 
     }

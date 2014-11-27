@@ -55,7 +55,7 @@ namespace SP
                                const boost::chrono::steady_clock::duration& period,
                                const bool all)
             : m_rawHandler(rawHandler)
-            , m_publisher(ioService,name)
+            , m_publisher(ioService,name,nullptr,nullptr)
             , m_publishTimer(ioService,
                              period,
                              [this](const boost::system::error_code& error)
