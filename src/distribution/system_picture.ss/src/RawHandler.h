@@ -98,14 +98,21 @@ namespace SP
             , m_checkDeadNodesTimer(ioService,
                                     CalculateDeadCheckPeriod(nodeTypes),
                                     m_strand.wrap([this](const boost::system::error_code& error)
-                                                  {
-                                                      if (m_stopped)
-                                                      {
-                                                          return;
-                                                      }
+                                    {
+                                        if (m_stopped)
+                                        {
+                                            return;
+                                        }
 
-                                                      CheckDeadNodes(error);
-                                                  }))
+                                        if (error)
+                                        {
+                                            SEND_SYSTEM_LOG(Alert,
+                                                            << "Unexpected error in CheckDeadNodes: " << error);
+                                            throw std::logic_error("Unexpected error in CheckDeadNodes");
+                                        }
+
+                                        CheckDeadNodes();
+                                    }))
             , m_master(master)
             , m_stopped(false)
         {
@@ -435,6 +442,7 @@ namespace SP
             {
                 return false;
             }
+
             const bool inserted = m_moreDeadNodes.insert(id).second;
             if(inserted)
             {
@@ -567,18 +575,11 @@ namespace SP
         }
 
         //Must be called in strand!
-        void CheckDeadNodes(const boost::system::error_code& error)
+        void CheckDeadNodes()
         {
-            if (error)
-            {
-                SEND_SYSTEM_LOG(Alert,
-                                << "Unexpected error in CheckDeadNodes: " << error);
-                throw std::logic_error("Unexpected error in CheckDeadNodes");
-            }
-
             const auto now = boost::chrono::steady_clock::now();
 
-            const auto clearThreshold = now - boost::chrono::minutes(5);
+            const auto clearThreshold = now - boost::chrono::minutes(1);
 
             bool somethingChanged = false;
 
@@ -658,6 +659,13 @@ namespace SP
 
                     AddToMoreDeadNodes(pair.first);
                     //node was already dead, so no need to set somethingChanged
+
+                    //we've just modified the table that we're looping through, so
+                    //we can't continue the loop. Post another call to this function
+                    //and break out of the loop.
+                    m_strand.post([this]{CheckDeadNodes();});
+
+                    break;
                 }
             }
 
