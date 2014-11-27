@@ -617,26 +617,37 @@ namespace SP
                              << " with id " << pair.first
                              << " has been dead for five minutes, clearing data." << std::endl;
 
+                    const auto lastIndex = m_allStatisticsMessage.node_info_size() - 1;
                     //get id of last element in protobuf
-                    const auto lastId = m_allStatisticsMessage.node_info
-                        (m_allStatisticsMessage.node_info_size() - 1).id();
+                    const auto lastId = m_allStatisticsMessage.node_info(lastIndex).id();
 
                     //if we're not the last element in node_info we need to swap ourselves there
                     if (lastId != pair.first)
                     {
-                        auto swapTo = m_nodeTable.find(lastId);
-                        if (swapTo == m_nodeTable.end())
+                        auto lastEntry = m_nodeTable.find(lastId);
+                        if (lastEntry == m_nodeTable.end())
                         {
-                            throw std::logic_error("Failed to find table entry to swap to!");
+                            throw std::logic_error("Failed to find table entry for last index!");
                         }
 
-                        *pair.second.nodeInfo = *swapTo->second.nodeInfo;
-                        swapTo->second.nodeInfo = pair.second.nodeInfo;
-                        /*m_allStatisticsMessage.mutable_node_info().SwapElements
-                            (m_allStatisticsMessage.node_info_size() - 1,
-                            );*/
-                        //TODO: swap with last and erase
+                        //find index to swap to last (that is the index that the current pair
+                        //points to
+                        int swapIndex = -1;
+                        for (int i = 0; m_allStatisticsMessage.node_info_size(); ++i)
+                        {
+                            if (m_allStatisticsMessage.node_info(i).id() == pair.first)
+                            {
+                                swapIndex = i;
+                                break;
+                            }
+                        }
+                        if (swapIndex == -1)
+                        {
+                            throw std::logic_error("Failed to find index for for current pair!");
+                        }
 
+                        m_allStatisticsMessage.mutable_node_info()->SwapElements(lastIndex,swapIndex);
+                        lastEntry->second.nodeInfo = m_allStatisticsMessage.mutable_node_info(swapIndex);
                     }
 
                     //remove node from table
