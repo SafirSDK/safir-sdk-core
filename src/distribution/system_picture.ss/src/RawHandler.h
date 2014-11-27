@@ -579,7 +579,7 @@ namespace SP
         {
             const auto now = boost::chrono::steady_clock::now();
 
-            const auto clearThreshold = now - boost::chrono::minutes(1);
+            const auto clearThreshold = now - boost::chrono::minutes(5);
 
             bool somethingChanged = false;
 
