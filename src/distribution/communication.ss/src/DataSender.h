@@ -166,7 +166,7 @@ namespace Com
             //std::cout<<"Send size="<<size<<", fullFrag="<<numberOfFullFragments<<", rest="<<restSize<<", totalFrag="<<totalNumberOfFragments<<std::endl;
 
             //The actual work where the data is inserted in the queue must be done inside the strand.
-            m_strand.dispatch([=]
+            m_strand.post([=]
             {
                 if (!ReceiverExists(toId))
                 {
