@@ -57,9 +57,9 @@ namespace Internal
     /**
      * Internal implementation class
      */
-    template<typename TestPolicy, typename StreamPtr>
+    template<typename StreamPtr>
     class Session
-        : public boost::enable_shared_from_this<Session<TestPolicy, StreamPtr>>
+        : public boost::enable_shared_from_this<Session<StreamPtr>>
     {
     public:
         Session(const StreamPtr&                    streamPtr,
@@ -127,8 +127,6 @@ namespace Internal
                         }
 
                         m_streamPtr->close();
-
-                        TestPolicy::SubscriberDisconnect();
                     }
                 }));
         }

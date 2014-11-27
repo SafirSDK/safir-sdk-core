@@ -139,11 +139,6 @@ private:
 
 struct PublisherTestPolicy
 {
-    static void ConnectionAcceptEvent()
-    {
-        std::wcout <<  "A Subscriber connected!" << std::endl;
-    }
-
     static void StartListeningEvent()
     {
         std::wcout <<  "Publisher is started!" << std::endl;
@@ -152,11 +147,6 @@ struct PublisherTestPolicy
     static void StopListeningEvent()
     {
         std::wcout <<  "Publisher is stopped!" << std::endl;
-    }
-
-    static void SubscriberDisconnect()
-    {
-        std::wcout << "A Subscriber disconnected!" << std::endl;
     }
 };
 
@@ -182,7 +172,10 @@ int main(int argc, char* argv[])
 
     boost::shared_ptr<boost::asio::io_service::work> work (new boost::asio::io_service::work(ioService));
 
-    auto pubPtr = boost::make_shared<IpcPublisher>(ioService, po.endpointName);
+    auto pubPtr = boost::make_shared<IpcPublisher>(ioService,
+                                                   po.endpointName,
+                                                   [](){std::wcout <<  "A Subscriber connected!" << std::endl;},
+                                                   [](){std::wcout <<  "A Subscriber disconnected!" << std::endl;});
 
     boost::thread_group threads;
     for (int i = 0; i < 9; ++i)
