@@ -8,13 +8,15 @@ include(CMakeParseArguments)
 #
 FUNCTION(SAFIR_IS_EXTERNAL_BUILD)
   if (SAFIR_SDK_CORE_INSTALL_DIR AND safir-sdk-core_SOURCE_DIR)
-    MESSAGE(FATAL_ERROR "Please do not use find_package(SafirSDKCore) from within the Safir SDK Core build tree! What are you trying to do?!")
+    MESSAGE(FATAL_ERROR "Please do not use find_package(SafirSDKCore) from "
+      "within the Safir SDK Core build tree! What are you trying to do?!")
   elseif(SAFIR_SDK_CORE_INSTALL_DIR)
     set (SAFIR_EXTERNAL_BUILD True PARENT_SCOPE)
   elseif(safir-sdk-core_SOURCE_DIR)
     set (SAFIR_EXTERNAL_BUILD False PARENT_SCOPE)
   else()
-    MESSAGE(FATAL_ERROR "Could not work out whether this is an external or internal build. Did you follow the instructions in the users guide?")
+    MESSAGE(FATAL_ERROR "Could not work out whether this is an external or "
+      "internal build. Did you follow the instructions in the users guide?")
   endif()
 ENDFUNCTION()
 
@@ -81,7 +83,8 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
             GET_DEPS(DEPENDENCIES ${deps})
           endif()
         else()
-          MESSAGE("Could not resolve dependency '${DEP}', assuming that it is external.")
+          MESSAGE(STATUS "ADD_SAFIR_GENERATED_LIBRARY could not resolve "
+            "dependency '${DEP}' in build tree, will look at typesystem.ini.")
         endif()
         list (APPEND GET_DEPS_RESULT ${DEP})
       endif()
@@ -129,7 +132,7 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
     string (REGEX REPLACE "^([a-zA-Z\\.0-9]*)\\.[a-zA-Z0-9]+$" "\\1" namespace ${base_name})
     string (REGEX REPLACE "^[a-zA-Z\\.0-9]*\\.([a-zA-Z0-9]+)$" "\\1" java_base_name ${base_name})
 
-    #TODO: we need to read namespace files from our dependencies too!
+    #  TODO: we need to read namespace files from our dependencies too!
     #or maybe warn when there is a difference? No, thats no good....
 
     #perform prefix insertion
@@ -140,13 +143,13 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
 
     string (TOLOWER ${namespace} java_namespace)
     string (REPLACE "." "/" java_path ${java_namespace})
-    set (java_files ${java_files} "${CMAKE_CURRENT_BINARY_DIR}/generated_code/java/src/${java_path}/${java_base_name}.java")
+    set (java_files ${java_files}
+      "${CMAKE_CURRENT_BINARY_DIR}/generated_code/java/src/${java_path}/${java_base_name}.java")
   endforeach()
 
   ##############
 
 
-  #TODO: fix the paths below!
   #
   # Generate code
   #
@@ -165,10 +168,11 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
   FIND_PACKAGE(PythonInterp)
 
   if (SAFIR_EXTERNAL_BUILD)
+    #on linux we install the dots_v script without the extension, so we have to mess about a bit here
     if (MSVC)
-      set(dots_v_path "${SAFIR_SDK_CORE_EXECUTABLES_DIR}/dots_v.py") #TODO different on windows?
+      set(dots_v_path "${SAFIR_SDK_CORE_EXECUTABLES_DIR}/dots_v.py")
     else()
-      set(dots_v_path "${SAFIR_SDK_CORE_EXECUTABLES_DIR}/dots_v") #TODO different on windows?
+      set(dots_v_path "${SAFIR_SDK_CORE_EXECUTABLES_DIR}/dots_v")
     endif()
     set(dod_directory "${SAFIR_SDK_CORE_GENERATION_DIR}/dod/")
   else()
@@ -204,7 +208,7 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
   #
   # Build CPP
   #
-  ADD_LIBRARY(safir_generated-${GEN_NAME}-cpp SHARED ${cpp_files}) #TODO headers?
+  ADD_LIBRARY(safir_generated-${GEN_NAME}-cpp SHARED ${cpp_files})
 
   target_include_directories(safir_generated-${GEN_NAME}-cpp
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated_code/cpp/include>)
@@ -299,7 +303,6 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
       set (snk_path ${safir-sdk-core_SOURCE_DIR}/src/dots/dots_v.ss/data/dots_generated-dotnet.snk)
     endif()
 
-    #TODO key path!
     ADD_CSHARP_ASSEMBLY(safir_generated-${GEN_NAME}-dotnet LIBRARY
       SIGN ${snk_path}
       SOURCES ${dotnet_files}
@@ -317,7 +320,8 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
   #
   get_property(SAFIR_GENERATED_PATHS GLOBAL PROPERTY SAFIR_GENERATED_PATHS)
 
-  set_property(GLOBAL PROPERTY SAFIR_GENERATED_PATHS ${SAFIR_GENERATED_PATHS} "SAFIR_GENERATED_${GEN_NAME}_DIR=$<TARGET_FILE_DIR:safir_generated-${GEN_NAME}-cpp>")
+  set_property(GLOBAL PROPERTY SAFIR_GENERATED_PATHS
+    ${SAFIR_GENERATED_PATHS} "SAFIR_GENERATED_${GEN_NAME}_DIR=$<TARGET_FILE_DIR:safir_generated-${GEN_NAME}-cpp>")
   ##############
 
 ENDFUNCTION()
@@ -332,7 +336,6 @@ FUNCTION(INSTALL_SAFIR_GENERATED_LIBRARY)
   else()
     cmake_parse_arguments(_in "TEST_SUITE" "" "TARGETS" ${ARGN})
   endif()
-
 
   if (NOT "${_in_UNPARSED_ARGUMENTS}" STREQUAL "")
     message(FATAL_ERROR "Unknown argument to INSTALL_SAFIR_GENERATED_LIBRARY '${_in_UNPARSED_ARGUMENTS}'")
