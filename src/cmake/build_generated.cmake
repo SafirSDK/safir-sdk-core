@@ -189,7 +189,7 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
     OUTPUT ${cpp_files} ${java_files} ${dotnet_files}
 
     COMMAND ${dots_v_command} ${CMAKE_CURRENT_SOURCE_DIR}
-    DEPENDS ${dod_files} ${dou_files}
+    DEPENDS ${dod_files} ${dou_files} ${namespace_files}
     COMMENT "Generating code for ${CMAKE_CURRENT_SOURCE_DIR}")
 
   #make clean target remove the generated_code directory

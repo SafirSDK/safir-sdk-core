@@ -22,3 +22,6 @@ INSTALL_SAFIR_GENERATED_LIBRARY(
 #TODO: multiple paths for dou files in typesystem.ini?
 
 #GAC is up to user, nothing we do for them...
+
+
+#TODO: should not need namespace file here
