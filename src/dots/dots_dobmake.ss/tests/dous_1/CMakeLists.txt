@@ -4,7 +4,6 @@ find_package(SafirSDKCore REQUIRED)
 
 ADD_SAFIR_GENERATED_LIBRARY(
   NAME Test1
-  SOURCES Dobmake.Test1.dou
   DEPENDENCIES Core)
 
 
