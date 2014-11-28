@@ -434,7 +434,7 @@ namespace SP
 
                     if (!sent)
                     {
-                        lllog(9) << "SP: Coordinator: Overflow when sending ALIVE to node "
+                        lllog(9) << "SP: ElectionHandler: Overflow when sending ALIVE to node "
                                  << it.first << std::endl;
                         m_pendingAlives.insert(it);
                     }
@@ -457,7 +457,7 @@ namespace SP
 
                     if (!sent)
                     {
-                        lllog(9) << "SP: Coordinator: Overflow when sending VICTORY to node type "
+                        lllog(9) << "SP: ElectionHandler: Overflow when sending VICTORY to node type "
                                  << m_nodeTypes.find(it)->second.name.c_str() << std::endl;
                         m_pendingVictories.insert(it);
                     }
@@ -479,13 +479,13 @@ namespace SP
                     const bool sent = m_communication.Send(0, it, std::move(data), size, m_receiverId, true);
                     if (!sent)
                     {
-                        lllog(7) << "SP: Coordinator: Overflow when sending INQUIRY to node type "
+                        lllog(7) << "SP: ElectionHandler: Overflow when sending INQUIRY to node type "
                                  << m_nodeTypes.find(it)->second.name.c_str() << std::endl;
                         m_pendingInquiries.insert(it);
                     }
                     else
                     {
-                        lllog(9) << "SP: Coordinator: sent INQUIRY to node type "
+                        lllog(9) << "SP: ElectionHandler: sent INQUIRY to node type "
                                  << m_nodeTypes.find(it)->second.name.c_str() << std::endl;
                     }
                 }
