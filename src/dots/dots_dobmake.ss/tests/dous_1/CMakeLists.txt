@@ -2,15 +2,6 @@ cmake_minimum_required(VERSION 2.8.12)
 
 find_package(SafirSDKCore REQUIRED)
 
-
-#SAFIR_INSTALL_DESTINATION_BIN
-    #SAFIR_INSTALL_DESTINATION_LIB
-    #SAFIR_INSTALL_DESTINATION_INCLUDE
-    #SAFIR_INSTALL_DESTINATION_DOU_BASE
-    #SAFIR_INSTALL_DESTINATION_JAR
-    #SAFIR_INSTALL_DESTINATION_CSHARP
-
-
 ADD_SAFIR_GENERATED_LIBRARY(
   NAME Test1
   SOURCES Dobmake.Test1.dou
@@ -31,4 +22,4 @@ INSTALL_SAFIR_GENERATED_LIBRARY(
 
 #TODO: multiple paths for dou files in typesystem.ini?
 
-#GAC?
+#GAC is up to user, nothing we do for them...

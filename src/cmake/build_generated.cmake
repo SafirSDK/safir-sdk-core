@@ -311,97 +311,6 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
 
   ############
 
-
-
-  #TODO: install externals?!
-  #
-  # Install everything
-  #
-  # if (NOT GEN_NO_INSTALL AND NOT SAFIR_EXTERNAL_BUILD)
-  #   if (GEN_TEST_SUITE)
-  #     set (component_runtime Test)
-  #     set (component_development Test)
-  #     unset(GEN_export)
-  #   else()
-  #     set (component_runtime Runtime)
-  #     set (component_development Development)
-  #     set (GEN_export EXPORT SafirSDKCore)
-  #   endif()
-
-  #   INSTALL(TARGETS safir_generated-${GEN_NAME}-cpp
-  #     ${GEN_export}
-  #     RUNTIME DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN} COMPONENT ${component_runtime}
-  #     LIBRARY DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT ${component_runtime}
-  #     ARCHIVE DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT ${component_development})
-
-  #   INSTALL(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated_code/cpp/include/
-  #     DESTINATION ${SAFIR_INSTALL_DESTINATION_INCLUDE}
-  #     COMPONENT ${component_development}
-  #     PATTERN ".svn" EXCLUDE
-  #     PATTERN "*~" EXCLUDE)
-
-  #   INSTALL(FILES ${dou_files} ${dom_files} ${namespace_files}
-  #     DESTINATION ${SAFIR_INSTALL_DESTINATION_DOU_BASE}/${GEN_NAME}
-  #     COMPONENT ${component_runtime})
-
-  #   if (Java_FOUND)
-  #       get_target_property(install_files safir_generated-${GEN_NAME}-java INSTALL_FILES)
-
-  #       if (install_files)
-  #         INSTALL(FILES ${install_files}
-  #           DESTINATION ${SAFIR_INSTALL_DESTINATION_JAR}
-  #           COMPONENT ${component_runtime})
-  #       endif()
-  #   endif()
-
-  #   if (CSHARP_FOUND)
-  #     if (GEN_TEST_SUITE)
-  #       set (TEST_SUITE "TEST_SUITE")
-  #     else()
-  #       unset (TEST_SUITE)
-  #     endif()
-  #     INSTALL_CSHARP_ASSEMBLY(TARGET safir_generated-${GEN_NAME}-dotnet
-  #       DESTINATION ${SAFIR_INSTALL_DESTINATION_CSHARP}
-  #       ${TEST_SUITE})
-  #   endif()
-
-  # elseif(SAFIR_EXTERNAL_BUILD)
-  #   #SAFIR_INSTALL_DESTINATION_BIN
-  #   #SAFIR_INSTALL_DESTINATION_LIB
-  #   #SAFIR_INSTALL_DESTINATION_INCLUDE
-  #   #SAFIR_INSTALL_DESTINATION_DOU_BASE
-  #   #SAFIR_INSTALL_DESTINATION_JAR
-  #   #SAFIR_INSTALL_DESTINATION_CSHARP
-
-  #   INSTALL(TARGETS safir_generated-${GEN_NAME}-cpp
-  #     RUNTIME DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
-  #     LIBRARY DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB}
-  #     ARCHIVE DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB})
-
-  #   INSTALL(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated_code/cpp/include/
-  #     DESTINATION ${SAFIR_INSTALL_DESTINATION_INCLUDE}
-  #     PATTERN ".svn" EXCLUDE
-  #     PATTERN "*~" EXCLUDE)
-
-  #   INSTALL(FILES ${dou_files} ${dom_files} ${namespace_files}
-  #     DESTINATION ${SAFIR_INSTALL_DESTINATION_DOU_BASE}/${GEN_NAME})
-
-  #   if (Java_FOUND)
-  #       get_target_property(install_files safir_generated-${GEN_NAME}-java INSTALL_FILES)
-
-  #       if (install_files)
-  #         INSTALL(FILES ${install_files}
-  #           DESTINATION ${SAFIR_INSTALL_DESTINATION_JAR})
-  #       endif()
-  #   endif()
-
-  #   if (CSHARP_FOUND)
-  #     INSTALL_CSHARP_ASSEMBLY(TARGET safir_generated-${GEN_NAME}-dotnet
-  #       DESTINATION ${SAFIR_INSTALL_DESTINATION_CSHARP})
-  #   endif()
-  # endif()
-  ##############
-
   #
   # Remember paths to all generated libraries, for use by tests
   # use get_property to get hold of the value (like below)
@@ -419,7 +328,7 @@ FUNCTION(INSTALL_SAFIR_GENERATED_LIBRARY)
   SAFIR_IS_EXTERNAL_BUILD()
 
   if (SAFIR_EXTERNAL_BUILD)
-    cmake_parse_arguments(_in "" "" "TARGETS" ${ARGN})
+    cmake_parse_arguments(_in "" "CXX_BIN;CXX_LIB;CXX_INCLUDE;JAR;DOTNET;DOU_BASE" "TARGETS" ${ARGN})
   else()
     cmake_parse_arguments(_in "TEST_SUITE" "" "TARGETS" ${ARGN})
   endif()
@@ -430,7 +339,41 @@ FUNCTION(INSTALL_SAFIR_GENERATED_LIBRARY)
   endif()
 
   if (SAFIR_EXTERNAL_BUILD)
+    foreach (_in_NAME IN LISTS _in_TARGETS)
+      if (_in_CXX_BIN AND _in_CXX_LIB)
+        INSTALL(TARGETS safir_generated-${GEN_NAME}-cpp
+          RUNTIME DESTINATION ${_in_CXX_BIN}
+          LIBRARY DESTINATION ${_in_CXX_LIB}
+          ARCHIVE DESTINATION ${_in_CXX_LIB})
+      endif()
 
+      if (_in_CXX_INCLUDE)
+        INSTALL(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated_code/cpp/include/
+          DESTINATION ${_in_CXX_INCLUDE}
+          PATTERN ".svn" EXCLUDE
+          PATTERN "*~" EXCLUDE)
+      endif()
+
+      if (_in_DOU_BASE)
+        INSTALL(FILES ${dou_files} ${dom_files} ${namespace_files}
+          DESTINATION ${_in_DOU_BASE}/${GEN_NAME})
+      endif()
+
+      if (Java_FOUND)
+        get_target_property(install_files safir_generated-${GEN_NAME}-java INSTALL_FILES)
+
+        if (install_files AND _in_JAR)
+          INSTALL(FILES ${install_files}
+            DESTINATION ${_in_JAR})
+        endif()
+      endif()
+
+      if (CSHARP_FOUND AND _in_DOTNET)
+        INSTALL_CSHARP_ASSEMBLY(TARGET safir_generated-${GEN_NAME}-dotnet
+          DESTINATION ${_in_DOTNET})
+      endif()
+
+    endforeach()
   else()
     #For installs that happen from within the Safir SDK Core build tree we use
     #a lot of component stuff etc.
