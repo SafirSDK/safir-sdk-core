@@ -68,15 +68,15 @@ namespace Com
             throw std::invalid_argument("Safir.Communication ctor: Id=0 is reserved for internal usage and is not valid. You should consider using a random generated id.");
         }
         auto myNodeType=m_nodeTypes[nodeTypeId];
-        lllog(2)<<L"COM: -------------------------------------------------"<<std::endl;
-        lllog(2)<<L"COM: Communication started"<<std::endl;
-        lllog(2)<<L"COM:     id:    "<<m_me.nodeId<<std::endl;
-        lllog(2)<<L"COM:     name:    "<<m_me.name.c_str()<<std::endl;
-        lllog(2)<<L"COM:     data address: "<<m_me.dataAddress.c_str()<<std::endl;
-        lllog(2)<<L"COM:     control address: "<<m_me.controlAddress.c_str()<<std::endl;
-        lllog(2)<<L"COM:     multicast: "<<myNodeType->MulticastAddress().c_str()<<std::endl;
-        lllog(2)<<L"COM:     using multicast: "<<std::boolalpha<<myNodeType->UseMulticast()<<std::dec<<std::endl;
-        lllog(2)<<L"COM: -------------------------------------------------"<<std::endl;
+        lllog(1)<<L"COM: -------------------------------------------------"<<std::endl;
+        lllog(1)<<L"COM: Communication started"<<std::endl;
+        lllog(1)<<L"COM:     id:    "<<m_me.nodeId<<std::endl;
+        lllog(1)<<L"COM:     name:    "<<m_me.name.c_str()<<std::endl;
+        lllog(1)<<L"COM:     data address: "<<m_me.dataAddress.c_str()<<std::endl;
+        lllog(1)<<L"COM:     control address: "<<m_me.controlAddress.c_str()<<std::endl;
+        lllog(1)<<L"COM:     multicast: "<<myNodeType->MulticastAddress().c_str()<<std::endl;
+        lllog(1)<<L"COM:     using multicast: "<<std::boolalpha<<myNodeType->UseMulticast()<<std::dec<<std::endl;
+        lllog(1)<<L"COM: -------------------------------------------------"<<std::endl;
     }
 #ifdef _MSC_VER
 #pragma warning (default: 4355)

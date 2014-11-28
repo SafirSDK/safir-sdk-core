@@ -508,7 +508,7 @@ int main(int argc, char * argv[])
 
         if (sendCounter%50==0)
         {
-            boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
+            boost::this_thread::yield();
         }
 
         if (sendCounter%10000==0)

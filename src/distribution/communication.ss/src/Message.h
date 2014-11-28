@@ -123,18 +123,14 @@ namespace Com
         }
     };
 
-    struct AckRequest
+    inline std::string AckToString(const Ack& ack)
     {
-        CommonHeader commonHeader;
-        uint64_t sequenceNumber; //last sent sequence number so far, makes it possible to NACK messages until this seqNo
-        uint8_t sendMethod; //tells wich sequence number serie that shall be acked
-        AckRequest(int64_t senderId_, int64_t receiverId_, uint64_t sequenceNumber_, uint8_t sendMethod_)
-            :commonHeader(senderId_, receiverId_, AckRequestType)
-            ,sequenceNumber(sequenceNumber_)
-            ,sendMethod(sendMethod_)
-        {
-        }
-    };
+        std::ostringstream os;
+        os<<"Ack from: "<<ack.commonHeader.senderId<<" "<<SendMethodToString(ack.sendMethod)<<
+            " dataType: "<<ack.commonHeader.dataType<<" seq: "<<ack.sequenceNumber<<" gaps: ";
+        for (auto i : ack.missing) os<<static_cast<int>(i);
+        return os.str();
+    }
 
     struct MessageHeader
     {

@@ -118,7 +118,7 @@ namespace Com
                 return;
             }
 
-            lllog(8)<<L"COM: Received AppData from "<<header->commonHeader.senderId<<std::endl;
+            lllog(8)<<L"COM: Received AppData from "<<header->commonHeader.senderId<<" "<<SendMethodToString(header->sendMethod).c_str()<<", seq: "<<header->sequenceNumber<<std::endl;
             m_gotRecvFrom(header->commonHeader.senderId); //report that we are receivinga intact data from the node
 
             bool ackNow=HandleMessage(header, payload, senderIt->second);
@@ -404,12 +404,25 @@ namespace Com
                     return true; //we ack evertying we have so far so that the sender becomes aware of the gaps
                 }
                 else //lost messages, got something too far ahead
-                {
-                    //This can occur if the senders send window is bigger than the receivers receive window, and it should never happen.
-                    //If everything is working as expected we can just ignore this message, but still it is a logic error in the code!
-                    //Sooner or later the sender must retransmit all non-acked messages, and in time this message will come into our receive window.
-                    lllog(8)<<L"COM: Received Seq: "<<header->sequenceNumber<<" wich means that we have lost a message. LastInSequence="<<ch.lastInSequence<<std::endl;
-                    std::wcout<<L"COM: Received Seq: "<<header->sequenceNumber<<" wich means that we have lost a message. LastInSequence="<<ch.lastInSequence<<std::endl;
+                {                    
+                    //This is a logic error in the code. We received something too far ahead. Means that the sender thinks that we have acked a
+                    //message that we dont think we have got at all.
+                    std::ostringstream os;
+                    os<<"COM: Logic Error! Receive message too far ahead which means that we have lost a message. Sender: "<<header->commonHeader.senderId<<
+                        SendMethodToString(header->sendMethod)<<", seq: "<<header->sequenceNumber<<"\n     RecvQueue - lastInSeq: "<<ch.lastInSequence<<
+                        ", recvQueue: [";
+                    for (size_t i=0; i<ch.queue.Size(); ++i)
+                    {
+                        if (ch.queue[i].free)
+                            os<<"X  ";
+                        else
+                            os<<ch.queue[i].sequenceNumber<<"  ";
+                    }
+                    os<<"]";
+                    SEND_SYSTEM_LOG(Error, <<os.str().c_str());
+                    lllog(8)<<os.str().c_str()<<std::endl;
+                    std::wcout<<os.str().c_str()<<std::endl;
+
                     return false; //we dont ack messages we are not supposed to get
                 }                                
             }
@@ -556,6 +569,7 @@ namespace Com
                 }
             }
 
+            lllog(9)<<"COM: SendAck "<<AckToString(*ackPtr).c_str()<<std::endl;
             WriterType::SendTo(ackPtr, ni.endpoint);
         }
 

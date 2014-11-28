@@ -212,7 +212,10 @@ namespace Com
         void HandleAck(const Ack& ack)
         {
             //Called from readStrand
-            lllog(8)<<L"COM: got Ack from "<<ack.commonHeader.senderId<<std::endl;
+            if (Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().LogLevel()==9)
+            {
+                lllog(9)<<"COM: HandleAck "<<AckToString(ack).c_str()<<std::endl;
+            }
 
             //Will only check ack against sent messages. If an ack is received for a message that is still unsent, that ack will be ignored.
             m_strand.dispatch([=]
@@ -229,7 +232,10 @@ namespace Com
                         if (ack.missing[index]==0)
                         {
                             //This message is now acked, remove from list of still unacked
-                            ud->receivers.erase(ack.commonHeader.senderId);
+                            if (ud->receivers.erase(ack.commonHeader.senderId)==0)
+                            {
+                                lllog(5)<<L"COM: Got ack from node that was not supposed to ack this message (might also be a duplicated ack). "<<AckToString(ack).c_str()<<std::endl;
+                            }
                         }
                         else
                         {
@@ -258,6 +264,7 @@ namespace Com
                                     os<<L"COM: Node["<<ack.commonHeader.senderId<<L"] is missing a message that has already been acked or we dont expect the node to get at all. "<<
                                               SendMethodToString(ack.sendMethod).c_str()<<L" sequenceNumber: "<<ack.sequenceNumber;
                                     lllog(1)<<os.str()<<std::endl;
+                                    DumpSendQueue(1);
                                     SEND_SYSTEM_LOG(Error, <<os.str()<<std::endl);
                                 }
                             }
@@ -454,6 +461,7 @@ namespace Com
             //Always called from writeStrand
             static const boost::chrono::milliseconds timerInterval(m_waitForAckTimeout-10);
             static const boost::chrono::milliseconds waitLimit(m_waitForAckTimeout);
+            static const boost::chrono::milliseconds mustBeSeriousError(10000);
 
             //Check if there is any unacked messages that are old enough to be retransmitted
             for (size_t i=0; i<m_sendQueue.first_unhandled_index(); ++i)
@@ -463,6 +471,12 @@ namespace Com
                 if (durationSinceSend>waitLimit)
                 {
                     RetransmitMessage(ud);
+                }
+
+                if (durationSinceSend>mustBeSeriousError)
+                {
+                    lllog(9)<<"COM: Seems like we are retransmitting forever. Seq: "<<ud->header.sequenceNumber<<", "<<SendMethodToString(ud->header.sendMethod).c_str()<<std::endl;
+                    DumpSendQueue();
                 }
             }
 
@@ -597,7 +611,7 @@ namespace Com
 
     public:
         //debug
-        void DumpSendQueue() const
+        void DumpSendQueue(int loglevel=9) const
         {
             std::ostringstream os;
             os<<"===== SendQueue ====="<<std::endl;
@@ -626,7 +640,7 @@ namespace Com
             }
             os<<"======== End ========"<<std::endl;
 
-            lllog(6)<<L"COM: "<<os.str().c_str()<<std::endl;
+            lllog(loglevel)<<L"COM: "<<os.str().c_str()<<std::endl;
 
             std::cout<<os.str()<<std::endl;
         }
