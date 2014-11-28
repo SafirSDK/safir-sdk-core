@@ -34,6 +34,7 @@
 #include <map>
 #include <set>
 #include "ElectionHandler.h"
+#include "MessagePrinting.h"
 #include "RawChanges.h"
 
 #ifdef _MSC_VER
@@ -63,10 +64,8 @@ namespace Internal
         class Communication;
     }
 
-
 namespace SP
 {
-
 
     template <class CommunicationT, class RawHandlerT, class ElectionHandlerT>
     class CoordinatorBasic
@@ -430,6 +429,7 @@ namespace SP
             }
 
             lllog(7) << "SP: Updating my state." << std::endl;
+            lllog(9) << "SP: Last state:\n" << m_stateMessage << std::endl;
 
             //Note: This code will ignore the case where we for some reason have a RAW from another node
             //that says that we are dead. If that is the case it will stop sending data to us and
@@ -687,6 +687,7 @@ namespace SP
             }
 
             lllog(8) << "SP: A new SystemState has been produced" << std::endl;
+            lllog(9) << "SP: New state:\n" << m_stateMessage << std::endl;
 
             if (m_stateChangedCallback != nullptr)
             {

@@ -247,9 +247,12 @@ namespace SP
 
                         if (m_lastStatistics.Id(i) == m_elected && !m_lastStatistics.IsDead(i))
                         {
-                            //TODO: what do we do here?!
-                            //we need the remote node to have seen the same election as we did, otherwise
-                            //we may be in a situation where a reelection is needed.
+                            //TODO: the uncommented code below gives very bad behaviour when enabled,
+                            //which is rather strange. For example it causes the unit tests to time out
+                            //and makes the component tests very unstable.
+                            //This is rather surprising, since the extra check seems reasonable to me...
+                            //All it adds is that we need the remote node to have seen the same election
+                            //as we did, otherwise we may be in a situation where a reelection is needed.
                             if (m_elected > m_id/* &&
                                 m_lastStatistics.HasRemoteStatistics(i) &&
                                 m_lastStatistics.RemoteStatistics(i).ElectionId() == m_lastStatistics.ElectionId()*/)

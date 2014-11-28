@@ -37,8 +37,13 @@
 #pragma warning (pop)
 #endif
 
-
-namespace
+namespace Safir
+{
+namespace Dob
+{
+namespace Internal
+{
+namespace SP
 {
     void PrintMessage(const Safir::Dob::Internal::SP::SystemStateMessage& msg,
                       std::wostream& out)
@@ -58,16 +63,6 @@ namespace
         }
         out << std::flush;
     }
-}
-
-namespace Safir
-{
-namespace Dob
-{
-namespace Internal
-{
-namespace SP
-{
 
     class SystemState::Impl
         : private boost::noncopyable
