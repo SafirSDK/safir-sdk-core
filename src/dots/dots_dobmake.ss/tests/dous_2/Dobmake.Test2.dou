@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <name>Dobmake.Test1</name>
-    <baseClass>Safir.Dob.Entity</baseClass>
+    <name>Dobmake.Test2</name>
+    <baseClass>Dobmake.Test1</baseClass>
     <members>
         <member>
-            <name>Id</name>
+            <name>Id2</name>
             <type>String</type>
             <maxLength>10</maxLength>
         </member>

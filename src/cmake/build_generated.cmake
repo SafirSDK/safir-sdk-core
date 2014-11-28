@@ -333,6 +333,10 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
     ${SAFIR_GENERATED_PATHS} "SAFIR_GENERATED_${GEN_NAME}_DIR=$<TARGET_FILE_DIR:safir_generated-${GEN_NAME}-cpp>")
   ##############
 
+  set_target_properties(${GEN_NAME}-dou PROPERTIES
+    JAVA_BUILT ${Java_FOUND}
+    DOTNET_BUILT ${CSHARP_FOUND})
+
 ENDFUNCTION()
 
 
@@ -359,6 +363,8 @@ FUNCTION(INSTALL_SAFIR_GENERATED_LIBRARY)
   foreach (_in_NAME IN LISTS _in_TARGETS)
     get_target_property(_in_SOURCE_FILES ${_in_NAME}-dou SOURCE_FILES)
     get_target_property(_in_CXX_INCLUDE_DIRECTORY ${_in_NAME}-dou CXX_INCLUDE_DIRECTORY)
+    get_target_property(_in_JAVA_BUILT ${_in_NAME}-dou JAVA_BUILT)
+    get_target_property(_in_DOTNET_BUILT ${_in_NAME}-dou DOTNET_BUILT)
 
     if (SAFIR_EXTERNAL_BUILD)
       if (_in_CXX_BIN AND _in_CXX_LIB)
@@ -380,7 +386,7 @@ FUNCTION(INSTALL_SAFIR_GENERATED_LIBRARY)
           DESTINATION ${_in_DOU_BASE}/${_in_NAME})
       endif()
 
-      if (Java_FOUND)
+      if (_in_JAVA_BUILT)
         get_target_property(install_files safir_generated-${_in_NAME}-java INSTALL_FILES)
 
         if (install_files AND _in_JAR)
@@ -389,7 +395,7 @@ FUNCTION(INSTALL_SAFIR_GENERATED_LIBRARY)
         endif()
       endif()
 
-      if (CSHARP_FOUND AND _in_DOTNET)
+      if (_in_DOTNET_BUILT AND _in_DOTNET)
         INSTALL_CSHARP_ASSEMBLY(TARGET safir_generated-${_in_NAME}-dotnet
           DESTINATION ${_in_DOTNET})
       endif()
@@ -423,7 +429,7 @@ FUNCTION(INSTALL_SAFIR_GENERATED_LIBRARY)
         DESTINATION ${SAFIR_INSTALL_DESTINATION_DOU_BASE}/${_in_NAME}
         COMPONENT ${component_runtime})
 
-      if (Java_FOUND)
+      if (_in_JAVA_BUILT)
         get_target_property(install_files safir_generated-${_in_NAME}-java INSTALL_FILES)
 
         if (install_files)
@@ -433,7 +439,7 @@ FUNCTION(INSTALL_SAFIR_GENERATED_LIBRARY)
         endif()
       endif()
 
-      if (CSHARP_FOUND)
+      if (_in_DOTNET_BUILT)
         if (_in_TEST_SUITE)
           set (TEST_SUITE "TEST_SUITE")
         else()
