@@ -39,7 +39,7 @@ size_t gsize = 0;
 class Handler
 {
 public:
-    void PerformOnStateMessage(const std::function<void(std::unique_ptr<char []> data, 
+    void PerformOnStateMessage(const std::function<void(std::unique_ptr<char []> data,
                                                         const size_t size)> & fn,
                                const size_t extraSpace,
                                const bool onlyOwnState) const
@@ -66,7 +66,7 @@ public:
 class Publisher
 {
 public:
-    Publisher(boost::asio::io_service&, const std::string&)
+    Publisher(boost::asio::io_service&, const std::string&, void*,void*)
     {
 
     }
@@ -87,13 +87,11 @@ BOOST_AUTO_TEST_CASE( send_ten )
     Handler h;
 
     StatePublisherLocalBasic<::Handler, ::Publisher> publisher(ioService,h,"foo",boost::chrono::milliseconds(10));
-     
+
     h.stopCall = [&]{publisher.Stop();};
     ioService.run();
-    
+
 
     BOOST_CHECK(numPerform == 10);
     BOOST_CHECK(numSend == 10);
 }
-
-

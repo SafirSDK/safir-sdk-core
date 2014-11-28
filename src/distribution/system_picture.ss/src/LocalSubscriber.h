@@ -64,10 +64,7 @@ namespace SP
             , m_name (name)
             , m_subscriber(ioService,
                            m_name,
-                           m_strand.wrap([this](const char* const data, size_t size)
-                                         {
-                                             DataReceived(data,size);
-                                         }))
+                           [this](const char* const data, size_t size){DataReceived(data,size);})
         {
 
         }
@@ -117,7 +114,8 @@ namespace SP
             if (crc != expected)
             {
                 SEND_SYSTEM_LOG(Alert,
-                                << "Bad CRC in LocalSubscriber, expected " << expected << " got " << crc);
+                                << "Bad CRC in LocalSubscriber " << m_name.c_str()
+                                << ", expected " << expected << " got " << crc);
                 throw std::logic_error("CRC check failed!");
             }
 #endif
@@ -130,11 +128,15 @@ namespace SP
             {
                 throw std::logic_error("LocalSubscriber: Failed to parse message");
             }
+
             const auto wrapped = WrapperCreatorT::Create(std::move(msg));
-            for (const auto cb : m_dataCallbacks)
+            m_strand.dispatch([this,wrapped]
             {
-                cb(wrapped);
-            }
+                for (const auto cb : m_dataCallbacks)
+                {
+                    cb(wrapped);
+                }
+            });
         }
 
         //Order/sync is guaranteed by IpcSubscribers delivery order guarantee.

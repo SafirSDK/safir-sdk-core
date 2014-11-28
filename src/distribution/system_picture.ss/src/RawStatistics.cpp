@@ -100,10 +100,13 @@ namespace
             }
         }
 
-        out << "\nMore Dead Nodes: ";
-        for (int i = 0; i < msg.more_dead_nodes_size(); ++i)
+        if (level == 0)
         {
-            out << msg.more_dead_nodes(i) << " ";
+            out << "\nMore Dead Nodes: ";
+            for (int i = 0; i < msg.more_dead_nodes_size(); ++i)
+            {
+                out << msg.more_dead_nodes(i) << " ";
+            }
         }
 
         out << std::flush;

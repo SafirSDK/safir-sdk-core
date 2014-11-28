@@ -119,7 +119,7 @@ namespace Control
     public:
 
         Impl(boost::asio::io_service& ioService)
-            : m_ipcPublisher(ioService, doseMainCmdChannel)
+            : m_ipcPublisher(ioService, doseMainCmdChannel, nullptr, nullptr)
         {
         }
 

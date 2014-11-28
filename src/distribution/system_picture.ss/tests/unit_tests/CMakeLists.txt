@@ -9,8 +9,8 @@ FIND_PACKAGE(Protobuf REQUIRED)
 
 INCLUDE_DIRECTORIES(${PROTOBUF_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 
-PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS 
-  ../../src/RawStatisticsMessage.proto 
+PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS
+  ../../src/RawStatisticsMessage.proto
   ../../src/SystemStateMessage.proto
   ../../src/ElectionMessage.proto)
 
@@ -35,7 +35,7 @@ ADD_EXECUTABLE(RemoteSubscriber_test RemoteSubscriber_test.cpp)
 ADD_EXECUTABLE(RawHandler_test RawHandler_test.cpp ../../src/RawStatistics.cpp ${PROTO_SRCS} ${PROTO_HDRS})
 ADD_EXECUTABLE(RawChanges_test RawChanges_test.cpp)
 ADD_EXECUTABLE(ElectionHandler_test ElectionHandler_test.cpp ../../src/RawStatistics.cpp ${PROTO_SRCS} ${PROTO_HDRS})
-ADD_EXECUTABLE(Coordinator_test Coordinator_test.cpp ../../src/RawStatistics.cpp ${PROTO_SRCS} ${PROTO_HDRS})
+ADD_EXECUTABLE(Coordinator_test Coordinator_test.cpp ../../src/RawStatistics.cpp ../../src/SystemState.cpp ${PROTO_SRCS} ${PROTO_HDRS})
 
 
 TARGET_LINK_LIBRARIES(RawStatistics_test

@@ -247,9 +247,12 @@ namespace SP
 
                         if (m_lastStatistics.Id(i) == m_elected && !m_lastStatistics.IsDead(i))
                         {
-                            //TODO: what do we do here?!
-                            //we need the remote node to have seen the same election as we did, otherwise
-                            //we may be in a situation where a reelection is needed.
+                            //TODO: the uncommented code below gives very bad behaviour when enabled,
+                            //which is rather strange. For example it causes the unit tests to time out
+                            //and makes the component tests very unstable.
+                            //This is rather surprising, since the extra check seems reasonable to me...
+                            //All it adds is that we need the remote node to have seen the same election
+                            //as we did, otherwise we may be in a situation where a reelection is needed.
                             if (m_elected > m_id/* &&
                                 m_lastStatistics.HasRemoteStatistics(i) &&
                                 m_lastStatistics.RemoteStatistics(i).ElectionId() == m_lastStatistics.ElectionId()*/)
@@ -431,7 +434,7 @@ namespace SP
 
                     if (!sent)
                     {
-                        lllog(9) << "SP: Coordinator: Overflow when sending ALIVE to node "
+                        lllog(9) << "SP: ElectionHandler: Overflow when sending ALIVE to node "
                                  << it.first << std::endl;
                         m_pendingAlives.insert(it);
                     }
@@ -454,7 +457,7 @@ namespace SP
 
                     if (!sent)
                     {
-                        lllog(9) << "SP: Coordinator: Overflow when sending VICTORY to node type "
+                        lllog(9) << "SP: ElectionHandler: Overflow when sending VICTORY to node type "
                                  << m_nodeTypes.find(it)->second.name.c_str() << std::endl;
                         m_pendingVictories.insert(it);
                     }
@@ -476,13 +479,13 @@ namespace SP
                     const bool sent = m_communication.Send(0, it, std::move(data), size, m_receiverId, true);
                     if (!sent)
                     {
-                        lllog(7) << "SP: Coordinator: Overflow when sending INQUIRY to node type "
+                        lllog(7) << "SP: ElectionHandler: Overflow when sending INQUIRY to node type "
                                  << m_nodeTypes.find(it)->second.name.c_str() << std::endl;
                         m_pendingInquiries.insert(it);
                     }
                     else
                     {
-                        lllog(9) << "SP: Coordinator: sent INQUIRY to node type "
+                        lllog(9) << "SP: ElectionHandler: sent INQUIRY to node type "
                                  << m_nodeTypes.find(it)->second.name.c_str() << std::endl;
                     }
                 }

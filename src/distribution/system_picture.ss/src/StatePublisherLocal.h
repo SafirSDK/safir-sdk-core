@@ -51,7 +51,7 @@ namespace SP
                                  const char* const name,
                                  const boost::chrono::steady_clock::duration& period)
             : m_coordinator(coordinator)
-            , m_publisher(ioService,name)
+            , m_publisher(ioService,name,nullptr,nullptr)
             , m_publishTimer(ioService,
                              period,
                              [this](const boost::system::error_code& error)
