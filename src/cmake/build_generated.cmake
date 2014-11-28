@@ -107,6 +107,11 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
   FILE(GLOB_RECURSE dom_files *.dom)
   FILE(GLOB_RECURSE namespace_files *.namespace.txt)
 
+  #put the files in a target property so the INSTALL_SAFIR_GENERATED_LIBRARY
+  #function can know what files it needs to install
+  set_property(TARGET ${GEN_NAME}-dou PROPERTY
+    SOURCE_FILES ${dou_files} ${dom_files} ${namespace_files})
+
   #set up java namespace prefixing rules
   foreach (file ${namespace_files})
     string (REGEX REPLACE ".*/([a-zA-Z\\.0-9]*)-java\\.namespace\\.txt" "\\1" namespace ${file})
@@ -239,6 +244,10 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
 
   add_dependencies(safir_generated-${GEN_NAME}-cpp safir_generated-${GEN_NAME}-code)
 
+  #put the include files in a target property
+  set_property(TARGET ${GEN_NAME}-dou PROPERTY
+    CXX_INCLUDE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated_code/cpp/include/)
+
   #TODO:precompiled headers?!
 
   ############
@@ -347,8 +356,11 @@ FUNCTION(INSTALL_SAFIR_GENERATED_LIBRARY)
   FILE(GLOB_RECURSE dom_files *.dom)
   FILE(GLOB_RECURSE namespace_files *.namespace.txt)
 
-  if (SAFIR_EXTERNAL_BUILD)
-    foreach (_in_NAME IN LISTS _in_TARGETS)
+  foreach (_in_NAME IN LISTS _in_TARGETS)
+    get_target_property(_in_SOURCE_FILES ${_in_NAME}-dou SOURCE_FILES)
+    get_target_property(_in_CXX_INCLUDE_DIRECTORY ${_in_NAME}-dou CXX_INCLUDE_DIRECTORY)
+
+    if (SAFIR_EXTERNAL_BUILD)
       if (_in_CXX_BIN AND _in_CXX_LIB)
         INSTALL(TARGETS safir_generated-${_in_NAME}-cpp
           RUNTIME DESTINATION ${_in_CXX_BIN}
@@ -357,14 +369,14 @@ FUNCTION(INSTALL_SAFIR_GENERATED_LIBRARY)
       endif()
 
       if (_in_CXX_INCLUDE)
-        INSTALL(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated_code/cpp/include/
+        INSTALL(DIRECTORY ${_in_CXX_INCLUDE_DIRECTORY}
           DESTINATION ${_in_CXX_INCLUDE}
           PATTERN ".svn" EXCLUDE
           PATTERN "*~" EXCLUDE)
       endif()
 
       if (_in_DOU_BASE)
-        INSTALL(FILES ${dou_files} ${dom_files} ${namespace_files}
+        INSTALL(FILES ${_in_SOURCE_FILES}
           DESTINATION ${_in_DOU_BASE}/${_in_NAME})
       endif()
 
@@ -382,34 +394,32 @@ FUNCTION(INSTALL_SAFIR_GENERATED_LIBRARY)
           DESTINATION ${_in_DOTNET})
       endif()
 
-    endforeach()
-  else()
-    #For installs that happen from within the Safir SDK Core build tree we use
-    #a lot of component stuff etc.
-    if (_in_TEST_SUITE)
-      set (component_runtime Test)
-      set (component_development Test)
-      unset(_in_export)
     else()
-      set (component_runtime Runtime)
-      set (component_development Development)
-      set (_in_export EXPORT SafirSDKCore)
-    endif()
+      #For installs that happen from within the Safir SDK Core build tree we use
+      #a lot of component stuff etc.
+      if (_in_TEST_SUITE)
+        set (component_runtime Test)
+        set (component_development Test)
+        unset(_in_export)
+      else()
+        set (component_runtime Runtime)
+        set (component_development Development)
+        set (_in_export EXPORT SafirSDKCore)
+      endif()
 
-    foreach (_in_NAME IN LISTS _in_TARGETS)
       INSTALL(TARGETS safir_generated-${_in_NAME}-cpp
         ${_in_export}
         RUNTIME DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN} COMPONENT ${component_runtime}
         LIBRARY DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT ${component_runtime}
         ARCHIVE DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT ${component_development})
 
-      INSTALL(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated_code/cpp/include/
+      INSTALL(DIRECTORY ${_in_CXX_INCLUDE_DIRECTORY}
         DESTINATION ${SAFIR_INSTALL_DESTINATION_INCLUDE}
         COMPONENT ${component_development}
         PATTERN ".svn" EXCLUDE
         PATTERN "*~" EXCLUDE)
 
-      INSTALL(FILES ${dou_files} ${dom_files} ${namespace_files}
+      INSTALL(FILES ${_in_SOURCE_FILES}
         DESTINATION ${SAFIR_INSTALL_DESTINATION_DOU_BASE}/${_in_NAME}
         COMPONENT ${component_runtime})
 
@@ -433,8 +443,7 @@ FUNCTION(INSTALL_SAFIR_GENERATED_LIBRARY)
           DESTINATION ${SAFIR_INSTALL_DESTINATION_CSHARP}
           ${TEST_SUITE})
       endif()
-    endforeach()
-  endif()
-
+    endif()
+  endforeach()
 
 ENDFUNCTION()
