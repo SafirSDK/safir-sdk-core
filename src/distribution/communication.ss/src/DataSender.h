@@ -413,8 +413,11 @@ namespace Com
                     {
                         for (const auto& val : m_nodes)
                         {
-                            ud->receivers.insert(val.first);
-                            WriterType::SendTo(ud, val.second.endpoint);
+                            if (val.second.systemNode)
+                            {
+                                ud->receivers.insert(val.first);
+                                WriterType::SendTo(ud, val.second.endpoint);
+                            }
                         }
                     }
                 }
