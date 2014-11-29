@@ -4,9 +4,8 @@
     <baseClass>Dobmake.Test1</baseClass>
     <members>
         <member>
-            <name>Id2</name>
-            <type>String</type>
-            <maxLength>10</maxLength>
+            <name>Mem</name>
+            <type>Dobmake.Test1</type>
         </member>
     </members>
 </class>

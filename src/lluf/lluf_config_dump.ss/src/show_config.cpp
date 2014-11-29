@@ -44,7 +44,7 @@ public:
         : parseOk(false)
     {
         using namespace boost::program_options;
-        
+
         options_description options("Options");
         options.add_options()
             ("help,h", "show help message")
@@ -53,7 +53,7 @@ public:
             ("logging", "Show contents of logging.ini")
             ("dou-install-dirs", "Show the dou install dirs of all modules defined in typesystem.ini")
             ("module-install-dir", value<std::string>(&module), "Get the install dir from typesystem.ini for the specified module");
-        
+
         variables_map vm;
 
         try
@@ -158,7 +158,7 @@ int main(int argc, char * argv[])
 
         if (options.dou_install_dirs)
         {
-            const std::vector<std::pair<std::string,std::string> > dirs = 
+            const std::vector<std::pair<std::string,std::string> > dirs =
                 Safir::Utilities::Internal::ConfigHelper::GetDouDirectories(reader);
             for (std::vector<std::pair<std::string,std::string> >::const_iterator it = dirs.begin();
                  it != dirs.end(); ++it)
@@ -166,7 +166,7 @@ int main(int argc, char * argv[])
                 std::cout << it->first << "=" << it->second << std::endl;
             }
         }
-        
+
         if (!options.module.empty())
         {
             try
@@ -177,7 +177,7 @@ int main(int argc, char * argv[])
             {
                 std::cout << (boost::filesystem::path(reader.Typesystem().get<std::string>("default_dou_directory")) / options.module).string() << std::endl;
             }
-            
+
         }
     }
     catch (const std::exception&e)

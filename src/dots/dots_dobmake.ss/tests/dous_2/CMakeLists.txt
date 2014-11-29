@@ -2,6 +2,13 @@ cmake_minimum_required(VERSION 2.8.12)
 
 find_package(SafirSDKCore REQUIRED)
 
+LINK_DIRECTORIES(/home/lars/tmp/bar/lib)
+INCLUDE_DIRECTORIES(/home/lars/tmp/bar/include)
+LIST(APPEND CSHARP_LIBRARY_PATHS /home/lars/tmp/bar/dotnet)
+
+SET(ADD_SAFIR_GENERATED_LIBRARY_NO_JAVA True)
+SET(ADD_SAFIR_GENERATED_LIBRARY_NO_DOTNET True)
+
 ADD_SAFIR_GENERATED_LIBRARY(
   NAME Test2
   DEPENDENCIES Test1)

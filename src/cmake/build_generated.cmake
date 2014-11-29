@@ -255,7 +255,7 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
   #
   # Build Java
   #
-  if (Java_FOUND)
+  if (Java_FOUND AND NOT ADD_SAFIR_GENERATED_LIBRARY_NO_JAVA)
 
     #TODO: most of this will not work when building a second external jar (e.g. something
     #that depends on Example. Probably true for other langs as well?
@@ -291,6 +291,10 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
       MANIFEST ${CMAKE_CURRENT_BINARY_DIR}/Manifest.generated.txt)
 
     add_dependencies(safir_generated-${GEN_NAME}-java safir_generated-${GEN_NAME}-code)
+
+    #remember that we built java
+    set_target_properties(${GEN_NAME}-dou PROPERTIES
+      JAVA_BUILT True)
   endif()
 
   ############
@@ -298,7 +302,7 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
   #
   # Build Dotnet
   #
-  if (CSHARP_FOUND)
+  if (CSHARP_FOUND AND NOT ADD_SAFIR_GENERATED_LIBRARY_NO_DOTNET)
 
     set (assembly_refs Safir.Dob.Typesystem)
     foreach (DEP ${GEN_DEPENDENCIES})
@@ -319,6 +323,11 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
       ${lib_path_arg})
 
     add_dependencies(safir_generated-${GEN_NAME}-dotnet safir_generated-${GEN_NAME}-code)
+
+    #remember that we built dotnet
+    set_target_properties(${GEN_NAME}-dou PROPERTIES
+      DOTNET_BUILT True)
+
   endif()
 
   ############
@@ -333,9 +342,6 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
     ${SAFIR_GENERATED_PATHS} "SAFIR_GENERATED_${GEN_NAME}_DIR=$<TARGET_FILE_DIR:safir_generated-${GEN_NAME}-cpp>")
   ##############
 
-  set_target_properties(${GEN_NAME}-dou PROPERTIES
-    JAVA_BUILT ${Java_FOUND}
-    DOTNET_BUILT ${CSHARP_FOUND})
 
 ENDFUNCTION()
 

@@ -65,7 +65,7 @@ namespace Internal
     {
         return Safir::Utilities::Internal::ExpandEnvironment(str);
     }
-   
+
     std::string Expansion::ExpandSpecial(const std::string& str)
     {
         return Safir::Utilities::Internal::ExpandSpecial(str);
