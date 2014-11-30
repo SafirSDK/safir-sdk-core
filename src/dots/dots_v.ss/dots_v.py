@@ -150,7 +150,8 @@ def dou_uniform_lookup_add(dou_uniform_lookup_cache,
                            dou_xml_lookup_cache,
                            file,
                            path):
-    if file in dou_file_lookup_cache:
+    if file in dou_file_lookup_cache and \
+       os.path.join(path,file) != dou_file_lookup_cache[file]:
         print ("Duplicate dou file", os.path.join(path,file), file=sys.stderr)
         sys.exit(1)
 
