@@ -169,15 +169,16 @@ int main(int argc, char * argv[])
 
         if (!options.module.empty())
         {
-            try
+            const std::vector<std::pair<std::string,std::string> > dirs =
+                Safir::Utilities::Internal::ConfigHelper::GetDouDirectories(reader);
+            for (std::vector<std::pair<std::string,std::string> >::const_iterator it = dirs.begin();
+                 it != dirs.end(); ++it)
             {
-                std::cout << reader.Typesystem().get<std::string>(options.module+".dou_directory") << std::endl;
+                if (it->first == options.module)
+                {
+                    std::cout << it->second << std::endl;
+                }
             }
-            catch (boost::property_tree::ptree_bad_path&)
-            {
-                std::cout << (boost::filesystem::path(reader.Typesystem().get<std::string>("default_dou_directory")) / options.module).string() << std::endl;
-            }
-
         }
     }
     catch (const std::exception&e)

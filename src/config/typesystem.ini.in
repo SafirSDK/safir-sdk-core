@@ -5,7 +5,7 @@
 dots_shared_memory_size=10
 
 ;Default directory to look for dou files in. Can be overridden in each section.
-default_dou_directory=@DEFAULT_DOU_DIRECTORY@
+dou_search_path=@DEFAULT_DOU_SEARCH_PATH@
 
 ;Comma separated search path for dots_generated-xxx-java.jar files.
 java_search_path=@DEFAULT_JAVA_SEARCH_PATH@

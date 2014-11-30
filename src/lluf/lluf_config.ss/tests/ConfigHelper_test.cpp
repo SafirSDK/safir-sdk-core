@@ -24,6 +24,18 @@
 #include <Safir/Utilities/Internal/ConfigReader.h>
 #include <boost/filesystem/path.hpp>
 #include <iostream>
+namespace
+{
+    std::string GetEnv(const std::string& name)
+    {
+        char* env = getenv(name.c_str());
+        if (env == NULL)
+        {
+            throw std::logic_error("Environment variable " + name + " is not set");
+        }
+        return env;
+    }
+}
 
 int main()
 {
@@ -44,7 +56,7 @@ int main()
             douFilePaths[1].first != "Override" ||
             douFilePaths[2].first != "AnotherOverride")
         {
-            std::wcout << "Unexpected module!\n" 
+            std::wcout << "Unexpected module!\n"
                        << " " << douFilePaths[0].first.c_str() << "\n"
                        << " " << douFilePaths[1].first.c_str() << "\n"
                        << " " << douFilePaths[2].first.c_str() << std::endl;
@@ -52,12 +64,13 @@ int main()
             return 1;
         }
 
+        const std::string curbindir = GetEnv("CMAKE_CURRENT_BINARY_DIR");
         if (douFilePaths[0].second != "/path/to/default/directory" ||
             douFilePaths[1].second != "/path/to/some/other/directory" ||
-            (douFilePaths[2].second != "/path/to/default/AnotherOverride" && 
-             douFilePaths[2].second != "/path/to/default\\AnotherOverride"))
+            (douFilePaths[2].second != curbindir + "/AnotherOverride" &&
+             douFilePaths[2].second != curbindir + "\\AnotherOverride"))
         {
-            std::wcout << "Unexpected path!\n" 
+            std::wcout << "Unexpected path!\n"
                        << " " << douFilePaths[0].second.c_str() << "\n"
                        << " " << douFilePaths[1].second.c_str() << "\n"
                        << " " << douFilePaths[2].second.c_str() << std::endl;
@@ -74,5 +87,3 @@ int main()
     std::wcout << "success" << std::endl;
     return 0;
 }
-
-

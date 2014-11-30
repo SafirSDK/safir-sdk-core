@@ -26,7 +26,31 @@
 #include "ConfigReaderImpl.h"
 #include "Path.h"
 #include "PathFinders.h"
+#include <boost/algorithm/string.hpp>
 
+
+namespace
+{
+    std::vector<Safir::Utilities::Internal::Path> GetDouSearchPath(const Safir::Utilities::Internal::ConfigReader& reader)
+    {
+        std::string param = reader.Typesystem().get<std::string>("dou_search_path");
+        std::vector<std::string> douSearchPath;
+        boost::split(douSearchPath,
+                     param,
+                     boost::is_any_of(","));
+        std::vector<Safir::Utilities::Internal::Path> checked;
+        for (std::vector<std::string>::iterator it = douSearchPath.begin();
+             it != douSearchPath.end(); ++it)
+        {
+            Safir::Utilities::Internal::Path p(*it);
+            if (p.Exists())
+            {
+                checked.push_back(p);
+            }
+        }
+        return checked;
+    }
+}
 namespace Safir
 {
 namespace Utilities
@@ -71,11 +95,14 @@ namespace Internal
         return Safir::Utilities::Internal::ExpandSpecial(str);
     }
 
+
+
+
     std::vector<std::pair<std::string,std::string> > ConfigHelper::GetDouDirectories(const ConfigReader& reader)
     {
         std::vector<std::pair<std::string,std::string> > directories;
 
-        const Path default_dou_directory(reader.Typesystem().get<std::string>("default_dou_directory"));
+        const std::vector<Path> dou_search_path = GetDouSearchPath(reader);
 
         // Loop through all sections in typesystem.ini
         for (boost::property_tree::ptree::const_iterator it = reader.Typesystem().begin();
@@ -92,12 +119,22 @@ namespace Internal
                 }
                 catch (boost::property_tree::ptree_bad_path&)
                 {
-                    if (default_dou_directory.str() == "NONE")
+                    bool found = false;
+                    for (std::vector<Path>::const_iterator sit = dou_search_path.begin();
+                         sit != dou_search_path.end(); ++sit)
                     {
-                        throw std::logic_error("No default directory available, please fix your typesystem.ini");
+                        Path p = *sit / it->first;
+                        if (p.Exists())
+                        {
+                            directories.push_back(std::make_pair(it->first, p.str()));
+                            found = true;
+                        }
                     }
 
-                    directories.push_back(std::make_pair(it->first, (default_dou_directory / it->first).str()));
+                    if (!found)
+                    {
+                        throw std::logic_error("Dou directory not found for " + it->first);
+                    }
                 }
             }
         }

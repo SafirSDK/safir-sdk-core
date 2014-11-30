@@ -136,7 +136,7 @@ class Parameters:
         #Get the default dou directory and set it as an environment variable that can be
         #picked up by the typesystem.ini that belongs to the test suite.
         #This path is set by cmake during configuration/installation.
-        os.environ["SAFIR_TEST_SUITE_DOU_DIRECTORY"] = "@DEFAULT_DOU_DIRECTORY@" 
+        os.environ["SAFIR_TEST_SUITE_DOU_DIRECTORY"] = "@DEFAULT_DOU_SEARCH_PATH@"
 
         self.test_data_directory = "@TEST_DATA_DIRECTORY@" #This path is set by cmake during configuration/installation.
         log(self.test_data_directory)

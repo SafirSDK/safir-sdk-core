@@ -25,7 +25,8 @@ ADD_TEST(NAME ConfigReader_Util COMMAND Util_test)
 ADD_TEST(NAME ConfigReader_PathFinders COMMAND PathFinders_test)
 ADD_TEST(NAME ConfigReader_ConfigReaderImpl COMMAND ConfigReaderImpl_test ${CMAKE_CURRENT_SOURCE_DIR}/testconf)
 
-ADD_TEST(NAME ConfigReader_ConfigHelper COMMAND ConfigHelper_test)
-SET_SAFIR_TEST_PROPERTIES(TEST ConfigReader_ConfigHelper 
-  CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/testconf/config_helper/)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/AnotherOverride)
 
+ADD_TEST(NAME ConfigReader_ConfigHelper COMMAND ConfigHelper_test)
+SET_SAFIR_TEST_PROPERTIES(TEST ConfigReader_ConfigHelper
+  CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/testconf/config_helper/)

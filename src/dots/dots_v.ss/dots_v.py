@@ -61,19 +61,6 @@ dod_parameter_names = [\
 
 loglevel = 3
 
-class GeneratedLibrary(object):
-    def __init__(self, section, items, default_dou_directory):
-        #print("Creating GeneratedLibrary for", section)
-        self.section = section
-        self.dependencies = items["dependencies"].split()
-        if "dou_directory" in items:
-            self.dou_directory = items["dou_directory"]
-        else:
-            self.dou_directory = os.path.join(default_dou_directory,section)
-
-        #print (" dependencies =", self.dependencies)
-        #print (" dou_directory =", self.dou_directory)
-
 class Dou(object):
     def __init__(self):
         self.type = ""
