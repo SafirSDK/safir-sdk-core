@@ -109,10 +109,12 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
     endforeach()
 
     if (NOT _cs_NOVERSION)
-      FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/version.cs
-        "//This is an automatically generated file.\n"
-        "[assembly: System.Reflection.AssemblyVersion(\"${SAFIR_VERSION_STRING}.0\")]\n"
-        "internal class BuildInfo {public const string Version = \"${SAFIR_VERSION_STRING}.0\";}")
+      add_custom_command(
+        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/version.cs
+        COMMAND ${CMAKE_COMMAND} -E echo "//This is an automatically generated file." > ${CMAKE_CURRENT_BINARY_DIR}/version.cs
+        COMMAND ${CMAKE_COMMAND} -E echo "[assembly: System.Reflection.AssemblyVersion\\(\\\"${SAFIR_VERSION_STRING}.0\\\"\\)]" >> ${CMAKE_CURRENT_BINARY_DIR}/version.cs
+        COMMAND ${CMAKE_COMMAND} -E echo "internal class BuildInfo {public const string Version = \\\"${SAFIR_VERSION_STRING}.0\\\"\;}" >> ${CMAKE_CURRENT_BINARY_DIR}/version.cs
+        COMMENT "Creating version.cs for ${TARGET_NAME}")
 
       #add version.cs to the list of sources, but remove it again if it was already there...
       LIST(APPEND _cs_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/version.cs)
