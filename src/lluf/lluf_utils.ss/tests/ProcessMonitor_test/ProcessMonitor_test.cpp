@@ -73,6 +73,8 @@ int main(int argc, char** argv)
     std::wcout << "Got " << pids.size() << " pids to monitor" << std::endl;
 
     std::wcout << "Starting thread" << std::endl;
+
+    boost::shared_ptr<boost::asio::io_service::work> work(new boost::asio::io_service::work(ioService));
     boost::thread thread(boost::bind(&boost::asio::io_service::run,&ioService));
 
     std::wcout << "Adding pids to monitor" << std::endl;
@@ -81,6 +83,7 @@ int main(int argc, char** argv)
     {
         monitor.StartMonitorPid(boost::lexical_cast<pid_t>(*it));
     }
+    work.reset();
 
     std::wcout << "Running io_service" << std::endl;
     ioService.run();
