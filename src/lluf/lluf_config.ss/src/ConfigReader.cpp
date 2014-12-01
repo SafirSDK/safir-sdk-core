@@ -27,7 +27,7 @@
 #include "Path.h"
 #include "PathFinders.h"
 #include <boost/algorithm/string.hpp>
-
+#include <set>
 
 namespace
 {
@@ -50,6 +50,40 @@ namespace
         }
         return checked;
     }
+
+    void GetDouDependenciesInternal(const Safir::Utilities::Internal::ConfigReader& reader,
+                                    const std::string& moduleName,
+                                    std::set<std::string>& deps)
+    {
+        try
+        {
+            const std::string temp = reader.Typesystem().get<std::string>(moduleName + ".dependencies");
+            std::set<std::string> splitDeps;
+            boost::split(splitDeps,
+                         temp,
+                         boost::is_any_of(","));
+
+            for (std::set<std::string>::iterator it = splitDeps.begin();
+                 it != splitDeps.end(); ++it)
+            {
+                //ignore empties
+                if (it->empty())
+                {
+                    continue;
+                }
+
+                if(deps.insert(*it).second)
+                {
+                    GetDouDependenciesInternal(reader, *it, deps);
+                }
+            }
+        }
+        catch (boost::property_tree::ptree_bad_path&)
+        {
+            throw std::logic_error("Failed to resolve dependencies of dou module " + moduleName);
+        }
+    }
+
 }
 namespace Safir
 {
@@ -139,6 +173,13 @@ namespace Internal
             }
         }
         return directories;
+    }
+
+    std::set<std::string> ConfigHelper::GetDouDependencies(const ConfigReader& reader, const std::string& moduleName)
+    {
+        std::set<std::string> deps;
+        GetDouDependenciesInternal(reader,moduleName,deps);
+        return deps;
     }
 }
 }

@@ -24,6 +24,11 @@
 #include <Safir/Utilities/Internal/ConfigReader.h>
 #include <boost/filesystem/path.hpp>
 #include <iostream>
+#define BOOST_TEST_MODULE ConfigHelperTest
+#include <boost/test/unit_test.hpp>
+
+
+
 namespace
 {
     std::string GetEnv(const std::string& name)
@@ -37,53 +42,46 @@ namespace
     }
 }
 
-int main()
+BOOST_AUTO_TEST_CASE(GetDouDirectories)
 {
-    try
+    using namespace Safir::Utilities::Internal;
+    ConfigReader reader;
+
+    std::vector<std::pair<std::string,std::string> > douFilePaths = ConfigHelper::GetDouDirectories(reader);
+
+    BOOST_REQUIRE_EQUAL (douFilePaths.size(), 3);
+
+    BOOST_REQUIRE_EQUAL(douFilePaths[0].first, "Default");
+    BOOST_REQUIRE_EQUAL(douFilePaths[1].first, "Override");
+    BOOST_REQUIRE_EQUAL(douFilePaths[2].first, "AnotherOverride");
+
+    const std::string curbindir = GetEnv("CMAKE_CURRENT_BINARY_DIR");
+    if (douFilePaths[0].second != "/path/to/default/directory" ||
+        douFilePaths[1].second != "/path/to/some/other/directory" ||
+        (douFilePaths[2].second != curbindir + "/AnotherOverride" &&
+         douFilePaths[2].second != curbindir + "\\AnotherOverride"))
     {
-        using namespace Safir::Utilities::Internal;
-        ConfigReader reader;
+        std::wcout << "Unexpected path!\n"
+                   << " " << douFilePaths[0].second.c_str() << "\n"
+                   << " " << douFilePaths[1].second.c_str() << "\n"
+                   << " " << douFilePaths[2].second.c_str() << std::endl;
 
-        std::vector<std::pair<std::string,std::string> > douFilePaths = ConfigHelper::GetDouDirectories(reader);
-
-        if (douFilePaths.size() != 3)
-        {
-            std::wcout << "Expected 3 file paths, got " << douFilePaths.size() << std::endl;
-            return 1;
-        }
-
-        if (douFilePaths[0].first != "Default" ||
-            douFilePaths[1].first != "Override" ||
-            douFilePaths[2].first != "AnotherOverride")
-        {
-            std::wcout << "Unexpected module!\n"
-                       << " " << douFilePaths[0].first.c_str() << "\n"
-                       << " " << douFilePaths[1].first.c_str() << "\n"
-                       << " " << douFilePaths[2].first.c_str() << std::endl;
-
-            return 1;
-        }
-
-        const std::string curbindir = GetEnv("CMAKE_CURRENT_BINARY_DIR");
-        if (douFilePaths[0].second != "/path/to/default/directory" ||
-            douFilePaths[1].second != "/path/to/some/other/directory" ||
-            (douFilePaths[2].second != curbindir + "/AnotherOverride" &&
-             douFilePaths[2].second != curbindir + "\\AnotherOverride"))
-        {
-            std::wcout << "Unexpected path!\n"
-                       << " " << douFilePaths[0].second.c_str() << "\n"
-                       << " " << douFilePaths[1].second.c_str() << "\n"
-                       << " " << douFilePaths[2].second.c_str() << std::endl;
-
-            return 1;
-        }
-
+        BOOST_FAIL("Unexpected path");
     }
-    catch (const std::exception& e)
-    {
-        std::wcout << "exception:" << e.what() <<  std::endl;
-        return 1;
-    }
-    std::wcout << "success" << std::endl;
-    return 0;
+}
+
+BOOST_AUTO_TEST_CASE(GetDouDependencies)
+{
+    using namespace Safir::Utilities::Internal;
+    ConfigReader reader;
+
+    BOOST_CHECK(ConfigHelper::GetDouDependencies(reader, "AnotherOverride").empty());
+    std::set<std::string> deps = ConfigHelper::GetDouDependencies(reader, "Override");
+    BOOST_CHECK_EQUAL(deps.size(), 1);
+    BOOST_CHECK_EQUAL(*deps.begin(),"AnotherOverride");
+    deps = ConfigHelper::GetDouDependencies(reader, "Default");
+    BOOST_CHECK_EQUAL(deps.size(), 2);
+    BOOST_CHECK(deps.find("AnotherOverride") != deps.end());
+    BOOST_CHECK(deps.find("Override") != deps.end());
+    BOOST_CHECK_THROW(ConfigHelper::GetDouDependencies(reader, "Klopp"), std::logic_error);
 }

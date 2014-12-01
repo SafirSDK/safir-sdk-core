@@ -37,6 +37,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/filesystem.hpp>
 #include <vector>
+#include <set>
 
 
 namespace Safir
@@ -52,11 +53,11 @@ namespace Internal
     class LLUF_CONFIG_API ConfigReader
     {
     public:
-        /** 
+        /**
          * Reads the Safir SDK Core configuration files and populates
          * the property trees for use.
          *
-         * Also expands environment and special variables (see below) in the 
+         * Also expands environment and special variables (see below) in the
          * property trees. There is no need to do that yourself!
          *
          * Throws various errors derived from std::exception on failure.
@@ -77,14 +78,14 @@ namespace Internal
 #pragma warning (disable: 4251)
 #endif
 
-        boost::shared_ptr<ConfigReaderImpl> m_impl;  
+        boost::shared_ptr<ConfigReaderImpl> m_impl;
 
 #ifdef _MSC_VER
 #pragma warning (pop)
-#endif          
+#endif
     };
 
-    /** 
+    /**
      * Utility functions for expanding environment and special variables.
      *
      * These are exported in case there are any other places where the same
@@ -98,7 +99,7 @@ namespace Internal
     {
     public:
         /**
-         * Expand environment variables in the string. 
+         * Expand environment variables in the string.
          *
          * Looks for $(VARIABLE) and replaces it with the value of getenv("VARIABLE").
          * Throws std::logic_error if the variable cannot be found.
@@ -107,14 +108,14 @@ namespace Internal
          * be expanded to the value of NAME_0 if NUMBER is 0.
          */
         static std::string ExpandEnvironment(const std::string& str);
-        
+
         /**
          * Expand special variables int the string.
          *
          * E.g. looks for @{CSIDL_COMMON_APPDATA} and replaces it with the value of that special
          * varible (in this case usually C:\\ProgramData on Windows Vista and later).
          *
-         * Currently these are only a number of special folders on 
+         * Currently these are only a number of special folders on
          * Windows, please look at the source code or the Safir SDK Users Guide
          * for a list of variables that are expanded (search for Special Folders).
          */
@@ -135,11 +136,20 @@ namespace Internal
         static std::vector<std::pair<std::string,std::string> > GetDouDirectories(const ConfigReader& reader);
 
 
-
+        /**
+         * Retreives all dependencies of a dou module.
+         *
+         * The dependency resolution is recursive, so a dependency of a dependency will be included.
+         *
+         * @param [in] reader ConfigReader object.
+         * @param [in] moduleName Name of the module to fetch dependecies for.
+         * @return list of module names that the given module depends on.
+         */
+        static std::set<std::string> GetDouDependencies(const ConfigReader& reader,
+                                                        const std::string& moduleName);
     };
 }
 }
 }
 
 #endif
-

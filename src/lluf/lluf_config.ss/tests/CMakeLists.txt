@@ -12,7 +12,7 @@ TARGET_LINK_LIBRARIES (Path_test lluf_config)
 TARGET_LINK_LIBRARIES (Util_test lluf_config)
 TARGET_LINK_LIBRARIES (PathFinders_test lluf_config)
 TARGET_LINK_LIBRARIES (ConfigReaderImpl_test lluf_config)
-TARGET_LINK_LIBRARIES (ConfigHelper_test lluf_config)
+TARGET_LINK_LIBRARIES (ConfigHelper_test lluf_config ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
 ADD_TEST(NAME display_test_env COMMAND display_env)
 SET_SAFIR_TEST_PROPERTIES(TEST display_test_env)
