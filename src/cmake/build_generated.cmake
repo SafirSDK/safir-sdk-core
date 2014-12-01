@@ -368,12 +368,6 @@ FUNCTION(INSTALL_SAFIR_GENERATED_LIBRARY)
     message(FATAL_ERROR "Unknown argument to INSTALL_SAFIR_GENERATED_LIBRARY '${_in_UNPARSED_ARGUMENTS}'")
   endif()
 
-  #TODO: should we really do it this way?
-  #usually cmake functions force you to list all files yourself.
-  FILE(GLOB_RECURSE dou_files *.dou)
-  FILE(GLOB_RECURSE dom_files *.dom)
-  FILE(GLOB_RECURSE namespace_files *.namespace.txt)
-
   foreach (_in_NAME IN LISTS _in_TARGETS)
     if(NOT TARGET ${_in_NAME}-dou)
       message(FATAL_ERROR "No such safir_generated target: ${_in_NAME}")
