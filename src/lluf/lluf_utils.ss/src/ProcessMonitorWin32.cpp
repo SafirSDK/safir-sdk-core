@@ -96,6 +96,8 @@ namespace Utilities
     {
         if (error)
         {
+            std::wcout << "An error occurred in HandleEvent!\nError: "
+                       << error << "\nMessage: " << error.message() << std::endl;
             return;
         }
 
