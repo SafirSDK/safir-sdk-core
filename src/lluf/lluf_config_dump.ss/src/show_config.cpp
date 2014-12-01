@@ -52,7 +52,10 @@ public:
             ("locations", "Show contents of locations.ini")
             ("logging", "Show contents of logging.ini")
             ("dou-install-dirs", "Show the dou install dirs of all modules defined in typesystem.ini")
-            ("module-install-dir", value<std::string>(&module), "Get the install dir from typesystem.ini for the specified module");
+            ("module-install-dir", value<std::string>(&moduledir),
+             "Get the install dir from typesystem.ini for the specified module")
+            ("module-dependencies", value<std::string>(&moduledep),
+             "Get the all dependencies from typesystem.ini for the specified module");
 
         variables_map vm;
 
@@ -80,7 +83,12 @@ public:
         locations = vm.count("locations") != 0;
         dou_install_dirs = vm.count("dou-install-dirs") != 0;
 
-        if (!logging && !locations && !typesystem && !dou_install_dirs && vm.count("module-install-dir") == 0)
+        if (!logging &&
+            !locations &&
+            !typesystem &&
+            !dou_install_dirs &&
+            vm.count("module-install-dir") == 0 &&
+            vm.count("module-dependencies") == 0)
         {
             ShowHelp(options);
             return;
@@ -92,7 +100,8 @@ public:
     bool typesystem;
     bool locations;
     bool dou_install_dirs;
-    std::string module;
+    std::string moduledir;
+    std::string moduledep;
 
     bool parseOk;
 
@@ -167,19 +176,32 @@ int main(int argc, char * argv[])
             }
         }
 
-        if (!options.module.empty())
+        if (!options.moduledir.empty())
         {
             const std::vector<std::pair<std::string,std::string> > dirs =
                 Safir::Utilities::Internal::ConfigHelper::GetDouDirectories(reader);
             for (std::vector<std::pair<std::string,std::string> >::const_iterator it = dirs.begin();
                  it != dirs.end(); ++it)
             {
-                if (it->first == options.module)
+                if (it->first == options.moduledir)
                 {
                     std::cout << it->second << std::endl;
                 }
             }
         }
+
+        if (!options.moduledep.empty())
+        {
+            const std::set<std::string> deps =
+                Safir::Utilities::Internal::ConfigHelper::GetDouDependencies(reader,options.moduledep);
+            for (std::set<std::string>::const_iterator it = deps.begin();
+                 it != deps.end(); ++it)
+            {
+                std::cout << *it << " ";
+            }
+            std::cout << std::endl;
+        }
+
     }
     catch (const std::exception&e)
     {
