@@ -375,6 +375,10 @@ FUNCTION(INSTALL_SAFIR_GENERATED_LIBRARY)
   FILE(GLOB_RECURSE namespace_files *.namespace.txt)
 
   foreach (_in_NAME IN LISTS _in_TARGETS)
+    if(NOT TARGET ${_in_NAME}-dou)
+      message(FATAL_ERROR "No such safir_generated target: ${_in_NAME}")
+    endif()
+
     get_target_property(_in_SOURCE_FILES ${_in_NAME}-dou SOURCE_FILES)
     get_target_property(_in_CXX_INCLUDE_DIRECTORY ${_in_NAME}-dou CXX_INCLUDE_DIRECTORY)
     get_target_property(_in_JAVA_BUILT ${_in_NAME}-dou JAVA_BUILT)
