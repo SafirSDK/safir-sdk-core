@@ -63,10 +63,12 @@ namespace Internal
     {
     public:
         Session(const StreamPtr&                    streamPtr,
-                boost::asio::io_service::strand&    strand)
+                boost::asio::io_service::strand&    strand,
+                std::function<void()>               sessionClosedCb)
             : m_streamPtr(streamPtr),
               m_msgQueue(),
-              m_strand(strand)
+              m_strand(strand),
+              m_sessionClosedCb(sessionClosedCb)
         {
         }
 
@@ -127,6 +129,11 @@ namespace Internal
                         }
 
                         m_streamPtr->close();
+
+                        if (m_sessionClosedCb != nullptr)
+                        {
+                            m_sessionClosedCb();
+                        }
                     }
                 }));
         }
@@ -134,6 +141,7 @@ namespace Internal
         StreamPtr                           m_streamPtr;
         std::deque<Msg>                     m_msgQueue;
         boost::asio::io_service::strand&    m_strand;
+        std::function<void()>               m_sessionClosedCb;
     };
 
 }

@@ -76,15 +76,65 @@ def terminate(proc):
     proc.kill()
     proc.communicate()
 
+def exit_process(proc):
+    send_cmd(proc, "EXIT\n") 
+    proc.communicate()
 
 IpcPublisher = os.path.join(exe_path,"IpcPublisher")
 IpcSubscriber = os.path.join(exe_path,"IpcSubscriber")
 
-#########
-## Test 1
-#########
-print("Test that the publisher can be started before the subscribers")
+#######
+print("Test that the publisher is notified of subscriber connect/disconnect")
+#######
+# Start a publisher that sends no messages
+publisher = subprocess.Popen((IpcPublisher, "--cmd-from-stdin"), stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+send_cmd(publisher, "START\n")
+wait_for_output(publisher, "Publisher is started", exact_match=True)
 
+# Start two subscribers
+subscriber1 = subprocess.Popen((IpcSubscriber, "--cmd-from-stdin"), stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+subscriber2 = subprocess.Popen((IpcSubscriber, "--cmd-from-stdin"), stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+
+# Let them connect
+send_cmd(subscriber1, "CONNECT\n")
+send_cmd(subscriber2, "CONNECT\n")
+
+wait_for_output(publisher, "A Subscriber connected", exact_match=True)
+wait_for_output(publisher, "A Subscriber connected", exact_match=True)
+
+# Disconnect one of the subscribers
+send_cmd(subscriber1, "DISCONNECT\n")
+wait_for_output(subscriber1, "Disconnected from publisher")
+
+# Send a message to trigger the disconnect indication.
+send_cmd(publisher, "SEND Kalle 1 0\n")
+
+wait_for_output(publisher, "A Subscriber disconnected")
+
+# Connect subscriber again
+send_cmd(subscriber1, "CONNECT\n")
+wait_for_output(publisher, "A Subscriber connected", exact_match=True)
+
+# Disconnect both subscribers
+send_cmd(subscriber1, "DISCONNECT\n")
+send_cmd(subscriber2, "DISCONNECT\n")
+wait_for_output(subscriber1, "Disconnected from publisher")
+wait_for_output(subscriber2, "Disconnected from publisher")
+
+# Send a message to trigger the disconnect indication.
+send_cmd(publisher, "SEND Kalle 1 0\n")
+
+wait_for_output(publisher, "A Subscriber disconnected", exact_match=True)
+wait_for_output(publisher, "A Subscriber disconnected", exact_match=True)
+
+
+terminate(publisher)
+terminate(subscriber1)
+terminate(subscriber2)
+
+#######
+print("Test that the publisher can be started before the subscribers")
+#######
 # Start a publisher that sends messages
 publisher = subprocess.Popen((IpcPublisher, "--message-delay", "10"), stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
 wait_for_output(publisher, "Publisher is started")
@@ -104,11 +154,9 @@ if sub2_result.decode("utf-8").count("Kalle") != 5:
 
 terminate(publisher)
 
-#########
-## Test 2
-#########
+#######
 print("Test that subscribers can be started before publisher")
-
+#######
 subscriber1 = subprocess.Popen((IpcSubscriber, "--number-of-messages", "5"), stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
 wait_for_output(subscriber1, "Trying to connect")
 subscriber2 = subprocess.Popen((IpcSubscriber, "--number-of-messages", "5"), stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
@@ -131,11 +179,9 @@ if sub2_result.decode("utf-8").count("Kalle") != 5:
 
 terminate(publisher)
 
-#########
-## Test 3
-#########
+#######
 print("Test that subscribers can connect/disconnect several times")
-
+#######
 # Connect/disconnect witout an existing publisher
 subscriber = subprocess.Popen((IpcSubscriber, "--cmd-from-stdin"), stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
 send_cmd(subscriber, "CONNECT\n")
@@ -168,11 +214,9 @@ terminate(publisher)
 terminate(subscriber)
 
 
-#########
-## Test 4
-#########
+#######
 print("Test that a publisher can do several start/stop")
-
+#######
 subscriber1 = subprocess.Popen((IpcSubscriber), stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
 wait_for_output(subscriber1, "Trying to connect", exact_match=True)
 
@@ -201,11 +245,9 @@ terminate(publisher)
 terminate(subscriber1)
 
 
-#########
-## Test 5
-#########
+#######
 print("Test with large messages")
-
+#######
 subscriber1 = subprocess.Popen((IpcSubscriber, "--number-of-messages", "2", "-o"), stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
 wait_for_output(subscriber1, "Trying to connect")
 subscriber2 = subprocess.Popen((IpcSubscriber, "--number-of-messages", "2", "-o"), stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
@@ -226,6 +268,23 @@ if sub2_result.decode("utf-8").count("Received msg with size 100000000") != 2:
     test_failed("Subscriber 2 didn't receive the expected 2 large messages!")
     
 terminate(publisher)
+
+#######
+print("Test that publisher and subscriber can be stopped properly")
+#######
+publisher = subprocess.Popen((IpcPublisher, "--cmd-from-stdin"), stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+send_cmd(publisher, "START\n")
+wait_for_output(publisher, "Publisher is started", exact_match=True)
+
+subscriber = subprocess.Popen((IpcSubscriber, "--cmd-from-stdin"), stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+
+send_cmd(subscriber, "CONNECT\n")
+
+wait_for_output(publisher, "A Subscriber connected", exact_match=True)
+
+exit_process(publisher)
+exit_process(subscriber)
+
 
 print("success")
 sys.exit(0)

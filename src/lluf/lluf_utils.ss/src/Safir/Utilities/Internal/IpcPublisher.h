@@ -74,13 +74,14 @@ namespace Internal
                          const std::string&         name,
                          std::function<void()>      subscriberConnectedCb,
                          std::function<void()>      subscriberDisconnectedCb)
-            : m_strand(ioService),
+            : m_running(false),
+              m_strand(ioService),
               m_acceptor(boost::make_shared<Acceptor>(m_strand,
                                                       name,
                                                       [this](typename Acceptor::StreamPtr streamPtr)
                                                       {
                                                           m_sessions.insert(boost::make_shared<SessionType>
-                                                                            (streamPtr, m_strand));
+                                                                            (streamPtr, m_strand, m_subscriberDisconnectedCb));
                                                           if (m_subscriberConnectedCb != nullptr)
                                                           {
                                                               m_subscriberConnectedCb();
@@ -94,6 +95,12 @@ namespace Internal
 
         void Start()
         {
+            const bool wasRunning = m_running.exchange(true);
+            if (wasRunning)
+            {
+                return;
+            }
+
             auto selfHandle(this->shared_from_this());
 
             m_strand.dispatch(
@@ -112,13 +119,18 @@ namespace Internal
 
         void Stop()
         {
+            const bool wasRunning = m_running.exchange(false);
+            if (!wasRunning)
+            {
+                return;
+            }
+
             auto selfHandle(this->shared_from_this());
 
             m_strand.dispatch(
                         [this, selfHandle]()
                         {
                             m_sessions.clear();
-
                             m_acceptor->Stop();
 
                             TestPolicy::StopListeningEvent();
@@ -127,6 +139,11 @@ namespace Internal
 
         void Send(std::unique_ptr<char[]> msg, uint32_t msgSize)
         {
+            if (!m_running)
+            {
+                return;
+            }
+
             auto selfHandle(this->shared_from_this());
 
             boost::shared_ptr<char[]> msgSharedPtr(std::move(msg));
@@ -141,10 +158,6 @@ namespace Internal
                                 if (!sessionPtr->IsOpen())
                                 {
                                     it = m_sessions.erase(it);
-                                    if (m_subscriberDisconnectedCb != nullptr)
-                                    {
-                                        m_subscriberDisconnectedCb();
-                                    }
                                     continue;
                                 }
 
@@ -162,6 +175,7 @@ namespace Internal
         typedef boost::shared_ptr<SessionType> SessionPtr;
         typedef boost::shared_ptr<Acceptor> AcceptorPtr;
 
+        std::atomic<bool>                   m_running;
         boost::asio::io_service::strand     m_strand;
         AcceptorPtr                         m_acceptor;
         std::set<SessionPtr>                m_sessions;
@@ -206,6 +220,8 @@ namespace Internal
          *                                     Provide a nullptr if no calback is wanted.
          * @param subscriberDisconnectedCb [in] - Called when a subscriber disconnects.
          *                                        Provide a nullptr if no callback is wanted.
+         *                                        Note that detection of a disconnected subscriber is done only
+         *                                        when the publisher is sending.
          */
         IpcPublisher(boost::asio::io_service&   ioService,
                      const std::string&         name,

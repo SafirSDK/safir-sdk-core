@@ -205,6 +205,7 @@ int main(int argc, char* argv[])
             }
             else if (cmd[0] == L"EXIT")
             {
+                subPtr->Disconnect();
                 break;
             }
             else
