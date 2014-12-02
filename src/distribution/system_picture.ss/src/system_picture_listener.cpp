@@ -64,9 +64,9 @@ public:
         options_description options("Options");
         options.add_options()
             ("help,h", "show help message")
-            ("raw", 
+            ("raw",
              "Subscribe to the Raw data instead of the SystemState data");
-        
+
         variables_map vm;
 
         try
@@ -116,11 +116,11 @@ int main(int argc, char * argv[])
     }
 
     boost::asio::io_service ioService;
-    
+
     auto wk = Safir::make_unique<boost::asio::io_service::work>(ioService);
-    
+
     boost::asio::signal_set signals(ioService);
-    
+
 #if defined (_WIN32)
     signals.add(SIGABRT);
     signals.add(SIGBREAK);
@@ -133,18 +133,18 @@ int main(int argc, char * argv[])
 #endif
 
     Safir::Dob::Internal::SP::SystemPicture sp(Safir::Dob::Internal::SP::subscriber_tag, ioService);
-    
+
     if (options.raw)
     {
         sp.StartRawSubscription([](const Safir::Dob::Internal::SP::RawStatistics& data)
-                                {                  
+                                {
                                     std::wcout << data << std::endl;
                                 });
     }
     else
     {
         sp.StartStateSubscription([](const Safir::Dob::Internal::SP::SystemState& data)
-                                  {                  
+                                  {
                                       std::wcout << data << std::endl;
                                   });
     }

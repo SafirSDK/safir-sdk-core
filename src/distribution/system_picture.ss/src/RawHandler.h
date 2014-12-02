@@ -693,7 +693,7 @@ namespace SP
             lllog(7) << "SP: PostRawChangedCallback " << flags << std::endl;
             const auto copy = RawStatisticsCreator::Create
                 (Safir::make_unique<RawStatisticsMessage>(m_allStatisticsMessage));
-            lllog(7) << "SP:   - Data:\n" << copy << std::endl;
+
             //this will create an object that will cause one and only one call to the completion handler
             //when the last callback is complete.
             boost::shared_ptr<void> completionCaller(static_cast<void*>(0),

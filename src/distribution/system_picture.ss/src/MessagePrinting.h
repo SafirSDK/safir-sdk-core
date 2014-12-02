@@ -55,7 +55,6 @@ namespace SP
         PrintMessage(msg,out);
         return out;
     }
-
 }
 }
 }

@@ -340,7 +340,7 @@ namespace SP
         //must be called in strand
         bool UpdateMyState()
         {
-            lllog(8) << "SP: Entering UpdateMyState" << std::endl;
+            lllog(8) << "SP: Entering UpdateMyState\n";
             if (!m_electionHandler.IsElected())
             {
                 return false;
@@ -429,7 +429,11 @@ namespace SP
             }
 
             lllog(7) << "SP: Updating my state." << std::endl;
-            lllog(9) << "SP: Last state:\n" << m_stateMessage << std::endl;
+            const bool logState = Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().LogLevel() >= 9;
+            if (logState)
+            {
+                std::wcout << "SP: Last state:\n" << m_stateMessage << std::endl;
+            }
 
             //Note: This code will ignore the case where we for some reason have a RAW from another node
             //that says that we are dead. If that is the case it will stop sending data to us and
@@ -439,7 +443,7 @@ namespace SP
             m_stateMessage.set_elected_id(m_id);
             m_stateMessage.set_election_id(m_ownElectionId);
 
-            lllog(8) << "SP: Looking at last state" << std::endl;
+            lllog(8) << "SP: Looking at last state\n";
 
             //get lists of dead and alive nodes in the last state, for future use.
             //(remember that the last state might not have been produced by us)
@@ -450,13 +454,13 @@ namespace SP
                 if (m_stateMessage.node_info(i).is_dead())
                 {
                     lllog(8) << "SP:   Dead node " << m_stateMessage.node_info(i).name().c_str()
-                             << " (" << m_stateMessage.node_info(i).id() << ")" << std::endl;
+                             << " (" << m_stateMessage.node_info(i).id() << ")\n";
                     lastDeadNodes.insert(m_stateMessage.node_info(i).id());
                 }
                 else
                 {
                     lllog(8) << "SP:   Live node " << m_stateMessage.node_info(i).name().c_str()
-                             << " (" << m_stateMessage.node_info(i).id() << ")" << std::endl;
+                             << " (" << m_stateMessage.node_info(i).id() << ")\n";
                     lastLiveNodes.insert(std::make_pair(m_stateMessage.node_info(i).id(),
                                                         m_stateMessage.mutable_node_info(i)));
                 }
@@ -470,7 +474,7 @@ namespace SP
             //check that we're in the last state (and alive), and insert us if we're not
             if (lastLiveNodes.find(m_id) == lastLiveNodes.end())
             {
-                lllog(8) << "SP: Adding own node to system state" << std::endl;
+                lllog(8) << "SP: Adding own node to system state\n";
 
                 //add myself
                 auto node = m_stateMessage.add_node_info();
@@ -494,7 +498,7 @@ namespace SP
                         lln.second->set_is_dead(true);
                         deadNodes.erase(findIt);
                         died.insert(lln.first);
-                        lllog(8) << "SP: Node " << lln.first << " has died since last state" << std::endl;
+                        lllog(8) << "SP: Node " << lln.first << " has died since last state\n";
                     }
                 }
 
@@ -515,7 +519,7 @@ namespace SP
             //but that doesnt really matter, since we'll be using deadNodes to add dead nodes to
             //systemState at the end of this fcn.
 
-            lllog(8) << "SP: Looking for new nodes that can be added to the system state" << std::endl;
+            lllog(8) << "SP: Looking for new nodes that can be added to the system state\n";
 
             //we need a list of new nodes that are fully connected, that we can add to the system state
             std::set<int64_t> newNodes;
@@ -545,7 +549,7 @@ namespace SP
                     if (lln.empty())
                     {
                         lllog(8) << "SP:   Found a candidate " << m_lastStatistics.Name(i).c_str()
-                                 << " (" << m_lastStatistics.Id(i) << ")" << std::endl;
+                                 << " (" << m_lastStatistics.Id(i) << ")\n";
 
                         newNodes.insert(m_lastStatistics.Id(i));
                     }
@@ -578,7 +582,7 @@ namespace SP
                     for (const auto notSeen : seen)
                     {
                         lllog(8) << "SP:   Node " << m_lastStatistics.Id(i) << " cannot see node "
-                                 << notSeen << ", so we cannot add it to system state yet" << std::endl;
+                                 << notSeen << ", so we cannot add it to system state yet\n";
 
                         newNodes.erase(notSeen);
                     }
@@ -613,7 +617,7 @@ namespace SP
                     for (const auto notSeen : seen)
                     {
                         lllog(8) << "SP:   Node " << m_lastStatistics.Id(i) << " cannot see node "
-                                 << notSeen << ", so we cannot add it to system state yet" << std::endl;
+                                 << notSeen << ", so we cannot add it to system state yet\n";
 
                         newNodes.erase(notSeen);
                     }
@@ -650,7 +654,7 @@ namespace SP
                 const int index = dn.second.second;
 
                 lllog(8) << "SP: Adding dead node " << remote.Name(index).c_str()
-                         << " (" << remote.Id(index) << ")" << std::endl;
+                         << " (" << remote.Id(index) << ")\n";
 
                 auto node = m_stateMessage.add_node_info();
                 node->set_name(remote.Name(index));
@@ -687,7 +691,10 @@ namespace SP
             }
 
             lllog(8) << "SP: A new SystemState has been produced" << std::endl;
-            lllog(9) << "SP: New state:\n" << m_stateMessage << std::endl;
+            if (logState)
+            {
+                std::wcout << "SP: New state:\n" << m_stateMessage << std::endl;
+            }
 
             if (m_stateChangedCallback != nullptr)
             {

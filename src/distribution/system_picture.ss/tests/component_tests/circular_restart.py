@@ -208,7 +208,8 @@ try:
 
         for i in dead:
             if args.revolutions == 0 or revolution < args.revolutions:
-                log ("Restarting node", i)
+                log ("Restarting node",i, "in 9 seconds")
+                time.sleep(9)
                 nodes.append(launch_node(i,args))
             else:
                 log("We've done our revolutions, not restarting node", i)
