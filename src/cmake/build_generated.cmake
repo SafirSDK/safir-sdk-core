@@ -38,6 +38,7 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
   if (SAFIR_EXTERNAL_BUILD)
     #load compiler settings, csharp and java!
     include(${SAFIR_SDK_CORE_CMAKE_DIR}/SafirCompilerSettings.cmake)
+    INCLUDE(${SAFIR_SDK_CORE_CMAKE_DIR}/PrecompiledHeader.cmake)
     include(${SAFIR_SDK_CORE_DOTNET_SETTINGS})
     include(${SAFIR_SDK_CORE_JAVA_SETTINGS})
 
@@ -56,6 +57,8 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
     if (MSVC)
       SET(CMAKE_DEBUG_POSTFIX "d")
     endif()
+  else()
+    INCLUDE(PrecompiledHeader)
   endif()
 
   #
@@ -227,17 +230,47 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
   #
   # Build CPP
   #
+
+  #start by setting up some precompiled header stuff
+  if (SAFIR_EXTERNAL_BUILD)
+    set(precompiled_header_path ${SAFIR_SDK_CORE_GENERATION_DIR}/cpp/)
+  else()
+    set(precompiled_header_path ${safir-sdk-core_SOURCE_DIR}/src/dots/dots_v.ss/data/)
+  endif()
+
+  if (MSVC)
+    #Visual C++ needs a "special" cpp file in its source list for precompiled headers to work,
+    #and also wants an absolute path to the header
+    list(APPEND cpp_files ${precompiled_header_path}precompiled_header_for_cpp.cpp)
+
+    set(precompiled_header ${precompiled_header_path}/precompiled_header_${prefix}.h)
+  else()
+    #gcc wants a relative path to the header-
+    file(RELATIVE_PATH precompiled_header ${CMAKE_CURRENT_SOURCE_DIR}
+      ${precompiled_header_path}/precompiled_header_for_cpp.h)
+  endif()
+
   ADD_LIBRARY(safir_generated-${GEN_NAME}-cpp SHARED ${cpp_files})
 
   target_include_directories(safir_generated-${GEN_NAME}-cpp
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated_code/cpp/include>)
 
+  #add safir include dirs.
+  if (SAFIR_EXTERNAL_BUILD)
+    target_include_directories(safir_generated-${GEN_NAME}-cpp
+      PRIVATE
+      ${SAFIR_SDK_CORE_INCLUDE_DIRS})
+  endif()
+
+  ADD_PRECOMPILED_HEADER(safir_generated-${GEN_NAME}-cpp
+    ${precompiled_header}
+    FORCEINCLUDE)
+
   #include path for precompiled_header_for_cpp.h
   if (SAFIR_EXTERNAL_BUILD)
     target_include_directories(safir_generated-${GEN_NAME}-cpp
       PRIVATE
-      ${SAFIR_SDK_CORE_GENERATION_DIR}/cpp
-      ${SAFIR_SDK_CORE_INCLUDE_DIRS})
+      ${SAFIR_SDK_CORE_GENERATION_DIR}/cpp)
   else()
     target_include_directories(safir_generated-${GEN_NAME}-cpp
       PRIVATE ${safir-sdk-core_SOURCE_DIR}/src/dots/dots_v.ss/data)

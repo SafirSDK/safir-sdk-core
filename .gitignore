@@ -8,6 +8,7 @@
 *.dll.config
 *.mdb
 *.pdb
+*.gch
 
 #CMake stuff
 cmake_install.cmake
