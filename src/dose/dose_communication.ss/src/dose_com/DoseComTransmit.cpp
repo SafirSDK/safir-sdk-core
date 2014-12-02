@@ -1227,7 +1227,7 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
                 // Check if this node considers the nacked fragment to have been
                 // sent but not acked
 
-                bool expectedFragmentNbrIsWithinWindow = false;
+                bool expectedSeqNbrIsWithinWindow = false;
                 dcom_ushort16 ixToAck = TxQ[qIx].GetIxToAck;
                 for(;;)
                 {
@@ -1238,15 +1238,7 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
                     {
                         if (TxQ[qIx].TxMsgArr[ixToAck].SequenceNumber == g_Ack_Queue[g_Ack_Get_ix].SequenceNumber)
                         {
-                            // The sequence number is within the sliding window. Now check if the expected fragment is
-                            // within the sliding window at fragment level.
-                            dcom_ushort16 expectedFragment = g_Ack_Queue[g_Ack_Get_ix].Info;
-
-                            if (expectedFragment >= TxQ[qIx].TxMsgArr[ixToAck].NotAckedFragment &&
-                                expectedFragment <= TxQ[qIx].TxMsgArr[ixToAck].SentFragment)
-                            {
-                                expectedFragmentNbrIsWithinWindow = true;
-                            }
+                            expectedSeqNbrIsWithinWindow = true;
                             break;
                         }
                     }
@@ -1267,7 +1259,7 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
                     }
                 }
 
-                if (expectedFragmentNbrIsWithinWindow)
+                if (expectedSeqNbrIsWithinWindow)
                 {
                     if(!TxQ[qIx].TxMsgArr[TxMsgArr_Ix].IsRetransmitting)
                     {
@@ -1278,12 +1270,11 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
                 }
                 else
                 {
-                    // We got a NACK for a fragment but the fragment that are expected by the receiver is not within our
-                    // fragment sliding window.
+                    // We got a NACK for a fragmented message but the sequence number is not within our sliding window.
                     // This is an "impossible" case probably caused by a bug. The solution for now is to simulate that this
                     // node loses contact with all other nodes, in order to force a resynchronization.
 
-                    PrintErr(0, "TxThread[%d] Got a NACK with an expected fragment that is already acked! Simulating a node disconnect in order to force resynchronization\n", qIx);
+                    PrintErr(0, "TxThread[%d] Got a NACK for a fragmented message that is already acked! Simulating a node disconnect in order to force resynchronization\n", qIx);
 
                     g_pShm->InhibitOutgoingTraffic = true;
                     DoseOs::Sleep(6000);
