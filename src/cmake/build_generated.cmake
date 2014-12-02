@@ -253,7 +253,7 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
     ${Boost_THREAD_LIBRARY}
     ${Boost_SYSTEM_LIBRARY})
 
-  FOREACH (DEP ${GEN_DEPENDENCIES})
+  FOREACH (DEP ${ALL_DEPENDENCIES})
     TARGET_LINK_LIBRARIES(safir_generated-${GEN_NAME}-cpp safir_generated-${DEP}-cpp)
   ENDFOREACH()
 
@@ -280,7 +280,7 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
       set (include_jars dots_java)
     endif()
 
-    FOREACH (DEP ${GEN_DEPENDENCIES})
+    FOREACH (DEP ${ALL_DEPENDENCIES})
       if (SAFIR_EXTERNAL_BUILD)
         FOREACH(inc ${CMAKE_JAVA_INCLUDE_PATH})
           GET_FILENAME_COMPONENT(inc_name ${inc} NAME)
@@ -328,7 +328,7 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
   if (CSHARP_FOUND AND NOT ADD_SAFIR_GENERATED_LIBRARY_NO_DOTNET)
 
     set (assembly_refs Safir.Dob.Typesystem)
-    foreach (DEP ${GEN_DEPENDENCIES})
+    foreach (DEP ${ALL_DEPENDENCIES})
       list(APPEND assembly_refs safir_generated-${DEP}-dotnet)
     endforeach()
 

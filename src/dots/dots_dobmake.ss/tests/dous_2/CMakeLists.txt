@@ -8,7 +8,7 @@ LIST(APPEND CSHARP_LIBRARY_PATHS /home/lars/tmp/bar/dotnet)
 LIST(APPEND CMAKE_JAVA_INCLUDE_PATH /home/lars/tmp/bar/java/safir_generated-Test1-java.jar)
 #LIST(APPEND CMAKE_JAVA_INCLUDE_PATH /home/lars/safir-logan/share/java/safir-sdk-core/safir_generated-Core-java.jar)
 SET(ADD_SAFIR_GENERATED_LIBRARY_NO_JAVA True)
-SET(ADD_SAFIR_GENERATED_LIBRARY_NO_DOTNET True)
+#SET(ADD_SAFIR_GENERATED_LIBRARY_NO_DOTNET True)
 
 ADD_SAFIR_GENERATED_LIBRARY(
   NAME Test2
