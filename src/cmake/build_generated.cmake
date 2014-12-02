@@ -83,8 +83,6 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
             GET_DEPS(DEPENDENCIES ${deps})
           endif()
         else()
-          MESSAGE(STATUS "ADD_SAFIR_GENERATED_LIBRARY could not resolve "
-            "dependency '${DEP}' in build tree, will look at typesystem.ini.")
           if (NOT SAFIR_EXTERNAL_BUILD)
             message(FATAL_ERROR "External dependencies in Core build tree is not allowed!")
           endif()
@@ -273,8 +271,6 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
   #
   if (Java_FOUND AND NOT ADD_SAFIR_GENERATED_LIBRARY_NO_JAVA)
 
-    #TODO: most of this will not work when building a second external jar (e.g. something
-    #that depends on Example. Probably true for other langs as well?
     if (SAFIR_EXTERNAL_BUILD)
       set (include_jars ${SAFIR_SDK_CORE_JAVA_DIR}/dots_java.jar)
     else()
