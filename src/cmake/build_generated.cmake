@@ -85,6 +85,21 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
         else()
           MESSAGE(STATUS "ADD_SAFIR_GENERATED_LIBRARY could not resolve "
             "dependency '${DEP}' in build tree, will look at typesystem.ini.")
+          if (NOT SAFIR_EXTERNAL_BUILD)
+            message(FATAL_ERROR "External dependencies in Core build tree is not allowed!")
+          endif()
+          execute_process(
+            COMMAND safir_show_config --module-dependencies ${DEP}
+            RESULT_VARIABLE ext_dep_res
+            OUTPUT_VARIABLE ext_dep
+            ERROR_VARIABLE ext_dep)
+          if (ext_dep_res EQUAL 0)
+            string(STRIP ${ext_dep} ext_dep)
+            GET_DEPS(DEPENDENCIES ${ext_dep})
+          else()
+            message(FATAL_ERROR "Failed to resolve external dependency ${DEP} in typesystem.ini. "
+              "Error(${ext_dep_res}):\n${ext_dep}")
+          endif()
         endif()
         list (APPEND GET_DEPS_RESULT ${DEP})
       endif()
