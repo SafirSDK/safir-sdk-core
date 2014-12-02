@@ -429,11 +429,11 @@ namespace SP
             }
 
             lllog(7) << "SP: Updating my state." << std::endl;
-            const bool logState = Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().LogLevel() >= 9;
+            /*            const bool logState = Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().LogLevel() >= 9;
             if (logState)
             {
                 std::wcout << "SP: Last state:\n" << m_stateMessage << std::endl;
-            }
+                }*/
 
             //Note: This code will ignore the case where we for some reason have a RAW from another node
             //that says that we are dead. If that is the case it will stop sending data to us and
@@ -691,10 +691,10 @@ namespace SP
             }
 
             lllog(8) << "SP: A new SystemState has been produced" << std::endl;
-            if (logState)
+            /*            if (logState)
             {
                 std::wcout << "SP: New state:\n" << m_stateMessage << std::endl;
-            }
+                }*/
 
             if (m_stateChangedCallback != nullptr)
             {

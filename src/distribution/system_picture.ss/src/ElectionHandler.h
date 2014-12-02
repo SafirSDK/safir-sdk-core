@@ -156,10 +156,10 @@ namespace SP
             m_strand.dispatch([this, statistics, completionSignaller]
                               {
                                   lllog(5) << "SP: ElectionHandler got new RawStatistics" << std::endl;
-                                  if (Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().LogLevel() >= 9)
+                                  /*                                  if (Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().LogLevel() >= 9)
                                   {
                                       std::wcout << statistics << std::endl;
-                                  }
+                                      }*/
                                   m_lastStatistics = std::move(statistics);
                                   StartElection();
                               });
