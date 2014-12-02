@@ -95,6 +95,7 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
             ERROR_VARIABLE ext_dep)
           if (ext_dep_res EQUAL 0)
             string(STRIP ${ext_dep} ext_dep)
+            string(REPLACE " " ";" ext_dep "${ext_dep}")
             GET_DEPS(DEPENDENCIES ${ext_dep})
           else()
             message(FATAL_ERROR "Failed to resolve external dependency ${DEP} in typesystem.ini. "
