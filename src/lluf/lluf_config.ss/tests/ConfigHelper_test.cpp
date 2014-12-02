@@ -75,13 +75,13 @@ BOOST_AUTO_TEST_CASE(GetDouDependencies)
     using namespace Safir::Utilities::Internal;
     ConfigReader reader;
 
-    BOOST_CHECK(ConfigHelper::GetDouDependencies(reader, "AnotherOverride").empty());
+    BOOST_CHECK(ConfigHelper::GetDouDependencies(reader, "Default").empty());
     std::set<std::string> deps = ConfigHelper::GetDouDependencies(reader, "Override");
     BOOST_CHECK_EQUAL(deps.size(), 1U);
-    BOOST_CHECK_EQUAL(*deps.begin(),"AnotherOverride");
-    deps = ConfigHelper::GetDouDependencies(reader, "Default");
+    BOOST_CHECK_EQUAL(*deps.begin(),"Default");
+    deps = ConfigHelper::GetDouDependencies(reader, "AnotherOverride");
     BOOST_CHECK_EQUAL(deps.size(), 2U);
-    BOOST_CHECK(deps.find("AnotherOverride") != deps.end());
     BOOST_CHECK(deps.find("Override") != deps.end());
+    BOOST_CHECK(deps.find("Default") != deps.end());
     BOOST_CHECK_THROW(ConfigHelper::GetDouDependencies(reader, "Klopp"), std::logic_error);
 }
