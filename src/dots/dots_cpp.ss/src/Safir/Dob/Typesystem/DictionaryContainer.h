@@ -175,7 +175,7 @@ namespace Typesystem
                 for (DictionaryContainer<KeyType, ValueContainerType>::const_iterator it=other.begin(); it!=other.end(); ++it)
                 {
                     ValueContainerType val;
-                    it->second.Copy(val);
+                    val.Copy(it->second);
                     boost::unordered_map<KeyT, ValT>::insert(std::make_pair(it->first, val));
                 }
             }
