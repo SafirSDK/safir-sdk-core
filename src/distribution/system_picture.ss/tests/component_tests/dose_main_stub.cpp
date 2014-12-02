@@ -479,10 +479,15 @@ int main(int argc, char * argv[])
 
     const auto stopFcn = [&sp, &communication, &sendTimer, &work, &signalSet]
     {
+        lllog(0) << "DM: Stopping SystemPicture" << std::endl;
         sp.Stop();
+        lllog(0) << "DM: Stopping Communication" << std::endl;
         communication.Stop();
+        lllog(0) << "DM: Stopping sendTimer" << std::endl;
         sendTimer.cancel();
+        lllog(0) << "DM: resetting work" << std::endl;
         work.reset();
+        lllog(0) << "DM: Cancelling signalSet" << std::endl;
         signalSet.cancel();
     };
 
@@ -510,6 +515,7 @@ int main(int argc, char * argv[])
 
     ioService.run();
 
+    lllog(0) << "DM: Joining threads" << std::endl;
     threads.join_all();
 
     lllog(0) << "DM: Exiting..." << std::endl;

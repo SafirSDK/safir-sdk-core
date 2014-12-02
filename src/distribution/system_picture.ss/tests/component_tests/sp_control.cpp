@@ -221,17 +221,20 @@ int main(int argc, char * argv[])
     signalSet.add(SIGTERM);
 #endif
 
-    signalSet.async_wait([&sp,&work,&communication,&signalSet](const boost::system::error_code& error,
-                                                           const int signal_number)
-                       {
-                           lllog(3) << "CTRL: Got signal " << signal_number << std::endl;
+    signalSet.async_wait([&sp,&work,&communication](const boost::system::error_code& error,
+                                                    const int signal_number)
+                         {
+                           lllog(0) << "CTRL: Got signal " << signal_number << std::endl;
                            if (error)
                            {
                                SEND_SYSTEM_LOG(Error,
                                                << "Got a signals error: " << error);
                            }
+                           lllog(0) << "CTRL: Stopping SystemPicture" << std::endl;
                            sp.Stop();
+                           lllog(0) << "CTRL: Stopping Communication" << std::endl;
                            communication.Stop();
+                           lllog(0) << "CTRL: Resetting work" << std::endl;
                            work.reset();
                        }
                        );
@@ -246,8 +249,9 @@ int main(int argc, char * argv[])
 
     ioService.run();
 
+    lllog(0) << "CTRL: Joining threads" << std::endl;
     threads.join_all();
 
-    lllog(3) << "CTRL: Exiting..." << std::endl;
+    lllog(0) << "CTRL: Exiting..." << std::endl;
     return 0;
 }

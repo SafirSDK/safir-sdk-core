@@ -107,6 +107,7 @@ def stop(proc):
         if proc.poll() is not None:
             return
         proc.terminate()
+        proc.wait() #comment this line to get procs killed after 30s
         for i in range(300): #30 seconds
             if proc.poll() is not None:
                 return
