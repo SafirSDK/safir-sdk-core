@@ -1312,13 +1312,20 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
 
                 bool expectedSeqNbrIsWithinWindow = false;
                 dcom_ushort16 ixToAck = TxQ[qIx].GetIxToAck;
-                while (ixToAck != TxQ[qIx].GetIxToSendHighWatermark)
+                for(;;)
                 {
                     if (TxQ[qIx].TxMsgArr[ixToAck].SequenceNumber == g_Ack_Queue[g_Ack_Get_ix].Info)
                     {
                         expectedSeqNbrIsWithinWindow = true;
                         break;
                     }
+
+                    // Don't step beyond what we have actually sent
+                    if (ixToAck == TxQ[qIx].GetIxToSendHighWatermark)
+                    {
+                        break;
+                    }
+
                     if((ixToAck + 1) >= MAX_XMIT_QUEUE)
                     {
                         ixToAck = 0;
