@@ -455,19 +455,46 @@ namespace SP
                 {
                     lllog(8) << "SP:   Dead node " << m_stateMessage.node_info(i).name().c_str()
                              << " (" << m_stateMessage.node_info(i).id() << ")\n";
-                    lastDeadNodes.insert(m_stateMessage.node_info(i).id());
+                    const bool res = lastDeadNodes.insert(m_stateMessage.node_info(i).id()).second;
+                    if (!res)
+                    {
+                        lllog(8) << std::flush;
+                        throw std::logic_error("Duplicate dead node in last state! Not good at all!");
+                    }
+//TODO #ifndef NDEBUG
+                    //check that it's not in live nodes!
+                    if (lastLiveNodes.find(m_stateMessage.node_info(i).id()) != lastLiveNodes.end())
+                    {
+                        lllog(8) << std::flush;
+                        throw std::logic_error("Dead node was already defined as alive in last state!");
+                    }
+//#else
                 }
                 else
                 {
                     lllog(8) << "SP:   Live node " << m_stateMessage.node_info(i).name().c_str()
                              << " (" << m_stateMessage.node_info(i).id() << ")\n";
-                    lastLiveNodes.insert(std::make_pair(m_stateMessage.node_info(i).id(),
-                                                        m_stateMessage.mutable_node_info(i)));
+                    const bool res = lastLiveNodes.insert(std::make_pair(m_stateMessage.node_info(i).id(),
+                                                                         m_stateMessage.mutable_node_info(i))).second;
+                    if (!res)
+                    {
+                        lllog(8) << std::flush;
+                        throw std::logic_error("Duplicate live node in last state! Not good at all!");
+                    }
+//TODO #ifndef NDEBUG
+                    //check that it's not in dead nodes!
+                    if (lastDeadNodes.find(m_stateMessage.node_info(i).id()) != lastDeadNodes.end())
+                    {
+                        lllog(8) << std::flush;
+                        throw std::logic_error("Live node was already defined as dead in last state!");
+                    }
+//#else
                 }
             }
 
             if (lastDeadNodes.find(m_id) != lastDeadNodes.end())
             {
+                lllog(8) << std::flush;
                 throw std::logic_error("We're dead in the last state! Not good at all!");
             }
 
