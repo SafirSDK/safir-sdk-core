@@ -14,4 +14,4 @@ java_search_path=@DEFAULT_JAVA_SEARCH_PATH@
 ;This section contains the information needed to load the safir_generated-Core-xxx libraries and its dou files.
 ;This section just uses the defaults.
 kind=library
-
+dependencies=
