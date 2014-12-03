@@ -713,7 +713,7 @@ namespace SP
 
             //this will create an object that will cause one and only one call to the completion handler
             //when the last callback is complete.
-            boost::shared_ptr<void> completionCaller(static_cast<void*>(0),
+            boost::shared_ptr<void> completionCaller(static_cast<void*>(nullptr),
                                                      [completionHandler](void*)
                                                      {
                                                          if (completionHandler != nullptr)
