@@ -240,14 +240,7 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
 
   if (MSVC)
     #Visual C++ needs a "special" cpp file in its source list for precompiled headers to work,
-    #and also wants an absolute path to the header
     list(APPEND cpp_files ${precompiled_header_path}precompiled_header_for_cpp.cpp)
-
-    set(precompiled_header ${precompiled_header_path}/precompiled_header_${prefix}.h)
-  else()
-    #gcc wants a relative path to the header-
-    file(RELATIVE_PATH precompiled_header ${CMAKE_CURRENT_SOURCE_DIR}
-      ${precompiled_header_path}/precompiled_header_for_cpp.h)
   endif()
 
   ADD_LIBRARY(safir_generated-${GEN_NAME}-cpp SHARED ${cpp_files})
@@ -263,7 +256,7 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
   endif()
 
   ADD_PRECOMPILED_HEADER(safir_generated-${GEN_NAME}-cpp
-    ${precompiled_header}
+    ${precompiled_header_path}/precompiled_header_for_cpp.h
     FORCEINCLUDE)
 
   #include path for precompiled_header_for_cpp.h

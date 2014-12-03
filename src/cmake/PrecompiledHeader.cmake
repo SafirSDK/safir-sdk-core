@@ -73,10 +73,9 @@ MACRO(ADD_PRECOMPILED_HEADER _targetName _input)
 
   IF(CMAKE_COMPILER_IS_GNUCXX)
     GET_FILENAME_COMPONENT(_name ${_input} NAME)
-    SET(_source "${CMAKE_CURRENT_SOURCE_DIR}/${_input}")
+    GET_FILENAME_COMPONENT(_source "${_input}" REALPATH)
     SET(_outdir "${CMAKE_CURRENT_BINARY_DIR}/${_name}.gch")
-    MAKE_DIRECTORY(${_outdir})
-    SET(_output "${_outdir}/.c++")
+    SET(_output "${_outdir}")
 
     STRING(TOUPPER "CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE}" _flags_var_name)
     SET(_compiler_FLAGS ${${_flags_var_name}} -fPIC -pthread)
@@ -90,10 +89,10 @@ MACRO(ADD_PRECOMPILED_HEADER _targetName _input)
     LIST(APPEND _compiler_FLAGS ${_directory_flags})
 
     SEPARATE_ARGUMENTS(_compiler_FLAGS)
-    #MESSAGE(STATUS "PCH command line: ${CMAKE_CXX_COMPILER} ${_compiler_FLAGS} -x c++-header -o {_output} ${_source}")
+    #MESSAGE(STATUS "PCH command line: ${CMAKE_CXX_COMPILER} ${_compiler_FLAGS} -x c++-header ${_source} -o ${_output}")
     ADD_CUSTOM_COMMAND(
       OUTPUT ${_output}
-      COMMAND ${CMAKE_CXX_COMPILER} ${_compiler_FLAGS} -x c++-header -o ${_output} ${_source}
+      COMMAND ${CMAKE_CXX_COMPILER} ${_compiler_FLAGS} -x c++-header  ${_source} -o ${_output}
       DEPENDS ${_source} )
     ADD_CUSTOM_TARGET(${_targetName}_gch DEPENDS ${_output})
     ADD_DEPENDENCIES(${_targetName} ${_targetName}_gch)
