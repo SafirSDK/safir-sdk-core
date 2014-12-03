@@ -225,9 +225,9 @@ namespace SP
 
         void NewRemoteStatistics(const int64_t from, const boost::shared_ptr<char[]>& data, const size_t size)
         {
-            lllog(9) << "SP: NewRemoteStatistics for node " << from << std::endl;
             m_strand.dispatch([this,from,data,size]
             {
+                lllog(9) << "SP: NewRemoteStatistics for node " << from << std::endl;
                 auto findIt = m_nodeTable.find(from);
 
                 if (findIt == m_nodeTable.end())
@@ -292,9 +292,10 @@ namespace SP
                 throw std::logic_error("Only Master should be able to receive DataChannelStatistics");
             }
 
-            lllog(9) << "SP: NewDataChannelStatistics" << std::endl;
             m_strand.dispatch([this,data]
             {
+                lllog(9) << "SP: NewDataChannelStatistics" << std::endl;
+
                 int changes = 0;
                 for (int i = 0; i < data.Size(); ++i)
                 {
