@@ -17,7 +17,7 @@ ADD_SAFIR_GENERATED_LIBRARY(
 
 #Can be absolute paths or relative paths. If relative, they will be prefixed with CMAKE_INSTALL_PREFIX
 INSTALL_SAFIR_GENERATED_LIBRARY(
-  TARGETS Test2 #TODO: check that target exists in build_generated
+  TARGETS Test2
   CXX_BIN bin
   CXX_LIB lib
   CXX_INCLUDE include
@@ -27,6 +27,3 @@ INSTALL_SAFIR_GENERATED_LIBRARY(
   )
 
 #GAC is up to user, nothing we do for them...
-
-
-#TODO: should not need namespace file here

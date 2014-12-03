@@ -18,10 +18,4 @@ INSTALL_SAFIR_GENERATED_LIBRARY(
   DOU_BASE dou   #files will be installed to dou/Test1
   )
 
-
-#TODO: multiple paths for dou files in typesystem.ini?
-
-#GAC is up to user, nothing we do for them...
-
-
-#TODO: should not need namespace file here
+#Note: installation into GAC is up to user.
