@@ -261,6 +261,9 @@ namespace SP
                     {
                         if (AddToMoreDeadNodes(n.id()))
                         {
+                            lllog(8) << "SP: Added " << n.id() << " to more_dead_nodes since "
+                                     << from  << " thinks that it is dead" << std::endl;
+
                             nodesChanged = true;
                         }
                     }
@@ -270,6 +273,9 @@ namespace SP
                 {
                     if (AddToMoreDeadNodes(id))
                     {
+                        lllog(8) << "SP: Added " << id << " to more_dead_nodes since "
+                                 << from  << " has it in more_dead_nodes" << std::endl;
+
                         nodesChanged = true;
                     }
                 }
@@ -440,6 +446,12 @@ namespace SP
             {
                 throw std::logic_error("Unexpected id in AddToMoreDeadNodes");
             }
+
+            if (id == m_id)
+            {
+                throw std::logic_error("Can't add myself to more_dead_nodes!");
+            }
+
             //if the node is one of our top-level nodes we don't want it in more_dead_nodes
             if (m_nodeTable.find(id) != m_nodeTable.end())
             {
@@ -657,12 +669,16 @@ namespace SP
                     const auto id = pair.first;
 
                     //remove node from table
-                    m_nodeTable.erase(pair.first);
+                    m_nodeTable.erase(id);
 
                     //now we can remove the last element
                     m_allStatisticsMessage.mutable_node_info()->RemoveLast();
 
-                    AddToMoreDeadNodes(id);
+                    if (AddToMoreDeadNodes(id))
+                    {
+                        lllog(8) << "SP: Added " << id << " to more_dead_nodes since "
+                                  "it has been dead for a long time." << std::endl;
+                    }
                     //node was already dead, so no need to set somethingChanged
 
                     //we've just modified the table that we're looping through, so

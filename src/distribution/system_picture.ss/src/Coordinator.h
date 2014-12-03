@@ -707,6 +707,8 @@ namespace SP
             {
                 if (addedDeadNodes.find(m_lastStatistics.MoreDeadNodes(i)) == addedDeadNodes.end())
                 {
+                    lllog(8) << "SP: Adding dead node " << m_lastStatistics.MoreDeadNodes(i)
+                             << " from more_dead_nodes\n";
                     auto node = m_stateMessage.add_node_info();
                     node->set_name("<unknown>");
                     node->set_id(m_lastStatistics.MoreDeadNodes(i));
