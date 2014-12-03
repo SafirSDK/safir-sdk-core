@@ -65,7 +65,8 @@ DbOlibTest::DbOlibTest():
     m_bWriteBlobIsPrepared(false),
     m_bReadBlobIsPrepared(false),
     m_bLongTimeQueryIsPrepared(false),
-    m_bInsertInto42IsPrepared( false )
+    m_bInsertInto42IsPrepared( false ),
+    m_bRowCountIsPrepared(false)
 {   
     m_Object=OlibTest::TestObject::Create();
     m_Object->StringName().SetVal(L"Name");
