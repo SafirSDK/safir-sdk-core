@@ -40,8 +40,8 @@ protected:
 
 
 private:
-    bool m_create;
+    //bool m_create;
     Safir::Dob::Typesystem::EntityId m_Id;
     Safir::Dob::SecondaryConnection m_Connection;
-   
+
 };

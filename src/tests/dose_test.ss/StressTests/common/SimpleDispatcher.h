@@ -30,7 +30,7 @@
 #include <stdlib.h>
 
 
-//we include a bunch of extra stuff in here that most of the stress tests use anyway, to reduce 
+//we include a bunch of extra stuff in here that most of the stress tests use anyway, to reduce
 //the number of places for the warning stuff.
 #ifdef _MSC_VER
   #pragma warning(push)
@@ -60,14 +60,13 @@ class SimpleDispatcher:
 {
 public:
     explicit SimpleDispatcher(Safir::Dob::Connection & connection)
-        : m_connection(connection)
-        , m_dispatch(false)
+        : m_dispatch(false)
     {
-    
+
     }
 
     virtual void OnStopOrder() {exit(0);}
-    virtual void OnDoDispatch() 
+    virtual void OnDoDispatch()
     {
         {
             boost::lock_guard<boost::mutex> lock(m_mutex);
@@ -75,8 +74,8 @@ public:
         }
         m_condition.notify_one();
     }
-    
-    
+
+
     //return true if dispatch is due
     bool Wait(const long milliseconds)
     {
@@ -96,11 +95,9 @@ public:
 private:
     bool DispatchPending() const {return m_dispatch;}
 
-    Safir::Dob::Connection & m_connection;
     bool m_dispatch;
     boost::mutex m_mutex;
     boost::condition m_condition;
 };
 
 #endif
-

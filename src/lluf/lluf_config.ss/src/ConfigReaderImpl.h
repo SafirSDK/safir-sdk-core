@@ -56,23 +56,23 @@ namespace Internal
             {
                 return;
             }
-            
+
             const Path dir2 = PathFinder::SystemConfigDirectory();
             if (TryLoad(dir2))
             {
                 return;
             }
-            
+
             const Path dir3 = PathFinder::UserConfigDirectory();
             if (TryLoad(dir3))
             {
                 return;
             }
-            
+
             throw std::logic_error("Failed to load configuration.\n"
-                                   "Looked in '" 
-                                   + dir1.empty() ? "" : (dir1.str() + "', '")
-                                   + dir2.str() + "', '" 
+                                   "Looked in '"
+                                   + (dir1.empty() ? "" : (dir1.str() + "', '"))
+                                   + dir2.str() + "', '"
                                    + dir3.str() + "'");
         }
 
@@ -130,7 +130,7 @@ namespace Internal
                     value = ExpandSpecial(value);
                     it->second.put_value(ExpandEnvironment(value));
                 }
-                
+
 
             }
         }

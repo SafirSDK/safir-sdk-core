@@ -28,7 +28,7 @@
 #include <Safir/Dob/EntityIdResponse.h>
 #include <iostream>
 
-Requestor::Requestor(): m_create(true)
+Requestor::Requestor()//: m_create(true)
 {
 
 }

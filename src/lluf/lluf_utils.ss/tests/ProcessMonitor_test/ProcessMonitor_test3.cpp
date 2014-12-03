@@ -104,7 +104,7 @@ struct Fixture
     {
         work.reset();
         monitor.Stop();
-        if (thread != boost::thread())
+        if (thread.get_id() != boost::thread::id())
         {
             thread.join();
             thread = boost::thread();

@@ -83,7 +83,7 @@ namespace Internal
         for (;;)
         {
             // Generate a unique id for the controller
-            ctrl = abs(static_cast<long>(Safir::Dob::Typesystem::Internal::GenerateRandom64Bit()));
+            ctrl = std::abs(static_cast<long>(Safir::Dob::Typesystem::Internal::GenerateRandom64Bit()));
 
             if (m_controllers.insert(std::make_pair(ctrl, controller)).second)
             {
