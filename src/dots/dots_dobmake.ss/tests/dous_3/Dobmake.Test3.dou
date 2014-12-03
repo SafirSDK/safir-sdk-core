@@ -4,7 +4,7 @@
     <baseClass>Dobmake.Test2</baseClass>
     <members>
         <member>
-            <name>Mem</name>
+            <name>Mem2</name>
             <type>Dobmake.Test1</type>
         </member>
     </members>

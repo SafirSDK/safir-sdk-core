@@ -14,7 +14,7 @@ LIST(APPEND CMAKE_JAVA_INCLUDE_PATH
 
 ADD_SAFIR_GENERATED_LIBRARY(
   NAME Test3
-  DEPENDENCIES Test2)
+  DEPENDENCIES Test1 Test2)
 
 
 #Can be absolute paths or relative paths. If relative, they will be prefixed with CMAKE_INSTALL_PREFIX
