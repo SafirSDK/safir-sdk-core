@@ -12,7 +12,7 @@
 # every header file.
 #
 # Copyright (C) 2009-2013 Lars Christensen <larsch@belunktum.dk>
-# Copyright (C) 2013 Lars Hagström <lars@foldspace.nu>
+# Copyright (C) 2013-2014 Lars Hagström <lars@foldspace.nu>
 #
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation files
@@ -77,12 +77,12 @@ MACRO(ADD_PRECOMPILED_HEADER _targetName _input)
     SET(_outdir "${CMAKE_CURRENT_BINARY_DIR}/${_name}.gch")
     MAKE_DIRECTORY(${_outdir})
     SET(_output "${_outdir}/.c++")
-    
+
     STRING(TOUPPER "CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE}" _flags_var_name)
     SET(_compiler_FLAGS ${${_flags_var_name}} -fPIC -pthread)
-    
-    GET_DIRECTORY_PROPERTY(_directory_flags INCLUDE_DIRECTORIES)
-    FOREACH(item ${_directory_flags})
+
+    GET_TARGET_PROPERTY(_include_dirs ${_targetName} INCLUDE_DIRECTORIES)
+    FOREACH(item ${_include_dirs})
       LIST(APPEND _compiler_FLAGS "-I\"${item}\"")
     ENDFOREACH(item)
 
@@ -90,7 +90,7 @@ MACRO(ADD_PRECOMPILED_HEADER _targetName _input)
     LIST(APPEND _compiler_FLAGS ${_directory_flags})
 
     SEPARATE_ARGUMENTS(_compiler_FLAGS)
-    #MESSAGE("${CMAKE_CXX_COMPILER} -DPCHCOMPILE ${_compiler_FLAGS} -x c++-header -o {_output} ${_source}")
+    #MESSAGE(STATUS "PCH command line: ${CMAKE_CXX_COMPILER} ${_compiler_FLAGS} -x c++-header -o {_output} ${_source}")
     ADD_CUSTOM_COMMAND(
       OUTPUT ${_output}
       COMMAND ${CMAKE_CXX_COMPILER} ${_compiler_FLAGS} -x c++-header -o ${_output} ${_source}

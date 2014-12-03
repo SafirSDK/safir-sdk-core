@@ -17,6 +17,10 @@ if (UNIX)
 
    #make sure we get the correct posix version
    ADD_DEFINITIONS(-D_POSIX_C_SOURCE=200809L)
+
+   #this is defined by -pthread (above) in most cases, but at least when creating precompiled headers
+   #it is not, so we define it here as well.
+   ADD_DEFINITIONS(-D_REENTRANT)
 endif ()
 
 if (MSVC)
