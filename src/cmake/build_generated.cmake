@@ -304,7 +304,7 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
     endif()
 
     FOREACH (DEP ${ALL_DEPENDENCIES})
-      if (SAFIR_EXTERNAL_BUILD)
+      if (SAFIR_EXTERNAL_BUILD AND NOT TARGET safir_generated-${DEP}-java)
         FOREACH(inc ${CMAKE_JAVA_INCLUDE_PATH})
           GET_FILENAME_COMPONENT(inc_name ${inc} NAME)
           if ("${inc_name}" STREQUAL "safir_generated-${DEP}-java.jar")
