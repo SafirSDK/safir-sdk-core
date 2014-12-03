@@ -64,6 +64,7 @@ DbOlibTest::DbOlibTest():
     m_bReadNClobIsPrepared(false),
     m_bWriteBlobIsPrepared(false),
     m_bReadBlobIsPrepared(false),
+    m_bReadUnitIsPrepared(false),
     m_bLongTimeQueryIsPrepared(false),
     m_bInsertInto42IsPrepared( false ),
     m_bRowCountIsPrepared(false)
@@ -244,6 +245,8 @@ void DbOlibTest::AllocStmt()
         m_RowCountStmt.Prepare(L"select count(*) from tblOlibTest;");
 
         m_RowCountStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);
+
+        m_bRowCountIsPrepared = true;
     }
 
     if (!m_bReadUnitIsPrepared && m_ReadUnitStmt.IsValid())
@@ -263,6 +266,8 @@ void DbOlibTest::AllocStmt()
         m_ReadUnitStmt.BindColumn(8, m_columnBool);
 
         m_ReadUnitStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);  // Query timeout is 5 secs
+
+        m_bReadUnitIsPrepared = true;
     }
 
     if (!m_bPerfTestIsPrepared && m_PerfTestStmt.IsValid())
