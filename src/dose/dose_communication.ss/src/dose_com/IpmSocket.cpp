@@ -273,7 +273,7 @@ long CIpmSocket::CreateIpMulticastSocket(int             bForReceive,
                                          unsigned long   Opt_So_Rcvbuf_Size,
                                          unsigned long   Opt_So_RcvTimeo_Timeout)
 {
-    struct sockaddr_in  sname;
+    struct sockaddr_in  sname = {0};
     SOCKET              Sock_id;
     int                 result;
     struct ip_mreq      mreq;
