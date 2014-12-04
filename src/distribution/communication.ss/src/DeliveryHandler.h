@@ -74,7 +74,6 @@ namespace Com
             ,m_receivers()
             ,m_gotRecvFrom()
         {
-            //TODO: use initialization instead. This is due to problems with VS2013
             m_numberOfUndeliveredMessages=0;
         }
 
@@ -118,10 +117,20 @@ namespace Com
                 return;
             }
 
-            lllog(8)<<L"COM: Received AppData from "<<header->commonHeader.senderId<<" "<<SendMethodToString(header->sendMethod).c_str()<<", seq: "<<header->sequenceNumber<<std::endl;
+            lllog(8)<<L"COM: Received AppData from "<<header->commonHeader.senderId<<" "<<
+                      SendMethodToString(header->sendMethod).c_str()<<", seq: "<<header->sequenceNumber<<std::endl;
             m_gotRecvFrom(header->commonHeader.senderId); //report that we are receivinga intact data from the node
 
-            bool ackNow=HandleMessage(header, payload, senderIt->second);
+            bool ackNow=false;
+            if (header->deliveryGuarantee==Acked)
+            {
+                ackNow=HandleAckedMessage(header, payload, senderIt->second);
+            }
+            else
+            {
+                HandleUnackedMessage(header, payload, senderIt->second);
+            }
+
             Deliver(senderIt->second, header); //if something is now fully received, deliver it to application
 
             if (ackNow)
@@ -212,11 +221,13 @@ namespace Com
 
         struct Channel
         {
+            uint64_t welcome; //first received message that we are supposed to handle
             uint64_t lastInSequence; //last sequence number that was moved out of the queue. seq(queue[0])-1
             uint64_t biggestSequence; //biggest sequence number recevived (within our window)
             CircularArray<RecvData> queue;
             Channel()
-                :lastInSequence(0)
+                :welcome(UINT64_MAX)
+                ,lastInSequence(0)
                 ,biggestSequence(0)
                 ,queue(Parameters::SlidingWindowSize)
             {
@@ -357,109 +368,185 @@ namespace Com
             Insert(header, payload, ni);
         }
 
-        //Return true if ack shall be sent immediately.
-        bool HandleMessage(const MessageHeader* header, const char* payload, NodeInfo& ni)
+        void HandleUnackedMessage(const MessageHeader* header, const char* payload, NodeInfo& ni)
         {
-            lllog(8)<<L"COM: recv from: "<<ni.node.nodeId<<L", sendMethod: "<<
-                      (header->sendMethod==SingleReceiverSendMethod ? L"Unicast" : L"Multicast")<<
+            lllog(8)<<L"COM: recvUnacked from: "<<ni.node.nodeId<<L", sendMethod: "<<
+                      SendMethodToString(header->sendMethod).c_str()<<
                       L", seq: "<<header->sequenceNumber<<std::endl;
 
             Channel& ch=ni.GetChannel(header);
 
-            if (header->deliveryGuarantee==Acked)
+            if (header->sequenceNumber==ch.lastInSequence+1)
             {
-                if (ch.lastInSequence==0)
-                {
-                    //first time we receive anything, we accept any seqNo and start counting from there
-                    //however we cannot start in the middle of a fragmented message.
-                    if (header->fragmentNumber==0) //we cannot start in the middle of a fragmented message
-                    {
-                        //this is the first fragment of the message, keep it and start sequnceNumber from here.
-                        ForceInsert(header, payload, ni);
-                        return header->ackNow==1;
-                    }
-                    else
-                    {
-                        //not the first fragment of the message, we have to wait for beginning of a new message before we start
-                        return false; //no ack to send
-                    }
-                }
-                else if (header->sequenceNumber<=ch.lastInSequence)
-                {
-                    //duplicated message, we must always ack this since it is possible that an ack is lost and the sender has started to resend.
-                    lllog(8)<<L"COM: Recv duplicated message in order. Seq: "<<header->sequenceNumber<<L" from node "<<ni.node.name.c_str()<<std::endl;
-                    return true;
-                }
-                else if (header->sequenceNumber==ch.lastInSequence+1)
-                {
-                    //The Normal case: Message in correct order. Ack only if sender has requested an ack.
-                    Insert(header, payload, ni);
-                    return header->ackNow==1;
-                }
-                else if (header->sequenceNumber<=ch.lastInSequence+Parameters::SlidingWindowSize)
-                {
-                    //This is something within our receive window but out of order, the gaps will eventually be filled in
-                    //when sender retransmits non-acked messages.
-                    Insert(header, payload, ni);
-                    return true; //we ack evertying we have so far so that the sender becomes aware of the gaps
-                }
-                else //lost messages, got something too far ahead
-                {                    
-                    //This is a logic error in the code. We received something too far ahead. Means that the sender thinks that we have acked a
-                    //message that we dont think we have got at all.
-                    std::ostringstream os;
-                    os<<"COM: Logic Error! Receive message too far ahead which means that we have lost a message. Sender: "<<header->commonHeader.senderId<<
-                        SendMethodToString(header->sendMethod)<<", seq: "<<header->sequenceNumber<<"\n     RecvQueue - lastInSeq: "<<ch.lastInSequence<<
-                        ", recvQueue: [";
-                    for (size_t i=0; i<ch.queue.Size(); ++i)
-                    {
-                        if (ch.queue[i].free)
-                            os<<"X  ";
-                        else
-                            os<<ch.queue[i].sequenceNumber<<"  ";
-                    }
-                    os<<"]";
-                    SEND_SYSTEM_LOG(Error, <<os.str().c_str());
-                    lllog(8)<<os.str().c_str()<<std::endl;
-                    std::wcout<<os.str().c_str()<<std::endl;
-
-                    return false; //we dont ack messages we are not supposed to get
-                }                                
+                Insert(header, payload, ni); //message received in correct order, just insert
             }
-            else //unacked
+            else if (header->sequenceNumber>ch.lastInSequence)
             {
-                if (header->sequenceNumber==ch.lastInSequence+1)
+                //this is a message with bigger seq but we have missed something inbetween
+                //reset receive queue, since theres nothing old we want to keep any longer
+                for (size_t i=0; i<ch.queue.Size(); ++i)
                 {
-                    Insert(header, payload, ni); //message received in correct order, just insert
+                    ch.queue[i].Clear();
                 }
-                else if (header->sequenceNumber>ch.lastInSequence)
+
+                if (header->fragmentNumber==0)
                 {
-                    //this is a message with bigger seq but we have missed something inbetween
-                    //reset receive queue, since theres nothing old we want to keep any longer
-                    for (size_t i=0; i<ch.queue.Size(); ++i)
-                    {
-                        ch.queue[i].Clear();
-                    }
-
-                    if (header->fragmentNumber==0)
-                    {
-                        //this is something that we want to keep
-                        ch.lastInSequence=header->sequenceNumber-1;
-                        Insert(header, payload, ni);
-                    }
-                    else
-                    {
-                        //in the middle of a fragmented message, nothing we want to keep. Set lastInSeq to match with the beginning of next new message
-                        ch.lastInSequence=header->sequenceNumber+header->numberOfFragments-header->fragmentNumber-1; //calculate nextStartOfNewMessage-1
-                    }
-
-                    lllog(8)<<L"COM: Recv unacked message with seqNo gap (i.e messages have been lost), received seqNo "<<header->sequenceNumber<<std::endl;
+                    //this is something that we want to keep
+                    ch.lastInSequence=header->sequenceNumber-1;
+                    Insert(header, payload, ni);
                 }
                 else
                 {
-                    lllog(8)<<L"COM: Recv unacked message too old seqNo, received seqNo "<<header->sequenceNumber<<L", expected "<<ch.lastInSequence+1<<std::endl;
+                    //in the middle of a fragmented message, nothing we want to keep. Set lastInSeq to match with the beginning of next new message
+                    ch.lastInSequence=header->sequenceNumber+header->numberOfFragments-header->fragmentNumber-1; //calculate nextStartOfNewMessage-1
                 }
-                return false;
+
+                lllog(8)<<L"COM: Recv unacked message with seqNo gap (i.e messages have been lost), received seqNo "<<header->sequenceNumber<<std::endl;
+            }
+            else
+            {
+                lllog(8)<<L"COM: Recv unacked message too old seqNo, received seqNo "<<header->sequenceNumber<<L", expected "<<ch.lastInSequence+1<<std::endl;
+            }
+        }
+
+        void HandleWelcome(const MessageHeader* header, const char* payload, NodeInfo& ni)
+        {
+            int64_t nodeThatIsWelcome=*reinterpret_cast<const int64_t*>(payload);
+
+            Channel& ch=ni.GetChannel(header);
+
+            if (nodeThatIsWelcome==m_myId) //another node says welcome to us
+            {
+                if (ch.welcome==UINT64_MAX)
+                {
+                    lllog(8)<<L"COM: Got welcome from node "<<header->commonHeader.senderId<<
+                              L", seq: "<<header->sequenceNumber<<", "<<SendMethodToString(header->sendMethod).c_str()<<std::endl;
+
+                    ch.welcome=header->sequenceNumber;
+                    ch.lastInSequence=ch.welcome-1; //will make this message to be exactly what was expected to come
+                    ch.biggestSequence=ch.welcome;
+                }
+                else if (header->sequenceNumber==ch.welcome)
+                {
+                    //duplicated welcome
+                    lllog(8)<<L"COM: Got duplicated welcome from node "<<header->commonHeader.senderId<<
+                              L", seq: "<<header->sequenceNumber<<", "<<SendMethodToString(header->sendMethod).c_str()<<std::endl;
+                }
+                else
+                {
+                    //should not happen, logical error. Got new welcome from same node.
+                    std::ostringstream os;
+                    os<<"COM ["<<m_myId<<"]: Logical error, got new welcome from node "<<header->commonHeader.senderId<<
+                        ", seq: "<<header->sequenceNumber<<", "<<SendMethodToString(header->sendMethod)<<
+                        ". Already receive welcome from that node, old value was: "<<ch.welcome;
+                    SEND_SYSTEM_LOG(Error, <<os.str().c_str());
+                    lllog(8)<<os.str().c_str()<<std::endl;
+                    throw std::logic_error(os.str());
+                }
+            }
+            else
+            {
+                //welcome message not for this node. we have to check if we
+                std::wostringstream os;
+                os<<L"COM ["<<m_myId<<L"]: Welcome not for us. From "<<header->commonHeader.senderId<<L" to "<<
+                    nodeThatIsWelcome<<L", seq: "<<header->sequenceNumber;
+
+                if (ch.welcome<=header->sequenceNumber)
+                {
+                    os<<L". I was welcome at seq "<<ch.welcome<<L" and will ack this message.";
+                }
+                else if (ch.welcome==UINT64_MAX)
+                {
+                    os<<L". I have still not got any welcome from that node and will NOT ack this message.";
+                }
+                else
+                {
+                    os<<L". I was welcome at "<<ch.welcome<<L" and will NOT ack this message.";
+                }
+
+                lllog(8)<<os.str()<<std::endl;
+            }
+        }
+
+        //Return true if ack shall be sent immediately.
+        bool HandleAckedMessage(const MessageHeader* header, const char* payload, NodeInfo& ni)
+        {
+            if (header->commonHeader.dataType==WelcomeDataType)
+            {
+                HandleWelcome(header, payload, ni);
+            }
+
+            lllog(8)<<L"COM: recvAcked from: "<<header->commonHeader.senderId<<L", sendMethod: "<<
+                      SendMethodToString(header->sendMethod).c_str()<<
+                      L", seq: "<<header->sequenceNumber<<std::endl;
+
+            Channel& ch=ni.GetChannel(header);
+
+            if (header->sequenceNumber<ch.welcome)
+            {
+                //this message was sent before we got a welcome message, i.e not for us
+                return false; //dont send ack
+            }
+            else if (header->sequenceNumber<=ch.lastInSequence)
+            {
+                //duplicated message, we must always ack this since it is possible that an ack is lost and the sender has started to resend.
+                lllog(8)<<L"COM: Recv duplicated message in order. Seq: "<<header->sequenceNumber<<L" from node "<<ni.node.name.c_str()<<std::endl;
+                return true;
+            }
+            else if (header->sequenceNumber==ch.lastInSequence+1)
+            {
+                //The Normal case: Message in correct order. Ack only if sender has requested an ack.
+                Insert(header, payload, ni);
+                return header->ackNow==1;
+            }
+            else if (header->sequenceNumber<=ch.lastInSequence+Parameters::SlidingWindowSize)
+            {
+                //This is something within our receive window but out of order, the gaps will eventually be filled in
+                //when sender retransmits non-acked messages.
+                Insert(header, payload, ni);
+                return true; //we ack everything we have so far so that the sender becomes aware of the gaps
+            }
+            else //lost messages, got something too far ahead
+            {
+                //This is a logic error in the code. We received something too far ahead. Means that the sender thinks that we have acked a
+                //message that we dont think we have got at all.
+                //All the code here just produce helpfull logs.
+                std::ostringstream os;
+                os<<"COM: Logic Error! Node "<<m_myId<<" received message from node "<<header->commonHeader.senderId<<
+                    L" that is too far ahead which means that we have lost a message. "<<
+                    SendMethodToString(header->sendMethod)<<", seq: "<<header->sequenceNumber<<"\n     RecvQueue - lastInSeq: "<<ch.lastInSequence<<
+                    ", biggestSeq: "<<ch.biggestSequence<<", welcome: "<<ch.welcome<<
+                    ", recvQueue: [";
+                size_t firstNonFree=ch.queue.Size()+1;
+                for (size_t i=0; i<ch.queue.Size(); ++i)
+                {
+                    if (ch.queue[i].free)
+                    {
+                        os<<"X  ";
+                    }
+                    else
+                    {
+                        os<<ch.queue[i].sequenceNumber<<"  ";
+                        if (i<firstNonFree)
+                        {
+                            firstNonFree=i;
+                        }
+                    }
+                }
+                os<<"]";
+                if (firstNonFree<ch.queue.Size() && ch.queue[firstNonFree].free==false)
+                {
+                    const auto& recvData=ch.queue[firstNonFree];
+                    os<<". More info about seq "<<recvData.sequenceNumber<<
+                        ", size: "<<recvData.dataSize<<
+                        ", numFrags: "<<recvData.numberOfFragments<<
+                        ", fragment: "<<recvData.fragmentNumber;
+
+                }
+                SEND_SYSTEM_LOG(Error, <<os.str().c_str());
+                lllog(8)<<os.str().c_str()<<std::endl;
+
+                throw std::logic_error(os.str());
             }
         }
 
@@ -493,25 +580,26 @@ namespace Com
                         auto dataType=rd.dataType;
                         //auto seqNo=rd.sequenceNumber;
 
-
-                        m_numberOfUndeliveredMessages++;
-
-                        m_deliverStrand.post([=]
+                        if (dataType!=WelcomeDataType) //welcome messages are not delivered
                         {
-                            auto recvIt=m_receivers.find(dataType); //m_receivers shall be safe to use inside m_deliverStrand since it is not supposed to be modified after start
-                            if (recvIt!=m_receivers.end())
+                            m_numberOfUndeliveredMessages++;
+                            m_deliverStrand.post([=]
                             {
-                                recvIt->second(fromId, fromNodeType, dataPtr, dataSize);
-                            }
-                            else
-                            {
-                                std::ostringstream os;
-                                os<<"COM: Received data from node "<<fromId<<" that has no registered receiver. DataTypeIdentifier: "<<dataType<<std::endl;
-                                SEND_SYSTEM_LOG(Error, <<os.str().c_str());
-                                throw std::logic_error(os.str());
-                            }
-                            m_numberOfUndeliveredMessages--;
-                        });
+                                auto recvIt=m_receivers.find(dataType); //m_receivers shall be safe to use inside m_deliverStrand since it is not supposed to be modified after start
+                                if (recvIt!=m_receivers.end())
+                                {
+                                    recvIt->second(fromId, fromNodeType, dataPtr, dataSize);
+                                }
+                                else
+                                {
+                                    std::ostringstream os;
+                                    os<<"COM: Received data from node "<<fromId<<" that has no registered receiver. DataTypeIdentifier: "<<dataType<<std::endl;
+                                    SEND_SYSTEM_LOG(Error, <<os.str().c_str());
+                                    throw std::logic_error(os.str());
+                                }
+                                m_numberOfUndeliveredMessages--;
+                            });
+                        }
                     }
 
                     //Check if queue contains fragmented message with more fragments than recvWindowSize, needs special handling
@@ -569,7 +657,7 @@ namespace Com
                 }
             }
 
-            lllog(9)<<"COM: SendAck "<<AckToString(*ackPtr).c_str()<<std::endl;
+            lllog(9)<<L"COM: SendAck "<<AckToString(*ackPtr).c_str()<<std::endl;
             WriterType::SendTo(ackPtr, ni.endpoint);
         }
 

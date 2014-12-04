@@ -179,6 +179,11 @@ namespace
         return m_impl->Send(nodeId, nodeTypeId, data, size, dataTypeIdentifier, deliveryGuarantee);
     }
 
+    size_t Communication::SendQueueCapacity(int64_t nodeTypeId) const
+    {
+        return m_impl->SendQueueCapacity(nodeTypeId);
+    }
+
     size_t Communication::NumberOfQueuedMessages(int64_t nodeTypeId) const
     {
         return m_impl->NumberOfQueuedMessages(nodeTypeId);

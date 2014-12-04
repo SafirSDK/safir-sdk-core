@@ -53,12 +53,12 @@ namespace Internal
 {
 namespace Com
 {
-    //Constants
+    //DataTypes used internally by Communication
+    static const int64_t WelcomeDataType=-106681077037179467; //Hash for 'Communication.Welcome'
     static const int64_t HeartbeatType=-1113057794592031140; //Hash for 'Communication.Heartbeat'
     static const int64_t AckType=-6769271806353797703; //Hash for 'Communication.Ack'
     static const int64_t AckRequestType=-3908639933957133038; //Hash for 'Communication.AckRequest'
     static const int64_t ControlDataType=186858702748131856; //Hash for 'Communication.ControlData'
-
 
     //Send method
     static const uint8_t SingleReceiverSendMethod=0;
@@ -69,11 +69,11 @@ namespace Com
     static const uint8_t Acked=1;
 
     //------------------------------------------------------------
-    //toString functions for convenience
+    // Functions for convenience
     //------------------------------------------------------------
     inline std::string SendMethodToString(uint8_t sm) {return sm==SingleReceiverSendMethod ? "SingleReceiver" : "MultiReceiver";}
     inline std::string DeliveryGuaranteeToString(uint8_t dg) {return dg==Acked ? "Acked" : "Unacked";}
-    inline void hexdump(const char* data, size_t first, size_t last)
+    inline void Hexdump(const char* data, size_t first, size_t last)
     {
         for (size_t i=first; i<last; ++i)
         {
@@ -84,6 +84,13 @@ namespace Com
         }
         std::cout<<std::dec<<std::endl;
     }
+
+    inline bool IsCommunicationDataType(int64_t dataType)
+    {
+        return dataType==WelcomeDataType || dataType==HeartbeatType ||
+                dataType==AckType || dataType==ControlDataType;
+    }
+
     //------------------------------------------------------------
 
 
@@ -126,8 +133,7 @@ namespace Com
     inline std::string AckToString(const Ack& ack)
     {
         std::ostringstream os;
-        os<<"Ack from: "<<ack.commonHeader.senderId<<" "<<SendMethodToString(ack.sendMethod)<<
-            " dataType: "<<ack.commonHeader.dataType<<" seq: "<<ack.sequenceNumber<<" gaps: ";
+        os<<"AckContent from: "<<ack.commonHeader.senderId<<", to: "<<ack.commonHeader.receiverId<<", "<<SendMethodToString(ack.sendMethod)<<" seq: "<<ack.sequenceNumber<<" gaps: ";
         for (auto i : ack.missing) os<<static_cast<int>(i);
         return os.str();
     }

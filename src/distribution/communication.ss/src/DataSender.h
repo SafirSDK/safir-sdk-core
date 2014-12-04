@@ -28,6 +28,7 @@
 #include <atomic>
 #include <boost/noncopyable.hpp>
 #include <boost/function.hpp>
+#include <boost/make_shared.hpp>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include "Node.h"
@@ -163,12 +164,12 @@ namespace Com
                 return false;
             }
 
-            //std::cout<<"Send size="<<size<<", fullFrag="<<numberOfFullFragments<<", rest="<<restSize<<", totalFrag="<<totalNumberOfFragments<<std::endl;
-
             //The actual work where the data is inserted in the queue must be done inside the strand.
             m_strand.post([=]
             {
-                if (!ReceiverExists(toId))
+                uint8_t sendMethod;
+                uint64_t* sequenceSerie=GetSequenceSerieIfExist(toId, sendMethod);
+                if (sequenceSerie==nullptr)
                 {
                     m_sendQueueSize-=static_cast<unsigned int>(totalNumberOfFragments);
                     //receiver does not exist so we just throw it away
@@ -176,14 +177,14 @@ namespace Com
                     return;
                 }
 
-                const uint8_t sendMethod=(toId==0 ? MultiReceiverSendMethod : SingleReceiverSendMethod);
-
                 for (size_t frag=0; frag<numberOfFullFragments; ++frag)
                 {
+                    ++(*sequenceSerie);
                     const char* fragment=msg.get()+frag*m_fragmentDataSize;
                     UserDataPtr userData(new UserData(m_nodeId, toId, dataTypeIdentifier, msg, size, fragment, m_fragmentDataSize));
                     userData->header.commonHeader.receiverId=toId;
                     userData->header.sendMethod=sendMethod;
+                    userData->header.sequenceNumber=*sequenceSerie;
                     userData->header.deliveryGuarantee=m_deliveryGuarantee;
                     userData->header.numberOfFragments=static_cast<uint16_t>(totalNumberOfFragments);
                     userData->header.fragmentNumber=static_cast<uint16_t>(frag);
@@ -192,10 +193,12 @@ namespace Com
 
                 if (restSize>0)
                 {
+                    ++(*sequenceSerie);
                     const char* fragment=msg.get()+numberOfFullFragments*m_fragmentDataSize;
                     UserDataPtr userData(new UserData(m_nodeId, toId, dataTypeIdentifier, msg, size, fragment, restSize));
                     userData->header.commonHeader.receiverId=toId;
                     userData->header.sendMethod=sendMethod;
+                    userData->header.sequenceNumber=*sequenceSerie;
                     userData->header.deliveryGuarantee=m_deliveryGuarantee;
                     userData->header.numberOfFragments=static_cast<uint16_t>(totalNumberOfFragments);
                     userData->header.fragmentNumber=static_cast<uint16_t>(totalNumberOfFragments-1);
@@ -234,7 +237,19 @@ namespace Com
                             //This message is now acked, remove from list of still unacked
                             if (ud->receivers.erase(ack.commonHeader.senderId)==0)
                             {
-                                lllog(5)<<L"COM: Got ack from node that was not supposed to ack this message (might also be a duplicated ack). "<<AckToString(ack).c_str()<<std::endl;
+                                auto ackSenderIt=m_nodes.find(ack.commonHeader.senderId);
+                                if (ackSenderIt==m_nodes.end())
+                                {
+                                    lllog(5)<<L"COM: Got ack from node that was not supposed to ack this message. Unknown node. "<<AckToString(ack).c_str()<<std::endl;
+                                }
+                                else if (!ackSenderIt->second.systemNode)
+                                {
+                                    lllog(5)<<L"COM: Got ack from node that was not supposed to ack this message. Node exist but is not systemNode. "<<AckToString(ack).c_str()<<std::endl;
+                                }
+                                else
+                                {
+                                    lllog(5)<<L"COM: Got duplicated ack. "<<AckToString(ack).c_str()<<std::endl;
+                                }
                             }
                         }
                         else
@@ -261,10 +276,10 @@ namespace Com
                                 {
                                     //this should never happen, a programming error. Receiver missing message that we think has already been acked.
                                     std::wostringstream os;
-                                    os<<L"COM: Node["<<ack.commonHeader.senderId<<L"] is missing a message that has already been acked or we dont expect the node to get at all. "<<
+                                    os<<L"COM ["<<m_nodeId<<L"]: Node["<<ack.commonHeader.senderId<<L"] is missing a message that has already been acked or we dont expect the node to get at all. "<<
                                               SendMethodToString(ack.sendMethod).c_str()<<L" sequenceNumber: "<<ack.sequenceNumber;
+                                    os<<L"\n"<<SendQueueToString().c_str();
                                     lllog(1)<<os.str()<<std::endl;
-                                    DumpSendQueue(1);
                                     SEND_SYSTEM_LOG(Error, <<os.str()<<std::endl);
                                 }
                             }
@@ -292,6 +307,7 @@ namespace Com
                 NodeInfo ni;
                 ni.endpoint=Utilities::CreateEndpoint(address);
                 ni.lastSentSeqNo=0;
+                ni.welcome=UINT64_MAX;
                 ni.systemNode=false;
                 m_nodes.insert(std::make_pair(id, ni));
             });
@@ -306,6 +322,14 @@ namespace Com
                 if (it!=m_nodes.end())
                 {
                     it->second.systemNode=true;
+                    if (m_deliveryGuarantee)
+                    {
+                        PostWelcome(id);
+                    }
+                    else //unacked data does not have to wait for welcome
+                    {
+                        it->second.welcome=0;
+                    }
                 }
             });
         }
@@ -334,6 +358,7 @@ namespace Com
             bool systemNode;
             boost::asio::ip::udp::endpoint endpoint;
             uint64_t lastSentSeqNo;
+            uint64_t welcome;
         };
 
         boost::asio::io_service::strand m_strand;
@@ -354,22 +379,44 @@ namespace Com
         size_t m_queueNotFullNotificationLimit; //below number of used slots. NOT percent.
         std::atomic_bool m_notifyQueueNotFull;
 
-        bool RequestAck() const
+        void PostWelcome(int64_t nodeId)
         {
+            auto& ni=m_nodes[nodeId];
+            ++m_lastSentMultiReceiverSeqNo;
+            ni.welcome=m_lastSentMultiReceiverSeqNo;
 
+            ++m_sendQueueSize;
+            boost::shared_ptr<char[]> welcome=boost::make_shared<char[]>(sizeof(int64_t));
+            memcpy(static_cast<void*>(welcome.get()), static_cast<const void*>(&nodeId), sizeof(int64_t));
+            UserDataPtr userData=boost::make_shared<UserData>(m_nodeId, 0, WelcomeDataType, welcome, sizeof(int64_t), welcome.get(), sizeof(int64_t));
+            userData->header.sendMethod=MultiReceiverSendMethod;
+            userData->header.sequenceNumber=ni.welcome;
+            userData->header.deliveryGuarantee=true;
+            userData->header.numberOfFragments=1;
+            userData->header.fragmentNumber=0;
+            userData->header.ackNow=1;
+            userData->receivers.insert(nodeId);
+            m_sendQueue.enqueue(userData);
+
+            lllog(8)<<L"COM: Welcome posted from "<<m_nodeId<<L" to "<<nodeId<<", seq: "<<ni.welcome<<std::endl;
+            HandleSendQueue();
+        }
+
+        void SetRequestAck(MessageHeader& header) const
+        {
             static const size_t AckThreshold=Parameters::SlidingWindowSize/2;
 
-            if (m_lastSentMultiReceiverSeqNo % AckThreshold==0)
+            if (header.sequenceNumber % AckThreshold==0)
             {
-                return true;
+                header.ackNow=1;
+            }
+            else if (m_sendQueue.first_unhandled_index()==m_sendQueue.size()-1)
+            {
+                header.ackNow=1;
             }
 
-            if (m_sendQueue.first_unhandled_index()==m_sendQueue.size()-1)
-            {
-                return true;
-            }
-
-            return false;
+            //let ackNow be as it was before, PostWelcome will explicitly set the ackNow=1
+            //so we dont have to check it here for every message
         }
 
         //Send new messages in sendQueue. No retransmits sent here.
@@ -385,18 +432,13 @@ namespace Com
 
                 if (ud->header.sendMethod==MultiReceiverSendMethod) //this is message that shall be sent to every system node
                 {
-                    ++m_lastSentMultiReceiverSeqNo;
-                    ud->header.sequenceNumber=m_lastSentMultiReceiverSeqNo;
-                    if (RequestAck())
-                    {
-                        ud->header.ackNow=1;
-                    }
+                    SetRequestAck(ud->header);
 
                     if (WriterType::IsMulticastEnabled()) //this node and all the receivers are capable of sending and receiving multicast
                     {
                         for (const auto& val : m_nodes)
                         {
-                            if (val.second.systemNode)
+                            if (val.second.systemNode && val.second.welcome<=ud->header.sequenceNumber)
                             {
                                 //The node will get the message throuch the multicast message, we just add it to receiver list
                                 //to be able to track the ack
@@ -413,7 +455,7 @@ namespace Com
                     {
                         for (const auto& val : m_nodes)
                         {
-                            if (val.second.systemNode)
+                            if (val.second.systemNode && val.second.welcome<=ud->header.sequenceNumber)
                             {
                                 ud->receivers.insert(val.first);
                                 WriterType::SendTo(ud, val.second.endpoint);
@@ -429,8 +471,6 @@ namespace Com
                     {
                         ud->receivers.insert(ud->header.commonHeader.receiverId);
                         NodeInfo& n=nodeIt->second;
-                        ++n.lastSentSeqNo;
-                        ud->header.sequenceNumber=n.lastSentSeqNo;
                         WriterType::SendTo(ud, n.endpoint);
                     }
                     else
@@ -478,8 +518,8 @@ namespace Com
 
                 if (durationSinceSend>mustBeSeriousError)
                 {
-                    lllog(9)<<"COM: Seems like we are retransmitting forever. Seq: "<<ud->header.sequenceNumber<<", "<<SendMethodToString(ud->header.sendMethod).c_str()<<std::endl;
-                    DumpSendQueue();
+                    lllog(9)<<"COM: Seems like we are retransmitting forever. Seq: "<<ud->header.sequenceNumber<<", "<<
+                              SendMethodToString(ud->header.sendMethod).c_str()<<L"\n"<<SendQueueToString().c_str()<<std::endl;
                 }
             }
 
@@ -503,7 +543,7 @@ namespace Com
 
                     WriterType::SendTo(ud, nodeIt->second.endpoint);
                     m_retransmitNotification(nodeIt->first);
-                    lllog(6)<<L"COM: retransmitted  "<<(ud->header.sendMethod==SingleReceiverSendMethod ? "SingleReceiverMessage" : "MultiReceiverMessage")<<
+                    lllog(6)<<L"COM: retransmitted  "<<SendMethodToString(ud->header.sendMethod).c_str()<<
                               ", seq: "<<ud->header.sequenceNumber<<" to "<<*recvIt<<std::endl;
                     ++recvIt;
                 }
@@ -588,15 +628,28 @@ namespace Com
             }
         }
 
-        bool ReceiverExists(int64_t toId) const
+        //returns the correct sequenceNumberSerie, returns NULL if no receiver exists
+        uint64_t* GetSequenceSerieIfExist(int64_t toId, uint8_t& sendMethod)
         {
             if (toId==0) //send to all, check if there are any nodes
             {
-                return !m_nodes.empty();
+                sendMethod=MultiReceiverSendMethod;
+                if (m_nodes.empty())
+                {
+                    return nullptr;
+                }
+
+                return &m_lastSentMultiReceiverSeqNo;
             }
             else //check if a specific node exists
             {
-                return m_nodes.find(toId)!=m_nodes.end();
+                sendMethod=SingleReceiverSendMethod;
+                auto it=m_nodes.find(toId);
+                if (it==m_nodes.end())
+                {
+                    return nullptr;
+                }
+                return &(it->second.lastSentSeqNo);
             }
         }
 
@@ -614,7 +667,7 @@ namespace Com
 
     public:
         //debug
-        void DumpSendQueue(int loglevel=9) const
+        std::string SendQueueToString() const
         {
             std::ostringstream os;
             os<<"===== SendQueue ====="<<std::endl;
@@ -643,9 +696,7 @@ namespace Com
             }
             os<<"======== End ========"<<std::endl;
 
-            lllog(loglevel)<<L"COM: "<<os.str().c_str()<<std::endl;
-
-            std::cout<<os.str()<<std::endl;
+            return os.str();
         }
     };
 

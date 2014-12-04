@@ -80,10 +80,12 @@ namespace Com
      * message fragmentation and retranmits of lost packets and ordering of incoming data.
      *
      * After construction all callbacks must be set before calling the Start method. All callbacks will be made in a
-     * sequential manner, i.e the same callback will not be called concurrently.
-     * Seeds can be injected at any time, even before Start method is called.
+     * sequential manner, i.e the same callback will not be called concurrently. However different callbacks may be called
+     * concurrently an are independent of each other.
+     * Seeds can be injected at any time, before or after the Start method is called.
      *
-     * Nowhere in this class is 0 (zero) allowed as node Id.
+     * NodeId 0 is reserved and represents all nodes. It is not allowed to use nodeId 0 in any other meaning than all nodes,
+     * for example when calling send. Assigning nodeId 0 to a node results in undefined behaviour.
      */
     class DISTRIBUTION_COMMUNICATION_API Communication : private boost::noncopyable
     {
@@ -234,9 +236,10 @@ namespace Com
          * @param data [in] - pointer to the data that shall be sent.
          * @param size [in] - Size of data.
          * @param dataTypeIdentifier [in] - Custom identifier specifying which type of data. Only data receivers added with the same identifier will get the data.
-         * @param deliveryGuarantee [in] - If true communication will assure delivery by requesting all receivers to acknowledge the reception of the data. Will also perform retransmits if necessary.
-         * @return When sending with delivery guarantee, true is returned if data could be added to send queue. False if send queue is full, in that case try again later. If sending without delivery
-         *          guarantee true is always returned.
+         * @param deliveryGuarantee [in] - If true communication will assure delivery by requesting all receivers to acknowledge the reception of the data.
+         *                                 Will also perform retransmits if necessary.
+         * @return When sending with delivery guarantee, true is returned if data could be added to send queue. If queue is full
+         *         false will be returned, in that case try again later. If sending without delivery guarantee true is always returned.
          */
         bool Send(int64_t nodeId,
                   int64_t nodeTypeId,
@@ -246,7 +249,17 @@ namespace Com
                   bool deliveryGuarantee);
 
         /**
+         * Get the fixed capacity of the send queue for the specified nodeType. If number of queued messages are equal to
+         * the value returned by this method, a call to Send will return false (queue full).
+         *
+         * @param nodeTypeId [in] - Node type.
+         * @return Size of the acked send queue.
+         */
+        size_t SendQueueCapacity(int64_t nodeTypeId) const;
+
+        /**
          * Get the number of messages in a node types acked send queue.
+         *
          * @param nodeTypeId [in] - Node type.
          * @return Number of messages in the acked send queue.
          */

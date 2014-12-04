@@ -81,7 +81,8 @@ public:
 //        MessageHeader(int64_t senderId_,
 //                      int64_t receiverId_,
 //                      int64_t dataType_ ,
-//                      uint16_t sendMethod_,
+//                      uint8_t sendMethod_,
+//                      uint8_t deliveryGuarantee_,
 //                      uint64_t sequenceNumber_,
 //                      size_t totalContentSize_,
 //                      size_t fragmentContentSize_,
@@ -89,7 +90,7 @@ public:
 //                      uint16_t fragmentNumber_,
 //                      size_t fragmentOffset_)
 
-        //Send one non-fragmented from each node to node 1
+        //Send one non-fragmented from each node to node 1, before welcome is received.
         for (int64_t id=2; id<=4; ++id)
         {
             auto payload="hello";
@@ -109,8 +110,65 @@ public:
         TRACELINE
         for (int64_t id=2; id<=4; ++id)
         {
+            CHECK(received[id]==0);
+            CHECK(acked[id]==0);
+        }
+
+        CHECK(dh.m_nodes.find(2)->second.ackedMultiReceiverChannel.welcome==UINT64_MAX);
+        CHECK(dh.m_nodes.find(3)->second.ackedMultiReceiverChannel.welcome==UINT64_MAX);
+        CHECK(dh.m_nodes.find(4)->second.ackedMultiReceiverChannel.welcome==UINT64_MAX);
+
+        TRACELINE
+
+
+        //Send welcome
+        for (int64_t id=2; id<=4; ++id)
+        {
+            int64_t welcomeNodeId=1;
+            auto size=sizeof(int64_t);
+            Com::MessageHeader header(id, 1, Com::WelcomeDataType, Com::MultiReceiverSendMethod, Com::Acked, 10, size, size, 1, 0, 0);
+            header.ackNow=1;
+            dh.ReceivedApplicationData(&header, reinterpret_cast<const char*>(&welcomeNodeId));
+        }
+
+        dh.m_receiveStrand.post([&]{SetReady();});
+        WaitUntilReady();
+        dh.m_deliverStrand.post([&]{SetReady();});
+        WaitUntilReady();
+
+        CHECK(dh.m_nodes.find(2)->second.ackedMultiReceiverChannel.welcome==10);
+        CHECK(dh.m_nodes.find(3)->second.ackedMultiReceiverChannel.welcome==10);
+        CHECK(dh.m_nodes.find(4)->second.ackedMultiReceiverChannel.welcome==10);
+
+        TRACELINE
+        for (int64_t id=2; id<=4; ++id)
+        {
+            CHECKMSG(received[id]==0, received[id]); //no application data received
+            CHECKMSG(acked[id]==10, acked[id]); //we have acked the welcome
+        }
+
+        //Send one non-fragmented from each node to node 1, after welcome is received
+        for (int64_t id=2; id<=4; ++id)
+        {
+            auto payload="hello";
+            auto size=strlen(payload);
+            Com::MessageHeader header(id, 1, 0, Com::MultiReceiverSendMethod, Com::Acked, 11, size, size, 1, 0, 0);
+            header.ackNow=1;
+            dh.ReceivedApplicationData(&header, payload);
+        }
+
+        TRACELINE
+
+        dh.m_receiveStrand.post([&]{SetReady();});
+        WaitUntilReady();
+        dh.m_deliverStrand.post([&]{SetReady();});
+        WaitUntilReady();
+
+        TRACELINE
+        for (int64_t id=2; id<=4; ++id)
+        {
             CHECK(received[id]==1);
-            CHECK(acked[id]==1);
+            CHECK(acked[id]==11);
         }
 
         TRACELINE
@@ -119,7 +177,7 @@ public:
         for (int frag=0; frag<4; ++frag)
         {
             const char* msg="ABCDEFGH";
-            uint64_t seq=2+frag;
+            uint64_t seq=12+frag;
             const size_t fragmentSize=2;
             const uint16_t numberOfFragments=4;
 
@@ -134,6 +192,18 @@ public:
             }
         }
 
+        dh.m_receiveStrand.post([&]{SetReady();});
+        WaitUntilReady();
+        dh.m_deliverStrand.post([&]{SetReady();});
+        WaitUntilReady();
+
+        TRACELINE
+        for (int64_t id=2; id<=4; ++id)
+        {
+            CHECKMSG(received[id]==2, received[id]);
+            CHECKMSG(acked[id]==15, acked[id]);
+        }
+
         TRACELINE        
 
         //---------------------------------------------
@@ -144,9 +214,22 @@ public:
         {
             auto payload="hello";
             auto size=strlen(payload);
-            Com::MessageHeader header(id, 1, 0, Com::MultiReceiverSendMethod, Com::Unacked, 10, size, size, 1, 0, 0);
+            Com::MessageHeader header(id, 1, 0, Com::MultiReceiverSendMethod, Com::Unacked, 16, size, size, 1, 0, 0);
             dh.ReceivedApplicationData(&header, payload);
         }
+
+        dh.m_receiveStrand.post([&]{SetReady();});
+        WaitUntilReady();
+        dh.m_deliverStrand.post([&]{SetReady();});
+        WaitUntilReady();
+
+        TRACELINE
+        for (int64_t id=2; id<=4; ++id)
+        {
+            CHECKMSG(received[id]==3, received[id]);
+            CHECKMSG(acked[id]==15, acked[id]);
+        }
+
         DumpNodeInfo(dh);
 
         std::cout<<"========================="<<std::endl;
@@ -156,7 +239,7 @@ public:
         for (int frag=0; frag<4; ++frag)
         {
             const char* msg="ABCDEFGH";
-            uint64_t seq=11+frag;
+            uint64_t seq=17+frag;
             const size_t fragmentSize=2;
             const uint16_t numberOfFragments=4;
 
@@ -170,6 +253,19 @@ public:
             }
         }
 
+        dh.m_receiveStrand.post([&]{SetReady();});
+        WaitUntilReady();
+        dh.m_deliverStrand.post([&]{SetReady();});
+        WaitUntilReady();
+
+        TRACELINE
+        for (int64_t id=2; id<=4; ++id)
+        {
+            CHECKMSG(received[id]==4, received[id]);
+            CHECKMSG(acked[id]==15, acked[id]);
+        }
+
+
         TRACELINE
         DumpNodeInfo(dh);
         DumpReceived();
@@ -182,7 +278,7 @@ public:
         //and expected seqNo should be the start of the next message.
         {
             const char* msg="12345678";
-            uint64_t seq=16;
+            uint64_t seq=22;
             const size_t fragmentSize=2;
             const uint16_t numberOfFragments=4;
             size_t fragmentOffset=2;
@@ -194,6 +290,19 @@ public:
                 dh.ReceivedApplicationData(&header, payload);
             }
         }
+
+        dh.m_receiveStrand.post([&]{SetReady();});
+        WaitUntilReady();
+        dh.m_deliverStrand.post([&]{SetReady();});
+        WaitUntilReady();
+
+        TRACELINE
+        for (int64_t id=2; id<=4; ++id)
+        {
+            CHECKMSG(received[id]==4, received[id]);
+            CHECKMSG(acked[id]==15, acked[id]);
+        }
+
 
         TRACELINE
         DumpNodeInfo(dh);
@@ -208,7 +317,7 @@ public:
         {
             auto payload="hello";
             auto size=strlen(payload);
-            Com::MessageHeader header(id, 1, 0, Com::MultiReceiverSendMethod, Com::Unacked, 19, size, size, 1, 0, 0);
+            Com::MessageHeader header(id, 1, 0, Com::MultiReceiverSendMethod, Com::Unacked, 25, size, size, 1, 0, 0);
             dh.ReceivedApplicationData(&header, payload);
         }
 
@@ -220,14 +329,13 @@ public:
         TRACELINE
         DumpNodeInfo(dh);
         DumpReceived();
-        Wait(3000);
-        TRACELINE
 
+        TRACELINE
         for (int64_t id=2; id<=4; ++id)
         {
-            CHECK(received[id]==5);
-            CHECK(acked[id]==5);
-            CHECK(dh.m_nodes.find(id)->second.unackedMultiReceiverChannel.lastInSequence==19);
+            CHECKMSG(received[id]==5, received[id]);
+            CHECKMSG(acked[id]==15, acked[id]);
+            CHECK(dh.m_nodes.find(id)->second.unackedMultiReceiverChannel.lastInSequence==25);
         }
 
         TRACELINE

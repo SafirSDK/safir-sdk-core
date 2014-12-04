@@ -133,12 +133,14 @@ namespace Com
             {
                 if (WriterType::IsMulticastEnabled())
                 {
+                    lllog(8)<<L"COM: Send Heartbeat multicast"<<std::endl;
                     WriterType::SendMulticast(m_heartbeat);
                 }
                 else
                 {
                     for (auto& vt : m_nodes)
                     {
+                        lllog(8)<<L"COM: Send Heartbeat to "<<vt.first<<std::endl;
                         WriterType::SendTo(m_heartbeat, vt.second);
                     }
                 }
