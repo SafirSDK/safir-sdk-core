@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2014 (http://www.consoden.se)
 *
 * Created by: Lars Hagström / lars.hagstrom@consoden.se
 *
@@ -178,7 +179,7 @@ namespace Internal
 
                     if (!found)
                     {
-                        throw std::logic_error("Dou directory not found for " + it->first);
+                        directories.push_back(std::make_pair(it->first, "<not found>"));
                     }
                 }
             }
