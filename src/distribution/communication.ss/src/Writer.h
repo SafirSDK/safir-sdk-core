@@ -51,6 +51,12 @@ namespace Internal
 {
 namespace Com
 {
+
+//#define COM_USE_UNRELIABLE_SEND_POLICY //Only uncomment during test.
+#ifndef COM_USE_UNRELIABLE_SEND_POLICY
+    //------------------------------------------------------------
+    // Normal send policy using udp sockets
+    //------------------------------------------------------------
     template <class T>
     struct BasicSendPolicy
     {
@@ -92,6 +98,102 @@ namespace Com
             //socket.async_send_to(bufs, to, [val](const boost::system::error_code& error, size_t){if (error) std::cout<<"Send UserData failed, error "<<error.message().c_str()<<std::endl;});
         }
     };
+#else
+    //------------------------------------------------------------
+    // Unsafe sendpolicy - simulates a very unreliable network
+    //------------------------------------------------------------
+    struct UnreliableSender
+    {
+        static const int LossPercent        = 3;
+        static const int DuplicatePercent   = 3;
+        static const int ReorderPercent     = 3;
+
+        void Send(std::vector< boost::asio::const_buffer > bufs,
+                  boost::asio::ip::udp::socket& socket,
+                  const boost::asio::ip::udp::endpoint& to)
+        {
+            static Utilities::Random random(0, 100);
+
+            if (!m_reorderBuf.empty()) //we have something to reorder
+            {
+                socket.send_to(bufs, to);
+                socket.send_to(boost::asio::buffer(m_reorderBuf), to);
+                m_reorderBuf.clear();
+                return;
+            }
+
+            auto n=random.Get();
+            if (Loss(n))
+            {
+                return;
+            }
+            else if (Duplicate(n))
+            {
+                socket.send_to(bufs, to);
+                socket.send_to(bufs, to);
+                socket.send_to(bufs, to);
+            }
+            else if (Reorder(n))
+            {
+                m_reorderBuf.clear();
+                m_reorderBuf.resize(boost::asio::buffer_size(bufs));
+                boost::asio::buffer_copy(boost::asio::buffer(m_reorderBuf), bufs);
+            }
+            else //normal send
+            {
+                socket.send_to(bufs, to);
+            }
+        }
+
+    private:
+        std::vector<char> m_reorderBuf{};
+
+        inline bool Loss(int n) const {return n<=LossPercent;} //0 - 5
+        inline bool Duplicate(int n) const {return n>LossPercent && n<=(LossPercent+DuplicatePercent);} // 10 - 15
+        inline bool Reorder(int n) const {return n>(LossPercent+DuplicatePercent) && n<=(LossPercent+DuplicatePercent+ReorderPercent);} //5 - 10
+    };
+
+    template <class T>
+    struct BasicSendPolicy : private UnreliableSender
+    {
+        void Send(const boost::shared_ptr<T>& val,
+                  boost::asio::ip::udp::socket& socket,
+                  const boost::asio::ip::udp::endpoint& to)
+        {
+            //calculate crc and add it last in sendBuffer
+            boost::crc_32_type crc;
+            crc.process_bytes(static_cast<const void*>(val.get()), sizeof(T));
+            uint32_t crc32=crc.checksum();
+            std::vector< boost::asio::const_buffer > bufs;
+            bufs.push_back(boost::asio::buffer(static_cast<const void*>(val.get()), sizeof(T)));
+            bufs.push_back(boost::asio::buffer(reinterpret_cast<const char*>(&crc32), sizeof(uint32_t)));
+            UnreliableSender::Send(bufs, socket, to);
+        }
+    };
+
+    template <>
+    struct BasicSendPolicy<UserData> : private UnreliableSender
+    {
+        void Send(const UserDataPtr& val,
+                  boost::asio::ip::udp::socket& socket,
+                  const boost::asio::ip::udp::endpoint& to)
+        {
+            const char* header=reinterpret_cast<const char*>(&(val->header));
+
+            //calculate crc and add it last in sendBuffer
+            boost::crc_32_type crc;
+            crc.process_bytes(static_cast<const void*>(header), MessageHeaderSize);
+            crc.process_bytes(static_cast<const void*>(val->fragment), val->header.fragmentContentSize);
+            uint32_t crc32=crc.checksum();
+            std::vector< boost::asio::const_buffer > bufs;
+            bufs.push_back(boost::asio::buffer(header, MessageHeaderSize));
+            bufs.push_back(boost::asio::buffer(val->fragment, val->header.fragmentContentSize));
+            bufs.push_back(boost::asio::buffer(reinterpret_cast<const char*>(&crc32), sizeof(uint32_t)));
+            UnreliableSender::Send(bufs, socket, to);
+        }
+    };
+    //------------------------------------------------------------
+#endif
 
     /**
      * The writer class is responsible for sending data using asynchronous UDP unicast or multicast.

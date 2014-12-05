@@ -153,7 +153,7 @@ public:
 class NodeTypes
 {
 public:
-    static const int NumberOfNodeTypes = 3;
+    static const int NumberOfNodeTypes = 1;
 
     NodeTypes()
     {
@@ -540,7 +540,7 @@ int main(int argc, char * argv[])
     std::cout<<"Retransmits: "<<sp->RetransmitCount()<<std::endl;
     sp->PrintRecvCount();
     std::cout<<"---------------------------------------------------------"<<std::endl;
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(1000)); //allow 1 sec for retransmissions
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(2000)); //allow 1 sec for retransmissions
     ioService.stop();
     threads.join_all();
 

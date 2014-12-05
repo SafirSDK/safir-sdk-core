@@ -68,7 +68,6 @@ namespace Com
             ,m_me(me)
             ,m_onNewNode(onNewNode)
             ,m_timer(ioService)
-            ,m_randomGenerator(static_cast<uint32_t>(me.nodeId))
         {
         }
 #ifdef _MSC_VER
@@ -80,7 +79,8 @@ namespace Com
             m_strand.dispatch([=]
             {
                 m_running=true;
-                m_timer.expires_from_now(boost::chrono::milliseconds(Random(0, 1000)));
+                int firstTimeout=(m_random.Get()-490)%1000; //10 - 1000 ms first time
+                m_timer.expires_from_now(boost::chrono::milliseconds(firstTimeout));
                 m_timer.async_wait(m_strand.wrap([=](const boost::system::error_code& error){OnTimeout(error);}));
             });
         }
@@ -237,15 +237,11 @@ namespace Com
         NodeMap m_reportedNodes{}; //nodes only heard about from others, never talked to
         std::map<int64_t, std::vector<bool> > m_incompletedNodes{}; //talked to but still haven't received all node info from this node
         std::set<int64_t> m_excludedNodes{};
-
         boost::asio::io_service::strand m_strand;
         Node m_me;
-
         std::function<void(const Node&)> m_onNewNode;
         boost::asio::steady_timer m_timer;
-        std::pair<int, int> m_timeoutInterval{500, 3000};
-
-        mutable boost::random::mt19937 m_randomGenerator;
+        Utilities::Random m_random{500, 3000};
 
         bool IsExcluded(int64_t id) const {return m_excludedNodes.find(id)!=m_excludedNodes.cend();}
 
@@ -503,14 +499,9 @@ namespace Com
                 SendDiscover();
 
                 //restart timer
-                m_timer.expires_from_now(boost::chrono::milliseconds(Random(m_timeoutInterval.first, m_timeoutInterval.second)));
+                m_timer.expires_from_now(boost::chrono::milliseconds(m_random.Get()));
                 m_timer.async_wait(m_strand.wrap([=](const boost::system::error_code& error){OnTimeout(error);}));
             }
-        }
-
-        int Random(int min, int max) const
-        {
-            return (boost::random::uniform_int_distribution<>(min, max))(m_randomGenerator);
         }
     };
 

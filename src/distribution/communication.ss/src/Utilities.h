@@ -25,6 +25,7 @@
 #define __SAFIR_DOB_COMMUNICATION_UTILIITIES_H__
 
 #include <string>
+#include <random>
 #include <boost/lexical_cast.hpp>
 
 #ifdef _MSC_VER
@@ -48,6 +49,22 @@ namespace Com
 {
 namespace Utilities
 {
+    class Random
+    {
+    public:
+        Random(int min, int max)
+            :m_engine(std::random_device()())
+            ,m_distribution(min, max)
+        {
+        }
+
+        int Get() const {return m_distribution(m_engine);}
+
+    private:
+        mutable std::mt19937 m_engine;
+        mutable std::uniform_int_distribution<> m_distribution;
+    };
+
     inline bool SplitAddress(const std::string& address, std::string& ip, unsigned short& port)
     {
         size_t startPortSearch=address.find_last_of(']'); //if ip6, start search after address end

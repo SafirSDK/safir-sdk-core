@@ -54,11 +54,12 @@ public:
         Discoverer n2(io, CreateNode(2), [&](const Com::Node&){});
 
         TRACELINE
-        s0.m_timeoutInterval={100, 200};
-        s1.m_timeoutInterval={100, 200};
-        n0.m_timeoutInterval={100, 200};
-        n1.m_timeoutInterval={100, 200};
-        n2.m_timeoutInterval={100, 200};
+        //Speed up the tests, set timerinterval
+        s0.m_random=Com::Utilities::Random(100, 200);
+        s1.m_random=Com::Utilities::Random(100, 200);
+        n0.m_random=Com::Utilities::Random(100, 200);
+        n1.m_random=Com::Utilities::Random(100, 200);
+        n2.m_random=Com::Utilities::Random(100, 200);
 
         TRACELINE
         std::vector<std::string> seeds{"127.0.0.1:10100", "127.0.0.1:10200"};
@@ -341,7 +342,7 @@ private:
         Info(int64_t id, boost::asio::io_service& io)
             :discover(boost::make_shared<HandleDiscover::Discoverer>(io, HandleDiscover::CreateNode(id), [=](const Com::Node& n){HandleDiscover::OnNewNode(id, n);}))
         {
-            discover->m_timeoutInterval={100,200};
+            discover->m_random=Com::Utilities::Random(100, 200);
         }
     };
     static std::map<int64_t, HandleDiscover::Info> discoverState;

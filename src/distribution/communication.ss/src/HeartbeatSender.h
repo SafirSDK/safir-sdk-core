@@ -61,6 +61,7 @@ namespace Com
     {
     public:
         HeartbeatSenderBasic(boost::asio::io_service& ioService,
+                             int64_t nodeTypeId,
                              int64_t myNodeId,
                              int ipVersion,
                              const std::string& localIf,
@@ -73,6 +74,9 @@ namespace Com
             ,m_interval(heartbeatInterval)
             ,m_nodes()
             ,m_running(false)
+            ,m_logPrefix([&]{std::ostringstream os;
+                             os<<"COM: (HeartbeatSender nodeType "<<nodeTypeId<<") - ";
+                             return os.str();}())
         {
         }
 
@@ -103,7 +107,7 @@ namespace Com
                 if (m_nodes.find(id)!=m_nodes.end())
                 {
                     std::ostringstream os;
-                    os<<"COM: Duplicated call to HeartbeatSender.AddNode with same nodeId! NodeId: "<<id<<", address: "<<address;
+                    os<<m_logPrefix.c_str()<<"Duplicated call to AddNode with same nodeId! NodeId: "<<id<<", address: "<<address;
                     throw std::logic_error(os.str());
                 }
 
@@ -126,6 +130,7 @@ namespace Com
         int m_interval;
         std::map<int64_t, boost::asio::ip::udp::endpoint> m_nodes;
         bool m_running;
+        const std::string m_logPrefix;
 
         void OnTimeout()
         {
@@ -133,14 +138,14 @@ namespace Com
             {
                 if (WriterType::IsMulticastEnabled())
                 {
-                    lllog(8)<<L"COM: Send Heartbeat multicast"<<std::endl;
+                    lllog(8)<<m_logPrefix.c_str()<<"Send Heartbeat multicast"<<std::endl;
                     WriterType::SendMulticast(m_heartbeat);
                 }
                 else
                 {
                     for (auto& vt : m_nodes)
                     {
-                        lllog(8)<<L"COM: Send Heartbeat to "<<vt.first<<std::endl;
+                        lllog(8)<<m_logPrefix.c_str()<<"Send Heartbeat to "<<vt.first<<std::endl;
                         WriterType::SendTo(m_heartbeat, vt.second);
                     }
                 }

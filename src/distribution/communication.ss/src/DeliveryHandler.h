@@ -419,6 +419,8 @@ namespace Com
             {
                 if (ch.welcome==UINT64_MAX)
                 {
+                    std::wcout<<L"COM: Got welcome from node "<<header->commonHeader.senderId<<
+                              L", seq: "<<header->sequenceNumber<<", "<<SendMethodToString(header->sendMethod).c_str()<<std::endl;
                     lllog(8)<<L"COM: Got welcome from node "<<header->commonHeader.senderId<<
                               L", seq: "<<header->sequenceNumber<<", "<<SendMethodToString(header->sendMethod).c_str()<<std::endl;
 
@@ -476,7 +478,7 @@ namespace Com
                 HandleWelcome(header, payload, ni);
             }
 
-            lllog(8)<<L"COM: recvAcked from: "<<header->commonHeader.senderId<<L", sendMethod: "<<
+            lllog(8)<<L"COM: HandleAckedMessage from: "<<header->commonHeader.senderId<<L", sendMethod: "<<
                       SendMethodToString(header->sendMethod).c_str()<<
                       L", seq: "<<header->sequenceNumber<<std::endl;
 
@@ -485,6 +487,7 @@ namespace Com
             if (header->sequenceNumber<ch.welcome)
             {
                 //this message was sent before we got a welcome message, i.e not for us
+                lllog(5)<<"Acked msg seq: "<<header->sequenceNumber<<" from: "<<header->commonHeader.senderId<<", was sent before we got welcome. I will not ack."<<std::endl;
                 return false; //dont send ack
             }
             else if (header->sequenceNumber<=ch.lastInSequence)

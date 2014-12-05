@@ -28,12 +28,11 @@
 #include "DataSenderTest.h"
 #include "DiscovererTest.h"
 
-
 //**********************************
 // Main - run all tests
 //**********************************
 int main(int argc, char* argv[])
-{    
+{
     boost::chrono::steady_clock::now();
 
     if (argc>1)

@@ -68,7 +68,7 @@ namespace Com
             ,m_heartbeatInterval(heartbeatInterval)
             ,m_retryTimeout(retryTimeout)
             ,m_useMulticast(useMulticast)
-            ,m_heartbeatSender(ioService, thisNodeId, m_ipVersion, localIf, McAddr(m_multicastAddress, m_useMulticast), heartbeatInterval)
+            ,m_heartbeatSender(ioService, id, thisNodeId, m_ipVersion, localIf, McAddr(m_multicastAddress, m_useMulticast), heartbeatInterval)
             ,m_ackedDataSender(ioService, Acked, m_id, thisNodeId, m_ipVersion, localIf, McAddr(m_multicastAddress, m_useMulticast), retryTimeout, Parameters::FragmentSize)
             ,m_unackedDataSender(ioService, Unacked, m_id, thisNodeId, m_ipVersion, localIf, McAddr(m_multicastAddress, m_useMulticast), retryTimeout, Parameters::FragmentSize)
         {

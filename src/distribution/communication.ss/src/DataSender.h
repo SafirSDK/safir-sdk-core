@@ -99,7 +99,11 @@ namespace Com
             ,m_retransmitNotification()
             ,m_queueNotFullNotification()
             ,m_queueNotFullNotificationLimit(0)
+            ,m_logPrefix([&]{std::ostringstream os;
+                             os<<"COM: ("<<DeliveryGuaranteeToString(deliveryGuarantee)<<"DataSender nodeType "<<nodeTypeId<<") - ";
+                             return os.str();}())
         {
+
             m_sendQueueSize=0;
             m_notifyQueueNotFull=false;
         }
@@ -158,7 +162,7 @@ namespace Com
             }
             else //not room for one more fragment
             {
-                lllog(5)<<"COM: SendQueue full"<<std::endl;
+                lllog(5)<<m_logPrefix.c_str()<<"SendQueue full"<<std::endl;
                 --m_sendQueueSize;
                 m_notifyQueueNotFull=true;
                 return false;
@@ -173,7 +177,7 @@ namespace Com
                 {
                     m_sendQueueSize-=static_cast<unsigned int>(totalNumberOfFragments);
                     //receiver does not exist so we just throw it away
-                    lllog(9)<<"COM: Receiver does not exist. Message will not be sent."<<std::endl;
+                    lllog(9)<<m_logPrefix.c_str()<<"Receiver does not exist. Message will not be sent."<<std::endl;
                     return;
                 }
 
@@ -215,14 +219,14 @@ namespace Com
         void HandleAck(const Ack& ack)
         {
             //Called from readStrand
-            if (Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().LogLevel()==9)
-            {
-                lllog(9)<<"COM: HandleAck "<<AckToString(ack).c_str()<<std::endl;
-            }
 
             //Will only check ack against sent messages. If an ack is received for a message that is still unsent, that ack will be ignored.
             m_strand.dispatch([=]
             {
+                if (Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().LogLevel()==9)
+                {
+                    lllog(9)<<m_logPrefix.c_str()<<"HandleAck "<<AckToString(ack).c_str()<<std::endl;
+                }
 
                 //Update queue
                 for (size_t i=0; i<m_sendQueue.first_unhandled_index(); ++i)
@@ -240,15 +244,16 @@ namespace Com
                                 auto ackSenderIt=m_nodes.find(ack.commonHeader.senderId);
                                 if (ackSenderIt==m_nodes.end())
                                 {
-                                    lllog(5)<<L"COM: Got ack from node that was not supposed to ack this message. Unknown node. "<<AckToString(ack).c_str()<<std::endl;
+                                    lllog(5)<<m_logPrefix.c_str()<<"Got ack from node that was not supposed to ack this message. Unknown node. "<<AckToString(ack).c_str()<<std::endl;
                                 }
                                 else if (!ackSenderIt->second.systemNode)
                                 {
-                                    lllog(5)<<L"COM: Got ack from node that was not supposed to ack this message. Node exist but is not systemNode. "<<AckToString(ack).c_str()<<std::endl;
+                                    lllog(5)<<m_logPrefix.c_str()<<"Got ack from node that was not supposed to ack this message. Node exist but is not systemNode. "<<AckToString(ack).c_str()<<std::endl;
                                 }
                                 else
                                 {
-                                    lllog(5)<<L"COM: Got duplicated ack. "<<AckToString(ack).c_str()<<std::endl;
+                                    //duplicated acks will be very common since the same ack has a missing list that is all zeroes in normal case
+                                    //lllog(5)<<m_logPrefix.c_str()<<"Got duplicated ack. "<<AckToString(ack).c_str()<<std::endl;
                                 }
                             }
                         }
@@ -265,22 +270,22 @@ namespace Com
                                 auto nodeIt=m_nodes.find(ack.commonHeader.senderId);
                                 if (nodeIt==m_nodes.end())
                                 {
-                                    lllog(1)<<L"COM: got Ack from node we dont have. Maybe it has been excluded just before we received the ack-message. Ack sender id: "<<ack.commonHeader.senderId<<std::endl;
+                                    lllog(1)<<m_logPrefix.c_str()<<"got Ack from node we dont have. Maybe it has been excluded just before we received the ack-message. Ack sender id: "<<ack.commonHeader.senderId<<std::endl;
                                 }
                                 else if (!nodeIt->second.systemNode)
                                 {
-                                    lllog(1)<<L"COM: got Ack from node that is not a systemNode. Maybe it was excluded just before we received the ack-message. Ack sender id: "<<
+                                    lllog(1)<<m_logPrefix.c_str()<<"got Ack from node that is not a systemNode. Maybe it was excluded just before we received the ack-message. Ack sender id: "<<
                                               ack.commonHeader.senderId<<std::endl;
                                 }
                                 else
                                 {
                                     //this should never happen, a programming error. Receiver missing message that we think has already been acked.
-                                    std::wostringstream os;
-                                    os<<L"COM ["<<m_nodeId<<L"]: Node["<<ack.commonHeader.senderId<<L"] is missing a message that has already been acked or we dont expect the node to get at all. "<<
-                                              SendMethodToString(ack.sendMethod).c_str()<<L" sequenceNumber: "<<ack.sequenceNumber;
-                                    os<<L"\n"<<SendQueueToString().c_str();
-                                    lllog(1)<<os.str()<<std::endl;
-                                    SEND_SYSTEM_LOG(Error, <<os.str()<<std::endl);
+                                    std::ostringstream os;
+                                    os<<m_logPrefix<<"Got ack from "<<ack.commonHeader.senderId<<" that indicates that the node is missing a message that has already been acked. "<<
+                                        " This does not have to be an error, it can occur if acks are re-ordered on the network. In that case the system will recover and continue normally"
+                                        " AckContent: "<<AckToString(ack)<<"\n"<<SendQueueToString();
+                                    lllog(1)<<os.str().c_str()<<std::endl;
+                                    SEND_SYSTEM_LOG(Error, <<os.str().c_str()<<std::endl);
                                 }
                             }
                         }
@@ -300,7 +305,7 @@ namespace Com
                 if (m_nodes.find(id)!=m_nodes.end())
                 {
                     std::ostringstream os;
-                    os<<"COM: Duplicated call to DataSender.AddNode with same nodeId! NodeId: "<<id<<", address: "<<address;
+                    os<<m_logPrefix.c_str()<<"Duplicated call to DataSender.AddNode with same nodeId! NodeId: "<<id<<", address: "<<address;
                     throw std::logic_error(os.str());
                 }
 
@@ -378,6 +383,7 @@ namespace Com
         QueueNotFull m_queueNotFullNotification;
         size_t m_queueNotFullNotificationLimit; //below number of used slots. NOT percent.
         std::atomic_bool m_notifyQueueNotFull;
+        const std::string m_logPrefix;
 
         void PostWelcome(int64_t nodeId)
         {
@@ -398,7 +404,8 @@ namespace Com
             userData->receivers.insert(nodeId);
             m_sendQueue.enqueue(userData);
 
-            lllog(8)<<L"COM: Welcome posted from "<<m_nodeId<<L" to "<<nodeId<<", seq: "<<ni.welcome<<std::endl;
+            std::wcout<<m_logPrefix.c_str()<<"Welcome posted from "<<m_nodeId<<L" to "<<nodeId<<", seq: "<<ni.welcome<<std::endl;
+            lllog(8)<<m_logPrefix.c_str()<<"Welcome posted from "<<m_nodeId<<L" to "<<nodeId<<", seq: "<<ni.welcome<<std::endl;
             HandleSendQueue();
         }
 
@@ -433,6 +440,8 @@ namespace Com
                 if (ud->header.sendMethod==MultiReceiverSendMethod) //this is message that shall be sent to every system node
                 {
                     SetRequestAck(ud->header);
+
+                    lllog(9)<<m_logPrefix.c_str()<<"Send to all seq: "<<ud->header.sequenceNumber<<", ackNow: "<<static_cast<int>(ud->header.ackNow)<<std::endl;
 
                     if (WriterType::IsMulticastEnabled()) //this node and all the receivers are capable of sending and receiving multicast
                     {
@@ -469,6 +478,7 @@ namespace Com
                     auto nodeIt=m_nodes.find(ud->header.commonHeader.receiverId);
                     if (nodeIt!=m_nodes.end())
                     {
+                        lllog(9)<<m_logPrefix.c_str()<<"Send to: "<<ud->header.commonHeader.receiverId<<",  seq: "<<ud->header.sequenceNumber<<", ackNow: "<<static_cast<int>(ud->header.ackNow)<<std::endl;
                         ud->receivers.insert(ud->header.commonHeader.receiverId);
                         NodeInfo& n=nodeIt->second;
                         WriterType::SendTo(ud, n.endpoint);
@@ -476,7 +486,7 @@ namespace Com
                     else
                     {
                         //Not a system node, remove from sendList
-                        lllog(8)<<L"COM: receiver does not exist, id:  "<<ud->header.commonHeader.receiverId<<std::endl;
+                        lllog(8)<<m_logPrefix.c_str()<<"receiver does not exist, id:  "<<ud->header.commonHeader.receiverId<<std::endl;
                     }
                 }
 
@@ -518,7 +528,7 @@ namespace Com
 
                 if (durationSinceSend>mustBeSeriousError)
                 {
-                    lllog(9)<<"COM: Seems like we are retransmitting forever. Seq: "<<ud->header.sequenceNumber<<", "<<
+                    lllog(9)<<m_logPrefix.c_str()<<"Seems like we are retransmitting forever. Seq: "<<ud->header.sequenceNumber<<", "<<
                               SendMethodToString(ud->header.sendMethod).c_str()<<L"\n"<<SendQueueToString().c_str()<<std::endl;
                 }
             }
@@ -543,14 +553,14 @@ namespace Com
 
                     WriterType::SendTo(ud, nodeIt->second.endpoint);
                     m_retransmitNotification(nodeIt->first);
-                    lllog(6)<<L"COM: retransmitted  "<<SendMethodToString(ud->header.sendMethod).c_str()<<
+                    lllog(6)<<m_logPrefix.c_str()<<"Retransmit  "<<SendMethodToString(ud->header.sendMethod).c_str()<<
                               ", seq: "<<ud->header.sequenceNumber<<" to "<<*recvIt<<std::endl;
                     ++recvIt;
                 }
                 else
                 {
                     //node does not exist anymore or is not part of the system, dont wait for this node anymore
-                    lllog(6)<<L"COM: Ignore retransmit to receiver that is not longer a system node  "<<
+                    lllog(6)<<m_logPrefix.c_str()<<"Ignore retransmit to receiver that is not longer a system node  "<<
                               (ud->header.sendMethod==SingleReceiverSendMethod ? "SingleReceiverMessage" : "MultiReceiverMessage")<<
                               ", seq: "<<ud->header.sequenceNumber<<" to "<<*recvIt<<std::endl;
                     ud->receivers.erase(recvIt++);
@@ -597,13 +607,17 @@ namespace Com
                     if (ud->receivers.empty())
                     {
                         //no more receivers in receiver list, then message is completed and shall be removed
-                        lllog(8)<<L"COM: remove message from sendQueue"<<std::endl;
+                        lllog(8)<<m_logPrefix.c_str()<<"Remove message from sendQueue, seq: "<<ud->header.sequenceNumber<<std::endl;
                         m_sendQueue.dequeue();
                         --m_sendQueueSize;
                     }
                     else
                     {
                         //message has not been acked by everyone
+                        for (auto r : ud->receivers)
+                        {
+                            lllog(8)<<m_logPrefix.c_str()<<"Cant remove seq: "<<ud->header.sequenceNumber<<", left: "<<r<<std::endl;
+                        }
                         break;
                     }
                 }

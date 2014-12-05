@@ -94,7 +94,7 @@ namespace Com
                   int64_t dataTypeIdentifier,
                   bool deliveryGuarantee);
 
-        size_t SendQueueCapacity(int64_t /*nodeTypeId*/) const {return Parameters::SendQueueSize;}
+        size_t SendQueueCapacity(int64_t nodeTypeId) const {return Parameters::SendQueueSize;}
         size_t NumberOfQueuedMessages(int64_t nodeTypeId) const;
         const std::string& Name() const {return m_me.name;}
         int64_t Id() const {return m_me.nodeId;}
