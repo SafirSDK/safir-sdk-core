@@ -80,6 +80,8 @@
 
 #include "../defs/DoseCom_Interface.h"
 
+extern void WakeUp_RequestPoolDistribution(int doseId);
+
 //---------------------
 // This bit is to check the sizes of our data types,
 // bad sizes will cause compilation errors
@@ -1207,11 +1209,27 @@ static THREAD_API RxThread(void *pChNum)
                     continue;
                 }
 
-                // case 5 - This should never happen
+                // case 5 - This should never happen ... but apparently it does since the log
+                // has appeared occasionally. We try to solve this situation by sending an ack (so the sender
+                // doesn' get stuck), ignoring the message and request a pool distribution from the sender.
 
-                PrintDbg("*   RxThread[%d] DoseId=%d Invalid SequenceNumber=%d. Exp=%d\n",
+                PrintDbg("*   RxThread[%d] DoseId=%d Invalid SequenceNumber=%d. Expected=%d\n",
                              MyIx, DoseId, MsgHdr.SequenceNumber,
                              1 + LatestSequenceNumber);
+
+                if(MsgHdr.bWantAck)
+                {
+                    Send_AckMsg(&TxSock,&TxAckMsg,MyIx,MsgHdr.IpAddrFrom_nw,
+                           MsgHdr.SequenceNumber, MsgHdr.TxMsgArray_Ix,
+                             MsgHdr.FragmentNumber, (dcom_ushort16)(0x100 | MsgHdr.Info));
+                }
+
+                // Save current SequenceNumber
+                g_RxQ[MyIx].RxNodeStatus[DoseId].SeqNumber[SeqNumSet]
+                                    = MsgHdr.SequenceNumber;
+
+                WakeUp_RequestPoolDistribution(DoseId);
+
                 continue;
             } // end SequenceNumber != ((1+LatestSequenceNumber)
 
