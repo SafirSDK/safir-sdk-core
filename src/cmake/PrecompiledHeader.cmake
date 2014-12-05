@@ -34,9 +34,7 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-MACRO(ADD_PRECOMPILED_HEADER _targetName _input)
-  GET_FILENAME_COMPONENT(_inputWe ${_input} NAME_WE)
-  SET(pch_source ${_inputWe}.cpp)
+function(ADD_PRECOMPILED_HEADER _targetName _input)
   FOREACH(arg ${ARGN})
     IF(arg STREQUAL FORCEINCLUDE)
       SET(FORCEINCLUDE ON)
@@ -46,6 +44,7 @@ MACRO(ADD_PRECOMPILED_HEADER _targetName _input)
   ENDFOREACH(arg)
 
   IF(MSVC)
+    GET_FILENAME_COMPONENT(_inputWe ${_input} NAME_WE)
     GET_TARGET_PROPERTY(sources ${_targetName} SOURCES)
     SET(_sourceFound FALSE)
     FOREACH(_source ${sources})
@@ -100,4 +99,4 @@ MACRO(ADD_PRECOMPILED_HEADER _targetName _input)
   ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
   UNSET(FORCEINCLUDE)
-ENDMACRO()
+endfunction()

@@ -238,9 +238,15 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
     set(precompiled_header_path ${safir-sdk-core_SOURCE_DIR}/src/dots/dots_v.ss/data/)
   endif()
 
+  #MSVC needs an extra source file, so we generate one
   if (MSVC)
-    #Visual C++ needs a "special" cpp file in its source list for precompiled headers to work,
-    list(APPEND cpp_files ${precompiled_header_path}precompiled_header_for_cpp.cpp)
+    add_custom_command(
+      OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/precompiled_header_for_cpp.cpp
+      COMMAND ${CMAKE_COMMAND} -E echo "//This is an automatically generated file." > ${CMAKE_CURRENT_BINARY_DIR}/precompiled_header_for_cpp.cpp
+      COMMAND ${CMAKE_COMMAND} -E echo "#include <precompiled_header_for_cpp.h>" >> ${CMAKE_CURRENT_BINARY_DIR}/precompiled_header_for_cpp.cpp
+      COMMENT "Creating precompiled_header_for_cpp.cpp for ${TARGET_NAME}"
+      VERBATIM)
+    list (APPEND cpp_files ${CMAKE_CURRENT_BINARY_DIR}/precompiled_header_for_cpp.cpp)
   endif()
 
   ADD_LIBRARY(safir_generated-${GEN_NAME}-cpp SHARED ${cpp_files})
@@ -260,15 +266,8 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
     FORCEINCLUDE)
 
   #include path for precompiled_header_for_cpp.h
-  if (SAFIR_EXTERNAL_BUILD)
-    target_include_directories(safir_generated-${GEN_NAME}-cpp
-      PRIVATE
-      ${SAFIR_SDK_CORE_GENERATION_DIR}/cpp)
-  else()
-    target_include_directories(safir_generated-${GEN_NAME}-cpp
-      PRIVATE ${safir-sdk-core_SOURCE_DIR}/src/dots/dots_v.ss/data)
-  endif()
-
+  target_include_directories(safir_generated-${GEN_NAME}-cpp
+    PRIVATE ${precompiled_header_path})
 
   target_link_libraries(safir_generated-${GEN_NAME}-cpp
     dots_cpp
