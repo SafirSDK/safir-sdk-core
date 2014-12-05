@@ -9,6 +9,7 @@
 *.mdb
 *.pdb
 *.gch
+*.pch
 precompiled_header_for_cpp.cpp
 
 #CMake stuff
