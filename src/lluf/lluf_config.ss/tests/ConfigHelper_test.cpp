@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(GetDouDirectories)
 
     std::vector<std::pair<std::string,std::string> > douFilePaths = ConfigHelper::GetDouDirectories(reader);
 
-    BOOST_REQUIRE_EQUAL (douFilePaths.size(), 3);
+    BOOST_REQUIRE_EQUAL (douFilePaths.size(), 3U);
 
     BOOST_REQUIRE_EQUAL(douFilePaths[0].first, "Default");
     BOOST_REQUIRE_EQUAL(douFilePaths[1].first, "Override");
