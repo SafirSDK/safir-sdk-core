@@ -59,7 +59,7 @@ class SimpleDispatcher:
     private boost::noncopyable
 {
 public:
-    explicit SimpleDispatcher(Safir::Dob::Connection & connection)
+    explicit SimpleDispatcher(Safir::Dob::Connection & /*connection*/)
         : m_dispatch(false)
     {
 
