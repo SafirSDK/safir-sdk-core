@@ -287,8 +287,6 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
   set_property(TARGET ${GEN_NAME}-dou PROPERTY
     CXX_INCLUDE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated_code/cpp/include/)
 
-  #TODO:precompiled headers?!
-
   ############
 
   #
