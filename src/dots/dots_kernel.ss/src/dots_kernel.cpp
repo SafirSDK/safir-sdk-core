@@ -966,6 +966,45 @@ DotsC_Int32 DotsC_DictionaryEntityIdKeyToIndex(const DotsC_TypeId typeId, const 
 //* Base operations on blobs
 //********************************************************
 
+void DotsC_CreateCopyOfBlob(char* & to, const char* from)
+{
+    Init();
+    const size_t size=static_cast<size_t>(RepositoryKeeper::GetBlobLayout()->GetSize(from));
+    to=new char[size];
+    memcpy(to, from, size);
+}
+
+void DotsC_DeleteBlob(char* & blob)
+{
+    Init();
+    RepositoryKeeper::GetBlobLayout()->DeleteBlob(blob);
+}
+
+//Reset changed flags for the members
+void DotsC_SetChanged(char* const blob,
+                      const bool changed)
+{
+    Init();
+    RepositoryKeeper::GetBlobLayout()->SetChanged(blob,changed);
+}
+
+void DotsC_SetChangedHere(char* const blob,
+                          const DotsC_MemberIndex member,
+                          const DotsC_ArrayIndex index,
+                          const bool changed)
+{
+    Init();
+    const Status status=RepositoryKeeper::GetBlobLayout()->GetMemberStatus(blob, member, index);
+    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(status.IsNull(), changed, blob, member, index);
+}
+
+void DotsC_SetChangedSinceLastRead(const char* const lastRead,
+                                   char* const current)
+{
+    Init();
+    RepositoryKeeper::GetBlobLayout()->SetChangedSinceLastRead(lastRead, current);
+}
+
 //Read operations
 DotsC_TypeId DotsC_GetTypeId(const char* blob)
 {

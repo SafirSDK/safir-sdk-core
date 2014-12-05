@@ -62,6 +62,44 @@ namespace
         return DotsC_GetSize(blob);
     }
 
+    //======================================================================
+//    char * CreateCopy(char const * const blob)
+//    {
+//        char * copy;
+//        DotsC_CreateCopyOfBlob(copy, blob);
+//        return copy;
+//    }
+
+//    void Delete(char * & blob)
+//    {
+//        DotsC_DeleteBlob(blob);
+//        blob = NULL;
+//    }
+
+//    //Sets all changed flags in the blob to false
+//    void SetChanged(char * const blob, const bool changed)
+//    {
+//        DotsC_SetChanged(blob, changed);
+//    }
+
+//    void SetChangedHere(char* const blob,
+//                        const Dob::Typesystem::MemberIndex member,
+//                        const Dob::Typesystem::ArrayIndex index,
+//                        const bool changed)
+//    {
+//        DotsC_SetChangedHere(blob,member,index,changed);
+//    }
+
+
+//    //Compare the two blobs and set the change flags in "mine" on all members that have
+//    //changed between "base" and "mine".
+//    void Diff(char const * const base,
+//              char * const mine)
+//    {
+//        DotsC_SetChangedSinceLastRead(base,mine);
+//        //TODO: rename the function in DOTS.
+//    }
+
     bool BlobOperations::IsChanged(const char* /*blob*/) {return false;}
     bool BlobOperations::IsChanged(const char* /*blob*/,
                                    const Dob::Typesystem::MemberIndex /*member*/,

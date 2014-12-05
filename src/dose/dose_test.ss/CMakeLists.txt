@@ -8,15 +8,15 @@ INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
 
 ADD_SUBDIRECTORY(util)
 ADD_SUBDIRECTORY(cpp)
-ADD_SUBDIRECTORY(dotnet)
+#ADD_SUBDIRECTORY(dotnet)
 
-if (SAFIR_JAVA_SUPPORT)
-  ADD_SUBDIRECTORY(java)
-endif()
+#if (SAFIR_JAVA_SUPPORT)
+#  ADD_SUBDIRECTORY(java)
+#endif()
 
-if (SAFIR_ADA_SUPPORT)
-  ADD_SUBDIRECTORY(ada)      
-endif ()
+#if (SAFIR_ADA_SUPPORT)
+#  ADD_SUBDIRECTORY(ada)      
+#endif ()
 
 
 

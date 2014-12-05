@@ -596,6 +596,53 @@ extern "C"
     // Operations on blobs
     //********************************************************
 
+    //Old operations
+    //----------------
+    // Function:    DotsC_CreateCopyOfBlob
+    // Parameters:  to - the copy to be created
+    //              from - the original blob
+    // Returns:     -
+    // Comments:    This method will create an exact copy of a blob. The blob 'to' shall not already
+    //              have been created since it will cause memory leaks. This method does not delete
+    //              the blob 'to' before it is allocated.
+    DOTS_KERNEL_API void DotsC_CreateCopyOfBlob(char* & to, const char* from);
+
+    // Function:    DotsC_DeleteBlob
+    // Parameters:  blob - the blob to be deleted
+    // Returns:     -
+    // Comments:    Deletes a blob. Blobs created within dots_kernel must be deleted there too.
+    //              This is the only method that performs a 'delete blob'. All other methods that
+    //              allocates relies on that this metod is used for deletion.
+    DOTS_KERNEL_API void DotsC_DeleteBlob(char* & blob);
+
+    /**
+     * Recursively set changed flags for all members in the blob.
+     *
+     * @param blob [in,out] - The blob to modify.
+     * @param changed [in] - The value to set all change flags to
+     */
+    DOTS_KERNEL_API void DotsC_SetChanged(char* blob, bool changed);
+
+    /**
+     * Set the change flag on one member (non-recursively).
+     *
+     * @param blob [in,out] - The blob to modify.
+     * @param member [in] - id of the member.
+     * @param index [in] - array index of member. Shall be 0 if member is not an array.
+     * @param changed [in] - The value to set change flag to.
+     */
+    DOTS_KERNEL_API void DotsC_SetChangedHere(char* blob,
+                                              DotsC_MemberIndex member,
+                                              DotsC_ArrayIndex index,
+                                              bool changed);
+
+    /**
+      * Set changed flags for all members in current that have been changed since last read object.
+      *
+      * @param lastRead [in] -  last read version of the object.
+      * @param current [in,out] -   the current version of the object.
+      */
+    DOTS_KERNEL_API void DotsC_SetChangedSinceLastRead(const char* lastRead, char* current);
 
     // Read operations
     //------------------------------------------------------------------------
