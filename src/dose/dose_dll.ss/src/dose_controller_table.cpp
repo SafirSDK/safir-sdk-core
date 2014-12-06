@@ -82,9 +82,11 @@ namespace Internal
 
         for (;;)
         {
+            //TODO: the long should be replaced with a type that is the same
+            //size in all languages and platforms. On 64 bit linux a long
+            //is larger than whatever type we use in dotnet...
             // Generate a unique id for the controller
-            ctrl = std::abs(static_cast<long>(Safir::Dob::Typesystem::Internal::GenerateRandom64Bit()));
-
+            ctrl = std::abs(static_cast<long>(0x0fffffff & Safir::Dob::Typesystem::Internal::GenerateRandom64Bit()));
             if (m_controllers.insert(std::make_pair(ctrl, controller)).second)
             {
                 break;
