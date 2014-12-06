@@ -14,17 +14,27 @@ include(ExternalProject)
 
 set(MY_SVN_REPOSITORY http://google-breakpad.googlecode.com/svn/trunk)
 set(MY_SVN_REVISION 1408)
+set(TARBALL_MD5 ef2824b22e75d18951e9040d1c5df9b3)
 
-set(CACHE_URL https://connect.consoden.se/safir/job/Breakpad%20cache/lastSuccessfulBuild/artifact/google-breakpad-${MY_SVN_REVISION}.tar.gz)
+set(CACHE_URL http://safir-jenkins-master:8080/safir/job/Breakpad%20cache/lastSuccessfulBuild/artifact/google-breakpad-${MY_SVN_REVISION}.tar.gz)
 
 file (DOWNLOAD ${CACHE_URL}
   ${CMAKE_CURRENT_BINARY_DIR}/google-breakpad.tar.gz
   STATUS download_result
-  EXPECTED_HASH MD5=ef2824b22e75d18951e9040d1c5df9b3)
+  )
+list (GET download_result 0 download_result_0)
 
-list (GET download_result 0 download_result)
+if (NOT download_result_0 EQUAL 0)
+  message(STATUS "Failed to download cached tarball: [${download_result}]")
+else()
+  file(MD5 ${CMAKE_CURRENT_BINARY_DIR}/google-breakpad.tar.gz md5)
+  if (NOT md5 STREQUAL TARBALL_MD5)
+    message(STATUS "MD5 mismatch. Expected ${TARBALL_MD5}")
+    message(STATUS "                   got ${md5}")
+  endif()
+endif()
 
-if (download_result EQUAL 0)
+if (download_result EQUAL 0 AND md5 STREQUAL TARBALL_MD5)
   message(STATUS "Found cached breakpad tarball.")
   set (DOWNLOAD_COMMANDS
     URL ${CMAKE_CURRENT_BINARY_DIR}/google-breakpad.tar.gz)
