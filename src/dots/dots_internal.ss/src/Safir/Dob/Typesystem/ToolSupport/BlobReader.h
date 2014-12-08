@@ -205,6 +205,8 @@ namespace ToolSupport
             os<<"Trying to write data of wrong collection type to a blob for member '"<<m_memberDescription->GetName()<<"' in class '"<<m_classDescription->GetName()<<"'";
             throw std::logic_error(os.str());
         }
+
+        friend class Internal::BlobUtils::BlobAccess;
     };
 }
 }

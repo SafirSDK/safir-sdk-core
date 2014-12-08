@@ -25,13 +25,7 @@
 #define __DOTS_INTERNAL_BLOB_WRITER_H__
 
 #include <assert.h>
-#include <string>
-#include <vector>
-#include <sstream>
-#include <boost/noncopyable.hpp>
-#include <Safir/Dob/Typesystem/ToolSupport/TypeRepository.h>
-#include <Safir/Dob/Typesystem/ToolSupport/Internal/InternalDefs.h>
-#include <Safir/Dob/Typesystem/ToolSupport/Internal/Blob.h>
+#include <Safir/Dob/Typesystem/ToolSupport/BlobReader.h>
 
 namespace Safir
 {
@@ -91,6 +85,16 @@ namespace ToolSupport
             ,m_blob(typeId, m_classDescription->GetNumberOfMembers())
         {
             Init();
+        }
+
+        BlobWriter(const BlobReader<RepositoryT, Traits>& reader)
+            :m_repository(Internal::BlobUtils::BlobAccess::GetRepository<BlobReader<RepositoryT, Traits> >(reader))
+            ,m_classDescription(m_repository->GetClass(reader.TypeId()))
+            ,m_memberDescription(NULL)
+            ,m_memberIndex(-1)
+            ,m_valueIndex(-1)
+            ,m_blob(Internal::BlobUtils::BlobAccess::GetBlob<BlobReader<RepositoryT, Traits> >(reader))
+        {
         }
 
         /**
@@ -379,9 +383,31 @@ namespace ToolSupport
         }
     };
 
-    //Free helper functions
-    //DiffBlob
-    //SetAllChanged
+    // Free helper functions
+    //------------------------------------
+
+    /**
+     * @brief SetAllChangeFlags
+     * @param writer
+     */
+    template <class RepositoryT>
+    void SetAllChangeFlags(BlobWriter<RepositoryT>& writer)
+    {
+
+    }
+
+    /**
+     * @brief MarkChanges
+     * @param writer
+     * @param origin
+     * @return
+     */
+    template <class RepositoryT>
+    bool MarkChanges(BlobWriter<RepositoryT>& writer, const BlobReader<RepositoryT> origin)
+    {
+        return true;
+
+    }
 }
 }
 }

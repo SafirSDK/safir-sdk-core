@@ -40,7 +40,7 @@ namespace ToolSupport
 {
 namespace Internal
 {
-    class AnyObject; //forward declaration of protoBuf type
+    class AnyObject; //forward declaration of protoBuf type     
 
     /**
      * Wrapper around a protobub AnyObject. No checks made here that a type is correct according to dou-files
@@ -216,6 +216,22 @@ namespace Internal
             {
                 return blob.GetValueBinary(member, index);
             }
+        };
+
+        struct BlobAccess
+        {
+            template <class T>
+            static const Safir::Dob::Typesystem::ToolSupport::Internal::Blob& GetBlob(const T& obj)
+            {
+                return obj.m_blob;
+            }
+
+            template <class T>
+            static const typename T::RepositoryType* GetRepository(const T& obj)
+            {
+                return obj.m_repository;
+            }
+
         };
     }
 
