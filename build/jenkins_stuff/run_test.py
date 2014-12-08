@@ -275,10 +275,11 @@ def build_examples():
 
     for (builddir, installdir) in dirs.items():
         os.chdir(builddir)
-        cmd = [os.path.join("..","build", "build.py"), "--jenkins"]
+        cmd = [os.path.join(olddir,"build", "build.py"), "--jenkins"]
         if installdir is not None:
             cmd += ("--install", installdir)
 
+        log ("Running command ", " ".join(cmd))
         result = subprocess.call(cmd,
                                  shell = sys.platform == "win32")
         if result != 0:
