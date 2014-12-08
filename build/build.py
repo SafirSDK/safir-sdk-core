@@ -145,6 +145,21 @@ def physical_memory():
     else:
         return None
 
+def num_jobs():
+    #We need to limit ourselves a little bit in how
+    #many parallel jobs we perform. Each job may use
+    #up to 400Mb of memory.
+    try:
+        num_jobs = num_cpus() + 1
+
+        mem_per_job = 400
+        memory = physical_memory()
+        if memory is not None and memory / self.num_jobs < mem_per_job:
+            num_jobs = max(1, int(memory / mem_per_job))
+    except:
+        num_jobs = 2
+    return num_jobs
+
 class DummyLogger(object):
     def log(self, data, tag = None):
         sys.stdout.write(data + "\n")
@@ -286,20 +301,25 @@ def add_linux_options(parser):
 
 def parse_command_line():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--jenkins",
-                        action="store_true",
-                        default=False,
-                        help="Increase verbosity and obey build matrix variables.")
+    action = parser.add_mutually_exclusive_group()
 
-    parser.add_argument("--package",
+    action.add_argument("--package",
                         action="store_true",
                         default=False,
-                        help="Build everything and one or more packages. This option may cause all "
-                        + "other options to be ignored...")
+                        help="Build everything and package the results for the current platform.")
+
+    action.add_argument("--install",
+                        metavar="PATH",
+                        help="Build the source in the current directory and install it to PATH")
 
     parser.add_argument("--skip-tests",
                         action = "store_true",
                         help="Skip running the unit tests")
+
+    parser.add_argument("--jenkins",
+                        action="store_true",
+                        default=False,
+                        help="Increase verbosity and obey build matrix variables.")
 
     parser.add_argument("--verbose", "-v",
                         action="count",
@@ -325,39 +345,29 @@ def parse_command_line():
 
 class BuilderBase(object):
     def __init__(self, arguments):
-        #We need to limit ourselves a little bit in how
-        #many parallel jobs we perform. Each job may use
-        #up to 400Mb of memory.
-        try:
-            self.num_jobs = num_cpus() + 1
-
-            mem_per_job = 400
-            memory = physical_memory()
-            if memory is not None and memory / self.num_jobs < mem_per_job:
-                self.num_jobs = max(1, int(memory / mem_per_job))
-        except:
-            self.num_jobs = 2
+        self.num_jobs = num_jobs()
 
         self.total_tests = 0
         self.failed_tests = 0
 
-        self.install_prefix = None #derived classes can override
+        self.arguments = arguments
+        self.__handle_command_line_arguments()
 
-        self.__handle_command_line_arguments(arguments)
-
-    def __handle_command_line_arguments(self,arguments):
-        self.configs = arguments.configs
+    def __handle_command_line_arguments(self):
+        self.configs = self.arguments.configs
 
         self.debug_only = False
-        if arguments.jenkins:
+        if self.arguments.jenkins:
             if os.environ.get("Config") == "DebugOnly":
                 logger.log("Using Config 'DebugOnly', building everything in Debug only.")
                 self.configs = ("Debug",)
                 self.debug_only = True
 
-        self.skip_tests = arguments.skip_tests
+        self.stagedir = os.path.join(os.getcwd(),"stage") if self.arguments.package else None
 
-        self.stagedir = os.path.join(os.getcwd(),"stage") if arguments.package else None
+        self.install_prefix = None #derived classes can override if arguments.package is true
+        if self.arguments.install:
+            self.install_prefix = self.arguments.install
 
     def build(self):
         for config in self.configs:
@@ -369,7 +379,7 @@ class BuilderBase(object):
                                   config)
             os.chdir(olddir)
 
-        if self.stagedir is not None:
+        if self.arguments.package:
             self.__package()
 
     def __package(self):
@@ -406,14 +416,16 @@ class BuilderBase(object):
 
         self._run_command(command,
                            "Build " + config)
-        if not self.skip_tests:
+        if not self.arguments.skip_tests:
             logger.log("   + testing", "brief")
             self.test()
             translate_results_to_junit(config)
 
-        if self.stagedir:
+        if self.arguments.package:
             logger.log("   + installing to staging area", "brief")
             self.__stage_install()
+        elif self.arguments.install:
+            self.__install()
 
     def __stage_install(self):
         for component in ("Runtime", "Development", "Test"):
@@ -424,6 +436,12 @@ class BuilderBase(object):
             env["DESTDIR"] = os.path.join(self.stagedir,component)
             self._run_command(command,
                                "Staged install " + component, env = env)
+
+    def __install(self):
+        command = (cmake(),
+                   "-P", "cmake_install.cmake")
+        self._run_command(command,
+                          "Installing to " + self.arguments.install)
     def stage_package(self):
         logger.log(" ! Packaging not implemented in this builder !","brief")
 
@@ -469,11 +487,6 @@ class BuilderBase(object):
         tests = int(match.group(2))
         self.total_tests += tests
         self.failed_tests += failed
-        #if failed == 0:
-        #    logger.log(" - All tests succeeded.","brief")
-        #else:
-        #    logger.log("!! " + str(failed) + " tests failed out of " + str(tests) + ".","brief")
-
 
 class VisualStudioBuilder(BuilderBase):
     def __init__(self, arguments):
@@ -490,17 +503,17 @@ class VisualStudioBuilder(BuilderBase):
             self.cmake_generator = "NMake Makefiles"
             self.have_jom = False
 
-        self.__handle_command_line_arguments(arguments)
+        self.__handle_command_line_arguments()
 
         self.__setup_build_environment()
     @staticmethod
     def can_use():
         return sys.platform == "win32"
 
-    def __handle_command_line_arguments(self,arguments):
-        self.use_studio = arguments.use_studio
+    def __handle_command_line_arguments(self):
+        self.use_studio = self.arguments.use_studio
 
-        if not is_64_bit() or arguments.build_32_bit:
+        if not is_64_bit() or self.arguments.build_32_bit:
             self.target_architecture = "x86"
         else:
             self.target_architecture = "x86-64"
@@ -622,7 +635,6 @@ class UnixGccBuilder(BuilderBase):
 
         self.install_target = "install"
         self.cmake_generator = "Unix Makefiles"
-        self.install_prefix = "/usr"
 
     @staticmethod
     def can_use():
@@ -632,13 +644,9 @@ class UnixGccBuilder(BuilderBase):
         return ( "-j", str(self.num_jobs))
 
 #this builder has nothing in common with the other builders, really.
-class DebianBuilder(object):
+class DebianPackager(object):
     def __init__(self, arguments):
-        #super(DebianBuilder, self).__init__(arguments)
-
-        #ada builds (with gnatmake) will look at environment variable that is
-        #defined on windows to determine parallellism. Define it on linux too.
-        #os.environ["NUMBER_OF_PROCESSORS"] = str(self.num_jobs)
+        self.num_jobs = num_jobs()
 
         #this builder doesnt support exposing test results.
         self.total_tests = -1
@@ -675,10 +683,14 @@ class DebianBuilder(object):
         self.__run(("/bin/tar", "xvfj", "safir-sdk-core_6.0.orig.tar.bz2"), "extracting archive")
         os.chdir("safir-sdk-core_6.0")
         shutil.copytree(os.path.join("build", "packaging", "debian"), "debian")
-        self.__run(("debuild", "--prepend-path", "/usr/lib/ccache/", "-us", "-uc"), "building packages")
+        self.__run(("debuild",
+                    "--prepend-path",
+                    "/usr/lib/ccache/",
+                    "-us", "-uc",
+                    "-eDEB_BUILD_OPTIONS=\"parallel="+ str(self.num_jobs) +"\""), "building packages")
         os.chdir(glob.glob("obj-*")[0])
         translate_results_to_junit("debhelper")
-        
+
 def getText(nodelist):
     rc = []
     for node in nodelist:
@@ -732,8 +744,8 @@ def translate_results_to_junit(suite_name):
 def get_builder(arguments):
     if VisualStudioBuilder.can_use():
         return VisualStudioBuilder(arguments)
-    elif arguments.package and DebianBuilder.can_use():
-        return DebianBuilder(arguments)
+    elif arguments.package and DebianPackager.can_use():
+        return DebianPackager(arguments)
     elif UnixGccBuilder.can_use():
         return UnixGccBuilder(arguments)
     else:
