@@ -94,6 +94,12 @@ namespace ToolSupport
         }
 
         /**
+         * @brief Get the type id of this BlobWriter.
+         * @return TypeId of the blob writer.
+         */
+        DotsC_TypeId TypeId() const {return m_blob.TypeId();}
+
+        /**
          * @brief Calculate the size of the blob in bytes.
          * @return Size in bytes.
          */
@@ -109,9 +115,18 @@ namespace ToolSupport
         /**
          * @brief Set the top level isChanged flag. Useful for empty collectons that still may have isChanged=true.
          * @param member[in] - Member index of the member.
-         * @param isChanged - Indicates if the member value is changed at top level.
+         * @param isChanged [in] - Indicates if the member value is changed at top level.
          */
         void SetChangedTopLevel(DotsC_MemberIndex member, bool isChanged) {m_blob.SetChangedTopLevel(member, isChanged);}
+
+        /**
+         * @brief Set the change flag for a member value.
+         * @param member [in] - Member index of the member.
+         * @param valueIndex [in] - Index of the value. If array this is the arrayIndex, if dictionary you
+         *                          have to find out the value index in some way. Sequences only have top-level change flag.
+         * @param isChanged [in] - The change flag value to set.
+         */
+        void SetChanged(DotsC_MemberIndex member, DotsC_Int32 valueIndex, bool isChanged) {m_blob.SetChanged(member, valueIndex, isChanged);}
 
         /**
          * Write member key to the a blob. Only use this when member is a dictionary otherwize the blob will be corrupt.

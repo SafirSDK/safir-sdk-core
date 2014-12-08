@@ -969,7 +969,7 @@ DotsC_Int32 DotsC_DictionaryEntityIdKeyToIndex(const DotsC_TypeId typeId, const 
 void DotsC_CreateCopyOfBlob(char* & to, const char* from)
 {
     Init();
-    const size_t size=static_cast<size_t>(RepositoryKeeper::GetBlobLayout()->GetSize(from));
+    size_t size=static_cast<size_t>(Reader::GetSize(from));
     to=new char[size];
     memcpy(to, from, size);
 }
@@ -977,32 +977,17 @@ void DotsC_CreateCopyOfBlob(char* & to, const char* from)
 void DotsC_DeleteBlob(char* & blob)
 {
     Init();
-    RepositoryKeeper::GetBlobLayout()->DeleteBlob(blob);
+    if (blob!=NULL)
+    {
+        delete[] blob;
+        blob=NULL;
+    }
 }
 
-//Reset changed flags for the members
-void DotsC_SetChanged(char* const blob,
-                      const bool changed)
+void DotsC_DiffBlob(const char* origin, char* current)
 {
     Init();
-    RepositoryKeeper::GetBlobLayout()->SetChanged(blob,changed);
-}
-
-void DotsC_SetChangedHere(char* const blob,
-                          const DotsC_MemberIndex member,
-                          const DotsC_ArrayIndex index,
-                          const bool changed)
-{
-    Init();
-    const Status status=RepositoryKeeper::GetBlobLayout()->GetMemberStatus(blob, member, index);
-    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(status.IsNull(), changed, blob, member, index);
-}
-
-void DotsC_SetChangedSinceLastRead(const char* const lastRead,
-                                   char* const current)
-{
-    Init();
-    RepositoryKeeper::GetBlobLayout()->SetChangedSinceLastRead(lastRead, current);
+    //RepositoryKeeper::GetBlobLayout()->SetChangedSinceLastRead(lastRead, current);
 }
 
 //Read operations
@@ -1351,6 +1336,54 @@ void DotsC_WriteBlob(DotsC_Handle writerHandle, char* blobDest)
     Init();
     Writer* writer=WriterFromHandle(writerHandle);
     writer->CopyRawBlob(blobDest);
+}
+
+void DotsC_WriteAllChangeFlags(DotsC_Handle writerHandle, bool changed)
+{
+    Init();
+//    Writer* writer=WriterFromHandle(writerHandle);
+//    const ClassDescriptionShm* cd=RepositoryKeeper::GetRepository()->GetClass(writer->TypeId());
+//    for (DotsC_MemberIndex memberIx=0; memberIx<cd->GetNumberOfMembers(); ++memberIx)
+//    {
+//        const MemberDescriptionShm* md=cd->GetMember(memberIx);
+//        switch (md->GetCollectionType())
+//        {
+//        case SingleValueCollectionType:
+//        {
+//            writer->SetChanged(memberIx, 0, changed);
+//        }
+//            break;
+
+//        case ArrayCollectionType:
+//        {
+
+//        }
+//            break;
+
+//        case SequenceCollectionType:
+//        {
+
+//        }
+//            break;
+
+//        case DictionaryCollectionType:
+//        {
+
+//        }
+//            break;
+//        }
+
+//    }
+}
+
+void DotsC_WriteChangeFlag(DotsC_Handle writerHandle,
+                           DotsC_MemberIndex member,
+                           DotsC_ArrayIndex index,
+                           bool changed)
+{
+    Init();
+    Writer* writer=WriterFromHandle(writerHandle);
+    writer->SetChanged(member, index, changed);
 }
 
 void DotsC_DeleteBlobWriter(DotsC_Handle writerHandle)

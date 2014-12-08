@@ -596,55 +596,7 @@ extern "C"
     // Operations on blobs
     //********************************************************
 
-    //Old operations
-    //----------------
-    // Function:    DotsC_CreateCopyOfBlob
-    // Parameters:  to - the copy to be created
-    //              from - the original blob
-    // Returns:     -
-    // Comments:    This method will create an exact copy of a blob. The blob 'to' shall not already
-    //              have been created since it will cause memory leaks. This method does not delete
-    //              the blob 'to' before it is allocated.
-    DOTS_KERNEL_API void DotsC_CreateCopyOfBlob(char* & to, const char* from);
-
-    // Function:    DotsC_DeleteBlob
-    // Parameters:  blob - the blob to be deleted
-    // Returns:     -
-    // Comments:    Deletes a blob. Blobs created within dots_kernel must be deleted there too.
-    //              This is the only method that performs a 'delete blob'. All other methods that
-    //              allocates relies on that this metod is used for deletion.
-    DOTS_KERNEL_API void DotsC_DeleteBlob(char* & blob);
-
-    /**
-     * Recursively set changed flags for all members in the blob.
-     *
-     * @param blob [in,out] - The blob to modify.
-     * @param changed [in] - The value to set all change flags to
-     */
-    DOTS_KERNEL_API void DotsC_SetChanged(char* blob, bool changed);
-
-    /**
-     * Set the change flag on one member (non-recursively).
-     *
-     * @param blob [in,out] - The blob to modify.
-     * @param member [in] - id of the member.
-     * @param index [in] - array index of member. Shall be 0 if member is not an array.
-     * @param changed [in] - The value to set change flag to.
-     */
-    DOTS_KERNEL_API void DotsC_SetChangedHere(char* blob,
-                                              DotsC_MemberIndex member,
-                                              DotsC_ArrayIndex index,
-                                              bool changed);
-
-    /**
-      * Set changed flags for all members in current that have been changed since last read object.
-      *
-      * @param lastRead [in] -  last read version of the object.
-      * @param current [in,out] -   the current version of the object.
-      */
-    DOTS_KERNEL_API void DotsC_SetChangedSinceLastRead(const char* lastRead, char* current);
-
-    // Read operations
+    // Raw blob operations - does not need a BlobReader/BlobWriter
     //------------------------------------------------------------------------
     /**
      * @brief Get the type id of the blob.
@@ -661,6 +613,37 @@ extern "C"
     DOTS_KERNEL_API DotsC_Int32 DotsC_GetSize(const char* blob);
 
     /**
+     * This method will create an exact copy of a blob. The blob 'to' shall not already
+     * have been created since it will cause memory leaks. This method does not delete
+     * the blob 'to' before it is allocated.
+     *
+     * @param to [in,out] - The copy to be created.
+     * @param from [in] - The original blob.
+     */
+    void DotsC_CreateCopyOfBlob(char* & to, const char* from);
+
+    /**
+     * Deletes a blob. Blobs created within dots_kernel must be deleted there too.
+     * This is the only method that performs a 'delete blob'. All other methods that
+     * allocates relies on that this metod is used for deletion.
+     *
+     * @param blob [in,out] - The blob to be deleted.
+     */
+    DOTS_KERNEL_API void DotsC_DeleteBlob(char* & blob);
+
+    /**
+      * Set changed flags for all members in current that are different from origin.
+      *
+      * @param origin [in] - The origin blob to compare against.
+      * @param current [in,out] -  The current version of the object that will have its change flags updated.
+      */
+    DOTS_KERNEL_API void DotsC_DiffBlob(const char* origin, char* current);
+
+
+    // Read operations
+    //------------------------------------------------------------------------
+
+    /**
      * @brief Create a new instance of blob reader.
      * @param blob [in] - The blob to read.
      * @return Handle to a new blob reader instance.
@@ -669,24 +652,50 @@ extern "C"
 
     /**
      * @brief Deletes an instance of blob reader.
-     * @param handle [in] - Handle of the blob readet to be deleted.
+     * @param handle [in] - Handle to the blob readet to be deleted.
      */
     DOTS_KERNEL_API void DotsC_DeleteBlobReader(DotsC_Handle handle);
 
-    DOTS_KERNEL_API DotsC_Int32 DotsC_GetNumberOfMemberValues(DotsC_Handle readerHandleHandle, DotsC_MemberIndex member);
+    /**
+     * Get the number of values for a member. If collection type is SingleValueCollectionType 1 will always be returned.
+     * @param readerHandle [in] - Handle to blob reader.
+     * @param member [in] - The member.
+     * @return Number of values.
+     */
+    DOTS_KERNEL_API DotsC_Int32 DotsC_GetNumberOfMemberValues(DotsC_Handle readerHandle, DotsC_MemberIndex member);
 
-    DOTS_KERNEL_API void DotsC_ReadMemberStatus(DotsC_Handle readerHandle, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex);
+    /**
+     * Read member status for a specific member.
+     *
+     * @param readerHandle [in] - Handle to blob reader.
+     * @param isNull [out] - The isNull status. Set to true if null.
+     * @param isChanged [out] - The isChanged status. Set to true if changed.
+     * @param member [in] - The member.
+     * @param valueIndex [in] - The value index.
+     */
+    DOTS_KERNEL_API void DotsC_ReadMemberStatus(DotsC_Handle readerHandle, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 valueIndex);
 
-    DOTS_KERNEL_API void DotsC_ReadInt32Member(DotsC_Handle readerHandle, DotsC_Int32& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode);
-    DOTS_KERNEL_API void DotsC_ReadInt64Member(DotsC_Handle readerHandle, DotsC_Int64& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode);
-    DOTS_KERNEL_API void DotsC_ReadFloat32Member(DotsC_Handle readerHandle, DotsC_Float32& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode);
-    DOTS_KERNEL_API void DotsC_ReadFloat64Member(DotsC_Handle readerHandle, DotsC_Float64& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode);
-    DOTS_KERNEL_API void DotsC_ReadBooleanMember(DotsC_Handle readerHandle, bool& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode);
-    DOTS_KERNEL_API void DotsC_ReadStringMember(DotsC_Handle readerHandle, const char*& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode);
-    DOTS_KERNEL_API void DotsC_ReadHashedMember(DotsC_Handle readerHandle, DotsC_Int64& val, const char*& optionalStr, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode);
-    DOTS_KERNEL_API void DotsC_ReadEntityIdMember(DotsC_Handle readerHandle, DotsC_EntityId& val, const char*& optionalStr, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode);
-    DOTS_KERNEL_API void DotsC_ReadBinaryMember(DotsC_Handle readerHandle, const char*& val, DotsC_Int32& size, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode);
-    DOTS_KERNEL_API void DotsC_ReadObjectMember(DotsC_Handle readerHandle, const char*& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode);
+    /**
+     * Read a value from the blob managed by the specified blob reader.
+     *
+     * @param readerHandle [in] - Handle to blob reader.
+     * @param val [out] - Read value.
+     * @param isNull [out] - Null flag.
+     * @param isChanged [out] - Change flag.
+     * @param member [in] - Member to read.
+     * @param valueIndex [in] - Value index to read.
+     * @param keyValMode [in] - Specify if we want to read a key or value. Key is only allowed if member is a dictionary.
+     */
+    DOTS_KERNEL_API void DotsC_ReadInt32Member(DotsC_Handle readerHandle, DotsC_Int32& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 valueIndex, DotsC_KeyValMode keyValMode);
+    DOTS_KERNEL_API void DotsC_ReadInt64Member(DotsC_Handle readerHandle, DotsC_Int64& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 valueIndex, DotsC_KeyValMode keyValMode);
+    DOTS_KERNEL_API void DotsC_ReadFloat32Member(DotsC_Handle readerHandle, DotsC_Float32& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 valueIndex, DotsC_KeyValMode keyValMode);
+    DOTS_KERNEL_API void DotsC_ReadFloat64Member(DotsC_Handle readerHandle, DotsC_Float64& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 valueIndex, DotsC_KeyValMode keyValMode);
+    DOTS_KERNEL_API void DotsC_ReadBooleanMember(DotsC_Handle readerHandle, bool& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 valueIndex, DotsC_KeyValMode keyValMode);
+    DOTS_KERNEL_API void DotsC_ReadStringMember(DotsC_Handle readerHandle, const char*& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 valueIndex, DotsC_KeyValMode keyValMode);
+    DOTS_KERNEL_API void DotsC_ReadHashedMember(DotsC_Handle readerHandle, DotsC_Int64& val, const char*& optionalStr, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 valueIndex, DotsC_KeyValMode keyValMode);
+    DOTS_KERNEL_API void DotsC_ReadEntityIdMember(DotsC_Handle readerHandle, DotsC_EntityId& val, const char*& optionalStr, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 valueIndex, DotsC_KeyValMode keyValMode);
+    DOTS_KERNEL_API void DotsC_ReadBinaryMember(DotsC_Handle readerHandle, const char*& val, DotsC_Int32& size, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 valueIndex, DotsC_KeyValMode keyValMode);
+    DOTS_KERNEL_API void DotsC_ReadObjectMember(DotsC_Handle readerHandle, const char*& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 valueIndex, DotsC_KeyValMode keyValMode);
 
 
     // Write operations
@@ -696,11 +705,60 @@ extern "C"
      * @param typeId [in] - The type of blob to be written.
      * @return Handle to a new blob writer instance.
      */
-    DOTS_KERNEL_API DotsC_Handle DotsC_CreateBlobWriter(DotsC_TypeId typeId);    
-    DOTS_KERNEL_API void DotsC_DeleteBlobWriter(DotsC_Handle handle);
-    DOTS_KERNEL_API DotsC_Int32 DotsC_CalculateBlobSize(DotsC_Handle writerHandleHandle);
-    DOTS_KERNEL_API void DotsC_WriteBlob(DotsC_Handle writerHandle, char* blobDest);
+    DOTS_KERNEL_API DotsC_Handle DotsC_CreateBlobWriter(DotsC_TypeId typeId);
 
+    /**
+     * @brief Deletes an instance of blob writer.
+     * @param writeHandle [in] - Handle to the blob writer to be deleted.
+     */
+    DOTS_KERNEL_API void DotsC_DeleteBlobWriter(DotsC_Handle writeHandle);
+
+    /**
+     * Calculate the needed size of the destination blob when calling WriteBlob with this writeHandle.
+     * @param writeHandle [in] - Handle to blob writer.
+     * @return Number of bytes needed to be allocated before serializing to a raw blob.
+     */
+    DOTS_KERNEL_API DotsC_Int32 DotsC_CalculateBlobSize(DotsC_Handle writeHandle);
+
+    /**
+     * Write content of a blob writer to a raw blob. The blobDest must be preallocated with enough capacity
+     * to contain the raw blob. Use CalculateBlobSize to get the needed size.
+     * @param writeHandle [in] - Handle to blob writer.
+     * @param blobDest [in, out] - Preallocated raw blob. After this call blobDest contains the binary serialization.
+     */
+    DOTS_KERNEL_API void DotsC_WriteBlob(DotsC_Handle writeHandle, char* blobDest);
+
+    /**
+     * Recursively set changed flags for all members.
+     *
+     * @param writerHandle [in,out] - Handle to blob writer.
+     * @param changed [in] - The value to set all change flags to
+     */
+    DOTS_KERNEL_API void DotsC_WriteAllChangeFlags(DotsC_Handle writerHandle, bool changed);
+
+    /**
+     * Set the change flag on one member (non-recursively).
+     *
+     * @param writerHandle [in,out] - Handle to a blob writer.
+     * @param member [in] - id of the member.
+     * @param index [in] - array index of member. Shall be 0 if member is not an array.
+     * @param changed [in] - The value to set change flag to.
+     */
+    DOTS_KERNEL_API void DotsC_WriteChangeFlag(DotsC_Handle writerHandle,
+                                               DotsC_MemberIndex member,
+                                               DotsC_ArrayIndex index,
+                                               bool changed);
+
+    /**
+     * Write a value to the blob managed by the specified blob writer.
+     * @param writerHandle [in] - Handle to blob writer.
+     * @param val [in] - The value to write.
+     * @param isNull [in] - Null flag.
+     * @param isChanged [in] - Change flag.
+     * @param member [in] - The member to write.
+     * @param arrayIndex [in] - ArrayIndex, only relevant if member is an array.
+     * @param keyValMode [in] - Specify if we want to write a key or value. Key is only allowed if member is a dictionary.
+     */
     DOTS_KERNEL_API void DotsC_WriteInt32Member(DotsC_Handle writerHandle, DotsC_Int32 val, bool isNull, bool isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode);
     DOTS_KERNEL_API void DotsC_WriteInt32Member(DotsC_Handle writerHandle, DotsC_Int32 val, bool isNull, bool isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode);
     DOTS_KERNEL_API void DotsC_WriteInt64Member(DotsC_Handle writerHandle, DotsC_Int64 val, bool isNull, bool isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode);
