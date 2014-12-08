@@ -884,7 +884,7 @@ def parameter_is_array(dou, table_line):
 
 def parameter_is_dictionary(dou, table_line):
     return trim_false(len(dou.parameters) > 0 and (dou.parameters[table_line - 1].dictionary_type is not None))
-
+    
 def member_is_array(dou, table_line):
     return trim_false(len(dou.members) > 0 and ((dou.members[table_line - 1].arraySize is not None) or (dou.members[table_line - 1].array is not None) or dou.members[table_line - 1].arraySizeRef))
     

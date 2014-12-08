@@ -62,24 +62,33 @@ void callback(const pid_t pid)
 
 int main(int argc, char** argv)
 {
-    { //scope for the temporary variables
-        const std::vector<std::string> pidStrings(argv + 1, argv + argc);
+    std::wcout << "Starting" << std::endl;
+    const std::vector<std::string> pidStrings(argv + 1, argv + argc);
 
-        for(std::vector<std::string>::const_iterator it = pidStrings.begin();
-            it != pidStrings.end(); ++it)
-        {
-            pids.insert(boost::lexical_cast<pid_t>(*it));
-        }
+    for(std::vector<std::string>::const_iterator it = pidStrings.begin();
+        it != pidStrings.end(); ++it)
+    {
+        pids.insert(boost::lexical_cast<pid_t>(*it));
     }
+    std::wcout << "Got " << pids.size() << " pids to monitor" << std::endl;
 
+    std::wcout << "Starting thread" << std::endl;
+
+    boost::shared_ptr<boost::asio::io_service::work> work(new boost::asio::io_service::work(ioService));
     boost::thread thread(boost::bind(&boost::asio::io_service::run,&ioService));
 
-    for(std::set<pid_t>::iterator it = pids.begin(); it != pids.end(); ++it)
+    std::wcout << "Adding pids to monitor" << std::endl;
+    for(std::vector<std::string>::const_iterator it = pidStrings.begin();
+        it != pidStrings.end(); ++it)
     {
-        monitor.StartMonitorPid(*it);
+        monitor.StartMonitorPid(boost::lexical_cast<pid_t>(*it));
     }
+    work.reset();
 
+    std::wcout << "Running io_service" << std::endl;
     ioService.run();
+    std::wcout << "Joining thread" << std::endl;
     thread.join();
+    std::wcout << "Done, pids remaining " << pids.size() << std::endl;
     return static_cast<int>(pids.size());
 }
