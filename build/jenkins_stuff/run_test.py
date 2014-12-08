@@ -3,6 +3,7 @@
 ###############################################################################
 #
 # Copyright Saab AB, 2014 (http://safir.sourceforge.net)
+# Copyright Consoden AB, 2014 (http://www.consoden.se)
 #
 # Created by: Lars Hagstrom / lars.hagstrom@consoden.se
 #
@@ -265,11 +266,25 @@ def run_test_suite():
         raise SetupError("Test suite failed. Returncode = " + str(result))
 
 def build_examples():
-    os.chdir("examples")
-    result = subprocess.call((os.path.join("..","build", "build.py"), "--jenkins", "--skip-tests"),
-                             shell = sys.platform == "win32")
-    if result != 0:
-        raise SetupError("Build examples failed. Returncode = " + str(result))
+    olddir = os.getcwd()
+    dirs = {"examples" : None,
+            "src/dots/dots_dobmake.ss/tests/tree" : None,
+            "src/dots_dobmake.ss/tests/separate_dirs/dous_1" : os.path.join(olddir, "inst"),
+            "src/dots_dobmake.ss/tests/separate_dirs/dous_2" : os.path.join(olddir, "inst"),
+            "src/dots_dobmake.ss/tests/separate_dirs/dous_3" : os.path.join(olddir, "inst")}
+
+    for (builddir, installdir) in dirs:
+        os.chdir(builddir)
+        cmd = [os.path.join("..","build", "build.py"), "--jenkins"]
+        if installdir is not None:
+            cmd.append(("--install", installdir))
+
+        result = subprocess.call(cmd,
+                                 shell = sys.platform == "win32")
+        if result != 0:
+            raise SetupError("Build examples failed. Returncode = " + str(result))
+
+        os.chdir(olddir)
 
 def parse_command_line():
     parser = argparse.ArgumentParser()
