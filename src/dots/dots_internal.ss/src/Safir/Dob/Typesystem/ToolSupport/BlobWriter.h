@@ -117,7 +117,15 @@ namespace ToolSupport
          * @param member[in] - Member index of the member.
          * @param isChanged [in] - Indicates if the member value is changed at top level.
          */
-        void SetChangedTopLevel(DotsC_MemberIndex member, bool isChanged) {m_blob.SetChangedTopLevel(member, isChanged);}
+        void SetChangedTopLevel(DotsC_MemberIndex member, bool isChanged)
+        {
+            const MemberDescriptionType* md=m_classDescription->GetMembner(member);
+            DotsC_CollectionType collectionType=md->GetCollectionType();
+            if (collectionType==SequenceCollectionType || collectionType==DictionaryCollectionType)
+            {
+                m_blob.SetChangedTopLevel(member, isChanged);
+            }
+        }
 
         /**
          * @brief Set the change flag for a member value.
@@ -240,7 +248,6 @@ namespace ToolSupport
                     break;
                 }
             }
-
         }
 
         inline void MoveToMember(DotsC_MemberIndex member)
@@ -371,6 +378,10 @@ namespace ToolSupport
             m_blob.SetValueBinary(m_memberIndex, m_valueIndex, val.first, val.second);
         }
     };
+
+    //Free helper functions
+    //DiffBlob
+    //SetAllChanged
 }
 }
 }

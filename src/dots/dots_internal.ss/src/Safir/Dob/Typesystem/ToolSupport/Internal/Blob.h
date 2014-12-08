@@ -100,7 +100,7 @@ namespace Internal
         //----------------------------------------
         // Write
         //----------------------------------------        
-        //set isChanged on top level, only meaningful for containers and objects
+        //set isChanged on top level, only meaningful for sequences and dictionaries
         void SetChangedTopLevel(int member, bool isChanged);
 
         //append a new value to current member and set the changeFlag and isNull=true

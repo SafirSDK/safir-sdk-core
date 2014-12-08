@@ -72,9 +72,22 @@ namespace Internal
         */
         static Int32 GetSize(char const * const blob);
 
+        /**
+         * Allocate and create a copy of a blob. The returned blob must be
+         * deallocated using BlobOperations::Delete.
+         *
+         * @param blob [in] - The blob to be copied.
+         * @return Copy of blob;
+         */
+        static char* CreateCopy(const char* blob);
 
-        //REMOVE
-        static bool IsChanged(const char* blob);
+        /**
+         * Delete a blob that has been allocated by CreateCopy.
+         *
+         * @param blob [in,out] - Blob to be deleted.
+         */
+        static void Delete(char* & blob);
+
         static bool IsChanged(const char* blob,
                               const Dob::Typesystem::MemberIndex member,
                               const Dob::Typesystem::ArrayIndex index);
@@ -84,10 +97,9 @@ namespace Internal
                                    const Dob::Typesystem::ArrayIndex index,
                                    bool val);
         //REMOVE
-        static void SetChanged(const char* blob, bool val);
+        static void SetChanged(char* blob, bool val);
         //REMOVE
-        static char* CreateCopy(const char* blob);
-        static void Delete(char* & blob);
+
         static void Diff(const char* pref, char* & diff);
 
 

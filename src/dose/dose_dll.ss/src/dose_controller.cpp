@@ -919,31 +919,6 @@ namespace Internal
             if (typeId == m_dispatchedInjection.GetTypeId() &&
                 instanceId == m_dispatchedInjection.GetInstanceId())
             {
-                if (onInjNewCb || onInjUpdCb)
-                {
-                    if (!Dob::Typesystem::Internal::BlobOperations::IsChanged(blob))
-                    {
-                        // The app is calling Set in an OnInjectedNew or OnInjectedUpdate callback.
-                        // In this case we check that the app really has changed some member and isn't
-                        // just setting the same entity as received in the callback.
-                        std::wostringstream ostr;
-                        ostr << "Calling SetAll or SetChanges in an";
-                        if (onInjNewCb)
-                        {
-                            ostr << " OnInjectedNewEntity";
-                        }
-                        else
-                        {
-                            ostr << " OnInjectedUpdatedEntity";
-                        }
-                        ostr << " callback with hasn't been changed!"
-                             << " The app has probably not been modified to the new way of accepting"
-                             << " an injected entity (the new way is to do nothing). (Type = "
-                             << Typesystem::Operations::GetName(typeId) << " and instance = " << instanceId
-                             << " and handler = " << handlerId << ")";
-                        throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
-                    }
-                }
                 // The app is calling set in an OnInject callback.
                 m_setInjectedEntity = true;
 

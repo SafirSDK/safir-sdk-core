@@ -116,12 +116,15 @@ namespace ToolSupport
         DotsC_TypeId TypeId() const {return m_blob.TypeId();}
 
         /**
-         * Check if the member is changed at top level. For simple values this is the same as the change flag of the value,
-         * but for collections and objects changed at top level indicates that the collection or object has changed in some way.
+         * Check if the member is changed at top level. For simple values this has no meaning.
+         * For sequences and dictionaries changed at top level indicates that the collection has changed in some way.
          * @param member
          * @return
          */
-        bool IsChangedTopLevel(DotsC_MemberIndex member) const {return m_blob.IsChangedTopLevel(member);}
+        bool IsChangedTopLevel(DotsC_MemberIndex member) const
+        {
+            return m_blob.IsChangedTopLevel(member);
+        }
 
         /**
          * @brief Get the number of values for the member. Only collections may contain more than one value.

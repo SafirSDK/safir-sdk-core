@@ -63,18 +63,6 @@ namespace
     }
 
     //======================================================================
-//    char * CreateCopy(char const * const blob)
-//    {
-//        char * copy;
-//        DotsC_CreateCopyOfBlob(copy, blob);
-//        return copy;
-//    }
-
-//    void Delete(char * & blob)
-//    {
-//        DotsC_DeleteBlob(blob);
-//        blob = NULL;
-//    }
 
 //    //Sets all changed flags in the blob to false
 //    void SetChanged(char * const blob, const bool changed)
@@ -100,7 +88,19 @@ namespace
 //        //TODO: rename the function in DOTS.
 //    }
 
-    bool BlobOperations::IsChanged(const char* /*blob*/) {return false;}
+    char* BlobOperations::CreateCopy(const char* blob)
+    {
+        char* copy;
+        DotsC_CreateCopyOfBlob(copy, blob);
+        return copy;
+    }
+
+    void BlobOperations::Delete(char* & blob)
+    {
+        DotsC_DeleteBlob(blob);
+        blob=NULL;
+    }
+
     bool BlobOperations::IsChanged(const char* /*blob*/,
                                    const Dob::Typesystem::MemberIndex /*member*/,
                                    const Dob::Typesystem::ArrayIndex /*index*/)
@@ -114,15 +114,21 @@ namespace
                                         const Dob::Typesystem::ArrayIndex /*index*/,
                                         bool /*val*/)
     {
-        //TODO: Remove
+        //TODO:
     }
 
-    //REMOVE
-    void BlobOperations::SetChanged(const char* , bool ) {}
-    //REMOVE
-    char* BlobOperations::CreateCopy(const char* ) {return NULL;}
-    void BlobOperations::Delete(char* &) {}
-    void BlobOperations::Diff(const char*, char* &) {}
+    void BlobOperations::SetChanged(char* , bool )
+    {
+        //TODO:
+    }
+
+
+
+    void BlobOperations::Diff(const char*, char* &)
+    {
+        //TODO:
+    }
+
 
     /**********************************************************************
      *
