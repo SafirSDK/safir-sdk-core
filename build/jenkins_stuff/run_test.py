@@ -273,7 +273,7 @@ def build_examples():
             "src/dots_dobmake.ss/tests/separate_dirs/dous_2" : os.path.join(olddir, "inst"),
             "src/dots_dobmake.ss/tests/separate_dirs/dous_3" : os.path.join(olddir, "inst")}
 
-    for (builddir, installdir) in dirs:
+    for (builddir, installdir) in dirs.items():
         os.chdir(builddir)
         cmd = [os.path.join("..","build", "build.py"), "--jenkins"]
         if installdir is not None:
