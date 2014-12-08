@@ -269,9 +269,9 @@ def build_examples():
     olddir = os.getcwd()
     dirs = {"examples" : None,
             "src/dots/dots_dobmake.ss/tests/tree" : None,
-            "src/dots_dobmake.ss/tests/separate_dirs/dous_1" : os.path.join(olddir, "inst"),
-            "src/dots_dobmake.ss/tests/separate_dirs/dous_2" : os.path.join(olddir, "inst"),
-            "src/dots_dobmake.ss/tests/separate_dirs/dous_3" : os.path.join(olddir, "inst")}
+            "src/dots/dots_dobmake.ss/tests/separate_dirs/dous_1" : os.path.join(olddir, "inst"),
+            "src/dots/dots_dobmake.ss/tests/separate_dirs/dous_2" : os.path.join(olddir, "inst"),
+            "src/dots/dots_dobmake.ss/tests/separate_dirs/dous_3" : os.path.join(olddir, "inst")}
 
     for (builddir, installdir) in dirs.items():
         os.chdir(builddir)
