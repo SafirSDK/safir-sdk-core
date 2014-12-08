@@ -275,7 +275,7 @@ def build_examples():
             }
     for (builddir, installdir) in dirs.items():
         os.chdir(builddir)
-        cmd = [os.path.join(olddir,"build", "build.py"), "--jenkins"]
+        cmd = [os.path.join(olddir,"build", "build.py"), "--jenkins", "--skip-tests"]
         if installdir is not None:
             cmd += ("--install", installdir)
 
