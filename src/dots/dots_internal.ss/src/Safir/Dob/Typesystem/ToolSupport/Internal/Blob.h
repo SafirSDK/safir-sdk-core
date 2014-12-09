@@ -231,7 +231,6 @@ namespace Internal
             {
                 return obj.m_repository;
             }
-
         };
     }
 

@@ -54,12 +54,15 @@ namespace ToolSupport
      *      ChannelId   => pair<DotsC_Int64, const char* optional_string>
      *      EntityId    => pair<DotsC_EntityId, const char* optional_instance_string>
      *      Binary      => pair<const char* data, DostC_Int32 size>
-     *      Object      => pair<const char* blob, DostC_Int32 size> (a valid blob pointer and blob size)
+     *      Object      => pair<const char* blob, DostC_Int32 size> or another BlobWriter
+     *
      */
     template <class RepositoryT, class Traits=Safir::Dob::Typesystem::ToolSupport::TypeRepositoryTraits<RepositoryT> >
     class BlobWriter : private boost::noncopyable
     {
     public:
+        typedef BlobWriter<RepositoryT, Traits> BlobWriterType;
+        typedef BlobReader<RepositoryT, Traits> BlobReaderType;
         typedef typename Traits::RepositoryType RepositoryType;
         typedef typename Traits::ClassDescriptionType ClassDescriptionType;
         typedef typename Traits::MemberDescriptionType MemberDescriptionType;
@@ -87,7 +90,7 @@ namespace ToolSupport
             Init();
         }
 
-        BlobWriter(const BlobReader<RepositoryT, Traits>& reader)
+        BlobWriter(const BlobReaderType& reader)
             :m_repository(Internal::BlobUtils::BlobAccess::GetRepository<BlobReader<RepositoryT, Traits> >(reader))
             ,m_classDescription(m_repository->GetClass(reader.TypeId()))
             ,m_memberDescription(NULL)
@@ -107,14 +110,14 @@ namespace ToolSupport
          * @brief Calculate the size of the blob in bytes.
          * @return Size in bytes.
          */
-        DotsC_Int32 CalculateBlobSize() {return m_blob.CalculateBlobSize();}
+        DotsC_Int32 CalculateBlobSize() const {return m_blob.CalculateBlobSize();}
 
         /**
          * @brief Copy the binarey blob into a destination buffer. The destBlob must already have been allocated and
          * the size of destBlob must be at least the number of bytes retured by a preceeding call to CalculateBlobSize().
          * @param destBlob [in] - Pointer to an allocated buffer of sufficient size.
          */
-        void CopyRawBlob(char* destBlob) {m_blob.Serialize(destBlob);}
+        void CopyRawBlob(char* destBlob) const {m_blob.Serialize(destBlob);}
 
         /**
          * @brief Set the top level isChanged flag. Useful for empty collectons that still may have isChanged=true.
@@ -216,13 +219,126 @@ namespace ToolSupport
             }
         }
 
+        void SetAllChangeFlags(bool isChanged)
+        {
+            bool dummy=false, isNull=false;
+
+            for (int memIx=0; memIx<m_classDescription->GetNumberOfMembers(); ++memIx)
+            {
+                const MemberDescriptionType* md=m_classDescription->GetMember(memIx);
+
+                switch (md->GetCollectionType())
+                {
+                case SingleValueCollectionType:
+                {
+                    m_blob.SetChanged(memIx, 0, isChanged);
+                    if (md->GetMemberType()==ObjectMemberType)
+                    {
+                        m_blob.ValueStatus(memIx, 0, isNull, dummy);
+                        if (!isNull)
+                        {
+                            std::pair<const char*, DotsC_Int32> obj=m_blob.GetValueBinary(memIx, 0);
+                            BlobWriterType inner(BlobReaderType(m_repository, obj.first));
+                            inner.SetAllChangeFlags(isChanged);
+                            WriteValue(memIx, 0, inner, isNull, isChanged);
+                        }
+                    }
+                }
+                    break;
+                case ArrayCollectionType:
+                {
+                    if (md->GetMemberType()==ObjectMemberType)
+                    {
+                        for (int valIx=0; valIx<m_blob.NumberOfValues(memIx); ++valIx)
+                        {
+                            m_blob.ValueStatus(memIx, valIx, isNull, dummy);
+                            if (isNull)
+                            {
+                                m_blob.SetChanged(memIx, valIx, isChanged);
+                            }
+                            else
+                            {
+                                std::pair<const char*, DotsC_Int32> obj=m_blob.GetValueBinary(memIx, valIx);
+                                BlobWriterType inner(BlobReaderType(m_repository, obj.first));
+                                inner.SetAllChangeFlags(isChanged);
+                                WriteValue(memIx, valIx, inner, isNull, isChanged);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        for (int valIx=0; valIx<m_blob.NumberOfValues(memIx); ++valIx)
+                        {
+                            m_blob.SetChanged(memIx, valIx, isChanged);
+                        }
+                    }
+                }
+                    break;
+                case SequenceCollectionType:
+                {
+                    m_blob.SetChangedTopLevel(memIx, isChanged);
+                    if (md->GetMemberType()==ObjectMemberType)
+                    {
+                        for (int valIx=0; valIx<m_blob.NumberOfValues(memIx); ++valIx)
+                        {
+                            m_blob.ValueStatus(memIx, valIx, isNull, dummy);
+                            if (isNull)
+                            {
+                                m_blob.SetChanged(memIx, valIx, isChanged);
+                            }
+                            else
+                            {
+                                std::pair<const char*, DotsC_Int32> obj=m_blob.GetValueBinary(memIx, valIx);
+                                BlobWriterType inner(BlobReaderType(m_repository, obj.first));
+                                inner.SetAllChangeFlags(isChanged);
+                                WriteValue(memIx, valIx, inner, isNull, isChanged);
+                            }
+                        }
+                    }
+                }
+                    break;
+                case DictionaryCollectionType:
+                {
+                    m_blob.SetChangedTopLevel(memIx, isChanged);
+                    if (md->GetMemberType()==ObjectMemberType)
+                    {
+                        for (int valIx=0; valIx<m_blob.NumberOfValues(memIx); ++valIx)
+                        {
+                            m_blob.ValueStatus(memIx, valIx, isNull, dummy);
+                            if (isNull)
+                            {
+                                m_blob.SetChanged(memIx, valIx, isChanged);
+                            }
+                            else
+                            {
+                                std::pair<const char*, DotsC_Int32> obj=m_blob.GetValueBinary(memIx, valIx);
+                                BlobWriterType inner(BlobReaderType(m_repository, obj.first));
+                                inner.SetAllChangeFlags(isChanged);
+                                WriteValue(memIx, valIx, inner, isNull, isChanged);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        for (int valIx=0; valIx<m_blob.NumberOfValues(memIx); ++valIx)
+                        {
+                            m_blob.SetChanged(memIx, valIx, isChanged);
+                        }
+                    }
+                }
+                    break;
+                }
+            }
+
+        }
+
     private:
         const RepositoryType* m_repository;
         const ClassDescriptionType* m_classDescription;
         const MemberDescriptionType* m_memberDescription;
         DotsC_MemberIndex m_memberIndex;
         DotsC_Int32 m_valueIndex;
-        Safir::Dob::Typesystem::ToolSupport::Internal::Blob m_blob;
+        mutable Safir::Dob::Typesystem::ToolSupport::Internal::Blob m_blob;
 
         inline void Init()
         {
@@ -381,20 +497,16 @@ namespace ToolSupport
             assert(m_memberDescription->GetMemberType()==BinaryMemberType || m_memberDescription->GetMemberType()==ObjectMemberType);
             m_blob.SetValueBinary(m_memberIndex, m_valueIndex, val.first, val.second);
         }
+
+        void WriteValue(const BlobWriterType& val) //object
+        {
+            assert(m_memberDescription->GetMemberType()==ObjectMemberType);
+            std::vector<char> bin(static_cast<size_t>(val.CalculateBlobSize()));
+            val.CopyRawBlob(&bin[0]);
+            m_blob.SetValueBinary(m_memberIndex, m_valueIndex, &bin[0], bin.size());
+        }
     };
 
-    // Free helper functions
-    //------------------------------------
-
-    /**
-     * @brief SetAllChangeFlags
-     * @param writer
-     */
-    template <class RepositoryT>
-    void SetAllChangeFlags(BlobWriter<RepositoryT>& writer)
-    {
-
-    }
 
     /**
      * @brief MarkChanges

@@ -13,10 +13,10 @@
             <type>String</type>
             <maxLength>20</maxLength>
         </member>
-	<member>
-	  <name>DictStringInt32</name>
-	  <type>Int32</type>
-	  <dictionary keyType="String"/>
-	</member>
+	    <member>
+	        <name>DictStringInt32</name>
+	        <type>Int32</type>
+	        <dictionary keyType="String"/>
+	    </member>
     </members>
 </class>
