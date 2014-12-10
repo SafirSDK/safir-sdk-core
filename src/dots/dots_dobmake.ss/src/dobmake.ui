@@ -144,6 +144,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="build">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="text">
         <string>Build</string>
        </property>
@@ -151,6 +154,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="buildAndInstall">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="text">
         <string>Build &amp;&amp; Install</string>
        </property>
