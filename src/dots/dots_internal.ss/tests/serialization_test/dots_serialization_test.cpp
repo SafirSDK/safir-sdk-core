@@ -57,76 +57,147 @@ void CheckBlobSize(const std::vector<char>& blob)
 
 }
 
-void BlobTest(RepositoryPtr rep)
+void BlobDiffTest(RepositoryPtr rep)
 {
-    std::cout<<std::boolalpha<<std::endl;
-    std::cout<<"========= Blob Test ========"<<std::endl;
-    //ParserTest.MyItem
-    DotsC_TypeId tid=Safir::Dob::Typesystem::ToolSupport::TypeUtilities::CalculateTypeId("ParserTest.MySpecialItem");
-    std::cout<<"Class ParserTest.MySpecialItem "<<tid<<std::endl;
+    std::cout<<"========= Blob Diff Test ========"<<std::endl;
 
-    const ClassDescription* cd=GetClassByName(rep, "ParserTest.MySpecialItem");
+    //BlobTest.MyItem
+    DotsC_TypeId tid=Safir::Dob::Typesystem::ToolSupport::TypeUtilities::CalculateTypeId("BlobTest.MySpecialItem");
+    DotsC_TypeId collectionTid=Safir::Dob::Typesystem::ToolSupport::TypeUtilities::CalculateTypeId("BlobTest.MyCollections");
+    const ClassDescription* cd=rep->GetClass(tid);
     DotsC_MemberIndex myNum=cd->GetMemberIndex("MyNumber");
     DotsC_MemberIndex myStrings=cd->GetMemberIndex("MyStrings");
     DotsC_MemberIndex myChild=cd->GetMemberIndex("Child");
     DotsC_MemberIndex myChildName=cd->GetMemberIndex("ChildName");
     DotsC_MemberIndex myDictStringInt32=cd->GetMemberIndex("DictStringInt32");
+    DotsC_MemberIndex myDictAdvanced=cd->GetMemberIndex("DictAdvanced");
+    const ClassDescription* collDesc=rep->GetClass(collectionTid);
+    DotsC_MemberIndex mySeqInt32=collDesc->GetMemberIndex("SeqInt32");
+    DotsC_MemberIndex mySeqObject=collDesc->GetMemberIndex("SeqObject");
+    DotsC_MemberIndex myDictEntityIdObject=collDesc->GetMemberIndex("DictEntityIdObject");
 
-    BlobWriter<Safir::Dob::Typesystem::ToolSupport::TypeRepository> w2(rep.get(), tid);
-    w2.WriteValue(myNum, 0, 456, false, true);
-    w2.WriteValue(myStrings, 0, "In0", false, true);
-    w2.WriteValue(myStrings, 3, "In3", false, true);
-    w2.WriteValue(myStrings, 4, "In4", false, true);
-    std::vector<char> innerBlob(static_cast<size_t>(w2.CalculateBlobSize()));
-    w2.CopyRawBlob(&innerBlob[0]);
 
-    BlobWriter<Safir::Dob::Typesystem::ToolSupport::TypeRepository> w(rep.get(), tid);
-    w.WriteValue(myNum, 0, 123, false, true);
-    w.WriteValue(myStrings, 0, "Hej_1", false, true);
-    w.WriteValue(myStrings, 3, "Hej_2", false, true);
-    w.WriteValue(myStrings, 4, "Hej_3", false, true);
-    w.WriteValue(myChildName, 0, "Svarre", false, true);
-    w.WriteValue(myChild, 0, std::make_pair(&innerBlob[0], static_cast<DotsC_Int32>(innerBlob.size())), false, true);
-    w.WriteKey(myDictStringInt32, "first");
-    w.WriteValue(myDictStringInt32, 0, 1, false, false);
-    w.WriteKey(myDictStringInt32, "second");
-    w.WriteValue(myDictStringInt32, 0, 2, true, true);
-    w.WriteKey(myDictStringInt32, "third");
-    w.WriteValue(myDictStringInt32, 0, 3, false, false);
+    //Create First object
+    //--------------------
+    BlobWriter<Safir::Dob::Typesystem::ToolSupport::TypeRepository> first(rep.get(), tid);
+    {
+        first.WriteValue(myNum, 0, 123, false, true);
+        first.WriteValue(myStrings, 0, "Hej_1", false, true);
+        first.WriteValue(myStrings, 3, "Hej_2", false, true);
+        first.WriteValue(myStrings, 4, "Hej_3", false, true);
+        first.WriteValue(myChildName, 0, "Svarre", false, true);
+        first.WriteKey(myDictStringInt32, "first");
+        first.WriteValue(myDictStringInt32, 0, 1, false, false);
+        first.WriteKey(myDictStringInt32, "second");
+        first.WriteValue(myDictStringInt32, 0, 2, true, true);
+        first.WriteKey(myDictStringInt32, "third");
+        first.WriteValue(myDictStringInt32, 0, 3, false, false);
+        {
+            BlobWriter<Safir::Dob::Typesystem::ToolSupport::TypeRepository> w2(rep.get(), tid);
+            w2.WriteValue(myNum, 0, 456, false, true);
+            w2.WriteValue(myStrings, 0, "In0", false, true);
+            w2.WriteValue(myStrings, 3, "In3", false, true);
+            w2.WriteValue(myStrings, 4, "In4", false, true);
+            first.WriteValue(myChild, 0, w2, false, true);
 
-    std::vector<char> blob(static_cast<size_t>(w.CalculateBlobSize()));
-    w.CopyRawBlob(&blob[0]);
-    std::cout<<"Blob created, with size "<<blob.size()<<std::endl;
-    std::cout<<"BlobSize = "<<BlobReader<TypeRepository>::GetSize(&blob[0])<<std::endl;
-    std::cout<<"BlobTypeId = "<<BlobReader<TypeRepository>::GetTypeId(&blob[0])<<std::endl;
+            //Create a BlobTest.MyCollections object
+            BlobWriter<Safir::Dob::Typesystem::ToolSupport::TypeRepository> wc(rep.get(), collectionTid);
+            wc.WriteValue(mySeqInt32, 0, 100, false, false);
+            wc.WriteValue(mySeqInt32, 0, 200, false, false);
+            wc.WriteValue(mySeqObject, 0, w2, false, false);
 
-    BlobReader<Safir::Dob::Typesystem::ToolSupport::TypeRepository> r(rep.get(), &blob[0]);
+            DotsC_EntityId eid={tid, 1};
+            wc.WriteKey(myDictEntityIdObject, std::pair<DotsC_EntityId, const char*>(eid, NULL));
+            wc.WriteValue(myDictEntityIdObject, 0, w2, false, false);
+
+            first.WriteKey(myDictAdvanced, 0);
+            first.WriteValue(myDictAdvanced, 0, wc, false, false);
+
+            first.WriteKey(myDictAdvanced, 1);
+            first.WriteValue(myDictAdvanced, 0, wc, false, false);
+        }
+        first.SetAllChangeFlags(false);
+    }
+
+    //Create Second object
+    //--------------------
+    BlobWriter<Safir::Dob::Typesystem::ToolSupport::TypeRepository> second(rep.get(), tid);
+    {
+        second.WriteValue(myNum, 0, 123, false, true);
+        second.WriteValue(myStrings, 0, "Hej_1", false, false);
+        second.WriteValue(myStrings, 3, "Hej_2", false, false);
+        second.WriteValue(myStrings, 4, "Hej_3", false, true);
+        second.WriteValue(myChildName, 0, "Svarre", false, true);
+        second.WriteKey(myDictStringInt32, "first");
+        second.WriteValue(myDictStringInt32, 0, 1, false, false);
+        second.WriteKey(myDictStringInt32, "second");
+        second.WriteValue(myDictStringInt32, 0, 2, true, true);
+        second.WriteKey(myDictStringInt32, "third");
+        second.WriteValue(myDictStringInt32, 0, 3, false, true);
+        {
+            BlobWriter<Safir::Dob::Typesystem::ToolSupport::TypeRepository> w2(rep.get(), tid);
+            w2.WriteValue(myNum, 0, 456, false, true);
+            w2.WriteValue(myStrings, 0, "In0", false, false);
+            w2.WriteValue(myStrings, 3, "In3", false, true);
+            w2.WriteValue(myStrings, 4, "In4", false, false);
+            second.WriteValue(myChild, 0, w2, false, true);
+
+            //Create a BlobTest.MyCollections object
+            BlobWriter<Safir::Dob::Typesystem::ToolSupport::TypeRepository> wc(rep.get(), collectionTid);
+            wc.WriteValue(mySeqInt32, 0, 100, false, true);
+            wc.WriteValue(mySeqInt32, 0, 200, false, false);
+            wc.WriteValue(mySeqObject, 0, w2, false, false);
+
+            DotsC_EntityId eid={tid, 1};
+            wc.WriteKey(myDictEntityIdObject, std::pair<DotsC_EntityId, const char*>(eid, NULL));
+            wc.WriteValue(myDictEntityIdObject, 0, w2, false, true);
+
+            second.WriteKey(myDictAdvanced, 0);
+            second.WriteValue(myDictAdvanced, 0, wc, false, true);
+
+            second.WriteKey(myDictAdvanced, 1);
+            second.WriteValue(myDictAdvanced, 0, wc, false, false);
+        }
+        second.SetAllChangeFlags(false);
+    }
+
+    std::vector<char> firstBlob(static_cast<size_t>(first.CalculateBlobSize()));
+    first.CopyRawBlob(&firstBlob[0]);
+    std::vector<char> secondBlob(static_cast<size_t>(second.CalculateBlobSize()));
+    second.CopyRawBlob(&secondBlob[0]);
+
+    BlobReader<Safir::Dob::Typesystem::ToolSupport::TypeRepository> r(rep.get(), &firstBlob[0]);
+    BlobWriter<Safir::Dob::Typesystem::ToolSupport::TypeRepository> diffWriter(r);
+    BlobReader<Safir::Dob::Typesystem::ToolSupport::TypeRepository> origin(rep.get(), &secondBlob[0]);
+    diffWriter.MarkChanges(origin);
 
     {
+        //---------- Print Object --------------------------
         bool isNull=false, isChanged=true;
         DotsC_Int32 myNumVal=0;
+        std::cout<<"----- "<<rep->GetClass(r.TypeId())->GetName()<<" -----"<<std::endl;
         r.ReadValue(myNum, 0, myNumVal, isNull, isChanged);
-        std::cout<<"myNum isNull="<<isNull<<", isChanged="<<isChanged<<", val="<<myNumVal<<std::endl;
+        std::cout<<"- myNum isNull="<<isNull<<", isChanged="<<isChanged<<", val="<<myNumVal<<std::endl;
 
         const char* str=NULL;
-        std::cout<<"myStrings array"<<std::endl;
+        std::cout<<"- myStrings array"<<std::endl;
         for (DotsC_Int32 i=0; i<5; ++i)
         {
             r.ReadValue(myStrings, i, str, isNull, isChanged);
-            std::cout<<"isNull="<<isNull<<", isChanged="<<isChanged;
+            std::cout<<"    isNull="<<isNull<<", isChanged="<<isChanged;
             if (isNull)
                 std::cout<<std::endl;
             else
                 std::cout<<", val="<<str<<std::endl;
         }
 
-        std::cout<<"myDictStringInt32, topChanged="<<r.IsChangedTopLevel(myDictStringInt32)<<std::endl;
+        std::cout<<"- myDictStringInt32, topChanged="<<r.IsChangedTopLevel(myDictStringInt32)<<std::endl;
         for (int i=0; i<r.NumberOfValues(myDictStringInt32); ++i)
         {
-            DotsC_Int32 val;
+            DotsC_Int32 val=0;
             std::string key=r.ReadKey<const char*>(myDictStringInt32, i);
             r.ReadValue<DotsC_Int32>(myDictStringInt32, i, val, isNull, isChanged);
-            std::cout<<"  "<<key<<" = {isNull="<<isNull<<", isChanged="<<isChanged;
+            std::cout<<"    key: "<<key<<" = {isNull="<<isNull<<", isChanged="<<isChanged;
             if (!isNull)
                 std::cout<<", val="<<val;
 
@@ -134,23 +205,284 @@ void BlobTest(RepositoryPtr rep)
         }
 
         r.ReadValue(myChildName, 0, str, isNull, isChanged);
-        std::cout<<"myChildName isNull="<<isNull<<", isChanged="<<isChanged<<", val="<<str<<std::endl;
+        std::cout<<"- myChildName isNull="<<isNull<<", isChanged="<<isChanged<<", val="<<str<<std::endl;
 
         std::pair<const char*, DotsC_Int32> inner;
         r.ReadValue(myChild, 0, inner, isNull, isChanged);
+        std::cout<<"- myChild isNull="<<isNull<<", isChanged="<<isChanged<<std::endl;
         BlobReader<Safir::Dob::Typesystem::ToolSupport::TypeRepository> innerReader(rep.get(), inner.first);
-
-        std::cout<<" -- inner myChild:"<<std::endl;
         innerReader.ReadValue(myNum, 0, myNumVal, isNull, isChanged);
-        std::cout<<"isNull="<<isNull<<", isChanged="<<isChanged<<", val="<<myNumVal<<std::endl;
+        std::cout<<"  - myNum, isNull="<<isNull<<", isChanged="<<isChanged<<", val="<<myNumVal<<std::endl;
+        std::cout<<"  - myStrings array"<<std::endl;
         for (DotsC_Int32 i=0; i<5; ++i)
         {
             innerReader.ReadValue(myStrings, i, str, isNull, isChanged);
-            std::cout<<"isNull="<<isNull<<", isChanged="<<isChanged;
+            std::cout<<"      isNull="<<isNull<<", isChanged="<<isChanged;
             if (isNull)
                 std::cout<<std::endl;
             else
                 std::cout<<", val="<<str<<std::endl;
+        }
+
+        std::cout<<"- DictAdvanced, topChanged="<<r.IsChangedTopLevel(myDictAdvanced)<<std::endl;
+        for (int i=0; i<r.NumberOfValues(myDictAdvanced); ++i)
+        {
+            int key=r.ReadKey<DotsC_Int32>(myDictAdvanced, i);
+            std::pair<const char*, DotsC_Int32> obj;
+            r.ReadValue(myDictAdvanced, i, obj, isNull, isChanged);
+            std::cout<<"    key: "<<key<<" = {isNull="<<isNull<<", isChanged="<<isChanged<<"}"<<std::endl;
+            if (!isNull)
+            {
+                BlobReader<Safir::Dob::Typesystem::ToolSupport::TypeRepository> wc(rep.get(), obj.first);
+                wc.ReadStatus(mySeqInt32, 0, isNull, isChanged);
+                std::cout<<"      - MyCollections.SeqInt32 isNull="<<isNull<<", isChanged="<<isChanged<<std::endl;
+                for (int j=0; j<wc.NumberOfValues(mySeqInt32); ++j)
+                {
+                    DotsC_Int32 val=0;
+                    wc.ReadValue(mySeqInt32, j, val, isNull, isChanged);
+                    std::cout<<"          val["<<j<<"] = "<<val<<std::endl;
+                }
+
+                std::cout<<"      - MyCollections.SeqObject, topChanged="<<wc.IsChangedTopLevel(mySeqObject)<<std::endl;
+                for (int j=0; j<wc.NumberOfValues(mySeqObject); ++j)
+                {
+                    std::pair<const char*, DotsC_Int32> val;
+                    wc.ReadValue(mySeqObject, j, val, isNull, isChanged);
+                    BlobReader<Safir::Dob::Typesystem::ToolSupport::TypeRepository> wcInnerObj(rep.get(), val.first);
+                    DotsC_Int32 numVal;
+                    wcInnerObj.ReadValue(myNum, 0, numVal, isNull, isChanged);
+                    std::cout<<"        - MyCollections.SeqObject.MyNum isNull="<<isNull<<", isChanged="<<isChanged<<", val="<<numVal<<std::endl;
+                    std::cout<<"        - MyCollections.SeqObject.MyStrings"<<std::endl;
+                    for (DotsC_Int32 strIx=0; strIx<5; ++strIx)
+                    {
+                        innerReader.ReadValue(myStrings, strIx, str, isNull, isChanged);
+                        std::cout<<"            isNull="<<isNull<<", isChanged="<<isChanged;
+                        if (isNull)
+                            std::cout<<std::endl;
+                        else
+                            std::cout<<", val="<<str<<std::endl;
+                    }
+                }
+
+                std::cout<<"    - MyCollections.DictEntityIdObject, topChanged="<<wc.IsChangedTopLevel(myDictEntityIdObject)<<std::endl;
+                for (int j=0; j<wc.NumberOfValues(myDictEntityIdObject); ++j)
+                {
+                    std::pair<DotsC_EntityId, const char*> key=wc.ReadKey< std::pair<DotsC_EntityId, const char*> >(myDictEntityIdObject, j);
+                    std::pair<const char*, DotsC_Int32> val;
+                    wc.ReadValue(myDictEntityIdObject, j, val, isNull, isChanged);
+                    std::cout<<"        key: {"<<rep->GetClass(key.first.typeId)->GetName()<<", "<<key.first.instanceId<<
+                               "}, isNull="<<isNull<<", isChanged="<<isChanged<<std::endl;
+
+                    BlobReader<Safir::Dob::Typesystem::ToolSupport::TypeRepository> wcInnerObj(rep.get(), val.first);
+                    DotsC_Int32 numVal;
+                    wcInnerObj.ReadValue(myNum, 0, numVal, isNull, isChanged);
+                    std::cout<<"          - MyCollections.DictEntityIdObject.MyNum isNull="<<isNull<<", isChanged="<<isChanged<<", val="<<numVal<<std::endl;
+                    std::cout<<"          - MyCollections.DictEntityIdObject.MyStrings"<<std::endl;
+                    for (DotsC_Int32 strIx=0; strIx<5; ++strIx)
+                    {
+                        innerReader.ReadValue(myStrings, strIx, str, isNull, isChanged);
+                        std::cout<<"              isNull="<<isNull<<", isChanged="<<isChanged;
+                        if (isNull)
+                            std::cout<<std::endl;
+                        else
+                            std::cout<<", val="<<str<<std::endl;
+                    }
+                }
+            }
+        }
+    }
+
+    std::cout<<"========= Blob Diff Test Done========"<<std::endl;
+}
+
+void BlobChangeTest(RepositoryPtr rep)
+{
+    std::cout<<std::boolalpha<<std::endl;
+    std::cout<<"========= Blob Change Test ========"<<std::endl;
+    //BlobTest.MyItem
+    DotsC_TypeId tid=Safir::Dob::Typesystem::ToolSupport::TypeUtilities::CalculateTypeId("BlobTest.MySpecialItem");
+    DotsC_TypeId collectionTid=Safir::Dob::Typesystem::ToolSupport::TypeUtilities::CalculateTypeId("BlobTest.MyCollections");
+    std::cout<<"Class BlobTest.MySpecialItem "<<tid<<std::endl;
+
+    const ClassDescription* cd=rep->GetClass(tid);
+    DotsC_MemberIndex myNum=cd->GetMemberIndex("MyNumber");
+    DotsC_MemberIndex myStrings=cd->GetMemberIndex("MyStrings");
+    DotsC_MemberIndex myChild=cd->GetMemberIndex("Child");
+    DotsC_MemberIndex myChildName=cd->GetMemberIndex("ChildName");
+    DotsC_MemberIndex myDictStringInt32=cd->GetMemberIndex("DictStringInt32");
+    DotsC_MemberIndex myDictAdvanced=cd->GetMemberIndex("DictAdvanced");
+    const ClassDescription* collDesc=rep->GetClass(collectionTid);
+    DotsC_MemberIndex mySeqInt32=collDesc->GetMemberIndex("SeqInt32");
+    DotsC_MemberIndex mySeqObject=collDesc->GetMemberIndex("SeqObject");
+    DotsC_MemberIndex myDictEntityIdObject=collDesc->GetMemberIndex("DictEntityIdObject");
+
+    BlobWriter<Safir::Dob::Typesystem::ToolSupport::TypeRepository> w(rep.get(), tid);
+    w.WriteValue(myNum, 0, 123, false, true);
+    w.WriteValue(myStrings, 0, "Hej_1", false, true);
+    w.WriteValue(myStrings, 3, "Hej_2", false, true);
+    w.WriteValue(myStrings, 4, "Hej_3", false, true);
+    w.WriteValue(myChildName, 0, "Svarre", false, true);
+    w.WriteKey(myDictStringInt32, "first");
+    w.WriteValue(myDictStringInt32, 0, 1, false, false);
+    w.WriteKey(myDictStringInt32, "second");
+    w.WriteValue(myDictStringInt32, 0, 2, true, true);
+    w.WriteKey(myDictStringInt32, "third");
+    w.WriteValue(myDictStringInt32, 0, 3, false, false);
+    {
+        BlobWriter<Safir::Dob::Typesystem::ToolSupport::TypeRepository> w2(rep.get(), tid);
+        w2.WriteValue(myNum, 0, 456, false, true);
+        w2.WriteValue(myStrings, 0, "In0", false, true);
+        w2.WriteValue(myStrings, 3, "In3", false, true);
+        w2.WriteValue(myStrings, 4, "In4", false, true);
+        w.WriteValue(myChild, 0, w2, false, true);
+
+        //Create a BlobTest.MyCollections object
+        BlobWriter<Safir::Dob::Typesystem::ToolSupport::TypeRepository> wc(rep.get(), collectionTid);
+        wc.WriteValue(mySeqInt32, 0, 100, false, false);
+        wc.WriteValue(mySeqInt32, 0, 200, false, false);
+        wc.WriteValue(mySeqObject, 0, w2, false, false);
+
+        DotsC_EntityId eid={tid, 1};
+        wc.WriteKey(myDictEntityIdObject, std::pair<DotsC_EntityId, const char*>(eid, NULL));
+        wc.WriteValue(myDictEntityIdObject, 0, w2, false, false);
+
+        w.WriteKey(myDictAdvanced, 0);
+        w.WriteValue(myDictAdvanced, 0, wc, false, false);
+
+        w.WriteKey(myDictAdvanced, 1);
+        w.WriteValue(myDictAdvanced, 0, wc, false, false);
+    }
+
+    std::vector<char> blob(static_cast<size_t>(w.CalculateBlobSize()));
+    w.CopyRawBlob(&blob[0]);
+    std::cout<<"Blob created, with size "<<blob.size()<<std::endl;
+    std::cout<<"BlobSize = "<<BlobReader<TypeRepository>::GetSize(&blob[0])<<std::endl;
+    std::cout<<"BlobTypeId = "<<BlobReader<TypeRepository>::GetTypeId(&blob[0])<<std::endl;
+
+//    std::ostringstream json;
+//    BinaryToJson(rep.get(), &blob[0], json);
+//    std::cout<<"======== JSON acvanded object ==========\n"<<json.str()<<std::endl;
+
+    BlobReader<Safir::Dob::Typesystem::ToolSupport::TypeRepository> r(rep.get(), &blob[0]);
+
+    {
+        //---------- Print Object --------------------------
+        bool isNull=false, isChanged=true;
+        DotsC_Int32 myNumVal=0;
+        std::cout<<"----- "<<rep->GetClass(r.TypeId())->GetName()<<" -----"<<std::endl;
+        r.ReadValue(myNum, 0, myNumVal, isNull, isChanged);
+        std::cout<<"- myNum isNull="<<isNull<<", isChanged="<<isChanged<<", val="<<myNumVal<<std::endl;
+
+        const char* str=NULL;
+        std::cout<<"- myStrings array"<<std::endl;
+        for (DotsC_Int32 i=0; i<5; ++i)
+        {
+            r.ReadValue(myStrings, i, str, isNull, isChanged);
+            std::cout<<"    isNull="<<isNull<<", isChanged="<<isChanged;
+            if (isNull)
+                std::cout<<std::endl;
+            else
+                std::cout<<", val="<<str<<std::endl;
+        }
+
+        std::cout<<"- myDictStringInt32, topChanged="<<r.IsChangedTopLevel(myDictStringInt32)<<std::endl;
+        for (int i=0; i<r.NumberOfValues(myDictStringInt32); ++i)
+        {
+            DotsC_Int32 val=0;
+            std::string key=r.ReadKey<const char*>(myDictStringInt32, i);
+            r.ReadValue<DotsC_Int32>(myDictStringInt32, i, val, isNull, isChanged);
+            std::cout<<"    key: "<<key<<" = {isNull="<<isNull<<", isChanged="<<isChanged;
+            if (!isNull)
+                std::cout<<", val="<<val;
+
+            std::cout<<"}"<<std::endl;
+        }
+
+        r.ReadValue(myChildName, 0, str, isNull, isChanged);
+        std::cout<<"- myChildName isNull="<<isNull<<", isChanged="<<isChanged<<", val="<<str<<std::endl;
+
+        std::pair<const char*, DotsC_Int32> inner;
+        r.ReadValue(myChild, 0, inner, isNull, isChanged);
+        std::cout<<"- myChild isNull="<<isNull<<", isChanged="<<isChanged<<std::endl;
+        BlobReader<Safir::Dob::Typesystem::ToolSupport::TypeRepository> innerReader(rep.get(), inner.first);
+        innerReader.ReadValue(myNum, 0, myNumVal, isNull, isChanged);
+        std::cout<<"  - myNum, isNull="<<isNull<<", isChanged="<<isChanged<<", val="<<myNumVal<<std::endl;
+        std::cout<<"  - myStrings array"<<std::endl;
+        for (DotsC_Int32 i=0; i<5; ++i)
+        {
+            innerReader.ReadValue(myStrings, i, str, isNull, isChanged);
+            std::cout<<"      isNull="<<isNull<<", isChanged="<<isChanged;
+            if (isNull)
+                std::cout<<std::endl;
+            else
+                std::cout<<", val="<<str<<std::endl;
+        }
+
+        std::cout<<"- DictAdvanced, topChanged="<<r.IsChangedTopLevel(myDictAdvanced)<<std::endl;
+        for (int i=0; i<r.NumberOfValues(myDictAdvanced); ++i)
+        {
+            int key=r.ReadKey<DotsC_Int32>(myDictAdvanced, i);
+            std::pair<const char*, DotsC_Int32> obj;
+            r.ReadValue(myDictAdvanced, i, obj, isNull, isChanged);
+            std::cout<<"    key: "<<key<<" = {isNull="<<isNull<<", isChanged="<<isChanged<<"}"<<std::endl;
+            if (!isNull)
+            {
+                BlobReader<Safir::Dob::Typesystem::ToolSupport::TypeRepository> wc(rep.get(), obj.first);
+                wc.ReadStatus(mySeqInt32, 0, isNull, isChanged);
+                std::cout<<"      - MyCollections.SeqInt32 isNull="<<isNull<<", isChanged="<<isChanged<<std::endl;
+                for (int j=0; j<wc.NumberOfValues(mySeqInt32); ++j)
+                {
+                    DotsC_Int32 val=0;
+                    wc.ReadValue(mySeqInt32, j, val, isNull, isChanged);
+                    std::cout<<"          val["<<j<<"] = "<<val<<std::endl;
+                }
+
+                std::cout<<"      - MyCollections.SeqObject, topChanged="<<wc.IsChangedTopLevel(mySeqObject)<<std::endl;
+                for (int j=0; j<wc.NumberOfValues(mySeqObject); ++j)
+                {
+                    std::pair<const char*, DotsC_Int32> val;
+                    wc.ReadValue(mySeqObject, j, val, isNull, isChanged);
+                    BlobReader<Safir::Dob::Typesystem::ToolSupport::TypeRepository> wcInnerObj(rep.get(), val.first);
+                    DotsC_Int32 numVal;
+                    wcInnerObj.ReadValue(myNum, 0, numVal, isNull, isChanged);
+                    std::cout<<"        - MyCollections.SeqObject.MyNum isNull="<<isNull<<", isChanged="<<isChanged<<", val="<<numVal<<std::endl;
+                    std::cout<<"        - MyCollections.SeqObject.MyStrings"<<std::endl;
+                    for (DotsC_Int32 strIx=0; strIx<5; ++strIx)
+                    {
+                        innerReader.ReadValue(myStrings, strIx, str, isNull, isChanged);
+                        std::cout<<"            isNull="<<isNull<<", isChanged="<<isChanged;
+                        if (isNull)
+                            std::cout<<std::endl;
+                        else
+                            std::cout<<", val="<<str<<std::endl;
+                    }
+                }
+
+                std::cout<<"    - MyCollections.DictEntityIdObject, topChanged="<<wc.IsChangedTopLevel(myDictEntityIdObject)<<std::endl;
+                for (int j=0; j<wc.NumberOfValues(myDictEntityIdObject); ++j)
+                {
+                    std::pair<DotsC_EntityId, const char*> key=wc.ReadKey< std::pair<DotsC_EntityId, const char*> >(myDictEntityIdObject, j);
+                    std::pair<const char*, DotsC_Int32> val;
+                    wc.ReadValue(myDictEntityIdObject, j, val, isNull, isChanged);
+                    std::cout<<"        key: {"<<rep->GetClass(key.first.typeId)->GetName()<<", "<<key.first.instanceId<<
+                               "}, isNull="<<isNull<<", isChanged="<<isChanged<<std::endl;
+
+                    BlobReader<Safir::Dob::Typesystem::ToolSupport::TypeRepository> wcInnerObj(rep.get(), val.first);
+                    DotsC_Int32 numVal;
+                    wcInnerObj.ReadValue(myNum, 0, numVal, isNull, isChanged);
+                    std::cout<<"          - MyCollections.DictEntityIdObject.MyNum isNull="<<isNull<<", isChanged="<<isChanged<<", val="<<numVal<<std::endl;
+                    std::cout<<"          - MyCollections.DictEntityIdObject.MyStrings"<<std::endl;
+                    for (DotsC_Int32 strIx=0; strIx<5; ++strIx)
+                    {
+                        innerReader.ReadValue(myStrings, strIx, str, isNull, isChanged);
+                        std::cout<<"              isNull="<<isNull<<", isChanged="<<isChanged;
+                        if (isNull)
+                            std::cout<<std::endl;
+                        else
+                            std::cout<<", val="<<str<<std::endl;
+                    }
+                }
+            }
         }
     }
 
@@ -159,30 +491,35 @@ void BlobTest(RepositoryPtr rep)
     w3.SetAllChangeFlags(true);
 
     {
+        //---------- Print Object --------------------------
         bool isNull=false, isChanged=true;
         DotsC_Int32 myNumVal=0;
+        std::cout<<"----- "<<rep->GetClass(r.TypeId())->GetName()<<" -----"<<std::endl;
         r.ReadValue(myNum, 0, myNumVal, isNull, isChanged);
-        std::cout<<"myNum isNull="<<isNull<<", isChanged="<<isChanged<<", val="<<myNumVal<<std::endl;
+        if (!isChanged) throw std::logic_error(std::string("Change flag error, line: ")+boost::lexical_cast<std::string>(__LINE__));
+        std::cout<<"- myNum isNull="<<isNull<<", isChanged="<<isChanged<<", val="<<myNumVal<<std::endl;
 
         const char* str=NULL;
-        std::cout<<"myStrings array"<<std::endl;
+        std::cout<<"- myStrings array"<<std::endl;
         for (DotsC_Int32 i=0; i<5; ++i)
         {
             r.ReadValue(myStrings, i, str, isNull, isChanged);
-            std::cout<<"isNull="<<isNull<<", isChanged="<<isChanged;
+            if (!isChanged) throw std::logic_error(std::string("Change flag error, line: ")+boost::lexical_cast<std::string>(__LINE__));
+            std::cout<<"    isNull="<<isNull<<", isChanged="<<isChanged;
             if (isNull)
                 std::cout<<std::endl;
             else
                 std::cout<<", val="<<str<<std::endl;
         }
 
-        std::cout<<"myDictStringInt32, topChanged="<<r.IsChangedTopLevel(myDictStringInt32)<<std::endl;
+        std::cout<<"- myDictStringInt32, topChanged="<<r.IsChangedTopLevel(myDictStringInt32)<<std::endl;
         for (int i=0; i<r.NumberOfValues(myDictStringInt32); ++i)
         {
-            DotsC_Int32 val;
+            DotsC_Int32 val=0;
             std::string key=r.ReadKey<const char*>(myDictStringInt32, i);
             r.ReadValue<DotsC_Int32>(myDictStringInt32, i, val, isNull, isChanged);
-            std::cout<<"  "<<key<<" = {isNull="<<isNull<<", isChanged="<<isChanged;
+            if (!isChanged) throw std::logic_error(std::string("Change flag error, line: ")+boost::lexical_cast<std::string>(__LINE__));
+            std::cout<<"    key: "<<key<<" = {isNull="<<isNull<<", isChanged="<<isChanged;
             if (!isNull)
                 std::cout<<", val="<<val;
 
@@ -190,29 +527,106 @@ void BlobTest(RepositoryPtr rep)
         }
 
         r.ReadValue(myChildName, 0, str, isNull, isChanged);
-        std::cout<<"myChildName isNull="<<isNull<<", isChanged="<<isChanged<<", val="<<str<<std::endl;
+        if (!isChanged) throw std::logic_error(std::string("Change flag error, line: ")+boost::lexical_cast<std::string>(__LINE__));
+        std::cout<<"- myChildName isNull="<<isNull<<", isChanged="<<isChanged<<", val="<<str<<std::endl;
 
         std::pair<const char*, DotsC_Int32> inner;
         r.ReadValue(myChild, 0, inner, isNull, isChanged);
+        if (!isChanged) throw std::logic_error(std::string("Change flag error, line: ")+boost::lexical_cast<std::string>(__LINE__));
+        std::cout<<"- myChild isNull="<<isNull<<", isChanged="<<isChanged<<std::endl;
         BlobReader<Safir::Dob::Typesystem::ToolSupport::TypeRepository> innerReader(rep.get(), inner.first);
-
-        std::cout<<" -- inner myChild:"<<std::endl;
         innerReader.ReadValue(myNum, 0, myNumVal, isNull, isChanged);
-        std::cout<<"isNull="<<isNull<<", isChanged="<<isChanged<<", val="<<myNumVal<<std::endl;
+        if (!isChanged) throw std::logic_error(std::string("Change flag error, line: ")+boost::lexical_cast<std::string>(__LINE__));
+        std::cout<<"  - myNum, isNull="<<isNull<<", isChanged="<<isChanged<<", val="<<myNumVal<<std::endl;
+        std::cout<<"  - myStrings array"<<std::endl;
         for (DotsC_Int32 i=0; i<5; ++i)
         {
             innerReader.ReadValue(myStrings, i, str, isNull, isChanged);
-            std::cout<<"isNull="<<isNull<<", isChanged="<<isChanged;
+            if (!isChanged) throw std::logic_error(std::string("Change flag error, line: ")+boost::lexical_cast<std::string>(__LINE__));
+            std::cout<<"      isNull="<<isNull<<", isChanged="<<isChanged;
             if (isNull)
                 std::cout<<std::endl;
             else
                 std::cout<<", val="<<str<<std::endl;
         }
+
+        std::cout<<"- DictAdvanced, topChanged="<<r.IsChangedTopLevel(myDictAdvanced)<<std::endl;
+        for (int i=0; i<r.NumberOfValues(myDictAdvanced); ++i)
+        {
+            int key=r.ReadKey<DotsC_Int32>(myDictAdvanced, i);
+            std::pair<const char*, DotsC_Int32> obj;
+            r.ReadValue(myDictAdvanced, i, obj, isNull, isChanged);
+            if (!isChanged) throw std::logic_error(std::string("Change flag error, line: ")+boost::lexical_cast<std::string>(__LINE__));
+            std::cout<<"    key: "<<key<<" = {isNull="<<isNull<<", isChanged="<<isChanged<<"}"<<std::endl;
+            if (!isNull)
+            {
+                BlobReader<Safir::Dob::Typesystem::ToolSupport::TypeRepository> wc(rep.get(), obj.first);
+                if (!wc.IsChangedTopLevel(mySeqInt32)) throw std::logic_error(std::string("Change flag error, line: ")+boost::lexical_cast<std::string>(__LINE__));
+                std::cout<<"      - MyCollections.SeqInt32 topChanged="<<r.IsChangedTopLevel(mySeqInt32)<<std::endl;
+                for (int j=0; j<wc.NumberOfValues(mySeqInt32); ++j)
+                {
+                    DotsC_Int32 val=0;
+                    wc.ReadValue(mySeqInt32, j, val, isNull, isChanged);
+                    std::cout<<"          val["<<j<<"] = "<<val<<std::endl;
+                }
+
+                if (!wc.IsChangedTopLevel(mySeqObject)) throw std::logic_error(std::string("Change flag error, line: ")+boost::lexical_cast<std::string>(__LINE__));
+                std::cout<<"      - MyCollections.SeqObject, topChanged="<<wc.IsChangedTopLevel(mySeqObject)<<std::endl;
+                for (int j=0; j<wc.NumberOfValues(mySeqObject); ++j)
+                {
+                    std::pair<const char*, DotsC_Int32> val;
+                    wc.ReadValue(mySeqObject, j, val, isNull, isChanged);
+                    BlobReader<Safir::Dob::Typesystem::ToolSupport::TypeRepository> wcInnerObj(rep.get(), val.first);
+                    DotsC_Int32 numVal;
+                    wcInnerObj.ReadValue(myNum, 0, numVal, isNull, isChanged);
+                    if (!isChanged) throw std::logic_error(std::string("Change flag error, line: ")+boost::lexical_cast<std::string>(__LINE__));
+                    std::cout<<"        - MyCollections.SeqObject.MyNum isNull="<<isNull<<", isChanged="<<isChanged<<", val="<<numVal<<std::endl;
+                    std::cout<<"        - MyCollections.SeqObject.MyStrings"<<std::endl;
+                    for (DotsC_Int32 strIx=0; strIx<5; ++strIx)
+                    {
+                        innerReader.ReadValue(myStrings, strIx, str, isNull, isChanged);
+                        if (!isChanged) throw std::logic_error(std::string("Change flag error, line: ")+boost::lexical_cast<std::string>(__LINE__));
+                        std::cout<<"            isNull="<<isNull<<", isChanged="<<isChanged;
+                        if (isNull)
+                            std::cout<<std::endl;
+                        else
+                            std::cout<<", val="<<str<<std::endl;
+                    }
+                }
+
+                if (!wc.IsChangedTopLevel(myDictEntityIdObject)) throw std::logic_error(std::string("Change flag error, line: ")+boost::lexical_cast<std::string>(__LINE__));
+                std::cout<<"    - MyCollections.DictEntityIdObject, topChanged="<<wc.IsChangedTopLevel(myDictEntityIdObject)<<std::endl;
+                for (int j=0; j<wc.NumberOfValues(myDictEntityIdObject); ++j)
+                {
+                    std::pair<DotsC_EntityId, const char*> key=wc.ReadKey< std::pair<DotsC_EntityId, const char*> >(myDictEntityIdObject, j);
+                    std::pair<const char*, DotsC_Int32> val;
+                    wc.ReadValue(myDictEntityIdObject, j, val, isNull, isChanged);
+                    if (!isChanged) throw std::logic_error(std::string("Change flag error, line: ")+boost::lexical_cast<std::string>(__LINE__));
+                    std::cout<<"        key: {"<<rep->GetClass(key.first.typeId)->GetName()<<", "<<key.first.instanceId<<
+                               "}, isNull="<<isNull<<", isChanged="<<isChanged<<std::endl;
+
+                    BlobReader<Safir::Dob::Typesystem::ToolSupport::TypeRepository> wcInnerObj(rep.get(), val.first);
+                    DotsC_Int32 numVal;
+                    wcInnerObj.ReadValue(myNum, 0, numVal, isNull, isChanged);
+                    if (!isChanged) throw std::logic_error(std::string("Change flag error, line: ")+boost::lexical_cast<std::string>(__LINE__));
+                    std::cout<<"          - MyCollections.DictEntityIdObject.MyNum isNull="<<isNull<<", isChanged="<<isChanged<<", val="<<numVal<<std::endl;
+                    std::cout<<"          - MyCollections.DictEntityIdObject.MyStrings"<<std::endl;
+                    for (DotsC_Int32 strIx=0; strIx<5; ++strIx)
+                    {
+                        innerReader.ReadValue(myStrings, strIx, str, isNull, isChanged);
+                        if (!isChanged) throw std::logic_error(std::string("Change flag error, line: ")+boost::lexical_cast<std::string>(__LINE__));
+                        std::cout<<"              isNull="<<isNull<<", isChanged="<<isChanged;
+                        if (isNull)
+                            std::cout<<std::endl;
+                        else
+                            std::cout<<", val="<<str<<std::endl;
+                    }
+                }
+            }
+        }
     }
 
-
-
-    std::cout<<"========= Blob Test Done ========"<<std::endl;
+    std::cout<<"========= Blob Change Test Done ========"<<std::endl;
 }
 
 int main(int argc, char* argv[])
@@ -245,7 +659,9 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    BlobTest(repository);
+    BlobChangeTest(repository);
+    BlobDiffTest(repository);
+
     return 0;
 
     std::cout<<"========= Repository ========"<<std::endl;

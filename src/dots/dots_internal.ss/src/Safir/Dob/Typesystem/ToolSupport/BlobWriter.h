@@ -283,19 +283,17 @@ namespace ToolSupport
                     m_blob.SetChangedTopLevel(memIx, isChanged);
                     if (md->GetMemberType()==ObjectMemberType)
                     {
+                        MoveToMember(memIx);
                         for (int valIx=0; valIx<m_blob.NumberOfValues(memIx); ++valIx)
                         {
                             m_blob.ValueStatus(memIx, valIx, isNull, dummy);
-                            if (isNull)
-                            {
-                                m_blob.SetChanged(memIx, valIx, isChanged);
-                            }
-                            else
+                            if (!isNull)
                             {
                                 std::pair<const char*, DotsC_Int32> obj=m_blob.GetValueBinary(memIx, valIx);
                                 BlobWriterType inner(BlobReaderType(m_repository, obj.first));
                                 inner.SetAllChangeFlags(isChanged);
-                                WriteValue(memIx, valIx, inner, isNull, isChanged);
+                                m_valueIndex=valIx;
+                                WriteValue(inner);
                             }
                         }
                     }
@@ -304,29 +302,22 @@ namespace ToolSupport
                 case DictionaryCollectionType:
                 {
                     m_blob.SetChangedTopLevel(memIx, isChanged);
-                    if (md->GetMemberType()==ObjectMemberType)
+                    MoveToMember(memIx);
+
+                    for (int valIx=0; valIx<m_blob.NumberOfValues(memIx); ++valIx)
                     {
-                        for (int valIx=0; valIx<m_blob.NumberOfValues(memIx); ++valIx)
+                        m_blob.SetChanged(memIx, valIx, isChanged);
+                        if (md->GetMemberType()==ObjectMemberType)
                         {
                             m_blob.ValueStatus(memIx, valIx, isNull, dummy);
-                            if (isNull)
-                            {
-                                m_blob.SetChanged(memIx, valIx, isChanged);
-                            }
-                            else
+                            if (!isNull)
                             {
                                 std::pair<const char*, DotsC_Int32> obj=m_blob.GetValueBinary(memIx, valIx);
                                 BlobWriterType inner(BlobReaderType(m_repository, obj.first));
                                 inner.SetAllChangeFlags(isChanged);
-                                WriteValue(memIx, valIx, inner, isNull, isChanged);
+                                m_valueIndex=valIx;
+                                WriteValue(inner);
                             }
-                        }
-                    }
-                    else
-                    {
-                        for (int valIx=0; valIx<m_blob.NumberOfValues(memIx); ++valIx)
-                        {
-                            m_blob.SetChanged(memIx, valIx, isChanged);
                         }
                     }
                 }
@@ -345,7 +336,8 @@ namespace ToolSupport
             if (TypeId()!=reader.TypeId())
                 return true;
 
-            bool dummy=false, isNull=false;
+            bool diff=false;
+            const Internal::Blob& other=Internal::BlobUtils::BlobAccess::GetBlob(reader);
 
             for (int memIx=0; memIx<m_classDescription->GetNumberOfMembers(); ++memIx)
             {
@@ -355,106 +347,47 @@ namespace ToolSupport
                 {
                 case SingleValueCollectionType:
                 {
-                    m_blob.SetChanged(memIx, 0, isChanged);
-                    if (md->GetMemberType()==ObjectMemberType)
+                    if (Diff(other, md, memIx, 0))
                     {
-                        m_blob.ValueStatus(memIx, 0, isNull, dummy);
-                        if (!isNull)
-                        {
-                            std::pair<const char*, DotsC_Int32> obj=m_blob.GetValueBinary(memIx, 0);
-                            BlobWriterType inner(BlobReaderType(m_repository, obj.first));
-                            inner.SetAllChangeFlags(isChanged);
-                            WriteValue(memIx, 0, inner, isNull, isChanged);
-                        }
+                        m_blob.SetChanged(memIx, 0, true);
+                        diff=true;
                     }
                 }
                     break;
                 case ArrayCollectionType:
                 {
-                    if (md->GetMemberType()==ObjectMemberType)
+                    for (int valIx=0; valIx<md->GetArraySize(); ++valIx)
                     {
-                        for (int valIx=0; valIx<m_blob.NumberOfValues(memIx); ++valIx)
+                        if (Diff(other, md, memIx, valIx))
                         {
-                            m_blob.ValueStatus(memIx, valIx, isNull, dummy);
-                            if (isNull)
-                            {
-                                m_blob.SetChanged(memIx, valIx, isChanged);
-                            }
-                            else
-                            {
-                                std::pair<const char*, DotsC_Int32> obj=m_blob.GetValueBinary(memIx, valIx);
-                                BlobWriterType inner(BlobReaderType(m_repository, obj.first));
-                                inner.SetAllChangeFlags(isChanged);
-                                WriteValue(memIx, valIx, inner, isNull, isChanged);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        for (int valIx=0; valIx<m_blob.NumberOfValues(memIx); ++valIx)
-                        {
-                            m_blob.SetChanged(memIx, valIx, isChanged);
+                            m_blob.SetChanged(memIx, valIx, true);
+                            diff=true;
                         }
                     }
                 }
                     break;
                 case SequenceCollectionType:
                 {
-                    m_blob.SetChangedTopLevel(memIx, isChanged);
-                    if (md->GetMemberType()==ObjectMemberType)
+                    for (int valIx=0; valIx<m_blob.NumberOfValues(memIx); ++valIx)
                     {
-                        for (int valIx=0; valIx<m_blob.NumberOfValues(memIx); ++valIx)
+                        if (Diff(other, md, memIx, valIx))
                         {
-                            m_blob.ValueStatus(memIx, valIx, isNull, dummy);
-                            if (isNull)
-                            {
-                                m_blob.SetChanged(memIx, valIx, isChanged);
-                            }
-                            else
-                            {
-                                std::pair<const char*, DotsC_Int32> obj=m_blob.GetValueBinary(memIx, valIx);
-                                BlobWriterType inner(BlobReaderType(m_repository, obj.first));
-                                inner.SetAllChangeFlags(isChanged);
-                                WriteValue(memIx, valIx, inner, isNull, isChanged);
-                            }
+                            m_blob.SetChangedTopLevel(memIx, true);
+                            diff=true;
+                            break;
                         }
                     }
                 }
                     break;
                 case DictionaryCollectionType:
                 {
-                    m_blob.SetChangedTopLevel(memIx, isChanged);
-                    if (md->GetMemberType()==ObjectMemberType)
-                    {
-                        for (int valIx=0; valIx<m_blob.NumberOfValues(memIx); ++valIx)
-                        {
-                            m_blob.ValueStatus(memIx, valIx, isNull, dummy);
-                            if (isNull)
-                            {
-                                m_blob.SetChanged(memIx, valIx, isChanged);
-                            }
-                            else
-                            {
-                                std::pair<const char*, DotsC_Int32> obj=m_blob.GetValueBinary(memIx, valIx);
-                                BlobWriterType inner(BlobReaderType(m_repository, obj.first));
-                                inner.SetAllChangeFlags(isChanged);
-                                WriteValue(memIx, valIx, inner, isNull, isChanged);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        for (int valIx=0; valIx<m_blob.NumberOfValues(memIx); ++valIx)
-                        {
-                            m_blob.SetChanged(memIx, valIx, isChanged);
-                        }
-                    }
+                    //TODO: joot
                 }
                     break;
                 }
             }
 
-
+            return diff;
         }
 
     private:
@@ -645,109 +578,67 @@ namespace ToolSupport
                 {
                     std::pair<const char*, DotsC_Int32> obj=m_blob.GetValueBinary(memberIndex, valueIndex);
                     BlobWriterType inner(BlobReaderType(m_repository, obj.first));
-                    inner.SetAllChangeFlags(isChanged);
+                    inner.SetAllChangeFlags(true);
                     WriteValue(memberIndex, valueIndex, inner, false, true);
                 }
-                else
-                {
-                    m_blob.SetChanged(memberIndex, valueIndex, true);
-                }
+                return true;
             }
             else if (!meIsNull)
             {
                 switch(md->GetMemberType())
                 {
                 case BooleanMemberType:
-                {
-                    if (m_blob.GetValueBool(memberIndex, valueIndex)!=other.GetValueBool(memberIndex, valueIndex))
-                        m_blob.SetChanged(memberIndex, valueIndex, true);
-                }
-                    break;
-                case EnumerationMemberType:
-                {
-                    if (m_blob.GetValueInt32(memberIndex, valueIndex)!=other.GetValueInt32(memberIndex, valueIndex))
-                        m_blob.SetChanged(memberIndex, valueIndex, true);
-                }
-                    break;
+                    return m_blob.GetValueBool(memberIndex, valueIndex)!=other.GetValueBool(memberIndex, valueIndex);
+
                 case Int32MemberType:
-                {
-                    if (m_blob.GetValueInt32(memberIndex, valueIndex)!=other.GetValueInt32(memberIndex, valueIndex))
-                        m_blob.SetChanged(memberIndex, valueIndex, true);
-                }
-                    break;
+                case EnumerationMemberType:
+                    return m_blob.GetValueInt32(memberIndex, valueIndex)!=other.GetValueInt32(memberIndex, valueIndex);
+
                 case Int64MemberType:
-                {
-                    if (m_blob.GetValueInt64(memberIndex, valueIndex)!=other.GetValueInt64(memberIndex, valueIndex))
-                        m_blob.SetChanged(memberIndex, valueIndex, true);
-                }
-                    break;
-                case Float32MemberType:
-                {
-                    if (m_blob.GetValueFloat32(memberIndex, valueIndex)!=other.GetValueFloat32(memberIndex, valueIndex))
-                        m_blob.SetChanged(memberIndex, valueIndex, true);
-                }
-                    break;
-                case Float64MemberType:
-                {
-                    if (m_blob.GetValueFloat64(memberIndex, valueIndex)!=other.GetValueFloat64(memberIndex, valueIndex))
-                        m_blob.SetChanged(memberIndex, valueIndex, true);
-                }
-                    break;
                 case TypeIdMemberType:
-                {
-                    if (m_blob.GetValueInt64(memberIndex, valueIndex)!=other.GetValueInt64(memberIndex, valueIndex))
-                        m_blob.SetChanged(memberIndex, valueIndex, true);
-                }
-                    break;
+                    return m_blob.GetValueInt64(memberIndex, valueIndex)!=other.GetValueInt64(memberIndex, valueIndex);
 
                 case InstanceIdMemberType:
                 case ChannelIdMemberType:
                 case HandlerIdMemberType:
-                {
-                    if (m_blob.GetValueHash(memberIndex, valueIndex)!=other.GetValueHash(memberIndex, valueIndex))
-                        m_blob.SetChanged(memberIndex, valueIndex, true);
-                }
-                    break;
+                    return m_blob.GetValueHash(memberIndex, valueIndex)!=other.GetValueHash(memberIndex, valueIndex);
 
                 case EntityIdMemberType:
-                {
-                    if (m_blob.GetValueInt64(memberIndex, valueIndex)!=other.GetValueInt64(memberIndex, valueIndex))
-                    {
-                        m_blob.SetChanged(memberIndex, valueIndex, true);
-                    }
-                    else if (m_blob.GetValueHash(memberIndex, valueIndex)!=other.GetValueHash(memberIndex, valueIndex))
-                    {
-                        m_blob.SetChanged(memberIndex, valueIndex, true);
-                    }
-                }
-                    break;
+                    return (m_blob.GetValueInt64(memberIndex, valueIndex)!=other.GetValueInt64(memberIndex, valueIndex)) ||
+                            (m_blob.GetValueHash(memberIndex, valueIndex)!=other.GetValueHash(memberIndex, valueIndex));
+
                 case StringMemberType:
-                {
-                    std::string a=m_blob.GetValueString(memberIndex, valueIndex);
-                    std::string b=other.GetValueString(memberIndex, valueIndex);
-                    if (a!=b)
-                        m_blob.SetChanged(memberIndex, valueIndex, true);
-                }
-                    break;
+                    return strcmp(m_blob.GetValueString(memberIndex, valueIndex), other.GetValueString(memberIndex, valueIndex))!=0;
+
                 case ObjectMemberType:
                 {
                     std::pair<const char*, boost::int32_t> meInner=m_blob.GetValueBinary(memberIndex, valueIndex);
                     std::pair<const char*, boost::int32_t> otherInner=other.GetValueBinary(memberIndex, valueIndex);
-                    BlobWriterType inner(BlobReaderType(m_repository, meInner.first));
-                    BlobReaderType otherReader(m_repository, otherInner.first);
-                    inner.MarkChanges(otherReader);
-                    WriteValue(memberIndex, valueIndex, inner, false, true);
+                    if (meInner.second!=otherInner.second || memcmp(meInner.first, otherInner.first, static_cast<size_t>(meInner.second))!=0)
+                    {
+                        //not binary equal, something is probably different
+                        BlobWriterType inner(BlobReaderType(m_repository, meInner.first));
+                        BlobReaderType otherReader(m_repository, otherInner.first);
+                        bool diff=inner.MarkChanges(otherReader);
+                        if (diff)
+                        {
+                            WriteValue(memberIndex, valueIndex, inner, false, true);
+                            return true;
+                        }
+                    }
+                    return false;
                 }
                     break;
+
                 case BinaryMemberType:
                 {
                     std::pair<const char*, boost::int32_t> a=m_blob.GetValueBinary(memberIndex, valueIndex);
                     std::pair<const char*, boost::int32_t> b=other.GetValueBinary(memberIndex, valueIndex);
-                    if (a.second!=b.second || memcmp(a.first, b.first, static_cast<size_t>(a.second))!=0)
-                        m_blob.SetChanged(memberIndex, valueIndex, true);
+                    return a.second!=b.second || memcmp(a.first, b.first, static_cast<size_t>(a.second))!=0;
                 }
                     break;
-                    //SI Types
+
+                case Float32MemberType:
                 case Ampere32MemberType:
                 case CubicMeter32MemberType:
                 case Hertz32MemberType:
@@ -767,12 +658,9 @@ namespace ToolSupport
                 case Steradian32MemberType:
                 case Volt32MemberType:
                 case Watt32MemberType:
-                {
-                    if (m_blob.GetValueFloat32(memberIndex, valueIndex)!=other.GetValueFloat32(memberIndex, valueIndex))
-                        m_blob.SetChanged(memberIndex, valueIndex, true);
-                }
-                    break;
-                    //SI Long Types
+                    return m_blob.GetValueFloat32(memberIndex, valueIndex)!=other.GetValueFloat32(memberIndex, valueIndex);
+
+                case Float64MemberType:
                 case Ampere64MemberType:
                 case CubicMeter64MemberType:
                 case Hertz64MemberType:
@@ -792,14 +680,11 @@ namespace ToolSupport
                 case Steradian64MemberType:
                 case Volt64MemberType:
                 case Watt64MemberType:
-                {
-                    if (m_blob.GetValueFloat64(memberIndex, valueIndex)!=other.GetValueFloat64(memberIndex, valueIndex))
-                        m_blob.SetChanged(memberIndex, valueIndex, true);
-                }
-                    break;
-                }
-            }
+                    return m_blob.GetValueFloat64(memberIndex, valueIndex)!=other.GetValueFloat64(memberIndex, valueIndex);
 
+                } //end switch-statement
+            }
+            return true; //should be unreachable
         }
     };
 }

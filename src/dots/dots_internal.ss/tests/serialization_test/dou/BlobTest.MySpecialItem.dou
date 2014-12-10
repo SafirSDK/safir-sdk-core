@@ -13,10 +13,15 @@
             <type>String</type>
             <maxLength>20</maxLength>
         </member>
-	<member>
-	  <name>DictStringInt32</name>
-	  <type>Int32</type>
-	  <dictionary keyType="String"/>
-	</member>
+	    <member>
+	        <name>DictStringInt32</name>
+	        <type>Int32</type>
+	        <dictionary keyType="String"/>
+	    </member>
+	    <member>
+	        <name>DictAdvanced</name>
+	        <type>BlobTest.MyCollections</type>
+	        <dictionary keyType="BlobTest.MyColorEnum"/>
+	    </member>
     </members>
 </class>
