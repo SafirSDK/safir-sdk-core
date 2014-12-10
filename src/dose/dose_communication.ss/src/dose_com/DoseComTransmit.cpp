@@ -1275,7 +1275,7 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
 					// but to an "impossible" case probably caused by a bug. The solution for now is to simulate that this node loses
 					// contact with all other nodes, in order to force a resynchronization.
 
-                    PrintErr(0, "TxThread[%d] Got a NACK for a fragmented message that is already acked! Simulating a node disconnect in order to force resynchronization\n", qIx);
+                    PrintErr(0, "TxThread[%d] Got a NACK for a fragmented message that is already acked! We have already retried 10 times so now we are simulating a node disconnect in order to force resynchronization\n", qIx);
 
                     g_pShm->InhibitOutgoingTraffic = true;
                     DoseOs::Sleep(6000);
@@ -1347,7 +1347,7 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
 					// but to an "impossible" case probably caused by a bug. The solution for now is to simulate that this node loses
 					// contact with all other nodes, in order to force a resynchronization.
 
-                    PrintErr(0, "TxThread[%d] Got a NACK with an expected message that is already acked! Simulating a node disconnect in order to force resynchronization\n", qIx);
+                    PrintErr(0, "TxThread[%d] Got a NACK with an expected message that is already acked! We have already retried 10 times so now we are simulating a node disconnect in order to force resynchronization\n", qIx);
 
                     g_pShm->InhibitOutgoingTraffic = true;
                     DoseOs::Sleep(6000);
