@@ -23,8 +23,19 @@
 ******************************************************************************/
 #pragma once
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning (disable: 4127)
+#pragma warning (disable: 4244)
+#endif
+
 #include <QDialog>
-#include <boost/shared_ptr.hpp>
+#include <QFileDialog>
+#include <QApplication>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 namespace Ui {
     class Dobmake;
@@ -37,6 +48,33 @@ class Dobmake : public QDialog
 public:
     explicit Dobmake(QWidget *parent = 0);
 
+    ~Dobmake();
+private slots:
+    void on_douDirectoryBrowse_clicked();
+
+    void on_douDirectory_textChanged(const QString &arg1);
+
+    void on_installDirectory_textChanged(const QString &arg1);
+
+    void on_installDirectoryBrowse_clicked();
+
+    void on_build_clicked();
+
+    void on_buildAndInstall_clicked();
+
+    void on_debugRadioButton_clicked(bool checked);
+
+    void on_releaseRadioButton_clicked(bool checked);
+
+    void on_debugCheckButton_clicked(bool checked);
+
+    void on_releaseCheckButton_clicked(bool checked);
+
 private:
-    boost::shared_ptr<Ui::Dobmake> ui;
+    void UpdateInstallButton();
+
+    bool m_debug;
+    bool m_release;
+
+    Ui::Dobmake* ui;
 };
