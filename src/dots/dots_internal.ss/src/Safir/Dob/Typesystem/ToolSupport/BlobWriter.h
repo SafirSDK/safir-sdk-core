@@ -381,7 +381,7 @@ namespace ToolSupport
                     break;
                 case DictionaryCollectionType:
                 {
-                    //TODO: joot
+                    //olika antal, eller någon i this som inte finns i other -> topLevel
                 }
                     break;
                 }
@@ -579,7 +579,9 @@ namespace ToolSupport
                     std::pair<const char*, DotsC_Int32> obj=m_blob.GetValueBinary(memberIndex, valueIndex);
                     BlobWriterType inner(BlobReaderType(m_repository, obj.first));
                     inner.SetAllChangeFlags(true);
-                    WriteValue(memberIndex, valueIndex, inner, false, true);
+                    MoveToMember(memberIndex);
+                    m_valueIndex=valueIndex;
+                    WriteValue(inner);
                 }
                 return true;
             }
@@ -622,7 +624,9 @@ namespace ToolSupport
                         bool diff=inner.MarkChanges(otherReader);
                         if (diff)
                         {
-                            WriteValue(memberIndex, valueIndex, inner, false, true);
+                            MoveToMember(memberIndex);
+                            m_valueIndex=valueIndex;
+                            WriteValue(inner);
                             return true;
                         }
                     }
