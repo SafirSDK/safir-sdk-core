@@ -33,6 +33,7 @@
 
 #include "ui_dobmake.h"
 #include <QFileDialog>
+#include <QProcess>
 
 #ifdef _MSC_VER
 #pragma warning(pop)
@@ -132,7 +133,16 @@ void Dobmake::UpdateInstallButton()
 
 void Dobmake::on_build_clicked()
 {
+    QProcess p;
+    QStringList params;
 
+    params << "--version"; //"script.py -arg1 arg1"
+    p.start("python", params);
+    p.waitForFinished(-1);
+
+    QString stdout = p.readAll();
+
+    std::wcout << stdout.toStdWString() << std::endl;
 }
 
 void Dobmake::on_buildAndInstall_clicked()
