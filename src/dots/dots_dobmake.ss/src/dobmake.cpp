@@ -22,8 +22,21 @@
 *
 ******************************************************************************/
 #include "dobmake.h"
-#include "ui_dobmake.h"
 #include <iostream>
+
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning (disable: 4127)
+#pragma warning (disable: 4244)
+#pragma warning (disable: 4251)
+#endif
+
+#include "ui_dobmake.h"
+#include <QFileDialog>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 Dobmake::Dobmake(QWidget *parent)
     : QDialog(parent)

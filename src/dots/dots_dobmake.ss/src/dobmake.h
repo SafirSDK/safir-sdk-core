@@ -30,8 +30,6 @@
 #endif
 
 #include <QDialog>
-#include <QFileDialog>
-#include <QApplication>
 
 #ifdef _MSC_VER
 #pragma warning(pop)
