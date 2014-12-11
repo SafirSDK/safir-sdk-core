@@ -17,6 +17,37 @@ SET(SAFIR_VERSION_MINOR 0)
 SET(SAFIR_VERSION_PATCH 0)
 SET(SAFIR_VERSION_STRING "${SAFIR_VERSION_MAJOR}.${SAFIR_VERSION_MINOR}.${SAFIR_VERSION_PATCH}")
 
+
+#
+# This function will install a python script into the bin directory.
+# If it is a *nix system the script will have ".py" stripped from its name.
+#
+function (SAFIR_INSTALL_PYTHON)
+  cmake_parse_arguments(INST "" "SCRIPT;COMPONENT;RENAME" "" ${ARGN})
+
+  if (NOT "${INST_UNPARSED_ARGUMENTS}" STREQUAL "")
+    message(FATAL_ERROR "Unknown argument to SAFIR_INSTALL_PYTHON '${INST_UNPARSED_ARGUMENTS}'")
+  endif()
+
+  if(INST_RENAME AND NOT MSVC)
+    STRING(REGEX REPLACE "\\.py$" "" _stripped_name "${INST_RENAME}")
+    GET_FILENAME_COMPONENT(_stripped_name ${_stripped_name} NAME)
+    SET(_RENAME_ARG RENAME ${_stripped_name})
+  elseif(INST_RENAME)
+    SET(_RENAME_ARG RENAME ${INST_RENAME})
+  elseif(NOT MSVC)
+    STRING(REGEX REPLACE "\\.py$" "" _stripped_name "${INST_SCRIPT}")
+    GET_FILENAME_COMPONENT(_stripped_name ${_stripped_name} NAME)
+    SET(_RENAME_ARG RENAME ${_stripped_name})
+  endif()
+
+  INSTALL(PROGRAMS ${INST_SCRIPT}
+    DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN}
+    COMPONENT ${INST_COMPONENT}
+    ${_RENAME_ARG})
+endfunction()
+
+
 #TODO: !!
 set(SAFIR_SDK "STOP_USING_SAFIR_SDK_VARIABLE" NOW PLEASE)
 set(SAFIR_RUNTIME "STOP_USING_SAFIR_RUNTIME_VARIABLE" NOW PLEASE)
@@ -62,5 +93,9 @@ ENABLE_TESTING()
 add_subdirectory(src)
 add_subdirectory(docs)
 
+SAFIR_INSTALL_PYTHON(
+  SCRIPT build/build.py
+  RENAME dobmake-batch.py
+  COMPONENT Development)
 
 #TODO: should dobexplorer be in dev package?
