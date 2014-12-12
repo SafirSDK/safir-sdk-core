@@ -194,7 +194,7 @@ namespace Com
         struct RecvData
         {
             bool free;
-            uint64_t dataType;
+            int64_t dataType;
             uint64_t sequenceNumber;
             uint16_t fragmentNumber;
             uint16_t numberOfFragments;
