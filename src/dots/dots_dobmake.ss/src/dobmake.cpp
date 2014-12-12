@@ -69,12 +69,15 @@ Dobmake::~Dobmake()
 
 bool Dobmake::CheckPython()
 {
-    QProcess p;
     QStringList params;
-
     params << "--version";
+
+    QProcess p;
+    p.setStandardOutputFile(QProcess::nullDevice());
+    p.setStandardErrorFile(QProcess::nullDevice());
     p.start("python", params);
     p.waitForFinished(-1);
+
     return p.error() == QProcess::UnknownError && p.exitStatus() == QProcess::NormalExit && p.exitCode() == 0;
 }
 
