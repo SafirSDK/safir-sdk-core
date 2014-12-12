@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2014 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2014 (http://www.consoden.se)
 *
 * Created by: Joel Ottosson / joel.ottosson@consoden.se
 *
@@ -23,10 +24,10 @@
 ******************************************************************************/
 #include "Receiver.h"
 
-Receiver::Receiver(boost::asio::io_service& ioService, int64_t nodeId, int64_t nodeType)
+Receiver::Receiver(Com::ControlModeTag tag, boost::asio::io_service& ioService, int64_t nodeId, int64_t nodeType)
     :m_timerInclude(ioService)
     ,m_strand(ioService)
-    ,m_com(Safir::Dob::Internal::Com::controlModeTag,
+    ,m_com(tag,
            ioService,
            std::string("Node_")+boost::lexical_cast<std::string>(nodeId),
            nodeId,
@@ -45,6 +46,39 @@ Receiver::Receiver(boost::asio::io_service& ioService, int64_t nodeId, int64_t n
     m_com.SetRetransmitToCallback([this](int64_t id){RetransmitTo(id);});
 
     m_com.Start();
+}
+
+Receiver::Receiver(Com::DataModeTag tag, boost::asio::io_service& ioService, int64_t nodeId, int64_t nodeType)
+    :m_timerInclude(ioService)
+    ,m_strand(ioService)
+    ,m_com(tag,
+           ioService,
+           std::string("Node_")+boost::lexical_cast<std::string>(nodeId),
+           nodeId,
+           nodeType,
+           std::string("127.0.0.1:1100")+boost::lexical_cast<std::string>(nodeId),
+           {
+             {0, "nt0", "", "", 1000, 1000}
+             ,{1, "nt1", "224.90.90.241:12000", "224.90.90.241:13000", 1000, 1000}
+           })
+{
+    m_timerInclude.expires_from_now(boost::chrono::milliseconds(1000));
+    m_timerInclude.async_wait(m_strand.wrap([=](const boost::system::error_code& error){if (!error) IncludeNode();}));
+
+    m_com.SetDataReceiver([this](int64_t fromNodeId, int64_t fromNodeType, const boost::shared_ptr<char[]>& data, size_t size){ReceiveData(fromNodeId, fromNodeType, data, size);}, 0);
+    m_com.SetGotReceiveFromCallback([this](int64_t id){GotReceiveFrom(id);});
+    m_com.SetNewNodeCallback([this](const std::string& n, int64_t id, int64_t nt, const std::string& ca, const std::string& da){NewNode(n, id, nt, ca, da);});
+    m_com.SetQueueNotFullCallback([this](int64_t id){QueueNotFull(id);}, 100);
+    m_com.SetRetransmitToCallback([this](int64_t id){RetransmitTo(id);});
+
+    m_com.Start();
+}
+
+void Receiver::InjectNode(int64_t nodeId, int64_t nodeType)
+{
+    std::string name=std::string("Node_")+boost::lexical_cast<std::string>(nodeId);
+    std::string address=std::string("127.0.0.1:1100")+boost::lexical_cast<std::string>(nodeId);
+    m_com.InjectNode(name, nodeId, nodeType, address);
 }
 
 void Receiver::Seed(int64_t nodeId)
@@ -105,7 +139,6 @@ void Receiver::IncludeNode()
 
 void Receiver::ReceiveData(int64_t fromNodeId, int64_t fromNodeType, const boost::shared_ptr<char[]>& data, size_t size)
 {
-
     auto it=m_recvCount.find(fromNodeId);
     if (it==m_recvCount.end())
     {

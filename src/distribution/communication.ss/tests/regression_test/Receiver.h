@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2014 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2014 (http://www.consoden.se)
 *
 * Created by: Joel Ottosson / joel.ottosson@consoden.se
 *
@@ -32,8 +33,10 @@ class Receiver
 {
 public:
 
-    Receiver(boost::asio::io_service& ioService, int64_t nodeId, int64_t nodeType);
+    Receiver(Com::ControlModeTag tag, boost::asio::io_service& ioService, int64_t nodeId, int64_t nodeType);
+    Receiver(Com::DataModeTag tag, boost::asio::io_service& ioService, int64_t nodeId, int64_t nodeType);
 
+    void InjectNode(int64_t nodeId, int64_t nodeType);
     void Seed(int64_t nodeId);
     void Stop();
     void Print() const;

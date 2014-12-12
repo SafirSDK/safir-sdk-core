@@ -130,7 +130,7 @@ namespace Com
             auto findIt = m_nodeTypes.find(nodeTypeId);
             if (findIt == m_nodeTypes.end())
             {
-                throw std::logic_error("Invalid nodeTypeId");
+                throw std::logic_error(std::string("COM: GetNodeType Invalid, nodeTypeId: ")+boost::lexical_cast<std::string>(nodeTypeId));
             }
             return *(findIt->second);
         }

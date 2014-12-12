@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2014 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2014 (http://www.consoden.se)
 *
 * Created by: Joel Ottosson / joel.ottosson@consoden.se
 *
@@ -23,12 +24,21 @@
 ******************************************************************************/
 #include "Sender.h"
 
-Sender::Sender(boost::asio::io_service& ioService, int64_t nodeId, int64_t nodeType)
-    :Receiver(ioService, nodeId, nodeType)
+Sender::Sender(Com::ControlModeTag tag, boost::asio::io_service& ioService, int64_t nodeId, int64_t nodeType)
+    :Receiver(tag, ioService, nodeId, nodeType)
     ,m_timerSend(ioService)
     ,m_msgCount(0)
 {
     m_timerSend.expires_from_now(boost::chrono::milliseconds(10));
+    m_timerSend.async_wait(m_strand.wrap([=](const boost::system::error_code& error){if (!error) Send();}));
+}
+
+Sender::Sender(Com::DataModeTag tag, boost::asio::io_service& ioService, int64_t nodeId, int64_t nodeType)
+    :Receiver(tag, ioService, nodeId, nodeType)
+    ,m_timerSend(ioService)
+    ,m_msgCount(0)
+{
+    m_timerSend.expires_from_now(boost::chrono::milliseconds(3000));
     m_timerSend.async_wait(m_strand.wrap([=](const boost::system::error_code& error){if (!error) Send();}));
 }
 
