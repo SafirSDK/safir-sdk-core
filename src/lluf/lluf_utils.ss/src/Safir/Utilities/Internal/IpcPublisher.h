@@ -26,6 +26,7 @@
 #define __LLUF_IPC_PUBLISHER_H__
 
 #include <set>
+#include <atomic>
 #include <boost/cstdint.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
