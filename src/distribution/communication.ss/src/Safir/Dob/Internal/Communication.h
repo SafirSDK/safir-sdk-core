@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2014 (http://www.consoden.se)
 *
 * Created by: Joel Ottosson / joel.ottosson@consoden.se
 *
@@ -203,7 +204,7 @@ namespace Com
 
         /**
          * Make a node that have been reported on the NewNode callback a system node.
-         * Only useful if created with ControlModeTag
+         * Only allowed if created with ControlModeTag.
          *
          * @param nodeId [in] - Id of the node to include.
          */
@@ -211,16 +212,14 @@ namespace Com
 
         /**
          * Exclude a system node. After a node has been excluded it can never be included  again.
-         * Only useful if created with ControlModeTag
          *
          * @param nodeId [in] - Id of the node to exclude.
          */
         void ExcludeNode(int64_t nodeId);
 
         /**
-         * Tell communication that a node exist and is part of the system. Calls to this method will be ignored if the instance was created with
-         * ControlModeTag and hence is running the discover mechanism.
-         * Only useful if created with DataModeTag
+         * Tell communication that a node exist and is part of the system.
+         * Only allowed if created with DataModeTag.
          * @param name [in] - Name of the node.
          * @param id [in] - Id of the node.
          * @param nodeTypeId [in] - Node type of the node.

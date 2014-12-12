@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2014 (http://www.consoden.se)
 *
 * Created by: Joel Ottosson / joel.ottosson@consoden.se
 *
@@ -326,14 +327,21 @@ namespace Com
                 const auto it=m_nodes.find(id);
                 if (it!=m_nodes.end())
                 {
-                    it->second.systemNode=true;
-                    if (m_deliveryGuarantee)
+                    if (it->second.systemNode)
                     {
-                        PostWelcome(id);
+                        lllog(5)<<m_logPrefix.c_str()<<" IncluedNode called for an already included node, nodeId: "<<boost::lexical_cast<std::wstring>(id)<<std::endl;
                     }
-                    else //unacked data does not have to wait for welcome
+                    else
                     {
-                        it->second.welcome=0;
+                        it->second.systemNode=true;
+                        if (m_deliveryGuarantee)
+                        {
+                            PostWelcome(id);
+                        }
+                        else //unacked data does not have to wait for welcome
+                        {
+                            it->second.welcome=0;
+                        }
                     }
                 }
             });
@@ -404,7 +412,6 @@ namespace Com
             userData->receivers.insert(nodeId);
             m_sendQueue.enqueue(userData);
 
-            std::wcout<<m_logPrefix.c_str()<<"Welcome posted from "<<m_nodeId<<L" to "<<nodeId<<", seq: "<<ni.welcome<<std::endl;
             lllog(8)<<m_logPrefix.c_str()<<"Welcome posted from "<<m_nodeId<<L" to "<<nodeId<<", seq: "<<ni.welcome<<std::endl;
             HandleSendQueue();
         }

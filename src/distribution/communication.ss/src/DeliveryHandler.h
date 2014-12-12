@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2014 (http://www.consoden.se)
 *
 * Created by: Joel Ottosson / joel.ottosson@consoden.se
 *
@@ -419,8 +420,6 @@ namespace Com
             {
                 if (ch.welcome==UINT64_MAX)
                 {
-                    std::wcout<<L"COM: Got welcome from node "<<header->commonHeader.senderId<<
-                              L", seq: "<<header->sequenceNumber<<", "<<SendMethodToString(header->sendMethod).c_str()<<std::endl;
                     lllog(8)<<L"COM: Got welcome from node "<<header->commonHeader.senderId<<
                               L", seq: "<<header->sequenceNumber<<", "<<SendMethodToString(header->sendMethod).c_str()<<std::endl;
 

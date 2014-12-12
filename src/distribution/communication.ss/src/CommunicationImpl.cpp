@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2014 (http://www.consoden.se)
 *
 * Created by: Joel Ottosson / joel.ottosson@consoden.se
 *
@@ -153,6 +154,12 @@ namespace Com
 
     void CommunicationImpl::IncludeNode(int64_t id)
     {
+        if (!m_isControlInstance)
+        {
+            return; //TODO: remove and throw exception
+            //std::logic_error("COM: InclueNode was called on instance running in DataMode.");
+        }
+
         lllog(6)<<L"COM: IncludeNode "<<id<<std::endl;
 
         //We do post here to be sure the AddNode job will be executed before IncludeNode. Otherwize we
@@ -201,6 +208,12 @@ namespace Com
 
     void CommunicationImpl::InjectNode(const std::string& name, int64_t id, int64_t nodeTypeId, const std::string& dataAddress)
     {
+        if (m_isControlInstance)
+        {
+            return; //TODO: remove and throw exception
+            //std::logic_error("COM: InjectNode was called on instance running in ControlMode.");
+        }
+
         lllog(6)<<L"COM: Inject node '"<<name.c_str()<<L"' ["<<id<<L"]"<<std::endl;
 
         Node node(name, id, nodeTypeId, "", dataAddress, false);
