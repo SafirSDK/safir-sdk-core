@@ -123,6 +123,8 @@ namespace Com
         //Received internal Communication msg that is not directly passed to application, i.e discover, nodeInfo etc.
         void ReceivedControlData(const MessageHeader* header, const char* payload);
 
+        void IncludeNodeInternal(int64_t nodeId);
+
         NodeType& GetNodeType(int64_t nodeTypeId)
         {
             auto findIt = m_nodeTypes.find(nodeTypeId);

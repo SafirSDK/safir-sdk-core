@@ -154,26 +154,30 @@ namespace Com
 
     void CommunicationImpl::IncludeNode(int64_t id)
     {
+        lllog(6)<<L"COM: IncludeNode "<<id<<std::endl;
         if (!m_isControlInstance)
         {
             return; //TODO: remove and throw exception
             //std::logic_error("COM: InclueNode was called on instance running in DataMode.");
         }
 
-        lllog(6)<<L"COM: IncludeNode "<<id<<std::endl;
+        IncludeNodeInternal(id);
+    }
 
+    void CommunicationImpl::IncludeNodeInternal(int64_t id)
+    {
         //We do post here to be sure the AddNode job will be executed before IncludeNode. Otherwize we
         //risk losing a node.
         //We also do the DataSender inside readerStrand since
         //it only through the deliveryHandler we can lookup nodeTypeId from a nodeId. Since this a a very low frequent operaton this is ok.
         m_receiveStrand.post([=]
         {
-            lllog(6)<<L"COM: Execute IncludeNode id="<<id<<std::endl;
+            lllog(6)<<L"COM: Execute IncludeNodeInternal id="<<id<<std::endl;
             auto node=m_deliveryHandler.GetNode(id);
 
             if (node==nullptr)
             {
-                throw std::logic_error(std::string("COM: IncludeNode unknown or excluded node. NodeId: ")+boost::lexical_cast<std::string>(id));
+                throw std::logic_error(std::string("COM: IncludeNodeInternal unknown or excluded node. NodeId: ")+boost::lexical_cast<std::string>(id));
             }
 
             auto& nodeType=GetNodeType(node->nodeTypeId);
@@ -218,7 +222,7 @@ namespace Com
 
         Node node(name, id, nodeTypeId, "", dataAddress, false);
         OnNewNode(node);
-        IncludeNode(id);
+        IncludeNodeInternal(id);
     }
 
     bool CommunicationImpl::Send(int64_t nodeId, int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, int64_t dataTypeIdentifier, bool deliveryGuarantee)
