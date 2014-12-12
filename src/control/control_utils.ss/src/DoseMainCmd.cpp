@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2014 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2014 (http://www.consoden.se)
 *
 * Created by: Anders Widén / anders.widen@consoden.se
 *
@@ -45,14 +46,18 @@ namespace Control
     public:
 
         Impl(boost::asio::io_service& ioService,
-             const InjectNodeCmdCb&   cmdCb)
+             const InjectNodeCmdCb&   injectOwnNodeCmdCb,
+             const InjectNodeCmdCb&   injectNodeCmdCb,
+             const StopDoseMainCb&    stopDoseMainCb)
             : m_ipcSubscriber(ioService,
                               doseMainCmdChannel,
                               [this](const char* data, size_t size)
                               {
                                   RecvDataCb(data, size);
                               }),
-              m_injectNodeCmdCb(cmdCb)
+              m_injectOwnNodeCmdCb(injectOwnNodeCmdCb),
+              m_injectNodeCmdCb(injectNodeCmdCb),
+              m_stopDoseMainCb(stopDoseMainCb)
         {
         }
 
@@ -71,7 +76,9 @@ namespace Control
 
         Safir::Utilities::Internal::IpcSubscriber m_ipcSubscriber;
 
+        InjectNodeCmdCb     m_injectOwnNodeCmdCb;
         InjectNodeCmdCb     m_injectNodeCmdCb;
+        StopDoseMainCb      m_stopDoseMainCb;
 
         void RecvDataCb(const char* data, size_t size)
         {
@@ -79,26 +86,48 @@ namespace Control
 
             controlCmd.ParseFromArray(data, static_cast<int>(size));
 
-            if (controlCmd.has_inject_node_cmd())
+            switch (controlCmd.cmd_type())
             {
-               m_injectNodeCmdCb(controlCmd.request_id(),
-                                 controlCmd.inject_node_cmd().node_name(),
-                                 controlCmd.inject_node_cmd().node_id(),
-                                 controlCmd.inject_node_cmd().node_type_id(),
-                                 controlCmd.inject_node_cmd().data_address());
-            }
-            // More commands here
-            else
-            {
-               throw std::logic_error("Received unknown control command!");
-            }
+                case controlCmd.INJECT_NODE:
+                {
+                    m_injectNodeCmdCb(controlCmd.request_id(),
+                                      controlCmd.node_data().node_name(),
+                                      controlCmd.node_data().node_id(),
+                                      controlCmd.node_data().node_type_id(),
+                                      controlCmd.node_data().data_address());
+                }
+                break;
 
+                case controlCmd.INJECT_OWN_NODE:
+                {
+                    m_injectOwnNodeCmdCb(controlCmd.request_id(),
+                                         controlCmd.node_data().node_name(),
+                                         controlCmd.node_data().node_id(),
+                                         controlCmd.node_data().node_type_id(),
+                                         controlCmd.node_data().data_address());
+                }
+                break;
+
+                case controlCmd.STOP:
+                {
+                    m_stopDoseMainCb(controlCmd.request_id());
+                }
+                break;
+
+                default:
+                {
+                    throw std::logic_error("Received unknown control command!");
+                }
+
+            }
         }
     };
 
     DoseMainCmdReceiver::DoseMainCmdReceiver(boost::asio::io_service& ioService,
-                                             const InjectNodeCmdCb&   cmdCb)
-        : m_impl(Safir::make_unique<Impl>(ioService, cmdCb))
+                                             const InjectNodeCmdCb&   injectOwnNodeCmdCb,
+                                             const InjectNodeCmdCb&   injectNodeCmdCb,
+                                             const StopDoseMainCb&    stopDoseMainCb)
+        : m_impl(Safir::make_unique<Impl>(ioService, injectOwnNodeCmdCb, injectNodeCmdCb, stopDoseMainCb))
     {
     }
 
@@ -118,8 +147,9 @@ namespace Control
     {
     public:
 
-        Impl(boost::asio::io_service& ioService)
-            : m_ipcPublisher(ioService, doseMainCmdChannel, nullptr, nullptr)
+        Impl(boost::asio::io_service&       ioService,
+             const std::function<void()>    doseMainConnectedCb)
+            : m_ipcPublisher(ioService, doseMainCmdChannel, doseMainConnectedCb, nullptr)
         {
         }
 
@@ -133,6 +163,24 @@ namespace Control
            m_ipcPublisher.Stop();
         }
 
+        void InjectOwnNode(int64_t requestId,
+                           const std::string& nodeName,
+                           int64_t nodeId,
+                           int64_t nodeTypeId,
+                           const std::string& dataAddress)
+        {
+            ControlCmd controlCmd;
+
+            controlCmd.set_request_id(requestId);
+            controlCmd.set_cmd_type(ControlCmd::INJECT_OWN_NODE);
+            controlCmd.mutable_node_data()->set_node_name(nodeName);
+            controlCmd.mutable_node_data()->set_node_id(nodeId);
+            controlCmd.mutable_node_data()->set_node_type_id(nodeTypeId);
+            controlCmd.mutable_node_data()->set_data_address(dataAddress);
+
+            Send(controlCmd);
+        }
+
         void InjectNode(int64_t requestId,
                         const std::string& nodeName,
                         int64_t nodeId,
@@ -142,11 +190,21 @@ namespace Control
             ControlCmd controlCmd;
 
             controlCmd.set_request_id(requestId);
+            controlCmd.set_cmd_type(ControlCmd::INJECT_NODE);
+            controlCmd.mutable_node_data()->set_node_name(nodeName);
+            controlCmd.mutable_node_data()->set_node_id(nodeId);
+            controlCmd.mutable_node_data()->set_node_type_id(nodeTypeId);
+            controlCmd.mutable_node_data()->set_data_address(dataAddress);
 
-            controlCmd.mutable_inject_node_cmd()->set_node_name(nodeName);
-            controlCmd.mutable_inject_node_cmd()->set_node_id(nodeId);
-            controlCmd.mutable_inject_node_cmd()->set_node_type_id(nodeTypeId);
-            controlCmd.mutable_inject_node_cmd()->set_data_address(dataAddress);
+            Send(controlCmd);
+        }
+
+        void StopDoseMain(int64_t requestId)
+        {
+            ControlCmd controlCmd;
+
+            controlCmd.set_request_id(requestId);
+            controlCmd.set_cmd_type(ControlCmd::STOP);
 
             Send(controlCmd);
         }
@@ -166,8 +224,9 @@ namespace Control
 
     };
 
-    DoseMainCmdSender::DoseMainCmdSender(boost::asio::io_service& ioService)
-        : m_impl(Safir::make_unique<Impl>(ioService))
+    DoseMainCmdSender::DoseMainCmdSender(boost::asio::io_service&       ioService,
+                                         const std::function<void()>    doseMainConnectedCb)
+        : m_impl(Safir::make_unique<Impl>(ioService, doseMainConnectedCb))
     {
     }
 
@@ -181,6 +240,19 @@ namespace Control
         m_impl->Stop();
     }
 
+    void DoseMainCmdSender::InjectOwnNode(int64_t requestId,
+                                          const std::string& nodeName,
+                                          int64_t nodeId,
+                                          int64_t nodeTypeId,
+                                          const std::string& dataAddress)
+    {
+        m_impl->InjectOwnNode(requestId,
+                              nodeName,
+                              nodeId,
+                              nodeTypeId,
+                              dataAddress);
+    }
+
     void DoseMainCmdSender::InjectNode(int64_t requestId,
                                        const std::string& nodeName,
                                        int64_t nodeId,
@@ -192,6 +264,11 @@ namespace Control
                            nodeId,
                            nodeTypeId,
                            dataAddress);
+    }
+
+    void DoseMainCmdSender::StopDoseMain(int64_t requestId)
+    {
+        m_impl->StopDoseMain(requestId);
     }
 
 

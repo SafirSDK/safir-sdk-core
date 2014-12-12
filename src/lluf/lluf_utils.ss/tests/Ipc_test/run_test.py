@@ -3,6 +3,7 @@
 ###############################################################################
 #
 # Copyright Saab AB, 2013 (http://safir.sourceforge.net)
+# Copyright Consoden AB, 2014 (http://www.consoden.se)
 #
 # Created by: Anders Widén (anders.widen@consoden.se)
 #
@@ -56,7 +57,7 @@ def wait_for_output(proc, output, n=1, exact_match=False):
     no_found = 0
     while True:
         line = proc.stdout.readline().decode("utf-8")
-        #print (line)
+        print (line)
         if line.find(output) != -1:
             no_found = no_found + 1
             if no_found >= n:
@@ -164,6 +165,9 @@ wait_for_output(subscriber2, "Trying to connect")
 
 # Start Publisher and wait for the subscribers to receive the messages
 publisher = subprocess.Popen((IpcPublisher, "--message-delay", "10"), stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+
+wait_for_output(publisher, "A Subscriber connected")
+wait_for_output(publisher, "A Subscriber connected")
 wait_for_output(publisher, "A Subscriber disconnected")
 wait_for_output(publisher, "A Subscriber disconnected")
 

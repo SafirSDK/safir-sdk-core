@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2014 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2014 (http://www.consoden.se)
 *
 * Created by: Anders Widén / anders.widen@consoden.se
 *
@@ -63,8 +64,12 @@ namespace Control
                                    int64_t nodeTypeId,
                                    const std::string& dataAddress)> InjectNodeCmdCb;
 
+        typedef std::function<void(int64_t requestId)> StopDoseMainCb;
+
         DoseMainCmdReceiver(boost::asio::io_service& ioService,
-                            const InjectNodeCmdCb&   cmdCb);
+                            const InjectNodeCmdCb&   injectOwnNodeCmdCb,
+                            const InjectNodeCmdCb&   injectNodeCmdCb,
+                            const StopDoseMainCb&    stopDoseMainCb);
 
         // Start command reception
         void Start();
@@ -87,7 +92,8 @@ namespace Control
     {
     public:
 
-        DoseMainCmdSender(boost::asio::io_service& ioService);
+        DoseMainCmdSender(boost::asio::io_service&      ioService,
+                          const std::function<void()>   doseMainConnectedCb);
 
         // Start sender
         void Start();
@@ -95,11 +101,20 @@ namespace Control
         // Stop sender
         void Stop();
 
+        // dose_main commands
+        void InjectOwnNode(int64_t requestId,
+                           const std::string& nodeName,
+                           int64_t nodeId,
+                           int64_t nodeTypeId,
+                           const std::string& dataAddress);
+
         void InjectNode(int64_t requestId,
                         const std::string& nodeName,
                         int64_t nodeId,
                         int64_t nodeTypeId,
                         const std::string& dataAddress);
+
+        void StopDoseMain(int64_t requestId);
 
     private:
         class Impl;

@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2014 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2014 (http://www.consoden.se)
 *
 * Created by: Anders Widén / anders.widen@consoden.se
 *
@@ -33,13 +34,15 @@ namespace Internal
 namespace Control
 {
 
-    SystemStateHandler::SystemStateHandler(const NodeIncludedCb&            nodeIncludedCb,
+    SystemStateHandler::SystemStateHandler(const Node&                      ownNode,
+                                           const NodeIncludedCb&            nodeIncludedCb,
                                            const NodeDownCb&                nodeDownCb)
 
         : m_systemState(),
           m_nodeIncludedCb(nodeIncludedCb),
           m_nodeDownCb(nodeDownCb)
     {
+        m_systemState.insert({ownNode.nodeId, ownNode});
     }
 
     void SystemStateHandler::SetNewState(const Safir::Dob::Internal::SP::SystemState& newState)
