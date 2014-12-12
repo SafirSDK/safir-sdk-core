@@ -68,7 +68,7 @@ std::wostream& operator<<(std::wostream& out, const boost::program_options::opti
 // Communication callbacks
 void QueueNotFullCb(int64_t nodeTypeId)
 {
-    std::wcout << "dose_main got queue not full indication for nodetypeId " << nodeTypeId << std::endl;
+    lllog(3) << "DOSE_MAIN: Got queue not full indication for nodetypeId " << nodeTypeId << std::endl;
 }
 
 boost::shared_ptr<char[]> StrToPtr(const std::string& s)
@@ -81,7 +81,7 @@ boost::shared_ptr<char[]> StrToPtr(const std::string& s)
 
 int main(int /*argc*/, char * /*argv*/[])
 {
-    std::wcout << "dose_main exe is started" << std::endl;
+    lllog(3) << "DOSE_MAIN: Started" << std::endl;
 
     const Safir::Dob::Internal::Control::Config config;
 
@@ -120,7 +120,7 @@ int main(int /*argc*/, char * /*argv*/[])
     std::unique_ptr<Com::Communication> communication;
     std::unique_ptr<SP::SystemPicture> sp;
 
-    int counter;
+    int counter = 0;
 
     std::function<void (const boost::system::error_code&)> onTimeout =
             [&running, &timer, &onTimeout, &communication, &counter, &config]
@@ -133,7 +133,7 @@ int main(int /*argc*/, char * /*argv*/[])
 
                if (error)
                {
-                   std::wcout << "OnTimeout error!" << std::endl;
+                   lllog(3) << "DOSE_MAIN: OnTimeout error!" << std::endl;
                }
 
                std::ostringstream output;
@@ -143,7 +143,6 @@ int main(int /*argc*/, char * /*argv*/[])
                // Send message to all node types
                for (const auto& nt: config.GetNodeTypes())
                {
-                   lllog(3) << "Send a message to all nodes of type " << nt.id << std::endl;
                    communication->Send(0, // Send to all nodes of this type
                                        nt.id,
                                        StrToPtr(output.str()),
@@ -191,8 +190,8 @@ int main(int /*argc*/, char * /*argv*/[])
                                          size_t size)
                                         {
                                             std::string msg(data.get(), size);
-                                            std::wcout << " dose_main_stub received " << msg << " from Node Id " << fromNodeId
-                                                       << " of Node Type " << fromNodeType << std::endl;
+                                            lllog(3) << "DOSE_MAIN: Received " << msg << " from Node Id " << fromNodeId
+                                                     << " of Node Type " << fromNodeType << std::endl;
                                         },
                                         12345);
 
@@ -222,6 +221,7 @@ int main(int /*argc*/, char * /*argv*/[])
                         [&sp, &work, &communication, &running, &doseMainCmdReceiver]
                         (int64_t /*requestId*/)
                         {
+                            lllog(0) << "DOSE_MAIN: Got stop command" << std::endl;
                             sp->Stop();
                             communication->Stop();
                             doseMainCmdReceiver.Stop();
@@ -233,7 +233,38 @@ int main(int /*argc*/, char * /*argv*/[])
     // Start reception of commands
     doseMainCmdReceiver.Start();
 
-    std::wcout << "dose_main has called doseMainCmdReceiver.Start()" << std::endl;
+    boost::asio::signal_set signalSet(ioService);
+
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+    signalSet.add(SIGABRT);
+    signalSet.add(SIGBREAK);
+    signalSet.add(SIGINT);
+    signalSet.add(SIGTERM);
+#elif defined(linux) || defined(__linux) || defined(__linux__)
+    signalSet.add(SIGQUIT);
+    signalSet.add(SIGINT);
+    signalSet.add(SIGTERM);
+#endif
+
+    signalSet.async_wait([&sp, &work, &communication, &running, &doseMainCmdReceiver]
+                         (const boost::system::error_code& error,
+                          const int signalNumber)
+                         {
+                             lllog(0) << "DOSE_MAIN: got signal " << signalNumber  << std::endl;
+
+                             if (error)
+                             {
+                                 SEND_SYSTEM_LOG(Error,
+                                                 << "DOSE_MAIN: Got a signals error: " << error);
+                             }
+
+                             sp->Stop();
+                             communication->Stop();
+                             doseMainCmdReceiver.Stop();
+                             work.reset();
+                             running = false;
+                         }
+                         );
 
     boost::thread_group threads;
     for (int i = 0; i < 9; ++i)
@@ -245,6 +276,6 @@ int main(int /*argc*/, char * /*argv*/[])
 
     threads.join_all();
 
-    lllog(3) << "Exiting..." << std::endl;
+    lllog(0) << "DOSE_MAIN: Exiting..." << std::endl;
     return 0;
 }

@@ -201,7 +201,7 @@ int main(int argc, char * argv[])
     if (dose_main_path.empty())
     {
         std::ostringstream os;
-        os << "CTRL: Can't find " << doseMainName << " in current worPATH" << std::endl;
+        os << "CTRL: Can't find " << doseMainName << " in PATH" << std::endl;
         SEND_SYSTEM_LOG(Error, << os.str().c_str());
         throw std::logic_error(os.str());
     }
@@ -298,8 +298,6 @@ int main(int argc, char * argv[])
                                      // This is what we do when dose_main is started
                                      [&sp, &communication, &doseMainCmdSender, &options, &stateHandler]()
                                      {
-                                         std::wcout << "Send Inject own node and start state subscriptions" << std::endl;
-
                                          // Send info about own node to dose_main
                                          doseMainCmdSender.InjectOwnNode(0, // request id currently not used
                                                                          options.name,
@@ -307,7 +305,6 @@ int main(int argc, char * argv[])
                                                                          options.nodeTypeId,
                                                                          options.dataAddress);                                         
 
-                                         std::wcout << "Start subscription for system states" << std::endl;
                                          sp.StartStateSubscription
                                                  ([&stateHandler](const SP::SystemState& newState)
                                                   {
