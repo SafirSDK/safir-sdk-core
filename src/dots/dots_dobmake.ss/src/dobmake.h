@@ -47,6 +47,11 @@ public:
     explicit Dobmake(QWidget *parent = 0);
 
     ~Dobmake();
+
+
+
+    static bool CheckPython();
+    static QString GetDobmakeBatchScript();
 private slots:
     void on_douDirectoryBrowse_clicked();
 

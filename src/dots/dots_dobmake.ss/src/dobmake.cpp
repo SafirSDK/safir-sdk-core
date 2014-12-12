@@ -34,6 +34,7 @@
 #include "ui_dobmake.h"
 #include <QFileDialog>
 #include <QProcess>
+#include <QMessageBox>
 
 #ifdef _MSC_VER
 #pragma warning(pop)
@@ -65,6 +66,44 @@ Dobmake::~Dobmake()
     delete ui;
 }
 
+
+bool Dobmake::CheckPython()
+{
+    QProcess p;
+    QStringList params;
+
+    params << "--version";
+    p.start("python", params);
+    p.waitForFinished(-1);
+    return p.error() == QProcess::UnknownError && p.exitStatus() == QProcess::NormalExit && p.exitCode() == 0;
+}
+
+QString Dobmake::GetDobmakeBatchScript()
+{
+#if defined(linux) || defined(__linux) || defined(__linux__)
+    const QString separator = ":";
+    const QString scriptSuffix = "";
+#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+    const QString separator = ";";
+    const QString scriptSuffix = ".py";
+#else
+#  error Dobmake does not know how to handle this platform
+#endif
+
+    const QString pathenv = QProcessEnvironment::systemEnvironment().value("PATH");
+    const QStringList paths = pathenv.split(separator,QString::SkipEmptyParts);
+
+    for (QStringList::const_iterator it = paths.begin();
+         it != paths.end(); ++it)
+    {
+        QFile f(*it + QDir::separator() + "dobmake-batch" + scriptSuffix);
+        if (f.exists())
+        {
+            return f.fileName();
+        }
+    }
+    return "";
+}
 
 void Dobmake::on_douDirectoryBrowse_clicked()
 {
@@ -133,16 +172,48 @@ void Dobmake::UpdateInstallButton()
 
 void Dobmake::on_build_clicked()
 {
-    QProcess p;
     QStringList params;
 
-    params << "--version"; //"script.py -arg1 arg1"
+    params << GetDobmakeBatchScript();
+    params << "--skip-tests";
+
+#if defined(linux) || defined(__linux) || defined(__linux__)
+    params << "--config";
+#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+    params << "--configs"
+#else
+#  error Dobmake does not know how to handle this platform
+#endif
+
+    if (m_debug)
+    {
+        params << "Debug";
+    }
+
+    if (m_release)
+    {
+        params << "Release";
+    }
+    std::wcout << params.join(" ").toStdWString() << std::endl;
+    QProcess p;
+    p.setWorkingDirectory(ui->douDirectory->text());
+    p.setStandardOutputFile(QProcess::nullDevice());
+    p.setStandardErrorFile(QProcess::nullDevice());
     p.start("python", params);
     p.waitForFinished(-1);
 
-    QString stdout = p.readAll();
+    if (p.error() == QProcess::UnknownError && p.exitStatus() == QProcess::NormalExit && p.exitCode() == 0)
+    {
+        QMessageBox::information(this,"Build successful!", "Build was completed successfully!");
+    }
+    else
+    {
+        QMessageBox::critical(this, "Build failed!", "Build failed!\nPlease check your dou and CMakeLists.txt files for errors.");
+    }
 
-    std::wcout << stdout.toStdWString() << std::endl;
+//TODO: split into separate thread
+    //make the error box have one button saying "open log"
+    //add support for the show log button.
 }
 
 void Dobmake::on_buildAndInstall_clicked()
