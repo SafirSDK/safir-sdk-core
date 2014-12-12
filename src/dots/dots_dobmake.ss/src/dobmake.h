@@ -73,11 +73,15 @@ private slots:
 
     void on_releaseCheckButton_clicked(bool checked);
 
+    void BuildComplete(const bool result);
+
 private:
     void UpdateInstallButton();
+    void UpdateBuildButton();
 
     bool m_debug;
     bool m_release;
+    bool m_buildRunning;
 
     Ui::Dobmake* ui;
 };

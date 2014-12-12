@@ -110,7 +110,7 @@
           <item>
            <widget class="QRadioButton" name="releaseRadioButton">
             <property name="text">
-             <string>Release</string>
+             <string>RelWithDebInfo</string>
             </property>
             <property name="checked">
              <bool>true</bool>
@@ -164,7 +164,7 @@
           <item>
            <widget class="QCheckBox" name="releaseCheckButton">
             <property name="text">
-             <string>Release</string>
+             <string>RelWithDebInfo</string>
             </property>
             <property name="checked">
              <bool>true</bool>

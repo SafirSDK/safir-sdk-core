@@ -1,6 +1,6 @@
 set(ui dobmake.ui)
 set(sources dobmake.cpp main.cpp)
-set(headers dobmake.h)
+set(headers dobmake.h BuildThread.h)
 
 # As moc files are generated in the binary dir, tell CMake
 # to always look for includes there:

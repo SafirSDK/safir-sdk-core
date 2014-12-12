@@ -23,6 +23,7 @@
 ******************************************************************************/
 #include "dobmake.h"
 #include <iostream>
+#include "BuildThread.h"
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -40,8 +41,10 @@
 #pragma warning(pop)
 #endif
 
+
 Dobmake::Dobmake(QWidget *parent)
     : QDialog(parent)
+    , m_buildRunning(false)
     , ui(new Ui::Dobmake)
 {
     ui->setupUi(this);
@@ -124,7 +127,7 @@ void Dobmake::on_douDirectory_textChanged(const QString &path)
 {
     const QFile dir(path);
     const QFile cmakelists(path + QDir::separator() + "CMakeLists.txt");
-    ui->build->setEnabled(dir.exists() && cmakelists.exists());
+
     if (dir.exists() && cmakelists.exists())
     {
         ui->douDirectory->setStyleSheet("");
@@ -134,13 +137,13 @@ void Dobmake::on_douDirectory_textChanged(const QString &path)
         ui->douDirectory->setStyleSheet("Background-color:red");
     }
 
+    UpdateBuildButton();
     UpdateInstallButton();
 }
 
 void Dobmake::on_installDirectory_textChanged(const QString &path)
 {
     const QFile dir(path);
-    //ui->build->setEnabled(cmakelists.exists());
     if (dir.exists())
     {
         ui->installDirectory->setStyleSheet("");
@@ -170,57 +173,73 @@ void Dobmake::UpdateInstallButton()
     const QFile buildDir(ui->douDirectory->text());
     const QFile cmakelists(ui->douDirectory->text() + QDir::separator() + "CMakeLists.txt");
     const QFile installDir(ui->installDirectory->text());
-    ui->buildAndInstall->setEnabled(buildDir.exists() && cmakelists.exists() && installDir.exists());
+    ui->buildAndInstall->setEnabled(!m_buildRunning &&
+                                    buildDir.exists() &&
+                                    cmakelists.exists() &&
+                                    installDir.exists());
+}
+
+void Dobmake::UpdateBuildButton()
+{
+    const QFile dir(ui->douDirectory->text());
+    const QFile cmakelists(ui->douDirectory->text() + QDir::separator() + "CMakeLists.txt");
+    ui->build->setEnabled(!m_buildRunning &&
+                          dir.exists() &&
+                          cmakelists.exists());
 }
 
 void Dobmake::on_build_clicked()
 {
-    QStringList params;
+    BuildThread* worker = new BuildThread(this,
+                                      GetDobmakeBatchScript(),
+                                      ui->douDirectory->text(),
+                                      m_debug,
+                                      m_release,
+                                      ""); //no installation
 
-    params << GetDobmakeBatchScript();
-    params << "--skip-tests";
+    connect(worker, &BuildThread::BuildComplete, this, &Dobmake::BuildComplete);
+    connect(worker, &BuildThread::finished, worker, &QObject::deleteLater);
+    m_buildRunning = true;
+    UpdateBuildButton();
+    UpdateInstallButton();
+    worker->start();
+}
 
-#if defined(linux) || defined(__linux) || defined(__linux__)
-    params << "--config";
-#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-    params << "--configs"
-#else
-#  error Dobmake does not know how to handle this platform
-#endif
+void Dobmake::on_buildAndInstall_clicked()
+{
+    BuildThread* worker = new BuildThread(this,
+                                          GetDobmakeBatchScript(),
+                                          ui->douDirectory->text(),
+                                          m_debug,
+                                          m_release,
+                                          ui->installDirectory->text());
 
-    if (m_debug)
-    {
-        params << "Debug";
-    }
+    connect(worker, &BuildThread::BuildComplete, this, &Dobmake::BuildComplete);
+    connect(worker, &BuildThread::finished, worker, &QObject::deleteLater);
+    m_buildRunning = true;
+    UpdateBuildButton();
+    UpdateInstallButton();
+    worker->start();
+}
 
-    if (m_release)
-    {
-        params << "Release";
-    }
-    std::wcout << params.join(" ").toStdWString() << std::endl;
-    QProcess p;
-    p.setWorkingDirectory(ui->douDirectory->text());
-    p.setStandardOutputFile(QProcess::nullDevice());
-    p.setStandardErrorFile(QProcess::nullDevice());
-    p.start("python", params);
-    p.waitForFinished(-1);
+void Dobmake::BuildComplete(const bool result)
+{
+    m_buildRunning = false;
+    UpdateBuildButton();
+    UpdateInstallButton();
 
-    if (p.error() == QProcess::UnknownError && p.exitStatus() == QProcess::NormalExit && p.exitCode() == 0)
+    if (result)
     {
         QMessageBox::information(this,"Build successful!", "Build was completed successfully!");
     }
     else
     {
-        QMessageBox::critical(this, "Build failed!", "Build failed!\nPlease check your dou and CMakeLists.txt files for errors.");
+        QMessageBox::critical(this,
+                              "Build failed!",
+                              "Build failed!\nPlease check your dou and CMakeLists.txt files for errors.");
     }
-
-//TODO: split into separate thread
-    //make the error box have one button saying "open log"
-    //add support for the show log button.
-}
-
-void Dobmake::on_buildAndInstall_clicked()
-{
+    //TODO: make the error box have one button saying "open log"
+    //TODO: add support for the show log button.
 
 }
 
