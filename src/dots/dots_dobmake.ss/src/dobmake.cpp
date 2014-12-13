@@ -195,8 +195,8 @@ void Dobmake::on_build_clicked()
                                       m_release,
                                       ""); //no installation
 
-    connect(worker, &BuildThread::BuildComplete, this, &Dobmake::BuildComplete);
-    connect(worker, &BuildThread::finished, worker, &QObject::deleteLater);
+    connect(worker, SIGNAL(BuildComplete(bool)), this, SLOT(BuildComplete(bool)));
+    connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
     m_buildRunning = true;
     UpdateBuildButton();
     UpdateInstallButton();
@@ -212,8 +212,8 @@ void Dobmake::on_buildAndInstall_clicked()
                                           m_release,
                                           ui->installDirectory->text());
 
-    connect(worker, &BuildThread::BuildComplete, this, &Dobmake::BuildComplete);
-    connect(worker, &BuildThread::finished, worker, &QObject::deleteLater);
+    connect(worker, SIGNAL(BuildComplete(bool)), this, SLOT(BuildComplete(bool)));
+    connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
     m_buildRunning = true;
     UpdateBuildButton();
     UpdateInstallButton();
