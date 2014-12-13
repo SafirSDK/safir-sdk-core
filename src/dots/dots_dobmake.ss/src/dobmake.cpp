@@ -291,9 +291,11 @@ void Dobmake::on_releaseCheckButton_clicked(bool checked)
     m_release = checked;
 }
 
-void Dobmake::on_showLog_toggled(bool checked)
+void Dobmake::on_showLog_toggled(const bool checked)
 {
-    if (m_buildRunning)
+    //This allows the user to check the box while the build is running
+    //which will open the log.
+    if (m_buildRunning && checked)
     {
         OpenLog();
     }
