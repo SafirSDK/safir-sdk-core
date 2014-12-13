@@ -36,6 +36,8 @@
 #include <QFileDialog>
 #include <QProcess>
 #include <QMessageBox>
+#include <QDesktopServices>
+#include <QUrl>
 
 #ifdef _MSC_VER
 #pragma warning(pop)
@@ -186,6 +188,23 @@ void Dobmake::UpdateBuildButton()
                           cmakelists.exists());
 }
 
+
+void Dobmake::OpenLog()
+{
+    if (ui->showLog->isChecked())
+    {
+        const bool result = QDesktopServices::openUrl
+            (QUrl("file://" + ui->douDirectory->text() + "/" + "buildlog.html"));
+
+        if (not result)
+        {
+            QMessageBox::warning(this,
+                                 "Failed to open browser",
+                                 "Failed to open the log in your web browser.\n"
+                                 "Please open the buildlog.html file in the dou directory manually.");
+        }
+    }
+}
 void Dobmake::on_build_clicked()
 {
     BuildThread* worker = new BuildThread(this,
@@ -200,6 +219,7 @@ void Dobmake::on_build_clicked()
     m_buildRunning = true;
     UpdateBuildButton();
     UpdateInstallButton();
+    OpenLog();
     worker->start();
 }
 
@@ -217,6 +237,7 @@ void Dobmake::on_buildAndInstall_clicked()
     m_buildRunning = true;
     UpdateBuildButton();
     UpdateInstallButton();
+    OpenLog();
     worker->start();
 }
 
@@ -226,19 +247,23 @@ void Dobmake::BuildComplete(const bool result)
     UpdateBuildButton();
     UpdateInstallButton();
 
-    if (result)
+    if (!result)
     {
         QMessageBox::information(this,"Build successful!", "Build was completed successfully!");
     }
     else
     {
-        QMessageBox::critical(this,
-                              "Build failed!",
-                              "Build failed!\nPlease check your dou and CMakeLists.txt files for errors.");
+        QMessageBox box(QMessageBox::Critical,
+                        "Build failed!",
+                        "Build failed!\nPlease check your dou and CMakeLists.txt files for errors.",
+                        QMessageBox::Ok);
+        QAbstractButton* showLog = box.addButton("Show Log", QMessageBox::ApplyRole);
+        box.exec();
+        if (box.clickedButton() == showLog)
+        {
+            OpenLog();
+        }
     }
-    //TODO: make the error box have one button saying "open log"
-    //TODO: add support for the show log button.
-
 }
 
 void Dobmake::on_debugRadioButton_clicked(bool checked)
@@ -261,4 +286,12 @@ void Dobmake::on_debugCheckButton_clicked(bool checked)
 void Dobmake::on_releaseCheckButton_clicked(bool checked)
 {
     m_release = checked;
+}
+
+void Dobmake::on_showLog_toggled(bool checked)
+{
+    if (m_buildRunning)
+    {
+        OpenLog();
+    }
 }

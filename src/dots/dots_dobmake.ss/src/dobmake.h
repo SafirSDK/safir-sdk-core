@@ -75,10 +75,13 @@ private slots:
 
     void BuildComplete(const bool result);
 
+    void on_showLog_toggled(bool checked);
+
 private:
     void UpdateInstallButton();
     void UpdateBuildButton();
-
+    void OpenLog();
+    
     bool m_debug;
     bool m_release;
     bool m_buildRunning;
