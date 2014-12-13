@@ -76,8 +76,6 @@ bool Dobmake::CheckPython()
     params << "--version";
 
     QProcess p;
-    p.setStandardOutputFile(QProcess::nullDevice());
-    p.setStandardErrorFile(QProcess::nullDevice());
     p.start("python", params);
     p.waitForFinished(-1);
 

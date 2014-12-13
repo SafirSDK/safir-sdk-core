@@ -32,7 +32,7 @@
 
 #include <QThread>
 #include <QProcess>
-
+#include <QFile>
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
@@ -68,10 +68,21 @@ private:
         params << m_dobmakeBatchScript;
         params << "--skip-tests";
 
+#if QT_VERSION >= 0x050000
+        const QString null = QProcess::nullDevice();
+#endif
+
 #if defined(linux) || defined(__linux) || defined(__linux__)
         params << "--config";
+#  if QT_VERSION < 0x050000
+        const QString null("/dev/null");
+#  endif
+
 #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
         params << "--configs";
+#  if QT_VERSION < 0x050000
+        const QString null("nul");
+#  endif
 #else
 #  error Dobmake does not know how to handle this platform
 #endif
@@ -93,8 +104,8 @@ private:
 
         QProcess p;
         p.setWorkingDirectory(m_buildDir);
-        p.setStandardOutputFile(QProcess::nullDevice());
-        p.setStandardErrorFile(QProcess::nullDevice());
+        p.setStandardOutputFile(null);
+        p.setStandardErrorFile(null);
         p.start("python", params);
         p.waitForFinished(-1);
 
