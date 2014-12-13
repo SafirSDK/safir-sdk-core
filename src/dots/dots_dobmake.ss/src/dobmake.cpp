@@ -217,6 +217,7 @@ void Dobmake::on_build_clicked()
     connect(worker, SIGNAL(BuildComplete(bool)), this, SLOT(BuildComplete(bool)));
     connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
     m_buildRunning = true;
+    QApplication::setOverrideCursor(Qt::BusyCursor);
     UpdateBuildButton();
     UpdateInstallButton();
     OpenLog();
@@ -235,6 +236,7 @@ void Dobmake::on_buildAndInstall_clicked()
     connect(worker, SIGNAL(BuildComplete(bool)), this, SLOT(BuildComplete(bool)));
     connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
     m_buildRunning = true;
+    QApplication::setOverrideCursor(Qt::BusyCursor);
     UpdateBuildButton();
     UpdateInstallButton();
     OpenLog();
@@ -244,10 +246,11 @@ void Dobmake::on_buildAndInstall_clicked()
 void Dobmake::BuildComplete(const bool result)
 {
     m_buildRunning = false;
+    QApplication::restoreOverrideCursor();
     UpdateBuildButton();
     UpdateInstallButton();
 
-    if (!result)
+    if (result)
     {
         QMessageBox::information(this,"Build successful!", "Build was completed successfully!");
     }
