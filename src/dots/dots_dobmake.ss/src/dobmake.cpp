@@ -196,7 +196,7 @@ void Dobmake::OpenLog()
         const bool result = QDesktopServices::openUrl
             (QUrl("file://" + ui->douDirectory->text() + "/" + "buildlog.html"));
 
-        if (not result)
+        if (!result)
         {
             QMessageBox::warning(this,
                                  "Failed to open browser",
