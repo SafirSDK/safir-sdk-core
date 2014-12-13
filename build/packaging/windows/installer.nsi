@@ -82,9 +82,16 @@ FunctionEnd
     !define debugonlyStr ""
   !endif
 
+  ;Check for VERSION
+  !ifdef VERSION
+    !define versionStr "-${VERSION}"
+  !else
+    !define versionStr ""
+  !endif
+
   ;Name and file
   Name "Safir SDK Core"
-  OutFile "SafirSDKCore-VS${STUDIO}-${nameBitwidth}${debugonlyStr}.exe"
+  OutFile "SafirSDKCore${versionStr}-VS${STUDIO}-${nameBitwidth}${debugonlyStr}.exe"
 
   ;Source directories created by build script
   !define StageDirRuntime "..\..\..\stage\Runtime\Program Files\safir-sdk-core"

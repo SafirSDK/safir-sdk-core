@@ -626,9 +626,11 @@ class VisualStudioBuilder(BuilderBase):
             die("Failed to find all expected variables in vcvarsall.bat")
 
     def stage_package(self):
+        version_tuple, version_string = read_version()
         command = ("makensis",
                    "/DARCH=" + self.target_architecture,
-                   "/DSTUDIO=" + self.used_studio)
+                   "/DSTUDIO=" + self.used_studio,
+				   "/DVERSION=" + version_string)
 
         if self.debug_only:
             command += ("/DDEBUGONLY",)
