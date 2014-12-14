@@ -13,10 +13,7 @@ INSTALL(FILES
         DESTINATION ${SAFIR_INSTALL_DESTINATION_GENERATION}/cpp
         COMPONENT Development)
 
-#TODO versioning of the dots_generated assemblies?
-
 INSTALL(FILES
-#          data/AssemblyInfo.cs TODO?
           data/dots_generated-dotnet.snk
         DESTINATION ${SAFIR_INSTALL_DESTINATION_GENERATION}/dotnet
         COMPONENT Development)
@@ -26,15 +23,6 @@ INSTALL(FILES
         DESTINATION ${SAFIR_INSTALL_DESTINATION_GENERATION}/java
         COMPONENT Development)
 
-
-
-#INSTALL(DIRECTORY
-#          data/dobmake_config
-#        DESTINATION ${SAFIR_SDK}/dots/dots_generated)
-
-
 SAFIR_INSTALL_PYTHON(SCRIPT dots_v.py
   COMPONENT Development)
 
-
-#TODO        data/dobmake.py
