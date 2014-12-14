@@ -44,8 +44,6 @@ endif()
 #  SET_SAFIR_TEST_PROPERTIES(TEST dots_ada)
 #endif()
 
-#TODO: why does dots_java_jni not rebuild when make is run from here?
-
 if (Java_FOUND)
   ADD_TEST(NAME dots_java
     COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
