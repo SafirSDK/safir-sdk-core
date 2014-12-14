@@ -300,3 +300,6 @@ void Dobmake::on_showLog_toggled(const bool checked)
         OpenLog();
     }
 }
+
+
+//TODO: add dots_configuration_check stuff?

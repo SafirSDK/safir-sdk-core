@@ -112,8 +112,8 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
       add_custom_command(
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/version.cs
         COMMAND ${CMAKE_COMMAND} -E echo "//This is an automatically generated file." > ${CMAKE_CURRENT_BINARY_DIR}/version.cs
-        COMMAND ${CMAKE_COMMAND} -E echo "[assembly: System.Reflection.AssemblyVersion\(\"${SAFIR_VERSION_STRING}.0\"\)]" >> ${CMAKE_CURRENT_BINARY_DIR}/version.cs
-        COMMAND ${CMAKE_COMMAND} -E echo "internal class BuildInfo {public const string Version = \"${SAFIR_VERSION_STRING}.0\";}" >> ${CMAKE_CURRENT_BINARY_DIR}/version.cs
+        COMMAND ${CMAKE_COMMAND} -E echo "[assembly: System.Reflection.AssemblyVersion\(\"${SAFIR_VERSION_MAJOR}.${SAFIR_VERSION_MINOR}.${SAFIR_VERSION_PATCH}.0\"\)]" >> ${CMAKE_CURRENT_BINARY_DIR}/version.cs
+        COMMAND ${CMAKE_COMMAND} -E echo "internal class BuildInfo {public const string Version = \"${SAFIR_VERSION_MAJOR}.${SAFIR_VERSION_MINOR}.${SAFIR_VERSION_PATCH}.0\";}" >> ${CMAKE_CURRENT_BINARY_DIR}/version.cs
         COMMENT "Creating version.cs for ${TARGET_NAME}"
         VERBATIM)
 
