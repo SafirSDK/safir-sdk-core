@@ -35,8 +35,7 @@ foreach (line IN LISTS version_strings)
 endforeach()
 
 SET(SAFIR_VERSION_STRING "${SAFIR_VERSION_MAJOR}.${SAFIR_VERSION_MINOR}.${SAFIR_VERSION_PATCH}${SAFIR_VERSION_SUFFIX}")
-message("SAFIR_VERSION_STRING '${SAFIR_VERSION_STRING}'")
-return()
+
 #
 # This function will install a python script into the bin directory.
 # If it is a *nix system the script will have ".py" stripped from its name.
