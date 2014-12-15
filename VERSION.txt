@@ -8,3 +8,5 @@ PATCH=0
 SUFFIX=-alpha
 
 #Set the SUFFIX to empty string for stable releases (but keep the equal sign).
+
+#Note: Keep to 7-bit ascii in this file, or everything will blow up...

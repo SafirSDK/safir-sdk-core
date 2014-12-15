@@ -161,7 +161,7 @@ def num_jobs():
 
 def read_version():
     parts = {}
-    with open("VERSION.txt", 'r', encoding="utf-8") as version_file:
+    with open("VERSION.txt", 'r') as version_file:
         for line in version_file:
             line = line.strip()
             if len(line) == 0 or line.startswith("#"):
