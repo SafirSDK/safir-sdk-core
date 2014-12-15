@@ -159,6 +159,18 @@ def num_jobs():
         num_jobs = 2
     return num_jobs
 
+def read_version():
+    parts = {}
+    with open("VERSION.txt", 'r', encoding="utf-8") as version_file:
+        for line in version_file:
+            line = line.strip()
+            if len(line) == 0 or line.startswith("#"):
+                continue
+            key, value = line.split("=")
+            parts[key] = value
+    return ((parts["MAJOR"],parts["MINOR"],parts["PATCH"],parts["SUFFIX"]),
+            parts["MAJOR"] + "." + parts["MINOR"] + "." + parts["PATCH"] + parts["SUFFIX"])
+
 class DummyLogger(object):
     def log(self, data, tag = None):
         sys.stdout.write(data + "\n")
@@ -671,17 +683,17 @@ class DebianPackager(object):
         return output
 
     def build(self):
-        #TODO: what about the versions here?
+        version_tuple, version_string = read_version()
         remove("tmp")
         mkdir("tmp")
         self.__run(("/usr/bin/git", "archive", "HEAD",
-                    "--prefix", "safir-sdk-core_6.0/",
-                    "-o", "tmp/safir-sdk-core_6.0.orig.tar"),
+                    "--prefix", "safir-sdk-core_/" + version_string,
+                    "-o", "tmp/safir-sdk-core_" + version_string + ".orig.tar"),
                    "creating tar archive")
-        self.__run(("/bin/bzip2", "tmp/safir-sdk-core_6.0.orig.tar"), "compressing archive")
+        self.__run(("/bin/bzip2", "tmp/safir-sdk-core_" + version_string + ".orig.tar"), "compressing archive")
         os.chdir("tmp")
-        self.__run(("/bin/tar", "xvfj", "safir-sdk-core_6.0.orig.tar.bz2"), "extracting archive")
-        os.chdir("safir-sdk-core_6.0")
+        self.__run(("/bin/tar", "xvfj", "safir-sdk-core_" + version_string + ".orig.tar.bz2"), "extracting archive")
+        os.chdir("safir-sdk-core_" + version_string)
         shutil.copytree(os.path.join("build", "packaging", "debian"), "debian")
         self.__run(("debuild",
                     "--prepend-path",
