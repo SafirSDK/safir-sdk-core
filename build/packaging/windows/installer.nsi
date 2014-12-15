@@ -167,6 +167,8 @@ Section "Runtime" SecRuntime
                    "ProductID" "Safir SDK Core"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Safir SDK Core" \
                    "Publisher" "Saab AB"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Safir SDK Core" \
+                   "DisplayVersion" "${VERSION}"
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Safir SDK Core" \
                    "NoModify" 1
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Safir SDK Core" \
@@ -175,8 +177,6 @@ Section "Runtime" SecRuntime
                    "UninstallString" "$\"$INSTDIR\Uninstall.exe$\""
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Safir SDK Core" \
                    "QuietUninstallString" "$\"$INSTDIR\Uninstall.exe$\" /S"
-
-  ;TODO: show version!
 
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
