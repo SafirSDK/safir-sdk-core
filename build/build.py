@@ -623,7 +623,7 @@ class VisualStudioBuilder(BuilderBase):
 
         command += (os.path.join("build","packaging","windows","installer.nsi"),)
 
-        self._run_command(command, "Packaging ", "TODO")
+        self._run_command(command, "Packaging ")
 
 class UnixGccBuilder(BuilderBase):
     def __init__(self, arguments):
