@@ -8,16 +8,35 @@ else()
   cmake_minimum_required(VERSION 2.8.12)
 endif()
 
-#Set up the Safir SDK Core version
-#IMPORTANT: THESE NEED TO BE CHANGED FOR EVERY RELEASE!
+#Set up the Safir SDK Core version by parsing version.txt
+#IMPORTANT: THE version.txt FILE NEEDS TO BE UPDATED FOR EVERY RELEASE
 #Remember: any updates that change APIs should update MAJOR, since
 #that is used for SOVERSION.
-SET(SAFIR_VERSION_MAJOR 6)
-SET(SAFIR_VERSION_MINOR 0)
-SET(SAFIR_VERSION_PATCH 0)
-SET(SAFIR_VERSION_SUFFIX "-beta") #Set to empty string for stable releases
-SET(SAFIR_VERSION_STRING "${SAFIR_VERSION_MAJOR}.${SAFIR_VERSION_MINOR}.${SAFIR_VERSION_PATCH}${SAFIR_VERSION_SUFFIX}")
+#Set the SUFFIX to empty string for stable releases
+file(STRINGS VERSION.txt version_strings)
+foreach (line IN LISTS version_strings)
+  #skip comments and empty lines
+  if (NOT line MATCHES "^#.*" AND NOT line STREQUAL "")
+    string(REPLACE "=" ";" line ${line})
+    list(GET line 0 key)
+    list(GET line 1 value)
+    if (key STREQUAL "MAJOR")
+      set(SAFIR_VERSION_MAJOR "${value}")
+    elseif(key STREQUAL "MINOR")
+      set(SAFIR_VERSION_MINOR "${value}")
+    elseif(key STREQUAL "PATCH")
+      set(SAFIR_VERSION_PATCH "${value}")
+    elseif(key STREQUAL "SUFFIX")
+      set(SAFIR_VERSION_SUFFIX "${value}")
+    else()
+      message(FATAL_ERROR "Failed to parse version.txt file")
+    endif()
+  endif()
+endforeach()
 
+SET(SAFIR_VERSION_STRING "${SAFIR_VERSION_MAJOR}.${SAFIR_VERSION_MINOR}.${SAFIR_VERSION_PATCH}${SAFIR_VERSION_SUFFIX}")
+message("SAFIR_VERSION_STRING '${SAFIR_VERSION_STRING}'")
+return()
 #
 # This function will install a python script into the bin directory.
 # If it is a *nix system the script will have ".py" stripped from its name.
