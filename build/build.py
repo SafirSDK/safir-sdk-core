@@ -687,7 +687,7 @@ class DebianPackager(object):
         remove("tmp")
         mkdir("tmp")
         self.__run(("/usr/bin/git", "archive", "HEAD",
-                    "--prefix", "safir-sdk-core_/" + version_string,
+                    "--prefix", "safir-sdk-core_" + version_string + "/",
                     "-o", "tmp/safir-sdk-core_" + version_string + ".orig.tar"),
                    "creating tar archive")
         self.__run(("/bin/bzip2", "tmp/safir-sdk-core_" + version_string + ".orig.tar"), "compressing archive")
