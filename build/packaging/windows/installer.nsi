@@ -1,4 +1,31 @@
-﻿;Safir SDK Core installer script
+﻿# -*- coding: utf-8 -*-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; Copyright Saab AB, 2014 (http://safir.sourceforge.net)
+; Copyright Consoden AB, 2014 (http://www.consoden.se)
+;
+; Created by: Lars Hagstrom / lars.hagstrom@consoden.se
+;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; This file is part of Safir SDK Core.
+;
+; Safir SDK Core is free software: you can redistribute it and/or modify
+; it under the terms of version 3 of the GNU General Public License as
+; published by the Free Software Foundation.
+;
+; Safir SDK Core is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
+;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;Safir SDK Core installer script
 ;Written by Lars Hagström
 
 ;--------------------------------
@@ -17,6 +44,51 @@
 
 ;Set a compressor that gives us very good ratios
 SetCompressor /SOLID lzma
+
+
+!ifndef IPersistFile
+!define IPersistFile {0000010b-0000-0000-c000-000000000046}
+!endif
+!ifndef CLSID_ShellLink
+!define CLSID_ShellLink {00021401-0000-0000-C000-000000000046}
+!define IID_IShellLinkA {000214EE-0000-0000-C000-000000000046}
+!define IID_IShellLinkW {000214F9-0000-0000-C000-000000000046}
+!define IShellLinkDataList {45e2b4ae-b1c3-11d0-b92f-00a0c90312e1}
+	!ifdef NSIS_UNICODE
+	!define IID_IShellLink ${IID_IShellLinkW}
+	!else
+	!define IID_IShellLink ${IID_IShellLinkA}
+	!endif
+!endif
+
+Function ShellLinkSetRunAs
+System::Store S
+pop $9
+System::Call "ole32::CoCreateInstance(g'${CLSID_ShellLink}',i0,i1,g'${IID_IShellLink}',*i.r1)i.r0"
+${If} $0 = 0
+	System::Call "$1->0(g'${IPersistFile}',*i.r2)i.r0" ;QI
+	${If} $0 = 0
+		System::Call "$2->5(w '$9',i 0)i.r0" ;Load
+		${If} $0 = 0
+			System::Call "$1->0(g'${IShellLinkDataList}',*i.r3)i.r0" ;QI
+			${If} $0 = 0
+				System::Call "$3->6(*i.r4)i.r0" ;GetFlags
+				${If} $0 = 0
+					System::Call "$3->7(i $4|0x2000)i.r0" ;SetFlags ;SLDF_RUNAS_USER
+					${If} $0 = 0
+						System::Call "$2->6(w '$9',i1)i.r0" ;Save
+					${EndIf}
+				${EndIf}
+				System::Call "$3->2()" ;Release
+			${EndIf}
+		System::Call "$2->2()" ;Release
+		${EndIf}
+	${EndIf}
+	System::Call "$1->2()" ;Release
+${EndIf}
+push $0
+System::Store L
+FunctionEnd
 
 ;--------------------------------
 
@@ -93,6 +165,8 @@ FunctionEnd
   Name "Safir SDK Core"
   OutFile "SafirSDKCore${versionStr}-VS${STUDIO}-${nameBitwidth}${debugonlyStr}.exe"
 
+  !define ProgramFilesDir "$SMPROGRAMS\Safir SDK Core"
+
   ;Source directories created by build script
   !define StageDirRuntime "..\..\..\stage\Runtime\Program Files\safir-sdk-core"
   !define StageDirDevelopment "..\..\..\stage\Development\Program Files\safir-sdk-core"
@@ -146,8 +220,40 @@ Section "Runtime" SecRuntime
   SetOutPath "$APPDATA\safir-sdk-core\config"
   File "${StageDirRuntime}\docs\example_configuration\*.ini"
 
-  ;TODO start menu (config links with notepad, dobmake, docs, etc)
+  ;TODO start menu:
+  #sate,
+  #dobexplorer,
+  #dobmake,
+  #UG
+  #doxygen
+  #license
+  #uninstaller
 
+  # Start Menu
+  CreateDirectory "${ProgramFilesDir}"
+  CreateDirectory "${ProgramFilesDir}\Configuration"
+  CreateShortCut "${ProgramFilesDir}\Configuration\Edit typesystem.ini.lnk" \
+				 "notepad" "$APPDATA\safir-sdk-core\config\typesystem.ini"
+  push "${ProgramFilesDir}\Configuration\Edit typesystem.ini.lnk"
+  call ShellLinkSetRunAs
+  pop $0
+
+  CreateShortCut "${ProgramFilesDir}\Configuration\Edit locations.ini.lnk" \
+				 "notepad" "$APPDATA\safir-sdk-core\config\locations.ini"
+  push "${ProgramFilesDir}\Configuration\Edit locations.ini.lnk"
+  call ShellLinkSetRunAs
+  pop $0
+
+  CreateShortCut "${ProgramFilesDir}\Configuration\Edit logging.ini.lnk" \
+				 "notepad" "$APPDATA\safir-sdk-core\config\logging.ini"
+  push "${ProgramFilesDir}\Configuration\Edit logging.ini.lnk"
+  call ShellLinkSetRunAs
+  pop $0
+
+  #TODO: create direct links instead
+  CreateShortCut "${ProgramFilesDir}\Documentation.lnk" \
+				 "explorer" "$INSTDIR\docs"
+  
   ;Add to PATH
   nsExec::ExecToLog '"$INSTDIR\installer_utils\pathed" "/MACHINE" "/APPEND" "$INSTDIR\bin"'
   ;Add assemblies to GAC.
