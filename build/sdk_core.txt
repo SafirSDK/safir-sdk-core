@@ -61,7 +61,7 @@ build_dir        src/dots/dots_v.ss                        RelWithDebInfo
 build_dir        src/dots/dots_depends.ss                  RelWithDebInfo
 
 #Control
-build_dir        src/control/control_utils.ss/src          RelWithDebInfo 
+build_dir        src/control/control_utils.ss/src          RelWithDebInfo Debug 
 build_dir        src/control/control.ss/src                RelWithDebInfo
 
 #Control unit tests
