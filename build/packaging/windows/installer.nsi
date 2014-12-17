@@ -165,7 +165,7 @@ FunctionEnd
   Name "Safir SDK Core"
   OutFile "SafirSDKCore${versionStr}-VS${STUDIO}-${nameBitwidth}${debugonlyStr}.exe"
 
-  !define ProgramFilesDir "$SMPROGRAMS\Safir SDK Core"
+  !define StartMenuDir "$SMPROGRAMS\Safir SDK Core"
 
   ;Source directories created by build script
   !define StageDirRuntime "..\..\..\stage\Runtime\Program Files\safir-sdk-core"
@@ -221,38 +221,23 @@ Section "Runtime" SecRuntime
   File "${StageDirRuntime}\docs\example_configuration\*.ini"
 
   ;TODO start menu:
-  #sate,
-  #dobexplorer,
-  #dobmake,
-  #UG
-  #doxygen
-  #license
-  #uninstaller
+  #a readme? That mentions licensing terms?
 
   # Start Menu
-  CreateDirectory "${ProgramFilesDir}"
-  CreateDirectory "${ProgramFilesDir}\Configuration"
-  CreateShortCut "${ProgramFilesDir}\Configuration\Edit typesystem.ini.lnk" \
-				 "notepad" "$APPDATA\safir-sdk-core\config\typesystem.ini"
-  push "${ProgramFilesDir}\Configuration\Edit typesystem.ini.lnk"
-  call ShellLinkSetRunAs
-  pop $0
+  CreateDirectory "${StartMenuDir}"
+  CreateDirectory "${StartMenuDir}\Documentation"
+  
+  CreateShortCut "${StartMenuDir}\GPLv3 License.lnk" \
+				 "$INSTDIR\docs\LICENSE.txt" "" "" "" SW_SHOWNORMAL "" "Open Source license of Safir SDK Core"
 
-  CreateShortCut "${ProgramFilesDir}\Configuration\Edit locations.ini.lnk" \
-				 "notepad" "$APPDATA\safir-sdk-core\config\locations.ini"
-  push "${ProgramFilesDir}\Configuration\Edit locations.ini.lnk"
-  call ShellLinkSetRunAs
-  pop $0
-
-  CreateShortCut "${ProgramFilesDir}\Configuration\Edit logging.ini.lnk" \
-				 "notepad" "$APPDATA\safir-sdk-core\config\logging.ini"
-  push "${ProgramFilesDir}\Configuration\Edit logging.ini.lnk"
-  call ShellLinkSetRunAs
-  pop $0
-
-  #TODO: create direct links instead
-  CreateShortCut "${ProgramFilesDir}\Documentation.lnk" \
-				 "explorer" "$INSTDIR\docs"
+  CreateShortCut "${StartMenuDir}\Sate.lnk" \
+				 "$INSTDIR\bin\sate.exe" "" "" "" SW_SHOWNORMAL "" "Safir Application Tester"
+				 
+  CreateShortCut "${StartMenuDir}\Dobexplorer.lnk" \
+				 "$INSTDIR\bin\dobexplorer.exe" "" "" "" SW_SHOWNORMAL "" "Explore the Dob internals"
+				 
+  CreateShortCut "${StartMenuDir}\Uninstall.lnk" \
+				 "$INSTDIR\Uninstall.exe" "" "" "" SW_SHOWNORMAL "" "Uninstall Safir SDK Core"			 
   
   ;Add to PATH
   nsExec::ExecToLog '"$INSTDIR\installer_utils\pathed" "/MACHINE" "/APPEND" "$INSTDIR\bin"'
@@ -296,6 +281,35 @@ Section "Development" SecDevelopment
 
   File /r "${StageDirDevelopment}\*"
 
+  
+  ;TODO start menu:
+  #dobmake d
+  #UG d
+  #doxygen d
+  
+  #
+  #Start menu items
+  #
+  
+  #Shortcuts to config files - as admin
+  CreateDirectory "${StartMenuDir}\Configuration"
+  CreateShortCut "${StartMenuDir}\Configuration\Edit typesystem.ini.lnk" \
+				 "notepad" "$APPDATA\safir-sdk-core\config\typesystem.ini"
+  push "${StartMenuDir}\Configuration\Edit typesystem.ini.lnk"
+  call ShellLinkSetRunAs
+  pop $0
+
+  CreateShortCut "${StartMenuDir}\Configuration\Edit locations.ini.lnk" \
+				 "notepad" "$APPDATA\safir-sdk-core\config\locations.ini"
+  push "${StartMenuDir}\Configuration\Edit locations.ini.lnk"
+  call ShellLinkSetRunAs
+  pop $0
+
+  CreateShortCut "${StartMenuDir}\Configuration\Edit logging.ini.lnk" \
+				 "notepad" "$APPDATA\safir-sdk-core\config\logging.ini"
+  push "${StartMenuDir}\Configuration\Edit logging.ini.lnk"
+  call ShellLinkSetRunAs
+  pop $0
 SectionEnd
 
 Section /o "Test suite" SecTest
@@ -369,6 +383,9 @@ Section "Uninstall"
 
   SetShellVarContext all
   RMDir /r "$APPDATA\safir-sdk-core"
+  
+  #Remove start menu stuff
+  RMDir /r "${StartMenuDir}"
 
   DeleteRegKey HKCU "Software\Safir SDK Core"
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Safir SDK Core"
