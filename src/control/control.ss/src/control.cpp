@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2012 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2014 (http://www.consoden.se)
 *
 * Created by: Lars Hagström / lars.hagstrom@consoden.se
 *
@@ -151,11 +152,11 @@ private:
                    << desc << "\n"
                    << "Examples:\n"
                    << "  Listen to loopback address and ports 33000 and 43000.\n"
-                   << "    control --controlAddress='127.0.0.1:33000' --data-address='127.0.0.1:43000'\n"
+                   << "    control --control-address='127.0.0.1:33000' --data-address='127.0.0.1:43000'\n"
                    << "  As above, but all addresses.\n"
-                   << "    control --controlAddress='0.0.0.0:33000' --data-address='0.0.0.0:43000'\n"
+                   << "    control --control-address='0.0.0.0:33000' --data-address='0.0.0.0:43000'\n"
                    << "  Listen to ipv6 loopback.\n"
-                   << "    control --controlAddress='[::1]:33000' --data-address='[::1]:43000'\n"
+                   << "    control --control-address='[::1]:33000' --data-address='[::1]:43000'\n"
                    << std::endl;
     }
 
@@ -164,43 +165,84 @@ private:
 
 int main(int argc, char * argv[])
 {
+    lllog(3) << "CTRL: Started" << std::endl;
+
     const ProgramOptions options(argc, argv);
     if (!options.parseOk)
     {
         return 1;
     }
 
-    // Start dose_main
-    // TODO: Hur hitta binärer?
-    // TODO: Hur hantera environment? (Ärvs automatiskt på Windows men inte för Posix)
-    // TODO: Skicka ett kommando till dose_main i stället för kommandoradsparameterar
+    boost::asio::io_service ioService;
 
-#ifdef _MSC_VER
-    std::wostringstream doseMainCmdLine;
-    doseMainCmdLine << "dose_main_stub --data-address " << options.dataAddress << " --name " << options.name
-                    << " --node-type " << options.nodeTypeId << " --force-id " << options.id;
-#else
-    std::ostringstream doseMainCmdLine;
-    doseMainCmdLine << "dose_main_stub --data-address " << options.dataAddress << " --name " << options.name
-                    << " --node-type " << options.nodeTypeId << " --force-id " << options.id;
+    // Make some work to stop io_service from exiting.
+    auto work = Safir::make_unique<boost::asio::io_service::work>(ioService);
+
+#if defined(linux) || defined(__linux) || defined(__linux__)
+    boost::asio::signal_set sigchldSet(ioService, SIGCHLD);
+    sigchldSet.async_wait(
+        [](const boost::system::error_code& error, int signalNumber)
+        {
+            lllog(3) << "CTRL: Got signal " << signalNumber << " ... dose_main has stopped" << std::endl;
+            if (error)
+            {
+                SEND_SYSTEM_LOG(Error,
+                                << "Got a signals error: " << error);
+            }
+            // Wait for dose_main to exit before exit the control program.
+            int status;  // Don't care about dose_main exit status
+            ::wait(&status);
+
+        }
+    );
 #endif
 
+    // Locate and start dose_main
+#if defined(_UNICODE) || defined(UNICODE)
+    const std::wstring doseMainName = L"dose_main_stub";
+    std::wstring dose_main_path;
+#else
+    const std::string doseMainName = "dose_main_stub";
+    std::string dose_main_path;
+
+#endif
+    dose_main_path = boost::process::search_path(doseMainName);
+    if (dose_main_path.empty())
+    {
+        std::ostringstream os;
+        os << "CTRL: Can't find " << doseMainName.c_str() << " in PATH" << std::endl;
+        SEND_SYSTEM_LOG(Error, << os.str().c_str());
+        throw std::logic_error(os.str().c_str());
+    }
+
     boost::system::error_code ec;
-    //boost::process::child dose_main =
-    boost::process::execute(
-                boost::process::initializers::run_exe("dose_main_stub"),
-                boost::process::initializers::set_cmd_line(doseMainCmdLine.str()),
-                boost::process::initializers::set_on_error(ec),
-                boost::process::initializers::inherit_env());
+
+    boost::process::child dose_main =
+    boost::process::execute
+            (boost::process::initializers::run_exe(dose_main_path),
+             boost::process::initializers::set_on_error(ec),
+             boost::process::initializers::inherit_env()
+#if defined(linux) || defined(__linux) || defined(__linux__)
+             ,boost::process::initializers::notify_io_service(ioService)
+#endif
+            );
+
+    (void)dose_main;  // to keep compilers from warning about unused variable
+
     if (ec)
     {
         std::cout << "Error run_exe: " << ec.message() << std::endl;
     }
 
-    boost::asio::io_service ioService;
-
-    //make some work to stop io_service from exiting.
-    auto work = Safir::make_unique<boost::asio::io_service::work>(ioService);
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+    boost::asio::windows::object_handle handle(ioService, dose_main.process_handle());
+    handle.async_wait(
+        [&handle](const boost::system::error_code&)
+        {
+            lllog(3) << "CTRL: dose_main has stopped" << std::endl;
+        }
+    );
+#endif
 
     std::vector<Com::NodeTypeDefinition> commNodeTypes;
 
@@ -250,58 +292,91 @@ int main(int argc, char * argv[])
                          std::move(spNodeTypes));
 
 
-    Control::DoseMainCmdSender doseMainCmdSender(ioService);
+    std::unique_ptr<Control::SystemStateHandler> stateHandler;
+    std::unique_ptr<Control::DoseMainCmdSender> doseMainCmdSender;
 
-    Control::SystemStateHandler stateHandler([&doseMainCmdSender](const Control::Node& node)
-                                             {
-                                                 doseMainCmdSender.InjectNode(0, // request id currently not used
-                                                 node.name,
-                                                 node.nodeId,
-                                                 node.nodeTypeId,
-                                                 node.dataAddress);
-                                             },
-                                             [](const int64_t /*nodeId*/)
-                                             {
-                                                 // TODO: What to do here?
-                                             });
+    doseMainCmdSender.reset(new Control::DoseMainCmdSender
+                            (ioService,
+                             // This is what we do when dose_main is started
+                             [&sp, &communication, &doseMainCmdSender, &options, &stateHandler]()
+                             {
+                                 // Send info about own node to dose_main
+                                 doseMainCmdSender->InjectOwnNode(0, // request id currently not used
+                                                                  options.name,
+                                                                  options.id,
+                                                                  options.nodeTypeId,
+                                                                  options.dataAddress);
 
-    // Start subscription to system state changes from SP
-    sp.StartStateSubscription([&stateHandler](const SP::SystemState& newState)
-                              {
-                                  stateHandler.SetNewState(newState);
-                              });
+                                 sp.StartStateSubscription
+                                         ([&stateHandler](const SP::SystemState& newState)
+                                          {
+                                              stateHandler->SetNewState(newState);
+                                          });
 
-    communication.Start();
+                                 communication.Start();
+                             })
+                            );
+
+    stateHandler.reset(new Control::SystemStateHandler
+                                    (Control::Node{options.name,  // Insert own node
+                                                   options.id,
+                                                   options.nodeTypeId,
+                                                   options.controlAddress,
+                                                   options.dataAddress},
+
+                                    // Node included callback
+                                    [&doseMainCmdSender](const Control::Node& node)
+                                    {
+                                        doseMainCmdSender->InjectNode(0, // request id currently not used
+                                                                      node.name,
+                                                                      node.nodeId,
+                                                                      node.nodeTypeId,
+                                                                      node.dataAddress);
+                                    },
+                                    // Node down callback
+                                    [](const int64_t /*nodeId*/)
+                                    {
+                                        // TODO: What to do here?
+                                    }));
 
     boost::asio::signal_set signalSet(ioService);
-    
-#if defined (_WIN32)
+
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
     signalSet.add(SIGABRT);
     signalSet.add(SIGBREAK);
     signalSet.add(SIGINT);
     signalSet.add(SIGTERM);
-#else
+#elif defined(linux) || defined(__linux) || defined(__linux__)
     signalSet.add(SIGQUIT);
     signalSet.add(SIGINT);
     signalSet.add(SIGTERM);
 #endif
 
-    signalSet.async_wait([&sp,&work,&communication,&signalSet](const boost::system::error_code& error,
-                                                           const int signal_number)
-                       {
-                           lllog(3) << "Got signal " << signal_number << std::endl;
-                           if (error)
-                           {
-                               SEND_SYSTEM_LOG(Error,
-                                               << "Got a signals error: " << error);
-                           }
-                           sp.Stop();
-                           communication.Stop();
-                           work.reset();
-                       }
-                       );
+    signalSet.async_wait([&sp,&work,&communication, &doseMainCmdSender]
+                         (const boost::system::error_code& error,
+                          const int signalNumber)
+                          {
+                              lllog(3) << "CTRL: Got signal " << signalNumber << " ... stop sequence initiated." << std::endl;
+                              if (error)
+                              {
+                                  SEND_SYSTEM_LOG(Error,
+                                                  << "Got a signals error: " << error);
+                              }
+                              sp.Stop();
+                              communication.Stop();
+
+                              // Send stop order to dose_main
+                              doseMainCmdSender->StopDoseMain(0);  // request id currently not used
+
+                              // Stop the doseMainCmdSender itself
+                              doseMainCmdSender->Stop();
+
+                              work.reset();
+                          }
+                         );
 
 
+    doseMainCmdSender->Start();
 
     boost::thread_group threads;
     for (int i = 0; i < 9; ++i)
@@ -313,6 +388,6 @@ int main(int argc, char * argv[])
 
     threads.join_all();
 
-    lllog(3) << "Exiting..." << std::endl;
+    lllog(3) << "CTRL: Exiting..." << std::endl;
     return 0;
 }

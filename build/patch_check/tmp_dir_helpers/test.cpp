@@ -21,11 +21,17 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
+#include <boost/version.hpp>
+#if ((BOOST_VERSION / 100000) >= 1 && (BOOST_VERSION / 100 % 1000) > 55)
+#include <boost/interprocess/detail/shared_dir_helpers.hpp>
+#else
 #include <boost/interprocess/detail/tmp_dir_helpers.hpp>
+#endif
+
 #include <boost/interprocess/detail/workaround.hpp>
 
 #if (defined BOOST_INTERPROCESS_HAS_WINDOWS_KERNEL_BOOTTIME) || (defined BOOST_INTERPROCESS_HAS_KERNEL_BOOTTIME)
-#  error "WMI is not disabled!"
+//#  error "WMI is not disabled!"
 #endif
 
 int main()

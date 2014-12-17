@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2014 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2014 (http://www.consoden.se)
 *
 * Created by: Anders Widén / anders.widen@consoden.se
 *
@@ -53,39 +54,88 @@ BOOST_AUTO_TEST_CASE( send_inject_node )
     threads.create_thread([&pubIoService](){pubIoService.run();});
     threads.create_thread([&subIoService](){subIoService.run();});
 
-    DoseMainCmdSender cmdSender(pubIoService);
+    bool injectOwnNodeCmdReceived = false;
+    bool injectNodeCmdReceived = false;
 
-    DoseMainCmdReceiver cmdReceiver(subIoService,
-                                    [](int64_t requestId,
+    std::unique_ptr<DoseMainCmdSender> cmdSender;
+
+    cmdSender.reset(new DoseMainCmdSender (pubIoService,
+
+                                           [&cmdSender]()
+                                           {
+                                               // cmd receiver has connected
+
+		                                       std::wcout << "The receiver has connected!" << std::endl;
+
+                                               cmdSender->InjectOwnNode(12345,
+                                                                       "Kalle",
+                                                                       54321,
+                                                                       121212,
+                                                                       "192.168.211.10");
+
+                                               cmdSender->InjectNode(54321,
+                                                                    "Olle",
+                                                                    99999,
+                                                                    88888,
+                                                                    "192.168.213.55");
+
+                                               cmdSender->StopDoseMain(45);
+
+                                           }));
+
+    std::unique_ptr<DoseMainCmdReceiver> cmdReceiver;
+
+    cmdReceiver.reset(new DoseMainCmdReceiver(subIoService,
+
+                                    // Inject own node callback
+                                    [&injectOwnNodeCmdReceived](int64_t requestId,
                                        const std::string& nodeName,
                                        int64_t nodeId,
                                        int64_t nodeTypeId,
                                        const std::string& dataAddress)
                                     {
+                                        injectOwnNodeCmdReceived = true;
+
                                         BOOST_CHECK(requestId == 12345);
                                         BOOST_CHECK(nodeName == "Kalle");
                                         BOOST_CHECK(nodeId == 54321);
                                         BOOST_CHECK(nodeTypeId == 121212);
                                         BOOST_CHECK(dataAddress == "192.168.211.10");
-                                    });
-    cmdSender.Start();
-    cmdReceiver.Start();
+                                    },
 
-    // Sleep a while to let the sender and receiver connect
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(2000));
+                                    // Inject node callback
+                                    [&injectNodeCmdReceived](int64_t requestId,
+                                       const std::string& nodeName,
+                                       int64_t nodeId,
+                                       int64_t nodeTypeId,
+                                       const std::string& dataAddress)
+                                    {
+                                        injectNodeCmdReceived = true;
 
-    cmdSender.InjectNode(12345,
-                         "Kalle",
-                         54321,
-                         121212,
-                         "192.168.211.10");
+                                        BOOST_CHECK(requestId == 54321);
+                                        BOOST_CHECK(nodeName == "Olle");
+                                        BOOST_CHECK(nodeId == 99999);
+                                        BOOST_CHECK(nodeTypeId == 88888);
+                                        BOOST_CHECK(dataAddress == "192.168.213.55");
+                                    },
 
-    boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+                                    // Stop dose_main
+                                    [&cmdSender, &cmdReceiver, &pubWork, &subWork,
+                                     &injectOwnNodeCmdReceived, &injectNodeCmdReceived](int64_t requestId)
+                                    {
+                                        BOOST_CHECK(requestId == 45);
+                                        BOOST_CHECK(injectOwnNodeCmdReceived);
+                                        BOOST_CHECK(injectNodeCmdReceived);
 
-    cmdSender.Stop();
-    cmdReceiver.Stop();
-    pubWork.reset();
-    subWork.reset();
+                                        cmdSender->Stop();
+                                        cmdReceiver->Stop();
+                                        pubWork.reset();
+                                        subWork.reset();
+                                    }
+
+                                    ));
+	cmdReceiver->Start();
+	cmdSender->Start();
 
     threads.join_all();
 

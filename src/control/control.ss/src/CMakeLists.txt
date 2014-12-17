@@ -13,7 +13,7 @@ FILE(GLOB sources *.cpp)
 
 ADD_EXECUTABLE(safir_control ${sources} ${headers})
 
-FIND_PACKAGE(Boost COMPONENTS program_options thread system)
+FIND_PACKAGE(Boost COMPONENTS filesystem program_options thread system)
 
 TARGET_LINK_LIBRARIES(safir_control
   optimized system_picture

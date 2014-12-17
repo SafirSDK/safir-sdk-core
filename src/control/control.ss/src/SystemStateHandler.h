@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2014 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2014 (http://www.consoden.se)
 *
 * Created by: Anders Widén / anders.widen@consoden.se
 *
@@ -81,7 +82,8 @@ namespace Control
         //TODO: beskriv exakta betydelsen nod nere, controlkanal och datakanal är nere eller kommer tas ner snart.
         typedef boost::function<void(const int64_t nodeId)> NodeDownCb;
 
-        explicit SystemStateHandler(const NodeIncludedCb&            nodeIncludedCb,
+        explicit SystemStateHandler(const Node&                      ownNode,
+                                    const NodeIncludedCb&            nodeIncludedCb,
                                     const NodeDownCb&                nodeDownCb);
 
         void SetNewState(const Safir::Dob::Internal::SP::SystemState& newState);

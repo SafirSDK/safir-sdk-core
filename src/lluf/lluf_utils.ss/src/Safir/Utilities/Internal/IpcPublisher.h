@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2014 (http://www.consoden.se)
 *
 * Created by: Anders Widén/ anders.widen@consoden.se
 *
@@ -24,8 +25,8 @@
 #ifndef __LLUF_IPC_PUBLISHER_H__
 #define __LLUF_IPC_PUBLISHER_H__
 
-#include <atomic>
 #include <set>
+#include <atomic>
 #include <boost/cstdint.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
@@ -71,10 +72,10 @@ namespace Internal
     {
     public:
 
-        IpcPublisherImpl(boost::asio::io_service&   ioService,
-                         const std::string&         name,
-                         std::function<void()>      subscriberConnectedCb,
-                         std::function<void()>      subscriberDisconnectedCb)
+        IpcPublisherImpl(boost::asio::io_service&       ioService,
+                         const std::string&             name,
+                         const std::function<void()>    subscriberConnectedCb,
+                         const std::function<void()>    subscriberDisconnectedCb)
             : m_running(false),
               m_strand(ioService),
               m_acceptor(boost::make_shared<Acceptor>(m_strand,
@@ -224,10 +225,10 @@ namespace Internal
          *                                        Note that detection of a disconnected subscriber is done only
          *                                        when the publisher is sending.
          */
-        IpcPublisher(boost::asio::io_service&   ioService,
-                     const std::string&         name,
-                     std::function<void()>      subscriberConnectedCb,
-                     std::function<void()>      subscriberDisconnectedCb)
+        IpcPublisher(boost::asio::io_service&       ioService,
+                     const std::string&             name,
+                     const std::function<void()>    subscriberConnectedCb,
+                     const std::function<void()>    subscriberDisconnectedCb)
             : m_pimpl(boost::make_shared<IpcPubImpl>(ioService,
                                                      name,
                                                      subscriberConnectedCb,

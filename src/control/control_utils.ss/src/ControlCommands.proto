@@ -1,21 +1,50 @@
+/******************************************************************************
+*
+* Copyright Consoden AB, 2014 (http://www.consoden.se)
+*
+* Created by: Anders Widén / anders.widen@consoden.se
+*
+*******************************************************************************
+*
+* This file is part of Safir SDK Core.
+*
+* Safir SDK Core is free software: you can redistribute it and/or modify
+* it under the terms of version 3 of the GNU General Public License as
+* published by the Free Software Foundation.
+*
+* Safir SDK Core is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
+*
+******************************************************************************/
 option optimize_for = LITE_RUNTIME;
 
 package Safir.Dob.Internal.Control;
 
 message ControlCmd {
 
-    // Inject node cmd
-    message InjectNodeCmd {
+    enum CmdType
+    {
+      INJECT_OWN_NODE = 0;
+      INJECT_NODE = 1;
+      STOP = 2;
+    }
+    
+    message NodeData {
         required string node_name = 1;
         required sfixed64 node_id = 2;
         required sfixed64 node_type_id = 3;
         required string data_address = 4;        
     }
-
+    
    // Fields
    required sfixed64 request_id = 1;
-   optional InjectNodeCmd inject_node_cmd = 2;
-   
+   required CmdType cmd_type = 2;
+   optional NodeData node_data = 3;   
 }
 
 message ControlCmdResponse {
