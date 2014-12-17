@@ -201,7 +201,7 @@ int main(int argc, char * argv[])
 #if defined(_UNICODE) || defined(UNICODE)
     const std::wstring doseMainName = L"dose_main_stub";
     std::wstring dose_main_path;
-#elif
+#else
     const std::string doseMainName = "dose_main_stub";
     std::string dose_main_path;
 
