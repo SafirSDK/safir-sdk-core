@@ -15,12 +15,13 @@ TARGET_LINK_LIBRARIES(dose_main_stub
   optimized system_picture
   debug system_picture${CMAKE_DEBUG_POSTFIX}
   optimized communication
-  debug communication${CMAKE_DEBUG_POSTFIX})
+  debug communication${CMAKE_DEBUG_POSTFIX}
+  optimized control_utils
+  debug control_utils${CMAKE_DEBUG_POSTFIX})
 
 if (NOT MSVC)
   TARGET_LINK_LIBRARIES(dose_main_stub
     dots_internal
-    control_utils
     lluf_id
     lluf_utils
     lluf_config
