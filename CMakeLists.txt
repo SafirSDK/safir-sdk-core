@@ -112,4 +112,8 @@ SAFIR_INSTALL_PYTHON(
   RENAME dobmake-batch.py
   COMPONENT Development)
 
+INSTALL(FILES COPYING.txt
+  DESTINATION ${SAFIR_INSTALL_DESTINATION_DOC}
+  RENAME LICENSE.txt)
+
 #TODO: should dobexplorer be in dev package?
