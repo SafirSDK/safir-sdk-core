@@ -154,7 +154,9 @@ int main(int /*argc*/, char * /*argv*/[])
                timer.async_wait(onTimeout);
             };
 
-    Control::DoseMainCmdReceiver doseMainCmdReceiver
+    std::unique_ptr<Control::DoseMainCmdReceiver> doseMainCmdReceiver;
+
+    doseMainCmdReceiver.reset(new Control::DoseMainCmdReceiver
                         (ioService,
 
                          // Action when InjectOwnNode command is received
@@ -224,14 +226,14 @@ int main(int /*argc*/, char * /*argv*/[])
                             lllog(0) << "DOSE_MAIN: Got stop command" << std::endl;
                             sp->Stop();
                             communication->Stop();
-                            doseMainCmdReceiver.Stop();
+                            doseMainCmdReceiver->Stop();
                             work.reset();
                             running = false;
                         }
-                        );
+                        ));
 
     // Start reception of commands
-    doseMainCmdReceiver.Start();
+    doseMainCmdReceiver->Start();
 
     boost::asio::signal_set signalSet(ioService);
 
@@ -260,7 +262,7 @@ int main(int /*argc*/, char * /*argv*/[])
 
                              sp->Stop();
                              communication->Stop();
-                             doseMainCmdReceiver.Stop();
+                             doseMainCmdReceiver->Stop();
                              work.reset();
                              running = false;
                          }

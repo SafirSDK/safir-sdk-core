@@ -57,29 +57,35 @@ BOOST_AUTO_TEST_CASE( send_inject_node )
     bool injectOwnNodeCmdReceived = false;
     bool injectNodeCmdReceived = false;
 
-    DoseMainCmdSender cmdSender(pubIoService,
+    std::unique_ptr<DoseMainCmdSender> cmdSender;
 
-                                [&cmdSender]()
-                                {
-                                    // cmd receiver has connected
+    cmdSender.reset(new DoseMainCmdSender (pubIoService,
 
-                                    cmdSender.InjectOwnNode(12345,
-                                                            "Kalle",
-                                                            54321,
-                                                            121212,
-                                                            "192.168.211.10");
+                                           [&cmdSender]()
+                                           {
+                                               // cmd receiver has connected
 
-                                    cmdSender.InjectNode(54321,
-                                                         "Olle",
-                                                         99999,
-                                                         88888,
-                                                         "192.168.213.55");
+		                                       std::wcout << "The receiver has connected!" << std::endl;
 
-                                    cmdSender.StopDoseMain(45);
+                                               cmdSender->InjectOwnNode(12345,
+                                                                       "Kalle",
+                                                                       54321,
+                                                                       121212,
+                                                                       "192.168.211.10");
 
-                                });
+                                               cmdSender->InjectNode(54321,
+                                                                    "Olle",
+                                                                    99999,
+                                                                    88888,
+                                                                    "192.168.213.55");
 
-    DoseMainCmdReceiver cmdReceiver(subIoService,
+                                               cmdSender->StopDoseMain(45);
+
+                                           }));
+
+    std::unique_ptr<DoseMainCmdReceiver> cmdReceiver;
+
+    cmdReceiver.reset(new DoseMainCmdReceiver(subIoService,
 
                                     // Inject own node callback
                                     [&injectOwnNodeCmdReceived](int64_t requestId,
@@ -121,15 +127,15 @@ BOOST_AUTO_TEST_CASE( send_inject_node )
                                         BOOST_CHECK(injectOwnNodeCmdReceived);
                                         BOOST_CHECK(injectNodeCmdReceived);
 
-                                        cmdSender.Stop();
-                                        cmdReceiver.Stop();
+                                        cmdSender->Stop();
+                                        cmdReceiver->Stop();
                                         pubWork.reset();
                                         subWork.reset();
                                     }
 
-                                    );
-    cmdSender.Start();
-    cmdReceiver.Start();
+                                    ));
+	cmdReceiver->Start();
+	cmdSender->Start();
 
     threads.join_all();
 

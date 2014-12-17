@@ -165,6 +165,8 @@ private:
 
 int main(int argc, char * argv[])
 {
+    lllog(3) << "CTRL: Started" << std::endl;
+
     const ProgramOptions options(argc, argv);
     if (!options.parseOk)
     {
@@ -196,14 +198,21 @@ int main(int argc, char * argv[])
 #endif
 
     // Locate and start dose_main
+#if defined(_UNICODE) || defined(UNICODE)
+    const std::wstring doseMainName = L"dose_main_stub";
+    std::wstring dose_main_path;
+#elif
     const std::string doseMainName = "dose_main_stub";
-    std::string dose_main_path = boost::process::search_path(doseMainName);
+    std::string dose_main_path;
+
+#endif
+    dose_main_path = boost::process::search_path(doseMainName);
     if (dose_main_path.empty())
     {
         std::ostringstream os;
-        os << "CTRL: Can't find " << doseMainName << " in PATH" << std::endl;
+        os << "CTRL: Can't find " << doseMainName.c_str() << " in PATH" << std::endl;
         SEND_SYSTEM_LOG(Error, << os.str().c_str());
-        throw std::logic_error(os.str());
+        throw std::logic_error(os.str().c_str());
     }
 
     boost::system::error_code ec;
@@ -225,20 +234,12 @@ int main(int argc, char * argv[])
         std::cout << "Error run_exe: " << ec.message() << std::endl;
     }
 
-
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-    boost::asio::windows::object_handle handle(io_service, dose_main.process_handle());
+    boost::asio::windows::object_handle handle(ioService, dose_main.process_handle());
     handle.async_wait(
         [&handle](const boost::system::error_code&)
         {
-            {
-                SEND_SYSTEM_LOG(Error,
-                                << "Got a windows object handle error: " << error);
-            }
-
             lllog(3) << "CTRL: dose_main has stopped" << std::endl;
-            DWORD exitCode; // Don't care about dose_main exit status
-            ::GetExitCodeProcess(handle.native(), &exit_code);
         }
     );
 #endif
@@ -292,27 +293,29 @@ int main(int argc, char * argv[])
 
 
     std::unique_ptr<Control::SystemStateHandler> stateHandler;
+    std::unique_ptr<Control::DoseMainCmdSender> doseMainCmdSender;
 
-    Control::DoseMainCmdSender doseMainCmdSender
-                                    (ioService,
-                                     // This is what we do when dose_main is started
-                                     [&sp, &communication, &doseMainCmdSender, &options, &stateHandler]()
-                                     {
-                                         // Send info about own node to dose_main
-                                         doseMainCmdSender.InjectOwnNode(0, // request id currently not used
-                                                                         options.name,
-                                                                         options.id,
-                                                                         options.nodeTypeId,
-                                                                         options.dataAddress);                                         
+    doseMainCmdSender.reset(new Control::DoseMainCmdSender
+                            (ioService,
+                             // This is what we do when dose_main is started
+                             [&sp, &communication, &doseMainCmdSender, &options, &stateHandler]()
+                             {
+                                 // Send info about own node to dose_main
+                                 doseMainCmdSender->InjectOwnNode(0, // request id currently not used
+                                                                  options.name,
+                                                                  options.id,
+                                                                  options.nodeTypeId,
+                                                                  options.dataAddress);
 
-                                         sp.StartStateSubscription
-                                                 ([&stateHandler](const SP::SystemState& newState)
-                                                  {
-                                                      stateHandler->SetNewState(newState);
-                                                  });
+                                 sp.StartStateSubscription
+                                         ([&stateHandler](const SP::SystemState& newState)
+                                          {
+                                              stateHandler->SetNewState(newState);
+                                          });
 
-                                         communication.Start();
-                                     });
+                                 communication.Start();
+                             })
+                            );
 
     stateHandler.reset(new Control::SystemStateHandler
                                     (Control::Node{options.name,  // Insert own node
@@ -324,11 +327,11 @@ int main(int argc, char * argv[])
                                     // Node included callback
                                     [&doseMainCmdSender](const Control::Node& node)
                                     {
-                                        doseMainCmdSender.InjectNode(0, // request id currently not used
-                                                                     node.name,
-                                                                     node.nodeId,
-                                                                     node.nodeTypeId,
-                                                                     node.dataAddress);
+                                        doseMainCmdSender->InjectNode(0, // request id currently not used
+                                                                      node.name,
+                                                                      node.nodeId,
+                                                                      node.nodeTypeId,
+                                                                      node.dataAddress);
                                     },
                                     // Node down callback
                                     [](const int64_t /*nodeId*/)
@@ -363,17 +366,17 @@ int main(int argc, char * argv[])
                               communication.Stop();
 
                               // Send stop order to dose_main
-                              doseMainCmdSender.StopDoseMain(0);  // request id currently not used
+                              doseMainCmdSender->StopDoseMain(0);  // request id currently not used
 
                               // Stop the doseMainCmdSender itself
-                              doseMainCmdSender.Stop();
+                              doseMainCmdSender->Stop();
 
                               work.reset();
                           }
                          );
 
 
-    doseMainCmdSender.Start();
+    doseMainCmdSender->Start();
 
     boost::thread_group threads;
     for (int i = 0; i < 9; ++i)
