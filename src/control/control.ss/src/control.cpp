@@ -215,7 +215,7 @@ int main(int argc, char * argv[])
     if (doseMainPath.empty())
     {
         std::ostringstream os;
-        os << "CTRL: Can't find " << doseMainName.c_str() << " in PATH" << std::endl;
+        os << "CTRL: Can't find " << options.doseMainName << " in PATH" << std::endl;
         SEND_SYSTEM_LOG(Error, << os.str().c_str());
         throw std::logic_error(os.str().c_str());
     }
