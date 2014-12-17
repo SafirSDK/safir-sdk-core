@@ -91,6 +91,9 @@ public:
             ("node-type,t", 
              value<std::string>(&nodeType)->default_value("Server"), 
              "Node type of this node")
+            ("dosemain-name",
+             value<std::string>(&doseMainName)->default_value("dose_main_test_stub"),
+             "Name of dose_main executable (without file extension)")
             ("force-id", 
              value<boost::int64_t>(&id)->default_value(LlufId_GenerateRandom64(), ""), 
              "Override the automatically generated node id. For debugging/testing purposes only.");
@@ -143,6 +146,7 @@ public:
     boost::int64_t id;
     std::string name;
     std::string nodeType;
+    std::string doseMainName;
     boost::int64_t nodeTypeId = -1;
 private:
     static void ShowHelp(const boost::program_options::options_description& desc)
@@ -199,15 +203,16 @@ int main(int argc, char * argv[])
 
     // Locate and start dose_main
 #if defined(_UNICODE) || defined(UNICODE)
-    const std::wstring doseMainName = L"dose_main_stub";
-    std::wstring dose_main_path;
+    // For now we assume that the name of the dose_main executable contains only ascii characters.
+    std::wstring doseMainName = std::wstring(options.doseMainName.begin(), options.doseMainName.end());
+    std::wstring doseMainPath;
 #else
-    const std::string doseMainName = "dose_main_stub";
-    std::string dose_main_path;
+    std::string doseMainName = options.doseMainName;
+    std::string doseMainPath;
 
 #endif
-    dose_main_path = boost::process::search_path(doseMainName);
-    if (dose_main_path.empty())
+    doseMainPath = boost::process::search_path(doseMainName);
+    if (doseMainPath.empty())
     {
         std::ostringstream os;
         os << "CTRL: Can't find " << doseMainName.c_str() << " in PATH" << std::endl;
@@ -219,7 +224,7 @@ int main(int argc, char * argv[])
 
     boost::process::child dose_main =
     boost::process::execute
-            (boost::process::initializers::run_exe(dose_main_path),
+            (boost::process::initializers::run_exe(doseMainPath),
              boost::process::initializers::set_on_error(ec),
              boost::process::initializers::inherit_env()
 #if defined(linux) || defined(__linux) || defined(__linux__)
