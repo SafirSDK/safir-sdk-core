@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
 ; Copyright Saab AB, 2014 (http://safir.sourceforge.net)
@@ -89,6 +89,12 @@ ${EndIf}
 push $0
 System::Store L
 FunctionEnd
+
+!macro CreateInternetShortcut FILENAME URL ICONFILE ICONINDEX
+WriteINIStr "${FILENAME}.url" "InternetShortcut" "URL" "${URL}"
+WriteINIStr "${FILENAME}.url" "InternetShortcut" "IconFile" "${ICONFILE}"
+WriteINIStr "${FILENAME}.url" "InternetShortcut" "IconIndex" "${ICONINDEX}"
+!macroend
 
 ;--------------------------------
 
@@ -226,19 +232,19 @@ Section "Runtime" SecRuntime
   # Start Menu
   CreateDirectory "${StartMenuDir}"
   CreateDirectory "${StartMenuDir}\Documentation"
-  
+
   CreateShortCut "${StartMenuDir}\GPLv3 License.lnk" \
 				 "$INSTDIR\docs\LICENSE.txt" "" "" "" SW_SHOWNORMAL "" "Open Source license of Safir SDK Core"
 
   CreateShortCut "${StartMenuDir}\Sate.lnk" \
 				 "$INSTDIR\bin\sate.exe" "" "" "" SW_SHOWNORMAL "" "Safir Application Tester"
-				 
+
   CreateShortCut "${StartMenuDir}\Dobexplorer.lnk" \
 				 "$INSTDIR\bin\dobexplorer.exe" "" "" "" SW_SHOWNORMAL "" "Explore the Dob internals"
-				 
+
   CreateShortCut "${StartMenuDir}\Uninstall.lnk" \
-				 "$INSTDIR\Uninstall.exe" "" "" "" SW_SHOWNORMAL "" "Uninstall Safir SDK Core"			 
-  
+				 "$INSTDIR\Uninstall.exe" "" "" "" SW_SHOWNORMAL "" "Uninstall Safir SDK Core"
+
   ;Add to PATH
   nsExec::ExecToLog '"$INSTDIR\installer_utils\pathed" "/MACHINE" "/APPEND" "$INSTDIR\bin"'
   ;Add assemblies to GAC.
@@ -281,16 +287,15 @@ Section "Development" SecDevelopment
 
   File /r "${StageDirDevelopment}\*"
 
-  
+
   ;TODO start menu:
-  #dobmake d
   #UG d
   #doxygen d
-  
+
   #
   #Start menu items
   #
-  
+
   #Shortcuts to config files - as admin
   CreateDirectory "${StartMenuDir}\Configuration"
   CreateShortCut "${StartMenuDir}\Configuration\Edit typesystem.ini.lnk" \
@@ -310,6 +315,19 @@ Section "Development" SecDevelopment
   push "${StartMenuDir}\Configuration\Edit logging.ini.lnk"
   call ShellLinkSetRunAs
   pop $0
+
+  CreateShortCut "${StartMenuDir}\Dobmake.lnk" \
+				 "$INSTDIR\bin\dobmake.exe" "" "" "" SW_SHOWNORMAL "" "Build libraries from your dou files."
+
+  CreateShortCut "${StartMenuDir}\Documentation\Doxygen.lnk" \
+				 "$INSTDIR\docs\html\index.html" "" "" "" SW_SHOWNORMAL "" "Doxygen API documentation."
+
+  !insertmacro CreateInternetShortcut "${StartMenuDir}\Documentation\User's Guide" \
+                                      "http://www.safirsdkcore.com/docs" "" "0"
+
+  ;TODO Test all the startmenu stuff
+  ;TODO set nice icons
+
 SectionEnd
 
 Section /o "Test suite" SecTest
@@ -383,7 +401,7 @@ Section "Uninstall"
 
   SetShellVarContext all
   RMDir /r "$APPDATA\safir-sdk-core"
-  
+
   #Remove start menu stuff
   RMDir /r "${StartMenuDir}"
 
