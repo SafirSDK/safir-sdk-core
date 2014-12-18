@@ -688,7 +688,7 @@ namespace ToolSupport
 
                 } //end switch-statement
             }
-            return true; //should be unreachable
+            return false; //both values are null, i.e not changed
         }
     };
 }
