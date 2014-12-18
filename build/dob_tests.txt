@@ -18,4 +18,6 @@ build_dir        src/tests/test_support                          RelWithDebInfo
 build_dir        src/dose/dose_test.ss                           RelWithDebInfo
 build_dir        src/distribution/communication.ss/tests/communication_test      RelWithDebInfo
 build_dir        src/distribution/system_picture.ss/tests/component_tests        RelWithDebInfo
+build_dir        src/control/control.ss/tests/dose_main_stub     RelWithDebInfo
+
 run_test_suite   src/dope/dope_test.ss/src/file_backend          dope_file_backend
