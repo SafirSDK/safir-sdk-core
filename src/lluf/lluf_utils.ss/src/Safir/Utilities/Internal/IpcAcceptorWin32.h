@@ -148,7 +148,8 @@ namespace Internal
                                         return;
                                     }
 
-                                    if (!ec)
+                                    if (!ec ||
+                                        (ec.category() == boost::system::system_category() && ec.value() == ERROR_PIPE_CONNECTED))
                                     {
                                         m_callback(m_currentConnectHandle);
 
@@ -157,10 +158,6 @@ namespace Internal
                                     else if (ec == boost::asio::error::broken_pipe)
                                     {
                                         // This is most likely caused by a normal Disconnect. Do nothing.
-                                    }
-                                    else if (ec.category() == boost::system::system_category() && ec.value() == ERROR_PIPE_CONNECTED)
-                                    {
-                                        // Under certain circumstances (unclear what) we get this when the publisher i stopped. Do nothing.
                                     }
                                     else
                                     {
