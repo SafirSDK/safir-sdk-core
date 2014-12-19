@@ -227,7 +227,7 @@ namespace Com
             uint64_t biggestSequence; //biggest sequence number recevived (within our window)
             CircularArray<RecvData> queue;
             Channel()
-                :welcome(UINT64_MAX)
+                :welcome(0)
                 ,lastInSequence(0)
                 ,biggestSequence(0)
                 ,queue(Parameters::SlidingWindowSize)
@@ -249,6 +249,7 @@ namespace Com
                 :node(node_)
                 ,endpoint(Utilities::CreateEndpoint(node.unicastAddress))
             {
+                ackedMultiReceiverChannel.welcome=UINT64_MAX;
             }
 
             Channel& GetChannel(const MessageHeader* header)

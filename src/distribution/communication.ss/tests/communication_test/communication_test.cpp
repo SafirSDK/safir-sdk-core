@@ -153,7 +153,7 @@ public:
 class NodeTypes
 {
 public:
-    static const int NumberOfNodeTypes = 1;
+    static const int NumberOfNodeTypes = 3;
 
     NodeTypes()
     {
