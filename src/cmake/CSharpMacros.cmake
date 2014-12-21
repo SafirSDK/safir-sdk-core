@@ -1,6 +1,6 @@
 function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
     cmake_parse_arguments(_cs
-      "LIBRARY;EXE;WINEXE;NOVERSION" "SIGN" "SOURCES;RESOURCES;REFERENCES;LIBRARY_PATHS;DLL_IMPORTS" ${ARGN})
+      "LIBRARY;EXE;WINEXE;NOVERSION" "SIGN;ICON" "SOURCES;RESOURCES;REFERENCES;LIBRARY_PATHS;DLL_IMPORTS" ${ARGN})
 
     if (NOT _cs_LIBRARY AND NOT _cs_EXE AND NOT _cs_WINEXE)
       message(FATAL_ERROR "ADD_CSHARP_ASSEMBLY: TARGET_KIND not specified!")
@@ -17,6 +17,10 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
       set(_cs_flags "${_cs_flags} -keyfile:\"${_cs_SIGN}\"")
     endif()
 
+    if (_cs_ICON)
+      get_filename_component(_cs_ICON ${_cs_ICON} ABSOLUTE)
+      set (_cs_flags "${_cs_flags} -win32icon:\"${_cs_ICON}\"")
+    endif()
 
     if (_cs_LIBRARY)
       set (_cs_target "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}.dll")
