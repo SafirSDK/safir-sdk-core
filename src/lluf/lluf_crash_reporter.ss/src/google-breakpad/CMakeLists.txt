@@ -43,7 +43,6 @@ else()
   set (DOWNLOAD_COMMANDS
     SVN_REPOSITORY ${MY_SVN_REPOSITORY}
     SVN_REVISION -r ${MY_SVN_REVISION}
-    UPDATE_COMMAND "" #disable update since we're going against fixed revision
     )
 endif()
 
@@ -54,6 +53,7 @@ if (MSVC)
     SOURCE_DIR src
     BINARY_DIR bin
     ${DOWNLOAD_COMMANDS}
+    UPDATE_COMMAND "" #disable update since we're going against fixed revision
     PATCH_COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/build-breakpad-windows.cmake <SOURCE_DIR>/CMakeLists.txt
     CMAKE_ARGS -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
     INSTALL_COMMAND ""
@@ -65,6 +65,7 @@ else()
     SOURCE_DIR src
     BINARY_DIR src
     ${DOWNLOAD_COMMANDS}
+    UPDATE_COMMAND "" #disable update since we're going against fixed revision
     CONFIGURE_COMMAND cd <SOURCE_DIR> && ./configure CFLAGS=-fPIC CXXFLAGS=-fPIC
     INSTALL_COMMAND ""
     )
