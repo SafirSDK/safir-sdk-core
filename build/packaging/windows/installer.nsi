@@ -233,7 +233,10 @@ Section "Runtime" SecRuntime
   CreateDirectory "${StartMenuDir}"
   CreateDirectory "${StartMenuDir}\Documentation"
 
-  CreateShortCut "${StartMenuDir}\GPLv3 License.lnk" \
+  !insertmacro CreateInternetShortcut "${StartMenuDir}\Documentation\Safir SDK Core Web Site" \
+                                      "http://www.safirsdkcore.com/" "" "0"
+
+  CreateShortCut "${StartMenuDir}\Documentation\GPLv3 License.lnk" \
 				 "$INSTDIR\docs\LICENSE.txt" "" "" "" SW_SHOWNORMAL "" "Open Source license of Safir SDK Core"
 
   CreateShortCut "${StartMenuDir}\Sate.lnk" \
@@ -320,7 +323,7 @@ Section "Development" SecDevelopment
 				 "$INSTDIR\bin\dobmake.exe" "" "" "" SW_SHOWNORMAL "" "Build libraries from your dou files."
 
   CreateShortCut "${StartMenuDir}\Documentation\Doxygen.lnk" \
-				 "$INSTDIR\docs\html\index.html" "" "" "" SW_SHOWNORMAL "" "Doxygen API documentation."
+				 "$INSTDIR\docs\html\index.xhtml" "" "" "" SW_SHOWNORMAL "" "Doxygen API documentation."
 
   !insertmacro CreateInternetShortcut "${StartMenuDir}\Documentation\User's Guide" \
                                       "http://www.safirsdkcore.com/docs" "" "0"
