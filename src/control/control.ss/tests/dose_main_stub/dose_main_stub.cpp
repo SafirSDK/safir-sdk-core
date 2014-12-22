@@ -204,7 +204,7 @@ int main(int /*argc*/, char * /*argv*/[])
                                                << " from Node " << nodeNameMap[fromNodeId]
                                                << " of Node Type " << spNodeTypes.find(fromNodeType)->second.name;
                                             std::cout << os.str() << std::endl;
-                                            lllog(3) << os << std::endl;
+                                            lllog(3) << os.str() << std::endl;
                                         },
                                         12345);
 
