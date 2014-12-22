@@ -261,6 +261,7 @@ int main(int /*argc*/, char * /*argv*/[])
                                  {
                                      // We probably got a stop command which canceled all waiting operations,
                                      // do nothing.
+                                     return;
                                  }
                                  else
                                  {
