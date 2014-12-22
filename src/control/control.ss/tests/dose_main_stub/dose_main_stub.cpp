@@ -203,7 +203,7 @@ int main(int /*argc*/, char * /*argv*/[])
                                             os << "DOSE_MAIN: Received " << msg
                                                << " from Node " << nodeNameMap[fromNodeId]
                                                << " of Node Type " << spNodeTypes.find(fromNodeType)->second.name;
-                                            std::cout << os << std::endl;
+                                            std::cout << os.str() << std::endl;
                                             lllog(3) << os << std::endl;
                                         },
                                         12345);
