@@ -96,6 +96,9 @@ int main(int /*argc*/, char * /*argv*/[])
     // Make some work to stop io_service from exiting.
     auto work = Safir::make_unique<boost::asio::io_service::work>(ioService);
 
+    // Map so that we can use the node name in printouts
+    std::map<int64_t, std::string> nodeNameMap;
+
     // Create and populate structures that are needed when creating the Communication and
     // SP instances.
     std::vector<Com::NodeTypeDefinition> commNodeTypes;
@@ -162,7 +165,8 @@ int main(int /*argc*/, char * /*argv*/[])
                         (ioService,
 
                          // Action when InjectOwnNode command is received
-                         [&communication, &sp, &ioService, &commNodeTypes, &spNodeTypes, &timer, &onTimeout]
+                         [&communication, &sp, &ioService, &commNodeTypes,
+                          &spNodeTypes, &timer, &onTimeout, &nodeNameMap]
                          (int64_t /*requestId*/,
                           const std::string& nodeName,
                           int64_t nodeId,
@@ -188,14 +192,19 @@ int main(int /*argc*/, char * /*argv*/[])
                                                             spNodeTypes));
 
                              communication->SetDataReceiver
-                                     ([](int64_t fromNodeId,
-                                         int64_t fromNodeType,
-                                         const boost::shared_ptr<char[]>& data,
-                                         size_t size)
+                                     ([&nodeNameMap, &spNodeTypes]
+                                      (int64_t fromNodeId,
+                                       int64_t fromNodeType,
+                                       const boost::shared_ptr<char[]>& data,
+                                       size_t size)
                                         {
                                             std::string msg(data.get(), size);
-                                            lllog(3) << "DOSE_MAIN: Received " << msg << " from Node Id " << fromNodeId
-                                                     << " of Node Type " << fromNodeType << std::endl;
+                                            std::ostringstream os;
+                                            os << "DOSE_MAIN: Received " << msg
+                                               << " from Node " << nodeNameMap[fromNodeId]
+                                               << " of Node Type " << spNodeTypes.find(fromNodeType)->second.name;
+                                            std::cout << os << std::endl;
+                                            lllog(3) << os << std::endl;
                                         },
                                         12345);
 
@@ -207,7 +216,7 @@ int main(int /*argc*/, char * /*argv*/[])
                          },
 
                         // Action when InjectNode command is received
-                        [&communication]
+                        [&communication, &nodeNameMap]
                         (int64_t /*requestId*/,
                          const std::string& nodeName,
                          int64_t nodeId,
@@ -219,6 +228,7 @@ int main(int /*argc*/, char * /*argv*/[])
                                                      nodeTypeId,
                                                      dataAddress);
 
+                           nodeNameMap.insert(std::make_pair(nodeId, nodeName));
                         },
 
                         // Action when StopDoseMain command is received
