@@ -26,6 +26,7 @@
 
 #include <assert.h>
 #include <Safir/Dob/Typesystem/ToolSupport/BlobReader.h>
+#include <Safir/Dob/Typesystem/ToolSupport/TypeUtilities.h>
 
 namespace Safir
 {
@@ -347,7 +348,7 @@ namespace ToolSupport
                 {
                 case SingleValueCollectionType:
                 {
-                    if (Diff(other, md, memIx, 0))
+                    if (Diff(other, md, memIx, 0, 0))
                     {
                         m_blob.SetChanged(memIx, 0, true);
                         diff=true;
@@ -358,7 +359,7 @@ namespace ToolSupport
                 {
                     for (int valIx=0; valIx<md->GetArraySize(); ++valIx)
                     {
-                        if (Diff(other, md, memIx, valIx))
+                        if (Diff(other, md, memIx, valIx, valIx))
                         {
                             m_blob.SetChanged(memIx, valIx, true);
                             diff=true;
@@ -370,7 +371,7 @@ namespace ToolSupport
                 {
                     for (int valIx=0; valIx<m_blob.NumberOfValues(memIx); ++valIx)
                     {
-                        if (Diff(other, md, memIx, valIx))
+                        if (Diff(other, md, memIx, valIx, valIx))
                         {
                             m_blob.SetChangedTopLevel(memIx, true);
                             diff=true;
@@ -382,6 +383,34 @@ namespace ToolSupport
                 case DictionaryCollectionType:
                 {
                     //olika antal, eller någon i this som inte finns i other -> topLevel
+                    //different size, i.e top leve changed
+                    if (m_blob.NumberOfValues(memIx)!=other.NumberOfValues(memIx))
+                    {
+                        m_blob.SetChangedTopLevel(memIx, true);
+                        diff=true;
+                    }
+
+                    typedef std::map<DotsC_Int64, int> Uki;
+                    Uki myUki, otherUki;
+                    UniversalKeyToIndex(m_blob, md, memIx, myUki);
+                    UniversalKeyToIndex(other, md, memIx, otherUki);
+
+                    for (Uki::const_iterator myIt=myUki.begin(); myIt!=myUki.end(); ++myIt)
+                    {
+                        Uki::const_iterator otherIt=otherUki.find(myIt->first);
+                        if (otherIt==otherUki.end())
+                        {
+                            //not found, we have something that is new
+                            m_blob.SetChangedTopLevel(memIx, true);
+                            m_blob.SetChanged(memIx, myIt->second, true);
+                            diff=true;
+                        }
+                        else if (Diff(other, md, memIx, myIt->second, otherIt->second))
+                        {
+                            m_blob.SetChanged(memIx, myIt->second, true);
+                            diff=true;
+                        }
+                    }
                 }
                     break;
                 }
@@ -564,23 +593,23 @@ namespace ToolSupport
             m_blob.SetValueBinary(m_memberIndex, m_valueIndex, &bin[0], bin.size());
         }
 
-        bool Diff(const Internal::Blob& other, const MemberDescriptionType* md, int memberIndex, int valueIndex)
+        bool Diff(const Internal::Blob& other, const MemberDescriptionType* md, int memberIndex, int myValueIndex, int otherValueIndex)
         {
             bool meIsNull=false, meIsChanged=false;
             bool otherIsNull=false, otherIsChanged=false;
 
-            m_blob.ValueStatus(memberIndex, valueIndex, meIsNull, meIsChanged);
-            other.ValueStatus(memberIndex, valueIndex, otherIsNull, otherIsChanged);
+            m_blob.ValueStatus(memberIndex, myValueIndex, meIsNull, meIsChanged);
+            other.ValueStatus(memberIndex, otherValueIndex, otherIsNull, otherIsChanged);
 
             if (meIsNull!=otherIsNull)
             {
                 if (!meIsNull && md->GetMemberType()==ObjectMemberType)
                 {
-                    std::pair<const char*, DotsC_Int32> obj=m_blob.GetValueBinary(memberIndex, valueIndex);
+                    std::pair<const char*, DotsC_Int32> obj=m_blob.GetValueBinary(memberIndex, myValueIndex);
                     BlobWriterType inner(BlobReaderType(m_repository, obj.first));
                     inner.SetAllChangeFlags(true);
                     MoveToMember(memberIndex);
-                    m_valueIndex=valueIndex;
+                    m_valueIndex=myValueIndex;
                     WriteValue(inner);
                 }
                 return true;
@@ -590,32 +619,32 @@ namespace ToolSupport
                 switch(md->GetMemberType())
                 {
                 case BooleanMemberType:
-                    return m_blob.GetValueBool(memberIndex, valueIndex)!=other.GetValueBool(memberIndex, valueIndex);
+                    return m_blob.GetValueBool(memberIndex, myValueIndex)!=other.GetValueBool(memberIndex, otherValueIndex);
 
                 case Int32MemberType:
                 case EnumerationMemberType:
-                    return m_blob.GetValueInt32(memberIndex, valueIndex)!=other.GetValueInt32(memberIndex, valueIndex);
+                    return m_blob.GetValueInt32(memberIndex, myValueIndex)!=other.GetValueInt32(memberIndex, otherValueIndex);
 
                 case Int64MemberType:
                 case TypeIdMemberType:
-                    return m_blob.GetValueInt64(memberIndex, valueIndex)!=other.GetValueInt64(memberIndex, valueIndex);
+                    return m_blob.GetValueInt64(memberIndex, myValueIndex)!=other.GetValueInt64(memberIndex, otherValueIndex);
 
                 case InstanceIdMemberType:
                 case ChannelIdMemberType:
                 case HandlerIdMemberType:
-                    return m_blob.GetValueHash(memberIndex, valueIndex)!=other.GetValueHash(memberIndex, valueIndex);
+                    return m_blob.GetValueHash(memberIndex, myValueIndex)!=other.GetValueHash(memberIndex, otherValueIndex);
 
                 case EntityIdMemberType:
-                    return (m_blob.GetValueInt64(memberIndex, valueIndex)!=other.GetValueInt64(memberIndex, valueIndex)) ||
-                            (m_blob.GetValueHash(memberIndex, valueIndex)!=other.GetValueHash(memberIndex, valueIndex));
+                    return (m_blob.GetValueInt64(memberIndex, myValueIndex)!=other.GetValueInt64(memberIndex, otherValueIndex)) ||
+                            (m_blob.GetValueHash(memberIndex, myValueIndex)!=other.GetValueHash(memberIndex, otherValueIndex));
 
                 case StringMemberType:
-                    return strcmp(m_blob.GetValueString(memberIndex, valueIndex), other.GetValueString(memberIndex, valueIndex))!=0;
+                    return strcmp(m_blob.GetValueString(memberIndex, myValueIndex), other.GetValueString(memberIndex, otherValueIndex))!=0;
 
                 case ObjectMemberType:
                 {
-                    std::pair<const char*, boost::int32_t> meInner=m_blob.GetValueBinary(memberIndex, valueIndex);
-                    std::pair<const char*, boost::int32_t> otherInner=other.GetValueBinary(memberIndex, valueIndex);
+                    std::pair<const char*, boost::int32_t> meInner=m_blob.GetValueBinary(memberIndex, myValueIndex);
+                    std::pair<const char*, boost::int32_t> otherInner=other.GetValueBinary(memberIndex, otherValueIndex);
                     if (meInner.second!=otherInner.second || memcmp(meInner.first, otherInner.first, static_cast<size_t>(meInner.second))!=0)
                     {
                         //not binary equal, something is probably different
@@ -625,7 +654,7 @@ namespace ToolSupport
                         if (diff)
                         {
                             MoveToMember(memberIndex);
-                            m_valueIndex=valueIndex;
+                            m_valueIndex=myValueIndex;
                             WriteValue(inner);
                             return true;
                         }
@@ -636,8 +665,8 @@ namespace ToolSupport
 
                 case BinaryMemberType:
                 {
-                    std::pair<const char*, boost::int32_t> a=m_blob.GetValueBinary(memberIndex, valueIndex);
-                    std::pair<const char*, boost::int32_t> b=other.GetValueBinary(memberIndex, valueIndex);
+                    std::pair<const char*, boost::int32_t> a=m_blob.GetValueBinary(memberIndex, myValueIndex);
+                    std::pair<const char*, boost::int32_t> b=other.GetValueBinary(memberIndex, otherValueIndex);
                     return a.second!=b.second || memcmp(a.first, b.first, static_cast<size_t>(a.second))!=0;
                 }
                     break;
@@ -662,7 +691,7 @@ namespace ToolSupport
                 case Steradian32MemberType:
                 case Volt32MemberType:
                 case Watt32MemberType:
-                    return m_blob.GetValueFloat32(memberIndex, valueIndex)!=other.GetValueFloat32(memberIndex, valueIndex);
+                    return m_blob.GetValueFloat32(memberIndex, myValueIndex)!=other.GetValueFloat32(memberIndex, otherValueIndex);
 
                 case Float64MemberType:
                 case Ampere64MemberType:
@@ -684,11 +713,75 @@ namespace ToolSupport
                 case Steradian64MemberType:
                 case Volt64MemberType:
                 case Watt64MemberType:
-                    return m_blob.GetValueFloat64(memberIndex, valueIndex)!=other.GetValueFloat64(memberIndex, valueIndex);
+                    return m_blob.GetValueFloat64(memberIndex, myValueIndex)!=other.GetValueFloat64(memberIndex, otherValueIndex);
 
                 } //end switch-statement
             }
             return false; //both values are null, i.e not changed
+        }
+
+        void UniversalKeyToIndex(const Internal::Blob& blob,
+                                 const MemberDescriptionType* md,
+                                 int memberIndex,
+                                 std::map<DotsC_Int64, int>& keyToIndex) const
+        {
+            //, InstanceId, HandlerId, ChannelId, EntityId.
+            switch (md->GetKeyType)
+            {
+            case Int32MemberType:
+            case EnumerationMemberType:
+            {
+                for (int i=0; i<blob.NumberOfValues(memberIndex); ++i)
+                {
+                     keyToIndex.insert(std::make_pair(TypeUtilities::ToUnifiedDictionaryKey(m_blob.GetKeyInt32(memberIndex, i)), i));
+                }
+            }
+                break;
+
+            case Int64MemberType:
+            case TypeIdMemberType:
+            {
+                for (int i=0; i<blob.NumberOfValues(memberIndex); ++i)
+                {
+                     keyToIndex.insert(std::make_pair(TypeUtilities::ToUnifiedDictionaryKey(m_blob.GetKeyInt64(memberIndex, i)), i));
+                }
+            }
+                break;
+
+            case StringMemberType:
+            {
+                for (int i=0; i<blob.NumberOfValues(memberIndex); ++i)
+                {
+                     keyToIndex.insert(std::make_pair(TypeUtilities::ToUnifiedDictionaryKey(m_blob.GetKeyString(memberIndex, i)), i));
+                }
+            }
+                break;
+
+            case InstanceIdMemberType:
+            case HandlerIdMemberType:
+            case ChannelIdMemberType:
+            {
+                for (int i=0; i<blob.NumberOfValues(memberIndex); ++i)
+                {
+                     keyToIndex.insert(std::make_pair(TypeUtilities::ToUnifiedDictionaryKey(m_blob.GetKeyHash(memberIndex, i)), i));
+                }
+            }
+                break;
+
+            case EntityIdMemberType:
+            {
+                for (int i=0; i<blob.NumberOfValues(memberIndex); ++i)
+                {
+                    DotsC_EntityId eid={m_blob.GetKeyInt64(memberIndex, i), m_blob.GetKeyHash(memberIndex, i)};
+                    keyToIndex.insert(std::make_pair(TypeUtilities::ToUnifiedDictionaryKey(eid), i));
+                }
+            }
+                break;
+
+            default:
+                break;
+            }
+
         }
     };
 }
