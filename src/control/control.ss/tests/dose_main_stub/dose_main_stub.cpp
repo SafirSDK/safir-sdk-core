@@ -89,7 +89,9 @@ int main(int /*argc*/, char * /*argv*/[])
 
     boost::asio::io_service ioService;
 
-    boost::asio::steady_timer timer{ioService};
+    boost::asio::steady_timer timer(ioService);
+
+    boost::asio::signal_set signalSet(ioService);
 
     // Make some work to stop io_service from exiting.
     auto work = Safir::make_unique<boost::asio::io_service::work>(ioService);
@@ -220,10 +222,11 @@ int main(int /*argc*/, char * /*argv*/[])
                         },
 
                         // Action when StopDoseMain command is received
-                        [&sp, &work, &communication, &running, &doseMainCmdReceiver]
+                        [&sp, &work, &communication, &running, &doseMainCmdReceiver, &signalSet]
                         (int64_t /*requestId*/)
                         {
                             lllog(0) << "DOSE_MAIN: Got stop command" << std::endl;
+                            signalSet.cancel();
                             sp->Stop();
                             communication->Stop();
                             doseMainCmdReceiver->Stop();
@@ -234,8 +237,6 @@ int main(int /*argc*/, char * /*argv*/[])
 
     // Start reception of commands
     doseMainCmdReceiver->Start();
-
-    boost::asio::signal_set signalSet(ioService);
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
     signalSet.add(SIGABRT);
@@ -256,8 +257,16 @@ int main(int /*argc*/, char * /*argv*/[])
 
                              if (error)
                              {
-                                 SEND_SYSTEM_LOG(Error,
-                                                 << "DOSE_MAIN: Got a signals error: " << error);
+                                 if (error == boost::asio::error::operation_aborted)
+                                 {
+                                     // We probably got a stop command which canceled all waiting operations,
+                                     // do nothing.
+                                 }
+                                 else
+                                 {
+                                    SEND_SYSTEM_LOG(Error,
+                                                     << "DOSE_MAIN: Got a signals error: " << error);
+                                 }
                              }
 
                              sp->Stop();
