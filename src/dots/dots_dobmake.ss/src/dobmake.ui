@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Dobmake - build your dou files</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>dobmake.png</normaloff>dobmake.png</iconset>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QGridLayout" name="gridLayout" columnstretch="0,0,0">

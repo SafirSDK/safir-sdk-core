@@ -1,5 +1,5 @@
 set(ui dobmake.ui)
-set(sources dobmake.cpp main.cpp)
+set(sources dobmake.cpp main.cpp dobmake.rc)
 set(headers dobmake.h BuildThread.h)
 
 # As moc files are generated in the binary dir, tell CMake
