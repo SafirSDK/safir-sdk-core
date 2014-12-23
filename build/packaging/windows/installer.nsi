@@ -290,11 +290,6 @@ Section "Development" SecDevelopment
 
   File /r "${StageDirDevelopment}\*"
 
-
-  ;TODO start menu:
-  #UG d
-  #doxygen d
-
   #
   #Start menu items
   #
