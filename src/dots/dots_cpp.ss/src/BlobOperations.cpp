@@ -122,11 +122,9 @@ namespace
         //TODO:
     }
 
-
-
-    void BlobOperations::Diff(const char*, char* &)
+    void BlobOperations::Diff(const char* originalBlob, char* & currentBlob)
     {
-        //TODO:
+        DotsC_CreateBlobWriterFromBlob(currentBlob)
     }
 
 

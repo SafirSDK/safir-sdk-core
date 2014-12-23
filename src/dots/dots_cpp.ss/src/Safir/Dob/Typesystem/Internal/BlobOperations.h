@@ -100,7 +100,7 @@ namespace Internal
         static void SetChanged(char* blob, bool val);
         //REMOVE
 
-        static void Diff(const char* pref, char* & diff);
+        static void Diff(const char* originalBlob, char* & currentBlob);
 
 
         /** @} */

@@ -1169,6 +1169,61 @@ DotsC_Handle DotsC_CreateBlobWriter(DotsC_TypeId typeId)
     return address;
 }
 
+DotsC_Handle DotsC_CreateBlobWriterFromBlob(const char* blob)
+{
+    Init();
+    Writer* writer=new Writer(Reader(RepositoryKeeper::GetRepository(), blob));
+    DotsC_Handle address=(DotsC_Handle)writer;
+    return address;
+}
+
+void DotsC_DeleteBlobWriter(DotsC_Handle writerHandle)
+{
+    Init();
+    Writer* writer=WriterFromHandle(writerHandle);
+    delete writer;
+}
+
+DotsC_Int32 DotsC_CalculateBlobSize(DotsC_Handle writerHandle)
+{
+    Init();
+    Writer* writer=WriterFromHandle(writerHandle);
+    return writer->CalculateBlobSize();
+}
+
+void DotsC_WriteBlob(DotsC_Handle writerHandle, char* blobDest)
+{
+    Init();
+    Writer* writer=WriterFromHandle(writerHandle);
+    writer->CopyRawBlob(blobDest);
+}
+
+void DotsC_WriteAllChangeFlags(DotsC_Handle writerHandle, bool changed)
+{
+    Init();
+    Writer* writer=WriterFromHandle(writerHandle);
+    writer->SetAllChangeFlags(changed);
+}
+
+void DotsC_WriteChangeFlag(DotsC_Handle writerHandle,
+                           DotsC_MemberIndex member,
+                           DotsC_ArrayIndex index,
+                           bool changed)
+{
+    Init();
+    Writer* writer=WriterFromHandle(writerHandle);
+    writer->SetChanged(member, index, changed);
+}
+
+bool DotsC_MarkChanges(DotsC_Handle originalReader, DotsC_Handle currentWriter)
+{
+    Init();
+    const Reader* original=ReaderFromHandle(originalReader);
+    Writer* current=WriterFromHandle(currentWriter);
+    bool anythingChanged=current->MarkChanges(*original);
+    return anythingChanged;
+}
+
 void DotsC_WriteInt32Member(DotsC_Handle writerHandle, DotsC_Int32 val,
                             bool isNull,
                             bool isChanged,
@@ -1322,75 +1377,6 @@ void DotsC_WriteObjectMember(DotsC_Handle writerHandle, const char* blob,
     Init();
     Writer* writer=WriterFromHandle(writerHandle);
     writer->WriteValue(member, arrayIndex, std::make_pair(blob, DotsC_GetSize(blob)), isNull, isChanged);
-}
-
-DotsC_Int32 DotsC_CalculateBlobSize(DotsC_Handle writerHandle)
-{
-    Init();
-    Writer* writer=WriterFromHandle(writerHandle);
-    return writer->CalculateBlobSize();
-}
-
-void DotsC_WriteBlob(DotsC_Handle writerHandle, char* blobDest)
-{
-    Init();
-    Writer* writer=WriterFromHandle(writerHandle);
-    writer->CopyRawBlob(blobDest);
-}
-
-void DotsC_WriteAllChangeFlags(DotsC_Handle writerHandle, bool changed)
-{
-    Init();
-//    Writer* writer=WriterFromHandle(writerHandle);
-//    const ClassDescriptionShm* cd=RepositoryKeeper::GetRepository()->GetClass(writer->TypeId());
-//    for (DotsC_MemberIndex memberIx=0; memberIx<cd->GetNumberOfMembers(); ++memberIx)
-//    {
-//        const MemberDescriptionShm* md=cd->GetMember(memberIx);
-//        switch (md->GetCollectionType())
-//        {
-//        case SingleValueCollectionType:
-//        {
-//            writer->SetChanged(memberIx, 0, changed);
-//        }
-//            break;
-
-//        case ArrayCollectionType:
-//        {
-
-//        }
-//            break;
-
-//        case SequenceCollectionType:
-//        {
-
-//        }
-//            break;
-
-//        case DictionaryCollectionType:
-//        {
-
-//        }
-//            break;
-//        }
-
-//    }
-}
-
-void DotsC_WriteChangeFlag(DotsC_Handle writerHandle,
-                           DotsC_MemberIndex member,
-                           DotsC_ArrayIndex index,
-                           bool changed)
-{
-    Init();
-    Writer* writer=WriterFromHandle(writerHandle);
-    writer->SetChanged(member, index, changed);
-}
-
-void DotsC_DeleteBlobWriter(DotsC_Handle writerHandle)
-{
-    Init();
-    Writer* writer=WriterFromHandle(writerHandle);
-    delete writer;
 }
 
 //************************************************************************************

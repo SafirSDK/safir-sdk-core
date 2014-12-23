@@ -708,6 +708,14 @@ extern "C"
     DOTS_KERNEL_API DotsC_Handle DotsC_CreateBlobWriter(DotsC_TypeId typeId);
 
     /**
+     * Create a new instance of blob writer from an existing blob. The existing blob will never be changed.
+     *
+     * @param blob [in] - Blob that initiates the writer
+     * @return Handle to a new blob writer instance.
+     */
+    DOTS_KERNEL_API DotsC_Handle DotsC_CreateBlobWriterFromBlob(const char* blob);
+
+    /**
      * @brief Deletes an instance of blob writer.
      * @param writeHandle [in] - Handle to the blob writer to be deleted.
      */
@@ -748,6 +756,25 @@ extern "C"
                                                DotsC_MemberIndex member,
                                                DotsC_ArrayIndex index,
                                                bool changed);
+
+    /**
+     * Creates a BlobWriter and initiates it with current. Then all differences between current and original are
+     * marked as changed. The original and current blobs are not changed at all, instead a completely new BlobWriter
+     * is created and the caller is responsible for deleting it by calling DotsC_DeleteBlobWriter.
+     * @param original [in] - The original blob.
+     * @param current [in] - Current version of blob that will be diffed towards original.
+     * @return Handle to a new blob writer instance containing a copy of current but with updated change flags.
+     */
+
+    /**
+      * Diff content of currentWriter and originalReader and mark all changes in currentWriter;
+      *
+      * @param originalReader [in] - Reader handle to the original blob to compare towards.
+      * @param currentWriter [in] - Writer handle to the current blob that will be compared and have ist change flags updated.
+      * @return False if there were no changes found, else true. If false is returned nothing has been changed
+      *         in currentWriter, if true change flags have been updated.
+      */
+    DOTS_KERNEL_API bool DotsC_MarkChanges(DotsC_Handle originalReader, DotsC_Handle currentWriter);
 
     /**
      * Write a value to the blob managed by the specified blob writer.
