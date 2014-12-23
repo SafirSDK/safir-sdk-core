@@ -369,13 +369,21 @@ namespace ToolSupport
                     break;
                 case SequenceCollectionType:
                 {
-                    for (int valIx=0; valIx<m_blob.NumberOfValues(memIx); ++valIx)
+                    if (m_blob.NumberOfValues(memIx)!=other.NumberOfValues(memIx))
                     {
-                        if (Diff(other, md, memIx, valIx, valIx))
+                        diff=true;
+                        m_blob.SetChangedTopLevel(memIx, true);
+                    }
+                    else
+                    {
+                        for (int valIx=0; valIx<m_blob.NumberOfValues(memIx); ++valIx)
                         {
-                            m_blob.SetChangedTopLevel(memIx, true);
-                            diff=true;
-                            break;
+                            if (Diff(other, md, memIx, valIx, valIx))
+                            {
+                                m_blob.SetChangedTopLevel(memIx, true);
+                                diff=true;
+                                break;
+                            }
                         }
                     }
                 }
@@ -720,20 +728,20 @@ namespace ToolSupport
             return false; //both values are null, i.e not changed
         }
 
-        void UniversalKeyToIndex(const Internal::Blob& blob,
-                                 const MemberDescriptionType* md,
-                                 int memberIndex,
-                                 std::map<DotsC_Int64, int>& keyToIndex) const
+        static void UniversalKeyToIndex(const Internal::Blob& blob,
+                                        const MemberDescriptionType* md,
+                                        int memberIndex,
+                                        std::map<DotsC_Int64, int>& keyToIndex)
         {
             //, InstanceId, HandlerId, ChannelId, EntityId.
-            switch (md->GetKeyType)
+            switch (md->GetKeyType())
             {
             case Int32MemberType:
             case EnumerationMemberType:
             {
                 for (int i=0; i<blob.NumberOfValues(memberIndex); ++i)
                 {
-                     keyToIndex.insert(std::make_pair(TypeUtilities::ToUnifiedDictionaryKey(m_blob.GetKeyInt32(memberIndex, i)), i));
+                     keyToIndex.insert(std::make_pair(TypeUtilities::ToUnifiedDictionaryKey(blob.GetKeyInt32(memberIndex, i)), i));
                 }
             }
                 break;
@@ -743,7 +751,7 @@ namespace ToolSupport
             {
                 for (int i=0; i<blob.NumberOfValues(memberIndex); ++i)
                 {
-                     keyToIndex.insert(std::make_pair(TypeUtilities::ToUnifiedDictionaryKey(m_blob.GetKeyInt64(memberIndex, i)), i));
+                     keyToIndex.insert(std::make_pair(TypeUtilities::ToUnifiedDictionaryKey(blob.GetKeyInt64(memberIndex, i)), i));
                 }
             }
                 break;
@@ -752,7 +760,7 @@ namespace ToolSupport
             {
                 for (int i=0; i<blob.NumberOfValues(memberIndex); ++i)
                 {
-                     keyToIndex.insert(std::make_pair(TypeUtilities::ToUnifiedDictionaryKey(m_blob.GetKeyString(memberIndex, i)), i));
+                     keyToIndex.insert(std::make_pair(TypeUtilities::ToUnifiedDictionaryKey(blob.GetKeyString(memberIndex, i)), i));
                 }
             }
                 break;
@@ -763,7 +771,7 @@ namespace ToolSupport
             {
                 for (int i=0; i<blob.NumberOfValues(memberIndex); ++i)
                 {
-                     keyToIndex.insert(std::make_pair(TypeUtilities::ToUnifiedDictionaryKey(m_blob.GetKeyHash(memberIndex, i)), i));
+                     keyToIndex.insert(std::make_pair(TypeUtilities::ToUnifiedDictionaryKey(blob.GetKeyHash(memberIndex, i)), i));
                 }
             }
                 break;
@@ -772,7 +780,7 @@ namespace ToolSupport
             {
                 for (int i=0; i<blob.NumberOfValues(memberIndex); ++i)
                 {
-                    DotsC_EntityId eid={m_blob.GetKeyInt64(memberIndex, i), m_blob.GetKeyHash(memberIndex, i)};
+                    DotsC_EntityId eid={blob.GetKeyInt64(memberIndex, i), blob.GetKeyHash(memberIndex, i)};
                     keyToIndex.insert(std::make_pair(TypeUtilities::ToUnifiedDictionaryKey(eid), i));
                 }
             }
