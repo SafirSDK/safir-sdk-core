@@ -192,7 +192,7 @@ FunctionEnd
 
   !define MUI_ICON "installer.ico"
 
-
+  !define MUI_WELCOMEFINISHPAGE_BITMAP "installer-welcome.bmp"
 ;--------------------------------
 ;Pages
 
