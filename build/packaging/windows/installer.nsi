@@ -185,11 +185,13 @@ FunctionEnd
   ;Request application privileges for Windows Vista
   RequestExecutionLevel admin
 
-
 ;--------------------------------
 ;Interface Settings
 
   !define MUI_ABORTWARNING
+
+  !define MUI_ICON "installer.ico"
+
 
 ;--------------------------------
 ;Pages
