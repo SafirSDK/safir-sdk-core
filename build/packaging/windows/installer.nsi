@@ -135,6 +135,19 @@ Function .onInit
 FunctionEnd
 
 ;--------------------------------
+;Skip the page which allows choice of where to install
+;Currently the install package is not relocatable, unfortunately.
+;See for example src/config/CMakeLists.txt
+;This also alleviates the problem described in the uninstall section below.
+
+!define MUI_PAGE_CUSTOMFUNCTION_PRE "SkipPageDirectory"
+!insertmacro MUI_PAGE_DIRECTORY
+
+Function SkipPageDirectory
+Abort
+FunctionEnd
+
+;--------------------------------
 ;General
 
   ;Check architecture and set default installation folder
@@ -331,9 +344,6 @@ Section "Development" SecDevelopment
   !insertmacro CreateInternetShortcut "${StartMenuDir}\Documentation\User's Guide" \
                                       "http://www.safirsdkcore.com/docs" "" "0"
 
-  ;TODO Test all the startmenu stuff
-  ;TODO set nice icons
-
 SectionEnd
 
 Section /o "Test suite" SecTest
@@ -397,10 +407,14 @@ Section "Uninstall"
   ;remove assemblies from GAC
   nsExec::ExecToLog '"$INSTDIR\installer_utils\gactool" "--uninstall" "$INSTDIR\dotnet"'
 
-  ; We blindly remove everything from the installation dir. This might blow up if someone decides to
-  ; install to a path with other stuff in it, e.g. C:\ (yes, we'd try to remove everything from c:\...).
-  ;Also, we try twice, in case f-ing windows doesn't let us delete the files the first time round...
-  ; TODO: better way?
+  ; We blindly remove everything from the installation dir. This might blow up if someone
+  ; decides to install to a path with other stuff in it, e.g. C:\ (yes, we'd try to
+  ; remove everything from c:\...).
+  ; Luckily we currently dont allow the user to set install directory...
+
+  ; Also, we try twice, in case f-ing windows doesn't let us delete the files the first
+  ; time round...
+
   RMDir /r "$INSTDIR"
   IfErrors 0 +2
   RMDir /r "$INSTDIR"
