@@ -191,8 +191,15 @@ FunctionEnd
   !define MUI_ABORTWARNING
 
   !define MUI_ICON "installer.ico"
+  !define MUI_UNICON "uninstaller.ico"
+
+  !define MUI_HEADERIMAGE
+  !define MUI_HEADERIMAGE_BITMAP "header.bmp"
+  !define MUI_HEADERIMAGE_UNBITMAP "header.bmp"
+  !define MUI_HEADERIMAGE_UNBITMAP_STRETCH "FitControl"
 
   !define MUI_WELCOMEFINISHPAGE_BITMAP "installer-welcome.bmp"
+  !define MUI_UNWELCOMEFINISHPAGE_BITMAP "uninstaller-welcome.bmp"
 ;--------------------------------
 ;Pages
 
@@ -212,7 +219,6 @@ FunctionEnd
 ;Languages
 
   !insertmacro MUI_LANGUAGE "English"
-
 
 ;--------------------------------
 ;Installer Sections
