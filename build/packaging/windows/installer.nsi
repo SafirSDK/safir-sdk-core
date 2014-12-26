@@ -135,19 +135,6 @@ Function .onInit
 FunctionEnd
 
 ;--------------------------------
-;Skip the page which allows choice of where to install
-;Currently the install package is not relocatable, unfortunately.
-;See for example src/config/CMakeLists.txt
-;This also alleviates the problem described in the uninstall section below.
-
-!define MUI_PAGE_CUSTOMFUNCTION_PRE "SkipPageDirectory"
-!insertmacro MUI_PAGE_DIRECTORY
-
-Function SkipPageDirectory
-Abort
-FunctionEnd
-
-;--------------------------------
 ;General
 
   ;Check architecture and set default installation folder
@@ -215,11 +202,15 @@ FunctionEnd
   !define MUI_UNWELCOMEFINISHPAGE_BITMAP "uninstaller-welcome.bmp"
 ;--------------------------------
 ;Pages
+;Skip the page which allows choice of where to install
+;Currently the install package is not relocatable, unfortunately.
+;See for example src/config/CMakeLists.txt
+;This also alleviates the problem described in the uninstall section below.
 
   !insertmacro MUI_PAGE_WELCOME
   !insertmacro MUI_PAGE_LICENSE "..\..\..\COPYING.txt"
   !insertmacro MUI_PAGE_COMPONENTS
-  !insertmacro MUI_PAGE_DIRECTORY
+  ;!insertmacro MUI_PAGE_DIRECTORY
   !insertmacro MUI_PAGE_INSTFILES
   !insertmacro MUI_PAGE_FINISH
 
