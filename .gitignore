@@ -10,7 +10,11 @@
 *.pdb
 *.gch
 *.pch
+
+#misc generated files
 precompiled_header_for_cpp.cpp
+safir_sdk_core_version.h
+Manifest.generated.txt
 
 #CMake stuff
 cmake_install.cmake
@@ -24,7 +28,6 @@ Makefile
 generated_code
 .ninja_*
 *.ninja
-Manifest.generated.txt
 stage
 
 #MSVC stuff

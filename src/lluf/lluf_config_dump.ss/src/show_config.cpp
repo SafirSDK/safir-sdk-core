@@ -48,6 +48,7 @@ public:
         options_description options("Options");
         options.add_options()
             ("help,h", "show help message")
+            ("version", "show Safir SDK Core version")
             ("typesystem", "Show contents of typesystem.ini")
             ("locations", "Show contents of locations.ini")
             ("logging", "Show contents of logging.ini")
@@ -78,12 +79,14 @@ public:
             return;
         }
 
+        version = vm.count("version") != 0;
         logging = vm.count("logging") != 0;
         typesystem = vm.count("typesystem") != 0;
         locations = vm.count("locations") != 0;
         dou_install_dirs = vm.count("dou-install-dirs") != 0;
 
-        if (!logging &&
+        if (!version &&
+            !logging &&
             !locations &&
             !typesystem &&
             !dou_install_dirs &&
@@ -96,6 +99,8 @@ public:
 
         parseOk = true;
     }
+
+    bool version;
     bool logging;
     bool typesystem;
     bool locations;
@@ -149,6 +154,10 @@ int main(int argc, char * argv[])
     {
         Safir::Utilities::Internal::ConfigReader reader;
 
+        if (options.version)
+        {
+            std::cout << "Safir SDK Core " << SAFIR_SDK_CORE_VERSION << std::endl;
+        }
         if (options.locations)
         {
             std::cout << "; ==== locations.ini ====" << std::endl;

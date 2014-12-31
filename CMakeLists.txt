@@ -36,6 +36,9 @@ endforeach()
 
 SET(SAFIR_VERSION_STRING "${SAFIR_VERSION_MAJOR}.${SAFIR_VERSION_MINOR}.${SAFIR_VERSION_PATCH}${SAFIR_VERSION_SUFFIX}")
 
+#make the version available to code as well.
+ADD_DEFINITIONS(-DSAFIR_SDK_CORE_VERSION="${SAFIR_VERSION_STRING}")
+
 #
 # This function will install a python script into the bin directory.
 # If it is a *nix system the script will have ".py" stripped from its name.
@@ -99,7 +102,23 @@ INSTALL(DIRECTORY include/ DESTINATION ${SAFIR_INSTALL_DESTINATION_INCLUDE}
   PATTERN ".svn" EXCLUDE
   PATTERN "*~" EXCLUDE)
 
-#TODO: create a version.h file and install it. Not sure how to do it best...
+
+#Note: do not try to use this file from within the Safir SDK Core build tree!
+#use the version defined using ADD_DEFINITIONS above instead.
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/SafirSdkCoreVersion.h
+  "//This is an automatically generated file.\n"
+  "#pragma once\n"
+  "#define SAFIR_SDK_CORE_VERSION_MAJOR ${SAFIR_VERSION_MAJOR}\n"
+  "#define SAFIR_SDK_CORE_VERSION_MINOR ${SAFIR_VERSION_MINOR}\n"
+  "#define SAFIR_SDK_CORE_VERSION_PATCH ${SAFIR_VERSION_PATCH}\n"
+  "#define SAFIR_SDK_CORE_VERSION_SUFFIX \"${SAFIR_VERSION_SUFFIX}\"\n"
+  "#define SAFIR_SDK_CORE_VERSION_STRING \"${SAFIR_VERSION_STRING}\"\n"
+  )
+
+INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/SafirSdkCoreVersion.h
+  DESTINATION ${SAFIR_INSTALL_DESTINATION_INCLUDE}/Safir
+  COMPONENT Development)
+
 
 set(CTEST_FULL_OUTPUT 1)
 ENABLE_TESTING()
