@@ -25,6 +25,8 @@
 #ifndef _dose_main_communication_h
 #define _dose_main_communication_h
 
+#if 0 //stewart
+
 #include "dose_main_quality_of_service_data.h"
 #include "dose_main_thread_monitor.h"
 #include <Safir/Dob/Internal/DistributionData.h>
@@ -135,6 +137,6 @@ namespace Internal
 }
 }
 }
-
+#endif
 #endif
 

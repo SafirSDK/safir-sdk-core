@@ -42,7 +42,11 @@
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <boost/bind.hpp>
+
+#if 0 //stewart
 #include <Safir/Dob/Internal/DoseCom_Interface.h>
+#endif
+
 #include <Safir/Dob/Internal/NodeStatuses.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 
@@ -79,7 +83,10 @@ namespace Internal
     }
 
     NodeHandler::NodeHandler()
-        : m_ecom(NULL),
+        :
+#if 0 //stewart
+        m_ecom(NULL),
+#endif
           m_requestHandler(NULL),
           m_poolHandler(NULL)
     {
@@ -89,20 +96,28 @@ namespace Internal
     {
     }
 
-    void NodeHandler::Init(ExternNodeCommunication & ecom,
+    void NodeHandler::Init(
+#if 0 //stewart
+                           ExternNodeCommunication & ecom,
+#endif
                            RequestHandler & requestHandler,
                            PoolHandler& poolHandler)
     {
         CheckParameters();
+#if 0 //stewart
         m_ecom = &ecom;
+#endif
+
         m_requestHandler = &requestHandler;
         m_poolHandler = &poolHandler;
 
+#if 0 //stewart
         if (!ecom.IsLocal(Dob::NodeInfo::ClassTypeId))
         {
             throw Dob::Typesystem::ConfigurationErrorException
                 (L"Entity NodeInfo must have DistributionChannelProperty (or Override) set to Local",__WFILE__,__LINE__);
         }
+#endif
 
         m_connection.Attach();
         m_connection.RegisterEntityHandler(Dob::NodeInfo::ClassTypeId,
@@ -120,7 +135,9 @@ namespace Internal
             if (id == ThisNodeParameters::NodeNumber())
             {
                 ni->Status().SetVal(Dob::NodeStatus::Started);
+#if 0 //stewart
                 ni->IpAddress().SetVal(m_ecom->GetOwnIpAddress());
+#endif
             }
             else
             {
@@ -137,10 +154,12 @@ namespace Internal
             }
         }
 
+#if 0 //stewart
         if (!m_ecom->GetQualityOfServiceData().IsStandalone())
         {
             HandleNodeStatusChanges();
         }
+#endif
     }
 
 
@@ -148,6 +167,7 @@ namespace Internal
 
     void NodeHandler::HandleNodeStatusChanges()
     {
+#if 0 //stewart
         dcom_ulong32 id;        //out range 0-63
         dcom_ulong32 ns = 0;        //out = NODESTATUS_UP/DOWN
         dcom_ulong32 addr;
@@ -219,6 +239,7 @@ namespace Internal
             Connections::Instance().ForEachConnectionPtr(boost::bind(&NodeHandler::KickConnection,this,_1));
 
         }
+#endif
     }
 
     void NodeHandler::HandleDisconnect(const ConnectionPtr & connection, const NodeNumber node)

@@ -37,16 +37,22 @@ namespace Dob
 namespace Internal
 {
     MessageHandler::MessageHandler():
+#if 0 //stewart
         m_ecom(NULL),
+#endif
         m_blockingHandler(NULL)
     {
     }
 
-    void MessageHandler::Init(BlockingHandlers & blockingHandler,
+    void MessageHandler::Init(BlockingHandlers & blockingHandler)
+#if 0 //stewart
                               ExternNodeCommunication & ecom)
+#endif
     {
         m_blockingHandler = &blockingHandler;
+#if 0 //stewart
         m_ecom = &ecom;
+#endif
     }
 
 
@@ -63,6 +69,7 @@ namespace Internal
         exitDispatch = false;
         dontRemove = false;
 
+#if 0 //stewart
         if (!m_ecom->Send(msg))
         {
             m_blockingHandler->Message().AddWaitingConnection(ExternNodeCommunication::DoseComVirtualConnectionId,connection->Id().m_id);
@@ -70,6 +77,7 @@ namespace Internal
             exitDispatch = true;
             return;
         }
+#endif
 
         lllout << "DOSE_MAIN has found a message in msg out queue for connection " << connection->Id() << std::endl;
 

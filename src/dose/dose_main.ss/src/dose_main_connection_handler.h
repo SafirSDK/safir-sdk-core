@@ -37,7 +37,9 @@ namespace Dob
 namespace Internal
 {
     //forward declarations:
+#if 0 //stewart
     class ExternNodeCommunication;
+#endif
     class ProcessInfoHandler;
     class RequestHandler;
     class PendingRegistrationHandler;
@@ -51,7 +53,10 @@ namespace Internal
         ConnectionHandler();
         ~ConnectionHandler();
 
-        void Init(ExternNodeCommunication & ecom,
+        void Init(
+#if 0 //stewart
+                  ExternNodeCommunication & ecom,
+#endif
                   ProcessInfoHandler & processInfoHandler,
                   RequestHandler & requesthandler,
                   PendingRegistrationHandler & prh,
@@ -69,7 +74,9 @@ namespace Internal
         void HandleDisconnectFromDoseCom(const DistributionData & disconnectMsg);
 
     private:
+#if 0 //stewart
         ExternNodeCommunication * m_ecom;
+#endif
         ProcessInfoHandler * m_processInfoHandler;
         RequestHandler * m_requestHandler;
         PendingRegistrationHandler * m_pendingRegistrationHandler;

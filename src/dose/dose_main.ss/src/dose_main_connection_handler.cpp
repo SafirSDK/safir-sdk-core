@@ -45,7 +45,9 @@ namespace Internal
 {
 
     ConnectionHandler::ConnectionHandler():
+#if 0 //stewart
         m_ecom(NULL),
+#endif
         m_processInfoHandler(NULL),
         m_requestHandler(NULL),
         m_pendingRegistrationHandler(NULL),
@@ -62,14 +64,19 @@ namespace Internal
     }
 
 
-    void ConnectionHandler::Init(ExternNodeCommunication & ecom,
+    void ConnectionHandler::Init(
+#if 0 //stewart
+                                 ExternNodeCommunication & ecom,
+#endif
                                  ProcessInfoHandler & processInfoHandler,
                                  RequestHandler & requestHandler,
                                  PendingRegistrationHandler & prh,
                                  NodeHandler & nh,
                                  PersistHandler & persistHandler)
     {
+#if 0 //stewart
         m_ecom = &ecom;
+#endif
         m_processInfoHandler = &processInfoHandler;
         m_requestHandler = &requestHandler;
         m_pendingRegistrationHandler = &prh;
@@ -92,6 +99,7 @@ namespace Internal
             return;
         }
 
+#if 0 //stewart
         if (m_ecom->Send(connMsg))
         {
             lllout << "Sent a new connection to dose_com: " << connection->NameWithCounter() << std::endl; 
@@ -102,6 +110,7 @@ namespace Internal
                    << connection->NameWithCounter() << std::endl;
             m_unsent.push_back(connMsg);
         }
+#endif
     }
 
     void ConnectionHandler::HandleDisconnect(const ConnectionPtr & connection)
@@ -129,16 +138,19 @@ namespace Internal
                 return;
             }
 
+#if 0 //stewart
             if (!m_ecom->Send(msg))
             {
                 m_unsent.push_back(msg);
             }
+#endif
         }
     }
 
 
     bool ConnectionHandler::HandleUnsent()
     {
+#if 0 //stewart
         while (!m_unsent.empty())
         {
             if (m_ecom->Send(m_unsent.front()))
@@ -150,6 +162,7 @@ namespace Internal
                 return false;
             }
         }
+#endif
         return true;
     }
 

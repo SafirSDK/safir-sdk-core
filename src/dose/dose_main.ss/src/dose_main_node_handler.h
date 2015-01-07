@@ -37,7 +37,10 @@ namespace Dob
 {
 namespace Internal
 {
+#if 0 //stewart
     class ExternNodeCommunication;
+#endif
+
     class RequestHandler;
     class PoolHandler;
 
@@ -49,7 +52,10 @@ namespace Internal
 
         NodeHandler();
         ~NodeHandler();
-        void Init (ExternNodeCommunication & ecom,
+        void Init (
+#if 0 //stewart
+                   ExternNodeCommunication & ecom,
+#endif
                    RequestHandler & requestHandler,
                    PoolHandler& poolHandler);
 
@@ -75,7 +81,10 @@ namespace Internal
 
         void KickConnection(const ConnectionPtr& connection);
 
+#if 0 //stewart
         ExternNodeCommunication* m_ecom;
+#endif
+
         RequestHandler * m_requestHandler;
         PoolHandler * m_poolHandler;
 

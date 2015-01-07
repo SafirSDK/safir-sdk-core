@@ -37,7 +37,9 @@ namespace Dob
 {
 namespace Internal
 {
+#if 0 //stewart
     class ExternNodeCommunication;
+#endif
 
     class ProcessInfoHandler:
         public Safir::Dob::EntityHandler,
@@ -48,7 +50,10 @@ namespace Internal
         ProcessInfoHandler();
         ~ProcessInfoHandler();
 
-        void Init(const ExternNodeCommunication & ecom,
+        void Init(
+#if 0 //stewart
+                  const ExternNodeCommunication & ecom,
+#endif
                   Safir::Utilities::ProcessMonitor& processMonitor);
 
         void ConnectionAdded(const ConnectionPtr & connection);

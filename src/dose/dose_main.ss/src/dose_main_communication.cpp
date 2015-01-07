@@ -23,7 +23,7 @@
 ******************************************************************************/
 
 #include "dose_main_communication.h"
-
+#if 0 //stewart
 
 #include "dose_main_defs.h"
 #include <Safir/Dob/Internal/Connection.h>
@@ -722,3 +722,4 @@ namespace Internal
 }
 }
 }
+#endif

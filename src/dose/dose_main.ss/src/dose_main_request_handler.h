@@ -37,7 +37,9 @@ namespace Internal
 {
     //forward declarations
     class BlockingHandlers;
+#if 0 //stewart
     class ExternNodeCommunication;
+#endif
     class ResponseHandler;
 
     class RequestHandler:
@@ -48,7 +50,9 @@ namespace Internal
         virtual ~RequestHandler();
 
         void Init(BlockingHandlers & blockingHandler,
+#if 0 //stewart
                   ExternNodeCommunication & ecom,
+#endif
                   ResponseHandler & responseHandler);
 
 
@@ -113,7 +117,9 @@ namespace Internal
         typedef unordered_map<Typesystem::TypeId, Typesystem::Si64::Second> TimeoutTable;
         mutable TimeoutTable m_timeoutTable;
 
+#if 0 //stewart
         ExternNodeCommunication* m_ecom;
+#endif
         BlockingHandlers* m_blockingHandler;
         ResponseHandler * m_responseHandler;
     };

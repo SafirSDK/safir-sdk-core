@@ -75,12 +75,14 @@ namespace Internal
         }
         else
         {
+#if 0 //stewart
             //This can only occur if response was for connection on another node, and DoseCom sendQ was full.
             m_blockingHandler->Response().AddWaitingConnection
                 (ExternNodeCommunication::DoseComVirtualConnectionId,
                 sender->Id().m_id);
             doseComOverflowed = true;
             dontRemove = true;
+#endif
         }
     }
 
@@ -115,9 +117,11 @@ namespace Internal
         }
         else if (fromConnection.m_node == m_thisNode)
         {
+#if 0 //stewart
             //Response to another node
             lllout << "Sending the response to node " << toConnection.m_node << std::endl;
             return m_ecom->Send(response);
+#endif
         }
 
         return true;

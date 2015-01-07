@@ -45,7 +45,10 @@ namespace Internal
         public boost::noncopyable
     {
     public:
-        explicit PendingRegistrationHandler(ExternNodeCommunication & ecom);
+        explicit PendingRegistrationHandler();
+#if 0 //stewart
+        ExternNodeCommunication & ecom);
+#endif
 
         void CheckForNewOrRemovedPendingRegistration(const ConnectionPtr & connection);
 
@@ -95,7 +98,9 @@ namespace Internal
 
         PendingRegistrations m_pendingRegistrations;
         long m_nextId;
+#if 0 //stewart
         ExternNodeCommunication & m_ecom;
+#endif
 
         LamportClock m_pendingRegistrationClock;
 
