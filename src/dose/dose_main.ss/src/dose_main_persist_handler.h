@@ -49,7 +49,10 @@ namespace Internal
     public:
         PersistHandler();
 
-        void Init(ExternNodeCommunication& ecom, 
+        void Init(
+#if 0 //stewart
+                  ExternNodeCommunication& ecom,
+#endif
                   ConnectionHandler& connectionHandler,
                   NodeHandler& nodeHandler,
                   const bool otherNodesExistAtStartup);
@@ -72,7 +75,9 @@ namespace Internal
         
         void RequestPersistenceInfo();
 
+#if 0 //stewart
         ExternNodeCommunication * m_ecom;
+#endif
         ConnectionHandler * m_connectionHandler;
         NodeHandler * m_nodeHandler;
 

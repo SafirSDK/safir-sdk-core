@@ -50,10 +50,16 @@ namespace Internal
     }
 
 
-    void ResponseHandler::Init(BlockingHandlers & blockingHandler, ExternNodeCommunication & ecom)
+    void ResponseHandler::Init(BlockingHandlers & blockingHandler)
+#if 0 //stewart
+        , ExternNodeCommunication & ecom)
+#endif
+
     {
         m_blockingHandler = &blockingHandler;
+#if 0 //stewart
         m_ecom = &ecom;
+#endif
     }
 
     void ResponseHandler::DispatchResponse(const DistributionData& response,
