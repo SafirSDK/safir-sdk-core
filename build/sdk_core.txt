@@ -96,7 +96,6 @@ build_dir        src/dose/dose_internal.ss/src             RelWithDebInfo   Debu
 run_test_suite   src/dose/dose_internal.ss/tests           dose_internal_tests
 build_dir        src/dose/dose_dll.ss/src                  RelWithDebInfo
 build_dir        src/dose/dose_cpp.ss/src                  RelWithDebInfo   Debug
-build_dir        src/dose/dose_communication.ss/src        RelWithDebInfo   Debug
 build_dir        src/dose/dose_main.ss/src                 RelWithDebInfo
 run_test_suite   src/dose/dose_main.ss/tests               dose_main_tests
 build_dir        src/dose/dose_dotnet.ss/src               RelWithDebInfo
