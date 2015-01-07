@@ -36,7 +36,7 @@ proc = subprocess.Popen(os.path.join(SAFIR_RUNTIME,"bin","dose_main"),
                         universal_newlines=True,
                         creationflags = subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0)
 lines = list()
-for i in range(3):
+for i in range(2):
     lines.append(proc.stdout.readline().rstrip("\n\r"))
     print("Line", i, ": '" + lines[-1] + "'")
 
@@ -61,7 +61,7 @@ if proc.poll() is None:
     proc.wait()
 
 lines.append(proc.stdout.readline().rstrip("\n\r"))
-print("Line", 3, ": '" + lines[-1] + "'")
+print("Line", 2, ": '" + lines[-1] + "'")
 
 res = proc.communicate()[0]
 
@@ -72,13 +72,15 @@ if len(res) != 0:
 if not lines[0].endswith("dose_main is waiting for persistence data!"):
     print("Failed to find string ending in 'dose_main is waiting for persistence data!'")
     sys.exit(1)
+""" stewart
 if not lines[1].endswith("Running in Standalone mode"):
     print("Failed to find string ending in 'Running in Standalone mode'")
     sys.exit(1)
-if not lines[2].endswith("dose_main running (release)...") and not lines[2].endswith("dose_main running (debug)..."):
+"""
+if not lines[1].endswith("dose_main running (release)...") and not lines[1].endswith("dose_main running (debug)..."):
     print("Failed to find string ending in 'dose_main running (release)...' or 'dose_main running (debug)...'")
     sys.exit(1)
-if not lines[3].endswith("Exiting..."):
+if not lines[2].endswith("Exiting..."):
     print("Failed to find string ending in 'Exiting...'")
     sys.exit(1)
 
