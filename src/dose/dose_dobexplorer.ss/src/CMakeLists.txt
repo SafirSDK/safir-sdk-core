@@ -12,7 +12,6 @@ INCLUDE("$ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake")
 FILE(GLOB ui *.ui)
 FILE(GLOB sources *.cpp)
 FILE(GLOB headers [!ui_]*.h)
-FILE(GLOB dose_com_sources ${SAFIR_SDK}/include/Safir/Dob/Internal/DoseComAux/*.cpp)
 
 # As moc files are generated in the binary dir, tell CMake
 # to always look for includes there:
@@ -56,7 +55,7 @@ else()
 
 endif()
 
-ADD_EXECUTABLE(dobexplorer WIN32 ${sources} ${ui_headers} ${moc_sources} ${dose_com_sources} ${headers})
+ADD_EXECUTABLE(dobexplorer WIN32 ${sources} ${ui_headers} ${moc_sources} ${headers})
 
 if (Qt5Widgets_FOUND)
   qt5_use_modules(dobexplorer Widgets)

@@ -67,22 +67,6 @@
       </item>
       <item>
        <property name="text">
-        <string>Node Statuses</string>
-       </property>
-       <property name="toolTip">
-        <string>Show information about nodes and their statuses.</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>DoseCom Info</string>
-       </property>
-       <property name="toolTip">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Show internal information about dose_coms state.&lt;/p&gt;&lt;p&gt;Also allows enabling of dose_com internal logging.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
         <string>Remote Connections</string>
        </property>
        <property name="toolTip">
@@ -95,9 +79,9 @@
        </property>
       </item>
       <item>
-        <property name="text">
-          <string>Raw Node Statistics</string>
-        </property>
+       <property name="text">
+        <string>Raw Node Statistics</string>
+       </property>
       </item>
      </widget>
      <widget class="QTabWidget" name="tabWidget">
