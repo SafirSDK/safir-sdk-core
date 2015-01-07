@@ -36,7 +36,9 @@
 #include <Safir/Dob/NodeInfo.h>
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Dob/DistributionChannelParameters.h>
+#if 0 //stewart
 #include "dosecom_stuff.h"
+#endif
 
 
 #ifdef _MSC_VER
@@ -233,10 +235,12 @@ Executor::ExecuteAction(DoseTest::ActionPtr action)
         {
             if (m_isActive)
             {
+#if 0 //stewart
                 DOSE_SHARED_DATA_S * pShm = (DOSE_SHARED_DATA_S *) Get_NodeSharedData_Pointer();
                 
                 pShm->InhibitOutgoingTraffic = action->Inhibit().GetVal();
                 lout << "InhibitOutgoingTraffic set to " << pShm->InhibitOutgoingTraffic << std::endl;
+#endif
             }
         }
         break;

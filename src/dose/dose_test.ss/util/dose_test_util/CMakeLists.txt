@@ -7,9 +7,8 @@ INCLUDE_DIRECTORIES(.)
 
 FILE(GLOB headers *.h)
 FILE(GLOB sources *.cpp)
-FILE(GLOB dose_com_sources ${SAFIR_SDK}/include/Safir/Dob/Internal/DoseComAux/*.cpp)
 
-ADD_LIBRARY(dose_test_util SHARED ${sources} ${dose_com_sources} ${headers})
+ADD_LIBRARY(dose_test_util SHARED ${sources} ${headers})
 
 INSTALL(DIRECTORY Safir 
   DESTINATION ${SAFIR_SDK}/include

@@ -23,12 +23,15 @@
 ******************************************************************************/
 #include <iostream>
 #include <Safir/Dob/Internal/DoseTest/dose_test_util.h>
+#if 0 //stewart
 #include "dose_com_utils.h"
+#endif
 #include <Safir/Dob/Typesystem/Utilities.h>
 
 
 void InhibitOutgoingTraffic(const bool inhibit, bool& success)
 {
+#if 0 //stewart
     DOSE_SHARED_DATA_S * pShm = (DOSE_SHARED_DATA_S *) Get_NodeSharedData_Pointer();  
 
     if (pShm->MyIpAddr_nw == 0)
@@ -40,11 +43,13 @@ void InhibitOutgoingTraffic(const bool inhibit, bool& success)
 
     pShm->InhibitOutgoingTraffic = inhibit;     
     success = true;
+#endif
 }
 
 
 void InhibitOutgoingTrafficStatus(bool& isInhibited)
 {
+#if 0 //stewart
     DOSE_SHARED_DATA_S * pShm = (DOSE_SHARED_DATA_S *) Get_NodeSharedData_Pointer();  
     if (pShm->InhibitOutgoingTraffic == 0)
     {
@@ -54,6 +59,7 @@ void InhibitOutgoingTrafficStatus(bool& isInhibited)
     {
         isInhibited = true;
     }
+#endif
 }
 
 
