@@ -28,8 +28,6 @@
 #include "About.h"
 #include "memgraph.h"
 #include "entitystats.h"
-#include "nodestatus.h"
-#include "dosecominfo.h"
 #include "connectionstats.h"
 #include "loggingsettings.h"
 #include "SystemPicturePage.h"
@@ -145,16 +143,6 @@ void DoseMon::TreeItemActivated ( QTreeWidgetItem * item, int /*column*/ )
     else if (item->text(0) == "Logging settings")
     {
         newTab = tabWidget->addTab(new LoggingSettings(this),"Logging settings");
-        tabWidget->setTabToolTip(newTab,tabWidget->widget(newTab)->toolTip());
-    }
-    else if (item->text(0) == "Node Statuses")
-    {
-        newTab = tabWidget->addTab(new NodeStatus(this),"Node Statuses");
-        tabWidget->setTabToolTip(newTab,tabWidget->widget(newTab)->toolTip());
-    }
-    else if (item->text(0) == "DoseCom Info")
-    {
-        newTab = tabWidget->addTab(new DoseComInfo(this),"DoseCom Info");
         tabWidget->setTabToolTip(newTab,tabWidget->widget(newTab)->toolTip());
     }
     else if (item->text(0) == "Raw Node Statistics")

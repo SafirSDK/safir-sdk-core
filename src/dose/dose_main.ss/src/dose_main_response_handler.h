@@ -35,7 +35,9 @@ namespace Internal
 {
     //forward declarations
     class BlockingHandlers;
+#if 0 //stewart
     class ExternNodeCommunication;
+#endif
 
     class ResponseHandler
     {
@@ -43,7 +45,10 @@ namespace Internal
         ResponseHandler();
         virtual ~ResponseHandler();
 
-        void Init(BlockingHandlers & blockingHandler, ExternNodeCommunication& ecom);
+        void Init(BlockingHandlers & blockingHandler);
+#if 0 //stewart
+                  , ExternNodeCommunication& ecom);
+#endif
 
         void DistributeResponses(const ConnectionPtr& sender);
 
@@ -62,7 +67,9 @@ namespace Internal
         void PostResponse(const ConnectionPtr& receiver,
                           const DistributionData& response);
 
+#if 0 //stewart
         ExternNodeCommunication* m_ecom;
+#endif
         BlockingHandlers* m_blockingHandler;
 
         const Dob::Typesystem::Int32 m_thisNode;

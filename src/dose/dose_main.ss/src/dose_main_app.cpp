@@ -89,8 +89,11 @@ namespace Internal
         m_signalHandler(m_ioService),
         m_timerHandlerInitiated(initiateTimerHandler(m_ioService)),
         m_poolHandler(m_ioService),
-        m_pendingRegistrationHandler(m_ecom),
+        m_pendingRegistrationHandler(),
+#if 0 //stewart
+        m_ecom),
         m_ecom(m_ioService),
+#endif
         m_processMonitor(m_ioService,ProcessExited,boost::chrono::seconds(1)),
         m_HandleEvents_notified(0),
         m_DispatchOwnConnection_notified(0)
@@ -274,7 +277,9 @@ namespace Internal
             if (m_persistHandler.IsPersistentDataReady())
             {
                 lllout << "Calling SetOkToSignalPDComplete, since this node has now fulfilled the requirements for signalling PD complete" << std::endl;
+#if 0 //stewart
                 m_ecom.SetOkToSignalPDComplete();
+#endif
             }
             m_connectionHandler.MaybeSignalConnectSemaphore();
             m_pendingRegistrationHandler.CheckForPending();
@@ -337,19 +342,24 @@ namespace Internal
         NodeStatuses::Initialize();
         EntityTypes::Initialize(/*iAmDoseMain = */ true);
 
-        m_connectionHandler.Init(m_ecom,
+        m_connectionHandler.Init(
+#if 0 //stewart
+                                 m_ecom,
+#endif
                                  m_processInfoHandler,
                                  m_requestHandler,
                                  m_pendingRegistrationHandler,
                                  m_nodeHandler,
                                  m_persistHandler);
 
-        const bool otherNodesExistAtStartup =
+        const bool otherNodesExistAtStartup = false;
+#if 0 //stewart
             m_ecom.Init(boost::bind(&DoseApp::HandleIncomingData, this, _1, _2),
                         boost::bind(&DoseApp::QueueNotFull, this),
                         boost::bind(&DoseApp::NodeStatusChangedNotifier, this),
                         boost::bind(&DoseApp::StartPoolDistribution,this),
                         boost::bind(&DoseApp::RequestPoolDistribution,this, _1));
+#endif
 
         //we notify so that even if there were no new nodes we trigger
         //the call to MaybeSignal...() to start letting applications connect.
@@ -357,28 +367,27 @@ namespace Internal
         //persistence.
         NodeStatusChangedNotifier();
 
-        m_messageHandler.Init(m_blockingHandler,m_ecom);
+        m_messageHandler.Init(m_blockingHandler);
 
-        m_responseHandler.Init(m_blockingHandler, m_ecom);
-        m_requestHandler.Init(m_blockingHandler, m_ecom, m_responseHandler);
+        m_responseHandler.Init(m_blockingHandler);
+        m_requestHandler.Init(m_blockingHandler, m_responseHandler);
 
         m_ownConnection.Open(L"dose_main",L"own",0,NULL,this);
 
         m_poolHandler.Init(m_blockingHandler,
-                           m_ecom,
                            m_pendingRegistrationHandler,
                            m_persistHandler,
                            m_connectionHandler,
                            m_threadMonitor);
 
 
-        m_processInfoHandler.Init(m_ecom,m_processMonitor);
+        m_processInfoHandler.Init(m_processMonitor);
 
-        m_nodeHandler.Init (m_ecom, m_requestHandler, m_poolHandler);
+        m_nodeHandler.Init (m_requestHandler, m_poolHandler);
 
         m_connectionThread = boost::thread(boost::bind(&DoseApp::ConnectionThread,this));
 
-        m_persistHandler.Init(m_ecom,m_connectionHandler,m_nodeHandler,otherNodesExistAtStartup);
+        m_persistHandler.Init(m_connectionHandler,m_nodeHandler,otherNodesExistAtStartup);
 
         m_memoryMonitorThread = boost::thread(&DoseApp::MemoryMonitorThread);
     }
@@ -521,6 +530,7 @@ namespace Internal
         {
             tmpId.m_id=*it;
 
+#if 0 //stewart
             if (tmpId.m_id == ExternNodeCommunication::DoseComVirtualConnectionId)
             {
                 // dose_com virtual connection has been waiting for the blocking app
@@ -528,8 +538,11 @@ namespace Internal
             }
             else
             {
+#endif
                 HandleAppEventHelper(Connections::Instance().GetConnection(tmpId), recursionLevel);
+#if 0 //stewart
             }
+#endif
         }
     }
 
@@ -541,6 +554,7 @@ namespace Internal
     //----------------------------------------------------------------
     void DoseApp::HandleIncomingData(const DistributionData & data, const bool isAckedData)
     {
+#if 0 //stewart
         switch (data.GetType())
         {
         case DistributionData::Action_Connect:
@@ -615,6 +629,7 @@ namespace Internal
             }
             break;
         }
+#endif
     }
 
     void DoseApp::NodeStatusChangedNotifier()
@@ -632,9 +647,11 @@ namespace Internal
         lllout << "DoseApp::QueueNotFull: Calling HandleUnsent()" << std::endl;
         m_connectionHandler.HandleUnsent();
 
+#if 0 //stewart
         lllout << "DoseApp::QueueNotFull: Calling HandleWaitingConnections(...)" << std::endl;
         int recLevel=0;
         HandleWaitingConnections(ExternNodeCommunication::DoseComVirtualConnectionId, recLevel);
+#endif
 
         lllout << "DoseApp::QueueNotFull: Calling DistributePoolChanges()" << std::endl;
         m_poolHandler.DistributeStates();

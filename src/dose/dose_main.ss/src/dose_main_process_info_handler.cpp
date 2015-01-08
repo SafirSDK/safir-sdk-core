@@ -55,17 +55,22 @@ namespace Internal
     {
     }
 
-    void ProcessInfoHandler::Init(const ExternNodeCommunication & ecom,
+    void ProcessInfoHandler::Init(
+#if 0 //stewart
+                                  const ExternNodeCommunication & ecom,
+#endif
                                   Safir::Utilities::ProcessMonitor& processMonitor)
     {
         m_processMonitor = &processMonitor;
         m_connection.Attach();
 
+#if 0 //stewart
         if (!ecom.IsLocal(Dob::ProcessInfo::ClassTypeId))
         {
             throw Dob::Typesystem::ConfigurationErrorException
                 (L"Entity ProcessInfo must have DistributionChannelProperty (or Override) set to Local",__WFILE__,__LINE__);
         }
+#endif
 
         // Register ProcessInfo class
         m_connection.RegisterEntityHandler(Dob::ProcessInfo::ClassTypeId,

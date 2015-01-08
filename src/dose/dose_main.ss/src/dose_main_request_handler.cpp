@@ -75,11 +75,15 @@ namespace Internal
     }
 
     void RequestHandler::Init(BlockingHandlers & blockingHandler,
+#if 0 //stewart
                               ExternNodeCommunication  & ecom,
+#endif
                               ResponseHandler & responseHandler)
     {
         m_blockingHandler = &blockingHandler;
+#if 0 //stewart
         m_ecom = &ecom;
+#endif
         m_responseHandler = &responseHandler;
     }
 
@@ -355,6 +359,7 @@ namespace Internal
     bool RequestHandler::HandleRequest_LocalSender_ExternReceiver(const DistributionData & request,
                                                       const ConnectionPtr & sender)
     {
+#if 0 //stewart
         if (!m_ecom->Send(request))
         {
             m_blockingHandler->Request().AddWaitingConnection(ExternNodeCommunication::DoseComVirtualConnectionId,
@@ -362,6 +367,7 @@ namespace Internal
 
             return false;
         }
+#endif
         return true;
     }
 
@@ -659,10 +665,11 @@ namespace Internal
                                              TimerInfoPtr(new ReqTimer(RequestTimers::m_externalReqTimerId,
                                                                        timeoutInfo)),
                                              GetTimeout(request.GetTypeId()));
-                                             
+#if 0 //stewart
         // Set that dose_main is waiting for the receiver
         m_blockingHandler->Request().AddWaitingConnection(blockingConn,
                                                           ExternNodeCommunication::DoseComVirtualConnectionId);
+#endif
     }
 
 

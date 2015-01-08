@@ -151,8 +151,10 @@ namespace Internal
         //Persistent data service and state
         PersistHandler m_persistHandler;
 
+#if 0 //stewart
         //Extern node communication
         ExternNodeCommunication m_ecom;
+#endif
 
         // Process info
         ProcessInfoHandler m_processInfoHandler;

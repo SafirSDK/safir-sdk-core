@@ -49,7 +49,9 @@ namespace Safir
         namespace Internal
         {
             PersistHandler::PersistHandler():
+#if 0 //stewart
         m_ecom(NULL),
+#endif
             m_connectionHandler(NULL),
             m_nodeHandler(NULL),
             m_persistDataReady(false)
@@ -64,12 +66,17 @@ namespace Safir
 
         }
 
-        void PersistHandler::Init(ExternNodeCommunication& ecom,
+        void PersistHandler::Init(
+#if 0 //stewart
+                                  ExternNodeCommunication& ecom,
+#endif
             ConnectionHandler& connectionHandler,
             NodeHandler& nodeHandler,
             const bool otherNodesExistAtStartup)
         {
+#if 0 //stewart
             m_ecom = &ecom;
+#endif
             m_connectionHandler = &connectionHandler;
             m_nodeHandler = &nodeHandler;
 
@@ -115,6 +122,7 @@ namespace Safir
 
         void PersistHandler::RequestPersistenceInfo()
         {
+#if 0 //stewart
             DistributionData request
                 (have_persistence_data_request_tag,
                 ConnectionId(ThisNodeParameters::NodeNumber(),
@@ -167,11 +175,13 @@ namespace Safir
                                                      timerInfo,
                                                      0.01); //time out in 10 milliseconds*/
             }
+#endif
         }
 
 
         void PersistHandler::HandleMessageFromDoseCom(const DistributionData& data)
         {
+#if 0 //stewart
             if (data.GetType() == DistributionData::Action_HavePersistenceDataRequest)
             {
                 lllout << "Got an Action_HavePersistenceDataRequest, responding with " << m_persistDataReady << std::endl;
@@ -218,6 +228,7 @@ namespace Safir
                     }
                 }
             }
+#endif
         }
 
         void PersistHandler::HandleTimeout(const TimerInfoPtr & /*timer*/)
@@ -243,7 +254,9 @@ namespace Safir
                     SetPersistentDataReady();
 
                     lllout << "Calling SetOkToSignalPDComplete, since this node has now fulfilled the requirements for signalling PD complete (we got persistance data from local app)" << std::endl;
+#if 0 //stewart
                     m_ecom->SetOkToSignalPDComplete();
+#endif
                     m_connectionHandler->MaybeSignalConnectSemaphore();
 
                     //disallow more persistence data

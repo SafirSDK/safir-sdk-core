@@ -27,6 +27,7 @@
 
 #include "dose_main_communication.h"
 #include "dose_main_blocking_handler.h"
+#include <Safir/Dob/Internal/Connection.h>
 
 namespace Safir
 {
@@ -40,8 +41,10 @@ namespace Internal
     public:
         MessageHandler();
 
-        void Init(BlockingHandlers & blockingHandler,
+        void Init(BlockingHandlers & blockingHandler);
+#if 0 //stewart
                   ExternNodeCommunication & ecom);
+#endif
 
         void DistributeMessages(const ConnectionPtr & connection);
 
@@ -55,7 +58,9 @@ namespace Internal
                              bool & dontRemove);
 
         void TraverseMessageQueue(const ConnectionPtr & connection);
+#if 0 //stewart
         ExternNodeCommunication* m_ecom;
+#endif
         BlockingHandlers * m_blockingHandler;
     };
 }

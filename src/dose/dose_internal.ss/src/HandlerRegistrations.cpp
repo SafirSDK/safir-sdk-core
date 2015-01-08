@@ -261,10 +261,6 @@ namespace Internal
 
         statePtr->SetConnection(ConnectionPtr());
 
-        // Unregistration states are kept forever. This is necessary in order for the split/join
-        // functionality to work.
-        statePtr->SetReleased(false);
-
         DistributionData newRegState(registration_state_tag,
                                      ConnectionId(nodeNumber, contextId, -1),
                                      m_typeId,
@@ -274,6 +270,11 @@ namespace Internal
                                      currentRegState.GetRegistrationTime());
 
         statePtr->SetRealState(newRegState);
+
+        statePtr->SetReleased(true);
+
+        // The released end state must be saved "a while".
+        EndStates::Instance().Add(statePtr);
     }
 
     void HandlerRegistrations::RemoteRegistrationStateInternal(const ConnectionPtr&    connection,
@@ -307,20 +308,23 @@ namespace Internal
 
         if (remoteRegistrationState.IsRegistered())
         {
+            // Remote registration
             statePtr->SetConnection(connection);
             connection->AddRegistration(m_typeId,
                                         handlerId,
                                         ConsumerId(NULL, static_cast<short>(0))); // Dummy consumer for registration state from external node
+            statePtr->SetReleased(false);
         }
         else
         {
+            // Remote unregistration
             statePtr->SetConnection(ConnectionPtr());
             const_cast<DistributionData&>(remoteRegistrationState).ResetSenderIdConnectionPart();
-        }
+            statePtr->SetReleased(true);
 
-        // All registration states are kept forever (even unregistration states) since this is necessary
-        // in order for the split/join functionality to work correctly.
-        statePtr->SetReleased(false);
+            // This is an end state so it must be saved "a while".
+            EndStates::Instance().Add(statePtr);
+        }
 
         statePtr->SetRealState(remoteRegistrationState);
 

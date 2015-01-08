@@ -58,7 +58,9 @@ namespace Internal
 {
     //forward declarations
     class BlockingHandlers;
+#if 0 //stewart
     class ExternNodeCommunication;
+#endif
     class PendingRegistrationHandler;
     class PersistHandler;
     class ConnectionHandler;
@@ -134,7 +136,9 @@ namespace Internal
         virtual ~PoolHandler();
 
         void Init(BlockingHandlers & blockingHandler,
+#if 0 //stewart
                   ExternNodeCommunication & ecom,
+#endif
                   PendingRegistrationHandler & pendingHandler,
                   PersistHandler & persistHandler,
                   ConnectionHandler & connectionHandler,
@@ -194,7 +198,9 @@ namespace Internal
         void PDConnection(const Connection & connection);
         void PDDispatchSubscription(const SubscriptionPtr& subscription, bool& exitDispatch, bool& dontRemove);
 
+#if 0 //stewart
         ExternNodeCommunication* m_ecom;
+#endif
         BlockingHandlers* m_blockingHandler;
         PendingRegistrationHandler * m_pendingRegistrationHandler;
         PersistHandler * m_persistHandler;

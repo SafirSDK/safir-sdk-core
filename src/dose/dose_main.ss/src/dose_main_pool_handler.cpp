@@ -73,7 +73,9 @@ namespace Internal
     };
 
     PoolHandler::PoolHandler(boost::asio::io_service & ioService):
+#if 0 //stewart
         m_ecom(NULL),
+#endif
         m_blockingHandler(NULL),
         m_pendingRegistrationHandler(NULL),
         m_persistHandler(NULL),
@@ -130,14 +132,18 @@ namespace Internal
     }
 
     void PoolHandler::Init(BlockingHandlers & blockingHandler,
+#if 0 //stewart
                            ExternNodeCommunication & ecom,
+#endif
                            PendingRegistrationHandler & pendingHandler,
                            PersistHandler & persistHandler,
                            ConnectionHandler & connectionHandler,
                            ThreadMonitor & threadMonitor)
     {
         m_blockingHandler = &blockingHandler;
+#if 0 //stewart
         m_ecom = &ecom;
+#endif
         m_pendingRegistrationHandler = &pendingHandler;
         m_persistHandler = &persistHandler;
         m_connectionHandler = &connectionHandler;
@@ -150,7 +156,11 @@ namespace Internal
 
             StartSubscriptions(m_stateSubscriptionConnections[context].m_connection,
                                m_dummySubscriber,
+#if 0 //stewart
                                !m_ecom->GetQualityOfServiceData().IsStandalone(), //only include entity states when we're in a multinode system
+#else
+                               false,
+#endif
                                true);
 
             const std::wstring connectionName = ConnectionAspectMisc(m_stateSubscriptionConnections[context].m_connection).GetConnectionName();
@@ -184,7 +194,9 @@ namespace Internal
             (request_pool_distribution_request_tag,
             ConnectionId(ThisNodeParameters::NodeNumber(), 0, -1), //Sender - use context 0 for this request
             ConnectionId(nodeId, 0, -1)); //Receiver - use context 0 for this request
+#if 0 //stewart
         m_ecom->Send(PDRequest);
+#endif
     }
 
     void PoolHandler::HandleMessageFromDoseCom(const DistributionData& data)
@@ -192,7 +204,9 @@ namespace Internal
         if (data.GetType() == DistributionData::Action_RequestPoolDistribution)
         {
             lllog(1) << "Forcing pool distribution on request from node " << data.GetSenderId().m_node << "." << std::endl;
+#if 0 //stewart
             m_ecom->ForcePoolDistribution(data.GetSenderId().m_node);
+#endif
         }
     }
 
@@ -219,6 +233,7 @@ namespace Internal
  
     void PoolHandler::PoolDistributionWorker()
     {
+#if 0 //stewart
         boost::shared_ptr<ExceptionInfo> exceptionInfo;
         
         try
@@ -316,6 +331,7 @@ namespace Internal
         m_ioService.post(boost::bind(&PoolHandler::PDCompletedHandler,this,exceptionInfo));
 
         m_threadMonitor->StopWatchdog(m_poolDistributionThreadId);
+#endif
     }
 
     void PoolHandler::HandleRegistrationStateFromDoseCom(const DistributionData& state, const bool isAckedData)
@@ -499,6 +515,7 @@ namespace Internal
                             const SubscriptionPtr & subscription)
     {
         bool complete = true;
+#if 0 //stewart
         //Real state
         {
             const DistributionData currentState = subscription->GetCurrentRealState();
@@ -550,12 +567,14 @@ namespace Internal
                 }
             }
         }
+#endif
 
         return complete;
     }
 
     bool PoolHandler::PDProcessEntityState(const SubscriptionPtr & subscription)
     {
+#if 0 //stewart
         // All nodes send ghost and injection data on PD!
         // Do not send updates
 
@@ -590,14 +609,18 @@ namespace Internal
                 subscription->SetLastInjectionState(currentState);
             }
         }
-
+#endif
         return true; //PD send always succeeds
     }
 
-    bool ProcessRegistrationState(ExternNodeCommunication * ecom,
+    bool ProcessRegistrationState(
+#if 0 //stewart
+                                  ExternNodeCommunication * ecom,
+#endif
                                   PendingRegistrationHandler * pendingHandler,
                                   const SubscriptionPtr & subscription)
     {
+#if 0 //stewart
         const DistributionData currentState = subscription->GetCurrentRealState();
         const DistributionData lastState = subscription->GetLastRealState();
 
@@ -621,10 +644,14 @@ namespace Internal
         }
 
         return success;
+#else
+        return true;
+#endif
     }
 
     bool PoolHandler::PDProcessRegistrationState(const SubscriptionPtr & subscription)
     {
+#if 0 //stewart
         if (subscription->GetLastRealState().IsNoState())
         {
             const DistributionData state = subscription->GetCurrentRealState();
@@ -642,6 +669,8 @@ namespace Internal
             }
             subscription->SetLastRealState(state); //update this so we only dispatch this state once (see "if" above)
         }
+#endif
+
         return true; //PD send always succeeds
     }
 
@@ -649,6 +678,7 @@ namespace Internal
     {
         DistributionData realState = subscription->GetState()->GetRealState();
 
+#if 0 //stewart
         if (!realState.IsNoState() && realState.GetType() == DistributionData::RegistrationState)
         {
             // Registration state
@@ -664,6 +694,9 @@ namespace Internal
                                                                         m_ecom,
                                                                         boost::cref(subscription)));
         }
+#else
+        dontRemove = false;
+#endif
 
         //dontRemove is true if we got an overflow, and if we did we dont want to keep sending anything to dose_com.
         exitDispatch = dontRemove;

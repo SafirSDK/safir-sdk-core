@@ -39,9 +39,14 @@ namespace Dob
 {
 namespace Internal
 {
-    PendingRegistrationHandler::PendingRegistrationHandler(ExternNodeCommunication & ecom):
-        m_nextId(1),
+    PendingRegistrationHandler::PendingRegistrationHandler():
+#if 0 //stewart
+    ExternNodeCommunication & ecom):
+#endif
+        m_nextId(1)
+#if 0 //stewart
         m_ecom(ecom)
+#endif
     {
         m_timerId = TimerHandler::Instance().RegisterTimeoutHandler(L"Pending Registrations Timer",*this);
     }
@@ -153,6 +158,7 @@ namespace Internal
         PendingRegistrationInfo & reg = findIt->second;
         const NodeStatuses::Status statuses = NodeStatuses::Instance().GetNodeStatuses();
         bool gotAll = true;
+#if 0 //stewart
         for (NodeStatuses::Status::const_iterator it = statuses.begin();
              it != statuses.end();++it)
         {
@@ -171,6 +177,7 @@ namespace Internal
                 }
             }
         }
+#endif
 
         if (gotAll)
         {
@@ -215,6 +222,7 @@ namespace Internal
                                  findIt->second.lastRequestTimestamp,
                                  findIt->first);
 
+#if 0 //stewart
             const bool success = m_ecom.Send(msg);
 
             if (success)
@@ -231,6 +239,7 @@ namespace Internal
                 findIt->second.nextRequestTime = boost::chrono::steady_clock::now() + 
                     boost::chrono::milliseconds(10);
             }
+#endif
 
             TimerHandler::Instance().Set(Discard,
                                          timerInfo,
@@ -343,13 +352,14 @@ namespace Internal
                     lllout << "No, I've got an accepted pending for that ObjectId!" <<std::endl;
                     resp.SetPendingResponse(false);
                 }
-
+#if 0 //stewart
                 lllout << "Sending response " << std::boolalpha << msg.GetPendingResponse() << std::endl;
                 const bool success = m_ecom.Send(resp);
                 if (!success)
                 {
                     //Sending failed, but he will ask me again to approve of his registration, so ignore the failure
                 }
+#endif
             }
             break;
 
