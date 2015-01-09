@@ -334,7 +334,7 @@ class Executor implements
 
             case INHIBIT_OUTGOING_TRAFFIC:
                 if (m_isActive) {
-                    /* Stewart
+                    /* stewart
                     boolean ok = com.saabgroup.safir.dob.test.util.Utilities.InhibitOutgoingTraffic(action.inhibit().getVal());
 
                     if (ok) {

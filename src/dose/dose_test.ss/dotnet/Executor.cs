@@ -158,7 +158,7 @@ namespace dose_test_dotnet
             m_controlConnection.Close();
         }
 
-#if removed //Stewart
+#if removed //stewart
         const string DOSE_TEST_UTIL = "dose_test_util.dll";
 
         [DllImport(DOSE_TEST_UTIL, CallingConvention = CallingConvention.Cdecl)]
@@ -447,7 +447,7 @@ namespace dose_test_dotnet
                 case DoseTest.ActionEnum.Enumeration.InhibitOutgoingTraffic:
                     if (m_isActive)
                     {
-#if removed //Stewart
+#if removed //stewart
                         byte success;
                         InhibitOutgoingTraffic(ByteOf(action.Inhibit.Val), out success);
                         Logger.Instance.WriteLine("InhibitOutgoingTraffic set to " + ByteOf(action.Inhibit.Val));

@@ -55,7 +55,7 @@ pragma Warnings ("D"); -- turn off warnings for implicit dereference
 
 package body Executor is
 
-   --  Stewart
+   --  stewart
    --  package C renames Interfaces.C;
 
    --  procedure Inhibit_Outgoing_Traffic
@@ -586,9 +586,9 @@ package body Executor is
                   -- Inhibit : constant C.char := C.char'Val (Boolean'Pos (Action.Ref.Inhibit.Get_Val));
                   -- Is_Inhibited : C.char;
                begin
-                  -- Stewart Inhibit_Outgoing_Traffic (Inhibit, Success);
-                  -- Stewart Inhibit_Outgoing_Traffic_Status (Is_Inhibited);
-                  -- Stewart Logger.Put_Line ("InhibitOutgoingTraffic set to" & Integer'Wide_Image (C.char'Pos (Is_Inhibited)));
+                  -- stewart Inhibit_Outgoing_Traffic (Inhibit, Success);
+                  -- stewart Inhibit_Outgoing_Traffic_Status (Is_Inhibited);
+                  -- stewart Logger.Put_Line ("InhibitOutgoingTraffic set to" & Integer'Wide_Image (C.char'Pos (Is_Inhibited)));
                   null;
                end;
             end if;
