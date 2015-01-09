@@ -7,8 +7,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>388</width>
-    <height>317</height>
+    <width>518</width>
+    <height>379</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -29,6 +29,13 @@
   <layout class="QVBoxLayout" name="verticalLayout" stretch="1,98,0">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QLabel" name="memLabel">
+       <property name="text">
+        <string>mem</string>
+       </property>
+      </widget>
+     </item>
      <item>
       <spacer name="horizontalSpacer_2">
        <property name="orientation">

@@ -31,6 +31,7 @@
 #include "connectionstats.h"
 #include "loggingsettings.h"
 #include "SystemPicturePage.h"
+#include "numberofentities.h"
 #include "RawStatisticsPage.h"
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Typesystem/Utilities.h>
@@ -152,6 +153,10 @@ void DoseMon::TreeItemActivated ( QTreeWidgetItem * item, int /*column*/ )
     else if (item->text(0) == "System Picture")
     {
         newTab = tabWidget->addTab(new SystemPicturePage(this),"System Picture");
+    }
+    else if (item->text(0) == "Entity Statistics")
+    {
+        newTab = tabWidget->addTab(new NumberOfEntities(this),"Entity Statistics");
     }
     else if (item->parent() == NULL)
     {

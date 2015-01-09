@@ -109,12 +109,12 @@ class DouCreateRoutineValue(object):
         
 class DouParameter(object):
     
-    def __init__(self, summary, name, type, value, arrayElements):
+    def __init__(self, summary, name, type, value, array):
         self.summary = summary
         self.name = name
         self.type = type
         self.value = value
-        self.arrayElements = arrayElements
+        self.array = array
         
 def readTextPropery(xml_root, element):
     if (element.find("/") != -1):
@@ -437,20 +437,15 @@ def parse_dou(gSession, dou_xmlfile):
     parameters = xml_root.find("{urn:safir-dots-unit}parameters")
     if parameters is not None:
         for p in parameters:
-            arrayElements = []
-            aes = p.find(".//{urn:safir-dots-unit}arrayElements")
-            if not aes is None:
-                for ae in aes:
-                    arrayElements.append(ae.text)
-        
             m_type = readTextPropery(p, "type")
+            is_array = readTextPropery(p, "arrayElements") is not None or readTextPropery(p, "array") is not None
             parsed.parameters.append( DouParameter( summary_formatter(readTextPropery(p, "summary")), \
                                         readTextPropery(p, "name"), \
                                         m_type, \
                                         readTextPropery(p, "value"), \
-                                        arrayElements) )
+                                        is_array) )
 
-            if len(arrayElements) > 0: 
+            if is_array: 
                 parsed.unique_dependencies.append(gSession.dod_types[gSession.dod_parameters["Index_Type"]].dependency)
 
             if not (m_type in gSession.dod_types): 
@@ -867,7 +862,7 @@ def create_value_parameter_inline(dou, table_line, parent_table_line):
     return dou.createRoutines[parent_table_line - 1].values[table_line - 1].inline
     
 def parameter_is_array(dou, table_line):
-    return trim_false(len(dou.parameters) > 0 and len(dou.parameters[table_line - 1].arrayElements) > 0)
+    return trim_false(len(dou.parameters) > 0 and dou.parameters[table_line - 1].array)
 
 def member_is_array(dou, table_line):
     return trim_false(len(dou.members) > 0 and ((dou.members[table_line - 1].arraySize is not None) or (dou.members[table_line - 1].array is not None) or dou.members[table_line - 1].arraySizeRef))

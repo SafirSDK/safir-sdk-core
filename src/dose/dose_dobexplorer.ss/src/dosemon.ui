@@ -67,6 +67,11 @@
       </item>
       <item>
        <property name="text">
+        <string>Entity Statistics</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
         <string>Remote Connections</string>
        </property>
        <property name="toolTip">

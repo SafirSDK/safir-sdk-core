@@ -74,149 +74,8 @@ EntityStats::EntityStats(QWidget * /*parent*/, const Safir::Dob::Typesystem::Typ
     UpdateStatistics();
 }
 
-struct Arguments
-{
-    Arguments():
-        numStates(0),
-        downgraded(0),
-        realStates(0),
-        ghostStates(0),
-        injectionStates(0)
-    {}
 
-    void ResetOutParam()
-    {
-        numStates = 0;
-        downgraded = 0;
-        realStates = 0;
-        ghostStates = 0;
-        injectionStates = 0;
-    }
-
-    //IN PARAMETERS
-    Safir::Dob::Typesystem::TypeId typeId;
-    EntityStats* _this;
-    int context;
-
-    //OUT PARAMETERS
-    boost::uint64_t numStates;
-    boost::uint64_t downgraded;
-    boost::uint64_t realStates;
-    boost::uint64_t ghostStates;
-    boost::uint64_t injectionStates;
-
-    //TEMPORARIES
-    Safir::Dob::Typesystem::Int64 instanceId;
-    bool getInfo;
-    std::wstring info;
-    bool contextChecked;
-
-    std::string connection;
-    std::string kind;
-    std::string handler;
-    int numSubscribers;
-};
-
-
-
-void Safir::Dob::Internal::StatisticsCollector(Safir::Dob::Internal::EntityTypes& entityTypes, void* arg)
-{
-    Arguments& arguments = *static_cast<Arguments*>(arg);
-    Safir::Dob::Internal::EntityType &entityType = entityTypes.GetType(arguments.typeId);
-
-    StatisticsCollector(entityType,arg);
-}
-
-void Safir::Dob::Internal::StatisticsCollector(Safir::Dob::Internal::EntityType& entityType, void* arg)
-{
-    Arguments& arguments = *static_cast<Arguments*>(arg);
-    for (int context = 0; context < NodeParameters::NumberOfContexts(); ++context)
-    {
-        arguments.ResetOutParam();
-        arguments.context = context;
-
-        // Add context rows if neccessary and check the "show" checkbox
-        arguments._this->AddContextRow(entityType, arguments);
-
-        arguments._this->InitRemoveInstances(arguments);
-
-        // Update the instance table.
-        // (This routine updates  m_removeInstances.)
-        StatisticsCollector(entityType.m_entityStates[context],arg);
-
-        // Delete the instance rows that shouldn't be kept
-        arguments._this->RemoveInstances();
-
-        // Now that we have visited all instances in this context we can produce the overall
-        // context data.
-        arguments._this->AddContextGlobalData(arguments);
-    }
-}
-
-void Safir::Dob::Internal::StatisticsCollector(Safir::Dob::Internal::State& state, void* arg)
-{
-    Arguments& arguments = *static_cast<Arguments*>(arg);
-    DistributionData realState = state.m_realState.GetState();
-
-    if (!realState.IsNoState())
-    {
-        if (realState.GetEntityStateKind() == DistributionData::Real)
-        {
-            arguments.kind = "Real";
-            ++arguments.realStates;
-        }
-        else
-        {
-            arguments.kind = "Ghost";
-            ++arguments.ghostStates;
-        }
-
-        arguments.handler = Safir::Dob::Typesystem::Utilities::ToUtf8(realState.GetHandlerId().ToString());
-    }
-
-    DistributionData injectionState = state.m_injectionState.GetState();
-    if (!injectionState.IsNoState())
-    {
-        ++arguments.injectionStates;
-
-        if (!arguments.kind.empty())
-        {
-            arguments.kind.append(" ");
-        }
-        arguments.kind.append("has Injection");
-    }
-
-    if (arguments.getInfo)
-    {
-        std::wostringstream ostr;
-        ostr << "Instance: " << arguments.instanceId << std::endl;
-
-        if (!realState.IsNoState())
-        {
-            ostr << "RealState: " << realState.Image();
-        }
-
-        if (!injectionState.IsNoState())
-        {
-            ostr << "Injection State: " << injectionState.Image();
-        }
-        arguments.info = ostr.str();
-    }
-
-    if (state.m_connection != NULL)
-    {
-        arguments.connection = state.m_connection->NameWithCounter();
-    }
-    else
-    {
-        arguments.connection = "No owner";
-    }
-
-
-    arguments.numSubscribers = static_cast<int>(state.m_subscriptions.size());
-}
-
-void EntityStats::AddContextRow(Safir::Dob::Internal::EntityType& /*entityType*/, Arguments& arguments)
+void EntityStats::AddContextRow(Safir::Dob::Internal::EntityType& /*entityType*/, Safir::Dob::Internal::Arguments& arguments)
 {
     if (Safir::Dob::Internal::ContextSharedTable::Instance().IsContextShared(arguments.typeId))
     {
@@ -277,7 +136,7 @@ void EntityStats::AddContextRow(Safir::Dob::Internal::EntityType& /*entityType*/
     }
 }
 
-void EntityStats::InitRemoveInstances(Arguments& arguments)
+void EntityStats::InitRemoveInstances(Safir::Dob::Internal::Arguments& arguments)
 {
     const QString contextString = boost::lexical_cast<std::string>(arguments.context).c_str();
 
@@ -313,7 +172,7 @@ void EntityStats::RemoveInstances()
 
 void EntityStats::ProcessState(const Safir::Dob::Typesystem::Int64 instance,
                                 const Safir::Dob::Internal::StateSharedPtr& statePtr,
-                               Arguments& arguments)
+                               Safir::Dob::Internal::Arguments& arguments)
 {
     ++arguments.numStates;
     if (statePtr->IsReleased())
@@ -387,18 +246,8 @@ void EntityStats::ProcessState(const Safir::Dob::Typesystem::Int64 instance,
     instances->item(row,NUM_SUBS_COLUMN)->setText(boost::lexical_cast<std::string>(arguments.numSubscribers).c_str());
 }
 
-void Safir::Dob::Internal::StatisticsCollector(Safir::Dob::Internal::StateContainer& stateContainer, void* arg)
-{
-    Arguments& arguments = *static_cast<Arguments*>(arg);
-    stateContainer.ForEachState(boost::bind(&EntityStats::ProcessState,
-                                            arguments._this,
-                                            _1,
-                                            _2,
-                                            boost::ref(arguments)),
-                                true);
-}
 
-void EntityStats::AddContextGlobalData(Arguments& arguments)
+void EntityStats::AddContextGlobalData(Safir::Dob::Internal::Arguments& arguments)
 {
     const QString contextString = boost::lexical_cast<std::string>(arguments.context).c_str();
     int row = 0;
@@ -431,7 +280,7 @@ void EntityStats::UpdateStatistics()
     information->clear();
     assert(m_removeInstances.empty());
 
-    Arguments arg;
+    Safir::Dob::Internal::Arguments arg;
     arg.typeId = m_typeId;
     arg._this = this;
     StatisticsCollector(Safir::Dob::Internal::EntityTypes::Instance(), &arg);
@@ -452,46 +301,4 @@ void EntityStats::UpdateStatistics()
     contexts->setSortingEnabled(true);
     contexts->setAlternatingRowColors(true);
 }
-
-/* AWI: old
-void EntityStats::UpdateStatistics()
-{
-    instances->setSortingEnabled(false);
-    information->clear();
-    assert(m_removeInstances.empty());
-
-    for (int i = 0; i < instances->rowCount(); ++i)
-    {
-        m_removeInstances.insert(instances->item(i,INSTANCE_ID_COLUMN));
-    }
-
-    Arguments arg;
-    arg.typeId = m_typeId;
-    arg._this = this;
-    StatisticsCollector(Safir::Dob::Internal::EntityTypes::Instance(), &arg);
-
-    numStates->setText(boost::lexical_cast<std::string>(arg.numStates).c_str());
-    numDowngraded->setText(boost::lexical_cast<std::string>(arg.downgraded).c_str());
-    numReal->setText(boost::lexical_cast<std::string>(arg.realStates).c_str());
-    numGhost->setText(boost::lexical_cast<std::string>(arg.ghostStates).c_str());
-    numInjections->setText(boost::lexical_cast<std::string>(arg.injectionStates).c_str());
-
-    while(!m_removeInstances.empty())
-    {
-        const int row = (*m_removeInstances.begin())->row();
-        delete instances->item(row,CHECK_COLUMN);
-        delete instances->item(row,INSTANCE_ID_COLUMN);
-        delete instances->item(row,CONNECTION_COLUMN);
-        delete instances->item(row,ENTITY_STATE_KIND_COLUMN);
-        delete instances->item(row,HANDLER_ID_COLUMN);
-        delete instances->item(row,NUM_SUBS_COLUMN);
-
-        instances->removeRow(row);
-        m_removeInstances.erase(m_removeInstances.begin());
-    }
-
-    instances->resizeColumnsToContents();
-    instances->setSortingEnabled(true);
-}
-*/
 
