@@ -306,21 +306,24 @@ endif()
 
 add_subdirectory(patch_check)
 add_subdirectory(lluf)
-add_subdirectory(logging)
-add_subdirectory(dots)
-add_subdirectory(safir_dou)
-add_subdirectory(dose)
-add_subdirectory(douf)
-add_subdirectory(swre)
-add_subdirectory(foreach)
-add_subdirectory(olib)
-add_subdirectory(dope)
+return()
+#add_subdirectory(logging)
+#add_subdirectory(distribution)
+#add_subdirectory(dots)
+#TODO control
+#add_subdirectory(safir_dou)
+#add_subdirectory(dose)
+#add_subdirectory(douf)
+#add_subdirectory(swre)
+#add_subdirectory(foreach)
+#add_subdirectory(olib)
+#add_subdirectory(dope)
 
-add_subdirectory(tests)
+#add_subdirectory(tests)
 
 
-add_subdirectory(util)
-add_subdirectory(config)
+#add_subdirectory(util)
+#add_subdirectory(config)
 
 INSTALL(EXPORT SafirSDKCore DESTINATION ${SAFIR_INSTALL_DESTINATION_CMAKE}
   COMPONENT Development)

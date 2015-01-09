@@ -26,10 +26,6 @@ else()
   set(BREAKPAD_FOUND False)
 endif()
 
-#google breakpad does not compile with c++11 support. But interface is ABI compatible.
-SET(SAFIR_NO_CXX11 True)
-
-
 #we add our own breakpad build, which will download from svn and build.
 if (NOT BREAKPAD_FOUND)
   add_subdirectory(google-breakpad)
