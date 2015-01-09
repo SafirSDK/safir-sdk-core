@@ -13,7 +13,7 @@
 
 #misc generated files
 precompiled_header_for_cpp.cpp
-safir_sdk_core_version.h
+SafirSdkCoreVersion.h
 Manifest.generated.txt
 
 #CMake stuff
