@@ -1227,7 +1227,7 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
                 // Check if this node considers the nacked fragment to have been
                 // sent but not acked
 
-                bool expectedFragmentNbrIsWithinWindow = false;
+                bool expectedSeqNbrIsWithinWindow = false;
                 dcom_ushort16 ixToAck = TxQ[qIx].GetIxToAck;
                 for(;;)
                 {
@@ -1238,15 +1238,7 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
                     {
                         if (TxQ[qIx].TxMsgArr[ixToAck].SequenceNumber == g_Ack_Queue[g_Ack_Get_ix].SequenceNumber)
                         {
-                            // The sequence number is within the sliding window. Now check if the expected fragment is
-                            // within the sliding window at fragment level.
-                            dcom_ushort16 expectedFragment = g_Ack_Queue[g_Ack_Get_ix].Info;
-
-                            if (expectedFragment >= TxQ[qIx].TxMsgArr[ixToAck].NotAckedFragment &&
-                                expectedFragment <= TxQ[qIx].TxMsgArr[ixToAck].SentFragment)
-                            {
-                                expectedFragmentNbrIsWithinWindow = true;
-                            }
+                            expectedSeqNbrIsWithinWindow = true;
                             break;
                         }
                     }
@@ -1267,7 +1259,7 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
                     }
                 }
 
-                if (expectedFragmentNbrIsWithinWindow)
+                if (expectedSeqNbrIsWithinWindow)
                 {
                     if(!TxQ[qIx].TxMsgArr[TxMsgArr_Ix].IsRetransmitting)
                     {
@@ -1276,14 +1268,14 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
                             PrintDbg("Force Timeout. FragmentNum=%X\n", FragmentNum);
                     }
                 }
-                else
+                else if (TxQ[qIx].RetryCount > 10)
                 {
-                    // We got a NACK for a fragment but the fragment that are expected by the receiver is not within our
-                    // fragment sliding window.
-                    // This is an "impossible" case probably caused by a bug. The solution for now is to simulate that this
-                    // node loses contact with all other nodes, in order to force a resynchronization.
+                    // We got a NACK for a fragmented message but the sequence number is not within our sliding window.
+					// Since we have resent the message a lot of times this is most likely not due to a network duplicated NACK message  
+					// but to an "impossible" case probably caused by a bug. The solution for now is to simulate that this node loses
+					// contact with all other nodes, in order to force a resynchronization.
 
-                    PrintErr(0, "TxThread[%d] Got a NACK with an expected fragment that is already acked! Simulating a node disconnect in order to force resynchronization\n", qIx);
+                    PrintErr(0, "TxThread[%d] Got a NACK for a fragmented message that is already acked! We have already retried 10 times so now we are simulating a node disconnect in order to force resynchronization\n", qIx);
 
                     g_pShm->InhibitOutgoingTraffic = true;
                     DoseOs::Sleep(6000);
@@ -1314,13 +1306,20 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
 
                 bool expectedSeqNbrIsWithinWindow = false;
                 dcom_ushort16 ixToAck = TxQ[qIx].GetIxToAck;
-                while (ixToAck != TxQ[qIx].GetIxToSendHighWatermark)
+                for(;;)
                 {
                     if (TxQ[qIx].TxMsgArr[ixToAck].SequenceNumber == g_Ack_Queue[g_Ack_Get_ix].Info)
                     {
                         expectedSeqNbrIsWithinWindow = true;
                         break;
                     }
+
+                    // Don't step beyond what we have actually sent
+                    if (ixToAck == TxQ[qIx].GetIxToSendHighWatermark)
+                    {
+                        break;
+                    }
+
                     if((ixToAck + 1) >= MAX_XMIT_QUEUE)
                     {
                         ixToAck = 0;
@@ -1340,14 +1339,15 @@ static dcom_ulong32 Check_Pending_Ack_Queue(void)
                             PrintDbg("Force Timeout. FragmentNum=%X\n", FragmentNum);
                     }
                 }
-                else
+                else if (TxQ[qIx].RetryCount > 10)
                 {
                     // We got a NACK for a message but the message that are expected by the receiver is not within our
                     // message sliding window.
-                    // This is an "impossible" case probably caused by a bug. The solution for now is to simulate that this
-                    // node loses contact with all other nodes, in order to force a resynchronization.
+					// Since we have resent the message a lot of times this is most likely not due to a network duplicated NACK message  
+					// but to an "impossible" case probably caused by a bug. The solution for now is to simulate that this node loses
+					// contact with all other nodes, in order to force a resynchronization.
 
-                    PrintErr(0, "TxThread[%d] Got a NACK with an expected message that is already acked! Simulating a node disconnect in order to force resynchronization\n", qIx);
+                    PrintErr(0, "TxThread[%d] Got a NACK with an expected message that is already acked! We have already retried 10 times so now we are simulating a node disconnect in order to force resynchronization\n", qIx);
 
                     g_pShm->InhibitOutgoingTraffic = true;
                     DoseOs::Sleep(6000);
