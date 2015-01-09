@@ -641,7 +641,7 @@ namespace Internal
                 return i;
             }
         }
-        ENSURE(false, << "Failed to GetClosestPriority, probably a programming error by STLRHA or AIWI");
+        ENSURE(false, << "Failed to GetClosestPriority, probably a programming error.");
         return -1;
     }
 

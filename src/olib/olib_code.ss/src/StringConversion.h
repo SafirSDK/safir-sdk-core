@@ -32,9 +32,9 @@ namespace
 {
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
 #  define NO_WCHAR_CONVERSION
-#elif defined(ODBC_IS_IODBC)
+#elif defined(SAFIR_ODBC_IS_IODBC)
 #  define NO_WCHAR_CONVERSION
-#elif defined (ODBC_IS_UNIXODBC)
+#elif defined (SAFIR_ODBC_IS_UNIXODBC)
     //conversion needed
 #else
 #error "Can't work out if conversion is needed"

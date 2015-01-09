@@ -1,4 +1,4 @@
-/******************************************************************************
+/* ****************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 *
@@ -28,14 +28,14 @@ namespace Safir.SwReports
 {
     internal class Library
     {
-        internal const string SWRE_LIBRARY_NAME = "swre_library.dll";
+        internal const string SWRE_LIBRARY_NAME = "swre_library";
 
         //SwreC_StartTraceBackdoory
         [DllImport(SWRE_LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
         internal static extern void SwreC_StartTraceBackdoor(byte [] connectionNameCommonPart,
                                                              byte [] connectionNameInstancePart,
                                                              out byte success);
-        
+
 
         //SwreC_StopTraceBackdoory
         [DllImport(SWRE_LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
@@ -58,20 +58,20 @@ namespace Safir.SwReports
                                                                System.Int32 offset,
                                                                System.Int32 length,
                                                                out byte success);
-        
-        
+
+
         //SwreC_TraceFlush
         [DllImport(SWRE_LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void SwreC_TraceFlush(out byte success);
 
-        
+
         //SwreC_TracePrefixAdd
         [DllImport(SWRE_LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void SwreC_TracePrefixAdd(byte [] prefix,
                                                          out System.Int64 prefixId,
                                                          out byte success);
 
-        
+
         //SwreC_TracePrefixSetEnabled
         [DllImport(SWRE_LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void SwreC_TracePrefixSetEnabled(System.Int64 id,
@@ -82,8 +82,8 @@ namespace Safir.SwReports
         [DllImport(SWRE_LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
         internal static extern byte SwreC_TracePrefixIsEnabled(System.Int64 id);
 
-       
-        
+
+
         //SwreC_SendFatalErrorReport
         [DllImport(SWRE_LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void SwreC_SendFatalErrorReport(byte [] errorCode,
@@ -91,7 +91,7 @@ namespace Safir.SwReports
                                                                byte [] text,
                                                                out byte success);
 
-       
+
         //SwreC_SendErrorReport
         [DllImport(SWRE_LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void SwreC_SendErrorReport(byte [] errorCode,
@@ -99,7 +99,7 @@ namespace Safir.SwReports
                                                           byte [] text,
                                                           out byte success);
 
-      
+
         //SwreC_SendResourceReport
         [DllImport(SWRE_LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void SwreC_SendResourceReport(byte [] resourceId,
@@ -107,15 +107,15 @@ namespace Safir.SwReports
                                                              byte [] text,
                                                              out byte success);
 
-      
+
         //SwreC_SendProgrammingErrorReport
         [DllImport(SWRE_LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void SwreC_SendProgrammingErrorReport(byte [] errorCode,
                                                                      byte [] location,
                                                                      byte [] text,
                                                                      out byte success);
-        
-      
+
+
         //SwreC_SendProgramInfoReport
         [DllImport(SWRE_LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void SwreC_SendProgramInfoReport(byte [] text,

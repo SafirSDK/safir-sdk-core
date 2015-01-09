@@ -26,20 +26,20 @@ ADD_CUSTOM_TARGET(douf_time_ada ALL
                   COMMENT "Building douf_time_ada using gnatmake"
                   VERBATIM)
 
-INSTALL(DIRECTORY program/interface/
-        DESTINATION ${SAFIR_SDK}/ada/douf_time_ada/interface)
+# INSTALL(DIRECTORY program/interface/
+#         DESTINATION ${SAFIR_SDK}/ada/douf_time_ada/interface)
 
-INSTALL(DIRECTORY program/ali/
-        DESTINATION ${SAFIR_SDK}/ada/douf_time_ada/ali)
+# INSTALL(DIRECTORY program/ali/
+#         DESTINATION ${SAFIR_SDK}/ada/douf_time_ada/ali)
         
-if (WIN32)
-   INSTALL(FILES program/lib/libdouf_time_ada.dll
-           DESTINATION ${SAFIR_RUNTIME}/bin/)
-elseif (UNIX)
-   INSTALL(FILES program/lib/libdouf_time_ada.so
-           DESTINATION ${SAFIR_RUNTIME}/lib/)
-endif(WIN32)
+# if (WIN32)
+#    INSTALL(FILES program/lib/libdouf_time_ada.dll
+#            DESTINATION ${SAFIR_RUNTIME}/bin/)
+# elseif (UNIX)
+#    INSTALL(FILES program/lib/libdouf_time_ada.so
+#            DESTINATION ${SAFIR_RUNTIME}/lib/)
+# endif(WIN32)
 
-INSTALL(FILES data/douf_time_ada.gpr
-        DESTINATION ${SAFIR_SDK}/ada/)
+# INSTALL(FILES data/douf_time_ada.gpr
+#         DESTINATION ${SAFIR_SDK}/ada/)
 

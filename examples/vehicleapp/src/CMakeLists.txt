@@ -1,5 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+add_subdirectory(cpp)
+add_subdirectory(dotnet)
+add_subdirectory(java)
 
-ADD_SUBDIRECTORY(VehicleAppCpp)
-ADD_SUBDIRECTORY(VehicleAppCs)
-ADD_SUBDIRECTORY(VehicleAppJava/com.saabgroup.safir.samples.vehicleappjava/src)

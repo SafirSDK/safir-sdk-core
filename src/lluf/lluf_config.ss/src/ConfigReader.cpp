@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2014 (http://www.consoden.se)
 *
 * Created by: Lars Hagström / lars.hagstrom@consoden.se
 *
@@ -26,7 +27,76 @@
 #include "ConfigReaderImpl.h"
 #include "Path.h"
 #include "PathFinders.h"
+#include <boost/algorithm/string.hpp>
+#include <set>
 
+namespace
+{
+    std::vector<Safir::Utilities::Internal::Path> GetDouSearchPath(const Safir::Utilities::Internal::ConfigReader& reader)
+    {
+        std::string param = reader.Typesystem().get<std::string>("dou_search_path");
+        std::vector<std::string> douSearchPath;
+        boost::split(douSearchPath,
+                     param,
+                     boost::is_any_of(","));
+        std::vector<Safir::Utilities::Internal::Path> checked;
+        for (std::vector<std::string>::iterator it = douSearchPath.begin();
+             it != douSearchPath.end(); ++it)
+        {
+            Safir::Utilities::Internal::Path p(*it);
+            if (p.Exists())
+            {
+                checked.push_back(p);
+            }
+        }
+        return checked;
+    }
+
+
+    //TODO: consider making this function able to detect dependency errors.
+    //It should really not be possible to have circular dependencies
+    //and it should only be possible to depend on things that have already
+    //been declared in typesystem.ini, i.e. no dependencies on something that
+    //is declared further down in the file.
+    void GetDouDependenciesInternal(const Safir::Utilities::Internal::ConfigReader& reader,
+                                    const std::string& moduleName,
+                                    std::set<std::string>& deps)
+    {
+        try
+        {
+            const std::string temp = reader.Typesystem().get<std::string>(moduleName + ".dependencies");
+            std::set<std::string> splitDeps;
+            boost::split(splitDeps,
+                         temp,
+                         boost::is_any_of(","));
+
+            for (std::set<std::string>::iterator it = splitDeps.begin();
+                 it != splitDeps.end(); ++it)
+            {
+                //ignore empties
+                if (it->empty())
+                {
+                    continue;
+                }
+
+                if(*it == moduleName)
+                {
+                    throw std::logic_error("Module is depending on itself: " + moduleName);
+                }
+
+                if(deps.insert(*it).second)
+                {
+                    GetDouDependenciesInternal(reader, *it, deps);
+                }
+            }
+        }
+        catch (boost::property_tree::ptree_bad_path&)
+        {
+            throw std::logic_error("Failed to resolve dependencies of dou module " + moduleName);
+        }
+    }
+
+}
 namespace Safir
 {
 namespace Utilities
@@ -65,7 +135,7 @@ namespace Internal
     {
         return Safir::Utilities::Internal::ExpandEnvironment(str);
     }
-   
+
     std::string Expansion::ExpandSpecial(const std::string& str)
     {
         return Safir::Utilities::Internal::ExpandSpecial(str);
@@ -75,10 +145,14 @@ namespace Internal
     {
         return Safir::Utilities::Internal::GetSafirInstanceSuffix();
     }
-    
-    std::vector<std::string> ConfigHelper::GetDouDirectories(const ConfigReader& reader)
+
+
+
+    std::vector<std::pair<std::string,std::string> > ConfigHelper::GetDouDirectories(const ConfigReader& reader)
     {
-        std::vector<std::string> directories;
+        std::vector<std::pair<std::string,std::string> > directories;
+
+        const std::vector<Path> dou_search_path = GetDouSearchPath(reader);
 
         // Loop through all sections in typesystem.ini
         for (boost::property_tree::ptree::const_iterator it = reader.Typesystem().begin();
@@ -89,10 +163,39 @@ namespace Internal
 
             if (isSection)
             {
-                directories.push_back(it->second.get<std::string>("dou_directory"));
+                try
+                {
+                    directories.push_back(std::make_pair(it->first, it->second.get<std::string>("dou_directory")));
+                }
+                catch (boost::property_tree::ptree_bad_path&)
+                {
+                    bool found = false;
+                    for (std::vector<Path>::const_iterator sit = dou_search_path.begin();
+                         sit != dou_search_path.end(); ++sit)
+                    {
+                        Path p = *sit / it->first;
+                        if (p.Exists())
+                        {
+                            directories.push_back(std::make_pair(it->first, p.str()));
+                            found = true;
+                        }
+                    }
+
+                    if (!found)
+                    {
+                        directories.push_back(std::make_pair(it->first, "<not found>"));
+                    }
+                }
             }
         }
         return directories;
+    }
+
+    std::set<std::string> ConfigHelper::GetDouDependencies(const ConfigReader& reader, const std::string& moduleName)
+    {
+        std::set<std::string> deps;
+        GetDouDependenciesInternal(reader,moduleName,deps);
+        return deps;
     }
 
 }

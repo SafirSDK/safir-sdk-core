@@ -1,24 +1,14 @@
-cmake_minimum_required(VERSION 2.8)
+ADD_EXECUTABLE(backdoor main.cpp)
 
-project(swre_backdoor CXX)
+TARGET_LINK_LIBRARIES(backdoor PRIVATE
+  dose_cpp
+  safir_generated-Core-cpp
+  ${Boost_PROGRAM_OPTIONS_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY})
 
-INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
-
-FILE(GLOB sources *.cpp)
-
-ADD_EXECUTABLE(backdoor ${sources})
-
-FIND_PACKAGE(Boost COMPONENTS program_options system)
-TARGET_LINK_LIBRARIES(backdoor ${Boost_LIBRARIES})
-
-if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(backdoor dots_cpp dots_generated-Safir-cpp dots_generated-cpp dose_cpp)
+#Needed on windows
+if (MSVC)
+  TARGET_LINK_LIBRARIES(backdoor PRIVATE ${Boost_DATE_TIME_LIBRARY})
 endif()
 
-INSTALL(TARGETS backdoor
-        RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-        LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-        ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
-
-
-INSTALL_DEBUG_INFO(backdoor)
+SAFIR_INSTALL(TARGETS backdoor)

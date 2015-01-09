@@ -1,27 +1,12 @@
-cmake_minimum_required(VERSION 2.8)
+ADD_LIBRARY(swre_interface_cpp SHARED BackdoorKeeper.cpp CrashReporter.cpp SwReport.cpp Tracer.cpp TraceStreamBuffer.cpp)
 
-project(swre_interface_cpp CXX)
+TARGET_LINK_LIBRARIES(swre_interface_cpp PRIVATE 
+  swre_library
+  logging_cpp
+  ${Boost_REGEX_LIBRARY}
+  
+  PUBLIC
+  dose_cpp
+  safir_generated-Core-cpp)
 
-INCLUDE_DIRECTORIES(.)
-
-INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
-
-FILE(GLOB_RECURSE headers *.h)
-FILE(GLOB sources *.cpp)
-
-ADD_LIBRARY(swre_interface_cpp SHARED ${sources} ${headers})
-
-if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(swre_interface_cpp dose_cpp swre_library douf_time_cpp logging_cpp)
-endif()
-
-INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
-        PATTERN ".svn" EXCLUDE
-        PATTERN "*~" EXCLUDE)
-
-INSTALL(TARGETS swre_interface_cpp
-        RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-        LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-        ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
-
-INSTALL_DEBUG_INFO(swre_interface_cpp)
+SAFIR_INSTALL(TARGETS swre_interface_cpp)

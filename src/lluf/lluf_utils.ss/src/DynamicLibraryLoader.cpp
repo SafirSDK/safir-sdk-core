@@ -81,6 +81,46 @@ namespace Utilities
 #endif
         }
 
+        void Load(const std::string& libraryName, const std::string& path, const bool global)
+        {
+#if defined(linux) || defined(__linux) || defined(__linux__)
+            const std::string filename = path + "/" + std::string("lib") + libraryName + ".so";
+
+            //clear any previous errors
+            dlerror();
+
+            m_handle = dlopen(filename.c_str(), RTLD_NOW | (global ? RTLD_GLOBAL : 0));
+
+            if (m_handle == NULL)
+            {
+                throw std::logic_error("Failed to load library '"
+                                       + libraryName
+                                       + "' (tried loading file with name '"
+                                       + filename +"'). dlerror() info:\n" + dlerror());
+            }
+
+#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+            (global); //unreferenced parameter
+
+            std::string filename = path;
+            if (path.back() != '\\' && path.back() != '/')
+            {
+                filename += "\\";
+            }
+            filename += libraryName + ".dll";
+            m_handle = LoadLibraryA(filename.c_str());
+
+            if (m_handle == NULL)
+            {
+                throw std::logic_error("Failed to load library '"
+                                       + libraryName
+                                       + "' (tried loading file with name '"
+                                       + filename +"')");
+            }
+#endif
+        }
+
+
         void Unload()
         {
 #if defined(linux) || defined(__linux) || defined(__linux__)
@@ -142,6 +182,20 @@ namespace Utilities
             throw std::logic_error("A library has already been loaded.");
         }
         m_impl->Load(libraryName, global);
+        m_unloadOnDestruction = unloadOnDestruction;
+    }
+
+
+    void DynamicLibraryLoader::Load(const std::string& libraryName,
+                                    const std::string& path,
+                                    const bool unloadOnDestruction,
+                                    const bool global)
+    {
+        if (m_impl->Loaded())
+        {
+            throw std::logic_error("A library has already been loaded.");
+        }
+        m_impl->Load(libraryName, path, global);
         m_unloadOnDestruction = unloadOnDestruction;
     }
     

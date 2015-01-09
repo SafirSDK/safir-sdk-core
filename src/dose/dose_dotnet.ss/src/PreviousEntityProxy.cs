@@ -1,4 +1,4 @@
-/******************************************************************************
+/* ****************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 *
@@ -126,9 +126,6 @@ namespace Safir.Dob
                 if (m_previousBlobWithChangeInfo == System.IntPtr.Zero)
                 {
                     byte success;
-#if FUNC_PTR_WORKAROUND
-                    System.IntPtr m_blobDeleter;
-#endif
                     Interface.DoseC_Diff(m_previousState,
                                          m_currentState,
                                          Interface.ByteOf(false), //wantCurrent
@@ -140,9 +137,7 @@ namespace Safir.Dob
                     if (!Interface.BoolOf(success))
                     {
                         m_previousBlobWithChangeInfo = System.IntPtr.Zero;
-#if ! FUNC_PTR_WORKAROUND
                         m_blobDeleter = null;
-#endif
                         Typesystem.LibraryExceptions.Instance.Throw();
                     }
                 }
@@ -180,11 +175,7 @@ namespace Safir.Dob
             {
                 CheckNotDisposed();
                 System.IntPtr blob;
-#if FUNC_PTR_WORKAROUND
-                System.IntPtr blobDeleter;
-#else
                 Interface.DoseC_BlobDeleter blobDeleter;
-#endif
                 byte success;
                 Interface.DoseC_GetConnectionInfo(m_previousState, out blob, out blobDeleter, out success);
 
@@ -199,11 +190,7 @@ namespace Safir.Dob
                 }
                 finally
                 {
-#if FUNC_PTR_WORKAROUND
-                    Safir.Dob.Typesystem.Internal.InternalOperations.Delete(ref blob);
-#else
                     blobDeleter(ref blob);
-#endif
                 }
             }
         }
@@ -253,9 +240,6 @@ namespace Safir.Dob
                 if (m_previousBlobWithChangeInfo == System.IntPtr.Zero)
                 {
                     byte success;
-#if FUNC_PTR_WORKAROUND
-                    System.IntPtr m_blobDeleter;
-#endif
                     Interface.DoseC_Diff(m_previousState,
                                          m_currentState,
                                          Interface.ByteOf(false), //wantCurrent
@@ -267,9 +251,7 @@ namespace Safir.Dob
                     if (!Interface.BoolOf(success))
                     {
                         m_previousBlobWithChangeInfo = System.IntPtr.Zero;
-#if ! FUNC_PTR_WORKAROUND
                         m_blobDeleter = null;
-#endif
                         Typesystem.LibraryExceptions.Instance.Throw();
                     }
                 }
@@ -368,17 +350,10 @@ namespace Safir.Dob
             if (!disposed)
             {
                 disposed = true;
-#if FUNC_PTR_WORKAROUND
-                if (m_previousBlobWithChangeInfo != System.IntPtr.Zero)
-                {
-                    Safir.Dob.Typesystem.Internal.InternalOperations.Delete(ref m_previousBlobWithChangeInfo);
-                }
-#else
                 if (m_blobDeleter != null)
                 {
                     m_blobDeleter(ref m_previousBlobWithChangeInfo);
                 }
-#endif
             }
         }
 
@@ -411,10 +386,7 @@ namespace Safir.Dob
         private readonly System.IntPtr m_previousBlob;
         private readonly System.IntPtr m_previousState;
         private System.IntPtr m_previousBlobWithChangeInfo = System.IntPtr.Zero;
-
-#if !FUNC_PTR_WORKAROUND
         private Interface.DoseC_BlobDeleter m_blobDeleter = null;
-#endif
         private readonly bool m_timestampDiff;
         #endregion
     }

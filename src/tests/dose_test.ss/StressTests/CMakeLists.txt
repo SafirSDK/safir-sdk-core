@@ -1,0 +1,17 @@
+ADD_SUBDIRECTORY(EntityIntegrityChecker)
+ADD_SUBDIRECTORY(EntityReceptionVerifier)
+ADD_SUBDIRECTORY(EntityStresser)
+
+ADD_SUBDIRECTORY(MessageLatencies)
+ADD_SUBDIRECTORY(MessageStresser)
+ADD_SUBDIRECTORY(MultiPingPong)
+
+
+ADD_SUBDIRECTORY(RequestLatencies)
+ADD_SUBDIRECTORY(RequestPingPong)
+ADD_SUBDIRECTORY(RequestStresser)
+
+ADD_SUBDIRECTORY(SignalTest)
+ADD_SUBDIRECTORY(SplitJoinStresser)
+ADD_SUBDIRECTORY(SplitJoinTest)
+

@@ -1,4 +1,4 @@
-/******************************************************************************
+/* ****************************************************************************
 *
 * Copyright Saab AB, 2005-2013 (http://safir.sourceforge.net)
 *
@@ -107,7 +107,6 @@ namespace Safir.Dob.Typesystem
         void IList<T>.Insert(int index, T item)
         {
             throw new SoftwareViolationException("Array containers cannot change size!");
-            //TODO: maybe this should drop one off the end instead?
         }
 
         void IList<T>.RemoveAt(int index)

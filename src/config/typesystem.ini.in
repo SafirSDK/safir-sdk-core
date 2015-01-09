@@ -1,0 +1,16 @@
+;Each section describes one location where dou and dom files are loaded from.
+;If a filename is found in multiple locations the _last one_ is used.
+
+;Number of megabytes of shared memory that will be allocated by dots kernel.
+dots_shared_memory_size=10
+
+;Default directory to look for dou files in. Can be overridden in each section.
+dou_search_path=@DEFAULT_DOU_SEARCH_PATH@
+
+;Comma separated search path for dots_generated-xxx-java.jar files.
+java_search_path=@DEFAULT_JAVA_SEARCH_PATH@
+
+[Core]
+;This section contains the information needed to load the safir_generated-Core-xxx libraries and its dou files.
+kind=library
+dependencies=

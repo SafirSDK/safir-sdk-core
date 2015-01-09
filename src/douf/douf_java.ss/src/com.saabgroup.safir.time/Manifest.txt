@@ -1,1 +1,1 @@
-Class-Path: dots_java.jar
+Class-Path: dots_java.jar safir_generated-Core-java

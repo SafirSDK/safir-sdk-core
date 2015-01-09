@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>OlibTest.TestObject</name>
+    <baseClass>Object</baseClass>
+    <members>
+        <member>
+            <name>StringName</name>
+            <type>String</type>
+            <maxLength>100</maxLength>
+        </member>
+        <member>
+            <name>StringDescription</name>
+            <type>String</type>
+            <maxLength>200</maxLength>
+        </member> 
+        <member>
+            <name>Int32</name>
+            <type>Int32</type>
+        </member>  
+        <member>
+            <name>Int64</name>
+            <type>Int64</type>
+        </member>
+        <member>
+            <name>Float32</name>
+            <type>Float32</type>
+        </member>
+        <member>
+            <name>Float64</name>
+            <type>Float64</type>
+        </member>
+        <member>
+            <name>Bool</name>
+            <type>Boolean</type>
+        </member>
+    </members>
+</class>

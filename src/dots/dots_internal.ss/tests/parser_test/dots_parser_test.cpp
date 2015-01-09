@@ -213,11 +213,8 @@ bool RunSingleTest(const TestCase& test)
 
 bool TestInfoFromPath(const boost::filesystem::path& testDir, TestCase& test)
 {
-#if !defined(BOOST_FILESYSTEM_VERSION) || (BOOST_FILESYSTEM_VERSION == 2)
-    std::string name=testDir.filename();
-#else
     std::string name=testDir.filename().string();
-#endif
+
     size_t ix=name.find_first_of('.');
     if (ix==name.npos || ix==0)
     {

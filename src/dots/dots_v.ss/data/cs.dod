@@ -132,14 +132,18 @@ namespace @_NAMESPACE_@
 @@-- PROPERTY
 @@--
 
-@@IF@@ @_EXIST:CLASSSUMMARY_@
     /// <summary>
+@@IF@@ @_EXIST:CLASSSUMMARY_@
     /// @_REPLACE_ALL(\n/\n    /// ):CLASSSUMMARY_@
-    /// </summary>
+@@ELSE@@
+    /// No description given in dou file.
 @@END_IF@@
+    /// </summary>
     public class @_CLASS_@
     {
-
+        /// <summary>
+        /// Check if a certain object has this property mapped on it.
+        /// </summary>
         public static bool HasProperty(Safir.Dob.Typesystem.Object obj)
         {
             return Safir.Dob.Typesystem.Operations.HasProperty(obj.GetTypeId(), ClassTypeId);
@@ -149,19 +153,23 @@ namespace @_NAMESPACE_@
 
 @@TABLE@@
 @@IF@@ @_EXIST:MEMBER_@
-        //@_MEMBER_@
 @@IF@@ @_EXIST:MEMBERISARRAY_@
+        /// <summary>
+        /// Get the array size of the @_MEMBER_@ member.
+        /// </summary>
         public static System.Int32 @_MEMBER_@ArraySize(Safir.Dob.Typesystem.Object obj)
         {
             Init();
             return Safir.Dob.Typesystem.Properties.GetArraySize(obj.GetTypeId(), ClassTypeId, @_LOWER:MEMBER_@MemberIndex);
         }
 
-@@IF@@ @_EXIST:MEMBERSUMMARY_@
         /// <summary>
+        /// Set a value in the @_MEMBER_@ array property member.
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+        /// <para/>
         /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
-        /// </summary>
 @@END_IF@@
+        /// </summary>
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
         public static void Set@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index, @_MEMBERTYPE_@.Enumeration val)
         {
@@ -169,6 +177,13 @@ namespace @_NAMESPACE_@
             Safir.Dob.Typesystem.Properties.SetEnum(obj, ClassTypeId, (System.Int32) val, @_LOWER:MEMBER_@MemberIndex, index);
         }
 
+        /// <summary>
+        /// Set a value in the @_MEMBER_@ enumeration array property member using an integer ordinal.
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+        /// <para/>
+        /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
+@@END_IF@@
+        /// </summary>        
         public static void SetOrdinal@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index, System.Int32 ordinal)
         {
             Init();
@@ -182,35 +197,64 @@ namespace @_NAMESPACE_@
         }
 @@END_IF@@
 
+        /// <summary>
+        /// Set an index in the @_MEMBER_@ array property member to null.
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+        /// <para/>
+        /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
+@@END_IF@@
+        /// </summary>        
         public static void SetNull@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index)
         {
             Init();
             Safir.Dob.Typesystem.Properties.SetNull(obj, ClassTypeId, @_LOWER:MEMBER_@MemberIndex, index);
         }
 
+        /// <summary>
+        /// Check if an index in the @_MEMBER_@ array property member is null.
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+        /// <para/>
+        /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
+@@END_IF@@
+        /// </summary>        
         public static bool IsNull@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index)
         {
             Init();
             return Safir.Dob.Typesystem.Properties.IsNull(obj, ClassTypeId, @_LOWER:MEMBER_@MemberIndex, index);
         }
 
+        /// <summary>
+        /// Check if an index in the @_MEMBER_@ array property member is changed.
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+        /// <para/>
+        /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
+@@END_IF@@
+        /// </summary>        
         public static bool IsChanged@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index)
         {
             Init();
             return Safir.Dob.Typesystem.Properties.IsChanged(obj, ClassTypeId, @_LOWER:MEMBER_@MemberIndex, index);
         }
 
+        /// <summary>
+        /// Check if an index in the @_MEMBER_@ property member is read only, i.e. it is mapped to null or to a parameter.
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+        /// <para/>
+        /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
+@@END_IF@@
+        /// </summary>
         public static bool IsReadOnly@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index)
         {
             Init();
             return Safir.Dob.Typesystem.Properties.IsReadOnly(obj, ClassTypeId, @_LOWER:MEMBER_@MemberIndex, index);
         }
 
-@@IF@@ @_EXIST:MEMBERSUMMARY_@
         /// <summary>
+        /// Get the value of the @_MEMBER_@ array property member.
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
         /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
-        /// </summary>
 @@END_IF@@
+        /// </summary>
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Object
         public static @_MEMBERTYPE_@ Get@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index)
         {
@@ -232,6 +276,12 @@ namespace @_NAMESPACE_@
             return (@_MEMBERTYPE_@.Enumeration) val;
         }
 
+        /// <summary>
+        /// Get the ordinal value of the @_MEMBER_@ array property member.
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+        /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
+@@END_IF@@
+        /// </summary>
         public static System.Int32 GetOrdinal@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index)
         {
             System.Int32 val;
@@ -250,8 +300,14 @@ namespace @_NAMESPACE_@
 @@END_IF@@
 @@ELSE@@
         /// <summary>
+        /// Set the value of the @_MEMBER_@ property member.
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+        /// <para/>
         /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
+@@END_IF@@
         /// </summary>
+        /// <param name="obj">The object in which to change the value</param>
+        /// <param name="val">The value to set</param>
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
         public static void Set@_MEMBER_@(Safir.Dob.Typesystem.Object obj, @_MEMBERTYPE_@.Enumeration val)
         {
@@ -259,6 +315,13 @@ namespace @_NAMESPACE_@
             Safir.Dob.Typesystem.Properties.SetEnum(obj, ClassTypeId, (System.Int32) val, @_LOWER:MEMBER_@MemberIndex, 0);
         }
 
+        /// <summary>
+        /// Set the value of the @_MEMBER_@ enumeration member using an integer ordinal.
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+        /// <para/>
+        /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
+@@END_IF@@
+        /// </summary>
         public static void SetOrdinal@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 ordinal)
         {
             Init();
@@ -272,34 +335,65 @@ namespace @_NAMESPACE_@
         }
 @@END_IF@@
 
+        /// <summary>
+        /// Set the @_MEMBER_@ property member to null.
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+        /// <para/>
+        /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
+@@END_IF@@
+        /// </summary>
         public static void SetNull@_MEMBER_@(Safir.Dob.Typesystem.Object obj)
         {
             Init();
             Safir.Dob.Typesystem.Properties.SetNull(obj, ClassTypeId, @_LOWER:MEMBER_@MemberIndex, 0);
         }
 
+        /// <summary>
+        /// Check if the @_MEMBER_@ property member is null.
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+        /// <para/>
+        /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
+@@END_IF@@
+        /// </summary>
         public static bool IsNull@_MEMBER_@(Safir.Dob.Typesystem.Object obj)
         {
             Init();
             return Safir.Dob.Typesystem.Properties.IsNull(obj, ClassTypeId, @_LOWER:MEMBER_@MemberIndex, 0);
         }
 
+        /// <summary>
+        /// Check if the @_MEMBER_@ property member is changed.
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+        /// <para/>
+        /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
+@@END_IF@@
+        /// </summary>
         public static bool IsChanged@_MEMBER_@(Safir.Dob.Typesystem.Object obj)
         {
             Init();
             return Safir.Dob.Typesystem.Properties.IsChanged(obj, ClassTypeId, @_LOWER:MEMBER_@MemberIndex, 0);
         }
 
+        /// <summary>
+        /// Check if the @_MEMBER_@ property member read only, i.e. it is mapped to null or to a parameter.
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+        /// <para/>
+        /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
+@@END_IF@@
+        /// </summary>
         public static bool IsReadOnly@_MEMBER_@(Safir.Dob.Typesystem.Object obj)
         {
             Init();
             return Safir.Dob.Typesystem.Properties.IsReadOnly(obj, ClassTypeId, @_LOWER:MEMBER_@MemberIndex, 0);
         }
-@@IF@@ @_EXIST:MEMBERSUMMARY_@
+
         /// <summary>
+        /// Get the value of the @_MEMBER_@ property member.
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+        /// <para/>
         /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
-        /// </summary>
 @@END_IF@@
+        /// </summary>
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Object
         public static @_MEMBERTYPE_@ Get@_MEMBER_@(Safir.Dob.Typesystem.Object obj)
         {
@@ -321,6 +415,13 @@ namespace @_NAMESPACE_@
             return (@_MEMBERTYPE_@.Enumeration) val;
         }
 
+        /// <summary>
+        /// Get the ordinal value of the @_MEMBER_@ property member.
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+        /// <para/>
+        /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
+@@END_IF@@
+        /// </summary>
         public static System.Int32 GetOrdinal@_MEMBER_@(Safir.Dob.Typesystem.Object obj)
         {
             System.Int32 val;
@@ -343,7 +444,9 @@ namespace @_NAMESPACE_@
 @@END_TABLE@@
         #endregion
 
-        //Type id for @_CLASS_@
+        /// <summary>
+        /// Type id for @_CLASS_@
+        /// </summary>        
         public static System.Int64 ClassTypeId = @_TYPEID_@;
 
         #region Indices
@@ -376,15 +479,20 @@ namespace @_NAMESPACE_@
 @@-- CLASS
 @@--
 
-@@IF@@ @_EXIST:CLASSSUMMARY_@
     /// <summary>
+@@IF@@ @_EXIST:CLASSSUMMARY_@
     /// @_REPLACE_ALL(\n/\n    /// ):CLASSSUMMARY_@
-    /// </summary>
+@@ELSE@@
+    /// No description given in dou file.
 @@END_IF@@
+    /// </summary>
     public class @_CLASS_@ : @_BASECLASS_@, ICloneable
     {
         #region Constructors
 
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
         public @_CLASS_@()
             : base()
         {
@@ -416,11 +524,13 @@ namespace @_NAMESPACE_@
         #region Create Routines
 
 @@TABLE@@
-@@IF@@ @_EXIST:CREATEROUTINESUMMARY_@
         /// <summary>
+@@IF@@ @_EXIST:CREATEROUTINESUMMARY_@
         /// @_REPLACE_ALL(\n/\n        /// ):CREATEROUTINESUMMARY_@
-        /// </summary>
+@@ELSE@@
+        /// No description given in dou file.
 @@END_IF@@
+        /// </summary>
 @@IF@@ @_EXIST:CREATEPARAMETER_@
         public static @_NAMESPACE_@.@_CLASS_@ Create@_CREATEROUTINE_@ (
 @@ELSE@@
@@ -519,11 +629,17 @@ namespace @_NAMESPACE_@
             return new @_CLASS_@(this);
         }
 
+        /// <summary>
+        /// <see cref="Safir.Dob.Typesystem.Object.Clone()"/>
+        /// </summary>
         public new @_CLASS_@ Clone()
         {
             return (@_CLASS_@)(((ICloneable)this).Clone());
         }
 
+        /// <summary>
+        /// Copy constructor.
+        /// </summary>
         protected @_CLASS_@(@_CLASS_@ other)
             : base(other)
         {
@@ -556,8 +672,10 @@ namespace @_NAMESPACE_@
 
 @@TABLE@@
 @@IF@@ @_EXIST:PARAMETER_@
-        //@_PARAMETER_@
 @@IF@@ @_EXIST:PARAMETERISARRAY_@
+        /// <summary>
+        /// Get the array size of the @_PARAMETER_@ member.
+        /// </summary>
         public static System.Int32 @_PARAMETER_@ArraySize
         {
             get
@@ -567,11 +685,13 @@ namespace @_NAMESPACE_@
             }
         }
 
-@@IF@@ @_EXIST:PARAMETERSUMMARY_@
         /// <summary>
+        /// Get the value of the @_PARAMETER_@ array parameter.
+@@IF@@ @_EXIST:PARAMETERSUMMARY_@
+        /// <para/>
         /// @_REPLACE_ALL(\n/\n        /// ):PARAMETERSUMMARY_@
-        /// </summary>
 @@END_IF@@
+        /// </summary>        
 @@IF@@ @_UNIFORM_PARAMETERTYPE_@=Object
         public static @_PARAMETERTYPE_@ @_PARAMETER_@ (System.Int32 index)
         {
@@ -604,6 +724,13 @@ namespace @_NAMESPACE_@
         }
 @@END_IF@@
 @@ELSE@@
+        /// <summary>
+        /// Get the value of the @_PARAMETER_@ parameter.
+@@IF@@ @_EXIST:PARAMETERSUMMARY_@
+        /// <para/>
+        /// @_REPLACE_ALL(\n/\n        /// ):PARAMETERSUMMARY_@
+@@END_IF@@
+        /// </summary>
 @@IF@@ @_UNIFORM_PARAMETERTYPE_@=Object
         public static @_PARAMETERTYPE_@ @_PARAMETER_@
         {
@@ -657,7 +784,13 @@ namespace @_NAMESPACE_@
 
 @@TABLE@@
 @@IF@@ @_EXIST:MEMBER_@
-        //@_MEMBER_@
+        /// <summary>
+        /// Get the member index of the @_MEMBER_@ member
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+        /// <para/>
+        /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
+@@END_IF@@
+        /// </summary>        
         public static System.Int32 @_MEMBER_@MemberIndex
         {
             get
@@ -668,6 +801,13 @@ namespace @_NAMESPACE_@
         }
 
 @@IF@@ @_EXIST:MEMBERISSTRING_@
+        /// <summary>
+        /// Get the maximum string length of the @_MEMBER_@ member
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+        /// <para/>
+        /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
+@@END_IF@@
+        /// </summary>        
         public static System.Int32 @_MEMBER_@MaxStringLength
         {
             get
@@ -679,6 +819,13 @@ namespace @_NAMESPACE_@
 
 @@END_IF@@
 @@IF@@ @_EXIST:MEMBERISARRAY_@
+        /// <summary>
+        /// Get the array size of the @_MEMBER_@ member
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+        /// <para/>
+        /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
+@@END_IF@@
+        /// </summary>        
         public static System.Int32 @_MEMBER_@ArraySize
         {
             get
@@ -689,11 +836,13 @@ namespace @_NAMESPACE_@
         }
 
 @@END_IF@@
-@@IF@@ @_EXIST:MEMBERSUMMARY_@
         /// <summary>
+        /// Get the value of the @_MEMBER_@ member
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+        /// <para/>
         /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
-        /// </summary>
 @@END_IF@@
+        /// </summary>        
 @@IF@@ @_EXIST:MEMBERISARRAY_@
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
         public @_MEMBERTYPE_@.EnumerationContainerArray @_MEMBER_@
@@ -722,9 +871,14 @@ namespace @_NAMESPACE_@
 
         #region TypeId, Instance and EntityId
 
-        //Type id for @_CLASS_@
+        /// <summary>
+        /// Type id for the class @_CLASS_@
+        /// </summary>
         public new const System.Int64 ClassTypeId = @_TYPEID_@;
 
+        /// <summary>
+        /// Get the type id of this object.
+        /// </summary>
         public override System.Int64 GetTypeId()
         {
             return ClassTypeId;
@@ -734,6 +888,13 @@ namespace @_NAMESPACE_@
 
         #region Change flags
 
+        /// <summary>
+        /// Check if any member of this object is changed.
+        /// <para>
+        /// This method will recursively check if any member of the object has its change flag set.
+        /// </para>
+        /// </summary>
+        /// <returns>True if any member has changed.</returns>
         override public bool IsChanged()
         {
             return
@@ -745,6 +906,10 @@ namespace @_NAMESPACE_@
                 base.IsChanged();
         }
 
+        /// <summary>
+        /// Recursively set change flags in all members of this object.
+        /// </summary>
+        /// <param name="changed">The value to set the change flags to.</param>
         override public void SetChanged(bool changed)
         {
             base.SetChanged(changed);
@@ -759,6 +924,10 @@ namespace @_NAMESPACE_@
 
         #region Blob serialization and deserialization
 
+        /// <summary>
+        /// Create a(n) @_CLASS_@ from a blob.
+        /// </summary>
+        /// <param name="blob">The blob to deserialize.</param>
         public @_CLASS_@(System.IntPtr blob)
             : base(blob)
         {
@@ -793,6 +962,9 @@ namespace @_NAMESPACE_@
 @@END_TABLE@@
         }
 
+        /// <summary>
+        /// <see cref="Safir.Dob.Typesystem.Object.CalculateBlobSize()"/>
+        /// </summary>
         override public System.Int32 CalculateBlobSize()
         {
             Init();
@@ -865,6 +1037,9 @@ namespace @_NAMESPACE_@
             return size;
         }
 
+        /// <summary>
+        /// <see cref="Safir.Dob.Typesystem.Object.WriteToBlob(System.IntPtr, ref System.IntPtr)"/>
+        /// </summary>
         override public void WriteToBlob(System.IntPtr blob, ref System.IntPtr beginningOfUnused)
         {
             Init();
@@ -917,6 +1092,9 @@ namespace @_NAMESPACE_@
 
         #region Reflection part
 
+        /// <summary>
+        /// <see cref="Safir.Dob.Typesystem.Object.GetMember(System.Int32, System.Int32)"/>
+        /// </summary>
         public override Safir.Dob.Typesystem.ContainerBase GetMember(System.Int32 member,
                                                                      System.Int32 index)
         {
@@ -1038,11 +1216,14 @@ namespace @_NAMESPACE_@
         #endregion
     }
 
-    //
-    // @_CLASS_@Container
-    //
+    /// <summary>
+    /// Container for members of type @_CLASS_@
+    /// </summary>
     public class @_CLASS_@Container : Safir.Dob.Typesystem.ObjectContainerImpl<@_CLASS_@>, ICloneable
     {
+        /// <summary>
+        /// Constructor.
+        /// </summary>
         public @_CLASS_@Container() : base() { }
 
         #region Cloning
@@ -1052,22 +1233,30 @@ namespace @_NAMESPACE_@
             return new @_CLASS_@Container(this);
         }
 
+        /// <summary>
+        /// <see cref="Safir.Dob.Typesystem.ContainerBase.Clone()"/>
+        /// </summary>
         public new @_CLASS_@Container Clone()
         {
             return (@_CLASS_@Container)((ICloneable)this).Clone();
         }
 
-        //Copy constructor for use by Clone
+        /// <summary>
+        /// Copy constructor for use by Clone
+        /// </summary>
         protected @_CLASS_@Container(@_CLASS_@Container other) : base(other) { }
 
         #endregion
     }
 
-    //
-    // @_CLASS_@ContainerArray
-    //
+    /// <summary>
+    /// Container for array members of type @_CLASS_@
+    /// </summary>
     public class @_CLASS_@ContainerArray : Safir.Dob.Typesystem.ArrayContainer<@_CLASS_@Container>, ICloneable
     {
+        /// <summary>
+        /// Constructor.
+        /// </summary>
         public @_CLASS_@ContainerArray(System.Int32 size) : base(size) { }
 
         #region Cloning
@@ -1077,12 +1266,17 @@ namespace @_NAMESPACE_@
             return new @_CLASS_@ContainerArray(this);
         }
 
+        /// <summary>
+        /// <see cref="Safir.Dob.Typesystem.ContainerBase.Clone()"/>
+        /// </summary>
         public new @_CLASS_@ContainerArray Clone()
         {
             return (@_CLASS_@ContainerArray)(((ICloneable)this).Clone());
         }
 
-        //Copy constructor for use by Clone
+        /// <summary>
+        /// Copy constructor for use by Clone
+        /// </summary>
         protected @_CLASS_@ContainerArray(@_CLASS_@ContainerArray other) : base(other) { }
 
         #endregion
@@ -1092,13 +1286,25 @@ namespace @_NAMESPACE_@
 @@-- ENUMERATION
 @@--
 
-@@IF@@ @_EXIST:CLASSSUMMARY_@
     /// <summary>
+    /// Class wrapping the @_CLASS_@ enumeration.
+    /// <para/>
+@@IF@@ @_EXIST:CLASSSUMMARY_@
     /// @_REPLACE_ALL(\n/\n    /// ):CLASSSUMMARY_@
-    /// </summary>
+@@ELSE@@
+    /// No description given in dou file.
 @@END_IF@@
+    /// </summary>
     public struct @_CLASS_@
     {
+#pragma warning disable 1591  //no comments on the enum values
+        /// <summary>
+        /// The @_CLASS_@ enum.
+@@IF@@ @_EXIST:CLASSSUMMARY_@
+        /// <para/>
+        /// @_REPLACE_ALL(\n/\n    /// ):CLASSSUMMARY_@
+@@END_IF@@
+        /// </summary>
         public enum Enumeration
         {
 @@IF@@ @_ENUMVALUE'length_@=1
@@ -1115,18 +1321,34 @@ namespace @_NAMESPACE_@
 @@END_TABLE@@
 @@END_IF@@
         }
+#pragma warning restore 1591
 
+        /// <summary>
+        /// Enumeration id (or type id) of the @_CLASS_@ enumeration type.
+        /// </summary>
         public static System.Int64 EnumerationId = @_TYPEID_@;
 
+        /// <summary>
+        /// Checksum of all the values of the @_CLASS_@ enumeration type.
+        /// <see cref="CheckForMismatch(System.Int64)"/>
+        /// </summary>
         public const System.Int64 Checksum = @_CHECKSUM_@;
 
-        //Check that there is no enumeration mismatch
-        //throws an exception if there is - ConfigurationErrorException
-        //call this like this from your application (somewhere in the startup code):
-        //  @_UNIT_@.CheckForMismatch(@_UNIT_@.Checksum);
-        //The checksum that you are passing to this function is compiled into your application
-        //so that if the enum changes the checksum in your application will be different than that
-        //in dots_generated, which will mean that an exception is thrown.
+        /// <summary>
+        /// Check that there is no enumeration mismatch that would require a recompilation of your application.
+        /// <para/>
+        /// This is useful for detecting that an enumeration has changed, e.g. values have been added or removed, 
+        /// or values have changed order. By calling this method you will get an exception if your application
+        /// needs to be recompiled.
+        /// <para/>
+        /// Call this like this from your application (somewhere in the startup code):
+        ///   @_UNIT_@.CheckForMismatch(@_UNIT_@.Checksum);
+        /// <para/>
+        /// The checksum that you are passing to this function is compiled into your application
+        /// so that if the enum changes the checksum in your application will be different than that
+        /// in safir_generated, which will mean that an exception is thrown.
+        /// </summary>
+        /// <exception cref="Safir.Dob.Typesystem.ConfigurationErrorException">If there is an enumeration checksum mismatch</exception>
         static public void CheckForMismatch(System.Int64 checksum)
         {
             if (checksum != Checksum)
@@ -1135,9 +1357,14 @@ namespace @_NAMESPACE_@
             }
         }
 
-
+        /// <summary>
+        /// Container for members of type @_CLASS_@
+        /// </summary>        
         public class EnumerationContainer : Safir.Dob.Typesystem.EnumerationContainerBase, ICloneable
         {
+            /// <summary>
+            /// Constructor.
+            /// </summary>        
             public EnumerationContainer() : base() { }
 
             #region Cloning
@@ -1147,16 +1374,24 @@ namespace @_NAMESPACE_@
                 return new EnumerationContainer(this);
             }
 
+            /// <summary>
+            /// <see cref="Safir.Dob.Typesystem.ContainerBase.Clone()"/>
+            /// </summary>
             public new EnumerationContainer Clone()
             {
                 return (EnumerationContainer)((ICloneable)this).Clone();
             }
 
-            //Copy constructor for use by Clone
+            /// <summary>
+            /// Copy constructor for use by Clone.
+            /// </summary>
             protected EnumerationContainer(EnumerationContainer other) : base(other) { }
 
             #endregion
 
+            /// <summary>
+            /// Get or set the enumeration value by ordinal integer value.
+            /// </summary>        
             public override int Ordinal
             {
                 get
@@ -1179,38 +1414,65 @@ namespace @_NAMESPACE_@
                 }
             }
 
+            /// <summary>
+            /// Get or set the enumeration value.
+            /// </summary>        
             public Enumeration Val
             {
                 get { return (Enumeration)Ordinal; }
                 set { Ordinal = (int)value; }
             }
 
+            /// <summary>
+            /// Equality operator.
+            /// </summary>
             public static bool operator ==(EnumerationContainer first, Enumeration second)
             { return !first.IsNull() && first.m_Value.Equals((int)second); }
 
+            /// <summary>
+            /// Inequality operator.
+            /// </summary>
             public static bool operator !=(EnumerationContainer first, Enumeration second)
             { return !(first == second); }
 
+            /// <summary>
+            /// Equality operator.
+            /// </summary>
             public static bool operator ==(Enumeration first, EnumerationContainer second)
             { return second == first; }
 
+            /// <summary>
+            /// Inequality operator.
+            /// </summary>
             public static bool operator !=(Enumeration first, EnumerationContainer second)
             { return !(second == first); }
 
+            /// <summary>
+            /// Has no useful implementation.
+            /// </summary>
             public override int GetHashCode()
             {
                 throw new System.Exception("The method or operation is not implemented.");
             }
 
+            /// <summary>
+            /// Has no useful implementation.
+            /// </summary>
             public override bool Equals(object obj)
             {
                 throw new System.Exception("The method or operation is not implemented.");
             }
         }
 
+        /// <summary>
+        /// Container for array members of type @_CLASS_@
+        /// </summary>
         public class EnumerationContainerArray : Safir.Dob.Typesystem.ArrayContainer<EnumerationContainer>, ICloneable
         {
-             public EnumerationContainerArray(System.Int32 size) : base(size) { }
+            /// <summary>
+            /// Constructor for array container.
+            /// </summary>        
+            public EnumerationContainerArray(System.Int32 size) : base(size) { }
 
             #region Cloning
 
@@ -1219,12 +1481,17 @@ namespace @_NAMESPACE_@
                 return new EnumerationContainerArray(this);
             }
 
+            /// <summary>
+            /// <see cref="Safir.Dob.Typesystem.ContainerBase.Clone()"/>
+            /// </summary>
             public new EnumerationContainerArray Clone()
             {
                 return (EnumerationContainerArray)(((ICloneable)this).Clone());
             }
 
-            //Copy constructor for use by Clone
+            /// <summary>
+            /// Copy constructor for use by Clone.
+            /// </summary>
             protected EnumerationContainerArray(EnumerationContainerArray other) : base(other) { }
 
             #endregion
@@ -1235,20 +1502,30 @@ namespace @_NAMESPACE_@
 @@--
 @@-- EXCEPTION
 @@--
-@@IF@@ @_EXIST:CLASSSUMMARY_@
     /// <summary>
+@@IF@@ @_EXIST:CLASSSUMMARY_@
     /// @_REPLACE_ALL(\n/\n    /// ):CLASSSUMMARY_@
-    /// </summary>
+@@ELSE@@
+    /// No summary given in dou file.
 @@END_IF@@
+    /// </summary>
     public class @_CLASS_@ : @_BASECLASS_@
     {
+        /// <summary>
+        /// Construct a @_CLASS_@ exception with string as the message.
+        /// </summary>        
         public @_CLASS_@(string message) : base(message)
         {
         }
 
-        //Type id for @_CLASS_@
+        /// <summary>
+        /// Type id for @_CLASS_@
+        /// </summary>        
         public new const System.Int64 ExceptionTypeId = @_TYPEID_@;
 
+        /// <summary>
+        /// Get the type id of this exception object.
+        /// </summary>
         public override System.Int64 GetTypeId()
         {
             return ExceptionTypeId;

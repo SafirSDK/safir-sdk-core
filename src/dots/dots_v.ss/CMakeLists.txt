@@ -1,37 +1,28 @@
-cmake_minimum_required(VERSION 2.8)
-
-PROJECT (dots_v NONE)
-
-INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
-
 FILE(GLOB dod_files data/*.dod)
 
-INSTALL(FILES 
-          ${dod_files} 
-          data/dots_unit.xsd
-        DESTINATION ${SAFIR_RUNTIME}/data/text/dots/config/)
-
-INSTALL(FILES 
-          data/AssemblyInfo.cs
-          data/dots_generated-dotnet.snk
-          data/CMakeLists.txt 
-          data/Manifest.java.txt
-          data/precompiled_header_for_cpp.h
-          data/precompiled_header_for_cpp.cpp
-          data/dots_generated_ada.gpr_template
-          data/dots_generated_ada_library.gpr_template
-          data/dots_generated_main_ada.gpr_template
-        DESTINATION ${SAFIR_SDK}/dots/dots_generated)
-
-INSTALL(DIRECTORY
-          data/dobmake_config
-        DESTINATION ${SAFIR_SDK}/dots/dots_generated)
+INSTALL(FILES
+  ${dod_files}
+  DESTINATION ${SAFIR_INSTALL_DESTINATION_GENERATION}/dod
+  COMPONENT Development)
 
 INSTALL(FILES
-        data/gen/CMakeLists.txt
-        DESTINATION ${SAFIR_SDK}/dots/dots_generated/gen)
-     
-INSTALL(PROGRAMS
-        dots_v.py
-        data/dobmake.py
-        DESTINATION ${SAFIR_RUNTIME}/bin)
+          data/precompiled_header_for_cpp.h
+#          data/dots_generated_ada.gpr_template
+#          data/dots_generated_ada_library.gpr_template
+#          data/dots_generated_main_ada.gpr_template
+        DESTINATION ${SAFIR_INSTALL_DESTINATION_GENERATION}/cpp
+        COMPONENT Development)
+
+INSTALL(FILES
+          data/dots_generated-dotnet.snk
+        DESTINATION ${SAFIR_INSTALL_DESTINATION_GENERATION}/dotnet
+        COMPONENT Development)
+
+INSTALL(FILES
+          data/Manifest.txt.in
+        DESTINATION ${SAFIR_INSTALL_DESTINATION_GENERATION}/java
+        COMPONENT Development)
+
+SAFIR_INSTALL_PYTHON(SCRIPT dots_v.py
+  COMPONENT Development)
+

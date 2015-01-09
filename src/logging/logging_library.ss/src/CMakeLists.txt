@@ -1,35 +1,18 @@
-cmake_minimum_required(VERSION 2.8)
-
-project(logging_library CXX)
-
-INCLUDE_DIRECTORIES(.)
-
-#this library has a C interface, so we don't want the "d" suffix on debug builds on windows
-#Must be set before including safir_sdk_core_config.cmake
-SET(NO_LIBRARY_POSTFIXES 1) 
-
-INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
+#this library has a C interface and we only want one version of it,
+#so we never want the "d" suffix on debug builds, which is default on windows.
+SET(CMAKE_DEBUG_POSTFIX "")
 
 FILE(GLOB_RECURSE headers *.h)
-FILE(GLOB sources *.cpp)
 
-ADD_LIBRARY(logging_library SHARED ${sources} ${headers})
+ADD_LIBRARY(logging_library SHARED Interface.cpp include/Safir/Logging/Internal/Interface.h)
 
-if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(logging_library lluf_utils)
-endif()
+#Make our INTERNAL headers available to other parts of Core.
+target_include_directories(logging_library PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
-INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
-        PATTERN ".svn" EXCLUDE
-        PATTERN "*~" EXCLUDE)
+TARGET_LINK_LIBRARIES(logging_library PRIVATE lluf_utils)
 
-INSTALL(TARGETS logging_library
-        RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-        LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-        ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
+SAFIR_INSTALL(TARGETS logging_library)
 
-INSTALL(FILES ../data/logging_library.gpr
-        DESTINATION ${SAFIR_SDK}/ada)
+# INSTALL(FILES ../data/logging_library.gpr
+#         DESTINATION ${SAFIR_SDK}/ada)
 
-
-INSTALL_DEBUG_INFO(logging_library)

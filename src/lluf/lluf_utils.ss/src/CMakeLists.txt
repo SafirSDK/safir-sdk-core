@@ -1,40 +1,45 @@
-cmake_minimum_required(VERSION 2.8)
-
-PROJECT (lluf_utils CXX)
-
-INCLUDE_DIRECTORIES(.)
-
-INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
-
 FILE(GLOB_RECURSE headers *.h)
-FILE(GLOB sources *.cpp)
 
-ADD_LIBRARY(lluf_utils SHARED ${sources} ${headers})
+ADD_LIBRARY(lluf_utils SHARED ${headers} 
+  DynamicLibraryLoader.cpp
+  LowLevelLoggerControl.cpp
+  ProcessMonitor.cpp
+  StringEncoding.cpp
+  LowLevelLogger.cpp
+  ProcessMonitorLinux.cpp
+  SystemLog.cpp
+  LogWin32.cpp
+  ProcessInfo.cpp
+  ProcessMonitorWin32.cpp
+)
 
-FIND_PACKAGE(Boost COMPONENTS filesystem system thread program_options)
+#Make our INTERNAL headers available to other parts of Core.
+target_include_directories(lluf_utils PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
-if (NOT MSVC)
-  TARGET_LINK_LIBRARIES(lluf_utils lluf_startup_synchronizer lluf_config ${Boost_LIBRARIES} dl rt)
+TARGET_LINK_LIBRARIES(lluf_utils PRIVATE 
+  lluf_startup_synchronizer 
+  lluf_config 
+  ${Boost_FILESYSTEM_LIBRARY} 
+  ${Boost_THREAD_LIBRARY} 
+  ${Boost_SYSTEM_LIBRARY})
+
+if (WIN32)
+  TARGET_LINK_LIBRARIES(lluf_utils PRIVATE psapi)
+else()
+  TARGET_LINK_LIBRARIES(lluf_utils PRIVATE dl rt)
 endif()
 
-#on windows we need the psapi library
-if (WIN32)
-  TARGET_LINK_LIBRARIES(lluf_utils psapi)
-endif(WIN32)
 
-INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
-        PATTERN ".svn" EXCLUDE
-        PATTERN "*~" EXCLUDE)
+ADD_EXECUTABLE(logger_control logger_control.cpp)
 
-INSTALL(TARGETS lluf_utils 
-        RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-        LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-        ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
+TARGET_LINK_LIBRARIES(logger_control PRIVATE 
+  lluf_utils
+  ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
-
-INSTALL_DEBUG_INFO(lluf_utils)
+SAFIR_INSTALL(
+  TARGETS lluf_utils logger_control)
 
 if (WIN32)
-INSTALL(FILES ../data/safir_event_log_registration.reg
-        DESTINATION ${SAFIR_RUNTIME}/data/text/)
+  INSTALL(FILES ../data/safir_event_log_registration.reg
+    DESTINATION ${SAFIR_INSTALL_DESTINATION_DOC}/utilities/)
 endif()

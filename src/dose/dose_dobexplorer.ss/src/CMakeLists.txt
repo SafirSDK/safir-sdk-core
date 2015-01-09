@@ -1,14 +1,3 @@
-cmake_minimum_required(VERSION 2.8)
-
-#make sure we link with qtmain.lib on windows
-if (NOT CMAKE_VERSION VERSION_LESS "2.8.11")
-  cmake_policy(SET CMP0020 NEW)
-endif()
-
-project(dobexplorer C CXX) #FindQt needs C
-
-INCLUDE("$ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake")
-
 FILE(GLOB ui *.ui)
 FILE(GLOB sources *.cpp)
 FILE(GLOB headers [!ui_]*.h)
@@ -19,62 +8,64 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # We default to Qt5 if we can find it and fall back to Qt4
 
-if (CMAKE_VERSION VERSION_GREATER "2.8.10") #need cmake 2.8.11 or greater for qt5
-  find_package(Qt5Widgets QUIET)
-endif()
+find_package(Qt5Widgets QUIET)
 
 if (Qt5Widgets_FOUND)
-  message("-- Building dobexplorer with Qt5")
+  message(STATUS "Building dobexplorer with Qt5")
+
   QT5_WRAP_UI(ui_headers ${ui})
   QT5_WRAP_CPP(moc_sources ${headers} ${QT5_WRAP_CPP_OPTIONS})
+
+  mark_as_advanced(Qt5Core_DIR Qt5Gui_DIR Qt5Widgets_DIR)
 else()
   # Try to use Qt4 instead
   SET(QT_USE_QTMAIN TRUE)
-  find_package(Qt4 REQUIRED)
+  SET(QT4_FIND_QUIETLY TRUE)
+  find_package(Qt4)
 
-  message("-- Building dobexplorer with Qt4")
+  if (NOT QT4_FOUND)
+    message(STATUS "Could not find Qt4 or Qt5, will not build dobexplorer")
+    return()
+  endif()
+
+  message(STATUS "Building dobexplorer with Qt4")
 
   include(${QT_USE_FILE})
-  
+
   QT4_WRAP_UI(ui_headers ${ui})
-   
+
   #qt 4.7 and 4.8 have a bug where moc will fail to parse some stuff in boost
-  #so we have a test.h file which we try moc on, and if it fails we add a 
+  #so we have a test.h file which we try moc on, and if it fails we add a
   #workaround. See https://bugreports.qt-project.org/browse/QTBUG-22829
   execute_process(COMMAND moc -o moc_test.cxx test.h
     OUTPUT_VARIABLE moctest_output
     ERROR_VARIABLE moctest_output
     RESULT_VARIABLE moctest_result
     WORKING_DIRECTORY moctest)
-  
+
   if (moctest_result) #if test failed
     set(QT4_WRAP_CPP_OPTIONS OPTIONS -DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED)
   endif()
-  
+
   QT4_WRAP_CPP(moc_sources ${headers} ${QT4_WRAP_CPP_OPTIONS})
 
 endif()
 
-ADD_EXECUTABLE(dobexplorer WIN32 ${sources} ${ui_headers} ${moc_sources} ${headers})
+ADD_EXECUTABLE(dobexplorer WIN32 ${sources} ${ui_headers} ${moc_sources} ${headers} dobexplorer.rc)
 
 if (Qt5Widgets_FOUND)
-  qt5_use_modules(dobexplorer Widgets)
-
-  if (CMAKE_VERSION VERSION_LESS "2.8.11")
-    target_link_libraries(dobexplorer ${Qt5Core_QTMAIN_LIBRARIES})
-  endif()
+  TARGET_LINK_LIBRARIES(dobexplorer Qt5::Widgets)
 else()
   TARGET_LINK_LIBRARIES(dobexplorer ${QT_LIBRARIES})
 endif()
 
-FIND_PACKAGE(Boost COMPONENTS filesystem system)
-
 TARGET_LINK_LIBRARIES(dobexplorer
-  optimized system_picture
-  debug system_picture${CMAKE_DEBUG_POSTFIX})
+  dose_internal
+  system_picture
+  lluf_crash_reporter
+  ${Boost_SYSTEM_LIBRARY})
+  
 
-IF (NOT MSVC)
-  TARGET_LINK_LIBRARIES(dobexplorer
     dots_cpp 
     dots_generated-Safir-cpp 
     dots_generated-cpp 
@@ -82,11 +73,8 @@ IF (NOT MSVC)
     lluf_utils 
     lluf_crash_reporter 
     ${Boost_LIBRARIES})
-ENDIF ()
 
-INSTALL(TARGETS dobexplorer
-        RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-        LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-        ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
+target_include_directories(dobexplorer PRIVATE ../../dose_communication.ss/src/defs/ ../../dose_communication.ss/src/dose_com/)
+#dobexplorer doesnt really need to link against dose_com, so instead just add the include directories
 
-INSTALL_DEBUG_INFO(dobexplorer)
+SAFIR_INSTALL(TARGETS dobexplorer)

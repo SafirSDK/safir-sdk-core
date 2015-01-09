@@ -39,7 +39,7 @@ else:
     exe_path = "."
 
 ProcessMonitor_test = os.path.join(exe_path,"ProcessMonitor_test")
-Sleeper = os.path.join(exe_path,"Sleeper")
+Sleeper = os.path.join(exe_path,"ProcessMonitorSleeper")
 
 #start a bunch of sleepers
 sleepers = list()
@@ -67,7 +67,7 @@ for sleeper in sleepers:
         errors += 1
 
 if result.count("Process with pid") != len(sleepers):
-    print("Too many terminated processes! Expected", len(sleepers)," processes!")
+    print("Wrong number of terminated processes! Expected", len(sleepers),"got",result.count("Process with pid"))
     errors += 1
 
 if listener.returncode != 0:

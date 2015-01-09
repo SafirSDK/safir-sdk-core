@@ -24,24 +24,23 @@
 #
 ###############################################################################
 from __future__ import print_function
-import subprocess, os, time, sys, xml.dom.minidom, shutil
+import subprocess, os, time, sys, xml.dom.minidom, shutil, argparse
 
-if sys.platform == "win32":
-    config_type = os.environ.get("CMAKE_CONFIG_TYPE")
-    exe_path = config_type if config_type else ""
-else:
-    libpath = os.environ.get("LD_LIBRARY_PATH")
-    os.environ["LD_LIBRARY_PATH"] = libpath + ":" + os.getcwd()
-    exe_path = "."
+parser = argparse.ArgumentParser("test script")
+parser.add_argument("--test-exe-1", required=True)
+parser.add_argument("--test-exe-2", required=True)
+parser.add_argument("--test-exe-3", required=True)
+parser.add_argument("--test-exe-4", required=True)
 
+arguments = parser.parse_args()
 
-result = subprocess.call(os.path.join(exe_path,"DynamicLibraryLoader_test1"))
+result = subprocess.call(arguments.test_exe_1)
 
 if result != 0:
     print ("test1 Failure")
     sys.exit(1)
 
-result = subprocess.call(os.path.join(exe_path,"DynamicLibraryLoader_test2"))
+result = subprocess.call(arguments.test_exe_2)
 
 
 if result != -11 and result != 1234: #SIGSEGV and ACCESSVIOL exit codes
@@ -50,14 +49,14 @@ if result != -11 and result != 1234: #SIGSEGV and ACCESSVIOL exit codes
     sys.exit(1)
 
 
-result = subprocess.call(os.path.join(exe_path,"DynamicLibraryLoader_test3"))
+result = subprocess.call(arguments.test_exe_3)
 
 if result != 0:
     print ("test3 Failure")
     sys.exit(1)
 
 
-result = subprocess.call(os.path.join(exe_path,"DynamicLibraryLoader_test4"))
+result = subprocess.call(arguments.test_exe_4)
 
 if result != 0:
     print ("test4 Failure")

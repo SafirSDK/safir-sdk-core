@@ -28,6 +28,7 @@
 #include "dose_main_timers.h"
 #include <Safir/Dob/ErrorResponse.h>
 #include <deque>
+#include <boost/unordered_map.hpp>
 
 namespace Safir
 {
@@ -109,12 +110,12 @@ namespace Internal
 
 
         typedef std::deque<DistributionData> PendingRequests;
-        typedef unordered_map<Identifier, PendingRequests> PendingRequestTable;
+        typedef boost::unordered_map<Identifier, PendingRequests> PendingRequestTable;
 
         PendingRequestTable m_pendingRequests;
 
         Dob::Typesystem::Si64::Second GetTimeout(const Safir::Dob::Typesystem::TypeId typeId) const;
-        typedef unordered_map<Typesystem::TypeId, Typesystem::Si64::Second> TimeoutTable;
+        typedef boost::unordered_map<Typesystem::TypeId, Typesystem::Si64::Second> TimeoutTable;
         mutable TimeoutTable m_timeoutTable;
 
 #if 0 //stewart

@@ -25,26 +25,15 @@
 #ifndef _dose_main_defs_h
 #define _dose_main_defs_h
 
-#include <Safir/Utilities/Internal/UnorderedMap.h>
-
 namespace Safir
 {
 namespace Dob
 {
 namespace Internal
 {
-
     const int NUM_NODES = 64;
 
     const int NUM_PRIORITY_CHANNELS = 6;
-    /*
-    static inline std::wstring AppendErrorCode(const std::wstring & str, int err)
-    {
-        std::wostringstream out;
-        out << str << err;
-        return out.str();
-        }*/
-
 }
 }
 }

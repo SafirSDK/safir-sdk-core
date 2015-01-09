@@ -3,10 +3,11 @@ FILE(GLOB sources *.cpp)
 ADD_EXECUTABLE(ProcessInfo_test ProcessInfo_test.cpp)
 ADD_EXECUTABLE(ProcessInfoSleeper ProcessInfoSleeper.cpp)
 
-IF (NOT MSVC)
-  TARGET_LINK_LIBRARIES (ProcessInfoSleeper ${Boost_LIBRARIES})
-  TARGET_LINK_LIBRARIES (ProcessInfo_test lluf_utils ${Boost_LIBRARIES})
-ENDIF()
+TARGET_LINK_LIBRARIES (ProcessInfo_test PRIVATE lluf_utils)
 
-ADD_TEST(ProcessInfo ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
-SET_SAFIR_TEST_PROPERTIES(ProcessInfo)
+TARGET_LINK_LIBRARIES (ProcessInfoSleeper PRIVATE ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+
+TARGET_LINK_LIBRARIES (ProcessInfoSleeper)
+
+ADD_TEST(NAME ProcessInfo COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
+SET_SAFIR_TEST_PROPERTIES(TEST ProcessInfo)

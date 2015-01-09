@@ -1,8 +1,8 @@
 ADD_EXECUTABLE(CheckCapabilities_test CheckCapabilities.cpp)
 
-IF (NOT MSVC)
-  TARGET_LINK_LIBRARIES (CheckCapabilities_test lluf_utils ${Boost_LIBRARIES})
-ENDIF()
+TARGET_LINK_LIBRARIES (CheckCapabilities_test PRIVATE lluf_utils
+  ${Boost_THREAD_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY})
 
 ADD_TEST(CheckCapabilities CheckCapabilities_test)
-SET_SAFIR_TEST_PROPERTIES(CheckCapabilities)
+SET_SAFIR_TEST_PROPERTIES(TEST CheckCapabilities)

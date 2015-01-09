@@ -26,18 +26,18 @@ ADD_CUSTOM_TARGET(logging_ada ALL
                   VERBATIM)
 
 FILE(GLOB ads_files *.ads)
-INSTALL(FILES ${ads_files}
-        DESTINATION ${SAFIR_SDK}/ada/logging_ada/interface)
+# INSTALL(FILES ${ads_files}
+#         DESTINATION ${SAFIR_SDK}/ada/logging_ada/interface)
 
-INSTALL(DIRECTORY ali/
-        DESTINATION ${SAFIR_SDK}/ada/logging_ada/ali)
-if (WIN32)
-   INSTALL(FILES lib/liblogging_ada.dll
-           DESTINATION ${SAFIR_RUNTIME}/bin/)
-elseif (UNIX)
-   INSTALL(FILES lib/liblogging_ada.so
-           DESTINATION ${SAFIR_RUNTIME}/lib/)
-endif(WIN32)
+# INSTALL(DIRECTORY ali/
+#         DESTINATION ${SAFIR_SDK}/ada/logging_ada/ali)
+# if (WIN32)
+#    INSTALL(FILES lib/liblogging_ada.dll
+#            DESTINATION ${SAFIR_RUNTIME}/bin/)
+# elseif (UNIX)
+#    INSTALL(FILES lib/liblogging_ada.so
+#            DESTINATION ${SAFIR_RUNTIME}/lib/)
+# endif(WIN32)
 
-INSTALL(FILES ../data/logging_ada.gpr
-        DESTINATION ${SAFIR_SDK}/ada/)
+# INSTALL(FILES ../data/logging_ada.gpr
+#         DESTINATION ${SAFIR_SDK}/ada/)

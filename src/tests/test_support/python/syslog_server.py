@@ -48,11 +48,9 @@ class SyslogServer(SocketServer.UDPServer):
             else:
                 self.server.buf += data + '\n'
                 
-    def __init__(self):
-        SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
-
+    def __init__(self, safir_show_config):
         #Run the program that writes the ini file configuration to standard output
-        proc = subprocess.Popen(os.path.join(SAFIR_RUNTIME,"bin","safir_show_config"),
+        proc = subprocess.Popen((safir_show_config,"--logging"),
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.STDOUT,
                                 universal_newlines=True)

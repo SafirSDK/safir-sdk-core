@@ -26,18 +26,18 @@ ADD_CUSTOM_TARGET(swre_interface_ada ALL
                   VERBATIM)
 
 FILE(GLOB ads_files src/*.ads)
-INSTALL(FILES ${ads_files}
-        DESTINATION ${SAFIR_SDK}/ada/swre_interface_ada/interface)
+# INSTALL(FILES ${ads_files}
+#         DESTINATION ${SAFIR_SDK}/ada/swre_interface_ada/interface)
 
-INSTALL(DIRECTORY src/ali/
-        DESTINATION ${SAFIR_SDK}/ada/swre_interface_ada/ali)
-if (WIN32)
-   INSTALL(FILES src/lib/libswre_interface_ada.dll
-           DESTINATION ${SAFIR_RUNTIME}/bin/)
-elseif (UNIX)
-   INSTALL(FILES src/lib/libswre_interface_ada.so
-           DESTINATION ${SAFIR_RUNTIME}/lib/)
-endif(WIN32)
+# INSTALL(DIRECTORY src/ali/
+#         DESTINATION ${SAFIR_SDK}/ada/swre_interface_ada/ali)
+# if (WIN32)
+#    INSTALL(FILES src/lib/libswre_interface_ada.dll
+#            DESTINATION ${SAFIR_RUNTIME}/bin/)
+# elseif (UNIX)
+#    INSTALL(FILES src/lib/libswre_interface_ada.so
+#            DESTINATION ${SAFIR_RUNTIME}/lib/)
+# endif(WIN32)
 
-INSTALL(FILES data/swre_interface_ada.gpr
-        DESTINATION ${SAFIR_SDK}/ada/)
+# INSTALL(FILES data/swre_interface_ada.gpr
+#         DESTINATION ${SAFIR_SDK}/ada/)

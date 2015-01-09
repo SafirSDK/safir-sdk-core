@@ -72,7 +72,7 @@ public class ObjectFactory {
         long typeId = BlobOperations.getTypeId(blob);
 
         try {
-            Class<?> theClass = Class.forName(getClassName(typeId));
+            Class<?> theClass = getClass(typeId);
             return (Object) theClass.getConstructor(java.nio.ByteBuffer.class).newInstance(blob);
         } catch (java.lang.Exception e) {
             e.printStackTrace();
@@ -92,7 +92,7 @@ public class ObjectFactory {
     */
     public com.saabgroup.safir.dob.typesystem.Object createObject(long typeId){
         try {
-            Class<?> theClass = Class.forName(getClassName(typeId));
+            Class<?> theClass = getClass(typeId);
             return (Object) theClass.getConstructor().newInstance();
         } catch (java.lang.Exception e) {
             throw new SoftwareViolationException("Failed to create object (from blob) of type " + typeId + ". Got exception " + e.toString());
@@ -110,33 +110,69 @@ public class ObjectFactory {
         return NamespaceMappings.getInstance().toJava(fullClassName);
     }
 
-    /**
-     * Register a class in the object factory along with its constructors.
-     *
-     * @param typeId typeid of the class.
-     * @param typeIdConstructor A constructor that takes one argument, typeid.
-     * @param blobConstructor A constructor that takes one argument, a blob.
-     */
-    public void registerClass(long typeId,
-                              java.lang.reflect.Constructor<?> typeIdConstructor,
-                              java.lang.reflect.Constructor<?> blobConstructor){
-        m_callbackMap.put(typeId, new Constructors(typeIdConstructor,blobConstructor));
+
+    private Class<?> getClass(long typeId) throws ClassNotFoundException {
+        //first try jars that were on our classpath
+        try {
+            return Class.forName(getClassName(typeId));
+        }
+        catch (ClassNotFoundException e) {
+        }
+
+        try {
+            //then try the jars from typesystem.ini
+            return m_classLoader.loadClass(getClassName(typeId));
+        }
+        catch (ClassNotFoundException e) {
+            throw new ClassNotFoundException(e.toString()
+                                             + "\nLoaded jars are '" 
+                                             + m_classLoader.getJarList() + "'");
+        }
+
+    }
+
+    private class GeneratedClassLoader extends java.net.URLClassLoader
+    {
+        public GeneratedClassLoader()
+        {
+            super (new java.net.URL[0]);
+            m_generatedJars = Kernel.GetGeneratedJars();
+            for (String file : m_generatedJars)
+            {
+                try
+                {
+                    java.io.File jar = new java.io.File(file);
+                    addURL (jar.toURI().toURL());
+                }
+                catch (java.net.MalformedURLException e)
+                {
+                    throw new SoftwareViolationException("Failed to load jar file " 
+                                                         + file 
+                                                         + ". Got exception " 
+                                                         + e.toString());
+            
+                }
+            }
+        }
+        
+        public String getJarList() {
+            java.lang.StringBuilder builder = new java.lang.StringBuilder();
+            boolean first = false;
+            for (String jar : m_generatedJars) {
+                if (!first) {
+                    first = true;
+                }
+                else {
+                    builder.append(", ");
+                }
+                builder.append(jar);
+            }
+            return builder.toString();
+        }
+
+        private String[] m_generatedJars = null;
     }
 
     private static final ObjectFactory m_instance = new ObjectFactory();
-
-    private class Constructors
-    {
-        Constructors(java.lang.reflect.Constructor<?> typeIdConstructor,
-                     java.lang.reflect.Constructor<?> blobConstructor){
-            m_typeIdConstructor = typeIdConstructor;
-            m_blobConstructor = blobConstructor;
-        }
-
-        java.lang.reflect.Constructor<?> m_typeIdConstructor;
-        java.lang.reflect.Constructor<?> m_blobConstructor;
-    }
-
-    private java.util.HashMap<Long, Constructors> m_callbackMap = new java.util.HashMap<Long, Constructors>();
-
+    private GeneratedClassLoader m_classLoader = new GeneratedClassLoader();
 }

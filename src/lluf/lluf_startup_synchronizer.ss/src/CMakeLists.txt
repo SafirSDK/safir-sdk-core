@@ -1,31 +1,14 @@
-cmake_minimum_required(VERSION 2.8)
-
-project(lluf_startup_synchronizer CXX)
-
 #this library has an interface which is okay to call between debug/release runtimes,
-#and we only want one version of it, so we don't want the "d" suffix on debug builds on windows.
-#Must be set before including safir_sdk_core_config.cmake
-SET(NO_LIBRARY_POSTFIXES 1) 
+#and we only want one version of it, so we never want the "d" suffix on debug builds,
+#which is default on windows.
+SET(CMAKE_DEBUG_POSTFIX "")
 
-INCLUDE_DIRECTORIES(.)
+add_library(lluf_startup_synchronizer SHARED StartupSynchronizer.cpp)
 
-INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
+TARGET_LINK_LIBRARIES(lluf_startup_synchronizer PRIVATE 
+  lluf_config 
+  ${Boost_FILESYSTEM_LIBRARY} 
+  ${Boost_THREAD_LIBRARY} 
+  ${Boost_SYSTEM_LIBRARY})
 
-add_library(lluf_startup_synchronizer SHARED StartupSynchronizer.cpp Safir/Utilities/StartupSynchronizer.h)
-
-FIND_PACKAGE(Boost COMPONENTS filesystem thread system)
-
-if (NOT MSVC)
-  TARGET_LINK_LIBRARIES(lluf_startup_synchronizer lluf_config ${Boost_LIBRARIES})
-endif()
-
-INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
-        PATTERN ".svn" EXCLUDE
-        PATTERN "*~" EXCLUDE)
-
-INSTALL(TARGETS lluf_startup_synchronizer
-        RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-        LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-        ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
-
-INSTALL_DEBUG_INFO(lluf_startup_synchronizer)
+SAFIR_INSTALL(TARGETS lluf_startup_synchronizer)

@@ -35,10 +35,6 @@ except ImportError:
     # 2.x name
     from Queue import Queue, Empty
 
-SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
-dose_main_cmd = (os.path.join(SAFIR_RUNTIME,"bin","dose_main"),)
-dope_main_cmd = (os.path.join(SAFIR_RUNTIME,"bin","dope_main"),)
-
 def enqueue_output(out, queue):
     while True:
         line = out.readline()
@@ -47,6 +43,17 @@ def enqueue_output(out, queue):
         queue.put(line.rstrip("\n\r"))
     out.close()
 
+class Unbuffered(object):
+   def __init__(self, stream):
+       self.stream = stream
+   def write(self, data):
+       self.stream.write(data)
+       self.stream.flush()
+   def __getattr__(self, attr):
+       return getattr(self.stream, attr)
+
+sys.stdout = Unbuffered(sys.stdout)
+    
 class TestEnvStopper:
     def __init__(self, env):
         self.env = env
@@ -60,22 +67,33 @@ class TestEnvStopper:
 
 
 class TestEnv:
-    def __init__(self):
+    """dose_main: full path to dose_main
+       dope_main: full path to dope_main (pass None if you dont want dope to start)
+       safir_show_config: full path to safir_show_config
+    """
+    def __init__(self, dose_main, dope_main, safir_show_config):
         self.__procs = dict()
         self.__creationflags = 0
         if sys.platform == "win32":
             self.__creationflags= subprocess.CREATE_NEW_PROCESS_GROUP
-        self.outputlock = threading.Lock()
-        self.dose_main = self.launchProcess("dose_main", dose_main_cmd)
-        self.launchProcess("dope_main", dope_main_cmd)
-        self.syslog = syslog_server.SyslogServer()
+        self.dose_main = self.launchProcess("dose_main", (dose_main,))
+        self.have_dope = dope_main is not None
+        if self.have_dope:
+            self.launchProcess("dope_main", (dope_main,))
+        self.syslog = syslog_server.SyslogServer(safir_show_config)
         self.syslog_output = list()
         
         start_time = time.time()
         print("Waiting for dose_main to be ready")
+
+        if self.have_dope:
+            phrase="persistence data is ready"
+        else:
+            phrase="dose_main running"
+        
         while True:
             time.sleep(0.2)
-            if self.Output("dose_main").find("persistence data is ready") != -1:
+            if self.Output("dose_main").find(phrase) != -1:
                 print(" dose_main seems to be ready")
                 break
             if self.dose_main.poll() is not None:
@@ -88,8 +106,9 @@ class TestEnv:
                 print("dose_main seems slow to start. Here is some output:")
                 print("----- dose_main output -----")
                 print(self.Output("dose_main"))
-                print("----- dope_main output -----")
-                print(self.Output("dope_main"))
+                if self.have_dope:
+                    print("----- dope_main output -----")
+                    print(self.Output("dope_main"))
                 print("---- syslog output ----")
                 print(self.syslog.get_data(0))
                 print("----------------------------")
@@ -167,6 +186,8 @@ class TestEnv:
             output = self.Output(name)
             if output.find(expected_output) != -1:
                 return output
+            if not self.ProcessDied(): #reversed return value
+                raise Exception("A process died")
             time.sleep(1)
 
 
@@ -178,5 +199,17 @@ class TestEnv:
         ok = True
         for name, (proc,queue,output) in self.__procs.items():
             if proc.returncode != 0:
+                print (" - Process", name, "exited with code", proc.returncode)
+                print (" - Output:\n", self.Output(name))
+                ok = False
+        return ok;
+
+    def ProcessDied(self):
+        ok = True
+        for name, (proc,queue,output) in self.__procs.items():
+            ret = proc.poll()
+            if ret is not None and ret != 0:
+                print (" - Process", name, "exited with code", proc.returncode)
+                print (" - Output:\n", self.Output(name))
                 ok = False
         return ok;

@@ -1,0 +1,28 @@
+DOSE_MEMORY_STATS(1)
+====================
+:doctype: manpage
+
+
+NAME
+----
+dose_memory_stats - simple memory statistics of Safir
+
+
+SYNOPSIS
+--------
+*dose_memory_stats*
+
+DESCRIPTION
+-----------
+Shows the shared memory usage in a Safir system. Updates cyclically.
+
+RESOURCES
+---------
+Web site: <http://www.safirsdkcore.com/>
+
+
+COPYING
+-------
+Copyright \(C) 2004-2014 Saab AB. Free use of this software is granted under
+the terms of the GNU General Public License Version 3 (GPL-3).
+

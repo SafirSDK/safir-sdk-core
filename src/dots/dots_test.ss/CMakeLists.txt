@@ -1,36 +1,61 @@
-cmake_minimum_required(VERSION 2.8)
-
-project(dots_test CXX)
-
-INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
-
 ADD_SUBDIRECTORY(cpp)
 ADD_SUBDIRECTORY(dotnet)
+ADD_SUBDIRECTORY(java)
 
-if (SAFIR_ADA_SUPPORT)
-  ADD_SUBDIRECTORY(ada)
+#if (SAFIR_ADA_SUPPORT)
+#  ADD_SUBDIRECTORY(ada)
+#endif()
+
+
+
+get_property(SAFIR_GENERATED_PATHS GLOBAL PROPERTY SAFIR_GENERATED_PATHS)
+
+ADD_TEST(NAME dots_cpp 
+  COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
+  --show-safir-config $<TARGET_FILE:safir_show_config>
+  --language cpp
+  --binary $<TARGET_FILE:dots_test_cpp>
+  --output ${CMAKE_CURRENT_SOURCE_DIR}/output.txt
+  --safir-generated-paths "${SAFIR_GENERATED_PATHS}")
+
+
+SET_SAFIR_TEST_PROPERTIES(TEST dots_cpp
+  CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/test_config)
+
+
+if (CSHARP_FOUND)
+  ADD_TEST(NAME dots_dotnet
+    COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py 
+    --show-safir-config $<TARGET_FILE:safir_show_config>
+    --language dotnet
+    --binary $<TARGET_PROPERTY:dots_test_dotnet,ASSEMBLY_FILE>
+    --dependencies $<TARGET_PROPERTY:Safir.Dob.Typesystem,ASSEMBLY_FILE>,$<TARGET_PROPERTY:safir_generated-DotsTest-dotnet,ASSEMBLY_FILE>
+    --output ${CMAKE_CURRENT_SOURCE_DIR}/output.txt
+    --safir-generated-paths "${SAFIR_GENERATED_PATHS}"
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/dotnet)
+
+  SET_SAFIR_TEST_PROPERTIES(TEST dots_dotnet
+    CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/test_config)
 endif()
 
-if (SAFIR_JAVA_SUPPORT)
-  ADD_SUBDIRECTORY(java)
-endif()
 
-FIND_PACKAGE(PythonInterp)
+#if (SAFIR_ADA_SUPPORT)
+#  ADD_TEST(dots_ada ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py ada)
+#  SET_SAFIR_TEST_PROPERTIES(TEST dots_ada)
+#endif()
 
-ENABLE_TESTING()
+if (Java_FOUND)
+  ADD_TEST(NAME dots_java
+    COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
+    --show-safir-config $<TARGET_FILE:safir_show_config>
+    --language java
+    --jar $<TARGET_PROPERTY:dots_test_java,JAR_FILE>
+    --dependencies $<TARGET_PROPERTY:safir_generated-DotsTest-java,JAR_FILE>,$<TARGET_PROPERTY:dots_java,JAR_FILE>
+    --output ${CMAKE_CURRENT_SOURCE_DIR}/output.txt
+    --safir-generated-paths "${SAFIR_GENERATED_PATHS}"
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/java)
 
-ADD_TEST(dots_cpp ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py cpp)
-ADD_TEST(dots_dotnet ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py dotnet)
+  SET_SAFIR_TEST_PROPERTIES(TEST dots_java
+    CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/test_config)
 
-SET_SAFIR_TEST_PROPERTIES(dots_cpp)
-SET_SAFIR_TEST_PROPERTIES(dots_dotnet)
-
-if (SAFIR_ADA_SUPPORT)
-  ADD_TEST(dots_ada ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py ada)
-  SET_SAFIR_TEST_PROPERTIES(dots_ada)
-endif()
-
-if (SAFIR_JAVA_SUPPORT)
-  ADD_TEST(dots_java ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py java)
-  SET_SAFIR_TEST_PROPERTIES(dots_java)
 endif()

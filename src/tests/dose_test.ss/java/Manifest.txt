@@ -1,0 +1,8 @@
+Class-Path: 
+   dots_java.jar
+   safir_generated-Core-java.jar
+   safir_generated-DoseTest-java.jar
+   dose_java.jar
+   swre_application_java.jar
+
+

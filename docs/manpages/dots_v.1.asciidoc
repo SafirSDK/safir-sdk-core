@@ -1,0 +1,29 @@
+DOTS_V(1)
+=========
+:doctype: manpage
+
+
+NAME
+----
+dots_v - Safir SDK Core code generation
+
+
+SYNOPSIS
+--------
+*dots_v*
+
+DESCRIPTION
+-----------
+Dots_v is a tool for generating code from dou files. Do not use this tool directly. Use dobmake instead!
+
+
+RESOURCES
+---------
+Web site: <http://www.safirsdkcore.com/>
+
+
+COPYING
+-------
+Copyright \(C) 2004-2014 Saab AB. Free use of this software is granted under
+the terms of the GNU General Public License Version 3 (GPL-3).
+

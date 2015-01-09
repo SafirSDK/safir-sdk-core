@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>Dobmake.Test1</name>
+    <baseClass>Safir.Dob.Entity</baseClass>
+    <parameters>
+      <parameter>
+        <name>Foo</name>
+        <type>Int64</type>
+        <value>20</value>
+      </parameter>
+    </parameters>
+    <members>
+        <member>
+            <name>Id</name>
+            <type>String</type>
+            <maxLength>10</maxLength>
+        </member>
+    </members>
+</class>

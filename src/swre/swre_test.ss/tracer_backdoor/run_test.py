@@ -24,24 +24,31 @@
 #
 ###############################################################################
 from __future__ import print_function
-import subprocess, os, time, sys, signal, re
+import subprocess, os, time, sys, signal, re, argparse
 import syslog_server
 from safe_print import *
 from testenv import TestEnv, TestEnvStopper
 
-if sys.platform == "win32":
-    config_type = os.environ.get("CMAKE_CONFIG_TYPE")
-    exe_path = config_type if config_type else ""
-else:
-    exe_path = "."
+
+parser = argparse.ArgumentParser("test script")
+parser.add_argument("--sender", required=True)
+parser.add_argument("--backdoor", required=True)
+parser.add_argument("--dose-main", required=True)
+parser.add_argument("--safir-show-config", required=True)
+parser.add_argument("--safir-generated-paths", required=True)
+
+arguments = parser.parse_args()
     
-sender_path = os.path.join(exe_path,"tracer_backdoor_sender")
+sender_path = arguments.sender
 
-SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
+backdoor = arguments.backdoor
 
-backdoor = os.path.join(SAFIR_RUNTIME,"bin","backdoor")
-
-
+#add all the environment variables. passed on format A=10;B=20
+for pair in arguments.safir_generated_paths.split(";"):
+    (name,value) = pair.split("=")
+    print("Setting environment variable", name, "to", value)
+    os.environ[name] = value
+    
 #in this test we dont check syslog output at all, we trust that it works, since we've tested
 #that elsewhere.
 
@@ -52,7 +59,7 @@ def fail(message, output):
     sys.exit(1)
 
 
-env = TestEnv()
+env = TestEnv(dose_main = arguments.dose_main, safir_show_config = arguments.safir_show_config, dope_main = None)
 with TestEnvStopper(env):
     env.launchProcess("sender", sender_path)
     output = env.WaitForOutput("sender", "Have logged 10 times")
@@ -75,7 +82,7 @@ with TestEnvStopper(env):
 
 
 #test turning individual prefix on
-env = TestEnv()
+env = TestEnv(dose_main = arguments.dose_main, safir_show_config = arguments.safir_show_config, dope_main = None)
 with TestEnvStopper(env):
     env.launchProcess("sender", sender_path)
     output = env.WaitForOutput("sender", "Have logged 10 times")

@@ -287,4 +287,6 @@ final class Kernel {
 
     //Get all the dou directories defined in typesystem.ini
     public static native String[] GetDouDirectories();
+
+    public static native String [] GetGeneratedJars();
 }

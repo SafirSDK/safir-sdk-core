@@ -1,11 +1,13 @@
-INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
-
 FILE(GLOB sources *.cpp)
+
+#Container tests have a lot of unused values...
+if (UNIX)
+  SET(CMAKE_CXX_FLAGS "-Wno-unused-value")
+endif()
 
 ADD_EXECUTABLE(dots_test_cpp ${sources})
 
-FIND_PACKAGE(Boost COMPONENTS filesystem system)
-
-if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(dots_test_cpp dots_cpp dots_generated-DotsTest-cpp dots_generated-cpp ${Boost_LIBRARIES})
-endif()
+TARGET_LINK_LIBRARIES(dots_test_cpp PRIVATE 
+  safir_generated-DotsTest-cpp
+  dots_cpp 
+  ${Boost_FILESYSTEM_LIBRARY})

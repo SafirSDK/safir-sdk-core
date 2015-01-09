@@ -1,32 +1,16 @@
-find_package(JNI REQUIRED)
-string (REPLACE "javac" "javah" JAVAH ${JAVA_COMPILE})
+#this project contains a library that has a C interface and we only want one version of it,
+#so we never want the "d" suffix on debug builds, which is default on windows.
+SET(CMAKE_DEBUG_POSTFIX "")
 
-INCLUDE_DIRECTORIES(${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2})
+ADD_LIBRARY(logging_java_jni SHARED
+  logging_jni.cpp)
 
-ADD_CUSTOM_COMMAND(OUTPUT 
-  com_saabgroup_safir_Logging.h
-  
-  COMMAND ${JAVAH} -classpath ../com.saabgroup.safir/bin com.saabgroup.safir.Logging
-  COMMENT "Generating javah header file"
-  VERBATIM)
+TARGET_INCLUDE_DIRECTORIES(logging_java_jni
+  PRIVATE ${JAVA_INCLUDE_PATH} ${JAVA_INCLUDE_PATH2} ${CMAKE_CURRENT_BINARY_DIR})
 
-ADD_CUSTOM_TARGET(javah ALL
-                  DEPENDS com_saabgroup_safir_Logging.h)
+#depend on the javah target to ensure we get our header files.
+add_dependencies(logging_java_jni logging_java_javah)
 
-FILE(GLOB sources *.cpp)
+TARGET_LINK_LIBRARIES(logging_java_jni PRIVATE logging_library)
 
-ADD_LIBRARY(logging_java_jni SHARED ${sources})
-
-if (NOT MSVC)
-  TARGET_LINK_LIBRARIES(logging_java_jni logging_library)
-endif()
-
-ADD_DEPENDENCIES(javah logging_java)
-ADD_DEPENDENCIES(logging_java_jni javah)
-
-INSTALL(TARGETS logging_java_jni
-        RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-        LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-        ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
-
-INSTALL_DEBUG_INFO(logging_java_jni)
+SAFIR_INSTALL(TARGETS logging_java_jni JNI)

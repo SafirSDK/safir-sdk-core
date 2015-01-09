@@ -1,0 +1,29 @@
+FOREACH(1)
+==========
+:doctype: manpage
+
+
+NAME
+----
+foreach - Safir SDK Core ForEach service
+
+
+SYNOPSIS
+--------
+*foreach*
+
+DESCRIPTION
+-----------
+See the user's guide for more information about the foreach service.
+
+
+RESOURCES
+---------
+Web site: <http://www.safirsdkcore.com/>
+
+
+COPYING
+-------
+Copyright \(C) 2004-2014 Saab AB. Free use of this software is granted under
+the terms of the GNU General Public License Version 3 (GPL-3).
+

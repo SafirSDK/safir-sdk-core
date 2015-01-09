@@ -1,4 +1,4 @@
-/******************************************************************************
+/* ****************************************************************************
 *
 * Copyright Saab AB, 2005-2013 (http://safir.sourceforge.net)
 * 
@@ -31,42 +31,6 @@ namespace Safir.Dob.Typesystem
     /// </summary>
     public class LibraryExceptions
     {
-        private System.Collections.Generic.Dictionary<System.Int64, string> m_exceptionNameTable =
-            new System.Collections.Generic.Dictionary<System.Int64, string>();
-
-        private LibraryExceptions()
-        {
-            //add exceptions from dots_generated
-            {
-                System.Reflection.Assembly ass = System.Reflection.Assembly.Load("dots_generated-dotnet");
-                System.Type[] exportedTypes = ass.GetExportedTypes();
-                foreach (System.Type type in exportedTypes)
-                {
-                    if (type.IsSubclassOf(typeof(System.Exception)))
-                    {
-                        System.IntPtr typename = Internal.InternalOperations.CStringOf(type.FullName);
-                        m_exceptionNameTable.Add(Internal.Kernel.DotsC_TypeIdFromName(typename), type.FullName + ", dots_generated-dotnet");
-                        Marshal.FreeHGlobal(typename);
-                    }
-                }
-            }
-
-            //add exceptions from dots_dotnet
-            {
-                System.Reflection.Assembly ass = System.Reflection.Assembly.Load("Safir.Dob.Typesystem");
-                System.Type[] exportedTypes = ass.GetExportedTypes();
-                foreach (System.Type type in exportedTypes)
-                {
-                    if (type.IsSubclassOf(typeof(System.Exception)))
-                    {
-                        System.IntPtr typename = Internal.InternalOperations.CStringOf(type.FullName);
-                        m_exceptionNameTable.Add(Internal.Kernel.DotsC_TypeIdFromName(typename), type.FullName + ", Safir.Dob.Typesystem");
-                        Marshal.FreeHGlobal(typename);
-                    }
-                }
-            }
-        }
-
         /// <summary>
         /// Property to retrieve the only instance of the Singleton.
         /// </summary>
@@ -153,48 +117,26 @@ namespace Safir.Dob.Typesystem
             byte wasSetByte;
             System.Int64 exceptionId;
             System.IntPtr description;
-            //TODO: remove workaround when MONO has fixed their problem
-#if FUNC_PTR_WORKAROUND
-            System.IntPtr deleter;
-#else
             Internal.Kernel.DotsC_BytePointerDeleter deleter;
-#endif
             Internal.Kernel.DotsC_GetAndClearException(out exceptionId, out description, out deleter, out wasSetByte);
             bool wasSet = Internal.InternalOperations.BoolOf(wasSetByte);
             if (wasSet)
             {
                 string desc = Internal.InternalOperations.StringOf(description);
-#if FUNC_PTR_WORKAROUND
-                Internal.Kernel.DotsC_DeleteBlob(ref description);
-#else
                 deleter(ref description);
-#endif
                 if (exceptionId == 0)
                 {
                     throw new System.Exception(desc);
                 }
                 else
                 {
-                    string typename;
-                    if (m_exceptionNameTable.TryGetValue(exceptionId, out typename))
-                    { //found in table
-                        //TODO: replace the table with a direct reflection call when
-                        //      DotsKernel supports typeId->exceptionName.
-                        System.Type type = System.Type.GetType(typename);
-                        System.Exception exc = System.Activator.CreateInstance(type, desc) as System.Exception;
-                        if (exc == null)
-                        {
-                            throw new IllegalValueException("Could not create exception " + type.FullName);
-                        }
-                        throw exc;
+                    System.Type type = GeneratedAssemblies.Instance.GetType(exceptionId);
+                    System.Exception exc = System.Activator.CreateInstance(type, desc) as System.Exception;
+                    if (exc == null)
+                    {
+                        throw new IllegalValueException("Could not create exception " + type.FullName);
                     }
-                    else
-                    {//not found in table! Internal error!
-                        throw new Safir.Dob.Typesystem.SoftwareViolationException
-                            ("LibraryExceptions::Throw was called when an exception that was not registered in the exception-factory was set in dots_kernel.\n"
-                             + "exceptionId = " + exceptionId + ", description = '" + desc + "'.\n"
-                             + "Please report this to your nearest DOB developer!");
-                    }
+                    throw exc;
                 }
             }
             else
@@ -212,8 +154,7 @@ namespace Safir.Dob.Typesystem
         {
             System.Int64 exceptionId;
             Internal.Kernel.DotsC_PeekAtException(out exceptionId);
-            return exceptionTypeId == exceptionId;
-            //TODO: use IsOfType when it works for exceptions
+            return Internal.InternalOperations.BoolOf(Internal.Kernel.DotsC_IsOfType(exceptionId, exceptionTypeId));
         }
 
         // Static, VOLATILE variable to store single instance

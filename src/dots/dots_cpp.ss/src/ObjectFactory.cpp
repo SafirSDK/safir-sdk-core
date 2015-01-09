@@ -23,10 +23,14 @@
 ******************************************************************************/
 
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
-#include <Safir/Dob/Typesystem/Exceptions.h>
 #include <Safir/Dob/Typesystem/BlobOperations.h>
+#include <Safir/Dob/Typesystem/Exceptions.h>
+#include <Safir/Dob/Typesystem/Internal/Kernel.h>
 #include <Safir/Dob/Typesystem/Operations.h>
+#include <Safir/Utilities/DynamicLibraryLoader.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <boost/thread/mutex.hpp>
 #include <boost/bind.hpp>
 #include <sstream>
@@ -37,6 +41,77 @@ namespace Dob
 {
 namespace Typesystem
 {
+    namespace 
+    {
+        void LoadGeneratedLibrary(const std::string& path, std::string name)
+        {
+#if defined (_MSC_VER) && !defined (NDEBUG)
+            name += 'd';
+#endif
+            
+            try
+            {
+                Safir::Utilities::DynamicLibraryLoader loader;
+                if (path.empty())
+                {
+                    loader.Load(name, false, true);
+                }
+                else
+                {
+                    loader.Load(name, path, false, true);
+                }
+            }
+            catch (const std::logic_error& e)
+            {
+                SEND_SYSTEM_LOG (Critical,  << "Failed to load " << name.c_str() << " library: " << e.what());
+                std::wostringstream ostr;
+                ostr << "Failed to load " << name.c_str() << " library. Please check your configuration!";
+                throw Safir::Dob::Typesystem::ConfigurationErrorException(ostr.str(), __WFILE__, __LINE__);
+            }
+        }
+
+        bool LoadGeneratedLibraries()
+        {
+            DotsC_GeneratedLibrary* generatedLibraries;
+            DotsC_Int32 size;
+            DotsC_GeneratedLibraryListDeleter deleter;
+            
+            DotsC_GetGeneratedLibraryList(generatedLibraries,
+                                          size,
+                                          deleter);
+            
+            if (size ==0)
+            {
+                throw Safir::Dob::Typesystem::ConfigurationErrorException(L"Failed to read information from typesystem.ini",
+                                                                          __WFILE__, __LINE__);
+            }
+
+            for (int i = 0; i < size; ++i)
+            {
+                std::string location;
+
+                if (generatedLibraries[i].cppLibraryLocation != NULL)
+                {
+                    location = generatedLibraries[i].cppLibraryLocation;
+                }
+                
+                if (generatedLibraries[i].library == 0)
+                {
+                    lllog(1) << "Not loading " << generatedLibraries[i].library << " since it is an override" << std::endl;
+                }
+                else
+                {
+                    lllog(1) << "Loading " << generatedLibraries[i].cppLibraryName << std::endl;
+                    LoadGeneratedLibrary(location, generatedLibraries[i].cppLibraryName);
+                }
+            }
+
+            return true;
+        }
+
+        const bool loadedLibraries = LoadGeneratedLibraries();
+    }
+
     boost::once_flag ObjectFactory::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
 
     ObjectFactory & ObjectFactory::SingletonHelper::Instance()

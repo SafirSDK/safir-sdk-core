@@ -1,4 +1,4 @@
-/******************************************************************************
+/* ****************************************************************************
 *
 * Copyright Saab AB, 2013 (http://safir.sourceforge.net)
 *
@@ -36,7 +36,7 @@ namespace Safir.Application
         /// Calling this function will cause google breakpad to be enabled for the current process.
         /// This function should be called as early as is humanly possible!
         /// Note that Stop() must be called before the process exits.
-        /// <summary>
+        /// </summary>
         public static void Start()
         {
             byte success;

@@ -1,0 +1,31 @@
+#!/bin/sh
+
+set -e
+
+case "${1}" in
+	configure)
+		if ! getent group safirusers > /dev/null 2>&1
+		then
+			echo "Creating safirusers group..."
+
+			addgroup --system safirusers
+		fi
+
+		chown root:safirusers /var/log/safir-sdk-core
+		chown root:safirusers /var/lib/safir-sdk-core
+
+		;;
+
+	abort-upgrade|abort-remove|abort-deconfigure)
+
+		;;
+
+	*)
+		echo "postinst called with unknown argument \`${1}'" >&2
+		exit 1
+		;;
+esac
+
+#DEBHELPER#
+
+exit 0

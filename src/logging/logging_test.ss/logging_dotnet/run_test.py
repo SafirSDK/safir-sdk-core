@@ -24,52 +24,27 @@
 #
 ###############################################################################
 from __future__ import print_function
-import subprocess, os, time, sys, shutil
+import subprocess, os, time, sys, shutil, argparse
 import syslog_server
 
-#TODO remove this when we drop python 2.6 support
-if "check_output" not in dir( subprocess ): # duck punch it in!
-    def f(*popenargs, **kwargs):
-        if 'stdout' in kwargs:
-            raise ValueError('stdout argument not allowed, it will be overridden.')
-        process = subprocess.Popen(stdout=subprocess.PIPE, *popenargs, **kwargs)
-        output, unused_err = process.communicate()
-        retcode = process.poll()
-        if retcode:
-            cmd = kwargs.get("args")
-            if cmd is None:
-                cmd = popenargs[0]
-            raise subprocess.CalledProcessError(retcode, cmd)
-        return output
-    subprocess.check_output = f
+parser = argparse.ArgumentParser("test script for logging")
+parser.add_argument("--safir-show-config", required=True)
+parser.add_argument("--sender-exe", required=True)
+parser.add_argument("--dependencies", required=True)
 
-if sys.platform == "win32":
-    config_type = os.environ.get("CMAKE_CONFIG_TYPE")
-    exe_path = config_type if config_type else ""
-else:
-    exe_path = "."
-    
-sender_path_base = os.path.join(exe_path,"log_sender_dotnet")
-sender_csexe = sender_path_base+".csexe"
-sender_exe = sender_path_base+".exe"
-shutil.copy2(sender_csexe,sender_exe)
+arguments = parser.parse_args()
 
-dependencies = ("Safir.Logging.dll",)
+dependencies = arguments.dependencies.split(",")
 
-SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
 for dep in dependencies:
-    shutil.copy2(os.path.join(SAFIR_RUNTIME,"bin",dep),
+    shutil.copy2(dep,
                  ".")
 
-log_server = syslog_server.SyslogServer()
+log_server = syslog_server.SyslogServer(arguments.safir_show_config)
 
-o1 = subprocess.check_output(sender_exe, stderr=subprocess.STDOUT)
-o2 = subprocess.check_output(sender_exe, stderr=subprocess.STDOUT)
-o3 = subprocess.check_output(sender_exe, stderr=subprocess.STDOUT)
-
-os.remove(sender_exe)
-for dep in dependencies:
-    os.remove(dep)
+o1 = subprocess.check_output(arguments.sender_exe, stderr=subprocess.STDOUT)
+o2 = subprocess.check_output(arguments.sender_exe, stderr=subprocess.STDOUT)
+o3 = subprocess.check_output(arguments.sender_exe, stderr=subprocess.STDOUT)
 
 syslog_output = log_server.get_data(1)
 stdout_output = (o1 + o2 + o3).decode("utf-8").replace("\r","")

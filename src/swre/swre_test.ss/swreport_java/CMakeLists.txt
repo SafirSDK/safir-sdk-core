@@ -1,13 +1,17 @@
-find_package(Java REQUIRED)
+if (NOT Java_FOUND)
+  return()
+endif()
 
-INCLUDE(JavaMacros)
+ADD_JAR(swreport_sender_java
+  SOURCES Sender.java
+  INCLUDE_JARS swre_reports_java
+  ENTRY_POINT Sender
+  MANIFEST ${CMAKE_CURRENT_SOURCE_DIR}/Manifest.txt)
 
-SET_JAVA_CLASSPATH(${SAFIR_RUNTIME}/bin/swre_reports_java.jar)
+ADD_TEST(NAME swreport_java
+  COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
+  --jar $<TARGET_PROPERTY:swreport_sender_java,JAR_FILE>
+  --dependencies $<TARGET_PROPERTY:swre_reports_java,JAR_FILE>
+  --safir-show-config $<TARGET_FILE:safir_show_config>)
 
-SET(JAVA_MANIFEST ${CMAKE_CURRENT_SOURCE_DIR}/Manifest.txt)
-
-ADD_JAR(swreport_sender_java Sender.java ALL)
-
-ADD_TEST(swreport_java ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
-
-SET_SAFIR_TEST_PROPERTIES(swreport_java 120)
+SET_SAFIR_TEST_PROPERTIES(TEST swreport_java TIMEOUT 120)

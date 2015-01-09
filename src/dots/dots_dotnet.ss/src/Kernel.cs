@@ -1,4 +1,4 @@
-/******************************************************************************
+/* ****************************************************************************
 *
 * Copyright Saab AB, 2005-2013 (http://safir.sourceforge.net)
 * 
@@ -34,7 +34,7 @@ namespace Safir.Dob.Typesystem.Internal
     /// </summary>
     internal class Id
     {
-        internal const string LLUF_ID_NAME = "lluf_id.dll";
+        internal const string LLUF_ID_NAME = "lluf_id";
 
         internal static Int64 Generate64BitHash(string str)
         {
@@ -59,7 +59,7 @@ namespace Safir.Dob.Typesystem.Internal
     /// </summary>
     internal class Kernel
     {
-        internal const string DOTS_KERNEL_NAME = "dots_kernel.dll";
+        internal const string DOTS_KERNEL_NAME = "dots_kernel";
 
         //********************************************************
         //* Base operations on blobs
@@ -315,21 +315,6 @@ namespace Safir.Dob.Typesystem.Internal
                                                      System.Int32 bufSize,
                                                      out System.Int32 resultSize);
 
-#if FUNC_PTR_WORKAROUND
-        //XmlToBlob
-        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-        internal static extern void DotsC_XmlToBlob(out System.IntPtr blobDest,
-                                                    out System.IntPtr dummy,
-                                                    System.IntPtr val);
-
-        //JsonToBlob
-        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-        internal static extern void DotsC_JsonToBlob(out System.IntPtr blobDest,
-                                                     out System.IntPtr dummy,
-                                                     System.IntPtr val);
-
-
-#else
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal delegate void DotsC_BytePointerDeleter(ref System.IntPtr ptr);
 
@@ -344,8 +329,6 @@ namespace Safir.Dob.Typesystem.Internal
         internal static extern void DotsC_JsonToBlob(out System.IntPtr blobDest,
                                                     out DotsC_BytePointerDeleter deleter,
                                                     System.IntPtr val);
-#endif
-
 
 
         //CalculateBase64BufferSize
@@ -1170,15 +1153,6 @@ namespace Safir.Dob.Typesystem.Internal
                                                        System.IntPtr description);
 
 
-        //TODO: re-add this when MONO has fixed their bug
-#if FUNC_PTR_WORKAROUND
-        [DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void DotsC_GetAndClearException(out System.Int64 exceptionId,
-                                                               out System.IntPtr description,
-                                                               out System.IntPtr dummy,
-                                                               out byte wasSet);
-
-#else
         //DotsC_GetAndClearException
         [DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void DotsC_GetAndClearException(out System.Int64 exceptionId,
@@ -1186,7 +1160,6 @@ namespace Safir.Dob.Typesystem.Internal
                                                                out DotsC_BytePointerDeleter deleter,
                                                                out byte wasSet);
 
-#endif
         //DotsC_PeekAtException
         [DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void DotsC_PeekAtException(out System.Int64 exceptionId);
@@ -1197,5 +1170,44 @@ namespace Safir.Dob.Typesystem.Internal
                                                                 System.IntPtr buf,
                                                                 System.Int32 bufSize,
                                                                 out System.Int32 resultSize);
+
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 4)]
+        internal struct DotsC_GeneratedLibrary
+        {
+            [MarshalAs(UnmanagedType.LPStr)]
+            public string name;
+
+            [MarshalAs(UnmanagedType.Bool)]
+            public bool library;
+
+            [MarshalAs(UnmanagedType.LPStr)]
+            public string cppLibraryName;
+
+            [MarshalAs(UnmanagedType.LPStr)]
+            public string cppLibraryLocation;
+
+            [MarshalAs(UnmanagedType.LPStr)]
+            public string javaJarName;
+
+            [MarshalAs(UnmanagedType.LPStr)]
+            public string javaJarLocation;
+
+            [MarshalAs(UnmanagedType.LPStr)]
+            public string dotnetAssemblyName;
+
+            [MarshalAs(UnmanagedType.LPStr)]
+            public string dotnetAssemblyLocation;
+        }
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        internal delegate void DotsC_GeneratedLibraryListDeleter(System.IntPtr list,
+                                                                 System.Int32 size);
+
+        [DllImport(DOTS_KERNEL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        static internal extern void DotsC_GetGeneratedLibraryList(out System.IntPtr generatedLibraries,
+                                                                  out System.Int32 size,
+                                                                  out DotsC_GeneratedLibraryListDeleter deleter);
+
     }
 }

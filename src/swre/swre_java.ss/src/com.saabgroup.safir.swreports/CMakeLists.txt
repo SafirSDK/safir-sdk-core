@@ -1,10 +1,13 @@
 file(GLOB_RECURSE sources src/*.java)
 
-SET_JAVA_CLASSPATH(${SAFIR_RUNTIME}/bin/dots_java.jar)
+ADD_JAR(swre_reports_java
+  SOURCES ${sources}
+  INCLUDE_JARS dots_java
+  MANIFEST ${CMAKE_CURRENT_SOURCE_DIR}/Manifest.txt)
 
-SET(JAVA_MANIFEST ${CMAKE_CURRENT_SOURCE_DIR}/Manifest.txt)
+SAFIR_INSTALL(TARGETS swre_reports_java)
 
-ADD_JAR(swre_reports_java "${sources}" ALL)
-
-INSTALL(FILES swre_reports_java.jar
-  DESTINATION ${SAFIR_RUNTIME}/bin)
+SAFIR_JAVAH(JAR swre_reports_java
+  CLASS com.saabgroup.safir.swreports.Library
+  OUTPUT_FILES com_saabgroup_safir_swreports_Library.h
+  OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/../swre_java_jni)
