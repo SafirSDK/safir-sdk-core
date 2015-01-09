@@ -179,7 +179,7 @@ namespace Safir
         }
 
 
-        void PersistHandler::HandleMessageFromDoseCom(const DistributionData& data)
+        void PersistHandler::HandleMessageFromDoseCom(const DistributionData& /*data*/)
         {
 #if 0 //stewart
             if (data.GetType() == DistributionData::Action_HavePersistenceDataRequest)

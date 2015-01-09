@@ -356,8 +356,8 @@ namespace Internal
         return true;
     }
 
-    bool RequestHandler::HandleRequest_LocalSender_ExternReceiver(const DistributionData & request,
-                                                      const ConnectionPtr & sender)
+    bool RequestHandler::HandleRequest_LocalSender_ExternReceiver(const DistributionData& /*request*/,
+                                                                  const ConnectionPtr& /*sender*/)
     {
 #if 0 //stewart
         if (!m_ecom->Send(request))

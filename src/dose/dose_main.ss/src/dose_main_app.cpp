@@ -519,7 +519,7 @@ namespace Internal
         }
     }
 
-    void DoseApp::WaitingConnectionsHelper(const Identifier blockingApp,
+    void DoseApp::WaitingConnectionsHelper(const Identifier /*blockingApp*/,
                                            IdentifierSet & waiting,
                                            int & recursionLevel)
     {
@@ -552,7 +552,7 @@ namespace Internal
     //----------------------------------------------------------------
     // Handling of Dose_Communication events
     //----------------------------------------------------------------
-    void DoseApp::HandleIncomingData(const DistributionData & data, const bool isAckedData)
+    void DoseApp::HandleIncomingData(const DistributionData & /*data*/, const bool /*isAckedData*/)
     {
 #if 0 //stewart
         switch (data.GetType())

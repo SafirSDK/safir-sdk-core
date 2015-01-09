@@ -65,7 +65,7 @@ namespace Internal
     void ResponseHandler::DispatchResponse(const DistributionData& response,
                                            bool & dontRemove,
                                            bool & doseComOverflowed,
-                                           const ConnectionPtr & sender)
+                                           const ConnectionPtr & /*sender*/)
     {
         //if dosecom is overflowed and response is for remote node we skip it.
         if (doseComOverflowed && response.GetReceiverId().m_node != Dob::ThisNodeParameters::NodeNumber())

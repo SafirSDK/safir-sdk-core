@@ -511,8 +511,8 @@ namespace Internal
         return state.GetSenderId().m_node == g_thisNode;
     }
 
-    bool ProcessEntityState(ExternNodeCommunication * ecom,
-                            const SubscriptionPtr & subscription)
+    bool ProcessEntityState(ExternNodeCommunication* /*ecom*/,
+                            const SubscriptionPtr& /*subscription*/)
     {
         bool complete = true;
 #if 0 //stewart
@@ -572,7 +572,7 @@ namespace Internal
         return complete;
     }
 
-    bool PoolHandler::PDProcessEntityState(const SubscriptionPtr & subscription)
+    bool PoolHandler::PDProcessEntityState(const SubscriptionPtr & /*subscription*/)
     {
 #if 0 //stewart
         // All nodes send ghost and injection data on PD!
@@ -617,8 +617,8 @@ namespace Internal
 #if 0 //stewart
                                   ExternNodeCommunication * ecom,
 #endif
-                                  PendingRegistrationHandler * pendingHandler,
-                                  const SubscriptionPtr & subscription)
+                                  PendingRegistrationHandler * /*pendingHandler*/,
+                                  const SubscriptionPtr & /*subscription*/)
     {
 #if 0 //stewart
         const DistributionData currentState = subscription->GetCurrentRealState();
@@ -649,7 +649,7 @@ namespace Internal
 #endif
     }
 
-    bool PoolHandler::PDProcessRegistrationState(const SubscriptionPtr & subscription)
+    bool PoolHandler::PDProcessRegistrationState(const SubscriptionPtr & /*subscription*/)
     {
 #if 0 //stewart
         if (subscription->GetLastRealState().IsNoState())
