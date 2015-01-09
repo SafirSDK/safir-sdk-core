@@ -278,6 +278,12 @@ namespace Com
          */
         int64_t Id() const;
 
+        /**
+         * Returns the ip address used for unicast by this instance.
+         * @return Ip address.
+         */
+        std::string IpAddress() const;
+
     private:
         std::unique_ptr<CommunicationImpl> m_impl;
 

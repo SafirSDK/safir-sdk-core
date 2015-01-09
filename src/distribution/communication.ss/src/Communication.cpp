@@ -198,6 +198,11 @@ namespace
     {
         return m_impl->Id();
     }
+
+    std::string Communication::IpAddress() const
+    {
+        return m_impl->IpAddress();
+    }
 }
 }
 }

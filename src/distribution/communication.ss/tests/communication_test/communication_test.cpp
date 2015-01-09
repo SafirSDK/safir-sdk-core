@@ -74,9 +74,9 @@ public:
                 ("node-type,t", boost::program_options::value<std::string>(), "Node type nt0(unicast only), nt1 or nt2, defaults to nt0'.")
                 ("await,w", boost::program_options::value<int>(), "Wait for specified number of other nodes before start sending data")
                 ("seed,s", boost::program_options::value< std::vector<std::string> >()->multitoken(), "Seed addresses on format 'address:port'")
-                ("nmsg,n", boost::program_options::value<unsigned int>(), "Number of messages to send and receive to and from each other node.")
-                ("nsend", boost::program_options::value<unsigned int>(), "Number of messages to send to every other node, default unlimited")
-                ("nrecv", boost::program_options::value<unsigned int>(), "Number of messages to receive from all otherl nodes (accumulated), default unlimited")
+                ("nmsg,n", boost::program_options::value<uint64_t>(), "Number of messages to send and receive to and from each other node.")
+                ("nsend", boost::program_options::value<uint64_t>(), "Number of messages to send to every other node, default unlimited")
+                ("nrecv", boost::program_options::value<uint64_t>(), "Number of messages to receive from all otherl nodes (accumulated), default unlimited")
                 ("size", boost::program_options::value<size_t>(), "Size of data packets, default is 1000 bytes")
                 ("thread-count", boost::program_options::value<unsigned int>(), "Number of threads to run io_service, default is 2 threads")
                 ("unacked", "Send unacked messages");
@@ -107,16 +107,16 @@ public:
         }
         if (vm.count("nmsg"))
         {
-            nsend=vm["nmsg"].as<unsigned int>();
+            nsend=vm["nmsg"].as<uint64_t>();
             nrecv=nsend;
         }
         if (vm.count("nsend"))
         {
-            nsend=vm["nsend"].as<unsigned int>();
+            nsend=vm["nsend"].as<uint64_t>();
         }
         if (vm.count("nrecv"))
         {
-            nrecv=vm["nrecv"].as<unsigned int>();
+            nrecv=vm["nrecv"].as<uint64_t>();
             accumulatedRecv=true;
         }
         if (vm.count("size"))
@@ -142,8 +142,8 @@ public:
     std::string nodeType;
     int await;
     std::vector<std::string> seeds;
-    unsigned int nsend;
-    unsigned int nrecv;
+    uint64_t nsend;
+    uint64_t nrecv;
     bool accumulatedRecv;
     size_t messageSize;
     unsigned int threadCount;
@@ -264,7 +264,7 @@ class Sp : private boost::noncopyable
 {
 public:
 
-    Sp(unsigned int numRecv, bool accumulated, bool acked,
+    Sp(uint64_t numRecv, bool accumulated, bool acked,
        const std::function< void(int64_t) >& includeNode,
        const std::function< void(int64_t) >& reportNodeFinished)
         :m_nodeTypes()
@@ -279,7 +279,6 @@ public:
         ,m_reportNodeFinished(reportNodeFinished)
     {        
     }
-
 
     void NewNode(const std::string& name, int64_t nodeId, int64_t nodeTypeId, const std::string& address)
     {
@@ -306,7 +305,6 @@ public:
     void GotReceive(int64_t /*id*/)
     {
         //std::cout<<"SP: GotRecv from "<<id<<std::endl;
-
     }
 
     void GotNack(int64_t /*id*/)
@@ -317,10 +315,6 @@ public:
     void Retransmit(int64_t id)
     {
         ++m_retransmitCount;
-        if (m_retransmitCount%25==0)
-        {
-            std::cout<<"Retransmits to "<<m_nodeNames[id]<<": "<<m_retransmitCount<<std::endl;
-        }
     }
 
     void OnRecv(int64_t id, const boost::shared_ptr<char[]>& msg, size_t size)
@@ -331,8 +325,8 @@ public:
         }
 
         ++m_totalRecvCount;
-        unsigned int& rc=m_recvCount[id];
-        unsigned int sendCount=*reinterpret_cast<const unsigned int*>(msg.get());
+        uint64_t& rc=m_recvCount[id];
+        uint64_t sendCount=*reinterpret_cast<const uint64_t*>(msg.get());
 
         if (rc>0)
         {
@@ -369,21 +363,21 @@ public:
 
     void PrintRecvCount()
     {
-        for (std::map<int64_t, unsigned int>::const_iterator it=m_recvCount.begin(); it!=m_recvCount.end(); ++it)
+        for (std::map<int64_t, uint64_t>::const_iterator it=m_recvCount.begin(); it!=m_recvCount.end(); ++it)
         {
             std::cout<<"Has got "<<it->second<<" from node "<<m_nodeNames[it->first]<<std::endl;
         }
     }
 
-    unsigned int RetransmitCount() const {return m_retransmitCount;}
+    uint64_t RetransmitCount() const {return m_retransmitCount;}
 
 private:
     NodeTypes m_nodeTypes;
     std::map<int64_t, std::string> m_nodeNames;
-    std::map<int64_t, unsigned int> m_recvCount;
-    unsigned int m_totalRecvCount;
-    unsigned int m_retransmitCount;
-    unsigned int m_numRecv;
+    std::map<int64_t, uint64_t> m_recvCount;
+    uint64_t m_totalRecvCount;
+    uint64_t m_retransmitCount;
+    uint64_t m_numRecv;
     bool m_accumulated;
     bool m_acked;
     std::function< void(int64_t) > m_includeNode;
@@ -448,6 +442,8 @@ int main(int argc, char * argv[])
                                                            cmd.unicastAddress,
                                                            nodeTypes.ToVector()));
 
+    std::cout<<"Ip "<<com->IpAddress()<<std::endl;
+
     com->SetDataReceiver([=](int64_t fromNode, int64_t /*fromNodeType*/, const boost::shared_ptr<char[]>& msg, size_t size){sp->OnRecv(fromNode, msg, size);}, 0);
     com->SetGotReceiveFromCallback([=](int64_t id){sp->GotReceive(id);});
     com->SetRetransmitToCallback([=](int64_t id){sp->Retransmit(id);});
@@ -480,14 +476,14 @@ int main(int argc, char * argv[])
     std::cout<<"Start sending "<<cmd.nsend<<" messages!"<<std::endl;
 
     auto startTime=std::chrono::high_resolution_clock::now();
-    unsigned int numberOfOverflows=0;
-    unsigned int sendCounter=0;    
+    uint64_t numberOfOverflows=0;
+    uint64_t sendCounter=0;
     while (sendCounter<cmd.nsend)
     {
         ++sendCounter;
 
         boost::shared_ptr<char[]> data=boost::make_shared<char[]>(cmd.messageSize);
-        (*reinterpret_cast<unsigned int*>(data.get()))=sendCounter;
+        (*reinterpret_cast<uint64_t*>(data.get()))=sendCounter;
         SetCRC(data, cmd.messageSize);
 
         for (auto& nt : nodeTypes.Map())
