@@ -1,36 +1,11 @@
-cmake_minimum_required(VERSION 2.8)
-
-project(dose_main_test_stub CXX)
-
-INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
-
 FILE(GLOB headers *.h)
 FILE(GLOB sources *.cpp)
 
 ADD_EXECUTABLE(dose_main_test_stub ${sources} ${headers})
 
-FIND_PACKAGE(Boost COMPONENTS program_options thread system)
-
 TARGET_LINK_LIBRARIES(dose_main_test_stub
-  optimized system_picture
-  debug system_picture${CMAKE_DEBUG_POSTFIX}
-  optimized communication
-  debug communication${CMAKE_DEBUG_POSTFIX}
-  optimized control_utils
-  debug control_utils${CMAKE_DEBUG_POSTFIX})
+  system_picture
+  control_utils
+  ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
-if (NOT MSVC)
-  TARGET_LINK_LIBRARIES(dose_main_test_stub
-    dots_internal
-    lluf_id
-    lluf_utils
-    lluf_config
-    ${Boost_LIBRARIES})
-endif()
-
-INSTALL(TARGETS dose_main_test_stub
-        RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-        LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-        ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
-
-INSTALL_DEBUG_INFO(dose_main_test_stub)
+SAFIR_INSTALL(TARGETS dose_main_test_stub TEST_SUITE)

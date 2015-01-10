@@ -97,9 +97,9 @@ namespace Control
 
             std::vector<boost::filesystem::path> douDirs;
 
-            for(const std::string& s : Safir::Utilities::Internal::ConfigHelper::GetDouDirectories(reader))
+            for(const auto& s : Safir::Utilities::Internal::ConfigHelper::GetDouDirectories(reader))
             {
-                douDirs.push_back(boost::filesystem::path(s));
+                douDirs.push_back(boost::filesystem::path(s.second));
             }
 
             auto repo = ts::ParseTypeDefinitions(douDirs);

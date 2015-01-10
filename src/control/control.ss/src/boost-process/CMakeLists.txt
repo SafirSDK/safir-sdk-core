@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 2.8)
-
 include(ExternalProject)
 
 set(DOWNLOAD_URL http://www.highscore.de/boost/process0.5/process.zip)

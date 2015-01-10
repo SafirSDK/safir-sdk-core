@@ -319,7 +319,7 @@ add_subdirectory(lluf)
 add_subdirectory(logging)
 add_subdirectory(distribution)
 add_subdirectory(dots)
-#TODO control
+add_subdirectory(control)
 add_subdirectory(safir_dou)
 add_subdirectory(dose)
 add_subdirectory(douf)
