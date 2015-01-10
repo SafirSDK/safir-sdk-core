@@ -26,6 +26,11 @@ else()
   set(BREAKPAD_FOUND False)
 endif()
 
+#breakpad needs the GNU extensions to build, so we append a new -std= here
+if (NOT MSVC)
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
+endif()
+
 #we add our own breakpad build, which will download from svn and build.
 if (NOT BREAKPAD_FOUND)
   add_subdirectory(google-breakpad)
