@@ -14,7 +14,7 @@ PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS
   ElectionMessage.proto)
 
 if (MSVC)
-  SET_SOURCE_FILES_PROPERTIES(${PROTO_SRCS} PROPERTIES COMPILE_FLAGS "/wd4127 /wd4244 /wd4267")
+  SET_SOURCE_FILES_PROPERTIES(${PROTO_SRCS} PROPERTIES COMPILE_FLAGS "/wd4127 /wd4244 /wd4267 /wd4018")
 endif()
 
 add_library(system_picture SHARED ${sources} ${headers} ${PROTO_SRCS} ${PROTO_HDRS})
@@ -23,6 +23,7 @@ add_library(system_picture SHARED ${sources} ${headers} ${PROTO_SRCS} ${PROTO_HD
 target_include_directories(system_picture PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
 TARGET_LINK_LIBRARIES(system_picture
+  lluf_config
   communication
   ${PROTOBUF_LITE_LIBRARIES})
 

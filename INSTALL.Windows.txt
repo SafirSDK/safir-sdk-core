@@ -41,10 +41,10 @@ Check newer releases!
 
  1. Download the protobuf source code from http://code.google.com/p/protobuf/downloads. 
  2. Unzip the code to c:\protobuf (or somewhere else of your choice).
- 3. Create create an environment variable PROTOBUF_DIR that points to c:\protobuf (or the place where you put it).
+ 3. Create an environment variable PROTOBUF_DIR that points to c:\protobuf (or the place where you put it).
  4. Open c:\protobuf\vsprojects\protobuf.sln in Visual Studio and click through the Conversion Wizard to update the solution to your studio version.
  5. If you're building a 64-bit system: Open Build --> Configuration Manager and create an x64 configuration under the "Active solution platform" drop down.
- 6  Build the solution in both Debug and Release configurations (you may have to build twice to get them to compile, for some reason).
+ 6  Build the solution in both Debug and Release configurations (you may have to build a few times to get them to compile, for some reason).
  7. Open a command prompt in the vsprojects directory, and run "extract_includes.bat".
  8. If you're building a 64 bit system: Move the Debug and Release directories from vsprojects\x64\ to vsprojects\ .
 
