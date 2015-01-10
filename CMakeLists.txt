@@ -37,7 +37,7 @@ endforeach()
 SET(SAFIR_VERSION_STRING "${SAFIR_VERSION_MAJOR}.${SAFIR_VERSION_MINOR}.${SAFIR_VERSION_PATCH}${SAFIR_VERSION_SUFFIX}")
 
 #make the version available to code as well.
-ADD_DEFINITIONS(-DSAFIR_SDK_CORE_VERSION="${SAFIR_VERSION_STRING}")
+ADD_DEFINITIONS(-DSAFIR_SDK_CORE_VERSION=\"${SAFIR_VERSION_STRING}\")
 
 #
 # This function will install a python script into the bin directory.
