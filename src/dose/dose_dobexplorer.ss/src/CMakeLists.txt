@@ -64,17 +64,5 @@ TARGET_LINK_LIBRARIES(dobexplorer
   system_picture
   lluf_crash_reporter
   ${Boost_SYSTEM_LIBRARY})
-  
-
-    dots_cpp 
-    dots_generated-Safir-cpp 
-    dots_generated-cpp 
-    dose_internal 
-    lluf_utils 
-    lluf_crash_reporter 
-    ${Boost_LIBRARIES})
-
-target_include_directories(dobexplorer PRIVATE ../../dose_communication.ss/src/defs/ ../../dose_communication.ss/src/dose_com/)
-#dobexplorer doesnt really need to link against dose_com, so instead just add the include directories
 
 SAFIR_INSTALL(TARGETS dobexplorer)

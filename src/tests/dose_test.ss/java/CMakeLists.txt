@@ -8,7 +8,6 @@ ADD_JAR(dose_test_java
   SOURCES ${sources}
   INCLUDE_JARS
   swre_application_java
-  dose_test_util_java
   dose_java
   safir_generated-DoseTest-java
   safir_generated-Core-java

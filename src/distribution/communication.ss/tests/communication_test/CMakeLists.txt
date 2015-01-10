@@ -1,31 +1,10 @@
-cmake_minimum_required(VERSION 2.8)
-
-project(communication_test)
-
-if (MSVC_VERSION EQUAL 1600) #vs2010 doesnt have noexcept
-  add_definitions(-DSAFIR_NO_NOEXCEPT)
-endif()
-
-INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
-
-FIND_PACKAGE(Boost COMPONENTS filesystem system thread chrono program_options)
-
 FILE(GLOB headers *.h)
 FILE(GLOB sources *.cpp)
 
 ADD_EXECUTABLE(communication_test ${sources} ${headers})
 
-TARGET_LINK_LIBRARIES(communication_test 
-  optimized communication
-  debug communication${CMAKE_DEBUG_POSTFIX})
+TARGET_LINK_LIBRARIES(communication_test
+  communication
+  ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
-if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(communication_test lluf_id lluf_utils ${Boost_LIBRARIES})
-endif()
-
-INSTALL(TARGETS communication_test
-        RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-        LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-        ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
-
-INSTALL_DEBUG_INFO(communication_test)
+SAFIR_INSTALL(TARGETS communication_test TEST_SUITE)

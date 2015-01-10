@@ -28,6 +28,11 @@ if (UNIX)
     endif()
 endif()
 ###########
+
+
+#
+# TODO write something about what this does
+#
 function (SAFIR_INSTALL)
   cmake_parse_arguments(INST "TEST_SUITE;JNI" "" "TARGETS" ${ARGN})
 
@@ -299,6 +304,11 @@ if(PYTHON_VERSION_STRING VERSION_LESS "2.7")
   message(FATAL_ERROR "Need Python version 2.7 or greater. Sorry.")
 endif()
 
+#
+# Set up Protobuf
+#
+FIND_PACKAGE(Protobuf REQUIRED)
+INCLUDE_DIRECTORIES(${PROTOBUF_INCLUDE_DIRS})
 
 #
 # At last, we're ready to add our subdirectories.
@@ -307,23 +317,22 @@ endif()
 add_subdirectory(patch_check)
 add_subdirectory(lluf)
 add_subdirectory(logging)
-#add_subdirectory(distribution)
+add_subdirectory(distribution)
 add_subdirectory(dots)
 #TODO control
 add_subdirectory(safir_dou)
-return()
-#add_subdirectory(dose)
-#add_subdirectory(douf)
-#add_subdirectory(swre)
-#add_subdirectory(foreach)
-#add_subdirectory(olib)
-#add_subdirectory(dope)
+add_subdirectory(dose)
+add_subdirectory(douf)
+add_subdirectory(swre)
+add_subdirectory(foreach)
+add_subdirectory(olib)
+add_subdirectory(dope)
 
-#add_subdirectory(tests)
+add_subdirectory(tests)
 
 
-#add_subdirectory(util)
-#add_subdirectory(config)
+add_subdirectory(util)
+add_subdirectory(config)
 
 INSTALL(EXPORT SafirSDKCore DESTINATION ${SAFIR_INSTALL_DESTINATION_CMAKE}
   COMPONENT Development)
