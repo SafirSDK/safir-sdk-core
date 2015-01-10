@@ -307,6 +307,13 @@ endif()
 #
 # Set up Protobuf
 #
+if (WIN32)
+  #Try to make Safir able to find Protobuf on windows
+  if (NOT "$ENV{PROTOBUF_DIR}" STREQUAL "")
+    set (PROTOBUF_SRC_ROOT_FOLDER $ENV{PROTOBUF_DIR})
+  endif()
+endif()
+
 FIND_PACKAGE(Protobuf REQUIRED)
 INCLUDE_DIRECTORIES(${PROTOBUF_INCLUDE_DIRS})
 
