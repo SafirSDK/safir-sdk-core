@@ -1,6 +1,6 @@
 ADD_SUBDIRECTORY(boost-process)
 
-INCLUDE_DIRECTORIES(. boost-process/src)
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/boost-process/src)
 
 FILE(GLOB headers *.h)
 FILE(GLOB sources *.cpp)
