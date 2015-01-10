@@ -106,42 +106,42 @@ TARGET_LINK_LIBRARIES(Coordinator_test
   ${Boost_SYSTEM_LIBRARY}
   ${PROTOBUF_LITE_LIBRARIES})
 
-add_test(RawStatistics_test RawStatistics_test)
+add_test(NAME RawStatistics_test COMMAND RawStatistics_test)
 SET_SAFIR_TEST_PROPERTIES(TEST RawStatistics_test TIMEOUT 30)
 
-add_test(SystemState_test SystemState_test)
+add_test(NAME SystemState_test COMMAND SystemState_test)
 SET_SAFIR_TEST_PROPERTIES(TEST SystemState_test TIMEOUT 30)
 
-add_test(RawPublisherLocal_test RawPublisherLocal_test)
+add_test(NAME RawPublisherLocal_test COMMAND RawPublisherLocal_test)
 SET_SAFIR_TEST_PROPERTIES(TEST RawPublisherLocal_test TIMEOUT 30)
 
-add_test(RawPublisherRemote_test RawPublisherRemote_test)
+add_test(NAME RawPublisherRemote_test COMMAND RawPublisherRemote_test)
 SET_SAFIR_TEST_PROPERTIES(TEST RawPublisherRemote_test TIMEOUT 30)
 
-add_test(StatePublisherLocal_test StatePublisherLocal_test)
+add_test(NAME StatePublisherLocal_test COMMAND StatePublisherLocal_test)
 SET_SAFIR_TEST_PROPERTIES(TEST StatePublisherLocal_test TIMEOUT 30)
 
-add_test(StatePublisherRemote_test StatePublisherRemote_test)
+add_test(NAME StatePublisherRemote_test COMMAND StatePublisherRemote_test)
 SET_SAFIR_TEST_PROPERTIES(TEST StatePublisherRemote_test TIMEOUT 30)
 
 
-add_test(LocalSubscriber_test LocalSubscriber_test)
+add_test(NAME LocalSubscriber_test COMMAND LocalSubscriber_test)
 SET_SAFIR_TEST_PROPERTIES(TEST LocalSubscriber_test TIMEOUT 30)
 
-add_test(RemoteSubscriber_test RemoteSubscriber_test)
+add_test(NAME RemoteSubscriber_test COMMAND RemoteSubscriber_test)
 SET_SAFIR_TEST_PROPERTIES(TEST RemoteSubscriber_test TIMEOUT 30)
 
-add_test(RawHandler_test RawHandler_test)
+add_test(NAME RawHandler_test COMMAND RawHandler_test)
 SET_SAFIR_TEST_PROPERTIES(TEST RawHandler_test TIMEOUT 30)
 
-add_test(RawChanges_test RawChanges_test)
+add_test(NAME RawChanges_test COMMAND RawChanges_test)
 SET_SAFIR_TEST_PROPERTIES(TEST RawChanges_test TIMEOUT 30)
 
-add_test(ElectionHandler_test ElectionHandler_test)
+add_test(NAME ElectionHandler_test COMMAND ElectionHandler_test)
 SET_SAFIR_TEST_PROPERTIES(TEST ElectionHandler_test TIMEOUT 1200)
 
-add_test(ElectionHandler_test_with_overflows ElectionHandler_test --overflows)
+add_test(NAME ElectionHandler_test_with_overflows COMMAND ElectionHandler_test --overflows)
 SET_SAFIR_TEST_PROPERTIES(TEST ElectionHandler_test_with_overflows TIMEOUT 1200)
 
-add_test(Coordinator_test Coordinator_test)
+add_test(NAME Coordinator_test COMMAND Coordinator_test)
 SET_SAFIR_TEST_PROPERTIES(TEST Coordinator_test TIMEOUT 30)

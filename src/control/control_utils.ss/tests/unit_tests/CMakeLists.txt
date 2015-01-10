@@ -26,6 +26,6 @@ TARGET_LINK_LIBRARIES(DoseMainCmd_test
   ${Boost_SYSTEM_LIBRARY}
   ${PROTOBUF_LITE_LIBRARIES})
 
-ADD_TEST(DoseMainCmd_test DoseMainCmd_test)
+ADD_TEST(NAME DoseMainCmd_test COMMAND DoseMainCmd_test)
 SET_SAFIR_TEST_PROPERTIES(TEST DoseMainCmd_test TIMEOUT 240)
 

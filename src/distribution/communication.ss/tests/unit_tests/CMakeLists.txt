@@ -24,20 +24,20 @@ target_link_libraries(unit_tests
   ${PROTOBUF_LITE_LIBRARIES}
   )
 
-ADD_TEST(MessageQueueTest unit_tests MessageQueueTest)
+ADD_TEST(NAME MessageQueueTest COMMAND unit_tests MessageQueueTest)
 SET_SAFIR_TEST_PROPERTIES(TEST MessageQueueTest TIMEOUT 360)
 
-ADD_TEST(HeartbeatSenderTest unit_tests HeartbeatSenderTest)
+ADD_TEST(NAME HeartbeatSenderTest COMMAND unit_tests HeartbeatSenderTest)
 SET_SAFIR_TEST_PROPERTIES(TEST HeartbeatSenderTest TIMEOUT 360)
 
-ADD_TEST(DataReceiverTest unit_tests DataReceiverTest)
+ADD_TEST(NAME DataReceiverTest COMMAND unit_tests DataReceiverTest)
 SET_SAFIR_TEST_PROPERTIES(TEST DataReceiverTest TIMEOUT 360)
 
-ADD_TEST(DataSenderTest unit_tests DataSenderTest)
+ADD_TEST(NAME DataSenderTest COMMAND unit_tests DataSenderTest)
 SET_SAFIR_TEST_PROPERTIES(TEST DataSenderTest TIMEOUT 360)
 
-ADD_TEST(DeliveryHandlerTest unit_tests DeliveryHandlerTest)
+ADD_TEST(NAME DeliveryHandlerTest COMMAND unit_tests DeliveryHandlerTest)
 SET_SAFIR_TEST_PROPERTIES(TEST DeliveryHandlerTest TIMEOUT 360)
 
-ADD_TEST(DiscovererTest unit_tests DiscovererTest)
+ADD_TEST(NAME DiscovererTest COMMAND unit_tests DiscovererTest)
 SET_SAFIR_TEST_PROPERTIES(TEST DiscovererTest TIMEOUT 360)
