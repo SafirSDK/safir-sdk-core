@@ -1,2 +1,5 @@
 #package is not meant for inclusion in debian at this time
 safir-sdk-core-dev: new-package-should-close-itp-bug
+
+#I believe this warning comes only on ubuntu, since they're using a different default java than lintian expects.
+safir-sdk-core-dev: incompatible-java-bytecode-format
