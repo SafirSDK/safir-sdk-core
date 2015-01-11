@@ -11,4 +11,4 @@ safir-sdk-core-testsuite: non-dev-pkg-with-shlib-symlink *
 safir-sdk-core-testsuite: package-name-doesnt-match-sonames *
 
 #I believe this warning comes only on ubuntu, since they're using a different default java than lintian expects.
-safir-sdk-core: incompatible-java-bytecode-format
+safir-sdk-core-testsuite: incompatible-java-bytecode-format
