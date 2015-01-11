@@ -1,0 +1,34 @@
+DOBMAKE-BATCH(1)
+================
+:doctype: manpage
+
+
+NAME
+----
+dobmake-batch - Safir SDK Core interface code generation and build command line tool
+
+
+SYNOPSIS
+--------
+*dobmake-batch* ['OPTIONS']
+
+DESCRIPTION
+-----------
+Dobmake is a tool that takes dou files and uses them to generate and build code into libraries.
+Please see the User's Guide for more information.
+
+OPTIONS
+-------
+Please check dobmake-batch --help for information on options.
+
+
+RESOURCES
+---------
+Web site: <http://www.safirsdkcore.com/>
+
+
+COPYING
+-------
+Copyright \(C) 2004-2014 Saab AB. Free use of this software is granted under
+the terms of the GNU General Public License Version 3 (GPL-3).
+

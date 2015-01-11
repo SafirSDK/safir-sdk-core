@@ -701,7 +701,7 @@ class DebianPackager(object):
                     "--prepend-path",
                     "/usr/lib/ccache/",
                     "-us", "-uc",
-                    "-eDEB_BUILD_OPTIONS=\"parallel="+ str(self.num_jobs) +"\""), "building packages")
+                    "--set-envvar DEB_BUILD_OPTIONS=\"parallel="+ str(self.num_jobs) +"\""), "building packages")
         os.chdir(glob.glob("obj-*")[0])
         translate_results_to_junit("debhelper")
 
