@@ -1,5 +1,6 @@
-safir-sdk-core (6.0.0~alpha-1) UNRELEASED; urgency=medium
+safir-sdk-core (6.0.0~alpha-1ubuntu1) UNRELEASED; urgency=medium
 
+  [ Lars Hagström ]
   * Initial release.
 
- -- Lars Hagström <lars@foldspace.nu>  Mon, 04 Aug 2014 22:09:33 +0200
+ -- Lars Hagström <lars@foldspace.nu>  Sun, 11 Jan 2015 17:54:29 +0100
