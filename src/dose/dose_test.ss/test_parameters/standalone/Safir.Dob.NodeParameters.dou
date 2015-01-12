@@ -82,5 +82,73 @@
         </arrayElement>
       </arrayElements>
     </parameter>
+    
+    <parameter>
+      <summary>Defines the different node types in the system. Can be an empty array if standalone configuration.</summary>
+      <name>NodeTypes</name>
+      <type>Safir.Dob.NodeType</type>
+      <arrayElements>
+
+        <arrayElement>
+          <Safir.Dob.NodeType type="Safir.Dob.NodeType">
+            <Name>Server</Name>
+            <IsLight>False</IsLight>
+            <TalksTo></TalksTo>
+            <MulticastAddressControl>224.11.11.11:23000</MulticastAddressControl>
+            <MulticastAddressData>224.11.11.11:24000</MulticastAddressData>
+            <HeartbeatInterval>1.0</HeartbeatInterval>
+            <MaxLostHeartbeats>5</MaxLostHeartbeats>
+            <SlidingWindowsSize>10</SlidingWindowsSize>
+            <RetryTimeout>0.2</RetryTimeout>
+            <WantedTypes>
+              <String>.*</String> <!-- Must be all types for non IsLight node -->
+            </WantedTypes> 
+            <UnwantedTypes></UnwantedTypes> <!-- Can't be specified for non IsLight node -->
+          </Safir.Dob.NodeType>
+        </arrayElement>
+
+        <arrayElement>
+          <Safir.Dob.NodeType type="Safir.Dob.NodeType">
+            <Name>Client</Name>
+            <IsLight>True</IsLight>
+            <TalksTo>
+              <String>Server</String>
+            </TalksTo>
+            <MulticastAddressControl>224.11.11.11:23001</MulticastAddressControl>
+            <MulticastAddressData>224.11.11.11:24001</MulticastAddressData>
+            <HeartbeatInterval>5.0</HeartbeatInterval>
+            <MaxLostHeartbeats>5</MaxLostHeartbeats>
+            <SlidingWindowsSize>10</SlidingWindowsSize>
+            <RetryTimeout>2.0</RetryTimeout>
+            <WantedTypes>
+              <String>.*</String> <!-- This client  wants all types -->
+            </WantedTypes> 
+            <UnwantedTypes></UnwantedTypes>
+          </Safir.Dob.NodeType>
+        </arrayElement>
+
+        <arrayElement>
+          <Safir.Dob.NodeType type="Safir.Dob.NodeType">
+            <Name>RemoteClient</Name>
+            <IsLight>True</IsLight>
+            <TalksTo>
+              <String>Server</String>
+            </TalksTo>
+            <HeartbeatInterval>30.0</HeartbeatInterval>
+            <MaxLostHeartbeats>5</MaxLostHeartbeats>
+            <SlidingWindowsSize>10</SlidingWindowsSize>
+            <RetryTimeout>5.0</RetryTimeout>
+            <WantedTypes>
+              <String>Capabilities\.Vehicles\.</String>
+            </WantedTypes>
+            <UnwantedTypes>
+              <String>Capabilities\.Vehicles\.Ambulance.*</String>
+            </UnwantedTypes>
+          </Safir.Dob.NodeType>
+        </arrayElement>
+        
+      </arrayElements>
+    </parameter>
+    
   </parameters>
 </class>

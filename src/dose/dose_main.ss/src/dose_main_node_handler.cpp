@@ -138,6 +138,9 @@ namespace Internal
 #if 0 //stewart
                 ni->IpAddress().SetVal(m_ecom->GetOwnIpAddress());
 #endif
+                //stewart todo
+                ni->IpAddress().SetVal(L"127.0.0.1");
+
             }
             else
             {

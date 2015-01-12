@@ -82,7 +82,7 @@
     </parameter>
 
     <parameter>
-      <summary>Defines the different node types in the system.</summary>
+      <summary>Defines the different node types in the system. Can be an empty array if standalone configuration.</summary>
       <name>NodeTypes</name>
       <type>Safir.Dob.NodeType</type>
       <arrayElements>
@@ -144,7 +144,7 @@
             </UnwantedTypes>
           </Safir.Dob.NodeType>
         </arrayElement>
-
+        
       </arrayElements>
     </parameter>
 
