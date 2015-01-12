@@ -1355,7 +1355,7 @@ public enum @_CLASS_@
      *   @_UNIT_@.checkForMismatch(@_UNIT_@.Checksum);
      * The checksum that you are passing to this function is compiled into your application
      * so that if the enum changes the checksum in your application will be different than that
-     * in dots_generated, which will mean that an exception is thrown.
+     * in safir_generated, which will mean that an exception is thrown.
      *
      * @param checksum the checksum to check against.
      */

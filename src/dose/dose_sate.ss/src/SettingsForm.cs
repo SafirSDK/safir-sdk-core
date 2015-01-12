@@ -200,10 +200,6 @@ namespace Sate
             //
             InitializeComponent();
 
-            //
-            // TODO: Add any constructor code after InitializeComponent call
-            //
-
             sublistView.ContextMenu = new ContextMenu(new MenuItem[] { new MenuItem("Remove", new EventHandler(OnRemoveSub_click)) });
             subRegListView.ContextMenu = new ContextMenu(new MenuItem[] { new MenuItem("Remove", new EventHandler(OnRemoveSubReg_click)) });
             reglistView.ContextMenu = new ContextMenu(new MenuItem[] { new MenuItem("Remove", new EventHandler(OnRemoveReg_click)) });

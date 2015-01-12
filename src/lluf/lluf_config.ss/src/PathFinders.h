@@ -35,13 +35,6 @@ namespace Internal
 {
     struct CommonPathFinder
     {
-        /** Throws logic_error if environment variable is not set */
-        static Path SafirRuntimeConfigDirectory()
-        {
-            const Path path(GetEnv("SAFIR_RUNTIME"));
-            return path / "data" / "core_config";
-        }
-
         /** Returns empty path if environment variable is not set*/
         static Path SafirTestConfigOverrideDirectory()
         {
@@ -58,13 +51,13 @@ namespace Internal
         static Path SystemConfigDirectory()
         {
             //this should be c:/ProgramData most of the time
-            return GetFolderPathFromCSIDL(CSIDL_COMMON_APPDATA) / "safir_sdk_core" / "config";
+            return GetFolderPathFromCSIDL(CSIDL_COMMON_APPDATA) / "safir-sdk-core" / "config";
         }
-        
+
         static Path UserConfigDirectory()
         {
             //try %USERPROFILE%/AppData/Local/
-            return GetFolderPathFromCSIDL(CSIDL_LOCAL_APPDATA) / "safir_sdk_core" / "config";
+            return GetFolderPathFromCSIDL(CSIDL_LOCAL_APPDATA) / "safir-sdk-core" / "config";
         }
     };
 #endif
@@ -75,14 +68,14 @@ namespace Internal
     {
         static Path SystemConfigDirectory()
         {
-            return Path("/etc/safir_sdk_core");
+            return Path("/etc/safir-sdk-core");
         }
 
         static Path UserConfigDirectory()
         {
             try
             {
-                return Path(GetEnv("XDG_CONFIG_HOME")) / "safir_sdk_core";
+                return Path(GetEnv("XDG_CONFIG_HOME")) / "safir-sdk-core";
             }
             catch (const std::logic_error&)
             {
@@ -90,7 +83,7 @@ namespace Internal
 
             try
             {
-                return Path(GetEnv("HOME")) / ".config" / "safir_sdk_core";
+                return Path(GetEnv("HOME")) / ".config" / "safir-sdk-core";
             }
             catch (const std::logic_error&)
             {
@@ -105,4 +98,3 @@ namespace Internal
 }
 
 #endif
-

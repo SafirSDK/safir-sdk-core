@@ -1,16 +1,11 @@
-cmake_minimum_required(VERSION 2.8)
+ADD_TEST(NAME crash_dump_monitor_test 
+  COMMAND ${PYTHON_EXECUTABLE} 
+  ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py 
+  --show-config $<TARGET_FILE:safir_show_config>
+  --dump-monitor $<TARGET_FILE:crash_dump_monitor>
+  --config-dir ${CMAKE_CURRENT_SOURCE_DIR}/testconf)
 
-project(crash_dump_monitor_test CXX)
-
-include($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
-
-find_package(PythonInterp)
-
-enable_testing()
-
-ADD_TEST(crash_dump_monitor_test ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py ${CMAKE_CURRENT_SOURCE_DIR}/testconf)
-
-SET_SAFIR_TEST_PROPERTIES(crash_dump_monitor_test 120)
+SET_SAFIR_TEST_PROPERTIES(TEST crash_dump_monitor_test TIMEOUT 120)
 
 
 

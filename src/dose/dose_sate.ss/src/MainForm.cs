@@ -29,6 +29,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows.Forms;
 using System.Data;
+using System.IO;
 
 namespace Sate
 {
@@ -56,8 +57,6 @@ namespace Sate
 
         //Must prevent the callback delegate from garbage collection. Thats why its declared here
         private CallDispatchDelegate callDispatch;
-
-        private System.Diagnostics.Process doseMainProcess;
 
         //dynamically loaded assembly
         private System.Reflection.Assembly dotsGenerated;
@@ -928,39 +927,6 @@ namespace Sate
 
             isConnected = true;
 
-
-            //there seems to be a bug in a mono version that causes the DoseMainMonitor to fail
-            bool useMonitor = true;
-            try
-            {
-                System.Reflection.Assembly ass = System.Reflection.Assembly.Load("Mono.Posix");
-                Console.WriteLine("Runtime Version of Mono.Posix.dll assembly = '{0}'", ass.ImageRuntimeVersion);
-                if (ass.ImageRuntimeVersion == "v2.0.50727")
-                {
-                    Console.WriteLine("Not using the DoseMainMonitor");
-                    useMonitor = false;
-                }
-            }
-            catch (System.Exception)
-            {
-
-            }
-
-            if (useMonitor)
-            {
-                //monitor dose_main
-                System.Diagnostics.Process[] doseProcess=System.Diagnostics.Process.GetProcessesByName("dose_main");
-                if (doseProcess.Length==0)
-                {
-                    doseProcess=System.Diagnostics.Process.GetProcessesByName("dose_maind");
-                }
-                if (doseProcess.Length>0)
-                {
-                    doseMainProcess=doseProcess[0];
-                    doseMainProcess.Exited += new EventHandler(DoseMainMonitor);
-                }
-            }
-
             this.connectToolStripMenuItem.Enabled = false;
             this.connectWithContextToolStripMenuItem.Enabled = false;
             this.disconnectToolStripMenuItem.Enabled=true;
@@ -1567,22 +1533,6 @@ namespace Sate
             get {return isConnected;}
         }
 
-        //Event handler called if dose_main terminates in any way
-        private void DoseMainMonitor(object sender, EventArgs args)
-        {
-            System.Windows.Forms.Application.Exit();
-
-            // TODO : For now Sate is exiting without displaying any message boxes. If this is the desired
-            //        behaviour the code below can be removed.
-            //
-            //OutputPanel.Instance.LogEvent("- Process Dose_Main.exe has exited. SATE must be restarted.", true);
-            //this.statusBar.Text="Disconnected! - dose_main.exe has been killed, restart SATE.";
-            //MessageBox.Show("SATE has detected that "+info+" has exited! You must restart SATE.", "Dose_Main.exe killed", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-            //isConnected=false;
-            //this.connectToolStripMenuItem.Enabled=false;
-            //this.disconnectToolStripMenuItem.Enabled=false;
-        }
-
         //Event handler for menu: Tools -> Scenario
         private void scenariomenuItem_Click(object sender, System.EventArgs e)
         {
@@ -2046,8 +1996,8 @@ namespace Sate
             OpenFileDialog of = new OpenFileDialog();
             of.AddExtension = true;
             of.Filter = "DOU files (*.dou)|*.dou|All files (*.*)|*.*";
-            of.InitialDirectory = Environment.GetEnvironmentVariable(@"SAFIR_RUNTIME") +
-                                    @"\data\text\dots\classes\";
+            of.InitialDirectory = Path.GetDirectoryName(Path.GetDirectoryName
+                (Safir.Dob.Typesystem.Internal.InternalOperations.GetDouFilePath(Safir.Dob.Entity.ClassTypeId)));
 
             if (of.ShowDialog() == DialogResult.OK)
             {

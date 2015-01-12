@@ -31,6 +31,15 @@
 #include <DopeTest/BigEntity.h>
 #include <boost/lexical_cast.hpp>
 
+#ifdef NDEBUG
+const int NUM_SMALL=100;
+const int NUM_BIG=10;
+#else
+const int NUM_SMALL=10;
+const int NUM_BIG=2;
+#endif
+
+
 class StopHandler :
     public Safir::Dob::StopHandler
 {
@@ -40,15 +49,15 @@ public:
     virtual void OnStopOrder() {m_ioService.stop();}
 private:
     boost::asio::io_service& m_ioService;
-    
+
 };
 
-class EntityOwner 
+class EntityOwner
     : public Safir::Dob::EntityHandlerInjection
 {
 public:
     explicit EntityOwner(boost::asio::io_service& ioService)
-        : m_ioService(ioService) 
+        : m_ioService(ioService)
         , m_gotAllSmall(false)
         , m_gotAllBig(false)
     {
@@ -65,7 +74,7 @@ public:
 
     void SetSmall()
     {
-        for (int i = 0; i < 100; ++i)
+        for (int i = 0; i < NUM_SMALL; ++i)
         {
             DopeTest::SmallEntityPtr ent = DopeTest::SmallEntity::Create();
             ent->Name() = L"testelitest";
@@ -95,7 +104,7 @@ public:
 
     void SetBig()
     {
-        for (int i = 0; i < 10; ++i)
+        for (int i = 0; i < NUM_BIG; ++i)
         {
             DopeTest::BigEntityPtr ent = DopeTest::BigEntity::Create();
             for (int j = 0; j < DopeTest::BigEntity::NumberArraySize(); ++j)
@@ -137,7 +146,7 @@ private:
     virtual void OnInjectedNewEntity(const Safir::Dob::InjectedEntityProxy injectedEntityProxy)
     {
         //output only the first 200 chars of the xml
-        std::wcout << "OnInjectedNewEntity " 
+        std::wcout << "OnInjectedNewEntity "
                    << injectedEntityProxy.GetEntityId() << ": "
                    << Safir::Dob::Typesystem::Serialization::ToXml(injectedEntityProxy.GetInjectionBlob()).substr(0,200)
                    << std::endl;
@@ -170,25 +179,33 @@ private:
 
 int main(int argc, char* argv[])
 {
+
     std::vector<std::string> args(argv+1, argv+argc);
-    if (args.size() != 1 || (args[0] != "set" && args[0] != "accept" && args[0] != "update"))
+    if (args.size() != 1 || (args[0] != "set" && args[0] != "accept" && args[0] != "update" && args[0] != "num"))
     {
         std::wcout << "Arg must be either set, accept or update" << std::endl;
         return 1;
     }
 
+    if (args[0] == "num")
+    {
+        std::wcout << "NUM_SMALL = " << NUM_SMALL << std::endl;
+        std::wcout << "NUM_BIG = " << NUM_BIG << std::endl;
+        return 0;
+    }
+
     const bool set = args[0] == "set";
     const bool update = args[0] == "update";
-        
+
     try
     {
         const std::wstring nameCommonPart = L"C++";
         const std::wstring nameInstancePart = L"1";
 
         boost::asio::io_service ioService;
-            
+
         StopHandler stopHandler(ioService);
-        
+
         Safir::Dob::Connection connection;
 
         Safir::Utilities::AsioDispatcher dispatcher(connection,ioService);
@@ -198,7 +215,7 @@ int main(int argc, char* argv[])
                         0, // Context
                         &stopHandler,
                         &dispatcher);
-        
+
         EntityOwner owner(ioService);
         if (set)
         {
@@ -209,7 +226,7 @@ int main(int argc, char* argv[])
         {
             boost::asio::io_service::work keepRunning(ioService);
             ioService.run();
-            
+
             if (update)
             {
                 owner.UpdateSmall();
@@ -234,4 +251,3 @@ int main(int argc, char* argv[])
     //std::cin.get();
     return 0;
 }
-

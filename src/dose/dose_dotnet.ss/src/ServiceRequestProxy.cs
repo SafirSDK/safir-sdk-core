@@ -1,4 +1,4 @@
-/******************************************************************************
+/* ****************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 *
@@ -68,11 +68,7 @@ namespace Safir.Dob
             {
                 CheckNotDisposed();
                 System.IntPtr blob;
-#if FUNC_PTR_WORKAROUND
-                System.IntPtr blobDeleter;
-#else
                 Interface.DoseC_BlobDeleter blobDeleter;
-#endif
                 byte success;
                 Interface.DoseC_GetConnectionInfo(m_state, out blob, out blobDeleter, out success);
 
@@ -87,11 +83,7 @@ namespace Safir.Dob
                 }
                 finally
                 {
-#if FUNC_PTR_WORKAROUND
-                    Safir.Dob.Typesystem.Internal.InternalOperations.Delete(ref blob);
-#else
                     blobDeleter(ref blob);
-#endif
                 }
             }
         }

@@ -1,21 +1,35 @@
 #Binaries
 *.jar
 *.so
+*.so.[0-9]*
 *.exe
-*.csexe
+*.exe.config
 *.dll
+*.dll.config
 *.mdb
 *.pdb
+*.gch
+*.pch
+
+#misc generated files
+precompiled_header_for_cpp.cpp
+SafirSdkCoreVersion.h
+Manifest.generated.txt
 
 #CMake stuff
-*.cmake
-CMakeLists.txt.user*
-install_manifest.txt
+cmake_install.cmake
+CTestTestfile.cmake
+CMakeLists.txt.user
+install_manifest*.txt
 CMakeFiles
 *.rsp
 CMakeCache.txt
 Makefile
 compile_commands.json
+generated_code
+.ninja_*
+*.ninja
+stage
 
 #MSVC stuff
 *embed.manifest
@@ -91,7 +105,7 @@ qrc_*.cxx
 
 #Misc
 __pycache__
-buildlog_*.html
+buildlog.html
 *.resources
 *.bak
 *.pyc
@@ -100,3 +114,8 @@ bin
 *-build
 build-*
 *.orig
+*-dotnet.xml
+dose_test_output
+version.cs
+*.1.asciidoc.copied
+tmp

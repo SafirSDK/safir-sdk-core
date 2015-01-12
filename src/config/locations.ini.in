@@ -1,0 +1,7 @@
+;Specify where internal lock files are to be kept
+lock_file_directory=@DEFAULT_LOCK_FILE_DIRECTORY@
+
+;Specify where crash dump files should be put.
+crash_dump_directory=@DEFAULT_CRASH_DUMP_DIRECTORY@
+
+

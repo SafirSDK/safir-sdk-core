@@ -54,9 +54,6 @@ namespace Sate
             //
             InitializeComponent();
 
-            //
-            // TODO: Add any constructor code after InitializeComponent call
-            //
             reps=defaultReps;
             if (reps<0)
             {

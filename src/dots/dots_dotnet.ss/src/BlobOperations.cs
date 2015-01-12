@@ -1,4 +1,4 @@
-/******************************************************************************
+/* ****************************************************************************
 *
 * Copyright Saab AB, 2005-2013 (http://safir.sourceforge.net)
 *
@@ -2956,7 +2956,6 @@ namespace Safir.Dob.Typesystem
         #endregion
         #endregion
 
-        //TODO: Rename this function to something that reflects what it actually does.
         /// <summary>
         /// Get the static blob size of an type, but excluding the size that is inherited from parent classes.
         /// <para>

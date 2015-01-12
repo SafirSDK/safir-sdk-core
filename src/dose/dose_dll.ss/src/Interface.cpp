@@ -28,6 +28,7 @@
 #include <Safir/Dob/Typesystem/Utilities.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Dob/Internal/SubscriptionOptions.h>
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Dob/Internal/InjectionKindTable.h>
@@ -1329,9 +1330,13 @@ void DoseC_EntityIteratorDestroy(const long ctrl,
         ControllerTable::Instance().GetController(ctrl)->
             EntityIteratorDestroy(iteratorId);
     }
+    catch (const std::exception& e)
+    {
+        SEND_SYSTEM_LOG(Alert, << "Got an exception while destroying an entity iterator: " << e.what())
+    }
     catch (...)
     {
-        //TODO: do something useful here, crash maybe?
+        SEND_SYSTEM_LOG(Alert, << "Got a ... exception while destroying an entity iterator. What are you doing?")
     }
 }
 
@@ -1422,28 +1427,6 @@ void DoseC_GetContext(const long ctrl,
 }
 
 
-
-
-
-
-// //-------------------------------
-// // Debug
-// //-------------------------------
-// void DoseC_TestSupp_GetConnectionId(const char* name,
-//                                     Safir::Dob::Typesystem::Int32& node,
-//                                     Safir::Dob::Typesystem::Int64& id,
-//                                     bool& nameExists,
-//                                     bool & success)
-// {
-//    success = false;
-//    try
-//    {
-//       Safir::Dob::Internal::Controller::GetConnectionId(name, node, id, nameExists);
-//       success = true;
-//    }
-//    CATCH_LIBRARY_EXCEPTIONS;
-// }
-
 void DoseC_SimulateOverflows(const long ctrl,
                              const bool inQueues,
                              const bool outQueues,
@@ -1461,188 +1444,4 @@ void DoseC_SimulateOverflows(const long ctrl,
     CATCH_LIBRARY_EXCEPTIONS;
 }
 
-
-
-
-// void DoseC_TestSupp_GetObjectStats(Safir::Dob::Typesystem::TypeId tid[],
-//                                    int writes[],
-//                                    int& size,
-//                                    bool & success)
-// {
-//    success = false;
-//    try
-//    {
-//       Safir::Dob::Internal::Controller::GetObjectStats(tid, writes, size);
-//       success = true;
-//    }
-//    CATCH_LIBRARY_EXCEPTIONS;
-// }
-
-// void DoseC_TestSupp_GetConnectionStats( const char* connName[],
-//                                         int reqSent[],
-//                                         int reqRecv[],
-//                                         int reqSendOverflow[],
-//                                         int reqRecvOverflow[],
-//                                         int reqTimedOut[],
-//                                         int respSent[],
-//                                         int respRecv[],
-//                                         int msgSent[],
-//                                         int msgRecv[],
-//                                         int msgSendOverflow[],
-//                                         int msgRecvOverflow[],
-//                                         int arrSize,
-//                                         int& results,
-//                                         bool& gotAll,
-//                                         bool & success)
-// {
-//    success = false;
-//    try
-//    {
-//       Safir::Dob::Internal::Controller::GetConnectionStats(connName,
-//                                                            reqSent,
-//                                                            reqRecv,
-//                                                            reqSendOverflow,
-//                                                            reqRecvOverflow,
-//                                                            reqTimedOut,
-//                                                            respSent,
-//                                                            respRecv,
-//                                                            msgSent,
-//                                                            msgRecv,
-//                                                            msgSendOverflow,
-//                                                            msgRecvOverflow,
-//                                                            arrSize,
-//                                                            results,
-//                                                            gotAll);
-//       success = true;
-//    }
-//    CATCH_LIBRARY_EXCEPTIONS;
-// }
-
-// void DoseC_TestSupp_GetSharedMemoryGeneralInfo(  int& numberOfBlockGroups,
-//                                                  int& numberOfMemoryBlocks,
-//                                                  unsigned int& poolSizeInBytes,
-//                                                  bool & success)
-// {
-//    success = false;
-//    try
-//    {
-//       Safir::Dob::Internal::Controller::GetSharedMemoryGeneralInfo(numberOfBlockGroups,
-//                                                                    numberOfMemoryBlocks,
-//                                                                    poolSizeInBytes);
-//       success = true;
-//    }
-//    CATCH_LIBRARY_EXCEPTIONS;
-// }
-
-// void DoseC_TestSupp_GetSharedMemoryDetailedStats(int blockSize[],
-//                                                  int noBlocks[],
-//                                                  int noAllocs[],
-//                                                  int noDeallocs[],
-//                                                  int highWaterMark[],
-//                                                  bool & success)
-// {
-//    success = false;
-//    try
-//    {
-//       Safir::Dob::Internal::Controller::GetSharedMemoryDetailedStats(blockSize, noBlocks, noAllocs, noDeallocs, highWaterMark);
-//       success = true;
-//    }
-//    CATCH_LIBRARY_EXCEPTIONS;
-// }
-
-// void DoseC_TestSupp_GetQueueSize(Safir::Dob::Typesystem::Int64 connId,
-//                                  int queue,
-//                                  int& size,
-//                                  bool & success)
-// {
-//    success = false;
-//    try
-//    {
-//       Safir::Dob::Internal::Controller::GetQueueSize(connId, queue, size);
-//       success = true;
-//    }
-//    CATCH_LIBRARY_EXCEPTIONS;
-// }
-
-// void DoseC_TestSupp_GetMessageQueueContent( Safir::Dob::Typesystem::Int64 connId,
-//                                             bool outQ, //true if messageOutQ, false if messageInQ
-//                                             Safir::Dob::Typesystem::TypeId types[],
-//                                             Safir::Dob::Typesystem::InstanceNumber instances[],
-//                                             int size,
-//                                             int& noResults,
-//                                             bool & success)
-// {
-//    success = false;
-//    try
-//    {
-//       Safir::Dob::Internal::Controller::GetMessageQueueContent(connId, outQ, types, instances, size, noResults);
-//       success = true;
-//    }
-//    CATCH_LIBRARY_EXCEPTIONS;
-// }
-
-// void DoseC_TestSupp_GetRequestQueueContent( Safir::Dob::Typesystem::Int64 connId,
-//                                             bool outQ, //true if requestOut/responseIn, false if requestIn/responseOut
-//                                             Safir::Dob::Typesystem::TypeId reqTypes[],
-//                                             Safir::Dob::Typesystem::InstanceNumber reqInstances[],
-//                                             Safir::Dob::Typesystem::TypeId respTypes[],
-//                                             Safir::Dob::Typesystem::InstanceNumber respInstances[],
-//                                             char typeOfReq[],
-//                                             bool reqHandled[],
-//                                             bool hasResponse[],
-//                                             bool& validContent,
-//                                             bool & success)
-// {
-//    success = false;
-//    try
-//    {
-//       Safir::Dob::Internal::Controller::GetRequestQueueContent(connId, outQ, reqTypes, reqInstances, respTypes,
-//                                                                respInstances, typeOfReq, reqHandled, hasResponse, validContent);
-//       success = true;
-//    }
-//    CATCH_LIBRARY_EXCEPTIONS;
-// }
-
-// void DoseC_TestSupp_GetQueueItemDetails( Safir::Dob::Typesystem::Int64 connId,
-//                                          int queue,
-//                                          Safir::Dob::Typesystem::Int64& sender,
-//                                          char * & blob,
-//                                          bool & success)
-// {
-//    success = false;
-//    try
-//    {
-//       Safir::Dob::Internal::Controller::GetQueueItemDetails(connId, queue, sender, blob);
-//       success = true;
-//    }
-//    CATCH_LIBRARY_EXCEPTIONS;
-// }
-
-// void DoseC_TestSupp_GetSimulateFullQueue(Safir::Dob::Typesystem::Int64 connId,
-//                                          int queue,
-//                                          bool& simulateFull,
-//                                          bool & success)
-// {
-//    success = false;
-//    try
-//    {
-//       Safir::Dob::Internal::Controller::GetSimulateFullQueue(connId, queue, simulateFull);
-//       success = true;
-//    }
-//    CATCH_LIBRARY_EXCEPTIONS;
-// }
-
-// void DoseC_TestSupp_SetSimulateFullQueue(Safir::Dob::Typesystem::Int64 connId,
-//                                          int queue,
-//                                          bool simulateFull,
-//                                          bool & success)
-// {
-//    success = false;
-//    try
-//    {
-//       Safir::Dob::Internal::Controller::SetSimulateFullQueue(connId, queue, simulateFull);
-//       success = true;
-//    }
-//    CATCH_LIBRARY_EXCEPTIONS;
-// }
 

@@ -24,38 +24,29 @@
 #
 ###############################################################################
 from __future__ import print_function
-import subprocess, os, time, sys, signal, re
+import subprocess, os, time, sys, signal, re, argparse, shutil
 import syslog_server
 from safe_print import *
 
-#TODO remove this when we drop python 2.6 support
-if "check_output" not in dir( subprocess ): # duck punch it in!
-    def f(*popenargs, **kwargs):
-        if 'stdout' in kwargs:
-            raise ValueError('stdout argument not allowed, it will be overridden.')
-        process = subprocess.Popen(stdout=subprocess.PIPE, *popenargs, **kwargs)
-        output, unused_err = process.communicate()
-        retcode = process.poll()
-        if retcode:
-            cmd = kwargs.get("args")
-            if cmd is None:
-                cmd = popenargs[0]
-            raise subprocess.CalledProcessError(retcode, cmd)
-        return output
-    subprocess.check_output = f
+parser = argparse.ArgumentParser("test script for logging")
+parser.add_argument("--jar", required=True)
+parser.add_argument("--dependencies", required=True)
+parser.add_argument("--safir-show-config", required=True)
 
-SAFIR_RUNTIME = os.environ["SAFIR_RUNTIME"]
+arguments = parser.parse_args()
+
+dependencies = arguments.dependencies.split(",")
+
+for dep in dependencies:
+    shutil.copy2(dep,
+                 ".")
 
 sender_cmd = ("java",
               "-Xcheck:jni",
               "-Xfuture",
-              "-cp", 
-              os.path.join(SAFIR_RUNTIME, "bin", "swre_application_java.jar") +
-              os.pathsep +
-              "tracer_sender_java.jar",
-              "Sender")
+              "-jar", arguments.jar)
 
-syslog = syslog_server.SyslogServer()
+syslog = syslog_server.SyslogServer(arguments.safir_show_config)
 
 o1 = subprocess.check_output(sender_cmd)
 o2 = subprocess.check_output(sender_cmd)

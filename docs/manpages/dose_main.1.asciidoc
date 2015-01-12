@@ -1,0 +1,29 @@
+DOSE_MAIN(1)
+============
+:doctype: manpage
+
+
+NAME
+----
+dose_main - Safir object distribution service
+
+
+SYNOPSIS
+--------
+*dose_main*
+
+DESCRIPTION
+-----------
+dose_main is the service in Safir SDK Core that distributes objects within and between nodes.
+
+
+RESOURCES
+---------
+Web site: <http://www.safirsdkcore.com/>
+
+
+COPYING
+-------
+Copyright \(C) 2004-2014 Saab AB. Free use of this software is granted under
+the terms of the GNU General Public License Version 3 (GPL-3).
+

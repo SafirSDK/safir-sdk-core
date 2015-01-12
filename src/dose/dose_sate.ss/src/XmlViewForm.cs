@@ -54,9 +54,6 @@ namespace Sate
             //
             InitializeComponent();
 
-            //
-            // TODO: Add any constructor code after InitializeComponent call
-            //
             string name=Safir.Dob.Typesystem.Operations.GetName(obj.GetTypeId());
             name=name.Substring(name.LastIndexOf('.')+1);
             this.Text = "XML Serialization of " + name; // +" instance " + obj.InstanceNumber;

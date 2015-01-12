@@ -312,7 +312,7 @@ public:
 
     }
 
-    void Retransmit(int64_t id)
+    void Retransmit(int64_t /*id*/)
     {
         ++m_retransmitCount;
     }

@@ -7,5 +7,5 @@ ADD_CUSTOM_TARGET(douf_test_ada ALL
                   COMMENT "Building douf_test_ada using gnatmake"
                   VERBATIM)
 
-ADD_TEST(TimeProvider_ada_test obj/douf_test_ada)
-SET_SAFIR_TEST_PROPERTIES(TimeProvider_ada_test)
+ADD_TEST(NAME TimeProvider_ada_test COMMAND obj/douf_test_ada)
+SET_SAFIR_TEST_PROPERTIES(TEST TimeProvider_ada_test)

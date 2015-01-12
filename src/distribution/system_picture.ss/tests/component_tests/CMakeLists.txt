@@ -1,45 +1,20 @@
-cmake_minimum_required(VERSION 2.8)
-
-project(system_picture_test_stubs CXX)
-
-INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
-
-FIND_PACKAGE(Boost COMPONENTS program_options thread system)
-
 ADD_EXECUTABLE(control_stub sp_control.cpp)
 ADD_EXECUTABLE(dose_main_stub dose_main_stub.cpp)
 
 TARGET_LINK_LIBRARIES(control_stub
-  optimized system_picture
-  debug system_picture${CMAKE_DEBUG_POSTFIX}
-  optimized communication
-  debug communication${CMAKE_DEBUG_POSTFIX})
+  system_picture
+  ${Boost_PROGRAM_OPTIONS_LIBRARY}
+  )
 
 TARGET_LINK_LIBRARIES(dose_main_stub
-  optimized system_picture
-  debug system_picture${CMAKE_DEBUG_POSTFIX}
-  optimized communication
-  debug communication${CMAKE_DEBUG_POSTFIX})
+  system_picture
+  ${Boost_PROGRAM_OPTIONS_LIBRARY}
+  )
 
-if (NOT MSVC)
-  TARGET_LINK_LIBRARIES(control_stub
-    lluf_id
-    lluf_utils
-    lluf_config
-    ${Boost_LIBRARIES})
-  TARGET_LINK_LIBRARIES(dose_main_stub
-    lluf_id
-    lluf_utils
-    lluf_config
-    ${Boost_LIBRARIES})
-endif()
+SAFIR_INSTALL(TARGETS control_stub dose_main_stub TEST_SUITE)
 
-INSTALL(TARGETS control_stub dose_main_stub
-        RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-        LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-        ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
+SAFIR_INSTALL_PYTHON(SCRIPT start_system_picture_test.py
+  COMPONENT Test)
 
-INSTALL(PROGRAMS
-    start_system_picture_test.py
-    circular_restart.py
-  DESTINATION ${SAFIR_RUNTIME}/bin)
+SAFIR_INSTALL_PYTHON(SCRIPT circular_restart.py
+  COMPONENT Test)

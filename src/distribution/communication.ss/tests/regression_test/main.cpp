@@ -29,7 +29,7 @@
 void ControlChannelTest(int executionTime)
 {
     std::cout<<"===== Control channel test ====="<<std::endl;
-    srand(time(0));
+    srand(static_cast<unsigned int>(time(0)));
 
     boost::asio::io_service ioService;
     auto work=boost::make_shared<boost::asio::io_service::work>(ioService);
@@ -87,7 +87,7 @@ void DataChannelTest(int executionTime)
 {
     std::cout<<"===== Data channel test ====="<<std::endl;
 
-    srand(time(0));
+    srand(static_cast<unsigned int>(time(0)));
 
     boost::asio::io_service ioService;
     auto work=boost::make_shared<boost::asio::io_service::work>(ioService);

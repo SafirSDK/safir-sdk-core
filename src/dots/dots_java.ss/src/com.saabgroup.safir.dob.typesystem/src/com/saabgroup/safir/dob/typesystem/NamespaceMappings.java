@@ -31,7 +31,7 @@ import java.util.List;
  * This singleton can be used to find out mappings between the "dou-namespaces"
  * and the java namespaces.
  *
- * These are defined in the dots_generated/XXX-java.namespace.txt files.
+ * These are defined in the safir_generated/XXX-java.namespace.txt files.
  */
 public class NamespaceMappings {
     /**

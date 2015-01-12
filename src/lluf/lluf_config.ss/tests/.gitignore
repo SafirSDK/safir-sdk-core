@@ -4,3 +4,4 @@ Path_test
 Util_test
 read_parameter_test
 ConfigHelper_test
+display_env

@@ -21,7 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include "../../src/Safir/Utilities/Internal/Atomic.h"
+#include <Safir/Utilities/Internal/Atomic.h>
 #include <stdlib.h>
 #include <boost/static_assert.hpp>
 #include <boost/type_traits.hpp>

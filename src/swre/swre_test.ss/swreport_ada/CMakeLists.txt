@@ -7,6 +7,6 @@ ADD_CUSTOM_TARGET(swreport_sender_ada ALL
                   COMMENT "Building sender using gnatmake"
                   VERBATIM)
 
-ADD_TEST(swreport_ada ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
+ADD_TEST(NAME swreport_ada COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
 
-SET_SAFIR_TEST_PROPERTIES(swreport_ada 120)
+SET_SAFIR_TEST_PROPERTIES(TEST swreport_ada TIMEOUT 120)

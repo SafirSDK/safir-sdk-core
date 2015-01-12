@@ -24,43 +24,59 @@
 #
 ###############################################################################
 from __future__ import print_function
-import sys, subprocess, os, shutil, difflib
+import sys, subprocess, os, shutil, difflib, argparse
 from syslog_server import SyslogServer
 
-syslog = SyslogServer()
+parser = argparse.ArgumentParser("test script")
+parser.add_argument("--show-safir-config", required=True)
+parser.add_argument("--language", required=True)
+parser.add_argument("--output", required=True)
+parser.add_argument("--safir-generated-paths", required=True)
 
-SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
+#cpp and dotnet
+parser.add_argument("--binary")
 
-if len(sys.argv) != 2:
-    print("Need one argument!")
+#for java and dotnet
+parser.add_argument("--dependencies")
+
+#for java
+parser.add_argument("--jar")
+
+arguments = parser.parse_args()
+
+#add all the environment variables. passed on format A=10;B=20
+for pair in arguments.safir_generated_paths.split(";"):
+    (name,value) = pair.split("=")
+    print("Setting environment variable", name, "to", value)
+    os.environ[name] = value
+
+syslog = SyslogServer(arguments.show_safir_config)
+
+if arguments.dependencies is not None:
+    dependencies = arguments.dependencies.split(",")
+
+    for dep in dependencies:
+        shutil.copy2(dep,".")
+
+if arguments.language == "cpp":
+    command = (arguments.binary,)
+elif arguments.language == "java":
+    command = ("java",
+               "-Xcheck:jni",
+               "-Xfuture",
+               "-jar", arguments.jar)
+elif arguments.language == "dotnet":
+    command = (arguments.binary,)
+else:
+    print("Not implemented")
     sys.exit(1)
-if sys.argv[1] not in ("cpp","dotnet","java","ada"):
-    print("Need argument cpp, dotnet, java or ada")
-    sys.exit(1)
-lang = sys.argv[1]
-
-dependencies = list()
-
-if lang == "cpp":
-    command = (os.path.join("cpp", "dots_test_cpp"),)
-elif lang == "ada":
-    command = (os.path.join("ada", "obj", "dots_test_ada"),)
-elif lang == "dotnet":
-    command = (os.path.join("dotnet", "dots_test_dotnet.csexe"),)
-    dependencies = ("dots_generated-dotnet.dll", "Safir.Dob.Typesystem.dll")
-elif lang == "java":
-    command = ("java","-jar", os.path.join("java","dots_test_java.jar"))
-    dependencies = ("dots_generated-java.jar", "dots_java.jar")
+    
 print("Test suite command is '" + " ".join(command) + "'")
-
-for dep in dependencies:
-    shutil.copy2(os.path.join(SAFIR_RUNTIME,"bin",dep),
-                 lang)
 
 proc = subprocess.Popen(command, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, universal_newlines=True)
 res = proc.communicate()[0].replace("\r","").splitlines(1) #fix any DOS newlines
 
-with open("output.txt") as expected_file:
+with open(arguments.output) as expected_file:
     expected_output = expected_file.read().replace("\r","").splitlines(1) #fix any DOS newlines
 diff = list(difflib.unified_diff(expected_output,res))
 

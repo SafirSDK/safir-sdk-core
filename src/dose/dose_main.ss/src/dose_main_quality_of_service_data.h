@@ -32,6 +32,7 @@
 #include <map>
 #include <boost/cstdint.hpp>
 #include <boost/noncopyable.hpp>
+#include <boost/unordered_map.hpp>
 
 namespace Safir
 {
@@ -109,7 +110,7 @@ namespace Internal
             int priority;
             QoSData(const int channel, const int prio):distributionChannel(channel),priority(prio) {}
         };
-        typedef unordered_map<Dob::Typesystem::TypeId,QoSData> QoSTable;
+        typedef boost::unordered_map<Dob::Typesystem::TypeId,QoSData> QoSTable;
 
         typedef std::map<std::wstring,int> NameIdTable;
 

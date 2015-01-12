@@ -1,10 +1,15 @@
+#this library has a C interface and we only want one version of it,
+#so we never want the "d" suffix on debug builds, which is default on windows.
+SET(CMAKE_DEBUG_POSTFIX "")
+
 add_library(external_time_provider_for_test SHARED test_provider.cpp)
 
 ADD_EXECUTABLE(ExternalTimeProvider_test test.cpp)
 
-if (NOT MSVC)
-  TARGET_LINK_LIBRARIES(ExternalTimeProvider_test douf_time_cpp)
-endif()
+TARGET_LINK_LIBRARIES(ExternalTimeProvider_test PRIVATE
+  douf_time_cpp)
 
-ADD_TEST(ExternalTimeProvider_test ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
-SET_SAFIR_TEST_PROPERTIES(ExternalTimeProvider_test 60)
+ADD_TEST(NAME ExternalTimeProvider_test COMMAND ExternalTimeProvider_test)
+
+SET_SAFIR_TEST_PROPERTIES(TEST ExternalTimeProvider_test
+                          CONFIG_OVERRIDE "${CMAKE_CURRENT_SOURCE_DIR}/config")

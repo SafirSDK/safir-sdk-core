@@ -433,7 +433,6 @@ namespace @_NAMESPACEV_@
 #include <precompiled_header_for_cpp.h>
 #include <Safir/Dob/Typesystem/BlobOperations.h>
 #include <@_REPLACE_ALL(\./\/):UNIT_@.h>
-#include <dll_imports.h>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -467,7 +466,6 @@ namespace @_NAMESPACEV_@
         }
         const bool registered =
             Safir::Dob::Typesystem::ObjectFactory::Instance().RegisterClass(@_CLASS_@::ClassTypeId, CreateObject);
-        const bool dlls_loaded = Safir::Dob::Typesystem::Dll_Imports::Init();
     }
 
     static bool isInitialised = false;

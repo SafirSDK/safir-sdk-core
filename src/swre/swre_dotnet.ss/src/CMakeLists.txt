@@ -1,21 +1,11 @@
-cmake_minimum_required(VERSION 2.8)
+if (NOT CSHARP_FOUND)
+  return()
+endif()
 
-PROJECT(swre_interface_dotnet NONE)
+ADD_CSHARP_ASSEMBLY(Safir.SwReports LIBRARY
+  SIGN ${safir-sdk-core_SOURCE_DIR}/build/config/sdk/data/build/safirkey.snk
+  SOURCES Library.cs backdoor.cs sw_reports.cs CrashReporter.cs Tracer.cs AssemblyInfo.cs
+  REFERENCES Safir.Dob safir_generated-Core-dotnet Safir.Dob.Typesystem Safir.Logging
+  DLL_IMPORTS swre_library)
 
-
-INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
-
-find_package(CSharp REQUIRED)
-INCLUDE(CSharpMacros)
-
-FILE(GLOB sources *.cs)
-
-SET(CS_FLAGS ${COMMON_CS_FLAGS} "-keyfile:${SAFIR_SDK}/data/build/safirkey.snk"
-                                "-r:${SAFIR_RUNTIME}/bin/Safir.Dob.Typesystem.dll,${SAFIR_RUNTIME}/bin/Safir.Dob.dll,${SAFIR_RUNTIME}/bin/dots_generated-dotnet.dll,${SAFIR_RUNTIME}/bin/Safir.Logging.dll")
-
-ADD_CS_LIBRARY(Safir.SwReports "${sources}" ALL)
-
-INSTALL(FILES ${target_DLL}
-  DESTINATION ${SAFIR_RUNTIME}/bin)
-  
-INSTALL_CS_DEBUG_INFO()
+SAFIR_INSTALL(TARGETS Safir.SwReports)

@@ -1,4 +1,4 @@
-/******************************************************************************
+/* ****************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 *
@@ -104,23 +104,6 @@ namespace Safir.Application
         }
 
         /// <summary>
-        /// Starts subscription for Program Information commands to be sent to the Backdoor using
-        /// the given named connection.
-        /// <para>A backdoor will be established for the named connection that is opened in
-        /// the thread that calls this method</para>
-        /// <para>If the main connection is closed and opened again (maybe in a different context),
-        /// this method must be called again. </para>
-        /// <para>The class supports restarting/pausing by calling stop and then start again.</para>
-        /// </summary>
-        /// <param name="backdoor">PI command backdoor</param>
-        /// <param name="connectionNameCommonPart"> Name that identifies the connection but not any particular
-        ///                                        instance.</param>
-        /// <param name="connectionNameInstancePart">Name that identifies a particular connection instance.</param>
-        /// <exception cref=" Safir.Dob.NotOpenException">
-        /// 'Start' called before connect to Dose
-        /// </exception>
-
-        /// <summary>
         /// Stops subscription for Program Information commands.
         /// <para>The backdoor can be started again by calling start after it has been stopped.</para>
         /// </summary>
@@ -143,6 +126,9 @@ namespace Safir.Application
             m_started = false;
         }
 
+        /// <summary>
+        /// Check if a backdoor is started.
+        /// </summary>
         public bool IsStarted()
         {
             return m_started;

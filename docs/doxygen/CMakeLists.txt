@@ -1,17 +1,34 @@
-project(doxygen NONE)
+find_package(Doxygen)
 
-cmake_minimum_required(VERSION 2.8)
-
-FILE(TO_CMAKE_PATH $ENV{SAFIR_SDK} SAFIR_SDK)
-FILE(TO_CMAKE_PATH $ENV{SAFIR_RUNTIME} SAFIR_RUNTIME)
-
-ADD_CUSTOM_TARGET(html ALL
-  COMMAND doxygen)
-
-INSTALL(DIRECTORY html
-  DESTINATION ${SAFIR_SDK}/docs/)
-
-#just use these variables to avoid some cmake warnings 
-#(they're set in the build script)
-if(SAFIR_ADA_SUPPORT OR SAFIR_JAVA_SUPPORT)
+if (NOT DOXYGEN_FOUND)
+  message(STATUS "Failed to find the Doxygen tools, will not build Doxygen documentation")
+  return()
 endif()
+
+if (ENV{VERBOSE})
+  set(CMAKE_DOXYGEN_QUIET "NO")
+else()
+  set(CMAKE_DOXYGEN_QUIET "YES")
+endif()
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
+
+FILE(GLOB_RECURSE headers ${safir-sdk-core_SOURCE_DIR}/include/*.h)
+
+add_custom_command(
+  OUTPUT documentation_generated
+  COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+  COMMAND ${CMAKE_COMMAND} -E touch documentation_generated
+  DEPENDS ${headers}
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+  COMMENT "Generating API documentation with Doxygen")
+
+add_custom_target(Doxygen ALL DEPENDS documentation_generated)
+
+set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES html)
+
+add_dependencies(Doxygen safir_generated-Core-cpp)
+
+INSTALL(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
+  DESTINATION ${SAFIR_INSTALL_DESTINATION_DOC}
+  COMPONENT Development)

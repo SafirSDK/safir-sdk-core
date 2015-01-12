@@ -1,4 +1,4 @@
-/******************************************************************************
+/* ****************************************************************************
 *
 * Copyright Saab AB, 2005-2013 (http://safir.sourceforge.net)
 *
@@ -32,9 +32,9 @@ namespace Safir.Time
     public class TimeProvider
     {
 
-        [DllImport("douf_time_library.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "DoufTimeC_GetUtcTime")]
+        [DllImport("douf_time_library", CallingConvention = CallingConvention.Cdecl, EntryPoint = "DoufTimeC_GetUtcTime")]
         internal static extern void GetUtcTime(out double utcTime, out byte success);
-        [DllImport("douf_time_library.dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "DoufTimeC_GetLocalTimeOffset")]
+        [DllImport("douf_time_library", CallingConvention = CallingConvention.Cdecl, EntryPoint = "DoufTimeC_GetLocalTimeOffset")]
         internal static extern void GetLocalTimeOffset(out Int32 offset, out byte success);
 
         private static System.DateTime _1_JAN_1970 = new DateTime( 1970, 1, 1 );

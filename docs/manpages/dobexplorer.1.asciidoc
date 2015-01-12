@@ -1,0 +1,31 @@
+DOBEXPLORER(1)
+==============
+:doctype: manpage
+
+
+NAME
+----
+dobexplorer - Explore the internals of the Dob
+
+
+SYNOPSIS
+--------
+*dobexplorer*
+
+DESCRIPTION
+-----------
+Dobexplorer is a tool for exploring the internals of a Safir SDK Core Dob. Most of the
+information provided by this tool is of a very technical nature and can be hard to
+understand.
+
+
+RESOURCES
+---------
+Web site: <http://www.safirsdkcore.com/>
+
+
+COPYING
+-------
+Copyright \(C) 2004-2014 Saab AB. Free use of this software is granted under
+the terms of the GNU General Public License Version 3 (GPL-3).
+

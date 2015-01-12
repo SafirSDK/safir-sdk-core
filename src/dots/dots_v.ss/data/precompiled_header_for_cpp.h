@@ -1,7 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2006-2013 (http://safir.sourceforge.net)
-* 
+*
 * Created by: Lars Hagström / stlrha
 *
 *******************************************************************************
@@ -21,8 +21,8 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __DOTS_GENERATED_PRECOMPILED_HEADER_H__
-#define __DOTS_GENERATED_PRECOMPILED_HEADER_H__
+#ifndef __SAFIR_GENERATED_PRECOMPILED_HEADER_H__
+#define __SAFIR_GENERATED_PRECOMPILED_HEADER_H__
 
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
@@ -44,5 +44,3 @@
 #include <Safir/Dob/Typesystem/ArrayContainer.h>
 
 #endif
-
-

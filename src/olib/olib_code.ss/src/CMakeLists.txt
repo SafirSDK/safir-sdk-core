@@ -1,43 +1,11 @@
-cmake_minimum_required(VERSION 2.8)
+ADD_LIBRARY(olib SHARED Connection.cpp  Diagnostics.cpp  Diagnostics.h  Environment.cpp  Statement.cpp  StringConversion.h)
 
-project(olib CXX)
+TARGET_LINK_LIBRARIES(olib 
+  PRIVATE
+  logging_cpp
 
-INCLUDE_DIRECTORIES(.)
+  PUBLIC
+  safir_generated-Core-cpp
+  ${SAFIR_ODBC_LIBRARIES})
 
-INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
-
-if (UNIX)
-    FIND_PACKAGE(IODBC)
-    if (IODBC_FOUND)
-      INCLUDE_DIRECTORIES(${IODBC_INCLUDE_DIRS})
-      SET(ODBC_LIBRARIES ${IODBC_LIBRARIES})
-      ADD_DEFINITIONS(-DODBC_IS_IODBC)
-    else()
-      message("iODBC not found, trying UnixODBC")
-      FIND_PACKAGE(UnixODBC REQUIRED)
-      INCLUDE_DIRECTORIES(${UnixODBC_INCLUDE_DIRS})
-      SET(ODBC_LIBRARIES ${UnixODBC_LIBRARIES})
-      ADD_DEFINITIONS(-DODBC_IS_UNIXODBC)
-    endif()
-endif()
-
-
-FILE(GLOB_RECURSE headers *.h)
-FILE(GLOB sources *.cpp)
-
-ADD_LIBRARY(olib SHARED ${sources} ${headers})
-
-if (NOT MSVC)
-    TARGET_LINK_LIBRARIES(olib dots_generated-Safir-cpp dots_generated-cpp logging_cpp ${ODBC_LIBRARIES})
-endif()
-
-INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
-        PATTERN ".svn" EXCLUDE
-        PATTERN "*~" EXCLUDE)
-
-INSTALL(TARGETS olib
-        RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-        LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-        ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
-
-INSTALL_DEBUG_INFO(olib)
+SAFIR_INSTALL(TARGETS olib)

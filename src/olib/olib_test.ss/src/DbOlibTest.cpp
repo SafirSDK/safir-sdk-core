@@ -64,10 +64,12 @@ DbOlibTest::DbOlibTest():
     m_bReadNClobIsPrepared(false),
     m_bWriteBlobIsPrepared(false),
     m_bReadBlobIsPrepared(false),
+    m_bReadUnitIsPrepared(false),
     m_bLongTimeQueryIsPrepared(false),
-    m_bInsertInto42IsPrepared( false )
+    m_bInsertInto42IsPrepared( false ),
+    m_bRowCountIsPrepared(false)
 {   
-    m_Object=Safir::OlibTest::TestObject::Create();
+    m_Object=OlibTest::TestObject::Create();
     m_Object->StringName().SetVal(L"Name");
     m_Object->StringDescription().SetVal(L"Description");
     m_Object->Int32().SetVal(32);
@@ -92,15 +94,6 @@ DbOlibTest::~DbOlibTest(void)
     m_Object.reset();
 }
 
-void DbOlibTest::OnDoDispatch()
-{
-    std::wcout << "Dispatch" << std::endl;
-}
-
-void DbOlibTest::OnStopOrder()
-{
-    std::wcout << "StopOrder" << std::endl;
-}
 void DbOlibTest::TestOutputParameters(const bool curlyBracesNeeded)
 {
     if (!m_connection.IsConnected())
@@ -147,7 +140,7 @@ void DbOlibTest::TestOutputParameters(const bool curlyBracesNeeded)
         ;
 
     //Create objectptr to testobject
-    Safir::OlibTest::TestObjectPtr outObjPtr =Safir::OlibTest::TestObject::Create();
+    OlibTest::TestObjectPtr outObjPtr = OlibTest::TestObject::Create();
 
     //Get values from columndata and set to outObject
     outObjPtr->StringName().SetVal(m_outParamStringName.GetValue());
@@ -252,6 +245,8 @@ void DbOlibTest::AllocStmt()
         m_RowCountStmt.Prepare(L"select count(*) from tblOlibTest;");
 
         m_RowCountStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);
+
+        m_bRowCountIsPrepared = true;
     }
 
     if (!m_bReadUnitIsPrepared && m_ReadUnitStmt.IsValid())
@@ -271,6 +266,8 @@ void DbOlibTest::AllocStmt()
         m_ReadUnitStmt.BindColumn(8, m_columnBool);
 
         m_ReadUnitStmt.SetStmtAttr(SQL_ATTR_QUERY_TIMEOUT, 5L);  // Query timeout is 5 secs
+
+        m_bReadUnitIsPrepared = true;
     }
 
     if (!m_bPerfTestIsPrepared && m_PerfTestStmt.IsValid())
@@ -754,7 +751,7 @@ void DbOlibTest::ReadData(int Id)
 void DbOlibTest::EvaluateOutData()
 {
     //Create objectptr to testobject
-    Safir::OlibTest::TestObjectPtr outObjPtr =Safir::OlibTest::TestObject::Create();
+    OlibTest::TestObjectPtr outObjPtr =OlibTest::TestObject::Create();
 
     //Get values from columndata and set to outObject
     if (m_columnStringName.IsNull())
@@ -1221,7 +1218,7 @@ void DbOlibTest::WriteBlob()
 
     //set ID and size of blob
     int nId=0;
-    int nSize=binary.size();
+    size_t nSize=binary.size();
     unsigned short sParameterNumber;
 
 
@@ -1281,9 +1278,9 @@ void DbOlibTest::ReadBlob()
     const char * const data = reinterpret_cast<const char * const>(m_columnBlob.GetValue());
 
     //Create object and serialize
-    Safir::Dob::EntityPtr entity = boost::dynamic_pointer_cast<Safir::Dob::Entity>
-        (Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(data));
-    std::wstring outputXml=Safir::Dob::Typesystem::Serialization::ToXml(entity);
+    Safir::Dob::Typesystem::ObjectPtr obj = 
+        Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(data);
+    std::wstring outputXml=Safir::Dob::Typesystem::Serialization::ToXml(obj);
     std::wstring inputXml=Safir::Dob::Typesystem::Serialization::ToXml(m_Object);
 
     //Check if diff between input and output xml
@@ -1436,11 +1433,11 @@ void DbOlibTest::BinaryTestRead()
 
     const char * const data = reinterpret_cast<const char * const>(m_columnBinary.GetValue());
 
-    Safir::Dob::EntityPtr entity = boost::dynamic_pointer_cast<Safir::Dob::Entity>
-        (Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(data));
+    Safir::Dob::Typesystem::ObjectPtr obj = 
+        Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(data);
 
 
-    std::wstring outputXml=Safir::Dob::Typesystem::Serialization::ToXml(entity);
+    std::wstring outputXml=Safir::Dob::Typesystem::Serialization::ToXml(obj);
     std::wstring inputXml=Safir::Dob::Typesystem::Serialization::ToXml(m_Object);
 
     //Check if diff between input and output xml
@@ -1480,7 +1477,7 @@ void DbOlibTest::BinaryTestWrite()
     Safir::Dob::Typesystem::Serialization::ToBinary(m_Object,binary);
 
     m_paramId.SetValue( nId );
-    m_paramBinary.SetValue( &binary[0], binary.size() );
+    m_paramBinary.SetValue( &binary[0], static_cast<unsigned int>(binary.size()) );
     m_BinaryWriteStmt.Execute();
     m_connection.Commit();
 }

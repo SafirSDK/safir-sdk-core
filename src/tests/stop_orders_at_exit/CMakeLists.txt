@@ -1,20 +1,17 @@
-cmake_minimum_required(VERSION 2.8)
-
-project(stop_orders_at_exit CXX)
-
-include($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
-
-find_package(Boost COMPONENTS system)
-find_package(PythonInterp)
-
 add_executable(stoppee stoppee.cpp)
 
-if (NOT MSVC)
-  target_link_libraries(stoppee dose_cpp dots_generated-Safir-cpp dots_cpp ${Boost_LIBRARIES})
-endif()
+target_link_libraries(stoppee PRIVATE
+  dose_cpp 
+  ${Boost_SYSTEM_LIBRARY})
 
-enable_testing()
+get_property(SAFIR_GENERATED_PATHS GLOBAL PROPERTY SAFIR_GENERATED_PATHS)
 
-ADD_TEST(stop_orders_at_exit ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
+ADD_TEST(NAME stop_orders_at_exit
+  COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py
+  --stoppee $<TARGET_FILE:stoppee>
+  --dose_main $<TARGET_FILE:dose_main>
+  --dope_main $<TARGET_FILE:dope_main>
+  --safir-show-config $<TARGET_FILE:safir_show_config>
+  --safir-generated-paths "${SAFIR_GENERATED_PATHS}")
 
-SET_SAFIR_TEST_PROPERTIES(stop_orders_at_exit 240)
+SET_SAFIR_TEST_PROPERTIES(TEST stop_orders_at_exit TIMEOUT 240)

@@ -1,10 +1,23 @@
+INCLUDE_DIRECTORIES(../../src/include)
+
 ADD_EXECUTABLE(IpcPublisher ipc_publisher.cpp)
 ADD_EXECUTABLE(IpcSubscriber ipc_subscriber.cpp)
 
-IF (NOT MSVC)
-   TARGET_LINK_LIBRARIES (IpcPublisher lluf_config lluf_utils ${Boost_LIBRARIES})
-   TARGET_LINK_LIBRARIES (IpcSubscriber lluf_config lluf_utils ${Boost_LIBRARIES})
-ENDIF()
+TARGET_LINK_LIBRARIES(IpcPublisher
+  lluf_config
+  lluf_utils
+  ${Boost_FILESYSTEM_LIBRARY}
+  ${Boost_PROGRAM_OPTIONS_LIBRARY}
+  ${Boost_THREAD_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY})
 
-ADD_TEST(Ipc ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
-SET_SAFIR_TEST_PROPERTIES(Ipc 240)
+TARGET_LINK_LIBRARIES(IpcSubscriber
+  lluf_config
+  lluf_utils
+  ${Boost_FILESYSTEM_LIBRARY}
+  ${Boost_PROGRAM_OPTIONS_LIBRARY}
+  ${Boost_THREAD_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY})
+
+ADD_TEST(NAME Ipc COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
+SET_SAFIR_TEST_PROPERTIES(TEST Ipc TIMEOUT 240)

@@ -1,36 +1,22 @@
-cmake_minimum_required(VERSION 2.8)
-
-project(dose_dll CXX)
-
-INCLUDE_DIRECTORIES(.)
-
-#this library has a C interface, so we don't want the "d" suffix on debug builds on windows
-#Must be set before including safir_sdk_core_config.cmake
-SET(NO_LIBRARY_POSTFIXES 1) 
-
-INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
+#this library has a C interface and we only want one version of it,
+#so we never want the "d" suffix on debug builds, which is default on windows.
+SET(CMAKE_DEBUG_POSTFIX "")
 
 FILE(GLOB_RECURSE headers *.h)
 FILE(GLOB sources *.cpp)
 
-FIND_PACKAGE(Boost COMPONENTS thread)
-
 ADD_LIBRARY(dose_dll SHARED ${sources} ${headers})
 
-if (NOT MSVC)
-  TARGET_LINK_LIBRARIES(dose_dll dose_internal ${Boost_LIBRARIES})
-endif()
+#Make our INTERNAL headers available to other parts of Core.
+target_include_directories(dose_dll PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
-INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
-        PATTERN ".svn" EXCLUDE
-        PATTERN "*~" EXCLUDE)
+TARGET_LINK_LIBRARIES(dose_dll PRIVATE
+  lluf_utils
+  dose_internal
+  ${Boost_THREAD_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY})
 
-INSTALL(TARGETS dose_dll
-        RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-        LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-        ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
+SAFIR_INSTALL(TARGETS dose_dll)
 
-INSTALL(FILES ../data/dose_dll.gpr
-        DESTINATION ${SAFIR_SDK}/ada)
-
-INSTALL_DEBUG_INFO(dose_dll)
+# INSTALL(FILES ../data/dose_dll.gpr
+#         DESTINATION ${SAFIR_SDK}/ada)

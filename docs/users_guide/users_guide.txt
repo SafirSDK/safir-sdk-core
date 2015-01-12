@@ -2701,15 +2701,13 @@ The system will look for these configuration files in several places, which allo
 
 *Linux*::
 
-  1. /etc/safir_sdk_core/ - system wide configuration
-  2. ~/.config/safir_sdk_core/ - user configuration
-  3. $(SAFIR_RUNTIME)/data/core_config/
+  1. /etc/safir-sdk-core/ - system wide configuration
+  2. ~/.config/safir-sdk-core/ - user configuration
 
 *Windows*::
 
-  1. _CSIDL_COMMON_APPDATA_\safir_sdk_core\config\ - system wide configuration
-  2. _CSIDL_LOCAL_APPDATA_\safir_sdk_core\config\ - user configuration
-  3. %SAFIR_RUNTIME%\data\core_config\
+  1. _CSIDL_COMMON_APPDATA_\safir-sdk-core\config\ - system wide configuration
+  2. _CSIDL_LOCAL_APPDATA_\safir-sdk-core\config\ - user configuration
 
 +
 On Windows 7 _CSIDL_COMMON_APPDATA_ is +C:\ProgramData+ and _CSIDL_LOCAL_APPDATA_ is +%USERPROFILE%\AppData\Local+ by default. See http://msdn.microsoft.com/en-us/library/windows/desktop/bb762494%28v=vs.85%29.aspx[MSDN documentation] for more information about CSIDLs. (The reason that we use CSIDLs rather than Windows Known Folders is that it allows us to be backward compatible with Windows XP.)

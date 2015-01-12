@@ -43,6 +43,8 @@
 #include <boost/scoped_array.hpp>
 #include <boost/bind.hpp>
 #include <string.h>
+#include <boost/filesystem.hpp>
+#include <boost/algorithm/string.hpp>
 
 //use this to set the first element of an array
 //will assert on arraylength == 1
@@ -1258,7 +1260,7 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_SetEntityIdMemberInP
                                           _index,
                                           beginningOfUnused);
     SetJArray(env,_beginningOfUnused,static_cast<DotsC_Int32>(beginningOfUnused - blob));
-    
+
     assert(_stringLength == 0 || *(beginningOfUnused - 1) == 0); //check that we got null terminated correctly
 }
 
@@ -1572,7 +1574,7 @@ jlong JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_Generate64
 JNIEXPORT jobjectArray JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetDouDirectories
   (JNIEnv * env, jclass)
 {
-    std::vector<std::string> directories;
+    std::vector<std::pair<std::string,std::string> > directories;
 
     try
     {
@@ -1587,22 +1589,103 @@ JNIEXPORT jobjectArray JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_Ge
     }
     catch (const std::exception& e)
     {
-        std::wcerr << "Failed to read ini files!\nException:" << 
+        std::wcerr << "Failed to read ini files!\nException:" <<
             e.what() << std::endl;
         exit(1);
     }
-    
+
     jobjectArray stringArray = env->NewObjectArray(static_cast<jsize>(directories.size()),
-                                                   env->FindClass("java/lang/String"),  
+                                                   env->FindClass("java/lang/String"),
                                                    env->NewStringUTF(""));
-    for(size_t i = 0; i < directories.size(); ++i) 
-    {  
+    for(size_t i = 0; i < directories.size(); ++i)
+    {
         env->SetObjectArrayElement(stringArray,
                                    static_cast<jsize>(i),
-                                   env->NewStringUTF(directories[i].c_str()));
+                                   env->NewStringUTF(directories[i].second.c_str()));
     }
     return stringArray;
 }
 
+std::vector<std::string> GetJavaSearchPath()
+{
+    std::string param = Safir::Utilities::Internal::ConfigReader().Typesystem().
+        get<std::string>("java_search_path");
+    std::vector<std::string> javaSearchPath;
+    boost::split(javaSearchPath,
+                 param,
+                 boost::is_any_of(","));
+    return javaSearchPath;
+}
 
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    GetGeneratedJars
+ * Signature: ()[Ljava/lang/String;
+ */
+JNIEXPORT jobjectArray JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetGeneratedJars
+  (JNIEnv * env, jclass)
+{
+    const std::vector<std::string> javaSearchPath = GetJavaSearchPath();
 
+    std::vector<std::string> libraries;
+
+    DotsC_GeneratedLibrary* generatedLibraries;
+    DotsC_Int32 size;
+    DotsC_GeneratedLibraryListDeleter deleter;
+
+    DotsC_GetGeneratedLibraryList(generatedLibraries,
+                                  size,
+                                  deleter);
+
+    if (size ==0)
+    {
+        std::wcerr << "Failed to read information from typesystem.ini" << std::endl;
+        exit(1);
+    }
+
+    for (int i = 0; i < size; ++i)
+    {
+        if (generatedLibraries[i].library != 1)
+        {
+            continue;
+        }
+
+        boost::filesystem::path jarPath;
+
+        if (generatedLibraries[i].javaJarLocation != NULL)
+        {
+            jarPath = generatedLibraries[i].javaJarLocation;
+            jarPath /= generatedLibraries[i].javaJarName;
+        }
+        else
+        {
+            for (std::vector<std::string>::const_iterator it = javaSearchPath.begin();
+                 it != javaSearchPath.end(); ++it)
+            {
+                using namespace boost::filesystem;
+                const path p = path(*it) / generatedLibraries[i].javaJarName;
+                if (is_regular_file(p))
+                {
+                    jarPath = p;
+                    break;
+                }
+            }
+        }
+
+        if (!jarPath.empty())
+        {
+            libraries.push_back(jarPath.make_preferred().string());
+        }
+    }
+
+    jobjectArray stringArray = env->NewObjectArray(static_cast<jsize>(libraries.size()),
+                                                   env->FindClass("java/lang/String"),
+                                                   env->NewStringUTF(""));
+    for(size_t i = 0; i < libraries.size(); ++i)
+    {
+        env->SetObjectArrayElement(stringArray,
+                                   static_cast<jsize>(i),
+                                   env->NewStringUTF(libraries[i].c_str()));
+    }
+    return stringArray;
+}

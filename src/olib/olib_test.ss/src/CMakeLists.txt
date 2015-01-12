@@ -1,96 +1,13 @@
-cmake_minimum_required(VERSION 2.8)
+add_executable(olib_test main.cpp DbOlibTest.cpp DbOlibTest.h)
 
-project(OlibTester CXX)
+TARGET_LINK_LIBRARIES(olib_test PRIVATE
+  olib
+  safir_generated-OlibTest-cpp
+  safir_generated-Core-cpp
+  ${SAFIR_ODBC_LIBRARIES}
+  ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
+SAFIR_INSTALL(TARGETS olib_test TEST_SUITE)
 
-INCLUDE_DIRECTORIES(.)
-
-INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
-
-if (UNIX)
-    FIND_PACKAGE(IODBC)
-    if (IODBC_FOUND)
-      INCLUDE_DIRECTORIES(${IODBC_INCLUDE_DIRS})
-      SET(ODBC_LIBRARIES ${IODBC_LIBRARIES})
-      ADD_DEFINITIONS(-DODBC_IS_IODBC)
-    else()
-      message("iODBC not found, trying UnixODBC")
-      FIND_PACKAGE(UnixODBC REQUIRED)
-      INCLUDE_DIRECTORIES(${UnixODBC_INCLUDE_DIRS})
-      SET(ODBC_LIBRARIES ${UnixODBC_LIBRARIES})
-      ADD_DEFINITIONS(-DODBC_IS_UNIXODBC)
-    endif()
-endif()
-
-FILE(GLOB_RECURSE headers *.h)
-FILE(GLOB sources *.cpp)
-
-FIND_PACKAGE(Boost COMPONENTS filesystem program_options system)
-
-add_executable(OlibTester ${sources} ${headers})
-
-if (NOT MSVC)
-  TARGET_LINK_LIBRARIES(OlibTester olib swre_interface_cpp dots_generated-Safir-cpp dots_cpp ${ODBC_LIBRARIES} ${Boost_LIBRARIES})
-endif()
-
-enable_testing()
-
-if("$ENV{Driver}" STREQUAL "")
-  set(ENV{Driver} mimer)
-  message("'Driver' environment variable is not set, using '$ENV{Driver}'")
-endif()
-
-if(NOT "$ENV{Driver}" STREQUAL "mimer")
-  message("Olib currently only has complete support for mimer database")
-  return()
-endif()
-
-
-if("$ENV{DATABASE_NAME}" STREQUAL "")
-  set(ENV{DATABASE_NAME} SafirDb)
-  message("'DATABASE_NAME' environment variable is not set, using '$ENV{DATABASE_NAME}'")
-endif()
-
-if("$ENV{DATABASE_SERVER}" STREQUAL "")
-  set(ENV{DATABASE_SERVER} localhost)
-  message("'DATABASE_SERVER' environment variable is not set, using '$ENV{DATABASE_SERVER}'")
-endif()
-
-ADD_TEST(OlibTest_Connect OlibTester --testcase connect --driver $ENV{Driver} --hostname $ENV{DATABASE_SERVER} --database $ENV{DATABASE_NAME})
-ADD_TEST(OlibTest_Disconnect OlibTester --testcase disconnect --driver $ENV{Driver} --hostname $ENV{DATABASE_SERVER} --database $ENV{DATABASE_NAME})
-ADD_TEST(OlibTest_AllocCloseStatement OlibTester --testcase allocclosestm --driver $ENV{Driver} --hostname $ENV{DATABASE_SERVER} --database $ENV{DATABASE_NAME})
-ADD_TEST(OlibTest_ConnectionPooling OlibTester --testcase connectionpooling --driver $ENV{Driver} --hostname $ENV{DATABASE_SERVER} --database $ENV{DATABASE_NAME})
-ADD_TEST(OlibTest_ConnectionTimeout OlibTester --testcase connectiontimeout --driver $ENV{Driver} --hostname $ENV{DATABASE_SERVER} --database $ENV{DATABASE_NAME})
-ADD_TEST(OlibTest_QueryTimeout OlibTester --testcase readalltimeout --driver $ENV{Driver} --hostname $ENV{DATABASE_SERVER} --database $ENV{DATABASE_NAME})
-ADD_TEST(OlibTest_ClearTable OlibTester --testcase cleartable --driver $ENV{Driver} --hostname $ENV{DATABASE_SERVER} --database $ENV{DATABASE_NAME})
-ADD_TEST(OlibTest_CreateData OlibTester --testcase createdata --driver $ENV{Driver} --hostname $ENV{DATABASE_SERVER} --database $ENV{DATABASE_NAME})
-ADD_TEST(OlibTest_ReadData OlibTester --testcase readdata --driver $ENV{Driver} --hostname $ENV{DATABASE_SERVER} --database $ENV{DATABASE_NAME})
-ADD_TEST(OlibTest_UpdateData OlibTester --testcase updatedata --driver $ENV{Driver} --hostname $ENV{DATABASE_SERVER} --database $ENV{DATABASE_NAME})
-ADD_TEST(OlibTest_InsertInto42 OlibTester --testcase insertinto42 --driver $ENV{Driver} --hostname $ENV{DATABASE_SERVER} --database $ENV{DATABASE_NAME})
-ADD_TEST(OlibTest_DeleteData OlibTester --testcase deletedata --driver $ENV{Driver} --hostname $ENV{DATABASE_SERVER} --database $ENV{DATABASE_NAME})
-ADD_TEST(OlibTest_BinaryWriteRead OlibTester --testcase binaryrw --driver $ENV{Driver} --hostname $ENV{DATABASE_SERVER} --database $ENV{DATABASE_NAME})
-ADD_TEST(OlibTest_BlobWriteRead OlibTester --testcase blobrw --driver $ENV{Driver} --hostname $ENV{DATABASE_SERVER} --database $ENV{DATABASE_NAME})
-ADD_TEST(OlibTest_NClobWriteRead OlibTester --testcase nclobrw --driver $ENV{Driver} --hostname $ENV{DATABASE_SERVER} --database $ENV{DATABASE_NAME})
-ADD_TEST(OlibTest_LotsOfInput OlibTester --testcase lotsofinput --driver $ENV{Driver} --hostname $ENV{DATABASE_SERVER} --database $ENV{DATABASE_NAME})
-ADD_TEST(OlibTest_OutParam OlibTester --testcase outparam --driver $ENV{Driver} --hostname $ENV{DATABASE_SERVER} --database $ENV{DATABASE_NAME})
-ADD_TEST(OlibTest_InOutParam OlibTester --testcase inoutparam --driver $ENV{Driver} --hostname $ENV{DATABASE_SERVER} --database $ENV{DATABASE_NAME})
-#ADD_TEST(OlibTest_PerformanceTest OlibTester --testcase perftest --driver $ENV{Driver} --hostname $ENV{DATABASE_SERVER} --database $ENV{DATABASE_NAME})
-
-SET_SAFIR_TEST_PROPERTIES(OlibTest_Connect)
-SET_SAFIR_TEST_PROPERTIES(OlibTest_Disconnect)
-SET_SAFIR_TEST_PROPERTIES(OlibTest_AllocCloseStatement)
-SET_SAFIR_TEST_PROPERTIES(OlibTest_ConnectionPooling)
-SET_SAFIR_TEST_PROPERTIES(OlibTest_ConnectionTimeout)
-SET_SAFIR_TEST_PROPERTIES(OlibTest_QueryTimeout)
-SET_SAFIR_TEST_PROPERTIES(OlibTest_ClearTable)
-SET_SAFIR_TEST_PROPERTIES(OlibTest_CreateData)
-SET_SAFIR_TEST_PROPERTIES(OlibTest_ReadData)
-SET_SAFIR_TEST_PROPERTIES(OlibTest_UpdateData)
-SET_SAFIR_TEST_PROPERTIES(OlibTest_InsertInto42)
-SET_SAFIR_TEST_PROPERTIES(OlibTest_DeleteData)
-SET_SAFIR_TEST_PROPERTIES(OlibTest_BinaryWriteRead)
-SET_SAFIR_TEST_PROPERTIES(OlibTest_BlobWriteRead)
-SET_SAFIR_TEST_PROPERTIES(OlibTest_NClobWriteRead)
-SET_SAFIR_TEST_PROPERTIES(OlibTest_LotsOfInput)
-SET_SAFIR_TEST_PROPERTIES(OlibTest_OutParam)
-SET_SAFIR_TEST_PROPERTIES(OlibTest_InOutParam)
+SAFIR_INSTALL_PYTHON(SCRIPT run_olib_tests.py
+  COMPONENT Test)

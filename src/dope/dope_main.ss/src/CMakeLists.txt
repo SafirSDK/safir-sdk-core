@@ -1,22 +1,32 @@
-cmake_minimum_required(VERSION 2.8)
+ADD_EXECUTABLE(dope_main 
+  DopeApp.h
+  dope_main.cpp
+  OdbcPersistor.cpp
+  PersistenceHandler.h
+  Defs.h
+  FilePersistor.cpp
+  OdbcPersistor.h
+  DopeApp.cpp
+  FilePersistor.h
+  PersistenceHandler.cpp
+)
 
-project(dope_main CXX)
-
-INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
-
-if (UNIX)
-    FIND_PACKAGE(IODBC)
-    if (IODBC_FOUND)
-      INCLUDE_DIRECTORIES(${IODBC_INCLUDE_DIRS})
-      SET(ODBC_LIBRARIES ${IODBC_LIBRARIES})
-      message("iODBC not found, trying UnixODBC")
-    else()
-      FIND_PACKAGE(UnixODBC REQUIRED)
-      INCLUDE_DIRECTORIES(${UnixODBC_INCLUDE_DIRS})
-      SET(ODBC_LIBRARIES ${UnixODBC_LIBRARIES})
-    endif()
-endif()
+ADD_EXECUTABLE(dope_bin2xml dope_bin2xml.cpp)
 
 
-ADD_SUBDIRECTORY(dope_main)
-ADD_SUBDIRECTORY(dope_bin2xml)
+TARGET_LINK_LIBRARIES(dope_main PRIVATE 
+  swre_interface_cpp 
+  olib
+  dose_cpp
+  logging_cpp
+  ${Boost_FILESYSTEM_LIBRARY}
+  ${Boost_THREAD_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY})
+
+TARGET_LINK_LIBRARIES(dope_bin2xml PRIVATE
+  olib
+  safir_generated-Core-cpp
+  ${Boost_FILESYSTEM_LIBRARY}
+  ${Boost_PROGRAM_OPTIONS_LIBRARY})
+
+SAFIR_INSTALL(TARGETS dope_main dope_bin2xml)

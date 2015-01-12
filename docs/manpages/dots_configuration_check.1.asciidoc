@@ -1,0 +1,33 @@
+DOTS_CONFIGURATION_CHECK(1)
+===========================
+:doctype: manpage
+
+
+NAME
+----
+dots_configuration_check - check and display typesystem information
+
+
+SYNOPSIS
+--------
+*dots_configuration_check* ['OPTIONS']
+
+DESCRIPTION
+-----------
+dots_configuration_check can be used to display information about the typesystem and about dou file contents.
+
+OPTIONS
+-------
+Please check dots_configuration_check --help for information on options.
+
+
+RESOURCES
+---------
+Web site: <http://www.safirsdkcore.com/>
+
+
+COPYING
+-------
+Copyright \(C) 2004-2014 Saab AB. Free use of this software is granted under
+the terms of the GNU General Public License Version 3 (GPL-3).
+

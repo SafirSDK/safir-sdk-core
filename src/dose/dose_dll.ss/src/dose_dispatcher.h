@@ -38,8 +38,6 @@
 #include <vector>
 #include <stack>
 
-#include "dose_dll_defs.h"
-
 namespace Safir
 {
 namespace Dob

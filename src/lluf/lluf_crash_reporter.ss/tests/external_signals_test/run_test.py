@@ -32,7 +32,7 @@ if sys.platform == "win32":
 else:
     exe_path = "."
 
-sleeper_exe = os.path.join(exe_path,"sleeper")
+sleeper_exe = os.path.join(exe_path,"crash_reporter_sleeper")
 
 print ("stdout isatty:", sys.stdout.isatty())
 print ("stderr isatty:", sys.stderr.isatty())

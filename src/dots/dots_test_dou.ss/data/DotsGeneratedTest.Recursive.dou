@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <class xmlns="urn:safir-dots-unit">
     <name>DotsGeneratedTest.Recursive</name>
-    <baseClass>Safir.Dob.Item</baseClass>
+    <baseClass>Object</baseClass>
     <parameters>
         <parameter>
             <name>Myself</name>

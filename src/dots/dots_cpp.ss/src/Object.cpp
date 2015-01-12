@@ -27,6 +27,8 @@
 #include "Safir/Dob/Typesystem/ObjectFactory.h"
 #include "Safir/Dob/Typesystem/BlobOperations.h"
 #include "Safir/Dob/Typesystem/ContainerProxies.h"
+#include <iostream>
+
 namespace Safir
 {
 namespace Dob
@@ -39,8 +41,6 @@ namespace Typesystem
     const Safir::Dob::Typesystem::TypeId Object::ClassTypeId;
 #endif
 
-    //An anonymous namespace for object factory registration
-    //this can never be called directly by anyone (since it is anonymous)
     namespace
     {
         ObjectPtr CreateObject(char const * const blob)
@@ -54,8 +54,11 @@ namespace Typesystem
                 return ObjectPtr(new Object(blob));
             }
         }
+
+        //This ensures that Object is registered in the object factory 
         const bool registered =
             ObjectFactory::Instance().RegisterClass(Safir::Dob::Typesystem::Object::ClassTypeId,CreateObject);
+        
     }
 
     //Check if anything in the object has change flags set

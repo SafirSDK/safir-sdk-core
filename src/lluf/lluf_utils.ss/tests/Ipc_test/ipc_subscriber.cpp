@@ -21,7 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include "../../src/Safir/Utilities/Internal/IpcSubscriber.h"
+#include "../../src/include/Safir/Utilities/Internal/IpcSubscriber.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/thread.hpp>

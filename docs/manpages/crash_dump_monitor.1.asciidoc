@@ -1,0 +1,35 @@
+CRASH_DUMP_MONITOR(1)
+=====================
+:doctype: manpage
+
+
+NAME
+----
+crash_dump_monitor - monitor Safir crash dump directory
+
+
+SYNOPSIS
+--------
+*crash_dump_monitor* ['OPTIONS']
+
+DESCRIPTION
+-----------
+Safir SDK Core contains a facility for generating crash dumps into a configured
+directory. This executable can be used to supervise that directory to ensure that the
+filesystem does not fill up.
+
+OPTIONS
+-------
+Please check crash_dump_monitor --help for information on options.
+
+
+RESOURCES
+---------
+Web site: <http://www.safirsdkcore.com/>
+
+
+COPYING
+-------
+Copyright \(C) 2004-2014 Saab AB. Free use of this software is granted under
+the terms of the GNU General Public License Version 3 (GPL-3).
+

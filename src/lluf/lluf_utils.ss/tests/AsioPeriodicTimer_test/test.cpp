@@ -21,11 +21,11 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include <Safir/Utilities/Internal/AsioPeriodicTimer.h>
+#include "../../src/include/Safir/Utilities/Internal/AsioPeriodicTimer.h"
 #include <iostream>
 
 //Note: This test does not actually check that the timer is at all correct in timing.
-//All it does is check that it will repeat cyclically. Timing is difficult to test 
+//All it does is check that it will repeat cyclically. Timing is difficult to test
 //in unit test, since it may fail if there is a lot of load on the computer.
 int main()
 {
@@ -36,7 +36,7 @@ int main()
         int countdown = 10;
 
         std::function<void()> stopCb;
-        
+
         Safir::Utilities::Internal::AsioPeriodicTimer timer(ioService,
                                                             boost::chrono::milliseconds(10),
                                                             [&](const boost::system::error_code& error)
@@ -56,11 +56,11 @@ int main()
                                                                     exit(2);
                                                                 }
                                                             });
-        
+
         stopCb = [&timer]{timer.Stop();};
         timer.Start();
         ioService.run();
-        
+
         if (countdown == 0)
         {
             std::wcout << "Success!" << std::endl;
@@ -78,4 +78,3 @@ int main()
         return 1;
     }
 }
-

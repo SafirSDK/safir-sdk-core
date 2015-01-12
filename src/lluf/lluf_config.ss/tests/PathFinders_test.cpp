@@ -50,11 +50,11 @@ namespace
     {
         char path[MAX_PATH];
 
-        if(SUCCEEDED(SHGetFolderPathA(NULL, 
-                                     csidl|CSIDL_FLAG_CREATE, 
-                                     NULL, 
-                                     0, 
-                                     path))) 
+        if(SUCCEEDED(SHGetFolderPathA(NULL,
+                                     csidl|CSIDL_FLAG_CREATE,
+                                     NULL,
+                                     0,
+                                     path)))
         {
             return path;
         }
@@ -78,16 +78,6 @@ int main()
 
     try
     {
-        std::wcout << "test safir_runtime config" << std::endl;
-        {
-            const Path p = Path("some") / "path";
-            SetEnv("SAFIR_RUNTIME", p.str());
-            if (PathFinder::SafirRuntimeConfigDirectory().str() != (p / "data" / "core_config").str())
-            {
-                return 1;
-            }
-        }
-
         std::wcout << "test override config" << std::endl;
         {
             const Path p = Path("some") / "other" / "path";
@@ -101,12 +91,12 @@ int main()
         std::wcout << "test system config" << std::endl;
         {
 #ifdef LLUF_CONFIG_READER_USE_LINUX
-            if (PathFinder::SystemConfigDirectory().str() != "/etc/safir_sdk_core")
+            if (PathFinder::SystemConfigDirectory().str() != "/etc/safir-sdk-core")
             {
                 return 1;
             }
 #else
-            if (PathFinder::SystemConfigDirectory().str() != GetCSIDL(CSIDL_COMMON_APPDATA) + "\\safir_sdk_core\\config")
+            if (PathFinder::SystemConfigDirectory().str() != GetCSIDL(CSIDL_COMMON_APPDATA) + "\\safir-sdk-core\\config")
             {
                 return 1;
             }
@@ -126,30 +116,30 @@ int main()
             }
             catch (const std::logic_error&)
             {
-                
+
             }
 
             SetEnv("HOME","some/path");
-            if (PathFinder::UserConfigDirectory().str() != "some/path/.config/safir_sdk_core")
+            if (PathFinder::UserConfigDirectory().str() != "some/path/.config/safir-sdk-core")
             {
                 return 1;
             }
 
             SetEnv("XDG_CONFIG_HOME","some/other/path");
-            if (PathFinder::UserConfigDirectory().str() != "some/other/path/safir_sdk_core")
+            if (PathFinder::UserConfigDirectory().str() != "some/other/path/safir-sdk-core")
             {
                 return 1;
             }
 
             UnsetEnv("HOME");
             SetEnv("XDG_CONFIG_HOME","some/other/path");
-            if (PathFinder::UserConfigDirectory().str() != "some/other/path/safir_sdk_core")
+            if (PathFinder::UserConfigDirectory().str() != "some/other/path/safir-sdk-core")
             {
                 return 1;
             }
 
 #else
-            if (PathFinder::UserConfigDirectory().str() != GetCSIDL(CSIDL_LOCAL_APPDATA) + "\\safir_sdk_core\\config")
+            if (PathFinder::UserConfigDirectory().str() != GetCSIDL(CSIDL_LOCAL_APPDATA) + "\\safir-sdk-core\\config")
             {
                 return 1;
             }
@@ -165,5 +155,3 @@ int main()
     std::wcout << "success" << std::endl;
     return 0;
 }
-
-

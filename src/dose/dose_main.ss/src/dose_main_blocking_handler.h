@@ -28,6 +28,8 @@
 #include <Safir/Dob/Internal/ConnectionId.h>
 #include "dose_main_defs.h"
 #include <boost/noncopyable.hpp>
+#include <boost/unordered_map.hpp>
+
 namespace Safir
 {
 namespace Dob
@@ -52,7 +54,7 @@ namespace Internal
         void RemoveConnection(const Identifier& id);
 
     private:
-        typedef unordered_map<Identifier, IdentifierSet> ClientMap;
+        typedef boost::unordered_map<Identifier, IdentifierSet> ClientMap;
         typedef std::pair<Identifier, IdentifierSet> ClientPair;
         ClientMap m_clientMap;
     };

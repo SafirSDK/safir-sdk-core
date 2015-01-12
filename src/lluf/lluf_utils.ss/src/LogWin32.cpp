@@ -151,6 +151,8 @@ bool WindowsLogger::AddRegistryEntries() const
         L"using a provided reg file.\n"
         L"Check %SAFIR_RUNTIME%\\data\\text\\safir_event_log_registration.reg";
 
+    //TODO: remove the 'tower' reference above!
+
     // First check the registry keys and values in read-only mode.
     // This allow us to avoid to elevate permissions to modify the registry
     // when we dont need to.

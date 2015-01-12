@@ -1,12 +1,3 @@
-cmake_minimum_required(VERSION 2.8)
-
-project(dose_internal_test CXX)
-
-INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
-
-FIND_PACKAGE(Boost COMPONENTS system thread)
-ENABLE_TESTING()
-
 ADD_SUBDIRECTORY(signals_test)
 
 ADD_EXECUTABLE(distribution_data_test distribution_data_test.cpp)
@@ -15,21 +6,30 @@ ADD_EXECUTABLE(dose_message_queue_test dose_message_queue_test.cpp)
 ADD_EXECUTABLE(dose_sem_wrapper_test semaphore_test.cpp)
 ADD_EXECUTABLE(wrap_around_counter_test wrap_around_counter_test.cpp)
 
+TARGET_LINK_LIBRARIES(distribution_data_test PRIVATE
+  dose_internal 
+  ${Boost_SYSTEM_LIBRARY})
 
-if (NOT MSVC)
-  TARGET_LINK_LIBRARIES(distribution_data_test dose_internal dots_generated-Safir-cpp dots_cpp lluf_id ${Boost_LIBRARIES})
-  TARGET_LINK_LIBRARIES(lamport_clock_test dose_internal ${Boost_LIBRARIES})
-  TARGET_LINK_LIBRARIES(dose_message_queue_test dose_internal dots_generated-Safir-cpp dots_generated-cpp dots_cpp lluf_utils lluf_crash_reporter ${Boost_LIBRARIES})
-endif()
+TARGET_LINK_LIBRARIES(lamport_clock_test PRIVATE 
+  dose_internal)
 
-ADD_TEST(Semaphore dose_sem_wrapper_test)
-ADD_TEST(MessageQueue dose_message_queue_test)
-ADD_TEST(DistributionData distribution_data_test)
-ADD_TEST(LamportClocks lamport_clock_test)
-ADD_TEST(WrapAroundCounter wrap_around_counter_test)
+TARGET_LINK_LIBRARIES(dose_message_queue_test PRIVATE
+  dose_internal
+  lluf_crash_reporter
+  ${Boost_THREAD_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY})
 
-SET_SAFIR_TEST_PROPERTIES(Semaphore 60)
-SET_SAFIR_TEST_PROPERTIES(MessageQueue 360)
-SET_SAFIR_TEST_PROPERTIES(DistributionData)
-SET_SAFIR_TEST_PROPERTIES(LamportClocks 2400)
-SET_SAFIR_TEST_PROPERTIES(WrapAroundCounter 600)
+target_include_directories(wrap_around_counter_test PRIVATE ../src/include)
+target_include_directories(dose_sem_wrapper_test PRIVATE ../src/include)
+
+ADD_TEST(NAME Semaphore COMMAND dose_sem_wrapper_test)
+ADD_TEST(NAME MessageQueue COMMAND dose_message_queue_test)
+ADD_TEST(NAME DistributionData COMMAND distribution_data_test)
+ADD_TEST(NAME LamportClocks COMMAND lamport_clock_test)
+ADD_TEST(NAME WrapAroundCounter COMMAND wrap_around_counter_test)
+
+SET_SAFIR_TEST_PROPERTIES(TEST Semaphore TIMEOUT 60)
+SET_SAFIR_TEST_PROPERTIES(TEST MessageQueue TIMEOUT 360)
+SET_SAFIR_TEST_PROPERTIES(TEST DistributionData)
+SET_SAFIR_TEST_PROPERTIES(TEST LamportClocks TIMEOUT 2400)
+SET_SAFIR_TEST_PROPERTIES(TEST WrapAroundCounter TIMEOUT 600)

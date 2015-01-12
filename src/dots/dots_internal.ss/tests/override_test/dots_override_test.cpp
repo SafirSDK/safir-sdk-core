@@ -81,8 +81,11 @@ int main(int argc, char* argv[])
     std::set<std::string>::const_iterator parsedIt=parsedFiles.begin();
     while (expIt!=expectedToBeParsed.end())
     {
-        if (parsedIt->find(*expIt)==std::string::npos)
+        std::string parsed = *parsedIt;
+        std::replace(parsed.begin(), parsed.end(), L'\\', L'/');
+        if (parsed.find(*expIt) == std::string::npos)
         {
+            std::cout << *expIt << " does not match " << parsed << std::endl;
             //Error
             TestFailed(parsedFiles);
         }

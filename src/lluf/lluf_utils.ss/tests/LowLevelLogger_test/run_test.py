@@ -33,7 +33,7 @@ try:
 except ImportError:
     # 2.x name
     from Queue import Queue, Empty
-    
+
 def rmdir(directory):
     if os.path.exists(directory):
         try:
@@ -73,7 +73,7 @@ class LllProc:
             except Empty:
                 pass
         return False
-    
+
     #returns any output that hasn't already been dequeued
     def output(self):
         data = list();
@@ -89,7 +89,7 @@ class LllProc:
         with open(logfilename(self.proc)) as logfile:
             return logfile.read()
 
-    
+
     def kill(self):
         self.proc.kill()
         self.proc.wait()
@@ -101,26 +101,28 @@ def call_logger_control(args):
 
 
 if sys.platform == "win32":
-    config_type = os.environ.get("CMAKE_CONFIG_TYPE")
-    exe_path = config_type if config_type else ""
     temp = os.environ.get("TEMP")
     if temp is None:
         temp = os.environ.get("TMP")
     if temp is None:
         print ("Failed to find temp dir!")
         sys.exit(1)
-    logdir = os.path.join(temp, "safir_sdk_core", "log")
+    logdir = os.path.join(temp, "safir-sdk-core", "log")
 else:
-    exe_path = "."
-    logdir = os.path.join("/", "tmp", "safir_sdk_core", "log")
+    logdir = os.path.join("/", "tmp", "safir-sdk-core", "log")
 
 print ("Logdir: ", logdir)
 
-lll_test = os.path.join(exe_path,"lll_test")
+parser = argparse.ArgumentParser("test script")
+parser.add_argument("--test-exe", required=True)
+parser.add_argument("--control-exe", required=True)
+parser.add_argument("--config-dir", required=True)
 
-SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
+arguments = parser.parse_args()
 
-logger_control = os.path.join(SAFIR_RUNTIME,"bin","logger_control")
+lll_test = arguments.test_exe
+
+logger_control = arguments.control_exe
 
 def logfilename(proc):
     if sys.platform == "win32":
@@ -129,11 +131,8 @@ def logfilename(proc):
         fn = "lll_test-" + str(proc.pid) + ".txt"
     return os.path.join(logdir,fn)
 
-if len(sys.argv) != 2:
-    print ("Expect one argument")
-    sys.exit(1)
 
-configs_dir = sys.argv[1]
+configs_dir = arguments.config_dir
 if not os.path.isdir(configs_dir):
     print ("arg is not a directory")
     sys.exit(1)
@@ -153,7 +152,7 @@ for i in range(100):
         found = True
         break
     time.sleep(0.1)
-    
+
 if not found:
     print("failed to find error texts in log file")
     p.kill()
@@ -265,7 +264,7 @@ if len(data) != 0:
     print("stdout logging doesnt seem to be possible to turn off")
     print(data)
     p.kill()
-    sys.exit(1)    
+    sys.exit(1)
 
 print ("turn file off")
 call_logger_control(("-f", "0"))
@@ -278,7 +277,7 @@ if len(data) != 0:
     print("file logging doesnt seem to be possible to turn off")
     print(data)
     p.kill()
-    sys.exit(1)    
+    sys.exit(1)
 
 p.kill()
 
@@ -336,7 +335,7 @@ if res.find("Log level should now be 0") == -1:
     proc.kill()
     sys.exit(1)
 
-time.sleep(0.5) #fragile, since there might be a log pending that doesnt get out within this time...    
+time.sleep(0.5) #fragile, since there might be a log pending that doesnt get out within this time...
 print ("clear output and check that new logs are only error logs")
 p.output()
 time.sleep(0.5)

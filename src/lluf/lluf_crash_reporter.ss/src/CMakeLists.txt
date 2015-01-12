@@ -1,49 +1,64 @@
-cmake_minimum_required(VERSION 2.8)
-
-project(lluf_crash_reporter C CXX)
-
-if (NOT "${CMAKE_CONFIGURATION_TYPES}" STREQUAL "")
-  message(FATAL_ERROR "This project does not support being built in visual studio. Please use NMake on windows and make on linux")
-endif()
-
 #this library has an interface which is okay to call between debug/release runtimes,
-#and we only want one version of it, so we don't want the "d" suffix on debug builds on windows.
-#Must be set before including safir_sdk_core_config.cmake
-SET(NO_LIBRARY_POSTFIXES 1) 
+#and we only want one version of it, so we never want the "d" suffix on debug builds,
+#which is default on windows.
+SET(CMAKE_DEBUG_POSTFIX "")
 
-INCLUDE_DIRECTORIES(. google-breakpad/src/src)
 
-#google breakpad does not compile with c++11 support. But interface is ABI compatible.
-SET(SAFIR_NO_CXX11 True)
+FIND_PATH(BREAKPAD_INCLUDE_DIRECTORY
+  NAMES
+    client/linux/handler/exception_handler.h
+  PATHS
+    /usr/include/breakpad
+    /usr/local/include/breakpad)
 
-INCLUDE($ENV{SAFIR_SDK}/data/build/safir_sdk_core_config.cmake)
+FIND_LIBRARY(BREAKPAD_LIBRARY
+  NAMES
+    breakpad_client
+  PATHS
+    /usr/lib
+    /usr/local/lib)
 
-add_subdirectory(google-breakpad)
-
-add_library(lluf_crash_reporter SHARED CrashReporter.cpp Safir/Utilities/CrashReporter.h)
-
-FIND_PACKAGE(Boost COMPONENTS filesystem thread system)
-
-if (MSVC)
-  TARGET_LINK_LIBRARIES(lluf_crash_reporter 
-  "${CMAKE_CURRENT_BINARY_DIR}/google-breakpad/src/breakpad_client.lib")
+if (BREAKPAD_LIBRARY AND BREAKPAD_INCLUDE_DIRECTORY)
+  MESSAGE(STATUS "Google breakpad seems to be installed on this computer, will use the installed version.")
+  set(BREAKPAD_FOUND True)
 else()
-  TARGET_LINK_LIBRARIES(lluf_crash_reporter 
-    lluf_config
-    ${Boost_LIBRARIES}
-    "${CMAKE_CURRENT_BINARY_DIR}/google-breakpad/src/src/client/linux/libbreakpad_client.a")
+  MESSAGE(STATUS "Google breakpad is not installed on this computer, will download and build it.")
+  set(BREAKPAD_FOUND False)
 endif()
 
-add_dependencies(lluf_crash_reporter google-breakpad)
+#breakpad needs the GNU extensions to build, so we append a new -std= here
+if (NOT MSVC)
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
+endif()
 
+#we add our own breakpad build, which will download from svn and build.
+if (NOT BREAKPAD_FOUND)
+  add_subdirectory(google-breakpad)
 
-INSTALL(DIRECTORY Safir DESTINATION ${SAFIR_SDK}/include
-        PATTERN ".svn" EXCLUDE
-        PATTERN "*~" EXCLUDE)
+  set(BREAKPAD_INCLUDE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/google-breakpad/src/src)
 
-INSTALL(TARGETS lluf_crash_reporter
-        RUNTIME DESTINATION ${SAFIR_RUNTIME}/bin
-        LIBRARY DESTINATION ${SAFIR_RUNTIME}/lib
-        ARCHIVE DESTINATION ${SAFIR_SDK}/lib)
+  set(BREAKPAD_LIBRARY breakpad_client)
 
-INSTALL_DEBUG_INFO(lluf_crash_reporter)
+  if (MSVC)
+    link_directories(${CMAKE_CURRENT_BINARY_DIR}/google-breakpad/bin/)
+  else()
+    link_directories(${CMAKE_CURRENT_BINARY_DIR}/google-breakpad/src/src/client/linux/)
+  endif()
+endif()
+
+add_library(lluf_crash_reporter SHARED CrashReporter.cpp)
+
+TARGET_INCLUDE_DIRECTORIES(lluf_crash_reporter PRIVATE ${BREAKPAD_INCLUDE_DIRECTORY})
+
+TARGET_LINK_LIBRARIES(lluf_crash_reporter PRIVATE
+  lluf_config
+  ${BREAKPAD_LIBRARY}
+  ${Boost_FILESYSTEM_LIBRARY}
+  ${Boost_THREAD_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY})
+
+if (NOT BREAKPAD_FOUND)
+  add_dependencies(lluf_crash_reporter google-breakpad)
+endif()
+
+SAFIR_INSTALL(TARGETS lluf_crash_reporter)

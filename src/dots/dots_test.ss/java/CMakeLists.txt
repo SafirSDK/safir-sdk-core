@@ -1,13 +1,11 @@
-find_package(Java REQUIRED)
+if (NOT Java_FOUND)
+  return()
+endif()
 
-INCLUDE(JavaMacros)
-
-file(GLOB_RECURSE sources src/*.java)
-
-SET_JAVA_CLASSPATH(${SAFIR_RUNTIME}/bin/dots_java.jar ${SAFIR_RUNTIME}/bin/dots_generated-java.jar)
-
-SET(JAVA_MANIFEST ${CMAKE_CURRENT_SOURCE_DIR}/Manifest.txt)
-
-ADD_JAR(dots_test_java "${sources}" ALL)
+ADD_JAR(dots_test_java 
+  SOURCES src/Test.java
+  INCLUDE_JARS safir_generated-DotsTest-java dots_java
+  ENTRY_POINT Test
+  MANIFEST ${CMAKE_CURRENT_SOURCE_DIR}/Manifest.txt)
 
 

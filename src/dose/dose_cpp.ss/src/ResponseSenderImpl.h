@@ -28,7 +28,6 @@
 #include <boost/shared_ptr.hpp>
 #include <Safir/Dob/Response.h>
 #include <Safir/Dob/ResponseSender.h>
-#include <Safir/Dob/Internal/ConnectionId.h>
 
 namespace Safir
 {
