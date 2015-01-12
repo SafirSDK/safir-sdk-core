@@ -4,8 +4,8 @@ FIND_PATH(BOOST_PROCESS_INCLUDE_DIRECTORY
   NAMES
     boost/process.hpp
   PATHS
-    /usr/include/breakpad
-    /usr/local/include/breakpad)
+    /usr/include
+    /usr/local/include)
 
 if (BOOST_PROCESS_INCLUDE_DIRECTORY)
   MESSAGE(STATUS "Boost.Process seems to be installed on this computer, will use the installed version.")
