@@ -39,5 +39,6 @@ override_dh_auto_test:
 
 
 #TODO: remove this when cli-common-dev has fixed this bug
+#and remove the jenkins suppression of the cli:Depends warning
 override_dh_clideps:
 	pwd|grep -q " " && echo "Skipping dh_clideps since there is a space in pwd" || dh_clideps

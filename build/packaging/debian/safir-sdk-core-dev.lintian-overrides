@@ -1,2 +1,9 @@
 #package is not meant for inclusion in debian at this time
 safir-sdk-core-dev: new-package-should-close-itp-bug
+
+#I believe this warning comes only on ubuntu, since they're using a different default java than lintian expects.
+safir-sdk-core-dev: incompatible-java-bytecode-format
+
+#doxygen bundles jquery.js with the generated html, which lintian doesnt really like. But currently there
+#appears to be no way around it.
+safir-sdk-core-dev: embedded-javascript-library

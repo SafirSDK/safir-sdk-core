@@ -153,7 +153,7 @@ def num_jobs():
 
         mem_per_job = 400
         memory = physical_memory()
-        if memory is not None and memory / self.num_jobs < mem_per_job:
+        if memory is not None and memory / num_jobs < mem_per_job:
             num_jobs = max(1, int(memory / mem_per_job))
     except:
         num_jobs = 2
@@ -698,10 +698,11 @@ class DebianPackager(object):
         os.chdir("safir-sdk-core_" + version_string)
         shutil.copytree(os.path.join("build", "packaging", "debian"), "debian")
         self.__run(("debuild",
+                    "--set-envvar", "DEB_BUILD_OPTIONS=parallel="+ str(self.num_jobs),
                     "--prepend-path",
                     "/usr/lib/ccache/",
-                    "-us", "-uc",
-                    "-eDEB_BUILD_OPTIONS=\"parallel="+ str(self.num_jobs) +"\""), "building packages")
+                    "-us", "-uc"),
+                    "building packages")
         os.chdir(glob.glob("obj-*")[0])
         translate_results_to_junit("debhelper")
 
