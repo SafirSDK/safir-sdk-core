@@ -698,7 +698,7 @@ class DebianPackager(object):
         os.chdir("safir-sdk-core_" + version_string)
         shutil.copytree(os.path.join("build", "packaging", "debian"), "debian")
         self.__run(("debuild",
-                    "--set-envvar", "DEB_BUILD_OPTIONS='parallel="+ str(self.num_jobs) +"'",
+                    "--set-envvar", "DEB_BUILD_OPTIONS=parallel="+ str(self.num_jobs),
                     "--prepend-path",
                     "/usr/lib/ccache/",
                     "-us", "-uc"),
