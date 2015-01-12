@@ -153,7 +153,7 @@ def num_jobs():
 
         mem_per_job = 400
         memory = physical_memory()
-        if memory is not None and memory / self.num_jobs < mem_per_job:
+        if memory is not None and memory / num_jobs < mem_per_job:
             num_jobs = max(1, int(memory / mem_per_job))
     except:
         num_jobs = 2
