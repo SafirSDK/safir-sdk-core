@@ -122,9 +122,24 @@ namespace
         //TODO:
     }
 
-    void BlobOperations::Diff(const char* originalBlob, char* & currentBlob)
+    bool BlobOperations::Diff(const char* originalBlob, const char* & currentBlob, Safir::Dob::Typesystem::BinarySerialization& changedBlob)
     {
-        DotsC_CreateBlobWriterFromBlob(currentBlob)
+        DotsC_Handle writer=DotsC_CreateBlobWriterFromBlob(currentBlob);
+        DotsC_Handle reader=DotsC_CreateBlobReader(originalBlob);
+
+        bool anythingChanged=DotsC_MarkChanges(reader, writer);
+
+        if (anythingChanged)
+        {
+            DotsC_Int32 size=DotsC_CalculateBlobSize(writer);
+            changedBlob.resize(static_cast<size_t>(size));
+            DotsC_WriteBlob(writer, &changedBlob[0]);
+        }
+
+        DotsC_DeleteBlobReader(reader);
+        DotsC_DeleteBlobWriter(writer);
+
+        return anythingChanged;
     }
 
 

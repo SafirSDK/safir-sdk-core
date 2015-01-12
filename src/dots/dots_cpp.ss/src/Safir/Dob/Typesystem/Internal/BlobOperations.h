@@ -100,7 +100,7 @@ namespace Internal
         static void SetChanged(char* blob, bool val);
         //REMOVE
 
-        static void Diff(const char* originalBlob, char* & currentBlob);
+        static bool Diff(const char* originalBlob, const char* & currentBlob, Safir::Dob::Typesystem::BinarySerialization& changedBlob);
 
 
         /** @} */
