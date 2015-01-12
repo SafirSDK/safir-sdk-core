@@ -631,18 +631,8 @@ extern "C"
      */
     DOTS_KERNEL_API void DotsC_DeleteBlob(char* & blob);
 
-    /**
-      * Set changed flags for all members in current that are different from origin.
-      *
-      * @param origin [in] - The origin blob to compare against.
-      * @param current [in,out] -  The current version of the object that will have its change flags updated.
-      */
-    DOTS_KERNEL_API void DotsC_DiffBlob(const char* origin, char* current);
-
-
     // Read operations
     //------------------------------------------------------------------------
-
     /**
      * @brief Create a new instance of blob reader.
      * @param blob [in] - The blob to read.
@@ -716,25 +706,34 @@ extern "C"
     DOTS_KERNEL_API DotsC_Handle DotsC_CreateBlobWriterFromBlob(const char* blob);
 
     /**
-     * @brief Deletes an instance of blob writer.
-     * @param writeHandle [in] - Handle to the blob writer to be deleted.
+     * Create a new instance of blob writer from an existing blobReader handle. The readHandle can
+     * be deleted by calling DotsC_DeleteBlobReader at any time.
+     *
+     * @param readHandle [in] - Handle to a blobReader.
+     * @return Handle to a new blob writer instance.
      */
-    DOTS_KERNEL_API void DotsC_DeleteBlobWriter(DotsC_Handle writeHandle);
+    DOTS_KERNEL_API DotsC_Handle DotsC_CreateBlobWriterFromReader(DotsC_Handle readerHandle);
 
     /**
-     * Calculate the needed size of the destination blob when calling WriteBlob with this writeHandle.
-     * @param writeHandle [in] - Handle to blob writer.
+     * @brief Deletes an instance of blob writer.
+     * @param writerHandle [in] - Handle to the blob writer to be deleted.
+     */
+    DOTS_KERNEL_API void DotsC_DeleteBlobWriter(DotsC_Handle writerHandle);
+
+    /**
+     * Calculate the needed size of the destination blob when calling WriteBlob with this writerHandle.
+     * @param writerHandle [in] - Handle to blob writer.
      * @return Number of bytes needed to be allocated before serializing to a raw blob.
      */
-    DOTS_KERNEL_API DotsC_Int32 DotsC_CalculateBlobSize(DotsC_Handle writeHandle);
+    DOTS_KERNEL_API DotsC_Int32 DotsC_CalculateBlobSize(DotsC_Handle writerHandle);
 
     /**
      * Write content of a blob writer to a raw blob. The blobDest must be preallocated with enough capacity
      * to contain the raw blob. Use CalculateBlobSize to get the needed size.
-     * @param writeHandle [in] - Handle to blob writer.
+     * @param writerHandle [in] - Handle to blob writer.
      * @param blobDest [in, out] - Preallocated raw blob. After this call blobDest contains the binary serialization.
      */
-    DOTS_KERNEL_API void DotsC_WriteBlob(DotsC_Handle writeHandle, char* blobDest);
+    DOTS_KERNEL_API void DotsC_WriteBlob(DotsC_Handle writerHandle, char* blobDest);
 
     /**
      * Recursively set changed flags for all members.

@@ -984,12 +984,6 @@ void DotsC_DeleteBlob(char* & blob)
     }
 }
 
-void DotsC_DiffBlob(const char* origin, char* current)
-{
-    Init();
-    //RepositoryKeeper::GetBlobLayout()->SetChangedSinceLastRead(lastRead, current);
-}
-
 //Read operations
 DotsC_TypeId DotsC_GetTypeId(const char* blob)
 {
@@ -1175,6 +1169,15 @@ DotsC_Handle DotsC_CreateBlobWriterFromBlob(const char* blob)
     Writer* writer=new Writer(Reader(RepositoryKeeper::GetRepository(), blob));
     DotsC_Handle address=(DotsC_Handle)writer;
     return address;
+}
+
+DotsC_Handle DotsC_CreateBlobWriterFromReader(DotsC_Handle readerHandle)
+{
+    Init();
+    Writer* writer=new Writer(*ReaderFromHandle(readerHandle));
+    DotsC_Handle address=(DotsC_Handle)writer;
+    return address;
+
 }
 
 void DotsC_DeleteBlobWriter(DotsC_Handle writerHandle)

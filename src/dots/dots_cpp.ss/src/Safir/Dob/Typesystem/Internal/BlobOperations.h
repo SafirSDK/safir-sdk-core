@@ -91,14 +91,14 @@ namespace Internal
         static bool IsChanged(const char* blob,
                               const Dob::Typesystem::MemberIndex member,
                               const Dob::Typesystem::ArrayIndex index);
-        //REMOVE
-        static void SetChangedHere(char* blob,
+
+        static bool SetChangedHere(char* blob,
                                    const Dob::Typesystem::MemberIndex member,
                                    const Dob::Typesystem::ArrayIndex index,
-                                   bool val);
-        //REMOVE
-        static void SetChanged(char* blob, bool val);
-        //REMOVE
+                                   bool val,
+                                   Safir::Dob::Typesystem::BinarySerialization& changedBlob);
+
+        static void SetChanged(const char* blob, bool val, Safir::Dob::Typesystem::BinarySerialization& changedBlob);
 
         static bool Diff(const char* originalBlob, const char* & currentBlob, Safir::Dob::Typesystem::BinarySerialization& changedBlob);
 

@@ -62,32 +62,6 @@ namespace
         return DotsC_GetSize(blob);
     }
 
-    //======================================================================
-
-//    //Sets all changed flags in the blob to false
-//    void SetChanged(char * const blob, const bool changed)
-//    {
-//        DotsC_SetChanged(blob, changed);
-//    }
-
-//    void SetChangedHere(char* const blob,
-//                        const Dob::Typesystem::MemberIndex member,
-//                        const Dob::Typesystem::ArrayIndex index,
-//                        const bool changed)
-//    {
-//        DotsC_SetChangedHere(blob,member,index,changed);
-//    }
-
-
-//    //Compare the two blobs and set the change flags in "mine" on all members that have
-//    //changed between "base" and "mine".
-//    void Diff(char const * const base,
-//              char * const mine)
-//    {
-//        DotsC_SetChangedSinceLastRead(base,mine);
-//        //TODO: rename the function in DOTS.
-//    }
-
     char* BlobOperations::CreateCopy(const char* blob)
     {
         char* copy;
@@ -101,25 +75,50 @@ namespace
         blob=NULL;
     }
 
-    bool BlobOperations::IsChanged(const char* /*blob*/,
-                                   const Dob::Typesystem::MemberIndex /*member*/,
-                                   const Dob::Typesystem::ArrayIndex /*index*/)
+    bool BlobOperations::IsChanged(const char* blob,
+                                   const Dob::Typesystem::MemberIndex member,
+                                   const Dob::Typesystem::ArrayIndex index)
     {
-        //TODO: Remove
-        return false;
+        DotsC_Handle reader=DotsC_CreateBlobReader(blob);
+        bool isNull, isChanged;
+        DotsC_ReadMemberStatus(reader, isNull, isChanged, member, index);
+        DotsC_DeleteBlobReader(reader);
+        return isChanged;
     }
 
-    void BlobOperations::SetChangedHere(char* /*blob*/,
-                                        const Dob::Typesystem::MemberIndex /*member*/,
-                                        const Dob::Typesystem::ArrayIndex /*index*/,
-                                        bool /*val*/)
+    bool BlobOperations::SetChangedHere(char* blob,
+                                        const Dob::Typesystem::MemberIndex member,
+                                        const Dob::Typesystem::ArrayIndex index,
+                                        bool val,
+                                        Safir::Dob::Typesystem::BinarySerialization& changedBlob)
     {
-        //TODO:
+        DotsC_Handle reader=DotsC_CreateBlobReader(blob);
+        bool isNull, isChanged;
+        DotsC_ReadMemberStatus(reader, isNull, isChanged, member, index);
+        bool mustWrite=(isChanged!=val);
+
+        if (mustWrite)
+        {
+            DotsC_Handle writer=DotsC_CreateBlobWriterFromReader(reader);
+            DotsC_WriteChangeFlag(writer, member, index, val);
+            DotsC_Int32 size=DotsC_CalculateBlobSize(writer);
+            changedBlob.resize(static_cast<size_t>(size));
+            DotsC_WriteBlob(writer, &changedBlob[0]);
+            DotsC_DeleteBlobWriter(writer);
+        }
+
+        DotsC_DeleteBlobReader(reader);
+        return mustWrite;
     }
 
-    void BlobOperations::SetChanged(char* , bool )
-    {
-        //TODO:
+    void BlobOperations::SetChanged(const char* blob, bool val, Safir::Dob::Typesystem::BinarySerialization& changedBlob)
+    {        
+        DotsC_Handle writer=DotsC_CreateBlobWriterFromBlob(blob);
+        DotsC_WriteAllChangeFlags(writer, val);
+        DotsC_Int32 size=DotsC_CalculateBlobSize(writer);
+        changedBlob.resize(static_cast<size_t>(size));
+        DotsC_WriteBlob(writer, &changedBlob[0]);
+        DotsC_DeleteBlobWriter(writer);
     }
 
     bool BlobOperations::Diff(const char* originalBlob, const char* & currentBlob, Safir::Dob::Typesystem::BinarySerialization& changedBlob)
