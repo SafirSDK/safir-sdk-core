@@ -1100,7 +1100,8 @@ namespace Internal
 
         char* blob = const_cast<char*>(GetBlob());
 
-        Typesystem::Internal::BlobOperations::SetChanged(blob, changed);
+        //TODO: JOOT
+        //Typesystem::Internal::BlobOperations::SetChanged(blob, changed);
     }
 
     void DistributionData::DecrementVersion()

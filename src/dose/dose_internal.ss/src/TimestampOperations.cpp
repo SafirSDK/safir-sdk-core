@@ -258,7 +258,7 @@ namespace Internal
             return;
         }
 
-        const char * const blob = entityState.GetBlob();
+        Typesystem::Internal::BlobChangeFlagReader reader(entityState.GetBlob());
 
         const Typesystem::MemberIndex numberOfMembers =
             Safir::Dob::Typesystem::Members::GetNumberOfMembers(typeId);
@@ -269,7 +269,7 @@ namespace Internal
             bool isChanged = false;
             for (Typesystem::ArrayIndex index = 0; index < arraySize; ++index)
             {
-                if (Typesystem::Internal::BlobOperations::IsChanged(blob,member,index))
+                if (reader.IsChanged(member, index))
                 {
                     isChanged = true;
                     break;
@@ -317,7 +317,7 @@ namespace Internal
     void
     TimestampOperations::SetChangeFlags(const DistributionData& previous,
                                         const DistributionData& current,
-                                        char* const inBlob)
+                                        Typesystem::Internal::BlobDiffWriter& writer)
     {
         const Typesystem::TypeId typeId = current.GetTypeId();
         ENSURE(InjectionKindTable::Instance().IsInjectable(typeId),
@@ -340,7 +340,7 @@ namespace Internal
                 const Typesystem::Int32 arraySize = Typesystem::Members::GetArraySize(typeId,member);
                 for (Typesystem::ArrayIndex index = 0; index < arraySize; ++index)
                 {
-                    Typesystem::Internal::BlobOperations::SetChangedHere(inBlob,member,index,true);
+                    writer.SetChangedHere(member, index, true);
                 }
             }
         }

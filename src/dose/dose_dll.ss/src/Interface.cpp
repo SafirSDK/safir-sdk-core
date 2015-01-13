@@ -1242,45 +1242,49 @@ void DoseC_Diff(const char* const previousState,
 
         if (wantCurrent)
         {
-            diffBlob = Safir::Dob::Typesystem::Internal::BlobOperations::CreateCopy(current.GetBlob());
+            Typesystem::Internal::BlobDiffWriter writer(current.GetBlob());
 
             if (!previous.IsCreated())
             {
-                Safir::Dob::Typesystem::Internal::BlobOperations::SetChanged(diffBlob,true);
+                writer.SetAllChanged(true);
             }
             else
             {
                 if (timestampDiff)
                 {
-                    TimestampOperations::SetChangeFlags(previous, current, diffBlob);
+                    TimestampOperations::SetChangeFlags(previous, current, writer);
                 }
                 else
                 {
                     //ordinary blob diff
-                    Safir::Dob::Typesystem::Internal::BlobOperations::Diff(previous.GetBlob(),diffBlob);
+                    writer.Diff(previous.GetBlob());
                 }
             }
+
+            diffBlob=writer.ToBlob();
         }
         else //wantPrevious
         {
-            diffBlob = Safir::Dob::Typesystem::Internal::BlobOperations::CreateCopy(previous.GetBlob());
+            Typesystem::Internal::BlobDiffWriter writer(previous.GetBlob());
 
             if (!current.IsCreated())
             {
-                Safir::Dob::Typesystem::Internal::BlobOperations::SetChanged(diffBlob,true);
+                writer.SetAllChanged(true);
             }
             else
             {
                 if (timestampDiff)
                 {
-                    TimestampOperations::SetChangeFlags(previous, current, diffBlob);
+                    TimestampOperations::SetChangeFlags(previous, current, writer);
                 }
                 else
                 {
                     //ordinary blob diff
-                    Safir::Dob::Typesystem::Internal::BlobOperations::Diff(current.GetBlob(),diffBlob);
+                    writer.Diff(current.GetBlob());
                 }
             }
+
+            diffBlob=writer.ToBlob();
         }
 
         success = true;

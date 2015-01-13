@@ -613,6 +613,16 @@ extern "C"
     DOTS_KERNEL_API DotsC_Int32 DotsC_GetSize(const char* blob);
 
     /**
+     * This method will allocate memory within dots_kernel.
+     * The memory must be deleted with DotsC_DeleteBlob.
+     *
+     * @param to [in,out] - The copy to be created.
+     * @param size [in] - Number of bytes to allocate.
+     * @return Pointer to allocated memory.
+     */
+    DOTS_KERNEL_API char* DotsC_AllocateBlob(DotsC_Int32 size);
+
+    /**
      * This method will create an exact copy of a blob. The blob 'to' shall not already
      * have been created since it will cause memory leaks. This method does not delete
      * the blob 'to' before it is allocated.
@@ -620,7 +630,7 @@ extern "C"
      * @param to [in,out] - The copy to be created.
      * @param from [in] - The original blob.
      */
-    void DotsC_CreateCopyOfBlob(char* & to, const char* from);
+    DOTS_KERNEL_API void DotsC_CreateCopyOfBlob(char* & to, const char* from);
 
     /**
      * Deletes a blob. Blobs created within dots_kernel must be deleted there too.

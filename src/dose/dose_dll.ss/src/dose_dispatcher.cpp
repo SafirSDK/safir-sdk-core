@@ -541,8 +541,10 @@ namespace Internal
 
         bool success;
         boost::shared_ptr<const char> refHolder (injectionState.GetReference(), &DistributionData::DropReference);
-        boost::shared_ptr<char> blobHolder(injectionState.GetBlobCopy(), Typesystem::Internal::BlobOperations::Delete);
-        Typesystem::Internal::BlobOperations::SetChanged(blobHolder.get(), true);
+
+        Typesystem::Internal::BlobDiffWriter writer(injectionState.GetBlob());
+        writer.SetAllChanged(true);
+        boost::shared_ptr<char> blobHolder(writer.ToBlob(), Typesystem::Internal::BlobOperations::Delete);
 
         CheckLocks();
 

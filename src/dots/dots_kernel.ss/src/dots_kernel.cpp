@@ -966,6 +966,13 @@ DotsC_Int32 DotsC_DictionaryEntityIdKeyToIndex(const DotsC_TypeId typeId, const 
 //* Base operations on blobs
 //********************************************************
 
+char* DotsC_AllocateBlob(DotsC_Int32 size)
+{
+    Init();
+    char* blob=new char[static_cast<size_t>(size)];
+    return blob;
+}
+
 void DotsC_CreateCopyOfBlob(char* & to, const char* from)
 {
     Init();

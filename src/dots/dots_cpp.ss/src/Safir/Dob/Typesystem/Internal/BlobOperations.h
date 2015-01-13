@@ -88,21 +88,6 @@ namespace Internal
          */
         static void Delete(char* & blob);
 
-        static bool IsChanged(const char* blob,
-                              const Dob::Typesystem::MemberIndex member,
-                              const Dob::Typesystem::ArrayIndex index);
-
-        static bool SetChangedHere(char* blob,
-                                   const Dob::Typesystem::MemberIndex member,
-                                   const Dob::Typesystem::ArrayIndex index,
-                                   bool val,
-                                   Safir::Dob::Typesystem::BinarySerialization& changedBlob);
-
-        static void SetChanged(const char* blob, bool val, Safir::Dob::Typesystem::BinarySerialization& changedBlob);
-
-        static bool Diff(const char* originalBlob, const char* & currentBlob, Safir::Dob::Typesystem::BinarySerialization& changedBlob);
-
-
         /** @} */
 
         /**
@@ -729,6 +714,49 @@ namespace Internal
                         const Dob::Typesystem::MemberIndex member,
                         const Dob::Typesystem::ArrayIndex valueIndex,
                         KeyValueMode mode);
+    };
+
+    /**********************************************************************
+     *
+     *  Helper class for reading change flags
+     *
+     **********************************************************************/
+    class BlobChangeFlagReader
+    {
+    public:
+        explicit BlobChangeFlagReader(const char* blob);
+        ~BlobChangeFlagReader();
+
+        bool IsChanged(const Dob::Typesystem::MemberIndex member,
+                       const Dob::Typesystem::ArrayIndex index);
+    private:
+        DotsC_Int64 m_handle;
+    };
+
+    /**********************************************************************
+     *
+     *  Helper class for writing change flags and diff blobs
+     *
+     **********************************************************************/
+    class BlobDiffWriter
+    {
+    public:
+        explicit BlobDiffWriter(const char* blob);
+        ~BlobDiffWriter();
+
+        void SetChangedHere(const Dob::Typesystem::MemberIndex member,
+                            Dob::Typesystem::ArrayIndex index,
+                            bool val);
+
+        void SetAllChanged(bool val);
+
+        bool Diff(const char* otherBlob);
+
+        //The result blob must be deleted using DeleteBlob
+        char* ToBlob();
+
+    private:
+        DotsC_Int64 m_handle;
     };
 }
 }
