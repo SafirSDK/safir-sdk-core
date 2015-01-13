@@ -767,6 +767,7 @@ namespace Internal
         void Allocate(const size_t size);
 
         const std::wstring HeaderImage() const;
+        const std::wstring RequestHeaderImage() const;
 
         /**
          * Operations for allocating and manipulating the use_count on the char

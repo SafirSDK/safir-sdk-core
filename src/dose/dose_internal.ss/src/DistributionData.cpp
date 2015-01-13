@@ -1149,6 +1149,18 @@ namespace Internal
                HasBlob();
     }
 
+    const std::wstring DistributionData::RequestHeaderImage() const
+    {
+        std::wostringstream oStr;
+        const RequestHeader & header=GetRequestHeader();
+
+        oStr << "\tHandlerId: " << GetHandlerId() << std::endl
+             << "\tRequestId: " << header.m_requestId << std::endl
+             << "\tResponseId: " << header.m_responseId;
+
+        return oStr.str();
+    }
+
 
     const std::wstring DistributionData::HeaderImage() const
     {
@@ -1256,30 +1268,28 @@ namespace Internal
 
         case Action_PendingRegistrationRequest:
             {
-#if 0 //dob-v4
                 ConnectionId originator = GetPendingOriginator();
                 oStr << "Action_PendingRegistrationRequest" << std::endl
                      << HeaderImage() << std::endl
-                     << "\t" << GetObjectId() <<std::endl
+                     << "\tType: " << Dob::Typesystem::Operations::GetName(GetTypeId()) << std::endl
+                     << "\tHandlerId: " << GetHandlerId() << std::endl
                      << "\tRequestTimestamp: " << GetPendingRequestTimestamp() << std::endl
                      << "\tRequestId: " << GetPendingRequestId() << std::endl
                      << "\tOriginator: (" << originator.m_id << ", " << originator.m_node << ")" << std::endl;
-#endif
             }
             break;
 
         case Action_PendingRegistrationResponse:
             {
-#if 0 //dob-v4
                 ConnectionId originator = GetPendingOriginator();
                 oStr << "Action_PendingRegistrationResponse" << std::endl
                      << HeaderImage() << std::endl
-                     << "\t" << GetObjectId() <<std::endl
+                     << "\tType: " << Dob::Typesystem::Operations::GetName(GetTypeId()) << std::endl
+                     << "\tHandlerId: " << GetHandlerId() << std::endl
                      << "\tRequestTimestamp: " << GetPendingRequestTimestamp() << std::endl
                      << "\tRequestId: " << GetPendingRequestId() << std::endl
                      << "\tOriginator: (" << originator.m_id << ", " << originator.m_node << ")" << std::endl
                      << "\tResponse: " << std::boolalpha << GetPendingResponse() << std::endl;
-#endif
             }
             break;
         case Action_HavePersistenceDataRequest:
@@ -1305,52 +1315,46 @@ namespace Internal
             break;
         case Request_Service:
             {
-#if 0 //dob-v4
-                Dob::Typesystem::ObjectId oid = GetObjectId();
                 oStr << "Request_Service" << std::endl
                      << HeaderImage() << std::endl
-                    << "\t" << oid;
-#endif
+                     << RequestHeaderImage() << std::endl;
             }
             break;
         case Request_EntityCreate:
             {
-#if 0 //dob-v4
-                Dob::Typesystem::ObjectId oid = GetObjectId();
-                oStr << "Request_EntityCreate" << std::endl
+                oStr << "Request_Service" << std::endl
                      << HeaderImage() << std::endl
-                    << "\t" << oid;
-#endif
+                     << RequestHeaderImage() << std::endl
+                     << "\tHasInstanceId: " << std::boolalpha << HasInstanceId() << std::endl;
+                if (HasInstanceId())
+                {
+                    oStr << "\tInstanceId: " << GetInstanceId() << std::endl;
+                }
             }
             break;
         case Request_EntityUpdate:
             {
-#if 0 //dob-v4
-                Dob::Typesystem::ObjectId oid = GetObjectId();
                 oStr << "Request_EntityUpdate" << std::endl
                      << HeaderImage() << std::endl
-                    << "\t" << oid;
-#endif
+                     << RequestHeaderImage() << std::endl
+                     << "\tInstanceId: " << GetInstanceId() << std::endl;
             }
             break;
         case Response:
             {
-#if 0 //dob-v4
-                Dob::Typesystem::ObjectId oid = GetObjectId();
                 oStr << "Response" << std::endl
                      << HeaderImage() << std::endl
-                    << "\t" << oid;
-#endif
+                     << "\tReceiver: " << GetReceiverId() << std::endl
+                     << "\tRequestId: " << GetRequestId() << std::endl;
             }
             break;
         case Request_EntityDelete:
             {
-#if 0 //dob-v4
-                Dob::Typesystem::ObjectId oid = GetObjectId();
                 oStr << "Request_EntityDelete" << std::endl
-                    << HeaderImage() << std::endl
-                    << "\t" << oid;
-#endif
+                     << HeaderImage() << std::endl
+                     << RequestHeaderImage() << std::endl
+                     << "\tInstanceId: " << GetInstanceId() << std::endl
+                     << "\tType: " << Dob::Typesystem::Operations::GetName(GetTypeId()) << std::endl;
             }
             break;
         default:
