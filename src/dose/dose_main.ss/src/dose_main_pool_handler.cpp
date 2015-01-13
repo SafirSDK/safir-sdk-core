@@ -511,11 +511,14 @@ namespace Internal
         return state.GetSenderId().m_node == g_thisNode;
     }
 
-    bool ProcessEntityState(ExternNodeCommunication* /*ecom*/,
-                            const SubscriptionPtr& /*subscription*/)
+    bool ProcessEntityState(
+#if 0 //stewart
+            ExternNodeCommunication* /*ecom*/,
+#endif
+            const SubscriptionPtr& subscription)
     {
         bool complete = true;
-#if 0 //stewart
+
         //Real state
         {
             const DistributionData currentState = subscription->GetCurrentRealState();
@@ -530,14 +533,18 @@ namespace Internal
                 }
                 else
                 {
+#if 0 //stewart
                     if (ecom->Send(currentState))
+#endif
                     {
                         subscription->SetLastRealState(currentState);
                     }
+#if 0 //stewart
                     else
                     {
                         complete = false;
                     }
+#endif
                 }
             }
         }
@@ -556,18 +563,21 @@ namespace Internal
                 }
                 else
                 {
+#if 0 //stewart
                     if (ecom->Send(currentState))
+#endif
                     {
                         subscription->SetLastInjectionState(currentState);
                     }
+#if 0 //stewart
                     else
                     {
                         complete = false;
                     }
+#endif
                 }
             }
         }
-#endif
 
         return complete;
     }
@@ -617,10 +627,10 @@ namespace Internal
 #if 0 //stewart
                                   ExternNodeCommunication * ecom,
 #endif
-                                  PendingRegistrationHandler * /*pendingHandler*/,
-                                  const SubscriptionPtr & /*subscription*/)
+                                  PendingRegistrationHandler * pendingHandler,
+                                  const SubscriptionPtr & subscription)
     {
-#if 0 //stewart
+
         const DistributionData currentState = subscription->GetCurrentRealState();
         const DistributionData lastState = subscription->GetLastRealState();
 
@@ -634,15 +644,17 @@ namespace Internal
         {
             return true;
         }
-
+#if 0 //stewart
         const bool success = ecom->Send(currentState);
 
         if (success)
+#endif
         {
             pendingHandler->CheckForPending(currentState.GetTypeId());
             subscription->SetLastRealState(currentState);
         }
 
+#if 0 //stewart
         return success;
 #else
         return true;
@@ -678,12 +690,14 @@ namespace Internal
     {
         DistributionData realState = subscription->GetState()->GetRealState();
 
-#if 0 //stewart
+
         if (!realState.IsNoState() && realState.GetType() == DistributionData::RegistrationState)
         {
             // Registration state
             dontRemove = !subscription->DirtyFlag().Process(boost::bind(ProcessRegistrationState,
+#if 0 //stewart
                                                                         m_ecom,
+#endif
                                                                         m_pendingRegistrationHandler,
                                                                         boost::cref(subscription)));
         }
@@ -691,13 +705,11 @@ namespace Internal
         {
             // Entity state
             dontRemove = !subscription->DirtyFlag().Process(boost::bind(ProcessEntityState,
+#if 0 //stewart
                                                                         m_ecom,
+#endif
                                                                         boost::cref(subscription)));
         }
-#else
-        dontRemove = false;
-#endif
-
         //dontRemove is true if we got an overflow, and if we did we dont want to keep sending anything to dose_com.
         exitDispatch = dontRemove;
     }
