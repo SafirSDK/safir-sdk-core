@@ -157,7 +157,7 @@ namespace Internal
         //    -1000000    "minus one"-connection in context 0
         //    -1000001    "minus one"-connection in context 1
         //    -1000345    "minus one"-connection in context 345
-        // 
+        //
         //
         bool minusOneConnection = false;
         if (contextId < 0)
@@ -169,7 +169,7 @@ namespace Internal
         {
             m_contextId = contextId;
         }
-       
+
         if (m_contextId >= NodeParameters::NumberOfContexts())
         {
             std::wostringstream ostr;
@@ -262,6 +262,10 @@ namespace Internal
                 ostr << "Failed to open connection! There are too many processes connected to the Dob, please increase "
                      << "the parameter Safir.Dob.ProcessInfo.MaxNumberOfInstances. " << std::endl
                      << "While opening connection with name " << m_connectionName.c_str();
+                m_consumerReferences.DropAllReferences(boost::bind(&Dispatcher::InvokeDropReferenceCb,
+                                                                   m_dispatcher,
+                                                                   _1,
+                                                                   _2));
                 throw Safir::Dob::NotOpenException(ostr.str(), __WFILE__,__LINE__);
             }
             break;
@@ -272,6 +276,10 @@ namespace Internal
                 ostr << "Failed to open connection! This process has too many connections, "
                      << "please increase the size of the ConnectionNames array in class Safir.Dob.ProcessInfo. " << std::endl
                      << "While opening Process pid = " << Safir::Utilities::ProcessInfo::GetPid() << ", ConnectionName = " << m_connectionName.c_str();
+                m_consumerReferences.DropAllReferences(boost::bind(&Dispatcher::InvokeDropReferenceCb,
+                                                                   m_dispatcher,
+                                                                   _1,
+                                                                   _2));
                 throw Safir::Dob::NotOpenException(ostr.str(), __WFILE__,__LINE__);
             }
             break;
@@ -282,6 +290,10 @@ namespace Internal
                 std::wostringstream ostr;
                 ostr << "Failed to open connection! The connection name '" << m_connectionName.c_str()
                      << "' is already in use. While opening connection from process with pid = " << Safir::Utilities::ProcessInfo::GetPid();
+                m_consumerReferences.DropAllReferences(boost::bind(&Dispatcher::InvokeDropReferenceCb,
+                                                                   m_dispatcher,
+                                                                   _1,
+                                                                   _2));
                 throw Safir::Dob::NotOpenException(ostr.str(), __WFILE__,__LINE__);
             }
             break;
@@ -389,11 +401,11 @@ namespace Internal
 
         //AWI:? Can be removed?
         //m_contextId = 0;
-        
+
         m_connection.reset();
 
         // Drop any reference corresponding to a saved consumer (will be saved for
-        // garbage colleted languages only).
+        // garbage collected languages only).
         m_consumerReferences.DropAllReferences(boost::bind(&Dispatcher::InvokeDropReferenceCb,
                                                            m_dispatcher,
                                                            _1,
@@ -1121,7 +1133,7 @@ namespace Internal
             throw Safir::Dob::NotFoundException(ostr.str(),__WFILE__,__LINE__);
         }
 
-        
+
         ConnectionConsumerPair regOwner;
         InstanceIdPolicy::Enumeration policy;
         EntityTypes::Instance().GetRegisterer(typeId, handlerId, m_connection->Id().m_contextId, regOwner, policy);
@@ -1208,7 +1220,7 @@ namespace Internal
             std::wostringstream ostr;
             ostr << "A message that has the property ContextShared can only be sent from context 0 . TypeId = "
                  << Typesystem::Operations::GetName(typeId);
-             throw Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);            
+             throw Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
         }
 
         const bool success = m_connection->GetMessageOutQueue().push(msg);
@@ -2159,7 +2171,7 @@ namespace Internal
                 //to "fudge" this delete to have the correct states.
                 if (created || updated)
                 {
-                    ENSURE(subscriptionOptions.wantsLastState, << "Unexpected combination of created, updated and deleted (" 
+                    ENSURE(subscriptionOptions.wantsLastState, << "Unexpected combination of created, updated and deleted ("
                            << created << ", " << updated << ", " << deleted << ") when wantsLastState is not set");
                     m_dispatcher.InvokeOnDeletedEntityCb(consumer, currState, currState, deleteIsExplicit, timestampChangeInfo);
                 }
@@ -2364,7 +2376,7 @@ namespace Internal
     {
         const InjectionDispatchAction& action = injection.first;
         const DistributionData& injectedEntity = injection.second;
-        
+
         const ConsumerId consumer = subscription->GetSubscriptionId().connectionConsumer.consumer;
         DistributionData realState = subscription->GetCurrentRealState();
         DistributionData injectionState = subscription->GetCurrentInjectionState();
@@ -2497,7 +2509,7 @@ namespace Internal
         return dontRemove;
     }
 
-    
+
 
     bool Controller::ProcessInjectionSubscription(const SubscriptionPtr& subscription, bool& exitDispatch, bool& dontRemove)
     {
@@ -2583,7 +2595,7 @@ namespace Internal
 
         const InjectionDispatchAction& dispatchAction = injection.first; //Get a better name
         DistributionData& dispatchedInjection = injection.second; //Get a better name
-        
+
         const ConsumerId consumer = subscription->GetSubscriptionId().connectionConsumer.consumer;
         const Safir::Dob::Internal::ConnectionPtr connection = subscription->GetSubscriptionId().connectionConsumer.connection;
         if (!dispatchedInjection.IsNoState())
@@ -2640,7 +2652,7 @@ namespace Internal
     {
         bool removedLastInstance = m_connection->RemoveInitialInjectionInstance(typeId,
                                                                                 handlerId,
-                                                                                instanceId); 
+                                                                                instanceId);
         if (removedLastInstance)
         {
              m_dispatcher.InvokeOnInitialInjectionsDoneCb(consumer, typeId, handlerId);
@@ -2896,7 +2908,7 @@ namespace Internal
 
     ContextId Controller::GetContext() const
     {
-        return m_contextId; 
+        return m_contextId;
     }
 
     void Controller::SimulateOverflows(const bool inQueues, const bool outQueues)
