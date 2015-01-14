@@ -28,6 +28,7 @@
 #include <Safir/Dob/Internal/ContextSharedTable.h>
 #include <Safir/Dob/Entity.h>
 #include <Safir/Dob/NodeParameters.h>
+#include <Safir/Utilities/Internal/ConfigReader.h>
 
 namespace Safir
 {
@@ -53,7 +54,9 @@ namespace Internal
 
     void EntityTypes::Initialize(const bool iAmDoseMain)
     {
-        m_instance = GetSharedMemory().find_or_construct<EntityTypes>("EntityTypes")(private_constructor_t());
+        auto shmName = "ENTITYTYPES" + Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix();
+
+        m_instance = GetSharedMemory().find_or_construct<EntityTypes>(shmName.c_str())(private_constructor_t());
 
         if (iAmDoseMain)
         {

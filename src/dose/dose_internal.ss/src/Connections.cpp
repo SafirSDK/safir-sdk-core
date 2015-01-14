@@ -29,6 +29,7 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/ProcessInfo.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
+#include <Safir/Utilities/Internal/ConfigReader.h>
 #include <boost/interprocess/sync/upgradable_lock.hpp>
 #include <boost/interprocess/sync/sharable_lock.hpp>
 #include <boost/interprocess/detail/move.hpp>
@@ -54,7 +55,9 @@ namespace Internal
 
     Connections & Connections::SingletonHelper::Instance()
     {
-        static Connections* instance = GetSharedMemory().find_or_construct<Connections>("CONNECTIONS")(private_constructor_t());
+        auto shmName = "CONNECTIONS" + Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix();
+
+        static Connections* instance = GetSharedMemory().find_or_construct<Connections>(shmName.c_str())(private_constructor_t());
         return *instance;
     }
 

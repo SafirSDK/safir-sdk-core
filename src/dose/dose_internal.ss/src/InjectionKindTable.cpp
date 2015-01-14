@@ -27,6 +27,7 @@
 #include <Safir/Dob/InjectionOverrideProperty.h>
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/ConfigReader.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 
 namespace Safir
@@ -45,7 +46,9 @@ namespace Internal
 
     void InjectionKindTable::Initialize()
     {
-        m_instance = GetSharedMemory().find_or_construct<InjectionKindTable>("INJECTIONKIND_TABLE")(private_constructor_t());
+        auto shmName = "INJECTIONKIND_TABLE" + Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix();
+
+        m_instance = GetSharedMemory().find_or_construct<InjectionKindTable>(shmName.c_str())(private_constructor_t());
     }
 
     InjectionKind::Enumeration ReadInjectionKind(const Typesystem::TypeId typeId)

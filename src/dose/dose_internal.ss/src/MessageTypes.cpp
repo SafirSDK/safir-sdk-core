@@ -27,6 +27,7 @@
 #include <Safir/Dob/Internal/Connection.h>
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Message.h>
+#include <Safir/Utilities/Internal/ConfigReader.h>
 
 namespace Safir
 {
@@ -51,7 +52,9 @@ namespace Internal
 
     void MessageTypes::Initialize(const bool iAmDoseMain)
     {
-        m_instance = GetSharedMemory().find_or_construct<MessageTypes>("MESSAGETYPES")(private_constructor_t());
+        auto shmName = "MESSAGETYPES" + Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix();
+
+        m_instance = GetSharedMemory().find_or_construct<MessageTypes>(shmName.c_str())(private_constructor_t());
 
         if (iAmDoseMain)
         {

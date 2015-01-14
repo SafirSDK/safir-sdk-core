@@ -25,6 +25,7 @@
 #include <Safir/Dob/Internal/EndStates.h>
 #include <Safir/Dob/Internal/StateContainer.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/ConfigReader.h>
 #include <vector>
 
 namespace Safir
@@ -43,7 +44,9 @@ namespace Internal
 
     void EndStates::Initialize()
     {
-        m_instance = GetSharedMemory().find_or_construct<EndStates>("ENDSTATES")(private_constructor_t());
+        auto shmName = "ENDSTATES" + Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix();
+
+        m_instance = GetSharedMemory().find_or_construct<EndStates>(shmName.c_str())(private_constructor_t());
     }
 
 
