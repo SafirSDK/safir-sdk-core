@@ -23,6 +23,7 @@
 ******************************************************************************/
 #pragma once
 
+#include <boost/noncopyable.hpp>
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Typesystem/EntityId.h>
 #include <Safir/Dob/Typesystem/ValueContainers.h>
@@ -721,14 +722,14 @@ namespace Internal
      *  Helper class for reading change flags
      *
      **********************************************************************/
-    class DOTS_CPP_API BlobChangeFlagReader
+    class DOTS_CPP_API BlobReadHelper : private boost::noncopyable
     {
     public:
-        explicit BlobChangeFlagReader(const char* blob);
-        ~BlobChangeFlagReader();
+        explicit BlobReadHelper(const char* blob);
+        ~BlobReadHelper();
 
         bool IsChanged(const Dob::Typesystem::MemberIndex member,
-                       const Dob::Typesystem::ArrayIndex index);
+                       const Dob::Typesystem::ArrayIndex index) const;
     private:
         DotsC_Int64 m_handle;
     };
@@ -738,11 +739,11 @@ namespace Internal
      *  Helper class for writing change flags and diff blobs
      *
      **********************************************************************/
-    class DOTS_CPP_API BlobDiffWriter
+    class DOTS_CPP_API BlobWriteHelper : private boost::noncopyable
     {
     public:
-        explicit BlobDiffWriter(const char* blob);
-        ~BlobDiffWriter();
+        explicit BlobWriteHelper(const char* blob);
+        ~BlobWriteHelper();
 
         void SetChangedHere(const Dob::Typesystem::MemberIndex member,
                             Dob::Typesystem::ArrayIndex index,
@@ -753,7 +754,11 @@ namespace Internal
         bool Diff(const char* otherBlob);
 
         //The result blob must be deleted using DeleteBlob
-        char* ToBlob();
+        char* ToBlob() const;
+
+        //Copy blob to preallocated memory
+        DotsC_Int32 CalculatedSize() const;
+        void ToBlob(char* blobBuffer) const;
 
     private:
         DotsC_Int64 m_handle;

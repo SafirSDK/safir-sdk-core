@@ -76,7 +76,7 @@ namespace Internal
         /** Set change flags in "inBlob" for all members that are newer in "previous" than in "current" */
         static void SetChangeFlags(const DistributionData& previous,
                                    const DistributionData& current,
-                                   Typesystem::Internal::BlobDiffWriter& writer);
+                                   Typesystem::Internal::BlobWriteHelper& writer);
 
         /** Returns true if realState contains all the data in injection. */
         static bool HaveChanges(const DistributionData & realState, const DistributionData & injection);

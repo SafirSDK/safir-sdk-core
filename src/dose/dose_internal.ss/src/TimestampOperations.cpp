@@ -130,7 +130,7 @@ namespace Internal
 
                 if (from.HasBlob())
                 {
-                    result = into.GetEntityStateCopy(from.GetBlob());
+                    result = into.GetEntityStateCopy(from.GetBlob(), false);
 
                     Dob::Typesystem::Int32 numberOfMembers = Safir::Dob::Typesystem::Members::GetNumberOfMembers(typeId);
                     Typesystem::Int64* resultTimestamps = result.GetMemberTimestamps();
@@ -192,7 +192,7 @@ namespace Internal
 
         Typesystem::BinarySerialization bin;
         Typesystem::Serialization::ToBinary(intoObject,bin);
-        DistributionData result = into.GetEntityStateCopy(&bin[0]);
+        DistributionData result = into.GetEntityStateCopy(&bin[0], false);
 
         if (from.GetTopTimestamp() > into.GetTopTimestamp())
         {
@@ -235,7 +235,7 @@ namespace Internal
         }
         else
         {
-            from = into.GetEntityStateCopy(blob);
+            from = into.GetEntityStateCopy(blob, false);
         }
         SetTimestampForChangedMembers(from,timestamp,true);
         return Merge(into,from);
@@ -258,7 +258,7 @@ namespace Internal
             return;
         }
 
-        Typesystem::Internal::BlobChangeFlagReader reader(entityState.GetBlob());
+        Typesystem::Internal::BlobReadHelper reader(entityState.GetBlob());
 
         const Typesystem::MemberIndex numberOfMembers =
             Safir::Dob::Typesystem::Members::GetNumberOfMembers(typeId);
@@ -317,7 +317,7 @@ namespace Internal
     void
     TimestampOperations::SetChangeFlags(const DistributionData& previous,
                                         const DistributionData& current,
-                                        Typesystem::Internal::BlobDiffWriter& writer)
+                                        Typesystem::Internal::BlobWriteHelper& writer)
     {
         const Typesystem::TypeId typeId = current.GetTypeId();
         ENSURE(InjectionKindTable::Instance().IsInjectable(typeId),

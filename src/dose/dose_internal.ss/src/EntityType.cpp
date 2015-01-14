@@ -1265,9 +1265,8 @@ namespace Internal
             }
 
             // Clear change flags before storing
-            injectionState.SetChangeFlags(false);
+            statePtr->SetRealState(injectionState.SetChangeFlags(false));
 
-            statePtr->SetRealState(injectionState);
         }   // Registration state is released here
 
         if (!injectionState.HasBlob())
@@ -1708,24 +1707,43 @@ namespace Internal
             statePtr->SetConsumer(registerer.consumer);
             statePtr->SetOwnerRequestInQueue(connection->AddRequestInQueue(registerer.consumer));
 
-            newRealState = DistributionData(entity_state_tag,
-                                            connection->Id(),
-                                            m_typeId,
-                                            handlerId,
-                                            registrationTime,
-                                            instanceId,
-                                            m_clock.GetNewTimestamp(),      // creation time
-                                            DistributionData::Real,
-                                            false,                          // false => not explicitly deleted
-                                            false,                          // false => source is not permanent store
-                                            blob);
+            if (blob!=NULL)
+            {
+                Dob::Typesystem::Internal::BlobWriteHelper writer(blob);
+                writer.SetAllChanged(false);
+                newRealState = DistributionData(entity_state_tag,
+                                                connection->Id(),
+                                                m_typeId,
+                                                handlerId,
+                                                registrationTime,
+                                                instanceId,
+                                                m_clock.GetNewTimestamp(),      // creation time
+                                                DistributionData::Real,
+                                                false,                          // false => not explicitly deleted
+                                                false,                          // false => source is not permanent store
+                                                writer);
+            }
+            else
+            {
+                newRealState = DistributionData(entity_state_tag,
+                                                connection->Id(),
+                                                m_typeId,
+                                                handlerId,
+                                                registrationTime,
+                                                instanceId,
+                                                m_clock.GetNewTimestamp(),      // creation time
+                                                DistributionData::Real,
+                                                false,                          // false => not explicitly deleted
+                                                false,                          // false => source is not permanent store
+                                                blob);
+            }
         }
         else
         {
             // Update an existing state
 
             // Create a copy that includes the new blob
-            newRealState = realState.GetEntityStateCopy(blob);
+            newRealState = realState.GetEntityStateCopy(blob, true);
 
             newRealState.IncrementVersion();
             newRealState.SetExplicitlyDeleted(false);
@@ -1752,9 +1770,6 @@ namespace Internal
                           timeBase,
                           considerChangeFlags);
         }
-
-        // Reset change flags in blob before storing
-        newRealState.SetChangeFlags(false);
 
         // Set new state, subscribers will be notified
         statePtr->SetRealState(newRealState);

@@ -1242,7 +1242,7 @@ void DoseC_Diff(const char* const previousState,
 
         if (wantCurrent)
         {
-            Typesystem::Internal::BlobDiffWriter writer(current.GetBlob());
+            Typesystem::Internal::BlobWriteHelper writer(current.GetBlob());
 
             if (!previous.IsCreated())
             {
@@ -1265,7 +1265,7 @@ void DoseC_Diff(const char* const previousState,
         }
         else //wantPrevious
         {
-            Typesystem::Internal::BlobDiffWriter writer(previous.GetBlob());
+            Typesystem::Internal::BlobWriteHelper writer(previous.GetBlob());
 
             if (!current.IsCreated())
             {

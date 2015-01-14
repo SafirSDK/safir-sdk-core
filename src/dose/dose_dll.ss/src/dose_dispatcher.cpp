@@ -542,7 +542,7 @@ namespace Internal
         bool success;
         boost::shared_ptr<const char> refHolder (injectionState.GetReference(), &DistributionData::DropReference);
 
-        Typesystem::Internal::BlobDiffWriter writer(injectionState.GetBlob());
+        Typesystem::Internal::BlobWriteHelper writer(injectionState.GetBlob());
         writer.SetAllChanged(true);
         boost::shared_ptr<char> blobHolder(writer.ToBlob(), Typesystem::Internal::BlobOperations::Delete);
 

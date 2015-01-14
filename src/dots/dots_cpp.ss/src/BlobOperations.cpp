@@ -708,18 +708,18 @@ namespace
      *  Helper class for reading change flags
      *
      **********************************************************************/
-    BlobChangeFlagReader::BlobChangeFlagReader(const char* blob)
+    BlobReadHelper::BlobReadHelper(const char* blob)
         :m_handle(DotsC_CreateBlobReader(blob))
     {
     }
 
-    BlobChangeFlagReader::~BlobChangeFlagReader()
+    BlobReadHelper::~BlobReadHelper()
     {
         DotsC_DeleteBlobReader(m_handle);
     }
 
-    bool BlobChangeFlagReader::IsChanged(const Dob::Typesystem::MemberIndex member,
-                                         const Dob::Typesystem::ArrayIndex index)
+    bool BlobReadHelper::IsChanged(const Dob::Typesystem::MemberIndex member,
+                                         const Dob::Typesystem::ArrayIndex index) const
     {
         bool isNull, isChanged;
         DotsC_ReadMemberStatus(m_handle, isNull, isChanged, member, index);
@@ -731,29 +731,29 @@ namespace
      *  Helper class for writing change flags and diff blobs
      *
      **********************************************************************/
-    BlobDiffWriter::BlobDiffWriter(const char* blob)
+    BlobWriteHelper::BlobWriteHelper(const char* blob)
         :m_handle(DotsC_CreateBlobWriterFromBlob(blob))
     {
     }
 
-    BlobDiffWriter::~BlobDiffWriter()
+    BlobWriteHelper::~BlobWriteHelper()
     {
         DotsC_DeleteBlobWriter(m_handle);
     }
 
-    void BlobDiffWriter::SetChangedHere(const Dob::Typesystem::MemberIndex member,
+    void BlobWriteHelper::SetChangedHere(const Dob::Typesystem::MemberIndex member,
                                         Dob::Typesystem::ArrayIndex index,
                                         bool val)
     {
         DotsC_WriteChangeFlag(m_handle, member, index, val);
     }
 
-    void BlobDiffWriter::SetAllChanged(bool val)
+    void BlobWriteHelper::SetAllChanged(bool val)
     {
         DotsC_WriteAllChangeFlags(m_handle, val);
     }
 
-    bool BlobDiffWriter::Diff(const char* otherBlob)
+    bool BlobWriteHelper::Diff(const char* otherBlob)
     {
         DotsC_Handle reader=DotsC_CreateBlobReader(otherBlob);
         bool hadDiffs=DotsC_MarkChanges(reader, m_handle);
@@ -761,12 +761,23 @@ namespace
         return hadDiffs;
     }
 
-    char* BlobDiffWriter::ToBlob()
+    char* BlobWriteHelper::ToBlob() const
     {
         DotsC_Int32 size=DotsC_CalculateBlobSize(m_handle);
         char* blob=DotsC_AllocateBlob(size);
         DotsC_WriteBlob(m_handle, blob);
         return blob;
+    }
+
+    //Copy blob to preallocated memory
+    DotsC_Int32 BlobWriteHelper::CalculatedSize() const
+    {
+        return DotsC_CalculateBlobSize(m_handle);
+    }
+
+    void BlobWriteHelper::ToBlob(char* blobBuffer) const
+    {
+        DotsC_WriteBlob(m_handle, blobBuffer);
     }
 }
 }
