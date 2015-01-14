@@ -1386,7 +1386,8 @@ void DotsC_WriteObjectMember(DotsC_Handle writerHandle, const char* blob,
 {
     Init();
     Writer* writer=WriterFromHandle(writerHandle);
-    writer->WriteValue(member, arrayIndex, std::make_pair(blob, DotsC_GetSize(blob)), isNull, isChanged);
+    DotsC_Int32 size=isNull ? 0 : DotsC_GetSize(blob);
+    writer->WriteValue(member, arrayIndex, std::make_pair(blob, size), isNull, isChanged);
 }
 
 //************************************************************************************

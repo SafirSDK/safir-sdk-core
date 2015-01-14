@@ -721,7 +721,7 @@ namespace Internal
      *  Helper class for reading change flags
      *
      **********************************************************************/
-    class BlobChangeFlagReader
+    class DOTS_CPP_API BlobChangeFlagReader
     {
     public:
         explicit BlobChangeFlagReader(const char* blob);
@@ -738,7 +738,7 @@ namespace Internal
      *  Helper class for writing change flags and diff blobs
      *
      **********************************************************************/
-    class BlobDiffWriter
+    class DOTS_CPP_API BlobDiffWriter
     {
     public:
         explicit BlobDiffWriter(const char* blob);

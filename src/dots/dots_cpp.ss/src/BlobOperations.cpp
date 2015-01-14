@@ -664,12 +664,19 @@ namespace
             throw std::logic_error("BlobOperation.Set(Object) called with mode=KeyMode. Only ValueMode is allowed for this type!");
         }
 
-        Safir::Dob::Typesystem::Int64 objHandle=DotsC_CreateBlobWriter(val->GetTypeId());
-        val->WriteToBlob(objHandle);
-        Binary blob(static_cast<size_t>(DotsC_CalculateBlobSize(objHandle)));
-        DotsC_WriteBlob(objHandle,&blob[0]);
-        DotsC_DeleteBlobWriter(objHandle);
-        DotsC_WriteObjectMember(handle, &blob[0], isNull, isChanged, member, valueIndex, Conv(mode));
+        if (isNull)
+        {
+            DotsC_WriteObjectMember(handle, NULL, isNull, isChanged, member, valueIndex, Conv(mode));
+        }
+        else
+        {
+            Safir::Dob::Typesystem::Int64 objHandle=DotsC_CreateBlobWriter(val->GetTypeId());
+            val->WriteToBlob(objHandle);
+            Binary blob(static_cast<size_t>(DotsC_CalculateBlobSize(objHandle)));
+            DotsC_WriteBlob(objHandle,&blob[0]);
+            DotsC_DeleteBlobWriter(objHandle);
+            DotsC_WriteObjectMember(handle, &blob[0], isNull, isChanged, member, valueIndex, Conv(mode));
+        }
     }
 
     void BlobOperations::Set(const Safir::Dob::Typesystem::Binary& val,
@@ -685,7 +692,14 @@ namespace
             throw std::logic_error("BlobOperation.Set(Binary) called with mode=KeyMode. Only ValueMode is allowed for this type!");
         }
 
-        DotsC_WriteBinaryMember(handle, &(val[0]), static_cast<DotsC_Int32>(val.size()), isNull, isChanged, member, valueIndex, Conv(mode));
+        if (isNull)
+        {
+            DotsC_WriteBinaryMember(handle, NULL, 0, isNull, isChanged, member, valueIndex, Conv(mode));
+        }
+        else
+        {
+            DotsC_WriteBinaryMember(handle, &(val[0]), static_cast<DotsC_Int32>(val.size()), isNull, isChanged, member, valueIndex, Conv(mode));
+        }
     }
 
 
