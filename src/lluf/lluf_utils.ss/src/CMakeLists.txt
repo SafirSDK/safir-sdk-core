@@ -1,6 +1,6 @@
 FILE(GLOB_RECURSE headers *.h)
 
-ADD_LIBRARY(lluf_utils SHARED ${headers} 
+ADD_LIBRARY(lluf_utils SHARED ${headers}
   DynamicLibraryLoader.cpp
   LowLevelLoggerControl.cpp
   ProcessMonitor.cpp
@@ -16,11 +16,11 @@ ADD_LIBRARY(lluf_utils SHARED ${headers}
 #Make our INTERNAL headers available to other parts of Core.
 target_include_directories(lluf_utils PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
-TARGET_LINK_LIBRARIES(lluf_utils PRIVATE 
-  lluf_startup_synchronizer 
-  lluf_config 
-  ${Boost_FILESYSTEM_LIBRARY} 
-  ${Boost_THREAD_LIBRARY} 
+TARGET_LINK_LIBRARIES(lluf_utils PRIVATE
+  lluf_startup_synchronizer
+  lluf_config
+  ${Boost_FILESYSTEM_LIBRARY}
+  ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY})
 
 if (WIN32)
@@ -32,7 +32,7 @@ endif()
 
 ADD_EXECUTABLE(logger_control logger_control.cpp)
 
-TARGET_LINK_LIBRARIES(logger_control PRIVATE 
+TARGET_LINK_LIBRARIES(logger_control PRIVATE
   lluf_utils
   ${Boost_PROGRAM_OPTIONS_LIBRARY})
 

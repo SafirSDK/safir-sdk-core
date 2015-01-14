@@ -1,7 +1,7 @@
 add_executable(tracer_backdoor_sender sender.cpp)
 
 target_link_libraries(tracer_backdoor_sender PRIVATE
-  swre_interface_cpp 
+  swre_interface_cpp
   ${Boost_SYSTEM_LIBRARY})
 
 #Needed on windows

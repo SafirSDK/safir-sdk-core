@@ -291,7 +291,7 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
   target_include_directories(safir_generated-${GEN_NAME}-cpp
     PRIVATE ${precompiled_header_path})
 
-  target_link_libraries(safir_generated-${GEN_NAME}-cpp
+  target_link_libraries(safir_generated-${GEN_NAME}-cpp PRIVATE
     dots_cpp
     dots_internal
     dots_kernel
@@ -300,7 +300,7 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
     ${Boost_SYSTEM_LIBRARY})
 
   FOREACH (DEP ${ALL_DEPENDENCIES})
-    TARGET_LINK_LIBRARIES(safir_generated-${GEN_NAME}-cpp safir_generated-${DEP}-cpp)
+    TARGET_LINK_LIBRARIES(safir_generated-${GEN_NAME}-cpp PRIVATE safir_generated-${DEP}-cpp)
   ENDFOREACH()
 
   add_dependencies(safir_generated-${GEN_NAME}-cpp safir_generated-${GEN_NAME}-code)

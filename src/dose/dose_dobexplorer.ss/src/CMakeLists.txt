@@ -55,12 +55,12 @@ endif()
 ADD_EXECUTABLE(dobexplorer WIN32 ${sources} ${ui_headers} ${moc_sources} ${dose_com_sources} ${headers} dobexplorer.rc)
 
 if (Qt5Widgets_FOUND)
-  TARGET_LINK_LIBRARIES(dobexplorer Qt5::Widgets)
+  TARGET_LINK_LIBRARIES(dobexplorer PRIVATE Qt5::Widgets)
 else()
-  TARGET_LINK_LIBRARIES(dobexplorer ${QT_LIBRARIES})
+  TARGET_LINK_LIBRARIES(dobexplorer PRIVATE ${QT_LIBRARIES})
 endif()
 
-TARGET_LINK_LIBRARIES(dobexplorer
+TARGET_LINK_LIBRARIES(dobexplorer PRIVATE
   dose_internal
   lluf_crash_reporter
   ${Boost_SYSTEM_LIBRARY})

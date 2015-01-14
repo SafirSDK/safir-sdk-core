@@ -3,7 +3,9 @@ FILE(GLOB sources *.cpp)
 
 ADD_LIBRARY(dose_cpp SHARED ${sources} ${headers})
 
-TARGET_LINK_LIBRARIES(dose_cpp PRIVATE 
+TARGET_LINK_LIBRARIES(dose_cpp PRIVATE
+  lluf_utils
+  dots_cpp
   dose_dll
 
   PUBLIC safir_generated-Core-cpp)

@@ -273,6 +273,14 @@ function (SET_SAFIR_TEST_PROPERTIES)
     ${PROP_ENVIRONMENT})
 endfunction()
 
+function(target_link_libraries)
+  list(FIND ARGN "PRIVATE" has_private_keyword)
+  if(has_private_keyword EQUAL -1)
+    message(FATAL_ERROR "target_link_libraries lacks PRIVATE keyword!")
+  endif()
+  _target_link_libraries(${ARGN})
+endfunction()
+
 INCLUDE(build_generated)
 
 include_directories(lluf/lluf_build_helpers.ss/src)

@@ -3,7 +3,7 @@
 #  FOOBAR_INCLUDE_DIRS - include directories for FooBar
 #  FOOBAR_LIBRARIES    - libraries to link against
 #  FOOBAR_EXECUTABLE   - the bar executable
-#TODO!
+#TODO document this!
 
 # Compute paths
 set(SAFIR_SDK_CORE_CMAKE_DIR ${CMAKE_CURRENT_LIST_DIR})
@@ -15,11 +15,12 @@ else()
   get_filename_component(SAFIR_SDK_CORE_INSTALL_DIR ${CMAKE_CURRENT_LIST_DIR}/../../.. ABSOLUTE)
 endif()
 
-include("${SAFIR_SDK_CORE_CMAKE_DIR}/SafirSDKCore.cmake")
-include("${SAFIR_SDK_CORE_CMAKE_DIR}/build_generated.cmake")
+#We only use the istalled export file on non-msvc platforms
+if (NOT MSVC)
+  include("${SAFIR_SDK_CORE_CMAKE_DIR}/SafirSDKCore.cmake")
+endif()
 
-#MESSAGE("SAFIR_SDK_CORE_CMAKE_DIR: ${SAFIR_SDK_CORE_CMAKE_DIR}")
-#MESSAGE("SAFIR_SDK_CORE_INSTALL_DIR: ${SAFIR_SDK_CORE_INSTALL_DIR}")
+include("${SAFIR_SDK_CORE_CMAKE_DIR}/build_generated.cmake")
 
 SET(SAFIR_SDK_CORE_INCLUDE_DIRS "${SAFIR_SDK_CORE_INSTALL_DIR}/@SAFIR_INSTALL_DESTINATION_INCLUDE@")
 SET(SAFIR_SDK_CORE_EXECUTABLES_DIR "${SAFIR_SDK_CORE_INSTALL_DIR}/@SAFIR_INSTALL_DESTINATION_BIN@")
@@ -30,19 +31,19 @@ set(SAFIR_SDK_CORE_JAVA_DIR "${SAFIR_SDK_CORE_INSTALL_DIR}/@SAFIR_INSTALL_DESTIN
 set(SAFIR_SDK_CORE_GENERATION_DIR "${SAFIR_SDK_CORE_INSTALL_DIR}/@SAFIR_INSTALL_DESTINATION_GENERATION@")
 
 
-set(SAFIR_SDK_CORE_LIBRARIES olib swre_interface_cpp douf_time_cpp
-                             dose_cpp safir_generated-Core-cpp dots_cpp
-                             logging_cpp lluf_utils)
+#We don't need this set to anything in particular on msvc, since
+#there we have autolinking through #pragma comment
+if (NOT MSVC)
+  set(SAFIR_SDK_CORE_LIBRARIES olib swre_interface_cpp douf_time_cpp
+                               dose_cpp safir_generated-Core-cpp dots_cpp
+                               logging_cpp lluf_utils)
+endif()
 
 set(SAFIR_SDK_CORE_DOTNET_SETTINGS "${SAFIR_SDK_CORE_CMAKE_DIR}/SafirLoadCSharp.cmake")
 set(SAFIR_SDK_CORE_JAVA_SETTINGS "${SAFIR_SDK_CORE_CMAKE_DIR}/SafirLoadJava.cmake")
-
 
 SET(SAFIR_VERSION_MAJOR @SAFIR_VERSION_MAJOR@)
 SET(SAFIR_VERSION_MINOR @SAFIR_VERSION_MINOR@)
 SET(SAFIR_VERSION_PATCH @SAFIR_VERSION_PATCH@)
 SET(SAFIR_VERSION_SUFFIX @SAFIR_VERSION_SUFFIX@)
 SET(SAFIR_VERSION_STRING "${SAFIR_VERSION_MAJOR}.${SAFIR_VERSION_MINOR}.${SAFIR_VERSION_PATCH}${SAFIR_VERSION_SUFFIX}")
-
-
-#TODO: the lib/safir_sdk_core bit should be configured from our general paths. is this really the same on windows, for example...

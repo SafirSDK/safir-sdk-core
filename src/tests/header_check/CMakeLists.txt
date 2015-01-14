@@ -11,7 +11,7 @@ FILE(GLOB_RECURSE headers
 
 set(EXCLUDE_LIST
   AutoLink\\.h       #Special file, but manually checked to not include windows.h
-  AceTimeConverter\\.h #these are kind of meant to 
+  AceTimeConverter\\.h #these are kind of meant to
   AceDispatcher\\.h    # include ace, which includes windows.h...
   AsioDispatcher\\.h   #includes asio.hpp, which appears to include windows.h
 
@@ -29,7 +29,7 @@ foreach(header ${headers})
       set(SKIP TRUE)
     endif()
   endforeach()
-  
+
   if(NOT SKIP)
     string(REGEX REPLACE "[^a-zA-Z]" "_" name_base ${header})
     set(generated_name ${CMAKE_CURRENT_BINARY_DIR}/check_${name_base}_generated.cpp)
@@ -51,7 +51,7 @@ endif()
 
 add_executable(check_correct_public_headers main.cpp ${sources})
 
-target_link_libraries(check_correct_public_headers
+target_link_libraries(check_correct_public_headers PRIVATE
   safir_generated-Core-cpp)
 
 add_dependencies(check_correct_public_headers logging_cpp dots_cpp dose_cpp olib douf_time_cpp swre_interface_cpp)

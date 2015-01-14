@@ -7,6 +7,7 @@ ADD_LIBRARY(dose_internal SHARED ${sources} ${headers})
 target_include_directories(dose_internal PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
 TARGET_LINK_LIBRARIES(dose_internal PRIVATE
+  lluf_utils
   dots_cpp
   lluf_startup_synchronizer
   ${Boost_REGEX_LIBRARY}

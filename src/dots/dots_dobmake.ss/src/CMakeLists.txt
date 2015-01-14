@@ -39,9 +39,9 @@ endif()
 ADD_EXECUTABLE(dobmake WIN32 ${sources} ${ui_headers} ${moc_sources} ${headers})
 
 if (Qt5Widgets_FOUND)
-  TARGET_LINK_LIBRARIES(dobmake Qt5::Widgets)
+  TARGET_LINK_LIBRARIES(dobmake PRIVATE Qt5::Widgets)
 else()
-  TARGET_LINK_LIBRARIES(dobmake ${QT_LIBRARIES})
+  TARGET_LINK_LIBRARIES(dobmake PRIVATE ${QT_LIBRARIES})
 endif()
 
 #TARGET_LINK_LIBRARIES(dobmake

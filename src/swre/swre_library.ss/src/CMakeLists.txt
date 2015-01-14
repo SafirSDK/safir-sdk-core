@@ -10,7 +10,7 @@ ADD_LIBRARY(swre_library SHARED ${sources} ${headers})
 #Make our INTERNAL headers available to other parts of Core.
 target_include_directories(swre_library PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
-TARGET_LINK_LIBRARIES(swre_library PRIVATE 
+TARGET_LINK_LIBRARIES(swre_library PRIVATE
   dose_cpp
   safir_generated-Core-cpp
   logging_cpp
@@ -23,4 +23,3 @@ SAFIR_INSTALL(TARGETS swre_library)
 
 # INSTALL(FILES ../data/swre_library.gpr
 #         DESTINATION ${SAFIR_SDK}/ada)
-
