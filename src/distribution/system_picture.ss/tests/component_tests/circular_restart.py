@@ -61,7 +61,7 @@ def mkdir(newdir):
             os.mkdir(newdir)
 
 def launch_control(number, previous, id, env, ownip, seedip):
-    command = (control_stub,) + ("--name",    "Node_{0:03d}".format(number),
+    command = ("control_stub",) + ("--name",    "Node_{0:03d}".format(number),
                                   "--control-address", ownip + ":33{0:03d}".format(number),
                                   "--data-address", ownip + ":43{0:03d}".format(number),
                                   "--seed", seedip + ":33{0:03d}".format(previous),
@@ -75,7 +75,7 @@ def launch_control(number, previous, id, env, ownip, seedip):
     return proc
 
 def launch_dose_main(number, previous, id, env, ownip):
-    command = (dose_main_stub,) + ("--name", "Node_{0:03d}".format(number),
+    command = ("dose_main_stub",) + ("--name", "Node_{0:03d}".format(number),
                                    "--data-address", ownip + ":43{0:03d}".format(number),
                                    "--force-id", str(id),
                                    "--suicide-trigger", "Node_{0:03d}".format(previous))
@@ -126,15 +126,6 @@ def stop_node(i, control, main):
     if main.returncode != 0:
         log ("DOSE_MAIN RETURN CODE",main.returncode)
         raise Failure
-
-SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
-if SAFIR_RUNTIME is None or not os.path.isdir(SAFIR_RUNTIME):
-    log("SAFIR_RUNTIME must be set")
-    sys.exit(1)
-SAFIR_RUNTIME = os.path.normpath(SAFIR_RUNTIME)
-
-control_stub = os.path.join(SAFIR_RUNTIME,"bin","control_stub")
-dose_main_stub = os.path.join(SAFIR_RUNTIME,"bin","dose_main_stub")
 
 parser = argparse.ArgumentParser(description='Run a lot of control_stub')
 parser.add_argument('--start',type=int,

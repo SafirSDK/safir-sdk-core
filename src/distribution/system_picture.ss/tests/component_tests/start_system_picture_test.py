@@ -54,7 +54,7 @@ def mkdir(newdir):
             os.mkdir(newdir)
 
 def launch_control(number, id, debug):
-    command = (control_stub,) + ("--name",    "Node_{0:03d}".format(number),
+    command = ("control_stub",) + ("--name",    "Node_{0:03d}".format(number),
                                   "--control-address", "127.0.0.1:33{0:03d}".format(number),
                                   "--data-address", "127.0.0.1:43{0:03d}".format(number),
                                   "--seed",    "127.0.0.1:33000",
@@ -75,7 +75,7 @@ def launch_control(number, id, debug):
     return c
 
 def launch_dose_main(number, id, debug):
-    command = (dose_main_stub,) + ("--name", "Node_{0:03d}".format(number),
+    command = ("dose_main_stub",) + ("--name", "Node_{0:03d}".format(number),
                                    "--data-address", "127.0.0.1:43{0:03d}".format(number),
                                    "--force-id", str(id))
 
@@ -112,15 +112,6 @@ def stop(proc):
         proc.wait()
     except ProcessLookupError:
         pass
-
-SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
-if SAFIR_RUNTIME is None or not os.path.isdir(SAFIR_RUNTIME):
-    print("SAFIR_RUNTIME must be set")
-    sys.exit(1)
-SAFIR_RUNTIME = os.path.normpath(SAFIR_RUNTIME)
-
-control_stub = os.path.join(SAFIR_RUNTIME,"bin","control_stub")
-dose_main_stub = os.path.join(SAFIR_RUNTIME,"bin","dose_main_stub")
 
 parser = argparse.ArgumentParser(description='Run a lot of control_stub')
 parser.add_argument('--number', '-n', dest="num", action='store', type=int,
