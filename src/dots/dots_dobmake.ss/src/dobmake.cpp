@@ -43,6 +43,7 @@
 #pragma warning(pop)
 #endif
 
+//TODO: Add choice for 32bit on win64
 
 Dobmake::Dobmake(QWidget *parent)
     : QDialog(parent)
