@@ -281,9 +281,6 @@ function(target_link_libraries)
   _target_link_libraries(${ARGN})
 endfunction()
 
-function(target_link_libraries_foobar)
-endfunction()
-
 INCLUDE(build_generated)
 
 include_directories(lluf/lluf_build_helpers.ss/src)
