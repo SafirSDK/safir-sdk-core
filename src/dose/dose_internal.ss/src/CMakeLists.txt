@@ -16,9 +16,9 @@ TARGET_LINK_LIBRARIES(dose_internal PRIVATE
   #configuration. This allows for other parts of core to include dose_internal things
   #without having to add thread and system to their link dependencies.
   PUBLIC
-  $<BUILD_INTERFACE:safir_generated-Core-cpp>
-  $<BUILD_INTERFACE:${Boost_THREAD_LIBRARY}>
-  $<BUILD_INTERFACE:${Boost_SYSTEM_LIBRARY}>)
+  "$<BUILD_INTERFACE:safir_generated-Core-cpp>"
+  "$<BUILD_INTERFACE:${Boost_THREAD_LIBRARY}>"
+  "$<BUILD_INTERFACE:${Boost_SYSTEM_LIBRARY}>")
 
 if (UNIX)
   TARGET_LINK_LIBRARIES(dose_internal PRIVATE rt)

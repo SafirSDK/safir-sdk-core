@@ -11,7 +11,7 @@ TARGET_LINK_LIBRARIES(dots_cpp PRIVATE
   lluf_utils
   dots_kernel
   lluf_crash_reporter
-  
+
   PUBLIC
   ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY}

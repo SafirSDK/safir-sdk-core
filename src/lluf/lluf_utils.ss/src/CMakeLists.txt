@@ -26,8 +26,8 @@ TARGET_LINK_LIBRARIES(lluf_utils PRIVATE
   #configuration. This allows for other parts of core to include e.g. LowLevelLogger
   #without having to add thread and system to their link dependencies.
   PUBLIC
-  $<BUILD_INTERFACE:${Boost_THREAD_LIBRARY}>
-  $<BUILD_INTERFACE:${Boost_SYSTEM_LIBRARY}>)
+  "$<BUILD_INTERFACE:${Boost_THREAD_LIBRARY}>"
+  "$<BUILD_INTERFACE:${Boost_SYSTEM_LIBRARY}>")
 
 if (WIN32)
   TARGET_LINK_LIBRARIES(lluf_utils PRIVATE psapi)
