@@ -186,6 +186,13 @@ namespace Safir.Dob.Typesystem
 
         /// <summary>Watt64 member.</summary>
         Watt64MemberType
-    };
+    }
 
+	public enum CollectionType
+	{
+		SingleValueCollectionType = 0,
+		ArrayCollectionType,
+		SequenceCollectionType,
+		DictionaryCollectionType
+	} 
 }

@@ -1346,7 +1346,7 @@ void DotsC_WriteHashedMember(DotsC_Handle writerHandle, DotsC_Int64 hash, const 
     }
 }
 
-void DotsC_WriteEntityIdMember(DotsC_Handle writerHandle, const DotsC_EntityId& val, const char* instanceString,
+void DotsC_WriteEntityIdMember(DotsC_Handle writerHandle, DotsC_EntityId val, const char* instanceString,
                                bool isNull,
                                bool isChanged,
                                DotsC_MemberIndex member,

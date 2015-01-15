@@ -49,19 +49,16 @@ namespace Safir.Dob.Typesystem.Internal
         public System.Int64 InstanceId;
     };
 
-
-    internal enum DotsC_ErrorCode
-    {
-        NoError = 0,
-        ReadOnlyProperty,
-        UnableToDereferenceProperty,
-        IllegalValue,
-    }
-
     internal enum DotsC_PropertyMappingKind
     {
         MappedToNull,
         MappedToMember,
         MappedToParameter,
     }
+
+	internal enum DotsC_KeyValMode
+	{
+		DotsC_KeyMode=0, 
+		DotsC_ValueMode
+	}
 }
