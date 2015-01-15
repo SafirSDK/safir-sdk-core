@@ -19,22 +19,31 @@ target_include_directories(lluf_utils PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_S
 TARGET_LINK_LIBRARIES(lluf_utils PRIVATE
   lluf_startup_synchronizer
   lluf_config
-  ${Boost_FILESYSTEM_LIBRARY}
+  ${Boost_FILESYSTEM_LIBRARY})
 
-  #the thread library is used in our internal headers, not in the public headers so we
-  #only make them public for the Core tree build, not for the exported cmake
-  #configuration. This allows for other parts of core to include e.g. LowLevelLogger
-  #without having to add thread and system to their link dependencies.
-  PUBLIC
-  "$<BUILD_INTERFACE:${Boost_THREAD_LIBRARY}>"
-  "$<BUILD_INTERFACE:${Boost_SYSTEM_LIBRARY}>")
+#the thread library is used in our internal headers, not in the public headers so we
+#only make them public for the Core tree build, not for the exported cmake
+#configuration. This allows for other parts of core to include e.g. LowLevelLogger
+#without having to add thread and system to their link dependencies.
+#The reason for having different code on windows and Linux is a bug in cmake, which
+#makes the correct code (which is in the Linux branch) not work on Windows.
+if (MSVC)
+  TARGET_LINK_LIBRARIES(lluf_utils PRIVATE
+    PUBLIC
+    ${Boost_THREAD_LIBRARY}
+	${Boost_SYSTEM_LIBRARY})
+else()
+  TARGET_LINK_LIBRARIES(lluf_utils PRIVATE
+    PUBLIC
+    "$<BUILD_INTERFACE:${Boost_THREAD_LIBRARY}>"
+	"$<BUILD_INTERFACE:${Boost_SYSTEM_LIBRARY}>")
+endif()
 
 if (WIN32)
   TARGET_LINK_LIBRARIES(lluf_utils PRIVATE psapi)
 else()
   TARGET_LINK_LIBRARIES(lluf_utils PRIVATE dl rt)
 endif()
-
 
 ADD_EXECUTABLE(logger_control logger_control.cpp)
 
