@@ -29,9 +29,10 @@ if (Boost_VERSION LESS 105300)
 endif()
 
 #Date_time is needed by boost thread on windows, so we monkey-patch that in, rather than adding link dependencies everywhere.
-if (MSVC)
-  set (Boost_THREAD_LIBRARY ${Boost_DATE_TIME_LIBRARY} ${Boost_THREAD_LIBRARY})
-endif()
+#TODO: better solution for this?
+#if (MSVC)
+#  set (Boost_THREAD_LIBRARY ${Boost_DATE_TIME_LIBRARY} ${Boost_THREAD_LIBRARY})
+#endif()
 
 #TODO: remove this?
 #make sure all linking is explicit as to what parts of boost it needs, so we clear the variable
