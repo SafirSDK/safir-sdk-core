@@ -6,7 +6,6 @@ ADD_EXECUTABLE(SignalTest ${sources} ${headers})
 TARGET_LINK_LIBRARIES(SignalTest PRIVATE
   dose_internal
   ${Boost_PROGRAM_OPTIONS_LIBRARY}
-  ${Boost_THREAD_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY})
+  lluf_utils)
 
 SAFIR_INSTALL(TARGETS SignalTest TEST_SUITE)

@@ -281,6 +281,9 @@ function(target_link_libraries)
   _target_link_libraries(${ARGN})
 endfunction()
 
+function(target_link_libraries_foobar)
+endfunction()
+
 INCLUDE(build_generated)
 
 include_directories(lluf/lluf_build_helpers.ss/src)
@@ -330,8 +333,12 @@ add_subdirectory(tests)
 add_subdirectory(util)
 add_subdirectory(config)
 
-INSTALL(EXPORT SafirSDKCore DESTINATION ${SAFIR_INSTALL_DESTINATION_CMAKE}
-  COMPONENT Development)
+#non-msvc systems need the cmake export file.
+#msvc uses autolinking, so we don't need this file there.
+if (NOT MSVC)
+  INSTALL(EXPORT SafirSDKCore DESTINATION ${SAFIR_INSTALL_DESTINATION_CMAKE}
+    COMPONENT Development)
+endif()
 
 configure_file(cmake/SafirSDKCoreConfig.cmake.in
   "${CMAKE_CURRENT_BINARY_DIR}/cmake/SafirSDKCoreConfig.cmake" @ONLY)

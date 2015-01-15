@@ -11,7 +11,7 @@ QT5_ADD_RESOURCES(rcc_sources entitymw.qrc)
 QT5_WRAP_CPP(moc_sources categoryinfodialog.h entitydialog.h entitymw.h entitytablehandler.h messagedialog.h servicedialog.h)
 
 
-ADD_EXECUTABLE(VehicleMmiCppQt WIN32 
+ADD_EXECUTABLE(VehicleMmiCppQt WIN32
   app.h app.cpp
   categoryinfodialog.h categoryinfodialog.cpp
   entitydialog.h entitydialog.cpp
@@ -22,15 +22,13 @@ ADD_EXECUTABLE(VehicleMmiCppQt WIN32
   qtworkaround.h qtworkaround.cpp
   qtdispatcher.h qtdispatcher.cpp
   main.cpp
-  ${moc_sources} 
+  ${moc_sources}
   ${rcc_sources}
   ${ui_headers})
 
-TARGET_LINK_LIBRARIES(VehicleMmiCppQt 
+TARGET_LINK_LIBRARIES(VehicleMmiCppQt
   safir_generated-Example-cpp
   ${SAFIR_SDK_CORE_LIBRARIES}
   Qt5::Widgets)
 
 TARGET_INCLUDE_DIRECTORIES(VehicleMmiCppQt PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-
-#TODO: install?

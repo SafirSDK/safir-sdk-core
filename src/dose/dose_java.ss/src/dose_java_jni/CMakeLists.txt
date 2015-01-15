@@ -16,7 +16,7 @@ add_dependencies(dose_java_jni dose_java_javah)
 TARGET_LINK_LIBRARIES(dose_java_jni PRIVATE
   dose_dll
   dots_kernel
-  ${Boost_THREAD_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY})
-
+#  ${Boost_THREAD_LIBRARY}
+#  ${Boost_SYSTEM_LIBRARY}
+)
 SAFIR_INSTALL(TARGETS dose_java_jni JNI)

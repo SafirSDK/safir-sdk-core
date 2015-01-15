@@ -5,7 +5,9 @@ TARGET_LINK_LIBRARIES(TimeProvider_cpp_test PRIVATE
 
 #Needed on windows
 if (MSVC)
-  TARGET_LINK_LIBRARIES(TimeProvider_cpp_test PRIVATE ${Boost_DATE_TIME_LIBRARY})
+  TARGET_LINK_LIBRARIES(TimeProvider_cpp_test PRIVATE
+    PUBLIC
+    ${Boost_DATE_TIME_LIBRARY})
 endif()
 
 

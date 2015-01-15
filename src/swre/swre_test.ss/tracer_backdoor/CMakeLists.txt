@@ -1,12 +1,11 @@
 add_executable(tracer_backdoor_sender sender.cpp)
 
 target_link_libraries(tracer_backdoor_sender PRIVATE
-  swre_interface_cpp
-  ${Boost_SYSTEM_LIBRARY})
+  swre_interface_cpp)
 
 #Needed on windows
 if (MSVC)
-  TARGET_LINK_LIBRARIES(tracer_backdoor_sender PRIVATE ${Boost_DATE_TIME_LIBRARY})
+  TARGET_LINK_LIBRARIES_FOOBAR(tracer_backdoor_sender PRIVATE ${Boost_DATE_TIME_LIBRARY})
 endif()
 
 

@@ -8,6 +8,6 @@ ADD_EXECUTABLE(VehicleAppCpp
 #TODO: remove ACE from the code
 ADD_DEFINITIONS(-DNO_ACE)
 
-TARGET_LINK_LIBRARIES(VehicleAppCpp safir_generated-Example-cpp ${SAFIR_SDK_CORE_LIBRARIES} ${Boost_LIBRARIES})
-
-#TODO: install?
+TARGET_LINK_LIBRARIES(VehicleAppCpp PRIVATE
+  safir_generated-Example-cpp
+  ${SAFIR_SDK_CORE_LIBRARIES})

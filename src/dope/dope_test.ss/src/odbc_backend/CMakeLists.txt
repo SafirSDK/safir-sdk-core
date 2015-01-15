@@ -1,9 +1,7 @@
 ADD_EXECUTABLE(run_sql run_sql.cpp)
 
 TARGET_LINK_LIBRARIES(run_sql PRIVATE
-  dots_cpp
   olib
-  ${SAFIR_ODBC_LIBRARIES}
   ${Boost_PROGRAM_OPTIONS_LIBRARY}
 )
 

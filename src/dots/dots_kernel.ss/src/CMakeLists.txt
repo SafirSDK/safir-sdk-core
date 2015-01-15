@@ -10,13 +10,8 @@ ADD_LIBRARY(dots_kernel SHARED ${sources} include/Safir/Dob/Typesystem/Internal/
 target_include_directories(dots_kernel PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
 TARGET_LINK_LIBRARIES(dots_kernel PRIVATE
-  dots_internal
   lluf_utils
-  lluf_crash_reporter
-  lluf_startup_synchronizer
-  ${Boost_FILESYSTEM_LIBRARY}
-  ${Boost_THREAD_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY})
+  dots_internal)
 
 if (UNIX)
   TARGET_LINK_LIBRARIES(dots_kernel PRIVATE rt)

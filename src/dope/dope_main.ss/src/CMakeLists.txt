@@ -19,9 +19,7 @@ TARGET_LINK_LIBRARIES(dope_main PRIVATE
   olib
   dose_cpp
   logging_cpp
-  ${Boost_FILESYSTEM_LIBRARY}
-  ${Boost_THREAD_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY})
+  ${Boost_FILESYSTEM_LIBRARY})
 
 TARGET_LINK_LIBRARIES(dope_bin2xml PRIVATE
   olib

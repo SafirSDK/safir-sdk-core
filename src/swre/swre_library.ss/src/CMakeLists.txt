@@ -12,12 +12,8 @@ target_include_directories(swre_library PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT
 
 TARGET_LINK_LIBRARIES(swre_library PRIVATE
   dose_cpp
-  safir_generated-Core-cpp
   logging_cpp
-  lluf_crash_reporter
-  ${Boost_REGEX_LIBRARY}
-  ${Boost_THREAD_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY})
+  lluf_utils)
 
 SAFIR_INSTALL(TARGETS swre_library)
 

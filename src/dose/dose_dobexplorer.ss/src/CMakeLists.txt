@@ -62,8 +62,8 @@ endif()
 
 TARGET_LINK_LIBRARIES(dobexplorer PRIVATE
   dose_internal
-  lluf_crash_reporter
-  ${Boost_SYSTEM_LIBRARY})
+  lluf_utils
+  lluf_crash_reporter)
 
 target_include_directories(dobexplorer PRIVATE ../../dose_communication.ss/src/defs/ ../../dose_communication.ss/src/dose_com/)
 #dobexplorer doesnt really need to link against dose_com, so instead just add the include directories

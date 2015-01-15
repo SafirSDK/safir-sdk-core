@@ -1,10 +1,8 @@
 ADD_EXECUTABLE(timer_test timer_test.cpp ../src/dose_main_timers.h ../src/dose_main_timers.cpp)
 
 TARGET_LINK_LIBRARIES(timer_test PRIVATE
-  dots_cpp
   dose_internal
-  ${Boost_THREAD_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY})
+  lluf_utils)
 
 ADD_TEST(NAME TryStart_dose_main
   COMMAND ${PYTHON_EXECUTABLE}

@@ -44,9 +44,4 @@ else()
   TARGET_LINK_LIBRARIES(dobmake PRIVATE ${QT_LIBRARIES})
 endif()
 
-#TARGET_LINK_LIBRARIES(dobmake
-#  dose_internal
-#  lluf_crash_reporter
-#  ${Boost_SYSTEM_LIBRARY})
-
 SAFIR_INSTALL(TARGETS dobmake)

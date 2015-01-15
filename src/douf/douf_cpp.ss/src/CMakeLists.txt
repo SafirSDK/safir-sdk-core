@@ -1,8 +1,7 @@
 ADD_LIBRARY(douf_time_cpp SHARED TimeProvider.cpp)
 
 TARGET_LINK_LIBRARIES(douf_time_cpp PRIVATE
-  douf_time_library
-  dots_cpp)
+  douf_time_library)
 
 #Needed on windows
 if (MSVC)

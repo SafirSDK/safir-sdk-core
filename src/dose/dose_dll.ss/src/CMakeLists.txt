@@ -12,10 +12,7 @@ target_include_directories(dose_dll PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOU
 
 TARGET_LINK_LIBRARIES(dose_dll PRIVATE
   lluf_utils
-  dots_cpp
-  dose_internal
-  ${Boost_THREAD_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY})
+  dose_internal)
 
 SAFIR_INSTALL(TARGETS dose_dll)
 

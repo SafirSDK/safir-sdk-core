@@ -292,15 +292,15 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
     PRIVATE ${precompiled_header_path})
 
   target_link_libraries(safir_generated-${GEN_NAME}-cpp PRIVATE
+    PUBLIC
     dots_cpp
-    dots_internal
-    dots_kernel
-    lluf_utils
-    ${Boost_THREAD_LIBRARY}
-    ${Boost_SYSTEM_LIBRARY})
+    )
 
   FOREACH (DEP ${ALL_DEPENDENCIES})
-    TARGET_LINK_LIBRARIES(safir_generated-${GEN_NAME}-cpp PRIVATE safir_generated-${DEP}-cpp)
+    TARGET_LINK_LIBRARIES(safir_generated-${GEN_NAME}-cpp PRIVATE
+
+      PUBLIC
+      safir_generated-${DEP}-cpp)
   ENDFOREACH()
 
   add_dependencies(safir_generated-${GEN_NAME}-cpp safir_generated-${GEN_NAME}-code)
@@ -522,4 +522,3 @@ FUNCTION(INSTALL_SAFIR_GENERATED_LIBRARY)
   endforeach()
 
 ENDFUNCTION()
-

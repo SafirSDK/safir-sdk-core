@@ -70,10 +70,10 @@ namespace Internal
         {
         public:
             static LowLevelLogger & Instance();
-            
-            inline int LogLevel() const 
+
+            inline int LogLevel() const
             {
-                if (m_pLogLevel == NULL) 
+                if (m_pLogLevel == NULL)
                 {
                     return 0;
                 }
@@ -94,7 +94,7 @@ namespace Internal
                 {
                 }
 
-                operator bool() const 
+                operator bool() const
                 {
                     return false;
                 }
@@ -108,7 +108,7 @@ namespace Internal
                 Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().m_lock.lock();
                 return Magic(Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().m_lock);
             }
-            
+
         private:
             /** Constructor*/
             explicit LowLevelLogger();
@@ -117,16 +117,16 @@ namespace Internal
             ~LowLevelLogger();
 
             /**
-             * This class is here to ensure that only the Instance method can get at the 
+             * This class is here to ensure that only the Instance method can get at the
              * instance, so as to be sure that boost call_once is used correctly.
-             * Also makes it easier to grep for singletons in the code, if all 
+             * Also makes it easier to grep for singletons in the code, if all
              * singletons use the same construction and helper-name.
              */
             struct SingletonHelper
             {
             private:
                 friend LowLevelLogger& LowLevelLogger::Instance();
-                
+
                 static LowLevelLogger& Instance();
                 static boost::once_flag m_onceFlag;
             };
@@ -135,8 +135,8 @@ namespace Internal
             class LoggingImpl;
             class FallbackImpl;
             boost::shared_ptr<Impl> m_impl;
-            
-            const int* m_pLogLevel;            
+
+            const int* m_pLogLevel;
 
             //this lock needs to be taken before logging to the logger!
             boost::recursive_mutex m_lock;

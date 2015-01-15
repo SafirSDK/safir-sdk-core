@@ -6,10 +6,8 @@ target_include_directories(signals_test PRIVATE ../../src/include)
 add_definitions(-DDOSE_NO_LOCK_CHECKING)
 
 TARGET_LINK_LIBRARIES(signals_test PRIVATE
-  safir_generated-Core-cpp
-  dots_cpp
-  ${Boost_THREAD_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY})
+  lluf_utils
+  safir_generated-Core-cpp)
 
 ADD_TEST(NAME Signals COMMAND signals_test)
 

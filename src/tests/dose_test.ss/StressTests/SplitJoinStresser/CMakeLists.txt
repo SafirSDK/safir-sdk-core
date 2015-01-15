@@ -8,7 +8,7 @@ if (ACE_FOUND)
 
   ADD_EXECUTABLE(SplitJoinStresser ${sources} ${headers})
 
-  TARGET_LINK_LIBRARIES(SplitJoinStresser PRIVATE
+  TARGET_LINK_LIBRARIES_FOOBAR(SplitJoinStresser PRIVATE
     dose_cpp
     safir_generated-DoseTest-cpp
     ${Boost_PROGRAM_OPTIONS_LIBRARY}

@@ -1,9 +1,7 @@
 ADD_EXECUTABLE(lll_test lll_test.cpp)
 
 TARGET_LINK_LIBRARIES(lll_test PRIVATE
-  lluf_utils
-  ${Boost_THREAD_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY})
+  lluf_utils)
 
 add_dependencies(lll_test logger_control) #logger control is needed for the test
 

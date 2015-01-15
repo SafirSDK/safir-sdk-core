@@ -14,11 +14,6 @@ TARGET_INCLUDE_DIRECTORIES(dose_test_util PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRE
 target_include_directories(dose_test_util PRIVATE ${safir-sdk-core_SOURCE_DIR}/src/dose/dose_communication.ss/src/defs/)
 target_include_directories(dose_test_util PRIVATE ${safir-sdk-core_SOURCE_DIR}/src/dose/dose_communication.ss/src/dose_com/)
 
-#target_link_libraries(dose_test_util PRIVATE
-#  dots_cpp
-#  dots_internal
-#  lluf_utils)
-
 SAFIR_INSTALL(TARGETS dose_test_util TEST_SUITE)
 
 # INSTALL(FILES dose_test_util.gpr
