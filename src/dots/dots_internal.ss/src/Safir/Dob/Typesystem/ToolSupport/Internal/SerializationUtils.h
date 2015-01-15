@@ -150,6 +150,14 @@ namespace SerializationUtils
         throw std::invalid_argument("Failed to convert '"+val+"' to boolean");
     }
 
+    template <class WriterT, class KeyT>
+    void SetKeyWithNullValue(DotsC_MemberIndex memIx,
+                             const KeyT& key,
+                             WriterT& writer)
+    {
+        writer.WriteKey(memIx, key);
+        writer.WriteValue(memIx, 0, 0, true, true);
+    }
 
     template <class WriterT, class KeyT>
     void SetMemberValue(const typename WriterT::RepositoryType* repository,

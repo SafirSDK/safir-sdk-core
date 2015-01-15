@@ -8653,6 +8653,61 @@ void Test_GetDouFilePath()
               L"DotsTest.MemberTypesProperty.dou");
 }
 
+void PrintSequences(DotsTest::MemberSequencesPtr ms)
+{
+    std::wcout<<L"--- Int32Member ---"<<std::endl;
+    std::wcout<<L"size: "<<ms->Int32Member().size()<<std::endl;
+    std::wcout<<L"isChanged: "<<ms->Int32Member().IsChanged()<<std::endl;
+    std::wcout<<L"val[0]: "<<ms->Int32Member()[0]<<std::endl;
+    std::wcout<<L"val[1]: "<<ms->Int32Member()[1]<<std::endl;
+
+    std::wcout<<L"--- Int64Member ---"<<std::endl;
+    std::wcout<<L"size: "<<ms->Int64Member().size()<<std::endl;
+    std::wcout<<L"isChanged: "<<ms->Int64Member().IsChanged()<<std::endl;
+    std::wcout<<L"val[0]: "<<ms->Int64Member()[0]<<std::endl;
+    std::wcout<<L"val[1]: "<<ms->Int64Member()[1]<<std::endl;
+
+    std::wcout<<L"--- Float32Member ---"<<std::endl;
+    std::wcout<<L"size: "<<ms->Float32Member().size()<<std::endl;
+    std::wcout<<L"isChanged: "<<ms->Float32Member().IsChanged()<<std::endl;
+    std::wcout<<L"val[0]: "<<ms->Float32Member()[0]<<std::endl;
+    std::wcout<<L"val[1]: "<<ms->Float32Member()[1]<<std::endl;
+
+    std::wcout<<L"--- Float64Member ---"<<std::endl;
+    std::wcout<<L"size: "<<ms->Float64Member().size()<<std::endl;
+    std::wcout<<L"isChanged: "<<ms->Float64Member().IsChanged()<<std::endl;
+    std::wcout<<L"val[0]: "<<ms->Float64Member()[0]<<std::endl;
+    std::wcout<<L"val[1]: "<<ms->Float64Member()[1]<<std::endl;
+
+    std::wcout<<L"--- BooleanMember ---"<<std::endl;
+    std::wcout<<L"size: "<<ms->BooleanMember().size()<<std::endl;
+    std::wcout<<L"isChanged: "<<ms->BooleanMember().IsChanged()<<std::endl;
+    std::wcout<<L"val[0]: "<<ms->BooleanMember()[0]<<std::endl;
+    std::wcout<<L"val[1]: "<<ms->BooleanMember()[1]<<std::endl;
+
+    std::wcout<<L"--- EnumerationMember ---"<<std::endl;
+    std::wcout<<L"size: "<<ms->EnumerationMember().size()<<std::endl;
+    std::wcout<<L"isChanged: "<<ms->EnumerationMember().IsChanged()<<std::endl;
+    std::wcout<<L"val[0]: "<<DotsTest::TestEnum::ToString(ms->EnumerationMember()[0])<<std::endl;
+    std::wcout<<L"val[1]: "<<DotsTest::TestEnum::ToString(ms->EnumerationMember()[1])<<std::endl;
+
+    std::wcout<<L"--- StringMember ---"<<std::endl;
+    std::wcout<<L"size: "<<ms->StringMember().size()<<std::endl;
+    std::wcout<<L"isChanged: "<<ms->StringMember().IsChanged()<<std::endl;
+    std::wcout<<L"val[0]: "<<ms->StringMember()[0]<<std::endl;
+    std::wcout<<L"val[1]: "<<ms->StringMember()[1]<<std::endl;
+
+    std::wcout<<L"--- TypeIdMember ---"<<std::endl;
+    std::wcout<<L"size: "<<ms->TypeIdMember().size()<<std::endl;
+    std::wcout<<L"isChanged: "<<ms->TypeIdMember().IsChanged()<<std::endl;
+    std::wcout<<L"val[0]: "<<ts::Operations::GetName(ms->TypeIdMember()[0])<<std::endl;
+    std::wcout<<L"val[1]: "<<ts::Operations::GetName(ms->TypeIdMember()[1])<<std::endl;
+
+    std::wcout<<L"--- HandlerIdMember ---"<<std::endl;
+    std::wcout<<L"size: "<<ms->HandlerIdMember().size()<<std::endl;
+    std::wcout<<L"isChanged: "<<ms->HandlerIdMember().IsChanged()<<std::endl;
+}
+
 void TestSequences()
 {
     Header(L"Sequences");
@@ -8699,30 +8754,127 @@ void TestSequences()
     ms->TypeIdMember().InsertAt(0, DotsTest::MemberDictionaries::ClassTypeId);
     ms->TypeIdMember().EraseAt(2);
 
-    std::wcout<<L"------ ToXml -----"<<std::endl;
+    PrintSequences(ms);
+
+    std::wcout<<L"------ To Xml -----"<<std::endl;
     std::wstring xml=ts::Serialization::ToXml(ms);
     std::wcout<<xml<<std::endl;
 
-    std::wcout<<L"------ ToJson -----"<<std::endl;
+    std::wcout<<L"------ From Xml -----"<<std::endl;
+    DotsTest::MemberSequencesPtr fromXml=boost::dynamic_pointer_cast<DotsTest::MemberSequences>(ts::Serialization::ToObject(xml));
+    PrintSequences(fromXml);
+
+
+    std::wcout<<L"------ To Json -----"<<std::endl;
     std::wstring json=ts::Serialization::ToJson(ms);
     std::wcout<<json<<std::endl;
 
-    Safir::Dob::Typesystem::BinarySerialization bin;
-    Safir::Dob::Typesystem::Serialization::ToBinary(ms, bin);
-    ts::ObjectPtr op=ts::Serialization::ToObject(bin);
-    DotsTest::MemberSequencesPtr ms2=boost::dynamic_pointer_cast<DotsTest::MemberSequences>(op);
-    DotsTest::MemberSequencesPtr ms3=boost::static_pointer_cast<DotsTest::MemberSequences>(ms2->Clone());
+    std::wcout<<L"------ From Json -----"<<std::endl;
+    DotsTest::MemberSequencesPtr fromJson=boost::dynamic_pointer_cast<DotsTest::MemberSequences>(ts::Serialization::ToObjectFromJson(json));
+    PrintSequences(fromJson);
 
-    std::wcout<<L"------ StringMember -----"<<std::endl;
-    std::wcout<<L"IsChanged1 "<<ms->StringMember().IsChanged()<<std::endl;
-    std::wcout<<L"IsChanged2 "<<ms2->StringMember().IsChanged()<<std::endl;
-    std::wcout<<L"IsChanged3 "<<ms3->StringMember().IsChanged()<<std::endl;
-    for (size_t i=0; i<ms->StringMember().size(); ++i)
+    std::wcout<<L"------ Clone -----"<<std::endl;
+    DotsTest::MemberSequencesPtr clone=boost::dynamic_pointer_cast<DotsTest::MemberSequences>(ms);
+    PrintSequences(clone);
+}
+
+void PrintDictionaries(DotsTest::MemberDictionariesPtr md)
+{
+    std::wcout<<L"--- Int32StringMember ---"<<std::endl;
+    std::wcout<<L"size: "<<md->Int32StringMember().size()<<std::endl;
+    std::wcout<<L"isChanged: "<<md->Int32StringMember().IsChanged()<<std::endl;
+    for (ts::DictionaryContainer<ts::Int32, ts::StringContainer>::const_iterator it=md->Int32StringMember().begin();
+         it!=md->Int32StringMember().end(); ++it)
     {
-        std::wcout<<L"Val1: "<<ms->StringMember().GetVal(i)<<std::endl;
-        std::wcout<<L"Val2: "<<ms2->StringMember().GetVal(i)<<std::endl;
-        std::wcout<<L"Val3: "<<ms3->StringMember().GetVal(i)<<std::endl;
-        //std::wcout<<L"Equal: "<<(ms->StringMember().GetVal(i)==ms2->StringMember().GetVal(i))<<L", val: "<<ms->StringMember().GetVal(i)<<std::endl;
+        if (it->second.IsNull())
+            std::wcout<<it->first<<L" = NULL, changed: "<<it->second.IsChanged()<<std::endl;
+        else
+            std::wcout<<it->first<<L" = "<<it->second.GetVal()<<L", changed: "<<it->second.IsChanged()<<std::endl;
+    }
+
+    std::wcout<<L"--- Int64BinaryMember ---"<<std::endl;
+    std::wcout<<L"size: "<<md->Int64BinaryMember().size()<<std::endl;
+    std::wcout<<L"isChanged: "<<md->Int64BinaryMember().IsChanged()<<std::endl;
+    for (ts::DictionaryContainer<ts::Int64, ts::BinaryContainer>::const_iterator it=md->Int64BinaryMember().begin();
+         it!=md->Int64BinaryMember().end(); ++it)
+    {
+        if (it->second.IsNull())
+            std::wcout<<it->first<<L" = NULL, changed: "<<it->second.IsChanged()<<std::endl;
+        else
+            std::wcout<<it->first<<L" = "<<ts::Utilities::ToWstring(std::string(it->second.GetVal().begin(), it->second.GetVal().end()))<<L", changed: "<<it->second.IsChanged()<<std::endl;
+    }
+
+
+    std::wcout<<L"--- TypeIdEnumMember ---"<<std::endl;
+    std::wcout<<L"size: "<<md->TypeIdEnumMember().size()<<std::endl;
+    std::wcout<<L"isChanged: "<<md->TypeIdEnumMember().IsChanged()<<std::endl;
+    for (ts::DictionaryContainer<ts::TypeId, DotsTest::TestEnum::EnumerationContainer>::const_iterator it=md->TypeIdEnumMember().begin();
+         it!=md->TypeIdEnumMember().end(); ++it)
+    {
+        if (it->second.IsNull())
+            std::wcout<<ts::Operations::GetName(it->first)<<L" = NULL, changed: "<<it->second.IsChanged()<<std::endl;
+        else
+            std::wcout<<ts::Operations::GetName(it->first)<<L" = "<<DotsTest::TestEnum::ToString(it->second.GetVal())<<L", changed: "<<it->second.IsChanged()<<std::endl;
+    }
+
+    std::wcout<<L"--- EnumInstanceIdMember ---"<<std::endl;
+    std::wcout<<L"size: "<<md->EnumInstanceIdMember().size()<<std::endl;
+    std::wcout<<L"isChanged: "<<md->EnumInstanceIdMember().IsChanged()<<std::endl;
+    for (ts::DictionaryContainer<DotsTest::TestEnum::Enumeration, ts::InstanceIdContainer>::const_iterator it=md->EnumInstanceIdMember().begin();
+         it!=md->EnumInstanceIdMember().end(); ++it)
+    {
+        if (it->second.IsNull())
+            std::wcout<<DotsTest::TestEnum::ToString(it->first)<<L" = NULL, changed: "<<it->second.IsChanged()<<std::endl;
+        else
+            std::wcout<<DotsTest::TestEnum::ToString(it->first)<<L" = "<<it->second.GetVal().ToString()<<L", changed: "<<it->second.IsChanged()<<std::endl;
+    }
+
+    std::wcout<<L"--- InstanceIdEntityIdMember ---"<<std::endl;
+    std::wcout<<L"size: "<<md->InstanceIdEntityIdMember().size()<<std::endl;
+    std::wcout<<L"isChanged: "<<md->InstanceIdEntityIdMember().IsChanged()<<std::endl;
+    for (ts::DictionaryContainer<ts::InstanceId, ts::EntityIdContainer>::const_iterator it=md->InstanceIdEntityIdMember().begin();
+         it!=md->InstanceIdEntityIdMember().end(); ++it)
+    {
+        if (it->second.IsNull())
+            std::wcout<<it->first.ToString()<<L" = NULL, changed: "<<it->second.IsChanged()<<std::endl;
+        else
+            std::wcout<<it->first.ToString()<<L" = "<<it->second.GetVal().ToString()<<L", changed: "<<it->second.IsChanged()<<std::endl;
+    }
+
+    std::wcout<<L"--- EntityIdHandlerIdMember ---"<<std::endl;
+    std::wcout<<L"size: "<<md->EntityIdHandlerIdMember().size()<<std::endl;
+    std::wcout<<L"isChanged: "<<md->EntityIdHandlerIdMember().IsChanged()<<std::endl;
+    for (ts::DictionaryContainer<ts::EntityId, ts::HandlerIdContainer>::const_iterator it=md->EntityIdHandlerIdMember().begin();
+         it!=md->EntityIdHandlerIdMember().end(); ++it)
+    {
+        if (it->second.IsNull())
+            std::wcout<<it->first.ToString()<<L" = NULL, changed: "<<it->second.IsChanged()<<std::endl;
+        else
+            std::wcout<<it->first.ToString()<<L" = "<<it->second.GetVal().ToString()<<L", changed: "<<it->second.IsChanged()<<std::endl;
+    }
+
+    std::wcout<<L"--- StringItemMember ---"<<std::endl;
+    std::wcout<<L"size: "<<md->StringItemMember().size()<<std::endl;
+    std::wcout<<L"isChanged: "<<md->StringItemMember().IsChanged()<<std::endl;
+    for (ts::DictionaryContainer<std::wstring, DotsTest::MemberDictionariesContainer>::const_iterator it=md->StringItemMember().begin();
+         it!=md->StringItemMember().end(); ++it)
+    {
+        if (it->second.IsNull())
+            std::wcout<<it->first<<L" = NULL, changed: "<<it->second.IsChanged()<<std::endl;
+        else
+            std::wcout<<it->first<<L" = "<<ts::Serialization::ToJson(it->second.GetPtr())<<L", changed: "<<it->second.IsChanged()<<std::endl;
+    }
+
+    std::wcout<<L"--- StringObjectMember ---"<<std::endl;
+    std::wcout<<L"size: "<<md->StringObjectMember().size()<<std::endl;
+    std::wcout<<L"isChanged: "<<md->StringObjectMember().IsChanged()<<std::endl;
+    for (ts::DictionaryContainer<std::wstring, ts::ObjectContainer>::const_iterator it=md->StringObjectMember().begin();
+         it!=md->StringObjectMember().end(); ++it)
+    {
+        if (it->second.IsNull())
+            std::wcout<<it->first<<L" = NULL, changed: "<<it->second.IsChanged()<<std::endl;
+        else
+            std::wcout<<it->first<<L" = "<<ts::Serialization::ToJson(it->second.GetPtr())<<L", changed: "<<it->second.IsChanged()<<std::endl;
     }
 }
 
@@ -8747,50 +8899,39 @@ void TestDictionaries()
     md->InstanceIdEntityIdMember()[ts::InstanceId(L"FirstInstance")].SetVal(DotsTest::ParameterDictionaries::HandlerIdEntityIdParameter(ts::HandlerId(L"handlerOne")));
     md->InstanceIdEntityIdMember()[ts::InstanceId(L"SecondInstance")].SetVal(DotsTest::ParameterDictionaries::HandlerIdEntityIdParameter(ts::HandlerId(2)));
 
+    DotsTest::MemberDictionariesPtr item1=DotsTest::MemberDictionaries::Create();
+    item1->EntityIdHandlerIdMember()[ts::EntityId(Safir::Dob::Entity::ClassTypeId, ts::InstanceId(L"first"))].SetVal(DotsTest::ParameterDictionaries::EntityIdHandlerIdParameter(ts::EntityId(Safir::Dob::Entity::ClassTypeId, ts::InstanceId(L"first"))));
+    item1->EntityIdHandlerIdMember()[ts::EntityId(Safir::Dob::Entity::ClassTypeId, ts::InstanceId(2))].SetVal(DotsTest::ParameterDictionaries::EntityIdHandlerIdParameter(ts::EntityId(Safir::Dob::Entity::ClassTypeId, ts::InstanceId(L"second"))));
 
+    md->StringItemMember()[L"Karl"].SetPtr(item1);
+    md->StringItemMember()[L"Philip"].SetNull();
+    md->StringItemMember()[L"Gustav"].SetPtr(item1);
 
-    std::wcout<<L"------ ToXml -----"<<std::endl;
+    md->StringObjectMember()[L"Dilbert"].SetPtr(DotsTest::ParameterDictionaries::Int32ObjectParameter(10));
+    md->StringObjectMember()[L"Wally"].SetPtr(DotsTest::ParameterDictionaries::Int32ObjectParameter(20));
+
+    PrintDictionaries(md);
+
+    std::wcout<<L"------ To Xml -----"<<std::endl;
     std::wstring xml=ts::Serialization::ToXml(md);
     std::wcout<<xml<<std::endl;
 
-    std::wcout<<L"------ ToJson -----"<<std::endl;
+    std::wcout<<L"------ From Xml -----"<<std::endl;
+    DotsTest::MemberDictionariesPtr fromXml=boost::dynamic_pointer_cast<DotsTest::MemberDictionaries>(ts::Serialization::ToObject(xml));
+    PrintDictionaries(fromXml);
+
+
+    std::wcout<<L"------ To Json -----"<<std::endl;
     std::wstring json=ts::Serialization::ToJson(md);
     std::wcout<<json<<std::endl;
 
-    Safir::Dob::Typesystem::BinarySerialization bin;
-    Safir::Dob::Typesystem::Serialization::ToBinary(md, bin);
-    ts::ObjectPtr op=ts::Serialization::ToObject(bin);
-    DotsTest::MemberDictionariesPtr md2=boost::dynamic_pointer_cast<DotsTest::MemberDictionaries>(op);
-    DotsTest::MemberDictionariesPtr md3=boost::static_pointer_cast<DotsTest::MemberDictionaries>(md2->Clone());
+    std::wcout<<L"------ From Json -----"<<std::endl;
+    DotsTest::MemberDictionariesPtr fromJson=boost::dynamic_pointer_cast<DotsTest::MemberDictionaries>(ts::Serialization::ToObjectFromJson(json));
+    PrintDictionaries(fromJson);
 
-    std::cout<<"-- Dictval--"<<std::endl;
-    for (ts::DictionaryContainer<ts::InstanceId, ts::EntityIdContainer>::const_iterator it=md2->InstanceIdEntityIdMember().begin(); it!=md2->InstanceIdEntityIdMember().end(); ++it)
-    {
-
-        std::wcout<<it->first.ToString()<<L" = "<<it->second.GetVal().ToString()<<std::endl;
-    }
-
-    std::wcout<<L"MD1, IsChanged "<<md->Int32StringMember().IsChanged()<<std::endl;
-    for (ts::DictionaryContainer<ts::Int32, ts::StringContainer>::const_iterator it=md->Int32StringMember().begin(); it!=md->Int32StringMember().end(); ++it)
-    {
-        std::wcout<<it->first<<L" = "<<it->second.GetVal()<<L", isChanged="<<it->second.IsChanged()<<std::endl;
-    }
-    std::wcout<<L"MD2, IsChanged "<<md2->Int32StringMember().IsChanged()<<std::endl;
-    for (ts::DictionaryContainer<ts::Int32, ts::StringContainer>::const_iterator it=md2->Int32StringMember().begin(); it!=md2->Int32StringMember().end(); ++it)
-    {
-        std::wcout<<it->first<<L" = "<<it->second.GetVal()<<L", isChanged="<<it->second.IsChanged()<<std::endl;
-    }
-    std::wcout<<L"MD3, IsChanged "<<md3->Int32StringMember().IsChanged()<<std::endl;
-    for (ts::DictionaryContainer<ts::Int32, ts::StringContainer>::const_iterator it=md3->Int32StringMember().begin(); it!=md3->Int32StringMember().end(); ++it)
-    {
-        std::wcout<<it->first<<L" = "<<it->second.GetVal()<<L", isChanged="<<it->second.IsChanged()<<std::endl;
-    }
-
-//    std::wcout<<L"------ Int64BinaryMember -----"<<std::endl;
-//    std::wcout<<L"size: "<<md2->Int64BinaryMember().size()<<L", IsChanged: "<<md2->IsChanged()<<std::endl;
-//    std::string tmp(md2->Int64BinaryMember()[100].GetVal().begin(), md2->Int64BinaryMember()[100].GetVal().end());
-//    std::wcout<<tmp.c_str()<<std::endl;
-
+    std::wcout<<L"------ Clone -----"<<std::endl;
+    DotsTest::MemberDictionariesPtr clone=boost::dynamic_pointer_cast<DotsTest::MemberDictionaries>(md);
+    PrintDictionaries(clone);
 }
 
 int main(int /*argc*/, char* /*argv*/[])
@@ -8808,70 +8949,70 @@ int main(int /*argc*/, char* /*argv*/[])
 
     try
     {
-//        Test_Has_Property();
-//        Test_GetName();
-//        Test_GetNumberOfMembers();
-//        Test_GetNumberOfParameters();
-//        Test_Create_Routines();
-//        Test_Int32();
-//        Test_Int64();
-//        Test_Float32();
-//        Test_Float64();
-//        Test_Boolean();
-//        Test_Enumeration();
-//        Test_String();
-//        Test_EntityId();
-//        Test_InstanceId();
-//        Test_TypeId();
-//        Test_ChannelId();
-//        Test_HandlerId();
-//        Test_Object();
-//        Test_Binary();
-//        Test_TestClass();
-//        Test_Ampere32();
-//        Test_CubicMeter32();
-//        Test_Hertz32();
-//        Test_Joule32();
-//        Test_Kelvin32();
-//        Test_Kilogram32();
-//        Test_Meter32();
-//        Test_MeterPerSecond32();
-//        Test_MeterPerSecondSquared32();
-//        Test_Newton32();
-//        Test_Pascal32();
-//        Test_Radian32();
-//        Test_RadianPerSecond32();
-//        Test_RadianPerSecondSquared32();
-//        Test_Second32();
-//        Test_SquareMeter32();
-//        Test_Steradian32();
-//        Test_Volt32();
-//        Test_Watt32();
-//        Test_Ampere64();
-//        Test_CubicMeter64();
-//        Test_Hertz64();
-//        Test_Joule64();
-//        Test_Kelvin64();
-//        Test_Kilogram64();
-//        Test_Meter64();
-//        Test_MeterPerSecond64();
-//        Test_MeterPerSecondSquared64();
-//        Test_Newton64();
-//        Test_Pascal64();
-//        Test_Radian64();
-//        Test_RadianPerSecond64();
-//        Test_RadianPerSecondSquared64();
-//        Test_Second64();
-//        Test_SquareMeter64();
-//        Test_Steradian64();
-//        Test_Volt64();
-//        Test_Watt64();
-//        Test_TestException();
-//        Test_LibraryExceptions();
-//        Test_IsProperty();
-//        Test_IsEnumeration();
-//        Test_IsException();
-//        Test_GetDouFilePath();
+        Test_Has_Property();
+        Test_GetName();
+        Test_GetNumberOfMembers();
+        Test_GetNumberOfParameters();
+        Test_Create_Routines();
+        Test_Int32();
+        Test_Int64();
+        Test_Float32();
+        Test_Float64();
+        Test_Boolean();
+        Test_Enumeration();
+        Test_String();
+        Test_EntityId();
+        Test_InstanceId();
+        Test_TypeId();
+        Test_ChannelId();
+        Test_HandlerId();
+        Test_Object();
+        Test_Binary();
+        Test_TestClass();
+        Test_Ampere32();
+        Test_CubicMeter32();
+        Test_Hertz32();
+        Test_Joule32();
+        Test_Kelvin32();
+        Test_Kilogram32();
+        Test_Meter32();
+        Test_MeterPerSecond32();
+        Test_MeterPerSecondSquared32();
+        Test_Newton32();
+        Test_Pascal32();
+        Test_Radian32();
+        Test_RadianPerSecond32();
+        Test_RadianPerSecondSquared32();
+        Test_Second32();
+        Test_SquareMeter32();
+        Test_Steradian32();
+        Test_Volt32();
+        Test_Watt32();
+        Test_Ampere64();
+        Test_CubicMeter64();
+        Test_Hertz64();
+        Test_Joule64();
+        Test_Kelvin64();
+        Test_Kilogram64();
+        Test_Meter64();
+        Test_MeterPerSecond64();
+        Test_MeterPerSecondSquared64();
+        Test_Newton64();
+        Test_Pascal64();
+        Test_Radian64();
+        Test_RadianPerSecond64();
+        Test_RadianPerSecondSquared64();
+        Test_Second64();
+        Test_SquareMeter64();
+        Test_Steradian64();
+        Test_Volt64();
+        Test_Watt64();
+        Test_TestException();
+        Test_LibraryExceptions();
+        Test_IsProperty();
+        Test_IsEnumeration();
+        Test_IsException();
+        Test_GetDouFilePath();
         TestSequences();
         TestDictionaries();
     }

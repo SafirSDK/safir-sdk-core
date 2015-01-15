@@ -1806,3 +1806,358 @@ DotsTest.TestEnum
 Testing: IsException
 =====================================================
 DotsTest.TestException
+
+
+
+=====================================================
+Testing: Sequences
+=====================================================
+--- Int32Member ---
+size: 2
+isChanged: true
+val[0]: 10
+val[1]: 20
+--- Int64Member ---
+size: 2
+isChanged: true
+val[0]: 100
+val[1]: 200
+--- Float32Member ---
+size: 2
+isChanged: true
+val[0]: 1.1
+val[1]: 2.2
+--- Float64Member ---
+size: 2
+isChanged: true
+val[0]: 11.11
+val[1]: 22.22
+--- BooleanMember ---
+size: 2
+isChanged: true
+val[0]: true
+val[1]: false
+--- EnumerationMember ---
+size: 2
+isChanged: true
+val[0]: MyFirst
+val[1]: MySecond
+--- StringMember ---
+size: 2
+isChanged: true
+val[0]: Aa
+val[1]: Bb
+--- TypeIdMember ---
+size: 2
+isChanged: true
+val[0]: DotsTest.MemberDictionaries
+val[1]: DotsTest.MemberSequences
+--- HandlerIdMember ---
+size: 0
+isChanged: false
+------ To Xml -----
+<?xml version="1.0" encoding="utf-8"?><DotsTest.MemberSequences><Int32Member><Int32>10</Int32><Int32>20</Int32></Int32Member><Int64Member><Int64>100</Int64><Int64>200</Int64></Int64Member><Float32Member><Float32>1.1</Float32><Float32>2.2</Float32></Float32Member><Float64Member><Float64>11.1099996566772</Float64><Float64>22.2199993133545</Float64></Float64Member><BooleanMember><Boolean>true</Boolean><Boolean>false</Boolean></BooleanMember><EnumerationMember><DotsTest.TestEnum>MyFirst</DotsTest.TestEnum><DotsTest.TestEnum>MySecond</DotsTest.TestEnum></EnumerationMember><StringMember><String xml:space="preserve">Aa</String><String xml:space="preserve">Bb</String></StringMember><TypeIdMember><TypeId>DotsTest.MemberDictionaries</TypeId><TypeId>DotsTest.MemberSequences</TypeId></TypeIdMember></DotsTest.MemberSequences>
+------ From Xml -----
+--- Int32Member ---
+size: 2
+isChanged: true
+val[0]: 10
+val[1]: 20
+--- Int64Member ---
+size: 2
+isChanged: true
+val[0]: 100
+val[1]: 200
+--- Float32Member ---
+size: 2
+isChanged: true
+val[0]: 1.1
+val[1]: 2.2
+--- Float64Member ---
+size: 2
+isChanged: true
+val[0]: 11.11
+val[1]: 22.22
+--- BooleanMember ---
+size: 2
+isChanged: true
+val[0]: true
+val[1]: false
+--- EnumerationMember ---
+size: 2
+isChanged: true
+val[0]: MyFirst
+val[1]: MySecond
+--- StringMember ---
+size: 2
+isChanged: true
+val[0]: Aa
+val[1]: Bb
+--- TypeIdMember ---
+size: 2
+isChanged: true
+val[0]: DotsTest.MemberDictionaries
+val[1]: DotsTest.MemberSequences
+--- HandlerIdMember ---
+size: 0
+isChanged: false
+------ To Json -----
+{"DotsTest.MemberSequences": {"_DouType": "DotsTest.MemberSequences", "Int32Member": [10, 20], "Int64Member": [100, 200], "Float32Member": [1.1, 2.2], "Float64Member": [11.1099996566772, 22.2199993133545], "BooleanMember": [true, false], "EnumerationMember": ["MyFirst", "MySecond"], "StringMember": ["Aa", "Bb"], "TypeIdMember": ["DotsTest.MemberDictionaries", "DotsTest.MemberSequences"]}}
+------ From Json -----
+--- Int32Member ---
+size: 2
+isChanged: true
+val[0]: 10
+val[1]: 20
+--- Int64Member ---
+size: 2
+isChanged: true
+val[0]: 100
+val[1]: 200
+--- Float32Member ---
+size: 2
+isChanged: true
+val[0]: 1.1
+val[1]: 2.2
+--- Float64Member ---
+size: 2
+isChanged: true
+val[0]: 11.11
+val[1]: 22.22
+--- BooleanMember ---
+size: 2
+isChanged: true
+val[0]: true
+val[1]: false
+--- EnumerationMember ---
+size: 2
+isChanged: true
+val[0]: MyFirst
+val[1]: MySecond
+--- StringMember ---
+size: 2
+isChanged: true
+val[0]: Aa
+val[1]: Bb
+--- TypeIdMember ---
+size: 2
+isChanged: true
+val[0]: DotsTest.MemberDictionaries
+val[1]: DotsTest.MemberSequences
+--- HandlerIdMember ---
+size: 0
+isChanged: false
+------ Clone -----
+--- Int32Member ---
+size: 2
+isChanged: true
+val[0]: 10
+val[1]: 20
+--- Int64Member ---
+size: 2
+isChanged: true
+val[0]: 100
+val[1]: 200
+--- Float32Member ---
+size: 2
+isChanged: true
+val[0]: 1.1
+val[1]: 2.2
+--- Float64Member ---
+size: 2
+isChanged: true
+val[0]: 11.11
+val[1]: 22.22
+--- BooleanMember ---
+size: 2
+isChanged: true
+val[0]: true
+val[1]: false
+--- EnumerationMember ---
+size: 2
+isChanged: true
+val[0]: MyFirst
+val[1]: MySecond
+--- StringMember ---
+size: 2
+isChanged: true
+val[0]: Aa
+val[1]: Bb
+--- TypeIdMember ---
+size: 2
+isChanged: true
+val[0]: DotsTest.MemberDictionaries
+val[1]: DotsTest.MemberSequences
+--- HandlerIdMember ---
+size: 0
+isChanged: false
+
+
+
+=====================================================
+Testing: Dictionaries
+=====================================================
+--- Int32StringMember ---
+size: 2
+isChanged: true
+20 = rifaS, changed: true
+10 = Safir, changed: true
+--- Int64BinaryMember ---
+size: 2
+isChanged: true
+200 = Safir rules the world, changed: true
+100 = I am a Rockefeller!, changed: true
+--- TypeIdEnumMember ---
+size: 2
+isChanged: true
+DotsTest.MemberSequences = MySecond, changed: true
+DotsTest.MemberDictionaries = MyFirst, changed: true
+--- EnumInstanceIdMember ---
+size: 2
+isChanged: true
+MySecond = 2, changed: true
+MyFirst = first, changed: true
+--- InstanceIdEntityIdMember ---
+size: 2
+isChanged: true
+SecondInstance = (Safir.Dob.Entity, 2), changed: true
+FirstInstance = (Safir.Dob.Entity, first), changed: true
+--- EntityIdHandlerIdMember ---
+size: 0
+isChanged: false
+--- StringItemMember ---
+size: 3
+isChanged: true
+Gustav = {"DotsTest.MemberDictionaries": {"_DouType": "DotsTest.MemberDictionaries", "EntityIdHandlerIdMember": [{"key": {"name": "Safir.Dob.Entity", "instanceId": 2}, "value": 2}, {"key": {"name": "Safir.Dob.Entity", "instanceId": "first"}, "value": "first"}]}}, changed: true
+Philip = NULL, changed: true
+Karl = {"DotsTest.MemberDictionaries": {"_DouType": "DotsTest.MemberDictionaries", "EntityIdHandlerIdMember": [{"key": {"name": "Safir.Dob.Entity", "instanceId": 2}, "value": 2}, {"key": {"name": "Safir.Dob.Entity", "instanceId": "first"}, "value": "first"}]}}, changed: true
+--- StringObjectMember ---
+size: 2
+isChanged: true
+Wally = {"DotsTest.MemberDictionaries": {"_DouType": "DotsTest.MemberDictionaries", "TypeIdStringMember": [{"key": "DotsTest.MemberDictionaries", "value": "World"}, {"key": "DotsTest.TestEnum", "value": "Hello"}]}}, changed: true
+Dilbert = {"Object": {"_DouType": "Object"}}, changed: true
+------ To Xml -----
+<?xml version="1.0" encoding="utf-8"?><DotsTest.MemberDictionaries><Int32StringMember><entry><key>20</key><value xml:space="preserve">rifaS</value></entry><entry><key>10</key><value xml:space="preserve">Safir</value></entry></Int32StringMember><Int64BinaryMember><entry><key>200</key><value>U2FmaXIgcnVsZXMgdGhlIHdvcmxk</value></entry><entry><key>100</key><value>SSBhbSBhIFJvY2tlZmVsbGVyIQ==</value></entry></Int64BinaryMember><StringObjectMember><entry><key>Wally</key><Object type="DotsTest.MemberDictionaries"><TypeIdStringMember><entry><key>DotsTest.MemberDictionaries</key><value xml:space="preserve">World</value></entry><entry><key>DotsTest.TestEnum</key><value xml:space="preserve">Hello</value></entry></TypeIdStringMember></Object></entry><entry><key>Dilbert</key><Object></Object></entry></StringObjectMember><StringItemMember><entry><key>Gustav</key><DotsTest.MemberDictionaries><EntityIdHandlerIdMember><entry><key><name>Safir.Dob.Entity</name><instanceId>2</instanceId></key><value>2</value></entry><entry><key><name>Safir.Dob.Entity</name><instanceId>first</instanceId></key><value>first</value></entry></EntityIdHandlerIdMember></DotsTest.MemberDictionaries></entry><entry><key>Philip</key></entry><entry><key>Karl</key><DotsTest.MemberDictionaries><EntityIdHandlerIdMember><entry><key><name>Safir.Dob.Entity</name><instanceId>2</instanceId></key><value>2</value></entry><entry><key><name>Safir.Dob.Entity</name><instanceId>first</instanceId></key><value>first</value></entry></EntityIdHandlerIdMember></DotsTest.MemberDictionaries></entry></StringItemMember><TypeIdEnumMember><entry><key>DotsTest.MemberSequences</key><value>MySecond</value></entry><entry><key>DotsTest.MemberDictionaries</key><value>MyFirst</value></entry></TypeIdEnumMember><EnumInstanceIdMember><entry><key>MySecond</key><value>2</value></entry><entry><key>MyFirst</key><value>first</value></entry></EnumInstanceIdMember><InstanceIdEntityIdMember><entry><key>SecondInstance</key><value><name>Safir.Dob.Entity</name><instanceId>2</instanceId></value></entry><entry><key>FirstInstance</key><value><name>Safir.Dob.Entity</name><instanceId>first</instanceId></value></entry></InstanceIdEntityIdMember></DotsTest.MemberDictionaries>
+------ From Xml -----
+--- Int32StringMember ---
+size: 2
+isChanged: true
+10 = Safir, changed: true
+20 = rifaS, changed: true
+--- Int64BinaryMember ---
+size: 2
+isChanged: true
+100 = I am a Rockefeller!, changed: true
+200 = Safir rules the world, changed: true
+--- TypeIdEnumMember ---
+size: 2
+isChanged: true
+DotsTest.MemberDictionaries = MyFirst, changed: true
+DotsTest.MemberSequences = MySecond, changed: true
+--- EnumInstanceIdMember ---
+size: 2
+isChanged: true
+MyFirst = first, changed: true
+MySecond = 2, changed: true
+--- InstanceIdEntityIdMember ---
+size: 2
+isChanged: true
+FirstInstance = (Safir.Dob.Entity, first), changed: true
+SecondInstance = (Safir.Dob.Entity, 2), changed: true
+--- EntityIdHandlerIdMember ---
+size: 0
+isChanged: false
+--- StringItemMember ---
+size: 3
+isChanged: true
+Karl = {"DotsTest.MemberDictionaries": {"_DouType": "DotsTest.MemberDictionaries", "EntityIdHandlerIdMember": [{"key": {"name": "Safir.Dob.Entity", "instanceId": "first"}, "value": "first"}, {"key": {"name": "Safir.Dob.Entity", "instanceId": 2}, "value": 2}]}}, changed: true
+Philip = NULL, changed: true
+Gustav = {"DotsTest.MemberDictionaries": {"_DouType": "DotsTest.MemberDictionaries", "EntityIdHandlerIdMember": [{"key": {"name": "Safir.Dob.Entity", "instanceId": "first"}, "value": "first"}, {"key": {"name": "Safir.Dob.Entity", "instanceId": 2}, "value": 2}]}}, changed: true
+--- StringObjectMember ---
+size: 2
+isChanged: true
+Dilbert = {"Object": {"_DouType": "Object"}}, changed: true
+Wally = {"DotsTest.MemberDictionaries": {"_DouType": "DotsTest.MemberDictionaries", "TypeIdStringMember": [{"key": "DotsTest.TestEnum", "value": "Hello"}, {"key": "DotsTest.MemberDictionaries", "value": "World"}]}}, changed: true
+------ To Json -----
+{"DotsTest.MemberDictionaries": {"_DouType": "DotsTest.MemberDictionaries", "Int32StringMember": [{"key": 20, "value": "rifaS"}, {"key": 10, "value": "Safir"}], "Int64BinaryMember": [{"key": 200, "value": "U2FmaXIgcnVsZXMgdGhlIHdvcmxk"}, {"key": 100, "value": "SSBhbSBhIFJvY2tlZmVsbGVyIQ=="}], "StringObjectMember": [{"key": "Wally", "value": {"_DouType": "DotsTest.MemberDictionaries", "TypeIdStringMember": [{"key": "DotsTest.MemberDictionaries", "value": "World"}, {"key": "DotsTest.TestEnum", "value": "Hello"}]}}, {"key": "Dilbert", "value": {"_DouType": "Object"}}], "StringItemMember": [{"key": "Gustav", "value": {"_DouType": "DotsTest.MemberDictionaries", "EntityIdHandlerIdMember": [{"key": {"name": "Safir.Dob.Entity", "instanceId": 2}, "value": 2}, {"key": {"name": "Safir.Dob.Entity", "instanceId": "first"}, "value": "first"}]}}, {"key": "Philip", "value": null}, {"key": "Karl", "value": {"_DouType": "DotsTest.MemberDictionaries", "EntityIdHandlerIdMember": [{"key": {"name": "Safir.Dob.Entity", "instanceId": 2}, "value": 2}, {"key": {"name": "Safir.Dob.Entity", "instanceId": "first"}, "value": "first"}]}}], "TypeIdEnumMember": [{"key": "DotsTest.MemberSequences", "value": "MySecond"}, {"key": "DotsTest.MemberDictionaries", "value": "MyFirst"}], "EnumInstanceIdMember": [{"key": "MySecond", "value": 2}, {"key": "MyFirst", "value": "first"}], "InstanceIdEntityIdMember": [{"key": "SecondInstance", "value": {"name": "Safir.Dob.Entity", "instanceId": 2}}, {"key": "FirstInstance", "value": {"name": "Safir.Dob.Entity", "instanceId": "first"}}]}}
+------ From Json -----
+--- Int32StringMember ---
+size: 2
+isChanged: true
+10 = Safir, changed: true
+20 = rifaS, changed: true
+--- Int64BinaryMember ---
+size: 2
+isChanged: true
+100 = I am a Rockefeller!, changed: true
+200 = Safir rules the world, changed: true
+--- TypeIdEnumMember ---
+size: 2
+isChanged: true
+DotsTest.MemberDictionaries = MyFirst, changed: true
+DotsTest.MemberSequences = MySecond, changed: true
+--- EnumInstanceIdMember ---
+size: 2
+isChanged: true
+MyFirst = first, changed: true
+MySecond = 2, changed: true
+--- InstanceIdEntityIdMember ---
+size: 2
+isChanged: true
+FirstInstance = (Safir.Dob.Entity, first), changed: true
+SecondInstance = (Safir.Dob.Entity, 2), changed: true
+--- EntityIdHandlerIdMember ---
+size: 0
+isChanged: false
+--- StringItemMember ---
+size: 3
+isChanged: true
+Karl = {"DotsTest.MemberDictionaries": {"_DouType": "DotsTest.MemberDictionaries", "EntityIdHandlerIdMember": [{"key": {"name": "Safir.Dob.Entity", "instanceId": "first"}, "value": "first"}, {"key": {"name": "Safir.Dob.Entity", "instanceId": 2}, "value": 2}]}}, changed: true
+Philip = NULL, changed: false
+Gustav = {"DotsTest.MemberDictionaries": {"_DouType": "DotsTest.MemberDictionaries", "EntityIdHandlerIdMember": [{"key": {"name": "Safir.Dob.Entity", "instanceId": "first"}, "value": "first"}, {"key": {"name": "Safir.Dob.Entity", "instanceId": 2}, "value": 2}]}}, changed: true
+--- StringObjectMember ---
+size: 2
+isChanged: true
+Dilbert = {"Object": {"_DouType": "Object"}}, changed: true
+Wally = {"DotsTest.MemberDictionaries": {"_DouType": "DotsTest.MemberDictionaries", "TypeIdStringMember": [{"key": "DotsTest.TestEnum", "value": "Hello"}, {"key": "DotsTest.MemberDictionaries", "value": "World"}]}}, changed: true
+------ Clone -----
+--- Int32StringMember ---
+size: 2
+isChanged: true
+20 = rifaS, changed: true
+10 = Safir, changed: true
+--- Int64BinaryMember ---
+size: 2
+isChanged: true
+200 = Safir rules the world, changed: true
+100 = I am a Rockefeller!, changed: true
+--- TypeIdEnumMember ---
+size: 2
+isChanged: true
+DotsTest.MemberSequences = MySecond, changed: true
+DotsTest.MemberDictionaries = MyFirst, changed: true
+--- EnumInstanceIdMember ---
+size: 2
+isChanged: true
+MySecond = 2, changed: true
+MyFirst = first, changed: true
+--- InstanceIdEntityIdMember ---
+size: 2
+isChanged: true
+SecondInstance = (Safir.Dob.Entity, 2), changed: true
+FirstInstance = (Safir.Dob.Entity, first), changed: true
+--- EntityIdHandlerIdMember ---
+size: 0
+isChanged: false
+--- StringItemMember ---
+size: 3
+isChanged: true
+Gustav = {"DotsTest.MemberDictionaries": {"_DouType": "DotsTest.MemberDictionaries", "EntityIdHandlerIdMember": [{"key": {"name": "Safir.Dob.Entity", "instanceId": 2}, "value": 2}, {"key": {"name": "Safir.Dob.Entity", "instanceId": "first"}, "value": "first"}]}}, changed: true
+Philip = NULL, changed: true
+Karl = {"DotsTest.MemberDictionaries": {"_DouType": "DotsTest.MemberDictionaries", "EntityIdHandlerIdMember": [{"key": {"name": "Safir.Dob.Entity", "instanceId": 2}, "value": 2}, {"key": {"name": "Safir.Dob.Entity", "instanceId": "first"}, "value": "first"}]}}, changed: true
+--- StringObjectMember ---
+size: 2
+isChanged: true
+Wally = {"DotsTest.MemberDictionaries": {"_DouType": "DotsTest.MemberDictionaries", "TypeIdStringMember": [{"key": "DotsTest.MemberDictionaries", "value": "World"}, {"key": "DotsTest.TestEnum", "value": "Hello"}]}}, changed: true
+Dilbert = {"Object": {"_DouType": "Object"}}, changed: true
+

@@ -238,7 +238,7 @@ namespace Internal
                     {
                         ++entryCount;
 
-                        if (entryIt->second.size()!=2) //there shall be exactly 2 subelements, key and value
+                        if (entryIt->second.size()>2) //there shall at most 2 subelements, key and value. If no value, key->NULL
                         {
                             throw "Wrong number of subelements";
                         }
@@ -262,14 +262,16 @@ namespace Internal
                             throw "No key element";
                         }
 
-                        if (valTree==NULL)
-                        {
-                            throw "No val element";
-                        }
-
                         try
                         {
-                            SetMember(md, memIx, 0, *valTree, *keyTree, writer);
+                            if (valTree!=NULL)
+                            {
+                                SetMember(md, memIx, 0, *valTree, *keyTree, writer);
+                            }
+                            else
+                            {
+                                SetKeyWithNullValue(md, memIx, *keyTree, writer);
+                            }
                         }
                         catch (boost::property_tree::ptree_error&)
                         {
@@ -290,6 +292,67 @@ namespace Internal
 
     private:
         const RepositoryType* m_repository;
+
+        void SetKeyWithNullValue(const MemberDescriptionType* md,
+                                 DotsC_MemberIndex memIx,
+                                 boost::property_tree::ptree& keyContent,
+                                 BlobWriter<RepositoryType>& writer) const
+        {
+            switch(md->GetKeyType())
+            {
+            case Int32MemberType:
+            {
+                SerializationUtils::SetKeyWithNullValue(memIx, boost::lexical_cast<DotsC_Int32>(keyContent.data()), writer);
+            }
+                break;
+
+            case Int64MemberType:
+            {
+                SerializationUtils::SetKeyWithNullValue(memIx, boost::lexical_cast<DotsC_Int64>(keyContent.data()), writer);
+            }
+                break;
+
+            case TypeIdMemberType:
+            {
+                DotsC_TypeId tid=SerializationUtils::StringToTypeId(keyContent.data());
+                SerializationUtils::SetKeyWithNullValue(memIx, tid, writer);
+            }
+                break;
+
+            case StringMemberType:
+            {
+                SerializationUtils::SetKeyWithNullValue(memIx, keyContent.data().c_str(), writer);
+            }
+                break;
+
+            case EntityIdMemberType:
+            {
+                std::pair<DotsC_EntityId, const char*> eid=SerializationUtils::StringToEntityId(keyContent.get<std::string>("name"), keyContent.get<std::string>("instanceId"));
+                SerializationUtils::SetKeyWithNullValue(memIx, eid, writer);
+            }
+                break;
+
+            case InstanceIdMemberType:
+            case HandlerIdMemberType:
+            case ChannelIdMemberType:
+            {
+                std::pair<DotsC_Int64, const char*> hash=SerializationUtils::StringToHash(keyContent.data());
+                SerializationUtils::SetKeyWithNullValue(memIx, hash, writer);
+            }
+                break;
+
+            case EnumerationMemberType:
+            {
+                const EnumDescriptionType* ed=m_repository->GetEnum(md->GetKeyTypeId());
+                DotsC_EnumerationValue enumVal=TypeUtilities::GetIndexOfEnumValue(ed, keyContent.data());
+                SerializationUtils::SetKeyWithNullValue(memIx, enumVal, writer);
+            }
+                break;
+
+            default:
+                break;
+            }
+        }
 
         void SetMember(const MemberDescriptionType* md,
                        DotsC_MemberIndex memIx,

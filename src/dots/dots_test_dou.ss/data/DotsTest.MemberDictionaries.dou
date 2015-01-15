@@ -144,7 +144,78 @@
             <name>Int64ItemMember</name>
             <type>DotsTest.MemberDictionaries</type>
             <dictionary keyType="Int64"/>
-        </member>        
+        </member>
+        <!-- Dictionaries keyType=String -->
+        <member>
+            <name>StringInt32Member</name>
+            <type>Int32</type>
+            <dictionary keyType="String"/>
+        </member>
+        <member>
+            <name>StringInt64Member</name>
+            <type>Int64</type>
+            <dictionary keyType="String"/>
+        </member>
+        <member>
+            <name>StringStringMember</name>
+            <type>String</type>
+            <dictionary keyType="String"/>
+        </member>
+        <member>
+            <name>StringFloat32Member</name>
+            <type>Float32</type>
+            <dictionary keyType="String"/>
+        </member>
+        <member>
+            <name>StringFloat64Member</name>
+            <type>Float64</type>
+            <dictionary keyType="String"/>
+        </member>
+        <member>
+            <name>StringTypeIdMember</name>
+            <type>TypeId</type>
+            <dictionary keyType="String"/>
+        </member>
+        <member>
+            <name>StringInstanceIdMember</name>
+            <type>InstanceId</type>
+            <dictionary keyType="String"/>
+        </member>
+        <member>
+            <name>StringChannelIdMember</name>
+            <type>ChannelId</type>
+            <dictionary keyType="String"/>
+        </member>
+        <member>
+            <name>StringHandlerIdMember</name>
+            <type>HandlerId</type>
+            <dictionary keyType="String"/>
+        </member>
+        <member>
+            <name>StringEntityIdMember</name>
+            <type>EntityId</type>
+            <dictionary keyType="String"/>
+        </member>
+        <member>
+            <name>StringBinaryMember</name>
+            <type>Binary</type>
+            <dictionary keyType="String"/>
+        </member>
+        <member>
+            <name>StringEnumMember</name>
+            <type>DotsTest.TestEnum</type>
+            <dictionary keyType="String"/>
+        </member>
+        <member>
+            <name>StringObjectMember</name>
+            <type>Object</type>
+            <dictionary keyType="String"/>
+        </member>
+        <member>
+            <name>StringItemMember</name>
+            <type>DotsTest.MemberDictionaries</type>
+            <dictionary keyType="String"/>
+        </member>
         <!-- Dictionaries keyType=TypeId -->
         <member>
             <name>TypeIdInt32Member</name>
