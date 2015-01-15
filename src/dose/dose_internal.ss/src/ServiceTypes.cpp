@@ -24,7 +24,6 @@
 
 #include <Safir/Dob/Internal/ServiceTypes.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
-#include <Safir/Utilities/Internal/ConfigReader.h>
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Internal/Connection.h>
 #include <Safir/Dob/Service.h>
@@ -52,9 +51,7 @@ namespace Internal
 
     void ServiceTypes::Initialize(const bool iAmDoseMain)
     {
-        auto shmName = "SERVICETYPES" + Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix();
-
-        m_instance = GetSharedMemory().find_or_construct<ServiceTypes>(shmName.c_str())(private_constructor_t());
+        m_instance = GetSharedMemory().find_or_construct<ServiceTypes>("SERVICETYPES")(private_constructor_t());
 
         if (iAmDoseMain)
         {

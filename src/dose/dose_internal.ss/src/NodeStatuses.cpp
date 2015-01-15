@@ -23,7 +23,6 @@
 ******************************************************************************/
 #include <Safir/Dob/Internal/NodeStatuses.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
-#include <Safir/Utilities/Internal/ConfigReader.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Dob/NodeParameters.h>
 
@@ -43,9 +42,7 @@ namespace Internal
 
     void NodeStatuses::Initialize()
     {
-        auto shmName = "NODE_STATUS" + Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix();
-
-        m_instance = GetSharedMemory().find_or_construct<NodeStatuses>(shmName.c_str())(private_constructor_t());
+        m_instance = GetSharedMemory().find_or_construct<NodeStatuses>("NODE_STATUS")(private_constructor_t());
     }
 
     NodeStatuses::NodeStatuses(private_constructor_t)

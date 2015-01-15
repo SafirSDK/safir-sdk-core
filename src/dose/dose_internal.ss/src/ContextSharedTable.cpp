@@ -29,7 +29,6 @@
 #include <Safir/Dob/ContextSharedOverrideProperty.h>
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
-#include <Safir/Utilities/Internal/ConfigReader.h>
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 
@@ -49,9 +48,7 @@ namespace Internal
 
     void ContextSharedTable::Initialize()
     {
-        auto shmName = "CONTEXTSHARED_TABLE" + Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix();
-
-        m_instance = GetSharedMemory().find_or_construct<ContextSharedTable>(shmName.c_str())(private_constructor_t());
+        m_instance = GetSharedMemory().find_or_construct<ContextSharedTable>("CONTEXTSHARED_TABLE")(private_constructor_t());
     }
 
     bool ReadIsContextShared(const Typesystem::TypeId typeId)

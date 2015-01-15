@@ -23,7 +23,6 @@
 ******************************************************************************/
 #include <Safir/Dob/Internal/LeveledLockHelper.h>
 #include <Safir/Utilities/ProcessInfo.h>
-#include <Safir/Utilities/Internal/ConfigReader.h>
 
 namespace Safir
 {
@@ -40,10 +39,7 @@ namespace Internal
 
     LeveledLockHelper & LeveledLockHelper::SingletonHelper::Instance()
     {
-        auto shmName = "LEVELEDLOCKHELPER" + Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix();
-
-        static LeveledLockHelper* instance =
-                GetSharedMemory().find_or_construct<LeveledLockHelper>(shmName.c_str())(private_constructor_t());
+        static LeveledLockHelper* instance = GetSharedMemory().find_or_construct<LeveledLockHelper>("LEVELEDLOCKHELPER")(private_constructor_t());
         return *instance;
     }
 
