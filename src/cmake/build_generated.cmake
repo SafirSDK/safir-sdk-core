@@ -66,6 +66,12 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
     include(${SAFIR_SDK_CORE_DOTNET_SETTINGS})
     include(${SAFIR_SDK_CORE_JAVA_SETTINGS})
 
+    #on windows we assume that boost has been installed into the
+    #the safir installation directory, like our installer does.
+    if (MSVC)
+      set(BOOST_ROOT ${SAFIR_SDK_CORE_INSTALL_DIR})
+    endif()
+
     #We need boost headers.
     set(Boost_FIND_QUIETLY True)
     find_package(Boost COMPONENTS system thread REQUIRED)
