@@ -3037,10 +3037,16 @@ namespace Safir.Dob.Typesystem.Internal
          * @param [in] member - The member to be set.
          * @param [in] index - Array index in member to set. Shall be 0 if the member is not an array.
          */
-		static void Set(const BooleanContainer& value,
+		static void Set(BooleanContainer value,
 		                Safir::Dob::Typesystem::Int64 handle,
 		                const Dob::Typesystem::MemberIndex member,
-		                const Dob::Typesystem::ArrayIndex index);
+		                const Dob::Typesystem::ArrayIndex index)
+		{
+			if (container == null)
+			{
+				throw new SoftwareViolationException("Container was null!");
+			}
+		}
 
 		/**
          * Get a boolean from a blob.
@@ -3450,101 +3456,256 @@ namespace Safir.Dob.Typesystem.Internal
 		//---------------------------------------------------------
 		// Get values
 		//--------------------------------------------------------
-		static void Get(bool& val,
-		                bool& isNull,
-		                bool& isChanged,
-		                Safir::Dob::Typesystem::Int64 handle,
-		                const Dob::Typesystem::MemberIndex member,
-		                const Dob::Typesystem::ArrayIndex valueIndex,
-		                KeyValueMode mode);
+		public static void Get(out bool val,
+                               out bool isNull,
+                               out bool isChanged,
+		                	   Int64 handle,
+				               Int32 member,
+                               Int32 valueIndex,
+				               DotsC_KeyValMode mode)
+        {
+            byte v, n, c;
+            Kernel.DotsC_ReadBooleanMember (handle, out v, out n, out c, member, valueIndex, mode);
+            val = InternalOperations.BoolOf (v);
+            isNull = InternalOperations.BoolOf (n);
+            isChanged = InternalOperations.BoolOf (c);
+        }
 
-		static void Get(Safir::Dob::Typesystem::Int32& val,
-		                bool& isNull,
-		                bool& isChanged,
-		                Safir::Dob::Typesystem::Int64 handle,
-		                const Dob::Typesystem::MemberIndex member,
-		                const Dob::Typesystem::ArrayIndex valueIndex,
-		                KeyValueMode mode);
+        public static void Get(out Int32 val,
+                               out bool isNull,
+                               out bool isChanged,
+                               Int64 handle,
+                               Int32 member,
+                               Int32 valueIndex,
+                               DotsC_KeyValMode mode)
+        {
+            byte n, c;
+            Kernel.DotsC_ReadInt32Member (handle, out val, out n, out c, member, valueIndex, mode);
+            isNull = InternalOperations.BoolOf (n);
+            isChanged = InternalOperations.BoolOf (c);
+        }
 
-		static void Get(Safir::Dob::Typesystem::Int64& val,
-		                bool& isNull,
-		                bool& isChanged,
-		                Safir::Dob::Typesystem::Int64 handle,
-		                const Dob::Typesystem::MemberIndex member,
-		                const Dob::Typesystem::ArrayIndex valueIndex,
-		                KeyValueMode mode);
+        public static void Get(out Int64 val,
+                               out bool isNull,
+                               out bool isChanged,
+                               Int64 handle,
+                               Int32 member,
+                               Int32 valueIndex,
+                               DotsC_KeyValMode mode)
+        {
+            byte n, c;
+            Kernel.DotsC_ReadInt64Member (handle, out val, out n, out c, member, valueIndex, mode);
+            isNull = InternalOperations.BoolOf (n);
+            isChanged = InternalOperations.BoolOf (c);
+        }
+		
 
-		static void Get(Safir::Dob::Typesystem::Float32& val,
-		                bool& isNull,
-		                bool& isChanged,
-		                Safir::Dob::Typesystem::Int64 handle,
-		                const Dob::Typesystem::MemberIndex member,
-		                const Dob::Typesystem::ArrayIndex valueIndex,
-		                KeyValueMode mode);
+		public static void Get(out float val,
+                               out bool isNull,
+                               out bool isChanged,
+                               Int64 handle,
+                               Int32 member,
+                               Int32 valueIndex,
+                               DotsC_KeyValMode mode)
+        {
+            byte n, c;
+            Kernel.DotsC_ReadFloat32Member (handle, out val, out n, out c, member, valueIndex, mode);
+            isNull = InternalOperations.BoolOf (n);
+            isChanged = InternalOperations.BoolOf (c);
+        }
 
-		static void Get(Safir::Dob::Typesystem::Float64& val,
-		                bool& isNull,
-		                bool& isChanged,
-		                Safir::Dob::Typesystem::Int64 handle,
-		                const Dob::Typesystem::MemberIndex member,
-		                const Dob::Typesystem::ArrayIndex valueIndex,
-		                KeyValueMode mode);
+		public static void Get(out double val,
+                               out bool isNull,
+                               out bool isChanged,
+                               Int64 handle,
+                               Int32 member,
+                               Int32 valueIndex,
+                               DotsC_KeyValMode mode)
+        {
+            byte n, c;
+            Kernel.DotsC_ReadFloat64Member (handle, out val, out n, out c, member, valueIndex, mode);
+            isNull = InternalOperations.BoolOf (n);
+            isChanged = InternalOperations.BoolOf (c);
+        }
 
-		static void Get(std::wstring& val,
-		                bool& isNull,
-		                bool& isChanged,
-		                Safir::Dob::Typesystem::Int64 handle,
-		                const Dob::Typesystem::MemberIndex member,
-		                const Dob::Typesystem::ArrayIndex valueIndex,
-		                KeyValueMode mode);
+        public static void Get(out string val,
+                               out bool isNull,
+                               out bool isChanged,
+                               Int64 handle,
+                               Int32 member,
+                               Int32 valueIndex,
+                               DotsC_KeyValMode mode)
+        {
+            byte n, c;
+            IntPtr str;
+            Kernel.DotsC_ReadStringMember (handle, out str, out n, out c, member, valueIndex, mode);
+            isNull = InternalOperations.BoolOf (n);
+            isChanged = InternalOperations.BoolOf (c);
+            if (!isNull)
+            {
+                val = Internal.InternalOperations.StringOf(str);
+            }
+            else
+            {
+                val = null;
+            }
+        }
 
-		static void Get(Safir::Dob::Typesystem::InstanceId& val,
-		                bool& isNull,
-		                bool& isChanged,
-		                Safir::Dob::Typesystem::Int64 handle,
-		                const Dob::Typesystem::MemberIndex member,
-		                const Dob::Typesystem::ArrayIndex valueIndex,
-		                KeyValueMode mode);
+        public static void Get(out InstanceId val,
+                               out bool isNull,
+                               out bool isChanged,
+                               Int64 handle,
+                               Int32 member,
+                               Int32 valueIndex,
+                               DotsC_KeyValMode mode)
+        {
+            byte n, c;
+            Int64 hash;
+            IntPtr str;
+            Kernel.DotsC_ReadHashedMember (handle, out hash, out str, out n, out c, member, valueIndex, mode);
+            isNull = InternalOperations.BoolOf (n);
+            isChanged = InternalOperations.BoolOf (c);
+            if (!isNull)
+            {
+                if (str == IntPtr.Zero)
+                    val = new InstanceId (hash);
+                else
+                    val = new InstanceId (hash, InternalOperations.StringOf(str));
+            }
+            else
+            {
+                val = null;
+            }
+        }
 
-		static void Get(Safir::Dob::Typesystem::HandlerId& val,
-		                bool& isNull,
-		                bool& isChanged,
-		                Safir::Dob::Typesystem::Int64 handle,
-		                const Dob::Typesystem::MemberIndex member,
-		                const Dob::Typesystem::ArrayIndex valueIndex,
-		                KeyValueMode mode);
+        public static void Get(out HandlerId val,
+                               out bool isNull,
+                               out bool isChanged,
+                               Int64 handle,
+                               Int32 member,
+                               Int32 valueIndex,
+                               DotsC_KeyValMode mode)
+        {
+            byte n, c;
+            Int64 hash;
+            IntPtr str;
+            Kernel.DotsC_ReadHashedMember (handle, out hash, out str, out n, out c, member, valueIndex, mode);
+            isNull = InternalOperations.BoolOf (n);
+            isChanged = InternalOperations.BoolOf (c);
+            if (!isNull)
+            {
+                if (str == IntPtr.Zero)
+                    val = new HandlerId (hash);
+                else
+                    val = new HandlerId (hash, InternalOperations.StringOf(str));
+            }
+            else
+            {
+                val = null;
+            }
+        }
 
-		static void Get(Safir::Dob::Typesystem::ChannelId& val,
-		                bool& isNull,
-		                bool& isChanged,
-		                Safir::Dob::Typesystem::Int64 handle,
-		                const Dob::Typesystem::MemberIndex member,
-		                const Dob::Typesystem::ArrayIndex valueIndex,
-		                KeyValueMode mode);
+        public static void Get(out ChannelId val,
+                               out bool isNull,
+                               out bool isChanged,
+                               Int64 handle,
+                               Int32 member,
+                               Int32 valueIndex,
+                               DotsC_KeyValMode mode)
+        {
+            byte n, c;
+            Int64 hash;
+            IntPtr str;
+            Kernel.DotsC_ReadHashedMember (handle, out hash, out str, out n, out c, member, valueIndex, mode);
+            isNull = InternalOperations.BoolOf (n);
+            isChanged = InternalOperations.BoolOf (c);
+            if (!isNull)
+            {
+                if (str == IntPtr.Zero)
+                    val = new ChannelId (hash);
+                else
+                    val = new ChannelId (hash, InternalOperations.StringOf(str));
+            }
+            else
+            {
+                val = null;
+            }
+        }
 
-		static void Get(Safir::Dob::Typesystem::EntityId& val,
-		                bool& isNull,
-		                bool& isChanged,
-		                Safir::Dob::Typesystem::Int64 handle,
-		                const Dob::Typesystem::MemberIndex member,
-		                const Dob::Typesystem::ArrayIndex valueIndex,
-		                KeyValueMode mode);
+        public static void Get(out EntityId val,
+                               out bool isNull,
+                               out bool isChanged,
+                               Int64 handle,
+                               Int32 member,
+                               Int32 valueIndex,
+                               DotsC_KeyValMode mode)
+        {
+            byte n, c;
+            DotsC_EntityId eid;
+            IntPtr str;
+            Kernel.DotsC_ReadEntityIdMember (handle, out eid, out str, out n, out c, member, valueIndex, mode);
+            isNull = InternalOperations.BoolOf (n);
+            isChanged = InternalOperations.BoolOf (c);
+            if (!isNull)
+            {
+                if (str == IntPtr.Zero)
+                    val = new EntityId (eid.TypeId, new InstanceId (eid.InstanceId));
+                else
+                    val = new EntityId (eid.TypeId, new InstanceId (eid.InstanceId, InternalOperations.StringOf(str)));
+            }
+            else
+            {
+                val = null;
+            }
+        }
 
-		static void Get(Safir::Dob::Typesystem::ObjectPtr& val,
-		                bool& isNull,
-		                bool& isChanged,
-		                Safir::Dob::Typesystem::Int64 handle,
-		                const Dob::Typesystem::MemberIndex member,
-		                const Dob::Typesystem::ArrayIndex valueIndex,
-		                KeyValueMode mode);
+        public static void Get(out Safir.Dob.Typesystem.Object val,
+                               out bool isNull,
+                               out bool isChanged,
+                               Int64 handle,
+                               Int32 member,
+                               Int32 valueIndex,
+                               DotsC_KeyValMode mode)
+        {
+            byte n, c;
+            IntPtr blob;
+            Kernel.DotsC_ReadObjectMember(handle, out blob, out n, out c, member, valueIndex, mode);
+            isNull = InternalOperations.BoolOf (n);
+            isChanged = InternalOperations.BoolOf (c);
+            if (!isNull)
+            {
+                val = ObjectFactory.Instance.CreateObject (blob);
+            }
+            else
+            {
+                val = null;
+            }
+        }
 
-		static void Get(Safir::Dob::Typesystem::Binary& val,
-		                bool& isNull,
-		                bool& isChanged,
-		                Safir::Dob::Typesystem::Int64 handle,
-		                const Dob::Typesystem::MemberIndex member,
-		                const Dob::Typesystem::ArrayIndex valueIndex,
-		                KeyValueMode mode);
+        public static void Get(out byte[] val,
+                               out bool isNull,
+                               out bool isChanged,
+                               Int64 handle,
+                               Int32 member,
+                               Int32 valueIndex,
+                               DotsC_KeyValMode mode)
+        {
+            byte n, c;
+            IntPtr bin;
+            Int32 size;
+            Kernel.DotsC_ReadBinaryMember(handle, out bin, out size, out n, out c, member, valueIndex, mode);
+            isNull = InternalOperations.BoolOf (n);
+            isChanged = InternalOperations.BoolOf (c);
+            if (!isNull)
+            {
+                val = new byte[size];
+                Marshal.Copy(bin, val, 0, size);
+            }
+            else
+            {
+                val = null;
+            }
+        }
 
 		//---------------------------------------------------------
 		// Set values
@@ -3552,98 +3713,128 @@ namespace Safir.Dob.Typesystem.Internal
 		static void Set(bool val,
 		                bool isNull,
 		                bool isChanged,
-		                Safir::Dob::Typesystem::Int64 handle,
-		                const Dob::Typesystem::MemberIndex member,
-		                const Dob::Typesystem::ArrayIndex valueIndex,
-		                KeyValueMode mode);
+		                Int64 handle,
+		                Int32 member,
+		                Int32 valueIndex,
+		                DotsC_KeyValMode mode)
+        {
+            Kernel.DotsC_WriteBooleanMember (handle,
+                                             InternalOperations.ByteOf(val),
+                                             InternalOperations.ByteOf(isNull),
+                                             InternalOperations.ByteOf(isChanged),
+                                             member, valueIndex, mode);
+        }
 
-		static void Set(Safir::Dob::Typesystem::Int32 val,
+		static void Set(Int32 val,
 		                bool isNull,
 		                bool isChanged,
-		                Safir::Dob::Typesystem::Int64 handle,
-		                const Dob::Typesystem::MemberIndex member,
-		                const Dob::Typesystem::ArrayIndex valueIndex,
-		                KeyValueMode mode);
+		                Int64 handle,
+		                Int32 member,
+		                Int32 valueIndex,
+		                DotsC_KeyValMode mode)
+        {
+            Kernel.DotsC_WriteInt32Member (handle, val,
+                                           InternalOperations.ByteOf(isNull),
+                                           InternalOperations.ByteOf(isChanged),
+                                           member, valueIndex, mode);
+        }
 
-		static void Set(Safir::Dob::Typesystem::Int64 val,
+		static void Set(Int64 val,
 		                bool isNull,
 		                bool isChanged,
-		                Safir::Dob::Typesystem::Int64 handle,
-		                const Dob::Typesystem::MemberIndex member,
-		                const Dob::Typesystem::ArrayIndex valueIndex,
-		                KeyValueMode mode);
+		                Int64 handle,
+		                Int32 member,
+		                Int32 valueIndex,
+		                DotsC_KeyValMode mode)
+        {
+            Kernel.DotsC_WriteInt64Member (handle, val,
+                                           InternalOperations.ByteOf(isNull),
+                                           InternalOperations.ByteOf(isChanged),
+                                           member, valueIndex, mode);
+        }
 
-		static void Set(Safir::Dob::Typesystem::Float32 val,
+		static void Set(float val,
 		                bool isNull,
 		                bool isChanged,
-		                Safir::Dob::Typesystem::Int64 handle,
-		                const Dob::Typesystem::MemberIndex member,
-		                const Dob::Typesystem::ArrayIndex valueIndex,
-		                KeyValueMode mode);
+		                Int64 handle,
+		                Int32 member,
+		                Int32 valueIndex,
+		                DotsC_KeyValMode mode)
+        {
+            Kernel.DotsC_WriteFloat32Member (handle, val,
+                                             InternalOperations.ByteOf(isNull),
+                                             InternalOperations.ByteOf(isChanged),
+                                             member, valueIndex, mode);
+        }
 
-		static void Set(Safir::Dob::Typesystem::Float64 val,
+		static void Set(double val,
 		                bool isNull,
 		                bool isChanged,
-		                Safir::Dob::Typesystem::Int64 handle,
-		                const Dob::Typesystem::MemberIndex member,
-		                const Dob::Typesystem::ArrayIndex valueIndex,
-		                KeyValueMode mode);
+		                Int64 handle,
+		                Int32 member,
+		                Int32 valueIndex,
+		                DotsC_KeyValMode mode)
+        {
+            Kernel.DotsC_WriteFloat64Member (handle, val,
+                                             InternalOperations.ByteOf(isNull),
+                                             InternalOperations.ByteOf(isChanged),
+                                             member, valueIndex, mode);
+        }
 
-		static void Set(const std::wstring& val,
+		static void Set(string val,
 		                bool isNull,
 		                bool isChanged,
-		                Safir::Dob::Typesystem::Int64 handle,
-		                const Dob::Typesystem::MemberIndex member,
-		                const Dob::Typesystem::ArrayIndex valueIndex,
-		                KeyValueMode mode);
+		                Int64 handle,
+		                Int32 member,
+		                Int32 valueIndex,
+		                DotsC_KeyValMode mode);
 
-		static void Set(const Safir::Dob::Typesystem::InstanceId& val,
+		static void Set(InstanceId val,
 		                bool isNull,
 		                bool isChanged,
-		                Safir::Dob::Typesystem::Int64 handle,
-		                const Dob::Typesystem::MemberIndex member,
-		                const Dob::Typesystem::ArrayIndex valueIndex,
-		                KeyValueMode mode);
+		                Int64 handle,
+		                Int32 member,
+		                Int32 valueIndex,
+		                DotsC_KeyValMode mode);
 
-		static void Set(const Safir::Dob::Typesystem::HandlerId& val,
+		static void Set(HandlerId val,
 		                bool isNull,
 		                bool isChanged,
-		                Safir::Dob::Typesystem::Int64 handle,
-		                const Dob::Typesystem::MemberIndex member,
-		                const Dob::Typesystem::ArrayIndex valueIndex,
-		                KeyValueMode mode);
+		                Int64 handle,
+		                Int32 member,
+		                Int32 valueIndex,
+		                DotsC_KeyValMode mode);
 
-		static void Set(const Safir::Dob::Typesystem::ChannelId& val,
+		static void Set(ChannelId val,
 		                bool isNull,
 		                bool isChanged,
-		                Safir::Dob::Typesystem::Int64 handle,
-		                const Dob::Typesystem::MemberIndex member,
-		                const Dob::Typesystem::ArrayIndex valueIndex,
-		                KeyValueMode mode);
+		                Int64 handle,
+		                Int32 member,
+		                Int32 valueIndex,
+		                DotsC_KeyValMode mode);
 
-		static void Set(const Safir::Dob::Typesystem::EntityId& val,
+		static void Set(EntityId val,
 		                bool isNull,
 		                bool isChanged,
-		                Safir::Dob::Typesystem::Int64 handle,
-		                const Dob::Typesystem::MemberIndex member,
-		                const Dob::Typesystem::ArrayIndex valueIndex,
-		                KeyValueMode mode);
+		                Int64 handle,
+		                Int32 member,
+		                Int32 valueIndex,
+		                DotsC_KeyValMode mode);
 
-		static void Set(const Safir::Dob::Typesystem::ObjectPtr& val,
+		static void Set(Safir.Dob.Typesystem.Object val,
 		                bool isNull,
 		                bool isChanged,
-		                Safir::Dob::Typesystem::Int64 handle,
-		                const Dob::Typesystem::MemberIndex member,
-		                const Dob::Typesystem::ArrayIndex valueIndex,
-		                KeyValueMode mode);
+		                Int64 handle,
+		                Int32 member,
+		                Int32 valueIndex,
+		                DotsC_KeyValMode mode);
 
-		static void Set(const Safir::Dob::Typesystem::Binary& val,
+		static void Set(byte[] val,
 		                bool isNull,
 		                bool isChanged,
-		                Safir::Dob::Typesystem::Int64 handle,
-		                const Dob::Typesystem::MemberIndex member,
-		                const Dob::Typesystem::ArrayIndex valueIndex,
-		                KeyValueMode mode);
-	};
-    }
+		                Int64 handle,
+		                Int32 member,
+		                Int32 valueIndex,
+		                DotsC_KeyValMode mode);
+	}
 }
