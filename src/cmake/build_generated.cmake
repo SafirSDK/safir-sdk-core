@@ -77,9 +77,6 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
     find_package(Boost COMPONENTS system thread REQUIRED)
     include_directories(${Boost_INCLUDE_DIRS})
 
-    #dont use autolinking with boost
-    ADD_DEFINITIONS(-DBOOST_ALL_NO_LIB)
-
     #use dynamic linking with boost
     ADD_DEFINITIONS(-DBOOST_ALL_DYN_LINK)
 
@@ -277,6 +274,11 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
     list (APPEND cpp_files ${CMAKE_CURRENT_BINARY_DIR}/precompiled_header_for_cpp.cpp)
   endif()
 
+  #add safir link dirs.
+  if (SAFIR_EXTERNAL_BUILD)
+    link_directories(${SAFIR_SDK_CORE_LIBRARIES_DIR})
+  endif()
+
   ADD_LIBRARY(safir_generated-${GEN_NAME}-cpp SHARED ${cpp_files})
 
   target_include_directories(safir_generated-${GEN_NAME}-cpp
@@ -297,17 +299,23 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
   target_include_directories(safir_generated-${GEN_NAME}-cpp
     PRIVATE ${precompiled_header_path})
 
-  target_link_libraries(safir_generated-${GEN_NAME}-cpp PRIVATE
+  #On Windows external builds autolinking is used.
+  if (NOT MSVC AND NOT SAFIR_EXTERNAL_BUILD)
+    target_link_libraries(safir_generated-${GEN_NAME}-cpp PRIVATE
     PUBLIC
-    dots_cpp
-    )
+    dots_cpp)
+  endif()
 
-  FOREACH (DEP ${ALL_DEPENDENCIES})
-    TARGET_LINK_LIBRARIES(safir_generated-${GEN_NAME}-cpp PRIVATE
+  #On Windows external builds autolinking is used except for other targets in the
+  #current build tree.
+  foreach (DEP ${ALL_DEPENDENCIES})
+    if (NOT (MSVC AND SAFIR_EXTERNAL_BUILD) OR TARGET safir_generated-${DEP}-cpp)
+      TARGET_LINK_LIBRARIES(safir_generated-${GEN_NAME}-cpp PRIVATE
 
-      PUBLIC
-      safir_generated-${DEP}-cpp)
-  ENDFOREACH()
+        PUBLIC
+        safir_generated-${DEP}-cpp)
+    endif()
+  endforeach()
 
   add_dependencies(safir_generated-${GEN_NAME}-cpp safir_generated-${GEN_NAME}-code)
 
