@@ -254,6 +254,7 @@ namespace SP
                     throw std::logic_error("Failed to parse remote data!");
                 }
 
+                lllog(9) << "SP: Processing remote node information" << std::endl;
                 bool nodesChanged = false;
                 for (const auto& n: node.nodeInfo->remote_statistics().node_info())
                 {
@@ -269,6 +270,7 @@ namespace SP
                     }
                 }
 
+                lllog(9) << "SP: Processing remote more_dead_nodes" << std::endl;
                 for (const auto id: node.nodeInfo->remote_statistics().more_dead_nodes())
                 {
                     if (AddToMoreDeadNodes(id))
