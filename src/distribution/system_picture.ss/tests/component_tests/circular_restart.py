@@ -121,10 +121,10 @@ def stop_node(i, control, main):
     stop(control)
     stop(main)
     if control.returncode != 0:
-        log ("CONTROL RETURN CODE",control.returncode)
+        log ("CONTROL", i, "RETURN CODE",control.returncode)
         raise Failure
     if main.returncode != 0:
-        log ("DOSE_MAIN RETURN CODE",main.returncode)
+        log ("DOSE_MAIN", i, "RETURN CODE",main.returncode)
         raise Failure
 
 parser = argparse.ArgumentParser(description='Run a lot of control_stub')
