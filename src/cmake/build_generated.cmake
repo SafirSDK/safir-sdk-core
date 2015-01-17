@@ -300,7 +300,7 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
     PRIVATE ${precompiled_header_path})
 
   #On Windows external builds autolinking is used.
-  if (NOT MSVC AND NOT SAFIR_EXTERNAL_BUILD)
+  if (NOT (MSVC AND SAFIR_EXTERNAL_BUILD))
     target_link_libraries(safir_generated-${GEN_NAME}-cpp PRIVATE
     PUBLIC
     dots_cpp)
