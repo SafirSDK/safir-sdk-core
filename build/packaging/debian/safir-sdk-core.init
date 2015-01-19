@@ -7,14 +7,16 @@
 # Provides:          safir-tempfiles
 # Required-Start:    $remote_fs
 # Required-Stop:     $remote_fs
-# Default-Start:     S
-# Default-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
 # Short-Description: Safir lockfiles dir creation
 # Description: Create Safir lockfile directory and adjust
 #  permissions if needed.
 ### END INIT INFO
 
 set -e
+
+. /lib/lsb/init-functions
 
 SAFIRDIR=/run/safir-sdk-core
 
