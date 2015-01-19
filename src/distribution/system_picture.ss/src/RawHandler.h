@@ -452,7 +452,8 @@ namespace SP
 
             if (id == m_id)
             {
-                throw std::logic_error("Can't add myself to more_dead_nodes!");
+                lllog(4) << "SP: Someone else thinks that I am dead! I guess that is goodbye, then!" << std::endl;
+                return false;
             }
 
             //if the node is one of our top-level nodes we don't want it in more_dead_nodes
