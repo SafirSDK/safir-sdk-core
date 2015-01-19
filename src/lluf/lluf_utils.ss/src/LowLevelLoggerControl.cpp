@@ -33,7 +33,9 @@
 
 namespace //anonymous namespace for internal functions
 {
-    const char * SHARED_MEMORY_NAME = "LLUF_LLL_SHARED_MEMORY";
+    const std::string shmName("SAFIR_LLL_SHARED_MEMORY" +
+                                           Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix());
+    const char * SHARED_MEMORY_NAME = shmName.c_str();
 }
 
 
@@ -51,7 +53,7 @@ namespace Internal
             : m_shmData(NULL)
             , m_configReader(new Safir::Utilities::Internal::ConfigReader())
             , m_disabled(m_configReader->Logging().get<bool>("LowLevelLog.disabled"))
-            , m_startupSynchronizer("LLUF_LLL_INITIALIZATION")
+            , m_startupSynchronizer("SAFIR_LLL_INITIALIZATION")
             , m_readWrite(readWrite)
             , m_openOnly(openOnly)
         {

@@ -402,7 +402,8 @@ namespace Utilities
 
 
     StartupSynchronizer::StartupSynchronizer(const char* uniqueName)
-        : m_impl(ImplKeeper::Instance().Get(uniqueName))
+        : m_impl(ImplKeeper::Instance().Get(uniqueName +
+                                            Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix()))
         , m_synchronized(NULL)
     {
 

@@ -46,6 +46,7 @@
 
 #endif
 
+#include <Safir/Utilities/Internal/ConfigReader.h>
 #include <boost/interprocess/sync/interprocess_semaphore.hpp>
 #include <boost/noncopyable.hpp>
 
@@ -72,6 +73,7 @@ namespace Internal
         void post();
 
     private:
+
 #ifdef DOSE_SEMAPHORE_WIN32
         void* m_semaphoreHandle;
 #else
@@ -98,7 +100,11 @@ namespace Internal
     inline NamedSemaphore::NamedSemaphore(const std::string& name):
         m_semaphoreHandle(NULL)
     {
-        m_semaphoreHandle = Win32::CreateSemaphoreA(NULL,0,0x7fffffff,name.c_str());
+        m_semaphoreHandle =
+                Win32::CreateSemaphoreA(NULL,
+                                        0,
+                                        0x7fffffff,
+                                        (name + Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix()).c_str());
         if (m_semaphoreHandle == NULL) 
         {
             throw boost::interprocess::interprocess_exception(Win32::GetLastError());
@@ -156,7 +162,9 @@ namespace Internal
 
 #else
     inline NamedSemaphore::NamedSemaphore(const std::string& name):
-        m_semaphore(boost::interprocess::open_or_create, name.c_str(), 0)
+        m_semaphore(boost::interprocess::open_or_create,
+                    (name + Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix()).c_str(),
+                    0)
     {
 
     }
@@ -168,7 +176,7 @@ namespace Internal
 
     inline void NamedSemaphore::remove(const std::string& name)
     {
-        boost::interprocess::named_semaphore::remove(name.c_str());
+        boost::interprocess::named_semaphore::remove((name + Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix()).c_str());
     }
 
     inline void NamedSemaphore::wait()
@@ -211,13 +219,13 @@ namespace Internal
         private boost::noncopyable
     {
     public:
-        Semaphore(unsigned int initialCount) : m_semaphore(initialCount) {};
+        Semaphore(unsigned int initialCount) : m_semaphore(initialCount) {}
 
-        ~Semaphore() {};
+        ~Semaphore() {}
 
         void wait();
-        bool try_wait() {return m_semaphore.try_wait();};
-        void post() {m_semaphore.post();};
+        bool try_wait() {return m_semaphore.try_wait();}
+        void post() {m_semaphore.post();}
 
     private:
 

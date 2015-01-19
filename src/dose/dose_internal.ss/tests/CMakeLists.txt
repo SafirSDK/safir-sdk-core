@@ -19,6 +19,9 @@ TARGET_LINK_LIBRARIES(dose_message_queue_test PRIVATE
   ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY})
 
+TARGET_LINK_LIBRARIES(dose_sem_wrapper_test PRIVATE
+  lluf_config)
+
 target_include_directories(wrap_around_counter_test PRIVATE ../src/include)
 target_include_directories(dose_sem_wrapper_test PRIVATE ../src/include)
 

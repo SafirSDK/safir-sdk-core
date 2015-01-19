@@ -8,6 +8,7 @@
 #include <iostream>
 #include <algorithm>
 #include <set>
+#include <Safir/Utilities/Internal/ConfigReader.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Serialization.h>
 #include "../src/dots_shm_repository.h"
 
@@ -33,10 +34,13 @@ int main(int argc, char* argv[])
     }
     Safir::Dob::Typesystem::ToolSupport::RepositoryToString(local.get(), false, lom);
 
-    boost::interprocess::shared_memory_object::remove("DOTS_SHM_TEST");
-    boost::interprocess::managed_shared_memory sharedMemory(boost::interprocess::create_only, "DOTS_SHM_TEST", 5000000);
-    Safir::Dob::Typesystem::Internal::RepositoryShm::CreateShmCopyOfRepository(*local, "DOTS_TEST_REPO", sharedMemory);
-    Safir::Dob::Typesystem::Internal::RepositoryShm* shm=sharedMemory.find<Safir::Dob::Typesystem::Internal::RepositoryShm>("DOTS_TEST_REPO").first;
+    const std::string dotsShmTest("SAFIR_DOTS_SHM_TEST" + Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix());
+    const std::string dotsTestRepo("SAFIR_DOTS_TEST_REPO" + Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix());
+
+    boost::interprocess::shared_memory_object::remove(dotsShmTest.c_str());
+    boost::interprocess::managed_shared_memory sharedMemory(boost::interprocess::create_only, dotsShmTest.c_str(), 5000000);
+    Safir::Dob::Typesystem::Internal::RepositoryShm::CreateShmCopyOfRepository(*local, dotsTestRepo.c_str(), sharedMemory);
+    Safir::Dob::Typesystem::Internal::RepositoryShm* shm=sharedMemory.find<Safir::Dob::Typesystem::Internal::RepositoryShm>(dotsTestRepo.c_str()).first;
 
     std::ostringstream som;
     Safir::Dob::Typesystem::ToolSupport::RepositoryToString(shm, false, som);
