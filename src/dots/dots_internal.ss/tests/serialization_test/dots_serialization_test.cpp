@@ -379,7 +379,7 @@ void BlobChangeTest(RepositoryPtr rep)
                     std::pair<const char*, DotsC_Int32> val;
                     wc.ReadValue(mySeqObject, j, val, isNull, isChanged);
                     BlobReader<Safir::Dob::Typesystem::ToolSupport::TypeRepository> wcInnerObj(rep.get(), val.first);
-                    DotsC_Int32 numVal;
+                    DotsC_Int32 numVal=0;
                     wcInnerObj.ReadValue(myNum, 0, numVal, isNull, isChanged);
                     std::cout<<"        - MyCollections.SeqObject.MyNum isNull="<<isNull<<", isChanged="<<isChanged<<", val="<<numVal<<std::endl;
                     std::cout<<"        - MyCollections.SeqObject.MyStrings"<<std::endl;
@@ -404,7 +404,7 @@ void BlobChangeTest(RepositoryPtr rep)
                                "}, isNull="<<isNull<<", isChanged="<<isChanged<<std::endl;
 
                     BlobReader<Safir::Dob::Typesystem::ToolSupport::TypeRepository> wcInnerObj(rep.get(), val.first);
-                    DotsC_Int32 numVal;
+                    DotsC_Int32 numVal=0;
                     wcInnerObj.ReadValue(myNum, 0, numVal, isNull, isChanged);
                     std::cout<<"          - MyCollections.DictEntityIdObject.MyNum isNull="<<isNull<<", isChanged="<<isChanged<<", val="<<numVal<<std::endl;
                     std::cout<<"          - MyCollections.DictEntityIdObject.MyStrings"<<std::endl;
@@ -513,7 +513,7 @@ void BlobChangeTest(RepositoryPtr rep)
                     std::pair<const char*, DotsC_Int32> val;
                     wc.ReadValue(mySeqObject, j, val, isNull, isChanged);
                     BlobReader<Safir::Dob::Typesystem::ToolSupport::TypeRepository> wcInnerObj(rep.get(), val.first);
-                    DotsC_Int32 numVal;
+                    DotsC_Int32 numVal=0;
                     wcInnerObj.ReadValue(myNum, 0, numVal, isNull, isChanged);
                     if (!isChanged) throw std::logic_error(std::string("Change flag error, line: ")+boost::lexical_cast<std::string>(__LINE__));
                     std::cout<<"        - MyCollections.SeqObject.MyNum isNull="<<isNull<<", isChanged="<<isChanged<<", val="<<numVal<<std::endl;
@@ -542,7 +542,7 @@ void BlobChangeTest(RepositoryPtr rep)
                                "}, isNull="<<isNull<<", isChanged="<<isChanged<<std::endl;
 
                     BlobReader<Safir::Dob::Typesystem::ToolSupport::TypeRepository> wcInnerObj(rep.get(), val.first);
-                    DotsC_Int32 numVal;
+                    DotsC_Int32 numVal=0;
                     wcInnerObj.ReadValue(myNum, 0, numVal, isNull, isChanged);
                     if (!isChanged) throw std::logic_error(std::string("Change flag error, line: ")+boost::lexical_cast<std::string>(__LINE__));
                     std::cout<<"          - MyCollections.DictEntityIdObject.MyNum isNull="<<isNull<<", isChanged="<<isChanged<<", val="<<numVal<<std::endl;

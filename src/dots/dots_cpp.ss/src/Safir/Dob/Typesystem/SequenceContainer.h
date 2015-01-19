@@ -42,12 +42,12 @@ namespace Typesystem
 {
     /**
      * Container class for sequences of values. A sequence is a collection of values that can dynamically
-     * grow or shrink in size. The whole container can be null, and has a change flag that will automatically
-     * be set when values are added, removed or changed or when the container is set to null. Individual values
-     * does not have change flags and can not be null.
+     * grow or shrink in size. The whole container has a change flag that will automatically
+     * be set when values are added, removed or changed. Values in a sequence cannot be null and does not
+     * have change flags.
      */
     template <class T>
-    class SequenceContainer : public ContainerBase
+    class SequenceContainer
     {
     public:
 
@@ -62,22 +62,8 @@ namespace Typesystem
          */
         SequenceContainer()
             :m_values()
+            ,m_bIsChanged(false)
         {
-        }
-
-        /**
-         * @brief IsNull - Since sequences cannot be null this will always return false.
-         * @return Always false
-         */
-        virtual bool IsNull() const {return false;}
-
-        /**
-         * @brief SetNull - Will always throw an exception. Sequences can't be null. If the intention is to remove all the content
-         *                  use clear instead.
-         */
-        virtual void SetNull()
-        {
-            throw SoftwareViolationException(L"Sequences can't be null.", __WFILE__, __LINE__);
         }
 
         /**
@@ -205,27 +191,28 @@ namespace Typesystem
          * @param that [in] - The object to copy into this.
          * @throws SoftwareViolationException If the types are not of the same kind.
          */
-        virtual void Copy(const ContainerBase& that)
-        {
-            if (this != &that)
-            {
-                if (typeid(*this) != typeid(that))
-                {
-                    throw SoftwareViolationException(L"Invalid call to Copy, containers are not of same type",__WFILE__,__LINE__);
-                }
+//        virtual void Copy(const ContainerBase& that)
+//        {
+//            if (this != &that)
+//            {
+//                if (typeid(*this) != typeid(that))
+//                {
+//                    throw SoftwareViolationException(L"Invalid call to Copy, containers are not of same type",__WFILE__,__LINE__);
+//                }
 
-                const SequenceContainer<ContainedType>& other=static_cast<const SequenceContainer<ContainedType>& >(that);
+//                const SequenceContainer<ContainedType>& other=static_cast<const SequenceContainer<ContainedType>& >(that);
 
-                m_bIsChanged=other.m_bIsChanged;
-                for (typename StorageType::const_iterator it=other.m_values.begin(); it!=other.m_values.end(); ++it)
-                {
-                    m_values.push_back(Internal::SequenceCopyHelper<ContainedType>::Copy(*it));
-                }
-            }
-        }
+//                m_bIsChanged=other.m_bIsChanged;
+//                for (typename StorageType::const_iterator it=other.m_values.begin(); it!=other.m_values.end(); ++it)
+//                {
+//                    m_values.push_back(Internal::SequenceCopyHelper<ContainedType>::Copy(*it));
+//                }
+//            }
+//        }
 
     private:
         StorageType m_values;
+        bool m_bIsChanged;
     };
 
     /**

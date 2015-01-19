@@ -37,14 +37,12 @@ namespace Dob
 namespace Typesystem
 {
     /**
-     * Container class for sequences of values. A sequence is a collection of values that can dynamically
-     * grow or shrink in size. The whole container can be null, and has a change flag that will automatically
-     * be set when values are added, removed or changed or when the container is set to null. Individual values
-     * does not have change flags and can not be null.
+     * Container class for dictionaries of key value pairs. A dictionary is a collection of values that can dynamically
+     * grow or shrink in size. The whole container has a change flag that will automatically
+     * be set when values are added, removed or changed.
      */
     template <class KeyT, class ValT>
-    class DictionaryContainer : public ContainerBase,
-                                private boost::unordered_map<KeyT, ValT>
+    class DictionaryContainer : private boost::unordered_map<KeyT, ValT>
     {
     public:
 
@@ -61,22 +59,8 @@ namespace Typesystem
          * Construct a container that is not changed and not null.
          */
         DictionaryContainer()
+            :m_bIsChanged(false)
         {
-        }
-
-        /**
-         * @brief IsNull - Since dictionaries cannot be null this will always return false.
-         * @return Always false
-         */
-        virtual bool IsNull() const {return false;}
-
-        /**
-         * @brief SetNull - Will always throw an exception. Dictionaries can't be null. If the intention is to remove all the content
-         *                  use clear instead.
-         */
-        virtual void SetNull()
-        {
-            throw SoftwareViolationException(L"Dictionaries can't be null.", __WFILE__, __LINE__);
         }
 
         using StorageType::begin;
@@ -158,28 +142,31 @@ namespace Typesystem
          * @param that [in] - The object to copy into this.
          * @throws SoftwareViolationException If the types are not of the same kind.
          */
-        virtual void Copy(const ContainerBase& that)
-        {
-            if (this != &that)
-            {
-                if (typeid(*this) != typeid(that))
-                {
-                    throw SoftwareViolationException(L"Invalid call to Copy, containers are not of same type",__WFILE__,__LINE__);
-                }
+//        virtual void Copy(const ContainerBase& that)
+//        {
+//            if (this != &that)
+//            {
+//                if (typeid(*this) != typeid(that))
+//                {
+//                    throw SoftwareViolationException(L"Invalid call to Copy, containers are not of same type",__WFILE__,__LINE__);
+//                }
 
-                const DictionaryContainer<KeyType, ValueContainerType>& other=static_cast<const DictionaryContainer<KeyT, ValT>& >(that);
+//                const DictionaryContainer<KeyType, ValueContainerType>& other=static_cast<const DictionaryContainer<KeyT, ValT>& >(that);
 
-                clear();
-                m_bIsChanged=other.m_bIsChanged;
+//                clear();
+//                m_bIsChanged=other.m_bIsChanged;
 
-                for (DictionaryContainer<KeyType, ValueContainerType>::const_iterator it=other.begin(); it!=other.end(); ++it)
-                {
-                    ValueContainerType val;
-                    val.Copy(it->second);
-                    boost::unordered_map<KeyT, ValT>::insert(std::make_pair(it->first, val));
-                }
-            }
-        }
+//                for (DictionaryContainer<KeyType, ValueContainerType>::const_iterator it=other.begin(); it!=other.end(); ++it)
+//                {
+//                    ValueContainerType val;
+//                    val.Copy(it->second);
+//                    boost::unordered_map<KeyT, ValT>::insert(std::make_pair(it->first, val));
+//                }
+//            }
+//        }
+
+    private:
+        bool m_bIsChanged;
     };
 }
 }

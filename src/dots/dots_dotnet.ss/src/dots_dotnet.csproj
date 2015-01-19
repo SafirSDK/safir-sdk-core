@@ -104,6 +104,8 @@
     <Compile Include="Properties.cs" />
     <Compile Include="Serialization.cs" />
     <None Include="safirpublic.snk" />
+    <Compile Include="DictionaryContainer.cs" />
+    <Compile Include="SequenceContainer.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArrayContainer.cs" />
