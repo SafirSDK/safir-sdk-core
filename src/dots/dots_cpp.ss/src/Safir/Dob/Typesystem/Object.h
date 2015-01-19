@@ -176,14 +176,14 @@ namespace Typesystem
         /**
          * Create an Object from a blob.
          *
-         * @param blob [in] - The blob to deserialize.
+         * @param handle [in] - Handle to a blobReader to deserialize.
          */
         explicit Object(Safir::Dob::Typesystem::Int64 handle);
 
         /**
          * Write the object to a blob.
          *
-         * @param blob [out] - Destination of the serialized object.
+         * @param handle [in] - Handle to a blobWriter that is the destination of the serialized object.
          */
         virtual void WriteToBlob(Safir::Dob::Typesystem::Int64 handle) const;
 
