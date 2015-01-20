@@ -24,6 +24,7 @@ target_include_directories(system_picture PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRE
 
 TARGET_LINK_LIBRARIES(system_picture PRIVATE
   lluf_utils
+  lluf_id
   ${PROTOBUF_LITE_LIBRARIES}
 
   PUBLIC

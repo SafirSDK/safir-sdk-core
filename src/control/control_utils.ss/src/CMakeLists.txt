@@ -18,13 +18,8 @@ target_include_directories(control_utils PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 target_include_directories(control_utils PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
 TARGET_LINK_LIBRARIES(control_utils PRIVATE
-#  lluf_config
-#  lluf_id
   lluf_utils
-#  dots_internal
-#  ${Boost_DATE_TIME_LIBRARY}
-#  ${Boost_SYSTEM_LIBRARY}
-#  ${PROTOBUF_LITE_LIBRARIES}
+  ${PROTOBUF_LITE_LIBRARIES}
 
   PUBLIC
   $<BUILD_INTERFACE:dots_internal>
