@@ -106,10 +106,10 @@ public abstract class ConnectionBase
      *
      * There are two typical cases when entities are injected outside the control of a registered
      * handler:
-     *
-     * @li Reception of persistent entity instances.
-     * @li Reception of entity instances from an external system installation (multi-owned entities).
-     *
+     * <ul>
+     * <li>Reception of persistent entity instances.</li>
+     * <li>Reception of entity instances from an external system installation (multi-owned entities).</li>
+     *</ul>
      * After registration, any persistent data will be transfered to the handler via
      * EntityInjectionBase#OnInjectedNewEntity callbacks. When all persistent data have been transfered
      * the handler is notified by the callback EntityInjectionBase#OnInitialInjectionsDone. This callback
