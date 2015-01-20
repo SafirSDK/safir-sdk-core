@@ -19,17 +19,18 @@ if (UNIX)
   set(DEFAULT_JAVA_SEARCH_PATH "${CMAKE_INSTALL_PREFIX}/${SAFIR_INSTALL_DESTINATION_JAR}")
   set(TEST_DATA_DIRECTORY "${CMAKE_INSTALL_PREFIX}/${SAFIR_INSTALL_DESTINATION_TEST_DATA}")
 else()
-  set(DEFAULT_DOU_SEARCH_PATH "C:/Program Files/Safir SDK Core/${SAFIR_INSTALL_DESTINATION_DOU_BASE}")
-  set(DEFAULT_JAVA_SEARCH_PATH "C:/Program Files/Safir SDK Core/${SAFIR_INSTALL_DESTINATION_JAR}")
-  set(TEST_DATA_DIRECTORY "C:/Program Files/Safir SDK Core/${SAFIR_INSTALL_DESTINATION_TEST_DATA}")
+
+  #Work out our default install directory.  The reason for this stuff is that the
+  #CMAKE_INSTALL_PREFIX contains "safir-sdk-core" instead of "Safir SDK Core", which is
+  #not where we install by default.
+  set(SAFIR_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/../Safir SDK Core")
+  get_filename_component(SAFIR_INSTALL_PREFIX ${SAFIR_INSTALL_PREFIX} ABSOLUTE)
+
+  set(DEFAULT_DOU_SEARCH_PATH "${SAFIR_INSTALL_PREFIX}/${SAFIR_INSTALL_DESTINATION_DOU_BASE}")
+  set(DEFAULT_JAVA_SEARCH_PATH "${SAFIR_INSTALL_PREFIX}/${SAFIR_INSTALL_DESTINATION_JAR}")
+  set(TEST_DATA_DIRECTORY "${SAFIR_INSTALL_PREFIX}/${SAFIR_INSTALL_DESTINATION_TEST_DATA}")
+  unset (SAFIR_INSTALL_PREFIX) #unset the path, so noone else tries to use it!
 endif()
-
-
-
-#The reason for the C:/Program... stuff above is that the CMAKE_INSTALL_PREFIX contains
-#"safir-sdk-core" instead of "Safir SDK Core", which is not where we install by default.
-#Maybe it is possible to find some better way of doing this...
-#TODO: this is in src/config/CMakeLists.txt as well. Fix somehow?
 
 configure_file(run_dose_tests.py.in
   "${CMAKE_CURRENT_BINARY_DIR}/run_dose_tests.py" @ONLY)

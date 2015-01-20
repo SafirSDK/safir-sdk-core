@@ -138,5 +138,3 @@ INSTALL(FILES COPYING.txt
   DESTINATION ${SAFIR_INSTALL_DESTINATION_DOC}
   RENAME LICENSE.txt
   COMPONENT Runtime)
-
-#TODO: dobexplorer and sate should be in dev package

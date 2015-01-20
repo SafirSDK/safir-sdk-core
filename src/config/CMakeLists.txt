@@ -13,8 +13,6 @@ else()
   #Work out our default install directory.  The reason for this stuff is that the
   #CMAKE_INSTALL_PREFIX contains "safir-sdk-core" instead of "Safir SDK Core", which is
   #not where we install by default.
-
-  message("CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
   set(SAFIR_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/../Safir SDK Core")
   get_filename_component(SAFIR_INSTALL_PREFIX ${SAFIR_INSTALL_PREFIX} ABSOLUTE)
 
