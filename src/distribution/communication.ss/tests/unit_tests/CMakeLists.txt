@@ -16,13 +16,10 @@ add_executable(unit_tests ${sources} ${headers} ${PROTO_SRCS} ${PROTO_HDRS} ../.
                 ../../src/Writer.h ../../src/HeartbeatSender.h
                 ../../src/DataReceiver.h ../../src/Discoverer.h ../../src/Utilities.h)
 
-target_link_libraries(unit_tests
-  lluf_id
+target_link_libraries(unit_tests PRIVATE
   lluf_utils
-  ${Boost_THREAD_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY}
-  ${PROTOBUF_LITE_LIBRARIES}
-  )
+  lluf_id
+  ${PROTOBUF_LITE_LIBRARIES})
 
 ADD_TEST(NAME MessageQueueTest COMMAND unit_tests MessageQueueTest)
 SET_SAFIR_TEST_PROPERTIES(TEST MessageQueueTest TIMEOUT 360)

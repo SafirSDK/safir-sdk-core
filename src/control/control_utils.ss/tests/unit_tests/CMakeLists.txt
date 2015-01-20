@@ -1,8 +1,8 @@
-#TODO
+#The tests in here need the generated protobuf headers
+#all the control_utils headers
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR} ../../src/include)
 
 ADD_SUBDIRECTORY(Config_test)
-
 
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS
   ../../src/ControlCommands.proto)
@@ -17,13 +17,9 @@ add_definitions(-Dcontrol_utils_EXPORTS)
 
 ADD_EXECUTABLE(DoseMainCmd_test DoseMainCmd_test.cpp ../../src/DoseMainCmd.cpp ${PROTO_SRCS} ${PROTO_HDRS})
 
-TARGET_LINK_LIBRARIES(DoseMainCmd_test
-  lluf_config
+TARGET_LINK_LIBRARIES(DoseMainCmd_test PRIVATE
   lluf_utils
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-  ${Boost_FILESYSTEM_LIBRARY}
-  ${Boost_THREAD_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY}
   ${PROTOBUF_LITE_LIBRARIES})
 
 ADD_TEST(NAME DoseMainCmd_test COMMAND DoseMainCmd_test)

@@ -1,4 +1,4 @@
-ADD_EXECUTABLE(dope_main 
+ADD_EXECUTABLE(dope_main
   DopeApp.h
   dope_main.cpp
   OdbcPersistor.cpp
@@ -14,14 +14,12 @@ ADD_EXECUTABLE(dope_main
 ADD_EXECUTABLE(dope_bin2xml dope_bin2xml.cpp)
 
 
-TARGET_LINK_LIBRARIES(dope_main PRIVATE 
-  swre_interface_cpp 
+TARGET_LINK_LIBRARIES(dope_main PRIVATE
+  swre_interface_cpp
   olib
   dose_cpp
   logging_cpp
-  ${Boost_FILESYSTEM_LIBRARY}
-  ${Boost_THREAD_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY})
+  ${Boost_FILESYSTEM_LIBRARY})
 
 TARGET_LINK_LIBRARIES(dope_bin2xml PRIVATE
   olib

@@ -1,8 +1,7 @@
 add_executable(stoppee stoppee.cpp)
 
 target_link_libraries(stoppee PRIVATE
-  dose_cpp 
-  ${Boost_SYSTEM_LIBRARY})
+  dose_cpp)
 
 get_property(SAFIR_GENERATED_PATHS GLOBAL PROPERTY SAFIR_GENERATED_PATHS)
 

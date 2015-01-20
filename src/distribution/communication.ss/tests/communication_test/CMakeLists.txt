@@ -1,10 +1,10 @@
-FILE(GLOB headers *.h)
-FILE(GLOB sources *.cpp)
+ADD_EXECUTABLE(communication_test communication_test.cpp)
 
-ADD_EXECUTABLE(communication_test ${sources} ${headers})
-
-TARGET_LINK_LIBRARIES(communication_test
+TARGET_LINK_LIBRARIES(communication_test PRIVATE
   communication
-  ${Boost_PROGRAM_OPTIONS_LIBRARY})
+  lluf_id
+  ${Boost_PROGRAM_OPTIONS_LIBRARY}
+  ${Boost_THREAD_LIBRARY}
+  ${Boost_SYSTEM_LIBRARY})
 
 SAFIR_INSTALL(TARGETS communication_test TEST_SUITE)

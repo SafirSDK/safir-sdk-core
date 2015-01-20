@@ -1,6 +1,6 @@
 ADD_EXECUTABLE(Config_test Config_test.cpp)
 
-TARGET_LINK_LIBRARIES(Config_test
+TARGET_LINK_LIBRARIES(Config_test PRIVATE
   lluf_id
   lluf_config
   dots_internal

@@ -1,9 +1,6 @@
 FILE(GLOB_RECURSE headers *.h)
 FILE(GLOB sources *.cpp)
 
-#TODO: is there a more elgant way to do this for the protbuf headers for oos builds?
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
-
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS CommunicationMessage.proto)
 
 if (MSVC)
@@ -12,15 +9,15 @@ endif()
 
 ADD_LIBRARY(communication SHARED ${sources} ${headers} ${PROTO_SRCS} ${PROTO_HDRS} )
 
+#Make the generated protobuf headers available for us to include inside communication
+target_include_directories(communication PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
 #Make our INTERNAL headers available to other parts of Core.
 target_include_directories(communication PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
-TARGET_LINK_LIBRARIES(communication
+TARGET_LINK_LIBRARIES(communication PRIVATE
   lluf_id
-   lluf_utils
-   ${Boost_THREAD_LIBRARY}
-   ${Boost_SYSTEM_LIBRARY}
-   ${PROTOBUF_LITE_LIBRARIES}
-)
+  lluf_utils
+  ${PROTOBUF_LITE_LIBRARIES})
 
 SAFIR_INSTALL(TARGETS communication)

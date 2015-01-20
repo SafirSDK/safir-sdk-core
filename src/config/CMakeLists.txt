@@ -19,6 +19,7 @@ endif()
 #"safir-sdk-core" instead of "Safir SDK Core", which is not where we install by default.
 #Maybe it is possible to find some better way of doing this...
 
+#TODO: we cannot use Program Files! E.g. on Swedish windows this dir will be called something else!
 
 
 configure_file(typesystem.ini.in

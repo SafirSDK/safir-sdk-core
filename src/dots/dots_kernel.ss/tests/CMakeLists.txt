@@ -4,23 +4,18 @@ add_executable(repository_compare repository_compare.cpp
                 ../src/dots_shm_repository.h ../src/dots_shm_repository.cpp)
 
 TARGET_LINK_LIBRARIES(multiple_accesses PRIVATE
-  dots_internal
   dots_kernel
   ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY})
 
-TARGET_LINK_LIBRARIES(multiple_serialization PRIVATE 
-  dots_internal
+TARGET_LINK_LIBRARIES(multiple_serialization PRIVATE
   dots_kernel
   ${Boost_THREAD_LIBRARY}
   ${Boost_SYSTEM_LIBRARY})
 
 TARGET_LINK_LIBRARIES(repository_compare PRIVATE
-  lluf_config
-  lluf_id
   lluf_utils
-  dots_internal
-  ${Boost_FILESYSTEM_LIBRARY})
+  dots_internal)
 
 if (NOT MSVC)
   TARGET_LINK_LIBRARIES(repository_compare PRIVATE rt)

@@ -19,19 +19,13 @@ endif()
 TARGET_LINK_LIBRARIES (ProcessMonitor_test3 PRIVATE
   lluf_utils
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-  ${Boost_FILESYSTEM_LIBRARY}
-  ${Boost_THREAD_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY})
+  ${Boost_FILESYSTEM_LIBRARY})
 
 TARGET_LINK_LIBRARIES (ProcessMonitor_test PRIVATE
-  lluf_utils
-  ${Boost_THREAD_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY})
+  lluf_utils)
 
 TARGET_LINK_LIBRARIES (ProcessMonitor_test2 PRIVATE
-  lluf_utils
-  ${Boost_THREAD_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY})
+  lluf_utils)
 
 TARGET_LINK_LIBRARIES (ProcessMonitorSleeper PRIVATE
   ${Boost_THREAD_LIBRARY}

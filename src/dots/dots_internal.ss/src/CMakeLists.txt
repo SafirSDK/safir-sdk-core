@@ -4,14 +4,12 @@ FILE(GLOB sources *.cpp)
 ADD_LIBRARY(dots_internal SHARED ${sources} ${headers})
 
 TARGET_LINK_LIBRARIES(dots_internal PRIVATE
-  lluf_utils 
-  ${Boost_FILESYSTEM_LIBRARY}
-  ${Boost_THREAD_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY}
-  
-  PUBLIC 
-  lluf_id 
+  lluf_utils
+
+  PUBLIC
+  lluf_id
   lluf_config
+  ${Boost_FILESYSTEM_LIBRARY}
 )
 
 SAFIR_INSTALL(TARGETS dots_internal)

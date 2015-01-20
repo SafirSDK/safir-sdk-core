@@ -1,12 +1,11 @@
 ADD_EXECUTABLE(timer_test timer_test.cpp ../src/dose_main_timers.h ../src/dose_main_timers.cpp)
 
-TARGET_LINK_LIBRARIES(timer_test PRIVATE 
+TARGET_LINK_LIBRARIES(timer_test PRIVATE
   dose_internal
-  ${Boost_THREAD_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY})
+  lluf_utils)
 
-ADD_TEST(NAME TryStart_dose_main  
-  COMMAND ${PYTHON_EXECUTABLE} 
+ADD_TEST(NAME TryStart_dose_main
+  COMMAND ${PYTHON_EXECUTABLE}
   ${CMAKE_CURRENT_SOURCE_DIR}/try_start_dose_main.py
   --dose-main $<TARGET_FILE:dose_main>)
 

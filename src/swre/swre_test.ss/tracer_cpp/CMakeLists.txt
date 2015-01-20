@@ -1,6 +1,6 @@
 add_executable(tracer_sender_cpp sender.cpp)
 
-target_link_libraries(tracer_sender_cpp PRIVATE 
+target_link_libraries(tracer_sender_cpp PRIVATE
   swre_interface_cpp)
 
 ADD_TEST(NAME tracer_cpp

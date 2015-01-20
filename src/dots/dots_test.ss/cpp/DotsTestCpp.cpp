@@ -41,7 +41,6 @@
 #include <DotsTest/TestException.h>
 #include <Safir/Dob/Typesystem/Parameters.h>
 #include <Safir/Dob/Typesystem/Members.h>
-#include <Safir/Dob/Typesystem/Internal/Kernel.h>
 #include <Safir/Dob/Typesystem/Internal/InternalOperations.h>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/filesystem/operations.hpp>

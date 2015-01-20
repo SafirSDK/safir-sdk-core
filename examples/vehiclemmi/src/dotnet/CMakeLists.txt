@@ -11,4 +11,3 @@ ADD_CSHARP_ASSEMBLY(VehicleMmiCsWinForms WINEXE
              Safir.Logging Safir.SwReports System.Drawing System.Windows.Forms
   NOVERSION)
 
-#TODO: install?

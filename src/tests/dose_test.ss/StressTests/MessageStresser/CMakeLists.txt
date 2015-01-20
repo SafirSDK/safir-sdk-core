@@ -6,8 +6,7 @@ ADD_EXECUTABLE(MessageStresser ${sources} ${headers})
 TARGET_LINK_LIBRARIES(MessageStresser PRIVATE
   dose_cpp
   safir_generated-DoseTest-cpp
-  ${Boost_PROGRAM_OPTIONS_LIBRARY}
-  ${Boost_THREAD_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY})
+  lluf_utils
+  ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
 SAFIR_INSTALL(TARGETS MessageStresser TEST_SUITE)

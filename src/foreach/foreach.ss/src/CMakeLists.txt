@@ -6,8 +6,6 @@ ADD_EXECUTABLE(foreach ${sources} ${headers})
 TARGET_LINK_LIBRARIES(foreach PRIVATE
   swre_interface_cpp
   dose_cpp
-  safir_generated-Core-cpp
-  logging_cpp
-  ${Boost_SYSTEM_LIBRARY})
+  logging_cpp)
 
 SAFIR_INSTALL(TARGETS foreach)

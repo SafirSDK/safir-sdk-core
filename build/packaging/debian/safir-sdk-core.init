@@ -1,0 +1,37 @@
+#!/bin/sh
+#
+# Script to create directories for Safir lockfiles
+#
+
+### BEGIN INIT INFO
+# Provides:          safir-tempfiles
+# Required-Start:    $remote_fs
+# Required-Stop:     $remote_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Safir lockfiles dir creation
+# Description: Create Safir lockfile directory and adjust
+#  permissions if needed.
+### END INIT INFO
+
+set -e
+
+. /lib/lsb/init-functions
+
+SAFIRDIR=/run/safir-sdk-core
+
+case "$1" in
+start)
+    if test -L $SAFIRDIR || ! test -d $SAFIRDIR; then
+        rm -f $SAFIRDIR
+        mkdir $SAFIRDIR
+        chown root:safirusers $SAFIRDIR
+        [ -x /sbin/restorecon ] && /sbin/restorecon $SAFIRDIR
+    fi
+    chmod 0775 $SAFIRDIR
+    ;;
+stop|restart|reload|force-reload)
+    ;;
+esac
+
+exit 0

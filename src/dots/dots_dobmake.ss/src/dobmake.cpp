@@ -43,6 +43,12 @@
 #pragma warning(pop)
 #endif
 
+//TODO: Add choice for 32bit on win64
+//TODO: Add a clean button
+//TODO: show log doesnt work on windows
+//TODO: show a progress bar
+//TODO: stop using message boxes for status.
+//TODO: change the way the folder is selected. Instead make it so that a CMakeLists.txt file has to be chosen.
 
 Dobmake::Dobmake(QWidget *parent)
     : QDialog(parent)

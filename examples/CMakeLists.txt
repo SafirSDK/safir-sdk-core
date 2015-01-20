@@ -10,7 +10,7 @@ add_subdirectory(dou_files)
 include_directories(${SAFIR_SDK_CORE_INCLUDE_DIRS})
 
 #we also need boost
-FIND_PACKAGE(Boost COMPONENTS system regex)
+FIND_PACKAGE(Boost REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
 

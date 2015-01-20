@@ -3,13 +3,11 @@ FILE(GLOB sources *.cpp)
 
 ADD_EXECUTABLE(dose_main ${sources} ${headers})
 
-TARGET_LINK_LIBRARIES(dose_main PRIVATE 
+TARGET_LINK_LIBRARIES(dose_main PRIVATE
   dose_cpp
-  dose_internal 
-  dots_cpp
+  dose_internal
+  lluf_utils
   lluf_crash_reporter
-  ${Boost_REGEX_LIBRARY}
-  ${Boost_THREAD_LIBRARY}
-  ${Boost_SYSTEM_LIBRARY})
+  ${Boost_REGEX_LIBRARY})
 
 SAFIR_INSTALL(TARGETS dose_main)

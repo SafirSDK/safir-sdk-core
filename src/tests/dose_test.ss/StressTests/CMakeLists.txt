@@ -12,6 +12,4 @@ ADD_SUBDIRECTORY(RequestPingPong)
 ADD_SUBDIRECTORY(RequestStresser)
 
 ADD_SUBDIRECTORY(SignalTest)
-ADD_SUBDIRECTORY(SplitJoinStresser)
-ADD_SUBDIRECTORY(SplitJoinTest)
 

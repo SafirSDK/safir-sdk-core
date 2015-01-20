@@ -278,6 +278,14 @@ function (SET_SAFIR_TEST_PROPERTIES)
     ${PROP_ENVIRONMENT})
 endfunction()
 
+function(target_link_libraries)
+  list(FIND ARGN "PRIVATE" has_private_keyword)
+  if(has_private_keyword EQUAL -1)
+    message(FATAL_ERROR "target_link_libraries lacks PRIVATE keyword!")
+  endif()
+  _target_link_libraries(${ARGN})
+endfunction()
+
 INCLUDE(build_generated)
 
 include_directories(lluf/lluf_build_helpers.ss/src)
@@ -341,8 +349,12 @@ add_subdirectory(tests)
 add_subdirectory(util)
 add_subdirectory(config)
 
-INSTALL(EXPORT SafirSDKCore DESTINATION ${SAFIR_INSTALL_DESTINATION_CMAKE}
-  COMPONENT Development)
+#non-msvc systems need the cmake export file.
+#msvc uses autolinking, so we don't need this file there.
+if (NOT MSVC)
+  INSTALL(EXPORT SafirSDKCore DESTINATION ${SAFIR_INSTALL_DESTINATION_CMAKE}
+    COMPONENT Development)
+endif()
 
 configure_file(cmake/SafirSDKCoreConfig.cmake.in
   "${CMAKE_CURRENT_BINARY_DIR}/cmake/SafirSDKCoreConfig.cmake" @ONLY)

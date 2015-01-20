@@ -23,9 +23,12 @@ FILE(GLOB sources *.cpp)
 
 ADD_EXECUTABLE(safir_control ${sources} ${headers})
 
-TARGET_LINK_LIBRARIES(safir_control
+TARGET_LINK_LIBRARIES(safir_control PRIVATE
   system_picture
-  control_utils)
+  control_utils
+  lluf_utils
+  ${Boost_FILESYSTEM_LIBRARY}
+  ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
 target_include_directories(safir_control PRIVATE ${BOOST_PROCESS_INCLUDE_DIRECTORY})
 
@@ -33,8 +36,6 @@ if (NOT BOOST_PROCESS_FOUND)
   add_dependencies(safir_control boost-process)
 endif()
 
-TARGET_LINK_LIBRARIES(safir_control
-  ${Boost_FILESYSTEM_LIBRARY}
-  ${Boost_PROGRAM_OPTIONS_LIBRARY})
+
 
 SAFIR_INSTALL(TARGETS safir_control)

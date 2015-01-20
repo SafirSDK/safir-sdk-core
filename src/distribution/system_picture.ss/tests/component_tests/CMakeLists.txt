@@ -1,15 +1,17 @@
 ADD_EXECUTABLE(control_stub sp_control.cpp)
 ADD_EXECUTABLE(dose_main_stub dose_main_stub.cpp)
 
-TARGET_LINK_LIBRARIES(control_stub
+TARGET_LINK_LIBRARIES(control_stub PRIVATE
   system_picture
-  ${Boost_PROGRAM_OPTIONS_LIBRARY}
-  )
+  lluf_utils
+  lluf_id
+  ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
-TARGET_LINK_LIBRARIES(dose_main_stub
+TARGET_LINK_LIBRARIES(dose_main_stub PRIVATE
   system_picture
-  ${Boost_PROGRAM_OPTIONS_LIBRARY}
-  )
+  lluf_utils
+  lluf_id
+  ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
 SAFIR_INSTALL(TARGETS control_stub dose_main_stub TEST_SUITE)
 
