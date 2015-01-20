@@ -25,22 +25,13 @@
 #ifndef __APP_H
 #define __APP_H
 
-// The cmake configuration allows us to compile this application with or without ACE
-// If ace is not found we use Boost.Asio instead.
-#ifdef NO_ACE
-#  include <Safir/Utilities/AsioDispatcher.h>
-#else
-#  include <Safir/Utilities/AceDispatcher.h>
-#  ifndef ACE_HAS_WINSOCK2
-#    define ACE_HAS_WINSOCK2 0
-#  endif
-#endif
+#include <Safir/Utilities/AsioDispatcher.h>
 
 #include <Safir/Dob/Connection.h>
 
 namespace VehicleDatabaseCpp
 {
-    /** 
+    /**
     * This application is an example of how to use the database interface.
     * The application will show how to :
     * 1) Read an entry in a database table.
@@ -55,15 +46,15 @@ namespace VehicleDatabaseCpp
     * Exception handling, resource handling, recovery handling and SW reporting
     * is omitted or minimized to not obscure the database interfacing.
     * Yet, the necessary exception handling is indicated.
-    * 
+    *
     * The application can be run together with:
     *  - VehicleApp (producer of Vehicle objects).
     *  - VehicleMmi (consumer of vehicle objects and user of the database
     *                services provided by this example).
-    */ 
+    */
 
 
-    /** 
+    /**
      * Main class. Controls startup, closedown and receives events.
      */
     class App :
@@ -74,13 +65,13 @@ namespace VehicleDatabaseCpp
 
         App();
 
-        /** 
+        /**
         * Startup application: open dob connection, register entity ownership
         * and service provider, attach message sender and start event loop.
         */
         int Run();
 
-        /** 
+        /**
          * Called by the stop handler.
          */
         void OnStopOrder();
@@ -88,24 +79,18 @@ namespace VehicleDatabaseCpp
     private:
         // Primary connection for Dob calls
         Safir::Dob::Connection m_connection;
-   
-        // This application is event driven. It's triggered by events 
-        // received in the main event loop. 
-        // The main event loop for this application is implemented by 
-        // the process wide reactor in the singleton class ACE_Reactor.
-        // The event loop is started in the Run method.
+
+        // This application is event driven. It's triggered by events
+        // received in the main event loop.
+        // The main event loop for this application is implemented by
+        // the asio io_service
         //
-        // The Dispatcher class makes a thread switch from the calling 
+        // The Dispatcher class makes a thread switch from the calling
         // Dob thread to this applications main thread. It performs a dispatch
-        // on the Dob connection that will result in callbacks to all overidden 
+        // on the Dob connection that will result in callbacks to all overidden
         // Dob interface methods, for example OnCreateRequest call in EntityOwner.
-#ifdef NO_ACE
         boost::asio::io_service m_ioService;
         Safir::Utilities::AsioDispatcher   m_dispatch;
-#else
-        Safir::Utilities::AceDispatcher   m_dispatch;
-#endif
-        
     };
 
 }

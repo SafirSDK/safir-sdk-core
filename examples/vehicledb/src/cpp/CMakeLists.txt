@@ -4,9 +4,6 @@ ADD_EXECUTABLE(VehicleAppDb
   VehicleDatabaseServices.h VehicleDatabaseServices.cpp
   main.cpp)
 
-#TODO: remove ACE support
-ADD_DEFINITIONS(-DNO_ACE)
-
 TARGET_LINK_LIBRARIES(VehicleAppDb
   safir_generated-Example-cpp
   ${SAFIR_SDK_CORE_LIBRARIES})
