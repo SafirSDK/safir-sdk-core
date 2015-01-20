@@ -8,7 +8,8 @@
 # Compute paths
 set(SAFIR_SDK_CORE_CMAKE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
-#TODO: correct way to do this?
+#finding the install directory is based on how we install the cmake files
+#which is defined in the top level CMakeLists.txt file.
 if (MSVC)
   get_filename_component(SAFIR_SDK_CORE_INSTALL_DIR ${CMAKE_CURRENT_LIST_DIR}/../ ABSOLUTE)
 else()
