@@ -139,4 +139,4 @@ INSTALL(FILES COPYING.txt
   RENAME LICENSE.txt
   COMPONENT Runtime)
 
-#TODO: should dobexplorer be in dev package?
+#TODO: dobexplorer and sate should be in dev package

@@ -14,6 +14,3 @@ ADD_CSHARP_ASSEMBLY(sate WINEXE
 
 SAFIR_INSTALL(TARGETS sate)
 
-#TODO: should sate only be part of the Development component?
-
-#TODO: why does the sate exe not have an icon on windows any longer?
