@@ -102,6 +102,9 @@ INSTALL(DIRECTORY include/ DESTINATION ${SAFIR_INSTALL_DESTINATION_INCLUDE}
   PATTERN ".svn" EXCLUDE
   PATTERN "*~" EXCLUDE)
 
+#This makes the include files show up in various IDEs
+FILE(GLOB_RECURSE include_headers include/*.h)
+ADD_CUSTOM_TARGET(dummy_header_target SOURCES ${include_headers})
 
 #Note: do not try to use this file from within the Safir SDK Core build tree!
 #use the version defined using ADD_DEFINITIONS above instead.
