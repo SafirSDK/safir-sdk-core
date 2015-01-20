@@ -9,15 +9,19 @@ else()
   set(DEFAULT_LOCK_FILE_DIRECTORY @{CSIDL_COMMON_APPDATA}/safir-sdk-core/locks/)
   set(DEFAULT_CRASH_DUMP_DIRECTORY @{CSIDL_COMMON_APPDATA}/safir-sdk-core/dump/)
   set(DEFAULT_LOG_DIRECTORY @{CSIDL_COMMON_APPDATA}/safir-sdk-core/log)
-  set(DEFAULT_DOU_SEARCH_PATH "C:/Program Files/Safir SDK Core/${SAFIR_INSTALL_DESTINATION_DOU_BASE}")
-  set(DEFAULT_JAVA_SEARCH_PATH "C:/Program Files/Safir SDK Core/${SAFIR_INSTALL_DESTINATION_JAR}")
+
+  #Work out our default install directory.  The reason for this stuff is that the
+  #CMAKE_INSTALL_PREFIX contains "safir-sdk-core" instead of "Safir SDK Core", which is
+  #not where we install by default.
+
+  message("CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
+  set(SAFIR_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/../Safir SDK Core")
+  get_filename_component(SAFIR_INSTALL_PREFIX ${SAFIR_INSTALL_PREFIX} ABSOLUTE)
+
+  set(DEFAULT_DOU_SEARCH_PATH "${SAFIR_INSTALL_PREFIX}/${SAFIR_INSTALL_DESTINATION_DOU_BASE}")
+  set(DEFAULT_JAVA_SEARCH_PATH "${SAFIR_INSTALL_PREFIX}/${SAFIR_INSTALL_DESTINATION_JAR}")
+  unset (SAFIR_INSTALL_PREFIX) #unset the path, so noone else tries to use it!
 endif()
-
-#The reason for the C:/Program... stuff above is that the CMAKE_INSTALL_PREFIX contains
-#"safir-sdk-core" instead of "Safir SDK Core", which is not where we install by default.
-#Maybe it is possible to find some better way of doing this...
-
-#TODO: we cannot use Program Files! E.g. on Swedish windows this dir will be called something else!
 
 
 configure_file(typesystem.ini.in
