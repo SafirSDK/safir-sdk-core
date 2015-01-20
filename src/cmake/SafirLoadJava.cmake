@@ -30,8 +30,6 @@ if (NOT Java_FOUND)
   MESSAGE(WARNING "Failed to find the Java development tools, will not build Java interfaces")
 endif()
 
-#TODO: javadoc?
-
 function (SAFIR_JAVAH)
   cmake_parse_arguments(_javah "" "JAR;CLASS;OUTPUT_DIR" "OUTPUT_FILES" ${ARGN})
 
