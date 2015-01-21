@@ -283,7 +283,13 @@ def build_examples():
     """
     for (builddir, installdir) in dirs:
         os.chdir(builddir)
-        cmd = [os.path.join(olddir,"build", "build.py"), "--jenkins", "--skip-tests"]
+
+        if sys.platform == "win32":
+            cmd = ["dobmake-batch.py",]
+        else:
+            cmd = ["dobmake-batch",]
+
+        cmd +=  ("--jenkins", "--skip-tests")
         if installdir is not None:
             cmd += ("--install", installdir)
 
