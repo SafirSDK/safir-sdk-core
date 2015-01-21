@@ -24,6 +24,7 @@
 #include "dobmake.h"
 #include <iostream>
 #include "BuildThread.h"
+#include <boost/current_function.hpp>
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -49,12 +50,14 @@
 //TODO: show a progress bar
 //TODO: stop using message boxes for status.
 //TODO: change the way the folder is selected. Instead make it so that a CMakeLists.txt file has to be chosen.
+//TODO: add dots_configuration_check stuff?
 
 Dobmake::Dobmake(QWidget *parent)
     : QDialog(parent)
     , m_buildRunning(false)
     , ui(new Ui::Dobmake)
 {
+    std::cerr << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     ui->setupUi(this);
     ui->douDirectory->setText("");
     ui->installDirectory->setText("");
@@ -74,12 +77,14 @@ Dobmake::Dobmake(QWidget *parent)
 
 Dobmake::~Dobmake()
 {
+    std::cerr << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     delete ui;
 }
 
 
 bool Dobmake::CheckPython()
 {
+    std::cerr << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     QStringList params;
     params << "--version";
 
@@ -92,6 +97,7 @@ bool Dobmake::CheckPython()
 
 QString Dobmake::GetDobmakeBatchScript()
 {
+    std::cerr << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
 #if defined(linux) || defined(__linux) || defined(__linux__)
     const QString separator = ":";
     const QString scriptSuffix = "";
@@ -119,6 +125,7 @@ QString Dobmake::GetDobmakeBatchScript()
 
 void Dobmake::on_douDirectoryBrowse_clicked()
 {
+    std::cerr << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     QFileDialog dialog;
     dialog.setFileMode(QFileDialog::Directory);
     dialog.setOption(QFileDialog::ShowDirsOnly);
@@ -131,6 +138,7 @@ void Dobmake::on_douDirectoryBrowse_clicked()
 
 void Dobmake::on_douDirectory_textChanged(const QString &path)
 {
+    std::cerr << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     const QFile dir(path);
     const QFile cmakelists(path + QDir::separator() + "CMakeLists.txt");
 
@@ -149,6 +157,7 @@ void Dobmake::on_douDirectory_textChanged(const QString &path)
 
 void Dobmake::on_installDirectory_textChanged(const QString &path)
 {
+    std::cerr << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     const QFile dir(path);
     if (dir.exists())
     {
@@ -164,6 +173,7 @@ void Dobmake::on_installDirectory_textChanged(const QString &path)
 
 void Dobmake::on_installDirectoryBrowse_clicked()
 {
+    std::cerr << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     QFileDialog dialog;
     dialog.setFileMode(QFileDialog::Directory);
     dialog.setOption(QFileDialog::ShowDirsOnly);
@@ -176,6 +186,7 @@ void Dobmake::on_installDirectoryBrowse_clicked()
 
 void Dobmake::UpdateInstallButton()
 {
+    std::cerr << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     const QFile buildDir(ui->douDirectory->text());
     const QFile cmakelists(ui->douDirectory->text() + QDir::separator() + "CMakeLists.txt");
     const QFile installDir(ui->installDirectory->text());
@@ -187,6 +198,7 @@ void Dobmake::UpdateInstallButton()
 
 void Dobmake::UpdateBuildButton()
 {
+    std::cerr << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     const QFile dir(ui->douDirectory->text());
     const QFile cmakelists(ui->douDirectory->text() + QDir::separator() + "CMakeLists.txt");
     ui->build->setEnabled(!m_buildRunning &&
@@ -197,8 +209,10 @@ void Dobmake::UpdateBuildButton()
 
 void Dobmake::OpenLog()
 {
+    std::cerr << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     if (ui->showLog->isChecked())
     {
+        std::cerr << "Trying to open " << QUrl("file://" + ui->douDirectory->text() + "/" + "buildlog.html").toString().toStdString() << std::endl;
         const bool result = QDesktopServices::openUrl
             (QUrl("file://" + ui->douDirectory->text() + "/" + "buildlog.html"));
 
@@ -213,6 +227,7 @@ void Dobmake::OpenLog()
 }
 void Dobmake::on_build_clicked()
 {
+    std::cerr << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     BuildThread* worker = new BuildThread(this,
                                       GetDobmakeBatchScript(),
                                       ui->douDirectory->text(),
@@ -232,6 +247,7 @@ void Dobmake::on_build_clicked()
 
 void Dobmake::on_buildAndInstall_clicked()
 {
+    std::cerr << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     BuildThread* worker = new BuildThread(this,
                                           GetDobmakeBatchScript(),
                                           ui->douDirectory->text(),
@@ -251,6 +267,7 @@ void Dobmake::on_buildAndInstall_clicked()
 
 void Dobmake::BuildComplete(const bool result)
 {
+    std::cerr << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     m_buildRunning = false;
     QApplication::restoreOverrideCursor();
     UpdateBuildButton();
@@ -277,28 +294,33 @@ void Dobmake::BuildComplete(const bool result)
 
 void Dobmake::on_debugRadioButton_clicked(bool checked)
 {
+    std::cerr << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     m_debug = checked;
     m_release = !checked;
 }
 
 void Dobmake::on_releaseRadioButton_clicked(bool checked)
 {
+    std::cerr << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     m_debug = !checked;
     m_release = checked;
 }
 
 void Dobmake::on_debugCheckButton_clicked(bool checked)
 {
+    std::cerr << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     m_debug = checked;
 }
 
 void Dobmake::on_releaseCheckButton_clicked(bool checked)
 {
+    std::cerr << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     m_release = checked;
 }
 
 void Dobmake::on_showLog_toggled(const bool checked)
 {
+    std::cerr << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     //This allows the user to check the box while the build is running
     //which will open the log.
     if (m_buildRunning && checked)
@@ -306,6 +328,3 @@ void Dobmake::on_showLog_toggled(const bool checked)
         OpenLog();
     }
 }
-
-
-//TODO: add dots_configuration_check stuff?
