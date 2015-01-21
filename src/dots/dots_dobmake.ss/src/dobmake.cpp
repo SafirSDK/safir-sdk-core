@@ -132,7 +132,7 @@ void Dobmake::on_douDirectoryBrowse_clicked()
 
     if (dialog.exec())
     {
-        ui->douDirectory->setText(dialog.selectedFiles()[0]);
+        ui->douDirectory->setText(QDir::toNativeSeparators(dialog.selectedFiles()[0]));
     }
 }
 
@@ -180,7 +180,7 @@ void Dobmake::on_installDirectoryBrowse_clicked()
 
     if (dialog.exec())
     {
-        ui->installDirectory->setText(dialog.selectedFiles()[0]);
+        ui->installDirectory->setText(QDir::toNativeSeparators(dialog.selectedFiles()[0]));
     }
 }
 
@@ -207,14 +207,14 @@ void Dobmake::UpdateBuildButton()
 }
 
 
-void Dobmake::OpenLog()
+void Dobmake::OpenLog(const bool ignoreCheckbox)
 {
     std::cerr << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
-    if (ui->showLog->isChecked())
+    if (ignoreCheckbox || ui->showLog->isChecked())
     {
-        std::cerr << "Trying to open " << QUrl("file://" + ui->douDirectory->text() + "/" + "buildlog.html").toString().toStdString() << std::endl;
-        const bool result = QDesktopServices::openUrl
-            (QUrl("file://" + ui->douDirectory->text() + "/" + "buildlog.html"));
+        const QUrl url = QUrl::fromLocalFile(ui->douDirectory->text() + QDir::separator() + "buildlog.html");
+
+        const bool result = QDesktopServices::openUrl(url);
 
         if (!result)
         {
@@ -287,7 +287,7 @@ void Dobmake::BuildComplete(const bool result)
         box.exec();
         if (box.clickedButton() == showLog)
         {
-            OpenLog();
+            OpenLog(true);
         }
     }
 }
