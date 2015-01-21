@@ -42,7 +42,7 @@ namespace
     void enableWindowsMultimediaTimers()
     {
         // Set best possible timer resolution on windows
-        
+
         TIMECAPS    tc;
         UINT        wTimerRes;
         const UINT  wantedResolution = 1;  // ms
@@ -130,7 +130,14 @@ namespace Internal
         return *m_instance;
     }
 
-
+    void TimerHandler::Stop()
+    {
+        if (m_steadyTimer != NULL)
+        {
+            m_steadyTimer->cancel();
+            m_steadyTimer.reset();
+        }
+    }
 
 
     const TimerId
@@ -274,7 +281,7 @@ namespace Internal
                     break;
                 }
             }
-            
+
             ENSURE(removedSomething, << L"removedSomething was not set to true correctly in TimerHandler::Remove");
 
             ScheduleTimer();
@@ -306,7 +313,7 @@ namespace Internal
                         break;
                     }
                 }
-                
+
                 ENSURE(removedSomething, << L"removedSomething was not set to true correctly in TimerHandler::Remove");
 
                 if (it == m_timerTable.begin())

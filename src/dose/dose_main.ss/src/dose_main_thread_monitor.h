@@ -54,9 +54,8 @@ namespace Internal
         // Constructor starts monitoring thread
         ThreadMonitor();
 
-        // Destructor waits for the monitoring thread to be stopped
-        // before returning.
-        ~ThreadMonitor();
+        //  waits for the monitoring thread to be stopped before returning.
+        void Stop();
 
         void StartWatchdog(const boost::thread::id& threadId,
                            const std::wstring& threadName);

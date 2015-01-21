@@ -52,9 +52,8 @@ namespace Internal
         // Constructor starts monitoring thread
         LockMonitor();
 
-        // Destructor waits for the monitoring thread to be stopped
-        // before returning.
-        ~LockMonitor();
+        // waits for the monitoring thread to be stopped before returning.
+        void Stop();
 
     private:
 

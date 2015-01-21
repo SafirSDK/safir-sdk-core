@@ -46,7 +46,7 @@ namespace Internal
         m_checkerThread = boost::thread(&ThreadMonitor::Check, this);
     }
 
-    ThreadMonitor::~ThreadMonitor()
+    void ThreadMonitor::Stop()
     {
         m_checkerThread.interrupt();
         m_checkerThread.join();

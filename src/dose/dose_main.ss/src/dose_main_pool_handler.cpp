@@ -169,6 +169,14 @@ namespace Internal
         }
     }
 
+    void PoolHandler::Stop()
+    {
+        for (ContextId context = 0; context < Safir::Dob::NodeParameters::NumberOfContexts(); ++context)
+        {
+            m_stateSubscriptionConnections[context].m_connection.Close();
+        }
+    }
+
     void PoolHandler::StartPoolDistribution()
     {
         lllout << "Starting pool distribution thread" << std::endl;

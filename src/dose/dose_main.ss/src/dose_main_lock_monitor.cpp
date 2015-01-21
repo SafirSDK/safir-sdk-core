@@ -55,7 +55,7 @@ namespace Internal
         m_checkerThread = boost::thread(&LockMonitor::Check, this);
     }
 
-    LockMonitor::~LockMonitor()
+    void LockMonitor::Stop()
     {
         m_checkerThread.interrupt();
         m_checkerThread.join();

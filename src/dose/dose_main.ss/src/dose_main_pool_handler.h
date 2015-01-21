@@ -144,6 +144,9 @@ namespace Internal
                   ConnectionHandler & connectionHandler,
                   ThreadMonitor & threadMonitor);
 
+
+        void Stop();
+        
         void StartPoolDistribution();
 
         // Request pooldistribution from nodeId

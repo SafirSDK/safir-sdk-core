@@ -138,7 +138,9 @@ namespace Internal
 
         /** Instantiate must have been called for this to function. */
         static TimerHandler & Instance();
-        
+
+        void Stop();
+
         const TimerId RegisterTimeoutHandler(const std::wstring & timerName, TimeoutHandler & timeoutHandler);
 
         const std::wstring & GetTimerName(const TimerId timerId) const;
@@ -195,7 +197,7 @@ namespace Internal
         TimerQueue m_timerQueue;
 
         TimeoutHandlerTable m_timeoutHandlerTable;
-        
+
         boost::asio::io_service & m_ioService;
         boost::scoped_ptr<boost::asio::steady_timer> m_steadyTimer;
 
@@ -237,4 +239,3 @@ namespace Internal
 }
 
 #endif
-

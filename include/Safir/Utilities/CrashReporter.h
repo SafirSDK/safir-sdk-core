@@ -43,7 +43,7 @@ namespace Utilities
 class LLUF_CRASH_REPORTER_API CrashReporter
 {
 public:
-    /** 
+    /**
      * Initiate the crash reporting functionality.
      *
      * After this has been called crashes will generate a dump under runtime/data/crash_reports.
@@ -62,14 +62,14 @@ public:
     /** dumpPath is ascii only! */
     typedef void (*DumpCallback)(const char* const dumpPath);
 
-    /** 
-     * Register a callback that will be called when a dump has occurred. 
+    /**
+     * Register a callback that will be called when a dump has occurred.
      * This can be used to report that a dump has occurred, or maybe to clean up state.
      * Be aware that the application may be in an undefined state at this point...
      */
     static void RegisterCallback(const DumpCallback callback);
 
-    /** 
+    /**
      * Write a dump immediately
      *
      * This can be used to capture the execution state independently of a crash.
@@ -82,4 +82,3 @@ public:
 }
 }
 #endif
-

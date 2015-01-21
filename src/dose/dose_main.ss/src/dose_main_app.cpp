@@ -86,7 +86,8 @@ namespace Internal
         m_connectEvent(0),
         m_connectionOutEvent(0),
         m_nodeStatusChangedEvent(0),
-        m_signalHandler(m_ioService),
+        m_work(new boost::asio::io_service::work(m_ioService)),
+        m_signalSet(m_ioService),
         m_timerHandlerInitiated(initiateTimerHandler(m_ioService)),
         m_poolHandler(m_ioService),
         m_pendingRegistrationHandler(),
@@ -98,33 +99,32 @@ namespace Internal
         m_HandleEvents_notified(0),
         m_DispatchOwnConnection_notified(0)
     {
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+        m_signalSet.add(SIGABRT);
+        m_signalSet.add(SIGBREAK);
+        m_signalSet.add(SIGINT);
+        m_signalSet.add(SIGTERM);
+#elif defined(linux) || defined(__linux) || defined(__linux__)
+        m_signalSet.add(SIGQUIT);
+        m_signalSet.add(SIGINT);
+        m_signalSet.add(SIGTERM);
+#endif
+
+        m_signalSet.async_wait([this](const boost::system::error_code& error,
+                                      const int signalNumber)
+                               {
+                                   HandleSignal(error,signalNumber);
+                               });
+
         Safir::Utilities::CrashReporter::RegisterCallback(DumpFunc);
         Safir::Utilities::CrashReporter::Start();
     }
 
     DoseApp::~DoseApp()
     {
-        m_processMonitor.Stop();
-
-        if (m_memoryMonitorThread.get_id() != boost::thread::id())
-        {
-            m_memoryMonitorThread.interrupt();
-            m_memoryMonitorThread.join();
-            m_memoryMonitorThread = boost::thread();
-        }
-
-        if (m_connectionThread.get_id() != boost::thread::id())
-        {
-            //set the interrupt state so that when we generate the spurious signal
-            //the thread will be interrupted at the interruption_point.
-            m_connectionThread.interrupt();
-            Connections::Instance().GenerateSpuriousConnectOrOutSignal();
-            m_connectionThread.join();
-            m_connectionThread = boost::thread();
-        }
-
+        //TODO stewart: should we try to call Stop here, in case it hasn't been
+        //called correctly? I.e. we're dying through an exception.
     }
-
 
     void DoseApp::Run()
     {
@@ -146,10 +146,6 @@ namespace Internal
 #else
         std::wcout<<"dose_main running (release)..." << std::endl;
 #endif
-
-        //we want the io service to keep running for ever.
-        boost::asio::io_service::work keepRunning(m_ioService);
-
         m_ioService.run();
     }
 
@@ -187,6 +183,51 @@ namespace Internal
         {
             //do nothing, just exit
         }
+    }
+
+    void DoseApp::Stop()
+    {
+        m_work.reset();
+        TimerHandler::Instance().Stop();
+
+        m_threadMonitor.Stop();
+        m_lockMonitor.Stop();
+
+        m_processMonitor.Stop();
+
+        if (m_memoryMonitorThread.get_id() != boost::thread::id())
+        {
+            m_memoryMonitorThread.interrupt();
+            m_memoryMonitorThread.join();
+            m_memoryMonitorThread = boost::thread();
+        }
+
+        if (m_connectionThread.get_id() != boost::thread::id())
+        {
+            //set the interrupt state so that when we generate the spurious signal
+            //the thread will be interrupted at the interruption_point.
+            m_connectionThread.interrupt();
+            Connections::Instance().GenerateSpuriousConnectOrOutSignal();
+            m_connectionThread.join();
+            m_connectionThread = boost::thread();
+        }
+
+        m_poolHandler.Stop();
+        m_ownConnection.Close();
+    }
+
+    void DoseApp::HandleSignal(const boost::system::error_code& error,
+                               const int signalNumber)
+    {
+        lllog(3) << "CTRL: Got signal " << signalNumber << " ... stop sequence initiated." << std::endl;
+
+        if (error)
+        {
+            SEND_SYSTEM_LOG(Error,
+                            << "Got a signals error: " << error);
+        }
+
+        Stop();
     }
 
     void DoseApp::OnDoDispatch()

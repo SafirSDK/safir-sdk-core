@@ -40,7 +40,6 @@
 #include "dose_main_thread_monitor.h"
 #include "dose_main_lock_monitor.h"
 #include "dose_main_connection_killer.h"
-#include "dose_main_signal_handler.h"
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Utilities/ProcessMonitor.h>
@@ -81,6 +80,12 @@ namespace Internal
         void Run();
 
     private:
+        //This is called when dose_main is expected to shut down
+        void Stop();
+
+        void HandleSignal(const boost::system::error_code& error,
+                          const int signalNumber);
+
         //Handler for dispatching own connection
         void DispatchOwnConnection();
 
@@ -100,7 +105,7 @@ namespace Internal
         //implementation of Connections::ConnectionHandler
         virtual ConnectResult CanAddConnection(const std::string & connectionName, const pid_t pid, const long context);
         virtual void HandleConnect(const ConnectionPtr & connection);
-        
+
         void HandleDisconnect(const ConnectionPtr & connection);
 
         void AllocateStatic();
@@ -127,7 +132,10 @@ namespace Internal
         static void MemoryMonitorThread();
 
         boost::asio::io_service m_ioService;
-        SignalHandler m_signalHandler;
+        boost::shared_ptr<boost::asio::io_service::work> m_work;
+
+        boost::asio::signal_set m_signalSet;
+
         const bool m_timerHandlerInitiated;
 
         EndStatesHandler m_endStates;
@@ -179,7 +187,7 @@ namespace Internal
         boost::thread m_connectionThread;
         boost::thread m_memoryMonitorThread;
 
-        //this class should be declared last, so that when the app 
+        //this class should be declared last, so that when the app
         //is destroyed all connections will be marked as dead and stop
         //orders sent before any more destruction is done.
         ConnectionKiller m_connectionKiller;
@@ -190,4 +198,3 @@ namespace Internal
 }
 
 #endif
-
