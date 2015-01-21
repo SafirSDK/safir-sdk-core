@@ -253,7 +253,7 @@ int main(int argc, char * argv[])
             lllog(3) << "CTRL: dose_main has stopped" << std::endl;
 
             DWORD exitCode;
-            ::GetExitCodeProcess(handle.native(), &exit_code);
+            ::GetExitCodeProcess(handle.native(), &exitCode);
 
             if (exitCode != 0)
             {
