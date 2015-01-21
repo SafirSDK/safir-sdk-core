@@ -194,8 +194,13 @@ int main(int argc, char * argv[])
                                 << "Got a signals error: " << error);
             }
             // Wait for dose_main to exit before exit the control program.
-            int status;  // Don't care about dose_main exit status
-            ::wait(&status);
+            int exitCode;
+            ::wait(&exitCode);
+
+            if (exitCode != 0)
+            {
+                SEND_SYSTEM_LOG(Critical, << "dose_main exited with return code " << exitCode);
+            }
 
         }
     );
@@ -241,10 +246,19 @@ int main(int argc, char * argv[])
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
     boost::asio::windows::object_handle handle(ioService, dose_main.process_handle());
+
     handle.async_wait(
         [&handle](const boost::system::error_code&)
         {
             lllog(3) << "CTRL: dose_main has stopped" << std::endl;
+
+            DWORD exitCode;
+            ::GetExitCodeProcess(handle.native(), &exit_code);
+
+            if (exitCode != 0)
+            {
+                SEND_SYSTEM_LOG(Critical, << "dose_main exited with return code " << exitCode);
+            }
         }
     );
 #endif
