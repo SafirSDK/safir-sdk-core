@@ -23,6 +23,9 @@
 ******************************************************************************/
 #pragma once
 
+#include <boost/current_function.hpp>
+#include <iostream>
+
 #ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning (disable: 4127)
@@ -55,7 +58,7 @@ public:
         , m_release(release)
         , m_installDir(installDir)
     {
-
+        std::cerr << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     }
 
 signals:
@@ -63,24 +66,28 @@ signals:
 private:
     void run()
     {
+        std::cerr << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
         QStringList params;
 
         params << m_dobmakeBatchScript;
         params << "--skip-tests";
 
 #if QT_VERSION >= 0x050000
+        std::cerr << "qt5" <<std::endl;
         const QString null = QProcess::nullDevice();
 #endif
 
 #if defined(linux) || defined(__linux) || defined(__linux__)
         params << "--config";
 #  if QT_VERSION < 0x050000
+        std::cerr << "qt4" <<std::endl;
         const QString null("/dev/null");
 #  endif
 
 #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
         params << "--configs";
 #  if QT_VERSION < 0x050000
+        std::cerr << "qt4" <<std::endl;
         const QString null("nul");
 #  endif
 #else
