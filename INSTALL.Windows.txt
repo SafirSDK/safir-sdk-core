@@ -60,9 +60,8 @@ Boost
 You can either build boost from source yourself (follow the instructions on boost.org), or download a binary installer that installs everything for you, saving you the build time. The situation around the binary installers is changing quite a lot at the moment, with boostpro.com having shut down and new installers are appearing. These instructions will work for boost 1.54, but might have to be modified for newer boost versions if the installer gets modified.
 
 Go to http://sourceforge.net/projects/boost/files/boost-binaries/ and download the binaries for your compiler and architecture. (e.g. boost_1_54_0-msvc-10.0-32.exe for 1.54 with 32-bit VS2010).
-Run the installer and let it install to a suitable directory. Go to that directory and rename the binary library directory to "lib" (e.g. rename lib64-msvc-10.0 to lib).
-Set the BOOST_ROOT environment variable to point to the installation directory, e.g. C:\local\boost_1_54_0
-Add the lib of the boost installation (e.g. %BOOST_ROOT%\lib) to your PATH.
+Run the installer and install to C:\boost. Go to that directory and rename the binary library directory to "lib" (e.g. rename lib64-msvc-10.0 to lib).
+Add the lib of the boost installation (e.g. c:\boost\lib) to your PATH.
 
 For some boost versions there are patches that need to be installed for Safir SDK to work correctly. The Safir SDK Core build script will check whether patches need to be installed, and tell you to install them if they are needed. The easisest way to install the patches for your version is to use the CMake file in the build/patches directory, run 'cmake . -G "NMake Makefiles"', 'nmake install'.
 
