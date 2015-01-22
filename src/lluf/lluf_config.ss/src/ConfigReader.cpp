@@ -141,6 +141,11 @@ namespace Internal
         return Safir::Utilities::Internal::ExpandSpecial(str);
     }
 
+    unsigned int Expansion::GetSafirInstance()
+    {
+        return Safir::Utilities::Internal::GetSafirInstance();
+    }
+
     std::string Expansion::GetSafirInstanceSuffix()
     {
         return Safir::Utilities::Internal::GetSafirInstanceSuffix();

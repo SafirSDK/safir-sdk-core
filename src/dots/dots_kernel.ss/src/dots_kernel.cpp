@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2004-2014 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Joel Ottosson / stjoot
 *
@@ -134,6 +135,26 @@ namespace
         char* dest = new char[str.size() + 1];
         strcpy(dest,str.c_str());
         return dest;
+    }
+
+    bool IsValidSection(const boost::property_tree::ptree& ptree)
+    {
+        if (ptree.empty())
+        {
+            return false;
+        }
+
+        const boost::optional<unsigned int> safirInstance =
+            ptree.get_optional<unsigned int>("safir_instance");
+
+        if (safirInstance &&
+            Safir::Utilities::Internal::Expansion::GetSafirInstance() != safirInstance.get())
+        {
+            // This section is for a different safir instance
+            return false;
+        }
+
+        return true;
     }
 }
 
@@ -1980,9 +2001,7 @@ void DotsC_GetGeneratedLibraryList(DotsC_GeneratedLibrary*& generatedLibraries,
         for (boost::property_tree::ptree::const_iterator it = ptree.begin();
              it != ptree.end(); ++it)
         {
-            const bool isSection = !it->second.empty();
-
-            if (isSection)
+            if (IsValidSection(it->second))
             {
                 ++size;
             }
@@ -1996,9 +2015,7 @@ void DotsC_GetGeneratedLibraryList(DotsC_GeneratedLibrary*& generatedLibraries,
         for (boost::property_tree::ptree::const_iterator it = ptree.begin();
              it != ptree.end(); ++it)
         {
-            const bool isSection = !it->second.empty();
-
-            if (isSection)
+            if (IsValidSection(it->second))
             {
                 const std::string module = it->first;
                 generatedLibraries[i].name = CopyStringToNew(module);
