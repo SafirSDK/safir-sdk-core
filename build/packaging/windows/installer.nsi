@@ -312,7 +312,7 @@ Section "Development" SecDevelopment
   # Set BOOST_ROOT environment variable
   #
   ; set variable
-  WriteRegExpandStr ${env_hklm} BOOST_ROOT MYVAL "$INSTDIR"
+  WriteRegExpandStr ${env_hklm} BOOST_ROOT "$INSTDIR"
   ; make sure windows knows about the change
   SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
 
