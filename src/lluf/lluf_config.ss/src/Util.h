@@ -157,27 +157,30 @@ namespace Internal
         return ExpandEnvironment(res); 
     }
 
-
-    std::string GetSafirInstanceSuffix()
+    unsigned int GetSafirInstance()
     {
         try
         {
             const std::string env = GetEnv("SAFIR_INSTANCE", std::nothrow);
-            
+
             if (env.empty())
             {
-                return "_0";
+                return 0;
             }
             else
             {
-                const unsigned int inst = boost::lexical_cast<unsigned int>(env);
-                return std::string("_") + boost::lexical_cast<std::string>(inst);
+                return boost::lexical_cast<unsigned int>(env);
             }
         }
         catch(const boost::bad_lexical_cast&)
         {
             throw std::logic_error("SAFIR_INSTANCE is not set to a number");
         }
+    }
+
+    std::string GetSafirInstanceSuffix()
+    {
+        return std::string("_") + boost::lexical_cast<std::string>(GetSafirInstance());
     }
 
 
