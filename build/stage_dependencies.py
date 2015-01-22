@@ -100,7 +100,7 @@ class __WindowsStager(object):
         self.logger.log("Copying boost stuff", "detail")
         boost_dir = os.environ.get("BOOST_ROOT")
         #Try some other directory
-        if boost_dir is None and os.path.isdir(os.path.join("C:","boost"))
+        if boost_dir is None and os.path.isdir(os.path.join("C:","boost")):
             boost_dir = os.path.join("C:","boost")
         if boost_dir is None:
             raise StagingError("Failed to find boost installation")
