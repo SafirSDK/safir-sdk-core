@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2014 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Anders Widén / anders.widen@consoden.se
 *
@@ -49,7 +50,7 @@ BOOST_AUTO_TEST_CASE(GetDouDirectories)
 
     std::vector<std::pair<std::string,std::string> > douFilePaths = ConfigHelper::GetDouDirectories(reader);
 
-    if (Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix() == "_0")
+    if (Safir::Utilities::Internal::Expansion::GetSafirInstance() == 0)
     {
         BOOST_REQUIRE_EQUAL (douFilePaths.size(), 4U);
 
@@ -74,7 +75,7 @@ BOOST_AUTO_TEST_CASE(GetDouDirectories)
             BOOST_FAIL("Unexpected path");
         }
     }
-    else if (Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix() == "_1")
+    else if (Safir::Utilities::Internal::Expansion::GetSafirInstance() == 1)
     {
         BOOST_REQUIRE_EQUAL (douFilePaths.size(), 4U);
 
