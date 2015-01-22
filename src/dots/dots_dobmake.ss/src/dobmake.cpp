@@ -42,11 +42,6 @@
 #pragma warning(pop)
 #endif
 
-//TODO: Add choice for 32bit on win64
-//TODO: Add a clean button
-//TODO: change the way the folder is selected. Instead make it so that a CMakeLists.txt file has to be chosen.
-//TODO: add dots_configuration_check stuff?
-
 Dobmake::Dobmake(QWidget *parent)
     : QDialog(parent)
     , m_buildRunning(false)
@@ -60,10 +55,17 @@ Dobmake::Dobmake(QWidget *parent)
     ui->configCheckButtons->hide();
     m_debug = false;
     m_release = true;
+    ui->archButtons->hide();
+    ui->archLabel->hide();
 #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
     ui->configRadioButtons->hide();
     m_debug = true;
     m_release = true;
+    if (sizeof (void*) != 8)
+    {
+        ui->archButtons->hide();
+        ui->archLabel->hide();
+    }
 #else
 #  error Dobmake does not know how to handle this platform
 #endif
@@ -116,22 +118,19 @@ QString Dobmake::GetDobmakeBatchScript()
 
 void Dobmake::on_douDirectoryBrowse_clicked()
 {
-    QFileDialog dialog;
-    dialog.setFileMode(QFileDialog::Directory);
-    dialog.setOption(QFileDialog::ShowDirsOnly);
-
-    if (dialog.exec())
-    {
-        ui->douDirectory->setText(QDir::toNativeSeparators(dialog.selectedFiles()[0]));
-    }
+    const QFileInfo fi(QFileDialog::getOpenFileName(this,
+                                                    "Locate your dou-file directory",
+                                                    "",
+                                                    "CMakeLists.txt"));
+    ui->douDirectory->setText(QDir::toNativeSeparators(fi.dir().path()));
 }
 
 void Dobmake::on_douDirectory_textChanged(const QString &path)
 {
-    const QFile dir(path);
-    const QFile cmakelists(path + QDir::separator() + "CMakeLists.txt");
+    const QFileInfo dir(path);
+    const QFileInfo cmakelists(path + QDir::separator() + "CMakeLists.txt");
 
-    if (dir.exists() && cmakelists.exists())
+    if (dir.exists() && dir.isDir() && cmakelists.exists() && cmakelists.isFile())
     {
         ui->douDirectory->setStyleSheet("");
     }
@@ -146,8 +145,8 @@ void Dobmake::on_douDirectory_textChanged(const QString &path)
 
 void Dobmake::on_installDirectory_textChanged(const QString &path)
 {
-    const QFile dir(path);
-    if (dir.exists())
+    const QFileInfo dir(path);
+    if (dir.exists() && dir.isDir())
     {
         ui->installDirectory->setStyleSheet("");
     }
@@ -212,11 +211,12 @@ void Dobmake::OpenLog(const bool ignoreCheckbox)
 void Dobmake::on_build_clicked()
 {
     BuildThread* worker = new BuildThread(this,
-                                      GetDobmakeBatchScript(),
-                                      ui->douDirectory->text(),
-                                      m_debug,
-                                      m_release,
-                                      ""); //no installation
+                                          GetDobmakeBatchScript(),
+                                          ui->douDirectory->text(),
+                                          m_debug,
+                                          m_release,
+                                          ui->radio32bit->isChecked(),
+                                          ""); //no installation
 
     connect(worker, SIGNAL(BuildComplete(bool)), this, SLOT(BuildComplete(bool)));
     connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
@@ -235,6 +235,7 @@ void Dobmake::on_buildAndInstall_clicked()
                                           ui->douDirectory->text(),
                                           m_debug,
                                           m_release,
+                                          ui->radio32bit->isChecked(),
                                           ui->installDirectory->text());
 
     connect(worker, SIGNAL(BuildComplete(bool)), this, SLOT(BuildComplete(bool)));

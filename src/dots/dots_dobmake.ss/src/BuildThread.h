@@ -48,12 +48,14 @@ public:
                 const QString& buildDir,
                 const bool debug,
                 const bool release,
+                const bool force32Bit, //adds --32-bit to cmd line
                 const QString& installDir)
         : QThread(parent)
         , m_dobmakeBatchScript(dobmakeBatchScript)
         , m_buildDir(buildDir)
         , m_debug(debug)
         , m_release(release)
+        , m_force32Bit(force32Bit)
         , m_installDir(installDir)
     {
 
@@ -70,7 +72,7 @@ private:
         params << m_dobmakeBatchScript;
         params << "--skip-tests";
         params << "--verbose";
-        
+
 #if defined(linux) || defined(__linux) || defined(__linux__)
         params << "--config";
 #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
@@ -87,6 +89,11 @@ private:
         if (m_release)
         {
             params << "RelWithDebInfo";
+        }
+
+        if (m_force32Bit)
+        {
+            params << "--32-bit";
         }
 
         if (!m_installDir.isEmpty())
@@ -110,5 +117,6 @@ private:
     const QString m_buildDir;
     const bool m_debug;
     const bool m_release;
+    const bool m_force32Bit;
     const QString m_installDir;
 };
