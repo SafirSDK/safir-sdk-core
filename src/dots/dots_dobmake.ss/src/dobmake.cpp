@@ -61,11 +61,23 @@ Dobmake::Dobmake(QWidget *parent)
     ui->configRadioButtons->hide();
     m_debug = true;
     m_release = true;
+
+    //disable constant conditional expression warning
+#  ifdef _MSC_VER
+#    pragma warning(push)
+#    pragma warning (disable: 4127)
+#  endif
+
     if (sizeof (void*) != 8)
     {
         ui->archButtons->hide();
         ui->archLabel->hide();
     }
+
+#  ifdef _MSC_VER
+#    pragma warning(pop)
+#  endif
+
 #else
 #  error Dobmake does not know how to handle this platform
 #endif
