@@ -380,7 +380,3 @@ INSTALL(FILES
   cmake/UseJavaWithManifest/UseJavaClassFilelist.cmake
   DESTINATION ${SAFIR_INSTALL_DESTINATION_CMAKE}/UseJavaWithManifest
   COMPONENT Development)
-
-
-
-#TODO: Add links to documentation in installed package.

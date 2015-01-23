@@ -88,9 +88,10 @@ package com.saabgroup.safir.dob;
          *
          * This method is guaranteed to be called once for each invocation of the following methods:
          * (This is true even when there is no initial injection data at all)
-         * @li ConnectionBase#RegisterEntityHandlerInjection
-         * @li ConnectionBase#RegisterEntityHandlerPending
-         *
+         * <ul>
+         * <li>ConnectionBase#RegisterEntityHandlerInjection</li>
+         * <li>ConnectionBase#RegisterEntityHandlerPending</li>
+         * </ul>
          * @param typeId Type id in corresponding registration.
          * @param handlerId Handler id in corresponding registration.
          */

@@ -5,9 +5,6 @@ ADD_EXECUTABLE(VehicleAppCpp
   ServiceHandler.h ServiceHandler.cpp
   main.cpp)
 
-#TODO: remove ACE from the code
-ADD_DEFINITIONS(-DNO_ACE)
-
 TARGET_LINK_LIBRARIES(VehicleAppCpp PRIVATE
   safir_generated-Example-cpp
   ${SAFIR_SDK_CORE_LIBRARIES})

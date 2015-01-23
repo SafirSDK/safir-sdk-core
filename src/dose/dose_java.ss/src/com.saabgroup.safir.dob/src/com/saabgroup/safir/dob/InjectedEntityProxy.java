@@ -147,9 +147,10 @@ public class InjectedEntityProxy {
      * This method retrieves the entity as it is before the injection has been completed.
      *
      * Can be used when a "current" state exists, i.e. from within the following callbacks:
-     * @li EntityInjectionHandler#OnInjectedUpdatedEntity
-     * @li EntityInjectionHandler#OnInjectedDeletedEntity
-     *
+     * <ul>
+     * <li>EntityInjectionHandler#OnInjectedUpdatedEntity</li>
+     * <li>EntityInjectionHandler#OnInjectedDeletedEntity</li>
+     * </ul>
      * No change flags will be set in the returned entity.
      *
      * @return Previous entity.

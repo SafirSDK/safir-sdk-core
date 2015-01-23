@@ -90,17 +90,6 @@ public abstract class ArrayContainer<T extends ContainerBase>
     }
 
 
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#copy()
-     *//*
-    @Override
-    public void copy(ContainerBase other) {
-        super.copy(other);
-        StringContainer that = (StringContainer)other;
-        m_isNull = that.m_isNull;
-        m_value = that.m_value;
-        }*/
-
     @SuppressWarnings("unchecked")
     protected ArrayContainer(ArrayContainer<T> other) {
         m_array = (ArrayList<T>) other.m_array.clone();

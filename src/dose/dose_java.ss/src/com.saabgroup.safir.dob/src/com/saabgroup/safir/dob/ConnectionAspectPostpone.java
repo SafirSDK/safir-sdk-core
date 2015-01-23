@@ -53,30 +53,32 @@ public class ConnectionAspectPostpone
      * Used by a consumer to postpone dispatching of current callback method for the dispatched type and its subclasses.
      *
      * This method can be called from within the following callbacks:
-     * @li EntitySubscriber#OnNewEntity
-     * @li EntitySubscriber#OnUpdatedEntity
-     * @li EntitySubscriber#OnDeletedEntity
-     * @li EntityInjectionBase#OnInjectedNewEntity
-     * @li EntityInjectionBase#OnInjectedUpdatedEntity
-     * @li EntityInjectionBase#OnInjectedDeletedEntity
-     * @li EntityRequestBase#OnCreateRequest
-     * @li EntityRequestBase#OnUpdateRequest
-     * @li EntityRequestBase#OnDeleteRequest
-     * @li ServiceRequestBase#OnServiceRequest
-     * @li MessageSubscriber#OnMessage
-     *
+     * <ul>
+     * <li>EntitySubscriber#onNewEntity</li>
+     * <li>EntitySubscriber#onUpdatedEntity</li>
+     * <li>EntitySubscriber#onDeletedEntity</li>
+     * <li>EntityInjectionBase#onInjectedNewEntity</li>
+     * <li>EntityInjectionBase#onInjectedUpdatedEntity</li>
+     * <li>EntityInjectionBase#onInjectedDeletedEntity</li>
+     * <li>EntityRequestBase#onCreateRequest</li>
+     * <li>EntityRequestBase#onUpdateRequest</li>
+     * <li>EntityRequestBase#onDeleteRequest</li>
+     * <li>ServiceRequestBase#onServiceRequest</li>
+     * <li>MessageSubscriber#onMessage</li>
+     *</ul>
      * but NOT from the following callbacks:
-     * @li RevokedRegistrationBase#OnRevokedRegistration
-     * @li CompletedRegistrationBase#OnCompletedRegistration
-     * @li EntityInjectionBase#OnInitialInjectionsDone
-     * @li StopHandler#OnStopOrder
-     * @li Dispatcher#OnDoDispatch
-     * @li Requestor#OnResponse
-     * @li Requestor#OnNotRequestOverflow
-     * @li MessageSender#OnNotMessageOverflow
-     * @li RegistrationSubscriber#OnRegistered
-     * @li RegistrationSubscriber#OnUnregistered
-     *
+     * <ul>
+     * <li>RevokedRegistrationBase#onRevokedRegistration</li>
+     * <li>CompletedRegistrationBase#onCompletedRegistration</li>
+     * <li>EntityInjectionBase#onInitialInjectionsDone</li>
+     * <li>StopHandler#onStopOrder</li>
+     * <li>Dispatcher#onDoDispatch</li>
+     * <li>Requestor#onResponse</li>
+     * <li>Requestor#onNotRequestOverflow</li>
+     * <li>MessageSender#onNotMessageOverflow</li>
+     * <li>RegistrationSubscriber#onRegistered</li>
+     * <li>RegistrationSubscriber#onUnregistered</li>
+     * </ul>
      * The dispatching is automatically resumed when an OnNotRequestOverflow or OnNotMessageOverflow is
      * dispatched to the application which means that the application doesn't need to invoke ResumePostponed()
      * by itself when the original postpone has been made because of an overflow situation.
@@ -127,9 +129,10 @@ public class ConnectionAspectPostpone
      * possibility to wait for the entity instance to be completly updated.
      *
      * This method can be called from within the following callbacks:
-     * @li EntityInjectionBase#OnInjectedNewEntity
-     * @li EntityInjectionBase#OnInjectedUpdatedEntity
-     *
+     * <ul>
+     * <li>EntityInjectionBase#OnInjectedNewEntity</li>
+     * <li>EntityInjectionBase#OnInjectedUpdatedEntity</li>
+     * </ul>
      * The dispatching of the injected entity instance is resumed when it is updated by the external source.
      */
     public void incompleteInjectionState()

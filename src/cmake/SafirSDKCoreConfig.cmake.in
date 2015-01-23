@@ -1,23 +1,14 @@
 # - Config file for the SafirSDKCore package
-# It defines the following variables
-#  FOOBAR_INCLUDE_DIRS - include directories for FooBar
-#  FOOBAR_LIBRARIES    - libraries to link against
-#  FOOBAR_EXECUTABLE   - the bar executable
-#TODO document this!
 
 # Compute paths
 set(SAFIR_SDK_CORE_CMAKE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
-#TODO: correct way to do this?
+#finding the install directory is based on how we install the cmake files
+#which is defined in the top level CMakeLists.txt file.
 if (MSVC)
   get_filename_component(SAFIR_SDK_CORE_INSTALL_DIR ${CMAKE_CURRENT_LIST_DIR}/../ ABSOLUTE)
 else()
   get_filename_component(SAFIR_SDK_CORE_INSTALL_DIR ${CMAKE_CURRENT_LIST_DIR}/../../.. ABSOLUTE)
-endif()
-
-#We only use the istalled export file on non-msvc platforms
-if (NOT MSVC)
-  include("${SAFIR_SDK_CORE_CMAKE_DIR}/SafirSDKCore.cmake")
 endif()
 
 include("${SAFIR_SDK_CORE_CMAKE_DIR}/build_generated.cmake")
@@ -30,14 +21,22 @@ set(SAFIR_SDK_CORE_CSHARP_LIBRARY_PATH "${SAFIR_SDK_CORE_INSTALL_DIR}/@SAFIR_INS
 set(SAFIR_SDK_CORE_JAVA_DIR "${SAFIR_SDK_CORE_INSTALL_DIR}/@SAFIR_INSTALL_DESTINATION_JAR@")
 set(SAFIR_SDK_CORE_GENERATION_DIR "${SAFIR_SDK_CORE_INSTALL_DIR}/@SAFIR_INSTALL_DESTINATION_GENERATION@")
 
+set(libraries olib swre_interface_cpp douf_time_cpp dose_cpp
+              safir_generated-Core-cpp dots_cpp logging_cpp lluf_utils)
 
-#We don't need this set to anything in particular on msvc, since
-#there we have autolinking through #pragma comment
-if (NOT MSVC)
-  set(SAFIR_SDK_CORE_LIBRARIES olib swre_interface_cpp douf_time_cpp
-                               dose_cpp safir_generated-Core-cpp dots_cpp
-                               logging_cpp lluf_utils)
+if (MSVC)
+  foreach(lib IN LISTS libraries)
+    list (APPEND SAFIR_SDK_CORE_LIBRARIES
+            debug "${SAFIR_SDK_CORE_LIBRARIES_DIR}/${lib}d.lib"
+            optimized "${SAFIR_SDK_CORE_LIBRARIES_DIR}/${lib}.lib")
+  endforeach()
+  #on windows we assume that boost has been installed into the
+  #the safir installation directory, like our installer does.
+else()
+  include("${SAFIR_SDK_CORE_CMAKE_DIR}/SafirSDKCore.cmake")
+  set(SAFIR_SDK_CORE_LIBRARIES ${libraries})
 endif()
+unset(libraries)
 
 set(SAFIR_SDK_CORE_DOTNET_SETTINGS "${SAFIR_SDK_CORE_CMAKE_DIR}/SafirLoadCSharp.cmake")
 set(SAFIR_SDK_CORE_JAVA_SETTINGS "${SAFIR_SDK_CORE_CMAKE_DIR}/SafirLoadJava.cmake")

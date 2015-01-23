@@ -66,12 +66,6 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
     include(${SAFIR_SDK_CORE_DOTNET_SETTINGS})
     include(${SAFIR_SDK_CORE_JAVA_SETTINGS})
 
-    #on windows we assume that boost has been installed into the
-    #the safir installation directory, like our installer does.
-    if (MSVC)
-      set(BOOST_ROOT ${SAFIR_SDK_CORE_INSTALL_DIR})
-    endif()
-
     #We need boost headers.
     set(Boost_FIND_QUIETLY True)
     find_package(Boost COMPONENTS system thread REQUIRED)
@@ -178,9 +172,6 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
 
     string (REGEX REPLACE "^([a-zA-Z\\.0-9]*)\\.[a-zA-Z0-9]+$" "\\1" namespace ${base_name})
     string (REGEX REPLACE "^[a-zA-Z\\.0-9]*\\.([a-zA-Z0-9]+)$" "\\1" java_base_name ${base_name})
-
-    #  TODO: we need to read namespace files from our dependencies too!
-    #or maybe warn when there is a difference? No, thats no good....
 
     #perform prefix insertion
     foreach(key ${java_namespace_keys})

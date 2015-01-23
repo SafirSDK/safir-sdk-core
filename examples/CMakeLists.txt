@@ -18,7 +18,9 @@ link_directories(${Boost_LIBRARY_DIRS})
 ADD_DEFINITIONS(-DBOOST_ALL_DYN_LINK)
 
 if (MSVC)
+  ADD_DEFINITIONS(-D_WINSOCK_DEPRECATED_NO_WARNINGS)
   ADD_DEFINITIONS(-D_WIN32_WINNT=0x0501)
+  ADD_DEFINITIONS(-DWIN32_LEAN_AND_MEAN)
 endif()
 
 #load macros for building dotnet stuff with cmake

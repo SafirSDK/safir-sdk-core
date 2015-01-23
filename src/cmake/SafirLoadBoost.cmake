@@ -33,7 +33,6 @@ if (MSVC)
   set (Boost_THREAD_LIBRARY ${Boost_DATE_TIME_LIBRARY} ${Boost_THREAD_LIBRARY})
 endif()
 
-#TODO: remove this?
 #make sure all linking is explicit as to what parts of boost it needs, so we clear the variable
 #that "contains all".
 SET(Boost_LIBRARIES "DONT_USE_Boost_LIBRARIES_VARIABLE")

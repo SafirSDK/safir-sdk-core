@@ -128,8 +128,7 @@ public class ConnectionAspectMisc
     /**
      * Get the context that the connection is opened in.
      *
-     * @param queue [in] The queue to get info for.
-     * @return The current size of the queue.
+     * @return The context of the connection
      */
     public int getContext()
     {

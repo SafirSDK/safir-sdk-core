@@ -315,9 +315,10 @@ public class EntityProxy {
      * Used to get the entity state that preceeded this state.
      *
      * Can be used when a "previous" state exists, that is, from within the following callbacks:
-     * @li EntitySubscriber#onUpdatedEntity
-     * @li EntitySubscriber#onDeletedEntity
-     *
+     * <ul>
+     * <li>EntitySubscriber#onUpdatedEntity</li>
+     * <li>EntitySubscriber#onDeletedEntity</li>
+     * </ul>
      * No change flags will be set in the returned entity.
      *
      * Calling this function inside an onDeletedEntity when the subscription was set up with

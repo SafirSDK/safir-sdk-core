@@ -199,6 +199,7 @@ class Logger(object):
         self.__buildlog.write("<body>\n")
         self.__buildlog.write("<h1>Safir SDK Core Build Log</h1>")
         self.__buildlog.write("<b>Command line:</b> " + " ".join(sys.argv) + "<br/>")
+        self.__buildlog.write("<b>Working directory:</b> " + os.getcwd() + "<br/>")
         self.__buildlog.write("<b>Start time (local time)</b>: " + time.asctime() + "<br/>")
         self.__buildlog.write("<h2>Starting build</h2>\n")
 

@@ -80,7 +80,7 @@ private slots:
 private:
     void UpdateInstallButton();
     void UpdateBuildButton();
-    void OpenLog();
+    void OpenLog(const bool ignoreCheckbox = false);
     
     bool m_debug;
     bool m_release;

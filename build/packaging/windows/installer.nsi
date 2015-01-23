@@ -42,6 +42,12 @@
 ;Check windows version header
 !include WinVer.nsh
 
+;include for some of the windows messages defines
+!include "winmessages.nsh"
+
+# HKLM (all users) defines
+!define env_hklm 'HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"'
+
 ;Set a compressor that gives us very good ratios
 SetCompressor /SOLID lzma
 
@@ -303,6 +309,15 @@ Section "Development" SecDevelopment
   File /r "${StageDirDevelopment}\*"
 
   #
+  # Set BOOST_ROOT environment variable
+  #
+  ; set variable
+  WriteRegExpandStr ${env_hklm} BOOST_ROOT "$INSTDIR"
+  ; make sure windows knows about the change
+  SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
+
+
+  #
   #Start menu items
   #
 
@@ -394,6 +409,11 @@ Section "Uninstall"
 
   ;remove from PATH
   nsExec::ExecToLog '"$INSTDIR\installer_utils\pathed" "/MACHINE" "/REMOVE" "$INSTDIR\bin"'
+
+   ; delete BOOST_ROOT environment variable
+   DeleteRegValue ${env_hklm} BOOST_ROOT
+   ; make sure windows knows about the change
+   SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
 
   ;remove assemblies from GAC
   nsExec::ExecToLog '"$INSTDIR\installer_utils\gactool" "--uninstall" "$INSTDIR\dotnet"'

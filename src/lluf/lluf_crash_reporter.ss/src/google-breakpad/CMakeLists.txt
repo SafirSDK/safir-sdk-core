@@ -24,9 +24,7 @@ file (DOWNLOAD ${CACHE_URL}
   )
 list (GET download_result 0 download_result_0)
 
-if (NOT download_result_0 EQUAL 0)
-  message(STATUS "Failed to download cached tarball: [${download_result}]")
-else()
+if (download_result_0 EQUAL 0)
   file(MD5 ${CMAKE_CURRENT_BINARY_DIR}/google-breakpad.tar.gz md5)
   if (NOT md5 STREQUAL TARBALL_MD5)
     message(STATUS "MD5 mismatch. Expected ${TARBALL_MD5}")
