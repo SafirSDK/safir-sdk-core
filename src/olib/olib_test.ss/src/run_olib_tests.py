@@ -30,11 +30,6 @@ print("Not implemented yet!")
 sys.exit(1)
 
 
-#TODO!!
-
-
-
-
 # if("$ENV{Driver}" STREQUAL "")
 #   set(ENV{Driver} mimer)
 #   message("'Driver' environment variable is not set, using '$ENV{Driver}'")
