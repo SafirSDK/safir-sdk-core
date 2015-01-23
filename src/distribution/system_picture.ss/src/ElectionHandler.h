@@ -128,14 +128,7 @@ namespace SP
 
             lllog(3) << "SP: AloneTimeout will be " << boost::chrono::duration_cast<boost::chrono::milliseconds>(m_aloneTimeout) << std::endl;
             lllog(3) << "SP: ElectionTimeout will be " << boost::chrono::duration_cast<boost::chrono::milliseconds>(m_electionTimeout) << std::endl;
-            m_electionTimer.expires_from_now(m_aloneTimeout);
-            m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
-                                                     {
-                                                         if (!error)
-                                                         {
-                                                             StartElection();
-                                                         }
-                                                     }));
+            StartElection(true);
         }
 
 
@@ -161,7 +154,7 @@ namespace SP
                                       std::wcout << statistics << std::endl;
                                       }*/
                                   m_lastStatistics = std::move(statistics);
-                                  StartElection();
+                                  StartElection(true);
                               });
         }
 
@@ -217,7 +210,7 @@ namespace SP
 
 
         //must be called in strand
-        void StartElection()
+        void StartElection(bool nodesChanged)
         {
             //cancel any other pending elections
             m_electionTimer.cancel(); //
@@ -226,7 +219,7 @@ namespace SP
             //we will not start too many elections
             //m_electionTimer.expires_from_now(boost::chrono::milliseconds(100));
             //TODO: what timeout should I use here?
-            m_electionTimer.expires_from_now(m_aloneTimeout);
+            m_electionTimer.expires_from_now(nodesChanged ? m_aloneTimeout : boost::chrono::milliseconds(100));
             m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
             {
                 if (!!error)
@@ -363,7 +356,7 @@ namespace SP
                             m_pendingAlives[from] = std::make_pair(nodeTypeId, message.election_id());
                             SendPendingElectionMessages();
 
-                            StartElection();
+                            StartElection(false);
                         }
                     }
                     break;
@@ -403,7 +396,7 @@ namespace SP
                             lllog(5) << "SP: Got victory from someone smaller than me ("
                                      << from << "), starting new election." << std::endl;
 
-                            StartElection();
+                            StartElection(false);
                         }
                     }
                     break;
