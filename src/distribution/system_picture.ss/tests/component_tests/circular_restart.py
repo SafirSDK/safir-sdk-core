@@ -105,20 +105,30 @@ def launch_node(number, args):
 def stop(proc):
     try:
         if proc.poll() is not None:
+            log("   poll returned value")
             return
+        log("   calling terminate")
         proc.terminate()
+        log("   calling wait")
         proc.wait() #comment this line to get procs killed after 30s
         for i in range(300): #30 seconds
+            log("   calling poll", i)
             if proc.poll() is not None:
+                log("   returning")
                 return
             time.sleep(0.1)
+        log("   calling kill")
         proc.kill()
+        log("   calling wait")
         proc.wait()
     except ProcessLookupError:
-        pass
+        log("   Caught ProcessLookupError")
+        traceback.print_exc()
 
 def stop_node(i, control, main):
+    log(" - Stopping control")
     stop(control)
+    log(" - Stopping main")
     stop(main)
     if control.returncode != 0:
         log ("CONTROL", i, "RETURN CODE",control.returncode)
