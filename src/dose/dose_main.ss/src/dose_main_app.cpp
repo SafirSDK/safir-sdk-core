@@ -219,7 +219,7 @@ namespace Internal
     void DoseApp::HandleSignal(const boost::system::error_code& error,
                                const int signalNumber)
     {
-        lllog(3) << "CTRL: Got signal " << signalNumber << " ... stop sequence initiated." << std::endl;
+        lllog(3) << "dose_main: Got signal " << signalNumber << " shutting down." << std::endl;
 
         if (error)
         {
