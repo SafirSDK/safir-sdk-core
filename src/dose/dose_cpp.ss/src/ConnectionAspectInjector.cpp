@@ -40,7 +40,7 @@ namespace Dob
 
         Typesystem::BinarySerialization bin;
         Typesystem::Serialization::ToBinary(entity, bin);
-        //TODO: serialize straight to shared memory
+
         DoseC_InjectEntity(GetControllerId(),
                            &bin[0],
                            instanceId.GetRawValue(),
@@ -83,7 +83,7 @@ namespace Dob
 
         Typesystem::BinarySerialization bin;
         Typesystem::Serialization::ToBinary(entity, bin);
-        //TODO: serialize straight to shared memory
+
         DoseC_SetEntity(GetControllerId(),
                         &bin[0],
                         instanceId.GetRawValue(),

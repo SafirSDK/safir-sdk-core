@@ -782,7 +782,6 @@ namespace Safir.Dob
         {
             byte success;
 
-            //TODO: serialize directly to shared memory
             System.Int32 blobSize = message.CalculateBlobSize();
             System.IntPtr blob = Marshal.AllocHGlobal(blobSize); //allocate blob
             System.IntPtr beginningOfUnused;
@@ -847,7 +846,6 @@ namespace Safir.Dob
             byte success;
             System.Int32 requestId = -1;
 
-            //TODO: serialize directly to shared memory
             System.Int32 blobSize = entity.CalculateBlobSize();
             System.IntPtr blob = Marshal.AllocHGlobal(blobSize); //allocate blob
             System.IntPtr beginningOfUnused;
@@ -920,7 +918,6 @@ namespace Safir.Dob
             byte success;
             System.Int32 requestId = -1;
 
-            //TODO: serialize directly to shared memory
             System.Int32 blobSize = entity.CalculateBlobSize();
             System.IntPtr blob = Marshal.AllocHGlobal(blobSize); //allocate blob
             System.IntPtr beginningOfUnused;
@@ -984,7 +981,6 @@ namespace Safir.Dob
             byte success;
             System.Int32 requestId = -1;
 
-            //TODO: serialize directly to shared memory
             System.Int32 blobSize = entity.CalculateBlobSize();
             System.IntPtr blob = Marshal.AllocHGlobal(blobSize); //allocate blob
             System.IntPtr beginningOfUnused;
@@ -1088,7 +1084,6 @@ namespace Safir.Dob
             byte success;
             System.Int32 requestId = -1;
 
-            //TODO: serialize directly to shared memory
             System.Int32 blobSize = service.CalculateBlobSize();
             System.IntPtr blob = Marshal.AllocHGlobal(blobSize); //allocate blob
             System.IntPtr beginningOfUnused;
@@ -1202,7 +1197,6 @@ namespace Safir.Dob
         {
             byte success;
 
-            //TODO: serialize directly to shared memory
             System.Int32 blobSize = entity.CalculateBlobSize();
             System.IntPtr blob = Marshal.AllocHGlobal(blobSize); //allocate blob
             System.IntPtr beginningOfUnused;

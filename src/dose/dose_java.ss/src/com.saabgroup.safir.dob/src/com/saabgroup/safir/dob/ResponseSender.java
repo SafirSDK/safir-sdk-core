@@ -73,8 +73,6 @@ public class ResponseSender
 
         boolean [] success = new boolean [1];
 
-
-        //TODO: serialize directly to shared memory
         int blobSize = response.calculateBlobSize();
         java.nio.ByteBuffer blob = java.nio.ByteBuffer.allocateDirect(blobSize); //allocate blob
         int beginningOfUnused = com.saabgroup.safir.dob.typesystem.InternalOperations.formatBlob(blob, blobSize, response.getTypeId());

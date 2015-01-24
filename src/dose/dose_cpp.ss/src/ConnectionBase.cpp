@@ -422,7 +422,7 @@ namespace Dob
 
         Typesystem::BinarySerialization bin;
         Typesystem::Serialization::ToBinary(message,bin);
-        //TODO: serialize straight to shared memory
+
         DoseC_SendMessage(GetControllerId(),
                           &bin[0],
                           channelId.GetRawValue(),
@@ -447,7 +447,6 @@ namespace Dob
 
         Typesystem::BinarySerialization bin;
         Typesystem::Serialization::ToBinary(request,bin);
-        //TODO: serialize straight to shared memory
 
         RequestId reqId;
         DoseC_ServiceRequest(GetControllerId(),
@@ -474,7 +473,6 @@ namespace Dob
 
         Typesystem::BinarySerialization bin;
         Typesystem::Serialization::ToBinary(request,bin);
-        //TODO: serialize straight to shared memory
 
         Dob::RequestId reqId;
         DoseC_CreateRequest(GetControllerId(),
@@ -505,7 +503,6 @@ namespace Dob
 
         Typesystem::BinarySerialization bin;
         Typesystem::Serialization::ToBinary(request,bin);
-        //TODO: serialize straight to shared memory
 
         Dob::RequestId reqId;
         DoseC_CreateRequest(GetControllerId(),
@@ -535,7 +532,6 @@ namespace Dob
 
         Typesystem::BinarySerialization bin;
         Typesystem::Serialization::ToBinary(request,bin);
-        //TODO: serialize straight to shared memory
 
         Dob::RequestId reqId;
         DoseC_UpdateRequest(GetControllerId(),
@@ -624,7 +620,7 @@ namespace Dob
 
         Typesystem::BinarySerialization bin;
         Typesystem::Serialization::ToBinary(entity, bin);
-        //TODO: serialize straight to shared memory
+
         DoseC_SetEntity(GetControllerId(),
                         &bin[0],
                         instanceId.GetRawValue(),

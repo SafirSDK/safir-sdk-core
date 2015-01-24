@@ -59,7 +59,6 @@ public class ConnectionAspectInjector
     {
         boolean [] success = new boolean [1];
 
-        //TODO: serialize directly to shared memory
         int blobSize = entity.calculateBlobSize();
         java.nio.ByteBuffer blob = java.nio.ByteBuffer.allocateDirect(blobSize); //allocate blob
         int beginningOfUnused = com.saabgroup.safir.dob.typesystem.InternalOperations.formatBlob(blob, blobSize, entity.getTypeId());
@@ -123,7 +122,6 @@ public class ConnectionAspectInjector
     {
         boolean [] success = new boolean [1];
 
-        //TODO: serialize directly to shared memory
         int blobSize = entity.calculateBlobSize();
         java.nio.ByteBuffer blob = java.nio.ByteBuffer.allocateDirect(blobSize); //allocate blob
         int beginningOfUnused = com.saabgroup.safir.dob.typesystem.InternalOperations.formatBlob(blob, blobSize, entity.getTypeId());
