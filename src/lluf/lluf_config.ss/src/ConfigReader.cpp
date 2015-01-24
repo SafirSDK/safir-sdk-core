@@ -53,11 +53,6 @@ namespace
     }
 
 
-    //TODO: consider making this function able to detect dependency errors.
-    //It should really not be possible to have circular dependencies
-    //and it should only be possible to depend on things that have already
-    //been declared in typesystem.ini, i.e. no dependencies on something that
-    //is declared further down in the file.
     void GetDouDependenciesInternal(const Safir::Utilities::Internal::ConfigReader& reader,
                                     const std::string& moduleName,
                                     std::set<std::string>& deps)

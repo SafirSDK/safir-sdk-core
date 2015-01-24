@@ -725,8 +725,6 @@ public abstract class ConnectionBase
     {
         boolean [] success = new boolean [1];
 
-
-        //TODO: serialize directly to shared memory
         int blobSize = message.calculateBlobSize();
         java.nio.ByteBuffer blob = java.nio.ByteBuffer.allocateDirect(blobSize); //allocate blob
         int beginningOfUnused = com.saabgroup.safir.dob.typesystem.InternalOperations.formatBlob(blob, blobSize, message.getTypeId());
@@ -788,8 +786,6 @@ public abstract class ConnectionBase
         boolean [] success = new boolean [1];
         int [] requestId = new int[1];
 
-
-        //TODO: serialize directly to shared memory
         int blobSize = request.calculateBlobSize();
         java.nio.ByteBuffer blob = java.nio.ByteBuffer.allocateDirect(blobSize); //allocate blob
         int beginningOfUnused = com.saabgroup.safir.dob.typesystem.InternalOperations.formatBlob(blob, blobSize, request.getTypeId());
@@ -857,8 +853,6 @@ public abstract class ConnectionBase
         boolean [] success = new boolean [1];
         int [] requestId = new int[1];
 
-
-        //TODO: serialize directly to shared memory
         int blobSize = request.calculateBlobSize();
         java.nio.ByteBuffer blob = java.nio.ByteBuffer.allocateDirect(blobSize); //allocate blob
         int beginningOfUnused = com.saabgroup.safir.dob.typesystem.InternalOperations.formatBlob(blob, blobSize, request.getTypeId());
@@ -916,7 +910,6 @@ public abstract class ConnectionBase
         boolean [] success = new boolean [1];
         int [] requestId = new int [1];
 
-        //TODO: serialize directly to shared memory
         int blobSize = request.calculateBlobSize();
         java.nio.ByteBuffer blob = java.nio.ByteBuffer.allocateDirect(blobSize); //allocate blob
         int beginningOfUnused = com.saabgroup.safir.dob.typesystem.InternalOperations.formatBlob(blob, blobSize, request.getTypeId());
@@ -1017,7 +1010,6 @@ public abstract class ConnectionBase
         boolean [] success = new boolean [1];
         int [] requestId = new int[1];
 
-        //TODO: serialize directly to shared memory
         int blobSize = request.calculateBlobSize();
         java.nio.ByteBuffer blob = java.nio.ByteBuffer.allocateDirect(blobSize); //allocate blob
         int beginningOfUnused = com.saabgroup.safir.dob.typesystem.InternalOperations.formatBlob(blob, blobSize, request.getTypeId());
@@ -1138,7 +1130,6 @@ public abstract class ConnectionBase
     {
         boolean [] success = new boolean [1];
 
-        //TODO: serialize directly to shared memory
         int blobSize = entity.calculateBlobSize();
         java.nio.ByteBuffer blob = java.nio.ByteBuffer.allocateDirect(blobSize); //allocate blob
         int beginningOfUnused = com.saabgroup.safir.dob.typesystem.InternalOperations.formatBlob(blob, blobSize, entity.getTypeId());

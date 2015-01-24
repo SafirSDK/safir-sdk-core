@@ -1331,7 +1331,7 @@ def write_to_file(gSession, s):
             print("** ERROR - could not open output file!", gSession.current_generated_filename, file=sys.stderr)
             sys.exit(1)
 
-    # TODO - wierd way that the original parses the .dod, decide later if we should remove this
+    # wierd way that the original parses the .dod:
     if s != "\n" and s.strip() == "": return
 
     # Make the line endings native
@@ -1478,7 +1478,7 @@ class FileReader(object):
                     self.lines[i] = self.lines[i].replace(eol_string, "\n")
 
                 if preprocess:
-                    # TODO - wierd way that the original parses the .dod, decide later if we should remove this
+                    # wierd way that the original parses the .dod
                     # All lines with spaces before the newline marker are skipped in the output by the old parser...
                     line = self.lines[i]
                     if line != "\n" and line.strip() == "": continue

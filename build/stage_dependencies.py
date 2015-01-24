@@ -143,7 +143,6 @@ class __WindowsStager(object):
     """
         ############
 
-        ############ TODO: remove or re-add
         log("Copying Ada stuff - GNAT runtime")
         copy_dll("libgnat-2013.dll", Log_Error = False)
         copy_dll("libgnarl-2013.dll", Log_Error = False)

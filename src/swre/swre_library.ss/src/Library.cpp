@@ -52,11 +52,6 @@
 #include <iomanip>
 #include <iostream>
 
-//TODO get rid of these!
-#ifdef GetMessage
-#undef GetMessage
-#endif
-
 namespace Safir
 {
 namespace SwReports
