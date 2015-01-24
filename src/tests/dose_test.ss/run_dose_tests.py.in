@@ -434,31 +434,30 @@ class Runner:
             if not parameters.no_java:
                 self.__launchProcess("dose_test_java." + str(i), parameters.dose_test_java_cmd + (str(i),))
 
-    def __kill(self, name, proc):
+    #By default processes have 10 seconds to shut down nicely.
+    def __kill(self, name, proc, timeout = 10):
         try:
-#            log "Terminating", name
             if sys.platform == "win32":
                 #can't send CTRL_C_EVENT to processes started with subprocess, unfortunately
                 proc.send_signal(signal.CTRL_BREAK_EVENT)
             else:
                 proc.terminate()
-            for i in range (100):
+            for i in range (timeout * 10):
                 if proc.poll() is not None:
-#                    log " Terminate successful"
                     return
                 time.sleep(0.1)
             if proc.poll() is None:
-                log("Killing", name)
+                log("Failed to terminate", name, "nicely. Killing it instead!")
                 proc.kill()
                 proc.wait()
         except OSError:
             pass
 
     def killprocs(self, results):
-        self.__kill("dose_main", self.dose_main)
+        self.__kill("dose_main", self.dose_main,120) #We give dose_main some extra time to stop
 
-        #Processes have up to 10 seconds to exit from the stop order
-        future = time.time() + 10 #ten seconds
+        #Processes have up to 20 seconds to exit from the stop order
+        future = time.time() + 20 #ten seconds
         for name, (proc,output) in self.procs.items():
             while time.time() < future:
                 if proc.poll() is not None:
