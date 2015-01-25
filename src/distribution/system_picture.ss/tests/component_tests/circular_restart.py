@@ -24,13 +24,13 @@
 #
 ###############################################################################
 from __future__ import print_function
-import subprocess, os, time, sys, shutil, random, argparse, traceback, platform
+import subprocess, os, time, sys, shutil, random, argparse, traceback, platform, datetime
 
 class Failure(Exception):
     pass
 
 def log(*args, **kwargs):
-    print(*args, **kwargs)
+    print(datetime.datetime.now().isoformat(), ":", *args, **kwargs)
     sys.stdout.flush()
 
 def rmdir(directory):
