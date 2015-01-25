@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 ###############################################################################
 #
@@ -104,9 +104,9 @@ def launch_node(number, args):
 
 def stop(proc):
     try:
-        if proc.poll() is not None:
-            log("   poll returned value")
-            return
+        #if proc.poll() is not None:
+        #    log("   poll returned value")
+        #    return
         log("   calling terminate")
         proc.terminate()
         log("   calling wait")
@@ -121,9 +121,10 @@ def stop(proc):
         proc.kill()
         log("   calling wait")
         proc.wait()
-    except ProcessLookupError:
-        log("   Caught ProcessLookupError")
-        traceback.print_exc()
+    except OSError:
+        #log("   Caught ProcessLookupError")
+        #traceback.print_exc()
+        pass
 
 def stop_node(i, control, main):
     log(" - Stopping control")
