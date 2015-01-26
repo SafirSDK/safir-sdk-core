@@ -20,7 +20,7 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QGridLayout" name="gridLayout" columnstretch="0,0,0">
-     <item row="5" column="1">
+     <item row="2" column="1">
       <widget class="QLineEdit" name="installDirectory">
        <property name="toolTip">
         <string>Directory to which the result of the build should be installed to.</string>
@@ -30,14 +30,14 @@
        </property>
       </widget>
      </item>
-     <item row="3" column="0">
+     <item row="1" column="0">
       <widget class="QLabel" name="label_2">
        <property name="text">
         <string>Build configs:</string>
        </property>
       </widget>
      </item>
-     <item row="5" column="0">
+     <item row="2" column="0">
       <widget class="QLabel" name="label_3">
        <property name="text">
         <string>Install directory:</string>
@@ -51,7 +51,7 @@
        </property>
       </widget>
      </item>
-     <item row="5" column="2">
+     <item row="2" column="2">
       <widget class="QToolButton" name="installDirectoryBrowse">
        <property name="toolTip">
         <string>Open a file browser.</string>
@@ -81,7 +81,7 @@
        </property>
       </widget>
      </item>
-     <item row="3" column="1" colspan="2">
+     <item row="1" column="1" colspan="2">
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
         <widget class="QFrame" name="configRadioButtons">
@@ -174,64 +174,6 @@
         </widget>
        </item>
       </layout>
-     </item>
-     <item row="4" column="0">
-      <widget class="QLabel" name="archLabel">
-       <property name="text">
-        <string>Binaries</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="1" colspan="2">
-      <widget class="QFrame" name="archButtons">
-       <property name="frameShape">
-        <enum>QFrame::NoFrame</enum>
-       </property>
-       <property name="frameShadow">
-        <enum>QFrame::Raised</enum>
-       </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_3">
-        <property name="margin">
-         <number>0</number>
-        </property>
-        <item>
-         <widget class="QRadioButton" name="radio32bit">
-          <property name="toolTip">
-           <string>Build 32 bit binaries, even if this computer has a 64 bit OS.</string>
-          </property>
-          <property name="text">
-           <string>32 bit</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="radio64bit">
-          <property name="toolTip">
-           <string>Build 64 bit binaries, that will only run on a 64 bit OS.</string>
-          </property>
-          <property name="text">
-           <string>64 bit</string>
-          </property>
-          <property name="checked">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
-      </widget>
      </item>
     </layout>
    </item>

@@ -23,6 +23,7 @@
 ******************************************************************************/
 #include "dobmake.h"
 #include "BuildThread.h"
+#include <boost/lexical_cast.hpp>
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -42,6 +43,27 @@
 #pragma warning(pop)
 #endif
 
+namespace
+{
+    bool Force32Bit()
+    {
+#if defined(linux) || defined(__linux) || defined(__linux__)
+        return false;
+#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+        BOOL isWow64;
+        if (!IsWow64Process(GetCurrentProcess,&isWow64))
+        {
+            throw std::runtime_error("Call to IsWow64Process(...) failed! Error Code = " +
+                                     boost::lexical_cast<std::string>(GetLastError()))
+        }
+        return isWow64;
+#else
+#  error Dobmake does not know how to handle this platform
+#endif
+
+    }
+}
+
 Dobmake::Dobmake(QWidget *parent)
     : QDialog(parent)
     , m_buildRunning(false)
@@ -55,29 +77,10 @@ Dobmake::Dobmake(QWidget *parent)
     ui->configCheckButtons->hide();
     m_debug = false;
     m_release = true;
-    ui->archButtons->hide();
-    ui->archLabel->hide();
 #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
     ui->configRadioButtons->hide();
     m_debug = true;
     m_release = true;
-
-    //disable constant conditional expression warning
-#  ifdef _MSC_VER
-#    pragma warning(push)
-#    pragma warning (disable: 4127)
-#  endif
-
-    if (sizeof (void*) != 8)
-    {
-        ui->archButtons->hide();
-        ui->archLabel->hide();
-    }
-
-#  ifdef _MSC_VER
-#    pragma warning(pop)
-#  endif
-
 #else
 #  error Dobmake does not know how to handle this platform
 #endif
@@ -227,7 +230,7 @@ void Dobmake::on_build_clicked()
                                           ui->douDirectory->text(),
                                           m_debug,
                                           m_release,
-                                          ui->radio32bit->isChecked(),
+                                          Force32Bit(),
                                           ""); //no installation
 
     connect(worker, SIGNAL(BuildComplete(bool)), this, SLOT(BuildComplete(bool)));
@@ -247,7 +250,7 @@ void Dobmake::on_buildAndInstall_clicked()
                                           ui->douDirectory->text(),
                                           m_debug,
                                           m_release,
-                                          ui->radio32bit->isChecked(),
+                                          Force32Bit(),
                                           ui->installDirectory->text());
 
     connect(worker, SIGNAL(BuildComplete(bool)), this, SLOT(BuildComplete(bool)));
