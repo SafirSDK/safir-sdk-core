@@ -41,6 +41,8 @@
 
 #ifdef _MSC_VER
 #pragma warning(pop)
+
+#include <windows.h>
 #endif
 
 namespace
@@ -54,9 +56,9 @@ namespace
         if (!IsWow64Process(GetCurrentProcess,&isWow64))
         {
             throw std::runtime_error("Call to IsWow64Process(...) failed! Error Code = " +
-                                     boost::lexical_cast<std::string>(GetLastError()))
+                                     boost::lexical_cast<std::string>(GetLastError()));
         }
-        return isWow64;
+        return isWow64 == TRUE;
 #else
 #  error Dobmake does not know how to handle this platform
 #endif
