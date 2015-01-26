@@ -109,7 +109,6 @@ namespace SP
                                       }
                                       return res;
                                   }())
-            , m_aloneTimeout(CalculateAloneTimeout(nodeTypes))
             , m_electionTimeout(CalculateElectionTimeout(nodeTypes))
             , m_elected(std::numeric_limits<int64_t>::min())
             , m_electionTimer(ioService)
@@ -126,9 +125,10 @@ namespace SP
                                           },
                                           m_receiverId);
 
-            lllog(3) << "SP: AloneTimeout will be " << boost::chrono::duration_cast<boost::chrono::milliseconds>(m_aloneTimeout) << std::endl;
+            const auto aloneTimeout = CalculateAloneTimeout(nodeTypes);
+            lllog(3) << "SP: AloneTimeout will be " << boost::chrono::duration_cast<boost::chrono::milliseconds>(aloneTimeout) << std::endl;
             lllog(3) << "SP: ElectionTimeout will be " << boost::chrono::duration_cast<boost::chrono::milliseconds>(m_electionTimeout) << std::endl;
-            m_electionTimer.expires_from_now(m_aloneTimeout);
+            m_electionTimer.expires_from_now(aloneTimeout);
             m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
                                                      {
                                                          if (!error)
@@ -156,7 +156,7 @@ namespace SP
             m_strand.dispatch([this, statistics, completionSignaller]
                               {
                                   lllog(5) << "SP: ElectionHandler got new RawStatistics" << std::endl;
-                                /*if (Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().LogLevel() >= 9)
+                                  /*                                  if (Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().LogLevel() >= 9)
                                   {
                                       std::wcout << statistics << std::endl;
                                       }*/
@@ -168,7 +168,6 @@ namespace SP
     private:
         /** Calculate the time to wait for other nodes to come up before assuming that
          * we're alone and proclaiming victory. */
-        //TODO: must be based on worst case!
         static boost::chrono::steady_clock::duration CalculateAloneTimeout(const std::map<int64_t, NodeType>& nodeTypes)
         {
             //use average of non-light node types heartbeatInterval * maxLostHeartbeats / 2.0
@@ -224,9 +223,7 @@ namespace SP
 
             //This timeout is just to make sure that if several nodes come up at the same time
             //we will not start too many elections
-            //m_electionTimer.expires_from_now(boost::chrono::milliseconds(100));
-            //TODO: what timeout should I use here?
-            m_electionTimer.expires_from_now(m_aloneTimeout);
+            m_electionTimer.expires_from_now(boost::chrono::milliseconds(100));
             m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
             {
                 if (!!error)
@@ -520,7 +517,6 @@ namespace SP
         const std::map<int64_t, NodeType> m_nodeTypes;
         const std::set<int64_t> m_nonLightNodeTypes;
 
-        const boost::chrono::steady_clock::duration m_aloneTimeout;
         const boost::chrono::steady_clock::duration m_electionTimeout;
 
         RawStatistics m_lastStatistics;
