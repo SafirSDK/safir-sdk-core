@@ -4,6 +4,85 @@
   <baseClass>Safir.Dob.Parametrization</baseClass>
   <parameters>
 
+      <parameter>
+      <summary>Specifies the Id of the System/System installation.</summary>
+      <name>SystemId</name>
+      <type>InstanceId</type>
+      <value>StandAlone</value>
+    </parameter>
+    <parameter>
+      <summary>Specifies the amount of shared memory to allocate for the Dob distribution (in megabytes)</summary>
+      <name>SharedMemorySize</name>
+      <type>Int32</type>
+      <value>100</value>
+    </parameter>
+    <parameter>
+      <summary>Use this to select which network card in a multihomed machine that will be used by dose for communication. If this is set to 0.0.0.0 the routing table will be used.</summary>
+      <name>NetworkAddress</name>
+      <type>String</type>
+      <value>0.0.0.0</value>
+    </parameter>
+    <parameter>
+      <summary>The number of routing hops (TTL, time-to-live) for the Dob packets. If set to 1 all packets will stay in the subnet.</summary>
+      <name>RoutingHops</name>
+      <type>Int32</type>
+      <value>1</value>
+    </parameter>
+    <parameter>
+      <summary>If True the Dob will check that all calls to Dob Connections are made from the same thread. If an incorrect call is detected a PanicLog with a warning will be sent.</summary>
+      <name>ThreadingWarningsEnabled</name>
+      <type>Boolean</type>
+      <value>True</value>
+    </parameter>
+    <parameter>
+      <summary>Determines if an unrecoverable error, typically an abondoned locked shared memory lock, causes a termination of dose_main. Consider setting this parameter to false when running dose_main under a debugger</summary>
+      <name>TerminateDoseMainWhenUnrecoverableError</name>
+      <type>Boolean</type>
+      <value>True</value>
+    </parameter>
+    <parameter>
+      <summary>Min time (seconds) before an apparently hanging dose_main thread causes a termination of the dose_main program.</summary>
+      <name>DoseMainThreadWatchdogTimeout</name>
+      <type>Int32</type>
+      <value>60</value>
+    </parameter>
+    <parameter>
+      <summary>The number of contexts in the system. (The context numbering starts from 0.)</summary>
+      <name>NumberOfContexts</name>
+      <type>Int32</type>
+      <value>1</value>
+    </parameter>
+    <parameter>
+      <summary>Specifies for every context wether or not it is a local context. The array length must correspond to the NumberOfContexts parameter above.</summary>
+      <name>LocalContexts</name>
+      <type>Boolean</type>
+      <arrayElements>
+        <arrayElement>
+          <value>False</value>
+        </arrayElement>
+      </arrayElements>
+    </parameter>
+
+    <parameter>
+      <summary>The number of nodes in the system. Must correspond to the Nodes parameter below.</summary>
+      <name>NumberOfNodes</name>
+      <type>Int32</type>
+      <value>1</value>
+    </parameter>
+    
+    <parameter>
+      <summary>The name of all nodes in the system. Must correspond to the NumberOfNodes parameter above.</summary>
+      <name>Nodes</name>
+      <type>Safir.Dob.NodeDefinition</type>
+      <arrayElements>
+        <arrayElement>
+          <Safir.Dob.NodeDefinition type="Safir.Dob.NodeDefinition">
+            <NodeName>StandAlone</NodeName>
+          </Safir.Dob.NodeDefinition>
+        </arrayElement>
+      </arrayElements>
+    </parameter>
+    
     <parameter>
       <summary>Defines the different node types in the system.</summary>
       <name>NodeTypes</name>

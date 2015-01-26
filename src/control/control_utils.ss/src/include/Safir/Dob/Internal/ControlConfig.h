@@ -27,10 +27,8 @@
 #include <vector>
 #include <set>
 #include <Safir/Utilities/Internal/Id.h>
-#include <Safir/Utilities/Internal/ConfigReader.h>
-#include <Safir/Dob/Typesystem/ToolSupport/BlobLayout.h>
-#include <Safir/Dob/Typesystem/ToolSupport/TypeParser.h>
-#include <Safir/Dob/Typesystem/ToolSupport/TypeUtilities.h>
+#include <Safir/Dob/NodeParameters.h>
+#include <Safir/Dob/Typesystem/Utilities.h>
 
 
 namespace Safir
@@ -84,103 +82,68 @@ namespace Control
         const std::vector<std::string> unwantedTypes;
     };
 
-    // This class parses configuration parameters needed by Control.
+    // This class reads configuration parameters and make some sanity checks for parameters needed by Control.
     class Config
     {
     public:
 
         Config()
         {
-            namespace ts = Safir::Dob::Typesystem::ToolSupport;
+            using Safir::Dob::Typesystem::Utilities::ToUtf8;
 
-            Safir::Utilities::Internal::ConfigReader reader;
-
-            std::vector<boost::filesystem::path> douDirs;
-
-            for(const auto& s : Safir::Utilities::Internal::ConfigHelper::GetDouDirectories(reader))
+            if (Safir::Dob::NodeParameters::NodeTypesArraySize() < 1)
             {
-                douDirs.push_back(boost::filesystem::path(s.second));
+                throw std::logic_error("Parameter NodeTypesArray is expected to be an array with length > 0");
             }
-
-            auto repo = ts::ParseTypeDefinitions(douDirs);
-            auto bl = ts::BlobLayout<ts::TypeRepository>(repo.get());
-
-            std::string paramClass("Safir.Dob.NodeParameters");
-            const auto npcd = repo->GetClass(ts::TypeUtilities::CalculateTypeId(paramClass));
-            if (npcd == nullptr)
-            {
-                throw std::logic_error("Can't find parameter class " + paramClass);
-            }
-
-            const std::string paramName("NodeTypes");
-            const auto pd = ts::TypeUtilities::GetParameterByName<ts::ClassDescription, ts::ParameterDescription>(npcd, paramName);
-            if (pd == nullptr)
-            {
-                throw std::logic_error("Can't find parameter " + paramName + " in " + paramClass);
-            }
-
-            if (!pd->IsArray() ||
-                pd->GetArraySize() < 1 ||
-                bl.GetTypeId(pd->GetObjectValue(0).first) != ts::TypeUtilities::CalculateTypeId("Safir.Dob.NodeType"))
-            {
-                throw std::logic_error("Parameter " + paramName + " in " + paramClass +
-                                       " is expected to be an array with length > 0 and elements of type Safir.Dob.NodeType!" );
-            }
-
-            std::string nodeTypeClass("Safir.Dob.NodeType");
-            const auto ntcd = repo->GetClass(ts::TypeUtilities::CalculateTypeId(nodeTypeClass));
 
             // First, get all node type names
             std::set<std::string> allNodeTypes;
-            for (int paramIdx = 0; paramIdx < pd->GetArraySize(); ++paramIdx)
+            for (Safir::Dob::Typesystem::ArrayIndex i = 0;
+                 i < Safir::Dob::NodeParameters::NodeTypesArraySize();
+                 ++i)
             {
-                auto blob = pd->GetObjectValue(paramIdx).first;
-
-                DotsC_Int32 dummy;
-
-                const char* name;
-                auto ms = bl.GetDynamicMember(blob, ntcd->GetMemberIndex("Name"), 0, name, dummy);
-                if (ms.IsNull())
+                if (Safir::Dob::NodeParameters::NodeTypes(i)->Name().IsNull())
                 {
-                    throw std::logic_error(nodeTypeClass + " is expected to contain member Name");
+                    throw std::logic_error
+                            ("Parameter error: "
+                             "A Safir.Dob.NodeType is expected to contain member Name");
                 }
+
+                auto name = ToUtf8(Safir::Dob::NodeParameters::NodeTypes(i)->Name());
+
                 if (!allNodeTypes.insert(name).second)
                 {
-                    throw std::logic_error("Node type " + std::string(name) + " multiple definitions");
+                    throw std::logic_error("Parameter error: "
+                                           "Node type " + name + " multiple definitions");
                 }
             }
 
-            for (int paramIdx = 0; paramIdx < pd->GetArraySize(); ++paramIdx)
+            for (Safir::Dob::Typesystem::ArrayIndex i = 0;
+                 i < Safir::Dob::NodeParameters::NodeTypesArraySize();
+                 ++i)
             {
-                auto blob = pd->GetObjectValue(paramIdx).first;
-
                 // Name
-
-                DotsC_Int32 dummy;
-                const char* name;
-                bl.GetDynamicMember(blob, ntcd->GetMemberIndex("Name"), 0, name, dummy);
-                const std::string nodeTypeName(name);
+                auto nt = Safir::Dob::NodeParameters::NodeTypes(i);
+                const std::string nodeTypeName =
+                        ToUtf8(nt->Name().GetVal());
 
                 // IsLight
-                bool isLight;
-                auto ms = bl.GetBoolMember(blob, ntcd->GetMemberIndex("IsLight"), 0, isLight);
-                if (ms.IsNull())
+                if (nt->IsLight().IsNull())
                 {
-                    throw std::logic_error("Node type " + nodeTypeName + ": IsLight is mandatory");
+                    throw std::logic_error("Parameter error: "
+                                           "Node type " + nodeTypeName + ": IsLight is mandatory");
                 }
+                auto isLight = nt->IsLight();
 
                 // TalksTo
                 std::set<std::string> talksTo;
-                const auto ttmd = ntcd->GetMember(ntcd->GetMemberIndex("TalksTo"));
-                for (int i = 0; i < ttmd->GetArraySize(); ++i)
+                for (Safir::Dob::Typesystem::ArrayIndex i = 0;
+                     i < nt->TalksToArraySize();
+                     ++i)
                 {
-                    ms = bl.GetMemberStatus(blob, ntcd->GetMemberIndex("TalksTo"), i);
-
-                    if (!ms.IsNull())
+                    if (!nt->TalksTo()[i].IsNull())
                     {
-                        const char* name;
-                        bl.GetDynamicMember(blob, ntcd->GetMemberIndex("TalksTo"), i, name, dummy);
-                        talksTo.insert(name);
+                        talksTo.insert(ToUtf8(nt->TalksTo()[i].GetVal()));
                     }
                 }
 
@@ -188,7 +151,8 @@ namespace Control
                 {
                     if (!isLight)
                     {
-                        throw std::logic_error("Node type " + nodeTypeName +
+                        throw std::logic_error("Parameter error: "
+                                               "Node type " + nodeTypeName +
                                                ": TalksTo can only be specified for Light nodes!");
                     }
 
@@ -197,7 +161,8 @@ namespace Control
                     {
                         if (allNodeTypes.find(talksToName) == allNodeTypes.end())
                         {
-                            throw std::logic_error("Node type " + nodeTypeName + ": TalksTo node " +
+                            throw std::logic_error("Parameter error: "
+                                                   "Node type " + nodeTypeName + ": TalksTo node " +
                                                    talksToName + "does not exist!");
                         }
                     }
@@ -208,71 +173,70 @@ namespace Control
                     talksTo = allNodeTypes;
                 }
 
-                const char* const EMPTY_STRING = "";
-
                 // MulticastAddressControl
-                const char* multicastAddressControl;
-                ms = bl.GetDynamicMember(blob, ntcd->GetMemberIndex("MulticastAddressControl"), 0, multicastAddressControl, dummy);
-                if (ms.IsNull())
+                std::string multicastAddressControl;
+                if (!nt->MulticastAddressControl().IsNull())
                 {
-                    multicastAddressControl = EMPTY_STRING;
+                    multicastAddressControl = ToUtf8(nt->MulticastAddressControl());
                 }
 
                 // MulticastAddressData
-                const char* multicastAddressData;
-                ms = bl.GetDynamicMember(blob, ntcd->GetMemberIndex("MulticastAddressData"), 0, multicastAddressData, dummy);
-                if (ms.IsNull())
+                std::string multicastAddressData;
+                if (!nt->MulticastAddressData().IsNull())
                 {
-                    multicastAddressData = EMPTY_STRING;
+                    multicastAddressData = ToUtf8(nt->MulticastAddressData());
                 }
 
                 // HeartbeatInterval
-                double heartbeatInterval;
-                ms = bl.GetFloat64Member(blob, ntcd->GetMemberIndex("HeartbeatInterval"), 0, heartbeatInterval);
-                if (ms.IsNull())
+                if (nt->HeartbeatInterval().IsNull())
                 {
-                    throw std::logic_error("Node type " + nodeTypeName + ": HeartbeatInterval is mandatory");
+                    throw std::logic_error("Parameter error: "
+                                           "Node type " + nodeTypeName + ": HeartbeatInterval is mandatory");
                 }
+
+                auto heartbeatInterval = nt->HeartbeatInterval();
 
                 // MaxLostHeartbeats
-                int maxLostHeartbeats;
-                ms = bl.GetInt32Member(blob, ntcd->GetMemberIndex("MaxLostHeartbeats"), 0, maxLostHeartbeats);
-                if (ms.IsNull())
+                if (nt->MaxLostHeartbeats().IsNull())
                 {
-                    throw std::logic_error("Node type " + nodeTypeName + ": MaxLostHeartbeats is mandatory");
+                    throw std::logic_error("Parameter error: "
+                                           "Node type " + nodeTypeName + ": MaxLostHeartbeats is mandatory");
                 }
+
+                auto maxLostHeartbeats = nt->MaxLostHeartbeats();
 
                 // SlidingWindowsSize
-                int slidingWindowsSize;
-                ms = bl.GetInt32Member(blob, ntcd->GetMemberIndex("SlidingWindowsSize"), 0, slidingWindowsSize);
-                if (ms.IsNull())
+                if (nt->SlidingWindowsSize().IsNull())
                 {
-                    throw std::logic_error("Node type " + nodeTypeName + ": SlidingWindowsSize is mandatory");
+                    throw std::logic_error("Parameter error: "
+                                           "Node type " + nodeTypeName + ": SlidingWindowsSize is mandatory");
                 }
 
+                auto slidingWindowsSize = nt->SlidingWindowsSize();
+
                 // RetryTimeout
-                double retryTimeout;
-                ms = bl.GetFloat64Member(blob, ntcd->GetMemberIndex("RetryTimeout"), 0, retryTimeout);
-                if (ms.IsNull())
+                if (nt->RetryTimeout().IsNull())
                 {
-                    throw std::logic_error("Node type " + nodeTypeName + ": RetryTimeout is mandatory");
+                    throw std::logic_error("Parameter error: "
+                                           "Node type " + nodeTypeName + ": RetryTimeout is mandatory");
                 }
+
+                auto retryTimeout = nt->RetryTimeout();
 
                 // WantedTypes
                 std::vector<std::string> wantedTypes;
-                const auto wtmd = ntcd->GetMember(ntcd->GetMemberIndex("WantedTypes"));
-                for (int i = 0; i < wtmd->GetArraySize(); ++i)
+                for (Safir::Dob::Typesystem::ArrayIndex i = 0;
+                     i < nt->WantedTypesArraySize();
+                     ++i)
                 {
-                    auto ms = bl.GetMemberStatus(blob, ntcd->GetMemberIndex("WantedTypes"), i);
-
-                    if (!ms.IsNull())
+                    if (!nt->WantedTypes()[i].IsNull())
                     {
-                        const char* wt;
-                        bl.GetDynamicMember(blob, ntcd->GetMemberIndex("WantedTypes"), i, wt, dummy);
-                        std::string regexp(wt);
-                        if (!isLight && regexp != ".*")
+                        std::string wt = ToUtf8(nt->WantedTypes()[i].GetVal());
+
+                        if (!isLight && wt != ".*")
                         {
-                            throw std::logic_error("Node type " + nodeTypeName +
+                            throw std::logic_error("Parameter error: "
+                                                   "Node type " + nodeTypeName +
                                                    ": WantedTypes can only be .* for non Light nodes!");
                         }
                         wantedTypes.push_back(wt);
@@ -281,24 +245,20 @@ namespace Control
 
                 // UnwantedTypes
                 std::vector<std::string> unwantedTypes;
-                const auto uwtmd = ntcd->GetMember(ntcd->GetMemberIndex("UnwantedTypes"));
 
-                for (int i = 0; i < uwtmd->GetArraySize(); ++i)
+                for (Safir::Dob::Typesystem::ArrayIndex i = 0;
+                     i < nt->UnwantedTypesArraySize();
+                     ++i)
                 {
-                    auto ms = bl.GetMemberStatus(blob, ntcd->GetMemberIndex("UnwantedTypes"), i);
-
-                    if (!ms.IsNull())
+                    if (!nt->UnwantedTypes()[i].IsNull())
                     {
                         if (!isLight)
                         {
-                            throw std::logic_error("Node type " + nodeTypeName +
+                            throw std::logic_error("Parameter error: "
+                                                   "Node type " + nodeTypeName +
                                                    ": UnwantedTypes can be specified only for non Light nodes!");
                         }
-
-                        const char* uwt;
-                        bl.GetDynamicMember(blob, ntcd->GetMemberIndex("UnwantedTypes"), i, uwt, dummy);
-                        std::string regExp(uwt);
-                        unwantedTypes.push_back(regExp);
+                        unwantedTypes.push_back(ToUtf8(nt->UnwantedTypes()[i].GetVal()));
                     }
                 }
 
@@ -324,7 +284,7 @@ namespace Control
                 {
                     if (!ipAddr.insert(i.multicastAddressControl).second)
                     {
-                        throw std::logic_error("Duplicated ip addresses!");
+                        throw std::logic_error("Parameter error: Duplicated ip addresses!");
                     }
                 }
 
@@ -332,7 +292,7 @@ namespace Control
                 {
                     if (!ipAddr.insert(i.multicastAddressData).second)
                     {
-                        throw std::logic_error("Duplicated ip addresses!");
+                        throw std::logic_error("Parameter error: Duplicated ip addresses!");
                     }
                 }
             }

@@ -22,6 +22,7 @@ TARGET_LINK_LIBRARIES(control_utils PRIVATE
   ${PROTOBUF_LITE_LIBRARIES}
 
   PUBLIC
+  $<BUILD_INTERFACE:safir_generated-Core-cpp>
   $<BUILD_INTERFACE:dots_internal>
   $<BUILD_INTERFACE:lluf_id>
   $<BUILD_INTERFACE:lluf_config>)

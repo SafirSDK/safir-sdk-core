@@ -18,6 +18,7 @@ add_definitions(-Dcontrol_utils_EXPORTS)
 ADD_EXECUTABLE(DoseMainCmd_test DoseMainCmd_test.cpp ../../src/DoseMainCmd.cpp ${PROTO_SRCS} ${PROTO_HDRS})
 
 TARGET_LINK_LIBRARIES(DoseMainCmd_test PRIVATE
+  control_utils
   lluf_utils
   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
   ${PROTOBUF_LITE_LIBRARIES})
