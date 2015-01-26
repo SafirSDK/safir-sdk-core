@@ -321,7 +321,7 @@ namespace SP
                     NodeInfo& node = findIt->second; //alias the iterator
 
                     //Check if data channel is dead and control channel is not.
-                    //In that case we want to kill our own channel (TODO: is this right?)
+                    //In that case we want to kill our own channel.
                     if (data.IsDead(i) && !node.nodeInfo->is_dead())
                     {
                         node.nodeInfo->set_is_dead(true);
@@ -390,8 +390,6 @@ namespace SP
          */
         void RecentlyDeadNodes(std::vector<int64_t> nodeIds)
         {
-            //TODO: should we detect that we're not receiving these and then
-            //deduce that control has died?
             m_strand.dispatch([this, nodeIds]
                               {
                                   bool changed = false;

@@ -461,14 +461,13 @@ namespace SP
                         lllog(8) << std::flush;
                         throw std::logic_error("Duplicate dead node in last state! Not good at all!");
                     }
-//TODO #ifndef NDEBUG
-                    //check that it's not in live nodes!
+
+                    //check that it's not in live nodes! (This is just a sanity check, really)
                     if (lastLiveNodes.find(m_stateMessage.node_info(i).id()) != lastLiveNodes.end())
                     {
                         lllog(8) << std::flush;
                         throw std::logic_error("Dead node was already defined as alive in last state!");
                     }
-//#else
                 }
                 else
                 {
@@ -481,14 +480,13 @@ namespace SP
                         lllog(8) << std::flush;
                         throw std::logic_error("Duplicate live node in last state! Not good at all!");
                     }
-//TODO #ifndef NDEBUG
-                    //check that it's not in dead nodes!
+
+                    //check that it's not in dead nodes! (This is just a sanity check, really)
                     if (lastDeadNodes.find(m_stateMessage.node_info(i).id()) != lastDeadNodes.end())
                     {
                         lllog(8) << std::flush;
                         throw std::logic_error("Live node was already defined as dead in last state!");
                     }
-//#else
                 }
             }
 
