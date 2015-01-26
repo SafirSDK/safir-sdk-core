@@ -219,7 +219,7 @@ namespace SP
             //we will not start too many elections
             //m_electionTimer.expires_from_now(boost::chrono::milliseconds(100));
             //TODO: what timeout should I use here?
-            m_electionTimer.expires_from_now(/*nodesChanged ? m_aloneTimeout :*/ boost::chrono::milliseconds(100));
+            m_electionTimer.expires_from_now(nodesChanged ? m_aloneTimeout : boost::chrono::milliseconds(100));
             m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
             {
                 if (!!error)
