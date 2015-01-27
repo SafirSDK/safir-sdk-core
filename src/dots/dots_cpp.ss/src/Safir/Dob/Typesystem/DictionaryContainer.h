@@ -42,7 +42,7 @@ namespace Typesystem
      * be set when values are added, removed or changed.
      */
     template <class KeyT, class ValT>
-    class DictionaryContainer : private boost::unordered_map<KeyT, ValT>
+    class DictionaryContainer : public ContainerBase
     {
     public:
 
@@ -51,6 +51,7 @@ namespace Typesystem
         typedef typename ValueContainerType::ContainedType ContainedType;
         typedef boost::unordered_map<KeyType, ValueContainerType> StorageType;  //we use boost version instead of std because we want to be able to use vector<bool> without warnings and errors.
         typedef typename StorageType::const_iterator const_iterator;
+        typedef typename StorageType::iterator iterator;
         typedef typename StorageType::value_type value_type;
 
         /**
@@ -59,16 +60,48 @@ namespace Typesystem
          * Construct a container that is not changed and not null.
          */
         DictionaryContainer()
-            :m_bIsChanged(false)
+            :ContainerBase()
+            ,m_values()
         {
         }
 
-        using StorageType::begin;
-        using StorageType::end;
-        using StorageType::find;
-        using StorageType::operator[];
-        using StorageType::size;
-        using StorageType::empty;
+        virtual bool IsNull() const {return false;}
+
+        virtual void SetNull()
+        {
+            throw SoftwareViolationException(L"Dictionaries cannot be null",__WFILE__,__LINE__);
+        }
+
+        iterator begin() {return m_values.begin();}
+        const_iterator begin() const {return m_values.begin();}
+
+        iterator end() {return m_values.end();}
+        const_iterator end() const {return m_values.end();}
+
+        iterator find(const KeyType& key) {return m_values.find(key);}
+        const_iterator find(const KeyType& key) const {return m_values.find(key);}
+
+        size_t size() const {return m_values.size();}
+
+        bool empty() const {return m_values.empty();}
+
+        size_t count(const KeyType& key) const {return m_values.count(key);}
+
+        ValueContainerType& operator[](const KeyType& key)
+        {
+            iterator it=m_values.find(key);
+            if (it!=m_values.end())
+            {
+                return it->second;
+            }
+            else
+            {
+                m_bIsChanged=true;
+                ValueContainerType& ct=m_values[key];
+                ct.SetChanged(true);
+                return ct;
+            }
+        }
 
         /**
          * @brief IsChanged - Check if the sequence has changed.
@@ -81,7 +114,7 @@ namespace Typesystem
                 return true; //top level change flag is set
             }
 
-            for (const_iterator it=begin(); it!=end(); ++it)
+            for (const_iterator it=m_values.begin(); it!=m_values.end(); ++it)
             {
                 if (it->second.IsChanged()) //a value container has changed flag set
                     return true;
@@ -97,12 +130,9 @@ namespace Typesystem
         virtual void SetChanged(const bool changed)
         {
             m_bIsChanged=changed;
-            if (!changed)
+            for (iterator it=m_values.begin(); it!=m_values.end(); ++it)
             {
-                for (typename StorageType::iterator it=begin(); it!=end(); ++it)
-                {
-                    it->second.SetChanged(changed);
-                }
+                it->second.SetChanged(changed);
             }
         }
 
@@ -113,7 +143,7 @@ namespace Typesystem
         void clear()
         {
             m_bIsChanged=true;
-            StorageType::clear();
+            m_values.clear();
         }
 
 
@@ -123,18 +153,17 @@ namespace Typesystem
             ValueContainerType container;
             container.SetVal(val);
             container.SetChanged(true);
-            StorageType::insert(value_type(key, container));
+            m_values.insert(value_type(key, container));
         }
 
         size_t erase(const KeyType& key)
         {
-            m_bIsChanged=true;
-            return StorageType::erase(key);
-        }
-
-        bool Exist(const KeyType& key) const
-        {
-            return find(key)!=end();
+            size_t count=m_values.erase(key);
+            if (count>0)
+            {
+                m_bIsChanged=true;
+            }
+            return count;
         }
 
         /**
@@ -142,31 +171,31 @@ namespace Typesystem
          * @param that [in] - The object to copy into this.
          * @throws SoftwareViolationException If the types are not of the same kind.
          */
-//        virtual void Copy(const ContainerBase& that)
-//        {
-//            if (this != &that)
-//            {
-//                if (typeid(*this) != typeid(that))
-//                {
-//                    throw SoftwareViolationException(L"Invalid call to Copy, containers are not of same type",__WFILE__,__LINE__);
-//                }
+        virtual void Copy(const ContainerBase& that)
+        {
+            if (this != &that)
+            {
+                if (typeid(*this) != typeid(that))
+                {
+                    throw SoftwareViolationException(L"Invalid call to Copy, containers are not of same type",__WFILE__,__LINE__);
+                }
 
-//                const DictionaryContainer<KeyType, ValueContainerType>& other=static_cast<const DictionaryContainer<KeyT, ValT>& >(that);
+                const DictionaryContainer<KeyType, ValueContainerType>& other=static_cast<const DictionaryContainer<KeyT, ValT>& >(that);
 
-//                clear();
-//                m_bIsChanged=other.m_bIsChanged;
+                clear();
+                m_bIsChanged=other.m_bIsChanged;
 
-//                for (DictionaryContainer<KeyType, ValueContainerType>::const_iterator it=other.begin(); it!=other.end(); ++it)
-//                {
-//                    ValueContainerType val;
-//                    val.Copy(it->second);
-//                    boost::unordered_map<KeyT, ValT>::insert(std::make_pair(it->first, val));
-//                }
-//            }
-//        }
+                for (const_iterator it=other.begin(); it!=other.end(); ++it)
+                {
+                    ValueContainerType val;
+                    val.Copy(it->second);
+                    m_values.insert(std::make_pair(it->first, val));
+                }
+            }
+        }
 
     private:
-        bool m_bIsChanged;
+        boost::unordered_map<KeyT, ValT> m_values;
     };
 }
 }

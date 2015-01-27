@@ -47,7 +47,7 @@ namespace Typesystem
      * have change flags.
      */
     template <class T>
-    class SequenceContainer
+    class SequenceContainer : public ContainerBase
     {
     public:
 
@@ -61,9 +61,16 @@ namespace Typesystem
          * Construct a container that is not changed and not null.
          */
         SequenceContainer()
-            :m_values()
-            ,m_bIsChanged(false)
+            :ContainerBase()
+            ,m_values()
         {
+        }
+
+        virtual bool IsNull() const {return false;}
+
+        virtual void SetNull()
+        {
+            throw SoftwareViolationException(L"Sequences cannot be null",__WFILE__,__LINE__);
         }
 
         /**
@@ -191,28 +198,27 @@ namespace Typesystem
          * @param that [in] - The object to copy into this.
          * @throws SoftwareViolationException If the types are not of the same kind.
          */
-//        virtual void Copy(const ContainerBase& that)
-//        {
-//            if (this != &that)
-//            {
-//                if (typeid(*this) != typeid(that))
-//                {
-//                    throw SoftwareViolationException(L"Invalid call to Copy, containers are not of same type",__WFILE__,__LINE__);
-//                }
+        virtual void Copy(const ContainerBase& that)
+        {
+            if (this != &that)
+            {
+                if (typeid(*this) != typeid(that))
+                {
+                    throw SoftwareViolationException(L"Invalid call to Copy, containers are not of same type",__WFILE__,__LINE__);
+                }
 
-//                const SequenceContainer<ContainedType>& other=static_cast<const SequenceContainer<ContainedType>& >(that);
+                const SequenceContainer<ContainedType>& other=static_cast<const SequenceContainer<ContainedType>& >(that);
 
-//                m_bIsChanged=other.m_bIsChanged;
-//                for (typename StorageType::const_iterator it=other.m_values.begin(); it!=other.m_values.end(); ++it)
-//                {
-//                    m_values.push_back(Internal::SequenceCopyHelper<ContainedType>::Copy(*it));
-//                }
-//            }
-//        }
+                m_bIsChanged=other.m_bIsChanged;
+                for (typename StorageType::const_iterator it=other.m_values.begin(); it!=other.m_values.end(); ++it)
+                {
+                    m_values.push_back(Internal::SequenceCopyHelper<ContainedType>::Copy(*it));
+                }
+            }
+        }
 
     private:
         StorageType m_values;
-        bool m_bIsChanged;
     };
 
     /**
