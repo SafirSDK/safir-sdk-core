@@ -419,17 +419,17 @@ namespace Safir.Dob.Typesystem.Internal
 		                                                                    System.Int32 key);
 
 		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern DotsC_Int32 DotsC_DictionaryInt64KeyToIndex(System.Int64 typeId,
+		internal static extern System.Int32 DotsC_DictionaryInt64KeyToIndex(System.Int64 typeId,
 		                                                                   System.Int32 parameter,
 		                                                                   System.Int64 key);
 
 		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern DotsC_Int32 DotsC_DictionaryStringKeyToIndex(System.Int64 typeId,
+        internal static extern System.Int32 DotsC_DictionaryStringKeyToIndex(System.Int64 typeId,
 		                                                                    System.Int32 parameter,
 		                                                                    System.IntPtr key);
 
 		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern DotsC_Int32 DotsC_DictionaryEntityIdKeyToIndex(System.Int64 typeId,
+        internal static extern System.Int32 DotsC_DictionaryEntityIdKeyToIndex(System.Int64 typeId,
 		                                                                      System.Int32 parameter,
 		                                                                      DotsC_EntityId key);
 
@@ -469,7 +469,7 @@ namespace Safir.Dob.Typesystem.Internal
 
 
 		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern DotsC_Int32 DotsC_GetNumberOfMemberValues(System.Int64 readerHandle,
+        internal static extern System.Int32 DotsC_GetNumberOfMemberValues(System.Int64 readerHandle,
 		                                                                 System.Int32 member);
 
 		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
@@ -589,7 +589,7 @@ namespace Safir.Dob.Typesystem.Internal
 		internal static extern void DotsC_DeleteBlobWriter(System.Int64 writerHandle);
 
 		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern DotsC_Int32 DotsC_CalculateBlobSize(System.Int64 writerHandle);
+        internal static extern System.Int32 DotsC_CalculateBlobSize(System.Int64 writerHandle);
 
 		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
 		internal static extern void DotsC_WriteBlob(System.Int64 writerHandle, System.IntPtr blob);
@@ -616,11 +616,11 @@ namespace Safir.Dob.Typesystem.Internal
 		                                                   System.Int32 member, System.Int32 arrayIndex, DotsC_KeyValMode keyValMode);
 
 		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern void DotsC_WriteFloat32Member(System.Int64 writerHandle, DotsC_Float32 val, byte isNull, byte isChanged, 
+		internal static extern void DotsC_WriteFloat32Member(System.Int64 writerHandle, float val, byte isNull, byte isChanged, 
 		                                                     System.Int32 member, System.Int32 arrayIndex, DotsC_KeyValMode keyValMode);
 
 		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern void DotsC_WriteFloat64Member(System.Int64 writerHandle, DotsC_Float64 val, byte isNull, byte isChanged, 
+		internal static extern void DotsC_WriteFloat64Member(System.Int64 writerHandle, double val, byte isNull, byte isChanged, 
 		                                                     System.Int32 member, System.Int32 arrayIndex, DotsC_KeyValMode keyValMode);
 
 		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
@@ -632,7 +632,7 @@ namespace Safir.Dob.Typesystem.Internal
 		                                                    System.Int32 member, System.Int32 arrayIndex, DotsC_KeyValMode keyValMode);
 
 		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern void DotsC_WriteHashedMember(System.Int64 writerHandle, DotsC_Int64 hash, System.IntPtr str, byte isNull, byte isChanged, 
+		internal static extern void DotsC_WriteHashedMember(System.Int64 writerHandle, System.Int64 hash, System.IntPtr str, byte isNull, byte isChanged, 
 		                                                    System.Int32 member, System.Int32 arrayIndex, DotsC_KeyValMode keyValMode);
 
 		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
@@ -640,7 +640,7 @@ namespace Safir.Dob.Typesystem.Internal
 		                                                      System.Int32 member, System.Int32 arrayIndex, DotsC_KeyValMode keyValMode);
 
 		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-		internal static extern void DotsC_WriteBinaryMember(System.Int64 writerHandle, System.IntPtr val, DotsC_Int32 size, byte isNull, byte isChanged, 
+        internal static extern void DotsC_WriteBinaryMember(System.Int64 writerHandle, System.IntPtr val, System.Int32 size, byte isNull, byte isChanged, 
 		                                                    System.Int32 member, System.Int32 arrayIndex, DotsC_KeyValMode keyValMode);
 
 		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]

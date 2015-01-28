@@ -201,9 +201,6 @@ namespace Safir.Dob.Typesystem
             throw new System.Exception("The method or operation is not implemented.");
         }
 
-
-
-        internal bool m_bIsNull;
         internal T m_Value;
     }
 
