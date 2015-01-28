@@ -104,7 +104,7 @@ int main(int /*argc*/, char * /*argv*/[])
     std::vector<Com::NodeTypeDefinition> commNodeTypes;
     std::map<boost::int64_t, SP::NodeType> spNodeTypes;
 
-    for (const auto& nt: config.GetNodeTypes())
+    for (const auto& nt: config.nodeTypesParam)
     {
         commNodeTypes.push_back({nt.id, 
                                  nt.name,
@@ -146,7 +146,7 @@ int main(int /*argc*/, char * /*argv*/[])
                ++counter;
 
                // Send message to all node types
-               for (const auto& nt: config.GetNodeTypes())
+               for (const auto& nt: config.nodeTypesParam)
                {
                    communication->Send(0, // Send to all nodes of this type
                                        nt.id,

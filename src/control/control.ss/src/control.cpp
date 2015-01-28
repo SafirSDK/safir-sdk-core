@@ -75,28 +75,13 @@ public:
         using namespace boost::program_options;
         options_description options("Options");
         options.add_options()
-            ("help,h", "show help message")
-            ("control-address,c", 
-             value<std::string>(&controlAddress)->default_value("0.0.0.0:30000"), 
-             "Address and port of the control channel")
-            ("data-address,d", 
-             value<std::string>(&dataAddress)->default_value("0.0.0.0:40000"), 
-             "Address and port of the data channel")
-            ("seed,s", 
-             value<std::vector<std::string> >(&seeds), 
-             "Seed address (can be specified multiple times). Pairs of address:port to control channel.")
-            ("name,n", 
-             value<std::string>(&name)->default_value("<not set>", ""), 
-             "A nice name for the node, for presentation purposes only")
-            ("node-type,t", 
-             value<std::string>(&nodeType)->default_value("Server"), 
-             "Node type of this node")
-            ("dosemain-name",
-             value<std::string>(&doseMainName)->default_value("dose_main_test_stub"),
-             "Name of dose_main executable (without file extension)")
-            ("force-id", 
-             value<boost::int64_t>(&id)->default_value(LlufId_GenerateRandom64(), ""), 
-             "Override the automatically generated node id. For debugging/testing purposes only.");
+                ("help,h", "show help message")
+                ("dosemain-name",
+                 value<std::string>(&doseMainName)->default_value("dose_main_test_stub"),
+                 "Name of dose_main executable (without file extension)")
+                ("force-id",
+                 value<boost::int64_t>(&id)->default_value(LlufId_GenerateRandom64(), ""),
+                 "Override the automatically generated node id. For debugging/testing purposes only.");
         
         variables_map vm;
 
@@ -119,49 +104,18 @@ public:
             return;
         }
 
-        for (const auto& nt: config.GetNodeTypes())
-        {
-            if (nt.name == nodeType)
-            {
-                nodeTypeId = nt.id;
-                break;
-            }
-        }
-        
-        if (nodeTypeId == -1)
-        {
-            std::wcerr << "Invalid nodeType specified" << std::endl;
-            return;
-        }
-
         parseOk = true;
     }
     bool parseOk;
-    
-    const Safir::Dob::Internal::Control::Config config;
-
-    std::string controlAddress;
-    std::string dataAddress;
-    std::vector<std::string> seeds;
-    boost::int64_t id;
-    std::string name;
-    std::string nodeType;
     std::string doseMainName;
-    boost::int64_t nodeTypeId = -1;
+    boost::int64_t id;
+
 private:
     static void ShowHelp(const boost::program_options::options_description& desc)
     {
         std::wcout << std::boolalpha
                    << "Usage: control [OPTIONS]\n"
-                   << desc << "\n"
-                   << "Examples:\n"
-                   << "  Listen to loopback address and ports 33000 and 43000.\n"
-                   << "    control --control-address='127.0.0.1:33000' --data-address='127.0.0.1:43000'\n"
-                   << "  As above, but all addresses.\n"
-                   << "    control --control-address='0.0.0.0:33000' --data-address='0.0.0.0:43000'\n"
-                   << "  Listen to ipv6 loopback.\n"
-                   << "    control --control-address='[::1]:33000' --data-address='[::1]:43000'\n"
-                   << std::endl;
+                   << desc << std::endl;
     }
 
 };
@@ -172,10 +126,14 @@ int main(int argc, char * argv[])
     lllog(3) << "CTRL: Started" << std::endl;
 
     const ProgramOptions options(argc, argv);
+
     if (!options.parseOk)
     {
         return 1;
     }
+
+    // Fetch dou parameters
+    Control::Config conf;
 
     boost::asio::io_service ioService;
 
@@ -265,7 +223,7 @@ int main(int argc, char * argv[])
 
     std::vector<Com::NodeTypeDefinition> commNodeTypes;
 
-    for (const auto& nt: options.config.GetNodeTypes())
+    for (const auto& nt: conf.nodeTypesParam)
     {
         commNodeTypes.push_back({nt.id, 
                                  nt.name,
@@ -277,18 +235,18 @@ int main(int argc, char * argv[])
     
     Com::Communication communication(Com::controlModeTag,
                                      ioService,
-                                     options.name,
+                                     conf.thisNodeParam.name,
                                      options.id,
-                                     options.nodeTypeId,
-                                     options.controlAddress,
-                                     options.dataAddress,
+                                     conf.thisNodeParam.nodeTypeId,
+                                     conf.thisNodeParam.controlAddress,
+                                     conf.thisNodeParam.dataAddress,
                                      commNodeTypes);
     
-    communication.InjectSeeds(options.seeds);
+    communication.InjectSeeds(conf.thisNodeParam.seeds);
 
     std::map<boost::int64_t, SP::NodeType> spNodeTypes;
     
-    for (const auto& nt: options.config.GetNodeTypes())
+    for (const auto& nt: conf.nodeTypesParam)
     {
         spNodeTypes.insert(std::make_pair(nt.id,
                                           SP::NodeType(nt.id,
@@ -303,11 +261,11 @@ int main(int argc, char * argv[])
     SP::SystemPicture sp(SP::master_tag,
                          ioService,
                          communication,
-                         options.name,
+                         conf.thisNodeParam.name,
                          options.id,
-                         options.nodeTypeId,
-                         options.controlAddress,
-                         options.dataAddress,
+                         conf.thisNodeParam.nodeTypeId,
+                         conf.thisNodeParam.controlAddress,
+                         conf.thisNodeParam.dataAddress,
                          std::move(spNodeTypes));
 
 
@@ -317,14 +275,14 @@ int main(int argc, char * argv[])
     doseMainCmdSender.reset(new Control::DoseMainCmdSender
                             (ioService,
                              // This is what we do when dose_main is started
-                             [&sp, &communication, &doseMainCmdSender, &options, &stateHandler]()
+                             [&sp, &communication, &doseMainCmdSender, &options, & conf, &stateHandler]()
                              {
                                  // Send info about own node to dose_main
                                  doseMainCmdSender->InjectOwnNode(0, // request id currently not used
-                                                                  options.name,
+                                                                  conf.thisNodeParam.name,
                                                                   options.id,
-                                                                  options.nodeTypeId,
-                                                                  options.dataAddress);
+                                                                  conf.thisNodeParam.nodeTypeId,
+                                                                  conf.thisNodeParam.dataAddress);
 
                                  sp.StartStateSubscription
                                          ([&stateHandler](const SP::SystemState& newState)
@@ -337,11 +295,11 @@ int main(int argc, char * argv[])
                             );
 
     stateHandler.reset(new Control::SystemStateHandler
-                                    (Control::Node{options.name,  // Insert own node
+                                    (Control::Node{conf.thisNodeParam.name,  // Insert own node
                                                    options.id,
-                                                   options.nodeTypeId,
-                                                   options.controlAddress,
-                                                   options.dataAddress},
+                                                   conf.thisNodeParam.nodeTypeId,
+                                                   conf.thisNodeParam.controlAddress,
+                                                   conf.thisNodeParam.dataAddress},
 
                                     // Node included callback
                                     [&doseMainCmdSender](const Control::Node& node)

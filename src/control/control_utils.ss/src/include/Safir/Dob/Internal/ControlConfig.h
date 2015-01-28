@@ -28,6 +28,7 @@
 #include <set>
 #include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Dob/NodeParameters.h>
+#include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Dob/Typesystem/Utilities.h>
 
 
@@ -68,18 +69,44 @@ namespace Control
               unwantedTypes(unwantedTypes_)
         {}
 
-        const std::string name;
-        const boost::int64_t id;
-        const bool isLight;
-        const std::set<std::string> talksTo;
-        const std::string multicastAddressControl;
-        const std::string multicastAddressData;
-        const int heartbeatInterval;
-        const int maxLostHeartbeats;
-        const int slidingWindowSize;
-        const int retryTimeout;
-        const std::vector<std::string> wantedTypes;
-        const std::vector<std::string> unwantedTypes;
+        std::string name;
+        boost::int64_t id;
+        bool isLight;
+        std::set<std::string> talksTo;
+        std::string multicastAddressControl;
+        std::string multicastAddressData;
+        int heartbeatInterval;
+        int maxLostHeartbeats;
+        int slidingWindowSize;
+        int retryTimeout;
+        std::vector<std::string> wantedTypes;
+        std::vector<std::string> unwantedTypes;
+    };
+
+    struct ThisNode
+    {
+        ThisNode() {}
+
+        ThisNode(const std::string& controlAddress_,
+                 const std::string dataAddress_,
+                 const std::vector<std::string> seeds_,
+                 const std::string name_,
+                 const std::string nodeType_)
+
+            : controlAddress(controlAddress_),
+              dataAddress(dataAddress_),
+              seeds(seeds_),
+              name(name_),
+              nodeType(nodeType_),
+              nodeTypeId(LlufId_Generate64(nodeType_.c_str()))
+        {}
+
+        std::string controlAddress;
+        std::string dataAddress;
+        std::vector<std::string> seeds;
+        std::string name;
+        std::string nodeType;
+        boost::int64_t nodeTypeId;
     };
 
     // This class reads configuration parameters and make some sanity checks for parameters needed by Control.
@@ -89,6 +116,7 @@ namespace Control
 
         Config()
         {
+            // NodeTypes
             using Safir::Dob::Typesystem::Utilities::ToUtf8;
 
             if (Safir::Dob::NodeParameters::NodeTypesArraySize() < 1)
@@ -117,6 +145,8 @@ namespace Control
                                            "Node type " + name + " multiple definitions");
                 }
             }
+
+            std::vector<NodeType> nodeTypes;
 
             for (Safir::Dob::Typesystem::ArrayIndex i = 0;
                  i < Safir::Dob::NodeParameters::NodeTypesArraySize();
@@ -262,23 +292,23 @@ namespace Control
                     }
                 }
 
-                m_nodeTypes.push_back(NodeType(nodeTypeName,
-                                               isLight,
-                                               talksTo,
-                                               multicastAddressControl,
-                                               multicastAddressData,
-                                               static_cast<int>(heartbeatInterval * 1000), // seconds -> milliseconds
-                                               maxLostHeartbeats,
-                                               slidingWindowsSize,
-                                               static_cast<int>(retryTimeout * 1000), // seconds -> milliseconds
-                                               wantedTypes,
-                                               unwantedTypes));
+                nodeTypesParam.push_back(NodeType(nodeTypeName,
+                                                  isLight,
+                                                  talksTo,
+                                                  multicastAddressControl,
+                                                  multicastAddressData,
+                                                  static_cast<int>(heartbeatInterval * 1000), // seconds -> milliseconds
+                                                  maxLostHeartbeats,
+                                                  slidingWindowsSize,
+                                                  static_cast<int>(retryTimeout * 1000), // seconds -> milliseconds
+                                                  wantedTypes,
+                                                  unwantedTypes));
 
             }
 
             // Check that there are no duplicated ip addresses
             std::set<std::string> ipAddr;
-            for (const auto& i : m_nodeTypes)
+            for (const auto& i : nodeTypesParam)
             {
                 if (!i.multicastAddressControl.empty())
                 {
@@ -296,16 +326,46 @@ namespace Control
                     }
                 }
             }
+
+            // ThisNode
+            std::string controlAddress = ToUtf8(Safir::Dob::ThisNodeParameters::ControlAddress());
+
+            std::string dataAddress = ToUtf8(Safir::Dob::ThisNodeParameters::DataAddress());
+
+            std::vector<std::string> seeds;
+
+            for (Safir::Dob::Typesystem::ArrayIndex i = 0;
+                 i < Safir::Dob::ThisNodeParameters::SeedsArraySize();
+                 ++i)
+            {
+                seeds.push_back(ToUtf8(Safir::Dob::ThisNodeParameters::Seeds(i)));
+            }
+
+            std::string name = ToUtf8(Safir::Dob::ThisNodeParameters::Name());
+
+            std::string nodeType = ToUtf8(Safir::Dob::ThisNodeParameters::NodeType());
+
+            thisNodeParam = ThisNode(controlAddress,
+                                     dataAddress,
+                                     seeds,
+                                     name,
+                                     nodeType);
+
+
+            for (const auto& nt: nodeTypesParam)
+            {
+                if (nt.id == thisNodeParam.nodeTypeId)
+                {
+                    break;
+                }
+                throw std::logic_error("Parameter error: " +
+                                       thisNodeParam.name + " is not a valid node type!");
+            }
+
         }
 
-        std::vector<NodeType> GetNodeTypes() const
-        {
-            return m_nodeTypes;
-        }
-
-    private:
-
-        std::vector<NodeType> m_nodeTypes;
+        std::vector<NodeType> nodeTypesParam;
+        ThisNode thisNodeParam;
     };
 }
 }
