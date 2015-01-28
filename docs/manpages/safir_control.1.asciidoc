@@ -1,5 +1,5 @@
 SAFIR_CONTROL(1)
-============
+================
 :doctype: manpage
 
 
