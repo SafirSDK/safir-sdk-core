@@ -43,10 +43,8 @@ namespace Internal
     class AsioLatencyMonitor
     {
     public:
-        AsioLatencyMonitor(const bool logAlways,
-                           boost::asio::io_service::strand& strand)
-            : m_logAlways(logAlways)
-            , m_strand(strand)
+        explicit AsioLatencyMonitor(boost::asio::io_service::strand& strand)
+            : m_strand(strand)
             , m_timer(m_strand.get_io_service())
             , m_stop(false)
         {
@@ -84,24 +82,10 @@ namespace Internal
             const auto postTime = boost::chrono::steady_clock::now();
             m_strand.post([this,postTime]
                           {
-                              //we need part of the log before checking what time it is now
-                              if (m_logAlways)
-                              {
-                                  lllog(0) << "Checking Boost.Asio latency" << std::endl;
-                              }
-
                               const auto latency = boost::chrono::duration_cast<boost::chrono::milliseconds>
                                   (boost::chrono::steady_clock::now() - postTime);
 
-                              if (m_logAlways)
-                              {
-                                  lllog(0) << " - Boost.Asio latency is currently " << latency << std::endl;
-                                  if (latency > boost::chrono::seconds(1))
-                                  {
-                                      lllog(0) << "Warning: Boost.Asio latency more than 1 second" << std::endl;
-                                  }
-                              }
-                              else if (latency > boost::chrono::seconds(1))
+                              if (latency > boost::chrono::milliseconds(100))
                               {
                                   lllog(0) << "Warning: Boost.Asio latency is at " << latency << std::endl;
                               }
@@ -110,8 +94,6 @@ namespace Internal
                               ScheduleTimer();
                           });
         }
-
-        const bool m_logAlways;
 
         boost::asio::io_service::strand& m_strand;
         boost::asio::steady_timer m_timer;

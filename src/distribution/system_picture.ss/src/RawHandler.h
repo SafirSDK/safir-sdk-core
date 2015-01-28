@@ -96,7 +96,7 @@ namespace SP
             , m_id(id)
             , m_nodeTypes(nodeTypes)
             , m_strand(ioService)
-            , m_latencyMonitor(true, m_strand)
+            , m_latencyMonitor(m_strand)
             , m_checkDeadNodesTimer(ioService,
                                     CalculateDeadCheckPeriod(nodeTypes),
                                     m_strand.wrap([this](const boost::system::error_code& error)
