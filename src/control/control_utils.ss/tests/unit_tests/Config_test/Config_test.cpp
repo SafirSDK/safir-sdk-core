@@ -43,67 +43,72 @@ int main(int argc, char* argv[])
 
     if (test == "tc1")
     {
-        ctrl::Config config;
+        ctrl::Config conf;
 
-        auto nodeTypes = config.GetNodeTypes();
-
-        CHECK(nodeTypes.size() == 3);
+        CHECK(conf.nodeTypesParam.size() == 3);
 
         // Check first index which is Server
-        CHECK(nodeTypes[0].name == "Server");
-        CHECK(nodeTypes[0].isLight == false);
-        CHECK(nodeTypes[0].talksTo.size() == 3);
-        CHECK(nodeTypes[0].talksTo.find("Server") != nodeTypes[0].talksTo.end());
-        CHECK(nodeTypes[0].talksTo.find("Client") != nodeTypes[0].talksTo.end());
-        CHECK(nodeTypes[0].talksTo.find("RemoteClient") != nodeTypes[0].talksTo.end());
-        CHECK(nodeTypes[0].multicastAddressControl == "192.0.0.1:9500");
-        CHECK(nodeTypes[0].multicastAddressData == "192.0.0.1:9501");
-        CHECK(nodeTypes[0].heartbeatInterval == 1000);
-        CHECK(nodeTypes[0].maxLostHeartbeats == 5);
-        CHECK(nodeTypes[0].slidingWindowSize == 10);
-        CHECK(nodeTypes[0].retryTimeout == 200);
-        CHECK(nodeTypes[0].wantedTypes.size() == 1);
-        CHECK(nodeTypes[0].wantedTypes[0] == ".*");
-        CHECK(nodeTypes[0].unwantedTypes.size() == 0);
+        CHECK(conf.nodeTypesParam[0].name == "Server");
+        CHECK(conf.nodeTypesParam[0].isLight == false);
+        CHECK(conf.nodeTypesParam[0].talksTo.size() == 3);
+        CHECK(conf.nodeTypesParam[0].talksTo.find("Server") != conf.nodeTypesParam[0].talksTo.end());
+        CHECK(conf.nodeTypesParam[0].talksTo.find("Client") != conf.nodeTypesParam[0].talksTo.end());
+        CHECK(conf.nodeTypesParam[0].talksTo.find("RemoteClient") != conf.nodeTypesParam[0].talksTo.end());
+        CHECK(conf.nodeTypesParam[0].multicastAddressControl == "192.0.0.1:9500");
+        CHECK(conf.nodeTypesParam[0].multicastAddressData == "192.0.0.1:9501");
+        CHECK(conf.nodeTypesParam[0].heartbeatInterval == 1000);
+        CHECK(conf.nodeTypesParam[0].maxLostHeartbeats == 5);
+        CHECK(conf.nodeTypesParam[0].slidingWindowSize == 10);
+        CHECK(conf.nodeTypesParam[0].retryTimeout == 200);
+        CHECK(conf.nodeTypesParam[0].wantedTypes.size() == 1);
+        CHECK(conf.nodeTypesParam[0].wantedTypes[0] == ".*");
+        CHECK(conf.nodeTypesParam[0].unwantedTypes.size() == 0);
 
         // Check second index which is Client
-        CHECK(nodeTypes[1].name == "Client");
-        CHECK(nodeTypes[1].isLight == true);
-        CHECK(nodeTypes[1].talksTo.size() == 1);
-        CHECK(nodeTypes[1].talksTo.find("Server") != nodeTypes[1].talksTo.end());
-        CHECK(nodeTypes[1].multicastAddressControl == "");
-        CHECK(nodeTypes[1].multicastAddressData == "192.0.0.15:9501");
-        CHECK(nodeTypes[1].heartbeatInterval == 5000);
-        CHECK(nodeTypes[1].maxLostHeartbeats == 5);
-        CHECK(nodeTypes[1].slidingWindowSize == 10);
-        CHECK(nodeTypes[1].retryTimeout == 2000);
-        CHECK(nodeTypes[1].wantedTypes.size() == 1);
-        CHECK(nodeTypes[1].wantedTypes[0] == ".*");
-        CHECK(nodeTypes[1].unwantedTypes.size() == 0);
+        CHECK(conf.nodeTypesParam[1].name == "Client");
+        CHECK(conf.nodeTypesParam[1].isLight == true);
+        CHECK(conf.nodeTypesParam[1].talksTo.size() == 1);
+        CHECK(conf.nodeTypesParam[1].talksTo.find("Server") != conf.nodeTypesParam[1].talksTo.end());
+        CHECK(conf.nodeTypesParam[1].multicastAddressControl == "");
+        CHECK(conf.nodeTypesParam[1].multicastAddressData == "192.0.0.15:9501");
+        CHECK(conf.nodeTypesParam[1].heartbeatInterval == 5000);
+        CHECK(conf.nodeTypesParam[1].maxLostHeartbeats == 5);
+        CHECK(conf.nodeTypesParam[1].slidingWindowSize == 10);
+        CHECK(conf.nodeTypesParam[1].retryTimeout == 2000);
+        CHECK(conf.nodeTypesParam[1].wantedTypes.size() == 1);
+        CHECK(conf.nodeTypesParam[1].wantedTypes[0] == ".*");
+        CHECK(conf.nodeTypesParam[1].unwantedTypes.size() == 0);
 
         // Check third index which is RemoteClient
-        CHECK(nodeTypes[2].name == "RemoteClient");
-        CHECK(nodeTypes[2].isLight == true);
-        CHECK(nodeTypes[2].talksTo.size() == 1);
-        CHECK(nodeTypes[2].talksTo.find("Server") != nodeTypes[2].talksTo.end());
-        CHECK(nodeTypes[2].multicastAddressControl == "192.0.0.16:9500");
-        CHECK(nodeTypes[2].multicastAddressData == "");
-        CHECK(nodeTypes[2].heartbeatInterval == 30000);
-        CHECK(nodeTypes[2].maxLostHeartbeats == 5);
-        CHECK(nodeTypes[2].slidingWindowSize == 10);
-        CHECK(nodeTypes[2].retryTimeout == 5000);
-        CHECK(nodeTypes[2].wantedTypes.size() == 1);
-        CHECK(nodeTypes[2].wantedTypes[0] == R"(Capabilities\.Vehicles\.)");
-        CHECK(nodeTypes[2].unwantedTypes.size() == 1);
-        CHECK(nodeTypes[2].unwantedTypes[0] == R"(Capabilities\.Vehicles\.Ambulance.*)");
+        CHECK(conf.nodeTypesParam[2].name == "RemoteClient");
+        CHECK(conf.nodeTypesParam[2].isLight == true);
+        CHECK(conf.nodeTypesParam[2].talksTo.size() == 1);
+        CHECK(conf.nodeTypesParam[2].talksTo.find("Server") != conf.nodeTypesParam[2].talksTo.end());
+        CHECK(conf.nodeTypesParam[2].multicastAddressControl == "192.0.0.16:9500");
+        CHECK(conf.nodeTypesParam[2].multicastAddressData == "");
+        CHECK(conf.nodeTypesParam[2].heartbeatInterval == 30000);
+        CHECK(conf.nodeTypesParam[2].maxLostHeartbeats == 5);
+        CHECK(conf.nodeTypesParam[2].slidingWindowSize == 10);
+        CHECK(conf.nodeTypesParam[2].retryTimeout == 5000);
+        CHECK(conf.nodeTypesParam[2].wantedTypes.size() == 1);
+        CHECK(conf.nodeTypesParam[2].wantedTypes[0] == R"(Capabilities\.Vehicles\.)");
+        CHECK(conf.nodeTypesParam[2].unwantedTypes.size() == 1);
+        CHECK(conf.nodeTypesParam[2].unwantedTypes[0] == R"(Capabilities\.Vehicles\.Ambulance.*)");
 
+        // Check ThisNode parameters
+        CHECK(conf.thisNodeParam.controlAddress == "0.0.0.0:30000");
+        CHECK(conf.thisNodeParam.dataAddress == "0.0.0.0:40000");
+        CHECK(conf.thisNodeParam.seeds[0] == "192.168.1.11:40000");
+        CHECK(conf.thisNodeParam.seeds[1] == "192.168.1.15:30000");
+        CHECK(conf.thisNodeParam.name == "MyNode");
+        CHECK(conf.thisNodeParam.nodeType == "Server");
+        CHECK(conf.thisNodeParam.nodeTypeId == LlufId_Generate64("Server"));
     }
     else if (test == "tc2")
     {
         try
-        {
-            ctrl::Config config;
-            config.GetNodeTypes();
+        {           
+            ctrl::Config conf;
 
             CHECK(!"Expected an exception!");
         }
@@ -115,9 +120,8 @@ int main(int argc, char* argv[])
     else if (test == "tc3")
     {
         try
-        {
-            ctrl::Config config;
-            config.GetNodeTypes();
+        {            
+            ctrl::Config conf;
 
             CHECK(!"Expected an exception!");
         }
@@ -130,8 +134,7 @@ int main(int argc, char* argv[])
     {
         try
         {
-            ctrl::Config config;
-            config.GetNodeTypes();
+            ctrl::Config conf;
 
             CHECK(!"Expected an exception!");
         }
