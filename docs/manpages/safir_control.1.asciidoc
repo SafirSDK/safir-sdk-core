@@ -1,0 +1,29 @@
+SAFIR_CONTROL(1)
+============
+:doctype: manpage
+
+
+NAME
+----
+safir_control - Safir system startup and closedown
+
+
+SYNOPSIS
+--------
+*safir_control*
+
+DESCRIPTION
+-----------
+safir_control is the service in Safir SDK Core that controls Safir system startup and closedown.
+
+
+RESOURCES
+---------
+Web site: <http://www.safirsdkcore.com/>
+
+
+COPYING
+-------
+Copyright \(C) 2004-2015 Saab AB. Free use of this software is granted under
+the terms of the GNU General Public License Version 3 (GPL-3).
+
