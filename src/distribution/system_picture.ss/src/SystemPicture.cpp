@@ -68,16 +68,28 @@ namespace
             : m_logAlways(logAlways)
             , m_ioService(ioService)
             , m_timer(ioService)
+            , m_stop(false)
         {
             ScheduleTimer();
         }
+
+        void Stop()
+        {
+            m_stop = true;
+        }
+
     private:
         void ScheduleTimer()
         {
+            if (m_stop)
+            {
+                return;
+            }
+
             m_timer.expires_from_now(boost::chrono::seconds(1));
             m_timer.async_wait([this](const boost::system::error_code& error)
                                {
-                                   if (error)
+                                   if (error || m_stop)
                                    {
                                        return;
                                    }
@@ -123,6 +135,8 @@ namespace
 
         boost::asio::io_service& m_ioService;
         boost::asio::steady_timer m_timer;
+
+        std::atomic<bool> m_stop;
     };
 }
 
@@ -305,6 +319,8 @@ namespace SP
             const bool was_stopped = m_stopped.exchange(true);
             if (!was_stopped)
             {
+                m_latencyMonitor.Stop();
+
                 if (m_rawHandler != nullptr)
                 {
                     m_rawHandler->Stop();
