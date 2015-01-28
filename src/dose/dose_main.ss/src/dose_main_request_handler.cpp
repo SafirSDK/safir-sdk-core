@@ -431,7 +431,6 @@ namespace Internal
                 (Dob::ResponseGeneralErrorCodes::SafirTimeout(),
                  ostr.str());
 
-            //TODO: write directly to shared memory
             Typesystem::BinarySerialization bin;
             Typesystem::Serialization::ToBinary(errorResponse,bin);
 
@@ -493,7 +492,6 @@ namespace Internal
                                            const InternalRequestId&     reqId,
                                            const ConnectionPtr&         sender)
     {
-        //TODO: write directly to shared memory
         Typesystem::BinarySerialization bin;
         Typesystem::Serialization::ToBinary(resp,bin);
 

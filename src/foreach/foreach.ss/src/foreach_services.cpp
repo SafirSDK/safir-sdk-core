@@ -138,7 +138,7 @@ namespace ForEach
 
             m_debug << "Delete request" << std::endl;
 
-            requestSpecificData->RequestType() = Delete;
+            requestSpecificData->GetRequestType() = Delete;
 
             /* if no responsetype is set, send an "SafirNullMember" error messsage back and don't do anything */
             if (deleteService->ResponseType().IsNull())
@@ -232,7 +232,7 @@ namespace ForEach
 
             m_debug << "DeleteAll request" << std::endl;
 
-            requestSpecificData->RequestType() = Delete;
+            requestSpecificData->GetRequestType() = Delete;
 
             /* if no responsetype is set, send an "SafirNullMember" error messsage back and don't do anything */
             if (deleteAllService->ResponseType().IsNull())
@@ -358,7 +358,7 @@ namespace ForEach
 
             m_debug << "Update request";
 
-            requestSpecificData->RequestType() = Update;
+            requestSpecificData->GetRequestType() = Update;
 
             /* if no responsetype is set, send an "SafirNullMember" error message back and don't do anything */
             if (updateService->ResponseType().IsNull())
@@ -547,7 +547,7 @@ namespace ForEach
             {
                 try
                 {
-                    if (requestSpecificData->RequestType() == Delete)
+                    if (requestSpecificData->GetRequestType() == Delete)
                     {
                         requestToSend = true;
                         reqId = m_connection.DeleteRequest(entry.entityId, this);

@@ -81,7 +81,7 @@ private:
     void UpdateInstallButton();
     void UpdateBuildButton();
     void OpenLog(const bool ignoreCheckbox = false);
-    
+
     bool m_debug;
     bool m_release;
     bool m_buildRunning;

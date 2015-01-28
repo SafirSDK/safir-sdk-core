@@ -54,7 +54,6 @@
 
 //dosecom_stuff.h includes stuff that includes windows.h crap header file!
 //undef the stupid defines from there.
-//TODO: rewrite the dose_com exported header files to not include windows.h!
 #ifdef GetMessage
 #undef GetMessage
 #endif

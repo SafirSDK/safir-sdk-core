@@ -273,9 +273,6 @@ void Sequencer::Tick()
         }
     }
 
-
-    //TODO what to do if a partner becomes not ready?
-
     const SequencerStates::State oldState = m_state;
     switch (m_state)
     {

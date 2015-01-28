@@ -1696,7 +1696,6 @@ namespace Internal
                         (Dob::ResponseGeneralErrorCodes::SafirNotRegistered(),
                         ostr.str());
 
-                    //TODO: write directly to shared memory
                     Typesystem::BinarySerialization bin;
                     Typesystem::Serialization::ToBinary(errorResponse,bin);
 
@@ -1741,7 +1740,6 @@ namespace Internal
                         (Dob::ResponseGeneralErrorCodes::SafirNotRegistered(),
                         ostr.str());
 
-                    //TODO: write directly to shared memory
                     Typesystem::BinarySerialization bin;
                     Typesystem::Serialization::ToBinary(errorResponse,bin);
 

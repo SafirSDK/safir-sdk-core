@@ -53,8 +53,17 @@ int main(int argc, char *argv[])
                               "The dobmake-batch script could not be found.\nMake sure you have it in your PATH.");
         return 1;
     }
-    Dobmake w;
-    w.show();
+    try
+    {
+        Dobmake w;
+        w.show();
 
-    return a.exec();
+        return a.exec();
+    }
+    catch(const std::exception& e)
+    {
+        QMessageBox::critical(NULL, "Critical error in dobmake!",
+                              QString("Dobmake failed completely!\n") + e.what());
+        return 1;
+    }
 }
