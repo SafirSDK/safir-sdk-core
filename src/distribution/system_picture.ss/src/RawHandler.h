@@ -31,6 +31,7 @@
 #include <Safir/Utilities/Internal/MakeUnique.h>
 #include "MessageWrapperCreators.h"
 #include "RawChanges.h"
+#include "AsioLatencyMonitor.h"
 #include <boost/make_shared.hpp>
 #include <boost/chrono.hpp>
 #include <boost/noncopyable.hpp>
@@ -95,6 +96,7 @@ namespace SP
             , m_id(id)
             , m_nodeTypes(nodeTypes)
             , m_strand(ioService)
+            , m_latencyMonitor(true, m_strand)
             , m_checkDeadNodesTimer(ioService,
                                     CalculateDeadCheckPeriod(nodeTypes),
                                     m_strand.wrap([this](const boost::system::error_code& error)
@@ -154,6 +156,8 @@ namespace SP
             const bool was_stopped = m_stopped.exchange(true);
             if (!was_stopped)
             {
+                m_latencyMonitor.Stop();
+
                 m_strand.dispatch([this]
                                   {
                                       m_checkDeadNodesTimer.Stop();
@@ -746,6 +750,7 @@ namespace SP
         const int64_t m_id;
         const std::map<int64_t, NodeType> m_nodeTypes;
         mutable boost::asio::strand m_strand;
+        AsioLatencyMonitor m_latencyMonitor;
 
         Safir::Utilities::Internal::AsioPeriodicTimer m_checkDeadNodesTimer;
 

@@ -59,85 +59,6 @@ namespace
     const char* const MASTER_REMOTE_RAW_NAME = "SP_RAW";
     const char* const MASTER_REMOTE_STATE_NAME = "SP_STATE";
     const char* const MASTER_REMOTE_ELECTION_NAME = "SP_ELECTION";
-
-    class AsioLatencyMonitor
-    {
-    public:
-        AsioLatencyMonitor(const bool logAlways,
-                           boost::asio::io_service& ioService)
-            : m_logAlways(logAlways)
-            , m_ioService(ioService)
-            , m_timer(ioService)
-            , m_stop(false)
-        {
-            ScheduleTimer();
-        }
-
-        void Stop()
-        {
-            m_stop = true;
-        }
-
-    private:
-        void ScheduleTimer()
-        {
-            if (m_stop)
-            {
-                return;
-            }
-
-            m_timer.expires_from_now(boost::chrono::seconds(1));
-            m_timer.async_wait([this](const boost::system::error_code& error)
-                               {
-                                   if (error || m_stop)
-                                   {
-                                       return;
-                                   }
-
-                                   MeasureLatency();
-                               });
-
-        }
-
-        void MeasureLatency()
-        {
-            const auto postTime = boost::chrono::steady_clock::now();
-            m_ioService.post([this,postTime]
-                           {
-                               //we need part of the log before checking what time it is now
-                               if (m_logAlways)
-                               {
-                                   lllog(0) << "Checking Boost.Asio latency" << std::endl;
-                               }
-
-                               const auto latency = boost::chrono::duration_cast<boost::chrono::milliseconds>
-                                   (boost::chrono::steady_clock::now() - postTime);
-
-                               if (m_logAlways)
-                               {
-                                   lllog(0) << " - Boost.Asio latency is currently " << latency << std::endl;
-                                   if (latency > boost::chrono::seconds(1))
-                                   {
-                                       lllog(0) << "Warning: Boost.Asio latency more than 1 second" << std::endl;
-                                   }
-                               }
-                               else if (latency > boost::chrono::seconds(1))
-                               {
-                                   lllog(0) << "Warning: Boost.Asio latency is at " << latency << std::endl;
-                               }
-
-                               //schedule next latency check
-                               ScheduleTimer();
-                           });
-        }
-
-        const bool m_logAlways;
-
-        boost::asio::io_service& m_ioService;
-        boost::asio::steady_timer m_timer;
-
-        std::atomic<bool> m_stop;
-    };
 }
 
 namespace Safir
@@ -148,8 +69,6 @@ namespace Internal
 {
 namespace SP
 {
-
-
     using namespace Safir::Utilities::Internal;
 
     class SystemPicture::Impl
@@ -168,8 +87,7 @@ namespace SP
              const std::string& controlAddress,
              const std::string& dataAddress,
              const std::map<int64_t, NodeType>& nodeTypes)
-            : m_latencyMonitor(true,ioService)
-            , m_rawHandler(Safir::make_unique<RawHandler>(ioService,
+            : m_rawHandler(Safir::make_unique<RawHandler>(ioService,
                                                           communication,
                                                           name,
                                                           id,
@@ -243,8 +161,7 @@ namespace SP
                       const int64_t nodeTypeId,
                       const std::string& dataAddress,
                       const std::map<int64_t, NodeType>& nodeTypes)
-            : m_latencyMonitor(true,ioService)
-            , m_rawHandler(Safir::make_unique<RawHandler>(ioService,
+            : m_rawHandler(Safir::make_unique<RawHandler>(ioService,
                                                           communication,
                                                           name,
                                                           id,
@@ -290,8 +207,7 @@ namespace SP
          * Construct a subscriber SystemPicture.
          */
         explicit Impl(boost::asio::io_service& ioService)
-            : m_latencyMonitor(true,ioService)
-            , m_rawSubscriberLocal(Safir::make_unique<LocalSubscriber<Safir::Utilities::Internal::IpcSubscriber,
+            : m_rawSubscriberLocal(Safir::make_unique<LocalSubscriber<Safir::Utilities::Internal::IpcSubscriber,
                                                                       RawStatisticsSubscriber,
                                                                       RawStatisticsCreator>>(ioService,
                                                                                              MASTER_LOCAL_RAW_NAME))
@@ -319,8 +235,6 @@ namespace SP
             const bool was_stopped = m_stopped.exchange(true);
             if (!was_stopped)
             {
-                m_latencyMonitor.Stop();
-
                 if (m_rawHandler != nullptr)
                 {
                     m_rawHandler->Stop();
@@ -395,8 +309,6 @@ namespace SP
 
 
     private:
-        AsioLatencyMonitor m_latencyMonitor;
-
         std::unique_ptr<RawHandler> m_rawHandler;
 
         std::unique_ptr<RawPublisherLocal> m_rawPublisherLocal;
