@@ -49,7 +49,11 @@ namespace Safir
                 Safir::Dob::ResponsePtr responsePtr;
             };
 
-            enum RequestType { Delete, Update };
+            enum RequestType
+            {
+                Delete,
+                Update
+            };
 
             class RequestSpecificData 
             {
@@ -60,10 +64,6 @@ namespace Safir
                     m_numberOfObjects = 0;
                     m_numberOfResponses = 0;
                     m_numberOfSuccessResponses = 0;
-                    //      m_responseType = Safir::Utilities::ForEach::ResponseType::Enumeration::Immediate;
-/*                    m_transactions;
-                    m_templateEntityRequest;
-                    m_responseType; */
                     m_currentTransaction = 0;
                 }
 
@@ -102,9 +102,8 @@ namespace Safir
                 Safir::Dob::EntityPtr & TemplateEntityRequest() { return m_templateEntityRequest; }
 
 
-                // TODO: ta bort enum här enligt Lars.. går ej att kompilera då
-                const enum RequestType & RequestType() const { return m_requestType; }
-                enum RequestType & RequestType() { return m_requestType; }
+                const RequestType & GetRequestType() const { return m_requestType; }
+                RequestType & GetRequestType() { return m_requestType; }
 
             private:
                 Safir::Dob::Typesystem::Int32 m_numberOfSuccessResponses;
