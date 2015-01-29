@@ -516,7 +516,6 @@ namespace Typesystem
                 if (container == NULL)
                 {
                     throw ReadOnlyException(L"Unable to dereference property, some parent is null",__WFILE__,__LINE__);
-                    return; //parent is null
                 }
                 else
                 {
@@ -578,7 +577,6 @@ namespace Typesystem
                 if (container == NULL)
                 {
                     throw ReadOnlyException(L"Unable to dereference property, some parent is null",__WFILE__,__LINE__);
-                    return; //parent is null
                 }
                 else
                 {
@@ -639,7 +637,6 @@ namespace Typesystem
                 if (container == NULL)
                 {
                     throw ReadOnlyException(L"Unable to dereference property, some parent is null",__WFILE__,__LINE__);
-                    return; //parent is null
                 }
                 else
                 {
@@ -700,7 +697,6 @@ namespace Typesystem
                 if (container == NULL)
                 {
                     throw ReadOnlyException(L"Unable to dereference property, some parent is null",__WFILE__,__LINE__);
-                    return; //parent is null
                 }
                 else
                 {
@@ -762,7 +758,6 @@ namespace Typesystem
                 if (container == NULL)
                 {
                     throw ReadOnlyException(L"Unable to dereference property, some parent is null",__WFILE__,__LINE__);
-                    return; //parent is null
                 }
                 else
                 {
@@ -823,7 +818,6 @@ namespace Typesystem
                 if (container == NULL)
                 {
                     throw ReadOnlyException(L"Unable to dereference property, some parent is null",__WFILE__,__LINE__);
-                    return; //parent is null
                 }
                 else
                 {
@@ -885,7 +879,6 @@ namespace Typesystem
                 if (container == NULL)
                 {
                     throw ReadOnlyException(L"Unable to dereference property, some parent is null",__WFILE__,__LINE__);
-                    return; //parent is null
                 }
                 else
                 {
@@ -948,7 +941,6 @@ namespace Typesystem
                 if (container == NULL)
                 {
                     throw ReadOnlyException(L"Unable to dereference property, some parent is null",__WFILE__,__LINE__);
-                    return; //parent is null
                 }
                 else
                 {
@@ -1010,7 +1002,6 @@ namespace Typesystem
                 if (container == NULL)
                 {
                     throw ReadOnlyException(L"Unable to dereference property, some parent is null",__WFILE__,__LINE__);
-                    return; //parent is null
                 }
                 else
                 {
@@ -1071,7 +1062,6 @@ namespace Typesystem
                 if (container == NULL)
                 {
                     throw ReadOnlyException(L"Unable to dereference property, some parent is null",__WFILE__,__LINE__);
-                    return; //parent is null
                 }
                 else
                 {
@@ -1133,7 +1123,6 @@ namespace Typesystem
                 if (container == NULL)
                 {
                     throw ReadOnlyException(L"Unable to dereference property, some parent is null",__WFILE__,__LINE__);
-                    return; //parent is null
                 }
                 else
                 {
@@ -1195,7 +1184,6 @@ namespace Typesystem
                 if (container == NULL)
                 {
                     throw ReadOnlyException(L"Unable to dereference property, some parent is null",__WFILE__,__LINE__);
-                    return; //parent is null
                 }
                 else
                 {
@@ -1268,7 +1256,6 @@ namespace Typesystem
                 if (container == NULL)
                 {
                     throw ReadOnlyException(L"Unable to dereference property, some parent is null",__WFILE__,__LINE__);
-                    return; //parent is null
                 }
                 else
                 {
@@ -1331,7 +1318,6 @@ namespace Typesystem
                 if (container == NULL)
                 {
                     throw ReadOnlyException(L"Unable to dereference property, some parent is null",__WFILE__,__LINE__);
-                    return; //parent is null
                 }
                 else
                 {
@@ -1404,7 +1390,6 @@ namespace Typesystem
                 if (container == NULL)
                 {
                     throw ReadOnlyException(L"Unable to dereference property, some parent is null",__WFILE__,__LINE__);
-                    return; //parent is null
                 }
                 else
                 {
@@ -1466,7 +1451,6 @@ namespace Typesystem
                 if (container == NULL)
                 {
                     throw ReadOnlyException(L"Unable to dereference property, some parent is null",__WFILE__,__LINE__);
-                    return; //parent is null
                 }
                 else
                 {
@@ -1539,7 +1523,6 @@ namespace Typesystem
                 if (container == NULL)
                 {
                     throw ReadOnlyException(L"Unable to dereference property, some parent is null",__WFILE__,__LINE__);
-                    return; //parent is null
                 }
                 else
                 {
@@ -1602,7 +1585,6 @@ namespace Typesystem
                 if (container == NULL)
                 {
                     throw ReadOnlyException(L"Unable to dereference property, some parent is null",__WFILE__,__LINE__);
-                    return; //parent is null
                 }
                 else
                 {
@@ -1675,7 +1657,6 @@ namespace Typesystem
                 if (container == NULL)
                 {
                     throw ReadOnlyException(L"Unable to dereference property, some parent is null",__WFILE__,__LINE__);
-                    return; //parent is null
                 }
                 else
                 {
@@ -1739,7 +1720,6 @@ namespace Typesystem
                 if (container == NULL)
                 {
                     throw ReadOnlyException(L"Unable to dereference property, some parent is null",__WFILE__,__LINE__);
-                    return; //parent is null
                 }
                 else
                 {
@@ -1803,7 +1783,6 @@ namespace Typesystem
                 if (container == NULL)
                 {
                     throw ReadOnlyException(L"Unable to dereference property, some parent is null",__WFILE__,__LINE__);
-                    return; //parent is null
                 }
                 else
                 {
@@ -1866,7 +1845,6 @@ namespace Typesystem
                 if (container == NULL)
                 {
                     throw ReadOnlyException(L"Unable to dereference property, some parent is null",__WFILE__,__LINE__);
-                    return; //parent is null
                 }
                 else
                 {
@@ -1932,7 +1910,6 @@ namespace Typesystem
                 if (container == NULL)
                 {
                     throw ReadOnlyException(L"Unable to dereference property, some parent is null",__WFILE__,__LINE__);
-                    return; //parent is null
                 }
                 else
                 {
@@ -2000,7 +1977,6 @@ namespace Typesystem
                 if (container == NULL)
                 {
                     throw ReadOnlyException(L"Unable to dereference property, some parent is null",__WFILE__,__LINE__);
-                    return; //parent is null
                 }
                 else
                 {
@@ -2071,7 +2047,6 @@ namespace Typesystem
                 if (container == NULL)
                 {
                     throw ReadOnlyException(L"Unable to dereference property, some parent is null",__WFILE__,__LINE__);
-                    return; //parent is null
                 }
                 else
                 {
