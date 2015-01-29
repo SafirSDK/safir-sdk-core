@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 ######################################################################
 # Created by: Joel Ottosson / joot
@@ -265,7 +265,7 @@ def convert_create_routines(tree):
     #Handle parameters first since we have a chance to reduce the use of type-attributes for parameters
     if root.tag==ns('class'):        
         for cr in root.findall(to_path(["createRoutines", "createRoutine", "values", "value", "parameter"])):
-	    if cr.find(ns("name"))==None:
+            if cr.find(ns("name"))==None:
                 cr_name_element=ET.SubElement(cr, "name")
                 cr_name_element.text=cr.text.strip()
                 cr.text=""
