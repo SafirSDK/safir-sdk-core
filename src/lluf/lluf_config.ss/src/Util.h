@@ -126,6 +126,14 @@ namespace Internal
         {
             value = GetFolderPathFromCSIDL(CSIDL_COMMON_DOCUMENTS);
         }
+        else if (var == "CSIDL_PROGRAM_FILES" || var == "FOLDERID_ProgramFiles")
+        {
+            value = GetFolderPathFromCSIDL(CSIDL_PROGRAM_FILES);
+        }
+        else if (var == "CSIDL_PROGRAM_FILESX86" || var == "FOLDERID_ProgramFilesX86")
+        {
+            value = GetFolderPathFromCSIDL(CSIDL_PROGRAM_FILESX86);
+        }
 #endif
         else
         {
