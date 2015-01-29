@@ -30,14 +30,10 @@
             <summary>Address and port of seed nodes control channel</summary>
             <name>Seeds</name>
             <type>String</type>
-            <arrayElements>
-                <arrayElement>
-                    <value>192.168.1.11:40000</value>
-                </arrayElement>
-                <arrayElement>
-                    <value>192.168.1.15:30000</value>
-                </arrayElement>
-            </arrayElements>
+            <array>
+                <value>192.168.1.11:40000</value>
+                <value>192.168.1.15:30000</value>
+            </array>
         </parameter>
 
         <parameter>

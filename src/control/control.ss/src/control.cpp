@@ -242,7 +242,10 @@ int main(int argc, char * argv[])
                                      conf.thisNodeParam.dataAddress,
                                      commNodeTypes);
     
-    communication.InjectSeeds(conf.thisNodeParam.seeds);
+    if (!conf.thisNodeParam.seeds.empty())
+    {
+        communication.InjectSeeds(conf.thisNodeParam.seeds);
+    }
 
     std::map<boost::int64_t, SP::NodeType> spNodeTypes;
     
