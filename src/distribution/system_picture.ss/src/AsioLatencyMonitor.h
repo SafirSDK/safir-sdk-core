@@ -85,7 +85,7 @@ namespace Internal
                               const auto latency = boost::chrono::duration_cast<boost::chrono::milliseconds>
                                   (boost::chrono::steady_clock::now() - postTime);
 
-                              if (latency > boost::chrono::milliseconds(500))
+                              //if (latency > boost::chrono::milliseconds(500))
                               {
                                   lllog(0) << "Warning: Boost.Asio latency is at " << latency << std::endl;
                               }

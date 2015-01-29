@@ -153,7 +153,7 @@ public:
     {
         m_strand.dispatch([this,data]
                           {
-                              lllog(0) << "DM: Got new SystemState:\n" << data << std::endl;
+                              //                              lllog(0) << "DM: Got new SystemState:\n" << data << std::endl;
 
                               CheckState(data);
                               InjectNodes(data);
@@ -290,7 +290,7 @@ private:
                 continue;
             }
 
-            lllog(0) << "DM: Found dead trigger node " << data.Id(i) << std::endl;
+            //lllog(0) << "DM: Found dead trigger node " << data.Id(i) << std::endl;
 
             //check if it was not known about
             const auto findIt = m_triggerHistory.find(data.Id(i));
