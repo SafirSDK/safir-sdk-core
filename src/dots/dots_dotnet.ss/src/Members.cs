@@ -92,14 +92,59 @@ namespace Safir.Dob.Typesystem
         public static string GetName(System.Int64 typeId,
                                      int member)
         {
-            System.IntPtr result = Kernel.DotsC_GetMemberName(typeId, member);
-            if (result == IntPtr.Zero)
+            MemberType memberType;
+            IntPtr memberName;
+            Int64 complexType;
+            Int32 stringLength;
+            CollectionType collectionType;
+            Int32 arraySize;
+
+            Kernel.DotsC_GetMemberInfo(typeId, member, out memberType, out memberName, out complexType, out stringLength, out collectionType, out arraySize);
+
+            if (memberName == IntPtr.Zero)
             {
                 throw new IllegalValueException("There is no such type or member defined");
             }
             else
             {
-                return Internal.InternalOperations.StringOf(result);
+                return Internal.InternalOperations.StringOf(memberName);
+            }
+        }
+
+        /// <summary>
+        /// Get type name of a member.
+        /// </summary>
+        /// <param name="typeId">TypeId of class or property.</param>
+        /// <param name="member">Index of member.</param>
+        /// <returns>The type name for the member.</returns>
+        /// <exception cref="Safir.Dob.Typesystem.IllegalValueException">There is no such type defined or there is no such member
+        /// in the type or the member is not an enum or object.</exception>
+        public static string GetTypeName(Int64 typeId,
+                                         int member)
+        {
+            MemberType memberType;
+            IntPtr memberName;
+            Int64 complexType;
+            Int32 stringLength;
+            CollectionType collectionType;
+            Int32 arraySize;
+
+            Kernel.DotsC_GetMemberInfo(typeId, member, out memberType, out memberName, out complexType, out stringLength, out collectionType, out arraySize);
+
+            if (memberName == IntPtr.Zero)
+            {
+                throw new IllegalValueException("There is no such type or member defined");
+            }
+
+            if (memberType==MemberType.ObjectMemberType || memberType==MemberType.EnumerationMemberType)
+            {
+                IntPtr typeName=Kernel.DotsC_GetTypeName (complexType);
+                return InternalOperations.StringOf (typeName);
+            }
+            else
+            {
+                IntPtr typeName = Kernel.DotsC_MemberTypeName (memberType);
+                return InternalOperations.StringOf (typeName);
             }
         }
 
@@ -118,14 +163,22 @@ namespace Safir.Dob.Typesystem
         public static System.Int64 GetTypeId(System.Int64 typeId,
                                              int member)
         {
-            System.Int64 result = Kernel.DotsC_GetComplexMemberTypeId(typeId, member);
-            if (result == -1)
+            MemberType memberType;
+            IntPtr memberName;
+            Int64 complexType;
+            Int32 stringLength;
+            CollectionType collectionType;
+            Int32 arraySize;
+
+            Kernel.DotsC_GetMemberInfo(typeId, member, out memberType, out memberName, out complexType, out stringLength, out collectionType, out arraySize);
+
+            if (complexType == -1)
             {
                 throw new IllegalValueException("There is no such type or member defined");
             }
             else
             {
-                return result;
+                return complexType;
             }
         }
 
@@ -141,26 +194,19 @@ namespace Safir.Dob.Typesystem
         /// <param name="isArray">True if member is an array. Not applicable if type id is a property.</param>
         /// <param name="arrayLength">Maximum capacity of array if the member is an array (1 if not an array). Not applicable if type id is a property.</param>
         /// <returns>The name of the member.</returns>
-        /// <exception cref="Safir.Dob.Typesystem.IllegalValueException">There is no such type defined or there is no such member in the type.</exception>
+        /// <exception cref="Safir.Dob.Typesystem.IllegalValueException">There is no such type defined or there is no such member in the type.</exception>       
+
         public static string GetInfo(System.Int64 typeId,
                                      int member,
                                      out MemberType theMemberType,
                                      out System.Int64 memberTypeId,
-                                     out int theTypeSize,
-                                     out bool isArray,
+                                     out int stringLength,
+                                     out CollectionType collectionType,
                                      out int arrayLength)
         {
             IntPtr name;
-            byte isArr;
-            Kernel.DotsC_GetMemberInfo(typeId,
-                                       member,
-                                       out theMemberType,
-                                       out name,
-                                       out memberTypeId,
-                                       out theTypeSize,
-                                       out isArr,
-                                       out arrayLength);
-            isArray = Internal.InternalOperations.BoolOf(isArr);
+            Kernel.DotsC_GetMemberInfo(typeId, member, out theMemberType, out name, out memberTypeId, out stringLength, out collectionType, out arrayLength);
+           
             if (name == IntPtr.Zero)
             {
                 throw new IllegalValueException("There is no such type or member defined");
@@ -181,14 +227,22 @@ namespace Safir.Dob.Typesystem
         public static int GetArraySize(System.Int64 typeId,
                                              int member)
         {
-            int result = Kernel.DotsC_GetMemberArraySize(typeId, member);
-            if (result == -1)
+            MemberType memberType;
+            IntPtr memberName;
+            Int64 complexType;
+            Int32 stringLength;
+            CollectionType collectionType;
+            Int32 arraySize;
+
+            Kernel.DotsC_GetMemberInfo(typeId, member, out memberType, out memberName, out complexType, out stringLength, out collectionType, out arraySize);
+
+            if (arraySize == -1)
             {
                 throw new IllegalValueException("No such type or array defined");
             }
             else
             {
-                return result;
+                return arraySize;
             }
         }
 
@@ -202,35 +256,22 @@ namespace Safir.Dob.Typesystem
         public static int GetMaxStringLength(System.Int64 typeId,
                                              int member)
         {
-            int result = Kernel.DotsC_GetStringMemberMaxLength(typeId, member);
-            if (result == -1)
-            {
-                throw new IllegalValueException("No such type or member defined");
-            }
-            else
-            {
-                return result;
-            }
-        }
+            MemberType memberType;
+            IntPtr memberName;
+            Int64 complexType;
+            Int32 stringLength;
+            CollectionType collectionType;
+            Int32 arraySize;
 
-        /// <summary>
-        /// Get the name of the type as it was defined in the xml description.
-        /// </summary>
-        /// <param name="typeId">TypeId of class.</param>
-        /// <param name="member">Index of member.</param>
-        /// <returns>The name of the type.</returns>
-        /// <exception cref="Safir.Dob.Typesystem.IllegalValueException">There is no such class defined or there is no such member in the type or the member is not a string.</exception>
-        public static string GetTypeName(System.Int64 typeId,
-                                         int member)
-        {
-            IntPtr sp = Kernel.DotsC_GetMemberTypeName(typeId, member);
-            if (sp == IntPtr.Zero)
+            Kernel.DotsC_GetMemberInfo(typeId, member, out memberType, out memberName, out complexType, out stringLength, out collectionType, out arraySize);
+
+            if (stringLength == -1)
             {
-                throw new IllegalValueException("There is no such type or member defined");
+                throw new IllegalValueException("No such type or array defined");
             }
             else
             {
-                return Internal.InternalOperations.StringOf(sp);
+                return stringLength;
             }
         }
     }

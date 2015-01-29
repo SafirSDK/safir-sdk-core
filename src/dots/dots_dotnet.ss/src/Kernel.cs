@@ -331,7 +331,7 @@ namespace Safir.Dob.Typesystem.Internal
         internal static extern void DotsC_GetEnumerationParameter(System.Int64 id,
                                                                   System.Int32 parameter,
                                                                   System.Int32 index,
-		                                                          DotsC_KeyValMode keyValMode,
+		                                                          KeyValMode keyValMode,
                                                                   out System.Int32 val);
 
         //GetInt32Parameter
@@ -339,7 +339,7 @@ namespace Safir.Dob.Typesystem.Internal
         internal static extern void DotsC_GetInt32Parameter(System.Int64 id,
                                                             System.Int32 parameter,
                                                             System.Int32 index,
-		                                                    DotsC_KeyValMode keyValMode,
+		                                                    KeyValMode keyValMode,
                                                             out System.Int32 val);
 
         //GetInt64Parameter
@@ -347,7 +347,7 @@ namespace Safir.Dob.Typesystem.Internal
         internal static extern void DotsC_GetInt64Parameter(System.Int64 id,
                                                             System.Int32 parameter,
                                                             System.Int32 index,
-		                                                    DotsC_KeyValMode keyValMode,
+		                                                    KeyValMode keyValMode,
                                                             out System.Int64 val);
 
         //GetFloat32Parameter
@@ -369,7 +369,7 @@ namespace Safir.Dob.Typesystem.Internal
         internal static extern void DotsC_GetStringParameter(System.Int64 id,
                                                              System.Int32 parameter,
                                                              System.Int32 index,
-		                                                     DotsC_KeyValMode keyValMode,
+		                                                     KeyValMode keyValMode,
                                                              out System.IntPtr val);
 
 		//GetTypeIdParameter
@@ -377,7 +377,7 @@ namespace Safir.Dob.Typesystem.Internal
 		internal static extern void DotsC_GetTypeIdParameter(System.Int64 id,
 		                                                     System.Int32 parameter,
 		                                                     System.Int32 index,
-		                                                     DotsC_KeyValMode keyValMode,
+		                                                     KeyValMode keyValMode,
 		                                                     out System.Int64 val);
 
         //GetHashedIdParameter
@@ -385,7 +385,7 @@ namespace Safir.Dob.Typesystem.Internal
         internal static extern void DotsC_GetHashedIdParameter(System.Int64 id,
                                                                System.Int32 parameter,
                                                                System.Int32 index,
-		                                                       DotsC_KeyValMode keyValMode,
+		                                                       KeyValMode keyValMode,
                                                                out System.Int64 hashVal,
                                                                out System.IntPtr strVal);
 
@@ -394,7 +394,7 @@ namespace Safir.Dob.Typesystem.Internal
         internal static extern void DotsC_GetEntityIdParameter(System.Int64 id,
                                                                System.Int32 parameter,
                                                                System.Int32 index,
-		                                                       DotsC_KeyValMode keyValMode,
+		                                                       KeyValMode keyValMode,
                                                                out Internal.DotsC_EntityId eid,
                                                                out System.IntPtr strVal);
 
@@ -486,7 +486,7 @@ namespace Safir.Dob.Typesystem.Internal
 		                                                  out byte isChanged,
 		                                                  System.Int32 member,
 		                                                  System.Int32 valueIndex,
-		                                                  DotsC_KeyValMode keyValMode);
+		                                                  KeyValMode keyValMode);
 
 		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
 		internal static extern void DotsC_ReadInt64Member(System.Int64 readerHandle,
@@ -495,7 +495,7 @@ namespace Safir.Dob.Typesystem.Internal
 		                                                  out byte isChanged,
 		                                                  System.Int32 member,
 		                                                  System.Int32 valueIndex,
-		                                                  DotsC_KeyValMode keyValMode);
+		                                                  KeyValMode keyValMode);
 
 		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
 		internal static extern void DotsC_ReadFloat32Member(System.Int64 readerHandle,
@@ -504,7 +504,7 @@ namespace Safir.Dob.Typesystem.Internal
 		                                                  out byte isChanged,
 		                                                  System.Int32 member,
 		                                                  System.Int32 valueIndex,
-		                                                  DotsC_KeyValMode keyValMode);
+		                                                  KeyValMode keyValMode);
 
 
 		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
@@ -514,7 +514,7 @@ namespace Safir.Dob.Typesystem.Internal
 		                                                    out byte isChanged,
 		                                                    System.Int32 member,
 		                                                    System.Int32 valueIndex,
-		                                                    DotsC_KeyValMode keyValMode);
+		                                                    KeyValMode keyValMode);
 
 		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
 		internal static extern void DotsC_ReadBooleanMember(System.Int64 readerHandle,
@@ -523,7 +523,7 @@ namespace Safir.Dob.Typesystem.Internal
 		                                                    out byte isChanged,
 		                                                    System.Int32 member,
 		                                                    System.Int32 valueIndex,
-		                                                    DotsC_KeyValMode keyValMode);
+		                                                    KeyValMode keyValMode);
 
 		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
 		internal static extern void DotsC_ReadStringMember(System.Int64 readerHandle,
@@ -532,7 +532,7 @@ namespace Safir.Dob.Typesystem.Internal
 		                                                    out byte isChanged,
 		                                                    System.Int32 member,
 		                                                    System.Int32 valueIndex,
-		                                                    DotsC_KeyValMode keyValMode);
+		                                                    KeyValMode keyValMode);
 
 		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
 		internal static extern void DotsC_ReadHashedMember(System.Int64 readerHandle,
@@ -542,7 +542,7 @@ namespace Safir.Dob.Typesystem.Internal
 		                                                   out byte isChanged,
 		                                                   System.Int32 member,
 		                                                   System.Int32 valueIndex,
-		                                                   DotsC_KeyValMode keyValMode);
+		                                                   KeyValMode keyValMode);
 
 		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
 		internal static extern void DotsC_ReadEntityIdMember(System.Int64 readerHandle,
@@ -552,7 +552,7 @@ namespace Safir.Dob.Typesystem.Internal
 			                                                 out byte isChanged,
 			                                                 System.Int32 member,
 			                                                 System.Int32 valueIndex,
-			                                                 DotsC_KeyValMode keyValMode);
+			                                                 KeyValMode keyValMode);
 
 		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
 		internal static extern void DotsC_ReadBinaryMember(System.Int64 readerHandle,
@@ -562,7 +562,7 @@ namespace Safir.Dob.Typesystem.Internal
 		                                                     out byte isChanged,
 		                                                     System.Int32 member,
 		                                                     System.Int32 valueIndex,
-		                                                     DotsC_KeyValMode keyValMode);
+		                                                     KeyValMode keyValMode);
 
 		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
 		internal static extern void DotsC_ReadObjectMember(System.Int64 readerHandle,
@@ -571,7 +571,7 @@ namespace Safir.Dob.Typesystem.Internal
 		                                                   out byte isChanged,
 		                                                   System.Int32 member,
 		                                                   System.Int32 valueIndex,
-		                                                   DotsC_KeyValMode keyValMode);
+		                                                   KeyValMode keyValMode);
 
 		//************************************************************************************
 		//* Write operations
@@ -609,43 +609,43 @@ namespace Safir.Dob.Typesystem.Internal
 
 		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
 		internal static extern void DotsC_WriteInt32Member(System.Int64 writerHandle, System.Int32 val, byte isNull, byte isChanged,
-		                                                   System.Int32 member, System.Int32 arrayIndex, DotsC_KeyValMode keyValMode);
+		                                                   System.Int32 member, System.Int32 arrayIndex, KeyValMode keyValMode);
 
 		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
 		internal static extern void DotsC_WriteInt64Member(System.Int64 writerHandle, System.Int64 val, byte isNull, byte isChanged, 
-		                                                   System.Int32 member, System.Int32 arrayIndex, DotsC_KeyValMode keyValMode);
+		                                                   System.Int32 member, System.Int32 arrayIndex, KeyValMode keyValMode);
 
 		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
 		internal static extern void DotsC_WriteFloat32Member(System.Int64 writerHandle, float val, byte isNull, byte isChanged, 
-		                                                     System.Int32 member, System.Int32 arrayIndex, DotsC_KeyValMode keyValMode);
+		                                                     System.Int32 member, System.Int32 arrayIndex, KeyValMode keyValMode);
 
 		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
 		internal static extern void DotsC_WriteFloat64Member(System.Int64 writerHandle, double val, byte isNull, byte isChanged, 
-		                                                     System.Int32 member, System.Int32 arrayIndex, DotsC_KeyValMode keyValMode);
+		                                                     System.Int32 member, System.Int32 arrayIndex, KeyValMode keyValMode);
 
 		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
 		internal static extern void DotsC_WriteBooleanMember(System.Int64 writerHandle, byte val, byte isNull, byte isChanged, 
-		                                                     System.Int32 member, System.Int32 arrayIndex, DotsC_KeyValMode keyValMode);
+		                                                     System.Int32 member, System.Int32 arrayIndex, KeyValMode keyValMode);
 
 		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
 		internal static extern void DotsC_WriteStringMember(System.Int64 writerHandle, System.IntPtr val, byte isNull, byte isChanged, 
-		                                                    System.Int32 member, System.Int32 arrayIndex, DotsC_KeyValMode keyValMode);
+		                                                    System.Int32 member, System.Int32 arrayIndex, KeyValMode keyValMode);
 
 		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
 		internal static extern void DotsC_WriteHashedMember(System.Int64 writerHandle, System.Int64 hash, System.IntPtr str, byte isNull, byte isChanged, 
-		                                                    System.Int32 member, System.Int32 arrayIndex, DotsC_KeyValMode keyValMode);
+		                                                    System.Int32 member, System.Int32 arrayIndex, KeyValMode keyValMode);
 
 		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
 		internal static extern void DotsC_WriteEntityIdMember(System.Int64 writerHandle, DotsC_EntityId val, System.IntPtr instanceString, byte isNull, byte isChanged, 
-		                                                      System.Int32 member, System.Int32 arrayIndex, DotsC_KeyValMode keyValMode);
+		                                                      System.Int32 member, System.Int32 arrayIndex, KeyValMode keyValMode);
 
 		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
         internal static extern void DotsC_WriteBinaryMember(System.Int64 writerHandle, System.IntPtr val, System.Int32 size, byte isNull, byte isChanged, 
-		                                                    System.Int32 member, System.Int32 arrayIndex, DotsC_KeyValMode keyValMode);
+		                                                    System.Int32 member, System.Int32 arrayIndex, KeyValMode keyValMode);
 
 		[DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
 		internal static extern void DotsC_WriteObjectMember(System.Int64 writerHandle, System.IntPtr blob, byte isNull, byte isChanged, 
-		                                                    System.Int32 member, System.Int32 arrayIndex, DotsC_KeyValMode keyValMode);
+		                                                    System.Int32 member, System.Int32 arrayIndex, KeyValMode keyValMode);
 
 		//************************************************************************************
 		//* Library exception handling

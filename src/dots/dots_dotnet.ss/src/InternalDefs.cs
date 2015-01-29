@@ -55,10 +55,4 @@ namespace Safir.Dob.Typesystem.Internal
         MappedToMember,
         MappedToParameter,
     }
-
-	internal enum DotsC_KeyValMode
-	{
-		DotsC_KeyMode=0, 
-		DotsC_ValueMode
-	}
 }

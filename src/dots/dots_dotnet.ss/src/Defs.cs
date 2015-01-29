@@ -194,5 +194,11 @@ namespace Safir.Dob.Typesystem
 		ArrayCollectionType,
 		SequenceCollectionType,
 		DictionaryCollectionType
-	} 
+	}
+
+    public enum KeyValMode
+    {
+        KeyMode=0, 
+        ValueMode
+    }
 }

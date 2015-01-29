@@ -88,7 +88,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -106,7 +106,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -128,7 +128,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -146,7 +146,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -168,7 +168,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -186,7 +186,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -208,7 +208,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -226,7 +226,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -248,7 +248,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -266,7 +266,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -288,7 +288,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -306,7 +306,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -328,7 +328,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -346,7 +346,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -368,7 +368,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -433,7 +433,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -502,7 +502,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -568,7 +568,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -634,7 +634,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -766,7 +766,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -827,7 +827,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -845,7 +845,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -867,7 +867,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -885,7 +885,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -907,7 +907,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -925,7 +925,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -947,7 +947,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -965,7 +965,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -987,7 +987,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1005,7 +1005,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1027,7 +1027,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1045,7 +1045,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1067,7 +1067,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1085,7 +1085,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1107,7 +1107,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1125,7 +1125,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1147,7 +1147,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1165,7 +1165,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1187,7 +1187,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1205,7 +1205,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1227,7 +1227,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1245,7 +1245,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1267,7 +1267,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1285,7 +1285,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1307,7 +1307,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1325,7 +1325,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1347,7 +1347,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1365,7 +1365,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1387,7 +1387,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1405,7 +1405,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1427,7 +1427,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1445,7 +1445,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1467,7 +1467,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1485,7 +1485,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1507,7 +1507,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1525,7 +1525,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1547,7 +1547,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1565,7 +1565,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1587,7 +1587,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1605,7 +1605,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1627,7 +1627,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1645,7 +1645,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1667,7 +1667,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1685,7 +1685,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1707,7 +1707,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1725,7 +1725,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1747,7 +1747,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1765,7 +1765,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1787,7 +1787,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1805,7 +1805,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1827,7 +1827,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1845,7 +1845,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1867,7 +1867,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1885,7 +1885,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1907,7 +1907,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1925,7 +1925,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1947,7 +1947,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1965,7 +1965,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -1987,7 +1987,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -2005,7 +2005,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -2027,7 +2027,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -2045,7 +2045,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -2067,7 +2067,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -2085,7 +2085,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -2107,7 +2107,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -2125,7 +2125,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -2147,7 +2147,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -2165,7 +2165,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -2187,7 +2187,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -2205,7 +2205,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -2227,7 +2227,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -2245,7 +2245,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -2267,7 +2267,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -2285,7 +2285,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -2307,7 +2307,7 @@ namespace Safir.Dob.Typesystem.Internal
             {
                 throw new SoftwareViolationException("Container was null!");
             }
-            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Get (out container.m_Value, out container.m_bIsNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -2325,7 +2325,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, DotsC_KeyValMode.DotsC_ValueMode);
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
         #endregion
         #endregion
@@ -2339,9 +2339,9 @@ namespace Safir.Dob.Typesystem.Internal
 		                	   Int64 handle,
 				               Int32 member,
                                Int32 valueIndex,
-				               DotsC_KeyValMode mode)
+				               KeyValMode mode)
         {
-            if (mode==DotsC_KeyValMode.DotsC_KeyMode)
+            if (mode==KeyValMode.KeyMode)
             {
                 throw new SoftwareViolationException("BlobOperation.Get(bool) called with mode=KeyMode. Only ValueMode is allowed for this type!");
             }
@@ -2359,7 +2359,7 @@ namespace Safir.Dob.Typesystem.Internal
                                Int64 handle,
                                Int32 member,
                                Int32 valueIndex,
-                               DotsC_KeyValMode mode)
+                               KeyValMode mode)
         {
             byte n, c;
             Kernel.DotsC_ReadInt32Member (handle, out val, out n, out c, member, valueIndex, mode);
@@ -2373,7 +2373,7 @@ namespace Safir.Dob.Typesystem.Internal
                                Int64 handle,
                                Int32 member,
                                Int32 valueIndex,
-                               DotsC_KeyValMode mode)
+                               KeyValMode mode)
         {
             byte n, c;
             Kernel.DotsC_ReadInt64Member (handle, out val, out n, out c, member, valueIndex, mode);
@@ -2388,9 +2388,9 @@ namespace Safir.Dob.Typesystem.Internal
                                Int64 handle,
                                Int32 member,
                                Int32 valueIndex,
-                               DotsC_KeyValMode mode)
+                               KeyValMode mode)
         {
-            if (mode==DotsC_KeyValMode.DotsC_KeyMode)
+            if (mode==KeyValMode.KeyMode)
             {
                 throw new SoftwareViolationException("BlobOperation.Get(float) called with mode=KeyMode. Only ValueMode is allowed for this type!");
             }
@@ -2407,9 +2407,9 @@ namespace Safir.Dob.Typesystem.Internal
                                Int64 handle,
                                Int32 member,
                                Int32 valueIndex,
-                               DotsC_KeyValMode mode)
+                               KeyValMode mode)
         {
-            if (mode==DotsC_KeyValMode.DotsC_KeyMode)
+            if (mode==KeyValMode.KeyMode)
             {
                 throw new SoftwareViolationException("BlobOperation.Get(double) called with mode=KeyMode. Only ValueMode is allowed for this type!");
             }
@@ -2426,7 +2426,7 @@ namespace Safir.Dob.Typesystem.Internal
                                Int64 handle,
                                Int32 member,
                                Int32 valueIndex,
-                               DotsC_KeyValMode mode)
+                               KeyValMode mode)
         {
             byte n, c;
             IntPtr str;
@@ -2449,7 +2449,7 @@ namespace Safir.Dob.Typesystem.Internal
                                Int64 handle,
                                Int32 member,
                                Int32 valueIndex,
-                               DotsC_KeyValMode mode)
+                               KeyValMode mode)
         {
             byte n, c;
             Int64 hash;
@@ -2476,7 +2476,7 @@ namespace Safir.Dob.Typesystem.Internal
                                Int64 handle,
                                Int32 member,
                                Int32 valueIndex,
-                               DotsC_KeyValMode mode)
+                               KeyValMode mode)
         {
             byte n, c;
             Int64 hash;
@@ -2503,7 +2503,7 @@ namespace Safir.Dob.Typesystem.Internal
                                Int64 handle,
                                Int32 member,
                                Int32 valueIndex,
-                               DotsC_KeyValMode mode)
+                               KeyValMode mode)
         {
             byte n, c;
             Int64 hash;
@@ -2530,7 +2530,7 @@ namespace Safir.Dob.Typesystem.Internal
                                Int64 handle,
                                Int32 member,
                                Int32 valueIndex,
-                               DotsC_KeyValMode mode)
+                               KeyValMode mode)
         {
             byte n, c;
             DotsC_EntityId eid;
@@ -2557,9 +2557,9 @@ namespace Safir.Dob.Typesystem.Internal
                                Int64 handle,
                                Int32 member,
                                Int32 valueIndex,
-                               DotsC_KeyValMode mode)
+                               KeyValMode mode)
         {
-            if (mode==DotsC_KeyValMode.DotsC_KeyMode)
+            if (mode==KeyValMode.KeyMode)
             {
                 throw new SoftwareViolationException("BlobOperation.Get(object) called with mode=KeyMode. Only ValueMode is allowed for this type!");
             }
@@ -2585,9 +2585,9 @@ namespace Safir.Dob.Typesystem.Internal
                                Int64 handle,
                                Int32 member,
                                Int32 valueIndex,
-                               DotsC_KeyValMode mode)
+                               KeyValMode mode)
         {
-            if (mode==DotsC_KeyValMode.DotsC_KeyMode)
+            if (mode==KeyValMode.KeyMode)
             {
                 throw new SoftwareViolationException("BlobOperation.Get(binary) called with mode=KeyMode. Only ValueMode is allowed for this type!");
             }
@@ -2618,9 +2618,9 @@ namespace Safir.Dob.Typesystem.Internal
 		                Int64 handle,
 		                Int32 member,
 		                Int32 valueIndex,
-		                DotsC_KeyValMode mode)
+		                KeyValMode mode)
         {
-            if (mode==DotsC_KeyValMode.DotsC_KeyMode)
+            if (mode==KeyValMode.KeyMode)
             {
                 throw new SoftwareViolationException("BlobOperation.Set(bool) called with mode=KeyMode. Only ValueMode is allowed for this type!");
             }
@@ -2638,7 +2638,7 @@ namespace Safir.Dob.Typesystem.Internal
 		                Int64 handle,
 		                Int32 member,
 		                Int32 valueIndex,
-		                DotsC_KeyValMode mode)
+		                KeyValMode mode)
         {
             Kernel.DotsC_WriteInt32Member (handle, val,
                                            InternalOperations.ByteOf(isNull),
@@ -2652,7 +2652,7 @@ namespace Safir.Dob.Typesystem.Internal
 		                Int64 handle,
 		                Int32 member,
 		                Int32 valueIndex,
-		                DotsC_KeyValMode mode)
+		                KeyValMode mode)
         {
             Kernel.DotsC_WriteInt64Member (handle, val,
                                            InternalOperations.ByteOf(isNull),
@@ -2666,9 +2666,9 @@ namespace Safir.Dob.Typesystem.Internal
 		                Int64 handle,
 		                Int32 member,
 		                Int32 valueIndex,
-		                DotsC_KeyValMode mode)
+		                KeyValMode mode)
         {
-            if (mode==DotsC_KeyValMode.DotsC_KeyMode)
+            if (mode==KeyValMode.KeyMode)
             {
                 throw new SoftwareViolationException("BlobOperation.Set(float) called with mode=KeyMode. Only ValueMode is allowed for this type!");
             }
@@ -2684,9 +2684,9 @@ namespace Safir.Dob.Typesystem.Internal
 		                Int64 handle,
 		                Int32 member,
 		                Int32 valueIndex,
-		                DotsC_KeyValMode mode)
+		                KeyValMode mode)
         {
-            if (mode==DotsC_KeyValMode.DotsC_KeyMode)
+            if (mode==KeyValMode.KeyMode)
             {
                 throw new SoftwareViolationException("BlobOperation.Set(double) called with mode=KeyMode. Only ValueMode is allowed for this type!");
             }
@@ -2702,7 +2702,7 @@ namespace Safir.Dob.Typesystem.Internal
 		                Int64 handle,
 		                Int32 member,
 		                Int32 valueIndex,
-		                DotsC_KeyValMode mode)
+		                KeyValMode mode)
 		{
             if (isNull)
             {
@@ -2732,7 +2732,7 @@ namespace Safir.Dob.Typesystem.Internal
 		                Int64 handle,
 		                Int32 member,
 		                Int32 valueIndex,
-		                DotsC_KeyValMode mode)
+		                KeyValMode mode)
         {
             if (isNull)
             {
@@ -2773,7 +2773,7 @@ namespace Safir.Dob.Typesystem.Internal
 		                Int64 handle,
 		                Int32 member,
 		                Int32 valueIndex,
-		                DotsC_KeyValMode mode)
+		                KeyValMode mode)
         {
             if (isNull)
             {
@@ -2814,7 +2814,7 @@ namespace Safir.Dob.Typesystem.Internal
 		                Int64 handle,
 		                Int32 member,
 		                Int32 valueIndex,
-		                DotsC_KeyValMode mode)
+		                KeyValMode mode)
         {
             if (isNull)
             {
@@ -2855,7 +2855,7 @@ namespace Safir.Dob.Typesystem.Internal
 		                Int64 handle,
 		                Int32 member,
 		                Int32 valueIndex,
-		                DotsC_KeyValMode mode)
+		                KeyValMode mode)
         {
             if (isNull)
             {
@@ -2902,9 +2902,9 @@ namespace Safir.Dob.Typesystem.Internal
 		                Int64 handle,
 		                Int32 member,
 		                Int32 valueIndex,
-		                DotsC_KeyValMode mode)
+		                KeyValMode mode)
         {
-            if (mode==DotsC_KeyValMode.DotsC_KeyMode)
+            if (mode==KeyValMode.KeyMode)
             {
                 throw new SoftwareViolationException("BlobOperation.Set(object) called with mode=KeyMode. Only ValueMode is allowed for this type!");
             }
@@ -2943,9 +2943,9 @@ namespace Safir.Dob.Typesystem.Internal
 		                Int64 handle,
 		                Int32 member,
 		                Int32 valueIndex,
-		                DotsC_KeyValMode mode)
+		                KeyValMode mode)
         {
-            if (mode==DotsC_KeyValMode.DotsC_KeyMode)
+            if (mode==KeyValMode.KeyMode)
             {
                 throw new SoftwareViolationException("BlobOperation.Set(binary) called with mode=KeyMode. Only ValueMode is allowed for this type!");
             }
