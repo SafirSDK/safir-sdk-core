@@ -352,12 +352,18 @@ namespace Control
                                      nodeType);
 
 
+            bool nodeTypeValid = false;
             for (const auto& nt: nodeTypesParam)
             {
                 if (nt.id == thisNodeParam.nodeTypeId)
                 {
+                    nodeTypeValid = true;
                     break;
                 }
+            }
+
+            if (!nodeTypeValid)
+            {
                 throw std::logic_error("Parameter error: " +
                                        thisNodeParam.name + " is not a valid node type!");
             }
