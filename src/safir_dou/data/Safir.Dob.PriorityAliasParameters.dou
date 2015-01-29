@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8" ?>
 <class xmlns="urn:safir-dots-unit">
   <summary>Contains the definitions of the aliases for the priority channel names.</summary>
   <name>Safir.Dob.PriorityAliasParameters</name>
@@ -7,26 +8,20 @@
       <summary>The definitions of the aliases for the priority channel names.</summary>
       <name>Aliases</name>
       <type>Safir.Dob.Alias</type>
-      <arrayElements>
-        <arrayElement>
-          <Safir.Dob.Alias type="Safir.Dob.Alias">
-            <AliasName>PrioAlias1</AliasName>
-            <RealName>High</RealName>
-          </Safir.Dob.Alias>
-        </arrayElement>
-        <arrayElement>
-          <Safir.Dob.Alias type="Safir.Dob.Alias">
-            <AliasName>AnotherAlias</AliasName>
-            <RealName>Normal</RealName>
-          </Safir.Dob.Alias>
-        </arrayElement>
-        <arrayElement>
-          <Safir.Dob.Alias type="Safir.Dob.Alias">
-            <AliasName>Plots</AliasName>
-            <RealName>High No Ack</RealName>
-          </Safir.Dob.Alias>
-        </arrayElement>
-      </arrayElements>
+      <array>
+        <Safir.Dob.Alias type="Safir.Dob.Alias">
+          <AliasName>PrioAlias1</AliasName>
+          <RealName>High</RealName>
+        </Safir.Dob.Alias>
+        <Safir.Dob.Alias type="Safir.Dob.Alias">
+          <AliasName>AnotherAlias</AliasName>
+          <RealName>Normal</RealName>
+        </Safir.Dob.Alias>
+        <Safir.Dob.Alias type="Safir.Dob.Alias">
+          <AliasName>Plots</AliasName>
+          <RealName>High No Ack</RealName>
+        </Safir.Dob.Alias>
+      </array>
     </parameter>
   </parameters>
 </class>
