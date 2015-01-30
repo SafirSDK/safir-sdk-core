@@ -34,12 +34,22 @@ namespace Utilities
                                              const boost::chrono::steady_clock::duration& /*pollPeriod*/)
         : m_callback(callback)
         , m_ioService(ioService)
+        , m_stopped(false)
         , m_strand(ioService)
     {
-        //m_signalEvent = CreateEvent(NULL,false,false,NULL);
+
     }
 
     void ProcessMonitorImpl::Stop()
+    {
+        const bool was_stopped = m_stopped.exchange(true);
+        if (!was_stopped)
+        {
+            m_strand.dispatch(boost::bind(ProcessMonitorImpl::StopInternal,this));
+        }
+    }
+
+    void ProcessMonitorImpl::StopInternal()
     {
         for(ProcessTable::iterator it = m_processes.begin();
             it != m_processes.end(); ++it)

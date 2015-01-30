@@ -60,6 +60,8 @@ namespace Utilities
             m_strand.dispatch(boost::bind(&ProcessMonitorImpl::StopMonitorPidInternal,this,pid));
         }
     private:
+        void StopInternal();
+
         void StartMonitorPidInternal(const pid_t pid);
         void StopMonitorPidInternal(const pid_t pid);
 
@@ -71,7 +73,7 @@ namespace Utilities
         boost::function<void(const pid_t pid)> m_callback;
 
         boost::asio::io_service& m_ioService;
-
+        boost::atomic<bool> m_stopped;
         boost::asio::io_service::strand m_strand;
 
         struct Process
