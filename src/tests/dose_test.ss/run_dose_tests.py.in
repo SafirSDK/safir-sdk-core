@@ -89,6 +89,8 @@ class Parameters:
                           help="Run multinode tests instead of standalone tests")
         parser.add_option("--slave", action="store_true",dest="slave",default=False,
                           help="Be a multinode slave")
+        parser.add_option("--no-syslog", action="store_false",dest="check_syslog",default=True,
+                          help="Do not check syslog output")
         parser.add_option("--no-java", action="store_true",dest="no_java",default=False,
                           help="Do not run java partners")
         parser.add_option("--lang0", action="store",dest="lang0",default="cpp",
@@ -109,6 +111,7 @@ class Parameters:
 
         self.multinode = options.multinode
         self.slave = options.slave
+        self.check_syslog = options.check_syslog
         self.standalone = not options.multinode and not options.slave
 
         self.no_java = options.no_java
@@ -380,6 +383,7 @@ def preexec(): # Don't forward signals.
 class Runner:
     def __init__(self):
         self.procs = dict()
+        self.syslog = None
 
     def __launchProcess(self, name, cmd, stdoutToFile = True):
         if stdoutToFile:
@@ -402,10 +406,11 @@ class Runner:
         return proc
 
     def initialize(self,parameters):
-        #load and start syslog server
         sys.path.append(os.path.join(parameters.test_data_directory,"python"))
-        from syslog_server import SyslogServer
-        self.syslog = SyslogServer("safir_show_config") #This should be in the PATH here, so no need to give full path
+        if parameters.check_syslog:
+           #load and start syslog server
+           from syslog_server import SyslogServer
+           self.syslog = SyslogServer("safir_show_config") #This should be in the PATH here, so no need to give full path
 
         if parameters.standalone:
             partners = (0,1,2)
@@ -475,11 +480,12 @@ class Runner:
             if output is not None:
                 output.close()
 
-        #check that syslog output is empty
-        syslog_data = self.syslog.get_data(10) # wait for 10 seconds to collect any output
-        results.write_test_result(len(syslog_data) == 0,
-                                  "syslog_output",
-                                  "syslog is not empty:\n" + xml.sax.saxutils.quoteattr(syslog_data))
+        if self.syslog is not None:
+            #check that syslog output is empty
+            syslog_data = self.syslog.get_data(10) # wait for 10 seconds to collect any output
+            results.write_test_result(len(syslog_data) == 0,
+                                      "syslog_output",
+                                      "syslog is not empty:\n" + xml.sax.saxutils.quoteattr(syslog_data))
 
     def run_sequencer(self,parameters):
         log("** Running test sequencer with languages set to", parameters.lang0, parameters.lang1, parameters.lang2)

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8" ?>
 <class xmlns="urn:safir-dots-unit">
   <summary>Contains the definitions of the aliases for the distribution channel names.</summary>
   <name>Safir.Dob.DistributionChannelAliases</name>
@@ -7,20 +8,16 @@
       <summary>The definitions of the aliases for the priority channel names.</summary>
       <name>Aliases</name>
       <type>Safir.Dob.Alias</type>
-      <arrayElements>
-        <arrayElement>
-          <Safir.Dob.Alias type="Safir.Dob.Alias">
-            <AliasName>Tracks</AliasName>
-            <RealName>System</RealName>
-          </Safir.Dob.Alias>
-        </arrayElement>
-        <arrayElement>
-          <Safir.Dob.Alias type="Safir.Dob.Alias">
-            <AliasName>Foo</AliasName>
-            <RealName>Local</RealName>
-          </Safir.Dob.Alias>
-        </arrayElement>
-      </arrayElements>
+      <array>
+        <Safir.Dob.Alias type="Safir.Dob.Alias">
+          <AliasName>Tracks</AliasName>
+          <RealName>System</RealName>
+        </Safir.Dob.Alias>
+        <Safir.Dob.Alias type="Safir.Dob.Alias">
+          <AliasName>Foo</AliasName>
+          <RealName>Local</RealName>
+        </Safir.Dob.Alias>
+      </array>
     </parameter>
   </parameters>
 </class>

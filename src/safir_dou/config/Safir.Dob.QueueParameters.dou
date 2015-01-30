@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8" ?>
 <class xmlns="urn:safir-dots-unit">
   <summary>Contains the parametrization of queue lengths used by a connection.</summary>
   <name>Safir.Dob.QueueParameters</name>
@@ -6,18 +7,16 @@
     <parameter>
       <name>QueueRules</name>
       <type>Safir.Dob.QueueRule</type>
-      <arrayElements>
-        <!-- The first array item is the default queue lengths.
-             We match all connections. -->
-        <arrayElement>
-          <Safir.Dob.QueueRule type="Safir.Dob.QueueRule">
-            <MessageInQueueCapacity>10</MessageInQueueCapacity>
-            <MessageOutQueueCapacity>10</MessageOutQueueCapacity>
-            <RequestInQueueCapacity>10</RequestInQueueCapacity>
-            <RequestOutQueueCapacity>10</RequestOutQueueCapacity>
-          </Safir.Dob.QueueRule>
-        </arrayElement>
-      </arrayElements>
+      <!-- The first array item is the default queue lengths.
+           We match all connections. -->
+      <array>
+        <Safir.Dob.QueueRule type="Safir.Dob.QueueRule">
+          <MessageInQueueCapacity>10</MessageInQueueCapacity>
+          <MessageOutQueueCapacity>10</MessageOutQueueCapacity>
+          <RequestInQueueCapacity>10</RequestInQueueCapacity>
+          <RequestOutQueueCapacity>10</RequestOutQueueCapacity>
+        </Safir.Dob.QueueRule>
+      </array>
     </parameter>
   </parameters>
 </class>

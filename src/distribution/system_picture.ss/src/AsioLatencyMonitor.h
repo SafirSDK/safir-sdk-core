@@ -23,6 +23,8 @@
 ******************************************************************************/
 #pragma once
 
+#include <Safir/Utilities/Internal/SystemLog.h>
+
 #ifdef _MSC_VER
 #pragma warning (push)
 #pragma warning (disable: 4267)
@@ -43,8 +45,10 @@ namespace Internal
     class AsioLatencyMonitor
     {
     public:
-        explicit AsioLatencyMonitor(boost::asio::io_service::strand& strand)
-            : m_strand(strand)
+        explicit AsioLatencyMonitor(const std::string& identifier,
+                                    boost::asio::io_service::strand& strand)
+            : m_identifier(identifier)
+            , m_strand(strand)
             , m_timer(m_strand.get_io_service())
             , m_stop(false)
         {
@@ -72,28 +76,26 @@ namespace Internal
                                        return;
                                    }
 
-                                   MeasureLatency();
+                                   const auto latency = boost::chrono::duration_cast<boost::chrono::milliseconds>
+                                       (boost::chrono::steady_clock::now() - m_timer.expires_at());
+
+                                   if (latency > boost::chrono::milliseconds(1000))
+                                   {
+                                       lllog(0) << "Warning: Boost.Asio latency for '"
+                                                << m_identifier.c_str()
+                                                << "' is at " << latency << std::endl;
+                                       SEND_SYSTEM_LOG(Warning, << "Boost.Asio latency for '"
+                                                       << m_identifier.c_str() << "' is at " << latency
+                                                       << ". If this happens a lot your system is overloaded and may start misbehaving.");
+                                   }
+
+                                   //schedule next latency check
+                                   ScheduleTimer();
                                });
 
         }
 
-        void MeasureLatency()
-        {
-            const auto postTime = boost::chrono::steady_clock::now();
-            m_strand.post([this,postTime]
-                          {
-                              const auto latency = boost::chrono::duration_cast<boost::chrono::milliseconds>
-                                  (boost::chrono::steady_clock::now() - postTime);
-
-                              if (latency > boost::chrono::milliseconds(500))
-                              {
-                                  lllog(0) << "Warning: Boost.Asio latency is at " << latency << std::endl;
-                              }
-
-                              //schedule next latency check
-                              ScheduleTimer();
-                          });
-        }
+        const std::string m_identifier;
 
         boost::asio::io_service::strand& m_strand;
         boost::asio::steady_timer m_timer;

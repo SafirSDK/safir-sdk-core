@@ -1,19 +1,19 @@
-ADD_EXECUTABLE(control_stub sp_control.cpp)
-ADD_EXECUTABLE(dose_main_stub dose_main_stub.cpp)
+ADD_EXECUTABLE(sp_test_ctrl sp_test_ctrl.cpp)
+ADD_EXECUTABLE(sp_test_dm sp_test_dm.cpp)
 
-TARGET_LINK_LIBRARIES(control_stub PRIVATE
+TARGET_LINK_LIBRARIES(sp_test_ctrl PRIVATE
   system_picture
   lluf_utils
   lluf_id
   ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
-TARGET_LINK_LIBRARIES(dose_main_stub PRIVATE
+TARGET_LINK_LIBRARIES(sp_test_dm PRIVATE
   system_picture
   lluf_utils
   lluf_id
   ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
-SAFIR_INSTALL(TARGETS control_stub dose_main_stub TEST_SUITE)
+SAFIR_INSTALL(TARGETS sp_test_ctrl sp_test_dm TEST_SUITE)
 
 SAFIR_INSTALL_PYTHON(SCRIPT start_system_picture_test.py
   COMPONENT Test)

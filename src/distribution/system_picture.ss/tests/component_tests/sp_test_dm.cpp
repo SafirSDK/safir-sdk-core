@@ -31,6 +31,7 @@
 #include <map>
 #include <deque>
 #include <boost/thread.hpp>
+#include <atomic>
 
 //disable warnings in boost
 #if defined _MSC_VER
@@ -153,7 +154,7 @@ public:
     {
         m_strand.dispatch([this,data]
                           {
-                              lllog(0) << "DM: Got new SystemState:\n" << data << std::endl;
+                              std::wcout << "DM: Got new SystemState:\n" << data << std::endl;
 
                               CheckState(data);
                               InjectNodes(data);
@@ -290,13 +291,13 @@ private:
                 continue;
             }
 
-            lllog(0) << "DM: Found dead trigger node " << data.Id(i) << std::endl;
+            //lllog(0) << "DM: Found dead trigger node " << data.Id(i) << std::endl;
 
             //check if it was not known about
             const auto findIt = m_triggerHistory.find(data.Id(i));
             if (findIt == m_triggerHistory.end())
             {
-                lllog(0) << "DM:  most probably from a previous cycle, ignore it." << std::endl;
+                //lllog(0) << "DM:  most probably from a previous cycle, ignore it." << std::endl;
                 m_triggerHistory.insert(std::make_pair(data.Id(i),true));
                 continue;
             }
@@ -304,7 +305,7 @@ private:
             //if it wasnt previously dead
             if (!findIt->second)
             {
-                lllog(0) << "DM:  was not previously dead, triggering" << std::endl;
+                //lllog(0) << "DM:  was not previously dead, triggering" << std::endl;
                 findIt->second = true; //now known to be dead
                 triggered = true;
                 break;
@@ -352,6 +353,7 @@ int main(int argc, char * argv[])
     }
 
     boost::asio::io_service ioService;
+    std::atomic<bool> m_stop(false);
 
     // Make some work to stop io_service from exiting.
     auto work = Safir::make_unique<boost::asio::io_service::work>(ioService);
@@ -371,7 +373,7 @@ int main(int argc, char * argv[])
                                                                          "NodeTypeA",
                                                                          false,
                                                                          boost::chrono::milliseconds(1000),
-                                                                         5,
+                                                                         10,
                                                                          boost::chrono::milliseconds(20))));
 
     commNodeTypes.push_back({2,
@@ -386,7 +388,7 @@ int main(int argc, char * argv[])
                                                                          "NodeTypeB",
                                                                          false,
                                                                          boost::chrono::milliseconds(2000),
-                                                                         5,
+                                                                         10,
                                                                          boost::chrono::milliseconds(50))));
 
 
@@ -477,8 +479,9 @@ int main(int argc, char * argv[])
     signalSet.add(SIGTERM);
 #endif
 
-    const auto stopFcn = [&sp, &communication, &sendTimer, &work, &signalSet]
+    const auto stopFcn = [&sp, &communication, &sendTimer, &work, &signalSet, &m_stop]
     {
+        m_stop = true;
         lllog(0) << "DM: Stopping SystemPicture" << std::endl;
         sp.Stop();
         lllog(0) << "DM: Stopping Communication" << std::endl;
@@ -491,15 +494,21 @@ int main(int argc, char * argv[])
         signalSet.cancel();
     };
 
-    signalSet.async_wait([stopFcn](const boost::system::error_code& error,
+    signalSet.async_wait([stopFcn, &m_stop](const boost::system::error_code& error,
                                    const int signal_number)
                          {
-                             lllog(0) << "DM: Got signal " << signal_number << std::endl;
+                             if (m_stop)
+                             {
+                                 return;
+                             }
+
                              if (error)
                              {
                                  SEND_SYSTEM_LOG(Error,
                                                  << "Got a signals error: " << error);
                              }
+
+                             lllog(0) << "DM: Got signal " << signal_number << std::endl;
                              stopFcn();
                          }
                          );
