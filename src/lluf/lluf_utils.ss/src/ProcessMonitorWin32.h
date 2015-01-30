@@ -25,6 +25,7 @@
 
 #include <Safir/Utilities/ProcessMonitor.h>
 #include <boost/bind.hpp>
+#include <boost/atomic.hpp>
 
 #ifdef _MSC_VER
 #  pragma warning (push)
