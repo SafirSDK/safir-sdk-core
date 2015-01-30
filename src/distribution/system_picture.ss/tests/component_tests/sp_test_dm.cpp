@@ -31,6 +31,7 @@
 #include <map>
 #include <deque>
 #include <boost/thread.hpp>
+#include <atomic>
 
 //disable warnings in boost
 #if defined _MSC_VER
@@ -153,7 +154,7 @@ public:
     {
         m_strand.dispatch([this,data]
                           {
-                              //                              lllog(0) << "DM: Got new SystemState:\n" << data << std::endl;
+                              std::wcout << "DM: Got new SystemState:\n" << data << std::endl;
 
                               CheckState(data);
                               InjectNodes(data);
@@ -296,7 +297,7 @@ private:
             const auto findIt = m_triggerHistory.find(data.Id(i));
             if (findIt == m_triggerHistory.end())
             {
-                lllog(0) << "DM:  most probably from a previous cycle, ignore it." << std::endl;
+                //lllog(0) << "DM:  most probably from a previous cycle, ignore it." << std::endl;
                 m_triggerHistory.insert(std::make_pair(data.Id(i),true));
                 continue;
             }
@@ -304,7 +305,7 @@ private:
             //if it wasnt previously dead
             if (!findIt->second)
             {
-                lllog(0) << "DM:  was not previously dead, triggering" << std::endl;
+                //lllog(0) << "DM:  was not previously dead, triggering" << std::endl;
                 findIt->second = true; //now known to be dead
                 triggered = true;
                 break;
