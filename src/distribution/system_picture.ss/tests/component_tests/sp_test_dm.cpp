@@ -352,6 +352,7 @@ int main(int argc, char * argv[])
     }
 
     boost::asio::io_service ioService;
+    std::atomic<bool> m_stop(false);
 
     // Make some work to stop io_service from exiting.
     auto work = Safir::make_unique<boost::asio::io_service::work>(ioService);
@@ -477,8 +478,9 @@ int main(int argc, char * argv[])
     signalSet.add(SIGTERM);
 #endif
 
-    const auto stopFcn = [&sp, &communication, &sendTimer, &work, &signalSet]
+    const auto stopFcn = [&sp, &communication, &sendTimer, &work, &signalSet, &m_stop]
     {
+        m_stop = true;
         lllog(0) << "DM: Stopping SystemPicture" << std::endl;
         sp.Stop();
         lllog(0) << "DM: Stopping Communication" << std::endl;
@@ -491,15 +493,21 @@ int main(int argc, char * argv[])
         signalSet.cancel();
     };
 
-    signalSet.async_wait([stopFcn](const boost::system::error_code& error,
+    signalSet.async_wait([stopFcn, &m_stop](const boost::system::error_code& error,
                                    const int signal_number)
                          {
-                             lllog(0) << "DM: Got signal " << signal_number << std::endl;
+                             if (m_stop)
+                             {
+                                 return;
+                             }
+
                              if (error)
                              {
                                  SEND_SYSTEM_LOG(Error,
                                                  << "Got a signals error: " << error);
                              }
+
+                             lllog(0) << "DM: Got signal " << signal_number << std::endl;
                              stopFcn();
                          }
                          );
