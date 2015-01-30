@@ -61,11 +61,11 @@ def mkdir(newdir):
             os.mkdir(newdir)
 
 def launch_control(number, previous, id, env, ownip, seedip):
-    command = ("control_stub",) + ("--name",    "Node_{0:03d}".format(number),
-                                  "--control-address", ownip + ":33{0:03d}".format(number),
-                                  "--data-address", ownip + ":43{0:03d}".format(number),
-                                  "--seed", seedip + ":33{0:03d}".format(previous),
-                                  "--force-id", str(id))
+    command = ("sp_test_ctrl",) + ("--name",    "Node_{0:03d}".format(number),
+                                   "--control-address", ownip + ":33{0:03d}".format(number),
+                                   "--data-address", ownip + ":43{0:03d}".format(number),
+                                   "--seed", seedip + ":33{0:03d}".format(previous),
+                                   "--force-id", str(id))
 
     output = open("control_{0:03d}.output.txt".format(number),"w")
     proc = subprocess.Popen(command,
@@ -75,10 +75,10 @@ def launch_control(number, previous, id, env, ownip, seedip):
     return proc
 
 def launch_dose_main(number, previous, id, env, ownip):
-    command = ("dose_main_stub",) + ("--name", "Node_{0:03d}".format(number),
-                                   "--data-address", ownip + ":43{0:03d}".format(number),
-                                   "--force-id", str(id),
-                                   "--suicide-trigger", "Node_{0:03d}".format(previous))
+    command = ("sp_test_dm",) + ("--name", "Node_{0:03d}".format(number),
+                                 "--data-address", ownip + ":43{0:03d}".format(number),
+                                 "--force-id", str(id),
+                                 "--suicide-trigger", "Node_{0:03d}".format(previous))
 
     output = open("main_{0:03d}.output.txt".format(number),"w")
     proc = subprocess.Popen(command,
@@ -138,7 +138,7 @@ def stop_node(i, control, main):
         log ("DOSE_MAIN", i, "RETURN CODE",main.returncode)
         raise Failure
 
-parser = argparse.ArgumentParser(description='Run a lot of control_stub')
+parser = argparse.ArgumentParser(description='Run a lot of test stub controls and dose_mains')
 parser.add_argument('--start',type=int,
                     default = 0,
                     help = "Node number of first node to start")
