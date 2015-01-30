@@ -45,7 +45,7 @@ namespace Utilities
         const bool was_stopped = m_stopped.exchange(true);
         if (!was_stopped)
         {
-            m_strand.dispatch(boost::bind(ProcessMonitorImpl::StopInternal,this));
+            m_strand.dispatch(boost::bind(&ProcessMonitorImpl::StopInternal,this));
         }
     }
 
