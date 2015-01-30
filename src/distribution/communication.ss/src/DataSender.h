@@ -132,7 +132,10 @@ namespace Com
             {
                 m_running=true;
                 //start retransmit timer
-                RetransmitUnackedMessages();
+                if (m_deliveryGuarantee==Acked)
+                {
+                    RetransmitUnackedMessages();
+                }
             });
         }
 
@@ -142,7 +145,10 @@ namespace Com
             m_strand.dispatch([=]
             {
                 m_running=false;
-                m_resendTimer.cancel();
+                if (m_deliveryGuarantee==Acked)
+                {
+                    m_resendTimer.cancel();
+                }
             });
         }
 
@@ -233,61 +239,42 @@ namespace Com
                 for (size_t i=0; i<m_sendQueue.first_unhandled_index(); ++i)
                 {
                     UserDataPtr& ud=m_sendQueue[i];
+
+                    auto receiverListIt=ud->receivers.find(ack.commonHeader.senderId);
+                    if (receiverListIt==ud->receivers.end())
+                    {
+                        //the ack-sender is not a receiver of this message, continue
+                        continue;
+                    }
+
                     if (ud->header.sendMethod==ack.sendMethod && ud->header.sequenceNumber<=ack.sequenceNumber)
                     {
                         //calculate index in missing-array
                         size_t index=static_cast<size_t>(ack.sequenceNumber-ud->header.sequenceNumber);
+
+                        if (index>Parameters::SlidingWindowSize-1)
+                        {
+                            std::ostringstream os;
+                            os<<m_logPrefix<<"Programming Error! Index out of range. Calculated missing index: "<<index<<". AckContent: "<<AckToString(ack)<<"\n"<<SendQueueToString();
+                            lllog(1)<<os.str().c_str()<<std::endl;
+                            SEND_SYSTEM_LOG(Error, <<os.str().c_str()<<std::endl);
+                            throw std::logic_error(os.str());
+                        }
+
                         if (ack.missing[index]==0)
                         {
-                            //This message is now acked, remove from list of still unacked
-                            if (ud->receivers.erase(ack.commonHeader.senderId)==0)
-                            {
-                                auto ackSenderIt=m_nodes.find(ack.commonHeader.senderId);
-                                if (ackSenderIt==m_nodes.end())
-                                {
-                                    lllog(5)<<m_logPrefix.c_str()<<"Got ack from node that was not supposed to ack this message. Unknown node. "<<AckToString(ack).c_str()<<std::endl;
-                                }
-                                else if (!ackSenderIt->second.systemNode)
-                                {
-                                    lllog(5)<<m_logPrefix.c_str()<<"Got ack from node that was not supposed to ack this message. Node exist but is not systemNode. "<<AckToString(ack).c_str()<<std::endl;
-                                }
-                                else
-                                {
-                                    //duplicated acks will be very common since the same ack has a missing list that is all zeroes in normal case
-                                    //lllog(5)<<m_logPrefix.c_str()<<"Got duplicated ack. "<<AckToString(ack).c_str()<<std::endl;
-                                }
-                            }
+                            ud->receivers.erase(receiverListIt);
                         }
                         else
                         {
-                            //the ack-sender is missing a message, a gap. Resend immediately
-                            if (ud->receivers.find(ack.commonHeader.senderId)!=ud->receivers.end())
+                            //AckSender is missing a message.
+                            //if the message has already been transmitted 2 times (i.e retransmitted 1 time), we fall back on the retransmit timeouts only.
+                            //This is because every ack will have the missign message marked in the missing list and the retransmit count will explode if
+                            //we retransmit for every ack received.
+                            if (ud->transmitCount<2)
                             {
+                                //resend immediately if we have not retransmitted this message before
                                 RetransmitMessage(ud);
-                            }
-                            else
-                            {
-                                //receiver is missing a message that we dont expect it to be missing. Log all info we have
-                                auto nodeIt=m_nodes.find(ack.commonHeader.senderId);
-                                if (nodeIt==m_nodes.end())
-                                {
-                                    lllog(1)<<m_logPrefix.c_str()<<"got Ack from node we dont have. Maybe it has been excluded just before we received the ack-message. Ack sender id: "<<ack.commonHeader.senderId<<std::endl;
-                                }
-                                else if (!nodeIt->second.systemNode)
-                                {
-                                    lllog(1)<<m_logPrefix.c_str()<<"got Ack from node that is not a systemNode. Maybe it was excluded just before we received the ack-message. Ack sender id: "<<
-                                              ack.commonHeader.senderId<<std::endl;
-                                }
-                                else
-                                {
-                                    //this should never happen, a programming error. Receiver missing message that we think has already been acked.
-                                    std::ostringstream os;
-                                    os<<m_logPrefix<<"Got ack from "<<ack.commonHeader.senderId<<" that indicates that the node is missing a message that has already been acked. "<<
-                                        " This does not have to be an error, it can occur if acks are re-ordered on the network. In that case the system will recover and continue normally"
-                                        " AckContent: "<<AckToString(ack)<<"\n"<<SendQueueToString();
-                                    lllog(1)<<os.str().c_str()<<std::endl;
-                                    SEND_SYSTEM_LOG(Error, <<os.str().c_str()<<std::endl);
-                                }
                             }
                         }
                     }
@@ -334,7 +321,7 @@ namespace Com
                     else
                     {
                         it->second.systemNode=true;
-                        if (m_deliveryGuarantee)
+                        if (m_deliveryGuarantee==Acked)
                         {
                             PostWelcome(id);
                         }
@@ -416,15 +403,16 @@ namespace Com
             HandleSendQueue();
         }
 
-        void SetRequestAck(MessageHeader& header) const
+        static bool RequestAck(MessageHeader& header)
         {
-            static const size_t AckThreshold=Parameters::SlidingWindowSize/2;
+            return true;
+            //static const size_t AckThreshold=Parameters::SlidingWindowSize/2;
+            //return (header.sequenceNumber % AckThreshold==0);
+        }
 
-            if (header.sequenceNumber % AckThreshold==0)
-            {
-                header.ackNow=1;
-            }
-            else if (m_sendQueue.first_unhandled_index()==m_sendQueue.size()-1)
+        static void SetRequestAck(MessageHeader& header)
+        {
+            if (RequestAck(header))
             {
                 header.ackNow=1;
             }
@@ -442,6 +430,7 @@ namespace Com
             while (m_sendQueue.has_unhandled() && m_sendQueue.first_unhandled_index()<Parameters::SlidingWindowSize)
             {
                 UserDataPtr& ud=m_sendQueue[m_sendQueue.first_unhandled_index()];
+                ++ud->transmitCount;
                 ud->header.ackNow=0;
 
                 if (ud->header.sendMethod==MultiReceiverSendMethod) //this is message that shall be sent to every system node
@@ -519,18 +508,36 @@ namespace Com
             }
 
             //Always called from writeStrand
-            static const boost::chrono::milliseconds timerInterval(m_waitForAckTimeout-10);
-            static const boost::chrono::milliseconds waitLimit(m_waitForAckTimeout);
+            static const boost::chrono::milliseconds timerInterval(m_waitForAckTimeout/2);
+            static const boost::chrono::milliseconds retransmitLimit(m_waitForAckTimeout);
             static const boost::chrono::milliseconds mustBeSeriousError(10000);
+
+            //Check if we should ask receiver for an ack. For example if we dont have enough messages to
+            //send to automatically request acks every now and then.
+            bool sendAckRequest=false;
 
             //Check if there is any unacked messages that are old enough to be retransmitted
             for (size_t i=0; i<m_sendQueue.first_unhandled_index(); ++i)
             {
                 UserDataPtr& ud=m_sendQueue[i];
                 auto durationSinceSend=boost::chrono::steady_clock::now()-ud->sendTime;
-                if (durationSinceSend>waitLimit)
+                if (durationSinceSend>retransmitLimit)
                 {
                     RetransmitMessage(ud);
+                }
+                else if (durationSinceSend>timerInterval && ud->transmitCount<2)
+                {
+                    //this message has never been retransmitted, we have not asked receiver to ack,
+                    //and half the restransmitInterval has expired. It is time to send an explicit ack-request
+                    //to avoid unecessary retransmits.
+                    sendAckRequest=true;
+                }
+
+                if (RequestAck(ud->header))
+                {
+                    //when this message was sent we requested an ack, hence we shouldn't have to send an
+                    //explicit ack request for any message that was sent prior to this.
+                    sendAckRequest=false;
                 }
 
                 if (durationSinceSend>mustBeSeriousError)
@@ -542,13 +549,41 @@ namespace Com
 
             RemoveCompletedMessages();
 
+            if (sendAckRequest)
+            {
+                SendAckRequest();
+            }
+
             //Restart timer
             m_resendTimer.expires_from_now(timerInterval);
             m_resendTimer.async_wait(m_strand.wrap([=](const boost::system::error_code& /*error*/){RetransmitUnackedMessages();}));
         }
 
+        void SendAckRequest()
+        {
+//            std::cout<<"SendAckRequest"<<std::endl;
+//            //Sends an ack request to all system nodes
+//            boost::shared_ptr<char[]> noData;
+//            UserDataPtr ud=boost::make_shared<UserData>(m_nodeId, 0, AckRequestType, noData, 0);
+//            if (WriterType::IsMulticastEnabled())
+//            {
+//                WriterType::SendMulticast(ud);
+//            }
+//            else
+//            {
+//                for (const auto& val : m_nodes)
+//                {
+//                    if (val.second.systemNode)
+//                    {
+//                        WriterType::SendTo(ud, val.second.endpoint);
+//                    }
+//                }
+//            }
+        }
+
         void RetransmitMessage(UserDataPtr& ud)
         {
+            ++ud->transmitCount;
             //Always called from writeStrand
             auto recvIt=ud->receivers.begin();
             while (recvIt!=ud->receivers.end())
@@ -722,6 +757,7 @@ namespace Com
     };
 
     typedef DataSenderBasic< Writer<UserData> > DataSender;
+    //typedef DataSenderBasic< Writer<UserData, LoserPolicy> > DataSender;
 }
 }
 }

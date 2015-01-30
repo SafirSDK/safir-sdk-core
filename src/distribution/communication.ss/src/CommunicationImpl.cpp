@@ -78,6 +78,11 @@ namespace Com
         lllog(1)<<L"COM:     multicast: "<<myNodeType->MulticastAddress().c_str()<<std::endl;
         lllog(1)<<L"COM:     using multicast: "<<std::boolalpha<<myNodeType->UseMulticast()<<std::dec<<std::endl;
         lllog(1)<<L"COM: -------------------------------------------------"<<std::endl;
+
+#ifdef COM_USE_UNRELIABLE_SEND_POLICY
+        lllog(1)<<L"*** COM_USE_UNRELIABLE_SEND_POLICY IS DEFINED ***"<<std::endl;
+        std::wcout<<L"*** COM_USE_UNRELIABLE_SEND_POLICY IS DEFINED ***"<<std::endl;
+#endif
     }
 #ifdef _MSC_VER
 #pragma warning (default: 4355)
@@ -308,6 +313,12 @@ namespace Com
                 const Ack* ack=reinterpret_cast<const Ack*>(data);
                 GetNodeType(senderNode->nodeTypeId).GetAckedDataSender().HandleAck(*ack);
             }
+        }
+            break;
+
+        case AckRequestType:
+        {
+            std::cout<<"ACK_REQUEST"<<std::endl;
         }
             break;
 

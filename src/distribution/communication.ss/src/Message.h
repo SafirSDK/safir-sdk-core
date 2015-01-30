@@ -87,8 +87,11 @@ namespace Com
 
     inline bool IsCommunicationDataType(int64_t dataType)
     {
-        return dataType==WelcomeDataType || dataType==HeartbeatType ||
-                dataType==AckType || dataType==ControlDataType;
+        return  dataType==HeartbeatType ||
+                dataType==AckType ||
+                dataType==AckRequestType ||
+                dataType==ControlDataType ||
+                dataType==WelcomeDataType;
     }
 
     //------------------------------------------------------------
@@ -189,6 +192,7 @@ namespace Com
         const char* fragment; //This is what is sent in this UserData. If not fragmented these will be the same as payload and payloadSize
         Receivers receivers; //Set of receivers, can be filled with a receiver list, or if MultiReceiverSendMethod it will be filled when its sent
         boost::chrono::steady_clock::time_point sendTime; //timestamp when this messages was last transmitted so we know when it's time to make retransmit
+        int transmitCount;
 
         UserData(const int64_t senderId,
                  const int64_t receiverId,
@@ -198,6 +202,7 @@ namespace Com
             :header(senderId, receiverId, dataType, MultiReceiverSendMethod, Acked, 0, messageSize, messageSize, 1, 0, 0)
             ,message(message_)
             ,fragment(message.get())
+            ,transmitCount(0)
         {
         }
 
@@ -211,6 +216,7 @@ namespace Com
             :header(senderId, receiverId, dataType, MultiReceiverSendMethod, Acked, 0, messageSize, fragmentSize, 1, 0, static_cast<size_t>(fragment_-message_.get()))
             ,message(message_)
             ,fragment(fragment_)
+            ,transmitCount(0)
         {
         }
     };
