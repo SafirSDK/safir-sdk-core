@@ -133,16 +133,26 @@ class Parameters:
                 self.lang1 = splitlangs[1]
                 self.lang2 = splitlangs[2]
 
+        #This relies on the fact that we're installed in the bin directory on both linux and windows.
+        install_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),"..")
+
         #Get the default dou directory and set it as an environment variable that can be
         #picked up by the typesystem.ini that belongs to the test suite.
-        #This path is set by cmake during configuration/installation.
-        os.environ["SAFIR_TEST_SUITE_DOU_DIRECTORY"] = "@DEFAULT_DOU_SEARCH_PATH@"
+        #Note: The last part of this path is set by cmake during configuration/installation.
+        os.environ["SAFIR_TEST_SUITE_DOU_DIRECTORY"] = os.path.join(install_dir, "@SAFIR_INSTALL_DESTINATION_DOU_BASE@")
 
-        self.test_data_directory = "@TEST_DATA_DIRECTORY@" #This path is set by cmake during configuration/installation.
+        #Note: Last half ofpath is set by cmake during configuration/installation.
+        self.test_data_directory = os.path.join(install_dir, "@SAFIR_INSTALL_DESTINATION_TEST_DATA@"
         log(self.test_data_directory)
 
         #Set up to use our own test configuration
-        os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(self.test_data_directory, "dose", "test_config", "standalone")
+        os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(self.test_data_directory,
+                                                                "dose",
+                                                                "test_config",
+                                                                "standalone")
+
+        jar_install_path = os.path.join(install_dir,
+                                        "@SAFIR_INSTALL_DESTINATION_JAR@")
 
         self.dose_main_cmd = ("dose_main",)
         self.foreach_cmd = ("foreach",)
@@ -152,7 +162,7 @@ class Parameters:
         #self.dose_test_ada_exe_name = self.dose_test_ada_cmd[0] + (".exe" if sys.platform == "win32" else "")
         self.dose_test_dotnet_cmd = ("dose_test_dotnet",)
         self.dose_test_java_cmd = ("java", "-Xcheck:jni", "-Xfuture", "-jar",
-                                   os.path.join("@DEFAULT_JAVA_SEARCH_PATH@","dose_test_java.jar"))
+                                   os.path.join(jar_install_path,"dose_test_java.jar"))
 
         self.testcases_path = os.path.join(self.test_data_directory, "dose", "testcases")
         self.dose_test_sequencer_cmd = ("dose_test_sequencer",
