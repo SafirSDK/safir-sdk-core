@@ -53,7 +53,7 @@ namespace
         return false;
 #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
         BOOL isWow64;
-        if (!IsWow64Process(GetCurrentProcess,&isWow64))
+        if (!IsWow64Process(GetCurrentProcess(),&isWow64))
         {
             throw std::runtime_error("Call to IsWow64Process(...) failed! Error Code = " +
                                      boost::lexical_cast<std::string>(GetLastError()));
