@@ -284,10 +284,13 @@ class DebianInstaller(object):
 
 def run_test_suite():
     log("Launching test suite")
+    arguments = ["--jenkins",]
+    if os.environ["JOB_NAME"].find("32on64") != -1:
+        arguments += ("--no-java",)
     if sys.platform == "win32":
-        result = subprocess.call(("run_dose_tests.py" ,"--jenkins"), shell = True)
+        result = subprocess.call(["run_dose_tests.py",] + arguments, shell = True)
     else:
-        result = subprocess.call(("run_dose_tests","--jenkins"))
+        result = subprocess.call(["run_dose_tests",] + arguments)
 
     if result != 0:
         raise SetupError("Test suite failed. Returncode = " + str(result))
