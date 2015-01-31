@@ -109,14 +109,16 @@ Function .onInit
     ;Check windows version
     ${IfNot} ${AtLeastWin7}
         MessageBox MB_OK "Windows 7 or above required"
-        Quit
+        Abort
     ${EndIf}
 
     ; Check for uninstaller.
     ReadRegStr $R0 HKLM "Software\Safir SDK Core" ""
 
     ${If} $R0 != ""
-        MessageBox MB_OK "Please uninstall previous versions of Safir SDK Core first!"
+        ${IfNot} {Silent}
+             MessageBox MB_OK "Please uninstall previous versions of Safir SDK Core first!"
+         ${Endif}
         Quit
     ${EndIf}
 
