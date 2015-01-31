@@ -43,7 +43,12 @@ class SetupError(Exception):
 
 class WindowsInstaller(object):
     def __init__(self):
-        self.installpath = os.path.join(os.environ["ProgramFiles"],"Safir SDK Core")
+        #This probably won't work if running 32bit python on 64bit windows... but our build/test
+        #machines dont use that config, so we're okay
+        if os.environ["JOB_NAME"].find("32on64") != -1:
+            self.installpath = os.path.join(os.environ["ProgramFiles(x86)"],"Safir SDK Core")
+        else:
+            self.installpath = os.path.join(os.environ["ProgramFiles"],"Safir SDK Core")
         self.uninstaller = os.path.join(self.installpath, "Uninstall.exe")
 
         installer = glob.glob("SafirSDKCore*.exe")
