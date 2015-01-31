@@ -177,7 +177,7 @@ class WindowsInstaller(object):
         binpath = os.path.join(self.installpath,"bin")
         if output.find(binpath) == -1:
             raise SetupError("bin directory does not appear to have been added to PATH:\n" + output)
-        if os.environ["PATH"].find(os.path.join("Safir SDK Core","bin") != -1:
+        if os.environ["PATH"].find(os.path.join("Safir SDK Core","bin")) != -1:
             raise SetupError("bin directory seems to have been added to PATH before installation!:\n"
                              + os.environ["PATH"])
         os.environ["PATH"] += os.pathsep + binpath
