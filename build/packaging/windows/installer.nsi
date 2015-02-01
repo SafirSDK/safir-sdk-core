@@ -108,7 +108,7 @@ WriteINIStr "${FILENAME}.url" "InternetShortcut" "IconIndex" "${ICONINDEX}"
 Function .onInit
     ;Check windows version
     ${IfNot} ${AtLeastWin7}
-        MessageBox MB_OK "Windows 7 or above required"
+        MessageBox MB_OK "Windows 7 or above required"  /SD IDOK
         Abort
     ${EndIf}
 
@@ -116,9 +116,7 @@ Function .onInit
     ReadRegStr $R0 HKLM "Software\Safir SDK Core" ""
 
     ${If} $R0 != ""
-        ${IfNot} {Silent}
-             MessageBox MB_OK "Please uninstall previous versions of Safir SDK Core first!"
-         ${Endif}
+         MessageBox MB_OK "Please uninstall previous versions of Safir SDK Core first!" /SD IDOK
         Quit
     ${EndIf}
 
