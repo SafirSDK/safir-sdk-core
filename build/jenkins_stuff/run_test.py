@@ -295,6 +295,14 @@ def run_test_suite():
     if result != 0:
         raise SetupError("Test suite failed. Returncode = " + str(result))
 
+def run_test_slave():
+    log("Launching Multinode test slave")
+    arguments = ["--jenkins", "--slave"]
+    result = subprocess.call(["run_dose_tests",] + arguments)
+
+    if result != 0:
+        raise SetupError("Test suite failed. Returncode = " + str(result))
+
 def build_examples():
     olddir = os.getcwd()
     dirs = (("examples" , None),
@@ -341,6 +349,9 @@ def parse_command_line():
                         choices=["standalone-tests","build-examples"],
                         help="Which test to perform")
 
+    parser.add_argument("--slave", action = "store_true",
+                        help = "Be a multinode test slave")
+
     arguments = parser.parse_args()
 
     return arguments
@@ -375,6 +386,8 @@ def main():
             run_test_suite()
         elif args.test == "build-examples":
             build_examples()
+        elif args.slave:
+            run_test_slave()
 
     except SetupError as e:
         log ("Error: " + str(e))

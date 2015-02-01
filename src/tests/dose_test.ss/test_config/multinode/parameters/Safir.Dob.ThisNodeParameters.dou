@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Defines the node number of this node. This file must be different in all nodes.</summary>
+    <name>Safir.Dob.ThisNodeParameters</name>
+    <baseClass>Safir.Dob.Parametrization</baseClass>
+    <parameters>
+        <parameter>
+            <summary>The node number of this node.</summary>
+            <name>NodeNumber</name>
+            <type>Int32</type>
+            <value>$(SAFIR_TEST_NODE_NUMBER)</value>
+        </parameter>
+    </parameters>
+</class>
