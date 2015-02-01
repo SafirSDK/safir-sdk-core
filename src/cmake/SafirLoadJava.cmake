@@ -18,14 +18,6 @@ if (Java_Development_FOUND AND Java_Runtime_FOUND)
     endif()
 
     SET(CMAKE_JAVA_COMPILE_FLAGS -encoding UTF-8)
-
-    #jar in a specific version on ubuntu seems to fail on multiprocessor systems:
-    #java.util.zip.ZipException: attempt to write past end of STORED entry
-    #we workaround this by locking jar to one cpu
-    if (UNIX AND Java_VERSION_STRING STREQUAL "1.7.0_75")
-      set(Java_JAR_EXECUTABLE taskset 0x00000001 ${Java_JAR_EXECUTABLE})
-    endif()
-
   else()
     SET(Java_FOUND Java-NOTFOUND)
   endif()
