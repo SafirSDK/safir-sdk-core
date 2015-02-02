@@ -47,17 +47,22 @@ else:
 system_log_test_pgm = "SystemLog_test"  
 system_log_test_path = os.path.join(exe_path, system_log_test_pgm)
 
-conf_dir = os.path.join(args.test_conf_dir, "syslog_logging")
-conf_file = os.path.join(conf_dir, "logging.ini")
+conf_file = os.path.join(args.test_conf_dir, "logging.ini")
 
-os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = conf_dir
+os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = args.test_conf_dir
 
 config = ConfigParser.ConfigParser()
       
 if not config.read(conf_file):
     print("Failed to read file " + conf_file)
     sys.exit(1)
-    
+
+# figure out what (if any) instance string that is expected
+inst_str = r""
+show_safir_instance = config.getboolean('SystemLog','show_safir_instance')
+if show_safir_instance:
+   inst_str = r"\(" + os.getenv("SAFIR_INSTANCE", "0") + r"\) "
+
 syslog_server_address = config.get('SystemLog','syslog_server_address')
 syslog_server_port = config.get('SystemLog','syslog_server_port')
 
@@ -115,7 +120,7 @@ try:
             pri = r"<9>"
             text = r"This is a log from a singleton destructor"   
             
-        p = re.compile(pri + log_common_part + text)
+        p = re.compile(pri + log_common_part + inst_str + text)
         data = data.decode("utf-8")
         if p.match(data) == None:
             print ("Unexpected syslog message:", data)

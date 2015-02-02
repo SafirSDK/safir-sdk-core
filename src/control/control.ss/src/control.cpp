@@ -123,6 +123,10 @@ private:
 
 int main(int argc, char * argv[])
 {
+
+    SEND_SYSTEM_LOG(Error,
+                    << "Testing the format");
+
     lllog(3) << "CTRL: Started" << std::endl;
 
     const ProgramOptions options(argc, argv);
