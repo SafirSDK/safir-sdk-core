@@ -403,7 +403,7 @@ namespace Com
             HandleSendQueue();
         }
 
-        static bool RequestAck(MessageHeader& header)
+        static bool RequestAck(MessageHeader& /*header*/)
         {
             return true;
             //static const size_t AckThreshold=Parameters::SlidingWindowSize/2;
