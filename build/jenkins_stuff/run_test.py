@@ -331,6 +331,8 @@ def build_examples():
         cmd +=  ("--jenkins", "--skip-tests")
         if installdir is not None:
             cmd += ("--install", installdir)
+        if os.environ["JOB_NAME"].find("32on64") != -1:
+            cmd += ("--32-bit",)
 
         log ("Running command ", " ".join(cmd))
         result = subprocess.call(cmd,
