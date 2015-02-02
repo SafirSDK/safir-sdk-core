@@ -43,6 +43,7 @@ class SetupError(Exception):
 
 class WindowsInstaller(object):
     def __init__(self):
+        log("JOB_NAME = ", os.environ.get("JOB_NAME"))
         #This probably won't work if running 32bit python on 64bit windows... but our build/test
         #machines dont use that config, so we're okay
         if os.environ["JOB_NAME"].find("32on64") != -1:
