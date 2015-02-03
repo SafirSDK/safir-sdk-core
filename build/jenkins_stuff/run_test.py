@@ -181,8 +181,12 @@ class WindowsInstaller(object):
         if os.environ["PATH"].find(os.path.join("Safir SDK Core","bin")) != -1:
             raise SetupError("bin directory seems to have been added to PATH before installation!:\n"
                              + os.environ["PATH"])
-        os.environ["PATH"] += os.pathsep + binpath
+        if os.environ["BOOST_ROOT"].find("Safir SDK Core") != -1:
+            raise SetupError("BOOST_ROOT environment variable seems to have been assigned before installation!:\n"
+                             + os.environ["BOOST_ROOT"])
 
+        os.environ["PATH"] += os.pathsep + binpath
+        os.environ["BOOST_ROOT"] = self.installpath
 
         self.__setup_debug_runtime()
 
