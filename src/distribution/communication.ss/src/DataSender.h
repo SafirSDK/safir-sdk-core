@@ -100,6 +100,7 @@ namespace Com
             ,m_retransmitNotification()
             ,m_queueNotFullNotification()
             ,m_queueNotFullNotificationLimit(0)
+            ,m_sendAckRequestForMsgIndex()
             ,m_logPrefix([&]{std::ostringstream os;
                              os<<"COM: ("<<DeliveryGuaranteeToString(deliveryGuarantee)<<"DataSender nodeType "<<nodeTypeId<<") - ";
                              return os.str();}())
@@ -378,6 +379,7 @@ namespace Com
         QueueNotFull m_queueNotFullNotification;
         size_t m_queueNotFullNotificationLimit; //below number of used slots. NOT percent.
         std::atomic_bool m_notifyQueueNotFull;
+        std::vector<size_t> m_sendAckRequestForMsgIndex;
         const std::string m_logPrefix;
 
         void PostWelcome(int64_t nodeId)
@@ -403,11 +405,10 @@ namespace Com
             HandleSendQueue();
         }
 
-        static bool RequestAck(MessageHeader& /*header*/)
+        static bool RequestAck(MessageHeader& header)
         {
-            return true;
-            //static const size_t AckThreshold=Parameters::SlidingWindowSize/2;
-            //return (header.sequenceNumber % AckThreshold==0);
+            static const size_t AckThreshold=Parameters::SlidingWindowSize/2;
+            return (header.sequenceNumber % AckThreshold==0);
         }
 
         static void SetRequestAck(MessageHeader& header)
@@ -508,13 +509,10 @@ namespace Com
             }
 
             //Always called from writeStrand
-            static const boost::chrono::milliseconds timerInterval(m_waitForAckTimeout/2);
+            static const boost::chrono::milliseconds timerInterval(m_waitForAckTimeout/2-5);
+            static const boost::chrono::milliseconds requestAckLimit(m_waitForAckTimeout/2);
             static const boost::chrono::milliseconds retransmitLimit(m_waitForAckTimeout);
             static const boost::chrono::milliseconds mustBeSeriousError(10000);
-
-            //Check if we should ask receiver for an ack. For example if we dont have enough messages to
-            //send to automatically request acks every now and then.
-            bool sendAckRequest=false;
 
             //Check if there is any unacked messages that are old enough to be retransmitted
             for (size_t i=0; i<m_sendQueue.first_unhandled_index(); ++i)
@@ -525,19 +523,12 @@ namespace Com
                 {
                     RetransmitMessage(ud);
                 }
-                else if (durationSinceSend>timerInterval && ud->transmitCount<2)
+                else if (durationSinceSend>requestAckLimit && ud->transmitCount<2)
                 {
                     //this message has never been retransmitted, we have not asked receiver to ack,
                     //and half the restransmitInterval has expired. It is time to send an explicit ack-request
                     //to avoid unecessary retransmits.
-                    sendAckRequest=true;
-                }
-
-                if (RequestAck(ud->header))
-                {
-                    //when this message was sent we requested an ack, hence we shouldn't have to send an
-                    //explicit ack request for any message that was sent prior to this.
-                    sendAckRequest=false;
+                    m_sendAckRequestForMsgIndex.push_back(i);
                 }
 
                 if (durationSinceSend>mustBeSeriousError)
@@ -547,38 +538,68 @@ namespace Com
                 }
             }
 
-            RemoveCompletedMessages();
+            SendAckRequests();
 
-            if (sendAckRequest)
-            {
-                SendAckRequest();
-            }
+            RemoveCompletedMessages();
 
             //Restart timer
             m_resendTimer.expires_from_now(timerInterval);
             m_resendTimer.async_wait(m_strand.wrap([=](const boost::system::error_code& /*error*/){RetransmitUnackedMessages();}));
         }
 
-        void SendAckRequest()
+        void SendAckRequests()
         {
-//            std::cout<<"SendAckRequest"<<std::endl;
-//            //Sends an ack request to all system nodes
-//            boost::shared_ptr<char[]> noData;
-//            UserDataPtr ud=boost::make_shared<UserData>(m_nodeId, 0, AckRequestType, noData, 0);
-//            if (WriterType::IsMulticastEnabled())
-//            {
-//                WriterType::SendMulticast(ud);
-//            }
-//            else
-//            {
-//                for (const auto& val : m_nodes)
-//                {
-//                    if (val.second.systemNode)
-//                    {
-//                        WriterType::SendTo(ud, val.second.endpoint);
-//                    }
-//                }
-//            }
+            if (m_sendAckRequestForMsgIndex.empty())
+            {
+                return;
+            }
+
+            std::set<int64_t> singleReceiverSendMethod;
+            std::set<int64_t> multiReceiverSendMethod;
+
+            for (auto index : m_sendAckRequestForMsgIndex)
+            {
+                const UserDataPtr& ud=m_sendQueue[index];
+                if (ud->header.sendMethod==SingleReceiverSendMethod)
+                {
+                    singleReceiverSendMethod.insert(ud->receivers.begin(), ud->receivers.end());
+                }
+                else
+                {
+                    multiReceiverSendMethod.insert(ud->receivers.begin(), ud->receivers.end());
+                }
+            }
+
+            boost::shared_ptr<char[]> noData;
+            UserDataPtr ud=boost::make_shared<UserData>(m_nodeId, 0, AckRequestType, noData, 0);
+
+            //Send ackRequests for SingleReceiver channel
+            ud->header.sendMethod=SingleReceiverSendMethod;
+            for (auto recvId : singleReceiverSendMethod)
+            {
+                auto nodeIt=m_nodes.find(recvId);
+                if (nodeIt!=m_nodes.end() && nodeIt->second.systemNode)
+                {
+                    lllog(9)<<m_logPrefix.c_str()<<"Send AckRequest for SingleReceiverSendMethod to "<<recvId<<std::endl;
+                    ud->header.commonHeader.receiverId=recvId;
+                    WriterType::SendTo(ud, nodeIt->second.endpoint);
+                }
+            }
+
+            //Send ackRequests for MultiReceiver channel
+            ud->header.sendMethod=MultiReceiverSendMethod;
+            for (auto recvId : multiReceiverSendMethod)
+            {
+                auto nodeIt=m_nodes.find(recvId);
+                if (nodeIt!=m_nodes.end() && nodeIt->second.systemNode)
+                {
+                    lllog(9)<<m_logPrefix.c_str()<<"Send AckRequest for MultiReceiverSendMethod to "<<recvId<<std::endl;
+                    ud->header.commonHeader.receiverId=recvId;
+                    WriterType::SendTo(ud, nodeIt->second.endpoint);
+                }
+            }
+
+            m_sendAckRequestForMsgIndex.clear();
         }
 
         void RetransmitMessage(UserDataPtr& ud)

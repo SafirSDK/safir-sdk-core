@@ -318,7 +318,13 @@ namespace Com
 
         case AckRequestType:
         {
-            std::cout<<"ACK_REQUEST"<<std::endl;
+            if (size<MessageHeaderSize)
+            {
+                lllog(4)<<L"COM: Received corrupt AckRequest"<<std::endl;
+                return true; //corrupt message, return true means it is ok to receive another message
+            }
+            const MessageHeader* ackReq=reinterpret_cast<const MessageHeader*>(data);
+            m_deliveryHandler.ReceivedAckRequest(ackReq);
         }
             break;
 
