@@ -84,52 +84,23 @@ namespace Com
                   const boost::asio::ip::udp::endpoint& to)
         {
             const char* header=reinterpret_cast<const char*>(&(val->header));
-
-            //calculate crc and add it last in sendBuffer
             boost::crc_32_type crc;
-            crc.process_bytes(static_cast<const void*>(header), MessageHeaderSize);
-            crc.process_bytes(static_cast<const void*>(val->fragment), val->header.fragmentContentSize);
-            uint32_t crc32=crc.checksum();
             std::vector< boost::asio::const_buffer > bufs;
+
             bufs.push_back(boost::asio::buffer(header, MessageHeaderSize));
-            bufs.push_back(boost::asio::buffer(val->fragment, val->header.fragmentContentSize));
+            crc.process_bytes(static_cast<const void*>(header), MessageHeaderSize);
+
+            if (val->header.fragmentContentSize>0)
+            {
+                bufs.push_back(boost::asio::buffer(val->fragment, val->header.fragmentContentSize));
+                crc.process_bytes(static_cast<const void*>(val->fragment), val->header.fragmentContentSize);
+            }
+
+            uint32_t crc32=crc.checksum();
             bufs.push_back(boost::asio::buffer(reinterpret_cast<const char*>(&crc32), sizeof(uint32_t)));
             socket.send_to(bufs, to);
-            //socket.async_send_to(bufs, to, [val](const boost::system::error_code& error, size_t){if (error) std::cout<<"Send UserData failed, error "<<error.message().c_str()<<std::endl;});
         }
     };
-
-//    struct LoserPolicy
-//    {
-//        void Send(const UserDataPtr& val,
-//                  boost::asio::ip::udp::socket& socket,
-//                  const boost::asio::ip::udp::endpoint& to)
-//        {
-//            const char* header=reinterpret_cast<const char*>(&(val->header));
-
-//            //calculate crc and add it last in sendBuffer
-//            boost::crc_32_type crc;
-//            crc.process_bytes(static_cast<const void*>(header), MessageHeaderSize);
-//            crc.process_bytes(static_cast<const void*>(val->fragment), val->header.fragmentContentSize);
-//            uint32_t crc32=crc.checksum();
-//            std::vector< boost::asio::const_buffer > bufs;
-//            bufs.push_back(boost::asio::buffer(header, MessageHeaderSize));
-//            bufs.push_back(boost::asio::buffer(val->fragment, val->header.fragmentContentSize));
-//            bufs.push_back(boost::asio::buffer(reinterpret_cast<const char*>(&crc32), sizeof(uint32_t)));
-
-//            static bool loss=true;
-//            if (val->header.sequenceNumber==50 && loss)
-//            {
-//                std::cout<<"LOSS 50"<<std::endl;
-//                loss=false;
-//                return;
-//            }
-
-//            socket.send_to(bufs, to);
-//        }
-//    };
-
-
 
 #else
     //------------------------------------------------------------
@@ -212,15 +183,19 @@ namespace Com
                   const boost::asio::ip::udp::endpoint& to)
         {
             const char* header=reinterpret_cast<const char*>(&(val->header));
-
-            //calculate crc and add it last in sendBuffer
             boost::crc_32_type crc;
-            crc.process_bytes(static_cast<const void*>(header), MessageHeaderSize);
-            crc.process_bytes(static_cast<const void*>(val->fragment), val->header.fragmentContentSize);
-            uint32_t crc32=crc.checksum();
             std::vector< boost::asio::const_buffer > bufs;
+
             bufs.push_back(boost::asio::buffer(header, MessageHeaderSize));
-            bufs.push_back(boost::asio::buffer(val->fragment, val->header.fragmentContentSize));
+            crc.process_bytes(static_cast<const void*>(header), MessageHeaderSize);
+
+            if (val->header.fragmentContentSize>0)
+            {
+                bufs.push_back(boost::asio::buffer(val->fragment, val->header.fragmentContentSize));
+                crc.process_bytes(static_cast<const void*>(val->fragment), val->header.fragmentContentSize);
+            }
+
+            uint32_t crc32=crc.checksum();
             bufs.push_back(boost::asio::buffer(reinterpret_cast<const char*>(&crc32), sizeof(uint32_t)));
             UnreliableSender::Send(bufs, socket, to);
         }
