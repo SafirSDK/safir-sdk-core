@@ -32,7 +32,7 @@ arguments = parser.parse_args()
 
 print("This test program expects to be killed off after about two minutes unless it has finished successfully before then.")
 
-proc = subprocess.Popen(arguments.dose_main, 
+proc = subprocess.Popen(arguments.dose_main,
                         stdout = subprocess.PIPE,
                         stderr = subprocess.STDOUT,
                         universal_newlines=True,
@@ -62,8 +62,10 @@ if proc.poll() is None:
         pass
     proc.wait()
 
-lines.append(proc.stdout.readline().rstrip("\n\r"))
-print("Line", 2, ": '" + lines[-1] + "'")
+for i in range(2):
+    lines.append(proc.stdout.readline().rstrip("\n\r"))
+    print("Line", len(lines) - 1, ": '" + lines[-1] + "'")
+
 
 res = proc.communicate()[0]
 
@@ -77,7 +79,10 @@ if not lines[0].endswith("dose_main is waiting for persistence data!"):
 if not lines[1].endswith("dose_main running (release)...") and not lines[1].endswith("dose_main running (debug)..."):
     print("Failed to find string ending in 'dose_main running (release)...' or 'dose_main running (debug)...'")
     sys.exit(1)
-if not lines[2].endswith("Exiting..."):
+if not lines[2].endswith("shutting down."):
+    print("Failed to find string ending in 'shutting down.'")
+    sys.exit(1)
+if not lines[3].endswith("Exiting..."):
     print("Failed to find string ending in 'Exiting...'")
     sys.exit(1)
 
