@@ -496,16 +496,15 @@ namespace Internal
 
 
     LowLevelLogger::LowLevelLogger()
-        : m_logLevel(nullptr)
+        : m_control(new LowLevelLoggerControl(false,false))
+        , m_logLevel(nullptr)
         , m_synchronous(true)
         , m_synchronousStream(nullptr)
     {
-        const auto control = boost::make_shared<LowLevelLoggerControl>(false,false);
-
-        if (control->FileLoggingEnabled())
+        if (m_control->FileLoggingEnabled())
         {
-            auto impl = Safir::make_unique<SyncFileLogger>(control);
-            m_logLevel = control->GetLogLevelPointer();
+            auto impl = Safir::make_unique<SyncFileLogger>(m_control);
+            m_logLevel = m_control->GetLogLevelPointer();
             m_synchronousStream.rdbuf(&impl->Buffer());
 
             m_syncLogger = std::move(impl);
@@ -534,21 +533,15 @@ namespace Internal
 
         m_synchronous = false;
 
-        boost::shared_ptr<LowLevelLoggerControl> control;
         boost::shared_ptr<boost::iostreams::wfile_sink> fileSink;
         if (m_syncLogger != nullptr)
         {
-            control = m_syncLogger->Control();
             fileSink = m_syncLogger->TakeFileSink();
         }
 
-        if (control == nullptr)
-        {
-            control = boost::make_shared<LowLevelLoggerControl>(false,false);
-            m_logLevel = control->GetLogLevelPointer();
-        }
+        m_logLevel = m_control->GetLogLevelPointer();
 
-        m_asyncLogger = Safir::make_unique<AsyncLogger>(control, ioService, fileSink);
+        m_asyncLogger = Safir::make_unique<AsyncLogger>(m_control, ioService, fileSink);
 
         m_syncLogger.reset();
 

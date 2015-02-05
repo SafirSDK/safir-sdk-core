@@ -29,6 +29,7 @@
 #include <boost/thread/once.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/tss.hpp>
+#include <boost/shared_ptr.hpp>
 #include <ostream>
 #include <boost/static_assert.hpp>
 
@@ -62,6 +63,8 @@ namespace Utilities
 {
 namespace Internal
 {
+    class LowLevelLoggerControl;
+
     //this is all the hidden magic implementation
     namespace Internal
     {
@@ -177,6 +180,8 @@ namespace Internal
                 static LowLevelLogger& Instance();
                 static boost::once_flag m_onceFlag;
             };
+
+            boost::shared_ptr<LowLevelLoggerControl> m_control;
 
             class SyncFileLogger;
             class AsyncLogger;
