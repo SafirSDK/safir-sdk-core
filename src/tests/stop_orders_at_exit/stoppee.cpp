@@ -32,14 +32,14 @@ class App
 //    , public Safir::Dob::Dispatcher
 {
 public:
-    App() 
+    App()
         : m_dispatcher(m_connection, m_ioService) {}
-    void OnStopOrder() {m_ioService.stop();}
+    void OnStopOrder() {m_work.reset();}
     void Run()
     {
         for (int i = 0; i < 1000; ++i) //allow max 1000 instances
         {
-            try 
+            try
             {
                 m_connection.Open(L"sender",boost::lexical_cast<std::wstring>(i),0,this,&m_dispatcher);
                 break; //connected, stop trying
@@ -49,7 +49,7 @@ public:
                 //retry connect in loop
             }
         }
-        
+
         std::wcout << "Connected sucessfully" << std::endl;
         m_ioService.run();
 
@@ -57,6 +57,7 @@ public:
     }
 private:
     boost::asio::io_service m_ioService;
+    std::unique_ptr<boost::asio::io_service::work> m_work {new boost::asio::io_service::work(m_ioService)};
     Safir::Dob::Connection m_connection;
     Safir::Utilities::AsioDispatcher m_dispatcher;
 };
@@ -76,5 +77,3 @@ int main()
         return 1;
     }
 }
-
-
