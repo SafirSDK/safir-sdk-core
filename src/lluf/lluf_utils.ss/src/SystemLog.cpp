@@ -106,10 +106,6 @@ private:
           m_sock(m_service),
           m_lock()
     {
-        //this will allow wcout to coexist with cout and with printf/wprintf
-        //which appears to be needed for java and dotnet.
-        std::ios_base::sync_with_stdio(false);
-
         try
         {
             boost::algorithm::replace_last(m_processName, ".exe", "");
@@ -179,29 +175,25 @@ public:
             // fatal errors are written to std::wcerr
             case Emergency:
             {
-                std::wcerr << L"EMERGENCY: " << textAscii << std::endl;
-                lllog(0) << L"EMERGENCY: " << textAscii << std::endl;
+                lllog(1) << L"EMERGENCY: " << textAscii << std::endl;
             }
             break;
 
             case Alert:
             {
-                std::wcerr << L"ALERT: " << textAscii << std::endl;
-                lllog(0) << L"ALERT: " << textAscii << std::endl;
+                lllog(1) << L"ALERT: " << textAscii << std::endl;
             }
             break;
 
             case Critical:
             {
-                std::wcerr << L"CRITICAL: " << textAscii << std::endl;
-                lllog(0) << L"CRITICAL: " << textAscii << std::endl;
+                lllog(1) << L"CRITICAL: " << textAscii << std::endl;
             }
             break;
 
             case Error:
             {
-                std::wcerr << L"ERROR: " << textAscii << std::endl;
-                lllog(0) << L"ERROR: " << textAscii << std::endl;
+                lllog(1) << L"ERROR: " << textAscii << std::endl;
             }
             break;
 
@@ -331,7 +323,7 @@ private:
                  it != text.end(); ++it)
             {
                 if (*it == '\n' || *it == '\r') //may produce two spaces on CRLF, but that
-                {                               //would only happen if the error message is 
+                {                               //would only happen if the error message is
                     *it = ' ';                  //read from a file with CRLF line endings.
                 }
             }
@@ -361,7 +353,7 @@ private:
 
     bool                            m_nativeLogging;
     bool                            m_sendToSyslogServer;
-    bool                            m_replaceNewlines;    
+    bool                            m_replaceNewlines;
     boost::asio::ip::udp::endpoint  m_syslogServerEndpoint;
     boost::asio::io_service         m_service;
     boost::asio::ip::udp::socket    m_sock;
@@ -379,12 +371,12 @@ public:
     static SystemLogImplKeeper& Instance()
     {
         boost::call_once(SingletonHelper::m_onceFlag,boost::bind(SingletonHelper::Instance));
-        
+
         if (destroyed)
         {
             throw std::runtime_error("Dead reference detected for singleton SystemLogImplKeeper");
         }
-            
+
         return SingletonHelper::Instance();
     }
 
@@ -398,7 +390,7 @@ public:
         }
         return m_impl;
     }
-    
+
     void Reset()
     {
         boost::lock_guard<boost::mutex> lck(m_lock);
@@ -420,7 +412,7 @@ private:
 
     boost::shared_ptr<SystemLogImpl> m_impl;
     boost::mutex                     m_lock;
-    
+
     static bool                      destroyed;
 
     /**
@@ -498,4 +490,3 @@ void Close()
 }
 }
 }
-

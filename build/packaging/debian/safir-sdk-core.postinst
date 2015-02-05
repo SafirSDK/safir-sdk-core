@@ -11,9 +11,6 @@ case "${1}" in
             addgroup --system safirusers
         fi
 
-        chown root:safirusers /var/log/safir-sdk-core
-        chmod 775 /var/log/safir-sdk-core
-
         chown root:safirusers /var/lib/safir-sdk-core
         chmod 775 /var/lib/safir-sdk-core
 

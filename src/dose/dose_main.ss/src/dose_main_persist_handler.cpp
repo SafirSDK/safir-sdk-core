@@ -60,7 +60,7 @@ namespace Safir
 
             if (Dob::PersistenceParameters::SystemHasPersistence())
             {
-                lllog(0) << "dose_main is waiting for persistence data!" << std::endl;
+                lllog(1) << "dose_main is waiting for persistence data!" << std::endl;
                 std::wcout << "dose_main is waiting for persistence data!" << std::endl;
             }
 
@@ -100,16 +100,16 @@ namespace Safir
                     // No other nodes are up, let -1 connections in.
                     Connections::Instance().AllowConnect(-1);
                 }
-            } 
+            }
             else
             {
                 if(Dob::PersistenceParameters::TestMode())
                 {
-                    lllog(0) << "RUNNING IN PERSISTENCE TEST MODE! PLEASE CHANGE PARAMETER "
-                        << "Safir.Dob.PersistenceParameters.TestMode IF THIS IS NOT WHAT YOU EXPECTED!" << std::endl;
+                    lllog(1) << "RUNNING IN PERSISTENCE TEST MODE! PLEASE CHANGE PARAMETER "
+                             << "Safir.Dob.PersistenceParameters.TestMode IF THIS IS NOT WHAT YOU EXPECTED!" << std::endl;
                     std::wcout << "RUNNING IN PERSISTENCE TEST MODE! PLEASE CHANGE PARAMETER "
                         << "Safir.Dob.PersistenceParameters.TestMode IF THIS IS NOT WHAT YOU EXPECTED!" << std::endl;
-                    
+
                 }
                 else
                 {
@@ -267,7 +267,7 @@ namespace Safir
                 responseSender->Send(Dob::SuccessResponse::Create());
             }
             else
-            {     
+            {
                 // Generate a success response
                 responseSender->Send(Dob::SuccessResponse::Create());
             }
@@ -281,7 +281,7 @@ namespace Safir
 
         void PersistHandler::SetPersistentDataReady()
         {
-            lllog(0) << "dose_main persistence data is ready!" << std::endl;
+            lllog(1) << "dose_main persistence data is ready!" << std::endl;
             std::wcout << "dose_main persistence data is ready!" << std::endl;
             ENSURE(Dob::PersistenceParameters::SystemHasPersistence(), << "This system does not have persistence, it is an error to call SetPersistentDataReady");
 

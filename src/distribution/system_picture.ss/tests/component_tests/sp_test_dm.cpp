@@ -106,7 +106,7 @@ public:
             return;
         }
 
-        lllog(0) << "DM: Got suicide trigger '" << suicideTrigger << "'" << std::endl;
+        lllog(1) << "DM: Got suicide trigger '" << suicideTrigger << "'" << std::endl;
 
         parseOk = true;
     }
@@ -179,7 +179,7 @@ private:
                 continue;
             }
 
-            lllog(0) << "DM: Injecting node " << data.Name(i) << "(" << data.Id(i)
+            lllog(1) << "DM: Injecting node " << data.Name(i) << "(" << data.Id(i)
                      << ") of type " << data.NodeTypeId(i)
                      << " with address " << data.DataAddress(i) << std::endl;
 
@@ -213,7 +213,7 @@ private:
 
                 if (!found)
                 {
-                    lllog(0) << "DM: Node " << last.Id(i) << " could not be found in current SS\n"
+                    lllog(1) << "DM: Node " << last.Id(i) << " could not be found in current SS\n"
                              << "DM: Last: \n" << last << "\nCurrent:\n"<< data <<std::endl;
                     throw std::logic_error("Node has gone missing!");
                 }
@@ -234,7 +234,7 @@ private:
                     {
                         if (last.IsDead(j))
                         {
-                            lllog(0) << "DM: Node " << data.Id(i) << " was dead in last state!\n"
+                            lllog(1) << "DM: Node " << data.Id(i) << " was dead in last state!\n"
                                      << "DM: Last: \n" << last << "\nCurrent:\n"<< data <<std::endl;
                             throw std::logic_error("Node has been resurrected!");
 
@@ -250,7 +250,7 @@ private:
             {
                 if (!ids.insert(data.Id(i)).second)
                 {
-                    lllog(0) << "DM: Node " << data.Id(i) << " is duplicated in the System State!\n"
+                    lllog(1) << "DM: Node " << data.Id(i) << " is duplicated in the System State!\n"
                              << "DM: State:\n"<< data <<std::endl;
                     throw std::logic_error("Duplicate node in state!");
                 }
@@ -267,7 +267,7 @@ private:
             return;
         }
 
-        //lllog(0) << "Considering suicide" << std::endl;
+        //lllog(1) << "Considering suicide" << std::endl;
 
         bool triggered = false;
 
@@ -291,13 +291,13 @@ private:
                 continue;
             }
 
-            //lllog(0) << "DM: Found dead trigger node " << data.Id(i) << std::endl;
+            //lllog(1) << "DM: Found dead trigger node " << data.Id(i) << std::endl;
 
             //check if it was not known about
             const auto findIt = m_triggerHistory.find(data.Id(i));
             if (findIt == m_triggerHistory.end())
             {
-                //lllog(0) << "DM:  most probably from a previous cycle, ignore it." << std::endl;
+                //lllog(1) << "DM:  most probably from a previous cycle, ignore it." << std::endl;
                 m_triggerHistory.insert(std::make_pair(data.Id(i),true));
                 continue;
             }
@@ -305,7 +305,7 @@ private:
             //if it wasnt previously dead
             if (!findIt->second)
             {
-                //lllog(0) << "DM:  was not previously dead, triggering" << std::endl;
+                //lllog(1) << "DM:  was not previously dead, triggering" << std::endl;
                 findIt->second = true; //now known to be dead
                 triggered = true;
                 break;
@@ -314,14 +314,14 @@ private:
 
         if (triggered)
         {
-            lllog(0) << "DM: My trigger node (" << m_trigger << "), has died, will schedule a suicide" << std::endl;
+            lllog(1) << "DM: My trigger node (" << m_trigger << "), has died, will schedule a suicide" << std::endl;
 
             m_suicideTimer.expires_from_now(boost::chrono::seconds(10));
             m_suicideTimer.async_wait([this](const boost::system::error_code& error)
                                       {
                                           if (!error)
                                           {
-                                              lllog(0) << "DM: Committing suicide!" << std::endl;
+                                              lllog(1) << "DM: Committing suicide!" << std::endl;
                                               m_stopHandler();
                                           }
                                       });
@@ -482,15 +482,15 @@ int main(int argc, char * argv[])
     const auto stopFcn = [&sp, &communication, &sendTimer, &work, &signalSet, &m_stop]
     {
         m_stop = true;
-        lllog(0) << "DM: Stopping SystemPicture" << std::endl;
+        lllog(1) << "DM: Stopping SystemPicture" << std::endl;
         sp.Stop();
-        lllog(0) << "DM: Stopping Communication" << std::endl;
+        lllog(1) << "DM: Stopping Communication" << std::endl;
         communication.Stop();
-        lllog(0) << "DM: Stopping sendTimer" << std::endl;
+        lllog(1) << "DM: Stopping sendTimer" << std::endl;
         sendTimer.cancel();
-        lllog(0) << "DM: resetting work" << std::endl;
+        lllog(1) << "DM: resetting work" << std::endl;
         work.reset();
-        lllog(0) << "DM: Cancelling signalSet" << std::endl;
+        lllog(1) << "DM: Cancelling signalSet" << std::endl;
         signalSet.cancel();
     };
 
@@ -508,7 +508,7 @@ int main(int argc, char * argv[])
                                                  << "Got a signals error: " << error);
                              }
 
-                             lllog(0) << "DM: Got signal " << signal_number << std::endl;
+                             lllog(1) << "DM: Got signal " << signal_number << std::endl;
                              stopFcn();
                          }
                          );
@@ -524,9 +524,9 @@ int main(int argc, char * argv[])
 
     ioService.run();
 
-    lllog(0) << "DM: Joining threads" << std::endl;
+    lllog(1) << "DM: Joining threads" << std::endl;
     threads.join_all();
 
-    lllog(0) << "DM: Exiting..." << std::endl;
+    lllog(1) << "DM: Exiting..." << std::endl;
     return 0;
 }

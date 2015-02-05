@@ -81,9 +81,6 @@ namespace Internal
 
                                    if (latency > boost::chrono::milliseconds(1000))
                                    {
-                                       lllog(0) << "Warning: Boost.Asio latency for '"
-                                                << m_identifier.c_str()
-                                                << "' is at " << latency << std::endl;
                                        SEND_SYSTEM_LOG(Warning, << "Boost.Asio latency for '"
                                                        << m_identifier.c_str() << "' is at " << latency
                                                        << ". If this happens a lot your system is overloaded and may start misbehaving.");

@@ -53,20 +53,18 @@ public:
         , ignoreFlush(false)
         , noTimestamps(false)
         , noStdout(false)
-        , noFile(false)
     {
         using namespace boost::program_options;
-        
+
         options_description general("General Options");
         general.add_options()
             ("help,h", "show help message");
-        
+
         options_description overhead("Options that reduce logging overhead");
         overhead.add_options()
             ("ignore-flush,i", value<bool>(&ignoreFlush)->zero_tokens(), "Ignore flushes, and write only when buffer is full.")
             ("no-timestamps,t", value<bool>(&noTimestamps)->zero_tokens(), "Don't put timestamps on each line in the logs.")
-            ("no-stdout,s", value<bool>(&noStdout)->zero_tokens(), "Don't log to stdout.")
-            ("no-file,f", value<bool>(&noFile)->zero_tokens(), "Don't log to file.");
+            ("no-stdout,s", value<bool>(&noStdout)->zero_tokens(), "Don't log to stdout.");
 
         options_description hidden("Hidden options");
         hidden.add_options()
@@ -77,10 +75,10 @@ public:
 
         options_description visible_options;
         visible_options.add(general).add(overhead);
-        
-        positional_options_description positional; 
+
+        positional_options_description positional;
         positional.add("log-level", 1);
-        
+
         variables_map vm;
 
         try
@@ -112,13 +110,12 @@ public:
         parseOk = true;
     }
     bool parseOk;
-    
+
     int logLevel;
-    
+
     bool ignoreFlush;
     bool noTimestamps;
     bool noStdout;
-    bool noFile;
 
 private:
     static void ShowHelp(const boost::program_options::options_description& desc)
@@ -157,16 +154,15 @@ int main(int argc, char * argv[])
     try
     {
         Safir::Utilities::Internal::LowLevelLoggerControl control(true, true);
-        if (control.Disabled())
+        /*TODO        if (control.Disabled())
         {
-            std::wcout << "LowLevelLogger is currently disabled, please enabled it in your logging.ini file." << std::endl;
+            std::wcout << "LowLevelLogger is currently disabled, please enable it in your logging.ini file." << std::endl;
             return 1;
-        }
+            }*/
         control.LogLevel(options.logLevel);
         std::wcout << "Log level should now be " << options.logLevel << std::endl;
         control.UseTimestamps(!options.noTimestamps);
         control.LogToStdout(!options.noStdout);
-        control.LogToFile(!options.noFile);
         control.IgnoreFlush(options.ignoreFlush);
     }
     catch (const std::exception &)

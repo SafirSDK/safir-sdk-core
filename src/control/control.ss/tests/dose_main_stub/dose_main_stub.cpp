@@ -106,7 +106,7 @@ int main(int /*argc*/, char * /*argv*/[])
 
     for (const auto& nt: config.nodeTypesParam)
     {
-        commNodeTypes.push_back({nt.id, 
+        commNodeTypes.push_back({nt.id,
                                  nt.name,
                                  nt.multicastAddressControl,
                                  nt.multicastAddressData,
@@ -121,7 +121,7 @@ int main(int /*argc*/, char * /*argv*/[])
                                                        nt.maxLostHeartbeats,
                                                        boost::chrono::milliseconds(nt.retryTimeout))));
     }
-    
+
     std::unique_ptr<Com::Communication> communication;
     std::unique_ptr<SP::SystemPicture> sp;
 
@@ -235,7 +235,7 @@ int main(int /*argc*/, char * /*argv*/[])
                         [&sp, &work, &communication, &running, &doseMainCmdReceiver, &signalSet]
                         (int64_t /*requestId*/)
                         {
-                            lllog(0) << "DOSE_MAIN: Got stop command" << std::endl;
+                            lllog(1) << "DOSE_MAIN: Got stop command" << std::endl;
                             signalSet.cancel();
                             sp->Stop();
                             communication->Stop();
@@ -263,7 +263,7 @@ int main(int /*argc*/, char * /*argv*/[])
                          (const boost::system::error_code& error,
                           const int signalNumber)
                          {
-                             lllog(0) << "DOSE_MAIN: got signal " << signalNumber  << std::endl;
+                             lllog(1) << "DOSE_MAIN: got signal " << signalNumber  << std::endl;
 
                              if (error)
                              {
@@ -298,6 +298,6 @@ int main(int /*argc*/, char * /*argv*/[])
 
     threads.join_all();
 
-    lllog(0) << "DOSE_MAIN: Exiting..." << std::endl;
+    lllog(1) << "DOSE_MAIN: Exiting..." << std::endl;
     return 0;
 }

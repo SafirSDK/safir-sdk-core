@@ -43,7 +43,7 @@ LoggingSettings::LoggingSettings(QWidget* /*parent*/):
     m_timer(this)
 {
     setupUi(this);
-    
+
     CreateControl();
 }
 
@@ -70,7 +70,7 @@ void LoggingSettings::Stdout(bool use)
 
 void LoggingSettings::File(bool use)
 {
-    m_control->LogToFile(use);
+    //TODO m_control->LogToFile(use);
 }
 
 
@@ -80,17 +80,17 @@ void LoggingSettings::CreateControl()
    try
     {
         m_control.reset(new Safir::Utilities::Internal::LowLevelLoggerControl(true,true));
-        
-        if (m_control->Disabled())
+
+        /* TODO        if (m_control->Disabled())
         {
             levelGroup->setVisible(false);
             optionsGroup->setVisible(false);
             return;
         }
         else
-        {
+        {*/
             disabledGroup->setVisible(false);
-        }
+            //        }
 
         //only connect these if we have a session to affect immediately
         connect(logLevelSlider, SIGNAL(valueChanged(int)), this, SLOT(LevelChanged(int)));
@@ -117,5 +117,5 @@ void LoggingSettings::UpdateWidgets()
     ignoreFlush->setChecked(m_control->IgnoreFlush());
     timestamps->setChecked(m_control->UseTimestamps());
     toStdout->setChecked(m_control->LogToStdout());
-    toFile->setChecked(m_control->LogToFile());
+    //TODO    toFile->setChecked(m_control->LogToFile());
 }

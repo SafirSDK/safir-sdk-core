@@ -154,7 +154,7 @@ int main(int argc, char * argv[])
                        {
                            if (error)
                            {
-                               lllog(0) << "Got a signals error: " << error << std::endl;
+                               return;
                            }
                            sp.Stop();
                            wk.reset();

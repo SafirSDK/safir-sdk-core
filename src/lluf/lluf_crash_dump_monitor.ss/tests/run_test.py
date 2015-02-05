@@ -65,7 +65,7 @@ crash_dump_dir = config.get('root','crash_dump_directory')
 
 # Make a fresh empty crash dump dir ...
 if os.path.exists(crash_dump_dir):
-    shutil.rmtree(crash_dump_dir)    
+    shutil.rmtree(crash_dump_dir)
 os.makedirs(crash_dump_dir)
 
 # ... and create some dummy dump files
@@ -77,15 +77,15 @@ open(file, 'w+')
 stat = os.stat(file)
 last_access_time = stat.st_atime
 last_mod_time = stat.st_mtime
-                         
+
 for i in range(2, 31):
-    f = os.path.join(crash_dump_dir, "dump" + str(i))                     
+    f = os.path.join(crash_dump_dir, "dump" + str(i))
     open(f, 'w+')
     # make the file "older" than the previous one
     last_mod_time = last_mod_time - 4000
-    os.utime(f, (last_access_time, last_mod_time))                         
+    os.utime(f, (last_access_time, last_mod_time))
 
-# start the program that we are testing                        
+# start the program that we are testing
 proc = subprocess.Popen((arguments.dump_monitor, "--max-dump-files", "25", "--check-interval", "1", "--run-once"))
 proc.communicate()
 
@@ -113,6 +113,3 @@ for file in remaining_dump_files:
 
 print("Success!")
 sys.exit(0)
-  
-
-
