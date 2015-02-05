@@ -29,6 +29,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/chrono.hpp>
+#include <cstdint>
 
 namespace Safir
 {

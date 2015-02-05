@@ -30,6 +30,7 @@
 #pragma warning (push)
 #pragma warning (disable:4127)
 #pragma warning (disable:4702)
+#pragma warning (disable:4267)
 #endif
 
 #include <boost/bind.hpp>
