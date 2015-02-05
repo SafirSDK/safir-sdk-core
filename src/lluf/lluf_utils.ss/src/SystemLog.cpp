@@ -101,6 +101,7 @@ private:
 #endif
           m_nativeLogging(false),
           m_sendToSyslogServer(false),
+          m_includeSafirInstance(false),
           m_syslogServerEndpoint(),
           m_service(),
           m_sock(m_service),
@@ -115,6 +116,7 @@ private:
             m_nativeLogging = configReader.Logging().get<bool>("SystemLog.native_logging");
             m_sendToSyslogServer = configReader.Logging().get<bool>("SystemLog.send_to_syslog_server");
             m_replaceNewlines = configReader.Logging().get<bool>("SystemLog.replace_newline_with_space");
+            m_includeSafirInstance = configReader.Logging().get<bool>("SystemLog.show_safir_instance");
 
             if (m_nativeLogging)
             {
@@ -159,7 +161,18 @@ public:
     void Send(const Severity severity,
               const std::wstring& text)
     {
-        std::wstring textAscii = text;
+        std::wstring logText;
+        if (m_includeSafirInstance)
+        {
+            logText = L"(" + boost::lexical_cast<std::wstring>(
+                          Safir::Utilities::Internal::Expansion::GetSafirInstance()) + L") " + text;
+        }
+        else
+        {
+            logText = text;
+        }
+
+        std::wstring textAscii = logText;
         //replace non-ascii chars
         for(std::wstring::iterator it = textAscii.begin();
             it != textAscii.end(); ++it)
@@ -213,13 +226,13 @@ public:
 
         if (m_nativeLogging)
         {
-            SendNativeLog(severity, ReplaceNewlines(text));
+            SendNativeLog(severity, ReplaceNewlines(logText));
         }
 
         if (m_sendToSyslogServer)
         {
             // Utf-8 is used when sending to a syslog server
-            SendToSyslogServer(severity, ToUtf8(ReplaceNewlines(text)));
+            SendToSyslogServer(severity, ToUtf8(ReplaceNewlines(logText)));
         }
     }
 
@@ -354,6 +367,7 @@ private:
     bool                            m_nativeLogging;
     bool                            m_sendToSyslogServer;
     bool                            m_replaceNewlines;
+    bool                            m_includeSafirInstance;
     boost::asio::ip::udp::endpoint  m_syslogServerEndpoint;
     boost::asio::io_service         m_service;
     boost::asio::ip::udp::socket    m_sock;

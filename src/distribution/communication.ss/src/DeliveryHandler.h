@@ -140,6 +140,15 @@ namespace Com
             }
         }
 
+        void ReceivedAckRequest(const MessageHeader* header)
+        {
+            //Always called from readStrand
+            lllog(8)<<L"COM: Received AckRequest from "<<header->commonHeader.senderId<<" "<<SendMethodToString(header->sendMethod).c_str()<<std::endl;
+            auto senderIt=m_nodes.find(header->commonHeader.senderId);
+            SendAck(senderIt->second, header);
+            m_gotRecvFrom(header->commonHeader.senderId); //report that we are receivinga data
+        }
+
         //Add a node
         void AddNode(const Node& node)
         {
