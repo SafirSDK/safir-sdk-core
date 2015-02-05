@@ -33,6 +33,6 @@ configure_file(locations.ini.in
 INSTALL(FILES
   "${CMAKE_CURRENT_BINARY_DIR}/typesystem.ini"
   "${CMAKE_CURRENT_BINARY_DIR}/locations.ini"
-  "${CMAKE_CURRENT_BINARY_DIR}/logging.ini"
+  logging.ini
   DESTINATION ${SAFIR_INSTALL_DESTINATION_DOC}/example_configuration
   COMPONENT Runtime)
