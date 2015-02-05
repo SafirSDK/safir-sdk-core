@@ -10,6 +10,188 @@ namespace Safir.Dob.Typesystem
 
         #region IDictionary implementation
 
+
+        public void Add (KeyT key, ValT value)
+        {
+            throw new NotImplementedException ();
+        }
+
+
+        public bool ContainsKey (KeyT key)
+        {
+            throw new NotImplementedException ();
+        }
+
+
+        public bool Remove (KeyT key)
+        {
+            throw new NotImplementedException ();
+        }
+
+
+        public bool TryGetValue (KeyT key, out ValT value)
+        {
+            throw new NotImplementedException ();
+        }
+
+
+        public ValT this [KeyT index] {
+            get {
+                throw new NotImplementedException ();
+            }
+            set {
+                throw new NotImplementedException ();
+            }
+        }
+
+
+        public ICollection<KeyT> Keys {
+            get {
+                throw new NotImplementedException ();
+            }
+        }
+
+
+        public ICollection<ValT> Values {
+            get {
+                throw new NotImplementedException ();
+            }
+        }
+
+
+        #endregion
+
+
+        #region ICollection implementation
+
+
+        public void Add (KeyValuePair<KeyT, ValT> item)
+        {
+            throw new NotImplementedException ();
+        }
+
+
+        public void Clear ()
+        {
+            throw new NotImplementedException ();
+        }
+
+
+        public bool Contains (KeyValuePair<KeyT, ValT> item)
+        {
+            throw new NotImplementedException ();
+        }
+
+
+        public void CopyTo (KeyValuePair<KeyT, ValT>[] array, int arrayIndex)
+        {
+            throw new NotImplementedException ();
+        }
+
+
+        public bool Remove (KeyValuePair<KeyT, ValT> item)
+        {
+            throw new NotImplementedException ();
+        }
+
+
+        public int Count {
+            get {
+                throw new NotImplementedException ();
+            }
+        }
+
+
+        public bool IsReadOnly {
+            get {
+                throw new NotImplementedException ();
+            }
+        }
+
+
+        #endregion
+
+
+        #region IEnumerable implementation
+
+
+        public IEnumerator<KeyValuePair<KeyT, ValT>> GetEnumerator ()
+        {
+            throw new NotImplementedException ();
+        }
+
+
+        #endregion
+
+
+        #region IEnumerable implementation
+
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator ()
+        {
+            throw new NotImplementedException ();
+        }
+
+
+        #endregion
+
+        /*#region ICollection implementation
+
+        public void Add (KeyValuePair<KeyT, ValT> item)
+        {
+            m_bIsChanged = true;
+            item.Value.SetChanged (true);
+            values.Add (item);
+        }
+
+        public void Clear ()
+        {
+            m_bIsChanged = true;
+            values.Clear ();
+        }
+
+        public bool Contains (KeyValuePair<KeyT, ValT> item)
+        {
+            throw new NotImplementedException ();
+        }
+
+        public void CopyTo (KeyValuePair<KeyT, ValT>[] array, int arrayIndex)
+        {
+            throw new NotImplementedException ();
+        }
+
+        public bool Remove (KeyValuePair<KeyT, ValT> item)
+        {
+            throw new NotImplementedException ();
+        }
+
+        public int Count {
+            get {
+                throw new NotImplementedException ();
+            }
+        }
+
+        public bool IsReadOnly {
+            get {
+                throw new NotImplementedException ();
+            }
+        }
+
+        #endregion
+
+        #region IEnumerable implementation
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator ()
+        {
+            throw new NotImplementedException ();
+        }
+
+        #endregion
+
+
+
+        #region IDictionary implementation
+
         public void Add (KeyT key, ValT value)
         {
             m_bIsChanged = true;
@@ -58,7 +240,6 @@ namespace Safir.Dob.Typesystem
 
         #endregion
 
-        /*
         #region ICollection implementation
 
         public void Add (KeyValuePair<KeyT, ValT> item)
@@ -102,7 +283,7 @@ namespace Safir.Dob.Typesystem
         }
 
         #endregion
-        */
+
 
         #region IEnumerable implementation
 
@@ -117,10 +298,11 @@ namespace Safir.Dob.Typesystem
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator ()
         {
-            return values.GetEnumerator ();
+           return values.GetEnumerator ();
         }
 
         #endregion
+        */
 
         #region implemented abstract members of ContainerBase
 
@@ -155,14 +337,12 @@ namespace Safir.Dob.Typesystem
             m_bIsChanged = changed;
             foreach (var kv in values)
             {
-                if (kv.Value.SetChanged(changed))
-                {
-                    return true;
-                }
+                kv.Value.SetChanged (changed);
             }
         }
 
         #endregion
+
 
         public DictionaryContainer ()
         {

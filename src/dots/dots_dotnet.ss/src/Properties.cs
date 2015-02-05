@@ -1871,22 +1871,12 @@ namespace Safir.Dob.Typesystem
                                                                                  System.Int32 member)
         {
             Internal.DotsC_PropertyMappingKind kind;
-            Internal.DotsC_ErrorCode errorCode;
-            Internal.Kernel.DotsC_GetPropertyMappingKind(typeId,
-                                                         propertyId,
-                                                         member,
-                                                         out kind,
-                                                         out errorCode);
-            switch (errorCode)
-            {
-            case Safir.Dob.Typesystem.Internal.DotsC_ErrorCode.NoError:
-                break;
-            case Internal.DotsC_ErrorCode.IllegalValue:
-                throw new IllegalValueException("That obj is not mapped to that property!");
-            default:
-                throw new SoftwareViolationException("Got unexpected error code from dots_kernel: " + errorCode);
+            byte okByte=Internal.Kernel.DotsC_GetPropertyMappingKind (typeId, propertyId, member, out kind);
+            if (Internal.InternalOperations.BoolOf (okByte)) {
+                return kind;
             }
-            return kind;
+
+            throw new IllegalValueException("That obj is not mapped to that property!");
         }
 
         

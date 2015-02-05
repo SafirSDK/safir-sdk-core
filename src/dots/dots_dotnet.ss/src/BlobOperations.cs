@@ -388,30 +388,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            if (!container.IsNull())
-            {
-                System.IntPtr stringStart = beginningOfUnused;
-                System.Int32 stringLength = container.Val.Utf8StringLength();
-                byte[] utf8Bytes = container.Val.Utf8String();
-                Internal.Kernel.DotsC_SetHashedIdMemberInPreallocated
-                    (container.m_Value.RawValue,
-                     (stringLength == 0 ? null : utf8Bytes),
-                     stringLength,
-                     Internal.InternalOperations.ByteOf(container.m_bIsNull),
-                     Internal.InternalOperations.ByteOf(container.m_bIsChanged),
-                     blob,
-                     member,
-                     index,
-                     ref beginningOfUnused);
-                if (stringLength != 0)
-                {
-                    Marshal.WriteByte(stringStart, 8 + 4 + utf8Bytes.Length, 0); //add '\0'
-                }
-            }
-            else if (container.IsChanged())
-            {
-                SetNull(blob, member, index);
-            }
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -453,34 +430,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            if (!container.IsNull())
-            {
-                System.IntPtr stringStart = beginningOfUnused;
-                System.Int32 stringLength = container.m_Value.InstanceId.Utf8StringLength();
-                byte[] utf8Bytes = container.m_Value.InstanceId.Utf8String();
-                Safir.Dob.Typesystem.Internal.DotsC_EntityId eid;
-                eid.TypeId = container.m_Value.TypeId;
-                eid.InstanceId =container.m_Value.InstanceId.RawValue;
-                Internal.Kernel.DotsC_SetEntityIdMemberInPreallocated
-                    (ref eid,
-                     (stringLength == 0 ? null : utf8Bytes),
-                     stringLength,
-                     Internal.InternalOperations.ByteOf(container.m_bIsNull),
-                     Internal.InternalOperations.ByteOf(container.m_bIsChanged),
-                     blob,
-                     member,
-                     index,
-                     ref beginningOfUnused);
-
-                if (stringLength != 0)
-                {
-                    Marshal.WriteByte(stringStart, 16 + 4 + utf8Bytes.Length, 0); //add '\0'
-                }
-            }
-            else if (container.IsChanged())
-            {
-                SetNull(blob, member, index);
-            }
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -522,31 +472,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            if (!container.IsNull())
-            {
-                System.IntPtr stringStart = beginningOfUnused;
-                System.Int32 stringLength = container.Val.Utf8StringLength();
-                byte[] utf8Bytes = container.Val.Utf8String();
-                Internal.Kernel.DotsC_SetHashedIdMemberInPreallocated
-                    (container.m_Value.RawValue,
-                     (stringLength == 0 ? null : utf8Bytes),
-                     stringLength,
-                     Internal.InternalOperations.ByteOf(container.m_bIsNull),
-                     Internal.InternalOperations.ByteOf(container.m_bIsChanged),
-                     blob,
-                     member,
-                     index,
-                     ref beginningOfUnused);
-
-                if (stringLength != 0)
-                {
-                    Marshal.WriteByte(stringStart, 8 + 4 + utf8Bytes.Length, 0); //add '\0'
-                }
-            }
-            else if (container.IsChanged())
-            {
-                SetNull(blob, member, index);
-            }
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -588,31 +514,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            if (!container.IsNull())
-            {
-                System.IntPtr stringStart = beginningOfUnused;
-                System.Int32 stringLength = container.Val.Utf8StringLength();
-                byte[] utf8Bytes = container.Val.Utf8String();
-                Internal.Kernel.DotsC_SetHashedIdMemberInPreallocated
-                    (container.m_Value.RawValue,
-                     (stringLength == 0 ? null : utf8Bytes),
-                     stringLength,
-                     Internal.InternalOperations.ByteOf(container.m_bIsNull),
-                     Internal.InternalOperations.ByteOf(container.m_bIsChanged),
-                     blob,
-                     member,
-                     index,
-                     ref beginningOfUnused);
-
-                if (stringLength != 0)
-                {
-                    Marshal.WriteByte(stringStart, 8 + 4 + utf8Bytes.Length, 0); //add '\0'
-                }
-            }
-            else if (container.IsChanged())
-            {
-                SetNull(blob, member, index);
-            }
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -654,28 +556,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            if (!container.IsNull())
-            {
-                System.IntPtr stringStart = beginningOfUnused;
-                System.Int32 stringLength = container.Utf8StringLength();
-                byte[] utf8Bytes = container.Utf8String();
-                Internal.Kernel.DotsC_CreateStringMember(blob,
-                                                         stringLength,
-                                                         member,
-                                                         index,
-                                                         Internal.InternalOperations.ByteOf(container.IsChanged()),
-                                                         ref beginningOfUnused);
-
-                for (int i = 0; i < stringLength - 1; ++i)
-                {
-                    Marshal.WriteByte(stringStart, i, utf8Bytes[i]);
-                }
-                Marshal.WriteByte(stringStart, utf8Bytes.Length, 0); //add '\0'
-            }
-            else if (container.IsChanged())
-            {
-                SetNull(blob, member, index);
-            }
+            Set (container.m_Value, container.m_bIsNull, container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -693,22 +574,16 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            if (container == null)
+            bool isNull;
+            Safir.Dob.Typesystem.Object obj;
+            Get(out obj, out isNull, out container.m_bIsChanged, handle, member, index, KeyValMode.ValueMode);
+            if (!isNull)
             {
-                throw new SoftwareViolationException("Container was null!");
-            }
-            System.IntPtr childBlob;
-            byte childIsNull, childIsChanged;
-            Internal.Kernel.DotsC_GetObjectMember(blob, member, index, out childBlob, out childIsNull, out childIsChanged);
-
-            container.m_bIsChanged = Internal.InternalOperations.BoolOf(childIsChanged);
-            if (Internal.InternalOperations.BoolOf(childIsNull))
-            {
-                container.InternalObj = null;
+                container.InternalObj=obj;
             }
             else
             {
-                container.InternalObj = ObjectFactory.Instance.CreateObject(childBlob);
+                container.InternalObj=null;
             }
         }
 
@@ -2887,10 +2762,10 @@ namespace Safir.Dob.Typesystem.Internal
                 else
                 {
                     IntPtr cstring = InternalOperations.CStringOf (val.InstanceId.RawString);
-                    Kernel.DotsC_WriteHashedMember (handle, eid, cstring,
-                                                    InternalOperations.ByteOf(isNull),
-                                                    InternalOperations.ByteOf(isChanged),
-                                                    member, valueIndex, mode);
+                    Kernel.DotsC_WriteEntityIdMember (handle, eid, cstring,
+                                                      InternalOperations.ByteOf(isNull),
+                                                      InternalOperations.ByteOf(isChanged),
+                                                      member, valueIndex, mode);
                     Marshal.FreeHGlobal (cstring);
                 }
             }

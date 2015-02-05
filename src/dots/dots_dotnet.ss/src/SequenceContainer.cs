@@ -42,14 +42,14 @@ namespace Safir.Dob.Typesystem
     /// <typeparam name="T">The type to contain.</typeparam>
     public class SequenceContainer<T> : ContainerBase, ICloneable
     {
+        private List<T> values;
         /// <summary>
         /// Default constructor
         /// <para/>
         /// Creates a null and not changed container.
         /// </summary>
         public SequenceContainer(): base()
-        {
-            m_bIsNull = true;
+        {           
         }
 
         #region Cloning
@@ -75,8 +75,7 @@ namespace Safir.Dob.Typesystem
         protected SequenceContainer(SequenceContainer<T> other):
             base(other)
         {
-            m_bIsNull = other.m_bIsNull;
-            m_Value = other.m_Value;
+            values = other.values;
         }
 
         /// <summary>
@@ -86,29 +85,20 @@ namespace Safir.Dob.Typesystem
         public override void Copy(ContainerBase other)
         {
             base.Copy(other);
-            SequenceContainer<T> that = other as SequenceContainer<T>;
-            m_bIsNull = that.m_bIsNull;
-            m_Value = that.m_Value;
+            SequenceContainer<T> that = other as SequenceContainer<T>;          
+            values = that.values;
         }
 
         #endregion
 
-        /// <summary>
-        /// The value of the container. 
-        /// Null and change flags are updated accordingly.
-        /// </summary>
-        public T Val
-        {
-            get { if (m_bIsNull) throw new NullException("Value is null"); return m_Value; }
-            set { m_Value = value; m_bIsNull = false; m_bIsChanged = true; }
-        }
+
 
         /// <summary>
         /// Override ContainerBase.
         /// </summary>
         public override bool IsNull()
         {
-            return m_bIsNull;
+            return false;
         }
 
         /// <summary>
@@ -116,70 +106,7 @@ namespace Safir.Dob.Typesystem
         /// </summary>
         public override void SetNull()
         {
-            m_bIsNull = true;
-            m_bIsChanged = true;
-        }
-
-        /// <summary>
-        /// Equality operator for SequenceContainer and value.
-        /// 
-        /// <para/>
-        /// This operator lets you compare the container with a value of the contained type.
-        /// It will return false if the container is null or the values are not equal.
-        /// The change flag is ignored.
-        /// </summary>
-        /// <param name="first">First value to compare.</param>
-        /// <param name="second">Second value to compare.</param>
-        /// <returns>True if the container is non-null and the values are equal.</returns>
-        public static bool operator ==(SequenceContainer<T> first, T second)
-        {
-            // If both are null, or both are same instance, return true.
-            if (System.Object.ReferenceEquals(first, second))
-            {
-                return true;
-            }
-
-            // If one is null, but not both, return false.
-            if (((object)first == null) || ((object)second == null))
-            {
-                return false;
-            }
-
-            // Return true if the fields match:
-            return !first.IsNull() && first.m_Value.Equals(second);
-        }
-
-        /// <summary>
-        /// Inequality operator for SequenceContainer and container.
-        /// </summary>
-        /// <param name="first">First value to compare.</param>
-        /// <param name="second">Second value to compare.</param>
-        /// <returns>True if the container is null or the values are different.</returns>
-        public static bool operator !=(SequenceContainer<T> first, T second)
-        {
-            return !(first == second);
-        }
-
-        /// <summary>
-        /// Equality operator for value and SequenceContainer.
-        /// </summary>
-        /// <param name="first">First value to compare.</param>
-        /// <param name="second">Second value to compare.</param>
-        /// <returns>True if the container is non-null and the values are equal.</returns>
-        public static bool operator ==(T first, SequenceContainer<T> second)
-        {
-            return second == first;
-        }
-
-        /// <summary>
-        /// Equality operator for value and SequenceContainer.
-        /// </summary>
-        /// <param name="first">First value to compare.</param>
-        /// <param name="second">Second value to compare.</param>
-        /// <returns>True if the container is null or the values are different.</returns>
-        public static bool operator !=(T first, SequenceContainer<T> second)
-        {
-            return !(second == first);
+            throw new SoftwareViolationException("Sequences cannot be null!");
         }
 
         /// <summary>
@@ -200,8 +127,6 @@ namespace Safir.Dob.Typesystem
         {
             throw new System.Exception("The method or operation is not implemented.");
         }
-
-        internal T m_Value;
     }
 
 
