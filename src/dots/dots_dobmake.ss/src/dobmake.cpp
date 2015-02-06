@@ -214,15 +214,21 @@ void Dobmake::OpenLog(const bool ignoreCheckbox)
     {
         const QUrl url = QUrl::fromLocalFile(ui->douDirectory->text() + QDir::separator() + "buildlog.html");
 
-        const bool result = QDesktopServices::openUrl(url);
-
-        if (!result)
+        //try to open for ten seconds, once every 0.1s
+        for (int i = 0; i < 100; ++i)
         {
-            QMessageBox::warning(this,
-                                 "Failed to open browser",
-                                 "Failed to open the log in your web browser.\n"
-                                 "Please open the buildlog.html file in the dou directory manually.");
+            const bool result = QDesktopServices::openUrl(url);
+            if (result)
+            {
+                return;
+            }
+            QThread::msleep(100);
         }
+
+        QMessageBox::warning(this,
+                             "Failed to open browser",
+                             "Failed to open the log in your web browser.\n"
+                             "Please open the buildlog.html file in the dou directory manually.");
     }
 }
 void Dobmake::on_build_clicked()
