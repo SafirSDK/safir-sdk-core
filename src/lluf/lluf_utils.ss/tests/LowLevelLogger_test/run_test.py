@@ -260,34 +260,6 @@ if len(data) != 0:
     p.kill()
     sys.exit(1)
 
-"""
-log ("turn flushing on and stdout off")
-call_logger_control(("-s", "1"))
-time.sleep(0.1)
-p2 = LllProc(wait_for_output = False)
-time.sleep(2.0)
-p2.kill()
-data = p2.output()
-if len(data) != 0:
-    log("stdout logging doesnt seem to be possible to turn off")
-    log(data)
-    p.kill()
-    sys.exit(1)
-
-log ("turn file off")
-call_logger_control(("-f", "1"))
-time.sleep(0.1)
-p2 = LllProc()
-time.sleep(2.0)
-p2.kill()
-data = p2.logfile()
-if len(data) != 0:
-    log("file logging doesnt seem to be possible to turn off")
-    log(data)
-    p.kill()
-    sys.exit(1)
-
-"""
 p.kill()
 
 log ("check that disabling in inifile works")
@@ -349,6 +321,53 @@ if not p.wait_output(".*Goodbye.*"):
     log("Async does not log to stdout")
     p.kill()
     sys.exit(1)
+data = p.logfile()
+
+if data.find("Hello, World!") == -1 or data.find("1234567890") == -1 or data.find("Goodbye cruel world") == -1:
+    log("Async does not log to file")
+    p.kill()
+    sys.exit(1)
+
+log ("turn stdout off")
+call_logger_control(("-s", "9"))
+time.sleep(0.1)
+p2 = LllProc(False, async = True)
+time.sleep(2.0)
+data = p2.output()
+p2.kill()
+p.kill()
+if data.find("Hello, World!") != -1 or data.find("1234567890") != -1 or data.find("Goodbye cruel world") != -1:
+    log("stdout logging doesnt seem to be possible to turn off")
+    sys.exit(1)
+
+
+log ("check that an ini file without file logging works as expected")
+os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join (configs_dir,"disabled")
+p = LllProc()
+try:
+    p.logfile()
+    log("Got a file even though I didnt expect it")
+    p.kill()
+except Exception:
+    pass
+time.sleep(1)
+data = p.output()
+p.kill()
+if data.find("Hello, World!") != -1 or data.find("1234567890") != -1 or data.find("Goodbye cruel world") != -1:
+    log("unexpected data on stdout")
+    sys.exit(1)
+
+p = LllProc(async = True)
+if not p.wait_output(".*Goodbye.*"):
+    log("failed to get stdout logs")
+    p.kill()
+    sys.exit(1)
+try:
+    p.logfile()
+    log("Got a file even though I didnt expect it")
+    p.kill()
+except Exception:
+    pass
 p.kill()
 
 log("success")
