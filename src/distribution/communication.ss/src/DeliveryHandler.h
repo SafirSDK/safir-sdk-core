@@ -145,6 +145,13 @@ namespace Com
             //Always called from readStrand
             lllog(8)<<L"COM: Received AckRequest from "<<header->commonHeader.senderId<<" "<<SendMethodToString(header->sendMethod).c_str()<<std::endl;
             auto senderIt=m_nodes.find(header->commonHeader.senderId);
+
+            if (senderIt==m_nodes.end() || !senderIt->second.node.systemNode)
+            {
+                lllog(4)<<L"COM: Received ackRequest from unknown node or a non system node with id="<<header->commonHeader.senderId<<std::endl;
+                return;
+            }
+
             SendAck(senderIt->second, header);
             m_gotRecvFrom(header->commonHeader.senderId); //report that we are receivinga data
         }
