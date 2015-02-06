@@ -27,6 +27,7 @@
 #if defined _MSC_VER
 #  pragma warning (push)
 #  pragma warning (disable : 4244)
+#  pragma warning (disable : 4267)
 #endif
 
 #include <boost/thread.hpp>
@@ -64,7 +65,7 @@ int main(const int argc, const char* argv[])
         signalSet.add(SIGTERM);
 #endif
         signalSet.async_wait([&done](const boost::system::error_code& error,
-                                     const int signal_number)
+                                     const int /*signal_number*/)
                              {
                                  if (error)
                                  {

@@ -68,7 +68,7 @@ void LoggingSettings::Stdout(bool use)
     m_control->LogToStdout(use);
 }
 
-void LoggingSettings::File(bool use)
+void LoggingSettings::File(bool /*use*/)
 {
     //TODO m_control->LogToFile(use);
 }
