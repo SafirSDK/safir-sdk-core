@@ -327,8 +327,6 @@ def build_examples():
     for (builddir, installdir) in dirs:
         os.chdir(builddir)
 
-        env = os.environ.copy()
-
         if sys.platform == "win32":
             cmd = ["dobmake-batch.py",]
         else:
@@ -341,13 +339,11 @@ def build_examples():
             cmd += ("--32-bit",)
             #the 64 bit build machines do not have 32bit Qt installed,
             #so we skip qt stuff, i.e. VehicleMmiCppQt.
-            log("Setting SAFIR_SKIP_QT")
-            env["SAFIR_SKIP_QT"] = "True"
+            os.environ["SAFIR_SKIP_QT"] = "True"
 
         log ("Running command ", " ".join(cmd))
         result = subprocess.call(cmd,
-                                 shell = sys.platform == "win32",
-                                 env = env)
+                                 shell = sys.platform == "win32")
         if result != 0:
             raise SetupError("Build examples failed. Returncode = " + str(result))
 
