@@ -1,5 +1,6 @@
 #This is here to allow the jenkins build scripts to exclude this from
 #32on64 builds on 64 bit machines that do not have a 32bit Qt.
+message("SAFIR_SKIP_QT = '$ENV{SAFIR_SKIP_QT}'")
 if (ENV{SAFIR_SKIP_QT})
   message("Skipping the VehicleMmiCppQt example since the SAFIR_SKIP_QT env variable was set.")
   return()
