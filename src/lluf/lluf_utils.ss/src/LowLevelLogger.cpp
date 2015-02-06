@@ -267,8 +267,8 @@ namespace //anonymous namespace for internal functions
         explicit Queue(const std::uint64_t size)
             : m_size(size)
         {
-            m_queueFront.reserve(m_size);
-            m_queueBack.reserve(m_size);
+            m_queueFront.reserve(static_cast<size_t>(m_size));
+            m_queueBack.reserve(static_cast<size_t>(m_size));
         }
 
         void Enqueue(const wchar_t* s, const std::streamsize n)
@@ -278,7 +278,7 @@ namespace //anonymous namespace for internal functions
             {
                 return;
             }
-            if (m_queueFront.size() + n > m_size)
+            if (static_cast<std::uint64_t>(m_queueFront.size() + n) > m_size)
             {
                 m_full = true;
                 return;
