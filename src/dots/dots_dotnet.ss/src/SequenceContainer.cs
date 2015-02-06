@@ -49,7 +49,8 @@ namespace Safir.Dob.Typesystem
         /// Creates a null and not changed container.
         /// </summary>
         public SequenceContainer(): base()
-        {           
+        {
+            values = new List<T> ();
         }
 
         #region Cloning

@@ -167,12 +167,6 @@ namespace Safir.Dob.Typesystem
 
         #endregion
 
-        #region Private Data
-
-        private static System.Int32 m_InitialSize = -1;
-
-        #endregion
-
     }
     
 }

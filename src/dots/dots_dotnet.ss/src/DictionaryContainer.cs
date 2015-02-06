@@ -8,6 +8,11 @@ namespace Safir.Dob.Typesystem
     {
         private Dictionary<KeyT, ValT> values;
 
+        public DictionaryContainer() : base()
+        {
+            values = new Dictionary<KeyT, ValT> ();
+        }
+
         #region IDictionary implementation
 
 
@@ -343,10 +348,6 @@ namespace Safir.Dob.Typesystem
 
         #endregion
 
-
-        public DictionaryContainer ()
-        {
-        }
     }
 }
 

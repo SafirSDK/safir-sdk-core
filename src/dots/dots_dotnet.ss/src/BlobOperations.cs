@@ -604,22 +604,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            if (!container.IsNull())
-            {
-                System.IntPtr childBlob = beginningOfUnused;
-                Internal.Kernel.DotsC_CreateObjectMember(blob,
-                                                         container.InternalObj.CalculateBlobSize(),
-                                                         container.InternalObj.GetTypeId(),
-                                                         member,
-                                                         index,
-                                                         Internal.InternalOperations.ByteOf(container.IsChangedHere()),
-                                                         ref beginningOfUnused);
-                container.InternalObj.WriteToBlob(childBlob, ref beginningOfUnused);
-            }
-            else if (container.IsChangedHere())
-            {
-                SetNull(blob, member, index);
-            }
+            Set (container.InternalObj, container.IsNull(), container.IsChanged(), handle, member, index, KeyValMode.ValueMode);
         }
 
         /// <summary>
@@ -661,24 +646,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            if (!container.IsNull())
-            {
-                System.IntPtr binaryStart = beginningOfUnused;
-                System.Int32 binarySize = container.Val.Length;
-
-                Internal.Kernel.DotsC_CreateBinaryMember(blob,
-                                                         binarySize,
-                                                         member,
-                                                         index,
-                                                         Internal.InternalOperations.ByteOf(container.IsChanged()),
-                                                         ref beginningOfUnused);
-
-                Marshal.Copy(container.Val, 0, new IntPtr(binaryStart.ToInt64()), binarySize);
-            }
-            else if (container.IsChanged())
-            {
-                SetNull(blob, member, index);
-            }
+            Set (container.Val, container.IsNull(), container.IsChanged(), handle, member, index, KeyValMode.ValueMode);
         }
 
         #region SI types
