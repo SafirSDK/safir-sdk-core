@@ -549,7 +549,6 @@ namespace Internal
 
     void LowLevelLogger::Stop()
     {
-        assert(m_asyncLogger != nullptr);
         if (m_asyncLogger != nullptr)
         {
             m_asyncLogger->Stop();

@@ -65,17 +65,18 @@ void CheckThreadCount()
 
 int main()
 {
+
     //ensure call to CrashReporter::Stop at application exit
     //Start is called in DoseApp
-    boost::shared_ptr<void> guard(static_cast<void*>(0),
-                                  boost::bind(Safir::Utilities::CrashReporter::Stop));
+    boost::shared_ptr<void> crGuard(static_cast<void*>(0),
+                                    [](void*){Safir::Utilities::CrashReporter::Stop();});
 
     try
     {
         Safir::Dob::Internal::DoseApp theApp;
         theApp.Run();
 
-        guard.reset();
+        crGuard.reset();
 
         //now check the thread count, all threads should be gone, except the main
         //thread.

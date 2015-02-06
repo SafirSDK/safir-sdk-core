@@ -99,6 +99,7 @@ namespace Internal
         m_HandleEvents_notified(0),
         m_DispatchOwnConnection_notified(0)
     {
+        Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().SwitchToAsynchronousMode(m_ioService);
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
         m_signalSet.add(SIGABRT);
         m_signalSet.add(SIGBREAK);
@@ -214,6 +215,8 @@ namespace Internal
 
         m_poolHandler.Stop();
         m_ownConnection.Close();
+
+        Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().Stop();
     }
 
     void DoseApp::HandleSignal(const boost::system::error_code& error,
