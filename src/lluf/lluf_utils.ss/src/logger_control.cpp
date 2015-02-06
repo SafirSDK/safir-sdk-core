@@ -154,11 +154,7 @@ int main(int argc, char * argv[])
     try
     {
         Safir::Utilities::Internal::LowLevelLoggerControl control(true, true);
-        /*TODO        if (control.Disabled())
-        {
-            std::wcout << "LowLevelLogger is currently disabled, please enable it in your logging.ini file." << std::endl;
-            return 1;
-            }*/
+
         control.LogLevel(options.logLevel);
         std::wcout << "Log level should now be " << options.logLevel << std::endl;
         control.UseTimestamps(!options.noTimestamps);
