@@ -287,11 +287,13 @@ class DebianInstaller(object):
             raise SetupError("Failed to run safir_show_config. returncode = "
                              + str(proc.returncode) + "\nOutput:\n" + output)
 
-def run_test_suite():
+def run_test_suite(multinode):
     log("Launching test suite")
     arguments = ["--jenkins",]
     if os.environ["JOB_NAME"].find("32on64") != -1:
         arguments += ("--no-java",)
+    if multinode:
+        arguments += ("--multinode",)
     if sys.platform == "win32":
         result = subprocess.call(["run_dose_tests.py",] + arguments, shell = True)
     else:
@@ -356,7 +358,7 @@ def parse_command_line():
                              + " you've already installed Safir SDK Core")
 
     parser.add_argument("--test", "-t",
-                        choices=["standalone-tests","build-examples"],
+                        choices=["standalone-tests","multinode-tests","build-examples"],
                         help="Which test to perform")
 
     parser.add_argument("--slave", action = "store_true",
@@ -393,7 +395,9 @@ def main():
             installer.check_installation()
 
         if args.test == "standalone-tests":
-            run_test_suite()
+            run_test_suite(multinode = False)
+        if args.test == "multinode-tests":
+            run_test_suite(multinode = True)
         elif args.test == "build-examples":
             build_examples()
         elif args.slave:
