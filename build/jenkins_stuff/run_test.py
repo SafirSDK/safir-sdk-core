@@ -337,6 +337,9 @@ def build_examples():
             cmd += ("--install", installdir)
         if os.environ["JOB_NAME"].find("32on64") != -1:
             cmd += ("--32-bit",)
+            #the 64 bit build machines do not have 32bit Qt installed,
+            #so we skip qt stuff, i.e. VehicleMmiCppQt.
+            os.environ["SAFIR_SKIP_QT"] = "True"
 
         log ("Running command ", " ".join(cmd))
         result = subprocess.call(cmd,

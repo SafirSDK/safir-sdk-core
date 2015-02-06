@@ -1,5 +1,11 @@
-# find and setup Qt5 for this project
+#This is here to allow the jenkins build scripts to exclude this from
+#32on64 builds on 64 bit machines that do not have a 32bit Qt.
+if (ENV{SAFIR_SKIP_QT})
+  message("Skipping the VehicleMmiCppQt example since the SAFIR_SKIP_QT env variable was set.")
+  return()
+endif()
 
+# find and setup Qt5 for this project
 find_package(Qt5Widgets QUIET)
 if (NOT Qt5Widgets_FOUND)
   message("Qt5 was not found, not building the VehicleMmiCppQt example.")
