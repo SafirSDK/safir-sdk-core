@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>495</width>
-    <height>284</height>
+    <height>248</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -94,19 +94,6 @@
         </property>
         <property name="text">
          <string>Log to stdout</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="toFile">
-        <property name="toolTip">
-         <string>Log to files. The location is configured in logging.ini.</string>
-        </property>
-        <property name="text">
-         <string>Log to files</string>
         </property>
         <property name="checked">
          <bool>true</bool>

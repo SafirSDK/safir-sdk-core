@@ -68,13 +68,6 @@ void LoggingSettings::Stdout(bool use)
     m_control->LogToStdout(use);
 }
 
-void LoggingSettings::File(bool /*use*/)
-{
-    //TODO m_control->LogToFile(use);
-}
-
-
-
 void LoggingSettings::CreateControl()
 {
    try
@@ -97,7 +90,6 @@ void LoggingSettings::CreateControl()
         connect(ignoreFlush , SIGNAL(toggled(bool)), this, SLOT(IgnoreFlush(bool)));
         connect(timestamps , SIGNAL(toggled(bool)), this, SLOT(Timestamps(bool)));
         connect(toStdout , SIGNAL(toggled(bool)), this, SLOT(Stdout(bool)));
-        connect(toFile , SIGNAL(toggled(bool)), this, SLOT(File(bool)));
         connect(&m_timer, SIGNAL(timeout()), this, SLOT(UpdateWidgets()));
 
         UpdateWidgets();
@@ -117,5 +109,4 @@ void LoggingSettings::UpdateWidgets()
     ignoreFlush->setChecked(m_control->IgnoreFlush());
     timestamps->setChecked(m_control->UseTimestamps());
     toStdout->setChecked(m_control->LogToStdout());
-    //TODO    toFile->setChecked(m_control->LogToFile());
 }
