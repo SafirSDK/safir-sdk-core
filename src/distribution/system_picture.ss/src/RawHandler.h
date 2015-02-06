@@ -543,7 +543,8 @@ namespace SP
 
             if (findIt == m_nodeTable.end())
             {
-                //TODO: lllog(0) << "SP: Got Receive from unknown node " << id << std::endl;
+                SEND_SYSTEM_LOG(Alert,
+                                << "GotReceive from unknown node " << id);
                 throw std::logic_error("GotReceive from unknown node");
             }
             NodeInfo& node = findIt->second; //alias the iterator
