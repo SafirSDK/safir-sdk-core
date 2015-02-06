@@ -74,17 +74,6 @@ void LoggingSettings::CreateControl()
     {
         m_control.reset(new Safir::Utilities::Internal::LowLevelLoggerControl(true,true));
 
-        /* TODO        if (m_control->Disabled())
-        {
-            levelGroup->setVisible(false);
-            optionsGroup->setVisible(false);
-            return;
-        }
-        else
-        {*/
-            disabledGroup->setVisible(false);
-            //        }
-
         //only connect these if we have a session to affect immediately
         connect(logLevelSlider, SIGNAL(valueChanged(int)), this, SLOT(LevelChanged(int)));
         connect(ignoreFlush , SIGNAL(toggled(bool)), this, SLOT(IgnoreFlush(bool)));
