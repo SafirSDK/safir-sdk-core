@@ -223,7 +223,7 @@ class Parameters:
         #     os.path.join(self.test_parameters_path, "multinode",
         #                  "Safir.Dob.NodeParameters.dou")
 
-        # self.tempdir = tempfile.mkdtemp(prefix="dose_test_backup")
+        self.tempdir = tempfile.mkdtemp(prefix="dose_test_backup")
 
 def getText(nodelist):
     rc = []
