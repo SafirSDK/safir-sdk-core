@@ -64,6 +64,14 @@ namespace
 #endif
 
     }
+
+    class ExposeSleep : public QThread
+    {
+    public:
+        static inline void msleep(unsigned long msecs) {
+            QThread::msleep(msecs);
+        }
+    };
 }
 
 Dobmake::Dobmake(QWidget *parent)
@@ -222,7 +230,7 @@ void Dobmake::OpenLog(const bool ignoreCheckbox)
             {
                 return;
             }
-            QThread::msleep(100);
+            ExposeSleep::msleep(100);
         }
 
         QMessageBox::warning(this,
