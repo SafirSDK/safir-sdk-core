@@ -343,7 +343,8 @@ def build_examples():
 
         log ("Running command ", " ".join(cmd))
         result = subprocess.call(cmd,
-                                 shell = sys.platform == "win32")
+                                 shell = sys.platform == "win32",
+                                 env = os.environ.copy()) #env may be modified
         if result != 0:
             raise SetupError("Build examples failed. Returncode = " + str(result))
 
