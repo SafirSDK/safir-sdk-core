@@ -131,7 +131,6 @@ namespace Internal
     const Dob::Typesystem::HandlerId EntityRequestProxyImpl::GetReceiverWithStringRepresentation() const
     {
         return GetReceivingHandlerId();
-        //TODO: try to obtain string representation
     }
 
 }

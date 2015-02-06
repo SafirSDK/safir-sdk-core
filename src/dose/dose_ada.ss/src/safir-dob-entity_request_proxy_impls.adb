@@ -148,9 +148,7 @@ package body Safir.Dob.Entity_Request_Proxy_Impls is
    function Get_Receiver_With_String_Representation (Self : in Entity_Request_Proxy_Impl) return
      Safir.Dob.Typesystem.Handler_Id.Handler_Id_Type is
    begin
-
       return Get_Receiving_Handler_Id (Self);
-      -- AWI:todo Try to obtain string representation
    end Get_Receiver_With_String_Representation;
 
 end Safir.Dob.Entity_Request_Proxy_Impls;

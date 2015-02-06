@@ -201,7 +201,6 @@ public class EntityRequestProxy {
     public com.saabgroup.safir.dob.typesystem.HandlerId getReceiverWithStringRepresentation() {
         checkNotDisposed();
         return getReceivingHandlerId();
-        //TODO: try to obtain string representation
     }
 
 

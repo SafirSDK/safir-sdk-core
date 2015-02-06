@@ -353,7 +353,6 @@ public class EntityProxy {
     {
         checkNotDisposed();
         return getOwner();
-        //TODO: try to obtain string representation
     }
 
     //

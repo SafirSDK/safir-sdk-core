@@ -252,7 +252,6 @@ package body Safir.Dob.Previous_Entity_Proxy_Impls is
                                                   return Safir.Dob.Typesystem.Handler_Id.Handler_Id_Type is
    begin
       return Get_Owner (Self);
-      -- AWI:todo Try to obtain string representation
    end Get_Owner_With_String_Representation;
 
    function Get_Timestamp (Self : in Previous_Entity_Proxy_Impl)

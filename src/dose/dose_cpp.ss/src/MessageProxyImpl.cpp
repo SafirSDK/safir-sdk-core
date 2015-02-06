@@ -97,7 +97,6 @@ namespace Internal
     MessageProxyImpl::GetChannelIdWithStringRepresentation() const
     {
         return GetChannelId();
-        //TODO: try to obtain string representation
     }
 }
 }

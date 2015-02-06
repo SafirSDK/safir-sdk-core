@@ -307,7 +307,6 @@ public class PreviousEntityProxy {
     public com.saabgroup.safir.dob.typesystem.HandlerId getOwnerWithStringRepresentation() {
         checkNotDisposed();
         return getOwner();
-        //TODO: try to obtain string representation
     }
 
     //
