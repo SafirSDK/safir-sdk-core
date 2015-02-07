@@ -18,7 +18,7 @@ Description: Distributed real-time system framework
 
 Package: safir-sdk-core-dev
 Architecture: any
-Depends: ${misc:Depends}, python (>= 2.7.0), safir-sdk-core
+Depends: ${shlibs:Depends}, ${misc:Depends}, python (>= 2.7.0), safir-sdk-core
 Description: Safir SDK Core development files
  Safir SDK Core is a middleware and platform for creation of
  distributed soft real-time systems. It is Scalable, Reliable,
