@@ -202,10 +202,14 @@ endfunction()
 
 
 function(INSTALL_CSHARP_ASSEMBLY)
-    cmake_parse_arguments(_cs "TEST_SUITE" "TARGET;DESTINATION" "" ${ARGN})
+    cmake_parse_arguments(_cs "TEST_SUITE;DEVELOPMENT" "TARGET;DESTINATION" "" ${ARGN})
 
     if (NOT "${_cs_UNPARSED_ARGUMENTS}" STREQUAL "")
       message(FATAL_ERROR "Unknown argument to INSTALL_CSHARP_ASSEMBLY '${_cs_UNPARSED_ARGUMENTS}'")
+    endif()
+
+    if (_cs_DEVELOPMENT AND _cs_TEST_SUITE)
+      message(FATAL_ERROR "You can only specify either TEST_SUITE or DEVELOPMENT!")
     endif()
 
     if (NOT CMAKE_VERSION VERSION_LESS "3.0.0")
@@ -229,6 +233,9 @@ function(INSTALL_CSHARP_ASSEMBLY)
     if (_cs_TEST_SUITE)
       set(_cs_COMPONENT_RUNTIME Test)
       set(_cs_COMPONENT_DEVELOPMENT Test)
+    elseif (_cs_DEVELOPMENT)
+      set(_cs_COMPONENT_RUNTIME Development)
+      set(_cs_COMPONENT_DEVELOPMENT Development)
     else()
       set(_cs_COMPONENT_RUNTIME Runtime)
       set(_cs_COMPONENT_DEVELOPMENT Development)

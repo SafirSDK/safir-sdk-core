@@ -68,4 +68,4 @@ TARGET_LINK_LIBRARIES(dobexplorer PRIVATE
 target_include_directories(dobexplorer PRIVATE ../../dose_communication.ss/src/defs/ ../../dose_communication.ss/src/dose_com/)
 #dobexplorer doesnt really need to link against dose_com, so instead just add the include directories
 
-SAFIR_INSTALL(TARGETS dobexplorer)
+SAFIR_INSTALL(TARGETS dobexplorer DEVELOPMENT)
