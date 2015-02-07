@@ -29,15 +29,18 @@ if (UNIX)
 endif()
 ###########
 
-
 #
-# TODO write something about what this does
+# Install a target to the proper place.
 #
 function (SAFIR_INSTALL)
-  cmake_parse_arguments(INST "TEST_SUITE;JNI" "" "TARGETS" ${ARGN})
+  cmake_parse_arguments(INST "TEST_SUITE;DEVELOPMENT;JNI" "" "TARGETS" ${ARGN})
 
   if (NOT "${INST_UNPARSED_ARGUMENTS}" STREQUAL "")
     message(FATAL_ERROR "Unknown argument to SAFIR_INSTALL '${INST_UNPARSED_ARGUMENTS}'")
+  endif()
+
+  if (INST_DEVELOPMENT AND INST_TEST_SUITE)
+    message(FATAL_ERROR "You can only specify either TEST_SUITE or DEVELOPMENT!")
   endif()
 
   foreach (target ${INST_TARGETS})
@@ -48,10 +51,13 @@ function (SAFIR_INSTALL)
       get_target_property(assembly_file ${target} ASSEMBLY_FILE)
       if (assembly_file)
         if (INST_TEST_SUITE)
-          set (TEST_SUITE "TEST_SUITE")
+          set (CS_COMP "TEST_SUITE")
           set (CONFIG_COMPONENT Test)
+        elseif(INST_DEVELOPMENT)
+          set (CS_COMP "DEVELOPMENT")
+          set (CONFIG_COMPONENT Development)
         else()
-          unset (TEST_SUITE)
+          unset (CS_COMP)
           set (CONFIG_COMPONENT Runtime)
         endif()
 
@@ -66,7 +72,7 @@ function (SAFIR_INSTALL)
 
         INSTALL_CSHARP_ASSEMBLY(TARGET ${target}
           DESTINATION ${destination}
-          ${TEST_SUITE})
+          ${CS_COMP})
 
         #and on unix systems we want a little shell script in bin to launch exes with
         if (UNIX AND NOT ASSEMBLY_KIND STREQUAL "library")
@@ -86,6 +92,8 @@ function (SAFIR_INSTALL)
       if (jar_file)
         if (INST_TEST_SUITE)
           set (component Test)
+        elseif (INST_DEVELOPMENT)
+          set (component Development)
         else()
           set (component Runtime)
         endif()
@@ -106,6 +114,9 @@ function (SAFIR_INSTALL)
 
       ############### C/C++ ####################
       if ("${target_type}" STREQUAL "SHARED_LIBRARY")
+        if (INST_DEVELOPMENT)
+          message(FATAL_ERROR "SAFIR_INSTALL does currently not support the DEVELOPMENT flag for library targets. Add support, if it makes sense.")
+        endif()
         if (INST_TEST_SUITE)
           unset(INST_export)
         else()
@@ -125,6 +136,12 @@ function (SAFIR_INSTALL)
           RUNTIME DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN} COMPONENT Test
           LIBRARY DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT Test
           ARCHIVE DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT Test)
+      elseif (INST_DEVELOPMENT)
+        INSTALL(TARGETS ${target}
+          ${INST_export}
+          RUNTIME DESTINATION ${SAFIR_INSTALL_DESTINATION_BIN} COMPONENT Development
+          LIBRARY DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT Development
+          ARCHIVE DESTINATION ${SAFIR_INSTALL_DESTINATION_LIB} COMPONENT Development)
       else()
         INSTALL(TARGETS ${target}
           ${INST_export}

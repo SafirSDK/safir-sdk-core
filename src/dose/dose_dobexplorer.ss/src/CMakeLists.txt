@@ -65,4 +65,4 @@ TARGET_LINK_LIBRARIES(dobexplorer PRIVATE
   lluf_utils
   lluf_crash_reporter)
 
-SAFIR_INSTALL(TARGETS dobexplorer)
+SAFIR_INSTALL(TARGETS dobexplorer DEVELOPMENT)
