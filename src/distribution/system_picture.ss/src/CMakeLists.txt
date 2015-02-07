@@ -37,4 +37,5 @@ target_link_libraries(system_picture_listener PRIVATE
   lluf_utils
   ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
-SAFIR_INSTALL(TARGETS system_picture system_picture_listener)
+SAFIR_INSTALL(TARGETS system_picture)
+SAFIR_INSTALL(TARGETS system_picture_listener DEVELOPMENT)
