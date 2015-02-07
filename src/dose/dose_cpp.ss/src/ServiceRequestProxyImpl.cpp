@@ -91,7 +91,6 @@ namespace Internal
     const Dob::Typesystem::HandlerId ServiceRequestProxyImpl::GetReceiverWithStringRepresentation() const
     {
         return GetReceivingHandlerId();
-        //TODO: try to obtain string representation
     }
 
 }

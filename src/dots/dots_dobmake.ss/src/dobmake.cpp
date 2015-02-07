@@ -53,7 +53,7 @@ namespace
         return false;
 #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
         BOOL isWow64;
-        if (!IsWow64Process(GetCurrentProcess,&isWow64))
+        if (!IsWow64Process(GetCurrentProcess(),&isWow64))
         {
             throw std::runtime_error("Call to IsWow64Process(...) failed! Error Code = " +
                                      boost::lexical_cast<std::string>(GetLastError()));
@@ -64,6 +64,14 @@ namespace
 #endif
 
     }
+
+    class ExposeSleep : public QThread
+    {
+    public:
+        static inline void msleep(unsigned long msecs) {
+            QThread::msleep(msecs);
+        }
+    };
 }
 
 Dobmake::Dobmake(QWidget *parent)
@@ -214,15 +222,21 @@ void Dobmake::OpenLog(const bool ignoreCheckbox)
     {
         const QUrl url = QUrl::fromLocalFile(ui->douDirectory->text() + QDir::separator() + "buildlog.html");
 
-        const bool result = QDesktopServices::openUrl(url);
-
-        if (!result)
+        //try to open for ten seconds, once every 0.1s
+        for (int i = 0; i < 100; ++i)
         {
-            QMessageBox::warning(this,
-                                 "Failed to open browser",
-                                 "Failed to open the log in your web browser.\n"
-                                 "Please open the buildlog.html file in the dou directory manually.");
+            const bool result = QDesktopServices::openUrl(url);
+            if (result)
+            {
+                return;
+            }
+            ExposeSleep::msleep(100);
         }
+
+        QMessageBox::warning(this,
+                             "Failed to open browser",
+                             "Failed to open the log in your web browser.\n"
+                             "Please open the buildlog.html file in the dou directory manually.");
     }
 }
 void Dobmake::on_build_clicked()

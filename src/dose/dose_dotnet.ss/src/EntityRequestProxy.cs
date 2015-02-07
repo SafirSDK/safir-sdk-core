@@ -203,7 +203,6 @@ namespace Safir.Dob
             {
                 CheckNotDisposed();
                 return ReceivingHandlerId;
-                //TODO: try to obtain string representation
             }
         }
 

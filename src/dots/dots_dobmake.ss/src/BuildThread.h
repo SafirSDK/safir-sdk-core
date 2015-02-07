@@ -96,6 +96,16 @@ private:
             params << "--32-bit";
         }
 
+#if _MSC_VER == 1600
+        params << "--use-studio" << "2010";
+#elif _MSC_VER == 1700
+        params << "--use-studio" << "2012";
+#elif _MSC_VER == 1800
+        params << "--use-studio" << "2013";
+#elif defined(_MSC_VER)
+#  error "Unknown version of Visual Studio. Dobmake won't stand for it!"
+#endif
+
         if (!m_installDir.isEmpty())
         {
             params << "--install" << m_installDir;

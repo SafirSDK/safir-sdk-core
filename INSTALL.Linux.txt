@@ -24,8 +24,8 @@ The instructions can be adapted to other versions as well, but these are the one
 First of all there are a number of packages that you need to have installed on your system to be able to build all the parts of Safir SDK Core.
 
 1.1. Ubuntu
-To install these from the command line "in one go" on distributions based on Ubuntu 13.10 or 14.04, run:
-   sudo apt-get install qt5-default mono-devel unixodbc-dev cmake g++ default-jdk doxygen graphviz make python-tk autoconf build-essential subversion gnat libboost-all-dev protobuf-compiler libprotobuf-dev asciidoc
+To install these from the command line "in one go" on distributions based on Ubuntu 14.04, run:
+   sudo apt-get install qt5-default mono-devel unixodbc-dev cmake g++ default-jdk doxygen graphviz make python-tk autoconf build-essential subversion gnat libboost-all-dev protobuf-compiler libprotobuf-dev asciidoc xsltproc
 
 1.2. Centos/RHEL
 Safir SDK Core is only compatible with 7.0 or later of Centos/RHEL (unless you install a custom Boost of version 1.50 or later).

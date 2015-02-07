@@ -23,11 +23,12 @@ if (Java_Development_FOUND AND Java_Runtime_FOUND)
   endif()
   unset(Java_Development_FOUND)
   unset(Java_Runtime_FOUND)
+
 else()
   SET(Java_FOUND Java-NOTFOUND)
 endif()
 if (NOT Java_FOUND)
-  MESSAGE(WARNING "Failed to find the Java development tools, will not build Java interfaces")
+  MESSAGE(STATUS "Failed to find the Java development tools, will not build Java interfaces")
 endif()
 
 function (SAFIR_JAVAH)

@@ -113,7 +113,6 @@ package body Safir.Dob.Message_Proxy_Impls is
      Safir.Dob.Typesystem.Channel_Id.Channel_Id_Type is
    begin
       return Get_Channel_Id (Self);
-      -- AWI:todo Try to obtain string representation
    end Get_Channel_Id_With_String_Representation;
 
 

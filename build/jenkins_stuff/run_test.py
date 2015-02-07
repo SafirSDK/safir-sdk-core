@@ -43,8 +43,13 @@ class SetupError(Exception):
 
 class WindowsInstaller(object):
     def __init__(self):
-        self.installpath = os.path.join(os.environ["ProgramFiles"],"Safir SDK Core")
-        self.uninstaller = os.path.join(self.installpath, "Uninstall.exe")
+        log("JOB_NAME = ", os.environ.get("JOB_NAME"))
+        #This probably won't work if running 32bit python on 64bit windows... but our build/test
+        #machines dont use that config, so we're okay
+        if os.environ["JOB_NAME"].find("32on64") != -1:
+            self.installpath = os.path.join(os.environ["ProgramFiles(x86)"],"Safir SDK Core")
+        else:
+            self.installpath = os.path.join(os.environ["ProgramFiles"],"Safir SDK Core")
 
         installer = glob.glob("SafirSDKCore*.exe")
         if len(installer) != 1:
@@ -52,7 +57,30 @@ class WindowsInstaller(object):
         self.installer = installer[0]
 
     def can_uninstall(self):
-        return os.path.isfile(self.uninstaller)
+        self.uninstaller = None
+
+        #we can't use self.installpath, since it may not be installed there if it was
+        #left over from previous installation
+        ip = os.path.join(os.environ["ProgramFiles"],"Safir SDK Core")
+        uninstaller = os.path.join(ip, "Uninstall.exe")
+
+        pf86 = os.environ.get("ProgramFiles(x86)")
+
+        if pf86 is None:
+            if os.path.isfile(uninstaller):
+                self.uninstaller = uninstaller
+        else:
+            ip86 = os.path.join(pf86,"Safir SDK Core")
+            uninstaller86 = os.path.join(ip86, "Uninstall.exe")
+
+            if os.path.isfile(uninstaller) and os.path.isfile(uninstaller86):
+                raise SetupError("Multiple uninstallers found!")
+            elif os.path.isfile(uninstaller):
+                self.uninstaller = uninstaller
+            elif os.path.isfile(uninstaller86):
+                self.uninstaller = uninstaller86
+
+        return self.uninstaller is not None
 
     def uninstall(self):
         if not self.can_uninstall():
@@ -150,11 +178,15 @@ class WindowsInstaller(object):
         binpath = os.path.join(self.installpath,"bin")
         if output.find(binpath) == -1:
             raise SetupError("bin directory does not appear to have been added to PATH:\n" + output)
-        if os.environ["PATH"].find(binpath) != -1:
+        if os.environ["PATH"].find(os.path.join("Safir SDK Core","bin")) != -1:
             raise SetupError("bin directory seems to have been added to PATH before installation!:\n"
                              + os.environ["PATH"])
-        os.environ["PATH"] += os.pathsep + binpath
+        if os.environ.get("BOOST_ROOT") is not None and os.environ["BOOST_ROOT"].find("Safir SDK Core") != -1:
+            raise SetupError("BOOST_ROOT environment variable seems to have been assigned before installation!:\n"
+                             + os.environ["BOOST_ROOT"])
 
+        os.environ["PATH"] += os.pathsep + binpath
+        os.environ["BOOST_ROOT"] = self.installpath
 
         self.__setup_debug_runtime()
 
@@ -255,12 +287,25 @@ class DebianInstaller(object):
             raise SetupError("Failed to run safir_show_config. returncode = "
                              + str(proc.returncode) + "\nOutput:\n" + output)
 
-def run_test_suite():
+def run_test_suite(multinode):
     log("Launching test suite")
+    arguments = ["--jenkins",]
+    if os.environ["JOB_NAME"].find("32on64") != -1:
+        arguments += ("--no-java",)
+    if multinode:
+        arguments += ("--multinode",)
     if sys.platform == "win32":
-        result = subprocess.call(("run_dose_tests.py" ,"--jenkins"), shell = True)
+        result = subprocess.call(["run_dose_tests.py",] + arguments, shell = True)
     else:
-        result = subprocess.call(("run_dose_tests","--jenkins"))
+        result = subprocess.call(["run_dose_tests",] + arguments)
+
+    if result != 0:
+        raise SetupError("Test suite failed. Returncode = " + str(result))
+
+def run_test_slave():
+    log("Launching Multinode test slave")
+    arguments = ["--jenkins", "--slave"]
+    result = subprocess.call(["run_dose_tests",] + arguments)
 
     if result != 0:
         raise SetupError("Test suite failed. Returncode = " + str(result))
@@ -292,6 +337,11 @@ def build_examples():
         cmd +=  ("--jenkins", "--skip-tests")
         if installdir is not None:
             cmd += ("--install", installdir)
+        if os.environ["JOB_NAME"].find("32on64") != -1:
+            cmd += ("--32-bit",)
+            #the 64 bit build machines do not have 32bit Qt installed,
+            #so we skip qt stuff, i.e. VehicleMmiCppQt.
+            os.environ["SAFIR_SKIP_QT"] = "True"
 
         log ("Running command ", " ".join(cmd))
         result = subprocess.call(cmd,
@@ -308,8 +358,11 @@ def parse_command_line():
                              + " you've already installed Safir SDK Core")
 
     parser.add_argument("--test", "-t",
-                        choices=["standalone-tests","build-examples"],
+                        choices=["standalone-tests","multinode-tests","build-examples"],
                         help="Which test to perform")
+
+    parser.add_argument("--slave", action = "store_true",
+                        help = "Be a multinode test slave")
 
     arguments = parser.parse_args()
 
@@ -342,9 +395,13 @@ def main():
             installer.check_installation()
 
         if args.test == "standalone-tests":
-            run_test_suite()
+            run_test_suite(multinode = False)
+        if args.test == "multinode-tests":
+            run_test_suite(multinode = True)
         elif args.test == "build-examples":
             build_examples()
+        elif args.slave:
+            run_test_slave()
 
     except SetupError as e:
         log ("Error: " + str(e))

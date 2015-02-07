@@ -230,7 +230,6 @@ namespace Internal
     PreviousEntityProxyImpl::GetOwnerWithStringRepresentation() const
     {
         return GetOwner();
-        //TODO: try to obtain string representation
     }
 
     const Dob::Typesystem::Int64

@@ -137,7 +137,6 @@ namespace Safir.Dob
             {
                 CheckNotDisposed();
                 return ChannelId;
-                //TODO: try to obtain string representation
             }
         }
         #endregion

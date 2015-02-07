@@ -1,7 +1,7 @@
 ﻿/* ****************************************************************************
 *
 * Copyright Saab AB, 2014 (http://safir.sourceforge.net)
-* 
+*
 * Created by: Lars Hagström / lars.hagstrom@consoden.se
 *
 *******************************************************************************
@@ -38,7 +38,7 @@ class gactool
     {
         var loadedAssembly = System.Reflection.Assembly.LoadFile(path);
 
-        if (loadedAssembly.GetName().GetPublicKey().Length == 0) 
+        if (loadedAssembly.GetName().GetPublicKey().Length == 0)
         {
             throw new Exception("The assembly '" + path + "' must be strongly signed.");
         }
@@ -46,12 +46,12 @@ class gactool
         m_publisher.GacInstall(path);
         Console.WriteLine("Installed assembly '" + path + "' into the GAC.");
     }
-    
+
     private void UninstallAssembly(string path)
     {
         var loadedAssembly = System.Reflection.Assembly.LoadFile(path);
 
-        if (loadedAssembly.GetName().GetPublicKey().Length == 0) 
+        if (loadedAssembly.GetName().GetPublicKey().Length == 0)
         {
             throw new Exception("The assembly '" + path + "' must be strongly signed.");
         }
@@ -59,23 +59,22 @@ class gactool
         m_publisher.GacRemove(path);
         Console.WriteLine("Removed assembly '" + path + "' from the GAC.");
     }
-    
+
     private void Run(string[] args)
     {
         Console.OutputEncoding = Encoding.GetEncoding(Encoding.Default.CodePage);
-        Console.WriteLine(args.Length);
         if (args.Length != 2 || (args[0] != "--install" && args[0] != "--uninstall"))
         {
             Console.WriteLine("usage: gactool --install/--uninstall <path>");
             Console.WriteLine("       <path> can be either relative or absolute path to assembly\n       or to a directory containing assemblies");
             return;
         }
-        
+
         bool install = args[0] == "--install";
-        
+
         var path = Path.GetFullPath(args[1]);
         Console.WriteLine("Path is " + Path.GetFullPath(path));
-        
+
         if (File.Exists(path))
         {
             if (install)
@@ -117,9 +116,9 @@ class gactool
         {
             Console.WriteLine("gactool failed: " + e.Message);
             return 1;
-        }        
+        }
         return 0;
     }
-    
+
     System.EnterpriseServices.Internal.Publish m_publisher = new System.EnterpriseServices.Internal.Publish();
 }

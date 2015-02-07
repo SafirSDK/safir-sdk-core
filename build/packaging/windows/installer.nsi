@@ -60,11 +60,11 @@ SetCompressor /SOLID lzma
 !define IID_IShellLinkA {000214EE-0000-0000-C000-000000000046}
 !define IID_IShellLinkW {000214F9-0000-0000-C000-000000000046}
 !define IShellLinkDataList {45e2b4ae-b1c3-11d0-b92f-00a0c90312e1}
-	!ifdef NSIS_UNICODE
-	!define IID_IShellLink ${IID_IShellLinkW}
-	!else
-	!define IID_IShellLink ${IID_IShellLinkA}
-	!endif
+    !ifdef NSIS_UNICODE
+    !define IID_IShellLink ${IID_IShellLinkW}
+    !else
+    !define IID_IShellLink ${IID_IShellLinkA}
+    !endif
 !endif
 
 Function ShellLinkSetRunAs
@@ -72,25 +72,25 @@ System::Store S
 pop $9
 System::Call "ole32::CoCreateInstance(g'${CLSID_ShellLink}',i0,i1,g'${IID_IShellLink}',*i.r1)i.r0"
 ${If} $0 = 0
-	System::Call "$1->0(g'${IPersistFile}',*i.r2)i.r0" ;QI
-	${If} $0 = 0
-		System::Call "$2->5(w '$9',i 0)i.r0" ;Load
-		${If} $0 = 0
-			System::Call "$1->0(g'${IShellLinkDataList}',*i.r3)i.r0" ;QI
-			${If} $0 = 0
-				System::Call "$3->6(*i.r4)i.r0" ;GetFlags
-				${If} $0 = 0
-					System::Call "$3->7(i $4|0x2000)i.r0" ;SetFlags ;SLDF_RUNAS_USER
-					${If} $0 = 0
-						System::Call "$2->6(w '$9',i1)i.r0" ;Save
-					${EndIf}
-				${EndIf}
-				System::Call "$3->2()" ;Release
-			${EndIf}
-		System::Call "$2->2()" ;Release
-		${EndIf}
-	${EndIf}
-	System::Call "$1->2()" ;Release
+    System::Call "$1->0(g'${IPersistFile}',*i.r2)i.r0" ;QI
+    ${If} $0 = 0
+        System::Call "$2->5(w '$9',i 0)i.r0" ;Load
+        ${If} $0 = 0
+            System::Call "$1->0(g'${IShellLinkDataList}',*i.r3)i.r0" ;QI
+            ${If} $0 = 0
+                System::Call "$3->6(*i.r4)i.r0" ;GetFlags
+                ${If} $0 = 0
+                    System::Call "$3->7(i $4|0x2000)i.r0" ;SetFlags ;SLDF_RUNAS_USER
+                    ${If} $0 = 0
+                        System::Call "$2->6(w '$9',i1)i.r0" ;Save
+                    ${EndIf}
+                ${EndIf}
+                System::Call "$3->2()" ;Release
+            ${EndIf}
+        System::Call "$2->2()" ;Release
+        ${EndIf}
+    ${EndIf}
+    System::Call "$1->2()" ;Release
 ${EndIf}
 push $0
 System::Store L
@@ -108,7 +108,15 @@ WriteINIStr "${FILENAME}.url" "InternetShortcut" "IconIndex" "${ICONINDEX}"
 Function .onInit
     ;Check windows version
     ${IfNot} ${AtLeastWin7}
-        MessageBox MB_OK "Windows 7 or above required"
+        MessageBox MB_OK "Windows 7 or above required"  /SD IDOK
+        Abort
+    ${EndIf}
+
+    ; Check for uninstaller.
+    ReadRegStr $R0 HKLM "Software\Safir SDK Core" ""
+
+    ${If} $R0 != ""
+         MessageBox MB_OK "Please uninstall previous versions of Safir SDK Core first!" /SD IDOK
         Quit
     ${EndIf}
 
@@ -130,8 +138,8 @@ Function .onInit
     Var /GLOBAL option_development
     Var /GLOBAL option_testSuite
 
-    StrCpy $option_development	  1
-    StrCpy $option_testSuite	  0
+    StrCpy $option_development    1
+    StrCpy $option_testSuite      0
 
     ; Parse Parameters
     Push $R0
@@ -184,9 +192,8 @@ FunctionEnd
   !define StageDirDevelopment "..\..\..\stage\Development\Program Files\safir-sdk-core"
   !define StageDirTest "..\..\..\stage\Test\Program Files\safir-sdk-core"
 
-
   ;Get installation folder from registry if available
-  InstallDirRegKey HKCU "Software\Safir SDK Core" ""
+  InstallDirRegKey HKLM "Software\Safir SDK Core" ""
 
   ;Request application privileges for Windows Vista
   RequestExecutionLevel admin
@@ -255,16 +262,16 @@ Section "Runtime" SecRuntime
                                       "http://www.safirsdkcore.com/" "" "0"
 
   CreateShortCut "${StartMenuDir}\Documentation\GPLv3 License.lnk" \
-				 "$INSTDIR\docs\LICENSE.txt" "" "" "" SW_SHOWNORMAL "" "Open Source license of Safir SDK Core"
+                 "$INSTDIR\docs\LICENSE.txt" "" "" "" SW_SHOWNORMAL "" "Open Source license of Safir SDK Core"
 
   CreateShortCut "${StartMenuDir}\Sate.lnk" \
-				 "$INSTDIR\bin\sate.exe" "" "" "" SW_SHOWNORMAL "" "Safir Application Tester"
+                 "$INSTDIR\bin\sate.exe" "" "" "" SW_SHOWNORMAL "" "Safir Application Tester"
 
   CreateShortCut "${StartMenuDir}\Dobexplorer.lnk" \
-				 "$INSTDIR\bin\dobexplorer.exe" "" "" "" SW_SHOWNORMAL "" "Explore the Dob internals"
+                 "$INSTDIR\bin\dobexplorer.exe" "" "" "" SW_SHOWNORMAL "" "Explore the Dob internals"
 
   CreateShortCut "${StartMenuDir}\Uninstall.lnk" \
-				 "$INSTDIR\Uninstall.exe" "" "" "" SW_SHOWNORMAL "" "Uninstall Safir SDK Core"
+                 "$INSTDIR\Uninstall.exe" "" "" "" SW_SHOWNORMAL "" "Uninstall Safir SDK Core"
 
   ;Add to PATH
   nsExec::ExecToLog '"$INSTDIR\installer_utils\pathed" "/MACHINE" "/APPEND" "$INSTDIR\bin"'
@@ -277,7 +284,7 @@ Section "Runtime" SecRuntime
   ${EndIf}
 
   ;Store installation folder
-  WriteRegStr HKCU "Software\Safir SDK Core" "" $INSTDIR
+  WriteRegStr HKLM "Software\Safir SDK Core" "" $INSTDIR
 
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Safir SDK Core" \
                    "DisplayName" "Safir SDK Core"
@@ -324,28 +331,28 @@ Section "Development" SecDevelopment
   #Shortcuts to config files - as admin
   CreateDirectory "${StartMenuDir}\Configuration"
   CreateShortCut "${StartMenuDir}\Configuration\Edit typesystem.ini.lnk" \
-				 "notepad" "$APPDATA\safir-sdk-core\config\typesystem.ini"
+                 "notepad" "$APPDATA\safir-sdk-core\config\typesystem.ini"
   push "${StartMenuDir}\Configuration\Edit typesystem.ini.lnk"
   call ShellLinkSetRunAs
   pop $0
 
   CreateShortCut "${StartMenuDir}\Configuration\Edit locations.ini.lnk" \
-				 "notepad" "$APPDATA\safir-sdk-core\config\locations.ini"
+                 "notepad" "$APPDATA\safir-sdk-core\config\locations.ini"
   push "${StartMenuDir}\Configuration\Edit locations.ini.lnk"
   call ShellLinkSetRunAs
   pop $0
 
   CreateShortCut "${StartMenuDir}\Configuration\Edit logging.ini.lnk" \
-				 "notepad" "$APPDATA\safir-sdk-core\config\logging.ini"
+                 "notepad" "$APPDATA\safir-sdk-core\config\logging.ini"
   push "${StartMenuDir}\Configuration\Edit logging.ini.lnk"
   call ShellLinkSetRunAs
   pop $0
 
   CreateShortCut "${StartMenuDir}\Dobmake.lnk" \
-				 "$INSTDIR\bin\dobmake.exe" "" "" "" SW_SHOWNORMAL "" "Build libraries from your dou files."
+                 "$INSTDIR\bin\dobmake.exe" "" "" "" SW_SHOWNORMAL "" "Build libraries from your dou files."
 
   CreateShortCut "${StartMenuDir}\Documentation\Doxygen.lnk" \
-				 "$INSTDIR\docs\html\index.xhtml" "" "" "" SW_SHOWNORMAL "" "Doxygen API documentation."
+                 "$INSTDIR\docs\html\index.xhtml" "" "" "" SW_SHOWNORMAL "" "Doxygen API documentation."
 
   !insertmacro CreateInternetShortcut "${StartMenuDir}\Documentation\User's Guide" \
                                       "http://www.safirsdkcore.com/docs" "" "0"
@@ -436,7 +443,7 @@ Section "Uninstall"
   #Remove start menu stuff
   RMDir /r "${StartMenuDir}"
 
-  DeleteRegKey HKCU "Software\Safir SDK Core"
+  DeleteRegKey HKLM "Software\Safir SDK Core"
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\Safir SDK Core"
 
 SectionEnd

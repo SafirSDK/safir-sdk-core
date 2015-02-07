@@ -119,6 +119,9 @@ class Parameters:
         if options.autostart_slave and not self.multinode:
             log("--autostart-slave can only be used together with --multinode")
             sys.exit(1)
+        if options.slave and options.multinode:
+            log("Don't specify both --slave and --multinode")
+            sys.exit(1)
 
         self.autostart_jenkins_slave = options.autostart_slave or (options.jenkins and self.multinode)
 
@@ -136,16 +139,32 @@ class Parameters:
                 self.lang1 = splitlangs[1]
                 self.lang2 = splitlangs[2]
 
+        #This relies on the fact that we're installed in the bin directory on both linux and windows.
+        install_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),"..")
+
         #Get the default dou directory and set it as an environment variable that can be
         #picked up by the typesystem.ini that belongs to the test suite.
-        #This path is set by cmake during configuration/installation.
-        os.environ["SAFIR_TEST_SUITE_DOU_DIRECTORY"] = "@DEFAULT_DOU_SEARCH_PATH@"
+        #Note: The last part of this path is set by cmake during configuration/installation.
+        os.environ["SAFIR_TEST_SUITE_DOU_DIRECTORY"] = os.path.join(install_dir, "@SAFIR_INSTALL_DESTINATION_DOU_BASE@")
 
-        self.test_data_directory = "@TEST_DATA_DIRECTORY@" #This path is set by cmake during configuration/installation.
+        #Note: Last half ofpath is set by cmake during configuration/installation.
+        self.test_data_directory = os.path.join(install_dir, "@SAFIR_INSTALL_DESTINATION_TEST_DATA@")
         log(self.test_data_directory)
 
         #Set up to use our own test configuration
-        os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(self.test_data_directory, "dose", "test_config", "standalone")
+        os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(self.test_data_directory,
+                                                                "dose",
+                                                                "test_config",
+                                                                "standalone" if self.standalone else "multinode")
+
+        #set up the node number as it is specified in ThisNodeParameters
+        if self.multinode:
+            os.environ["SAFIR_TEST_NODE_NUMBER"] = "0"
+        elif self.slave:
+            os.environ["SAFIR_TEST_NODE_NUMBER"] = "1"
+
+        jar_install_path = os.path.join(install_dir,
+                                        "@SAFIR_INSTALL_DESTINATION_JAR@")
 
         self.dose_main_cmd = ("dose_main",)
         self.foreach_cmd = ("foreach",)
@@ -155,7 +174,7 @@ class Parameters:
         #self.dose_test_ada_exe_name = self.dose_test_ada_cmd[0] + (".exe" if sys.platform == "win32" else "")
         self.dose_test_dotnet_cmd = ("dose_test_dotnet",)
         self.dose_test_java_cmd = ("java", "-Xcheck:jni", "-Xfuture", "-jar",
-                                   os.path.join("@DEFAULT_JAVA_SEARCH_PATH@","dose_test_java.jar"))
+                                   os.path.join(jar_install_path,"dose_test_java.jar"))
 
         self.testcases_path = os.path.join(self.test_data_directory, "dose", "testcases")
         self.dose_test_sequencer_cmd = ("dose_test_sequencer",
@@ -207,7 +226,7 @@ class Parameters:
         #     os.path.join(self.test_parameters_path, "multinode",
         #                  "Safir.Dob.NodeParameters.dou")
 
-        # self.tempdir = tempfile.mkdtemp(prefix="dose_test_backup")
+        self.tempdir = tempfile.mkdtemp(prefix="dose_test_backup")
 
 def getText(nodelist):
     rc = []

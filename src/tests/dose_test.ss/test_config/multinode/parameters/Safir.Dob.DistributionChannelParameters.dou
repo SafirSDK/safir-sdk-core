@@ -1,0 +1,37 @@
+<class xmlns="urn:safir-dots-unit">
+  <summary>Contains the parametrization of all distribution channels.</summary>
+  <name>Safir.Dob.DistributionChannelParameters</name>
+  <baseClass>Safir.Dob.Parametrization</baseClass>
+  <parameters>
+    <parameter>
+      <summary>There is one predefined distribution channel 'Local' (which is not sent to other nodes).
+                     The distribution channel System _must_ be defined, _must_ be the first channel and
+                     _must_ include all nodes in the system.
+                     If the MulticastAddress of System is set to 127.0.0.1 all communication
+                     will be local only (even for Objects that are defined to use another distribution
+                     channel). This is used to configure a machine to be standalone.
+                     There can be 31 distribution channels that go to more than one node.
+                     If a channel only contains one node singlecast communication will be used.
+                     In this case the multicast address is ignored (and can be left out)
+            </summary>
+      <name>DistributionChannels</name>
+      <type>Safir.Dob.DistributionChannel</type>
+      <arrayElements>
+        <arrayElement>
+          <Safir.Dob.DistributionChannel type="Safir.Dob.DistributionChannel">
+            <Name>System</Name>
+            <IncludedNodes>++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++</IncludedNodes>
+            <MulticastAddress>224.90.90.240</MulticastAddress>
+          </Safir.Dob.DistributionChannel>
+        </arrayElement>
+        <arrayElement>
+          <Safir.Dob.DistributionChannel type="Safir.Dob.DistributionChannel">
+            <Name>PoolDistribution</Name>
+            <IncludedNodes>++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++</IncludedNodes>
+            <MulticastAddress>224.90.90.241</MulticastAddress>
+          </Safir.Dob.DistributionChannel>
+        </arrayElement>
+      </arrayElements>
+    </parameter>
+  </parameters>
+</class>

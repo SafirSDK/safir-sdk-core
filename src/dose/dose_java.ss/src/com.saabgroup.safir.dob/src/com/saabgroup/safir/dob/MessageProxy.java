@@ -133,7 +133,6 @@ public class MessageProxy {
     {
         checkNotDisposed();
         return getChannelId();
-        //TODO: try to obtain string representation
     }
 
     /**

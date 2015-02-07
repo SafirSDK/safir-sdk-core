@@ -310,7 +310,6 @@ namespace Safir.Dob
             {
                 CheckNotDisposed();
                 return Owner;
-                //TODO: try to obtain string representation
             }
         }
 

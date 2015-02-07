@@ -29,9 +29,11 @@
 #ifdef _MSC_VER
 #  pragma warning (push)
 #  pragma warning (disable: 4267)
+#  pragma warning (disable: 4100)
 #endif
 
 #include <boost/asio.hpp>
+#include <boost/atomic.hpp>
 
 #ifdef _MSC_VER
 #  pragma warning (pop)
@@ -60,6 +62,8 @@ namespace Utilities
             m_strand.dispatch(boost::bind(&ProcessMonitorImpl::StopMonitorPidInternal,this,pid));
         }
     private:
+        void StopInternal();
+
         void StartMonitorPidInternal(const pid_t pid);
         void StopMonitorPidInternal(const pid_t pid);
 
@@ -71,7 +75,7 @@ namespace Utilities
         boost::function<void(const pid_t pid)> m_callback;
 
         boost::asio::io_service& m_ioService;
-
+        boost::atomic<bool> m_stopped;
         boost::asio::io_service::strand m_strand;
 
         struct Process
