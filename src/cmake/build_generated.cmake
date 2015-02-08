@@ -24,27 +24,6 @@
 #******************************************************************************
 include(CMakeParseArguments)
 
-#
-# Work out if we're building the Safir SDK Core source tree or if
-# we're building a user library (i.e. external to Core).
-#
-# Will set SAFIR_EXTERNAL_BUILD to True or False.
-#
-FUNCTION(SAFIR_IS_EXTERNAL_BUILD)
-  if (SAFIR_SDK_CORE_INSTALL_DIR AND safir-sdk-core_SOURCE_DIR)
-    MESSAGE(FATAL_ERROR "Please do not use find_package(SafirSDKCore) from "
-      "within the Safir SDK Core build tree! What are you trying to do?!")
-  elseif(SAFIR_SDK_CORE_INSTALL_DIR)
-    set (SAFIR_EXTERNAL_BUILD True PARENT_SCOPE)
-  elseif(safir-sdk-core_SOURCE_DIR)
-    set (SAFIR_EXTERNAL_BUILD False PARENT_SCOPE)
-  else()
-    MESSAGE(FATAL_ERROR "Could not work out whether this is an external or "
-      "internal build. Did you follow the instructions in the users guide?")
-  endif()
-ENDFUNCTION()
-
-
 FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
   cmake_parse_arguments(GEN "" "NAME" "DEPENDENCIES" ${ARGN})
 
@@ -527,3 +506,27 @@ FUNCTION(INSTALL_SAFIR_GENERATED_LIBRARY)
   endforeach()
 
 ENDFUNCTION()
+
+#
+# Work out if we're building the Safir SDK Core source tree or if
+# we're building a user library (i.e. external to Core).
+#
+# Will set SAFIR_EXTERNAL_BUILD to True or False.
+#
+# This is really an internal function, and should not be used by anyone
+# outside of build_generated.cmake.
+#
+FUNCTION(SAFIR_IS_EXTERNAL_BUILD)
+  if (SAFIR_SDK_CORE_INSTALL_DIR AND safir-sdk-core_SOURCE_DIR)
+    MESSAGE(FATAL_ERROR "Please do not use find_package(SafirSDKCore) from "
+      "within the Safir SDK Core build tree! What are you trying to do?!")
+  elseif(SAFIR_SDK_CORE_INSTALL_DIR)
+    set (SAFIR_EXTERNAL_BUILD True PARENT_SCOPE)
+  elseif(safir-sdk-core_SOURCE_DIR)
+    set (SAFIR_EXTERNAL_BUILD False PARENT_SCOPE)
+  else()
+    MESSAGE(FATAL_ERROR "Could not work out whether this is an external or "
+      "internal build. Did you follow the instructions in the users guide?")
+  endif()
+ENDFUNCTION()
+
