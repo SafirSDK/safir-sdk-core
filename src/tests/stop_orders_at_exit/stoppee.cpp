@@ -29,7 +29,6 @@
 
 class App
     : public Safir::Dob::StopHandler
-//    , public Safir::Dob::Dispatcher
 {
 public:
     App()

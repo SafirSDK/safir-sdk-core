@@ -53,7 +53,7 @@ class Unbuffered(object):
        return getattr(self.stream, attr)
 
 sys.stdout = Unbuffered(sys.stdout)
-    
+
 class TestEnvStopper:
     def __init__(self, env):
         self.env = env
@@ -82,7 +82,7 @@ class TestEnv:
             self.launchProcess("dope_main", (dope_main,))
         self.syslog = syslog_server.SyslogServer(safir_show_config)
         self.syslog_output = list()
-        
+
         start_time = time.time()
         print("Waiting for dose_main to be ready")
 
@@ -90,7 +90,7 @@ class TestEnv:
             phrase="persistence data is ready"
         else:
             phrase="dose_main running"
-        
+
         while True:
             time.sleep(0.2)
             if self.Output("dose_main").find(phrase) != -1:
@@ -98,7 +98,7 @@ class TestEnv:
                 break
             if self.dose_main.poll() is not None:
                 raise Exception(" dose_main appears to have failed to start!\n" +
-                                "----- Output so far ----\n" + 
+                                "----- Output so far ----\n" +
                                 self.Output("dose_main") +
                                 "\n---------------------")
             if time.time() - start_time > 90:
@@ -116,8 +116,8 @@ class TestEnv:
 
     def launchProcess(self, name, cmd):
         print("Launching", name)
-        proc = subprocess.Popen(cmd, 
-                                stdout = subprocess.PIPE, 
+        proc = subprocess.Popen(cmd,
+                                stdout = subprocess.PIPE,
                                 stderr = subprocess.STDOUT,
                                 creationflags = self.__creationflags,
                                 universal_newlines = True)
@@ -129,7 +129,7 @@ class TestEnv:
         self.__procs[name] = (proc,queue,list())
         return proc
 
-    def __kill(self, name, proc):
+    def __kill(self, name, proc, timeout):
         try:
             print(" Terminating", name)
             if sys.platform == "win32":
@@ -138,7 +138,7 @@ class TestEnv:
             else:
                 proc.terminate()
             #let it have a minute to die...
-            for i in range (600):
+            for i in range (timeout * 10):
                 if proc.poll() is not None:
                     print("   Terminate successful")
                     return
@@ -152,7 +152,7 @@ class TestEnv:
 
     def killprocs(self):
         print("Terminating all processes")
-        self.__kill("dose_main", self.dose_main)
+        self.__kill("dose_main", self.dose_main, timeout = 120)
 
         polls = 0
         for name, (proc,queue,output) in self.__procs.items():
@@ -160,18 +160,21 @@ class TestEnv:
                 time.sleep(0.1)
                 polls += 1
 
+            if proc.returncode is None:
+                self.__kill(name,proc, timeout = 30)
+
             if proc.returncode != 0:
                 print("--", name, "returncode is", proc.returncode, " -----")
                 print(self.Output(name))
                 print("----------------------------------")
-                
+
         self.syslog.stop()
-        
+
     def Syslog(self):
         data = self.syslog.get_data(0)
         self.syslog_output.append(data)
         return "".join(self.syslog_output)
-    
+
     def Output(self,name):
         (proc,queue,output) = self.__procs[name]
         try:
@@ -194,7 +197,7 @@ class TestEnv:
     def ResetOutput(self, name):
         (proc,queue,output) = self.__procs[name]
         del output[:] #clear the list
-        
+
     def ReturnCodesOk(self):
         ok = True
         for name, (proc,queue,output) in self.__procs.items():
