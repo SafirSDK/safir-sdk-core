@@ -350,7 +350,7 @@ function(target_link_libraries)
 endfunction()
 ##############
 
-INCLUDE(build_generated)
+INCLUDE(BuildSafirGenerated)
 
 include_directories(lluf/lluf_build_helpers.ss/src)
 
@@ -410,7 +410,7 @@ configure_file(cmake/SafirSDKCoreConfig.cmake.in
   "${CMAKE_CURRENT_BINARY_DIR}/cmake/SafirSDKCoreConfig.cmake" @ONLY)
 
 INSTALL(FILES
-  cmake/build_generated.cmake
+  cmake/BuildSafirGenerated.cmake
   cmake/CSharpMacros.cmake
   cmake/SafirCompilerSettings.cmake
   cmake/SafirLoadCSharp.cmake

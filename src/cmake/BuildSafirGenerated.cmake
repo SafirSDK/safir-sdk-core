@@ -32,7 +32,7 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
   endif()
 
   if (NOT "${GEN_UNPARSED_ARGUMENTS}" STREQUAL "")
-    message(FATAL_ERROR "Unknown argument to BUILD_GENERATED_LIBRARY '${GEN_UNPARSED_ARGUMENTS}'")
+    message(FATAL_ERROR "Unknown argument to ADD_SAFIR_GENERATED_LIBRARY '${GEN_UNPARSED_ARGUMENTS}'")
   endif()
 
   # Work out if we're building the Safir SDK Core source tree or not
@@ -514,7 +514,7 @@ ENDFUNCTION()
 # Will set SAFIR_EXTERNAL_BUILD to True or False.
 #
 # This is really an internal function, and should not be used by anyone
-# outside of build_generated.cmake.
+# outside of BuildSafirGenerated.cmake.
 #
 FUNCTION(SAFIR_IS_EXTERNAL_BUILD)
   if (SAFIR_SDK_CORE_INSTALL_DIR AND safir-sdk-core_SOURCE_DIR)
