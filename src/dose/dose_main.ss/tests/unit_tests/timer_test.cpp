@@ -21,7 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include "../src/dose_main_timers.h"
+#include "../../src/dose_main_timers.h"
 
 /* 
  * NOTE: This test is meant as a unit test for regression, not as a
