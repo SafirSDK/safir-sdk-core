@@ -1292,19 +1292,29 @@ namespace Internal
                      << "\tResponse: " << std::boolalpha << GetPendingResponse() << std::endl;
             }
             break;
+
         case Action_HavePersistenceDataRequest:
+            {
+                oStr << "Action_HavePersistenceDataRequest" << std::endl
+                     << HeaderImage() << std::endl;
+            }
+            break;
+
         case Action_HavePersistenceDataResponse:
             {
-                //TODO
+                oStr << "Action_HavePersistenceDataResponse" << std::endl
+                     << HeaderImage() << std::endl
+                     << "\tIHavePersistenceData: " << std::boolalpha << GetIHavePersistenceData() << std::endl;
             }
             break;
 
         case Action_RequestPoolDistribution:
             {
-                //TODO
+                oStr << "Action_RequestPoolDistribution" << std::endl
+                     << HeaderImage() << std::endl
+                     << "\tReceiverId: " << GetPDRequestReceiverId() << std::endl;
             }
             break;
-
 
         case Message:
             {
@@ -1313,6 +1323,7 @@ namespace Internal
                      << "\t" << GetChannelId() << std::endl;
             }
             break;
+
         case Request_Service:
             {
                 oStr << "Request_Service" << std::endl
@@ -1320,6 +1331,7 @@ namespace Internal
                      << RequestHeaderImage() << std::endl;
             }
             break;
+
         case Request_EntityCreate:
             {
                 oStr << "Request_Service" << std::endl
@@ -1332,6 +1344,7 @@ namespace Internal
                 }
             }
             break;
+
         case Request_EntityUpdate:
             {
                 oStr << "Request_EntityUpdate" << std::endl
@@ -1340,6 +1353,7 @@ namespace Internal
                      << "\tInstanceId: " << GetInstanceId() << std::endl;
             }
             break;
+
         case Response:
             {
                 oStr << "Response" << std::endl
@@ -1348,6 +1362,7 @@ namespace Internal
                      << "\tRequestId: " << GetRequestId() << std::endl;
             }
             break;
+
         case Request_EntityDelete:
             {
                 oStr << "Request_EntityDelete" << std::endl
@@ -1357,6 +1372,7 @@ namespace Internal
                      << "\tType: " << Dob::Typesystem::Operations::GetName(GetTypeId()) << std::endl;
             }
             break;
+
         default:
             {
                 oStr << "Unknown_Type!!!";
