@@ -134,9 +134,10 @@ int main(int argc, char * argv[])
     }
 
     boost::asio::io_service ioService;
-
     //make some work to stop io_service from exiting.
     auto work = Safir::make_unique<boost::asio::io_service::work>(ioService);
+
+    Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().SwitchToAsynchronousMode(ioService);
 
     std::vector<Safir::Dob::Internal::Com::NodeTypeDefinition> commNodeTypes;
     std::map<boost::int64_t, Safir::Dob::Internal::SP::NodeType> spNodeTypes;
@@ -153,7 +154,7 @@ int main(int argc, char * argv[])
                                                                          "NodeTypeA",
                                                                          false,
                                                                          boost::chrono::milliseconds(1000),
-                                                                         10,
+                                                                         60,
                                                                          boost::chrono::milliseconds(20))));
 
     commNodeTypes.push_back({2,
@@ -168,7 +169,7 @@ int main(int argc, char * argv[])
                                                                          "NodeTypeB",
                                                                          false,
                                                                          boost::chrono::milliseconds(2000),
-                                                                         10,
+                                                                         60,
                                                                          boost::chrono::milliseconds(50))));
 
 
@@ -236,13 +237,15 @@ int main(int argc, char * argv[])
                            communication.Stop();
                            lllog(1) << "CTRL: Resetting work" << std::endl;
                            work.reset();
+
+                           Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().Stop();
                        }
                        );
 
 
 
     boost::thread_group threads;
-    for (int i = 0; i < 9; ++i)
+    for (int i = 0; i < 2; ++i)
     {
         threads.create_thread([&ioService]{ioService.run();});
     }
