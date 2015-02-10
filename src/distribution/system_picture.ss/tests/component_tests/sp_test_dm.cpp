@@ -154,7 +154,7 @@ public:
     {
         m_strand.dispatch([this,data]
                           {
-                              std::wcout << "DM: Got new SystemState:\n" << data << std::endl;
+                              //std::wcout << "DM: Got new SystemState:\n" << data << std::endl;
 
                               CheckState(data);
                               InjectNodes(data);

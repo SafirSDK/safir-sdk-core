@@ -82,11 +82,12 @@ int main(const int argc, const char* argv[])
         lllog(9) << "Goodbye cruel world!"<<std::endl;
         lllog(1) << 1234567890 << std::endl;
         boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
-        std::wcout << "Logging at "
-                   << Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().LogLevel() << std::endl;
+        //std::wcout << "Logging at "
+        //           << Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().LogLevel() << std::endl;
     }
 
     threads.join_all();
 
+    std::wcout << "exiting nicely" << std::endl;
     return 0;
 }
