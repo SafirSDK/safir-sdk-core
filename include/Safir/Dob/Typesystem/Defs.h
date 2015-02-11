@@ -287,8 +287,6 @@ namespace Typesystem
 
      /**
      * A type to contain binary data.
-     *
-     * TODO: maybe Binary and BinarySerialization should be replaced by only one type.
      */
     typedef std::vector<char> Binary;
 }
