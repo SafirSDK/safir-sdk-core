@@ -1,3 +1,9 @@
+#
+# Check for existence of CSharp compiler and set up compilation flags for Safir build tree.
+#
+# Defines CSHARP_FOUND if a csharp compiler could be found
+#
+
 if (SAFIR_SDK_CORE_INSTALL_DIR)
   list(APPEND CMAKE_MODULE_PATH ${SAFIR_SDK_CORE_CMAKE_DIR})
 endif()
