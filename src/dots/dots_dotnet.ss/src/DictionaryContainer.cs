@@ -18,202 +18,27 @@ namespace Safir.Dob.Typesystem
 
         public void Add (KeyT key, ValT value)
         {
-            throw new NotImplementedException ();
-        }
-
-
-        public bool ContainsKey (KeyT key)
-        {
-            throw new NotImplementedException ();
-        }
-
-
-        public bool Remove (KeyT key)
-        {
-            throw new NotImplementedException ();
-        }
-
-
-        public bool TryGetValue (KeyT key, out ValT value)
-        {
-            throw new NotImplementedException ();
-        }
-
-
-        public ValT this [KeyT index] {
-            get {
-                throw new NotImplementedException ();
-            }
-            set {
-                throw new NotImplementedException ();
-            }
-        }
-
-
-        public ICollection<KeyT> Keys {
-            get {
-                throw new NotImplementedException ();
-            }
-        }
-
-
-        public ICollection<ValT> Values {
-            get {
-                throw new NotImplementedException ();
-            }
-        }
-
-
-        #endregion
-
-
-        #region ICollection implementation
-
-
-        public void Add (KeyValuePair<KeyT, ValT> item)
-        {
-            throw new NotImplementedException ();
-        }
-
-
-        public void Clear ()
-        {
-            throw new NotImplementedException ();
-        }
-
-
-        public bool Contains (KeyValuePair<KeyT, ValT> item)
-        {
-            throw new NotImplementedException ();
-        }
-
-
-        public void CopyTo (KeyValuePair<KeyT, ValT>[] array, int arrayIndex)
-        {
-            throw new NotImplementedException ();
-        }
-
-
-        public bool Remove (KeyValuePair<KeyT, ValT> item)
-        {
-            throw new NotImplementedException ();
-        }
-
-
-        public int Count {
-            get {
-                throw new NotImplementedException ();
-            }
-        }
-
-
-        public bool IsReadOnly {
-            get {
-                throw new NotImplementedException ();
-            }
-        }
-
-
-        #endregion
-
-
-        #region IEnumerable implementation
-
-
-        public IEnumerator<KeyValuePair<KeyT, ValT>> GetEnumerator ()
-        {
-            throw new NotImplementedException ();
-        }
-
-
-        #endregion
-
-
-        #region IEnumerable implementation
-
-
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator ()
-        {
-            throw new NotImplementedException ();
-        }
-
-
-        #endregion
-
-        /*#region ICollection implementation
-
-        public void Add (KeyValuePair<KeyT, ValT> item)
-        {
-            m_bIsChanged = true;
-            item.Value.SetChanged (true);
-            values.Add (item);
-        }
-
-        public void Clear ()
-        {
-            m_bIsChanged = true;
-            values.Clear ();
-        }
-
-        public bool Contains (KeyValuePair<KeyT, ValT> item)
-        {
-            throw new NotImplementedException ();
-        }
-
-        public void CopyTo (KeyValuePair<KeyT, ValT>[] array, int arrayIndex)
-        {
-            throw new NotImplementedException ();
-        }
-
-        public bool Remove (KeyValuePair<KeyT, ValT> item)
-        {
-            throw new NotImplementedException ();
-        }
-
-        public int Count {
-            get {
-                throw new NotImplementedException ();
-            }
-        }
-
-        public bool IsReadOnly {
-            get {
-                throw new NotImplementedException ();
-            }
-        }
-
-        #endregion
-
-        #region IEnumerable implementation
-
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator ()
-        {
-            throw new NotImplementedException ();
-        }
-
-        #endregion
-
-
-
-        #region IDictionary implementation
-
-        public void Add (KeyT key, ValT value)
-        {
             m_bIsChanged = true;
             value.SetChanged (true);
             values.Add (key, value);
         }
+
 
         public bool ContainsKey (KeyT key)
         {
             return values.ContainsKey (key);
         }
 
+
         public bool Remove (KeyT key)
         {
-            m_bIsChanged = true;
-            values.Remove (key);
+            bool removed = values.Remove (key);
+            if (removed)
+                m_bIsChanged = true;
+
+            return removed;
         }
+
 
         public bool TryGetValue (KeyT key, out ValT value)
         {
@@ -227,7 +52,7 @@ namespace Safir.Dob.Typesystem
             set {
                 m_bIsChanged = true;
                 value.SetChanged (true);
-                Values [index] = value;
+                values [index] = value;
             }
         }
 
@@ -243,71 +68,83 @@ namespace Safir.Dob.Typesystem
             }
         }
 
+
         #endregion
+
 
         #region ICollection implementation
 
+
         public void Add (KeyValuePair<KeyT, ValT> item)
         {
-            m_bIsChanged = true;
             item.Value.SetChanged (true);
-            values.Add (item);
+            values.Add (item.Key, item.Value);
         }
+
 
         public void Clear ()
         {
-            m_bIsChanged = true;
             values.Clear ();
         }
 
+
         public bool Contains (KeyValuePair<KeyT, ValT> item)
         {
-            return values.Contains (item);
+            throw new NotImplementedException ();
         }
+
 
         public void CopyTo (KeyValuePair<KeyT, ValT>[] array, int arrayIndex)
         {
             throw new NotImplementedException ();
         }
 
+
         public bool Remove (KeyValuePair<KeyT, ValT> item)
         {
-            throw new NotImplementedException ();
+            return Remove(item.Key);
         }
+
 
         public int Count {
             get {
-                throw new NotImplementedException ();
+                return values.Count;
             }
         }
 
+
         public bool IsReadOnly {
             get {
-                throw new NotImplementedException ();
+                return false;
             }
         }
+
 
         #endregion
 
 
         #region IEnumerable implementation
 
+
         public IEnumerator<KeyValuePair<KeyT, ValT>> GetEnumerator ()
+        {
+            return (values as IEnumerable<KeyValuePair<KeyT, ValT>>).GetEnumerator ();
+        }
+
+
+        #endregion
+
+
+        #region IEnumerable implementation
+
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator ()
         {
             return values.GetEnumerator ();
         }
 
-        #endregion
-
-        #region IEnumerable implementation
-
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator ()
-        {
-           return values.GetEnumerator ();
-        }
 
         #endregion
-        */
 
         #region implemented abstract members of ContainerBase
 
