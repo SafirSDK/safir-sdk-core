@@ -40,7 +40,7 @@ namespace Safir.Dob.Typesystem
     /// This container is intended for the simple types of the DOB typesystem.
     /// </summary>
     /// <typeparam name="T">The type to contain.</typeparam>
-    public class SequenceContainer<T> : ContainerBase, IList<T> where T : ICloneable
+    public class SequenceContainer<T> : ContainerBase, IList<T>, ICloneable
     {
         #region IList implementation
 
@@ -158,6 +158,51 @@ namespace Safir.Dob.Typesystem
         public override void SetChanged (bool changed)
         {
             m_bIsChanged = changed;
+        }
+
+        #endregion
+
+        #region Cloning
+
+        object ICloneable.Clone()
+        {
+            return new SequenceContainer<T>(this);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public new SequenceContainer<T> Clone()
+        {
+            return (SequenceContainer<T>)((ICloneable)this).Clone(); 
+        }
+
+        /// <summary>
+        /// Copy constructor for use by Clone
+        /// </summary>
+        /// <param name="other"></param>
+        protected SequenceContainer(SequenceContainer<T> other):
+            base(other)
+        {
+            foreach (var val in other.values) {
+                this.values.Add(val);
+            }
+        }
+
+        /// <summary>
+        /// Override ContainerBase.
+        /// </summary>
+        /// <param name="other"></param>
+        public override void Copy(ContainerBase other)
+        {
+            base.Copy(other);
+            this.values.Clear ();
+            SequenceContainer<T> that = other as SequenceContainer<T>;
+            foreach (var val in that.values) {
+
+                this.values.Add(val);
+            }
         }
 
         #endregion
