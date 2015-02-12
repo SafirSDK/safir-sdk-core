@@ -30,7 +30,20 @@ endif()
 ###########
 
 #
-# Install a target to the proper place.
+# Install a target to the proper place. This function tries to put all parts
+# of the targets into the correct places.
+#
+# Usage: SAFIR_INSTALL(TARGETS <target1> .. <targetN>
+#                      [JNI]
+#                      [DEVELOPMENT]
+#                      [TEST_SUITE])
+#
+# JNI: Use flag to specify that this is a Java Native Interface library.
+#      This will cause namelink installation to be handled slightly differently.
+# DEVELOPMENT: Use this flag to specify that this target is part of the
+#              Development component.
+# TEST_SUITE: Use this flag to specify that this target is part of the
+#             Test component
 #
 function (SAFIR_INSTALL)
   cmake_parse_arguments(INST "TEST_SUITE;DEVELOPMENT;JNI" "" "TARGETS" ${ARGN})
@@ -184,6 +197,7 @@ function (SAFIR_INSTALL)
     endif()
   endforeach()
 endfunction()
+###########
 
 if (UNIX)
   set(PATH_SEPARATOR ":")
@@ -200,6 +214,19 @@ else()
   set_property(GLOBAL PROPERTY SAFIR_LIBRARY_PATH "$ENV{LD_LIBRARY_PATH}")
 endif()
 
+#
+# This is an "overload" of the builtin ADD_LIBRARY function. The
+# purpose is threefold:
+#
+# 1. Set the version properties (VERSION and SOVERSION) on the targets, to make *nix
+#    builds get correct library naming.
+# 2. Collect the paths of all libraries so that it will be possible to link
+#    the header_check target.
+# 3. Collect the paths of all libraries so that SET_SAFIR_TEST_PROPERTIES can add them
+#    to PATH/LD_LIBRARY_PATH. Without this lots of tests can't execute.
+#
+# It calls the builtin ADD_LIBRARY routine when the other tasks have been performed.
+#
 function(add_library NAME)
   list(FIND ARGN "IMPORTED" is_imported)
   if(NOT is_imported EQUAL -1)
@@ -242,12 +269,22 @@ function(add_library NAME)
   set_property(TARGET ${NAME} PROPERTY SOVERSION ${SAFIR_VERSION_MAJOR})
 endfunction()
 
-# Set up properties on tests
-# Usage: SET_SAFIR_TEST_PROPERTIES(TEST <test_target> [TIMEOUT <timeout>] [CONFIG_OVERRIDE <config_dir>] [ENVIRONMENT ...])
 #
-# TIMEOUT (optional): Time in seconds after which the test is interrupted. If not specified will be set to 60s.
-# CONFIG_OVERRIDE (optional): Absolute path to directory containing safir configuration. If not specified
-#                             it will be set to a default configuration.
+# Set up common properties on tests
+#
+# Note that it is most likely not possible to combine this function with any of the
+# other CMake ways of setting properties on tests. It appears that they override each other.
+#
+# Usage: SET_SAFIR_TEST_PROPERTIES(TEST <test_target>
+#                                  [TIMEOUT <timeout>]
+#                                  [CONFIG_OVERRIDE <config_dir>]
+#                                  [ENVIRONMENT ...])
+#
+# TIMEOUT: Time in seconds after which the test is interrupted.
+#          If this option is not specified the timeout will be set to 60s by default.
+# CONFIG_OVERRIDE: Absolute path to directory containing safir configuration. If not specified
+#                  it will be set to a default configuration.
+# ENVIRONMENT: Specify more environment variables to be passed to the test.
 #
 function (SET_SAFIR_TEST_PROPERTIES)
   cmake_parse_arguments(PROP "" "TEST;TIMEOUT;CONFIG_OVERRIDE" "ENVIRONMENT" ${ARGN})
@@ -294,7 +331,16 @@ function (SET_SAFIR_TEST_PROPERTIES)
     "${PATH_ENVIRONMENT}"
     ${PROP_ENVIRONMENT})
 endfunction()
+################
 
+#
+# This is an "overload" of the builtin TARGET_LINK_LIBRARIES function.
+#
+# The purpose is to check that the keyword PRIVATE has not been left out.
+# This check is slightly overzealous, since not all TARGET_LINK_LIBRARIES
+# calls actually need to use the PRIVATE keyword, but those few exceptions
+# can just add it anyway.
+#
 function(target_link_libraries)
   list(FIND ARGN "PRIVATE" has_private_keyword)
   if(has_private_keyword EQUAL -1)
@@ -302,8 +348,9 @@ function(target_link_libraries)
   endif()
   _target_link_libraries(${ARGN})
 endfunction()
+##############
 
-INCLUDE(build_generated)
+INCLUDE(BuildSafirGenerated)
 
 include_directories(lluf/lluf_build_helpers.ss/src)
 
@@ -377,7 +424,7 @@ configure_file(cmake/SafirSDKCoreConfig.cmake.in
   "${CMAKE_CURRENT_BINARY_DIR}/cmake/SafirSDKCoreConfig.cmake" @ONLY)
 
 INSTALL(FILES
-  cmake/build_generated.cmake
+  cmake/BuildSafirGenerated.cmake
   cmake/CSharpMacros.cmake
   cmake/SafirCompilerSettings.cmake
   cmake/SafirLoadCSharp.cmake

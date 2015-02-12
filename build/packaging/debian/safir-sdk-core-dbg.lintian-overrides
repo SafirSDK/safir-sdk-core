@@ -1,0 +1,2 @@
+#package is not meant for inclusion in debian at this time
+safir-sdk-core-dbg: new-package-should-close-itp-bug

@@ -175,8 +175,6 @@ namespace Internal
          */
         static void DropReference(const char* const data);
 
-        //TODO: comment all these functions better, and describe that they're not only used by dose_com!
-
         static void AddReference(const char* const data);
 
         /**

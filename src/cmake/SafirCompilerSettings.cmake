@@ -1,4 +1,5 @@
-#if we're using gcc we need to set up some things
+#This file sets up some of the compiler flags we want for GCC and MSVC.
+
 if (UNIX)
 
    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -36,7 +37,7 @@ if (MSVC)
    ADD_DEFINITIONS(/wd4503) #decorated name length exceeded
    ADD_DEFINITIONS(/wd4512) #assignment operator could not be generated
 
-   #increase warning level
+   # increase warning level
    # Use the highest warning level for visual studio.
    SET(CMAKE_CXX_WARNING_LEVEL 4)
    IF(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
@@ -46,7 +47,9 @@ if (MSVC)
      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
    ENDIF()
 
-   #Set linker flag /OPT:REF (eliminates functions and/or data that are never referenced) reduces size of executable to approx the same size as in Release mode. Also disable incremental linking to avoid warning.
+   #Set linker flag /OPT:REF (eliminates functions and/or data that are never referenced)
+   #reduces size of executable to approx the same size as in Release mode.
+   #Also disable incremental linking to avoid warning.
    set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO  "${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO} /OPT:REF /INCREMENTAL:NO")
    set(CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO  "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO} /OPT:REF /INCREMENTAL:NO")
 endif ()

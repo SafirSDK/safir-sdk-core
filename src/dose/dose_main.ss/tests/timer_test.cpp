@@ -23,13 +23,13 @@
 ******************************************************************************/
 #include "../src/dose_main_timers.h"
 
-/* 
+/*
  * NOTE: This test is meant as a unit test for regression, not as a
  * performance test for the underlying OS timers. So the error margins
  * are set quite generously.
  */
 
-namespace 
+namespace
 {
     boost::asio::io_service ioService;
 }
@@ -47,14 +47,14 @@ public:
         m_timerId = TimerHandler::Instance().RegisterTimeoutHandler(name, *this);
     }
 
-    ~TimerTesterBase() 
+    ~TimerTesterBase()
     {
         if (!m_ok)
         {
             std::wostringstream ostr;
             ostr << TimerHandler::Instance().GetTimerName(m_timerId)
                  << " test failed!";
-                
+
             throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(), __WFILE__, __LINE__);
         }
         else
@@ -62,7 +62,7 @@ public:
             std::wcout << TimerHandler::Instance().GetTimerName(m_timerId)
                        << " test succeeded!" << std::endl;
         }
-        
+
     }
 protected:
     TimerId m_timerId;
@@ -116,7 +116,7 @@ public:
     DiscardTimerTester() : TimerTesterBase(L"Discard Timer")
     {
         TimerInfoPtr timerInfo(new EmptyTimerInfo(m_timerId));
-        TimerHandler::Instance().SetRelative(Discard, timerInfo, 0.01); 
+        TimerHandler::Instance().SetRelative(Discard, timerInfo, 0.01);
         TimerHandler::Instance().SetRelative(Discard, timerInfo, 10); //this should be discarded
 
     }
@@ -143,16 +143,16 @@ public:
                             m_delayMillis(10),
                             m_delay(m_delayMillis)
     {
-        TimerHandler::Instance().Set(Replace, m_timerInfo, m_constructionTime + m_delay); 
+        TimerHandler::Instance().Set(Replace, m_timerInfo, m_constructionTime + m_delay);
     }
 
     void HandleTimeout(const TimerInfoPtr& /*timer*/)
     {
         --m_count;
 
-        TimerHandler::Instance().Set(Replace, 
-                                     m_timerInfo, 
-                                     m_constructionTime + (m_repeats - m_count) * m_delay); 
+        TimerHandler::Instance().Set(Replace,
+                                     m_timerInfo,
+                                     m_constructionTime + (m_repeats - m_count) * m_delay);
 
         const boost::chrono::steady_clock::time_point now = boost::chrono::steady_clock::now();
 
@@ -217,45 +217,43 @@ int main(int,char**)
 {
     TimerHandler::Instantiate(ioService);
 
-    try 
+    try
     {
         {
             SingleTimerTester tester(L"Starved Timer",5.0);
             TimerStarver starver;
-            
+
             ioService.run();
             ioService.reset();
         }
 
         {
             SingleTimerTester tester(L"Single Timer",0.1);
-            
+
             ioService.run();
             ioService.reset();
         }
-            
+
         {
             ReplaceTimerTester tester;
-            
+
             ioService.run();
             ioService.reset();
         }
 
         {
             DiscardTimerTester tester;
-            
+
             ioService.run();
             ioService.reset();
         }
 
         {
             DeadlineTimerTester tester;
-            
+
             ioService.run();
             ioService.reset();
         }
-
-        //TODO: test Remove!
 
     }
     catch (const std::exception& e)
@@ -265,5 +263,3 @@ int main(int,char**)
     }
     return 0;
 }
-
-

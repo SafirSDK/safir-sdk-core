@@ -1645,7 +1645,6 @@ namespace Safir.Dob.Typesystem
                 }
                 else
                 {
-                    //TODO can this be improved?!
                     ((ObjectContainerBase)container).InternalObj = val;
                     ((ObjectContainerBase)container).m_bIsChanged = true;
                 }
@@ -1713,7 +1712,6 @@ namespace Safir.Dob.Typesystem
                 }
                 else
                 {
-                    //TODO can this be improved?!
                     if (((ObjectContainerBase)container).IsNull())
                     {
                         throw new NullException("Object is null");
