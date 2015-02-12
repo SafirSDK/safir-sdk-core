@@ -321,8 +321,8 @@ namespace Com
                 return "";
             }
         }
-    };
 #endif
+    };
 }
 }
 }
