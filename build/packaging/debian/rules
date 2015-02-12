@@ -1,4 +1,5 @@
 #!/usr/bin/make -f
+.PHONY: override_dh_install install_runtime install_development install_testsuite override_dh_auto_test override_dh_clideps override_dh_strip
 
 #upstream recommends NDEBUG for release builds!
 export CPPFLAGS += -DNDEBUG
@@ -40,3 +41,8 @@ override_dh_auto_test:
 #and remove the jenkins suppression of the cli:Depends warning
 override_dh_clideps:
 	pwd|grep -q " " && echo "Skipping dh_clideps since there is a space in pwd" || dh_clideps
+
+
+#make debug symbols go in separate package
+override_dh_strip:
+	dh_strip --dbg-package=safir-sdk-core-dbg

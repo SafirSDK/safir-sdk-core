@@ -1,6 +1,6 @@
 Source: safir-sdk-core
 Maintainer: Lars Hagström <lars@foldspace.nu>
-Section: misc
+Section: libs
 Priority: optional
 Standards-Version: 3.9.5
 Build-Depends: debhelper (>= 9), cmake (>= 2.8.12), python (>= 2.7.0), default-jdk, asciidoc, cli-common-dev (>= 0.5.7)
@@ -15,9 +15,12 @@ Description: Distributed real-time system framework
  Safir SDK Core is based on modern architectural principles
  and has a solid foundation in more than 20 years of
  development of distributed systems at Saab AB.
+ .
+ This package contains the runtime for Safir SDK Core.
 
 Package: safir-sdk-core-dev
 Architecture: any
+Section: libdevel
 Depends: ${shlibs:Depends}, ${misc:Depends}, python (>= 2.7.0), safir-sdk-core
 Description: Safir SDK Core development files
  Safir SDK Core is a middleware and platform for creation of
@@ -26,9 +29,12 @@ Description: Safir SDK Core development files
  Safir SDK Core is based on modern architectural principles
  and has a solid foundation in more than 20 years of
  development of distributed systems at Saab AB.
+ .
+ This package contains the development files for Safir SDK Core.
 
 Package: safir-sdk-core-testsuite
 Architecture: any
+Section: libdevel
 Depends: ${shlibs:Depends}, ${misc:Depends}, ${cli:Depends}, python (>= 2.7.0), safir-sdk-core
 Description: Safir SDK Core test suite
  Safir SDK Core is a middleware and platform for creation of
@@ -37,3 +43,20 @@ Description: Safir SDK Core test suite
  Safir SDK Core is based on modern architectural principles
  and has a solid foundation in more than 20 years of
  development of distributed systems at Saab AB.
+ .
+ This package contains the test suite for Safir SDK Core.
+
+Package: safir-sdk-core-dbg
+Architecture: any
+Section: debug
+Priority: extra
+Depends: safir-sdk-core (= ${binary:Version}), ${misc:Depends}
+Description: debugging symbols for safir-sdk-core
+ Safir SDK Core is a middleware and platform for creation of
+ distributed soft real-time systems. It is Scalable, Reliable,
+ Portable, and last but not least, it is Open!
+ Safir SDK Core is based on modern architectural principles
+ and has a solid foundation in more than 20 years of
+ development of distributed systems at Saab AB.
+ .
+ This package contains the debugging symbols for Safir SDK Core.
