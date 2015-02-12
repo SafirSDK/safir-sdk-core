@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Joel Ottosson / joel.ottosson@consoden.se
 *
@@ -27,6 +28,7 @@
 #include "DeliveryHandlerTest.h"
 #include "DataSenderTest.h"
 #include "DiscovererTest.h"
+#include "ResolverTest.h"
 
 //**********************************
 // Main - run all tests
@@ -62,6 +64,10 @@ int main(int argc, char* argv[])
         {
             DiscovererTest::Run();
         }
+        else if (testcase=="ResolverTest")
+        {
+            ResolverTest::Run();
+        }
     }
     else //run all tests
     {
@@ -71,6 +77,7 @@ int main(int argc, char* argv[])
         DataSenderTest::Run();
         DeliveryHandlerTest::Run();
         DiscovererTest::Run();
+        ResolverTest::Run();
     }
 
     std::cout<<"================================="<<std::endl;

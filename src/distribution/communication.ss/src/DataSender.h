@@ -1,7 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2013 (http://safir.sourceforge.net)
-* Copyright Consoden AB, 2014 (http://www.consoden.se)
+* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Joel Ottosson / joel.ottosson@consoden.se
 *
@@ -22,8 +22,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __SAFIR_DOB_COMMUNICATION_ACKED_DATA_SENDER_H__
-#define __SAFIR_DOB_COMMUNICATION_ACKED_DATA_SENDER_H__
+#pragma once
 
 #include <map>
 #include <atomic>
@@ -786,6 +785,4 @@ namespace Com
 
 #ifdef _MSC_VER
 #pragma warning (default: 4127)
-#endif
-
 #endif

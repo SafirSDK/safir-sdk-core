@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Joel Ottosson / joel.ottosson@consoden.se
 *
@@ -21,8 +22,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __SAFIR_DOB_COMMUNICATION_FWD_H__
-#define __SAFIR_DOB_COMMUNICATION_FWD_H__
+#pragma once
 
 #include <iostream>
 #include <string>
@@ -42,6 +42,7 @@
 #include "../../src/Writer.h"
 #include "../../src/Discoverer.h"
 #include "../../src/DataSender.h"
+#include "../../src/Resolver.h"
 
 #ifdef _MSC_VER
 #pragma warning(disable:4127) //Get rid of warning that this if-expression is constant (comparing two constants)
@@ -63,5 +64,3 @@ boost::shared_ptr<char[]> MakeShared(const std::string& str)
     memcpy(ptr.get(), str.c_str(), str.length());
     return ptr;
 }
-
-#endif

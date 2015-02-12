@@ -21,8 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef _communication_export_defs_h
-#define _communication_export_defs_h
+#pragma once
 
 #include <Safir/Utilities/Internal/VisibilityHelpers.h>
 
@@ -32,5 +31,3 @@
 #  define DISTRIBUTION_COMMUNICATION_API SAFIR_HELPER_DLL_IMPORT
 #endif
 #define DISTRIBUTION_COMMUNICATION_LOCAL SAFIR_HELPER_DLL_LOCAL
-
-#endif
