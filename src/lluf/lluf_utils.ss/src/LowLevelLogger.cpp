@@ -247,7 +247,6 @@ namespace //anonymous namespace for internal functions
 
         int sync()
         {
-            //            std::wcerr << "Got sync call" << std::endl;
             if (m_control == nullptr || !m_control->IgnoreFlush())
             {
                 return boost::iostreams::filtering_wostreambuf::sync();
@@ -404,7 +403,10 @@ namespace Internal
         {
             assert(m_queueBuffer.get() == nullptr);
             m_queueBuffer.reset(new FilteringStreambuf());
-            m_queueBuffer->SetControl(m_control);
+            //We do *NOT* give m_queueBuffer m_control, since we don't
+            //want it to be able to ignore flushes. Having the async filtering streambuf
+            //ignore flushes is not a great idea...
+
             m_queueBuffer->push(TimeOutputFilter(m_control, false));
             m_queueBuffer->push(QueueingSink(m_control,m_queue));
             return new std::wostream(m_queueBuffer.get());
