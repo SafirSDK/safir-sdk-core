@@ -49,6 +49,8 @@ namespace Dob
 {
 namespace Internal
 {
+    // Class that encapsulates the Communication and System Picture instances
+    //
     template <typename CommunicationT, typename SystemPictureT, typename ConfigT>
     class DistributionBasic
         : private boost::noncopyable
@@ -109,6 +111,7 @@ namespace Internal
 
         }
 
+        // Inject an external node
         void InjectNode(const std::string& nodeName,
                         int64_t            nodeId,
                         int64_t            nodeTypeId,
