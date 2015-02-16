@@ -40,6 +40,7 @@
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Dob/Typesystem/LibraryExceptions.h>
 #include <boost/bind.hpp>
 #include <Safir/Utilities/Internal/SystemLog.h>
@@ -356,7 +357,6 @@ namespace Internal
             if (connection == NULL)
             {
                 ENSURE(isAckedData, << "Got a registration state on an unacked priority channel! " << state.Image());
-                m_waitingStates.Add(state);
             }
             else
             {
@@ -368,8 +368,6 @@ namespace Internal
                 {
                     EntityTypes::Instance().RemoteSetRegistrationState(connection,state);
                 }
-
-                PerformStatesWaitingForRegistration(state);
             }
         }
         else
@@ -388,12 +386,8 @@ namespace Internal
                 EntityTypes::Instance().RemoteSetRegistrationState(ConnectionPtr(), state);
             }
 
-            PerformStatesWaitingForRegistration(state);
-
             m_pendingRegistrationHandler->CheckForPending(state.GetTypeId());
         }
-
-        m_waitingStates.CleanUp(state);
     }
 
     void PoolHandler::HandleEntityStateFromDoseCom(const DistributionData& state, const bool isAckedData)
@@ -405,13 +399,8 @@ namespace Internal
                 ENSURE(state.GetSenderId().m_id == -1, << "Ghost states are expected to have ConnectionId == -1! Ghost for "
                        << state.GetEntityId());
 
-                const RemoteSetResult result = EntityTypes::Instance().RemoteSetRealEntityState(ConnectionPtr(), // Null connection for ghosts
-                                                                                                state);
-
-                if (result == RemoteSetNeedRegistration)
-                {
-                    m_waitingStates.Add(state);
-                }
+                EntityTypes::Instance().RemoteSetRealEntityState(ConnectionPtr(), // Null connection for ghosts
+                                                                 state);
             }
             break;
         case DistributionData::Injection:
@@ -435,21 +424,20 @@ namespace Internal
                     {
                         if (isAckedData)
                         {
-                            m_waitingStates.Add(state);
+                            SEND_SYSTEM_LOG(Alert,
+                                            << "Got an acked entity with a sender connection "
+                                            << "(Id:" << senderId.m_id << " Node:" << senderId.m_node << " Ctx:"
+                                            << senderId.m_contextId << ") that is unknown on this node.");
+                            throw std::logic_error("Received acked entity with an unknown connection");
                         }
                         else
                         {
-                            lllout << "Discarding an unacked entity state since we don't have its connection" << std::endl;
+                            lllog(3) << "Discarding an unacked entity state since we don't have its connection" << std::endl;
                         }
                     }
                     else
                     {
-                        const RemoteSetResult result = EntityTypes::Instance().RemoteSetRealEntityState(connection, state);
-
-                        if (result == RemoteSetNeedRegistration)
-                        {
-                            m_waitingStates.Add(state);
-                        }
+                        EntityTypes::Instance().RemoteSetRealEntityState(connection, state);
                     }
                 }
                 else
@@ -457,11 +445,7 @@ namespace Internal
                     ENSURE(state.GetSenderId().m_id == -1, << "Delete states are expected to have ConnectionId == -1! Delete for "
                            << state.GetEntityId());
 
-                    RemoteSetResult result = EntityTypes::Instance().RemoteSetDeleteEntityState(state);
-                    if (result == RemoteSetNeedRegistration)
-                    {
-                        m_waitingStates.Add(state);
-                    }
+                    EntityTypes::Instance().RemoteSetDeleteEntityState(state);
                 }
             }
             break;
@@ -747,31 +731,6 @@ namespace Internal
         }
     }
 
-    void PoolHandler::PerformStatesWaitingForConnection(const ConnectionId & connId)
-    {
-        //Note that all waiting states are acked states, hence the "true" at the end.
-        m_waitingStates.PerformStatesWaitingForConnection
-            (connId,
-             boost::bind(&PoolHandler::HandleStateFromDoseCom,this,_1,true));
-    }
-
-    void PoolHandler::PerformStatesWaitingForRegistration(const DistributionData & registrationState)
-    {
-        //Note that all waiting states are acked states, hence the "true" at the end.
-        m_waitingStates.PerformStatesWaitingForRegistration
-            (registrationState,
-             boost::bind(&PoolHandler::HandleStateFromDoseCom,this,_1,true));
-    }
-
-    void PoolHandler::HandleDisconnectFromDoseCom(const ConnectionId & connId)
-    {
-        m_waitingStates.Disconnect(connId);
-    }
-
-    void PoolHandler::RemoveStatesWaitingForNode(const Typesystem::Int32 node)
-    {
-        m_waitingStates.NodeDown(node);
-    }
 }
 }
 }

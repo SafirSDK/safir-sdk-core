@@ -226,10 +226,10 @@ namespace Internal
         void RemoteSetInjectionEntityState(const DistributionData& entityState);
 
         /** Set a delete (an end state) from external node */
-        RemoteSetResult RemoteSetDeleteEntityState(const DistributionData&   entityState);
+        void RemoteSetDeleteEntityState(const DistributionData&   entityState);
 
         /** Set a state (that is not an injection or delete state) from external node. */
-        RemoteSetResult RemoteSetRealEntityState(const ConnectionPtr&      connection,
+        void RemoteSetRealEntityState(const ConnectionPtr&      connection,
                                                  const DistributionData&   entityState);
 
         /** @} */

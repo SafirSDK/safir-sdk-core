@@ -35,7 +35,6 @@
 #include <boost/array.hpp>
 #include <boost/thread.hpp>
 #include <boost/function.hpp>
-#include "dose_main_waiting_states.h"
 #include "dose_main_thread_monitor.h"
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 
@@ -164,24 +163,12 @@ namespace Internal
          */
         void HandleMessageFromDoseCom(const DistributionData& data);
 
-        /** when a new connection arrives a list of waiting states need to be checked
-          * to see if there are any states that need to be "set".
-          */
-        void HandleConnectFromDoseCom(const ConnectionId & connId)
-        {PerformStatesWaitingForConnection(connId);}
-
         /** When a connection is removed we need to clear stuff from the waitingstates structure */
         void HandleDisconnectFromDoseCom(const ConnectionId & connId);
 
         void RemoveStatesWaitingForNode(const Typesystem::Int32 node);
     private:
         class ExceptionInfo;
-
-        void PerformStatesWaitingForConnection(const ConnectionId & connId);
-
-        //when a new registration arrives a list of waiting states need to be checked
-        //to see if there are any states that need to be "set".
-        void PerformStatesWaitingForRegistration(const DistributionData & registrationState);
 
         void HandleRegistrationStateFromDoseCom(const DistributionData& state, const bool isAckedData);
         void HandleEntityStateFromDoseCom(const DistributionData& state, const bool isAckedData);
@@ -232,7 +219,6 @@ namespace Internal
 
         boost::thread m_pdThread;
 
-        WaitingStates m_waitingStates;
         boost::asio::io_service & m_ioService;
     };
 }
