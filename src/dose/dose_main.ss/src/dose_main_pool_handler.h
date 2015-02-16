@@ -134,7 +134,7 @@ namespace Internal
         explicit PoolHandler(boost::asio::io_service & ioService);
         virtual ~PoolHandler();
 
-        void Init(BlockingHandlers & blockingHandler,
+        void Init(
 #if 0 //stewart
                   ExternNodeCommunication & ecom,
 #endif
@@ -191,7 +191,6 @@ namespace Internal
 #if 0 //stewart
         ExternNodeCommunication* m_ecom;
 #endif
-        BlockingHandlers* m_blockingHandler;
         PendingRegistrationHandler * m_pendingRegistrationHandler;
         PersistHandler * m_persistHandler;
         ConnectionHandler * m_connectionHandler;

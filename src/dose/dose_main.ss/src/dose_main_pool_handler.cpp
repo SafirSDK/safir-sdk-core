@@ -77,7 +77,6 @@ namespace Internal
 #if 0 //stewart
         m_ecom(NULL),
 #endif
-        m_blockingHandler(NULL),
         m_pendingRegistrationHandler(NULL),
         m_persistHandler(NULL),
         m_connectionHandler(NULL),
@@ -132,7 +131,7 @@ namespace Internal
         }
     }
 
-    void PoolHandler::Init(BlockingHandlers & blockingHandler,
+    void PoolHandler::Init(
 #if 0 //stewart
                            ExternNodeCommunication & ecom,
 #endif
@@ -141,7 +140,6 @@ namespace Internal
                            ConnectionHandler & connectionHandler,
                            ThreadMonitor & threadMonitor)
     {
-        m_blockingHandler = &blockingHandler;
 #if 0 //stewart
         m_ecom = &ecom;
 #endif
