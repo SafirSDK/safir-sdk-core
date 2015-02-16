@@ -418,8 +418,7 @@ namespace Internal
 
         m_ownConnection.Open(L"dose_main",L"own",0,NULL,this);
 
-        m_poolHandler.Init(m_blockingHandler,
-                           m_pendingRegistrationHandler,
+        m_poolHandler.Init(m_pendingRegistrationHandler,
                            m_persistHandler,
                            m_connectionHandler,
                            m_threadMonitor);
@@ -526,12 +525,6 @@ namespace Internal
 
         IdentifierSet waiting;
         if (m_blockingHandler.Response().GetWaitingConnections(blockingApp, waiting))
-        {
-            WaitingConnectionsHelper(blockingApp, waiting, recursionLevel);
-        }
-
-        waiting.clear();
-        if (m_blockingHandler.State().GetWaitingConnections(blockingApp, waiting))
         {
             WaitingConnectionsHelper(blockingApp, waiting, recursionLevel);
         }

@@ -88,5 +88,6 @@ int main(const int argc, const char* argv[])
 
     threads.join_all();
 
+    std::wcout << "exiting nicely" << std::endl;
     return 0;
 }

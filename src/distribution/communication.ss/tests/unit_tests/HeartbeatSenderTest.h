@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Joel Ottosson / joel.ottosson@consoden.se
 *
@@ -21,8 +22,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef _SAFIR_COM_HEART_BEAT_TEST_H_
-#define _SAFIR_COM_HEART_BEAT_TEST_H_
+#pragma once
 
 #include "fwd.h"
 
@@ -127,5 +127,3 @@ private:
 
 boost::mutex HeartbeatSenderTest::mutex;
 std::map<unsigned short, int> HeartbeatSenderTest::received;
-
-#endif

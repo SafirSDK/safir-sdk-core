@@ -1,6 +1,11 @@
-# We need to find both Java and JNI stuff, hence the convoluted mess below.
-# Anyway, if Java_FOUND is set we're ok!
 #
+# Check for existence of Java compiler and set up compilation flags for Safir build tree.
+#
+# Defines Java_FOUND if a Java compiler and JNI stuff is found.
+#
+# Also defines a function SAFIR_JAVAH which is described below.
+#
+
 set(Java_FIND_QUIETLY True)
 find_package(Java COMPONENTS Development Runtime)
 if (Java_Development_FOUND AND Java_Runtime_FOUND)
@@ -31,6 +36,18 @@ if (NOT Java_FOUND)
   MESSAGE(STATUS "Failed to find the Java development tools, will not build Java interfaces")
 endif()
 
+#
+# Generate a C/C++ header file for a Java Native Interface (JNI) class.
+#
+# Usage: SAFIR_JAVAH(JAR <jar name>
+#                    CLASS <jni class>
+#                    OUTPUT_FILES <expected output files>
+#                    OUTPUT_DIR <directory where output should be put>)
+#
+# A target <jar name>_javah will be defined, which will generate the needed files.
+# Set up a dependency from your shared library to this target to ensure the
+# files get generated correctly.
+#
 function (SAFIR_JAVAH)
   cmake_parse_arguments(_javah "" "JAR;CLASS;OUTPUT_DIR" "OUTPUT_FILES" ${ARGN})
 

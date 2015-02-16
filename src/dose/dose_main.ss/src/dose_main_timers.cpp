@@ -105,7 +105,8 @@ namespace Internal
     //--------------------
 
     TimerHandler::TimerHandler(boost::asio::io_service & ioService):
-        m_ioService(ioService)
+        m_ioService(ioService),
+        m_steadyTimer(ioService)
     {
 #ifdef _MSC_VER
         enableWindowsMultimediaTimers();
@@ -132,11 +133,7 @@ namespace Internal
 
     void TimerHandler::Stop()
     {
-        if (m_steadyTimer != NULL)
-        {
-            m_steadyTimer->cancel();
-            m_steadyTimer.reset();
-        }
+        m_steadyTimer.cancel();
     }
 
 
@@ -366,12 +363,9 @@ namespace Internal
 
     void TimerHandler::ScheduleTimer()
     {
-        if (m_steadyTimer != NULL)
-        {
-            m_steadyTimer->cancel();
-        }
-        m_steadyTimer.reset(new boost::asio::steady_timer(m_ioService, NextTimeout()));
-        m_steadyTimer->async_wait(boost::bind(&TimerHandler::HandleTimeout,this,_1));
+        m_steadyTimer.cancel();
+        m_steadyTimer.expires_at(NextTimeout());
+        m_steadyTimer.async_wait(boost::bind(&TimerHandler::HandleTimeout,this,_1));
     }
 
     void TimerHandler::HandleTimeout(const boost::system::error_code & error)

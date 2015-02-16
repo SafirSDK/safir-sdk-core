@@ -3,6 +3,10 @@
 #
 # Asciidoc_FOUND        - system has asciidoc
 # A2X_EXECUTABLE        - the a2x executable
+# GZIP_EXECUTABLE       - the gzip executable
+#
+# ADD_ASCIIDOC_MANPAGE(...) which is described below.
+#
 
 FIND_PROGRAM(A2X_EXECUTABLE NAMES a2x)
 FIND_PROGRAM(GZIP_EXECUTABLE NAMES gzip)
@@ -13,12 +17,19 @@ find_package_handle_standard_args(Asciidoc DEFAULT_MSG A2X_EXECUTABLE GZIP_EXECU
 mark_as_advanced(A2X_EXECUTABLE)
 mark_as_advanced(GZIP_EXECUTABLE)
 
-#exepects to find a source file named TARGET.asciidoc
-#call like this add_asciidoc_manpage(sate.1). Will generate
-#a manpage sate.1 from sate.1.asciidoc
-#will also generate installation code
-#will currently only install to man1, so if you use other
-#section this has to be updated.
+#
+# Add a manpage to build from asciidoc source. This command will
+# also add instructions for installing the manpage.
+#
+# Usage: ADD_ASCIIDOC_MANPAGE(TARGET <target>
+#                             COMPONENT <component>)
+#
+# Exepects to find a source file named TARGET.asciidoc.
+# Call like this: add_asciidoc_manpage(sate.1).
+# Will generate a manpage "sate.1" from "sate.1.asciidoc", and will also generate
+# installation code.
+# Will currently only install to man1, so if you use other section this has to be updated.
+#
 function(ADD_ASCIIDOC_MANPAGE TARGET)
     cmake_parse_arguments(_ad "" "COMPONENT" "" ${ARGN})
 

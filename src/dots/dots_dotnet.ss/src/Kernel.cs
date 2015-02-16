@@ -226,13 +226,7 @@ namespace Safir.Dob.Typesystem.Internal
         [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
         internal static extern System.IntPtr DotsC_GetMemberTypeName(System.Int64 id,
                                                                      System.Int32 member);
-/*TODO awaiting changes to dots_kernel
-        //GetMappedMemberId
-        [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
-        internal static extern System.Int32 DotsC_GetMappedMemberId(ref System.Int64 classId,
-                                                                    ref System.Int64 propertyId,
-                                                                    ref System.Int32 propertyMember);
-*/
+
         //IsAnythingChanged
         [DllImport(DOTS_KERNEL_NAME, CallingConvention=CallingConvention.Cdecl)]
         internal static extern byte DotsC_IsAnythingChanged(System.IntPtr blob);

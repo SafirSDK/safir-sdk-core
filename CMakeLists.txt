@@ -43,6 +43,15 @@ ADD_DEFINITIONS(-DSAFIR_SDK_CORE_VERSION=\"${SAFIR_VERSION_STRING}\")
 # This function will install a python script into the bin directory.
 # If it is a *nix system the script will have ".py" stripped from its name.
 #
+# Usage: SAFIR_INSTALL_PYTHON(SCRIPT <script>
+#                             [RENAME <new name>]
+#                             [COMPONENT <component>])
+#
+# RENAME can be used to rename a python script during installation. Please
+#        include the .py extension in the argument, it will still be stripped
+#        during installation.
+# COMPONENT can be used to specify which component the script belongs to.
+#
 function (SAFIR_INSTALL_PYTHON)
   cmake_parse_arguments(INST "" "SCRIPT;COMPONENT;RENAME" "" ${ARGN})
 

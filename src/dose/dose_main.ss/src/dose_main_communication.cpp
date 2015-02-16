@@ -81,7 +81,6 @@ namespace Internal
         }
     };
 
-    //TODO: move this one to header.
     static MyAllocator myAllocator;
 
     const Identifier ExternNodeCommunication::DoseComVirtualConnectionId = Connection::CalculateIdentifier("dose_com_virtual_conn");

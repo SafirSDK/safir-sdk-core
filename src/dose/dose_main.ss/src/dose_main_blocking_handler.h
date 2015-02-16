@@ -36,9 +36,10 @@ namespace Dob
 {
 namespace Internal
 {
-    //--------------------------------------------------------
-    // AWI ??
-    //--------------------------------------------------------
+    /**
+     * This class holds info about connections that are waiting for free space on another connection's
+     * in queue.
+     */
     class BlockingHandler:
         private boost::noncopyable
     {
@@ -65,14 +66,12 @@ namespace Internal
     public:
         BlockingHandler& Request() {return m_requestQ;}
         BlockingHandler& Response() {return m_responseQ;}
-        BlockingHandler& State() {return m_stateQ;}
         BlockingHandler& Message() {return m_messageQ;}
 
         void RemoveConnection(const Identifier& id);
     private:
         BlockingHandler m_requestQ;
         BlockingHandler m_responseQ;   //only dose_com may block this
-        BlockingHandler m_stateQ;   //only dose_com may block this
         BlockingHandler m_messageQ; //only dose_com may block this
     };
 

@@ -154,7 +154,7 @@ public:
     {
         m_strand.dispatch([this,data]
                           {
-                              std::wcout << "DM: Got new SystemState:\n" << data << std::endl;
+                              //std::wcout << "DM: Got new SystemState:\n" << data << std::endl;
 
                               CheckState(data);
                               InjectNodes(data);
@@ -358,6 +358,8 @@ int main(int argc, char * argv[])
     // Make some work to stop io_service from exiting.
     auto work = Safir::make_unique<boost::asio::io_service::work>(ioService);
 
+    Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().SwitchToAsynchronousMode(ioService);
+
     std::vector<Safir::Dob::Internal::Com::NodeTypeDefinition> commNodeTypes;
     std::map<int64_t, Safir::Dob::Internal::SP::NodeType> spNodeTypes;
 
@@ -373,7 +375,7 @@ int main(int argc, char * argv[])
                                                                          "NodeTypeA",
                                                                          false,
                                                                          boost::chrono::milliseconds(1000),
-                                                                         10,
+                                                                         60,
                                                                          boost::chrono::milliseconds(20))));
 
     commNodeTypes.push_back({2,
@@ -388,7 +390,7 @@ int main(int argc, char * argv[])
                                                                          "NodeTypeB",
                                                                          false,
                                                                          boost::chrono::milliseconds(2000),
-                                                                         10,
+                                                                         60,
                                                                          boost::chrono::milliseconds(50))));
 
 
@@ -492,6 +494,7 @@ int main(int argc, char * argv[])
         work.reset();
         lllog(1) << "DM: Cancelling signalSet" << std::endl;
         signalSet.cancel();
+        Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().Stop();
     };
 
     signalSet.async_wait([stopFcn, &m_stop](const boost::system::error_code& error,
@@ -517,7 +520,7 @@ int main(int argc, char * argv[])
     ssh.SetStopHandler(stopFcn);
 
     boost::thread_group threads;
-    for (int i = 0; i < 9; ++i)
+    for (int i = 0; i < 2; ++i)
     {
         threads.create_thread([&ioService]{ioService.run();});
     }
