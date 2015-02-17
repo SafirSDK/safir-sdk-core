@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Lars Hagström / lars@foldspace.nu
 *
@@ -533,8 +534,6 @@ namespace Internal
 
         std::ios_base::sync_with_stdio(false);
 
-        m_synchronous = false;
-
         boost::shared_ptr<boost::iostreams::wfile_sink> fileSink;
         if (m_syncLogger != nullptr)
         {
@@ -544,6 +543,7 @@ namespace Internal
         m_logLevel = m_control->GetLogLevelPointer();
 
         m_asyncLogger = Safir::make_unique<AsyncLogger>(m_control, ioService, fileSink);
+        m_synchronous = false;
 
         m_syncLogger.reset();
 
