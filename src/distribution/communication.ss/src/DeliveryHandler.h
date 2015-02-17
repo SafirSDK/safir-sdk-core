@@ -675,7 +675,7 @@ namespace Com
                 }
             }
 
-            lllog(9)<<L"COM: SendAck "<<AckToString(*ackPtr).c_str()<<std::endl;
+            lllog(9)<<L"COM: SendAck "<<ackPtr->ToString().c_str()<<std::endl;
             WriterType::SendTo(ackPtr, ni.endpoint);
         }
 

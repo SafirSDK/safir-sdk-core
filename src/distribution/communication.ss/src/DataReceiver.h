@@ -166,7 +166,13 @@ namespace Com
             boost::crc_32_type crc;
             crc.process_bytes(static_cast<const void*>(buf), size-sizeof(uint32_t));
             uint32_t checksum=*reinterpret_cast<const uint32_t*>(buf+size-sizeof(uint32_t));
-            return checksum==crc.checksum();
+            bool valid=(checksum==crc.checksum());
+            if (!valid)
+            {
+                std::cout<<"CRC expected: "<<crc.checksum()<<", got: "<<checksum<<std::endl;
+            }
+
+            return valid;
         }
 
         void HandleReceive(const boost::system::error_code& error, size_t bytesRecv, char* buf, boost::asio::ip::udp::socket* socket)
@@ -195,15 +201,32 @@ namespace Com
             else
             {
                 //received message with invalid checksum. Throw away the message and then continue as normal.
-                std::cout<<"COM: Received message with bad CRC, size="<<bytesRecv<<". Throw away and continue."<<std::endl;
-                lllog(7)<<"COM: Received message with bad CRC, size="<<bytesRecv<<". Throw away and continue."<<std::endl;
+                std::ostringstream os;
+
+                os<<"COM: Received message with bad CRC, size="<<bytesRecv<<". Throw away and continue."<<std::endl;
 
                 if (bytesRecv>CommonHeaderSize)
                 {
-                    const CommonHeader* commonHeader=reinterpret_cast<const CommonHeader*>(buf);
-                    std::cout<<"COM: If trying to parse despite CRC error: senerId="<<commonHeader->senderId<<", receiverId="<<commonHeader->receiverId<<", dataType="<<commonHeader->dataType<<std::endl;
-                    lllog(7)<<"COM: If trying to parse CRC error: senerId="<<commonHeader->senderId<<", receiverId="<<commonHeader->receiverId<<", dataType="<<commonHeader->dataType<<std::endl;
+                    const CommonHeader* commonHeader=reinterpret_cast<const CommonHeader*>(buf);                    
+
+                    if (commonHeader->dataType==123) //used by communication_test
+                    {
+                        const MessageHeader* messageHeader=reinterpret_cast<const MessageHeader*>(buf);
+                        os<<"     If trying to parse despite CRC error: "<<messageHeader->ToString()<<std::endl;
+                    }
+                    else
+                    {
+                        os<<"     If trying to parse despite CRC error: "<<commonHeader->ToString()<<std::endl;
+                        if (bytesRecv>MessageHeaderSize)
+                        {
+                            os<<Hexdump(buf, MessageHeaderSize, bytesRecv)<<std::endl;
+                        }
+                    }
                 }
+
+                std::cout<<os.str()<<std::endl;
+                lllog(7)<<os.str().c_str()<<std::endl;
+
                 receiverReady=m_isReceiverReady(); //explicitly ask if receiver is ready to handle incoming data
             }
 
