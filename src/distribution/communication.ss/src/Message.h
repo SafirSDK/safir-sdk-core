@@ -194,7 +194,7 @@ namespace Com
             os<<"MessageHeader: {"<<commonHeader.ToString()<<", sendMethod: "<<SendMethodToString(sendMethod)<<
                 ", delivery: "<<DeliveryGuaranteeToString(deliveryGuarantee)<<", seq: "<<sequenceNumber<<", totSize: "<<totalContentSize<<
                 ", fragSize: "<<fragmentContentSize<<", numFrags: "<<numberOfFragments<<", fragNum: "<<fragmentNumber<<
-                ", fragOffs: "<<fragmentOffset<<", ackNow"<<ackNow<<"}";
+                ", fragOffs: "<<fragmentOffset<<", ackNow"<<static_cast<int>(ackNow)<<"}";
             return os.str();
         }
     };

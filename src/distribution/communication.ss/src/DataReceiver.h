@@ -166,13 +166,7 @@ namespace Com
             boost::crc_32_type crc;
             crc.process_bytes(static_cast<const void*>(buf), size-sizeof(uint32_t));
             uint32_t checksum=*reinterpret_cast<const uint32_t*>(buf+size-sizeof(uint32_t));
-            bool valid=(checksum==crc.checksum());
-            if (!valid)
-            {
-                std::cout<<"CRC expected: "<<crc.checksum()<<", got: "<<checksum<<std::endl;
-            }
-
-            return valid;
+            return checksum==crc.checksum();
         }
 
         void HandleReceive(const boost::system::error_code& error, size_t bytesRecv, char* buf, boost::asio::ip::udp::socket* socket)
@@ -213,14 +207,14 @@ namespace Com
                     {
                         const MessageHeader* messageHeader=reinterpret_cast<const MessageHeader*>(buf);
                         os<<"     If trying to parse despite CRC error: "<<messageHeader->ToString()<<std::endl;
-                    }
-                    else
-                    {
-                        os<<"     If trying to parse despite CRC error: "<<commonHeader->ToString()<<std::endl;
                         if (bytesRecv>MessageHeaderSize)
                         {
                             os<<Hexdump(buf, MessageHeaderSize, bytesRecv)<<std::endl;
                         }
+                    }
+                    else
+                    {
+                        os<<"     If trying to parse despite CRC error: "<<commonHeader->ToString()<<std::endl;
                     }
                 }
 
