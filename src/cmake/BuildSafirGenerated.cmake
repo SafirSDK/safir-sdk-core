@@ -25,14 +25,21 @@
 include(CMakeParseArguments)
 
 FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
-  cmake_parse_arguments(GEN "" "NAME" "DEPENDENCIES" ${ARGN})
+  cmake_parse_arguments(_gen "GLOB" "NAME" "DOU_FILES;DOM_FILES;NAMESPACE_MAPPINGS;DEPENDENCIES" ${ARGN})
 
-  if ("${GEN_NAME}" STREQUAL "")
+  if ("${_gen_NAME}" STREQUAL "")
     message(FATAL_ERROR "Invalid NAME passed to ADD_SAFIR_GENERATED_LIBRARY")
   endif()
 
-  if (NOT "${GEN_UNPARSED_ARGUMENTS}" STREQUAL "")
-    message(FATAL_ERROR "Unknown argument to ADD_SAFIR_GENERATED_LIBRARY '${GEN_UNPARSED_ARGUMENTS}'")
+  if (NOT "${_gen_UNPARSED_ARGUMENTS}" STREQUAL "")
+    message(FATAL_ERROR "Unknown argument to ADD_SAFIR_GENERATED_LIBRARY '${_gen_UNPARSED_ARGUMENTS}'")
+  endif()
+
+  if (_gen_GLOB AND (NOT "${_gen_DOU_FILES}" STREQUAL "" OR
+                     NOT "${_gen_DOM_FILES}" STREQUAL "" OR
+                     NOT "${_gen_NAMESPACE_MAPPINGS}" STREQUAL ""))
+    message(FATAL_ERROR "ADD_SAFIR_GENERATED_LIBRARY: the GLOB option cannot be used together with the\n"
+                        "DOU_FILES, DOM_FILES or NAMESPACE_MAPPINGS options.")
   endif()
 
   # Work out if we're building the Safir SDK Core source tree or not
@@ -67,9 +74,9 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
   # Create custom targets dummy that we just use to have somewhere to put the dependencies.
   # Then, when we need to resolve a targets dependencies, we recursively look at the dummy
   # targets to find all of the dependencies of our dependencies.
-  add_custom_target(${GEN_NAME}-dou)
-  set_target_properties(${GEN_NAME}-dou PROPERTIES
-    DOU_DEPENDENCIES "${GEN_DEPENDENCIES}"
+  add_custom_target(${_gen_NAME}-dou)
+  set_target_properties(${_gen_NAME}-dou PROPERTIES
+    DOU_DEPENDENCIES "${_gen_DEPENDENCIES}"
     DOU_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
   #recursively get all dependendencies
@@ -110,26 +117,32 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
     set (GET_DEPS_RESULT ${GET_DEPS_RESULT} PARENT_SCOPE)
   endfunction()
 
-  GET_DEPS(DEPENDENCIES ${GEN_DEPENDENCIES})
+  GET_DEPS(DEPENDENCIES ${_gen_DEPENDENCIES})
   set(ALL_DEPENDENCIES ${GET_DEPS_RESULT})
   ################
 
+  if (_gen_GLOB)
+    #
+    # Set up variables containing all dou files and all expected source code files
+    #
+    FILE(GLOB_RECURSE _gen_DOU_FILES *.dou)
+    FILE(GLOB_RECURSE _gen_DOM_FILES *.dom)
+    FILE(GLOB_RECURSE _gen_NAMESPACE_MAPPINGS *.namespace.txt)
+  endif()
 
-  #
-  # Set up variables containing all dou files and all expected source code files
-  #
-  FILE(GLOB_RECURSE dou_files *.dou)
-  FILE(GLOB_RECURSE dom_files *.dom)
-  FILE(GLOB_RECURSE namespace_files *.namespace.txt)
+  if ("${_gen_DOU_FILES}" STREQUAL "")
+    message(FATAL_ERROR "No dou files found")
+  endif()
 
   #put the files in a target property so the INSTALL_SAFIR_GENERATED_LIBRARY
   #function can know what files it needs to install
-  set_property(TARGET ${GEN_NAME}-dou PROPERTY
-    SOURCE_FILES ${dou_files} ${dom_files} ${namespace_files})
+  set_property(TARGET ${_gen_NAME}-dou PROPERTY
+    SOURCE_FILES ${_gen_DOU_FILES} ${_gen_DOM_FILES} ${_gen_NAMESPACE_MAPPINGS})
 
   #set up java namespace prefixing rules
-  foreach (file ${namespace_files})
-    string (REGEX REPLACE ".*/([a-zA-Z\\.0-9]*)-java\\.namespace\\.txt" "\\1" namespace ${file})
+  foreach (file ${_gen_NAMESPACE_MAPPINGS})
+    get_filename_component(filename ${file} NAME)
+    string (REGEX REPLACE "([a-zA-Z\\.0-9]*)-java\\.namespace\\.txt" "\\1" namespace ${filename})
 
     file(STRINGS ${file} prefix REGEX "^[a-zA-Z0-9\\.]+$") #read the line we want from the file
     set (java_namespace_keys ${java_namespace_keys} ${namespace})
@@ -143,7 +156,7 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
   endif()
 
   #loop over all dou files
-  foreach (dou ${dou_files})
+  foreach (dou ${_gen_DOU_FILES})
     string (REGEX REPLACE ".*/([a-zA-Z\\.0-9]*)\\.dou" "\\1" base_name ${dou})
     set (cpp_files ${cpp_files} generated_code/cpp/${base_name}.cpp)
     set (dotnet_files ${dotnet_files} "${CMAKE_CURRENT_BINARY_DIR}/generated_code/dotnet/${base_name}.cs")
@@ -203,14 +216,14 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
     ${dots_v_path}
     --dod-files=${dod_directory}
     --dependencies ${DOTS_V_DEPS}
-    --library-name ${GEN_NAME}
+    --library-name ${_gen_NAME}
     --output-path=generated_code)
 
   ADD_CUSTOM_COMMAND(
     OUTPUT ${cpp_files} ${java_files} ${dotnet_files}
 
     COMMAND ${dots_v_command} ${CMAKE_CURRENT_SOURCE_DIR}
-    DEPENDS ${dod_files} ${dou_files} ${namespace_files}
+    DEPENDS ${dod_files} ${_gen_DOU_FILES} ${_gen_NAMESPACE_MAPPINGS}
     COMMENT "Generating code for ${CMAKE_CURRENT_SOURCE_DIR}")
 
   #make clean target remove the generated_code directory
@@ -219,7 +232,7 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
   #We need a custom target that the library (java,cpp,dotnet) targets can depend on, since
   #having them all just depend on the output files will wreak havoc with cmake in parallel builds.
   #See http://public.kitware.com/Bug/view.php?id=12311
-  add_custom_target(safir_generated-${GEN_NAME}-code ALL DEPENDS ${cpp_files} ${java_files} ${dotnet_files})
+  add_custom_target(safir_generated-${_gen_NAME}-code ALL DEPENDS ${cpp_files} ${java_files} ${dotnet_files})
   #############
 
   #
@@ -249,29 +262,29 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
     link_directories(${SAFIR_SDK_CORE_LIBRARIES_DIR})
   endif()
 
-  ADD_LIBRARY(safir_generated-${GEN_NAME}-cpp SHARED ${cpp_files})
+  ADD_LIBRARY(safir_generated-${_gen_NAME}-cpp SHARED ${cpp_files})
 
-  target_include_directories(safir_generated-${GEN_NAME}-cpp
+  target_include_directories(safir_generated-${_gen_NAME}-cpp
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated_code/cpp/include>)
 
   #add safir include dirs.
   if (SAFIR_EXTERNAL_BUILD)
-    target_include_directories(safir_generated-${GEN_NAME}-cpp
+    target_include_directories(safir_generated-${_gen_NAME}-cpp
       PRIVATE
       ${SAFIR_SDK_CORE_INCLUDE_DIRS})
   endif()
 
-  ADD_PRECOMPILED_HEADER(safir_generated-${GEN_NAME}-cpp
+  ADD_PRECOMPILED_HEADER(safir_generated-${_gen_NAME}-cpp
     ${precompiled_header_path}/precompiled_header_for_cpp.h
     FORCEINCLUDE)
 
   #include path for precompiled_header_for_cpp.h
-  target_include_directories(safir_generated-${GEN_NAME}-cpp
+  target_include_directories(safir_generated-${_gen_NAME}-cpp
     PRIVATE ${precompiled_header_path})
 
   #On Windows external builds autolinking is used.
   if (NOT (MSVC AND SAFIR_EXTERNAL_BUILD))
-    target_link_libraries(safir_generated-${GEN_NAME}-cpp PRIVATE
+    target_link_libraries(safir_generated-${_gen_NAME}-cpp PRIVATE
     PUBLIC
     dots_cpp)
   endif()
@@ -280,17 +293,17 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
   #current build tree.
   foreach (DEP ${ALL_DEPENDENCIES})
     if (NOT (MSVC AND SAFIR_EXTERNAL_BUILD) OR TARGET safir_generated-${DEP}-cpp)
-      TARGET_LINK_LIBRARIES(safir_generated-${GEN_NAME}-cpp PRIVATE
+      TARGET_LINK_LIBRARIES(safir_generated-${_gen_NAME}-cpp PRIVATE
 
         PUBLIC
         safir_generated-${DEP}-cpp)
     endif()
   endforeach()
 
-  add_dependencies(safir_generated-${GEN_NAME}-cpp safir_generated-${GEN_NAME}-code)
+  add_dependencies(safir_generated-${_gen_NAME}-cpp safir_generated-${_gen_NAME}-code)
 
   #put the include files in a target property
-  set_property(TARGET ${GEN_NAME}-dou PROPERTY
+  set_property(TARGET ${_gen_NAME}-dou PROPERTY
     CXX_INCLUDE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated_code/cpp/include/)
 
   ############
@@ -334,15 +347,15 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
 
     configure_file(${manifest_path} ${CMAKE_CURRENT_BINARY_DIR}/Manifest.generated.txt @ONLY)
 
-    ADD_JAR(safir_generated-${GEN_NAME}-java
+    ADD_JAR(safir_generated-${_gen_NAME}-java
       SOURCES ${java_files}
       INCLUDE_JARS ${include_jars}
       MANIFEST ${CMAKE_CURRENT_BINARY_DIR}/Manifest.generated.txt)
 
-    add_dependencies(safir_generated-${GEN_NAME}-java safir_generated-${GEN_NAME}-code)
+    add_dependencies(safir_generated-${_gen_NAME}-java safir_generated-${_gen_NAME}-code)
 
     #remember that we built java
-    set_target_properties(${GEN_NAME}-dou PROPERTIES
+    set_target_properties(${_gen_NAME}-dou PROPERTIES
       JAVA_BUILT True)
   endif()
 
@@ -365,16 +378,16 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
       set (snk_path ${safir-sdk-core_SOURCE_DIR}/src/dots/dots_v.ss/data/dots_generated-dotnet.snk)
     endif()
 
-    ADD_CSHARP_ASSEMBLY(safir_generated-${GEN_NAME}-dotnet LIBRARY
+    ADD_CSHARP_ASSEMBLY(safir_generated-${_gen_NAME}-dotnet LIBRARY
       SIGN ${snk_path}
       SOURCES ${dotnet_files}
       REFERENCES ${assembly_refs}
       ${lib_path_arg})
 
-    add_dependencies(safir_generated-${GEN_NAME}-dotnet safir_generated-${GEN_NAME}-code)
+    add_dependencies(safir_generated-${_gen_NAME}-dotnet safir_generated-${_gen_NAME}-code)
 
     #remember that we built dotnet
-    set_target_properties(${GEN_NAME}-dou PROPERTIES
+    set_target_properties(${_gen_NAME}-dou PROPERTIES
       DOTNET_BUILT True)
 
   endif()
@@ -388,7 +401,7 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
   get_property(SAFIR_GENERATED_PATHS GLOBAL PROPERTY SAFIR_GENERATED_PATHS)
 
   set_property(GLOBAL PROPERTY SAFIR_GENERATED_PATHS
-    ${SAFIR_GENERATED_PATHS} "SAFIR_GENERATED_${GEN_NAME}_DIR=$<TARGET_FILE_DIR:safir_generated-${GEN_NAME}-cpp>")
+    ${SAFIR_GENERATED_PATHS} "SAFIR_GENERATED_${_gen_NAME}_DIR=$<TARGET_FILE_DIR:safir_generated-${_gen_NAME}-cpp>")
   ##############
 
 

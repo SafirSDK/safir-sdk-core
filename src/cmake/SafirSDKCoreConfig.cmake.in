@@ -13,7 +13,7 @@
 #
 # ADD_SAFIR_GENERATED_LIBRARY(NAME <target name>
 #                             [DEPENDENCIES <dep>])
-#
+# TODO: more documentation!
 #
 # INSTALL_SAFIR_GENERATED_LIBRARY(TARGETS <target1> .. <targetN>
 #                                 [CXX_BIN <c++ .dll destination dir>]

@@ -1,6 +1,7 @@
 ADD_SAFIR_GENERATED_LIBRARY(
   NAME Test2
-  DEPENDENCIES Test1)
+  DEPENDENCIES Test1
+  DOU_FILES Dobmake.Test2.dou)
 
 
 #Can be absolute paths or relative paths. If relative, they will be prefixed with CMAKE_INSTALL_PREFIX
