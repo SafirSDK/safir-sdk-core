@@ -157,7 +157,8 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
 
   #loop over all dou files
   foreach (dou ${_gen_DOU_FILES})
-    string (REGEX REPLACE ".*/([a-zA-Z\\.0-9]*)\\.dou" "\\1" base_name ${dou})
+    get_filename_component(douname ${dou} NAME)
+    string (REGEX REPLACE "([a-zA-Z\\.0-9]*)\\.dou" "\\1" base_name ${douname})
     set (cpp_files ${cpp_files} generated_code/cpp/${base_name}.cpp)
     set (dotnet_files ${dotnet_files} "${CMAKE_CURRENT_BINARY_DIR}/generated_code/dotnet/${base_name}.cs")
 
@@ -210,21 +211,23 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
     set(dod_directory "${safir-sdk-core_SOURCE_DIR}/src/dots/dots_v.ss/data/")
   endif()
 
-  FILE(GLOB dod_files ${dod_directory} *.dod)
-
+  FILE(GLOB dod_files ${dod_directory}*.dod)
   SET(dots_v_command ${PYTHON_EXECUTABLE}
     ${dots_v_path}
-    --dod-files=${dod_directory}
+    --dod-files ${dod_files}
+    --dou-files ${_gen_DOU_FILES}
+    --namespace-mappings ${_gen_NAMESPACE_MAPPINGS}
     --dependencies ${DOTS_V_DEPS}
     --library-name ${_gen_NAME}
-    --output-path=generated_code)
+    --output-path=${CMAKE_CURRENT_BINARY_DIR}/generated_code)
 
   ADD_CUSTOM_COMMAND(
     OUTPUT ${cpp_files} ${java_files} ${dotnet_files}
 
-    COMMAND ${dots_v_command} ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMAND ${dots_v_command}
     DEPENDS ${dod_files} ${_gen_DOU_FILES} ${_gen_NAMESPACE_MAPPINGS}
-    COMMENT "Generating code for ${CMAKE_CURRENT_SOURCE_DIR}")
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMENT "Generating code for safir_generated-${_gen_NAME}")
 
   #make clean target remove the generated_code directory
   SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES generated_code)
