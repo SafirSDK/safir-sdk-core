@@ -4,14 +4,18 @@ else()
   set(DEFAULT_FILE_PERSISTENCE_DIRECTORY TODO)
 endif()
 
+
+#We configure the file into the source dir, which may seem a bit strange
+#for out-of-source builds, but we need all the dou files in one directory
+#since our tests point there for dou file loading.
 configure_file(Safir.Dob.PersistenceParameters.dou.in
-  "${CMAKE_CURRENT_BINARY_DIR}/config/Safir.Dob.PersistenceParameters.dou" @ONLY)
+  "${CMAKE_CURRENT_SOURCE_DIR}/config/Safir.Dob.PersistenceParameters.dou" @ONLY)
 
 ADD_SAFIR_GENERATED_LIBRARY(NAME Core
 
   DOU_FILES
 
-  "${CMAKE_CURRENT_BINARY_DIR}/config/Safir.Dob.PersistenceParameters.dou"
+  "${CMAKE_CURRENT_SOURCE_DIR}/config/Safir.Dob.PersistenceParameters.dou"
   config/Safir.Dob.DistributionChannelParameters.dou
   config/Safir.Dob.NodeParameters.dou
   config/Safir.Dob.QueueParameters.dou

@@ -36,7 +36,7 @@ parser.add_argument("--safir-show-config", required=True)
 parser.add_argument("--safir-generated-paths", required=True)
 
 arguments = parser.parse_args()
-    
+
 stoppee_path = arguments.stoppee
 
 #add all the environment variables. passed on format A=10;B=20
@@ -45,7 +45,9 @@ for pair in arguments.safir_generated_paths.split(";"):
     print("Setting environment variable", name, "to", value)
     os.environ[name] = value
 
-env = TestEnv(dose_main = arguments.dose_main, dope_main = arguments.dope_main, safir_show_config = arguments.safir_show_config)
+env = TestEnv(dose_main = arguments.dose_main,
+              dope_main = arguments.dope_main,
+              safir_show_config = arguments.safir_show_config)
 with TestEnvStopper(env):
     for i in range(95):
         env.launchProcess("stoppee_" + str(i),stoppee_path)
@@ -61,7 +63,7 @@ with TestEnvStopper(env):
             break;
         time.sleep(1)
 
-    
+
 if not env.ReturnCodesOk():
     print("Some process exited with an unexpected value")
     sys.exit(1)
