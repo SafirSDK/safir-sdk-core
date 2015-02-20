@@ -24,6 +24,7 @@
 #******************************************************************************
 include(CMakeParseArguments)
 
+# Documentation for this function can be found in SafirSDKCoreConfig.cmake
 FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
   cmake_parse_arguments(_gen "GLOB" "NAME" "DOU_FILES;DOM_FILES;NAMESPACE_MAPPINGS;DEPENDENCIES" ${ARGN})
 
@@ -406,11 +407,9 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
   set_property(GLOBAL PROPERTY SAFIR_GENERATED_PATHS
     ${SAFIR_GENERATED_PATHS} "SAFIR_GENERATED_${_gen_NAME}_DIR=$<TARGET_FILE_DIR:safir_generated-${_gen_NAME}-cpp>")
   ##############
-
-
 ENDFUNCTION()
 
-
+# Documentation for this function can be found in SafirSDKCoreConfig.cmake
 FUNCTION(INSTALL_SAFIR_GENERATED_LIBRARY)
   # Work out if we're building the Safir SDK Core source tree or not
   SAFIR_IS_EXTERNAL_BUILD()
