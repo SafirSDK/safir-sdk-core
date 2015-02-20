@@ -1704,9 +1704,9 @@ def main():
 
     arguments = parser.parse_args()
 
-    dod_files = arguments.dod_files
-    dou_files = arguments.dou_files
-    namespace_prefix_files = arguments.namespace_mappings
+    dod_files = [os.path.normpath(f) for f in arguments.dod_files]
+    dou_files = [os.path.normpath(f) for f in arguments.dou_files]
+    namespace_prefix_files = [os.path.normpath(f) for f in arguments.namespace_mappings]
 
     dependency_paths = resolve_typesystem_dependencies(arguments.dependencies)
 
