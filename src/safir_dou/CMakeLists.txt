@@ -1,7 +1,7 @@
 if (UNIX)
   set(DEFAULT_FILE_PERSISTENCE_DIRECTORY /var/lib/safir-sdk-core/persistence/)
 else()
-  set(DEFAULT_FILE_PERSISTENCE_DIRECTORY TODO)
+  set(DEFAULT_FILE_PERSISTENCE_DIRECTORY @{CSIDL_COMMON_APPDATA}/safir-sdk-core/persistence)
 endif()
 
 
