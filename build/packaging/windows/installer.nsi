@@ -275,6 +275,11 @@ Section "Runtime" SecRuntime
 
   ;Add to PATH
   nsExec::ExecToLog '"$INSTDIR\installer_utils\pathed" "/MACHINE" "/APPEND" "$INSTDIR\bin"'
+  Pop $0 # return value/error/timeout
+  ${If} $0 != "0"
+    MessageBox MB_OK "Failed to add Safir SDK Core binary directory to PATH environment variable.$\r$\nThis is probably because no suitable .NET Framework was found.$\r$\nPlease modify your PATH manually."
+  ${EndIf}
+
   ;Add assemblies to GAC.
   ;This only happens here if we're not installing the test suite,
   ;otherwise we wait until the assemblies from the test suite
