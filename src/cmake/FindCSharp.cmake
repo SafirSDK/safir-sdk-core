@@ -1,4 +1,4 @@
-# - Try to find the a csharp compiler and associated tools
+# - Try to find the a csharp compiler for .Net 2.0 and associated tools
 #
 # defines
 #
@@ -8,14 +8,22 @@
 # RESGEN_EXECUTABLE - where to find 'resgen' or 'resgen2'
 #
 # copyright (c) 2007 Arno Rehn arno@arnorehn.de
-# copyright (c) 2008,2014 Lars Hagstrom lars.hagstrom@saabgroup.com
+# copyright (c) 2008,2014, 2015 Lars Hagstrom lars.hagstrom@consoden.se
 #
 # Redistribution and use is allowed according to the terms of the GPL license.
 
-FIND_PROGRAM (CSHARP_COMPILER NAMES cli-csc csc gmcs gmcs2)
+#on windows we specifically look for .Net 2.0
+if (WIN32)
+  get_filename_component(dotnet_path "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\.NETFramework;InstallRoot]" PATH)
+  find_program(CSHARP_COMPILER NAMES csc PATHS "${dotnet_path}/Framework/v2.0.50727")
+else()
+  FIND_PROGRAM (CSHARP_COMPILER NAMES cli-csc gmcs gmcs2)
+endif()
+
 FIND_PROGRAM (CSHARP_LINKER NAMES cli-al al)
 FIND_PROGRAM (GACUTIL_EXECUTABLE gacutil)
 FIND_PROGRAM (RESGEN_EXECUTABLE NAMES cli-resgen resgen2 resgen PATH_SUFFIXES ..) #in vs2013 express x64 we need to look one step up!
+
 
 SET (CSHARP_FOUND FALSE)
 
