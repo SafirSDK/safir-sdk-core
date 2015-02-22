@@ -131,7 +131,7 @@ namespace SP
             m_electionTimer.expires_from_now(aloneTimeout);
             m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
                                                      {
-                                                         if (!error)
+                                                         if (!error && !m_stopped)
                                                          {
                                                              StartElection();
                                                          }
@@ -146,6 +146,7 @@ namespace SP
         {
             m_strand.dispatch([this]
                               {
+                                  m_stopped = true;
                                   m_electionTimer.cancel();
                                   m_sendMessageTimer.cancel();
                               });
@@ -226,7 +227,7 @@ namespace SP
             m_electionTimer.expires_from_now(boost::chrono::milliseconds(100));
             m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
             {
-                if (!!error)
+                if (!!error || m_stopped)
                 {
                     return;
                 }
@@ -278,7 +279,7 @@ namespace SP
                 m_electionTimer.expires_from_now(m_electionTimeout);
                 m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
                                                          {
-                                                             if (!error)
+                                                             if (!error && !m_stopped)
                                                              {
                                                                  ElectionTimeout();
                                                              }
@@ -500,7 +501,7 @@ namespace SP
                 m_sendMessageTimer.expires_from_now(boost::chrono::milliseconds(10));
                 m_sendMessageTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
                                                             {
-                                                                if (!error)
+                                                                if (!error && !m_stopped)
                                                                 {
                                                                     SendPendingElectionMessages();
                                                                 }
@@ -510,6 +511,7 @@ namespace SP
 
 
         mutable boost::asio::strand m_strand;
+        bool m_stopped{false};
         CommunicationT& m_communication;
         const uint64_t m_receiverId;
 
