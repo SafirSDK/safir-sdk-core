@@ -469,6 +469,10 @@ namespace SP
             {
                 m_allStatisticsMessage.mutable_more_dead_nodes()->Add(id);
             }
+
+            //TODO: Should we call ExcludeNode here? Or do we need to check
+            //m_moreDeadNodes in NewNode, to ensure that the node is not added?!
+
             return inserted;
         }
 

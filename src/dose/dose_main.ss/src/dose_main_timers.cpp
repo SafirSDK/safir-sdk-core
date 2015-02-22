@@ -133,6 +133,7 @@ namespace Internal
 
     void TimerHandler::Stop()
     {
+        m_stopped = true;
         m_steadyTimer.cancel();
     }
 
@@ -371,7 +372,7 @@ namespace Internal
     void TimerHandler::HandleTimeout(const boost::system::error_code & error)
     {
         //check if timer was cancelled (happens in ScheduleTimer) and don't recurse...
-        if (error == boost::asio::error::operation_aborted)
+        if (error == boost::asio::error::operation_aborted || m_stopped)
         {
             return;
         }

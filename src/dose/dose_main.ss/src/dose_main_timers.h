@@ -200,6 +200,8 @@ namespace Internal
         boost::asio::io_service & m_ioService;
         boost::asio::steady_timer m_steadyTimer;
 
+        bool m_stopped{false};
+        
         static TimerHandler* m_instance;
     };
 

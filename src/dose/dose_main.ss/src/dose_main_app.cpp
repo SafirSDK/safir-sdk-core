@@ -83,10 +83,10 @@ namespace Internal
     }
 
     DoseApp::DoseApp(boost::asio::io_service& ioService):
-        m_ioService(ioService),
         m_connectEvent(0),
         m_connectionOutEvent(0),
         m_nodeStatusChangedEvent(0),
+        m_ioService(ioService),
         m_work(new boost::asio::io_service::work(m_ioService)),
         m_signalSet(m_ioService),
         m_timerHandlerInitiated(initiateTimerHandler(m_ioService)),
