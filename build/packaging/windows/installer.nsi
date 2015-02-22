@@ -264,12 +264,6 @@ Section "Runtime" SecRuntime
   CreateShortCut "${StartMenuDir}\Documentation\GPLv3 License.lnk" \
                  "$INSTDIR\docs\LICENSE.txt" "" "" "" SW_SHOWNORMAL "" "Open Source license of Safir SDK Core"
 
-  CreateShortCut "${StartMenuDir}\Sate.lnk" \
-                 "$INSTDIR\bin\sate.exe" "" "" "" SW_SHOWNORMAL "" "Safir Application Tester"
-
-  CreateShortCut "${StartMenuDir}\Dobexplorer.lnk" \
-                 "$INSTDIR\bin\dobexplorer.exe" "" "" "" SW_SHOWNORMAL "" "Explore the Dob internals"
-
   CreateShortCut "${StartMenuDir}\Uninstall.lnk" \
                  "$INSTDIR\Uninstall.exe" "" "" "" SW_SHOWNORMAL "" "Uninstall Safir SDK Core"
 
@@ -352,6 +346,12 @@ Section "Development" SecDevelopment
   push "${StartMenuDir}\Configuration\Edit logging.ini.lnk"
   call ShellLinkSetRunAs
   pop $0
+
+  CreateShortCut "${StartMenuDir}\Sate.lnk" \
+                 "$INSTDIR\bin\sate.exe" "" "" "" SW_SHOWNORMAL "" "Safir Application Tester"
+
+  CreateShortCut "${StartMenuDir}\Dobexplorer.lnk" \
+                 "$INSTDIR\bin\dobexplorer.exe" "" "" "" SW_SHOWNORMAL "" "Explore the Dob internals"
 
   CreateShortCut "${StartMenuDir}\Dobmake.lnk" \
                  "$INSTDIR\bin\dobmake.exe" "" "" "" SW_SHOWNORMAL "" "Build libraries from your dou files."
