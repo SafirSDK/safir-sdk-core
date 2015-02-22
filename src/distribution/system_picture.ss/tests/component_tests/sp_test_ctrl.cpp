@@ -238,7 +238,7 @@ int main(int argc, char * argv[])
                            lllog(1) << "CTRL: Resetting work" << std::endl;
                            work.reset();
 
-                           Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().Stop();
+                           Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().StopAsynchronousLogger();
                        }
                        );
 
@@ -254,7 +254,7 @@ int main(int argc, char * argv[])
 
     lllog(1) << "CTRL: Joining threads" << std::endl;
     threads.join_all();
-
+    Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().DestroyAsynchronousLogger();
     lllog(1) << "CTRL: Exiting..." << std::endl;
     return 0;
 }

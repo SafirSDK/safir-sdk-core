@@ -70,14 +70,11 @@ namespace Internal
         private boost::noncopyable
     {
     public:
-        DoseApp();
+        explicit DoseApp(boost::asio::io_service& ioService);
 
         ~DoseApp();
 
-        /**
-         * Start the main loop of dose_main
-         */
-        void Run();
+        void Start();
 
     private:
         //This is called when dose_main is expected to shut down
@@ -131,7 +128,7 @@ namespace Internal
 
         static void MemoryMonitorThread();
 
-        boost::asio::io_service m_ioService;
+        boost::asio::io_service& m_ioService;
         boost::shared_ptr<boost::asio::io_service::work> m_work;
 
         boost::asio::signal_set m_signalSet;

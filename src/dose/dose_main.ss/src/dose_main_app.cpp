@@ -82,7 +82,8 @@ namespace Internal
         }
     }
 
-    DoseApp::DoseApp():
+    DoseApp::DoseApp(boost::asio::io_service& ioService):
+        m_ioService(ioService),
         m_connectEvent(0),
         m_connectionOutEvent(0),
         m_nodeStatusChangedEvent(0),
@@ -99,8 +100,7 @@ namespace Internal
         m_HandleEvents_notified(0),
         m_DispatchOwnConnection_notified(0)
     {
-        //TODO readd when async logging is working
-        //Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().SwitchToAsynchronousMode(m_ioService);
+        Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().SwitchToAsynchronousMode(m_ioService);
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
         m_signalSet.add(SIGABRT);
         m_signalSet.add(SIGBREAK);
@@ -128,7 +128,7 @@ namespace Internal
         //called correctly? I.e. we're dying through an exception.
     }
 
-    void DoseApp::Run()
+    void DoseApp::Start()
     {
         AllocateStatic();
 
@@ -142,13 +142,11 @@ namespace Internal
                                              timerInfo,
                                              5.0);
 
-        // enter main loop
 #ifndef NDEBUG
         std::wcout<<"dose_main running (debug)..." << std::endl;
 #else
         std::wcout<<"dose_main running (release)..." << std::endl;
 #endif
-        m_ioService.run();
     }
 
 
@@ -189,7 +187,6 @@ namespace Internal
 
     void DoseApp::Stop()
     {
-        m_work.reset();
         TimerHandler::Instance().Stop();
 
         m_threadMonitor.Stop();
@@ -217,8 +214,8 @@ namespace Internal
         m_poolHandler.Stop();
         m_ownConnection.Close();
 
-        //TODO readd when async logging is working
-        //Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().Stop();
+        m_work.reset();
+        Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().StopAsynchronousLogger();
     }
 
     void DoseApp::HandleSignal(const boost::system::error_code& error,

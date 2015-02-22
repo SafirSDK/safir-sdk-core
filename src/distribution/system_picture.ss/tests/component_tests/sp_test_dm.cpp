@@ -494,7 +494,7 @@ int main(int argc, char * argv[])
         work.reset();
         lllog(1) << "DM: Cancelling signalSet" << std::endl;
         signalSet.cancel();
-        Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().Stop();
+        Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().StopAsynchronousLogger();
     };
 
     signalSet.async_wait([stopFcn, &m_stop](const boost::system::error_code& error,
@@ -529,6 +529,8 @@ int main(int argc, char * argv[])
 
     lllog(1) << "DM: Joining threads" << std::endl;
     threads.join_all();
+
+    Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().DestroyAsynchronousLogger();
 
     lllog(1) << "DM: Exiting..." << std::endl;
     return 0;

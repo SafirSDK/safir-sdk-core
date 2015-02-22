@@ -98,7 +98,8 @@ namespace Internal
                 }*/
 
             void SwitchToAsynchronousMode(boost::asio::io_service& ioService);
-            void Stop(); //only need to call this if SwitchToAsynchronousMode has been called.
+            void StopAsynchronousLogger(); //only need to call this if SwitchToAsynchronousMode has been called.
+            void DestroyAsynchronousLogger(); //only need to call this if SwitchToAsynchronousMode has been called.
 
             //This is a magic unlocker that has the strange behaviour of having a bool
             //operator that always returns false. It is for the use in preprocessor
