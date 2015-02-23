@@ -12,8 +12,20 @@
 # SAFIR_SDK_CORE_INCLUDE_DIRS - Location of Safir SDK Core headers
 #
 # ADD_SAFIR_GENERATED_LIBRARY(NAME <target name>
-#                             [DEPENDENCIES <dep>])
-# TODO: more documentation!
+#                             [DOU_FILES <file1> .. <fileN>]
+#                             [DOM_FILES <file1> .. <fileN>]
+#                             [NAMESPACE_MAPPINGS <file1> .. <fileN>]
+#                             [GLOB]
+#                             [DEPENDENCIES <dep1> .. <depN>]
+#
+#  NAME: Name of the target to create. If for example NAME is Foo the C++ libraries will
+#        be called safir_generated-Foo-cpp.dll on windows.
+#  DOU_FILES: The dou files to use to generate code.
+#  DOM_FILES: Property mappings that should be installed as part of this target.
+#  NAMESPACE_MAPPINGS: Java namespace mappings.
+#  GLOB: Use this to automatically find dou, dom and namespace.txt files in the current source directory.
+#        This option can not be used together with DOU_FILES, DOM_FILES and NAMESPACE_MAPPINGS.
+#  DEPENDENCIES: Dependencies to other safir_generated targets within the build tree.
 #
 # INSTALL_SAFIR_GENERATED_LIBRARY(TARGETS <target1> .. <targetN>
 #                                 [CXX_BIN <c++ .dll destination dir>]
@@ -26,7 +38,7 @@
 # Notes:
 #  1. Dotnet assemblies are not installed into GAC.
 #  2. Dou files will be installed into <DOU_BASE>/<target name> directory.
-#
+#  3. Both CXX_LIB and CXX_BIN have to be specified to install the C++ libraries..
 #
 # This file will actually define some other variables, some of which are used by the
 # example apps build scripts to make CMake build Java and .Net. If you're trying to do
