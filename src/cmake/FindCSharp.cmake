@@ -1,4 +1,4 @@
-# - Try to find the a csharp compiler for .Net 2.0 and associated tools
+# - Try to find the a csharp compiler and associated tools
 #
 # defines
 #
@@ -12,14 +12,7 @@
 #
 # Redistribution and use is allowed according to the terms of the GPL license.
 
-#on windows we specifically look for .Net 2.0
-if (WIN32)
-  get_filename_component(dotnet_path "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\.NETFramework;InstallRoot]" PATH)
-  find_program(CSHARP_COMPILER NAMES csc PATHS "${dotnet_path}/Framework/v2.0.50727")
-else()
-  FIND_PROGRAM (CSHARP_COMPILER NAMES cli-csc gmcs gmcs2)
-endif()
-
+FIND_PROGRAM (CSHARP_COMPILER NAMES csc cli-csc gmcs gmcs2)
 FIND_PROGRAM (CSHARP_LINKER NAMES cli-al al)
 FIND_PROGRAM (GACUTIL_EXECUTABLE gacutil)
 FIND_PROGRAM (RESGEN_EXECUTABLE NAMES cli-resgen resgen2 resgen PATH_SUFFIXES ..) #in vs2013 express x64 we need to look one step up!
