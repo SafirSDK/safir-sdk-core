@@ -71,8 +71,16 @@ namespace Com
             std::vector< boost::asio::const_buffer > bufs;
             bufs.push_back(boost::asio::buffer(static_cast<const void*>(val.get()), sizeof(T)));
             bufs.push_back(boost::asio::buffer(reinterpret_cast<const char*>(&crc32), sizeof(uint32_t)));
-            socket.send_to(bufs, to);
-            //socket.async_send_to(bufs, to, [val](const boost::system::error_code& error, size_t){if (error) std::cout<<"Send failed, error "<<error.message().c_str()<<std::endl;});
+
+            try
+            {
+                socket.send_to(bufs, to);
+            }
+            catch (const boost::system::system_error& sysErr)
+            {
+                std::cout<<"Write<T> failed with systemError: "<<sysErr.what()<<std::endl;
+                SEND_SYSTEM_LOG(Error, <<"Write failed with systemError: "<<sysErr.what());
+            }
         }
     };
 
@@ -98,7 +106,17 @@ namespace Com
 
             uint32_t crc32=crc.checksum();
             bufs.push_back(boost::asio::buffer(reinterpret_cast<const char*>(&crc32), sizeof(uint32_t)));
-            socket.send_to(bufs, to);
+
+
+            try
+            {
+                socket.send_to(bufs, to);
+            }
+            catch (const boost::system::system_error& sysErr)
+            {
+                std::cout<<"Write<UserData> failed with systemError: "<<sysErr.what()<<std::endl;
+                SEND_SYSTEM_LOG(Error, <<"Write failed with systemError: "<<sysErr.what());
+            }
         }
     };
 
