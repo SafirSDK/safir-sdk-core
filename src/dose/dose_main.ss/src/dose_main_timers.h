@@ -133,10 +133,8 @@ namespace Internal
         private boost::noncopyable
     {
     public:
-        static void Instantiate(boost::asio::io_service & ioService);
-
-        /** Instantiate must have been called for this to function. */
-        static TimerHandler & Instance();
+        explicit TimerHandler(boost::asio::io_service& ioService);
+        ~TimerHandler();
 
         void Stop();
 
@@ -184,8 +182,6 @@ namespace Internal
 
         void ScheduleTimer();
 
-        explicit TimerHandler(boost::asio::io_service & ioService);
-        ~TimerHandler();
 
         //must use custom comparer to compare pointer contents rather than pointers.
         typedef std::map<TimerInfoPtr,boost::chrono::steady_clock::time_point, TimerInfoPtrLess> TimerTable;
@@ -201,8 +197,6 @@ namespace Internal
         boost::asio::steady_timer m_steadyTimer;
 
         bool m_stopped{false};
-        
-        static TimerHandler* m_instance;
     };
 
 

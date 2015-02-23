@@ -35,20 +35,19 @@ namespace Internal
 {
     //forward declarations
     class BlockingHandlers;
+    class TimerHandler;
 #if 0 //stewart
     class ExternNodeCommunication;
 #endif
 
     class ResponseHandler
+        : private boost::noncopyable
     {
     public:
-        ResponseHandler();
+        explicit ResponseHandler(TimerHandler& timerHandler);
         virtual ~ResponseHandler();
 
         void Init(BlockingHandlers & blockingHandler);
-#if 0 //stewart
-                  , ExternNodeCommunication& ecom);
-#endif
 
         void DistributeResponses(const ConnectionPtr& sender);
 
@@ -59,13 +58,13 @@ namespace Internal
         bool HandleResponse(const DistributionData& response);
 
     private:
-        void operator=(const ResponseHandler&) const; //Disable assignment operator
-
         void DispatchResponse(const DistributionData& response, bool & dontRemove, bool & doseComOverflowed, const ConnectionPtr & sender);
         void DispatchResponsesFromRequestInQueue(RequestInQueue & queue, const ConnectionPtr & sender);
 
         void PostResponse(const ConnectionPtr& receiver,
                           const DistributionData& response);
+
+        TimerHandler& m_timerHandler;
 
 #if 0 //stewart
         ExternNodeCommunication* m_ecom;

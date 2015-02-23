@@ -41,10 +41,11 @@ class TimerTesterBase
 {
 public:
     TimerTesterBase(const std::wstring& name)
-        : m_ok(false)
+        : m_timerHandler(ioService)
+        , m_ok(false)
         , m_constructionTime(boost::chrono::steady_clock::now())
     {
-        m_timerId = TimerHandler::Instance().RegisterTimeoutHandler(name, *this);
+        m_timerId = m_timerHandler.RegisterTimeoutHandler(name, *this);
     }
 
     ~TimerTesterBase()
@@ -52,19 +53,20 @@ public:
         if (!m_ok)
         {
             std::wostringstream ostr;
-            ostr << TimerHandler::Instance().GetTimerName(m_timerId)
+            ostr << m_timerHandler.GetTimerName(m_timerId)
                  << " test failed!";
 
             throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(), __WFILE__, __LINE__);
         }
         else
         {
-            std::wcout << TimerHandler::Instance().GetTimerName(m_timerId)
+            std::wcout << m_timerHandler.GetTimerName(m_timerId)
                        << " test succeeded!" << std::endl;
         }
-
     }
+
 protected:
+    TimerHandler m_timerHandler;
     TimerId m_timerId;
     bool m_ok;
     const boost::chrono::steady_clock::time_point m_constructionTime;
@@ -78,7 +80,7 @@ public:
     SingleTimerTester(const std::wstring& name, const double delay) : TimerTesterBase(name)
     {
         TimerInfoPtr timerInfo(new EmptyTimerInfo(m_timerId));
-        TimerHandler::Instance().SetRelative(Replace, timerInfo, delay);
+        m_timerHandler.SetRelative(Replace, timerInfo, delay);
     }
 
     void HandleTimeout(const TimerInfoPtr& /*timer*/)
@@ -95,8 +97,8 @@ public:
     ReplaceTimerTester() : TimerTesterBase(L"Replace Timer")
     {
         TimerInfoPtr timerInfo(new EmptyTimerInfo(m_timerId));
-        TimerHandler::Instance().SetRelative(Replace, timerInfo, 10000);
-        TimerHandler::Instance().SetRelative(Replace, timerInfo, 0.01); //replace the previous timer
+        m_timerHandler.SetRelative(Replace, timerInfo, 10000);
+        m_timerHandler.SetRelative(Replace, timerInfo, 0.01); //replace the previous timer
     }
 
     void HandleTimeout(const TimerInfoPtr& /*timer*/)
@@ -116,8 +118,8 @@ public:
     DiscardTimerTester() : TimerTesterBase(L"Discard Timer")
     {
         TimerInfoPtr timerInfo(new EmptyTimerInfo(m_timerId));
-        TimerHandler::Instance().SetRelative(Discard, timerInfo, 0.01);
-        TimerHandler::Instance().SetRelative(Discard, timerInfo, 10); //this should be discarded
+        m_timerHandler.SetRelative(Discard, timerInfo, 0.01);
+        m_timerHandler.SetRelative(Discard, timerInfo, 10); //this should be discarded
 
     }
 
@@ -143,14 +145,14 @@ public:
                             m_delayMillis(10),
                             m_delay(m_delayMillis)
     {
-        TimerHandler::Instance().Set(Replace, m_timerInfo, m_constructionTime + m_delay);
+        m_timerHandler.Set(Replace, m_timerInfo, m_constructionTime + m_delay);
     }
 
     void HandleTimeout(const TimerInfoPtr& /*timer*/)
     {
         --m_count;
 
-        TimerHandler::Instance().Set(Replace,
+        m_timerHandler.Set(Replace,
                                      m_timerInfo,
                                      m_constructionTime + (m_repeats - m_count) * m_delay);
 
@@ -191,7 +193,7 @@ public:
         , m_timeoutCount(0)
     {
         m_timerInfo.reset(new EmptyTimerInfo(m_timerId));
-        TimerHandler::Instance().SetRelative(Discard, m_timerInfo, 0.0001);
+        m_timerHandler.SetRelative(Discard, m_timerInfo, 0.0001);
         m_ok = true;
     }
 
@@ -200,13 +202,13 @@ public:
         ++m_timeoutCount;
         const boost::chrono::steady_clock::time_point now = boost::chrono::steady_clock::now();
         boost::this_thread::sleep_for(boost::chrono::milliseconds(20));
-        TimerHandler::Instance().Set(Discard, m_timerInfo, now + boost::chrono::milliseconds(10));
+        m_timerHandler.Set(Discard, m_timerInfo, now + boost::chrono::milliseconds(10));
     }
 
     ~TimerStarver()
     {
         std::wcout << "TimerStarver timed out " << m_timeoutCount << " times" <<std::endl;
-        TimerHandler::Instance().Remove(m_timerInfo);
+        m_timerHandler.Remove(m_timerInfo);
     }
 private:
     long m_timeoutCount;
@@ -215,8 +217,6 @@ private:
 
 int main(int,char**)
 {
-    TimerHandler::Instantiate(ioService);
-
     try
     {
         {

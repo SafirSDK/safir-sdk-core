@@ -56,22 +56,18 @@ namespace Internal
 {
     static const Dob::Typesystem::Si32::Second deletedConnReqTimeout = 0.5;
 
-    RequestHandler::RequestHandler()
+    RequestHandler::RequestHandler(TimerHandler& timerHandler)
+        : m_timerHandler(timerHandler)
     {
         RequestTimers::m_localReqTimerId =
-            TimerHandler::Instance().RegisterTimeoutHandler
+            m_timerHandler.RegisterTimeoutHandler
             (L"Safir::Dob::Internal::RequestHandler::localReqTimeout",
              *this);
 
         RequestTimers::m_externalReqTimerId =
-            TimerHandler::Instance().RegisterTimeoutHandler
+            m_timerHandler.RegisterTimeoutHandler
             (L"Safir::Dob::Internal::RequestHandler::externalReqTimeout",
              *this);
-    }
-
-    RequestHandler::~RequestHandler()
-    {
-
     }
 
     void RequestHandler::Init(BlockingHandlers & blockingHandler,
@@ -307,10 +303,10 @@ namespace Internal
                                                         request.GetTypeId(),
                                                         request.GetHandlerId());
 
-        TimerHandler::Instance().SetRelative(Discard, //discard the timer if it is already set
-                                     TimerInfoPtr(new ReqTimer(RequestTimers::m_localReqTimerId,
-                                                               timeoutInfo)),
-                                     GetTimeout(request.GetTypeId()));
+        m_timerHandler.SetRelative(Discard, //discard the timer if it is already set
+                                   TimerInfoPtr(new ReqTimer(RequestTimers::m_localReqTimerId,
+                                                             timeoutInfo)),
+                                   GetTimeout(request.GetTypeId()));
     }
 
 
@@ -507,8 +503,8 @@ namespace Internal
 
         // Remove timeout
         RequestTimerInfo timeoutInfo = RequestTimerInfo(sender->Id().m_id, reqId);
-        TimerHandler::Instance().Remove(TimerInfoPtr(new ReqTimer(RequestTimers::m_localReqTimerId,
-                                                                  timeoutInfo)));
+        m_timerHandler.Remove(TimerInfoPtr(new ReqTimer(RequestTimers::m_localReqTimerId,
+                                                        timeoutInfo)));
 
         sender->SignalIn();
     }
@@ -573,7 +569,8 @@ namespace Internal
 
     void SetShortTimeout(const DistributionData& request,
                          const ConnectionPtr& deletedConn,
-                         const ConnectionPtr & fromConnection)
+                         const ConnectionPtr & fromConnection,
+                         TimerHandler& timerHandler)
     {
         const ConnectionPtr regOwner = GetRegistrationOwner(request).connection;
 
@@ -588,11 +585,11 @@ namespace Internal
 
             RequestTimerInfo timeoutInfo = RequestTimerInfo(fromConnection->Id().m_id, reqId, request.GetTypeId(),request.GetHandlerId());
 
-            TimerHandler::Instance().SetRelative(Replace,
-                                                 TimerInfoPtr(new ReqTimer
-                                                              (RequestTimers::m_localReqTimerId,
-                                                               timeoutInfo)),
-                                                 deletedConnReqTimeout);
+            timerHandler.SetRelative(Replace,
+                                     TimerInfoPtr(new ReqTimer
+                                                  (RequestTimers::m_localReqTimerId,
+                                                   timeoutInfo)),
+                                     deletedConnReqTimeout);
         }
     }
 
@@ -613,7 +610,11 @@ namespace Internal
         //to with an 'unregistered'!
 
         fromConnection->GetRequestOutQueue().ForEachDispatchedRequest
-            (boost::bind(SetShortTimeout,_1,boost::cref(deletedConn), boost::cref(fromConnection)));
+            (boost::bind(SetShortTimeout,
+                         _1,
+                         boost::cref(deletedConn),
+                         boost::cref(fromConnection),
+                         boost::ref(m_timerHandler)));
     }
 
     void RequestHandler::HandleDisconnect(const ConnectionPtr & connection)
@@ -659,10 +660,10 @@ namespace Internal
                                                         request.GetTypeId(),
                                                         request.GetHandlerId());
 
-        TimerHandler::Instance().SetRelative(Discard,   //discard if already set
-                                             TimerInfoPtr(new ReqTimer(RequestTimers::m_externalReqTimerId,
-                                                                       timeoutInfo)),
-                                             GetTimeout(request.GetTypeId()));
+        m_timerHandler.SetRelative(Discard,   //discard if already set
+                                   TimerInfoPtr(new ReqTimer(RequestTimers::m_externalReqTimerId,
+                                                             timeoutInfo)),
+                                   GetTimeout(request.GetTypeId()));
 #if 0 //stewart
         // Set that dose_main is waiting for the receiver
         m_blockingHandler->Request().AddWaitingConnection(blockingConn,

@@ -40,8 +40,9 @@ namespace Dob
 {
 namespace Internal
 {
-    ResponseHandler::ResponseHandler()
-        : m_thisNode(Dob::ThisNodeParameters::NodeNumber())
+    ResponseHandler::ResponseHandler(TimerHandler& timerHandler)
+        : m_timerHandler(timerHandler)
+        , m_thisNode(Dob::ThisNodeParameters::NodeNumber())
     {
     }
 
@@ -141,8 +142,8 @@ namespace Internal
 
         //Create a timeoutinfo object so that we can remove the timer
         const RequestTimerInfo timeoutInfo = RequestTimerInfo(response.GetReceiverId().m_id, reqId);
-        TimerHandler::Instance().Remove(TimerInfoPtr(new ReqTimer(RequestTimers::m_localReqTimerId,
-                                                                  timeoutInfo)));
+        m_timerHandler.Remove(TimerInfoPtr(new ReqTimer(RequestTimers::m_localReqTimerId,
+                                                        timeoutInfo)));
         toConnection->SignalIn();
     }
 

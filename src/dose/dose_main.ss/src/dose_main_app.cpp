@@ -52,12 +52,6 @@ namespace Internal
 
     namespace //anonymous namespace
     {
-        bool initiateTimerHandler(boost::asio::io_service& ioService)
-        {
-            TimerHandler::Instantiate(ioService);
-            return true;
-        }
-
         void SetDiedIfPidEquals(const ConnectionPtr& connection, const pid_t pid)
         {
             if (connection->Pid() == pid)
@@ -89,13 +83,13 @@ namespace Internal
         m_ioService(ioService),
         m_work(new boost::asio::io_service::work(m_ioService)),
         m_signalSet(m_ioService),
-        m_timerHandlerInitiated(initiateTimerHandler(m_ioService)),
+        m_timerHandler(m_ioService),
+        m_endStates(m_timerHandler),
+        m_requestHandler(m_timerHandler),
+        m_responseHandler(m_timerHandler),
         m_poolHandler(m_ioService),
-        m_pendingRegistrationHandler(),
-#if 0 //stewart
-        m_ecom),
-        m_ecom(m_ioService),
-#endif
+        m_pendingRegistrationHandler(m_timerHandler),
+        m_persistHandler(m_timerHandler),
         m_processMonitor(m_ioService,ProcessExited,boost::chrono::seconds(1)),
         m_HandleEvents_notified(0),
         m_DispatchOwnConnection_notified(0)
@@ -137,10 +131,10 @@ namespace Internal
         m_threadMonitor.StartWatchdog(m_mainThreadId, L"dose_main main thread");
 
         // Schedule a timer so that the main thread will kick the watchdog.
-        TimerInfoPtr timerInfo(new EmptyTimerInfo(TimerHandler::Instance().RegisterTimeoutHandler(L"dose_main watchdog timer", *this)));
-        TimerHandler::Instance().SetRelative(Discard,
-                                             timerInfo,
-                                             5.0);
+        TimerInfoPtr timerInfo(new EmptyTimerInfo(m_timerHandler.RegisterTimeoutHandler(L"dose_main watchdog timer", *this)));
+        m_timerHandler.SetRelative(Discard,
+                                   timerInfo,
+                                   5.0);
 
 #ifndef NDEBUG
         std::wcout<<"dose_main running (debug)..." << std::endl;
@@ -187,7 +181,7 @@ namespace Internal
 
     void DoseApp::Stop()
     {
-        TimerHandler::Instance().Stop();
+        m_timerHandler.Stop();
 
         m_threadMonitor.Stop();
         m_lockMonitor.Stop();
@@ -333,9 +327,9 @@ namespace Internal
     {
         m_threadMonitor.KickWatchdog(m_mainThreadId);
 
-        TimerHandler::Instance().SetRelative(Discard,
-                                             timer,
-                                             5.0);
+        m_timerHandler.SetRelative(Discard,
+                                   timer,
+                                   5.0);
     }
 
     ConnectResult DoseApp::CanAddConnection(const std::string & connectionName, const pid_t pid, const long /*context*/)

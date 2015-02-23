@@ -133,7 +133,7 @@ namespace Internal
 
         boost::asio::signal_set m_signalSet;
 
-        const bool m_timerHandlerInitiated;
+        TimerHandler m_timerHandler;
 
         EndStatesHandler m_endStates;
 

@@ -48,7 +48,8 @@ namespace Safir
     {
         namespace Internal
         {
-            PersistHandler::PersistHandler():
+            PersistHandler::PersistHandler(TimerHandler& timerHandler):
+                m_timerHandler(timerHandler),
 #if 0 //stewart
         m_ecom(NULL),
 #endif
@@ -56,7 +57,7 @@ namespace Safir
             m_nodeHandler(NULL),
             m_persistDataReady(false)
         {
-            m_timerId = TimerHandler::Instance().RegisterTimeoutHandler(L"End States Timer", *this);
+            m_timerId = m_timerHandler.RegisterTimeoutHandler(L"End States Timer", *this);
 
             if (Dob::PersistenceParameters::SystemHasPersistence())
             {
@@ -164,16 +165,16 @@ namespace Safir
             if (result)
             {
                 //successful send, wait for responses for 100ms
-                TimerHandler::Instance().SetRelative(Discard,
-                                                     timerInfo,
-                                                     0.1); //time out in 100 milliseconds*/
+                m_timerHandler.SetRelative(Discard,
+                                           timerInfo,
+                                           0.1); //time out in 100 milliseconds*/
             }
             else
             {
                 //failed to send (dosecom overflow), retry in 10ms
-                TimerHandler::Instance().SetRelative(Discard,
-                                                     timerInfo,
-                                                     0.01); //time out in 10 milliseconds*/
+                m_timerHandler.SetRelative(Discard,
+                                           timerInfo,
+                                           0.01); //time out in 10 milliseconds*/
             }
 #endif
         }
@@ -207,7 +208,7 @@ namespace Safir
                     EntityTypes::Instance().DisallowInitialSet();
                     Connections::Instance().AllowConnect(-1);
                     //cancel the timer
-                    TimerHandler::Instance().Remove(m_timerId);
+                    m_timerHandler.Remove(m_timerId);
                     m_waitingForResponsesFromNodes.clear();
                     return; //no need to do anything else!
                 }
@@ -223,7 +224,7 @@ namespace Safir
                         //everyone has responded saying that they have not seen persistence data
                         //allow initial sets to start.
                         Connections::Instance().AllowConnect(-1);
-                        TimerHandler::Instance().Remove(m_timerId);
+                        m_timerHandler.Remove(m_timerId);
                         return; //no need to do anything else!
                     }
                 }

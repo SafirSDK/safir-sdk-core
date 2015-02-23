@@ -38,10 +38,12 @@ namespace Internal
         private boost::noncopyable
     {
     public:
-        EndStatesHandler();
+        explicit EndStatesHandler(TimerHandler& timerHandler);
 
     private:
         virtual void HandleTimeout(const TimerInfoPtr & timer);
+
+        TimerHandler& m_timerHandler;
 
         TimerId m_timerId;
     };

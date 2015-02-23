@@ -65,9 +65,6 @@ namespace Dob
 {
 namespace Internal
 {
-    //static member initialization
-    TimerHandler* TimerHandler::m_instance = NULL;
-
     TimerInfoBase::TimerInfoBase(const TimerId timerId):
         m_timerId(timerId)
     {
@@ -116,19 +113,6 @@ namespace Internal
     TimerHandler::~TimerHandler()
     {
 
-    }
-
-
-    void TimerHandler::Instantiate(boost::asio::io_service & ioService)
-    {
-        ENSURE(m_instance == NULL, << L"Instantiate() was called twice!");
-        m_instance = new TimerHandler(ioService);
-    }
-
-    TimerHandler & TimerHandler::Instance()
-    {
-        ENSURE(m_instance != NULL, << L"Instance() was called before Instantiate()");
-        return *m_instance;
     }
 
     void TimerHandler::Stop()
