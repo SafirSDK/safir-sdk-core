@@ -24,12 +24,16 @@
 #pragma once
 
 #ifdef _MSC_VER
-    //Windows implementation
     #pragma warning (push)
-    #pragma warning (disable: 4267)
+    #pragma warning (disable: 4996)
+    #pragma warning (disable: 4267)    
+
+    //Windows implementation
     #include <boost/asio.hpp>
-    #include <boost/asio/ip/udp.hpp>
-    #pragma warning (pop)
+    #include <boost/asio/ip/udp.hpp>    
+    #include <winsock2.h>
+    #include <ws2tcpip.h>
+
 #else
     //Linux implementation
     #include <sys/ioctl.h>
@@ -100,6 +104,13 @@ namespace Com
 #ifndef SAFIR_TEST
     private:
 #endif
+
+        struct AdapterInfo
+        {
+            std::string name;
+            std::string ipAddress;
+            int ipVersion;
+        };
 
         mutable boost::asio::ip::udp::resolver m_resolver;
 
@@ -172,32 +183,19 @@ namespace Com
         std::string GetIPAddressBestMatch(const std::string& expr) const
         {
             //check if a adapter name has been specified
-            for (int version=4; version<=6; version+=2)
-            {
-                auto addr=GetInterfaceIpAddress(expr, version);
-                if (!addr.empty())
-                {
-                    return addr;
-                }
-            }
-
+            auto adapters = GetAdapters();
             std::vector<std::string> addresses;
-            for (const auto& n : GetInterfaceNames())
+
+            for (const auto& ai : adapters)
             {
-                auto a6=GetInterfaceIpAddress(n, 6);
-                if (!a6.empty())
+                if (ai.name == expr || ai.ipAddress==expr)
                 {
-                    addresses.emplace_back(a6);
+                    return ai.ipAddress;
                 }
-                auto a4=GetInterfaceIpAddress(n, 4);
-                if (!a4.empty())
-                {
-                    addresses.emplace_back(a4);
-                }
+                addresses.push_back(ai.ipAddress);
             }
 
             auto bestMatchingIp=FindBestMatch(expr, addresses);
-
             if (!bestMatchingIp.empty())
             {
                 return bestMatchingIp;
@@ -267,19 +265,80 @@ namespace Com
         }
 
 #ifdef _MSC_VER
+
         //Windows implementation
-        std::vector<std::string> GetInterfaceNames() const
+        std::vector<AdapterInfo> GetAdapters() const
         {
-            std::vector<std::string> result;
+            std::vector<AdapterInfo> result;
+            WSADATA WinsockData;
+            if (WSAStartup(MAKEWORD(2, 2), &WinsockData) != 0)
+            {
+                return result;
+            }
+
+            SOCKET sd = WSASocketW(AF_INET, SOCK_DGRAM, 0, 0, 0, 0);
+            if (sd == SOCKET_ERROR)
+            {
+                return result;
+            }
+
+            INTERFACE_INFO InterfaceList[20];
+            unsigned long nBytesReturned;
+            if (WSAIoctl(sd, SIO_GET_INTERFACE_LIST, 0, 0, &InterfaceList,
+                sizeof(InterfaceList), &nBytesReturned, 0, 0) == SOCKET_ERROR)
+            {
+                return result;
+            }
+
+            int nNumInterfaces = nBytesReturned / sizeof(INTERFACE_INFO);
+            for (int i = 0; i < nNumInterfaces; ++i)
+            {
+                AdapterInfo ai;
+                const sockaddr_in *pAddress = reinterpret_cast<const sockaddr_in*>(&(InterfaceList[i].iiAddress));
+                ai.ipAddress = inet_ntoa(pAddress->sin_addr);
+                ai.name = ai.ipAddress;
+                ai.ipVersion = 4;
+                result.push_back(ai);
+            }
+
+            WSACleanup();
             return result;
         }
 
-        std::string GetInterfaceIpAddress(const std::string& /*interfaceName*/, int /*protocol*/) const
+#else
+        std::vector<AdapterInfo> GetAdapters() const
         {
-            return "";
+            std::vector<AdapterInfo> result;
+
+            auto names=GetInterfaceNames();
+            for (const auto& name : names)
+            {
+                auto a4=GetInterfaceIpAddress(name, 4);
+                if (!a4.empty())
+                {
+                    AdapterInfo ai;
+                    ai.name=name;
+                    ai.ipAddress=a4;
+                    ai.ipVersion=4;
+                    result.push_back(ai);
+                    continue;
+                }
+
+                auto a6=GetInterfaceIpAddress(name, 6);
+                if (!a6.empty())
+                {
+                    AdapterInfo ai;
+                    ai.name=name;
+                    ai.ipAddress=a6;
+                    ai.ipVersion=6;
+                    result.push_back(ai);
+                    continue;
+                }
+            }
+
+            return result;
         }
 
-#else
         //Linux implementation
         std::vector<std::string> GetInterfaceNames() const
         {
@@ -327,3 +386,7 @@ namespace Com
 }
 }
 }
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif

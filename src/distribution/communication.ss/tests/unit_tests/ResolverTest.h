@@ -32,72 +32,72 @@ public:
     static void Run()
     {
         std::cout<<"ResolverTest started"<<std::endl;
-//        boost::asio::io_service io;
-//        auto work=boost::make_shared<boost::asio::io_service::work>(io);
+        boost::asio::io_service io;
+        auto work=boost::make_shared<boost::asio::io_service::work>(io);
 
-//        boost::thread_group threads;
-//        for (int i = 0; i < 9; ++i)
-//        {
-//            threads.create_thread([&]{io.run();});
-//        }
+        boost::thread_group threads;
+        for (int i = 0; i < 9; ++i)
+        {
+            threads.create_thread([&]{io.run();});
+        }
 
-//        bool success=true;
-//        Com::Resolver resolver(io);
-//        auto resolveLocal=[&](const std::string& expr)
-//        {
-//            try
-//            {
-//                auto ep=resolver.ResolveLocalEndpoint(expr);
-//                std::cout<<"ResolvedLocal "<<expr<<" to '"<<ep.address().to_string()<<":"<<ep.port()<<"'"<<std::endl;
-//            }
-//            catch(const std::exception& e)
-//            {
-//                success=false;
-//                std::cout<<"Got Exception in ResolvedLocal: "<<e.what()<<std::endl;
-//            }
-//        };
+        bool success=true;
+        Com::Resolver resolver(io);
+        auto resolveLocal=[&](const std::string& expr)
+        {
+            try
+            {
+                auto ep=resolver.ResolveLocalEndpoint(expr);
+                std::cout<<"ResolvedLocal "<<expr<<" to '"<<ep.address().to_string()<<":"<<ep.port()<<"'"<<std::endl;
+            }
+            catch(const std::exception& e)
+            {
+                success=false;
+                std::cout<<"Got Exception in ResolvedLocal: "<<e.what()<<std::endl;
+            }
+        };
 
-//        auto resolveRemote=[&](const std::string& expr, const std::string myAddr, int protocol)
-//        {
-//            try
-//            {
-//                auto ep=resolver.ResolveRemoteEndpoint(expr, myAddr, protocol);
-//                std::cout<<"ResolvedRemote "<<expr<<" to '"<<ep.address().to_string()<<":"<<ep.port()<<"'"<<std::endl;
-//            }
-//            catch(const std::exception& e)
-//            {
-//                success=false;
-//                std::cout<<"Got Exception in ResolvedRemote: "<<e.what()<<std::endl;
-//            }
-//        };
+        auto resolveRemote=[&](const std::string& expr, const std::string myAddr, int protocol)
+        {
+            try
+            {
+                auto ep=resolver.ResolveRemoteEndpoint(expr, myAddr, protocol);
+                std::cout<<"ResolvedRemote "<<expr<<" to '"<<ep.address().to_string()<<":"<<ep.port()<<"'"<<std::endl;
+            }
+            catch(const std::exception& e)
+            {
+                success=false;
+                std::cout<<"Got Exception in ResolvedRemote: "<<e.what()<<std::endl;
+            }
+        };
 
-//        CHECK(resolver.DiffIndex("abcdefg", "abdcefg")==2);
-//        CHECK(resolver.DiffIndex("bcdefg", "abdcefg")==0);
-//        CHECK(resolver.DiffIndex("abcdefg", "abcdefg")==7);
+        CHECK(resolver.DiffIndex("abcdefg", "abdcefg")==2);
+        CHECK(resolver.DiffIndex("bcdefg", "abdcefg")==0);
+        CHECK(resolver.DiffIndex("abcdefg", "abcdefg")==7);
 
-//        std::vector<std::string> v={"192.168.0.100", "192.168.66.100", "192.0.0.0", "192.168.0.0", "192.255.255.255"};
-//        CHECK(resolver.FindBestMatch("192.168.66.123", v)=="192.168.66.100");
-//        CHECK(resolver.FindBestMatch("192.0.66.123", v)=="192.0.0.0");
-//        CHECK(resolver.FindBestMatch("192.168.255.255", v)=="192.168.0.0");
+        std::vector<std::string> v={"192.168.0.100", "192.168.66.100", "192.0.0.0", "192.168.0.0", "192.255.255.255"};
+        CHECK(resolver.FindBestMatch("192.168.66.123", v)=="192.168.66.100");
+        CHECK(resolver.FindBestMatch("192.0.66.123", v)=="192.0.0.0");
+        CHECK(resolver.FindBestMatch("192.168.255.255", v)=="192.168.0.0");
 
-//        std::cout<<"Testing resolve local endpoint"<<std::endl;
-//        resolveLocal("localhost:10000");
-//        resolveLocal("192.168.*.*:12345");
-//        resolveLocal("eth0:10000");
-//        resolveLocal("lo:12000");
+        std::cout<<"Testing resolve local endpoint"<<std::endl;
+        resolveLocal("localhost:10000");
+        resolveLocal("192.168.*.*:12345");
+        resolveLocal("eth0:10000");
+        resolveLocal("lo:12000");
 
-//        std::cout<<"Testing resolve remote endpoint"<<std::endl;
-//        auto myEndpoint=resolver.ResolveLocalEndpoint("192:10000");
-//        auto myAddr=myEndpoint.address().to_string();
-//        auto protocol=4;
-//        resolveRemote("safir-salt-router:10000", myAddr, protocol);
-//        resolveRemote("192.168.211.157:10000", myAddr, protocol);
+        std::cout<<"Testing resolve remote endpoint"<<std::endl;
+        auto myEndpoint=resolver.ResolveLocalEndpoint("192:10000");
+        auto myAddr=myEndpoint.address().to_string();
+        auto protocol=4;
+        resolveRemote("safir-salt-router:10000", myAddr, protocol);
+        resolveRemote("192.168.211.157:10000", myAddr, protocol);
 
-//        resolveRemote("google.com:10000", myAddr, protocol);
-//        TRACELINE
+        resolveRemote("google.com:10000", myAddr, protocol);
+        TRACELINE
 
-//        work.reset();
-//        threads.join_all();
+        work.reset();
+        threads.join_all();
         std::cout<<"Resolver tests passed"<<std::endl;
     }
 
