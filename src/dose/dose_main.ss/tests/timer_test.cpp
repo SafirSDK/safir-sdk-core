@@ -65,6 +65,11 @@ public:
         }
     }
 
+    void Stop()
+    {
+        m_timerHandler.Stop();
+    }
+
 protected:
     TimerHandler m_timerHandler;
     TimerId m_timerId;
@@ -224,6 +229,7 @@ int main(int,char**)
             TimerStarver starver;
 
             ioService.run();
+            starver.Stop();
             ioService.reset();
         }
 
@@ -231,6 +237,7 @@ int main(int,char**)
             SingleTimerTester tester(L"Single Timer",0.1);
 
             ioService.run();
+            tester.Stop();
             ioService.reset();
         }
 
@@ -238,6 +245,7 @@ int main(int,char**)
             ReplaceTimerTester tester;
 
             ioService.run();
+            tester.Stop();
             ioService.reset();
         }
 
@@ -245,6 +253,7 @@ int main(int,char**)
             DiscardTimerTester tester;
 
             ioService.run();
+            tester.Stop();
             ioService.reset();
         }
 
@@ -252,6 +261,7 @@ int main(int,char**)
             DeadlineTimerTester tester;
 
             ioService.run();
+            tester.Stop();
             ioService.reset();
         }
 
