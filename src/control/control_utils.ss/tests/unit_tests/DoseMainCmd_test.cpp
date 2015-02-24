@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE( send_inject_node )
     threads.create_thread([&pubIoService](){pubIoService.run();});
     threads.create_thread([&subIoService](){subIoService.run();});
 
-    bool injectOwnNodeCmdReceived = false;
+    bool setOwnNodeCmdReceived = false;
     bool injectNodeCmdReceived = false;
 
     std::unique_ptr<DoseMainCmdSender> cmdSender;
@@ -67,11 +67,11 @@ BOOST_AUTO_TEST_CASE( send_inject_node )
 
 		                                       std::wcout << "The receiver has connected!" << std::endl;
 
-                                               cmdSender->InjectOwnNode(12345,
-                                                                       "Kalle",
-                                                                       54321,
-                                                                       121212,
-                                                                       "192.168.211.10");
+                                               cmdSender->SetOwnNode(12345,
+                                                                     "Kalle",
+                                                                     54321,
+                                                                     121212,
+                                                                     "192.168.211.10");
 
                                                cmdSender->InjectNode(54321,
                                                                     "Olle",
@@ -88,13 +88,13 @@ BOOST_AUTO_TEST_CASE( send_inject_node )
     cmdReceiver.reset(new DoseMainCmdReceiver(subIoService,
 
                                     // Inject own node callback
-                                    [&injectOwnNodeCmdReceived](int64_t requestId,
+                                    [&setOwnNodeCmdReceived](int64_t requestId,
                                        const std::string& nodeName,
                                        int64_t nodeId,
                                        int64_t nodeTypeId,
                                        const std::string& dataAddress)
                                     {
-                                        injectOwnNodeCmdReceived = true;
+                                        setOwnNodeCmdReceived = true;
 
                                         BOOST_CHECK(requestId == 12345);
                                         BOOST_CHECK(nodeName == "Kalle");
@@ -121,10 +121,10 @@ BOOST_AUTO_TEST_CASE( send_inject_node )
 
                                     // Stop dose_main
                                     [&cmdSender, &cmdReceiver, &pubWork, &subWork,
-                                     &injectOwnNodeCmdReceived, &injectNodeCmdReceived](int64_t requestId)
+                                     &setOwnNodeCmdReceived, &injectNodeCmdReceived](int64_t requestId)
                                     {
                                         BOOST_CHECK(requestId == 45);
-                                        BOOST_CHECK(injectOwnNodeCmdReceived);
+                                        BOOST_CHECK(setOwnNodeCmdReceived);
                                         BOOST_CHECK(injectNodeCmdReceived);
 
                                         cmdSender->Stop();

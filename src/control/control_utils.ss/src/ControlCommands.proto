@@ -29,7 +29,7 @@ message ControlCmd {
 
     enum CmdType
     {
-      INJECT_OWN_NODE = 0;
+      SET_OWN_NODE = 0;
       INJECT_NODE = 1;
       STOP = 2;
     }

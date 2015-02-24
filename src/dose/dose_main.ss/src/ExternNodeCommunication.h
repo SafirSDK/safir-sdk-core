@@ -1,8 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://safir.sourceforge.net)
 *
-* Created by: Lars Hagström / stlrha
+* Created by: Anders Widén / anders.widen@consoden.se
 *
 *******************************************************************************
 *
@@ -21,6 +21,136 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
+#pragma once
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
+#endif
+
+#include <boost/asio.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
+
+#include <Safir/Dob/Internal/StateDeleter.h>
+#include <Safir/Dob/Internal/DistributionData.h>
+#include <Safir/Utilities/Internal/LowLevelLogger.h>
+
+#include "Distribution.h"
+
+namespace Safir
+{
+namespace Dob
+{
+namespace Internal
+{
+
+    typedef std::function<void(const DistributionData& data, const bool isAckedData)> IncomingDataCallback;
+    typedef std::function<void(void)> StartPoolDistributionCallback;
+
+    template <typename DistributionT>
+    class ExternNodeCommunicationBasic:
+        private boost::noncopyable
+    {
+    public:
+
+        ExternNodeCommunicationBasic(boost::asio::io_service::strand&        receiveStrand,
+                                     const IncomingDataCallback&             handleDataCb,
+                                     const StartPoolDistributionCallback&    startPoolDistributionCb)
+            : m_distribution(),
+              m_receiveStrand(receiveStrand),
+              m_handleDataCb(handleDataCb),
+              m_startPoolDistributionCb(startPoolDistributionCb)
+        {
+
+        }
+
+        void SetOwnNode(const std::string&        ownNodeName,
+                        int64_t                   ownNodeId,
+                        int64_t                   ownNodeTypeId,
+                        const std::string&        ownDataAddress)
+        {
+            m_distribution.reset(new DistributionT(m_receiveStrand.get_io_service(),
+                                                   ownNodeName,
+                                                   ownNodeId,
+                                                   ownNodeTypeId,
+                                                   ownDataAddress,
+                                                   m_receiveStrand.wrap(
+                                                       [this](int64_t fromNodeId,
+                                                              int64_t fromNodeType,
+                                                              const boost::shared_ptr<char[]>& data,
+                                                              size_t size)
+                                                       {
+                                                           HandleIncomingData(fromNodeId,
+                                                                              fromNodeType,
+                                                                              data,
+                                                                              size);
+                                                       })));
+        }
+
+        void InjectNode(const std::string& nodeName,
+                        int64_t            nodeId,
+                        int64_t            nodeTypeId,
+                        const std::string& dataAddress)
+        {
+            if (m_distribution == nullptr)
+            {
+                std::ostringstream os;
+                os << "DOSE_MAIN: ExternNodeCommunication::InjectNode called before SetOwnNode";
+                throw std::logic_error(os.str());
+            }
+
+            m_distribution->InjectNode(nodeName,
+                                       nodeId,
+                                       nodeTypeId,
+                                       dataAddress);
+        }
+
+    private:
+
+        std::unique_ptr<DistributionT> m_distribution;
+
+        boost::asio::io_service::strand&    m_receiveStrand;
+
+        const IncomingDataCallback&             m_handleDataCb;
+        const StartPoolDistributionCallback&    m_startPoolDistributionCb;
+
+        void HandleIncomingData(int64_t fromNodeId,
+                                int64_t fromNodeType,
+                                const boost::shared_ptr<char[]>& data,
+                                size_t size)
+        {
+            // TODO: In the future the data chunk given in this callback should already be in shared memory.
+            //       Change this when Communication is given this ability.
+
+            // Create shm chunk
+            auto shmData = DistributionData::NewData(size);
+
+            std::memcpy(shmData, data.get(), size);
+
+            DistributionData msg(new_data_tag, shmData);
+
+            // The data reference count is now 2, drop it to 1.
+            DistributionData::DropReference(shmData);
+
+            lllog(9) << "DOSE_MAIN: Msg RECEIVED from node id " << fromNodeId
+                     << " with node type " << fromNodeType << '\n'
+                     <<  msg.Image() << std::endl;
+
+        }
+
+
+
+    };
+
+    typedef ExternNodeCommunicationBasic<Distribution> ExternNodeCommunication;
+
+}
+}
+}
+
 #if 0 //stewart
 
 #ifndef _dose_main_communication_h

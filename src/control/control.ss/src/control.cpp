@@ -285,11 +285,11 @@ int main(int argc, char * argv[])
                              [&sp, &communication, &doseMainCmdSender, &options, & conf, &stateHandler]()
                              {
                                  // Send info about own node to dose_main
-                                 doseMainCmdSender->InjectOwnNode(0, // request id currently not used
-                                                                  conf.thisNodeParam.name,
-                                                                  options.id,
-                                                                  conf.thisNodeParam.nodeTypeId,
-                                                                  conf.thisNodeParam.dataAddress);
+                                 doseMainCmdSender->SetOwnNode(0, // request id currently not used
+                                                               conf.thisNodeParam.name,
+                                                               options.id,
+                                                               conf.thisNodeParam.nodeTypeId,
+                                                               conf.thisNodeParam.dataAddress);
 
                                  sp.StartStateSubscription
                                          ([&stateHandler](const SP::SystemState& newState)

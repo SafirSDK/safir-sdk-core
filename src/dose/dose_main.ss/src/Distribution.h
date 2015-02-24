@@ -61,7 +61,8 @@ namespace Internal
                           const std::string&        ownNodeName,
                           int64_t                   ownNodeId,
                           int64_t                   ownNodeTypeId,
-                          const std::string&        ownDataAddress)
+                          const std::string&        ownDataAddress,
+                          Com::ReceiveData          receiveDataCb)
             : m_communication(),
               m_sp()
         {
@@ -70,7 +71,7 @@ namespace Internal
             // Create and populate structures that are needed when creating the Communication and
             // SP instances.
             std::vector<Com::NodeTypeDefinition> commNodeTypes;
-            std::map<boost::int64_t, SP::NodeType> spNodeTypes;
+            std::map<boost::int64_t, typename SP::NodeType> spNodeTypes;
 
             for (const auto& nt: config.nodeTypesParam)
             {
@@ -90,22 +91,26 @@ namespace Internal
                                                                boost::chrono::milliseconds(nt.retryTimeout))));
             }
 
-            m_communication.reset(new Com::Communication(Com::dataModeTag,
-                                                         ioService,
-                                                         ownNodeName,
-                                                         ownNodeId,
-                                                         ownNodeTypeId,
-                                                         ownDataAddress,
-                                                         commNodeTypes));
+            m_communication.reset(new CommunicationT(Com::dataModeTag,
+                                                     ioService,
+                                                     ownNodeName,
+                                                     ownNodeId,
+                                                     ownNodeTypeId,
+                                                     ownDataAddress,
+                                                     commNodeTypes));
 
-            m_sp.reset(new SP::SystemPicture(SP::slave_tag,
-                                             ioService,
-                                             *m_communication,
-                                             ownNodeName,
-                                             ownNodeId,
-                                             ownNodeTypeId,
-                                             ownDataAddress,
-                                             spNodeTypes));
+            m_sp.reset(new SystemPictureT(SP::slave_tag,
+                                          ioService,
+                                          *m_communication,
+                                          ownNodeName,
+                                          ownNodeId,
+                                          ownNodeTypeId,
+                                          ownDataAddress,
+                                          spNodeTypes));
+
+
+            m_communication->SetDataReceiver(receiveDataCb,
+                                             0); // dataTypeIdentifier currently not used
 
             m_communication->Start();
 
@@ -123,6 +128,8 @@ namespace Internal
                                         dataAddress);
         }
 
+
+
         // Stop the internal workings of this class.
         // Must be called before destroying the object.
         void Stop()
@@ -133,8 +140,8 @@ namespace Internal
 
     private:
 
-        std::unique_ptr<Com::Communication> m_communication;
-        std::unique_ptr<SP::SystemPicture> m_sp;
+        std::unique_ptr<CommunicationT> m_communication;
+        std::unique_ptr<SystemPictureT> m_sp;
     };
 
     typedef DistributionBasic<Com::Communication, SP::SystemPicture, Control::Config> Distribution;

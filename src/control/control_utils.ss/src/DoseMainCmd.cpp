@@ -46,7 +46,7 @@ namespace Control
     public:
 
         Impl(boost::asio::io_service& ioService,
-             const InjectNodeCmdCb&   injectOwnNodeCmdCb,
+             const InjectNodeCmdCb&   setOwnNodeCmdCb,
              const InjectNodeCmdCb&   injectNodeCmdCb,
              const StopDoseMainCb&    stopDoseMainCb)
             : m_ipcSubscriber(ioService,
@@ -55,7 +55,7 @@ namespace Control
                               {
                                   RecvDataCb(data, size);
                               }),
-              m_injectOwnNodeCmdCb(injectOwnNodeCmdCb),
+              m_setOwnNodeCmdCb(setOwnNodeCmdCb),
               m_injectNodeCmdCb(injectNodeCmdCb),
               m_stopDoseMainCb(stopDoseMainCb)
         {
@@ -76,7 +76,7 @@ namespace Control
 
         Safir::Utilities::Internal::IpcSubscriber m_ipcSubscriber;
 
-        InjectNodeCmdCb     m_injectOwnNodeCmdCb;
+        InjectNodeCmdCb     m_setOwnNodeCmdCb;
         InjectNodeCmdCb     m_injectNodeCmdCb;
         StopDoseMainCb      m_stopDoseMainCb;
 
@@ -98,13 +98,13 @@ namespace Control
                 }
                 break;
 
-                case controlCmd.INJECT_OWN_NODE:
+                case controlCmd.SET_OWN_NODE:
                 {
-                    m_injectOwnNodeCmdCb(controlCmd.request_id(),
-                                         controlCmd.node_data().node_name(),
-                                         controlCmd.node_data().node_id(),
-                                         controlCmd.node_data().node_type_id(),
-                                         controlCmd.node_data().data_address());
+                    m_setOwnNodeCmdCb(controlCmd.request_id(),
+                                      controlCmd.node_data().node_name(),
+                                      controlCmd.node_data().node_id(),
+                                      controlCmd.node_data().node_type_id(),
+                                      controlCmd.node_data().data_address());
                 }
                 break;
 
@@ -124,10 +124,10 @@ namespace Control
     };
 
     DoseMainCmdReceiver::DoseMainCmdReceiver(boost::asio::io_service& ioService,
-                                             const InjectNodeCmdCb&   injectOwnNodeCmdCb,
+                                             const InjectNodeCmdCb&   setOwnNodeCmdCb,
                                              const InjectNodeCmdCb&   injectNodeCmdCb,
                                              const StopDoseMainCb&    stopDoseMainCb)
-        : m_impl(Safir::make_unique<Impl>(ioService, injectOwnNodeCmdCb, injectNodeCmdCb, stopDoseMainCb))
+        : m_impl(Safir::make_unique<Impl>(ioService, setOwnNodeCmdCb, injectNodeCmdCb, stopDoseMainCb))
     {
     }
 
@@ -163,16 +163,16 @@ namespace Control
            m_ipcPublisher.Stop();
         }
 
-        void InjectOwnNode(int64_t requestId,
-                           const std::string& nodeName,
-                           int64_t nodeId,
-                           int64_t nodeTypeId,
-                           const std::string& dataAddress)
+        void SetOwnNode(int64_t requestId,
+                        const std::string& nodeName,
+                        int64_t nodeId,
+                        int64_t nodeTypeId,
+                        const std::string& dataAddress)
         {
             ControlCmd controlCmd;
 
             controlCmd.set_request_id(requestId);
-            controlCmd.set_cmd_type(ControlCmd::INJECT_OWN_NODE);
+            controlCmd.set_cmd_type(ControlCmd::SET_OWN_NODE);
             controlCmd.mutable_node_data()->set_node_name(nodeName);
             controlCmd.mutable_node_data()->set_node_id(nodeId);
             controlCmd.mutable_node_data()->set_node_type_id(nodeTypeId);
@@ -240,13 +240,13 @@ namespace Control
         m_impl->Stop();
     }
 
-    void DoseMainCmdSender::InjectOwnNode(int64_t requestId,
+    void DoseMainCmdSender::SetOwnNode(int64_t requestId,
                                           const std::string& nodeName,
                                           int64_t nodeId,
                                           int64_t nodeTypeId,
                                           const std::string& dataAddress)
     {
-        m_impl->InjectOwnNode(requestId,
+        m_impl->SetOwnNode(requestId,
                               nodeName,
                               nodeId,
                               nodeTypeId,

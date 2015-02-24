@@ -21,27 +21,43 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include "../../src/Distribution.h"
+#include "../../src/ExternNodeCommunication.h"
 
-#define BOOST_TEST_MODULE DistributionTests
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
+#endif
+
+#include <boost/asio.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
+
+#define BOOST_TEST_MODULE ExternNodeCommunication
 #include <boost/test/unit_test.hpp>
+
+void DataCb(const Safir::Dob::Internal::DistributionData& data, const bool isAckedData)
+{
+
+}
+
+void StartPoolDistributionCb()
+{
+
+}
 
 BOOST_AUTO_TEST_CASE( first_test )
 {
     boost::asio::io_service ioService;
+    boost::asio::strand strand(ioService);
 
-    Safir::Dob::Internal::Distribution d(ioService,
-                                         "Pelle",
-                                         6565,
-                                         878787,
-                                         "127.0.0.1",
-                                         [](int64_t fromNodeId,
-                                            int64_t fromNodeType,
-                                            const boost::shared_ptr<char[]>& data,
-                                            size_t size)
-                                         {
 
-                                         });
+    Safir::Dob::Internal::ExternNodeCommunication ecom(strand, DataCb, StartPoolDistributionCb);
+
+    ecom.SetOwnNode("Kalle", 123, 54321, "192.168.1.0");
+
+    ecom.InjectNode("Olle", 789, 5656, "192.168.1.2");
 
     bool ok = true;
     BOOST_CHECK(ok);

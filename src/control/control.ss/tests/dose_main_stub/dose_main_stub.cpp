@@ -164,7 +164,7 @@ int main(int /*argc*/, char * /*argv*/[])
     doseMainCmdReceiver.reset(new Control::DoseMainCmdReceiver
                         (ioService,
 
-                         // Action when InjectOwnNode command is received
+                         // Action when SetOwnNode command is received
                          [&communication, &sp, &ioService, &commNodeTypes,
                           &spNodeTypes, &timer, &onTimeout, &nodeNameMap]
                          (int64_t /*requestId*/,

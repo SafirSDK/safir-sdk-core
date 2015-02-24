@@ -67,7 +67,7 @@ namespace Control
         typedef std::function<void(int64_t requestId)> StopDoseMainCb;
 
         DoseMainCmdReceiver(boost::asio::io_service& ioService,
-                            const InjectNodeCmdCb&   injectOwnNodeCmdCb,
+                            const InjectNodeCmdCb&   setOwnNodeCmdCb,
                             const InjectNodeCmdCb&   injectNodeCmdCb,
                             const StopDoseMainCb&    stopDoseMainCb);
 
@@ -102,11 +102,11 @@ namespace Control
         void Stop();
 
         // dose_main commands
-        void InjectOwnNode(int64_t requestId,
-                           const std::string& nodeName,
-                           int64_t nodeId,
-                           int64_t nodeTypeId,
-                           const std::string& dataAddress);
+        void SetOwnNode(int64_t requestId,
+                        const std::string& nodeName,
+                        int64_t nodeId,
+                        int64_t nodeTypeId,
+                        const std::string& dataAddress);
 
         void InjectNode(int64_t requestId,
                         const std::string& nodeName,
