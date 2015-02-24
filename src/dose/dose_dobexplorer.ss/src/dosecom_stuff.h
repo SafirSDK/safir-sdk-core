@@ -34,10 +34,4 @@ void IpAddr_ToString(unsigned long IpAddr_nw, char *StrIpAddr);
 
 int Get_Status_Info(DOSE_SHARED_DATA_S *pShm, char *buff);
 
-//Some stuff to avoid warning from moc
-#include <QObject>
-
-class dummy : public QObject{
-    Q_OBJECT
-};
 #endif
