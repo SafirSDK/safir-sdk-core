@@ -310,9 +310,11 @@ struct Fixture
 {
     Fixture()
     {
-        SAFE_BOOST_TEST_MESSAGE("setup fixture");
+        SAFE_BOOST_TEST_MESSAGE("Set up fixture");
 
         Connector::Instance().Reset();
+        
+        SAFE_BOOST_TEST_MESSAGE("Connector reset");
 
         for (int i = 0; i < boost::unit_test::framework::master_test_suite().argc; ++i)
         {
@@ -326,6 +328,8 @@ struct Fixture
 
         nodes.push_back(Safir::make_unique<Node>(ioService,nextNodeId));
         ++nextNodeId;
+        
+        SAFE_BOOST_TEST_MESSAGE("Fixture setup complete");
     }
 
     ~Fixture()
@@ -564,9 +568,9 @@ BOOST_AUTO_TEST_CASE( lots_of_nodes )
 {
     //windows debug builds run out of memory when using too many nodes :-)
 #if defined (_MSC_VER) && !defined(NDEBUG)
-    const int numNodes = 100;
+    const int numNodes = 50;
 #else
-    const int numNodes = 1000;
+    const int numNodes = 500;
 #endif
 
     //remember that one node is automatically added by the fixture
@@ -595,9 +599,9 @@ BOOST_AUTO_TEST_CASE( lots_of_nodes_remove_some )
 {
     //windows debug builds run out of memory when using too many nodes :-)
 #if defined (_MSC_VER) && !defined(NDEBUG)
-    const int numNodes = 100;
+    const int numNodes = 50;
 #else
-    const int numNodes = 1000;
+    const int numNodes = 500;
 #endif
 
     //remember that one node is automatically added by the fixture
@@ -646,7 +650,7 @@ BOOST_AUTO_TEST_CASE( lots_of_nodes_remove_some )
 
 BOOST_AUTO_TEST_CASE( remove_during_election )
 {
-    const int numNodes = 100;
+    const int numNodes = 50;
 
     //remember that one node is automatically added by the fixture
     for (int i = 0; i < numNodes - 1 ; ++i)

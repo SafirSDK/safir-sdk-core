@@ -128,6 +128,7 @@ namespace SP
             const auto aloneTimeout = CalculateAloneTimeout(nodeTypes);
             lllog(3) << "SP: AloneTimeout will be " << boost::chrono::duration_cast<boost::chrono::milliseconds>(aloneTimeout) << std::endl;
             lllog(3) << "SP: ElectionTimeout will be " << boost::chrono::duration_cast<boost::chrono::milliseconds>(m_electionTimeout) << std::endl;
+            m_electionInProgress = true;
             m_electionTimer.expires_from_now(aloneTimeout);
             m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
                                                      {
@@ -146,6 +147,10 @@ namespace SP
         {
             m_strand.dispatch([this]
                               {
+                                  m_pendingAlives.clear();
+                                  m_pendingVictories.clear();
+                                  m_pendingInquiries.clear();
+
                                   m_stopped = true;
                                   m_electionTimer.cancel();
                                   m_sendMessageTimer.cancel();
@@ -171,25 +176,15 @@ namespace SP
          * we're alone and proclaiming victory. */
         static boost::chrono::steady_clock::duration CalculateAloneTimeout(const std::map<int64_t, NodeType>& nodeTypes)
         {
-            //use average of non-light node types heartbeatInterval * maxLostHeartbeats / 2.0
-            boost::chrono::steady_clock::duration sum;
-            int number = 0;
-            for (const auto& nt: nodeTypes)
-            {
-                if (!nt.second.isLight)
-                {
-                    ++number;
-                    sum += nt.second.heartbeatInterval * nt.second.maxLostHeartbeats;
-                }
-            }
-            //election timeout can never be less than 100 milliseconds
-            return std::max<boost::chrono::steady_clock::duration>(boost::chrono::milliseconds(100),
-                                                                   sum / (number * 2));
+            return CalculateElectionTimeout(nodeTypes);
         }
 
         /** Calculate the time to wait for other nodes to respond to our INQUIRY. */
         static boost::chrono::steady_clock::duration CalculateElectionTimeout(const std::map<int64_t, NodeType>& nodeTypes)
         {
+            //NOTE: This function is also called by CalculateElectionTimeout, so take that into account
+            //if you're changing this function.
+
             //use max of non-light node types retryTimeout * maxLostHeartbeats
             boost::chrono::steady_clock::duration max = boost::chrono::milliseconds(100);
             for (const auto& nt: nodeTypes)
@@ -225,9 +220,10 @@ namespace SP
             //This timeout is just to make sure that if several nodes come up at the same time
             //we will not start too many elections
             m_electionTimer.expires_from_now(boost::chrono::milliseconds(100));
+            m_electionInProgress = true;
             m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
             {
-                if (!!error || m_stopped)
+                if (!!error || m_stopped || !m_electionInProgress)
                 {
                     return;
                 }
@@ -251,15 +247,16 @@ namespace SP
 
                         if (m_lastStatistics.Id(i) == m_elected && !m_lastStatistics.IsDead(i))
                         {
-                            //TODO: the uncommented code below gives very bad behaviour when enabled,
-                            //which is rather strange. For example it causes the unit tests to time out
-                            //and makes the component tests very unstable.
-                            //This is rather surprising, since the extra check seems reasonable to me...
-                            //All it adds is that we need the remote node to have seen the same election
-                            //as we did, otherwise we may be in a situation where a reelection is needed.
-                            if (m_elected > m_id/* &&
+                            // Note: the last two conditions below changes the behaviour
+                            // of SystemPicture in a rather surprising way. For example
+                            // it causes the unit tests to take a lot longer.
+                            // This is rather surprising, since the extra check seems reasonable
+                            // to me...  All it adds is that we need the remote node to
+                            // have seen the same election as we did, otherwise we may be
+                            // in a situation where a reelection is needed.
+                            if (m_elected > m_id &&
                                 m_lastStatistics.HasRemoteStatistics(i) &&
-                                m_lastStatistics.RemoteStatistics(i).ElectionId() == m_lastStatistics.ElectionId()*/)
+                                m_lastStatistics.RemoteStatistics(i).ElectionId() == m_lastStatistics.ElectionId())
                             {
                                 lllog(4) << "SP: Found elected node with higher id than me, "
                                          << "not starting election!" << std::endl;
@@ -276,11 +273,13 @@ namespace SP
                 m_pendingInquiries = m_nonLightNodeTypes;
                 SendPendingElectionMessages();
 
+                m_electionInProgress = true;
                 m_electionTimer.expires_from_now(m_electionTimeout);
                 m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
                                                          {
-                                                             if (!error && !m_stopped)
+                                                             if (!error && !m_stopped && m_electionInProgress)
                                                              {
+                                                                 m_electionInProgress = false;
                                                                  ElectionTimeout();
                                                              }
                                                          }));
@@ -374,6 +373,7 @@ namespace SP
                         {
                             lllog(5) << "SP: Got alive from someone bigger than me ("
                                      << from << "), abandoning election." << std::endl;
+                            m_electionInProgress = false;
                             m_electionTimer.cancel();
                             m_pendingInquiries.clear();
                             m_pendingVictories.clear();
@@ -392,6 +392,7 @@ namespace SP
                             m_electionCompleteCallback(m_elected, message.election_id());
 
                             //cancel any ongoing elections
+                            m_electionInProgress = false;
                             m_electionTimer.cancel();
                             m_pendingInquiries.clear();
                             m_pendingVictories.clear();
@@ -525,6 +526,7 @@ namespace SP
 
         std::atomic<int64_t> m_elected;
         boost::asio::steady_timer m_electionTimer;
+        bool m_electionInProgress{false};
         std::atomic<int64_t> m_currentElectionId;
 
         boost::asio::steady_timer m_sendMessageTimer;
