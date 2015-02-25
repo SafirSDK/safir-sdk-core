@@ -89,7 +89,7 @@ std::string GetSyslogTimestamp()
 class LLUF_UTILS_API SystemLogImpl
 {
     friend class SystemLogImplKeeper;
-    friend void Send(const Severity, const std::wstring&);
+    friend void Send(const Severity, const std::wstring&) noexcept;
 
 private:
     //constructor is private, to make sure only SystemLogImplKeeper can create it
@@ -107,8 +107,6 @@ private:
           m_sock(m_service),
           m_lock()
     {
-        try
-        {
             boost::algorithm::replace_last(m_processName, ".exe", "");
 
             Safir::Utilities::Internal::ConfigReader configReader;
@@ -140,13 +138,6 @@ private:
                                 (configReader.Logging().get<std::string>("SystemLog.syslog_server_address")),
                                  configReader.Logging().get<unsigned short>("SystemLog.syslog_server_port"));
             }
-
-        }
-        catch (const std::exception& e)
-        {
-            // Something really bad has happened, we have to stop executing
-            FatalError(ToUtf16(e.what()));
-        }
     }
 
 public:
@@ -221,7 +212,7 @@ public:
             break;
 
             default:
-                FatalError(L"SystemLogImpl::SendNativeLog: Unknown severity!");
+                throw std::logic_error("SystemLogImpl::SendNativeLog: Unknown severity!");
         }
 
         if (m_nativeLogging)
@@ -275,7 +266,7 @@ private:
             break;
 
             default:
-                FatalError(L"LogImpl::SendNativeLog: Unknown severity!");
+                throw std::logic_error("LogImpl::SendNativeLog: Unknown severity!");
         }
 
         boost::lock_guard<boost::mutex> lck(m_lock);
@@ -342,13 +333,6 @@ private:
             }
             return text;
         }
-    }
-
-    //-------------------------------------------------------------------------
-    void FatalError(const std::wstring& errTxt)
-    {
-        SendNativeLog(Critical, errTxt);
-        throw std::logic_error(ToUtf8(errTxt));
     }
 
 #ifdef _MSC_VER
@@ -453,21 +437,23 @@ private:
 boost::once_flag SystemLogImplKeeper::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
 bool SystemLogImplKeeper::destroyed = false;
 
-void Open()
+void TrySendNativeLog(const std::string& errTxt)
 {
     try
     {
-        SystemLogImplKeeper::Instance().Get();
+#if defined(linux) || defined(__linux) || defined(__linux__)
+        syslog(SAFIR_FACILITY | Critical, "%s", errTxt.c_str());
+#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+        WindowsLogger("Unknown process").Send(EVENTLOG_ERROR_TYPE, ToUtf16(errTxt));
+#endif
     }
-    catch (const std::runtime_error&)
+    catch (...)
     {
-        // The singleton has been destroyed, most likely because Open is called from
-        // another singleton's destructor.
-        // We don't do anything in this case.
+        // Nothing we can do here
     }
 }
 
-void Send(const Severity severity, const std::wstring& text)
+void Send(const Severity severity, const std::wstring& text) noexcept
 {
     try
     {
@@ -483,19 +469,19 @@ void Send(const Severity severity, const std::wstring& text)
         SystemLogImpl log;
         log.Send(severity, text);
     }
-}
-
-void Close()
-{
-    try
+    catch (const std::exception& e)
     {
-        SystemLogImplKeeper::Instance().Reset();
+        // If it is not possible to send a log we try to send a native log and
+        // then just terminate the program.
+        TrySendNativeLog(e.what());
+        exit(56);
     }
-    catch (const std::runtime_error&)
+    catch (...)
     {
-        // The singleton has been destroyed, most likely because Close is called from
-        // another singleton's destructor.
-        // We don't do anything in this case.
+        // Something really bad happened. We have no information about what it is, just
+        // terminate the program.
+        TrySendNativeLog("Caught some really weird exception when trying to send a system log.");
+        exit(57);
     }
 }
 

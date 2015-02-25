@@ -52,10 +52,6 @@ int main()
         Singleton::Instance();
 
         Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::Emergency, L"This is an emergency log");
-
-        Safir::Utilities::Internal::Log::Close();
-        // The following logs should still be sent since a Send implicitly opens the log
-
         Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::Alert, L"This is an alert log");
         Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::Critical, L"This is a critical log with \n newline and \t tab");
         Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::Error, L"This is an error log");
@@ -64,12 +60,8 @@ int main()
         Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::Informational, L"This is an informational log with \n newline and \t tab");
         Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::Debug, L"This is a debug log with \n newline and \t tab");
 
-        Safir::Utilities::Internal::Log::Close();
-        Safir::Utilities::Internal::Log::Open();
-
         SEND_SYSTEM_LOG(Error, << L"This is another error log");
 
-        Safir::Utilities::Internal::Log::Close();
     }
     catch (const std::exception& e)
     {
