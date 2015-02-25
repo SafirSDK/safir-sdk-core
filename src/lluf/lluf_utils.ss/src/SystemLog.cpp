@@ -185,7 +185,7 @@ public:
 
         switch (severity)
         {
-            // fatal errors are written to std::wcerr
+            // fatal errors are written to lll
             case Emergency:
             {
                 lllog(1) << L"EMERGENCY: " << textAscii << std::endl;
@@ -215,7 +215,7 @@ public:
             case Informational:
             case Debug:
             {
-                // No output to std::wcerr/lllog in these cases.
+                // No output to lllog in these cases.
                 ;
             }
             break;
@@ -348,7 +348,6 @@ private:
     void FatalError(const std::wstring& errTxt)
     {
         SendNativeLog(Critical, errTxt);
-        std::wcerr << errTxt << std::endl;
         throw std::logic_error(ToUtf8(errTxt));
     }
 
