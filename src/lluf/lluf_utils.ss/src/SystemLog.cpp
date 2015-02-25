@@ -89,7 +89,7 @@ std::string GetSyslogTimestamp()
 class LLUF_UTILS_API SystemLogImpl
 {
     friend class SystemLogImplKeeper;
-    friend void Send(const Severity, const std::wstring&) noexcept;
+    friend void Send(const Severity, const std::wstring&);
 
 private:
     //constructor is private, to make sure only SystemLogImplKeeper can create it
@@ -453,7 +453,7 @@ void TrySendNativeLog(const std::string& errTxt)
     }
 }
 
-void Send(const Severity severity, const std::wstring& text) noexcept
+void Send(const Severity severity, const std::wstring& text);
 {
     try
     {

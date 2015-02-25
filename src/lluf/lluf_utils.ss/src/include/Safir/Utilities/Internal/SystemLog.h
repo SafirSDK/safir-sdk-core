@@ -64,7 +64,7 @@ namespace Log
     * @param [in] text Log text.
     *
     */
-    LLUF_UTILS_API void Send(const Severity severity, const std::wstring& text) noexcept;
+    LLUF_UTILS_API void Send(const Severity severity, const std::wstring& text);
 
 }
 }
