@@ -313,7 +313,7 @@ struct Fixture
         SAFE_BOOST_TEST_MESSAGE("Set up fixture");
 
         Connector::Instance().Reset();
-        
+
         SAFE_BOOST_TEST_MESSAGE("Connector reset");
 
         for (int i = 0; i < boost::unit_test::framework::master_test_suite().argc; ++i)
@@ -328,7 +328,7 @@ struct Fixture
 
         nodes.push_back(Safir::make_unique<Node>(ioService,nextNodeId));
         ++nextNodeId;
-        
+
         SAFE_BOOST_TEST_MESSAGE("Fixture setup complete");
     }
 
@@ -566,8 +566,7 @@ BOOST_AUTO_TEST_CASE( three_nodes_remove_elected )
 
 BOOST_AUTO_TEST_CASE( lots_of_nodes )
 {
-    //windows debug builds run out of memory when using too many nodes :-)
-#if defined (_MSC_VER) && !defined(NDEBUG)
+#if !defined(NDEBUG)
     const int numNodes = 50;
 #else
     const int numNodes = 500;
@@ -597,8 +596,7 @@ BOOST_AUTO_TEST_CASE( lots_of_nodes )
 
 BOOST_AUTO_TEST_CASE( lots_of_nodes_remove_some )
 {
-    //windows debug builds run out of memory when using too many nodes :-)
-#if defined (_MSC_VER) && !defined(NDEBUG)
+#if !defined(NDEBUG)
     const int numNodes = 50;
 #else
     const int numNodes = 500;
