@@ -475,8 +475,6 @@ int main(int argc, char * argv[])
                                                            cmd.unicastAddress,
                                                            nodeTypes.ToVector()));
 
-    std::cout<<"Ip "<<com->IpAddress()<<std::endl;
-
     com->SetDataReceiver([=](int64_t fromNode, int64_t /*fromNodeType*/, const boost::shared_ptr<char[]>& msg, size_t size){sp->OnRecv(fromNode, msg, size);}, 123);
     com->SetGotReceiveFromCallback([=](int64_t id){sp->GotReceive(id);});
     com->SetRetransmitToCallback([=](int64_t id){sp->Retransmit(id);});

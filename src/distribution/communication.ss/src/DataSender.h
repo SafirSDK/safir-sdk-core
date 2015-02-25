@@ -298,7 +298,7 @@ namespace Com
                 }
 
                 NodeInfo ni;
-                ni.endpoint=Utilities::CreateEndpoint(address);
+                ni.endpoint=Resolver::StringToEndpoint(address);
                 ni.lastSentSeqNo=0;
                 ni.welcome=UINT64_MAX;
                 ni.systemNode=false;

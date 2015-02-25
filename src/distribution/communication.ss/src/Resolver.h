@@ -29,10 +29,11 @@
     #pragma warning (disable: 4267)    
 
     //Windows implementation
-    #include <boost/asio.hpp>
-    #include <boost/asio/ip/udp.hpp>    
     #include <winsock2.h>
     #include <ws2tcpip.h>
+    #include <boost/asio.hpp>
+    #include <boost/asio/ip/udp.hpp>    
+    #include <boost/lexical_cast.hpp>
 
 #else
     //Linux implementation
@@ -43,6 +44,7 @@
     #include <ifaddrs.h>
     #include <boost/asio.hpp>
     #include <boost/asio/ip/udp.hpp>
+    #include <boost/lexical_cast.hpp>
 #endif
 
 namespace Safir
@@ -53,15 +55,34 @@ namespace Internal
 {
 namespace Com
 {
+    /**
+     * The Resolver class is responsible for resolving hostnames and other expressions to endpoints, i.e address and port.
+     */
     class Resolver
     {
     public:
+
+        /**
+         * Constructor
+         *
+         * @param io [in] - Reference to io_service, needed to make dns lookups.
+         */
         Resolver(boost::asio::io_service& io)
             :m_resolver(io)
         {
         }
 
-        boost::asio::ip::udp::endpoint ResolveLocalEndpoint(const std::string& expr) const
+        /**
+         * @brief ResolveLocalEndpoint - Resolve an expresson to best matching endpoint. Will look at all network adapters and adapter names.
+         *                              Will also make dns lookup if needed. If expr has the form of an ip address the best matching ip address
+         *                              will be selected. I.e if expr="192.168.0.0:10000" and the computer has two network adapters with ip
+         *                              addresses {127.0.0.1, 192.168.100.100}, the adapter with address "192.168.100.100" will be chosen.
+         * @param expr [in] - Expression that can be a hostname, localhost, adapter name (ex: eth0), ip-address. Must end with port number,
+         *                    For example ip:port, adapter_name:port, host_name:port.
+         * @throw Throws logic_error of expr could not be resolved.
+         * @return Resolved address as a string on form <ip_address>:<port>
+         */
+        std::string ResolveLocalEndpoint(const std::string& expr) const
         {
             std::string ipExpr;
             unsigned short port;
@@ -76,11 +97,20 @@ namespace Com
                 throw std::logic_error(std::string("COM: Resolver.ResolveLocalEndpoint failed to resolve address: "+ipExpr));
             }
 
-            return CreateEndpoint(ip, port);
+            return ip+std::string(":")+boost::lexical_cast<std::string>(port);
         }
 
-        boost::asio::ip::udp::endpoint ResolveRemoteEndpoint(const std::string& expr, const std::string& myAddress, int protocol) const
+        /**
+         * @brief ResolveRemoteEndpoint - Resolve an expresson to an endpoint. expr can have the form hostname:port or ip_address:port.
+         *                              Will use dns lookup to resolve host names.
+         * @param expr [in] - Expression that can be a hostname or ip-address. Must end with port number.
+         * @param myAddress [in] - Own ip address. Will be matched if expr is on the form of an ip address.
+         * @throw Throws logic_error of expr could not be resolved.
+         * @return Resolved address as a string on form <ip_address>:<port>
+         */
+        std::string ResolveRemoteEndpoint(const std::string& expr, const std::string& myAddress) const
         {
+            auto protocol=Protocol(myAddress);
             std::string ipExpr;
             unsigned short port;
             if (!SplitAddress(expr, ipExpr, port))
@@ -97,9 +127,75 @@ namespace Com
                 throw std::logic_error(os.str());
             }
 
-            return CreateEndpoint(ip, port);
+            return ip+std::string(":")+boost::lexical_cast<std::string>(port);
         }
 
+        /**
+         * @brief StringToEndpoint - Converts a string on the form ip_address:port to an endpoint. No attempts to resolve host names or adapter names.
+         * @param address [in] - Address string, ip:port. Assumed to be correct.
+         * @throw std::logic_error on error.
+         * @return Endpoint.
+         */
+        static boost::asio::ip::udp::endpoint StringToEndpoint(const std::string& address)
+        {
+            std::string addr;
+            unsigned short port=0;
+            if (!SplitAddress(address, addr, port))
+            {
+                throw std::logic_error("Failed to parse '"+address+"' as an udp endpoint with port_number on form <ip>:<port>");
+            }
+            return CreateEndpoint(addr, port);
+        }
+
+        /**
+         * @brief Protocol - Convert number 4 or 6 to corresponding IP protocol type.
+         * @param p [in] - Protocol version, valid values are 4 and 6.
+         * @throw std::logic_error on error if invalid protocol is specified.
+         * @return protocol_type.
+         */
+        static boost::asio::ip::udp::endpoint::protocol_type Protocol(int p)
+        {
+            if (p==4)
+            {
+                return boost::asio::ip::udp::v4();
+            }
+            else if (p==6)
+            {
+                return boost::asio::ip::udp::v6();
+            }
+            throw std::logic_error("Invalid ip protocol. IPv4 and IPv6 supported.");
+        }
+
+        /**
+         * @brief Protocol - Finds out protocol version of address.
+         * @param address [in] - Address on form ip_address:port.
+         * @throw std::logic_error on error.
+         * @return Ip version 4 or 6.
+         */
+        static int Protocol(const std::string& address)
+        {
+            std::string addr;
+            unsigned short port=0;
+            if (!SplitAddress(address, addr, port))
+            {
+                throw std::logic_error("Failed to parse '"+address+"' as an udp endpoint with port_number on form <ip>:<port>");
+            }
+
+            boost::system::error_code ec;
+            boost::asio::ip::address_v4::from_string(addr, ec);
+            if (!ec) //ip v4 address
+            {
+                return 4;
+            }
+
+            boost::asio::ip::address_v6::from_string(addr, ec);
+            if (!ec) //ip v6 address
+            {
+                return 6;
+            }
+
+            throw std::logic_error("Failed to parse '"+address+"' as an udp endpoint.");
+        }
 
 #ifndef SAFIR_TEST
     private:
@@ -114,7 +210,8 @@ namespace Com
 
         mutable boost::asio::ip::udp::resolver m_resolver;
 
-        size_t DiffIndex(const std::string& original, const std::string& val) const
+        //Get first index at which val differs from original
+        static size_t DiffIndex(const std::string& original, const std::string& val)
         {
             size_t index=0;
             while (index<std::min(original.size(), val.size()))
@@ -129,7 +226,8 @@ namespace Com
            return index;
         }
 
-        bool SplitAddress(const std::string& address, std::string& ip, unsigned short& port) const
+        //Splig addrss into ip and port. Indata on form "addr:port"
+        static bool SplitAddress(const std::string& address, std::string& ip, unsigned short& port)
         {
             size_t startPortSearch=address.find_last_of(']'); //if ip6, start search after address end
             if (startPortSearch==address.npos)
@@ -157,6 +255,7 @@ namespace Com
             return true;
         }
 
+        //Match all addresses against pattern and return best match.
         std::string FindBestMatch(const std::string& pattern, const std::vector<std::string>& addresses) const
         {
             size_t highScore=0;
@@ -180,6 +279,7 @@ namespace Com
             return addresses[static_cast<size_t>(bestIndex)];
         }
 
+        //Get the ip address of local machine that best matches expr.
         std::string GetIPAddressBestMatch(const std::string& expr) const
         {
             //check if a adapter name has been specified
@@ -217,6 +317,7 @@ namespace Com
             return ""; //could not find any ip address to matching the expression
         }
 
+        //Make dns lookup and retun list of all ip addresses that support specified protocol
         std::vector<std::string> DnsLookup(const std::string& hostName, int protocol) const
         {
             std::vector<std::string> result;
@@ -246,7 +347,8 @@ namespace Com
             return result;
         }
 
-        boost::asio::ip::udp::endpoint CreateEndpoint(const std::string& ip, unsigned short port) const
+        //Create and endpoint from ip and port.
+        static boost::asio::ip::udp::endpoint CreateEndpoint(const std::string& ip, unsigned short port)
         {
             boost::system::error_code ec;
             boost::asio::ip::address_v4 a4=boost::asio::ip::address_v4::from_string(ip, ec);

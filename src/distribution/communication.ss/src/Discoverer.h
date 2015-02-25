@@ -63,7 +63,7 @@ namespace Com
         DiscovererBasic(boost::asio::io_service& ioService,
                         const Node& me,
                         const std::function<void(const Node&)>& onNewNode)
-            :WriterType(ioService, Utilities::Protocol(me.unicastAddress))
+            :WriterType(ioService, Resolver::Protocol(me.unicastAddress))
             ,m_strand(ioService)
             ,m_me(me)
             ,m_onNewNode(onNewNode)
@@ -137,7 +137,7 @@ namespace Com
                     UpdateIncompleteNodes(msg.from().node_id(), 0, 0);  //setting numberOfPackets=0 indicates that we still havent got a nodeInfo, just a discover
                 }
 
-                SendNodeInfo(msg.from().node_id(), msg.sent_to_id(), Utilities::CreateEndpoint(msg.from().control_address()));
+                SendNodeInfo(msg.from().node_id(), msg.sent_to_id(), Resolver::StringToEndpoint(msg.from().control_address()));
             });
         }
 
@@ -259,14 +259,14 @@ namespace Com
             {
                 cm.mutable_discover()->set_sent_to_id(it->first);
                 lllog(DiscovererLogLevel)<<L"COM["<<m_me.nodeId<<L"]: Send discover to seed: "<<it->second.controlAddress.c_str()<<std::endl;
-                SendMessageTo(cm, Utilities::CreateEndpoint(it->second.controlAddress));
+                SendMessageTo(cm, Resolver::StringToEndpoint(it->second.controlAddress));
             }
 
             for (auto it=m_reportedNodes.cbegin(); it!=m_reportedNodes.cend(); ++it)
             {
                 cm.mutable_discover()->set_sent_to_id(it->first);
                 lllog(DiscovererLogLevel)<<L"COM["<<m_me.nodeId<<L"]: Send discover to node I've heard about: "<<it->second.name.c_str()<<L", id="<<it->second.nodeId<<std::endl;
-                SendMessageTo(cm, Utilities::CreateEndpoint(it->second.controlAddress));
+                SendMessageTo(cm, Resolver::StringToEndpoint(it->second.controlAddress));
             }
 
             for (auto it=m_incompletedNodes.cbegin(); it!=m_incompletedNodes.cend(); ++it)
@@ -276,7 +276,7 @@ namespace Com
                 const Node& node=nodeIt->second;
                 cm.mutable_discover()->set_sent_to_id(node.nodeId);
                 lllog(DiscovererLogLevel)<<L"COM["<<m_me.nodeId<<L"]: Resend discover to node I havent got all nodeInfo from: "<<node.name.c_str()<<L", id="<<node.nodeId<<std::endl;
-                SendMessageTo(cm, Utilities::CreateEndpoint(node.controlAddress));
+                SendMessageTo(cm, Resolver::StringToEndpoint(node.controlAddress));
             }
         }
 

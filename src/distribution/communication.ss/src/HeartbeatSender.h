@@ -111,7 +111,7 @@ namespace Com
                     throw std::logic_error(os.str());
                 }
 
-                m_nodes.emplace(id, Utilities::CreateEndpoint(address));
+                m_nodes.emplace(id, Resolver::StringToEndpoint(address));
             });
         }
 

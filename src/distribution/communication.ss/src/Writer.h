@@ -30,7 +30,7 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include "Message.h"
-#include "Utilities.h"
+#include "Resolver.h"
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -233,7 +233,7 @@ namespace Com
         typedef boost::shared_ptr<T> Ptr;
 
         Writer(boost::asio::io_service& ioService, int protocol)
-            :m_socket(ioService,  Utilities::Protocol(protocol))
+            :m_socket(ioService,  Resolver::Protocol(protocol))
             ,m_multicastEndpoint()
             ,m_multicastEnabled(false)
         {
@@ -245,15 +245,16 @@ namespace Com
                int protocol,
                const std::string& localIf,
                const std::string& multicastAddress)
-            :m_socket(ioService, Utilities::Protocol(protocol))
-            ,m_multicastEndpoint(Utilities::CreateEndpoint(multicastAddress))
+            :m_socket(ioService, Resolver::Protocol(protocol))
+            ,m_multicastEndpoint()
             ,m_multicastEnabled(!multicastAddress.empty())
         {
             m_socket.set_option(boost::asio::ip::udp::socket::reuse_address(true));
             m_socket.set_option(boost::asio::socket_base::send_buffer_size(Parameters::SocketBufferSize));
             if (m_multicastEnabled)
             {
-                m_socket.set_option(boost::asio::ip::multicast::outbound_interface(Utilities::CreateEndpoint(localIf).address().to_v4())); //TODO: Test this code with IP6 and figure out how to specify outbound_if for ip6
+                m_multicastEndpoint=Resolver::StringToEndpoint(multicastAddress);
+                m_socket.set_option(boost::asio::ip::multicast::outbound_interface(Resolver::StringToEndpoint(localIf).address().to_v4())); //TODO: Test this code with IP6 and figure out how to specify outbound_if for ip6
                 m_socket.set_option(boost::asio::ip::multicast::enable_loopback(true));
                 m_socket.set_option(boost::asio::ip::multicast::join_group(m_multicastEndpoint.address()));
             }

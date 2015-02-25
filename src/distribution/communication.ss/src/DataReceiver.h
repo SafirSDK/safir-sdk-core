@@ -75,8 +75,7 @@ namespace Com
             ,m_isReceiverReady(isReceiverIsReady)
             ,m_running(false)
         {
-            int unicastIpVersion;
-            auto unicastEndpoint=Utilities::CreateEndpoint(unicastAddress, unicastIpVersion);
+            auto unicastEndpoint=Resolver::StringToEndpoint(unicastAddress);
 
             m_socket.reset(new boost::asio::ip::udp::socket(m_strand.get_io_service()));
             m_socket->open(unicastEndpoint.protocol());
@@ -86,9 +85,9 @@ namespace Com
             if (!multicastAddress.empty())
             {
                 //using multicast
-                int multicastIpVersion=0;
-                auto mcEndpoint=Utilities::CreateEndpoint(multicastAddress, multicastIpVersion);
-                if (multicastIpVersion!=unicastIpVersion)
+                auto mcEndpoint=Resolver::StringToEndpoint(multicastAddress);
+
+                if (mcEndpoint.protocol()!=unicastEndpoint.protocol())
                 {
                     throw std::logic_error("Unicast address and multicast address is not in same format (IPv4 and IPv6)");
                 }

@@ -262,7 +262,7 @@ namespace Com
 
             NodeInfo(const Node& node_)
                 :node(node_)
-                ,endpoint(Utilities::CreateEndpoint(node.unicastAddress))
+                ,endpoint(Resolver::StringToEndpoint(node.unicastAddress))
             {
                 ackedMultiReceiverChannel.welcome=UINT64_MAX;
             }

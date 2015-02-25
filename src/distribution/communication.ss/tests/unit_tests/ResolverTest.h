@@ -48,7 +48,7 @@ public:
             try
             {
                 auto ep=resolver.ResolveLocalEndpoint(expr);
-                std::cout<<"ResolvedLocal "<<expr<<" to '"<<ep.address().to_string()<<":"<<ep.port()<<"'"<<std::endl;
+                std::cout<<"ResolvedLocal "<<expr<<" to '"<<ep<<"'"<<std::endl;
             }
             catch(const std::exception& e)
             {
@@ -57,12 +57,12 @@ public:
             }
         };
 
-        auto resolveRemote=[&](const std::string& expr, const std::string myAddr, int protocol)
+        auto resolveRemote=[&](const std::string& expr, const std::string myAddr)
         {
             try
             {
-                auto ep=resolver.ResolveRemoteEndpoint(expr, myAddr, protocol);
-                std::cout<<"ResolvedRemote "<<expr<<" to '"<<ep.address().to_string()<<":"<<ep.port()<<"'"<<std::endl;
+                auto ep=resolver.ResolveRemoteEndpoint(expr, myAddr);
+                std::cout<<"ResolvedRemote "<<expr<<" to '"<<ep<<"'"<<std::endl;
             }
             catch(const std::exception& e)
             {
@@ -87,13 +87,11 @@ public:
         resolveLocal("lo:12000");
 
         std::cout<<"Testing resolve remote endpoint"<<std::endl;
-        auto myEndpoint=resolver.ResolveLocalEndpoint("192:10000");
-        auto myAddr=myEndpoint.address().to_string();
-        auto protocol=4;
-        resolveRemote("safir-salt-router:10000", myAddr, protocol);
-        resolveRemote("192.168.211.157:10000", myAddr, protocol);
+        auto myAddr=resolver.ResolveLocalEndpoint("192:10000");
+        resolveRemote("safir-salt-router:10000", myAddr);
+        resolveRemote("192.168.211.157:10000", myAddr);
 
-        resolveRemote("google.com:10000", myAddr, protocol);
+        resolveRemote("google.com:10000", myAddr);
         TRACELINE
 
         work.reset();

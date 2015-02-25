@@ -58,10 +58,14 @@ namespace
                                               const std::vector<NodeTypeDefinition>& nodeTypes)
     {
         //find address of local interface to use
-        const std::string localIf=(isControlInstance ? controlAddress : dataAddress);
+        Resolver resolver(ioService);
+
+        const auto controlAddressResolved=(isControlInstance ? resolver.ResolveLocalEndpoint(controlAddress) : "");
+        const auto dataAddressResolved=resolver.ResolveLocalEndpoint(dataAddress);
+        const auto localIf=(isControlInstance ? controlAddressResolved : dataAddressResolved);
 
         //find out if we are using ip4 or ip6
-        const int ipVersion=Utilities::Protocol(localIf);
+        const int ipVersion=Resolver::Protocol(localIf);
 
         //find own node type and check if we are multicast enabled
         auto nodeTypeIt=std::find_if(nodeTypes.cbegin(), nodeTypes.cend(), [=](const NodeTypeDefinition& n){return n.id==nodeTypeId;});
@@ -82,7 +86,7 @@ namespace
         }
 
         //create impl object
-        return std::unique_ptr<CommunicationImpl>(new CommunicationImpl(ioService, nodeName, nodeId, nodeTypeId, controlAddress, dataAddress, isControlInstance, nodeTypeMap));
+        return std::unique_ptr<CommunicationImpl>(new CommunicationImpl(ioService, nodeName, nodeId, nodeTypeId, controlAddressResolved, dataAddressResolved, isControlInstance, nodeTypeMap));
     }
 }
 
