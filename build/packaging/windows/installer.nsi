@@ -51,6 +51,10 @@
 ;Set a compressor that gives us very good ratios
 SetCompressor /SOLID lzma
 
+;;We want at least .NET framework 4:
+!define MIN_FRA_MAJOR "4"
+!define MIN_FRA_MINOR "0"
+!define MIN_FRA_BUILD "*"
 
 !ifndef IPersistFile
 !define IPersistFile {0000010b-0000-0000-c000-000000000046}
@@ -102,6 +106,153 @@ WriteINIStr "${FILENAME}.url" "InternetShortcut" "IconFile" "${ICONFILE}"
 WriteINIStr "${FILENAME}.url" "InternetShortcut" "IconIndex" "${ICONINDEX}"
 !macroend
 
+#Check .NET framework and abort if it is not what we want
+Function AbortIfBadFramework
+
+  ;Save the variables in case something else is using them
+  Push $0
+  Push $1
+  Push $2
+  Push $3
+  Push $4
+  Push $R1
+  Push $R2
+  Push $R3
+  Push $R4
+  Push $R5
+  Push $R6
+  Push $R7
+  Push $R8
+
+  StrCpy $R5 "0"
+  StrCpy $R6 "0"
+  StrCpy $R7 "0"
+  StrCpy $R8 "0.0.0"
+  StrCpy $0 0
+
+  loop:
+
+  ;Get each sub key under "SOFTWARE\Microsoft\NET Framework Setup\NDP"
+  EnumRegKey $1 HKLM "SOFTWARE\Microsoft\NET Framework Setup\NDP" $0
+  StrCmp $1 "" done ;jump to end if no more registry keys
+  IntOp $0 $0 + 1
+  StrCpy $2 $1 1 ;Cut off the first character
+  StrCpy $3 $1 "" 1 ;Remainder of string
+
+  ;Loop if first character is not a 'v'
+  StrCmpS $2 "v" start_parse loop
+
+  ;Parse the string
+  start_parse:
+  StrCpy $R1 ""
+  StrCpy $R2 ""
+  StrCpy $R3 ""
+  StrCpy $R4 $3
+
+  StrCpy $4 1
+
+  parse:
+  StrCmp $3 "" parse_done ;If string is empty, we are finished
+  StrCpy $2 $3 1 ;Cut off the first character
+  StrCpy $3 $3 "" 1 ;Remainder of string
+  StrCmp $2 "." is_dot not_dot ;Move to next part if it's a dot
+
+  is_dot:
+  IntOp $4 $4 + 1 ; Move to the next section
+  goto parse ;Carry on parsing
+
+  not_dot:
+  IntCmp $4 1 major_ver
+  IntCmp $4 2 minor_ver
+  IntCmp $4 3 build_ver
+  IntCmp $4 4 parse_done
+
+  major_ver:
+  StrCpy $R1 $R1$2
+  goto parse ;Carry on parsing
+
+  minor_ver:
+  StrCpy $R2 $R2$2
+  goto parse ;Carry on parsing
+
+  build_ver:
+  StrCpy $R3 $R3$2
+  goto parse ;Carry on parsing
+
+  parse_done:
+
+  IntCmp $R1 $R5 this_major_same loop this_major_more
+  this_major_more:
+  StrCpy $R5 $R1
+  StrCpy $R6 $R2
+  StrCpy $R7 $R3
+  StrCpy $R8 $R4
+
+  goto loop
+
+  this_major_same:
+  IntCmp $R2 $R6 this_minor_same loop this_minor_more
+  this_minor_more:
+  StrCpy $R6 $R2
+  StrCpy $R7 $R3
+  StrCpy $R8 $R4
+  goto loop
+
+  this_minor_same:
+  IntCmp R3 $R7 loop loop this_build_more
+  this_build_more:
+  StrCpy $R7 $R3
+  StrCpy $R8 $R4
+  goto loop
+
+  done:
+
+  ;Have we got the framework we need?
+  IntCmp $R5 ${MIN_FRA_MAJOR} max_major_same fail end
+  max_major_same:
+  IntCmp $R6 ${MIN_FRA_MINOR} max_minor_same fail end
+  max_minor_same:
+  IntCmp $R7 ${MIN_FRA_BUILD} end fail end
+
+  fail:
+  StrCmp $R8 "0.0.0" no_framework
+  goto wrong_framework
+
+  no_framework:
+  MessageBox MB_OK|MB_ICONSTOP "Installation failed.$\n$\n\
+         This software requires Windows Framework version \
+         ${MIN_FRA_MAJOR}.${MIN_FRA_MINOR}.${MIN_FRA_BUILD} or higher.$\n$\n\
+         No version of Windows Framework is installed.$\n$\n\
+         Please update your computer at http://windowsupdate.microsoft.com/."
+  abort
+
+  wrong_framework:
+  MessageBox MB_OK|MB_ICONSTOP "Installation failed!$\n$\n\
+         This software requires Windows Framework version \
+         ${MIN_FRA_MAJOR}.${MIN_FRA_MINOR}.${MIN_FRA_BUILD} or higher.$\n$\n\
+         The highest version on this computer is $R8.$\n$\n\
+         Please update your computer at http://windowsupdate.microsoft.com/."
+  abort
+
+  end:
+
+  ;Pop the variables we pushed earlier
+  Pop $R8
+  Pop $R7
+  Pop $R6
+  Pop $R5
+  Pop $R4
+  Pop $R3
+  Pop $R2
+  Pop $R1
+  Pop $4
+  Pop $3
+  Pop $2
+  Pop $1
+  Pop $0
+
+FunctionEnd
+
 ;--------------------------------
 
 
@@ -119,6 +270,8 @@ Function .onInit
          MessageBox MB_OK "Please uninstall previous versions of Safir SDK Core first!" /SD IDOK
         Quit
     ${EndIf}
+
+    call AbortIfBadFramework
 
     ;Set up command line for parsing
     var /GLOBAL cmdLineParams
@@ -280,6 +433,10 @@ Section "Runtime" SecRuntime
   ;have been installed before we run gactool).
   ${If} $option_testSuite == "0"
     nsExec::ExecToLog '"$INSTDIR\installer_utils\gactool" "--install" "$INSTDIR\dotnet"'
+    Pop $0 # return value/error/timeout
+    ${If} $0 != "0"
+      MessageBox MB_OK "Failed to add Safir SDK Core .NET assemblies to the Global Assembly Cache.$\r$\nThis is probably because no suitable .NET Framework was found.$\r$\nPlease add the assemblies in the 'dotnet' folder to the GAC manually."
+    ${EndIf}
   ${EndIf}
 
   ;Store installation folder
@@ -372,6 +529,11 @@ Section /o "Test suite" SecTest
 
   #Install to assemblies to GAC (see also above)
   nsExec::ExecToLog '"$INSTDIR\installer_utils\gactool" "--install" "$INSTDIR\dotnet"'
+  Pop $0 # return value/error/timeout
+  ${If} $0 != "0"
+    MessageBox MB_OK "Failed to add Safir SDK Core .NET assemblies to the Global Assembly Cache.$\r$\nThis is probably because no suitable .NET Framework was found.$\r$\nPlease add the assemblies in the 'dotnet' folder to the GAC manually."
+  ${EndIf}
+
 SectionEnd
 
 ;--------------------------------
