@@ -2,7 +2,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
 ; Copyright Saab AB, 2014 (http://safir.sourceforge.net)
-; Copyright Consoden AB, 2014 (http://www.consoden.se)
+; Copyright Consoden AB, 2014-2015 (http://www.consoden.se)
 ;
 ; Created by: Lars Hagstrom / lars.hagstrom@consoden.se
 ;
@@ -366,6 +366,9 @@ FunctionEnd
 
   !define MUI_WELCOMEFINISHPAGE_BITMAP "installer-welcome.bmp"
   !define MUI_UNWELCOMEFINISHPAGE_BITMAP "uninstaller-welcome.bmp"
+  
+  !define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\readme.txt"
+
 ;--------------------------------
 ;Pages
 ;Skip the page which allows choice of where to install
@@ -400,12 +403,12 @@ Section "Runtime" SecRuntime
 
   File /r "${StageDirRuntime}\*"
 
+  SetOutPath "$INSTDIR\docs"
+  File "readme.txt"
+
   SetShellVarContext all
   SetOutPath "$APPDATA\safir-sdk-core\config"
   File "${StageDirRuntime}\docs\example_configuration\*.ini"
-
-  ;TODO start menu:
-  #a readme? That mentions licensing terms?
 
   # Start Menu
   CreateDirectory "${StartMenuDir}"
@@ -414,6 +417,9 @@ Section "Runtime" SecRuntime
   !insertmacro CreateInternetShortcut "${StartMenuDir}\Documentation\Safir SDK Core Web Site" \
                                       "http://www.safirsdkcore.com/" "" "0"
 
+  CreateShortCut "${StartMenuDir}\Documentation\Readme.lnk" \
+                 "$INSTDIR\docs\readme.txt" "" "" "" SW_SHOWNORMAL "" "Readme for binary installation of Safir SDK Core"
+				 
   CreateShortCut "${StartMenuDir}\Documentation\GPLv3 License.lnk" \
                  "$INSTDIR\docs\LICENSE.txt" "" "" "" SW_SHOWNORMAL "" "Open Source license of Safir SDK Core"
 
