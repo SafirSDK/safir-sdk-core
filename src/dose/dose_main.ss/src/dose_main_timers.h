@@ -133,7 +133,7 @@ namespace Internal
         private boost::noncopyable
     {
     public:
-        explicit TimerHandler(boost::asio::io_service& ioService);
+        explicit TimerHandler(boost::asio::io_service::strand& strand);
         ~TimerHandler();
 
         void Stop();
@@ -193,7 +193,7 @@ namespace Internal
 
         TimeoutHandlerTable m_timeoutHandlerTable;
 
-        boost::asio::io_service & m_ioService;
+        boost::asio::io_service::strand& m_strand;
         boost::asio::steady_timer m_steadyTimer;
 
         bool m_stopped{false};

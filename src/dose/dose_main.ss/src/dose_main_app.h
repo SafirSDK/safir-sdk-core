@@ -70,7 +70,7 @@ namespace Internal
         private boost::noncopyable
     {
     public:
-        explicit DoseApp(boost::asio::io_service& ioService);
+        explicit DoseApp(boost::asio::io_service::strand& strand);
 
         ~DoseApp();
 
@@ -110,6 +110,7 @@ namespace Internal
         void HandleConnectionOutEvent(const ConnectionPtr & connection, std::vector<ConnectionPtr>& deadConnections);
 
         void NodeStatusChangedNotifier();
+
         void QueueNotFull();
         void StartPoolDistribution();
         void RequestPoolDistribution(const int nodeId);
@@ -128,7 +129,7 @@ namespace Internal
 
         static void MemoryMonitorThread();
 
-        boost::asio::io_service& m_ioService;
+        boost::asio::io_service::strand& m_strand;
         boost::shared_ptr<boost::asio::io_service::work> m_work;
 
         boost::asio::signal_set m_signalSet;

@@ -32,6 +32,7 @@
 namespace
 {
     boost::asio::io_service ioService;
+    boost::asio::io_service::strand strand(ioService);
 }
 
 using namespace Safir::Dob::Internal;
@@ -41,7 +42,7 @@ class TimerTesterBase
 {
 public:
     TimerTesterBase(const std::wstring& name)
-        : m_timerHandler(ioService)
+        : m_timerHandler(strand)
         , m_ok(false)
         , m_constructionTime(boost::chrono::steady_clock::now())
     {

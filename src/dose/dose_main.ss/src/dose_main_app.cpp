@@ -76,25 +76,26 @@ namespace Internal
         }
     }
 
-    DoseApp::DoseApp(boost::asio::io_service& ioService):
+    DoseApp::DoseApp(boost::asio::io_service::strand& strand):
         m_connectEvent(0),
         m_connectionOutEvent(0),
         m_nodeStatusChangedEvent(0),
-        m_ioService(ioService),
-        m_work(new boost::asio::io_service::work(m_ioService)),
-        m_signalSet(m_ioService),
-        m_timerHandler(m_ioService),
+        m_strand(strand),
+        m_work(new boost::asio::io_service::work(m_strand.get_io_service())),
+        m_signalSet(m_strand.get_io_service()),
+        m_timerHandler(m_strand),
         m_endStates(m_timerHandler),
         m_requestHandler(m_timerHandler),
         m_responseHandler(m_timerHandler),
-        m_poolHandler(m_ioService),
+        m_poolHandler(m_strand),
         m_pendingRegistrationHandler(m_timerHandler),
         m_persistHandler(m_timerHandler),
-        m_processMonitor(m_ioService,ProcessExited,boost::chrono::seconds(1)),
+        m_processMonitor(m_strand.get_io_service(),ProcessExited,boost::chrono::seconds(1)),
         m_HandleEvents_notified(0),
         m_DispatchOwnConnection_notified(0)
     {
-        Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().SwitchToAsynchronousMode(m_ioService);
+        Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().
+                                                    SwitchToAsynchronousMode(m_strand.get_io_service());
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
         m_signalSet.add(SIGABRT);
         m_signalSet.add(SIGBREAK);
@@ -169,7 +170,10 @@ namespace Internal
                 if (m_HandleEvents_notified == 0)
                 {
                     m_HandleEvents_notified = 1;
-                    m_ioService.post(boost::bind(&DoseApp::HandleEvents,this));
+                    m_strand.post([this]()
+                                  {
+                                      HandleEvents();
+                                  });
                 }
             }
         }
@@ -231,7 +235,10 @@ namespace Internal
         if (m_DispatchOwnConnection_notified == 0)
         {
             m_DispatchOwnConnection_notified = 1;
-            m_ioService.post(boost::bind(&DoseApp::DispatchOwnConnection,this));
+            m_strand.post([this]()
+                          {
+                              DispatchOwnConnection();
+                          });
         }
     }
 
@@ -668,7 +675,10 @@ namespace Internal
         if (m_HandleEvents_notified == 0)
         {
             m_HandleEvents_notified = 1;
-            m_ioService.post(boost::bind(&DoseApp::HandleEvents,this));
+            m_strand.post([this]()
+                          {
+                              HandleEvents();
+                          });
         }
     }
 

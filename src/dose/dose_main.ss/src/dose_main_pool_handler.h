@@ -94,31 +94,30 @@ namespace Internal
     {
     public:
         StateDispatcher(const boost::function <void(void)> & dispatchFunc,
-                        boost::asio::io_service & ioService):
+                        boost::asio::io_service::strand& strand):
             m_dispatchFunc(dispatchFunc),
             m_isNotified(0),
-            m_ioService(ioService)
+            m_strand(strand)
         {}
 
     private:
-        void Dispatch()
-        {
-            m_isNotified = 0;
-            m_dispatchFunc();
-        }
 
         virtual void OnDoDispatch()
         {
             if (m_isNotified == 0)
             {
                 m_isNotified = 1;
-                m_ioService.post(boost::bind(&StateDispatcher::Dispatch,this));
+                m_strand.post([this]()
+                              {
+                                  m_isNotified = 0;
+                                  m_dispatchFunc();
+                              });
             }
         }
 
         const boost::function <void(void)>       m_dispatchFunc;
         Safir::Utilities::Internal::AtomicUint32 m_isNotified;
-        boost::asio::io_service &                m_ioService;
+        boost::asio::io_service::strand&         m_strand;
     };
 
     class DummyDispatcher:
@@ -131,7 +130,7 @@ namespace Internal
     class PoolHandler
     {
     public:
-        explicit PoolHandler(boost::asio::io_service & ioService);
+        explicit PoolHandler(boost::asio::io_service::strand& strand);
         virtual ~PoolHandler();
 
         void Init(
@@ -218,7 +217,7 @@ namespace Internal
 
         boost::thread m_pdThread;
 
-        boost::asio::io_service & m_ioService;
+        boost::asio::io_service::strand& m_strand;
     };
 }
 }

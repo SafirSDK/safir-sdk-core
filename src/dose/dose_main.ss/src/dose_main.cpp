@@ -73,12 +73,30 @@ int main()
                                     [](void*){Safir::Utilities::CrashReporter::Stop();});
 
     boost::asio::io_service ioService;
+    boost::asio::io_service::strand strand(ioService);
+
     try
     {
-        Safir::Dob::Internal::DoseApp theApp(ioService);
+        Safir::Dob::Internal::DoseApp theApp(strand);
         theApp.Start();
 
+        // Try to figure out how many threads to use
+        auto nbrOfThreads = boost::thread::hardware_concurrency();
+        if (nbrOfThreads == 0)
+        {
+            // The information is not available, we put a finger in the air and use ...
+            nbrOfThreads = 4;
+        }
+
+        boost::thread_group threads;
+        for (unsigned int i = 0; i < nbrOfThreads-1; ++i)
+        {
+            threads.create_thread([&ioService]{ioService.run();});
+        }
+
         ioService.run();
+
+        threads.join_all();
 
         crGuard.reset();
 
