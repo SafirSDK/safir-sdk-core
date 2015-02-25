@@ -124,7 +124,7 @@ void JNICALL Java_com_saabgroup_safir_dob_Interface_Constructor
  jintArray _ctrl,
  jbooleanArray _success)
 {
-    long ctrl;
+    DotsC_Int32 ctrl;
     bool success;
     DoseC_Constructor(ctrl, success);
     SetJArray(env,_ctrl,ctrl);
@@ -245,7 +245,7 @@ void JNICALL Java_com_saabgroup_safir_dob_Interface_ConnectSecondary
  jbooleanArray _success)
 {
     bool success;
-    long newCtrlId;
+    DotsC_Int32 newCtrlId;
     DoseC_ConnectSecondary(GetUtf8(env,_connectionNameCommonPart).get(),
                            GetUtf8(env,_connectionNameInstancePart).get(),
                            DOSE_LANGUAGE_JAVA,
@@ -284,11 +284,10 @@ void JNICALL Java_com_saabgroup_safir_dob_Interface_Disconnect
 (JNIEnv * env,
  jclass,
  jint _ctrl,
- jboolean _checkThread,
  jbooleanArray _success)
 {
     bool success;
-    DoseC_Disconnect(_ctrl, _checkThread==JNI_TRUE, success);
+    DoseC_Disconnect(_ctrl, success);
     SetJArray(env,_success,success);
 }
 

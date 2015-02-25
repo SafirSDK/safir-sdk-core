@@ -68,27 +68,27 @@ public:
 
     static void OnCreateRequestCb(const char* const requestBlob,
                                   const char* const state,
-                                  const long ctrl,
+                                  const DotsC_Int32 ctrl,
                                   const DotsC_Int32 responseId,
                                   void* const consumer,
                                   bool& success);
 
     static void OnUpdateRequestCb(const char* const requestBlob,
                                   const char* const state,
-                                  const long ctrl,
+                                  const DotsC_Int32 ctrl,
                                   const DotsC_Int32 responseId,
                                   void* const consumer,
                                   bool& success);
 
     static void OnDeleteRequestCb(const char* const state,
-                                  const long ctrl,
+                                  const DotsC_Int32 ctrl,
                                   const DotsC_Int32 responseId,
                                   void* const consumer,
                                   bool& success);
 
     static void OnServiceRequestCb(const char* const requestBlob,
                                    const char* const state,
-                                   const long ctrl,
+                                   const DotsC_Int32 ctrl,
                                    const DotsC_Int32 responseId,
                                    void* const consumer,
                                    bool& success);
@@ -161,7 +161,7 @@ public:
                                        bool& success);
 
     static void OnDropReferenceCb(void* const consumer,
-                                  const long refCounter,
+                                  const DotsC_Int32 refCounter,
                                   bool& success);
 
 private:

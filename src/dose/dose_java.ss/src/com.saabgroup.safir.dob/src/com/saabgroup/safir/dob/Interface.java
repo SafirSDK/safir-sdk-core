@@ -66,7 +66,6 @@ final class Interface {
 
     //dose_java_jni Disconnect
     static native void Disconnect(int ctrl,
-                                  boolean checkThread,
                                   boolean [] success);
 
 

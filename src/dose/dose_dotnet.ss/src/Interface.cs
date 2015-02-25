@@ -279,7 +279,6 @@ namespace Safir.Dob
         //DoseC_Disconnect
         [DllImport(DOSE_DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void DoseC_Disconnect(System.Int32 ctrl,
-                                                     byte checkThread,
                                                      out byte success);
 
         //DoseC_GetConnectionName

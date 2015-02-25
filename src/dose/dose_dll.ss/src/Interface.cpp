@@ -44,7 +44,7 @@ using namespace Safir::Dob;
 //-------------------------------------------------------------
 // class Dose
 //-------------------------------------------------------------
-void DoseC_Constructor(long & ctrl,
+void DoseC_Constructor(DotsC_Int32 & ctrl,
                        bool & success)
 {
     lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
@@ -58,7 +58,7 @@ void DoseC_Constructor(long & ctrl,
     CATCH_LIBRARY_EXCEPTIONS;
 }
 
-void DoseC_Destructor(const long ctrl)
+void DoseC_Destructor(const DotsC_Int32 ctrl)
 {
     lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     try
@@ -78,7 +78,7 @@ void DoseC_Destructor(const long ctrl)
 }
 
 
-void DoseC_IsConnected(const long ctrl, bool & isConnected, bool & success)
+void DoseC_IsConnected(const DotsC_Int32 ctrl, bool & isConnected, bool & success)
 {
     lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
@@ -86,20 +86,16 @@ void DoseC_IsConnected(const long ctrl, bool & isConnected, bool & success)
     {
         ControllerPtr controller = ControllerTable::Instance().GetController(ctrl);
         isConnected = controller != NULL && controller->IsConnected();
-        if (isConnected)
-        {
-            ControllerTable::Instance().ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
-        }
         success = true;
     }
     CATCH_LIBRARY_EXCEPTIONS;
 }
 
-void DoseC_Connect(const long ctrl,
+void DoseC_Connect(const DotsC_Int32 ctrl,
                    const char* connectionNameCommonPart,
                    const char* connectionNameInstancePart,
                    const DotsC_Int32 contextId,
-                   const long lang,
+                   const DotsC_Int32 lang,
                    void* const connectionOwner,
                    void* const dispatcher,
                    OnDispatchCb* onDispatchCb, //callback instead of event
@@ -173,7 +169,7 @@ void DoseC_Connect(const long ctrl,
 
 void DoseC_ConnectSecondary(const char* connectionNameCommonPart,
                             const char* connectionNameInstancePart,
-                            const long lang,
+                            const DotsC_Int32 lang,
                             OnNewEntityCb* onNewEntityCb,
                             OnUpdatedEntityCb* onUpdatedEntityCb,
                             OnDeletedEntityCb* onDeletedEntityCb,
@@ -194,14 +190,14 @@ void DoseC_ConnectSecondary(const char* connectionNameCommonPart,
                             OnNotRequestOverflowCb* onNotRequestOverflowCb,
                             OnNotMessageOverflowCb* onNotMessageOverflowCb,
                             OnDropReferenceCb* onDropReferenceCb,
-                            long & newCtrlId,
+                            DotsC_Int32 & newCtrlId,
                             bool & success)
 {
     lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
-        long ctrl=-1;
+        DotsC_Int32 ctrl=-1;
 
         //Is it an attach-without-arguments?
         if (strlen(connectionNameCommonPart) == 0 && strlen(connectionNameInstancePart) == 0)
@@ -210,7 +206,7 @@ void DoseC_ConnectSecondary(const char* connectionNameCommonPart,
         }
         else
         {
-            ctrl = ControllerTable::Instance().GetNamedControllerInThread(connectionNameCommonPart,connectionNameInstancePart);
+            ctrl = ControllerTable::Instance().GetNamedController(connectionNameCommonPart,connectionNameInstancePart);
         }
 
         ControllerPtr controller = ControllerTable::Instance().GetController(ctrl);
@@ -244,14 +240,14 @@ void DoseC_ConnectSecondary(const char* connectionNameCommonPart,
 }
 
 
-void DoseC_Disconnect(const long ctrl, const bool checkThread, bool & success)
+void DoseC_Disconnect(const DotsC_Int32 ctrl, bool & success)
 {
     lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
         ControllerPtr controller = ControllerTable::Instance().GetController(ctrl);
-        ControllerTable::Instance().UnsetThread(ctrl, checkThread);
+        ControllerTable::Instance().UnsetThread(ctrl);
 
         if (controller->IsConnected())
         {
@@ -262,26 +258,24 @@ void DoseC_Disconnect(const long ctrl, const bool checkThread, bool & success)
     CATCH_LIBRARY_EXCEPTIONS;
 }
 
-void DoseC_GetConnectionName(const long ctrl, const char* &name, bool & success)
+void DoseC_GetConnectionName(const DotsC_Int32 ctrl, const char* &name, bool & success)
 {
     lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         name = ControllerTable::Instance().GetController(ctrl)->GetConnectionName();
         success = true;
     }
     CATCH_LIBRARY_EXCEPTIONS;
 }
 
-void DoseC_GetConnectionNameCommonPart(const long ctrl, const char* &name, bool & success)
+void DoseC_GetConnectionNameCommonPart(const DotsC_Int32 ctrl, const char* &name, bool & success)
 {
     lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         name = ControllerTable::Instance().GetController(ctrl)->
             GetConnectionNameCommonPart();
         success = true;
@@ -289,13 +283,12 @@ void DoseC_GetConnectionNameCommonPart(const long ctrl, const char* &name, bool 
     CATCH_LIBRARY_EXCEPTIONS;
 }
 
-void DoseC_GetConnectionNameInstancePart(const long ctrl, const char* &name, bool & success)
+void DoseC_GetConnectionNameInstancePart(const DotsC_Int32 ctrl, const char* &name, bool & success)
 {
     lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         name = ControllerTable::Instance().GetController(ctrl)->
             GetConnectionNameInstancePart();
         success = true;
@@ -303,12 +296,12 @@ void DoseC_GetConnectionNameInstancePart(const long ctrl, const char* &name, boo
     CATCH_LIBRARY_EXCEPTIONS;
 }
 
-void DoseC_RegisterServiceHandler(const long ctrl,
+void DoseC_RegisterServiceHandler(const DotsC_Int32 ctrl,
                                   const Safir::Dob::Typesystem::TypeId typeId,
                                   const Safir::Dob::Typesystem::Int64 handlerId,
                                   const char* const handlerIdStr,
                                   const bool overrideRegistration,
-                                  const long lang,
+                                  const DotsC_Int32 lang,
                                   void* const consumer,
                                   bool& success)
 {
@@ -316,7 +309,6 @@ void DoseC_RegisterServiceHandler(const long ctrl,
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         ControllerTable::Instance().GetController(ctrl)->
             RegisterServiceHandler(typeId,
                                    Typesystem::HandlerId(handlerId,
@@ -329,14 +321,14 @@ void DoseC_RegisterServiceHandler(const long ctrl,
     CATCH_LIBRARY_EXCEPTIONS;
 }
 
-void DoseC_RegisterEntityHandler(const long ctrl,
+void DoseC_RegisterEntityHandler(const DotsC_Int32 ctrl,
                                  const Safir::Dob::Typesystem::TypeId typeId,
                                  const Safir::Dob::Typesystem::Int64 handlerId,
                                  const char* const handlerIdStr,
                                  const Safir::Dob::Typesystem::EnumerationValue instanceIdPolicy,
                                  const bool overrideRegistration,
                                  const bool injectionHandler,
-                                 const long lang,
+                                 const DotsC_Int32 lang,
                                  void* const consumer,
                                  bool& success)
 {
@@ -344,7 +336,6 @@ void DoseC_RegisterEntityHandler(const long ctrl,
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         ControllerTable::Instance().GetController(ctrl)->
             RegisterEntityHandler(typeId,
                                   Typesystem::HandlerId(handlerId,
@@ -360,7 +351,7 @@ void DoseC_RegisterEntityHandler(const long ctrl,
 }
 
 
-void DoseC_UnregisterHandler(const long ctrl,
+void DoseC_UnregisterHandler(const DotsC_Int32 ctrl,
                              const Safir::Dob::Typesystem::TypeId typeId,
                              const Safir::Dob::Typesystem::Int64 handlerId,
                              const char* const handlerIdStr,
@@ -370,7 +361,6 @@ void DoseC_UnregisterHandler(const long ctrl,
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         ControllerTable::Instance().GetController(ctrl)->
             UnregisterHandler(typeId,
                               Typesystem::HandlerId(handlerId,
@@ -381,12 +371,12 @@ void DoseC_UnregisterHandler(const long ctrl,
 }
 
 
-void DoseC_SubscribeMessage(const long ctrl,
+void DoseC_SubscribeMessage(const DotsC_Int32 ctrl,
                             const Safir::Dob::Typesystem::TypeId typeId,
                             const Safir::Dob::Typesystem::Int64 channelId,
                             const char * const channelIdStr,
                             const bool includeSubclasses,
-                            const long lang,
+                            const DotsC_Int32 lang,
                             void* const consumer,
                             bool & success)
 {
@@ -394,7 +384,6 @@ void DoseC_SubscribeMessage(const long ctrl,
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         ControllerTable::Instance().GetController(ctrl)->
             SubscribeMessage(typeId,
                              Typesystem::ChannelId(channelId,
@@ -406,12 +395,12 @@ void DoseC_SubscribeMessage(const long ctrl,
     CATCH_LIBRARY_EXCEPTIONS;
 }
 
-void DoseC_UnsubscribeMessage(const long ctrl,
+void DoseC_UnsubscribeMessage(const DotsC_Int32 ctrl,
                               const Safir::Dob::Typesystem::TypeId typeId,
                               const Safir::Dob::Typesystem::Int64 channelId,
                               const char * const channelIdStr,
                               const bool includeSubclasses,
-                              const long lang,
+                              const DotsC_Int32 lang,
                               void* const consumer,
                               bool & success)
 {
@@ -419,7 +408,6 @@ void DoseC_UnsubscribeMessage(const long ctrl,
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         ControllerTable::Instance().GetController(ctrl)->
             UnsubscribeMessage(typeId,
                                Typesystem::ChannelId(channelId,
@@ -431,7 +419,7 @@ void DoseC_UnsubscribeMessage(const long ctrl,
     CATCH_LIBRARY_EXCEPTIONS;
 }
 
-void DoseC_SubscribeEntity(const long ctrl,
+void DoseC_SubscribeEntity(const DotsC_Int32 ctrl,
                            const Safir::Dob::Typesystem::TypeId typeId,
                            const Safir::Dob::Typesystem::Int64 instanceId,
                            const char* const instanceIdStr,
@@ -439,7 +427,7 @@ void DoseC_SubscribeEntity(const long ctrl,
                            const bool includeUpdates,
                            const bool includeSubclasses,
                            const bool restartSubscription,
-                           const long lang,
+                           const DotsC_Int32 lang,
                            void* const consumer,
                            bool& success)
 {
@@ -447,7 +435,6 @@ void DoseC_SubscribeEntity(const long ctrl,
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         ControllerTable::Instance().GetController(ctrl)->SubscribeEntity
             (Typesystem::EntityId(typeId,Typesystem::InstanceId
                                            (instanceId,Typesystem::Utilities::ToWstring(instanceIdStr))),
@@ -466,7 +453,7 @@ void DoseC_SubscribeEntity(const long ctrl,
     CATCH_LIBRARY_EXCEPTIONS;
 }
 
-void DoseC_InjectorSubscribeEntity(const long ctrl,
+void DoseC_InjectorSubscribeEntity(const DotsC_Int32 ctrl,
                                    const Safir::Dob::Typesystem::TypeId typeId,
                                    const bool includeUpdates,
                                    const bool includeSubclasses,
@@ -476,7 +463,7 @@ void DoseC_InjectorSubscribeEntity(const long ctrl,
                                    const bool doesntWantSourceIsPermanentStore,
                                    const bool wantsAllStateChanges,
                                    const bool timestampChangeInfo,
-                                   const long lang,
+                                   const DotsC_Int32 lang,
                                    void* const consumer,
                                    bool& success)
 {
@@ -484,7 +471,6 @@ void DoseC_InjectorSubscribeEntity(const long ctrl,
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         ControllerTable::Instance().GetController(ctrl)->
             SubscribeEntity(Typesystem::EntityId(typeId,Typesystem::InstanceId(0)),
                             true, //allInstances,
@@ -502,13 +488,13 @@ void DoseC_InjectorSubscribeEntity(const long ctrl,
     CATCH_LIBRARY_EXCEPTIONS;
 }
 
-void DoseC_UnsubscribeEntity(const long ctrl,
+void DoseC_UnsubscribeEntity(const DotsC_Int32 ctrl,
                              const Safir::Dob::Typesystem::TypeId typeId,
                              const Safir::Dob::Typesystem::Int64 instanceId,
                              const char* const instanceIdStr,
                              const bool allInstances,
                              const bool includeSubclasses,
-                             const long lang,
+                             const DotsC_Int32 lang,
                              void* const consumer,
                              bool& success)
 {
@@ -516,7 +502,6 @@ void DoseC_UnsubscribeEntity(const long ctrl,
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         ControllerTable::Instance().GetController(ctrl)->UnsubscribeEntity
             (Typesystem::EntityId(typeId,Typesystem::InstanceId
                                            (instanceId,Typesystem::Utilities::ToWstring(instanceIdStr))),
@@ -528,13 +513,13 @@ void DoseC_UnsubscribeEntity(const long ctrl,
     CATCH_LIBRARY_EXCEPTIONS;
 }
 
-void DoseC_SubscribeRegistration(const long ctrl,
+void DoseC_SubscribeRegistration(const DotsC_Int32 ctrl,
                                  const Safir::Dob::Typesystem::TypeId typeId,
                                  const Safir::Dob::Typesystem::Int64 handlerId,
                                  const char* const handlerIdStr,
                                  const bool includeSubclasses,
                                  const bool restartSubscription,
-                                 const long lang,
+                                 const DotsC_Int32 lang,
                                  void* const consumer,
                                  bool & success)
 {
@@ -542,7 +527,6 @@ void DoseC_SubscribeRegistration(const long ctrl,
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         ControllerTable::Instance().GetController(ctrl)->
             SubscribeRegistration(typeId,
                                   Typesystem::HandlerId(handlerId,
@@ -556,12 +540,12 @@ void DoseC_SubscribeRegistration(const long ctrl,
     CATCH_LIBRARY_EXCEPTIONS;
 }
 
-void DoseC_UnsubscribeRegistration(const long ctrl,
+void DoseC_UnsubscribeRegistration(const DotsC_Int32 ctrl,
                                    const Safir::Dob::Typesystem::TypeId typeId,
                                    const Safir::Dob::Typesystem::Int64 handlerId,
                                    const char* const handlerIdStr,
                                    const bool includeSubclasses,
-                                   const long lang,
+                                   const DotsC_Int32 lang,
                                    void* const consumer,
                                    bool & success)
 {
@@ -569,7 +553,6 @@ void DoseC_UnsubscribeRegistration(const long ctrl,
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         ControllerTable::Instance().GetController(ctrl)->
             UnsubscribeRegistration(typeId,
                                    Typesystem::HandlerId(handlerId,
@@ -585,7 +568,7 @@ void DoseC_UnsubscribeRegistration(const long ctrl,
 // Dispatch methods
 //---------------------------------
 
-void DoseC_Dispatch(const long ctrl,
+void DoseC_Dispatch(const DotsC_Int32 ctrl,
                     bool & success)
 {
     lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
@@ -594,9 +577,8 @@ void DoseC_Dispatch(const long ctrl,
     {
         const ControllerPtr controller = ControllerTable::Instance().GetController(ctrl);
         if (controller->IsConnected())
-        {       
-            ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
-            controller->Dispatch();
+        {
+                controller->Dispatch();
         }
 
         success = true;
@@ -604,21 +586,20 @@ void DoseC_Dispatch(const long ctrl,
     CATCH_LIBRARY_EXCEPTIONS;
 }
 
-void DoseC_ExitDispatch(const long ctrl,
+void DoseC_ExitDispatch(const DotsC_Int32 ctrl,
                         bool & success)
 {
     lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         ControllerTable::Instance().GetController(ctrl)->ExitDispatch();
         success = true;
     }
     CATCH_LIBRARY_EXCEPTIONS;
 }
 
-void DoseC_GetCurrentCallbackId(const long ctrl,
+void DoseC_GetCurrentCallbackId(const DotsC_Int32 ctrl,
                                 DotsC_Int32& callbackId,
                                 bool& success)
 {
@@ -626,7 +607,6 @@ void DoseC_GetCurrentCallbackId(const long ctrl,
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         callbackId = ControllerTable::Instance().GetController(ctrl)->CurrentCallback();
         success = true;
     }
@@ -638,11 +618,11 @@ void DoseC_GetCurrentCallbackId(const long ctrl,
 // Message methods
 //--------------------------------
 // Send Message
-void DoseC_SendMessage(const long ctrl,
+void DoseC_SendMessage(const DotsC_Int32 ctrl,
                        const char * const message,
                        const Safir::Dob::Typesystem::Int64 channelId,
                        const char * const channelIdStr,
-                       const long lang,
+                       const DotsC_Int32 lang,
                        void* const consumer,
                        bool & success)
 {
@@ -650,7 +630,6 @@ void DoseC_SendMessage(const long ctrl,
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         ControllerTable::Instance().GetController(ctrl)->
             SendMessage(message,
                         Typesystem::ChannelId(channelId,
@@ -664,10 +643,10 @@ void DoseC_SendMessage(const long ctrl,
 //--------------------------------
 // Response methods
 //--------------------------------
-void DoseC_SendResponse(const long ctrl,
+void DoseC_SendResponse(const DotsC_Int32 ctrl,
                         const char * const blob,
                         void * const consumer,
-                        const long lang,
+                        const DotsC_Int32 lang,
                         const Safir::Dob::Typesystem::Int32 responseId,
                         bool& success)
 {
@@ -675,7 +654,6 @@ void DoseC_SendResponse(const long ctrl,
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         ControllerTable::Instance().GetController(ctrl)->
             SendResponse(blob, ConsumerId(consumer,lang), ResponseId(responseId));
         success = true;
@@ -687,11 +665,11 @@ void DoseC_SendResponse(const long ctrl,
 // Request methods
 //----------------------------
 // Send Request
-void DoseC_ServiceRequest(const long ctrl,
+void DoseC_ServiceRequest(const DotsC_Int32 ctrl,
                           const char* const request,
                           const Safir::Dob::Typesystem::Int64 handlerId,
                           const char* const handlerIdStr,
-                          const long lang,
+                          const DotsC_Int32 lang,
                           void* const consumer,
                           Safir::Dob::RequestId& reqId,
                           bool& success)
@@ -700,7 +678,6 @@ void DoseC_ServiceRequest(const long ctrl,
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         ControllerTable::Instance().GetController(ctrl)->
             ServiceRequest(request,
                            Typesystem::HandlerId(handlerId,Typesystem::Utilities::ToWstring(handlerIdStr)),
@@ -713,14 +690,14 @@ void DoseC_ServiceRequest(const long ctrl,
 
 
 
-void DoseC_CreateRequest(const long ctrl,
+void DoseC_CreateRequest(const DotsC_Int32 ctrl,
                          const char* const request,
                          const bool hasInstanceId,
                          const Safir::Dob::Typesystem::Int64 instanceId,
                          const char* const instanceIdStr,
                          const Safir::Dob::Typesystem::Int64 handlerId,
                          const char* const handlerIdStr,
-                         const long lang,
+                         const DotsC_Int32 lang,
                          void* const consumer,
                          Safir::Dob::RequestId& reqId,
                          bool& success)
@@ -729,7 +706,6 @@ void DoseC_CreateRequest(const long ctrl,
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         ControllerTable::Instance().GetController(ctrl)->
             CreateRequest(request,
                           hasInstanceId,
@@ -743,11 +719,11 @@ void DoseC_CreateRequest(const long ctrl,
 }
 
 // Send Entity Request update
-void DoseC_UpdateRequest(const long ctrl,
+void DoseC_UpdateRequest(const DotsC_Int32 ctrl,
                          const char* const request,
                          const Safir::Dob::Typesystem::Int64 instanceId,
                          const char* const instanceIdStr,
-                         const long lang,
+                         const DotsC_Int32 lang,
                          void* const consumer,
                          Safir::Dob::RequestId& reqId,
                          bool& success)
@@ -756,7 +732,6 @@ void DoseC_UpdateRequest(const long ctrl,
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         ControllerTable::Instance().GetController(ctrl)->
             UpdateRequest(request,
                           Typesystem::InstanceId(instanceId,Typesystem::Utilities::ToWstring(instanceIdStr)),
@@ -768,11 +743,11 @@ void DoseC_UpdateRequest(const long ctrl,
 }
 
 // Send Entity Request delete
-void DoseC_DeleteRequest(const long ctrl,
+void DoseC_DeleteRequest(const DotsC_Int32 ctrl,
                          const Safir::Dob::Typesystem::TypeId typeId,
                          const Safir::Dob::Typesystem::Int64 instanceId,
                          const char* const instanceIdStr,
-                         const long lang,
+                         const DotsC_Int32 lang,
                          void* const consumer,
                          Safir::Dob::RequestId& reqId,
                          bool& success)
@@ -781,7 +756,6 @@ void DoseC_DeleteRequest(const long ctrl,
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         ControllerTable::Instance().GetController(ctrl)->
             DeleteRequest(Typesystem::EntityId(typeId,Typesystem::InstanceId(instanceId,Typesystem::Utilities::ToWstring(instanceIdStr))),
                           ConsumerId(consumer,lang),
@@ -796,7 +770,7 @@ void DoseC_DeleteRequest(const long ctrl,
 //----------------------------
 // Entity methods
 //----------------------------
-void DoseC_SetEntity(const long ctrl,
+void DoseC_SetEntity(const DotsC_Int32 ctrl,
                      const char* const entity,
                      const Safir::Dob::Typesystem::Int64 instanceId,
                      const char* const instanceIdStr,
@@ -810,7 +784,6 @@ void DoseC_SetEntity(const long ctrl,
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         ControllerTable::Instance().GetController(ctrl)->
             SetEntity(entity,
                       Typesystem::InstanceId(instanceId,Typesystem::Utilities::ToWstring(instanceIdStr)),
@@ -822,7 +795,7 @@ void DoseC_SetEntity(const long ctrl,
     CATCH_LIBRARY_EXCEPTIONS;
 }
 
-void DoseC_DeleteEntity(const long ctrl,
+void DoseC_DeleteEntity(const DotsC_Int32 ctrl,
                         const Safir::Dob::Typesystem::TypeId typeId,
                         const Safir::Dob::Typesystem::Int64 instanceId,
                         const char* const instanceIdStr,
@@ -835,7 +808,6 @@ void DoseC_DeleteEntity(const long ctrl,
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         ControllerTable::Instance().GetController(ctrl)->
             DeleteEntity(Typesystem::EntityId(typeId,
                                               Typesystem::InstanceId(instanceId, Typesystem::Utilities::ToWstring(instanceIdStr))),
@@ -846,7 +818,7 @@ void DoseC_DeleteEntity(const long ctrl,
     CATCH_LIBRARY_EXCEPTIONS;
 }
 
-void DoseC_InjectEntity(const long ctrl,
+void DoseC_InjectEntity(const DotsC_Int32 ctrl,
                         const char* const entity,
                         const Safir::Dob::Typesystem::Int64 instanceId,
                         const char* const instanceIdStr,
@@ -859,7 +831,6 @@ void DoseC_InjectEntity(const long ctrl,
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         ControllerTable::Instance().GetController(ctrl)->
             InjectEntity(entity,
                          Typesystem::InstanceId(instanceId,Typesystem::Utilities::ToWstring(instanceIdStr)),
@@ -870,7 +841,7 @@ void DoseC_InjectEntity(const long ctrl,
     CATCH_LIBRARY_EXCEPTIONS;
 }
 
-void DoseC_InjectDeletedEntity(const long ctrl,
+void DoseC_InjectDeletedEntity(const DotsC_Int32 ctrl,
                                const Safir::Dob::Typesystem::TypeId typeId,
                                const Safir::Dob::Typesystem::Int64 instanceId,
                                const char* const instanceIdStr,
@@ -883,7 +854,6 @@ void DoseC_InjectDeletedEntity(const long ctrl,
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         ControllerTable::Instance().GetController(ctrl)->
             InjectDeletedEntity(Typesystem::EntityId(typeId,
                                                      Typesystem::InstanceId(instanceId, Typesystem::Utilities::ToWstring(instanceIdStr))),
@@ -895,7 +865,7 @@ void DoseC_InjectDeletedEntity(const long ctrl,
 }
 
 
-void DoseC_ReadEntity(const long ctrl,
+void DoseC_ReadEntity(const DotsC_Int32 ctrl,
                       const Safir::Dob::Typesystem::TypeId typeId,
                       const Safir::Dob::Typesystem::Int64 instanceId,
                       const char* const instanceIdStr,
@@ -907,7 +877,6 @@ void DoseC_ReadEntity(const long ctrl,
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         ControllerTable::Instance().GetController(ctrl)->
             ReadEntity(Typesystem::EntityId(typeId,
                                             Typesystem::InstanceId(instanceId, Typesystem::Utilities::ToWstring(instanceIdStr))),
@@ -919,7 +888,7 @@ void DoseC_ReadEntity(const long ctrl,
     CATCH_LIBRARY_EXCEPTIONS;
 }
 
-void DoseC_IsCreated(const long ctrl,
+void DoseC_IsCreated(const DotsC_Int32 ctrl,
                      const Safir::Dob::Typesystem::TypeId typeId,
                      const Safir::Dob::Typesystem::Int64 instanceId,
                      const char* const instanceIdStr,
@@ -930,7 +899,6 @@ void DoseC_IsCreated(const long ctrl,
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         isCreated = ControllerTable::Instance().GetController(ctrl)->
             IsCreated(Typesystem::EntityId(typeId,
                                            Typesystem::InstanceId(instanceId, Typesystem::Utilities::ToWstring(instanceIdStr))));
@@ -939,7 +907,7 @@ void DoseC_IsCreated(const long ctrl,
     CATCH_LIBRARY_EXCEPTIONS;
 }
 
-void DoseC_GetNumberOfInstances(const long ctrl,
+void DoseC_GetNumberOfInstances(const DotsC_Int32 ctrl,
                                 const Safir::Dob::Typesystem::TypeId typeId,
                                 const Safir::Dob::Typesystem::Int64 handlerId,
                                 const char* const /*handlerIdStr*/,
@@ -954,7 +922,6 @@ void DoseC_GetNumberOfInstances(const long ctrl,
         const Typesystem::HandlerId handler(handlerId);
         numberOfInstances = 0;
 
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         const ControllerPtr controller = ControllerTable::Instance().GetController(ctrl);
 
         bool end;
@@ -990,7 +957,7 @@ void DoseC_GetNumberOfInstances(const long ctrl,
     CATCH_LIBRARY_EXCEPTIONS;
 }
 
-void DoseC_GetInstanceIdPolicy(const long ctrl,
+void DoseC_GetInstanceIdPolicy(const DotsC_Int32 ctrl,
                                const Safir::Dob::Typesystem::TypeId typeId,
                                const Safir::Dob::Typesystem::Int64 handlerId,
                                Safir::Dob::Typesystem::EnumerationValue& instanceIdPolicy,
@@ -1000,7 +967,6 @@ void DoseC_GetInstanceIdPolicy(const long ctrl,
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
 
         const ControllerPtr controller = ControllerTable::Instance().GetController(ctrl);
 
@@ -1010,7 +976,7 @@ void DoseC_GetInstanceIdPolicy(const long ctrl,
     CATCH_LIBRARY_EXCEPTIONS;
 }
 
-void DoseC_Postpone(const long ctrl,
+void DoseC_Postpone(const DotsC_Int32 ctrl,
                     const bool redispatchCurrent,
                     bool & success)
 {
@@ -1018,35 +984,32 @@ void DoseC_Postpone(const long ctrl,
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         ControllerTable::Instance().GetController(ctrl)->Postpone(redispatchCurrent);
         success = true;
     }
     CATCH_LIBRARY_EXCEPTIONS;
 }
 
-void DoseC_ResumePostponed(const long ctrl,
+void DoseC_ResumePostponed(const DotsC_Int32 ctrl,
                            bool & success)
 {
     lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         ControllerTable::Instance().GetController(ctrl)->ResumePostponed();
         success = true;
     }
     CATCH_LIBRARY_EXCEPTIONS;
 }
 
-void DoseC_IncompleteInjectionState(const long ctrl,
+void DoseC_IncompleteInjectionState(const DotsC_Int32 ctrl,
                                     bool & success)
 {
     lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         ControllerTable::Instance().GetController(ctrl)->IncompleteInjectionState();
         success = true;
     }
@@ -1189,7 +1152,7 @@ void DoseC_GetMemberTimestamp(const char* const state,
 }
 
 
-void DoseC_GetQueueCapacity(const long ctrl,
+void DoseC_GetQueueCapacity(const DotsC_Int32 ctrl,
                             const Safir::Dob::Typesystem::EnumerationValue queue,
                             Safir::Dob::Typesystem::Int32 & queueCapacity,
                             bool & success)
@@ -1198,7 +1161,6 @@ void DoseC_GetQueueCapacity(const long ctrl,
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         queueCapacity = ControllerTable::Instance().GetController(ctrl)->
             GetQueueCapacity(static_cast<Safir::Dob::ConnectionQueueId::Enumeration>(queue));
         success = true;
@@ -1206,7 +1168,7 @@ void DoseC_GetQueueCapacity(const long ctrl,
     CATCH_LIBRARY_EXCEPTIONS;
 }
 
-void DoseC_GetQueueSize(const long ctrl,
+void DoseC_GetQueueSize(const DotsC_Int32 ctrl,
                         const Safir::Dob::Typesystem::EnumerationValue queue,
                         Safir::Dob::Typesystem::Int32 & queueSize,
                         bool & success)
@@ -1215,7 +1177,6 @@ void DoseC_GetQueueSize(const long ctrl,
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         queueSize = ControllerTable::Instance().GetController(ctrl)->
             GetQueueSize(static_cast<Safir::Dob::ConnectionQueueId::Enumeration>(queue));
         success = true;
@@ -1301,7 +1262,7 @@ void DoseC_DropReference(const char* const state)
 }
 
 
-void DoseC_EntityIteratorCreate(const long ctrl,
+void DoseC_EntityIteratorCreate(const DotsC_Int32 ctrl,
                                 const Safir::Dob::Typesystem::TypeId typeId,
                                 const bool includeSubclasses,
                                 Safir::Dob::Typesystem::Int32& iteratorId,
@@ -1312,7 +1273,6 @@ void DoseC_EntityIteratorCreate(const long ctrl,
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         iteratorId = ControllerTable::Instance().GetController(ctrl)->
             EntityIteratorCreate(typeId, includeSubclasses, end);
         success = true;
@@ -1320,13 +1280,12 @@ void DoseC_EntityIteratorCreate(const long ctrl,
     CATCH_LIBRARY_EXCEPTIONS;
 }
 
-void DoseC_EntityIteratorDestroy(const long ctrl,
+void DoseC_EntityIteratorDestroy(const DotsC_Int32 ctrl,
                                  const Safir::Dob::Typesystem::Int32 iteratorId)
 {
     lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         ControllerTable::Instance().GetController(ctrl)->
             EntityIteratorDestroy(iteratorId);
     }
@@ -1340,7 +1299,7 @@ void DoseC_EntityIteratorDestroy(const long ctrl,
     }
 }
 
-void DoseC_EntityIteratorCopy(const long ctrl,
+void DoseC_EntityIteratorCopy(const DotsC_Int32 ctrl,
                               const Safir::Dob::Typesystem::Int32 iteratorId,
                               Safir::Dob::Typesystem::Int32& iteratorIdCopy,
                               bool& success)
@@ -1349,7 +1308,6 @@ void DoseC_EntityIteratorCopy(const long ctrl,
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         iteratorIdCopy = ControllerTable::Instance().GetController(ctrl)->
             EntityIteratorCopy(iteratorId);
         success = true;
@@ -1357,7 +1315,7 @@ void DoseC_EntityIteratorCopy(const long ctrl,
     CATCH_LIBRARY_EXCEPTIONS;
 }
 
-void DoseC_EntityIteratorIncrement(const long ctrl,
+void DoseC_EntityIteratorIncrement(const DotsC_Int32 ctrl,
                                    const Safir::Dob::Typesystem::Int32 iteratorId,
                                    bool& end,
                                    bool& success)
@@ -1366,7 +1324,6 @@ void DoseC_EntityIteratorIncrement(const long ctrl,
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         ControllerTable::Instance().GetController(ctrl)->
             EntityIteratorIncrement(iteratorId, end);
         success = true;
@@ -1374,7 +1331,7 @@ void DoseC_EntityIteratorIncrement(const long ctrl,
     CATCH_LIBRARY_EXCEPTIONS;
 }
 
-void DoseC_EntityIteratorDereference(const long ctrl,
+void DoseC_EntityIteratorDereference(const DotsC_Int32 ctrl,
                                      const Safir::Dob::Typesystem::Int32 iteratorId,
                                      const char *& entityBlob,
                                      const char *& entityState,
@@ -1384,7 +1341,6 @@ void DoseC_EntityIteratorDereference(const long ctrl,
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         ControllerTable::Instance().GetController(ctrl)->
             EntityIteratorDereference(iteratorId, entityBlob, entityState);
 
@@ -1393,7 +1349,7 @@ void DoseC_EntityIteratorDereference(const long ctrl,
     CATCH_LIBRARY_EXCEPTIONS;
 }
 
-void DoseC_EntityIteratorEqual(const long ctrl,
+void DoseC_EntityIteratorEqual(const DotsC_Int32 ctrl,
                                const Safir::Dob::Typesystem::Int32 first,
                                const Safir::Dob::Typesystem::Int32 second,
                                bool& equal,
@@ -1403,7 +1359,6 @@ void DoseC_EntityIteratorEqual(const long ctrl,
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         equal = ControllerTable::Instance().GetController(ctrl)->
             EntityIteratorEqual(first,second);
         success = true;
@@ -1411,7 +1366,7 @@ void DoseC_EntityIteratorEqual(const long ctrl,
     CATCH_LIBRARY_EXCEPTIONS;
 }
 
-void DoseC_GetContext(const long ctrl,
+void DoseC_GetContext(const DotsC_Int32 ctrl,
                       DotsC_Int32& context,
                       bool& success)
 {
@@ -1419,7 +1374,6 @@ void DoseC_GetContext(const long ctrl,
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); 
         context = ControllerTable::Instance().GetController(ctrl)->GetContext();
         success = true;
     }
@@ -1427,7 +1381,7 @@ void DoseC_GetContext(const long ctrl,
 }
 
 
-void DoseC_SimulateOverflows(const long ctrl,
+void DoseC_SimulateOverflows(const DotsC_Int32 ctrl,
                              const bool inQueues,
                              const bool outQueues,
                              bool & success)
@@ -1436,12 +1390,9 @@ void DoseC_SimulateOverflows(const long ctrl,
     success = false;
     try
     {
-        ControllerTable::Instance().CheckThread(ctrl); //check the threading if we're in debug build
         ControllerTable::Instance().GetController(ctrl)->
             SimulateOverflows(inQueues,outQueues);
         success = true;
     }
     CATCH_LIBRARY_EXCEPTIONS;
 }
-
-

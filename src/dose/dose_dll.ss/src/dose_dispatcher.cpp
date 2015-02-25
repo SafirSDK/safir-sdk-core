@@ -46,7 +46,7 @@ namespace Internal
 {
     Dispatcher::Dispatcher():
         m_onStopOrderCb(NULL),
-        m_connectionOwner(NULL, -1L)
+        m_connectionOwner(NULL, -1)
     {
 
     }

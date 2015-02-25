@@ -40,7 +40,7 @@ namespace Internal
             handlerId(Dob::Typesystem::HandlerId(0)),
             instanceIdPolicy(Dob::InstanceIdPolicy::RequestorDecidesInstanceId),
             isInjectionHandler(false),
-            consumer(NULL,0L),
+            consumer(NULL,0),
             accepted(false),
             remove(false),
             id(0)
