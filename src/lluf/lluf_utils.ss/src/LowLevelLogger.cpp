@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Lars Hagström / lars@foldspace.nu
 *
@@ -416,6 +417,7 @@ namespace Internal
         {
             m_strand.dispatch([this]
                               {
+                                  m_stopped = true;
                                   m_timer.cancel();
                                   FlushBuffer();
                               });
@@ -461,7 +463,7 @@ namespace Internal
             m_timer.expires_from_now(m_control->WritePeriod());
             m_timer.async_wait([this](const boost::system::error_code& error)
                                {
-                                   if (!error)
+                                   if (!error && !m_stopped)
                                    {
                                        m_strand.dispatch([this]
                                                          {
@@ -480,6 +482,7 @@ namespace Internal
         boost::thread_specific_ptr<FilteringStreambuf> m_queueBuffer;
 
         boost::shared_ptr<boost::iostreams::wfile_sink> m_fileSink;
+        bool m_stopped{false};
     };
 
     boost::once_flag LowLevelLogger::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
@@ -533,8 +536,6 @@ namespace Internal
 
         std::ios_base::sync_with_stdio(false);
 
-        m_synchronous = false;
-
         boost::shared_ptr<boost::iostreams::wfile_sink> fileSink;
         if (m_syncLogger != nullptr)
         {
@@ -544,17 +545,23 @@ namespace Internal
         m_logLevel = m_control->GetLogLevelPointer();
 
         m_asyncLogger = Safir::make_unique<AsyncLogger>(m_control, ioService, fileSink);
+        m_synchronous = false;
 
         m_syncLogger.reset();
 
     }
 
-    void LowLevelLogger::Stop()
+    void LowLevelLogger::StopAsynchronousLogger()
     {
+        m_logLevel = nullptr;
         if (m_asyncLogger != nullptr)
         {
             m_asyncLogger->Stop();
         }
+    }
+    void LowLevelLogger::DestroyAsynchronousLogger()
+    {
+        m_asyncLogger.reset();
     }
 }
 }

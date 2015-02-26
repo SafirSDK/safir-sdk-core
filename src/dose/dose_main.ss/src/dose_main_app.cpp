@@ -52,12 +52,6 @@ namespace Internal
 
     namespace //anonymous namespace
     {
-        bool initiateTimerHandler(boost::asio::io_service& ioService)
-        {
-            TimerHandler::Instantiate(ioService);
-            return true;
-        }
-
         void SetDiedIfPidEquals(const ConnectionPtr& connection, const pid_t pid)
         {
             if (connection->Pid() == pid)
@@ -82,24 +76,26 @@ namespace Internal
         }
     }
 
-    DoseApp::DoseApp():
+    DoseApp::DoseApp(boost::asio::io_service::strand& strand):
         m_connectEvent(0),
         m_connectionOutEvent(0),
         m_nodeStatusChangedEvent(0),
-        m_work(new boost::asio::io_service::work(m_ioService)),
-        m_signalSet(m_ioService),
-        m_timerHandlerInitiated(initiateTimerHandler(m_ioService)),
-        m_poolHandler(m_ioService),
-        m_pendingRegistrationHandler(),
-#if 0 //stewart
-        m_ecom),
-        m_ecom(m_ioService),
-#endif
-        m_processMonitor(m_ioService,ProcessExited,boost::chrono::seconds(1)),
+        m_strand(strand),
+        m_work(new boost::asio::io_service::work(m_strand.get_io_service())),
+        m_signalSet(m_strand.get_io_service()),
+        m_timerHandler(m_strand),
+        m_endStates(m_timerHandler),
+        m_requestHandler(m_timerHandler),
+        m_responseHandler(m_timerHandler),
+        m_poolHandler(m_strand),
+        m_pendingRegistrationHandler(m_timerHandler),
+        m_persistHandler(m_timerHandler),
+        m_processMonitor(m_strand.get_io_service(),ProcessExited,boost::chrono::seconds(1)),
         m_HandleEvents_notified(0),
         m_DispatchOwnConnection_notified(0)
     {
-        Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().SwitchToAsynchronousMode(m_ioService);
+        Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().
+                                                    SwitchToAsynchronousMode(m_strand.get_io_service());
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
         m_signalSet.add(SIGABRT);
         m_signalSet.add(SIGBREAK);
@@ -127,7 +123,7 @@ namespace Internal
         //called correctly? I.e. we're dying through an exception.
     }
 
-    void DoseApp::Run()
+    void DoseApp::Start()
     {
         AllocateStatic();
 
@@ -136,18 +132,16 @@ namespace Internal
         m_threadMonitor.StartWatchdog(m_mainThreadId, L"dose_main main thread");
 
         // Schedule a timer so that the main thread will kick the watchdog.
-        TimerInfoPtr timerInfo(new EmptyTimerInfo(TimerHandler::Instance().RegisterTimeoutHandler(L"dose_main watchdog timer", *this)));
-        TimerHandler::Instance().SetRelative(Discard,
-                                             timerInfo,
-                                             5.0);
+        TimerInfoPtr timerInfo(new EmptyTimerInfo(m_timerHandler.RegisterTimeoutHandler(L"dose_main watchdog timer", *this)));
+        m_timerHandler.SetRelative(Discard,
+                                   timerInfo,
+                                   5.0);
 
-        // enter main loop
 #ifndef NDEBUG
         std::wcout<<"dose_main running (debug)..." << std::endl;
 #else
         std::wcout<<"dose_main running (release)..." << std::endl;
 #endif
-        m_ioService.run();
     }
 
 
@@ -176,7 +170,10 @@ namespace Internal
                 if (m_HandleEvents_notified == 0)
                 {
                     m_HandleEvents_notified = 1;
-                    m_ioService.post(boost::bind(&DoseApp::HandleEvents,this));
+                    m_strand.post([this]()
+                                  {
+                                      HandleEvents();
+                                  });
                 }
             }
         }
@@ -188,8 +185,7 @@ namespace Internal
 
     void DoseApp::Stop()
     {
-        m_work.reset();
-        TimerHandler::Instance().Stop();
+        m_timerHandler.Stop();
 
         m_threadMonitor.Stop();
         m_lockMonitor.Stop();
@@ -216,7 +212,8 @@ namespace Internal
         m_poolHandler.Stop();
         m_ownConnection.Close();
 
-        Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().Stop();
+        m_work.reset();
+        Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().StopAsynchronousLogger();
     }
 
     void DoseApp::HandleSignal(const boost::system::error_code& error,
@@ -238,7 +235,10 @@ namespace Internal
         if (m_DispatchOwnConnection_notified == 0)
         {
             m_DispatchOwnConnection_notified = 1;
-            m_ioService.post(boost::bind(&DoseApp::DispatchOwnConnection,this));
+            m_strand.post([this]()
+                          {
+                              DispatchOwnConnection();
+                          });
         }
     }
 
@@ -334,9 +334,9 @@ namespace Internal
     {
         m_threadMonitor.KickWatchdog(m_mainThreadId);
 
-        TimerHandler::Instance().SetRelative(Discard,
-                                             timer,
-                                             5.0);
+        m_timerHandler.SetRelative(Discard,
+                                   timer,
+                                   5.0);
     }
 
     ConnectResult DoseApp::CanAddConnection(const std::string & connectionName, const pid_t pid, const long /*context*/)
@@ -675,7 +675,10 @@ namespace Internal
         if (m_HandleEvents_notified == 0)
         {
             m_HandleEvents_notified = 1;
-            m_ioService.post(boost::bind(&DoseApp::HandleEvents,this));
+            m_strand.post([this]()
+                          {
+                              HandleEvents();
+                          });
         }
     }
 

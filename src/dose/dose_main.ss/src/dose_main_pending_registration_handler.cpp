@@ -39,7 +39,8 @@ namespace Dob
 {
 namespace Internal
 {
-    PendingRegistrationHandler::PendingRegistrationHandler():
+    PendingRegistrationHandler::PendingRegistrationHandler(TimerHandler& timerHandler):
+        m_timerHandler(timerHandler),
 #if 0 //stewart
     ExternNodeCommunication & ecom):
 #endif
@@ -48,7 +49,7 @@ namespace Internal
         m_ecom(ecom)
 #endif
     {
-        m_timerId = TimerHandler::Instance().RegisterTimeoutHandler(L"Pending Registrations Timer",*this);
+        m_timerId = m_timerHandler.RegisterTimeoutHandler(L"Pending Registrations Timer",*this);
     }
 
         bool IsRegistered(const Dob::Typesystem::TypeId typeId, const Dob::Typesystem::HandlerId& handlerId, const ContextId contextId)
@@ -229,29 +230,29 @@ namespace Internal
             {
                 // Set the first timeout to now + 1.0, the second to now + 1.5, and so on. This is to handle
                 // any node that for some reason is permanently slow.
-                findIt->second.nextRequestTime = boost::chrono::steady_clock::now() + 
+                findIt->second.nextRequestTime = boost::chrono::steady_clock::now() +
                     boost::chrono::milliseconds(1000 + findIt->second.nbrOfSentRequests * 500);
 
                 ++findIt->second.nbrOfSentRequests;
             }
             else
             {
-                findIt->second.nextRequestTime = boost::chrono::steady_clock::now() + 
+                findIt->second.nextRequestTime = boost::chrono::steady_clock::now() +
                     boost::chrono::milliseconds(10);
             }
 #endif
 
-            TimerHandler::Instance().Set(Discard,
-                                         timerInfo,
-                                         findIt->second.nextRequestTime);
+            m_timerHandler.Set(Discard,
+                               timerInfo,
+                               findIt->second.nextRequestTime);
         }
         else
         {
             // If for some reason the timer for this pending request has fired but nextRequestTime
             // has not yet been reached, we must insert the timer again.
-            TimerHandler::Instance().Set(Discard,
-                                         timerInfo,
-                                         findIt->second.nextRequestTime);
+            m_timerHandler.Set(Discard,
+                               timerInfo,
+                               findIt->second.nextRequestTime);
         }
 
         //TODO: hook on to NotOverflow from doseCom instead of polling.

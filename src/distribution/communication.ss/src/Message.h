@@ -73,16 +73,18 @@ namespace Com
     //------------------------------------------------------------
     inline std::string SendMethodToString(uint8_t sm) {return sm==SingleReceiverSendMethod ? "SingleReceiver" : "MultiReceiver";}
     inline std::string DeliveryGuaranteeToString(uint8_t dg) {return dg==Acked ? "Acked" : "Unacked";}
-    inline void Hexdump(const char* data, size_t first, size_t last)
+    inline std::string Hexdump(const char* data, size_t first, size_t last)
     {
+        std::ostringstream os;
+        os<<std::hex;
         for (size_t i=first; i<last; ++i)
         {
             if (i%50==0)
-                std::cout<<std::endl;
+                os<<std::endl;
 
-            std::cout<<std::hex<<(unsigned int)data[i];
+            os<<(unsigned int)data[i];
         }
-        std::cout<<std::dec<<std::endl;
+        return os.str();
     }
 
     inline bool IsCommunicationDataType(int64_t dataType)
@@ -110,6 +112,13 @@ namespace Com
             :senderId(senderId_)
             ,receiverId(receiverId_)
             ,dataType(dataType_) {}
+
+        std::string ToString() const
+        {
+            std::ostringstream os;
+            os<<"CommonHeader: {senderId: "<<senderId<<", receiverId: "<<receiverId<<", dataType: "<<dataType<<"}";
+            return os.str();
+        }
     };
     static const size_t CommonHeaderSize=sizeof(CommonHeader);
 
@@ -131,15 +140,16 @@ namespace Com
             ,sendMethod(sendMethod_)
         {
         }
-    };
 
-    inline std::string AckToString(const Ack& ack)
-    {
-        std::ostringstream os;
-        os<<"AckContent from: "<<ack.commonHeader.senderId<<", to: "<<ack.commonHeader.receiverId<<", "<<SendMethodToString(ack.sendMethod)<<" seq: "<<ack.sequenceNumber<<" gaps: ";
-        for (auto i : ack.missing) os<<static_cast<int>(i);
-        return os.str();
-    }
+        std::string ToString() const
+        {
+            std::ostringstream os;
+            os<<"AckContent: {"<<commonHeader.ToString()<<", sendMethod: "<<SendMethodToString(sendMethod)<<", seq: "<<sequenceNumber<<", gaps: [";
+            for (auto i : missing) os<<static_cast<int>(i);
+            os<<"]}";
+            return os.str();
+        }
+    };
 
     struct MessageHeader
     {
@@ -177,7 +187,18 @@ namespace Com
             ,ackNow(0)
         {
         }
+
+        std::string ToString() const
+        {
+            std::ostringstream os;
+            os<<"MessageHeader: {"<<commonHeader.ToString()<<", sendMethod: "<<SendMethodToString(sendMethod)<<
+                ", delivery: "<<DeliveryGuaranteeToString(deliveryGuarantee)<<", seq: "<<sequenceNumber<<", totSize: "<<totalContentSize<<
+                ", fragSize: "<<fragmentContentSize<<", numFrags: "<<numberOfFragments<<", fragNum: "<<fragmentNumber<<
+                ", fragOffs: "<<fragmentOffset<<", ackNow"<<static_cast<int>(ackNow)<<"}";
+            return os.str();
+        }
     };
+
     #pragma pack(pop)
 
     static const size_t MessageHeaderSize=sizeof(MessageHeader);

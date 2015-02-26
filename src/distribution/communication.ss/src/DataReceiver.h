@@ -75,8 +75,7 @@ namespace Com
             ,m_isReceiverReady(isReceiverIsReady)
             ,m_running(false)
         {
-            int unicastIpVersion;
-            auto unicastEndpoint=Utilities::CreateEndpoint(unicastAddress, unicastIpVersion);
+            auto unicastEndpoint=Resolver::StringToEndpoint(unicastAddress);
 
             m_socket.reset(new boost::asio::ip::udp::socket(m_strand.get_io_service()));
             m_socket->open(unicastEndpoint.protocol());
@@ -86,9 +85,9 @@ namespace Com
             if (!multicastAddress.empty())
             {
                 //using multicast
-                int multicastIpVersion=0;
-                auto mcEndpoint=Utilities::CreateEndpoint(multicastAddress, multicastIpVersion);
-                if (multicastIpVersion!=unicastIpVersion)
+                auto mcEndpoint=Resolver::StringToEndpoint(multicastAddress);
+
+                if (mcEndpoint.protocol()!=unicastEndpoint.protocol())
                 {
                     throw std::logic_error("Unicast address and multicast address is not in same format (IPv4 and IPv6)");
                 }
@@ -195,15 +194,32 @@ namespace Com
             else
             {
                 //received message with invalid checksum. Throw away the message and then continue as normal.
-                std::cout<<"COM: Received message with bad CRC, size="<<bytesRecv<<". Throw away and continue."<<std::endl;
-                lllog(7)<<"COM: Received message with bad CRC, size="<<bytesRecv<<". Throw away and continue."<<std::endl;
+                std::ostringstream os;
+
+                os<<"COM: Received message with bad CRC, size="<<bytesRecv<<". Throw away and continue."<<std::endl;
 
                 if (bytesRecv>CommonHeaderSize)
                 {
-                    const CommonHeader* commonHeader=reinterpret_cast<const CommonHeader*>(buf);
-                    std::cout<<"COM: If trying to parse despite CRC error: senerId="<<commonHeader->senderId<<", receiverId="<<commonHeader->receiverId<<", dataType="<<commonHeader->dataType<<std::endl;
-                    lllog(7)<<"COM: If trying to parse CRC error: senerId="<<commonHeader->senderId<<", receiverId="<<commonHeader->receiverId<<", dataType="<<commonHeader->dataType<<std::endl;
+                    const CommonHeader* commonHeader=reinterpret_cast<const CommonHeader*>(buf);                    
+
+                    if (commonHeader->dataType==123) //used by communication_test
+                    {
+                        const MessageHeader* messageHeader=reinterpret_cast<const MessageHeader*>(buf);
+                        os<<"     If trying to parse despite CRC error: "<<messageHeader->ToString()<<std::endl;
+                        if (bytesRecv>MessageHeaderSize)
+                        {
+                            os<<Hexdump(buf, MessageHeaderSize, bytesRecv)<<std::endl;
+                        }
+                    }
+                    else
+                    {
+                        os<<"     If trying to parse despite CRC error: "<<commonHeader->ToString()<<std::endl;
+                    }
                 }
+
+                std::cout<<os.str()<<std::endl;
+                lllog(7)<<os.str().c_str()<<std::endl;
+
                 receiverReady=m_isReceiverReady(); //explicitly ask if receiver is ready to handle incoming data
             }
 

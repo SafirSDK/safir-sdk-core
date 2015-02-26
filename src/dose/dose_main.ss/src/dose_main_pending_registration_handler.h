@@ -45,10 +45,7 @@ namespace Internal
         public boost::noncopyable
     {
     public:
-        explicit PendingRegistrationHandler();
-#if 0 //stewart
-        ExternNodeCommunication & ecom);
-#endif
+        explicit PendingRegistrationHandler(TimerHandler& timerHandler);
 
         void CheckForNewOrRemovedPendingRegistration(const ConnectionPtr & connection);
 
@@ -95,6 +92,8 @@ namespace Internal
             bool rejected;
         };
         typedef std::map<long,PendingRegistrationInfo> PendingRegistrations;
+
+        TimerHandler& m_timerHandler;
 
         PendingRegistrations m_pendingRegistrations;
         long m_nextId;

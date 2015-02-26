@@ -232,7 +232,7 @@ namespace Com
             {
                 if (Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().LogLevel()==9)
                 {
-                    lllog(9)<<m_logPrefix.c_str()<<"HandleAck "<<AckToString(ack).c_str()<<std::endl;
+                    lllog(9)<<m_logPrefix.c_str()<<"HandleAck "<<ack.ToString().c_str()<<std::endl;
                 }
 
                 //Update queue
@@ -255,7 +255,7 @@ namespace Com
                         if (index>Parameters::SlidingWindowSize-1)
                         {
                             std::ostringstream os;
-                            os<<m_logPrefix<<"Programming Error! Index out of range. Calculated missing index: "<<index<<". AckContent: "<<AckToString(ack)<<"\n"<<SendQueueToString();
+                            os<<m_logPrefix<<"Programming Error! Index out of range. Calculated missing index: "<<index<<". AckContent: "<<ack.ToString()<<"\n"<<SendQueueToString();
                             lllog(1)<<os.str().c_str()<<std::endl;
                             SEND_SYSTEM_LOG(Error, <<os.str().c_str()<<std::endl);
                             throw std::logic_error(os.str());
@@ -298,7 +298,7 @@ namespace Com
                 }
 
                 NodeInfo ni;
-                ni.endpoint=Utilities::CreateEndpoint(address);
+                ni.endpoint=Resolver::StringToEndpoint(address);
                 ni.lastSentSeqNo=0;
                 ni.welcome=UINT64_MAX;
                 ni.systemNode=false;

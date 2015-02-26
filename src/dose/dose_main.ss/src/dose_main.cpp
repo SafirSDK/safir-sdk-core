@@ -28,6 +28,7 @@
 #include <Safir/Utilities/CrashReporter.h>
 #include <boost/regex.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/asio.hpp>
 
 
 //This is a sanity check to make sure we've taken down all the threads in dose_main
@@ -71,12 +72,35 @@ int main()
     boost::shared_ptr<void> crGuard(static_cast<void*>(0),
                                     [](void*){Safir::Utilities::CrashReporter::Stop();});
 
+    boost::asio::io_service ioService;
+    boost::asio::io_service::strand strand(ioService);
+
     try
     {
-        Safir::Dob::Internal::DoseApp theApp;
-        theApp.Run();
+        Safir::Dob::Internal::DoseApp theApp(strand);
+        theApp.Start();
+
+        // Try to figure out how many threads to use
+        auto nbrOfThreads = boost::thread::hardware_concurrency();
+        if (nbrOfThreads == 0)
+        {
+            // The information is not available, we put a finger in the air and use ...
+            nbrOfThreads = 4;
+        }
+
+        boost::thread_group threads;
+        for (unsigned int i = 0; i < nbrOfThreads-1; ++i)
+        {
+            threads.create_thread([&ioService]{ioService.run();});
+        }
+
+        ioService.run();
+
+        threads.join_all();
 
         crGuard.reset();
+
+        Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().DestroyAsynchronousLogger();
 
         //now check the thread count, all threads should be gone, except the main
         //thread.

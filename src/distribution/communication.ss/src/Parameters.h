@@ -35,7 +35,7 @@ namespace Com
     namespace Parameters
     {
         //Size of a fragment, if total message is bigger the message will be sent at more than one fragment
-        static const size_t FragmentSize=50000;
+        static const size_t FragmentSize=3000;
 
         //Size of the send queue, number of outstanding messages
         static const size_t SendQueueSize = 100;

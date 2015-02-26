@@ -47,7 +47,7 @@ namespace Internal
         private boost::noncopyable
     {
     public:
-        PersistHandler();
+        explicit PersistHandler(TimerHandler& timerHandler);
 
         void Init(
 #if 0 //stewart
@@ -70,11 +70,12 @@ namespace Internal
         virtual void OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRequestProxy,
                                       Safir::Dob::ResponseSenderPtr   responseSender);
 
-        
+
         virtual void HandleTimeout(const TimerInfoPtr & timer);
-        
+
         void RequestPersistenceInfo();
 
+        TimerHandler& m_timerHandler;
 #if 0 //stewart
         ExternNodeCommunication * m_ecom;
 #endif
@@ -82,7 +83,7 @@ namespace Internal
         NodeHandler * m_nodeHandler;
 
         Safir::Dob::SecondaryConnection m_connection;
-        
+
         std::set<Safir::Dob::Typesystem::Int32> m_waitingForResponsesFromNodes;
 
         TimerId m_timerId;

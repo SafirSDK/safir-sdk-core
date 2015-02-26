@@ -47,8 +47,7 @@ namespace Internal
         public TimeoutHandler
     {
     public:
-        RequestHandler();
-        virtual ~RequestHandler();
+        explicit RequestHandler(TimerHandler& timerHandler);
 
         void Init(BlockingHandlers & blockingHandler,
 #if 0 //stewart
@@ -107,7 +106,7 @@ namespace Internal
         void RemovePendingRequest(const Identifier blockingConn, const InternalRequestId& requestId);
         bool ReceiverHasOtherPendingRequest(const Identifier receiver, const InternalRequestId& requestId) const;
 
-
+        TimerHandler& m_timerHandler;
 
         typedef std::deque<DistributionData> PendingRequests;
         typedef boost::unordered_map<Identifier, PendingRequests> PendingRequestTable;

@@ -35,6 +35,7 @@
 #include "Discoverer.h"
 #include "DataSender.h"
 #include "HeartbeatSender.h"
+#include "Resolver.h"
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -106,7 +107,7 @@ namespace Com
         boost::asio::io_service::strand m_receiveStrand;
         Node m_me;
         bool m_isControlInstance;
-        NodeTypeMap m_nodeTypes;
+        NodeTypeMap m_nodeTypes;        
 
         //Callbacks
         NewNode m_onNewNode;

@@ -59,7 +59,7 @@ namespace Com
         ,m_onNewNode()
         ,m_gotRecv()
         ,m_discoverer(m_ioService, m_me, [=](const Node& n){OnNewNode(n);})
-        ,m_deliveryHandler(m_receiveStrand, m_me.nodeId, Utilities::Protocol(m_me.unicastAddress))
+        ,m_deliveryHandler(m_receiveStrand, m_me.nodeId, Resolver::Protocol(m_me.unicastAddress))
         ,m_reader(m_receiveStrand, m_me.unicastAddress, m_nodeTypes[nodeTypeId]->MulticastAddress(),
                     [=](const char* d, size_t s){return OnRecv(d,s);},
                     [=](){return m_deliveryHandler.NumberOfUndeliveredMessages()<Parameters::MaxNumberOfUndelivered;})
@@ -225,7 +225,7 @@ namespace Com
 
         lllog(6)<<L"COM: Inject node '"<<name.c_str()<<L"' ["<<id<<L"]"<<std::endl;
 
-        Node node(name, id, nodeTypeId, "", dataAddress, false);
+        Node node(name, id, nodeTypeId, "", Resolver(m_ioService).ResolveRemoteEndpoint(dataAddress, m_me.unicastAddress), false);
         OnNewNode(node);
         IncludeNodeInternal(id);
     }
@@ -249,10 +249,26 @@ namespace Com
 
     void CommunicationImpl::InjectSeeds(const std::vector<std::string>& seeds)
     {
-        if (m_isControlInstance)
+        if (!m_isControlInstance)
+            return;
+
+        std::vector<std::string> resolvedSeeds;
+        for (auto& seed : seeds)
         {
-            m_discoverer.AddSeeds(seeds);
+            try
+            {
+                auto rs=Resolver(m_ioService).ResolveRemoteEndpoint(seed, m_me.unicastAddress);
+                resolvedSeeds.push_back(rs);
+            }
+            catch(const std::logic_error& badSeed)
+            {
+                lllog(2)<<"COM: InjectSeeds injecting a seed that could not be resolved to a valid ip_address and port. Seed: "
+                          <<seed.c_str()<<". "<<badSeed.what()<<std::endl;
+
+            }
         }
+
+        m_discoverer.AddSeeds(resolvedSeeds);
     }
 
     void CommunicationImpl::OnNewNode(const Node& node)

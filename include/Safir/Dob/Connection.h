@@ -121,11 +121,9 @@ namespace Dob
     private:
 
         //implementation of pure virtual
-        virtual long GetControllerId() const {return m_ctrl;}
+        virtual DotsC_Int32 GetControllerId() const {return m_ctrl;}
 
-        void Close(const bool checkThread);
-
-        long m_ctrl;
+        DotsC_Int32 m_ctrl;
 
         //Disable copying and assignment
         Connection(const Connection&);

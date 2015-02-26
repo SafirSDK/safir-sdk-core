@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Lars Hagström / lars@foldspace.nu
 *
@@ -97,7 +98,8 @@ namespace Internal
                 }*/
 
             void SwitchToAsynchronousMode(boost::asio::io_service& ioService);
-            void Stop(); //only need to call this if SwitchToAsynchronousMode has been called.
+            void StopAsynchronousLogger(); //only need to call this if SwitchToAsynchronousMode has been called.
+            void DestroyAsynchronousLogger(); //only need to call this if SwitchToAsynchronousMode has been called.
 
             //This is a magic unlocker that has the strange behaviour of having a bool
             //operator that always returns false. It is for the use in preprocessor
@@ -150,11 +152,11 @@ namespace Internal
                 }
                 else
                 {
-                    if (m_asyncronousStream.get() == nullptr)
+                    if (m_asynchronousStream.get() == nullptr)
                     {
-                        m_asyncronousStream.reset(CreateAsyncStream());
+                        m_asynchronousStream.reset(CreateAsyncStream());
                     }
-                    return *m_asyncronousStream;
+                    return *m_asynchronousStream;
                 }
             }
         private:
@@ -198,7 +200,7 @@ namespace Internal
             //This stream is used when using synchronous mode
             std::wostream m_synchronousStream;
 
-            boost::thread_specific_ptr<std::wostream> m_asyncronousStream;
+            boost::thread_specific_ptr<std::wostream> m_asynchronousStream;
         };
 #ifdef _MSC_VER
 #pragma warning (pop)

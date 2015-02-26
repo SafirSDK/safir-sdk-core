@@ -65,9 +65,6 @@ namespace Dob
 {
 namespace Internal
 {
-    //static member initialization
-    TimerHandler* TimerHandler::m_instance = NULL;
-
     TimerInfoBase::TimerInfoBase(const TimerId timerId):
         m_timerId(timerId)
     {
@@ -104,9 +101,9 @@ namespace Internal
     // Timers
     //--------------------
 
-    TimerHandler::TimerHandler(boost::asio::io_service & ioService):
-        m_ioService(ioService),
-        m_steadyTimer(ioService)
+    TimerHandler::TimerHandler(boost::asio::io_service::strand& strand):
+        m_strand(strand),
+        m_steadyTimer(strand.get_io_service())
     {
 #ifdef _MSC_VER
         enableWindowsMultimediaTimers();
@@ -118,21 +115,9 @@ namespace Internal
 
     }
 
-
-    void TimerHandler::Instantiate(boost::asio::io_service & ioService)
-    {
-        ENSURE(m_instance == NULL, << L"Instantiate() was called twice!");
-        m_instance = new TimerHandler(ioService);
-    }
-
-    TimerHandler & TimerHandler::Instance()
-    {
-        ENSURE(m_instance != NULL, << L"Instance() was called before Instantiate()");
-        return *m_instance;
-    }
-
     void TimerHandler::Stop()
     {
+        m_stopped = true;
         m_steadyTimer.cancel();
     }
 
@@ -365,13 +350,16 @@ namespace Internal
     {
         m_steadyTimer.cancel();
         m_steadyTimer.expires_at(NextTimeout());
-        m_steadyTimer.async_wait(boost::bind(&TimerHandler::HandleTimeout,this,_1));
+        m_steadyTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
+                                               {
+                                                   HandleTimeout(error);
+                                               }));
     }
 
     void TimerHandler::HandleTimeout(const boost::system::error_code & error)
     {
         //check if timer was cancelled (happens in ScheduleTimer) and don't recurse...
-        if (error == boost::asio::error::operation_aborted)
+        if (error == boost::asio::error::operation_aborted || m_stopped)
         {
             return;
         }

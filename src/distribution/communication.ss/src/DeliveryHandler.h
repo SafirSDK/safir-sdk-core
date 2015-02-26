@@ -262,7 +262,7 @@ namespace Com
 
             NodeInfo(const Node& node_)
                 :node(node_)
-                ,endpoint(Utilities::CreateEndpoint(node.unicastAddress))
+                ,endpoint(Resolver::StringToEndpoint(node.unicastAddress))
             {
                 ackedMultiReceiverChannel.welcome=UINT64_MAX;
             }
@@ -675,7 +675,7 @@ namespace Com
                 }
             }
 
-            lllog(9)<<L"COM: SendAck "<<AckToString(*ackPtr).c_str()<<std::endl;
+            lllog(9)<<L"COM: SendAck "<<ackPtr->ToString().c_str()<<std::endl;
             WriterType::SendTo(ackPtr, ni.endpoint);
         }
 

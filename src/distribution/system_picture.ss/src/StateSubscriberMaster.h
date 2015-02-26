@@ -78,7 +78,7 @@ namespace SP
                                   {
                                       throw std::logic_error("StateSubscriberMaster already started");
                                   }
-                                  
+
                                   m_dataCallback = dataCallback;
                               });
         }
@@ -97,9 +97,8 @@ namespace SP
         boost::asio::strand m_strand;
     };
 
-    
-}
-}
-}
-}
 
+}
+}
+}
+}

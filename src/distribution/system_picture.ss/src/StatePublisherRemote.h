@@ -53,7 +53,7 @@ namespace SP
             , m_senderId(LlufId_Generate64(senderId))
             , m_nodeTypes(nodeTypes)
             , m_coordinator(coordinator)
-            , m_publishTimer(ioService, 
+            , m_publishTimer(ioService,
                              period,
                              [this](const boost::system::error_code& error)
                              {
@@ -83,22 +83,22 @@ namespace SP
 #else
             const int crcBytes = 0;
 #endif
-            
+
             m_coordinator.PerformOnStateMessage([this,crcBytes](const boost::shared_ptr<char[]>& data, const size_t size)
             {
                 lllog(8) << "Publishing system state to other nodes" << std::endl;
-            
+
 #ifdef CHECK_CRC
                 const int crc = GetCrc32(data.get(), size - crcBytes);
                 memcpy(data.get() + size - crcBytes, &crc, sizeof(int));
 #endif
-                
+
                 for (const auto& it: m_nodeTypes)
                 {
                     const bool sent = m_communication.Send(0, it.second.id, std::move(data), size, m_senderId, true);
                     if (!sent)
                     {
-                        lllog(8) << "StatePublisherRemote: Overflow when sending to node type " 
+                        lllog(8) << "StatePublisherRemote: Overflow when sending to node type "
                                  << it.second.name.c_str() << std::endl;
                         //No retry handling, since we send cyclically
                     }
@@ -120,5 +120,3 @@ namespace SP
 }
 }
 }
-
-

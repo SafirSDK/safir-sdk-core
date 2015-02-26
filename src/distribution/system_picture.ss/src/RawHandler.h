@@ -469,6 +469,7 @@ namespace SP
             {
                 m_allStatisticsMessage.mutable_more_dead_nodes()->Add(id);
             }
+
             return inserted;
         }
 
@@ -513,6 +514,12 @@ namespace SP
             newNode->set_data_receive_count(0);
             newNode->set_data_retransmit_count(0);
 
+            if (m_moreDeadNodes.find(id) != m_moreDeadNodes.end())
+            {
+                m_communication.ExcludeNode(id);
+                newNode->set_is_dead(true);
+            }
+
             //notify our users of the new node, and when they've returned we can
             //let it in.
             PostRawChangedCallback(RawChanges(RawChanges::NODES_CHANGED),
@@ -531,7 +538,6 @@ namespace SP
                       }
                   }));
         }
-
 
         //Must be called in strand!
         void GotReceive(int64_t id)

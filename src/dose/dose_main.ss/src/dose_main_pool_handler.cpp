@@ -73,7 +73,7 @@ namespace Internal
         const std::string m_description;
     };
 
-    PoolHandler::PoolHandler(boost::asio::io_service & ioService):
+    PoolHandler::PoolHandler(boost::asio::io_service::strand& strand):
 #if 0 //stewart
         m_ecom(NULL),
 #endif
@@ -83,9 +83,13 @@ namespace Internal
         m_threadMonitor(NULL),
         m_stateSubscriptionConnections(Safir::Dob::NodeParameters::NumberOfContexts()),
         m_pdThread(),
-        m_ioService(ioService)
+        m_strand(strand)
     {
-        m_stateDispatcher.reset(new StateDispatcher(boost::bind(&PoolHandler::DistributeStates,this),ioService));
+        m_stateDispatcher.reset(new StateDispatcher([this]()
+                                                    {
+                                                        DistributeStates();
+                                                    },
+                                                    strand));
     }
 
     PoolHandler::~PoolHandler()

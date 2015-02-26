@@ -543,7 +543,7 @@ namespace Internal
         else
         {
             registerer.connection.reset();
-            registerer.consumer = ConsumerId(NULL,0L);
+            registerer.consumer = ConsumerId(NULL,0);
         }
     }
 

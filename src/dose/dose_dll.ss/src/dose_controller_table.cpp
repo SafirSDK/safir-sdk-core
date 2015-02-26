@@ -63,8 +63,7 @@ namespace Internal
         return SingletonHelper::Instance();
     }
 
-    ControllerTable::ControllerTable():
-        m_threadWarningsEnabled(Safir::Dob::NodeParameters::ThreadingWarningsEnabled())
+    ControllerTable::ControllerTable()
     {
 
     }
@@ -74,31 +73,23 @@ namespace Internal
 
     }
 
-    long ControllerTable::AddController(ControllerPtr controller)
+    std::int32_t ControllerTable::AddController(ControllerPtr controller)
     {
         boost::lock_guard<boost::mutex> lck(m_lock);
 
-        long ctrl = -1;
-
-        for (;;)
+        for (std::int32_t ctrl = 1; ctrl < 100000; ++ ctrl)
         {
-            //TODO: the long should be replaced with a type that is the same
-            //size in all languages and platforms. On 64 bit linux a long
-            //is larger than whatever type we use in dotnet...
-            // Generate a unique id for the controller
-            ctrl = std::abs(static_cast<long>(0x0fffffff & Safir::Dob::Typesystem::Internal::GenerateRandom64Bit()));
             if (m_controllers.insert(std::make_pair(ctrl, controller)).second)
             {
-                break;
+                controller->SetInstanceId(ctrl);
+                return ctrl;
             }
         }
-
-        controller->SetInstanceId(ctrl);
-
-        return ctrl;
+        ENSURE(false, << "Too many controllers in one application");
+        return false;
     }
 
-    void ControllerTable::RemoveController(const long ctrl)
+    void ControllerTable::RemoveController(const std::int32_t ctrl)
     {
         boost::lock_guard<boost::mutex> lck(m_lock);
 
@@ -114,121 +105,23 @@ namespace Internal
         }
     }
 
-    void ControllerTable::CheckThread(const long ctrl) const
-    {
-        if (!m_threadWarningsEnabled)
-        {
-            return;
-        }
 
-        boost::lock_guard<boost::mutex> lck(m_lock);
-
-        ThreadControllersTable::const_iterator findIt = m_threadControllersTable.find(boost::this_thread::get_id());
-        if (findIt != m_threadControllersTable.end())
-        {
-            for (ControllerIdList::const_iterator it = findIt->second.begin();
-                 it != findIt->second.end(); ++it)
-            {
-                if (ctrl == *it)
-                {
-                    return;
-                }
-            }
-        }
-
-
-        std::wostringstream ostr;
-        ostr << "You are trying to use a connection from a different thread than it was Opened in." << std::endl
-             << "Getting connection name (this may fail if you've done something really wrong): " <<std::endl;
-        const char * name;
-        try
-        {
-            ControllerConstPtr ctrlPtr = GetControllerInternal(ctrl);
-            if (ctrlPtr != NULL)
-            {
-                name = ctrlPtr->GetConnectionName();
-                ostr << "Got it: '" << name << "'" << std::endl;
-            }
-        }
-        catch (const std::exception & exc)
-        {
-            ostr << "Failed: "<< exc.what() <<std::endl;
-        }
-
-        bool found = false;
-        //try to find it anyway (we want to remove it so nothing strange happens..
-        for (ThreadControllersTable::const_iterator it = m_threadControllersTable.begin();
-             it != m_threadControllersTable.end(); ++it)
-        {
-            for (ControllerIdList::const_iterator it2 = it->second.begin();
-                 it2 != it->second.end(); ++it2)
-            {
-                if (ctrl == *it2)
-                {
-                    ostr << "The thread id that you called from was "
-                         << boost::this_thread::get_id()
-                         << " but DOSE expected you to call it from "
-                         << it->first
-                         <<std::endl;
-
-                    found = true;
-                    break;
-                }
-            }
-        }
-
-        if (!found)
-        {
-            ostr << "Could not find the connection in any thread at all!" <<std::endl;
-        }
-
-        std::wcout << ostr.str();
-        lllout << ostr.str();
-        Safir::Utilities::Internal::Log::Send(Safir::Utilities::Internal::Log::Alert,
-                                              ostr.str());
-    }
-
-    ControllerPtr ControllerTable::GetController(const long ctrl)
-    {
-        //Avoid code duplication between the const and non-const version of this method.
-        return boost::const_pointer_cast<Controller>(static_cast<const ControllerTable*>(this)->GetController(ctrl));
-    }
-
-    ControllerConstPtr ControllerTable::GetController(const long ctrl) const
+    ControllerPtr ControllerTable::GetController(const std::int32_t ctrl)
     {
         boost::lock_guard<boost::mutex> lck(m_lock);
 
-        return GetControllerInternal(ctrl);
-    }
+        ControllerMap::const_iterator it = m_controllers.find(ctrl);
 
-    ControllerPtr ControllerTable::GetControllerByName(const std::string & name)
-    {
-        boost::lock_guard<boost::mutex> lck(m_lock);
-
-        for (ControllerMap::iterator it=m_controllers.begin();
-             it != m_controllers.end(); ++it)
+        if (it == m_controllers.end())
         {
-            if (it->second != NULL)
-            {
-                const char* tmpName;
-                //if it is not connected there is no connection name to get
-                if (it->second->IsConnected())
-                {
-                    tmpName = it->second->GetConnectionName();
-                    CheckThread(it->first); //check the threading if we're in debug build
-
-                    if (name == std::string(tmpName))
-                    {
-                        return it->second;
-                    }
-                }
-            }
+            // Return a null pointer if not found
+            return ControllerPtr();
         }
-        ENSURE(false, << "An unknown controller name was used! " << name.c_str());
-        return ControllerPtr(); //Keep compiler happy
+
+        return it->second;
     }
 
-    void ControllerTable::SetThread(const long ctrl)
+    void ControllerTable::SetThread(const std::int32_t ctrl)
     {
         boost::lock_guard<boost::mutex> lck(m_lock);
 
@@ -241,11 +134,9 @@ namespace Internal
         }
 
         findIt->second.push_back(ctrl);
-
-        //            std::wcout << "ControllerTable::SetThread() - ctrl: " << ctrl << ". tid: " << tid << std::endl;
     }
 
-    long
+    std::int32_t
     ControllerTable::GetFirstControllerInThread() const
     {
         boost::lock_guard<boost::mutex> lck(m_lock);
@@ -260,33 +151,27 @@ namespace Internal
         }
     }
 
-    long
-    ControllerTable::GetNamedControllerInThread(const std::string & connectionNameCommonPart,
-                                                const std::string & connectionNameInstancePart) const
+    std::int32_t
+    ControllerTable::GetNamedController(const std::string & connectionNameCommonPart,
+                                        const std::string & connectionNameInstancePart) const
     {
         boost::lock_guard<boost::mutex> lck(m_lock);
 
-        ThreadControllersTable::const_iterator findIt = m_threadControllersTable.find(boost::this_thread::get_id());
-        if (findIt != m_threadControllersTable.end()) //if it was not found we will go into the bit below
+        for (const auto& pair: m_controllers)
         {
-            for (ControllerIdList::const_iterator it = findIt->second.begin();
-                 it != findIt->second.end(); ++it)
+            if (pair.second->NameIsEqual(connectionNameCommonPart,connectionNameInstancePart))
             {
-                ControllerConstPtr ctrlPtr = GetControllerInternal(*it);
-                if (ctrlPtr != NULL && ctrlPtr->NameIsEqual(connectionNameCommonPart,connectionNameInstancePart))
-                {
-                    return *it;
-                }
+                return pair.first;
             }
         }
 
         std::wostringstream msg;
-        msg << "Failed to find named connection in this thread (" << connectionNameCommonPart.c_str() << ", " << connectionNameInstancePart.c_str() << ")";
+        msg << "Failed to find named connection (" << connectionNameCommonPart.c_str() << ", " << connectionNameInstancePart.c_str() << ")";
         throw Safir::Dob::NotOpenException(msg.str() ,__WFILE__,__LINE__);
     }
 
     void
-    ControllerTable::UnsetThread(const long ctrl, const bool checkThread)
+    ControllerTable::UnsetThread(const std::int32_t ctrl)
     {
         boost::lock_guard<boost::mutex> lck(m_lock);
 
@@ -303,90 +188,8 @@ namespace Internal
                 }
             }
         }
-
-        std::wostringstream ostr;
-        try
-        {
-            ostr << "You are trying to Close a connection from a different thread than it was Opened in." << std::endl
-                 << "This could either be because you're not calling Close from the right thread, or that you "
-                 << "are not calling Close at all, so that it gets called from the destructor, which can get "
-                 << "called from a different thread." <<std::endl
-                 << "Getting connection name (this may fail if you've done something really wrong): " <<std::endl;
-            const char * name;
-            try
-            {
-                ControllerConstPtr ctrlPtr = GetControllerInternal(ctrl);
-                if (ctrlPtr != NULL)
-                {
-                    name = ctrlPtr->GetConnectionName();
-                    ostr << "Got it: '" << name << "'" << std::endl;
-                }
-            }
-            catch (const std::exception & exc)
-            {
-                ostr << "Failed: "<< exc.what() <<std::endl;
-            }
-
-            bool found = false;
-            //try to find it anyway (we want to remove it so nothing strange happens..
-            for (ThreadControllersTable::iterator it = m_threadControllersTable.begin();
-                 it != m_threadControllersTable.end(); ++it)
-            {
-                for (ControllerIdList::iterator it2 = it->second.begin();
-                     it2 != it->second.end(); ++it2)
-                {
-                    if (ctrl == *it2)
-                    {
-                        ostr << "The thread id that you called from was "
-                             << boost::this_thread::get_id()
-                             << " but DOSE expected you to call it from "
-                             << it->first
-                             <<std::endl;
-
-                        it->second.erase(it2);
-                        found = true;
-                        break;
-                    }
-                }
-            }
-
-            if (!found)
-            {
-                //oh well, the connection was not opened after all. just skip outputting
-                //the error message...
-                return;
-            }
-
-            if (checkThread)
-            {
-                std::wcout << ostr.str();
-                lllout << ostr.str();
-            }
-        }
-        catch (...)
-        {
-            if (checkThread)
-            {
-                ostr <<std::endl<< "caught exception while building error message!!!"<<std::endl;
-                std::wcout << ostr.str();
-                lllout << ostr.str();
-            }
-            throw;
-        }
     }
 
-    ControllerConstPtr ControllerTable::GetControllerInternal(const long ctrl) const
-    {
-        ControllerMap::const_iterator it = m_controllers.find(ctrl);
-
-        if (it == m_controllers.end())
-        {
-            // Return a null pointer if not found
-            return ControllerConstPtr();
-        }
-
-        return it->second;
-    }
 }
 }
 }

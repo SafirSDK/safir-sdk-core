@@ -52,61 +52,49 @@ namespace Internal
     //forward declaration
     class Controller;
     typedef boost::shared_ptr<Controller> ControllerPtr;
-    typedef boost::shared_ptr<const Controller> ControllerConstPtr;
 
 
     class ControllerTable
+        : private boost::noncopyable
     {
     public:
         static ControllerTable & Instance();
 
-        long AddController(ControllerPtr controller);
-        void RemoveController(const long ctrl);
+        std::int32_t AddController(ControllerPtr controller);
+        void RemoveController(const std::int32_t ctrl);
 
-        ControllerPtr GetController(const long ctrl);
-        ControllerConstPtr GetController(const long ctrl) const;
-
-        ControllerPtr GetControllerByName(const std::string & name);
+        ControllerPtr GetController(const std::int32_t ctrl);
 
         /**
          * Set the thread that the controller acts in.
          */
-        void SetThread(const long ctrl);
+        void SetThread(const std::int32_t ctrl);
 
         /**
          * Remove the controller from the thread.
          */
-        void UnsetThread(const long ctrl, const bool checkThread);
+        void UnsetThread(const std::int32_t ctrl);
 
         /**
          * Get the first controller that is set to the current thread.
          */
-        long GetFirstControllerInThread() const;
+        std::int32_t GetFirstControllerInThread() const;
 
         /**
          * Get the named controller that is set to the current thread.
          */
-        long GetNamedControllerInThread(const std::string & connectionNameCommonPart,
-                                        const std::string & connectionNameInstancePart) const;
+        std::int32_t GetNamedController(const std::string & connectionNameCommonPart,
+                                const std::string & connectionNameInstancePart) const;
 
-        /**
-         * Check that the controller is set to the current thread.
-         * Only done in debug builds
-         */
-        void CheckThread(const long ctrl) const;
 
     private:
         ControllerTable();
         ~ControllerTable();
 
-        //declare but dont implement to prevent copying
-        explicit ControllerTable(const ControllerTable &);
-        ControllerTable & operator=(const ControllerTable &);
-
         /**
-         * This class is here to ensure that only the Instance method can get at the 
+         * This class is here to ensure that only the Instance method can get at the
          * instance, so as to be sure that boost call_once is used correctly.
-         * Also makes it easier to grep for singletons in the code, if all 
+         * Also makes it easier to grep for singletons in the code, if all
          * singletons use the same construction and helper-name.
          */
         struct SingletonHelper
@@ -118,19 +106,15 @@ namespace Internal
             static boost::once_flag m_onceFlag;
         };
 
-        ControllerConstPtr GetControllerInternal(const long ctrl) const;
-
         mutable boost::mutex m_lock;
 
-        typedef std::map<long, ControllerPtr> ControllerMap;
+        typedef std::map<std::int32_t, ControllerPtr> ControllerMap;
         ControllerMap m_controllers;
 
 
-        typedef std::vector<long> ControllerIdList;
+        typedef std::vector<std::int32_t> ControllerIdList;
         typedef std::map<boost::thread::id, ControllerIdList> ThreadControllersTable;
         ThreadControllersTable m_threadControllersTable;
-
-        const bool m_threadWarningsEnabled;
     };
 
 }

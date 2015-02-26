@@ -806,7 +806,7 @@ namespace Dob
 
         friend class ConnectionAspectBase;
 
-        virtual long GetControllerId() const = 0;
+        virtual DotsC_Int32 GetControllerId() const = 0;
 
         void Set(const Dob::EntityPtr&              entity,
                  const Dob::Typesystem::InstanceId& instanceId,

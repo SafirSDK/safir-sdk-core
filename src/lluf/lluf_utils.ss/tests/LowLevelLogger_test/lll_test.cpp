@@ -72,7 +72,7 @@ int main(const int argc, const char* argv[])
                                      std::wcout << "error" << std::endl;
                                  }
                                  done = true;
-                                 Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().Stop();
+                                 Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().StopAsynchronousLogger();
                              });
     }
 
@@ -87,7 +87,7 @@ int main(const int argc, const char* argv[])
     }
 
     threads.join_all();
-
+    Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().DestroyAsynchronousLogger();
     std::wcout << "exiting nicely" << std::endl;
     return 0;
 }

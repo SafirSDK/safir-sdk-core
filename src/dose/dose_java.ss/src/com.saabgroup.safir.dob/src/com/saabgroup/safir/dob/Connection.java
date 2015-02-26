@@ -120,17 +120,8 @@ public final class Connection extends ConnectionBase
      */
     public void close()
     {
-        close(true);
-    }
-
-    /**
-     * Internal Close function that allows for enabling/disabling of the thread check.
-     * @param checkThread Whether to check which thread the call is being made from.
-     */
-    private void close(boolean checkThread)
-    {
         boolean [] success = new boolean [1];
-        Interface.Disconnect(m_ctrl, checkThread, success);
+        Interface.Disconnect(m_ctrl, success);
 
 
         if (!success[0]) {
@@ -195,7 +186,7 @@ public final class Connection extends ConnectionBase
         {
             try
             {
-                close(false);
+                close();
             }
             catch (Exception exc)
             {

@@ -111,9 +111,9 @@ namespace Dob
     private:
 
         //implementation of pure virtual
-        virtual long GetControllerId() const;
+        virtual DotsC_Int32 GetControllerId() const;
 
-        long m_ctrl;
+        DotsC_Int32 m_ctrl;
 
         //Disable copying and assignment
         SecondaryConnection(const SecondaryConnection& d);

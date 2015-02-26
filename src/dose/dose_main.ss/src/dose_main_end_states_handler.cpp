@@ -33,23 +33,24 @@ namespace Dob
 {
 namespace Internal
 {
-    EndStatesHandler::EndStatesHandler()
+    EndStatesHandler::EndStatesHandler(TimerHandler& timerHandler)
+        : m_timerHandler(timerHandler)
     {
-        m_timerId = TimerHandler::Instance().RegisterTimeoutHandler(L"End States Timer", *this);
+        m_timerId = m_timerHandler.RegisterTimeoutHandler(L"End States Timer", *this);
 
         TimerInfoPtr timerInfo(new EmptyTimerInfo(m_timerId));
-        TimerHandler::Instance().SetRelative(Discard,
-                                             timerInfo,
-                                             60.0); //time out in 60 seconds
+        m_timerHandler.SetRelative(Discard,
+                                   timerInfo,
+                                   60.0); //time out in 60 seconds
     }
 
 
     void EndStatesHandler::HandleTimeout(const TimerInfoPtr& timer)
     {
         //TimerInfoPtr timerInfo(new EmptyTimerInfo(m_timerId));
-        TimerHandler::Instance().SetRelative(Discard,
-                                             timer,
-                                             60.0); //time out again in 60 seconds
+        m_timerHandler.SetRelative(Discard,
+                                   timer,
+                                   60.0); //time out again in 60 seconds
 
         Safir::Dob::Internal::EndStates::Instance().HandleTimeout();
     }

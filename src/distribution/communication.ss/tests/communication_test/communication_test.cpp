@@ -268,7 +268,7 @@ private:
     boost::condition_variable m_cond;
 };
 
-void SetCRC(const boost::shared_ptr<char[]>& ptr, size_t size)
+inline void SetCRC(const boost::shared_ptr<char[]>& ptr, size_t size)
 {
     boost::crc_32_type crc;
     crc.process_bytes(static_cast<const void*>(ptr.get()), size-4);
@@ -276,12 +276,21 @@ void SetCRC(const boost::shared_ptr<char[]>& ptr, size_t size)
     *val=crc.checksum();
 }
 
-bool ValidCRC(const boost::shared_ptr<char[]>& ptr, size_t size)
+inline bool ValidCRC(const boost::shared_ptr<char[]>& ptr, size_t size)
 {
     boost::crc_32_type crc;
     crc.process_bytes(static_cast<const void*>(ptr.get()), size-4);
     uint32_t checksum=*reinterpret_cast<uint32_t*>(ptr.get()+size-4);
     return checksum==crc.checksum();
+}
+
+inline boost::shared_ptr<char[]> CreateMessage(uint64_t val, size_t size)
+{
+    boost::shared_ptr<char[]> msg=boost::make_shared<char[]>(size);
+    memset(msg.get(), 0, size);
+    (*reinterpret_cast<uint64_t*>(msg.get()))=val;
+    SetCRC(msg, size);
+    return msg;
 }
 
 class Sp : private boost::noncopyable
@@ -466,9 +475,7 @@ int main(int argc, char * argv[])
                                                            cmd.unicastAddress,
                                                            nodeTypes.ToVector()));
 
-    std::cout<<"Ip "<<com->IpAddress()<<std::endl;
-
-    com->SetDataReceiver([=](int64_t fromNode, int64_t /*fromNodeType*/, const boost::shared_ptr<char[]>& msg, size_t size){sp->OnRecv(fromNode, msg, size);}, 0);
+    com->SetDataReceiver([=](int64_t fromNode, int64_t /*fromNodeType*/, const boost::shared_ptr<char[]>& msg, size_t size){sp->OnRecv(fromNode, msg, size);}, 123);
     com->SetGotReceiveFromCallback([=](int64_t id){sp->GotReceive(id);});
     com->SetRetransmitToCallback([=](int64_t id){sp->Retransmit(id);});
     com->SetNewNodeCallback([=](const std::string& name, int64_t nodeId, int64_t nodeTypeId, const std::string& ca, const std::string& /*da*/)
@@ -506,15 +513,13 @@ int main(int argc, char * argv[])
     {
         ++sendCounter;
 
-        boost::shared_ptr<char[]> data=boost::make_shared<char[]>(cmd.messageSize);
-        (*reinterpret_cast<uint64_t*>(data.get()))=sendCounter;
-        SetCRC(data, cmd.messageSize);
+        auto data=CreateMessage(sendCounter, cmd.messageSize);
 
         for (auto& nt : nodeTypes.Map())
         {
             if (cmd.acked)
             {
-                while (!com->Send(0, nt.second.id, data, cmd.messageSize, 0, true))
+                while (!com->Send(0, nt.second.id, data, cmd.messageSize, 123, true))
                 {
                     ++numberOfOverflows;
                     queueFullSem.Wait();
@@ -522,7 +527,7 @@ int main(int argc, char * argv[])
             }
             else
             {
-                com->Send(0, nt.second.id, data, cmd.messageSize, 0, false);
+                com->Send(0, nt.second.id, data, cmd.messageSize, 123, false);
             }
         }
 

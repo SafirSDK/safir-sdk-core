@@ -26,7 +26,7 @@
 #define _dose_internal_consumer_id_h
 
 #include <Safir/Dob/Internal/InternalExportDefs.h>
-
+#include <cstdint>
 
 namespace Safir
 {
@@ -39,7 +39,7 @@ namespace Internal
         ConsumerId() : consumer(0), lang(-1) {}
 
         ConsumerId(void* _consumer, short _lang) : consumer(_consumer), lang(_lang) {}
-        ConsumerId(void* _consumer, long _lang) : consumer(_consumer), lang(static_cast<short>(_lang)) {}
+        ConsumerId(void* _consumer, std::int32_t _lang) : consumer(_consumer), lang(static_cast<short>(_lang)) {}
 
         bool operator<(const ConsumerId& other) const
         {

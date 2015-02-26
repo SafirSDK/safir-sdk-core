@@ -54,14 +54,6 @@ namespace Log
     };
 
     /**
-    * Open the connection to the system logger.
-    *
-    * The use of Open() is optional; it will automatically be called if necessary,
-    *
-    */
-    LLUF_UTILS_API void Open();
-
-    /**
     * Service for sending log messages to the native system logging mechanism.
     *
     * The service takes a severity and an arbitrary string.
@@ -73,14 +65,6 @@ namespace Log
     *
     */
     LLUF_UTILS_API void Send(const Severity severity, const std::wstring& text);
-
-    /**
-    * Close the connection to the system logger.
-    *
-    * The use of Close() is optional; it will automatically be called if necessary,
-    *
-    */
-    LLUF_UTILS_API void Close();
 
 }
 }

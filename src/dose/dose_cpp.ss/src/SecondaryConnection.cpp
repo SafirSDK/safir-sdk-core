@@ -65,7 +65,7 @@ namespace Dob
             Detach();
         }
 
-        long newCtrlId;
+        DotsC_Int32 newCtrlId;
         std::string nameCommonPart=Dob::Typesystem::Utilities::ToUtf8(connectionNameCommonPart);
         std::string nameInstancePart=Dob::Typesystem::Utilities::ToUtf8(connectionNameInstancePart);
         bool success;
@@ -126,7 +126,8 @@ namespace Dob
     {
         return IsAttached();
     }
-    long SecondaryConnection::GetControllerId() const
+
+    DotsC_Int32 SecondaryConnection::GetControllerId() const
     {
         if (!IsAttached())
         {
