@@ -1,14 +1,14 @@
-set(ui About.ui connectionstats.ui dosecominfo.ui dosemon.ui entitystats.ui
-  loggingsettings.ui memgraph.ui nodestatus.ui numberOfEntities.ui)
+set(ui About.ui connectionstats.ui dosemon.ui entitystats.ui
+  loggingsettings.ui memgraph.ui numberOfEntities.ui RawStatisticsPage.ui SystemPicturePage.ui)
 
-set(sources About.cpp connectionstats.cpp dosecom_stuff.cpp dosecominfo.cpp dosemon.cpp
+set(sources About.cpp connectionstats.cpp dosemon.cpp
   entitystats.cpp graphwidget.cpp internalfunctions.cpp loggingsettings.cpp main.cpp
-  memgraph.cpp nodestatus.cpp numberofentities.cpp)
+  memgraph.cpp numberofentities.cpp RawStatisticsPage.cpp SystemPicturePage.cpp)
 
-set(widget_headers About.h connectionstats.h dosecominfo.h dosemon.h entitystats.h
-  graphwidget.h loggingsettings.h memgraph.h nodestatus.h numberofentities.h )
+set(widget_headers About.h connectionstats.h dosemon.h entitystats.h
+  graphwidget.h loggingsettings.h memgraph.h numberofentities.h RawStatisticsPage.h SystemPicturePage.h)
 
-set(headers internalfunctions.h dosecom_stuff.h common_header.h)
+set(headers internalfunctions.h common_header.h)
 
 
 

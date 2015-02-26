@@ -52,6 +52,7 @@ ADD_SAFIR_GENERATED_LIBRARY(NAME Core
   data/Safir.Dob.NodeDefinition.dou
   data/Safir.Dob.NodeInfo.dou
   data/Safir.Dob.NodeStatus.dou
+  data/Safir.Dob.NodeType.dou
   data/Safir.Dob.NotFoundException.dou
   data/Safir.Dob.NotOpenException.dou
   data/Safir.Dob.OverflowException.dou
