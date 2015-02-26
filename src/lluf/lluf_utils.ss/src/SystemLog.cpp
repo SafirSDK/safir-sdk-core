@@ -444,7 +444,7 @@ void TrySendNativeLog(const std::string& errTxt)
 #if defined(linux) || defined(__linux) || defined(__linux__)
         syslog(SAFIR_FACILITY | Critical, "%s", errTxt.c_str());
 #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-        WindowsLogger("Unknown process").Send(EVENTLOG_ERROR_TYPE, ToUtf16(errTxt));
+        WindowsLogger(L"Unknown process").Send(EVENTLOG_ERROR_TYPE, ToUtf16(errTxt));
 #endif
     }
     catch (...)
