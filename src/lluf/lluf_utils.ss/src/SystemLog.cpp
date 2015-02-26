@@ -453,7 +453,7 @@ void TrySendNativeLog(const std::string& errTxt)
     }
 }
 
-void Send(const Severity severity, const std::wstring& text);
+void Send(const Severity severity, const std::wstring& text)
 {
     try
     {
