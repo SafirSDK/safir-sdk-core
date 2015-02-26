@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2014 (http://safir.sourceforge.net)
+* Copyright Saab AB, 2008-2015 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / lars.hagstrom@consoden.se
 *
@@ -37,7 +37,6 @@
 #ifdef _MSC_VER
 #  pragma warning (pop)
 #endif
-
 
 namespace Safir
 {

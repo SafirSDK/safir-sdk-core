@@ -1,6 +1,16 @@
-FILE(GLOB ui *.ui)
-FILE(GLOB sources *.cpp)
-FILE(GLOB headers [!ui_]*.h)
+set(ui About.ui connectionstats.ui dosecominfo.ui dosemon.ui entitystats.ui
+  loggingsettings.ui memgraph.ui nodestatus.ui numberOfEntities.ui)
+
+set(sources About.cpp connectionstats.cpp dosecom_stuff.cpp dosecominfo.cpp dosemon.cpp
+  entitystats.cpp graphwidget.cpp internalfunctions.cpp loggingsettings.cpp main.cpp
+  memgraph.cpp nodestatus.cpp numberofentities.cpp)
+
+set(widget_headers About.h connectionstats.h dosecominfo.h dosemon.h entitystats.h
+  graphwidget.h loggingsettings.h memgraph.h nodestatus.h numberofentities.h )
+
+set(headers internalfunctions.h dosecom_stuff.h common_header.h)
+
+
 
 # As moc files are generated in the binary dir, tell CMake
 # to always look for includes there:
@@ -14,7 +24,7 @@ if (Qt5Widgets_FOUND)
   message(STATUS "Building dobexplorer with Qt5")
 
   QT5_WRAP_UI(ui_headers ${ui})
-  QT5_WRAP_CPP(moc_sources ${headers} ${QT5_WRAP_CPP_OPTIONS})
+  QT5_WRAP_CPP(moc_sources ${widget_headers} ${QT5_WRAP_CPP_OPTIONS})
 
   mark_as_advanced(Qt5Core_DIR Qt5Gui_DIR Qt5Widgets_DIR)
 else()
@@ -47,11 +57,11 @@ else()
     set(QT4_WRAP_CPP_OPTIONS OPTIONS -DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED)
   endif()
 
-  QT4_WRAP_CPP(moc_sources ${headers} ${QT4_WRAP_CPP_OPTIONS})
+  QT4_WRAP_CPP(moc_sources ${widget_headers} ${QT4_WRAP_CPP_OPTIONS})
 
 endif()
 
-ADD_EXECUTABLE(dobexplorer WIN32 ${sources} ${ui_headers} ${moc_sources} ${headers} dobexplorer.rc)
+ADD_EXECUTABLE(dobexplorer WIN32 ${sources} ${ui_headers} ${moc_sources} ${headers} ${widget_headers} dobexplorer.rc)
 
 if (Qt5Widgets_FOUND)
   TARGET_LINK_LIBRARIES(dobexplorer PRIVATE Qt5::Widgets)
