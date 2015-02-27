@@ -55,7 +55,7 @@ public:
 
         Com::DeliveryHandlerBasic<DeliveryHandlerTest::TestWriter> dh(strand, 1, 4);
         dh.SetGotRecvCallback([=](int64_t id){DeliveryHandlerTest::GotReceiveFrom(id);});
-        dh.SetReceiver([=](int64_t n, int64_t nt, const boost::shared_ptr<char[]>& d, size_t s){DeliveryHandlerTest::OnRecv(n, nt, d, s);}, 0);
+        dh.SetReceiver([=](int64_t n, int64_t nt, const char* d, size_t s){DeliveryHandlerTest::OnRecv(n, nt, d, s);}, 0, [=](size_t s){return new char[s];});
         dh.Start();
 
         TRACELINE
@@ -348,7 +348,6 @@ public:
 
 
 private:
-
     static boost::mutex mutex;
     static std::map<int64_t, int> received;
     static std::map<int64_t, uint64_t> acked;
@@ -368,11 +367,12 @@ private:
     typedef Com::Writer<Com::Ack, DeliveryHandlerTest::TestSendPolicy> TestWriter;
 
 
-    static void OnRecv(int64_t fromNodeId, int64_t /*fromNodeType*/, const boost::shared_ptr<char[]>& data, size_t size)
+    static void OnRecv(int64_t fromNodeId, int64_t /*fromNodeType*/, const char* data, size_t size)
     {
-        std::string msg(data.get(), size);
+        std::string msg(data, size);
         //std::cout<<"OnRecv from "<<fromNodeId<<": "<<msg<<std::endl;
         received[fromNodeId]++;
+        delete[] data; //receiver is responsible for deleting data
     }
 
     static void GotReceiveFrom(int64_t /*fromNodeId*/)

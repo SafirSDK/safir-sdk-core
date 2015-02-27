@@ -50,19 +50,19 @@ namespace Com = Safir::Dob::Internal::Com;
 
 namespace Utilities
 {
-    inline void SetCRC(const boost::shared_ptr<char[]>& ptr, size_t size)
+    inline void SetCRC(char* ptr, size_t size)
     {
         boost::crc_32_type crc;
-        crc.process_bytes(static_cast<const void*>(ptr.get()), size-4);
-        uint32_t* val=reinterpret_cast<uint32_t*>(ptr.get()+size-4);
+        crc.process_bytes(static_cast<const void*>(ptr), size-4);
+        uint32_t* val=reinterpret_cast<uint32_t*>(ptr+size-4);
         *val=crc.checksum();
     }
 
-    inline bool ValidCRC(const boost::shared_ptr<char[]>& ptr, size_t size)
+    inline bool ValidCRC(const char* ptr, size_t size)
     {
         boost::crc_32_type crc;
-        crc.process_bytes(static_cast<const void*>(ptr.get()), size-4);
-        uint32_t checksum=*reinterpret_cast<uint32_t*>(ptr.get()+size-4);
+        crc.process_bytes(static_cast<const void*>(ptr), size-4);
+        uint32_t checksum=*reinterpret_cast<const uint32_t*>(ptr+size-4);
         return checksum==crc.checksum();
     }
 
@@ -70,13 +70,13 @@ namespace Utilities
     {
         boost::shared_ptr<char[]> data=boost::make_shared<char[]>(size);
         (*reinterpret_cast<uint64_t*>(data.get()))=value;
-        SetCRC(data, size);
+        SetCRC(data.get(), size);
         return data;
     }
 
-    inline uint64_t GetValue(const boost::shared_ptr<char[]>& data)
+    inline uint64_t GetValue(const char* data)
     {
-        return *reinterpret_cast<const uint64_t*>(data.get());
+        return *reinterpret_cast<const uint64_t*>(data);
     }
 
     inline std::string TimeString()
