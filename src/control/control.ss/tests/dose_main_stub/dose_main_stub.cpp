@@ -192,21 +192,23 @@ int main(int /*argc*/, char * /*argv*/[])
                                                             spNodeTypes));
 
                              communication->SetDataReceiver
-                                     ([&nodeNameMap, &spNodeTypes]
-                                      (int64_t fromNodeId,
-                                       int64_t fromNodeType,
-                                       const boost::shared_ptr<char[]>& data,
-                                       size_t size)
-                                        {
-                                            std::string msg(data.get(), size);
-                                            std::ostringstream os;
-                                            os << "DOSE_MAIN: Received " << msg
-                                               << " from Node " << nodeNameMap[fromNodeId]
-                                               << " of Node Type " << spNodeTypes.find(fromNodeType)->second.name;
-                                            std::cout << os.str() << std::endl;
-                                            lllog(3) << os.str() << std::endl;
-                                        },
-                                        12345);
+                                 ([&nodeNameMap, &spNodeTypes]
+                                  (int64_t fromNodeId,
+                                   int64_t fromNodeType,
+                                   const char* const data_,
+                                   size_t size)
+                                  {
+                                      const boost::shared_ptr<const char[]> data(data_);
+                                      std::string msg(data.get(), size);
+                                      std::ostringstream os;
+                                      os << "DOSE_MAIN: Received " << msg
+                                         << " from Node " << nodeNameMap[fromNodeId]
+                                         << " of Node Type " << spNodeTypes.find(fromNodeType)->second.name;
+                                      std::cout << os.str() << std::endl;
+                                      lllog(3) << os.str() << std::endl;
+                                  },
+                                  12345,
+                                  [](size_t size){return new char[size];});
 
                              communication->Start();
 

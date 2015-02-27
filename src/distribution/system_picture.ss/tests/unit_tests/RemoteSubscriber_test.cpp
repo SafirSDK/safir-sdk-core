@@ -38,15 +38,25 @@
 
 using namespace Safir::Dob::Internal::SP;
 
-std::function<void(int64_t fromNodeId, int64_t fromNodeType, const boost::shared_ptr<char[]>& data, size_t size)> dataCallback;
+std::function<void(int64_t fromNodeId,
+                   int64_t fromNodeType,
+                   const char* const data,
+                   size_t size)> dataCallback;
+
+std::function<char*(size_t)> allocator;
 
 class Com
 {
 public:
-    void SetDataReceiver(const std::function<void(int64_t fromNodeId, int64_t fromNodeType, const boost::shared_ptr<char[]>& data, size_t size)>& callback, 
-                         int64_t /*dataTypeIdentifier*/)
+    void SetDataReceiver(const std::function<void(int64_t fromNodeId,
+                                                  int64_t fromNodeType,
+                                                  const char* const data,
+                                                  size_t size)>& callback,
+                         int64_t /*dataTypeIdentifier*/,
+                         const std::function<char*(size_t)>& alloc)
     {
         dataCallback = callback;
+        allocator = alloc;
     }
 };
 
@@ -55,8 +65,8 @@ int updates = 0;
 class Handler
 {
 public:
-    void NewRemoteStatistics(const int64_t from, 
-                             const boost::shared_ptr<char[]>& data,
+    void NewRemoteStatistics(const int64_t from,
+                             const boost::shared_ptr<const char[]>& data,
                              const size_t size)
     {
         ++updates;
@@ -80,10 +90,10 @@ BOOST_AUTO_TEST_CASE( send_one )
     const int crc = GetCrc32(data.get(), size - crcBytes);
     memcpy(data.get() + size - crcBytes, &crc, sizeof(int));
 #endif
+    char* dataCopy = allocator(size);
+    memcpy(dataCopy,data.get(),size);
 
-    dataCallback(1,2002,data,size);
-    
+    dataCallback(1,2002,dataCopy,size);
+
     BOOST_CHECK(updates == 1);
 }
-
-

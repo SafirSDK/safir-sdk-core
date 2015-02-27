@@ -118,12 +118,13 @@ namespace SP
         {
             communication.SetDataReceiver([this](const int64_t from,
                                                  const int64_t nodeTypeId,
-                                                 const boost::shared_ptr<char[]>& data,
+                                                 const char* const data,
                                                  const size_t size)
                                           {
-                                              GotData(from, nodeTypeId, data, size);
+                                              GotData(from, nodeTypeId, boost::shared_ptr<const char[]>(data), size);
                                           },
-                                          m_receiverId);
+                                          m_receiverId,
+                                          [](size_t size){return new char[size];});
 
             const auto aloneTimeout = CalculateAloneTimeout(nodeTypes);
             lllog(3) << "SP: AloneTimeout will be " << boost::chrono::duration_cast<boost::chrono::milliseconds>(aloneTimeout) << std::endl;
@@ -305,7 +306,7 @@ namespace SP
         //not in strand
         void GotData(const int64_t from,
                      const int64_t nodeTypeId,
-                     const boost::shared_ptr<char[]>& data,
+                     const boost::shared_ptr<const char[]>& data,
                      size_t size)
         {
             ElectionMessage message;
