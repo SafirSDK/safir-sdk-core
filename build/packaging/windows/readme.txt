@@ -57,3 +57,14 @@ Documentation for Safir SDK Core can be found at http://www.safirsdkcore.com/doc
 
 Go to http://www.safirsdkcore.com to find out about our Google+ Community, our GitHub and
 SourceForge pages and to get in touch with us!
+
+Bundled Software
+----------------
+
+The Safir SDK Core windows installer comes with some bundled software, that is used
+internally and that is used in our interfaces:
+
+* Boost C++ Libraries (http://www.boost.org) - All headers and a subset of the Boost
+  libraries are bundled.
+* Qt runtime (http://www.qt.io) - used by dobmake and dobexplorer.
+* Jom (http://qt-project.org/wiki/jom) - NMake clone that can run in parallel.
