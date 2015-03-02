@@ -77,7 +77,7 @@ namespace Com
         void SetGotReceiveFromCallback(const GotReceiveFrom& callback);
         void SetRetransmitToCallback(const RetransmitTo& callback);
         void SetQueueNotFullCallback(const QueueNotFull& callback, int freePartThreshold);
-        void SetDataReceiver(const ReceiveData& callback, int64_t dataTypeIdentifier);
+        void SetDataReceiver(const ReceiveData& callback, int64_t dataTypeIdentifier, const Allocator& allocator);
 
         void InjectSeeds(const std::vector<std::string>& seeds);
 

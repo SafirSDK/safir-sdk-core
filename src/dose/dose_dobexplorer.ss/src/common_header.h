@@ -43,12 +43,4 @@
 #pragma warning (disable: 4355)
 #endif
 
-//Define a dummy class to avoid "moc" warning about this file not containing any QObjects. 
-//The cmake setup currently runs moc on all .h files.
-class Dummy 
-    : public QObject
-{
-    Q_OBJECT
-};
-
 #endif

@@ -227,7 +227,7 @@ namespace SP
                               });
         }
 
-        void NewRemoteStatistics(const int64_t from, const boost::shared_ptr<char[]>& data, const size_t size)
+        void NewRemoteStatistics(const int64_t from, const boost::shared_ptr<const char[]>& data, const size_t size)
         {
             m_strand.dispatch([this,from,data,size]
             {

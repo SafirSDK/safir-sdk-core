@@ -57,7 +57,8 @@ namespace Internal
 {
 namespace Com
 {
-    typedef std::function<void(int64_t fromNodeId, int64_t fromNodeType, const boost::shared_ptr<char[]>& data, size_t size)> ReceiveData;
+    typedef std::function<char*(size_t)> Allocator;
+    typedef std::function<void(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size)> ReceiveData;
     typedef std::function<void(int64_t fromNodeId)> GotReceiveFrom;
 
     template <class WriterType>
@@ -75,6 +76,12 @@ namespace Com
             ,m_gotRecvFrom()
         {
             m_numberOfUndeliveredMessages=0;
+
+            m_receivers.insert(std::make_pair(WelcomeDataType,
+                                              DataReceiver([=](size_t size){return new char[size];},
+                                                           [=](int64_t, int64_t, const char* data, size_t) {delete[] data;})
+                                              )
+                               );
         }
 
         void Start()
@@ -100,9 +107,9 @@ namespace Com
             m_gotRecvFrom=callback;
         }
 
-        void SetReceiver(const ReceiveData& callback, int64_t dataTypeIdentifier)
+        void SetReceiver(const ReceiveData& callback, int64_t dataTypeIdentifier, const Allocator& allocator)
         {
-            m_receivers.insert(std::make_pair(dataTypeIdentifier, callback));
+            m_receivers.insert(std::make_pair(dataTypeIdentifier, DataReceiver(allocator, callback)));
         }
 
         //Handle received data and deliver to application if possible and sends ack back to sender.
@@ -204,7 +211,19 @@ namespace Com
     private:
 #endif
 
-        typedef boost::unordered_map<int64_t, ReceiveData>  ReceiverMap;
+        struct DataReceiver
+        {
+            Allocator alloc;
+            ReceiveData onRecv;
+
+            DataReceiver(const Allocator& a, const ReceiveData& r)
+                :alloc(a)
+                ,onRecv(r)
+            {
+            }
+        };
+
+        typedef boost::unordered_map<int64_t, DataReceiver>  ReceiverMap;
 
         struct RecvData
         {
@@ -213,7 +232,7 @@ namespace Com
             uint64_t sequenceNumber;
             uint16_t fragmentNumber;
             uint16_t numberOfFragments;
-            boost::shared_ptr<char[]> data;
+            char* data;
             size_t dataSize;
 
             RecvData()
@@ -222,7 +241,7 @@ namespace Com
                 ,sequenceNumber(0)
                 ,fragmentNumber(0)
                 ,numberOfFragments(0)
-                ,data()
+                ,data(nullptr)
                 ,dataSize(0)
             {
             }
@@ -230,7 +249,7 @@ namespace Com
             void Clear()
             {
                 free=true;
-                data.reset();
+                data=nullptr; //we are not responsible for deleting data
                 dataSize=0;
             }
         };
@@ -343,9 +362,18 @@ namespace Com
 
             //Check if buffer is not created for us. In the case the message is fragmented
             //another fragment may already have arrived and the buffer is created.
-            if (!recvData.data)
+            if (recvData.data==nullptr)
             {
-                recvData.data.reset(new char[header->totalContentSize]);
+                auto recvIt=m_receivers.find(recvData.dataType); //m_receivers shall be safe to use inside m_deliverStrand since it is not supposed to be modified after start
+                if (recvIt==m_receivers.end())
+                {
+                    std::ostringstream os;
+                    os<<"COM: Received data from node "<<header->commonHeader.senderId<<" that has no registered receiver. DataTypeIdentifier: "<<recvData.dataType<<std::endl;
+                    SEND_SYSTEM_LOG(Error, <<os.str().c_str());
+                    throw std::logic_error(os.str());
+                }
+
+                recvData.data=recvIt->second.alloc(header->totalContentSize);
                 recvData.dataSize=header->totalContentSize;
 
                 //copy buffer to other indices if it shall be shared among many fragments
@@ -367,7 +395,7 @@ namespace Com
             }
 
             //copy data to correct offset in buffer depending on fragment number
-            char* dest=recvData.data.get()+header->fragmentOffset;
+            char* dest=recvData.data+header->fragmentOffset;
             memcpy(dest, payload, header->fragmentContentSize);
         }
 
@@ -596,28 +624,24 @@ namespace Com
                         auto dataPtr=rd.data;
                         auto dataSize=rd.dataSize;
                         auto dataType=rd.dataType;
-                        //auto seqNo=rd.sequenceNumber;
 
-                        if (dataType!=WelcomeDataType) //welcome messages are not delivered
+                        m_numberOfUndeliveredMessages++;
+                        m_deliverStrand.post([=]
                         {
-                            m_numberOfUndeliveredMessages++;
-                            m_deliverStrand.post([=]
+                            auto recvIt=m_receivers.find(dataType); //m_receivers shall be safe to use inside m_deliverStrand since it is not supposed to be modified after start
+                            if (recvIt!=m_receivers.end())
                             {
-                                auto recvIt=m_receivers.find(dataType); //m_receivers shall be safe to use inside m_deliverStrand since it is not supposed to be modified after start
-                                if (recvIt!=m_receivers.end())
-                                {
-                                    recvIt->second(fromId, fromNodeType, dataPtr, dataSize);
-                                }
-                                else
-                                {
-                                    std::ostringstream os;
-                                    os<<"COM: Received data from node "<<fromId<<" that has no registered receiver. DataTypeIdentifier: "<<dataType<<std::endl;
-                                    SEND_SYSTEM_LOG(Error, <<os.str().c_str());
-                                    throw std::logic_error(os.str());
-                                }
-                                m_numberOfUndeliveredMessages--;
-                            });
-                        }
+                                recvIt->second.onRecv(fromId, fromNodeType, dataPtr, dataSize);
+                            }
+                            else
+                            {
+                                std::ostringstream os;
+                                os<<"COM: Trying to deliver data from node "<<fromId<<" that has no registered receiver. DataTypeIdentifier: "<<dataType<<std::endl;
+                                SEND_SYSTEM_LOG(Error, <<os.str().c_str());
+                                throw std::logic_error(os.str());
+                            }
+                            m_numberOfUndeliveredMessages--;
+                        });
                     }
 
                     //Check if queue contains fragmented message with more fragments than recvWindowSize, needs special handling
@@ -626,10 +650,10 @@ namespace Com
                     {
                         //lastInQueue has allocated buffer and is not the last fragment of the message
                         //remember if windowSize=1 then lastInQueue==rd, so we have to copy data before clearing rd
-                        boost::shared_ptr<char[]> data=lastInQueue.data;
-                        size_t dataSize=lastInQueue.dataSize;
-                        uint16_t numberOfFragments=lastInQueue.numberOfFragments;
-                        uint16_t fragmentNumber=lastInQueue.fragmentNumber+1;
+                        auto data=lastInQueue.data;
+                        auto dataSize=lastInQueue.dataSize;
+                        auto numberOfFragments=lastInQueue.numberOfFragments;
+                        auto fragmentNumber=lastInQueue.fragmentNumber+1;
 
                         rd.Clear();
                         ch.queue.Step();

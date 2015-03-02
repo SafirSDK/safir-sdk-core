@@ -59,8 +59,9 @@ namespace Com
     typedef std::function<void(const std::string& name, int64_t nodeId, int64_t nodeTypeId, const std::string& controlAddress, const std::string& dataAddress)> NewNode;
     typedef std::function<void(int64_t fromNodeId)> GotReceiveFrom;
     typedef std::function<void(int64_t toNodeId)> RetransmitTo;
-    typedef std::function<void(int64_t fromNodeId, int64_t fromNodeType, const boost::shared_ptr<char[]>& data, size_t size)> ReceiveData;
+    typedef std::function<void(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size)> ReceiveData;
     typedef std::function<void(int64_t nodeTypeId)> QueueNotFull;
+    typedef std::function<char*(size_t)> Allocator;
 
     struct ControlModeTag {};
     const ControlModeTag controlModeTag = ControlModeTag();
@@ -176,8 +177,10 @@ namespace Com
          *
          * @param callback [in] - Callback function.
          * @param dataTypeIdentifier [in] - Only data sent with the same dataTypeIdentifier will be received by the callback.
+         * @param allocator [in] - Will be used to allocate memory for the received data. The receiver is responsible for
+         *                         deleting the allocated memory after a message has been received.
          */
-        void SetDataReceiver(const ReceiveData& callback, int64_t dataTypeIdentifier);
+        void SetDataReceiver(const ReceiveData& callback, int64_t dataTypeIdentifier, const Allocator& allocator);
 
         /**
          * Start communication, no callbacks can be setup after started.

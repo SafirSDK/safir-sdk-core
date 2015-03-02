@@ -1,4 +1,54 @@
-# - Config file for the SafirSDKCore package
+#
+# Config file for the SafirSDKCore package
+#
+# This file will set up the variables and functions needed to build and link Safir
+# programs, including building safir_generated libraries.
+#
+# After having run find_package(SafirSDKCore) the following variables and functions will
+# be defined:
+#
+# SAFIR_SDK_CORE_LIBRARIES - Libraries that Safir applications should link to.
+# SAFIR_SDK_CORE_LIBRARIES_DIR - Location of Safir SDK Core libraries
+# SAFIR_SDK_CORE_INCLUDE_DIRS - Location of Safir SDK Core headers
+#
+# ADD_SAFIR_GENERATED_LIBRARY(NAME <target name>
+#                             [DOU_FILES <file1> .. <fileN>]
+#                             [DOM_FILES <file1> .. <fileN>]
+#                             [NAMESPACE_MAPPINGS <file1> .. <fileN>]
+#                             [GLOB]
+#                             [DEPENDENCIES <dep1> .. <depN>]
+#
+#  NAME: Name of the target to create. If for example NAME is Foo the C++ libraries will
+#        be called safir_generated-Foo-cpp.dll on windows.
+#  DOU_FILES: The dou files to use to generate code.
+#  DOM_FILES: Property mappings that should be installed as part of this target.
+#  NAMESPACE_MAPPINGS: Java namespace mappings.
+#  GLOB: Use this to automatically find dou, dom and namespace.txt files in the current source directory.
+#        This option can not be used together with DOU_FILES, DOM_FILES and NAMESPACE_MAPPINGS.
+#  DEPENDENCIES: Dependencies to other safir_generated targets within the build tree.
+#
+# INSTALL_SAFIR_GENERATED_LIBRARY(TARGETS <target1> .. <targetN>
+#                                 [CXX_BIN <c++ .dll destination dir>]
+#                                 [CXX_LIB <c++ .lib/.so destination dir>]
+#                                 [CXX_INCLUDE <c++ include destination dir>]
+#                                 [JAR <java .jar destination dir>]
+#                                 [DOTNET <dotnet .dll destination dir>]
+#                                 [DOU_BASE <dou base destination dir>])
+#
+# Notes:
+#  1. Dotnet assemblies are not installed into GAC.
+#  2. Dou files will be installed into <DOU_BASE>/<target name> directory.
+#  3. Both CXX_LIB and CXX_BIN have to be specified to install the C++ libraries..
+#
+# This file will actually define some other variables, some of which are used by the
+# example apps build scripts to make CMake build Java and .Net. If you're trying to do
+# that, have a look at those build scripts, and/or get in touch with us and we'll try to
+# help you out or provide documentation on those variables and functions.
+#
+# There are even more things defined by this file but they may change without notice. If
+# you believe you need one of them, please let us know and we can add them to the
+# documented interface and make sure we don't mess up your CMake scripts without knowing.
+#
 
 # Compute paths
 set(SAFIR_SDK_CORE_CMAKE_DIR ${CMAKE_CURRENT_LIST_DIR})

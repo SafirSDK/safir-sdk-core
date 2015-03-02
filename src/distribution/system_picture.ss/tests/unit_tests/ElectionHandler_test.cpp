@@ -86,11 +86,11 @@ public:
 
     bool SendTo(const int64_t nodeId,
                 const int64_t sender,
-                const boost::shared_ptr<char[]>& data,
+                const boost::shared_ptr<const char[]>& data,
                 const size_t size);
 
     bool SendAll(const int64_t sender,
-                 const boost::shared_ptr<char[]>& data,
+                 const boost::shared_ptr<const char[]>& data,
                  const size_t size);
 
     void EnableOverflows() {m_overflows = true;}
@@ -134,17 +134,23 @@ public:
     typedef std::function<void(const std::string& name, int64_t nodeId, int64_t nodeTypeId, const std::string& controlAddress, const std::string& dataAddress)> NewNode;
     typedef std::function<void(int64_t fromNodeId)> GotReceiveFrom;
     typedef std::function<void(int64_t toNodeId)> RetransmitTo;
-    typedef std::function<void(int64_t fromNodeId, int64_t fromNodeType, const boost::shared_ptr<char[]>& data, size_t size)> ReceiveData;
+    typedef std::function<void(int64_t fromNodeId,
+                               int64_t fromNodeType,
+                               const char* const data,
+                               size_t size)> ReceiveData;
 
-    void SetDataReceiver(const ReceiveData& callback, const int64_t /*dataTypeIdentifier*/)
+    typedef std::function<char*(size_t size)> Allocator;
+
+    void SetDataReceiver(const ReceiveData& callback, const int64_t /*dataTypeIdentifier*/, const Allocator& alloc)
     {
         receiveDataCb = callback;
+        allocator = alloc;
     }
 
 
     bool Send(const int64_t nodeId,
               const int64_t nodeTypeId,
-              const boost::shared_ptr<char[]>& data,
+              const boost::shared_ptr<const char[]>& data,
               const size_t size,
               const int64_t /*dataTypeIdentifier*/,
               const bool ack)
@@ -176,6 +182,7 @@ public:
     const int64_t id;
 
     ReceiveData receiveDataCb;
+    Allocator allocator;
 
 };
 
@@ -188,7 +195,7 @@ public:
 
 bool Connector::SendTo(const int64_t nodeId,
                        const int64_t sender,
-                       const boost::shared_ptr<char[]>& data,
+                       const boost::shared_ptr<const char[]>& data,
                        const size_t size)
 {
     if (!DeliverMessage())
@@ -209,7 +216,9 @@ bool Connector::SendTo(const int64_t nodeId,
         if (comm.first == nodeId)
         {
             SAFE_BOOST_TEST_MESSAGE(" - Sending to node " << comm.first);
-            comm.second->receiveDataCb(sender,10,data,size);
+            char* dataCopy = comm.second->allocator(size);
+            memcpy(dataCopy,data.get(),size);
+            comm.second->receiveDataCb(sender,10,dataCopy,size);
             return true;
         }
     }
@@ -220,7 +229,7 @@ bool Connector::SendTo(const int64_t nodeId,
 
 
 bool Connector::SendAll(const int64_t sender,
-                        const boost::shared_ptr<char[]>& data,
+                        const boost::shared_ptr<const char[]>& data,
                         const size_t size)
 {
     if (!DeliverMessage())
@@ -243,7 +252,9 @@ bool Connector::SendAll(const int64_t sender,
         if (comm.first != sender)
         {
             SAFE_BOOST_TEST_MESSAGE(" - Sending to node " << sender);
-            comm.second->receiveDataCb(sender,10,data,size);
+            char* dataCopy = comm.second->allocator(size);
+            memcpy(dataCopy,data.get(),size);
+            comm.second->receiveDataCb(sender,10,dataCopy,size);
         }
     }
 

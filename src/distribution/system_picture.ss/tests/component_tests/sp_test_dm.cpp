@@ -422,9 +422,10 @@ int main(int argc, char * argv[])
 
     communication.SetDataReceiver([](const int64_t /*fromNodeId*/,
                                      const int64_t /*fromNodeType*/,
-                                     const boost::shared_ptr<char[]>& data,
+                                     const char* data_,
                                      const size_t size)
                                   {
+                                      const boost::shared_ptr<const char[]> data(data_);
                                       if (size != 10000)
                                       {
                                           throw std::logic_error("Received incorrectly sized data!");
@@ -438,7 +439,8 @@ int main(int argc, char * argv[])
                                       }
 
                                   },
-                                  1000100222);
+                                  1000100222,
+                                  [](size_t size){return new char[size];});
 
     communication.Start();
 

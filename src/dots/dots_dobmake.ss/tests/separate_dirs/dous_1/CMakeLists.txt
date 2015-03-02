@@ -4,7 +4,8 @@ find_package(SafirSDKCore REQUIRED)
 
 ADD_SAFIR_GENERATED_LIBRARY(
   NAME Test1
-  DEPENDENCIES Core)
+  DEPENDENCIES Core
+  DOU_FILES Dobmake.Test1.dou)
 
 
 #Can be absolute paths or relative paths. If relative, they will be prefixed with CMAKE_INSTALL_PREFIX

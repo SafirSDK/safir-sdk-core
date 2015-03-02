@@ -47,18 +47,18 @@ namespace SP
         {
             communication.SetDataReceiver([this](const int64_t from,
                                                  const int64_t /*nodeTypeId*/,
-                                                 const boost::shared_ptr<char[]>& data,
+                                                 const char* const data,
                                                  const size_t size)
                                           {
-                                              GotData(from,data,size);
+                                              GotData(from,boost::shared_ptr<const char[]>(data),size);
                                           },
-                                          LlufId_Generate64(receiverId));
+                                          LlufId_Generate64(receiverId),
+                                          [](size_t size){return new char[size];});
         }
-
 
     private:
         void GotData(const int64_t from,
-                     const boost::shared_ptr<char[]>& data,
+                     const boost::shared_ptr<const char[]>& data,
                      size_t size)
         {
 #ifdef CHECK_CRC
@@ -69,7 +69,7 @@ namespace SP
             if (crc != expected)
             {
                 SEND_SYSTEM_LOG(Alert,
-                                << "Bad CRC in data from " << from 
+                                << "Bad CRC in data from " << from
                                 << ", expected " << expected << " got " << crc);
                 throw std::logic_error("CRC check failed!");
             }

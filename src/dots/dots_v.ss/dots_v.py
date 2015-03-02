@@ -1659,45 +1659,44 @@ def main():
 
     parser = argparse.ArgumentParser(description='Source code generator tool for Safir SDK Core. Processes .dou files into source code for all supported languages. Files are generated in language specific subdirectories of root path of processed dou files.')
 
-    parser.add_argument('dou_files',
+    parser.add_argument('--dou-files',
                         metavar='DOU_FILE(S)',
-                        help='.dou file(s) to process. If a directory is specified, all .dou files in the directory are processed (recursive)')
+                        nargs="*",
+                        help='.dou file(s) to process.')
+    parser.add_argument('--namespace-mappings',
+                        metavar='NAMESPACE_MAPPING(S)',
+                        nargs="*",
+                        help='.namespace.txt files to process for namespaces.')
     parser.add_argument('--dod-files',
-                        dest='dod_files',
                         metavar='DOD_FILE(S)',
+                        nargs="*",
                         required=True,
-                        help='Specifies .dod files to use as templates for the processing. Accepts wildcards (*). If it is a directory, all .dod files in that directory are used.')
+                        help='Specifies .dod files to use as templates for the processing.')
     parser.add_argument('--dependencies',
-                        dest='dependencies',
                         metavar='DEPENDENCIES',
                         required=False,
                         nargs="*",
                         help="Paths to dou file directory that this module depends on.")
     parser.add_argument('--library-name',
-                        dest='library_name',
                         metavar='LIBRARY_NAME',
                         required=True,
                         help="Name of the generated library/module being built")
     parser.add_argument('--output-path',
-                        dest='output_path',
                         metavar='OUTPUT_PATH',
                         required=False,
                         default='',
                         help='Directory where the generated file structure starts. Defaults to current working directory.')
     parser.add_argument('--show-files',
-                        dest='show_files',
                         required=False,
                         default=False,
                         action='store_true',
                         help='Prints out the dod and dou filenames for each parsing')
     parser.add_argument('-v', '--verbose',
-                        dest='show_parsing',
                         required=False,
                         default=False,
                         action='store_true',
                         help='Prints debugging info from the parsing to stderr')
     parser.add_argument('--multiprocess',
-                        dest='multiprocess',
                         required=False,
                         default=False,
                         action='store_true',
@@ -1705,17 +1704,9 @@ def main():
 
     arguments = parser.parse_args()
 
-    dod_files = []
-    if os.path.isdir(arguments.dod_files):
-        normalized_path = os.path.abspath(arguments.dod_files) + os.sep
-        for dod_file in os.listdir(normalized_path + "."):
-            if dod_file.endswith(".dod"):
-                dod_files.append(normalized_path + dod_file)
-
-    if len(dod_files) == 0 or not os.path.isfile(dod_files[0]):
-        print("Invalid argument for dod files.", file=sys.stderr)
-        sys.exit(1)
-
+    dod_files = [os.path.normpath(f) for f in arguments.dod_files]
+    dou_files = [os.path.normpath(f) for f in arguments.dou_files]
+    namespace_prefix_files = [os.path.normpath(f) for f in arguments.namespace_mappings]
 
     dependency_paths = resolve_typesystem_dependencies(arguments.dependencies)
 
@@ -1730,25 +1721,11 @@ def main():
                 sys.exit(1)
     gen_src_output_path = os.path.abspath(gen_src_output_path) + os.sep
 
-
-    dou_files = []
-    namespace_prefix_files = []
-    if os.path.isdir(arguments.dou_files):
-        # Walk directory tree
-        for path, dirs, files in os.walk(os.path.abspath(arguments.dou_files)):
-            for file in files:
-                if file.endswith(".dou"):
-                    dou_files.append(os.path.join(path, file))
-                if file.endswith(".namespace.txt"):
-                    namespace_prefix_files.append(os.path.join(path,file))
-    elif os.path.isfile(arguments.dou_files):
-        dou_files.append(os.path.abspath(arguments.dou_files))
-
     if len(dou_files) == 0:
         print("No valid dou files to process.", file=sys.stderr)
         sys.exit(1)
 
-    if arguments.show_parsing: loglevel = 4
+    if arguments.verbose: loglevel = 4
 
     if support_multicpu and arguments.multiprocess:
         # Prepare dou lookup tables

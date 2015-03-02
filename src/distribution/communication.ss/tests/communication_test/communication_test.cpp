@@ -268,19 +268,19 @@ private:
     boost::condition_variable m_cond;
 };
 
-inline void SetCRC(const boost::shared_ptr<char[]>& ptr, size_t size)
+inline void SetCRC(char* ptr, size_t size)
 {
     boost::crc_32_type crc;
-    crc.process_bytes(static_cast<const void*>(ptr.get()), size-4);
-    uint32_t* val=reinterpret_cast<uint32_t*>(ptr.get()+size-4);
+    crc.process_bytes(static_cast<const void*>(ptr), size-4);
+    uint32_t* val=reinterpret_cast<uint32_t*>(ptr+size-4);
     *val=crc.checksum();
 }
 
-inline bool ValidCRC(const boost::shared_ptr<char[]>& ptr, size_t size)
+inline bool ValidCRC(const char* ptr, size_t size)
 {
     boost::crc_32_type crc;
-    crc.process_bytes(static_cast<const void*>(ptr.get()), size-4);
-    uint32_t checksum=*reinterpret_cast<uint32_t*>(ptr.get()+size-4);
+    crc.process_bytes(static_cast<const void*>(ptr), size-4);
+    uint32_t checksum=*reinterpret_cast<const uint32_t*>(ptr+size-4);
     return checksum==crc.checksum();
 }
 
@@ -289,7 +289,7 @@ inline boost::shared_ptr<char[]> CreateMessage(uint64_t val, size_t size)
     boost::shared_ptr<char[]> msg=boost::make_shared<char[]>(size);
     memset(msg.get(), 0, size);
     (*reinterpret_cast<uint64_t*>(msg.get()))=val;
-    SetCRC(msg, size);
+    SetCRC(msg.get(), size);
     return msg;
 }
 
@@ -350,16 +350,20 @@ public:
         ++m_retransmitCount;
     }
 
-    void OnRecv(int64_t id, const boost::shared_ptr<char[]>& msg, size_t size)
+    void OnRecv(int64_t id, const char* msg, size_t size)
     {
-        if (!ValidCRC(msg, size))
+        uint64_t sendCount=*reinterpret_cast<const uint64_t*>(msg);
+        auto validCrc=ValidCRC(msg, size);
+        delete[] msg;
+
+        if (!validCrc)
         {
             std::cout<<"ComTest: Bad CRC! size="<<size<<std::endl;
         }
 
         ++m_totalRecvCount;
         uint64_t& rc=m_recvCount[id];
-        uint64_t sendCount=*reinterpret_cast<const uint64_t*>(msg.get());
+
 
         if (rc>0)
         {
@@ -416,6 +420,8 @@ private:
     std::function< void(int64_t) > m_includeNode;
     std::function< void(int64_t) > m_reportNodeFinished;
 };
+
+char* Allocate(size_t size) {return new char[size];}
 
 int main(int argc, char * argv[])
 {
@@ -475,7 +481,7 @@ int main(int argc, char * argv[])
                                                            cmd.unicastAddress,
                                                            nodeTypes.ToVector()));
 
-    com->SetDataReceiver([=](int64_t fromNode, int64_t /*fromNodeType*/, const boost::shared_ptr<char[]>& msg, size_t size){sp->OnRecv(fromNode, msg, size);}, 123);
+    com->SetDataReceiver([=](int64_t fromNode, int64_t /*fromNodeType*/, const char* msg, size_t size){sp->OnRecv(fromNode, msg, size);}, 123, Allocate);
     com->SetGotReceiveFromCallback([=](int64_t id){sp->GotReceive(id);});
     com->SetRetransmitToCallback([=](int64_t id){sp->Retransmit(id);});
     com->SetNewNodeCallback([=](const std::string& name, int64_t nodeId, int64_t nodeTypeId, const std::string& ca, const std::string& /*da*/)
