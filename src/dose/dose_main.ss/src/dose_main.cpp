@@ -37,29 +37,40 @@
 void CheckThreadCount()
 {
 #if defined(linux) || defined(__linux) || defined(__linux__)
-    std::ifstream t("/proc/" + boost::lexical_cast<std::string>(getpid()) + "/status");
-    const std::string str((std::istreambuf_iterator<char>(t)),
-                          std::istreambuf_iterator<char>());
-
-    const boost::regex re("^Threads:[[:space:]]*([0-9]+)$");
-    boost::smatch what;
-
-    if (!boost::regex_search(str,what,re))
+    for (int i = 0;; ++i)
     {
-        throw std::runtime_error("Failed to read thread count for dose_main (no match in /proc file)");
+        std::ifstream t("/proc/" + boost::lexical_cast<std::string>(getpid()) + "/status");
+        const std::string str((std::istreambuf_iterator<char>(t)),
+                              std::istreambuf_iterator<char>());
+
+        const boost::regex re("^Threads:[[:space:]]*([0-9]+)$");
+        boost::smatch what;
+
+        if (!boost::regex_search(str,what,re))
+        {
+            throw std::runtime_error("Failed to read thread count for dose_main (no match in /proc file)");
+        }
+
+        if (what.size() != 2)
+        {
+            throw std::runtime_error("Failed to read thread count for dose_main (failed to parse /proc file)");
+        }
+
+        const auto threads = boost::lexical_cast<int>(what[1]);
+
+        if (threads == 1)
+        {
+            return;
+        }
+
+        if (threads != 1 && i > 10)
+        {
+            throw std::logic_error("Unexpected number of threads in dose_main when exiting: " + what[1]);
+        }
+
+        boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
     }
 
-    if (what.size() != 2)
-    {
-        throw std::runtime_error("Failed to read thread count for dose_main (failed to parse /proc file)");
-    }
-
-    const auto threads = boost::lexical_cast<int>(what[1]);
-
-    if (threads != 1)
-    {
-        throw std::logic_error("Unexpected number of threads in dose_main when exiting: " + what[1]);
-    }
 #endif
 }
 
