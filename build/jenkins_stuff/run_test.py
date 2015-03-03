@@ -313,15 +313,15 @@ def run_test_slave():
 def run_database_tests():
     log("Running Olib tests")
     if sys.platform == "win32":
-        result = subprocess.call(["run_olib_tests.py",] + arguments, shell = True)
+        result = subprocess.call(["run_olib_tests.py",], shell = True)
     else:
-        result = subprocess.call(["run_olib_tests",] + arguments)
+        result = subprocess.call(["run_olib_tests",])
 
     log("Running Dope tests")
     if sys.platform == "win32":
-        result = subprocess.call(["run_dope_odbc_backend_test.py",] + arguments, shell = True)
+        result = subprocess.call(["run_dope_odbc_backend_test.py",], shell = True)
     else:
-        result = subprocess.call(["run_dope_odbc_backend_test",] + arguments)
+        result = subprocess.call(["run_dope_odbc_backend_test",])
 
 def build_examples():
     olddir = os.getcwd()
