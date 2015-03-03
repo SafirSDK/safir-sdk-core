@@ -305,6 +305,11 @@ namespace SP
             //check what nodes they know of.
             for (int i = 0; i < m_lastStatistics.Size(); ++i)
             {
+                if (!m_lastStatistics.HasRemoteStatistics(i))
+                {
+                    continue;
+                }
+
                 const auto& remote = m_lastStatistics.RemoteStatistics(i);
                 for (int j = 0; j < remote.Size(); ++j)
                 {
