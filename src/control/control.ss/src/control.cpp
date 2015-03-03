@@ -285,8 +285,7 @@ int main(int argc, char * argv[])
                              [&sp, &communication, &doseMainCmdSender, &options, & conf, &stateHandler]()
                              {
                                  // Send info about own node to dose_main
-                                 doseMainCmdSender->SetOwnNode(0, // request id currently not used
-                                                               conf.thisNodeParam.name,
+                                 doseMainCmdSender->SetOwnNode(conf.thisNodeParam.name,
                                                                options.id,
                                                                conf.thisNodeParam.nodeTypeId,
                                                                conf.thisNodeParam.dataAddress);
@@ -311,8 +310,7 @@ int main(int argc, char * argv[])
                                     // Node included callback
                                     [&doseMainCmdSender](const Control::Node& node)
                                     {
-                                        doseMainCmdSender->InjectNode(0, // request id currently not used
-                                                                      node.name,
+                                        doseMainCmdSender->InjectNode(node.name,
                                                                       node.nodeId,
                                                                       node.nodeTypeId,
                                                                       node.dataAddress);
@@ -350,7 +348,7 @@ int main(int argc, char * argv[])
                               communication.Stop();
 
                               // Send stop order to dose_main
-                              doseMainCmdSender->StopDoseMain(0);  // request id currently not used
+                              doseMainCmdSender->StopDoseMain();
 
                               // Stop the doseMainCmdSender itself
                               doseMainCmdSender->Stop();

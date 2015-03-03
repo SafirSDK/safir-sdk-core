@@ -167,8 +167,7 @@ int main(int /*argc*/, char * /*argv*/[])
                          // Action when SetOwnNode command is received
                          [&communication, &sp, &ioService, &commNodeTypes,
                           &spNodeTypes, &timer, &onTimeout, &nodeNameMap]
-                         (int64_t /*requestId*/,
-                          const std::string& nodeName,
+                         (const std::string& nodeName,
                           int64_t nodeId,
                           int64_t nodeTypeId,
                           const std::string& dataAddress)
@@ -219,8 +218,7 @@ int main(int /*argc*/, char * /*argv*/[])
 
                         // Action when InjectNode command is received
                         [&communication, &nodeNameMap]
-                        (int64_t /*requestId*/,
-                         const std::string& nodeName,
+                        (const std::string& nodeName,
                          int64_t nodeId,
                          int64_t nodeTypeId,
                          const std::string& dataAddress)
@@ -235,7 +233,7 @@ int main(int /*argc*/, char * /*argv*/[])
 
                         // Action when StopDoseMain command is received
                         [&sp, &work, &communication, &running, &doseMainCmdReceiver, &signalSet]
-                        (int64_t /*requestId*/)
+                        ()
                         {
                             lllog(1) << "DOSE_MAIN: Got stop command" << std::endl;
                             signalSet.cancel();

@@ -90,8 +90,7 @@ namespace Control
             {
                 case controlCmd.INJECT_NODE:
                 {
-                    m_injectNodeCmdCb(controlCmd.request_id(),
-                                      controlCmd.node_data().node_name(),
+                    m_injectNodeCmdCb(controlCmd.node_data().node_name(),
                                       controlCmd.node_data().node_id(),
                                       controlCmd.node_data().node_type_id(),
                                       controlCmd.node_data().data_address());
@@ -100,8 +99,7 @@ namespace Control
 
                 case controlCmd.SET_OWN_NODE:
                 {
-                    m_setOwnNodeCmdCb(controlCmd.request_id(),
-                                      controlCmd.node_data().node_name(),
+                    m_setOwnNodeCmdCb(controlCmd.node_data().node_name(),
                                       controlCmd.node_data().node_id(),
                                       controlCmd.node_data().node_type_id(),
                                       controlCmd.node_data().data_address());
@@ -110,7 +108,7 @@ namespace Control
 
                 case controlCmd.STOP:
                 {
-                    m_stopDoseMainCb(controlCmd.request_id());
+                    m_stopDoseMainCb();
                 }
                 break;
 
@@ -163,15 +161,13 @@ namespace Control
            m_ipcPublisher.Stop();
         }
 
-        void SetOwnNode(int64_t requestId,
-                        const std::string& nodeName,
+        void SetOwnNode(const std::string& nodeName,
                         int64_t nodeId,
                         int64_t nodeTypeId,
                         const std::string& dataAddress)
         {
             ControlCmd controlCmd;
 
-            controlCmd.set_request_id(requestId);
             controlCmd.set_cmd_type(ControlCmd::SET_OWN_NODE);
             controlCmd.mutable_node_data()->set_node_name(nodeName);
             controlCmd.mutable_node_data()->set_node_id(nodeId);
@@ -181,15 +177,13 @@ namespace Control
             Send(controlCmd);
         }
 
-        void InjectNode(int64_t requestId,
-                        const std::string& nodeName,
+        void InjectNode(const std::string& nodeName,
                         int64_t nodeId,
                         int64_t nodeTypeId,
                         const std::string& dataAddress)
         {
             ControlCmd controlCmd;
 
-            controlCmd.set_request_id(requestId);
             controlCmd.set_cmd_type(ControlCmd::INJECT_NODE);
             controlCmd.mutable_node_data()->set_node_name(nodeName);
             controlCmd.mutable_node_data()->set_node_id(nodeId);
@@ -199,11 +193,10 @@ namespace Control
             Send(controlCmd);
         }
 
-        void StopDoseMain(int64_t requestId)
+        void StopDoseMain()
         {
             ControlCmd controlCmd;
 
-            controlCmd.set_request_id(requestId);
             controlCmd.set_cmd_type(ControlCmd::STOP);
 
             Send(controlCmd);
@@ -240,35 +233,31 @@ namespace Control
         m_impl->Stop();
     }
 
-    void DoseMainCmdSender::SetOwnNode(int64_t requestId,
-                                          const std::string& nodeName,
-                                          int64_t nodeId,
-                                          int64_t nodeTypeId,
-                                          const std::string& dataAddress)
-    {
-        m_impl->SetOwnNode(requestId,
-                              nodeName,
-                              nodeId,
-                              nodeTypeId,
-                              dataAddress);
-    }
-
-    void DoseMainCmdSender::InjectNode(int64_t requestId,
-                                       const std::string& nodeName,
+    void DoseMainCmdSender::SetOwnNode(const std::string& nodeName,
                                        int64_t nodeId,
                                        int64_t nodeTypeId,
                                        const std::string& dataAddress)
     {
-        m_impl->InjectNode(requestId,
-                           nodeName,
+        m_impl->SetOwnNode(nodeName,
                            nodeId,
                            nodeTypeId,
                            dataAddress);
     }
 
-    void DoseMainCmdSender::StopDoseMain(int64_t requestId)
+    void DoseMainCmdSender::InjectNode(const std::string& nodeName,
+                                       int64_t nodeId,
+                                       int64_t nodeTypeId,
+                                       const std::string& dataAddress)
     {
-        m_impl->StopDoseMain(requestId);
+        m_impl->InjectNode(nodeName,
+                           nodeId,
+                           nodeTypeId,
+                           dataAddress);
+    }
+
+    void DoseMainCmdSender::StopDoseMain()
+    {
+        m_impl->StopDoseMain();
     }
 
 

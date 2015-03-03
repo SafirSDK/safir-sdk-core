@@ -42,11 +42,6 @@ message ControlCmd {
     }
     
    // Fields
-   required sfixed64 request_id = 1;
-   required CmdType cmd_type = 2;
-   optional NodeData node_data = 3;   
-}
-
-message ControlCmdResponse {
-    required sfixed64 request_id = 1;
+   required CmdType cmd_type = 1;
+   optional NodeData node_data = 2;
 }
