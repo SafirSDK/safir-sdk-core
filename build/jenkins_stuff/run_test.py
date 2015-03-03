@@ -310,6 +310,19 @@ def run_test_slave():
     if result != 0:
         raise SetupError("Test suite failed. Returncode = " + str(result))
 
+def run_database_tests():
+    log("Running Olib tests")
+    if sys.platform == "win32":
+        result = subprocess.call(["run_olib_tests.py",] + arguments, shell = True)
+    else:
+        result = subprocess.call(["run_olib_tests",] + arguments)
+
+    log("Running Dope tests")
+    if sys.platform == "win32":
+        result = subprocess.call(["run_dope_odbc_backend_test.py",] + arguments, shell = True)
+    else:
+        result = subprocess.call(["run_dope_odbc_backend_test",] + arguments)
+
 def build_examples():
     olddir = os.getcwd()
     dirs = (("examples" , None),
@@ -358,7 +371,7 @@ def parse_command_line():
                              + " you've already installed Safir SDK Core")
 
     parser.add_argument("--test", "-t",
-                        choices=["standalone-tests","multinode-tests","build-examples"],
+                        choices=["standalone-tests","multinode-tests","build-examples","database"],
                         help="Which test to perform")
 
     parser.add_argument("--slave", action = "store_true",
@@ -400,6 +413,8 @@ def main():
             run_test_suite(multinode = True)
         elif args.test == "build-examples":
             build_examples()
+        elif args.test == "database":
+            run_database_tests()
         elif args.slave:
             run_test_slave()
 
