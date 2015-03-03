@@ -166,6 +166,8 @@ os.chdir("circular_restart_output")
 
 nodes = list()
 
+success = False
+
 try:
     log("Starting some nodes")
     for i in range (args.start, args.start + args.nodes):
@@ -220,13 +222,14 @@ try:
         if len(nodes) == 0:
             log("No nodes running, exiting")
             break;
-
+    success = True
 except KeyboardInterrupt:
     pass
 except:
     traceback.print_exc()
 
-log ("Killing", len(nodes), "nodes")
+if len(nodes) > 0:
+    log ("Killing", len(nodes), "nodes")
 for i, control, main in nodes:
     try:
         stop(main)
@@ -236,3 +239,9 @@ for i, control, main in nodes:
         stop(control)
     except ProcessLookupError:
         pass
+
+if success:
+    log("Test appears to have been successful")
+else:
+    log("Test failed")
+sys.exit(0 if success else 1)
