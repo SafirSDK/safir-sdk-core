@@ -171,8 +171,8 @@ try:
     for i in range (args.start, args.start + args.nodes):
         nodes.append(launch_node(i,args))
 
-    log("Sleeping for a while to let the nodes start up")
-    time.sleep(10)
+    log("Sleeping for one minute while other nodes start up")
+    time.sleep(60)
 
     #we need to kill the first node manually, after which the circle will start running...
     if args.start == 0:
