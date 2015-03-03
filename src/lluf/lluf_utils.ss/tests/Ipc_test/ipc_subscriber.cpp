@@ -151,6 +151,7 @@ int main(int argc, char* argv[])
     }
 
     boost::asio::io_service ioService;
+    boost::asio::io_service::strand strand(ioService);
 
     boost::shared_ptr<boost::asio::io_service::work> work (new boost::asio::io_service::work(ioService));
 
@@ -168,7 +169,7 @@ int main(int argc, char* argv[])
     auto subPtr = boost::make_shared<Safir::Utilities::Internal::IpcSubscriberImpl<SubscriberTestPolicy>>(
                     ioService,
                     po.endpointName,
-                    [&nbrOfMsg, &cond, &mut, po](const char* msg, size_t size)
+                    strand.wrap([&nbrOfMsg, &cond, &mut, po](const char* msg, size_t size)
                     {
                         if (po.noMessageOutput)
                         {
@@ -182,7 +183,7 @@ int main(int argc, char* argv[])
                         boost::lock_guard<boost::mutex> lock(mut);
                         ++nbrOfMsg;
                         cond.notify_one();
-                    });
+                    }));
 
     if (po.cmdFromStdin)
     {
