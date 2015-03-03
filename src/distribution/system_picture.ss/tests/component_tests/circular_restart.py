@@ -24,7 +24,7 @@
 #
 ###############################################################################
 from __future__ import print_function
-import subprocess, os, time, sys, shutil, random, argparse, traceback, platform, datetime
+import subprocess, os, time, sys, shutil, random, argparse, traceback, platform, datetime, signal
 
 class Failure(Exception):
     pass
@@ -71,7 +71,8 @@ def launch_control(number, previous, id, env, ownip, seedip):
     proc = subprocess.Popen(command,
                             stdout = output,
                             stderr = subprocess.STDOUT,
-                            env = env)
+                            env = env,
+                            creationflags = subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0)
     return proc
 
 def launch_dose_main(number, previous, id, env, ownip):
@@ -84,7 +85,8 @@ def launch_dose_main(number, previous, id, env, ownip):
     proc = subprocess.Popen(command,
                             stdout = output,
                             stderr = subprocess.STDOUT,
-                            env = env)
+                            env = env,
+                            creationflags = subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0)
     return proc
 
 
@@ -104,26 +106,21 @@ def launch_node(number, args):
 
 def stop(proc):
     try:
-        #if proc.poll() is not None:
-        #    log("   poll returned value")
-        #    return
-        log("   calling terminate")
-        proc.terminate()
-        log("   calling wait")
+        if sys.platform == "win32":
+            #can't send CTRL_C_EVENT to processes started with subprocess, unfortunately
+            proc.send_signal(signal.CTRL_BREAK_EVENT)
+        else:
+            proc.terminate()
+
         proc.wait() #comment this line to get procs killed after 30s
         for i in range(300): #30 seconds
-            log("   calling poll", i)
             if proc.poll() is not None:
                 log("   returning")
                 return
             time.sleep(0.1)
-        log("   calling kill")
         proc.kill()
-        log("   calling wait")
         proc.wait()
     except OSError:
-        #log("   Caught ProcessLookupError")
-        #traceback.print_exc()
         pass
 
 def stop_node(i, control, main):
