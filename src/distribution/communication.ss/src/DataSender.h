@@ -172,7 +172,7 @@ namespace Com
                 lllog(5)<<m_logPrefix.c_str()<<"SendQueue full"<<std::endl;
                 --m_sendQueueSize;
                 m_notifyQueueNotFull=true;
-                return false;
+                return m_deliveryGuarantee!=Acked; //return Acked->false, Unacked->true
             }
 
             //The actual work where the data is inserted in the queue must be done inside the strand.

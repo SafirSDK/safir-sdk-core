@@ -106,6 +106,7 @@ namespace Com
         boost::asio::io_service& m_ioService;
         boost::asio::io_service::strand m_receiveStrand;
         Node m_me;
+        int m_protocol;
         bool m_isControlInstance;
         NodeTypeMap m_nodeTypes;        
 
