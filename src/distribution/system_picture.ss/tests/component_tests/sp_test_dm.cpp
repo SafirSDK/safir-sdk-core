@@ -521,6 +521,8 @@ int main(int argc, char * argv[])
 
     ssh.SetStopHandler(stopFcn);
 
+    std::wcout << "DM: Launching io_service" << std::endl;
+
     boost::thread_group threads;
     for (int i = 0; i < 2; ++i)
     {
@@ -529,11 +531,10 @@ int main(int argc, char * argv[])
 
     ioService.run();
 
-    lllog(1) << "DM: Joining threads" << std::endl;
     threads.join_all();
 
     Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().DestroyAsynchronousLogger();
 
-    lllog(1) << "DM: Exiting..." << std::endl;
+    std::wcout << "DM: Exiting..." << std::endl;
     return 0;
 }
