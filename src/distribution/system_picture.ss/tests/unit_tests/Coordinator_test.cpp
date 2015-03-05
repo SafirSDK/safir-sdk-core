@@ -359,11 +359,13 @@ public:
                         const std::map<int64_t, NodeType>& /*nodeTypes*/,
                         const char* const /*receiverId*/,
                         const std::function<void(const int64_t nodeId,
-                                                 const int64_t electionId)>& electionCompleteCallback_)
+                                                 const int64_t electionId)>& electionCompleteCallback_,
+                        const std::function<void(const int64_t incarnationId)>& /*setIncarnationIdCallback_*/)
         : id(id_)
         , electionCompleteCallback(electionCompleteCallback_)
     {
         lastInstance = this;
+        //TODO use setIncarnationIdCallback_
     }
 
     bool IsElected() const

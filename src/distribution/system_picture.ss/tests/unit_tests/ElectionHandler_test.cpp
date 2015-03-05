@@ -278,6 +278,10 @@ struct Node
                     const int64_t electionId)
              {
                  ElectionComplete(nodeId,electionId);
+             },
+             [this](const int64_t incarnationId)
+             {
+                 //TODO use incarnation id
              })
         , electedNode(0)
         , electionId(0)

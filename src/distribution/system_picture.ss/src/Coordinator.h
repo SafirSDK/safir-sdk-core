@@ -101,6 +101,10 @@ namespace SP
                                     }
 
                                     m_rawHandler.SetElectionId(nodeId, electionId);
+                                },
+                                [this](const int64_t incarnationId)
+                                {
+                                    //m_rawHandler.SetIncarnationId(incarnationId);
                                 })
             , m_name(name)
             , m_id(id)

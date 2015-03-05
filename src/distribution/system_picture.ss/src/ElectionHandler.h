@@ -91,7 +91,8 @@ namespace SP
                              const std::map<int64_t, NodeType>& nodeTypes,
                              const char* const receiverId,
                              const std::function<void(const int64_t nodeId,
-                                                      const int64_t electionId)>& electionCompleteCallback)
+                                                      const int64_t electionId)>& electionCompleteCallback,
+                             const std::function<void(const int64_t incarnationId)>& setIncarnationIdCallback)
             : m_strand (ioService)
             , m_communication(communication)
             , m_receiverId(LlufId_Generate64(receiverId))
@@ -115,6 +116,7 @@ namespace SP
             , m_currentElectionId(0)
             , m_sendMessageTimer(ioService)
             , m_electionCompleteCallback(electionCompleteCallback)
+            , m_setIncarnationIdCallback(setIncarnationIdCallback)
         {
             communication.SetDataReceiver([this](const int64_t from,
                                                  const int64_t nodeTypeId,
@@ -235,8 +237,10 @@ namespace SP
                     lllog(4) << "SP: Haven't heard from any other nodes, electing myself!" << std::endl;
                     m_elected = m_id;
                     m_currentElectionId = LlufId_GenerateRandom64();
-                    m_electionCompleteCallback(m_elected,m_currentElectionId);
+                    m_electionCompleteCallback(m_elected, m_currentElectionId);
 
+                    const auto incarnationId = LlufId_GenerateRandom64();
+                    m_setIncarnationIdCallback(incarnationId);
                     return;
                 }
                 else
@@ -544,7 +548,11 @@ namespace SP
         std::set<int64_t> m_pendingVictories;
 
         //callback to call on completed election
-        const std::function<void(const int64_t nodeId, const int64_t electionId)> m_electionCompleteCallback;
+        const std::function<void(const int64_t nodeId,
+                                 const int64_t electionId)> m_electionCompleteCallback;
+
+        //callback to call when generating a new incarnation id
+        const std::function<void(const int64_t incarnationId)> m_setIncarnationIdCallback;
 
 
     };
