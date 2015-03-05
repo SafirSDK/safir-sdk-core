@@ -76,8 +76,11 @@ namespace SP
         const std::string& ControlAddress() const;
         const std::string& DataAddress() const;
 
-        //last election id
+        //last election id (0 if none)
         int64_t ElectionId() const;
+
+        //Id of System Incarnation that this node belongs to (0 if none)
+        int64_t IncarnationId() const;
 
         int Size() const;
 

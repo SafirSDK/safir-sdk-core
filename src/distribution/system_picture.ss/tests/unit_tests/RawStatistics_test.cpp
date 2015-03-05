@@ -59,6 +59,7 @@ std::unique_ptr<RawStatisticsMessage> GetProtobuf(bool empty,bool recursive)
     msg->set_control_address("asdfasdf");
     msg->set_data_address("foobar");
     msg->set_election_id(91);
+    msg->set_incarnation_id(1001);
 
     for (int i = 0; i < 5; ++i)
     {
@@ -86,6 +87,7 @@ std::unique_ptr<RawStatisticsMessage> GetProtobuf(bool empty,bool recursive)
             remote->set_control_address("asdfasdf" + iAsStr);
             remote->set_data_address("foobar" + iAsStr);
             remote->set_election_id(91 + i);
+            remote->set_incarnation_id(1001 + i);
 
             for (int j = 0; j < 5; ++j)
             {
@@ -149,6 +151,7 @@ BOOST_AUTO_TEST_CASE( test_one_level )
     BOOST_CHECK(r.ControlAddress() == "asdfasdf");
     BOOST_CHECK(r.DataAddress() == "foobar");
     BOOST_CHECK(r.ElectionId() == 91);
+    BOOST_CHECK(r.IncarnationId() == 1001);
 
     BOOST_CHECK(r.Size() == 5);
 
@@ -190,6 +193,7 @@ BOOST_AUTO_TEST_CASE( test_two_levels )
         BOOST_CHECK(remote.ControlAddress() == "asdfasdf" + iAsStr);
         BOOST_CHECK(remote.DataAddress() == "foobar" + iAsStr);
         BOOST_CHECK(remote.ElectionId() == 91 + i);
+        BOOST_CHECK(remote.IncarnationId() == 1001 + i);
 
         BOOST_CHECK(remote.Size() == 5);
         BOOST_CHECK_EQUAL(remote.MoreDeadNodesSize(), 5);
