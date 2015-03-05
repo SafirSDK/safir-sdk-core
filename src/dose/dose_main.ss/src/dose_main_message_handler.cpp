@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -27,7 +28,7 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Dob/Internal/Connection.h>
 #include <Safir/Dob/Internal/MessageTypes.h>
-
+#include <Safir/Dob/NodeParameters.h>
 
 
 namespace Safir
@@ -36,26 +37,12 @@ namespace Dob
 {
 namespace Internal
 {
-    MessageHandler::MessageHandler():
-#if 0 //stewart
-        m_ecom(NULL),
-#endif
-        m_blockingHandler(NULL)
+    MessageHandler::MessageHandler(Com::Communication& communication,
+                                   const NodeTypeIds& nodeTypeIds)
+        : m_communication(communication),
+          m_nodeTypeIds(nodeTypeIds)
     {
     }
-
-    void MessageHandler::Init(BlockingHandlers & blockingHandler)
-#if 0 //stewart
-                              ExternNodeCommunication & ecom)
-#endif
-    {
-        m_blockingHandler = &blockingHandler;
-#if 0 //stewart
-        m_ecom = &ecom;
-#endif
-    }
-
-
 
     void MessageHandler::DistributeMessages(const ConnectionPtr & connection)
     {
@@ -64,10 +51,24 @@ namespace Internal
     }
 
 
-    void MessageHandler::DispatchMessage(size_t & numberDispatched, const ConnectionPtr & connection, const DistributionData & msg, bool & exitDispatch, bool & dontRemove)
+    void MessageHandler::DispatchMessage(size_t& numberDispatched,
+                                         const ConnectionPtr& connection,
+                                         const DistributionData& msg,
+                                         bool& exitDispatch,
+                                         bool& dontRemove)
     {
+        if (msg.GetType() != DistributionData::Message)
+        {
+            throw std::logic_error("MessageHandler found a DistributionData that is not of type Message!");
+        }
+
         exitDispatch = false;
         dontRemove = false;
+
+
+
+
+
 
 #if 0 //stewart
         if (!m_ecom->Send(msg))
@@ -115,6 +116,24 @@ namespace Internal
     void MessageHandler::HandleMessageFromDoseCom(const DistributionData & msg)
     {
         MessageTypes::Instance().DistributeMsg(msg);
+    }
+
+    void MessageHandler::Send(const DistributionData& msg)
+    {
+        // TODO: here we also have to check if the type has a Local property
+        if (Safir::Dob::NodeParameters::LocalContexts(msg.GetSenderId().m_contextId) == true)
+        {
+            return;
+        }
+
+//        // Send message to all node types
+//        for (const auto& nodeType : m_nodeTypes)
+//        {
+//            m_communication.Send(0,  // All nodes of the type
+//                                 nodeType,
+//                                 )
+
+//        }
     }
 
 }

@@ -34,14 +34,17 @@ BOOST_AUTO_TEST_CASE( first_test )
                                          "Pelle",
                                          6565,
                                          878787,
-                                         "127.0.0.1",
-                                         [](int64_t fromNodeId,
-                                            int64_t fromNodeType,
-                                            const boost::shared_ptr<char[]>& data,
-                                            size_t size)
-                                         {
+                                         "127.0.0.1");
 
-                                         });
+    d.SetDataReceiver([](int64_t fromNodeId,
+                      int64_t fromNodeType,
+                      const char* data,
+                      size_t size)
+                      {
+
+                      },
+                      12345,
+                      [](size_t size){return new char[size];});
 
     bool ok = true;
     BOOST_CHECK(ok);

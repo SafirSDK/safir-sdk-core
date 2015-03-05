@@ -80,7 +80,6 @@ namespace Internal
         m_pendingRegistrationHandler(NULL),
         m_persistHandler(NULL),
         m_connectionHandler(NULL),
-        m_threadMonitor(NULL),
         m_stateSubscriptionConnections(Safir::Dob::NodeParameters::NumberOfContexts()),
         m_pdThread(),
         m_strand(strand)
@@ -141,8 +140,7 @@ namespace Internal
 #endif
                            PendingRegistrationHandler & pendingHandler,
                            PersistHandler & persistHandler,
-                           ConnectionHandler & connectionHandler,
-                           ThreadMonitor & threadMonitor)
+                           ConnectionHandler & connectionHandler)
     {
 #if 0 //stewart
         m_ecom = &ecom;
@@ -150,7 +148,6 @@ namespace Internal
         m_pendingRegistrationHandler = &pendingHandler;
         m_persistHandler = &persistHandler;
         m_connectionHandler = &connectionHandler;
-        m_threadMonitor = &threadMonitor;
 
         // dose_main must subscribe for states in all contexts
         for (ContextId context = 0; context < Safir::Dob::NodeParameters::NumberOfContexts(); ++context)

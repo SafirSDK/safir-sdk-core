@@ -284,11 +284,10 @@ int main(int argc, char * argv[])
                              // This is what we do when dose_main is started
                              [&sp, &communication, &doseMainCmdSender, &options, & conf, &stateHandler]()
                              {
-                                 // Send info about own node to dose_main
-                                 doseMainCmdSender->SetOwnNode(conf.thisNodeParam.name,
-                                                               options.id,
-                                                               conf.thisNodeParam.nodeTypeId,
-                                                               conf.thisNodeParam.dataAddress);
+                                 doseMainCmdSender->StartDoseMain(conf.thisNodeParam.name,
+                                                                  options.id,
+                                                                  conf.thisNodeParam.nodeTypeId,
+                                                                  conf.thisNodeParam.dataAddress);
 
                                  sp.StartStateSubscription
                                          ([&stateHandler](const SP::SystemState& newState)

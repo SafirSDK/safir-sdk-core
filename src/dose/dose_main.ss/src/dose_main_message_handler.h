@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -21,13 +22,12 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
+#pragma once
 
-#ifndef _dose_main_message_handler_h
-#define _dose_main_message_handler_h
-
-#include "dose_main_communication.h"
+#include "Node.h"
 #include "dose_main_blocking_handler.h"
 #include <Safir/Dob/Internal/Connection.h>
+#include <Safir/Dob/Internal/Communication.h>
 
 namespace Safir
 {
@@ -39,12 +39,8 @@ namespace Internal
         private boost::noncopyable
     {
     public:
-        MessageHandler();
-
-        void Init(BlockingHandlers & blockingHandler);
-#if 0 //stewart
-                  ExternNodeCommunication & ecom);
-#endif
+        MessageHandler(Com::Communication& communication,
+                       const NodeTypeIds& nodeTypeIds);
 
         void DistributeMessages(const ConnectionPtr & connection);
 
@@ -58,12 +54,12 @@ namespace Internal
                              bool & dontRemove);
 
         void TraverseMessageQueue(const ConnectionPtr & connection);
-#if 0 //stewart
-        ExternNodeCommunication* m_ecom;
-#endif
-        BlockingHandlers * m_blockingHandler;
+
+        void Send(const DistributionData& msg);
+
+        Com::Communication& m_communication;
+        const NodeTypeIds m_nodeTypeIds;
     };
 }
 }
 }
-#endif

@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Consoden AB, 2014 (http://www.consoden.se)
+* Copyright Consoden AB, 2015 (http://safir.sourceforge.net)
 *
 * Created by: Anders Widén / anders.widen@consoden.se
 *
@@ -21,27 +21,35 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-option optimize_for = LITE_RUNTIME;
+#pragma once
 
-package Safir.Dob.Internal.Control;
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
 
-message ControlCmd {
-
-    enum CmdType
+namespace Safir
+{
+namespace Dob
+{
+namespace Internal
+{
+    struct NodeInfo
     {
-      START = 0;
-      INJECT_NODE = 1;
-      STOP = 2;
-    }
-    
-    message NodeData {
-        required string node_name = 1;
-        required sfixed64 node_id = 2;
-        required sfixed64 node_type_id = 3;
-        required string data_address = 4;        
-    }
-    
-   // Fields
-   required CmdType cmd_type = 1;
-   optional NodeData node_data = 2;
+        NodeInfo(const std::string& _nodeName,
+                 int64_t            _nodeId,
+                 int64_t            _nodeTypeId,
+                 const std::string& _dataAddress)
+
+        {}
+
+        std::string nodeName;
+        int64_t     nodeId;
+        int64_t     nodeTypeId;
+        std::string dataAddress;
+    };
+
+    using NodeTypeIds = std::unordered_set<int64_t>;
+
+}
+}
 }

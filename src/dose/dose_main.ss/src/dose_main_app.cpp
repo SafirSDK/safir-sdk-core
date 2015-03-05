@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -24,6 +25,7 @@
 
 #include "dose_main_app.h"
 #include "dose_main_timers.h"
+#include <Safir/Dob/Internal/ControlConfig.h>
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Dob/Internal/InternalDefs.h>
 #include <Safir/Dob/Internal/MessageTypes.h>
@@ -82,9 +84,39 @@ namespace Internal
         m_nodeStatusChangedEvent(0),
         m_strand(strand),
         m_work(new boost::asio::io_service::work(m_strand.get_io_service())),
+        m_distribution(),
+        m_cmdReceiver(m_strand.get_io_service(),
+                      m_strand.wrap([this](const std::string& nodeName,
+                                           int64_t nodeId,
+                                           int64_t nodeTypeId,
+                                           const std::string& dataAddress)
+                                    {
+                                        SetOwnNode(nodeName,
+                                                   nodeId,
+                                                   nodeTypeId,
+                                                   dataAddress);
+                                    }),
+                      m_strand.wrap([this](const std::string& nodeName,
+                                           int64_t nodeId,
+                                           int64_t nodeTypeId,
+                                           const std::string& dataAddress)
+                                    {
+                                        InjectNode(nodeName,
+                                                   nodeId,
+                                                   nodeTypeId,
+                                                   dataAddress);
+                                    }),
+                      m_strand.wrap([this]()
+                                    {
+                                        Stop();
+                                    })),
+
+
         m_signalSet(m_strand.get_io_service()),
         m_timerHandler(m_strand),
         m_endStates(m_timerHandler),
+        m_blockingHandler(),
+        m_messageHandler(),
         m_requestHandler(m_timerHandler),
         m_responseHandler(m_timerHandler),
         m_poolHandler(m_strand),
@@ -107,14 +139,24 @@ namespace Internal
         m_signalSet.add(SIGTERM);
 #endif
 
-        m_signalSet.async_wait([this](const boost::system::error_code& error,
-                                      const int signalNumber)
-                               {
-                                   HandleSignal(error,signalNumber);
-                               });
+        m_signalSet.async_wait(m_strand.wrap([this](const boost::system::error_code& error,
+                                                    const int signalNumber)
+                                            {
+                                                HandleSignal(error, signalNumber);
+                                            }));
 
         Safir::Utilities::CrashReporter::RegisterCallback(DumpFunc);
         Safir::Utilities::CrashReporter::Start();
+
+        // Initialize shared memory stuff
+        Connections::Cleanup();
+        ContextSharedTable::Initialize();
+        MessageTypes::Initialize(/*iAmDoseMain = */ true);
+        EndStates::Initialize();
+        ServiceTypes::Initialize(/*iAmDoseMain = */ true);
+        InjectionKindTable::Initialize();
+        NodeStatuses::Initialize();
+        EntityTypes::Initialize(/*iAmDoseMain = */ true);
     }
 
     DoseApp::~DoseApp()
@@ -123,19 +165,16 @@ namespace Internal
         //called correctly? I.e. we're dying through an exception.
     }
 
+    void DoseApp::Init()
+    {
+        // Start reception of commands from Control
+        m_cmdReceiver.Start();
+    }
+
     void DoseApp::Start()
     {
         AllocateStatic();
 
-        // Start monitoring of this thread (that is, the main thread)
-        m_mainThreadId = boost::this_thread::get_id();
-        m_threadMonitor.StartWatchdog(m_mainThreadId, L"dose_main main thread");
-
-        // Schedule a timer so that the main thread will kick the watchdog.
-        TimerInfoPtr timerInfo(new EmptyTimerInfo(m_timerHandler.RegisterTimeoutHandler(L"dose_main watchdog timer", *this)));
-        m_timerHandler.SetRelative(Discard,
-                                   timerInfo,
-                                   5.0);
 
 #ifndef NDEBUG
         std::wcout<<"dose_main running (debug)..." << std::endl;
@@ -183,11 +222,54 @@ namespace Internal
         }
     }
 
+    void DoseApp::SetOwnNode(const std::string& nodeName,
+                             int64_t nodeId,
+                             int64_t nodeTypeId,
+                             const std::string& dataAddress)
+    {
+        m_distribution.reset(new Distribution(m_strand.get_io_service(),
+                                              nodeName,
+                                              nodeId,
+                                              nodeTypeId,
+                                              dataAddress));
+
+        const Control::Config config;
+
+        // Collect all node type ids
+        NodeTypeIds nodeTypeIds;
+        for (const auto& nt: config.nodeTypesParam)
+        {
+            nodeTypeIds.insert(nt.id);
+        }
+
+        m_messageHandler.reset(new MessageHandler(m_distribution->GetCommunication(),
+                                                  nodeTypeIds));
+
+        Start();
+    }
+
+    void DoseApp::InjectNode(const std::string& nodeName,
+                             int64_t nodeId,
+                             int64_t nodeTypeId,
+                             const std::string& dataAddress)
+    {
+        if (m_distribution == nullptr)
+        {
+            throw std::logic_error("InjectNode cmd received before SetOwnNode cmd!");
+        }
+
+        m_distribution->InjectNode(nodeName,
+                                   nodeId,
+                                   nodeTypeId,
+                                   dataAddress);
+    }
+
     void DoseApp::Stop()
     {
+        m_cmdReceiver.Stop();
+
         m_timerHandler.Stop();
 
-        m_threadMonitor.Stop();
         m_lockMonitor.Stop();
 
         m_processMonitor.Stop();
@@ -207,6 +289,11 @@ namespace Internal
             Connections::Instance().GenerateSpuriousConnectOrOutSignal();
             m_connectionThread.join();
             m_connectionThread = boost::thread();
+        }
+
+        if (m_distribution != nullptr)
+        {
+            m_distribution->Stop();
         }
 
         m_poolHandler.Stop();
@@ -330,15 +417,6 @@ namespace Internal
         }
     }
 
-    void DoseApp::HandleTimeout(const TimerInfoPtr& timer)
-    {
-        m_threadMonitor.KickWatchdog(m_mainThreadId);
-
-        m_timerHandler.SetRelative(Discard,
-                                   timer,
-                                   5.0);
-    }
-
     ConnectResult DoseApp::CanAddConnection(const std::string & connectionName, const pid_t pid, const long /*context*/)
     {
         switch (m_processInfoHandler.CanAddConnectionFromProcess(pid))
@@ -377,14 +455,6 @@ namespace Internal
 
     void DoseApp::AllocateStatic()
     {
-        Connections::Cleanup();
-        ContextSharedTable::Initialize();
-        MessageTypes::Initialize(/*iAmDoseMain = */ true);
-        EndStates::Initialize();
-        ServiceTypes::Initialize(/*iAmDoseMain = */ true);
-        InjectionKindTable::Initialize();
-        NodeStatuses::Initialize();
-        EntityTypes::Initialize(/*iAmDoseMain = */ true);
 
         m_connectionHandler.Init(
 #if 0 //stewart
@@ -411,8 +481,6 @@ namespace Internal
         //persistence.
         NodeStatusChangedNotifier();
 
-        m_messageHandler.Init(m_blockingHandler);
-
         m_responseHandler.Init(m_blockingHandler);
         m_requestHandler.Init(m_blockingHandler, m_responseHandler);
 
@@ -420,8 +488,7 @@ namespace Internal
 
         m_poolHandler.Init(m_pendingRegistrationHandler,
                            m_persistHandler,
-                           m_connectionHandler,
-                           m_threadMonitor);
+                           m_connectionHandler);
 
 
         m_processInfoHandler.Init(m_processMonitor);
@@ -499,7 +566,7 @@ namespace Internal
         m_requestHandler.DistributeRequests(connection);
 
         //Send messages
-        m_messageHandler.DistributeMessages(connection);
+        m_messageHandler->DistributeMessages(connection);
 
         //Handle pending registrations
         m_pendingRegistrationHandler.CheckForNewOrRemovedPendingRegistration(connection);
@@ -544,7 +611,7 @@ namespace Internal
                 it != waiting.end(); ++it)
             {
                 const ConnectionPtr connection = Connections::Instance().GetConnection(ConnectionId(ThisNodeParameters::NodeNumber(), -1, *it));
-                m_messageHandler.DistributeMessages(connection);
+                m_messageHandler->DistributeMessages(connection);
 
                 //If the connection is dead it might be a zombie that has been waiting for dosecom.
                 //signal it so that we try to finish removing it again.

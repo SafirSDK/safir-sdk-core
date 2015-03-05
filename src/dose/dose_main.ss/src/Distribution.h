@@ -61,10 +61,10 @@ namespace Internal
                           const std::string&        ownNodeName,
                           int64_t                   ownNodeId,
                           int64_t                   ownNodeTypeId,
-                          const std::string&        ownDataAddress,
-                          Com::ReceiveData          receiveDataCb)
+                          const std::string&        ownDataAddress)
             : m_communication(),
-              m_sp()
+              m_sp(),
+              m_started(false)
         {
             const ConfigT config;
 
@@ -108,12 +108,6 @@ namespace Internal
                                           ownDataAddress,
                                           spNodeTypes));
 
-
-            m_communication->SetDataReceiver(receiveDataCb,
-                                             0); // dataTypeIdentifier currently not used
-
-            m_communication->Start();
-
         }
 
         // Inject an external node
@@ -129,6 +123,25 @@ namespace Internal
         }
 
 
+        void SetDataReceiver(Com::ReceiveData receiveDataCb,
+                             int64_t dataTypeIdentifier,
+                             Com::Allocator allocator)
+        {
+            if (m_started)
+            {
+                throw std::logic_error("SetDataReceiver called efter Start!");
+            }
+
+            m_communication->SetDataReceiver(receiveDataCb,
+                                             dataTypeIdentifier,
+                                             allocator);
+        }
+
+        void Start()
+        {
+            m_communication->Start();
+            m_started = true;
+        }
 
         // Stop the internal workings of this class.
         // Must be called before destroying the object.
@@ -136,12 +149,20 @@ namespace Internal
         {
             m_sp->Stop();
             m_communication->Stop();
+            m_started = false;
+        }
+
+        CommunicationT& GetCommunication()
+        {
+            return *m_communication;
         }
 
     private:
 
         std::unique_ptr<CommunicationT> m_communication;
         std::unique_ptr<SystemPictureT> m_sp;
+
+        bool m_started;
     };
 
     typedef DistributionBasic<Com::Communication, SP::SystemPicture, Control::Config> Distribution;

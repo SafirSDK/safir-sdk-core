@@ -35,7 +35,6 @@
 #include <boost/array.hpp>
 #include <boost/thread.hpp>
 #include <boost/function.hpp>
-#include "dose_main_thread_monitor.h"
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 
 #ifdef _MSC_VER
@@ -139,8 +138,7 @@ namespace Internal
 #endif
                   PendingRegistrationHandler & pendingHandler,
                   PersistHandler & persistHandler,
-                  ConnectionHandler & connectionHandler,
-                  ThreadMonitor & threadMonitor);
+                  ConnectionHandler & connectionHandler);
 
 
         void Stop();
@@ -193,7 +191,6 @@ namespace Internal
         PendingRegistrationHandler * m_pendingRegistrationHandler;
         PersistHandler * m_persistHandler;
         ConnectionHandler * m_connectionHandler;
-        ThreadMonitor * m_threadMonitor;
 
         boost::thread::id m_poolDistributionThreadId;
 

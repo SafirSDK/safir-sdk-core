@@ -67,10 +67,10 @@ BOOST_AUTO_TEST_CASE( send_inject_node )
 
 		                                       std::wcout << "The receiver has connected!" << std::endl;
 
-                                               cmdSender->SetOwnNode("Kalle",
-                                                                     54321,
-                                                                     121212,
-                                                                     "192.168.211.10");
+                                               cmdSender->StartDoseMain("Kalle",
+                                                                        54321,
+                                                                        121212,
+                                                                        "192.168.211.10");
 
                                                cmdSender->InjectNode("Olle",
                                                                      99999,
