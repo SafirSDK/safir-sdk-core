@@ -87,8 +87,6 @@ namespace SP
                       const std::string& name,
                       const int64_t id,
                       const int64_t nodeTypeId,
-                      const std::string& controlAddress,
-                      const std::string& dataAddress,
                       const std::map<int64_t, NodeType>& nodeTypes);
 
         /**
@@ -102,7 +100,6 @@ namespace SP
                       const std::string& name,
                       const int64_t id,
                       const int64_t nodeTypeId,
-                      const std::string& dataAddress,
                       const std::map<int64_t, NodeType>& nodeTypes);
         /**
          * Constructor for creating a subscriber instance of SystemPicture.

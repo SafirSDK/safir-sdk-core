@@ -271,8 +271,6 @@ int main(int argc, char * argv[])
                          conf.thisNodeParam.name,
                          options.id,
                          conf.thisNodeParam.nodeTypeId,
-                         conf.thisNodeParam.controlAddress,
-                         conf.thisNodeParam.dataAddress,
                          std::move(spNodeTypes));
 
 

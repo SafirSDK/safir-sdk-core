@@ -412,7 +412,6 @@ int main(int argc, char * argv[])
                                                options.name,
                                                options.id,
                                                1,
-                                               options.dataAddress,
                                                std::move(spNodeTypes));
 
     SystemStateHandler ssh(ioService, options.id, communication, options.suicideTrigger);
