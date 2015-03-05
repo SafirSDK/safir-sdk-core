@@ -67,8 +67,9 @@ namespace Com
          *
          * @param io [in] - Reference to io_service, needed to make dns lookups.
          */
-        Resolver(boost::asio::io_service& io)
+        Resolver(boost::asio::io_service& io, bool verbose=false)
             :m_resolver(io)
+            ,m_verbose(verbose)
         {
         }
 
@@ -118,6 +119,16 @@ namespace Com
             }
 
             auto addresses=DnsLookup(ipExpr, protocol);
+
+            if (m_verbose)
+            {
+                std::cout<<"Candidates after DNS lookup:"<<std::endl;
+                for (const auto& s : addresses)
+                {
+                    std::cout<<"  "<<s<<std::endl;
+                }
+            }
+
             if (addresses.empty())
             {
                 std::ostringstream os;
@@ -207,6 +218,7 @@ namespace Com
         };
 
         mutable boost::asio::ip::udp::resolver m_resolver;
+        const bool m_verbose;
 
         //Get first index at which val differs from original
         static size_t DiffIndex(const std::string& original, const std::string& val)
@@ -282,6 +294,16 @@ namespace Com
         {
             //check if a adapter name has been specified
             auto adapters = GetAdapters();
+
+            if (m_verbose)
+            {
+                std::cout<<"Own interface addresses available:"<<std::endl;
+                for (const auto& a : adapters)
+                {
+                    std::cout<<"  "<<a.ipAddress<<std::endl;
+                }
+            }
+
             std::vector<std::string> addresses;
 
             for (const auto& ai : adapters)
@@ -301,9 +323,16 @@ namespace Com
 
             for (const auto& addr : DnsLookup(expr, 46))
             {
+                if (m_verbose)
+                {
+                    std::cout<<" DNS lookup: "<<addr<<std::endl;
+                }
+
                 auto found=std::find(addresses.begin(), addresses.end(), addr);
                 if (found!=addresses.end())
+                {
                     return *found;
+                }
             }
 
             return ""; //could not find any ip address to matching the expression
@@ -434,6 +463,19 @@ namespace Com
                     ai.ipVersion=6;
                     result.push_back(ai);
                     continue;
+                }
+            }
+
+            for (int ipVersion=4; ipVersion<=6; ipVersion+=2)
+            {
+                auto dns=DnsLookup(boost::asio::ip::host_name(), ipVersion);
+                if (!dns.empty())
+                {
+                    AdapterInfo ai;
+                    ai.name=boost::asio::ip::host_name();
+                    ai.ipAddress=dns[0];
+                    ai.ipVersion=ipVersion;
+                    result.push_back(ai);
                 }
             }
 

@@ -99,7 +99,8 @@ namespace Com
         size_t NumberOfQueuedMessages(int64_t nodeTypeId) const;
         const std::string& Name() const {return m_me.name;}
         int64_t Id() const {return m_me.nodeId;}
-        std::string IpAddress() const {return m_me.unicastAddress;}
+        std::string ControlAddress() const {return m_me.controlAddress;}
+        std::string DataAddress() const {return m_me.dataAddress;}
 
     private:
         ::google::protobuf::LogSilencer m_disableProtobufLogs;

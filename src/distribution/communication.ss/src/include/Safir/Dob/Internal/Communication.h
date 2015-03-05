@@ -281,10 +281,17 @@ namespace Com
         int64_t Id() const;
 
         /**
-         * Returns the ip address used for unicast by this instance.
-         * @return Ip address.
+         * Returns the resolved control address on the form ip:port.
+         * If this instance was created with DataModeTag an empty string is returned.
+         * @return Ip address and port as a string "ip:port"
          */
-        std::string IpAddress() const;
+        std::string ControlAddress() const;
+
+        /**
+         * Returns the resolved data address on the form ip:port.
+         * @return Ip address and port as a string "ip:port"
+         */
+        std::string DataAddress() const;
 
     private:
         std::unique_ptr<CommunicationImpl> m_impl;

@@ -466,12 +466,6 @@ int main(int argc, char * argv[])
     NodeTypes nodeTypes;
     int64_t myId=LlufId_GenerateRandom64();
     int64_t myNodeTypeId=nodeTypes.Get(cmd.nodeType).id;
-    std::cout<<"----------------------------------------------------------------------------"<<std::endl;
-    std::cout<<"-- Name:      "<<name.str()<<std::endl;
-    std::cout<<"-- Id:        "<<myId<<std::endl;
-    std::cout<<"-- Address:   "<<cmd.unicastAddress<<std::endl;
-    std::cout<<"-- Node type: "<<cmd.nodeType<<std::endl;
-    std::cout<<"----------------------------------------------------------------------------"<<std::endl;
     com.reset(new Safir::Dob::Internal::Com::Communication(Safir::Dob::Internal::Com::controlModeTag,
                                                            ioService,
                                                            name.str(),
@@ -480,6 +474,14 @@ int main(int argc, char * argv[])
                                                            cmd.unicastAddress,
                                                            cmd.unicastAddress,
                                                            nodeTypes.ToVector()));
+
+    std::cout<<"----------------------------------------------------------------------------"<<std::endl;
+    std::cout<<"-- Name:      "<<com->Name()<<std::endl;
+    std::cout<<"-- Id:        "<<com->Id()<<std::endl;
+    std::cout<<"-- CtrlAddr:  "<<com->ControlAddress()<<std::endl;
+    std::cout<<"-- DataAddr:  "<<com->DataAddress()<<std::endl;
+    std::cout<<"-- Node type: "<<cmd.nodeType<<std::endl;
+    std::cout<<"----------------------------------------------------------------------------"<<std::endl;
 
     com->SetDataReceiver([=](int64_t fromNode, int64_t /*fromNodeType*/, const char* msg, size_t size){sp->OnRecv(fromNode, msg, size);}, 123, Allocate);
     com->SetGotReceiveFromCallback([=](int64_t id){sp->GotReceive(id);});

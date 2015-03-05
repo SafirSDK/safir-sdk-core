@@ -33,6 +33,7 @@ public:
         boost::program_options::options_description desc("Command line options");
         desc.add_options()
                 ("help,h", "Produce help message")
+                ("verbose,v", "Verbose mode")
                 ("local,l", "Resolve expression to an interface on the local machine")
                 ("arguments",  boost::program_options::value<std::string>(), "Expression to resolve");
 
@@ -54,6 +55,10 @@ public:
         {
             local=true;
         }
+        if (vm.count("verbose"))
+        {
+            verbose=true;
+        }
         if (vm.count("arguments")==1)
         {
             expr=vm["arguments"].as<std::string>();
@@ -66,6 +71,7 @@ public:
     }
 
     bool help{false};
+    bool verbose{false};
     bool local{false};
     std::string expr{};
 };
@@ -84,7 +90,7 @@ int main(int argc, char * argv[])
     if (cmd.help) return 0; //only show help
 
     boost::asio::io_service ioService;
-    Safir::Dob::Internal::Com::Resolver resolver(ioService);
+    Safir::Dob::Internal::Com::Resolver resolver(ioService, cmd.verbose);
 
     boost::function<void()> fun;
     if (cmd.local)
