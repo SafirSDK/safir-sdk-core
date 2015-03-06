@@ -26,25 +26,77 @@
 #define BOOST_TEST_MODULE DistributionTests
 #include <boost/test/unit_test.hpp>
 
+struct NodeTypeDefinition
+{
+    int64_t id;
+    std::string name;
+    std::string controlMulticastAddress;
+    std::string dataMulticastAddress;
+    int heartbeatInterval;
+    int retryTimeout;
+};
+
+class Communication
+{
+public:
+
+    Communication(Safir::Dob::Internal::Com::DataModeTag,
+                  boost::asio::io_service& ioService,
+                  const std::string& nodeName,
+                  int64_t nodeId, //0 is not a valid id.
+                  int64_t nodeTypeId,
+                  const std::string& dataAddress,
+                  const std::vector<Safir::Dob::Internal::Com::NodeTypeDefinition>& nodeTypes)
+    {}
+};
+
+class SP
+{
+public:
+
+    SP(Safir::Dob::Internal::SP::slave_tag_t,
+       boost::asio::io_service& ioService,
+       Communication& communication,
+       const std::string& name,
+       const int64_t id,
+       const int64_t nodeTypeId,
+       const std::string& dataAddress,
+       const std::map<int64_t, Safir::Dob::Internal::SP::NodeType>& nodeTypes)
+    {}
+};
+
+struct NodeType
+{
+    std::string name;
+    boost::int64_t id;
+    bool isLight;
+    std::set<std::string> talksTo;
+    std::string multicastAddressControl;
+    std::string multicastAddressData;
+    int heartbeatInterval;
+    int maxLostHeartbeats;
+    int slidingWindowSize;
+    int retryTimeout;
+    std::vector<std::string> wantedTypes;
+    std::vector<std::string> unwantedTypes;
+};
+
+class Config
+{
+public:
+
+    std::vector<NodeType> nodeTypesParam;
+};
+
 BOOST_AUTO_TEST_CASE( first_test )
 {
     boost::asio::io_service ioService;
 
-    Safir::Dob::Internal::Distribution d(ioService,
-                                         "Pelle",
-                                         6565,
-                                         878787,
-                                         "127.0.0.1");
-
-    d.SetDataReceiver([](int64_t fromNodeId,
-                      int64_t fromNodeType,
-                      const char* data,
-                      size_t size)
-                      {
-
-                      },
-                      12345,
-                      [](size_t size){return new char[size];});
+    Safir::Dob::Internal::DistributionBasic<Communication, SP, Config> d(ioService,
+                                                                         "Pelle",
+                                                                         6565,
+                                                                         878787,
+                                                                         "127.0.0.1:5555");
 
     bool ok = true;
     BOOST_CHECK(ok);

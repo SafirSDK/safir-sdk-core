@@ -122,21 +122,6 @@ namespace Internal
                                         dataAddress);
         }
 
-
-        void SetDataReceiver(Com::ReceiveData receiveDataCb,
-                             int64_t dataTypeIdentifier,
-                             Com::Allocator allocator)
-        {
-            if (m_started)
-            {
-                throw std::logic_error("SetDataReceiver called efter Start!");
-            }
-
-            m_communication->SetDataReceiver(receiveDataCb,
-                                             dataTypeIdentifier,
-                                             allocator);
-        }
-
         void Start()
         {
             m_communication->Start();

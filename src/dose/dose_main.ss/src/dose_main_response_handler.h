@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Anders Widén / stawi
 *
@@ -21,9 +22,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-
-#ifndef _dose_main_response_handler_h
-#define _dose_main_response_handler_h
+#pragma once
 
 #include <Safir/Dob/Internal/InternalFwd.h>
 
@@ -36,18 +35,20 @@ namespace Internal
     //forward declarations
     class BlockingHandlers;
     class TimerHandler;
-#if 0 //stewart
-    class ExternNodeCommunication;
-#endif
+    namespace Com
+    {
+        class Communication;
+    }
 
     class ResponseHandler
         : private boost::noncopyable
     {
     public:
-        explicit ResponseHandler(TimerHandler& timerHandler);
-        virtual ~ResponseHandler();
+        ResponseHandler(TimerHandler& timerHandler,
+                        BlockingHandlers& blockingHandler,
+                        Com::Communication& communication);
 
-        void Init(BlockingHandlers & blockingHandler);
+        virtual ~ResponseHandler();
 
         void DistributeResponses(const ConnectionPtr& sender);
 
@@ -66,15 +67,12 @@ namespace Internal
 
         TimerHandler& m_timerHandler;
 
-#if 0 //stewart
-        ExternNodeCommunication* m_ecom;
-#endif
-        BlockingHandlers* m_blockingHandler;
+        BlockingHandlers& m_blockingHandler;
 
-        const Dob::Typesystem::Int32 m_thisNode;
+        Com::Communication& m_communication;
+
     };
 }
 }
 }
-#endif
 

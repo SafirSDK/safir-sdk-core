@@ -79,17 +79,15 @@ namespace Internal
 
     private:
 
-        void SetOwnNode(const std::string& nodeName,
-                        int64_t nodeId,
-                        int64_t nodeTypeId,
-                        const std::string& dataAddress);
+        void Start(const std::string& nodeName,
+                   int64_t nodeId,
+                   int64_t nodeTypeId,
+                   const std::string& dataAddress);
 
         void InjectNode(const std::string& nodeName,
                         int64_t nodeId,
                         int64_t nodeTypeId,
                         const std::string& dataAddress);
-
-        void Start();
 
         //This is called when dose_main is expected to shut down
         void Stop();
@@ -160,8 +158,8 @@ namespace Internal
         // Shared memory queue message handlers
         ConnectionHandler   m_connectionHandler;       
 
-        RequestHandler      m_requestHandler;
-        ResponseHandler     m_responseHandler;
+        std::unique_ptr<RequestHandler>      m_requestHandler;
+        std::unique_ptr<ResponseHandler>     m_responseHandler;
 
         PoolHandler         m_poolHandler;
 

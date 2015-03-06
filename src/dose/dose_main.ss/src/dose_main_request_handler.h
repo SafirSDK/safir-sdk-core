@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -21,9 +22,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-
-#ifndef _dose_main_request_handler_h
-#define _dose_main_request_handler_h
+#pragma once
 
 #include "dose_main_timers.h"
 #include <Safir/Dob/ErrorResponse.h>
@@ -38,22 +37,21 @@ namespace Internal
 {
     //forward declarations
     class BlockingHandlers;
-#if 0 //stewart
-    class ExternNodeCommunication;
-#endif
     class ResponseHandler;
+    namespace Com
+    {
+        class Communication;
+    }
 
     class RequestHandler:
         public TimeoutHandler
     {
     public:
-        explicit RequestHandler(TimerHandler& timerHandler);
 
-        void Init(BlockingHandlers & blockingHandler,
-#if 0 //stewart
-                  ExternNodeCommunication & ecom,
-#endif
-                  ResponseHandler & responseHandler);
+        RequestHandler(TimerHandler& timerHandler,
+                       BlockingHandlers& blockingHandler,
+                       ResponseHandler& responseHandler,
+                       Com::Communication& communication);
 
 
         void DistributeRequests(const ConnectionPtr & connection);
@@ -117,14 +115,12 @@ namespace Internal
         typedef boost::unordered_map<Typesystem::TypeId, Typesystem::Si64::Second> TimeoutTable;
         mutable TimeoutTable m_timeoutTable;
 
-#if 0 //stewart
-        ExternNodeCommunication* m_ecom;
-#endif
-        BlockingHandlers* m_blockingHandler;
-        ResponseHandler * m_responseHandler;
+
+        BlockingHandlers& m_blockingHandler;
+        ResponseHandler& m_responseHandler;
+        Com::Communication& m_communication;
     };
 }
 }
 }
-#endif
 
