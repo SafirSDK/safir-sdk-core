@@ -26,18 +26,20 @@
 ###############################################################################
 from __future__ import print_function
 import subprocess, os, time, sys, signal, argparse
-
+    
 parser = argparse.ArgumentParser("test script")
 parser.add_argument("--safir-control", required=True)
+parser.add_argument("--dose-main", required=True)
 arguments = parser.parse_args()
 
 print("This test program expects to be killed off after about two minutes unless it has finished successfully before then.")
 
-proc = subprocess.Popen(arguments.safir_control,
+proc = subprocess.Popen([arguments.safir_control, "--dose-main-path" , arguments.dose_main],
                         stdout = subprocess.PIPE,
                         stderr = subprocess.STDOUT,
                         universal_newlines=True,
                         creationflags = subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0)
+    
 lines = list()
 for i in range(2):
     lines.append(proc.stdout.readline().rstrip("\n\r"))
@@ -57,16 +59,19 @@ for i in range (100):
         break
     time.sleep(0.1)
 if proc.poll() is None:
-    try:
+    try:        
         proc.kill()
+        print("Unable to stop Control and/or dose_main! OS resources might be locked, preventing further tests from running.")
+        sys.exit(1)
     except OSError:
         pass
     proc.wait()
 
+
+
 for i in range(2):
     lines.append(proc.stdout.readline().rstrip("\n\r"))
     print("Line", len(lines) - 1, ": '" + lines[-1] + "'")
-
 
 res = proc.communicate()[0]
 

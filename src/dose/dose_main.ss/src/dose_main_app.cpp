@@ -298,7 +298,10 @@ namespace Internal
         m_poolHandler.Stop();
         m_ownConnection.Close();
 
+        m_signalSet.cancel();
+
         m_work.reset();
+
         Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().StopAsynchronousLogger();
     }
 
@@ -309,8 +312,16 @@ namespace Internal
 
         if (error)
         {
-            SEND_SYSTEM_LOG(Error,
-                            << "Got a signals error: " << error);
+            if (error == boost::asio::error::operation_aborted)
+            {
+                // dose_main got stopped via a command from Control, do nothing
+                return;
+            }
+            else
+            {
+               SEND_SYSTEM_LOG(Error,
+                                << "DOSE_MAIN: Got a signals error: " << error);
+            }
         }
 
         Stop();

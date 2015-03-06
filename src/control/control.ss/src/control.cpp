@@ -41,7 +41,7 @@
 #  pragma warning (disable : 4100 4267 4251)
 #endif
 
-#include <boost/filesystem/path.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 #include <boost/asio.hpp>
 #include "boost/process.hpp"
@@ -77,10 +77,9 @@ public:
         options_description options("Options");
         options.add_options()
                 ("help,h", "show help message")
-                ("dose-main",
-                 value<std::string>(&doseMainName)->default_value("dose_main"),
-                 "Absolute or relative path to dose_main executable. If not found the filename is searched "
-                 "for in PATH")
+                ("dose-main-path",
+                 value<std::string>(&doseMainPath)->required(),
+                 "Absolute or relative path to dose_main executable.")
                 ("force-id",
                  value<boost::int64_t>(&id)->default_value(LlufId_GenerateRandom64(), ""),
                  "Override the automatically generated node id. For debugging/testing purposes only.");
@@ -109,7 +108,7 @@ public:
         parseOk = true;
     }
     bool parseOk;
-    std::string doseMainName;
+    std::string doseMainPath;
     boost::int64_t id;
 
 private:
@@ -125,10 +124,6 @@ private:
 
 int main(int argc, char * argv[])
 {
-
-    SEND_SYSTEM_LOG(Error,
-                    << "Testing the format");
-
     lllog(3) << "CTRL: Started" << std::endl;
 
     const ProgramOptions options(argc, argv);
@@ -171,20 +166,24 @@ int main(int argc, char * argv[])
 #endif
 
     // Locate and start dose_main
-#if defined(_UNICODE) || defined(UNICODE)
-    // For now we assume that the name of the dose_main executable contains only ascii characters.
-    std::wstring doseMainName = std::wstring(options.doseMainName.begin(), options.doseMainName.end());
-    std::wstring doseMainPath;
-#else
-    std::string doseMainName = options.doseMainName;
-    std::string doseMainPath;
+    namespace fs = boost::filesystem;
 
-#endif
-    doseMainPath = boost::process::search_path(doseMainName);
-    if (doseMainPath.empty())
+    fs::path path(options.doseMainPath);
+
+    if (fs::exists(path))
+    {
+        if (fs::is_directory(path) || !fs::is_regular_file(path))
+        {
+            std::ostringstream os;
+            os << "CTRL: " << options.doseMainPath << " is a directory or a non regular file!" << std::endl;
+            SEND_SYSTEM_LOG(Error, << os.str().c_str());
+            throw std::logic_error(os.str().c_str());
+        }
+    }
+    else
     {
         std::ostringstream os;
-        os << "CTRL: Can't find " << options.doseMainName << " in PATH" << std::endl;
+        os << "CTRL: Can't find " << options.doseMainPath << std::endl;
         SEND_SYSTEM_LOG(Error, << os.str().c_str());
         throw std::logic_error(os.str().c_str());
     }
@@ -193,7 +192,7 @@ int main(int argc, char * argv[])
 
     boost::process::child dose_main =
     boost::process::execute
-            (boost::process::initializers::run_exe(doseMainPath),
+            (boost::process::initializers::run_exe(path),
              boost::process::initializers::set_on_error(ec),
              boost::process::initializers::inherit_env()
 #if defined(linux) || defined(__linux) || defined(__linux__)
