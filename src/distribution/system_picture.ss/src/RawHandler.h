@@ -477,19 +477,14 @@ namespace SP
         {
             m_strand.dispatch([this, incarnationId]
                               {
+                                  if (m_allStatisticsMessage.has_incarnation_id())
+                                  {
+                                      return;
+                                  }
+
                                   lllog(1) << "SP: Incarnation Id " << incarnationId
                                            << " set in RawHandler." << std::endl;
 
-                                  if (m_allStatisticsMessage.has_incarnation_id())
-                                  {
-                                      SEND_SYSTEM_LOG(Warning,
-                                                      << "SetIncarnationId("
-                                                      << incarnationId <<
-                                                      ") was called even though an incarnation number ("
-                                                      << m_allStatisticsMessage.incarnation_id()
-                                                      << ") was already set. Discarding.")
-                                          return;
-                                  }
                                   m_allStatisticsMessage.set_incarnation_id(incarnationId);
 
                                   //TODO: better name for ELECTION_ID_CHANGED
