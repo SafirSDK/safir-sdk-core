@@ -279,7 +279,7 @@ struct Node
              {
                  ElectionComplete(nodeId,electionId);
              },
-             [this](const int64_t incarnationId)
+             [this](const int64_t /*incarnationId*/)
              {
                  //TODO use incarnation id
              })

@@ -102,7 +102,7 @@ namespace SP
 
                                     m_rawHandler.SetElectionId(nodeId, electionId);
                                 },
-                                [this](const int64_t incarnationId)
+                                [this](const int64_t /*incarnationId*/)
                                 {
                                     //m_rawHandler.SetIncarnationId(incarnationId);
                                 })
