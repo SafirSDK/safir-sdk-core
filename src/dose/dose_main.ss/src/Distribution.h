@@ -30,6 +30,7 @@
 #include <boost/chrono.hpp>
 #include <string>
 #include <vector>
+#include <functional>
 #include <map>
 
 #ifdef _MSC_VER
@@ -40,6 +41,7 @@
 #include <boost/asio.hpp>
 
 #ifdef _MSC_VER
+
 #pragma warning (pop)
 #endif
 
@@ -49,6 +51,9 @@ namespace Dob
 {
 namespace Internal
 {
+    using OnInjectNode = std::function<void(const std::string& nodeName, int64_t nodeId, int64_t nodeTypeId, const std::string& dataAddress)>;
+    using OnExcludeNode = std::function<void(int64_t nodeId, int64_t nodeTypeId)>;
+
     // Class that encapsulates the Communication and System Picture instances
     //
     template <typename CommunicationT, typename SystemPictureT, typename ConfigT>
@@ -66,14 +71,12 @@ namespace Internal
               m_sp(),
               m_started(false)
         {
-            const ConfigT config;
-
             // Create and populate structures that are needed when creating the Communication and
             // SP instances.
             std::vector<Com::NodeTypeDefinition> commNodeTypes;
             std::map<boost::int64_t, typename SP::NodeType> spNodeTypes;
 
-            for (const auto& nt: config.nodeTypesParam)
+            for (const auto& nt: m_config.nodeTypesParam)
             {
                 commNodeTypes.push_back({nt.id,
                                          nt.name,
@@ -110,33 +113,6 @@ namespace Internal
 
         }
 
-        // Inject an external node
-        void InjectNode(const std::string& nodeName,
-                        int64_t            nodeId,
-                        int64_t            nodeTypeId,
-                        const std::string& dataAddress)
-        {
-            m_communication->InjectNode(nodeName,
-                                        nodeId,
-                                        nodeTypeId,
-                                        dataAddress);
-        }
-
-
-        void SetDataReceiver(Com::ReceiveData receiveDataCb,
-                             int64_t dataTypeIdentifier,
-                             Com::Allocator allocator)
-        {
-            if (m_started)
-            {
-                throw std::logic_error("SetDataReceiver called efter Start!");
-            }
-
-            m_communication->SetDataReceiver(receiveDataCb,
-                                             dataTypeIdentifier,
-                                             allocator);
-        }
-
         void Start()
         {
             m_communication->Start();
@@ -152,15 +128,57 @@ namespace Internal
             m_started = false;
         }
 
+        //subscribe for new injected nodes and excluded nodes.
+        void SubscribeNodeEvents(const OnInjectNode& onInjectNode, const OnExcludeNode& onExcludeNode)
+        {
+            m_injectCallbacks.push_back(onInjectNode);
+            m_excludeCallbacks.push_back(onExcludeNode);
+        }
+
+        // Inject an external node
+        void InjectNode(const std::string& nodeName,
+                        int64_t            nodeId,
+                        int64_t            nodeTypeId,
+                        const std::string& dataAddress)
+        {
+            m_communication->InjectNode(nodeName,
+                                        nodeId,
+                                        nodeTypeId,
+                                        dataAddress);
+
+            for (auto& cb : m_injectCallbacks)
+            {
+                cb(nodeName, nodeId, nodeTypeId, dataAddress);
+            }
+        }
+
+        void ExcludeNode(int64_t nodeId, int64_t nodeTypeId)
+        {
+            for (auto& cb : m_excludeCallbacks)
+
+            {
+                cb(nodeId, nodeTypeId);
+            }
+        }
+
+
         CommunicationT& GetCommunication()
         {
             return *m_communication;
+        }
+
+        const ConfigT& GetNodeTypeConfiguration() const
+        {
+            return m_config;
         }
 
     private:
 
         std::unique_ptr<CommunicationT> m_communication;
         std::unique_ptr<SystemPictureT> m_sp;
+        const ConfigT m_config;
+        std::vector<OnInjectNode> m_injectCallbacks;
+        std::vector<OnExcludeNode> m_excludeCallbacks;
 
         bool m_started;
     };

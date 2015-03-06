@@ -233,11 +233,9 @@ namespace Internal
                                               nodeTypeId,
                                               dataAddress));
 
-        const Control::Config config;
-
         // Collect all node type ids
         NodeTypeIds nodeTypeIds;
-        for (const auto& nt: config.nodeTypesParam)
+        for (const auto& nt: m_distribution->GetNodeTypeConfiguration().nodeTypesParam)
         {
             nodeTypeIds.insert(nt.id);
         }

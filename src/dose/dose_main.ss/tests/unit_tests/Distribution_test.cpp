@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE( first_test )
                                          878787,
                                          "127.0.0.1");
 
-    d.SetDataReceiver([](int64_t fromNodeId,
+    d.GetCommunication().SetDataReceiver([](int64_t fromNodeId,
                       int64_t fromNodeType,
                       const char* data,
                       size_t size)
@@ -45,6 +45,28 @@ BOOST_AUTO_TEST_CASE( first_test )
                       },
                       12345,
                       [](size_t size){return new char[size];});
+
+    //-------------------------
+    //Test node subscription
+    //-------------------------
+    {
+        std::vector<int64_t> included;
+        std::vector<int64_t> excluded;
+        d.SubscribeNodeEvents([&](const std::string& nodeName, int64_t nodeId, int64_t nodeTypeId, const std::string& dataAddress)
+                                {included.push_back(nodeId);},
+                              [&](int64_t nodeId, int64_t nodeTypeId)
+                                {excluded.push_back(nodeId);});
+
+        d.InjectNode("node10", 10, 0, "127.0.0.1:1010");
+        d.InjectNode("node20", 20, 0, "127.0.0.1:1020");
+        d.ExcludeNode(10, 0);
+        d.ExcludeNode(20, 0);
+
+        BOOST_CHECK(included[0]==10);
+        BOOST_CHECK(included[1]==20);
+        BOOST_CHECK(excluded[0]==10);
+        BOOST_CHECK(excluded[1]==20);
+    }
 
     bool ok = true;
     BOOST_CHECK(ok);

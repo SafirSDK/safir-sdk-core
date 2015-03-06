@@ -172,7 +172,8 @@ namespace Com
         void SetQueueNotFullCallback(const QueueNotFull& callback, int freePartThreshold);
 
         /**
-         * Set callback for receive data for a specific data type. Can be called multiple times with different dataTypeIdentifier.
+         * Set callback for receive data for a specific data type. Can be called multiple times with different dataTypeIdentifier,
+         * but only once per dataType. I.e it is not possible to set upp multiple receivers with the same dataTypeIdentifier.
          * Must be called before calling Start.
          *
          * @param callback [in] - Callback function.
