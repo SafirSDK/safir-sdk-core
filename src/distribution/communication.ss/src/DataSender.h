@@ -615,7 +615,7 @@ namespace Com
 
                     WriterType::SendTo(ud, nodeIt->second.endpoint);
                     m_retransmitNotification(nodeIt->first);
-                    lllog(6)<<m_logPrefix.c_str()<<"Retransmit  "<<SendMethodToString(ud->header.sendMethod).c_str()<<
+                    lllog(9)<<m_logPrefix.c_str()<<"Retransmit  "<<SendMethodToString(ud->header.sendMethod).c_str()<<
                               ", seq: "<<ud->header.sequenceNumber<<" to "<<*recvIt<<std::endl;
                     ++recvIt;
                 }
