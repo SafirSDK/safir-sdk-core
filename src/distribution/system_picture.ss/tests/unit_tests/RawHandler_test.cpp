@@ -226,7 +226,7 @@ BOOST_AUTO_TEST_CASE( nodes_changed_add_callback )
 
                                    BOOST_CHECK(flags.NodesChanged());
                                    BOOST_CHECK(!flags.NewRemoteStatistics());
-                                   BOOST_CHECK(!flags.ElectionIdChanged());
+                                   BOOST_CHECK(!flags.MetadataChanged());
 
                                    BOOST_CHECK(!statistics.IsDead(0));
                                    BOOST_CHECK(statistics.ControlReceiveCount(0) == 0);
@@ -260,7 +260,7 @@ BOOST_AUTO_TEST_CASE( nodes_changed_removed_callback )
 
                                    BOOST_CHECK(flags.NodesChanged());
                                    BOOST_CHECK(!flags.NewRemoteStatistics());
-                                   BOOST_CHECK(!flags.ElectionIdChanged());
+                                   BOOST_CHECK(!flags.MetadataChanged());
 
                                    BOOST_CHECK(statistics.DataReceiveCount(0) == 0);
                                    BOOST_CHECK(statistics.DataRetransmitCount(0) == 0);
@@ -346,7 +346,7 @@ BOOST_AUTO_TEST_CASE( raw_changed_callback )
                                    ++cbCalls;
                                    CheckStatisticsCommon(statistics);
 
-                                   BOOST_CHECK(!flags.ElectionIdChanged());
+                                   BOOST_CHECK(!flags.MetadataChanged());
 
                                    if (cbCalls == 1)
                                    {
@@ -401,18 +401,18 @@ BOOST_AUTO_TEST_CASE( election_id_changed_callback)
                                  if (cbCalls == 1)
                                  {
                                      BOOST_CHECK(flags.NodesChanged());
-                                     BOOST_CHECK(!flags.ElectionIdChanged());
+                                     BOOST_CHECK(!flags.MetadataChanged());
                                  }
                                  else if (cbCalls == 2)
                                  {
                                      BOOST_CHECK(!flags.NodesChanged());
-                                     BOOST_CHECK(flags.ElectionIdChanged());
+                                     BOOST_CHECK(flags.MetadataChanged());
                                      BOOST_CHECK_EQUAL(statistics.ElectionId(), 199);
                                  }
                                  else
                                  {
                                      BOOST_CHECK(flags.NodesChanged());
-                                     BOOST_CHECK(!flags.ElectionIdChanged());
+                                     BOOST_CHECK(!flags.MetadataChanged());
                                      BOOST_CHECK_EQUAL(statistics.ElectionId(), 199);
                                  }
                              });
@@ -434,7 +434,7 @@ BOOST_AUTO_TEST_CASE( set_dead_node )
 
                                    BOOST_CHECK(flags.NodesChanged());
                                    BOOST_CHECK(!flags.NewRemoteStatistics());
-                                   BOOST_CHECK(!flags.ElectionIdChanged());
+                                   BOOST_CHECK(!flags.MetadataChanged());
 
                                    if (cbCalls == 1)
                                    {
@@ -475,7 +475,7 @@ BOOST_AUTO_TEST_CASE( recently_dead_nodes )
 
                                    BOOST_CHECK(flags.NodesChanged());
                                    BOOST_CHECK(!flags.NewRemoteStatistics());
-                                   BOOST_CHECK(!flags.ElectionIdChanged());
+                                   BOOST_CHECK(!flags.MetadataChanged());
 
                                    if (cbCalls == 1)
                                    {

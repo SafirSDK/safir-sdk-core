@@ -275,7 +275,7 @@ namespace SP
                                  << ", let's use it!" << std::endl;
                         m_allStatisticsMessage.set_incarnation_id(node.nodeInfo->remote_statistics().incarnation_id());
 
-                        changes |= RawChanges::ELECTION_ID_CHANGED;
+                        changes |= RawChanges::METADATA_CHANGED;
                     }
                     else
                     {
@@ -469,7 +469,7 @@ namespace SP
 
                                   m_allStatisticsMessage.set_election_id(electionId);
 
-                                  PostRawChangedCallback(RawChanges(RawChanges::ELECTION_ID_CHANGED));
+                                  PostRawChangedCallback(RawChanges(RawChanges::METADATA_CHANGED));
                               });
         }
 
@@ -487,8 +487,7 @@ namespace SP
 
                                   m_allStatisticsMessage.set_incarnation_id(incarnationId);
 
-                                  //TODO: better name for ELECTION_ID_CHANGED
-                                  PostRawChangedCallback(RawChanges(RawChanges::ELECTION_ID_CHANGED));
+                                  PostRawChangedCallback(RawChanges(RawChanges::METADATA_CHANGED));
                               });
         }
 

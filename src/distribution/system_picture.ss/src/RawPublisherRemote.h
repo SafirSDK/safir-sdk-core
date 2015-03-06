@@ -72,7 +72,7 @@ namespace SP
                                                                   const RawChanges flags,
                                                                   boost::shared_ptr<void> completionSignaller)
             {
-                if (flags.NodesChanged() || flags.ElectionIdChanged())
+                if (flags.NodesChanged() || flags.MetadataChanged())
                 {
                     Publish(m_allNodeTypes);
                 }

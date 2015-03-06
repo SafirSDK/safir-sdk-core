@@ -149,12 +149,12 @@ BOOST_AUTO_TEST_CASE( callbacks )
     cb(RawStatistics(), RawChanges(RawChanges::NODES_CHANGED), cs);
     cb(RawStatistics(), RawChanges(RawChanges::NODES_CHANGED), cs);
     cb(RawStatistics(), RawChanges(RawChanges::NODES_CHANGED), cs);
-    cb(RawStatistics(), RawChanges(RawChanges::ELECTION_ID_CHANGED), cs);
-    cb(RawStatistics(), RawChanges(RawChanges::ELECTION_ID_CHANGED), cs);
-    cb(RawStatistics(), RawChanges(RawChanges::ELECTION_ID_CHANGED), cs);
-    cb(RawStatistics(), RawChanges(RawChanges::ELECTION_ID_CHANGED), cs);
+    cb(RawStatistics(), RawChanges(RawChanges::METADATA_CHANGED), cs);
+    cb(RawStatistics(), RawChanges(RawChanges::METADATA_CHANGED), cs);
+    cb(RawStatistics(), RawChanges(RawChanges::METADATA_CHANGED), cs);
+    cb(RawStatistics(), RawChanges(RawChanges::METADATA_CHANGED), cs);
     cb(RawStatistics(), RawChanges(RawChanges::NODES_CHANGED), cs);
-    cb(RawStatistics(), RawChanges(RawChanges::ELECTION_ID_CHANGED), cs);
+    cb(RawStatistics(), RawChanges(RawChanges::METADATA_CHANGED), cs);
 
     ioService.run();
 
