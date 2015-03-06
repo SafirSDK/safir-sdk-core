@@ -41,6 +41,7 @@
 #  pragma warning (disable : 4100 4267 4251)
 #endif
 
+#include <boost/filesystem/path.hpp>
 #include <boost/program_options.hpp>
 #include <boost/asio.hpp>
 #include "boost/process.hpp"
@@ -76,9 +77,10 @@ public:
         options_description options("Options");
         options.add_options()
                 ("help,h", "show help message")
-                ("dosemain-name",
-                 value<std::string>(&doseMainName)->default_value("dose_main_test_stub"),
-                 "Name of dose_main executable (without file extension)")
+                ("dose-main",
+                 value<std::string>(&doseMainName)->default_value("dose_main"),
+                 "Absolute or relative path to dose_main executable. If not found the filename is searched "
+                 "for in PATH")
                 ("force-id",
                  value<boost::int64_t>(&id)->default_value(LlufId_GenerateRandom64(), ""),
                  "Override the automatically generated node id. For debugging/testing purposes only.");

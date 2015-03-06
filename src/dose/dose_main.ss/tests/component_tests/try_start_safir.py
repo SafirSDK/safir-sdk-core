@@ -3,6 +3,7 @@
 ###############################################################################
 #
 # Copyright Saab AB, 2011-2013 (http://safir.sourceforge.net)
+# Copyright Consoden AB, 2015 (http://www.consoden.se)
 #
 # Created by: Lars Hagstrom (lars@foldspace.nu)
 #
@@ -27,12 +28,12 @@ from __future__ import print_function
 import subprocess, os, time, sys, signal, argparse
 
 parser = argparse.ArgumentParser("test script")
-parser.add_argument("--dose-main", required=True)
+parser.add_argument("--safir-control", required=True)
 arguments = parser.parse_args()
 
 print("This test program expects to be killed off after about two minutes unless it has finished successfully before then.")
 
-proc = subprocess.Popen(arguments.dose_main,
+proc = subprocess.Popen(arguments.safir_control,
                         stdout = subprocess.PIPE,
                         stderr = subprocess.STDOUT,
                         universal_newlines=True,

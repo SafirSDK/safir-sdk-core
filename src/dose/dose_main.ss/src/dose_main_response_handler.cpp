@@ -31,7 +31,6 @@
 #include <Safir/Dob/Internal/Connection.h>
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Internal/Connections.h>
-#include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 
 namespace Safir
@@ -40,9 +39,12 @@ namespace Dob
 {
 namespace Internal
 {
-    ResponseHandler::ResponseHandler(TimerHandler& timerHandler)
-        : m_timerHandler(timerHandler)
-        , m_thisNode(Dob::ThisNodeParameters::NodeNumber())
+    ResponseHandler::ResponseHandler(TimerHandler& timerHandler,
+                                     BlockingHandlers& blockingHandler,
+                                     Com::Communication& communication)
+        : m_timerHandler(timerHandler),
+          m_blockingHandler(blockingHandler),
+          m_communication(communication)
     {
     }
 
@@ -50,30 +52,18 @@ namespace Internal
     {
     }
 
-
-    void ResponseHandler::Init(BlockingHandlers & blockingHandler)
-#if 0 //stewart
-        , ExternNodeCommunication & ecom)
-#endif
-
-    {
-        m_blockingHandler = &blockingHandler;
-#if 0 //stewart
-        m_ecom = &ecom;
-#endif
-    }
-
     void ResponseHandler::DispatchResponse(const DistributionData& response,
                                            bool & dontRemove,
                                            bool & doseComOverflowed,
                                            const ConnectionPtr & /*sender*/)
     {
-        //if dosecom is overflowed and response is for remote node we skip it.
-        if (doseComOverflowed && response.GetReceiverId().m_node != Dob::ThisNodeParameters::NodeNumber())
-        {
-            dontRemove = true;
-            return;
-        }
+        //TODO
+//        //if dosecom is overflowed and response is for remote node we skip it.
+//        if (doseComOverflowed && response.GetReceiverId().m_node != Dob::ThisNodeParameters::NodeNumber())
+//        {
+//            dontRemove = true;
+//            return;
+//        }
 
         //Try to send the response
         if (HandleResponse(response))
@@ -107,29 +97,30 @@ namespace Internal
 
     bool ResponseHandler::HandleResponse(const DistributionData & response)
     {
-        lllout << "HandleResponse: " << Typesystem::Operations::GetName(response.GetTypeId()) << std::endl;
+        //TODO
+//        lllout << "HandleResponse: " << Typesystem::Operations::GetName(response.GetTypeId()) << std::endl;
 
-        const ConnectionId fromConnection=response.GetSenderId();
-        const ConnectionId toConnection=response.GetReceiverId();
+//        const ConnectionId fromConnection=response.GetSenderId();
+//        const ConnectionId toConnection=response.GetReceiverId();
 
-        if (toConnection.m_node == m_thisNode)
-        {
-            //Can't fail due to overflow.
-            const ConnectionPtr to = Connections::Instance().GetConnection(toConnection,std::nothrow);
-            if (to != NULL) //if receiver of the response is dead, theres nothing to do
-            {
-                PostResponse(to, response);
-            }
-            return true;
-        }
-        else if (fromConnection.m_node == m_thisNode)
-        {
-#if 0 //stewart
-            //Response to another node
-            lllout << "Sending the response to node " << toConnection.m_node << std::endl;
-            return m_ecom->Send(response);
-#endif
-        }
+//        if (toConnection.m_node == m_thisNode)
+//        {
+//            //Can't fail due to overflow.
+//            const ConnectionPtr to = Connections::Instance().GetConnection(toConnection,std::nothrow);
+//            if (to != NULL) //if receiver of the response is dead, theres nothing to do
+//            {
+//                PostResponse(to, response);
+//            }
+//            return true;
+//        }
+//        else if (fromConnection.m_node == m_thisNode)
+//        {
+//#if 0 //stewart
+//            //Response to another node
+//            lllout << "Sending the response to node " << toConnection.m_node << std::endl;
+//            return m_ecom->Send(response);
+//#endif
+//        }
 
         return true;
     }
