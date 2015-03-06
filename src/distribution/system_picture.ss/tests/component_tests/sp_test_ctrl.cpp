@@ -68,10 +68,10 @@ public:
         options.add_options()
             ("help,h", "show help message")
             ("control-address,c",
-             value<std::string>(&controlAddress)->default_value("0.0.0.0:30000"),
+             value<std::string>(&controlAddress)->default_value("127.0.0.1:30000"),
              "Address and port of the control channel")
             ("data-address,d",
-             value<std::string>(&dataAddress)->default_value("0.0.0.0:40000"),
+             value<std::string>(&dataAddress)->default_value("127.0.0.1:40000"),
              "Address and port of the data channel")
             ("seed,s",
              value<std::vector<std::string> >(&seeds),
@@ -155,7 +155,7 @@ int main(int argc, char * argv[])
                                                                          "NodeTypeA",
                                                                          false,
                                                                          boost::chrono::milliseconds(1000),
-                                                                         60,
+                                                                         30,
                                                                          boost::chrono::milliseconds(20))));
 
     commNodeTypes.push_back({2,
@@ -170,7 +170,7 @@ int main(int argc, char * argv[])
                                                                          "NodeTypeB",
                                                                          false,
                                                                          boost::chrono::milliseconds(2000),
-                                                                         60,
+                                                                         15,
                                                                          boost::chrono::milliseconds(50))));
 
 

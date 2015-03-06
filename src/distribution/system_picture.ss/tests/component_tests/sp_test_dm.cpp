@@ -72,7 +72,7 @@ public:
         options.add_options()
             ("help,h", "show help message")
             ("data-address,d",
-             value<std::string>(&dataAddress)->default_value("0.0.0.0:40000"),
+             value<std::string>(&dataAddress)->default_value("127.0.0.1:40000"),
              "Address and port of the data channel")
             ("name,n",
              value<std::string>(&name)->default_value("<not set>", ""),
@@ -375,7 +375,7 @@ int main(int argc, char * argv[])
                                                                          "NodeTypeA",
                                                                          false,
                                                                          boost::chrono::milliseconds(1000),
-                                                                         60,
+                                                                         30,
                                                                          boost::chrono::milliseconds(20))));
 
     commNodeTypes.push_back({2,
@@ -390,7 +390,7 @@ int main(int argc, char * argv[])
                                                                          "NodeTypeB",
                                                                          false,
                                                                          boost::chrono::milliseconds(2000),
-                                                                         60,
+                                                                         15,
                                                                          boost::chrono::milliseconds(50))));
 
 

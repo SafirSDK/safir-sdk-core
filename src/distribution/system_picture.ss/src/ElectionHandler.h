@@ -110,10 +110,12 @@ namespace SP
                                       }
                                       return res;
                                   }())
+            , m_aloneTimeout(CalculateAloneTimeout(nodeTypes))
             , m_electionTimeout(CalculateElectionTimeout(nodeTypes))
             , m_elected(std::numeric_limits<int64_t>::min())
             , m_electionTimer(ioService)
             , m_currentElectionId(0)
+            , m_generateIncarnationIdTimer(ioService)
             , m_sendMessageTimer(ioService)
             , m_electionCompleteCallback(electionCompleteCallback)
             , m_setIncarnationIdCallback(setIncarnationIdCallback)
@@ -128,11 +130,10 @@ namespace SP
                                           m_receiverId,
                                           [](size_t size){return new char[size];});
 
-            const auto aloneTimeout = CalculateAloneTimeout(nodeTypes);
-            lllog(3) << "SP: AloneTimeout will be " << boost::chrono::duration_cast<boost::chrono::milliseconds>(aloneTimeout) << std::endl;
+            lllog(3) << "SP: AloneTimeout will be " << boost::chrono::duration_cast<boost::chrono::milliseconds>(m_aloneTimeout) << std::endl;
             lllog(3) << "SP: ElectionTimeout will be " << boost::chrono::duration_cast<boost::chrono::milliseconds>(m_electionTimeout) << std::endl;
             m_electionInProgress = true;
-            m_electionTimer.expires_from_now(aloneTimeout);
+            m_electionTimer.expires_from_now(m_aloneTimeout);
             m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
                                                      {
                                                          if (!error && !m_stopped)
@@ -157,18 +158,15 @@ namespace SP
                                   m_stopped = true;
                                   m_electionTimer.cancel();
                                   m_sendMessageTimer.cancel();
+                                  m_generateIncarnationIdTimer.cancel();
                               });
         }
 
-        void NodesChanged(RawStatistics statistics, boost::shared_ptr<void> completionSignaller)
+        void NodesChanged(const RawStatistics& statistics, boost::shared_ptr<void> completionSignaller)
         {
             m_strand.dispatch([this, statistics, completionSignaller]
                               {
                                   lllog(5) << "SP: ElectionHandler got new RawStatistics" << std::endl;
-                                  /*                                  if (Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().LogLevel() >= 9)
-                                  {
-                                      std::wcout << statistics << std::endl;
-                                      }*/
                                   m_lastStatistics = std::move(statistics);
                                   StartElection();
                               });
@@ -179,15 +177,21 @@ namespace SP
          * we're alone and proclaiming victory. */
         static boost::chrono::steady_clock::duration CalculateAloneTimeout(const std::map<int64_t, NodeType>& nodeTypes)
         {
-            return CalculateElectionTimeout(nodeTypes);
+            //use max of non-light node types heartbeatInterval * maxLostHeartbeats
+            boost::chrono::steady_clock::duration max = boost::chrono::milliseconds(100);
+            for (const auto& nt: nodeTypes)
+            {
+                if (!nt.second.isLight)
+                {
+                    max = std::max(max,nt.second.heartbeatInterval * nt.second.maxLostHeartbeats);
+                }
+            }
+            return max;
         }
 
         /** Calculate the time to wait for other nodes to respond to our INQUIRY. */
         static boost::chrono::steady_clock::duration CalculateElectionTimeout(const std::map<int64_t, NodeType>& nodeTypes)
         {
-            //NOTE: This function is also called by CalculateElectionTimeout, so take that into account
-            //if you're changing this function.
-
             //use max of non-light node types retryTimeout * maxLostHeartbeats
             boost::chrono::steady_clock::duration max = boost::chrono::milliseconds(100);
             for (const auto& nt: nodeTypes)
@@ -239,8 +243,9 @@ namespace SP
                     m_currentElectionId = LlufId_GenerateRandom64();
                     m_electionCompleteCallback(m_elected, m_currentElectionId);
 
-                    const auto incarnationId = LlufId_GenerateRandom64();
-                    m_setIncarnationIdCallback(incarnationId);
+                    //note that we may not end up with this incarnationId, in case a RAW
+                    //is received just after this call, but before it is executed
+                    m_setIncarnationIdCallback(LlufId_GenerateRandom64());
                     return;
                 }
                 else
@@ -304,6 +309,24 @@ namespace SP
             SendPendingElectionMessages();
 
             m_electionCompleteCallback(m_elected, m_currentElectionId);
+
+            if (!m_lastStatistics.IncarnationId() != 0)
+            {
+                m_generateIncarnationIdTimer.expires_from_now(m_aloneTimeout);
+
+                m_generateIncarnationIdTimer.async_wait
+                    (m_strand.wrap([this](const boost::system::error_code& error)
+                                   {
+                                       if (!!error || m_stopped)
+                                       {
+                                           return;
+                                       }
+
+                                       //note that we may not end up with this incarnationId, in case a RAW
+                                       //is received just after this call, but before it is executed
+                                       m_setIncarnationIdCallback(LlufId_GenerateRandom64());
+                                   }));
+            }
         }
 
 
@@ -431,6 +454,7 @@ namespace SP
                     ElectionMessage aliveMsg;
                     aliveMsg.set_action(ALIVE);
                     aliveMsg.set_election_id(it.second.second);
+
                     const auto size = aliveMsg.ByteSize();
                     boost::shared_ptr<char[]> data = boost::make_shared<char[]>(size);
                     aliveMsg.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
@@ -459,6 +483,7 @@ namespace SP
                     ElectionMessage victoryMsg;
                     victoryMsg.set_action(VICTORY);
                     victoryMsg.set_election_id(m_currentElectionId);
+
                     const auto size = victoryMsg.ByteSize();
                     boost::shared_ptr<char[]> data = boost::make_shared<char[]>(size);
                     victoryMsg.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
@@ -482,6 +507,7 @@ namespace SP
                     ElectionMessage message;
                     message.set_action(INQUIRY);
                     message.set_election_id(m_currentElectionId);
+
                     const auto size = message.ByteSize();
                     boost::shared_ptr<char[]> data = boost::make_shared<char[]>(size);
                     message.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
@@ -525,6 +551,7 @@ namespace SP
         const std::map<int64_t, NodeType> m_nodeTypes;
         const std::set<int64_t> m_nonLightNodeTypes;
 
+        const boost::chrono::steady_clock::duration m_aloneTimeout;
         const boost::chrono::steady_clock::duration m_electionTimeout;
 
         RawStatistics m_lastStatistics;
@@ -533,6 +560,8 @@ namespace SP
         boost::asio::steady_timer m_electionTimer;
         bool m_electionInProgress{false};
         std::atomic<int64_t> m_currentElectionId;
+
+        boost::asio::steady_timer m_generateIncarnationIdTimer;
 
         boost::asio::steady_timer m_sendMessageTimer;
 

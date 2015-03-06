@@ -259,35 +259,80 @@ namespace SP
                 }
 
                 lllog(9) << "SP: Processing remote node information" << std::endl;
-                bool nodesChanged = false;
-                for (const auto& n: node.nodeInfo->remote_statistics().node_info())
-                {
-                    if (n.is_dead())
-                    {
-                        if (AddToMoreDeadNodes(n.id()))
-                        {
-                            lllog(8) << "SP: Added " << n.id() << " to more_dead_nodes since "
-                                     << from  << " thinks that it is dead" << std::endl;
 
-                            nodesChanged = true;
+                int changes = 0;
+
+                if (!m_allStatisticsMessage.has_incarnation_id())
+                {
+                    lllog(6) << "SP: This node does not have an incarnation id" << std::endl;
+                    if (node.nodeInfo->remote_statistics().has_incarnation_id())
+                    {
+                        //TODO: ask ctrl about this incarnation id.
+                        //if not ok exclude and mark dead
+
+                        lllog(1) << "SP: Remote RAW contains incarnation id "
+                                 << node.nodeInfo->remote_statistics().incarnation_id()
+                                 << ", let's use it!" << std::endl;
+                        m_allStatisticsMessage.set_incarnation_id(node.nodeInfo->remote_statistics().incarnation_id());
+
+                        changes |= RawChanges::ELECTION_ID_CHANGED;
+                    }
+                    else
+                    {
+                        lllog(6) << "SP: Remote node does not have incarnation either." << std::endl;
+                    }
+                }
+                else if (node.nodeInfo->remote_statistics().has_incarnation_id() &&
+                         node.nodeInfo->remote_statistics().incarnation_id() != m_allStatisticsMessage.incarnation_id())
+                {
+                    lllog(6) << "SP: Remote node has different incarnation from us, excluding node." << std::endl;
+                    node.nodeInfo->set_is_dead(true);
+                    node.nodeInfo->clear_remote_statistics();
+                    m_communication.ExcludeNode(from);
+
+                    changes |= RawChanges::NODES_CHANGED;
+                }
+                else if (!node.nodeInfo->remote_statistics().has_incarnation_id())
+                {
+                    lllog(6) << "SP: Remote node has no incarnation discarding remote data." << std::endl;
+                    node.nodeInfo->clear_remote_statistics();
+                }
+
+                if (node.nodeInfo->has_remote_statistics()) //node might have been excluded or cleared above
+                {
+                    changes |= RawChanges::NEW_REMOTE_STATISTICS;
+
+                    for (const auto& n: node.nodeInfo->remote_statistics().node_info())
+                    {
+                        if (n.is_dead())
+                        {
+                            if (AddToMoreDeadNodes(n.id()))
+                            {
+                                lllog(8) << "SP: Added " << n.id() << " to more_dead_nodes since "
+                                         << from  << " thinks that it is dead" << std::endl;
+
+                                changes |= RawChanges::NODES_CHANGED;
+                            }
+                        }
+                    }
+
+                    lllog(9) << "SP: Processing remote more_dead_nodes" << std::endl;
+                    for (const auto id: node.nodeInfo->remote_statistics().more_dead_nodes())
+                    {
+                        if (AddToMoreDeadNodes(id))
+                        {
+                            lllog(8) << "SP: Added " << id << " to more_dead_nodes since "
+                                     << from  << " has it in more_dead_nodes" << std::endl;
+
+                            changes |= RawChanges::NODES_CHANGED;
                         }
                     }
                 }
 
-                lllog(9) << "SP: Processing remote more_dead_nodes" << std::endl;
-                for (const auto id: node.nodeInfo->remote_statistics().more_dead_nodes())
+                if (changes != 0)
                 {
-                    if (AddToMoreDeadNodes(id))
-                    {
-                        lllog(8) << "SP: Added " << id << " to more_dead_nodes since "
-                                 << from  << " has it in more_dead_nodes" << std::endl;
-
-                        nodesChanged = true;
-                    }
+                    PostRawChangedCallback(RawChanges(changes));
                 }
-
-                PostRawChangedCallback(RawChanges(RawChanges::NEW_REMOTE_STATISTICS |
-                                                  (nodesChanged ? RawChanges::NODES_CHANGED : 0)));
             });
         }
 
@@ -424,6 +469,30 @@ namespace SP
 
                                   m_allStatisticsMessage.set_election_id(electionId);
 
+                                  PostRawChangedCallback(RawChanges(RawChanges::ELECTION_ID_CHANGED));
+                              });
+        }
+
+        void SetIncarnationId(const int64_t incarnationId)
+        {
+            m_strand.dispatch([this, incarnationId]
+                              {
+                                  lllog(1) << "SP: Incarnation Id " << incarnationId
+                                           << " set in RawHandler." << std::endl;
+
+                                  if (m_allStatisticsMessage.has_incarnation_id())
+                                  {
+                                      SEND_SYSTEM_LOG(Warning,
+                                                      << "SetIncarnationId("
+                                                      << incarnationId <<
+                                                      ") was called even though an incarnation number ("
+                                                      << m_allStatisticsMessage.incarnation_id()
+                                                      << ") was already set. Discarding.")
+                                          return;
+                                  }
+                                  m_allStatisticsMessage.set_incarnation_id(incarnationId);
+
+                                  //TODO: better name for ELECTION_ID_CHANGED
                                   PostRawChangedCallback(RawChanges(RawChanges::ELECTION_ID_CHANGED));
                               });
         }

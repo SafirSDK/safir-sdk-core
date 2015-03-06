@@ -330,6 +330,11 @@ public:
         electionId = electionId_;
     }
 
+    void SetIncarnationId(const int64_t incarnationId_)
+    {
+        //TODO???
+    }
+
     void AddRawChangedCallback(const StatisticsCallback& callback)
     {
         BOOST_CHECK(rawCb == nullptr);

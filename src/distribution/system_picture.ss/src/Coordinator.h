@@ -102,9 +102,9 @@ namespace SP
 
                                     m_rawHandler.SetElectionId(nodeId, electionId);
                                 },
-                                [this](const int64_t /*incarnationId*/)
+                                [this](const int64_t incarnationId)
                                 {
-                                    //m_rawHandler.SetIncarnationId(incarnationId);
+                                    m_rawHandler.SetIncarnationId(incarnationId);
                                 })
             , m_name(name)
             , m_id(id)
@@ -132,7 +132,7 @@ namespace SP
 
                 if (flags.NodesChanged())
                 {
-                    m_electionHandler.NodesChanged(std::move(statistics), completionSignaller);
+                    m_electionHandler.NodesChanged(statistics, completionSignaller);
                 }
             }));
         }
@@ -355,6 +355,12 @@ namespace SP
             if (!m_lastStatistics.Valid())
             {
                 lllog(9) << "SP: No valid raw data yet, not updating my state" << std::endl;
+                return false;
+            }
+
+            if (!m_lastStatistics.IncarnationId() == 0)
+            {
+                lllog(9) << "SP: We don't have an incarnation id yet, not updating my state" << std::endl;
                 return false;
             }
 
