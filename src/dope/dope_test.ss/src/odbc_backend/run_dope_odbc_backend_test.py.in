@@ -25,6 +25,12 @@
 ###############################################################################
 from __future__ import print_function
 import sys, os, shutil, xml.dom.minidom, glob, time, subprocess, re
+
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                             "..",
+                             "@SAFIR_INSTALL_DESTINATION_TEST_DATA@",
+                             "python"))
+
 from testenv import TestEnv, TestEnvStopper
 
 class Unbuffered:
@@ -77,14 +83,14 @@ class Parameters:
             sys.exit(1)
 
         self.parameters_path = os.path.join(self.SAFIR_RUNTIME,
-                                            "data", 
-                                            "text", 
-                                            "dots", 
-                                            "classes", 
-                                            "safir_core", 
+                                            "data",
+                                            "text",
+                                            "dots",
+                                            "classes",
+                                            "safir_core",
                                             "config")
 
-        self.PersistenceParameters_path = os.path.join(self.parameters_path, 
+        self.PersistenceParameters_path = os.path.join(self.parameters_path,
                                                        "Safir.Dob.PersistenceParameters.dou")
 
         self.tempdir = tempfile.mkdtemp(prefix="dose_test_backup")
@@ -123,7 +129,7 @@ def UpdateConfig(parameters):
     print("** Updating configuration files")
     #backup dou files to temporary directory
     shutil.copy2(parameters.PersistenceParameters_path, parameters.tempdir)
-    
+
     # Update PersistenceParameters
     dom = xml.dom.minidom.parse(parameters.PersistenceParameters_path)
     for param in dom.getElementsByTagName("parameter"):
@@ -162,8 +168,8 @@ def run_sql(parameters,statement):
     process = subprocess.Popen((run_sql_path,
                                 "--connection-string", parameters.connection_string,
                                 "--statement", statement),
-                               stdout=subprocess.PIPE, 
-                               stderr=subprocess.STDOUT, 
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.STDOUT,
                                universal_newlines=True)
     output = process.communicate()[0]
     if process.returncode != 0:
@@ -294,7 +300,7 @@ try:
     if len(syslog_output) != 0:
         print("Unexpected syslog output:\n" + syslog_output)
         sys.exit(1)
-        
+
     output = env.Output("entity_owner")
     if output.count("OnInjectedNewEntity") != 110:
         print("could not find the right number of 'OnInjectedNewEntity' in output")
@@ -322,7 +328,7 @@ try:
 
     env = TestEnv()
     with TestEnvStopper(env):
-        #remove all bin binaries (that have been loaded by dope by now), so 
+        #remove all bin binaries (that have been loaded by dope by now), so
         #that we can wait for all entities to be written again
         #problem is that dope is rewriting them...
         while count_binares(parameters) != 0:
