@@ -41,7 +41,7 @@ class Unbuffered:
        self.stream.flush()
    def __getattr__(self, attr):
        return getattr(self.stream, attr)
-
+"""
 def rmdir(directory):
     if os.path.exists(directory):
         try:
@@ -50,7 +50,7 @@ def rmdir(directory):
             print("Failed to remove directory, will retry")
             time.sleep(0.2)
             shutil.rmtree(directory)
-
+"""
 
 class Parameters:
     def __init__(self):
@@ -63,7 +63,7 @@ class Parameters:
         parser.add_option("--hostname", action="store",dest="hostname",default="localhost",
                           help="Hostname of the database server")
         parser.add_option("--database", action="store",dest="database",
-                          help="Hostname of the database server")
+                          help="Database to connect to")
 
         (options,args) = parser.parse_args()
 
@@ -77,6 +77,7 @@ class Parameters:
 
         self.driver = options.driver
 
+        """
         self.SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
         if not self.SAFIR_RUNTIME:
             print("Cannot run without SAFIR_RUNTIME being set.")
@@ -94,7 +95,7 @@ class Parameters:
                                                        "Safir.Dob.PersistenceParameters.dou")
 
         self.tempdir = tempfile.mkdtemp(prefix="dose_test_backup")
-
+        """
         if self.driver == "mimer":
             driver = os.environ.get("MIMER_ODBC_DRIVER_NAME")
             if driver is None:
@@ -118,6 +119,7 @@ class Parameters:
 
         print("Using connection string", self.connection_string)
 
+"""
 def getText(nodelist):
     rc = []
     for node in nodelist:
@@ -149,10 +151,11 @@ def RestoreConfig(parameters):
     for dou in dous:
         shutil.copy2(os.path.join(parameters.tempdir,dou), parameters.parameters_path)
     rmdir(parameters.tempdir)
-
+"""
 #make stdout unbuffered
 sys.stdout=Unbuffered(sys.stdout)
 
+"""
 if sys.platform == "win32":
     config_type = os.environ.get("CMAKE_CONFIG_TYPE")
     exe_path = config_type if config_type else ""
@@ -161,7 +164,7 @@ else:
 
 owner_path = os.path.join(exe_path,"entity_owner")
 run_sql_path = os.path.join(exe_path,"run_sql")
-
+"""
 run_sql_pattern = re.compile(r"Got ([0-9]+) rows.")
 
 def run_sql(parameters,statement):
@@ -208,7 +211,7 @@ def delete_binary(parameters):
 parameters = Parameters()
 try:
 
-    UpdateConfig(parameters)
+    #UpdateConfig(parameters)
 
     print("== Clear the db")
     delete_all_rows(parameters)
@@ -378,7 +381,7 @@ finally:
     print("== Clear the db")
     delete_all_rows(parameters)
 
-    RestoreConfig(parameters)
+    #RestoreConfig(parameters)
 
 print("Success")
 sys.exit(0)
