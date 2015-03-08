@@ -326,7 +326,7 @@ def run_database_tests():
     log("Olib tests result:", olib_result)
     log("Dope tests result:", dope_result)
 
-    if dope_result != 0 || olib_result != 0:
+    if dope_result != 0 or olib_result != 0:
         raise Exception("Database tests failed")
 
 def build_examples():
