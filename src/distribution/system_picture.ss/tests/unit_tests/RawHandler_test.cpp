@@ -159,8 +159,6 @@ BOOST_AUTO_TEST_CASE( new_node )
     BOOST_CHECK_NO_THROW(ioService.run());
     BOOST_CHECK(comm.includedNodes == std::set<int64_t>{11});
     BOOST_CHECK(comm.excludedNodes.empty());
-
-    //TODO: check actual receive count?
 }
 
 BOOST_AUTO_TEST_CASE( new_node_of_unknown_type )
