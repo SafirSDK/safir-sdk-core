@@ -336,7 +336,7 @@ public:
 
     void SetIncarnationId(const int64_t /*incarnationId_*/)
     {
-        //TODO???
+
     }
 
     void AddRawChangedCallback(const StatisticsCallback& callback)
@@ -374,7 +374,6 @@ public:
         , electionCompleteCallback(electionCompleteCallback_)
     {
         lastInstance = this;
-        //TODO use setIncarnationIdCallback_
     }
 
     bool IsElected() const
@@ -804,7 +803,9 @@ BOOST_AUTO_TEST_CASE( remote_reports_dead )
     BOOST_CHECK(comm.excludedNodes.find(1001) != comm.excludedNodes.end());
 }
 
-//TODO: what does this test do now?
+/* Not sure what this test tests at the moment.
+ * It used to test the long_gone flag in RAW data, but that flag has been removed.
+ */
 BOOST_AUTO_TEST_CASE( ignore_long_gone_flag )
 {
     ElectionHandlerStub::lastInstance->electedId = 1000;
