@@ -137,6 +137,7 @@ int main(int argc, char * argv[])
     //make some work to stop io_service from exiting.
     auto work = Safir::make_unique<boost::asio::io_service::work>(ioService);
 
+    std::wcout << "Switching logger to async mode" << std::endl;
     Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().SwitchToAsynchronousMode(ioService);
 
     std::vector<Safir::Dob::Internal::Com::NodeTypeDefinition> commNodeTypes;
@@ -173,7 +174,7 @@ int main(int argc, char * argv[])
                                                                          boost::chrono::milliseconds(50))));
 
 
-
+    std::wcout << "Creating Communication instance" << std::endl;
     Safir::Dob::Internal::Com::Communication communication(Safir::Dob::Internal::Com::controlModeTag,
                                                            ioService,
                                                            options.name,
@@ -183,10 +184,11 @@ int main(int argc, char * argv[])
                                                            options.dataAddress,
                                                            commNodeTypes);
 
+    std::wcout << "Injecting seeds" << std::endl;
     communication.InjectSeeds(options.seeds);
 
 
-
+    std::wcout << "Creating SystemPicture instance" << std::endl;
     Safir::Dob::Internal::SP::SystemPicture sp(Safir::Dob::Internal::SP::master_tag,
                                                ioService,
                                                communication,
@@ -197,6 +199,7 @@ int main(int argc, char * argv[])
                                                options.dataAddress,
                                                std::move(spNodeTypes));
 
+    std::wcout << "Starting SystemState subscription" << std::endl;
 
     // Start subscription to system state changes from SP
     sp.StartStateSubscription([](const Safir::Dob::Internal::SP::SystemState& /*data*/)
@@ -205,9 +208,8 @@ int main(int argc, char * argv[])
                               });
 
 
-
+    std::wcout << "Starting Communication" << std::endl;
     communication.Start();
-
 
     boost::asio::signal_set signalSet(ioService);
 
@@ -222,6 +224,7 @@ int main(int argc, char * argv[])
     signalSet.add(SIGTERM);
 #endif
 
+    std::wcout << "Registering signal handler" << std::endl;
     signalSet.async_wait([&sp,&work,&communication](const boost::system::error_code& error,
                                                     const int signal_number)
                          {
@@ -244,6 +247,7 @@ int main(int argc, char * argv[])
 
 
 
+    std::wcout << "Launching io_service" << std::endl;
     boost::thread_group threads;
     for (int i = 0; i < 2; ++i)
     {
@@ -252,9 +256,8 @@ int main(int argc, char * argv[])
 
     ioService.run();
 
-    lllog(1) << "CTRL: Joining threads" << std::endl;
     threads.join_all();
     Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().DestroyAsynchronousLogger();
-    lllog(1) << "CTRL: Exiting..." << std::endl;
+    std::wcout << "CTRL: Exiting..." << std::endl;
     return 0;
 }
