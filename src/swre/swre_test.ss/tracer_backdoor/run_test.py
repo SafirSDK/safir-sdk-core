@@ -33,6 +33,7 @@ from testenv import TestEnv, TestEnvStopper
 parser = argparse.ArgumentParser("test script")
 parser.add_argument("--sender", required=True)
 parser.add_argument("--backdoor", required=True)
+parser.add_argument("--safir-control", required=True)
 parser.add_argument("--dose-main", required=True)
 parser.add_argument("--safir-show-config", required=True)
 parser.add_argument("--safir-generated-paths", required=True)
@@ -59,7 +60,7 @@ def fail(message, output):
     sys.exit(1)
 
 
-env = TestEnv(dose_main = arguments.dose_main, safir_show_config = arguments.safir_show_config, dope_main = None)
+env = TestEnv(safir_control = arguments.safir_control, dose_main = arguments.dose_main, safir_show_config = arguments.safir_show_config, dope_main = None)
 with TestEnvStopper(env):
     env.launchProcess("sender", sender_path)
     output = env.WaitForOutput("sender", "Have logged 10 times")
@@ -82,7 +83,7 @@ with TestEnvStopper(env):
 
 
 #test turning individual prefix on
-env = TestEnv(dose_main = arguments.dose_main, safir_show_config = arguments.safir_show_config, dope_main = None)
+env = TestEnv(safir_control = arguments.safir_control, dose_main = arguments.dose_main, safir_show_config = arguments.safir_show_config, dope_main = None)
 with TestEnvStopper(env):
     env.launchProcess("sender", sender_path)
     output = env.WaitForOutput("sender", "Have logged 10 times")
