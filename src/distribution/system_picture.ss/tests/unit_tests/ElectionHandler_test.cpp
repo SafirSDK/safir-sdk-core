@@ -279,12 +279,12 @@ struct Node
              {
                  ElectionComplete(nodeId,electionId);
              },
-             [this](const int64_t /*incarnationId*/)
+             [this](const int64_t incarnationId_)
              {
-                 //TODO use incarnation id
+                 BOOST_CHECK_EQUAL(incarnationId, 0);
+                 BOOST_CHECK_NE(incarnationId_, 0);
+                 incarnationId = incarnationId_;
              })
-        , electedNode(0)
-        , electionId(0)
     {
         SAFE_BOOST_TEST_MESSAGE("Create node " << id);
     }
@@ -314,8 +314,10 @@ struct Node
     Communication comm;
     ElectionHandlerBasic<Communication> eh;
 
-    int64_t electedNode;
-    int64_t electionId;
+    int64_t electedNode = 0;
+    int64_t electionId = 0;
+
+    int64_t incarnationId = 0;
 
     bool removed = false;
 
@@ -393,9 +395,13 @@ struct Fixture
         nodes[which]->removed = true;
     }
 
-    void SendNodesChanged()
+    void SendNodesChanged(bool setIncarnationId)
     {
         auto msg = Safir::make_unique<RawStatisticsMessage>();
+        if (setIncarnationId)
+        {
+            msg->set_incarnation_id(111111);
+        }
         for(auto&& node: nodes)
         {
             auto ni = msg->add_node_info();
@@ -464,42 +470,61 @@ BOOST_AUTO_TEST_CASE( elect_self )
     BOOST_CHECK(nodes[0]->eh.IsElected());
     BOOST_CHECK(nodes[0]->eh.IsElected(10));
     BOOST_CHECK(!nodes[0]->eh.IsElected(20));
+    BOOST_CHECK_NE(nodes[0]->incarnationId,0);
 }
 
 BOOST_AUTO_TEST_CASE( two_nodes )
 {
     AddNode();
-    SendNodesChanged();
+    SendNodesChanged(true);
     BOOST_CHECK(!nodes[0]->eh.IsElected());
     BOOST_CHECK(!nodes[1]->eh.IsElected());
     RunIoService();
     BOOST_CHECK(!nodes[0]->eh.IsElected());
     BOOST_CHECK(nodes[1]->eh.IsElected());
+    BOOST_CHECK_EQUAL(nodes[0]->incarnationId, 0);
+    BOOST_CHECK_EQUAL(nodes[1]->incarnationId, 0);
+}
+
+BOOST_AUTO_TEST_CASE( two_nodes_no_incarnation )
+{
+    AddNode();
+    SendNodesChanged(false);
+    BOOST_CHECK(!nodes[0]->eh.IsElected());
+    BOOST_CHECK(!nodes[1]->eh.IsElected());
+    RunIoService();
+    BOOST_CHECK(!nodes[0]->eh.IsElected());
+    BOOST_CHECK(nodes[1]->eh.IsElected());
+    BOOST_CHECK_NE(nodes[0]->incarnationId, 0);
+    BOOST_CHECK_NE(nodes[1]->incarnationId, 0);
 }
 
 BOOST_AUTO_TEST_CASE( two_nodes_remove_elected )
 {
     AddNode();
-    SendNodesChanged();
+    SendNodesChanged(true);
     BOOST_CHECK(!nodes[0]->eh.IsElected());
     BOOST_CHECK(!nodes[1]->eh.IsElected());
     RunIoService();
     BOOST_CHECK(!nodes[0]->eh.IsElected());
     BOOST_CHECK(nodes[1]->eh.IsElected());
-
+    BOOST_CHECK_EQUAL(nodes[0]->incarnationId, 0);
+    BOOST_CHECK_EQUAL(nodes[1]->incarnationId, 0);
     RemoveNode(1);
-    SendNodesChanged();
+    SendNodesChanged(true);
     BOOST_CHECK(!nodes[0]->eh.IsElected());
 
     RunIoService();
     BOOST_CHECK(nodes[0]->eh.IsElected());
+    BOOST_CHECK_EQUAL(nodes[0]->incarnationId, 0);
+
 }
 
 BOOST_AUTO_TEST_CASE( three_nodes )
 {
     AddNode();
     AddNode();
-    SendNodesChanged();
+    SendNodesChanged(true);
     BOOST_CHECK(!nodes[0]->eh.IsElected());
     BOOST_CHECK(!nodes[1]->eh.IsElected());
     BOOST_CHECK(!nodes[2]->eh.IsElected());
@@ -512,7 +537,7 @@ BOOST_AUTO_TEST_CASE( three_nodes )
 BOOST_AUTO_TEST_CASE( three_nodes_with_reelection )
 {
     AddNode();
-    SendNodesChanged();
+    SendNodesChanged(true);
     BOOST_CHECK(!nodes[0]->eh.IsElected());
     BOOST_CHECK(!nodes[1]->eh.IsElected());
     RunIoService();
@@ -520,7 +545,7 @@ BOOST_AUTO_TEST_CASE( three_nodes_with_reelection )
     BOOST_CHECK(nodes[1]->eh.IsElected());
 
     AddNode();
-    SendNodesChanged();
+    SendNodesChanged(true);
     BOOST_CHECK(!nodes[0]->eh.IsElected());
     BOOST_CHECK(nodes[1]->eh.IsElected());
     BOOST_CHECK(!nodes[2]->eh.IsElected());
@@ -535,7 +560,7 @@ BOOST_AUTO_TEST_CASE( three_nodes_remove_unelected )
 {
     AddNode();
     AddNode();
-    SendNodesChanged();
+    SendNodesChanged(true);
     BOOST_CHECK(!nodes[0]->eh.IsElected());
     BOOST_CHECK(!nodes[1]->eh.IsElected());
     BOOST_CHECK(!nodes[2]->eh.IsElected());
@@ -545,7 +570,7 @@ BOOST_AUTO_TEST_CASE( three_nodes_remove_unelected )
     BOOST_CHECK(nodes[2]->eh.IsElected());
 
     RemoveNode(1);
-    SendNodesChanged();
+    SendNodesChanged(true);
     BOOST_CHECK(!nodes[0]->eh.IsElected());
     BOOST_CHECK(nodes[2]->eh.IsElected());
 
@@ -559,7 +584,7 @@ BOOST_AUTO_TEST_CASE( three_nodes_remove_elected )
 {
     AddNode();
     AddNode();
-    SendNodesChanged();
+    SendNodesChanged(true);
     BOOST_CHECK(!nodes[0]->eh.IsElected());
     BOOST_CHECK(!nodes[1]->eh.IsElected());
     BOOST_CHECK(!nodes[2]->eh.IsElected());
@@ -569,7 +594,7 @@ BOOST_AUTO_TEST_CASE( three_nodes_remove_elected )
     BOOST_CHECK(nodes[2]->eh.IsElected());
 
     RemoveNode(2);
-    SendNodesChanged();
+    SendNodesChanged(true);
     BOOST_CHECK(!nodes[0]->eh.IsElected());
     BOOST_CHECK(!nodes[1]->eh.IsElected());
 
@@ -592,7 +617,7 @@ BOOST_AUTO_TEST_CASE( lots_of_nodes )
     {
         AddNode();
     }
-    SendNodesChanged();
+    SendNodesChanged(true);
     for (int i = 0; i < numNodes; ++i)
     {
         SAFE_BOOST_CHECK(!nodes[i]->eh.IsElected());
@@ -623,7 +648,7 @@ BOOST_AUTO_TEST_CASE( lots_of_nodes_remove_some )
         AddNode();
     }
 
-    SendNodesChanged();
+    SendNodesChanged(true);
 
     for (int i = 0; i < numNodes; ++i)
     {
@@ -653,7 +678,7 @@ BOOST_AUTO_TEST_CASE( lots_of_nodes_remove_some )
         RemoveNode(i);
     }
 
-    SendNodesChanged();
+    SendNodesChanged(true);
 
     RunIoService(10);
 
@@ -671,7 +696,7 @@ BOOST_AUTO_TEST_CASE( remove_during_election )
         AddNode();
     }
 
-    SendNodesChanged();
+    SendNodesChanged(true);
 
 
     boost::thread_group threads;
@@ -684,7 +709,7 @@ BOOST_AUTO_TEST_CASE( remove_during_election )
     for (int i = numNodes - 1; i > 1; --i)
     {
         RemoveNode(i);
-        SendNodesChanged();
+        SendNodesChanged(true);
     }
 
     threads.join_all();
