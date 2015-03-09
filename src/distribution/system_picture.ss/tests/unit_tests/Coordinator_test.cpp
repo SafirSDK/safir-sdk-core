@@ -53,7 +53,7 @@ RawStatistics GetRawWithOneNode()
     msg->set_id(1000);
     msg->set_node_type_id(10);
     msg->set_election_id(100);
-
+    msg->set_incarnation_id(1000);
     auto node = msg->add_node_info();
 
     node->set_name("remote1");
@@ -75,6 +75,7 @@ RawStatistics GetRawWithTwoNodes()
     msg->set_id(1000);
     msg->set_node_type_id(10);
     msg->set_election_id(100);
+    msg->set_incarnation_id(1000);
 
     auto node = msg->add_node_info();
 
@@ -106,6 +107,7 @@ RawStatistics GetRawWithOneNodeAndRemoteRaw()
     msg->set_id(1000);
     msg->set_node_type_id(10);
     msg->set_election_id(100);
+    msg->set_incarnation_id(1000);
 
     auto node = msg->add_node_info();
 
@@ -140,6 +142,7 @@ RawStatistics GetRawWithTwoNodesAndRemoteRaw(bool iThinkANodeIsDead, bool remote
     msg->set_name("myself");
     msg->set_id(1000);
     msg->set_election_id(100);
+    msg->set_incarnation_id(1000);
 
     //Add node remote1
     auto node = msg->add_node_info();
@@ -197,6 +200,7 @@ RawStatistics GetRawWithTwoNodesAndOneRemoteRaw()
     msg->set_name("myself");
     msg->set_id(1000);
     msg->set_election_id(100);
+    msg->set_incarnation_id(1000);
 
     //add node remote2
     {
