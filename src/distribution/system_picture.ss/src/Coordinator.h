@@ -358,7 +358,7 @@ namespace SP
                 return false;
             }
 
-            if (!m_lastStatistics.IncarnationId() == 0)
+            if (m_lastStatistics.IncarnationId() == 0)
             {
                 lllog(9) << "SP: We don't have an incarnation id yet, not updating my state" << std::endl;
                 return false;
