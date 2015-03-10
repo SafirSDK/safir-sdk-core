@@ -140,11 +140,11 @@ os.environ["SAFIR_TEST_SUITE_DOU_DIRECTORY"] = os.path.join(install_dir, "@SAFIR
 
 
 #Note: Last half of path is set by cmake during configuration/installation.
-self.test_data_directory = os.path.join(install_dir, "@SAFIR_INSTALL_DESTINATION_TEST_DATA@")
+test_data_directory = os.path.join(install_dir, "@SAFIR_INSTALL_DESTINATION_TEST_DATA@")
 log(self.test_data_directory)
 
 #Set up to use our own test configuration
-os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(self.test_data_directory,
+os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(test_data_directory,
                                                         "dope",
                                                         "test_config")
 
