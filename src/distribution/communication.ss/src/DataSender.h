@@ -153,7 +153,7 @@ namespace Com
         }
 
         //Add message to send queue. Message will be retranmitted unitl all receivers have acked. Returns false if queue is full.
-        bool AddToSendQueue(int64_t toId, const boost::shared_ptr<char[]>& msg, size_t size, int64_t dataTypeIdentifier)
+        bool AddToSendQueue(int64_t toId, const boost::shared_ptr<const char[]>& msg, size_t size, int64_t dataTypeIdentifier)
         {
             //calculate number of fragments
             size_t numberOfFullFragments=size/m_fragmentDataSize;

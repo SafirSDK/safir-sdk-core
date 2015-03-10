@@ -90,7 +90,7 @@ namespace Com
 
         bool Send(int64_t nodeId,
                   int64_t nodeTypeId,
-                  const boost::shared_ptr<char[]>& data,
+                  const boost::shared_ptr<const char[]>& data,
                   size_t size,
                   int64_t dataTypeIdentifier,
                   bool deliveryGuarantee);

@@ -27,7 +27,7 @@
 #include "dose_main_communication.h"
 #include "dose_main_process_info_handler.h"
 #include "dose_main_pending_registration_handler.h"
-#include "dose_main_pool_handler.h"
+#include "PoolHandler.h"
 #include "dose_main_request_handler.h"
 #include "dose_main_persist_handler.h"
 #include <Safir/Dob/NodeParameters.h>

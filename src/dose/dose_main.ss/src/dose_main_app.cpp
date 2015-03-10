@@ -119,7 +119,7 @@ namespace Internal
         m_messageHandler(),
         m_requestHandler(),
         m_responseHandler(),
-        m_poolHandler(m_strand),
+        m_poolHandler(),
         m_pendingRegistrationHandler(m_timerHandler),
         m_persistHandler(m_timerHandler),
         m_processMonitor(m_strand.get_io_service(),ProcessExited,boost::chrono::seconds(1)),
@@ -220,6 +220,8 @@ namespace Internal
                                               nodeTypeId,
                                               dataAddress));
 
+        m_poolHandler.reset(new PoolHandler(m_strand, *m_distribution));
+
         // Collect all node type ids
         NodeTypeIds nodeTypeIds;
         for (const auto& nt: m_distribution->GetNodeTypeConfiguration().nodeTypesParam)
@@ -262,6 +264,7 @@ namespace Internal
             // Own node has been included in the system state, now its time to start
             // the distribution mechanism.
             m_distribution->Start();
+            m_poolHandler->Start([]{});  //Dummy implementation
         }
         else
         {
@@ -304,7 +307,7 @@ namespace Internal
             m_distribution->Stop();
         }
 
-        m_poolHandler.Stop();
+        m_poolHandler->Stop();
         m_ownConnection.Close();
 
         m_signalSet.cancel();
@@ -587,9 +590,6 @@ namespace Internal
         //Handle pending registrations
         m_pendingRegistrationHandler.CheckForNewOrRemovedPendingRegistration(connection);
 
-        //Send injections to other nodes. (the injection itself has already been performed)
-        //m_poolHandler.SendInjections(connection);
-
         //Check in queues, and notify waiting applications
         HandleWaitingConnections(connection->Id().m_id, recursionLevel);
     }
@@ -775,20 +775,6 @@ namespace Internal
         int recLevel=0;
         HandleWaitingConnections(ExternNodeCommunication::DoseComVirtualConnectionId, recLevel);
 #endif
-
-        lllout << "DoseApp::QueueNotFull: Calling DistributePoolChanges()" << std::endl;
-        m_poolHandler.DistributeStates();
-        lllout << "DoseApp::QueueNotFull: End" << std::endl;
-    }
-
-    void DoseApp::StartPoolDistribution()
-    {
-        m_poolHandler.StartPoolDistribution();
-    }
-
-    void DoseApp::RequestPoolDistribution(const int nodeId)
-    {
-       m_poolHandler.RequestPoolDistribution(nodeId);
     }
 
     class MemoryMonitor:

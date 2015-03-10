@@ -34,7 +34,7 @@
 #include "dose_main_node_handler.h"
 #include "dose_main_pending_registration_handler.h"
 #include "dose_main_persist_handler.h"
-#include "dose_main_pool_handler.h"
+#include "PoolHandler.h"
 #include "dose_main_process_info_handler.h"
 #include "dose_main_response_handler.h"
 #include "dose_main_request_handler.h"
@@ -121,8 +121,6 @@ namespace Internal
         void NodeStatusChangedNotifier();
 
         void QueueNotFull();
-        void StartPoolDistribution();
-        void RequestPoolDistribution(const int nodeId);
 
         void HandleIncomingData(const DistributionData & data, const bool isAckedData);
 
@@ -160,8 +158,7 @@ namespace Internal
 
         std::unique_ptr<RequestHandler>      m_requestHandler;
         std::unique_ptr<ResponseHandler>     m_responseHandler;
-
-        PoolHandler         m_poolHandler;
+        std::unique_ptr<PoolHandler>         m_poolHandler;
 
         //Pending Registrations
         PendingRegistrationHandler m_pendingRegistrationHandler;
