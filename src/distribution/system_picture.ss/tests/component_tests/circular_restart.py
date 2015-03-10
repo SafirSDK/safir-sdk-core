@@ -65,7 +65,8 @@ def launch_control(number, previous, id, env, ownip, seedip):
                                    "--control-address", ownip + ":33{0:03d}".format(number),
                                    "--data-address", ownip + ":43{0:03d}".format(number),
                                    "--seed", seedip + ":33{0:03d}".format(previous),
-                                   "--force-id", str(id))
+                                   "--force-id", str(id),
+                                   "--check-incarnation")
 
     output = open("control_{0:03d}.output.txt".format(number),"w")
     proc = subprocess.Popen(command,
