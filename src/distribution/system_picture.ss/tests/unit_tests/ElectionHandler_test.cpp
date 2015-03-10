@@ -27,7 +27,7 @@
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #include <memory>
-
+#include <time.h>
 
 #ifdef _MSC_VER
 #  pragma warning (push)
@@ -328,7 +328,7 @@ struct Fixture
     Fixture()
     {
         SAFE_BOOST_TEST_MESSAGE("Set up fixture");
-
+        srand(time(nullptr));
         Connector::Instance().Reset();
 
         SAFE_BOOST_TEST_MESSAGE("Connector reset");
@@ -495,7 +495,6 @@ BOOST_AUTO_TEST_CASE( two_nodes_no_incarnation )
     RunIoService();
     BOOST_CHECK(!nodes[0]->eh.IsElected());
     BOOST_CHECK(nodes[1]->eh.IsElected());
-    BOOST_CHECK_NE(nodes[0]->incarnationId, 0);
     BOOST_CHECK_NE(nodes[1]->incarnationId, 0);
 }
 
