@@ -257,10 +257,19 @@ namespace Internal
             throw std::logic_error("InjectNode cmd received before SetOwnNode cmd!");
         }
 
-        m_distribution->InjectNode(nodeName,
-                                   nodeId,
-                                   nodeTypeId,
-                                   dataAddress);
+        if (m_distribution->GetCommunication().Id() == nodeId)
+        {
+            // Own node has been included in the system state, now its time to start
+            // the distribution mechanism.
+            m_distribution->Start();
+        }
+        else
+        {
+            m_distribution->InjectNode(nodeName,
+                                       nodeId,
+                                       nodeTypeId,
+                                       dataAddress);
+        }
     }
 
     void DoseApp::Stop()

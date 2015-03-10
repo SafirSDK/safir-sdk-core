@@ -282,8 +282,8 @@ int main(int argc, char * argv[])
 
     doseMainCmdSender.reset(new Control::DoseMainCmdSender
                             (ioService,
-                             // This is what we do when dose_main is started
-                             [&sp, &communication, &doseMainCmdSender, &options, & conf, &stateHandler]()
+                             // This is what we do when dose_main is ready to receive commands
+                             [&sp, &communication, &stateHandler, &doseMainCmdSender, &conf, &options]()
                              {
                                  doseMainCmdSender->StartDoseMain(conf.thisNodeParam.name,
                                                                   options.id,
@@ -301,11 +301,7 @@ int main(int argc, char * argv[])
                             );
 
     stateHandler.reset(new Control::SystemStateHandler
-                                    (Control::Node{conf.thisNodeParam.name,  // Insert own node
-                                                   options.id,
-                                                   conf.thisNodeParam.nodeTypeId,
-                                                   conf.thisNodeParam.controlAddress,
-                                                   conf.thisNodeParam.dataAddress},
+                                    (options.id,
 
                                     // Node included callback
                                     [&doseMainCmdSender](const Control::Node& node)
@@ -315,6 +311,7 @@ int main(int argc, char * argv[])
                                                                       node.nodeTypeId,
                                                                       node.dataAddress);
                                     },
+
                                     // Node down callback
                                     [](const int64_t /*nodeId*/)
                                     {
