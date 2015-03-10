@@ -85,7 +85,8 @@ namespace SP
              const std::string& name,
              const int64_t id,
              const int64_t nodeTypeId,
-             const std::map<int64_t, NodeType>& nodeTypes)
+             const std::map<int64_t, NodeType>& nodeTypes,
+             const std::function<bool (const int64_t incarnationId)>& validateIncarnationIdCallback)
             : m_rawHandler(Safir::make_unique<RawHandler>(ioService,
                                                           communication,
                                                           name,
@@ -94,7 +95,8 @@ namespace SP
                                                           communication.ControlAddress(),
                                                           communication.DataAddress(),
                                                           nodeTypes,
-                                                          true))
+                                                          true,
+                                                          validateIncarnationIdCallback))
             , m_rawPublisherLocal(Safir::make_unique<RawPublisherLocal>(ioService,
                                                                         *m_rawHandler,
                                                                         MASTER_LOCAL_RAW_NAME,
@@ -168,7 +170,8 @@ namespace SP
                                                           "",
                                                           communication.DataAddress(),
                                                           nodeTypes,
-                                                          false))
+                                                          false,
+                                                          nullptr))
             , m_rawPublisherLocal(Safir::make_unique<RawPublisherLocal>(ioService,
                                                                         *m_rawHandler,
                                                                         SLAVE_LOCAL_RAW_NAME,
@@ -334,14 +337,16 @@ namespace SP
                                  const std::string& name,
                                  const int64_t id,
                                  const int64_t nodeTypeId,
-                                 const std::map<int64_t, NodeType>& nodeTypes)
+                                 const std::map<int64_t, NodeType>& nodeTypes,
+                                 const std::function<bool (const int64_t incarnationId)>& validateIncarnationIdCallback)
         : m_impl(Safir::make_unique<Impl>(master_tag,
                                           ioService,
                                           communication,
                                           name,
                                           id,
                                           nodeTypeId,
-                                          nodeTypes))
+                                          nodeTypes,
+                                          validateIncarnationIdCallback))
     {
 
     }

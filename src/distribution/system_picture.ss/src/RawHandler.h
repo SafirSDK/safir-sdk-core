@@ -90,7 +90,8 @@ namespace SP
                         const std::string& controlAddress,
                         const std::string& dataAddress,
                         const std::map<int64_t, NodeType>& nodeTypes,
-                        const bool master)
+                        const bool master,
+                        const std::function<bool (const int64_t incarnationId)>& validateIncarnationIdCallback)
             : m_ioService(ioService)
             , m_communication(communication)
             , m_id(id)
@@ -116,6 +117,7 @@ namespace SP
                                         CheckDeadNodes();
                                     }))
             , m_master(master)
+            , m_validateIncarnationIdCallback(validateIncarnationIdCallback)
             , m_stopped(false)
         {
             //set up some info about ourselves in our message
@@ -267,15 +269,30 @@ namespace SP
                     lllog(6) << "SP: This node does not have an incarnation id" << std::endl;
                     if (node.nodeInfo->remote_statistics().has_incarnation_id())
                     {
-                        //TODO: ask ctrl about this incarnation id.
-                        //if not ok exclude and mark dead
+                        const bool join = m_validateIncarnationIdCallback != nullptr &&
+                            m_validateIncarnationIdCallback(node.nodeInfo->remote_statistics().incarnation_id());
 
-                        lllog(1) << "SP: Remote RAW contains incarnation id "
-                                 << node.nodeInfo->remote_statistics().incarnation_id()
-                                 << ", let's use it!" << std::endl;
-                        m_allStatisticsMessage.set_incarnation_id(node.nodeInfo->remote_statistics().incarnation_id());
+                        if (join)
+                        {
+                            lllog(1) << "SP: Remote RAW contains incarnation id "
+                                     << node.nodeInfo->remote_statistics().incarnation_id()
+                                     << " and validation passed, let's use it!" << std::endl;
+                            m_allStatisticsMessage.set_incarnation_id(node.nodeInfo->remote_statistics().incarnation_id());
 
-                        changes |= RawChanges::METADATA_CHANGED;
+                            changes |= RawChanges::METADATA_CHANGED;
+                        }
+                        else
+                        {
+                            lllog(1) << "SP: Remote RAW contains incarnation id "
+                                     << node.nodeInfo->remote_statistics().incarnation_id()
+                                     << " but validation did not pass. Marking remote dead and excluding!" << std::endl;
+
+                            node.nodeInfo->set_is_dead(true);
+                            node.nodeInfo->clear_remote_statistics();
+                            m_communication.ExcludeNode(from);
+
+                            changes |= RawChanges::NODES_CHANGED;
+                        }
                     }
                     else
                     {
@@ -485,6 +502,13 @@ namespace SP
                                   lllog(1) << "SP: Incarnation Id " << incarnationId
                                            << " set in RawHandler." << std::endl;
 
+                                  if (m_validateIncarnationIdCallback != nullptr)
+                                  {
+                                      if (!m_validateIncarnationIdCallback(incarnationId))
+                                      {
+                                          throw std::logic_error("Nooooo! You can't say no to this incarnation id!");
+                                      }
+                                  }
                                   m_allStatisticsMessage.set_incarnation_id(incarnationId);
 
                                   PostRawChangedCallback(RawChanges(RawChanges::METADATA_CHANGED));
@@ -832,6 +856,8 @@ namespace SP
         std::vector<StatisticsCallback> m_rawChangedCallbacks;
 
         const bool m_master; //true if running in SystemPicture master instance
+        const std::function<bool (const int64_t incarnationId)> m_validateIncarnationIdCallback;
+
         std::atomic<bool> m_stopped;
     };
 

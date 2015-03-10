@@ -195,7 +195,8 @@ int main(int argc, char * argv[])
                                                options.name,
                                                options.id,
                                                1,
-                                               std::move(spNodeTypes));
+                                               std::move(spNodeTypes),
+                                               nullptr); //TODO: do something with validation here
 
     std::wcout << "Starting SystemState subscription" << std::endl;
 

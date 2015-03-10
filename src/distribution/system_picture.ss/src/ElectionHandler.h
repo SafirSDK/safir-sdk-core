@@ -310,7 +310,7 @@ namespace SP
 
             m_electionCompleteCallback(m_elected, m_currentElectionId);
 
-            if (!m_lastStatistics.IncarnationId() != 0)
+            if (m_lastStatistics.IncarnationId() == 0)
             {
                 m_generateIncarnationIdTimer.expires_from_now(m_aloneTimeout);
 
