@@ -441,7 +441,7 @@ void OdbcPersistor::RestoreAll()
 
                     const Safir::Dob::Typesystem::HandlerId handler(handlerColumn.GetValue());
 
-                    TypeIdSet::const_iterator findIt = GetPersistentTypes().find(entityId.GetTypeId());
+                    auto findIt = GetPersistentTypes().find(entityId.GetTypeId());
                     if (findIt == GetPersistentTypes().end())
                     { //not to be persisted!
                         Delete(m_deleteConnection,entityId);

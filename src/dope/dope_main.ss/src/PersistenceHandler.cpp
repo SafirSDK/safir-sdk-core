@@ -52,13 +52,12 @@ PersistenceHandler::PersistenceHandler(boost::asio::io_service& ioService):
     const Safir::Dob::Typesystem::TypeIdVector types =
         Safir::Dob::Typesystem::Operations::GetClassTree(Safir::Dob::Entity::ClassTypeId);
     m_debug << "-----These classes will be persisted--------" <<std::endl;
-    for (Safir::Dob::Typesystem::TypeIdVector::const_iterator it = types.begin();
-         it != types.end(); ++it)
+    for (const auto & type : types)
     {
-        if (ShouldPersist(*it))
+        if (ShouldPersist(type))
         {
-            m_debug << "  " << Safir::Dob::Typesystem::Operations::GetName(*it) << std::endl;
-            m_persistentTypes->insert(*it);
+            m_debug << "  " << Safir::Dob::Typesystem::Operations::GetName(type) << std::endl;
+            m_persistentTypes->insert(type);
         }
     }
     m_debug << "---------------- End list ----------------" <<std::endl;
@@ -83,7 +82,7 @@ void PersistenceHandler::Start(bool restore)
     //m_dobConnection.Attach();
     try
     {
-        m_dobConnection.Open(L"DOPE_SUBSCRIBE", L"0", PERSISTENCE_CONTEXT, NULL, &m_dispatcher);
+        m_dobConnection.Open(L"DOPE_SUBSCRIBE", L"0", PERSISTENCE_CONTEXT, nullptr, &m_dispatcher);
         m_debug << "Opened DOB connection DOPE_SUBSCRIBE"<<std::endl;
     }
     catch (Safir::Dob::NotOpenException e)
@@ -188,8 +187,7 @@ PersistenceHandler::StartSubscriptions()
 {
     Safir::Dob::ConnectionAspectInjector inject(m_dobConnection);
 
-    for (TypeIdSet::const_iterator it = m_persistentTypes->begin();
-        it != m_persistentTypes->end(); ++it)
+    for (const auto & elem : *m_persistentTypes)
     {
         // Subscribing with updates only this type not subclasses.
         // GhostDeletes == true. Happens when a ghost object is actively deleted by owner app.
@@ -197,7 +195,7 @@ PersistenceHandler::StartSubscriptions()
         // DoesntWantSourceIsPermanent == false. we do want our own sets, in case they're from a "joined" system.
         // timestampChangeInfo == false, we dont want change info at all...
         // WantsAllStateChanges == false. This is for DOSE only. Shall be false.
-        inject.SubscribeEntity(*it,              // Dob::Typesystem::TypeId      typeId
+        inject.SubscribeEntity(elem,              // Dob::Typesystem::TypeId      typeId
                                true,             // bool                         includeUpdates
                                false,            // bool                         includeSubclasses
                                false,            // bool                         restartSubscription

@@ -56,35 +56,35 @@ public:
 
 private:
     /** Implements Safir::Dob::StopHandler. */
-    virtual void  OnStopOrder();
+    virtual void  OnStopOrder() override;
 
     /** Implements Safir::Application::Backdoor. */
-    virtual void HandleCommand(const std::vector<std::wstring>& cmdTokens);
+    virtual void HandleCommand(const std::vector<std::wstring>& cmdTokens) override;
 
     /** Implements Safir::Application::Backdoor. */
-    virtual std::wstring GetHelpText();
+    virtual std::wstring GetHelpText() override;
 
     /** Implements Safir::Dob::EntityHandler. */
     virtual void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId     typeId,
-        const Safir::Dob::Typesystem::HandlerId& handlerId);
+        const Safir::Dob::Typesystem::HandlerId& handlerId) override;
 
     virtual void OnCompletedRegistration(const Safir::Dob::Typesystem::TypeId     typeId,
-        const Safir::Dob::Typesystem::HandlerId& handlerId);
+        const Safir::Dob::Typesystem::HandlerId& handlerId) override;
 
     virtual void OnCreateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
-        Safir::Dob::ResponseSenderPtr        responseSender);
+        Safir::Dob::ResponseSenderPtr        responseSender) override;
 
     virtual void OnUpdateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
-        Safir::Dob::ResponseSenderPtr        responseSender);
+        Safir::Dob::ResponseSenderPtr        responseSender) override;
 
     virtual void OnDeleteRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
-        Safir::Dob::ResponseSenderPtr        responseSender);
+        Safir::Dob::ResponseSenderPtr        responseSender) override;
 
 
     /** Implements Safir::Dob::EntitySubscriber. */
-    virtual void OnNewEntity(const Safir::Dob::EntityProxy entityProxy);
-    virtual void OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy){};
-    virtual void OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy, const bool ){};
+    virtual void OnNewEntity(const Safir::Dob::EntityProxy entityProxy) override;
+    virtual void OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy) override{};
+    virtual void OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy, const bool ) override{};
 
 
     void StartUp(bool restore);

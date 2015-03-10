@@ -350,7 +350,7 @@ FilePersistor::RestoreAll()
         try
         {
             const EntityIdAndHandlerId tuple = Filename2EntityIdAndHandlerId(path);
-            TypeIdSet::const_iterator findIt = GetPersistentTypes().find(tuple.get<0>().GetTypeId());
+            auto findIt = GetPersistentTypes().find(tuple.get<0>().GetTypeId());
             if (findIt == GetPersistentTypes().end())
             { //not persistent any more, remove it
 
@@ -389,7 +389,7 @@ FilePersistor::RestoreAll()
                     entity = RestoreBinary(path);
                 }
 
-                if (entity == NULL)
+                if (entity == nullptr)
                 {
                     continue;
                 }

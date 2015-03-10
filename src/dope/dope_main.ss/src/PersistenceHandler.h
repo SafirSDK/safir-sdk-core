@@ -61,14 +61,14 @@ public:
     void Stop();
 
     // From Safir::Dob::EntitySubscriber
-    virtual void OnNewEntity(const Safir::Dob::EntityProxy entityProxy);
-    virtual void OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy);
+    virtual void OnNewEntity(const Safir::Dob::EntityProxy entityProxy) override;
+    virtual void OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy) override;
     virtual void OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy, 
-                                 const bool                    deletedByOwner);
+                                 const bool                    deletedByOwner) override;
 
     // From Safir::Dob::Requestor
-    void OnResponse(const Safir::Dob::ResponseProxy responseProxy);
-    void OnNotRequestOverflow();
+    void OnResponse(const Safir::Dob::ResponseProxy responseProxy) override;
+    void OnNotRequestOverflow() override;
 
 protected:
 

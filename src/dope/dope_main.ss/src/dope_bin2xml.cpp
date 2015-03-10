@@ -183,7 +183,7 @@ void ConvertDb()
                 object = Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(data);
             }
         }
-        if (object != NULL)
+        if (object != nullptr)
         {
             std::wstring xml = Safir::Dob::Typesystem::Serialization::ToXml(object);
             
