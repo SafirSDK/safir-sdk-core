@@ -75,8 +75,6 @@ namespace Internal
 
         ~DoseApp();
 
-        void Init();
-
     private:
 
         void Start(const std::string& nodeName,

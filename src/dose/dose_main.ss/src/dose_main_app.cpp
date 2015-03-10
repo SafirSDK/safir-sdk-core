@@ -157,18 +157,15 @@ namespace Internal
         InjectionKindTable::Initialize();
         NodeStatuses::Initialize();
         EntityTypes::Initialize(/*iAmDoseMain = */ true);
+
+        // Start reception of commands from Control
+        m_cmdReceiver.Start();
     }
 
     DoseApp::~DoseApp()
     {
         //TODO stewart: should we try to call Stop here, in case it hasn't been
         //called correctly? I.e. we're dying through an exception.
-    }
-
-    void DoseApp::Init()
-    {
-        // Start reception of commands from Control
-        m_cmdReceiver.Start();
     }
 
     void DoseApp::ConnectionThread()

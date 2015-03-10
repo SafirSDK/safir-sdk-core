@@ -89,7 +89,6 @@ int main()
     try
     {
         Safir::Dob::Internal::DoseApp theApp(strand);
-        theApp.Init();
 
         // Try to figure out how many threads to use
         auto nbrOfThreads = boost::thread::hardware_concurrency();
