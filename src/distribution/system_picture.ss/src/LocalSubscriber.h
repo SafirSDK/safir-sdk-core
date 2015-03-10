@@ -28,7 +28,6 @@
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include "SubscriberInterfaces.h"
 #include <functional>
-#include "CrcUtils.h"
 #include <atomic>
 
 #ifdef _MSC_VER
@@ -103,22 +102,9 @@ namespace SP
 
     private:
         //called in strand
-        void DataReceived(const char* const data, size_t size)
+        void DataReceived(const char* const data, const size_t size)
         {
             lllog(9) << "SP: LocalSubscriber " << m_name.c_str() << " received new data" << std::endl;
-#ifdef CHECK_CRC
-            size -= sizeof(int); //remove the crc from size
-            int expected;
-            memcpy(&expected, data + size, sizeof(int));
-            const int crc = GetCrc32(data, size);
-            if (crc != expected)
-            {
-                SEND_SYSTEM_LOG(Alert,
-                                << "Bad CRC in LocalSubscriber " << m_name.c_str()
-                                << ", expected " << expected << " got " << crc);
-                throw std::logic_error("CRC check failed!");
-            }
-#endif
 
             auto msg = Safir::make_unique<typename WrapperCreatorT::WrappedType>();
 

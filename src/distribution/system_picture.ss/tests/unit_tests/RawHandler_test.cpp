@@ -621,8 +621,7 @@ BOOST_AUTO_TEST_CASE( perform_on_all )
                                          BOOST_CHECK(!statistics.IsDead(0));
                                          BOOST_CHECK(statistics.HasRemoteStatistics(0));
                                          CheckRemotesCommon(statistics.RemoteStatistics(0));
-                                     },
-                                     0);
+                                     });
     rh.Stop();
     BOOST_CHECK_NO_THROW(ioService.run());
 }
@@ -647,8 +646,7 @@ BOOST_AUTO_TEST_CASE( perform_on_my )
 
                                          BOOST_CHECK(!statistics.IsDead(0));
                                          BOOST_CHECK(!statistics.HasRemoteStatistics(0));
-                                     },
-                                     0);
+                                     });
     rh.Stop();
     BOOST_CHECK_NO_THROW(ioService.run());
 }

@@ -106,19 +106,10 @@ BOOST_AUTO_TEST_CASE( send_one )
                      });
 
 
-#ifdef CHECK_CRC
-    const int crcBytes = sizeof(int);
-#else
-    const int crcBytes = 0;
-#endif
     const auto pbuf = GetProtobuf();
-    const size_t size = pbuf->ByteSize() + crcBytes;
+    const size_t size = pbuf->ByteSize();
     auto data = std::unique_ptr<char[]>(new char[size]);
     pbuf->SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
-#ifdef CHECK_CRC
-    const int crc = GetCrc32(data.get(), size - crcBytes);
-    memcpy(data.get() + size - crcBytes, &crc, sizeof(int));
-#endif
 
     dataCallback(data.get(),size);
 
@@ -166,19 +157,10 @@ BOOST_AUTO_TEST_CASE( two_subscribers )
                              });
 
 
-#ifdef CHECK_CRC
-    const int crcBytes = sizeof(int);
-#else
-    const int crcBytes = 0;
-#endif
     const auto pbuf = GetProtobuf();
-    const size_t size = pbuf->ByteSize() + crcBytes;
+    const size_t size = pbuf->ByteSize();
     auto data = std::unique_ptr<char[]>(new char[size]);
     pbuf->SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
-#ifdef CHECK_CRC
-    const int crc = GetCrc32(data.get(), size - crcBytes);
-    memcpy(data.get() + size - crcBytes, &crc, sizeof(int));
-#endif
 
     dataCallback(data.get(),size);
 
@@ -224,19 +206,10 @@ BOOST_AUTO_TEST_CASE( add_before_start )
                              });
 
 
-#ifdef CHECK_CRC
-    const int crcBytes = sizeof(int);
-#else
-    const int crcBytes = 0;
-#endif
     const auto pbuf = GetProtobuf();
-    const size_t size = pbuf->ByteSize() + crcBytes;
+    const size_t size = pbuf->ByteSize();
     auto data = std::unique_ptr<char[]>(new char[size]);
     pbuf->SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
-#ifdef CHECK_CRC
-    const int crc = GetCrc32(data.get(), size - crcBytes);
-    memcpy(data.get() + size - crcBytes, &crc, sizeof(int));
-#endif
 
     dataCallback(data.get(),size);
 

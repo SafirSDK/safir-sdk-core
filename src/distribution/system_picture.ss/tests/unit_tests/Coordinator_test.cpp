@@ -478,7 +478,6 @@ BOOST_AUTO_TEST_CASE( perform_only_own_unelected )
                                       {
                                           callbackCalled = true;
                                       },
-                                      0,
                                       true);
     ioService.run();
     BOOST_CHECK(!callbackCalled);
@@ -492,7 +491,6 @@ BOOST_AUTO_TEST_CASE( perform_no_state_received )
                                       {
                                           callbackCalled = true;
                                       },
-                                      0,
                                       false);
     ioService.run();
     BOOST_CHECK(!callbackCalled);
@@ -529,7 +527,6 @@ BOOST_AUTO_TEST_CASE( simple_state_production )
                                       {
                                           callbackCalled = true;
                                       },
-                                      0,
                                       true);
 
     ioService.run();
@@ -545,7 +542,6 @@ BOOST_AUTO_TEST_CASE( simple_state_production )
                                           callbackCalled = true;
                                           stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
                                       },
-                                      0,
                                       true);
 
     ioService.reset();
@@ -594,7 +590,6 @@ BOOST_AUTO_TEST_CASE( propagate_state_from_other )
                                       {
                                           callbackCalled = true;
                                       },
-                                      0,
                                       true);
     ioService.run();
     BOOST_CHECK(!callbackCalled);
@@ -607,7 +602,6 @@ BOOST_AUTO_TEST_CASE( propagate_state_from_other )
                                           callbackCalled = true;
                                           stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
                                       },
-                                      0,
                                       false);
 
     ioService.reset();
@@ -668,7 +662,6 @@ BOOST_AUTO_TEST_CASE( remote_from_other_with_dead )
                                           callbackCalled = true;
                                           stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
                                       },
-                                      0,
                                       false);
     ioService.reset();
     ioService.run();
@@ -715,7 +708,6 @@ BOOST_AUTO_TEST_CASE( remote_reports_dead )
                                           callbackCalled = true;
                                           stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
                                       },
-                                      0,
                                       true);
 
     ioService.run();
@@ -745,7 +737,6 @@ BOOST_AUTO_TEST_CASE( remote_reports_dead )
                                           callbackCalled = true;
                                           stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
                                       },
-                                      0,
                                       true);
 
     ioService.reset();
@@ -777,7 +768,6 @@ BOOST_AUTO_TEST_CASE( remote_reports_dead )
                                           callbackCalled = true;
                                           stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
                                       },
-                                      0,
                                       true);
 
     ioService.reset();
@@ -823,7 +813,6 @@ BOOST_AUTO_TEST_CASE( ignore_long_gone_flag )
                                           callbackCalled = true;
                                           stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
                                       },
-                                      0,
                                       true);
 
     ioService.run();
@@ -861,7 +850,6 @@ BOOST_AUTO_TEST_CASE( state_sequence_consistent )
                                           callbackCalled = true;
                                           stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
                                       },
-                                      0,
                                       true);
 
     ioService.run();
@@ -883,7 +871,6 @@ BOOST_AUTO_TEST_CASE( state_sequence_consistent )
                                           callbackCalled = true;
                                           stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
                                       },
-                                      0,
                                       true);
 
     ioService.reset();

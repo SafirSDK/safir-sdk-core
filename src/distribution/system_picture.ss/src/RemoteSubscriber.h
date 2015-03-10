@@ -25,7 +25,6 @@
 
 #include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
-#include "CrcUtils.h"
 #include <cstring>
 
 namespace Safir
@@ -59,21 +58,8 @@ namespace SP
     private:
         void GotData(const int64_t from,
                      const boost::shared_ptr<const char[]>& data,
-                     size_t size)
+                     const size_t size)
         {
-#ifdef CHECK_CRC
-            size -= sizeof(int); //remove the crc from size
-            int expected;
-            memcpy(&expected, data.get() + size, sizeof(int));
-            const int crc = GetCrc32(data.get(), size);
-            if (crc != expected)
-            {
-                SEND_SYSTEM_LOG(Alert,
-                                << "Bad CRC in data from " << from
-                                << ", expected " << expected << " got " << crc);
-                throw std::logic_error("CRC check failed!");
-            }
-#endif
             m_receiver.NewRemoteStatistics(from, data, size);
         }
 

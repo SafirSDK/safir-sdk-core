@@ -27,7 +27,6 @@
 #include <Safir/Utilities/Internal/AsioPeriodicTimer.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
-#include "CrcUtils.h"
 #include "Coordinator.h"
 
 namespace Safir
@@ -81,21 +80,10 @@ namespace SP
 
             lllog(8) << "Publishing system state over ipc" << std::endl;
 
-#ifdef CHECK_CRC
-            const int crcBytes = sizeof(int);
-#else
-            const int crcBytes = 0;
-#endif
-
-            m_coordinator.PerformOnStateMessage([this,crcBytes](std::unique_ptr<char[]> data, const size_t size)
+            m_coordinator.PerformOnStateMessage([this](std::unique_ptr<char[]> data, const size_t size)
                                                 {
-#ifdef CHECK_CRC
-                                                    const int crc = GetCrc32(data.get(), size - crcBytes);
-                                                    memcpy(data.get() + size - crcBytes, &crc, sizeof(int));
-#endif
                                                     m_publisher.Send(std::move(data), static_cast<uint32_t>(size));
                                                 },
-                                                crcBytes,
                                                 false); //ok to send anyones state
         }
 

@@ -47,12 +47,10 @@ public:
     }
 
     void PerformOnMyStatisticsMessage(const std::function<void(std::unique_ptr<char []> data,
-                                                               const size_t size)> & fn,
-                                      const size_t extraSpace) const
+                                                               const size_t size)> & fn) const
     {
-        BOOST_CHECK(extraSpace == 0 || extraSpace == sizeof(int32_t));
         std::wcout << "Perform " << numPerform << std::endl;
-        const size_t size = 10 + extraSpace;
+        const size_t size = 10;
         auto data = std::unique_ptr<char[]>(new char[size]);
         strcpy(data.get(),"123456789");
         gsize = size;

@@ -168,12 +168,10 @@ namespace SP
         }
 
 
-        //extraSpace adds bytes at the end of the buffer, e.g. for adding a crc
         void PerformOnMyStatisticsMessage(const std::function<void(std::unique_ptr<char[]> data,
-                                                                   const size_t size)> & fn,
-                                          const size_t extraSpace) const
+                                                                   const size_t size)> & fn) const
         {
-            m_strand.dispatch([this,fn,extraSpace]
+            m_strand.dispatch([this,fn]
             {
                 //With newer protobuf (>= 2.5.0) we can be clever
                 //we just get the remote statistics out of the way before serializing a
@@ -195,7 +193,7 @@ namespace SP
                     }
                 }
 
-                const size_t size = m_allStatisticsMessage.ByteSize() + extraSpace;
+                const size_t size = m_allStatisticsMessage.ByteSize();
 
                 auto data = std::unique_ptr<char[]>(new char[size]);
 
@@ -216,12 +214,11 @@ namespace SP
 
 
         void PerformOnAllStatisticsMessage(const std::function<void(std::unique_ptr<char []> data,
-                                                                    const size_t size)> & fn,
-                                           const size_t extraSpace) const
+                                                                    const size_t size)> & fn) const
         {
-            m_strand.dispatch([this,fn, extraSpace]
+            m_strand.dispatch([this,fn]
                               {
-                                  const size_t size = m_allStatisticsMessage.ByteSize() + extraSpace;
+                                  const size_t size = m_allStatisticsMessage.ByteSize();
                                   auto data = std::unique_ptr<char[]>(new char[size]);
                                   m_allStatisticsMessage.SerializeWithCachedSizesToArray
                                       (reinterpret_cast<google::protobuf::uint8*>(data.get()));

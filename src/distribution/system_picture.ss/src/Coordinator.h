@@ -146,15 +146,13 @@ namespace SP
         }
 
         //used to send state message
-        //extraSpace adds bytes at the end of the buffer, e.g. for adding a crc
         //if onlyOwnState is true the callback will only be called if we're elected
         //and have a valid own system state that is ok to send.
         void PerformOnStateMessage(const std::function<void(std::unique_ptr<char []> data,
                                                             const size_t size)> & fn,
-                                   const size_t extraSpace,
                                    const bool onlyOwnState)
         {
-            m_strand.dispatch([this,fn,extraSpace,onlyOwnState]
+            m_strand.dispatch([this,fn,onlyOwnState]
             {
                 if (onlyOwnState)
                 {
@@ -174,7 +172,7 @@ namespace SP
                 }
 
                 lllog(8) << " - Sending!" << std::endl;
-                const size_t size = m_stateMessage.ByteSize() + extraSpace;
+                const size_t size = m_stateMessage.ByteSize();
                 auto data = std::unique_ptr<char[]>(new char[size]);
                 m_stateMessage.SerializeWithCachedSizesToArray
                     (reinterpret_cast<google::protobuf::uint8*>(data.get()));

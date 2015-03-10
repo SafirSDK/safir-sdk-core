@@ -27,7 +27,6 @@
 #include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include "RawHandler.h"
-#include "CrcUtils.h"
 #include <set>
 
 namespace Safir
@@ -127,24 +126,13 @@ namespace SP
             //this will be cancelled if we need to do a resend due to overflow below.
             SchedulePublishTimer(m_period, m_allNodeTypes);
 
-#ifdef CHECK_CRC
-            const int crcBytes = sizeof(int);
-#else
-            const int crcBytes = 0;
-#endif
-
-            m_rawHandler.PerformOnMyStatisticsMessage([this,crcBytes,toNodeTypes]
+            m_rawHandler.PerformOnMyStatisticsMessage([this,toNodeTypes]
                                                       (std::unique_ptr<char[]> d,
                                                        const size_t size)
             {
                 //we need to move the data into a shared_ptr
                 boost::shared_ptr<char[]> data(std::move(d));
-#ifdef CHECK_CRC
-                const int crc = GetCrc32(data.get(), size - crcBytes);
-                memcpy(data.get() + size - crcBytes, &crc, sizeof(int));
-#endif
                 std::set<int64_t> overflowNodes;
-
 
                 for (auto id: toNodeTypes)
                 {
@@ -161,8 +149,7 @@ namespace SP
                 {
                     SchedulePublishTimer(boost::chrono::milliseconds(100), overflowNodes);
                 }
-            },
-                                                       crcBytes);
+            });
         }
 
         boost::asio::strand m_strand;
