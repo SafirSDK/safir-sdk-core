@@ -83,6 +83,7 @@ class Parameters:
                                                                database = options.database)
 
         print("Using connection string", self.connection_string)
+        os.environ["DOPE_TEST_ODBC_CONNECT_STRING"] = self.connection_string
 
 #make stdout unbuffered
 sys.stdout=Unbuffered(sys.stdout)
@@ -156,8 +157,6 @@ from testenv import TestEnv, TestEnvStopper
 
 parameters = Parameters()
 try:
-
-    #UpdateConfig(parameters)
 
     print("== Clear the db")
     delete_all_rows(parameters)
