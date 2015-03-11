@@ -162,7 +162,7 @@ try:
     delete_all_rows(parameters)
 
     print("== Set a bunch of entities")
-    env = TestEnv()
+    env = TestEnv("dose_main", "dope_main", "safir_show_config")
     with TestEnvStopper(env):
         env.launchProcess("entity_owner", ("entity_owner","set")).wait()
         print("waiting for 110 entities in db")
@@ -180,7 +180,7 @@ try:
 
 
     print("== See if dope loads them at startup")
-    env = TestEnv()
+    env = TestEnv("dose_main", "dope_main", "safir_show_config")
     with TestEnvStopper(env):
         env.launchProcess("entity_owner", ("entity_owner","accept")).wait()
 
@@ -236,7 +236,7 @@ try:
 
     print("== Check that dope can load xml")
 
-    env = TestEnv()
+    env = TestEnv("dose_main", "dope_main", "safir_show_config")
     with TestEnvStopper(env):
         env.launchProcess("entity_owner", ("entity_owner","accept")).wait()
 
@@ -274,7 +274,7 @@ try:
     print("== update the entities")
 
 
-    env = TestEnv()
+    env = TestEnv("dose_main", "dope_main", "safir_show_config")
     with TestEnvStopper(env):
         #remove all bin binaries (that have been loaded by dope by now), so
         #that we can wait for all entities to be written again
@@ -299,7 +299,7 @@ try:
         sys.exit(1)
 
     print("== Load them again and check output")
-    env = TestEnv()
+    env = TestEnv("dose_main", "dope_main", "safir_show_config")
     with TestEnvStopper(env):
         env.launchProcess("entity_owner", ("entity_owner","accept")).wait()
 

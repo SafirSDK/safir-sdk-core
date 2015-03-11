@@ -53,7 +53,7 @@ class Unbuffered(object):
        return getattr(self.stream, attr)
 
 sys.stdout = Unbuffered(sys.stdout)
-    
+
 class TestEnvStopper:
     def __init__(self, env):
         self.env = env
@@ -67,9 +67,12 @@ class TestEnvStopper:
 
 
 class TestEnv:
-    """dose_main: full path to dose_main
-       dope_main: full path to dope_main (pass None if you dont want dope to start)
-       safir_show_config: full path to safir_show_config
+    """
+    dose_main: full path to dose_main
+    dope_main: full path to dope_main (pass None if you dont want dope to start)
+    safir_show_config: full path to safir_show_config
+
+    If the exes are in the PATH, its okay to just use exe names.
     """
     def __init__(self, dose_main, dope_main, safir_show_config):
         self.__procs = dict()
@@ -82,7 +85,7 @@ class TestEnv:
             self.launchProcess("dope_main", (dope_main,))
         self.syslog = syslog_server.SyslogServer(safir_show_config)
         self.syslog_output = list()
-        
+
         start_time = time.time()
         print("Waiting for dose_main to be ready")
 
@@ -90,7 +93,7 @@ class TestEnv:
             phrase="persistence data is ready"
         else:
             phrase="dose_main running"
-        
+
         while True:
             time.sleep(0.2)
             if self.Output("dose_main").find(phrase) != -1:
@@ -98,7 +101,7 @@ class TestEnv:
                 break
             if self.dose_main.poll() is not None:
                 raise Exception(" dose_main appears to have failed to start!\n" +
-                                "----- Output so far ----\n" + 
+                                "----- Output so far ----\n" +
                                 self.Output("dose_main") +
                                 "\n---------------------")
             if time.time() - start_time > 90:
@@ -116,8 +119,8 @@ class TestEnv:
 
     def launchProcess(self, name, cmd):
         print("Launching", name)
-        proc = subprocess.Popen(cmd, 
-                                stdout = subprocess.PIPE, 
+        proc = subprocess.Popen(cmd,
+                                stdout = subprocess.PIPE,
                                 stderr = subprocess.STDOUT,
                                 creationflags = self.__creationflags,
                                 universal_newlines = True)
@@ -164,14 +167,14 @@ class TestEnv:
                 print("--", name, "returncode is", proc.returncode, " -----")
                 print(self.Output(name))
                 print("----------------------------------")
-                
+
         self.syslog.stop()
-        
+
     def Syslog(self):
         data = self.syslog.get_data(0)
         self.syslog_output.append(data)
         return "".join(self.syslog_output)
-    
+
     def Output(self,name):
         (proc,queue,output) = self.__procs[name]
         try:
@@ -194,7 +197,7 @@ class TestEnv:
     def ResetOutput(self, name):
         (proc,queue,output) = self.__procs[name]
         del output[:] #clear the list
-        
+
     def ReturnCodesOk(self):
         ok = True
         for name, (proc,queue,output) in self.__procs.items():
