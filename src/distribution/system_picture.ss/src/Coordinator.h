@@ -196,6 +196,10 @@ namespace SP
                     return;
                 }
 
+                //if we did not have a valid election_id before this is the very first
+                //SS we have received.
+                const bool firstMessage = m_stateMessage.election_id() == 0;
+
                 lllog (7) << "SP: Got new SystemState from node " << from << std::endl;
                 m_stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
 
@@ -208,6 +212,40 @@ namespace SP
                                     << m_stateMessage.election_id() <<
                                     " while m_ownElectionId was " << m_ownElectionId);
                     throw std::logic_error("Incorrect ElectionIds!");
+                }
+
+                //Getting a system state that we're marked as dead in signifies that
+                //there is a bug in Communication, where an ExcludeNode has not worked
+                //or a bug in UpdateMyState where a node has been marked as dead but
+                //not excluded.
+                bool foundSelf = false;
+                for (int i = 0; i < m_stateMessage.node_info_size(); ++i)
+                {
+                    if (m_stateMessage.node_info(i).id() == m_id)
+                    {
+                        foundSelf = true;
+                        if (m_stateMessage.node_info(i).is_dead())
+                        {
+                            SEND_SYSTEM_LOG(Alert,
+                                            << "Got a SystemState in which I am dead!");
+                            throw std::logic_error("Got a SystemState in which I am dead!");
+                        }
+                    }
+                }
+
+                if (!foundSelf)
+                {
+                    if (!firstMessage)
+                    {
+                        SEND_SYSTEM_LOG(Alert,
+                                        << "I've disappeared from SystemState! Very bad!");
+                        throw std::logic_error("Got a SystemState which I am not in!");
+                    }
+
+                    //This state does not contain ourselves, so we ignore it.
+                    //This is done by setting the state to an invalid mode.
+                    m_stateMessage.set_election_id(0);
+                    return;
                 }
 
                 const auto deadNodes = GetDeadNodes(m_stateMessage);
@@ -230,6 +268,7 @@ namespace SP
                         m_rawHandler.SetDeadNode(m_lastStatistics.Id(i));
                     }
                 }
+
 
                 if (m_stateChangedCallback != nullptr)
                 {
