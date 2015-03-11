@@ -67,8 +67,9 @@ namespace Com
          *
          * @param io [in] - Reference to io_service, needed to make dns lookups.
          */
-        Resolver(boost::asio::io_service& io)
+        Resolver(boost::asio::io_service& io, bool verbose=false)
             :m_resolver(io)
+            ,m_verbose(verbose)
         {
         }
 
@@ -104,13 +105,12 @@ namespace Com
          * @brief ResolveRemoteEndpoint - Resolve an expresson to an endpoint. expr can have the form hostname:port or ip_address:port.
          *                              Will use dns lookup to resolve host names.
          * @param expr [in] - Expression that can be a hostname or ip-address. Must end with port number.
-         * @param myAddress [in] - Own ip address. Will be matched if expr is on the form of an ip address.
+         * @param protocol [in] - Protocol required of the remote endpoint, 4 or 6.
          * @throw Throws logic_error of expr could not be resolved.
          * @return Resolved address as a string on form <ip_address>:<port>
          */
-        std::string ResolveRemoteEndpoint(const std::string& expr, const std::string& myAddress) const
+        std::string ResolveRemoteEndpoint(const std::string& expr, int protocol) const
         {
-            auto protocol=Protocol(myAddress);
             std::string ipExpr;
             unsigned short port;
             if (!SplitAddress(expr, ipExpr, port))
@@ -119,15 +119,24 @@ namespace Com
             }
 
             auto addresses=DnsLookup(ipExpr, protocol);
-            auto ip=FindBestMatch(myAddress, addresses);
-            if (ip.empty())
+
+            if (m_verbose)
+            {
+                std::cout<<"Candidates after DNS lookup:"<<std::endl;
+                for (const auto& s : addresses)
+                {
+                    std::cout<<"  "<<s<<std::endl;
+                }
+            }
+
+            if (addresses.empty())
             {
                 std::ostringstream os;
-                os<<"COM: Resolver.ResolveRemoteEndpoint failed to resolve address '"<<expr<<"' to an ip address that matches my ip: "<<myAddress;
+                os<<"COM: Resolver.ResolveRemoteEndpoint failed to resolve address '"<<expr<<"'";
                 throw std::logic_error(os.str());
             }
 
-            return ip+std::string(":")+boost::lexical_cast<std::string>(port);
+            return addresses[0]+std::string(":")+boost::lexical_cast<std::string>(port);
         }
 
         /**
@@ -142,7 +151,7 @@ namespace Com
             unsigned short port=0;
             if (!SplitAddress(address, addr, port))
             {
-                throw std::logic_error("Failed to parse '"+address+"' as an udp endpoint with port_number on form <ip>:<port>");
+                throw std::logic_error("COM: Failed to parse '"+address+"' as an udp endpoint with port_number on form <ip>:<port>");
             }
             return CreateEndpoint(addr, port);
         }
@@ -163,7 +172,7 @@ namespace Com
             {
                 return boost::asio::ip::udp::v6();
             }
-            throw std::logic_error("Invalid ip protocol. IPv4 and IPv6 supported.");
+            throw std::logic_error("COM: Invalid ip protocol. IPv4 and IPv6 supported.");
         }
 
         /**
@@ -178,7 +187,7 @@ namespace Com
             unsigned short port=0;
             if (!SplitAddress(address, addr, port))
             {
-                throw std::logic_error("Failed to parse '"+address+"' as an udp endpoint with port_number on form <ip>:<port>");
+                throw std::logic_error("COM: Failed to parse '"+address+"' as an udp endpoint with port_number on form <ip>:<port>");
             }
 
             boost::system::error_code ec;
@@ -194,7 +203,7 @@ namespace Com
                 return 6;
             }
 
-            throw std::logic_error("Failed to parse '"+address+"' as an udp endpoint.");
+            throw std::logic_error("COM: Failed to parse '"+address+"' as an udp endpoint.");
         }
 
 #ifndef SAFIR_TEST
@@ -209,6 +218,7 @@ namespace Com
         };
 
         mutable boost::asio::ip::udp::resolver m_resolver;
+        const bool m_verbose;
 
         //Get first index at which val differs from original
         static size_t DiffIndex(const std::string& original, const std::string& val)
@@ -264,7 +274,7 @@ namespace Com
             for (size_t i=0; i<addresses.size(); ++i)
             {
                 auto tmp=DiffIndex(pattern, addresses[i]);
-                if (tmp>=highScore)
+                if (tmp>highScore)
                 {
                     highScore=tmp;
                     bestIndex=static_cast<int>(i);
@@ -284,6 +294,16 @@ namespace Com
         {
             //check if a adapter name has been specified
             auto adapters = GetAdapters();
+
+            if (m_verbose)
+            {
+                std::cout<<"Own interface addresses available:"<<std::endl;
+                for (const auto& a : adapters)
+                {
+                    std::cout<<"  "<<a.ipAddress<<std::endl;
+                }
+            }
+
             std::vector<std::string> addresses;
 
             for (const auto& ai : adapters)
@@ -301,41 +321,49 @@ namespace Com
                 return bestMatchingIp;
             }
 
-            //still have not found an ip we can use, try dns lookup
-            auto dnsV4=DnsLookup(expr, 4);
-            if (!dnsV4.empty())
+            for (const auto& addr : DnsLookup(expr, 46))
             {
-                return dnsV4[0];
-            }
+                if (m_verbose)
+                {
+                    std::cout<<" DNS lookup: "<<addr<<std::endl;
+                }
 
-            auto dnsV6=DnsLookup(expr, 6);
-            if (!dnsV6.empty())
-            {
-                return dnsV6[0];
+                auto found=std::find(addresses.begin(), addresses.end(), addr);
+                if (found!=addresses.end())
+                {
+                    return *found;
+                }
             }
 
             return ""; //could not find any ip address to matching the expression
         }
 
         //Make dns lookup and retun list of all ip addresses that support specified protocol
+        //protocol=46 means both 4 and 6
         std::vector<std::string> DnsLookup(const std::string& hostName, int protocol) const
         {
             std::vector<std::string> result;
             boost::asio::ip::udp::resolver::query query(hostName, "");
-            auto it=m_resolver.resolve(query);
+            boost::system::error_code ec;
+            auto it=m_resolver.resolve(query, ec);
+            if (ec)
+            {
+                throw std::logic_error(std::string("COM: DnsLookup failed. Host not found ")+hostName);
+            }
 
             while(it!=boost::asio::ip::udp::resolver::iterator())
             {
                 auto addr=(it++)->endpoint().address();
 
-                if (protocol==4)
+                if (protocol==4 || protocol==46)
                 {
                     if(addr.is_v4())
                     {
                         result.emplace_back(addr.to_string());
                     }
                 }
-                else if (protocol==6)
+
+                if (protocol==6 || protocol==46)
                 {
                     if(addr.is_v6())
                     {
@@ -363,7 +391,7 @@ namespace Com
                 return boost::asio::ip::udp::endpoint(a6, port);
             }
 
-            throw std::logic_error("Failed to parse '"+ip+"' as an udp endpoint.");
+            throw std::logic_error("COM: Failed to parse '"+ip+"' as an udp endpoint.");
         }
 
 #ifdef _MSC_VER
@@ -435,6 +463,19 @@ namespace Com
                     ai.ipVersion=6;
                     result.push_back(ai);
                     continue;
+                }
+            }
+
+            for (int ipVersion=4; ipVersion<=6; ipVersion+=2)
+            {
+                auto dns=DnsLookup(boost::asio::ip::host_name(), ipVersion);
+                if (!dns.empty())
+                {
+                    AdapterInfo ai;
+                    ai.name=boost::asio::ip::host_name();
+                    ai.ipAddress=dns[0];
+                    ai.ipVersion=ipVersion;
+                    result.push_back(ai);
                 }
             }
 

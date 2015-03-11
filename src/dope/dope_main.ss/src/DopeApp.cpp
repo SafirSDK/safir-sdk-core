@@ -278,7 +278,7 @@ DopeApp::Run()
 class DummyDispatcher:
     public Safir::Dob::Dispatcher
 {
-    virtual void OnDoDispatch() {}
+    virtual void OnDoDispatch() override {}
 };
 
 /*
@@ -291,7 +291,7 @@ void DopeApp::ConnectionThread()
 
     try
     {
-        tmpConnection.Open(L"DOPE_TMP",L"0",0,NULL,&dispatcher);
+        tmpConnection.Open(L"DOPE_TMP",L"0",0,nullptr,&dispatcher);
         m_ioService.post(boost::bind(&DopeApp::SignalOkToConnect,this, true));
     }
     catch (Safir::Dob::NotOpenException e)

@@ -172,7 +172,7 @@ namespace Com
                 lllog(5)<<m_logPrefix.c_str()<<"SendQueue full"<<std::endl;
                 --m_sendQueueSize;
                 m_notifyQueueNotFull=true;
-                return false;
+                return m_deliveryGuarantee!=Acked; //return Acked->false, Unacked->true
             }
 
             //The actual work where the data is inserted in the queue must be done inside the strand.
@@ -615,7 +615,7 @@ namespace Com
 
                     WriterType::SendTo(ud, nodeIt->second.endpoint);
                     m_retransmitNotification(nodeIt->first);
-                    lllog(6)<<m_logPrefix.c_str()<<"Retransmit  "<<SendMethodToString(ud->header.sendMethod).c_str()<<
+                    lllog(9)<<m_logPrefix.c_str()<<"Retransmit  "<<SendMethodToString(ud->header.sendMethod).c_str()<<
                               ", seq: "<<ud->header.sequenceNumber<<" to "<<*recvIt<<std::endl;
                     ++recvIt;
                 }

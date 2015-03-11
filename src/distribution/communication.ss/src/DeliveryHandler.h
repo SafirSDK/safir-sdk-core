@@ -653,7 +653,7 @@ namespace Com
                         auto data=lastInQueue.data;
                         auto dataSize=lastInQueue.dataSize;
                         auto numberOfFragments=lastInQueue.numberOfFragments;
-                        auto fragmentNumber=lastInQueue.fragmentNumber+1;
+                        uint16_t fragmentNumber=lastInQueue.fragmentNumber+1;
 
                         rd.Clear();
                         ch.queue.Step();

@@ -90,7 +90,8 @@ namespace SP
                         const std::string& controlAddress,
                         const std::string& dataAddress,
                         const std::map<int64_t, NodeType>& nodeTypes,
-                        const bool master)
+                        const bool master,
+                        const std::function<bool (const int64_t incarnationId)>& validateIncarnationIdCallback)
             : m_ioService(ioService)
             , m_communication(communication)
             , m_id(id)
@@ -116,6 +117,7 @@ namespace SP
                                         CheckDeadNodes();
                                     }))
             , m_master(master)
+            , m_validateIncarnationIdCallback(validateIncarnationIdCallback)
             , m_stopped(false)
         {
             //set up some info about ourselves in our message
@@ -166,12 +168,10 @@ namespace SP
         }
 
 
-        //extraSpace adds bytes at the end of the buffer, e.g. for adding a crc
         void PerformOnMyStatisticsMessage(const std::function<void(std::unique_ptr<char[]> data,
-                                                                   const size_t size)> & fn,
-                                          const size_t extraSpace) const
+                                                                   const size_t size)> & fn) const
         {
-            m_strand.dispatch([this,fn,extraSpace]
+            m_strand.dispatch([this,fn]
             {
                 //With newer protobuf (>= 2.5.0) we can be clever
                 //we just get the remote statistics out of the way before serializing a
@@ -193,7 +193,7 @@ namespace SP
                     }
                 }
 
-                const size_t size = m_allStatisticsMessage.ByteSize() + extraSpace;
+                const size_t size = m_allStatisticsMessage.ByteSize();
 
                 auto data = std::unique_ptr<char[]>(new char[size]);
 
@@ -214,12 +214,11 @@ namespace SP
 
 
         void PerformOnAllStatisticsMessage(const std::function<void(std::unique_ptr<char []> data,
-                                                                    const size_t size)> & fn,
-                                           const size_t extraSpace) const
+                                                                    const size_t size)> & fn) const
         {
-            m_strand.dispatch([this,fn, extraSpace]
+            m_strand.dispatch([this,fn]
                               {
-                                  const size_t size = m_allStatisticsMessage.ByteSize() + extraSpace;
+                                  const size_t size = m_allStatisticsMessage.ByteSize();
                                   auto data = std::unique_ptr<char[]>(new char[size]);
                                   m_allStatisticsMessage.SerializeWithCachedSizesToArray
                                       (reinterpret_cast<google::protobuf::uint8*>(data.get()));
@@ -259,35 +258,95 @@ namespace SP
                 }
 
                 lllog(9) << "SP: Processing remote node information" << std::endl;
-                bool nodesChanged = false;
-                for (const auto& n: node.nodeInfo->remote_statistics().node_info())
-                {
-                    if (n.is_dead())
-                    {
-                        if (AddToMoreDeadNodes(n.id()))
-                        {
-                            lllog(8) << "SP: Added " << n.id() << " to more_dead_nodes since "
-                                     << from  << " thinks that it is dead" << std::endl;
 
-                            nodesChanged = true;
+                int changes = 0;
+
+                if (!m_allStatisticsMessage.has_incarnation_id())
+                {
+                    lllog(6) << "SP: This node does not have an incarnation id" << std::endl;
+                    if (node.nodeInfo->remote_statistics().has_incarnation_id())
+                    {
+                        const bool join = m_validateIncarnationIdCallback != nullptr &&
+                            m_validateIncarnationIdCallback(node.nodeInfo->remote_statistics().incarnation_id());
+
+                        if (join)
+                        {
+                            lllog(1) << "SP: Remote RAW contains incarnation id "
+                                     << node.nodeInfo->remote_statistics().incarnation_id()
+                                     << " and validation passed, let's use it!" << std::endl;
+                            m_allStatisticsMessage.set_incarnation_id(node.nodeInfo->remote_statistics().incarnation_id());
+
+                            changes |= RawChanges::METADATA_CHANGED;
+                        }
+                        else
+                        {
+                            lllog(1) << "SP: Remote RAW contains incarnation id "
+                                     << node.nodeInfo->remote_statistics().incarnation_id()
+                                     << " but validation did not pass. Marking remote dead and excluding!" << std::endl;
+
+                            node.nodeInfo->set_is_dead(true);
+                            node.nodeInfo->clear_remote_statistics();
+                            m_communication.ExcludeNode(from);
+
+                            changes |= RawChanges::NODES_CHANGED;
+                        }
+                    }
+                    else
+                    {
+                        lllog(6) << "SP: Remote node does not have incarnation either." << std::endl;
+                    }
+                }
+                else if (node.nodeInfo->remote_statistics().has_incarnation_id() &&
+                         node.nodeInfo->remote_statistics().incarnation_id() != m_allStatisticsMessage.incarnation_id())
+                {
+                    lllog(6) << "SP: Remote node has different incarnation from us, excluding node." << std::endl;
+                    node.nodeInfo->set_is_dead(true);
+                    node.nodeInfo->clear_remote_statistics();
+                    m_communication.ExcludeNode(from);
+
+                    changes |= RawChanges::NODES_CHANGED;
+                }
+                else if (!node.nodeInfo->remote_statistics().has_incarnation_id())
+                {
+                    lllog(6) << "SP: Remote node has no incarnation discarding remote data." << std::endl;
+                    node.nodeInfo->clear_remote_statistics();
+                }
+
+                if (node.nodeInfo->has_remote_statistics()) //node might have been excluded or cleared above
+                {
+                    changes |= RawChanges::NEW_REMOTE_STATISTICS;
+
+                    for (const auto& n: node.nodeInfo->remote_statistics().node_info())
+                    {
+                        if (n.is_dead())
+                        {
+                            if (AddToMoreDeadNodes(n.id()))
+                            {
+                                lllog(8) << "SP: Added " << n.id() << " to more_dead_nodes since "
+                                         << from  << " thinks that it is dead" << std::endl;
+
+                                changes |= RawChanges::NODES_CHANGED;
+                            }
+                        }
+                    }
+
+                    lllog(9) << "SP: Processing remote more_dead_nodes" << std::endl;
+                    for (const auto id: node.nodeInfo->remote_statistics().more_dead_nodes())
+                    {
+                        if (AddToMoreDeadNodes(id))
+                        {
+                            lllog(8) << "SP: Added " << id << " to more_dead_nodes since "
+                                     << from  << " has it in more_dead_nodes" << std::endl;
+
+                            changes |= RawChanges::NODES_CHANGED;
                         }
                     }
                 }
 
-                lllog(9) << "SP: Processing remote more_dead_nodes" << std::endl;
-                for (const auto id: node.nodeInfo->remote_statistics().more_dead_nodes())
+                if (changes != 0)
                 {
-                    if (AddToMoreDeadNodes(id))
-                    {
-                        lllog(8) << "SP: Added " << id << " to more_dead_nodes since "
-                                 << from  << " has it in more_dead_nodes" << std::endl;
-
-                        nodesChanged = true;
-                    }
+                    PostRawChangedCallback(RawChanges(changes));
                 }
-
-                PostRawChangedCallback(RawChanges(RawChanges::NEW_REMOTE_STATISTICS |
-                                                  (nodesChanged ? RawChanges::NODES_CHANGED : 0)));
             });
         }
 
@@ -424,7 +483,32 @@ namespace SP
 
                                   m_allStatisticsMessage.set_election_id(electionId);
 
-                                  PostRawChangedCallback(RawChanges(RawChanges::ELECTION_ID_CHANGED));
+                                  PostRawChangedCallback(RawChanges(RawChanges::METADATA_CHANGED));
+                              });
+        }
+
+        void SetIncarnationId(const int64_t incarnationId)
+        {
+            m_strand.dispatch([this, incarnationId]
+                              {
+                                  if (m_allStatisticsMessage.has_incarnation_id())
+                                  {
+                                      return;
+                                  }
+
+                                  lllog(1) << "SP: Incarnation Id " << incarnationId
+                                           << " set in RawHandler." << std::endl;
+
+                                  if (m_validateIncarnationIdCallback != nullptr)
+                                  {
+                                      if (!m_validateIncarnationIdCallback(incarnationId))
+                                      {
+                                          throw std::logic_error("Nooooo! You can't say no to this incarnation id!");
+                                      }
+                                  }
+                                  m_allStatisticsMessage.set_incarnation_id(incarnationId);
+
+                                  PostRawChangedCallback(RawChanges(RawChanges::METADATA_CHANGED));
                               });
         }
 
@@ -769,6 +853,8 @@ namespace SP
         std::vector<StatisticsCallback> m_rawChangedCallbacks;
 
         const bool m_master; //true if running in SystemPicture master instance
+        const std::function<bool (const int64_t incarnationId)> m_validateIncarnationIdCallback;
+
         std::atomic<bool> m_stopped;
     };
 

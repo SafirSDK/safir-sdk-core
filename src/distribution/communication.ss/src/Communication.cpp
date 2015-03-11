@@ -204,9 +204,14 @@ namespace
         return m_impl->Id();
     }
 
-    std::string Communication::IpAddress() const
+    std::string Communication::ControlAddress() const
     {
-        return m_impl->IpAddress();
+        return m_impl->ControlAddress();
+    }
+
+    std::string Communication::DataAddress() const
+    {
+        return m_impl->DataAddress();
     }
 }
 }

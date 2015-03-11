@@ -42,7 +42,7 @@ namespace SP
             NEW_REMOTE_STATISTICS = 0x1,
             NEW_DATA_CHANNEL_STATISTICS = 0x2,
             NODES_CHANGED = 0x4,
-            ELECTION_ID_CHANGED = 0x8,
+            METADATA_CHANGED = 0x8,
         };
 
         RawChanges(const int flags)
@@ -54,7 +54,7 @@ namespace SP
         bool NewRemoteStatistics() const {return (m_flags & NEW_REMOTE_STATISTICS) != 0;}
         bool NewDataChannelStatistics() const {return (m_flags & NEW_DATA_CHANNEL_STATISTICS) != 0;}
         bool NodesChanged() const {return (m_flags & NODES_CHANGED) != 0;}
-        bool ElectionIdChanged() const {return (m_flags & ELECTION_ID_CHANGED) != 0;}
+        bool MetadataChanged() const {return (m_flags & METADATA_CHANGED) != 0;}
 
         void Print(std::wostream& out) const
         {
@@ -62,7 +62,7 @@ namespace SP
                 << "NewRemoteStatistics = " << NewRemoteStatistics()
                 << ", NewDataChannelStatistics = " << NewDataChannelStatistics()
                 << ", NodesChanged = " << NodesChanged()
-                << ", ElectionIdChanged = " << ElectionIdChanged();
+                << ", MetadataChanged = " << MetadataChanged();
         }
 
     private:

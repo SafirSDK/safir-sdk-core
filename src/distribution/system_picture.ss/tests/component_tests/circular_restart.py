@@ -24,7 +24,7 @@
 #
 ###############################################################################
 from __future__ import print_function
-import subprocess, os, time, sys, shutil, random, argparse, traceback, platform, datetime
+import subprocess, os, time, sys, shutil, random, argparse, traceback, platform, datetime, signal
 
 class Failure(Exception):
     pass
@@ -65,13 +65,15 @@ def launch_control(number, previous, id, env, ownip, seedip):
                                    "--control-address", ownip + ":33{0:03d}".format(number),
                                    "--data-address", ownip + ":43{0:03d}".format(number),
                                    "--seed", seedip + ":33{0:03d}".format(previous),
-                                   "--force-id", str(id))
+                                   "--force-id", str(id),
+                                   "--check-incarnation")
 
     output = open("control_{0:03d}.output.txt".format(number),"w")
     proc = subprocess.Popen(command,
                             stdout = output,
                             stderr = subprocess.STDOUT,
-                            env = env)
+                            env = env,
+                            creationflags = subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0)
     return proc
 
 def launch_dose_main(number, previous, id, env, ownip):
@@ -84,7 +86,8 @@ def launch_dose_main(number, previous, id, env, ownip):
     proc = subprocess.Popen(command,
                             stdout = output,
                             stderr = subprocess.STDOUT,
-                            env = env)
+                            env = env,
+                            creationflags = subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0)
     return proc
 
 
@@ -104,26 +107,20 @@ def launch_node(number, args):
 
 def stop(proc):
     try:
-        #if proc.poll() is not None:
-        #    log("   poll returned value")
-        #    return
-        log("   calling terminate")
-        proc.terminate()
-        log("   calling wait")
+        if sys.platform == "win32":
+            #can't send CTRL_C_EVENT to processes started with subprocess, unfortunately
+            proc.send_signal(signal.CTRL_BREAK_EVENT)
+        else:
+            proc.terminate()
+
         proc.wait() #comment this line to get procs killed after 30s
         for i in range(300): #30 seconds
-            log("   calling poll", i)
             if proc.poll() is not None:
-                log("   returning")
                 return
             time.sleep(0.1)
-        log("   calling kill")
         proc.kill()
-        log("   calling wait")
         proc.wait()
     except OSError:
-        #log("   Caught ProcessLookupError")
-        #traceback.print_exc()
         pass
 
 def stop_node(i, control, main):
@@ -166,13 +163,15 @@ os.chdir("circular_restart_output")
 
 nodes = list()
 
+success = False
+
 try:
     log("Starting some nodes")
     for i in range (args.start, args.start + args.nodes):
         nodes.append(launch_node(i,args))
 
-    log("Sleeping for a while to let the nodes start up")
-    time.sleep(10)
+    log("Sleeping for one minute while other nodes start up")
+    time.sleep(60)
 
     #we need to kill the first node manually, after which the circle will start running...
     if args.start == 0:
@@ -220,13 +219,14 @@ try:
         if len(nodes) == 0:
             log("No nodes running, exiting")
             break;
-
+    success = True
 except KeyboardInterrupt:
     pass
 except:
     traceback.print_exc()
 
-log ("Killing", len(nodes), "nodes")
+if len(nodes) > 0:
+    log ("Killing", len(nodes), "nodes")
 for i, control, main in nodes:
     try:
         stop(main)
@@ -236,3 +236,9 @@ for i, control, main in nodes:
         stop(control)
     except ProcessLookupError:
         pass
+
+if success:
+    log("Test appears to have been successful")
+else:
+    log("Test failed")
+sys.exit(0 if success else 1)

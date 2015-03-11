@@ -55,16 +55,16 @@ private:
     virtual void Store(const Safir::Dob::Typesystem::EntityId entityId,
                        const Safir::Dob::Typesystem::HandlerId handlerId,
                        Safir::Dob::Typesystem::BinarySerialization & bin,
-                       const bool update);
+                       const bool update) override;
 
     //implementation of pure virtual from Backend
-    virtual void RestoreAll();
+    virtual void RestoreAll() override;
 
     //implementation of pure virtual from Backend
-    virtual void Remove(const Safir::Dob::EntityProxy & entityProxy);
+    virtual void Remove(const Safir::Dob::EntityProxy & entityProxy) override;
 
     //implementation of pure virtual from Backend
-    virtual void RemoveAll();
+    virtual void RemoveAll() override;
 
     //Insert an empty row into the db
     void Insert(const Safir::Dob::Typesystem::EntityId & entityId);

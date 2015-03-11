@@ -43,6 +43,8 @@ namespace
         COLUMN_DATA_RECEIVE_COUNT,
         COLUMN_DATA_RETRANSMIT_COUNT,
 
+        COLUMN_INCARNATION_ID, //this is only in the local table
+
         NUM_COLUMNS
     };
 
@@ -51,7 +53,7 @@ namespace
         if (table->item(row, COLUMN_NAME)->background() != QColor(200,200,200))
         {
             //std::wcout << "Set row " << row << " to dead" << std::endl;
-            for (int column = 0; column < NUM_COLUMNS; ++column)
+            for (int column = 0; column < table->columnCount(); ++column)
             {
                 table->item(row, column)->setBackground(QColor(200,200,200));
                 table->item(row, column)->setToolTip("Node is dead");
@@ -151,6 +153,9 @@ void RawStatisticsPage::UpdatedStatistics(const Safir::Dob::Internal::SP::RawSta
     SetText(address,data.ControlAddress());
     SetText(id,data.Id());
 
+    SetText(incarnationId, data.IncarnationId());
+    SetText(electionId, data.ElectionId());
+
     localTable->setSortingEnabled(false);
     UpdateLocalTable();
     localTable->setSortingEnabled(true);
@@ -191,6 +196,16 @@ void RawStatisticsPage::UpdateLocalTable()
 
             SetText(localTable->item(row,COLUMN_DATA_RETRANSMIT_COUNT),
                     m_statistics.DataRetransmitCount(findIt->second));
+
+            if (m_statistics.HasRemoteStatistics(findIt->second))
+            {
+                SetText(localTable->item(row,COLUMN_INCARNATION_ID),
+                        m_statistics.RemoteStatistics(findIt->second).IncarnationId());
+            }
+            else
+            {
+                SetText(localTable->item(row,COLUMN_INCARNATION_ID), "");
+            }
 
             ids.erase(id);
 
@@ -238,7 +253,11 @@ void RawStatisticsPage::UpdateLocalTable()
                              COLUMN_DATA_RETRANSMIT_COUNT,
                              new QTableWidgetItem(QString::number(m_statistics.DataRetransmitCount(it->second))));
 
-        for (int column = 0; column < NUM_COLUMNS; ++column)
+        localTable->setItem(row,
+                            COLUMN_INCARNATION_ID,
+                            new QTableWidgetItem(QString()));
+
+        for (int column = 0; column < localTable->columnCount(); ++column)
         {
             localTable->item(row, column)->setToolTip("Node is alive");
         }
@@ -369,7 +388,7 @@ void RawStatisticsPage::UpdateRemoteTable()
                                          COLUMN_DATA_RETRANSMIT_COUNT,
                                          new QTableWidgetItem(QString::number(statistics.DataRetransmitCount(it->second))));
 
-                    for (int column = 0; column < NUM_COLUMNS; ++column)
+                    for (int column = 0; column < remoteTable->columnCount(); ++column)
                     {
                         remoteTable->item(row, column)->setToolTip("Node is alive");
                     }

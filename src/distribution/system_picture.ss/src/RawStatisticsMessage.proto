@@ -34,11 +34,13 @@ message RawStatisticsMessage
     //which, if any, election_id was sent out by the elected coordinator in his VICTORY message
     optional sfixed64 election_id = 6;
 
-    repeated NodeInfo node_info = 7;
+    optional sfixed64 incarnation_id = 7;
+
+    repeated NodeInfo node_info = 8;
 
     //This list contains dead nodes that we have removed from the node_info list
     //and that we have been told about by other nodes.
-    repeated sfixed64 more_dead_nodes = 8;
+    repeated sfixed64 more_dead_nodes = 9;
 
     //TODO: Add some support for clearing the more_dead_nodes list
 }

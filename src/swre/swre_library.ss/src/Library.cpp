@@ -140,7 +140,7 @@ namespace Internal
 
     }
 
-    Library::~Library() 
+    Library::~Library()
     {
 
     }
@@ -238,7 +238,7 @@ namespace Internal
         {
             m_traceStdoutBuffer.push_back('@');
         }
-        
+
         //no syslog when using windows native logging
         if (!m_windowsNativeLogging)
         {
@@ -322,9 +322,8 @@ namespace Internal
     void Library::CrashFunc(const char* const dumpPath)
     {
         std::wostringstream ostr;
-        ostr << "An application has crashed! A dump was generated to:\n" 
+        ostr << "An application has crashed! A dump was generated to:\n"
              << dumpPath;
-        std::wcerr << ostr.str().c_str() << std::endl;
         Safir::Logging::SendSystemLog(Safir::Logging::Alert,
                                       ostr.str());
     }
@@ -401,11 +400,11 @@ namespace Internal
                     Safir::Dob::SecondaryConnection conn;
                     conn.Attach();
                     Safir::Dob::ConnectionAspectMisc connectionAspectMisc(conn);
-                    
+
                     std::wostringstream ostr;
-                    ostr << "Tracer Ping reply from " 
-                         << connectionAspectMisc.GetConnectionName() 
-                         <<  " on node " 
+                    ostr << "Tracer Ping reply from "
+                         << connectionAspectMisc.GetConnectionName()
+                         <<  " on node "
                          << Safir::Dob::NodeParameters::Nodes(Safir::Dob::ThisNodeParameters::NodeNumber())->NodeName().GetVal();
 
                     std::wcout << ostr.str() << std::endl;
@@ -504,7 +503,7 @@ namespace Internal
     Library::PrefixState::PrefixState(const std::wstring & prefix, const bool enabled)
         : m_prefix(prefix)
         , m_prefixAscii(prefix)
-        , m_isEnabled(enabled) 
+        , m_isEnabled(enabled)
     {
         //replace non-ascii chars
         for(std::wstring::iterator it = m_prefixAscii.begin();
@@ -541,8 +540,8 @@ namespace Internal
                                 const std::wstring& text)
     {
         Safir::Logging::SendSystemLog(allocated ? Safir::Logging::Informational : Safir::Logging::Error,
-                                      L"Resource " + resourceId + L" is " 
-                                      + ((allocated) ? L"" : L"not ") 
+                                      L"Resource " + resourceId + L" is "
+                                      + ((allocated) ? L"" : L"not ")
                                       + L"allocated" + L"|" + text);
     }
 

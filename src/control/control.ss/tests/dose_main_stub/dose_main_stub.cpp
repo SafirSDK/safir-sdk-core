@@ -187,7 +187,6 @@ int main(int /*argc*/, char * /*argv*/[])
                                                             nodeName,
                                                             nodeId,
                                                             nodeTypeId,
-                                                            dataAddress,
                                                             spNodeTypes));
 
                              communication->SetDataReceiver

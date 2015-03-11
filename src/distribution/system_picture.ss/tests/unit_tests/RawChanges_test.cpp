@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE( no_flags )
     BOOST_CHECK(!flags.NewRemoteStatistics());
     BOOST_CHECK(!flags.NewDataChannelStatistics());
     BOOST_CHECK(!flags.NodesChanged());
-    BOOST_CHECK(!flags.ElectionIdChanged());
+    BOOST_CHECK(!flags.MetadataChanged());
 }
 
 
@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE( new_remote )
     BOOST_CHECK(flags.NewRemoteStatistics());
     BOOST_CHECK(!flags.NewDataChannelStatistics());
     BOOST_CHECK(!flags.NodesChanged());
-    BOOST_CHECK(!flags.ElectionIdChanged());
+    BOOST_CHECK(!flags.MetadataChanged());
 }
 
 
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE( new_data )
     BOOST_CHECK(!flags.NewRemoteStatistics());
     BOOST_CHECK(flags.NewDataChannelStatistics());
     BOOST_CHECK(!flags.NodesChanged());
-    BOOST_CHECK(!flags.ElectionIdChanged());
+    BOOST_CHECK(!flags.MetadataChanged());
 }
 
 BOOST_AUTO_TEST_CASE( nodes_changed )
@@ -62,38 +62,38 @@ BOOST_AUTO_TEST_CASE( nodes_changed )
     BOOST_CHECK(!flags.NewRemoteStatistics());
     BOOST_CHECK(!flags.NewDataChannelStatistics());
     BOOST_CHECK(flags.NodesChanged());
-    BOOST_CHECK(!flags.ElectionIdChanged());
+    BOOST_CHECK(!flags.MetadataChanged());
 }
 
 
 BOOST_AUTO_TEST_CASE( election_id_changed )
 {
-    RawChanges flags(RawChanges::ELECTION_ID_CHANGED);
+    RawChanges flags(RawChanges::METADATA_CHANGED);
     BOOST_CHECK(!flags.NewRemoteStatistics());
     BOOST_CHECK(!flags.NewDataChannelStatistics());
     BOOST_CHECK(!flags.NodesChanged());
-    BOOST_CHECK(flags.ElectionIdChanged());
+    BOOST_CHECK(flags.MetadataChanged());
 }
 
 
 BOOST_AUTO_TEST_CASE( two_set )
 {
-    RawChanges flags(RawChanges::ELECTION_ID_CHANGED | RawChanges::NEW_REMOTE_STATISTICS);
+    RawChanges flags(RawChanges::METADATA_CHANGED | RawChanges::NEW_REMOTE_STATISTICS);
     BOOST_CHECK(flags.NewRemoteStatistics());
     BOOST_CHECK(!flags.NewDataChannelStatistics());
     BOOST_CHECK(!flags.NodesChanged());
-    BOOST_CHECK(flags.ElectionIdChanged());
+    BOOST_CHECK(flags.MetadataChanged());
 }
 
 BOOST_AUTO_TEST_CASE( three_set )
 {
     RawChanges flags(RawChanges::NEW_REMOTE_STATISTICS |
                      RawChanges::NODES_CHANGED |
-                     RawChanges::ELECTION_ID_CHANGED);
+                     RawChanges::METADATA_CHANGED);
     BOOST_CHECK(flags.NewRemoteStatistics());
     BOOST_CHECK(!flags.NewDataChannelStatistics());
     BOOST_CHECK(flags.NodesChanged());
-    BOOST_CHECK(flags.ElectionIdChanged());
+    BOOST_CHECK(flags.MetadataChanged());
 }
 
 BOOST_AUTO_TEST_CASE( four_set )
@@ -101,9 +101,9 @@ BOOST_AUTO_TEST_CASE( four_set )
     RawChanges flags(RawChanges::NEW_REMOTE_STATISTICS |
                      RawChanges::NEW_DATA_CHANNEL_STATISTICS |
                      RawChanges::NODES_CHANGED |
-                     RawChanges::ELECTION_ID_CHANGED);
+                     RawChanges::METADATA_CHANGED);
     BOOST_CHECK(flags.NewRemoteStatistics());
     BOOST_CHECK(flags.NewDataChannelStatistics());
     BOOST_CHECK(flags.NodesChanged());
-    BOOST_CHECK(flags.ElectionIdChanged());
+    BOOST_CHECK(flags.MetadataChanged());
 }

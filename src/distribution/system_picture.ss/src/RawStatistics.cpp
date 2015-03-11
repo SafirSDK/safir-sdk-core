@@ -55,11 +55,13 @@ namespace
         if (level == 0)
         {
             out << indent << msg.name().c_str() << "@" << msg.control_address().c_str() << " (" << msg.id() << "), "
-                << "Eid: " << (msg.has_election_id() ? msg.election_id() : 0);
+                << "\n          Eid: " << (msg.has_election_id() ? msg.election_id() : 0)
+                << "\n          Iid: " << (msg.has_incarnation_id() ? msg.incarnation_id() : 0);
         }
         else
         {
             out << "\n        " << indent << "Eid: " << (msg.has_election_id() ? msg.election_id() : 0);
+            out << "\n        " << indent << "Iid: " << (msg.has_incarnation_id() ? msg.incarnation_id() : 0);
         }
 
         for (int i = 0; i < msg.node_info_size(); ++i)
@@ -96,7 +98,7 @@ namespace
             }
             else if (level == 0 && !node.is_dead())
             {
-                out << indent << "        [No remote statistics received yet]";
+                out << indent << "\n        [No remote statistics received yet]";
             }
         }
 
@@ -164,6 +166,18 @@ namespace SP
             if (m_message.has_election_id())
             {
                 return m_message.election_id();
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
+        int64_t IncarnationId() const
+        {
+            if (m_message.has_incarnation_id())
+            {
+                return m_message.incarnation_id();
             }
             else
             {
@@ -281,6 +295,7 @@ namespace SP
     const std::string& RawStatistics::DataAddress() const {return m_impl->DataAddress();}
 
     int64_t RawStatistics::ElectionId() const {return m_impl->ElectionId();}
+    int64_t RawStatistics::IncarnationId() const {return m_impl->IncarnationId();}
 
     int RawStatistics::Size() const {return m_impl->Size();}
 

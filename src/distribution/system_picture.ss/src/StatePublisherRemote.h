@@ -78,20 +78,9 @@ namespace SP
                 throw std::logic_error("Unexpected error in StatePublisherRemote::Publish");
             }
 
-#ifdef CHECK_CRC
-            const int crcBytes = sizeof(int);
-#else
-            const int crcBytes = 0;
-#endif
-
-            m_coordinator.PerformOnStateMessage([this,crcBytes](const boost::shared_ptr<char[]>& data, const size_t size)
+            m_coordinator.PerformOnStateMessage([this](const boost::shared_ptr<char[]>& data, const size_t size)
             {
                 lllog(8) << "Publishing system state to other nodes" << std::endl;
-
-#ifdef CHECK_CRC
-                const int crc = GetCrc32(data.get(), size - crcBytes);
-                memcpy(data.get() + size - crcBytes, &crc, sizeof(int));
-#endif
 
                 for (const auto& it: m_nodeTypes)
                 {
@@ -104,7 +93,6 @@ namespace SP
                     }
                 }
             },
-                                                crcBytes,
                                                 true); //we can only send own states
         }
 

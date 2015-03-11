@@ -25,11 +25,14 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/MakeUnique.h>
+#include <Safir/Utilities/Internal/ConfigReader.h>
 #include <Safir/Dob/Internal/SystemPicture.h>
 #include <Safir/Utilities/Internal/Id.h>
 #include <iostream>
+#include <fstream>
 #include <map>
 #include <boost/thread.hpp>
+#include <boost/lexical_cast.hpp>
 
 //disable warnings in boost
 #if defined _MSC_VER
@@ -68,10 +71,10 @@ public:
         options.add_options()
             ("help,h", "show help message")
             ("control-address,c",
-             value<std::string>(&controlAddress)->default_value("0.0.0.0:30000"),
+             value<std::string>(&controlAddress)->default_value("127.0.0.1:30000"),
              "Address and port of the control channel")
             ("data-address,d",
-             value<std::string>(&dataAddress)->default_value("0.0.0.0:40000"),
+             value<std::string>(&dataAddress)->default_value("127.0.0.1:40000"),
              "Address and port of the data channel")
             ("seed,s",
              value<std::vector<std::string> >(&seeds),
@@ -81,7 +84,10 @@ public:
              "A nice name for the node, for presentation purposes only")
             ("force-id",
              value<boost::int64_t>(&id)->default_value(LlufId_GenerateRandom64(), ""),
-             "Override the automatically generated node id. For debugging/testing purposes only.");
+             "Override the automatically generated node id. For debugging/testing purposes only.")
+            ("check-incarnation",
+             bool_switch(&checkIncarnation)->default_value(false),
+             "Perform checking on incarnation ids");
 
         variables_map vm;
 
@@ -114,6 +120,7 @@ public:
     std::vector<std::string> seeds;
     boost::int64_t id;
     std::string name;
+    bool checkIncarnation;
 private:
     static void ShowHelp(const boost::program_options::options_description& desc)
     {
@@ -123,6 +130,62 @@ private:
                    << std::endl;
     }
 
+};
+
+class IncarnationChecker
+{
+public:
+    explicit IncarnationChecker(bool enabled)
+        : m_enabled(enabled)
+        , m_filename("last_incarnation" + Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix() + ".txt")
+    {
+        std::ifstream f(m_filename);
+        if (f.good())
+        {
+            f >> m_lastIncarnation;
+            std::wcout << "Last incarnation read from file: " << m_lastIncarnation << std::endl;
+        }
+    }
+
+    bool Check(const int64_t id)
+    {
+        ++m_calls;
+        if (m_calls > 1)
+        {
+            throw std::logic_error("Expect only one call to IncarnationChecker::Check");
+        }
+
+        std::wcout << "Checking incarnation id " << id << std::endl;
+        if (!m_enabled)
+        {
+            std::wcout << "Checking disabled, return true" << std::endl;
+            return true;
+        }
+
+        if (m_lastIncarnation == 0)
+        {
+            std::wcout << "Have no previous incarnation, writing to file and returning true" << std::endl;
+            std::ofstream f(m_filename);
+            f << id;
+            return true;
+        }
+        else if (m_lastIncarnation == id)
+        {
+            return true;
+        }
+        else
+        {
+            throw std::logic_error("Incarnation mismatch! Expected "
+                                   + boost::lexical_cast<std::string>(m_lastIncarnation)
+                                   + ", got "
+                                   + boost::lexical_cast<std::string>(id));
+        }
+    }
+private:
+    bool m_enabled;
+    std::string m_filename;
+    int m_calls{0};
+    int64_t m_lastIncarnation {0};
 };
 
 int main(int argc, char * argv[])
@@ -155,7 +218,7 @@ int main(int argc, char * argv[])
                                                                          "NodeTypeA",
                                                                          false,
                                                                          boost::chrono::milliseconds(1000),
-                                                                         60,
+                                                                         30,
                                                                          boost::chrono::milliseconds(20))));
 
     commNodeTypes.push_back({2,
@@ -170,7 +233,7 @@ int main(int argc, char * argv[])
                                                                          "NodeTypeB",
                                                                          false,
                                                                          boost::chrono::milliseconds(2000),
-                                                                         60,
+                                                                         15,
                                                                          boost::chrono::milliseconds(50))));
 
 
@@ -187,6 +250,7 @@ int main(int argc, char * argv[])
     std::wcout << "Injecting seeds" << std::endl;
     communication.InjectSeeds(options.seeds);
 
+    IncarnationChecker incarnationChecker(options.checkIncarnation);
 
     std::wcout << "Creating SystemPicture instance" << std::endl;
     Safir::Dob::Internal::SP::SystemPicture sp(Safir::Dob::Internal::SP::master_tag,
@@ -195,9 +259,8 @@ int main(int argc, char * argv[])
                                                options.name,
                                                options.id,
                                                1,
-                                               options.controlAddress,
-                                               options.dataAddress,
-                                               std::move(spNodeTypes));
+                                               std::move(spNodeTypes),
+                                               [&incarnationChecker](const int64_t id){return incarnationChecker.Check(id);});
 
     std::wcout << "Starting SystemState subscription" << std::endl;
 

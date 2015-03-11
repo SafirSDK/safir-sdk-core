@@ -101,6 +101,10 @@ namespace SP
                                     }
 
                                     m_rawHandler.SetElectionId(nodeId, electionId);
+                                },
+                                [this](const int64_t incarnationId)
+                                {
+                                    m_rawHandler.SetIncarnationId(incarnationId);
                                 })
             , m_name(name)
             , m_id(id)
@@ -128,7 +132,7 @@ namespace SP
 
                 if (flags.NodesChanged())
                 {
-                    m_electionHandler.NodesChanged(std::move(statistics), completionSignaller);
+                    m_electionHandler.NodesChanged(statistics, completionSignaller);
                 }
             }));
         }
@@ -142,15 +146,13 @@ namespace SP
         }
 
         //used to send state message
-        //extraSpace adds bytes at the end of the buffer, e.g. for adding a crc
         //if onlyOwnState is true the callback will only be called if we're elected
         //and have a valid own system state that is ok to send.
         void PerformOnStateMessage(const std::function<void(std::unique_ptr<char []> data,
                                                             const size_t size)> & fn,
-                                   const size_t extraSpace,
                                    const bool onlyOwnState)
         {
-            m_strand.dispatch([this,fn,extraSpace,onlyOwnState]
+            m_strand.dispatch([this,fn,onlyOwnState]
             {
                 if (onlyOwnState)
                 {
@@ -170,7 +172,7 @@ namespace SP
                 }
 
                 lllog(8) << " - Sending!" << std::endl;
-                const size_t size = m_stateMessage.ByteSize() + extraSpace;
+                const size_t size = m_stateMessage.ByteSize();
                 auto data = std::unique_ptr<char[]>(new char[size]);
                 m_stateMessage.SerializeWithCachedSizesToArray
                     (reinterpret_cast<google::protobuf::uint8*>(data.get()));
@@ -194,6 +196,10 @@ namespace SP
                     return;
                 }
 
+                //if we did not have a valid election_id before this is the very first
+                //SS we have received.
+                const bool firstMessage = m_stateMessage.election_id() == 0;
+
                 lllog (7) << "SP: Got new SystemState from node " << from << std::endl;
                 m_stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
 
@@ -206,6 +212,40 @@ namespace SP
                                     << m_stateMessage.election_id() <<
                                     " while m_ownElectionId was " << m_ownElectionId);
                     throw std::logic_error("Incorrect ElectionIds!");
+                }
+
+                //Getting a system state that we're marked as dead in signifies that
+                //there is a bug in Communication, where an ExcludeNode has not worked
+                //or a bug in UpdateMyState where a node has been marked as dead but
+                //not excluded.
+                bool foundSelf = false;
+                for (int i = 0; i < m_stateMessage.node_info_size(); ++i)
+                {
+                    if (m_stateMessage.node_info(i).id() == m_id)
+                    {
+                        foundSelf = true;
+                        if (m_stateMessage.node_info(i).is_dead())
+                        {
+                            SEND_SYSTEM_LOG(Alert,
+                                            << "Got a SystemState in which I am dead!");
+                            throw std::logic_error("Got a SystemState in which I am dead!");
+                        }
+                    }
+                }
+
+                if (!foundSelf)
+                {
+                    if (!firstMessage)
+                    {
+                        SEND_SYSTEM_LOG(Alert,
+                                        << "I've disappeared from SystemState! Very bad!");
+                        throw std::logic_error("Got a SystemState which I am not in!");
+                    }
+
+                    //This state does not contain ourselves, so we ignore it.
+                    //This is done by setting the state to an invalid mode.
+                    m_stateMessage.set_election_id(0);
+                    return;
                 }
 
                 const auto deadNodes = GetDeadNodes(m_stateMessage);
@@ -228,6 +268,7 @@ namespace SP
                         m_rawHandler.SetDeadNode(m_lastStatistics.Id(i));
                     }
                 }
+
 
                 if (m_stateChangedCallback != nullptr)
                 {
@@ -305,6 +346,11 @@ namespace SP
             //check what nodes they know of.
             for (int i = 0; i < m_lastStatistics.Size(); ++i)
             {
+                if (!m_lastStatistics.HasRemoteStatistics(i))
+                {
+                    continue;
+                }
+
                 const auto& remote = m_lastStatistics.RemoteStatistics(i);
                 for (int j = 0; j < remote.Size(); ++j)
                 {
@@ -346,6 +392,12 @@ namespace SP
             if (!m_lastStatistics.Valid())
             {
                 lllog(9) << "SP: No valid raw data yet, not updating my state" << std::endl;
+                return false;
+            }
+
+            if (m_lastStatistics.IncarnationId() == 0)
+            {
+                lllog(9) << "SP: We don't have an incarnation id yet, not updating my state" << std::endl;
                 return false;
             }
 

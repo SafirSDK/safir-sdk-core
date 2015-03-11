@@ -27,7 +27,6 @@
 #include <Safir/Utilities/Internal/AsioPeriodicTimer.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
-#include "CrcUtils.h"
 #include "RawHandler.h"
 
 namespace Safir
@@ -86,29 +85,19 @@ namespace SP
 
             lllog(8) << "Publishing raw statistics over ipc" << std::endl;
 
-#ifdef CHECK_CRC
-            const int crcBytes = sizeof(int);
-#else
-            const int crcBytes = 0;
-#endif
-
-            const auto sender = [this,crcBytes](std::unique_ptr<char[]> data,
-                                                const size_t size)
+            const auto sender = [this](std::unique_ptr<char[]> data,
+                                       const size_t size)
                 {
-#ifdef CHECK_CRC
-                    const int crc = GetCrc32(data.get(), size - crcBytes);
-                    memcpy(data.get() + size - crcBytes, &crc, sizeof(int));
-#endif
                     m_publisher.Send(std::move(data), static_cast<uint32_t>(size));
                 };
 
             if (m_all)
             {
-                m_rawHandler.PerformOnAllStatisticsMessage(sender, crcBytes);
+                m_rawHandler.PerformOnAllStatisticsMessage(sender);
             }
             else
             {
-                m_rawHandler.PerformOnMyStatisticsMessage(sender, crcBytes);
+                m_rawHandler.PerformOnMyStatisticsMessage(sender);
             }
         }
 

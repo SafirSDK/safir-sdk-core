@@ -83,7 +83,7 @@ public:
                 ("force-id",
                  value<boost::int64_t>(&id)->default_value(LlufId_GenerateRandom64(), ""),
                  "Override the automatically generated node id. For debugging/testing purposes only.");
-        
+
         variables_map vm;
 
         try
@@ -230,14 +230,14 @@ int main(int argc, char * argv[])
 
     for (const auto& nt: conf.nodeTypesParam)
     {
-        commNodeTypes.push_back({nt.id, 
+        commNodeTypes.push_back({nt.id,
                                  nt.name,
                                  nt.multicastAddressControl,
                                  nt.multicastAddressData,
                                  nt.heartbeatInterval,
                                  nt.retryTimeout});
     }
-    
+
     Com::Communication communication(Com::controlModeTag,
                                      ioService,
                                      conf.thisNodeParam.name,
@@ -246,14 +246,14 @@ int main(int argc, char * argv[])
                                      conf.thisNodeParam.controlAddress,
                                      conf.thisNodeParam.dataAddress,
                                      commNodeTypes);
-    
+
     if (!conf.thisNodeParam.seeds.empty())
     {
         communication.InjectSeeds(conf.thisNodeParam.seeds);
     }
 
     std::map<boost::int64_t, SP::NodeType> spNodeTypes;
-    
+
     for (const auto& nt: conf.nodeTypesParam)
     {
         spNodeTypes.insert(std::make_pair(nt.id,
@@ -272,9 +272,8 @@ int main(int argc, char * argv[])
                          conf.thisNodeParam.name,
                          options.id,
                          conf.thisNodeParam.nodeTypeId,
-                         conf.thisNodeParam.controlAddress,
-                         conf.thisNodeParam.dataAddress,
-                         std::move(spNodeTypes));
+                         std::move(spNodeTypes),
+                         nullptr); //TODO: implement incarnation id validation
 
 
     std::unique_ptr<Control::SystemStateHandler> stateHandler;

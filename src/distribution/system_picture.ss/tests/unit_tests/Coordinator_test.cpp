@@ -53,7 +53,7 @@ RawStatistics GetRawWithOneNode()
     msg->set_id(1000);
     msg->set_node_type_id(10);
     msg->set_election_id(100);
-
+    msg->set_incarnation_id(1000);
     auto node = msg->add_node_info();
 
     node->set_name("remote1");
@@ -75,6 +75,7 @@ RawStatistics GetRawWithTwoNodes()
     msg->set_id(1000);
     msg->set_node_type_id(10);
     msg->set_election_id(100);
+    msg->set_incarnation_id(1000);
 
     auto node = msg->add_node_info();
 
@@ -106,6 +107,7 @@ RawStatistics GetRawWithOneNodeAndRemoteRaw()
     msg->set_id(1000);
     msg->set_node_type_id(10);
     msg->set_election_id(100);
+    msg->set_incarnation_id(1000);
 
     auto node = msg->add_node_info();
 
@@ -140,6 +142,7 @@ RawStatistics GetRawWithTwoNodesAndRemoteRaw(bool iThinkANodeIsDead, bool remote
     msg->set_name("myself");
     msg->set_id(1000);
     msg->set_election_id(100);
+    msg->set_incarnation_id(1000);
 
     //Add node remote1
     auto node = msg->add_node_info();
@@ -197,6 +200,7 @@ RawStatistics GetRawWithTwoNodesAndOneRemoteRaw()
     msg->set_name("myself");
     msg->set_id(1000);
     msg->set_election_id(100);
+    msg->set_incarnation_id(1000);
 
     //add node remote2
     {
@@ -330,6 +334,11 @@ public:
         electionId = electionId_;
     }
 
+    void SetIncarnationId(const int64_t /*incarnationId_*/)
+    {
+
+    }
+
     void AddRawChangedCallback(const StatisticsCallback& callback)
     {
         BOOST_CHECK(rawCb == nullptr);
@@ -359,7 +368,8 @@ public:
                         const std::map<int64_t, NodeType>& /*nodeTypes*/,
                         const char* const /*receiverId*/,
                         const std::function<void(const int64_t nodeId,
-                                                 const int64_t electionId)>& electionCompleteCallback_)
+                                                 const int64_t electionId)>& electionCompleteCallback_,
+                        const std::function<void(const int64_t incarnationId)>& /*setIncarnationIdCallback_*/)
         : id(id_)
         , electionCompleteCallback(electionCompleteCallback_)
     {
@@ -468,7 +478,6 @@ BOOST_AUTO_TEST_CASE( perform_only_own_unelected )
                                       {
                                           callbackCalled = true;
                                       },
-                                      0,
                                       true);
     ioService.run();
     BOOST_CHECK(!callbackCalled);
@@ -482,7 +491,6 @@ BOOST_AUTO_TEST_CASE( perform_no_state_received )
                                       {
                                           callbackCalled = true;
                                       },
-                                      0,
                                       false);
     ioService.run();
     BOOST_CHECK(!callbackCalled);
@@ -519,7 +527,6 @@ BOOST_AUTO_TEST_CASE( simple_state_production )
                                       {
                                           callbackCalled = true;
                                       },
-                                      0,
                                       true);
 
     ioService.run();
@@ -535,7 +542,6 @@ BOOST_AUTO_TEST_CASE( simple_state_production )
                                           callbackCalled = true;
                                           stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
                                       },
-                                      0,
                                       true);
 
     ioService.reset();
@@ -584,7 +590,6 @@ BOOST_AUTO_TEST_CASE( propagate_state_from_other )
                                       {
                                           callbackCalled = true;
                                       },
-                                      0,
                                       true);
     ioService.run();
     BOOST_CHECK(!callbackCalled);
@@ -597,7 +602,6 @@ BOOST_AUTO_TEST_CASE( propagate_state_from_other )
                                           callbackCalled = true;
                                           stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
                                       },
-                                      0,
                                       false);
 
     ioService.reset();
@@ -658,7 +662,6 @@ BOOST_AUTO_TEST_CASE( remote_from_other_with_dead )
                                           callbackCalled = true;
                                           stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
                                       },
-                                      0,
                                       false);
     ioService.reset();
     ioService.run();
@@ -705,7 +708,6 @@ BOOST_AUTO_TEST_CASE( remote_reports_dead )
                                           callbackCalled = true;
                                           stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
                                       },
-                                      0,
                                       true);
 
     ioService.run();
@@ -735,7 +737,6 @@ BOOST_AUTO_TEST_CASE( remote_reports_dead )
                                           callbackCalled = true;
                                           stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
                                       },
-                                      0,
                                       true);
 
     ioService.reset();
@@ -767,7 +768,6 @@ BOOST_AUTO_TEST_CASE( remote_reports_dead )
                                           callbackCalled = true;
                                           stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
                                       },
-                                      0,
                                       true);
 
     ioService.reset();
@@ -793,7 +793,9 @@ BOOST_AUTO_TEST_CASE( remote_reports_dead )
     BOOST_CHECK(comm.excludedNodes.find(1001) != comm.excludedNodes.end());
 }
 
-//TODO: what does this test do now?
+/* Not sure what this test tests at the moment.
+ * It used to test the long_gone flag in RAW data, but that flag has been removed.
+ */
 BOOST_AUTO_TEST_CASE( ignore_long_gone_flag )
 {
     ElectionHandlerStub::lastInstance->electedId = 1000;
@@ -811,7 +813,6 @@ BOOST_AUTO_TEST_CASE( ignore_long_gone_flag )
                                           callbackCalled = true;
                                           stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
                                       },
-                                      0,
                                       true);
 
     ioService.run();
@@ -849,7 +850,6 @@ BOOST_AUTO_TEST_CASE( state_sequence_consistent )
                                           callbackCalled = true;
                                           stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
                                       },
-                                      0,
                                       true);
 
     ioService.run();
@@ -871,7 +871,6 @@ BOOST_AUTO_TEST_CASE( state_sequence_consistent )
                                           callbackCalled = true;
                                           stateMessage.ParseFromArray(data.get(),static_cast<int>(size));
                                       },
-                                      0,
                                       true);
 
     ioService.reset();
