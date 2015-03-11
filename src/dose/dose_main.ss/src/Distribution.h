@@ -108,7 +108,6 @@ namespace Internal
                                           ownNodeName,
                                           ownNodeId,
                                           ownNodeTypeId,
-                                          ownDataAddress,
                                           spNodeTypes));
 
         }

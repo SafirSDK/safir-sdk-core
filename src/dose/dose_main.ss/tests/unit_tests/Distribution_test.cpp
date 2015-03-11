@@ -62,7 +62,6 @@ public:
        const std::string& name,
        const int64_t id,
        const int64_t nodeTypeId,
-       const std::string& dataAddress,
        const std::map<int64_t, Safir::Dob::Internal::SP::NodeType>& nodeTypes)
     {}
 };
