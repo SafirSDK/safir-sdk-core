@@ -25,7 +25,9 @@
 
 #include "dose_main_message_handler.h"
 
+#include <boost/shared_ptr.hpp>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Dob/Internal/Connection.h>
 #include <Safir/Dob/Internal/MessageTypes.h>
 #include <Safir/Dob/NodeParameters.h>
@@ -40,8 +42,25 @@ namespace Internal
     MessageHandler::MessageHandler(Com::Communication& communication,
                                    const NodeTypeIds& nodeTypeIds)
         : m_communication(communication),
-          m_nodeTypeIds(nodeTypeIds)
+          m_nodeTypeIds(nodeTypeIds),
+          m_dataTypeIdentifier(LlufId_Generate64("Safir.Dob.Message"))
+
     {
+        m_communication.SetDataReceiver([this]
+                                        (int64_t /*fromNodeId*/,
+                                        int64_t /*fromNodeType*/,
+                                        const char* data,
+                                        size_t /*size*/)
+                                        {
+                                            const DistributionData msg =
+                                                    DistributionData::ConstConstructor(new_data_tag, data);
+
+                                            DistributionData::DropReference(data);
+
+                                            MessageTypes::Instance().DistributeMsg(msg);
+                                        },
+                                        m_dataTypeIdentifier,
+                                        DistributionData::NewData);
     }
 
     void MessageHandler::DistributeMessages(const ConnectionPtr & connection)
@@ -65,22 +84,7 @@ namespace Internal
         exitDispatch = false;
         dontRemove = false;
 
-
-
-
-
-
-#if 0 //stewart
-        if (!m_ecom->Send(msg))
-        {
-            m_blockingHandler->Message().AddWaitingConnection(ExternNodeCommunication::DoseComVirtualConnectionId,connection->Id().m_id);
-            dontRemove = true;
-            exitDispatch = true;
-            return;
-        }
-#endif
-
-        lllout << "DOSE_MAIN has found a message in msg out queue for connection " << connection->Id() << std::endl;
+        Send(msg);
 
         MessageTypes::Instance().DistributeMsg(msg);
         ++numberDispatched;
@@ -115,7 +119,7 @@ namespace Internal
 
     void MessageHandler::HandleMessageFromDoseCom(const DistributionData & msg)
     {
-        MessageTypes::Instance().DistributeMsg(msg);
+
     }
 
     void MessageHandler::Send(const DistributionData& msg)
@@ -126,16 +130,24 @@ namespace Internal
             return;
         }
 
-//        // Send message to all node types
-//        for (const auto& nodeType : m_nodeTypes)
-//        {
-//            m_communication.Send(0,  // All nodes of the type
-//                                 nodeType,
-//                                 )
+        boost::shared_ptr<const char[]> msgP(msg.GetReference(),
+                                             [](const char* data)
+                                             {
+                                                 DistributionData::DropReference(data);
+                                             });
 
-//        }
+        // Send message to all node types
+        for (const auto& nodeType : m_nodeTypeIds)
+        {
+            m_communication.Send(0,  // All nodes of the type
+                                 nodeType,
+                                 msgP,
+                                 msg.Size(),
+                                 m_dataTypeIdentifier,
+                                 false); // no delivery guarantee for messages
+
+        }
     }
-
 }
 }
 }

@@ -26,6 +26,7 @@
 
 #include "Node.h"
 #include "dose_main_blocking_handler.h"
+#include <Safir/Dob/Internal/DistributionData.h>
 #include <Safir/Dob/Internal/Connection.h>
 #include <Safir/Dob/Internal/Communication.h>
 
@@ -56,9 +57,11 @@ namespace Internal
         void TraverseMessageQueue(const ConnectionPtr & connection);
 
         void Send(const DistributionData& msg);
+        void Receive(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size);
 
         Com::Communication& m_communication;
-        const NodeTypeIds m_nodeTypeIds;
+        const NodeTypeIds   m_nodeTypeIds;
+        const int64_t       m_dataTypeIdentifier;
     };
 }
 }
