@@ -320,7 +320,7 @@ def run_database_tests():
     log("Running Dope tests")
     args = ["--driver", os.environ["Driver"],
             "--hostname", "databases",
-            "--database", "SafirDb"]
+            "--database", os.environ.get("label").replace("-","")]
     if sys.platform == "win32":
         dope_result = subprocess.call(["run_dope_odbc_backend_test.py",] + args, shell = True)
     else:
