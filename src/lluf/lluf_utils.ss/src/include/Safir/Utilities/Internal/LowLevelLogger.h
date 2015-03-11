@@ -28,7 +28,7 @@
 #include <Safir/Utilities/Internal/UtilsExportDefs.h>
 #include <boost/noncopyable.hpp>
 #include <boost/thread/once.hpp>
-#include <boost/thread/mutex.hpp>
+#include <boost/thread/recursive_mutex.hpp>
 #include <boost/thread/tss.hpp>
 #include <boost/shared_ptr.hpp>
 #include <ostream>
@@ -109,7 +109,7 @@ namespace Internal
             public:
                 inline Magic():m_lock(nullptr) {}
 
-                inline explicit Magic(boost::mutex& mutex):
+                inline explicit Magic(boost::recursive_mutex& mutex):
                     m_lock(&mutex)
                 {
                 }
@@ -127,7 +127,10 @@ namespace Internal
                     return false;
                 }
             private:
-                boost::mutex* m_lock;
+                //This lock needs to be recursive. For example:
+                /// lllog << GetFoo() << std::endl;
+                /// and GetFoo also uses lllog.
+                boost::recursive_mutex* m_lock;
             };
 
             //Returns a Magic object that will unlock the lock when destroyed
@@ -195,7 +198,7 @@ namespace Internal
             bool m_synchronous;
 
             //this lock needs to be taken before logging to the logger when in synchronous mode!
-            boost::mutex m_synchronousLock;
+            boost::recursive_mutex m_synchronousLock;
 
             //This stream is used when using synchronous mode
             std::wostream m_synchronousStream;
