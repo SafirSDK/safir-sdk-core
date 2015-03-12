@@ -3,7 +3,8 @@
   <summary>Enumerates the different backends that DOPE can use for persistence.</summary>
   <name>Safir.Dob.PersistenceBackend</name>
   <values>
+    <value>None</value>
     <value>File</value>
     <value>Odbc</value>
   </values>
-</enumeration>    
+</enumeration>

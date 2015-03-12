@@ -27,6 +27,7 @@
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Dob/ThisNodeParameters.h>
 #include "FilePersistor.h"
+#include "NonePersistor.h"
 #include <Safir/Logging/Log.h>
 #include <Safir/Application/CrashReporter.h>
 #include <Safir/Dob/NotOpenException.h>
@@ -64,14 +65,6 @@ DopeApp::DopeApp():
     m_keeper(m_dobConnection),
     m_debug(L"DopeApp")
 {
-    //perform sanity check!
-    if (!Safir::Dob::PersistenceParameters::SystemHasPersistence())
-    {
-        Safir::Logging::SendSystemLog(Safir::Logging::Critical,
-                                      L"Configuration error: Dope was started even though Safir.Dob.PersistenceParameters.SystemHasPersistence is set to false!");
-        throw StartupError();
-    }
-
     try
     {
         m_dobConnection.Open(L"DOPE", L"0", PERSISTENCE_CONTEXT, this, &m_dispatcher);
@@ -89,7 +82,7 @@ DopeApp::DopeApp():
     m_debug << "Started keeper"<<std::endl;
 
     // Start pending registration to try be the active dope.
-    m_dobConnection.RegisterEntityHandlerPending(Safir::Dob::PersistentDataStatus::ClassTypeId, 
+    m_dobConnection.RegisterEntityHandlerPending(Safir::Dob::PersistentDataStatus::ClassTypeId,
         m_handlerId,
         Safir::Dob::InstanceIdPolicy::HandlerDecidesInstanceId,
         this);
@@ -115,30 +108,12 @@ void DopeApp::OnStopOrder()
 }
 
 //-------------------------------------------------------
-void DopeApp::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId typeId,
-                                    const Safir::Dob::Typesystem::HandlerId& handlerId)
+void DopeApp::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId /*typeId*/,
+                                    const Safir::Dob::Typesystem::HandlerId& /*handlerId*/)
 {
-    if (handlerId != m_handlerId)
-        return;   // DOPE_ENTITY_HANDLER, not used for this purpose. Handle only the "pending" registration.
-
-    m_debug << L"OnRevokedRegistration() " <<  Safir::Dob::Typesystem::Operations::GetName(typeId) +  L":" + handlerId.GetRawString() << std::endl;
-
-    std::wcout << L"Dope is now standby persistence." << std::endl;
-
-    // split-join
-    // some other dope has become the master
-    // stop all persistence and restart as pending dope.
-    // If standaloneMode the continue to save persistent data.
-    if (!Safir::Dob::PersistenceParameters::StandaloneMode())
-    {
-        m_persistenceHandler->Stop();
-    }
-
-    // Start pending registration and wait to be the active dope.
-    m_dobConnection.RegisterEntityHandlerPending(Safir::Dob::PersistentDataStatus::ClassTypeId, 
-        m_handlerId,
-        Safir::Dob::InstanceIdPolicy::HandlerDecidesInstanceId,
-        this);
+    throw Safir::Dob::Typesystem::SoftwareViolationException
+        (L"Dope got an OnRevokedRegistration! Something is wrong with your configuration!",
+         __WFILE__,__LINE__);
 }
 
 void DopeApp::OnCompletedRegistration(const Safir::Dob::Typesystem::TypeId     typeId,
@@ -152,32 +127,32 @@ void DopeApp::OnCompletedRegistration(const Safir::Dob::Typesystem::TypeId     t
             StartUp(true);
             m_debug << L"Start completed."  << std::endl;
             m_persistenceStarted = true;
-        } 
+        }
         else
         {
             std::wcout << L"Dope is taking over the persistence."  << std::endl;
             StartUp(false);
             m_debug << L"Take over completed."  << std::endl;
         }
-    } 
+    }
 }
 
 void DopeApp::OnCreateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
                               Safir::Dob::ResponseSenderPtr        responseSender)
-{ 
-    responseSender->Send(Safir::Dob::ErrorResponse::Create()); 
+{
+    responseSender->Send(Safir::Dob::ErrorResponse::Create());
 };
 
 void DopeApp::OnUpdateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
                               Safir::Dob::ResponseSenderPtr        responseSender)
-{ 
-    responseSender->Send(Safir::Dob::ErrorResponse::Create()); 
+{
+    responseSender->Send(Safir::Dob::ErrorResponse::Create());
 };
 
 void DopeApp::OnDeleteRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
                               Safir::Dob::ResponseSenderPtr        responseSender)
-{ 
-    responseSender->Send(Safir::Dob::ErrorResponse::Create()); 
+{
+    responseSender->Send(Safir::Dob::ErrorResponse::Create());
 };
 
 //-------------------------------------------------------
@@ -191,14 +166,8 @@ void DopeApp::OnNewEntity(const Safir::Dob::EntityProxy entityProxy)
             std::wcout << L"Dope is started as standby persistence. Active persistence is running on node ";
             std::wcout << entityProxy.GetInstanceId().GetRawValue() << "." << std::endl;
             m_persistenceStarted = true;
-
-            if (Safir::Dob::PersistenceParameters::StandaloneMode())
-            {
-                // Start saving persistent data
-                Start(false);
-            }
         }
-    }     
+    }
 }
 
 //-------------------------------------------------------
@@ -209,6 +178,12 @@ void DopeApp::Start(bool restore)
     {
         switch (Safir::Dob::PersistenceParameters::Backend())
         {
+        case Safir::Dob::PersistenceBackend::None:
+            {
+                m_debug << "Using 'None' persistence" << std::endl;
+                m_persistenceHandler.reset(new NonePersistor(m_ioService));
+            }
+            break;
         case Safir::Dob::PersistenceBackend::File:
             {
                 m_debug << "Using file persistence" << std::endl;
@@ -292,7 +267,10 @@ void DopeApp::ConnectionThread()
     try
     {
         tmpConnection.Open(L"DOPE_TMP",L"0",0,nullptr,&dispatcher);
-        m_ioService.post(boost::bind(&DopeApp::SignalOkToConnect,this, true));
+        m_ioService.post([this]
+                         {
+                             SignalOkToConnect(true);
+                         });
     }
     catch (Safir::Dob::NotOpenException e)
     {
@@ -318,17 +296,17 @@ void DopeApp::SignalOkToConnect(bool ok)
     if (ok)
     {
         // use a different handler to register PersistentDataStatus to get the correct registration time.
-        Safir::Dob::Typesystem::HandlerId entityHandler(L"DOPE_ENTITY_HANDLER"); 
-        
-        m_dobConnection.RegisterEntityHandler(Safir::Dob::PersistentDataStatus::ClassTypeId, 
+        Safir::Dob::Typesystem::HandlerId entityHandler(L"DOPE_ENTITY_HANDLER");
+
+        m_dobConnection.RegisterEntityHandler(Safir::Dob::PersistentDataStatus::ClassTypeId,
                                               entityHandler,
                                               Safir::Dob::InstanceIdPolicy::HandlerDecidesInstanceId,
                                               this);
-        
+
         Safir::Dob::PersistentDataStatusPtr status = Safir::Dob::PersistentDataStatus::Create();
         status->State().SetVal( Safir::Dob::PersistentDataState::Started);
         m_dobConnection.SetAll(status, m_instanceId, entityHandler);
-        
+
         m_thread.join();
         m_thread = boost::thread();
     }

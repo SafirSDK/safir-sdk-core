@@ -26,13 +26,17 @@
 ###############################################################################
 from __future__ import print_function
 import subprocess, os, time, sys, signal, argparse
+
+def log(*args, **kwargs):
+    print(*args, **kwargs)
+    sys.stdout.flush()
     
 parser = argparse.ArgumentParser("test script")
 parser.add_argument("--safir-control", required=True)
 parser.add_argument("--dose-main", required=True)
 arguments = parser.parse_args()
 
-print("This test program expects to be killed off after about two minutes unless it has finished successfully before then.")
+log("This test program expects to be killed off after about two minutes unless it has finished successfully before then.")
 
 proc = subprocess.Popen([arguments.safir_control, "--dose-main-path" , arguments.dose_main],
                         stdout = subprocess.PIPE,
@@ -43,7 +47,7 @@ proc = subprocess.Popen([arguments.safir_control, "--dose-main-path" , arguments
 lines = list()
 for i in range(2):
     lines.append(proc.stdout.readline().rstrip("\n\r"))
-    print("Line", i, ": '" + lines[-1] + "'")
+    log("Line", i, ": '" + lines[-1] + "'")
 
 #give it one second to output any spurious stuff...
 time.sleep(1)
@@ -61,7 +65,7 @@ for i in range (100):
 if proc.poll() is None:
     try:        
         proc.kill()
-        print("Unable to stop Control and/or dose_main! OS resources might be locked, preventing further tests from running.")
+        log("Unable to stop Control and/or dose_main! OS resources might be locked, preventing further tests from running.")
         sys.exit(1)
     except OSError:
         pass
@@ -71,26 +75,26 @@ if proc.poll() is None:
 
 for i in range(2):
     lines.append(proc.stdout.readline().rstrip("\n\r"))
-    print("Line", len(lines) - 1, ": '" + lines[-1] + "'")
+    log("Line", len(lines) - 1, ": '" + lines[-1] + "'")
 
 res = proc.communicate()[0]
 
 if len(res) != 0:
-    print("More than four lines output! Trailing data is\n'"+res + "'")
+    log("More than four lines output! Trailing data is\n'"+res + "'")
     sys.exit(1)
 
 if not lines[0].endswith("dose_main is waiting for persistence data!"):
-    print("Failed to find string ending in 'dose_main is waiting for persistence data!'")
+    log("Failed to find string ending in 'dose_main is waiting for persistence data!'")
     sys.exit(1)
 if not lines[1].endswith("dose_main running (release)...") and not lines[1].endswith("dose_main running (debug)..."):
-    print("Failed to find string ending in 'dose_main running (release)...' or 'dose_main running (debug)...'")
+    log("Failed to find string ending in 'dose_main running (release)...' or 'dose_main running (debug)...'")
     sys.exit(1)
 if not lines[2].endswith("shutting down."):
-    print("Failed to find string ending in 'shutting down.'")
+    log("Failed to find string ending in 'shutting down.'")
     sys.exit(1)
 if not lines[3].endswith("Exiting..."):
-    print("Failed to find string ending in 'Exiting...'")
+    log("Failed to find string ending in 'Exiting...'")
     sys.exit(1)
 
-print("success")
+log("success")
 sys.exit(0)
