@@ -4,13 +4,7 @@
     <baseClass>Safir.Dob.Parametrization</baseClass>
     <parameters>
       <parameter>
-        <summary>True if persistence is used in this system.</summary>
-        <name>SystemHasPersistence</name>
-        <type>Boolean</type>
-        <value>True</value>
-      </parameter>
-      <parameter>
-          <summary>Which backend should DOPE use (Currently 'File' and 'Odbc' are supported).</summary>
+          <summary>Which backend should DOPE use (Currently 'None', 'File', and 'Odbc' are supported).</summary>
           <name>Backend</name>
           <type>Safir.Dob.PersistenceBackend</type>
           <value>File</value>
@@ -52,16 +46,7 @@
         <value>236</value>
       </parameter>
       <parameter>
-        <summary>StandaloneMode means that each dope that is started is saving its own persistent data.
-                 Only valid if when several dope_main runs on different nodes in a redundant system.
-                 Use with caution. If active dope_main(the one that is started first) has no persistent data saved, all
-                 other nodes persistent data will be cleared. </summary>
-        <name>StandaloneMode</name>
-        <type>Boolean</type>
-        <value>False</value>
-      </parameter>
-      <parameter>
-        <summary>TestMode allow initial injections without persistence started. Only valid if SystemHasPersistence flag is set to false.</summary>
+        <summary>TestMode allow initial injections without persistence started.</summary>
         <name>TestMode</name>
         <type>Boolean</type>
         <value>False</value>
