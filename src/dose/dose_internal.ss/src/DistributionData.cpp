@@ -55,14 +55,10 @@ namespace Internal
         BOOST_STATIC_ASSERT(sizeof(LamportTimestamp) == 8);
         BOOST_STATIC_ASSERT(sizeof(InternalRequestId) == 4);
         BOOST_STATIC_ASSERT(sizeof(Identifier) == 8);
-        BOOST_STATIC_ASSERT(sizeof(NodeNumber) == 4);
+        BOOST_STATIC_ASSERT(sizeof(NodeNumber) == 8);
         BOOST_STATIC_ASSERT(sizeof(ContextId) == 4);
-        BOOST_STATIC_ASSERT(sizeof(ConnectionId) == 16);
-#ifdef REGISTER_TIMES
-        BOOST_STATIC_ASSERT(sizeof(Header) == 4 + sizeof(ConnectionId) + 4);
-#else
+        BOOST_STATIC_ASSERT(sizeof(ConnectionId) == 24);
         BOOST_STATIC_ASSERT(sizeof(Header) == 4 + sizeof(ConnectionId));
-#endif
 
         BOOST_STATIC_ASSERT(sizeof(ConnectHeader) == sizeof(Header) + 4);
 
@@ -132,7 +128,7 @@ namespace Internal
                             + sizeof(ConnectionId)
                             + sizeof(InternalRequestId)
                             + 4); //padding
-        BOOST_STATIC_ASSERT(sizeof(ResponseHeader) == 44);
+        BOOST_STATIC_ASSERT(sizeof(ResponseHeader) == 60);
 
 
         BOOST_STATIC_ASSERT(sizeof (unsigned int) == sizeof(boost::uint32_t));

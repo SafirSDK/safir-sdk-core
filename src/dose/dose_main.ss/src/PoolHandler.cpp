@@ -95,7 +95,8 @@ namespace Internal
         //create one StateDistributor per nodeType
         for (auto& nt : distribution.GetNodeTypeConfiguration().nodeTypesParam)
         {
-            m_stateDistributors.emplace(nt.id, StateDistributor<Com::Communication>(m_communication, m_strand, nt.id));
+            auto sd=std::unique_ptr<StateDistributor<Com::Communication> >(new StateDistributor<Com::Communication>(m_communication, m_strand, nt.id));
+            m_stateDistributors.emplace(nt.id, std::move(sd));
         }
     }
 
@@ -112,7 +113,7 @@ namespace Internal
             //start distributing states to other nodes
             for (auto& vt : m_stateDistributors)
             {
-                vt.second.Start();
+                vt.second->Start();
             }
         });
     }
@@ -135,7 +136,7 @@ namespace Internal
             //stop distributing states to others
             for (auto& vt : m_stateDistributors)
             {
-                vt.second.Stop();
+                vt.second->Stop();
             }
         });
     }

@@ -51,7 +51,7 @@ namespace Internal
         Com::Communication& m_communication;
         std::unordered_map<int64_t, int64_t> m_nodes; //map<nodeId, nodeType>
         std::unique_ptr<PoolDistributionRequestor<Com::Communication> > m_poolDistributionRequests;
-        std::unordered_map<int64_t, StateDistributor<Com::Communication> > m_stateDistributors; //map<nodeType, StateDistributor>
+        std::unordered_map<int64_t, std::unique_ptr<StateDistributor<Com::Communication> > > m_stateDistributors; //map<nodeType, StateDistributor>
 
         //other node is requesting a pd or report pdComplete
         void OnPoolDistributionInfo(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size);

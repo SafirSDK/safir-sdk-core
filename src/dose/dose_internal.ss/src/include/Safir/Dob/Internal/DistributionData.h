@@ -581,10 +581,6 @@ namespace Internal
         {
             Type m_type;
             ConnectionId m_sender;
-#ifdef REGISTER_TIMES
-            Typesystem::Int32 m_id;
-            Typesystem::Int32 m_padding2;
-#endif
         };
 
         struct ConnectHeader
