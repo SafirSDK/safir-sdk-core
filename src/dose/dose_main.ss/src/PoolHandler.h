@@ -22,7 +22,6 @@
 *
 ******************************************************************************/
 #pragma once
-
 #include <unordered_map>
 #include "Distribution.h"
 #include "PoolDistribution.h"
@@ -39,7 +38,6 @@ namespace Internal
     /// It handles pool distribution to other nodes, and it request pools from other
     /// existing nodes at start-up.
     ///
-    ///
     class PoolHandler : private boost::noncopyable
     {
     public:
@@ -53,13 +51,16 @@ namespace Internal
         Com::Communication& m_communication;
         std::unordered_map<int64_t, int64_t> m_nodes; //map<nodeId, nodeType>
         std::unique_ptr<PoolDistributionRequestor<Com::Communication> > m_poolDistributionRequests;
-
-        //called from Distribution when new nodes are injected or excluded
-        void OnInjectNode(const std::string& nodeName, int64_t nodeId, int64_t nodeTypeId, const std::string& dataAddress);
-        void OnExcludeNode(int64_t nodeId, int64_t nodeTypeId);
+        std::unordered_map<int64_t, StateDistributor<Com::Communication> > m_stateDistributors; //map<nodeType, StateDistributor>
 
         //other node is requesting a pd or report pdComplete
         void OnPoolDistributionInfo(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size);
+
+        //received registration state from other node
+        void OnRegistrationState(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size);
+
+        //received entity state from other node
+        void OnEntityState(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size);
     };
 }
 }
