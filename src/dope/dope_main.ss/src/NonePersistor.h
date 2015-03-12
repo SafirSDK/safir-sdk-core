@@ -24,45 +24,44 @@
 #pragma once
 
 #include "PersistenceHandler.h"
-#include <boost/filesystem/path.hpp>
-#include <boost/tuple/tuple.hpp>
 #include <Safir/Application/Tracer.h>
 
 
 /**
  * Uses file system for Persistent storage.
  */
-class FilePersistor :
+class NonePersistor :
     public PersistenceHandler
 {
 public:
-    typedef boost::tuple<Safir::Dob::Typesystem::EntityId, Safir::Dob::Typesystem::HandlerId, std::wstring> EntityIdAndHandlerId;
-
-
     /**
      * Constructor
      */
-    explicit FilePersistor(boost::asio::io_service& ioService);
+    explicit NonePersistor(boost::asio::io_service& ioService)
+        : PersistenceHandler(ioService, true)
+    {
+
+    }
 
 private:
     void Store(const Safir::Dob::Typesystem::EntityId entityId,
                        const Safir::Dob::Typesystem::HandlerId handlerId,
                        Safir::Dob::Typesystem::BinarySerialization & bin,
-                       const bool update) override;
+                       const bool update) override
+    {throw std::logic_error("Unexpected call to NonePersistor::Store(...)");}
 
-    void RestoreAll() override;
-    void Remove(const Safir::Dob::EntityProxy & entityProxy) override;
-    void RemoveAll() override;
+    void RestoreAll() override
+    {
+        if (!GetPersistentTypes().empty())
+        {
+            throw std::logic_error("Unexpected persisted types in NonePersistor::RestoreAll()");
+        }
+    }
 
-    boost::filesystem::path GetFilePath(const EntityIdAndHandlerId& entityAndHandler) const;
+    void Remove(const Safir::Dob::EntityProxy & entityProxy) override
+    {throw std::logic_error("Unexpected call to NonePersistor::Remove(...)");}
 
-    Safir::Dob::EntityPtr RestoreBinary(const boost::filesystem::path & path) const;
-    Safir::Dob::EntityPtr RestoreXml(const boost::filesystem::path & path) const;
+    void RemoveAll() override
+    {throw std::logic_error("Unexpected call to NonePersistor::RemoveAll()");}
 
-    void RemoveFile(const boost::filesystem::path& path) const;
-
-    boost::filesystem::path m_storagePath;
-
-    Safir::Application::Tracer m_debug;
 };
-

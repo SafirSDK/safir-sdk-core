@@ -21,8 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __DOPE_APP_H__
-#define __DOPE_APP_H__
+#pragma once
 
 #include <Safir/Application/Backdoor.h>
 #include <Safir/Application/BackdoorKeeper.h>
@@ -105,7 +104,7 @@ private:
     void ConnectionThread();
     //Handler when ok to connect for applications.
     void SignalOkToConnect(bool ok);
-    
+
     boost::asio::io_service m_ioService;
     boost::thread m_thread;
 
@@ -118,5 +117,3 @@ private:
 
     Safir::Application::Tracer m_debug;
 };
-
-#endif

@@ -59,12 +59,8 @@ namespace Safir
         {
             m_timerId = m_timerHandler.RegisterTimeoutHandler(L"End States Timer", *this);
 
-            if (Dob::PersistenceParameters::SystemHasPersistence())
-            {
-                lllog(1) << "dose_main is waiting for persistence data!" << std::endl;
-                std::wcout << "dose_main is waiting for persistence data!" << std::endl;
-            }
-
+            lllog(1) << "dose_main is waiting for persistence data!" << std::endl;
+            std::wcout << "dose_main is waiting for persistence data!" << std::endl;
         }
 
         void PersistHandler::Init(
@@ -81,7 +77,14 @@ namespace Safir
             m_connectionHandler = &connectionHandler;
             m_nodeHandler = &nodeHandler;
 
-            if (Dob::PersistenceParameters::SystemHasPersistence())
+            if(Dob::PersistenceParameters::TestMode())
+            {
+                lllog(1) << "RUNNING IN PERSISTENCE TEST MODE! PLEASE CHANGE PARAMETER "
+                         << "Safir.Dob.PersistenceParameters.TestMode IF THIS IS NOT WHAT YOU EXPECTED!" << std::endl;
+                std::wcout << "RUNNING IN PERSISTENCE TEST MODE! PLEASE CHANGE PARAMETER "
+                           << "Safir.Dob.PersistenceParameters.TestMode IF THIS IS NOT WHAT YOU EXPECTED!" << std::endl;
+            }
+            else
             {
                 m_connection.Attach();
 
@@ -102,23 +105,6 @@ namespace Safir
                     Connections::Instance().AllowConnect(-1);
                 }
             }
-            else
-            {
-                if(Dob::PersistenceParameters::TestMode())
-                {
-                    lllog(1) << "RUNNING IN PERSISTENCE TEST MODE! PLEASE CHANGE PARAMETER "
-                             << "Safir.Dob.PersistenceParameters.TestMode IF THIS IS NOT WHAT YOU EXPECTED!" << std::endl;
-                    std::wcout << "RUNNING IN PERSISTENCE TEST MODE! PLEASE CHANGE PARAMETER "
-                        << "Safir.Dob.PersistenceParameters.TestMode IF THIS IS NOT WHAT YOU EXPECTED!" << std::endl;
-
-                }
-                else
-                {
-                    EntityTypes::Instance().DisallowInitialSet();
-                }
-                // No persistence is used, let -1 connections in.
-                Connections::Instance().AllowConnect(-1);
-           }
         }
 
         void PersistHandler::RequestPersistenceInfo()
@@ -284,15 +270,13 @@ namespace Safir
         {
             lllog(1) << "dose_main persistence data is ready!" << std::endl;
             std::wcout << "dose_main persistence data is ready!" << std::endl;
-            ENSURE(Dob::PersistenceParameters::SystemHasPersistence(), << "This system does not have persistence, it is an error to call SetPersistentDataReady");
-
             m_persistDataReady = true;
         }
 
         bool PersistHandler::IsPersistentDataReady() const
         {
             // Always return true if NO persistence is used.
-            return m_persistDataReady || !Dob::PersistenceParameters::SystemHasPersistence();
+            return m_persistDataReady;
         }
 
         }
