@@ -7,7 +7,7 @@
           <summary>Which backend should DOPE use (Currently 'None', 'File', and 'Odbc' are supported).</summary>
           <name>Backend</name>
           <type>Safir.Dob.PersistenceBackend</type>
-          <value>File</value>
+          <value>None</value>
       </parameter>
       <parameter>
         <summary>Full path where the File storage backend stores its data. Use forward slashes as directory separator!</summary>
