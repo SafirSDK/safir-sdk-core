@@ -187,6 +187,7 @@ class TestEnv:
     def WaitForOutput(self, name, expected_output):
         while True:
             output = self.Output(name)
+            #print(output)
             if output.find(expected_output) != -1:
                 return output
             if not self.ProcessDied(): #reversed return value

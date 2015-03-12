@@ -248,6 +248,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    //std::cin.get();
+    std::wcout << "Exiting" << std::endl;
+
     return 0;
 }
