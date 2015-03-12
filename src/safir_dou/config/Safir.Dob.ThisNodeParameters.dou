@@ -16,14 +16,14 @@
             <summary>Address and port of the control channel</summary>
             <name>ControlAddress</name>
             <type>String</type>
-            <value>0.0.0.0:30000</value>
+            <value>127.0.0.1:30000</value>
         </parameter>
 
         <parameter>
             <summary>Address and port of the data channel</summary>
             <name>DataAddress</name>
             <type>String</type>
-            <value>0.0.0.0:40000</value>
+            <value>127.0.0.1:40000</value>
         </parameter>
 
         <parameter>
