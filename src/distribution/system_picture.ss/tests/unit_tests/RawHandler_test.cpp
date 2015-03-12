@@ -475,7 +475,7 @@ BOOST_AUTO_TEST_CASE( incarnation_id_set_callback)
 
     BOOST_CHECK_NO_THROW(ioService.run());
     BOOST_CHECK_EQUAL(cbCalls, 3);
-    BOOST_REQUIRE_EQUAL(incarnations.size(), 1);
+    BOOST_REQUIRE_EQUAL(incarnations.size(), 1U);
     BOOST_CHECK_EQUAL(*incarnations.begin(), 12345);
 }
 
@@ -514,7 +514,7 @@ BOOST_AUTO_TEST_CASE( incarnation_id_forbid)
 
     BOOST_CHECK_NO_THROW(ioService.run());
     BOOST_CHECK_EQUAL(cbCalls, 2);
-    BOOST_REQUIRE_EQUAL(incarnations.size(), 1);
+    BOOST_REQUIRE_EQUAL(incarnations.size(), 1U);
     BOOST_CHECK_EQUAL(*incarnations.begin(), 12345);
 }
 
