@@ -222,7 +222,7 @@ try:
     print("== Convert binaries to xml")
 
     #db is automatically chosen by parameter setting
-    subprocess.call(os.path.join(parameters.SAFIR_RUNTIME,"bin","dope_bin2xml"))
+    subprocess.call("dope_bin2xml")
 
     if count_xml(parameters) != 110 or count_rows(parameters) != 110:
         print("dope_bin2xml appears to have failed")
