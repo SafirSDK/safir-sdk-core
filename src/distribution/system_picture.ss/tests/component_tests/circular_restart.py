@@ -215,11 +215,11 @@ try:
                 nodes.append(launch_node(i,args))
             else:
                 log("We've done our revolutions, not restarting node", i)
+                success = True
 
         if len(nodes) == 0:
             log("No nodes running, exiting")
             break;
-    success = True
 except KeyboardInterrupt:
     pass
 except:
