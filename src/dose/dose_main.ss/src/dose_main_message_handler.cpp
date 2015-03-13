@@ -28,6 +28,9 @@
 #include <boost/shared_ptr.hpp>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/Id.h>
+#include <Safir/Dob/Internal/DistributionData.h>
+#include <Safir/Dob/Internal/Connection.h>
+#include <Safir/Dob/Internal/Communication.h>
 #include <Safir/Dob/Internal/Connection.h>
 #include <Safir/Dob/Internal/MessageTypes.h>
 #include <Safir/Dob/NodeParameters.h>
@@ -115,11 +118,6 @@ namespace Internal
         connection->GetMessageOutQueue().Dispatch
             (boost::bind(&MessageHandler::DispatchMessage,this,boost::ref(noPopped),boost::cref(connection),_1,_2,_3),
             boost::bind(PostFullAction,boost::cref(connection)));
-    }
-
-    void MessageHandler::HandleMessageFromDoseCom(const DistributionData & msg)
-    {
-
     }
 
     void MessageHandler::Send(const DistributionData& msg)

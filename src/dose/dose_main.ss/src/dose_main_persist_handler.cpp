@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -26,8 +27,6 @@
 
 #include "dose_main_defs.h"
 #include "dose_main_communication.h"
-#include "dose_main_connection_handler.h"
-#include "dose_main_node_handler.h"
 #include <Safir/Dob/PersistenceParameters.h>
 #include <Safir/Dob/PersistentDataReady.h>
 #include <Safir/Dob/Internal/Connections.h>
@@ -44,38 +43,28 @@
 
 namespace Safir
 {
-    namespace Dob
-    {
-        namespace Internal
-        {
-            PersistHandler::PersistHandler(TimerHandler& timerHandler):
-                m_timerHandler(timerHandler),
-#if 0 //stewart
-        m_ecom(NULL),
-#endif
-            m_connectionHandler(NULL),
-            m_nodeHandler(NULL),
-            m_persistDataReady(false)
+namespace Dob
+{
+namespace Internal
+{
+
+    PersistHandler::PersistHandler(boost::asio::io_service& ioService,
+                                   Com::Communication& communication,
+                                   TimerHandler& timerHandler)
+        : m_strand(ioService),
+          m_communication(communication),
+          m_timerHandler(timerHandler),
+          m_persistDataReady(false)
         {
             m_timerId = m_timerHandler.RegisterTimeoutHandler(L"End States Timer", *this);
-
-            lllog(1) << "dose_main is waiting for persistence data!" << std::endl;
-            std::wcout << "dose_main is waiting for persistence data!" << std::endl;
         }
 
-        void PersistHandler::Init(
-#if 0 //stewart
-                                  ExternNodeCommunication& ecom,
-#endif
-            ConnectionHandler& connectionHandler,
-            NodeHandler& nodeHandler,
-            const bool otherNodesExistAtStartup)
+    void PersistHandler::Start()
+    {
+        m_strand.dispatch([this] ()
         {
-#if 0 //stewart
-            m_ecom = &ecom;
-#endif
-            m_connectionHandler = &connectionHandler;
-            m_nodeHandler = &nodeHandler;
+            lllog(1) << "dose_main is waiting for persistence data!" << std::endl;
+            std::wcout << "dose_main is waiting for persistence data!" << std::endl;
 
             if(Dob::PersistenceParameters::TestMode())
             {
@@ -86,27 +75,123 @@ namespace Safir
             }
             else
             {
-                m_connection.Attach();
+                m_connection.Open(L"dose_main", L"persist_handler", 0, NULL, this);
 
-                // Register service
                 m_connection.RegisterServiceHandler
-                    (Dob::PersistentDataReady::ClassTypeId,
-                    Typesystem::HandlerId(),
-                    this);
+                        (Dob::PersistentDataReady::ClassTypeId,
+                         Typesystem::HandlerId(),
+                         this);
 
-                if (otherNodesExistAtStartup)
-                {
-                    //Get the statuses of the other nodes
-                    RequestPersistenceInfo();
-                }
-                else
-                {
-                    // No other nodes are up, let -1 connections in.
-                    Connections::Instance().AllowConnect(-1);
-                }
+                //TODO stewart: Figure out how this should work.
+                //                if (otherNodesExistAtStartup)
+                //                {
+                //                    //Get the statuses of the other nodes
+                //                    RequestPersistenceInfo();
+                //                }
+                //                else
+                //                {
+                //                    // No other nodes are up, let -1 connections in.
+                //                    Connections::Instance().AllowConnect(-1);
+                //                }
             }
+        });
+    }
+
+    void PersistHandler::Stop()
+    {
+         m_strand.dispatch([this] ()
+         {
+             m_connection.Close();
+         });
+    }
+
+    void PersistHandler::AddSubscriber(const PersistenDataReadyCallback& cb)
+    {
+        m_strand.dispatch([this, cb] ()
+        {
+            m_callbacks.push_back(cb);
+        });
+    }
+
+    void PersistHandler::SetPersistentDataReady()
+    {
+        m_strand.dispatch([this] ()
+        {
+            lllog(1) << "dose_main persistence data is ready!" << std::endl;
+            std::wcout << "dose_main persistence data is ready!" << std::endl;
+            m_persistDataReady = true;
+
+            for (auto& cb : m_callbacks)
+            {
+                cb();
+            }
+        });
+
+    }
+
+    bool PersistHandler::IsPersistentDataReady() const
+    {
+        return m_persistDataReady;
+    }
+
+    void PersistHandler::OnDoDispatch()
+    {
+        m_strand.dispatch([this] ()
+        {
+            m_connection.Dispatch();
+        });
+    }
+
+    // OnDoDispatch guarantees that strand is taken when this method is called
+    void PersistHandler::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId    /*typeId*/,
+        const Safir::Dob::Typesystem::HandlerId& /*handlerId*/)
+    {
+        SEND_SYSTEM_LOG(Alert,
+                        << "Someone overregistered Safir::Dob::PersistentDataReady, "
+                           "so I'm not going to be able to allow other connections to connect!");
+    }
+
+    // OnDoDispatch guarantees that strand is taken when this method is called
+    void PersistHandler::OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRequestProxy,
+                                          Safir::Dob::ResponseSenderPtr   responseSender)
+    {
+        if (!m_persistDataReady)
+        {
+            if (EntityTypes::Instance().IsInitialSetAllowed())
+            {
+                //disallow more persistence data
+                EntityTypes::Instance().DisallowInitialSet();
+
+                SetPersistentDataReady();
+
+#if 0 //stewart
+                lllout << "Calling SetOkToSignalPDComplete, since this node has now fulfilled the requirements for signalling PD complete (we got persistance data from local app)" << std::endl;
+
+                m_ecom->SetOkToSignalPDComplete();
+#endif
+            }
+
+            // Generate a success response
+            responseSender->Send(Dob::SuccessResponse::Create());
+        }
+        else
+        {
+            // Generate a success response
+            responseSender->Send(Dob::SuccessResponse::Create());
         }
 
+        //unregister so we can't be called again!
+        //TODO: add this again when #193 is fixed
+        //then we can get rid of the dual-calling above.
+        //        m_connection.UnregisterHandler(Dob::PersistentDataReady::ClassTypeId,
+        //                                       Typesystem::HandlerId());
+    }
+
+    void PersistHandler::HandleTimeout(const TimerInfoPtr & /*timer*/)
+    {
+        lllout << "Timeout! Calling RequestPersistenceInfo."  <<std::endl;
+        RequestPersistenceInfo();
+    }
         void PersistHandler::RequestPersistenceInfo()
         {
 #if 0 //stewart
@@ -165,10 +250,9 @@ namespace Safir
 #endif
         }
 
-
+#if 0 //stewart
         void PersistHandler::HandleMessageFromDoseCom(const DistributionData& /*data*/)
         {
-#if 0 //stewart
             if (data.GetType() == DistributionData::Action_HavePersistenceDataRequest)
             {
                 lllout << "Got an Action_HavePersistenceDataRequest, responding with " << m_persistDataReady << std::endl;
@@ -215,70 +299,9 @@ namespace Safir
                     }
                 }
             }
+        }
 #endif
-        }
 
-        void PersistHandler::HandleTimeout(const TimerInfoPtr & /*timer*/)
-        {
-            lllout << "Timeout! Calling RequestPersistenceInfo."  <<std::endl;
-            RequestPersistenceInfo();
-        }
-
-        void PersistHandler::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId    /*typeId*/,
-            const Safir::Dob::Typesystem::HandlerId& /*handlerId*/)
-        {
-            SEND_SYSTEM_LOG(Alert,
-                            << "Someone overregistered Safir::Dob::PersistentDataReady, so I'm not going to be able to allow other connections to connect!");
-        }
-
-        void PersistHandler::OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRequestProxy,
-            Safir::Dob::ResponseSenderPtr   responseSender)
-        {
-            if (!m_persistDataReady)
-            {
-                if (EntityTypes::Instance().IsInitialSetAllowed())
-                {
-                    SetPersistentDataReady();
-
-                    lllout << "Calling SetOkToSignalPDComplete, since this node has now fulfilled the requirements for signalling PD complete (we got persistance data from local app)" << std::endl;
-#if 0 //stewart
-                    m_ecom->SetOkToSignalPDComplete();
-#endif
-                    m_connectionHandler->MaybeSignalConnectSemaphore();
-
-                    //disallow more persistence data
-                    EntityTypes::Instance().DisallowInitialSet();
-                }
-
-                // Generate a success response
-                responseSender->Send(Dob::SuccessResponse::Create());
-            }
-            else
-            {
-                // Generate a success response
-                responseSender->Send(Dob::SuccessResponse::Create());
-            }
-
-            //unregister so we can't be called again!
-            //TODO: add this again when #193 is fixed
-            //then we can get rid of the dual-calling above.
-            //        m_connection.UnregisterHandler(Dob::PersistentDataReady::ClassTypeId,
-            //                                       Typesystem::HandlerId());
-        }
-
-        void PersistHandler::SetPersistentDataReady()
-        {
-            lllog(1) << "dose_main persistence data is ready!" << std::endl;
-            std::wcout << "dose_main persistence data is ready!" << std::endl;
-            m_persistDataReady = true;
-        }
-
-        bool PersistHandler::IsPersistentDataReady() const
-        {
-            // Always return true if NO persistence is used.
-            return m_persistDataReady;
-        }
-
-        }
-    }
+}
+}
 }

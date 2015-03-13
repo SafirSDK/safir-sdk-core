@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -23,17 +24,15 @@
 ******************************************************************************/
 
 #include "dose_main_connection_handler.h"
-#include "dose_main_node_handler.h"
-#include "dose_main_communication.h"
-#include "dose_main_process_info_handler.h"
 #include "dose_main_pending_registration_handler.h"
-#include "PoolHandler.h"
 #include "dose_main_request_handler.h"
 #include "dose_main_persist_handler.h"
+#include <Safir/Dob/Internal/Communication.h>
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Dob/Internal/NodeStatuses.h>
+#include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 
 
@@ -44,47 +43,32 @@ namespace Dob
 namespace Internal
 {
 
-    ConnectionHandler::ConnectionHandler():
-#if 0 //stewart
-        m_ecom(NULL),
-#endif
-        m_processInfoHandler(NULL),
-        m_requestHandler(NULL),
-        m_pendingRegistrationHandler(NULL),
-        m_nodeHandler(NULL),
-        m_persistHandler(NULL),
-        m_connectSemHasBeenSignalled(false)
+    ConnectionHandler::ConnectionHandler(boost::asio::io_service& ioService,
+                                         Com::Communication& communication,
+                                         RequestHandler& requesthandler,
+                                         PendingRegistrationHandler& prh,
+                                         PersistHandler& persistHandler)
+        : m_strand(ioService),
+          m_communication(communication),
+          m_requestHandler(requesthandler),
+          m_pendingRegistrationHandler(prh),
+          m_persistHandler(persistHandler)
     {
-
     }
 
-    ConnectionHandler::~ConnectionHandler()
+    void ConnectionHandler::Start()
     {
-
+        // Set up callback for the persistentDataReady event.
+        m_persistHandler.AddSubscriber([]()
+        {
+            lllog(1) << "We have received persistence data (either from DOPE or other node), "
+                        "ok to let apps connect!" << std::endl;
+            Connections::Instance().AllowConnect(-1);
+            Connections::Instance().AllowConnect(0);
+        });
     }
 
-
-    void ConnectionHandler::Init(
-#if 0 //stewart
-                                 ExternNodeCommunication & ecom,
-#endif
-                                 ProcessInfoHandler & processInfoHandler,
-                                 RequestHandler & requestHandler,
-                                 PendingRegistrationHandler & prh,
-                                 NodeHandler & nh,
-                                 PersistHandler & persistHandler)
-    {
-#if 0 //stewart
-        m_ecom = &ecom;
-#endif
-        m_processInfoHandler = &processInfoHandler;
-        m_requestHandler = &requestHandler;
-        m_pendingRegistrationHandler = &prh;
-        m_nodeHandler = &nh;
-        m_persistHandler = &persistHandler;
-    }
-
-    void ConnectionHandler::HandleConnect(const ConnectionPtr & connection)
+    void ConnectionHandler::HandleConnect(const ConnectionPtr& connection)
     {
         DistributionData connMsg(connect_message_tag,
                                  connection->Id(),
@@ -113,14 +97,15 @@ namespace Internal
 #endif
     }
 
-    void ConnectionHandler::HandleDisconnect(const ConnectionPtr & connection)
+    void ConnectionHandler::HandleDisconnect(const ConnectionPtr& connection)
     {
         //remove pending registrations
-        m_pendingRegistrationHandler->RemovePendingRegistrations(connection->Id());
+        m_pendingRegistrationHandler.RemovePendingRegistrations(connection->Id());
 
         // Handle outstanding requests towards the disconnected app ...
-        m_requestHandler->HandleDisconnect(connection);
+        m_requestHandler.HandleDisconnect(connection);
 
+#if 0 //stewart
         //Distribute the disconnection to dose_com if Connection resides on this node
         if (connection->Id().m_node == Dob::ThisNodeParameters::NodeNumber())
         {
@@ -138,13 +123,14 @@ namespace Internal
                 return;
             }
 
-#if 0 //stewart
+
             if (!m_ecom->Send(msg))
             {
                 m_unsent.push_back(msg);
             }
-#endif
+
         }
+#endif
     }
 
 
@@ -166,6 +152,7 @@ namespace Internal
         return true;
     }
 
+#if 0 //stewart
     //-----------------------
     //From dose_com
     //-----------------------
@@ -241,6 +228,7 @@ namespace Internal
         }
 
     }
+#endif
 
 }
 }

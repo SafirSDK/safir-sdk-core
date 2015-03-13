@@ -25,10 +25,8 @@
 #pragma once
 
 #include "Node.h"
-#include "dose_main_blocking_handler.h"
-#include <Safir/Dob/Internal/DistributionData.h>
-#include <Safir/Dob/Internal/Connection.h>
-#include <Safir/Dob/Internal/Communication.h>
+#include <Safir/Dob/Internal/InternalFwd.h>
+#include <boost/noncopyable.hpp>
 
 namespace Safir
 {
@@ -36,32 +34,36 @@ namespace Dob
 {
 namespace Internal
 {
+
+    // Forward declarations
+    namespace Com
+    {
+        class Communication;
+    }
+
     class MessageHandler:
         private boost::noncopyable
     {
     public:
         MessageHandler(Com::Communication& communication,
-                       const NodeTypeIds& nodeTypeIds);
+                       const NodeTypeIds&  nodeTypeIds);
 
-        void DistributeMessages(const ConnectionPtr & connection);
-
-        void HandleMessageFromDoseCom(const DistributionData & msg);
+        void DistributeMessages(const ConnectionPtr& connection);
 
     private:
-        void DispatchMessage(size_t & numberDispatched,
-                             const ConnectionPtr & connection,
-                             const DistributionData & msg,
-                             bool & exitDispatch,
-                             bool & dontRemove);
+        void DispatchMessage(size_t&                    numberDispatched,
+                             const ConnectionPtr&       connection,
+                             const DistributionData&    msg,
+                             bool&                      exitDispatch,
+                             bool&                      dontRemove);
 
-        void TraverseMessageQueue(const ConnectionPtr & connection);
+        void TraverseMessageQueue(const ConnectionPtr& connection);
 
         void Send(const DistributionData& msg);
-        void Receive(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size);
 
-        Com::Communication& m_communication;
-        const NodeTypeIds   m_nodeTypeIds;
-        const int64_t       m_dataTypeIdentifier;
+        Com::Communication&      m_communication;
+        const NodeTypeIds        m_nodeTypeIds;
+        const int64_t            m_dataTypeIdentifier;
     };
 }
 }

@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -21,15 +22,25 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-
-#ifndef __DOSE_MAIN_PERSIST_HANDLER_H__
-#define __DOSE_MAIN_PERSIST_HANDLER_H__
+#pragma once
 
 #include <Safir/Dob/Internal/InternalFwd.h>
+#include <Safir/Dob/Internal/Communication.h>
 #include <Safir/Dob/Connection.h>
 #include "dose_main_timers.h"
 #include <boost/noncopyable.hpp>
-#include <deque>
+#include <set>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
+#endif
+
+#include <boost/asio.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 namespace Safir
 {
@@ -37,61 +48,55 @@ namespace Dob
 {
 namespace Internal
 {
-    class ExternNodeCommunication;
-    class ConnectionHandler;
-    class NodeHandler;
+
 
     class PersistHandler:
+        public Safir::Dob::Dispatcher,
         public Safir::Dob::ServiceHandler,
         public TimeoutHandler,
         private boost::noncopyable
     {
     public:
-        explicit PersistHandler(TimerHandler& timerHandler);
 
-        void Init(
-#if 0 //stewart
-                  ExternNodeCommunication& ecom,
-#endif
-                  ConnectionHandler& connectionHandler,
-                  NodeHandler& nodeHandler,
-                  const bool otherNodesExistAtStartup);
+        using PersistenDataReadyCallback = std::function<void()>;
 
-        //only to be called when the service persistencedataready is called
-        //or when we have fulfilled other criteria for receiving persistence data
+        explicit PersistHandler(boost::asio::io_service& ioService,
+                                Com::Communication& communication,
+                                TimerHandler& timerHandler);
+
+        void Start();
+        void Stop();
+
+        void AddSubscriber(const PersistenDataReadyCallback& cb);
+
         void SetPersistentDataReady();
+
         bool IsPersistentDataReady() const;
 
-        void HandleMessageFromDoseCom(const DistributionData& data);
     private:
-        virtual void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId    typeId,
-                                           const Safir::Dob::Typesystem::HandlerId& handlerId);
 
-        virtual void OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRequestProxy,
-                                      Safir::Dob::ResponseSenderPtr   responseSender);
+        void OnDoDispatch() override;
+        void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId    typeId,
+                                   const Safir::Dob::Typesystem::HandlerId& handlerId) override;
+
+        void OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRequestProxy,
+                              Safir::Dob::ResponseSenderPtr   responseSender) override;
 
 
-        virtual void HandleTimeout(const TimerInfoPtr & timer);
+        void HandleTimeout(const TimerInfoPtr & timer) override;
 
         void RequestPersistenceInfo();
 
-        TimerHandler& m_timerHandler;
-#if 0 //stewart
-        ExternNodeCommunication * m_ecom;
-#endif
-        ConnectionHandler * m_connectionHandler;
-        NodeHandler * m_nodeHandler;
-
-        Safir::Dob::SecondaryConnection m_connection;
-
+        boost::asio::io_service::strand         m_strand;
+        Com::Communication&                     m_communication;
+        TimerHandler&                           m_timerHandler;
+        Safir::Dob::Connection                  m_connection;
         std::set<Safir::Dob::Typesystem::Int32> m_waitingForResponsesFromNodes;
-
-        TimerId m_timerId;
-
-        bool m_persistDataReady;
+        TimerId                                 m_timerId;
+        std::atomic<bool>                       m_persistDataReady;
+        std::vector<PersistenDataReadyCallback> m_callbacks;
     };
 }
 }
 }
 
-#endif

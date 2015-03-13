@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -21,14 +22,23 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-
-#ifndef _dose_main_connection_handler_h
-#define _dose_main_connection_handler_h
+#pragma once
 
 #include <boost/noncopyable.hpp>
 #include <Safir/Dob/Internal/InternalFwd.h>
 #include <Safir/Dob/Internal/DistributionData.h>
 #include <deque>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
+#endif
+
+#include <boost/asio.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 namespace Safir
 {
@@ -37,10 +47,10 @@ namespace Dob
 namespace Internal
 {
     //forward declarations:
-#if 0 //stewart
-    class ExternNodeCommunication;
-#endif
-    class ProcessInfoHandler;
+    namespace Com
+    {
+        class Communication;
+    }
     class RequestHandler;
     class PendingRegistrationHandler;
     class NodeHandler;
@@ -50,46 +60,35 @@ namespace Internal
         private boost::noncopyable
     {
     public:
-        ConnectionHandler();
-        ~ConnectionHandler();
+        ConnectionHandler(boost::asio::io_service& ioService,
+                          Com::Communication& communication,
+                          RequestHandler& requesthandler,
+                          PendingRegistrationHandler& prh,
+                          PersistHandler& persistHandler);
 
-        void Init(
-#if 0 //stewart
-                  ExternNodeCommunication & ecom,
-#endif
-                  ProcessInfoHandler & processInfoHandler,
-                  RequestHandler & requesthandler,
-                  PendingRegistrationHandler & prh,
-                  NodeHandler & nh,
-                  PersistHandler & persistHandler);
+        void Start();
 
-        void MaybeSignalConnectSemaphore();
+        //stewart TODO Instead of other classes calling this method when something has happened
+        //             This class should set up its own event subscriptions
+        //void MaybeSignalConnectSemaphore();
 
         void HandleConnect(const ConnectionPtr & connection);
         void HandleDisconnect(const ConnectionPtr & connection);
 
         bool HandleUnsent();
 
-        void HandleConnectFromDoseCom(const DistributionData & connectMsg);
-        void HandleDisconnectFromDoseCom(const DistributionData & disconnectMsg);
-
     private:
-#if 0 //stewart
-        ExternNodeCommunication * m_ecom;
-#endif
-        ProcessInfoHandler * m_processInfoHandler;
-        RequestHandler * m_requestHandler;
-        PendingRegistrationHandler * m_pendingRegistrationHandler;
-        NodeHandler * m_nodeHandler;
-        PersistHandler * m_persistHandler;
+
+        boost::asio::io_service::strand m_strand;
+        Com::Communication&             m_communication;
+        RequestHandler&                 m_requestHandler;
+        PendingRegistrationHandler&     m_pendingRegistrationHandler;
+        PersistHandler&                 m_persistHandler;
 
         std::deque<DistributionData> m_unsent;
-
-        bool m_connectSemHasBeenSignalled;
     };
 }
 }
 }
 
-#endif
 

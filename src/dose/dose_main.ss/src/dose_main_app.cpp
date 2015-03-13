@@ -81,7 +81,6 @@ namespace Internal
     DoseApp::DoseApp(boost::asio::io_service::strand& strand):
         m_connectEvent(0),
         m_connectionOutEvent(0),
-        m_nodeStatusChangedEvent(0),
         m_strand(strand),
         m_work(new boost::asio::io_service::work(m_strand.get_io_service())),
         m_distribution(),
@@ -115,13 +114,7 @@ namespace Internal
         m_signalSet(m_strand.get_io_service()),
         m_timerHandler(m_strand),
         m_endStates(m_timerHandler),
-        m_blockingHandler(),
-        m_messageHandler(),
-        m_requestHandler(),
-        m_responseHandler(),
-        m_poolHandler(),
         m_pendingRegistrationHandler(m_timerHandler),
-        m_persistHandler(m_timerHandler),
         m_processMonitor(m_strand.get_io_service(),ProcessExited,boost::chrono::seconds(1)),
         m_HandleEvents_notified(0),
         m_DispatchOwnConnection_notified(0)
@@ -238,6 +231,22 @@ namespace Internal
                                                   *m_responseHandler,
                                                   m_distribution->GetCommunication()));
 
+        m_persistHandler.reset(new PersistHandler(m_strand.get_io_service(),
+                                                  m_distribution->GetCommunication(),
+                                                  m_timerHandler));
+
+        m_connectionHandler.reset(new ConnectionHandler(m_strand.get_io_service(),
+                                                        m_distribution->GetCommunication(),
+                                                        *m_requestHandler,
+                                                        m_pendingRegistrationHandler,
+                                                        *m_persistHandler));
+
+        m_persistHandler->Start();
+        m_connectionHandler->Start();
+
+        //stewart TODO This is a temporary call just to be able to test dose_main.
+        m_persistHandler->SetPersistentDataReady();
+
 #ifndef NDEBUG
         std::wcout<<"dose_main running (debug)..." << std::endl;
 #else
@@ -305,6 +314,7 @@ namespace Internal
         }
 
         m_poolHandler->Stop();
+        m_persistHandler->Stop();
         m_ownConnection.Close();
 
         m_signalSet.cancel();
@@ -405,6 +415,9 @@ namespace Internal
             Connections::Instance().HandleConnect(*this);
         }
 
+#if 0 //stewart TODO If there are handlers that need to be notified of node status changes this should be
+      //             done with a subscription mechanism provided by the NodeStatus class.
+
         if (m_nodeStatusChangedEvent != 0)
         {
             ++numEvents;
@@ -426,14 +439,17 @@ namespace Internal
 
             if (m_persistHandler.IsPersistentDataReady())
             {
+
                 lllout << "Calling SetOkToSignalPDComplete, since this node has now fulfilled the requirements for signalling PD complete" << std::endl;
-#if 0 //stewart
+
                 m_ecom.SetOkToSignalPDComplete();
-#endif
+
             }
             m_connectionHandler.MaybeSignalConnectSemaphore();
             m_pendingRegistrationHandler.CheckForPending();
         }
+#endif
+
     }
 
     ConnectResult DoseApp::CanAddConnection(const std::string & connectionName, const pid_t pid, const long /*context*/)
@@ -521,7 +537,7 @@ namespace Internal
     void DoseApp::HandleConnect(const ConnectionPtr & connection)
     {
         lllout << "ConnectionHandler::HandleConnect: New connection from " << connection->NameWithCounter() << " id = " << connection->Id() << std::endl;
-        m_connectionHandler.HandleConnect(connection);
+        m_connectionHandler->HandleConnect(connection);
         m_processInfoHandler.ConnectionAdded(connection);
     }
 
@@ -543,7 +559,7 @@ namespace Internal
             return;
         }
 
-        m_connectionHandler.HandleDisconnect(connection);
+        m_connectionHandler->HandleDisconnect(connection);
 
         // Remove the connection from the processInfo structure
         m_processInfoHandler.ConnectionRemoved(connection);
@@ -749,23 +765,10 @@ namespace Internal
 #endif
     }
 
-    void DoseApp::NodeStatusChangedNotifier()
-    {
-        m_nodeStatusChangedEvent = true;
-        if (m_HandleEvents_notified == 0)
-        {
-            m_HandleEvents_notified = 1;
-            m_strand.post([this]()
-                          {
-                              HandleEvents();
-                          });
-        }
-    }
-
     void DoseApp::QueueNotFull()
     {
         lllout << "DoseApp::QueueNotFull: Calling HandleUnsent()" << std::endl;
-        m_connectionHandler.HandleUnsent();
+        m_connectionHandler->HandleUnsent();
 
 #if 0 //stewart
         lllout << "DoseApp::QueueNotFull: Calling HandleWaitingConnections(...)" << std::endl;

@@ -100,7 +100,6 @@ namespace Internal
         void HandleEvents();
         Safir::Utilities::Internal::AtomicUint32 m_connectEvent;
         Safir::Utilities::Internal::AtomicUint32 m_connectionOutEvent;
-        Safir::Utilities::Internal::AtomicUint32 m_nodeStatusChangedEvent;
 
         void ConnectionThread();
 
@@ -115,8 +114,6 @@ namespace Internal
         void AllocateStatic();
 
         void HandleConnectionOutEvent(const ConnectionPtr & connection, std::vector<ConnectionPtr>& deadConnections);
-
-        void NodeStatusChangedNotifier();
 
         void QueueNotFull();
 
@@ -149,21 +146,15 @@ namespace Internal
 
         BlockingHandlers    m_blockingHandler;
 
-        std::unique_ptr<MessageHandler> m_messageHandler;
-
-        // Shared memory queue message handlers
-        ConnectionHandler   m_connectionHandler;       
-
+        std::unique_ptr<MessageHandler>      m_messageHandler;
         std::unique_ptr<RequestHandler>      m_requestHandler;
         std::unique_ptr<ResponseHandler>     m_responseHandler;
         std::unique_ptr<PoolHandler>         m_poolHandler;
+        std::unique_ptr<PersistHandler>      m_persistHandler;
+        std::unique_ptr<ConnectionHandler>   m_connectionHandler;
 
         //Pending Registrations
         PendingRegistrationHandler m_pendingRegistrationHandler;
-
-
-        //Persistent data service and state
-        PersistHandler m_persistHandler;
 
 #if 0 //stewart
         //Extern node communication
