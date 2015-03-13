@@ -36,15 +36,17 @@
 
 //disable warnings in boost
 #if defined _MSC_VER
-  #pragma warning (push)
-  #pragma warning (disable : 4100 4267 4505)
+#  pragma warning (push)
+#  pragma warning (disable : 4100 4267 4505)
 #endif
 
 #include <boost/program_options.hpp>
 #include <boost/asio.hpp>
 
 #if defined _MSC_VER
-  #pragma warning (pop)
+#  pragma warning (pop)
+//and disable a warning that happens on instantiation
+#  pragma warning (disable : 4505)
 #endif
 
 
