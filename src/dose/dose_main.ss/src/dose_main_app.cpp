@@ -217,7 +217,7 @@ namespace Internal
                                               nodeTypeId,
                                               dataAddress));
 
-        m_poolHandler.reset(new PoolHandler(m_strand, *m_distribution));
+        m_poolHandler.reset(new PoolHandler(m_strand, *m_distribution, [this](int64_t tid){m_pendingRegistrationHandler.CheckForPending(tid);}));
 
         // Collect all node type ids
         NodeTypeIds nodeTypeIds;

@@ -40,7 +40,9 @@ namespace Dob
 {
 namespace Internal
 {
-    PoolHandler::PoolHandler(boost::asio::io_service::strand& strand, Distribution& distribution)
+    PoolHandler::PoolHandler(boost::asio::io_service::strand& strand,
+                             Distribution& distribution,
+                             const std::function<void(int64_t)>& checkPendingReg)
         :m_strand(strand)
         ,m_communication(distribution.GetCommunication())
     {
@@ -95,7 +97,7 @@ namespace Internal
         //create one StateDistributor per nodeType
         for (auto& nt : distribution.GetNodeTypeConfiguration().nodeTypesParam)
         {
-            auto sd=std::unique_ptr<StateDistributor<Com::Communication> >(new StateDistributor<Com::Communication>(m_communication, m_strand, nt.id));
+            auto sd=std::unique_ptr<StateDistributor<Com::Communication> >(new StateDistributor<Com::Communication>(nt.id, m_communication, m_strand, checkPendingReg));
             m_stateDistributors.emplace(nt.id, std::move(sd));
         }
     }
@@ -285,55 +287,3 @@ namespace Internal
 }
 }
 }
-
-
-//-----------------------------
-// OLD
-//-----------------------------
-
-//#include "PoolHandler.h"
-
-//#include "dose_main_blocking_handler.h"
-//#include "dose_main_communication.h"
-//#include "dose_main_connection_handler.h"
-//#include "dose_main_pending_registration_handler.h"
-//#include "dose_main_persist_handler.h"
-//#include <Safir/Dob/Internal/Connections.h>
-//#include <Safir/Dob/ConnectionAspectMisc.h>
-//#include <Safir/Dob/ConnectionAspectInjector.h>
-//#include <Safir/Dob/NodeParameters.h>
-//#include <Safir/Dob/Internal/EntityTypes.h>
-//#include <Safir/Dob/Internal/ServiceTypes.h>
-//#include <Safir/Dob/Internal/State.h>
-//#include <Safir/Dob/Internal/ContextIdComposer.h>
-//#include <Safir/Dob/ThisNodeParameters.h>
-//#include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
-//#include <Safir/Utilities/Internal/LowLevelLogger.h>
-//#include <Safir/Utilities/Internal/SystemLog.h>
-//#include <Safir/Dob/Typesystem/LibraryExceptions.h>
-//#include <boost/bind.hpp>
-//#include <Safir/Utilities/Internal/SystemLog.h>
-
-
-//    PoolHandler::PoolHandler(boost::asio::io_service::strand& strand):
-//#if 0 //stewart
-//        m_ecom(NULL),
-//#endif
-//        m_pendingRegistrationHandler(NULL),
-//        m_persistHandler(NULL),
-//        m_connectionHandler(NULL),
-//        m_stateSubscriptionConnections(Safir::Dob::NodeParameters::NumberOfContexts()),
-//        m_pdThread(),
-//        m_strand(strand)
-//    {
-//        m_stateDispatcher.reset(new StateDispatcher([this]()
-//                                                    {
-//                                                        DistributeStates();
-//                                                    },
-//                                                    strand));
-//    }
-
-
-
-
-

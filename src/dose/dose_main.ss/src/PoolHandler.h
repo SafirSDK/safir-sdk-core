@@ -41,7 +41,9 @@ namespace Internal
     class PoolHandler : private boost::noncopyable
     {
     public:
-        PoolHandler(boost::asio::io_service::strand& strand, Distribution& distribution);
+        PoolHandler(boost::asio::io_service::strand& strand,
+                    Distribution& distribution,
+                    const std::function<void(int64_t)>& checkPendingReg);
 
         void Start(const std::function<void()>& poolDistributionComplete);
         void Stop();
