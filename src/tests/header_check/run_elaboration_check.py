@@ -82,16 +82,10 @@ class LllProc:
 
     #returns the contents of the logfile so far.
     def logfile(self):
-        try:
-            with open(logfilename(self.proc)) as logfile:
-                return logfile.read()
-        except FileNotFoundError:
-            return ""
-
-    #returns true if the logfile matches
-    def logfile_contains(self,regex):
-        pattern = re.compile(regex, flags = re.MULTILINE)
-        return pattern.search(self.logfile())
+        if not os.path.isfile(logfilename(self.proc)):
+            return None
+        with open(logfilename(self.proc)) as logfile:
+            return logfile.read()
 
     def kill(self):
         self.proc.kill()
@@ -130,8 +124,8 @@ if not res:
     sys.exit(1)
 p.kill()
 logfile = p.logfile()
-if len(logfile) != 0:
-    log("Logfile was not empty:")
+if logfile is not None:
+    log("Logfile existed, and contained:")
     log(logfile)
     sys.exit(1)
 else:
