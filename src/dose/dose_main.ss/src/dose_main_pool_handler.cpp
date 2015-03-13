@@ -51,7 +51,11 @@ namespace Dob
 {
 namespace Internal
 {
-    const Dob::Typesystem::Int32 g_thisNode = Safir::Dob::ThisNodeParameters::NodeNumber();
+    Dob::Typesystem::Int32 ThisNode()
+    {
+        static const Dob::Typesystem::Int32 thisNode = Safir::Dob::ThisNodeParameters::NodeNumber();
+        return thisNode;
+    }
 
     class PoolHandler::ExceptionInfo
     {
@@ -61,9 +65,9 @@ namespace Internal
             : m_typeId(typeId)
             , m_description(description)
         {
-                
+
         }
-            
+
         void Rethrow() const
         {
             Dob::Typesystem::LibraryExceptions::Instance().Throw(m_typeId, m_description);
@@ -241,16 +245,16 @@ namespace Internal
         }
     }
 
- 
+
     void PoolHandler::PoolDistributionWorker()
     {
 #if 0 //stewart
         boost::shared_ptr<ExceptionInfo> exceptionInfo;
-        
+
         try
         {
             lllout << "Pool distribution thread started" << std::endl;
-            
+
         m_poolDistributionThreadId = boost::this_thread::get_id();
         m_threadMonitor->StartWatchdog(m_poolDistributionThreadId, L"pool distribution thread");
 
@@ -261,7 +265,7 @@ namespace Internal
                 while (!m_persistHandler->IsPersistentDataReady())
                 {
                     boost::this_thread::sleep_for(boost::chrono::milliseconds(10)); //sleep is interruption point
-                
+
                 m_threadMonitor->KickWatchdog(m_poolDistributionThreadId);
                 }
                 lllout << "Pool distribution thread thinks DOPE is done." << std::endl;
@@ -502,7 +506,7 @@ namespace Internal
 
     bool IsLocal(const DistributionData& state)
     {
-        return state.GetSenderId().m_node == g_thisNode;
+        return state.GetSenderId().m_node == ThisNode();
     }
 
     bool ProcessEntityState(
@@ -634,7 +638,7 @@ namespace Internal
         }
 
         //if sender is not local node we dont send to dosecom, and just ignore it.
-        if (currentState.GetSenderId().m_node != g_thisNode)
+        if (currentState.GetSenderId().m_node != ThisNode())
         {
             return true;
         }

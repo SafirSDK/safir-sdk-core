@@ -21,10 +21,12 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
+#include <iostream>
 
 int main()
 {
-    return 0;
+    std::wcout << "START" << std::endl;
+    return 1;
 }
 
 

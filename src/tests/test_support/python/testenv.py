@@ -67,9 +67,12 @@ class TestEnvStopper:
 
 
 class TestEnv:
-    """dose_main: full path to dose_main
-       dope_main: full path to dope_main (pass None if you dont want dope to start)
-       safir_show_config: full path to safir_show_config
+    """
+    dose_main: full path to dose_main
+    dope_main: full path to dope_main (pass None if you dont want dope to start)
+    safir_show_config: full path to safir_show_config
+
+    If the exes are in the PATH, its okay to just use exe names.
     """
     def __init__(self, dose_main, dope_main, safir_show_config):
         self.__procs = dict()

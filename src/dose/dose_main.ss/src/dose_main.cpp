@@ -77,6 +77,8 @@ void CheckThreadCount()
 
 int main()
 {
+    //This log is required by the tests for checking that we don't do too much during elaboration
+    lllog(1) << "dose_main entering main()" << std::endl;
 
     //ensure call to CrashReporter::Stop at application exit
     //Start is called in DoseApp

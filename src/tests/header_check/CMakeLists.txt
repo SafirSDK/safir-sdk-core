@@ -55,3 +55,9 @@ target_link_libraries(check_correct_public_headers PRIVATE
   safir_generated-Core-cpp)
 
 add_dependencies(check_correct_public_headers logging_cpp dots_cpp dose_cpp olib douf_time_cpp swre_interface_cpp)
+
+add_test(NAME check_elaboration COMMAND check_correct_public_headers)
+set_tests_properties(check_elaboration PROPERTIES PASS_REGULAR_EXPRESSION "^START")
+SET_SAFIR_TEST_PROPERTIES(TEST check_elaboration
+  CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/test_config)
+

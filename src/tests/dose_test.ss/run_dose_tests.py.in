@@ -147,7 +147,7 @@ class Parameters:
         #Note: The last part of this path is set by cmake during configuration/installation.
         os.environ["SAFIR_TEST_SUITE_DOU_DIRECTORY"] = os.path.join(install_dir, "@SAFIR_INSTALL_DESTINATION_DOU_BASE@")
 
-        #Note: Last half ofpath is set by cmake during configuration/installation.
+        #Note: Last half of path is set by cmake during configuration/installation.
         self.test_data_directory = os.path.join(install_dir, "@SAFIR_INSTALL_DESTINATION_TEST_DATA@")
         log(self.test_data_directory)
 

@@ -25,7 +25,7 @@
 ###############################################################################
 from __future__ import print_function
 import sys, os, shutil, xml.dom.minidom, glob, time, subprocess, re
-from testenv import TestEnv, TestEnvStopper
+
 
 class Unbuffered:
    def __init__(self, stream):
@@ -35,16 +35,6 @@ class Unbuffered:
        self.stream.flush()
    def __getattr__(self, attr):
        return getattr(self.stream, attr)
-
-def rmdir(directory):
-    if os.path.exists(directory):
-        try:
-            shutil.rmtree(directory)
-        except OSError:
-            print("Failed to remove directory, will retry")
-            time.sleep(0.2)
-            shutil.rmtree(directory)
-
 
 class Parameters:
     def __init__(self):
@@ -57,7 +47,7 @@ class Parameters:
         parser.add_option("--hostname", action="store",dest="hostname",default="localhost",
                           help="Hostname of the database server")
         parser.add_option("--database", action="store",dest="database",
-                          help="Hostname of the database server")
+                          help="Database to connect to")
 
         (options,args) = parser.parse_args()
 
@@ -70,24 +60,6 @@ class Parameters:
             sys.exit(1)
 
         self.driver = options.driver
-
-        self.SAFIR_RUNTIME = os.environ.get("SAFIR_RUNTIME")
-        if not self.SAFIR_RUNTIME:
-            print("Cannot run without SAFIR_RUNTIME being set.")
-            sys.exit(1)
-
-        self.parameters_path = os.path.join(self.SAFIR_RUNTIME,
-                                            "data", 
-                                            "text", 
-                                            "dots", 
-                                            "classes", 
-                                            "safir_core", 
-                                            "config")
-
-        self.PersistenceParameters_path = os.path.join(self.parameters_path, 
-                                                       "Safir.Dob.PersistenceParameters.dou")
-
-        self.tempdir = tempfile.mkdtemp(prefix="dose_test_backup")
 
         if self.driver == "mimer":
             driver = os.environ.get("MIMER_ODBC_DRIVER_NAME")
@@ -111,59 +83,19 @@ class Parameters:
                                                                database = options.database)
 
         print("Using connection string", self.connection_string)
-
-def getText(nodelist):
-    rc = []
-    for node in nodelist:
-        if node.nodeType == node.TEXT_NODE:
-            rc.append(node.data)
-    return ''.join(rc)
-
-def UpdateConfig(parameters):
-    print("** Updating configuration files")
-    #backup dou files to temporary directory
-    shutil.copy2(parameters.PersistenceParameters_path, parameters.tempdir)
-    
-    # Update PersistenceParameters
-    dom = xml.dom.minidom.parse(parameters.PersistenceParameters_path)
-    for param in dom.getElementsByTagName("parameter"):
-        name = getText(param.getElementsByTagName("name")[0].childNodes)
-        value = param.getElementsByTagName("value")[0]
-        if name == "Backend":
-            value.childNodes[0].data = "Odbc"
-        if name == "OdbcStorageConnectString":
-            value.childNodes[0].data = parameters.connection_string
-    with open(parameters.PersistenceParameters_path,"w") as file:
-       file.write(dom.toxml())
-
-def RestoreConfig(parameters):
-    print("** Restoring configuration files")
-    #restore dou files from temporary directory
-    dous = glob.glob(os.path.join(parameters.tempdir,"*.dou"))
-    for dou in dous:
-        shutil.copy2(os.path.join(parameters.tempdir,dou), parameters.parameters_path)
-    rmdir(parameters.tempdir)
+        os.environ["DOPE_TEST_ODBC_CONNECT_STRING"] = self.connection_string
 
 #make stdout unbuffered
 sys.stdout=Unbuffered(sys.stdout)
 
-if sys.platform == "win32":
-    config_type = os.environ.get("CMAKE_CONFIG_TYPE")
-    exe_path = config_type if config_type else ""
-else:
-    exe_path = "."
-
-owner_path = os.path.join(exe_path,"entity_owner")
-run_sql_path = os.path.join(exe_path,"run_sql")
-
 run_sql_pattern = re.compile(r"Got ([0-9]+) rows.")
 
 def run_sql(parameters,statement):
-    process = subprocess.Popen((run_sql_path,
+    process = subprocess.Popen(("run_sql",
                                 "--connection-string", parameters.connection_string,
                                 "--statement", statement),
-                               stdout=subprocess.PIPE, 
-                               stderr=subprocess.STDOUT, 
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.STDOUT,
                                universal_newlines=True)
     output = process.communicate()[0]
     if process.returncode != 0:
@@ -199,18 +131,40 @@ def count_binares(parameters):
 def delete_binary(parameters):
     return run_sql(parameters,"update PersistentEntity set binarydata=null,binarysmalldata=null")
 
+#This relies on the fact that we're installed in the bin directory on both linux and windows.
+install_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),"..")
+
+#Get the default dou directory and set it as an environment variable that can be
+#picked up by the typesystem.ini that belongs to the test suite.
+#Note: The last part of this path is set by cmake during configuration/installation.
+os.environ["SAFIR_TEST_SUITE_DOU_DIRECTORY"] = os.path.join(install_dir, "@SAFIR_INSTALL_DESTINATION_DOU_BASE@")
+
+
+#Note: Last half of path is set by cmake during configuration/installation.
+test_data_directory = os.path.join(install_dir, "@SAFIR_INSTALL_DESTINATION_TEST_DATA@")
+
+#Set up to use our own test configuration
+os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(test_data_directory,
+                                                        "dope",
+                                                        "test_config")
+
+sys.path.append(os.path.join(install_dir,
+                             "@SAFIR_INSTALL_DESTINATION_TEST_DATA@",
+                             "python"))
+
+from testenv import TestEnv, TestEnvStopper
+
+
 parameters = Parameters()
 try:
-
-    UpdateConfig(parameters)
 
     print("== Clear the db")
     delete_all_rows(parameters)
 
     print("== Set a bunch of entities")
-    env = TestEnv()
+    env = TestEnv("dose_main", "dope_main", "safir_show_config")
     with TestEnvStopper(env):
-        env.launchProcess("entity_owner", (owner_path,"set")).wait()
+        env.launchProcess("entity_owner", ("entity_owner","set")).wait()
         print("waiting for 110 entities in db")
         while count_rows(parameters) != 110:
             time.sleep(1)
@@ -226,9 +180,9 @@ try:
 
 
     print("== See if dope loads them at startup")
-    env = TestEnv()
+    env = TestEnv("dose_main", "dope_main", "safir_show_config")
     with TestEnvStopper(env):
-        env.launchProcess("entity_owner", (owner_path,"accept")).wait()
+        env.launchProcess("entity_owner", ("entity_owner","accept")).wait()
 
     if not env.ReturnCodesOk():
         print("Some process exited with an unexpected value")
@@ -268,7 +222,7 @@ try:
     print("== Convert binaries to xml")
 
     #db is automatically chosen by parameter setting
-    subprocess.call(os.path.join(parameters.SAFIR_RUNTIME,"bin","dope_bin2xml"))
+    subprocess.call("dope_bin2xml")
 
     if count_xml(parameters) != 110 or count_rows(parameters) != 110:
         print("dope_bin2xml appears to have failed")
@@ -282,9 +236,9 @@ try:
 
     print("== Check that dope can load xml")
 
-    env = TestEnv()
+    env = TestEnv("dose_main", "dope_main", "safir_show_config")
     with TestEnvStopper(env):
-        env.launchProcess("entity_owner", (owner_path,"accept")).wait()
+        env.launchProcess("entity_owner", ("entity_owner","accept")).wait()
 
     if not env.ReturnCodesOk():
         print("Some process exited with an unexpected value")
@@ -294,7 +248,7 @@ try:
     if len(syslog_output) != 0:
         print("Unexpected syslog output:\n" + syslog_output)
         sys.exit(1)
-        
+
     output = env.Output("entity_owner")
     if output.count("OnInjectedNewEntity") != 110:
         print("could not find the right number of 'OnInjectedNewEntity' in output")
@@ -320,16 +274,16 @@ try:
     print("== update the entities")
 
 
-    env = TestEnv()
+    env = TestEnv("dose_main", "dope_main", "safir_show_config")
     with TestEnvStopper(env):
-        #remove all bin binaries (that have been loaded by dope by now), so 
+        #remove all bin binaries (that have been loaded by dope by now), so
         #that we can wait for all entities to be written again
         #problem is that dope is rewriting them...
         while count_binares(parameters) != 0:
             delete_binary(parameters)
             time.sleep(1)
 
-        env.launchProcess("entity_owner", (owner_path,"update")).wait()
+        env.launchProcess("entity_owner", ("entity_owner","update")).wait()
 
         print("waiting for 110 entities in db")
         while count_binares(parameters) != 110:
@@ -345,9 +299,9 @@ try:
         sys.exit(1)
 
     print("== Load them again and check output")
-    env = TestEnv()
+    env = TestEnv("dose_main", "dope_main", "safir_show_config")
     with TestEnvStopper(env):
-        env.launchProcess("entity_owner", (owner_path,"accept")).wait()
+        env.launchProcess("entity_owner", ("entity_owner","accept")).wait()
 
     if not env.ReturnCodesOk():
         print("Some process exited with an unexpected value")
@@ -372,7 +326,7 @@ finally:
     print("== Clear the db")
     delete_all_rows(parameters)
 
-    RestoreConfig(parameters)
+    #RestoreConfig(parameters)
 
 print("Success")
 sys.exit(0)
