@@ -46,10 +46,6 @@ namespace Internal
     using boost::move; //we need to get hold of the boost move, in case we're
     //using boost >= 1.49. This way our code is backwards compatible.
 
-    static const int MAX_NUM_CONNECTIONS =
-        Safir::Dob::ProcessInfo::MaxNumberOfInstances() *
-        Safir::Dob::ProcessInfo::ConnectionNamesArraySize();
-
     boost::once_flag Connections::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
 
     Connections & Connections::SingletonHelper::Instance()
@@ -65,7 +61,9 @@ namespace Internal
     }
 
     Connections::Connections(private_constructor_t):
-        m_connectionOutIds(MAX_NUM_CONNECTIONS), //default constructed (-1,-1)
+        m_maxNumConnections(Safir::Dob::ProcessInfo::MaxNumberOfInstances() *
+                            Safir::Dob::ProcessInfo::ConnectionNamesArraySize()),
+        m_connectionOutIds(m_maxNumConnections), //default constructed (-1,-1)
         m_lastUsedSlot(0),
         m_connectSignal(0),
         m_connectSem(0),
@@ -77,10 +75,10 @@ namespace Internal
     {
         m_connectionOutSignals =
             static_cast<AtomicUint32*>
-            (GetSharedMemory().allocate(sizeof(AtomicUint32)* MAX_NUM_CONNECTIONS));
+            (GetSharedMemory().allocate(sizeof(AtomicUint32)* m_maxNumConnections));
 
 
-        for (int i = 0; i < MAX_NUM_CONNECTIONS; ++i)
+        for (int i = 0; i < m_maxNumConnections; ++i)
         {
             m_connectionOutSignals.get()[i] = 0;
         }

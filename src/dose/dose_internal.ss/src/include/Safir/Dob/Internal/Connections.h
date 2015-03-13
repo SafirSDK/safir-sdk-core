@@ -213,6 +213,8 @@ namespace Internal
                              ConnectResult & result,
                              ConnectionPtr & connection);
 
+        const int m_maxNumConnections;
+
         typedef PairContainers<ConnectionId, ConnectionPtr>::map ConnectionTable;
         ConnectionTable m_connections;
 
@@ -241,7 +243,7 @@ namespace Internal
                                                   NO_MASTER_LEVEL_REQUIRED> ConnectLock;
         mutable ConnectLock m_connectLock;
         typedef boost::interprocess::scoped_lock<ConnectLock> ScopedConnectLock;
-        
+
         Semaphore m_connectResponseEvent;
 
         //lock for m_connections, m_connectionOutIds, and m_connectionOutSignals
@@ -260,9 +262,9 @@ namespace Internal
         bool m_connectSemSignalled;
 
         /**
-         * This class is here to ensure that only the Instance method can get at the 
+         * This class is here to ensure that only the Instance method can get at the
          * instance, so as to be sure that boost call_once is used correctly.
-         * Also makes it easier to grep for singletons in the code, if all 
+         * Also makes it easier to grep for singletons in the code, if all
          * singletons use the same construction and helper-name.
          */
         struct SingletonHelper
@@ -278,4 +280,3 @@ namespace Internal
 }
 }
 #endif
-

@@ -92,8 +92,6 @@ namespace Internal
         BOOST_STATIC_ASSERT(NUM_PRIORITY_CHANNELS == MAX_NUM_PRIO_CHANNELS);
     }
 
-    const Typesystem::Int32 NumberOfNodes = Safir::Dob::NodeParameters::NumberOfNodes();
-
     static void CheckParameters()
     {
         if (Safir::Dob::NodeParameters::NumberOfContexts() < 1)
@@ -115,12 +113,13 @@ namespace Internal
     }
 
     ExternNodeCommunication::ExternNodeCommunication(boost::asio::io_service & ioService):
+        m_numberOfNodes(Safir::Dob::NodeParameters::NumberOfNodes()),
         m_thisNode(Safir::Dob::ThisNodeParameters::NodeNumber()),
         m_queueIsFull(new AtomicUint32 [NUM_PRIORITY_CHANNELS]),
         m_okToSignalPDComplete(0),
         m_isNotified(0),
         m_incomingDataEvents(new AtomicUint32 [NUM_PRIORITY_CHANNELS]),
-        m_requestPDEvents(new AtomicUint32 [NumberOfNodes]),
+        m_requestPDEvents(new AtomicUint32 [m_numberOfNodes]),
         m_queueNotFullEvent(0),
         m_startPoolDistributionEvent(0),
         m_ioService(ioService)
@@ -528,7 +527,7 @@ namespace Internal
             }
         }
 
-        for (int nodeId = 0; nodeId < NumberOfNodes; ++nodeId)
+        for (int nodeId = 0; nodeId < m_numberOfNodes; ++nodeId)
         {
             if (m_requestPDEvents[nodeId] != 0)
             {

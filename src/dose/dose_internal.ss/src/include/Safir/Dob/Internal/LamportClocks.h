@@ -60,7 +60,7 @@ namespace Internal
         bool operator != (const LamportTimestamp & other) const {return m_timestamp != other.m_timestamp;}
 
     private:
-        explicit LamportTimestamp(const boost::uint32_t clock);
+        explicit LamportTimestamp(const boost::uint32_t clock, const boost::uint64_t nodeNumber);
 
         static const boost::uint64_t WRAP_INTERVAL =
             (static_cast<boost::uint64_t>(0x7fffffff) << 6);
@@ -90,6 +90,7 @@ namespace Internal
 
     private:
         AtomicUint32 m_currentClock;
+        boost::uint64_t m_nodeNumber; //only the 6 least significant bits are used!
     };
 
 }
