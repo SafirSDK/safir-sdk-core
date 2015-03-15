@@ -58,7 +58,7 @@ function(ADD_ASCIIDOC_MANPAGE TARGET)
       DEPENDS ${_ad_SOURCE_NAME}
       COMMENT "Generating man page ${TARGET}")
 
-    add_custom_target(${TARGET} ALL DEPENDS ${_ad_TARGET_NAME})
+    add_custom_target(${TARGET} ALL DEPENDS ${_ad_TARGET_NAME} SOURCES ${_ad_SOURCE_NAME})
 
     install(
       FILES ${_ad_TARGET_NAME}
