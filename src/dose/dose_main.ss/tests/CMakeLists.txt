@@ -13,3 +13,10 @@ ADD_TEST(NAME dose_main_timers COMMAND timer_test)
 
 SET_SAFIR_TEST_PROPERTIES(TEST TryStart_dose_main TIMEOUT 600)
 SET_SAFIR_TEST_PROPERTIES(TEST dose_main_timers TIMEOUT 600)
+
+
+#this executable is useful for signalling that persistence is ready in
+#tests where dope is not built yet.
+ADD_EXECUTABLE(signal_persistance_ready signal_persistance_ready.cpp)
+TARGET_LINK_LIBRARIES(signal_persistance_ready PRIVATE
+  dose_cpp)

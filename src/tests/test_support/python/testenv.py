@@ -80,19 +80,14 @@ class TestEnv:
         if sys.platform == "win32":
             self.__creationflags= subprocess.CREATE_NEW_PROCESS_GROUP
         self.dose_main = self.launchProcess("dose_main", (dose_main,))
-        self.have_dope = dope_main is not None
-        if self.have_dope:
-            self.launchProcess("dope_main", (dope_main,))
+        self.launchProcess("dope_main", (dope_main,))
         self.syslog = syslog_server.SyslogServer(safir_show_config)
         self.syslog_output = list()
 
         start_time = time.time()
         print("Waiting for dose_main to be ready")
 
-        if self.have_dope:
-            phrase="persistence data is ready"
-        else:
-            phrase="dose_main running"
+        phrase="persistence data is ready"
 
         while True:
             time.sleep(0.2)
@@ -109,9 +104,8 @@ class TestEnv:
                 print("dose_main seems slow to start. Here is some output:")
                 print("----- dose_main output -----")
                 print(self.Output("dose_main"))
-                if self.have_dope:
-                    print("----- dope_main output -----")
-                    print(self.Output("dope_main"))
+                print("----- dope_main output -----")
+                print(self.Output("dope_main"))
                 print("---- syslog output ----")
                 print(self.syslog.get_data(0))
                 print("----------------------------")
