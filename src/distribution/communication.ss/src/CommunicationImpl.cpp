@@ -216,6 +216,10 @@ namespace Com
             nodeType.GetUnackedDataSender().RemoveNode(id);
             nodeType.GetHeartbeatSender().RemoveNode(id);
             m_deliveryHandler.RemoveNode(id);
+            if (m_isControlInstance)
+            {
+                m_discoverer.ExcludeNode(id);
+            }
         });
     }
 

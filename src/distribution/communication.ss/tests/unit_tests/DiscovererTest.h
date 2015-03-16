@@ -165,12 +165,12 @@ public:
 
 
         //exclude seed-nodes, that should move them back to seed-list
-        n0.ExlcludeNode(100);
-        n0.ExlcludeNode(200);
-        n1.ExlcludeNode(100);
-        n1.ExlcludeNode(200);
-        n2.ExlcludeNode(100);
-        n2.ExlcludeNode(200);
+        n0.ExcludeNode(100);
+        n0.ExcludeNode(200);
+        n1.ExcludeNode(100);
+        n1.ExcludeNode(200);
+        n2.ExcludeNode(100);
+        n2.ExcludeNode(200);
 
         Wait(3100);  //should be enogh to get discovers
 

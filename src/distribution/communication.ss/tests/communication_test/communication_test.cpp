@@ -408,6 +408,16 @@ public:
 
     uint64_t RetransmitCount() const {return m_retransmitCount;}
 
+    int64_t GetNodeIdByName(const std::string& name) const
+    {
+        for (auto& vt : m_nodeNames)
+        {
+            if (vt.second==name)
+                return vt.first;
+        }
+        return 0;
+    }
+
 private:
     NodeTypes m_nodeTypes;
     std::map<int64_t, std::string> m_nodeNames;
@@ -550,6 +560,25 @@ int main(int argc, char * argv[])
         {
             std::cout<<"sent "<<sendCounter<<std::endl;
         }
+
+
+//        //--------TEST EXCLUDE-------------
+//        static bool seedExcluded=false;
+//        if (!seedExcluded)
+//        {
+//            auto soFar=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now()-startTime);
+//            if (soFar.count()>10000)
+//            {
+//                seedExcluded=true;
+//                auto seedId=sp->GetNodeIdByName("Test_127.0.0.1:10000");
+//                if (seedId!=0)
+//                {
+//                    std::cout<<"Exclude node: "<<seedId<<std::endl;
+//                    com->ExcludeNode(seedId);
+//                }
+//            }
+//        }
+//        //-------------------------------------
     }
 
     std::cout<<"All messages posted to communication. Waiting for all to get delivered..."<<std::endl;

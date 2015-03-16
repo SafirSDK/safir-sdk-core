@@ -199,7 +199,7 @@ namespace Com
             });
         }
 
-        void ExlcludeNode(int64_t nodeId)
+        void ExcludeNode(int64_t nodeId)
         {
             m_strand.dispatch([=]
             {
@@ -258,6 +258,7 @@ namespace Com
             for (auto it=m_seeds.cbegin(); it!=m_seeds.cend(); ++it)
             {
                 cm.mutable_discover()->set_sent_to_id(it->first);
+                std::wcout<<L"COM["<<m_me.nodeId<<L"]: Send discover to seed: "<<it->second.controlAddress.c_str()<<std::endl;
                 lllog(DiscovererLogLevel)<<L"COM["<<m_me.nodeId<<L"]: Send discover to seed: "<<it->second.controlAddress.c_str()<<std::endl;
                 SendMessageTo(cm, Resolver::StringToEndpoint(it->second.controlAddress));
             }
