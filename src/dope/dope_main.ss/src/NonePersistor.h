@@ -44,10 +44,10 @@ public:
     }
 
 private:
-    void Store(const Safir::Dob::Typesystem::EntityId entityId,
-                       const Safir::Dob::Typesystem::HandlerId handlerId,
-                       Safir::Dob::Typesystem::BinarySerialization & bin,
-                       const bool update) override
+    void Store(const Safir::Dob::Typesystem::EntityId& /*entityId*/,
+               const Safir::Dob::Typesystem::HandlerId& /*handlerId*/,
+               Safir::Dob::Typesystem::BinarySerialization & /*bin*/,
+               const bool /*update*/) override
     {throw std::logic_error("Unexpected call to NonePersistor::Store(...)");}
 
     void RestoreAll() override
@@ -58,7 +58,7 @@ private:
         }
     }
 
-    void Remove(const Safir::Dob::EntityProxy & entityProxy) override
+    void Remove(const Safir::Dob::EntityProxy & /*entityProxy*/) override
     {throw std::logic_error("Unexpected call to NonePersistor::Remove(...)");}
 
     void RemoveAll() override

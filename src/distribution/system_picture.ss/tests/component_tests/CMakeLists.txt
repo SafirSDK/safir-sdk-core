@@ -3,12 +3,14 @@ ADD_EXECUTABLE(sp_test_dm sp_test_dm.cpp)
 
 TARGET_LINK_LIBRARIES(sp_test_ctrl PRIVATE
   system_picture
+  lluf_crash_reporter
   lluf_utils
   lluf_id
   ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
 TARGET_LINK_LIBRARIES(sp_test_dm PRIVATE
   system_picture
+  lluf_crash_reporter
   lluf_utils
   lluf_id
   ${Boost_PROGRAM_OPTIONS_LIBRARY})

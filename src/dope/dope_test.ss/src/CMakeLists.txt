@@ -6,5 +6,6 @@ TARGET_LINK_LIBRARIES(entity_owner PRIVATE
 
 SAFIR_INSTALL(TARGETS entity_owner TEST_SUITE)
 
+add_subdirectory(none_backend)
 add_subdirectory(file_backend)
 add_subdirectory(odbc_backend)

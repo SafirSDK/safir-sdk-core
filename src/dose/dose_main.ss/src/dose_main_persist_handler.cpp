@@ -202,7 +202,7 @@ namespace Internal
                              -1));  //dummy identifier since it is a dose_main only thing.
 
             const bool result = m_ecom->Send(request);
-            lllout << "Sent HavePersistanceDataRequest (send result = " << result << ")" << std::endl;
+            lllout << "Sent HavePersistenceDataRequest (send result = " << result << ")" << std::endl;
 
             m_waitingForResponsesFromNodes.clear();
 

@@ -1,7 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2006-2013 (http://safir.sourceforge.net)
-* 
+*
 * Created by: Lars Hagström / stlrha
 *
 *******************************************************************************
@@ -41,14 +41,14 @@ namespace Dob
 {
 namespace Typesystem
 {
-    namespace 
+    namespace
     {
         void LoadGeneratedLibrary(const std::string& path, std::string name)
         {
 #if defined (_MSC_VER) && !defined (NDEBUG)
             name += 'd';
 #endif
-            
+
             try
             {
                 Safir::Utilities::DynamicLibraryLoader loader;
@@ -75,11 +75,11 @@ namespace Typesystem
             DotsC_GeneratedLibrary* generatedLibraries;
             DotsC_Int32 size;
             DotsC_GeneratedLibraryListDeleter deleter;
-            
+
             DotsC_GetGeneratedLibraryList(generatedLibraries,
                                           size,
                                           deleter);
-            
+
             if (size ==0)
             {
                 throw Safir::Dob::Typesystem::ConfigurationErrorException(L"Failed to read information from typesystem.ini",
@@ -94,14 +94,9 @@ namespace Typesystem
                 {
                     location = generatedLibraries[i].cppLibraryLocation;
                 }
-                
-                if (generatedLibraries[i].library == 0)
+
+                if (generatedLibraries[i].library != 0)
                 {
-                    lllog(1) << "Not loading " << generatedLibraries[i].library << " since it is an override" << std::endl;
-                }
-                else
-                {
-                    lllog(1) << "Loading " << generatedLibraries[i].cppLibraryName << std::endl;
                     LoadGeneratedLibrary(location, generatedLibraries[i].cppLibraryName);
                 }
             }
@@ -154,7 +149,7 @@ namespace Typesystem
             {
                 ostr << Operations::GetName(typeId);
             }
-            else 
+            else
             {
                 ostr << typeId;
             }
@@ -177,7 +172,7 @@ namespace Typesystem
             {
                 ostr << Operations::GetName(typeId);
             }
-            else 
+            else
             {
                 ostr << typeId;
             }
@@ -188,10 +183,9 @@ namespace Typesystem
         return it->second(NULL);
     }
 
-    bool 
+    bool
     ObjectFactory::RegisterClass(const TypeId typeId, CreateObjectCallback createFunction)
     {
-        lllout << "Adding type " << Operations::GetName(typeId) << " to ObjectFactory" << std::endl;
         return m_CallbackMap.insert(CallbackMap::value_type(typeId,createFunction)).second;
     }
 }

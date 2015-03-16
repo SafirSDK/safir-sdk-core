@@ -89,9 +89,9 @@ private:
     /**
      * Persist an object. ObjectId of the object should be used as key.
      */
-    virtual void Store(const Safir::Dob::Typesystem::EntityId entityId,
-                       const Safir::Dob::Typesystem::HandlerId handlerId,
-                       Safir::Dob::Typesystem::BinarySerialization & bin,
+    virtual void Store(const Safir::Dob::Typesystem::EntityId& entityId,
+                       const Safir::Dob::Typesystem::HandlerId& handlerId,
+                       Safir::Dob::Typesystem::BinarySerialization& bin,
                        const bool update) = 0;
 
     /**

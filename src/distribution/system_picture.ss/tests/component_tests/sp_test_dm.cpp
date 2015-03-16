@@ -25,6 +25,7 @@
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/MakeUnique.h>
+#include <Safir/Utilities/CrashReporter.h>
 #include <Safir/Dob/Internal/SystemPicture.h>
 #include <Safir/Utilities/Internal/Id.h>
 #include <iostream>
@@ -346,6 +347,11 @@ private:
 
 int main(int argc, char * argv[])
 {
+    //ensure call to CrashReporter::Stop at application exit
+    boost::shared_ptr<void> crGuard(static_cast<void*>(0),
+                                    [](void*){Safir::Utilities::CrashReporter::Stop();});
+    Safir::Utilities::CrashReporter::Start();
+    
     const ProgramOptions options(argc, argv);
     if (!options.parseOk)
     {

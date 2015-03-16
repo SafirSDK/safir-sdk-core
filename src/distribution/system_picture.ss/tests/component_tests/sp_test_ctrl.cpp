@@ -25,6 +25,7 @@
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/MakeUnique.h>
+#include <Safir/Utilities/CrashReporter.h>
 #include <Safir/Utilities/Internal/ConfigReader.h>
 #include <Safir/Dob/Internal/SystemPicture.h>
 #include <Safir/Utilities/Internal/Id.h>
@@ -36,15 +37,17 @@
 
 //disable warnings in boost
 #if defined _MSC_VER
-  #pragma warning (push)
-  #pragma warning (disable : 4100 4267 4505)
+#  pragma warning (push)
+#  pragma warning (disable : 4100 4267 4505)
 #endif
 
 #include <boost/program_options.hpp>
 #include <boost/asio.hpp>
 
 #if defined _MSC_VER
-  #pragma warning (pop)
+#  pragma warning (pop)
+//and disable a warning that happens on instantiation
+#  pragma warning (disable : 4505)
 #endif
 
 
@@ -143,7 +146,7 @@ public:
         if (f.good())
         {
             f >> m_lastIncarnation;
-            std::wcout << "Last incarnation read from file: " << m_lastIncarnation << std::endl;
+            lllog(1) << "Last incarnation read from file: " << m_lastIncarnation << std::endl;
         }
     }
 
@@ -155,16 +158,16 @@ public:
             throw std::logic_error("Expect only one call to IncarnationChecker::Check");
         }
 
-        std::wcout << "Checking incarnation id " << id << std::endl;
+        lllog(1) << "Checking incarnation id " << id << std::endl;
         if (!m_enabled)
         {
-            std::wcout << "Checking disabled, return true" << std::endl;
+            lllog(1) << "Checking disabled, return true" << std::endl;
             return true;
         }
 
         if (m_lastIncarnation == 0)
         {
-            std::wcout << "Have no previous incarnation, writing to file and returning true" << std::endl;
+            lllog(1) << "Have no previous incarnation, writing to file and returning true" << std::endl;
             std::ofstream f(m_filename);
             f << id;
             return true;
@@ -190,137 +193,152 @@ private:
 
 int main(int argc, char * argv[])
 {
-    const ProgramOptions options(argc, argv);
-    if (!options.parseOk)
+    try
     {
-        return 1;
-    }
+        //ensure call to CrashReporter::Stop at application exit
+        boost::shared_ptr<void> crGuard(static_cast<void*>(0),
+                                        [](void*){Safir::Utilities::CrashReporter::Stop();});
+        Safir::Utilities::CrashReporter::Start();
 
-    boost::asio::io_service ioService;
-    //make some work to stop io_service from exiting.
-    auto work = Safir::make_unique<boost::asio::io_service::work>(ioService);
+        const ProgramOptions options(argc, argv);
+        if (!options.parseOk)
+        {
+            return 1;
+        }
 
-    std::wcout << "Switching logger to async mode" << std::endl;
-    Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().SwitchToAsynchronousMode(ioService);
+        boost::asio::io_service ioService;
+        //make some work to stop io_service from exiting.
+        auto work = Safir::make_unique<boost::asio::io_service::work>(ioService);
 
-    std::vector<Safir::Dob::Internal::Com::NodeTypeDefinition> commNodeTypes;
-    std::map<boost::int64_t, Safir::Dob::Internal::SP::NodeType> spNodeTypes;
+        std::wcout << "Switching logger to async mode" << std::endl;
+        Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().SwitchToAsynchronousMode(ioService);
 
-    commNodeTypes.push_back({1,
-                "NodeTypeA",
-                "", //no multicast
-                "", //no multicast
-                1000,
-                20});
+        std::vector<Safir::Dob::Internal::Com::NodeTypeDefinition> commNodeTypes;
+        std::map<boost::int64_t, Safir::Dob::Internal::SP::NodeType> spNodeTypes;
 
-    spNodeTypes.insert(std::make_pair(1,
-                                      Safir::Dob::Internal::SP::NodeType(1,
-                                                                         "NodeTypeA",
-                                                                         false,
-                                                                         boost::chrono::milliseconds(1000),
-                                                                         30,
-                                                                         boost::chrono::milliseconds(20))));
+        commNodeTypes.push_back({1,
+                    "NodeTypeA",
+                    "", //no multicast
+                    "", //no multicast
+                    1000,
+                    20});
 
-    commNodeTypes.push_back({2,
-                "NodeTypeB",
-                "", //no multicast
-                "", //no multicast
-                2000,
-                50});
+        spNodeTypes.insert(std::make_pair(1,
+                                          Safir::Dob::Internal::SP::NodeType(1,
+                                                                             "NodeTypeA",
+                                                                             false,
+                                                                             boost::chrono::milliseconds(1000),
+                                                                             30,
+                                                                             boost::chrono::milliseconds(20))));
 
-    spNodeTypes.insert(std::make_pair(2,
-                                      Safir::Dob::Internal::SP::NodeType(2,
-                                                                         "NodeTypeB",
-                                                                         false,
-                                                                         boost::chrono::milliseconds(2000),
-                                                                         15,
-                                                                         boost::chrono::milliseconds(50))));
+        commNodeTypes.push_back({2,
+                    "NodeTypeB",
+                    "", //no multicast
+                    "", //no multicast
+                    2000,
+                    50});
 
-
-    std::wcout << "Creating Communication instance" << std::endl;
-    Safir::Dob::Internal::Com::Communication communication(Safir::Dob::Internal::Com::controlModeTag,
-                                                           ioService,
-                                                           options.name,
-                                                           options.id,
-                                                           1,
-                                                           options.controlAddress,
-                                                           options.dataAddress,
-                                                           commNodeTypes);
-
-    std::wcout << "Injecting seeds" << std::endl;
-    communication.InjectSeeds(options.seeds);
-
-    IncarnationChecker incarnationChecker(options.checkIncarnation);
-
-    std::wcout << "Creating SystemPicture instance" << std::endl;
-    Safir::Dob::Internal::SP::SystemPicture sp(Safir::Dob::Internal::SP::master_tag,
-                                               ioService,
-                                               communication,
-                                               options.name,
-                                               options.id,
-                                               1,
-                                               std::move(spNodeTypes),
-                                               [&incarnationChecker](const int64_t id){return incarnationChecker.Check(id);});
-
-    std::wcout << "Starting SystemState subscription" << std::endl;
-
-    // Start subscription to system state changes from SP
-    sp.StartStateSubscription([](const Safir::Dob::Internal::SP::SystemState& /*data*/)
-                              {
-
-                              });
+        spNodeTypes.insert(std::make_pair(2,
+                                          Safir::Dob::Internal::SP::NodeType(2,
+                                                                             "NodeTypeB",
+                                                                             false,
+                                                                             boost::chrono::milliseconds(2000),
+                                                                             15,
+                                                                             boost::chrono::milliseconds(50))));
 
 
-    std::wcout << "Starting Communication" << std::endl;
-    communication.Start();
+        std::wcout << "Creating Communication instance" << std::endl;
+        Safir::Dob::Internal::Com::Communication communication(Safir::Dob::Internal::Com::controlModeTag,
+                                                               ioService,
+                                                               options.name,
+                                                               options.id,
+                                                               1,
+                                                               options.controlAddress,
+                                                               options.dataAddress,
+                                                               commNodeTypes);
 
-    boost::asio::signal_set signalSet(ioService);
+        std::wcout << "Injecting seeds" << std::endl;
+        communication.InjectSeeds(options.seeds);
+
+        IncarnationChecker incarnationChecker(options.checkIncarnation);
+
+        std::wcout << "Creating SystemPicture instance" << std::endl;
+        Safir::Dob::Internal::SP::SystemPicture sp(Safir::Dob::Internal::SP::master_tag,
+                                                   ioService,
+                                                   communication,
+                                                   options.name,
+                                                   options.id,
+                                                   1,
+                                                   std::move(spNodeTypes),
+                                                   [&incarnationChecker](const int64_t id){return incarnationChecker.Check(id);});
+
+        std::wcout << "Starting SystemState subscription" << std::endl;
+
+        // Start subscription to system state changes from SP
+        sp.StartStateSubscription([](const Safir::Dob::Internal::SP::SystemState& /*data*/)
+                                  {
+
+                                  });
+
+
+        std::wcout << "Starting Communication" << std::endl;
+        communication.Start();
+
+        boost::asio::signal_set signalSet(ioService);
 
 #if defined (_WIN32)
-    signalSet.add(SIGABRT);
-    signalSet.add(SIGBREAK);
-    signalSet.add(SIGINT);
-    signalSet.add(SIGTERM);
+        signalSet.add(SIGABRT);
+        signalSet.add(SIGBREAK);
+        signalSet.add(SIGINT);
+        signalSet.add(SIGTERM);
 #else
-    signalSet.add(SIGQUIT);
-    signalSet.add(SIGINT);
-    signalSet.add(SIGTERM);
+        signalSet.add(SIGQUIT);
+        signalSet.add(SIGINT);
+        signalSet.add(SIGTERM);
 #endif
 
-    std::wcout << "Registering signal handler" << std::endl;
-    signalSet.async_wait([&sp,&work,&communication](const boost::system::error_code& error,
-                                                    const int signal_number)
-                         {
-                           lllog(1) << "CTRL: Got signal " << signal_number << std::endl;
-                           if (error)
-                           {
-                               SEND_SYSTEM_LOG(Error,
-                                               << "Got a signals error: " << error);
-                           }
-                           lllog(1) << "CTRL: Stopping SystemPicture" << std::endl;
-                           sp.Stop();
-                           lllog(1) << "CTRL: Stopping Communication" << std::endl;
-                           communication.Stop();
-                           lllog(1) << "CTRL: Resetting work" << std::endl;
-                           work.reset();
+        std::wcout << "Registering signal handler" << std::endl;
+        signalSet.async_wait([&sp,&work,&communication](const boost::system::error_code& error,
+                                                        const int signal_number)
+                             {
+                                 lllog(1) << "CTRL: Got signal " << signal_number << std::endl;
+                                 if (error)
+                                 {
+                                     SEND_SYSTEM_LOG(Error,
+                                                     << "Got a signals error: " << error);
+                                 }
+                                 lllog(1) << "CTRL: Stopping SystemPicture" << std::endl;
+                                 sp.Stop();
+                                 lllog(1) << "CTRL: Stopping Communication" << std::endl;
+                                 communication.Stop();
+                                 lllog(1) << "CTRL: Resetting work" << std::endl;
+                                 work.reset();
 
-                           Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().StopAsynchronousLogger();
-                       }
-                       );
+                                 Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().StopAsynchronousLogger();
+                             }
+                             );
 
 
 
-    std::wcout << "Launching io_service" << std::endl;
-    boost::thread_group threads;
-    for (int i = 0; i < 2; ++i)
-    {
-        threads.create_thread([&ioService]{ioService.run();});
+        std::wcout << "Launching io_service" << std::endl;
+        boost::thread_group threads;
+        for (int i = 0; i < 2; ++i)
+        {
+            threads.create_thread([&ioService]{ioService.run();});
+        }
+
+        ioService.run();
+
+        threads.join_all();
+        Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().DestroyAsynchronousLogger();
+        std::wcout << "CTRL: Exiting..." << std::endl;
+        return 0;
     }
-
-    ioService.run();
-
-    threads.join_all();
-    Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().DestroyAsynchronousLogger();
-    std::wcout << "CTRL: Exiting..." << std::endl;
-    return 0;
+    catch(std::exception& e)
+    {
+        std::wcout << "Caught exception: " << e.what() << std::endl;
+        Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().StopAsynchronousLogger();
+        Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().DestroyAsynchronousLogger();
+        return 1;
+    }
 }

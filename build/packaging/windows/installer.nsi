@@ -366,8 +366,8 @@ FunctionEnd
 
   !define MUI_WELCOMEFINISHPAGE_BITMAP "installer-welcome.bmp"
   !define MUI_UNWELCOMEFINISHPAGE_BITMAP "uninstaller-welcome.bmp"
-  
-  !define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\readme.txt"
+
+  !define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\docs\readme.txt"
 
 ;--------------------------------
 ;Pages
@@ -419,7 +419,7 @@ Section "Runtime" SecRuntime
 
   CreateShortCut "${StartMenuDir}\Documentation\Readme.lnk" \
                  "$INSTDIR\docs\readme.txt" "" "" "" SW_SHOWNORMAL "" "Readme for binary installation of Safir SDK Core"
-				 
+
   CreateShortCut "${StartMenuDir}\Documentation\GPLv3 License.lnk" \
                  "$INSTDIR\docs\LICENSE.txt" "" "" "" SW_SHOWNORMAL "" "Open Source license of Safir SDK Core"
 

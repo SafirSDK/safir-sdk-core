@@ -75,7 +75,6 @@ namespace Internal
 
         ~DoseApp();
 
-    private:
 
         void Start(const std::string& nodeName,
                    int64_t nodeId,
@@ -87,9 +86,9 @@ namespace Internal
                         int64_t nodeTypeId,
                         const std::string& dataAddress);
 
-        //This is called when dose_main is expected to shut down
         void Stop();
 
+    private:
         void HandleSignal(const boost::system::error_code& error,
                           const int signalNumber);
 

@@ -49,10 +49,10 @@ public:
     ~OdbcPersistor();
 
 private:
-    void Store(const Safir::Dob::Typesystem::EntityId entityId,
-                       const Safir::Dob::Typesystem::HandlerId handlerId,
-                       Safir::Dob::Typesystem::BinarySerialization & bin,
-                       const bool update) override;
+    void Store(const Safir::Dob::Typesystem::EntityId& entityId,
+               const Safir::Dob::Typesystem::HandlerId& handlerId,
+               Safir::Dob::Typesystem::BinarySerialization & bin,
+               const bool update) override;
 
     void RestoreAll() override;
     void Remove(const Safir::Dob::EntityProxy & entityProxy) override;

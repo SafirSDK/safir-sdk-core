@@ -172,8 +172,8 @@ OdbcPersistor::~OdbcPersistor()
 
 
 //-------------------------------------------------------
-void OdbcPersistor::Store(const Safir::Dob::Typesystem::EntityId entityId,
-                          const Safir::Dob::Typesystem::HandlerId handlerId,
+void OdbcPersistor::Store(const Safir::Dob::Typesystem::EntityId& entityId,
+                          const Safir::Dob::Typesystem::HandlerId& handlerId,
                           Safir::Dob::Typesystem::BinarySerialization & bin,
                           const bool update)
 {

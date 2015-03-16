@@ -32,13 +32,11 @@ namespace Dob
 {
 namespace Internal
 {
-    const boost::uint64_t NODE_NUMBER = ThisNodeParameters::NodeNumber();
-
-    LamportTimestamp::LamportTimestamp(const boost::uint32_t clock):
+    LamportTimestamp::LamportTimestamp(const boost::uint32_t clock, const boost::uint64_t nodeNumber):
         m_timestamp(clock)
     {
         //shift 6 bits and put the node number there.
-        m_timestamp = (static_cast<boost::uint64_t>(clock) << 6)| NODE_NUMBER;
+        m_timestamp = (static_cast<boost::uint64_t>(clock) << 6)| nodeNumber;
     }
 
     boost::uint32_t LamportTimestamp::GetClock() const
@@ -55,7 +53,8 @@ namespace Internal
 
 
     LamportClock::LamportClock():
-        m_currentClock(0)
+        m_currentClock(0),
+        m_nodeNumber(ThisNodeParameters::NodeNumber())
     {
 
     }
@@ -68,7 +67,7 @@ namespace Internal
 
     const LamportTimestamp LamportClock::GetCurrentTimestamp() const
     {
-        return LamportTimestamp(m_currentClock.value());
+        return LamportTimestamp(m_currentClock.value(), m_nodeNumber);
     }
 
 
@@ -97,7 +96,7 @@ namespace Internal
 
     const LamportTimestamp LamportClock::GetNewTimestamp()
     {
-        return LamportTimestamp(m_currentClock++);
+        return LamportTimestamp(m_currentClock++, m_nodeNumber);
     }
 
 

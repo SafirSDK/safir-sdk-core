@@ -146,7 +146,10 @@ namespace ToolSupport
         std::map<boost::filesystem::path, boost::filesystem::path> domFiles;
         SelectFiles(roots, douFiles, domFiles);
 
-        lllog(5)<<"Starting ParseJob #files (dou/dom/tot): "<<douFiles.size()<<"/"<<domFiles.size()<<"/"<<douFiles.size()+domFiles.size()<<std::endl;
+        lllog(5) << "Starting ParseJob #files (dou/dom/tot): "
+                 << douFiles.size() << "/"
+                 << domFiles.size() << "/"
+                 << douFiles.size()+domFiles.size() << std::endl;
 
         ParseWorker<DouParser, DouCompletionAlgorithm>()(m_result, douFiles);
         ParseWorker<DomParser, DomCompletionAlgorithm>()(m_result, domFiles);

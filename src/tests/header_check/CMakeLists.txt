@@ -55,3 +55,12 @@ target_link_libraries(check_correct_public_headers PRIVATE
   safir_generated-Core-cpp)
 
 add_dependencies(check_correct_public_headers logging_cpp dots_cpp dose_cpp olib douf_time_cpp swre_interface_cpp)
+
+add_test(NAME check_elaboration
+    COMMAND ${PYTHON_EXECUTABLE}
+  ${CMAKE_CURRENT_SOURCE_DIR}/run_elaboration_check.py
+  --test-exe $<TARGET_FILE:check_correct_public_headers>)
+
+SET_SAFIR_TEST_PROPERTIES(TEST check_elaboration
+  CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/test_config)
+

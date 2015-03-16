@@ -236,7 +236,8 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
   #We need a custom target that the library (java,cpp,dotnet) targets can depend on, since
   #having them all just depend on the output files will wreak havoc with cmake in parallel builds.
   #See http://public.kitware.com/Bug/view.php?id=12311
-  add_custom_target(safir_generated-${_gen_NAME}-code ALL DEPENDS ${cpp_files} ${java_files} ${dotnet_files})
+  add_custom_target(safir_generated-${_gen_NAME}-code ALL DEPENDS ${cpp_files} ${java_files} ${dotnet_files}
+                    SOURCES ${_gen_DOU_FILES} ${_gen_DOM_FILES} ${_gen_NAMESPACE_MAPPINGS})
   #############
 
   #

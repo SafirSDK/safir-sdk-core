@@ -69,8 +69,10 @@ class TestEnvStopper:
 class TestEnv:
     """safir_control: full path to safir_control
        dose_main: full path to dose_main
-       dope_main: full path to dope_main (pass None if you dont want dope to start)
-       safir_show_config: full path to safir_show_config
+    dope_main: full path to dope_main (pass None if you dont want dope to start)
+    safir_show_config: full path to safir_show_config
+
+    If the exes are in the PATH, its okay to just use exe names.
     """
     def __init__(self, safir_control, dose_main, dope_main, safir_show_config):
         self.__procs = dict()
@@ -78,19 +80,14 @@ class TestEnv:
         if sys.platform == "win32":
             self.__creationflags= subprocess.CREATE_NEW_PROCESS_GROUP
         self.safir_control = self.launchProcess("safir_control", (safir_control, "--dose-main-path", dose_main))
-        self.have_dope = dope_main is not None
-        if self.have_dope:
-            self.launchProcess("dope_main", (dope_main,))
+        self.launchProcess("dope_main", (dope_main,))
         self.syslog = syslog_server.SyslogServer(safir_show_config)
         self.syslog_output = list()
 
         start_time = time.time()
         print("Waiting for safir_control to be ready")
 
-        if self.have_dope:
-            phrase="persistence data is ready"
-        else:
-            phrase="dose_main running"
+        phrase="persistence data is ready"
 
         while True:
             time.sleep(0.2)
@@ -107,9 +104,8 @@ class TestEnv:
                 print("safir_control and/or dose_main seems slow to start. Here is some output:")
                 print("----- safir_control output -----")
                 print(self.Output("safir_control"))
-                if self.have_dope:
-                    print("----- dope_main output -----")
-                    print(self.Output("dope_main"))
+                print("----- dope_main output -----")
+                print(self.Output("dope_main"))
                 print("---- syslog output ----")
                 print(self.syslog.get_data(0))
                 print("----------------------------")
@@ -188,6 +184,7 @@ class TestEnv:
     def WaitForOutput(self, name, expected_output):
         while True:
             output = self.Output(name)
+            #print(output)
             if output.find(expected_output) != -1:
                 return output
             if not self.ProcessDied(): #reversed return value

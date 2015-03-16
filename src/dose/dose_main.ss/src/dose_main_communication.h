@@ -109,6 +109,7 @@ namespace Internal
         static const Identifier DoseComVirtualConnectionId;
 
     private:
+        const Dob::Typesystem::Int32 m_numberOfNodes;
         const Dob::Typesystem::Int32 m_thisNode;
 
         bool ShouldBeDiscarded(const DistributionData & msg);

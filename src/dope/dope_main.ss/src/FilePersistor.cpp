@@ -194,9 +194,9 @@ FilePersistor::FilePersistor(boost::asio::io_service& ioService) :
 
 //-------------------------------------------------------
 void
-FilePersistor::Store(const Safir::Dob::Typesystem::EntityId entityId,
-                     const Safir::Dob::Typesystem::HandlerId handlerId,
-                     Safir::Dob::Typesystem::BinarySerialization & bin,
+FilePersistor::Store(const Safir::Dob::Typesystem::EntityId& entityId,
+                     const Safir::Dob::Typesystem::HandlerId& handlerId,
+                     Safir::Dob::Typesystem::BinarySerialization& bin,
                      const bool /*update*/)
 {
     const boost::filesystem::path path = GetFilePath(boost::make_tuple(entityId,handlerId, std::wstring()));
