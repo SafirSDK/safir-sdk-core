@@ -58,9 +58,10 @@ public:
             go=0;
         };
 
-
+        bool gotQueueNotFull1=false, gotQueueNotFull2=false;
+        sender.SetNotFullCallback([&](int64_t id){gotQueueNotFull1=true; std::cout<<"QueueNotFull 1 nodeType "<<id<<std::endl;});
+        sender.SetNotFullCallback([&](int64_t id){gotQueueNotFull2=true; std::cout<<"QueueNotFull 2 nodeType "<<id<<std::endl;});
         sender.SetRetransmitCallback([=](int64_t id){std::cout<<"Retransmit to "<<id<<std::endl;});
-        sender.SetNotFullCallback([=](int64_t id){std::cout<<"QueueNotFull nodeType "<<id<<std::endl;}, 50);
         sender.Start();
         sender.AddNode(2, "127.0.0.1:2");
         sender.AddNode(3, "127.0.0.1:3");
@@ -220,6 +221,39 @@ public:
         sender.m_strand.post([&]{CHECKMSG(sender.SendQueueSize()==0, sender.SendQueueSize());});
 
         TRACELINE
+
+        WaitUntilReady();
+
+        for(;;)
+        {
+            if (!sender.AddToSendQueue(0, MakeShared("1"), 1, 1)) //toId, data, size, dataType
+                break;
+        }
+
+        uint64_t  lastAcked=14;
+        auto lastPostedSeq=static_cast<uint64_t>(lastAcked+Com::Parameters::SendQueueSize);
+
+        std::cout<<"last posted to send queue: "<<lastPostedSeq<<std::endl;
+
+        while(lastAcked<lastPostedSeq)
+        {
+            Wait(100);
+            lastAcked=LastSentSeq();
+            sender.HandleAck(Ack(2, 1, lastAcked, Com::MultiReceiverSendMethod)); //ack half sendQueue from R2
+            sender.HandleAck(Ack(3, 1, lastAcked, Com::MultiReceiverSendMethod)); //ack half sendQueue from R3
+
+            std::cout<<"last sent: "<<lastAcked<<", lastPosted: "<<lastPostedSeq<<std::endl;
+            bool dfaf=lastAcked<lastPostedSeq;
+            std::cout<<"lastAcked<lastPostedSeq = "<<std::boolalpha<<dfaf<<std::endl;
+        }
+
+        std::cout<<"Done - lastPosted: "<<lastPostedSeq<<", lastAcked: "<<lastAcked<<std::endl;
+        WaitUntilReady();
+
+        CHECK(gotQueueNotFull1);
+        CHECK(gotQueueNotFull2);
+
+        TRACELINE
         sender.m_strand.post([&]
         {
             sender.Stop();
@@ -253,6 +287,12 @@ private:
         return std::string(p->fragment, p->header.fragmentContentSize);
     }
 
+    static uint64_t LastSentSeq()
+    {
+        boost::mutex::scoped_lock lock(mutex);
+        return sent.back()->header.sequenceNumber;
+    }
+
     struct TestSendPolicy
     {
         void Send(const boost::shared_ptr<Com::UserData>& val,
@@ -267,25 +307,13 @@ private:
             }
 
             std::string s(val->fragment, val->header.fragmentContentSize);
-            std::cout<<"Writer.Send to_port: "<<to.port()<<", seq: "<<val->header.sequenceNumber<<", data: '"<<s<<"'"<<std::endl;
+            //std::cout<<"Writer.Send to_port: "<<to.port()<<", seq: "<<val->header.sequenceNumber<<", data: '"<<s<<"'"<<std::endl;
             sent.push_back(val);
         }
     };
 
     typedef Com::Writer<Com::UserData, AckedDataSenderTest::TestSendPolicy> TestWriter;
     typedef Com::DataSenderBasic<TestWriter> Sender;
-
-    static void OnQueueNotFull()
-    {
-        std::cout<<"callback OnQueueNotFull"<<std::endl;
-
-    }
-
-    static void OnRetransmit(int64_t /*toId*/)
-    {
-        std::cout<<"callback OnRetransmit"<<std::endl;
-
-    }
 };
 
 boost::mutex AckedDataSenderTest::mutex;
@@ -328,7 +356,6 @@ public:
 
 
         sender.SetRetransmitCallback([=](int64_t id){std::cout<<"Retransmit to "<<id<<std::endl;});
-        sender.SetNotFullCallback([=](int64_t id){std::cout<<"QueueNotFull nodeType "<<id<<std::endl;}, 50);
         sender.Start();
         sender.AddNode(2, "127.0.0.1:2");
         sender.AddNode(3, "127.0.0.1:3");
@@ -440,6 +467,6 @@ struct DataSenderTest
     static void Run()
     {
         AckedDataSenderTest::Run();
-        UnackedDataSenderTest::Run();
+        //UnackedDataSenderTest::Run();
     }
 };

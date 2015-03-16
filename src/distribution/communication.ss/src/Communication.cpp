@@ -134,9 +134,9 @@ namespace
         m_impl->SetRetransmitToCallback(callback);
     }
 
-    void Communication::SetQueueNotFullCallback(const QueueNotFull& callback, int freePartThreshold)
+    void Communication::SetQueueNotFullCallback(const QueueNotFull& callback, int64_t nodeTypeId)
     {
-       m_impl->SetQueueNotFullCallback(callback, freePartThreshold);
+       m_impl->SetQueueNotFullCallback(callback, nodeTypeId);
     }
 
     void Communication::SetDataReceiver(const ReceiveData& callback, int64_t dataTypeIdentifier, const Allocator& allocator)

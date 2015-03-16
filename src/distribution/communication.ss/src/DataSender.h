@@ -98,7 +98,7 @@ namespace Com
             ,m_resendTimer(ioService)
             ,m_retransmitNotification()
             ,m_queueNotFullNotification()
-            ,m_queueNotFullNotificationLimit(0)
+            ,m_queueNotFullNotificationLimit(Parameters::SendQueueSize/2)
             ,m_sendAckRequestForMsgIndex()
             ,m_logPrefix([&]{std::ostringstream os;
                              os<<"COM: ("<<DeliveryGuaranteeToString(deliveryGuarantee)<<"DataSender nodeType "<<nodeTypeId<<") - ";
@@ -115,14 +115,9 @@ namespace Com
             m_strand.dispatch([=]{m_retransmitNotification=callback;});
         }
 
-        void SetNotFullCallback(const QueueNotFull& callback, int threshold)
+        void SetNotFullCallback(const QueueNotFull& callback)
         {
-            m_strand.dispatch([=]
-            {
-                m_queueNotFullNotification=callback;
-                double ratio=static_cast<double>(100-threshold)/100.0;
-                m_queueNotFullNotificationLimit=static_cast<size_t>(Parameters::SendQueueSize*ratio); //calculate threshold in number of used slots, callback made when size<m_queueNotFullNotificationLimit
-            });
+            m_strand.dispatch([=]{m_queueNotFullNotification.push_back(callback);});
         }
 
         //Start writer component
@@ -375,7 +370,7 @@ namespace Com
         uint64_t m_lastAckRequestMultiReceiver; //the last seq we have requested ack
         boost::asio::steady_timer m_resendTimer;
         RetransmitTo m_retransmitNotification;
-        QueueNotFull m_queueNotFullNotification;
+        std::vector<QueueNotFull> m_queueNotFullNotification;
         size_t m_queueNotFullNotificationLimit; //below number of used slots. NOT percent.
         std::atomic_bool m_notifyQueueNotFull;
         std::vector<size_t> m_sendAckRequestForMsgIndex;
@@ -734,9 +729,15 @@ namespace Com
             if (m_sendQueueSize<=m_queueNotFullNotificationLimit)
             {
                 m_notifyQueueNotFull=false; //very important that this flag is set before the notification call since a new overflow may occur after notification.
-                if (m_queueNotFullNotification)
+                if (!m_queueNotFullNotification.empty())
                 {
-                    m_strand.get_io_service().post([this]{m_queueNotFullNotification(m_nodeTypeId);});
+                     m_strand.get_io_service().post([this]
+                     {
+                         for (auto& callback : m_queueNotFullNotification)
+                         {
+                             callback(m_nodeTypeId);
+                         }
+                     });
                 }
             }
         }

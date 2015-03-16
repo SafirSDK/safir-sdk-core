@@ -208,7 +208,7 @@ public:
         return m_nodeTypes.find(LlufId_Generate64(name.c_str()))->second;
     }
 
-    const std::map<int64_t, Safir::Dob::Internal::Com::NodeTypeDefinition> Map() const
+    const std::map<int64_t, Safir::Dob::Internal::Com::NodeTypeDefinition>& Map() const
     {
         return m_nodeTypes;
     }
@@ -489,8 +489,10 @@ int main(int argc, char * argv[])
     com->SetNewNodeCallback([=](const std::string& name, int64_t nodeId, int64_t nodeTypeId, const std::string& ca, const std::string& /*da*/)
                             {sp->NewNode(name, nodeId, nodeTypeId, ca);});
 
-    com->SetQueueNotFullCallback([&](int64_t){queueFullSem.Notify();}, 100); //50% free queue space before we get notification, acked
-    com->SetQueueNotFullCallback([&](int64_t){queueFullSem.Notify();}, 100); //50% free queue space before we get notification, unacked
+    for (const auto& vt : nodeTypes.Map())
+    {
+        com->SetQueueNotFullCallback([&](int64_t){queueFullSem.Notify();}, vt.first);
+    }
 
     boost::thread_group threads;
     for (unsigned int i=0; i<cmd.threadCount; ++i)
