@@ -153,24 +153,27 @@ namespace Com
                 }
 
                 //handle info about the sender
-                if (msg.has_sent_from_node())
+                if (IsExcluded(msg.sent_from_node().node_id()))
                 {
-                    //we have now talked to this node, so it can be added as a real node and removed from seed and reported lists
-                    bool isSeed=m_seeds.erase(msg.sent_from_id())==1; //must use sentFromId and not sent_from_node().id since sentFromId is generated from address when seeding.
-                    m_reportedNodes.erase(msg.sent_from_node().node_id());
-
-                    if (IsNewNode(msg.sent_from_node().node_id()))
-                    {
-                        AddNewNode(msg.sent_from_node(), isSeed);
-                    }
-                    else
-                    {
-                        //maybe some other node reported this before we got this message. The mark it as seed in case it will be excluded sometime in future.
-                        m_nodes.find(msg.sent_from_node().node_id())->second.isSeed=isSeed;
-                    }
-
-                    UpdateIncompleteNodes(msg.sent_from_node().node_id(), msg.number_of_packets(), msg.packet_number());
+                    lllog(DiscovererLogLevel)<<L"COM["<<m_me.nodeId<<L"]: Discoverer got nodeInfo from: "<<msg.sent_from_node().name().c_str()<<L" ["<<msg.sent_from_node().node_id()<<L"]. Node is excluded by this node, throw away!"<<std::endl;
+                    return;
                 }
+
+                //we have now talked to this node, so it can be added as a real node and removed from seed and reported lists
+                bool isSeed=m_seeds.erase(msg.sent_from_id())==1; //must use sentFromId and not sent_from_node().id since sentFromId is generated from address when seeding.
+                m_reportedNodes.erase(msg.sent_from_node().node_id());
+
+                if (IsNewNode(msg.sent_from_node().node_id()))
+                {
+                    AddNewNode(msg.sent_from_node(), isSeed);
+                }
+                else
+                {
+                    //maybe some other node reported this before we got this message. The mark it as seed in case it will be excluded sometime in future.
+                    m_nodes.find(msg.sent_from_node().node_id())->second.isSeed=isSeed;
+                }
+
+                UpdateIncompleteNodes(msg.sent_from_node().node_id(), msg.number_of_packets(), msg.packet_number());
 
                 //Add the rest to reportedNodes if not already a known node
                 for (auto nit=msg.nodes().begin(); nit!=msg.nodes().end(); ++nit)
@@ -258,7 +261,6 @@ namespace Com
             for (auto it=m_seeds.cbegin(); it!=m_seeds.cend(); ++it)
             {
                 cm.mutable_discover()->set_sent_to_id(it->first);
-                std::wcout<<L"COM["<<m_me.nodeId<<L"]: Send discover to seed: "<<it->second.controlAddress.c_str()<<std::endl;
                 lllog(DiscovererLogLevel)<<L"COM["<<m_me.nodeId<<L"]: Send discover to seed: "<<it->second.controlAddress.c_str()<<std::endl;
                 SendMessageTo(cm, Resolver::StringToEndpoint(it->second.controlAddress));
             }
@@ -344,8 +346,6 @@ namespace Com
                 SendMessageTo(cm, toEndpoint);
                 ++packetNumber;
             }
-
-            assert(packetNumber==numberOfPackets);
 
             lllog(DiscovererLogLevel)<<L"COM["<<m_me.nodeId<<L"]: Send "<<packetNumber<<" NodeInfo messages to id="<<toId<<std::endl;
         }

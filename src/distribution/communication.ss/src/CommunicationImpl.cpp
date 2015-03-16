@@ -71,7 +71,7 @@ namespace Com
         }
         auto myNodeType=m_nodeTypes[nodeTypeId];
         lllog(1)<<L"COM: -------------------------------------------------"<<std::endl;
-        lllog(1)<<L"COM: Communication started"<<std::endl;
+        lllog(1)<<L"COM: Communication initiated"<<std::endl;
         lllog(1)<<L"COM:     id:    "<<m_me.nodeId<<std::endl;
         lllog(1)<<L"COM:     name:    "<<m_me.name.c_str()<<std::endl;
         lllog(1)<<L"COM:     data address: "<<m_me.dataAddress.c_str()<<std::endl;
