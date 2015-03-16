@@ -10,7 +10,7 @@ ADD_TEST(NAME tracer_backdoor
   --sender $<TARGET_FILE:tracer_backdoor_sender>
   --backdoor $<TARGET_FILE:backdoor>
   --dose-main $<TARGET_FILE:dose_main>
-  --dope-main $<TARGET_FILE:signal_persistance_ready>
+  --dope-main $<TARGET_FILE:signal_persistence_ready>
   --safir-show-config $<TARGET_FILE:safir_show_config>
   --safir-generated-paths "${SAFIR_GENERATED_PATHS}")
 

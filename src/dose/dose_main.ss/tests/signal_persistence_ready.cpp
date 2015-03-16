@@ -54,7 +54,7 @@ public:
 };
 
 int main()
-{   
+{
     std::wcout <<"starting" << std::endl;
     boost::asio::io_service ioService;
     Safir::Dob::Connection connection;
