@@ -74,7 +74,6 @@ void CheckThreadCount()
 #endif
 }
 
-
 int main()
 {
     //This log is required by the tests for checking that we don't do too much during elaboration
@@ -101,13 +100,35 @@ int main()
             nbrOfThreads = 4;
         }
 
+        const auto run = [&ioService,&theApp]
+        {
+            try
+            {
+                ioService.run();
+                return;
+            }
+            catch (const std::exception & exc)
+            {
+                SEND_SYSTEM_LOG(Alert,
+                                << "dose_main: Caught 'std::exception' exception from io_service.run(): "
+                                << "  '" << exc.what() << "'.");
+            }
+            catch (...)
+            {
+                SEND_SYSTEM_LOG(Alert,
+                                << "dose_main: Caught '...' exception from io_service.run().");
+            }
+
+            theApp.Stop();
+        };
+
         boost::thread_group threads;
         for (unsigned int i = 0; i < nbrOfThreads-1; ++i)
         {
-            threads.create_thread([&ioService]{ioService.run();});
+            threads.create_thread(run);
         }
 
-        ioService.run();
+        run();
 
         threads.join_all();
 

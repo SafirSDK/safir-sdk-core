@@ -76,10 +76,9 @@ namespace Internal
 
         void Start();
 
-    private:
-        //This is called when dose_main is expected to shut down
         void Stop();
 
+    private:
         void HandleSignal(const boost::system::error_code& error,
                           const int signalNumber);
 
