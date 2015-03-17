@@ -266,7 +266,7 @@ namespace SP
                     lllog(6) << "SP: This node does not have an incarnation id" << std::endl;
                     if (node.nodeInfo->remote_statistics().has_incarnation_id())
                     {
-                        const bool join = m_validateIncarnationIdCallback != nullptr ||
+                        const bool join = m_validateIncarnationIdCallback == nullptr ||
                             m_validateIncarnationIdCallback(node.nodeInfo->remote_statistics().incarnation_id());
 
                         if (join)

@@ -324,6 +324,7 @@ std::unique_ptr<RawStatisticsMessage> GetProtobuf(bool setIncarnation)
     node->set_control_retransmit_count(100);
     node->set_data_receive_count(5000);
     node->set_data_retransmit_count(500);
+
     return std::move(msg);
 }
 
@@ -359,10 +360,9 @@ BOOST_AUTO_TEST_CASE( raw_changed_callback )
                                    ++cbCalls;
                                    CheckStatisticsCommon(statistics);
 
-                                   BOOST_CHECK(!flags.MetadataChanged());
-
                                    if (cbCalls == 1)
                                    {
+                                       BOOST_CHECK(!flags.MetadataChanged());
                                        BOOST_CHECK(flags.NodesChanged());
                                        BOOST_CHECK(!flags.NewRemoteStatistics());
 
@@ -371,6 +371,7 @@ BOOST_AUTO_TEST_CASE( raw_changed_callback )
                                    }
                                    else if (cbCalls == 2)
                                    {
+                                       BOOST_CHECK(flags.MetadataChanged());
                                        BOOST_CHECK(!flags.NodesChanged());
                                        BOOST_CHECK(flags.NewRemoteStatistics());
 
@@ -380,12 +381,56 @@ BOOST_AUTO_TEST_CASE( raw_changed_callback )
                                    }
                                    else
                                    {
+                                       BOOST_CHECK(!flags.MetadataChanged());
                                        BOOST_CHECK(flags.NodesChanged());
                                        BOOST_CHECK(!flags.NewRemoteStatistics());
 
                                        BOOST_CHECK(statistics.IsDead(0));
                                        BOOST_CHECK(statistics.HasRemoteStatistics(0));
                                    }
+                               });
+    comm.newNodeCb("asdf",11,10,"asdffff","asdfqqqq");
+
+    auto msg = GetProtobuf(true);
+    const size_t size = msg->ByteSize();
+    auto data = boost::make_shared<char[]>(size);
+    msg->SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
+    rh.NewRemoteStatistics(11,data,size);
+
+    BOOST_CHECK_NO_THROW(ioService.run());
+    BOOST_CHECK_EQUAL(cbCalls, 3);
+    BOOST_REQUIRE_EQUAL(incarnations.size(), 1U);
+    BOOST_CHECK_EQUAL(*incarnations.begin(), 12345);
+}
+
+
+
+BOOST_AUTO_TEST_CASE( no_incarnations_discard )
+{
+    comm.excludeCb=[&]{rh.Stop();};
+    int cbCalls = 0;
+    rh.AddRawChangedCallback([&](const RawStatistics& statistics,
+                                 const RawChanges& flags,
+                                 boost::shared_ptr<void> completionSignaller)
+                               {
+                                   ++cbCalls;
+                                   CheckStatisticsCommon(statistics);
+
+                                   BOOST_CHECK(!flags.MetadataChanged());
+                                   BOOST_CHECK(flags.NodesChanged());
+                                   BOOST_CHECK(!flags.NewRemoteStatistics());
+
+                                   if (cbCalls == 1)
+                                   {
+                                       BOOST_CHECK(!statistics.IsDead(0));
+                                       BOOST_CHECK(!statistics.HasRemoteStatistics(0));
+                                   }
+                                   else if (cbCalls == 2)
+                                   {
+                                       BOOST_CHECK(statistics.IsDead(0));
+                                       BOOST_CHECK(!statistics.HasRemoteStatistics(0));
+                                   }
+
                                });
     comm.newNodeCb("asdf",11,10,"asdffff","asdfqqqq");
 
@@ -396,8 +441,8 @@ BOOST_AUTO_TEST_CASE( raw_changed_callback )
     rh.NewRemoteStatistics(11,data,size);
 
     BOOST_CHECK_NO_THROW(ioService.run());
-    BOOST_CHECK_EQUAL(cbCalls, 3);
-    BOOST_CHECK(incarnations.empty());
+    BOOST_CHECK_EQUAL(cbCalls, 2);
+    BOOST_REQUIRE_EQUAL(incarnations.size(), 0U);
 }
 
 
@@ -604,7 +649,7 @@ BOOST_AUTO_TEST_CASE( perform_on_all )
 {
     comm.newNodeCb("asdf",11,10,"asdffff","asdfqqqq");
 
-    auto msg = GetProtobuf(false);
+    auto msg = GetProtobuf(true);
     const size_t size = msg->ByteSize();
     auto data = boost::make_shared<char[]>(size);
     msg->SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(data.get()));
