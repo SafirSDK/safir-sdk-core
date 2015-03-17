@@ -780,7 +780,7 @@ namespace SP
             lllog(9) << "SP: A new SystemState has been produced\n";
             if (logState)
             {
-                lllog(9) << "SP: New state:\n" << m_stateMessage;
+                lllog(9) << "SP: New state:\n" << m_stateMessage << "\n";
             }
 
             if (m_stateChangedCallback != nullptr)
