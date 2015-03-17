@@ -59,8 +59,18 @@ namespace Safir
         {
             m_timerId = m_timerHandler.RegisterTimeoutHandler(L"End States Timer", *this);
 
-            lllog(1) << "dose_main is waiting for persistence data!" << std::endl;
-            std::wcout << "dose_main is waiting for persistence data!" << std::endl;
+            if(Dob::PersistenceParameters::TestMode())
+            {
+                lllog(1) << "RUNNING IN PERSISTENCE TEST MODE! PLEASE CHANGE PARAMETER "
+                         << "Safir.Dob.PersistenceParameters.TestMode IF THIS IS NOT WHAT YOU EXPECTED!" << std::endl;
+                std::wcout << "RUNNING IN PERSISTENCE TEST MODE! PLEASE CHANGE PARAMETER "
+                           << "Safir.Dob.PersistenceParameters.TestMode IF THIS IS NOT WHAT YOU EXPECTED!" << std::endl;
+            }
+            else
+            {
+                lllog(1) << "dose_main is waiting for persistence data!" << std::endl;
+                std::wcout << "dose_main is waiting for persistence data!" << std::endl;
+            }
         }
 
         void PersistHandler::Init(
@@ -79,10 +89,7 @@ namespace Safir
 
             if(Dob::PersistenceParameters::TestMode())
             {
-                lllog(1) << "RUNNING IN PERSISTENCE TEST MODE! PLEASE CHANGE PARAMETER "
-                         << "Safir.Dob.PersistenceParameters.TestMode IF THIS IS NOT WHAT YOU EXPECTED!" << std::endl;
-                std::wcout << "RUNNING IN PERSISTENCE TEST MODE! PLEASE CHANGE PARAMETER "
-                           << "Safir.Dob.PersistenceParameters.TestMode IF THIS IS NOT WHAT YOU EXPECTED!" << std::endl;
+                Connections::Instance().AllowConnect(-1);
             }
             else
             {
@@ -270,13 +277,15 @@ namespace Safir
         {
             lllog(1) << "dose_main persistence data is ready!" << std::endl;
             std::wcout << "dose_main persistence data is ready!" << std::endl;
+            ENSURE(!Dob::PersistenceParameters::TestMode(),
+                   << "This system is in persistence test mode, it is an error to call SetPersistentDataReady");
             m_persistDataReady = true;
         }
 
         bool PersistHandler::IsPersistentDataReady() const
         {
-            // Always return true if NO persistence is used.
-            return m_persistDataReady;
+            // Always return true if we're in test mode
+            return m_persistDataReady || Dob::PersistenceParameters::TestMode();
         }
 
         }
