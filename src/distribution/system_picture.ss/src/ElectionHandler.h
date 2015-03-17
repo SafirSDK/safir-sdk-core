@@ -177,13 +177,13 @@ namespace SP
          * we're alone and proclaiming victory. */
         static boost::chrono::steady_clock::duration CalculateAloneTimeout(const std::map<int64_t, NodeType>& nodeTypes)
         {
-            //use max of non-light node types heartbeatInterval * maxLostHeartbeats
+            //use max of non-light node types heartbeatInterval * maxLostHeartbeats * 2
             boost::chrono::steady_clock::duration max = boost::chrono::milliseconds(100);
             for (const auto& nt: nodeTypes)
             {
                 if (!nt.second.isLight)
                 {
-                    max = std::max(max,nt.second.heartbeatInterval * nt.second.maxLostHeartbeats);
+                    max = std::max(max,nt.second.heartbeatInterval * nt.second.maxLostHeartbeats * 2);
                 }
             }
             return max;

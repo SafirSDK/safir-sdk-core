@@ -228,7 +228,7 @@ int main(int argc, char * argv[])
                                                                              "NodeTypeA",
                                                                              false,
                                                                              boost::chrono::milliseconds(1000),
-                                                                             30,
+                                                                             15,
                                                                              boost::chrono::milliseconds(20))));
 
         commNodeTypes.push_back({2,
@@ -243,7 +243,7 @@ int main(int argc, char * argv[])
                                                                              "NodeTypeB",
                                                                              false,
                                                                              boost::chrono::milliseconds(2000),
-                                                                             15,
+                                                                             8,
                                                                              boost::chrono::milliseconds(50))));
 
 
