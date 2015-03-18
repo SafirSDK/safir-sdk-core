@@ -281,9 +281,11 @@ struct Node
              },
              [this](const int64_t incarnationId_)
              {
-                 BOOST_CHECK_EQUAL(incarnationId, 0);
                  BOOST_CHECK_NE(incarnationId_, 0);
-                 incarnationId = incarnationId_;
+                 if (incarnationId == 0)
+                 {
+                     incarnationId = incarnationId_;
+                 }
              })
     {
         SAFE_BOOST_TEST_MESSAGE("Create node " << id);
