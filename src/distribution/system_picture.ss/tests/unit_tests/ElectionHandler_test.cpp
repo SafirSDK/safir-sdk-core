@@ -328,7 +328,9 @@ struct Fixture
     Fixture()
     {
         SAFE_BOOST_TEST_MESSAGE("Set up fixture");
-        srand(static_cast<unsigned int>(time(nullptr)));
+        const auto seed = static_cast<unsigned int>(time(nullptr));
+        std::wcout << "Using random seed " << seed << std::endl;
+        srand(seed);
         Connector::Instance().Reset();
 
         SAFE_BOOST_TEST_MESSAGE("Connector reset");
