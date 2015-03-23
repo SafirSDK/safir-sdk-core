@@ -38,16 +38,6 @@ def log(*args, **kwargs):
     print(*args, **kwargs)
     sys.stdout.flush()
 
-"""
-def rmdir(directory):
-    if os.path.exists(directory):
-        try:
-            shutil.rmtree(directory)
-        except OSError:
-            log("Failed to remove directory",directory,", will retry")
-            time.sleep(0.2)
-            shutil.rmtree(directory)
-"""
 def enqueue_output(out, queue):
     while True:
         line = out.readline()
@@ -118,14 +108,17 @@ def logfilename(proc):
 
 
 p = LllProc(arguments.test_exe)
-res = p.wait_output("START")
+res = p.wait_output(".*START")
 if not res:
     log("got unexpected output")
     sys.exit(1)
 p.kill()
 logfile = p.logfile()
-if logfile is not None:
-    log("Logfile existed, and contained:")
+if logfile is None:
+    log("Logfile empty!")
+    sys.exit(1)
+elif not re.match(r"\[[0-9:.]*\] START\n",logfile):
+    log("Failed to find expected output in logfile:")
     log(logfile)
     sys.exit(1)
 else:

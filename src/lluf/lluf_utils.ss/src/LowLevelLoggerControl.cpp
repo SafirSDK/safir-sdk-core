@@ -1,7 +1,6 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2012-2013 (http://safir.sourceforge.net)
-* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Lars Hagström / lars@foldspace.nu
 *
@@ -34,9 +33,7 @@
 
 namespace //anonymous namespace for internal functions
 {
-    const std::string shmName("SAFIR_LLL_SHARED_MEMORY" +
-                                           Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix());
-    const char * SHARED_MEMORY_NAME = shmName.c_str();
+    const char * SHARED_MEMORY_NAME = "LLUF_LLL_SHARED_MEMORY";
 }
 
 
@@ -51,57 +48,70 @@ namespace Internal
     {
     public:
         Impl(const bool openOnly, const bool readWrite)
-            : m_configReader(new Safir::Utilities::Internal::ConfigReader())
-            , m_logDirectory(m_configReader->Logging().get<std::string>("LowLevelLog_General.log_directory"))
-            , m_writePeriod(m_configReader->Logging().get<std::uint32_t>("LowLevelLog_Services.write_period"))
-            , m_bufferSize(m_configReader->Logging().get<std::uint64_t>("LowLevelLog_Services.write_buffer_size")*1024*1024)
-            , m_startupSynchronizer("SAFIR_LLL_INITIALIZATION")
+            : m_shmData(NULL)
+            , m_configReader(new Safir::Utilities::Internal::ConfigReader())
+            , m_disabled(m_configReader->Logging().get<bool>("LowLevelLog.disabled"))
+            , m_startupSynchronizer("LLUF_LLL_INITIALIZATION")
             , m_readWrite(readWrite)
             , m_openOnly(openOnly)
         {
+            if (m_disabled)
+            {
+                m_configReader.reset();
+                return;
+            }
+
             m_startupSynchronizer.Start(this);
         }
-
-        bool FileLoggingEnabled() const
+                         
+        bool Disabled() const
         {
-            return !m_logDirectory.empty();
+            return m_disabled;
         }
 
+        void CheckDisabled() const
+        {
+            if (m_disabled)
+            {
+                throw std::logic_error("LowLevelLogger is disabled! It is illegal to call this method!");
+            }
+        }
+                         
         const boost::filesystem::path LogDirectory() const
         {
-            if (!FileLoggingEnabled())
-            {
-                throw std::logic_error("File logging is disabled");
-            }
-            return m_logDirectory;
+            CheckDisabled();
+            return m_configReader->Logging().get<std::string>("LowLevelLog.log_directory");
         }
 
         //StartupSynchronizer stuff
         virtual void Create()
         {
+            CheckDisabled();
+
             if (m_openOnly)
             {
                 return;
             }
-
+            
             boost::interprocess::shared_memory_object::remove(SHARED_MEMORY_NAME);
             boost::interprocess::shared_memory_object shm(boost::interprocess::create_only,
-                                                          SHARED_MEMORY_NAME,
+                                                          SHARED_MEMORY_NAME, 
                                                           boost::interprocess::read_write);
             shm.truncate(sizeof(ShmData));
             boost::interprocess::mapped_region shmRegion(shm,
                                                          boost::interprocess::read_write);
             ShmData* data = static_cast<ShmData*>(shmRegion.get_address());
 
-            data->logLevel = m_configReader->Logging().get<int>("LowLevelLog_General.log_level");
-            data->timestamps = m_configReader->Logging().get<bool>("LowLevelLog_General.show_timestamps");
-            data->toStdout = m_configReader->Logging().get<bool>("LowLevelLog_Services.to_standard_output");
-            data->ignoreFlush = m_configReader->Logging().get<bool>("LowLevelLog_General.ignore_flush");
+            data->logLevel = m_configReader->Logging().get<int>("LowLevelLog.log_level");
+            data->timestamps = m_configReader->Logging().get<bool>("LowLevelLog.show_timestamps");
+            data->toStdout = m_configReader->Logging().get<bool>("LowLevelLog.to_standard_output");
+            data->toFile = m_configReader->Logging().get<bool>("LowLevelLog.to_file");
+            data->ignoreFlush = m_configReader->Logging().get<bool>("LowLevelLog.ignore_flush");
         }
 
         virtual void Use()
         {
-            m_configReader.reset();
+            CheckDisabled();
 
             boost::interprocess::mode_t mode = boost::interprocess::read_only;
             if (m_readWrite)
@@ -110,36 +120,30 @@ namespace Internal
             }
 
             boost::interprocess::shared_memory_object shm(boost::interprocess::open_only,
-                                                          SHARED_MEMORY_NAME,
+                                                          SHARED_MEMORY_NAME, 
                                                           mode);
             m_shm.swap(shm);
             boost::interprocess::mapped_region shmRegion(m_shm, mode);
             m_shmRegion.swap(shmRegion);
-
+            
             m_shmData = static_cast<ShmData*>(m_shmRegion.get_address());
         }
 
         virtual void Destroy()
         {
+            CheckDisabled();
+
             boost::interprocess::shared_memory_object::remove(SHARED_MEMORY_NAME);
         }
 
-        void CheckReadWrite() const
+        void CheckReadWrite() const 
         {
+            CheckDisabled();
+
             if (!m_readWrite)
             {
                 throw std::logic_error("This instance of LowLevelLoggerControl is not read-write");
             }
-        }
-
-        boost::chrono::milliseconds WritePeriod() const
-        {
-            return m_writePeriod;
-        }
-
-        std::uint64_t BufferSize() const
-        {
-            return m_bufferSize;
         }
 
         struct ShmData
@@ -147,15 +151,14 @@ namespace Internal
             int logLevel;
             bool timestamps;
             bool toStdout;
+            bool toFile;
             bool ignoreFlush;
         };
 
-        ShmData* m_shmData {nullptr};
+        ShmData* m_shmData;
     private:
-        std::unique_ptr<Safir::Utilities::Internal::ConfigReader> m_configReader;
-        const boost::filesystem::path m_logDirectory;
-        const boost::chrono::milliseconds m_writePeriod;
-        const std::uint64_t m_bufferSize;
+        boost::shared_ptr<Safir::Utilities::Internal::ConfigReader> m_configReader;
+        const bool m_disabled;
         boost::interprocess::shared_memory_object m_shm;
         boost::interprocess::mapped_region m_shmRegion;
         StartupSynchronizer m_startupSynchronizer;
@@ -168,9 +171,9 @@ namespace Internal
         m_impl.reset(new Impl(openOnly, readWrite));
     }
 
-    bool LowLevelLoggerControl::FileLoggingEnabled() const
+    bool LowLevelLoggerControl::Disabled() const
     {
-        return m_impl->FileLoggingEnabled();
+        return m_impl->Disabled();
     }
 
     const boost::filesystem::path LowLevelLoggerControl::LogDirectory() const
@@ -180,26 +183,14 @@ namespace Internal
 
     const int* LowLevelLoggerControl::GetLogLevelPointer() const
     {
-        if (m_impl->m_shmData == nullptr)
-        {
-            return nullptr;
-        }
-        else
-        {
-            return &m_impl->m_shmData->logLevel;
-        }
+        m_impl->CheckDisabled();
+        return &m_impl->m_shmData->logLevel;
     }
 
     int LowLevelLoggerControl::LogLevel() const
     {
-        if (m_impl->m_shmData == nullptr)
-        {
-            return 0;
-        }
-        else
-        {
-            return m_impl->m_shmData->logLevel;
-        }
+        m_impl->CheckDisabled();
+        return m_impl->m_shmData->logLevel;
     }
 
     void LowLevelLoggerControl::LogLevel(const int level)
@@ -208,34 +199,26 @@ namespace Internal
         m_impl->m_shmData->logLevel = level;
     }
 
-
+        
     bool LowLevelLoggerControl::UseTimestamps() const
     {
-        if (m_impl->m_shmData == nullptr)
-        {
-            throw std::logic_error("Shared memory not loaded");
-        }
-
+        m_impl->CheckDisabled();
         return m_impl->m_shmData->timestamps;
     }
-
+    
     void LowLevelLoggerControl::UseTimestamps(const bool enabled)
     {
         m_impl->CheckReadWrite();
         m_impl->m_shmData->timestamps = enabled;
     }
 
-
+        
     bool LowLevelLoggerControl::LogToStdout()  const
     {
-        if (m_impl->m_shmData == nullptr)
-        {
-            throw std::logic_error("Shared memory not loaded");
-        }
-
+        m_impl->CheckDisabled();
         return m_impl->m_shmData->toStdout;
     }
-
+    
     void LowLevelLoggerControl::LogToStdout(const bool enabled)
     {
         m_impl->CheckReadWrite();
@@ -243,32 +226,32 @@ namespace Internal
     }
 
 
-    bool LowLevelLoggerControl::IgnoreFlush()  const
+    bool LowLevelLoggerControl::LogToFile()  const
     {
-        if (m_impl->m_shmData == nullptr)
-        {
-            throw std::logic_error("Shared memory not loaded");
-        }
-
-        return m_impl->m_shmData->ignoreFlush;
+        m_impl->CheckDisabled();
+        return m_impl->m_shmData->toFile;
+    }
+    
+    void LowLevelLoggerControl::LogToFile(const bool enabled)
+    {
+        m_impl->CheckReadWrite();
+        m_impl->m_shmData->toFile = enabled;
     }
 
+
+    bool LowLevelLoggerControl::IgnoreFlush()  const
+    {
+        m_impl->CheckDisabled();
+        return m_impl->m_shmData->ignoreFlush;
+    }
+    
     void LowLevelLoggerControl::IgnoreFlush(const bool enabled)
     {
         m_impl->CheckReadWrite();
         m_impl->m_shmData->ignoreFlush = enabled;
     }
-
-    boost::chrono::milliseconds LowLevelLoggerControl::WritePeriod() const
-    {
-        return m_impl->WritePeriod();
-    }
-
-    std::uint64_t LowLevelLoggerControl::BufferSize() const
-    {
-        return m_impl->BufferSize();
-    }
-
 }
 }
 }
+
+

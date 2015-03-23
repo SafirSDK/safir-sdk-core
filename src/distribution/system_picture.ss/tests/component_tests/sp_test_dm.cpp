@@ -364,8 +364,6 @@ int main(int argc, char * argv[])
     // Make some work to stop io_service from exiting.
     auto work = Safir::make_unique<boost::asio::io_service::work>(ioService);
 
-    Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().SwitchToAsynchronousMode(ioService);
-
     std::vector<Safir::Dob::Internal::Com::NodeTypeDefinition> commNodeTypes;
     std::map<int64_t, Safir::Dob::Internal::SP::NodeType> spNodeTypes;
 
@@ -501,7 +499,6 @@ int main(int argc, char * argv[])
         work.reset();
         lllog(1) << "DM: Cancelling signalSet" << std::endl;
         signalSet.cancel();
-        Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().StopAsynchronousLogger();
     };
 
     signalSet.async_wait([stopFcn, &m_stop](const boost::system::error_code& error,
@@ -537,8 +534,6 @@ int main(int argc, char * argv[])
     ioService.run();
 
     threads.join_all();
-
-    Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().DestroyAsynchronousLogger();
 
     std::wcout << "DM: Exiting..." << std::endl;
     return 0;

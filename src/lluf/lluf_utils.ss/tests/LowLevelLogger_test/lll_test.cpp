@@ -22,72 +22,30 @@
 *
 ******************************************************************************/
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
-#include <atomic>
+
 //disable warnings in boost
 #if defined _MSC_VER
 #  pragma warning (push)
 #  pragma warning (disable : 4244)
-#  pragma warning (disable : 4267)
 #endif
 
 #include <boost/thread.hpp>
-#include <boost/asio.hpp>
 
 #if defined _MSC_VER
 #  pragma warning (pop)
 #endif
 
 #include <iostream>
-int main(const int argc, const char* argv[])
+int main()
 {
-    const bool async = argc == 2 && argv[1] == std::string("async");
-
-    boost::asio::io_service ioService;
-    boost::thread_group threads;
-    boost::asio::signal_set signalSet(ioService);
-    std::atomic<bool> done(false);
-    
-    if (async)
-    {
-        Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().SwitchToAsynchronousMode(ioService);
-        threads.create_thread([&ioService]{ioService.run();});
-
-        //Only some async tests are going to be stopped using the signal
-        //everyone else just kills this program...
-#if defined (_WIN32)
-        signalSet.add(SIGABRT);
-        signalSet.add(SIGBREAK);
-        signalSet.add(SIGINT);
-        signalSet.add(SIGTERM);
-#else
-        signalSet.add(SIGQUIT);
-        signalSet.add(SIGINT);
-        signalSet.add(SIGTERM);
-#endif
-        signalSet.async_wait([&done](const boost::system::error_code& error,
-                                     const int /*signal_number*/)
-                             {
-                                 if (error)
-                                 {
-                                     std::wcout << "error" << std::endl;
-                                 }
-                                 done = true;
-                                 Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().StopAsynchronousLogger();
-                             });
-    }
-
-    while(!done)
+    for(int i = 0; i < 10000000; ++i)
     {
         lllog(5) << "Hello, World!"<<std::endl;
         lllog(9) << "Goodbye cruel world!"<<std::endl;
-        lllog(1) << 1234567890 << std::endl;
+        lllog(0) << 1234567890 << std::endl;
         boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
-        std::wcout << "Logging at "
-                   << Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().LogLevel() << std::endl;
     }
 
-    threads.join_all();
-    Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().DestroyAsynchronousLogger();
-    std::wcout << "exiting nicely" << std::endl;
     return 0;
 }
+

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>495</width>
-    <height>192</height>
+    <height>284</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -96,6 +96,38 @@
          <string>Log to stdout</string>
         </property>
         <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="toFile">
+        <property name="toolTip">
+         <string>Log to files. The location is configured in logging.ini.</string>
+        </property>
+        <property name="text">
+         <string>Log to files</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="disabledGroup">
+     <property name="title">
+      <string>LLL is disabled</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>LowLevelLogger is disabled in the logging.ini configuration file.</string>
+        </property>
+        <property name="wordWrap">
          <bool>true</bool>
         </property>
        </widget>

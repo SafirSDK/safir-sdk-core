@@ -94,8 +94,6 @@ namespace Internal
         m_HandleEvents_notified(0),
         m_DispatchOwnConnection_notified(0)
     {
-        Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().
-                                                    SwitchToAsynchronousMode(m_strand.get_io_service());
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
         m_signalSet.add(SIGABRT);
         m_signalSet.add(SIGBREAK);
@@ -213,7 +211,6 @@ namespace Internal
         m_ownConnection.Close();
 
         m_work.reset();
-        Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().StopAsynchronousLogger();
     }
 
     void DoseApp::HandleSignal(const boost::system::error_code& error,

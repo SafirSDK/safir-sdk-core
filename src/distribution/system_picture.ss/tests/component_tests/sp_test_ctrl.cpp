@@ -210,9 +210,6 @@ int main(int argc, char * argv[])
         //make some work to stop io_service from exiting.
         auto work = Safir::make_unique<boost::asio::io_service::work>(ioService);
 
-        std::wcout << "Switching logger to async mode" << std::endl;
-        Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().SwitchToAsynchronousMode(ioService);
-
         std::vector<Safir::Dob::Internal::Com::NodeTypeDefinition> commNodeTypes;
         std::map<boost::int64_t, Safir::Dob::Internal::SP::NodeType> spNodeTypes;
 
@@ -314,7 +311,6 @@ int main(int argc, char * argv[])
                                  lllog(1) << "CTRL: Resetting work" << std::endl;
                                  work.reset();
 
-                                 Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().StopAsynchronousLogger();
                              }
                              );
 
@@ -330,15 +326,12 @@ int main(int argc, char * argv[])
         ioService.run();
 
         threads.join_all();
-        Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().DestroyAsynchronousLogger();
         std::wcout << "CTRL: Exiting..." << std::endl;
         return 0;
     }
     catch(std::exception& e)
     {
         std::wcout << "Caught exception: " << e.what() << std::endl;
-        Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().StopAsynchronousLogger();
-        Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().DestroyAsynchronousLogger();
         return 1;
     }
 }

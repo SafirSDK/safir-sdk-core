@@ -1,7 +1,6 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2012-2013 (http://safir.sourceforge.net)
-* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Lars Hagström / lars@foldspace.nu
 *
@@ -29,8 +28,6 @@
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/filesystem/path.hpp>
-#include <boost/chrono.hpp>
-#include <cstdint>
 
 namespace Safir
 {
@@ -49,25 +46,28 @@ namespace Internal
     public:
         LowLevelLoggerControl(const bool openOnly, bool readWrite);
 
-        bool FileLoggingEnabled() const;
-        const boost::filesystem::path LogDirectory() const;
-
+        //If this returns true all other methods yield undefined results
+        bool Disabled() const;
+        
         const int* GetLogLevelPointer() const;
+
+        const boost::filesystem::path LogDirectory() const;
 
         int LogLevel() const;
         void LogLevel(const int level);
-
+        
         bool UseTimestamps() const;
         void UseTimestamps(const bool enabled);
-
+        
         bool LogToStdout() const;
         void LogToStdout(const bool enabled);
+
+        bool LogToFile() const;
+        void LogToFile(const bool enabled);
 
         bool IgnoreFlush() const;
         void IgnoreFlush(const bool enabled);
 
-        boost::chrono::milliseconds WritePeriod() const;
-        std::uint64_t BufferSize() const; //bytes
     private:
         class Impl;
         boost::shared_ptr<Impl> m_impl;
@@ -82,3 +82,4 @@ namespace Internal
 }
 
 #endif
+

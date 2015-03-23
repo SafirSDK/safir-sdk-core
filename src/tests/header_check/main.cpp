@@ -22,10 +22,11 @@
 *
 ******************************************************************************/
 #include <iostream>
+#include <Safir/Utilities/Internal/LowLevelLogger.h>
 
 int main()
 {
-    std::wcout << "START" << std::endl;
+    lllog(1) << "START" << std::endl;
     return 1;
 }
 

@@ -134,8 +134,6 @@ int main()
 
         crGuard.reset();
 
-        Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().DestroyAsynchronousLogger();
-
         //now check the thread count, all threads should be gone, except the main
         //thread.
         CheckThreadCount();

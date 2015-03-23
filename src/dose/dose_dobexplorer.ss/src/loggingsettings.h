@@ -49,7 +49,8 @@ public slots:
     void IgnoreFlush(bool ignore);
     void Timestamps(bool use);
     void Stdout(bool use);
-
+    void File(bool use);
+    
     void UpdateWidgets();
 private:
     void CreateControl();
