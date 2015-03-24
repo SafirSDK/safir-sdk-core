@@ -29,7 +29,6 @@
 #include "memgraph.h"
 #include "entitystats.h"
 #include "connectionstats.h"
-#include "loggingsettings.h"
 #include "SystemPicturePage.h"
 #include "numberofentities.h"
 #include "RawStatisticsPage.h"
@@ -139,11 +138,6 @@ void DoseMon::TreeItemActivated ( QTreeWidgetItem * item, int /*column*/ )
     if (item->text(0) == "Memory")
     {
         newTab = tabWidget->addTab(new MemGraph(this),"Memory");
-        tabWidget->setTabToolTip(newTab,tabWidget->widget(newTab)->toolTip());
-    }
-    else if (item->text(0) == "Logging settings")
-    {
-        newTab = tabWidget->addTab(new LoggingSettings(this),"Logging settings");
         tabWidget->setTabToolTip(newTab,tabWidget->widget(newTab)->toolTip());
     }
     else if (item->text(0) == "Raw Node Statistics")

@@ -16,9 +16,6 @@ ADD_LIBRARY(lluf_utils SHARED ${headers}
 #Make our INTERNAL headers available to other parts of Core.
 target_include_directories(lluf_utils PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
-TARGET_LINK_LIBRARIES(lluf_utils PRIVATE
-  lluf_startup_synchronizer)
-
 #Some libraries are used in our internal headers, not in the public headers so we
 #only make them public for the Core tree build, not for the exported cmake
 #configuration. This allows for other parts of core to include e.g. LowLevelLogger
@@ -47,14 +44,8 @@ else()
   TARGET_LINK_LIBRARIES(lluf_utils PRIVATE dl rt)
 endif()
 
-ADD_EXECUTABLE(logger_control logger_control.cpp)
-
-TARGET_LINK_LIBRARIES(logger_control PRIVATE
-  lluf_utils
-  ${Boost_PROGRAM_OPTIONS_LIBRARY})
-
 SAFIR_INSTALL(
-  TARGETS lluf_utils logger_control)
+  TARGETS lluf_utils)
 
 if (WIN32)
   INSTALL(FILES ../data/safir_event_log_registration.reg

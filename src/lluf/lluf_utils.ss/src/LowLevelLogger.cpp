@@ -54,7 +54,7 @@
 
 namespace //anonymous namespace for internal functions
 {
-    typedef boost::shared_ptr<const Safir::Utilities::Internal::LowLevelLoggerControl> ControlPtr;
+    using namespace Safir::Utilities::Internal;
 
     //also creates directories and removes files that are in the way
     const boost::filesystem::path GetLogFilename(const boost::filesystem::path& path)
@@ -94,17 +94,17 @@ namespace //anonymous namespace for internal functions
         typedef wchar_t char_type;
         struct category :
             boost::iostreams::output_filter_tag,
-            boost::iostreams::multichar_tag,            
+            boost::iostreams::multichar_tag,
             boost::iostreams::flushable_tag {};
 
-        explicit DateOutputFilter(const ControlPtr& control)
+        explicit DateOutputFilter(const LowLevelLoggerControl& control)
             : m_datePending(true)
             , m_fractionalDigits(boost::posix_time::time_duration::num_fractional_digits())
             , m_ostr(new std::wostringstream())
             , m_ostrLock(new boost::mutex())
             , m_control(control)
         {
-        
+
         }
 
         template <typename Sink>
@@ -118,7 +118,7 @@ namespace //anonymous namespace for internal functions
             {
                 if (start[i] == '\n')
                 {
-                    if (m_datePending && (m_control == NULL || m_control->UseTimestamps()))
+                    if (m_datePending && m_control.UseTimestamps())
                     {
                         const std::wstring timestring = TimeString();
                         boost::iostreams::write(dest,timestring.c_str(),timestring.size());
@@ -137,7 +137,7 @@ namespace //anonymous namespace for internal functions
 
             if (end - start > 0)
             {
-                if (m_datePending && (m_control == NULL || m_control->UseTimestamps()))
+                if (m_datePending && m_control.UseTimestamps())
                 {
                     const std::wstring timestring = TimeString();
                     boost::iostreams::write(dest,timestring.c_str(),timestring.size());
@@ -145,13 +145,13 @@ namespace //anonymous namespace for internal functions
                 }
                 boost::iostreams::write(dest,start,end-start);
             }
-                    
+
 
             return n;
         }
-        
+
         template <typename Sink>
-        bool flush(Sink& s) const 
+        bool flush(Sink& s) const
         {
             return boost::iostreams::flush(s);
         }
@@ -172,15 +172,15 @@ namespace //anonymous namespace for internal functions
 
     private:
         const DateOutputFilter& operator=(const DateOutputFilter& other); //no assignment op.
-        
-        /** 
+
+        /**
          * This is an optimized version of to_simple_string(time_duration) from posix_time.
          * It is here just to reduce the amount of time spent in serializing the time strings
          * in the logger.
-         * The ch argument is appended to the string, so that the caller only has to do 
+         * The ch argument is appended to the string, so that the caller only has to do
          * a call to write, rather than a write followed by a put.
          * The wostringstream is a member with a lock rather than a local variable since
-         * that is actually faster (tested on linux with gcc). 
+         * that is actually faster (tested on linux with gcc).
          */
         const std::wstring TimeString()
         {
@@ -215,30 +215,8 @@ namespace //anonymous namespace for internal functions
 
         boost::shared_ptr<std::wostringstream> m_ostr;
         boost::shared_ptr<boost::mutex> m_ostrLock;
-        
-        const ControlPtr m_control;
-    };
 
-    /* Just adding wcout to filtering_streambuf seems to stop
-     * flushing from working correctly, so we do this instead.*/
-    class FlushingWcoutSink
-    {
-    public:
-        typedef wchar_t      char_type;
-        struct category :
-            boost::iostreams::sink_tag,
-            boost::iostreams::flushable_tag {};
-
-        std::streamsize write(const wchar_t* s, const std::streamsize n) const
-        {
-            std::wcout.write(s,n);
-            return n;
-        }
-
-        bool flush() const 
-        {
-            return boost::iostreams::flush(std::wcout);
-        }
+        const LowLevelLoggerControl& m_control;
     };
 
     /**/
@@ -246,77 +224,26 @@ namespace //anonymous namespace for internal functions
         public boost::iostreams::filtering_wostreambuf
     {
     public:
-        explicit FilteringStreambuf()
-            : m_control()
+        explicit FilteringStreambuf(const LowLevelLoggerControl& control)
+            : m_control(control)
         {
 
-        }
-
-        void SetControl(const ControlPtr& control)
-        {
-            m_control = control;
         }
 
         int sync()
         {
-            //            std::wcerr << "Got sync call" << std::endl;
-            if (m_control == NULL || !m_control->IgnoreFlush())
-            {
-                return boost::iostreams::filtering_wostreambuf::sync();
-            }
-            else
+            if (m_control.IgnoreFlush())
             {
                 return 0;
             }
-        }
-    private:
-        ControlPtr m_control;
-    };
-
-    class TeeDevice
-        : public boost::iostreams::tee_device<boost::iostreams::wfile_sink, std::wostream>
-    {
-        typedef boost::iostreams::tee_device<boost::iostreams::wfile_sink, std::wostream> Base;
-    public:
-        explicit TeeDevice(boost::iostreams::wfile_sink& fileSink)
-            : Base(fileSink,std::wcout)
-            , m_fileSink(fileSink)
-        {
-        }
-
-        std::streamsize write(const wchar_t* s, std::streamsize n)
-        {
-            if (m_control == NULL ||
-                (m_control->LogToStdout() && m_control->LogToFile()))
-            {
-                return Base::write(s,n);
-            }
-            else if (m_control->LogToStdout())
-            {
-                return boost::iostreams::write(std::wcout,s,n);
-            }
-            else if (m_control->LogToFile())
-            {
-                return boost::iostreams::write(m_fileSink,s,n);
-            }
             else
             {
-                return n;
+                return boost::iostreams::filtering_wostreambuf::sync();
             }
         }
-
-        void SetControl(const ControlPtr& control)
-        {
-            m_control = control;
-        }
-
     private:
-        const TeeDevice& operator=(const TeeDevice&); //no assignment
-
-        boost::iostreams::wfile_sink& m_fileSink;
-        ControlPtr m_control;
+        const LowLevelLoggerControl& m_control;
     };
-    
 }
 
 
@@ -330,40 +257,21 @@ namespace Internal
 {
     class LowLevelLogger::Impl
     {
-
-    };
-
-
-    class LowLevelLogger::LoggingImpl
-        : public LowLevelLogger::Impl
-    {
     public:
-        explicit LoggingImpl(LowLevelLogger& lll)
+        explicit Impl()
+            : m_buffer(m_control)
         {
-            m_control.reset(new LowLevelLoggerControl(false,false));
-            if (m_control->Disabled())
+            if (m_control.LogLevel() > 0)
             {
-                m_control.reset();
-                throw std::runtime_error("LowLevelLogger is disabled!");
+                m_fileSink.reset(new boost::iostreams::wfile_sink(GetLogFilename(m_control.LogDirectory()).string()));
+                DateOutputFilter filter(m_control);
+                m_buffer.push(filter);
+                m_buffer.push(*m_fileSink);
             }
-            
-            m_fileSink.reset(new boost::iostreams::wfile_sink(GetLogFilename(m_control->LogDirectory()).string()));
-            m_tee.reset(new TeeDevice(*m_fileSink));
-            
-            m_buffer.SetControl(m_control);
-            m_tee->SetControl(m_control);
-            DateOutputFilter filter(m_control);
-            m_buffer.push(filter);
-            m_buffer.push(*m_tee);
-            lll.rdbuf(&m_buffer);
-            
-            lll.m_pLogLevel = m_control->GetLogLevelPointer();
         }
 
-    private:
-        boost::shared_ptr<LowLevelLoggerControl> m_control;
+        const LowLevelLoggerControl m_control;
         boost::shared_ptr<boost::iostreams::wfile_sink> m_fileSink;
-        boost::shared_ptr<TeeDevice> m_tee;
         FilteringStreambuf m_buffer;
     };
 
@@ -383,28 +291,12 @@ namespace Internal
 
 
     LowLevelLogger::LowLevelLogger()
-        : std::wostream(NULL)
-        , m_pLogLevel(NULL)
+        : std::wostream(nullptr)
+        , m_impl(new Impl())
+        , m_pLogLevel(nullptr)
     {
-        //wcout on windows has no buffering turned on at all! Give it some buffering!
-#ifdef _MSC_VER
-        std::wcout.rdbuf()->pubsetbuf(NULL,8196);
-#endif
-        
-        //this will allow wcout to coexist with cout and with printf/wprintf
-        //which Ada io is based upon.
-        std::ios_base::sync_with_stdio(false);
-
-        try
-        {
-            m_impl.reset(new LoggingImpl(*this));
-        }
-        catch (const std::exception&)
-        {
-            m_impl.reset();
-            //set it to null, just to be extra sure. Should not be needed...
-            m_pLogLevel = NULL;
-        }
+        rdbuf(&m_impl->m_buffer);
+        m_pLogLevel = m_impl->m_control.GetLogLevelPointer();
     }
 
     LowLevelLogger::~LowLevelLogger()
@@ -415,5 +307,3 @@ namespace Internal
 }
 }
 }
-
-
