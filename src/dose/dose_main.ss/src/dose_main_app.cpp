@@ -119,8 +119,8 @@ namespace Internal
         m_HandleEvents_notified(0),
         m_DispatchOwnConnection_notified(0)
     {
-        Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().
-                                                    SwitchToAsynchronousMode(m_strand.get_io_service());
+//        Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().
+//                                                    SwitchToAsynchronousMode(m_strand.get_io_service());
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
         m_signalSet.add(SIGABRT);
         m_signalSet.add(SIGBREAK);
@@ -244,6 +244,8 @@ namespace Internal
         m_persistHandler->Start();
         m_connectionHandler->Start();
 
+        m_connectionThread = boost::thread([this]() {ConnectionThread();});
+
         //stewart TODO This is a temporary call just to be able to test dose_main.
         m_persistHandler->SetPersistentDataReady();
 
@@ -260,13 +262,21 @@ namespace Internal
                              int64_t nodeTypeId,
                              const std::string& dataAddress)
     {
+        lllog(1) << "DOSE_MAIN: InjectNode cmd received."<<
+                  " NodeName=" << nodeName.c_str() <<
+                  " NodeId=" <<  nodeId <<
+                  " NodeTypeId=" << nodeTypeId <<
+                  " DataAddress=" << dataAddress.c_str() << std::endl;
+
         if (m_distribution == nullptr)
         {
-            throw std::logic_error("InjectNode cmd received before SetOwnNode cmd!");
+            throw std::logic_error("InjectNode cmd received before StartDoseMain cmd!");
         }
 
         if (m_distribution->GetCommunication().Id() == nodeId)
         {
+            lllog(1) << "DOSE_MAIN: Own node injected, starting distribution components!" << std::endl;
+
             // Own node has been included in the system state, now its time to start
             // the distribution mechanism.
             m_distribution->Start();
@@ -274,6 +284,12 @@ namespace Internal
         }
         else
         {
+            lllog(1) << "DOSE_MAIN: Injecting Node."<<
+                      " NodeName=" << nodeName.c_str() <<
+                      " NodeId=" <<  nodeId <<
+                      " NodeTypeId=" << nodeTypeId <<
+                      " DataAddress=" << dataAddress.c_str() << std::endl;
+
             m_distribution->InjectNode(nodeName,
                                        nodeId,
                                        nodeTypeId,
@@ -454,6 +470,9 @@ namespace Internal
 
     ConnectResult DoseApp::CanAddConnection(const std::string & connectionName, const pid_t pid, const long /*context*/)
     {
+
+        return Success;
+#if 0 //stewart
         switch (m_processInfoHandler.CanAddConnectionFromProcess(pid))
         {
         case TooManyProcesses:
@@ -485,6 +504,7 @@ namespace Internal
             ENSURE(false, << "Got unexpected result from ProcessInfoHandler::CanAddConnectionFromProcess!");
             return Undefined;
         }
+#endif
     }
 
 
@@ -538,7 +558,9 @@ namespace Internal
     {
         lllout << "ConnectionHandler::HandleConnect: New connection from " << connection->NameWithCounter() << " id = " << connection->Id() << std::endl;
         m_connectionHandler->HandleConnect(connection);
-        m_processInfoHandler.ConnectionAdded(connection);
+
+        // stewart
+        //m_processInfoHandler.ConnectionAdded(connection);
     }
 
     void DoseApp::HandleDisconnect(const ConnectionPtr & connection)
@@ -562,7 +584,8 @@ namespace Internal
         m_connectionHandler->HandleDisconnect(connection);
 
         // Remove the connection from the processInfo structure
-        m_processInfoHandler.ConnectionRemoved(connection);
+        //stewart
+        //m_processInfoHandler.ConnectionRemoved(connection);
 
         // Classes have been unregistered, inform waiting connections
         int recLevel=0;

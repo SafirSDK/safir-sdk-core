@@ -273,7 +273,7 @@ int main(int argc, char * argv[])
                          options.id,
                          conf.thisNodeParam.nodeTypeId,
                          std::move(spNodeTypes),
-                         nullptr); //TODO: implement incarnation id validation
+                         [](const int64_t /*incarnationId*/){return true;}); //TODO: implement incarnation id validation
 
 
     std::unique_ptr<Control::SystemStateHandler> stateHandler;
@@ -314,7 +314,7 @@ int main(int argc, char * argv[])
                                     // Node down callback
                                     [](const int64_t /*nodeId*/)
                                     {
-                                        // TODO: What to do here?
+                                        // TODO: What to do here?'
                                     }));
 
     boost::asio::signal_set signalSet(ioService);
