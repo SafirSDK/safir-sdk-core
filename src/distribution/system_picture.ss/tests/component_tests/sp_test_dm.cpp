@@ -107,7 +107,7 @@ public:
             return;
         }
 
-        lllog(1) << "DM: Got suicide trigger '" << suicideTrigger << "'" << std::endl;
+        std::wcout << "Got suicide trigger '" << suicideTrigger << "'" << std::endl;
 
         parseOk = true;
     }
@@ -155,7 +155,7 @@ public:
     {
         m_strand.dispatch([this,data]
                           {
-                              //std::wcout << "DM: Got new SystemState:\n" << data << std::endl;
+                              //std::wcout << "Got new SystemState:\n" << data << std::endl;
 
                               CheckState(data);
                               InjectNodes(data);
@@ -180,7 +180,7 @@ private:
                 continue;
             }
 
-            lllog(1) << "DM: Injecting node " << data.Name(i) << "(" << data.Id(i)
+            std::wcout << "Injecting node " << data.Name(i) << "(" << data.Id(i)
                      << ") of type " << data.NodeTypeId(i)
                      << " with address " << data.DataAddress(i) << std::endl;
 
@@ -214,8 +214,8 @@ private:
 
                 if (!found)
                 {
-                    lllog(1) << "DM: Node " << last.Id(i) << " could not be found in current SS\n"
-                             << "DM: Last: \n" << last << "\nCurrent:\n"<< data <<std::endl;
+                    std::wcout << "Node " << last.Id(i) << " could not be found in current SS\n"
+                             << "Last: \n" << last << "\nCurrent:\n"<< data <<std::endl;
                     throw std::logic_error("Node has gone missing!");
                 }
             }
@@ -235,8 +235,8 @@ private:
                     {
                         if (last.IsDead(j))
                         {
-                            lllog(1) << "DM: Node " << data.Id(i) << " was dead in last state!\n"
-                                     << "DM: Last: \n" << last << "\nCurrent:\n"<< data <<std::endl;
+                            std::wcout << "Node " << data.Id(i) << " was dead in last state!\n"
+                                     << "Last: \n" << last << "\nCurrent:\n"<< data <<std::endl;
                             throw std::logic_error("Node has been resurrected!");
 
                         }
@@ -251,8 +251,8 @@ private:
             {
                 if (!ids.insert(data.Id(i)).second)
                 {
-                    lllog(1) << "DM: Node " << data.Id(i) << " is duplicated in the System State!\n"
-                             << "DM: State:\n"<< data <<std::endl;
+                    std::wcout << "Node " << data.Id(i) << " is duplicated in the System State!\n"
+                             << "State:\n"<< data <<std::endl;
                     throw std::logic_error("Duplicate node in state!");
                 }
             }
@@ -268,7 +268,7 @@ private:
             return;
         }
 
-        //lllog(1) << "Considering suicide" << std::endl;
+        //std::wcout << "Considering suicide" << std::endl;
 
         bool triggered = false;
 
@@ -292,13 +292,13 @@ private:
                 continue;
             }
 
-            //lllog(1) << "DM: Found dead trigger node " << data.Id(i) << std::endl;
+            //std::wcout << "Found dead trigger node " << data.Id(i) << std::endl;
 
             //check if it was not known about
             const auto findIt = m_triggerHistory.find(data.Id(i));
             if (findIt == m_triggerHistory.end())
             {
-                //lllog(1) << "DM:  most probably from a previous cycle, ignore it." << std::endl;
+                //std::wcout << " most probably from a previous cycle, ignore it." << std::endl;
                 m_triggerHistory.insert(std::make_pair(data.Id(i),true));
                 continue;
             }
@@ -306,7 +306,7 @@ private:
             //if it wasnt previously dead
             if (!findIt->second)
             {
-                //lllog(1) << "DM:  was not previously dead, triggering" << std::endl;
+                //std::wcout << " was not previously dead, triggering" << std::endl;
                 findIt->second = true; //now known to be dead
                 triggered = true;
                 break;
@@ -315,14 +315,14 @@ private:
 
         if (triggered)
         {
-            lllog(1) << "DM: My trigger node (" << m_trigger << "), has died, will schedule a suicide" << std::endl;
+            std::wcout << "My trigger node (" << m_trigger << "), has died, will schedule a suicide" << std::endl;
 
             m_suicideTimer.expires_from_now(boost::chrono::seconds(10));
             m_suicideTimer.async_wait([this](const boost::system::error_code& error)
                                       {
                                           if (!error)
                                           {
-                                              lllog(1) << "DM: Committing suicide!" << std::endl;
+                                              std::wcout << "Committing suicide!" << std::endl;
                                               m_stopHandler();
                                           }
                                       });
@@ -489,15 +489,15 @@ int main(int argc, char * argv[])
     const auto stopFcn = [&sp, &communication, &sendTimer, &work, &signalSet, &m_stop]
     {
         m_stop = true;
-        lllog(1) << "DM: Stopping SystemPicture" << std::endl;
+        std::wcout << "Stopping SystemPicture" << std::endl;
         sp.Stop();
-        lllog(1) << "DM: Stopping Communication" << std::endl;
+        std::wcout << "Stopping Communication" << std::endl;
         communication.Stop();
-        lllog(1) << "DM: Stopping sendTimer" << std::endl;
+        std::wcout << "Stopping sendTimer" << std::endl;
         sendTimer.cancel();
-        lllog(1) << "DM: resetting work" << std::endl;
+        std::wcout << "resetting work" << std::endl;
         work.reset();
-        lllog(1) << "DM: Cancelling signalSet" << std::endl;
+        std::wcout << "Cancelling signalSet" << std::endl;
         signalSet.cancel();
     };
 
@@ -515,7 +515,7 @@ int main(int argc, char * argv[])
                                                  << "Got a signals error: " << error);
                              }
 
-                             lllog(1) << "DM: Got signal " << signal_number << std::endl;
+                             std::wcout << "Got signal " << signal_number << std::endl;
                              stopFcn();
                          }
                          );
@@ -523,7 +523,7 @@ int main(int argc, char * argv[])
 
     ssh.SetStopHandler(stopFcn);
 
-    std::wcout << "DM: Launching io_service" << std::endl;
+    std::wcout << "Launching io_service" << std::endl;
 
     boost::thread_group threads;
     for (int i = 0; i < 2; ++i)
@@ -535,6 +535,6 @@ int main(int argc, char * argv[])
 
     threads.join_all();
 
-    std::wcout << "DM: Exiting..." << std::endl;
+    std::wcout << "Exiting..." << std::endl;
     return 0;
 }

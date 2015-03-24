@@ -146,7 +146,7 @@ public:
         if (f.good())
         {
             f >> m_lastIncarnation;
-            lllog(1) << "Last incarnation read from file: " << m_lastIncarnation << std::endl;
+            std::wcout << "Last incarnation read from file: " << m_lastIncarnation << std::endl;
         }
     }
 
@@ -158,16 +158,16 @@ public:
             throw std::logic_error("Expect only one call to IncarnationChecker::Check");
         }
 
-        lllog(1) << "Checking incarnation id " << id << std::endl;
+        std::wcout << "Checking incarnation id " << id << std::endl;
         if (!m_enabled)
         {
-            lllog(1) << "Checking disabled, return true" << std::endl;
+            std::wcout << "Checking disabled, return true" << std::endl;
             return true;
         }
 
         if (m_lastIncarnation == 0)
         {
-            lllog(1) << "Have no previous incarnation, writing to file and returning true" << std::endl;
+            std::wcout << "Have no previous incarnation, writing to file and returning true" << std::endl;
             std::ofstream f(m_filename);
             f << id;
             return true;
@@ -272,9 +272,9 @@ int main(int argc, char * argv[])
         std::wcout << "Starting SystemState subscription" << std::endl;
 
         // Start subscription to system state changes from SP
-        sp.StartStateSubscription([](const Safir::Dob::Internal::SP::SystemState& /*data*/)
+        sp.StartStateSubscription([](const Safir::Dob::Internal::SP::SystemState& data)
                                   {
-
+                                      std::wcout << "Got new state: \n" << data << std::endl;
                                   });
 
 
@@ -298,17 +298,17 @@ int main(int argc, char * argv[])
         signalSet.async_wait([&sp,&work,&communication](const boost::system::error_code& error,
                                                         const int signal_number)
                              {
-                                 lllog(1) << "CTRL: Got signal " << signal_number << std::endl;
+                                 std::wcout << "Got signal " << signal_number << std::endl;
                                  if (error)
                                  {
                                      SEND_SYSTEM_LOG(Error,
                                                      << "Got a signals error: " << error);
                                  }
-                                 lllog(1) << "CTRL: Stopping SystemPicture" << std::endl;
+                                 std::wcout << "Stopping SystemPicture" << std::endl;
                                  sp.Stop();
-                                 lllog(1) << "CTRL: Stopping Communication" << std::endl;
+                                 std::wcout << "Stopping Communication" << std::endl;
                                  communication.Stop();
-                                 lllog(1) << "CTRL: Resetting work" << std::endl;
+                                 std::wcout << "Resetting work" << std::endl;
                                  work.reset();
 
                              }
@@ -326,7 +326,7 @@ int main(int argc, char * argv[])
         ioService.run();
 
         threads.join_all();
-        std::wcout << "CTRL: Exiting..." << std::endl;
+        std::wcout << "Exiting..." << std::endl;
         return 0;
     }
     catch(std::exception& e)
