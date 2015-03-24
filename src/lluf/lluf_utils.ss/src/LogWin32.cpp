@@ -103,7 +103,7 @@ LSTATUS GetRegistryValue(HKEY hKey, const wchar_t* lpValueName, DWORD& value)
 
 
 WindowsLogger::WindowsLogger(const std::wstring& processName)
-    : m_startupSynchronizer("LLUF_WINDOWS_LOGGING_INITIALIZATION"),
+    : m_startupSynchronizer("SAFIR_WINDOWS_LOGGING_INITIALIZATION"),
       m_sourceHandle(0),
       m_processName(processName)
 {

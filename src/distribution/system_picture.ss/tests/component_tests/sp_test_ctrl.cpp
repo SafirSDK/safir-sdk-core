@@ -274,7 +274,7 @@ int main(int argc, char * argv[])
         // Start subscription to system state changes from SP
         sp.StartStateSubscription([](const Safir::Dob::Internal::SP::SystemState& data)
                                   {
-                                      std::wcout << "Got new state: \n" << data << std::endl;
+                                      std::wcout << "Got new state:\n" << data << std::endl;
                                   });
 
 

@@ -39,7 +39,7 @@ else()
 endif()
 
 if (WIN32)
-  TARGET_LINK_LIBRARIES(lluf_utils PRIVATE psapi)
+  TARGET_LINK_LIBRARIES(lluf_utils PRIVATE lluf_startup_synchronizer psapi)
 else()
   TARGET_LINK_LIBRARIES(lluf_utils PRIVATE dl rt)
 endif()
