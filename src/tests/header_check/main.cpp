@@ -27,6 +27,7 @@
 int main()
 {
     lllog(1) << "START" << std::endl;
+    std::wcout << "START" << std::endl;
     return 1;
 }
 
