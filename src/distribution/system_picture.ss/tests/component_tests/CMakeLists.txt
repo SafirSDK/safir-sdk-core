@@ -17,8 +17,12 @@ TARGET_LINK_LIBRARIES(sp_test_dm PRIVATE
 
 SAFIR_INSTALL(TARGETS sp_test_ctrl sp_test_dm TEST_SUITE)
 
-SAFIR_INSTALL_PYTHON(SCRIPT start_system_picture_test.py
-  COMPONENT Test)
-
 SAFIR_INSTALL_PYTHON(SCRIPT circular_restart.py
   COMPONENT Test)
+
+INSTALL(
+  DIRECTORY
+    config
+  DESTINATION ${SAFIR_INSTALL_DESTINATION_TEST_DATA}/system_picture
+  COMPONENT Test
+  )

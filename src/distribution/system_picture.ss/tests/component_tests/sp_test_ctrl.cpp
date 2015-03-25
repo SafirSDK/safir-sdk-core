@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include <Safir/Dob/Internal/Communication.h>
+#include <Safir/Utilities/ProcessInfo.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/MakeUnique.h>
@@ -193,6 +194,8 @@ private:
 
 int main(int argc, char * argv[])
 {
+    std::wcout << "Pid: " << Safir::Utilities::ProcessInfo::GetPid() << std::endl;
+
     try
     {
         //ensure call to CrashReporter::Stop at application exit

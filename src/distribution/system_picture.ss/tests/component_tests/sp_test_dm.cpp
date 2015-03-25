@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include <Safir/Dob/Internal/Communication.h>
+#include <Safir/Utilities/ProcessInfo.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/MakeUnique.h>
@@ -347,11 +348,12 @@ private:
 
 int main(int argc, char * argv[])
 {
+    std::wcout << "Pid: " << Safir::Utilities::ProcessInfo::GetPid() << std::endl;
     //ensure call to CrashReporter::Stop at application exit
     boost::shared_ptr<void> crGuard(static_cast<void*>(0),
                                     [](void*){Safir::Utilities::CrashReporter::Stop();});
     Safir::Utilities::CrashReporter::Start();
-    
+
     const ProgramOptions options(argc, argv);
     if (!options.parseOk)
     {
