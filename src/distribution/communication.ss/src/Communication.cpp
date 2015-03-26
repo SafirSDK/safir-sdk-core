@@ -134,9 +134,9 @@ namespace
         m_impl->SetRetransmitToCallback(callback);
     }
 
-    void Communication::SetQueueNotFullCallback(const QueueNotFull& callback, int freePartThreshold)
+    void Communication::SetQueueNotFullCallback(const QueueNotFull& callback, int64_t nodeTypeId)
     {
-       m_impl->SetQueueNotFullCallback(callback, freePartThreshold);
+       m_impl->SetQueueNotFullCallback(callback, nodeTypeId);
     }
 
     void Communication::SetDataReceiver(const ReceiveData& callback, int64_t dataTypeIdentifier, const Allocator& allocator)
@@ -176,7 +176,7 @@ namespace
 
     bool Communication::Send(int64_t nodeId,
                              int64_t nodeTypeId,
-                             const boost::shared_ptr<char[]>& data,
+                             const boost::shared_ptr<const char[]>& data,
                              size_t size,
                              int64_t dataTypeIdentifier,
                              bool deliveryGuarantee)

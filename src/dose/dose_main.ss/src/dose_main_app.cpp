@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -24,6 +25,7 @@
 
 #include "dose_main_app.h"
 #include "dose_main_timers.h"
+#include <Safir/Dob/Internal/ControlConfig.h>
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Dob/Internal/InternalDefs.h>
 #include <Safir/Dob/Internal/MessageTypes.h>
@@ -40,8 +42,6 @@
 #include <Safir/Utilities/CrashReporter.h>
 #include <boost/bind.hpp>
 #include <iostream>
-
-
 
 namespace Safir
 {
@@ -79,17 +79,39 @@ namespace Internal
     DoseApp::DoseApp(boost::asio::io_service::strand& strand):
         m_connectEvent(0),
         m_connectionOutEvent(0),
-        m_nodeStatusChangedEvent(0),
         m_strand(strand),
         m_work(new boost::asio::io_service::work(m_strand.get_io_service())),
+        m_distribution(),
+        m_cmdReceiver(m_strand.get_io_service(),
+                      m_strand.wrap([this](const std::string& nodeName,
+                                           int64_t nodeId,
+                                           int64_t nodeTypeId,
+                                           const std::string& dataAddress)
+                                    {
+                                        Start(nodeName,
+                                              nodeId,
+                                              nodeTypeId,
+                                              dataAddress);
+                                    }),
+                      m_strand.wrap([this](const std::string& nodeName,
+                                           int64_t nodeId,
+                                           int64_t nodeTypeId,
+                                           const std::string& dataAddress)
+                                    {
+                                        InjectNode(nodeName,
+                                                   nodeId,
+                                                   nodeTypeId,
+                                                   dataAddress);
+                                    }),
+                      m_strand.wrap([this]()
+                                    {
+                                        Stop();
+                                    })),
+
+
         m_signalSet(m_strand.get_io_service()),
         m_timerHandler(m_strand),
-        m_endStates(m_timerHandler),
-        m_requestHandler(m_timerHandler),
-        m_responseHandler(m_timerHandler),
-        m_poolHandler(m_strand),
         m_pendingRegistrationHandler(m_timerHandler),
-        m_persistHandler(m_timerHandler),
         m_processMonitor(m_strand.get_io_service(),ProcessExited,boost::chrono::seconds(1)),
         m_HandleEvents_notified(0),
         m_DispatchOwnConnection_notified(0)
@@ -105,14 +127,27 @@ namespace Internal
         m_signalSet.add(SIGTERM);
 #endif
 
-        m_signalSet.async_wait([this](const boost::system::error_code& error,
-                                      const int signalNumber)
-                               {
-                                   HandleSignal(error,signalNumber);
-                               });
+        m_signalSet.async_wait(m_strand.wrap([this](const boost::system::error_code& error,
+                                                    const int signalNumber)
+                                            {
+                                                HandleSignal(error, signalNumber);
+                                            }));
 
         Safir::Utilities::CrashReporter::RegisterCallback(DumpFunc);
         Safir::Utilities::CrashReporter::Start();
+
+        // Initialize shared memory stuff
+        Connections::Cleanup();
+        ContextSharedTable::Initialize();
+        MessageTypes::Initialize(/*iAmDoseMain = */ true);
+        EndStates::Initialize();
+        ServiceTypes::Initialize(/*iAmDoseMain = */ true);
+        InjectionKindTable::Initialize();
+        NodeStatuses::Initialize();
+        EntityTypes::Initialize(/*iAmDoseMain = */ true);
+
+        // Start reception of commands from Control
+        m_cmdReceiver.Start();
     }
 
     DoseApp::~DoseApp()
@@ -120,28 +155,6 @@ namespace Internal
         //TODO stewart: should we try to call Stop here, in case it hasn't been
         //called correctly? I.e. we're dying through an exception.
     }
-
-    void DoseApp::Start()
-    {
-        AllocateStatic();
-
-        // Start monitoring of this thread (that is, the main thread)
-        m_mainThreadId = boost::this_thread::get_id();
-        m_threadMonitor.StartWatchdog(m_mainThreadId, L"dose_main main thread");
-
-        // Schedule a timer so that the main thread will kick the watchdog.
-        TimerInfoPtr timerInfo(new EmptyTimerInfo(m_timerHandler.RegisterTimeoutHandler(L"dose_main watchdog timer", *this)));
-        m_timerHandler.SetRelative(Discard,
-                                   timerInfo,
-                                   5.0);
-
-#ifndef NDEBUG
-        std::wcout<<"dose_main running (debug)..." << std::endl;
-#else
-        std::wcout<<"dose_main running (release)..." << std::endl;
-#endif
-    }
-
 
     void DoseApp::ConnectionThread()
     {
@@ -181,11 +194,109 @@ namespace Internal
         }
     }
 
+    void DoseApp::Start(const std::string& nodeName,
+                        int64_t nodeId,
+                        int64_t nodeTypeId,
+                        const std::string& dataAddress)
+    {
+        m_distribution.reset(new Distribution(m_strand.get_io_service(),
+                                              nodeName,
+                                              nodeId,
+                                              nodeTypeId,
+                                              dataAddress));
+
+        // Collect all node type ids
+        NodeTypeIds nodeTypeIds;
+        for (const auto& nt: m_distribution->GetNodeTypeConfiguration().nodeTypesParam)
+        {
+            nodeTypeIds.insert(nt.id);
+        }
+
+        m_messageHandler.reset(new MessageHandler(m_distribution->GetCommunication(),
+                                                  nodeTypeIds));
+
+        m_responseHandler.reset(new ResponseHandler(m_timerHandler,
+                                                    m_blockingHandler,
+                                                    m_distribution->GetCommunication()));
+
+        m_requestHandler.reset(new RequestHandler(m_timerHandler,
+                                                  m_blockingHandler,
+                                                  *m_responseHandler,
+                                                  m_distribution->GetCommunication()));
+
+        m_poolHandler.reset(new PoolHandler(m_strand.get_io_service(),
+                                            *m_distribution,
+                                            [this](int64_t tid){m_pendingRegistrationHandler.CheckForPending(tid);}));
+
+        m_connectionHandler.reset(new ConnectionHandler(m_strand.get_io_service(),
+                                                        m_distribution->GetCommunication(),
+                                                        *m_requestHandler,
+                                                        m_pendingRegistrationHandler));
+
+        //setup pdComplete sub
+
+        m_connectionThread = boost::thread([this]() {ConnectionThread();});
+
+
+#ifndef NDEBUG
+        std::wcout<<"dose_main running (debug)..." << std::endl;
+#else
+        std::wcout<<"dose_main running (release)..." << std::endl;
+#endif
+
+    }
+
+    void DoseApp::InjectNode(const std::string& nodeName,
+                             int64_t nodeId,
+                             int64_t nodeTypeId,
+                             const std::string& dataAddress)
+    {
+        lllog(1) << "DOSE_MAIN: InjectNode cmd received."<<
+                  " NodeName=" << nodeName.c_str() <<
+                  " NodeId=" <<  nodeId <<
+                  " NodeTypeId=" << nodeTypeId <<
+                  " DataAddress=" << dataAddress.c_str() << std::endl;
+
+        if (m_distribution == nullptr)
+        {
+            throw std::logic_error("InjectNode cmd received before StartDoseMain cmd!");
+        }
+
+        if (m_distribution->GetCommunication().Id() == nodeId)
+        {
+            lllog(1) << "DOSE_MAIN: Own node injected, starting distribution components!" << std::endl;
+
+            // Own node has been included in the system state, now its time to start
+            // the distribution mechanism.
+            m_distribution->Start();
+            m_poolHandler->Start([this]
+            {
+                //OnPdComplete: Probably more things to do here
+                std::wcout<<"PD complete"<<std::endl;
+                m_connectionHandler->OnPoolDistributionComplete();
+            });
+        }
+        else
+        {
+            lllog(1) << "DOSE_MAIN: Injecting Node."<<
+                      " NodeName=" << nodeName.c_str() <<
+                      " NodeId=" <<  nodeId <<
+                      " NodeTypeId=" << nodeTypeId <<
+                      " DataAddress=" << dataAddress.c_str() << std::endl;
+
+            m_distribution->InjectNode(nodeName,
+                                       nodeId,
+                                       nodeTypeId,
+                                       dataAddress);
+        }
+    }
+
     void DoseApp::Stop()
     {
+        m_cmdReceiver.Stop();
+
         m_timerHandler.Stop();
 
-        m_threadMonitor.Stop();
         m_lockMonitor.Stop();
 
         m_processMonitor.Stop();
@@ -207,8 +318,15 @@ namespace Internal
             m_connectionThread = boost::thread();
         }
 
-        m_poolHandler.Stop();
+        if (m_distribution != nullptr)
+        {
+            m_distribution->Stop();
+        }
+
+        m_poolHandler->Stop();
         m_ownConnection.Close();
+
+        m_signalSet.cancel();
 
         m_work.reset();
     }
@@ -220,8 +338,16 @@ namespace Internal
 
         if (error)
         {
-            SEND_SYSTEM_LOG(Error,
-                            << "Got a signals error: " << error);
+            if (error == boost::asio::error::operation_aborted)
+            {
+                // dose_main got stopped via a command from Control, do nothing
+                return;
+            }
+            else
+            {
+               SEND_SYSTEM_LOG(Error,
+                                << "DOSE_MAIN: Got a signals error: " << error);
+            }
         }
 
         Stop();
@@ -296,6 +422,9 @@ namespace Internal
             Connections::Instance().HandleConnect(*this);
         }
 
+#if 0 //stewart TODO If there are handlers that need to be notified of node status changes this should be
+      //             done with a subscription mechanism provided by the NodeStatus class.
+
         if (m_nodeStatusChangedEvent != 0)
         {
             ++numEvents;
@@ -317,27 +446,24 @@ namespace Internal
 
             if (m_persistHandler.IsPersistentDataReady())
             {
+
                 lllout << "Calling SetOkToSignalPDComplete, since this node has now fulfilled the requirements for signalling PD complete" << std::endl;
-#if 0 //stewart
+
                 m_ecom.SetOkToSignalPDComplete();
-#endif
+
             }
             m_connectionHandler.MaybeSignalConnectSemaphore();
             m_pendingRegistrationHandler.CheckForPending();
         }
-    }
+#endif
 
-    void DoseApp::HandleTimeout(const TimerInfoPtr& timer)
-    {
-        m_threadMonitor.KickWatchdog(m_mainThreadId);
-
-        m_timerHandler.SetRelative(Discard,
-                                   timer,
-                                   5.0);
     }
 
     ConnectResult DoseApp::CanAddConnection(const std::string & connectionName, const pid_t pid, const long /*context*/)
     {
+
+        return Success;
+#if 0 //stewart
         switch (m_processInfoHandler.CanAddConnectionFromProcess(pid))
         {
         case TooManyProcesses:
@@ -369,74 +495,63 @@ namespace Internal
             ENSURE(false, << "Got unexpected result from ProcessInfoHandler::CanAddConnectionFromProcess!");
             return Undefined;
         }
+#endif
     }
 
 
     void DoseApp::AllocateStatic()
     {
-        Connections::Cleanup();
-        ContextSharedTable::Initialize();
-        MessageTypes::Initialize(/*iAmDoseMain = */ true);
-        EndStates::Initialize();
-        ServiceTypes::Initialize(/*iAmDoseMain = */ true);
-        InjectionKindTable::Initialize();
-        NodeStatuses::Initialize();
-        EntityTypes::Initialize(/*iAmDoseMain = */ true);
+//TODO
+//        m_connectionHandler.Init(
+//#if 0 //stewart
+//                                 m_ecom,
+//#endif
+//                                 m_processInfoHandler,
+//                                 m_requestHandler,
+//                                 m_pendingRegistrationHandler,
+//                                 m_nodeHandler,
+//                                 m_persistHandler);
 
-        m_connectionHandler.Init(
-#if 0 //stewart
-                                 m_ecom,
-#endif
-                                 m_processInfoHandler,
-                                 m_requestHandler,
-                                 m_pendingRegistrationHandler,
-                                 m_nodeHandler,
-                                 m_persistHandler);
+//        const bool otherNodesExistAtStartup = false;
+//#if 0 //stewart
+//            m_ecom.Init(boost::bind(&DoseApp::HandleIncomingData, this, _1, _2),
+//                        boost::bind(&DoseApp::QueueNotFull, this),
+//                        boost::bind(&DoseApp::NodeStatusChangedNotifier, this),
+//                        boost::bind(&DoseApp::StartPoolDistribution,this),
+//                        boost::bind(&DoseApp::RequestPoolDistribution,this, _1));
+//#endif
 
-        const bool otherNodesExistAtStartup = false;
-#if 0 //stewart
-            m_ecom.Init(boost::bind(&DoseApp::HandleIncomingData, this, _1, _2),
-                        boost::bind(&DoseApp::QueueNotFull, this),
-                        boost::bind(&DoseApp::NodeStatusChangedNotifier, this),
-                        boost::bind(&DoseApp::StartPoolDistribution,this),
-                        boost::bind(&DoseApp::RequestPoolDistribution,this, _1));
-#endif
+//        //we notify so that even if there were no new nodes we trigger
+//        //the call to MaybeSignal...() to start letting applications connect.
+//        //this also takes care of the case where we're running Standalone without
+//        //persistence.
+//        NodeStatusChangedNotifier();
 
-        //we notify so that even if there were no new nodes we trigger
-        //the call to MaybeSignal...() to start letting applications connect.
-        //this also takes care of the case where we're running Standalone without
-        //persistence.
-        NodeStatusChangedNotifier();
+//        m_ownConnection.Open(L"dose_main",L"own",0,NULL,this);
 
-        m_messageHandler.Init(m_blockingHandler);
-
-        m_responseHandler.Init(m_blockingHandler);
-        m_requestHandler.Init(m_blockingHandler, m_responseHandler);
-
-        m_ownConnection.Open(L"dose_main",L"own",0,NULL,this);
-
-        m_poolHandler.Init(m_pendingRegistrationHandler,
-                           m_persistHandler,
-                           m_connectionHandler,
-                           m_threadMonitor);
+//        m_poolHandler.Init(m_pendingRegistrationHandler,
+//                           m_persistHandler,
+//                           m_connectionHandler);
 
 
-        m_processInfoHandler.Init(m_processMonitor);
+//        m_processInfoHandler.Init(m_processMonitor);
 
-        m_nodeHandler.Init (m_requestHandler, m_poolHandler);
+//        m_nodeHandler.Init (m_requestHandler, m_poolHandler);
 
-        m_connectionThread = boost::thread(boost::bind(&DoseApp::ConnectionThread,this));
+//        m_connectionThread = boost::thread(boost::bind(&DoseApp::ConnectionThread,this));
 
-        m_persistHandler.Init(m_connectionHandler,m_nodeHandler,otherNodesExistAtStartup);
+//        m_persistHandler.Init(m_connectionHandler,m_nodeHandler,otherNodesExistAtStartup);
 
-        m_memoryMonitorThread = boost::thread(&DoseApp::MemoryMonitorThread);
+//        m_memoryMonitorThread = boost::thread(&DoseApp::MemoryMonitorThread);
     }
 
     void DoseApp::HandleConnect(const ConnectionPtr & connection)
     {
         lllout << "ConnectionHandler::HandleConnect: New connection from " << connection->NameWithCounter() << " id = " << connection->Id() << std::endl;
-        m_connectionHandler.HandleConnect(connection);
-        m_processInfoHandler.ConnectionAdded(connection);
+        m_connectionHandler->HandleConnect(connection);
+
+        // stewart
+        //m_processInfoHandler.ConnectionAdded(connection);
     }
 
     void DoseApp::HandleDisconnect(const ConnectionPtr & connection)
@@ -457,10 +572,11 @@ namespace Internal
             return;
         }
 
-        m_connectionHandler.HandleDisconnect(connection);
+        m_connectionHandler->HandleDisconnect(connection);
 
         // Remove the connection from the processInfo structure
-        m_processInfoHandler.ConnectionRemoved(connection);
+        //stewart
+        //m_processInfoHandler.ConnectionRemoved(connection);
 
         // Classes have been unregistered, inform waiting connections
         int recLevel=0;
@@ -492,17 +608,14 @@ namespace Internal
         lllout << "HandleAppEventHelper for connection " << connection->NameWithCounter() << ", id = " << connection->Id() << std::endl;
 
         //---- Handle queued requests ----
-        m_responseHandler.DistributeResponses(connection);
-        m_requestHandler.DistributeRequests(connection);
+        m_responseHandler->DistributeResponses(connection);
+        m_requestHandler->DistributeRequests(connection);
 
         //Send messages
-        m_messageHandler.DistributeMessages(connection);
+        m_messageHandler->DistributeMessages(connection);
 
         //Handle pending registrations
         m_pendingRegistrationHandler.CheckForNewOrRemovedPendingRegistration(connection);
-
-        //Send injections to other nodes. (the injection itself has already been performed)
-        //m_poolHandler.SendInjections(connection);
 
         //Check in queues, and notify waiting applications
         HandleWaitingConnections(connection->Id().m_id, recursionLevel);
@@ -541,7 +654,7 @@ namespace Internal
                 it != waiting.end(); ++it)
             {
                 const ConnectionPtr connection = Connections::Instance().GetConnection(ConnectionId(ThisNodeParameters::NodeNumber(), -1, *it));
-                m_messageHandler.DistributeMessages(connection);
+                m_messageHandler->DistributeMessages(connection);
 
                 //If the connection is dead it might be a zombie that has been waiting for dosecom.
                 //signal it so that we try to finish removing it again.
@@ -666,43 +779,16 @@ namespace Internal
 #endif
     }
 
-    void DoseApp::NodeStatusChangedNotifier()
-    {
-        m_nodeStatusChangedEvent = true;
-        if (m_HandleEvents_notified == 0)
-        {
-            m_HandleEvents_notified = 1;
-            m_strand.post([this]()
-                          {
-                              HandleEvents();
-                          });
-        }
-    }
-
     void DoseApp::QueueNotFull()
     {
         lllout << "DoseApp::QueueNotFull: Calling HandleUnsent()" << std::endl;
-        m_connectionHandler.HandleUnsent();
+        m_connectionHandler->HandleUnsent();
 
 #if 0 //stewart
         lllout << "DoseApp::QueueNotFull: Calling HandleWaitingConnections(...)" << std::endl;
         int recLevel=0;
         HandleWaitingConnections(ExternNodeCommunication::DoseComVirtualConnectionId, recLevel);
 #endif
-
-        lllout << "DoseApp::QueueNotFull: Calling DistributePoolChanges()" << std::endl;
-        m_poolHandler.DistributeStates();
-        lllout << "DoseApp::QueueNotFull: End" << std::endl;
-    }
-
-    void DoseApp::StartPoolDistribution()
-    {
-        m_poolHandler.StartPoolDistribution();
-    }
-
-    void DoseApp::RequestPoolDistribution(const int nodeId)
-    {
-       m_poolHandler.RequestPoolDistribution(nodeId);
     }
 
     class MemoryMonitor:

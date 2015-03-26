@@ -26,8 +26,7 @@
 
 #include "dose_main_communication.h"
 #include "dose_main_request_handler.h"
-#include "dose_main_pool_handler.h"
-#include "dose_main_defs.h"
+#include "PoolHandler.h"
 #include <Safir/Dob/AccessDeniedException.h>
 #include <Safir/Dob/DistributionChannelProperty.h>
 #include <Safir/Dob/Internal/Connection.h>

@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Consoden AB, 2014 (http://www.consoden.se)
+* Copyright Consoden AB, 2015 (http://safir.sourceforge.net)
 *
 * Created by: Anders Widén / anders.widen@consoden.se
 *
@@ -21,27 +21,45 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-option optimize_for = LITE_RUNTIME;
+#include "../../src/ExternNodeCommunication.h"
 
-package Safir.Dob.Internal.Control;
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
+#endif
 
-message ControlCmd {
+#include <boost/asio.hpp>
 
-    enum CmdType
-    {
-      START = 0;
-      INJECT_NODE = 1;
-      STOP = 2;
-    }
-    
-    message NodeData {
-        required string node_name = 1;
-        required sfixed64 node_id = 2;
-        required sfixed64 node_type_id = 3;
-        required string data_address = 4;        
-    }
-    
-   // Fields
-   required CmdType cmd_type = 1;
-   optional NodeData node_data = 2;
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
+
+#define BOOST_TEST_MODULE ExternNodeCommunication
+#include <boost/test/unit_test.hpp>
+
+void DataCb(const Safir::Dob::Internal::DistributionData& data, const bool isAckedData)
+{
+
 }
+
+void StartPoolDistributionCb()
+{
+
+}
+
+BOOST_AUTO_TEST_CASE( first_test )
+{
+    boost::asio::io_service ioService;
+    boost::asio::strand strand(ioService);
+
+
+    Safir::Dob::Internal::ExternNodeCommunication ecom(strand, DataCb, StartPoolDistributionCb);
+
+    ecom.SetOwnNode("Kalle", 123, 54321, "192.168.1.0");
+
+    ecom.InjectNode("Olle", 789, 5656, "192.168.1.2");
+
+    bool ok = true;
+    BOOST_CHECK(ok);
+}
+

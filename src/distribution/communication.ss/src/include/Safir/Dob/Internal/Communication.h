@@ -139,6 +139,7 @@ namespace Com
          * Set callback for notification of new discovered nodes. Must be called before calling Start.
          * If created with DataModeTag this callback will be triggered immediately from within InjectNode.
          * I.e when calling InjectNode, this callback will be called before InjectNode returns.
+         * There can only be one NewNodeCallback set.
          *
          * @param callback [in] - Callback function.
          */
@@ -146,6 +147,7 @@ namespace Com
 
         /**
          * Set callback for receive notifications. Must be called before calling Start.
+         * There can only be one GotReceiveFromCallback set.
          *
          * @param callback [in] - Callback function.
          */
@@ -153,6 +155,8 @@ namespace Com
 
         /**
          * Set callback for retransmit notifications. Must be called before calling Start.
+         * There can only be one RetransmitToCallback set.
+         *
          * Note: It is not allowed to call a send method from inside the retransmit callback function.
          *
          * @param callback [in] - Callback function.
@@ -160,19 +164,22 @@ namespace Com
         void SetRetransmitToCallback(const RetransmitTo& callback);
 
         /**
-         * Set callback for notification that the send queue is nolonger full. After a SendToNode or SendToNodeType has returned false due to
-         * full send queue, this callback will notfy that the send queue is no longer full. The notification will be executed when
-         * at least the specified percent of the send queue is free.
-         * Note that callback will only be received if user called a Send method that returned false. If the send queue has been full but
-         * no attempt was made to send anything while it was full, no notification will be made.
+         * Set callback for notification that the send queue for a specific node type is nolonger full.
+         * After a Send has returned false due to full send queue, this callback will notfy that the send queue
+         * is no longer full. The notification will be executed when at least 50% of the send queue is free.
+         * Note that callback will only be received if user called Send with a false value in return.
+         * If the send queue has been full but no attempt was made to send anything while it was full, no notification will be made.
+         * There can be many QueueNotFullCallbacks set, even for the same nodeTypeId,
+         * however all callbacks must be set prior to start.
          *
          * @param callback [in] - Callback function.
-         * @param percentFreeLimit [in] - Threshold value given in percent of the total capacity of the send queue.
+         * @param nodeTypeId [in] - Wich sendQueue this callback belongs to.
          */
-        void SetQueueNotFullCallback(const QueueNotFull& callback, int freePartThreshold);
+        void SetQueueNotFullCallback(const QueueNotFull& callback, int64_t nodeTypeId);
 
         /**
-         * Set callback for receive data for a specific data type. Can be called multiple times with different dataTypeIdentifier.
+         * Set callback for receive data for a specific data type. Can be called multiple times with different dataTypeIdentifier,
+         * but only once per dataType. I.e it is not possible to set upp multiple receivers with the same dataTypeIdentifier.
          * Must be called before calling Start.
          *
          * @param callback [in] - Callback function.
@@ -244,7 +251,7 @@ namespace Com
          */
         bool Send(int64_t nodeId,
                   int64_t nodeTypeId,
-                  const boost::shared_ptr<char[]>& data,
+                  const boost::shared_ptr<const char[]>& data,
                   size_t size,
                   int64_t dataTypeIdentifier,
                   bool deliveryGuarantee);

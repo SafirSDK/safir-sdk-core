@@ -208,7 +208,7 @@ public:
         return m_nodeTypes.find(LlufId_Generate64(name.c_str()))->second;
     }
 
-    const std::map<int64_t, Safir::Dob::Internal::Com::NodeTypeDefinition> Map() const
+    const std::map<int64_t, Safir::Dob::Internal::Com::NodeTypeDefinition>& Map() const
     {
         return m_nodeTypes;
     }
@@ -408,6 +408,16 @@ public:
 
     uint64_t RetransmitCount() const {return m_retransmitCount;}
 
+    int64_t GetNodeIdByName(const std::string& name) const
+    {
+        for (auto& vt : m_nodeNames)
+        {
+            if (vt.second==name)
+                return vt.first;
+        }
+        return 0;
+    }
+
 private:
     NodeTypes m_nodeTypes;
     std::map<int64_t, std::string> m_nodeNames;
@@ -489,8 +499,10 @@ int main(int argc, char * argv[])
     com->SetNewNodeCallback([=](const std::string& name, int64_t nodeId, int64_t nodeTypeId, const std::string& ca, const std::string& /*da*/)
                             {sp->NewNode(name, nodeId, nodeTypeId, ca);});
 
-    com->SetQueueNotFullCallback([&](int64_t){queueFullSem.Notify();}, 100); //50% free queue space before we get notification, acked
-    com->SetQueueNotFullCallback([&](int64_t){queueFullSem.Notify();}, 100); //50% free queue space before we get notification, unacked
+    for (const auto& vt : nodeTypes.Map())
+    {
+        com->SetQueueNotFullCallback([&](int64_t){queueFullSem.Notify();}, vt.first);
+    }
 
     boost::thread_group threads;
     for (unsigned int i=0; i<cmd.threadCount; ++i)
@@ -548,6 +560,25 @@ int main(int argc, char * argv[])
         {
             std::cout<<"sent "<<sendCounter<<std::endl;
         }
+
+
+//        //--------TEST EXCLUDE-------------
+//        static bool seedExcluded=false;
+//        if (!seedExcluded)
+//        {
+//            auto soFar=std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now()-startTime);
+//            if (soFar.count()>10000)
+//            {
+//                seedExcluded=true;
+//                auto seedId=sp->GetNodeIdByName("Test_127.0.0.1:10000");
+//                if (seedId!=0)
+//                {
+//                    std::cout<<"Exclude node: "<<seedId<<std::endl;
+//                    com->ExcludeNode(seedId);
+//                }
+//            }
+//        }
+//        //-------------------------------------
     }
 
     std::cout<<"All messages posted to communication. Waiting for all to get delivered..."<<std::endl;

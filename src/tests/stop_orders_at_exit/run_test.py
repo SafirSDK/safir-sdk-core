@@ -30,6 +30,7 @@ from testenv import TestEnv, TestEnvStopper
 
 parser = argparse.ArgumentParser("test script")
 parser.add_argument("--stoppee", required=True)
+parser.add_argument("--safir-control", required=True)
 parser.add_argument("--dose_main", required=True)
 parser.add_argument("--dope_main", required=True)
 parser.add_argument("--safir-show-config", required=True)
@@ -45,7 +46,8 @@ for pair in arguments.safir_generated_paths.split(";"):
     print("Setting environment variable", name, "to", value)
     os.environ[name] = value
 
-env = TestEnv(dose_main = arguments.dose_main,
+env = TestEnv(safir_control = arguments.safir_control,
+              dose_main = arguments.dose_main,
               dope_main = arguments.dope_main,
               safir_show_config = arguments.safir_show_config)
 with TestEnvStopper(env):

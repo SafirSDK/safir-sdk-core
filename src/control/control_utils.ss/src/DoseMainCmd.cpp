@@ -46,8 +46,8 @@ namespace Control
     public:
 
         Impl(boost::asio::io_service& ioService,
-             const InjectNodeCmdCb&   injectOwnNodeCmdCb,
-             const InjectNodeCmdCb&   injectNodeCmdCb,
+             const NodeCmdCb&         startDoseMainCb,
+             const NodeCmdCb&         injectNodeCb,
              const StopDoseMainCb&    stopDoseMainCb)
             : m_ipcSubscriber(ioService,
                               doseMainCmdChannel,
@@ -55,8 +55,8 @@ namespace Control
                               {
                                   RecvDataCb(data, size);
                               }),
-              m_injectOwnNodeCmdCb(injectOwnNodeCmdCb),
-              m_injectNodeCmdCb(injectNodeCmdCb),
+              m_startDoseMainCb(startDoseMainCb),
+              m_injectNodeCb(injectNodeCb),
               m_stopDoseMainCb(stopDoseMainCb)
         {
         }
@@ -76,9 +76,9 @@ namespace Control
 
         Safir::Utilities::Internal::IpcSubscriber m_ipcSubscriber;
 
-        InjectNodeCmdCb     m_injectOwnNodeCmdCb;
-        InjectNodeCmdCb     m_injectNodeCmdCb;
-        StopDoseMainCb      m_stopDoseMainCb;
+        NodeCmdCb       m_startDoseMainCb;
+        NodeCmdCb       m_injectNodeCb;
+        StopDoseMainCb  m_stopDoseMainCb;
 
         void RecvDataCb(const char* data, size_t size)
         {
@@ -88,29 +88,27 @@ namespace Control
 
             switch (controlCmd.cmd_type())
             {
-                case controlCmd.INJECT_NODE:
+                case controlCmd.START:
                 {
-                    m_injectNodeCmdCb(controlCmd.request_id(),
-                                      controlCmd.node_data().node_name(),
+                    m_startDoseMainCb(controlCmd.node_data().node_name(),
                                       controlCmd.node_data().node_id(),
                                       controlCmd.node_data().node_type_id(),
                                       controlCmd.node_data().data_address());
                 }
                 break;
 
-                case controlCmd.INJECT_OWN_NODE:
+                case controlCmd.INJECT_NODE:
                 {
-                    m_injectOwnNodeCmdCb(controlCmd.request_id(),
-                                         controlCmd.node_data().node_name(),
-                                         controlCmd.node_data().node_id(),
-                                         controlCmd.node_data().node_type_id(),
-                                         controlCmd.node_data().data_address());
+                    m_injectNodeCb(controlCmd.node_data().node_name(),
+                                   controlCmd.node_data().node_id(),
+                                   controlCmd.node_data().node_type_id(),
+                                   controlCmd.node_data().data_address());
                 }
                 break;
 
                 case controlCmd.STOP:
                 {
-                    m_stopDoseMainCb(controlCmd.request_id());
+                    m_stopDoseMainCb();
                 }
                 break;
 
@@ -124,10 +122,10 @@ namespace Control
     };
 
     DoseMainCmdReceiver::DoseMainCmdReceiver(boost::asio::io_service& ioService,
-                                             const InjectNodeCmdCb&   injectOwnNodeCmdCb,
-                                             const InjectNodeCmdCb&   injectNodeCmdCb,
+                                             const NodeCmdCb&         startDoseMainCb,
+                                             const NodeCmdCb&         injectNodeCb,
                                              const StopDoseMainCb&    stopDoseMainCb)
-        : m_impl(Safir::make_unique<Impl>(ioService, injectOwnNodeCmdCb, injectNodeCmdCb, stopDoseMainCb))
+        : m_impl(Safir::make_unique<Impl>(ioService, startDoseMainCb, injectNodeCb, stopDoseMainCb))
     {
     }
 
@@ -163,16 +161,14 @@ namespace Control
            m_ipcPublisher.Stop();
         }
 
-        void InjectOwnNode(int64_t requestId,
-                           const std::string& nodeName,
-                           int64_t nodeId,
-                           int64_t nodeTypeId,
-                           const std::string& dataAddress)
+        void StartDoseMain(const std::string&   nodeName,
+                           int64_t              nodeId,
+                           int64_t              nodeTypeId,
+                           const std::string&   dataAddress)
         {
             ControlCmd controlCmd;
 
-            controlCmd.set_request_id(requestId);
-            controlCmd.set_cmd_type(ControlCmd::INJECT_OWN_NODE);
+            controlCmd.set_cmd_type(ControlCmd::START);
             controlCmd.mutable_node_data()->set_node_name(nodeName);
             controlCmd.mutable_node_data()->set_node_id(nodeId);
             controlCmd.mutable_node_data()->set_node_type_id(nodeTypeId);
@@ -181,15 +177,13 @@ namespace Control
             Send(controlCmd);
         }
 
-        void InjectNode(int64_t requestId,
-                        const std::string& nodeName,
-                        int64_t nodeId,
-                        int64_t nodeTypeId,
-                        const std::string& dataAddress)
+        void InjectNode(const std::string&  nodeName,
+                        int64_t             nodeId,
+                        int64_t             nodeTypeId,
+                        const std::string&  dataAddress)
         {
             ControlCmd controlCmd;
 
-            controlCmd.set_request_id(requestId);
             controlCmd.set_cmd_type(ControlCmd::INJECT_NODE);
             controlCmd.mutable_node_data()->set_node_name(nodeName);
             controlCmd.mutable_node_data()->set_node_id(nodeId);
@@ -199,11 +193,10 @@ namespace Control
             Send(controlCmd);
         }
 
-        void StopDoseMain(int64_t requestId)
+        void StopDoseMain()
         {
             ControlCmd controlCmd;
 
-            controlCmd.set_request_id(requestId);
             controlCmd.set_cmd_type(ControlCmd::STOP);
 
             Send(controlCmd);
@@ -240,35 +233,31 @@ namespace Control
         m_impl->Stop();
     }
 
-    void DoseMainCmdSender::InjectOwnNode(int64_t requestId,
-                                          const std::string& nodeName,
-                                          int64_t nodeId,
-                                          int64_t nodeTypeId,
-                                          const std::string& dataAddress)
+    void DoseMainCmdSender::StartDoseMain(const std::string&    nodeName,
+                                          int64_t               nodeId,
+                                          int64_t               nodeTypeId,
+                                          const std::string&    dataAddress)
     {
-        m_impl->InjectOwnNode(requestId,
-                              nodeName,
+        m_impl->StartDoseMain(nodeName,
                               nodeId,
                               nodeTypeId,
                               dataAddress);
     }
 
-    void DoseMainCmdSender::InjectNode(int64_t requestId,
-                                       const std::string& nodeName,
-                                       int64_t nodeId,
-                                       int64_t nodeTypeId,
-                                       const std::string& dataAddress)
+    void DoseMainCmdSender::InjectNode(const std::string&   nodeName,
+                                       int64_t              nodeId,
+                                       int64_t              nodeTypeId,
+                                       const std::string&   dataAddress)
     {
-        m_impl->InjectNode(requestId,
-                           nodeName,
+        m_impl->InjectNode(nodeName,
                            nodeId,
                            nodeTypeId,
                            dataAddress);
     }
 
-    void DoseMainCmdSender::StopDoseMain(int64_t requestId)
+    void DoseMainCmdSender::StopDoseMain()
     {
-        m_impl->StopDoseMain(requestId);
+        m_impl->StopDoseMain();
     }
 
 

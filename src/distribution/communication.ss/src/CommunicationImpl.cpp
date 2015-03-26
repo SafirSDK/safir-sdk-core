@@ -120,12 +120,15 @@ namespace Com
         m_receiveStrand.post([=]{m_deliveryHandler.SetReceiver(callback, dataTypeIdentifier, allocator);});
     }
 
-    void CommunicationImpl::SetQueueNotFullCallback(const QueueNotFull& callback, int freePartThreshold)
+    void CommunicationImpl::SetQueueNotFullCallback(const QueueNotFull& callback, int64_t nodeTypeId)
     {
-        for (auto& vt : m_nodeTypes)
+        auto nodeTypeIt=m_nodeTypes.find(nodeTypeId);
+        if (nodeTypeIt==m_nodeTypes.end())
         {
-            vt.second->GetAckedDataSender().SetNotFullCallback(callback, freePartThreshold);
+            throw std::logic_error("COM: Calling SetQueueNotFullCallback with nodeTypeId that does not exist. Used nodeTypeId: "+boost::lexical_cast<std::string>(nodeTypeId));
         }
+
+        nodeTypeIt->second->GetAckedDataSender().SetNotFullCallback(callback);
     }
 
     void CommunicationImpl::Start()
@@ -215,7 +218,7 @@ namespace Com
             m_deliveryHandler.RemoveNode(id);
             if (m_isControlInstance)
             {
-                m_discoverer.ExlcludeNode(id);
+                m_discoverer.ExcludeNode(id);
             }
         });
     }
@@ -235,7 +238,7 @@ namespace Com
         IncludeNodeInternal(id);
     }
 
-    bool CommunicationImpl::Send(int64_t nodeId, int64_t nodeTypeId, const boost::shared_ptr<char[]>& data, size_t size, int64_t dataTypeIdentifier, bool deliveryGuarantee)
+    bool CommunicationImpl::Send(int64_t nodeId, int64_t nodeTypeId, const boost::shared_ptr<const char[]>& data, size_t size, int64_t dataTypeIdentifier, bool deliveryGuarantee)
     {
         if (deliveryGuarantee)
         {

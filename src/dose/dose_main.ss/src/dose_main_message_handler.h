@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -21,13 +22,11 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
+#pragma once
 
-#ifndef _dose_main_message_handler_h
-#define _dose_main_message_handler_h
-
-#include "dose_main_communication.h"
-#include "dose_main_blocking_handler.h"
-#include <Safir/Dob/Internal/Connection.h>
+#include "Node.h"
+#include <Safir/Dob/Internal/InternalFwd.h>
+#include <boost/noncopyable.hpp>
 
 namespace Safir
 {
@@ -35,35 +34,37 @@ namespace Dob
 {
 namespace Internal
 {
+
+    // Forward declarations
+    namespace Com
+    {
+        class Communication;
+    }
+
     class MessageHandler:
         private boost::noncopyable
     {
     public:
-        MessageHandler();
+        MessageHandler(Com::Communication& communication,
+                       const NodeTypeIds&  nodeTypeIds);
 
-        void Init(BlockingHandlers & blockingHandler);
-#if 0 //stewart
-                  ExternNodeCommunication & ecom);
-#endif
-
-        void DistributeMessages(const ConnectionPtr & connection);
-
-        void HandleMessageFromDoseCom(const DistributionData & msg);
+        void DistributeMessages(const ConnectionPtr& connection);
 
     private:
-        void DispatchMessage(size_t & numberDispatched,
-                             const ConnectionPtr & connection,
-                             const DistributionData & msg,
-                             bool & exitDispatch,
-                             bool & dontRemove);
+        void DispatchMessage(size_t&                    numberDispatched,
+                             const ConnectionPtr&       connection,
+                             const DistributionData&    msg,
+                             bool&                      exitDispatch,
+                             bool&                      dontRemove);
 
-        void TraverseMessageQueue(const ConnectionPtr & connection);
-#if 0 //stewart
-        ExternNodeCommunication* m_ecom;
-#endif
-        BlockingHandlers * m_blockingHandler;
+        void TraverseMessageQueue(const ConnectionPtr& connection);
+
+        void Send(const DistributionData& msg);
+
+        Com::Communication&      m_communication;
+        const NodeTypeIds        m_nodeTypeIds;
+        const int64_t            m_dataTypeIdentifier;
     };
 }
 }
 }
-#endif

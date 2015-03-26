@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -21,27 +22,26 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
+#pragma once
 
-#ifndef _dose_main_app_h
-#define _dose_main_app_h
+#include <memory>
 
+#include "Distribution.h"
 #include "dose_main_blocking_handler.h"
 #include "dose_main_communication.h"
-#include "dose_main_connection_handler.h"
+#include "ConnectionHandler.h"
 #include "dose_main_message_handler.h"
 #include "dose_main_node_handler.h"
 #include "dose_main_pending_registration_handler.h"
-#include "dose_main_persist_handler.h"
-#include "dose_main_pool_handler.h"
+#include "PoolHandler.h"
 #include "dose_main_process_info_handler.h"
 #include "dose_main_response_handler.h"
 #include "dose_main_request_handler.h"
-#include "dose_main_end_states_handler.h"
-#include "dose_main_thread_monitor.h"
 #include "dose_main_lock_monitor.h"
 #include "dose_main_connection_killer.h"
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/Internal/Connections.h>
+#include <Safir/Dob/Internal/DoseMainCmd.h>
 #include <Safir/Utilities/ProcessMonitor.h>
 
 //disable warnings in boost
@@ -66,7 +66,6 @@ namespace Internal
     class DoseApp:
         public Connections::ConnectionConsumer,
         public Safir::Dob::Dispatcher,
-        public TimeoutHandler,
         private boost::noncopyable
     {
     public:
@@ -74,7 +73,16 @@ namespace Internal
 
         ~DoseApp();
 
-        void Start();
+
+        void Start(const std::string& nodeName,
+                   int64_t nodeId,
+                   int64_t nodeTypeId,
+                   const std::string& dataAddress);
+
+        void InjectNode(const std::string& nodeName,
+                        int64_t nodeId,
+                        int64_t nodeTypeId,
+                        const std::string& dataAddress);
 
         void Stop();
 
@@ -89,10 +97,6 @@ namespace Internal
         void HandleEvents();
         Safir::Utilities::Internal::AtomicUint32 m_connectEvent;
         Safir::Utilities::Internal::AtomicUint32 m_connectionOutEvent;
-        Safir::Utilities::Internal::AtomicUint32 m_nodeStatusChangedEvent;
-
-        //Timeout handler
-        virtual void HandleTimeout(const TimerInfoPtr& timer);
 
         void ConnectionThread();
 
@@ -108,11 +112,7 @@ namespace Internal
 
         void HandleConnectionOutEvent(const ConnectionPtr & connection, std::vector<ConnectionPtr>& deadConnections);
 
-        void NodeStatusChangedNotifier();
-
         void QueueNotFull();
-        void StartPoolDistribution();
-        void RequestPoolDistribution(const int nodeId);
 
         void HandleIncomingData(const DistributionData & data, const bool isAckedData);
 
@@ -131,30 +131,24 @@ namespace Internal
         boost::asio::io_service::strand& m_strand;
         boost::shared_ptr<boost::asio::io_service::work> m_work;
 
+        std::unique_ptr<Distribution> m_distribution;
+
+        Control::DoseMainCmdReceiver m_cmdReceiver;
+
         boost::asio::signal_set m_signalSet;
 
         TimerHandler m_timerHandler;
 
-        EndStatesHandler m_endStates;
-
-        // Shared memory queue message handlers
-        ConnectionHandler   m_connectionHandler;
-
         BlockingHandlers    m_blockingHandler;
 
-        MessageHandler      m_messageHandler;
-
-        RequestHandler      m_requestHandler;
-        ResponseHandler     m_responseHandler;
-
-        PoolHandler         m_poolHandler;
+        std::unique_ptr<MessageHandler>      m_messageHandler;
+        std::unique_ptr<RequestHandler>      m_requestHandler;
+        std::unique_ptr<ResponseHandler>     m_responseHandler;
+        std::unique_ptr<PoolHandler>         m_poolHandler;
+        std::unique_ptr<ConnectionHandler>   m_connectionHandler;
 
         //Pending Registrations
         PendingRegistrationHandler m_pendingRegistrationHandler;
-
-
-        //Persistent data service and state
-        PersistHandler m_persistHandler;
 
 #if 0 //stewart
         //Extern node communication
@@ -174,10 +168,6 @@ namespace Internal
         // For monitoring abandoned shared memory locks
         LockMonitor m_lockMonitor;
 
-        // For monitoring dose_main:s own threads
-        ThreadMonitor m_threadMonitor;
-        boost::thread::id m_mainThreadId;
-
         Safir::Utilities::Internal::AtomicUint32 m_HandleEvents_notified;
         Safir::Utilities::Internal::AtomicUint32 m_DispatchOwnConnection_notified;
 
@@ -193,5 +183,3 @@ namespace Internal
 }
 }
 }
-
-#endif

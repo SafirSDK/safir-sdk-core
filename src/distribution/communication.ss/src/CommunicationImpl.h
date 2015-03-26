@@ -76,7 +76,7 @@ namespace Com
         void SetNewNodeCallback(const NewNode& callback);
         void SetGotReceiveFromCallback(const GotReceiveFrom& callback);
         void SetRetransmitToCallback(const RetransmitTo& callback);
-        void SetQueueNotFullCallback(const QueueNotFull& callback, int freePartThreshold);
+        void SetQueueNotFullCallback(const QueueNotFull& callback, int64_t nodeTypeId);
         void SetDataReceiver(const ReceiveData& callback, int64_t dataTypeIdentifier, const Allocator& allocator);
 
         void InjectSeeds(const std::vector<std::string>& seeds);
@@ -90,7 +90,7 @@ namespace Com
 
         bool Send(int64_t nodeId,
                   int64_t nodeTypeId,
-                  const boost::shared_ptr<char[]>& data,
+                  const boost::shared_ptr<const char[]>& data,
                   size_t size,
                   int64_t dataTypeIdentifier,
                   bool deliveryGuarantee);

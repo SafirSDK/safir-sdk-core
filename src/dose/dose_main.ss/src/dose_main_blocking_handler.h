@@ -26,7 +26,6 @@
 #define _dose_main_blocking_handler_h
 
 #include <Safir/Dob/Internal/ConnectionId.h>
-#include "dose_main_defs.h"
 #include <boost/noncopyable.hpp>
 #include <boost/unordered_map.hpp>
 

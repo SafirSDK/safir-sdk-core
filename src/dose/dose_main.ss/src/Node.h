@@ -1,8 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://safir.sourceforge.net)
 *
-* Created by: Lars Hagström / stlrha
+* Created by: Anders Widén / anders.widen@consoden.se
 *
 *******************************************************************************
 *
@@ -21,33 +21,35 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
+#pragma once
 
-#ifndef _dose_main_end_states_h
-#define _dose_main_end_states_h
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
 
-#include "dose_main_timers.h"
-#include <boost/noncopyable.hpp>
 namespace Safir
 {
 namespace Dob
 {
 namespace Internal
 {
-    class EndStatesHandler:
-        public TimeoutHandler,
-        private boost::noncopyable
+    struct NodeInfo
     {
-    public:
-        explicit EndStatesHandler(TimerHandler& timerHandler);
+        NodeInfo(const std::string& _nodeName,
+                 int64_t            _nodeId,
+                 int64_t            _nodeTypeId,
+                 const std::string& _dataAddress)
 
-    private:
-        virtual void HandleTimeout(const TimerInfoPtr & timer);
+        {}
 
-        TimerHandler& m_timerHandler;
-
-        TimerId m_timerId;
+        std::string nodeName;
+        int64_t     nodeId;
+        int64_t     nodeTypeId;
+        std::string dataAddress;
     };
+
+    using NodeTypeIds = std::unordered_set<int64_t>;
+
 }
 }
 }
-#endif

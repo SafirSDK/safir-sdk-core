@@ -202,7 +202,7 @@ namespace Com
             });
         }
 
-        void ExlcludeNode(int64_t nodeId)
+        void ExcludeNode(int64_t nodeId)
         {
             m_strand.dispatch([=]
             {

@@ -74,8 +74,126 @@ public:
         n2.Start();
         s1.Start();
 
+        Wait(3100); //after this time all nodes should have sent discovers
+        std::cout<<"--- All should have sent discovers ---"<<std::endl;
+        std::cout<<"n0 NumSeeds: "<<n0.m_seeds.size()<<", sentDiscovers: "<<discoversSentToSeed100[0]<<"/"<<discoversSentToSeed200[0]<<std::endl;
+        std::cout<<"n1 NumSeeds: "<<n1.m_seeds.size()<<", sentDiscovers: "<<discoversSentToSeed100[1]<<"/"<<discoversSentToSeed200[1]<<std::endl;
+        std::cout<<"n2 NumSeeds: "<<n2.m_seeds.size()<<", sentDiscovers: "<<discoversSentToSeed100[2]<<"/"<<discoversSentToSeed200[2]<<std::endl;
+
+        bool passed=false;
+        {
+            boost::mutex::scoped_lock lock(mutex);
+            passed= discoversSentToSeed100[0]>1 && discoversSentToSeed100[1]>1 && discoversSentToSeed100[2]>1 &&
+                    discoversSentToSeed200[0]>1 && discoversSentToSeed200[1]>1 && discoversSentToSeed200[2]>1;
+        }
+        CHECK(passed);
+
+        //send node info from seed nodes, that makes them removed from seed-list
         TRACELINE
-        Wait(3000);
+        Com::CommunicationMessage_NodeInfo ni0;
+        ni0.set_number_of_packets(1);
+        ni0.set_packet_number(0);
+        ni0.set_sent_from_id(LlufId_Generate64("127.0.0.1:10100"));
+        ni0.mutable_sent_from_node()->set_name("s0");
+        ni0.mutable_sent_from_node()->set_node_id(100);
+        ni0.mutable_sent_from_node()->set_control_address("127.0.0.1:10100");
+        ni0.mutable_sent_from_node()->set_data_address("127.0.0.1:10100");
+
+        Com::CommunicationMessage_NodeInfo ni1;
+        ni1.set_number_of_packets(1);
+        ni1.set_packet_number(0);
+        ni1.set_sent_from_id(LlufId_Generate64("127.0.0.1:10200"));
+        ni1.mutable_sent_from_node()->set_name("s1");
+        ni1.mutable_sent_from_node()->set_node_id(200);
+        ni1.mutable_sent_from_node()->set_control_address("127.0.0.1:10200");
+        ni1.mutable_sent_from_node()->set_data_address("127.0.0.1:10200");
+
+        n0.HandleReceivedNodeInfo(ni0);
+        n0.HandleReceivedNodeInfo(ni1);
+        n1.HandleReceivedNodeInfo(ni0);
+        n1.HandleReceivedNodeInfo(ni1);
+        n2.HandleReceivedNodeInfo(ni0);
+        n2.HandleReceivedNodeInfo(ni1);
+
+        //Wait for HandleReceivedNodeInfo to be executed
+        std::atomic_int fence(0);
+        n0.m_strand.post([&]{++fence;});
+        n1.m_strand.post([&]{++fence;});
+        n2.m_strand.post([&]{++fence;});
+        while(fence<3)
+        {
+            Wait(100);
+        }
+
+        //reset sent discovers
+        {
+            boost::mutex::scoped_lock lock(mutex);
+            discoversSentToSeed100[0]=0;
+            discoversSentToSeed200[0]=0;
+            discoversSentToSeed100[1]=0;
+            discoversSentToSeed200[1]=0;
+            discoversSentToSeed100[2]=0;
+            discoversSentToSeed200[2]=0;
+        }
+
+        Wait(3100);
+
+        //now we should not send any more discovers to node 100 and 200 (seed nodes)
+        std::cout<<"--- After HandleReceivedNodeInfo ---"<<std::endl;
+        std::cout<<"n0 NumSeeds: "<<n0.m_seeds.size()<<", sentDiscovers: "<<discoversSentToSeed100[0]<<"/"<<discoversSentToSeed200[0]<<std::endl;
+        std::cout<<"n1 NumSeeds: "<<n1.m_seeds.size()<<", sentDiscovers: "<<discoversSentToSeed100[1]<<"/"<<discoversSentToSeed200[1]<<std::endl;
+        std::cout<<"n2 NumSeeds: "<<n2.m_seeds.size()<<", sentDiscovers: "<<discoversSentToSeed100[2]<<"/"<<discoversSentToSeed200[2]<<std::endl;
+        Wait(500);
+        std::cout<<"--- After HandleReceivedNodeInfo ---"<<std::endl;
+        std::cout<<"n0 NumSeeds: "<<n0.m_seeds.size()<<", sentDiscovers: "<<discoversSentToSeed100[0]<<"/"<<discoversSentToSeed200[0]<<std::endl;
+        std::cout<<"n1 NumSeeds: "<<n1.m_seeds.size()<<", sentDiscovers: "<<discoversSentToSeed100[1]<<"/"<<discoversSentToSeed200[1]<<std::endl;
+        std::cout<<"n2 NumSeeds: "<<n2.m_seeds.size()<<", sentDiscovers: "<<discoversSentToSeed100[2]<<"/"<<discoversSentToSeed200[2]<<std::endl;
+
+        {
+            boost::mutex::scoped_lock lock(mutex);
+            CHECK(n0.m_seeds.empty());
+            CHECK(n1.m_seeds.empty());
+            CHECK(n2.m_seeds.empty());
+
+            CHECK(discoversSentToSeed100[0]==0);
+            CHECK(discoversSentToSeed200[0]==0);
+            CHECK(discoversSentToSeed100[1]==0);
+            CHECK(discoversSentToSeed200[1]==0);
+            CHECK(discoversSentToSeed100[2]==0);
+            CHECK(discoversSentToSeed200[2]==0);
+        }
+
+
+        //exclude seed-nodes, that should move them back to seed-list
+        n0.ExcludeNode(100);
+        n0.ExcludeNode(200);
+        n1.ExcludeNode(100);
+        n1.ExcludeNode(200);
+        n2.ExcludeNode(100);
+        n2.ExcludeNode(200);
+
+        Wait(3100);  //should be enogh to get discovers
+
+        //now since the seeds have been excluded we expect to get discovers again
+        std::cout<<"--- After Exclude ---"<<std::endl;
+        std::cout<<"n0 NumSeeds: "<<n0.m_seeds.size()<<", sentDiscovers: "<<discoversSentToSeed100[0]<<"/"<<discoversSentToSeed200[0]<<std::endl;
+        std::cout<<"n1 NumSeeds: "<<n1.m_seeds.size()<<", sentDiscovers: "<<discoversSentToSeed100[1]<<"/"<<discoversSentToSeed200[1]<<std::endl;
+        std::cout<<"n2 NumSeeds: "<<n2.m_seeds.size()<<", sentDiscovers: "<<discoversSentToSeed100[2]<<"/"<<discoversSentToSeed200[2]<<std::endl;
+
+
+        {
+            boost::mutex::scoped_lock lock(mutex);
+            CHECK(n0.m_seeds.size()==2);
+            CHECK(n1.m_seeds.size()==2);
+            CHECK(n2.m_seeds.size()==2);
+
+            CHECK(discoversSentToSeed100[0]>0);
+            CHECK(discoversSentToSeed200[0]>0);
+            CHECK(discoversSentToSeed100[1]>0);
+            CHECK(discoversSentToSeed200[1]>0);
+            CHECK(discoversSentToSeed100[2]>0);
+            CHECK(discoversSentToSeed200[2]>0);
+        }
 
         s0.Stop();
         n0.Stop();
@@ -90,14 +208,14 @@ public:
         work.reset();
         threads.join_all();
 
-        bool passed=false;
-        {
-            boost::mutex::scoped_lock lock(mutex);            
-            passed= discoversSentToSeed100[0]>1 && discoversSentToSeed100[1]>1 && discoversSentToSeed100[2]>1 &&
-                    discoversSentToSeed200[0]>1 && discoversSentToSeed200[1]>1 && discoversSentToSeed200[2]>1;
-        }
+//        passed=false;
+//        {
+//            boost::mutex::scoped_lock lock(mutex);
+//            passed= discoversSentToSeed100[0]>1 && discoversSentToSeed100[1]>1 && discoversSentToSeed100[2]>1 &&
+//                    discoversSentToSeed200[0]>1 && discoversSentToSeed200[1]>1 && discoversSentToSeed200[2]>1;
+//        }
 
-        CHECK(passed);
+//        CHECK(passed);
 
         std::cout<<"SendDiscoverToSeed tests passed"<<std::endl;
     }
@@ -233,26 +351,6 @@ public:
 
         TRACELINE
 
-//        {
-//            boost::mutex::scoped_lock lock(mutex);
-
-//            //check that 10000 has got discover and nodeInfo from both the others
-//            CHECK(std::find(discoverState[10000].sentDiscoverTo.begin(), discoverState[10000].sentDiscoverTo.end(), 10001)!=discoverState[10000].sentDiscoverTo.end());
-//            CHECK(std::find(discoverState[10000].sentDiscoverTo.begin(), discoverState[10000].sentDiscoverTo.end(), 10002)!=discoverState[10000].sentDiscoverTo.end());
-//            CHECK(std::find(discoverState[10000].sentNodeInfoTo.begin(), discoverState[10000].sentNodeInfoTo.end(), 10001)!=discoverState[10000].sentNodeInfoTo.end());
-//            CHECK(std::find(discoverState[10000].sentNodeInfoTo.begin(), discoverState[10000].sentNodeInfoTo.end(), 10002)!=discoverState[10000].sentNodeInfoTo.end());
-//            //check that 10001 has got discover and nodeInfo from both the others
-//            CHECK(std::find(discoverState[10001].sentDiscoverTo.begin(), discoverState[10001].sentDiscoverTo.end(), 10000)!=discoverState[10001].sentDiscoverTo.end());
-//            CHECK(std::find(discoverState[10001].sentDiscoverTo.begin(), discoverState[10001].sentDiscoverTo.end(), 10002)!=discoverState[10001].sentDiscoverTo.end());
-//            CHECK(std::find(discoverState[10001].sentNodeInfoTo.begin(), discoverState[10001].sentNodeInfoTo.end(), 10000)!=discoverState[10001].sentNodeInfoTo.end());
-//            CHECK(std::find(discoverState[10001].sentNodeInfoTo.begin(), discoverState[10001].sentNodeInfoTo.end(), 10002)!=discoverState[10001].sentNodeInfoTo.end());
-//            //check that 10002 has got discover and nodeInfo from both the others
-//            CHECK(std::find(discoverState[10002].sentDiscoverTo.begin(), discoverState[10002].sentDiscoverTo.end(), 10000)!=discoverState[10002].sentDiscoverTo.end());
-//            CHECK(std::find(discoverState[10002].sentDiscoverTo.begin(), discoverState[10002].sentDiscoverTo.end(), 10001)!=discoverState[10002].sentDiscoverTo.end());
-//            CHECK(std::find(discoverState[10002].sentNodeInfoTo.begin(), discoverState[10002].sentNodeInfoTo.end(), 10000)!=discoverState[10002].sentNodeInfoTo.end());
-//            CHECK(std::find(discoverState[10002].sentNodeInfoTo.begin(), discoverState[10002].sentNodeInfoTo.end(), 10001)!=discoverState[10002].sentNodeInfoTo.end());
-//        }
-
         //-----------
         // shutdown
         //-----------
@@ -377,106 +475,6 @@ private:
 
 boost::mutex HandleDiscover::mutex;
 std::map<int64_t, HandleDiscover::Info> HandleDiscover::discoverState;
-
-//--------------------------------------
-//class DiscovererTest_
-//{
-//public:
-//    static void Run()
-//    {
-//        std::cout<<"DiscovererTest started"<<std::endl;
-
-//        boost::asio::io_service io;
-//        auto work=boost::make_shared<boost::asio::io_service::work>(io);
-//        boost::thread_group threads;
-//        for (int i = 0; i < 9; ++i)
-//        {
-//            threads.create_thread([&]{io.run();});
-//        }
-
-//        TRACELINE
-
-//        std::atomic_uint go{0};
-//        auto WaitUntilReady=[&](Com::Discoverer& d)
-//        {
-//            d.m_strand.post([&]{go=1;});
-
-//            while(go==0)
-//                Wait(20);
-//            go=0;
-//        };
-
-//        //-------------------
-//        // Tests
-//        //-------------------
-//        std::atomic_uint nodeCount1(0);
-//        std::atomic_uint nodeCount2(0);
-//        std::atomic_uint nodeCount3(0);
-//        std::atomic_uint nodeCount4(0);
-
-//        Com::Discoverer n1(io, CreateNode(1), [&](const Com::Node& n){std::cout<<"node_1: OnNewNode("<<n.nodeId<<")"<<std::endl;  ++nodeCount1;});
-//        Com::Discoverer n2(io, CreateNode(2), [&](const Com::Node& n){std::cout<<"node_2: OnNewNode("<<n.nodeId<<")"<<std::endl;  ++nodeCount2;});
-//        Com::Discoverer n3(io, CreateNode(3), [&](const Com::Node& n){std::cout<<"node_3: OnNewNode("<<n.nodeId<<")"<<std::endl;  ++nodeCount3;});
-//        Com::Discoverer n4(io, CreateNode(4), [&](const Com::Node& n){std::cout<<"node_4: OnNewNode("<<n.nodeId<<")"<<std::endl;  ++nodeCount4;});
-
-//        TRACELINE
-
-//        n1.AddSeed("127.0.0.1:10002");
-//        n2.AddSeed("127.0.0.1:10003");
-//        n3.AddSeed("127.0.0.1:10004");
-//        n4.AddSeed("127.0.0.1:10001");
-
-//        TRACELINE
-
-//        n1.Start();
-//        n2.Start();
-//        n3.Start();
-//        n4.Start();
-
-//        bool passed=false;
-
-//        for (int i=0; i<60; ++i)
-//        {
-//            if (nodeCount1==3 &&
-//                nodeCount2==3 &&
-//                nodeCount3==3 &&
-//                nodeCount4==3)
-//            {
-//                passed=true;
-//                break;
-//            }
-
-//            Wait(1000);
-//        }
-
-//        CHECK(passed);
-
-//        TRACELINE
-
-//        n1.Stop();
-//        n2.Stop();
-//        n3.Stop();
-//        n4.Stop();
-
-//        TRACELINE
-
-//        //-----------
-//        // shutdown
-//        //-----------
-//        work.reset();
-//        threads.join_all();
-
-//        std::cout<<"DiscovererTest passed"<<std::endl;
-//    }
-
-//private:
-//    static Com::Node CreateNode(int i)
-//    {
-//        return Com::Node(std::string("discoverer_")+boost::lexical_cast<std::string>(i), i, 1, std::string("127.0.0.1:")+boost::lexical_cast<std::string>(10000+i), "", true);
-//    }
-
-//};
-
 
 struct DiscovererTest
 {

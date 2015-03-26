@@ -58,18 +58,17 @@ namespace Control
     {
     public:
 
-        typedef std::function<void(int64_t requestId,
-                                   const std::string& nodeName,
-                                   int64_t nodeId,
-                                   int64_t nodeTypeId,
-                                   const std::string& dataAddress)> InjectNodeCmdCb;
+        using NodeCmdCb = std::function<void(const std::string& nodeName,
+                                             int64_t nodeId,
+                                             int64_t nodeTypeId,
+                                             const std::string& dataAddress)>;
 
-        typedef std::function<void(int64_t requestId)> StopDoseMainCb;
+        typedef std::function<void()> StopDoseMainCb;
 
-        DoseMainCmdReceiver(boost::asio::io_service& ioService,
-                            const InjectNodeCmdCb&   injectOwnNodeCmdCb,
-                            const InjectNodeCmdCb&   injectNodeCmdCb,
-                            const StopDoseMainCb&    stopDoseMainCb);
+        DoseMainCmdReceiver(boost::asio::io_service&    ioService,
+                            const NodeCmdCb&            startDoseMainCb,
+                            const NodeCmdCb&            injectNodeCb,
+                            const StopDoseMainCb&       stopDoseMainCb);
 
         // Start command reception
         void Start();
@@ -102,19 +101,17 @@ namespace Control
         void Stop();
 
         // dose_main commands
-        void InjectOwnNode(int64_t requestId,
-                           const std::string& nodeName,
+        void StartDoseMain(const std::string& nodeName,
                            int64_t nodeId,
                            int64_t nodeTypeId,
                            const std::string& dataAddress);
 
-        void InjectNode(int64_t requestId,
-                        const std::string& nodeName,
+        void InjectNode(const std::string& nodeName,
                         int64_t nodeId,
                         int64_t nodeTypeId,
                         const std::string& dataAddress);
 
-        void StopDoseMain(int64_t requestId);
+        void StopDoseMain();
 
     private:
         class Impl;

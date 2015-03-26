@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -56,8 +57,15 @@ namespace Internal
 {
     static const Dob::Typesystem::Si32::Second deletedConnReqTimeout = 0.5;
 
-    RequestHandler::RequestHandler(TimerHandler& timerHandler)
-        : m_timerHandler(timerHandler)
+    RequestHandler::RequestHandler(TimerHandler& timerHandler,
+                                   BlockingHandlers& blockingHandler,
+                                   ResponseHandler& responseHandler,
+                                   Com::Communication& communication)
+        : m_timerHandler(timerHandler),
+          m_blockingHandler(blockingHandler),
+          m_responseHandler(responseHandler),
+          m_communication(communication)
+
     {
         RequestTimers::m_localReqTimerId =
             m_timerHandler.RegisterTimeoutHandler
@@ -68,19 +76,6 @@ namespace Internal
             m_timerHandler.RegisterTimeoutHandler
             (L"Safir::Dob::Internal::RequestHandler::externalReqTimeout",
              *this);
-    }
-
-    void RequestHandler::Init(BlockingHandlers & blockingHandler,
-#if 0 //stewart
-                              ExternNodeCommunication  & ecom,
-#endif
-                              ResponseHandler & responseHandler)
-    {
-        m_blockingHandler = &blockingHandler;
-#if 0 //stewart
-        m_ecom = &ecom;
-#endif
-        m_responseHandler = &responseHandler;
     }
 
     const ConnectionConsumerPair GetRegistrationOwner(const DistributionData& request)
@@ -345,8 +340,8 @@ namespace Internal
     {
         if (!PostRequest(receiver, request))
         {
-            m_blockingHandler->Request().AddWaitingConnection(receiver.connection->Id().m_id,
-                                                              sender->Id().m_id);
+            m_blockingHandler.Request().AddWaitingConnection(receiver.connection->Id().m_id,
+                                                             sender->Id().m_id);
             return false;
         }
         return true;
@@ -441,7 +436,7 @@ namespace Internal
             sender->GetRequestOutQueue().RequestTimeout(timerInfo.m_requestId);
 
             //Post the response
-            m_responseHandler->HandleResponse(response);
+            m_responseHandler.HandleResponse(response);
 
             sender->SignalIn();
         }
@@ -499,7 +494,7 @@ namespace Internal
                                   &bin[0]);
 
         //Post the response
-        m_responseHandler->HandleResponse(response);
+        m_responseHandler.HandleResponse(response);
 
         // Remove timeout
         RequestTimerInfo timeoutInfo = RequestTimerInfo(sender->Id().m_id, reqId);

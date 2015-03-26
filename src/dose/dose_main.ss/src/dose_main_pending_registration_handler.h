@@ -27,7 +27,6 @@
 
 #include <Safir/Dob/Internal/InternalFwd.h>
 #include "dose_main_timers.h"
-#include "dose_main_defs.h"
 #include <map>
 #include "dose_main_communication.h"
 #include "dose_main_node_handler.h"
@@ -88,7 +87,7 @@ namespace Internal
             boost::chrono::steady_clock::time_point nextRequestTime;
             unsigned int nbrOfSentRequests;
             LamportTimestamp lastRequestTimestamp;
-            std::bitset<NUM_NODES> acceptedNodes;
+            std::bitset<64> acceptedNodes;
             bool rejected;
         };
         typedef std::map<long,PendingRegistrationInfo> PendingRegistrations;

@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -24,10 +25,15 @@
 
 #include "dose_main_message_handler.h"
 
+#include <boost/shared_ptr.hpp>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/Id.h>
+#include <Safir/Dob/Internal/DistributionData.h>
+#include <Safir/Dob/Internal/Connection.h>
+#include <Safir/Dob/Internal/Communication.h>
 #include <Safir/Dob/Internal/Connection.h>
 #include <Safir/Dob/Internal/MessageTypes.h>
-
+#include <Safir/Dob/NodeParameters.h>
 
 
 namespace Safir
@@ -36,26 +42,29 @@ namespace Dob
 {
 namespace Internal
 {
-    MessageHandler::MessageHandler():
-#if 0 //stewart
-        m_ecom(NULL),
-#endif
-        m_blockingHandler(NULL)
+    MessageHandler::MessageHandler(Com::Communication& communication,
+                                   const NodeTypeIds& nodeTypeIds)
+        : m_communication(communication),
+          m_nodeTypeIds(nodeTypeIds),
+          m_dataTypeIdentifier(LlufId_Generate64("Safir.Dob.Message"))
+
     {
+        m_communication.SetDataReceiver([this]
+                                        (int64_t /*fromNodeId*/,
+                                        int64_t /*fromNodeType*/,
+                                        const char* data,
+                                        size_t /*size*/)
+                                        {
+                                            const DistributionData msg =
+                                                    DistributionData::ConstConstructor(new_data_tag, data);
+
+                                            DistributionData::DropReference(data);
+
+                                            MessageTypes::Instance().DistributeMsg(msg);
+                                        },
+                                        m_dataTypeIdentifier,
+                                        DistributionData::NewData);
     }
-
-    void MessageHandler::Init(BlockingHandlers & blockingHandler)
-#if 0 //stewart
-                              ExternNodeCommunication & ecom)
-#endif
-    {
-        m_blockingHandler = &blockingHandler;
-#if 0 //stewart
-        m_ecom = &ecom;
-#endif
-    }
-
-
 
     void MessageHandler::DistributeMessages(const ConnectionPtr & connection)
     {
@@ -64,22 +73,21 @@ namespace Internal
     }
 
 
-    void MessageHandler::DispatchMessage(size_t & numberDispatched, const ConnectionPtr & connection, const DistributionData & msg, bool & exitDispatch, bool & dontRemove)
+    void MessageHandler::DispatchMessage(size_t& numberDispatched,
+                                         const ConnectionPtr& connection,
+                                         const DistributionData& msg,
+                                         bool& exitDispatch,
+                                         bool& dontRemove)
     {
+        if (msg.GetType() != DistributionData::Message)
+        {
+            throw std::logic_error("MessageHandler found a DistributionData that is not of type Message!");
+        }
+
         exitDispatch = false;
         dontRemove = false;
 
-#if 0 //stewart
-        if (!m_ecom->Send(msg))
-        {
-            m_blockingHandler->Message().AddWaitingConnection(ExternNodeCommunication::DoseComVirtualConnectionId,connection->Id().m_id);
-            dontRemove = true;
-            exitDispatch = true;
-            return;
-        }
-#endif
-
-        lllout << "DOSE_MAIN has found a message in msg out queue for connection " << connection->Id() << std::endl;
+        Send(msg);
 
         MessageTypes::Instance().DistributeMsg(msg);
         ++numberDispatched;
@@ -112,11 +120,32 @@ namespace Internal
             boost::bind(PostFullAction,boost::cref(connection)));
     }
 
-    void MessageHandler::HandleMessageFromDoseCom(const DistributionData & msg)
+    void MessageHandler::Send(const DistributionData& msg)
     {
-        MessageTypes::Instance().DistributeMsg(msg);
-    }
+        // TODO: here we also have to check if the type has a Local property
+        if (Safir::Dob::NodeParameters::LocalContexts(msg.GetSenderId().m_contextId) == true)
+        {
+            return;
+        }
 
+        boost::shared_ptr<const char[]> msgP(msg.GetReference(),
+                                             [](const char* data)
+                                             {
+                                                 DistributionData::DropReference(data);
+                                             });
+
+        // Send message to all node types
+        for (const auto& nodeType : m_nodeTypeIds)
+        {
+            m_communication.Send(0,  // All nodes of the type
+                                 nodeType,
+                                 msgP,
+                                 msg.Size(),
+                                 m_dataTypeIdentifier,
+                                 false); // no delivery guarantee for messages
+
+        }
+    }
 }
 }
 }

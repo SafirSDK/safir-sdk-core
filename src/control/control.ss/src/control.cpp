@@ -41,6 +41,7 @@
 #  pragma warning (disable : 4100 4267 4251)
 #endif
 
+#include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 #include <boost/asio.hpp>
 #include "boost/process.hpp"
@@ -76,9 +77,9 @@ public:
         options_description options("Options");
         options.add_options()
                 ("help,h", "show help message")
-                ("dosemain-name",
-                 value<std::string>(&doseMainName)->default_value("dose_main_test_stub"),
-                 "Name of dose_main executable (without file extension)")
+                ("dose-main-path",
+                 value<std::string>(&doseMainPath)->required(),
+                 "Absolute or relative path to dose_main executable.")
                 ("force-id",
                  value<boost::int64_t>(&id)->default_value(LlufId_GenerateRandom64(), ""),
                  "Override the automatically generated node id. For debugging/testing purposes only.");
@@ -107,7 +108,7 @@ public:
         parseOk = true;
     }
     bool parseOk;
-    std::string doseMainName;
+    std::string doseMainPath;
     boost::int64_t id;
 
 private:
@@ -123,10 +124,6 @@ private:
 
 int main(int argc, char * argv[])
 {
-
-    SEND_SYSTEM_LOG(Error,
-                    << "Testing the format");
-
     lllog(3) << "CTRL: Started" << std::endl;
 
     const ProgramOptions options(argc, argv);
@@ -169,20 +166,24 @@ int main(int argc, char * argv[])
 #endif
 
     // Locate and start dose_main
-#if defined(_UNICODE) || defined(UNICODE)
-    // For now we assume that the name of the dose_main executable contains only ascii characters.
-    std::wstring doseMainName = std::wstring(options.doseMainName.begin(), options.doseMainName.end());
-    std::wstring doseMainPath;
-#else
-    std::string doseMainName = options.doseMainName;
-    std::string doseMainPath;
+    namespace fs = boost::filesystem;
 
-#endif
-    doseMainPath = boost::process::search_path(doseMainName);
-    if (doseMainPath.empty())
+    fs::path path(options.doseMainPath);
+
+    if (fs::exists(path))
+    {
+        if (fs::is_directory(path) || !fs::is_regular_file(path))
+        {
+            std::ostringstream os;
+            os << "CTRL: " << options.doseMainPath << " is a directory or a non regular file!" << std::endl;
+            SEND_SYSTEM_LOG(Error, << os.str().c_str());
+            throw std::logic_error(os.str().c_str());
+        }
+    }
+    else
     {
         std::ostringstream os;
-        os << "CTRL: Can't find " << options.doseMainName << " in PATH" << std::endl;
+        os << "CTRL: Can't find " << options.doseMainPath << std::endl;
         SEND_SYSTEM_LOG(Error, << os.str().c_str());
         throw std::logic_error(os.str().c_str());
     }
@@ -191,7 +192,7 @@ int main(int argc, char * argv[])
 
     boost::process::child dose_main =
     boost::process::execute
-            (boost::process::initializers::run_exe(doseMainPath),
+            (boost::process::initializers::run_exe(path),
              boost::process::initializers::set_on_error(ec),
              boost::process::initializers::inherit_env()
 #if defined(linux) || defined(__linux) || defined(__linux__)
@@ -272,7 +273,7 @@ int main(int argc, char * argv[])
                          options.id,
                          conf.thisNodeParam.nodeTypeId,
                          std::move(spNodeTypes),
-                         nullptr); //TODO: implement incarnation id validation
+                         [](const int64_t /*incarnationId*/){return true;}); //TODO: implement incarnation id validation
 
 
     std::unique_ptr<Control::SystemStateHandler> stateHandler;
@@ -280,12 +281,10 @@ int main(int argc, char * argv[])
 
     doseMainCmdSender.reset(new Control::DoseMainCmdSender
                             (ioService,
-                             // This is what we do when dose_main is started
-                             [&sp, &communication, &doseMainCmdSender, &options, & conf, &stateHandler]()
+                             // This is what we do when dose_main is ready to receive commands
+                             [&sp, &communication, &stateHandler, &doseMainCmdSender, &conf, &options]()
                              {
-                                 // Send info about own node to dose_main
-                                 doseMainCmdSender->InjectOwnNode(0, // request id currently not used
-                                                                  conf.thisNodeParam.name,
+                                 doseMainCmdSender->StartDoseMain(conf.thisNodeParam.name,
                                                                   options.id,
                                                                   conf.thisNodeParam.nodeTypeId,
                                                                   conf.thisNodeParam.dataAddress);
@@ -301,25 +300,21 @@ int main(int argc, char * argv[])
                             );
 
     stateHandler.reset(new Control::SystemStateHandler
-                                    (Control::Node{conf.thisNodeParam.name,  // Insert own node
-                                                   options.id,
-                                                   conf.thisNodeParam.nodeTypeId,
-                                                   conf.thisNodeParam.controlAddress,
-                                                   conf.thisNodeParam.dataAddress},
+                                    (options.id,
 
                                     // Node included callback
                                     [&doseMainCmdSender](const Control::Node& node)
                                     {
-                                        doseMainCmdSender->InjectNode(0, // request id currently not used
-                                                                      node.name,
+                                        doseMainCmdSender->InjectNode(node.name,
                                                                       node.nodeId,
                                                                       node.nodeTypeId,
                                                                       node.dataAddress);
                                     },
+
                                     // Node down callback
                                     [](const int64_t /*nodeId*/)
                                     {
-                                        // TODO: What to do here?
+                                        // TODO: What to do here?'
                                     }));
 
     boost::asio::signal_set signalSet(ioService);
@@ -349,7 +344,7 @@ int main(int argc, char * argv[])
                               communication.Stop();
 
                               // Send stop order to dose_main
-                              doseMainCmdSender->StopDoseMain(0);  // request id currently not used
+                              doseMainCmdSender->StopDoseMain();
 
                               // Stop the doseMainCmdSender itself
                               doseMainCmdSender->Stop();

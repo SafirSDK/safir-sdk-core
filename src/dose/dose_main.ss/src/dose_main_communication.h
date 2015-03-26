@@ -21,6 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
+#if 0 //stewart
 
 #ifndef _dose_main_communication_h
 #define _dose_main_communication_h
@@ -39,53 +40,6 @@
 #ifdef _MSC_VER
 #pragma warning (pop)
 #endif
-
-namespace Safir
-{
-namespace Dob
-{
-namespace Internal
-{
-
-    template <class CommunicationT, class ConfigReaderT>
-    class NodeCommunicationBasic
-        : private boost::noncopyable
-    {
-    public:
-        explicit NodeCommunicationBasic(boost::asio::io_service& ioService)
-            : m_ioService(ioService)
-        {
-
-        }
-
-        std::string OwnIpAddress() const
-        {
-            //stewart todo
-            return "127.0.0.1";
-        }
-
-    private:
-
-        boost::asio::io_service& m_ioService;
-
-    };
-
-    // Forward declarations
-    namespace Com
-    {
-        class Communication;
-    }
-
-    class ConfigReader;
-
-    typedef NodeCommunicationBasic<Com::Communication, ConfigReader> NodeCommunication;
-
-
-}
-}
-}
-
-#if 0 //stewart
 
 #include "dose_main_quality_of_service_data.h"
 #include "dose_main_thread_monitor.h"
