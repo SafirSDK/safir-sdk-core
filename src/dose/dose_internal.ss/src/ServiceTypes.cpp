@@ -46,12 +46,12 @@ namespace Internal
     ServiceTypes::ServiceTypes(private_constructor_t, const int64_t nodeId)
         : m_registrationClock(nodeId)
     {
-
+        ENSURE(nodeId != 0, << "ServiceTypes must be constructed with valid nodeId")
     }
 
     void ServiceTypes::Initialize(const bool iAmDoseMain, const int64_t nodeId)
     {
-        m_instance = GetSharedMemory().find_or_construct<ServiceTypes>("SERVICETYPES")(private_constructor_t(), nodeId);
+        m_instance = GetSharedMemory().find_or_construct<ServiceTypes>("ServiceTypes")(private_constructor_t(), nodeId);
 
         if (iAmDoseMain)
         {

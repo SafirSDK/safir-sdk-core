@@ -106,7 +106,6 @@ namespace Internal
 
         m_signalSet(m_strand.get_io_service()),
         m_timerHandler(m_strand),
-        m_pendingRegistrationHandler(m_timerHandler),
         m_processMonitor(m_strand.get_io_service(),ProcessExited,boost::chrono::seconds(1)),
         m_HandleEvents_notified(0),
         m_DispatchOwnConnection_notified(0)
@@ -130,16 +129,6 @@ namespace Internal
 
         Safir::Utilities::CrashReporter::RegisterCallback(DumpFunc);
         Safir::Utilities::CrashReporter::Start();
-
-        // Initialize shared memory stuff
-        Connections::Cleanup();
-        ContextSharedTable::Initialize();
-        MessageTypes::Initialize(/*iAmDoseMain = */ true);
-        EndStates::Initialize();
-        ServiceTypes::Initialize(/*iAmDoseMain = */ true);
-        InjectionKindTable::Initialize();
-        NodeStatuses::Initialize();
-        EntityTypes::Initialize(/*iAmDoseMain = */ true);
 
         // Start reception of commands from Control
         m_cmdReceiver.Start();
@@ -200,6 +189,8 @@ namespace Internal
                                               nodeTypeId,
                                               dataAddress));
 
+        InitializeDoseInternalFromDoseMain(nodeId);
+
         // Collect all node type ids
         NodeTypeIds nodeTypeIds;
         for (const auto& nt: m_distribution->GetNodeTypeConfiguration().nodeTypesParam)
@@ -219,14 +210,16 @@ namespace Internal
                                                   *m_responseHandler,
                                                   m_distribution->GetCommunication()));
 
+        m_pendingRegistrationHandler.reset(new PendingRegistrationHandler(m_timerHandler,nodeId));
+
         m_poolHandler.reset(new PoolHandler(m_strand.get_io_service(),
                                             *m_distribution,
-                                            [this](int64_t tid){m_pendingRegistrationHandler.CheckForPending(tid);}));
+                                            [this](int64_t tid){m_pendingRegistrationHandler->CheckForPending(tid);}));
 
         m_connectionHandler.reset(new ConnectionHandler(m_strand.get_io_service(),
                                                         m_distribution->GetCommunication(),
                                                         *m_requestHandler,
-                                                        m_pendingRegistrationHandler));
+                                                        *m_pendingRegistrationHandler));
 
         //setup pdComplete sub
 
@@ -610,7 +603,7 @@ namespace Internal
         m_messageHandler->DistributeMessages(connection);
 
         //Handle pending registrations
-        m_pendingRegistrationHandler.CheckForNewOrRemovedPendingRegistration(connection);
+        m_pendingRegistrationHandler->CheckForNewOrRemovedPendingRegistration(connection);
 
         //Check in queues, and notify waiting applications
         HandleWaitingConnections(connection->Id().m_id, recursionLevel);

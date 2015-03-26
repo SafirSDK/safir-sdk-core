@@ -21,9 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-
-#ifndef __DOSE_PENDING_REGISTRATION_HANDLER_H__
-#define __DOSE_PENDING_REGISTRATION_HANDLER_H__
+#pragma once
 
 #include <Safir/Dob/Internal/InternalFwd.h>
 #include "dose_main_timers.h"
@@ -44,7 +42,8 @@ namespace Internal
         public boost::noncopyable
     {
     public:
-        explicit PendingRegistrationHandler(TimerHandler& timerHandler);
+        PendingRegistrationHandler(TimerHandler& timerHandler,
+                                   const int64_t nodeId);
 
         void CheckForNewOrRemovedPendingRegistration(const ConnectionPtr & connection);
 
@@ -107,6 +106,4 @@ namespace Internal
 }
 }
 }
-
-#endif
 

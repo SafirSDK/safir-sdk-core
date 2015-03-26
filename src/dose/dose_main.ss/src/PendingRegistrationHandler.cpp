@@ -22,7 +22,7 @@
 *
 ******************************************************************************/
 
-#include "dose_main_pending_registration_handler.h"
+#include "PendingRegistrationHandler.h"
 
 #include <Safir/Dob/Internal/ServiceTypes.h>
 #include <Safir/Dob/Internal/EntityTypes.h>
@@ -39,15 +39,11 @@ namespace Dob
 {
 namespace Internal
 {
-    PendingRegistrationHandler::PendingRegistrationHandler(TimerHandler& timerHandler):
-        m_timerHandler(timerHandler),
-#if 0 //stewart
-    ExternNodeCommunication & ecom):
-#endif
-        m_nextId(1)
-#if 0 //stewart
-        m_ecom(ecom)
-#endif
+    PendingRegistrationHandler::PendingRegistrationHandler(TimerHandler& timerHandler,
+                                                           const int64_t nodeId)
+        : m_timerHandler(timerHandler)
+        , m_nextId(1)
+        , m_pendingRegistrationClock(nodeId)
     {
         m_timerId = m_timerHandler.RegisterTimeoutHandler(L"Pending Registrations Timer",*this);
     }

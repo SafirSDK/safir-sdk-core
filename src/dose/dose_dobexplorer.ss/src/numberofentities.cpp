@@ -23,6 +23,7 @@
 ******************************************************************************/
 #include "numberofentities.h"
 #include "common_header.h"
+#include <Safir/Dob/Internal/Initialize.h>
 #include <Safir/Dob/Internal/EntityTypes.h>
 #include <Safir/Dob/Internal/EntityType.h>
 #include <Safir/Dob/Internal/DistributionData.h>
@@ -50,7 +51,7 @@ m_timer(this)
 
     GetEntities();
 
-    Safir::Dob::Internal::EntityTypes::Initialize();
+    Safir::Dob::Internal::InitializeDoseInternalFromApp();
 
     Update();
 }

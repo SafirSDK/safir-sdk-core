@@ -27,6 +27,7 @@
 #include <boost/lexical_cast.hpp>
 #include <sstream>
 #include <math.h>
+#include <Safir/Dob/Internal/Initialize.h>
 #include <Safir/Dob/Internal/EntityTypes.h>
 #include <Safir/Dob/Internal/InjectionKindTable.h>
 #include <Safir/Dob/Internal/ContextSharedTable.h>
@@ -57,9 +58,8 @@ EntityStats::EntityStats(QWidget * /*parent*/, const Safir::Dob::Typesystem::Typ
 {
     setupUi(this); // this sets up GUI
 
-    Safir::Dob::Internal::EntityTypes::Initialize();
-    Safir::Dob::Internal::InjectionKindTable::Initialize();
-    Safir::Dob::Internal::ContextSharedTable::Initialize();
+    Safir::Dob::Internal::InitializeDoseInternalFromApp();
+
     // signals/slots mechanism in action
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(UpdateStatistics()));
     m_timer.start(3000);

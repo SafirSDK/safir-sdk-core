@@ -24,7 +24,7 @@
 ******************************************************************************/
 
 #include "ConnectionHandler.h"
-#include "dose_main_pending_registration_handler.h"
+#include "PendingRegistrationHandler.h"
 #include "dose_main_request_handler.h"
 #include <Safir/Dob/Internal/Communication.h>
 #include <Safir/Dob/NodeParameters.h>

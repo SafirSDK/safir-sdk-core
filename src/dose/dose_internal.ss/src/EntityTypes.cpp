@@ -48,7 +48,7 @@ namespace Internal
         : m_registrationClock(nodeId)
         , m_allowInitialSet(true)
     {
-
+        ENSURE(nodeId != 0, << "EntityTypes must be constructed with valid nodeId")
     }
 
     void EntityTypes::Initialize(const bool iAmDoseMain, const int64_t nodeId)

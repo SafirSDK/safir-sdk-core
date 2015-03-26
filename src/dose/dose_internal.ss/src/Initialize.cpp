@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include <Safir/Dob/Internal/Initialize.h>
+
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Dob/Internal/ContextSharedTable.h>
 #include <Safir/Dob/Internal/MessageTypes.h>
@@ -30,7 +31,7 @@
 #include <Safir/Dob/Internal/InjectionKindTable.h>
 #include <Safir/Dob/Internal/NodeStatuses.h>
 #include <Safir/Dob/Internal/EntityTypes.h>
-
+#include <Safir/Utilities/Internal/LowLevelLogger.h>
 
 namespace Safir
 {
@@ -41,6 +42,7 @@ namespace Internal
 
 void InitializeDoseInternalFromDoseMain(const int64_t nodeId)
 {
+    lllog(1) << "Initializing dose_internal from dose_main" << std::endl;
     Connections::Cleanup();
     ContextSharedTable::Initialize();
     MessageTypes::Initialize(true);
@@ -50,10 +52,26 @@ void InitializeDoseInternalFromDoseMain(const int64_t nodeId)
     NodeStatuses::Initialize();
     EntityTypes::Initialize(true,nodeId);
 
+    auto sem = SharedMemoryObject::GetSharedMemory().find_or_construct<boost::interprocess::interprocess_semaphore>
+        ("InitializationGateKeeper")(0);
+
+    sem->post();
+
+    lllog(1) << "Initialization complete" << std::endl;
 }
 
 void InitializeDoseInternalFromApp()
 {
+    auto sem = SharedMemoryObject::GetSharedMemory().find_or_construct<boost::interprocess::interprocess_semaphore>
+        ("InitializationGateKeeper")(0);
+
+    lllog(1) << "Waiting for dose_main to initialize dose_internal" << std::endl;
+
+    sem->wait();
+    sem->post();
+
+    lllog(1) << "Connecting to dose_internal from app" << std::endl;
+
     ContextSharedTable::Initialize();
     MessageTypes::Initialize(false);
     EndStates::Initialize();

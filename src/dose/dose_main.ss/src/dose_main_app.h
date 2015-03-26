@@ -32,7 +32,7 @@
 #include "ConnectionHandler.h"
 #include "dose_main_message_handler.h"
 #include "dose_main_node_handler.h"
-#include "dose_main_pending_registration_handler.h"
+#include "PendingRegistrationHandler.h"
 #include "PoolHandler.h"
 #include "dose_main_process_info_handler.h"
 #include "dose_main_response_handler.h"
@@ -148,7 +148,7 @@ namespace Internal
         std::unique_ptr<ConnectionHandler>   m_connectionHandler;
 
         //Pending Registrations
-        PendingRegistrationHandler m_pendingRegistrationHandler;
+        std::unique_ptr<PendingRegistrationHandler> m_pendingRegistrationHandler;
 
 #if 0 //stewart
         //Extern node communication
