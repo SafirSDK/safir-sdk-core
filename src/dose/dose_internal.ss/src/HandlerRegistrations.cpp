@@ -27,7 +27,6 @@
 #include <Safir/Dob/Internal/State.h>
 #include <Safir/Dob/Internal/EndStates.h>
 #include <Safir/Dob/Internal/InjectionKindTable.h>
-#include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Dob/Entity.h>
@@ -39,8 +38,9 @@ namespace Dob
 {
 namespace Internal
 {
-    HandlerRegistrations::HandlerRegistrations(const Typesystem::TypeId typeId)
+    HandlerRegistrations::HandlerRegistrations(const Typesystem::TypeId typeId, const int64_t nodeId)
         : m_typeId(typeId),
+          m_nodeId(nodeId),
           m_registrations(typeId),
           m_entityContainerPtr(NULL)
     {
@@ -113,7 +113,7 @@ namespace Internal
                                                         boost::cref(connection),
                                                         boost::cref(handlerId),
                                                         true,  // true => explicit unregistration
-                                                        Safir::Dob::ThisNodeParameters::NodeNumber(),
+                                                        m_nodeId,
                                                         connection->Id().m_contextId,
                                                         _2));
     }

@@ -191,6 +191,7 @@ namespace Internal
 
         InitializeDoseInternalFromDoseMain(nodeId);
 
+        m_lockMonitor.reset(new LockMonitor());
         // Collect all node type ids
         NodeTypeIds nodeTypeIds;
         for (const auto& nt: m_distribution->GetNodeTypeConfiguration().nodeTypesParam)
@@ -285,7 +286,7 @@ namespace Internal
 
         m_timerHandler.Stop();
 
-        m_lockMonitor.Stop();
+        m_lockMonitor->Stop();
 
         m_processMonitor.Stop();
 

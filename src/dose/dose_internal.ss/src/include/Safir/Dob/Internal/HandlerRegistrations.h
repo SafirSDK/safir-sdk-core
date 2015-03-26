@@ -47,8 +47,7 @@ namespace Internal
         public SharedMemoryObject
     {
     public:
-
-        explicit HandlerRegistrations(const Typesystem::TypeId typeId);
+        HandlerRegistrations(const Typesystem::TypeId typeId, const int64_t nodeId);
 
         void SetStateContainer(const StateContainerPtr& entityContainerPtr);
 
@@ -132,7 +131,8 @@ namespace Internal
 
     private:
 
-        Typesystem::TypeId m_typeId;
+        const Typesystem::TypeId m_typeId;
+        const int64_t m_nodeId;
 
         SubscriptionType m_subscriptionType;
 

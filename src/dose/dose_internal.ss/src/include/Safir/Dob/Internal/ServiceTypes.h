@@ -51,7 +51,6 @@ namespace Internal
         struct private_constructor_t {};
     public:
         static void Initialize(const bool iAmDoseMain, const int64_t nodeId);
-        static bool IsInitialized();
 
         static ServiceTypes& Instance();
 
@@ -152,7 +151,6 @@ namespace Internal
         ServiceTypeTable m_serviceTypes;
 
         static ServiceTypes* m_instance;
-        static Safir::Utilities::Internal::AtomicUint32  m_isInitialized;
 
         LamportClock m_registrationClock;
     };

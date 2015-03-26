@@ -49,6 +49,8 @@ namespace Internal
         //itself has to be public (limitation of boost::interprocess)
         struct private_constructor_t {};
     public:
+        static void Initialize(const bool iAmDoseMain, const int64_t nodeId);
+
         /**
          * Get the singleton instance.
          * Note that this is not a singleton in the usual sense of the word,
@@ -58,13 +60,8 @@ namespace Internal
 
         //The constructor and destructor have to be public for the boost::interprocess internals to be able to call
         //them, but we can make the constructor "fake-private" by making it require a private type as argument.
-        explicit Connections(private_constructor_t);
+        Connections(private_constructor_t, const int64_t nodeId);
         ~Connections();
-
-        //Remove some underlying os primitives. This needs to be called before
-        //Connections is instantiated in dose_main. This is not really pretty
-        //and should maybe be changed in some Connections class refactoring
-        static void Cleanup();
 
         /**
          * This is for applications waiting for "things" to happen to its connection.
@@ -213,6 +210,7 @@ namespace Internal
                              ConnectResult & result,
                              ConnectionPtr & connection);
 
+        const int64_t m_nodeId;
         const int m_maxNumConnections;
 
         typedef PairContainers<ConnectionId, ConnectionPtr>::map ConnectionTable;
@@ -261,20 +259,7 @@ namespace Internal
         bool m_connectMinusOneSemSignalled;
         bool m_connectSemSignalled;
 
-        /**
-         * This class is here to ensure that only the Instance method can get at the
-         * instance, so as to be sure that boost call_once is used correctly.
-         * Also makes it easier to grep for singletons in the code, if all
-         * singletons use the same construction and helper-name.
-         */
-        struct SingletonHelper
-        {
-        private:
-            friend Connections& Connections::Instance();
-
-            static Connections& Instance();
-            static boost::once_flag m_onceFlag;
-        };
+        static Connections* m_instance;
     };
 }
 }

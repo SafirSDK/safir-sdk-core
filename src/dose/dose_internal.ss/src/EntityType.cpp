@@ -36,7 +36,6 @@
 #include <Safir/Dob/Internal/ContextSharedTable.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
-#include <Safir/Dob/ThisNodeParameters.h>
 
 #include <boost/bind.hpp>
 
@@ -50,9 +49,10 @@ namespace Internal
         : m_typeId(typeId),
           m_typeIsContextShared(ContextSharedTable::Instance().IsContextShared(typeId)),
           m_injectionKind(InjectionKindTable::Instance().GetInjectionKind(typeId)),
+          m_nodeId(nodeId),
           m_clock(nodeId),
           m_entityStates(Safir::Dob::NodeParameters::NumberOfContexts(), typeId),
-          m_handlerRegistrations(Safir::Dob::NodeParameters::NumberOfContexts(), typeId),
+          m_handlerRegistrations(Safir::Dob::NodeParameters::NumberOfContexts(), typeId, nodeId),
           m_typeLocks(Safir::Dob::NodeParameters::NumberOfContexts())
     {
         // Set the correct state container pointer in each registration handler.
@@ -983,7 +983,7 @@ namespace Internal
         {
             DistributionData newRealState =
                 DistributionData(entity_state_tag,
-                                 ConnectionId(ThisNodeParameters::NodeNumber(), connection->Id().m_contextId, -1), // Correct node number and context but no connection id for ghost states
+                                 ConnectionId(m_nodeId, connection->Id().m_contextId, -1), // Correct node number and context but no connection id for ghost states
                                  m_typeId,
                                  handlerId,
                                  LamportTimestamp(),             // an "old" registration time
@@ -1043,7 +1043,7 @@ namespace Internal
             // There is no existing injection state, create a new one
             newInjectionState = DistributionData(entity_state_tag,
                                                  // Dummy connectionId for injection states, but correct node number and context
-                                                 ConnectionId(ThisNodeParameters::NodeNumber(), connection->Id().m_contextId, -1),
+                                                 ConnectionId(m_nodeId, connection->Id().m_contextId, -1),
                                                  m_typeId,
                                                  handlerId,
                                                  LamportTimestamp(),            // dummy registration time for injection states
@@ -1080,7 +1080,7 @@ namespace Internal
             newInjectionState = mergeResult.first;
 
             // Dummy connectionId for injection states, but correct node number and context
-            newInjectionState.SetSenderId(ConnectionId(ThisNodeParameters::NodeNumber(), connection->Id().m_contextId, -1));
+            newInjectionState.SetSenderId(ConnectionId(m_nodeId, connection->Id().m_contextId, -1));
             newInjectionState.SetHandlerId(handlerId);
         }
 
@@ -1126,7 +1126,7 @@ namespace Internal
         {
             // There is no existing injection state, create a deleted state
             newInjectionState = DistributionData(entity_state_tag,
-                                                 ConnectionId(ThisNodeParameters::NodeNumber(), connection->Id().m_contextId, -1),
+                                                 ConnectionId(m_nodeId, connection->Id().m_contextId, -1),
                                                  m_typeId,
                                                  handlerId,
                                                  LamportTimestamp(),            // No registration time for injection states
@@ -1160,7 +1160,7 @@ namespace Internal
             newInjectionState = mergeResult.first;
 
             // Dummy connectionId for injection states, but correct node number and context.
-            newInjectionState.SetSenderId(ConnectionId(ThisNodeParameters::NodeNumber(), connection->Id().m_contextId, -1));
+            newInjectionState.SetSenderId(ConnectionId(m_nodeId, connection->Id().m_contextId, -1));
             newInjectionState.SetHandlerId(handlerId);
         }
 
@@ -1799,7 +1799,7 @@ namespace Internal
             // There is no existing real state, create a new real state 'deleted'
             newRealState = DistributionData(entity_state_tag,
                                             // Correct node number and context but no connection id for delete states
-                                            ConnectionId(ThisNodeParameters::NodeNumber(), registerer.connection->Id().m_contextId, -1),
+                                            ConnectionId(m_nodeId, registerer.connection->Id().m_contextId, -1),
                                             m_typeId,
                                             handlerId,
                                             registrationTime,
@@ -1816,7 +1816,7 @@ namespace Internal
             newRealState = realState.GetEntityStateCopy(false);
 
             // Correct node number and context but no connection id for delete states
-            newRealState.SetSenderId(ConnectionId(ThisNodeParameters::NodeNumber(), registerer.connection->Id().m_contextId, -1));
+            newRealState.SetSenderId(ConnectionId(m_nodeId, registerer.connection->Id().m_contextId, -1));
             newRealState.IncrementVersion();
             newRealState.SetExplicitlyDeleted(true);
             newRealState.SetEntityStateKind(DistributionData::Real);

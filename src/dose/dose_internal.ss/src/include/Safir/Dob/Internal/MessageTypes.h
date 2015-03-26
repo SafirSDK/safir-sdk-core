@@ -47,7 +47,6 @@ namespace Internal
         struct private_constructor_t {};
     public:
         static void Initialize(const bool iAmDoseMain = false);
-        static bool IsInitialized();
 
         static MessageTypes& Instance();
 
@@ -91,7 +90,6 @@ namespace Internal
 
         bool m_iAmDoseMain;
         static MessageTypes* m_instance;
-        static Safir::Utilities::Internal::AtomicUint32  m_isInitialized;
     };
 }
 }

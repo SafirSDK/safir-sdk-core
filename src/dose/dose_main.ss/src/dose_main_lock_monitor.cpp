@@ -71,17 +71,6 @@ namespace Internal
                 lockTimeout(static_cast<int>
                             (Safir::Dob::NodeParameters::DoseMainThreadWatchdogTimeout() / 4.0 * 1000.0));
 
-            // Wait for the shared memory to be initialized
-            for (;;)
-            {
-                if (Safir::Dob::Internal::ServiceTypes::IsInitialized() &&
-                    Safir::Dob::Internal::EntityTypes::IsInitialized())
-                {
-                    break;
-                }
-                boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
-            }
-
             for (;;)
             {
 

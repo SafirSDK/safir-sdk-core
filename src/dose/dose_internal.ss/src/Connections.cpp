@@ -24,8 +24,7 @@
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Dob/Typesystem/Operations.h>
-#include <Safir/Dob/ProcessInfo.h> 
-#include <Safir/Dob/ThisNodeParameters.h>
+#include <Safir/Dob/ProcessInfo.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/ProcessInfo.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
@@ -46,21 +45,16 @@ namespace Internal
     using boost::move; //we need to get hold of the boost move, in case we're
     //using boost >= 1.49. This way our code is backwards compatible.
 
-    boost::once_flag Connections::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
+    Connections* Connections::m_instance = NULL;
 
-    Connections & Connections::SingletonHelper::Instance()
+    Connections& Connections::Instance()
     {
-        static Connections* instance = GetSharedMemory().find_or_construct<Connections>("CONNECTIONS")(private_constructor_t());
-        return *instance;
+        ENSURE(m_instance != NULL, << "Connections::Instance was called before Initialize!!!");
+        return *m_instance;
     }
 
-    Connections & Connections::Instance()
-    {
-        boost::call_once(SingletonHelper::m_onceFlag,boost::bind(SingletonHelper::Instance));
-        return SingletonHelper::Instance();
-    }
-
-    Connections::Connections(private_constructor_t):
+    Connections::Connections(private_constructor_t, const int64_t nodeId):
+        m_nodeId(nodeId),
         m_maxNumConnections(Safir::Dob::ProcessInfo::MaxNumberOfInstances() *
                             Safir::Dob::ProcessInfo::ConnectionNamesArraySize()),
         m_connectionOutIds(m_maxNumConnections), //default constructed (-1,-1)
@@ -73,6 +67,8 @@ namespace Internal
         m_connectMinusOneSemSignalled(false),
         m_connectSemSignalled(false)
     {
+        ENSURE(nodeId != 0, << "Connections must be constructed with valid nodeId");
+
         m_connectionOutSignals =
             static_cast<Safir::Utilities::Internal::AtomicUint32*>
             (GetSharedMemory().allocate(sizeof(Safir::Utilities::Internal::AtomicUint32)* m_maxNumConnections));
@@ -82,6 +78,17 @@ namespace Internal
             m_connectionOutSignals.get()[i] = 0;
         }
     }
+
+    void Connections::Initialize(const bool iAmDoseMain, const int64_t nodeId)
+    {
+        m_instance = GetSharedMemory().find_or_construct<Connections>("Connections")(private_constructor_t(), nodeId);
+
+        if (iAmDoseMain)
+        {
+            Signals::RemoveConnectOrOut();
+        }
+    }
+
 
     Connections::~Connections()
     {
@@ -208,8 +215,8 @@ namespace Internal
             //upgrade the mutex
             boost::interprocess::scoped_lock<ConnectionsTableLock> wlock(boost::interprocess::move(rlock));
             connection = ConnectionPtr(GetSharedMemory().construct<Connection>
-                (boost::interprocess::anonymous_instance)
-                (connectionName, m_connectionCounter++, Safir::Dob::ThisNodeParameters::NodeNumber(), contextId, pid));
+                                       (boost::interprocess::anonymous_instance)
+                                       (connectionName, m_connectionCounter++, m_nodeId, contextId, pid, true));
 
             const bool success = m_connections.insert
                 (std::make_pair(connection->Id(), connection)).second;
@@ -273,8 +280,9 @@ namespace Internal
                         //upgrade the mutex
                         boost::interprocess::scoped_lock<ConnectionsTableLock> wlock(boost::interprocess::move(rlock));
 
-                        connection = ConnectionPtr(GetSharedMemory().construct<Connection>(boost::interprocess::anonymous_instance)
-                            (connectionName, m_connectionCounter++, Safir::Dob::ThisNodeParameters::NodeNumber(), context, pid));
+                        connection = ConnectionPtr(GetSharedMemory().construct<Connection>
+                                                   (boost::interprocess::anonymous_instance)
+                                                   (connectionName, m_connectionCounter++, m_nodeId, context, pid, true));
 
                         const bool success = m_connections.insert(std::make_pair(connection->Id(), connection)).second;
 
@@ -300,6 +308,7 @@ namespace Internal
                                     const long context,
                                     const ConnectionId & id)
     {
+        ENSURE(id.m_node != m_nodeId, << "AddConnection is meant for remote connections only");
         lllout << "Adding a connection (from other node?) name = '" << connectionName.c_str()
                << "', context = " << context
                << ", id = " << id << std::endl;
@@ -323,8 +332,9 @@ namespace Internal
         boost::interprocess::scoped_lock<ConnectionsTableLock> wlock(boost::interprocess::move(rlock));
 
         //remote connections have pid = -1
-        ConnectionPtr connection(GetSharedMemory().construct<Connection>(boost::interprocess::anonymous_instance)
-            (connectionName, counter, id.m_node, context, -1));
+        ConnectionPtr connection(GetSharedMemory().construct<Connection>
+                                 (boost::interprocess::anonymous_instance)
+                                 (connectionName, counter, id.m_node, context, -1, false));
 
         const bool success = m_connections.insert(std::make_pair(connection->Id(), connection)).second;
 
@@ -458,7 +468,7 @@ namespace Internal
         // i.e. in the GetConnection call, a connection could theoretically have been removed.
         // (we don't want to hold the lock while calling the callback, since it may want to take the lock itself at
         // some stage).
-        //Note: This should probably not happen at the moment, since the only thread that removes connections 
+        //Note: This should probably not happen at the moment, since the only thread that removes connections
         //is the dose_main main thread, which is also the only caller of this function. And it should
         //not be doing removes inside the callback.
 
@@ -646,11 +656,6 @@ namespace Internal
     void Connections::GenerateSpuriousConnectOrOutSignal() const
     {
         Signals::Instance().SignalConnectOrOut();
-    }
-    
-    void Connections::Cleanup()
-    {
-        Signals::RemoveConnectOrOut();
     }
 }
 }

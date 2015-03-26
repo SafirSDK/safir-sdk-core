@@ -43,7 +43,7 @@ namespace Internal
 void InitializeDoseInternalFromDoseMain(const int64_t nodeId)
 {
     lllog(1) << "Initializing dose_internal from dose_main" << std::endl;
-    Connections::Cleanup();
+    Connections::Initialize(true,nodeId);
     ContextSharedTable::Initialize();
     MessageTypes::Initialize(true);
     EndStates::Initialize();
@@ -71,7 +71,7 @@ void InitializeDoseInternalFromApp()
     sem->post();
 
     lllog(1) << "Connecting to dose_internal from app" << std::endl;
-
+    Connections::Initialize(false,0);
     ContextSharedTable::Initialize();
     MessageTypes::Initialize(false);
     EndStates::Initialize();

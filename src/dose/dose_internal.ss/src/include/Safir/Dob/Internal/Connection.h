@@ -61,7 +61,8 @@ namespace Internal
                    const Typesystem::Int32 counter,
                    const NodeNumber node,
                    const ContextId contextId,
-                   const pid_t pid);
+                   const pid_t pid,
+                   const bool local);
 
         ~Connection();
 

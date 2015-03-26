@@ -36,7 +36,6 @@ namespace Dob
 namespace Internal
 {
     EntityTypes* EntityTypes::m_instance = NULL;
-    Safir::Utilities::Internal::AtomicUint32 EntityTypes::m_isInitialized(0);
 
     EntityTypes& EntityTypes::Instance()
     {
@@ -48,7 +47,7 @@ namespace Internal
         : m_registrationClock(nodeId)
         , m_allowInitialSet(true)
     {
-        ENSURE(nodeId != 0, << "EntityTypes must be constructed with valid nodeId")
+        ENSURE(nodeId != 0, << "EntityTypes must be constructed with valid nodeId");
     }
 
     void EntityTypes::Initialize(const bool iAmDoseMain, const int64_t nodeId)
@@ -78,13 +77,6 @@ namespace Internal
                 }
             }
         }
-
-        m_isInitialized = 1;
-    }
-
-    bool EntityTypes::IsInitialized()
-    {
-        return m_isInitialized != 0;
     }
 
     bool EntityTypes::Register(const ConnectionPtr&                connection,

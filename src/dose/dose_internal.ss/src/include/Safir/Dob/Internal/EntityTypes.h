@@ -63,7 +63,6 @@ namespace Internal
         typedef PairContainers<Typesystem::TypeId, EntityTypePtr>::map EntityTypeTable;
     public:
         static void Initialize(const bool iAmDoseMain, const int64_t nodeId);
-        static bool IsInitialized();
 
         static EntityTypes& Instance();
 
@@ -354,7 +353,6 @@ namespace Internal
         EntityTypeTable m_entityTypes;
 
         static EntityTypes* m_instance;
-        static Safir::Utilities::Internal::AtomicUint32 m_isInitialized;
 
         LamportClock m_registrationClock;
 

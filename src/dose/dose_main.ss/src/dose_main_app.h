@@ -166,7 +166,7 @@ namespace Internal
         Safir::Utilities::ProcessMonitor m_processMonitor;
 
         // For monitoring abandoned shared memory locks
-        LockMonitor m_lockMonitor;
+        std::unique_ptr<LockMonitor> m_lockMonitor;
 
         Safir::Utilities::Internal::AtomicUint32 m_HandleEvents_notified;
         Safir::Utilities::Internal::AtomicUint32 m_DispatchOwnConnection_notified;

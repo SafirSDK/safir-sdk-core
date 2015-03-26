@@ -233,10 +233,11 @@ namespace Internal
                                            const boost::chrono::steady_clock::duration& lockTimeout);
 
     private:
-        Typesystem::TypeId            m_typeId;
-        bool                          m_typeIsContextShared;
-        InjectionKind::Enumeration    m_injectionKind;
-        LamportClock                  m_clock;
+        const Typesystem::TypeId            m_typeId;
+        const bool                          m_typeIsContextShared;
+        const InjectionKind::Enumeration    m_injectionKind;
+        const int64_t                       m_nodeId;
+        LamportClock                        m_clock;
 
         typedef ShmArray<StateContainer> StateContainerVector;
         mutable StateContainerVector m_entityStates;
