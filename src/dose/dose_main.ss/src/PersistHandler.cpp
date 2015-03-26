@@ -56,23 +56,20 @@ namespace Internal
         //m_timerId = m_timerHandler.RegisterTimeoutHandler(L"End States Timer", *this);
     }
 
-    void PersistHandler::Start()
+    void PersistHandler::Start(const std::function<void(const std::string& str)>& logStatus)
     {
-        m_strand.post([this] ()
+        m_strand.post([this,logStatus] ()
         {
             if(Dob::PersistenceParameters::TestMode())
             {
-                lllog(1) << "RUNNING IN PERSISTENCE TEST MODE! PLEASE CHANGE PARAMETER "
-                         << "Safir.Dob.PersistenceParameters.TestMode IF THIS IS NOT WHAT YOU EXPECTED!" << std::endl;
-                std::wcout << "RUNNING IN PERSISTENCE TEST MODE! PLEASE CHANGE PARAMETER "
-                           << "Safir.Dob.PersistenceParameters.TestMode IF THIS IS NOT WHAT YOU EXPECTED!" << std::endl;
+                logStatus("RUNNING IN PERSISTENCE TEST MODE! PLEASE CHANGE PARAMETER "
+                          "Safir.Dob.PersistenceParameters.TestMode IF THIS IS NOT WHAT YOU EXPECTED!");
 
                 Connections::Instance().AllowConnect(-1);
             }
             else
             {
-                lllog(1) << "dose_main is waiting for persistence data!" << std::endl;
-                std::wcout << "dose_main is waiting for persistence data!" << std::endl;
+                logStatus("dose_main is waiting for persistence data!");
 
                 m_connection.Open(L"dose_main", L"persist_handler", 0, NULL, this);
 

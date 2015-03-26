@@ -60,7 +60,7 @@ namespace Internal
 
         PersistHandler(boost::asio::io_service& ioService, Com::Communication& communication);
 
-        void Start();
+        void Start(const std::function<void(const std::string& str)>& logStatus);
         void Stop();
 
         void AddSubscriber(const PersistenDataReadyCallback& cb);

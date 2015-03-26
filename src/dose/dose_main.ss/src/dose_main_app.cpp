@@ -75,6 +75,7 @@ namespace Internal
         m_connectEvent(0),
         m_connectionOutEvent(0),
         m_strand(strand),
+        m_wcoutStrand(m_strand.get_io_service()),
         m_work(new boost::asio::io_service::work(m_strand.get_io_service())),
         m_distribution(),
         m_cmdReceiver(m_strand.get_io_service(),
@@ -183,6 +184,7 @@ namespace Internal
                         int64_t nodeTypeId,
                         const std::string& dataAddress)
     {
+        
         m_distribution.reset(new Distribution(m_strand.get_io_service(),
                                               nodeName,
                                               nodeId,
@@ -215,7 +217,8 @@ namespace Internal
 
         m_poolHandler.reset(new PoolHandler(m_strand.get_io_service(),
                                             *m_distribution,
-                                            [this](int64_t tid){m_pendingRegistrationHandler->CheckForPending(tid);}));
+                                            [this](int64_t tid){m_pendingRegistrationHandler->CheckForPending(tid);},
+                                            [this](const std::string& str){LogStatus(str);}));
 
         m_connectionHandler.reset(new ConnectionHandler(m_strand.get_io_service(),
                                                         m_distribution->GetCommunication(),
@@ -228,9 +231,9 @@ namespace Internal
 
 
 #ifndef NDEBUG
-        std::wcout<<"dose_main running (debug)..." << std::endl;
+        LogStatus("dose_main running (debug)...");
 #else
-        std::wcout<<"dose_main running (release)..." << std::endl;
+        LogStatus("dose_main running (release)...");
 #endif
 
     }
@@ -261,7 +264,7 @@ namespace Internal
             m_poolHandler->Start([this]
             {
                 //OnPdComplete: Probably more things to do here
-                std::wcout<<"PD complete"<<std::endl;
+                LogStatus("PD complete");
                 m_connectionHandler->OnPoolDistributionComplete();
             });
         }
@@ -323,8 +326,6 @@ namespace Internal
     void DoseApp::HandleSignal(const boost::system::error_code& error,
                                const int signalNumber)
     {
-        std::wcout << "Got signal " << signalNumber << " shutting down." << std::endl;
-
         if (error)
         {
             if (error == boost::asio::error::operation_aborted)
@@ -338,6 +339,8 @@ namespace Internal
                                 << "DOSE_MAIN: Got a signals error: " << error);
             }
         }
+
+        LogStatus("dose_main got signal " + boost::lexical_cast<std::string>(signalNumber) + ", shutting down.");
 
         Stop();
     }
@@ -845,6 +848,15 @@ namespace Internal
         {
             //do nothing, just exit
         }
+    }
+
+    void DoseApp::LogStatus(const std::string& str)
+    {
+        lllog(1) << str.c_str() << std::endl;
+        m_wcoutStrand.dispatch([str]
+                               {
+                                   std::wcout << str.c_str() << std::endl;
+                               });
     }
 
 }

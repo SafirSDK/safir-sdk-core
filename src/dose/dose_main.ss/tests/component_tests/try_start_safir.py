@@ -30,7 +30,7 @@ import subprocess, os, time, sys, signal, argparse
 def log(*args, **kwargs):
     print(*args, **kwargs)
     sys.stdout.flush()
-    
+
 parser = argparse.ArgumentParser("test script")
 parser.add_argument("--safir-control", required=True)
 parser.add_argument("--dose-main", required=True)
@@ -43,7 +43,7 @@ proc = subprocess.Popen([arguments.safir_control, "--dose-main-path" , arguments
                         stderr = subprocess.STDOUT,
                         universal_newlines=True,
                         creationflags = subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0)
-    
+
 lines = list()
 for i in range(2):
     lines.append(proc.stdout.readline().rstrip("\n\r"))
@@ -63,7 +63,7 @@ for i in range (100):
         break
     time.sleep(0.1)
 if proc.poll() is None:
-    try:        
+    try:
         proc.kill()
         log("Unable to stop Control and/or dose_main! OS resources might be locked, preventing further tests from running.")
         sys.exit(1)
@@ -83,14 +83,15 @@ if len(res) != 0:
     log("More than four lines output! Trailing data is\n'"+res + "'")
     sys.exit(1)
 
-if not lines[0].endswith("dose_main is waiting for persistence data!"):
-    log("Failed to find string ending in 'dose_main is waiting for persistence data!'")
-    sys.exit(1)
-if not lines[1].endswith("dose_main running (release)...") and not lines[1].endswith("dose_main running (debug)..."):
+if not lines[0].endswith("dose_main running (release)...") and not lines[0].endswith("dose_main running (debug)..."):
     log("Failed to find string ending in 'dose_main running (release)...' or 'dose_main running (debug)...'")
     sys.exit(1)
-if not lines[2].endswith("shutting down."):
-    log("Failed to find string ending in 'shutting down.'")
+if not lines[1].endswith("dose_main is waiting for persistence data!"):
+    log("Failed to find string ending in 'dose_main is waiting for persistence data!'")
+    sys.exit(1)
+#TODO stewart: remove this line since dope is not started by this test
+if not lines[2].endswith("dose_main persistence data is ready!"):
+    log("Failed to find string ending in 'dose_main persistence data is ready!'")
     sys.exit(1)
 if not lines[3].endswith("Exiting..."):
     log("Failed to find string ending in 'Exiting...'")

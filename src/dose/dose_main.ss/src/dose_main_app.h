@@ -87,6 +87,8 @@ namespace Internal
         void Stop();
 
     private:
+        void LogStatus(const std::string& str);
+
         void HandleSignal(const boost::system::error_code& error,
                           const int signalNumber);
 
@@ -129,6 +131,7 @@ namespace Internal
         static void MemoryMonitorThread();
 
         boost::asio::io_service::strand& m_strand;
+        boost::asio::io_service::strand m_wcoutStrand;
         boost::shared_ptr<boost::asio::io_service::work> m_work;
 
         std::unique_ptr<Distribution> m_distribution;

@@ -44,7 +44,8 @@ namespace Internal
     public:
         PoolHandler(boost::asio::io_service& io,
                     Distribution& distribution,
-                    const std::function<void(int64_t)>& checkPendingReg);
+                    const std::function<void(int64_t)>& checkPendingReg,
+                    const std::function<void(const std::string& str)>& logStatus);
 
         void Start(const std::function<void()>& poolDistributionComplete);
         void Stop();

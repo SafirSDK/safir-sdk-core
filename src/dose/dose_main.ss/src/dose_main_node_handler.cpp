@@ -192,6 +192,7 @@ namespace Internal
             {
             case NODESTATUS_NEW:
                 {
+                    //TODO If we're going to log these in stewart we need to use LogStatus fcn
                     lllog(0) << "NodeNew: " << ni->NodeName().GetVal() << " (id = " << id << ")"<< std::endl;
                     std::wcout << "NodeNew: " << ni->NodeName().GetVal() << " (id = " << id << ")"<< std::endl;
 
@@ -201,6 +202,7 @@ namespace Internal
                 break;
             case NODESTATUS_UP:
                 {
+                    //TODO If we're going to log these in stewart we need to use LogStatus fcn
                     lllog(0) << "NodeUp: " << ni->NodeName().GetVal() << " (id = " << id << ")"<< std::endl;
                     std::wcout << "NodeUp: " << ni->NodeName().GetVal() << " (id = " << id << ")"<< std::endl;
 
@@ -210,6 +212,7 @@ namespace Internal
                 break;
             case NODESTATUS_DOWN:
                 {
+                    //TODO If we're going to log these in stewart we need to use LogStatus fcn
                     lllog(0) << "NodeDown: " << ni->NodeName().GetVal() << " (id = " << id << ")"<< std::endl;
                     std::wcout << "NodeDown: " << ni->NodeName().GetVal() << " (id = " << id << ")"<< std::endl;
 

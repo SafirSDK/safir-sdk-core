@@ -43,7 +43,8 @@ namespace Internal
 {
     PoolHandler::PoolHandler(boost::asio::io_service& io,
                              Distribution& distribution,
-                             const std::function<void(int64_t)>& checkPendingReg)
+                             const std::function<void(int64_t)>& checkPendingReg,
+                             const std::function<void(const std::string& str)>& logStatus)
         :m_strand(io)
         ,m_endStatesTimer(io)
         ,m_communication(distribution.GetCommunication())
@@ -114,7 +115,7 @@ namespace Internal
             m_stateDistributors.emplace(nt.id, std::move(sd));
         }
 
-        m_persistHandler.Start();
+        m_persistHandler.Start(logStatus);
 
         //TODO: remove
         m_persistHandler.SetPersistentDataReady();
