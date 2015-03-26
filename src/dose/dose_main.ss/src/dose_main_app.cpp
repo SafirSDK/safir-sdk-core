@@ -488,8 +488,8 @@ namespace Internal
     }
 
 
-    void DoseApp::AllocateStatic()
-    {
+    //    void DoseApp::AllocateStatic()
+    //{
 //TODO
 //        m_connectionHandler.Init(
 //#if 0 //stewart
@@ -532,7 +532,7 @@ namespace Internal
 //        m_persistHandler.Init(m_connectionHandler,m_nodeHandler,otherNodesExistAtStartup);
 
 //        m_memoryMonitorThread = boost::thread(&DoseApp::MemoryMonitorThread);
-    }
+    //}
 
     void DoseApp::HandleConnect(const ConnectionPtr & connection)
     {

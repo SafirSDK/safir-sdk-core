@@ -108,7 +108,7 @@ namespace Internal
 
         void HandleDisconnect(const ConnectionPtr & connection);
 
-        void AllocateStatic();
+        //TODO void AllocateStatic();
 
         void HandleConnectionOutEvent(const ConnectionPtr & connection, std::vector<ConnectionPtr>& deadConnections);
 
