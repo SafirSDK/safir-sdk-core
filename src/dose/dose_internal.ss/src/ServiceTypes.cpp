@@ -43,19 +43,18 @@ namespace Internal
         return *m_instance;
     }
 
-    ServiceTypes::ServiceTypes(private_constructor_t):
-        m_iAmDoseMain(false)
+    ServiceTypes::ServiceTypes(private_constructor_t, const int64_t nodeId)
+        : m_registrationClock(nodeId)
     {
 
     }
 
-    void ServiceTypes::Initialize(const bool iAmDoseMain)
+    void ServiceTypes::Initialize(const bool iAmDoseMain, const int64_t nodeId)
     {
-        m_instance = GetSharedMemory().find_or_construct<ServiceTypes>("SERVICETYPES")(private_constructor_t());
+        m_instance = GetSharedMemory().find_or_construct<ServiceTypes>("SERVICETYPES")(private_constructor_t(), nodeId);
 
         if (iAmDoseMain)
         {
-            m_instance->m_iAmDoseMain = iAmDoseMain;
             ENSURE (m_instance->m_serviceTypes.empty(),
                     << "Can't start dose_main. An application or another dose_main "
                     "instance is already started!");

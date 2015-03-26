@@ -46,10 +46,11 @@ namespace Dob
 {
 namespace Internal
 {
-    EntityType::EntityType(const Typesystem::TypeId typeId)
+    EntityType::EntityType(const Typesystem::TypeId typeId, const int64_t nodeId)
         : m_typeId(typeId),
           m_typeIsContextShared(ContextSharedTable::Instance().IsContextShared(typeId)),
           m_injectionKind(InjectionKindTable::Instance().GetInjectionKind(typeId)),
+          m_clock(nodeId),
           m_entityStates(Safir::Dob::NodeParameters::NumberOfContexts(), typeId),
           m_handlerRegistrations(Safir::Dob::NodeParameters::NumberOfContexts(), typeId),
           m_typeLocks(Safir::Dob::NodeParameters::NumberOfContexts())

@@ -28,13 +28,8 @@
 #include <Safir/Dob/Internal/ControlConfig.h>
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Dob/Internal/InternalDefs.h>
-#include <Safir/Dob/Internal/MessageTypes.h>
-#include <Safir/Dob/Internal/ServiceTypes.h>
-#include <Safir/Dob/Internal/EntityTypes.h>
-#include <Safir/Dob/Internal/EndStates.h>
-#include <Safir/Dob/Internal/InjectionKindTable.h>
-#include <Safir/Dob/Internal/ContextSharedTable.h>
 #include <Safir/Dob/Internal/NodeStatuses.h>
+#include <Safir/Dob/Internal/Initialize.h>
 #include <Safir/Dob/OverflowException.h>
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>

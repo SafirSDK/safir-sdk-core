@@ -62,7 +62,7 @@ namespace Internal
 
         typedef PairContainers<Typesystem::TypeId, EntityTypePtr>::map EntityTypeTable;
     public:
-        static void Initialize(const bool iAmDoseMain = false);
+        static void Initialize(const bool iAmDoseMain, const int64_t nodeId);
         static bool IsInitialized();
 
         static EntityTypes& Instance();
@@ -340,7 +340,7 @@ namespace Internal
 
         //The constructor and destructor have to be public for the boost::interprocess internals to be able to call
         //them, but we can make the constructor "fake-private" by making it require a private type as argument.
-        explicit EntityTypes(private_constructor_t);
+        explicit EntityTypes(private_constructor_t, const int64_t nodeId);
 
     private:
         //Move the iterator to the next type if it is not currently iterating over a type.
@@ -353,7 +353,6 @@ namespace Internal
 
         EntityTypeTable m_entityTypes;
 
-        bool m_iAmDoseMain;
         static EntityTypes* m_instance;
         static Safir::Utilities::Internal::AtomicUint32 m_isInitialized;
 

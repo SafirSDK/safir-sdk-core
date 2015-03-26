@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -21,121 +22,56 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-
 #include <Safir/Dob/Internal/LamportClocks.h>
-#include <Safir/Utilities/Internal/Atomic.h>
-#include <iostream>
+
+#define BOOST_TEST_MODULE LamportClockTest
+#include <boost/test/unit_test.hpp>
 
 using namespace Safir::Dob::Internal;
 
-int main(int, char**)
+BOOST_AUTO_TEST_CASE(simple_comparison)
 {
-    LamportClock clock;
-
+    LamportClock clock(1000);
     {
         LamportTimestamp last = clock.GetNewTimestamp();
         for (int i = 0; i < 10; ++i)
         {
             const LamportTimestamp next = clock.GetNewTimestamp();
-            if (!(last < next)) 
-            {
-                std::wcout << "operator < failed for " << last << " < " << next << std::endl;
-                return 1;
-            }
-            if (!(last != next)) 
-            {
-                std::wcout << "operator != failed for " << last << " != " << next << std::endl;
-                return 1;
-            }
+            BOOST_CHECK(last < next);
+            BOOST_CHECK(last != next);
         }
     }
-
-    const LamportTimestamp a = clock.GetNewTimestamp();
-    std::wcout << "a = " << a << std::endl;
-
-    for (unsigned long i = 0; i <0x0fffffff;++i)
-    {
-        clock.GetNewTimestamp();
-    }
-    const LamportTimestamp b = clock.GetNewTimestamp();
-    std::wcout << "b = " << b << std::endl;
-
-
-    for (unsigned long i = 0; i <0x7ffffff0;++i)
-    {
-        clock.GetNewTimestamp();
-    }
-
-    const LamportTimestamp c = clock.GetNewTimestamp();
-    std::wcout << "c = " << c << std::endl;
-
-    for (unsigned long i = 0; i <0x7fffff00;++i)
-    {
-        clock.GetNewTimestamp();
-    }
-
-    const LamportTimestamp d = clock.GetNewTimestamp();
-    std::wcout << "d = " << d << std::endl;
-
-    std::wcout << std::boolalpha;
-    if (!(a < b))
-    {
-        std::wcout << "a < b (expect true): " << (a < b) << std::endl;
-        return 1;
-    }
-
-    if (b < a) 
-    {
-        std::wcout << "b < a (expect false): " << (b < a) << std::endl;
-        return 1;
-    }
-
-    if (a < c)
-    {
-        std::wcout << "a < c (expect false): " << (a < c) << std::endl;
-        return 1;
-    }
-    
-    if (!(c < a))
-    {
-        std::wcout << "c < a (expect true): " << (c < a) << std::endl;
-        return 1;
-    }
-
-    if (!(b < c))
-    {
-        std::wcout << "b < c (expect true): " << (b < c) << std::endl;
-        return 1;
-    }
-    if (c < b)
-    {
-        std::wcout << "c < b (expect false): " << (c < b) << std::endl;
-        return 1;
-    }
-
-    if (!(a < d))
-    {
-        std::wcout << "a < d (expect true): " << (a < d) << std::endl;
-        return 1;
-    }
-    if (d < a)
-    {
-        std::wcout << "d < a (expect false): " << (d < a) << std::endl;
-        return 1;
-    }
-
-    if (!(c < d))
-    {
-        std::wcout << "c < d (expect true): " << (c < d) << std::endl;
-        return 1;
-    }
-    if (d < c)
-    {
-        std::wcout << "d < c (expect false): " << (d < c) << std::endl;
-        return 1;
-    }
-
-    std::wcout << "success" << std::endl;
-    return 0;
 }
 
+
+BOOST_AUTO_TEST_CASE(different_nodes)
+{
+    LamportClock clock1(1000);
+    LamportClock clock2(2000);
+
+    const LamportTimestamp t1 = clock1.GetNewTimestamp();
+    const LamportTimestamp t2 = clock2.GetNewTimestamp();
+    BOOST_CHECK(t1 < t2);
+    BOOST_CHECK(t1 != t2);
+
+    const LamportTimestamp t3 = clock1.GetNewTimestamp();
+    BOOST_CHECK(t2 < t3);
+    BOOST_CHECK(t2 != t3);
+}
+
+
+BOOST_AUTO_TEST_CASE(update_current)
+{
+    LamportClock clock1(2000);
+    LamportClock clock2(1000);
+
+    auto t1 = clock1.GetNewTimestamp(); //1
+    t1 = clock1.GetNewTimestamp(); //2
+
+    const auto t2 = clock2.GetNewTimestamp(); //1
+    clock2.UpdateCurrentTimestamp(t1); //set clock2 to 2
+
+    const auto t3 = clock2.GetNewTimestamp();
+    BOOST_CHECK(t2 < t3);
+    BOOST_CHECK(t1 < t3);
+}

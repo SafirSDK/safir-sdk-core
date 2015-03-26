@@ -44,20 +44,19 @@ namespace Internal
         return *m_instance;
     }
 
-    EntityTypes::EntityTypes(private_constructor_t):
-        m_iAmDoseMain(false),
-        m_allowInitialSet(true)
+    EntityTypes::EntityTypes(private_constructor_t, const int64_t nodeId)
+        : m_registrationClock(nodeId)
+        , m_allowInitialSet(true)
     {
 
     }
 
-    void EntityTypes::Initialize(const bool iAmDoseMain)
+    void EntityTypes::Initialize(const bool iAmDoseMain, const int64_t nodeId)
     {
-        m_instance = GetSharedMemory().find_or_construct<EntityTypes>("EntityTypes")(private_constructor_t());
+        m_instance = GetSharedMemory().find_or_construct<EntityTypes>("EntityTypes")(private_constructor_t(), nodeId);
 
         if (iAmDoseMain)
         {
-            m_instance->m_iAmDoseMain = iAmDoseMain;
             ENSURE (m_instance->m_entityTypes.empty(),
                     << "Can't start dose_main. An application or another dose_main "
                     "instance is already started!");
@@ -71,7 +70,9 @@ namespace Internal
                 {
                     if (Dob::Typesystem::Operations::IsOfType(*it, Safir::Dob::Entity::ClassTypeId))
                     {
-                        EntityTypePtr entityType = GetSharedMemory().construct<EntityType>(boost::interprocess::anonymous_instance)(*it);
+                        EntityTypePtr entityType =
+                            GetSharedMemory().construct<EntityType>
+                            (boost::interprocess::anonymous_instance)(*it, nodeId);
                         m_instance->m_entityTypes.insert(std::make_pair(*it, entityType));
                     }
                 }

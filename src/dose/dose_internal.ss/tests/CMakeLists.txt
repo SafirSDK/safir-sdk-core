@@ -1,16 +1,19 @@
 ADD_SUBDIRECTORY(signals_test)
 
 ADD_EXECUTABLE(distribution_data_test distribution_data_test.cpp)
-ADD_EXECUTABLE(lamport_clock_test lamport_clock_test.cpp)
+ADD_EXECUTABLE(lamport_clock_test lamport_clock_test.cpp ../src/LamportClocks.cpp)
 ADD_EXECUTABLE(dose_message_queue_test dose_message_queue_test.cpp)
 ADD_EXECUTABLE(dose_sem_wrapper_test semaphore_test.cpp)
 ADD_EXECUTABLE(wrap_around_counter_test wrap_around_counter_test.cpp)
 
+TARGET_INCLUDE_DIRECTORIES(lamport_clock_test PRIVATE ../src/include)
+
 TARGET_LINK_LIBRARIES(distribution_data_test PRIVATE
   dose_internal)
 
+
 TARGET_LINK_LIBRARIES(lamport_clock_test PRIVATE
-  dose_internal)
+  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
 TARGET_LINK_LIBRARIES(dose_message_queue_test PRIVATE
   lluf_utils

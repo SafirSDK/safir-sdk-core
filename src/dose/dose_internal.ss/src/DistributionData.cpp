@@ -52,7 +52,7 @@ namespace Internal
         BOOST_STATIC_ASSERT(sizeof(bool) == 1);
         BOOST_STATIC_ASSERT(sizeof(VersionNumber) == sizeof(boost::uint16_t));
         BOOST_STATIC_ASSERT(sizeof(ResponseId) == 4);
-        BOOST_STATIC_ASSERT(sizeof(LamportTimestamp) == 8);
+        BOOST_STATIC_ASSERT(sizeof(LamportTimestamp) == 16);
         BOOST_STATIC_ASSERT(sizeof(InternalRequestId) == 4);
         BOOST_STATIC_ASSERT(sizeof(Identifier) == 8);
         BOOST_STATIC_ASSERT(sizeof(NodeNumber) == 8);
@@ -68,7 +68,7 @@ namespace Internal
         BOOST_STATIC_ASSERT(sizeof(StateHeader) == sizeof(Header)
                             + 8   //m_typeId
                             + 8   //handlerid
-                            + 8); //m_regTime
+                            + 16); //m_regTime
 
         BOOST_STATIC_ASSERT(sizeof(InstanceIdPolicy::Enumeration) == 4);
 
@@ -85,7 +85,7 @@ namespace Internal
 
         BOOST_STATIC_ASSERT(sizeof(EntityStateHeader) == sizeof(StateHeader)
                             + 8  //m_instanceId
-                            + 8  //m_creationTime
+                            + 16  //m_creationTime
                             + 2  //m_version
                             + 2  //padding
                             + 4  //m_kind

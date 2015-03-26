@@ -21,16 +21,12 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
+#pragma once
 
-#ifndef __DOSE_LAMPORT_CLOCKS_H__
-#define __DOSE_LAMPORT_CLOCKS_H__
-
-#include <boost/cstdint.hpp>
 #include <boost/noncopyable.hpp>
 #include <iosfwd>
-#include <climits>
 #include <Safir/Dob/Internal/InternalExportDefs.h>
-#include <Safir/Utilities/Internal/Atomic.h>
+#include <atomic>
 
 namespace Safir
 {
@@ -42,61 +38,61 @@ namespace Internal
     {
     public:
         // A default initialized timestamp will always be older than one that is acquired with GetNewTimestamp,
-        // since the first timestamp it will return will be 1.
-        LamportTimestamp(): m_timestamp(0) {}
+        // since the first timestamp GetNewTimestamp will return will be 1.
+        LamportTimestamp(): m_clock(0), m_nodeId(0) {}
 
-        bool operator < (const LamportTimestamp & other) const
+        bool operator < (const LamportTimestamp& other) const
         {
-            if (m_timestamp < other.m_timestamp)
+            if (m_clock == other.m_clock)
             {
-                return (other.m_timestamp - m_timestamp) <= WRAP_INTERVAL;
+                return m_nodeId < other.m_nodeId;
             }
             else
             {
-                return (m_timestamp - other.m_timestamp) > WRAP_INTERVAL;
+                return m_clock < other.m_clock;
             }
         }
 
-        bool operator != (const LamportTimestamp & other) const {return m_timestamp != other.m_timestamp;}
+        bool operator != (const LamportTimestamp& other) const
+        {return m_clock != other.m_clock || m_nodeId != other.m_nodeId;}
 
     private:
-        explicit LamportTimestamp(const boost::uint32_t clock, const boost::uint64_t nodeNumber);
+        LamportTimestamp(const uint64_t clock, const int64_t nodeId)
+            : m_clock(clock)
+            , m_nodeId(nodeId)
+        {
 
-        static const boost::uint64_t WRAP_INTERVAL =
-            (static_cast<boost::uint64_t>(0x7fffffff) << 6);
+        }
 
-        boost::uint32_t GetClock() const;
+        uint64_t GetClock() const { return m_clock;}
 
         friend class LamportClock;
 
-        friend DOSE_INTERNAL_API std::wostream & operator << (std::wostream & out, const LamportTimestamp & timestamp);
+        friend DOSE_INTERNAL_API std::wostream& operator << (std::wostream& out, const LamportTimestamp& timestamp);
 
-        boost::uint64_t m_timestamp;
+        uint64_t m_clock;
+        int64_t m_nodeId;
     };
 
-    DOSE_INTERNAL_API std::wostream & operator << (std::wostream & out, const LamportTimestamp & timestamp);
+    DOSE_INTERNAL_API std::wostream& operator << (std::wostream& out, const LamportTimestamp& timestamp);
 
     class DOSE_INTERNAL_API LamportClock:
         private boost::noncopyable
     {
     public:
-        LamportClock();
-        ~LamportClock();
+        explicit LamportClock(const int64_t nodeId);
 
-        const LamportTimestamp GetCurrentTimestamp() const;
-        void UpdateCurrentTimestamp(const LamportTimestamp & timestamp);
+        void UpdateCurrentTimestamp(const LamportTimestamp& timestamp);
 
         const LamportTimestamp GetNewTimestamp();
 
     private:
-        Safir::Utilities::Internal::AtomicUint32 m_currentClock;
-        boost::uint64_t m_nodeNumber; //only the 6 least significant bits are used!
+        std::atomic<uint64_t> m_currentClock;
+        const int64_t m_nodeId;
     };
 
 }
 }
 }
 
-
-#endif
 

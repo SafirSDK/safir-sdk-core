@@ -28,6 +28,7 @@
 #include <boost/bind.hpp>
 #include <Safir/Dob/AccessDeniedException.h>
 #include <Safir/Dob/Entity.h>
+#include <Safir/Dob/Internal/Initialize.h>
 #include <Safir/Dob/Internal/Connection.h>
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Dob/Internal/InternalDefs.h>
@@ -247,13 +248,7 @@ namespace Internal
                 m_isConnected = true;
                 m_connection = connection;
 
-                MessageTypes::Initialize();
-                EndStates::Initialize();
-                ServiceTypes::Initialize();
-                InjectionKindTable::Initialize();
-                NodeStatuses::Initialize();
-                EntityTypes::Initialize();
-                ContextSharedTable::Initialize();
+                InitializeDoseInternalFromApp();
             }
             break;
         case TooManyProcesses:

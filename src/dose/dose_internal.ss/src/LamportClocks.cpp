@@ -23,68 +23,46 @@
 ******************************************************************************/
 
 #include <Safir/Dob/Internal/LamportClocks.h>
-#include <Safir/Utilities/Internal/Atomic.h>
-#include <Safir/Dob/ThisNodeParameters.h>
 #include <iostream>
+#include <atomic>
+
 namespace Safir
 {
 namespace Dob
 {
 namespace Internal
 {
-    LamportTimestamp::LamportTimestamp(const boost::uint32_t clock, const boost::uint64_t nodeNumber):
-        m_timestamp(clock)
-    {
-        //shift 6 bits and put the node number there.
-        m_timestamp = (static_cast<boost::uint64_t>(clock) << 6)| nodeNumber;
-    }
-
-    boost::uint32_t LamportTimestamp::GetClock() const
-    {
-        return static_cast<boost::uint32_t>(m_timestamp >> 6);
-    }
-
 
     std::wostream & operator << (std::wostream & out, const LamportTimestamp & timestamp)
     {
-        return out << timestamp.GetClock() << ":" << (timestamp.m_timestamp & 0x3F);
+        return out << timestamp.m_clock << ":" << timestamp.m_nodeId;
     }
 
 
-
-    LamportClock::LamportClock():
+    LamportClock::LamportClock(const int64_t nodeId):
         m_currentClock(0),
-        m_nodeNumber(ThisNodeParameters::NodeNumber())
+        m_nodeId(nodeId)
     {
 
     }
 
-    LamportClock::~LamportClock()
+    void LamportClock::UpdateCurrentTimestamp(const LamportTimestamp& timestamp)
     {
-
-    }
-
-
-    const LamportTimestamp LamportClock::GetCurrentTimestamp() const
-    {
-        return LamportTimestamp(m_currentClock.value(), m_nodeNumber);
-    }
-
-
-    void LamportClock::UpdateCurrentTimestamp(const LamportTimestamp & timestamp)
-    {
-        boost::uint32_t otherClock = timestamp.GetClock();
-
+        const auto otherClock = timestamp.GetClock();
         //algorithm:
         //While the current clock value is smaller than the other value
         //we try to swap them. The swap will fail if the current clock
         //changes between the read and swap, and then we will try again.
         for(;;)
         {
-            const boost::uint32_t currentClock = m_currentClock.value();
+            auto currentClock = m_currentClock.load();
             if (otherClock > currentClock)
             {
-                m_currentClock.compare_exchange(otherClock,currentClock);
+                const bool res = m_currentClock.compare_exchange_strong(currentClock,otherClock);
+                if (res)
+                {
+                    return;
+                }
             }
             else
             {
@@ -96,7 +74,7 @@ namespace Internal
 
     const LamportTimestamp LamportClock::GetNewTimestamp()
     {
-        return LamportTimestamp(m_currentClock++, m_nodeNumber);
+        return LamportTimestamp(++m_currentClock, m_nodeId);
     }
 
 

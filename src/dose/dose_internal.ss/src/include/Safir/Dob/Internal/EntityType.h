@@ -47,7 +47,7 @@ namespace Internal
     {
     public:
 
-        explicit EntityType(const Typesystem::TypeId typeId);
+        EntityType(const Typesystem::TypeId typeId, const int64_t nodeId);
 
         Dob::Typesystem::TypeId GetTypeId() const {return m_typeId;}
 
