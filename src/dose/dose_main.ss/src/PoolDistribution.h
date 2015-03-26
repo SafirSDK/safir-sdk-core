@@ -23,9 +23,12 @@
 ******************************************************************************/
 #pragma once
 #include <unordered_map>
+#include <queue>
 #include <functional>
 #include <boost/make_shared.hpp>
 #include <boost/asio.hpp>
+#include <boost/chrono.hpp>
+#include <boost/asio/steady_timer.hpp>
 
 namespace Safir
 {
@@ -34,14 +37,89 @@ namespace Dob
 namespace Internal
 {
     static const int64_t PoolDistributionInfoDataTypeId=-3446507522969672286; //DoseMain.PoolDistributionInfo
-    enum class PoolDistributionInfo : uint8_t {RequestPd = 1, PdComplete = 2};
+    enum class PoolDistributionInfo : uint8_t
+    {
+        RequestPd = 1,
+        PdComplete = 2
+    };
 
     ///
-    /// This class handles a pool distribution to a single node.
+    /// This class is responsible for handling all pool distributions to other nodes.
+    /// It will keep a queue of PoolDistributionRequests and make sure that only one
+    /// pd is active at the same time. It will also ensure that pool distributions will
+    /// be sending in a pace that wont flood the network and cause starvation in other parts
+    /// of the system.
     ///
-    class PoolDistribution
+    template <class CommunicationT>
+    class PoolDistributor : private boost::noncopyable
     {
     public:
+        PoolDistributor(boost::asio::io_service& io, CommunicationT& com)
+            :m_strand(io)
+            ,m_communication(com)
+            ,m_timer(io)
+        {
+        }
+
+        //make sure that start is not called before persistent data is ready
+        void Start()
+        {
+            m_strand.dispatch([=]
+            {
+                m_running=true;
+                Run();
+            });
+        }
+
+        void Stop()
+        {
+            m_strand.post([=]
+            {
+                m_running=false;
+                m_timer.cancel();
+            });
+        }
+
+        void ReceivedPoolDistributionRequest(int64_t nodeId, int64_t nodeTypeId)
+        {
+            m_strand.dispatch([=]
+            {
+                m_pendingPoolDistributions.push(std::make_pair(nodeId, nodeTypeId));
+            });
+        }
+
+    private:
+        boost::asio::io_service::strand m_strand;
+        CommunicationT& m_communication;
+        boost::asio::steady_timer m_timer;
+        std::queue<std::pair<int64_t, int64_t> > m_pendingPoolDistributions;
+        bool m_running=false;
+
+        void Run()
+        {
+            if (!m_running)
+            {
+                return;
+            }
+
+            if (!m_pendingPoolDistributions.empty())
+            {
+                auto req=boost::make_shared<char[]>(sizeof(PoolDistributionInfo));
+                (*reinterpret_cast<PoolDistributionInfo*>(req.get()))=PoolDistributionInfo::PdComplete;
+
+                auto receiver=m_pendingPoolDistributions.front();
+                if (m_communication.Send(receiver.first, receiver.second, req, sizeof(PoolDistributionInfo), PoolDistributionInfoDataTypeId, true))
+                {
+                    m_pendingPoolDistributions.pop();
+                }
+            }
+
+            static const boost::chrono::milliseconds timerInterval(1000);
+            m_timer.expires_from_now(timerInterval);
+            m_timer.async_wait(m_strand.wrap([=](const boost::system::error_code& /*error*/){Run();}));
+        }
+    };
+
         //    void PoolHandler::PoolDistributionWorker()
         //    {
         //#if 0 //stewart
@@ -279,9 +357,7 @@ namespace Internal
         //    }
 
 
-    private:
 
-    };
 
     //********************************************************************************************************
 
@@ -293,79 +369,114 @@ namespace Internal
     class PoolDistributionRequestor
     {
     public:
-        PoolDistributionRequestor(boost::asio::io_service::strand& strand,
-                                  CommunicationT& communication,
-                                  std::unordered_map<int64_t, int64_t>& nodes,
-                                  std::function<void()> pdComplete)
-            :m_strand(strand)
+        PoolDistributionRequestor(boost::asio::io_service& io,
+                                  CommunicationT& communication)
+            :m_strand(io)
             ,m_communication(communication)
-            ,m_nodes(nodes)
-            ,m_pdComplete(pdComplete)
         {
-            for (auto& vt : m_nodes)
+        }
+
+        void Start(const std::function<void()>& pdComplete)
+        {
+            m_strand.dispatch([=]
             {
-                m_poolDistributionRequests.insert({vt.first, false});
-            }
-            m_strand.post([=]{SendPoolDistributionRequests();});
+                m_pdComplete=pdComplete;
+                m_running=true;
+                if (m_requests.empty())
+                {
+                    m_pdComplete();
+                }
+                else
+                {
+                    SendPoolDistributionRequests();
+                }
+            });
+
+        }
+
+        void Stop()
+        {
+            m_strand.post([=] //use post to prevent that stop is executed before start
+            {
+                m_running=false;
+                m_requests.clear();
+            });
+        }
+
+        void RequestPoolFrom(int64_t nodeId, int64_t nodeTypeId)
+        {
+            m_strand.post([=]
+            {
+                m_requests.push_back({nodeId, nodeTypeId, false});
+                SendPoolDistributionRequests();
+            });
         }
 
         void ReceivedPoolDistributionCompleteFrom(int64_t nodeId)
         {
-            m_poolDistributionRequests.erase(nodeId);
-            if (m_poolDistributionRequests.empty())
+            m_strand.dispatch([=]
             {
-                m_pdComplete();
-            }
+                auto it=std::find_if(m_requests.begin(), m_requests.end(), [nodeId](const PdReq& r){return r.nodeId==nodeId;});
+                if (it!=m_requests.end())
+                {
+                    m_requests.erase(it);
+                }
+
+                if (m_requests.empty())
+                {
+                    m_pdComplete();
+                }
+            });
         }
 
+#ifndef SAFIR_TEST
     private:
-        boost::asio::io_service::strand& m_strand;
+#endif
+        struct PdReq
+        {
+            int64_t nodeId;
+            int64_t nodeType;
+            bool sent;
+        };
+
+        bool m_running=false;
+
+        boost::asio::io_service::strand m_strand;
         CommunicationT& m_communication;
-        std::unordered_map<int64_t, int64_t>& m_nodes;
         std::function<void()> m_pdComplete; //signal pdComplete after all our pdRequests has reported pdComplete
-        std::unordered_map<int64_t, bool> m_poolDistributionRequests;
+        std::vector<PdReq> m_requests;
 
         void SendPoolDistributionRequests()
         {
+            if (!m_running)
+            {
+                return;
+            }
+
             auto req=boost::make_shared<char[]>(sizeof(PoolDistributionInfo));
             (*reinterpret_cast<PoolDistributionInfo*>(req.get()))=PoolDistributionInfo::RequestPd;
 
             bool unsentRequests=false;
 
-            for (auto it=m_poolDistributionRequests.begin(); it!=m_poolDistributionRequests.end();)
+            for (auto& r : m_requests)
             {
-                auto nodeIt=m_nodes.find(it->first);
-                if (nodeIt==m_nodes.end())
+                if (!r.sent)
                 {
-                    //node does no longer exist, remove it since we no longer expect to get a pd from that node.
-                    it=m_poolDistributionRequests.erase(it);
-                    continue;
-                }
-
-                if (it->second)
-                {
-                    //pd request has already been successfully sent in previous calls to this method
-                    ++it;
-                    continue;
-                }
-
-                //try to send pd request to the node
-                if (m_communication.Send(nodeIt->first, nodeIt->second, req, sizeof(PoolDistributionInfo), PoolDistributionInfoDataTypeId, true))
-                {
-                    it->second=true; //pd request has been sent
-                    ++it;
-                }
-                else
-                {
-                    unsentRequests=true; //could not send request right now due to overflow
-                    ++it;
+                    if (m_communication.Send(r.nodeId, r.nodeType, req, sizeof(PoolDistributionInfo), PoolDistributionInfoDataTypeId, true))
+                    {
+                        r.sent=true;
+                    }
+                    else
+                    {
+                        unsentRequests=true;
+                    }
                 }
             }
 
             if (unsentRequests)
             {
-                //there are nodes that has not got an pd request yet, retry later
-                m_strand.post([=]{SendPoolDistributionRequests();}); //set timer instead
+                //some requests could not be sent, retry
+                m_strand.post([=]{SendPoolDistributionRequests();}); //a bit aggressive, maybe we should set a timer instead
             }
         }
     };

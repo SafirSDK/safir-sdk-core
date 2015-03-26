@@ -54,7 +54,6 @@ namespace Internal
     class RequestHandler;
     class PendingRegistrationHandler;
     class NodeHandler;
-    class PersistHandler;
 
     class ConnectionHandler:
         private boost::noncopyable
@@ -63,19 +62,14 @@ namespace Internal
         ConnectionHandler(boost::asio::io_service& ioService,
                           Com::Communication& communication,
                           RequestHandler& requesthandler,
-                          PendingRegistrationHandler& prh,
-                          PersistHandler& persistHandler);
-
-        void Start();
-
-        //stewart TODO Instead of other classes calling this method when something has happened
-        //             This class should set up its own event subscriptions
-        //void MaybeSignalConnectSemaphore();
+                          PendingRegistrationHandler& prh);
 
         void HandleConnect(const ConnectionPtr & connection);
         void HandleDisconnect(const ConnectionPtr & connection);
 
         bool HandleUnsent();
+
+        void OnPoolDistributionComplete();
 
     private:
 
@@ -83,9 +77,10 @@ namespace Internal
         Com::Communication&             m_communication;
         RequestHandler&                 m_requestHandler;
         PendingRegistrationHandler&     m_pendingRegistrationHandler;
-        PersistHandler&                 m_persistHandler;
 
         std::deque<DistributionData> m_unsent;
+
+        bool m_poolDistributionComplete = false;
     };
 }
 }

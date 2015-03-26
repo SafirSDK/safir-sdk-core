@@ -72,6 +72,7 @@ namespace
             ,m_connections(static_cast<size_t>(Safir::Dob::NodeParameters::NumberOfContexts()))
         {
             m_dispatcherNotified=false;
+            m_communication.SetQueueNotFullCallback([=](int64_t){OnDoDispatch();}, m_nodeType);
         }
 
         void Start()
@@ -87,6 +88,14 @@ namespace
                 {
                     m_connections[static_cast<size_t>(context)].connection.Close();
                 }
+            });
+        }
+
+        void CheckForPending(Typesystem::TypeId typeId)
+        {
+            m_strand.dispatch([=]
+            {
+                m_checkPendingReg(typeId);
             });
         }
 
@@ -139,7 +148,7 @@ namespace
         }
 
         //dummy consumer impl
-        virtual void OnStopOrder() {}        
+        virtual void OnStopOrder() {}
         virtual void OnRegistered(const Safir::Dob::Typesystem::TypeId, const Safir::Dob::Typesystem::HandlerId&) {}
         virtual void OnUnregistered(const Safir::Dob::Typesystem::TypeId, const Safir::Dob::Typesystem::HandlerId&) {}
         virtual void OnNewEntity(const Safir::Dob::EntityProxy) {}

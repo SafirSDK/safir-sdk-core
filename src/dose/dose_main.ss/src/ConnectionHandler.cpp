@@ -23,10 +23,9 @@
 *
 ******************************************************************************/
 
-#include "dose_main_connection_handler.h"
+#include "ConnectionHandler.h"
 #include "dose_main_pending_registration_handler.h"
 #include "dose_main_request_handler.h"
-#include "dose_main_persist_handler.h"
 #include <Safir/Dob/Internal/Communication.h>
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Dob/ThisNodeParameters.h>
@@ -42,30 +41,34 @@ namespace Dob
 {
 namespace Internal
 {
+namespace
+{
+    boost::shared_ptr<const char[]> ToPtr(const DistributionData& d)
+    {
+        boost::shared_ptr<const char[]> p(d.GetReference(), [=](const char* ptr){DistributionData::DropReference(ptr);});
+        return p;
+    }
+}
 
     ConnectionHandler::ConnectionHandler(boost::asio::io_service& ioService,
                                          Com::Communication& communication,
                                          RequestHandler& requesthandler,
-                                         PendingRegistrationHandler& prh,
-                                         PersistHandler& persistHandler)
+                                         PendingRegistrationHandler& prh)
         : m_strand(ioService),
           m_communication(communication),
           m_requestHandler(requesthandler),
-          m_pendingRegistrationHandler(prh),
-          m_persistHandler(persistHandler)
+          m_pendingRegistrationHandler(prh)
     {
     }
 
-    void ConnectionHandler::Start()
+    void ConnectionHandler::OnPoolDistributionComplete()
     {
-        // Set up callback for the persistentDataReady event.
-        m_persistHandler.AddSubscriber([]()
-        {
-            lllog(1) << "We have received persistence data (either from DOPE or other node), "
-                        "ok to let apps connect!" << std::endl;
-            Connections::Instance().AllowConnect(-1);
-            Connections::Instance().AllowConnect(0);
-        });
+        m_poolDistributionComplete=true;
+
+        lllog(1) << "We have received persistence data (either from DOPE or other node), "
+                    "ok to let apps connect!" << std::endl;
+        Connections::Instance().AllowConnect(-1);
+        Connections::Instance().AllowConnect(0);
     }
 
     void ConnectionHandler::HandleConnect(const ConnectionPtr& connection)
@@ -83,18 +86,18 @@ namespace Internal
             return;
         }
 
-#if 0 //stewart
-        if (m_ecom->Send(connMsg))
-        {
-            lllout << "Sent a new connection to dose_com: " << connection->NameWithCounter() << std::endl; 
-        }
-        else
-        {
-            lllout << "Overflow when sending new connection to dose_com, adding to m_unsent: "
-                   << connection->NameWithCounter() << std::endl;
-            m_unsent.push_back(connMsg);
-        }
-#endif
+//--- Stewart
+//        if (m_ecom->Send(connMsg))
+//        {
+//            lllout << "Sent a new connection to dose_com: " << connection->NameWithCounter() << std::endl;
+//        }
+//        else
+//        {
+//            lllout << "Overflow when sending new connection to dose_com, adding to m_unsent: "
+//                   << connection->NameWithCounter() << std::endl;
+//            m_unsent.push_back(connMsg);
+//        }
+
     }
 
     void ConnectionHandler::HandleDisconnect(const ConnectionPtr& connection)

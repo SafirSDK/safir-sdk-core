@@ -29,16 +29,14 @@
 #include "Distribution.h"
 #include "dose_main_blocking_handler.h"
 #include "dose_main_communication.h"
-#include "dose_main_connection_handler.h"
+#include "ConnectionHandler.h"
 #include "dose_main_message_handler.h"
 #include "dose_main_node_handler.h"
 #include "dose_main_pending_registration_handler.h"
-#include "dose_main_persist_handler.h"
 #include "PoolHandler.h"
 #include "dose_main_process_info_handler.h"
 #include "dose_main_response_handler.h"
 #include "dose_main_request_handler.h"
-#include "dose_main_end_states_handler.h"
 #include "dose_main_lock_monitor.h"
 #include "dose_main_connection_killer.h"
 #include <Safir/Dob/Connection.h>
@@ -141,15 +139,12 @@ namespace Internal
 
         TimerHandler m_timerHandler;
 
-        EndStatesHandler m_endStates;
-
         BlockingHandlers    m_blockingHandler;
 
         std::unique_ptr<MessageHandler>      m_messageHandler;
         std::unique_ptr<RequestHandler>      m_requestHandler;
         std::unique_ptr<ResponseHandler>     m_responseHandler;
         std::unique_ptr<PoolHandler>         m_poolHandler;
-        std::unique_ptr<PersistHandler>      m_persistHandler;
         std::unique_ptr<ConnectionHandler>   m_connectionHandler;
 
         //Pending Registrations

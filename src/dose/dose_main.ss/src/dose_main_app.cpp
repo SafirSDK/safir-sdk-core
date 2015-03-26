@@ -43,8 +43,6 @@
 #include <boost/bind.hpp>
 #include <iostream>
 
-
-
 namespace Safir
 {
 namespace Dob
@@ -113,7 +111,6 @@ namespace Internal
 
         m_signalSet(m_strand.get_io_service()),
         m_timerHandler(m_strand),
-        m_endStates(m_timerHandler),
         m_pendingRegistrationHandler(m_timerHandler),
         m_processMonitor(m_strand.get_io_service(),ProcessExited,boost::chrono::seconds(1)),
         m_HandleEvents_notified(0),
@@ -210,8 +207,6 @@ namespace Internal
                                               nodeTypeId,
                                               dataAddress));
 
-        m_poolHandler.reset(new PoolHandler(m_strand, *m_distribution, [this](int64_t tid){m_pendingRegistrationHandler.CheckForPending(tid);}));
-
         // Collect all node type ids
         NodeTypeIds nodeTypeIds;
         for (const auto& nt: m_distribution->GetNodeTypeConfiguration().nodeTypesParam)
@@ -231,23 +226,19 @@ namespace Internal
                                                   *m_responseHandler,
                                                   m_distribution->GetCommunication()));
 
-        m_persistHandler.reset(new PersistHandler(m_strand.get_io_service(),
-                                                  m_distribution->GetCommunication(),
-                                                  m_timerHandler));
+        m_poolHandler.reset(new PoolHandler(m_strand.get_io_service(),
+                                            *m_distribution,
+                                            [this](int64_t tid){m_pendingRegistrationHandler.CheckForPending(tid);}));
 
         m_connectionHandler.reset(new ConnectionHandler(m_strand.get_io_service(),
                                                         m_distribution->GetCommunication(),
                                                         *m_requestHandler,
-                                                        m_pendingRegistrationHandler,
-                                                        *m_persistHandler));
+                                                        m_pendingRegistrationHandler));
 
-        m_persistHandler->Start();
-        m_connectionHandler->Start();
+        //setup pdComplete sub
 
         m_connectionThread = boost::thread([this]() {ConnectionThread();});
 
-        //stewart TODO This is a temporary call just to be able to test dose_main.
-        m_persistHandler->SetPersistentDataReady();
 
 #ifndef NDEBUG
         std::wcout<<"dose_main running (debug)..." << std::endl;
@@ -280,7 +271,12 @@ namespace Internal
             // Own node has been included in the system state, now its time to start
             // the distribution mechanism.
             m_distribution->Start();
-            m_poolHandler->Start([]{});  //Dummy implementation
+            m_poolHandler->Start([this]
+            {
+                //OnPdComplete: Probably more things to do here
+                std::wcout<<"PD complete"<<std::endl;
+                m_connectionHandler->OnPoolDistributionComplete();
+            });
         }
         else
         {
@@ -330,7 +326,6 @@ namespace Internal
         }
 
         m_poolHandler->Stop();
-        m_persistHandler->Stop();
         m_ownConnection.Close();
 
         m_signalSet.cancel();

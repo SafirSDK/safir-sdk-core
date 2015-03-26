@@ -53,7 +53,6 @@ BOOST_AUTO_TEST_CASE( first_test )
 {
     boost::asio::io_service io;
     auto work=boost::make_shared<boost::asio::io_service::work>(io);
-    boost::asio::io_service::strand strand(io);
 
     boost::thread_group threads;
     for (int i = 0; i < 2; ++i)
@@ -61,20 +60,22 @@ BOOST_AUTO_TEST_CASE( first_test )
         threads.create_thread([&]{io.run();});
     }
 
-    std::unordered_map<int64_t, int64_t> nodes; //nodeId, nodeType
-    nodes.insert({1, 1});
-    nodes.insert({2, 1});
-    nodes.insert({3, 1});
+    Communication com;
+    PoolDistributionRequestor<Communication> pdr(io, com);
+
+    pdr.RequestPoolFrom(1, 1);
+    pdr.RequestPoolFrom(2, 1);
+    pdr.RequestPoolFrom(3, 1);
 
     bool pdComplete=false;
-    Communication com;
-    PoolDistributionRequestor<Communication> pdr(strand, com, nodes, [&]{pdComplete=true;});
+    pdr.Start([&]{pdComplete=true;});
 
-    strand.post([&]
+    pdr.ReceivedPoolDistributionCompleteFrom(1);
+    pdr.ReceivedPoolDistributionCompleteFrom(2);
+    pdr.ReceivedPoolDistributionCompleteFrom(3);
+
+    pdr.m_strand.post([&]
     {
-        pdr.ReceivedPoolDistributionCompleteFrom(1);
-        pdr.ReceivedPoolDistributionCompleteFrom(2);
-        pdr.ReceivedPoolDistributionCompleteFrom(3);
         BOOST_CHECK(com.requests.find(1)!=com.requests.end());
         BOOST_CHECK(com.requests.find(2)!=com.requests.end());
         BOOST_CHECK(com.requests.find(3)!=com.requests.end());

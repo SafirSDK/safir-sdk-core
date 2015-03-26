@@ -23,9 +23,7 @@
 *
 ******************************************************************************/
 
-#include "dose_main_persist_handler.h"
-
-#include "dose_main_defs.h"
+#include "PersistHandler.h"
 #include "dose_main_communication.h"
 #include <Safir/Dob/PersistenceParameters.h>
 #include <Safir/Dob/PersistentDataReady.h>
@@ -49,19 +47,18 @@ namespace Internal
 {
 
     PersistHandler::PersistHandler(boost::asio::io_service& ioService,
-                                   Com::Communication& communication,
-                                   TimerHandler& timerHandler)
+                                   Com::Communication& communication)
         : m_strand(ioService),
           m_communication(communication),
-          m_timerHandler(timerHandler),
           m_persistDataReady(false)
-        {
-            m_timerId = m_timerHandler.RegisterTimeoutHandler(L"End States Timer", *this);
-        }
+    {
+        //stewart: replace with steady_timer
+        //m_timerId = m_timerHandler.RegisterTimeoutHandler(L"End States Timer", *this);
+    }
 
     void PersistHandler::Start()
     {
-        m_strand.dispatch([this] ()
+        m_strand.post([this] ()
         {
             if(Dob::PersistenceParameters::TestMode())
             {
@@ -101,7 +98,7 @@ namespace Internal
 
     void PersistHandler::Stop()
     {
-         m_strand.dispatch([this] ()
+         m_strand.post([this] ()
          {
              m_connection.Close();
          });
@@ -112,6 +109,10 @@ namespace Internal
         m_strand.dispatch([this, cb] ()
         {
             m_callbacks.push_back(cb);
+            if (m_persistDataReady) //if starting subscription after persistensReady make callback immediately
+            {
+                cb();
+            }
         });
     }
 
@@ -119,6 +120,11 @@ namespace Internal
     {
         m_strand.dispatch([this] ()
         {
+            if (m_persistDataReady)
+            {
+                return; //persist data was already ready
+            }
+
             lllog(1) << "dose_main persistence data is ready!" << std::endl;
             std::wcout << "dose_main persistence data is ready!" << std::endl;
             ENSURE(!Dob::PersistenceParameters::TestMode(),
@@ -193,11 +199,11 @@ namespace Internal
         //                                       Typesystem::HandlerId());
     }
 
-    void PersistHandler::HandleTimeout(const TimerInfoPtr & /*timer*/)
-    {
-        lllout << "Timeout! Calling RequestPersistenceInfo."  <<std::endl;
-        RequestPersistenceInfo();
-    }
+//    void PersistHandler::HandleTimeout(const TimerInfoPtr & /*timer*/)
+//    {
+//        lllout << "Timeout! Calling RequestPersistenceInfo."  <<std::endl;
+//        RequestPersistenceInfo();
+//    }
         void PersistHandler::RequestPersistenceInfo()
         {
 #if 0 //stewart

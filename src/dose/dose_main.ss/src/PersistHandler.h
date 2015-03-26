@@ -27,7 +27,6 @@
 #include <Safir/Dob/Internal/InternalFwd.h>
 #include <Safir/Dob/Internal/Communication.h>
 #include <Safir/Dob/Connection.h>
-#include "dose_main_timers.h"
 #include <boost/noncopyable.hpp>
 #include <set>
 
@@ -53,16 +52,13 @@ namespace Internal
     class PersistHandler:
         public Safir::Dob::Dispatcher,
         public Safir::Dob::ServiceHandler,
-        public TimeoutHandler,
         private boost::noncopyable
     {
     public:
 
         using PersistenDataReadyCallback = std::function<void()>;
 
-        explicit PersistHandler(boost::asio::io_service& ioService,
-                                Com::Communication& communication,
-                                TimerHandler& timerHandler);
+        PersistHandler(boost::asio::io_service& ioService, Com::Communication& communication);
 
         void Start();
         void Stop();
@@ -83,16 +79,14 @@ namespace Internal
                               Safir::Dob::ResponseSenderPtr   responseSender) override;
 
 
-        void HandleTimeout(const TimerInfoPtr & timer) override;
+        //void HandleTimeout(const TimerInfoPtr & timer) override;
 
         void RequestPersistenceInfo();
 
         boost::asio::io_service::strand         m_strand;
         Com::Communication&                     m_communication;
-        TimerHandler&                           m_timerHandler;
         Safir::Dob::Connection                  m_connection;
         std::set<Safir::Dob::Typesystem::Int32> m_waitingForResponsesFromNodes;
-        TimerId                                 m_timerId;
         std::atomic<bool>                       m_persistDataReady;
         std::vector<PersistenDataReadyCallback> m_callbacks;
     };
