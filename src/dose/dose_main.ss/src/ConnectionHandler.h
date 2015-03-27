@@ -1,9 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 * Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
-* Created by: Lars Hagström / stlrha
+* Created by: Joel Ottosson / joel.ottosson@consoden.se
 *
 *******************************************************************************
 *
@@ -26,6 +25,7 @@
 
 #include <queue>
 #include <unordered_set>
+#include <unordered_map>
 #include <boost/noncopyable.hpp>
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -68,18 +68,20 @@ namespace Internal
 
         void HandleConnect(const ConnectionPtr & connection);
         void HandleDisconnect(const ConnectionPtr & connection);
-        bool HandleUnsent();
 
     private:
         boost::asio::io_service::strand m_strand;
         Com::Communication&             m_communication;
-        const std::unordered_set<int64_t> m_nodeTypeIds;
         RequestHandler&                 m_requestHandler;
         PendingRegistrationHandler&     m_pendingRegistrationHandler;
 
-        std::queue< std::pair< boost::shared_ptr<const char[]>, size_t> > m_unsent; //vector of pair<data, size>
+        using SendQueue=std::queue< std::pair< boost::shared_ptr<const char[]>, size_t> >;//vector of pair<data, size>
+        std::unordered_map<int64_t, SendQueue> m_sendQueues; //<nodeType, SendQueue>
 
         bool m_poolDistributionComplete = false;
+
+        void SendAll(const std::pair<boost::shared_ptr<const char[]>, size_t>& data);
+        void HandleSendQueues();
 
         static inline std::pair<boost::shared_ptr<const char[]>, size_t> ConnectDataPtr(const Safir::Dob::Internal::ConnectionId& id,
                                                                                         const char* nameWithoutCounter,

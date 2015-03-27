@@ -1,9 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
 * Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
-* Created by: Lars Hagström / stlrha
+* Created by: Joel Ottosson / joel.ottosson@consoden.se
 *
 *******************************************************************************
 *
@@ -42,7 +41,6 @@ namespace Internal
 namespace
 {
     static const int64_t ConnectionMessageDataTypeId=4477521173098643793; //DoseMain.ConnectionMessage
-    //static const int64_t DisconnectMessageDataTypeId=6521684402056985821; //DoseMain.DisconnectMessage
 }
 
     ConnectionHandler::ConnectionHandler(boost::asio::io_service& ioService,
@@ -52,10 +50,30 @@ namespace
                                          PendingRegistrationHandler& prh)
         : m_strand(ioService),
           m_communication(communication),
-          m_nodeTypeIds(nodeTypeIds),
           m_requestHandler(requesthandler),
           m_pendingRegistrationHandler(prh)
     {
+        for (auto nt : nodeTypeIds)
+        {
+            m_sendQueues.insert(std::make_pair(nt, SendQueue()));
+            m_communication.SetQueueNotFullCallback([=](int64_t){HandleSendQueues();}, nt);
+        }
+
+        m_communication.SetDataReceiver([=](int64_t fromNodeId, int64_t fromNodeType, const char *data, size_t size)
+        {
+            const DistributionData state=DistributionData::ConstConstructor(new_data_tag, data);
+            DistributionData::DropReference(data);
+            if (state.GetType()==DistributionData::Action_Connect)
+            {
+                Connections::Instance().AddConnection(state.GetConnectionName(), state.GetCounter(), state.GetSenderId().m_contextId, state.GetSenderId());
+            }
+            else if (state.GetType()==DistributionData::Action_Disconnect)
+            {
+                const ConnectionPtr connection = Connections::Instance().GetConnection(state.GetSenderId(), std::nothrow);
+                m_requestHandler.HandleDisconnect(connection); //Handle outstanding requests towards the disconnected app ...
+                Connections::Instance().RemoveConnection(connection);
+            }
+        }, ConnectionMessageDataTypeId, [=](size_t s){return DistributionData::NewData(s);});
     }
 
     void ConnectionHandler::OnPoolDistributionComplete()
@@ -68,138 +86,59 @@ namespace
         Connections::Instance().AllowConnect(0);
     }
 
-    void ConnectionHandler::HandleConnect(const ConnectionPtr& connection)
+    void ConnectionHandler::HandleConnect(const ConnectionPtr& con)
     {
-        auto connMsg=ConnectDataPtr(connection->Id(),
-                                    connection->NameWithoutCounter(),
-                                    connection->Counter());
-        m_unsent.push(connMsg);
-        HandleUnsent();
+        SendAll(ConnectDataPtr(con->Id(), con->NameWithoutCounter(), con->Counter()));
     }
 
-    void ConnectionHandler::HandleDisconnect(const ConnectionPtr& connection)
+    void ConnectionHandler::HandleDisconnect(const ConnectionPtr& con)
     {
         //remove pending registrations
-        m_pendingRegistrationHandler.RemovePendingRegistrations(connection->Id());
+        m_pendingRegistrationHandler.RemovePendingRegistrations(con->Id());
 
         // Handle outstanding requests towards the disconnected app ...
-        m_requestHandler.HandleDisconnect(connection);
+        m_requestHandler.HandleDisconnect(con);
 
         //Distribute the disconnection to dose_com if Connection resides on this node
-        if (connection->Id().m_node==m_communication.Id())
+        if (con->Id().m_node==m_communication.Id())
         {
-            if (std::string(connection->NameWithoutCounter()).find(";dose_main;") != std::string::npos)
+            if (std::string(con->NameWithoutCounter()).find(";dose_main;") != std::string::npos)
             {
                 return;
             }
 
-            auto disconnMsg=DisconnectDataPtr(connection->Id());
-            m_unsent.push(disconnMsg);
-            HandleUnsent();
+            SendAll(DisconnectDataPtr(con->Id()));
         }
     }
 
-
-    bool ConnectionHandler::HandleUnsent()
+    void ConnectionHandler::SendAll(const std::pair<boost::shared_ptr<const char[]>, size_t>& data)
     {
-        while (!m_unsent.empty())
+        for (auto& vt : m_sendQueues)
         {
-            const auto& msg=m_unsent.front();
+            vt.second.push(data);
+        }
+        HandleSendQueues();
+    }
 
-            for (auto nt : m_nodeTypeIds)
+    void ConnectionHandler::HandleSendQueues()
+    {
+        for (auto& ntQ : m_sendQueues) //ntQ = pair<nodeType, SendQueue>
+        {
+            while (!ntQ.second.empty())
             {
-                if (m_communication.Send(0, nt, msg.first, msg.second, ConnectionMessageDataTypeId, true))
+                const auto& msg=ntQ.second.front();
+
+                if (m_communication.Send(0, ntQ.first, msg.first, msg.second, ConnectionMessageDataTypeId, true))
                 {
-                    m_unsent.pop();
+                    ntQ.second.pop();
                 }
                 else
                 {
-                    return false;
+                    break;
                 }
             }
         }
-
-        return true;
     }
-
-#if 0 //stewart
-    //-----------------------
-    //From dose_com
-    //-----------------------
-    void ConnectionHandler::HandleConnectFromDoseCom(const DistributionData & connectMsg)
-    {
-        const std::string name = connectMsg.GetConnectionName();
-        const ConnectionId id = connectMsg.GetSenderId();
-
-        ENSURE(id.m_contextId >= 0 && id.m_contextId < NodeParameters::NumberOfContexts(),
-               << "Received a connect with context " << id.m_contextId << " but this node is configured for "
-               << NodeParameters::NumberOfContexts() << " contexts.");
-
-        lllout << "Got a Connect message from DoseCom: '" << name.c_str() << "' " << id << std::endl;
-
-        //we don't know the context of remote connections, so we give a strange context number...
-        Connections::Instance().AddConnection(name,connectMsg.GetCounter(), id.m_contextId, id);
-
-        lllout << "New connection from dose_com added successfully" << std::endl;
-    }
-
-    void ConnectionHandler::HandleDisconnectFromDoseCom(const DistributionData & disconnectMsg)
-    {
-        const ConnectionId id = disconnectMsg.GetSenderId();
-
-        const ConnectionPtr connection = Connections::Instance().GetConnection(id, std::nothrow);
-        if (connection == NULL)
-        {
-            SEND_SYSTEM_LOG(Error,
-                            << "Got a Disconnect from dosecom for a connection that I dont have! id = " << id);
-            return;
-        }
-
-        // Handle outstanding requests towards the disconnected app ...
-        m_requestHandler->HandleDisconnect(connection);
-
-        // ... before removing the Connection object
-        Connections::Instance().RemoveConnection(connection);
-    }
-
-
-
-    void ConnectionHandler::MaybeSignalConnectSemaphore()
-    {
-        lllout << "MaybeSignalConnectSemaphore: " << std::endl;
-
-        if (m_connectSemHasBeenSignalled)
-        {
-            lllout << "  Connect Semaphore has already been signalled" << std::endl;
-            return;
-        }
-
-        const NodeStatuses::Status nodeStatuses = NodeStatuses::Instance().GetNodeStatuses();
-
-        if (std::find(nodeStatuses.begin(), nodeStatuses.end(), NodeStatus::Starting) != nodeStatuses.end())
-        {
-            lllout << "  Can't let apps connect, Node "
-                         << static_cast<int>(std::distance(nodeStatuses.begin(),
-                                                           std::find(nodeStatuses.begin(), nodeStatuses.end(), NodeStatus::Starting)))
-                         << " (and maybe others) are still Starting" << std::endl;
-            return;
-        }
-
-        if (m_persistHandler->IsPersistentDataReady())
-        {
-            lllout << "  We have received persistence data (either from DOPE or other node), ok to let apps connect!" << std::endl;
-            Connections::Instance().AllowConnect(-1);
-            Connections::Instance().AllowConnect(0);
-            m_connectSemHasBeenSignalled = true;
-        }
-        else
-        {
-            lllout << "  No persistence data, so can't let apps connect" << std::endl;
-        }
-
-    }
-#endif
-
 }
 }
 }

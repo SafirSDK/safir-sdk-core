@@ -114,8 +114,6 @@ namespace Internal
 
         void HandleConnectionOutEvent(const ConnectionPtr & connection, std::vector<ConnectionPtr>& deadConnections);
 
-        void QueueNotFull();
-
         void HandleIncomingData(const DistributionData & data, const bool isAckedData);
 
         void HandleAppEventHelper(const ConnectionPtr & connecction, int & recursionLevel);

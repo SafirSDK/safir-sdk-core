@@ -774,18 +774,6 @@ namespace Internal
 #endif
     }
 
-    void DoseApp::QueueNotFull()
-    {
-        lllout << "DoseApp::QueueNotFull: Calling HandleUnsent()" << std::endl;
-        m_connectionHandler->HandleUnsent();
-
-#if 0 //stewart
-        lllout << "DoseApp::QueueNotFull: Calling HandleWaitingConnections(...)" << std::endl;
-        int recLevel=0;
-        HandleWaitingConnections(ExternNodeCommunication::DoseComVirtualConnectionId, recLevel);
-#endif
-    }
-
     class MemoryMonitor:
         public SharedMemoryObject,
         private boost::noncopyable
