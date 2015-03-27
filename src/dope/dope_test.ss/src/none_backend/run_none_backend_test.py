@@ -34,6 +34,7 @@ def log(data):
 
 parser = argparse.ArgumentParser("test script")
 parser.add_argument("--safir-show-config", required=True)
+parser.add_argument("--safir-control", required=True)
 parser.add_argument("--dose-main", required=True)
 parser.add_argument("--dope-main", required=True)
 parser.add_argument("--entity-owner", required=True)
@@ -58,7 +59,10 @@ log("NUM_SMALL = " + str(NUM_SMALL) + " and NUM_BIG = " + str(NUM_BIG))
 """
 
 log("Set a bunch of entities")
-env = TestEnv(arguments.dose_main, arguments.dope_main, arguments.safir_show_config)
+env = TestEnv(arguments.safir_control,
+              arguments.dose_main,
+              arguments.dope_main,
+              arguments.safir_show_config)
 with TestEnvStopper(env):
     env.launchProcess("entity_owner", (arguments.entity_owner,"set")).wait()
     env.WaitForOutput("entity_owner", "Exiting")
@@ -74,7 +78,10 @@ if len(syslog_output) != 0:
 
 
 log("See if dope loads them at startup")
-env = TestEnv(arguments.dose_main, arguments.dope_main, arguments.safir_show_config)
+env = TestEnv(arguments.safir_control,
+              arguments.dose_main,
+              arguments.dope_main,
+              arguments.safir_show_config)
 with TestEnvStopper(env):
     env.launchProcess("entity_owner", (arguments.entity_owner,"accept")).wait()
 
