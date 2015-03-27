@@ -100,7 +100,7 @@ namespace Internal
           m_originalInjectionState(no_state_tag),
           m_consumerReferences()
     {
-
+        InitializeDoseInternalFromApp();
     }
 
     void Controller::SetInstanceId(long id)
@@ -247,8 +247,6 @@ namespace Internal
             {
                 m_isConnected = true;
                 m_connection = connection;
-
-                InitializeDoseInternalFromApp();
             }
             break;
         case TooManyProcesses:
