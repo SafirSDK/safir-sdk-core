@@ -100,7 +100,6 @@ namespace Internal
           m_originalInjectionState(no_state_tag),
           m_consumerReferences()
     {
-        InitializeDoseInternalFromApp();
     }
 
     void Controller::SetInstanceId(long id)
@@ -238,6 +237,8 @@ namespace Internal
 
         ConnectResult result;
         ConnectionPtr connection;
+
+        InitializeDoseInternalFromApp();
 
         Connections::Instance().Connect(m_connectionName, m_contextId, minusOneConnection, result, connection);
 
