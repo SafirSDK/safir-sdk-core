@@ -22,10 +22,6 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-
-#include "ConnectionHandler.h"
-#include "PendingRegistrationHandler.h"
-#include "dose_main_request_handler.h"
 #include <Safir/Dob/Internal/Communication.h>
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Dob/ThisNodeParameters.h>
@@ -33,7 +29,9 @@
 #include <Safir/Dob/Internal/NodeStatuses.h>
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
-
+#include "ConnectionHandler.h"
+#include "PendingRegistrationHandler.h"
+#include "dose_main_request_handler.h"
 
 namespace Safir
 {
@@ -43,19 +41,18 @@ namespace Internal
 {
 namespace
 {
-    boost::shared_ptr<const char[]> ToPtr(const DistributionData& d)
-    {
-        boost::shared_ptr<const char[]> p(d.GetReference(), [=](const char* ptr){DistributionData::DropReference(ptr);});
-        return p;
-    }
+    static const int64_t ConnectionMessageDataTypeId=4477521173098643793; //DoseMain.ConnectionMessage
+    //static const int64_t DisconnectMessageDataTypeId=6521684402056985821; //DoseMain.DisconnectMessage
 }
 
     ConnectionHandler::ConnectionHandler(boost::asio::io_service& ioService,
                                          Com::Communication& communication,
+                                         const std::unordered_set<int64_t>& nodeTypeIds,
                                          RequestHandler& requesthandler,
                                          PendingRegistrationHandler& prh)
         : m_strand(ioService),
           m_communication(communication),
+          m_nodeTypeIds(nodeTypeIds),
           m_requestHandler(requesthandler),
           m_pendingRegistrationHandler(prh)
     {
@@ -73,31 +70,11 @@ namespace
 
     void ConnectionHandler::HandleConnect(const ConnectionPtr& connection)
     {
-        DistributionData connMsg(connect_message_tag,
-                                 connection->Id(),
-                                 connection->NameWithoutCounter(),
-                                 connection->Counter());
-
-        
-        if (!HandleUnsent())
-        {
-            // There are unsent connect/disconnect messages, can't continue.
-            m_unsent.push_back(connMsg);
-            return;
-        }
-
-//--- Stewart
-//        if (m_ecom->Send(connMsg))
-//        {
-//            lllout << "Sent a new connection to dose_com: " << connection->NameWithCounter() << std::endl;
-//        }
-//        else
-//        {
-//            lllout << "Overflow when sending new connection to dose_com, adding to m_unsent: "
-//                   << connection->NameWithCounter() << std::endl;
-//            m_unsent.push_back(connMsg);
-//        }
-
+        auto connMsg=ConnectDataPtr(connection->Id(),
+                                    connection->NameWithoutCounter(),
+                                    connection->Counter());
+        m_unsent.push(connMsg);
+        HandleUnsent();
     }
 
     void ConnectionHandler::HandleDisconnect(const ConnectionPtr& connection)
@@ -108,50 +85,40 @@ namespace
         // Handle outstanding requests towards the disconnected app ...
         m_requestHandler.HandleDisconnect(connection);
 
-#if 0 //stewart
         //Distribute the disconnection to dose_com if Connection resides on this node
-        if (connection->Id().m_node == Dob::ThisNodeParameters::NodeNumber())
+        if (connection->Id().m_node==m_communication.Id())
         {
             if (std::string(connection->NameWithoutCounter()).find(";dose_main;") != std::string::npos)
             {
                 return;
             }
 
-            DistributionData msg(disconnect_message_tag, connection->Id());
-
-            if (!HandleUnsent())
-            {
-                // There are unsent connect/disconnect messages, can't continue.
-                m_unsent.push_back(msg);
-                return;
-            }
-
-
-            if (!m_ecom->Send(msg))
-            {
-                m_unsent.push_back(msg);
-            }
-
+            auto disconnMsg=DisconnectDataPtr(connection->Id());
+            m_unsent.push(disconnMsg);
+            HandleUnsent();
         }
-#endif
     }
 
 
     bool ConnectionHandler::HandleUnsent()
     {
-#if 0 //stewart
         while (!m_unsent.empty())
         {
-            if (m_ecom->Send(m_unsent.front()))
+            const auto& msg=m_unsent.front();
+
+            for (auto nt : m_nodeTypeIds)
             {
-                m_unsent.pop_front();
-            }
-            else
-            {
-                return false;
+                if (m_communication.Send(0, nt, msg.first, msg.second, ConnectionMessageDataTypeId, true))
+                {
+                    m_unsent.pop();
+                }
+                else
+                {
+                    return false;
+                }
             }
         }
-#endif
+
         return true;
     }
 

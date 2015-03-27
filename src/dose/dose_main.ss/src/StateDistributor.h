@@ -41,14 +41,6 @@ namespace Dob
 {
 namespace Internal
 {
-namespace
-{
-    boost::shared_ptr<const char[]> ToPtr(const DistributionData& d)
-    {
-        boost::shared_ptr<const char[]> p(d.GetReference(), [=](const char* ptr){DistributionData::DropReference(ptr);});
-        return p;
-    }
-}
     static const int64_t RegistrationStateDataTypeId=6915466164769792349; //DoseMain.RegistrationState
     static const int64_t EntityStateDataTypeId=5802524208372516084; //DoseMain.EntityState
 
@@ -112,6 +104,12 @@ namespace
         std::function<void(int64_t)> m_checkPendingReg;
         std::vector<SubcriptionConnection> m_connections;
         std::atomic_bool m_dispatcherNotified;
+
+        static inline boost::shared_ptr<const char[]> ToPtr(const DistributionData& d)
+        {
+            boost::shared_ptr<const char[]> p(d.GetReference(), [=](const char* ptr){DistributionData::DropReference(ptr);});
+            return p;
+        }
 
         //dispatch states
         virtual void OnDoDispatch()

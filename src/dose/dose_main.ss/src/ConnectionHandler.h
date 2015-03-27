@@ -24,21 +24,20 @@
 ******************************************************************************/
 #pragma once
 
+#include <queue>
+#include <unordered_set>
 #include <boost/noncopyable.hpp>
-#include <Safir/Dob/Internal/InternalFwd.h>
-#include <Safir/Dob/Internal/DistributionData.h>
-#include <deque>
-
 #ifdef _MSC_VER
 #pragma warning (push)
 #pragma warning (disable: 4267)
 #endif
-
 #include <boost/asio.hpp>
-
 #ifdef _MSC_VER
 #pragma warning (pop)
 #endif
+
+#include <Safir/Dob/Internal/InternalFwd.h>
+#include <Safir/Dob/Internal/DistributionData.h>
 
 namespace Safir
 {
@@ -61,26 +60,42 @@ namespace Internal
     public:
         ConnectionHandler(boost::asio::io_service& ioService,
                           Com::Communication& communication,
+                          const std::unordered_set<int64_t>& nodeTypeIds,
                           RequestHandler& requesthandler,
                           PendingRegistrationHandler& prh);
 
-        void HandleConnect(const ConnectionPtr & connection);
-        void HandleDisconnect(const ConnectionPtr & connection);
-
-        bool HandleUnsent();
-
         void OnPoolDistributionComplete();
 
-    private:
+        void HandleConnect(const ConnectionPtr & connection);
+        void HandleDisconnect(const ConnectionPtr & connection);
+        bool HandleUnsent();
 
+    private:
         boost::asio::io_service::strand m_strand;
         Com::Communication&             m_communication;
+        const std::unordered_set<int64_t> m_nodeTypeIds;
         RequestHandler&                 m_requestHandler;
         PendingRegistrationHandler&     m_pendingRegistrationHandler;
 
-        std::deque<DistributionData> m_unsent;
+        std::queue< std::pair< boost::shared_ptr<const char[]>, size_t> > m_unsent; //vector of pair<data, size>
 
         bool m_poolDistributionComplete = false;
+
+        static inline std::pair<boost::shared_ptr<const char[]>, size_t> ConnectDataPtr(const Safir::Dob::Internal::ConnectionId& id,
+                                                                                        const char* nameWithoutCounter,
+                                                                                        Typesystem::Int32 counter)
+        {
+            DistributionData d(connect_message_tag, id, nameWithoutCounter, counter);
+            boost::shared_ptr<const char[]> p(d.GetReference(), [=](const char* ptr){DistributionData::DropReference(ptr);});
+            return std::make_pair(std::move(p), d.Size());
+        }
+
+        static inline std::pair<boost::shared_ptr<const char[]>, size_t> DisconnectDataPtr(const Safir::Dob::Internal::ConnectionId& id)
+        {
+            DistributionData d(disconnect_message_tag, id);
+            boost::shared_ptr<const char[]> p(d.GetReference(), [=](const char* ptr){DistributionData::DropReference(ptr);});
+            return std::make_pair(std::move(p), d.Size());
+        }
     };
 }
 }

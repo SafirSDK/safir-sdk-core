@@ -222,6 +222,7 @@ namespace Internal
 
         m_connectionHandler.reset(new ConnectionHandler(m_strand.get_io_service(),
                                                         m_distribution->GetCommunication(),
+                                                        nodeTypeIds,
                                                         *m_requestHandler,
                                                         *m_pendingRegistrationHandler));
 
@@ -413,6 +414,8 @@ namespace Internal
             ++numEvents;
             Connections::Instance().HandleConnect(*this);
         }
+
+
 
 #if 0 //stewart TODO If there are handlers that need to be notified of node status changes this should be
       //             done with a subscription mechanism provided by the NodeStatus class.
