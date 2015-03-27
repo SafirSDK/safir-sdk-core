@@ -61,6 +61,7 @@ def rmdir(directory):
 
 parser = argparse.ArgumentParser("test script")
 parser.add_argument("--safir-show-config", required=True)
+parser.add_argument("--safir-control", required=True)
 parser.add_argument("--dose-main", required=True)
 parser.add_argument("--dope-main", required=True)
 parser.add_argument("--entity-owner", required=True)
@@ -93,7 +94,10 @@ NUM_BIG = int(re.search(r"NUM_BIG = ([0-9]+)",num_str).group(1))
 log("NUM_SMALL = " + str(NUM_SMALL) + " and NUM_BIG = " + str(NUM_BIG))
 
 log("Set a bunch of entities")
-env = TestEnv(arguments.dose_main, arguments.dope_main, arguments.safir_show_config)
+env = TestEnv(arguments.safir_control,
+              arguments.dose_main,
+              arguments.dope_main,
+              arguments.safir_show_config)
 with TestEnvStopper(env):
     env.launchProcess("entity_owner", (arguments.entity_owner,"set")).wait()
     while(len(glob.glob(os.path.join(file_storage_path,"DopeTest.*.bin"))) != NUM_SMALL + NUM_BIG):
@@ -113,7 +117,10 @@ if len(syslog_output) != 0:
     sys.exit(1)
 
 log("See if dope loads them at startup")
-env = TestEnv(arguments.dose_main, arguments.dope_main, arguments.safir_show_config)
+env = TestEnv(arguments.safir_control,
+              arguments.dose_main,
+              arguments.dope_main,
+              arguments.safir_show_config)
 with TestEnvStopper(env):
     env.launchProcess("entity_owner", (arguments.entity_owner,"accept")).wait()
 
@@ -158,7 +165,10 @@ for f in glob.glob(os.path.join(file_storage_path,"DopeTest.*.bin")):
 
 log("Check that dope can load xml")
 
-env = TestEnv(arguments.dose_main, arguments.dope_main, arguments.safir_show_config)
+env = TestEnv(arguments.safir_control,
+              arguments.dose_main,
+              arguments.dope_main,
+              arguments.safir_show_config)
 with TestEnvStopper(env):
     env.launchProcess("entity_owner", (arguments.entity_owner,"accept")).wait()
 
@@ -194,7 +204,10 @@ if len(glob.glob(os.path.join(file_storage_path,"DopeTest.*.xml"))) != 0:
 
 log("update the entities")
 
-env = TestEnv(arguments.dose_main, arguments.dope_main, arguments.safir_show_config)
+env = TestEnv(arguments.safir_control,
+              arguments.dose_main,
+              arguments.dope_main,
+              arguments.safir_show_config)
 with TestEnvStopper(env):
     #remove all bin files (that have been loaded by dope by now), so
     #that we can wait for all entities to be written again
@@ -216,7 +229,10 @@ if len(syslog_output) != 0:
     sys.exit(1)
 
 log("Load them again and check output")
-env = TestEnv(arguments.dose_main, arguments.dope_main, arguments.safir_show_config)
+env = TestEnv(arguments.safir_control,
+              arguments.dose_main,
+              arguments.dope_main,
+              arguments.safir_show_config)
 with TestEnvStopper(env):
     env.launchProcess("entity_owner", (arguments.entity_owner,"accept")).wait()
 
