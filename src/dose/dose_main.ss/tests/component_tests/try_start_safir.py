@@ -83,18 +83,23 @@ if len(res) != 0:
     log("More than four lines output! Trailing data is\n'"+res + "'")
     sys.exit(1)
 
-if not lines[0].endswith("dose_main running (release)...") and not lines[0].endswith("dose_main running (debug)..."):
-    log("Failed to find string ending in 'dose_main running (release)...' or 'dose_main running (debug)...'")
+running_str = "dose_main running ("
+waiting_str = "dose_main is waiting for persistence data!"
+ready_str = "dose_main persistence data is ready!"
+exiting_str = "Exiting..."
+
+if running_str not in lines[0] and running_str not in lines[1]:
+    log("Failed to find string '" + running_str + "'")
     sys.exit(1)
-if not lines[1].endswith("dose_main is waiting for persistence data!"):
-    log("Failed to find string ending in 'dose_main is waiting for persistence data!'")
+if waiting_str not in lines[0] and waiting_str not in lines[1]:
+    log("Failed to find string '" + waiting_str + "'")
     sys.exit(1)
 #TODO stewart: remove this line since dope is not started by this test
-if not lines[2].endswith("dose_main persistence data is ready!"):
-    log("Failed to find string ending in 'dose_main persistence data is ready!'")
+if ready_str not in lines[2]:
+    log("Failed to find string '" + ready_str + "'")
     sys.exit(1)
-if not lines[3].endswith("Exiting..."):
-    log("Failed to find string ending in 'Exiting...'")
+if exiting_str not in lines[3]:
+    log("Failed to find string '" + exiting_str + "'")
     sys.exit(1)
 
 log("success")
