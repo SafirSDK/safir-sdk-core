@@ -1,7 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2005-2013 (http://safir.sourceforge.net)
-* 
+*
 * Created by: Joel Ottosson / stjoot
 *
 *******************************************************************************
@@ -185,7 +185,7 @@ namespace Sate
             viewDouFileMenuItem = new MenuItem("View dou-file...");
 
             openMenuItem.Click += new EventHandler(openMenuItem_Click);
-            
+
             registerMenuItem.Click += new EventHandler(registerMenuItem_Click);
             registerOptionsMenuItem.Click += new EventHandler(registerOptionsMenuItem_Click);
             unregisterMenuItem.Click += new EventHandler(unregisterMenuItem_Click);
@@ -197,7 +197,7 @@ namespace Sate
             subscribeRegistrationMenuItem.Click += new EventHandler(subscribeRegistrationMenuItem_Click);
             subscribeRegistrationOptionsMenuItem.Click += new EventHandler(subscribeRegistrationOptionsMenuItem_Click);
             unsubscribeRegistrationMenuItem.Click += new EventHandler(unsubscribeRegistrationMenuItem_Click);
-            
+
             deleteRequestMenuItem.Click += new EventHandler(deleteRequestMenuItem_Click);
 
             iterateClassMenuItem.Click += new EventHandler(iterateClassMenuItem_Click);
@@ -233,7 +233,7 @@ namespace Sate
             this.treeViewClassHierarchy.Location = new System.Drawing.Point(0, 40);
             this.treeViewClassHierarchy.Dock = System.Windows.Forms.DockStyle.Fill;
             this.treeViewClassHierarchy.ImageList = this.imageList;
-            
+
             this.treeViewClassHierarchy.DoubleClick += new EventHandler(treeViewClassHierarchy_DoubleClick);
             this.treeViewClassHierarchy.MouseDown += new System.Windows.Forms.MouseEventHandler(this.treeViewClassHierarchy_MouseDown);
             this.treeViewClassHierarchy.ItemDrag += new ItemDragEventHandler(treeViewClassHierarchy_ItemDrag);
@@ -445,8 +445,8 @@ namespace Sate
         public void LoadClassHierarchy()
         {
             this.treeViewClassHierarchy.BeginUpdate();
-
             this.treeViewNsHierarchy.BeginUpdate();
+
             this.treeViewClassHierarchy.Nodes.Clear();
             this.treeViewNsHierarchy.Nodes.Clear();
 
@@ -459,12 +459,15 @@ namespace Sate
             nsTypeIdHt = new Hashtable();
             nsHt = new Hashtable();
             clTypeIdHt[GetTypeId(objType)] = objNode;
-            Type[] types = MainForm.Instance.DotsGenerated.GetTypes();
 
             InsertClassInNsHierarchy(objType, Safir.Dob.Typesystem.Object.ClassTypeId);
-            foreach (Type t in types)
+            foreach (Int64 tid in Safir.Dob.Typesystem.Operations.GetAllTypeIds())
             {
-                Type type = t;
+                if (!Safir.Dob.Typesystem.Operations.IsClass(tid))
+                {
+                    continue;
+                }
+                Type type = MainForm.Instance.GetType(tid);
                 if (type.IsSubclassOf(objType))
                 {
                     ClassNode node = null;
@@ -611,8 +614,7 @@ namespace Sate
                 }
                 else
                 {
-                    string name = Safir.Dob.Typesystem.Operations.GetName(n.TypeId);
-                    System.Type dobType = MainForm.Instance.DotsGenerated.GetType(name);
+                    System.Type dobType = MainForm.Instance.GetType(n.TypeId);
                     MessageInfo msgInfo = null;
                     ServiceHandlerInfo srvInfo = null;
                     EntityInfo entityInfo = null;
@@ -650,7 +652,7 @@ namespace Sate
                         objInfo.Obj = (Safir.Dob.Typesystem.Object)constr.Invoke(null);
                         MainForm.Instance.AddTabPage(new ObjectEditTabPage(objInfo));
                     }
-                  
+
                 }
             }
 
@@ -704,8 +706,7 @@ namespace Sate
                 }
                 else
                 {
-                    string name = Safir.Dob.Typesystem.Operations.GetName(n.TypeId);
-                    System.Type dobType = MainForm.Instance.DotsGenerated.GetType(name);
+                    System.Type dobType = MainForm.Instance.GetType(n.TypeId);
                     MessageInfo msgInfo = null;
                     ServiceHandlerInfo srvInfo = null;
                     EntityInfo entityInfo = null;
@@ -771,7 +772,7 @@ namespace Sate
                         {
                             SubInfo subInfo = new SubInfo(typeId, null, null, sf.DataUpdSub, sf.SubClassesSub, sf.RestartSub);
                             SubscribeEntity(subInfo);
-                           
+
                             if (sf.PermanentSub)
                             {
                                 //Subscriptions
@@ -841,7 +842,7 @@ namespace Sate
                     }
 
                 }
-            }          
+            }
         }
 
         private void subscribeMenuItem_Click(object sender, EventArgs e)
@@ -913,23 +914,23 @@ namespace Sate
             }
         }
 
-      
+
         private void subscribeRegistrationOptionsMenuItem_Click(object sender, EventArgs e)
         {
             System.Windows.Forms.TreeNode node = GetSelectedNode();
             Int64 typeId;
-        
+
             if (node is DobUnit)
             {
                 typeId = ((DobUnit)node).TypeId;
 
                 SubscribeRegistrationForm srf = new SubscribeRegistrationForm(typeId);
                 srf.InitSubForm();
-             
+
                 if ((Safir.Dob.Typesystem.Operations.IsOfType(typeId, Safir.Dob.Entity.ClassTypeId)) ||
                     (Safir.Dob.Typesystem.Operations.IsOfType(typeId, Safir.Dob.Service.ClassTypeId)))
                 {
-                  
+
                     if (srf.ShowDialog() == DialogResult.OK)
                     {
                         Safir.Dob.Typesystem.HandlerId handlerId;
@@ -967,16 +968,16 @@ namespace Sate
                             Settings.Save();
                         }
                     }
-                  
-                }
-                 
-            } 
-        }
-       
-    
 
-                    
-                    
+                }
+
+            }
+        }
+
+
+
+
+
 
         private void registerMenuItem_Click(object sender, EventArgs e)
         {
@@ -1104,12 +1105,12 @@ namespace Sate
                 }
             }
         }
-    
+
         public void RegisterService(RegInfo regInfo)
         {
             if (!MainForm.Instance.CheckConnection())
                 return;
-            
+
             Scenarios.Action rec = new Sate.Scenarios.Action(Scenarios.DobAction.Register, 0, regInfo);
             ScenarioTabPage.Instance.Player.Record(rec);
 
@@ -1149,7 +1150,7 @@ namespace Sate
 
         //--- Unregister ---
         public void Unregister(RegInfo regInfo)
-        {    
+        {
             if (!MainForm.Instance.CheckConnection())
                 return;
 
@@ -1273,7 +1274,7 @@ namespace Sate
             SubRegInfo subRegInfo = new SubRegInfo();
             subRegInfo.typeId = typeId;
             UnsubscribeRegistration(subRegInfo);
-            
+
         }
 
         private void deleteRequestMenuItem_Click(object sender, EventArgs e)
@@ -1385,10 +1386,10 @@ namespace Sate
         {
             if (!MainForm.Instance.CheckConnection())
                 return;
-            
+
             Scenarios.Action rec = new Sate.Scenarios.Action(Scenarios.DobAction.Subscribe, 0, subInfo);
             ScenarioTabPage.Instance.Player.Record(rec);
-            
+
             try
             {
                 MainForm.Instance.Dose.SubscribeMessage(subInfo.typeId, subInfo.channelIdSer.ChannelId(), subInfo.includeSubClasses, MainForm.Instance);
@@ -1470,7 +1471,7 @@ namespace Sate
         private void openMenuItem_Click(object sender, EventArgs e)
         {
             TreeNode node = GetSelectedNode();
-            
+
             if (node is ObjectNode)
             {
                 try
@@ -1500,8 +1501,7 @@ namespace Sate
                 }
                 else
                 {
-                    string name = Safir.Dob.Typesystem.Operations.GetName(n.TypeId);
-                    System.Type dobType = MainForm.Instance.DotsGenerated.GetType(name);
+                    System.Type dobType = MainForm.Instance.GetType(n.TypeId);
                     System.Reflection.ConstructorInfo constr = dobType.GetConstructor(System.Type.EmptyTypes);
                     objInfo.Obj = (Safir.Dob.Typesystem.Object)constr.Invoke(null);
                 }
@@ -1581,7 +1581,7 @@ namespace Sate
             ClassNode root = (ClassNode)clTypeIdHt[entityId.TypeId];
             foreach (TreeNode n in root.Nodes)
             {
-                if (n is ObjectNode) 
+                if (n is ObjectNode)
                 {
                     if (((ObjectNode)n).EntityId.InstanceId.CompareTo(entityId.InstanceId) == 0)
                     {
@@ -1849,7 +1849,7 @@ namespace Sate
         }
 
 
-     
+
         //--- Register ---
         public void RegisterEntity(RegInfo regInfo)
         {

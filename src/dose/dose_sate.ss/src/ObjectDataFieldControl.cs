@@ -1343,17 +1343,7 @@ namespace Sate
             Controls.Remove(objPanel[index]);
             ObjectInfo objInfo = new ObjectInfo();
 
-            if (newTypeId == Safir.Dob.Typesystem.Object.ClassTypeId)
-            {
-                objInfo.Obj = new Safir.Dob.Typesystem.Object();
-            }
-            else
-            {
-                string name = Safir.Dob.Typesystem.Operations.GetName(newTypeId);
-                System.Type dobType = MainForm.Instance.DotsGenerated.GetType(name);
-                System.Reflection.ConstructorInfo constr = dobType.GetConstructor(System.Type.EmptyTypes);
-                objInfo.Obj = (Safir.Dob.Typesystem.Object)constr.Invoke(null);
-            }
+            objInfo.Obj = Safir.Dob.Typesystem.ObjectFactory.Instance.CreateObject(newTypeId);
 
             fieldValueControl[index].Tag = objInfo;
             objPanel[index] = new ObjectEditPanel(objInfo, typeId, true);
@@ -1581,21 +1571,8 @@ namespace Sate
 
                 if (b.Tag == null)
                 {
-
-                    string name = Safir.Dob.Typesystem.Operations.GetName(typeId);
-                    if (name == "Object")
-                    {
-                        b.Tag = new ObjectInfo();
-                        ((ObjectInfo)b.Tag).Obj = new Safir.Dob.Typesystem.Object();
-                    }
-                    else
-                    {
-                        System.Type dobType = MainForm.Instance.DotsGenerated.GetType(name);
-                        System.Reflection.ConstructorInfo constr = dobType.GetConstructor(System.Type.EmptyTypes);
-                        b.Tag = new ObjectInfo();
-                        ((ObjectInfo)b.Tag).Obj = (Safir.Dob.Typesystem.Object)constr.Invoke(null);
-                    }
-
+                    b.Tag = new ObjectInfo();
+                    ((ObjectInfo)b.Tag).Obj = Safir.Dob.Typesystem.ObjectFactory.Instance.CreateObject(typeId);
                     objPanel[index] = new ObjectEditPanel((ObjectInfo)b.Tag, typeId, true);
                     objPanel[index].ParentObjectField = this;
                     objPanel[index].AutoScroll = false;
