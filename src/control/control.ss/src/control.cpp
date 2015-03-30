@@ -124,7 +124,7 @@ private:
 
 int main(int argc, char * argv[])
 {
-    lllog(3) << "CTRL: Started" << std::endl;
+    lllog(1) << "CTRL: Started" << std::endl;
 
     const ProgramOptions options(argc, argv);
 
@@ -138,93 +138,10 @@ int main(int argc, char * argv[])
 
     boost::asio::io_service ioService;
 
+    boost::asio::signal_set signalSet(ioService);
+
     // Make some work to stop io_service from exiting.
     auto work = Safir::make_unique<boost::asio::io_service::work>(ioService);
-
-#if defined(linux) || defined(__linux) || defined(__linux__)
-    boost::asio::signal_set sigchldSet(ioService, SIGCHLD);
-    sigchldSet.async_wait(
-        [](const boost::system::error_code& error, int signalNumber)
-        {
-            lllog(3) << "CTRL: Got signal " << signalNumber << " ... dose_main has stopped" << std::endl;
-            if (error)
-            {
-                SEND_SYSTEM_LOG(Error,
-                                << "Got a signals error: " << error);
-            }
-            // Wait for dose_main to exit before exit the control program.
-            int exitCode;
-            ::wait(&exitCode);
-
-            if (exitCode != 0)
-            {
-                SEND_SYSTEM_LOG(Critical, << "dose_main exited with return code " << exitCode);
-            }
-
-        }
-    );
-#endif
-
-    // Locate and start dose_main
-    namespace fs = boost::filesystem;
-
-    fs::path path(options.doseMainPath);
-
-    if (fs::exists(path))
-    {
-        if (fs::is_directory(path) || !fs::is_regular_file(path))
-        {
-            std::ostringstream os;
-            os << "CTRL: " << options.doseMainPath << " is a directory or a non regular file!" << std::endl;
-            SEND_SYSTEM_LOG(Error, << os.str().c_str());
-            throw std::logic_error(os.str().c_str());
-        }
-    }
-    else
-    {
-        std::ostringstream os;
-        os << "CTRL: Can't find " << options.doseMainPath << std::endl;
-        SEND_SYSTEM_LOG(Error, << os.str().c_str());
-        throw std::logic_error(os.str().c_str());
-    }
-
-    boost::system::error_code ec;
-
-    boost::process::child dose_main =
-    boost::process::execute
-            (boost::process::initializers::run_exe(path),
-             boost::process::initializers::set_on_error(ec),
-             boost::process::initializers::inherit_env()
-#if defined(linux) || defined(__linux) || defined(__linux__)
-             ,boost::process::initializers::notify_io_service(ioService)
-#endif
-            );
-
-    (void)dose_main;  // to keep compilers from warning about unused variable
-
-    if (ec)
-    {
-        std::cout << "Error run_exe: " << ec.message() << std::endl;
-    }
-
-#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-    boost::asio::windows::object_handle handle(ioService, dose_main.process_handle());
-
-    handle.async_wait(
-        [&handle](const boost::system::error_code&)
-        {
-            lllog(3) << "CTRL: dose_main has stopped" << std::endl;
-
-            DWORD exitCode;
-            ::GetExitCodeProcess(handle.native(), &exitCode);
-
-            if (exitCode != 0)
-            {
-                SEND_SYSTEM_LOG(Critical, << "dose_main exited with return code " << exitCode);
-            }
-        }
-    );
-#endif
 
     std::vector<Com::NodeTypeDefinition> commNodeTypes;
 
@@ -317,7 +234,114 @@ int main(int argc, char * argv[])
                                         // TODO: What to do here?'
                                     }));
 
-    boost::asio::signal_set signalSet(ioService);
+#if defined(linux) || defined(__linux) || defined(__linux__)
+    boost::asio::signal_set sigchldSet(ioService, SIGCHLD);
+    sigchldSet.async_wait(
+        [&sp, &communication, &doseMainCmdSender, &work, &signalSet]
+        (const boost::system::error_code& error, int signalNumber)
+        {
+            lllog(1) << "CTRL: Got signal " << signalNumber << " ... dose_main has exited" << std::endl;
+            if (error)
+            {
+                SEND_SYSTEM_LOG(Error,
+                                << "CTRL: Got a signals error: " << error);
+            }
+
+            int statusCode;
+            ::wait(&statusCode);
+
+            if (WIFEXITED(statusCode))
+            {
+                auto status = WEXITSTATUS(statusCode);
+
+                if (status != 0)
+                {
+                    SEND_SYSTEM_LOG(Critical, << "CTRL: dose_main has exited with status code "  << status);
+                    std::wcout << "CTRL: dose_main has exited with status code "  << status  << std::endl;
+                }
+            }
+            else
+            {
+                SEND_SYSTEM_LOG(Critical, << "CTRL: dose_main has exited, no exit status code provided");
+                std::wcout << "CTRL: dose_main has exited, no exit status code provided" << std::endl;
+            }
+
+            sp.Stop();
+            communication.Stop();
+            doseMainCmdSender->Stop();
+            signalSet.cancel();
+            work.reset();
+        }
+    );
+#endif
+
+    // Locate and start dose_main
+    namespace fs = boost::filesystem;
+
+    fs::path path(options.doseMainPath);
+
+    if (fs::exists(path))
+    {
+        if (fs::is_directory(path) || !fs::is_regular_file(path))
+        {
+            std::ostringstream os;
+            os << "CTRL: " << options.doseMainPath << " is a directory or a non regular file!" << std::endl;
+            SEND_SYSTEM_LOG(Error, << os.str().c_str());
+            throw std::logic_error(os.str().c_str());
+        }
+    }
+    else
+    {
+        std::ostringstream os;
+        os << "CTRL: Can't find " << options.doseMainPath << std::endl;
+        SEND_SYSTEM_LOG(Error, << os.str().c_str());
+        throw std::logic_error(os.str().c_str());
+    }
+
+    boost::system::error_code ec;
+
+    boost::process::child dose_main =
+    boost::process::execute
+            (boost::process::initializers::run_exe(path),
+             boost::process::initializers::set_on_error(ec),
+             boost::process::initializers::inherit_env()
+#if defined(linux) || defined(__linux) || defined(__linux__)
+             ,boost::process::initializers::notify_io_service(ioService)
+#endif
+            );
+
+    (void)dose_main;  // to keep compilers from warning about unused variable
+
+    if (ec)
+    {
+        std::cout << "Error run_exe: " << ec.message() << std::endl;
+    }
+
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+    boost::asio::windows::object_handle handle(ioService, dose_main.process_handle());
+
+    handle.async_wait(
+        [&handle](const boost::system::error_code&)
+        {
+            lllog(1) << "CTRL: dose_main has exited" << std::endl;
+
+            DWORD statusCode;
+            ::GetExitCodeProcess(handle.native(), &statusCode);
+
+            if (statusCode != 0)
+            {
+                SEND_SYSTEM_LOG(Critical, << "CTRL: dose_main has exited with status code "  << statusCode);
+                std::wcout << "CTRL: dose_main has exited with status code "  << statusCode  << std::endl;
+
+                sp.Stop();
+                communication.Stop();
+                doseMainCmdSender->Stop();
+                signalSet.cancel();
+                work.reset();
+            }
+        }
+    );
+#endif
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
     signalSet.add(SIGABRT);
@@ -334,11 +358,11 @@ int main(int argc, char * argv[])
                          (const boost::system::error_code& error,
                           const int signalNumber)
                           {
-                              lllog(3) << "CTRL: Got signal " << signalNumber << " ... stop sequence initiated." << std::endl;
+                              lllog(1) << "CTRL: Got signal " << signalNumber << " ... stop sequence initiated." << std::endl;
                               if (error)
                               {
                                   SEND_SYSTEM_LOG(Error,
-                                                  << "Got a signals error: " << error);
+                                                  << "CTRL: Got a signals error: " << error);
                               }
                               sp.Stop();
                               communication.Stop();
@@ -366,6 +390,7 @@ int main(int argc, char * argv[])
 
     threads.join_all();
 
-    lllog(3) << "CTRL: Exiting..." << std::endl;
+    lllog(1) << "CTRL: Exiting..." << std::endl;
+    std::wcout << "CTRL: Exiting..." << std::endl;
     return 0;
 }
