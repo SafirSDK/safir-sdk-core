@@ -30,6 +30,12 @@ import subprocess, os, time, sys, signal, argparse
 def log(*args, **kwargs):
     print(*args, **kwargs)
     sys.stdout.flush()
+    
+def string_in_output(string, output):
+    for line in output:
+        if string in line:
+            return True            
+    return False    
 
 parser = argparse.ArgumentParser("test script")
 parser.add_argument("--safir-control", required=True)
@@ -71,8 +77,6 @@ if proc.poll() is None:
         pass
     proc.wait()
 
-
-
 for i in range(2):
     lines.append(proc.stdout.readline().rstrip("\n\r"))
     log("Line", len(lines) - 1, ": '" + lines[-1] + "'")
@@ -85,22 +89,21 @@ if len(res) != 0:
 
 running_str = "dose_main running ("
 waiting_str = "dose_main is waiting for persistence data!"
-ready_str = "dose_main persistence data is ready!"
-exiting_str = "Exiting..."
+dose_main_exiting_str = "DOSE_MAIN: Exiting..."
+control_exiting_str ="CTRL: Exiting..."
 
-if running_str not in lines[0] and running_str not in lines[1]:
+if not string_in_output(running_str, lines):
     log("Failed to find string '" + running_str + "'")
     sys.exit(1)
-if waiting_str not in lines[0] and waiting_str not in lines[1]:
+if not string_in_output(waiting_str, lines):
     log("Failed to find string '" + waiting_str + "'")
     sys.exit(1)
-#TODO stewart: remove this line since dope is not started by this test
-if ready_str not in lines[2]:
-    log("Failed to find string '" + ready_str + "'")
+if not string_in_output(dose_main_exiting_str, lines):
+    log("Failed to find string '" + dose_main_exiting_str + "'")
     sys.exit(1)
-if exiting_str not in lines[3]:
-    log("Failed to find string '" + exiting_str + "'")
-    sys.exit(1)
+if not string_in_output(control_exiting_str, lines):
+    log("Failed to find string '" + control_exiting_str + "'")
+    sys.exit(1)    
 
 log("success")
 sys.exit(0)
