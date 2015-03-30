@@ -321,7 +321,7 @@ int main(int argc, char * argv[])
     boost::asio::windows::object_handle handle(ioService, dose_main.process_handle());
 
     handle.async_wait(
-        [&handle](const boost::system::error_code&)
+        [&handle,&sp,&communication,&doseMainCmdSender,&signalSet,&work](const boost::system::error_code&)
         {
             lllog(1) << "CTRL: dose_main has exited" << std::endl;
 
