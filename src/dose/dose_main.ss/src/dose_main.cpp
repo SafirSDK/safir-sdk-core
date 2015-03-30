@@ -109,13 +109,13 @@ int main()
             catch (const std::exception & exc)
             {
                 SEND_SYSTEM_LOG(Alert,
-                                << "dose_main: Caught 'std::exception' exception from io_service.run(): "
+                                << "DOSE_MAIN: Caught 'std::exception' exception from io_service.run(): "
                                 << "  '" << exc.what() << "'.");
             }
             catch (...)
             {
                 SEND_SYSTEM_LOG(Alert,
-                                << "dose_main: Caught '...' exception from io_service.run().");
+                                << "DOSE_MAIN: Caught '...' exception from io_service.run().");
             }
 
             theApp.Stop();
@@ -140,17 +140,17 @@ int main()
     catch (const std::exception & exc)
     {
         SEND_SYSTEM_LOG(Alert,
-                        << "dose_main: Caught 'std::exception' exception: "
+                        << "DOSE_MAIN: Caught 'std::exception' exception: "
                         << "  '" << exc.what() << "'.");
         return 1;
     }
     catch (...)
     {
         SEND_SYSTEM_LOG(Alert,
-                        << "dose_main: Caught '...' exception.");
+                        << "DOSE_MAIN: Caught '...' exception.");
         return 1;
     }
 
-    std::wcout << "Exiting..." << std::endl;
+    std::wcout << "DOSE_MAIN: Exiting..." << std::endl;
     return 0;
 }
