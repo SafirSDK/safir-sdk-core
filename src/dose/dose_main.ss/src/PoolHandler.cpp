@@ -116,9 +116,6 @@ namespace Internal
         }
 
         m_persistHandler.Start(logStatus);
-
-        //TODO: remove
-        m_persistHandler.SetPersistentDataReady();
     }
 
     void PoolHandler::Start(const std::function<void()>& poolDistributionComplete)
