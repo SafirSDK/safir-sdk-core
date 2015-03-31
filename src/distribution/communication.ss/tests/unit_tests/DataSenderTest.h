@@ -297,7 +297,7 @@ private:
     {
         void Send(const boost::shared_ptr<Com::UserData>& val,
                   boost::asio::ip::udp::socket& /*socket*/,
-                  const boost::asio::ip::udp::endpoint& to)
+                  const boost::asio::ip::udp::endpoint& /*to*/)
         {
             boost::mutex::scoped_lock lock(mutex);
 

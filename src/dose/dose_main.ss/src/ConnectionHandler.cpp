@@ -59,7 +59,7 @@ namespace
             m_communication.SetQueueNotFullCallback([=](int64_t){HandleSendQueues();}, nt);
         }
 
-        m_communication.SetDataReceiver([=](int64_t fromNodeId, int64_t fromNodeType, const char *data, size_t size)
+        m_communication.SetDataReceiver([=](int64_t /*fromNodeId*/, int64_t /*fromNodeType*/, const char *data, size_t /*size*/)
         {
             const DistributionData state=DistributionData::ConstConstructor(new_data_tag, data);
             DistributionData::DropReference(data);

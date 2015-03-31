@@ -21,12 +21,11 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include "../../src/PoolDistribution.h"
-#include <Safir/Dob/Internal/Communication.h>
-#include <boost/make_shared.hpp>
-#include <boost/thread.hpp>
-#include <set>
-
+//#include "../../src/PoolDistribution.h"
+//#include <Safir/Dob/Internal/Communication.h>
+//#include <boost/make_shared.hpp>
+//#include <boost/thread.hpp>
+//#include <set>
 
 #define BOOST_TEST_MODULE PoolHandlerTest
 #include <boost/test/unit_test.hpp>
