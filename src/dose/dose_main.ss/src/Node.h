@@ -40,7 +40,10 @@ namespace Internal
                  int64_t            _nodeId,
                  int64_t            _nodeTypeId,
                  const std::string& _dataAddress)
-
+            : nodeName(_nodeName),
+              nodeId(_nodeId),
+              nodeTypeId(_nodeTypeId),
+              dataAddress(_dataAddress)
         {}
 
         std::string nodeName;

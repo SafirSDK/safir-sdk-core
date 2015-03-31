@@ -54,7 +54,7 @@ namespace Internal
 
     void ResponseHandler::DispatchResponse(const DistributionData& response,
                                            bool & dontRemove,
-                                           bool & doseComOverflowed,
+                                           bool & /*doseComOverflowed*/,
                                            const ConnectionPtr & /*sender*/)
     {
         //TODO
@@ -95,7 +95,7 @@ namespace Internal
         sender->ForEachRequestInQueue(boost::bind(&ResponseHandler::DispatchResponsesFromRequestInQueue,this,_2, boost::cref(sender)));
     }
 
-    bool ResponseHandler::HandleResponse(const DistributionData & response)
+    bool ResponseHandler::HandleResponse(const DistributionData & /*response*/)
     {
         //TODO
 //        lllout << "HandleResponse: " << Typesystem::Operations::GetName(response.GetTypeId()) << std::endl;

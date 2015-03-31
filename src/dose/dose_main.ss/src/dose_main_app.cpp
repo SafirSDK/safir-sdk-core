@@ -454,7 +454,7 @@ namespace Internal
 
     }
 
-    ConnectResult DoseApp::CanAddConnection(const std::string & connectionName, const pid_t pid, const long /*context*/)
+    ConnectResult DoseApp::CanAddConnection(const std::string & /*connectionName*/, const pid_t /*pid*/, const long /*context*/)
     {
 
         return Success;
