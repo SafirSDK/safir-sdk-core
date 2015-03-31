@@ -23,6 +23,13 @@ namespace Safir.Dob.Typesystem
             values.Add (key, value);
         }
 
+        public ValT Add(KeyT key)
+        {
+            ValT value = new ValT ();
+            Add (key, value);
+            return value;
+        }
+
 
         public bool ContainsKey (KeyT key)
         {

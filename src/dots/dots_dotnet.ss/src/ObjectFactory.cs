@@ -95,7 +95,9 @@ namespace Safir.Dob.Typesystem
             {
                 throw new IllegalValueException("Could not create type " + typeName);
             }
-            Object obj = System.Activator.CreateInstance(type, blob) as Object;
+            Int64 handle = Internal.Kernel.DotsC_CreateBlobReader (blob);
+            Object obj = System.Activator.CreateInstance(type, handle) as Object;
+            Internal.Kernel.DotsC_DeleteBlobReader (handle);
             if (obj == null)
             {
                 throw new IllegalValueException("Could not create type " + typeName);

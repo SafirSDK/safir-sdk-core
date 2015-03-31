@@ -40,7 +40,7 @@ namespace Safir.Dob.Typesystem
     /// This container is intended for the simple types of the DOB typesystem.
     /// </summary>
     /// <typeparam name="T">The type to contain.</typeparam>
-    public class SequenceContainer<T> : ContainerBase, IList<T>, ICloneable
+    public abstract class SequenceContainer<T> : ContainerBase, IList<T>, ICloneable
     {
         #region IList implementation
 
@@ -162,52 +162,7 @@ namespace Safir.Dob.Typesystem
 
         #endregion
 
-        #region Cloning
-
-        object ICloneable.Clone()
-        {
-            return new SequenceContainer<T>(this);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public new SequenceContainer<T> Clone()
-        {
-            return (SequenceContainer<T>)((ICloneable)this).Clone(); 
-        }
-
-        /// <summary>
-        /// Copy constructor for use by Clone
-        /// </summary>
-        /// <param name="other"></param>
-        protected SequenceContainer(SequenceContainer<T> other):
-            base(other)
-        {
-            foreach (var val in other.values) {
-                this.values.Add(val);
-            }
-        }
-
-        /// <summary>
-        /// Override ContainerBase.
-        /// </summary>
-        /// <param name="other"></param>
-        public override void Copy(ContainerBase other)
-        {
-            base.Copy(other);
-            this.values.Clear ();
-            SequenceContainer<T> that = other as SequenceContainer<T>;
-            foreach (var val in that.values) {
-
-                this.values.Add(val);
-            }
-        }
-
-        #endregion
-
-        private List<T> values;
+        protected internal List<T> values;
         /// <summary>
         /// Default constructor
         /// <para/>
@@ -218,8 +173,167 @@ namespace Safir.Dob.Typesystem
             values = new List<T> ();
         }
 
-       
+        protected SequenceContainer(SequenceContainer<T> other):
+            base(other)
+        {
+        }
     }
+
+    public class ObjectSequenceContainer<T> : SequenceContainer<T>, ICloneable where T : Safir.Dob.Typesystem.Object
+    {
+        public ObjectSequenceContainer(): base()
+        {
+        }
+
+        /// <summary>
+        /// Override ContainerBase.
+        /// </summary>
+        /// <param name="other"></param>
+        public override void Copy(ContainerBase other)
+        {
+            base.Copy(other);
+            this.values.Clear ();
+            ObjectSequenceContainer<T> that = other as ObjectSequenceContainer<T>;
+            foreach (var val in that.values) {
+
+                this.values.Add(val.Clone() as T);
+            }
+        }
+
+        #region Cloning
+
+        object ICloneable.Clone()
+        {
+            return new ObjectSequenceContainer<T>(this);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public new ObjectSequenceContainer<T> Clone()
+        {
+            return (ObjectSequenceContainer<T>)((ICloneable)this).Clone(); 
+        }
+
+        /// <summary>
+        /// Copy constructor for use by Clone
+        /// </summary>
+        /// <param name="other"></param>
+        protected ObjectSequenceContainer(ObjectSequenceContainer<T> other):
+            base(other)
+        {
+            foreach (var val in other.values) {
+                this.values.Add(val.Clone() as T);
+            }
+        }
+
+        #endregion
+    }
+
+    public class MemberSequenceContainer<T> : SequenceContainer<T>, ICloneable
+    {
+        public MemberSequenceContainer(): base()
+        {
+        }
+
+        /// <summary>
+        /// Override ContainerBase.
+        /// </summary>
+        /// <param name="other"></param>
+        public override void Copy(ContainerBase other)
+        {
+            base.Copy(other);
+            this.values.Clear ();
+            MemberSequenceContainer<T> that = other as MemberSequenceContainer<T>;
+            foreach (var val in that.values) {
+                this.values.Add(val);
+            }
+        }
+
+        #region Cloning
+
+        object ICloneable.Clone()
+        {
+            return new MemberSequenceContainer<T>(this);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public new MemberSequenceContainer<T> Clone()
+        {
+            return (MemberSequenceContainer<T>)((ICloneable)this).Clone(); 
+        }
+
+        /// <summary>
+        /// Copy constructor for use by Clone
+        /// </summary>
+        /// <param name="other"></param>
+        protected MemberSequenceContainer(MemberSequenceContainer<T> other):
+            base(other)
+        {
+            foreach (var val in other.values) {
+                this.values.Add(val);
+            }
+        }
+
+        #endregion
+    }
+
+    public class Int32SequenceContainer : MemberSequenceContainer<Int32> {}
+    public class Int64SequenceContainer : MemberSequenceContainer<Int64> {}
+    public class StringSequenceContainer : MemberSequenceContainer<string> {}
+    public class Float32SequenceContainer : MemberSequenceContainer<float> {}
+    public class Float64SequenceContainer : MemberSequenceContainer<double> {}
+    public class TypeIdSequenceContainer : MemberSequenceContainer<Int64> {}
+    public class InstanceIdSequenceContainer : MemberSequenceContainer<InstanceId> {}
+    public class ChannelIdSequenceContainer : MemberSequenceContainer<ChannelId> {}
+    public class HandlerIdSequenceContainer : MemberSequenceContainer<HandlerId> {}
+    public class EntityIdSequenceContainer : MemberSequenceContainer<EntityId> {}
+
+    //SI32
+    public class Ampere32SequenceContainer : Float32SequenceContainer {}
+    public class CubicMeter32SequenceContainer : Float32SequenceContainer {}
+    public class Hertz32SequenceContainer : Float32SequenceContainer {}
+    public class Joule32SequenceContainer : Float32SequenceContainer {}
+    public class Kelvin32SequenceContainer : Float32SequenceContainer {}
+    public class Kilogram32SequenceContainer : Float32SequenceContainer {}
+    public class Meter32SequenceContainer : Float32SequenceContainer {}
+    public class MeterPerSecond32SequenceContainer : Float32SequenceContainer {}
+    public class MeterPerSecondSquared32SequenceContainer : Float32SequenceContainer {}
+    public class Newton32SequenceContainer : Float32SequenceContainer {}
+    public class Pascal32SequenceContainer : Float32SequenceContainer {}
+    public class Radian32SequenceContainer : Float32SequenceContainer {}
+    public class RadianPerSecond32SequenceContainer : Float32SequenceContainer {}
+    public class RadianPerSecondSquared32SequenceContainer : Float32SequenceContainer {}
+    public class Second32SequenceContainer : Float32SequenceContainer {}
+    public class SquareMeter32SequenceContainer : Float32SequenceContainer {}
+    public class Steradian32SequenceContainer : Float32SequenceContainer {}
+    public class Volt32SequenceContainer : Float32SequenceContainer {}
+    public class Watt32SequenceContainer : Float32SequenceContainer {}
+
+    //SI64
+    public class Ampere64SequenceContainer : Float64SequenceContainer {}
+    public class CubicMeter64SequenceContainer : Float64SequenceContainer {}
+    public class Hertz64SequenceContainer : Float64SequenceContainer {}
+    public class Joule64SequenceContainer : Float64SequenceContainer {}
+    public class Kelvin64SequenceContainer : Float64SequenceContainer {}
+    public class Kilogram64SequenceContainer : Float64SequenceContainer {}
+    public class Meter64SequenceContainer : Float64SequenceContainer {}
+    public class MeterPerSecond64SequenceContainer : Float64SequenceContainer {}
+    public class MeterPerSecondSquared64SequenceContainer : Float64SequenceContainer {}
+    public class Newton64SequenceContainer : Float64SequenceContainer {}
+    public class Pascal64SequenceContainer : Float64SequenceContainer {}
+    public class Radian64SequenceContainer : Float64SequenceContainer {}
+    public class RadianPerSecond64SequenceContainer : Float64SequenceContainer {}
+    public class RadianPerSecondSquared64SequenceContainer : Float64SequenceContainer {}
+    public class Second64SequenceContainer : Float64SequenceContainer {}
+    public class SquareMeter64SequenceContainer : Float64SequenceContainer {}
+    public class Steradian64SequenceContainer : Float64SequenceContainer {}
+    public class Volt64SequenceContainer : Float64SequenceContainer {}
+    public class Watt64SequenceContainer : Float64SequenceContainer {}
 
 
 }
