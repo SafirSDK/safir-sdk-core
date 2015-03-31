@@ -31,6 +31,7 @@
 #include <Safir/Logging/Log.h>
 #include <Safir/Application/CrashReporter.h>
 #include <Safir/Dob/NotOpenException.h>
+#include <Safir/Dob/ConnectionAspectMisc.h>
 #include <Safir/Dob/ErrorResponse.h>
 #include <Safir/Dob/PersistentDataStatus.h>
 #include <boost/thread.hpp>
@@ -59,7 +60,6 @@ const Safir::Dob::Typesystem::Int32 PERSISTENCE_CONTEXT = -1000000;
 //-------------------------------------------------------
 DopeApp::DopeApp():
     m_dispatcher(m_dobConnection, m_ioService),
-    m_instanceId(Safir::Dob::ThisNodeParameters::NodeNumber()),
     m_persistenceStarted(false),
     m_persistenceInitialized(false),
     m_keeper(m_dobConnection),
@@ -76,6 +76,9 @@ DopeApp::DopeApp():
                                       L"Failed to connect to Dob. Maybe Dope is already started on this node.");
         throw StartupError();
     }
+
+    m_instanceId = Safir::Dob::Typesystem::InstanceId
+        (Safir::Dob::ConnectionAspectMisc(m_dobConnection).GetNodeId());
 
     Safir::Application::TracerBackdoor::Start(m_dobConnection);
     m_keeper.Start(*this);

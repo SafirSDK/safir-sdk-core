@@ -63,6 +63,9 @@ namespace Internal
         Connections(private_constructor_t, const int64_t nodeId);
         ~Connections();
 
+        /** Get the id of the current node */
+        int64_t NodeId() const {return m_nodeId;}
+        
         /**
          * This is for applications waiting for "things" to happen to its connection.
          * This blocks forever until SignalIn for that connection has been called.

@@ -647,6 +647,13 @@ extern "C"
                                                 bool& equal,
                                                 bool& success);
 
+    DOSE_DLL_API void DoseC_GetContext(const DotsC_Int32 ctrl,
+                                       DotsC_Int32& context,
+                                       bool& success);
+
+    DOSE_DLL_API void DoseC_GetNodeId(DotsC_Int64& nodeId,
+                                      bool& success);
+
     //-------------------------------
     // Debug and statistics
     //-------------------------------
@@ -655,12 +662,6 @@ extern "C"
                                               const bool outQueues,
                                               bool& success);
 
-    //-----------
-    // Context
-    //-----------
-    DOSE_DLL_API void DoseC_GetContext(const DotsC_Int32 ctrl,
-                                       DotsC_Int32& context,
-                                       bool& success);
 
 #ifdef __cplusplus
 }

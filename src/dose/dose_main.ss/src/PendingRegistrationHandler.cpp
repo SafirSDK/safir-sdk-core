@@ -28,7 +28,6 @@
 #include <Safir/Dob/Internal/EntityTypes.h>
 
 #include <Safir/Dob/Internal/Connections.h>
-#include <Safir/Dob/Internal/NodeStatuses.h>
 #include <iomanip>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Dob/ThisNodeParameters.h>
@@ -41,7 +40,8 @@ namespace Internal
 {
     PendingRegistrationHandler::PendingRegistrationHandler(TimerHandler& timerHandler,
                                                            const int64_t nodeId)
-        : m_timerHandler(timerHandler)
+        : m_nodeId(nodeId)
+        , m_timerHandler(timerHandler)
         , m_nextId(1)
         , m_pendingRegistrationClock(nodeId)
     {
@@ -153,7 +153,9 @@ namespace Internal
 
         //check if we have the response from all nodes that are up
         PendingRegistrationInfo & reg = findIt->second;
+#if 0 //stewart
         const NodeStatuses::Status statuses = NodeStatuses::Instance().GetNodeStatuses();
+#endif
         bool gotAll = true;
 #if 0 //stewart
         for (NodeStatuses::Status::const_iterator it = statuses.begin();
@@ -312,11 +314,11 @@ namespace Internal
 
                 //create a response
                 DistributionData resp(pending_registration_response_tag,
-                    msg,
-                    ConnectionId(ThisNodeParameters::NodeNumber(),
-                    contextId,
-                    -1),
-                    true);
+                                      msg,
+                                      ConnectionId(m_nodeId,
+                                                   contextId,
+                                                   -1),
+                                      true);
 
                 //check if we have a reason to say no!
 

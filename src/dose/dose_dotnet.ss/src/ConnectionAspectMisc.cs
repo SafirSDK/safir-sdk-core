@@ -125,6 +125,24 @@ namespace Safir.Dob
             }
             return context;
         }
+
+        /// <summary>
+        /// Get the Node Identifier of the current node.
+        /// <para/>
+        /// Be aware that this identifier changes every time the node restarts.
+        /// </summary>
+        /// <returns>NodeId of current node</returns>
+        public System.Int64 GetNodeId()
+        {
+            System.Int64 nodeId;
+            byte success;
+            Interface.DoseC_GetNodeId(out nodeId, out success);
+            if (!Interface.BoolOf(success))
+            {
+                Typesystem.LibraryExceptions.Instance.Throw();
+            }
+            return nodeId;
+        }
         #endregion
 
         #region Queue Status

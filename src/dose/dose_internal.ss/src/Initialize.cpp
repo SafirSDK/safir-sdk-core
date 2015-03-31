@@ -29,7 +29,6 @@
 #include <Safir/Dob/Internal/EndStates.h>
 #include <Safir/Dob/Internal/ServiceTypes.h>
 #include <Safir/Dob/Internal/InjectionKindTable.h>
-#include <Safir/Dob/Internal/NodeStatuses.h>
 #include <Safir/Dob/Internal/EntityTypes.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 
@@ -49,7 +48,6 @@ void InitializeDoseInternalFromDoseMain(const int64_t nodeId)
     EndStates::Initialize();
     ServiceTypes::Initialize(true,nodeId);
     InjectionKindTable::Initialize();
-    NodeStatuses::Initialize();
     EntityTypes::Initialize(true,nodeId);
 
     auto sem = SharedMemoryObject::GetSharedMemory().find_or_construct<boost::interprocess::interprocess_semaphore>
@@ -77,7 +75,6 @@ void InitializeDoseInternalFromApp()
     EndStates::Initialize();
     ServiceTypes::Initialize(false,0);
     InjectionKindTable::Initialize();
-    NodeStatuses::Initialize();
     EntityTypes::Initialize(false,0);
 }
 

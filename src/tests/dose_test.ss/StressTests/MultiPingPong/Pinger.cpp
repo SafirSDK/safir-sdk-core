@@ -222,7 +222,7 @@ void Pinger::CheckForTimeouts()
                  << " timed out! Have not received all pongs for ping " << it->second.number << " within "
                  << CommandLine::Instance().Timeout() << " seconds!"  <<std::endl
                  << "Expecting " << m_pongers.size() << " pongs, but have " << it->second.pongers.size() << std::endl
-                 << "Node number " << Safir::Dob::ThisNodeParameters::NodeNumber() << std::endl;/*
+                 << "Node name " << Safir::Dob::ThisNodeParameters::Name() << std::endl;/*
                  << "The following are missing:" << std::endl;
 
 

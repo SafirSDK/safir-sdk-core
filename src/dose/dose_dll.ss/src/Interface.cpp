@@ -1380,6 +1380,19 @@ void DoseC_GetContext(const DotsC_Int32 ctrl,
     CATCH_LIBRARY_EXCEPTIONS;
 }
 
+void DoseC_GetNodeId(DotsC_Int64& nodeId,
+                     bool& success)
+{
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
+    success = false;
+    try
+    {
+        nodeId = Connections::Instance().NodeId();
+        success = true;
+    }
+    CATCH_LIBRARY_EXCEPTIONS;
+}
+
 
 void DoseC_SimulateOverflows(const DotsC_Int32 ctrl,
                              const bool inQueues,

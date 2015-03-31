@@ -97,6 +97,19 @@ namespace Dob
         return context;
     }
 
+    Dob::Typesystem::Int64 ConnectionAspectMisc::GetNodeId() const
+    {
+        Dob::Typesystem::Int64 nodeId;
+        bool success;
+        DoseC_GetNodeId(nodeId, success);
+
+        if (!success)
+        {
+            Typesystem::LibraryExceptions::Instance().Throw();
+        }
+        return nodeId;
+    }
+
     Safir::Dob::Typesystem::Int32
     ConnectionAspectMisc::GetQueueCapacity(const Safir::Dob::ConnectionQueueId::Enumeration queue) const
     {

@@ -42,7 +42,6 @@
 #include <Safir/Dob/Internal/TimestampOperations.h>
 #include <Safir/Dob/Internal/ContextSharedTable.h>
 #include <Safir/Dob/Internal/ContextIdComposer.h>
-#include <Safir/Dob/Internal/NodeStatuses.h>
 #include <Safir/Dob/Message.h>
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Dob/QueueParameters.h>
@@ -233,12 +232,12 @@ namespace Internal
         m_connectionNameCommonPart = connectionNameCommonPart;
         m_connectionNameInstancePart = connectionNameInstancePart;
 
+        InitializeDoseInternalFromApp();
+
         m_connectionName = ComposeName(m_contextId, m_connectionNameCommonPart, m_connectionNameInstancePart);
 
         ConnectResult result;
         ConnectionPtr connection;
-
-        InitializeDoseInternalFromApp();
 
         Connections::Instance().Connect(m_connectionName, m_contextId, minusOneConnection, result, connection);
 
@@ -1471,7 +1470,8 @@ namespace Internal
                                               const std::string& commonPart,
                                               const std::string& instancePart)
     {
-        std::string name(Dob::Typesystem::Utilities::ToUtf8(NodeParameters::Nodes(Dob::ThisNodeParameters::NodeNumber())->NodeName().GetVal()));
+        std::string name(Dob::Typesystem::Utilities::ToUtf8
+                         (Dob::ThisNodeParameters::Name()));
         name.append(";");
         name.append(boost::lexical_cast<std::string>(contextId));
         name.append(";");
@@ -2358,7 +2358,9 @@ namespace Internal
         else
         {
             // Correct node number and context, but no connection id for delete states
-            dispatchedInjection.SetSenderId(ConnectionId(ThisNodeParameters::NodeNumber(), connection->Id().m_contextId, -1));
+            dispatchedInjection.SetSenderId(ConnectionId(Connections::Instance().NodeId(),
+                                                         connection->Id().m_contextId,
+                                                         -1));
             dispatchedInjection.SetExplicitlyDeleted(true);
         }
 
@@ -2564,15 +2566,6 @@ namespace Internal
                                     entityId.GetTypeId(),
                                     entityId.GetInstanceId());
                 return true; // Remove from queue and reset dirty flag
-            }
-
-            if (NodeStatuses::Instance().AnyNodeHasStatus(NodeStatus::Starting))
-            {
-                // We won't start to inject ghosts as long as there are one or more nodes that are
-                // in state 'Starting'. This minimize the risk that we will signal OnInitialInjectionsDone
-                // before all ghosts are received from remote nodes.
-                dontRemove = true;
-                return false;  // Don't remove from queue and don't reset dirty flag
             }
         }
 

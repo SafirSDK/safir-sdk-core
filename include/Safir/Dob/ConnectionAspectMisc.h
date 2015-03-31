@@ -97,6 +97,15 @@ namespace Dob
          */
         Dob::Typesystem::Int32 GetContext() const;
 
+        /**
+         * Get the Node Identifier of the current node.
+         *
+         * Be aware that this identifier changes every time the node restarts.
+         *
+         * @return NodeId of current node
+         */
+        Dob::Typesystem::Int64 GetNodeId() const;
+
         /** @} */
 
         /**

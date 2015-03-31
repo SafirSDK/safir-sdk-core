@@ -204,7 +204,8 @@ namespace dose_test_dotnet
                 try
                 {
 
-                    Safir.Dob.Typesystem.InstanceId instance = new Safir.Dob.Typesystem.InstanceId(Safir.Dob.ThisNodeParameters.NodeNumber);
+                    Safir.Dob.Typesystem.InstanceId instance = new Safir.Dob.Typesystem.InstanceId
+                        (new Safir.Dob.ConnectionAspectMisc(m_controlConnection).GetNodeId());
                     Safir.Dob.Typesystem.EntityId eid = new Safir.Dob.Typesystem.EntityId(Safir.Dob.NodeInfo.ClassTypeId, instance);
                     using (Safir.Dob.EntityProxy ep = m_controlConnection.Read(eid))
                     {
