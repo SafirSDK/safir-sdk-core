@@ -5,9 +5,9 @@
     <baseClass>Safir.Dob.Item</baseClass>
     <members>
         <member>
-            <summary>The node number</summary>
-            <name>NodeNumber</name>
-            <type>Int32</type>
+            <summary>The node id</summary>
+            <name>NodeId</name>
+            <type>Int64</type>
         </member>
         <member>
             <summary>The connection name.</summary>
@@ -19,6 +19,6 @@
             <summary>The connection id.</summary>
             <name>ConnectionId</name>
             <type>Int64</type>
-        </member>     
+        </member>
     </members>
 </class>

@@ -1091,7 +1091,7 @@ void DoseC_GetConnectionInfo(const char* const state,
 
         const ConnectionId sender = data.GetSenderId();
 
-        connInfo->NodeNumber() = sender.m_node;
+        connInfo->NodeId() = sender.m_node;
         connInfo->ConnectionId() = sender.m_id;
 
         const std::string name = Connections::Instance().GetConnectionName(sender);
