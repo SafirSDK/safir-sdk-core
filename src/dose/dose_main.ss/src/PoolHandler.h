@@ -60,8 +60,11 @@ namespace Internal
         std::unordered_map<int64_t, int64_t> m_nodes; //map<nodeId, nodeType>
         std::unordered_map<int64_t, std::unique_ptr<StateDistributor<Com::Communication> > > m_stateDistributors; //map<nodeType, StateDistributor>
 
+        std::function<void()> m_poolDistributionCompleteCallback;
+        bool m_persistensReady=false;
         bool m_poolDistributionComplete=false;
 
+        void SignalPdComplete();
         void RunEndStatesTimer();
 
         //other node is requesting a pd or report pdComplete

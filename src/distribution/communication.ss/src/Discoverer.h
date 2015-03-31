@@ -62,12 +62,14 @@ namespace Com
 #endif
         DiscovererBasic(boost::asio::io_service& ioService,
                         const Node& me,
+                        int sendInterval,
                         const std::function<void(const Node&)>& onNewNode)
             :WriterType(ioService, Resolver::Protocol(me.unicastAddress))
             ,m_strand(ioService)
             ,m_me(me)
             ,m_onNewNode(onNewNode)
             ,m_timer(ioService)
+            ,m_random(sendInterval, 3*sendInterval)
         {
         }
 #ifdef _MSC_VER
@@ -244,7 +246,7 @@ namespace Com
         Node m_me;
         std::function<void(const Node&)> m_onNewNode;
         boost::asio::steady_timer m_timer;
-        Utilities::Random m_random{500, 3000};
+        Utilities::Random m_random;
 
         bool IsExcluded(int64_t id) const {return m_excludedNodes.find(id)!=m_excludedNodes.cend();}
 

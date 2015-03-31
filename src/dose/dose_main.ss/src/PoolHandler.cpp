@@ -52,7 +52,12 @@ namespace Internal
         ,m_poolDistributionRequests(io, m_communication)
         ,m_persistHandler(io, m_communication)
     {
-        m_persistHandler.AddSubscriber([=]{m_poolDistributor.Start();});
+        m_persistHandler.AddSubscriber([=]
+        {
+            m_persistensReady=true;
+            m_poolDistributor.Start();
+            SignalPdComplete();
+        });
 
         auto injectNode=[=](const std::string&, int64_t id, int64_t nt, const std::string&)
         {
@@ -125,13 +130,15 @@ namespace Internal
     {
         m_strand.dispatch([=]
         {
+            m_poolDistributionCompleteCallback=poolDistributionComplete;
+
             RunEndStatesTimer();
 
             //request pool distributions
             m_poolDistributionRequests.Start(m_strand.wrap([=]
             {
                 m_poolDistributionComplete=true;
-                poolDistributionComplete();
+                SignalPdComplete();
             }));
 
             //start distributing states to other nodes
@@ -176,12 +183,13 @@ namespace Internal
             case PoolDistributionInfo::RequestPd:
             {
                 //start new pool distribution to node
-                m_poolDistributor.ReceivedPoolDistributionRequest(fromNodeId, fromNodeType);
+                m_poolDistributor.AddPoolDistribution(fromNodeId, fromNodeType);
             }
                 break;
 
             case PoolDistributionInfo::PdComplete:
             {
+                std::wcout<<L"Received PdComplete from "<<fromNodeId<<std::endl;
                 m_persistHandler.SetPersistentDataReady(); //persistens is ready as soon as we have received one pdComplete
                 m_poolDistributionRequests.ReceivedPoolDistributionCompleteFrom(fromNodeId);
             }
@@ -303,6 +311,14 @@ namespace Internal
             }
         }
             break;
+        }
+    }
+
+    void PoolHandler::SignalPdComplete()
+    {
+        if (m_persistensReady && m_poolDistributionComplete)
+        {
+            m_poolDistributionCompleteCallback();
         }
     }
 

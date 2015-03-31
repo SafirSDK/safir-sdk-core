@@ -221,7 +221,8 @@ int main(int argc, char * argv[])
                     "", //no multicast
                     "", //no multicast
                     1000,
-                    20});
+                    20,
+                    15});
 
         spNodeTypes.insert(std::make_pair(1,
                                           Safir::Dob::Internal::SP::NodeType(1,
@@ -236,7 +237,8 @@ int main(int argc, char * argv[])
                     "", //no multicast
                     "", //no multicast
                     2000,
-                    50});
+                    50,
+                    8});
 
         spNodeTypes.insert(std::make_pair(2,
                                           Safir::Dob::Internal::SP::NodeType(2,

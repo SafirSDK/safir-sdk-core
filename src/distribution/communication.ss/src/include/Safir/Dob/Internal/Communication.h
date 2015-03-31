@@ -53,6 +53,7 @@ namespace Com
         std::string dataMulticastAddress;       //multicast address including port number, 'address:port' empty string if not multicast enabled
         int heartbeatInterval;                  //time between heartbeats (milliseconds)
         int retryTimeout;                       //time to wait before retransmitting data (milliseconds)
+        int maxLostHeartbeats;                  //max lost heartbeats before exclusion
     };
 
     //Callbacks functions used in Communications public interface.

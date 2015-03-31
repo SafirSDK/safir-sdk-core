@@ -91,13 +91,8 @@ int main()
     {
         Safir::Dob::Internal::DoseApp theApp(strand);
 
-        // Try to figure out how many threads to use
-        auto nbrOfThreads = boost::thread::hardware_concurrency();
-        if (nbrOfThreads == 0)
-        {
-            // The information is not available, we put a finger in the air and use ...
-            nbrOfThreads = 4;
-        }
+        //Set number of threads to at least 2, or the number of cpu kernels
+        auto nbrOfThreads = std::max<size_t>(2, boost::thread::hardware_concurrency());
 
         const auto run = [&ioService,&theApp]
         {

@@ -187,6 +187,7 @@ public:
             n.name="nt"+boost::lexical_cast<std::string>(i);
             n.id=LlufId_Generate64(n.name.c_str());
             n.heartbeatInterval=1000+500*i;
+            n.maxLostHeartbeats=10;
             n.retryTimeout=40;
             if (i>0)
             {

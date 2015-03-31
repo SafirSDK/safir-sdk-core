@@ -111,7 +111,8 @@ int main(int /*argc*/, char * /*argv*/[])
                                  nt.multicastAddressControl,
                                  nt.multicastAddressData,
                                  nt.heartbeatInterval,
-                                 nt.retryTimeout});
+                                 nt.retryTimeout,
+                                 nt.maxLostHeartbeats});
 
         spNodeTypes.insert(std::make_pair(nt.id,
                                           SP::NodeType(nt.id,

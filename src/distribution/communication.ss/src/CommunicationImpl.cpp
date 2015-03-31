@@ -59,11 +59,19 @@ namespace Com
         ,m_nodeTypes(nodeTypes)
         ,m_onNewNode()
         ,m_gotRecv()
-        ,m_discoverer(m_ioService, m_me, [=](const Node& n){OnNewNode(n);})
+        ,m_discoverer(m_ioService,
+                      m_me,
+                     [&nodeTypes]{ //calculate the maximum delay for Discover
+                         int ep=100;
+                         for (auto& vt : nodeTypes)
+                             ep=std::max(ep, vt.second->RetryTimeout()*vt.second->MaxLostHeartbeats());
+                         return ep;
+                     }(),
+                     [=](const Node& n){OnNewNode(n);})
         ,m_deliveryHandler(m_receiveStrand, m_me.nodeId, m_protocol)
         ,m_reader(m_receiveStrand, m_me.unicastAddress, m_nodeTypes[nodeTypeId]->MulticastAddress(),
-                    [=](const char* d, size_t s){return OnRecv(d,s);},
-                    [=](){return m_deliveryHandler.NumberOfUndeliveredMessages()<Parameters::MaxNumberOfUndelivered;})
+                  [=](const char* d, size_t s){return OnRecv(d,s);},
+    [=](){return m_deliveryHandler.NumberOfUndeliveredMessages()<Parameters::MaxNumberOfUndelivered;})
     {
         if (nodeId==0)
         {
@@ -80,14 +88,14 @@ namespace Com
         lllog(1)<<L"COM:     using multicast: "<<std::boolalpha<<myNodeType->UseMulticast()<<std::dec<<std::endl;
         lllog(1)<<L"COM: -------------------------------------------------"<<std::endl;
 
-#ifdef COM_USE_UNRELIABLE_SEND_POLICY
+    #ifdef COM_USE_UNRELIABLE_SEND_POLICY
         lllog(1)<<L"*** COM_USE_UNRELIABLE_SEND_POLICY IS DEFINED ***"<<std::endl;
         std::wcout<<L"*** COM_USE_UNRELIABLE_SEND_POLICY IS DEFINED ***"<<std::endl;
-#endif
+    #endif
     }
-#ifdef _MSC_VER
-#pragma warning (default: 4355)
-#endif
+    #ifdef _MSC_VER
+    #pragma warning (default: 4355)
+    #endif
 
     CommunicationImpl::~CommunicationImpl()
     {

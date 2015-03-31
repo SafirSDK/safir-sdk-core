@@ -59,6 +59,7 @@ namespace Com
                  const std::string &multicastAddr,
                  int ipVersion,
                  int heartbeatInterval,
+                 int maxLostHeartbeats,
                  int retryTimeout)
             :m_thisNodeId(thisNodeId)
             ,m_id(id)
@@ -66,6 +67,7 @@ namespace Com
             ,m_multicastAddress(multicastAddr)
             ,m_ipVersion(ipVersion)
             ,m_heartbeatInterval(heartbeatInterval)
+            ,m_maxLostHeartbeats(maxLostHeartbeats)
             ,m_retryTimeout(retryTimeout)
             ,m_useMulticast(useMulticast)
             ,m_heartbeatSender(ioService, id, thisNodeId, m_ipVersion, localIf, McAddr(m_multicastAddress, m_useMulticast), heartbeatInterval)
@@ -80,6 +82,7 @@ namespace Com
         const std::string& MulticastAddress() const {return m_multicastAddress;}
         int IpVersion() const {return m_ipVersion;}
         int HeartbeatInterval() const {return m_heartbeatInterval;}
+        int MaxLostHeartbeats() const {return m_maxLostHeartbeats;}
         int RetryTimeout() const {return m_retryTimeout;}
 
         HeartbeatSender& GetHeartbeatSender() {return m_heartbeatSender;}
@@ -98,6 +101,7 @@ namespace Com
         std::string m_multicastAddress;   //multicast address including port number, 'address:port' empty string if not multicast enabled
         int m_ipVersion;
         int m_heartbeatInterval;          //time between heartbeats
+        int m_maxLostHeartbeats;
         int m_retryTimeout;               //time to wait before retransmitting unacked data
         bool m_useMulticast;
 

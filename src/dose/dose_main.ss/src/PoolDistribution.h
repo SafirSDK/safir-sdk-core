@@ -29,6 +29,8 @@
 #include <boost/asio.hpp>
 #include <boost/chrono.hpp>
 #include <boost/asio/steady_timer.hpp>
+#include <Safir/Dob/Internal/DistributionData.h>
+#include <Safir/Dob/Internal/Connections.h>
 
 namespace Safir
 {
@@ -42,324 +44,7 @@ namespace Internal
         RequestPd = 1,
         PdComplete = 2
     };
-
-    ///
-    /// This class is responsible for handling all pool distributions to other nodes.
-    /// It will keep a queue of PoolDistributionRequests and make sure that only one
-    /// pd is active at the same time. It will also ensure that pool distributions will
-    /// be sending in a pace that wont flood the network and cause starvation in other parts
-    /// of the system.
-    ///
-    template <class CommunicationT>
-    class PoolDistributor : private boost::noncopyable
-    {
-    public:
-        PoolDistributor(boost::asio::io_service& io, CommunicationT& com)
-            :m_strand(io)
-            ,m_communication(com)
-            ,m_timer(io)
-        {
-        }
-
-        //make sure that start is not called before persistent data is ready
-        void Start()
-        {
-            m_strand.dispatch([=]
-            {
-                m_running=true;
-                Run();
-            });
-        }
-
-        void Stop()
-        {
-            m_strand.post([=]
-            {
-                m_running=false;
-                m_timer.cancel();
-            });
-        }
-
-        void ReceivedPoolDistributionRequest(int64_t nodeId, int64_t nodeTypeId)
-        {
-            m_strand.dispatch([=]
-            {
-                m_pendingPoolDistributions.push(std::make_pair(nodeId, nodeTypeId));
-            });
-        }
-
-    private:
-        boost::asio::io_service::strand m_strand;
-        CommunicationT& m_communication;
-        boost::asio::steady_timer m_timer;
-        std::queue<std::pair<int64_t, int64_t> > m_pendingPoolDistributions;
-        bool m_running=false;
-
-        void Run()
-        {
-            if (!m_running)
-            {
-                return;
-            }
-
-            if (!m_pendingPoolDistributions.empty())
-            {
-                auto req=boost::make_shared<char[]>(sizeof(PoolDistributionInfo));
-                (*reinterpret_cast<PoolDistributionInfo*>(req.get()))=PoolDistributionInfo::PdComplete;
-
-                auto receiver=m_pendingPoolDistributions.front();
-                if (m_communication.Send(receiver.first, receiver.second, req, sizeof(PoolDistributionInfo), PoolDistributionInfoDataTypeId, true))
-                {
-                    m_pendingPoolDistributions.pop();
-                }
-            }
-
-            static const boost::chrono::milliseconds timerInterval(1000);
-            m_timer.expires_from_now(timerInterval);
-            m_timer.async_wait(m_strand.wrap([=](const boost::system::error_code& /*error*/){Run();}));
-        }
-    };
-
-        //    void PoolHandler::PoolDistributionWorker()
-        //    {
-        //#if 0 //stewart
-        //        boost::shared_ptr<ExceptionInfo> exceptionInfo;
-
-        //        try
-        //        {
-        //            lllout << "Pool distribution thread started" << std::endl;
-
-        //        m_poolDistributionThreadId = boost::this_thread::get_id();
-        //        m_threadMonitor->StartWatchdog(m_poolDistributionThreadId, L"pool distribution thread");
-
-        //            // Wait until persistent data is ready.
-        //            if (!m_persistHandler->IsPersistentDataReady())
-        //            {
-        //                lllout << "Pool distribution thread is waiting for persistence data from DOPE" << std::endl;
-        //                while (!m_persistHandler->IsPersistentDataReady())
-        //                {
-        //                    boost::this_thread::sleep_for(boost::chrono::milliseconds(10)); //sleep is interruption point
-
-        //                m_threadMonitor->KickWatchdog(m_poolDistributionThreadId);
-        //                }
-        //                lllout << "Pool distribution thread thinks DOPE is done." << std::endl;
-        //            }
-
-
-        //            lllout << "Distributing connections" << std::endl;
-        //            // get connections
-        //            ConnectionMsgsToSend.clear();
-        //            Connections::Instance().ForEachConnection(boost::bind(&PoolHandler::PDConnection,this,_1));
-        //            // send connections
-        //            ConnectionMsgs::const_iterator msgIter;
-        //            for ( msgIter = ConnectionMsgsToSend.begin( ) ; msgIter != ConnectionMsgsToSend.end( ) ; msgIter++ )
-        //            {
-        //                boost::this_thread::interruption_point();
-        //                m_ecom->SendPoolDistributionData(*msgIter, *m_threadMonitor, m_poolDistributionThreadId);
-        //            }
-        //            ConnectionMsgsToSend.clear();
-        //            lllout << "Setting up connection in each context for pool distribution" << std::endl;
-
-        //            DummyDispatcher dispatcher;
-        //            DummySubscriber dummySubscriber;
-
-        //            // Distribute all contexts
-        //            for (ContextId context = 0; context < Safir::Dob::NodeParameters::NumberOfContexts(); ++context)
-        //            {
-        //                boost::this_thread::interruption_point();
-        //                Safir::Dob::Connection pdConnection;
-
-        //                //Note the connection name, we do NOT want to get special treatment for being
-        //                //in dose_main, since we're a different thread. But we want to be allowed in
-        //                //always, so don't change connection string "dose_main_pd" because it is always allowed to connect,
-        //                // even before we let -1 connections in.
-        //                pdConnection.Open(L"dose_main_pd",L"pool_distribution", context,NULL, &dispatcher);
-        //                StartSubscriptions(pdConnection, dummySubscriber,true,false);
-        //                const std::wstring connectionName = ConnectionAspectMisc(pdConnection).GetConnectionName();
-        //                ConnectionPtr connection = Connections::Instance().GetConnectionByName(Typesystem::Utilities::ToUtf8(connectionName));
-
-        //                connection->GetDirtySubscriptionQueue().Dispatch(boost::bind(&PoolHandler::PDDispatchSubscription,this,_1,_2,_3));
-        //            }
-
-        //            lllout << "Pool distribution completed (calling ecom::PoolDistributionCompleted" << std::endl;
-
-        //            m_ecom->PoolDistributionCompleted(*m_threadMonitor, m_poolDistributionThreadId);
-        //        }
-        //        catch (const boost::thread_interrupted&)
-        //        {
-        //            //do nothing but exit the thread.
-        //            return;
-        //        }
-        //        catch (const Dob::Typesystem::Internal::CommonExceptionBase& e)
-        //        {
-        //            exceptionInfo.reset
-        //                (new ExceptionInfo(e.GetTypeId(),
-        //                                   Dob::Typesystem::Utilities::ToUtf8(e.GetExceptionInfo())));
-        //        }
-        //        catch (const std::exception & e)
-        //        {
-        //            exceptionInfo.reset(new ExceptionInfo(0,
-        //                                                  e.what()));
-        //        }
-        //        catch (...)
-        //        {
-        //            exceptionInfo.reset(new ExceptionInfo(0,
-        //                                                  "Unknown exception (caught as ...)"));
-        //        }
-
-        //        if (exceptionInfo != NULL)
-        //        {
-        //            SEND_SYSTEM_LOG(Alert,
-        //                            << "An exception was caught inside PoolHandler::PoolDistributionWorker!"
-        //                            << "The exception will be rethrown in the main thread");
-        //        }
-
-        //        lllout << "Signalling pool distribution completed"<< std::endl;
-
-        //        //No need for m_isNotified flag guard, since this happens very seldom.
-        //        m_ioService.post(boost::bind(&PoolHandler::PDCompletedHandler,this,exceptionInfo));
-
-        //        m_threadMonitor->StopWatchdog(m_poolDistributionThreadId);
-        //#endif
-        //    }
-
-
-
-        //    void PoolHandler::PDCompletedHandler(const boost::shared_ptr<ExceptionInfo>& exceptionInfo)
-        //    {
-        //        lllout << "Pool distribution is completed"<< std::endl;
-        //        m_pdThread.join();
-        //        m_pdThread = boost::thread();
-
-        //        if (exceptionInfo != NULL)
-        //        {
-        //            SEND_SYSTEM_LOG(Alert,
-        //                            << "An exception occurred in pool distribution, rethrowing.");
-        //            exceptionInfo->Rethrow();
-        //        }
-        //        m_connectionHandler->MaybeSignalConnectSemaphore();
-        //    }
-
-        //    void PoolHandler::PDDispatchSubscription(const SubscriptionPtr& subscription, bool& exitDispatch, bool& dontRemove)
-        //    {
-        //        boost::this_thread::interruption_point();
-
-        //        exitDispatch = false;
-        //        dontRemove = false;
-
-        //        DistributionData realState = subscription->GetState()->GetRealState();
-
-        //        if (!realState.IsNoState() && realState.GetType() == DistributionData::RegistrationState)
-        //        {
-        //            // Registration state
-        //            subscription->DirtyFlag().Process(boost::bind(&PoolHandler::PDProcessRegistrationState,
-        //                                                          this,
-        //                                                          boost::cref(subscription)));
-        //        }
-        //        else
-        //        {
-        //            // Entity state
-        //            subscription->DirtyFlag().Process(boost::bind(&PoolHandler::PDProcessEntityState,
-        //                                                          this,
-        //                                                          boost::cref(subscription)));
-        //        }
-        //    }
-
-        //    bool PoolHandler::PDProcessRegistrationState(const SubscriptionPtr & /*subscription*/)
-        //    {
-        //#if 0 //stewart
-        //        if (subscription->GetLastRealState().IsNoState())
-        //        {
-        //            const DistributionData state = subscription->GetCurrentRealState();
-
-
-        //            if (!state.IsNoState())
-        //            {
-        //                //Local states are to be sent to other nodes.
-        //                //Unregistration states (regardless of whether they are local or not) are always sent.
-        //                if (IsLocal(state) ||
-        //                    !state.IsRegistered())
-        //                {
-        //                    m_ecom->SendPoolDistributionData(state, *m_threadMonitor, m_poolDistributionThreadId);
-        //                }
-        //            }
-        //            subscription->SetLastRealState(state); //update this so we only dispatch this state once (see "if" above)
-        //        }
-        //#endif
-
-        //        return true; //PD send always succeeds
-        //    }
-
-        //    void PoolHandler::PDConnection(const Connection & connection)
-        //    {
-        //        if (connection.IsLocal())
-        //        {
-        //            if (std::string(connection.NameWithoutCounter()).find(";dose_main;") != std::string::npos)
-        //            {
-        //                return;
-        //            }
-
-        //            //We're only interested in local node connections
-        //            DistributionData msg(connect_message_tag,
-        //                                 connection.Id(),
-        //                                 connection.NameWithoutCounter(),
-        //                                 connection.Counter());
-
-        //            // send later to avoid locking up shmem
-        //            ConnectionMsgsToSend.push_back(msg);
-        //        }
-        //    }
-
-        //    bool IsLocal(const DistributionData& state)
-        //    {
-        //        return state.GetSenderId().m_node == g_thisNode;
-        //    }
-
-        //    bool PoolHandler::PDProcessEntityState(const SubscriptionPtr & /*subscription*/)
-        //    {
-        //#if 0 //stewart
-        //        // All nodes send ghost and injection data on PD!
-        //        // Do not send updates
-
-        //        //Real state
-        //        if (subscription->GetLastRealState().IsNoState())
-        //        {
-        //            const DistributionData currentState = subscription->GetCurrentRealState();
-
-        //            if (!currentState.IsNoState())
-        //            {
-        //                //Send all local states
-        //                //send all ghosts (the owner node is probably down...)
-        //                //send all delete states (so that new nodes get the correct timestamps)
-        //                if (IsLocal(currentState) ||
-        //                    currentState.GetEntityStateKind() == DistributionData::Ghost ||
-        //                    !currentState.HasBlob())
-        //                {
-        //                    m_ecom->SendPoolDistributionData(currentState, *m_threadMonitor, m_poolDistributionThreadId);
-        //                }
-        //            }
-        //            subscription->SetLastRealState(currentState);
-        //        }
-
-        //        //injection state
-        //        if (subscription->GetLastInjectionState().IsNoState())
-        //        {
-        //            const DistributionData currentState = subscription->GetCurrentInjectionState();
-
-        //            if (!currentState.IsNoState())
-        //            {
-        //                m_ecom->SendPoolDistributionData(currentState, *m_threadMonitor, m_poolDistributionThreadId);
-        //                subscription->SetLastInjectionState(currentState);
-        //            }
-        //        }
-        //#endif
-        //        return true; //PD send always succeeds
-        //    }
-
-
-
-
-    //********************************************************************************************************
+    //---------------------------------------------------------
 
     ///
     /// Responsible for sending poolDistributionRequests to all nodes at start-up.
@@ -478,6 +163,181 @@ namespace Internal
                 //some requests could not be sent, retry
                 m_strand.post([=]{SendPoolDistributionRequests();}); //a bit aggressive, maybe we should set a timer instead
             }
+        }
+    };
+
+    ///
+    /// This class is responsible for handling all pool distributions to other nodes.
+    /// It will keep a queue of PoolDistributionRequests and make sure that only one
+    /// pd is active at the same time. It will also ensure that pool distributions will
+    /// be sending in a pace that wont flood the network and cause starvation in other parts
+    /// of the system.
+    ///
+    template <class CommunicationT> class PoolDistribution; //forward
+    template <class CommunicationT>
+    class PoolDistributor : private boost::noncopyable
+    {
+    public:
+        PoolDistributor(boost::asio::io_service& io, CommunicationT& com)
+            :m_strand(io)
+            ,m_communication(com)
+        {
+        }
+
+        //make sure that start is not called before persistent data is ready
+        void Start()
+        {
+            m_strand.dispatch([=]
+            {
+                m_running=true;
+                StartNextPoolDistribution();
+            });
+        }
+
+        void Stop()
+        {
+            m_strand.post([=]
+            {
+                m_running=false;
+                //TODO: m_timer.cancel();
+            });
+        }
+
+        //Called when a new pdRequest is received. Will result in a pd to the node with specified id.
+        void AddPoolDistribution(int64_t nodeId, int64_t nodeTypeId)
+        {
+            m_strand.dispatch([=]
+            {
+                auto pd=PdPtr(new PoolDistribution<CommunicationT>(nodeId, nodeTypeId, m_strand, m_communication, [=](int64_t nodeId){StartNextPoolDistribution();}));
+                m_pendingPoolDistributions.push(std::move(pd));
+
+                if (m_pendingPoolDistributions.size()==1) //if queue was empty we have to manually start the pd. If not the completion handler of the ongoing pd will start the next one.
+                {
+                    StartNextPoolDistribution();
+                }
+            });
+        }
+
+    private:
+        boost::asio::io_service::strand m_strand;
+        CommunicationT& m_communication;
+        bool m_running=false;
+
+        using PdPtr = std::unique_ptr< PoolDistribution<CommunicationT> >;
+        std::queue<PdPtr> m_pendingPoolDistributions;
+
+        void StartNextPoolDistribution()
+        {
+            if (m_running && !m_pendingPoolDistributions.empty())
+            {
+                m_pendingPoolDistributions.front()->Run();
+            }
+        }
+    };
+
+    ///
+    /// Handles a single pool distribution to a specific node. This class is only to be used by
+    /// PoolDistributor. To start a new pool distribution to a node, use PoolDistributor.AddPoolDistribution.
+    ///
+    template <class CommunicationT>
+    class PoolDistribution
+    {
+    public:
+        PoolDistribution(int64_t nodeId,
+                         int64_t nodeType,
+                         boost::asio::io_service::strand& strand, CommunicationT& communication,
+                         const std::function<void(int64_t)>& completionHandler)
+            :m_nodeId(nodeId)
+            ,m_nodeType(nodeType)
+            ,m_strand(strand)
+            ,m_timer(strand.get_io_service())
+            ,m_communication(communication)
+            ,m_completionHandler(completionHandler)
+        {
+        }
+
+        void Run()
+        {
+            m_strand.dispatch([=]
+            {
+                //collect all connections on this node
+                Connections::Instance().ForEachConnection([=](const Connection& connection)
+                {
+                    auto notLocalContext=!Safir::Dob::NodeParameters::LocalContexts(connection.Id().m_contextId);
+                    auto notDoseConnection=std::string(connection.NameWithoutCounter()).find(";dose_main;")==std::string::npos;
+                    auto connectionOnThisNode=connection.IsLocal();
+                    if (notLocalContext && notDoseConnection && connectionOnThisNode)
+                    {
+                        m_connections.push(DistributionData(connect_message_tag,
+                                                            connection.Id(),
+                                                            connection.NameWithoutCounter(),
+                                                            connection.Counter()));
+                        SendConnections(); //will trigger the sequence SendConnections -> SendStates() -> SendPdComplete()
+                    }
+                });
+            });
+        }
+
+    private:
+        static const int64_t ConnectionMessageDataTypeId=4477521173098643793; //DoseMain.ConnectionMessage
+
+        int64_t m_nodeId;
+        int64_t m_nodeType;
+        boost::asio::io_service::strand& m_strand;
+        boost::asio::steady_timer m_timer;
+        CommunicationT& m_communication;
+        std::function<void(int64_t)> m_completionHandler;
+        std::queue<DistributionData> m_connections;
+
+        void SendConnections()
+        {
+            while (CanSend() && !m_connections.empty())
+            {
+                const DistributionData& d=m_connections.front();
+                boost::shared_ptr<const char[]> p(d.GetReference(), [=](const char* ptr){DistributionData::DropReference(ptr);});
+
+                if (m_communication.Send(m_nodeId, m_nodeType, p, d.Size(), ConnectionMessageDataTypeId, true))
+                {
+                    m_connections.pop();
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            if (m_connections.empty())
+            {
+                SendStates();
+            }
+            else
+            {
+                m_timer.expires_from_now(boost::chrono::milliseconds(10));
+                m_timer.async_wait(m_strand.wrap([=](const boost::system::error_code& /*error*/){SendConnections();}));
+            }
+        }
+
+        void SendStates()
+        {
+            SendPdComplete();
+        }
+
+        void SendPdComplete()
+        {
+            auto req=boost::make_shared<char[]>(sizeof(PoolDistributionInfo));
+            (*reinterpret_cast<PoolDistributionInfo*>(req.get()))=PoolDistributionInfo::PdComplete;
+
+            if (m_communication.Send(m_nodeId, m_nodeType, req, sizeof(PoolDistributionInfo), PoolDistributionInfoDataTypeId, true))
+            {
+                m_timer.expires_from_now(boost::chrono::milliseconds(10));
+                m_timer.async_wait(m_strand.wrap([=](const boost::system::error_code& /*error*/){SendPdComplete();}));
+            }
+        }
+
+        bool CanSend() const
+        {
+            static const size_t threshold=m_communication.SendQueueCapacity(m_nodeType)/2;
+            return m_communication.NumberOfQueuedMessages(m_nodeType)<threshold;
         }
     };
 }

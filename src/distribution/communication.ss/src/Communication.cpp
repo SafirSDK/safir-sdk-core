@@ -81,7 +81,17 @@ namespace
         {
             const std::string& mc=isControlInstance ? nt.controlMulticastAddress : nt.dataMulticastAddress;
             bool useMulticast=(thisNodeIsMulticastEnabled && !mc.empty());
-            auto ptr=boost::make_shared<Safir::Dob::Internal::Com::NodeType>(ioService, nodeId, localIf, useMulticast, nt.id, nt.name, mc, ipVersion, nt.heartbeatInterval, nt.retryTimeout);
+            auto ptr=boost::make_shared<Safir::Dob::Internal::Com::NodeType>(ioService,
+                                                                             nodeId,
+                                                                             localIf,
+                                                                             useMulticast,
+                                                                             nt.id,
+                                                                             nt.name,
+                                                                             mc,
+                                                                             ipVersion,
+                                                                             nt.heartbeatInterval,
+                                                                             nt.maxLostHeartbeats,
+                                                                             nt.retryTimeout);
             nodeTypeMap.insert(NodeTypeMap::value_type(nt.id, ptr));
         }
 

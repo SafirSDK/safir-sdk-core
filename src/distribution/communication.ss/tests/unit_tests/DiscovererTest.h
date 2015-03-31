@@ -47,19 +47,11 @@ public:
         //----------------------
         // Test
         //----------------------
-        Discoverer s0(io, CreateNode(100), [&](const Com::Node&){});
-        Discoverer s1(io, CreateNode(200), [&](const Com::Node&){});
-        Discoverer n0(io, CreateNode(0), [&](const Com::Node&){});
-        Discoverer n1(io, CreateNode(1), [&](const Com::Node&){});
-        Discoverer n2(io, CreateNode(2), [&](const Com::Node&){});
-
-        TRACELINE
-        //Speed up the tests, set timerinterval
-        s0.m_random=Com::Utilities::Random(100, 200);
-        s1.m_random=Com::Utilities::Random(100, 200);
-        n0.m_random=Com::Utilities::Random(100, 200);
-        n1.m_random=Com::Utilities::Random(100, 200);
-        n2.m_random=Com::Utilities::Random(100, 200);
+        Discoverer s0(io, CreateNode(100), 100, [&](const Com::Node&){});
+        Discoverer s1(io, CreateNode(200), 100, [&](const Com::Node&){});
+        Discoverer n0(io, CreateNode(0), 100, [&](const Com::Node&){});
+        Discoverer n1(io, CreateNode(1), 100, [&](const Com::Node&){});
+        Discoverer n2(io, CreateNode(2), 100, [&](const Com::Node&){});
 
         TRACELINE
         std::vector<std::string> seeds{"127.0.0.1:10100", "127.0.0.1:10200"};
@@ -438,9 +430,8 @@ private:
         Info() {}
 
         Info(int64_t id, boost::asio::io_service& io)
-            :discover(boost::make_shared<HandleDiscover::Discoverer>(io, HandleDiscover::CreateNode(id), [=](const Com::Node& n){HandleDiscover::OnNewNode(id, n);}))
+            :discover(boost::make_shared<HandleDiscover::Discoverer>(io, HandleDiscover::CreateNode(id), 100, [=](const Com::Node& n){HandleDiscover::OnNewNode(id, n);}))
         {
-            discover->m_random=Com::Utilities::Random(100, 200);
         }
     };
     static std::map<int64_t, HandleDiscover::Info> discoverState;

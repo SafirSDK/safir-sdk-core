@@ -34,7 +34,7 @@ Receiver::Receiver(Com::ControlModeTag tag, boost::asio::io_service& ioService, 
            nodeType,
            std::string("127.0.0.1:1000")+boost::lexical_cast<std::string>(nodeId),
            std::string("127.0.0.1:1100")+boost::lexical_cast<std::string>(nodeId),
-           {{0, "nt0", "", "", 1000, 1000}, {1, "nt1", "224.90.90.241:12000", "224.90.90.241:13000", 1000, 1000}})
+           {{0, "nt0", "", "", 1000, 1000, 10}, {1, "nt1", "224.90.90.241:12000", "224.90.90.241:13000", 1000, 1000, 10}})
 {
     m_timerInclude.expires_from_now(boost::chrono::milliseconds(1000));
     m_timerInclude.async_wait(m_strand.wrap([=](const boost::system::error_code& error){if (!error) IncludeNode();}));
@@ -62,8 +62,8 @@ Receiver::Receiver(Com::DataModeTag tag, boost::asio::io_service& ioService, int
            nodeType,
            std::string("127.0.0.1:1100")+boost::lexical_cast<std::string>(nodeId),
            {
-             {0, "nt0", "", "", 1000, 1000}
-             ,{1, "nt1", "224.90.90.241:12000", "224.90.90.241:13000", 1000, 1000}
+             {0, "nt0", "", "", 1000, 1000, 10}
+             ,{1, "nt1", "224.90.90.241:12000", "224.90.90.241:13000", 1000, 1000, 10}
            })
 {
     m_timerInclude.expires_from_now(boost::chrono::milliseconds(1000));
