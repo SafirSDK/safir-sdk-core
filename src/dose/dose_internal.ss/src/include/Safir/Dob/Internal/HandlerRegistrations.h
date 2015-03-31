@@ -161,7 +161,7 @@ namespace Internal
         void UnregisterInternal(const ConnectionPtr&                connection,
                                 const Dob::Typesystem::HandlerId&   handlerId,
                                 const bool                          explicitUnregister,
-                                const NodeNumber                    nodeNumber,
+                                const int64_t                       nodeId,
                                 const ContextId                     contextId,
                                 const StateSharedPtr&               statePtr);
 

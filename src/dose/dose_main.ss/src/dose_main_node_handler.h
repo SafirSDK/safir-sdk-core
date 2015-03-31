@@ -76,8 +76,8 @@ namespace Internal
         virtual void OnDeleteRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
                                      Safir::Dob::ResponseSenderPtr    responseSender);
 
-        void HandleDisconnect(const ConnectionPtr & connection, const NodeNumber node);
-        void DeleteConnections(const NodeNumber node);
+        void HandleDisconnect(const ConnectionPtr & connection, const int64_t node);
+        void DeleteConnections(const int64_t node);
 
         void KickConnection(const ConnectionPtr& connection);
 

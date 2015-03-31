@@ -68,7 +68,7 @@ namespace Internal
     NodeStatuses::Status NodeStatuses::GetNodeStatuses() const
     {
         Status status;
-        
+
         for (int i = 0; i < m_nbrOfNodes; ++i)
         {
             status.push_back(m_nodeStatuses[i]);

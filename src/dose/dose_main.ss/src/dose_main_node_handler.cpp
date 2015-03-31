@@ -247,7 +247,7 @@ namespace Internal
 #endif
     }
 
-    void NodeHandler::HandleDisconnect(const ConnectionPtr & connection, const NodeNumber node)
+    void NodeHandler::HandleDisconnect(const ConnectionPtr& connection, const int64_t node)
     {
         if (!connection->IsLocal() && NodeStatuses::Instance().GetNodeStatus(node) == Dob::NodeStatus::Failed)
         {
@@ -257,7 +257,7 @@ namespace Internal
         m_requestHandler->HandleDisconnect(connection);
     }
 
-    void NodeHandler::DeleteConnections(const NodeNumber node)
+    void NodeHandler::DeleteConnections(const int64_t node)
     {
         Connections::Instance().RemoveConnectionFromNode(node, boost::bind(&NodeHandler::HandleDisconnect,this,_1,node));
     }

@@ -55,7 +55,7 @@ namespace Internal
         BOOST_STATIC_ASSERT(sizeof(LamportTimestamp) == 16);
         BOOST_STATIC_ASSERT(sizeof(InternalRequestId) == 4);
         BOOST_STATIC_ASSERT(sizeof(Identifier) == 8);
-        BOOST_STATIC_ASSERT(sizeof(NodeNumber) == 8);
+        BOOST_STATIC_ASSERT(sizeof(int64_t) == 8); //NodeId
         BOOST_STATIC_ASSERT(sizeof(ContextId) == 4);
         BOOST_STATIC_ASSERT(sizeof(ConnectionId) == 24);
         BOOST_STATIC_ASSERT(sizeof(Header) == 4 + sizeof(ConnectionId));

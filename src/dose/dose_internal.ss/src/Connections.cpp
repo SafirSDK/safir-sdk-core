@@ -578,7 +578,7 @@ namespace Internal
         }
     }
 
-    void Connections::RemoveConnectionFromNode(const NodeNumber node, const boost::function<void(const ConnectionPtr & connection)> & connectionFunc)
+    void Connections::RemoveConnectionFromNode(const int64_t node, const boost::function<void(const ConnectionPtr & connection)> & connectionFunc)
     {
         std::vector<ConnectionPtr> removeConnections;
 
