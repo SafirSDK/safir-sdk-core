@@ -100,22 +100,18 @@ namespace Sate
             {
                 ComboBox cb = new ComboBox();
                 cb.DropDownStyle = ComboBoxStyle.DropDownList;
-                Type baseType;
-                if (baseTypeId == Safir.Dob.Typesystem.Object.ClassTypeId)
-                {
-                    baseType = typeof(Safir.Dob.Typesystem.Object);
-                }
-                else
-                {
-                    baseType = MainForm.Instance.DotsGenerated.GetType(Safir.Dob.Typesystem.Operations.GetName(baseTypeId));
-                }
+                Type baseType = MainForm.Instance.GetType(baseTypeId);
                 cb.Sorted = true;
                 cb.Items.Add(baseType);
-                foreach (Type type in MainForm.Instance.DotsGenerated.GetTypes())
+                foreach (Int64 tid in Safir.Dob.Typesystem.Operations.GetAllTypeIds())
                 {
-                    if (type.IsSubclassOf(baseType))
+                    if (Safir.Dob.Typesystem.Operations.IsClass(tid))
                     {
-                        cb.Items.Add(type);
+                        Type type = MainForm.Instance.GetType(tid);
+                        if (type.IsSubclassOf(baseType))
+                        {
+                            cb.Items.Add(type);
+                        }
                     }
                 }
                 if (cb.Items.Count < 2)

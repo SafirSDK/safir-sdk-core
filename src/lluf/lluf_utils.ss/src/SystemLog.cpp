@@ -202,12 +202,26 @@ public:
             break;
 
             case Warning:
+            {
+                lllog(1) << L"WARNING: " << textAscii << std::endl;
+            }
+            break;
+
             case Notice:
+            {
+                lllog(1) << L"NOTICE: " << textAscii << std::endl;
+            }
+            break;
+
             case Informational:
+            {
+                lllog(1) << L"INFORMATIONAL: " << textAscii << std::endl;
+            }
+            break;
+
             case Debug:
             {
-                // No output to lllog in these cases.
-                ;
+                lllog(1) << L"DEBUG: " << textAscii << std::endl;
             }
             break;
 

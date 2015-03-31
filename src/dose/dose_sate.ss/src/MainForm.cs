@@ -58,9 +58,6 @@ namespace Sate
         //Must prevent the callback delegate from garbage collection. Thats why its declared here
         private CallDispatchDelegate callDispatch;
 
-        //dynamically loaded assembly
-        private System.Reflection.Assembly dotsGenerated;
-
         //DOB
         private Safir.Dob.Connection dose = new Safir.Dob.Connection();
 
@@ -280,15 +277,6 @@ namespace Sate
             get
             {
                 return dose;
-            }
-        }
-
-        //Get the dots_generated assembly
-        public System.Reflection.Assembly DotsGenerated
-        {
-            get
-            {
-                return dotsGenerated;
             }
         }
 
@@ -825,23 +813,6 @@ namespace Sate
         private void MainForm_Load(object sender, System.EventArgs e)
         {
             OutputPanel.Instance.LogEvent("- SATE started.", true);
-
-            //------------------------------------------------------
-            // Load dots_generated assembly
-            //------------------------------------------------------
-            OutputPanel.Instance.LogEvent("- Loading class definitions...",  false);
-            try
-            {
-                dotsGenerated=System.Reflection.Assembly.GetAssembly(typeof(Safir.Dob.Entity));
-            }
-            catch
-            {
-                OutputPanel.Instance.LogEvent("Failed!", true);
-                string msg="Falied to load DOB-classes, missing assembly!\nResolve the problem and restart SATE!";
-                MessageBox.Show(msg, "Classes Not Found", System.Windows.Forms.MessageBoxButtons.OK, MessageBoxIcon.Error);
-                throw;
-            }
-            OutputPanel.Instance.LogEvent("Success!", true);
 
             //---------------------------------------------
             //Fill class explorer with existing data types
@@ -2331,6 +2302,11 @@ namespace Sate
         private void runGarbageCollectorToolStripMenuItem_Click(object sender, EventArgs e)
         {
             System.GC.Collect();
+        }
+
+        public System.Type GetType(System.Int64 typeId)
+        {
+            return Safir.Dob.Typesystem.ObjectFactory.Instance.CreateObject(typeId).GetType();
         }
     }
 }

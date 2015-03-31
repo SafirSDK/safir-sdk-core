@@ -226,7 +226,8 @@ namespace SP
 
             //This timeout is just to make sure that if several nodes come up at the same time
             //we will not start too many elections
-            m_electionTimer.expires_from_now(boost::chrono::milliseconds(100));
+            //The number 9 is dependent on how Communication handles sending discovery information.
+            m_electionTimer.expires_from_now(9*m_electionTimeout);
             m_electionInProgress = true;
             m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
             {

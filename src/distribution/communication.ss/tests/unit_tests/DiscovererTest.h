@@ -108,7 +108,7 @@ public:
         n2.HandleReceivedNodeInfo(ni1);
 
         //Wait for HandleReceivedNodeInfo to be executed
-        std::atomic_int fence(0);
+        std::atomic_int fence{0};
         n0.m_strand.post([&]{++fence;});
         n1.m_strand.post([&]{++fence;});
         n2.m_strand.post([&]{++fence;});

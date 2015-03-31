@@ -29,7 +29,7 @@
 #include <boost/regex.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/asio.hpp>
-
+#include <atomic>
 
 //This is a sanity check to make sure we've taken down all the threads in dose_main
 //before exiting. It is only implemented in Linux at the moment, which is okay since it
@@ -87,6 +87,8 @@ int main()
     boost::asio::io_service ioService;
     boost::asio::io_service::strand strand(ioService);
 
+    std::atomic<bool> success {true};
+
     try
     {
         Safir::Dob::Internal::DoseApp theApp(strand);
@@ -94,7 +96,7 @@ int main()
         //Set number of threads to at least 2, or the number of cpu kernels
         auto nbrOfThreads = std::max<size_t>(2, boost::thread::hardware_concurrency());
 
-        const auto run = [&ioService,&theApp]
+        const auto run = [&ioService,&theApp,&success]
         {
             try
             {
@@ -104,13 +106,15 @@ int main()
             catch (const std::exception & exc)
             {
                 SEND_SYSTEM_LOG(Alert,
-                                << "dose_main: Caught 'std::exception' exception from io_service.run(): "
+                                << "DOSE_MAIN: Caught 'std::exception' exception from io_service.run(): "
                                 << "  '" << exc.what() << "'.");
+                success.exchange(false);
             }
             catch (...)
             {
                 SEND_SYSTEM_LOG(Alert,
-                                << "dose_main: Caught '...' exception from io_service.run().");
+                                << "DOSE_MAIN: Caught '...' exception from io_service.run().");
+                success.exchange(false);
             }
 
             theApp.Stop();
@@ -135,17 +139,23 @@ int main()
     catch (const std::exception & exc)
     {
         SEND_SYSTEM_LOG(Alert,
-                        << "dose_main: Caught 'std::exception' exception: "
+                        << "DOSE_MAIN: Caught 'std::exception' exception: "
                         << "  '" << exc.what() << "'.");
-        return 1;
+        success.exchange(false);
     }
     catch (...)
     {
         SEND_SYSTEM_LOG(Alert,
-                        << "dose_main: Caught '...' exception.");
-        return 1;
+                        << "DOSE_MAIN: Caught '...' exception.");
+        success.exchange(false);
     }
-
-    std::wcout << "Exiting..." << std::endl;
-    return 0;
+    if (success)
+    {
+        std::wcout << "DOSE_MAIN: Exiting..." << std::endl;
+    }
+    else
+    {
+        std::wcout << "DOSE_MAIN: Exiting due to error..." << std::endl;
+    }
+    return success ? 0 : 1;
 }
