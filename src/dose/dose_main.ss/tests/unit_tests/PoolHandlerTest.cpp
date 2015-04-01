@@ -108,6 +108,8 @@ public:
             it->second.first=true;
     }
 
+    int64_t Id() const {return m_nodeId;}
+
     int64_t m_nodeId;
 
     static std::map<int64_t, std::pair<bool, std::function<void(int64_t)> > > PoolDistributions;

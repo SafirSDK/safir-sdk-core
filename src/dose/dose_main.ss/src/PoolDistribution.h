@@ -69,23 +69,29 @@ namespace Internal
         {
             m_strand.dispatch([=]
             {
+                //std::wcout<<L"Run PD to "<<m_nodeId<<std::endl;
                 //collect all connections on this node
                 Connections::Instance().ForEachConnection([=](const Connection& connection)
                 {
                     auto notLocalContext=!Safir::Dob::NodeParameters::LocalContexts(connection.Id().m_contextId);
                     auto notDoseConnection=std::string(connection.NameWithoutCounter()).find(";dose_main;")==std::string::npos;
                     auto connectionOnThisNode=connection.IsLocal();
+
+                    //std::wcout<<std::boolalpha<<L"Pd_con id="<<connection.Id().m_id<<L", notLocalContext="<<notLocalContext<<L" notDoseCon="<<notDoseConnection<<L" conOnThis="<<connectionOnThisNode<<std::endl;
                     if (notLocalContext && notDoseConnection && connectionOnThisNode)
                     {
                         m_connections.push(DistributionData(connect_message_tag,
                                                             connection.Id(),
                                                             connection.NameWithoutCounter(),
                                                             connection.Counter()));
-                        SendConnections(); //will trigger the sequence SendConnections -> SendStates() -> SendPdComplete()
                     }
                 });
+
+                SendConnections(); //will trigger the sequence SendConnections -> SendStates() -> SendPdComplete()
             });
         }
+
+        int64_t Id() const {return m_nodeId;}
 
     private:
         static const int64_t ConnectionMessageDataTypeId=4477521173098643793; //DoseMain.ConnectionMessage
@@ -103,6 +109,7 @@ namespace Internal
 
         void SendConnections()
         {
+            //std::wcout<<L"SendConnections"<<std::endl;
             while (CanSend() && !m_connections.empty())
             {
                 const DistributionData& d=m_connections.front();
@@ -131,6 +138,7 @@ namespace Internal
 
         void SendStates(int context)
         {
+            //std::wcout<<L"SendStates"<<std::endl;
             if (context>=Safir::Dob::NodeParameters::NumberOfContexts())
             {
                 SendPdComplete();
@@ -179,6 +187,7 @@ namespace Internal
 
         void DispatchStates(const Safir::Dob::Internal::ConnectionPtr& conPtr, int context)
         {
+            //std::wcout<<L"DispatchStates"<<std::endl;
             bool overflow=false;
             conPtr->GetDirtySubscriptionQueue().Dispatch([this, conPtr, context, &overflow](const SubscriptionPtr& subscription, bool& exitDispatch, bool& dontRemove)
             {
@@ -211,12 +220,13 @@ namespace Internal
 
         void SendPdComplete()
         {
+            //std::wcout<<L"SendPdComplete"<<std::endl;
             m_dobConnection.Close();
 
             auto req=boost::make_shared<char[]>(sizeof(PoolDistributionInfo));
             (*reinterpret_cast<PoolDistributionInfo*>(req.get()))=PoolDistributionInfo::PdComplete;
 
-            if (m_communication.Send(m_nodeId, m_nodeType, req, sizeof(PoolDistributionInfo), PoolDistributionInfoDataTypeId, true))
+            if (!m_communication.Send(m_nodeId, m_nodeType, req, sizeof(PoolDistributionInfo), PoolDistributionInfoDataTypeId, true))
             {
                 m_timer.expires_from_now(boost::chrono::milliseconds(10));
                 m_timer.async_wait(m_strand.wrap([=](const boost::system::error_code& /*error*/){SendPdComplete();}));

@@ -54,7 +54,7 @@ namespace Internal
     {
         m_persistHandler.AddSubscriber([=]
         {
-            std::wcout<<"Persistent data ready"<<std::endl;
+            //std::wcout<<"Persistent data ready"<<std::endl;
             m_persistensReady=true;
             m_poolDistributor.Start();
             SignalPdComplete();
@@ -135,7 +135,8 @@ namespace Internal
             //request pool distributions
             m_poolDistributionRequests.Start(m_strand.wrap([=]
             {
-                std::wcout<<"pool distr ready"<<std::endl;
+
+                //std::wcout<<"pool distr ready"<<std::endl;
                 m_poolDistributionComplete=true;
                 SignalPdComplete();
             }));
@@ -181,6 +182,7 @@ namespace Internal
             {
             case PoolDistributionInfo::RequestPd:
             {
+                //std::wcout<<L"Received PdReq from "<<fromNodeId<<std::endl;
                 //start new pool distribution to node
                 m_poolDistributor.AddPoolDistribution(fromNodeId, fromNodeType);
             }
@@ -188,7 +190,7 @@ namespace Internal
 
             case PoolDistributionInfo::PdComplete:
             {
-                std::wcout<<L"Received PdComplete from "<<fromNodeId<<std::endl;
+                //std::wcout<<L"Received PdComplete from "<<fromNodeId<<std::endl;
                 m_persistHandler.SetPersistentDataReady(); //persistens is ready as soon as we have received one pdComplete
                 m_poolDistributionRequests.ReceivedPoolDistributionCompleteFrom(fromNodeId);
             }
@@ -317,7 +319,7 @@ namespace Internal
     {
         if (m_persistensReady && m_poolDistributionComplete)
         {
-            std::wcout<<"SignalPdComplete"<<std::endl;
+            //std::wcout<<"Signaling PdComplete"<<std::endl;
             m_poolDistributionCompleteCallback();
         }
     }

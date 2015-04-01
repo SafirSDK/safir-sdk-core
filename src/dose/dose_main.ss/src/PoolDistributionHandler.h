@@ -71,6 +71,7 @@ namespace Internal
         //Called when a new pdRequest is received. Will result in a pd to the node with specified id.
         void AddPoolDistribution(int64_t nodeId, int64_t nodeTypeId)
         {
+            //std::wcout<<L"AddPoolDistribution "<<nodeId<<std::endl;
             m_strand.dispatch([this, nodeId, nodeTypeId]
             {
                 auto pd=PdPtr(new PoolDistributionT(nodeId, nodeTypeId, m_strand, m_communication, [=](int64_t nodeId)
