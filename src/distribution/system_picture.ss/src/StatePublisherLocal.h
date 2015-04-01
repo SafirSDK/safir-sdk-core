@@ -78,10 +78,9 @@ namespace SP
                 throw std::logic_error("Unexpected error in StatePublisherLocal::Publish");
             }
 
-            lllog(8) << "Publishing system state over ipc" << std::endl;
-
             m_coordinator.PerformOnStateMessage([this](std::unique_ptr<char[]> data, const size_t size)
                                                 {
+                                                    lllog(8) << "Publishing system state over ipc" << std::endl;
                                                     m_publisher.Send(std::move(data), static_cast<uint32_t>(size));
                                                 },
                                                 false); //ok to send anyones state

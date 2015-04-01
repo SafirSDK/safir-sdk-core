@@ -154,6 +154,7 @@ namespace SP
         {
             m_strand.dispatch([this,fn,onlyOwnState]
             {
+                lllog(8) << "Coordinator::PerformOnStateMessage:" << std::endl;
                 if (onlyOwnState)
                 {
                     const bool okToSend = UpdateMyState();
@@ -171,7 +172,7 @@ namespace SP
                     return;
                 }
 
-                lllog(8) << " - Sending!" << std::endl;
+                lllog(8) << " - Ok to send!" << std::endl;
                 const size_t size = m_stateMessage.ByteSize();
                 auto data = std::unique_ptr<char[]>(new char[size]);
                 m_stateMessage.SerializeWithCachedSizesToArray
@@ -380,6 +381,7 @@ namespace SP
         {
             if (!m_electionHandler.IsElected())
             {
+                lllog(9) << "SP: We're not elected, not updating my state." << std::endl;
                 return false;
             }
 
