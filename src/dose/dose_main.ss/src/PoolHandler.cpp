@@ -54,6 +54,7 @@ namespace Internal
     {
         m_persistHandler.AddSubscriber([=]
         {
+            std::wcout<<"Persistent data ready"<<std::endl;
             m_persistensReady=true;
             m_poolDistributor.Start();
             SignalPdComplete();
@@ -121,6 +122,8 @@ namespace Internal
         }
 
         m_persistHandler.Start(logStatus);
+
+        m_persistHandler.SetPersistentDataReady();
     }
 
     void PoolHandler::Start(const std::function<void()>& poolDistributionComplete)
@@ -134,6 +137,7 @@ namespace Internal
             //request pool distributions
             m_poolDistributionRequests.Start(m_strand.wrap([=]
             {
+                std::wcout<<"pool distr ready"<<std::endl;
                 m_poolDistributionComplete=true;
                 SignalPdComplete();
             }));
@@ -315,6 +319,7 @@ namespace Internal
     {
         if (m_persistensReady && m_poolDistributionComplete)
         {
+            std::wcout<<"SignalPdComplete"<<std::endl;
             m_poolDistributionCompleteCallback();
         }
     }
