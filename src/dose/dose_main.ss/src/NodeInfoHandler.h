@@ -21,13 +21,8 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
+#pragma once
 
-#ifndef _dose_main_node_handler_h
-#define _dose_main_node_handler_h
-
-#include <Safir/Dob/NodeStatus.h>
-#include <Safir/Dob/Internal/ConnectionId.h>
-#include <Safir/Dob/Internal/InternalFwd.h>
 #include <Safir/Dob/Connection.h>
 #include <boost/noncopyable.hpp>
 
@@ -37,61 +32,30 @@ namespace Dob
 {
 namespace Internal
 {
-#if 0 //stewart
-    class ExternNodeCommunication;
-#endif
 
-    class RequestHandler;
-    class PoolHandler;
-
-    class NodeHandler:
+    class NodeInfoHandler:
         public Safir::Dob::EntityHandler,
         private boost::noncopyable
     {
     public:
-
-        NodeHandler();
-        ~NodeHandler();
-        void Init (
-#if 0 //stewart
-                   ExternNodeCommunication & ecom,
-#endif
-                   RequestHandler & requestHandler,
-                   PoolHandler& poolHandler);
-
-        //Get and handle node status changes from dosecom.
-        void HandleNodeStatusChanges();
+        NodeInfoHandler();
 
     private:
 
-        virtual void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId    typeId,
-                                           const Safir::Dob::Typesystem::HandlerId& handlerId);
+        void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId    typeId,
+                                   const Safir::Dob::Typesystem::HandlerId& handlerId) override;
 
-        virtual void OnCreateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
-                                     Safir::Dob::ResponseSenderPtr    responseSender);
+        void OnCreateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
+                             Safir::Dob::ResponseSenderPtr    responseSender) override;
 
-        virtual void OnUpdateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
-                                     Safir::Dob::ResponseSenderPtr    responseSender);
+        void OnUpdateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
+                                     Safir::Dob::ResponseSenderPtr    responseSender) override;
 
-        virtual void OnDeleteRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
-                                     Safir::Dob::ResponseSenderPtr    responseSender);
+        void OnDeleteRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
+                             Safir::Dob::ResponseSenderPtr    responseSender) override;
 
-        void HandleDisconnect(const ConnectionPtr & connection, const int64_t node);
-        void DeleteConnections(const int64_t node);
-
-        void KickConnection(const ConnectionPtr& connection);
-
-#if 0 //stewart
-        ExternNodeCommunication* m_ecom;
-#endif
-
-        RequestHandler * m_requestHandler;
-        PoolHandler * m_poolHandler;
-
-        Safir::Dob::SecondaryConnection m_connection;
+        Safir::Dob::Connection m_connection;
     };
 }
 }
 }
-
-#endif

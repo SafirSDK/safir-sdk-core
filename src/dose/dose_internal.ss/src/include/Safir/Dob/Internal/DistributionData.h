@@ -474,9 +474,6 @@ namespace Internal
         const VersionNumber GetVersion() const {return GetEntityStateHeader().m_version;}
         void IncrementVersion() {++GetEntityStateHeader().m_version;}
         void ResetVersion() {GetEntityStateHeader().m_version = VersionNumber();}
-        void DecrementVersion();
-        void ResetDecrementedFlag() {GetEntityStateHeader().m_versionIsDecremented = false;}
-        const VersionNumber GetUndecrementedVersion() const;
 
         EntityStateKind GetEntityStateKind() const {return GetEntityStateHeader().m_kind;}
         void SetEntityStateKind(const EntityStateKind& kind) {GetEntityStateHeader().m_kind = kind;}
@@ -632,7 +629,7 @@ namespace Internal
             bool                        m_explicitlyDeleted;
             bool                        m_sourceIsPermanentStore;
             bool                        m_hasBlob;
-            bool                        m_versionIsDecremented;
+            bool                        m_padding2;
             Typesystem::Int32           m_numTimestamps;
         };
 

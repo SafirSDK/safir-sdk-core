@@ -1820,7 +1820,6 @@ namespace Internal
             newRealState.IncrementVersion();
             newRealState.SetExplicitlyDeleted(true);
             newRealState.SetEntityStateKind(DistributionData::Real);
-            newRealState.ResetDecrementedFlag();
             newRealState.ResetSourceIsPermanentStore();
         }
 

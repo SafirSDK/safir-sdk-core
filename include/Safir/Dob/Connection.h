@@ -28,6 +28,7 @@
 #include <Safir/Dob/DoseCppExportDefs.h>
 #include <Safir/Dob/ConnectionBase.h>
 #include <Safir/Dob/Typesystem/Defs.h>
+#include <Safir/Dob/NodeStatus.h>
 
 // Somewhat dirty but convenient for the Dob-user
 #include <Safir/Dob/SecondaryConnection.h>

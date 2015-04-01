@@ -226,6 +226,8 @@ namespace Internal
                                                         *m_requestHandler,
                                                         *m_pendingRegistrationHandler));
 
+        m_nodeInfoHandler.reset(new NodeInfoHandler());
+
         //setup pdComplete sub
 
         m_connectionThread = boost::thread([this]() {ConnectionThread();});

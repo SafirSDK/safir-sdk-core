@@ -138,6 +138,67 @@ namespace
             }
         }
     }
+
+#if 0 //stewart from dose_main_node_handler.cpp
+
+
+    void NodeHandler::HandleNodeStatusChanges()
+    {
+        dcom_ulong32 id;        //out range 0-63
+        dcom_ulong32 ns = 0;        //out = NODESTATUS_UP/DOWN
+        dcom_ulong32 addr;
+
+        while (DoseCom_GetNodeChange(id, ns, addr))
+        {
+            switch (ns)
+            {
+            case NODESTATUS_DOWN:
+                {
+                    DeleteConnections(id);
+                    m_poolHandler->RemoveStatesWaitingForNode(static_cast<Typesystem::Int32>(id));
+                }
+                break;
+            default:
+            }
+        }
+
+
+        if (!NodeStatuses::Instance().AnyNodeHasStatus(NodeStatus::Starting) &&
+            !NodeStatuses::Instance().AnyNodeHasStatus(NodeStatus::Failed))
+        {
+            // Ok, it seems that all nodes are either Started or Expected (has never been started).
+            // In this case we know that we have got the pools, and thus the ghosts, from all nodes so
+            // we can clean-up the ghosts and only save the ones from the newest registration.
+
+            EntityTypes::Instance().CleanGhosts();
+
+            // Kick all connections so they will do an dispatch.
+            Connections::Instance().ForEachConnectionPtr(boost::bind(&NodeHandler::KickConnection,this,_1));
+
+        }
+    }
+
+
+    void NodeHandler::HandleDisconnect(const ConnectionPtr& connection, const int64_t /*TODO stewart: node*/)
+    {
+        if (!connection->IsLocal() && NodeStatuses::Instance().GetNodeStatus(node) == Dob::NodeStatus::Failed)
+        {
+            connection->SetNodeDown();
+        }
+        m_requestHandler->HandleDisconnect(connection);
+    }
+
+    void NodeHandler::DeleteConnections(const int64_t node)
+    {
+        Connections::Instance().RemoveConnectionFromNode(node, boost::bind(&NodeHandler::HandleDisconnect,this,_1,node));
+    }
+
+    void NodeHandler::KickConnection(const ConnectionPtr& connection)
+    {
+        connection->SignalIn();
+    }
+
+#endif
 }
 }
 }

@@ -459,7 +459,6 @@ namespace Internal
         entityStateHeader.m_explicitlyDeleted = explicitlyDeleted;
         entityStateHeader.m_sourceIsPermanentStore = sourceIsPermanentStore;
         entityStateHeader.m_hasBlob = blob != NULL;
-        entityStateHeader.m_versionIsDecremented = false;
         entityStateHeader.m_numTimestamps = numTimestamps;
 
         if (numTimestamps > 0)
@@ -1100,23 +1099,6 @@ namespace Internal
         Typesystem::Internal::SetChanged(blob, changed);
     }
 
-    void DistributionData::DecrementVersion()
-    {
-        ENSURE(!GetEntityStateHeader().m_versionIsDecremented, << "Can't decrement an already decremented version!");
-        --GetEntityStateHeader().m_version;
-        GetEntityStateHeader().m_versionIsDecremented = true;
-    }
-
-    const VersionNumber DistributionData::GetUndecrementedVersion() const
-    {
-        VersionNumber ver = GetEntityStateHeader().m_version;
-        if (GetEntityStateHeader().m_versionIsDecremented)
-        {
-            ++ver;
-        }
-        return ver;
-    }
-
     char * DistributionData::GetBlobCopy() const
     {
         return Dob::Typesystem::Internal::CreateCopy(GetBlob());
@@ -1243,7 +1225,6 @@ namespace Internal
                      << "\tExplicitlyDeleted: " << std::boolalpha << IsExplicitlyDeleted() << std::endl
                      << "\tSourceIsPermanentStore: " << SourceIsPermanentStore() << std::endl
                      << "\tHasBlob: " << HasBlob() << std::endl
-                     << "\tVersionIsDecremented: " << GetEntityStateHeader().m_versionIsDecremented << std::endl
                      << "\tNumTimestamps: " << GetEntityStateHeader().m_numTimestamps <<std::endl;
                 if (GetEntityStateHeader().m_numTimestamps != 0)
                 {

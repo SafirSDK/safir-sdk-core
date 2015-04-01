@@ -148,19 +148,13 @@ namespace Internal
         std::unique_ptr<ResponseHandler>     m_responseHandler;
         std::unique_ptr<PoolHandler>         m_poolHandler;
         std::unique_ptr<ConnectionHandler>   m_connectionHandler;
+        std::unique_ptr<NodeInfoHandler>     m_nodeInfoHandler;
 
         //Pending Registrations
         std::unique_ptr<PendingRegistrationHandler> m_pendingRegistrationHandler;
 
-#if 0 //stewart
-        //Extern node communication
-        ExternNodeCommunication m_ecom;
-#endif
-
         // Process info
         ProcessInfoHandler m_processInfoHandler;
-
-        NodeHandler m_nodeHandler;
 
         Safir::Dob::Connection m_ownConnection;
 

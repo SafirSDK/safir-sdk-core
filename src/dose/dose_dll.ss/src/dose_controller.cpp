@@ -1982,7 +1982,7 @@ namespace Internal
         if (lastKind == Real && currKind == Real && subscriptionOptions.includeUpdates)
         {
             if (lastState.GetCreationTime() != currState.GetCreationTime() ||
-                lastState.GetVersion() != currState.GetUndecrementedVersion())
+                lastState.GetVersion() != currState.GetVersion())
             {
                 updated = true;
             }
@@ -2029,7 +2029,7 @@ namespace Internal
             if (subscriptionOptions.wantsLastState && subscriptionOptions.includeUpdates)
             {
                 if (lastState.GetCreationTime() != currState.GetCreationTime() ||
-                    lastState.GetVersion().IsDiffGreaterThanOne(currState.GetUndecrementedVersion()))
+                    lastState.GetVersion().IsDiffGreaterThanOne(currState.GetVersion()))
                 {
                     updated = true;
                 }
@@ -2349,7 +2349,6 @@ namespace Internal
 
         // Update the header
         dispatchedInjection.SetEntityStateKind(DistributionData::Real);
-        dispatchedInjection.ResetDecrementedFlag();
         if (dispatchedInjection.HasBlob())
         {
             dispatchedInjection.SetSenderId(connection->Id());

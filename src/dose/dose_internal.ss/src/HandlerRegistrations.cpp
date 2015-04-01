@@ -658,19 +658,7 @@ namespace Internal
         newRealState.ResetSenderIdConnectionPart();
         newRealState.SetExplicitlyDeleted(false);
 
-        // Normally the entity version gets incremented for every new state, but, there is an
-        // exception to this rule and this is when the deletion (or ghosting) of an entity is
-        // caused by a remote node being marked as down. In this case we actually *decrements*
-        // the version number so if the node joins again the version from the remote node will
-        // override our version.
-        if (!connection->IsLocal() && connection->NodeIsDown())
-        {
-            newRealState.DecrementVersion();
-        }
-        else
-        {
-            newRealState.IncrementVersion();
-        }
+        newRealState.IncrementVersion();
 
         // Release pointer to request in queue. We must not have any shared pointers to request queues
         // when the connection (and therefore the queue container) is destructed.
