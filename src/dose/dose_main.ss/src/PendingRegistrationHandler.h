@@ -27,7 +27,6 @@
 #include "dose_main_timers.h"
 #include <map>
 #include "dose_main_communication.h"
-#include "dose_main_node_handler.h"
 #include <bitset>
 namespace Safir
 {

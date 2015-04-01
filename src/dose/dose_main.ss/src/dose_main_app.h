@@ -31,7 +31,7 @@
 #include "dose_main_communication.h"
 #include "ConnectionHandler.h"
 #include "dose_main_message_handler.h"
-#include "dose_main_node_handler.h"
+#include "NodeInfoHandler.h"
 #include "PendingRegistrationHandler.h"
 #include "PoolHandler.h"
 #include "dose_main_process_info_handler.h"

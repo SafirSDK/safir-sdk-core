@@ -22,7 +22,7 @@
 *
 ******************************************************************************/
 
-#include "dose_main_node_handler.h"
+#include "NodeInfoHandler.h"
 
 #include "dose_main_communication.h"
 #include "dose_main_request_handler.h"

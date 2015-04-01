@@ -26,8 +26,8 @@
 
 #include <Safir/Dob/Internal/ServiceTypes.h>
 #include <Safir/Dob/Internal/EntityTypes.h>
-
 #include <Safir/Dob/Internal/Connections.h>
+#include <Safir/Dob/Service.h>
 #include <iomanip>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Dob/ThisNodeParameters.h>
