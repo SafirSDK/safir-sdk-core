@@ -413,7 +413,7 @@ namespace Internal
                     lllout << "HandlerId did not match, discarding"<<std::endl;
                     return;
                 }
-
+#if 0 //stewart
                 if (response)
                 {
                     lllout << "Accept from "<< sender.m_node << ", " << sender.m_id<<std::endl;
@@ -426,6 +426,7 @@ namespace Internal
                     findIt->second.acceptedNodes[sender.m_node] = false;
                     findIt->second.rejected = true;
                 }
+#endif
             }
             break;
         default:
