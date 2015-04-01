@@ -249,7 +249,7 @@ namespace Internal
 #endif
     }
 
-    void NodeHandler::HandleDisconnect(const ConnectionPtr& connection, const int64_t node)
+    void NodeHandler::HandleDisconnect(const ConnectionPtr& connection, const int64_t /*TODO stewart: node*/)
     {
 #if 0 //stewart
         if (!connection->IsLocal() && NodeStatuses::Instance().GetNodeStatus(node) == Dob::NodeStatus::Failed)
