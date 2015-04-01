@@ -24,6 +24,8 @@
 #pragma once
 #include <unordered_map>
 #include "Distribution.h"
+#include "PoolDistributionRequestSender.h"
+#include "PoolDistributionHandler.h"
 #include "PoolDistribution.h"
 #include "StateDistributor.h"
 #include "PersistHandler.h"
@@ -51,14 +53,19 @@ namespace Internal
         void Stop();
 
     private:
+        using PoolDistributionType=PoolDistribution<Com::Communication>;
+        using PoolDistributionHandlerType=PoolDistributionHandler<Com::Communication, PoolDistributionType>;
+        using PoolDistributionRequestSenderType=PoolDistributionRequestSender<Com::Communication>;
+        using StateDistributorType=StateDistributor<Com::Communication>;
+
         boost::asio::io_service::strand m_strand;
         boost::asio::steady_timer m_endStatesTimer;
         Com::Communication& m_communication;
-        PoolDistributor<Com::Communication> m_poolDistributor;
-        PoolDistributionRequestor<Com::Communication> m_poolDistributionRequests;
+        PoolDistributionHandlerType m_poolDistributor;
+        PoolDistributionRequestSenderType m_poolDistributionRequests;
         PersistHandler m_persistHandler;
         std::unordered_map<int64_t, int64_t> m_nodes; //map<nodeId, nodeType>
-        std::unordered_map<int64_t, std::unique_ptr<StateDistributor<Com::Communication> > > m_stateDistributors; //map<nodeType, StateDistributor>
+        std::unordered_map<int64_t, std::unique_ptr<StateDistributorType> > m_stateDistributors; //map<nodeType, StateDistributor>
 
         std::function<void()> m_poolDistributionCompleteCallback;
         bool m_persistensReady=false;

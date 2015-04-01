@@ -31,6 +31,7 @@
 #include <Safir/Dob/Internal/ConnectionId.h>
 #include <Safir/Dob/ConnectionAspectMisc.h>
 #include <Safir/Dob/ConnectionAspectInjector.h>
+#include <Safir/Dob/Internal/DistributionData.h>
 #include <Safir/Dob/NodeParameters.h>
 
 

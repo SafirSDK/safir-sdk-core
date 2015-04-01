@@ -2,7 +2,9 @@ add_definitions(-DSAFIR_TEST)
 
 ADD_EXECUTABLE(timer_test timer_test.cpp ../../src/dose_main_timers.h ../../src/dose_main_timers.cpp)
 ADD_EXECUTABLE(Distribution_test Distribution_test.cpp ../../src/Distribution.h)
-ADD_EXECUTABLE(PoolHandler_test PoolHandlerTest.cpp ../../src/PoolDistribution.h)
+ADD_EXECUTABLE(PoolHandler_test PoolHandlerTest.cpp
+                ../../src/PoolDistributionRequestSender.h
+                ../../src/PoolDistributionHandler.h)
 
 TARGET_LINK_LIBRARIES(timer_test PRIVATE
   dose_internal

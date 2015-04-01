@@ -117,13 +117,11 @@ namespace Internal
         //create one StateDistributor per nodeType
         for (auto& nt : distribution.GetNodeTypeConfiguration().nodeTypesParam)
         {
-            auto sd=std::unique_ptr<StateDistributor<Com::Communication> >(new StateDistributor<Com::Communication>(nt.id, m_communication, m_strand, checkPendingReg));
+            auto sd=std::unique_ptr<StateDistributorType >(new StateDistributorType(nt.id, m_communication, m_strand, checkPendingReg));
             m_stateDistributors.emplace(nt.id, std::move(sd));
         }
 
         m_persistHandler.Start(logStatus);
-
-        m_persistHandler.SetPersistentDataReady();
     }
 
     void PoolHandler::Start(const std::function<void()>& poolDistributionComplete)
