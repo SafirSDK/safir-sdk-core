@@ -80,7 +80,7 @@ namespace Safir.Dob.Typesystem
 
                 if (!lib.library)
                 {
-                    System.Console.WriteLine("Not loading " + lib.dotnetAssemblyName + ", since it is an override.");
+                    // Not loading assembly since it is an override.
                 }
                 else if (string.IsNullOrEmpty(lib.dotnetAssemblyLocation))
                 {
