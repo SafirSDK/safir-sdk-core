@@ -222,12 +222,14 @@ namespace SP
         void StartElection()
         {
             //cancel any other pending elections
-            m_electionTimer.cancel(); //
+            m_electionTimer.cancel();
 
             //This timeout is just to make sure that if several nodes come up at the same time
             //we will not start too many elections
-            //The number 9 is dependent on how Communication handles sending discovery information.
-            m_electionTimer.expires_from_now(9*m_electionTimeout);
+            //The number 4 is dependent on how Communication handles sending discovery information.
+            //It sends discovery information every 3*electionTimeout, so we want to wait a little bit
+            //longer than that.
+            m_electionTimer.expires_from_now(4*m_electionTimeout);
             m_electionInProgress = true;
             m_electionTimer.async_wait(m_strand.wrap([this](const boost::system::error_code& error)
             {
