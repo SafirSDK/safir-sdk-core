@@ -25,7 +25,6 @@
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
-#include <Safir/Dob/Internal/NodeStatuses.h>
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include "ConnectionHandler.h"

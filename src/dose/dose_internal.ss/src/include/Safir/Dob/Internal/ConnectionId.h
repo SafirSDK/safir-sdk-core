@@ -36,7 +36,6 @@ namespace Dob
 {
 namespace Internal
 {
-    typedef Dob::Typesystem::Int64 NodeNumber;
     typedef Dob::Typesystem::Int64 Identifier;
     typedef std::set<Identifier> IdentifierSet;
 
@@ -45,11 +44,11 @@ namespace Internal
     struct ConnectionId
     {
         ConnectionId(): m_node(-1), m_id(-1), m_contextId(-1) {}
-        ConnectionId(const NodeNumber node, const ContextId contextId, const Identifier id): m_node(node),  m_id(id), m_contextId(contextId) {}
+        ConnectionId(const int64_t node, const ContextId contextId, const Identifier id): m_node(node),  m_id(id), m_contextId(contextId) {}
 
 #pragma pack (push)
 #pragma pack (4)
-        NodeNumber m_node;
+        int64_t m_node;
         Identifier m_id; //enough to identify a connection globally among connected DOB's
         ContextId  m_contextId;
         int32_t  m_padding;

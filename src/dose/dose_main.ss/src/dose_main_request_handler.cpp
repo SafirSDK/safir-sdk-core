@@ -401,7 +401,7 @@ namespace Internal
             const RequestTimerInfo& timerInfo = boost::static_pointer_cast<ReqTimer>(timer)->UserData();
 
             const ConnectionPtr sender = Connections::Instance().GetConnection
-                (ConnectionId(ThisNodeParameters::NodeNumber(),
+                (ConnectionId(Connections::Instance().NodeId(),
                               -1,
                               timerInfo.m_connectionIdentifier),
                  std::nothrow);

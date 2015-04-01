@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_CASE( callback_order )
 
                              },
                              [&nodeDownCbCounter]
-                             (const int64_t nodeId)
+                             (const int64_t /*nodeId*/)
                              {
                                 ++nodeDownCbCounter;
                              });

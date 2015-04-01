@@ -105,7 +105,7 @@ void BackdoorKeeper::OnMessage(const Safir::Dob::MessageProxy messageProxy)
 
         if (!cmd->NodeName().IsNull())
         {
-            if (!boost::regex_search(Safir::Dob::NodeParameters::Nodes(Safir::Dob::ThisNodeParameters::NodeNumber())->NodeName().GetVal(),
+            if (!boost::regex_search(Safir::Dob::ThisNodeParameters::Name(),
                                      boost::wregex(cmd->NodeName().GetVal(), regExpFlags)))
             {
                 // Node name doesn't match
@@ -142,13 +142,13 @@ void BackdoorKeeper::OnMessage(const Safir::Dob::MessageProxy messageProxy)
             {
                 // It's a 'ping' command. Answer to it without bothering
                 // the subclass implementator.
-                
+
                 std::wostringstream ostr;
-                ostr << "Ping reply from " 
-                     << connectionAspectMisc.GetConnectionName() 
-                     <<  " on node " 
-                     << Safir::Dob::NodeParameters::Nodes(Safir::Dob::ThisNodeParameters::NodeNumber())->NodeName().GetVal();
-                
+                ostr << "Ping reply from "
+                     << connectionAspectMisc.GetConnectionName()
+                     <<  " on node "
+                     << Safir::Dob::ThisNodeParameters::Name();
+
                 Safir::Logging::SendSystemLog(Safir::Logging::Debug,
                                               ostr.str());
 
@@ -209,4 +209,3 @@ void BackdoorKeeper::Tokenize(const std::wstring&        str,
 
 }
 }
-

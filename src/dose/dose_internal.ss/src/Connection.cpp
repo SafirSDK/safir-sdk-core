@@ -69,7 +69,7 @@ namespace Internal
 
     Connection::Connection(const std::string & name,
                            const Typesystem::Int32 counter,
-                           const NodeNumber node,
+                           const int64_t node,
                            const ContextId contextId,
                            const pid_t pid,
                            const bool local):

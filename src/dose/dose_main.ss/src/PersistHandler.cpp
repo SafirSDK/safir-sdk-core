@@ -31,7 +31,6 @@
 #include <Safir/Dob/SuccessResponse.h>
 #include <Safir/Dob/ErrorResponse.h>
 #include <Safir/Dob/Internal/EntityTypes.h>
-#include <Safir/Dob/Internal/NodeStatuses.h>
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Dob/ResponseGeneralErrorCodes.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
@@ -47,8 +46,10 @@ namespace Internal
 {
 
     PersistHandler::PersistHandler(boost::asio::io_service& ioService,
+                                   const int64_t nodeId,
                                    Com::Communication& communication)
         : m_strand(ioService),
+          m_nodeId(nodeId),
           m_communication(communication),
           m_persistDataReady(false)
     {
@@ -206,9 +207,9 @@ namespace Internal
 #if 0 //stewart
             DistributionData request
                 (have_persistence_data_request_tag,
-                ConnectionId(ThisNodeParameters::NodeNumber(),
-                             0,     //use context 0 for this request
-                             -1));  //dummy identifier since it is a dose_main only thing.
+                 ConnectionId(m_nodeId,
+                              0,     //use context 0 for this request
+                              -1));  //dummy identifier since it is a dose_main only thing.
 
             const bool result = m_ecom->Send(request);
             lllout << "Sent HavePersistenceDataRequest (send result = " << result << ")" << std::endl;
@@ -267,7 +268,7 @@ namespace Internal
                 lllout << "Got an Action_HavePersistenceDataRequest, responding with " << m_persistDataReady << std::endl;
                 DistributionData response
                     (have_persistence_data_response_tag,
-                     ConnectionId(ThisNodeParameters::NodeNumber(),
+                     ConnectionId(m_nodeId,
                                   0,    //use context 0 for this response
                                   -1),  //dummy identifier since it is a dose_main only thing.
                      m_persistDataReady);

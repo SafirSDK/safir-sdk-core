@@ -354,7 +354,7 @@ namespace Internal
 
             if (!cmd->NodeName().IsNull())
             {
-                if (!boost::regex_search(Safir::Dob::NodeParameters::Nodes(Safir::Dob::ThisNodeParameters::NodeNumber())->NodeName().GetVal(),
+                if (!boost::regex_search(Safir::Dob::ThisNodeParameters::Name(),
                                          boost::wregex(cmd->NodeName().GetVal(), regExpFlags)))
                 {
                     // Node name doesn't match
@@ -405,7 +405,7 @@ namespace Internal
                     ostr << "Tracer Ping reply from "
                          << connectionAspectMisc.GetConnectionName()
                          <<  " on node "
-                         << Safir::Dob::NodeParameters::Nodes(Safir::Dob::ThisNodeParameters::NodeNumber())->NodeName().GetVal();
+                         << Safir::Dob::ThisNodeParameters::Name();
 
                     std::wcout << ostr.str() << std::endl;
 

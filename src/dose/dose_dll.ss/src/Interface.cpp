@@ -1091,7 +1091,7 @@ void DoseC_GetConnectionInfo(const char* const state,
 
         const ConnectionId sender = data.GetSenderId();
 
-        connInfo->NodeNumber() = sender.m_node;
+        connInfo->NodeId() = sender.m_node;
         connInfo->ConnectionId() = sender.m_id;
 
         const std::string name = Connections::Instance().GetConnectionName(sender);
@@ -1375,6 +1375,19 @@ void DoseC_GetContext(const DotsC_Int32 ctrl,
     try
     {
         context = ControllerTable::Instance().GetController(ctrl)->GetContext();
+        success = true;
+    }
+    CATCH_LIBRARY_EXCEPTIONS;
+}
+
+void DoseC_GetNodeId(DotsC_Int64& nodeId,
+                     bool& success)
+{
+    lllog(9) << "Entering " << BOOST_CURRENT_FUNCTION << std::endl;
+    success = false;
+    try
+    {
+        nodeId = Connections::Instance().NodeId();
         success = true;
     }
     CATCH_LIBRARY_EXCEPTIONS;

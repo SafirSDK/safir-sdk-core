@@ -63,6 +63,9 @@ namespace Internal
         Connections(private_constructor_t, const int64_t nodeId);
         ~Connections();
 
+        /** Get the id of the current node */
+        int64_t NodeId() const {return m_nodeId;}
+        
         /**
          * This is for applications waiting for "things" to happen to its connection.
          * This blocks forever until SignalIn for that connection has been called.
@@ -185,7 +188,7 @@ namespace Internal
         bool IsPendingAccepted(const Typesystem::TypeId typeId, const Typesystem::HandlerId & handlerId, const ContextId contextId) const;
 
         // Removes connection(s) from specified node.
-        void RemoveConnectionFromNode(const NodeNumber node, const boost::function<void(const ConnectionPtr & connection)> & connectionFunc);
+        void RemoveConnectionFromNode(const int64_t node, const boost::function<void(const ConnectionPtr & connection)> & connectionFunc);
 
         //A reader lock on the connection vector will be taken during the looping and the callback!
         void ForEachConnection(const boost::function<void(const Connection & connection)> & connectionFunc) const;

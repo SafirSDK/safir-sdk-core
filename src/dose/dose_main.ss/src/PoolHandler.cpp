@@ -50,7 +50,7 @@ namespace Internal
         ,m_communication(distribution.GetCommunication())
         ,m_poolDistributor(io, m_communication)
         ,m_poolDistributionRequests(io, m_communication)
-        ,m_persistHandler(io, m_communication)
+        ,m_persistHandler(io, distribution.GetNodeId(), m_communication)
     {
         m_persistHandler.AddSubscriber([=]
         {

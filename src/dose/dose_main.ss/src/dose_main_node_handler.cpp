@@ -46,7 +46,6 @@
 #include <Safir/Dob/Internal/DoseCom_Interface.h>
 #endif
 
-#include <Safir/Dob/Internal/NodeStatuses.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 
 
@@ -56,6 +55,7 @@ namespace Dob
 {
 namespace Internal
 {
+#if 0 //stewart
     void CheckParameters()
     {
         if (Safir::Dob::NodeParameters::NodesArraySize() != Safir::Dob::NodeParameters::NumberOfNodes())
@@ -80,7 +80,7 @@ namespace Internal
             }
         }
     }
-
+#endif
     NodeHandler::NodeHandler()
         :
 #if 0 //stewart
@@ -102,8 +102,8 @@ namespace Internal
                            RequestHandler & requestHandler,
                            PoolHandler& poolHandler)
     {
-        CheckParameters();
 #if 0 //stewart
+        CheckParameters();
         m_ecom = &ecom;
 #endif
 
@@ -123,6 +123,10 @@ namespace Internal
                                            Typesystem::HandlerId(),
                                            Safir::Dob::InstanceIdPolicy::HandlerDecidesInstanceId,
                                            this);
+#if 0 //stewart
+
+        //TODO stewart: maybe make this a class constant
+        const int64_t thisNodeId = Connections::Instance().NodeId();
 
         // Set initial status for all nodes in the configuration
         for (int id = 0; id < Dob::NodeParameters::NumberOfNodes(); ++id)
@@ -131,12 +135,10 @@ namespace Internal
 
             ni->NodeName().SetVal(NodeParameters::Nodes(id)->NodeName().GetVal());
 
-            if (id == ThisNodeParameters::NodeNumber())
+            if (id == thisNodeId)
             {
                 ni->Status().SetVal(Dob::NodeStatus::Started);
-#if 0 //stewart
                 ni->IpAddress().SetVal(m_ecom->GetOwnIpAddress());
-#endif
                 //stewart todo
                 ni->IpAddress().SetVal(L"127.0.0.1");
 
@@ -156,7 +158,7 @@ namespace Internal
             }
         }
 
-#if 0 //stewart
+
         if (!m_ecom->GetQualityOfServiceData().IsStandalone())
         {
             HandleNodeStatusChanges();
@@ -247,17 +249,18 @@ namespace Internal
 #endif
     }
 
-    void NodeHandler::HandleDisconnect(const ConnectionPtr & connection, const NodeNumber node)
+    void NodeHandler::HandleDisconnect(const ConnectionPtr& connection, const int64_t node)
     {
+#if 0 //stewart
         if (!connection->IsLocal() && NodeStatuses::Instance().GetNodeStatus(node) == Dob::NodeStatus::Failed)
         {
             connection->SetNodeDown();
         }
-
+#endif
         m_requestHandler->HandleDisconnect(connection);
     }
 
-    void NodeHandler::DeleteConnections(const NodeNumber node)
+    void NodeHandler::DeleteConnections(const int64_t node)
     {
         Connections::Instance().RemoveConnectionFromNode(node, boost::bind(&NodeHandler::HandleDisconnect,this,_1,node));
     }

@@ -1694,3 +1694,21 @@ void JNICALL Java_com_saabgroup_safir_dob_Interface_GetContext
     SetJArray(env,_success,success);
     SetJArray(env,_context,context);
 }
+
+/*
+ * Class:     com_saabgroup_safir_dob_Interface
+ * Method:    GetNodeId
+ * Signature: ([J[Z)V
+ */
+void JNICALL Java_com_saabgroup_safir_dob_Interface_GetNodeId
+(JNIEnv * env,
+ jclass,
+ jlongArray _nodeId,
+ jbooleanArray _success)
+{
+    bool success;
+    DotsC_Int64 nodeId;
+    DoseC_GetNodeId(nodeId,success);
+    SetJArray(env,_success,success);
+    SetJArray(env,_nodeId,nodeId);
+}

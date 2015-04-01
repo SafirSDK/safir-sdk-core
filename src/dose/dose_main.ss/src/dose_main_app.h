@@ -132,6 +132,7 @@ namespace Internal
         boost::asio::io_service::strand m_wcoutStrand;
         boost::shared_ptr<boost::asio::io_service::work> m_work;
 
+        int64_t m_nodeId{0};
         std::unique_ptr<Distribution> m_distribution;
 
         Control::DoseMainCmdReceiver m_cmdReceiver;

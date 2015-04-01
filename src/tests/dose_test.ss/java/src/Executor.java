@@ -451,7 +451,9 @@ class Executor implements
             partner.port().setVal((int) m_actionReceiver.getPort());
 
             try {
-                InstanceId instance = new InstanceId(com.saabgroup.safir.dob.ThisNodeParameters.getNodeNumber());
+                InstanceId instance =
+                    new InstanceId(new com.saabgroup.safir.dob.ConnectionAspectMisc(m_controlConnection).getNodeId());
+
                 EntityId eid = new EntityId(com.saabgroup.safir.dob.NodeInfo.ClassTypeId,instance);
                 com.saabgroup.safir.dob.EntityProxy ep = m_controlConnection.read(eid);
                 try {

@@ -240,7 +240,7 @@ namespace Internal
     void HandlerRegistrations::UnregisterInternal(const ConnectionPtr&              connection,
                                                   const Dob::Typesystem::HandlerId& handlerId,
                                                   const bool                        explicitUnregister,
-                                                  const NodeNumber                  nodeNumber,
+                                                  const int64_t                     nodeId,
                                                   const ContextId                   contextId,
                                                   const StateSharedPtr&             statePtr)
     {
@@ -262,7 +262,7 @@ namespace Internal
         statePtr->SetConnection(ConnectionPtr());
 
         DistributionData newRegState(registration_state_tag,
-                                     ConnectionId(nodeNumber, contextId, -1),
+                                     ConnectionId(nodeId, contextId, -1),
                                      m_typeId,
                                      handlerId,
                                      InstanceIdPolicy::HandlerDecidesInstanceId, // Dummy for an unreg state

@@ -41,12 +41,12 @@ class Communication
 public:
 
     Communication(Safir::Dob::Internal::Com::DataModeTag,
-                  boost::asio::io_service& ioService,
-                  const std::string& nodeName,
-                  int64_t nodeId, //0 is not a valid id.
-                  int64_t nodeTypeId,
-                  const std::string& dataAddress,
-                  const std::vector<Safir::Dob::Internal::Com::NodeTypeDefinition>& nodeTypes)
+                  boost::asio::io_service& /*ioService*/,
+                  const std::string& /*nodeName*/,
+                  int64_t /*nodeId*/, //0 is not a valid id.
+                  int64_t /*nodeTypeId*/,
+                  const std::string& /*dataAddress*/,
+                  const std::vector<Safir::Dob::Internal::Com::NodeTypeDefinition>& /*nodeTypes*/)
     {}
 
     void InjectNode(const std::string& /*name*/, int64_t /*id*/, int64_t /*nodeTypeId*/, const std::string& /*dataAddress*/) {}
@@ -57,12 +57,12 @@ class SP
 public:
 
     SP(Safir::Dob::Internal::SP::slave_tag_t,
-       boost::asio::io_service& ioService,
-       Communication& communication,
-       const std::string& name,
-       const int64_t id,
-       const int64_t nodeTypeId,
-       const std::map<int64_t, Safir::Dob::Internal::SP::NodeType>& nodeTypes)
+       boost::asio::io_service& /*ioService*/,
+       Communication& /*communication*/,
+       const std::string& /*name*/,
+       const int64_t /*id*/,
+       const int64_t /*nodeTypeId*/,
+       const std::map<int64_t, Safir::Dob::Internal::SP::NodeType>& /*nodeTypes*/)
     {}
 };
 
@@ -105,9 +105,9 @@ BOOST_AUTO_TEST_CASE( first_test )
     {
         std::vector<int64_t> included;
         std::vector<int64_t> excluded;
-        d.SubscribeNodeEvents([&](const std::string& nodeName, int64_t nodeId, int64_t nodeTypeId, const std::string& dataAddress)
+        d.SubscribeNodeEvents([&](const std::string& /*nodeName*/, int64_t nodeId, int64_t /*nodeTypeId*/, const std::string& /*dataAddress*/)
                                 {included.push_back(nodeId);},
-                              [&](int64_t nodeId, int64_t nodeTypeId)
+                              [&](int64_t nodeId, int64_t /*nodeTypeId*/)
                                 {excluded.push_back(nodeId);});
 
         d.InjectNode("node10", 10, 0, "127.0.0.1:1010");

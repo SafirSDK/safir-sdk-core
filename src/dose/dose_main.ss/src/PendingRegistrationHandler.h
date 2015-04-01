@@ -91,6 +91,7 @@ namespace Internal
         };
         typedef std::map<long,PendingRegistrationInfo> PendingRegistrations;
 
+        const int64_t m_nodeId;
         TimerHandler& m_timerHandler;
 
         PendingRegistrations m_pendingRegistrations;

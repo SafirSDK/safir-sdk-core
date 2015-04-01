@@ -58,7 +58,9 @@ namespace Internal
 
         using PersistenDataReadyCallback = std::function<void()>;
 
-        PersistHandler(boost::asio::io_service& ioService, Com::Communication& communication);
+        PersistHandler(boost::asio::io_service& ioService,
+                       const int64_t nodeId,
+                       Com::Communication& communication);
 
         void Start(const std::function<void(const std::string& str)>& logStatus);
         void Stop();
@@ -84,6 +86,7 @@ namespace Internal
         void RequestPersistenceInfo();
 
         boost::asio::io_service::strand         m_strand;
+        const int64_t                           m_nodeId;
         Com::Communication&                     m_communication;
         Safir::Dob::Connection                  m_connection;
         std::set<Safir::Dob::Typesystem::Int32> m_waitingForResponsesFromNodes;

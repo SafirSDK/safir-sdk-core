@@ -460,4 +460,7 @@ final class Interface {
                                   int[] context,
                                   boolean[] success);
 
+    //dose_java_jni GetNodeId
+    static native void GetNodeId(long[] nodeId,
+                                 boolean[] success);
 }

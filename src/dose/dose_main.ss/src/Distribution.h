@@ -67,7 +67,8 @@ namespace Internal
                           int64_t                   ownNodeId,
                           int64_t                   ownNodeTypeId,
                           const std::string&        ownDataAddress)
-            : m_communication(),
+            : m_nodeId(ownNodeId),
+              m_communication(),
               m_sp(),
               m_started(false)
         {
@@ -172,8 +173,12 @@ namespace Internal
             return m_config;
         }
 
+        int64_t GetNodeId() const
+        {
+            return m_nodeId;
+        }
     private:
-
+        const int64_t m_nodeId;
         std::unique_ptr<CommunicationT> m_communication;
         std::unique_ptr<SystemPictureT> m_sp;
         const ConfigT m_config;

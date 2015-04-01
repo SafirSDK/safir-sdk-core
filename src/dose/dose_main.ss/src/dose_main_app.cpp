@@ -28,7 +28,6 @@
 #include <Safir/Dob/Internal/ControlConfig.h>
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Dob/Internal/InternalDefs.h>
-#include <Safir/Dob/Internal/NodeStatuses.h>
 #include <Safir/Dob/Internal/Initialize.h>
 #include <Safir/Dob/OverflowException.h>
 #include <Safir/Dob/ThisNodeParameters.h>
@@ -184,7 +183,8 @@ namespace Internal
                         int64_t nodeTypeId,
                         const std::string& dataAddress)
     {
-        
+        m_nodeId = nodeId;
+
         m_distribution.reset(new Distribution(m_strand.get_io_service(),
                                               nodeName,
                                               nodeId,
@@ -454,7 +454,7 @@ namespace Internal
 
     }
 
-    ConnectResult DoseApp::CanAddConnection(const std::string & connectionName, const pid_t pid, const long /*context*/)
+    ConnectResult DoseApp::CanAddConnection(const std::string & /*connectionName*/, const pid_t /*pid*/, const long /*context*/)
     {
 
         return Success;
@@ -648,7 +648,8 @@ namespace Internal
             for (IdentifierSet::iterator it = waiting.begin();
                 it != waiting.end(); ++it)
             {
-                const ConnectionPtr connection = Connections::Instance().GetConnection(ConnectionId(ThisNodeParameters::NodeNumber(), -1, *it));
+                const ConnectionPtr connection = Connections::Instance().GetConnection
+                    (ConnectionId(m_nodeId, -1, *it));
                 m_messageHandler->DistributeMessages(connection);
 
                 //If the connection is dead it might be a zombie that has been waiting for dosecom.
@@ -666,7 +667,7 @@ namespace Internal
                                            int & recursionLevel)
     {
         ConnectionId tmpId;
-        tmpId.m_node=Dob::ThisNodeParameters::NodeNumber();
+        tmpId.m_node=m_nodeId;
         for (IdentifierSet::const_iterator it=waiting.begin();
              it!=waiting.end(); ++it)
         {

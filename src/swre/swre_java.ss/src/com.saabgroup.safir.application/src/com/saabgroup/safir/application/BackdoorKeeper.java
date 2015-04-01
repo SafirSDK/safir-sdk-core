@@ -114,8 +114,7 @@ public class BackdoorKeeper
                     (cmd.nodeName().getVal(),
                      java.util.regex.Pattern.CASE_INSENSITIVE);
                 java.util.regex.Matcher matcher = pattern.matcher
-                    (com.saabgroup.safir.dob.NodeParameters.getNodes
-                     (com.saabgroup.safir.dob.ThisNodeParameters.getNodeNumber()).nodeName().getVal());
+                    (com.saabgroup.safir.dob.ThisNodeParameters.getName());
                 if (!matcher.find())
                 {
                     // Node name doesn't match
@@ -155,15 +154,14 @@ public class BackdoorKeeper
         {
             if (cmdTokens[0].compareToIgnoreCase("ping") == 0)
             {
-                // It's a 'ping' command. Answer to it without bothering
-                // the subclass implementator.
+                // It's a 'ping' command. Answer it without bothering the subclass
+                // implementator.
                 com.saabgroup.safir.Logging.sendSystemLog
                     (com.saabgroup.safir.Logging.Severity.DEBUG,
                      "Ping reply from "
                      + new com.saabgroup.safir.dob.ConnectionAspectMisc(m_connection).getConnectionName()
                      + " on node "
-                     + (com.saabgroup.safir.dob.NodeParameters.getNodes
-                        (com.saabgroup.safir.dob.ThisNodeParameters.getNodeNumber()).nodeName().getVal()));
+                     + com.saabgroup.safir.dob.ThisNodeParameters.getName());
 
                 return; // *** RETURN ***
             }

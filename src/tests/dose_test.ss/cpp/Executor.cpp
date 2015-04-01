@@ -33,6 +33,7 @@
 #include <DoseTest/Dump.h>
 #include <DoseTest/DumpResult.h>
 #include <Safir/Dob/OverflowException.h>
+#include <Safir/Dob/ConnectionAspectMisc.h>
 #include <Safir/Dob/NodeInfo.h>
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Dob/DistributionChannelParameters.h>
@@ -80,13 +81,13 @@ Executor::Executor(const std::vector<std::string> & commandLine):
     m_defaultContext(0)
 {
     m_controlConnection.Open(m_controlConnectionName, m_instanceString, 0, this, &m_controlDispatcher);
-    
+
     m_controlConnection.SubscribeEntity(DoseTest::Sequencer::ClassTypeId,this);
 }
 #ifdef _MSC_VER
 #  pragma warning(pop)
 #endif
-            
+
 void Executor::OnStopOrder()
 {
     lout << "Got stop order" << std::endl;
@@ -156,7 +157,7 @@ Executor::ExecuteAction(DoseTest::ActionPtr action)
                 std::wcout << "Calling Open" << std::endl;
                 m_testConnection.Open(m_testConnectionName,m_instanceString,m_defaultContext,NULL,&m_testDispatcher);
                 std::wcout << "Open completed" << std::endl;
-                
+
                 DoseTest::PartnerPtr partner =
                     boost::static_pointer_cast<DoseTest::Partner>
                     (m_controlConnection.Read(m_partnerEntityId).GetEntity());
@@ -236,7 +237,7 @@ Executor::ExecuteAction(DoseTest::ActionPtr action)
             {
 #if 0 //stewart
                 DOSE_SHARED_DATA_S * pShm = (DOSE_SHARED_DATA_S *) Get_NodeSharedData_Pointer();
-                
+
                 pShm->InhibitOutgoingTraffic = action->Inhibit().GetVal();
                 lout << "InhibitOutgoingTraffic set to " << pShm->InhibitOutgoingTraffic << std::endl;
 #endif
@@ -283,7 +284,7 @@ Executor::ExecuteAction(DoseTest::ActionPtr action)
             lout << "Got unexpected action " << DoseTest::ActionEnum::ToString(action->ActionKind().GetVal())<<std::endl;
         }
     }
-    
+
     std::wcout << "Leaving ExecuteAction" << std::endl;
 }
 void
@@ -411,9 +412,10 @@ void Executor::HandleSequencerState(const DoseTest::SequencerPtr& sequencer)
         {
             using namespace Safir::Dob;
             using namespace Safir::Dob::Typesystem;
+            const auto nodeId = ConnectionAspectMisc(m_controlConnection).GetNodeId();
             partner->Address() = boost::static_pointer_cast<NodeInfo>
                 (m_controlConnection.Read(EntityId(NodeInfo::ClassTypeId,
-                                                   InstanceId(ThisNodeParameters::NodeNumber()))).
+                                                   InstanceId(nodeId))).
                  GetEntity())->IpAddress();
         }
 
@@ -430,10 +432,9 @@ void Executor::HandleSequencerState(const DoseTest::SequencerPtr& sequencer)
 
         m_controlConnection.Delete(m_partnerEntityId, Safir::Dob::Typesystem::HandlerId(m_instance));
         m_controlConnection.UnregisterHandler(m_partnerEntityId.GetTypeId(),Safir::Dob::Typesystem::HandlerId(m_instance));
-        
+
         m_controlConnection.UnregisterHandler(DoseTest::Dump::ClassTypeId,Safir::Dob::Typesystem::HandlerId(m_instance));
         m_isActive = false;
         lout.Clear();
     }
 }
- 
