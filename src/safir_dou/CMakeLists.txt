@@ -92,7 +92,6 @@ ADD_SAFIR_GENERATED_LIBRARY(NAME Core
   data/Object-Safir.Dob.DistributionChannelProperty.dom
   data/Object-Safir.Dob.PriorityProperty.dom
   data/Safir.Application.BackdoorCommand-Safir.Dob.ContextSharedProperty.dom
-  data/Safir.Dob.NodeInfo-Safir.Dob.DistributionChannelProperty.dom
   data/Safir.Dob.PersistentDataReady-Safir.Dob.DistributionChannelProperty.dom
   data/Safir.Dob.ProcessInfo-Safir.Dob.DistributionChannelProperty.dom
   data/Safir.Utilities.ForEach.DeleteAllRequest-Safir.Dob.DistributionChannelProperty.dom
