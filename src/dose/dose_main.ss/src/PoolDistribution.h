@@ -321,12 +321,12 @@ namespace Internal
         }
 
         //Dummy consumer
-        virtual void OnDoDispatch() {}
-        virtual void OnRegistered(const Safir::Dob::Typesystem::TypeId, const Safir::Dob::Typesystem::HandlerId&) {}
-        virtual void OnUnregistered(const Safir::Dob::Typesystem::TypeId, const Safir::Dob::Typesystem::HandlerId&) {}
-        virtual void OnNewEntity(const Safir::Dob::EntityProxy) {}
-        virtual void OnUpdatedEntity(const Safir::Dob::EntityProxy) {}
-        virtual void OnDeletedEntity(const Safir::Dob::EntityProxy, const bool) {}
+        void OnDoDispatch() override {}
+        void OnRegistered(const Safir::Dob::Typesystem::TypeId, const Safir::Dob::Typesystem::HandlerId&) override {}
+        void OnUnregistered(const Safir::Dob::Typesystem::TypeId, const Safir::Dob::Typesystem::HandlerId&) override {}
+        void OnNewEntity(const Safir::Dob::EntityProxy) override {}
+        void OnUpdatedEntity(const Safir::Dob::EntityProxy) override {}
+        void OnDeletedEntity(const Safir::Dob::EntityProxy, const bool) override {}
     };
 }
 }

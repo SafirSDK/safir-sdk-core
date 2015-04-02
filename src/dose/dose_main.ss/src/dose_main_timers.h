@@ -95,7 +95,7 @@ namespace Internal
         UserDataType & UserData() {return m_userData;}
         const UserDataType & UserData() const {return m_userData;}
 
-        virtual bool operator<(const TimerInfoBase & other) const;
+        bool operator<(const TimerInfoBase & other) const override;
     private:
         UserDataType m_userData;
     };
@@ -107,7 +107,7 @@ namespace Internal
     public:
         EmptyTimerInfo(const TimerId timerId);
 
-        virtual bool operator<(const TimerInfoBase & other) const;
+        bool operator<(const TimerInfoBase & other) const override;
     };
 
     class TimeoutHandler

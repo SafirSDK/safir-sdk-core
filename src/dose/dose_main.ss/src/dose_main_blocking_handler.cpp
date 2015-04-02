@@ -62,10 +62,9 @@ namespace Internal
     {
         m_clientMap.erase(id);
 
-        for (ClientMap::iterator it = m_clientMap.begin();
-            it != m_clientMap.end(); ++it)
+        for (auto & elem : m_clientMap)
         {
-            it->second.erase(id);
+            elem.second.erase(id);
         }
     }
 

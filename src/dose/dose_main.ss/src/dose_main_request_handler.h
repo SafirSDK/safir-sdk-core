@@ -91,7 +91,7 @@ namespace Internal
         void StartTimer(const ConnectionPtr & sender,
                         const DistributionData & request);
 
-        virtual void HandleTimeout(const TimerInfoPtr& timer);
+        void HandleTimeout(const TimerInfoPtr& timer) override;
 
         bool PostRequest(const ConnectionConsumerPair& receiver,
                          const DistributionData& request); //is not const-ref since it needs to set the responseId

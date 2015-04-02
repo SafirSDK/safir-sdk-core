@@ -54,7 +54,7 @@ namespace Internal
 
         void HandleMessageFromDoseCom(const DistributionData & msg);
     private:
-        virtual void HandleTimeout(const TimerInfoPtr & timer);
+        void HandleTimeout(const TimerInfoPtr & timer) override;
 
         //check if the request is completed, and if so signal the application
         //returns false if the request is not completed
@@ -69,7 +69,7 @@ namespace Internal
         {
             PendingRegistrationInfo(const ConnectionId connId,
                                     const Dob::Typesystem::TypeId type,
-                                    const Dob::Typesystem::HandlerId& handler):
+                                    const Dob::Typesystem::HandlerId&  handler):
                 connectionId(connId),
                 typeId(type),
                 handlerId(handler),

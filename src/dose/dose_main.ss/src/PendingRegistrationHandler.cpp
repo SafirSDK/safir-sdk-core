@@ -261,19 +261,17 @@ namespace Internal
     {
         std::vector<long> affectedRequestIds;
 
-        for (PendingRegistrations::iterator it = m_pendingRegistrations.begin();
-             it != m_pendingRegistrations.end(); ++it)
+        for (auto & elem : m_pendingRegistrations)
         {
-            if (it->second.typeId == typeId)
+            if (elem.second.typeId == typeId)
             {
-                affectedRequestIds.push_back(it->first);
+                affectedRequestIds.push_back(elem.first);
             }
         }
 
-        for (std::vector<long>::iterator it = affectedRequestIds.begin();
-            it != affectedRequestIds.end(); ++it)
+        for (auto & affectedRequestId : affectedRequestIds)
         {
-            TryPendingRegistration(*it);
+            TryPendingRegistration(affectedRequestId);
         }
     }
 
@@ -323,12 +321,11 @@ namespace Internal
                 //check if we have a reason to say no!
 
                 //do we have an outstanding pending that is older!
-                for (PendingRegistrations::iterator it = m_pendingRegistrations.begin();
-                     it != m_pendingRegistrations.end(); ++it)
+                for (auto & elem : m_pendingRegistrations)
                 {
-                    if (it->second.typeId == typeId && it->second.handlerId == handlerId && it->second.connectionId.m_contextId == contextId)
+                    if (elem.second.typeId == typeId && elem.second.handlerId == handlerId && elem.second.connectionId.m_contextId == contextId)
                     {
-                        if (!it->second.rejected && it->second.lastRequestTimestamp < timestamp)
+                        if (!elem.second.rejected && elem.second.lastRequestTimestamp < timestamp)
                         {//no, mine is older!
                             lllout << "No, I believe I have an older pending request!" <<std::endl;
                             resp.SetPendingResponse(false);

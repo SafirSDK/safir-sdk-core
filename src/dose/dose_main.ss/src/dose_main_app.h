@@ -99,8 +99,8 @@ namespace Internal
         void ConnectionThread();
 
         //implementation of Connections::ConnectionHandler
-        virtual ConnectResult CanAddConnection(const std::string & connectionName, const pid_t pid, const long context);
-        virtual void HandleConnect(const ConnectionPtr & connection);
+        ConnectResult CanAddConnection(const std::string & connectionName, const pid_t pid, const long context) override;
+        void HandleConnect(const ConnectionPtr & connection) override;
 
         void HandleDisconnect(const ConnectionPtr & connection);
 

@@ -125,10 +125,9 @@ namespace Internal
     const TimerId
     TimerHandler::RegisterTimeoutHandler(const std::wstring & timerName, TimeoutHandler & timeoutHandler)
     {
-        for (TimeoutHandlerTable::iterator it = m_timeoutHandlerTable.begin();
-            it != m_timeoutHandlerTable.end(); ++it)
+        for (auto & elem : m_timeoutHandlerTable)
         {
-            if (it->first == timerName && it->second == &timeoutHandler)
+            if (elem.first == timerName && elem.second == &timeoutHandler)
             {
                 throw Safir::Dob::Typesystem::SoftwareViolationException(L"Multiple timers with the same name added!",__WFILE__,__LINE__);
             }
@@ -316,10 +315,9 @@ namespace Internal
 
     bool TimerHandler::IsSet(const TimerId timerId) const
     {
-        for (TimerTable::const_iterator it = m_timerTable.begin();
-            it != m_timerTable.end(); ++it)
+        for (const auto & elem : m_timerTable)
         {
-            if (it->first->GetTimerId() == timerId)
+            if (elem.first->GetTimerId() == timerId)
             {
                 return true;
             }

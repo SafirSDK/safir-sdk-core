@@ -113,7 +113,7 @@ namespace Internal
         }
 
         //dispatch states
-        virtual void OnDoDispatch()
+        void OnDoDispatch() override
         {
             if (!m_dispatcherNotified)
             {
@@ -147,12 +147,12 @@ namespace Internal
         }
 
         //dummy consumer impl
-        virtual void OnStopOrder() {}
-        virtual void OnRegistered(const Safir::Dob::Typesystem::TypeId, const Safir::Dob::Typesystem::HandlerId&) {}
-        virtual void OnUnregistered(const Safir::Dob::Typesystem::TypeId, const Safir::Dob::Typesystem::HandlerId&) {}
-        virtual void OnNewEntity(const Safir::Dob::EntityProxy) {}
-        virtual void OnUpdatedEntity(const Safir::Dob::EntityProxy) {}
-        virtual void OnDeletedEntity(const Safir::Dob::EntityProxy, const bool) {}
+        void OnStopOrder() override {}
+        void OnRegistered(const Safir::Dob::Typesystem::TypeId, const Safir::Dob::Typesystem::HandlerId&) override {}
+        void OnUnregistered(const Safir::Dob::Typesystem::TypeId, const Safir::Dob::Typesystem::HandlerId&) override {}
+        void OnNewEntity(const Safir::Dob::EntityProxy) override {}
+        void OnUpdatedEntity(const Safir::Dob::EntityProxy) override {}
+        void OnDeletedEntity(const Safir::Dob::EntityProxy, const bool) override {}
 
         void SubscribeStates()
         {
