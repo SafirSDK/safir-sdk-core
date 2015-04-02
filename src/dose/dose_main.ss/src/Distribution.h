@@ -167,6 +167,11 @@ namespace Internal
         {
             return *m_communication;
         }
+        
+        const CommunicationT& GetCommunication() const
+        {
+            return *m_communication;
+        }
 
         const ConfigT& GetNodeTypeConfiguration() const
         {

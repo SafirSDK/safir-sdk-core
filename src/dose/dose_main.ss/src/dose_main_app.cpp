@@ -107,8 +107,7 @@ namespace Internal
         m_signalSet(m_strand.get_io_service()),
         m_timerHandler(m_strand),
         m_processMonitor(m_strand.get_io_service(),ProcessExited,boost::chrono::seconds(1)),
-        m_HandleEvents_notified(0),
-        m_DispatchOwnConnection_notified(0)
+        m_HandleEvents_notified(0)
     {
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
         m_signalSet.add(SIGABRT);
@@ -226,7 +225,7 @@ namespace Internal
                                                         *m_requestHandler,
                                                         *m_pendingRegistrationHandler));
 
-        m_nodeInfoHandler.reset(new NodeInfoHandler());
+        m_nodeInfoHandler.reset(new NodeInfoHandler(m_strand.get_io_service(), *m_distribution));
 
         //setup pdComplete sub
 
@@ -319,7 +318,8 @@ namespace Internal
         }
 
         m_poolHandler->Stop();
-        m_ownConnection.Close();
+
+        m_nodeInfoHandler->Stop();
 
         m_signalSet.cancel();
 
@@ -346,25 +346,6 @@ namespace Internal
         LogStatus("dose_main got signal " + boost::lexical_cast<std::string>(signalNumber) + ", shutting down.");
 
         Stop();
-    }
-
-    void DoseApp::OnDoDispatch()
-    {
-        if (m_DispatchOwnConnection_notified == 0)
-        {
-            m_DispatchOwnConnection_notified = 1;
-            m_strand.post([this]()
-                          {
-                              DispatchOwnConnection();
-                          });
-        }
-    }
-
-    void DoseApp::DispatchOwnConnection()
-    {
-        //dispatch own connection!
-        m_DispatchOwnConnection_notified = 0;
-        m_ownConnection.Dispatch();
     }
 
 

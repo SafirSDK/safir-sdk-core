@@ -24,7 +24,10 @@
 #pragma once
 
 #include <Safir/Dob/Connection.h>
+#include <Safir/Utilities/AsioDispatcher.h>
 #include <boost/noncopyable.hpp>
+#include <boost/asio.hpp>
+#include "Distribution.h"
 
 namespace Safir
 {
@@ -32,16 +35,16 @@ namespace Dob
 {
 namespace Internal
 {
-
     class NodeInfoHandler:
         public Safir::Dob::EntityHandler,
         private boost::noncopyable
     {
     public:
-        NodeInfoHandler();
+        NodeInfoHandler(boost::asio::io_service& ioService,
+                        const Distribution& distribution);
 
+        void Stop();
     private:
-
         void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId    typeId,
                                    const Safir::Dob::Typesystem::HandlerId& handlerId) override;
 
@@ -55,6 +58,7 @@ namespace Internal
                              Safir::Dob::ResponseSenderPtr    responseSender) override;
 
         Safir::Dob::Connection m_connection;
+        Utilities::AsioDispatcher m_dispatcher;
     };
 }
 }

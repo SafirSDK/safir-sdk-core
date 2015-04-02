@@ -65,7 +65,6 @@ namespace Internal
 {
     class DoseApp:
         public Connections::ConnectionConsumer,
-        public Safir::Dob::Dispatcher,
         private boost::noncopyable
     {
     public:
@@ -92,17 +91,12 @@ namespace Internal
         void HandleSignal(const boost::system::error_code& error,
                           const int signalNumber);
 
-        //Handler for dispatching own connection
-        void DispatchOwnConnection();
-
         //Handler for all other events in dose_main
         void HandleEvents();
         Safir::Utilities::Internal::AtomicUint32 m_connectEvent;
         Safir::Utilities::Internal::AtomicUint32 m_connectionOutEvent;
 
         void ConnectionThread();
-
-        void OnDoDispatch();
 
         //implementation of Connections::ConnectionHandler
         virtual ConnectResult CanAddConnection(const std::string & connectionName, const pid_t pid, const long context);
@@ -156,8 +150,6 @@ namespace Internal
         // Process info
         ProcessInfoHandler m_processInfoHandler;
 
-        Safir::Dob::Connection m_ownConnection;
-
         // For monitoring processes
         Safir::Utilities::ProcessMonitor m_processMonitor;
 
@@ -165,7 +157,6 @@ namespace Internal
         std::unique_ptr<LockMonitor> m_lockMonitor;
 
         Safir::Utilities::Internal::AtomicUint32 m_HandleEvents_notified;
-        Safir::Utilities::Internal::AtomicUint32 m_DispatchOwnConnection_notified;
 
         boost::thread m_connectionThread;
         boost::thread m_memoryMonitorThread;
