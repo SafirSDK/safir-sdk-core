@@ -89,6 +89,8 @@ private:
     void StartUp(bool restore);
     void Start(bool restore);
 
+    boost::asio::io_service m_ioService;
+
     Safir::Utilities::AsioDispatcher m_dispatcher;
     Safir::Dob::Connection m_dobConnection;
     Safir::Dob::Typesystem::HandlerId m_handlerId;
@@ -105,7 +107,6 @@ private:
     //Handler when ok to connect for applications.
     void SignalOkToConnect(bool ok);
 
-    boost::asio::io_service m_ioService;
     boost::thread m_thread;
 
     bool m_persistenceStarted; // Any dope has started successfully and loaded persistent data into the system.

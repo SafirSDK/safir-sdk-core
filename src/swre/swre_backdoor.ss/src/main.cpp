@@ -25,6 +25,7 @@
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/NotOpenException.h>
 #include <boost/chrono.hpp>
+#include <boost/bind.hpp>
 #include <boost/asio/steady_timer.hpp>
 
 #ifdef _MSC_VER

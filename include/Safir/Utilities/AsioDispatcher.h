@@ -1,8 +1,9 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2008-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
-* Created by: Erik Adolfsson / sterad
+* Created by: Lars Hagström / lars.hagstrom@consoden.se
 *
 *******************************************************************************
 *
@@ -21,13 +22,16 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __DOB_UTILITIES_ASIO_DISPATCHER_H__
-#define __DOB_UTILITIES_ASIO_DISPATCHER_H__
+#pragma once
 
 #include <Safir/Dob/Connection.h>
 #include <Safir/Utilities/Internal/Atomic.h>
 #include <boost/bind.hpp>
+#include <boost/bind/protect.hpp>
 #include <boost/noncopyable.hpp>
+#include <boost/function.hpp>
+#include <boost/atomic.hpp>
+#include <boost/make_shared.hpp>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -54,7 +58,12 @@ namespace Utilities
     {
     public:
        /**
-        * Constructor.
+        * Strandless constructor.
+        *
+        * Creates an AsioDispatcher that performs Dispatches using an internal strand.
+        * I.e. all Dob callbacks will be performed from within the same - hidden - strand.
+        *
+        * If you need access to the strand, use the other constructor.
         *
         * @param [in] connection - The dob connection.
         * @param [in] ioService  - The ioService that runs the main loop
@@ -62,17 +71,44 @@ namespace Utilities
         AsioDispatcher(const Safir::Dob::Connection & connection,
                        boost::asio::io_service& ioService)
             : m_connection(connection)
-            , m_ioService(ioService)
-            , m_isNotified(0) {}
+            , m_strand(boost::make_shared<boost::asio::strand>(ioService))
+            , m_isNotified()
+        {
+
+        }
+
+        /**
+        * Stranded constructor.
+        *
+        * Creates an AsioDispatcher that performs Dispatches using a specified strand.
+        * I.e. all Dob callbacks will be performed from the given strand.
+        *
+        * @param [in] connection - The dob connection.
+        * @param [in] strand  - The strand to dispatch from.
+        */
+        AsioDispatcher(const Safir::Dob::Connection & connection,
+                       boost::asio::strand& strand)
+            : m_connection(connection)
+            , m_strand(&strand,null_deleter())
+            , m_isNotified()
+        {
+
+        }
 
     private:
+        struct null_deleter
+        {
+            void operator()(void const *) const
+            {
+            }
+        };
 
        /**
         * Perform dispatch on the connection.
         */
-        void Dispatch()
+        void CallDobDispatch()
         {
-            m_isNotified = 0;
+            m_isNotified.clear();
             m_connection.Dispatch();
         }
 
@@ -80,23 +116,20 @@ namespace Utilities
          * OnDoDispatch notifies the dob connection thread that it's time to perform a dispatch.
          * Overrides Safir::Dob::Dispatcher.
          */
-        virtual void OnDoDispatch()
+        void OnDoDispatch() override
         {
-            if (m_isNotified == 0)
+            if (!m_isNotified.test_and_set())
             {
-                m_isNotified = 1;
-                m_ioService.post(boost::bind(&AsioDispatcher::Dispatch,this));
+                m_strand->dispatch(boost::bind(&AsioDispatcher::CallDobDispatch,this));
             }
         }
 
-
         const Safir::Dob::Connection&      m_connection;
-        boost::asio::io_service&           m_ioService;
-        Safir::Utilities::Internal::AtomicUint32 m_isNotified;
+        boost::function<void()>            m_notifyFunction;
+        boost::shared_ptr<boost::asio::strand> m_strand;
+        boost::atomic_flag                 m_isNotified;
     };
 
 
-} // namespace Utilities
-} // namespace Safir
-
-#endif // __DOB_UTILITIES_ASIO_DISPATCHER_H__
+}
+}
