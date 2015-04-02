@@ -34,7 +34,7 @@
 #include "NodeInfoHandler.h"
 #include "PendingRegistrationHandler.h"
 #include "PoolHandler.h"
-#include "dose_main_process_info_handler.h"
+#include "ProcessInfoHandler.h"
 #include "dose_main_response_handler.h"
 #include "dose_main_request_handler.h"
 #include "dose_main_lock_monitor.h"

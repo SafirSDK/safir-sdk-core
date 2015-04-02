@@ -22,7 +22,7 @@
 *
 ******************************************************************************/
 
-#include "dose_main_process_info_handler.h"
+#include "ProcessInfoHandler.h"
 #include "dose_main_communication.h"
 
 #include <Safir/Dob/AccessDeniedException.h>

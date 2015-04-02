@@ -21,9 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-
-#ifndef _dose_main_process_info_handler_h
-#define _dose_main_process_info_handler_h
+#pragma once
 
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/Internal/Connections.h>
@@ -88,4 +86,3 @@ namespace Internal
 }
 }
 
-#endif
