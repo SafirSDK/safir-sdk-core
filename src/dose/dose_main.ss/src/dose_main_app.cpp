@@ -230,14 +230,6 @@ namespace Internal
         //setup pdComplete sub
 
         m_connectionThread = boost::thread([this]() {ConnectionThread();});
-
-
-#ifndef NDEBUG
-        LogStatus("dose_main running (debug)...");
-#else
-        LogStatus("dose_main running (release)...");
-#endif
-
     }
 
     void DoseApp::InjectNode(const std::string& nodeName,
@@ -269,6 +261,8 @@ namespace Internal
                 LogStatus("PD complete");
                 m_connectionHandler->OnPoolDistributionComplete();
             });
+
+            LogStatus("dose_main running...");
         }
         else
         {
