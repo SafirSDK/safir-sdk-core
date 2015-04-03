@@ -47,7 +47,8 @@ log("This test program expects to be killed off after about two minutes unless i
 proc = subprocess.Popen([arguments.safir_control, "--dose-main-path" , arguments.dose_main],
                         stdout = subprocess.PIPE,
                         stderr = subprocess.STDOUT,
-                        universal_newlines=True)
+                        universal_newlines=True,
+                        creationflags = subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == "win32" else 0)
 
 lines = list()
 for i in range(2):
