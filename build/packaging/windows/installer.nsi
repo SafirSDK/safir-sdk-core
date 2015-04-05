@@ -445,6 +445,23 @@ Section "Runtime" SecRuntime
     ${EndIf}
   ${EndIf}
 
+
+; The following two registry entries are needed to get Safir Log to log to the Windows
+; Event Log without a long preamble appearing in each error log about the event source
+; being missing. This is by no means a serious problem, it just looks ugly when looking
+; through the Event Viewer.
+; In order not to complicate our own build process (for example, we don't want to mess
+; with the MessageCompiler) we use the resources provided by EventLogMessages.dll from the
+; .Net framework.
+; The 7 below is logical or of EVENTLOG_SUCCESS, EVENTLOG_INFORMATION_TYPE,
+; EVENTLOG_WARNING_TYPE and EVENTLOG_ERROR_TYPE
+
+  WriteRegExpandStr HKLM "SYSTEM\CurrentControlSet\services\eventlog\Application\Safir" \
+                         "EventMessageFile" "C:\Windows\Microsoft.NET\Framework\v2.0.50727\EventLogMessages.dll"
+  WriteRegDWORD     HKLM "SYSTEM\CurrentControlSet\services\eventlog\Application\Safir" \
+                         "TypesSupported" 7
+
+
   ;Store installation folder
   WriteRegStr HKLM "Software\Safir SDK Core" "" $INSTDIR
 

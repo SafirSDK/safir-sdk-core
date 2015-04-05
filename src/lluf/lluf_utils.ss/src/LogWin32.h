@@ -28,7 +28,6 @@
 
 #include <windows.h>
 #include <string>
-#include <Safir/Utilities/StartupSynchronizer.h>
 
 namespace Safir
 {
@@ -37,7 +36,7 @@ namespace Utilities
 namespace Internal
 {
     class WindowsLogger :
-            private boost::noncopyable, public Synchronized
+            private boost::noncopyable
     {
     public:
         WindowsLogger(const std::wstring& processName);
@@ -45,21 +44,10 @@ namespace Internal
 
         void Send(const WORD eventType, const std::wstring& log) const;
 
-        bool RegistryIsInitialized() const;
-
     private:
 
-        //Synchronized stuff
-        virtual void Create();
-        virtual void Use();
-        virtual void Destroy();
-
-        bool AddRegistryEntries() const;
-
-        Safir::Utilities::StartupSynchronizer m_startupSynchronizer;
         HANDLE                                m_sourceHandle;
         std::wstring                          m_processName;
-        std::wstring                          m_eventMessageFile;
     };
 
 }
