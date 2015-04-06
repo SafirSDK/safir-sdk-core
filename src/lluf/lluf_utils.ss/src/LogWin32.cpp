@@ -40,8 +40,7 @@ namespace Internal
 {
 
 WindowsLogger::WindowsLogger(const std::wstring& processName)
-    : m_startupSynchronizer("LLUF_WINDOWS_LOGGING_INITIALIZATION"),
-      m_sourceHandle(0),
+    : m_sourceHandle(0),
       m_processName(processName)
 {
     m_sourceHandle = RegisterEventSourceW(NULL, L"Safir");
