@@ -43,6 +43,8 @@ WindowsLogger::WindowsLogger(const std::wstring& processName)
     : m_sourceHandle(0),
       m_processName(processName)
 {
+    //Note: The Safir event is added to the registry by the Windows installer.
+
     m_sourceHandle = RegisterEventSourceW(NULL, L"Safir");
     if (!m_sourceHandle)
     {
