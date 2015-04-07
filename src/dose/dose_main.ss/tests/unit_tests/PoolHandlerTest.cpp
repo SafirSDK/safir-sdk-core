@@ -155,14 +155,14 @@ BOOST_AUTO_TEST_CASE( PoolDistributionHandlerTest )
         BOOST_CHECK(Pd::PoolDistributions[1].first==true);
         BOOST_CHECK(Pd::PoolDistributions[2].first==false);
 
-        BOOST_CHECK_EQUAL(pdh.m_pendingPoolDistributions.size(), 2);
+        BOOST_CHECK_EQUAL(pdh.m_pendingPoolDistributions.size(), 2u);
 
         complete(1);
     });
 
     pdh.m_strand.post([&]
     {
-        BOOST_CHECK_EQUAL(pdh.m_pendingPoolDistributions.size(), 1);
+        BOOST_CHECK_EQUAL(pdh.m_pendingPoolDistributions.size(), 1u);
         dump();
         BOOST_CHECK(Pd::PoolDistributions[1].first==true);
         BOOST_CHECK(Pd::PoolDistributions[2].first==true);
@@ -172,7 +172,7 @@ BOOST_AUTO_TEST_CASE( PoolDistributionHandlerTest )
 
     pdh.m_strand.post([&]
     {
-        BOOST_CHECK_EQUAL(pdh.m_pendingPoolDistributions.size(), 0);
+        BOOST_CHECK_EQUAL(pdh.m_pendingPoolDistributions.size(), 0u);
         pdh.AddPoolDistribution(3, 1);
     });
 
@@ -180,7 +180,7 @@ BOOST_AUTO_TEST_CASE( PoolDistributionHandlerTest )
     {
         dump();
         BOOST_CHECK(Pd::PoolDistributions[3].first==true);
-        BOOST_CHECK_EQUAL(pdh.m_pendingPoolDistributions.size(), 1);
+        BOOST_CHECK_EQUAL(pdh.m_pendingPoolDistributions.size(), 1u);
 
         complete(3);
     });
@@ -188,7 +188,7 @@ BOOST_AUTO_TEST_CASE( PoolDistributionHandlerTest )
     pdh.m_strand.post([&]
     {
         dump();
-        BOOST_CHECK_EQUAL(pdh.m_pendingPoolDistributions.size(), 0);
+        BOOST_CHECK_EQUAL(pdh.m_pendingPoolDistributions.size(), 0u);
         BOOST_CHECK(Pd::PoolDistributions[1].first==true);
         BOOST_CHECK(Pd::PoolDistributions[2].first==true);
         BOOST_CHECK(Pd::PoolDistributions[3].first==true);

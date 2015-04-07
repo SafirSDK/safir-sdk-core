@@ -74,7 +74,7 @@ namespace Internal
             //std::wcout<<L"AddPoolDistribution "<<nodeId<<std::endl;
             m_strand.dispatch([this, nodeId, nodeTypeId]
             {
-                auto pd=PdPtr(new PoolDistributionT(nodeId, nodeTypeId, m_strand, m_communication, [=](int64_t nodeId)
+                auto pd=PdPtr(new PoolDistributionT(nodeId, nodeTypeId, m_strand, m_communication, [=](int64_t /*nodeId*/)
                 {
                     if (!m_pendingPoolDistributions.empty())
                         m_pendingPoolDistributions.pop();
