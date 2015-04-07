@@ -527,18 +527,42 @@ int main(int argc, char * argv[])
 
     ssh.SetStopHandler(stopFcn);
 
+    std::atomic<bool> success {true};
+
+    const auto run = [&ioService,&success]
+        {
+            try
+            {
+                ioService.run();
+                return;
+            }
+            catch (const std::exception & exc)
+            {
+                SEND_SYSTEM_LOG(Alert,
+                                << "Caught 'std::exception' exception from io_service.run(): "
+                                << "  '" << exc.what() << "'.");
+                success.exchange(false);
+            }
+            catch (...)
+            {
+                SEND_SYSTEM_LOG(Alert,
+                                << "Caught '...' exception from io_service.run().");
+                success.exchange(false);
+            }
+        };
+
     std::wcout << "Launching io_service" << std::endl;
 
     boost::thread_group threads;
     for (int i = 0; i < 2; ++i)
     {
-        threads.create_thread([&ioService]{ioService.run();});
+        threads.create_thread(run);
     }
 
-    ioService.run();
+    run();
 
     threads.join_all();
 
     std::wcout << "Exiting..." << std::endl;
-    return 0;
+    return success ? 0 : 1;
 }

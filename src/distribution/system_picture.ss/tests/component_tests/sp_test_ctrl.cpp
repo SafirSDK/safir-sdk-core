@@ -31,6 +31,7 @@
 #include <Safir/Dob/Internal/SystemPicture.h>
 #include <Safir/Utilities/Internal/Id.h>
 #include <iostream>
+#include <atomic>
 #include <fstream>
 #include <map>
 #include <boost/thread.hpp>
@@ -319,16 +320,41 @@ int main(int argc, char * argv[])
                              }
                              );
 
+        std::atomic<bool> success {true};
+
+        const auto run = [&ioService,&success]
+            {
+                try
+                {
+                    ioService.run();
+                    std::wcout << "Thread exiting" << std::endl;
+                    return;
+                }
+                catch (const std::exception & exc)
+                {
+                    SEND_SYSTEM_LOG(Alert,
+                                    << "Caught 'std::exception' exception from io_service.run(): "
+                                    << "  '" << exc.what() << "'.");
+                    success.exchange(false);
+                }
+                catch (...)
+                {
+                    SEND_SYSTEM_LOG(Alert,
+                                    << "Caught '...' exception from io_service.run().");
+                    success.exchange(false);
+                }
+            };
+
 
 
         std::wcout << "Launching io_service" << std::endl;
         boost::thread_group threads;
         for (int i = 0; i < 2; ++i)
         {
-            threads.create_thread([&ioService]{ioService.run();});
+            threads.create_thread(run);
         }
 
-        ioService.run();
+        run();
 
         threads.join_all();
         std::wcout << "Exiting..." << std::endl;
