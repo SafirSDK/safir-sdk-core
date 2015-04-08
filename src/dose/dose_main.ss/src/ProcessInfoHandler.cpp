@@ -26,7 +26,6 @@
 #include "dose_main_communication.h"
 
 #include <Safir/Dob/AccessDeniedException.h>
-#include <Safir/Dob/DistributionChannelProperty.h>
 #include <Safir/Dob/ErrorListResponse.h>
 #include <Safir/Dob/ResponseErrorInfo.h>
 #include <Safir/Dob/ConnectionAspectMisc.h>
@@ -88,11 +87,15 @@ namespace Internal
 
     void ProcessInfoHandler::Stop()
     {
-        m_strand.dispatch([this]
-                          {
-                              m_processMonitor.Stop();
-                              m_connection.Close();
-                          });
+        const bool was_stopped = m_stopped.exchange(true);
+        if (!was_stopped)
+        {
+            m_processMonitor.Stop();
+            m_strand.dispatch([this]
+                              {
+                                  m_connection.Close();
+                              });
+        }
     }
 
 #if 0 //stewart
@@ -136,6 +139,11 @@ namespace Internal
 
     void ProcessInfoHandler::ConnectionAdded(const ConnectionPtr & connection)
     {
+        if (m_stopped)
+        {
+            return;
+        }
+
         m_strand.dispatch([this,connection]
         {
             const Typesystem::EntityId eid(ProcessInfo::ClassTypeId,Typesystem::InstanceId(connection->Pid()));
@@ -220,6 +228,11 @@ namespace Internal
 
     void ProcessInfoHandler::ConnectionRemoved(const ConnectionPtr & connection)
     {
+        if (m_stopped)
+        {
+            return;
+        }
+
         m_strand.dispatch([this,connection]
         {
             const Typesystem::EntityId eid(ProcessInfo::ClassTypeId,Typesystem::InstanceId(connection->Pid()));

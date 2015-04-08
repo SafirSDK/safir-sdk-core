@@ -218,7 +218,6 @@ namespace Internal
         m_connectionThread = boost::thread([this]() {ConnectionThread();});
 
         m_memoryMonitorThread = boost::thread(&DoseApp::MemoryMonitorThread);
-
     }
 
     void DoseApp::InjectNode(const std::string& nodeName,

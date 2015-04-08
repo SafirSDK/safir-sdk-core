@@ -26,8 +26,6 @@
  #include <Safir/Dob/NotOpenException.h>
  #include <Safir/Dob/AccessDeniedException.h>
  #include <Safir/Dob/NotFoundException.h>
- #include <Safir/Dob/DistributionChannel.h>
- #include <Safir/Dob/DistributionChannelParameters.h>
  #include <Safir/Dob/NodeParameters.h>
  #include <DoseTest/Partner.h>
  #include <DoseTest/PartnerResponseMessage.h>
@@ -61,7 +59,7 @@
    #pragma warning(pop)
  #endif
 
-namespace 
+namespace
 {
     void FillBinaryMemberInternal(Safir::Dob::Typesystem::BinaryContainer & cont)
     {
@@ -131,16 +129,20 @@ Sequencer::Sequencer(const int startTc,
     m_contextId(contextId),
     m_testConfig()
 {
+#if 0 //stewart
     // Find out if we are running in standalone or multinode configuration
     Safir::Dob::DistributionChannelPtr systemChannel = Safir::Dob::DistributionChannelParameters::DistributionChannels(0);
     if (systemChannel->MulticastAddress().Utf8String() == "127.0.0.1")
     {
+#endif
         m_testConfig = DoseTest::TestConfigEnum::StandAlone;
+#if 0 //stewart
     }
     else
     {
         m_testConfig = DoseTest::TestConfigEnum::Multinode;
     }
+#endif
 
     m_connection.Attach();
 }
@@ -176,7 +178,7 @@ bool Sequencer::PrepareTestcaseSetup()
             break;
         }
     }
-    
+
     if (m_currentCaseNo > m_stopTc)
     {
         return false;

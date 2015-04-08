@@ -36,7 +36,6 @@
 #include <Safir/Dob/ConnectionAspectMisc.h>
 #include <Safir/Dob/NodeInfo.h>
 #include <Safir/Dob/ThisNodeParameters.h>
-#include <Safir/Dob/DistributionChannelParameters.h>
 #if 0 //stewart
 #include "dosecom_stuff.h"
 #endif
