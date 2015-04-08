@@ -42,7 +42,6 @@
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Dob/Internal/DoseMainCmd.h>
-#include <Safir/Utilities/ProcessMonitor.h>
 
 //disable warnings in boost
 #if defined _MSC_VER
@@ -104,8 +103,6 @@ namespace Internal
 
         void HandleDisconnect(const ConnectionPtr & connection);
 
-        //TODO void AllocateStatic();
-
         void HandleConnectionOutEvent(const ConnectionPtr & connection, std::vector<ConnectionPtr>& deadConnections);
 
         void HandleIncomingData(const DistributionData & data, const bool isAckedData);
@@ -148,10 +145,7 @@ namespace Internal
         std::unique_ptr<PendingRegistrationHandler> m_pendingRegistrationHandler;
 
         // Process info
-        ProcessInfoHandler m_processInfoHandler;
-
-        // For monitoring processes
-        Safir::Utilities::ProcessMonitor m_processMonitor;
+        std::unique_ptr<ProcessInfoHandler> m_processInfoHandler;
 
         // For monitoring abandoned shared memory locks
         std::unique_ptr<LockMonitor> m_lockMonitor;

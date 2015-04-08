@@ -31,6 +31,7 @@
 #include <Safir/Dob/ResponseErrorInfo.h>
 #include <Safir/Dob/ConnectionAspectMisc.h>
 #include <Safir/Dob/ResponseGeneralErrorCodes.h>
+#include <Safir/Dob/ProcessInfo.h>
 #include <Safir/Dob/SuccessResponse.h>
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
@@ -45,26 +46,29 @@ namespace Dob
 {
 namespace Internal
 {
-    ProcessInfoHandler::ProcessInfoHandler():
-        m_processMonitor(NULL)
+
+    ProcessInfoHandler::ProcessInfoHandler(boost::asio::io_service& ioService)
+        : m_strand(ioService)
+        , m_dispatcher(m_connection, m_strand)
+        , m_processMonitor(ioService,
+                           [] (const pid_t pid)
+                           {
+                               //This marks all connections belonging to the process that died
+                               //as dead.
+                               Connections::Instance().ForEachConnectionPtr
+                                   ([pid](const ConnectionPtr& connection)
+                                    {
+                                        if (connection->Pid() == pid)
+                                        {
+                                            connection->Died();
+                                        }
+                                    });
+                           },
+                           boost::chrono::seconds(1))
     {
+        m_connection.Open(L"dose_main",L"ProcessInfoHandler",0,nullptr,&m_dispatcher);
 
-    }
-
-    ProcessInfoHandler::~ProcessInfoHandler()
-    {
-    }
-
-    void ProcessInfoHandler::Init(
-#if 0 //stewart
-                                  const ExternNodeCommunication & ecom,
-#endif
-                                  Safir::Utilities::ProcessMonitor& processMonitor)
-    {
-        m_processMonitor = &processMonitor;
-        m_connection.Attach();
-
-#if 0 //stewart
+#if 0  //stewart
         if (!ecom.IsLocal(Dob::ProcessInfo::ClassTypeId))
         {
             throw Dob::Typesystem::ConfigurationErrorException
@@ -82,6 +86,16 @@ namespace Internal
     }
 
 
+    void ProcessInfoHandler::Stop()
+    {
+        m_strand.dispatch([this]
+                          {
+                              m_processMonitor.Stop();
+                              m_connection.Close();
+                          });
+    }
+
+#if 0 //stewart
 
     ConnectResult
     ProcessInfoHandler::CanAddConnectionFromProcess(const pid_t pid) const
@@ -118,60 +132,69 @@ namespace Internal
         }
         return Success;
     }
+#endif
 
     void ProcessInfoHandler::ConnectionAdded(const ConnectionPtr & connection)
     {
-        const Typesystem::EntityId eid(ProcessInfo::ClassTypeId,Typesystem::InstanceId(connection->Pid()));
-        try
+        m_strand.dispatch([this,connection]
         {
-            if (!m_connection.IsCreated(eid))
+            const Typesystem::EntityId eid(ProcessInfo::ClassTypeId,Typesystem::InstanceId(connection->Pid()));
+            try
             {
-                m_processMonitor->StartMonitorPid(connection->Pid());
-
-                //pid does not exist, need a new instance
-                ProcessInfoPtr processInfo = ProcessInfo::Create();
-
-                Safir::Utilities::ProcessInfo pi(connection->Pid());
-                processInfo->Name().SetVal(Typesystem::Utilities::ToWstring(pi.GetProcessName()));
-                processInfo->Pid().SetVal(connection->Pid());
-                processInfo->ConnectionNames()[0].SetVal(Typesystem::Utilities::ToWstring(connection->NameWithCounter()));
-
-                m_connection.SetAll(processInfo, eid.GetInstanceId(), Typesystem::HandlerId());
-            }
-            else
-            {
-                //we have an instance for the pid, add the connection to it.
-                ProcessInfoPtr processInfo = boost::static_pointer_cast<ProcessInfo>
-                    (m_connection.Read(eid).GetEntity());
-
-                bool connectionAdded = false;
-                for (int i = 0; i< ProcessInfo::ConnectionNamesArraySize(); ++i)
+                if (!m_connection.IsCreated(eid))
                 {
-                    if (processInfo->ConnectionNames()[i].IsNull())
-                    {
-                        processInfo->ConnectionNames()[i].SetVal(Typesystem::Utilities::ToWstring(connection->NameWithCounter()));
-                        connectionAdded = true;
-                        break;
-                    }
-                }
-                ENSURE(connectionAdded, << "Unable to add connection to ProcessInfo object. PID: " << connection->Pid()
-                       << " has reached max number of connections");
+                    m_processMonitor.StartMonitorPid(connection->Pid());
 
-                m_connection.SetAll(processInfo, eid.GetInstanceId(), Typesystem::HandlerId());
+                    //pid does not exist, need a new instance
+                    ProcessInfoPtr processInfo = ProcessInfo::Create();
+
+                    Safir::Utilities::ProcessInfo pi(connection->Pid());
+                    processInfo->Name().SetVal(Typesystem::Utilities::ToWstring(pi.GetProcessName()));
+                    processInfo->Pid().SetVal(connection->Pid());
+                    processInfo->ConnectionNames()[0].SetVal
+                        (Typesystem::Utilities::ToWstring(connection->NameWithCounter()));
+
+                    m_connection.SetAll(processInfo, eid.GetInstanceId(), Typesystem::HandlerId());
+                }
+                else
+                {
+                    //we have an instance for the pid, add the connection to it.
+                    ProcessInfoPtr processInfo = boost::static_pointer_cast<ProcessInfo>
+                        (m_connection.Read(eid).GetEntity());
+
+                    bool connectionAdded = false;
+                    for (int i = 0; i< ProcessInfo::ConnectionNamesArraySize(); ++i)
+                    {
+                        if (processInfo->ConnectionNames()[i].IsNull())
+                        {
+                            processInfo->ConnectionNames()[i].SetVal
+                                (Typesystem::Utilities::ToWstring(connection->NameWithCounter()));
+                            connectionAdded = true;
+                            break;
+                        }
+                    }
+                    ENSURE(connectionAdded,
+                           << "Unable to add connection to ProcessInfo object. PID: "
+                           << connection->Pid()
+                           << " has reached max number of connections");
+
+                    m_connection.SetAll(processInfo, eid.GetInstanceId(), Typesystem::HandlerId());
+                }
             }
-        }
-        catch (const Safir::Dob::AccessDeniedException &)
-        {
-            SEND_SYSTEM_LOG(Error,
-                            << "Unable to set ProcessInfo entity " << eid 
-                            << ". Has anyone overregistered Safir::Dob::ProcessInfo?");
-        }
+            catch (const Safir::Dob::AccessDeniedException &)
+            {
+                SEND_SYSTEM_LOG(Error,
+                                << "Unable to set ProcessInfo entity " << eid
+                                << ". Has anyone overregistered Safir::Dob::ProcessInfo?");
+            }
+        });
     }
 
 
     void ProcessInfoHandler::AddOwnConnection()
     {
-        const Typesystem::EntityId eid(ProcessInfo::ClassTypeId,Typesystem::InstanceId(Safir::Utilities::ProcessInfo::GetPid()));
+        const Typesystem::EntityId eid(ProcessInfo::ClassTypeId,
+                                       Typesystem::InstanceId(Safir::Utilities::ProcessInfo::GetPid()));
         try
         {
             ProcessInfoPtr processInfo = ProcessInfo::Create();
@@ -183,62 +206,72 @@ namespace Internal
             processInfo->ConnectionNames()[0].SetVal(ConnectionAspectMisc(m_connection).GetConnectionName());
 
             m_connection.SetAll(processInfo,eid.GetInstanceId(),Typesystem::HandlerId());
+
+            //TODO stewart: Add dose_mains other connections?!
         }
         catch (const Safir::Dob::AccessDeniedException &)
         {
             SEND_SYSTEM_LOG(Error,
                             << "Unable to set ProcessInfo entity " << eid
-                            << "Has anyone overregistered Safir::Dob::ProcessInfo?");
+                            << "Has someone overregistered Safir::Dob::ProcessInfo?");
         }
     }
 
+
     void ProcessInfoHandler::ConnectionRemoved(const ConnectionPtr & connection)
     {
-        const Typesystem::EntityId eid(ProcessInfo::ClassTypeId,Typesystem::InstanceId(connection->Pid()));
-        try
+        m_strand.dispatch([this,connection]
         {
-            bool processHasConnection = false;
-            bool processInfoUpdated = false;
-
-            ProcessInfoPtr processInfo =
-                boost::static_pointer_cast<ProcessInfo>(m_connection.Read(eid).GetEntity());
-
-            for (int i = 0; i< ProcessInfo::ConnectionNamesArraySize(); ++i)
+            const Typesystem::EntityId eid(ProcessInfo::ClassTypeId,Typesystem::InstanceId(connection->Pid()));
+            try
             {
-                if (!processInfo->ConnectionNames()[i].IsNull())
+                bool processHasConnection = false;
+                bool processInfoUpdated = false;
+
+                ProcessInfoPtr processInfo =
+                    boost::static_pointer_cast<ProcessInfo>(m_connection.Read(eid).GetEntity());
+
+                for (int i = 0; i< ProcessInfo::ConnectionNamesArraySize(); ++i)
                 {
-                    // Found a connection. Is it the one we are looking for ...?
-                    if (connection->NameWithCounter() == Typesystem::Utilities::ToUtf8
-                        (processInfo->ConnectionNames()[i].GetVal()))
+                    if (!processInfo->ConnectionNames()[i].IsNull())
                     {
-                        // Yes, it was. Set it to NULL.
-                        processInfo->ConnectionNames()[i].SetNull();
-                        processInfoUpdated = true;
-                    }
-                    else
-                    {
-                        processHasConnection = true;
-                        // No, it wasn't. Indicate that this process has a connection.
+                        // Found a connection. Is it the one we are looking for ...?
+                        if (connection->NameWithCounter() == Typesystem::Utilities::ToUtf8
+                            (processInfo->ConnectionNames()[i].GetVal()))
+                        {
+                            // Yes, it was. Set it to NULL.
+                            processInfo->ConnectionNames()[i].SetNull();
+                            processInfoUpdated = true;
+                        }
+                        else
+                        {
+                            processHasConnection = true;
+                            // No, it wasn't. Indicate that this process has a connection.
+                        }
                     }
                 }
+
+                ENSURE(processInfoUpdated,
+                       << "No process info was changed in call to ConnectionRemoved with connection "
+                       << connection->NameWithCounter());
+
+                if (!processHasConnection)
+                {
+                    m_connection.Delete(eid,Typesystem::HandlerId());
+                    m_processMonitor.StopMonitorPid(connection->Pid());
+                }
+                else
+                {
+                    m_connection.SetAll(processInfo,eid.GetInstanceId(),Typesystem::HandlerId());
+                }
             }
-
-            ENSURE(processInfoUpdated, << "No process info was changed in call to ConnectionRemoved with connection " << connection->NameWithCounter());
-
-            if (!processHasConnection)
+            catch (const Safir::Dob::AccessDeniedException &)
             {
-                m_connection.Delete(eid,Typesystem::HandlerId());
-                m_processMonitor->StopMonitorPid(connection->Pid());
+                SEND_SYSTEM_LOG(Error,
+                                << "Unable to set ProcessInfo entity " << eid
+                                << "Has someone overregistered Safir::Dob::ProcessInfo?");
             }
-            else
-            {
-                m_connection.SetAll(processInfo,eid.GetInstanceId(),Typesystem::HandlerId());
-            }
-        }
-        catch (const Safir::Dob::AccessDeniedException &)
-        {
-
-        }
+        });
     }
 
     void ProcessInfoHandler::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId    /*typeId*/,

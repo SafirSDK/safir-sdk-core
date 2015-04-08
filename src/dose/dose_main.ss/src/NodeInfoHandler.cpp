@@ -66,7 +66,10 @@ namespace Internal
 
     void NodeInfoHandler::Stop()
     {
-        m_connection.Close();
+        m_dispatcher.Strand().dispatch([this]
+                                       {
+                                           m_connection.Close();
+                                       });
     }
 
 

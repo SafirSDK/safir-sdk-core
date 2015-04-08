@@ -24,8 +24,8 @@
 #pragma once
 
 #include <Safir/Dob/Connection.h>
+#include <Safir/Utilities/AsioDispatcher.h>
 #include <Safir/Dob/Internal/Connections.h>
-#include <Safir/Dob/ProcessInfo.h>
 #include <Safir/Utilities/ProcessMonitor.h>
 #include <vector>
 
@@ -35,33 +35,22 @@ namespace Dob
 {
 namespace Internal
 {
-#if 0 //stewart
-    class ExternNodeCommunication;
-#endif
-
     class ProcessInfoHandler:
         public Safir::Dob::EntityHandler,
         private boost::noncopyable
     {
     public:
         // Constructor and Destructor
-        ProcessInfoHandler();
-        ~ProcessInfoHandler();
+        explicit ProcessInfoHandler(boost::asio::io_service& ioService);
 
-        void Init(
-#if 0 //stewart
-                  const ExternNodeCommunication & ecom,
-#endif
-                  Safir::Utilities::ProcessMonitor& processMonitor);
+        void Stop();
 
         void ConnectionAdded(const ConnectionPtr & connection);
         void ConnectionRemoved(const ConnectionPtr & connection);
 
-        void HandleProcessInfoEntityDelete(const DistributionData & request);
-
         //returns Success if it is possible to add a new connection to the given process,
         //otherwise an error code.
-        ConnectResult CanAddConnectionFromProcess(const pid_t pid) const;
+        //TODO stewart ConnectResult CanAddConnectionFromProcess(const pid_t pid) const;
 
     private:
         void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId typeId,
@@ -78,9 +67,11 @@ namespace Internal
 
         void AddOwnConnection();
 
-        Safir::Dob::SecondaryConnection m_connection;
+        boost::asio::io_service::strand m_strand;
+        Safir::Dob::Connection m_connection;
+        Utilities::AsioDispatcher m_dispatcher;
 
-        Safir::Utilities::ProcessMonitor * m_processMonitor;
+        Safir::Utilities::ProcessMonitor m_processMonitor;
     };
 }
 }

@@ -46,19 +46,6 @@ namespace Internal
 
     namespace //anonymous namespace
     {
-        void SetDiedIfPidEquals(const ConnectionPtr& connection, const pid_t pid)
-        {
-            if (connection->Pid() == pid)
-            {
-                connection->Died();
-            }
-        }
-
-        void ProcessExited(const pid_t& pid)
-        {
-            Connections::Instance().ForEachConnectionPtr(boost::bind(SetDiedIfPidEquals,_1,pid));
-        }
-
         void DumpFunc(const char* const dumpPath)
         {
             std::wostringstream ostr;
@@ -106,7 +93,6 @@ namespace Internal
 
         m_signalSet(m_strand.get_io_service()),
         m_timerHandler(m_strand),
-        m_processMonitor(m_strand.get_io_service(),ProcessExited,boost::chrono::seconds(1)),
         m_HandleEvents_notified(0)
     {
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
@@ -224,12 +210,15 @@ namespace Internal
                                                         nodeTypeIds,
                                                         *m_requestHandler,
                                                         *m_pendingRegistrationHandler));
-
+        m_processInfoHandler.reset(new ProcessInfoHandler(m_strand.get_io_service()));
         m_nodeInfoHandler.reset(new NodeInfoHandler(m_strand.get_io_service(), *m_distribution));
 
         //setup pdComplete sub
 
         m_connectionThread = boost::thread([this]() {ConnectionThread();});
+
+        m_memoryMonitorThread = boost::thread(&DoseApp::MemoryMonitorThread);
+
     }
 
     void DoseApp::InjectNode(const std::string& nodeName,
@@ -282,12 +271,10 @@ namespace Internal
     void DoseApp::Stop()
     {
         m_cmdReceiver.Stop();
-
+        m_nodeInfoHandler->Stop();
+        m_processInfoHandler->Stop();
         m_timerHandler.Stop();
-
         m_lockMonitor->Stop();
-
-        m_processMonitor.Stop();
 
         if (m_memoryMonitorThread.get_id() != boost::thread::id())
         {
@@ -312,8 +299,6 @@ namespace Internal
         }
 
         m_poolHandler->Stop();
-
-        m_nodeInfoHandler->Stop();
 
         m_signalSet.cancel();
 
@@ -499,22 +484,13 @@ namespace Internal
 //        //persistence.
 //        NodeStatusChangedNotifier();
 
-//        m_ownConnection.Open(L"dose_main",L"own",0,NULL,this);
-
 //        m_poolHandler.Init(m_pendingRegistrationHandler,
 //                           m_persistHandler,
 //                           m_connectionHandler);
 
-
-//        m_processInfoHandler.Init(m_processMonitor);
-
-//        m_nodeHandler.Init (m_requestHandler, m_poolHandler);
-
 //        m_connectionThread = boost::thread(boost::bind(&DoseApp::ConnectionThread,this));
 
 //        m_persistHandler.Init(m_connectionHandler,m_nodeHandler,otherNodesExistAtStartup);
-
-//        m_memoryMonitorThread = boost::thread(&DoseApp::MemoryMonitorThread);
     //}
 
     void DoseApp::HandleConnect(const ConnectionPtr & connection)
@@ -522,8 +498,7 @@ namespace Internal
         lllout << "ConnectionHandler::HandleConnect: New connection from " << connection->NameWithCounter() << " id = " << connection->Id() << std::endl;
         m_connectionHandler->HandleConnect(connection);
 
-        // stewart
-        //m_processInfoHandler.ConnectionAdded(connection);
+        m_processInfoHandler->ConnectionAdded(connection);
     }
 
     void DoseApp::HandleDisconnect(const ConnectionPtr & connection)
@@ -546,9 +521,8 @@ namespace Internal
 
         m_connectionHandler->HandleDisconnect(connection);
 
-        // Remove the connection from the processInfo structure
-        //stewart
-        //m_processInfoHandler.ConnectionRemoved(connection);
+        // Remove the connection from the ProcessInfoHandler
+        m_processInfoHandler->ConnectionRemoved(connection);
 
         // Classes have been unregistered, inform waiting connections
         int recLevel=0;
