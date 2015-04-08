@@ -534,6 +534,7 @@ int main(int argc, char * argv[])
             try
             {
                 ioService.run();
+                std::wcout << "Thread exiting" << std::endl;
                 return;
             }
             catch (const std::exception & exc)
