@@ -24,9 +24,20 @@
 #include <set>
 #include <boost/make_shared.hpp>
 #include <boost/thread.hpp>
-#include <boost/asio.hpp>
 #include "../../src/PoolDistributionRequestSender.h"
 #include "../../src/PoolDistributionHandler.h"
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
+#endif
+
+#include <boost/asio.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
+
 
 #define BOOST_TEST_MODULE PoolHandlerTest
 #include <boost/test/unit_test.hpp>
