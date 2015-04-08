@@ -95,6 +95,11 @@ namespace Utilities
 
         }
 
+        /**
+         * Get the strand that the dispatcher uses.
+         */
+        boost::asio::strand& Strand() {return *m_strand;}
+
     private:
         struct null_deleter
         {
