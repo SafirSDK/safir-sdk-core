@@ -58,8 +58,7 @@ namespace Internal
     class NodeHandler;
 
     class ConnectionHandler:
-            public Connections::ConnectionConsumer,
-            private boost::noncopyable
+        private boost::noncopyable
     {
     public:
         ConnectionHandler(boost::asio::io_service& ioService,
@@ -90,11 +89,9 @@ namespace Internal
         void ConnectionThread();
         void HandleEvents();
 
-        //implementation of Connections::ConnectionHandler
-        ConnectResult CanAddConnection(const std::string & connectionName, const pid_t pid, const long context) override;
-        void HandleConnect(const ConnectionPtr & connection) override;
-        void HandleDisconnect(const ConnectionPtr & connection);
-        void HandleConnectionOutEvent(const ConnectionPtr & connection, std::vector<ConnectionPtr>& deadConnections);
+        void HandleConnect(const ConnectionPtr& connection);
+        void HandleDisconnect(const ConnectionPtr& connection);
+        void HandleConnectionOutEvent(const ConnectionPtr& connection, std::vector<ConnectionPtr>& deadConnections);
 
         static inline std::pair<boost::shared_ptr<const char[]>, size_t> ConnectDataPtr(const Safir::Dob::Internal::ConnectionId& id,
                                                                                         const char* nameWithoutCounter,

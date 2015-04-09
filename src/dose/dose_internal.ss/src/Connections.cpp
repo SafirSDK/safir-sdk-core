@@ -236,7 +236,7 @@ namespace Internal
         connection->Died();
     }
 
-    void Connections::HandleConnect(ConnectionConsumer & connectionHandler)
+    void Connections::HandleConnect(const std::function<void(const ConnectionPtr& connection)>& handleConnect)
     {
        if (m_connectMessage.IsConnect())
         {
@@ -268,34 +268,26 @@ namespace Internal
             }
             else
             {
-                const ConnectResult result = connectionHandler.CanAddConnection(connectionName,pid,context);
-                if (result != Success)
+                ConnectionPtr connection;
                 {
-                    m_connectResponse.Set(connect_tag, result, ConnectionPtr(/*NULL*/));
+                    //upgrade the mutex
+                    boost::interprocess::scoped_lock<ConnectionsTableLock> wlock(boost::interprocess::move(rlock));
+
+                    connection = ConnectionPtr(GetSharedMemory().construct<Connection>
+                                               (boost::interprocess::anonymous_instance)
+                                               (connectionName, m_connectionCounter++, m_nodeId, context, pid, true));
+
+                    const bool success = m_connections.insert(std::make_pair(connection->Id(), connection)).second;
+
+                    ENSURE(success, << "HandleConnect: Failed to insert connection in map! name = " << connectionName.c_str());
+
+                    AddToSignalHandling(connection);
                 }
-                else
-                {
-                    ConnectionPtr connection;
-                    {
-                        //upgrade the mutex
-                        boost::interprocess::scoped_lock<ConnectionsTableLock> wlock(boost::interprocess::move(rlock));
 
-                        connection = ConnectionPtr(GetSharedMemory().construct<Connection>
-                                                   (boost::interprocess::anonymous_instance)
-                                                   (connectionName, m_connectionCounter++, m_nodeId, context, pid, true));
+                //call the connect handler
+                handleConnect(connection);
 
-                        const bool success = m_connections.insert(std::make_pair(connection->Id(), connection)).second;
-
-                        ENSURE(success, << "HandleConnect: Failed to insert connection in map! name = " << connectionName.c_str());
-
-                        AddToSignalHandling(connection);
-                    }
-
-                    //call the connect handler
-                    connectionHandler.HandleConnect(connection);
-
-                    m_connectResponse.Set(connect_tag, Success, connection);
-                }
+                m_connectResponse.Set(connect_tag, Success, connection);
             }
 
         }
@@ -390,7 +382,9 @@ namespace Internal
     void Connections::AddToSignalHandling(const ConnectionPtr& connection)
     {
         //find a free slot
-        Containers<ConnectionId>::vector::iterator findIt = std::find(m_connectionOutIds.begin(),m_connectionOutIds.end(),ConnectionId());
+        Containers<ConnectionId>::vector::iterator findIt = std::find(m_connectionOutIds.begin(),
+                                                                      m_connectionOutIds.end(),
+                                                                      ConnectionId());
         ENSURE (findIt != m_connectionOutIds.end(), << "No free slot was found in the connection handler arrays!");
 
         *findIt = connection->Id();

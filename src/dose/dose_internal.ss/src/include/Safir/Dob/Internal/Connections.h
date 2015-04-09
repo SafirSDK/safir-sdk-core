@@ -102,22 +102,15 @@ namespace Internal
         /** For applications to disconnect from the DOB. */
         void Disconnect(const ConnectionPtr & connection);
 
-        class ConnectionConsumer
-        {
-        public:
-            virtual ConnectResult CanAddConnection(const std::string & connectionName, const pid_t pid, const long context) = 0;
-            virtual void HandleConnect(const ConnectionPtr & connection) = 0;
-
-            virtual ~ConnectionConsumer() {}
-        };
-
         /**
          * Handle connects and disconnects.
          * Note that handles either one connect or disconnect per call.
          * It is illegal to call this method when there is noone trying to connect
          * (I.e when the WaitForDoseMainSignal hasnt said that there is a connect waiting)
+         *
+         * The handleConnect function will be called when an application is trying to connect.
          */
-        void HandleConnect(ConnectionConsumer & connectionHandler);
+        void HandleConnect(const std::function<void(const ConnectionPtr& connection)>& handleConnect);
 
         /**
          * This function is used to add connections from within dose_main.

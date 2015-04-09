@@ -35,6 +35,11 @@ namespace Dob
 {
 namespace Internal
 {
+    /**
+     * This class handles the Safir.Dob.NodeInfo entity.
+     *
+     * Every node own its own instance of this entity. No requests are allowed.
+     */
     class NodeInfoHandler:
         public Safir::Dob::EntityHandler,
         private boost::noncopyable

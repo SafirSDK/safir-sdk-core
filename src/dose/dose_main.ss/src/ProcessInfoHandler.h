@@ -35,6 +35,17 @@ namespace Dob
 {
 namespace Internal
 {
+    /**
+     * This class handles the ProcessInfo entity, creating and deleting instances
+     * when connections come and go.
+     * It also instantiates the ProcessMonitor class and uses it to detect when
+     * a process dies to be able to mark its connections as dead.
+     *
+     * The only request that is allowed on the entity is DeleteRequest, which
+     * will cause a stop order to be sent to the application.
+     *
+     * All methods in this class are thread safe.
+     */
     class ProcessInfoHandler:
         public Safir::Dob::EntityHandler,
         private boost::noncopyable
@@ -47,10 +58,6 @@ namespace Internal
 
         void ConnectionAdded(const ConnectionPtr & connection);
         void ConnectionRemoved(const ConnectionPtr & connection);
-
-        //returns Success if it is possible to add a new connection to the given process,
-        //otherwise an error code.
-        //TODO stewart ConnectResult CanAddConnectionFromProcess(const pid_t pid) const;
 
     private:
         void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId typeId,

@@ -249,34 +249,6 @@ namespace Internal
                 m_connection = connection;
             }
             break;
-        case TooManyProcesses:
-            {
-                m_isConnected = false;
-                std::wostringstream ostr;
-                ostr << "Failed to open connection! There are too many processes connected to the Dob, please increase "
-                     << "the parameter Safir.Dob.ProcessInfo.MaxNumberOfInstances. " << std::endl
-                     << "While opening connection with name " << m_connectionName.c_str();
-                m_consumerReferences.DropAllReferences(boost::bind(&Dispatcher::InvokeDropReferenceCb,
-                                                                   m_dispatcher,
-                                                                   _1,
-                                                                   _2));
-                throw Safir::Dob::NotOpenException(ostr.str(), __WFILE__,__LINE__);
-            }
-            break;
-        case TooManyConnectionsInProcess:
-            {
-                m_isConnected = false;
-                std::wostringstream ostr;
-                ostr << "Failed to open connection! This process has too many connections, "
-                     << "please increase the size of the ConnectionNames array in class Safir.Dob.ProcessInfo. " << std::endl
-                     << "While opening Process pid = " << Safir::Utilities::ProcessInfo::GetPid() << ", ConnectionName = " << m_connectionName.c_str();
-                m_consumerReferences.DropAllReferences(boost::bind(&Dispatcher::InvokeDropReferenceCb,
-                                                                   m_dispatcher,
-                                                                   _1,
-                                                                   _2));
-                throw Safir::Dob::NotOpenException(ostr.str(), __WFILE__,__LINE__);
-            }
-            break;
 
         case ConnectionNameAlreadyExists:
             {

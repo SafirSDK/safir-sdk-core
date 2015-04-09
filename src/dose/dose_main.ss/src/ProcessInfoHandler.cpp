@@ -98,45 +98,6 @@ namespace Internal
         }
     }
 
-#if 0 //stewart
-
-    ConnectResult
-    ProcessInfoHandler::CanAddConnectionFromProcess(const pid_t pid) const
-    {
-        const Typesystem::EntityId eid(ProcessInfo::ClassTypeId,Typesystem::InstanceId(pid));
-
-        if (m_connection.IsCreated(eid))
-        {
-            ProcessInfoPtr processInfo = boost::static_pointer_cast<ProcessInfo>
-                (m_connection.Read(eid).GetEntity());
-
-            bool slotFound = false;
-            for (int i = 0; i< ProcessInfo::ConnectionNamesArraySize(); ++i)
-            {
-                if (processInfo->ConnectionNames()[i].IsNull())
-                {
-                    slotFound = true;
-                    break;
-                }
-            }
-            if (!slotFound)
-            {
-                return TooManyConnectionsInProcess;
-            }
-        }
-        else
-        {
-            const size_t numProcessInfo = std::distance(m_connection.GetEntityIterator(ProcessInfo::ClassTypeId,false),
-                                                        EntityIterator());
-            if (numProcessInfo > static_cast<size_t>(ProcessInfo::MaxNumberOfInstances()))
-            {
-                return TooManyProcesses;
-            }
-        }
-        return Success;
-    }
-#endif
-
     void ProcessInfoHandler::ConnectionAdded(const ConnectionPtr & connection)
     {
         if (m_stopped)
@@ -181,12 +142,19 @@ namespace Internal
                             break;
                         }
                     }
-                    ENSURE(connectionAdded,
-                           << "Unable to add connection to ProcessInfo object. PID: "
-                           << connection->Pid()
-                           << " has reached max number of connections");
-
-                    m_connection.SetAll(processInfo, eid.GetInstanceId(), Typesystem::HandlerId());
+                    if (connectionAdded)
+                    {
+                        m_connection.SetAll(processInfo, eid.GetInstanceId(), Typesystem::HandlerId());
+                    }
+                    else
+                    {
+                        //TODO stewart: when Rockefeller is merged, use a sequence instead.
+                        SEND_SYSTEM_LOG(Critical,
+                                        << "Could not display new connection '" << connection->NameWithCounter()
+                                        << "' from process with pid = " << connection->Pid()
+                                        << " in the Safir.Dob.ProcessInfo entity since there are too many connections from that process. "
+                                        << "Increase length of Safir.Dob.ProcessInfo.ConnectionNames.");
+                    }
                 }
             }
             catch (const Safir::Dob::AccessDeniedException &)
@@ -259,23 +227,30 @@ namespace Internal
                         else
                         {
                             processHasConnection = true;
-                            // No, it wasn't. Indicate that this process has a connection.
+                            // No, it wasn't. Indicate that this process has other connections
+                            // and that the entity should not be deleted
                         }
                     }
                 }
 
-                ENSURE(processInfoUpdated,
-                       << "No process info was changed in call to ConnectionRemoved with connection "
-                       << connection->NameWithCounter());
-
-                if (!processHasConnection)
+                if (!processInfoUpdated)
                 {
-                    m_connection.Delete(eid,Typesystem::HandlerId());
-                    m_processMonitor.StopMonitorPid(connection->Pid());
+                    if (!processHasConnection)
+                    {
+                        m_connection.Delete(eid,Typesystem::HandlerId());
+                        m_processMonitor.StopMonitorPid(connection->Pid());
+                    }
+                    else
+                    {
+                        m_connection.SetAll(processInfo,eid.GetInstanceId(),Typesystem::HandlerId());
+                    }
                 }
                 else
                 {
-                    m_connection.SetAll(processInfo,eid.GetInstanceId(),Typesystem::HandlerId());
+                    SEND_SYSTEM_LOG(Warning,
+                                    << "Could not remove connection '" << connection->NameWithCounter()
+                                    << "' from process with pid = " << connection->Pid()
+                                    << " in the Safir.Dob.ProcessInfo entity since it wasn't in there!")
                 }
             }
             catch (const Safir::Dob::AccessDeniedException &)

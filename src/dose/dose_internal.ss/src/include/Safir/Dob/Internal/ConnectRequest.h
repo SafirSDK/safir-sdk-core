@@ -44,8 +44,6 @@ namespace Internal
     {
         Undefined,
         Success,
-        TooManyProcesses,
-        TooManyConnectionsInProcess,
         ConnectionNameAlreadyExists,
     };
 
@@ -57,14 +55,14 @@ namespace Internal
         /** Constructor */
         ConnectRequest();
 
-        void Set(connect_tag_t, 
-                 const std::string& connectionName, 
-                 const ContextId contextId, 
+        void Set(connect_tag_t,
+                 const std::string& connectionName,
+                 const ContextId contextId,
                  const pid_t pid);
 
-        void GetAndClear(connect_tag_t, 
-                         std::string& connectionName, 
-                         ContextId& contextId, 
+        void GetAndClear(connect_tag_t,
+                         std::string& connectionName,
+                         ContextId& contextId,
                          pid_t& pid);
 
         bool IsConnect() const;
@@ -103,4 +101,3 @@ namespace Internal
 }
 
 #endif
-

@@ -207,17 +207,17 @@ namespace
         //we do this after connectionOutEvents
         if (gotConnectEvent)
         {
-            Connections::Instance().HandleConnect(*this);
+            Connections::Instance().HandleConnect([this](const ConnectionPtr& connection)
+            {
+                lllout << "ConnectionHandler::HandleConnect: New connection from "
+                       << connection->NameWithCounter() << " id = " << connection->Id() << std::endl;
+
+                SendAll(ConnectDataPtr(connection->Id(), connection->NameWithoutCounter(), connection->Counter()));
+
+                m_processInfoHandler.ConnectionAdded(connection);
+
+            });
         }
-    }
-
-    void ConnectionHandler::HandleConnect(const ConnectionPtr & connection)
-    {
-        lllout << "ConnectionHandler::HandleConnect: New connection from " << connection->NameWithCounter() << " id = " << connection->Id() << std::endl;
-
-        SendAll(ConnectDataPtr(connection->Id(), connection->NameWithoutCounter(), connection->Counter()));
-
-        m_processInfoHandler.ConnectionAdded(connection);
     }
 
     void ConnectionHandler::HandleDisconnect(const ConnectionPtr & connection)
@@ -266,43 +266,6 @@ namespace
             lllout << "Connection is dead: " << connection->NameWithCounter() << ", disconnecting."<< std::endl;
             deadConnections.push_back(connection);
         }
-    }
-
-    ConnectResult ConnectionHandler::CanAddConnection(const std::string & connectionName, const pid_t pid, const long /*context*/)
-    {
-        return Success;
-        //TODO: Stewart, when/if processInfoHandler provides CanAddConnectionFromProcess
-//        switch (m_processInfoHandler.CanAddConnectionFromProcess(pid))
-//        {
-//        case TooManyProcesses:
-//            {
-//                SEND_SYSTEM_LOG(Critical,
-//                                << "Could not let new connection '" << connectionName.c_str()
-//                                << "' from process with pid = " << pid
-//                                << " connect since there are too many processes connected. "
-//                                << "Increase Safir.Dob.ProcessInfo.MaxNumberOfInstances.");
-//                return TooManyProcesses;
-//            }
-//            break;
-
-//        case TooManyConnectionsInProcess:
-//            {
-//                SEND_SYSTEM_LOG(Critical,
-//                                << "Could not let new connection '" << connectionName.c_str()
-//                                << "' from process with pid = " << pid
-//                                << " connect since there are too many connections from that process. "
-//                                << "Increase length of Safir.Dob.ProcessInfo.ConnectionNames.");
-//                return TooManyConnectionsInProcess;
-//            }
-//            break;
-
-//        case Success:
-//            return Success;
-
-//        default:
-//            ENSURE(false, << "Got unexpected result from ProcessInfoHandler::CanAddConnectionFromProcess!");
-//            return Undefined;
-//        }
     }
 
 

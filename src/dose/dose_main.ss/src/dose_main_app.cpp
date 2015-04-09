@@ -328,7 +328,6 @@ namespace Internal
 
 
             lllout << "Got NodeStatusChanged event" << std::endl;
-            m_nodeHandler.HandleNodeStatusChanges();
 
             const NodeStatuses::Status nodeStatuses = NodeStatuses::Instance().GetNodeStatuses();
             const bool atLeastOneNodeIsUp = std::count(nodeStatuses.begin(),nodeStatuses.end(),NodeStatus::Started) >= 1;
@@ -353,8 +352,6 @@ namespace Internal
         }
 #endif
 
-//    }
-
 
     //    void DoseApp::AllocateStatic()
     //{
@@ -366,7 +363,6 @@ namespace Internal
 //                                 m_processInfoHandler,
 //                                 m_requestHandler,
 //                                 m_pendingRegistrationHandler,
-//                                 m_nodeHandler,
 //                                 m_persistHandler);
 
 //        const bool otherNodesExistAtStartup = false;
