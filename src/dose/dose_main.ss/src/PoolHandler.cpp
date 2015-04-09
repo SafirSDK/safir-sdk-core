@@ -117,7 +117,7 @@ namespace Internal
         //create one StateDistributor per nodeType
         for (auto& nt : distribution.GetNodeTypeConfiguration().nodeTypesParam)
         {
-            auto sd=std::unique_ptr<StateDistributorType >(new StateDistributorType(nt.id, m_communication, m_strand, checkPendingReg));
+            auto sd=std::unique_ptr<StateDistributorType >(new StateDistributorType(nt.id, distribution, m_strand, checkPendingReg));
             m_stateDistributors.emplace(nt.id, std::move(sd));
         }
 

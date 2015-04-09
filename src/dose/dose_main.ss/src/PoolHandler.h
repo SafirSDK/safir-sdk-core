@@ -56,7 +56,7 @@ namespace Internal
         using PoolDistributionType=PoolDistribution<Com::Communication>;
         using PoolDistributionHandlerType=PoolDistributionHandler<Com::Communication, PoolDistributionType>;
         using PoolDistributionRequestSenderType=PoolDistributionRequestSender<Com::Communication>;
-        using StateDistributorType=StateDistributor<Com::Communication>;
+        using StateDistributorType=StateDistributor<Distribution>;
 
         boost::asio::io_service::strand m_strand;
         boost::asio::steady_timer m_endStatesTimer;

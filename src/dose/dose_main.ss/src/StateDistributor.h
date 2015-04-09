@@ -45,7 +45,7 @@ namespace Internal
     static const int64_t RegistrationStateDataTypeId=6915466164769792349; //DoseMain.RegistrationState
     static const int64_t EntityStateDataTypeId=5802524208372516084; //DoseMain.EntityState
 
-    template <class CommunicationT>
+    template <class DistributionT>
     class StateDistributor
             :private Safir::Dob::Dispatcher
             ,private Safir::Dob::StopHandler
@@ -55,17 +55,17 @@ namespace Internal
     {
     public:
         StateDistributor(int64_t nodeType,
-                         CommunicationT& com,
+                         Distribution& distribution,
                          boost::asio::io_service::strand& strand,
                          const std::function<void(int64_t)>& checkPendingReg)
             :m_nodeType(nodeType)
-            ,m_communication(com)
+            ,m_distribution(distribution)
             ,m_strand(strand)
             ,m_checkPendingReg(checkPendingReg)
             ,m_connections(static_cast<size_t>(Safir::Dob::NodeParameters::NumberOfContexts()))
         {
             m_dispatcherNotified=false;
-            m_communication.SetQueueNotFullCallback([=](int64_t){OnDoDispatch();}, m_nodeType);
+            m_distribution.GetCommunication().SetQueueNotFullCallback([=](int64_t){OnDoDispatch();}, m_nodeType);
         }
 
         void Start()
@@ -100,7 +100,7 @@ namespace Internal
         };
 
         int64_t m_nodeType;
-        CommunicationT& m_communication;
+        DistributionT& m_distribution;
         boost::asio::io_service::strand& m_strand;
         std::function<void(int64_t)> m_checkPendingReg;
         std::vector<SubcriptionConnection> m_connections;
@@ -202,14 +202,16 @@ namespace Internal
 
                 if (currentState != lastState && !currentState.IsNoState())
                 {
-                    //if sender is not local node we dont send to dosecom, and just ignore it.
-                    if (currentState.GetSenderId().m_node!=m_communication.Id())
+                    //if sender is not local node or object is local we just ignore it.
+                    if (currentState.GetSenderId().m_node!=m_distribution.GetCommunication().Id() ||
+                        m_distribution.IsLocal(currentState.GetTypeId()))
                     {
                         subscription->SetLastRealState(currentState);
                     }
                     else
                     {
-                        bool success=m_communication.Send(0, m_nodeType, ToPtr(currentState), currentState.Size(), EntityStateDataTypeId, true);
+                        bool success=m_distribution.GetCommunication().Send
+                            (0, m_nodeType, ToPtr(currentState), currentState.Size(), EntityStateDataTypeId, true);
                         if (success)
                         {
                             subscription->SetLastRealState(currentState);
@@ -229,14 +231,16 @@ namespace Internal
 
                 if (currentState != lastState && !currentState.IsNoState())
                 {
-                    //if sender is not local node we dont send to dosecom, and just ignore it.
-                    if (currentState.GetSenderId().m_node!=m_communication.Id())
+                    //if sender is not local node or object is local we just ignore it.
+                    if (currentState.GetSenderId().m_node!=m_distribution.GetCommunication().Id() ||
+                        m_distribution.IsLocal(currentState.GetTypeId()))
                     {
                         subscription->SetLastInjectionState(currentState);
                     }
                     else
                     {
-                        bool success=m_communication.Send(0, m_nodeType, ToPtr(currentState), currentState.Size(), EntityStateDataTypeId, true);
+                        bool success=m_distribution.GetCommunication().Send
+                            (0, m_nodeType, ToPtr(currentState), currentState.Size(), EntityStateDataTypeId, true);
                         if (success)
                         {
                             subscription->SetLastInjectionState(currentState);
@@ -263,18 +267,25 @@ namespace Internal
             }
 
             //if sender is not local node we dont send to dosecom, and just ignore it.
-            if (currentState.GetSenderId().m_node!=m_communication.Id())
+            if (currentState.GetSenderId().m_node!=m_distribution.GetCommunication().Id())
             {
                 return true;
             }
 
+            //dont send local objects
+            if (m_distribution.IsLocal(currentState.GetTypeId()))
+            {
+                return true;
+            }
+
+            //dont send local context
             if (Safir::Dob::NodeParameters::LocalContexts(currentState.GetSenderId().m_contextId))
             {
-                //dont send local context
                 return true;
             }
 
-            bool success=m_communication.Send(0, m_nodeType, ToPtr(currentState), currentState.Size(), RegistrationStateDataTypeId, true);
+            bool success=m_distribution.GetCommunication().Send
+                (0, m_nodeType, ToPtr(currentState), currentState.Size(), RegistrationStateDataTypeId, true);
 
             if (success)
             {
