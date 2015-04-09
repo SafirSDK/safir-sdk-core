@@ -65,22 +65,17 @@ namespace Internal
         ConnectionHandler(boost::asio::io_service& ioService,
                           Com::Communication& communication,
                           const std::unordered_set<int64_t>& nodeTypeIds,
-                          RequestHandler& requesthandler,
-                          PendingRegistrationHandler& prh);
+                          const std::function<void(const ConnectionPtr& connection, bool disconnecting)>& onAppEvent);
 
         void Stop();
-
-        void OnPoolDistributionComplete();
 
     private:
         boost::asio::io_service::strand m_strand;
         Com::Communication&             m_communication;
-        RequestHandler&                 m_requestHandler;
-        PendingRegistrationHandler&     m_pendingRegistrationHandler;
+        std::function<void(const ConnectionPtr& connection, bool disconnecting)> m_onAppEvent;
         using SendQueue=std::queue< std::pair< boost::shared_ptr<const char[]>, size_t> >;//vector of pair<data, size>
         std::unordered_map<int64_t, SendQueue> m_sendQueues; //<nodeType, SendQueue>
         boost::thread m_connectionThread;
-        bool m_poolDistributionComplete = false;
 
         std::atomic_bool m_connectEvent;
         std::atomic_bool m_connectionOutEvent;
@@ -100,7 +95,6 @@ namespace Internal
         void HandleConnect(const ConnectionPtr & connection) override;
         void HandleDisconnect(const ConnectionPtr & connection);
         void HandleConnectionOutEvent(const ConnectionPtr & connection, std::vector<ConnectionPtr>& deadConnections);
-        void HandleAppEventHelper(const ConnectionPtr & connection, int & recursionLevel);
 
         static inline std::pair<boost::shared_ptr<const char[]>, size_t> ConnectDataPtr(const Safir::Dob::Internal::ConnectionId& id,
                                                                                         const char* nameWithoutCounter,

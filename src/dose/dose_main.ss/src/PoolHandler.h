@@ -49,7 +49,7 @@ namespace Internal
                     const std::function<void(int64_t)>& checkPendingReg,
                     const std::function<void(const std::string& str)>& logStatus);
 
-        void Start(const std::function<void()>& poolDistributionComplete);
+        void Start();
         void Stop();
 
     private:

@@ -87,7 +87,8 @@ namespace Internal
 
         void HandleIncomingData(const DistributionData & data, const bool isAckedData);
 
-        void HandleAppEventHelper(const ConnectionPtr & connecction, int & recursionLevel);
+        void OnAppEvent(const ConnectionPtr & connection, bool disconnecting);
+        void HandleAppEventHelper(const ConnectionPtr & connection, int & recursionLevel);
 
         void HandleWaitingConnections(const Identifier blockingApp,
                                       int & recursionLevel);

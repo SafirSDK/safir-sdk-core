@@ -124,12 +124,10 @@ namespace Internal
         m_persistHandler.Start(logStatus);
     }
 
-    void PoolHandler::Start(const std::function<void()>& poolDistributionComplete)
+    void PoolHandler::Start()
     {
         m_strand.dispatch([=]
         {
-            m_poolDistributionCompleteCallback=poolDistributionComplete;
-
             RunEndStatesTimer();
 
             //request pool distributions
@@ -320,7 +318,8 @@ namespace Internal
         if (m_persistensReady && m_poolDistributionComplete)
         {
             //std::wcout<<"Signaling PdComplete"<<std::endl;
-            m_poolDistributionCompleteCallback();
+            Connections::Instance().AllowConnect(-1);
+            Connections::Instance().AllowConnect(0);
         }
     }
 

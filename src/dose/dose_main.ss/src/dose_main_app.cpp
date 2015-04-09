@@ -167,9 +167,8 @@ namespace Internal
         m_connectionHandler.reset(new ConnectionHandler(m_strand.get_io_service(),
                                                         m_distribution->GetCommunication(),
                                                         nodeTypeIds,
-                                                        *m_requestHandler,
-                                                        *m_pendingRegistrationHandler));
-        m_processInfoHandler.reset(new ProcessInfoHandler(m_strand.get_io_service()));
+                                                        [this](const ConnectionPtr& connection, bool disconnecting){OnAppEvent(connection, disconnecting);}));
+
         m_nodeInfoHandler.reset(new NodeInfoHandler(m_strand.get_io_service(), *m_distribution));
 
         m_memoryMonitorThread = boost::thread(&DoseApp::MemoryMonitorThread);
@@ -198,12 +197,7 @@ namespace Internal
             // Own node has been included in the system state, now its time to start
             // the distribution mechanism.
             m_distribution->Start();
-            m_poolHandler->Start([this]
-            {
-                //OnPdComplete: Probably more things to do here
-                LogStatus("PD complete");
-                m_connectionHandler->OnPoolDistributionComplete();
-            });
+            m_poolHandler->Start();
 
             LogStatus("dose_main running...");
         }
@@ -226,7 +220,6 @@ namespace Internal
     {
         m_cmdReceiver.Stop();
         m_nodeInfoHandler->Stop();
-        m_processInfoHandler->Stop();
         m_timerHandler.Stop();
         m_lockMonitor->Stop();
 
@@ -274,8 +267,8 @@ namespace Internal
     }
 
 
-    void DoseApp::HandleEvents()
-    {
+//    void DoseApp::HandleEvents()
+//    {
 //        m_HandleEvents_notified = 0;
 //        int numEvents = 0;
 
@@ -360,7 +353,7 @@ namespace Internal
         }
 #endif
 
-    }
+//    }
 
 
     //    void DoseApp::AllocateStatic()
@@ -377,13 +370,6 @@ namespace Internal
 //                                 m_persistHandler);
 
 //        const bool otherNodesExistAtStartup = false;
-//#if 0 //stewart
-//            m_ecom.Init(boost::bind(&DoseApp::HandleIncomingData, this, _1, _2),
-//                        boost::bind(&DoseApp::QueueNotFull, this),
-//                        boost::bind(&DoseApp::NodeStatusChangedNotifier, this),
-//                        boost::bind(&DoseApp::StartPoolDistribution,this),
-//                        boost::bind(&DoseApp::RequestPoolDistribution,this, _1));
-//#endif
 
 //        //we notify so that even if there were no new nodes we trigger
 //        //the call to MaybeSignal...() to start letting applications connect.
@@ -391,14 +377,20 @@ namespace Internal
 //        //persistence.
 //        NodeStatusChangedNotifier();
 
-//        m_poolHandler.Init(m_pendingRegistrationHandler,
-//                           m_persistHandler,
-//                           m_connectionHandler);
-
-//        m_connectionThread = boost::thread(boost::bind(&DoseApp::ConnectionThread,this));
-
 //        m_persistHandler.Init(m_connectionHandler,m_nodeHandler,otherNodesExistAtStartup);
     //}
+
+    void DoseApp::OnAppEvent(const ConnectionPtr & connection, bool disconnecting)
+    {
+        int recLevel=0;
+        HandleAppEventHelper(connection, recLevel);
+        if (disconnecting)
+        {
+            m_pendingRegistrationHandler->RemovePendingRegistrations(connection->Id());
+            m_requestHandler->HandleDisconnect(connection);
+            m_blockingHandler.RemoveConnection(connection->Id().m_id);
+        }
+    }
 
     void DoseApp::HandleAppEventHelper(const ConnectionPtr & connection, int & recursionLevel)
     {
@@ -474,25 +466,9 @@ namespace Internal
              it!=waiting.end(); ++it)
         {
             tmpId.m_id=*it;
-
-#if 0 //stewart
-            if (tmpId.m_id == ExternNodeCommunication::DoseComVirtualConnectionId)
-            {
-                // dose_com virtual connection has been waiting for the blocking app
-                m_requestHandler.HandlePendingExternalRequest(blockingApp);
-            }
-            else
-            {
-#endif
-                HandleAppEventHelper(Connections::Instance().GetConnection(tmpId), recursionLevel);
-#if 0 //stewart
-            }
-#endif
+            HandleAppEventHelper(Connections::Instance().GetConnection(tmpId), recursionLevel);
         }
     }
-
-
-
 
     //----------------------------------------------------------------
     // Handling of Dose_Communication events
