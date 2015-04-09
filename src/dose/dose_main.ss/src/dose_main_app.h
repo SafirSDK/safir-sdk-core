@@ -34,13 +34,10 @@
 #include "NodeInfoHandler.h"
 #include "PendingRegistrationHandler.h"
 #include "PoolHandler.h"
-#include "ProcessInfoHandler.h"
 #include "dose_main_response_handler.h"
-#include "dose_main_request_handler.h"
+#include "RequestHandler.h"
 #include "dose_main_lock_monitor.h"
 #include "dose_main_connection_killer.h"
-#include <Safir/Dob/Connection.h>
-#include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Dob/Internal/DoseMainCmd.h>
 
 //disable warnings in boost
@@ -62,9 +59,7 @@ namespace Dob
 {
 namespace Internal
 {
-    class DoseApp:
-        public Connections::ConnectionConsumer,
-        private boost::noncopyable
+    class DoseApp : private boost::noncopyable
     {
     public:
         explicit DoseApp(boost::asio::io_service::strand& strand);
@@ -90,21 +85,6 @@ namespace Internal
         void HandleSignal(const boost::system::error_code& error,
                           const int signalNumber);
 
-        //Handler for all other events in dose_main
-        void HandleEvents();
-        Safir::Utilities::Internal::AtomicUint32 m_connectEvent;
-        Safir::Utilities::Internal::AtomicUint32 m_connectionOutEvent;
-
-        void ConnectionThread();
-
-        //implementation of Connections::ConnectionHandler
-        ConnectResult CanAddConnection(const std::string & connectionName, const pid_t pid, const long context) override;
-        void HandleConnect(const ConnectionPtr & connection) override;
-
-        void HandleDisconnect(const ConnectionPtr & connection);
-
-        void HandleConnectionOutEvent(const ConnectionPtr & connection, std::vector<ConnectionPtr>& deadConnections);
-
         void HandleIncomingData(const DistributionData & data, const bool isAckedData);
 
         void HandleAppEventHelper(const ConnectionPtr & connecction, int & recursionLevel);
@@ -115,6 +95,8 @@ namespace Internal
         void WaitingConnectionsHelper(const Identifier blockingApp,
                                       IdentifierSet & waiting,
                                       int & recursionLevel);
+
+        void HandleEvents();
 
 
         static void MemoryMonitorThread();
@@ -144,15 +126,9 @@ namespace Internal
         //Pending Registrations
         std::unique_ptr<PendingRegistrationHandler> m_pendingRegistrationHandler;
 
-        // Process info
-        std::unique_ptr<ProcessInfoHandler> m_processInfoHandler;
-
         // For monitoring abandoned shared memory locks
         std::unique_ptr<LockMonitor> m_lockMonitor;
 
-        Safir::Utilities::Internal::AtomicUint32 m_HandleEvents_notified;
-
-        boost::thread m_connectionThread;
         boost::thread m_memoryMonitorThread;
 
         //this class should be declared last, so that when the app

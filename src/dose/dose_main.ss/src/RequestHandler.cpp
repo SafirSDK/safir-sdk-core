@@ -23,7 +23,7 @@
 *
 ******************************************************************************/
 
-#include "dose_main_request_handler.h"
+#include "RequestHandler.h"
 
 #include "dose_main_blocking_handler.h"
 #include "dose_main_communication.h"

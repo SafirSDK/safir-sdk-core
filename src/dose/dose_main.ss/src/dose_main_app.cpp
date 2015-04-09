@@ -58,8 +58,6 @@ namespace Internal
     }
 
     DoseApp::DoseApp(boost::asio::io_service::strand& strand):
-        m_connectEvent(0),
-        m_connectionOutEvent(0),
         m_strand(strand),
         m_wcoutStrand(m_strand.get_io_service()),
         m_work(new boost::asio::io_service::work(m_strand.get_io_service())),
@@ -92,8 +90,7 @@ namespace Internal
 
 
         m_signalSet(m_strand.get_io_service()),
-        m_timerHandler(m_strand),
-        m_HandleEvents_notified(0)
+        m_timerHandler(m_strand)
     {
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
         m_signalSet.add(SIGABRT);
@@ -123,44 +120,6 @@ namespace Internal
     {
         //TODO stewart: should we try to call Stop here, in case it hasn't been
         //called correctly? I.e. we're dying through an exception.
-    }
-
-    void DoseApp::ConnectionThread()
-    {
-        try
-        {
-            for (;;)
-            {
-                bool connect, connectionOut;
-                Connections::Instance().WaitForDoseMainSignal(connect, connectionOut);
-
-                boost::this_thread::interruption_point();
-
-                //Note that we cannot just do this->m_connectionOut = connectionOut, since that might clear flags that
-                //have not been handled yet.
-                if (connect)
-                {
-                    m_connectEvent = 1;
-                }
-                if (connectionOut)
-                {
-                    m_connectionOutEvent = 1;
-                }
-
-                if (m_HandleEvents_notified == 0)
-                {
-                    m_HandleEvents_notified = 1;
-                    m_strand.post([this]()
-                                  {
-                                      HandleEvents();
-                                  });
-                }
-            }
-        }
-        catch (const boost::thread_interrupted&)
-        {
-            //do nothing, just exit
-        }
     }
 
     void DoseApp::Start(const std::string& nodeName,
@@ -212,10 +171,6 @@ namespace Internal
                                                         *m_pendingRegistrationHandler));
         m_processInfoHandler.reset(new ProcessInfoHandler(m_strand.get_io_service()));
         m_nodeInfoHandler.reset(new NodeInfoHandler(m_strand.get_io_service(), *m_distribution));
-
-        //setup pdComplete sub
-
-        m_connectionThread = boost::thread([this]() {ConnectionThread();});
 
         m_memoryMonitorThread = boost::thread(&DoseApp::MemoryMonitorThread);
     }
@@ -282,15 +237,7 @@ namespace Internal
             m_memoryMonitorThread = boost::thread();
         }
 
-        if (m_connectionThread.get_id() != boost::thread::id())
-        {
-            //set the interrupt state so that when we generate the spurious signal
-            //the thread will be interrupted at the interruption_point.
-            m_connectionThread.interrupt();
-            Connections::Instance().GenerateSpuriousConnectOrOutSignal();
-            m_connectionThread.join();
-            m_connectionThread = boost::thread();
-        }
+        m_connectionHandler->Stop();
 
         if (m_distribution != nullptr)
         {
@@ -329,52 +276,52 @@ namespace Internal
 
     void DoseApp::HandleEvents()
     {
-        m_HandleEvents_notified = 0;
-        int numEvents = 0;
+//        m_HandleEvents_notified = 0;
+//        int numEvents = 0;
 
-        bool gotConnectEvent = false;
-        bool gotConnectOutEvent = false;
-        //if we have a connect event we want to ensure that
-        //we handle any outstanding disconnects ("died" flags in the
-        //connections), so we fake a connectionOutEvent.
-        //we must "harvest" the shared flag only once in this routine, so we
-        //use a local variable to avoid having a connector signal the connect
-        //event after we've already passed the out event handling code, but before
-        //we get to the connect event handling code.
+//        bool gotConnectEvent = false;
+//        bool gotConnectOutEvent = false;
+//        //if we have a connect event we want to ensure that
+//        //we handle any outstanding disconnects ("died" flags in the
+//        //connections), so we fake a connectionOutEvent.
+//        //we must "harvest" the shared flag only once in this routine, so we
+//        //use a local variable to avoid having a connector signal the connect
+//        //event after we've already passed the out event handling code, but before
+//        //we get to the connect event handling code.
 
-        const boost::uint32_t oldConnectEvent = m_connectEvent.compare_exchange(0, 1);
-        if (oldConnectEvent == 1)
-        {
-            m_connectionOutEvent = 1;
-            gotConnectEvent = true;
-        }
+//        const boost::uint32_t oldConnectEvent = m_connectEvent.compare_exchange(0, 1);
+//        if (oldConnectEvent == 1)
+//        {
+//            m_connectionOutEvent = 1;
+//            gotConnectEvent = true;
+//        }
 
-        const boost::uint32_t oldConnectOutEvent = m_connectionOutEvent.compare_exchange(0, 1);
-        if (oldConnectOutEvent == 1)
-        {
-            gotConnectOutEvent = true;
-        }
+//        const boost::uint32_t oldConnectOutEvent = m_connectionOutEvent.compare_exchange(0, 1);
+//        if (oldConnectOutEvent == 1)
+//        {
+//            gotConnectOutEvent = true;
+//        }
 
-        if (gotConnectOutEvent)
-        {
-            ++numEvents;
-            std::vector<ConnectionPtr> deadConnections;
-            Connections::Instance().HandleConnectionOutEvents(boost::bind(&DoseApp::HandleConnectionOutEvent,this,_1,boost::ref(deadConnections)));
+//        if (gotConnectOutEvent)
+//        {
+//            ++numEvents;
+//            std::vector<ConnectionPtr> deadConnections;
+//            Connections::Instance().HandleConnectionOutEvents(boost::bind(&DoseApp::HandleConnectionOutEvent,this,_1,boost::ref(deadConnections)));
 
-            for (std::vector<ConnectionPtr>::iterator it = deadConnections.begin();
-                 it != deadConnections.end(); ++it)
-            {
-                HandleDisconnect(*it);
-                Connections::Instance().RemoveConnection(*it);
-            }
-        }
+//            for (std::vector<ConnectionPtr>::iterator it = deadConnections.begin();
+//                 it != deadConnections.end(); ++it)
+//            {
+//                HandleDisconnect(*it);
+//                Connections::Instance().RemoveConnection(*it);
+//            }
+//        }
 
-        //we do this after connectionOutEvents
-        if (gotConnectEvent)
-        {
-            ++numEvents;
-            Connections::Instance().HandleConnect(*this);
-        }
+//        //we do this after connectionOutEvents
+//        if (gotConnectEvent)
+//        {
+//            ++numEvents;
+//            Connections::Instance().HandleConnect(*this);
+//        }
 
 
 
@@ -415,45 +362,6 @@ namespace Internal
 
     }
 
-    ConnectResult DoseApp::CanAddConnection(const std::string & /*connectionName*/, const pid_t /*pid*/, const long /*context*/)
-    {
-
-        return Success;
-#if 0 //stewart
-        switch (m_processInfoHandler.CanAddConnectionFromProcess(pid))
-        {
-        case TooManyProcesses:
-            {
-                SEND_SYSTEM_LOG(Critical,
-                                << "Could not let new connection '" << connectionName.c_str()
-                                << "' from process with pid = " << pid
-                                << " connect since there are too many processes connected. "
-                                << "Increase Safir.Dob.ProcessInfo.MaxNumberOfInstances.");
-                return TooManyProcesses;
-            }
-            break;
-
-        case TooManyConnectionsInProcess:
-            {
-                SEND_SYSTEM_LOG(Critical,
-                                << "Could not let new connection '" << connectionName.c_str()
-                                << "' from process with pid = " << pid
-                                << " connect since there are too many connections from that process. "
-                                << "Increase length of Safir.Dob.ProcessInfo.ConnectionNames.");
-                return TooManyConnectionsInProcess;
-            }
-            break;
-
-        case Success:
-            return Success;
-
-        default:
-            ENSURE(false, << "Got unexpected result from ProcessInfoHandler::CanAddConnectionFromProcess!");
-            return Undefined;
-        }
-#endif
-    }
-
 
     //    void DoseApp::AllocateStatic()
     //{
@@ -491,62 +399,6 @@ namespace Internal
 
 //        m_persistHandler.Init(m_connectionHandler,m_nodeHandler,otherNodesExistAtStartup);
     //}
-
-    void DoseApp::HandleConnect(const ConnectionPtr & connection)
-    {
-        lllout << "ConnectionHandler::HandleConnect: New connection from " << connection->NameWithCounter() << " id = " << connection->Id() << std::endl;
-        m_connectionHandler->HandleConnect(connection);
-
-        m_processInfoHandler->ConnectionAdded(connection);
-    }
-
-    void DoseApp::HandleDisconnect(const ConnectionPtr & connection)
-    {
-        lllout << "ConnectionHandler::HandleDisconnect: Disconnected " << connection->NameWithCounter() << " id = " << connection->Id() << std::endl;
-
-        //try to handle some outstanding stuff (this does not guarantee that all gets handled,
-        // e.g. dose_com overflow may stop something in here.).
-        std::vector<ConnectionPtr> dummy;
-        HandleConnectionOutEvent(connection,dummy);
-
-        //if message out queue is not empty we've failed to send the msgs
-        //because of dose_com overflow. We will have been added to the blocking handler
-        //and so we can just leave the connection in here for the time being
-        //and the blocking handler will make sure that we retry the disconnect
-        if (!connection->GetMessageOutQueue().empty())
-        {
-            return;
-        }
-
-        m_connectionHandler->HandleDisconnect(connection);
-
-        // Remove the connection from the ProcessInfoHandler
-        m_processInfoHandler->ConnectionRemoved(connection);
-
-        // Classes have been unregistered, inform waiting connections
-        int recLevel=0;
-        HandleWaitingConnections(connection->Id().m_id, recLevel);
-
-        // Remove any remaining traces of the connection from the blocking
-        // structure
-        m_blockingHandler.RemoveConnection(connection->Id().m_id);
-    }
-
-
-    void DoseApp::HandleConnectionOutEvent(const ConnectionPtr & connection, std::vector<ConnectionPtr>& deadConnections)
-    {
-        //        lllout << "Handling event from " << connection->Name() << " id = " << connection->Id() << std::endl;
-
-        int recLevel=0;
-        HandleAppEventHelper(connection, recLevel);
-
-        if (connection->IsDead())
-        {
-            lllout << "Connection is dead: " << connection->NameWithCounter() << ", disconnecting."<< std::endl;
-            deadConnections.push_back(connection);
-        }
-    }
-
 
     void DoseApp::HandleAppEventHelper(const ConnectionPtr & connection, int & recursionLevel)
     {
@@ -650,27 +502,6 @@ namespace Internal
 #if 0 //stewart
         switch (data.GetType())
         {
-        case DistributionData::Action_Connect:
-            {
-                m_connectionHandler.HandleConnectFromDoseCom(data);
-                m_poolHandler.HandleConnectFromDoseCom(data.GetSenderId());
-            }
-            break;
-
-        case DistributionData::Action_Disconnect:
-            {
-                m_connectionHandler.HandleDisconnectFromDoseCom(data);
-                m_poolHandler.HandleDisconnectFromDoseCom(data.GetSenderId());
-            }
-            break;
-
-        case DistributionData::RegistrationState:
-        case DistributionData::EntityState:
-            {
-                m_poolHandler.HandleStateFromDoseCom(data, isAckedData);
-            }
-            break;
-
         case DistributionData::Action_PendingRegistrationRequest:
         case DistributionData::Action_PendingRegistrationResponse:
             {
@@ -682,12 +513,6 @@ namespace Internal
         case DistributionData::Action_HavePersistenceDataResponse:
             {
                 m_persistHandler.HandleMessageFromDoseCom(data);
-            }
-            break;
-
-        case DistributionData::Action_RequestPoolDistribution:
-            {
-                m_poolHandler.HandleMessageFromDoseCom(data);
             }
             break;
 

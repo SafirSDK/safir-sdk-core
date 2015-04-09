@@ -38,6 +38,9 @@
 
 #include <Safir/Dob/Internal/InternalFwd.h>
 #include <Safir/Dob/Internal/DistributionData.h>
+#include <Safir/Dob/Connection.h>
+#include <Safir/Dob/Internal/Connections.h>
+#include "ProcessInfoHandler.h"
 
 namespace Safir
 {
@@ -55,7 +58,8 @@ namespace Internal
     class NodeHandler;
 
     class ConnectionHandler:
-        private boost::noncopyable
+            public Connections::ConnectionConsumer,
+            private boost::noncopyable
     {
     public:
         ConnectionHandler(boost::asio::io_service& ioService,
@@ -64,24 +68,39 @@ namespace Internal
                           RequestHandler& requesthandler,
                           PendingRegistrationHandler& prh);
 
-        void OnPoolDistributionComplete();
+        void Stop();
 
-        void HandleConnect(const ConnectionPtr & connection);
-        void HandleDisconnect(const ConnectionPtr & connection);
+        void OnPoolDistributionComplete();
 
     private:
         boost::asio::io_service::strand m_strand;
         Com::Communication&             m_communication;
         RequestHandler&                 m_requestHandler;
         PendingRegistrationHandler&     m_pendingRegistrationHandler;
-
         using SendQueue=std::queue< std::pair< boost::shared_ptr<const char[]>, size_t> >;//vector of pair<data, size>
         std::unordered_map<int64_t, SendQueue> m_sendQueues; //<nodeType, SendQueue>
-
+        boost::thread m_connectionThread;
         bool m_poolDistributionComplete = false;
+
+        std::atomic_bool m_connectEvent;
+        std::atomic_bool m_connectionOutEvent;
+        std::atomic_bool m_handleEventsNotified;
+
+        // Process info
+        ProcessInfoHandler m_processInfoHandler;
 
         void SendAll(const std::pair<boost::shared_ptr<const char[]>, size_t>& data);
         void HandleSendQueues();
+
+        void ConnectionThread();
+        void HandleEvents();
+
+        //implementation of Connections::ConnectionHandler
+        ConnectResult CanAddConnection(const std::string & connectionName, const pid_t pid, const long context) override;
+        void HandleConnect(const ConnectionPtr & connection) override;
+        void HandleDisconnect(const ConnectionPtr & connection);
+        void HandleConnectionOutEvent(const ConnectionPtr & connection, std::vector<ConnectionPtr>& deadConnections);
+        void HandleAppEventHelper(const ConnectionPtr & connection, int & recursionLevel);
 
         static inline std::pair<boost::shared_ptr<const char[]>, size_t> ConnectDataPtr(const Safir::Dob::Internal::ConnectionId& id,
                                                                                         const char* nameWithoutCounter,

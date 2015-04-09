@@ -61,8 +61,7 @@ namespace Com
                  int heartbeatInterval,
                  int maxLostHeartbeats,
                  int retryTimeout)
-            :m_thisNodeId(thisNodeId)
-            ,m_id(id)
+            :m_id(id)
             ,m_name(name)
             ,m_multicastAddress(multicastAddr)
             ,m_ipVersion(ipVersion)
@@ -95,7 +94,6 @@ namespace Com
         const DataSender& GetUnackedDataSender() const {return m_unackedDataSender;}
 
     private:
-        int64_t m_thisNodeId;
         int64_t m_id;
         std::string m_name;               //unique readable name
         std::string m_multicastAddress;   //multicast address including port number, 'address:port' empty string if not multicast enabled
