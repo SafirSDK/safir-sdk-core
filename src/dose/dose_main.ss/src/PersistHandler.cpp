@@ -55,6 +55,7 @@ namespace Internal
           m_systemFormed(false),
           m_distribution(distribution),
           m_communication(distribution.GetCommunication()),
+          m_dispatcher(m_connection, m_strand),
           m_persistentDataReady(false),
           m_persistentDataAllowed(false),
           m_dataTypeIdentifier(LlufId_Generate64("Safir.Dob.HavePersistenceData"))
@@ -76,7 +77,7 @@ namespace Internal
             {
                 logStatus("dose_main is waiting for persistence data!");
 
-                m_connection.Open(L"dose_main", L"persist_handler", 0, NULL, this);
+                m_connection.Open(L"dose_main", L"persist_handler", 0, nullptr, &m_dispatcher);
 
                 m_connection.RegisterServiceHandler
                         (Dob::PersistentDataReady::ClassTypeId,
@@ -198,15 +199,6 @@ namespace Internal
         {
             cb();
         }
-    }
-
-    //TODO använd asio dispatcher
-    void PersistHandler::OnDoDispatch()
-    {
-        m_strand.dispatch([this] ()
-        {
-            m_connection.Dispatch();
-        });
     }
 
     // OnDoDispatch guarantees that strand is taken when this method is called

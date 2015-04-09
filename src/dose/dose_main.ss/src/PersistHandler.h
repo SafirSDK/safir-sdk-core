@@ -25,6 +25,7 @@
 #pragma once
 
 #include "Distribution.h"
+#include <Safir/Utilities/AsioDispatcher.h>
 #include <Safir/Dob/Internal/InternalFwd.h>
 #include <Safir/Dob/Internal/Communication.h>
 #include <Safir/Dob/Connection.h>
@@ -48,10 +49,19 @@ namespace Dob
 {
 namespace Internal
 {
-
-    // TODO Comment
+    /**
+     * This class is responsible for generating two events (in the form of callbacks) that are
+     * of importance when starting a node:
+     *    - persistentDataReadyCb, indicates that persistent data is available
+     *    - persistentDataAllowedCb, indicates that it is ok to let the application responsible
+     *                               for persistence (that is, Dope) to connect.
+     *
+     * If there are other nodes at startup 'HavePersistence' requests will be sent to those nodes and
+     * an appropriate response will be sent at reception of such request.
+     *
+     * All public methods in this class are thread safe.
+     */
     class PersistHandler:
-        public Safir::Dob::Dispatcher,
         public Safir::Dob::ServiceHandler,
         private boost::noncopyable
     {
@@ -67,7 +77,6 @@ namespace Internal
 
     private:
 
-        void OnDoDispatch() override;
         void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId    typeId,
                                    const Safir::Dob::Typesystem::HandlerId& handlerId) override;
 
@@ -98,6 +107,7 @@ namespace Internal
         Distribution&                           m_distribution;
         Com::Communication&                     m_communication;
         Safir::Dob::Connection                  m_connection;
+        Utilities::AsioDispatcher               m_dispatcher;
         bool                                    m_persistentDataReady;
         bool                                    m_persistentDataAllowed;
         std::vector<std::function<void()> >     m_persistentDataReadyCb;
