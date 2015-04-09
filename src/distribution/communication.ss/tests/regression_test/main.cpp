@@ -46,9 +46,9 @@ void ControlChannelTest(int executionTime)
     //Receiver ru4(Com::controlModeTag, ioService, 4, 0);
 
     //multicast nodeType
-    Sender sm2(Com::controlModeTag, ioService, 2, 1);
-    Receiver rm5(Com::controlModeTag, ioService, 5, 1);
-    Receiver rm6(Com::controlModeTag, ioService, 6, 1);
+    Sender sm2(Com::controlModeTag, ioService, 2, 11);
+    Receiver rm5(Com::controlModeTag, ioService, 5, 11);
+    Receiver rm6(Com::controlModeTag, ioService, 6, 11);
 
 
     //su1.Seed(2);
@@ -104,19 +104,19 @@ void DataChannelTest(int executionTime)
     //Receiver ru4(Com::controlModeTag, ioService, 4, 0);
 
     //multicast nodeType
-    Sender sm2(Com::dataModeTag, ioService, 2, 0);
-    Receiver rm5(Com::dataModeTag, ioService, 5, 0);
-    Receiver rm6(Com::dataModeTag, ioService, 6, 0);
+    Sender sm2(Com::dataModeTag, ioService, 2, 10);
+    Receiver rm5(Com::dataModeTag, ioService, 5, 10);
+    Receiver rm6(Com::dataModeTag, ioService, 6, 10);
 
     //su1.Seed(2);
-    sm2.InjectNode(5, 0);
-    sm2.InjectNode(6, 0);
+    sm2.InjectNode(5, 10);
+    sm2.InjectNode(6, 10);
     //ru3.Seed(1);
     //ru4.Seed(1);
-    rm5.InjectNode(2, 0);
-    rm5.InjectNode(6, 0);
-    rm6.InjectNode(2, 0);
-    rm6.InjectNode(5, 0);
+    rm5.InjectNode(2, 10);
+    rm5.InjectNode(6, 10);
+    rm6.InjectNode(2, 10);
+    rm6.InjectNode(5, 10);
 
     //Shutdown after specified time
     boost::this_thread::sleep_for(boost::chrono::seconds(executionTime));

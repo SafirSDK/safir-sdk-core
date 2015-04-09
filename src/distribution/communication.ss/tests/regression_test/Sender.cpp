@@ -30,7 +30,7 @@ Sender::Sender(Com::ControlModeTag tag, boost::asio::io_service& ioService, int6
     ,m_msgCount(0)
 {
     m_timerSend.expires_from_now(boost::chrono::milliseconds(10));
-    m_timerSend.async_wait(m_strand.wrap([=](const boost::system::error_code& error){if (!error) Send();}));
+    m_timerSend.async_wait(m_strand.wrap([=](const boost::system::error_code& error){if (m_running) Send();}));
 }
 
 Sender::Sender(Com::DataModeTag tag, boost::asio::io_service& ioService, int64_t nodeId, int64_t nodeType)
@@ -61,19 +61,19 @@ void Sender::Send()
     //send a burst of messages each timeout
     for (int i=0; i<5; ++i)
     {
-        if (m_com.NumberOfQueuedMessages(0)>=SendQueueCapacity || m_com.NumberOfQueuedMessages(1)>=SendQueueCapacity)
+        if (m_com.NumberOfQueuedMessages(10)>=SendQueueCapacity || m_com.NumberOfQueuedMessages(11)>=SendQueueCapacity)
         {
             break;
         }
 
         size_t size=20+(rand()%30000); //random message size 20 bytes - 3 kb
         auto msg=Utilities::CreateMsg(++m_msgCount, size);
-        if (!m_com.Send(0, 0, msg, size, 0, true)) //send to NodeType 0 (unicast)
+        if (!m_com.Send(0, 10, msg, size, 0, true)) //send to NodeType 0 (unicast)
         {
             std::cout<<"Send overflow to nodeType 0 "<<std::endl;
 
         }
-        if (!m_com.Send(0, 1, msg, size, 0, true)) //send to NodeType 1 (multicast)
+        if (!m_com.Send(0, 11, msg, size, 0, true)) //send to NodeType 1 (multicast)
         {
             std::cout<<"Send overflow to nodeType 1 "<<std::endl;
         }

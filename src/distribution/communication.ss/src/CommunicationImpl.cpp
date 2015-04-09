@@ -130,13 +130,23 @@ namespace Com
 
     void CommunicationImpl::SetQueueNotFullCallback(const QueueNotFull& callback, int64_t nodeTypeId)
     {
-        auto nodeTypeIt=m_nodeTypes.find(nodeTypeId);
-        if (nodeTypeIt==m_nodeTypes.end())
+        if (nodeTypeId!=0)
         {
-            throw std::logic_error("COM: Calling SetQueueNotFullCallback with nodeTypeId that does not exist. Used nodeTypeId: "+boost::lexical_cast<std::string>(nodeTypeId));
-        }
+            auto nodeTypeIt=m_nodeTypes.find(nodeTypeId);
+            if (nodeTypeIt==m_nodeTypes.end())
+            {
+                throw std::logic_error("COM: Calling SetQueueNotFullCallback with nodeTypeId that does not exist. Used nodeTypeId: "+boost::lexical_cast<std::string>(nodeTypeId));
+            }
 
-        nodeTypeIt->second->GetAckedDataSender().SetNotFullCallback(callback);
+            nodeTypeIt->second->GetAckedDataSender().SetNotFullCallback(callback);
+        }
+        else //set callback for all nodeTypes
+        {
+            for (auto& nt : m_nodeTypes)
+            {
+                nt.second->GetAckedDataSender().SetNotFullCallback(callback);
+            }
+        }
     }
 
     void CommunicationImpl::Start()

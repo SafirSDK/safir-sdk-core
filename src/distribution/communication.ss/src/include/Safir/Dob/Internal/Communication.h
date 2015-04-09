@@ -174,7 +174,7 @@ namespace Com
          * however all callbacks must be set prior to start.
          *
          * @param callback [in] - Callback function.
-         * @param nodeTypeId [in] - Wich sendQueue this callback belongs to.
+         * @param nodeTypeId [in] - Wich sendQueue this callback belongs to. If 0 the callback will be set up for all node types.
          */
         void SetQueueNotFullCallback(const QueueNotFull& callback, int64_t nodeTypeId);
 

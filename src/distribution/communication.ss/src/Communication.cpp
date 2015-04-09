@@ -79,6 +79,11 @@ namespace
         NodeTypeMap nodeTypeMap;
         for (const auto& nt : nodeTypes)
         {
+            if (nt.id==0)
+            {
+                throw std::invalid_argument("Safir.Communication: NodeType '"+nt.name+"' has id=0. NodeTypeId 0 is reserved and can't be assigned to an specific nodeType.");
+            }
+
             const std::string& mc=isControlInstance ? nt.controlMulticastAddress : nt.dataMulticastAddress;
             bool useMulticast=(thisNodeIsMulticastEnabled && !mc.empty());
             auto ptr=boost::make_shared<Safir::Dob::Internal::Com::NodeType>(ioService,
