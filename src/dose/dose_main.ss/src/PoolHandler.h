@@ -60,7 +60,7 @@ namespace Internal
 
         boost::asio::io_service::strand m_strand;
         boost::asio::steady_timer m_endStatesTimer;
-        Com::Communication& m_communication;
+        Distribution& m_distribution;
         PoolDistributionHandlerType m_poolDistributor;
         PoolDistributionRequestSenderType m_poolDistributionRequests;
         PersistHandler m_persistHandler;

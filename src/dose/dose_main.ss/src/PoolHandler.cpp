@@ -47,10 +47,10 @@ namespace Internal
                              const std::function<void(const std::string& str)>& logStatus)
         :m_strand(io)
         ,m_endStatesTimer(io)
-        ,m_communication(distribution.GetCommunication())
-        ,m_poolDistributor(io, m_communication)
-        ,m_poolDistributionRequests(io, m_communication)
-        ,m_persistHandler(io, distribution.GetNodeId(), m_communication)
+        ,m_distribution(distribution)
+        ,m_poolDistributor(io, m_distribution.GetCommunication())
+        ,m_poolDistributionRequests(io, m_distribution.GetCommunication())
+        ,m_persistHandler(io, distribution.GetNodeId(), m_distribution.GetCommunication())
     {
         m_persistHandler.AddSubscriber([=]
         {
@@ -91,28 +91,28 @@ namespace Internal
         distribution.SubscribeNodeEvents(injectNode, excludeNode);
 
         //set data receiver for pool distribution information
-        m_communication.SetDataReceiver([=](int64_t fromNodeId, int64_t fromNodeType, const char *data, size_t size)
-                                        {
-                                            OnPoolDistributionInfo(fromNodeId, fromNodeType, data, size);
-                                        },
-                                        PoolDistributionInfoDataTypeId,
-                                        [=](size_t s){return new char[s];});
+        m_distribution.GetCommunication().SetDataReceiver([=](int64_t fromNodeId, int64_t fromNodeType, const char *data, size_t size)
+                                                          {
+                                                              OnPoolDistributionInfo(fromNodeId, fromNodeType, data, size);
+                                                          },
+                                                          PoolDistributionInfoDataTypeId,
+                                                          [=](size_t s){return new char[s];});
 
         //set data receiver for registration states
-        m_communication.SetDataReceiver([=](int64_t fromNodeId, int64_t fromNodeType, const char *data, size_t size)
-                                        {
-                                            OnRegistrationState(fromNodeId, fromNodeType, data, size);
-                                        },
-                                        RegistrationStateDataTypeId,
-                                        [=](size_t s){return DistributionData::NewData(s);});
+        m_distribution.GetCommunication().SetDataReceiver([=](int64_t fromNodeId, int64_t fromNodeType, const char *data, size_t size)
+                                                          {
+                                                              OnRegistrationState(fromNodeId, fromNodeType, data, size);
+                                                          },
+                                                          RegistrationStateDataTypeId,
+                                                          [=](size_t s){return DistributionData::NewData(s);});
 
         //set data receiver for entity states
-        m_communication.SetDataReceiver([=](int64_t fromNodeId, int64_t fromNodeType, const char *data, size_t size)
-                                        {
-                                            OnEntityState(fromNodeId, fromNodeType, data, size);
-                                        },
-                                        EntityStateDataTypeId,
-                                        [=](size_t s){return DistributionData::NewData(s);});
+        m_distribution.GetCommunication().SetDataReceiver([=](int64_t fromNodeId, int64_t fromNodeType, const char *data, size_t size)
+                                                          {
+                                                              OnEntityState(fromNodeId, fromNodeType, data, size);
+                                                          },
+                                                          EntityStateDataTypeId,
+                                                          [=](size_t s){return DistributionData::NewData(s);});
 
         //create one StateDistributor per nodeType
         for (auto& nt : distribution.GetNodeTypeConfiguration().nodeTypesParam)
@@ -199,10 +199,14 @@ namespace Internal
         });
     }
 
-    void PoolHandler::OnRegistrationState(int64_t /*fromNodeId*/, int64_t fromNodeType, const char* data, size_t /*size*/)
+    void PoolHandler::OnRegistrationState(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t /*size*/)
     {
         const auto state=DistributionData::ConstConstructor(new_data_tag, data);
         DistributionData::DropReference(data);
+
+        ENSURE(!m_distribution.IsLocal(state.GetTypeId()),
+               << "Received Local RegistrationState of type " << state.GetTypeId()
+               << " from node " << fromNodeId << ", system configuration is bad!");
 
         if (state.GetType()!=DistributionData::RegistrationState)
         {
@@ -254,7 +258,7 @@ namespace Internal
         }
     }
 
-    void PoolHandler::OnEntityState(int64_t /*fromNodeId*/, int64_t /*fromNodeType*/, const char* data, size_t /*size*/)
+    void PoolHandler::OnEntityState(int64_t fromNodeId, int64_t /*fromNodeType*/, const char* data, size_t /*size*/)
     {
         const auto state=DistributionData::ConstConstructor(new_data_tag, data);
         DistributionData::DropReference(data);
@@ -263,6 +267,10 @@ namespace Internal
         {
             throw std::logic_error("PoolHandler::OnEntityState received DistributionData that is not a EntityState");
         }
+
+        ENSURE(!m_distribution.IsLocal(state.GetTypeId()),
+               << "Received Local EntityState of type " << state.GetTypeId()
+               << " from node " << fromNodeId << ", system configuration is bad!");
 
         switch (state.GetEntityStateKind())
         {
