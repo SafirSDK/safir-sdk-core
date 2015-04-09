@@ -56,8 +56,13 @@ namespace Dob
 {
 namespace Internal
 {
-    using OnInjectNode = std::function<void(const std::string& nodeName, int64_t nodeId, int64_t nodeTypeId, const std::string& dataAddress)>;
-    using OnExcludeNode = std::function<void(int64_t nodeId, int64_t nodeTypeId)>;
+    using OnInjectNode = std::function<void(const std::string&  nodeName,
+                                            int64_t             nodeId,
+                                            int64_t             nodeTypeId,
+                                            const std::string&  dataAddress)>;
+
+    using OnExcludeNode = std::function<void(int64_t nodeId,
+                                             int64_t nodeTypeId)>;
 
     // Class that encapsulates the Communication and System Picture instances
     //
