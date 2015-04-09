@@ -133,10 +133,13 @@ namespace @_NAMESPACEV_@
 {
 @@END_TABLE@@
 
-#ifdef _GNUC
+#ifdef __GNUC__
     //obligatory static member initialization is needed by gcc
     const Safir::Dob::Typesystem::TypeId @_CLASS_@::ClassTypeId;
-#endif 
+
+    //Init function may be unused if there are no members.
+    static void Init()  __attribute__ ((unused));
+#endif
 
     static bool isInitialised = false;
 @@TABLE@@
@@ -822,7 +825,7 @@ namespace @_NAMESPACEV_@
 @@END_IF@@
 @@ELSE@@
 @@IF@@ (@_UNIFORM_MEMBERTYPE_@ = String) or (@_UNIFORM_MEMBERTYPE_@ = Boolean)
-    const Safir::Dob::Typesystem::ContainerProxy<Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@Container> @_MEMBERCLASS_@::@_MEMBER_@() const 
+    const Safir::Dob::Typesystem::ContainerProxy<Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@Container> @_MEMBERCLASS_@::@_MEMBER_@() const
     {return Safir::Dob::Typesystem::ContainerProxy<Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@Container>
       (const_cast<Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@Container &>(m_@_MEMBER_@Member));}
     Safir::Dob::Typesystem::ContainerProxy<Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@Container> @_MEMBERCLASS_@::@_MEMBER_@()
@@ -833,7 +836,7 @@ namespace @_NAMESPACEV_@
     Safir::Dob::Typesystem::ContainerProxy<@_MEMBERTYPE_@::EnumerationContainer> @_MEMBERCLASS_@::@_MEMBER_@()
     {return Safir::Dob::Typesystem::ContainerProxy<@_MEMBERTYPE_@::EnumerationContainer>(m_@_MEMBER_@Member);}
 @@ELSE@@
-    const Safir::Dob::Typesystem::ContainerProxy<@_MEMBERTYPE_@Container> @_MEMBERCLASS_@::@_MEMBER_@() const 
+    const Safir::Dob::Typesystem::ContainerProxy<@_MEMBERTYPE_@Container> @_MEMBERCLASS_@::@_MEMBER_@() const
     {return Safir::Dob::Typesystem::ContainerProxy<@_MEMBERTYPE_@Container>(const_cast<@_MEMBERTYPE_@Container&>(m_@_MEMBER_@Member));}
     Safir::Dob::Typesystem::ContainerProxy<@_MEMBERTYPE_@Container> @_MEMBERCLASS_@::@_MEMBER_@()
     {return Safir::Dob::Typesystem::ContainerProxy<@_MEMBERTYPE_@Container>(m_@_MEMBER_@Member);}
@@ -975,13 +978,13 @@ namespace @_NAMESPACEV_@
 @@ELSIF@@ @_EXIST:CREATEVALUEPARAMETERINDEX_@
 @@IF@@ @_UNIFORM_CREATEVALUETYPE_@=Object
 @@IF@@ @_EXIST:CREATEVALUEISINLINE_@
-# error Inline values in CreateRoutines with index not supported!        
+# error Inline values in CreateRoutines with index not supported!
 @@ELSE@@
         object->@_CREATEVALUE_@().SetPtr(@_CREATEVALUEPARAMETERCLASS_@::@_CREATEVALUEPARAMETER_@(@_CREATEVALUEPARAMETERINDEX_@));
 @@END_IF@@
 @@ELSE@@
 @@IF@@ @_EXIST:CREATEVALUEISINLINE_@
-# error Inline values in CreateRoutines with index not supported!        
+# error Inline values in CreateRoutines with index not supported!
 @@ELSE@@
         object->@_CREATEVALUE_@().SetVal(@_CREATEVALUEPARAMETERCLASS_@::@_CREATEVALUEPARAMETER_@(@_CREATEVALUEPARAMETERINDEX_@));
 @@END_IF@@
@@ -990,7 +993,7 @@ namespace @_NAMESPACEV_@
 @@IF@@ @_UNIFORM_CREATEVALUETYPE_@=Object
 @@IF@@ @_EXIST:CREATEVALUEISINLINE_@
         //Inline createRoutine object parameter
-        Safir::Dob::Typesystem::ParameterIndex tmp@_CREATEVALUE_@Index = 
+        Safir::Dob::Typesystem::ParameterIndex tmp@_CREATEVALUE_@Index =
             Safir::Dob::Typesystem::Parameters::GetIndex(@_PARAMETERCLASS_@::ClassTypeId, L"@_CREATEVALUEPARAMETERRAW_@");
         object->@_CREATEVALUE_@().SetPtr(Safir::Dob::Typesystem::Parameters::GetObject(ClassTypeId, tmp@_CREATEVALUE_@Index, 0));
 @@ELSE@@
@@ -1000,7 +1003,7 @@ namespace @_NAMESPACEV_@
 @@IF@@ @_EXIST:CREATEVALUEISINLINE_@
 
         // Inline set of member @_CREATEVALUE_@ value
-        Safir::Dob::Typesystem::ParameterIndex tmp@_CREATEVALUE_@Index = 
+        Safir::Dob::Typesystem::ParameterIndex tmp@_CREATEVALUE_@Index =
             Safir::Dob::Typesystem::Parameters::GetIndex(@_PARAMETERCLASS_@::ClassTypeId, L"@_CREATEVALUEPARAMETERRAW_@");
         object->@_CREATEVALUE_@().SetVal(Safir::Dob::Typesystem::Parameters::Get@_UNIFORM_CREATEVALUETYPE_@(ClassTypeId, tmp@_CREATEVALUE_@Index, 0));
 @@ELSE@@

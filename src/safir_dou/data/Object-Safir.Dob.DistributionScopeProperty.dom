@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<propertyMapping xmlns="urn:safir-dots-unit" xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance">
+    <property>Safir.Dob.DistributionScopeProperty</property>
+    <class>Object</class>
+    <memberMapping>
+        <member>
+            <propertyMember>DistributionScope</propertyMember>
+            <value>Global</value>
+        </member>
+    </memberMapping>
+</propertyMapping>

@@ -32,6 +32,9 @@ ADD_SAFIR_GENERATED_LIBRARY(NAME Core
   data/Safir.Dob.ContextSharedOverrideProperty.dou
   data/Safir.Dob.ContextSharedProperty.dou
   data/Safir.Dob.CreateRoutineParameters.dou
+  data/Safir.Dob.DistributionScope.dou
+  data/Safir.Dob.DistributionScopeProperty.dou
+  data/Safir.Dob.DistributionScopeOverrideProperty.dou
   data/Safir.Dob.Entity.dou
   data/Safir.Dob.EntityIdResponse.dou
   data/Safir.Dob.ErrorListResponse.dou
@@ -79,6 +82,11 @@ ADD_SAFIR_GENERATED_LIBRARY(NAME Core
   config/Safir.Utilities.ForEach.DeleteRequest-Safir.Dob.RequestTimeoutProperty.dom
   config/Safir.Utilities.ForEach.UpdateRequest-Safir.Dob.RequestTimeoutProperty.dom
   data/Safir.Application.BackdoorCommand-Safir.Dob.ContextSharedProperty.dom
+  data/Safir.Dob.PersistentDataReady-Safir.Dob.DistributionScopeProperty.dom
+  data/Safir.Dob.ProcessInfo-Safir.Dob.DistributionScopeProperty.dom
+  data/Safir.Utilities.ForEach.DeleteAllRequest-Safir.Dob.DistributionScopeProperty.dom
+  data/Safir.Utilities.ForEach.DeleteRequest-Safir.Dob.DistributionScopeProperty.dom
+  data/Safir.Utilities.ForEach.UpdateRequest-Safir.Dob.DistributionScopeProperty.dom
 
   NAMESPACE_MAPPINGS
 

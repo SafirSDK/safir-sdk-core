@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<property xmlns="urn:safir-dots-unit" xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Used to determine the distribution scope of a class. This value overrides the
+             inherited value, and it is not inherited by child classes.</summary>
+    <name>Safir.Dob.DistributionScopeOverrideProperty</name>
+    <members>
+        <member>
+            <summary>Defines distribution scope of the class</summary>
+            <name>DistributionScope</name>
+            <type>Safir.Dob.DistributionScope</type>
+        </member>
+    </members>
+</property>
+

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<enumeration xmlns="urn:safir-dots-unit" xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance">
+  <summary>Possible values for the DistributionScope property. Values are self-explanatory.</summary>
+  <name>Safir.Dob.DistributionScope</name>
+  <values>
+    <value>Global</value>
+    <value>Local</value>
+  </values>
+</enumeration>
