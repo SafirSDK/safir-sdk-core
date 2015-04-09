@@ -26,18 +26,18 @@
 
 #include <memory>
 
-#include "Distribution.h"
-#include "dose_main_blocking_handler.h"
-#include "dose_main_communication.h"
 #include "ConnectionHandler.h"
-#include "dose_main_message_handler.h"
+#include "Distribution.h"
+#include "MessageHandler.h"
 #include "NodeInfoHandler.h"
 #include "PendingRegistrationHandler.h"
 #include "PoolHandler.h"
-#include "dose_main_response_handler.h"
 #include "RequestHandler.h"
-#include "dose_main_lock_monitor.h"
+#include "dose_main_blocking_handler.h"
+#include "dose_main_communication.h"
 #include "dose_main_connection_killer.h"
+#include "dose_main_lock_monitor.h"
+#include "dose_main_response_handler.h"
 #include <Safir/Dob/Internal/DoseMainCmd.h>
 
 //disable warnings in boost

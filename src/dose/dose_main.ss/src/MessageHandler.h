@@ -24,6 +24,7 @@
 ******************************************************************************/
 #pragma once
 
+#include "Distribution.h"
 #include "Node.h"
 #include <Safir/Dob/Internal/InternalFwd.h>
 #include <boost/noncopyable.hpp>
@@ -45,8 +46,8 @@ namespace Internal
         private boost::noncopyable
     {
     public:
-        MessageHandler(Com::Communication& communication,
-                       const NodeTypeIds&  nodeTypeIds);
+        MessageHandler(Distribution&      distribution,
+                       const NodeTypeIds& nodeTypeIds);
 
         void DistributeMessages(const ConnectionPtr& connection);
 
@@ -61,9 +62,9 @@ namespace Internal
 
         void Send(const DistributionData& msg);
 
-        Com::Communication&      m_communication;
-        const NodeTypeIds        m_nodeTypeIds;
-        const int64_t            m_dataTypeIdentifier;
+        Distribution&      m_distribution;
+        const NodeTypeIds  m_nodeTypeIds;
+        const int64_t      m_dataTypeIdentifier;
     };
 }
 }

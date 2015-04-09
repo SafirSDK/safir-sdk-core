@@ -23,7 +23,7 @@
 *
 ******************************************************************************/
 
-#include "dose_main_message_handler.h"
+#include "MessageHandler.h"
 
 #include <boost/shared_ptr.hpp>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
@@ -42,28 +42,34 @@ namespace Dob
 {
 namespace Internal
 {
-    MessageHandler::MessageHandler(Com::Communication& communication,
+    MessageHandler::MessageHandler(Distribution& distribution,
                                    const NodeTypeIds& nodeTypeIds)
-        : m_communication(communication),
+        : m_distribution(distribution),
           m_nodeTypeIds(nodeTypeIds),
           m_dataTypeIdentifier(LlufId_Generate64("Safir.Dob.Message"))
 
     {
-        m_communication.SetDataReceiver([this]
-                                        (int64_t /*fromNodeId*/,
-                                        int64_t /*fromNodeType*/,
-                                        const char* data,
-                                        size_t /*size*/)
-                                        {
-                                            const DistributionData msg =
-                                                    DistributionData::ConstConstructor(new_data_tag, data);
+        m_distribution.GetCommunication().SetDataReceiver([this]
+                                                          (const int64_t fromNodeId,
+                                                           int64_t /*fromNodeType*/,
+                                                           const char* data,
+                                                           size_t /*size*/)
+                                                          {
+                                                              const DistributionData msg =
+                                                                  DistributionData::ConstConstructor(new_data_tag, data);
 
-                                            DistributionData::DropReference(data);
+                                                              DistributionData::DropReference(data);
 
-                                            MessageTypes::Instance().DistributeMsg(msg);
-                                        },
-                                        m_dataTypeIdentifier,
-                                        DistributionData::NewData);
+                                                              ENSURE(!m_distribution.IsLocal(msg.GetTypeId()),
+                                                                     << "Received Local Message of type "
+                                                                     << msg.GetTypeId()
+                                                                     << " from node " << fromNodeId
+                                                                     << ", system configuration is bad!");
+
+                                                              MessageTypes::Instance().DistributeMsg(msg);
+                                                          },
+                                                          m_dataTypeIdentifier,
+                                                          DistributionData::NewData);
     }
 
     void MessageHandler::DistributeMessages(const ConnectionPtr & connection)
@@ -106,24 +112,28 @@ namespace Internal
         }
     }
 
-    void PostFullAction(const ConnectionPtr & connection)
-    {
-        connection->SignalIn();
-    }
-
     void MessageHandler::TraverseMessageQueue(const ConnectionPtr & connection)
     {
         size_t noPopped = 0;
 
         connection->GetMessageOutQueue().Dispatch
-            (boost::bind(&MessageHandler::DispatchMessage,this,boost::ref(noPopped),boost::cref(connection),_1,_2,_3),
-            boost::bind(PostFullAction,boost::cref(connection)));
+            ([this,&noPopped,&connection] (const DistributionData& msg,
+                                           bool& exitDispatch,
+                                           bool& dontRemove)
+             {
+                 DispatchMessage(noPopped,
+                                 connection,
+                                 msg,
+                                 exitDispatch,
+                                 dontRemove);
+             },
+             [&connection]{connection->SignalIn();});
     }
 
     void MessageHandler::Send(const DistributionData& msg)
     {
-        // TODO: here we also have to check if the type has a Local property
-        if (Safir::Dob::NodeParameters::LocalContexts(msg.GetSenderId().m_contextId) == true)
+        if (m_distribution.IsLocal(msg.GetTypeId()) ||
+            Safir::Dob::NodeParameters::LocalContexts(msg.GetSenderId().m_contextId) == true)
         {
             return;
         }
@@ -137,13 +147,12 @@ namespace Internal
         // Send message to all node types
         for (const auto& nodeType : m_nodeTypeIds)
         {
-            m_communication.Send(0,  // All nodes of the type
-                                 nodeType,
-                                 msgP,
-                                 msg.Size(),
-                                 m_dataTypeIdentifier,
-                                 false); // no delivery guarantee for messages
-
+            m_distribution.GetCommunication().Send(0,  // All nodes of the type
+                                                   nodeType,
+                                                   msgP,
+                                                   msg.Size(),
+                                                   m_dataTypeIdentifier,
+                                                   false); // no delivery guarantee for messages
         }
     }
 }

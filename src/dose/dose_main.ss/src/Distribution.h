@@ -30,6 +30,7 @@
 #include <Safir/Dob/Internal/SystemPicture.h>
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
 #include <Safir/Dob/Typesystem/Operations.h>
+#include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <boost/chrono.hpp>
 #include <boost/noncopyable.hpp>
 #include <functional>
@@ -211,7 +212,8 @@ namespace Internal
                     //unfortunately we have to create dummy object here to be able to read the property, even
                     //though it is a constant
                     Dob::Typesystem::ObjectPtr obj = Typesystem::ObjectFactory::Instance().CreateObject(typeId);
-                    return Dob::DistributionScopeOverrideProperty::GetDistributionScope(obj);
+                    return Dob::DistributionScopeOverrideProperty::GetDistributionScope(obj) ==
+                        Dob::DistributionScope::Enumeration::Local;
                 }
                 catch (const std::exception & exc)
                 {
@@ -229,7 +231,8 @@ namespace Internal
                 try
                 {
                     Dob::Typesystem::ObjectPtr obj = Typesystem::ObjectFactory::Instance().CreateObject(typeId);
-                    return Dob::DistributionScopeProperty::GetDistributionScope(obj);
+                    return Dob::DistributionScopeProperty::GetDistributionScope(obj) ==
+                        Dob::DistributionScope::Enumeration::Local;
                 }
                 catch (const std::exception & exc)
                 {
@@ -251,11 +254,13 @@ namespace Internal
         {
             std::vector<Safir::Dob::Typesystem::TypeId> localTypes;
 
+            lllog(3) << "Reading DistributionScope properties to ascertain local types" << std::endl;
             for (const auto typeId : Safir::Dob::Typesystem::Operations::GetAllTypeIds())
             {
                 if (ReadDistributionScopeProperty(typeId))
                 {
                     localTypes.push_back(typeId);
+                    lllog(3) << "Local type " << Dob::Typesystem::Operations::GetName(typeId) << std::endl;
                 }
             }
 

@@ -145,7 +145,7 @@ namespace Internal
             nodeTypeIds.insert(nt.id);
         }
 
-        m_messageHandler.reset(new MessageHandler(m_distribution->GetCommunication(),
+        m_messageHandler.reset(new MessageHandler(*m_distribution,
                                                   nodeTypeIds));
 
         m_responseHandler.reset(new ResponseHandler(m_timerHandler,

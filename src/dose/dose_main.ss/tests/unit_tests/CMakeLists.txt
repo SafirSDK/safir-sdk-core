@@ -11,6 +11,7 @@ TARGET_LINK_LIBRARIES(timer_test PRIVATE
   lluf_utils)
 
 TARGET_LINK_LIBRARIES(Distribution_test PRIVATE
+  lluf_utils
   communication
   system_picture
   control_utils
