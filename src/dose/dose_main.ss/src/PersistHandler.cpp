@@ -34,6 +34,7 @@
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Dob/ResponseGeneralErrorCodes.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
+#include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 
@@ -46,27 +47,30 @@ namespace Internal
 {
 
     PersistHandler::PersistHandler(boost::asio::io_service& ioService,
-                                   const int64_t nodeId,
-                                   Com::Communication& communication)
+                                   Distribution& distribution,
+                                   const std::function<void(const std::string& str)>& logStatus,
+                                   const std::function<void()>& persistentDataReadyCb,
+                                   const std::function<void()>& persistentDataAllowedCb)
         : m_strand(ioService),
-          m_nodeId(nodeId),
-          m_communication(communication),
-          m_persistDataReady(false)
+          m_systemFormed(false),
+          m_distribution(distribution),
+          m_communication(distribution.GetCommunication()),
+          m_persistentDataReady(false),
+          m_persistentDataAllowed(false),
+          m_dataTypeIdentifier(LlufId_Generate64("Safir.Dob.HavePersistenceData"))
     {
-        //stewart: replace with steady_timer
-        //m_timerId = m_timerHandler.RegisterTimeoutHandler(L"End States Timer", *this);
-    }
-
-    void PersistHandler::Start(const std::function<void(const std::string& str)>& logStatus)
-    {
-        m_strand.post([this,logStatus] ()
+        m_strand.dispatch([this, logStatus, persistentDataReadyCb, persistentDataAllowedCb]()
         {
+
+            m_persistentDataReadyCb.push_back(persistentDataReadyCb);
+            m_persistentDataAllowedCb.push_back(persistentDataAllowedCb);
+
             if(Dob::PersistenceParameters::TestMode())
             {
                 logStatus("RUNNING IN PERSISTENCE TEST MODE! PLEASE CHANGE PARAMETER "
                           "Safir.Dob.PersistenceParameters.TestMode IF THIS IS NOT WHAT YOU EXPECTED!");
 
-                Connections::Instance().AllowConnect(-1);
+                SetPersistentDataAllowed();
             }
             else
             {
@@ -78,47 +82,81 @@ namespace Internal
                         (Dob::PersistentDataReady::ClassTypeId,
                          Typesystem::HandlerId(),
                          this);
-
-                //TODO stewart: Figure out how this should work.
-                //                if (otherNodesExistAtStartup)
-                //                {
-                //                    //Get the statuses of the other nodes
-                //                    RequestPersistenceInfo();
-                //                }
-                //                else
-                //                {
-                //                    // No other nodes are up, let -1 connections in.
-                //                    Connections::Instance().AllowConnect(-1);
-                //                }
             }
         });
-    }
 
-    void PersistHandler::Stop()
-    {
-         m_strand.post([this] ()
-         {
-             m_connection.Close();
-         });
-    }
-
-    void PersistHandler::AddSubscriber(const PersistenDataReadyCallback& cb)
-    {
-        m_strand.dispatch([this, cb] ()
+        m_distribution.SubscribeNodeEvents(m_strand.wrap([this]
+                                                         (const std::string&    /*nodeName*/,
+                                                         int64_t                nodeId,
+                                                         int64_t                nodeTypeId,
+                                                         const std::string&     /*dataAddress*/)
         {
-            m_callbacks.push_back(cb);
-            if (m_persistDataReady) //if starting subscription after persistensReady make callback immediately
+            if (m_systemFormed || m_persistentDataReady)
             {
-                cb();
+                return;
             }
-        });
+
+            if (nodeId == m_distribution.GetNodeId())
+            {
+                // Own node injected, this is an indication that a system is formed.
+                m_systemFormed = true;
+
+                if (m_nodes.size() > 0)
+                {
+                    // Send requests to all other nodes asking if someone has
+                    // persistence
+                    RequestPersistenceInfo();
+                }
+                else
+                {
+                    // There are no other nodes
+                    SetPersistentDataAllowed();
+                }
+            }
+            else
+            {
+                m_nodes.insert(std::make_pair(nodeId, nodeTypeId));
+            }
+        }),
+                                           m_strand.wrap([this]
+                                                         (int64_t   nodeId,
+                                                          int64_t   nodeTypeId)
+        {
+            if (m_persistentDataReady)
+            {
+                return;
+            }
+
+            m_nodes.erase(std::make_pair(nodeId, nodeTypeId));
+
+            CheckResponseStatus();
+        }));
+
+        m_communication.SetQueueNotFullCallback(m_strand.wrap([this]
+                                                              (int64_t /*nodeTypeId*/)
+                                                {
+                                                    Resend();
+                                                }),
+                                                0); // All node types
+
+        m_communication.SetDataReceiver(m_strand.wrap([this]
+                                                      (int64_t fromNodeId,
+                                                       int64_t fromNodeType,
+                                                       const char* data,
+                                                       size_t /*size*/)
+                                        {
+                                            HandleMessageFromRemoteNode(fromNodeId, fromNodeType, data);
+                                        }),
+                m_dataTypeIdentifier,
+                DistributionData::NewData);
+
     }
 
     void PersistHandler::SetPersistentDataReady()
     {
         m_strand.dispatch([this] ()
         {
-            if (m_persistDataReady)
+            if (m_persistentDataReady)
             {
                 return; //persist data was already ready
             }
@@ -128,22 +166,41 @@ namespace Internal
             ENSURE(!Dob::PersistenceParameters::TestMode(),
                    << "This system is in persistence test mode, it is an error to call SetPersistentDataReady");
 
-            m_persistDataReady = true;
+            m_persistentDataReady = true;
 
-            for (auto& cb : m_callbacks)
+            //disallow more persistence data injections
+            EntityTypes::Instance().DisallowInitialSet();
+
+            SetPersistentDataAllowed();
+
+            for (auto& cb : m_persistentDataReadyCb)
             {
                 cb();
             }
+
+            // We don't need the connection now
+            m_connection.Close();
         });
 
     }
 
-    bool PersistHandler::IsPersistentDataReady() const
+    // To be called only when strand is taken
+    void PersistHandler::SetPersistentDataAllowed()
     {
-        // Always return true if we're in test mode
-        return m_persistDataReady || Dob::PersistenceParameters::TestMode();
+        if (m_persistentDataAllowed)
+        {
+            return; // injection already allowed
+        }
+
+        m_persistentDataAllowed = true;
+
+        for (auto& cb : m_persistentDataAllowedCb)
+        {
+            cb();
+        }
     }
 
+    //TODO använd asio dispatcher
     void PersistHandler::OnDoDispatch()
     {
         m_strand.dispatch([this] ()
@@ -154,7 +211,7 @@ namespace Internal
 
     // OnDoDispatch guarantees that strand is taken when this method is called
     void PersistHandler::OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId    /*typeId*/,
-        const Safir::Dob::Typesystem::HandlerId& /*handlerId*/)
+                                               const Safir::Dob::Typesystem::HandlerId& /*handlerId*/)
     {
         SEND_SYSTEM_LOG(Alert,
                         << "Someone overregistered Safir::Dob::PersistentDataReady, "
@@ -165,153 +222,201 @@ namespace Internal
     void PersistHandler::OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRequestProxy,
                                           Safir::Dob::ResponseSenderPtr   responseSender)
     {
-        if (!m_persistDataReady)
+        // This service request indicates that persistent data is ready
+        if (!m_persistentDataReady)
         {
-            if (EntityTypes::Instance().IsInitialSetAllowed())
-            {
-                //disallow more persistence data
-                EntityTypes::Instance().DisallowInitialSet();
-
-                SetPersistentDataReady();
-
-#if 0 //stewart
-                lllout << "Calling SetOkToSignalPDComplete, since this node has now fulfilled the requirements for signalling PD complete (we got persistance data from local app)" << std::endl;
-
-                m_ecom->SetOkToSignalPDComplete();
-#endif
-            }
-
-            // Generate a success response
-            responseSender->Send(Dob::SuccessResponse::Create());
-        }
-        else
-        {
-            // Generate a success response
-            responseSender->Send(Dob::SuccessResponse::Create());
+            SetPersistentDataReady();
         }
 
-        //unregister so we can't be called again!
-        //TODO: add this again when #193 is fixed
-        //then we can get rid of the dual-calling above.
-        //        m_connection.UnregisterHandler(Dob::PersistentDataReady::ClassTypeId,
-        //                                       Typesystem::HandlerId());
+        responseSender->Send(Dob::SuccessResponse::Create());
     }
 
-//    void PersistHandler::HandleTimeout(const TimerInfoPtr & /*timer*/)
-//    {
-//        lllout << "Timeout! Calling RequestPersistenceInfo."  <<std::endl;
-//        RequestPersistenceInfo();
-//    }
-        void PersistHandler::RequestPersistenceInfo()
+    // To be called only when strand is taken
+    void PersistHandler::RequestPersistenceInfo()
+    {
+        auto request = CreateRequest();
+
+        // Send the request to all known nodes
+        for (const auto& node : m_nodes)
         {
-#if 0 //stewart
-            DistributionData request
-                (have_persistence_data_request_tag,
-                 ConnectionId(m_nodeId,
-                              0,     //use context 0 for this request
-                              -1));  //dummy identifier since it is a dose_main only thing.
-
-            const bool result = m_ecom->Send(request);
-            lllout << "Sent HavePersistenceDataRequest (send result = " << result << ")" << std::endl;
-
-            m_waitingForResponsesFromNodes.clear();
-
-            const NodeStatuses::Status ns = NodeStatuses::Instance().GetNodeStatuses();
-            for (NodeStatuses::Status::const_iterator it = ns.begin();
-                it != ns.end(); ++it)
+            auto ok = m_communication.Send(node.first, // nodeId
+                                           node.second, // nodetypeId
+                                           request.first,
+                                           request.second, // size
+                                           m_dataTypeIdentifier,
+                                           true); // delivery guarantee
+            if (ok)
             {
-                if (*it == NodeStatus::Started)
-                {
-                    //aha! A node is up, then we know that it has persistence so
-                    //we can stop initial sets and allow -1 connects.
-                    lllout << "A node is up! So we disallow initial sets and let -1:s connect (node = "
-                        << std::distance(ns.begin(),it) << ")" << std::endl;
-
-                    EntityTypes::Instance().DisallowInitialSet();
-                    Connections::Instance().AllowConnect(-1);
-                    m_waitingForResponsesFromNodes.clear();
-                    return; //no need to do anything else!
-                }
-
-                //if it is starting (i.e. NEW) we need to get its response.
-                if (*it == NodeStatus::Starting)
-                {
-                    lllout << "We must wait for response from node "
-                        << std::distance(ns.begin(),it) << std::endl;
-                    m_waitingForResponsesFromNodes.insert(static_cast<Typesystem::Int32>(std::distance(ns.begin(),it)));
-                }
-            }
-            TimerInfoPtr timerInfo(new EmptyTimerInfo(m_timerId));
-
-            if (result)
-            {
-                //successful send, wait for responses for 100ms
-                m_timerHandler.SetRelative(Discard,
-                                           timerInfo,
-                                           0.1); //time out in 100 milliseconds*/
+                lllog(3) << "DOSE_MAIN: Sent HavePersistenceDataRequest to nodeId " << node.first << std::endl;
             }
             else
             {
-                //failed to send (dosecom overflow), retry in 10ms
-                m_timerHandler.SetRelative(Discard,
-                                           timerInfo,
-                                           0.01); //time out in 10 milliseconds*/
+               m_unsentRequests.insert(node);
             }
-#endif
         }
+    }
 
-#if 0 //stewart
-        void PersistHandler::HandleMessageFromDoseCom(const DistributionData& /*data*/)
+    // To be called only when strand is taken
+    void PersistHandler::HandleMessageFromRemoteNode(const int64_t  fromNodeId,
+                                                     const int64_t  fromNodeType,
+                                                     const char*    data)
+    {
+        const DistributionData msg =
+                DistributionData::ConstConstructor(new_data_tag, data);
+
+        DistributionData::DropReference(data);
+
+        if (msg.GetType() == DistributionData::Action_HavePersistenceDataRequest)
         {
-            if (data.GetType() == DistributionData::Action_HavePersistenceDataRequest)
+            auto response = CreateResponse();
+
+            auto ok = m_communication.Send(fromNodeId,
+                                           fromNodeType,
+                                           response.first,
+                                           response.second,  // size
+                                           m_dataTypeIdentifier,
+                                           true); // delivery guarantee
+             if (ok)
+             {
+                 lllog(3) << "DOSE_MAIN: Sent HavePersistenceDataResponse=" << m_persistentDataReady
+                          << " to nodeId " << fromNodeId << std::endl;
+             }
+             else
+             {
+                m_unsentResponses.insert(std::make_pair(fromNodeId, fromNodeType));
+             }
+        }
+        else if (msg.GetType() == DistributionData::Action_HavePersistenceDataResponse)
+        {
+            lllog(3) << "DOSE_MAIN: Got an Action_HavePersistenceDataResponse" << std::endl;
+
+            if (msg.GetIHavePersistenceData())
             {
-                lllout << "Got an Action_HavePersistenceDataRequest, responding with " << m_persistDataReady << std::endl;
-                DistributionData response
-                    (have_persistence_data_response_tag,
-                     ConnectionId(m_nodeId,
-                                  0,    //use context 0 for this response
-                                  -1),  //dummy identifier since it is a dose_main only thing.
-                     m_persistDataReady);
+                lllog(3) << "DOSE_MAIN: Node " << msg.GetSenderId().m_node
+                         << " has persistence. Disallow initial set and let -1:s connect." << std::endl;
 
-                m_ecom->Send(response);
+                EntityTypes::Instance().DisallowInitialSet();
+                SetPersistentDataAllowed();
 
-                //we ignore any overflow, since the other node will resend if it doesnt get the response.
+                m_unsentRequests.clear();
             }
-            else //DistributionData::Action_HavePersistenceDataResponse
+            else
             {
-                lllout << "Got an Action_HavePersistenceDataResponse" << std::endl;
+                lllog(3) << "DOSE_MAIN: Node " << msg.GetSenderId().m_node
+                         << " doesnt have persistence." << std::endl;
 
-                if (data.GetIHavePersistenceData())
-                {
-                    lllout << "  Node " << data.GetSenderId().m_node << " has persistence. Disallow initial set and let -1:s connect." << std::endl;
-                    //it has persistence so we can stop initial sets and allow -1 connects.
-                    EntityTypes::Instance().DisallowInitialSet();
-                    Connections::Instance().AllowConnect(-1);
-                    //cancel the timer
-                    m_timerHandler.Remove(m_timerId);
-                    m_waitingForResponsesFromNodes.clear();
-                    return; //no need to do anything else!
-                }
-                else
-                {
-                    lllout << "  Node " << data.GetSenderId().m_node << " doesnt have persistence." << std::endl;
+                m_nodes.erase(std::make_pair(fromNodeId, fromNodeType));
 
-                    m_waitingForResponsesFromNodes.erase(data.GetSenderId().m_node);
-
-                    if (m_waitingForResponsesFromNodes.empty())
-                    {
-                        lllout << "  Noone has persistence! Allow -1:s to connect (without disabling initialset)." << std::endl;
-                        //everyone has responded saying that they have not seen persistence data
-                        //allow initial sets to start.
-                        Connections::Instance().AllowConnect(-1);
-                        m_timerHandler.Remove(m_timerId);
-                        return; //no need to do anything else!
-                    }
-                }
+                CheckResponseStatus();
             }
         }
-#endif
+        else
+        {
+            throw std::logic_error("PersistHandler: Received unexpected message");
+        }
+    }
 
+    void PersistHandler::Resend()
+    {
+        // Resend any unsent requests
+        if (!m_unsentRequests.empty())
+        {
+            auto request = CreateRequest();
+
+            for (auto it = m_unsentRequests.begin(); it != m_unsentRequests.end();)
+            {
+                auto ok = m_communication.Send(it->first, //nodeId
+                                               it->second, //nodeTypeId
+                                               request.first,
+                                               request.second,  // size
+                                               m_dataTypeIdentifier,
+                                               true); // delivery guarantee
+                 if (ok)
+                 {
+                    lllog(3) << "DOSE_MAIN: Sent HavePersistenceDataRequest to nodeId " << it->first << std::endl;
+
+                    it = m_unsentRequests.erase(it);
+                 }
+                 else
+                 {
+                    ++it;
+                 }
+            }
+        }
+
+        // Resend any unsent responses
+        if (!m_unsentResponses.empty())
+        {
+            auto response = CreateResponse();
+
+            for (auto it = m_unsentResponses.begin(); it != m_unsentResponses.end();)
+            {
+                auto ok = m_communication.Send(it->first, //nodeId
+                                               it->second, //nodeTypeId
+                                               response.first,
+                                               response.second,  // size
+                                               m_dataTypeIdentifier,
+                                               true); // delivery guarantee
+                 if (ok)
+                 {
+                     lllog(3) << "DOSE_MAIN: Sent HavePersistenceDataResponse=" << m_persistentDataReady
+                              << " to nodeId " << it->first << std::endl;
+
+                    it = m_unsentResponses.erase(it);
+                 }
+                 else
+                 {
+                    ++it;
+                 }
+            }
+        }
+    }
+
+    void PersistHandler::CheckResponseStatus()
+    {
+        if (m_nodes.empty())
+        {
+            lllog(3) << "DOSE_MAIN: Noone has persistence!"
+                        " Allow -1:s to connect (without disabling initialset)." << std::endl;
+
+            // Everyone has responded saying that they have not seen persistence data
+            // allow initial sets to start.
+            SetPersistentDataAllowed();
+        }
+    }
+
+    std::pair<boost::shared_ptr<const char[]>, size_t> PersistHandler::CreateRequest() const
+    {
+        DistributionData request
+                (have_persistence_data_request_tag,
+                 ConnectionId(m_communication.Id(),
+                              0,     //use context 0 for this request
+                              -1));  //dummy identifier since it is a dose_main only thing.
+
+        return std::make_pair(boost::shared_ptr<const char[]> (request.GetReference(),
+                                                [](const char* data)
+                                                {
+                                                    DistributionData::DropReference(data);
+                                                }),
+                              request.Size());
+    }
+
+    std::pair<boost::shared_ptr<const char[]>, size_t> PersistHandler::CreateResponse() const
+    {
+        DistributionData response
+                (have_persistence_data_response_tag,
+                 ConnectionId(m_communication.Id(),
+                              0,    //use context 0 for this response
+                              -1),  //dummy identifier since it is a dose_main only thing.
+                 m_persistentDataReady);
+
+        return std::make_pair(boost::shared_ptr<const char[]> (response.GetReference(),
+                                                [](const char* data)
+                                                {
+                                                    DistributionData::DropReference(data);
+                                                }),
+                              response.Size());
+    }
 }
 }
 }

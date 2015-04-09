@@ -50,16 +50,19 @@ namespace Internal
         ,m_distribution(distribution)
         ,m_poolDistributor(io, m_distribution.GetCommunication())
         ,m_poolDistributionRequests(io, m_distribution.GetCommunication())
-        ,m_persistHandler(io, distribution.GetNodeId(), m_distribution.GetCommunication())
+        ,m_persistHandler(io, distribution, logStatus, [=] // persistentDataReadyCb
+                                                       {
+                                                            //std::wcout<<"Persistent data ready"<<std::endl;
+                                                            m_persistensReady=true;
+                                                            m_poolDistributor.Start();
+                                                            SignalPdComplete();
+                                                       },
+                                                       [=] // persistentDataAllowedCb
+                                                       {
+                                                           Connections::Instance().AllowConnect(-1);
+                                                       }
+                                                       )
     {
-        m_persistHandler.AddSubscriber([=]
-        {
-            //std::wcout<<"Persistent data ready"<<std::endl;
-            m_persistensReady=true;
-            m_poolDistributor.Start();
-            SignalPdComplete();
-        });
-
         auto injectNode=[=](const std::string&, int64_t id, int64_t nt, const std::string&)
         {
             m_strand.dispatch([=]
@@ -120,8 +123,6 @@ namespace Internal
             auto sd=std::unique_ptr<StateDistributorType >(new StateDistributorType(nt.id, distribution, m_strand, checkPendingReg));
             m_stateDistributors.emplace(nt.id, std::move(sd));
         }
-
-        m_persistHandler.Start(logStatus);
     }
 
     void PoolHandler::Start()
@@ -152,8 +153,6 @@ namespace Internal
         m_strand.post([=]
         {
             m_endStatesTimer.cancel();
-
-            m_persistHandler.Stop();
 
             //We are stopping so we dont care about receiving pool distributions anymore
             m_poolDistributionRequests.Stop();
