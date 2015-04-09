@@ -46,7 +46,8 @@ namespace Dob
 namespace Internal
 {
 
-    ProcessInfoHandler::ProcessInfoHandler(boost::asio::io_service& ioService)
+    ProcessInfoHandler::ProcessInfoHandler(boost::asio::io_service& ioService,
+                                           const Distribution& distribution)
         : m_strand(ioService)
         , m_dispatcher(m_connection, m_strand)
         , m_processMonitor(ioService,
@@ -67,13 +68,11 @@ namespace Internal
     {
         m_connection.Open(L"dose_main",L"ProcessInfoHandler",0,nullptr,&m_dispatcher);
 
-#if 0  //stewart
-        if (!ecom.IsLocal(Dob::ProcessInfo::ClassTypeId))
+        if (!distribution.IsLocal(Dob::ProcessInfo::ClassTypeId))
         {
             throw Dob::Typesystem::ConfigurationErrorException
                 (L"Entity ProcessInfo must have DistributionChannelProperty (or Override) set to Local",__WFILE__,__LINE__);
         }
-#endif
 
         // Register ProcessInfo class
         m_connection.RegisterEntityHandler(Dob::ProcessInfo::ClassTypeId,

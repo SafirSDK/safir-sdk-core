@@ -165,7 +165,7 @@ namespace Internal
                                             [this](const std::string& str){LogStatus(str);}));
 
         m_connectionHandler.reset(new ConnectionHandler(m_strand.get_io_service(),
-                                                        m_distribution->GetCommunication(),
+                                                        *m_distribution,
                                                         nodeTypeIds,
                                                         [this](const ConnectionPtr& connection, bool disconnecting){OnAppEvent(connection, disconnecting);}));
 

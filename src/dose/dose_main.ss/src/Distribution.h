@@ -23,15 +23,19 @@
 ******************************************************************************/
 #pragma once
 
+#include <Safir/Dob/DistributionScopeOverrideProperty.h>
+#include <Safir/Dob/DistributionScopeProperty.h>
 #include <Safir/Dob/Internal/Communication.h>
-#include <Safir/Dob/Internal/SystemPicture.h>
 #include <Safir/Dob/Internal/ControlConfig.h>
-#include <boost/noncopyable.hpp>
+#include <Safir/Dob/Internal/SystemPicture.h>
+#include <Safir/Dob/Typesystem/ObjectFactory.h>
+#include <Safir/Dob/Typesystem/Operations.h>
 #include <boost/chrono.hpp>
-#include <string>
-#include <vector>
+#include <boost/noncopyable.hpp>
 #include <functional>
 #include <map>
+#include <string>
+#include <vector>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -70,6 +74,7 @@ namespace Internal
             : m_nodeId(ownNodeId),
               m_communication(),
               m_sp(),
+              m_localTypes(CalculateLocalTypes()),
               m_started(false)
         {
             // Create and populate structures that are needed when creating the Communication and
@@ -167,7 +172,7 @@ namespace Internal
         {
             return *m_communication;
         }
-        
+
         const CommunicationT& GetCommunication() const
         {
             return *m_communication;
@@ -182,13 +187,94 @@ namespace Internal
         {
             return m_nodeId;
         }
+
+        //Check if type is local. If false is returned it is global...
+        bool IsLocal(Safir::Dob::Typesystem::TypeId tid) const
+        {
+            return std::binary_search(m_localTypes.begin(), m_localTypes.end(), tid);
+        }
+
     private:
+        static bool ReadDistributionScopeProperty(const Safir::Dob::Typesystem::TypeId typeId)
+        {
+            bool isInherited,hasProperty;
+
+            Dob::Typesystem::Operations::HasProperty(typeId,
+                                                     Dob::DistributionScopeOverrideProperty::ClassTypeId,
+                                                     hasProperty,
+                                                     isInherited);
+
+            if (hasProperty && !isInherited) //Make sure we do not get an inherited override!
+            {
+                try
+                {
+                    //unfortunately we have to create dummy object here to be able to read the property, even
+                    //though it is a constant
+                    Dob::Typesystem::ObjectPtr obj = Typesystem::ObjectFactory::Instance().CreateObject(typeId);
+                    return Dob::DistributionScopeOverrideProperty::GetDistributionScope(obj);
+                }
+                catch (const std::exception & exc)
+                {
+                    std::wostringstream ostr;
+                    ostr << "Failed to read Property member 'DistributionScope' of property "
+                         << Dob::Typesystem::Operations::GetName(Dob::DistributionScopeOverrideProperty::ClassTypeId)
+                         << " for class "
+                         << Dob::Typesystem::Operations::GetName(typeId)
+                         << ". Got exception " << exc.what();
+                    throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+                }
+            }
+            else if (Dob::Typesystem::Operations::HasProperty(typeId,Dob::DistributionScopeProperty::ClassTypeId))
+            {
+                try
+                {
+                    Dob::Typesystem::ObjectPtr obj = Typesystem::ObjectFactory::Instance().CreateObject(typeId);
+                    return Dob::DistributionScopeProperty::GetDistributionScope(obj);
+                }
+                catch (const std::exception & exc)
+                {
+                    std::wostringstream ostr;
+                    ostr << "Failed to read Property member 'DistributionScope' of property "
+                         << Dob::Typesystem::Operations::GetName(Dob::DistributionScopeProperty::ClassTypeId)
+                         << " for class "
+                         << Dob::Typesystem::Operations::GetName(typeId)
+                         << ". Got exception " << exc.what();
+                    throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
+                }
+            }
+
+            return false;
+
+        }
+
+        static std::vector<Safir::Dob::Typesystem::TypeId> CalculateLocalTypes()
+        {
+            std::vector<Safir::Dob::Typesystem::TypeId> localTypes;
+
+            for (const auto typeId : Safir::Dob::Typesystem::Operations::GetAllTypeIds())
+            {
+                if (ReadDistributionScopeProperty(typeId))
+                {
+                    localTypes.push_back(typeId);
+                }
+            }
+
+            std::sort(localTypes.begin(),localTypes.end());
+            localTypes.shrink_to_fit();
+            return std::move(localTypes);
+        }
+
         const int64_t m_nodeId;
         std::unique_ptr<CommunicationT> m_communication;
         std::unique_ptr<SystemPictureT> m_sp;
         const ConfigT m_config;
         std::vector<OnInjectNode> m_injectCallbacks;
         std::vector<OnExcludeNode> m_excludeCallbacks;
+
+        //this is a sorted vector of typeids that are local
+        //it is a vector rather than a set since it is likely to be small and
+        //lookups are frequent.
+        const std::vector<Safir::Dob::Typesystem::TypeId> m_localTypes;
 
         bool m_started;
     };

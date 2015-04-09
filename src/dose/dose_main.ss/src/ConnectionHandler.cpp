@@ -21,7 +21,6 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include <Safir/Dob/Internal/Communication.h>
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
@@ -30,6 +29,7 @@
 #include "ConnectionHandler.h"
 #include "PendingRegistrationHandler.h"
 #include "RequestHandler.h"
+#include "Distribution.h"
 
 namespace Safir
 {
@@ -43,13 +43,13 @@ namespace
 }
 
     ConnectionHandler::ConnectionHandler(boost::asio::io_service& ioService,
-                                         Com::Communication& communication,
+                                         Distribution& distribution,
                                          const std::unordered_set<int64_t>& nodeTypeIds,
                                          const std::function<void(const ConnectionPtr& connection, bool disconnecting)>& onAppEvent)
         : m_strand(ioService),
-          m_communication(communication),
+          m_communication(distribution.GetCommunication()),
           m_onAppEvent(onAppEvent),
-          m_processInfoHandler(ioService)
+          m_processInfoHandler(ioService, distribution)
     {
         for (auto nt : nodeTypeIds)
         {
