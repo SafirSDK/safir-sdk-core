@@ -53,8 +53,8 @@ namespace Internal
         void Stop();
 
     private:
-        using PoolDistributionType=PoolDistribution<Com::Communication>;
-        using PoolDistributionHandlerType=PoolDistributionHandler<Com::Communication, PoolDistributionType>;
+        using PoolDistributionType=PoolDistribution<Distribution>;
+        using PoolDistributionHandlerType=PoolDistributionHandler<Distribution, PoolDistributionType>;
         using PoolDistributionRequestSenderType=PoolDistributionRequestSender<Com::Communication>;
         using StateDistributorType=StateDistributor<Distribution>;
 
@@ -70,6 +70,7 @@ namespace Internal
         std::function<void()> m_poolDistributionCompleteCallback;
         bool m_persistensReady=false;
         bool m_poolDistributionComplete=false;
+        int m_numReceivedPdComplete=0;
 
         void SignalPdComplete();
         void RunEndStatesTimer();

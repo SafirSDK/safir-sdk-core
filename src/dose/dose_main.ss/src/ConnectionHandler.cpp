@@ -93,9 +93,13 @@ namespace
                 //the thread will be interrupted at the interruption_point.
                 m_connectionThread.interrupt();
                 Connections::Instance().GenerateSpuriousConnectOrOutSignal();
+
+                std::wcout<<"Wait for connection thread to stop"<<std::endl;
                 m_connectionThread.join();
                 m_connectionThread = boost::thread();
                 m_processInfoHandler.Stop();
+
+                std::wcout<<"ConnectionHandler stopped"<<std::endl;
             }
         });
     }
@@ -154,7 +158,8 @@ namespace
                 if (m_handleEventsNotified==false)
                 {
                     m_handleEventsNotified=true;
-                    m_strand.post([this]{HandleEvents();});
+                    HandleEvents();
+                    //m_strand.post([this]{HandleEvents();});
                 }
             }
         }

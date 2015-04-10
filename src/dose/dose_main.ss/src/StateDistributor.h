@@ -127,16 +127,20 @@ namespace Internal
                         auto& queue=m_connections[static_cast<size_t>(context)].connectionPtr->GetDirtySubscriptionQueue();
                         queue.Dispatch([=](const SubscriptionPtr& subscription, bool& exitDispatch, bool& dontRemove)
                         {
+                            dontRemove=false;
                             DistributionData realState = subscription->GetState()->GetRealState();
-                            if (!realState.IsNoState() && realState.GetType()==DistributionData::RegistrationState)
+                            if (!realState.IsNoState() && !m_distribution.IsLocal(realState.GetTypeId()))
                             {
-                                // Registration state
-                                dontRemove=!subscription->DirtyFlag().Process([this, &subscription]{return ProcessRegistrationState(subscription);});
-                            }
-                            else
-                            {
-                                // Entity state
-                                dontRemove=!subscription->DirtyFlag().Process([this, &subscription]{return ProcessEntityState(subscription);});
+                                if (realState.GetType()==DistributionData::RegistrationState)
+                                {
+                                    // Registration state
+                                    dontRemove=!subscription->DirtyFlag().Process([this, &subscription]{return ProcessRegistrationState(subscription);});
+                                }
+                                else
+                                {
+                                    // Entity state
+                                    dontRemove=!subscription->DirtyFlag().Process([this, &subscription]{return ProcessEntityState(subscription);});
+                                }
                             }
                             //dontRemove is true if we got an overflow, and if we did we dont want to keep sending anything to dose_com.
                             exitDispatch = dontRemove;

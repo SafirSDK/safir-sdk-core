@@ -44,7 +44,7 @@ namespace Internal
     /// Handles a single pool distribution to a specific node. This class is only to be used by
     /// PoolDistributor. To start a new pool distribution to a node, use PoolDistributor.AddPoolDistribution.
     ///
-    template <class CommunicationT>
+    template <class DistributionT>
     class PoolDistribution
             :public Safir::Dob::EntitySubscriber
             ,public Safir::Dob::RegistrationSubscriber
@@ -54,13 +54,13 @@ namespace Internal
         PoolDistribution(int64_t nodeId,
                          int64_t nodeType,
                          boost::asio::io_service::strand& strand,
-                         CommunicationT& communication,
+                         DistributionT& distribution,
                          const std::function<void(int64_t)>& completionHandler)
             :m_nodeId(nodeId)
             ,m_nodeType(nodeType)
             ,m_strand(strand)
             ,m_timer(strand.get_io_service())
-            ,m_communication(communication)
+            ,m_distribution(distribution)
             ,m_completionHandler(completionHandler)
         {
         }
@@ -69,31 +69,46 @@ namespace Internal
         {
             m_strand.dispatch([=]
             {
-                //std::wcout<<L"Run PD to "<<m_nodeId<<std::endl;
+                m_running=true;
+                std::wcout<<L"Run PD to "<<m_nodeId<<std::endl;
                 //collect all connections on this node
                 Connections::Instance().ForEachConnection([=](const Connection& connection)
                 {
-                    auto notLocalContext=!Safir::Dob::NodeParameters::LocalContexts(connection.Id().m_contextId);
-                    auto notDoseConnection=std::string(connection.NameWithoutCounter()).find(";dose_main;")==std::string::npos;
+                    //auto notDoseConnection=std::string(connection.NameWithoutCounter()).find(";dose_main;")==std::string::npos;
+                    auto localContext=Safir::Dob::NodeParameters::LocalContexts(connection.Id().m_contextId);
                     auto connectionOnThisNode=connection.IsLocal();
 
                     //std::wcout<<std::boolalpha<<L"Pd_con id="<<connection.Id().m_id<<L", notLocalContext="<<notLocalContext<<L" notDoseCon="<<notDoseConnection<<L" conOnThis="<<connectionOnThisNode<<std::endl;
-                    if (notLocalContext && notDoseConnection && connectionOnThisNode)
+                    if (!localContext && connectionOnThisNode)
                     {
+                        std::wcout<<L"PD_CON: "<<connection.NameWithoutCounter()<<std::endl;
                         m_connections.push(DistributionData(connect_message_tag,
                                                             connection.Id(),
                                                             connection.NameWithoutCounter(),
                                                             connection.Counter()));
                     }
+                    else
+                        std::wcout<<L"PD_CON SKIP: "<<connection.NameWithoutCounter()<<std::endl;
                 });
 
                 SendConnections(); //will trigger the sequence SendConnections -> SendStates() -> SendPdComplete()
             });
         }
 
+        void Cancel()
+        {
+            std::wcout<<"Cancel a pd"<<std::endl;
+            m_strand.dispatch([=]
+            {
+                m_running=false;
+                m_timer.cancel();
+            });
+        }
+
         int64_t Id() const {return m_nodeId;}
 
     private:
+        static const int64_t PoolDistributionInfoDataTypeId=-3446507522969672286; //DoseMain.PoolDistributionInfo
         static const int64_t ConnectionMessageDataTypeId=4477521173098643793; //DoseMain.ConnectionMessage
         static const int64_t RegistrationStateDataTypeId=6915466164769792349; //DoseMain.RegistrationState
         static const int64_t EntityStateDataTypeId=5802524208372516084; //DoseMain.EntityState
@@ -102,20 +117,28 @@ namespace Internal
         int64_t m_nodeType;
         boost::asio::io_service::strand& m_strand;
         boost::asio::steady_timer m_timer;
-        CommunicationT& m_communication;
+        DistributionT& m_distribution;
         std::function<void(int64_t)> m_completionHandler;
         std::queue<DistributionData> m_connections;
         Safir::Dob::Connection m_dobConnection;
 
+        bool m_running=false;
+
         void SendConnections()
         {
-            //std::wcout<<L"SendConnections"<<std::endl;
+            if (!m_running)
+            {
+                std::wcout<<L"SendConnections not running"<<std::endl;
+                return;
+            }
+
+            std::wcout<<L"SendConnections"<<std::endl;
             while (CanSend() && !m_connections.empty())
             {
                 const DistributionData& d=m_connections.front();
                 boost::shared_ptr<const char[]> p(d.GetReference(), [=](const char* ptr){DistributionData::DropReference(ptr);});
 
-                if (m_communication.Send(m_nodeId, m_nodeType, p, d.Size(), ConnectionMessageDataTypeId, true))
+                if (m_distribution.GetCommunication().Send(m_nodeId, m_nodeType, p, d.Size(), ConnectionMessageDataTypeId, true))
                 {
                     m_connections.pop();
                 }
@@ -127,46 +150,66 @@ namespace Internal
 
             if (m_connections.empty())
             {
-                SendStates(0);
+                m_strand.post([=]
+                {
+                    SendStates(0);
+                });
             }
             else
             {
-                m_timer.expires_from_now(boost::chrono::milliseconds(10));
-                m_timer.async_wait(m_strand.wrap([=](const boost::system::error_code& /*error*/){SendConnections();}));
+                SetTimer([=]{SendConnections();});
             }
         }
 
         void SendStates(int context)
         {
-            //std::wcout<<L"SendStates"<<std::endl;
-            if (context>=Safir::Dob::NodeParameters::NumberOfContexts())
+            if (!m_running)
             {
-                SendPdComplete();
+                std::wcout<<L"SendStates not running"<<std::endl;
                 return;
             }
 
+            std::wcout<<L"SendStates"<<std::endl;
+            if (context>=Safir::Dob::NodeParameters::NumberOfContexts())
+            {
+                std::wcout<<L"SendStates 0"<<std::endl;
+                m_strand.post([=]{SendPdComplete();});
+                return;
+            }
+
+            std::wcout<<L"SendStates 1"<<std::endl;
             if (m_dobConnection.IsOpen())
             {
-
+                std::wcout<<L"SendStates 2"<<std::endl;
                 m_dobConnection.Close();
             }
+
+            std::wcout<<L"SendStates 3"<<std::endl;
 
             //Note the connection name, we do NOT want to get special treatment for being
             //in dose_main, since we're a different thread. But we want to be allowed in
             //always, so don't change connection string "dose_main_pd" because it is always allowed to connect,
             // even before we let -1 connections in.
             m_dobConnection.Open(L"dose_main_pd",L"pool_distribution", context, NULL, this);
+
+            std::wcout<<L"SendStates 4"<<std::endl;
+
+
             m_dobConnection.SubscribeRegistration(Entity::ClassTypeId,
                                                   Typesystem::HandlerId::ALL_HANDLERS,
                                                   true, //includeSubclasses
                                                   false, //restartSubscription
                                                   this);
 
+            std::wcout<<L"SendStates 5"<<std::endl;
+
             m_dobConnection.SubscribeRegistration(Service::ClassTypeId,
                                                   Typesystem::HandlerId::ALL_HANDLERS,
                                                   true, //includeSubclasses
                                                   false, //restartSubscription
                                                   this);
+
+            std::wcout<<L"SendStates 6"<<std::endl;
 
             ConnectionAspectInjector(m_dobConnection).SubscribeEntity(Entity::ClassTypeId,
                                                                       false, //includeUpdates,
@@ -179,28 +222,47 @@ namespace Internal
                                                                       false, //timestampChangeInfo
                                                                       this);
 
+            std::wcout<<L"SendStates 7"<<std::endl;
+
             auto connectionName=ConnectionAspectMisc(m_dobConnection).GetConnectionName();
+
+            std::wcout<<L"SendStates 8"<<std::endl;
+
             auto conPtr=Connections::Instance().GetConnectionByName(Typesystem::Utilities::ToUtf8(connectionName));
 
+            std::wcout<<L"SendStates 9"<<std::endl;
+
             DispatchStates(conPtr, context);
+
+            std::wcout<<L"SendStates 10"<<std::endl;
         }
 
         void DispatchStates(const Safir::Dob::Internal::ConnectionPtr& conPtr, int context)
         {
-            //std::wcout<<L"DispatchStates"<<std::endl;
+            if (!m_running)
+            {
+                std::wcout<<L"DispStates not running"<<std::endl;
+                return;
+            }
+
+            std::wcout<<L"DispatchStates"<<std::endl;
             bool overflow=false;
             conPtr->GetDirtySubscriptionQueue().Dispatch([this, conPtr, context, &overflow](const SubscriptionPtr& subscription, bool& exitDispatch, bool& dontRemove)
             {
+                dontRemove=false;
                 DistributionData realState = subscription->GetState()->GetRealState();
-                if (!realState.IsNoState() && realState.GetType()==DistributionData::RegistrationState)
+                if (!realState.IsNoState() && !m_distribution.IsLocal(realState.GetTypeId()))
                 {
-                    // Registration state
-                    dontRemove=!subscription->DirtyFlag().Process([this, &subscription]{return ProcessRegistrationState(subscription);});
-                }
-                else
-                {
-                    // Entity state
-                    dontRemove=!subscription->DirtyFlag().Process([this, &subscription]{return ProcessEntityState(subscription);});
+                    if (realState.GetType()==DistributionData::RegistrationState)
+                    {
+                        // Registration state
+                        dontRemove=!subscription->DirtyFlag().Process([this, &subscription]{return ProcessRegistrationState(subscription);});
+                    }
+                    else
+                    {
+                        // Entity state
+                        dontRemove=!subscription->DirtyFlag().Process([this, &subscription]{return ProcessEntityState(subscription);});
+                    }
                 }
                 //dontRemove is true if we got an overflow, and if we did we dont want to keep sending anything to dose_com.
                 exitDispatch = dontRemove;
@@ -209,8 +271,7 @@ namespace Internal
 
             if (overflow)
             {
-                m_timer.expires_from_now(boost::chrono::milliseconds(10));
-                m_timer.async_wait(m_strand.wrap([=](const boost::system::error_code& /*error*/){DispatchStates(conPtr, context);}));
+                SetTimer([=]{DispatchStates(conPtr, context);});
             }
             else //continue with next context
             {
@@ -220,24 +281,35 @@ namespace Internal
 
         void SendPdComplete()
         {
-            //std::wcout<<L"SendPdComplete"<<std::endl;
+            if (!m_running)
+            {
+                std::wcout<<L"SendPdComp not running"<<std::endl;
+                return;
+            }
+
+            std::wcout<<L"SendPdComplete"<<std::endl;
             m_dobConnection.Close();
 
             auto req=boost::make_shared<char[]>(sizeof(PoolDistributionInfo));
             (*reinterpret_cast<PoolDistributionInfo*>(req.get()))=PoolDistributionInfo::PdComplete;
 
-            if (!m_communication.Send(m_nodeId, m_nodeType, req, sizeof(PoolDistributionInfo), PoolDistributionInfoDataTypeId, true))
+            if (!m_distribution.GetCommunication().Send(m_nodeId, m_nodeType, req, sizeof(PoolDistributionInfo), PoolDistributionInfoDataTypeId, true))
             {
-                m_timer.expires_from_now(boost::chrono::milliseconds(10));
-                m_timer.async_wait(m_strand.wrap([=](const boost::system::error_code& /*error*/){SendPdComplete();}));
+                SetTimer([=]{SendPdComplete();});
             }
         }
 
         bool ProcessEntityState(const SubscriptionPtr& subscription)
         {
+            if (!m_running)
+            {
+                std::wcout<<L"ProcessEntityState not running"<<std::endl;
+                return true;
+            }
             // All nodes send ghost and injection data on PD!
             // Do not send updates
 
+            std::wcout<<L"ProcessEntityState"<<std::endl;
             bool success=true;
 
             //Real state
@@ -250,11 +322,11 @@ namespace Internal
                     //Send all local states
                     //send all ghosts (the owner node is probably down...)
                     //send all delete states (so that new nodes get the correct timestamps)
-                    if (currentState.GetSenderId().m_node==m_communication.Id() ||
+                    if (currentState.GetSenderId().m_node==m_distribution.GetCommunication().Id() ||
                             currentState.GetEntityStateKind() == DistributionData::Ghost ||
                             !currentState.HasBlob())
                     {
-                        if (!CanSend() || !m_communication.Send(m_nodeId, m_nodeType, ToPtr(currentState), currentState.Size(), EntityStateDataTypeId, true))
+                        if (!CanSend() || !m_distribution.GetCommunication().Send(m_nodeId, m_nodeType, ToPtr(currentState), currentState.Size(), EntityStateDataTypeId, true))
                         {
                             success=false;
                         }
@@ -270,7 +342,7 @@ namespace Internal
 
                 if (!currentState.IsNoState())
                 {
-                    if (!CanSend() || !m_communication.Send(m_nodeId, m_nodeType, ToPtr(currentState), currentState.Size(), EntityStateDataTypeId, true))
+                    if (!CanSend() || !m_distribution.GetCommunication().Send(m_nodeId, m_nodeType, ToPtr(currentState), currentState.Size(), EntityStateDataTypeId, true))
                     {
                         success=false;
                     }
@@ -294,10 +366,10 @@ namespace Internal
                 {
                     //Local states are to be sent to other nodes.
                     //Unregistration states (regardless of whether they are local or not) are always sent.
-                    if (state.GetSenderId().m_node==m_communication.Id() ||
+                    if (state.GetSenderId().m_node==m_distribution.GetCommunication().Id() ||
                             !state.IsRegistered())
                     {
-                        if (!CanSend() || !m_communication.Send(0, m_nodeType, ToPtr(state), state.Size(), RegistrationStateDataTypeId, true))
+                        if (!CanSend() || !m_distribution.GetCommunication().Send(0, m_nodeType, ToPtr(state), state.Size(), RegistrationStateDataTypeId, true))
                         {
                             success=false;
                         }
@@ -310,8 +382,21 @@ namespace Internal
 
         bool CanSend() const
         {
-            static const size_t threshold=m_communication.SendQueueCapacity(m_nodeType)/2;
-            return m_communication.NumberOfQueuedMessages(m_nodeType)<threshold;
+            static const size_t threshold=m_distribution.GetCommunication().SendQueueCapacity(m_nodeType)/2;
+            return m_distribution.GetCommunication().NumberOfQueuedMessages(m_nodeType)<threshold;
+        }
+
+        void SetTimer(const std::function<void()>& completionHandler)
+        {
+            if (!m_running)
+                return;
+
+            m_timer.expires_from_now(boost::chrono::milliseconds(10));
+            m_timer.async_wait(m_strand.wrap([=](const boost::system::error_code&)
+            {
+                if (m_running)
+                    completionHandler();
+            }));
         }
 
         static inline boost::shared_ptr<const char[]> ToPtr(const DistributionData& d)

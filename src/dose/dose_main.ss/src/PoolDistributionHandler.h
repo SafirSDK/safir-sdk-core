@@ -49,13 +49,13 @@ namespace Internal
     /// be sending in a pace that wont flood the network and cause starvation in other parts
     /// of the system.
     ///
-    template <class CommunicationT, class PoolDistributionT>
+    template <class DistributionT, class PoolDistributionT>
     class PoolDistributionHandler : private boost::noncopyable
     {
     public:
-        PoolDistributionHandler(boost::asio::io_service& io, CommunicationT& com)
+        PoolDistributionHandler(boost::asio::io_service& io, DistributionT& distribution)
             :m_strand(io)
-            ,m_communication(com)
+            ,m_distribution(distribution)
         {
         }
 
@@ -64,8 +64,11 @@ namespace Internal
         {
             m_strand.dispatch([=]
             {
-                m_running=true;
-                StartNextPoolDistribution();
+                if (!m_running) //dont call start if its already started
+                {
+                    m_running=true;
+                    StartNextPoolDistribution();
+                }
             });
         }
 
@@ -84,7 +87,7 @@ namespace Internal
             //std::wcout<<L"AddPoolDistribution "<<nodeId<<std::endl;
             m_strand.dispatch([this, nodeId, nodeTypeId]
             {
-                auto pd=PdPtr(new PoolDistributionT(nodeId, nodeTypeId, m_strand, m_communication, [=](int64_t /*nodeId*/)
+                auto pd=PdPtr(new PoolDistributionT(nodeId, nodeTypeId, m_strand, m_distribution, [=](int64_t /*nodeId*/)
                 {
                     if (!m_pendingPoolDistributions.empty())
                         m_pendingPoolDistributions.pop();
@@ -104,7 +107,7 @@ namespace Internal
     private:
 #endif
         boost::asio::io_service::strand m_strand;
-        CommunicationT& m_communication;
+        DistributionT& m_distribution;
         bool m_running=false;
 
         using PdPtr = std::unique_ptr< PoolDistributionT >;

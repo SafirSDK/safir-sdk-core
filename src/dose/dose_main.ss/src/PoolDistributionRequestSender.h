@@ -46,8 +46,9 @@ namespace Internal
     static const int64_t PoolDistributionInfoDataTypeId=-3446507522969672286; //DoseMain.PoolDistributionInfo
     enum class PoolDistributionInfo : uint8_t
     {
-        RequestPd = 1,
-        PdComplete = 2
+        PdRequest = 1,      //Request a pool distribution from another node
+        PdComplete = 2,     //Answer to PdRequest: my pool distribution is completed including persistent data
+        PdHaveNothing = 3   //Answer to PdRequest: you can ignore me, my pool is empty and I have no persistence ready
     };
     //---------------------------------------------------------
 
@@ -93,7 +94,7 @@ namespace Internal
             });
         }
 
-        void RequestPoolFrom(int64_t nodeId, int64_t nodeTypeId)
+        void RequestPoolDistribution(int64_t nodeId, int64_t nodeTypeId)
         {
             m_strand.post([=]
             {
@@ -102,14 +103,22 @@ namespace Internal
             });
         }
 
-        void ReceivedPoolDistributionCompleteFrom(int64_t nodeId)
+        //fromNodeId=0 means all queued requests are finished
+        void PoolDistributionFinished(int64_t fromNodeId)
         {
             m_strand.dispatch([=]
             {
-                auto it=std::find_if(m_requests.begin(), m_requests.end(), [nodeId](const PdReq& r){return r.nodeId==nodeId;});
-                if (it!=m_requests.end())
+                if (fromNodeId==0)
                 {
-                    m_requests.erase(it);
+                    m_requests.clear();
+                }
+                else
+                {
+                    auto it=std::find_if(m_requests.begin(), m_requests.end(), [fromNodeId](const PdReq& r){return r.nodeId==fromNodeId;});
+                    if (it!=m_requests.end())
+                    {
+                        m_requests.erase(it);
+                    }
                 }
 
                 if (m_requests.empty())
@@ -144,7 +153,7 @@ namespace Internal
             }
 
             auto req=boost::make_shared<char[]>(sizeof(PoolDistributionInfo));
-            (*reinterpret_cast<PoolDistributionInfo*>(req.get()))=PoolDistributionInfo::RequestPd;
+            (*reinterpret_cast<PoolDistributionInfo*>(req.get()))=PoolDistributionInfo::PdRequest;
 
             bool unsentRequests=false;
 

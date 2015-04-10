@@ -75,16 +75,16 @@ BOOST_AUTO_TEST_CASE( PoolDistributionRequestSenderTest )
     Communication com;
     PoolDistributionRequestSender<Communication> pdr(io, com);
 
-    pdr.RequestPoolFrom(1, 1);
-    pdr.RequestPoolFrom(2, 1);
-    pdr.RequestPoolFrom(3, 1);
+    pdr.RequestPoolDistribution(1, 1);
+    pdr.RequestPoolDistribution(2, 1);
+    pdr.RequestPoolDistribution(3, 1);
 
     bool pdComplete=false;
     pdr.Start([&]{pdComplete=true;});
 
-    pdr.ReceivedPoolDistributionCompleteFrom(1);
-    pdr.ReceivedPoolDistributionCompleteFrom(2);
-    pdr.ReceivedPoolDistributionCompleteFrom(3);
+    pdr.PoolDistributionFinished(1);
+    pdr.PoolDistributionFinished(2);
+    pdr.PoolDistributionFinished(3);
 
     pdr.m_strand.post([&]
     {

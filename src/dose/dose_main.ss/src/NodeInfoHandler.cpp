@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include "NodeInfoHandler.h"
+#include <boost/lexical_cast.hpp>
 #include <Safir/Dob/ErrorResponse.h>
 #include <Safir/Dob/NodeInfo.h>
 #include <Safir/Dob/ResponseGeneralErrorCodes.h>
@@ -39,7 +40,11 @@ namespace Internal
                                      const Distribution& distribution)
         : m_dispatcher(m_connection, ioService)
     {
-        m_connection.Open(L"dose_main",L"NodeInfoHandler",0,nullptr,&m_dispatcher);
+        m_connection.Open(L"dose_main",
+                          L"NodeInfoHandler"+boost::lexical_cast<std::wstring>(distribution.GetNodeId()),
+                          0,
+                          nullptr,
+                          &m_dispatcher);
 
         m_connection.RegisterEntityHandler(Dob::NodeInfo::ClassTypeId,
                                            Typesystem::HandlerId(distribution.GetNodeId()),
