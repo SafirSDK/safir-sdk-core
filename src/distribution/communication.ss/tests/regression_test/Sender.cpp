@@ -30,7 +30,7 @@ Sender::Sender(Com::ControlModeTag tag, boost::asio::io_service& ioService, int6
     ,m_msgCount(0)
 {
     m_timerSend.expires_from_now(boost::chrono::milliseconds(10));
-    m_timerSend.async_wait(m_strand.wrap([=](const boost::system::error_code& error){if (m_running) Send();}));
+    m_timerSend.async_wait(m_strand.wrap([=](const boost::system::error_code& /*error*/){if (m_running) Send();}));
 }
 
 Sender::Sender(Com::DataModeTag tag, boost::asio::io_service& ioService, int64_t nodeId, int64_t nodeType)
