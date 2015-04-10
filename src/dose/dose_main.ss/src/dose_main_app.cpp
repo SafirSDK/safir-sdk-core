@@ -142,15 +142,8 @@ namespace Internal
         InitializeDoseInternalFromDoseMain(nodeId);
 
         m_lockMonitor.reset(new LockMonitor());
-        // Collect all node type ids
-        NodeTypeIds nodeTypeIds;
-        for (const auto& nt: m_distribution->GetNodeTypeConfiguration().nodeTypesParam)
-        {
-            nodeTypeIds.insert(nt.id);
-        }
 
-        m_messageHandler.reset(new MessageHandler(*m_distribution,
-                                                  nodeTypeIds));
+        m_messageHandler.reset(new MessageHandler(*m_distribution));
 
         m_responseHandler.reset(new ResponseHandler(m_timerHandler,
                                                     m_blockingHandler,
@@ -170,7 +163,6 @@ namespace Internal
 
         m_connectionHandler.reset(new ConnectionHandler(m_strand.get_io_service(),
                                                         *m_distribution,
-                                                        nodeTypeIds,
                                                         [this](const ConnectionPtr& connection, bool disconnecting){OnAppEvent(connection, disconnecting);}));
 
         m_nodeInfoHandler.reset(new NodeInfoHandler(m_strand.get_io_service(), *m_distribution));

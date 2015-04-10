@@ -63,7 +63,6 @@ namespace Internal
     public:
         ConnectionHandler(boost::asio::io_service& ioService,
                           Distribution& distribution,
-                          const std::unordered_set<int64_t>& nodeTypeIds,
                           const std::function<void(const ConnectionPtr& connection, bool disconnecting)>& onAppEvent);
 
         void Stop();
