@@ -350,7 +350,6 @@ namespace Internal
 
             }
             m_connectionHandler.MaybeSignalConnectSemaphore();
-            m_pendingRegistrationHandler.CheckForPending();
         }
 #endif
 
@@ -476,13 +475,6 @@ namespace Internal
 #if 0 //stewart
         switch (data.GetType())
         {
-        case DistributionData::Action_PendingRegistrationRequest:
-        case DistributionData::Action_PendingRegistrationResponse:
-            {
-                m_pendingRegistrationHandler.HandleMessageFromDoseCom(data);
-            }
-            break;
-
         case DistributionData::Action_HavePersistenceDataRequest:
         case DistributionData::Action_HavePersistenceDataResponse:
             {
@@ -507,12 +499,6 @@ namespace Internal
             m_responseHandler.HandleResponseFromDoseCom(data);
             break;
 
-            //----------------------------------
-            // Messages
-            //----------------------------------
-        case DistributionData::Message:
-            m_messageHandler.HandleMessageFromDoseCom(data);
-            break;
 
         default: //Corrupted message
             {

@@ -80,11 +80,13 @@ namespace Internal
                                                               const std::string& /*dataAddress*/)
                                                        {
                                                            m_liveNodes.insert(std::make_pair(nodeId,nodeTypeId));
+                                                           CheckForPending();
                                                        }),
                                          m_strand.wrap([this](const int64_t nodeId,
                                                               const int64_t /*nodeTypeId*/)
                                                        {
                                                            m_liveNodes.erase(nodeId);
+                                                           CheckForPending();
                                                        }));
         m_distribution.GetCommunication().SetDataReceiver([this]
                                                           (const int64_t fromNodeId,
@@ -196,19 +198,6 @@ namespace Internal
             }
         });
     }
-    /*
-    void
-    PendingRegistrationHandler::HandleTimeout(const boost::system::error_code& error,
-                                              const long requestId)
-    {
-        if (error || m_stopped)
-        {
-            return;
-        }
-
-        TryPendingRegistration(requestId);
-        }*/
-
 
     //must be called in strand
     bool PendingRegistrationHandler::HandleCompletion(const long requestId)
@@ -266,7 +255,7 @@ namespace Internal
         findIt->second->lastRequestTimestamp = m_pendingRegistrationClock.GetNewTimestamp();
         findIt->second->rejected = false;
         findIt->second->acceptedNodes.clear();
-        
+
         lllout << "Sending Smt_Action_PendingRegistrationRequest requestId = " << requestId
                << ", type = " << Dob::Typesystem::Operations::GetName(findIt->second->typeId)
                << std::setprecision(20) << "timestamp = " << findIt->second->lastRequestTimestamp << std::endl;
