@@ -86,52 +86,40 @@ namespace Internal
             }
         });
 
-        m_distribution.SubscribeNodeEvents(m_strand.wrap([this]
-                                                         (const std::string&    /*nodeName*/,
-                                                         int64_t                nodeId,
-                                                         int64_t                nodeTypeId,
-                                                         const std::string&     /*dataAddress*/)
+        m_distribution.SubscribeNodeEvents([this]
+                                           (const std::string&    /*nodeName*/,
+                                            int64_t                nodeId,
+                                            int64_t                nodeTypeId,
+                                           const std::string&     /*dataAddress*/)
         {
-            if (m_systemFormed || m_persistentDataReady)
-            {
-                return;
-            }
+            m_strand.post([this, nodeId, nodeTypeId]
+                          {
+                              if (m_systemFormed || m_persistentDataReady)
+                              {
+                                  return;
+                              }
 
-            if (nodeId == m_distribution.GetNodeId())
-            {
-                // Own node injected, this is an indication that a system is formed.
-                m_systemFormed = true;
-
-                if (m_nodes.size() > 0)
-                {
-                    // Send requests to all other nodes asking if someone has
-                    // persistence
-                    RequestPersistenceInfo();
-                }
-                else
-                {
-                    // There are no other nodes
-                    SetPersistentDataAllowed();
-                }
-            }
-            else
-            {
-                m_nodes.insert(std::make_pair(nodeId, nodeTypeId));
-            }
-        }),
-                                           m_strand.wrap([this]
-                                                         (int64_t   nodeId,
-                                                          int64_t   nodeTypeId)
+                              m_nodes.insert(std::make_pair(nodeId, nodeTypeId));
+                          });
+        },
+                                           [this]
+                                           (int64_t   nodeId,
+                                            int64_t   nodeTypeId)
         {
-            if (m_persistentDataReady)
-            {
-                return;
-            }
+            m_strand.post([this, nodeId, nodeTypeId]
+                          {
+                              if (m_persistentDataReady)
+                              {
+                                  return;
+                              }
 
-            m_nodes.erase(std::make_pair(nodeId, nodeTypeId));
+                              m_nodes.erase(std::make_pair(nodeId, nodeTypeId));
 
-            CheckResponseStatus();
-        }));
+                             CheckResponseStatus();
+                          });
+
+
+        });
 
         m_communication.SetQueueNotFullCallback(m_strand.wrap([this]
                                                               (int64_t /*nodeTypeId*/)
@@ -151,6 +139,26 @@ namespace Internal
                 m_dataTypeIdentifier,
                 DistributionData::NewData);
 
+    }
+
+    void PersistHandler::Start()
+    {
+        m_strand.post([this]
+                      {
+                          m_systemFormed = true;
+
+                          if (m_nodes.size() > 0)
+                          {
+                              // Send requests to all other nodes asking if someone has
+                              // persistence
+                              RequestPersistenceInfo();
+                          }
+                          else
+                          {
+                              // There are no other nodes
+                              SetPersistentDataAllowed();
+                          }
+                      });
     }
 
     void PersistHandler::Stop()

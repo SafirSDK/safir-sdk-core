@@ -129,6 +129,8 @@ namespace Internal
     {
         m_strand.dispatch([=]
         {
+            m_persistHandler.Start();
+
             RunEndStatesTimer();
 
             //request pool distributions
