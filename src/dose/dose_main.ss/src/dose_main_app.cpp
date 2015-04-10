@@ -133,6 +133,8 @@ namespace Internal
     {
         m_nodeId = nodeId;
 
+        m_memoryMonitor.reset(new MemoryMonitor(m_strand.get_io_service()));
+
         m_distribution.reset(new Distribution(m_strand.get_io_service(),
                                               nodeName,
                                               nodeId,
@@ -167,9 +169,6 @@ namespace Internal
                                                         [this](const ConnectionPtr& connection, bool disconnecting){OnAppEvent(connection, disconnecting);}));
 
         m_nodeInfoHandler.reset(new NodeInfoHandler(m_strand.get_io_service(), *m_distribution));
-#if 0 //stewart
-        m_memoryMonitorThread = boost::thread(&DoseApp::MemoryMonitorThread);
-#endif
     }
 
     void DoseApp::InjectNode(const std::string& nodeName,
@@ -227,11 +226,6 @@ namespace Internal
         m_timerHandler.Stop();
         m_lockMonitor->Stop();
 
-#if 0 //stewart
-        m_memoryMonitorThread.interrupt();
-        m_memoryMonitorThread.join();
-        m_memoryMonitorThread = boost::thread();
-#endif
         m_connectionHandler->Stop();
 
         m_distribution->Stop();
@@ -241,6 +235,8 @@ namespace Internal
         m_pendingRegistrationHandler->Stop();
 
         m_signalSet.cancel();
+
+        m_memoryMonitor->Stop();
 
         m_work.reset();
     }

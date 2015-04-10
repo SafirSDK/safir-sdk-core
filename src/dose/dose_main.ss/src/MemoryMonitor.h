@@ -23,6 +23,10 @@
 ******************************************************************************/
 #pragma once
 
+#include <Safir/Utilities/Internal/AsioPeriodicTimer.h>
+#include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
+
 namespace Safir
 {
 namespace Dob
@@ -32,18 +36,27 @@ namespace Internal
     class MemoryMonitor:
         public SharedMemoryObject,
         private boost::noncopyable
-    {};
-#if 0 //stewart
+    {
     public:
         explicit MemoryMonitor(boost::asio::io_service& ioService):
             m_capacity(GetSharedMemory().get_size()),
-            m_warningPercent(20)
+            m_warningPercent(20),
+            m_timer(ioService,
+                    boost::chrono::seconds(30),
+                    [this](const boost::system::error_code& error)
+                    {
+                        if (!error)
+                        {
+                            Check();
+                        }
+                    })
         {
-
+            m_timer.Start();
         }
+
         void Stop()
         {
-
+            m_timer.Stop();
         }
     private:
         void Check()
@@ -54,6 +67,7 @@ namespace Internal
                 {
                     const size_t free = GetSharedMemory().get_free_memory();
                     const double percentFree = static_cast<double>(free)/static_cast<double>(m_capacity) * 100;
+                    lllog(4) << percentFree << "% of shared memory is available" << std::endl;
                     if (percentFree < m_warningPercent)
                     {
                         SEND_SYSTEM_LOG(Alert,
@@ -82,24 +96,9 @@ namespace Internal
     private:
         const size_t m_capacity;
         const double m_warningPercent;
+
+        Safir::Utilities::Internal::AsioPeriodicTimer m_timer;
     };
-    void DoseApp::MemoryMonitorThread()
-    {
-        try
-        {
-            MemoryMonitor monitor;
-            for (;;)
-            {
-                boost::this_thread::sleep_for(boost::chrono::seconds(5));
-                monitor.Check();
-            }
-        }
-        catch (const boost::thread_interrupted&)
-        {
-            //do nothing, just exit
-        }
-    }
-#endif
 }
 }
 }
