@@ -194,11 +194,12 @@ namespace Internal
                 }
                 else
                 {
-                    try
+                    const auto dir = it->second.get_optional<std::string>("dou_directory");
+                    if (dir)
                     {
-                        directories.push_back(std::make_pair(it->first, it->second.get<std::string>("dou_directory")));
+                        directories.push_back(std::make_pair(it->first, dir.get()));
                     }
-                    catch (boost::property_tree::ptree_bad_path&)
+                    else
                     {
                         bool found = false;
                         for (std::vector<Path>::const_iterator sit = dou_search_path.begin();
