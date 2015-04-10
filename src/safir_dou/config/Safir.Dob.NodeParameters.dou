@@ -17,18 +17,6 @@
       <value>100</value>
     </parameter>
     <parameter>
-      <summary>The number of routing hops (TTL, time-to-live) for the Dob packets. If set to 1 all packets will stay in the subnet.</summary>
-      <name>RoutingHops</name>
-      <type>Int32</type>
-      <value>1</value>
-    </parameter>
-    <parameter>
-      <summary>If True the Dob will check that all calls to Dob Connections are made from the same thread. If an incorrect call is detected a PanicLog with a warning will be sent.</summary>
-      <name>ThreadingWarningsEnabled</name>
-      <type>Boolean</type>
-      <value>True</value>
-    </parameter>
-    <parameter>
       <summary>Determines if an unrecoverable error, typically an abondoned locked shared memory lock, causes a termination of dose_main. Consider setting this parameter to false when running dose_main under a debugger</summary>
       <name>TerminateDoseMainWhenUnrecoverableError</name>
       <type>Boolean</type>
