@@ -195,8 +195,14 @@ namespace Internal
                 cb();
             }
 
-            // We don't need the connection now
-            m_connection.Close();
+            //We could be inside a Dob callback, so we need
+            //to post the call to Close, or else we might be
+            //killing the connection that is dispatching...
+            m_strand.post([this]
+                          {
+                              // We don't need the connection now
+                              m_connection.Close();
+                          });
         });
 
     }
