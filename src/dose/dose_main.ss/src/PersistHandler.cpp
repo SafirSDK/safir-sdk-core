@@ -230,13 +230,13 @@ namespace Internal
     void PersistHandler::OnServiceRequest(const Safir::Dob::ServiceRequestProxy serviceRequestProxy,
                                           Safir::Dob::ResponseSenderPtr   responseSender)
     {
+        responseSender->Send(Dob::SuccessResponse::Create());
+
         // This service request indicates that persistent data is ready
         if (!m_persistentDataReady)
         {
             SetPersistentDataReady();
         }
-
-        responseSender->Send(Dob::SuccessResponse::Create());
     }
 
     // To be called only when strand is taken
