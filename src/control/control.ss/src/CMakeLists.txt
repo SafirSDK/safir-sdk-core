@@ -27,6 +27,7 @@ TARGET_LINK_LIBRARIES(safir_control PRIVATE
   system_picture
   control_utils
   lluf_utils
+  lluf_crash_reporter
   ${Boost_FILESYSTEM_LIBRARY}
   ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
