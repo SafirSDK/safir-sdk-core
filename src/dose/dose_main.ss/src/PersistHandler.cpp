@@ -320,7 +320,7 @@ namespace Internal
         }
         else
         {
-            throw std::logic_error("PersistHandler: Received unexpected message");
+            ENSURE (false, << "PersistHandler: Received unexpected message!");
         }
     }
 

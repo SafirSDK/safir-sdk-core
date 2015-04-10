@@ -223,10 +223,8 @@ namespace Internal
                << "Received Local RegistrationState of type " << state.GetTypeId()
                << " from node " << fromNodeId << ", system configuration is bad!");
 
-        if (state.GetType()!=DistributionData::RegistrationState)
-        {
-            throw std::logic_error("PoolHandler::OnRegistrationState received DistributionData that is not a RegistrationState");
-        }
+        ENSURE (state.GetType() == DistributionData::RegistrationState, <<
+                "PoolHandler::OnRegistrationState received DistributionData that is not a RegistrationState!");
 
         if (state.IsRegistered()) //is a registration state
         {
@@ -280,10 +278,8 @@ namespace Internal
         const auto state=DistributionData::ConstConstructor(new_data_tag, data);
         DistributionData::DropReference(data);
 
-        if (state.GetType()!=DistributionData::EntityState)
-        {
-            throw std::logic_error("PoolHandler::OnEntityState received DistributionData that is not a EntityState");
-        }
+        ENSURE (state.GetType() == DistributionData::EntityState, <<
+                "PoolHandler::OnEntityState received DistributionData that is not a EntityState!");
 
         ENSURE(!m_distribution.IsLocal(state.GetTypeId()),
                << "Received Local EntityState of type " << state.GetTypeId()

@@ -183,10 +183,7 @@ namespace Internal
                   " NodeTypeId=" << nodeTypeId <<
                   " DataAddress=" << dataAddress.c_str() << std::endl;
 
-        if (m_distribution == nullptr)
-        {
-            throw std::logic_error("InjectNode cmd received before StartDoseMain cmd!");
-        }
+        ENSURE (m_distribution != nullptr, << "InjectNode cmd received before StartDoseMain cmd!");
 
         if (m_distribution->GetCommunication().Id() == nodeId)
         {

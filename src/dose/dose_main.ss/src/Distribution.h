@@ -28,6 +28,7 @@
 #include <Safir/Dob/Internal/Communication.h>
 #include <Safir/Dob/Internal/ControlConfig.h>
 #include <Safir/Dob/Internal/SystemPicture.h>
+#include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
@@ -144,10 +145,7 @@ namespace Internal
         //subscribe for new injected nodes and excluded nodes.
         void SubscribeNodeEvents(const OnInjectNode& onInjectNode, const OnExcludeNode& onExcludeNode)
         {
-            if (m_started)
-            {
-                throw std::logic_error("SubscribeNodeEvents must be called before Start");
-            }
+            ENSURE(!m_started, << "SubscribeNodeEvents must be called before Start!");
 
             m_injectCallbacks.push_back(onInjectNode);
             m_excludeCallbacks.push_back(onExcludeNode);

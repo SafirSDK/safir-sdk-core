@@ -82,10 +82,8 @@ namespace Internal
                                          bool& exitDispatch,
                                          bool& dontRemove)
     {
-        if (msg.GetType() != DistributionData::Message)
-        {
-            throw std::logic_error("MessageHandler found a DistributionData that is not of type Message!");
-        }
+        ENSURE (msg.GetType() == DistributionData::Message, <<
+                "MessageHandler found a DistributionData that is not of type Message!");
 
         exitDispatch = false;
         dontRemove = false;
