@@ -44,14 +44,13 @@ namespace
 
     ConnectionHandler::ConnectionHandler(boost::asio::io_service& ioService,
                                          Distribution& distribution,
-                                         const std::unordered_set<int64_t>& nodeTypeIds,
                                          const std::function<void(const ConnectionPtr& connection, bool disconnecting)>& onAppEvent)
         : m_strand(ioService),
           m_communication(distribution.GetCommunication()),
           m_onAppEvent(onAppEvent),
           m_processInfoHandler(ioService, distribution)
     {
-        for (auto nt : nodeTypeIds)
+        for (auto nt : distribution.GetNodeTypeIds())
         {
             m_sendQueues.insert(std::make_pair(nt, SendQueue()));
             m_communication.SetQueueNotFullCallback([=](int64_t){HandleSendQueues();}, nt);

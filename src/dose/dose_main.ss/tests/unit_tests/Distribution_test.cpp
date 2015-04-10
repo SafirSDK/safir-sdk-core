@@ -22,6 +22,9 @@
 *
 ******************************************************************************/
 #include "../../src/Distribution.h"
+#include <Safir/Dob/NodeInfo.h>
+#include <Safir/Dob/ProcessInfo.h>
+#include <Safir/Dob/PersistentDataReady.h>
 
 #define BOOST_TEST_MODULE DistributionTests
 #include <boost/test/unit_test.hpp>
@@ -89,39 +92,55 @@ public:
     std::vector<NodeType> nodeTypesParam;
 };
 
-BOOST_AUTO_TEST_CASE( first_test )
+struct Fixture
 {
     boost::asio::io_service ioService;
 
-    Safir::Dob::Internal::DistributionBasic<Communication, SP, Config> d(ioService,
-                                                                         "Pelle",
-                                                                         6565,
-                                                                         878787,
-                                                                         "127.0.0.1:5555");
+    Safir::Dob::Internal::DistributionBasic<Communication, SP, Config>
+        distribution {ioService,
+                      "Pelle",
+                      6565,
+                      878787,
+                      "127.0.0.1:5555"};
 
-    //-------------------------
-    //Test node subscription
-    //-------------------------
-    {
-        std::vector<int64_t> included;
-        std::vector<int64_t> excluded;
-        d.SubscribeNodeEvents([&](const std::string& /*nodeName*/, int64_t nodeId, int64_t /*nodeTypeId*/, const std::string& /*dataAddress*/)
-                                {included.push_back(nodeId);},
-                              [&](int64_t nodeId, int64_t /*nodeTypeId*/)
-                                {excluded.push_back(nodeId);});
+};
 
-        d.InjectNode("node10", 10, 0, "127.0.0.1:1010");
-        d.InjectNode("node20", 20, 0, "127.0.0.1:1020");
-        d.ExcludeNode(10, 0);
-        d.ExcludeNode(20, 0);
+BOOST_FIXTURE_TEST_SUITE( s, Fixture )
 
-        BOOST_CHECK(included[0]==10);
-        BOOST_CHECK(included[1]==20);
-        BOOST_CHECK(excluded[0]==10);
-        BOOST_CHECK(excluded[1]==20);
-    }
+BOOST_AUTO_TEST_CASE( node_subscription )
+{
+    std::vector<int64_t> included;
+    std::vector<int64_t> excluded;
+    distribution.SubscribeNodeEvents([&](const std::string& /*nodeName*/,
+                                         int64_t nodeId,
+                                         int64_t /*nodeTypeId*/,
+                                         const std::string& /*dataAddress*/)
+                                     {
+                                         included.push_back(nodeId);
+                                     },
+                                     [&](int64_t nodeId, int64_t /*nodeTypeId*/)
+                                     {
+                                         excluded.push_back(nodeId);
+                                     });
 
-    bool ok = true;
-    BOOST_CHECK(ok);
+    distribution.InjectNode("node10", 10, 0, "127.0.0.1:1010");
+    distribution.InjectNode("node20", 20, 0, "127.0.0.1:1020");
+    distribution.ExcludeNode(10, 0);
+    distribution.ExcludeNode(20, 0);
+
+    BOOST_CHECK(included[0]==10);
+    BOOST_CHECK(included[1]==20);
+    BOOST_CHECK(excluded[0]==10);
+    BOOST_CHECK(excluded[1]==20);
 }
 
+BOOST_AUTO_TEST_CASE( local_types_test )
+{
+    BOOST_CHECK(!distribution.IsLocal(Safir::Dob::Typesystem::Object::ClassTypeId));
+    BOOST_CHECK(distribution.IsLocal(Safir::Dob::ProcessInfo::ClassTypeId));
+    BOOST_CHECK(!distribution.IsLocal(Safir::Dob::NodeInfo::ClassTypeId));
+    BOOST_CHECK(distribution.IsLocal(Safir::Dob::PersistentDataReady::ClassTypeId));
+}
+
+
+BOOST_AUTO_TEST_SUITE_END()

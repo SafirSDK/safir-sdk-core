@@ -142,15 +142,8 @@ namespace Internal
         InitializeDoseInternalFromDoseMain(nodeId);
 
         m_lockMonitor.reset(new LockMonitor());
-        // Collect all node type ids
-        NodeTypeIds nodeTypeIds;
-        for (const auto& nt: m_distribution->GetNodeTypeConfiguration().nodeTypesParam)
-        {
-            nodeTypeIds.insert(nt.id);
-        }
 
-        m_messageHandler.reset(new MessageHandler(*m_distribution,
-                                                  nodeTypeIds));
+        m_messageHandler.reset(new MessageHandler(*m_distribution));
 
         m_responseHandler.reset(new ResponseHandler(m_timerHandler,
                                                     m_blockingHandler,
@@ -161,7 +154,8 @@ namespace Internal
                                                   *m_responseHandler,
                                                   m_distribution->GetCommunication()));
 
-        m_pendingRegistrationHandler.reset(new PendingRegistrationHandler(m_timerHandler,nodeId));
+        m_pendingRegistrationHandler.reset(new PendingRegistrationHandler(m_strand.get_io_service(),
+                                                                          *m_distribution));
 
         m_poolHandler.reset(new PoolHandler(m_strand.get_io_service(),
                                             *m_distribution,
@@ -170,7 +164,6 @@ namespace Internal
 
         m_connectionHandler.reset(new ConnectionHandler(m_strand.get_io_service(),
                                                         *m_distribution,
-                                                        nodeTypeIds,
                                                         [this](const ConnectionPtr& connection, bool disconnecting){OnAppEvent(connection, disconnecting);}));
 
         m_nodeInfoHandler.reset(new NodeInfoHandler(m_strand.get_io_service(), *m_distribution));
@@ -236,21 +229,17 @@ namespace Internal
         m_timerHandler.Stop();
         m_lockMonitor->Stop();
 
-        if (m_memoryMonitorThread.get_id() != boost::thread::id())
-        {
-            m_memoryMonitorThread.interrupt();
-            m_memoryMonitorThread.join();
-            m_memoryMonitorThread = boost::thread();
-        }
+        m_memoryMonitorThread.interrupt();
+        m_memoryMonitorThread.join();
+        m_memoryMonitorThread = boost::thread();
 
         m_connectionHandler->Stop();
 
-        if (m_distribution != nullptr)
-        {
-            m_distribution->Stop();
-        }
+        m_distribution->Stop();
 
         m_poolHandler->Stop();
+
+        m_pendingRegistrationHandler->Stop();
 
         m_signalSet.cancel();
 
@@ -361,7 +350,6 @@ namespace Internal
 
             }
             m_connectionHandler.MaybeSignalConnectSemaphore();
-            m_pendingRegistrationHandler.CheckForPending();
         }
 #endif
 
@@ -487,13 +475,6 @@ namespace Internal
 #if 0 //stewart
         switch (data.GetType())
         {
-        case DistributionData::Action_PendingRegistrationRequest:
-        case DistributionData::Action_PendingRegistrationResponse:
-            {
-                m_pendingRegistrationHandler.HandleMessageFromDoseCom(data);
-            }
-            break;
-
         case DistributionData::Action_HavePersistenceDataRequest:
         case DistributionData::Action_HavePersistenceDataResponse:
             {
@@ -518,12 +499,6 @@ namespace Internal
             m_responseHandler.HandleResponseFromDoseCom(data);
             break;
 
-            //----------------------------------
-            // Messages
-            //----------------------------------
-        case DistributionData::Message:
-            m_messageHandler.HandleMessageFromDoseCom(data);
-            break;
 
         default: //Corrupted message
             {

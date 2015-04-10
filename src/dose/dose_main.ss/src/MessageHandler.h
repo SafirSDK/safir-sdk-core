@@ -46,8 +46,7 @@ namespace Internal
         private boost::noncopyable
     {
     public:
-        MessageHandler(Distribution&      distribution,
-                       const NodeTypeIds& nodeTypeIds);
+        explicit MessageHandler(Distribution& distribution);
 
         void DistributeMessages(const ConnectionPtr& connection);
 
@@ -63,7 +62,6 @@ namespace Internal
         void Send(const DistributionData& msg);
 
         Distribution&      m_distribution;
-        const NodeTypeIds  m_nodeTypeIds;
         const int64_t      m_dataTypeIdentifier;
     };
 }

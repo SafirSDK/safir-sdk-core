@@ -81,6 +81,7 @@ namespace Internal
               m_communication(),
               m_sp(),
               m_localTypes(CalculateLocalTypes()),
+              m_nodeTypeIds(CalculateNodeTypeIds(m_config)),
               m_started(false)
         {
             // Create and populate structures that are needed when creating the Communication and
@@ -143,6 +144,11 @@ namespace Internal
         //subscribe for new injected nodes and excluded nodes.
         void SubscribeNodeEvents(const OnInjectNode& onInjectNode, const OnExcludeNode& onExcludeNode)
         {
+            if (m_started)
+            {
+                throw std::logic_error("SubscribeNodeEvents must be called before Start");
+            }
+
             m_injectCallbacks.push_back(onInjectNode);
             m_excludeCallbacks.push_back(onExcludeNode);
         }
@@ -192,6 +198,11 @@ namespace Internal
         int64_t GetNodeId() const
         {
             return m_nodeId;
+        }
+
+        const std::vector<int64_t>& GetNodeTypeIds() const
+        {
+            return m_nodeTypeIds;
         }
 
         //Check if type is local. If false is returned it is global...
@@ -274,6 +285,20 @@ namespace Internal
             return std::move(localTypes);
         }
 
+        static std::vector<int64_t> CalculateNodeTypeIds(const ConfigT& config)
+        {
+            std::vector<int64_t> nodeTypeIds;
+
+            for (const auto& nt: config.nodeTypesParam)
+            {
+                nodeTypeIds.push_back(nt.id);
+            }
+
+            std::sort(nodeTypeIds.begin(),nodeTypeIds.end());
+            nodeTypeIds.shrink_to_fit();
+            return std::move(nodeTypeIds);
+        }
+
         const int64_t m_nodeId;
         std::unique_ptr<CommunicationT> m_communication;
         std::unique_ptr<SystemPictureT> m_sp;
@@ -285,6 +310,11 @@ namespace Internal
         //it is a vector rather than a set since it is likely to be small and
         //lookups are frequent.
         const std::vector<Safir::Dob::Typesystem::TypeId> m_localTypes;
+
+        //this is a sorted vector of node type ids
+        //it is a vector rather than a set since it is likely to be small and
+        //we're going to loop over it frequently.
+        const std::vector<int64_t> m_nodeTypeIds;
 
         bool m_started;
     };

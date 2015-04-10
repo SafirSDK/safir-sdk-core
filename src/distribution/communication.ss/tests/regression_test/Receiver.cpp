@@ -37,7 +37,7 @@ Receiver::Receiver(Com::ControlModeTag tag, boost::asio::io_service& ioService, 
            {{10, "nt10", "", "", 1000, 1000, 10}, {11, "nt11", "224.90.90.241:12000", "224.90.90.241:13000", 1000, 1000, 10}})
 {
     m_timerInclude.expires_from_now(boost::chrono::milliseconds(1000));
-    m_timerInclude.async_wait(m_strand.wrap([=](const boost::system::error_code& error){if (m_running) IncludeNode();}));
+    m_timerInclude.async_wait(m_strand.wrap([=](const boost::system::error_code& /*error*/){if (m_running) IncludeNode();}));
 
     m_com.SetDataReceiver(  [this](int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size)
                             {ReceiveData(fromNodeId, fromNodeType, data, size);},

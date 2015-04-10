@@ -24,86 +24,99 @@
 #pragma once
 
 #include <Safir/Dob/Internal/InternalFwd.h>
-#include "dose_main_timers.h"
+#include <Safir/Dob/Internal/ConnectionId.h>
 #include <map>
-#include "dose_main_communication.h"
-#include <bitset>
+#include <set>
+#include <atomic>
+#include "Distribution.h"
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
+#endif
+
+#include <boost/asio.hpp>
+#include <boost/asio/steady_timer.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
+
 namespace Safir
 {
 namespace Dob
 {
 namespace Internal
 {
-    typedef TimerInfo<long> ResendPendingTimerInfo;
-
     class PendingRegistrationHandler :
-        public TimeoutHandler,
         public boost::noncopyable
     {
     public:
-        PendingRegistrationHandler(TimerHandler& timerHandler,
-                                   const int64_t nodeId);
+        PendingRegistrationHandler(boost::asio::io_service& ioService,
+                                   Distribution& distribution);
+
+        void Stop();
 
         void CheckForNewOrRemovedPendingRegistration(const ConnectionPtr & connection);
 
-
         void CheckForPending(const Safir::Dob::Typesystem::TypeId typeId);
-        void CheckForPending();
 
         void RemovePendingRegistrations(const ConnectionId & id);
 
-        void HandleMessageFromDoseCom(const DistributionData & msg);
+        void CheckForPending();
     private:
-        void HandleTimeout(const TimerInfoPtr & timer) override;
-
         //check if the request is completed, and if so signal the application
         //returns false if the request is not completed
         bool HandleCompletion(const long requestId);
 
         void SendRequest(const long requestId);
 
-
         void TryPendingRegistration(const long requestId);
+
+        //handle remote incoming request
+        void HandleRequest(const DistributionData & msg,
+                           const int64_t fromNodeId,
+                           const int64_t fromNodeType);
 
         struct PendingRegistrationInfo
         {
-            PendingRegistrationInfo(const ConnectionId connId,
+            PendingRegistrationInfo(boost::asio::io_service& ioService,
+                                    const ConnectionId connId,
                                     const Dob::Typesystem::TypeId type,
                                     const Dob::Typesystem::HandlerId&  handler):
                 connectionId(connId),
                 typeId(type),
                 handlerId(handler),
-                nextRequestTime(),
+                timer(ioService),
                 nbrOfSentRequests(0),
                 lastRequestTimestamp(),
-                acceptedNodes(false),
+                acceptedNodes(),
                 rejected(false){}
 
             ConnectionId connectionId;
             Dob::Typesystem::TypeId typeId;
             Dob::Typesystem::HandlerId handlerId;
-            boost::chrono::steady_clock::time_point nextRequestTime;
+            boost::asio::steady_timer timer;
             unsigned int nbrOfSentRequests;
             LamportTimestamp lastRequestTimestamp;
-            std::bitset<64> acceptedNodes;
+            std::set<int64_t> acceptedNodes;
             bool rejected;
         };
-        typedef std::map<long,PendingRegistrationInfo> PendingRegistrations;
+        typedef std::map<long,std::unique_ptr<PendingRegistrationInfo>> PendingRegistrations;
 
-        const int64_t m_nodeId;
-        TimerHandler& m_timerHandler;
+        std::atomic<bool> m_stopped {false};
+
+        boost::asio::strand m_strand;
+
+        Distribution& m_distribution;
+        const int64_t m_dataTypeIdentifier;
+        std::map<int64_t,int64_t> m_liveNodes;
 
         PendingRegistrations m_pendingRegistrations;
-        long m_nextId;
-#if 0 //stewart
-        ExternNodeCommunication & m_ecom;
-#endif
+        long m_nextId {1};
 
         LamportClock m_pendingRegistrationClock;
-
-        TimerId m_timerId;
     };
 }
 }
 }
-

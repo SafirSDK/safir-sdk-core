@@ -73,9 +73,12 @@ namespace Internal
                        const std::function<void()>& persistentDataReadyCb,
                        const std::function<void()>& persistentDataAllowedCb);
 
-        void SetPersistentDataReady();
+        // Start should be called when a system has been formed.
+        void Start();
 
         void Stop();
+
+        void SetPersistentDataReady();
 
     private:
 
