@@ -154,6 +154,8 @@ namespace Internal
         {
             m_endStatesTimer.cancel();
 
+            m_persistHandler.Stop();
+
             //We are stopping so we dont care about receiving pool distributions anymore
             m_poolDistributionRequests.Stop();
 

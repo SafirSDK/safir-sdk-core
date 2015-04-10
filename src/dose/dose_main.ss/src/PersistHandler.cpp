@@ -153,6 +153,14 @@ namespace Internal
 
     }
 
+    void PersistHandler::Stop()
+    {
+        m_strand.post([this]
+                      {
+                        m_connection.Close();
+                      });
+    }
+
     void PersistHandler::SetPersistentDataReady()
     {
         m_strand.dispatch([this] ()

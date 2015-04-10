@@ -75,6 +75,8 @@ namespace Internal
 
         void SetPersistentDataReady();
 
+        void Stop();
+
     private:
 
         void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId    typeId,
