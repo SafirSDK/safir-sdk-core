@@ -107,39 +107,31 @@ struct Fixture
 
 BOOST_FIXTURE_TEST_SUITE( s, Fixture )
 
-BOOST_AUTO_TEST_CASE( first_test )
+BOOST_AUTO_TEST_CASE( node_subscription )
 {
-    //-------------------------
-    //Test node subscription
-    //-------------------------
-    {
-        std::vector<int64_t> included;
-        std::vector<int64_t> excluded;
-        distribution.SubscribeNodeEvents([&](const std::string& /*nodeName*/,
-                                             int64_t nodeId,
-                                             int64_t /*nodeTypeId*/,
-                                             const std::string& /*dataAddress*/)
-                                         {
-                                             included.push_back(nodeId);
-                                         },
-                                         [&](int64_t nodeId, int64_t /*nodeTypeId*/)
-                                         {
-                                             excluded.push_back(nodeId);
-                                         });
+    std::vector<int64_t> included;
+    std::vector<int64_t> excluded;
+    distribution.SubscribeNodeEvents([&](const std::string& /*nodeName*/,
+                                         int64_t nodeId,
+                                         int64_t /*nodeTypeId*/,
+                                         const std::string& /*dataAddress*/)
+                                     {
+                                         included.push_back(nodeId);
+                                     },
+                                     [&](int64_t nodeId, int64_t /*nodeTypeId*/)
+                                     {
+                                         excluded.push_back(nodeId);
+                                     });
 
-        distribution.InjectNode("node10", 10, 0, "127.0.0.1:1010");
-        distribution.InjectNode("node20", 20, 0, "127.0.0.1:1020");
-        distribution.ExcludeNode(10, 0);
-        distribution.ExcludeNode(20, 0);
+    distribution.InjectNode("node10", 10, 0, "127.0.0.1:1010");
+    distribution.InjectNode("node20", 20, 0, "127.0.0.1:1020");
+    distribution.ExcludeNode(10, 0);
+    distribution.ExcludeNode(20, 0);
 
-        BOOST_CHECK(included[0]==10);
-        BOOST_CHECK(included[1]==20);
-        BOOST_CHECK(excluded[0]==10);
-        BOOST_CHECK(excluded[1]==20);
-    }
-
-    bool ok = true;
-    BOOST_CHECK(ok);
+    BOOST_CHECK(included[0]==10);
+    BOOST_CHECK(included[1]==20);
+    BOOST_CHECK(excluded[0]==10);
+    BOOST_CHECK(excluded[1]==20);
 }
 
 BOOST_AUTO_TEST_CASE( local_types_test )
