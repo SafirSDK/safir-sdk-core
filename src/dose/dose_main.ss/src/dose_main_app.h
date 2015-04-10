@@ -30,6 +30,7 @@
 #include "Distribution.h"
 #include "MessageHandler.h"
 #include "NodeInfoHandler.h"
+#include "MemoryMonitor.h"
 #include "PendingRegistrationHandler.h"
 #include "PoolHandler.h"
 #include "RequestHandler.h"
@@ -102,8 +103,6 @@ namespace Internal
         void HandleEvents();
 
 
-        static void MemoryMonitorThread();
-
         boost::asio::io_service::strand& m_strand;
         boost::asio::io_service::strand m_wcoutStrand;
         boost::shared_ptr<boost::asio::io_service::work> m_work;
@@ -132,7 +131,8 @@ namespace Internal
         // For monitoring abandoned shared memory locks
         std::unique_ptr<LockMonitor> m_lockMonitor;
 
-        boost::thread m_memoryMonitorThread;
+        // For monitoring memory usage
+        std::unique_ptr<MemoryMonitor> m_memoryMonitor;
 
         //this class should be declared last, so that when the app
         //is destroyed all connections will be marked as dead and stop
