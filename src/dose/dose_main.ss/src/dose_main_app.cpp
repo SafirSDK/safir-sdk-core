@@ -83,6 +83,10 @@ namespace Internal
                                                    nodeTypeId,
                                                    dataAddress);
                                     }),
+                      m_strand.wrap([this](int64_t nodeId, int64_t nodeTypeId)
+                                    {
+                                        ExcludeNode(nodeId, nodeTypeId);
+                                    }),
                       m_strand.wrap([this]()
                                     {
                                         Stop();
@@ -214,6 +218,15 @@ namespace Internal
                                        nodeTypeId,
                                        dataAddress);
         }
+    }
+
+    void DoseApp::ExcludeNode(int64_t nodeId, int64_t nodeTypeId)
+    {
+        lllog(1) << "DOSE_MAIN: ExcludeNode cmd received."<<
+                    " NodeId=" <<  nodeId <<
+                    " NodeTypeId=" << nodeTypeId << std::endl;
+
+        m_distribution->ExcludeNode(nodeId, nodeTypeId);
     }
 
     void DoseApp::Stop()

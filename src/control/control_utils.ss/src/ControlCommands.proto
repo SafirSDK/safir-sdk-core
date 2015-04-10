@@ -31,17 +31,14 @@ message ControlCmd {
     {
       START = 0;
       INJECT_NODE = 1;
-      STOP = 2;
+      EXCLUDE_NODE = 2;
+      STOP = 3;
     }
-    
-    message NodeData {
-        required string node_name = 1;
-        required sfixed64 node_id = 2;
-        required sfixed64 node_type_id = 3;
-        required string data_address = 4;        
-    }
-    
+        
    // Fields
    required CmdType cmd_type = 1;
-   optional NodeData node_data = 2;
+   optional sfixed64 node_id = 2;
+   optional sfixed64 node_type_id = 3;
+   optional string data_address = 4;
+   optional string node_name = 5;
 }

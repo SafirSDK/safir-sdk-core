@@ -77,6 +77,8 @@ namespace Internal
                         int64_t nodeTypeId,
                         const std::string& dataAddress);
 
+        void ExcludeNode(int64_t nodeId, int64_t nodeTypeId);
+
         void Stop();
 
     private:

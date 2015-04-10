@@ -231,6 +231,12 @@ int main(int /*argc*/, char * /*argv*/[])
                            nodeNameMap.insert(std::make_pair(nodeId, nodeName));
                         },
 
+                        // Action when ExcludeNode command is received
+                        []
+                        (int64_t /*nodeId*/, int64_t /*nodeTypeId*/)
+                        {
+                        },
+
                         // Action when StopDoseMain command is received
                         [&sp, &work, &communication, &running, &doseMainCmdReceiver, &signalSet]
                         ()

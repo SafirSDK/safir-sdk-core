@@ -45,10 +45,11 @@ namespace Control
     {
     public:
 
-        Impl(boost::asio::io_service& ioService,
-             const NodeCmdCb&         startDoseMainCb,
-             const NodeCmdCb&         injectNodeCb,
-             const StopDoseMainCb&    stopDoseMainCb)
+        Impl(boost::asio::io_service&   ioService,
+             const IncludeNodeCmdCb&    startDoseMainCb,
+             const IncludeNodeCmdCb&    injectNodeCb,
+             const ExcludeNodeCmdCb&    excludeNodeCb,
+             const StopDoseMainCb&      stopDoseMainCb)
             : m_ipcSubscriber(ioService,
                               doseMainCmdChannel,
                               [this](const char* data, size_t size)
@@ -57,6 +58,7 @@ namespace Control
                               }),
               m_startDoseMainCb(startDoseMainCb),
               m_injectNodeCb(injectNodeCb),
+              m_excludeNodeCb(excludeNodeCb),
               m_stopDoseMainCb(stopDoseMainCb)
         {
         }
@@ -76,9 +78,10 @@ namespace Control
 
         Safir::Utilities::Internal::IpcSubscriber m_ipcSubscriber;
 
-        NodeCmdCb       m_startDoseMainCb;
-        NodeCmdCb       m_injectNodeCb;
-        StopDoseMainCb  m_stopDoseMainCb;
+        IncludeNodeCmdCb    m_startDoseMainCb;
+        IncludeNodeCmdCb    m_injectNodeCb;
+        ExcludeNodeCmdCb    m_excludeNodeCb;
+        StopDoseMainCb      m_stopDoseMainCb;
 
         void RecvDataCb(const char* data, size_t size)
         {
@@ -90,19 +93,26 @@ namespace Control
             {
                 case controlCmd.START:
                 {
-                    m_startDoseMainCb(controlCmd.node_data().node_name(),
-                                      controlCmd.node_data().node_id(),
-                                      controlCmd.node_data().node_type_id(),
-                                      controlCmd.node_data().data_address());
+                    m_startDoseMainCb(controlCmd.node_name(),
+                                      controlCmd.node_id(),
+                                      controlCmd.node_type_id(),
+                                      controlCmd.data_address());
                 }
                 break;
 
                 case controlCmd.INJECT_NODE:
                 {
-                    m_injectNodeCb(controlCmd.node_data().node_name(),
-                                   controlCmd.node_data().node_id(),
-                                   controlCmd.node_data().node_type_id(),
-                                   controlCmd.node_data().data_address());
+                    m_injectNodeCb(controlCmd.node_name(),
+                                   controlCmd.node_id(),
+                                   controlCmd.node_type_id(),
+                                   controlCmd.data_address());
+                }
+                break;
+
+                case controlCmd.EXCLUDE_NODE:
+                {
+                    m_excludeNodeCb(controlCmd.node_id(),
+                                    controlCmd.node_type_id());
                 }
                 break;
 
@@ -121,11 +131,16 @@ namespace Control
         }
     };
 
-    DoseMainCmdReceiver::DoseMainCmdReceiver(boost::asio::io_service& ioService,
-                                             const NodeCmdCb&         startDoseMainCb,
-                                             const NodeCmdCb&         injectNodeCb,
-                                             const StopDoseMainCb&    stopDoseMainCb)
-        : m_impl(Safir::make_unique<Impl>(ioService, startDoseMainCb, injectNodeCb, stopDoseMainCb))
+    DoseMainCmdReceiver::DoseMainCmdReceiver(boost::asio::io_service&   ioService,
+                                             const IncludeNodeCmdCb&    startDoseMainCb,
+                                             const IncludeNodeCmdCb&    injectNodeCb,
+                                             const ExcludeNodeCmdCb&    excludeNodeCb,
+                                             const StopDoseMainCb&      stopDoseMainCb)
+        : m_impl(Safir::make_unique<Impl>(ioService,
+                                          startDoseMainCb,
+                                          injectNodeCb,
+                                          excludeNodeCb,
+                                          stopDoseMainCb))
     {
     }
 
@@ -169,10 +184,10 @@ namespace Control
             ControlCmd controlCmd;
 
             controlCmd.set_cmd_type(ControlCmd::START);
-            controlCmd.mutable_node_data()->set_node_name(nodeName);
-            controlCmd.mutable_node_data()->set_node_id(nodeId);
-            controlCmd.mutable_node_data()->set_node_type_id(nodeTypeId);
-            controlCmd.mutable_node_data()->set_data_address(dataAddress);
+            controlCmd.set_node_name(nodeName);
+            controlCmd.set_node_id(nodeId);
+            controlCmd.set_node_type_id(nodeTypeId);
+            controlCmd.set_data_address(dataAddress);
 
             Send(controlCmd);
         }
@@ -185,10 +200,22 @@ namespace Control
             ControlCmd controlCmd;
 
             controlCmd.set_cmd_type(ControlCmd::INJECT_NODE);
-            controlCmd.mutable_node_data()->set_node_name(nodeName);
-            controlCmd.mutable_node_data()->set_node_id(nodeId);
-            controlCmd.mutable_node_data()->set_node_type_id(nodeTypeId);
-            controlCmd.mutable_node_data()->set_data_address(dataAddress);
+            controlCmd.set_node_name(nodeName);
+            controlCmd.set_node_id(nodeId);
+            controlCmd.set_node_type_id(nodeTypeId);
+            controlCmd.set_data_address(dataAddress);
+
+            Send(controlCmd);
+        }
+
+        void ExcludeNode(int64_t nodeId,
+                         int64_t nodeTypeId)
+        {
+            ControlCmd controlCmd;
+
+            controlCmd.set_cmd_type(ControlCmd::EXCLUDE_NODE);
+            controlCmd.set_node_id(nodeId);
+            controlCmd.set_node_type_id(nodeTypeId);
 
             Send(controlCmd);
         }
@@ -253,6 +280,11 @@ namespace Control
                            nodeId,
                            nodeTypeId,
                            dataAddress);
+    }
+
+    void DoseMainCmdSender::ExcludeNode(int64_t nodeId, int64_t nodeTypeId)
+    {
+        m_impl->ExcludeNode(nodeId, nodeTypeId);
     }
 
     void DoseMainCmdSender::StopDoseMain()

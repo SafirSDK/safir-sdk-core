@@ -42,7 +42,7 @@
 using namespace Safir::Dob::Internal::Control;
 
 
-BOOST_AUTO_TEST_CASE( send_inject_node )
+BOOST_AUTO_TEST_CASE( send_commands )
 {
     boost::asio::io_service pubIoService;
     boost::asio::io_service subIoService;
@@ -56,6 +56,7 @@ BOOST_AUTO_TEST_CASE( send_inject_node )
 
     bool setOwnNodeCmdReceived = false;
     bool injectNodeCmdReceived = false;
+    bool excludeNodeCmdReceived = false;
 
     std::unique_ptr<DoseMainCmdSender> cmdSender;
 
@@ -76,6 +77,8 @@ BOOST_AUTO_TEST_CASE( send_inject_node )
                                                                      99999,
                                                                      88888,
                                                                      "192.168.213.55");
+
+                                               cmdSender->ExcludeNode(620109, 3737);
 
                                                cmdSender->StopDoseMain();
 
@@ -113,12 +116,23 @@ BOOST_AUTO_TEST_CASE( send_inject_node )
                                         BOOST_CHECK(dataAddress == "192.168.213.55");
                                     },
 
+                                    // Exclude node callback
+                                    [&excludeNodeCmdReceived](int64_t nodeId,
+                                                              int64_t nodeTypeId)
+                                    {
+                                        excludeNodeCmdReceived = true;
+
+                                        BOOST_CHECK(nodeId == 620109);
+                                        BOOST_CHECK(nodeTypeId == 3737);
+                                    },
+
                                     // Stop dose_main
                                     [&cmdSender, &cmdReceiver, &pubWork, &subWork,
-                                     &setOwnNodeCmdReceived, &injectNodeCmdReceived]()
+                                     &setOwnNodeCmdReceived, &injectNodeCmdReceived, &excludeNodeCmdReceived]()
                                     {
                                         BOOST_CHECK(setOwnNodeCmdReceived);
                                         BOOST_CHECK(injectNodeCmdReceived);
+                                        BOOST_CHECK(excludeNodeCmdReceived);
 
                                         cmdSender->Stop();
                                         cmdReceiver->Stop();

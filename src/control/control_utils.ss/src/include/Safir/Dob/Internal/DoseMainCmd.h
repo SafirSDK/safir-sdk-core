@@ -58,16 +58,20 @@ namespace Control
     {
     public:
 
-        using NodeCmdCb = std::function<void(const std::string& nodeName,
-                                             int64_t nodeId,
-                                             int64_t nodeTypeId,
-                                             const std::string& dataAddress)>;
+        using IncludeNodeCmdCb = std::function<void(const std::string& nodeName,
+                                                    int64_t nodeId,
+                                                    int64_t nodeTypeId,
+                                                    const std::string& dataAddress)>;
 
-        typedef std::function<void()> StopDoseMainCb;
+        using ExcludeNodeCmdCb = std::function<void(int64_t nodeId,
+                                                    int64_t nodeTypeId)>;
+
+        using StopDoseMainCb = std::function<void()>;
 
         DoseMainCmdReceiver(boost::asio::io_service&    ioService,
-                            const NodeCmdCb&            startDoseMainCb,
-                            const NodeCmdCb&            injectNodeCb,
+                            const IncludeNodeCmdCb&     startDoseMainCb,
+                            const IncludeNodeCmdCb&     injectNodeCb,
+                            const ExcludeNodeCmdCb&     excludeNodeCb,
                             const StopDoseMainCb&       stopDoseMainCb);
 
         // Start command reception
@@ -110,6 +114,9 @@ namespace Control
                         int64_t nodeId,
                         int64_t nodeTypeId,
                         const std::string& dataAddress);
+
+        void ExcludeNode(int64_t nodeId,
+                         int64_t nodeTypeId);
 
         void StopDoseMain();
 
