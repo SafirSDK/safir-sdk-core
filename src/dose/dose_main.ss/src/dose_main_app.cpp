@@ -154,7 +154,8 @@ namespace Internal
                                                   *m_responseHandler,
                                                   m_distribution->GetCommunication()));
 
-        m_pendingRegistrationHandler.reset(new PendingRegistrationHandler(m_timerHandler,nodeId));
+        m_pendingRegistrationHandler.reset(new PendingRegistrationHandler(m_strand.get_io_service(),
+                                                                          *m_distribution));
 
         m_poolHandler.reset(new PoolHandler(m_strand.get_io_service(),
                                             *m_distribution,
@@ -228,21 +229,17 @@ namespace Internal
         m_timerHandler.Stop();
         m_lockMonitor->Stop();
 
-        if (m_memoryMonitorThread.get_id() != boost::thread::id())
-        {
-            m_memoryMonitorThread.interrupt();
-            m_memoryMonitorThread.join();
-            m_memoryMonitorThread = boost::thread();
-        }
+        m_memoryMonitorThread.interrupt();
+        m_memoryMonitorThread.join();
+        m_memoryMonitorThread = boost::thread();
 
         m_connectionHandler->Stop();
 
-        if (m_distribution != nullptr)
-        {
-            m_distribution->Stop();
-        }
+        m_distribution->Stop();
 
         m_poolHandler->Stop();
+
+        m_pendingRegistrationHandler->Stop();
 
         m_signalSet.cancel();
 

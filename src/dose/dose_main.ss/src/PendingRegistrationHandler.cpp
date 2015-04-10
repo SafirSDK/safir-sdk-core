@@ -31,6 +31,8 @@
 #include <iomanip>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Dob/ThisNodeParameters.h>
+#include <Safir/Utilities/Internal/MakeUnique.h>
+#include <boost/make_shared.hpp>
 
 namespace Safir
 {
@@ -38,40 +40,91 @@ namespace Dob
 {
 namespace Internal
 {
-    PendingRegistrationHandler::PendingRegistrationHandler(TimerHandler& timerHandler,
-                                                           const int64_t nodeId)
-        : m_nodeId(nodeId)
-        , m_timerHandler(timerHandler)
-        , m_nextId(1)
-        , m_pendingRegistrationClock(nodeId)
+    namespace
     {
-        m_timerId = m_timerHandler.RegisterTimeoutHandler(L"Pending Registrations Timer",*this);
-    }
-
-        bool IsRegistered(const Dob::Typesystem::TypeId typeId, const Dob::Typesystem::HandlerId& handlerId, const ContextId contextId)
-    {
-        if (Safir::Dob::Typesystem::Operations::IsOfType(typeId,Safir::Dob::Service::ClassTypeId))
+        bool IsRegistered(const Dob::Typesystem::TypeId typeId,
+                          const Dob::Typesystem::HandlerId& handlerId,
+                          const ContextId contextId)
         {
-            return ServiceTypes::Instance().IsRegistered(typeId,handlerId, contextId);
-        }
-        else
-        {
-            return EntityTypes::Instance().IsRegistered(typeId, handlerId, contextId);
+            if (Safir::Dob::Typesystem::Operations::IsOfType(typeId,Safir::Dob::Service::ClassTypeId))
+            {
+                return ServiceTypes::Instance().IsRegistered(typeId,handlerId, contextId);
+            }
+            else
+            {
+                return EntityTypes::Instance().IsRegistered(typeId, handlerId, contextId);
+            }
         }
 
+        bool IsPendingAccepted(const Dob::Typesystem::TypeId typeId,
+                               const Typesystem::HandlerId& handlerId,
+                               const ContextId contextId)
+        {
+            return Connections::Instance().IsPendingAccepted(typeId, handlerId, contextId);
+        }
+
     }
 
-    bool IsPendingAccepted(const Dob::Typesystem::TypeId typeId, const Typesystem::HandlerId& handlerId, const ContextId contextId)
+
+    PendingRegistrationHandler::PendingRegistrationHandler(boost::asio::io_service& ioService,
+                                                           Distribution& distribution)
+        : m_strand(ioService)
+        , m_distribution(distribution)
+        , m_dataTypeIdentifier(LlufId_Generate64("PendingRegistrationHandler"))
+        , m_pendingRegistrationClock(distribution.GetNodeId())
     {
-        return Connections::Instance().IsPendingAccepted(typeId, handlerId, contextId);
+        //ioService is started after our constructor, so we do not need to be reentrant.
+        distribution.SubscribeNodeEvents(m_strand.wrap([this](const std::string& /*nodeName*/,
+                                                              const int64_t nodeId,
+                                                              const int64_t nodeTypeId,
+                                                              const std::string& /*dataAddress*/)
+                                                       {
+                                                           m_liveNodes.insert(std::make_pair(nodeId,nodeTypeId));
+                                                       }),
+                                         m_strand.wrap([this](const int64_t nodeId,
+                                                              const int64_t /*nodeTypeId*/)
+                                                       {
+                                                           m_liveNodes.erase(nodeId);
+                                                       }));
+        m_distribution.GetCommunication().SetDataReceiver([this]
+                                                          (const int64_t fromNodeId,
+                                                           int64_t fromNodeType,
+                                                           const char* data,
+                                                           size_t /*size*/)
+                                                          {
+                                                              const DistributionData msg =
+                                                                  DistributionData::ConstConstructor(new_data_tag, data);
+
+                                                              DistributionData::DropReference(data);
+
+                                                              HandleRequest(msg,fromNodeId,fromNodeType);
+                                                          },
+                                                          m_dataTypeIdentifier,
+                                                          DistributionData::NewData);
     }
 
+    void PendingRegistrationHandler::Stop()
+    {
+        const bool was_stopped = m_stopped.exchange(true);
+        if (!was_stopped)
+        {
+            m_strand.dispatch([this]
+                              {
+                                  for (auto& reg : m_pendingRegistrations)
+                                  {
+                                      reg.second->timer.cancel();
+                                  }
+                              });
+        }
+    }
+
+    //must be called in strand
     void PendingRegistrationHandler::TryPendingRegistration(const long requestId)
     {
         PendingRegistrations::iterator findIt = m_pendingRegistrations.find(requestId);
         if (findIt != m_pendingRegistrations.end())
         {
-            if (!IsRegistered(findIt->second.typeId, findIt->second.handlerId, findIt->second.connectionId.m_contextId))
+            if (!IsRegistered(findIt->second->typeId, findIt->second->handlerId, findIt->second->connectionId.m_contextId))
             {
                 const bool completed = HandleCompletion(requestId);
                 if (!completed)
@@ -86,97 +139,103 @@ namespace Internal
         }
     }
 
+
     void
     PendingRegistrationHandler::CheckForNewOrRemovedPendingRegistration(const ConnectionPtr & connection)
     {
-        //Check for new pending registrations
+        m_strand.dispatch([this,connection]
         {
-            PendingRegistration reg;
-            while (connection->GetNextNewPendingRegistration(m_nextId, reg))
+            //Check for new pending registrations
             {
-                std::pair<PendingRegistrations::iterator, bool> result =
-                    m_pendingRegistrations.insert
-                    (std::make_pair(reg.id,
-                                    PendingRegistrationInfo(connection->Id(),
-                                                            reg.typeId,
-                                                            reg.handlerId.GetHandlerId())));
-
-                lllout << "Inserted a new pending RegistrationRequest for type: "
-                       << Dob::Typesystem::Operations::GetName(reg.typeId) << ", connection: " << connection->NameWithCounter()
-                       << ", handler: " << reg.handlerId.GetHandlerId()  << ", context: " << connection->Id().m_contextId << std::endl;
-
-                ENSURE(result.second, << "Inserting new pending registration request failed!");
-
-                //count up nextId until we find a free spot (most likely after just one try)
-                while(m_pendingRegistrations.find(++m_nextId) != m_pendingRegistrations.end())
+                PendingRegistration reg;
+                while (connection->GetNextNewPendingRegistration(m_nextId, reg))
                 {
-                    //do nothing
+                    std::pair<PendingRegistrations::iterator, bool> result =
+                        m_pendingRegistrations.emplace
+                        (std::make_pair(reg.id,
+                                        Safir::make_unique<PendingRegistrationInfo>(m_strand.get_io_service(),
+                                                                                    connection->Id(),
+                                                                                    reg.typeId,
+                                                                                    reg.handlerId.GetHandlerId())));
+
+                    lllout << "Inserted a new pending RegistrationRequest for type: "
+                           << Dob::Typesystem::Operations::GetName(reg.typeId) << ", connection: " << connection->NameWithCounter()
+                           << ", handler: " << reg.handlerId.GetHandlerId()  << ", context: " << connection->Id().m_contextId << std::endl;
+
+                    ENSURE(result.second, << "Inserting new pending registration request failed!");
+
+                    //count up nextId until we find a free spot (most likely after just one try)
+                    while(m_pendingRegistrations.find(++m_nextId) != m_pendingRegistrations.end())
+                    {
+                        //do nothing
+                    }
+
+                    TryPendingRegistration(reg.id);
+
                 }
 
-                TryPendingRegistration(reg.id);
             }
 
-        }
-
-        //check for removed prs
-        {
-            PendingRegistrationVector prv = connection->GetRemovedPendingRegistrations();
-
-            for (PendingRegistrationVector::iterator it = prv.begin();
-                it!= prv.end(); ++it)
+            //check for removed prs
             {
-                lllout << "Removing RegistrationRequest for " << Dob::Typesystem::Operations::GetName(it->typeId)
-                       << " as request id " << it->id <<std::endl;
-                ENSURE(it->remove, << "The PR does not have the remove flag!");
-                PendingRegistrations::iterator findIt = m_pendingRegistrations.find(it->id);
+                PendingRegistrationVector prv = connection->GetRemovedPendingRegistrations();
 
-                if (findIt != m_pendingRegistrations.end())
-                { //it may have managed to get completed while we were doing other stuff...
-                    m_pendingRegistrations.erase(findIt);
+                for (PendingRegistrationVector::iterator it = prv.begin();
+                     it!= prv.end(); ++it)
+                {
+                    lllout << "Removing RegistrationRequest for " << Dob::Typesystem::Operations::GetName(it->typeId)
+                           << " as request id " << it->id <<std::endl;
+                    ENSURE(it->remove, << "The PR does not have the remove flag!");
+                    PendingRegistrations::iterator findIt = m_pendingRegistrations.find(it->id);
+
+                    if (findIt != m_pendingRegistrations.end())
+                    { //it may have managed to get completed while we were doing other stuff...
+                        m_pendingRegistrations.erase(findIt);
+                    }
                 }
             }
-        }
+        });
     }
-
+    /*
     void
-    PendingRegistrationHandler::HandleTimeout(const TimerInfoPtr & timer)
+    PendingRegistrationHandler::HandleTimeout(const boost::system::error_code& error,
+                                              const long requestId)
     {
-        TryPendingRegistration(boost::static_pointer_cast<ResendPendingTimerInfo>(timer)->UserData());
-    }
+        if (error || m_stopped)
+        {
+            return;
+        }
 
-    bool
-    PendingRegistrationHandler::HandleCompletion(const long requestId)
+        TryPendingRegistration(requestId);
+        }*/
+
+
+    //must be called in strand
+    bool PendingRegistrationHandler::HandleCompletion(const long requestId)
     {
         PendingRegistrations::iterator findIt = m_pendingRegistrations.find(requestId);
 
         ENSURE (findIt != m_pendingRegistrations.end(), << "PendingRegistrationHandler::HandleCompletion: Request id not found!");
 
         //check if we have the response from all nodes that are up
-        PendingRegistrationInfo & reg = findIt->second;
-#if 0 //stewart
-        const NodeStatuses::Status statuses = NodeStatuses::Instance().GetNodeStatuses();
-#endif
+        PendingRegistrationInfo & reg = *findIt->second;
         bool gotAll = true;
-#if 0 //stewart
-        for (NodeStatuses::Status::const_iterator it = statuses.begin();
-             it != statuses.end();++it)
+
+        if (!m_distribution.IsLocal(findIt->second->typeId))
         {
-            const int nodeId = static_cast<int>(std::distance(statuses.begin(),it));
-            if (m_ecom.GetQualityOfServiceData().IsNodeInDistributionChannel(findIt->second.typeId,nodeId) &&
-                (*it == Dob::NodeStatus::Started ||*it == Dob::NodeStatus::Starting))
+            for (const auto node: m_liveNodes)
             {
-                if (!reg.acceptedNodes[std::distance(statuses.begin(),it)])
+                if (reg.acceptedNodes.find(node.first) == reg.acceptedNodes.end())
                 {
                     gotAll = false;
-                    lllout << "Request " << requestId << " need accept from node " << nodeId << std::endl;
+                    lllout << "Request " << requestId << " needs accept from node " << node.first << std::endl;
                 }
                 else
                 {
-                    lllout << "Request " << requestId << " have accept from node " << nodeId << std::endl;
+                    lllout << "Request " << requestId << " has accept from node " << node.first << std::endl;
                 }
             }
         }
-#endif
 
         if (gotAll)
         {
@@ -194,103 +253,118 @@ namespace Internal
         }
     }
 
-    void
-    PendingRegistrationHandler::SendRequest(const long requestId)
+    //must be called in strand
+    void PendingRegistrationHandler::SendRequest(const long requestId)
     {
         PendingRegistrations::iterator findIt = m_pendingRegistrations.find(requestId);
 
-        ENSURE (findIt != m_pendingRegistrations.end(), << "PendingRegistrationHandler::SendRequest: Request id not found!");
+        ENSURE (findIt != m_pendingRegistrations.end(),
+                << "PendingRegistrationHandler::SendRequest: Request id not found!");
 
         const boost::chrono::steady_clock::time_point now = boost::chrono::steady_clock::now();
 
-        TimerInfoPtr timerInfo(new ResendPendingTimerInfo(m_timerId,requestId));
+        findIt->second->lastRequestTimestamp = m_pendingRegistrationClock.GetNewTimestamp();
+        findIt->second->rejected = false;
+        findIt->second->acceptedNodes.clear();
+        
+        lllout << "Sending Smt_Action_PendingRegistrationRequest requestId = " << requestId
+               << ", type = " << Dob::Typesystem::Operations::GetName(findIt->second->typeId)
+               << std::setprecision(20) << "timestamp = " << findIt->second->lastRequestTimestamp << std::endl;
 
-        if (now > findIt->second.nextRequestTime)
+        DistributionData msg(pending_registration_request_tag,
+                             findIt->second->connectionId,
+                             findIt->second->typeId,
+                             findIt->second->handlerId,
+                             findIt->second->lastRequestTimestamp,
+                             findIt->first);
+
+        boost::shared_ptr<const char[]> msgP(msg.GetReference(),
+                                             [](const char* data)
+                                             {
+                                                 DistributionData::DropReference(data);
+                                             });
+
+        bool success = true;
+        // Send message to all node types
+        for (const auto nodeType : m_distribution.GetNodeTypeIds())
         {
-            findIt->second.lastRequestTimestamp = m_pendingRegistrationClock.GetNewTimestamp();
-            findIt->second.rejected = false;
+            success = success &&
+                m_distribution.GetCommunication().Send(0,  // All nodes of the type
+                                                       nodeType,
+                                                       msgP,
+                                                       msg.Size(),
+                                                       m_dataTypeIdentifier,
+                                                       true); // no delivery guarantee for messages
 
-            lllout << "Sending Smt_Action_PendingRegistrationRequest requestId = " << requestId
-                   << ", type = " << Dob::Typesystem::Operations::GetName(findIt->second.typeId)
-                   << std::setprecision(20) << "timestamp = " << findIt->second.lastRequestTimestamp << std::endl;
+        }
 
-            DistributionData msg(pending_registration_request_tag,
-                                 findIt->second.connectionId,
-                                 findIt->second.typeId,
-                                 findIt->second.handlerId,
-                                 findIt->second.lastRequestTimestamp,
-                                 findIt->first);
+        if (success)
+        {
+            // Set the first timeout to now + 1.0, the second to now + 1.5, and so on. This is to handle
+            // any node that for some reason is permanently slow.
+            findIt->second->timer.expires_at(now +
+                                             boost::chrono::milliseconds(1000 + findIt->second->nbrOfSentRequests * 500));
 
-#if 0 //stewart
-            const bool success = m_ecom.Send(msg);
-
-            if (success)
-            {
-                // Set the first timeout to now + 1.0, the second to now + 1.5, and so on. This is to handle
-                // any node that for some reason is permanently slow.
-                findIt->second.nextRequestTime = boost::chrono::steady_clock::now() +
-                    boost::chrono::milliseconds(1000 + findIt->second.nbrOfSentRequests * 500);
-
-                ++findIt->second.nbrOfSentRequests;
-            }
-            else
-            {
-                findIt->second.nextRequestTime = boost::chrono::steady_clock::now() +
-                    boost::chrono::milliseconds(10);
-            }
-#endif
-
-            m_timerHandler.Set(Discard,
-                               timerInfo,
-                               findIt->second.nextRequestTime);
+            ++findIt->second->nbrOfSentRequests;
         }
         else
         {
-            // If for some reason the timer for this pending request has fired but nextRequestTime
-            // has not yet been reached, we must insert the timer again.
-            m_timerHandler.Set(Discard,
-                               timerInfo,
-                               findIt->second.nextRequestTime);
+            findIt->second->timer.expires_at(now + boost::chrono::milliseconds(10));
         }
 
-        //TODO: hook on to NotOverflow from doseCom instead of polling.
+        findIt->second->timer.async_wait(m_strand.wrap([this, requestId](const boost::system::error_code& error)
+                                                       {
+                                                           if (error || m_stopped)
+                                                           {
+                                                               return;
+                                                           }
+
+                                                           TryPendingRegistration(requestId);
+                                                       }));
     }
 
     void
     PendingRegistrationHandler::CheckForPending(const Safir::Dob::Typesystem::TypeId typeId)
     {
-        std::vector<long> affectedRequestIds;
-
-        for (auto & elem : m_pendingRegistrations)
+        m_strand.dispatch([this,typeId]
         {
-            if (elem.second.typeId == typeId)
+            std::vector<long> affectedRequestIds;
+
+            for (auto & elem : m_pendingRegistrations)
             {
-                affectedRequestIds.push_back(elem.first);
+                if (elem.second->typeId == typeId)
+                {
+                    affectedRequestIds.push_back(elem.first);
+                }
             }
-        }
 
-        for (auto & affectedRequestId : affectedRequestIds)
-        {
-            TryPendingRegistration(affectedRequestId);
-        }
+            for (auto & affectedRequestId : affectedRequestIds)
+            {
+                TryPendingRegistration(affectedRequestId);
+            }
+        });
     }
 
     void
     PendingRegistrationHandler::CheckForPending()
     {
-        for (PendingRegistrations::iterator it = m_pendingRegistrations.begin();
-             it != m_pendingRegistrations.end();)  // iterator incrementation done below
+        m_strand.dispatch([this]
         {
-            // Important to increment iterator before we call TryPendingRegistration since
-            // the pointed to object might get erased in that routine.
-            PendingRegistrations::iterator tmpIt = it;
-            ++it;
-            TryPendingRegistration(tmpIt->first);
-        }
+            for (PendingRegistrations::iterator it = m_pendingRegistrations.begin();
+                 it != m_pendingRegistrations.end();)  // iterator incrementation done below
+            {
+                // Important to increment iterator before we call TryPendingRegistration since
+                // the pointed to object might get erased in that routine.
+                PendingRegistrations::iterator tmpIt = it;
+                ++it;
+                TryPendingRegistration(tmpIt->first);
+            }
+        });
     }
 
-    void
-    PendingRegistrationHandler::HandleMessageFromDoseCom(const DistributionData & msg)
+    void PendingRegistrationHandler::HandleRequest(const DistributionData & msg,
+                                                   const int64_t fromNodeId,
+                                                   const int64_t fromNodeType)
     {
         switch (msg.GetType())
         {
@@ -313,7 +387,7 @@ namespace Internal
                 //create a response
                 DistributionData resp(pending_registration_response_tag,
                                       msg,
-                                      ConnectionId(m_nodeId,
+                                      ConnectionId(m_distribution.GetNodeId(),
                                                    contextId,
                                                    -1),
                                       true);
@@ -323,9 +397,11 @@ namespace Internal
                 //do we have an outstanding pending that is older!
                 for (auto & elem : m_pendingRegistrations)
                 {
-                    if (elem.second.typeId == typeId && elem.second.handlerId == handlerId && elem.second.connectionId.m_contextId == contextId)
+                    if (elem.second->typeId == typeId &&
+                        elem.second->handlerId == handlerId &&
+                        elem.second->connectionId.m_contextId == contextId)
                     {
-                        if (!elem.second.rejected && elem.second.lastRequestTimestamp < timestamp)
+                        if (!elem.second->rejected && elem.second->lastRequestTimestamp < timestamp)
                         {//no, mine is older!
                             lllout << "No, I believe I have an older pending request!" <<std::endl;
                             resp.SetPendingResponse(false);
@@ -348,14 +424,21 @@ namespace Internal
                     lllout << "No, I've got an accepted pending for that ObjectId!" <<std::endl;
                     resp.SetPendingResponse(false);
                 }
-#if 0 //stewart
+
                 lllout << "Sending response " << std::boolalpha << msg.GetPendingResponse() << std::endl;
-                const bool success = m_ecom.Send(resp);
-                if (!success)
-                {
-                    //Sending failed, but he will ask me again to approve of his registration, so ignore the failure
-                }
-#endif
+                boost::shared_ptr<const char[]> msgP(msg.GetReference(),
+                                                     [](const char* data)
+                                                     {
+                                                         DistributionData::DropReference(data);
+                                                     });
+
+                m_distribution.GetCommunication().Send(fromNodeId,
+                                                       fromNodeType,
+                                                       msgP,
+                                                       msg.Size(),
+                                                       m_dataTypeIdentifier,
+                                                       true);
+                //If sending fails he will ask me again to approve of his registration, so ignore failures
             }
             break;
 
@@ -382,73 +465,74 @@ namespace Internal
                     return;
                 }
 
-                if (findIt->second.connectionId != msg.GetPendingOriginator())
+                if (findIt->second->connectionId != msg.GetPendingOriginator())
                 {
                     lllout << "Originator does not correspond to pending connection id"<<std::endl
-                        << " - Expected (" << findIt->second.connectionId.m_id << ", "
-                        << findIt->second.connectionId.m_node << ") but got ("
+                        << " - Expected (" << findIt->second->connectionId.m_id << ", "
+                        << findIt->second->connectionId.m_node << ") but got ("
                         <<    msg.GetPendingOriginator().m_id<< ", "
                         <<    msg.GetPendingOriginator().m_node<< ")"
                         <<    std::endl;
                     return;
                 }
 
-                if (findIt->second.lastRequestTimestamp != timestamp)
+                if (findIt->second->lastRequestTimestamp != timestamp)
                 {
                     lllout << "Request time did not match, discarding"<<std::endl;
                     return;
                 }
 
-                if (findIt->second.typeId != typeId)
+                if (findIt->second->typeId != typeId)
                 {
                     lllout << "Type id did not match, discarding"<<std::endl;
                     return;
                 }
 
-                if (findIt->second.handlerId != handlerId)
+                if (findIt->second->handlerId != handlerId)
                 {
                     lllout << "HandlerId did not match, discarding"<<std::endl;
                     return;
                 }
-#if 0 //stewart
+
                 if (response)
                 {
                     lllout << "Accept from "<< sender.m_node << ", " << sender.m_id<<std::endl;
-                    findIt->second.acceptedNodes[sender.m_node] = true;
+                    findIt->second->acceptedNodes.insert(sender.m_node);
                     HandleCompletion(requestId);
                 }
                 else
                 {
                     lllout << "Reject from "<< sender.m_node << ", " << sender.m_id<<std::endl;
-                    findIt->second.acceptedNodes[sender.m_node] = false;
-                    findIt->second.rejected = true;
+                    findIt->second->rejected = true;
                 }
-#endif
             }
             break;
         default:
-            ENSURE(false,<<"Got unexpected type of DistributionData in PendingRegistrationHandler::HandleMessageFromDoseCom. type = " << msg.GetType());
+            ENSURE(false,<<"Got unexpected type of DistributionData in "
+                   << "PendingRegistrationHandler::HandleRequest. type = " << msg.GetType());
         }
     }
 
-
     void PendingRegistrationHandler::RemovePendingRegistrations(const ConnectionId & id)
     {
-        lllout << "RemovePendingRegistrations for " << id << std::endl;
-        for (PendingRegistrations::iterator it = m_pendingRegistrations.begin();
-             it != m_pendingRegistrations.end();)
+        m_strand.dispatch([this,id]
         {
-            if (it->second.connectionId == id)
+            lllout << "RemovePendingRegistrations for " << id << std::endl;
+            for (PendingRegistrations::iterator it = m_pendingRegistrations.begin();
+                 it != m_pendingRegistrations.end();)
             {
-                lllout << "  " << it->second.handlerId << std::endl;
+                if (it->second->connectionId == id)
+                {
+                    lllout << "  " << it->second->handlerId << std::endl;
 
-                m_pendingRegistrations.erase(it++);
+                    m_pendingRegistrations.erase(it++);
+                }
+                else
+                {
+                    ++it;
+                }
             }
-            else
-            {
-                ++it;
-            }
-        }
+        });
     }
 }
 }

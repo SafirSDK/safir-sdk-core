@@ -44,8 +44,7 @@ namespace Internal
 {
     MessageHandler::MessageHandler(Distribution& distribution)
         : m_distribution(distribution),
-          m_dataTypeIdentifier(LlufId_Generate64("Safir.Dob.Message"))
-
+          m_dataTypeIdentifier(LlufId_Generate64("MessageHandler"))
     {
         m_distribution.GetCommunication().SetDataReceiver([this]
                                                           (const int64_t fromNodeId,

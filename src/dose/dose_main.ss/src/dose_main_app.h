@@ -67,6 +67,9 @@ namespace Internal
         ~DoseApp();
 
 
+        void Stop();
+
+    private:
         void Start(const std::string& nodeName,
                    int64_t nodeId,
                    int64_t nodeTypeId,
@@ -79,9 +82,6 @@ namespace Internal
 
         void ExcludeNode(int64_t nodeId, int64_t nodeTypeId);
 
-        void Stop();
-
-    private:
         void LogStatus(const std::string& str);
 
         void HandleSignal(const boost::system::error_code& error,

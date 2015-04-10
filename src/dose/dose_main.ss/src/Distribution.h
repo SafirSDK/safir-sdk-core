@@ -144,6 +144,11 @@ namespace Internal
         //subscribe for new injected nodes and excluded nodes.
         void SubscribeNodeEvents(const OnInjectNode& onInjectNode, const OnExcludeNode& onExcludeNode)
         {
+            if (m_started)
+            {
+                throw std::logic_error("SubscribeNodeEvents must be called before Start");
+            }
+
             m_injectCallbacks.push_back(onInjectNode);
             m_excludeCallbacks.push_back(onExcludeNode);
         }
