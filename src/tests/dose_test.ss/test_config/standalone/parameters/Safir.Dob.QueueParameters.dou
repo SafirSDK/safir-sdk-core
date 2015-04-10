@@ -8,7 +8,7 @@
           <name>QueueRules</name>
           <type>Safir.Dob.QueueRule</type>
           <arrayElements>
-            <arrayElement> 
+            <arrayElement>
               <!-- The first array item is the default queue lengths.
                    We match all connections. -->
               <object>
@@ -33,7 +33,7 @@
                 </members>
               </object>
             </arrayElement>
-            <arrayElement> 
+            <arrayElement>
               <!--  long_message_in_queues -->
               <object>
                 <name>Safir.Dob.QueueRule</name>
@@ -61,7 +61,7 @@
                 </members>
               </object>
             </arrayElement>
-            <arrayElement> 
+            <arrayElement>
               <!--  long_message_out_queues -->
               <object>
                 <name>Safir.Dob.QueueRule</name>
@@ -89,7 +89,7 @@
                 </members>
               </object>
             </arrayElement>
-            <arrayElement> 
+            <arrayElement>
               <!--  long_request_in_queues -->
               <object>
                 <name>Safir.Dob.QueueRule</name>
@@ -117,7 +117,7 @@
                 </members>
               </object>
             </arrayElement>
-            <arrayElement> 
+            <arrayElement>
               <!--  long_request_out_queues -->
               <object>
                 <name>Safir.Dob.QueueRule</name>
