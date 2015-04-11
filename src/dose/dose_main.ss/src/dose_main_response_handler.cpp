@@ -24,14 +24,13 @@
 
 #include "dose_main_response_handler.h"
 
-
 #include "dose_main_blocking_handler.h"
-#include "dose_main_communication.h"
 #include "dose_main_request_timers.h"
 #include <Safir/Dob/Internal/Connection.h>
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include "Distribution.h"
 
 namespace Safir
 {
@@ -54,16 +53,15 @@ namespace Internal
 
     void ResponseHandler::DispatchResponse(const DistributionData& response,
                                            bool & dontRemove,
-                                           bool & /*doseComOverflowed*/,
+                                           bool & doseComOverflowed,
                                            const ConnectionPtr & /*sender*/)
     {
-        //TODO
-//        //if dosecom is overflowed and response is for remote node we skip it.
-//        if (doseComOverflowed && response.GetReceiverId().m_node != Dob::ThisNodeParameters::NodeNumber())
-//        {
-//            dontRemove = true;
-//            return;
-//        }
+        //if dosecom is overflowed and response is for remote node we skip it.
+        if (doseComOverflowed && response.GetReceiverId().m_node != m_communication.Id())
+        {
+            dontRemove = true;
+            return;
+        }
 
         //Try to send the response
         if (HandleResponse(response))
@@ -95,34 +93,33 @@ namespace Internal
         sender->ForEachRequestInQueue(boost::bind(&ResponseHandler::DispatchResponsesFromRequestInQueue,this,_2, boost::cref(sender)));
     }
 
-    bool ResponseHandler::HandleResponse(const DistributionData & /*response*/)
+    bool ResponseHandler::HandleResponse(const DistributionData & response)
     {
-        //TODO
-//        lllout << "HandleResponse: " << Typesystem::Operations::GetName(response.GetTypeId()) << std::endl;
+       lllout << "HandleResponse: " << Typesystem::Operations::GetName(response.GetTypeId()) << std::endl;
 
-//        const ConnectionId fromConnection=response.GetSenderId();
-//        const ConnectionId toConnection=response.GetReceiverId();
+       const ConnectionId fromConnection=response.GetSenderId();
+       const ConnectionId toConnection=response.GetReceiverId();
 
-//        if (toConnection.m_node == m_thisNode)
-//        {
-//            //Can't fail due to overflow.
-//            const ConnectionPtr to = Connections::Instance().GetConnection(toConnection,std::nothrow);
-//            if (to != NULL) //if receiver of the response is dead, theres nothing to do
-//            {
-//                PostResponse(to, response);
-//            }
-//            return true;
-//        }
-//        else if (fromConnection.m_node == m_thisNode)
-//        {
-//#if 0 //stewart
-//            //Response to another node
-//            lllout << "Sending the response to node " << toConnection.m_node << std::endl;
-//            return m_ecom->Send(response);
-//#endif
-//        }
+       if (toConnection.m_node == m_communication.Id())
+       {
+           //Can't fail due to overflow.
+           const ConnectionPtr to = Connections::Instance().GetConnection(toConnection,std::nothrow);
+           if (to != NULL) //if receiver of the response is dead, theres nothing to do
+           {
+               PostResponse(to, response);
+           }
+           return true;
+       }
+       else if (fromConnection.m_node == m_communication.Id())
+       {
+#if 0 //stewart
+           //Response to another node
+           lllout << "Sending the response to node " << toConnection.m_node << std::endl;
+           return m_ecom->Send(response);
+#endif
+       }
 
-        return true;
+       return true;
     }
 
     void ResponseHandler::PostResponse(const ConnectionPtr & toConnection,

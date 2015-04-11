@@ -49,7 +49,7 @@
         <summary>TestMode allow initial injections without persistence started.</summary>
         <name>TestMode</name>
         <type>Boolean</type>
-        <value>True/value>
+        <value>True</value>
       </parameter>
     </parameters>
 </class>

@@ -154,8 +154,7 @@ namespace
                 if (m_handleEventsNotified==false)
                 {
                     m_handleEventsNotified=true;
-                    HandleEvents();
-                    //m_strand.post([this]{HandleEvents();});
+                    m_strand.post([this]{HandleEvents();});
                 }
             }
         }

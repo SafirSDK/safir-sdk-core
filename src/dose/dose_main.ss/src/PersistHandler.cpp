@@ -62,7 +62,6 @@ namespace Internal
     {
         m_strand.dispatch([this, logStatus, persistentDataReadyCb, persistentDataAllowedCb]()
         {
-
             m_persistentDataReadyCb.push_back(persistentDataReadyCb);
             m_persistentDataAllowedCb.push_back(persistentDataAllowedCb);
 
@@ -70,20 +69,18 @@ namespace Internal
             {
                 logStatus("RUNNING IN PERSISTENCE TEST MODE! PLEASE CHANGE PARAMETER "
                           "Safir.Dob.PersistenceParameters.TestMode IF THIS IS NOT WHAT YOU EXPECTED!");
-
-                SetPersistentDataAllowed();
+                ENSURE(Dob::PersistenceParameters::Backend() == Dob::PersistenceBackend::Enumeration::None,
+                       << "Safir.Dob.PersistenceBackend must be None when running in persistence test mode");
             }
-            else
-            {
-                logStatus("dose_main is waiting for persistence data!");
 
-                m_connection.Open(L"dose_main", L"persist_handler", 0, nullptr, &m_dispatcher);
+            logStatus("dose_main is waiting for persistence data!");
 
-                m_connection.RegisterServiceHandler
-                        (Dob::PersistentDataReady::ClassTypeId,
-                         Typesystem::HandlerId(),
-                         this);
-            }
+            m_connection.Open(L"dose_main", L"persist_handler", 0, nullptr, &m_dispatcher);
+
+            m_connection.RegisterServiceHandler
+                (Dob::PersistentDataReady::ClassTypeId,
+                 Typesystem::HandlerId(),
+                 this);
         });
 
         m_distribution.SubscribeNodeEvents([this]
@@ -180,13 +177,14 @@ namespace Internal
 
             lllog(1) << "dose_main persistence data is ready!" << std::endl;
             std::wcout << "dose_main persistence data is ready!" << std::endl;
-            ENSURE(!Dob::PersistenceParameters::TestMode(),
-                   << "This system is in persistence test mode, it is an error to call SetPersistentDataReady");
 
             m_persistentDataReady = true;
 
-            //disallow more persistence data injections
-            EntityTypes::Instance().DisallowInitialSet();
+            if (!Dob::PersistenceParameters::TestMode())
+            {
+                //disallow more persistence data injections
+                EntityTypes::Instance().DisallowInitialSet();
+            }
 
             SetPersistentDataAllowed();
 
