@@ -232,7 +232,7 @@ namespace Internal
                     }
                 }
 
-                if (!processInfoUpdated)
+                if (processInfoUpdated)
                 {
                     if (!processHasConnection)
                     {
