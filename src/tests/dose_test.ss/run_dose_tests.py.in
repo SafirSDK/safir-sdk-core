@@ -166,7 +166,12 @@ class Parameters:
         jar_install_path = os.path.join(install_dir,
                                         "@SAFIR_INSTALL_DESTINATION_JAR@")
 
-        self.safir_control_cmd = ("safir_control", "--dose-main-path", os.path.join(install_dir,"bin","dose_main"), "--force-id", "999999")
+        self.safir_control_cmd = ("safir_control",
+                                  "--dose-main-path",
+                                  os.path.join(install_dir,
+                                               "bin",
+                                               "dose_main" + (".exe" if sys.platform == "win32" else "")),
+                                  "--force-id", "999999")
         self.dope_main_cmd = ("dope_main",)
         self.foreach_cmd = ("foreach",)
 
