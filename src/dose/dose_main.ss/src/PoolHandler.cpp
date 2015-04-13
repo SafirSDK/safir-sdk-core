@@ -50,23 +50,8 @@ namespace Internal
         ,m_distribution(distribution)
         ,m_poolDistributor(io, m_distribution)
         ,m_poolDistributionRequests(io, m_distribution.GetCommunication())
-        ,m_persistHandler(io, distribution, logStatus, [=] // persistentDataReadyCb
-                                                       {
-                                                            std::wcout<<"LPersistent data ready count="<<m_numReceivedPdComplete<<std::endl;
-                                                            if (m_numReceivedPdComplete==0)
-                                                            {
-                                                                //we must have got persistence from Dope
-                                                                m_poolDistributionRequests.PoolDistributionFinished(0); //clear all, we dont care anymore for other nodes pools
-                                                            }
-                                                            m_persistensReady=true;
-                                                            m_poolDistributor.Start();
-                                                            SignalPdComplete();
-                                                       },
-                                                       [=] // persistentDataAllowedCb
-                                                       {
-                                                           Connections::Instance().AllowConnect(-1);
-                                                       }
-                                                       )
+        ,m_persistHandler(io, distribution, logStatus, [=]{OnPersistenceReady();}, // persistentDataReadyCb
+                                                       [=]{Connections::Instance().AllowConnect(-1);}) // persistentDataAllowedCb
     {
         auto injectNode=[=](const std::string&, int64_t id, int64_t nt, const std::string&)
         {
@@ -130,6 +115,29 @@ namespace Internal
         }
     }
 
+    void PoolHandler::OnPersistenceReady()
+    {
+        m_strand.dispatch([=]
+        {
+            if (m_persistensReady)
+            {
+                return; //already got this event
+            }
+
+            if (m_numReceivedPdComplete==0) //got persistence from Dope
+            {
+                m_poolDistributionRequests.PoolDistributionFinished(0); //clear all, we dont care anymore for other nodes pools
+            }
+            else //got persistence from other node
+            {
+                m_poolDistributor.SetHaveNothing(); //tell poolDistributor that until we are started, we have no pool or persistence to provide
+            }
+            m_persistensReady=true;
+            SignalPdComplete();
+
+        });
+    }
+
     void PoolHandler::Start()
     {
         m_strand.dispatch([=]
@@ -141,7 +149,6 @@ namespace Internal
             //request pool distributions
             m_poolDistributionRequests.Start(m_strand.wrap([=]
             {
-                //std::wcout<<"pool distr ready"<<std::endl;
                 m_poolDistributionComplete=true;
                 SignalPdComplete();
             }));
@@ -187,7 +194,6 @@ namespace Internal
             {
             case PoolDistributionInfo::PdRequest:
             {
-                std::wcout<<L"Received PdRequest from "<<fromNodeId<<std::endl;
                 //start new pool distribution to node
                 m_poolDistributor.AddPoolDistribution(fromNodeId, fromNodeType);
             }
@@ -195,15 +201,14 @@ namespace Internal
 
             case PoolDistributionInfo::PdComplete:
             {
-                std::wcout<<L"Received PdComplete from "<<fromNodeId<<std::endl;
                 ++m_numReceivedPdComplete;
                 m_persistHandler.SetPersistentDataReady(); //persistens is ready as soon as we have received one pdComplete
                 m_poolDistributionRequests.PoolDistributionFinished(fromNodeId);
             }
+                break;
 
             case PoolDistributionInfo::PdHaveNothing:
             {
-                std::wcout<<L"Received PdHaveNothing from "<<fromNodeId<<std::endl;
                 m_poolDistributionRequests.PoolDistributionFinished(fromNodeId);
             }
                 break;
@@ -229,8 +234,6 @@ namespace Internal
         if (state.IsRegistered()) //is a registration state
         {
             const ConnectionId senderId=state.GetSenderId();
-
-            std::wcout<<L"OnRegState: "<<senderId<<std::endl;
 
             ENSURE(senderId.m_id != -1, << "Registration states are expected to have ConnectionId != -1! Reg for type "
                    << Safir::Dob::Typesystem::Operations::GetName(state.GetTypeId()));
@@ -340,7 +343,7 @@ namespace Internal
     {
         if (m_persistensReady && m_poolDistributionComplete)
         {
-            std::wcout<<"Signaling PdComplete"<<std::endl;
+            m_poolDistributor.Start();
             Connections::Instance().AllowConnect(-1);
             Connections::Instance().AllowConnect(0);
         }

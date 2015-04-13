@@ -24,6 +24,7 @@
 #pragma once
 #include <queue>
 #include <functional>
+#include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/asio.hpp>
 #include <boost/chrono.hpp>
@@ -70,7 +71,6 @@ namespace Internal
             m_strand.dispatch([=]
             {
                 m_running=true;
-                std::wcout<<L"Run PD to "<<m_nodeId<<std::endl;
                 //collect all connections on this node
                 Connections::Instance().ForEachConnection([=](const Connection& connection)
                 {
@@ -81,14 +81,11 @@ namespace Internal
                     //std::wcout<<std::boolalpha<<L"Pd_con id="<<connection.Id().m_id<<L", notLocalContext="<<notLocalContext<<L" notDoseCon="<<notDoseConnection<<L" conOnThis="<<connectionOnThisNode<<std::endl;
                     if (!localContext && connectionOnThisNode)
                     {
-                        std::wcout<<L"PD_CON: "<<connection.NameWithoutCounter()<<std::endl;
                         m_connections.push(DistributionData(connect_message_tag,
                                                             connection.Id(),
                                                             connection.NameWithoutCounter(),
                                                             connection.Counter()));
                     }
-                    else
-                        std::wcout<<L"PD_CON SKIP: "<<connection.NameWithoutCounter()<<std::endl;
                 });
 
                 SendConnections(); //will trigger the sequence SendConnections -> SendStates() -> SendPdComplete()
@@ -97,7 +94,6 @@ namespace Internal
 
         void Cancel()
         {
-            std::wcout<<"Cancel a pd"<<std::endl;
             m_strand.dispatch([=]
             {
                 m_running=false;
@@ -105,7 +101,8 @@ namespace Internal
             });
         }
 
-        int64_t Id() const {return m_nodeId;}
+        int64_t NodeId() const {return m_nodeId;}
+        int64_t NodeType() const {return m_nodeType;}
 
     private:
         static const int64_t PoolDistributionInfoDataTypeId=-3446507522969672286; //DoseMain.PoolDistributionInfo
@@ -128,11 +125,9 @@ namespace Internal
         {
             if (!m_running)
             {
-                std::wcout<<L"SendConnections not running"<<std::endl;
                 return;
             }
 
-            std::wcout<<L"SendConnections"<<std::endl;
             while (CanSend() && !m_connections.empty())
             {
                 const DistributionData& d=m_connections.front();
@@ -165,35 +160,21 @@ namespace Internal
         {
             if (!m_running)
             {
-                std::wcout<<L"SendStates not running"<<std::endl;
                 return;
             }
 
-            std::wcout<<L"SendStates"<<std::endl;
             if (context>=Safir::Dob::NodeParameters::NumberOfContexts())
             {
-                std::wcout<<L"SendStates 0"<<std::endl;
                 m_strand.post([=]{SendPdComplete();});
                 return;
             }
 
-            std::wcout<<L"SendStates 1"<<std::endl;
             if (m_dobConnection.IsOpen())
             {
-                std::wcout<<L"SendStates 2"<<std::endl;
                 m_dobConnection.Close();
             }
 
-            std::wcout<<L"SendStates 3"<<std::endl;
-
-            //Note the connection name, we do NOT want to get special treatment for being
-            //in dose_main, since we're a different thread. But we want to be allowed in
-            //always, so don't change connection string "dose_main_pd" because it is always allowed to connect,
-            // even before we let -1 connections in.
-            m_dobConnection.Open(L"dose_main_pd",L"pool_distribution", context, NULL, this);
-
-            std::wcout<<L"SendStates 4"<<std::endl;
-
+            m_dobConnection.Open(L"dose_pool_distribution",L"pool_distribution"+boost::lexical_cast<std::wstring>(m_distribution.GetNodeId()), context, NULL, this);
 
             m_dobConnection.SubscribeRegistration(Entity::ClassTypeId,
                                                   Typesystem::HandlerId::ALL_HANDLERS,
@@ -201,15 +182,12 @@ namespace Internal
                                                   false, //restartSubscription
                                                   this);
 
-            std::wcout<<L"SendStates 5"<<std::endl;
 
             m_dobConnection.SubscribeRegistration(Service::ClassTypeId,
                                                   Typesystem::HandlerId::ALL_HANDLERS,
                                                   true, //includeSubclasses
                                                   false, //restartSubscription
                                                   this);
-
-            std::wcout<<L"SendStates 6"<<std::endl;
 
             ConnectionAspectInjector(m_dobConnection).SubscribeEntity(Entity::ClassTypeId,
                                                                       false, //includeUpdates,
@@ -222,30 +200,20 @@ namespace Internal
                                                                       false, //timestampChangeInfo
                                                                       this);
 
-            std::wcout<<L"SendStates 7"<<std::endl;
-
             auto connectionName=ConnectionAspectMisc(m_dobConnection).GetConnectionName();
-
-            std::wcout<<L"SendStates 8"<<std::endl;
 
             auto conPtr=Connections::Instance().GetConnectionByName(Typesystem::Utilities::ToUtf8(connectionName));
 
-            std::wcout<<L"SendStates 9"<<std::endl;
-
             DispatchStates(conPtr, context);
-
-            std::wcout<<L"SendStates 10"<<std::endl;
         }
 
         void DispatchStates(const Safir::Dob::Internal::ConnectionPtr& conPtr, int context)
         {
             if (!m_running)
             {
-                std::wcout<<L"DispStates not running"<<std::endl;
                 return;
             }
 
-            std::wcout<<L"DispatchStates"<<std::endl;
             bool overflow=false;
             conPtr->GetDirtySubscriptionQueue().Dispatch([this, conPtr, context, &overflow](const SubscriptionPtr& subscription, bool& exitDispatch, bool& dontRemove)
             {
@@ -283,11 +251,9 @@ namespace Internal
         {
             if (!m_running)
             {
-                std::wcout<<L"SendPdComp not running"<<std::endl;
                 return;
             }
 
-            std::wcout<<L"SendPdComplete"<<std::endl;
             m_dobConnection.Close();
 
             auto req=boost::make_shared<char[]>(sizeof(PoolDistributionInfo));
@@ -303,13 +269,11 @@ namespace Internal
         {
             if (!m_running)
             {
-                std::wcout<<L"ProcessEntityState not running"<<std::endl;
                 return true;
             }
             // All nodes send ghost and injection data on PD!
             // Do not send updates
 
-            std::wcout<<L"ProcessEntityState"<<std::endl;
             bool success=true;
 
             //Real state

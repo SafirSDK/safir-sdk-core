@@ -61,6 +61,24 @@ public:
     std::set<int64_t> requests;
 };
 
+class Distribution
+{
+public:
+
+    Communication& GetCommunication()
+    {
+        return m_communication;
+    }
+
+    const Communication& GetCommunication() const
+    {
+        return m_communication;
+    }
+
+private:
+    Communication m_communication;
+};
+
 BOOST_AUTO_TEST_CASE( PoolDistributionRequestSenderTest )
 {
     boost::asio::io_service io;
@@ -103,11 +121,12 @@ BOOST_AUTO_TEST_CASE( PoolDistributionRequestSenderTest )
 class Pd
 {
 public:
-    Pd(int64_t nodeId, int64_t,
+    Pd(int64_t nodeId, int64_t nodeType,
        boost::asio::io_service::strand&,
-       Communication&,
+       Distribution&,
        const std::function<void(int64_t)>& completionHandler)
         :m_nodeId(nodeId)
+        ,m_nodeTypeId(nodeType)
     {
         Pd::PoolDistributions[nodeId]=std::make_pair(false, completionHandler);
     }
@@ -119,9 +138,11 @@ public:
             it->second.first=true;
     }
 
-    int64_t Id() const {return m_nodeId;}
+    int64_t NodeId() const {return m_nodeId;}
+    int64_t NodeType() const {return m_nodeTypeId;}
 
     int64_t m_nodeId;
+    int64_t m_nodeTypeId;
 
     static std::map<int64_t, std::pair<bool, std::function<void(int64_t)> > > PoolDistributions;
 };
@@ -153,8 +174,8 @@ BOOST_AUTO_TEST_CASE( PoolDistributionHandlerTest )
         threads.create_thread([&]{io.run();});
     }
 
-    Communication com;
-    PoolDistributionHandler<Communication, Pd> pdh(io, com);
+    Distribution distribution;
+    PoolDistributionHandler<Distribution, Pd> pdh(io, distribution);
     pdh.Start();
 
     pdh.AddPoolDistribution(1, 1);

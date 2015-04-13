@@ -66,6 +66,7 @@ namespace Internal
             {
                 if (!m_running) //dont call start if its already started
                 {
+                    m_haveNothing=false;
                     m_running=true;
                     StartNextPoolDistribution();
                 }
@@ -81,12 +82,33 @@ namespace Internal
             });
         }
 
+        void SetHaveNothing()
+        {
+            m_strand.dispatch([=]
+            {
+                if (m_running)
+                    return; //not allowed if we are started
+
+                m_haveNothing=true;
+                while (!m_pendingPoolDistributions.empty())
+                {
+                    SendHaveNothing(m_pendingPoolDistributions.front()->NodeId(), m_pendingPoolDistributions.front()->NodeType());
+                    m_pendingPoolDistributions.pop();
+                }
+            });
+        }
+
         //Called when a new pdRequest is received. Will result in a pd to the node with specified id.
         void AddPoolDistribution(int64_t nodeId, int64_t nodeTypeId)
         {
-            //std::wcout<<L"AddPoolDistribution "<<nodeId<<std::endl;
             m_strand.dispatch([this, nodeId, nodeTypeId]
             {
+                if (m_haveNothing)
+                {
+                    SendHaveNothing(nodeId, nodeTypeId);
+                    return;
+                }
+
                 auto pd=PdPtr(new PoolDistributionT(nodeId, nodeTypeId, m_strand, m_distribution, [=](int64_t /*nodeId*/)
                 {
                     if (!m_pendingPoolDistributions.empty())
@@ -109,6 +131,7 @@ namespace Internal
         boost::asio::io_service::strand m_strand;
         DistributionT& m_distribution;
         bool m_running=false;
+        bool m_haveNothing=false;
 
         using PdPtr = std::unique_ptr< PoolDistributionT >;
         std::queue<PdPtr> m_pendingPoolDistributions;
@@ -118,6 +141,17 @@ namespace Internal
             if (m_running && !m_pendingPoolDistributions.empty())
             {
                 m_pendingPoolDistributions.front()->Run();
+            }
+        }
+
+        void SendHaveNothing(int64_t nodeId, int64_t nodeType)
+        {
+            auto msg=boost::make_shared<char[]>(sizeof(PoolDistributionInfo));
+            (*reinterpret_cast<PoolDistributionInfo*>(msg.get()))=PoolDistributionInfo::PdHaveNothing;
+
+            if (!m_distribution.GetCommunication().Send(nodeId, nodeType, msg, sizeof(PoolDistributionInfo), PoolDistributionInfoDataTypeId, true))
+            {
+                m_strand.post([=]{SendHaveNothing(nodeId, nodeType);});
             }
         }
     };

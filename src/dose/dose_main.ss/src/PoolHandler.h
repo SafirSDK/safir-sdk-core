@@ -75,6 +75,9 @@ namespace Internal
         void SignalPdComplete();
         void RunEndStatesTimer();
 
+        //PersistenceHandler reports Persistet data ready
+        void OnPersistenceReady();
+
         //other node is requesting a pd or report pdComplete
         void OnPoolDistributionInfo(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t size);
 
