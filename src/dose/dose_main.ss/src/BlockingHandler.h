@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -21,9 +22,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-
-#ifndef _dose_main_blocking_handler_h
-#define _dose_main_blocking_handler_h
+#pragma once
 
 #include <Safir/Dob/Internal/ConnectionId.h>
 #include <boost/noncopyable.hpp>
@@ -64,19 +63,13 @@ namespace Internal
     {
     public:
         BlockingHandler& Request() {return m_requestQ;}
-        BlockingHandler& Response() {return m_responseQ;}
-        BlockingHandler& Message() {return m_messageQ;}
 
         void RemoveConnection(const Identifier& id);
     private:
         BlockingHandler m_requestQ;
-        BlockingHandler m_responseQ;   //only dose_com may block this
-        BlockingHandler m_messageQ; //only dose_com may block this
     };
 
 }
 }
 }
-
-#endif
 

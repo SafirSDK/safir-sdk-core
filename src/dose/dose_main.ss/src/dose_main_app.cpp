@@ -147,14 +147,7 @@ namespace Internal
 
         m_messageHandler.reset(new MessageHandler(*m_distribution));
 
-        m_responseHandler.reset(new ResponseHandler(m_timerHandler,
-                                                    m_blockingHandler,
-                                                    m_distribution->GetCommunication()));
-
-        m_requestHandler.reset(new RequestHandler(m_timerHandler,
-                                                  m_blockingHandler,
-                                                  *m_responseHandler,
-                                                  m_distribution->GetCommunication()));
+        m_requestHandler.reset(new RequestHandler(m_distribution->GetCommunication()));
 
         m_pendingRegistrationHandler.reset(new PendingRegistrationHandler(m_strand.get_io_service(),
                                                                           *m_distribution));
@@ -380,7 +373,9 @@ namespace Internal
         {
             m_pendingRegistrationHandler->RemovePendingRegistrations(connection->Id());
             m_requestHandler->HandleDisconnect(connection);
+#if 0 //stewart
             m_blockingHandler.RemoveConnection(connection->Id().m_id);
+#endif
         }
     }
 
@@ -389,7 +384,6 @@ namespace Internal
         lllout << "HandleAppEventHelper for connection " << connection->NameWithCounter() << ", id = " << connection->Id() << std::endl;
 
         //---- Handle queued requests ----
-        m_responseHandler->DistributeResponses(connection);
         m_requestHandler->DistributeRequests(connection);
 
         //Send messages

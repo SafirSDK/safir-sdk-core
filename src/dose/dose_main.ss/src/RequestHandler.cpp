@@ -25,10 +25,7 @@
 
 #include "RequestHandler.h"
 
-#include "dose_main_blocking_handler.h"
 #include "dose_main_communication.h"
-#include "dose_main_request_timers.h"
-#include "dose_main_response_handler.h"
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Dob/Internal/ServiceTypes.h>
 #include <Safir/Dob/Internal/EntityTypes.h>
@@ -57,25 +54,20 @@ namespace Internal
 {
     static const Dob::Typesystem::Si32::Second deletedConnReqTimeout = 0.5;
 
-    RequestHandler::RequestHandler(TimerHandler& timerHandler,
-                                   BlockingHandlers& blockingHandler,
-                                   ResponseHandler& responseHandler,
-                                   Com::Communication& communication)
-        : m_timerHandler(timerHandler),
-          m_blockingHandler(blockingHandler),
-          m_responseHandler(responseHandler),
-          m_communication(communication)
+    RequestHandler::RequestHandler(Com::Communication& communication)
+        : m_communication(communication)
 
     {
-        RequestTimers::m_localReqTimerId =
-            m_timerHandler.RegisterTimeoutHandler
-            (L"Safir::Dob::Internal::RequestHandler::localReqTimeout",
-             *this);
+        //TODO stewart
+//        RequestTimers::m_localReqTimerId =
+//            m_timerHandler.RegisterTimeoutHandler
+//            (L"Safir::Dob::Internal::RequestHandler::localReqTimeout",
+//             *this);
 
-        RequestTimers::m_externalReqTimerId =
-            m_timerHandler.RegisterTimeoutHandler
-            (L"Safir::Dob::Internal::RequestHandler::externalReqTimeout",
-             *this);
+//        RequestTimers::m_externalReqTimerId =
+//            m_timerHandler.RegisterTimeoutHandler
+//            (L"Safir::Dob::Internal::RequestHandler::externalReqTimeout",
+//             *this);
     }
 
     const ConnectionConsumerPair GetRegistrationOwner(const DistributionData& request)
@@ -292,16 +284,17 @@ namespace Internal
 
     void RequestHandler::StartTimer(const ConnectionPtr & sender, const DistributionData & request)
     {
-        // Start timer
-        RequestTimerInfo timeoutInfo = RequestTimerInfo(sender->Id().m_id,
-                                                        request.GetRequestId(),
-                                                        request.GetTypeId(),
-                                                        request.GetHandlerId());
+        // TODO stewart
+//        // Start timer
+//        RequestTimerInfo timeoutInfo = RequestTimerInfo(sender->Id().m_id,
+//                                                        request.GetRequestId(),
+//                                                        request.GetTypeId(),
+//                                                        request.GetHandlerId());
 
-        m_timerHandler.SetRelative(Discard, //discard the timer if it is already set
-                                   TimerInfoPtr(new ReqTimer(RequestTimers::m_localReqTimerId,
-                                                             timeoutInfo)),
-                                   GetTimeout(request.GetTypeId()));
+//        m_timerHandler.SetRelative(Discard, //discard the timer if it is already set
+//                                   TimerInfoPtr(new ReqTimer(RequestTimers::m_localReqTimerId,
+//                                                             timeoutInfo)),
+//                                   GetTimeout(request.GetTypeId()));
     }
 
 
@@ -340,8 +333,8 @@ namespace Internal
     {
         if (!PostRequest(receiver, request))
         {
-            m_blockingHandler.Request().AddWaitingConnection(receiver.connection->Id().m_id,
-                                                             sender->Id().m_id);
+            //TODO stewart m_blockingHandler.Request().AddWaitingConnection(receiver.connection->Id().m_id,
+            //                                                 sender->Id().m_id);
             return false;
         }
         return true;
@@ -391,6 +384,7 @@ namespace Internal
         }
     }
 
+#if 0 //stewart
     void RequestHandler::HandleTimeout(const TimerInfoPtr& timer)
     {
         if (timer->GetTimerId() == RequestTimers::m_localReqTimerId)
@@ -450,6 +444,7 @@ namespace Internal
             RemovePendingRequest(timerInfo.m_connectionIdentifier, timerInfo.m_requestId);
         }
     }
+#endif
 
     void PushRequest(const DistributionData & request, RequestInQueue& queue, bool & success)
     {
@@ -493,73 +488,75 @@ namespace Internal
                                   reqId,
                                   &bin[0]);
 
-        //Post the response
-        m_responseHandler.HandleResponse(response);
+        //TODO stewart
+//        //Post the response
+//        m_responseHandler.HandleResponse(response);
 
-        // Remove timeout
-        RequestTimerInfo timeoutInfo = RequestTimerInfo(sender->Id().m_id, reqId);
-        m_timerHandler.Remove(TimerInfoPtr(new ReqTimer(RequestTimers::m_localReqTimerId,
-                                                        timeoutInfo)));
+//        // Remove timeout
+//        RequestTimerInfo timeoutInfo = RequestTimerInfo(sender->Id().m_id, reqId);
+//        m_timerHandler.Remove(TimerInfoPtr(new ReqTimer(RequestTimers::m_localReqTimerId,
+//                                                        timeoutInfo)));
 
         sender->SignalIn();
     }
 
-    void RequestHandler::HandleRequestFromDoseCom(const DistributionData & request)
-    {
-        lllout << "Got request from dose_com: type = "
-            << Safir::Dob::Typesystem::Operations::GetName(request.GetTypeId())
-            << ", handler = " << request.GetHandlerId() << std::endl;
-        // If the request can not be put in the receiver's req in queue
-        // it will be added to the pending map.
+    //TODO stewart
+//    void RequestHandler::HandleRequestFromDoseCom(const DistributionData & request)
+//    {
+//        lllout << "Got request from dose_com: type = "
+//            << Safir::Dob::Typesystem::Operations::GetName(request.GetTypeId())
+//            << ", handler = " << request.GetHandlerId() << std::endl;
+//        // If the request can not be put in the receiver's req in queue
+//        // it will be added to the pending map.
 
-        const ConnectionConsumerPair receiver = GetRegistrationOwner(request);
-        if (receiver.connection == NULL)
-        {
-            return; //ignore the request and let the timeout on the other node take care of it.
-        }
+//        const ConnectionConsumerPair receiver = GetRegistrationOwner(request);
+//        if (receiver.connection == NULL)
+//        {
+//            return; //ignore the request and let the timeout on the other node take care of it.
+//        }
 
-        HandleRequest(request, receiver);
-    }
+//        HandleRequest(request, receiver);
+//    }
 
-    void RequestHandler::HandlePendingExternalRequest(const Identifier blockingConnection)
-    {
-        lllout << "HandlePendingExternalRequest for app " << blockingConnection <<std::endl;
-        PendingRequestTable::iterator it = m_pendingRequests.find(blockingConnection);
+//    void RequestHandler::HandlePendingExternalRequest(const Identifier blockingConnection)
+//    {
+//        lllout << "HandlePendingExternalRequest for app " << blockingConnection <<std::endl;
+//        PendingRequestTable::iterator it = m_pendingRequests.find(blockingConnection);
 
-        if (it == m_pendingRequests.end())
-        {
-            return;
-        }
+//        if (it == m_pendingRequests.end())
+//        {
+//            return;
+//        }
 
-        while (!it->second.empty())
-        {
-            const DistributionData & request = it->second.front();
+//        while (!it->second.empty())
+//        {
+//            const DistributionData & request = it->second.front();
 
-            const ConnectionConsumerPair receiver = GetRegistrationOwner(request);
-            if (receiver.connection == NULL)
-            {
-                // if no receiver ignore the request and let the timeout on the other node take care of it.
-                it->second.pop_front();
-            }
-            else
-            {
-                if (HandleRequest(request,receiver))
-                {
-                    it->second.pop_front();
-                }
-                else
-                {
-                    break;
-                }
-            }
-        }
+//            const ConnectionConsumerPair receiver = GetRegistrationOwner(request);
+//            if (receiver.connection == NULL)
+//            {
+//                // if no receiver ignore the request and let the timeout on the other node take care of it.
+//                it->second.pop_front();
+//            }
+//            else
+//            {
+//                if (HandleRequest(request,receiver))
+//                {
+//                    it->second.pop_front();
+//                }
+//                else
+//                {
+//                    break;
+//                }
+//            }
+//        }
 
-        if (it->second.empty())
-        {
-            // We managed to send all pending requests.
-            m_pendingRequests.erase(it);
-        }
-    }
+//        if (it->second.empty())
+//        {
+//            // We managed to send all pending requests.
+//            m_pendingRequests.erase(it);
+//        }
+//    }
 
 
     void SetShortTimeout(const DistributionData& request,
@@ -574,17 +571,18 @@ namespace Internal
             // Found a request towards an unregistered entity/service or an entity/service
             // that is owned by the deleted connection.
 
-            const InternalRequestId reqId = request.GetRequestId();
+            // TODO stewart const InternalRequestId reqId = request.GetRequestId();
             // Set the running timer for this request to expire in a short time from now giving
             // any response sent from the deleted connection a chance to be received.
 
-            RequestTimerInfo timeoutInfo = RequestTimerInfo(fromConnection->Id().m_id, reqId, request.GetTypeId(),request.GetHandlerId());
+            //TODO stewart
+//            RequestTimerInfo timeoutInfo = RequestTimerInfo(fromConnection->Id().m_id, reqId, request.GetTypeId(),request.GetHandlerId());
 
-            timerHandler.SetRelative(Replace,
-                                     TimerInfoPtr(new ReqTimer
-                                                  (RequestTimers::m_localReqTimerId,
-                                                   timeoutInfo)),
-                                     deletedConnReqTimeout);
+//            timerHandler.SetRelative(Replace,
+//                                     TimerInfoPtr(new ReqTimer
+//                                                  (RequestTimers::m_localReqTimerId,
+//                                                   timeoutInfo)),
+//                                     deletedConnReqTimeout);
         }
     }
 
@@ -604,12 +602,13 @@ namespace Internal
         //task 1 is not neccessary, since when that request is dispatched the handler will not be registered any longer, and will be responded
         //to with an 'unregistered'!
 
-        fromConnection->GetRequestOutQueue().ForEachDispatchedRequest
-            (boost::bind(SetShortTimeout,
-                         _1,
-                         boost::cref(deletedConn),
-                         boost::cref(fromConnection),
-                         boost::ref(m_timerHandler)));
+        //TODO stewart
+//        fromConnection->GetRequestOutQueue().ForEachDispatchedRequest
+//            (boost::bind(SetShortTimeout,
+//                         _1,
+//                         boost::cref(deletedConn),
+//                         boost::cref(fromConnection),
+//                         boost::ref(m_timerHandler)));
     }
 
     void RequestHandler::HandleDisconnect(const ConnectionPtr & connection)
@@ -649,16 +648,17 @@ namespace Internal
             m_pendingRequests.insert(std::make_pair(blockingConn, requests));
         }
 
-        // Set timeout timer for request
-        RequestTimerInfo timeoutInfo = RequestTimerInfo(blockingConn,
-                                                        request.GetRequestId(),
-                                                        request.GetTypeId(),
-                                                        request.GetHandlerId());
+        //TODO stewart
+//        // Set timeout timer for request
+//        RequestTimerInfo timeoutInfo = RequestTimerInfo(blockingConn,
+//                                                        request.GetRequestId(),
+//                                                        request.GetTypeId(),
+//                                                        request.GetHandlerId());
 
-        m_timerHandler.SetRelative(Discard,   //discard if already set
-                                   TimerInfoPtr(new ReqTimer(RequestTimers::m_externalReqTimerId,
-                                                             timeoutInfo)),
-                                   GetTimeout(request.GetTypeId()));
+//        m_timerHandler.SetRelative(Discard,   //discard if already set
+//                                   TimerInfoPtr(new ReqTimer(RequestTimers::m_externalReqTimerId,
+//                                                             timeoutInfo)),
+//                                   GetTimeout(request.GetTypeId()));
 #if 0 //stewart
         // Set that dose_main is waiting for the receiver
         m_blockingHandler->Request().AddWaitingConnection(blockingConn,

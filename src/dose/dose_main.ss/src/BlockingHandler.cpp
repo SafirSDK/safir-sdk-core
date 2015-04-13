@@ -22,7 +22,7 @@
 *
 ******************************************************************************/
 
-#include "dose_main_blocking_handler.h"
+#include "BlockingHandler.h"
 
 namespace Safir
 {
@@ -71,8 +71,6 @@ namespace Internal
     void BlockingHandlers::RemoveConnection(const Identifier& id)
     {
         m_requestQ.RemoveConnection(id);
-        m_responseQ.RemoveConnection(id);
-        m_messageQ.RemoveConnection(id);
     }
 
 }

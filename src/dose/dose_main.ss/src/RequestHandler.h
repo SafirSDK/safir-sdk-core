@@ -24,10 +24,13 @@
 ******************************************************************************/
 #pragma once
 
-#include "dose_main_timers.h"
 #include <Safir/Dob/ErrorResponse.h>
+#include <Safir/Dob/Internal/ConnectionConsumerPair.h>
+#include <Safir/Dob/Internal/DistributionData.h>
 #include <deque>
 #include <boost/unordered_map.hpp>
+#include "BlockingHandler.h"
+#include "ResponseHandler.h"
 
 namespace Safir
 {
@@ -35,33 +38,27 @@ namespace Dob
 {
 namespace Internal
 {
-    //forward declarations
-    class BlockingHandlers;
-    class ResponseHandler;
+
     namespace Com
     {
         class Communication;
     }
 
-    class RequestHandler:
-        public TimeoutHandler
+    class RequestHandler
     {
     public:
 
-        RequestHandler(TimerHandler& timerHandler,
-                       BlockingHandlers& blockingHandler,
-                       ResponseHandler& responseHandler,
-                       Com::Communication& communication);
+        RequestHandler(Com::Communication& communication);
 
 
-        void DistributeRequests(const ConnectionPtr & connection);
+        void DistributeRequests(const ConnectionPtr& connection);
 
-        void HandleRequestFromDoseCom(const DistributionData & request);
+        void HandleDisconnect(const ConnectionPtr& connection);
 
-        void HandleDisconnect(const ConnectionPtr & connection);
-
+#if 0 //TODO stewart
         //when a request is blocking on an overflow to dose_com, this gets called on not overflow.
         void HandlePendingExternalRequest(const Identifier blockingConnection);
+#endif
 
     private:
 
@@ -91,7 +88,7 @@ namespace Internal
         void StartTimer(const ConnectionPtr & sender,
                         const DistributionData & request);
 
-        void HandleTimeout(const TimerInfoPtr& timer) override;
+        // TODO stewart void HandleTimeout(const TimerInfoPtr& timer) override;
 
         bool PostRequest(const ConnectionConsumerPair& receiver,
                          const DistributionData& request); //is not const-ref since it needs to set the responseId
@@ -104,7 +101,7 @@ namespace Internal
         void RemovePendingRequest(const Identifier blockingConn, const InternalRequestId& requestId);
         bool ReceiverHasOtherPendingRequest(const Identifier receiver, const InternalRequestId& requestId) const;
 
-        TimerHandler& m_timerHandler;
+        //TimerHandler& m_timerHandler;
 
         typedef std::deque<DistributionData> PendingRequests;
         typedef boost::unordered_map<Identifier, PendingRequests> PendingRequestTable;
@@ -115,9 +112,8 @@ namespace Internal
         typedef boost::unordered_map<Typesystem::TypeId, Typesystem::Si64::Second> TimeoutTable;
         mutable TimeoutTable m_timeoutTable;
 
-
-        BlockingHandlers& m_blockingHandler;
-        ResponseHandler& m_responseHandler;
+        BlockingHandler m_blockingHandler;
+        // TODO stewart ResponseHandler m_responseHandler;
         Com::Communication& m_communication;
     };
 }

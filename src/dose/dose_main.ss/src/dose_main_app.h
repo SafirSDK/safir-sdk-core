@@ -34,11 +34,11 @@
 #include "PendingRegistrationHandler.h"
 #include "PoolHandler.h"
 #include "RequestHandler.h"
-#include "dose_main_blocking_handler.h"
+#include "BlockingHandler.h"
 #include "dose_main_communication.h"
 #include "dose_main_connection_killer.h"
 #include "dose_main_lock_monitor.h"
-#include "dose_main_response_handler.h"
+#include "dose_main_timers.h"
 #include <Safir/Dob/Internal/DoseMainCmd.h>
 
 //disable warnings in boost
@@ -120,7 +120,6 @@ namespace Internal
 
         std::unique_ptr<MessageHandler>      m_messageHandler;
         std::unique_ptr<RequestHandler>      m_requestHandler;
-        std::unique_ptr<ResponseHandler>     m_responseHandler;
         std::unique_ptr<PoolHandler>         m_poolHandler;
         std::unique_ptr<ConnectionHandler>   m_connectionHandler;
         std::unique_ptr<NodeInfoHandler>     m_nodeInfoHandler;

@@ -22,9 +22,11 @@
 *
 ******************************************************************************/
 
-#include "dose_main_response_handler.h"
+#include "ResponseHandler.h"
 
+#if 0 //stewart
 #include "dose_main_blocking_handler.h"
+#endif
 #include "dose_main_request_timers.h"
 #include <Safir/Dob/Internal/Connection.h>
 #include <Safir/Dob/Typesystem/Operations.h>
