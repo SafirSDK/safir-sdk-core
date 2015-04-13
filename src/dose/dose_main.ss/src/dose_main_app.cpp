@@ -398,10 +398,13 @@ namespace Internal
         //Handle pending registrations
         m_pendingRegistrationHandler->CheckForNewOrRemovedPendingRegistration(connection);
 
+#if 0 //stewart
         //Check in queues, and notify waiting applications
         HandleWaitingConnections(connection->Id().m_id, recursionLevel);
+#endif
     }
 
+#if 0 //stewart This functionality is , or shall be, removed or moved to the specific handler.
     //Check if blockingApp has non-full inQueues. If thats the case, it handles applications that are blocked
     //by blockingApp
     void DoseApp::HandleWaitingConnections(const Identifier blockingApp,
@@ -461,6 +464,7 @@ namespace Internal
             HandleAppEventHelper(Connections::Instance().GetConnection(tmpId), recursionLevel);
         }
     }
+#endif
 
     //----------------------------------------------------------------
     // Handling of Dose_Communication events
