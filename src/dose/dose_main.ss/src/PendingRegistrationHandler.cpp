@@ -79,8 +79,11 @@ namespace Internal
                                                               const int64_t nodeTypeId,
                                                               const std::string& /*dataAddress*/)
                                                        {
-                                                           m_liveNodes.insert(std::make_pair(nodeId,nodeTypeId));
-                                                           CheckForPending();
+                                                           if (nodeId != m_distribution.GetNodeId())
+                                                           {
+                                                               m_liveNodes.insert(std::make_pair(nodeId,nodeTypeId));
+                                                               CheckForPending();
+                                                           }
                                                        }),
                                          m_strand.wrap([this](const int64_t nodeId,
                                                               const int64_t /*nodeTypeId*/)
@@ -283,7 +286,7 @@ namespace Internal
                                                        msgP,
                                                        msg.Size(),
                                                        m_dataTypeIdentifier,
-                                                       true); // no delivery guarantee for messages
+                                                       true);
 
         }
 
@@ -415,16 +418,16 @@ namespace Internal
                 }
 
                 lllout << "Sending response " << std::boolalpha << msg.GetPendingResponse() << std::endl;
-                boost::shared_ptr<const char[]> msgP(msg.GetReference(),
-                                                     [](const char* data)
-                                                     {
-                                                         DistributionData::DropReference(data);
-                                                     });
+                boost::shared_ptr<const char[]> respP(resp.GetReference(),
+                                                      [](const char* data)
+                                                      {
+                                                          DistributionData::DropReference(data);
+                                                      });
 
                 m_distribution.GetCommunication().Send(fromNodeId,
                                                        fromNodeType,
-                                                       msgP,
-                                                       msg.Size(),
+                                                       respP,
+                                                       resp.Size(),
                                                        m_dataTypeIdentifier,
                                                        true);
                 //If sending fails he will ask me again to approve of his registration, so ignore failures
