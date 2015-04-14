@@ -40,16 +40,11 @@ namespace Dob
 {
 namespace Internal
 {
-    ResponseHandler::ResponseHandler(TimerHandler& timerHandler,
-                                     BlockingHandlers& blockingHandler,
-                                     Com::Communication& communication)
-        : m_timerHandler(timerHandler),
-          m_blockingHandler(blockingHandler),
-          m_communication(communication)
-    {
-    }
-
-    ResponseHandler::~ResponseHandler()
+    ResponseHandler::ResponseHandler(Distribution& distribution,
+                                     const std::function<void(const ConnectionId& connectionId,
+                                                              const InternalRequestId requestId)>& responsePostedCallback)
+        : m_distribution(distribution)
+        , m_responsePostedCallback(responsePostedCallback)
     {
     }
 
@@ -59,14 +54,14 @@ namespace Internal
                                            const ConnectionPtr & /*sender*/)
     {
         //if dosecom is overflowed and response is for remote node we skip it.
-        if (doseComOverflowed && response.GetReceiverId().m_node != m_communication.Id())
+        if (doseComOverflowed && response.GetReceiverId().m_node != m_distribution.GetNodeId())
         {
             dontRemove = true;
             return;
         }
 
         //Try to send the response
-        if (HandleResponse(response))
+        if (SendResponse(response))
         {
             dontRemove = false;
         }
@@ -86,23 +81,28 @@ namespace Internal
     void ResponseHandler::DispatchResponsesFromRequestInQueue(RequestInQueue & queue, const ConnectionPtr & sender)
     {
         bool doseComOverflowed = false;
-        queue.DispatchResponses(boost::bind(&ResponseHandler::DispatchResponse,this,_1,_2,boost::ref(doseComOverflowed),
-            boost::cref(sender)));
+        queue.DispatchResponses([this,sender,&doseComOverflowed](const DistributionData& response, bool& dontRemove)
+                                {
+                                    DispatchResponse(response,dontRemove,doseComOverflowed,sender);
+                                });
     }
 
     void ResponseHandler::DistributeResponses(const ConnectionPtr & sender)
     {
-        sender->ForEachRequestInQueue(boost::bind(&ResponseHandler::DispatchResponsesFromRequestInQueue,this,_2, boost::cref(sender)));
+        sender->ForEachRequestInQueue([this,sender](const ConsumerId& /*consumer*/, RequestInQueue& queue)
+                                      {
+                                          DispatchResponsesFromRequestInQueue(queue, sender);
+                                      });
     }
 
-    bool ResponseHandler::HandleResponse(const DistributionData & response)
+    bool ResponseHandler::SendResponse(const DistributionData & response)
     {
        lllout << "HandleResponse: " << Typesystem::Operations::GetName(response.GetTypeId()) << std::endl;
 
        const ConnectionId fromConnection=response.GetSenderId();
        const ConnectionId toConnection=response.GetReceiverId();
 
-       if (toConnection.m_node == m_communication.Id())
+       if (toConnection.m_node == m_distribution.GetNodeId())
        {
            //Can't fail due to overflow.
            const ConnectionPtr to = Connections::Instance().GetConnection(toConnection,std::nothrow);
@@ -112,7 +112,7 @@ namespace Internal
            }
            return true;
        }
-       else if (fromConnection.m_node == m_communication.Id())
+       else if (fromConnection.m_node == m_distribution.GetNodeId())
        {
 #if 0 //stewart
            //Response to another node
@@ -127,13 +127,10 @@ namespace Internal
     void ResponseHandler::PostResponse(const ConnectionPtr & toConnection,
                                        const DistributionData & response)
     {
-        InternalRequestId reqId = response.GetRequestId();
         toConnection->GetRequestOutQueue().AttachResponse(response);
 
-        //Create a timeoutinfo object so that we can remove the timer
-        const RequestTimerInfo timeoutInfo = RequestTimerInfo(response.GetReceiverId().m_id, reqId);
-        m_timerHandler.Remove(TimerInfoPtr(new ReqTimer(RequestTimers::m_localReqTimerId,
-                                                        timeoutInfo)));
+        m_responsePostedCallback(response.GetReceiverId(),response.GetRequestId());
+
         toConnection->SignalIn();
     }
 

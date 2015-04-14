@@ -25,6 +25,7 @@
 #pragma once
 
 #include <Safir/Dob/Internal/InternalFwd.h>
+#include "Distribution.h"
 
 namespace Safir
 {
@@ -32,45 +33,46 @@ namespace Dob
 {
 namespace Internal
 {
-    //forward declarations
-    class BlockingHandlers;
-    class TimerHandler;
-    namespace Com
-    {
-        class Communication;
-    }
-
+    /**
+     * This class handles distribution of responses within local and remote nodes.
+     *
+     * All methods are thread safe.
+     */
     class ResponseHandler
         : private boost::noncopyable
     {
     public:
-        ResponseHandler(TimerHandler& timerHandler,
-                        BlockingHandlers& blockingHandler,
-                        Com::Communication& communication);
+        ResponseHandler(Distribution& distribution,
+                        const std::function<void(const ConnectionId& connectionId,
+                                                 const InternalRequestId requestId)>& responsePostedCallback);
 
-        virtual ~ResponseHandler();
-
+        /**
+         * Distribute any responses the given connection has in its request in queues.
+         */
         void DistributeResponses(const ConnectionPtr& sender);
 
-        void HandleResponseFromDoseCom(const DistributionData& response) {HandleResponse(response);}
-
-        //if the responses destination is a remote node false will be returned if there
-        //is a dosecom overflow.
-        bool HandleResponse(const DistributionData& response);
+        /**
+         * Send a response.
+         *
+         * This can be used by the request handler to send automatic responses, e.g. when
+         * a service is not registered or a timeout occurs.
+         */
+        bool SendResponse(const DistributionData& response);
 
     private:
+#if 0 //stewart
+        void HandleResponseFromDoseCom(const DistributionData& response) {HandleResponse(response);}
+#endif
+
         void DispatchResponse(const DistributionData& response, bool & dontRemove, bool & doseComOverflowed, const ConnectionPtr & sender);
         void DispatchResponsesFromRequestInQueue(RequestInQueue & queue, const ConnectionPtr & sender);
 
         void PostResponse(const ConnectionPtr& receiver,
                           const DistributionData& response);
 
-        TimerHandler& m_timerHandler;
-
-        BlockingHandlers& m_blockingHandler;
-
-        Com::Communication& m_communication;
-
+        Distribution& m_distribution;
+        const std::function<void(const ConnectionId& connectionId,
+                                 const InternalRequestId requestId)> m_responsePostedCallback;
     };
 }
 }
