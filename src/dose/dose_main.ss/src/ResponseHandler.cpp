@@ -94,40 +94,34 @@ namespace Internal
         }
     }
 
-    void ResponseHandler::DispatchResponse(const DistributionData& response,
-                                           bool & dontRemove,
-                                           const ConnectionPtr& sender)
-    {
-        //Try to send the response
-        const bool success = SendResponseInternal(response);
-        dontRemove = !success;
 
-        if (!success)
-        {
-            m_waitingConnections.insert(sender->Id());
-        }
-    }
-
-    void ResponseHandler::DispatchResponsesFromRequestInQueue(RequestInQueue & queue, const ConnectionPtr & sender)
-    {
-        queue.DispatchResponses([this,sender](const DistributionData& response, bool& dontRemove)
-                                {
-                                    DispatchResponse(response,dontRemove,sender);
-                                });
-    }
-
-    void ResponseHandler::DistributeResponses(const ConnectionPtr & sender)
+    void ResponseHandler::DistributeResponses(const ConnectionPtr& sender)
     {
         m_strand.dispatch([this, sender]
-                          {
-                              sender->ForEachRequestInQueue([this,sender](const ConsumerId& /*consumer*/, RequestInQueue& queue)
-                                                            {
-                                                                DispatchResponsesFromRequestInQueue(queue, sender);
-                                                            });
-                          });
+        {
+            const auto senderId = sender->Id();
+
+            //loop over all the RequestInQueues in the connection
+            sender->ForEachRequestInQueue([this,senderId](const ConsumerId& /*consumer*/, RequestInQueue& queue)
+            {
+                //loop over all responses in the connection
+                queue.DispatchResponses([this,senderId](const DistributionData& response, bool& dontRemove)
+                {
+                    //Try to send the response
+                    const bool success = SendResponseInternal(response);
+                    dontRemove = !success;
+
+                    if (!success)
+                    {
+                        m_waitingConnections.insert(senderId);
+                    }
+                });
+            });
+        });
     }
 
 
+    //Even though this is not executing in the strand it is thread safe.
     void ResponseHandler::SendLocalResponse(const DistributionData& response)
     {
         const ConnectionId toConnection=response.GetReceiverId();
@@ -148,7 +142,8 @@ namespace Internal
 
     }
 
-    bool ResponseHandler::SendResponseInternal(const DistributionData & response)
+    //can be called inside or outside the strand
+    bool ResponseHandler::SendResponseInternal(const DistributionData& response)
     {
        lllout << "HandleResponse: " << Typesystem::Operations::GetName(response.GetTypeId()) << std::endl;
 

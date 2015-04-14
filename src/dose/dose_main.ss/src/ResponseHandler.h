@@ -70,15 +70,6 @@ namespace Internal
          */
         bool SendResponseInternal(const DistributionData& response);
 
-#if 0 //stewart
-        void HandleResponseFromDoseCom(const DistributionData& response) {HandleResponse(response);}
-#endif
-
-        void DispatchResponse(const DistributionData& response,
-                              bool & dontRemove,
-                              const ConnectionPtr & sender);
-        void DispatchResponsesFromRequestInQueue(RequestInQueue & queue, const ConnectionPtr & sender);
-
         boost::asio::strand m_strand;
         Distribution& m_distribution;
         const int64_t m_dataTypeIdentifier;
