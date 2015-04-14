@@ -53,33 +53,42 @@ namespace Internal
         void DistributeResponses(const ConnectionPtr& sender);
 
         /**
+         * Send local response.
+         *
+         * This can be used by the request handler to send automatic responses, e.g. when
+         * a service is not registered or a timeout occurs.
+         * This method only works for local receivers.
+         */
+        void SendLocalResponse(const DistributionData& response);
+
+    private:
+        /**
          * Send a response.
          *
          * This can be used by the request handler to send automatic responses, e.g. when
          * a service is not registered or a timeout occurs.
          */
-        bool SendResponse(const DistributionData& response);
+        bool SendResponseInternal(const DistributionData& response);
 
-    private:
 #if 0 //stewart
         void HandleResponseFromDoseCom(const DistributionData& response) {HandleResponse(response);}
 #endif
 
         void DispatchResponse(const DistributionData& response,
                               bool & dontRemove,
-                              bool & communicationOverflow,
                               const ConnectionPtr & sender);
         void DispatchResponsesFromRequestInQueue(RequestInQueue & queue, const ConnectionPtr & sender);
 
-        void PostResponse(const ConnectionPtr& receiver,
-                          const DistributionData& response);
-
         boost::asio::strand m_strand;
         Distribution& m_distribution;
+        const int64_t m_dataTypeIdentifier;
+        std::map<int64_t,int64_t> m_liveNodes;
+
+        std::set<ConnectionId> m_waitingConnections;
+
         const std::function<void(const ConnectionId& connectionId,
                                  const InternalRequestId requestId)> m_responsePostedCallback;
     };
 }
 }
 }
-

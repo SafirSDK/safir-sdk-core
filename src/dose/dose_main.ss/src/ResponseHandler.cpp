@@ -40,58 +40,115 @@ namespace Internal
                                                               const InternalRequestId requestId)>& responsePostedCallback)
         : m_strand(ioService)
         , m_distribution(distribution)
+        , m_dataTypeIdentifier(LlufId_Generate64("ResponseHandler"))
         , m_responsePostedCallback(responsePostedCallback)
     {
+        //ioService is started after our constructor, so we do not need to be reentrant.
+        distribution.SubscribeNodeEvents(m_strand.wrap([this](const std::string& /*nodeName*/,
+                                                              const int64_t nodeId,
+                                                              const int64_t nodeTypeId,
+                                                              const std::string& /*dataAddress*/)
+                                                       {
+                                                           if (nodeId != m_distribution.GetNodeId())
+                                                           {
+                                                               m_liveNodes.insert(std::make_pair(nodeId,nodeTypeId));
+                                                           }
+                                                       }),
+                                         m_strand.wrap([this](const int64_t nodeId,
+                                                              const int64_t /*nodeTypeId*/)
+                                                       {
+                                                           m_liveNodes.erase(nodeId);
+                                                       }));
+        m_distribution.GetCommunication().SetDataReceiver([this]
+                                                          (const int64_t fromNodeId,
+                                                           int64_t fromNodeType,
+                                                           const char* data,
+                                                           size_t /*size*/)
+                                                          {
+                                                              const DistributionData msg =
+                                                                  DistributionData::ConstConstructor(new_data_tag, data);
+
+                                                              DistributionData::DropReference(data);
+
+                                                              SendLocalResponse(msg);
+                                                          },
+                                                          m_dataTypeIdentifier,
+                                                          DistributionData::NewData);
+        for (const auto nodeTypeId : m_distribution.GetNodeTypeIds())
+        {
+            m_distribution.GetCommunication().SetQueueNotFullCallback
+                (m_strand.wrap([this](const int64_t /*nodeTypeId*/)
+                               {
+                                   const auto pending = std::move(m_waitingConnections);
+                                   for (auto&& conn : pending)
+                                   {
+                                       const ConnectionPtr to = Connections::Instance().
+                                           GetConnection(conn,std::nothrow);
+                                       if (to != NULL) //if receiver of the response is dead, theres nothing to do
+                                       {
+                                           DistributeResponses(to);
+                                       }
+                                   }
+                               }),
+                 nodeTypeId);
+        }
     }
 
     void ResponseHandler::DispatchResponse(const DistributionData& response,
                                            bool & dontRemove,
-                                           bool & communicationOverflow,
-                                           const ConnectionPtr & /*sender*/)
+                                           const ConnectionPtr& sender)
     {
-        //if dosecom is overflowed and response is for remote node we skip it.
-        if (communicationOverflow && response.GetReceiverId().m_node != m_distribution.GetNodeId())
-        {
-            dontRemove = true;
-            return;
-        }
-
         //Try to send the response
-        if (SendResponse(response))
+        const bool success = SendResponseInternal(response);
+        dontRemove = !success;
+
+        if (!success)
         {
-            dontRemove = false;
-        }
-        else
-        {
-#if 0 //stewart
-            //This can only occur if response was for connection on another node, and DoseCom sendQ was full.
-            m_blockingHandler->Response().AddWaitingConnection
-                (ExternNodeCommunication::DoseComVirtualConnectionId,
-                sender->Id().m_id);
-            communicationOverflow = true;
-            dontRemove = true;
-#endif
+            m_waitingConnections.insert(sender->Id());
         }
     }
 
     void ResponseHandler::DispatchResponsesFromRequestInQueue(RequestInQueue & queue, const ConnectionPtr & sender)
     {
-        bool communicationOverflow = false;
-        queue.DispatchResponses([this,sender,&communicationOverflow](const DistributionData& response, bool& dontRemove)
+        queue.DispatchResponses([this,sender](const DistributionData& response, bool& dontRemove)
                                 {
-                                    DispatchResponse(response,dontRemove,communicationOverflow,sender);
+                                    DispatchResponse(response,dontRemove,sender);
                                 });
     }
 
     void ResponseHandler::DistributeResponses(const ConnectionPtr & sender)
     {
-        sender->ForEachRequestInQueue([this,sender](const ConsumerId& /*consumer*/, RequestInQueue& queue)
-                                      {
-                                          DispatchResponsesFromRequestInQueue(queue, sender);
-                                      });
+        m_strand.dispatch([this, sender]
+                          {
+                              sender->ForEachRequestInQueue([this,sender](const ConsumerId& /*consumer*/, RequestInQueue& queue)
+                                                            {
+                                                                DispatchResponsesFromRequestInQueue(queue, sender);
+                                                            });
+                          });
     }
 
-    bool ResponseHandler::SendResponse(const DistributionData & response)
+
+    void ResponseHandler::SendLocalResponse(const DistributionData& response)
+    {
+        const ConnectionId toConnection=response.GetReceiverId();
+
+        ENSURE (toConnection.m_node == m_distribution.GetNodeId(),
+                << "SendLocalResponse can only be used for local responses!");
+
+        const ConnectionPtr to = Connections::Instance().GetConnection(toConnection,std::nothrow);
+
+        if (to != NULL) //if receiver of the response is dead, theres nothing to do
+        {
+            to->GetRequestOutQueue().AttachResponse(response);
+
+            m_responsePostedCallback(response.GetReceiverId(),response.GetRequestId());
+
+            to->SignalIn();
+        }
+
+    }
+
+    bool ResponseHandler::SendResponseInternal(const DistributionData & response)
     {
        lllout << "HandleResponse: " << Typesystem::Operations::GetName(response.GetTypeId()) << std::endl;
 
@@ -100,35 +157,30 @@ namespace Internal
 
        if (toConnection.m_node == m_distribution.GetNodeId())
        {
-           //Can't fail due to overflow.
-           const ConnectionPtr to = Connections::Instance().GetConnection(toConnection,std::nothrow);
-           if (to != NULL) //if receiver of the response is dead, theres nothing to do
-           {
-               PostResponse(to, response);
-           }
-           return true;
-       }
-       else if (fromConnection.m_node == m_distribution.GetNodeId())
-       {
-#if 0 //stewart
-           //Response to another node
-           lllout << "Sending the response to node " << toConnection.m_node << std::endl;
-           return m_ecom->Send(response);
-#endif
+           SendLocalResponse(response);
+           return true; //Can't fail due to overflow.
        }
 
-       return true;
+       ENSURE (fromConnection.m_node == m_distribution.GetNodeId(),
+               << "RequestInQueue should only contain responses from this node!");
+
+       //Response to another node
+       lllout << "Sending the response to node " << toConnection.m_node << std::endl;
+
+       boost::shared_ptr<const char[]> responseP(response.GetReference(),
+                                                 [](const char* data)
+                                                 {
+                                                     DistributionData::DropReference(data);
+                                                 });
+
+       return m_distribution.GetCommunication().Send(toConnection.m_node,
+                                                     m_liveNodes[toConnection.m_node],
+                                                     responseP,
+                                                     response.Size(),
+                                                     m_dataTypeIdentifier,
+                                                     true);
     }
 
-    void ResponseHandler::PostResponse(const ConnectionPtr & toConnection,
-                                       const DistributionData & response)
-    {
-        toConnection->GetRequestOutQueue().AttachResponse(response);
-
-        m_responsePostedCallback(response.GetReceiverId(),response.GetRequestId());
-
-        toConnection->SignalIn();
-    }
 
 }
 }
