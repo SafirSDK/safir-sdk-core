@@ -64,7 +64,10 @@ namespace Internal
         void HandleResponseFromDoseCom(const DistributionData& response) {HandleResponse(response);}
 #endif
 
-        void DispatchResponse(const DistributionData& response, bool & dontRemove, bool & doseComOverflowed, const ConnectionPtr & sender);
+        void DispatchResponse(const DistributionData& response,
+                              bool & dontRemove,
+                              bool & communicationOverflow,
+                              const ConnectionPtr & sender);
         void DispatchResponsesFromRequestInQueue(RequestInQueue & queue, const ConnectionPtr & sender);
 
         void PostResponse(const ConnectionPtr& receiver,

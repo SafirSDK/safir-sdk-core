@@ -50,11 +50,11 @@ namespace Internal
 
     void ResponseHandler::DispatchResponse(const DistributionData& response,
                                            bool & dontRemove,
-                                           bool & doseComOverflowed,
+                                           bool & communicationOverflow,
                                            const ConnectionPtr & /*sender*/)
     {
         //if dosecom is overflowed and response is for remote node we skip it.
-        if (doseComOverflowed && response.GetReceiverId().m_node != m_distribution.GetNodeId())
+        if (communicationOverflow && response.GetReceiverId().m_node != m_distribution.GetNodeId())
         {
             dontRemove = true;
             return;
@@ -72,7 +72,7 @@ namespace Internal
             m_blockingHandler->Response().AddWaitingConnection
                 (ExternNodeCommunication::DoseComVirtualConnectionId,
                 sender->Id().m_id);
-            doseComOverflowed = true;
+            communicationOverflow = true;
             dontRemove = true;
 #endif
         }
@@ -80,10 +80,10 @@ namespace Internal
 
     void ResponseHandler::DispatchResponsesFromRequestInQueue(RequestInQueue & queue, const ConnectionPtr & sender)
     {
-        bool doseComOverflowed = false;
-        queue.DispatchResponses([this,sender,&doseComOverflowed](const DistributionData& response, bool& dontRemove)
+        bool communicationOverflow = false;
+        queue.DispatchResponses([this,sender,&communicationOverflow](const DistributionData& response, bool& dontRemove)
                                 {
-                                    DispatchResponse(response,dontRemove,doseComOverflowed,sender);
+                                    DispatchResponse(response,dontRemove,communicationOverflow,sender);
                                 });
     }
 
