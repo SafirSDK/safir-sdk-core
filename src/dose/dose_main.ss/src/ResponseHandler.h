@@ -42,7 +42,8 @@ namespace Internal
         : private boost::noncopyable
     {
     public:
-        ResponseHandler(Distribution& distribution,
+        ResponseHandler(boost::asio::io_service& ioService,
+                        Distribution& distribution,
                         const std::function<void(const ConnectionId& connectionId,
                                                  const InternalRequestId requestId)>& responsePostedCallback);
 
@@ -73,6 +74,7 @@ namespace Internal
         void PostResponse(const ConnectionPtr& receiver,
                           const DistributionData& response);
 
+        boost::asio::strand m_strand;
         Distribution& m_distribution;
         const std::function<void(const ConnectionId& connectionId,
                                  const InternalRequestId requestId)> m_responsePostedCallback;

@@ -24,15 +24,9 @@
 
 #include "ResponseHandler.h"
 
-#if 0 //stewart
-#include "dose_main_blocking_handler.h"
-#endif
-#include "dose_main_request_timers.h"
 #include <Safir/Dob/Internal/Connection.h>
-#include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
-#include "Distribution.h"
 
 namespace Safir
 {
@@ -40,10 +34,12 @@ namespace Dob
 {
 namespace Internal
 {
-    ResponseHandler::ResponseHandler(Distribution& distribution,
+    ResponseHandler::ResponseHandler(boost::asio::io_service& ioService,
+                                     Distribution& distribution,
                                      const std::function<void(const ConnectionId& connectionId,
                                                               const InternalRequestId requestId)>& responsePostedCallback)
-        : m_distribution(distribution)
+        : m_strand(ioService)
+        , m_distribution(distribution)
         , m_responsePostedCallback(responsePostedCallback)
     {
     }
