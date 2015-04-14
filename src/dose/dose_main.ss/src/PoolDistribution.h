@@ -97,7 +97,6 @@ namespace Internal
             m_strand.dispatch([=]
             {
                 m_running=false;
-                m_timer.cancel();
             });
         }
 
@@ -259,7 +258,11 @@ namespace Internal
             auto req=boost::make_shared<char[]>(sizeof(PoolDistributionInfo));
             (*reinterpret_cast<PoolDistributionInfo*>(req.get()))=PoolDistributionInfo::PdComplete;
 
-            if (!m_distribution.GetCommunication().Send(m_nodeId, m_nodeType, req, sizeof(PoolDistributionInfo), PoolDistributionInfoDataTypeId, true))
+            if (m_distribution.GetCommunication().Send(m_nodeId, m_nodeType, req, sizeof(PoolDistributionInfo), PoolDistributionInfoDataTypeId, true))
+            {
+                m_completionHandler(m_nodeId);
+            }
+            else
             {
                 SetTimer([=]{SendPdComplete();});
             }

@@ -74,8 +74,7 @@ namespace Internal
                 if (m_nodes.erase(id)>0)
                 {
                     m_poolDistributionRequests.PoolDistributionFinished(id);
-
-                    //TODO: cancel ongoing pool distributions to this node
+                    m_poolDistributor.RemovePoolDistribution(id);
                 }
             });
         };

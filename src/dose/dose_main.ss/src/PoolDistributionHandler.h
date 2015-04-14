@@ -22,7 +22,7 @@
 *
 ******************************************************************************/
 #pragma once
-#include <queue>
+#include <deque>
 #include <functional>
 
 #ifdef _MSC_VER
@@ -78,7 +78,10 @@ namespace Internal
             m_strand.post([=]
             {
                 m_running=false;
-                //TODO: m_timer.cancel();
+                if (!m_pendingPoolDistributions.empty())
+                {
+                    m_pendingPoolDistributions.front()->Cancel();
+                }
             });
         }
 
@@ -93,7 +96,7 @@ namespace Internal
                 while (!m_pendingPoolDistributions.empty())
                 {
                     SendHaveNothing(m_pendingPoolDistributions.front()->NodeId(), m_pendingPoolDistributions.front()->NodeType());
-                    m_pendingPoolDistributions.pop();
+                    m_pendingPoolDistributions.pop_front();
                 }
             });
         }
@@ -109,18 +112,36 @@ namespace Internal
                     return;
                 }
 
-                auto pd=PdPtr(new PoolDistributionT(nodeId, nodeTypeId, m_strand, m_distribution, [=](int64_t /*nodeId*/)
+                auto pd=PdPtr(new PoolDistributionT(nodeId, nodeTypeId, m_strand, m_distribution, [=](int64_t nodeId)
                 {
-                    if (!m_pendingPoolDistributions.empty())
-                        m_pendingPoolDistributions.pop();
-                    StartNextPoolDistribution();
+                    if (!m_pendingPoolDistributions.empty() && m_pendingPoolDistributions.front()->NodeId()==nodeId)
+                    {
+                        m_pendingPoolDistributions.pop_front();
+                        StartNextPoolDistribution();
+                    }
                 }));
 
-                m_pendingPoolDistributions.push(std::move(pd));
+                m_pendingPoolDistributions.push_back(std::move(pd));
 
                 if (m_pendingPoolDistributions.size()==1) //if queue was empty we have to manually start the pd. If not the completion handler of the ongoing pd will start the next one.
                 {
                     StartNextPoolDistribution();
+                }
+            });
+        }
+
+        void RemovePoolDistribution(int64_t nodeId)
+        {
+            m_strand.post([this, nodeId]
+            {
+                auto it=++m_pendingPoolDistributions.begin(); //start at second element since the first one is probably already running
+                for (; it!=m_pendingPoolDistributions.end(); ++it)
+                {
+                    if ((*it)->NodeId()==nodeId)
+                    {
+                        m_pendingPoolDistributions.erase(it);
+                        break; //finished
+                    }
                 }
             });
         }
@@ -134,7 +155,7 @@ namespace Internal
         bool m_haveNothing=false;
 
         using PdPtr = std::unique_ptr< PoolDistributionT >;
-        std::queue<PdPtr> m_pendingPoolDistributions;
+        std::deque<PdPtr> m_pendingPoolDistributions;
 
         void StartNextPoolDistribution()
         {
