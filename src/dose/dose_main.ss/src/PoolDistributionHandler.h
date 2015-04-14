@@ -116,8 +116,11 @@ namespace Internal
                 {
                     if (!m_pendingPoolDistributions.empty() && m_pendingPoolDistributions.front()->NodeId()==nodeId)
                     {
-                        m_pendingPoolDistributions.pop_front();
-                        StartNextPoolDistribution();
+                        m_strand.post([=] //since this code is called from the m_pendingPoolDistributions.front object, we must post before we can pop_front
+                        {
+                            m_pendingPoolDistributions.pop_front();
+                            StartNextPoolDistribution();
+                        });
                     }
                 }));
 

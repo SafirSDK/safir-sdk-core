@@ -70,6 +70,9 @@ namespace Internal
         {
             m_strand.dispatch([=]
             {
+                if (m_running)
+                    return;
+
                 m_running=true;
                 //collect all connections on this node
                 Connections::Instance().ForEachConnection([=](const Connection& connection)
@@ -78,7 +81,6 @@ namespace Internal
                     auto localContext=Safir::Dob::NodeParameters::LocalContexts(connection.Id().m_contextId);
                     auto connectionOnThisNode=connection.IsLocal();
 
-                    //std::wcout<<std::boolalpha<<L"Pd_con id="<<connection.Id().m_id<<L", notLocalContext="<<notLocalContext<<L" notDoseCon="<<notDoseConnection<<L" conOnThis="<<connectionOnThisNode<<std::endl;
                     if (!localContext && connectionOnThisNode)
                     {
                         m_connections.push(DistributionData(connect_message_tag,
