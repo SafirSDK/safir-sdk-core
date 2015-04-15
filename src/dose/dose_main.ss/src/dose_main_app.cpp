@@ -120,9 +120,34 @@ namespace Internal
 
     DoseApp::~DoseApp()
     {
-        //TODO stewart: should we try to call Stop here, in case it hasn't been
-        //called correctly? I.e. we're dying through an exception.
+        Stop();
     }
+
+    void DoseApp::Stop()
+    {
+        const bool wasStopped = m_stopped.exchange(true);
+        if (!wasStopped)
+        {
+            m_cmdReceiver.Stop();
+            m_nodeInfoHandler->Stop();
+            m_lockMonitor->Stop();
+
+            m_connectionHandler->Stop();
+
+            m_distribution->Stop();
+
+            m_poolHandler->Stop();
+
+            m_pendingRegistrationHandler->Stop();
+
+            m_signalSet.cancel();
+
+            m_memoryMonitor->Stop();
+
+            m_work.reset();
+        }
+    }
+
 
     void DoseApp::Start(const std::string& nodeName,
                         int64_t nodeId,
@@ -210,26 +235,6 @@ namespace Internal
         m_distribution->ExcludeNode(nodeId, nodeTypeId);
     }
 
-    void DoseApp::Stop()
-    {
-        m_cmdReceiver.Stop();
-        m_nodeInfoHandler->Stop();
-        m_lockMonitor->Stop();
-
-        m_connectionHandler->Stop();
-
-        m_distribution->Stop();
-
-        m_poolHandler->Stop();
-
-        m_pendingRegistrationHandler->Stop();
-
-        m_signalSet.cancel();
-
-        m_memoryMonitor->Stop();
-
-        m_work.reset();
-    }
 
     void DoseApp::HandleSignal(const boost::system::error_code& error,
                                const int signalNumber)

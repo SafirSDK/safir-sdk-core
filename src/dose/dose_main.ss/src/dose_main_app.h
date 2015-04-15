@@ -100,6 +100,7 @@ namespace Internal
 
         void HandleEvents();
 
+        std::atomic<bool> m_stopped{false};
 
         boost::asio::io_service::strand& m_strand;
         boost::asio::io_service::strand m_wcoutStrand;
