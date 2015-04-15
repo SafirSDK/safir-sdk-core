@@ -142,22 +142,18 @@ namespace Internal
             return;
         }
 
-        //is this a connect from within dose_main's pooldistribution thread? if so, always let through.
-        if (connectionName.find(";dose_main_pd;") == connectionName.npos)
+        //guard against connections before dose_main has said that it is ok to start connecting.
+        if (isMinusOneConnection)
         {
-            //guard against connections before dose_main has said that it is ok to start connecting.
-            if (isMinusOneConnection)
-            {
-                lllout << "Waiting on m_connectMinusOneSem" << std::endl;
-                m_connectMinusOneSem.wait();
-                m_connectMinusOneSem.post();
-            }
-            else
-            {
-                lllout << "Waiting on m_connectSem" << std::endl;
-                m_connectSem.wait();
-                m_connectSem.post();
-            }
+            lllout << "Waiting on m_connectMinusOneSem" << std::endl;
+            m_connectMinusOneSem.wait();
+            m_connectMinusOneSem.post();
+        }
+        else
+        {
+            lllout << "Waiting on m_connectSem" << std::endl;
+            m_connectSem.wait();
+            m_connectSem.post();
         }
 
         ScopedConnectLock lck(m_connectLock);
