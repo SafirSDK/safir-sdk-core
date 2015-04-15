@@ -177,11 +177,10 @@ namespace Internal
 
             processInfo->Name().SetVal(L"dose_main");
             processInfo->Pid().SetVal(Safir::Utilities::ProcessInfo::GetPid());
-            processInfo->ConnectionNames()[0].SetVal(ConnectionAspectMisc(m_connection).GetConnectionName());
+
+            // We don't publish any of dose_mains connections.
 
             m_connection.SetAll(processInfo,eid.GetInstanceId(),Typesystem::HandlerId());
-
-            //TODO stewart: Add dose_mains other connections?!
         }
         catch (const Safir::Dob::AccessDeniedException &)
         {
