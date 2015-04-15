@@ -47,14 +47,6 @@
       </item>
       <item>
        <property name="text">
-        <string>Logging settings</string>
-       </property>
-       <property name="toolTip">
-        <string>Show settings for the low level logger (the internal debug log mechanism).</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
         <string>Connections</string>
        </property>
        <property name="toolTip">
