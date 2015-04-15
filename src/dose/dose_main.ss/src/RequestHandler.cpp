@@ -25,7 +25,6 @@
 
 #include "RequestHandler.h"
 
-#include "dose_main_communication.h"
 #include "dose_main_timers.h"
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Dob/Internal/ServiceTypes.h>

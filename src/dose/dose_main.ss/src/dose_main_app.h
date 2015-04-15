@@ -35,7 +35,6 @@
 #include "PoolHandler.h"
 #include "RequestHandler.h"
 #include "BlockingHandler.h"
-#include "dose_main_communication.h"
 #include "dose_main_connection_killer.h"
 #include "dose_main_lock_monitor.h"
 #include "dose_main_timers.h"

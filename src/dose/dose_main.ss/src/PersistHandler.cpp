@@ -24,7 +24,6 @@
 ******************************************************************************/
 
 #include "PersistHandler.h"
-#include "dose_main_communication.h"
 #include <Safir/Dob/PersistenceParameters.h>
 #include <Safir/Dob/PersistentDataReady.h>
 #include <Safir/Dob/Internal/Connections.h>
