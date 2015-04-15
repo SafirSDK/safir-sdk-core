@@ -11,5 +11,3 @@ ADD_SUBDIRECTORY(RequestLatencies)
 ADD_SUBDIRECTORY(RequestPingPong)
 ADD_SUBDIRECTORY(RequestStresser)
 
-ADD_SUBDIRECTORY(SignalTest)
-
