@@ -170,8 +170,12 @@ class Parameters:
                                   "--dose-main-path",
                                   os.path.join(install_dir,
                                                "bin",
-                                               "dose_main" + (".exe" if sys.platform == "win32" else "")),
-                                  "--force-id", "999999")
+                                               "dose_main" + (".exe" if sys.platform == "win32" else "")))
+        if self.slave:
+            self.safir_control_cmd += ("--force-id", "888888")
+        else:
+            self.safir_control_cmd += ("--force-id", "999999")
+
         self.dope_main_cmd = ("dope_main",)
         self.foreach_cmd = ("foreach",)
 
@@ -186,12 +190,15 @@ class Parameters:
         self.dose_test_sequencer_cmd = ("dose_test_sequencer",
                                         "-d",
                                         self.testcases_path,
-                                        "--no-timeout",
+                                        #"--no-timeout",
                                         #"--context", "-1", #random context
                                         "-l", self.lang0, self.lang1, self.lang2,
                                         #"--first", "1",
                                         #"--last", "1"
                                         )
+
+        if self.multinode:
+            self.dose_test_sequencer_cmd += ("--multinode",)
 
         self.expected_output_path = os.path.join(self.test_data_directory,
                                                  "dose",
