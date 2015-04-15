@@ -22,7 +22,7 @@
 *
 ******************************************************************************/
 
-#include "dose_main_lock_monitor.h"
+#include "LockMonitor.h"
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Service.h>
 #include <Safir/Dob/Entity.h>

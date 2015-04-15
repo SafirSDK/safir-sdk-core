@@ -36,7 +36,7 @@
 #include "RequestHandler.h"
 #include "BlockingHandler.h"
 #include "ConnectionKiller.h"
-#include "dose_main_lock_monitor.h"
+#include "LockMonitor.h"
 #include <Safir/Dob/Internal/DoseMainCmd.h>
 
 //disable warnings in boost

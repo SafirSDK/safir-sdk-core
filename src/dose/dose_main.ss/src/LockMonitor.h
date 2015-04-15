@@ -22,16 +22,17 @@
 *
 ******************************************************************************/
 
-#ifndef _dose_main_lock_monitor_h
-#define _dose_main_lock_monitor_h
+#pragma once
 
 #if defined _MSC_VER
-  #pragma warning (push)
-  #pragma warning (disable : 4244)
+#  pragma warning (push)
+#  pragma warning (disable : 4244)
 #endif
+
 #include <boost/thread.hpp>
+
 #if defined _MSC_VER
-  #pragma warning (pop)
+#  pragma warning (pop)
 #endif
 
 #include <Safir/Dob/Internal/InternalDefs.h>
@@ -45,7 +46,7 @@ namespace Internal
     // Monitors apparently abandoned locks in shared memory.
     //
     // This is an active object that contains its own thread. The thread will
-    // be started by the constructor and it will be stopped by the destructor. 
+    // be started by the constructor and it will be stopped by the destructor.
     class LockMonitor
     {
     public:
@@ -61,7 +62,7 @@ namespace Internal
 
         Dob::Typesystem::TypeIdVector m_serviceTypeIds;
         Dob::Typesystem::TypeIdVector m_entityTypeIds;
-        
+
         bool    m_loggingIsEnabled;
 
         boost::thread m_checkerThread;
@@ -69,5 +70,3 @@ namespace Internal
 }
 }
 }
-
-#endif
