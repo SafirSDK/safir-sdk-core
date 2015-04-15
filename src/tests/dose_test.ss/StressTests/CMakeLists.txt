@@ -1,4 +1,3 @@
-#TODO stewart ADD_SUBDIRECTORY(EntityIntegrityChecker)
 ADD_SUBDIRECTORY(EntityReceptionVerifier)
 ADD_SUBDIRECTORY(EntityStresser)
 
