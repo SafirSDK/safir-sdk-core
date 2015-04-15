@@ -65,6 +65,16 @@ namespace Safir.Dob.Typesystem.Internal
             return Internal.Kernel.DotsC_GetSize(blob);
         }
 
+        /// <summary>
+        /// Get the number of values contrained in a member.
+        /// </summary>
+        /// <returns>The number of member values.</returns>
+        /// <param name="handle">Handle.</param>
+        /// <param name="member">Member.</param>
+        public static Int32 NumerOfMemberValues(System.Int64 handle, System.Int32 member)
+        {
+            return Kernel.DotsC_GetNumberOfMemberValues (handle, member);
+        }
        
 
         #region Container operations on Blobs
@@ -2455,13 +2465,13 @@ namespace Safir.Dob.Typesystem.Internal
 		//---------------------------------------------------------
 		// Set values
 		//--------------------------------------------------------
-		static void Set(bool val,
-		                bool isNull,
-		                bool isChanged,
-		                Int64 handle,
-		                Int32 member,
-		                Int32 valueIndex,
-		                KeyValMode mode)
+		public static void Set(bool val,
+        		               bool isNull,
+        		               bool isChanged,
+        		               Int64 handle,
+        		               Int32 member,
+        		               Int32 valueIndex,
+        		               KeyValMode mode)
         {
             if (mode==KeyValMode.KeyMode)
             {
@@ -2475,13 +2485,13 @@ namespace Safir.Dob.Typesystem.Internal
                                              member, valueIndex, mode);
         }
 
-		static void Set(Int32 val,
-		                bool isNull,
-		                bool isChanged,
-		                Int64 handle,
-		                Int32 member,
-		                Int32 valueIndex,
-		                KeyValMode mode)
+        public static void Set(Int32 val,
+        		               bool isNull,
+        		               bool isChanged,
+        		               Int64 handle,
+        		               Int32 member,
+        		               Int32 valueIndex,
+        		               KeyValMode mode)
         {
             Kernel.DotsC_WriteInt32Member (handle, val,
                                            InternalOperations.ByteOf(isNull),
@@ -2489,13 +2499,13 @@ namespace Safir.Dob.Typesystem.Internal
                                            member, valueIndex, mode);
         }
 
-		static void Set(Int64 val,
-		                bool isNull,
-		                bool isChanged,
-		                Int64 handle,
-		                Int32 member,
-		                Int32 valueIndex,
-		                KeyValMode mode)
+        public static void Set(Int64 val,
+        		               bool isNull,
+        		               bool isChanged,
+        		               Int64 handle,
+        		               Int32 member,
+        		               Int32 valueIndex,
+        		               KeyValMode mode)
         {
             Kernel.DotsC_WriteInt64Member (handle, val,
                                            InternalOperations.ByteOf(isNull),
@@ -2503,13 +2513,13 @@ namespace Safir.Dob.Typesystem.Internal
                                            member, valueIndex, mode);
         }
 
-		static void Set(float val,
-		                bool isNull,
-		                bool isChanged,
-		                Int64 handle,
-		                Int32 member,
-		                Int32 valueIndex,
-		                KeyValMode mode)
+        public static void Set(float val,
+        		               bool isNull,
+        		               bool isChanged,
+        		               Int64 handle,
+        		               Int32 member,
+        		               Int32 valueIndex,
+        		               KeyValMode mode)
         {
             if (mode==KeyValMode.KeyMode)
             {
@@ -2521,13 +2531,13 @@ namespace Safir.Dob.Typesystem.Internal
                                              member, valueIndex, mode);
         }
 
-		static void Set(double val,
-		                bool isNull,
-		                bool isChanged,
-		                Int64 handle,
-		                Int32 member,
-		                Int32 valueIndex,
-		                KeyValMode mode)
+        public static void Set(double val,
+        		               bool isNull,
+        		               bool isChanged,
+        		               Int64 handle,
+        		               Int32 member,
+        		               Int32 valueIndex,
+        		               KeyValMode mode)
         {
             if (mode==KeyValMode.KeyMode)
             {
@@ -2539,13 +2549,13 @@ namespace Safir.Dob.Typesystem.Internal
                                              member, valueIndex, mode);
         }
 
-		static void Set(string val,
-		                bool isNull,
-		                bool isChanged,
-		                Int64 handle,
-		                Int32 member,
-		                Int32 valueIndex,
-		                KeyValMode mode)
+        public static void Set(string val,
+        		               bool isNull,
+        		               bool isChanged,
+        		               Int64 handle,
+        		               Int32 member,
+        		               Int32 valueIndex,
+        		               KeyValMode mode)
 		{
             if (isNull)
             {
@@ -2569,13 +2579,13 @@ namespace Safir.Dob.Typesystem.Internal
             }
 		}
 
-		static void Set(InstanceId val,
-		                bool isNull,
-		                bool isChanged,
-		                Int64 handle,
-		                Int32 member,
-		                Int32 valueIndex,
-		                KeyValMode mode)
+        public static void Set(InstanceId val,
+        		               bool isNull,
+        		               bool isChanged,
+        		               Int64 handle,
+        		               Int32 member,
+        		               Int32 valueIndex,
+        		               KeyValMode mode)
         {
             if (isNull)
             {
@@ -2610,13 +2620,13 @@ namespace Safir.Dob.Typesystem.Internal
             }
         }
 
-		static void Set(HandlerId val,
-		                bool isNull,
-		                bool isChanged,
-		                Int64 handle,
-		                Int32 member,
-		                Int32 valueIndex,
-		                KeyValMode mode)
+        public static void Set(HandlerId val,
+        		               bool isNull,
+        		               bool isChanged,
+        		               Int64 handle,
+        		               Int32 member,
+        		               Int32 valueIndex,
+        		               KeyValMode mode)
         {
             if (isNull)
             {
@@ -2651,13 +2661,13 @@ namespace Safir.Dob.Typesystem.Internal
             }
         }
 
-		static void Set(ChannelId val,
-		                bool isNull,
-		                bool isChanged,
-		                Int64 handle,
-		                Int32 member,
-		                Int32 valueIndex,
-		                KeyValMode mode)
+        public static void Set(ChannelId val,
+        		               bool isNull,
+        		               bool isChanged,
+        		               Int64 handle,
+        		               Int32 member,
+        		               Int32 valueIndex,
+        		               KeyValMode mode)
         {
             if (isNull)
             {
@@ -2692,13 +2702,13 @@ namespace Safir.Dob.Typesystem.Internal
             }
         }
 
-		static void Set(EntityId val,
-		                bool isNull,
-		                bool isChanged,
-		                Int64 handle,
-		                Int32 member,
-		                Int32 valueIndex,
-		                KeyValMode mode)
+        public static void Set(EntityId val,
+        		               bool isNull,
+        		               bool isChanged,
+        		               Int64 handle,
+        		               Int32 member,
+        		               Int32 valueIndex,
+        		               KeyValMode mode)
         {
             if (isNull)
             {
@@ -2739,13 +2749,13 @@ namespace Safir.Dob.Typesystem.Internal
             }
         }
 
-		static void Set(Safir.Dob.Typesystem.Object val,
-		                bool isNull,
-		                bool isChanged,
-		                Int64 handle,
-		                Int32 member,
-		                Int32 valueIndex,
-		                KeyValMode mode)
+        public static void Set(Safir.Dob.Typesystem.Object val,
+        		               bool isNull,
+        		               bool isChanged,
+        		               Int64 handle,
+        		               Int32 member,
+        		               Int32 valueIndex,
+        		               KeyValMode mode)
         {
             if (mode==KeyValMode.KeyMode)
             {
@@ -2780,13 +2790,13 @@ namespace Safir.Dob.Typesystem.Internal
             }
         }
 
-		static void Set(byte[] val,
-		                bool isNull,
-		                bool isChanged,
-		                Int64 handle,
-		                Int32 member,
-		                Int32 valueIndex,
-		                KeyValMode mode)
+        public static void Set(byte[] val,
+        		               bool isNull,
+        		               bool isChanged,
+        		               Int64 handle,
+        		               Int32 member,
+        		               Int32 valueIndex,
+        		               KeyValMode mode)
         {
             if (mode==KeyValMode.KeyMode)
             {
