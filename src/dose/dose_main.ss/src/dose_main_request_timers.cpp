@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 
+#if 0 //stewart
 #include "dose_main_request_timers.h"
 
 namespace Safir
@@ -56,3 +57,4 @@ namespace Internal
 }
 }
 }
+#endif

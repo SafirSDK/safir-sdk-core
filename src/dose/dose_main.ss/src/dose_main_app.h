@@ -37,7 +37,6 @@
 #include "BlockingHandler.h"
 #include "dose_main_connection_killer.h"
 #include "dose_main_lock_monitor.h"
-#include "dose_main_timers.h"
 #include <Safir/Dob/Internal/DoseMainCmd.h>
 
 //disable warnings in boost
@@ -112,8 +111,6 @@ namespace Internal
         Control::DoseMainCmdReceiver m_cmdReceiver;
 
         boost::asio::signal_set m_signalSet;
-
-        TimerHandler m_timerHandler;
 
         BlockingHandlers    m_blockingHandler;
 

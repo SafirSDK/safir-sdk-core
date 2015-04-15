@@ -24,7 +24,6 @@
 ******************************************************************************/
 
 #include "dose_main_app.h"
-#include "dose_main_timers.h"
 #include <Safir/Dob/Internal/ControlConfig.h>
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Dob/Internal/InternalDefs.h>
@@ -93,8 +92,7 @@ namespace Internal
                                     })),
 
 
-        m_signalSet(m_strand.get_io_service()),
-        m_timerHandler(m_strand)
+        m_signalSet(m_strand.get_io_service())
     {
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
         m_signalSet.add(SIGABRT);
@@ -216,7 +214,6 @@ namespace Internal
     {
         m_cmdReceiver.Stop();
         m_nodeInfoHandler->Stop();
-        m_timerHandler.Stop();
         m_lockMonitor->Stop();
 
         m_connectionHandler->Stop();

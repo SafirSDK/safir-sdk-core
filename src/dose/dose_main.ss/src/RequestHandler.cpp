@@ -25,7 +25,6 @@
 
 #include "RequestHandler.h"
 
-#include "dose_main_timers.h"
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Dob/Internal/ServiceTypes.h>
 #include <Safir/Dob/Internal/EntityTypes.h>
@@ -52,6 +51,11 @@ namespace Dob
 {
 namespace Internal
 {
+    class TimerHandler
+    {
+        //TODO remove
+    };
+    
     static const Dob::Typesystem::Si32::Second deletedConnReqTimeout = 0.5;
 
     RequestHandler::RequestHandler(Com::Communication& communication)
