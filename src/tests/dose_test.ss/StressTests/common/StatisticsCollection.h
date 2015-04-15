@@ -44,7 +44,9 @@
 
 double GetUtcTime();
 
-//TODO: Make all these thread safe!
+//Warning: these are not really thread safe, even though they are being
+//used as if they were. This might cause a crash if you're unlucky...
+//But it is just test code anyway...
 
 class StatisticsCollection;
 
