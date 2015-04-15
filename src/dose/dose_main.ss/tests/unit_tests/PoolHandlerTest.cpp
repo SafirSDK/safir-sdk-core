@@ -22,6 +22,7 @@
 *
 ******************************************************************************/
 #include <set>
+#include <atomic>
 #include <boost/make_shared.hpp>
 #include <boost/thread.hpp>
 #include "../../src/PoolDistributionRequestSender.h"
@@ -144,6 +145,7 @@ public:
     int64_t m_nodeId;
     int64_t m_nodeTypeId;
 
+    // map <nodeId,  (started, completionHandler) >
     static std::map<int64_t, std::pair<bool, std::function<void(int64_t)> > > PoolDistributions;
 };
 std::map<int64_t, std::pair<bool, std::function<void(int64_t)> > > Pd::PoolDistributions;
@@ -181,6 +183,15 @@ BOOST_AUTO_TEST_CASE( PoolDistributionHandlerTest )
     pdh.AddPoolDistribution(1, 1);
     pdh.AddPoolDistribution(2, 1);
 
+    std::atomic_bool hasRun;
+    hasRun=false;
+    auto WaitUntilReady=[&]
+    {
+        while(!hasRun)
+            boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
+        hasRun=false;
+    };
+
     pdh.m_strand.post([&]
     {
         dump();
@@ -190,7 +201,10 @@ BOOST_AUTO_TEST_CASE( PoolDistributionHandlerTest )
         BOOST_CHECK_EQUAL(pdh.m_pendingPoolDistributions.size(), 2u);
 
         complete(1);
+        hasRun=true;
     });
+
+    WaitUntilReady();  //make sure the above post is executed before we add next
 
     pdh.m_strand.post([&]
     {
@@ -200,12 +214,16 @@ BOOST_AUTO_TEST_CASE( PoolDistributionHandlerTest )
         BOOST_CHECK(Pd::PoolDistributions[2].first==true);
 
         complete(2);
+        hasRun=true;
     });
+
+    WaitUntilReady();
 
     pdh.m_strand.post([&]
     {
         BOOST_CHECK_EQUAL(pdh.m_pendingPoolDistributions.size(), 0u);
         pdh.AddPoolDistribution(3, 1);
+        hasRun=true;
     });
 
     pdh.m_strand.post([&]
@@ -215,7 +233,10 @@ BOOST_AUTO_TEST_CASE( PoolDistributionHandlerTest )
         BOOST_CHECK_EQUAL(pdh.m_pendingPoolDistributions.size(), 1u);
 
         complete(3);
+        hasRun=true;
     });
+
+    WaitUntilReady();
 
     pdh.m_strand.post([&]
     {
@@ -224,7 +245,10 @@ BOOST_AUTO_TEST_CASE( PoolDistributionHandlerTest )
         BOOST_CHECK(Pd::PoolDistributions[1].first==true);
         BOOST_CHECK(Pd::PoolDistributions[2].first==true);
         BOOST_CHECK(Pd::PoolDistributions[3].first==true);
+        hasRun=true;
     });
+
+    WaitUntilReady();
 
     work.reset();
     threads.join_all();
