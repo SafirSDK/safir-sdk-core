@@ -1444,6 +1444,8 @@ namespace Internal
     {
         std::string name(Dob::Typesystem::Utilities::ToUtf8
                          (Dob::ThisNodeParameters::Name()));
+        name.append(".");
+        name.append(boost::lexical_cast<std::string>(Connections::Instance().NodeId()));
         name.append(";");
         name.append(boost::lexical_cast<std::string>(contextId));
         name.append(";");
