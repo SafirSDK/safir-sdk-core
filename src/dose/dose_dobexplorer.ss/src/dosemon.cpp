@@ -32,6 +32,7 @@
 #include "SystemPicturePage.h"
 #include "numberofentities.h"
 #include "RawStatisticsPage.h"
+#include <Safir/Dob/Internal/Initialize.h>
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Typesystem/Utilities.h>
 #include <Safir/Dob/Entity.h>
@@ -59,6 +60,8 @@ namespace
 DoseMon::DoseMon(QWidget * /*parent*/)
 {
     setupUi(this); // this sets up GUI
+
+    Safir::Dob::Internal::InitializeDoseInternalFromApp();
 
     while (tabWidget->currentIndex() != -1)
     {
