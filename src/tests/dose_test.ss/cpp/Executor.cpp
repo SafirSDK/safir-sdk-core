@@ -36,10 +36,6 @@
 #include <Safir/Dob/ConnectionAspectMisc.h>
 #include <Safir/Dob/NodeInfo.h>
 #include <Safir/Dob/ThisNodeParameters.h>
-#if 0 //stewart
-#include "dosecom_stuff.h"
-#endif
-
 
 #ifdef _MSC_VER
   #pragma warning(push)
@@ -226,20 +222,6 @@ Executor::ExecuteAction(DoseTest::ActionPtr action)
             {
                 m_dispatchTestConnection = !action->Inhibit().GetVal();
                 lout << "InhibitDispatch set to " << m_dispatchTestConnection << std::endl;
-            }
-        }
-        break;
-
-    case DoseTest::ActionEnum::InhibitOutgoingTraffic:
-        {
-            if (m_isActive)
-            {
-#if 0 //stewart
-                DOSE_SHARED_DATA_S * pShm = (DOSE_SHARED_DATA_S *) Get_NodeSharedData_Pointer();
-
-                pShm->InhibitOutgoingTraffic = action->Inhibit().GetVal();
-                lout << "InhibitOutgoingTraffic set to " << pShm->InhibitOutgoingTraffic << std::endl;
-#endif
             }
         }
         break;

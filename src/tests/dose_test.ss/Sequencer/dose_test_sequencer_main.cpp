@@ -102,6 +102,7 @@ struct CommandLineResults
     bool noTimeout;
     int testcaseNo;
     int context;
+    bool multinode;
 };
 
 const CommandLineResults & HandleCommandLine(int argc, char* argv[])
@@ -118,7 +119,8 @@ const CommandLineResults & HandleCommandLine(int argc, char* argv[])
             ("first", po::value<int>(&results.first)->default_value(0), "first testcase")
             ("last", po::value<int>(&results.last)->default_value(9999), "last testcase")
             ("no-timeout", "Do not time out and exit if a partner does not respond for a long time")
-            ("context", po::value<int>(&results.context)->default_value(0), "default context for partner test connection (-1 for random)");
+            ("context", po::value<int>(&results.context)->default_value(0), "default context for partner test connection (-1 for random)")
+            ("multinode", "Run in multinode mode");
 
         po::variables_map vm;
         po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -131,7 +133,7 @@ const CommandLineResults & HandleCommandLine(int argc, char* argv[])
             std::wcout << ostr.str().c_str() << std::endl;
             exit(0);
         }
-        
+
         TestCaseReader::Initialize(results.testcaseDirectory);
 
         if (results.testcaseDirectory.empty())
@@ -140,6 +142,7 @@ const CommandLineResults & HandleCommandLine(int argc, char* argv[])
         }
 
         results.noTimeout = vm.count("no-timeout") != 0;
+        results.multinode = vm.count("multinode") != 0;
 
         if (results.languages.size() != 3)
         {
@@ -179,7 +182,7 @@ int main(int argc, char* argv[])
 
         boost::asio::io_service ioService;
         boost::asio::io_service::work keepRunning(ioService);
-    
+
         StopHandler stopHandler;
 
         Safir::Dob::Connection connection;
@@ -205,11 +208,12 @@ int main(int argc, char* argv[])
 
         std::wcout << "Context: " << context << std::endl;
 
-        Sequencer sequencer(commandLine.first, 
-                            commandLine.last, 
-                            languages, 
-                            commandLine.noTimeout, 
-                            context, 
+        Sequencer sequencer(commandLine.first,
+                            commandLine.last,
+                            languages,
+                            commandLine.multinode,
+                            commandLine.noTimeout,
+                            context,
                             ioService);
 
         ioService.run();
@@ -229,4 +233,3 @@ int main(int argc, char* argv[])
 
     return 0;
 }
-

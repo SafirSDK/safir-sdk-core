@@ -144,7 +144,7 @@ namespace dose_test_dotnet
                         }
 
                         m_actionReceiver.ActionHandled();
-                          
+
                         if (actionAfterAck)
                         {
                             HandleAction(action);
@@ -152,21 +152,11 @@ namespace dose_test_dotnet
                         break;
                 }
             }
- 
+
             //we apparently have to close the connection to not leave a dispatch thread running in the bg.
             m_testConnection.Close();
             m_controlConnection.Close();
         }
-
-#if removed //stewart
-
-        [DllImport(DOSE_TEST_UTIL, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void InhibitOutgoingTraffic(byte inhibit,
-                                                           out byte success);
-
-        [DllImport(DOSE_TEST_UTIL, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void InhibitOutgoingTrafficStatus(out byte isInhibited);
-#endif
 
         void HandleSequencerState(DoseTest.Sequencer sequencerState)
         {
@@ -232,7 +222,7 @@ namespace dose_test_dotnet
 
                 m_controlConnection.Delete(m_partnerEntityId, new Safir.Dob.Typesystem.HandlerId(m_instance));
                 m_controlConnection.UnregisterHandler(m_partnerEntityId.TypeId,new Safir.Dob.Typesystem.HandlerId(m_instance));
-        
+
                 m_controlConnection.UnregisterHandler(DoseTest.Dump.ClassTypeId,new Safir.Dob.Typesystem.HandlerId(m_instance));
                 m_isActive = false;
 
@@ -441,17 +431,6 @@ namespace dose_test_dotnet
                     {
                         m_dispatchTestConnection = !action.Inhibit.Val;
                         Logger.Instance.WriteLine("InhibitDispatch set to " + m_dispatchTestConnection);
-                    }
-                    break;
-
-                case DoseTest.ActionEnum.Enumeration.InhibitOutgoingTraffic:
-                    if (m_isActive)
-                    {
-#if removed //stewart
-                        byte success;
-                        InhibitOutgoingTraffic(ByteOf(action.Inhibit.Val), out success);
-                        Logger.Instance.WriteLine("InhibitOutgoingTraffic set to " + ByteOf(action.Inhibit.Val));
-#endif
                     }
                     break;
 
@@ -668,7 +647,7 @@ namespace dose_test_dotnet
         }
         #endregion
 
-       
+
 
         #region Data members
 
@@ -682,7 +661,7 @@ namespace dose_test_dotnet
         private bool m_isActive = false;
         private Consumer[] m_consumers;
         private int m_defaultContext = 0;
- 
+
         private Safir.Dob.Connection m_controlConnection = new Safir.Dob.Connection();
         private Safir.Dob.Connection m_testConnection = new Safir.Dob.Connection();
         private bool m_dispatchTestConnection = true;
@@ -697,7 +676,7 @@ namespace dose_test_dotnet
         private Dispatcher m_testDispatcher;
         private StopHandler m_testStopHandler;
         private ActionReceiver m_actionReceiver;
- 
+
 
         Dictionary<Safir.Dob.CallbackId.Enumeration, List<DoseTest.Action>> m_callbackActions;
         #endregion
@@ -717,7 +696,7 @@ namespace dose_test_dotnet
         }
 
         #endregion
-       
+
     }
 
     #region ActionReceiver Class
@@ -734,7 +713,7 @@ namespace dose_test_dotnet
         private Socket m_acceptor;
         private int m_instance;
 
-        public ActionReceiver(int instance, AutoResetEvent dataReady) 
+        public ActionReceiver(int instance, AutoResetEvent dataReady)
         {
             m_instance=instance;
             m_dataReady = dataReady;
@@ -756,7 +735,7 @@ namespace dose_test_dotnet
             catch (Exception e)
             {
                 System.Console.WriteLine("Action handled failed: " + e);
-            } 
+            }
         }
 
         public void Open()
@@ -770,7 +749,7 @@ namespace dose_test_dotnet
                     m_acceptor = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                     m_acceptor.Bind(new IPEndPoint(IPAddress.Any, port));
                     m_acceptor.Listen(200);
-                   
+
                     System.Console.WriteLine("accepting connections on port " + port);
                     m_socket = m_acceptor;
                     m_socket.BeginAccept(new AsyncCallback(AcceptCallback), m_socket);

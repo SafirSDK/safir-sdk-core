@@ -327,23 +327,6 @@ class Executor implements
                 }
                 break;
 
-            case INHIBIT_OUTGOING_TRAFFIC:
-                if (m_isActive) {
-                    /* stewart
-                    boolean ok = com.saabgroup.safir.dob.test.util.Utilities.InhibitOutgoingTraffic(action.inhibit().getVal());
-
-                    if (ok) {
-                        Logger.instance().println("InhibitOutgoingTraffic set to "
-                                + (com.saabgroup.safir.dob.test.util.Utilities.IsOutgoingTrafficInhibited() ? 1 : 0));
-                    } else {
-                        Logger.instance().println("InhibitOutgoingTraffic failed!");
-
-                    }
-                    */
-                }
-                break;
-
-
             case PRINT:
                 if (m_isActive) {
                     Logger.instance().println(action.printString().getVal());
@@ -506,7 +489,6 @@ class Executor implements
 
     public void onDeletedEntity(com.saabgroup.safir.dob.EntityProxy entityProxy,
                                 boolean deletedByOwner) {
-        //ignore deletes since they may be due to an inhibitoutgoingtraffic on the other side
     }
 
     //

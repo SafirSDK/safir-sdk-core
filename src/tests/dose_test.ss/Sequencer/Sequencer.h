@@ -84,6 +84,7 @@ public:
     Sequencer(const int startTc,
               const int stopTc,
               const Languages & languages,
+              const bool multinode,
               const bool noTimeout,
               const int contextId,
               boost::asio::io_service& ioService);

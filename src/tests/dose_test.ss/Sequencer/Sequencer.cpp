@@ -112,6 +112,7 @@ namespace
 Sequencer::Sequencer(const int startTc,
                      const int stopTc,
                      const Languages & languages,
+                     const bool multinode,
                      const bool noTimeout,
                      const int contextId,
                      boost::asio::io_service& ioService):
@@ -126,23 +127,16 @@ Sequencer::Sequencer(const int startTc,
     m_languages(languages),
     m_noTimeout(noTimeout),
     m_isDumpRequested(false),
-    m_contextId(contextId),
-    m_testConfig()
+    m_contextId(contextId)
 {
-#if 0 //stewart
-    // Find out if we are running in standalone or multinode configuration
-    Safir::Dob::DistributionChannelPtr systemChannel = Safir::Dob::DistributionChannelParameters::DistributionChannels(0);
-    if (systemChannel->MulticastAddress().Utf8String() == "127.0.0.1")
-    {
-#endif
-        m_testConfig = DoseTest::TestConfigEnum::StandAlone;
-#if 0 //stewart
-    }
-    else
+    if (multinode)
     {
         m_testConfig = DoseTest::TestConfigEnum::Multinode;
     }
-#endif
+    else
+    {
+        m_testConfig = DoseTest::TestConfigEnum::StandAlone;
+    }
 
     m_connection.Attach();
 }
