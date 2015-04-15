@@ -55,17 +55,6 @@ pragma Warnings ("D"); -- turn off warnings for implicit dereference
 
 package body Executor is
 
-   --  stewart
-   --  package C renames Interfaces.C;
-
-   --  procedure Inhibit_Outgoing_Traffic
-   --    (Inhibit   : in  C.char;
-   --     Success   : out C.char);
-   --  pragma Import (C, Inhibit_Outgoing_Traffic, "InhibitOutgoingTraffic");
-
-   --  procedure Inhibit_Outgoing_Traffic_Status (Is_Inhibited : out C.char);
-   --  pragma Import (C, Inhibit_Outgoing_Traffic_Status, "InhibitOutgoingTrafficStatus");
-
    type Signalled_Events_T is array (Event_T) of Boolean;
    All_Unsignalled : constant Signalled_Events_T := (others => False);
 
@@ -577,20 +566,6 @@ package body Executor is
             if Self.Is_Active then
                Self.Dispatch_Test_Connection := not Action.Ref.Inhibit.Get_Val;
                Logger.Put_Line ("InhibitDispatch set to " & Boolean'Wide_Image (Self.Dispatch_Test_Connection));
-            end if;
-
-         when Dose_Test.Action_Enum.Inhibit_Outgoing_Traffic =>
-            if Self.Is_Active then
-               declare
-                  -- Success : C.char;
-                  -- Inhibit : constant C.char := C.char'Val (Boolean'Pos (Action.Ref.Inhibit.Get_Val));
-                  -- Is_Inhibited : C.char;
-               begin
-                  -- stewart Inhibit_Outgoing_Traffic (Inhibit, Success);
-                  -- stewart Inhibit_Outgoing_Traffic_Status (Is_Inhibited);
-                  -- stewart Logger.Put_Line ("InhibitOutgoingTraffic set to" & Integer'Wide_Image (C.char'Pos (Is_Inhibited)));
-                  null;
-               end;
             end if;
 
          when Dose_Test.Action_Enum.Print =>
