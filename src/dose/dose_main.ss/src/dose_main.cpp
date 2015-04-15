@@ -85,13 +85,12 @@ int main()
                                     [](void*){Safir::Utilities::CrashReporter::Stop();});
 
     boost::asio::io_service ioService;
-    boost::asio::io_service::strand strand(ioService);
 
     std::atomic<bool> success {true};
 
     try
     {
-        Safir::Dob::Internal::DoseApp theApp(strand);
+        Safir::Dob::Internal::DoseApp theApp(ioService);
 
         //Set number of threads to at least 2, or the number of cpu kernels
         auto nbrOfThreads = std::max<size_t>(10, boost::thread::hardware_concurrency());

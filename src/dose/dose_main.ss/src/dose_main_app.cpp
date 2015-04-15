@@ -56,12 +56,13 @@ namespace Internal
         }
     }
 
-    DoseApp::DoseApp(boost::asio::io_service::strand& strand):
-        m_strand(strand),
-        m_wcoutStrand(m_strand.get_io_service()),
-        m_work(new boost::asio::io_service::work(m_strand.get_io_service())),
+    DoseApp::DoseApp(boost::asio::io_service& ioService):
+        m_ioService(ioService),
+        m_strand(ioService),
+        m_wcoutStrand(ioService),
+        m_work(new boost::asio::io_service::work(ioService)),
         m_distribution(),
-        m_cmdReceiver(m_strand.get_io_service(),
+        m_cmdReceiver(ioService,
                       m_strand.wrap([this](const std::string& nodeName,
                                            int64_t nodeId,
                                            int64_t nodeTypeId,
@@ -92,7 +93,7 @@ namespace Internal
                                     })),
 
 
-        m_signalSet(m_strand.get_io_service())
+        m_signalSet(ioService)
     {
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
         m_signalSet.add(SIGABRT);
@@ -156,9 +157,9 @@ namespace Internal
     {
         m_nodeId = nodeId;
 
-        m_memoryMonitor.reset(new MemoryMonitor(m_strand.get_io_service()));
+        m_memoryMonitor.reset(new MemoryMonitor(m_ioService));
 
-        m_distribution.reset(new Distribution(m_strand.get_io_service(),
+        m_distribution.reset(new Distribution(m_ioService,
                                               nodeName,
                                               nodeId,
                                               nodeTypeId,
@@ -172,19 +173,19 @@ namespace Internal
 
         m_requestHandler.reset(new RequestHandler(m_distribution->GetCommunication()));
 
-        m_pendingRegistrationHandler.reset(new PendingRegistrationHandler(m_strand.get_io_service(),
+        m_pendingRegistrationHandler.reset(new PendingRegistrationHandler(m_ioService,
                                                                           *m_distribution));
 
-        m_poolHandler.reset(new PoolHandler(m_strand.get_io_service(),
+        m_poolHandler.reset(new PoolHandler(m_ioService,
                                             *m_distribution,
                                             [this](int64_t tid){m_pendingRegistrationHandler->CheckForPending(tid);},
                                             [this](const std::string& str){LogStatus(str);}));
 
-        m_connectionHandler.reset(new ConnectionHandler(m_strand.get_io_service(),
+        m_connectionHandler.reset(new ConnectionHandler(m_ioService,
                                                         *m_distribution,
                                                         [this](const ConnectionPtr& connection, bool disconnecting){OnAppEvent(connection, disconnecting);}));
 
-        m_nodeInfoHandler.reset(new NodeInfoHandler(m_strand.get_io_service(), *m_distribution));
+        m_nodeInfoHandler.reset(new NodeInfoHandler(m_ioService, *m_distribution));
     }
 
     void DoseApp::InjectNode(const std::string& nodeName,
