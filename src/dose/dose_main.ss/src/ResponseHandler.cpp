@@ -168,8 +168,15 @@ namespace Internal
                                                      DistributionData::DropReference(data);
                                                  });
 
+       //if the requestor node is gone we just discard the response
+       const auto nodeType = m_liveNodes.find(toConnection.m_node);
+       if (nodeType == m_liveNodes.end())
+       {
+           return true;
+       }
+
        return m_distribution.GetCommunication().Send(toConnection.m_node,
-                                                     m_liveNodes[toConnection.m_node],
+                                                     nodeType->second,
                                                      responseP,
                                                      response.Size(),
                                                      m_dataTypeIdentifier,
