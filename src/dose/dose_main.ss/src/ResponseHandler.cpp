@@ -60,8 +60,8 @@ namespace Internal
                                                            m_liveNodes.erase(nodeId);
                                                        }));
         m_distribution.GetCommunication().SetDataReceiver([this]
-                                                          (const int64_t fromNodeId,
-                                                           int64_t fromNodeType,
+                                                          (const int64_t /*fromNodeId*/,
+                                                           int64_t /*fromNodeType*/,
                                                            const char* data,
                                                            size_t /*size*/)
                                                           {
