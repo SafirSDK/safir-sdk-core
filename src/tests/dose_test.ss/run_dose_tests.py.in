@@ -367,8 +367,8 @@ class Runner:
         if parameters.multinode:
             os.environ["SAFIR_INSTANCE"] = "1"
             log(" + starting slave node")
-            self.safir_control = self.__launchProcess("safir_control.1",
-                                                      parameters.safir_control_cmd + ("--force-id", "888888"))
+            self.safir_control_1 = self.__launchProcess("safir_control.1",
+                                                        parameters.safir_control_cmd + ("--force-id", "888888"))
 
             self.__launchProcess("dope_main.1", parameters.dope_main_cmd)
             self.__launchProcess("foreach.1", parameters.foreach_cmd)
@@ -400,6 +400,8 @@ class Runner:
 
     def killprocs(self, results):
         self.__kill("safir_control", self.safir_control,120) #We give safir_control some extra time to stop
+        if hasattr(self,"safir_control_1"):
+            self.__kill("safir_control", self.safir_control_1,120) #We give safir_control some extra time to stop
 
         #Processes have up to 20 seconds to exit from the stop order
         future = time.time() + 20 #ten seconds
@@ -438,6 +440,8 @@ class Runner:
 
     def wait_for_safir_control(self):
         self.safir_control.wait()
+        if hasattr(self,safir_control_1):
+            self.safir_control_1.wait()
 
 class JenkinsInterface:
     def __init__(self, parameters):
