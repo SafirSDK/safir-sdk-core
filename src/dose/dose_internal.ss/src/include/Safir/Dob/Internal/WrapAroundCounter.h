@@ -28,6 +28,7 @@
 
 #include <iostream>
 #include <boost/limits.hpp>
+#include <boost/functional/hash.hpp>
 #include <Safir/Dob/Typesystem/Defs.h>
 
 namespace Safir
@@ -114,8 +115,15 @@ namespace Internal
     {
         return out << counter.GetCounter();
     }
+
+    inline std::size_t hash_value(Safir::Dob::Internal::WrapAroundCounter const& c)
+    {
+        boost::hash<int> hasher;
+        return hasher(c.GetCounter());
+    }
 }
 }
 }
+
 
 #endif

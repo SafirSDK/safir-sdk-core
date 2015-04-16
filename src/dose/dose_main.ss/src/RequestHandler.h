@@ -28,9 +28,23 @@
 #include <Safir/Dob/Internal/ConnectionConsumerPair.h>
 #include <Safir/Dob/Internal/DistributionData.h>
 #include <deque>
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
+#include <boost/functional/hash.hpp>
+#include <memory>
 #include "BlockingHandler.h"
 #include "ResponseHandler.h"
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
+#endif
+
+#include <boost/asio.hpp>
+#include <boost/asio/steady_timer.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 namespace Safir
 {
@@ -48,47 +62,42 @@ namespace Internal
     {
     public:
 
-        RequestHandler(Com::Communication& communication);
+        RequestHandler(boost::asio::io_service& ioService,
+                       Distribution&            distribution);
 
+        // Handle outgoing and incoming requests for this connection
+        void HandleRequests(const ConnectionPtr& connection);
 
-        void DistributeRequests(const ConnectionPtr& connection);
-
-        void HandleDisconnect(const ConnectionPtr& connection);
-
-#if 0 //TODO stewart
-        //when a request is blocking on an overflow to dose_com, this gets called on not overflow.
-        void HandlePendingExternalRequest(const Identifier blockingConnection);
-#endif
+        void HandleDisconnect(const ConnectionPtr& deletedConnection);
 
     private:
 
         void DispatchRequest(DistributionData request,
-                             bool & handled,
-                             const ConnectionPtr & sender,
-                             ConnectionIdSet & skipList);
+                             bool& handled,
+                             const ConnectionPtr& sender,
+                             ConnectionIdSet& skipList);
 
         //Returns true if the request was successfully posted to someone else, and false otherwise
-        bool HandleRequest(const DistributionData & request,
-                           const ConnectionConsumerPair& receiver);
-
+        bool DistributeRequest(const DistributionData& request,
+                               const ConnectionConsumerPair& receiver);
 
         //called from HandleDisconnect
-        void FinalizeOutstandingRequests(const ConnectionPtr & toConnection, const ConnectionPtr & fromConnection);
+        void FinalizeOutstandingRequests(const ConnectionPtr& toConnection, const ConnectionPtr& fromConnection);
 
-        bool HandleRequest_LocalSender_LocalReceiver(const DistributionData & request,
-                                                     const ConnectionPtr& sender,
-                                                     const ConnectionConsumerPair& receiver);
+        bool DistributeRequestLocalSenderLocalReceiver(const DistributionData& request,
+                                                       const ConnectionPtr& sender,
+                                                       const ConnectionConsumerPair& receiver);
 
-        bool HandleRequest_LocalSender_ExternReceiver(const DistributionData & request,
-                                                      const ConnectionPtr & sender);
+        bool DistributeRequestLocalSenderExternReceiver(const DistributionData& request,
+                                                        const ConnectionPtr& sender,
+                                                        const ConnectionConsumerPair& receiver);
 
-        bool HandleRequest_ExternSender_LocalReceiver(const DistributionData & request,
-                                                      const ConnectionConsumerPair & receiver);
+        bool DistributeRequestExternSenderLocalReceiver(const DistributionData& request,
+                                                        const ConnectionConsumerPair& receiver);
 
-        void StartTimer(const ConnectionPtr & sender,
-                        const DistributionData & request);
-
-        // TODO stewart void HandleTimeout(const TimerInfoPtr& timer) override;
+        void StartOutReqTimer(const ConnectionPtr& sender,
+                              const DistributionData& request,
+                              boost::asio::steady_timer& timer);
 
         bool PostRequest(const ConnectionConsumerPair& receiver,
                          const DistributionData& request); //is not const-ref since it needs to set the responseId
@@ -97,24 +106,47 @@ namespace Internal
                               const InternalRequestId&     reqId,
                               const ConnectionPtr&         sender);
 
-        void AddPendingRequest(const Identifier blockingConn, const DistributionData & request);
-        void RemovePendingRequest(const Identifier blockingConn, const InternalRequestId& requestId);
-        bool ReceiverHasOtherPendingRequest(const Identifier receiver, const InternalRequestId& requestId) const;
+        void HandleMessageFromRemoteNode(int64_t        fromNodeId,
+                                         int64_t        fromNodeType,
+                                         const char*    data);
 
-        //TimerHandler& m_timerHandler;
+        void ReleaseAllBlocked(int64_t blockingConnection);
 
-        typedef std::deque<DistributionData> PendingRequests;
-        typedef boost::unordered_map<Identifier, PendingRequests> PendingRequestTable;
+        void HandlePendingExternalRequest(int64_t blockingConnection);
 
-        PendingRequestTable m_pendingRequests;
+        void SetShortTimeout(const DistributionData& request,
+                             const ConnectionPtr& deletedConn,
+                             const ConnectionPtr & fromConnection);
 
-        Dob::Typesystem::Si64::Second GetTimeout(const Safir::Dob::Typesystem::TypeId typeId) const;
+        void AddPendingRequest(const int64_t blockingConn, const DistributionData & request);
+        void RemovePendingRequest(const int64_t blockingConn, const InternalRequestId& requestId);
+        bool ReceiverHasOtherPendingRequest(const int64_t receiver, const InternalRequestId& requestId) const;
+
+        using PendingRequest = std::pair<DistributionData, std::unique_ptr<boost::asio::steady_timer>>;
+
+        using PendingRequestsQueue = std::deque<PendingRequest>;
+
+        using PendingRequestTable = boost::unordered_map<int64_t, PendingRequestsQueue>;
+
+        boost::asio::io_service&            m_ioService;
+        boost::asio::io_service::strand     m_strand;
+        Distribution&                       m_distribution;
+        Com::Communication&                 m_communication;
+        const int64_t                       m_dataTypeIdentifier;
+        const int64_t                       m_communicationVirtualConnectionId;
+        std::map<int64_t,int64_t>           m_liveNodes;
+        PendingRequestTable                 m_pendingRequests;
+
+        std::unordered_map<std::pair<int64_t, InternalRequestId>,
+                           std::unique_ptr<boost::asio::steady_timer>,
+                           boost::hash<std::pair<int64_t, InternalRequestId>>> m_outReqTimers;
+
+        boost::chrono::milliseconds GetTimeout(const Safir::Dob::Typesystem::TypeId typeId) const;
         typedef boost::unordered_map<Typesystem::TypeId, Typesystem::Si64::Second> TimeoutTable;
         mutable TimeoutTable m_timeoutTable;
 
-        BlockingHandler m_blockingHandler;
-        // TODO stewart ResponseHandler m_responseHandler;
-        Com::Communication& m_communication;
+        BlockingHandlers m_blockingHandler;
+        ResponseHandler m_responseHandler;
     };
 }
 }

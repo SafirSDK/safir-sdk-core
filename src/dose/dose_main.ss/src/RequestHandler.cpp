@@ -39,6 +39,7 @@
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
+#include <Safir/Utilities/Internal/MakeUnique.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Dob/NotFoundException.h>
 #include <Safir/Dob/SuccessResponse.h>
@@ -51,35 +52,16 @@ namespace Dob
 {
 namespace Internal
 {
-    class TimerHandler
-    {
-        //TODO remove
-    };
-    
-    static const Dob::Typesystem::Si32::Second deletedConnReqTimeout = 0.5;
 
-    RequestHandler::RequestHandler(Com::Communication& communication)
-        : m_communication(communication)
-
-    {
-        //TODO stewart
-//        RequestTimers::m_localReqTimerId =
-//            m_timerHandler.RegisterTimeoutHandler
-//            (L"Safir::Dob::Internal::RequestHandler::localReqTimeout",
-//             *this);
-
-//        RequestTimers::m_externalReqTimerId =
-//            m_timerHandler.RegisterTimeoutHandler
-//            (L"Safir::Dob::Internal::RequestHandler::externalReqTimeout",
-//             *this);
-    }
-
+// anonymous namespace for internal non-member functions
+namespace
+{
     const ConnectionConsumerPair GetRegistrationOwner(const DistributionData& request)
     {
         const Typesystem::TypeId typeId = request.GetTypeId();
 
         // If it is a ContextShared type we serach for the owner in context 0, otherwise
-        // we search in the same context as the sender 
+        // we search in the same context as the sender
         ContextId context;
         if (ContextSharedTable::Instance().IsContextShared(typeId))
         {
@@ -103,29 +85,146 @@ namespace Internal
 
     }
 
+}
+
+    RequestHandler::RequestHandler(boost::asio::io_service& ioService,
+                                   Distribution&            distribution)
+        : m_ioService(ioService),
+          m_strand(ioService),
+          m_distribution(distribution),
+          m_communication(distribution.GetCommunication()),
+          m_dataTypeIdentifier(LlufId_Generate64("RequestHandler")),
+          m_communicationVirtualConnectionId(LlufId_Generate64("CommunicationVirtualConnectionId")),
+          m_responseHandler(ioService,
+                            distribution,
+                            [this]
+                            (const ConnectionId& connectionId,
+                             const InternalRequestId requestId)
+                             {
+                                m_outReqTimers.erase(std::make_pair(connectionId.m_id, requestId));
+                             })
+
+    {
+        m_distribution.SubscribeNodeEvents(
+                    // Executed when a 'node included' cb is received
+                    m_strand.wrap([this](const std::string& /*nodeName*/,
+                                         const int64_t nodeId,
+                                         const int64_t nodeTypeId,
+                                         const std::string& /*dataAddress*/)
+                    {
+                        if (nodeId != m_distribution.GetNodeId())
+                        {
+                            m_liveNodes.insert(std::make_pair(nodeId,
+                                                              nodeTypeId));
+                        }
+                    }),
+                    // Executed when a 'node excluded' cb is received
+                    m_strand.wrap([this](const int64_t nodeId,
+                                         const int64_t /*nodeTypeId*/)
+                    {
+                        m_liveNodes.erase(nodeId);
+                    }));
+
+        m_communication.SetQueueNotFullCallback(
+                    // Executed when Communication indicates 'queue not full'
+                    m_strand.wrap([this] (int64_t /*nodeTypeId*/)
+                    {
+                        // Retry all connections that are waiting for Communication
+                        ReleaseAllBlocked(m_communicationVirtualConnectionId);
+                    }),
+                    0); // All node types
+
+        m_communication.SetDataReceiver(
+                    // Executed when a request message is received from external node
+                    m_strand.wrap([this]
+                                  (int64_t fromNodeId,
+                                   int64_t fromNodeType,
+                                   const char* data,
+                                   size_t /*size*/)
+                    {
+                        HandleMessageFromRemoteNode(fromNodeId, fromNodeType, data);
+                    }),
+                    m_dataTypeIdentifier,
+                    DistributionData::NewData);
+    }
+
+    void RequestHandler::HandleRequests(const ConnectionPtr& connection)
+    {
+        m_strand.dispatch([this, connection] ()
+        {
+            // First, try to distribute out requests for this connection
+            lllog(8) << "DOSE_MAIN: Distributing requests (out) for connection "
+                     << connection->Id() << "." << std::endl;
+
+            ConnectionIdSet skipList;
+            connection->GetRequestOutQueue().DispatchRequests([this, connection, &skipList]
+                                                              (const DistributionData& request,
+                                                               bool& handled)
+                                                              {
+                                                                  DispatchRequest(request,
+                                                                                  handled,
+                                                                                  connection,
+                                                                                  skipList);
+                                                              });
+
+            // Second, it could be that this connection now has empty slots on its in queue
+            // Get any connection blocking on this connection and try to distribute its requests.
+            ReleaseAllBlocked(connection->Id().m_id);
+        });
+    }
+
+    void RequestHandler::HandleDisconnect(const ConnectionPtr& deletedConnection)
+    {
+        m_strand.dispatch([this, deletedConnection] ()
+        {
+            // All requests that have been dispatched should have their timeout shortened, so that if
+            // the deleted connection (on a remote node) has not already sent a response
+            // (which we have not yet received) the request will timeout shortly.
+            Connections::Instance().ForEachConnectionPtr(
+                        [this, deletedConnection]
+                        (const ConnectionPtr& fromConnection)
+                        {
+                            if (!fromConnection->IsLocal())
+                            {
+                                return;
+                            }
+
+                            fromConnection->GetRequestOutQueue().ForEachDispatchedRequest(
+                                        [this, deletedConnection, fromConnection]
+                                        (const DistributionData& request)
+                                        {
+                                            SetShortTimeout(request, deletedConnection, fromConnection);
+                                        });
+                        });
+
+            m_blockingHandler.RemoveConnection(deletedConnection->Id().m_id);
+        });
+    }
+
     void RequestHandler::DispatchRequest(DistributionData request,
-                                         bool & handled,
-                                         const ConnectionPtr & sender,
-                                         ConnectionIdSet & skipList)
+                                         bool& handled,
+                                         const ConnectionPtr& sender,
+                                         ConnectionIdSet& skipList)
     {
         const Dob::Typesystem::TypeId typeId = request.GetTypeId();
 
-        lllout << "DispatchRequest of type " << Typesystem::Operations::GetName(typeId)
-            <<", requestId = " << request.GetRequestId() << std::endl;
+        lllog(8) << "DOSE_MAIN: DispatchRequest of type " << Typesystem::Operations::GetName(typeId)
+                 <<", requestId = " << request.GetRequestId() << std::endl;
+
         handled = false;
 
         //this is filled in inside the switch statement to be used later.
         ConnectionConsumerPair receiver;
 
-        const DistributionData::Type requestType = request.GetType();
+        const auto requestType = request.GetType();
 
         // Find out which context to use.
-        ContextId context =
+        auto context =
             ContextSharedTable::Instance().IsContextShared(typeId) ? 0 : request.GetSenderId().m_contextId;
 
         switch (requestType)
         {
-        case DistributionData::Request_Service:
+            case DistributionData::Request_Service:
             {
                 // Service request
                 receiver = ServiceTypes::Instance().GetRegisterer(typeId, request.GetHandlerId(), context);
@@ -149,14 +248,16 @@ namespace Internal
             }
             break;
 
-        case DistributionData::Request_EntityUpdate:
-        case DistributionData::Request_EntityDelete: //BEWARE of the fallthrough below!!! THERE IS NO break INTENTIONALLY
+            case DistributionData::Request_EntityUpdate:
+            case DistributionData::Request_EntityDelete: //BEWARE of the fallthrough below!!!
+                                                         //THERE IS NO break INTENTIONALLY
             {
                 try
                 {
                     //set the handler correctly so that we have all the needed info when we fall through
                     //to the next case statement.
-                    const Typesystem::HandlerId handler = EntityTypes::Instance().GetHandlerOfInstance(request.GetEntityId(), context);
+                    const auto handler =
+                            EntityTypes::Instance().GetHandlerOfInstance(request.GetEntityId(), context);
                     request.SetHandlerId(handler);
                 }
                 catch (const NotFoundException&)
@@ -176,11 +277,15 @@ namespace Internal
                 }
             }//BEWARE of the fallthrough here!!! THERE IS NO break INTENTIONALLY
 
-        case DistributionData::Request_EntityCreate: //NOTE the fallthrough above!
+            case DistributionData::Request_EntityCreate: //NOTE the fallthrough above!
             {
                 InstanceIdPolicy::Enumeration instanceIdPolicy;
 
-                EntityTypes::Instance().GetRegisterer(request.GetTypeId(), request.GetHandlerId(), context, receiver, instanceIdPolicy);
+                EntityTypes::Instance().GetRegisterer(request.GetTypeId(),
+                                                      request.GetHandlerId(),
+                                                      context,
+                                                      receiver,
+                                                      instanceIdPolicy);
 
                 if (receiver.connection == NULL)
                 {
@@ -205,7 +310,7 @@ namespace Internal
                     // the instance id policy applied by the handler.
                     switch (instanceIdPolicy)
                     {
-                    case Dob::InstanceIdPolicy::HandlerDecidesInstanceId:
+                        case Dob::InstanceIdPolicy::HandlerDecidesInstanceId:
                         {
                             if (request.HasInstanceId())
                             {
@@ -225,7 +330,7 @@ namespace Internal
                         }
                         break;
 
-                    case Dob::InstanceIdPolicy::RequestorDecidesInstanceId:
+                        case Dob::InstanceIdPolicy::RequestorDecidesInstanceId:
                         {
                             if (!request.HasInstanceId())
                             {
@@ -245,8 +350,8 @@ namespace Internal
                         }
                         break;
 
-                    default:
-                        ENSURE(false, << "Unknown instance id policy!");
+                        default:
+                            ENSURE(false, << "Unknown instance id policy!");
                     }
                 }
             }
@@ -254,7 +359,7 @@ namespace Internal
 
         default:
             ENSURE(false,<< "Got unexpected DistributionData type in DispatchRequest " << requestType);
-        };
+        }
 
         //if it is in the skip list we skip it!
         if (skipList.find(receiver.connection->Id()) != skipList.end())
@@ -262,48 +367,92 @@ namespace Internal
             return;
         }
 
-        if (HandleRequest(request, receiver))
+        if (DistributeRequest(request, receiver))
         {
             handled = true;
-            StartTimer(sender, request);
         }
         else
         {
             skipList.insert(receiver.connection->Id());
-            StartTimer(sender, request);
         }
+
+        auto timer = Safir::make_unique<boost::asio::steady_timer>(m_ioService);
+
+        timer->expires_from_now(GetTimeout(request.GetTypeId()));
+
+        StartOutReqTimer(sender, request, *timer);
+
+        m_outReqTimers.insert(std::make_pair(std::make_pair(sender->Id().m_id, request.GetRequestId()),
+                                             std::move(timer)));
     }
 
-    void RequestHandler::DistributeRequests(const ConnectionPtr & connection)
+    void RequestHandler::StartOutReqTimer(const ConnectionPtr& sender,
+                                          const DistributionData& request,
+                                          boost::asio::steady_timer& timer)
     {
-        lllout << "Distributing requests (out) for connection " << connection->Id() << "." << std::endl;
-        ConnectionIdSet skipList;
-        connection->GetRequestOutQueue().DispatchRequests
-            (boost::bind(&RequestHandler::DispatchRequest,
-                         this, _1, _2,
-                         boost::cref(connection),
-                         boost::ref(skipList)));
+        auto senderId = sender->Id().m_id;
+        auto reqId = request.GetRequestId();
+        auto typeId = request.GetTypeId();
+        auto handlerId = request.GetHandlerId();
+
+        timer.async_wait(m_strand.wrap([this, senderId, reqId, typeId, handlerId]
+                                       (const boost::system::error_code& error)
+        {
+            // This is the lambda that is executed when a request in the sender node has expired.
+
+            if (error == boost::asio::error::operation_aborted)
+            {
+                return;
+            }
+
+            m_outReqTimers.erase(std::make_pair(senderId, reqId));
+
+            // Generate a response.
+
+            const ConnectionPtr sender = Connections::Instance().GetConnection
+                                         (ConnectionId(Connections::Instance().NodeId(),
+                                                       -1,
+                                                       senderId),
+                                          std::nothrow);
+
+            if (sender == NULL)
+            {
+                // It seems that the sender is no longer there.
+                return;
+            }
+
+            std::wostringstream ostr;
+            ostr << "The handler " << handlerId << " did not respond to the request of type "
+                 << Typesystem::Operations::GetName(typeId) << "!";
+
+            //create timeout response
+            Dob::ErrorResponsePtr errorResponse =
+                    Dob::ErrorResponse::CreateErrorResponse
+                    (Dob::ResponseGeneralErrorCodes::SafirTimeout(),
+                     ostr.str());
+
+            Typesystem::BinarySerialization bin;
+            Typesystem::Serialization::ToBinary(errorResponse,bin);
+
+            //convert response to Shared Message
+            DistributionData response(response_tag,
+                                      sender->Id(),
+                                      sender->Id(),
+                                      reqId,
+                                      &bin[0]);
+
+            //set the request handled and increase the timeouts count.
+            sender->GetRequestOutQueue().RequestTimeout(reqId);
+
+            //Post the response
+            m_responseHandler.SendLocalResponse(response);
+
+            sender->SignalIn();
+        }));
     }
 
-
-    void RequestHandler::StartTimer(const ConnectionPtr & sender, const DistributionData & request)
-    {
-        // TODO stewart
-//        // Start timer
-//        RequestTimerInfo timeoutInfo = RequestTimerInfo(sender->Id().m_id,
-//                                                        request.GetRequestId(),
-//                                                        request.GetTypeId(),
-//                                                        request.GetHandlerId());
-
-//        m_timerHandler.SetRelative(Discard, //discard the timer if it is already set
-//                                   TimerInfoPtr(new ReqTimer(RequestTimers::m_localReqTimerId,
-//                                                             timeoutInfo)),
-//                                   GetTimeout(request.GetTypeId()));
-    }
-
-
-    bool RequestHandler::HandleRequest(const DistributionData & request,
-                                       const ConnectionConsumerPair& receiver)
+    bool RequestHandler::DistributeRequest(const DistributionData& request,
+                                           const ConnectionConsumerPair& receiver)
     {
         const ConnectionPtr sender = Connections::Instance().GetConnection(request.GetSenderId(), std::nothrow);
 
@@ -312,60 +461,79 @@ namespace Internal
 
         if (senderOnThisNode && receiverOnThisNode)
         {
-            return HandleRequest_LocalSender_LocalReceiver(request, sender, receiver);
+            return DistributeRequestLocalSenderLocalReceiver(request, sender, receiver);
         }
         else if (senderOnThisNode && !receiverOnThisNode)
         {
-            return HandleRequest_LocalSender_ExternReceiver(request, sender);
+            return DistributeRequestLocalSenderExternReceiver(request, sender, receiver);
         }
         else if (!senderOnThisNode && receiverOnThisNode)
         {
-            return HandleRequest_ExternSender_LocalReceiver(request, receiver);
+            return DistributeRequestExternSenderLocalReceiver(request, receiver);
         }
         else
         {
             SEND_SYSTEM_LOG(Error,
-                            << "RequestHandler::HandleRequest: Got a request that was neither sent to or from this node!");
+                            << "DOSE_MAIN: Got a request that was neither sent to or from this node!");
             // "This does not really cause any problems, but it is unexpected,
             return true; //Always OK, request not for us.
         }
     }
 
-    bool RequestHandler::HandleRequest_LocalSender_LocalReceiver(const DistributionData & request,
-                                                                 const ConnectionPtr& sender,
-                                                                 const ConnectionConsumerPair& receiver)
+    bool RequestHandler::DistributeRequestLocalSenderLocalReceiver(const DistributionData& request,
+                                                                   const ConnectionPtr&    sender,
+                                                                   const ConnectionConsumerPair& receiver)
     {
         if (!PostRequest(receiver, request))
         {
-            //TODO stewart m_blockingHandler.Request().AddWaitingConnection(receiver.connection->Id().m_id,
-            //                                                 sender->Id().m_id);
+            m_blockingHandler.Request().AddWaitingConnection(receiver.connection->Id().m_id,
+                                                             sender->Id().m_id);
             return false;
         }
         return true;
     }
 
-    bool RequestHandler::HandleRequest_LocalSender_ExternReceiver(const DistributionData& /*request*/,
-                                                                  const ConnectionPtr& /*sender*/)
+    bool RequestHandler::DistributeRequestLocalSenderExternReceiver(const DistributionData& request,
+                                                                    const ConnectionPtr& sender,
+                                                                    const ConnectionConsumerPair& receiver)
     {
-#if 0 //stewart
-        if (!m_ecom->Send(request))
+        // If the receiver node is gone we just discard the response
+        const auto nodeIt = m_liveNodes.find(receiver.connection->Id().m_node);
+        if (nodeIt == m_liveNodes.end())
         {
-            m_blockingHandler->Request().AddWaitingConnection(ExternNodeCommunication::DoseComVirtualConnectionId,
-                                                              sender->Id().m_id);
+            return true;
+        }
 
+        auto data = boost::shared_ptr<const char[]> (request.GetReference(),
+                                                     [](const char* data)
+                                                     {
+                                                         DistributionData::DropReference(data);
+                                                     });
+
+        auto ok = m_communication.Send(receiver.connection->Id().m_node,
+                                       nodeIt->second,  //nodeTypeId
+                                       data,
+                                       request.Size(),
+                                       m_dataTypeIdentifier,
+                                       true); // delivery guarantee
+        if (!ok)
+        {
+            m_blockingHandler.Request().AddWaitingConnection(m_communicationVirtualConnectionId,
+                                                              sender->Id().m_id);
             return false;
         }
-#endif
+
         return true;
     }
 
 
-    bool RequestHandler::HandleRequest_ExternSender_LocalReceiver(const DistributionData & request,
-                                                                  const ConnectionConsumerPair & receiver)
+    bool RequestHandler::DistributeRequestExternSenderLocalReceiver(const DistributionData& request,
+                                                                    const ConnectionConsumerPair& receiver)
     {
         if (ReceiverHasOtherPendingRequest(receiver.connection->Id().m_id, request.GetRequestId()))
         {
-            lllout << "ReceiverHasOtherPendingRequest, so we'll add it to pending!" << std::endl;
+            lllog(7) << "DOSE_MAIN: ReceiverHasOtherPendingRequest, so we'll add it to pending!" << std::endl;
+
             // To guarantee the request order, requests from external nodes can't
             // be posted to the receiver's requestInQ if there are other requests
             // already waiting. In this case the request has to be stored in
@@ -450,19 +618,18 @@ namespace Internal
     }
 #endif
 
-    void PushRequest(const DistributionData & request, RequestInQueue& queue, bool & success)
-    {
-        success = queue.PushRequest(request);
-        lllout << "  Pushing request (id = " << request.GetRequestId() << ". success = " << success << std::endl;
-    }
-
-    bool RequestHandler::PostRequest(const ConnectionConsumerPair & receiver,
-                                     const DistributionData & request)
+    bool RequestHandler::PostRequest(const ConnectionConsumerPair& receiver,
+                                     const DistributionData& request)
     {
         bool success;
         receiver.connection->ForSpecificRequestInQueue
             (receiver.consumer,
-            boost::bind(PushRequest, boost::cref(request),_2,boost::ref(success)));
+             [this, request, &success](const ConsumerId& /*consumer*/, RequestInQueue& queue)
+             {
+                 success = queue.PushRequest(request);
+                 lllog(8) << "DOSE_MAIN: Pushing request (id = " << request.GetRequestId()
+                          << ". success = " << success << std::endl;
+             });
 
         // Always kick the receiver. Theoretically a kick shouldn't be necessary when there
         // is an overflow, but since there have been reports of applications not dispatching
@@ -471,16 +638,16 @@ namespace Internal
 
         if (!success)
         {
-            lllout << "Overflow in a RequestInQueue. " << receiver.connection->NameWithCounter()
+            lllog(7) << "Overflow in a RequestInQueue. " << receiver.connection->NameWithCounter()
                 << " " << receiver.connection->Id() << std::endl;
             return false;
         }
         return true;
     }
 
-    void RequestHandler::SendAutoResponse(const Dob::ResponsePtr& resp,
-                                           const InternalRequestId&     reqId,
-                                           const ConnectionPtr&         sender)
+    void RequestHandler::SendAutoResponse(const Dob::ResponsePtr&   resp,
+                                          const InternalRequestId&  reqId,
+                                          const ConnectionPtr&      sender)
     {
         Typesystem::BinarySerialization bin;
         Typesystem::Serialization::ToBinary(resp,bin);
@@ -492,198 +659,211 @@ namespace Internal
                                   reqId,
                                   &bin[0]);
 
-        //TODO stewart
-//        //Post the response
-//        m_responseHandler.HandleResponse(response);
+        //Post the response
+        m_responseHandler.SendLocalResponse(response);
 
-//        // Remove timeout
-//        RequestTimerInfo timeoutInfo = RequestTimerInfo(sender->Id().m_id, reqId);
-//        m_timerHandler.Remove(TimerInfoPtr(new ReqTimer(RequestTimers::m_localReqTimerId,
-//                                                        timeoutInfo)));
+        //Remove timer
+        m_outReqTimers.erase(std::make_pair(sender->Id().m_id, reqId));
 
         sender->SignalIn();
     }
 
-    //TODO stewart
-//    void RequestHandler::HandleRequestFromDoseCom(const DistributionData & request)
-//    {
-//        lllout << "Got request from dose_com: type = "
-//            << Safir::Dob::Typesystem::Operations::GetName(request.GetTypeId())
-//            << ", handler = " << request.GetHandlerId() << std::endl;
-//        // If the request can not be put in the receiver's req in queue
-//        // it will be added to the pending map.
-
-//        const ConnectionConsumerPair receiver = GetRegistrationOwner(request);
-//        if (receiver.connection == NULL)
-//        {
-//            return; //ignore the request and let the timeout on the other node take care of it.
-//        }
-
-//        HandleRequest(request, receiver);
-//    }
-
-//    void RequestHandler::HandlePendingExternalRequest(const Identifier blockingConnection)
-//    {
-//        lllout << "HandlePendingExternalRequest for app " << blockingConnection <<std::endl;
-//        PendingRequestTable::iterator it = m_pendingRequests.find(blockingConnection);
-
-//        if (it == m_pendingRequests.end())
-//        {
-//            return;
-//        }
-
-//        while (!it->second.empty())
-//        {
-//            const DistributionData & request = it->second.front();
-
-//            const ConnectionConsumerPair receiver = GetRegistrationOwner(request);
-//            if (receiver.connection == NULL)
-//            {
-//                // if no receiver ignore the request and let the timeout on the other node take care of it.
-//                it->second.pop_front();
-//            }
-//            else
-//            {
-//                if (HandleRequest(request,receiver))
-//                {
-//                    it->second.pop_front();
-//                }
-//                else
-//                {
-//                    break;
-//                }
-//            }
-//        }
-
-//        if (it->second.empty())
-//        {
-//            // We managed to send all pending requests.
-//            m_pendingRequests.erase(it);
-//        }
-//    }
-
-
-    void SetShortTimeout(const DistributionData& request,
-                         const ConnectionPtr& deletedConn,
-                         const ConnectionPtr & fromConnection,
-                         TimerHandler& timerHandler)
+    void RequestHandler::HandleMessageFromRemoteNode(int64_t        fromNodeId,
+                                                     int64_t        fromNodeType,
+                                                     const char*    data)
     {
-        const ConnectionPtr regOwner = GetRegistrationOwner(request).connection;
+        const DistributionData request =
+                DistributionData::ConstConstructor(new_data_tag, data);
 
-        if (regOwner == NULL || regOwner->Id() == deletedConn->Id())
+        DistributionData::DropReference(data);
+
+        lllog(8) << "DOSE_MAIN: Got request from remote node type="
+                 << Safir::Dob::Typesystem::Operations::GetName(request.GetTypeId())
+                 << ", handler = " << request.GetHandlerId() << std::endl;
+
+        const ConnectionConsumerPair receiver = GetRegistrationOwner(request);
+        if (receiver.connection == nullptr)
         {
-            // Found a request towards an unregistered entity/service or an entity/service
-            // that is owned by the deleted connection.
+            return; //ignore the request and let the timeout on the other node take care of it.
+        }
 
-            // TODO stewart const InternalRequestId reqId = request.GetRequestId();
-            // Set the running timer for this request to expire in a short time from now giving
-            // any response sent from the deleted connection a chance to be received.
+        DistributeRequest(request, receiver);
+    }
 
-            //TODO stewart
-//            RequestTimerInfo timeoutInfo = RequestTimerInfo(fromConnection->Id().m_id, reqId, request.GetTypeId(),request.GetHandlerId());
+    void RequestHandler::ReleaseAllBlocked(int64_t blockingConnection)
+    {
 
-//            timerHandler.SetRelative(Replace,
-//                                     TimerInfoPtr(new ReqTimer
-//                                                  (RequestTimers::m_localReqTimerId,
-//                                                   timeoutInfo)),
-//                                     deletedConnReqTimeout);
+        std::set<int64_t> waitingConnections;
+        if (!m_blockingHandler.Request().GetWaitingConnections(blockingConnection, waitingConnections))
+        {
+            // There are no connections waiting for blockingConnection
+            return;
+        }
+
+        ConnectionId tmpConnectionId;
+        tmpConnectionId.m_node = m_communication.Id();
+        for (auto it = waitingConnections.begin(); it != waitingConnections.end(); ++it)
+        {
+            tmpConnectionId.m_id = *it;
+
+            if (tmpConnectionId.m_id == m_communicationVirtualConnectionId)
+            {
+                // This indicates that we have a request from an external node that is waiting for
+                // blockingConnection
+                HandlePendingExternalRequest(blockingConnection);
+            }
+            else
+            {
+                //TODO Need to have recursionLevel?
+                HandleRequests(Connections::Instance().GetConnection(tmpConnectionId));
+            }
         }
     }
 
-    void RequestHandler::FinalizeOutstandingRequests(const ConnectionPtr & deletedConn,
-                                                     const ConnectionPtr & fromConnection)
+    void RequestHandler::HandlePendingExternalRequest(int64_t blockingConnection)
     {
-        if (!fromConnection->IsLocal())
+        lllog(7) << "DOSE_MAIN: HandlePendingExternalRequest for app " << blockingConnection << std::endl;
+
+        auto it = m_pendingRequests.find(blockingConnection);
+
+        if (it == m_pendingRequests.end())
         {
             return;
         }
 
-        //two different tasks were performed in the previous version of this method:
-        //1. All requests that have not yet been dispatched (picked up by dose_main) should be answered with an Unregistered response
-        //2. All requests that have been dispatched should have their timeout shortened, so that if the deleted connection (on a remote node)
-        //    has not already sent a response (which we have not yet received) the request will timeout shortly.
-
-        //task 1 is not neccessary, since when that request is dispatched the handler will not be registered any longer, and will be responded
-        //to with an 'unregistered'!
-
-        //TODO stewart
-//        fromConnection->GetRequestOutQueue().ForEachDispatchedRequest
-//            (boost::bind(SetShortTimeout,
-//                         _1,
-//                         boost::cref(deletedConn),
-//                         boost::cref(fromConnection),
-//                         boost::ref(m_timerHandler)));
-    }
-
-    void RequestHandler::HandleDisconnect(const ConnectionPtr & connection)
-    {
-        Connections::Instance().ForEachConnectionPtr(boost::bind(&RequestHandler::FinalizeOutstandingRequests,this,connection,_1));
-    }
-
-    void RequestHandler::AddPendingRequest(const Identifier blockingConn, const DistributionData & request)
-    {
-        lllout << "AddPendingRequest for app " << blockingConn <<std::endl;
-
-        PendingRequestTable::iterator it = m_pendingRequests.find(blockingConn);
-        if(it != m_pendingRequests.end())
+        while (!it->second.empty())
         {
-            InternalRequestId reqId = request.GetRequestId();
+            const DistributionData& request = it->second.front().first;
+
+            const ConnectionConsumerPair receiver = GetRegistrationOwner(request);
+            if (receiver.connection == nullptr)
+            {
+                // if no receiver ignore the request and let the timeout on the other node take care of it.
+                it->second.pop_front();
+            }
+            else
+            {
+                if (DistributeRequest(request, receiver))
+                {
+                    it->second.pop_front();
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+
+        if (it->second.empty())
+        {
+            // We managed to send all pending requests.
+            m_pendingRequests.erase(it);
+        }
+    }
+
+
+    void RequestHandler::SetShortTimeout(const DistributionData& request,
+                                         const ConnectionPtr& deletedConn,
+                                         const ConnectionPtr & fromConnection)
+    {
+        const ConnectionPtr regOwner = GetRegistrationOwner(request).connection;
+
+        if (regOwner == nullptr || regOwner->Id() == deletedConn->Id())
+        {
+            // Found a request towards an unregistered entity/service or an entity/service
+            // that is owned by the deleted connection.
+
+            const InternalRequestId reqId = request.GetRequestId();
+
+            // Set the running timer for this request to expire in a short time from now giving
+            // any response sent from the deleted connection a chance to be received.
+
+            auto timerIt = m_outReqTimers.find(std::make_pair(fromConnection->Id().m_id, reqId));
+
+            if (timerIt == m_outReqTimers.end())
+            {
+                // Can't find timer, just quit
+                return;
+            }
+
+            timerIt->second->expires_from_now(boost::chrono::milliseconds(500));
+
+            StartOutReqTimer(fromConnection, request, *timerIt->second);
+        }
+    }
+
+    void RequestHandler::AddPendingRequest(const int64_t blockingConn, const DistributionData& request)
+    {
+        lllog(7) << "DOSE_MAIN: AddPendingRequest for app " << blockingConn <<std::endl;
+
+        auto timer = Safir::make_unique<boost::asio::steady_timer>(m_ioService);
+
+        auto reqId = request.GetRequestId();
+
+        timer->expires_from_now(GetTimeout(request.GetTypeId()));
+
+        timer->async_wait(m_strand.wrap([this, blockingConn, reqId]
+                                        (const boost::system::error_code& error)
+        {
+            // This is the lambda that is executed when a pending external request has expired
+
+            if (error == boost::asio::error::operation_aborted)
+            {
+                // The timer has been canceled.
+                return;
+            }
+
+            // We just remove the request since the corresponding timout in the sender node will take care
+            // of the response generation.
+            RemovePendingRequest(blockingConn, reqId);
+        }));
+
+        auto it = m_pendingRequests.find(blockingConn);
+        if(it != m_pendingRequests.end())
+        {            
             bool reqFound = false;
-            PendingRequests::iterator requestIt = it->second.begin();
+            auto requestIt = it->second.begin();
             while (requestIt != it->second.end())
             {
-                if (requestIt->GetRequestId() == reqId)
+                if (requestIt->first.GetRequestId() == reqId)
                 {
                     reqFound = true;
+                    break;
                 }
                 ++requestIt;
             }
 
             if (!reqFound)
             {
-                it->second.push_back(request);
+                it->second.push_back(std::make_pair(request, std::move(timer)));
             }
         }
         else
         {
             // No previous request for blockingConn
-            PendingRequests requests;
-            requests.push_back(request);
-            m_pendingRequests.insert(std::make_pair(blockingConn, requests));
+            PendingRequestsQueue requestQueue;
+            requestQueue.push_back(std::make_pair(request, std::move(timer)));
+            m_pendingRequests.insert(std::make_pair(blockingConn, std::move(requestQueue)));
         }
 
-        //TODO stewart
-//        // Set timeout timer for request
-//        RequestTimerInfo timeoutInfo = RequestTimerInfo(blockingConn,
-//                                                        request.GetRequestId(),
-//                                                        request.GetTypeId(),
-//                                                        request.GetHandlerId());
+        // Set that an external request is waiting for the receiver
+        m_blockingHandler.Request().AddWaitingConnection(blockingConn,
+                                                         m_communicationVirtualConnectionId);
 
-//        m_timerHandler.SetRelative(Discard,   //discard if already set
-//                                   TimerInfoPtr(new ReqTimer(RequestTimers::m_externalReqTimerId,
-//                                                             timeoutInfo)),
-//                                   GetTimeout(request.GetTypeId()));
-#if 0 //stewart
-        // Set that dose_main is waiting for the receiver
-        m_blockingHandler->Request().AddWaitingConnection(blockingConn,
-                                                          ExternNodeCommunication::DoseComVirtualConnectionId);
-#endif
     }
 
-
-    bool IsRequestIdEqual(const DistributionData& request, const InternalRequestId& requestId)
+    void RequestHandler::RemovePendingRequest(const int64_t blockingConn, const InternalRequestId& requestId)
     {
-        return request.GetRequestId() == requestId;
-    }
-
-    void RequestHandler::RemovePendingRequest(const Identifier blockingConn, const InternalRequestId& requestId)
-    {
-        PendingRequestTable::iterator it = m_pendingRequests.find(blockingConn);
+        auto it = m_pendingRequests.find(blockingConn);
         if(it != m_pendingRequests.end())
         {
-            PendingRequests::iterator newEnd = std::remove_if(it->second.begin(),
-                                                              it->second.end(),
-                                                              boost::bind(IsRequestIdEqual,_1,boost::cref(requestId)));
+            auto newEnd = std::remove_if(it->second.begin(),
+                                         it->second.end(),
+                                         [&requestId](const PendingRequest& request)
+                                         {
+                                             return request.first.GetRequestId() == requestId;
+                                         });
+
             it->second.erase(newEnd,it->second.end());
 
             if (it->second.empty())
@@ -693,16 +873,16 @@ namespace Internal
         }
     }
 
-    bool RequestHandler::ReceiverHasOtherPendingRequest(const Identifier receiver,
+    bool RequestHandler::ReceiverHasOtherPendingRequest(const int64_t receiver,
                                                         const InternalRequestId& requestId) const
     {
-        PendingRequestTable::const_iterator findIt = m_pendingRequests.find(receiver);
+        auto findIt = m_pendingRequests.find(receiver);
         if(findIt != m_pendingRequests.end())
         {
-            //if this request is first in the queue it means that we're not waiting for another request
-            //to be sent before sending this one.
-            if (!findIt->second.empty() && findIt->second.front().GetRequestId() == requestId)
+            if (!findIt->second.empty() && findIt->second.front().first.GetRequestId() == requestId)
             {
+                // This request is first in the queue which means that we're not waiting for another request
+                // to be sent before sending this one.
                 return false;
             }
             return true;
@@ -713,13 +893,13 @@ namespace Internal
         }
     }
 
-    Dob::Typesystem::Si64::Second
+    boost::chrono::milliseconds
     RequestHandler::GetTimeout(const Safir::Dob::Typesystem::TypeId typeId) const
     {
         TimeoutTable::iterator findIt = m_timeoutTable.find(typeId);
         if (findIt != m_timeoutTable.end())
         {
-            return findIt->second;
+            boost::chrono::milliseconds(static_cast<int>(findIt->second * 1000));
         }
         //nope, it wasnt in the table, we need to get the value and insert it.
 
@@ -756,7 +936,7 @@ namespace Internal
                           << Safir::Dob::Typesystem::Operations::GetName(typeId));
         }
         m_timeoutTable.insert(std::make_pair(typeId,timeout));
-        return timeout;
+        return boost::chrono::milliseconds(static_cast<int>(timeout * 1000));
     }
 
 }

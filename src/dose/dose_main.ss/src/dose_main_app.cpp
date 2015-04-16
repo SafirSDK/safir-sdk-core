@@ -171,7 +171,8 @@ namespace Internal
 
         m_messageHandler.reset(new MessageHandler(*m_distribution));
 
-        m_requestHandler.reset(new RequestHandler(m_distribution->GetCommunication()));
+        m_requestHandler.reset(new RequestHandler(m_strand.get_io_service(),
+                                                  *m_distribution));
 
         m_pendingRegistrationHandler.reset(new PendingRegistrationHandler(m_ioService,
                                                                           *m_distribution));
@@ -267,9 +268,6 @@ namespace Internal
         {
             m_pendingRegistrationHandler->RemovePendingRegistrations(connection->Id());
             m_requestHandler->HandleDisconnect(connection);
-#if 0 //stewart
-            m_blockingHandler.RemoveConnection(connection->Id().m_id);
-#endif
         }
     }
 
@@ -277,82 +275,15 @@ namespace Internal
     {
         lllout << "HandleAppEventHelper for connection " << connection->NameWithCounter() << ", id = " << connection->Id() << std::endl;
 
-        //---- Handle queued requests ----
-        m_requestHandler->DistributeRequests(connection);
+        //Handle queued requests
+        m_requestHandler->HandleRequests(connection);
 
         //Send messages
         m_messageHandler->DistributeMessages(connection);
 
         //Handle pending registrations
         m_pendingRegistrationHandler->CheckForNewOrRemovedPendingRegistration(connection);
-
-#if 0 //stewart
-        //Check in queues, and notify waiting applications
-        HandleWaitingConnections(connection->Id().m_id, recursionLevel);
-#endif
     }
-
-#if 0 //stewart This functionality is , or shall be, removed or moved to the specific handler.
-    //Check if blockingApp has non-full inQueues. If thats the case, it handles applications that are blocked
-    //by blockingApp
-    void DoseApp::HandleWaitingConnections(const Identifier blockingApp,
-                                           int & recursionLevel)
-    {
-        const int MAX_RECURSION_LEVEL=4;
-        recursionLevel++;
-        if (recursionLevel>MAX_RECURSION_LEVEL)
-        {
-            return;
-        }
-
-        IdentifierSet waiting;
-        if (m_blockingHandler.Response().GetWaitingConnections(blockingApp, waiting))
-        {
-            WaitingConnectionsHelper(blockingApp, waiting, recursionLevel);
-        }
-
-        waiting.clear();
-        if (m_blockingHandler.Request().GetWaitingConnections(blockingApp, waiting))
-        {
-            WaitingConnectionsHelper(blockingApp, waiting, recursionLevel);
-        }
-
-        waiting.clear();
-        if (m_blockingHandler.Message().GetWaitingConnections(blockingApp, waiting))
-        {
-            //traverse the message queues of the apps that have been waiting for the dosecom
-            //queue to empty
-            for (IdentifierSet::iterator it = waiting.begin();
-                it != waiting.end(); ++it)
-            {
-                const ConnectionPtr connection = Connections::Instance().GetConnection
-                    (ConnectionId(m_nodeId, -1, *it));
-                m_messageHandler->DistributeMessages(connection);
-
-                //If the connection is dead it might be a zombie that has been waiting for dosecom.
-                //signal it so that we try to finish removing it again.
-                if (connection->IsDead())
-                {
-                    connection->SignalOut();
-                }
-            }
-        }
-    }
-
-    void DoseApp::WaitingConnectionsHelper(const Identifier /*blockingApp*/,
-                                           IdentifierSet & waiting,
-                                           int & recursionLevel)
-    {
-        ConnectionId tmpId;
-        tmpId.m_node=m_nodeId;
-        for (IdentifierSet::const_iterator it=waiting.begin();
-             it!=waiting.end(); ++it)
-        {
-            tmpId.m_id=*it;
-            HandleAppEventHelper(Connections::Instance().GetConnection(tmpId), recursionLevel);
-        }
-    }
-#endif
 
     void DoseApp::LogStatus(const std::string& str)
     {
