@@ -1482,14 +1482,12 @@ namespace Internal
                 // the local entity is not a ghost.
                 if (localEntity.GetEntityStateKind() != DistributionData::Ghost)
                 {
-                    auto senderId = remoteEntity.GetSenderId();
+                    lllog(7) << "Got a delete entity state from sender " << remoteEntity.GetSenderId()
+                             << " with a reg time that is newer than the current reg time. Discarding."
+                             << "\nCurrent state: " << localEntity.Image()
+                             << "\nNew state " << remoteEntity.Image() << std::endl;
 
-                    SEND_SYSTEM_LOG(Alert,
-                                    << "Got a delete entity state from sender  "
-                                    << "(Id:" << senderId.m_id << " Node:" << senderId.m_node << " Ctx:"
-                                    << senderId.m_contextId << ") with a reg time that is newer than"
-                                    << " the current reg time");
-                    throw std::logic_error("Received delete entity state for which the registration is unknown");
+                    return;
                 }
 
                 //if localEntity is a ghost, then just delete it the normal way.
@@ -1605,14 +1603,13 @@ namespace Internal
                     // The entity is created and therefor we know that the registration time in the entity
                     // state corresponds to the active registration. Since this time is older than
                     // the received time we haven't got the registration yet.
-                    auto senderId = remoteEntity.GetSenderId();
 
-                    SEND_SYSTEM_LOG(Alert,
-                                    << "Got an entity state from sender  "
-                                    << "(Id:" << senderId.m_id << " Node:" << senderId.m_node << " Ctx:"
-                                    << senderId.m_contextId << ") with a reg time that is newer than"
-                                    << " the current reg time");
-                    throw std::logic_error("Received entity state for which the registration is unknown");
+                    lllog(7) << "Got n entity state from sender " << remoteEntity.GetSenderId()
+                             << " with a reg time that is newer than the current reg time. Discarding."
+                             << "\nCurrent state: " << localEntity.Image()
+                             << "\nNew state " << remoteEntity.Image() << std::endl;
+
+                    return;
                 }
             }
             else
@@ -1654,15 +1651,13 @@ namespace Internal
                 regStatePtr->GetRealState().GetRegistrationTime() < remoteEntity.GetRegistrationTime())
             {
                 // There is no registration state or it is an old one
-                auto senderId = remoteEntity.GetSenderId();
 
-                SEND_SYSTEM_LOG(Alert,
-                                << "Got an entity state from sender  "
-                                << "(Id:" << senderId.m_id << " Node:" << senderId.m_node << " Ctx:"
-                                << senderId.m_contextId << ") with a reg time that is either not known or is "
-                                << "newer than the current reg time");
-                throw std::logic_error("Received entity state for which the registration is unknown or newer "
-                                       "than the current one");
+                lllog(7) << "Got n entity state from sender " << remoteEntity.GetSenderId()
+                         << " with a reg time that is either unknown or newer than the current reg time. Discarding."
+                         << "\nCurrent state: " << localEntity.Image()
+                         << "\nNew state " << remoteEntity.Image() << std::endl;
+
+                return;
             }
             else if (remoteEntity.GetRegistrationTime() < regStatePtr->GetRealState().GetRegistrationTime())
             {
