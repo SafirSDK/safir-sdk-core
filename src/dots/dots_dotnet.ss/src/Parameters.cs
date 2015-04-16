@@ -452,6 +452,96 @@ namespace Safir.Dob.Typesystem
             return binary;
         }
 
+        /// <summary>
+        /// Dictionaries the index of the key to.
+        /// </summary>
+        /// <returns>The key to index.</returns>
+        /// <param name="typeId">Type identifier.</param>
+        /// <param name="parameter">Parameter.</param>
+        /// <param name="key">Key.</param>
+        public static Int32 DictionaryKeyToIndex(Int64 typeId, Int32 parameter, Int32 key)
+        {
+            return Kernel.DotsC_DictionaryInt32KeyToIndex (typeId, parameter, key);
+        }
+
+        /// <summary>
+        /// Dictionaries the index of the key to.
+        /// </summary>
+        /// <returns>The key to index.</returns>
+        /// <param name="typeId">Type identifier.</param>
+        /// <param name="parameter">Parameter.</param>
+        /// <param name="key">Key.</param>
+        public static Int32 DictionaryKeyToIndex(Int64 typeId, Int32 parameter, Int64 key)
+        {
+            return Kernel.DotsC_DictionaryInt64KeyToIndex (typeId, parameter, key);
+        }
+
+        /// <summary>
+        /// Dictionaries the index of the key to.
+        /// </summary>
+        /// <returns>The key to index.</returns>
+        /// <param name="typeId">Type identifier.</param>
+        /// <param name="parameter">Parameter.</param>
+        /// <param name="key">Key.</param>
+        public static Int32 DictionaryKeyToIndex(Int64 typeId, Int32 parameter, string key)
+        {
+            System.IntPtr sp = Internal.InternalOperations.CStringOf(key);
+            int index = Kernel.DotsC_DictionaryStringKeyToIndex (typeId, parameter, sp);
+            Marshal.FreeHGlobal(sp);
+            return index;
+        }
+
+        /// <summary>
+        /// Dictionaries the index of the key to.
+        /// </summary>
+        /// <returns>The key to index.</returns>
+        /// <param name="typeId">Type identifier.</param>
+        /// <param name="parameter">Parameter.</param>
+        /// <param name="key">Key.</param>
+        public static Int32 DictionaryKeyToIndex(Int64 typeId, Int32 parameter, EntityId key)
+        {
+            Internal.DotsC_EntityId eid;
+            eid.TypeId = key.TypeId;
+            eid.InstanceId = key.InstanceId.RawValue;
+            return Kernel.DotsC_DictionaryEntityIdKeyToIndex (typeId, parameter, eid);
+        }
+
+        /// <summary>
+        /// Dictionaries the index of the key to.
+        /// </summary>
+        /// <returns>The key to index.</returns>
+        /// <param name="typeId">Type identifier.</param>
+        /// <param name="parameter">Parameter.</param>
+        /// <param name="key">Key.</param>
+        public static Int32 DictionaryKeyToIndex(Int64 typeId, Int32 parameter, InstanceId key)
+        {
+            return Kernel.DotsC_DictionaryInt64KeyToIndex (typeId, parameter, key.RawValue);
+        }
+
+        /// <summary>
+        /// Dictionaries the index of the key to.
+        /// </summary>
+        /// <returns>The key to index.</returns>
+        /// <param name="typeId">Type identifier.</param>
+        /// <param name="parameter">Parameter.</param>
+        /// <param name="key">Key.</param>
+        public static Int32 DictionaryKeyToIndex(Int64 typeId, Int32 parameter, HandlerId key)
+        {
+            return Kernel.DotsC_DictionaryInt64KeyToIndex (typeId, parameter, key.RawValue);
+        }
+
+        /// <summary>
+        /// Dictionaries the index of the key to.
+        /// </summary>
+        /// <returns>The key to index.</returns>
+        /// <param name="typeId">Type identifier.</param>
+        /// <param name="parameter">Parameter.</param>
+        /// <param name="key">Key.</param>
+        public static Int32 DictionaryKeyToIndex(Int64 typeId, Int32 parameter, ChannelId key)
+        {
+            return Kernel.DotsC_DictionaryInt64KeyToIndex (typeId, parameter, key.RawValue);
+        }
+
         #endregion
     }
 }

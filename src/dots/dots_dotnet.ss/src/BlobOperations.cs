@@ -389,12 +389,10 @@ namespace Safir.Dob.Typesystem.Internal
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
         /// <param name="blob">Blob to set the member in.</param>
-        /// <param name="beginningOfUnused">Beginning of unused part of dynamic part of blob.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(InstanceIdContainer container,
                                System.Int64 handle,
-                               ref System.IntPtr beginningOfUnused,
                                System.Int32 member,
                                System.Int32 index)
         {
@@ -430,13 +428,11 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
-        /// <param name="beginningOfUnused">Beginning of unused part of dynamic part of blob.</param>
+        /// <param name="blob">Blob to set the member in.</param>       
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(EntityIdContainer container,
                                System.Int64 handle,
-                               ref System.IntPtr beginningOfUnused,
                                System.Int32 member,
                                System.Int32 index)
         {
@@ -473,12 +469,10 @@ namespace Safir.Dob.Typesystem.Internal
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
         /// <param name="blob">Blob to set the member in.</param>
-        /// <param name="beginningOfUnused">Beginning of unused part of dynamic part of blob.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(ChannelIdContainer container,
                                System.Int64 handle,
-                               ref System.IntPtr beginningOfUnused,
                                System.Int32 member,
                                System.Int32 index)
         {
@@ -515,12 +509,10 @@ namespace Safir.Dob.Typesystem.Internal
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
         /// <param name="blob">Blob to set the member in.</param>
-        /// <param name="beginningOfUnused">Beginning of unused part of dynamic part of blob.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(HandlerIdContainer container,
                                System.Int64 handle,
-                               ref System.IntPtr beginningOfUnused,
                                System.Int32 member,
                                System.Int32 index)
         {
@@ -557,12 +549,10 @@ namespace Safir.Dob.Typesystem.Internal
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
         /// <param name="blob">Blob to set the member in.</param>
-        /// <param name="beginningOfUnused">Beginning of unused part of dynamic part of blob.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(StringContainer container,
                                System.Int64 handle,
-                               ref System.IntPtr beginningOfUnused,
                                System.Int32 member,
                                System.Int32 index)
         {
@@ -605,12 +595,10 @@ namespace Safir.Dob.Typesystem.Internal
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
         /// <param name="blob">Blob to set the member in.</param>
-        /// <param name="beginningOfUnused">Beginning of unused part of dynamic part of blob.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(ObjectContainerBase container,
                                System.Int64 handle,
-                               ref System.IntPtr beginningOfUnused,
                                System.Int32 member,
                                System.Int32 index)
         {
@@ -647,12 +635,10 @@ namespace Safir.Dob.Typesystem.Internal
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
         /// <param name="blob">Blob to set the member in.</param>
-        /// <param name="beginningOfUnused">Beginning of unused part of dynamic part of blob.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(BinaryContainer container,
                                System.Int64 handle,
-                               ref System.IntPtr beginningOfUnused,
                                System.Int32 member,
                                System.Int32 index)
         {
@@ -2186,6 +2172,16 @@ namespace Safir.Dob.Typesystem.Internal
 		//---------------------------------------------------------
 		// Get values
 		//--------------------------------------------------------
+        /// <summary>
+        /// Get the specified val, isNull, isChanged, handle, member, valueIndex and mode.
+        /// </summary>
+        /// <param name="val">Value.</param>
+        /// <param name="isNull">Is null.</param>
+        /// <param name="isChanged">Is changed.</param>
+        /// <param name="handle">Handle.</param>
+        /// <param name="member">Member.</param>
+        /// <param name="valueIndex">Value index.</param>
+        /// <param name="mode">Mode.</param>
 		public static void Get(out bool val,
                                out bool isNull,
                                out bool isChanged,
@@ -2206,6 +2202,16 @@ namespace Safir.Dob.Typesystem.Internal
             isChanged = InternalOperations.BoolOf (c);
         }
 
+        /// <summary>
+        /// Get the specified val, isNull, isChanged, handle, member, valueIndex and mode.
+        /// </summary>
+        /// <param name="val">Value.</param>
+        /// <param name="isNull">Is null.</param>
+        /// <param name="isChanged">Is changed.</param>
+        /// <param name="handle">Handle.</param>
+        /// <param name="member">Member.</param>
+        /// <param name="valueIndex">Value index.</param>
+        /// <param name="mode">Mode.</param>
         public static void Get(out Int32 val,
                                out bool isNull,
                                out bool isChanged,
@@ -2220,6 +2226,16 @@ namespace Safir.Dob.Typesystem.Internal
             isChanged = InternalOperations.BoolOf (c);
         }
 
+        /// <summary>
+        /// Get the specified val, isNull, isChanged, handle, member, valueIndex and mode.
+        /// </summary>
+        /// <param name="val">Value.</param>
+        /// <param name="isNull">Is null.</param>
+        /// <param name="isChanged">Is changed.</param>
+        /// <param name="handle">Handle.</param>
+        /// <param name="member">Member.</param>
+        /// <param name="valueIndex">Value index.</param>
+        /// <param name="mode">Mode.</param>
         public static void Get(out Int64 val,
                                out bool isNull,
                                out bool isChanged,
@@ -2234,7 +2250,16 @@ namespace Safir.Dob.Typesystem.Internal
             isChanged = InternalOperations.BoolOf (c);
         }
 		
-
+        /// <summary>
+        /// Get the specified val, isNull, isChanged, handle, member, valueIndex and mode.
+        /// </summary>
+        /// <param name="val">Value.</param>
+        /// <param name="isNull">Is null.</param>
+        /// <param name="isChanged">Is changed.</param>
+        /// <param name="handle">Handle.</param>
+        /// <param name="member">Member.</param>
+        /// <param name="valueIndex">Value index.</param>
+        /// <param name="mode">Mode.</param>
 		public static void Get(out float val,
                                out bool isNull,
                                out bool isChanged,
@@ -2254,6 +2279,16 @@ namespace Safir.Dob.Typesystem.Internal
             isChanged = InternalOperations.BoolOf (c);
         }
 
+        /// <summary>
+        /// Get the specified val, isNull, isChanged, handle, member, valueIndex and mode.
+        /// </summary>
+        /// <param name="val">Value.</param>
+        /// <param name="isNull">Is null.</param>
+        /// <param name="isChanged">Is changed.</param>
+        /// <param name="handle">Handle.</param>
+        /// <param name="member">Member.</param>
+        /// <param name="valueIndex">Value index.</param>
+        /// <param name="mode">Mode.</param>
 		public static void Get(out double val,
                                out bool isNull,
                                out bool isChanged,
@@ -2273,6 +2308,16 @@ namespace Safir.Dob.Typesystem.Internal
             isChanged = InternalOperations.BoolOf (c);
         }
 
+        /// <summary>
+        /// Get the specified val, isNull, isChanged, handle, member, valueIndex and mode.
+        /// </summary>
+        /// <param name="val">Value.</param>
+        /// <param name="isNull">Is null.</param>
+        /// <param name="isChanged">Is changed.</param>
+        /// <param name="handle">Handle.</param>
+        /// <param name="member">Member.</param>
+        /// <param name="valueIndex">Value index.</param>
+        /// <param name="mode">Mode.</param>
         public static void Get(out string val,
                                out bool isNull,
                                out bool isChanged,
@@ -2296,6 +2341,16 @@ namespace Safir.Dob.Typesystem.Internal
             }
         }
 
+        /// <summary>
+        /// Get the specified val, isNull, isChanged, handle, member, valueIndex and mode.
+        /// </summary>
+        /// <param name="val">Value.</param>
+        /// <param name="isNull">Is null.</param>
+        /// <param name="isChanged">Is changed.</param>
+        /// <param name="handle">Handle.</param>
+        /// <param name="member">Member.</param>
+        /// <param name="valueIndex">Value index.</param>
+        /// <param name="mode">Mode.</param>
         public static void Get(out InstanceId val,
                                out bool isNull,
                                out bool isChanged,
@@ -2323,6 +2378,16 @@ namespace Safir.Dob.Typesystem.Internal
             }
         }
 
+        /// <summary>
+        /// Get the specified val, isNull, isChanged, handle, member, valueIndex and mode.
+        /// </summary>
+        /// <param name="val">Value.</param>
+        /// <param name="isNull">Is null.</param>
+        /// <param name="isChanged">Is changed.</param>
+        /// <param name="handle">Handle.</param>
+        /// <param name="member">Member.</param>
+        /// <param name="valueIndex">Value index.</param>
+        /// <param name="mode">Mode.</param>
         public static void Get(out HandlerId val,
                                out bool isNull,
                                out bool isChanged,
@@ -2350,6 +2415,16 @@ namespace Safir.Dob.Typesystem.Internal
             }
         }
 
+        /// <summary>
+        /// Get the specified val, isNull, isChanged, handle, member, valueIndex and mode.
+        /// </summary>
+        /// <param name="val">Value.</param>
+        /// <param name="isNull">Is null.</param>
+        /// <param name="isChanged">Is changed.</param>
+        /// <param name="handle">Handle.</param>
+        /// <param name="member">Member.</param>
+        /// <param name="valueIndex">Value index.</param>
+        /// <param name="mode">Mode.</param>
         public static void Get(out ChannelId val,
                                out bool isNull,
                                out bool isChanged,
@@ -2377,6 +2452,16 @@ namespace Safir.Dob.Typesystem.Internal
             }
         }
 
+        /// <summary>
+        /// Get the specified val, isNull, isChanged, handle, member, valueIndex and mode.
+        /// </summary>
+        /// <param name="val">Value.</param>
+        /// <param name="isNull">Is null.</param>
+        /// <param name="isChanged">Is changed.</param>
+        /// <param name="handle">Handle.</param>
+        /// <param name="member">Member.</param>
+        /// <param name="valueIndex">Value index.</param>
+        /// <param name="mode">Mode.</param>
         public static void Get(out EntityId val,
                                out bool isNull,
                                out bool isChanged,
@@ -2404,6 +2489,16 @@ namespace Safir.Dob.Typesystem.Internal
             }
         }
 
+        /// <summary>
+        /// Get the specified val, isNull, isChanged, handle, member, valueIndex and mode.
+        /// </summary>
+        /// <param name="val">Value.</param>
+        /// <param name="isNull">Is null.</param>
+        /// <param name="isChanged">Is changed.</param>
+        /// <param name="handle">Handle.</param>
+        /// <param name="member">Member.</param>
+        /// <param name="valueIndex">Value index.</param>
+        /// <param name="mode">Mode.</param>
         public static void Get(out Safir.Dob.Typesystem.Object val,
                                out bool isNull,
                                out bool isChanged,
@@ -2432,6 +2527,16 @@ namespace Safir.Dob.Typesystem.Internal
             }
         }
 
+        /// <summary>
+        /// Get the specified val, isNull, isChanged, handle, member, valueIndex and mode.
+        /// </summary>
+        /// <param name="val">Value.</param>
+        /// <param name="isNull">Is null.</param>
+        /// <param name="isChanged">Is changed.</param>
+        /// <param name="handle">Handle.</param>
+        /// <param name="member">Member.</param>
+        /// <param name="valueIndex">Value index.</param>
+        /// <param name="mode">Mode.</param>
         public static void Get(out byte[] val,
                                out bool isNull,
                                out bool isChanged,
@@ -2465,6 +2570,16 @@ namespace Safir.Dob.Typesystem.Internal
 		//---------------------------------------------------------
 		// Set values
 		//--------------------------------------------------------
+        /// <summary>
+        /// Set the specified val, isNull, isChanged, handle, member, valueIndex and mode.
+        /// </summary>
+        /// <param name="val">If set to <c>true</c> value.</param>
+        /// <param name="isNull">If set to <c>true</c> is null.</param>
+        /// <param name="isChanged">If set to <c>true</c> is changed.</param>
+        /// <param name="handle">Handle.</param>
+        /// <param name="member">Member.</param>
+        /// <param name="valueIndex">Value index.</param>
+        /// <param name="mode">Mode.</param>
 		public static void Set(bool val,
         		               bool isNull,
         		               bool isChanged,
@@ -2485,6 +2600,16 @@ namespace Safir.Dob.Typesystem.Internal
                                              member, valueIndex, mode);
         }
 
+        /// <summary>
+        /// Set the specified val, isNull, isChanged, handle, member, valueIndex and mode.
+        /// </summary>
+        /// <param name="val">Value.</param>
+        /// <param name="isNull">If set to <c>true</c> is null.</param>
+        /// <param name="isChanged">If set to <c>true</c> is changed.</param>
+        /// <param name="handle">Handle.</param>
+        /// <param name="member">Member.</param>
+        /// <param name="valueIndex">Value index.</param>
+        /// <param name="mode">Mode.</param>
         public static void Set(Int32 val,
         		               bool isNull,
         		               bool isChanged,
@@ -2499,6 +2624,16 @@ namespace Safir.Dob.Typesystem.Internal
                                            member, valueIndex, mode);
         }
 
+        /// <summary>
+        /// Set the specified val, isNull, isChanged, handle, member, valueIndex and mode.
+        /// </summary>
+        /// <param name="val">Value.</param>
+        /// <param name="isNull">If set to <c>true</c> is null.</param>
+        /// <param name="isChanged">If set to <c>true</c> is changed.</param>
+        /// <param name="handle">Handle.</param>
+        /// <param name="member">Member.</param>
+        /// <param name="valueIndex">Value index.</param>
+        /// <param name="mode">Mode.</param>
         public static void Set(Int64 val,
         		               bool isNull,
         		               bool isChanged,
@@ -2513,6 +2648,16 @@ namespace Safir.Dob.Typesystem.Internal
                                            member, valueIndex, mode);
         }
 
+        /// <summary>
+        /// Set the specified val, isNull, isChanged, handle, member, valueIndex and mode.
+        /// </summary>
+        /// <param name="val">Value.</param>
+        /// <param name="isNull">If set to <c>true</c> is null.</param>
+        /// <param name="isChanged">If set to <c>true</c> is changed.</param>
+        /// <param name="handle">Handle.</param>
+        /// <param name="member">Member.</param>
+        /// <param name="valueIndex">Value index.</param>
+        /// <param name="mode">Mode.</param>
         public static void Set(float val,
         		               bool isNull,
         		               bool isChanged,
@@ -2531,6 +2676,16 @@ namespace Safir.Dob.Typesystem.Internal
                                              member, valueIndex, mode);
         }
 
+        /// <summary>
+        /// Set the specified val, isNull, isChanged, handle, member, valueIndex and mode.
+        /// </summary>
+        /// <param name="val">Value.</param>
+        /// <param name="isNull">If set to <c>true</c> is null.</param>
+        /// <param name="isChanged">If set to <c>true</c> is changed.</param>
+        /// <param name="handle">Handle.</param>
+        /// <param name="member">Member.</param>
+        /// <param name="valueIndex">Value index.</param>
+        /// <param name="mode">Mode.</param>
         public static void Set(double val,
         		               bool isNull,
         		               bool isChanged,
@@ -2549,6 +2704,16 @@ namespace Safir.Dob.Typesystem.Internal
                                              member, valueIndex, mode);
         }
 
+        /// <summary>
+        /// Set the specified val, isNull, isChanged, handle, member, valueIndex and mode.
+        /// </summary>
+        /// <param name="val">Value.</param>
+        /// <param name="isNull">If set to <c>true</c> is null.</param>
+        /// <param name="isChanged">If set to <c>true</c> is changed.</param>
+        /// <param name="handle">Handle.</param>
+        /// <param name="member">Member.</param>
+        /// <param name="valueIndex">Value index.</param>
+        /// <param name="mode">Mode.</param>
         public static void Set(string val,
         		               bool isNull,
         		               bool isChanged,
@@ -2579,6 +2744,16 @@ namespace Safir.Dob.Typesystem.Internal
             }
 		}
 
+        /// <summary>
+        /// Set the specified val, isNull, isChanged, handle, member, valueIndex and mode.
+        /// </summary>
+        /// <param name="val">Value.</param>
+        /// <param name="isNull">If set to <c>true</c> is null.</param>
+        /// <param name="isChanged">If set to <c>true</c> is changed.</param>
+        /// <param name="handle">Handle.</param>
+        /// <param name="member">Member.</param>
+        /// <param name="valueIndex">Value index.</param>
+        /// <param name="mode">Mode.</param>
         public static void Set(InstanceId val,
         		               bool isNull,
         		               bool isChanged,
@@ -2620,6 +2795,16 @@ namespace Safir.Dob.Typesystem.Internal
             }
         }
 
+        /// <summary>
+        /// Set the specified val, isNull, isChanged, handle, member, valueIndex and mode.
+        /// </summary>
+        /// <param name="val">Value.</param>
+        /// <param name="isNull">If set to <c>true</c> is null.</param>
+        /// <param name="isChanged">If set to <c>true</c> is changed.</param>
+        /// <param name="handle">Handle.</param>
+        /// <param name="member">Member.</param>
+        /// <param name="valueIndex">Value index.</param>
+        /// <param name="mode">Mode.</param>
         public static void Set(HandlerId val,
         		               bool isNull,
         		               bool isChanged,
@@ -2661,6 +2846,16 @@ namespace Safir.Dob.Typesystem.Internal
             }
         }
 
+        /// <summary>
+        /// Set the specified val, isNull, isChanged, handle, member, valueIndex and mode.
+        /// </summary>
+        /// <param name="val">Value.</param>
+        /// <param name="isNull">If set to <c>true</c> is null.</param>
+        /// <param name="isChanged">If set to <c>true</c> is changed.</param>
+        /// <param name="handle">Handle.</param>
+        /// <param name="member">Member.</param>
+        /// <param name="valueIndex">Value index.</param>
+        /// <param name="mode">Mode.</param>
         public static void Set(ChannelId val,
         		               bool isNull,
         		               bool isChanged,
@@ -2702,6 +2897,16 @@ namespace Safir.Dob.Typesystem.Internal
             }
         }
 
+        /// <summary>
+        /// Set the specified val, isNull, isChanged, handle, member, valueIndex and mode.
+        /// </summary>
+        /// <param name="val">Value.</param>
+        /// <param name="isNull">If set to <c>true</c> is null.</param>
+        /// <param name="isChanged">If set to <c>true</c> is changed.</param>
+        /// <param name="handle">Handle.</param>
+        /// <param name="member">Member.</param>
+        /// <param name="valueIndex">Value index.</param>
+        /// <param name="mode">Mode.</param>
         public static void Set(EntityId val,
         		               bool isNull,
         		               bool isChanged,
@@ -2749,6 +2954,16 @@ namespace Safir.Dob.Typesystem.Internal
             }
         }
 
+        /// <summary>
+        /// Set the specified val, isNull, isChanged, handle, member, valueIndex and mode.
+        /// </summary>
+        /// <param name="val">Value.</param>
+        /// <param name="isNull">If set to <c>true</c> is null.</param>
+        /// <param name="isChanged">If set to <c>true</c> is changed.</param>
+        /// <param name="handle">Handle.</param>
+        /// <param name="member">Member.</param>
+        /// <param name="valueIndex">Value index.</param>
+        /// <param name="mode">Mode.</param>
         public static void Set(Safir.Dob.Typesystem.Object val,
         		               bool isNull,
         		               bool isChanged,
@@ -2790,6 +3005,16 @@ namespace Safir.Dob.Typesystem.Internal
             }
         }
 
+        /// <summary>
+        /// Set the specified val, isNull, isChanged, handle, member, valueIndex and mode.
+        /// </summary>
+        /// <param name="val">Value.</param>
+        /// <param name="isNull">If set to <c>true</c> is null.</param>
+        /// <param name="isChanged">If set to <c>true</c> is changed.</param>
+        /// <param name="handle">Handle.</param>
+        /// <param name="member">Member.</param>
+        /// <param name="valueIndex">Value index.</param>
+        /// <param name="mode">Mode.</param>
         public static void Set(byte[] val,
         		               bool isNull,
         		               bool isChanged,

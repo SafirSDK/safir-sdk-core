@@ -44,23 +44,43 @@ namespace Safir.Dob.Typesystem
     {
         #region IList implementation
 
+        /// <Docs>To be added.</Docs>
+        /// <para>Determines the index of a specific item in the current instance.</para>
+        /// <summary>
+        /// Indexs the of.
+        /// </summary>
+        /// <returns>The of.</returns>
+        /// <param name="item">Item.</param>
         public int IndexOf (T item)
         {
             return values.IndexOf (item);
         }
 
+        /// <summary>
+        /// Insert the specified index and item.
+        /// </summary>
+        /// <param name="index">Index.</param>
+        /// <param name="item">Item.</param>
         public void Insert (int index, T item)
         {
             m_bIsChanged = true;
             values.Insert (index, item);
         }
 
+        /// <summary>
+        /// Removes at index.
+        /// </summary>
+        /// <param name="index">Index.</param>
         public void RemoveAt (int index)
         {
             m_bIsChanged = true;
             values.RemoveAt (index);
         }
 
+        /// <summary>
+        /// Gets or sets the <see cref="Safir.Dob.Typesystem.SequenceContainer`1"/> at the specified index.
+        /// </summary>
+        /// <param name="index">Index.</param>
         public T this [int index] {
             get {
                 return values [index];
@@ -75,29 +95,57 @@ namespace Safir.Dob.Typesystem
 
         #region ICollection implementation
 
+        /// <Docs>The item to add to the current collection.</Docs>
+        /// <para>Adds an item to the current collection.</para>
+        /// <remarks>To be added.</remarks>
+        /// <exception cref="System.NotSupportedException">The current collection is read-only.</exception>
+        /// <summary>
+        /// Add the specified item.
+        /// </summary>
+        /// <param name="item">Item.</param>
         public void Add (T item)
         {
             m_bIsChanged = true;
             values.Add (item);
         }
 
+        /// <summary>
+        /// Clear this instance.
+        /// </summary>
         public void Clear ()
         {
             m_bIsChanged = true;
             values.Clear ();
         }
 
+        /// <Docs>The object to locate in the current collection.</Docs>
+        /// <para>Determines whether the current collection contains a specific value.</para>
+        /// <summary>
+        /// Contains the specified item.
+        /// </summary>
+        /// <param name="item">Item.</param>
         public bool Contains (T item)
         {
             return values.Contains (item);
         }
 
+        /// <summary>
+        /// Copies to.
+        /// </summary>
+        /// <param name="array">Array.</param>
+        /// <param name="arrayIndex">Array index.</param>
         public void CopyTo (T[] array, int arrayIndex)
         {
             m_bIsChanged = true;
             values.CopyTo (array, arrayIndex);
         }
 
+        /// <Docs>The item to remove from the current collection.</Docs>
+        /// <para>Removes the first occurrence of an item from the current collection.</para>
+        /// <summary>
+        /// Remove the specified item.
+        /// </summary>
+        /// <param name="item">Item.</param>
         public bool Remove (T item)
         {
             bool removed=values.Remove (item);
@@ -106,12 +154,20 @@ namespace Safir.Dob.Typesystem
             return removed;
         }
 
+        /// <summary>
+        /// Gets the count.
+        /// </summary>
+        /// <value>The count.</value>
         public int Count {
             get {
                 return values.Count;
             }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether this instance is read only.
+        /// </summary>
+        /// <value><c>true</c> if this instance is read only; otherwise, <c>false</c>.</value>
         public bool IsReadOnly {
             get {
                 return false;
@@ -122,6 +178,10 @@ namespace Safir.Dob.Typesystem
 
         #region IEnumerable implementation
 
+        /// <summary>
+        /// Gets the enumerator.
+        /// </summary>
+        /// <returns>The enumerator.</returns>
         public IEnumerator<T> GetEnumerator ()
         {
             return values.GetEnumerator ();
@@ -131,6 +191,10 @@ namespace Safir.Dob.Typesystem
 
         #region IEnumerable implementation
 
+        /// <summary>
+        /// Gets the enumerator.
+        /// </summary>
+        /// <returns>The enumerator.</returns>
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator ()
         {
             return (values as IEnumerable<T>).GetEnumerator ();
@@ -140,21 +204,36 @@ namespace Safir.Dob.Typesystem
 
         #region implemented abstract members of ContainerBase
 
+        /// <summary>
+        /// Is the container set to null?
+        /// </summary>
+        /// <returns>True if the container is set to null.</returns>
         public override bool IsNull ()
         {
             return false;
         }
 
+        /// <summary>
+        /// Set the container to null.
+        /// </summary>
         public override void SetNull ()
         {
             throw new SoftwareViolationException("Sequences cannot be null!");
         }
 
+        /// <summary>
+        /// Determines whether this instance is changed.
+        /// </summary>
+        /// <returns><c>true</c> if this instance is changed; otherwise, <c>false</c>.</returns>
         public override bool IsChanged ()
         {
             return m_bIsChanged;
         }
 
+        /// <summary>
+        /// Sets the changed.
+        /// </summary>
+        /// <param name="changed">If set to <c>true</c> changed.</param>
         public override void SetChanged (bool changed)
         {
             m_bIsChanged = changed;
@@ -173,6 +252,10 @@ namespace Safir.Dob.Typesystem
             values = new List<T> ();
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Safir.Dob.Typesystem.SequenceContainer`1"/> class.
+        /// </summary>
+        /// <param name="other">Other.</param>
         protected SequenceContainer(SequenceContainer<T> other):
             base(other)
         {
@@ -181,6 +264,9 @@ namespace Safir.Dob.Typesystem
 
     public class ObjectSequenceContainer<T> : SequenceContainer<T>, ICloneable where T : Safir.Dob.Typesystem.Object
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Safir.Dob.Typesystem.ObjectSequenceContainer`1"/> class.
+        /// </summary>
         public ObjectSequenceContainer(): base()
         {
         }
@@ -202,6 +288,9 @@ namespace Safir.Dob.Typesystem
 
         #region Cloning
 
+        /// <summary>
+        /// Clone this instance.
+        /// </summary>
         object ICloneable.Clone()
         {
             return new ObjectSequenceContainer<T>(this);
@@ -253,6 +342,9 @@ namespace Safir.Dob.Typesystem
 
         #region Cloning
 
+        /// <summary>
+        /// Clone this instance.
+        /// </summary>
         object ICloneable.Clone()
         {
             return new MemberSequenceContainer<T>(this);
@@ -282,9 +374,10 @@ namespace Safir.Dob.Typesystem
         #endregion
     }
 
+    public class StringSequenceContainer : MemberSequenceContainer<string> {}
+    public class BooleanSequenceContainer : MemberSequenceContainer<bool> {}
     public class Int32SequenceContainer : MemberSequenceContainer<Int32> {}
     public class Int64SequenceContainer : MemberSequenceContainer<Int64> {}
-    public class StringSequenceContainer : MemberSequenceContainer<string> {}
     public class Float32SequenceContainer : MemberSequenceContainer<float> {}
     public class Float64SequenceContainer : MemberSequenceContainer<double> {}
     public class TypeIdSequenceContainer : MemberSequenceContainer<Int64> {}
@@ -292,6 +385,7 @@ namespace Safir.Dob.Typesystem
     public class ChannelIdSequenceContainer : MemberSequenceContainer<ChannelId> {}
     public class HandlerIdSequenceContainer : MemberSequenceContainer<HandlerId> {}
     public class EntityIdSequenceContainer : MemberSequenceContainer<EntityId> {}
+    public class BinarySequenceContainer : MemberSequenceContainer<byte[]> {}
 
     //SI32
     public class Ampere32SequenceContainer : Float32SequenceContainer {}
