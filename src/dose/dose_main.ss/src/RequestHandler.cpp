@@ -152,7 +152,10 @@ namespace
     {
         m_strand.dispatch([this, connection] ()
         {
-            // First, try to distribute out requests for this connection
+            // First, try to distribute responses for this connection
+            m_responseHandler.DistributeResponses(connection);
+
+            // Second, try to distribute out requests for this connection
             lllog(8) << "DOSE_MAIN: Distributing requests (out) for connection "
                      << connection->Id() << "." << std::endl;
 
@@ -167,7 +170,7 @@ namespace
                                                                                   skipList);
                                                               });
 
-            // Second, it could be that this connection now has empty slots on its in queue
+            // Third, it could be that this connection now has empty slots on its in queue
             // Get any connection blocking on this connection and try to distribute its requests.
             ReleaseAllBlocked(connection->Id().m_id);
         });
@@ -555,68 +558,6 @@ namespace
             return false;
         }
     }
-
-#if 0 //stewart
-    void RequestHandler::HandleTimeout(const TimerInfoPtr& timer)
-    {
-        if (timer->GetTimerId() == RequestTimers::m_localReqTimerId)
-        {
-            // A request in the sender node has expired, generate a
-            // response.
-
-            const RequestTimerInfo& timerInfo = boost::static_pointer_cast<ReqTimer>(timer)->UserData();
-
-            const ConnectionPtr sender = Connections::Instance().GetConnection
-                (ConnectionId(Connections::Instance().NodeId(),
-                              -1,
-                              timerInfo.m_connectionIdentifier),
-                 std::nothrow);
-
-            if (sender == NULL)
-            {
-                // It seems that the sender is no longer there.
-                return;
-            }
-
-            std::wostringstream ostr;
-            ostr << "The handler " << timerInfo.m_handlerId << " did not respond to the request of type "
-                << Typesystem::Operations::GetName(timerInfo.m_typeId) << "!";
-
-            //create timeout response
-            Dob::ErrorResponsePtr errorResponse =
-                Dob::ErrorResponse::CreateErrorResponse
-                (Dob::ResponseGeneralErrorCodes::SafirTimeout(),
-                 ostr.str());
-
-            Typesystem::BinarySerialization bin;
-            Typesystem::Serialization::ToBinary(errorResponse,bin);
-
-            //convert response to Shared Message
-            DistributionData response(response_tag,
-                                      sender->Id(),
-                                      sender->Id(),
-                                      timerInfo.m_requestId,
-                                      &bin[0]);
-
-            //set the request handled and increase the timeouts count.
-            sender->GetRequestOutQueue().RequestTimeout(timerInfo.m_requestId);
-
-            //Post the response
-            m_responseHandler.HandleResponse(response);
-
-            sender->SignalIn();
-        }
-        else if (timer->GetTimerId() == RequestTimers::m_externalReqTimerId)
-        {
-            // A request in the receiver's node (external node) has expired. We just remove
-            // the request since the corresponding timout in the sender node will take care
-            // of the response generation.
-            RequestTimerInfo timerInfo = boost::static_pointer_cast<ReqTimer>(timer)->UserData();
-
-            RemovePendingRequest(timerInfo.m_connectionIdentifier, timerInfo.m_requestId);
-        }
-    }
-#endif
 
     bool RequestHandler::PostRequest(const ConnectionConsumerPair& receiver,
                                      const DistributionData& request)
