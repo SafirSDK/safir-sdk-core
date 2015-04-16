@@ -191,7 +191,7 @@ Expectation: Consumer 0 should get a service request
 Consumer 0: OnResponse:
   Type       = DoseTest.SuccessfulService
   IsSuccess  = true
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Response   = <?xml version="1.0" encoding="utf-8"?><DoseTest.SuccessfulService><Info xml:space="preserve">AutoResponse</Info></DoseTest.SuccessfulService>
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.LocalService></DoseTest.LocalService>
 
@@ -215,7 +215,7 @@ Expectation: Partner0/Consumer 1 should get a time out response on a service req
 --------- Test  -----------
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.GlobalService
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalService></DoseTest.GlobalService>
@@ -242,70 +242,70 @@ Consumer 0: SimulateOverflows(true, false)
 Consumer 0: SimulateOverflows(false, false)
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.GlobalService
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalService></DoseTest.GlobalService>
 
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.GlobalService
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalService></DoseTest.GlobalService>
 
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.GlobalService
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalService></DoseTest.GlobalService>
 
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.GlobalService
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalService></DoseTest.GlobalService>
 
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.GlobalService
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalService></DoseTest.GlobalService>
 
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.GlobalService
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalService></DoseTest.GlobalService>
 
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.GlobalService
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalService></DoseTest.GlobalService>
 
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.GlobalService
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalService></DoseTest.GlobalService>
 
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.GlobalService
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalService></DoseTest.GlobalService>
 
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.GlobalService
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalService></DoseTest.GlobalService>
@@ -330,70 +330,70 @@ Expectation: Partner0/Consumer 0 should get an overflow exception and then one r
 --------- Test  -----------
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.LocalService
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.LocalService></DoseTest.LocalService>
 
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.LocalService
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.LocalService></DoseTest.LocalService>
 
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.LocalService
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.LocalService></DoseTest.LocalService>
 
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.LocalService
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.LocalService></DoseTest.LocalService>
 
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.LocalService
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.LocalService></DoseTest.LocalService>
 
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.LocalService
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.LocalService></DoseTest.LocalService>
 
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.LocalService
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.LocalService></DoseTest.LocalService>
 
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.LocalService
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.LocalService></DoseTest.LocalService>
 
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.LocalService
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.LocalService></DoseTest.LocalService>
 
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.LocalService
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.LocalService></DoseTest.LocalService>
@@ -422,7 +422,7 @@ Expectation: Each partner should receive one (and only one) request, and p0 shou
 --------- Test  -----------
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.GlobalService
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = 7471736682775137277
   HandlerStr = 7471736682775137277
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalService></DoseTest.GlobalService>
@@ -586,7 +586,7 @@ Expectation: partner 0/consumer 0 receives one OnInjectedNewEntity and one OnInj
 Consumer 0: Read entity (DoseTest.InjectableEntity, 654321):
   EntityId  = (DoseTest.InjectableEntity, 654321):
   Owner     = DEFAULT_HANDLER
-  OwnerConn = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  OwnerConn = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   OwnerStr  = DEFAULT_HANDLER
   Entity    = <?xml version="1.0" encoding="utf-8"?><DoseTest.InjectableEntity><Info xml:space="preserve">Some new info</Info></DoseTest.InjectableEntity>
 
@@ -607,7 +607,7 @@ Expectation: partner 0/consumer 0 receives one OnInjectedNewEntity and one OnInj
 Consumer 0: OnNewEntity:
   EntityId  = (DoseTest.InjectableEntity, 987654)
   Owner     = DEFAULT_HANDLER
-  OwnerConn = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  OwnerConn = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   OwnerStr  = DEFAULT_HANDLER
   Entity    = <?xml version="1.0" encoding="utf-8"?><DoseTest.InjectableEntity><Info xml:space="preserve">Some new info</Info></DoseTest.InjectableEntity>
   Changed top-level members: 
@@ -637,14 +637,14 @@ Expectation: partner 0/consumer 0 receives one OnInitialInjectionsDone, one OnIn
 Consumer 0: Read entity (DoseTest.InjectableEntity, 654321):
   EntityId  = (DoseTest.InjectableEntity, 654321):
   Owner     = DEFAULT_HANDLER
-  OwnerConn = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  OwnerConn = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   OwnerStr  = DEFAULT_HANDLER
   Entity    = <?xml version="1.0" encoding="utf-8"?><DoseTest.InjectableEntity><Info xml:space="preserve">First inject</Info></DoseTest.InjectableEntity>
 
 Consumer 0: Read entity (DoseTest.InjectableEntity, 654321):
   EntityId  = (DoseTest.InjectableEntity, 654321):
   Owner     = DEFAULT_HANDLER
-  OwnerConn = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  OwnerConn = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   OwnerStr  = DEFAULT_HANDLER
   Entity    = <?xml version="1.0" encoding="utf-8"?><DoseTest.InjectableEntity><Info xml:space="preserve">Second inject</Info></DoseTest.InjectableEntity>
 
@@ -770,14 +770,14 @@ Expectation: P0 receives three OnServiceRequest, the first and second with Info 
 Consumer 1: OnResponse:
   Type       = DoseTest.SuccessfulService
   IsSuccess  = true
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Response   = <?xml version="1.0" encoding="utf-8"?><DoseTest.SuccessfulService><Info xml:space="preserve">AutoResponse</Info></DoseTest.SuccessfulService>
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalService><Info xml:space="preserve">Service request 1</Info></DoseTest.GlobalService>
 
 Consumer 1: OnResponse:
   Type       = DoseTest.SuccessfulService
   IsSuccess  = true
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Response   = <?xml version="1.0" encoding="utf-8"?><DoseTest.SuccessfulService><Info xml:space="preserve">AutoResponse</Info></DoseTest.SuccessfulService>
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalService><Info xml:space="preserve">Service request 2</Info></DoseTest.GlobalService>
 
@@ -790,14 +790,14 @@ Expectation: P0 receives three OnServiceRequest, the first and second with Info 
 Consumer 1: OnResponse:
   Type       = DoseTest.SuccessfulService
   IsSuccess  = true
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Response   = <?xml version="1.0" encoding="utf-8"?><DoseTest.SuccessfulService><Info xml:space="preserve">AutoResponse</Info></DoseTest.SuccessfulService>
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalService><Info xml:space="preserve">Service request 1</Info></DoseTest.GlobalService>
 
 Consumer 1: OnResponse:
   Type       = DoseTest.SuccessfulService
   IsSuccess  = true
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Response   = <?xml version="1.0" encoding="utf-8"?><DoseTest.SuccessfulService><Info xml:space="preserve">AutoResponse</Info></DoseTest.SuccessfulService>
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalService><Info xml:space="preserve">Service request 2</Info></DoseTest.GlobalService>
 
@@ -810,14 +810,14 @@ Expectation: P0 receives two OnServiceRequest, the first with Info set to 'Servi
 Consumer 1: OnResponse:
   Type       = DoseTest.SuccessfulService
   IsSuccess  = true
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Response   = <?xml version="1.0" encoding="utf-8"?><DoseTest.SuccessfulService><Info xml:space="preserve">AutoResponse</Info></DoseTest.SuccessfulService>
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalService><Info xml:space="preserve">Service request 1</Info></DoseTest.GlobalService>
 
 Consumer 1: OnResponse:
   Type       = DoseTest.SuccessfulService
   IsSuccess  = true
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Response   = <?xml version="1.0" encoding="utf-8"?><DoseTest.SuccessfulService><Info xml:space="preserve">AutoResponse</Info></DoseTest.SuccessfulService>
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalService><Info xml:space="preserve">Service request 2</Info></DoseTest.GlobalService>
 
@@ -830,14 +830,14 @@ Expectation: P0 receives two OnServiceRequest, the first with Info set to 'Servi
 Consumer 1: OnResponse:
   Type       = DoseTest.SuccessfulService
   IsSuccess  = true
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Response   = <?xml version="1.0" encoding="utf-8"?><DoseTest.SuccessfulService><Info xml:space="preserve">AutoResponse</Info></DoseTest.SuccessfulService>
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalService><Info xml:space="preserve">Service request 1</Info></DoseTest.GlobalService>
 
 Consumer 1: OnResponse:
   Type       = DoseTest.SuccessfulService
   IsSuccess  = true
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Response   = <?xml version="1.0" encoding="utf-8"?><DoseTest.SuccessfulService><Info xml:space="preserve">AutoResponse</Info></DoseTest.SuccessfulService>
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalService><Info xml:space="preserve">Service request 2</Info></DoseTest.GlobalService>
 
@@ -850,14 +850,14 @@ Expectation: P0 receives three OnCreateRequest, the first and second for instanc
 Consumer 1: OnResponse:
   Type       = DoseTest.SuccessfulCreate
   IsSuccess  = true
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Response   = <?xml version="1.0" encoding="utf-8"?><DoseTest.SuccessfulCreate><Info xml:space="preserve">AutoResponse</Info></DoseTest.SuccessfulCreate>
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalEntity><Info xml:space="preserve">Create request 1</Info></DoseTest.GlobalEntity>
 
 Consumer 1: OnResponse:
   Type       = DoseTest.SuccessfulCreate
   IsSuccess  = true
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Response   = <?xml version="1.0" encoding="utf-8"?><DoseTest.SuccessfulCreate><Info xml:space="preserve">AutoResponse</Info></DoseTest.SuccessfulCreate>
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalEntity><Info xml:space="preserve">Create request 2</Info></DoseTest.GlobalEntity>
 
@@ -870,14 +870,14 @@ Expectation: P0 receives two OnCreateRequest, the first for instance 121212 and 
 Consumer 1: OnResponse:
   Type       = DoseTest.SuccessfulCreate
   IsSuccess  = true
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Response   = <?xml version="1.0" encoding="utf-8"?><DoseTest.SuccessfulCreate><Info xml:space="preserve">AutoResponse</Info></DoseTest.SuccessfulCreate>
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalEntity><Info xml:space="preserve">Create request 1</Info></DoseTest.GlobalEntity>
 
 Consumer 1: OnResponse:
   Type       = DoseTest.SuccessfulCreate
   IsSuccess  = true
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Response   = <?xml version="1.0" encoding="utf-8"?><DoseTest.SuccessfulCreate><Info xml:space="preserve">AutoResponse</Info></DoseTest.SuccessfulCreate>
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalEntity><Info xml:space="preserve">Create request 2</Info></DoseTest.GlobalEntity>
 
@@ -890,14 +890,14 @@ Expectation: P0 receives three OnUpdateRequest, the first and second for instanc
 Consumer 1: OnResponse:
   Type       = DoseTest.SuccessfulUpdate
   IsSuccess  = true
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Response   = <?xml version="1.0" encoding="utf-8"?><DoseTest.SuccessfulUpdate><Info xml:space="preserve">AutoResponse</Info></DoseTest.SuccessfulUpdate>
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalEntity><Info xml:space="preserve">Update request 1</Info></DoseTest.GlobalEntity>
 
 Consumer 1: OnResponse:
   Type       = DoseTest.SuccessfulUpdate
   IsSuccess  = true
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Response   = <?xml version="1.0" encoding="utf-8"?><DoseTest.SuccessfulUpdate><Info xml:space="preserve">AutoResponse</Info></DoseTest.SuccessfulUpdate>
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalEntity><Info xml:space="preserve">Update request 2</Info></DoseTest.GlobalEntity>
 
@@ -910,14 +910,14 @@ Expectation: P0 receives two OnUpdateRequest, the first for instance 121212 and 
 Consumer 1: OnResponse:
   Type       = DoseTest.SuccessfulUpdate
   IsSuccess  = true
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Response   = <?xml version="1.0" encoding="utf-8"?><DoseTest.SuccessfulUpdate><Info xml:space="preserve">AutoResponse</Info></DoseTest.SuccessfulUpdate>
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalEntity><Info xml:space="preserve">Update request 1</Info></DoseTest.GlobalEntity>
 
 Consumer 1: OnResponse:
   Type       = DoseTest.SuccessfulUpdate
   IsSuccess  = true
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Response   = <?xml version="1.0" encoding="utf-8"?><DoseTest.SuccessfulUpdate><Info xml:space="preserve">AutoResponse</Info></DoseTest.SuccessfulUpdate>
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalEntity><Info xml:space="preserve">Update request 2</Info></DoseTest.GlobalEntity>
 
@@ -930,14 +930,14 @@ Expectation: P0 receives three OnDeleteRequest, the first and second for instanc
 Consumer 1: OnResponse:
   Type       = DoseTest.SuccessfulDelete
   IsSuccess  = true
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Response   = <?xml version="1.0" encoding="utf-8"?><DoseTest.SuccessfulDelete><Info xml:space="preserve">AutoResponse</Info></DoseTest.SuccessfulDelete>
   Request    = DeleteRequest on (DoseTest.GlobalEntity, 121212)
 
 Consumer 1: OnResponse:
   Type       = DoseTest.SuccessfulDelete
   IsSuccess  = true
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Response   = <?xml version="1.0" encoding="utf-8"?><DoseTest.SuccessfulDelete><Info xml:space="preserve">AutoResponse</Info></DoseTest.SuccessfulDelete>
   Request    = DeleteRequest on (DoseTest.GlobalEntity, 343434)
 
@@ -950,14 +950,14 @@ Expectation: P0 receives two OnDeleteRequest, the first for instance 121212 and 
 Consumer 1: OnResponse:
   Type       = DoseTest.SuccessfulDelete
   IsSuccess  = true
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Response   = <?xml version="1.0" encoding="utf-8"?><DoseTest.SuccessfulDelete><Info xml:space="preserve">AutoResponse</Info></DoseTest.SuccessfulDelete>
   Request    = DeleteRequest on (DoseTest.GlobalEntity, 121212)
 
 Consumer 1: OnResponse:
   Type       = DoseTest.SuccessfulDelete
   IsSuccess  = true
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Response   = <?xml version="1.0" encoding="utf-8"?><DoseTest.SuccessfulDelete><Info xml:space="preserve">AutoResponse</Info></DoseTest.SuccessfulDelete>
   Request    = DeleteRequest on (DoseTest.GlobalEntity, 343434)
 
@@ -1326,7 +1326,7 @@ Expectation: Partner 0/Consumer 0 receives a success response and the entity inf
 --------- Test  -----------
 Consumer 1: OnCreateRequest (Requestor decides instance id): 
   Entity     = (DoseTest.LocalEntity, 345678)
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.LocalEntity><Info xml:space="preserve">Created</Info></DoseTest.LocalEntity>
@@ -1345,7 +1345,7 @@ Expectation: Partner 0/Consumer 1 receives a success response and the entity inf
 --------- Test  -----------
 Consumer 1: OnUpdateRequest: 
   Entity     = (DoseTest.LocalEntity, 565656)
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.LocalEntity><Info xml:space="preserve">Updated</Info></DoseTest.LocalEntity>
@@ -1370,7 +1370,7 @@ Expectation: Partner 0/Consumer 1 receives a success response and exception Safi
 --------- Test  -----------
 Consumer 1: OnDeleteRequest: 
   Entity     = (DoseTest.LocalEntity, 0)
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
 
@@ -1394,7 +1394,7 @@ Expectation: Partner 0/Consumer 1 should get a time out response
 --------- Test  -----------
 Consumer 0: OnCreateRequest (Requestor decides instance id): 
   Entity     = (DoseTest.LocalEntity, 0)
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.LocalEntity><Info xml:space="preserve">Created</Info></DoseTest.LocalEntity>
@@ -1456,21 +1456,21 @@ Expectation: P2 receives requests (cre, upd, del) with correct data in them, and
 Consumer 0: OnResponse:
   Type       = DoseTest.SuccessfulCreate
   IsSuccess  = true
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;2</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;2</ConnectionName></Safir.Dob.ConnectionInfo>
   Response   = <?xml version="1.0" encoding="utf-8"?><DoseTest.SuccessfulCreate><Info xml:space="preserve">AutoResponse</Info></DoseTest.SuccessfulCreate>
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.ComplexGlobalEntity><Int32Member>32</Int32Member><Int64Member>64</Int64Member><Float32Member>32</Float32Member><Float64Member>64</Float64Member><BooleanMember>true</BooleanMember><EnumerationMember>MyFirst</EnumerationMember><StringMember xml:space="preserve">Safir</StringMember><EntityIdMember><name>DoseTest.RootEntity</name><instanceId>0</instanceId></EntityIdMember><TypeIdMember>DoseTest.TestItem</TypeIdMember><InstanceIdMember>SomeInstance</InstanceIdMember><ChannelIdMember>SomeChannel</ChannelIdMember><HandlerIdMember>SomeHandler</HandlerIdMember><ObjectMember></ObjectMember><BinaryMember></BinaryMember><TestClassMember><MyInt>-32</MyInt></TestClassMember><Ampere32Member>32001</Ampere32Member><CubicMeter32Member>32002</CubicMeter32Member><Hertz32Member>32003</Hertz32Member><Joule32Member>32004</Joule32Member><Kelvin32Member>32005</Kelvin32Member><Kilogram32Member>32006</Kilogram32Member><Meter32Member>32007</Meter32Member><MeterPerSecond32Member>32008</MeterPerSecond32Member><MeterPerSecondSquared32Member>32009</MeterPerSecondSquared32Member><Newton32Member>32010</Newton32Member><Pascal32Member>32011</Pascal32Member><Radian32Member>32012</Radian32Member><RadianPerSecond32Member>32013</RadianPerSecond32Member><RadianPerSecondSquared32Member>32014</RadianPerSecondSquared32Member><Second32Member>32015</Second32Member><SquareMeter32Member>32016</SquareMeter32Member><Steradian32Member>32017</Steradian32Member><Volt32Member>32018</Volt32Member><Watt32Member>32019</Watt32Member><Ampere64Member>64001</Ampere64Member><CubicMeter64Member>64002</CubicMeter64Member><Hertz64Member>64003</Hertz64Member><Joule64Member>64004</Joule64Member><Kelvin64Member>64005</Kelvin64Member><Kilogram64Member>64006</Kilogram64Member><Meter64Member>64007</Meter64Member><MeterPerSecond64Member>64008</MeterPerSecond64Member><MeterPerSecondSquared64Member>64009</MeterPerSecondSquared64Member><Newton64Member>64010</Newton64Member><Pascal64Member>64011</Pascal64Member><Radian64Member>64012</Radian64Member><RadianPerSecond64Member>64013</RadianPerSecond64Member><RadianPerSecondSquared64Member>64014</RadianPerSecondSquared64Member><Second64Member>64015</Second64Member><SquareMeter64Member>64016</SquareMeter64Member><Steradian64Member>64017</Steradian64Member><Volt64Member>64018</Volt64Member><Watt64Member>64019</Watt64Member><Int32ArrayMember><Int32 index="0">32</Int32><Int32 index="1">-32</Int32></Int32ArrayMember><Int64ArrayMember><Int64 index="0">64</Int64><Int64 index="1">-64</Int64></Int64ArrayMember><Float32ArrayMember><Float32 index="0">32</Float32><Float32 index="1">-32</Float32></Float32ArrayMember><Float64ArrayMember><Float64 index="0">64</Float64><Float64 index="1">-64</Float64></Float64ArrayMember><BooleanArrayMember><Boolean index="0">true</Boolean><Boolean index="1">false</Boolean></BooleanArrayMember><EnumerationArrayMember><DoseTest.TestEnum index="0">MyFirst</DoseTest.TestEnum><DoseTest.TestEnum index="1">MySecond</DoseTest.TestEnum></EnumerationArrayMember><StringArrayMember><String index="0" xml:space="preserve"></String><String index="1" xml:space="preserve">rifaS</String></StringArrayMember><EntityIdArrayMember><EntityId index="0"><name>DoseTest.RootEntity</name><instanceId>0</instanceId></EntityId><EntityId index="1"><name>DoseTest.RootEntity</name><instanceId>SomeInstance</instanceId></EntityId></EntityIdArrayMember><TypeIdArrayMember><TypeId index="0">DoseTest.TestItem</TypeId><TypeId index="1">DoseTest.TestEnum</TypeId></TypeIdArrayMember><InstanceIdArrayMember><InstanceId index="0">0</InstanceId><InstanceId index="1">SomeInstance</InstanceId></InstanceIdArrayMember><ChannelIdArrayMember><ChannelId index="0">0</ChannelId><ChannelId index="1">SomeChannel</ChannelId></ChannelIdArrayMember><HandlerIdArrayMember><HandlerId index="0">0</HandlerId><HandlerId index="1">SomeHandler</HandlerId></HandlerIdArrayMember><ObjectArrayMember><Object index="0"></Object><Object index="1"></Object></ObjectArrayMember><BinaryArrayMember><Binary index="0"></Binary><Binary index="1">b25jZSBtb3JlLi4u</Binary></BinaryArrayMember><TestClassArrayMember><DoseTest.TestItem index="0"><MyInt>3200</MyInt></DoseTest.TestItem><DoseTest.TestItem index="1"><MyInt>-3200</MyInt></DoseTest.TestItem></TestClassArrayMember><Ampere32ArrayMember><Ampere32 index="0">32001</Ampere32><Ampere32 index="1">-32001</Ampere32></Ampere32ArrayMember><CubicMeter32ArrayMember><CubicMeter32 index="0">32002</CubicMeter32><CubicMeter32 index="1">-32002</CubicMeter32></CubicMeter32ArrayMember><Hertz32ArrayMember><Hertz32 index="0">32003</Hertz32><Hertz32 index="1">-32003</Hertz32></Hertz32ArrayMember><Joule32ArrayMember><Joule32 index="0">32004</Joule32><Joule32 index="1">-32004</Joule32></Joule32ArrayMember><Kelvin32ArrayMember><Kelvin32 index="0">32005</Kelvin32><Kelvin32 index="1">-32005</Kelvin32></Kelvin32ArrayMember><Kilogram32ArrayMember><Kilogram32 index="0">32006</Kilogram32><Kilogram32 index="1">-32006</Kilogram32></Kilogram32ArrayMember><Meter32ArrayMember><Meter32 index="0">32007</Meter32><Meter32 index="1">-32007</Meter32></Meter32ArrayMember><MeterPerSecond32ArrayMember><MeterPerSecond32 index="0">32008</MeterPerSecond32><MeterPerSecond32 index="1">-32008</MeterPerSecond32></MeterPerSecond32ArrayMember><MeterPerSecondSquared32ArrayMember><MeterPerSecondSquared32 index="0">32009</MeterPerSecondSquared32><MeterPerSecondSquared32 index="1">-32009</MeterPerSecondSquared32></MeterPerSecondSquared32ArrayMember><Newton32ArrayMember><Newton32 index="0">32010</Newton32><Newton32 index="1">-32010</Newton32></Newton32ArrayMember><Pascal32ArrayMember><Pascal32 index="0">32011</Pascal32><Pascal32 index="1">-32011</Pascal32></Pascal32ArrayMember><Radian32ArrayMember><Radian32 index="0">32012</Radian32><Radian32 index="1">-32012</Radian32></Radian32ArrayMember><RadianPerSecond32ArrayMember><RadianPerSecond32 index="0">32013</RadianPerSecond32><RadianPerSecond32 index="1">-32013</RadianPerSecond32></RadianPerSecond32ArrayMember><RadianPerSecondSquared32ArrayMember><RadianPerSecondSquared32 index="0">32014</RadianPerSecondSquared32><RadianPerSecondSquared32 index="1">-32014</RadianPerSecondSquared32></RadianPerSecondSquared32ArrayMember><Second32ArrayMember><Second32 index="0">32015</Second32><Second32 index="1">-32015</Second32></Second32ArrayMember><SquareMeter32ArrayMember><SquareMeter32 index="0">32016</SquareMeter32><SquareMeter32 index="1">-32016</SquareMeter32></SquareMeter32ArrayMember><Steradian32ArrayMember><Steradian32 index="0">32017</Steradian32><Steradian32 index="1">-32017</Steradian32></Steradian32ArrayMember><Volt32ArrayMember><Volt32 index="0">32018</Volt32><Volt32 index="1">-32018</Volt32></Volt32ArrayMember><Watt32ArrayMember><Watt32 index="0">32019</Watt32><Watt32 index="1">-32019</Watt32></Watt32ArrayMember><Ampere64ArrayMember><Ampere64 index="0">64001</Ampere64><Ampere64 index="1">-64001</Ampere64></Ampere64ArrayMember><CubicMeter64ArrayMember><CubicMeter64 index="0">64002</CubicMeter64><CubicMeter64 index="1">-64002</CubicMeter64></CubicMeter64ArrayMember><Hertz64ArrayMember><Hertz64 index="0">64003</Hertz64><Hertz64 index="1">-64003</Hertz64></Hertz64ArrayMember><Joule64ArrayMember><Joule64 index="0">64004</Joule64><Joule64 index="1">-64004</Joule64></Joule64ArrayMember><Kelvin64ArrayMember><Kelvin64 index="0">64005</Kelvin64><Kelvin64 index="1">-64005</Kelvin64></Kelvin64ArrayMember><Kilogram64ArrayMember><Kilogram64 index="0">64006</Kilogram64><Kilogram64 index="1">-64006</Kilogram64></Kilogram64ArrayMember><Meter64ArrayMember><Meter64 index="0">64007</Meter64><Meter64 index="1">-64007</Meter64></Meter64ArrayMember><MeterPerSecond64ArrayMember><MeterPerSecond64 index="0">64008</MeterPerSecond64><MeterPerSecond64 index="1">-64008</MeterPerSecond64></MeterPerSecond64ArrayMember><MeterPerSecondSquared64ArrayMember><MeterPerSecondSquared64 index="0">64009</MeterPerSecondSquared64><MeterPerSecondSquared64 index="1">-64009</MeterPerSecondSquared64></MeterPerSecondSquared64ArrayMember><Newton64ArrayMember><Newton64 index="0">64010</Newton64><Newton64 index="1">-64010</Newton64></Newton64ArrayMember><Pascal64ArrayMember><Pascal64 index="0">64011</Pascal64><Pascal64 index="1">-64011</Pascal64></Pascal64ArrayMember><Radian64ArrayMember><Radian64 index="0">64012</Radian64><Radian64 index="1">-64012</Radian64></Radian64ArrayMember><RadianPerSecond64ArrayMember><RadianPerSecond64 index="0">64013</RadianPerSecond64><RadianPerSecond64 index="1">-64013</RadianPerSecond64></RadianPerSecond64ArrayMember><RadianPerSecondSquared64ArrayMember><RadianPerSecondSquared64 index="0">64014</RadianPerSecondSquared64><RadianPerSecondSquared64 index="1">-64014</RadianPerSecondSquared64></RadianPerSecondSquared64ArrayMember><Second64ArrayMember><Second64 index="0">64015</Second64><Second64 index="1">-64015</Second64></Second64ArrayMember><SquareMeter64ArrayMember><SquareMeter64 index="0">64016</SquareMeter64><SquareMeter64 index="1">-64016</SquareMeter64></SquareMeter64ArrayMember><Steradian64ArrayMember><Steradian64 index="0">64017</Steradian64><Steradian64 index="1">-64017</Steradian64></Steradian64ArrayMember><Volt64ArrayMember><Volt64 index="0">64018</Volt64><Volt64 index="1">-64018</Volt64></Volt64ArrayMember><Watt64ArrayMember><Watt64 index="0">64019</Watt64><Watt64 index="1">-64019</Watt64></Watt64ArrayMember></DoseTest.ComplexGlobalEntity>
 
 Consumer 1: OnResponse:
   Type       = DoseTest.SuccessfulUpdate
   IsSuccess  = true
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;2</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;2</ConnectionName></Safir.Dob.ConnectionInfo>
   Response   = <?xml version="1.0" encoding="utf-8"?><DoseTest.SuccessfulUpdate><Info xml:space="preserve">AutoResponse</Info></DoseTest.SuccessfulUpdate>
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.ComplexGlobalEntity><Int32Member>320</Int32Member><Int64Member>640</Int64Member><Float32Member>320</Float32Member><Float64Member>640</Float64Member><BooleanMember>false</BooleanMember><EnumerationMember>MySecond</EnumerationMember><StringMember xml:space="preserve">Safir SDK</StringMember><EntityIdMember><name>DoseTest.RootEntity</name><instanceId>1</instanceId></EntityIdMember><TypeIdMember>Object</TypeIdMember><InstanceIdMember>AnotherInstance</InstanceIdMember><ChannelIdMember>AnotherChannel</ChannelIdMember><HandlerIdMember>AnotherHandler</HandlerIdMember><ObjectMember type="DoseTest.TestItem"></ObjectMember><BinaryMember>b25jZSBtb3JlLi4u</BinaryMember><TestClassMember></TestClassMember><Ampere32Member>320001</Ampere32Member><CubicMeter32Member>320002</CubicMeter32Member><Hertz32Member>320003</Hertz32Member><Joule32Member>320004</Joule32Member><Kelvin32Member>320005</Kelvin32Member><Kilogram32Member>320006</Kilogram32Member><Meter32Member>320007</Meter32Member><MeterPerSecond32Member>320008</MeterPerSecond32Member><MeterPerSecondSquared32Member>320009</MeterPerSecondSquared32Member><Newton32Member>320010</Newton32Member><Pascal32Member>320011</Pascal32Member><Radian32Member>320012</Radian32Member><RadianPerSecond32Member>320013</RadianPerSecond32Member><RadianPerSecondSquared32Member>320014</RadianPerSecondSquared32Member><Second32Member>320015</Second32Member><SquareMeter32Member>320016</SquareMeter32Member><Steradian32Member>320017</Steradian32Member><Volt32Member>320018</Volt32Member><Watt32Member>320019</Watt32Member><Ampere64Member>640001</Ampere64Member><CubicMeter64Member>640002</CubicMeter64Member><Hertz64Member>640003</Hertz64Member><Joule64Member>640004</Joule64Member><Kelvin64Member>640005</Kelvin64Member><Kilogram64Member>640006</Kilogram64Member><Meter64Member>640007</Meter64Member><MeterPerSecond64Member>640008</MeterPerSecond64Member><MeterPerSecondSquared64Member>640009</MeterPerSecondSquared64Member><Newton64Member>640010</Newton64Member><Pascal64Member>640011</Pascal64Member><Radian64Member>640012</Radian64Member><RadianPerSecond64Member>640013</RadianPerSecond64Member><RadianPerSecondSquared64Member>640014</RadianPerSecondSquared64Member><Second64Member>640015</Second64Member><SquareMeter64Member>640016</SquareMeter64Member><Steradian64Member>640017</Steradian64Member><Volt64Member>640018</Volt64Member><Watt64Member>640019</Watt64Member><Int32ArrayMember><Int32 index="0">320</Int32><Int32 index="1">-320</Int32></Int32ArrayMember><Int64ArrayMember><Int64 index="0">640</Int64><Int64 index="1">-640</Int64></Int64ArrayMember><Float32ArrayMember><Float32 index="0">320</Float32><Float32 index="1">-320</Float32></Float32ArrayMember><Float64ArrayMember><Float64 index="0">640</Float64><Float64 index="1">-640</Float64></Float64ArrayMember><BooleanArrayMember><Boolean index="0">true</Boolean><Boolean index="1">false</Boolean></BooleanArrayMember><EnumerationArrayMember><DoseTest.TestEnum index="0">MyFirst</DoseTest.TestEnum><DoseTest.TestEnum index="1">MySecond</DoseTest.TestEnum></EnumerationArrayMember><StringArrayMember><String index="0" xml:space="preserve"></String><String index="1" xml:space="preserve">rifaS</String></StringArrayMember><EntityIdArrayMember><EntityId index="0"><name>DoseTest.RootEntity</name><instanceId>0</instanceId></EntityId><EntityId index="1"><name>DoseTest.RootEntity</name><instanceId>SomeInstance</instanceId></EntityId></EntityIdArrayMember><TypeIdArrayMember><TypeId index="0">DoseTest.TestItem</TypeId><TypeId index="1">DoseTest.TestEnum</TypeId></TypeIdArrayMember><InstanceIdArrayMember><InstanceId index="0">0</InstanceId><InstanceId index="1">SomeInstance</InstanceId></InstanceIdArrayMember><ChannelIdArrayMember><ChannelId index="0">0</ChannelId><ChannelId index="1">SomeChannel</ChannelId></ChannelIdArrayMember><HandlerIdArrayMember><HandlerId index="0">0</HandlerId><HandlerId index="1">SomeHandler</HandlerId></HandlerIdArrayMember><ObjectArrayMember><Object index="0"></Object><Object index="1"></Object></ObjectArrayMember><BinaryArrayMember><Binary index="0">b25jZSBtb3JlLi4u</Binary><Binary index="1">VGVzdGluZyBiaW5hcnkgdHlwZQ==</Binary></BinaryArrayMember><TestClassArrayMember><DoseTest.TestItem index="0"><MyInt>32000</MyInt></DoseTest.TestItem><DoseTest.TestItem index="1"><MyInt>-32000</MyInt></DoseTest.TestItem></TestClassArrayMember><Ampere32ArrayMember><Ampere32 index="0">320001</Ampere32><Ampere32 index="1">-320001</Ampere32></Ampere32ArrayMember><CubicMeter32ArrayMember><CubicMeter32 index="0">320002</CubicMeter32><CubicMeter32 index="1">-320002</CubicMeter32></CubicMeter32ArrayMember><Hertz32ArrayMember><Hertz32 index="0">320003</Hertz32><Hertz32 index="1">-320003</Hertz32></Hertz32ArrayMember><Joule32ArrayMember><Joule32 index="0">320004</Joule32><Joule32 index="1">-320004</Joule32></Joule32ArrayMember><Kelvin32ArrayMember><Kelvin32 index="0">320005</Kelvin32><Kelvin32 index="1">-320005</Kelvin32></Kelvin32ArrayMember><Kilogram32ArrayMember><Kilogram32 index="0">320006</Kilogram32><Kilogram32 index="1">-320006</Kilogram32></Kilogram32ArrayMember><Meter32ArrayMember><Meter32 index="0">320007</Meter32><Meter32 index="1">-320007</Meter32></Meter32ArrayMember><MeterPerSecond32ArrayMember><MeterPerSecond32 index="0">320008</MeterPerSecond32><MeterPerSecond32 index="1">-320008</MeterPerSecond32></MeterPerSecond32ArrayMember><MeterPerSecondSquared32ArrayMember><MeterPerSecondSquared32 index="0">320009</MeterPerSecondSquared32><MeterPerSecondSquared32 index="1">-320009</MeterPerSecondSquared32></MeterPerSecondSquared32ArrayMember><Newton32ArrayMember><Newton32 index="0">320010</Newton32><Newton32 index="1">-320010</Newton32></Newton32ArrayMember><Pascal32ArrayMember><Pascal32 index="0">320011</Pascal32><Pascal32 index="1">-320011</Pascal32></Pascal32ArrayMember><Radian32ArrayMember><Radian32 index="0">320012</Radian32><Radian32 index="1">-320012</Radian32></Radian32ArrayMember><RadianPerSecond32ArrayMember><RadianPerSecond32 index="0">320013</RadianPerSecond32><RadianPerSecond32 index="1">-320013</RadianPerSecond32></RadianPerSecond32ArrayMember><RadianPerSecondSquared32ArrayMember><RadianPerSecondSquared32 index="0">320014</RadianPerSecondSquared32><RadianPerSecondSquared32 index="1">-320014</RadianPerSecondSquared32></RadianPerSecondSquared32ArrayMember><Second32ArrayMember><Second32 index="0">320015</Second32><Second32 index="1">-320015</Second32></Second32ArrayMember><SquareMeter32ArrayMember><SquareMeter32 index="0">320016</SquareMeter32><SquareMeter32 index="1">-320016</SquareMeter32></SquareMeter32ArrayMember><Steradian32ArrayMember><Steradian32 index="0">320017</Steradian32><Steradian32 index="1">-320017</Steradian32></Steradian32ArrayMember><Volt32ArrayMember><Volt32 index="0">320018</Volt32><Volt32 index="1">-320018</Volt32></Volt32ArrayMember><Watt32ArrayMember><Watt32 index="0">320019</Watt32><Watt32 index="1">-320019</Watt32></Watt32ArrayMember><Ampere64ArrayMember><Ampere64 index="0">640001</Ampere64><Ampere64 index="1">-640001</Ampere64></Ampere64ArrayMember><CubicMeter64ArrayMember><CubicMeter64 index="0">640002</CubicMeter64><CubicMeter64 index="1">-640002</CubicMeter64></CubicMeter64ArrayMember><Hertz64ArrayMember><Hertz64 index="0">640003</Hertz64><Hertz64 index="1">-640003</Hertz64></Hertz64ArrayMember><Joule64ArrayMember><Joule64 index="0">640004</Joule64><Joule64 index="1">-640004</Joule64></Joule64ArrayMember><Kelvin64ArrayMember><Kelvin64 index="0">640005</Kelvin64><Kelvin64 index="1">-640005</Kelvin64></Kelvin64ArrayMember><Kilogram64ArrayMember><Kilogram64 index="0">640006</Kilogram64><Kilogram64 index="1">-640006</Kilogram64></Kilogram64ArrayMember><Meter64ArrayMember><Meter64 index="0">640007</Meter64><Meter64 index="1">-640007</Meter64></Meter64ArrayMember><MeterPerSecond64ArrayMember><MeterPerSecond64 index="0">640008</MeterPerSecond64><MeterPerSecond64 index="1">-640008</MeterPerSecond64></MeterPerSecond64ArrayMember><MeterPerSecondSquared64ArrayMember><MeterPerSecondSquared64 index="0">640009</MeterPerSecondSquared64><MeterPerSecondSquared64 index="1">-640009</MeterPerSecondSquared64></MeterPerSecondSquared64ArrayMember><Newton64ArrayMember><Newton64 index="0">640010</Newton64><Newton64 index="1">-640010</Newton64></Newton64ArrayMember><Pascal64ArrayMember><Pascal64 index="0">640011</Pascal64><Pascal64 index="1">-640011</Pascal64></Pascal64ArrayMember><Radian64ArrayMember><Radian64 index="0">640012</Radian64><Radian64 index="1">-640012</Radian64></Radian64ArrayMember><RadianPerSecond64ArrayMember><RadianPerSecond64 index="0">640013</RadianPerSecond64><RadianPerSecond64 index="1">-640013</RadianPerSecond64></RadianPerSecond64ArrayMember><RadianPerSecondSquared64ArrayMember><RadianPerSecondSquared64 index="0">640014</RadianPerSecondSquared64><RadianPerSecondSquared64 index="1">-640014</RadianPerSecondSquared64></RadianPerSecondSquared64ArrayMember><Second64ArrayMember><Second64 index="0">640015</Second64><Second64 index="1">-640015</Second64></Second64ArrayMember><SquareMeter64ArrayMember><SquareMeter64 index="0">640016</SquareMeter64><SquareMeter64 index="1">-640016</SquareMeter64></SquareMeter64ArrayMember><Steradian64ArrayMember><Steradian64 index="0">640017</Steradian64><Steradian64 index="1">-640017</Steradian64></Steradian64ArrayMember><Volt64ArrayMember><Volt64 index="0">640018</Volt64><Volt64 index="1">-640018</Volt64></Volt64ArrayMember><Watt64ArrayMember><Watt64 index="0">640019</Watt64><Watt64 index="1">-640019</Watt64></Watt64ArrayMember></DoseTest.ComplexGlobalEntity>
 
 Consumer 2: OnResponse:
   Type       = DoseTest.SuccessfulDelete
   IsSuccess  = true
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;2</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;2</ConnectionName></Safir.Dob.ConnectionInfo>
   Response   = <?xml version="1.0" encoding="utf-8"?><DoseTest.SuccessfulDelete><Info xml:space="preserve">AutoResponse</Info></DoseTest.SuccessfulDelete>
   Request    = DeleteRequest on (DoseTest.ComplexGlobalEntity, 0)
 
@@ -1483,21 +1483,21 @@ Expectation: P2 receives requests (cre, upd, del) with correct data in them, and
 Consumer 0: OnResponse:
   Type       = DoseTest.SuccessfulCreate
   IsSuccess  = true
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;2</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;2</ConnectionName></Safir.Dob.ConnectionInfo>
   Response   = <?xml version="1.0" encoding="utf-8"?><DoseTest.SuccessfulCreate><Info xml:space="preserve">AutoResponse</Info></DoseTest.SuccessfulCreate>
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.ComplexGlobalEntity><Int32Member>32</Int32Member><Int64Member>64</Int64Member><Float32Member>32</Float32Member><Float64Member>64</Float64Member><BooleanMember>true</BooleanMember><EnumerationMember>MyFirst</EnumerationMember><StringMember xml:space="preserve"></StringMember><EntityIdMember><name>DoseTest.RootEntity</name><instanceId>0</instanceId></EntityIdMember><TypeIdMember>DoseTest.TestItem</TypeIdMember><InstanceIdMember>SomeInstance</InstanceIdMember><ChannelIdMember>SomeChannel</ChannelIdMember><HandlerIdMember>SomeHandler</HandlerIdMember><ObjectMember></ObjectMember><TestClassMember><MyInt>-32</MyInt></TestClassMember><Ampere32Member>32001</Ampere32Member><CubicMeter32Member>32002</CubicMeter32Member><Hertz32Member>32003</Hertz32Member><Joule32Member>32004</Joule32Member><Kelvin32Member>32005</Kelvin32Member><Kilogram32Member>32006</Kilogram32Member><Meter32Member>32007</Meter32Member><MeterPerSecond32Member>32008</MeterPerSecond32Member><MeterPerSecondSquared32Member>32009</MeterPerSecondSquared32Member><Newton32Member>32010</Newton32Member><Pascal32Member>32011</Pascal32Member><Radian32Member>32012</Radian32Member><RadianPerSecond32Member>32013</RadianPerSecond32Member><RadianPerSecondSquared32Member>32014</RadianPerSecondSquared32Member><Second32Member>32015</Second32Member><SquareMeter32Member>32016</SquareMeter32Member><Steradian32Member>32017</Steradian32Member><Volt32Member>32018</Volt32Member><Watt32Member>32019</Watt32Member><Ampere64Member>64001</Ampere64Member><CubicMeter64Member>64002</CubicMeter64Member><Hertz64Member>64003</Hertz64Member><Joule64Member>64004</Joule64Member><Kelvin64Member>64005</Kelvin64Member><Kilogram64Member>64006</Kilogram64Member><Meter64Member>64007</Meter64Member><MeterPerSecond64Member>64008</MeterPerSecond64Member><MeterPerSecondSquared64Member>64009</MeterPerSecondSquared64Member><Newton64Member>64010</Newton64Member><Pascal64Member>64011</Pascal64Member><Radian64Member>64012</Radian64Member><RadianPerSecond64Member>64013</RadianPerSecond64Member><RadianPerSecondSquared64Member>64014</RadianPerSecondSquared64Member><Second64Member>64015</Second64Member><SquareMeter64Member>64016</SquareMeter64Member><Steradian64Member>64017</Steradian64Member><Volt64Member>64018</Volt64Member><Watt64Member>64019</Watt64Member><Int32ArrayMember><Int32 index="0">32</Int32><Int32 index="1">-32</Int32></Int32ArrayMember><Int64ArrayMember><Int64 index="0">64</Int64><Int64 index="1">-64</Int64></Int64ArrayMember><Float32ArrayMember><Float32 index="0">32</Float32><Float32 index="1">-32</Float32></Float32ArrayMember><Float64ArrayMember><Float64 index="0">64</Float64><Float64 index="1">-64</Float64></Float64ArrayMember><BooleanArrayMember><Boolean index="0">true</Boolean><Boolean index="1">false</Boolean></BooleanArrayMember><EnumerationArrayMember><DoseTest.TestEnum index="0">MyFirst</DoseTest.TestEnum><DoseTest.TestEnum index="1">MySecond</DoseTest.TestEnum></EnumerationArrayMember><StringArrayMember><String index="0" xml:space="preserve">Safir</String><String index="1" xml:space="preserve"></String></StringArrayMember><EntityIdArrayMember><EntityId index="0"><name>DoseTest.RootEntity</name><instanceId>0</instanceId></EntityId><EntityId index="1"><name>DoseTest.RootEntity</name><instanceId>SomeInstance</instanceId></EntityId></EntityIdArrayMember><TypeIdArrayMember><TypeId index="0">DoseTest.TestItem</TypeId><TypeId index="1">DoseTest.TestEnum</TypeId></TypeIdArrayMember><InstanceIdArrayMember><InstanceId index="0">0</InstanceId><InstanceId index="1">SomeInstance</InstanceId></InstanceIdArrayMember><ChannelIdArrayMember><ChannelId index="0">0</ChannelId><ChannelId index="1">SomeChannel</ChannelId></ChannelIdArrayMember><HandlerIdArrayMember><HandlerId index="0">0</HandlerId><HandlerId index="1">SomeHandler</HandlerId></HandlerIdArrayMember><ObjectArrayMember><Object index="0"></Object><Object index="1"></Object></ObjectArrayMember><BinaryArrayMember><Binary index="0">VGVzdGluZyBiaW5hcnkgdHlwZQ==</Binary><Binary index="1"></Binary></BinaryArrayMember><TestClassArrayMember><DoseTest.TestItem index="0"><MyInt>3200</MyInt></DoseTest.TestItem><DoseTest.TestItem index="1"><MyInt>-3200</MyInt></DoseTest.TestItem></TestClassArrayMember><Ampere32ArrayMember><Ampere32 index="0">32001</Ampere32><Ampere32 index="1">-32001</Ampere32></Ampere32ArrayMember><CubicMeter32ArrayMember><CubicMeter32 index="0">32002</CubicMeter32><CubicMeter32 index="1">-32002</CubicMeter32></CubicMeter32ArrayMember><Hertz32ArrayMember><Hertz32 index="0">32003</Hertz32><Hertz32 index="1">-32003</Hertz32></Hertz32ArrayMember><Joule32ArrayMember><Joule32 index="0">32004</Joule32><Joule32 index="1">-32004</Joule32></Joule32ArrayMember><Kelvin32ArrayMember><Kelvin32 index="0">32005</Kelvin32><Kelvin32 index="1">-32005</Kelvin32></Kelvin32ArrayMember><Kilogram32ArrayMember><Kilogram32 index="0">32006</Kilogram32><Kilogram32 index="1">-32006</Kilogram32></Kilogram32ArrayMember><Meter32ArrayMember><Meter32 index="0">32007</Meter32><Meter32 index="1">-32007</Meter32></Meter32ArrayMember><MeterPerSecond32ArrayMember><MeterPerSecond32 index="0">32008</MeterPerSecond32><MeterPerSecond32 index="1">-32008</MeterPerSecond32></MeterPerSecond32ArrayMember><MeterPerSecondSquared32ArrayMember><MeterPerSecondSquared32 index="0">32009</MeterPerSecondSquared32><MeterPerSecondSquared32 index="1">-32009</MeterPerSecondSquared32></MeterPerSecondSquared32ArrayMember><Newton32ArrayMember><Newton32 index="0">32010</Newton32><Newton32 index="1">-32010</Newton32></Newton32ArrayMember><Pascal32ArrayMember><Pascal32 index="0">32011</Pascal32><Pascal32 index="1">-32011</Pascal32></Pascal32ArrayMember><Radian32ArrayMember><Radian32 index="0">32012</Radian32><Radian32 index="1">-32012</Radian32></Radian32ArrayMember><RadianPerSecond32ArrayMember><RadianPerSecond32 index="0">32013</RadianPerSecond32><RadianPerSecond32 index="1">-32013</RadianPerSecond32></RadianPerSecond32ArrayMember><RadianPerSecondSquared32ArrayMember><RadianPerSecondSquared32 index="0">32014</RadianPerSecondSquared32><RadianPerSecondSquared32 index="1">-32014</RadianPerSecondSquared32></RadianPerSecondSquared32ArrayMember><Second32ArrayMember><Second32 index="0">32015</Second32><Second32 index="1">-32015</Second32></Second32ArrayMember><SquareMeter32ArrayMember><SquareMeter32 index="0">32016</SquareMeter32><SquareMeter32 index="1">-32016</SquareMeter32></SquareMeter32ArrayMember><Steradian32ArrayMember><Steradian32 index="0">32017</Steradian32><Steradian32 index="1">-32017</Steradian32></Steradian32ArrayMember><Volt32ArrayMember><Volt32 index="0">32018</Volt32><Volt32 index="1">-32018</Volt32></Volt32ArrayMember><Watt32ArrayMember><Watt32 index="0">32019</Watt32><Watt32 index="1">-32019</Watt32></Watt32ArrayMember><Ampere64ArrayMember><Ampere64 index="0">64001</Ampere64><Ampere64 index="1">-64001</Ampere64></Ampere64ArrayMember><CubicMeter64ArrayMember><CubicMeter64 index="0">64002</CubicMeter64><CubicMeter64 index="1">-64002</CubicMeter64></CubicMeter64ArrayMember><Hertz64ArrayMember><Hertz64 index="0">64003</Hertz64><Hertz64 index="1">-64003</Hertz64></Hertz64ArrayMember><Joule64ArrayMember><Joule64 index="0">64004</Joule64><Joule64 index="1">-64004</Joule64></Joule64ArrayMember><Kelvin64ArrayMember><Kelvin64 index="0">64005</Kelvin64><Kelvin64 index="1">-64005</Kelvin64></Kelvin64ArrayMember><Kilogram64ArrayMember><Kilogram64 index="0">64006</Kilogram64><Kilogram64 index="1">-64006</Kilogram64></Kilogram64ArrayMember><Meter64ArrayMember><Meter64 index="0">64007</Meter64><Meter64 index="1">-64007</Meter64></Meter64ArrayMember><MeterPerSecond64ArrayMember><MeterPerSecond64 index="0">64008</MeterPerSecond64><MeterPerSecond64 index="1">-64008</MeterPerSecond64></MeterPerSecond64ArrayMember><MeterPerSecondSquared64ArrayMember><MeterPerSecondSquared64 index="0">64009</MeterPerSecondSquared64><MeterPerSecondSquared64 index="1">-64009</MeterPerSecondSquared64></MeterPerSecondSquared64ArrayMember><Newton64ArrayMember><Newton64 index="0">64010</Newton64><Newton64 index="1">-64010</Newton64></Newton64ArrayMember><Pascal64ArrayMember><Pascal64 index="0">64011</Pascal64><Pascal64 index="1">-64011</Pascal64></Pascal64ArrayMember><Radian64ArrayMember><Radian64 index="0">64012</Radian64><Radian64 index="1">-64012</Radian64></Radian64ArrayMember><RadianPerSecond64ArrayMember><RadianPerSecond64 index="0">64013</RadianPerSecond64><RadianPerSecond64 index="1">-64013</RadianPerSecond64></RadianPerSecond64ArrayMember><RadianPerSecondSquared64ArrayMember><RadianPerSecondSquared64 index="0">64014</RadianPerSecondSquared64><RadianPerSecondSquared64 index="1">-64014</RadianPerSecondSquared64></RadianPerSecondSquared64ArrayMember><Second64ArrayMember><Second64 index="0">64015</Second64><Second64 index="1">-64015</Second64></Second64ArrayMember><SquareMeter64ArrayMember><SquareMeter64 index="0">64016</SquareMeter64><SquareMeter64 index="1">-64016</SquareMeter64></SquareMeter64ArrayMember><Steradian64ArrayMember><Steradian64 index="0">64017</Steradian64><Steradian64 index="1">-64017</Steradian64></Steradian64ArrayMember><Volt64ArrayMember><Volt64 index="0">64018</Volt64><Volt64 index="1">-64018</Volt64></Volt64ArrayMember><Watt64ArrayMember><Watt64 index="0">64019</Watt64><Watt64 index="1">-64019</Watt64></Watt64ArrayMember></DoseTest.ComplexGlobalEntity>
 
 Consumer 1: OnResponse:
   Type       = DoseTest.SuccessfulUpdate
   IsSuccess  = true
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;2</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;2</ConnectionName></Safir.Dob.ConnectionInfo>
   Response   = <?xml version="1.0" encoding="utf-8"?><DoseTest.SuccessfulUpdate><Info xml:space="preserve">AutoResponse</Info></DoseTest.SuccessfulUpdate>
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.ComplexGlobalEntity><Int32Member>320</Int32Member><Int64Member>640</Int64Member><Float32Member>320</Float32Member><Float64Member>640</Float64Member><BooleanMember>false</BooleanMember><EnumerationMember>MySecond</EnumerationMember><StringMember xml:space="preserve">Safir SDK</StringMember><EntityIdMember><name>DoseTest.RootEntity</name><instanceId>1</instanceId></EntityIdMember><TypeIdMember>Object</TypeIdMember><InstanceIdMember>AnotherInstance</InstanceIdMember><ChannelIdMember>AnotherChannel</ChannelIdMember><HandlerIdMember>AnotherHandler</HandlerIdMember><ObjectMember type="DoseTest.TestItem"></ObjectMember><BinaryMember>b25jZSBtb3JlLi4u</BinaryMember><TestClassMember></TestClassMember><Ampere32Member>320001</Ampere32Member><CubicMeter32Member>320002</CubicMeter32Member><Hertz32Member>320003</Hertz32Member><Joule32Member>320004</Joule32Member><Kelvin32Member>320005</Kelvin32Member><Kilogram32Member>320006</Kilogram32Member><Meter32Member>320007</Meter32Member><MeterPerSecond32Member>320008</MeterPerSecond32Member><MeterPerSecondSquared32Member>320009</MeterPerSecondSquared32Member><Newton32Member>320010</Newton32Member><Pascal32Member>320011</Pascal32Member><Radian32Member>320012</Radian32Member><RadianPerSecond32Member>320013</RadianPerSecond32Member><RadianPerSecondSquared32Member>320014</RadianPerSecondSquared32Member><Second32Member>320015</Second32Member><SquareMeter32Member>320016</SquareMeter32Member><Steradian32Member>320017</Steradian32Member><Volt32Member>320018</Volt32Member><Watt32Member>320019</Watt32Member><Ampere64Member>640001</Ampere64Member><CubicMeter64Member>640002</CubicMeter64Member><Hertz64Member>640003</Hertz64Member><Joule64Member>640004</Joule64Member><Kelvin64Member>640005</Kelvin64Member><Kilogram64Member>640006</Kilogram64Member><Meter64Member>640007</Meter64Member><MeterPerSecond64Member>640008</MeterPerSecond64Member><MeterPerSecondSquared64Member>640009</MeterPerSecondSquared64Member><Newton64Member>640010</Newton64Member><Pascal64Member>640011</Pascal64Member><Radian64Member>640012</Radian64Member><RadianPerSecond64Member>640013</RadianPerSecond64Member><RadianPerSecondSquared64Member>640014</RadianPerSecondSquared64Member><Second64Member>640015</Second64Member><SquareMeter64Member>640016</SquareMeter64Member><Steradian64Member>640017</Steradian64Member><Volt64Member>640018</Volt64Member><Watt64Member>640019</Watt64Member><Int32ArrayMember><Int32 index="0">320</Int32><Int32 index="1">-320</Int32></Int32ArrayMember><Int64ArrayMember><Int64 index="0">640</Int64><Int64 index="1">-640</Int64></Int64ArrayMember><Float32ArrayMember><Float32 index="0">320</Float32><Float32 index="1">-320</Float32></Float32ArrayMember><Float64ArrayMember><Float64 index="0">640</Float64><Float64 index="1">-640</Float64></Float64ArrayMember><BooleanArrayMember><Boolean index="0">true</Boolean><Boolean index="1">false</Boolean></BooleanArrayMember><EnumerationArrayMember><DoseTest.TestEnum index="0">MyFirst</DoseTest.TestEnum><DoseTest.TestEnum index="1">MySecond</DoseTest.TestEnum></EnumerationArrayMember><StringArrayMember><String index="0" xml:space="preserve"></String><String index="1" xml:space="preserve">rifaS</String></StringArrayMember><EntityIdArrayMember><EntityId index="0"><name>DoseTest.RootEntity</name><instanceId>0</instanceId></EntityId><EntityId index="1"><name>DoseTest.RootEntity</name><instanceId>SomeInstance</instanceId></EntityId></EntityIdArrayMember><TypeIdArrayMember><TypeId index="0">DoseTest.TestItem</TypeId><TypeId index="1">DoseTest.TestEnum</TypeId></TypeIdArrayMember><InstanceIdArrayMember><InstanceId index="0">0</InstanceId><InstanceId index="1">SomeInstance</InstanceId></InstanceIdArrayMember><ChannelIdArrayMember><ChannelId index="0">0</ChannelId><ChannelId index="1">SomeChannel</ChannelId></ChannelIdArrayMember><HandlerIdArrayMember><HandlerId index="0">0</HandlerId><HandlerId index="1">SomeHandler</HandlerId></HandlerIdArrayMember><ObjectArrayMember><Object index="0"></Object><Object index="1"></Object></ObjectArrayMember><BinaryArrayMember><Binary index="0">b25jZSBtb3JlLi4u</Binary></BinaryArrayMember><TestClassArrayMember><DoseTest.TestItem index="0"><MyInt>32000</MyInt></DoseTest.TestItem><DoseTest.TestItem index="1"><MyInt>-32000</MyInt></DoseTest.TestItem></TestClassArrayMember><Ampere32ArrayMember><Ampere32 index="0">320001</Ampere32><Ampere32 index="1">-320001</Ampere32></Ampere32ArrayMember><CubicMeter32ArrayMember><CubicMeter32 index="0">320002</CubicMeter32><CubicMeter32 index="1">-320002</CubicMeter32></CubicMeter32ArrayMember><Hertz32ArrayMember><Hertz32 index="0">320003</Hertz32><Hertz32 index="1">-320003</Hertz32></Hertz32ArrayMember><Joule32ArrayMember><Joule32 index="0">320004</Joule32><Joule32 index="1">-320004</Joule32></Joule32ArrayMember><Kelvin32ArrayMember><Kelvin32 index="0">320005</Kelvin32><Kelvin32 index="1">-320005</Kelvin32></Kelvin32ArrayMember><Kilogram32ArrayMember><Kilogram32 index="0">320006</Kilogram32><Kilogram32 index="1">-320006</Kilogram32></Kilogram32ArrayMember><Meter32ArrayMember><Meter32 index="0">320007</Meter32><Meter32 index="1">-320007</Meter32></Meter32ArrayMember><MeterPerSecond32ArrayMember><MeterPerSecond32 index="0">320008</MeterPerSecond32><MeterPerSecond32 index="1">-320008</MeterPerSecond32></MeterPerSecond32ArrayMember><MeterPerSecondSquared32ArrayMember><MeterPerSecondSquared32 index="0">320009</MeterPerSecondSquared32><MeterPerSecondSquared32 index="1">-320009</MeterPerSecondSquared32></MeterPerSecondSquared32ArrayMember><Newton32ArrayMember><Newton32 index="0">320010</Newton32><Newton32 index="1">-320010</Newton32></Newton32ArrayMember><Pascal32ArrayMember><Pascal32 index="0">320011</Pascal32><Pascal32 index="1">-320011</Pascal32></Pascal32ArrayMember><Radian32ArrayMember><Radian32 index="0">320012</Radian32><Radian32 index="1">-320012</Radian32></Radian32ArrayMember><RadianPerSecond32ArrayMember><RadianPerSecond32 index="0">320013</RadianPerSecond32><RadianPerSecond32 index="1">-320013</RadianPerSecond32></RadianPerSecond32ArrayMember><RadianPerSecondSquared32ArrayMember><RadianPerSecondSquared32 index="0">320014</RadianPerSecondSquared32><RadianPerSecondSquared32 index="1">-320014</RadianPerSecondSquared32></RadianPerSecondSquared32ArrayMember><Second32ArrayMember><Second32 index="0">320015</Second32><Second32 index="1">-320015</Second32></Second32ArrayMember><SquareMeter32ArrayMember><SquareMeter32 index="0">320016</SquareMeter32><SquareMeter32 index="1">-320016</SquareMeter32></SquareMeter32ArrayMember><Steradian32ArrayMember><Steradian32 index="0">320017</Steradian32><Steradian32 index="1">-320017</Steradian32></Steradian32ArrayMember><Volt32ArrayMember><Volt32 index="0">320018</Volt32><Volt32 index="1">-320018</Volt32></Volt32ArrayMember><Watt32ArrayMember><Watt32 index="0">320019</Watt32><Watt32 index="1">-320019</Watt32></Watt32ArrayMember><Ampere64ArrayMember><Ampere64 index="0">640001</Ampere64><Ampere64 index="1">-640001</Ampere64></Ampere64ArrayMember><CubicMeter64ArrayMember><CubicMeter64 index="0">640002</CubicMeter64><CubicMeter64 index="1">-640002</CubicMeter64></CubicMeter64ArrayMember><Hertz64ArrayMember><Hertz64 index="0">640003</Hertz64><Hertz64 index="1">-640003</Hertz64></Hertz64ArrayMember><Joule64ArrayMember><Joule64 index="0">640004</Joule64><Joule64 index="1">-640004</Joule64></Joule64ArrayMember><Kelvin64ArrayMember><Kelvin64 index="0">640005</Kelvin64><Kelvin64 index="1">-640005</Kelvin64></Kelvin64ArrayMember><Kilogram64ArrayMember><Kilogram64 index="0">640006</Kilogram64><Kilogram64 index="1">-640006</Kilogram64></Kilogram64ArrayMember><Meter64ArrayMember><Meter64 index="0">640007</Meter64><Meter64 index="1">-640007</Meter64></Meter64ArrayMember><MeterPerSecond64ArrayMember><MeterPerSecond64 index="0">640008</MeterPerSecond64><MeterPerSecond64 index="1">-640008</MeterPerSecond64></MeterPerSecond64ArrayMember><MeterPerSecondSquared64ArrayMember><MeterPerSecondSquared64 index="0">640009</MeterPerSecondSquared64><MeterPerSecondSquared64 index="1">-640009</MeterPerSecondSquared64></MeterPerSecondSquared64ArrayMember><Newton64ArrayMember><Newton64 index="0">640010</Newton64><Newton64 index="1">-640010</Newton64></Newton64ArrayMember><Pascal64ArrayMember><Pascal64 index="0">640011</Pascal64><Pascal64 index="1">-640011</Pascal64></Pascal64ArrayMember><Radian64ArrayMember><Radian64 index="0">640012</Radian64><Radian64 index="1">-640012</Radian64></Radian64ArrayMember><RadianPerSecond64ArrayMember><RadianPerSecond64 index="0">640013</RadianPerSecond64><RadianPerSecond64 index="1">-640013</RadianPerSecond64></RadianPerSecond64ArrayMember><RadianPerSecondSquared64ArrayMember><RadianPerSecondSquared64 index="0">640014</RadianPerSecondSquared64><RadianPerSecondSquared64 index="1">-640014</RadianPerSecondSquared64></RadianPerSecondSquared64ArrayMember><Second64ArrayMember><Second64 index="0">640015</Second64><Second64 index="1">-640015</Second64></Second64ArrayMember><SquareMeter64ArrayMember><SquareMeter64 index="0">640016</SquareMeter64><SquareMeter64 index="1">-640016</SquareMeter64></SquareMeter64ArrayMember><Steradian64ArrayMember><Steradian64 index="0">640017</Steradian64><Steradian64 index="1">-640017</Steradian64></Steradian64ArrayMember><Volt64ArrayMember><Volt64 index="0">640018</Volt64><Volt64 index="1">-640018</Volt64></Volt64ArrayMember><Watt64ArrayMember><Watt64 index="0">640019</Watt64><Watt64 index="1">-640019</Watt64></Watt64ArrayMember></DoseTest.ComplexGlobalEntity>
 
 Consumer 2: OnResponse:
   Type       = DoseTest.SuccessfulDelete
   IsSuccess  = true
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;2</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;2</ConnectionName></Safir.Dob.ConnectionInfo>
   Response   = <?xml version="1.0" encoding="utf-8"?><DoseTest.SuccessfulDelete><Info xml:space="preserve">AutoResponse</Info></DoseTest.SuccessfulDelete>
   Request    = DeleteRequest on (DoseTest.ComplexGlobalEntity, 0)
 
@@ -1545,7 +1545,7 @@ Expectation: Each partner should receive one (and only one) request, and P0 shou
 --------- Test  -----------
 Consumer 0: OnCreateRequest (Requestor decides instance id): 
   Entity     = (DoseTest.GlobalEntity, 1)
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = 7471736682775137277
   HandlerStr = 7471736682775137277
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalEntity><Info xml:space="preserve">Created</Info></DoseTest.GlobalEntity>
@@ -1558,7 +1558,7 @@ Expectation: Each partner should receive one (and only one) request, and P0 shou
 --------- Test  -----------
 Consumer 0: OnUpdateRequest: 
   Entity     = (DoseTest.GlobalEntity, 1)
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = 7471736682775137277
   HandlerStr = 7471736682775137277
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalEntity><Info xml:space="preserve">Updated</Info></DoseTest.GlobalEntity>
@@ -1571,7 +1571,7 @@ Expectation: Each partner should receive one (and only one) request, and P0 shou
 --------- Test  -----------
 Consumer 0: OnDeleteRequest: 
   Entity     = (DoseTest.GlobalEntity, 1)
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = 7471736682775137277
   HandlerStr = 7471736682775137277
 
@@ -1668,7 +1668,7 @@ Expectation: Partner 0 receives OnNewInjectedEntity. Partner 1 receives OnNewEnt
 Consumer 0: OnNewEntity:
   EntityId  = (DoseTest.SynchronousVolatileEntity, 12345)
   Owner     = DEFAULT_HANDLER
-  OwnerConn = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  OwnerConn = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   OwnerStr  = DEFAULT_HANDLER
   Entity    = <?xml version="1.0" encoding="utf-8"?><DoseTest.SynchronousVolatileEntity><Info xml:space="preserve">Blabla</Info></DoseTest.SynchronousVolatileEntity>
   Changed top-level members: 
@@ -1691,7 +1691,7 @@ Expectation: Node 0 receives OnInitialInjectionsDone and OnRevokedRegistration. 
 Consumer 0: OnNewEntity:
   EntityId  = (DoseTest.SynchronousVolatileEntity, 123)
   Owner     = DEFAULT_HANDLER
-  OwnerConn = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  OwnerConn = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   OwnerStr  = DEFAULT_HANDLER
   Entity    = <?xml version="1.0" encoding="utf-8"?><DoseTest.SynchronousVolatileEntity><Info xml:space="preserve">Kalle</Info></DoseTest.SynchronousVolatileEntity>
   Changed top-level members: 
@@ -1756,7 +1756,7 @@ Expectation: Partner 0 recieves one global message with info "context 0". Partne
 Consumer 0: OnMessage:
   Type       = DoseTest.GlobalMessage
   ChannelId  = DEFAULT_CHANNEL
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;1;partner_test_connection;2</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;1;partner_test_connection;2</ConnectionName></Safir.Dob.ConnectionInfo>
   ChannelId  = DEFAULT_CHANNEL
   Message    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalMessage><Info xml:space="preserve">context 1</Info></DoseTest.GlobalMessage>
 
@@ -1770,7 +1770,7 @@ Expectation: Both partner 0 and partner 1 recieves the context shared message.
 Consumer 0: OnMessage:
   Type       = DoseTest.ContextSharedMessage
   ChannelId  = DEFAULT_CHANNEL
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;2</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;2</ConnectionName></Safir.Dob.ConnectionInfo>
   ChannelId  = DEFAULT_CHANNEL
   Message    = <?xml version="1.0" encoding="utf-8"?><DoseTest.ContextSharedMessage><Info xml:space="preserve">context shared info</Info></DoseTest.ContextSharedMessage>
 
@@ -1849,7 +1849,7 @@ Expectation: Partner 1 (context 1) receives one OnServiceRequest. Partner 0 (con
 --------- Test  -----------
 Consumer 0: OnServiceRequest: 
   Type       = DoseTest.GlobalService
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;1;partner_test_connection;2</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;1;partner_test_connection;2</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalService></DoseTest.GlobalService>
@@ -1863,7 +1863,7 @@ Expectation: P0 (context 0) receives two OnServiceRequest. P1 and P2 receive an 
 Consumer 0: OnResponse:
   Type       = DoseTest.SuccessfulService
   IsSuccess  = true
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Response   = <?xml version="1.0" encoding="utf-8"?><DoseTest.SuccessfulService><Info xml:space="preserve">AutoResponse</Info></DoseTest.SuccessfulService>
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.ContextSharedService></DoseTest.ContextSharedService>
 
@@ -1945,7 +1945,7 @@ Expectation: P1 (context 1) receives one OnCreateRequest. P0 (context 0) receive
 --------- Test  -----------
 Consumer 0: OnCreateRequest (Requestor decides instance id): 
   Entity     = (DoseTest.GlobalEntity, 543543)
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;1;partner_test_connection;2</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;1;partner_test_connection;2</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalEntity><Info xml:space="preserve">Created</Info></DoseTest.GlobalEntity>
@@ -1958,7 +1958,7 @@ Expectation: P1 (context 1) receives one OnUpdateRequest. P0 (context 0) receive
 --------- Test  -----------
 Consumer 1: OnUpdateRequest: 
   Entity     = (DoseTest.GlobalEntity, 123)
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;1;partner_test_connection;2</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;1;partner_test_connection;2</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalEntity><Info xml:space="preserve">BlaBla</Info></DoseTest.GlobalEntity>
@@ -1971,7 +1971,7 @@ Expectation: P1 (context 1) receives one OnDeleteRequest. P0 (context 0) receive
 --------- Test  -----------
 Consumer 1: OnDeleteRequest: 
   Entity     = (DoseTest.GlobalEntity, 123)
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;1;partner_test_connection;2</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;1;partner_test_connection;2</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = DEFAULT_HANDLER
   HandlerStr = DEFAULT_HANDLER
 
@@ -1984,7 +1984,7 @@ Expectation: P0 (context 0) receives two OnCreateRequest(instance 111 and 222). 
 Consumer 0: OnResponse:
   Type       = DoseTest.SuccessfulCreate
   IsSuccess  = true
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Response   = <?xml version="1.0" encoding="utf-8"?><DoseTest.SuccessfulCreate><Info xml:space="preserve">AutoResponse</Info></DoseTest.SuccessfulCreate>
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.ContextSharedEntity><Info xml:space="preserve">Create request from context 0</Info></DoseTest.ContextSharedEntity>
 
@@ -1997,7 +1997,7 @@ Expectation: P0 (context 0) receives two OnUpdateRequest. P1 and P2 receive an O
 Consumer 0: OnResponse:
   Type       = DoseTest.Success
   IsSuccess  = true
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Response   = <?xml version="1.0" encoding="utf-8"?><DoseTest.Success><Info xml:space="preserve">Succesful response</Info></DoseTest.Success>
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.ContextSharedEntity><Info xml:space="preserve">Update request from context 0</Info></DoseTest.ContextSharedEntity>
 
@@ -2010,7 +2010,7 @@ Expectation: P0 (context 0) receives two OnDeleteRequest. P1 and P2 receive an O
 Consumer 0: OnResponse:
   Type       = DoseTest.SuccessfulDelete
   IsSuccess  = true
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;partner_test_connection;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Response   = <?xml version="1.0" encoding="utf-8"?><DoseTest.SuccessfulDelete><Info xml:space="preserve">AutoResponse</Info></DoseTest.SuccessfulDelete>
   Request    = DeleteRequest on (DoseTest.ContextSharedEntity, 345)
 
@@ -2058,7 +2058,7 @@ Expectation: Partner 1 and 2 should get an update request and partner 0 should g
 --------- Test  -----------
 Consumer 0: OnUpdateRequest: 
   Entity     = (DoseTest.GlobalEntity, 123)
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;ForEach-context0;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;ForEach-context0;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = -5453762115588730630
   HandlerStr = -5453762115588730630
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalEntity><Info xml:space="preserve">KalleKula</Info></DoseTest.GlobalEntity>
@@ -2071,7 +2071,7 @@ Expectation: Partner 1 and 2 should get an update request. Partner 0 should get 
 --------- Test  -----------
 Consumer 0: OnUpdateRequest: 
   Entity     = (DoseTest.GlobalEntity, 123)
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;ForEach-context0;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;ForEach-context0;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = -5453762115588730630
   HandlerStr = -5453762115588730630
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalEntity><Info xml:space="preserve">KalleKula</Info></DoseTest.GlobalEntity>
@@ -2084,7 +2084,7 @@ Expectation: Partner 1 and 2 should get an update request and partner 0 should g
 --------- Test  -----------
 Consumer 0: OnUpdateRequest: 
   Entity     = (DoseTest.GlobalEntity, 123)
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;ForEach-context0;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;ForEach-context0;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = -5453762115588730630
   HandlerStr = -5453762115588730630
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalEntity><Info xml:space="preserve">KalleKula</Info></DoseTest.GlobalEntity>
@@ -2097,7 +2097,7 @@ Expectation: Partner 1 and 2 should get an update request. Partner 0 should get 
 --------- Test  -----------
 Consumer 0: OnUpdateRequest: 
   Entity     = (DoseTest.GlobalEntity, 123)
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;ForEach-context0;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;ForEach-context0;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = -5453762115588730630
   HandlerStr = -5453762115588730630
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalEntity><Info xml:space="preserve">KalleKula</Info></DoseTest.GlobalEntity>
@@ -2110,7 +2110,7 @@ Expectation: Partner 1 and 2 should get an update request and partner 0 should g
 --------- Test  -----------
 Consumer 0: OnUpdateRequest: 
   Entity     = (DoseTest.GlobalEntity, 123)
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;ForEach-context0;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;ForEach-context0;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = -5453762115588730630
   HandlerStr = -5453762115588730630
   Request    = <?xml version="1.0" encoding="utf-8"?><DoseTest.GlobalEntity><Info xml:space="preserve">KalleKula</Info></DoseTest.GlobalEntity>
@@ -2123,7 +2123,7 @@ Expectation: Partner 1 and 2 should get a delete request and partner 0 should ge
 --------- Test  -----------
 Consumer 0: OnDeleteRequest: 
   Entity     = (DoseTest.GlobalEntity, 123)
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;ForEach-context0;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;ForEach-context0;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = -5453762115588730630
   HandlerStr = -5453762115588730630
 
@@ -2135,7 +2135,7 @@ Expectation: Partner 1 and 2 should get a delete request. Partner 0 should get a
 --------- Test  -----------
 Consumer 0: OnDeleteRequest: 
   Entity     = (DoseTest.GlobalEntity, 123)
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;ForEach-context0;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;ForEach-context0;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = -5453762115588730630
   HandlerStr = -5453762115588730630
 
@@ -2147,7 +2147,7 @@ Expectation: Partner 1 and 2 should get a delete request and partner 0 should ge
 --------- Test  -----------
 Consumer 0: OnDeleteRequest: 
   Entity     = (DoseTest.GlobalEntity, 123)
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;ForEach-context0;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;ForEach-context0;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = -5453762115588730630
   HandlerStr = -5453762115588730630
 
@@ -2159,7 +2159,7 @@ Expectation: Partner 1 and 2 should get a delete request. Partner 0 should get a
 --------- Test  -----------
 Consumer 0: OnDeleteRequest: 
   Entity     = (DoseTest.GlobalEntity, 123)
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;ForEach-context0;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;ForEach-context0;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = -5453762115588730630
   HandlerStr = -5453762115588730630
 
@@ -2171,7 +2171,7 @@ Expectation: Partner 1 and 2 should get a delete request and partner 0 should ge
 --------- Test  -----------
 Consumer 0: OnDeleteRequest: 
   Entity     = (DoseTest.GlobalEntity, 123)
-  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone;0;ForEach-context0;0</ConnectionName></Safir.Dob.ConnectionInfo>
+  Sender     = <?xml version="1.0" encoding="utf-8"?><Safir.Dob.ConnectionInfo><NodeId>999999</NodeId><ConnectionName xml:space="preserve">StandAlone.999999;0;ForEach-context0;0</ConnectionName></Safir.Dob.ConnectionInfo>
   Handler    = -5453762115588730630
   HandlerStr = -5453762115588730630
 
