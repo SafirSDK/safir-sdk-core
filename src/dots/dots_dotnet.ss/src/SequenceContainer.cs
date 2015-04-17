@@ -262,12 +262,12 @@ namespace Safir.Dob.Typesystem
         }
     }
 
-    public class ObjectSequenceContainer<T> : SequenceContainer<T>, ICloneable where T : Safir.Dob.Typesystem.Object
+    public class GenericObjectSequenceContainer<T> : SequenceContainer<T>, ICloneable where T : Safir.Dob.Typesystem.Object
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Safir.Dob.Typesystem.ObjectSequenceContainer`1"/> class.
         /// </summary>
-        public ObjectSequenceContainer(): base()
+        public GenericObjectSequenceContainer(): base()
         {
         }
 
@@ -279,7 +279,7 @@ namespace Safir.Dob.Typesystem
         {
             base.Copy(other);
             this.values.Clear ();
-            ObjectSequenceContainer<T> that = other as ObjectSequenceContainer<T>;
+            GenericObjectSequenceContainer<T> that = other as GenericObjectSequenceContainer<T>;
             foreach (var val in that.values) {
 
                 this.values.Add(val.Clone() as T);
@@ -293,23 +293,23 @@ namespace Safir.Dob.Typesystem
         /// </summary>
         object ICloneable.Clone()
         {
-            return new ObjectSequenceContainer<T>(this);
+            return new GenericObjectSequenceContainer<T>(this);
         }
 
         /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
-        public new ObjectSequenceContainer<T> Clone()
+        public new GenericObjectSequenceContainer<T> Clone()
         {
-            return (ObjectSequenceContainer<T>)((ICloneable)this).Clone(); 
+            return (GenericObjectSequenceContainer<T>)((ICloneable)this).Clone(); 
         }
 
         /// <summary>
         /// Copy constructor for use by Clone
         /// </summary>
         /// <param name="other"></param>
-        protected ObjectSequenceContainer(ObjectSequenceContainer<T> other):
+        protected GenericObjectSequenceContainer(GenericObjectSequenceContainer<T> other):
             base(other)
         {
             foreach (var val in other.values) {
@@ -386,48 +386,55 @@ namespace Safir.Dob.Typesystem
     public class HandlerIdSequenceContainer : MemberSequenceContainer<HandlerId> {}
     public class EntityIdSequenceContainer : MemberSequenceContainer<EntityId> {}
     public class BinarySequenceContainer : MemberSequenceContainer<byte[]> {}
+    public class ObjectSequenceContainer : GenericObjectSequenceContainer<Safir.Dob.Typesystem.Object> {}
 
     //SI32
-    public class Ampere32SequenceContainer : Float32SequenceContainer {}
-    public class CubicMeter32SequenceContainer : Float32SequenceContainer {}
-    public class Hertz32SequenceContainer : Float32SequenceContainer {}
-    public class Joule32SequenceContainer : Float32SequenceContainer {}
-    public class Kelvin32SequenceContainer : Float32SequenceContainer {}
-    public class Kilogram32SequenceContainer : Float32SequenceContainer {}
-    public class Meter32SequenceContainer : Float32SequenceContainer {}
-    public class MeterPerSecond32SequenceContainer : Float32SequenceContainer {}
-    public class MeterPerSecondSquared32SequenceContainer : Float32SequenceContainer {}
-    public class Newton32SequenceContainer : Float32SequenceContainer {}
-    public class Pascal32SequenceContainer : Float32SequenceContainer {}
-    public class Radian32SequenceContainer : Float32SequenceContainer {}
-    public class RadianPerSecond32SequenceContainer : Float32SequenceContainer {}
-    public class RadianPerSecondSquared32SequenceContainer : Float32SequenceContainer {}
-    public class Second32SequenceContainer : Float32SequenceContainer {}
-    public class SquareMeter32SequenceContainer : Float32SequenceContainer {}
-    public class Steradian32SequenceContainer : Float32SequenceContainer {}
-    public class Volt32SequenceContainer : Float32SequenceContainer {}
-    public class Watt32SequenceContainer : Float32SequenceContainer {}
+    namespace Si32
+    {
+        public class AmpereSequenceContainer : Float32SequenceContainer {}
+        public class CubicMeterSequenceContainer : Float32SequenceContainer {}
+        public class HertzSequenceContainer : Float32SequenceContainer {}
+        public class JouleSequenceContainer : Float32SequenceContainer {}
+        public class KelvinSequenceContainer : Float32SequenceContainer {}
+        public class KilogramSequenceContainer : Float32SequenceContainer {}
+        public class MeterSequenceContainer : Float32SequenceContainer {}
+        public class MeterPerSecondSequenceContainer : Float32SequenceContainer {}
+        public class MeterPerSecondSquaredSequenceContainer : Float32SequenceContainer {}
+        public class NewtonSequenceContainer : Float32SequenceContainer {}
+        public class PascalSequenceContainer : Float32SequenceContainer {}
+        public class RadianSequenceContainer : Float32SequenceContainer {}
+        public class RadianPerSecondSequenceContainer : Float32SequenceContainer {}
+        public class RadianPerSecondSquaredSequenceContainer : Float32SequenceContainer {}
+        public class SecondSequenceContainer : Float32SequenceContainer {}
+        public class SquareMeterSequenceContainer : Float32SequenceContainer {}
+        public class SteradianSequenceContainer : Float32SequenceContainer {}
+        public class VoltSequenceContainer : Float32SequenceContainer {}
+        public class WattSequenceContainer : Float32SequenceContainer {}
+    }
 
     //SI64
-    public class Ampere64SequenceContainer : Float64SequenceContainer {}
-    public class CubicMeter64SequenceContainer : Float64SequenceContainer {}
-    public class Hertz64SequenceContainer : Float64SequenceContainer {}
-    public class Joule64SequenceContainer : Float64SequenceContainer {}
-    public class Kelvin64SequenceContainer : Float64SequenceContainer {}
-    public class Kilogram64SequenceContainer : Float64SequenceContainer {}
-    public class Meter64SequenceContainer : Float64SequenceContainer {}
-    public class MeterPerSecond64SequenceContainer : Float64SequenceContainer {}
-    public class MeterPerSecondSquared64SequenceContainer : Float64SequenceContainer {}
-    public class Newton64SequenceContainer : Float64SequenceContainer {}
-    public class Pascal64SequenceContainer : Float64SequenceContainer {}
-    public class Radian64SequenceContainer : Float64SequenceContainer {}
-    public class RadianPerSecond64SequenceContainer : Float64SequenceContainer {}
-    public class RadianPerSecondSquared64SequenceContainer : Float64SequenceContainer {}
-    public class Second64SequenceContainer : Float64SequenceContainer {}
-    public class SquareMeter64SequenceContainer : Float64SequenceContainer {}
-    public class Steradian64SequenceContainer : Float64SequenceContainer {}
-    public class Volt64SequenceContainer : Float64SequenceContainer {}
-    public class Watt64SequenceContainer : Float64SequenceContainer {}
+    namespace Si64
+    {
+        public class AmpereSequenceContainer : Float64SequenceContainer {}
+        public class CubicMeterSequenceContainer : Float64SequenceContainer {}
+        public class HertzSequenceContainer : Float64SequenceContainer {}
+        public class JouleSequenceContainer : Float64SequenceContainer {}
+        public class KelvinSequenceContainer : Float64SequenceContainer {}
+        public class KilogramSequenceContainer : Float64SequenceContainer {}
+        public class MeterSequenceContainer : Float64SequenceContainer {}
+        public class MeterPerSecondSequenceContainer : Float64SequenceContainer {}
+        public class MeterPerSecondSquaredSequenceContainer : Float64SequenceContainer {}
+        public class NewtonSequenceContainer : Float64SequenceContainer {}
+        public class PascalSequenceContainer : Float64SequenceContainer {}
+        public class RadianSequenceContainer : Float64SequenceContainer {}
+        public class RadianPerSecondSequenceContainer : Float64SequenceContainer {}
+        public class RadianPerSecondSquaredSequenceContainer : Float64SequenceContainer {}
+        public class SecondSequenceContainer : Float64SequenceContainer {}
+        public class SquareMeterSequenceContainer : Float64SequenceContainer {}
+        public class SteradianSequenceContainer : Float64SequenceContainer {}
+        public class VoltSequenceContainer : Float64SequenceContainer {}
+        public class WattSequenceContainer : Float64SequenceContainer {}
+    }
 
 
 }
