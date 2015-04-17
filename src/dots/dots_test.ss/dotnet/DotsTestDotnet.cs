@@ -104,6 +104,8 @@ class DotsTestDotnet
             Test_IsEnumeration();
             Test_IsException();
             Test_GetDouFilePath();
+            TestSequences();
+            TestDictionaries();
         }
         finally
         {
@@ -283,7 +285,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Int32MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Int32MemberMemberIndex));
 
@@ -422,7 +424,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Int64MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Int64MemberMemberIndex));
 
@@ -559,7 +561,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Float32MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Float32MemberMemberIndex));
 
@@ -698,7 +700,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Float64MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Float64MemberMemberIndex));
 
@@ -837,7 +839,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.BooleanMemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.BooleanMemberMemberIndex));
 
@@ -981,7 +983,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.EnumerationMemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.EnumerationMemberMemberIndex));
         Console.WriteLine("GetTypeId: " + Safir.Dob.Typesystem.Members.GetTypeId(DotsTest.MemberTypes.ClassTypeId,
@@ -1148,7 +1150,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.StringMemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.StringMemberMemberIndex));
 
@@ -1286,7 +1288,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.EntityIdMemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.EntityIdMemberMemberIndex));
 
@@ -1422,7 +1424,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.TypeIdMemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.TypeIdMemberMemberIndex));
 
@@ -1564,7 +1566,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.InstanceIdMemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.InstanceIdMemberMemberIndex));
 
@@ -1701,7 +1703,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.ChannelIdMemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.ChannelIdMemberMemberIndex));
 
@@ -1839,7 +1841,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.HandlerIdMemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.HandlerIdMemberMemberIndex));
 
@@ -1976,7 +1978,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.ObjectMemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.ObjectMemberMemberIndex));
         Console.WriteLine("GetTypeId: " + Safir.Dob.Typesystem.Members.GetTypeId(DotsTest.MemberTypes.ClassTypeId,
@@ -2116,7 +2118,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.BinaryMemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.BinaryMemberMemberIndex));
 
@@ -2253,7 +2255,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.TestClassMemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.TestClassMemberMemberIndex));
         Console.WriteLine("GetTypeId: " + Safir.Dob.Typesystem.Members.GetTypeId(DotsTest.MemberTypes.ClassTypeId,
@@ -2406,7 +2408,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Ampere32MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Ampere32MemberMemberIndex));
 
@@ -2545,7 +2547,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.CubicMeter32MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.CubicMeter32MemberMemberIndex));
 
@@ -2684,7 +2686,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Hertz32MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Hertz32MemberMemberIndex));
 
@@ -2822,7 +2824,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Joule32MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Joule32MemberMemberIndex));
 
@@ -2960,7 +2962,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Kelvin32MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Kelvin32MemberMemberIndex));
 
@@ -3099,7 +3101,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Kilogram32MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Kilogram32MemberMemberIndex));
 
@@ -3238,7 +3240,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Meter32MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Meter32MemberMemberIndex));
 
@@ -3377,7 +3379,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.MeterPerSecond32MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.MeterPerSecond32MemberMemberIndex));
 
@@ -3516,7 +3518,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.MeterPerSecondSquared32MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.MeterPerSecondSquared32MemberMemberIndex));
 
@@ -3654,7 +3656,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Newton32MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Newton32MemberMemberIndex));
 
@@ -3793,7 +3795,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Pascal32MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Pascal32MemberMemberIndex));
 
@@ -3932,7 +3934,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Radian32MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Radian32MemberMemberIndex));
 
@@ -4071,7 +4073,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.RadianPerSecond32MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.RadianPerSecond32MemberMemberIndex));
 
@@ -4209,7 +4211,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.RadianPerSecondSquared32MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.RadianPerSecondSquared32MemberMemberIndex));
 
@@ -4348,7 +4350,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Second32MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Second32MemberMemberIndex));
 
@@ -4487,7 +4489,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.SquareMeter32MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.SquareMeter32MemberMemberIndex));
 
@@ -4626,7 +4628,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Steradian32MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Steradian32MemberMemberIndex));
 
@@ -4765,7 +4767,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Volt32MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Volt32MemberMemberIndex));
 
@@ -4904,7 +4906,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Watt32MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Watt32MemberMemberIndex));
 
@@ -5043,7 +5045,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Ampere64MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Ampere64MemberMemberIndex));
 
@@ -5182,7 +5184,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.CubicMeter64MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.CubicMeter64MemberMemberIndex));
 
@@ -5321,7 +5323,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Hertz64MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Hertz64MemberMemberIndex));
 
@@ -5459,7 +5461,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Joule64MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Joule64MemberMemberIndex));
 
@@ -5598,7 +5600,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Kelvin64MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Kelvin64MemberMemberIndex));
 
@@ -5737,7 +5739,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Kilogram64MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Kilogram64MemberMemberIndex));
 
@@ -5876,7 +5878,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Meter64MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Meter64MemberMemberIndex));
 
@@ -6015,7 +6017,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.MeterPerSecond64MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.MeterPerSecond64MemberMemberIndex));
 
@@ -6154,7 +6156,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.MeterPerSecondSquared64MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.MeterPerSecondSquared64MemberMemberIndex));
 
@@ -6293,7 +6295,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Newton64MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Newton64MemberMemberIndex));
 
@@ -6432,7 +6434,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Pascal64MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Pascal64MemberMemberIndex));
 
@@ -6570,7 +6572,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Radian64MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Radian64MemberMemberIndex));
 
@@ -6709,7 +6711,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.RadianPerSecond64MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.RadianPerSecond64MemberMemberIndex));
 
@@ -6848,7 +6850,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.RadianPerSecondSquared64MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.RadianPerSecondSquared64MemberMemberIndex));
 
@@ -6987,7 +6989,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Second64MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Second64MemberMemberIndex));
 
@@ -7126,7 +7128,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.SquareMeter64MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.SquareMeter64MemberMemberIndex));
 
@@ -7265,7 +7267,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Steradian64MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Steradian64MemberMemberIndex));
 
@@ -7403,7 +7405,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Volt64MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Volt64MemberMemberIndex));
 
@@ -7542,7 +7544,7 @@ class DotsTestDotnet
                                              out lMT, out lCT, out lTS, out liA, out lAL);
 
         Console.WriteLine("----Members---- ");
-        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + liA.ToString().ToLower() + "," + lAL);
+        Console.WriteLine("GetInfo: " + lMT.ToString().ToUpper() + "," + name + "," + lCT + "," + lTS + "," + CtStr(liA) + "," + lAL);
         Console.WriteLine("GetName: " + Safir.Dob.Typesystem.Members.GetName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Watt64MemberMemberIndex));
         Console.WriteLine("GetTypeName: " + Safir.Dob.Typesystem.Members.GetTypeName(DotsTest.MemberTypes.ClassTypeId, DotsTest.MemberTypes.Watt64MemberMemberIndex));
 
@@ -7713,4 +7715,299 @@ class DotsTestDotnet
     }
 
 
+    private static string CtStr(Safir.Dob.Typesystem.CollectionType ct)
+    {
+        switch (ct) {
+        case Safir.Dob.Typesystem.CollectionType.ArrayCollectionType:
+            return "Array";
+        case Safir.Dob.Typesystem.CollectionType.DictionaryCollectionType:
+            return "Dictionary";
+        case Safir.Dob.Typesystem.CollectionType.SequenceCollectionType:
+            return "Sequence";
+        case Safir.Dob.Typesystem.CollectionType.SingleValueCollectionType:
+            return "Single";
+        default:
+            return "Unknown";
+        }
+    }
+
+    private static void PrintSequences(DotsTest.MemberSequences ms)
+    {
+        Console.WriteLine("--- Int32Member ---");
+        Console.WriteLine("size: "+ms.Int32Member.Count);
+        Console.WriteLine("isChanged: "+ms.Int32Member.IsChanged().ToString().ToLower());
+        Console.WriteLine("val[0]: "+ms.Int32Member[0]);
+        Console.WriteLine("val[1]: "+ms.Int32Member[1]);
+
+        Console.WriteLine("--- Int64Member ---");
+        Console.WriteLine("size: "+ms.Int64Member.Count);
+        Console.WriteLine("isChanged: "+ms.Int64Member.IsChanged().ToString().ToLower());
+        Console.WriteLine("val[0]: "+ms.Int64Member[0]);
+        Console.WriteLine("val[1]: "+ms.Int64Member[1]);
+
+        Console.WriteLine("--- Float32Member ---");
+        Console.WriteLine("size: "+ms.Float32Member.Count);
+        Console.WriteLine("isChanged: "+ms.Float32Member.IsChanged().ToString().ToLower());
+        Console.WriteLine("val[0]: "+ms.Float32Member[0].ToString("0.0"));
+        Console.WriteLine("val[1]: "+ms.Float32Member[1].ToString("0.0"));
+
+        Console.WriteLine("--- Float64Member ---");
+        Console.WriteLine("size: "+ms.Float64Member.Count);
+        Console.WriteLine("isChanged: "+ms.Float64Member.IsChanged().ToString().ToLower());
+        Console.WriteLine("val[0]: "+ms.Float64Member[0].ToString("0.00"));
+        Console.WriteLine("val[1]: "+ms.Float64Member[1].ToString("0.00"));
+
+        Console.WriteLine("--- BooleanMember ---");
+        Console.WriteLine("size: "+ms.BooleanMember.Count);
+        Console.WriteLine("isChanged: "+ms.BooleanMember.IsChanged().ToString().ToLower());
+        Console.WriteLine("val[0]: "+ms.BooleanMember[0].ToString().ToLower());
+        Console.WriteLine("val[1]: "+ms.BooleanMember[1].ToString().ToLower());
+
+        Console.WriteLine("--- EnumerationMember ---");
+        Console.WriteLine("size: "+ms.EnumerationMember.Count);
+        Console.WriteLine("isChanged: "+ms.EnumerationMember.IsChanged().ToString().ToLower());
+        Console.WriteLine("val[0]: "+ms.EnumerationMember[0].ToString());
+        Console.WriteLine("val[1]: "+ms.EnumerationMember[1].ToString());
+
+        Console.WriteLine("--- StringMember ---");
+        Console.WriteLine("size: "+ms.StringMember.Count);
+        Console.WriteLine("isChanged: "+ms.StringMember.IsChanged().ToString().ToLower());
+        Console.WriteLine("val[0]: "+ms.StringMember[0]);
+        Console.WriteLine("val[1]: "+ms.StringMember[1]);
+
+        Console.WriteLine("--- TypeIdMember ---");
+        Console.WriteLine("size: "+ms.TypeIdMember.Count);
+        Console.WriteLine("isChanged: "+ms.TypeIdMember.IsChanged().ToString().ToLower());
+        Console.WriteLine("val[0]: "+Safir.Dob.Typesystem.Operations.GetName(ms.TypeIdMember[0]));
+        Console.WriteLine("val[1]: "+Safir.Dob.Typesystem.Operations.GetName(ms.TypeIdMember[1]));
+
+        Console.WriteLine("--- HandlerIdMember ---");
+        Console.WriteLine("size: "+ms.HandlerIdMember.Count);
+        Console.WriteLine("isChanged: "+ms.HandlerIdMember.IsChanged().ToString().ToLower());
+    }
+
+    private static void TestSequences()
+    {
+        Header("Sequences");
+
+        DotsTest.MemberSequences ms = new DotsTest.MemberSequences ();
+
+        ms.Int32Member.Add(20);
+        ms.Int32Member.Add(30);
+        ms.Int32Member.Insert(0, 10);
+        ms.Int32Member.RemoveAt(2);
+
+        ms.Int64Member.Add(200);
+        ms.Int64Member.Add(300);
+        ms.Int64Member.Insert(0, 100);
+        ms.Int64Member.RemoveAt(2);
+
+        ms.Float32Member.Add(2.2f);
+        ms.Float32Member.Add(3.3f);
+        ms.Float32Member.Insert(0, 1.1f);
+        ms.Float32Member.RemoveAt(2);
+
+        ms.Float64Member.Add(22.22f);
+        ms.Float64Member.Add(33.33f);
+        ms.Float64Member.Insert(0, 11.11f);
+        ms.Float64Member.RemoveAt(2);
+
+        ms.BooleanMember.Add(false);
+        ms.BooleanMember.Add(false);
+        ms.BooleanMember.Insert(0, true);
+        ms.BooleanMember.RemoveAt(2);
+
+        ms.EnumerationMember.Add(DotsTest.TestEnum.Enumeration.MySecond);
+        ms.EnumerationMember.Add(DotsTest.TestEnum.Enumeration.MyThird);
+        ms.EnumerationMember.Insert(0, DotsTest.TestEnum.Enumeration.MyFirst);
+        ms.EnumerationMember.RemoveAt(2);
+
+        ms.StringMember.Add("Bb");
+        ms.StringMember.Add("Cc");
+        ms.StringMember.Insert(0, "Aa");
+        ms.StringMember.RemoveAt(2);
+
+        ms.TypeIdMember.Add(DotsTest.MemberSequences.ClassTypeId);
+        ms.TypeIdMember.Add(DotsTest.TestEnum.EnumerationId);
+        ms.TypeIdMember.Insert(0, DotsTest.MemberDictionaries.ClassTypeId);
+        ms.TypeIdMember.RemoveAt(2);
+
+        PrintSequences(ms);
+
+        Console.WriteLine("------ To Xml -----");
+        var xml=Safir.Dob.Typesystem.Serialization.ToXml(ms);
+        Console.WriteLine (xml);
+
+        Console.WriteLine("------ From Xml -----");
+        DotsTest.MemberSequences fromXml = Safir.Dob.Typesystem.Serialization.ToObject (xml) as DotsTest.MemberSequences;
+        PrintSequences(fromXml);
+
+
+        Console.WriteLine("------ To Json -----");
+        var json=Safir.Dob.Typesystem.Serialization.ToJson(ms);
+        Console.WriteLine (json);
+
+        Console.WriteLine("------ From Json -----");
+        DotsTest.MemberSequences fromJson=Safir.Dob.Typesystem.Serialization.ToObjectFromJson(json) as DotsTest.MemberSequences;
+        PrintSequences(fromJson);
+
+        Console.WriteLine("------ Clone -----");
+        DotsTest.MemberSequences clone=ms as DotsTest.MemberSequences;
+        PrintSequences(clone);
+    }
+
+    private static void PrintDictionaries(DotsTest.MemberDictionaries md)
+    {
+        Console.WriteLine("--- Int32StringMember ---");
+        Console.WriteLine("size: "+md.Int32StringMember.Count);
+        Console.WriteLine("isChanged: "+md.Int32StringMember.IsChanged().ToString ().ToLower ());
+        foreach (var kv in md.Int32StringMember)
+        {
+            if (kv.Value.IsNull ())
+                Console.WriteLine (kv.Key + " = NULL, changed: " + kv.Value.IsChanged ().ToString ().ToLower ());
+            else
+                Console.WriteLine (kv.Key + " = "+kv.Value.Val.ToString()+", changed: " + kv.Value.IsChanged ().ToString ().ToLower ());
+        }
+
+        Console.WriteLine("--- Int64BinaryMember ---");
+        Console.WriteLine("size: "+md.Int64BinaryMember.Count);
+        Console.WriteLine("isChanged: "+md.Int64BinaryMember.IsChanged().ToString ().ToLower ());
+        foreach (var kv in md.Int64BinaryMember)
+        {
+            if (kv.Value.IsNull ())
+                Console.WriteLine (kv.Key + " = NULL, changed: " + kv.Value.IsChanged ().ToString ().ToLower ());
+            else
+                Console.WriteLine (kv.Key + " = "+System.Text.Encoding.UTF8.GetString(kv.Value.Val)+", changed: " + kv.Value.IsChanged ().ToString ().ToLower ());
+        }
+
+        Console.WriteLine("--- TypeIdEnumMember ---");
+        Console.WriteLine("size: "+md.TypeIdEnumMember.Count);
+        Console.WriteLine("isChanged: "+md.TypeIdEnumMember.IsChanged().ToString ().ToLower ());
+        foreach (var kv in md.TypeIdEnumMember)
+        {
+            string name = Safir.Dob.Typesystem.Operations.GetName (kv.Key);
+            if (kv.Value.IsNull ())
+                Console.WriteLine (name + " = NULL, changed: " + kv.Value.IsChanged ().ToString ().ToLower ());
+            else
+                Console.WriteLine (name + " = "+kv.Value.Val.ToString()+", changed: " + kv.Value.IsChanged ().ToString ().ToLower ());
+        }
+
+        Console.WriteLine("--- EnumInstanceIdMember ---");
+        Console.WriteLine("size: "+md.EnumInstanceIdMember.Count);
+        Console.WriteLine("isChanged: "+md.EnumInstanceIdMember.IsChanged().ToString ().ToLower ());
+        foreach (var kv in md.EnumInstanceIdMember)
+        {
+            if (kv.Value.IsNull ())
+                Console.WriteLine (kv.Key.ToString() + " = NULL, changed: " + kv.Value.IsChanged ().ToString ().ToLower ());
+            else
+                Console.WriteLine (kv.Key.ToString() + " = "+kv.Value.Val.ToString()+", changed: " + kv.Value.IsChanged ().ToString ().ToLower ());
+        }
+
+        Console.WriteLine("--- InstanceIdEntityIdMember ---");
+        Console.WriteLine("size: "+md.InstanceIdEntityIdMember.Count);
+        Console.WriteLine("isChanged: "+md.InstanceIdEntityIdMember.IsChanged().ToString ().ToLower ());
+        foreach (var kv in md.InstanceIdEntityIdMember)
+        {
+            if (kv.Value.IsNull ())
+                Console.WriteLine (kv.Key.ToString() + " = NULL, changed: " + kv.Value.IsChanged ().ToString ().ToLower ());
+            else
+                Console.WriteLine (kv.Key.ToString() + " = "+kv.Value.Val.ToString()+", changed: " + kv.Value.IsChanged ().ToString ().ToLower ());
+        }
+
+        Console.WriteLine("--- EntityIdHandlerIdMember ---");
+        Console.WriteLine("size: "+md.EntityIdHandlerIdMember.Count);
+        Console.WriteLine("isChanged: "+md.EntityIdHandlerIdMember.IsChanged().ToString ().ToLower ());
+        foreach (var kv in md.EntityIdHandlerIdMember)
+        {
+            if (kv.Value.IsNull ())
+                Console.WriteLine (kv.Key.ToString() + " = NULL, changed: " + kv.Value.IsChanged ().ToString ().ToLower ());
+            else
+                Console.WriteLine (kv.Key.ToString() + " = "+kv.Value.Val.ToString()+", changed: " + kv.Value.IsChanged ().ToString ().ToLower ());
+        }
+
+        Console.WriteLine("--- StringItemMember ---");
+        Console.WriteLine("size: "+md.StringItemMember.Count);
+        Console.WriteLine("isChanged: "+md.StringItemMember.IsChanged().ToString ().ToLower ());
+        foreach (var kv in md.StringItemMember)
+        {
+            if (kv.Value.IsNull ())
+                Console.WriteLine (kv.Key.ToString() + " = NULL, changed: " + kv.Value.IsChanged ().ToString ().ToLower ());
+            else
+                Console.WriteLine (kv.Key.ToString() + " = "+Safir.Dob.Typesystem.Serialization.ToJson(kv.Value.Obj)+", changed: " + kv.Value.IsChanged ().ToString ().ToLower ());
+        }
+
+
+     
+
+        Console.WriteLine("--- StringObjectMember ---");
+        Console.WriteLine("size: "+md.StringObjectMember.Count);
+        Console.WriteLine("isChanged: "+md.StringObjectMember.IsChanged());
+        foreach (var kv in md.StringObjectMember)
+        {
+            if (kv.Value.IsNull ())
+                Console.WriteLine (kv.Key.ToString() + " = NULL, changed: " + kv.Value.IsChanged ().ToString ().ToLower ());
+            else
+                Console.WriteLine (kv.Key.ToString() + " = "+Safir.Dob.Typesystem.Serialization.ToJson(kv.Value.Obj)+", changed: " + kv.Value.IsChanged ().ToString ().ToLower ());
+        }
+    }
+
+    private static void TestDictionaries()
+    {
+        Header("Dictionaries");
+
+        DotsTest.MemberDictionaries md=new DotsTest.MemberDictionaries();
+
+        md.Int32StringMember.Add (10).Val = DotsTest.ParameterDictionaries.Int32StringParameter (10);
+        md.Int32StringMember.Add (20).Val = DotsTest.ParameterDictionaries.Int32StringParameter (20);
+
+        md.Int64BinaryMember.Add (100).Val = DotsTest.ParameterDictionaries.Int32BinaryParameter (10);
+        md.Int64BinaryMember.Add (200).Val = DotsTest.ParameterDictionaries.Int32BinaryParameter (20);
+
+        md.TypeIdEnumMember.Add (DotsTest.MemberDictionaries.ClassTypeId).Val = DotsTest.ParameterDictionaries.StringEnumParameter ("Billy");
+        md.TypeIdEnumMember.Add (DotsTest.MemberSequences.ClassTypeId).Val = DotsTest.ParameterDictionaries.StringEnumParameter ("Svarre");
+
+        md.EnumInstanceIdMember.Add (DotsTest.TestEnum.Enumeration.MyFirst).Val = DotsTest.ParameterDictionaries.EnumInstanceIdParameter (DotsTest.TestEnum.Enumeration.MyFirst);
+        md.EnumInstanceIdMember.Add (DotsTest.TestEnum.Enumeration.MySecond).Val = DotsTest.ParameterDictionaries.EnumInstanceIdParameter (DotsTest.TestEnum.Enumeration.MySecond);
+     
+        md.InstanceIdEntityIdMember.Add (new Safir.Dob.Typesystem.InstanceId("FirstInstance")).Val = DotsTest.ParameterDictionaries.HandlerIdEntityIdParameter (new Safir.Dob.Typesystem.HandlerId("handlerOne"));
+        md.InstanceIdEntityIdMember.Add (new Safir.Dob.Typesystem.InstanceId("SecondInstance")).Val = DotsTest.ParameterDictionaries.HandlerIdEntityIdParameter (new Safir.Dob.Typesystem.HandlerId(2));
+
+        DotsTest.MemberDictionaries item1=new DotsTest.MemberDictionaries();
+        item1.EntityIdHandlerIdMember.Add (new Safir.Dob.Typesystem.EntityId(Safir.Dob.Entity.ClassTypeId, new Safir.Dob.Typesystem.InstanceId("first"))).Val = 
+                                        DotsTest.ParameterDictionaries.EntityIdHandlerIdParameter (new Safir.Dob.Typesystem.EntityId(Safir.Dob.Entity.ClassTypeId, new Safir.Dob.Typesystem.InstanceId("first")));
+        item1.EntityIdHandlerIdMember.Add (new Safir.Dob.Typesystem.EntityId(Safir.Dob.Entity.ClassTypeId, new Safir.Dob.Typesystem.InstanceId(2))).Val = 
+                                        DotsTest.ParameterDictionaries.EntityIdHandlerIdParameter (new Safir.Dob.Typesystem.EntityId(Safir.Dob.Entity.ClassTypeId, new Safir.Dob.Typesystem.InstanceId("second")));
+
+        //new Safir.Dob.Typesystem.EntityId(Safir.Dob.Entity.ClassTypeId, new Safir.Dob.Typesystem.InstanceId("first"))
+        //---------
+        md.StringItemMember.Add ("Karl").Obj = item1;
+        md.StringItemMember.Add ("Philip").SetNull();
+        md.StringItemMember.Add ("Gustav").Obj = item1;
+
+        md.StringObjectMember.Add ("Dilbert").Obj = DotsTest.ParameterDictionaries.Int32ObjectParameter(10);
+        md.StringObjectMember.Add ("Wally").Obj = DotsTest.ParameterDictionaries.Int32ObjectParameter(20);
+
+        PrintDictionaries(md);
+
+        Console.WriteLine("------ To Xml -----");
+        var xml=Safir.Dob.Typesystem.Serialization.ToXml(md);
+        Console.WriteLine (xml);
+
+        Console.WriteLine("------ From Xml -----");
+        var fromXml = Safir.Dob.Typesystem.Serialization.ToObject (xml) as DotsTest.MemberDictionaries;
+        PrintDictionaries(fromXml);
+
+        Console.WriteLine("------ To Json -----");
+        var json=Safir.Dob.Typesystem.Serialization.ToJson(md);
+        Console.WriteLine (json);
+
+       
+        Console.WriteLine("------ From Json -----");
+        var fromJson = Safir.Dob.Typesystem.Serialization.ToObjectFromJson (json) as DotsTest.MemberDictionaries;
+        PrintDictionaries(fromJson);
+
+        Console.WriteLine("------ Clone -----");
+        DotsTest.MemberDictionaries clone = md as DotsTest.MemberDictionaries;
+        PrintDictionaries(clone);
+    }
 }

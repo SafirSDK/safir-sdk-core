@@ -642,7 +642,7 @@ namespace Safir.Dob.Typesystem.Internal
                                System.Int32 member,
                                System.Int32 index)
         {
-            Set (container.Val, container.IsNull(), container.IsChanged(), handle, member, index, KeyValMode.ValueMode);
+            Set (container.m_Value, container.IsNull(), container.IsChanged(), handle, member, index, KeyValMode.ValueMode);
         }
 
         #region SI types
