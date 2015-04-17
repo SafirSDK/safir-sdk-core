@@ -24,7 +24,7 @@
 #ifndef __DOSE_SHARED_FLAG_H__
 #define __DOSE_SHARED_FLAG_H__
 
-#include <Safir/Dob/Internal/Atomic.h>
+#include <Safir/Utilities/Internal/Atomic.h>
 #include <boost/function.hpp>
 
 namespace Safir
@@ -93,7 +93,7 @@ namespace Internal
         }
 
     private:
-        mutable AtomicUint32 m_flag;
+        mutable Safir::Utilities::Internal::AtomicUint32 m_flag;
     };
 }
 }

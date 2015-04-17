@@ -1,17 +1,16 @@
-set(ui About.ui connectionstats.ui dosecominfo.ui dosemon.ui entitystats.ui
-  loggingsettings.ui memgraph.ui nodestatus.ui numberOfEntities.ui)
+set(ui About.ui connectionstats.ui dosemon.ui entitystats.ui
+  memgraph.ui numberOfEntities.ui RawStatisticsPage.ui SystemPicturePage.ui)
 
-set(sources About.cpp connectionstats.cpp dosecom_stuff.cpp dosecominfo.cpp dosemon.cpp
-  entitystats.cpp graphwidget.cpp internalfunctions.cpp loggingsettings.cpp main.cpp
-  memgraph.cpp nodestatus.cpp numberofentities.cpp)
+set(sources About.cpp connectionstats.cpp dosemon.cpp
+  entitystats.cpp graphwidget.cpp internalfunctions.cpp main.cpp
+  memgraph.cpp numberofentities.cpp RawStatisticsPage.cpp SystemPicturePage.cpp)
 
-set(widget_headers About.h connectionstats.h dosecominfo.h dosemon.h entitystats.h
-  graphwidget.h loggingsettings.h memgraph.h nodestatus.h numberofentities.h )
+set(widget_headers About.h connectionstats.h dosemon.h entitystats.h
+  graphwidget.h memgraph.h numberofentities.h RawStatisticsPage.h SystemPicturePage.h)
 
-set(headers internalfunctions.h dosecom_stuff.h common_header.h)
+set(headers internalfunctions.h common_header.h)
 
 
-SET(dose_com_sources ../../dose_communication.ss/src/dose_com/DoseOsSharedMem.cpp)
 
 # As moc files are generated in the binary dir, tell CMake
 # to always look for includes there:
@@ -62,7 +61,7 @@ else()
 
 endif()
 
-ADD_EXECUTABLE(dobexplorer WIN32 ${sources} ${ui_headers} ${moc_sources} ${dose_com_sources} ${headers} ${widget_headers} dobexplorer.rc)
+ADD_EXECUTABLE(dobexplorer WIN32 ${sources} ${ui_headers} ${moc_sources} ${headers} ${widget_headers} dobexplorer.rc)
 
 if (Qt5Widgets_FOUND)
   TARGET_LINK_LIBRARIES(dobexplorer PRIVATE Qt5::Widgets)
@@ -72,10 +71,8 @@ endif()
 
 TARGET_LINK_LIBRARIES(dobexplorer PRIVATE
   dose_internal
+  system_picture
   lluf_utils
   lluf_crash_reporter)
-
-target_include_directories(dobexplorer PRIVATE ../../dose_communication.ss/src/defs/ ../../dose_communication.ss/src/dose_com/)
-#dobexplorer doesnt really need to link against dose_com, so instead just add the include directories
 
 SAFIR_INSTALL(TARGETS dobexplorer DEVELOPMENT)

@@ -25,7 +25,8 @@
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/StringEncoding.h>
 #include <boost/bind.hpp>
-#include <boost/thread/thread.hpp>
+#include <boost/thread.hpp>
+#include <boost/chrono.hpp>
 #include <iostream>
 
 #ifdef _MSC_VER

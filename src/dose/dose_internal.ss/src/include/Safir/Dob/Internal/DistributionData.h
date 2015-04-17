@@ -33,7 +33,7 @@ void intrusive_ptr_release(const char * p);
 #include <Safir/Dob/Internal/SharedMemoryObject.h>
 #include <Safir/Dob/Internal/InternalFwd.h>
 #include <Safir/Dob/Internal/ConnectionId.h>
-#include <Safir/Dob/Internal/Atomic.h>
+#include <Safir/Utilities/Internal/Atomic.h>
 #include <Safir/Dob/Typesystem/EntityId.h>
 #include <Safir/Dob/Typesystem/HandlerId.h>
 #include <Safir/Dob/Typesystem/ChannelId.h>
@@ -474,9 +474,6 @@ namespace Internal
         const VersionNumber GetVersion() const {return GetEntityStateHeader().m_version;}
         void IncrementVersion() {++GetEntityStateHeader().m_version;}
         void ResetVersion() {GetEntityStateHeader().m_version = VersionNumber();}
-        void DecrementVersion();
-        void ResetDecrementedFlag() {GetEntityStateHeader().m_versionIsDecremented = false;}
-        const VersionNumber GetUndecrementedVersion() const;
 
         EntityStateKind GetEntityStateKind() const {return GetEntityStateHeader().m_kind;}
         void SetEntityStateKind(const EntityStateKind& kind) {GetEntityStateHeader().m_kind = kind;}
@@ -581,10 +578,6 @@ namespace Internal
         {
             Type m_type;
             ConnectionId m_sender;
-#ifdef REGISTER_TIMES
-            Typesystem::Int32 m_id;
-            Typesystem::Int32 m_padding2;
-#endif
         };
 
         struct ConnectHeader
@@ -636,7 +629,7 @@ namespace Internal
             bool                        m_explicitlyDeleted;
             bool                        m_sourceIsPermanentStore;
             bool                        m_hasBlob;
-            bool                        m_versionIsDecremented;
+            bool                        m_padding2;
             Typesystem::Int32           m_numTimestamps;
         };
 
@@ -778,14 +771,18 @@ namespace Internal
         public:
             static inline char * Allocate(const size_t size)
             {
-                char * data = static_cast<char*>(GetSharedMemory().allocate(size + sizeof(AtomicUint32))) + sizeof(AtomicUint32);
+                char * data = static_cast<char*>(GetSharedMemory().allocate(size + 
+                                                                            sizeof(Safir::Utilities::Internal::AtomicUint32))) +
+                    sizeof(Safir::Utilities::Internal::AtomicUint32);
                 GetCount(data) = 0;
                 return data;
             }
 
-            static inline AtomicUint32& GetCount(const char * p)
+            static inline Safir::Utilities::Internal::AtomicUint32& GetCount(const char * p)
             {
-                return *static_cast<AtomicUint32*>(static_cast<void *>(const_cast<char*>(p - sizeof(AtomicUint32))));
+                return *static_cast<Safir::Utilities::Internal::AtomicUint32*>
+                    (static_cast<void *>
+                     (const_cast<char*>(p - sizeof(Safir::Utilities::Internal::AtomicUint32))));
             }
 
             static inline void AddRef(const char * p)
@@ -797,7 +794,7 @@ namespace Internal
                 //if the old value is 0 the new value is 0 and we can deallocate.
                 if(1 == GetCount(p)--)
                 {
-                    GetSharedMemory().deallocate(const_cast<char*>(p) - sizeof(AtomicUint32));
+                    GetSharedMemory().deallocate(const_cast<char*>(p) - sizeof(Safir::Utilities::Internal::AtomicUint32));
                 }
             }
 

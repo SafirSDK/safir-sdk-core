@@ -34,7 +34,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/interprocess/exceptions.hpp>
 #include <iostream>
-#include <Safir/Dob/Internal/Atomic.h>
+#include <Safir/Utilities/Internal/Atomic.h>
 #include <Safir/Utilities/AsioDispatcher.h>
 
 

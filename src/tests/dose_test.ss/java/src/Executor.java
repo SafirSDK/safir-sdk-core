@@ -327,22 +327,6 @@ class Executor implements
                 }
                 break;
 
-            case INHIBIT_OUTGOING_TRAFFIC:
-                if (m_isActive) {
-                    boolean ok = com.saabgroup.safir.dob.test.util.Utilities.InhibitOutgoingTraffic(action.inhibit().getVal());
-
-
-                    if (ok) {
-                        Logger.instance().println("InhibitOutgoingTraffic set to "
-                                + (com.saabgroup.safir.dob.test.util.Utilities.IsOutgoingTrafficInhibited() ? 1 : 0));
-                    } else {
-                        Logger.instance().println("InhibitOutgoingTraffic failed!");
-
-                    }
-                }
-                break;
-
-
             case PRINT:
                 if (m_isActive) {
                     Logger.instance().println(action.printString().getVal());
@@ -450,7 +434,9 @@ class Executor implements
             partner.port().setVal((int) m_actionReceiver.getPort());
 
             try {
-                InstanceId instance = new InstanceId(com.saabgroup.safir.dob.ThisNodeParameters.getNodeNumber());
+                InstanceId instance =
+                    new InstanceId(new com.saabgroup.safir.dob.ConnectionAspectMisc(m_controlConnection).getNodeId());
+
                 EntityId eid = new EntityId(com.saabgroup.safir.dob.NodeInfo.ClassTypeId,instance);
                 com.saabgroup.safir.dob.EntityProxy ep = m_controlConnection.read(eid);
                 try {
@@ -503,7 +489,6 @@ class Executor implements
 
     public void onDeletedEntity(com.saabgroup.safir.dob.EntityProxy entityProxy,
                                 boolean deletedByOwner) {
-        //ignore deletes since they may be due to an inhibitoutgoingtraffic on the other side
     }
 
     //

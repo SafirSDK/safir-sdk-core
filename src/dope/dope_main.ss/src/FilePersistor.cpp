@@ -48,7 +48,7 @@
 #include <string>
 #include <Safir/Dob/ConnectionAspectInjector.h>
 
-namespace 
+namespace
 {
     const boost::filesystem::path replace_extension(boost::filesystem::path path,const std::string& ext)
     {
@@ -63,7 +63,7 @@ void FilePersistor::RemoveFile(const boost::filesystem::path& path) const
     {
         if (boost::filesystem::exists(path))
         {
-            m_debug << "Removing file " << path.string().c_str() << std::endl; 
+            m_debug << "Removing file " << path.string().c_str() << std::endl;
             boost::filesystem::remove(path);
         }
     }
@@ -73,7 +73,7 @@ void FilePersistor::RemoveFile(const boost::filesystem::path& path) const
                                       L"Failed to remove persistence file " +
                                       Safir::Dob::Typesystem::Utilities::ToWstring(path.string())
                                       + L", maybe it is read-only?");
-    }    
+    }
 }
 
 
@@ -184,25 +184,19 @@ FilePersistor::GetFilePath(const FilePersistor::EntityIdAndHandlerId& entityAndH
 
 //-------------------------------------------------------
 FilePersistor::FilePersistor(boost::asio::io_service& ioService) :
-    PersistenceHandler(ioService),
+    PersistenceHandler(ioService, false),
     m_storagePath(GetStorageDirectory()),
     m_debug(L"FilePersistor")
 {
     m_debug << "Persisting to '" << m_storagePath.string().c_str() << std::endl;
 }
 
-//-------------------------------------------------------
-FilePersistor::~FilePersistor()
-{
-
-}
-
 
 //-------------------------------------------------------
 void
-FilePersistor::Store(const Safir::Dob::Typesystem::EntityId entityId,
-                     const Safir::Dob::Typesystem::HandlerId handlerId,
-                     Safir::Dob::Typesystem::BinarySerialization & bin,
+FilePersistor::Store(const Safir::Dob::Typesystem::EntityId& entityId,
+                     const Safir::Dob::Typesystem::HandlerId& handlerId,
+                     Safir::Dob::Typesystem::BinarySerialization& bin,
                      const bool /*update*/)
 {
     const boost::filesystem::path path = GetFilePath(boost::make_tuple(entityId,handlerId, std::wstring()));
@@ -227,8 +221,8 @@ FilePersistor::Store(const Safir::Dob::Typesystem::EntityId entityId,
     {
         Safir::Logging::SendSystemLog(Safir::Logging::Error,
                                       L"Failed to open file "
-                                      + Safir::Dob::Typesystem::Utilities::ToWstring(path.string()) 
-                                      + L" for writing, cannot persist entity " 
+                                      + Safir::Dob::Typesystem::Utilities::ToWstring(path.string())
+                                      + L" for writing, cannot persist entity "
                                       + entityId.ToString());
     }
 }
@@ -260,7 +254,7 @@ FilePersistor::RemoveAll()
                                           L"Failed to remove persistence file "
                                           + Safir::Dob::Typesystem::Utilities::ToWstring(path.string())
                                           + L", maybe it is read-only?");
-        }    
+        }
     }
 }
 
@@ -304,9 +298,9 @@ FilePersistor::RestoreXml(const boost::filesystem::path & path) const
     }
 
     boost::filesystem::wifstream file (path, std::ios::in);
-    std::wstring xml((std::istreambuf_iterator<wchar_t>(file)), 
+    std::wstring xml((std::istreambuf_iterator<wchar_t>(file)),
                      std::istreambuf_iterator<wchar_t>());
-    
+
     file.close();
 
     //remove .xml file
@@ -323,10 +317,10 @@ FilePersistor::RestoreXml(const boost::filesystem::path & path) const
                                       L"Could not restore entity from file "
                                       + Safir::Dob::Typesystem::Utilities::ToWstring(path.string())
                                       + L", removing it and any corresponding bin file");
-        
+
         RemoveFile(path);
 
-        RemoveFile(replace_extension(path,".bin")); 
+        RemoveFile(replace_extension(path,".bin"));
     }
 
     return entityPtr;
@@ -350,14 +344,14 @@ FilePersistor::RestoreAll()
         try
         {
             const EntityIdAndHandlerId tuple = Filename2EntityIdAndHandlerId(path);
-            TypeIdSet::const_iterator findIt = GetPersistentTypes().find(tuple.get<0>().GetTypeId());
+            auto findIt = GetPersistentTypes().find(tuple.get<0>().GetTypeId());
             if (findIt == GetPersistentTypes().end())
             { //not persistent any more, remove it
 
                 m_debug << "File " << path.string().c_str() << " is not persistent in this configuration, removing" << std::endl;
 
                 Safir::Logging::SendSystemLog(Safir::Logging::Warning,
-                                              L"Type " 
+                                              L"Type "
                                               + tuple.get<2>()
                                               + L" is not persistent in this configuration, removing the corresponding xml and bin files");
 
@@ -389,7 +383,7 @@ FilePersistor::RestoreAll()
                     entity = RestoreBinary(path);
                 }
 
-                if (entity == NULL)
+                if (entity == nullptr)
                 {
                     continue;
                 }

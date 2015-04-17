@@ -160,7 +160,7 @@ function(ADD_CSHARP_ASSEMBLY TARGET_NAME)
       COMMENT "Building ${_cs_target_kind} assembly ${TARGET_NAME}"
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
-    ADD_CUSTOM_TARGET (${TARGET_NAME} ALL DEPENDS ${_cs_target})
+    ADD_CUSTOM_TARGET (${TARGET_NAME} ALL DEPENDS ${_cs_target} SOURCES ${_cs_SOURCES})
 
     #we need to write a dll map file for linux distros that split stuff into a -dev package
     if (UNIX AND _cs_DLL_IMPORTS)

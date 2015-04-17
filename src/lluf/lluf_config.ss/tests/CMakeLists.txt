@@ -23,6 +23,11 @@ ADD_TEST(NAME ConfigReader_ConfigReaderImpl COMMAND ConfigReaderImpl_test ${CMAK
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/AnotherOverride)
 
-ADD_TEST(NAME ConfigReader_ConfigHelper COMMAND ConfigHelper_test)
-SET_SAFIR_TEST_PROPERTIES(TEST ConfigReader_ConfigHelper
+ADD_TEST(NAME ConfigReader_ConfigHelper_Inst_0 COMMAND ConfigHelper_test)
+SET_SAFIR_TEST_PROPERTIES(TEST ConfigReader_ConfigHelper_Inst_0
   CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/testconf/config_helper/)
+
+ADD_TEST(NAME ConfigReader_ConfigHelper_Inst_1 COMMAND ConfigHelper_test)
+SET_SAFIR_TEST_PROPERTIES(TEST ConfigReader_ConfigHelper_Inst_1
+  CONFIG_OVERRIDE ${CMAKE_CURRENT_SOURCE_DIR}/testconf/config_helper/
+  ENVIRONMENT SAFIR_INSTANCE=1)

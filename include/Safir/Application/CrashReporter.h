@@ -47,7 +47,7 @@ namespace Application
          * and CrashReporter::Stop functions to be called automatically, even in case of exceptions.
          */
         static void Start();
-        
+
         /**
          * Stop crash reporting
          *

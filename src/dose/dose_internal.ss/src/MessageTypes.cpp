@@ -35,7 +35,6 @@ namespace Dob
 namespace Internal
 {
     MessageTypes* MessageTypes::m_instance = NULL;
-    AtomicUint32 MessageTypes::m_isInitialized(0);
 
     MessageTypes& MessageTypes::Instance()
     {
@@ -75,13 +74,6 @@ namespace Internal
                 }
             }
         }
-
-        m_isInitialized = 1;
-    }
-
-    bool MessageTypes::IsInitialized()
-    {
-        return m_isInitialized != 0;
     }
 
     void MessageTypes::Subscribe(const ConnectionPtr&              connection,

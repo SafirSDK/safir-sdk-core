@@ -37,10 +37,10 @@ namespace Dob
 {
 namespace Internal
 {
-    ServiceType::ServiceType(const Typesystem::TypeId typeId)
+    ServiceType::ServiceType(const Typesystem::TypeId typeId, const int64_t nodeId)
         : m_typeId(typeId),
           m_typeIsContextShared(ContextSharedTable::Instance().IsContextShared(typeId)),
-          m_handlerRegistrations(Safir::Dob::NodeParameters::NumberOfContexts(), typeId),
+          m_handlerRegistrations(Safir::Dob::NodeParameters::NumberOfContexts(), typeId, nodeId),
           m_typeLocks(Safir::Dob::NodeParameters::NumberOfContexts())
     {
     }

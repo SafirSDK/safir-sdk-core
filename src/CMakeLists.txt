@@ -376,6 +376,18 @@ if(PYTHON_VERSION_STRING VERSION_LESS "2.7")
   message(FATAL_ERROR "Need Python version 2.7 or greater. Sorry.")
 endif()
 
+#
+# Set up Protobuf
+#
+if (WIN32)
+  #Try to make Safir able to find Protobuf on windows
+  if (NOT "$ENV{PROTOBUF_DIR}" STREQUAL "")
+    set (PROTOBUF_SRC_ROOT_FOLDER $ENV{PROTOBUF_DIR})
+  endif()
+endif()
+
+FIND_PACKAGE(Protobuf REQUIRED)
+INCLUDE_DIRECTORIES(${PROTOBUF_INCLUDE_DIRS})
 
 #
 # At last, we're ready to add our subdirectories.
@@ -384,8 +396,10 @@ endif()
 add_subdirectory(patch_check)
 add_subdirectory(lluf)
 add_subdirectory(logging)
+add_subdirectory(distribution)
 add_subdirectory(dots)
 add_subdirectory(safir_dou)
+add_subdirectory(control)
 add_subdirectory(dose)
 add_subdirectory(douf)
 add_subdirectory(swre)

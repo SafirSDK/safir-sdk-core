@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2004-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Joel Ottosson / joot
 *
@@ -22,9 +23,21 @@
 *
 ******************************************************************************/
 #include <iostream>
+#include <Safir/Utilities/Internal/ConfigReader.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include "dots_repository_keeper.h"
+
+namespace //anonymous namespace for internal stuff
+{
+    const std::string shmName("SAFIR_TYPESYSTEM_DATA" +
+                              Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix());
+    const char* DOTS_SHM_NAME = shmName.c_str();
+
+    const std::string repName("SAFIR_DOTS_REPOSITORY" +
+                              Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix());
+    const char* DOTS_REPOSITORY_NAME = repName.c_str();
+}
 
 namespace Safir
 {
@@ -34,8 +47,6 @@ namespace Typesystem
 {
 namespace Internal
 {
-    static const char* DOTS_SHM_NAME = "DOB_TYPESYSTEM_DATA";
-    static const char* DOTS_REPOSITORY_NAME = "DOTS_REPOSITORY";
 
     RepositoryKeeper& RepositoryKeeper::Instance()
     {
@@ -84,7 +95,7 @@ namespace Internal
     }
 
     RepositoryKeeper::RepositoryKeeper()
-        :m_startupSynchronizer("DOTS_INITIALIZATION")
+        :m_startupSynchronizer("SAFIR_DOTS_INITIALIZATION")
         ,m_sharedMemorySize(0)
         ,m_paths()
         ,m_repositoryCreatedByThisProcess(false)

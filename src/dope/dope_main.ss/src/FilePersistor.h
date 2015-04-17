@@ -21,8 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __DOPE_FILE_PERSISTOR_H__
-#define __DOPE_FILE_PERSISTOR_H__
+#pragma once
 
 #include "PersistenceHandler.h"
 #include <boost/filesystem/path.hpp>
@@ -45,25 +44,15 @@ public:
      */
     explicit FilePersistor(boost::asio::io_service& ioService);
 
-    /**
-     * Destructor
-     */
-    virtual ~FilePersistor();
-
 private:
-    //implementation of pure virtual from Backend
-    virtual void Store(const Safir::Dob::Typesystem::EntityId entityId,
-                       const Safir::Dob::Typesystem::HandlerId handlerId,
-                       Safir::Dob::Typesystem::BinarySerialization & bin,
-                       const bool update);
+    void Store(const Safir::Dob::Typesystem::EntityId& entityId,
+               const Safir::Dob::Typesystem::HandlerId& handlerId,
+               Safir::Dob::Typesystem::BinarySerialization& bin,
+               const bool update) override;
 
-    //implementation of pure virtual from Backend
-    virtual void RestoreAll();
-
-    //implementation of pure virtual from Backend
-    virtual void Remove(const Safir::Dob::EntityProxy & entityProxy);
-    //implementation of pure virtual from Backend
-    virtual void RemoveAll();
+    void RestoreAll() override;
+    void Remove(const Safir::Dob::EntityProxy & entityProxy) override;
+    void RemoveAll() override;
 
     boost::filesystem::path GetFilePath(const EntityIdAndHandlerId& entityAndHandler) const;
 
@@ -77,4 +66,3 @@ private:
     Safir::Application::Tracer m_debug;
 };
 
-#endif

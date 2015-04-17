@@ -25,6 +25,7 @@ CMakeFiles
 *.rsp
 CMakeCache.txt
 Makefile
+compile_commands.json
 generated_code
 .ninja_*
 *.ninja
@@ -34,6 +35,7 @@ stage
 *embed.manifest
 *embed.manifest.res
 *.intermediate.manifest
+*.exe.manifest
 *.ilk
 *.pdb
 *.lib
@@ -50,6 +52,7 @@ x64/
 Debug/
 Release/
 RelWithDebInfo/
+
 
 #CTest / Unit test stuff
 DartConfiguration.tcl
@@ -94,6 +97,11 @@ moc_*.cxx_parameters
 qrc_*.cxx
 *.qrc.depends
 *.cbp
+*.autosave
+
+#protobuf
+*.pb.cc
+*.pb.h
 
 #Misc
 __pycache__
@@ -102,6 +110,7 @@ buildlog.html
 *.bak
 *.pyc
 bin
+*.tmp
 *-build
 build-*
 *.orig

@@ -131,7 +131,7 @@ namespace Internal
 
     void Callbacks::OnCreateRequest(const char* const requestBlob,
                                     const char* const state,
-                                    const long ctrl,
+                                    const DotsC_Int32 ctrl,
                                     const Safir::Dob::Typesystem::Int32 responseId,
                                     void* const consumer,
                                     bool& success)
@@ -154,7 +154,7 @@ namespace Internal
 
     void Callbacks::OnUpdateRequest(const char* const requestBlob,
                                     const char* const state,
-                                    const long ctrl,
+                                    const DotsC_Int32 ctrl,
                                     const Safir::Dob::Typesystem::Int32 responseId,
                                     void* const consumer,
                                     bool& success)
@@ -176,7 +176,7 @@ namespace Internal
     }
 
     void Callbacks::OnDeleteRequest(const char* const state,
-                                    const long ctrl,
+                                    const DotsC_Int32 ctrl,
                                     const Safir::Dob::Typesystem::Int32 responseId,
                                     void* const consumer,
                                     bool& success)
@@ -197,7 +197,7 @@ namespace Internal
 
     void Callbacks::OnServiceRequest(const char* const requestBlob,
                                      const char* const state,
-                                     const long ctrl,
+                                     const DotsC_Int32 ctrl,
                                      const Safir::Dob::Typesystem::Int32 responseId,
                                      void* const consumer,
                                      bool& success)

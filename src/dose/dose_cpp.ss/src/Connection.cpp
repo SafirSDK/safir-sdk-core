@@ -27,6 +27,7 @@
 #include <Safir/Dob/Internal/Interface.h>
 #include <Safir/Dob/Typesystem/LibraryExceptions.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include "Callbacks.h"
 
 namespace Safir
@@ -47,17 +48,11 @@ namespace Dob
     {
         try
         {
-            Close(false);   //no thread check when called from destructor.
+            Close();
         }
         catch (const std::exception & exc)
         {
-            lllout << "Connection::~Connection: Caught exception: " << exc.what() << std::endl;
-            lllout << "Will return as if nothing has happened" << std::endl;
-        }
-        catch (...)
-        {
-            lllout << "Connection::~Connection: Caught ... exception: " << std::endl;
-            lllout << "Will return as if nothing has happened" << std::endl;
+            SEND_SYSTEM_LOG(Alert, << "Connection::~Connection: Caught exception: " << exc.what());
         }
         DoseC_Destructor(m_ctrl);
     }
@@ -114,13 +109,8 @@ namespace Dob
 
     void Connection::Close()
     {
-        Close(true);
-    }
-
-    void Connection::Close(const bool checkThread)
-    {
         bool success;
-        DoseC_Disconnect(m_ctrl, checkThread, success);
+        DoseC_Disconnect(m_ctrl, success);
         if (!success)
         {
             Typesystem::LibraryExceptions::Instance().Throw();

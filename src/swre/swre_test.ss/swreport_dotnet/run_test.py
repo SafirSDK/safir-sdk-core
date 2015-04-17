@@ -47,11 +47,10 @@ o1 = subprocess.check_output(arguments.sender_exe, stderr=subprocess.STDOUT)
 o2 = subprocess.check_output(arguments.sender_exe, stderr=subprocess.STDOUT)
 o3 = subprocess.check_output(arguments.sender_exe, stderr=subprocess.STDOUT)
 
-stdout_output = (o1 + o2 + o3).decode("utf-8").replace("\r","")
+stdout_output = o1 + o2 + o3
 syslog_output = syslog.get_data(1)
 
 #fix unexpected locale
-stdout_output = stdout_output.replace("123,1","123.1")
 syslog_output = syslog_output.replace("123,1","123.1")
 
 def fail(message):
@@ -62,32 +61,35 @@ def fail(message):
     safe_print(syslog_output)
     sys.exit(1)
 
-if stdout_output.count("\n") != 18 or syslog_output.count("\n") != 24:
+if syslog_output.count("\n") != 24:
     fail("lines")
 
-if stdout_output.count(u"CRITICAL: FatalError FatalError|here|Testing SendFatalErrorReport") != 3 or syslog_output.count(u"FatalError FatalError|here|Testing SendFatalErrorReport") != 3:
+if syslog_output.count(u"FatalError FatalError|here|Testing SendFatalErrorReport") != 3:
     fail("SendFatalErrorReport")
 
-if stdout_output.count(u"ERROR: Error Error|there|Testing SendErrorReport") != 3 or syslog_output.count(u"Error Error|there|Testing SendErrorReport") != 3:
+if syslog_output.count(u"Error Error|there|Testing SendErrorReport") != 3:
     fail("SendErrorReport")
 
-if stdout_output.count(u"SendResourceReport") != 3 or syslog_output.count(u"SendResourceReport") != 6:
+if syslog_output.count(u"SendResourceReport") != 6:
     fail("SendResourceReport")
 
-if stdout_output.count(u"Resource ResourceReport is allocated") != 0 or syslog_output.count(u"Resource ResourceReport is allocated") != 3:
+if syslog_output.count(u"Resource ResourceReport is allocated") != 3:
     fail("Resource ResourceReport is allocated")
 
-if stdout_output.count(u"Resource ResourceReport is not allocated") != 3 or syslog_output.count(u"Resource ResourceReport is not allocated") != 3:
+if syslog_output.count(u"Resource ResourceReport is not allocated") != 3:
     fail("Resource ResourceReport is not allocated")
 
-if stdout_output.count(u"CRITICAL: ProgrammingError ProgrammingError|everywhere|Testing SendProgrammingErrorReport") != 3 or syslog_output.count(u"ProgrammingError ProgrammingError|everywhere|Testing SendProgrammingErrorReport") != 3:
+if syslog_output.count(u"ProgrammingError ProgrammingError|everywhere|Testing SendProgrammingErrorReport") != 3:
     fail("SendProgrammingErrorReport")
 
-if stdout_output.count(u"SendProgramInfoReport") != 0 or syslog_output.count(u"SendProgramInfoReport") != 3:
+if syslog_output.count(u"SendProgramInfoReport") != 3:
     fail("SendProgramInfoReport")
 
-if stdout_output.count(u"brynanuppafj@ssasponken|Don't know@|Testing\nfunny characters") != 3 or syslog_output.count(u"brynanuppafjässasponken|Don't know\u203d|Testing funny characters") != 3:
+if syslog_output.count(u"brynanuppafjässasponken|Don't know\u203d|Testing funny characters") != 3:
     fail("brynanuppa")
-    
+
+if len(stdout_output) != 0:
+    fail("Unexpected output on stdout")
+
 print("success")
 sys.exit(0)

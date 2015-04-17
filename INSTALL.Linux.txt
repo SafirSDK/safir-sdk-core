@@ -24,8 +24,8 @@ The instructions can be adapted to other versions as well, but these are the one
 First of all there are a number of packages that you need to have installed on your system to be able to build all the parts of Safir SDK Core.
 
 1.1. Ubuntu
-To install these from the command line "in one go" on distributions based on Ubuntu 13.10 or 14.04, run:
-   sudo apt-get install qt5-default mono-devel unixodbc-dev cmake g++ default-jdk doxygen graphviz make python-tk autoconf build-essential subversion gnat libboost-all-dev asciidoc xsltproc
+To install these from the command line "in one go" on distributions based on Ubuntu 14.04, run:
+   sudo apt-get install qt5-default mono-devel unixodbc-dev cmake g++ default-jdk doxygen graphviz make python-tk autoconf build-essential subversion gnat libboost-all-dev protobuf-compiler libprotobuf-dev asciidoc xsltproc
 
 1.2. Centos/RHEL
 Safir SDK Core is only compatible with 7.0 or later of Centos/RHEL (unless you install a custom Boost of version 1.50 or later).
@@ -34,7 +34,8 @@ Safir SDK Core is only compatible with 7.0 or later of Centos/RHEL (unless you i
 Mono, the C#/.Net environment for Linux is not part of the default repositories, so you need to add EPEL to your list of repositories. Follow the instructions on http://fedoraproject.org/wiki/EPEL.
 
 1.2.2. Install packages
-sudo yum install cmake boost-devel gcc-c++ doxygen graphviz make gcc-gnat libgnat-static tkinter java-1.7.0-openjdk-devel qt-devel libiodbc-devel m4 autoconf subversion mono-devel
+Run the following command to install all the needed packages:
+   sudo yum install cmake boost-devel gcc-c++ doxygen graphviz make gcc-gnat libgnat-static tkinter java-1.7.0-openjdk-devel qt-devel libiodbc-devel m4 autoconf subversion mono-devel protobuf-lite-devel libatomic
 
 1.2.3. Set up Mono binfmt_misc
 You will need to perform this step to be able to run C# executables directly, like "program.exe" instead of "mono program.exe". If you do not do this the build script will indicate a number of failed tests.
@@ -93,10 +94,11 @@ If you run into trouble building VehicleMmiCppQt you may need to install Qt4 ("l
 If you have built the SDK on one machine and just want to run it on another without installing all the development tools you need to install some libraries and runtimes to get it to run.
 
 5.1 Ubuntu
-Run "sudo apt-get install "libboost-.*1.54.0$" libgnat-4.6 default-jre-headless libmono-corlib2.0-cil libmono-system2.0-cil libodbc1"
+Run "sudo apt-get install "libboost-.*1.54.0$" libgnat-4.6 default-jre-headless libmono-corlib2.0-cil libmono-system2.0-cil libprotobuf-lite8 libodbc1"
 
 5.2 Centos/RHEL
 Add the EPEL repository, as outlined above.
-Run "sudo yum install boost mono-core mono-winforms libgnat"
+Run "sudo yum install boost mono-core mono-winforms libgnat protobuf-lite"
 
 Set up the Mono binfmt_misc, as outlined above.
+

@@ -101,17 +101,12 @@ private:
 #endif
           m_nativeLogging(false),
           m_sendToSyslogServer(false),
+          m_includeSafirInstance(false),
           m_syslogServerEndpoint(),
           m_service(),
           m_sock(m_service),
           m_lock()
     {
-        //this will allow wcout to coexist with cout and with printf/wprintf
-        //which appears to be needed for java and dotnet.
-        std::ios_base::sync_with_stdio(false);
-
-        try
-        {
             boost::algorithm::replace_last(m_processName, ".exe", "");
 
             Safir::Utilities::Internal::ConfigReader configReader;
@@ -119,6 +114,7 @@ private:
             m_nativeLogging = configReader.Logging().get<bool>("SystemLog.native_logging");
             m_sendToSyslogServer = configReader.Logging().get<bool>("SystemLog.send_to_syslog_server");
             m_replaceNewlines = configReader.Logging().get<bool>("SystemLog.replace_newline_with_space");
+            m_includeSafirInstance = configReader.Logging().get<bool>("SystemLog.show_safir_instance");
 
             if (m_nativeLogging)
             {
@@ -142,13 +138,6 @@ private:
                                 (configReader.Logging().get<std::string>("SystemLog.syslog_server_address")),
                                  configReader.Logging().get<unsigned short>("SystemLog.syslog_server_port"));
             }
-
-        }
-        catch (const std::exception& e)
-        {
-            // Something really bad has happened, we have to stop executing
-            FatalError(ToUtf16(e.what()));
-        }
     }
 
 public:
@@ -163,7 +152,18 @@ public:
     void Send(const Severity severity,
               const std::wstring& text)
     {
-        std::wstring textAscii = text;
+        std::wstring logText;
+        if (m_includeSafirInstance)
+        {
+            logText = L"(" + boost::lexical_cast<std::wstring>(
+                          Safir::Utilities::Internal::Expansion::GetSafirInstance()) + L") " + text;
+        }
+        else
+        {
+            logText = text;
+        }
+
+        std::wstring textAscii = logText;
         //replace non-ascii chars
         for(std::wstring::iterator it = textAscii.begin();
             it != textAscii.end(); ++it)
@@ -176,58 +176,68 @@ public:
 
         switch (severity)
         {
-            // fatal errors are written to std::wcerr
+            // fatal errors are written to lll
             case Emergency:
             {
-                std::wcerr << L"EMERGENCY: " << textAscii << std::endl;
-                lllog(0) << L"EMERGENCY: " << textAscii << std::endl;
+                lllog(1) << L"EMERGENCY: " << textAscii << std::endl;
             }
             break;
 
             case Alert:
             {
-                std::wcerr << L"ALERT: " << textAscii << std::endl;
-                lllog(0) << L"ALERT: " << textAscii << std::endl;
+                lllog(1) << L"ALERT: " << textAscii << std::endl;
             }
             break;
 
             case Critical:
             {
-                std::wcerr << L"CRITICAL: " << textAscii << std::endl;
-                lllog(0) << L"CRITICAL: " << textAscii << std::endl;
+                lllog(1) << L"CRITICAL: " << textAscii << std::endl;
             }
             break;
 
             case Error:
             {
-                std::wcerr << L"ERROR: " << textAscii << std::endl;
-                lllog(0) << L"ERROR: " << textAscii << std::endl;
+                lllog(1) << L"ERROR: " << textAscii << std::endl;
             }
             break;
 
             case Warning:
+            {
+                lllog(1) << L"WARNING: " << textAscii << std::endl;
+            }
+            break;
+
             case Notice:
+            {
+                lllog(1) << L"NOTICE: " << textAscii << std::endl;
+            }
+            break;
+
             case Informational:
+            {
+                lllog(1) << L"INFORMATIONAL: " << textAscii << std::endl;
+            }
+            break;
+
             case Debug:
             {
-                // No output to std::wcerr/lllog in these cases.
-                ;
+                lllog(1) << L"DEBUG: " << textAscii << std::endl;
             }
             break;
 
             default:
-                FatalError(L"SystemLogImpl::SendNativeLog: Unknown severity!");
+                throw std::logic_error("SystemLogImpl::SendNativeLog: Unknown severity!");
         }
 
         if (m_nativeLogging)
         {
-            SendNativeLog(severity, ReplaceNewlines(text));
+            SendNativeLog(severity, ReplaceNewlines(logText));
         }
 
         if (m_sendToSyslogServer)
         {
             // Utf-8 is used when sending to a syslog server
-            SendToSyslogServer(severity, ToUtf8(ReplaceNewlines(text)));
+            SendToSyslogServer(severity, ToUtf8(ReplaceNewlines(logText)));
         }
     }
 
@@ -270,7 +280,7 @@ private:
             break;
 
             default:
-                FatalError(L"LogImpl::SendNativeLog: Unknown severity!");
+                throw std::logic_error("LogImpl::SendNativeLog: Unknown severity!");
         }
 
         boost::lock_guard<boost::mutex> lck(m_lock);
@@ -331,20 +341,12 @@ private:
                  it != text.end(); ++it)
             {
                 if (*it == '\n' || *it == '\r') //may produce two spaces on CRLF, but that
-                {                               //would only happen if the error message is 
+                {                               //would only happen if the error message is
                     *it = ' ';                  //read from a file with CRLF line endings.
                 }
             }
             return text;
         }
-    }
-
-    //-------------------------------------------------------------------------
-    void FatalError(const std::wstring& errTxt)
-    {
-        SendNativeLog(Critical, errTxt);
-        std::wcerr << errTxt << std::endl;
-        throw std::logic_error(ToUtf8(errTxt));
     }
 
 #ifdef _MSC_VER
@@ -361,7 +363,8 @@ private:
 
     bool                            m_nativeLogging;
     bool                            m_sendToSyslogServer;
-    bool                            m_replaceNewlines;    
+    bool                            m_replaceNewlines;
+    bool                            m_includeSafirInstance;
     boost::asio::ip::udp::endpoint  m_syslogServerEndpoint;
     boost::asio::io_service         m_service;
     boost::asio::ip::udp::socket    m_sock;
@@ -379,12 +382,12 @@ public:
     static SystemLogImplKeeper& Instance()
     {
         boost::call_once(SingletonHelper::m_onceFlag,boost::bind(SingletonHelper::Instance));
-        
+
         if (destroyed)
         {
             throw std::runtime_error("Dead reference detected for singleton SystemLogImplKeeper");
         }
-            
+
         return SingletonHelper::Instance();
     }
 
@@ -398,7 +401,7 @@ public:
         }
         return m_impl;
     }
-    
+
     void Reset()
     {
         boost::lock_guard<boost::mutex> lck(m_lock);
@@ -420,7 +423,7 @@ private:
 
     boost::shared_ptr<SystemLogImpl> m_impl;
     boost::mutex                     m_lock;
-    
+
     static bool                      destroyed;
 
     /**
@@ -448,17 +451,19 @@ private:
 boost::once_flag SystemLogImplKeeper::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
 bool SystemLogImplKeeper::destroyed = false;
 
-void Open()
+void TrySendNativeLog(const std::string& errTxt)
 {
     try
     {
-        SystemLogImplKeeper::Instance().Get();
+#if defined(linux) || defined(__linux) || defined(__linux__)
+        syslog(SAFIR_FACILITY | Critical, "%s", errTxt.c_str());
+#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+        WindowsLogger(L"Unknown process").Send(EVENTLOG_ERROR_TYPE, ToUtf16(errTxt));
+#endif
     }
-    catch (const std::runtime_error&)
+    catch (...)
     {
-        // The singleton has been destroyed, most likely because Open is called from
-        // another singleton's destructor.
-        // We don't do anything in this case.
+        // Nothing we can do here
     }
 }
 
@@ -478,19 +483,19 @@ void Send(const Severity severity, const std::wstring& text)
         SystemLogImpl log;
         log.Send(severity, text);
     }
-}
-
-void Close()
-{
-    try
+    catch (const std::exception& e)
     {
-        SystemLogImplKeeper::Instance().Reset();
+        // If it is not possible to send a log we try to send a native log and
+        // then just terminate the program.
+        TrySendNativeLog(e.what());
+        exit(56);
     }
-    catch (const std::runtime_error&)
+    catch (...)
     {
-        // The singleton has been destroyed, most likely because Close is called from
-        // another singleton's destructor.
-        // We don't do anything in this case.
+        // Something really bad happened. We have no information about what it is, just
+        // terminate the program.
+        TrySendNativeLog("Caught some really weird exception when trying to send a system log.");
+        exit(57);
     }
 }
 
@@ -498,4 +503,3 @@ void Close()
 }
 }
 }
-

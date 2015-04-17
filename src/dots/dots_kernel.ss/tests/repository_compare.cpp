@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2004-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Joel Ottosson / joot
 *
@@ -8,6 +9,7 @@
 #include <iostream>
 #include <algorithm>
 #include <set>
+#include <Safir/Utilities/Internal/ConfigReader.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Serialization.h>
 #include "../src/dots_shm_repository.h"
 
@@ -33,23 +35,31 @@ int main(int argc, char* argv[])
     }
     Safir::Dob::Typesystem::ToolSupport::RepositoryToString(local.get(), false, lom);
 
-    boost::interprocess::shared_memory_object::remove("DOTS_SHM_TEST");
-    boost::interprocess::managed_shared_memory sharedMemory(boost::interprocess::create_only, "DOTS_SHM_TEST", 5000000);
-    Safir::Dob::Typesystem::Internal::RepositoryShm::CreateShmCopyOfRepository(*local, "DOTS_TEST_REPO", sharedMemory);
-    Safir::Dob::Typesystem::Internal::RepositoryShm* shm=sharedMemory.find<Safir::Dob::Typesystem::Internal::RepositoryShm>("DOTS_TEST_REPO").first;
+    const std::string dotsShmTest("SAFIR_DOTS_SHM_TEST" + Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix());
+    const std::string dotsTestRepo("SAFIR_DOTS_TEST_REPO" + Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix());
+
+    boost::interprocess::shared_memory_object::remove(dotsShmTest.c_str());
+    boost::interprocess::managed_shared_memory sharedMemory(boost::interprocess::create_only, dotsShmTest.c_str(), 5000000);
+    Safir::Dob::Typesystem::Internal::RepositoryShm::CreateShmCopyOfRepository(*local, dotsTestRepo.c_str(), sharedMemory);
+    Safir::Dob::Typesystem::Internal::RepositoryShm* shm=sharedMemory.find<Safir::Dob::Typesystem::Internal::RepositoryShm>(dotsTestRepo.c_str()).first;
 
     std::ostringstream som;
     Safir::Dob::Typesystem::ToolSupport::RepositoryToString(shm, false, som);
 
+    std::string sharedString=som.str();
+    std::string localString=lom.str();
 
-    if (som.str()!=lom.str())
+    if (sharedString!=localString)
     {
-        std::wcout<<"=====LOCAL====="<<std::endl;
-        std::wcout<<lom.str().c_str()<<std::endl;
-        std::wcout<<"=====SHM====="<<std::endl;
-        std::wcout<<som.str().c_str()<<std::endl;
-        std::wcout<<"Local repository and shared repository differ!"<<std::endl;
+        std::cout<<"Local repository and shared repository differ!"<<std::endl;
+        std::cout<<"Shared size: "<<sharedString.size()<<", local size: "<<localString.size()<<std::endl;
 
+        std::cout<<"=====LOCAL====="<<std::endl;
+        std::cout<<localString<<std::endl;
+        std::cout<<"=====SHM====="<<std::endl;
+        std::cout<<sharedString<<std::endl;
+
+        std::cout<<"Local repository and shared repository differ!"<<std::endl;
         return 1;
     }
     else

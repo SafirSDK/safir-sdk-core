@@ -23,7 +23,7 @@
 ******************************************************************************/
 #include <boost/noncopyable.hpp>
 #include <Safir/Dob/Connection.h>
-#include <Safir/Dob/Internal/Atomic.h>
+#include <Safir/Utilities/Internal/Atomic.h>
 #include "requestor.h"
 #include "handler.h"
 

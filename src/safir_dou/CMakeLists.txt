@@ -16,7 +16,6 @@ ADD_SAFIR_GENERATED_LIBRARY(NAME Core
   DOU_FILES
 
   "${CMAKE_CURRENT_SOURCE_DIR}/config/Safir.Dob.PersistenceParameters.dou"
-  config/Safir.Dob.DistributionChannelParameters.dou
   config/Safir.Dob.NodeParameters.dou
   config/Safir.Dob.QueueParameters.dou
   config/Safir.Dob.ThisNodeParameters.dou
@@ -27,17 +26,15 @@ ADD_SAFIR_GENERATED_LIBRARY(NAME Core
   data/Safir.Databases.Odbc.RetryException.dou
   data/Safir.Databases.Odbc.TimeoutException.dou
   data/Safir.Dob.AccessDeniedException.dou
-  data/Safir.Dob.Alias.dou
   data/Safir.Dob.CallbackId.dou
   data/Safir.Dob.ConnectionInfo.dou
   data/Safir.Dob.ConnectionQueueId.dou
   data/Safir.Dob.ContextSharedOverrideProperty.dou
   data/Safir.Dob.ContextSharedProperty.dou
   data/Safir.Dob.CreateRoutineParameters.dou
-  data/Safir.Dob.DistributionChannelAliases.dou
-  data/Safir.Dob.DistributionChannel.dou
-  data/Safir.Dob.DistributionChannelOverrideProperty.dou
-  data/Safir.Dob.DistributionChannelProperty.dou
+  data/Safir.Dob.DistributionScope.dou
+  data/Safir.Dob.DistributionScopeProperty.dou
+  data/Safir.Dob.DistributionScopeOverrideProperty.dou
   data/Safir.Dob.Entity.dou
   data/Safir.Dob.EntityIdResponse.dou
   data/Safir.Dob.ErrorListResponse.dou
@@ -51,7 +48,7 @@ ADD_SAFIR_GENERATED_LIBRARY(NAME Core
   data/Safir.Dob.Message.dou
   data/Safir.Dob.NodeDefinition.dou
   data/Safir.Dob.NodeInfo.dou
-  data/Safir.Dob.NodeStatus.dou
+  data/Safir.Dob.NodeType.dou
   data/Safir.Dob.NotFoundException.dou
   data/Safir.Dob.NotOpenException.dou
   data/Safir.Dob.OverflowException.dou
@@ -60,11 +57,6 @@ ADD_SAFIR_GENERATED_LIBRARY(NAME Core
   data/Safir.Dob.PersistentDataReady.dou
   data/Safir.Dob.PersistentDataState.dou
   data/Safir.Dob.PersistentDataStatus.dou
-  data/Safir.Dob.PriorityAliasParameters.dou
-  data/Safir.Dob.Priority.dou
-  data/Safir.Dob.PriorityOverrideProperty.dou
-  data/Safir.Dob.PriorityParameters.dou
-  data/Safir.Dob.PriorityProperty.dou
   data/Safir.Dob.ProcessInfo.dou
   data/Safir.Dob.QueueRule.dou
   data/Safir.Dob.RequestTimeoutOverrideProperty.dou
@@ -89,15 +81,12 @@ ADD_SAFIR_GENERATED_LIBRARY(NAME Core
   config/Safir.Utilities.ForEach.DeleteAllRequest-Safir.Dob.RequestTimeoutProperty.dom
   config/Safir.Utilities.ForEach.DeleteRequest-Safir.Dob.RequestTimeoutProperty.dom
   config/Safir.Utilities.ForEach.UpdateRequest-Safir.Dob.RequestTimeoutProperty.dom
-  data/Object-Safir.Dob.DistributionChannelProperty.dom
-  data/Object-Safir.Dob.PriorityProperty.dom
   data/Safir.Application.BackdoorCommand-Safir.Dob.ContextSharedProperty.dom
-  data/Safir.Dob.NodeInfo-Safir.Dob.DistributionChannelProperty.dom
-  data/Safir.Dob.PersistentDataReady-Safir.Dob.DistributionChannelProperty.dom
-  data/Safir.Dob.ProcessInfo-Safir.Dob.DistributionChannelProperty.dom
-  data/Safir.Utilities.ForEach.DeleteAllRequest-Safir.Dob.DistributionChannelProperty.dom
-  data/Safir.Utilities.ForEach.DeleteRequest-Safir.Dob.DistributionChannelProperty.dom
-  data/Safir.Utilities.ForEach.UpdateRequest-Safir.Dob.DistributionChannelProperty.dom
+  data/Safir.Dob.PersistentDataReady-Safir.Dob.DistributionScopeProperty.dom
+  data/Safir.Dob.ProcessInfo-Safir.Dob.DistributionScopeProperty.dom
+  data/Safir.Utilities.ForEach.DeleteAllRequest-Safir.Dob.DistributionScopeProperty.dom
+  data/Safir.Utilities.ForEach.DeleteRequest-Safir.Dob.DistributionScopeProperty.dom
+  data/Safir.Utilities.ForEach.UpdateRequest-Safir.Dob.DistributionScopeProperty.dom
 
   NAMESPACE_MAPPINGS
 

@@ -28,11 +28,11 @@
 #include "About.h"
 #include "memgraph.h"
 #include "entitystats.h"
-#include "nodestatus.h"
-#include "dosecominfo.h"
 #include "connectionstats.h"
-#include "loggingsettings.h"
+#include "SystemPicturePage.h"
 #include "numberofentities.h"
+#include "RawStatisticsPage.h"
+#include <Safir/Dob/Internal/Initialize.h>
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Typesystem/Utilities.h>
 #include <Safir/Dob/Entity.h>
@@ -61,26 +61,21 @@ DoseMon::DoseMon(QWidget * /*parent*/)
 {
     setupUi(this); // this sets up GUI
 
-    //    treeWidget->setSortingEnabled(true);
-    //treeWidget->sortByColumn(0,Qt::AscendingOrder);
+    Safir::Dob::Internal::InitializeDoseInternalFromApp();
 
     while (tabWidget->currentIndex() != -1)
     {
         tabWidget->removeTab(tabWidget->currentIndex());
     }
 
-    QPushButton * closeButton = new QPushButton("X");
-    tabWidget->setCornerWidget(closeButton);
-    //int newTab = tabWidget->addTab(new MemGraph(this),"Memory");
-    //tabWidget->setTabToolTip(newTab,tabWidget->widget(newTab)->toolTip());
-    
+    tabWidget->setTabsClosable(true);
+    connect(tabWidget,
+            SIGNAL(tabCloseRequested(int)),
+            this,
+            SLOT(CloseTab(int)));
+
     int newTab = tabWidget->addTab(new About(this),"About");
     tabWidget->setTabToolTip(newTab,tabWidget->widget(newTab)->toolTip());
-
-    connect(closeButton,
-            SIGNAL(clicked()),
-            this,
-            SLOT(CloseCurrentTab()));
 
     connect(treeWidget,
             SIGNAL(itemActivated(QTreeWidgetItem*,int)),
@@ -93,6 +88,29 @@ DoseMon::DoseMon(QWidget * /*parent*/)
 
     AddEntitesToTreeWidget();
 }
+
+
+void DoseMon::closeEvent(QCloseEvent* event)
+{
+    while (tabWidget->count() != 0)
+    {
+        QWidget* w = tabWidget->widget(0);
+        QCloseEvent evt;
+        QCoreApplication::sendEvent(w,&evt);
+        if (evt.isAccepted())
+        {
+            tabWidget->removeTab(0);
+            delete w;
+        }
+        else
+        {
+            event->ignore();
+            return;
+        }
+    }
+    event->accept();
+}
+
 
 bool DoseMon::ActivateTab(const QString& name)
 {
@@ -125,20 +143,13 @@ void DoseMon::TreeItemActivated ( QTreeWidgetItem * item, int /*column*/ )
         newTab = tabWidget->addTab(new MemGraph(this),"Memory");
         tabWidget->setTabToolTip(newTab,tabWidget->widget(newTab)->toolTip());
     }
-    else if (item->text(0) == "Logging settings")
+    else if (item->text(0) == "Raw Node Statistics")
     {
-        newTab = tabWidget->addTab(new LoggingSettings(this),"Logging settings");
-        tabWidget->setTabToolTip(newTab,tabWidget->widget(newTab)->toolTip());
+        newTab = tabWidget->addTab(new RawStatisticsPage(this),"Raw Node Statistics");
     }
-    else if (item->text(0) == "Node Statuses")
+    else if (item->text(0) == "System Picture")
     {
-        newTab = tabWidget->addTab(new NodeStatus(this),"Node Statuses");
-        tabWidget->setTabToolTip(newTab,tabWidget->widget(newTab)->toolTip());
-    }
-    else if (item->text(0) == "DoseCom Info")
-    {
-        newTab = tabWidget->addTab(new DoseComInfo(this),"DoseCom Info");
-        tabWidget->setTabToolTip(newTab,tabWidget->widget(newTab)->toolTip());
+        newTab = tabWidget->addTab(new SystemPicturePage(this),"System Picture");
     }
     else if (item->text(0) == "Entity Statistics")
     {
@@ -174,11 +185,16 @@ void DoseMon::TreeItemActivated ( QTreeWidgetItem * item, int /*column*/ )
 }
 
 
-void DoseMon::CloseCurrentTab()
+void DoseMon::CloseTab(int index)
 {
-    QWidget * currentTab = tabWidget->currentWidget();
-    tabWidget->removeTab(tabWidget->currentIndex());
-    delete currentTab;
+    QWidget * widget = tabWidget->widget(index);
+    QCloseEvent event;
+    QCoreApplication::sendEvent(widget,&event);
+    if (event.isAccepted())
+    {
+        tabWidget->removeTab(index);
+        delete widget;
+    }
 }
 
 
@@ -346,3 +362,4 @@ void DoseMon::UpdateTreeWidget()
     connectionItem->sortChildren(0, Qt::AscendingOrder);
     remoteConnectionItem->sortChildren(0, Qt::AscendingOrder);
 }
+

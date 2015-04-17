@@ -31,6 +31,7 @@
 #include <boost/thread/recursive_mutex.hpp>
 #include <boost/mem_fn.hpp>
 #include <ostream>
+#include <boost/static_assert.hpp>
 
 /**
   * This is a utility for logging to file that is _only_ intended for
@@ -44,7 +45,8 @@
   * Level is a value between 1 and 9 (no checks are made for this, but any other
   * values may cause unexpected behavior).
   */
-#define lllog(level) if (Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().LogLevel() < level) ; \
+#define lllog(level) if (Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().LogLevel() < level) \
+                         BOOST_STATIC_ASSERT(level > 0 && level <= 9); \
                      else if(Safir::Utilities::Internal::Internal::LowLevelLogger::Magic lck_fjki34 =           \
                              Safir::Utilities::Internal::Internal::LowLevelLogger::Instance().MagicLock()) ;    \
                      else Safir::Utilities::Internal::Internal::LowLevelLogger::Instance()
@@ -73,14 +75,7 @@ namespace Internal
 
             inline int LogLevel() const
             {
-                if (m_pLogLevel == NULL)
-                {
-                    return 0;
-                }
-                else
-                {
-                    return *m_pLogLevel;
-                }
+                return *m_pLogLevel;
             }
 
             //This is a magic unlocker that has the strange behaviour of having a bool
@@ -132,13 +127,14 @@ namespace Internal
             };
 
             class Impl;
-            class LoggingImpl;
-            class FallbackImpl;
             boost::shared_ptr<Impl> m_impl;
 
             const int* m_pLogLevel;
 
             //this lock needs to be taken before logging to the logger!
+            //it needs to be recursive. For example:
+            /// lllog << GetFoo() << std::endl;
+            /// and GetFoo also uses lllog.
             boost::recursive_mutex m_lock;
 
         };

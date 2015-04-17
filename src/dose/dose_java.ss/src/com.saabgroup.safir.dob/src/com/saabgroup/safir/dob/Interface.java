@@ -66,7 +66,6 @@ final class Interface {
 
     //dose_java_jni Disconnect
     static native void Disconnect(int ctrl,
-                                  boolean checkThread,
                                   boolean [] success);
 
 
@@ -461,4 +460,7 @@ final class Interface {
                                   int[] context,
                                   boolean[] success);
 
+    //dose_java_jni GetNodeId
+    static native void GetNodeId(long[] nodeId,
+                                 boolean[] success);
 }

@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -23,7 +24,6 @@
 ******************************************************************************/
 
 #include "Signals.h"
-#include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <iostream>
@@ -44,7 +44,7 @@ namespace
 {
     const std::string GetSemaphoreName(const Safir::Dob::Internal::ConnectionId& connection)
     {
-        return std::string("dose") + boost::lexical_cast<std::string>(connection.m_id);
+        return std::string("SAFIR_CONNECTION_") + boost::lexical_cast<std::string>(connection.m_id);
     }
 }
 
@@ -54,7 +54,7 @@ namespace Dob
 {
 namespace Internal
 {
-    const char * ConnectOrOutSignalName = "DOSE_CONN_OR_OUT";
+    const char * ConnectOrOutSignalName = "SAFIR_DOSE_CONN_OR_OUT";
 
 
     boost::once_flag Signals::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
@@ -87,8 +87,7 @@ namespace Internal
         m_signalSignals.GetSemaphore(connection)->post();
     }
 
-    Signals::SignalTable::SignalTable():
-        m_nodeNumber(Safir::Dob::ThisNodeParameters::NodeNumber())
+    Signals::SignalTable::SignalTable()
     {
 
     }
@@ -96,9 +95,6 @@ namespace Internal
     const Signals::SemaphorePtr
     Signals::SignalTable::GetSemaphore(const ConnectionId & connection)
     {
-        ENSURE(connection.m_node == m_nodeNumber,
-               << "It is not possible to signal or wait for a connection on other node!!! connId = " << connection);
-
         {
             boost::shared_lock<SignalsLock> guard(m_lock);
 
@@ -108,13 +104,13 @@ namespace Internal
                 return findIt->second;
             }
         }
-        
+
         //Did not find the semaphore, we need to get write access.
 
         //first get an upgrade lock, which is only a read lock, but stops new
         //readers from getting in, so we will never be starved.
         boost::upgrade_lock<SignalsLock> readGuard(m_lock);
-            
+
         //someone else may have gotten in and added the semaphore, so we check.
         Semaphores::iterator findIt = m_semaphores.find(connection.m_id);
         if (findIt != m_semaphores.end())

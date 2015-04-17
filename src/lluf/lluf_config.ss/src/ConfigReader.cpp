@@ -136,6 +136,15 @@ namespace Internal
         return Safir::Utilities::Internal::ExpandSpecial(str);
     }
 
+    unsigned int Expansion::GetSafirInstance()
+    {
+        return Safir::Utilities::Internal::GetSafirInstance();
+    }
+
+    std::string Expansion::GetSafirInstanceSuffix()
+    {
+        return Safir::Utilities::Internal::GetSafirInstanceSuffix();
+    }
 
 
 
@@ -154,27 +163,60 @@ namespace Internal
 
             if (isSection)
             {
-                try
+                const boost::optional<unsigned int> safirInstance =
+                    it->second.get_optional<unsigned int>("safir_instance");
+
+                if (safirInstance)
                 {
-                    directories.push_back(std::make_pair(it->first, it->second.get<std::string>("dou_directory")));
-                }
-                catch (boost::property_tree::ptree_bad_path&)
-                {
-                    bool found = false;
-                    for (std::vector<Path>::const_iterator sit = dou_search_path.begin();
-                         sit != dou_search_path.end(); ++sit)
+                    // This is a section valid only for a particular safir instance
+
+                    const std::string kind = it->second.get<std::string>("kind");
+                    if (kind != "override")
                     {
-                        Path p = *sit / it->first;
-                        if (p.Exists())
-                        {
-                            directories.push_back(std::make_pair(it->first, p.str()));
-                            found = true;
-                        }
+                        throw std::logic_error("Error in typesystem.ini. "
+                                               "A section with key 'safir_instance' must have 'kind' set to 'overrride'");
                     }
 
-                    if (!found)
+                    if (safirInstance.get() != Safir::Utilities::Internal::GetSafirInstance())
                     {
-                        directories.push_back(std::make_pair(it->first, "<not found>"));
+                        continue;  // Not for this instance
+                    }
+
+                    try
+                    {
+                        directories.push_back(std::make_pair(it->first, it->second.get<std::string>("dou_directory")));
+                    }
+                    catch (boost::property_tree::ptree_bad_path&)
+                    {
+                        throw std::logic_error("Error in typesystem.ini. "
+                                               "A section with key 'safir_instance' must also have a key 'dou_directory'");
+                    }
+                }
+                else
+                {
+                    const auto dir = it->second.get_optional<std::string>("dou_directory");
+                    if (dir)
+                    {
+                        directories.push_back(std::make_pair(it->first, dir.get()));
+                    }
+                    else
+                    {
+                        bool found = false;
+                        for (std::vector<Path>::const_iterator sit = dou_search_path.begin();
+                             sit != dou_search_path.end(); ++sit)
+                        {
+                            Path p = *sit / it->first;
+                            if (p.Exists())
+                            {
+                                directories.push_back(std::make_pair(it->first, p.str()));
+                                found = true;
+                            }
+                        }
+
+                        if (!found)
+                        {
+                            directories.push_back(std::make_pair(it->first, "<not found>"));
+                        }
                     }
                 }
             }
@@ -188,6 +230,7 @@ namespace Internal
         GetDouDependenciesInternal(reader,moduleName,deps);
         return deps;
     }
+
 }
 }
 }

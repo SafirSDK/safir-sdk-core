@@ -49,6 +49,8 @@ namespace Internal
         //itself has to be public (limitation of boost::interprocess)
         struct private_constructor_t {};
     public:
+        static void Initialize(const bool iAmDoseMain, const int64_t nodeId);
+
         /**
          * Get the singleton instance.
          * Note that this is not a singleton in the usual sense of the word,
@@ -58,14 +60,12 @@ namespace Internal
 
         //The constructor and destructor have to be public for the boost::interprocess internals to be able to call
         //them, but we can make the constructor "fake-private" by making it require a private type as argument.
-        explicit Connections(private_constructor_t);
+        Connections(private_constructor_t, const int64_t nodeId);
         ~Connections();
 
-        //Remove some underlying os primitives. This needs to be called before
-        //Connections is instantiated in dose_main. This is not really pretty
-        //and should maybe be changed in some Connections class refactoring
-        static void Cleanup();
-
+        /** Get the id of the current node */
+        int64_t NodeId() const {return m_nodeId;}
+        
         /**
          * This is for applications waiting for "things" to happen to its connection.
          * This blocks forever until SignalIn for that connection has been called.
@@ -102,22 +102,15 @@ namespace Internal
         /** For applications to disconnect from the DOB. */
         void Disconnect(const ConnectionPtr & connection);
 
-        class ConnectionConsumer
-        {
-        public:
-            virtual ConnectResult CanAddConnection(const std::string & connectionName, const pid_t pid, const long context) = 0;
-            virtual void HandleConnect(const ConnectionPtr & connection) = 0;
-
-            virtual ~ConnectionConsumer() {}
-        };
-
         /**
          * Handle connects and disconnects.
          * Note that handles either one connect or disconnect per call.
          * It is illegal to call this method when there is noone trying to connect
          * (I.e when the WaitForDoseMainSignal hasnt said that there is a connect waiting)
+         *
+         * The handleConnect function will be called when an application is trying to connect.
          */
-        void HandleConnect(ConnectionConsumer & connectionHandler);
+        void HandleConnect(const std::function<void(const ConnectionPtr& connection)>& handleConnect);
 
         /**
          * This function is used to add connections from within dose_main.
@@ -188,7 +181,7 @@ namespace Internal
         bool IsPendingAccepted(const Typesystem::TypeId typeId, const Typesystem::HandlerId & handlerId, const ContextId contextId) const;
 
         // Removes connection(s) from specified node.
-        void RemoveConnectionFromNode(const NodeNumber node, const boost::function<void(const ConnectionPtr & connection)> & connectionFunc);
+        void RemoveConnectionFromNode(const int64_t node, const boost::function<void(const ConnectionPtr & connection)> & connectionFunc);
 
         //A reader lock on the connection vector will be taken during the looping and the callback!
         void ForEachConnection(const boost::function<void(const Connection & connection)> & connectionFunc) const;
@@ -213,6 +206,7 @@ namespace Internal
                              ConnectResult & result,
                              ConnectionPtr & connection);
 
+        const int64_t m_nodeId;
         const int m_maxNumConnections;
 
         typedef PairContainers<ConnectionId, ConnectionPtr>::map ConnectionTable;
@@ -227,13 +221,13 @@ namespace Internal
         //the reason that this is an int is that assigns of 0 and 1 should be atomic, and
         //that any compiler should have int be the wordsize for that processor.
 
-        boost::interprocess::offset_ptr<AtomicUint32> m_connectionOutSignals;
+        boost::interprocess::offset_ptr<Safir::Utilities::Internal::AtomicUint32> m_connectionOutSignals;
         Containers<ConnectionId>::vector m_connectionOutIds;
         size_t m_lastUsedSlot; //slot that marks the end of the region of used slots. optimization
 
 
         //Signal for when an application is trying to connect
-        AtomicUint32 m_connectSignal;
+        Safir::Utilities::Internal::AtomicUint32 m_connectSignal;
 
         Semaphore m_connectSem;
         Semaphore m_connectMinusOneSem;
@@ -261,20 +255,7 @@ namespace Internal
         bool m_connectMinusOneSemSignalled;
         bool m_connectSemSignalled;
 
-        /**
-         * This class is here to ensure that only the Instance method can get at the
-         * instance, so as to be sure that boost call_once is used correctly.
-         * Also makes it easier to grep for singletons in the code, if all
-         * singletons use the same construction and helper-name.
-         */
-        struct SingletonHelper
-        {
-        private:
-            friend Connections& Connections::Instance();
-
-            static Connections& Instance();
-            static boost::once_flag m_onceFlag;
-        };
+        static Connections* m_instance;
     };
 }
 }

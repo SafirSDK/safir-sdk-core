@@ -21,8 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __DEFS_H__
-#define __DEFS_H__ 
+#pragma once
 
 #include <set>
 #include <Safir/Dob/Typesystem/Defs.h>
@@ -34,11 +33,8 @@ typedef std::set<Safir::Dob::Typesystem::EntityId> EntityIdSet;
 
 
 class StartupError
-    : public std::logic_error 
+    : public std::logic_error
 {
 public:
     StartupError() : std::logic_error("StartupError") {}
 };
-
-#endif
-

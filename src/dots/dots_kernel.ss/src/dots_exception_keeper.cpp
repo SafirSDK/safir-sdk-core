@@ -1,7 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2006-2013 (http://safir.sourceforge.net)
-* 
+*
 * Created by: Lars Hagström / stlrha
 *
 *******************************************************************************
@@ -84,11 +84,10 @@ namespace Internal
         {
             SEND_SYSTEM_LOG(Critical,
                             << "ExceptionKeeper::Set: Trying to set new exception data over old (and uncleared) exception data");
-            
-            lllog(0) << "ExceptionKeeper::Set: Trying to set new exception data over old (and uncleared) exception data\n"
-                     << "Old = (" << exc.exceptionId << ", " << exc.description.c_str() << ")\n"
-                     << "New = (" << exceptionId << ", " << description.c_str() << ")\n"
-                     << "This means that there is something wrong with the exception handling of a library you are using!"<<std::endl;
+            SEND_SYSTEM_LOG(Critical,
+                            << "Old = (" << exc.exceptionId << ", " << exc.description.c_str() << ")");
+            SEND_SYSTEM_LOG(Critical,
+                            << "New = (" << exceptionId << ", " << description.c_str() << ")");
         }
         exc.exceptionId = exceptionId;
         exc.description = description;
@@ -104,9 +103,6 @@ namespace Internal
         {
             SEND_SYSTEM_LOG(Critical,
                             << "ExceptionKeeper::AppendDescription: Called even though there is no exception set!!!");
-            
-            lllog(0) << "ExceptionKeeper::AppendDescription: Called even though there is no exception set!!!\n"
-                     << "This means that there is something wrong with the exception handling of a library you are using!"<< std::endl;
         }
         exc.description.append("\n-------------- More Description -------------\n");
         exc.description.append(moreDescription);
@@ -146,10 +142,7 @@ namespace Internal
         if (!exc.isSet)
         {
             SEND_SYSTEM_LOG(Critical,
-                            << "ExceptionKeeper::Peek: when no exception is set!");
-
-            lllog(0) << "ExceptionKeeper::Peek: Called even though there is no exception set!!!\n"
-                     << "This means that there is something wrong with the exception handling of a library you are using"<< std::endl;
+                            << "ExceptionKeeper::Peek: Called when no exception is set!");
             exceptionId = 0;
             description.clear();
         }
@@ -169,8 +162,6 @@ namespace Internal
         {
             SEND_SYSTEM_LOG(Critical,
                             << "ExceptionKeeper::Clear: Called even though there is no exception set!!!");
-            lllog(0) << "ExceptionKeeper::Clear: Called even though there is no exception set!!!\n"
-                     << "This means that there is something wrong with the exception handling of a library you are using"<< std::endl;
         }
         else
         {

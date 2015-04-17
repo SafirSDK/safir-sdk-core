@@ -86,9 +86,11 @@ class Parameters:
                           help="Automatically start a multinode slave (Server_1) through jenkins." +
                           "This is only applicable when using --multinode, and is implied when using --jenkins")
         parser.add_option("--multinode", action="store_true",dest="multinode",default=False,
-                          help="Run multinode tests instead of standalone tests")
-        parser.add_option("--slave", action="store_true",dest="slave",default=False,
-                          help="Be a multinode slave")
+                          help="Run multinode tests instead of standalone tests. Both nodes are run on this computer.")
+        #parser.add_option("--slave", action="store_true",dest="slave",default=False,
+        #                  help="Be a multinode slave")
+        parser.add_option("--no-syslog", action="store_false",dest="check_syslog",default=True,
+                          help="Do not check syslog output")
         parser.add_option("--no-java", action="store_true",dest="no_java",default=False,
                           help="Do not run java partners")
         parser.add_option("--lang0", action="store",dest="lang0",default="cpp",
@@ -108,19 +110,20 @@ class Parameters:
         self.lang2 = options.lang2
 
         self.multinode = options.multinode
-        self.slave = options.slave
-        self.standalone = not options.multinode and not options.slave
+        #self.slave = options.slave
+        self.check_syslog = options.check_syslog
+        self.standalone = not options.multinode # and not options.slave
 
         self.no_java = options.no_java
 
-        if options.autostart_slave and not self.multinode:
-            log("--autostart-slave can only be used together with --multinode")
-            sys.exit(1)
-        if options.slave and options.multinode:
-            log("Don't specify both --slave and --multinode")
-            sys.exit(1)
+        #if options.autostart_slave and not self.multinode:
+        #    log("--autostart-slave can only be used together with --multinode")
+        #    sys.exit(1)
+        #if options.slave and options.multinode:
+        #    log("Don't specify both --slave and --multinode")
+        #    sys.exit(1)
 
-        self.autostart_jenkins_slave = options.autostart_slave or (options.jenkins and self.multinode)
+        #self.autostart_jenkins_slave = options.autostart_slave or (options.jenkins and self.multinode)
 
         if options.jenkins:
             #make stdout unbuffered for more direct output in jenkins log
@@ -154,16 +157,20 @@ class Parameters:
                                                                 "test_config",
                                                                 "standalone" if self.standalone else "multinode")
 
-        #set up the node number as it is specified in ThisNodeParameters
-        if self.multinode:
-            os.environ["SAFIR_TEST_NODE_NUMBER"] = "0"
-        elif self.slave:
-            os.environ["SAFIR_TEST_NODE_NUMBER"] = "1"
-
         jar_install_path = os.path.join(install_dir,
                                         "@SAFIR_INSTALL_DESTINATION_JAR@")
 
-        self.dose_main_cmd = ("dose_main",)
+        self.safir_control_cmd = ("safir_control",
+                                  "--dose-main-path",
+                                  os.path.join(install_dir,
+                                               "bin",
+                                               "dose_main" + (".exe" if sys.platform == "win32" else "")))
+        #if self.slave:
+        #    self.safir_control_cmd += ("--force-id", "888888")
+        #else:
+        #    self.safir_control_cmd += ("--force-id", "999999")
+
+        self.dope_main_cmd = ("dope_main",)
         self.foreach_cmd = ("foreach",)
 
         self.dose_test_cpp_cmd = ("dose_test_cpp",)
@@ -177,114 +184,22 @@ class Parameters:
         self.dose_test_sequencer_cmd = ("dose_test_sequencer",
                                         "-d",
                                         self.testcases_path,
-                                        "--no-timeout",
+                                        #"--no-timeout",
                                         #"--context", "-1", #random context
                                         "-l", self.lang0, self.lang1, self.lang2,
                                         #"--first", "1",
                                         #"--last", "1"
                                         )
 
+        if self.multinode:
+            self.dose_test_sequencer_cmd += ("--multinode",)
+
         self.expected_output_path = os.path.join(self.test_data_directory,
                                                  "dose",
                                                  "output_multinode" if self.multinode else "output_standalone")
-        # self.parameters_path = os.path.join(self.SAFIR_RUNTIME,
-        #                                     "data",
-        #                                     "text",
-        #                                     "dots",
-        #                                     "classes",
-        #                                     "safir_core",
-        #                                     "config")
-
-        # self.PersistenceParameters_path = os.path.join(self.parameters_path,
-        #                                                "Safir.Dob.PersistenceParameters.dou")
-        # self.NodeParameters_path = os.path.join(self.parameters_path,
-        #                                         "Safir.Dob.NodeParameters.dou")
-        # self.ThisNodeParameters_path = os.path.join(self.parameters_path,
-        #                                             "Safir.Dob.ThisNodeParameters.dou")
-        # self.QueueParameters_path = os.path.join(self.parameters_path,
-        #                                          "Safir.Dob.QueueParameters.dou")
-        # self.DistributionChannelParameters_path = os.path.join(self.parameters_path,
-        #                                          "Safir.Dob.DistributionChannelParameters.dou")
-
-        # self.test_parameters_path = os.path.join(self.SAFIR_RUNTIME,
-        #                                          "data","text","dose_test","test_parameters")
-
-        # self.test_QueueParameters_path = os.path.join(self.test_parameters_path,
-        #                                               "Safir.Dob.QueueParameters.dou")
-        # self.test_multinode_DistributionChannelParameters_path = \
-        #     os.path.join(self.test_parameters_path, "multinode",
-        #                  "Safir.Dob.DistributionChannelParameters.dou")
-
-        # self.test_standalone_NodeParameters_path = \
-        #     os.path.join(self.test_parameters_path, "standalone",
-        #                  "Safir.Dob.NodeParameters.dou")
-
-        # self.test_multinode_NodeParameters_path = \
-        #     os.path.join(self.test_parameters_path, "multinode",
-        #                  "Safir.Dob.NodeParameters.dou")
 
         self.tempdir = tempfile.mkdtemp(prefix="dose_test_backup")
 
-def getText(nodelist):
-    rc = []
-    for node in nodelist:
-        if node.nodeType == node.TEXT_NODE:
-            rc.append(node.data)
-    return ''.join(rc)
-
-# def UpdateConfig(parameters):
-#     log "** Updating configuration files"
-#     #backup dou files to temporary directory
-#     shutil.copy2(parameters.PersistenceParameters_path, parameters.tempdir)
-#     shutil.copy2(parameters.NodeParameters_path, parameters.tempdir)
-#     shutil.copy2(parameters.ThisNodeParameters_path, parameters.tempdir)
-#     shutil.copy2(parameters.QueueParameters_path, parameters.tempdir)
-#     shutil.copy2(parameters.DistributionChannelParameters_path, parameters.tempdir)
-
-#     # Update PersistenceParameters
-#     dom = xml.dom.minidom.parse(parameters.PersistenceParameters_path)
-#     for param in dom.getElementsByTagName("parameter"):
-#         name = getText(param.getElementsByTagName("name")[0].childNodes)
-#         value = param.getElementsByTagName("value")[0]
-#         if name == "SystemHasPersistence":
-#             value.childNodes[0].data = "False"
-#         if name == "TestMode":
-#             value.childNodes[0].data = "True"
-#     with open(parameters.PersistenceParameters_path,"w") as file:
-#        file.write(dom.toxml())
-
-#     # Update NodeParameters
-#     if parameters.standalone:
-#         shutil.copy2(parameters.test_standalone_NodeParameters_path, parameters.parameters_path)
-#     else:
-#         shutil.copy2(parameters.test_multinode_NodeParameters_path, parameters.parameters_path)
-
-#     # Update ThisNodeParameters
-#     if parameters.slave:
-#         dom = xml.dom.minidom.parse(parameters.ThisNodeParameters_path)
-#         for param in dom.getElementsByTagName("parameter"):
-#             name = getText(param.getElementsByTagName("name")[0].childNodes)
-#             value = param.getElementsByTagName("value")[0]
-#             if name == "NodeNumber":
-#                 value.childNodes[0].data = "1"
-#         with open(parameters.ThisNodeParameters_path,"w") as file:
-#             file.write(dom.toprettyxml())
-
-
-#     # Update QueueParameters
-#     shutil.copy2(parameters.test_QueueParameters_path, parameters.parameters_path)
-
-#     # Update DistributionChannelParameters
-#     if parameters.multinode or parameters.slave:
-#         shutil.copy2(parameters.test_multinode_DistributionChannelParameters_path, parameters.parameters_path)
-
-# def RestoreConfig(parameters):
-#     log "** Restoring configuration files"
-#     #restore dou files from temporary directory
-#     dous = glob.glob(os.path.join(parameters.tempdir,"*.dou"))
-#     for dou in dous:
-#         shutil.copy2(os.path.join(parameters.tempdir,dou), parameters.parameters_path)
-#     rmdir(parameters.tempdir)
 
 class Results:
     def __init__(self):
@@ -399,6 +314,7 @@ def preexec(): # Don't forward signals.
 class Runner:
     def __init__(self):
         self.procs = dict()
+        self.syslog = None
 
     def __launchProcess(self, name, cmd, stdoutToFile = True):
         if stdoutToFile:
@@ -421,63 +337,74 @@ class Runner:
         return proc
 
     def initialize(self,parameters):
-        #load and start syslog server
         sys.path.append(os.path.join(parameters.test_data_directory,"python"))
-        from syslog_server import SyslogServer
-        self.syslog = SyslogServer("safir_show_config") #This should be in the PATH here, so no need to give full path
+        if parameters.check_syslog:
+           #load and start syslog server
+           from syslog_server import SyslogServer
+           self.syslog = SyslogServer("safir_show_config") #This should be in the PATH here, so no need to give full path
 
         if parameters.standalone:
             partners = (0,1,2)
         elif parameters.multinode:
             partners = (0,1)
-        else: #slave
-            partners = (2,)
+        #else: #slave
+        #    partners = (2,)
 
-        log("** Starting dose_main and partners", str(partners))
-        #if we're a slave we log to stdout, not file
-        self.dose_main = self.__launchProcess("dose_main",
-                                              parameters.dose_main_cmd,
-                                              stdoutToFile = not parameters.slave)
+        log("** Starting safir_control and partners", str(partners))
+        self.safir_control = self.__launchProcess("safir_control.0",
+                                                  parameters.safir_control_cmd + ("--force-id", "999999"))
 
-        if not parameters.slave:
-            self.__launchProcess("foreach", parameters.foreach_cmd)
+        self.__launchProcess("dope_main.0", parameters.dope_main_cmd)
+        self.__launchProcess("foreach.0", parameters.foreach_cmd)
 
         for i in partners:
             self.__launchProcess("dose_test_cpp." + str(i), parameters.dose_test_cpp_cmd + (str(i),))
-            #if os.path.isfile(parameters.dose_test_ada_exe_name): #only run ada if it exists
-            #    log "dose_test_ada_exe_name is", parameters.dose_test_ada_exe_name
-            #    self.__launchProcess("dose_test_ada." + str(i), parameters.dose_test_ada_cmd + (str(i),))
-            #else:
-            #    log "Not running ada partner. dose_test_ada_exe_name is", parameters.dose_test_ada_exe_name
             self.__launchProcess("dose_test_dotnet." + str(i), parameters.dose_test_dotnet_cmd + (str(i),))
             if not parameters.no_java:
                 self.__launchProcess("dose_test_java." + str(i), parameters.dose_test_java_cmd + (str(i),))
 
-    def __kill(self, name, proc):
+        #start second node
+        if parameters.multinode:
+            os.environ["SAFIR_INSTANCE"] = "1"
+            log(" + starting slave node")
+            self.safir_control_1 = self.__launchProcess("safir_control.1",
+                                                        parameters.safir_control_cmd + ("--force-id", "888888"))
+
+            self.__launchProcess("dope_main.1", parameters.dope_main_cmd)
+            self.__launchProcess("foreach.1", parameters.foreach_cmd)
+
+            self.__launchProcess("dose_test_cpp.2", parameters.dose_test_cpp_cmd + ("2",))
+            self.__launchProcess("dose_test_dotnet.2", parameters.dose_test_dotnet_cmd + ("2",))
+            if not parameters.no_java:
+                self.__launchProcess("dose_test_java.2", parameters.dose_test_java_cmd + ("2",))
+            del os.environ["SAFIR_INSTANCE"] #unset the environment after we've launched the processes.
+
+    #By default processes have 10 seconds to shut down nicely.
+    def __kill(self, name, proc, timeout = 10):
         try:
-#            log "Terminating", name
             if sys.platform == "win32":
                 #can't send CTRL_C_EVENT to processes started with subprocess, unfortunately
                 proc.send_signal(signal.CTRL_BREAK_EVENT)
             else:
                 proc.terminate()
-            for i in range (100):
+            for i in range (timeout * 10):
                 if proc.poll() is not None:
-#                    log " Terminate successful"
                     return
                 time.sleep(0.1)
             if proc.poll() is None:
-                log("Killing", name)
+                log("Failed to terminate", name, "nicely. Killing it instead!")
                 proc.kill()
                 proc.wait()
         except OSError:
             pass
 
     def killprocs(self, results):
-        self.__kill("dose_main", self.dose_main)
+        self.__kill("safir_control", self.safir_control,120) #We give safir_control some extra time to stop
+        if hasattr(self,"safir_control_1"):
+            self.__kill("safir_control", self.safir_control_1,120) #We give safir_control some extra time to stop
 
-        #Processes have up to 10 seconds to exit from the stop order
-        future = time.time() + 10 #ten seconds
+        #Processes have up to 20 seconds to exit from the stop order
+        future = time.time() + 20 #ten seconds
         for name, (proc,output) in self.procs.items():
             while time.time() < future:
                 if proc.poll() is not None:
@@ -495,11 +422,12 @@ class Runner:
             if output is not None:
                 output.close()
 
-        #check that syslog output is empty
-        syslog_data = self.syslog.get_data(10) # wait for 10 seconds to collect any output
-        results.write_test_result(len(syslog_data) == 0,
-                                  "syslog_output",
-                                  "syslog is not empty:\n" + xml.sax.saxutils.quoteattr(syslog_data))
+        if self.syslog is not None:
+            #check that syslog output is empty
+            syslog_data = self.syslog.get_data(10) # wait for 10 seconds to collect any output
+            results.write_test_result(len(syslog_data) == 0,
+                                      "syslog_output",
+                                      "syslog is not empty:\n" + xml.sax.saxutils.quoteattr(syslog_data))
 
     def run_sequencer(self,parameters):
         log("** Running test sequencer with languages set to", parameters.lang0, parameters.lang1, parameters.lang2)
@@ -510,8 +438,10 @@ class Runner:
         sequencer.wait()
         log("------------------------------------------")
 
-    def wait_for_dose_main(self):
-        self.dose_main.wait()
+    def wait_for_safir_control(self):
+        self.safir_control.wait()
+        if hasattr(self,safir_control_1):
+            self.safir_control_1.wait()
 
 class JenkinsInterface:
     def __init__(self, parameters):
@@ -622,7 +552,7 @@ class JenkinsInterface:
         log(self.__run_groovy(script))
 
 
-    def terminate_dose_main(self,job):
+    def terminate_safir_control(self,job):
         """Send a SIGTERM to dose main, to let the slave script end nicely"""
         script = """
                  import hudson.model.*
@@ -632,7 +562,7 @@ class JenkinsInterface:
                  if (executor != null)
                  {
                    computer = executor.getOwner()
-                   RemotingDiagnostics.executeGroovy("println \\"killall dose_main\\".execute().text", computer.getChannel())
+                   RemotingDiagnostics.executeGroovy("println \\"killall safir_control\\".execute().text", computer.getChannel())
                  }
                  """
         script = script.replace("JOB_NAME",job)
@@ -657,7 +587,7 @@ class JenkinsController:
     def stop_slave(self):
         try:
             log(" * Stopping slave")
-            self.interface.terminate_dose_main(self.job_name)
+            self.interface.terminate_safir_control(self.job_name)
             self.interface.wait_for_job(self.job_name,60)
             self.interface.cancel_job(self.job_name)
             self.interface.wait_for_job(self.job_name)
@@ -672,9 +602,9 @@ def main():
 
     parameters = Parameters()
 
-    if parameters.autostart_jenkins_slave:
-        jenkinsController = JenkinsController(parameters)
-        jenkinsController.start_slave()
+    #if parameters.autostart_jenkins_slave:
+    #    jenkinsController = JenkinsController(parameters)
+    #    jenkinsController.start_slave()
 
     runner = Runner()
     results = Results()
@@ -682,18 +612,18 @@ def main():
     completed = False
     try:
         runner.initialize(parameters)
-        if parameters.slave:
-            runner.wait_for_dose_main()
-        else:
-            runner.run_sequencer(parameters)
-            completed = True
+        #if parameters.slave:
+        #    runner.wait_for_safir_control()
+        #else:
+        runner.run_sequencer(parameters)
+        completed = True
     except:
         log("exception occurred!")
         traceback.print_exc()
 
     runner.killprocs(results)
-    if parameters.autostart_jenkins_slave:
-        jenkinsController.stop_slave()
+    #if parameters.autostart_jenkins_slave:
+    #    jenkinsController.stop_slave()
 
     if completed:
         results.check_output(parameters)

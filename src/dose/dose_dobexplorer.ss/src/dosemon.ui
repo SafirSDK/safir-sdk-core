@@ -47,14 +47,6 @@
       </item>
       <item>
        <property name="text">
-        <string>Logging settings</string>
-       </property>
-       <property name="toolTip">
-        <string>Show settings for the low level logger (the internal debug log mechanism).</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
         <string>Connections</string>
        </property>
        <property name="toolTip">
@@ -76,26 +68,20 @@
       </item>
       <item>
        <property name="text">
-        <string>Node Statuses</string>
-       </property>
-       <property name="toolTip">
-        <string>Show information about nodes and their statuses.</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>DoseCom Info</string>
-       </property>
-       <property name="toolTip">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Show internal information about dose_coms state.&lt;/p&gt;&lt;p&gt;Also allows enabling of dose_com internal logging.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
         <string>Remote Connections</string>
        </property>
        <property name="toolTip">
         <string>Show information about Dob connections on other nodes.</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>System Picture</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Raw Node Statistics</string>
        </property>
       </item>
      </widget>

@@ -21,9 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __DOPE_ODBC_PERSITOR_H__
-#define __DOPE_ODBC_PERSITOR_H__
-
+#pragma once
 
 #include <Safir/Databases/Odbc/Connection.h>
 #include <Safir/Databases/Odbc/Environment.h>
@@ -48,23 +46,17 @@ public:
     /**
      * Destructor
      */
-    virtual ~OdbcPersistor();
+    ~OdbcPersistor();
 
 private:
-    //implementation of pure virtual from Backend
-    virtual void Store(const Safir::Dob::Typesystem::EntityId entityId,
-                       const Safir::Dob::Typesystem::HandlerId handlerId,
-                       Safir::Dob::Typesystem::BinarySerialization & bin,
-                       const bool update);
+    void Store(const Safir::Dob::Typesystem::EntityId& entityId,
+               const Safir::Dob::Typesystem::HandlerId& handlerId,
+               Safir::Dob::Typesystem::BinarySerialization & bin,
+               const bool update) override;
 
-    //implementation of pure virtual from Backend
-    virtual void RestoreAll();
-
-    //implementation of pure virtual from Backend
-    virtual void Remove(const Safir::Dob::EntityProxy & entityProxy);
-
-    //implementation of pure virtual from Backend
-    virtual void RemoveAll();
+    void RestoreAll() override;
+    void Remove(const Safir::Dob::EntityProxy & entityProxy) override;
+    void RemoveAll() override;
 
     //Insert an empty row into the db
     void Insert(const Safir::Dob::Typesystem::EntityId & entityId);
@@ -123,5 +115,3 @@ private:
 
     Safir::Application::Tracer m_debug;
 };
-
-#endif

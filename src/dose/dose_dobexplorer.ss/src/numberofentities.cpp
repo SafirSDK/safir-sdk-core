@@ -23,7 +23,7 @@
 ******************************************************************************/
 #include "numberofentities.h"
 #include "common_header.h"
-#include "dosecom_stuff.h"
+#include <Safir/Dob/Internal/Initialize.h>
 #include <Safir/Dob/Internal/EntityTypes.h>
 #include <Safir/Dob/Internal/EntityType.h>
 #include <Safir/Dob/Internal/DistributionData.h>
@@ -51,7 +51,7 @@ m_timer(this)
 
     GetEntities();
 
-    Safir::Dob::Internal::EntityTypes::Initialize();
+    Safir::Dob::Internal::InitializeDoseInternalFromApp();
 
     Update();
 }
@@ -66,7 +66,7 @@ void NumberOfEntities::Update()
 
     for (int row=0; row<entityTable->rowCount(); row++)
     {
-        QTableWidgetItem *item = entityTable->item(row,NAME_COLUMN); 
+        QTableWidgetItem *item = entityTable->item(row,NAME_COLUMN);
         arguments.ResetOutParam();
         arguments.typeId = (Safir::Dob::Typesystem::TypeId)item->data(Qt::UserRole).toLongLong();
         arguments._this = this;
@@ -105,7 +105,7 @@ void NumberOfEntities::GetEntities()
             item->setData(Qt::UserRole, static_cast<qlonglong>(*it));
             entityTable->setItem(i, NAME_COLUMN, item);
             entityTable->setItem(i, CONTEXT_NUM_STATES_COLUMN, new QTableWidgetItem());
-            entityTable->setItem(i, CONTEXT_NUM_DOWNGRADED_COLUMN, new QTableWidgetItem());            
+            entityTable->setItem(i, CONTEXT_NUM_DOWNGRADED_COLUMN, new QTableWidgetItem());
             entityTable->setItem(i, CONTEXT_NUM_SUBSCRIBERS_COLUMN, new QTableWidgetItem());
             entityTable->setItem(i, CONTEXT_NUM_REAL_STATES_COLUMN, new QTableWidgetItem());
             entityTable->setItem(i, CONTEXT_NUM_GHOST_STATES_COLUMN, new QTableWidgetItem());

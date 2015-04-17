@@ -26,8 +26,6 @@
  #include <Safir/Dob/NotOpenException.h>
  #include <Safir/Dob/AccessDeniedException.h>
  #include <Safir/Dob/NotFoundException.h>
- #include <Safir/Dob/DistributionChannel.h>
- #include <Safir/Dob/DistributionChannelParameters.h>
  #include <Safir/Dob/NodeParameters.h>
  #include <DoseTest/Partner.h>
  #include <DoseTest/PartnerResponseMessage.h>
@@ -61,7 +59,7 @@
    #pragma warning(pop)
  #endif
 
-namespace 
+namespace
 {
     void FillBinaryMemberInternal(Safir::Dob::Typesystem::BinaryContainer & cont)
     {
@@ -114,6 +112,7 @@ namespace
 Sequencer::Sequencer(const int startTc,
                      const int stopTc,
                      const Languages & languages,
+                     const bool multinode,
                      const bool noTimeout,
                      const int contextId,
                      boost::asio::io_service& ioService):
@@ -128,18 +127,15 @@ Sequencer::Sequencer(const int startTc,
     m_languages(languages),
     m_noTimeout(noTimeout),
     m_isDumpRequested(false),
-    m_contextId(contextId),
-    m_testConfig()
+    m_contextId(contextId)
 {
-    // Find out if we are running in standalone or multinode configuration
-    Safir::Dob::DistributionChannelPtr systemChannel = Safir::Dob::DistributionChannelParameters::DistributionChannels(0);
-    if (systemChannel->MulticastAddress().Utf8String() == "127.0.0.1")
+    if (multinode)
     {
-        m_testConfig = DoseTest::TestConfigEnum::StandAlone;
+        m_testConfig = DoseTest::TestConfigEnum::Multinode;
     }
     else
     {
-        m_testConfig = DoseTest::TestConfigEnum::Multinode;
+        m_testConfig = DoseTest::TestConfigEnum::StandAlone;
     }
 
     m_connection.Attach();
@@ -176,7 +172,7 @@ bool Sequencer::PrepareTestcaseSetup()
             break;
         }
     }
-    
+
     if (m_currentCaseNo > m_stopTc)
     {
         return false;

@@ -34,12 +34,17 @@ except ImportError:
     # 2.x name
     from Queue import Queue, Empty
 
+def log(*args, **kwargs):
+    print(*args, **kwargs)
+    sys.stdout.flush()
+
+
 def rmdir(directory):
     if os.path.exists(directory):
         try:
             shutil.rmtree(directory)
         except OSError:
-            print("Failed to remove directory",directory,", will retry")
+            log("Failed to remove directory",directory,", will retry")
             time.sleep(0.2)
             shutil.rmtree(directory)
 
@@ -58,9 +63,8 @@ class LllProc:
         thread = Thread(target=enqueue_output, args=(self.proc.stdout, self.queue))
         thread.daemon = True #Thread dies with program, no need to stop explicitly
         thread.start()
-        if wait_for_output and not self.wait_output(".*1234567890$"):
+        if wait_for_output and not self.wait_output("^Logging at"):
             raise Exception("failed to launch lll_test properly")
-
 
     def wait_output(self, regex):
         pattern = re.compile(regex)
@@ -89,6 +93,10 @@ class LllProc:
         with open(logfilename(self.proc)) as logfile:
             return logfile.read()
 
+    #returns true if the logfile matches
+    def logfile_contains(self,regex):
+        pattern = re.compile(regex, flags = re.MULTILINE)
+        return pattern.search(self.logfile())
 
     def kill(self):
         self.proc.kill()
@@ -105,24 +113,21 @@ if sys.platform == "win32":
     if temp is None:
         temp = os.environ.get("TMP")
     if temp is None:
-        print ("Failed to find temp dir!")
+        log ("Failed to find temp dir!")
         sys.exit(1)
     logdir = os.path.join(temp, "safir-sdk-core", "log")
 else:
     logdir = os.path.join("/", "tmp", "safir-sdk-core", "log")
 
-print ("Logdir: ", logdir)
+log ("Logdir: ", logdir)
 
 parser = argparse.ArgumentParser("test script")
 parser.add_argument("--test-exe", required=True)
-parser.add_argument("--control-exe", required=True)
 parser.add_argument("--config-dir", required=True)
 
 arguments = parser.parse_args()
 
 lll_test = arguments.test_exe
-
-logger_control = arguments.control_exe
 
 def logfilename(proc):
     if sys.platform == "win32":
@@ -134,216 +139,92 @@ def logfilename(proc):
 
 configs_dir = arguments.config_dir
 if not os.path.isdir(configs_dir):
-    print ("arg is not a directory")
+    log ("arg is not a directory")
     sys.exit(1)
 
-os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join (configs_dir,"enabled_off")
-
-rmdir(logdir)
-
-print ("Run the program that logs")
+os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join (configs_dir,"level_0")
+log ("testing level 0")
+log ("Run the program that logs")
 p = LllProc()
 
-print ("check that log file only contains error texts")
-found = False
-for i in range(100):
-    data = p.logfile()
-    if data.count("123456789") >= 2:
-        found = True
-        break
-    time.sleep(0.1)
-
-if not found:
-    print("failed to find error texts in log file")
-    p.kill()
-    sys.exit(1)
-
-
-if data.find("Hello, World!") != -1 or data.find("Goodbye cruel world") != -1:
-    print("found logs when logging should be off")
-    p.kill()
-    sys.exit(1)
-
-print ("turn logging on")
-res = call_logger_control(("5",))
-if res.find("Log level should now be 5") == -1:
-    print("failed to turn logging on")
-    p.kill()
-    sys.exit(1)
-
-print ("let it log for a short while")
-p.wait_output(".*Hello, World!$")
-
-print ("turn logging off again")
-res = call_logger_control(("0",))
-if res.find("Log level should now be 0") == -1:
-    print("failed to turn logging off")
-    p.kill()
-    sys.exit(1)
-
-
-print ("check that log file isn't empty")
-data = p.logfile()
-if data.find("Hello, World!") == -1 or data.find("1234567890") == -1:
-    print("failed to find expected log data in log file")
-    p.kill()
-    sys.exit(1)
-oldnum = data.count("Hello, World!")
-
-if data.find("Goodbye cruel world!") != -1:
-    print("found unexpected log data in log file")
-    p.kill()
-    sys.exit(1)
-
-
-print ("sleep for a while and check that only errors are being logged")
-time.sleep(0.5)
-
-newnum = p.logfile().count("Hello, World!")
-if oldnum != newnum:
-    print("log file appears to have grown with non-error messages even though logging is turned off!")
-    p.kill()
-    sys.exit(1)
-
-
-print ("turn logging on again to level 9 and check that we get all logs")
-call_logger_control(("9",))
-p.wait_output(".*Goodbye cruel world!$")
-data = p.logfile()
-if data.find("Hello, World!") == -1 or data.find("1234567890") == -1 or data.find("Goodbye cruel world") == -1:
-    print("failed to find all expected log data in log file")
-    p.kill()
-    print(data)
-    sys.exit(1)
-
 p.kill()
-
-print ("check that we get output on stdout")
-p = LllProc()
-if not p.wait_output(".*1234567890$"):
-    print("lllerr does not output on stdout")
-    p.kill()
-    sys.exit(1)
-p.kill()
-
-print ("check that the timestamps can be turned off")
-p = LllProc()
-if not p.wait_output("^\[[0-9.:]*\] 1234567890$"):
-    print("could not find line with timestamp")
-    p.kill()
-    sys.exit(1)
-call_logger_control(("-t","0")) #turn timestamps off
-if not p.wait_output("^1234567890$"):
-    print("could not find line without timestamp")
-    p.kill()
-    sys.exit(1)
-p.kill()
-
-print ("check that flushing can be turned off")
-p = LllProc()
-call_logger_control(("-i","0")) #turn flushing off
-time.sleep(0.1)
-p2 = LllProc(False)
-time.sleep(1.0)
-p2.kill()
-data = p2.output()
-if len(data) != 0:
-    print("Flushing doesnt seem to be possible to turn off")
-    print(data)
-    p.kill()
-    sys.exit(1)
-
-print ("turn flushing on and stdout off")
-call_logger_control(("-s", "0"))
-time.sleep(0.1)
-p2 = LllProc(False)
-time.sleep(2.0)
-p2.kill()
-data = p2.output()
-if len(data) != 0:
-    print("stdout logging doesnt seem to be possible to turn off")
-    print(data)
-    p.kill()
-    sys.exit(1)
-
-print ("turn file off")
-call_logger_control(("-f", "0"))
-time.sleep(0.1)
-p2 = LllProc()
-time.sleep(2.0)
-p2.kill()
-data = p2.logfile()
-if len(data) != 0:
-    print("file logging doesnt seem to be possible to turn off")
-    print(data)
-    p.kill()
-    sys.exit(1)
-
-p.kill()
-
-print ("check that disabling in inifile works")
-os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join (configs_dir,"disabled")
-
-print ("Run the program that logs")
-p = LllProc(False)
-time.sleep(2.0)
-
-print ("check that we dont have a log file")
+log ("check that we dont have a log file")
 try:
     data = p.logfile()
-    print("have unexpected logfile")
+    log("have unexpected logfile")
     sys.exit(1)
 except:
     pass
 
 
-print ("try to turn logging on")
-res = call_logger_control(("5",))
-if res.find("LowLevelLogger is currently disabled") == -1:
-    print("Doesnt seem to be disabled!")
-    print(res)
-    p.kill()
-    sys.exit(1)
+os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join (configs_dir,"level_1")
 
-time.sleep(2.0)
-data = p.output()
-if data.find("orld!") != -1:
-    print("there should not be any log output")
-    p.kill()
-    sys.exit(1)
-
-p.kill()
-
-print ("check that enabling and turning on in inifile works")
-os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join (configs_dir,"enabled_on")
-
-print ("Run the program that logs")
+log ("testing level 1")
+log ("Run the program that logs")
 p = LllProc()
 
-print ("check that we get some logs")
-p.wait_output(".*Goodbye cruel world!$")
-
-data = p.logfile()
-if data.find("Goodbye") == -1 or data.find("Hello") == -1 or data.find("1234567890") == -1:
-    print("failed to find all the expected stuff in the log file")
+timestamp_regex = r"\[[0-9\.:]*\] "
+p.kill()
+log ("check log file")
+if not p.logfile_contains(timestamp_regex + r"1234567890"):
+    log("could not find expected output")
     sys.exit(1)
 
-print ("turn logging off")
-res = call_logger_control(("0",))
-if res.find("Log level should now be 0") == -1:
-    print("failed to turn logging off")
-    proc.kill()
+if p.logfile_contains("Hello") or p.logfile_contains("Goodbye"):
+    log("found unexpected output")
     sys.exit(1)
 
-time.sleep(0.5) #fragile, since there might be a log pending that doesnt get out within this time...
-print ("clear output and check that new logs are only error logs")
-p.output()
-time.sleep(0.5)
-data = p.output()
-if data.find("orld!") != -1:
-    print ("failed to turn off ini enabled")
-    sys.exit(1)
+
+os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join (configs_dir,"level_9")
+
+log ("testing level 9")
+log ("Run the program that logs")
+p = LllProc()
 
 p.kill()
-print("success")
+log ("check log file")
+if not p.logfile_contains(timestamp_regex + r"1234567890"):
+    log("could not find expected output 1")
+    sys.exit(1)
+
+if not p.logfile_contains(timestamp_regex + r"Hello, World!"):
+    log("could not find expected output 2")
+    sys.exit(1)
+
+if not p.logfile_contains(timestamp_regex + r"Goodbye cruel world!"):
+    log("could not find expected output 3")
+    sys.exit(1)
+
+
+
+os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join (configs_dir,"no_timestamps")
+
+log ("testing disabled timestamps")
+log ("Run the program that logs")
+p = LllProc()
+
+p.kill()
+log ("check log file")
+if p.logfile_contains(timestamp_regex):
+    log("found unexpected output")
+    log(p.logfile())
+    sys.exit(1)
+
+os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join (configs_dir,"no_flush")
+
+log ("testing level 1")
+log ("Run the program that logs")
+p = LllProc()
+
+p.kill()
+log ("check log file")
+data = p.logfile()
+if len(data) != 0:
+    log("logfile should be empty")
+    log(data)
+    sys.exit(1)
+
+
+
+log("success")
 sys.exit(0)

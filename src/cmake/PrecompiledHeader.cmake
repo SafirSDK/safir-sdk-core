@@ -77,7 +77,7 @@ function(ADD_PRECOMPILED_HEADER _targetName _input)
     SET(_output "${_outdir}")
 
     STRING(TOUPPER "CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE}" _flags_var_name)
-    SET(_compiler_FLAGS ${${_flags_var_name}} -fPIC -pthread)
+    SET(_compiler_FLAGS ${${_flags_var_name}} -fPIC -pthread -std=c++11)
 
     GET_TARGET_PROPERTY(_include_dirs ${_targetName} INCLUDE_DIRECTORIES)
     FOREACH(item ${_include_dirs})

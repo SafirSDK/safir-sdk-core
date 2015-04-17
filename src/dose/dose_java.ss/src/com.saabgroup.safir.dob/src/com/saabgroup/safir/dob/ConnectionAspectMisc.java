@@ -142,6 +142,25 @@ public class ConnectionAspectMisc
         return context[0];
     }
 
+    /**
+     * Get the Node Identifier of the current node.
+     *
+     * Be aware that this identifier changes every time the node restarts.
+     *
+     * @return NodeId of current node
+     */
+    public long getNodeId()
+    {
+        long [] nodeId = new long[1];
+        boolean [] success = new boolean [1];
+        Interface.GetNodeId(nodeId, success);
+        if (!success[0]) {
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwFundamental();
+            com.saabgroup.safir.dob.typesystem.LibraryExceptions.getInstance().throwUnknown();
+        }
+        return nodeId[0];
+    }
+
     //
     // Queue Status
     //

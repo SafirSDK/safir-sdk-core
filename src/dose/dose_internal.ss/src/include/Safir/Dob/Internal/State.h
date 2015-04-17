@@ -34,7 +34,7 @@
 #include <Safir/Dob/Internal/ConsumerQueueContainer.h>
 #include <Safir/Dob/Internal/SubscriptionOptions.h>
 #include <Safir/Dob/Internal/LeveledLock.h>
-#include <Safir/Dob/Internal/Atomic.h>
+#include <Safir/Utilities/Internal/Atomic.h>
 #include <boost/interprocess/sync/interprocess_mutex.hpp>
 
 namespace Safir
@@ -115,7 +115,7 @@ namespace Internal
         StateHolder                             m_realState;
         StateHolder                             m_injectionState;
 
-        AtomicUint32 m_released;
+        Safir::Utilities::Internal::AtomicUint32 m_released;
 
         typedef PairContainers<SubscriptionId, UpgradeableSubscriptionPtr>::map Subscriptions;
 

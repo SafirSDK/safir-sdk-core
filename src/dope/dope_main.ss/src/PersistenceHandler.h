@@ -21,16 +21,25 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __DOPE_PERSISTENCE_HANDLER_H__
-#define __DOPE_PERSISTENCE_HANDLER_H__
+#pragma once
 
 #include "Defs.h"
 
 #include <Safir/Dob/Connection.h>
 #include <Safir/Application/Tracer.h>
 #include <Safir/Utilities/AsioDispatcher.h>
-#include <boost/asio.hpp>
 #include <boost/noncopyable.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
+#endif
+
+#include <boost/asio.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 /**
  * Abstract base class for all persistence backends.
@@ -41,8 +50,14 @@ class PersistenceHandler :
     private boost::noncopyable
 {
 public:
-    /** Constructor */
-    explicit PersistenceHandler(boost::asio::io_service& ioService);
+    /**
+     * Constructor
+     *
+     * @param ignorePersistenceProperties: should only be set to true if implementing "no
+     * persistence" backend
+     */
+    PersistenceHandler(boost::asio::io_service& ioService,
+                       const bool ignorePersistenceProperties);
 
     /** Destructor */
     virtual ~PersistenceHandler();
@@ -51,32 +66,32 @@ public:
     void Stop();
 
     // From Safir::Dob::EntitySubscriber
-    virtual void OnNewEntity(const Safir::Dob::EntityProxy entityProxy);
-    virtual void OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy);
-    virtual void OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy, 
-                                 const bool                    deletedByOwner);
+    virtual void OnNewEntity(const Safir::Dob::EntityProxy entityProxy) override;
+    virtual void OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy) override;
+    virtual void OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy,
+                                 const bool                    deletedByOwner) override;
 
     // From Safir::Dob::Requestor
-    void OnResponse(const Safir::Dob::ResponseProxy responseProxy);
-    void OnNotRequestOverflow();
+    void OnResponse(const Safir::Dob::ResponseProxy responseProxy) override;
+    void OnNotRequestOverflow() override;
 
 protected:
 
-    void StartSubscriptions();
-    void ReportPersistentDataReady();
-
-    Safir::Utilities::AsioDispatcher m_dispatcher;
+    const TypeIdSet & GetPersistentTypes() const {return m_persistentTypes;}
     Safir::Dob::Connection  m_dobConnection;
 
-    const TypeIdSet & GetPersistentTypes() const {return *m_persistentTypes;}
 
 private:
+    void ReportPersistentDataReady();
+    void StartSubscriptions();
+    Safir::Utilities::AsioDispatcher m_dispatcher;
+
     /**
      * Persist an object. ObjectId of the object should be used as key.
      */
-    virtual void Store(const Safir::Dob::Typesystem::EntityId entityId,
-                       const Safir::Dob::Typesystem::HandlerId handlerId,
-                       Safir::Dob::Typesystem::BinarySerialization & bin,
+    virtual void Store(const Safir::Dob::Typesystem::EntityId& entityId,
+                       const Safir::Dob::Typesystem::HandlerId& handlerId,
+                       Safir::Dob::Typesystem::BinarySerialization& bin,
                        const bool update) = 0;
 
     /**
@@ -99,14 +114,9 @@ private:
 
     void HandleEntity(const Safir::Dob::EntityProxy & entityProxy, const bool update);
 
-    //This is set up by the constructor of the persistence handler
-    //and can be used in any way by the derived class.
-    //It should be cleared after allocation though...
-    //It is used by the StartSubscriptions call to know which classes to subscribe to.
-    boost::shared_ptr<TypeIdSet> m_persistentTypes;
+    TypeIdSet m_persistentTypes;
 
     Safir::Application::Tracer m_debug;
 
     bool m_started;
 };
-#endif

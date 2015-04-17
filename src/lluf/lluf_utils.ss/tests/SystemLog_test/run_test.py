@@ -44,20 +44,25 @@ if sys.platform == "win32":
 else:
     exe_path = "."
 
-system_log_test_pgm = "SystemLog_test"  
+system_log_test_pgm = "SystemLog_test"
 system_log_test_path = os.path.join(exe_path, system_log_test_pgm)
 
-conf_dir = os.path.join(args.test_conf_dir, "syslog_logging")
-conf_file = os.path.join(conf_dir, "logging.ini")
+conf_file = os.path.join(args.test_conf_dir, "logging.ini")
 
-os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = conf_dir
+os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = args.test_conf_dir
 
 config = ConfigParser.ConfigParser()
-      
+
 if not config.read(conf_file):
     print("Failed to read file " + conf_file)
     sys.exit(1)
-    
+
+# figure out what (if any) instance string that is expected
+inst_str = r""
+show_safir_instance = config.getboolean('SystemLog','show_safir_instance')
+if show_safir_instance:
+   inst_str = r"\(" + os.getenv("SAFIR_INSTANCE", "0") + r"\) "
+
 syslog_server_address = config.get('SystemLog','syslog_server_address')
 syslog_server_port = config.get('SystemLog','syslog_server_port')
 
@@ -66,14 +71,14 @@ sock = socket.socket(socket.AF_INET, # Internet
                      socket.SOCK_DGRAM ) # UDP
 sock.settimeout(2)
 sock.bind((syslog_server_address, int(syslog_server_port)))
-    
+
 #Run the program that sends system logs
 proc = subprocess.Popen(system_log_test_path, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,universal_newlines=True)
 stdout, stderr = proc.communicate()
-#print (stdout)
 
 if proc.returncode != 0:
     print("Failed when sending system logs!")
+    print(stdout)
     sys.exit(1)
 
 try:
@@ -83,13 +88,13 @@ try:
         print ("Received data:", data)
         if test == 0:
             pri = r"<9>"
-            text = r"This is a log from a singleton constructor" 
+            text = r"This is a log from a singleton constructor"
         elif test == 1:
             pri = r"<8>"
             text = r"This is an emergency log"
         elif test == 2:
             pri = r"<9>"
-            text = r"This is an alert log"            
+            text = r"This is an alert log"
         elif test == 3:
             pri = r"<10>"
             text = r"This is a critical log with   newline and \t tab"
@@ -107,20 +112,20 @@ try:
             text = r"This is an informational log with   newline and \t tab"
         elif test == 8:
             pri = r"<15>"
-            text = r"This is a debug log"            
+            text = r"This is a debug log"
         elif test == 9:
             pri = r"<11>"
             text = r"This is another error log"
         elif test == 10:
             pri = r"<9>"
-            text = r"This is a log from a singleton destructor"   
-            
-        p = re.compile(pri + log_common_part + text)
+            text = r"This is a log from a singleton destructor"
+
+        p = re.compile(pri + log_common_part + inst_str + text)
         data = data.decode("utf-8")
         if p.match(data) == None:
             print ("Unexpected syslog message:", data)
             sys.exit(1)
-            
+
 except:
     print("Exception!")
     sys.exit(1)

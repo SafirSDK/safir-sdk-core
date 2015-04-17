@@ -1,0 +1,38 @@
+option optimize_for = LITE_RUNTIME;
+
+package Safir.Dob.Internal.Com;
+
+message CommunicationMessage {
+
+    enum SequenceSerie {
+        UnicastSerie = 0;
+        MulticastSerie = 1;
+    }
+
+    message Node {
+        optional sfixed64 node_id = 1; //node_id=0 and name=seed means seed_node
+        optional string name = 2;
+        optional sfixed64 node_type_id = 3;
+        optional string control_address = 4;
+        optional string data_address = 5;
+    }
+    
+    message Discover {
+        optional sfixed64 sent_to_id = 1;
+        optional Node from = 2;
+    }
+    
+    message NodeInfo {
+        optional sfixed64 sent_from_id = 1;
+        optional sfixed64 sent_to_id = 2;
+        optional int32 packet_number = 3; //this packet number
+        optional int32 number_of_packets = 4; //total number of packets
+        optional Node sent_from_node = 5;
+        repeated Node nodes = 6;
+    }        
+    
+    //Fields
+    optional Discover discover = 1;
+    optional NodeInfo node_info = 2;
+}
+

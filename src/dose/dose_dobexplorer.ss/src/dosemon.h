@@ -29,6 +29,17 @@
 #include <Safir/Dob/Internal/InternalFwd.h>
 #include <Safir/Dob/Internal/StateDeleter.h>
 
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4267)
+#endif
+
+#include <boost/asio.hpp>
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
+
 class DoseMon : public QWidget, private Ui::DoseMonDlg
 {
     Q_OBJECT
@@ -36,14 +47,14 @@ class DoseMon : public QWidget, private Ui::DoseMonDlg
 public:
     DoseMon(QWidget *parent = 0);
 
-
 public slots:
     void TreeItemActivated ( QTreeWidgetItem * item, int column );
 
-    void CloseCurrentTab();
+    void CloseTab(int index);
     void UpdateTreeWidget();
 
 private:
+    void closeEvent(QCloseEvent* event) override;
     void AddConnection(const Safir::Dob::Internal::Connection & connection,
                        std::set<QString>& localConnectionNames,
                        std::set<QString>& remoteConnectionNames);

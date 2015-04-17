@@ -400,7 +400,7 @@ void Callbacks::OnDeletedEntityCb(const char* const currentState,
 
 void Callbacks::OnCreateRequestCb(const char* const requestBlob,
                                   const char* const state,
-                                  const long ctrl,
+                                  const DotsC_Int32 ctrl,
                                   const DotsC_Int32 responseId,
                                   void* const consumer,
                                   bool& success)
@@ -421,7 +421,7 @@ void Callbacks::OnCreateRequestCb(const char* const requestBlob,
 
 void Callbacks::OnUpdateRequestCb(const char* const requestBlob,
                                   const char* const state,
-                                  const long ctrl,
+                                  const DotsC_Int32 ctrl,
                                   const DotsC_Int32 responseId,
                                   void* const consumer,
                                   bool& success)
@@ -441,7 +441,7 @@ void Callbacks::OnUpdateRequestCb(const char* const requestBlob,
 }
 
 void Callbacks::OnDeleteRequestCb(const char* const state,
-                                  const long ctrl,
+                                  const DotsC_Int32 ctrl,
                                   const DotsC_Int32 responseId,
                                   void* const consumer,
                                   bool& success)
@@ -461,7 +461,7 @@ void Callbacks::OnDeleteRequestCb(const char* const state,
 
 void Callbacks::OnServiceRequestCb(const char* const requestBlob,
                                    const char* const state,
-                                   const long ctrl,
+                                   const DotsC_Int32 ctrl,
                                    const DotsC_Int32 responseId,
                                    void* const consumer,
                                    bool& success)
@@ -709,7 +709,7 @@ void Callbacks::OnNotMessageOverflowCb(void* const consumer,
 }
 
 void Callbacks::OnDropReferenceCb(void* const consumer,
-                                  const long refCounter,
+                                  const DotsC_Int32 refCounter,
                                   bool& success)
 {
     ConsumerTable::Instance().DropReference(CallbackEnv(),static_cast<jobject>(consumer),refCounter);

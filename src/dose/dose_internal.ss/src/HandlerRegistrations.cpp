@@ -27,7 +27,6 @@
 #include <Safir/Dob/Internal/State.h>
 #include <Safir/Dob/Internal/EndStates.h>
 #include <Safir/Dob/Internal/InjectionKindTable.h>
-#include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Dob/Entity.h>
@@ -39,8 +38,9 @@ namespace Dob
 {
 namespace Internal
 {
-    HandlerRegistrations::HandlerRegistrations(const Typesystem::TypeId typeId)
+    HandlerRegistrations::HandlerRegistrations(const Typesystem::TypeId typeId, const int64_t nodeId)
         : m_typeId(typeId),
+          m_nodeId(nodeId),
           m_registrations(typeId),
           m_entityContainerPtr(NULL)
     {
@@ -113,7 +113,7 @@ namespace Internal
                                                         boost::cref(connection),
                                                         boost::cref(handlerId),
                                                         true,  // true => explicit unregistration
-                                                        Safir::Dob::ThisNodeParameters::NodeNumber(),
+                                                        m_nodeId,
                                                         connection->Id().m_contextId,
                                                         _2));
     }
@@ -240,7 +240,7 @@ namespace Internal
     void HandlerRegistrations::UnregisterInternal(const ConnectionPtr&              connection,
                                                   const Dob::Typesystem::HandlerId& handlerId,
                                                   const bool                        explicitUnregister,
-                                                  const NodeNumber                  nodeNumber,
+                                                  const int64_t                     nodeId,
                                                   const ContextId                   contextId,
                                                   const StateSharedPtr&             statePtr)
     {
@@ -261,12 +261,8 @@ namespace Internal
 
         statePtr->SetConnection(ConnectionPtr());
 
-        // Unregistration states are kept forever. This is necessary in order for the split/join
-        // functionality to work.
-        statePtr->SetReleased(false);
-
         DistributionData newRegState(registration_state_tag,
-                                     ConnectionId(nodeNumber, contextId, -1),
+                                     ConnectionId(nodeId, contextId, -1),
                                      m_typeId,
                                      handlerId,
                                      InstanceIdPolicy::HandlerDecidesInstanceId, // Dummy for an unreg state
@@ -274,6 +270,11 @@ namespace Internal
                                      currentRegState.GetRegistrationTime());
 
         statePtr->SetRealState(newRegState);
+
+        statePtr->SetReleased(true);
+
+        // The released end state must be saved "a while".
+        EndStates::Instance().Add(statePtr);
     }
 
     void HandlerRegistrations::RemoteRegistrationStateInternal(const ConnectionPtr&    connection,
@@ -307,20 +308,23 @@ namespace Internal
 
         if (remoteRegistrationState.IsRegistered())
         {
+            // Remote registration
             statePtr->SetConnection(connection);
             connection->AddRegistration(m_typeId,
                                         handlerId,
                                         ConsumerId(NULL, static_cast<short>(0))); // Dummy consumer for registration state from external node
+            statePtr->SetReleased(false);
         }
         else
         {
+            // Remote unregistration
             statePtr->SetConnection(ConnectionPtr());
             const_cast<DistributionData&>(remoteRegistrationState).ResetSenderIdConnectionPart();
-        }
+            statePtr->SetReleased(true);
 
-        // All registration states are kept forever (even unregistration states) since this is necessary
-        // in order for the split/join functionality to work correctly.
-        statePtr->SetReleased(false);
+            // This is an end state so it must be saved "a while".
+            EndStates::Instance().Add(statePtr);
+        }
 
         statePtr->SetRealState(remoteRegistrationState);
 
@@ -539,7 +543,7 @@ namespace Internal
         else
         {
             registerer.connection.reset();
-            registerer.consumer = ConsumerId(NULL,0L);
+            registerer.consumer = ConsumerId(NULL,0);
         }
     }
 
@@ -654,19 +658,7 @@ namespace Internal
         newRealState.ResetSenderIdConnectionPart();
         newRealState.SetExplicitlyDeleted(false);
 
-        // Normally the entity version gets incremented for every new state, but, there is an
-        // exception to this rule and this is when the deletion (or ghosting) of an entity is
-        // caused by a remote node being marked as down. In this case we actually *decrements*
-        // the version number so if the node joins again the version from the remote node will
-        // override our version.
-        if (!connection->IsLocal() && connection->NodeIsDown())
-        {
-            newRealState.DecrementVersion();
-        }
-        else
-        {
-            newRealState.IncrementVersion();
-        }
+        newRealState.IncrementVersion();
 
         // Release pointer to request in queue. We must not have any shared pointers to request queues
         // when the connection (and therefore the queue container) is destructed.

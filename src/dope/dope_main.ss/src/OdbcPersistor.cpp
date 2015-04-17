@@ -143,7 +143,7 @@ void Alloc(T & thing, U & arg)
 
 //-------------------------------------------------------
 OdbcPersistor::OdbcPersistor(boost::asio::io_service& ioService) :
-    PersistenceHandler(ioService),
+    PersistenceHandler(ioService, false),
     m_odbcConnection(),
     m_environment(),
     m_storeBinaryDataParam(Safir::Dob::PersistenceParameters::XmlDataColumnSize()),
@@ -172,8 +172,8 @@ OdbcPersistor::~OdbcPersistor()
 
 
 //-------------------------------------------------------
-void OdbcPersistor::Store(const Safir::Dob::Typesystem::EntityId entityId,
-                          const Safir::Dob::Typesystem::HandlerId handlerId,
+void OdbcPersistor::Store(const Safir::Dob::Typesystem::EntityId& entityId,
+                          const Safir::Dob::Typesystem::HandlerId& handlerId,
                           Safir::Dob::Typesystem::BinarySerialization & bin,
                           const bool update)
 {
@@ -284,7 +284,7 @@ void OdbcPersistor::Store(const Safir::Dob::Typesystem::EntityId entityId,
             if (retries > REPORT_AFTER_RECONNECTS && !errorReported)
             {
                 Safir::Logging::SendSystemLog(Safir::Logging::Error,
-                                              L"Failed to connect to the database, will keep trying. Exception info: " + 
+                                              L"Failed to connect to the database, will keep trying. Exception info: " +
                                               e.GetExceptionInfo());
                 errorReported = true;
             }
@@ -358,7 +358,7 @@ void OdbcPersistor::DeleteAll(Safir::Databases::Odbc::Connection & connectionToU
             if (retries > REPORT_AFTER_RECONNECTS && !errorReported)
             {
                 Safir::Logging::SendSystemLog(Safir::Logging::Error,
-                                              L"Failed to connect to the database, will keep trying. Exception info: " + 
+                                              L"Failed to connect to the database, will keep trying. Exception info: " +
                                               e.GetExceptionInfo());
                 errorReported = true;
             }
@@ -383,9 +383,9 @@ void OdbcPersistor::RestoreAll()
     Safir::Databases::Odbc::WideStringColumn xmlDataColumn(Safir::Dob::PersistenceParameters::XmlDataColumnSize());
     Safir::Databases::Odbc::BinaryColumn binaryDataColumn(Safir::Dob::PersistenceParameters::BinaryDataColumnSize());
     Safir::Databases::Odbc::BinaryColumn binarySmallDataColumn(Safir::Dob::PersistenceParameters::BinarySmallDataColumnSize());
-    
+
     const boost::chrono::steady_clock::time_point startTime = boost::chrono::steady_clock::now();
-    
+
     bool done = false;
     while (!done)
     {
@@ -436,12 +436,12 @@ void OdbcPersistor::RestoreAll()
                     }
 
                     const Safir::Dob::Typesystem::EntityId entityId
-                        (typeIdColumn.GetValue(), 
+                        (typeIdColumn.GetValue(),
                          Safir::Dob::Typesystem::InstanceId(instanceColumn.GetValue()));
 
                     const Safir::Dob::Typesystem::HandlerId handler(handlerColumn.GetValue());
 
-                    TypeIdSet::const_iterator findIt = GetPersistentTypes().find(entityId.GetTypeId());
+                    auto findIt = GetPersistentTypes().find(entityId.GetTypeId());
                     if (findIt == GetPersistentTypes().end())
                     { //not to be persisted!
                         Delete(m_deleteConnection,entityId);
@@ -485,7 +485,7 @@ void OdbcPersistor::RestoreAll()
                                 boost::dynamic_pointer_cast<Safir::Dob::Entity>
                                 (Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(data));
                             m_debug << "Successfully deserialized" <<std::endl;
-                            
+
                             injector.InitialSet(entity, entityId.GetInstanceId(), handler );
                             m_debug << "InitialSet successful"<<std::endl;
                         }
@@ -519,9 +519,9 @@ void OdbcPersistor::RestoreAll()
                         m_debug << "Could not restore "
                                 << entityId.ToString()
                                 << ", removing it" << std::endl;
-                        
+
                         Safir::Logging::SendSystemLog(Safir::Logging::Error,
-                                                      L"Failed to restore entity" + 
+                                                      L"Failed to restore entity" +
                                                       entityId.ToString() +
                                                       L", will remove persisted data.");
 
@@ -545,7 +545,7 @@ void OdbcPersistor::RestoreAll()
             if (connectionAttempts > REPORT_AFTER_RECONNECTS && !errorReported)
             {
                 Safir::Logging::SendSystemLog(Safir::Logging::Error,
-                                              L"Failed to connect to the database, will keep trying. Exception info: " + 
+                                              L"Failed to connect to the database, will keep trying. Exception info: " +
                                               e.GetExceptionInfo());
                 errorReported = true;
             }
@@ -573,7 +573,7 @@ void OdbcPersistor::RestoreAll()
     Disconnect(m_deleteConnection);
     Free(m_deleteConnection);
     m_debug << "RestoreAll completed" <<std::endl;
-    m_debug << restoredObjects.size() << " objects restored in time " 
+    m_debug << restoredObjects.size() << " objects restored in time "
             << boost::chrono::steady_clock::now() - startTime << std::endl;
 }
 
@@ -645,7 +645,7 @@ OdbcPersistor::Insert(const Safir::Dob::Typesystem::EntityId & entityId)
             if (retries > REPORT_AFTER_RECONNECTS && !errorReported)
             {
                 Safir::Logging::SendSystemLog(Safir::Logging::Error,
-                                              L"Failed to connect to the database, will keep trying. Exception info: " + 
+                                              L"Failed to connect to the database, will keep trying. Exception info: " +
                                               e.GetExceptionInfo());
                 errorReported = true;
             }
@@ -721,7 +721,7 @@ OdbcPersistor::Delete(Safir::Databases::Odbc::Connection & connectionToUse,
             if (retries > REPORT_AFTER_RECONNECTS && !errorReported)
             {
                 Safir::Logging::SendSystemLog(Safir::Logging::Error,
-                                              L"Failed to connect to the database, will keep trying. Exception info: " + 
+                                              L"Failed to connect to the database, will keep trying. Exception info: " +
                                               e.GetExceptionInfo());
                 errorReported = true;
             }

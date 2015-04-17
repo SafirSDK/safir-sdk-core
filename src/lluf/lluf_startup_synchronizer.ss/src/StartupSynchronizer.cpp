@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -402,7 +403,8 @@ namespace Utilities
 
 
     StartupSynchronizer::StartupSynchronizer(const char* uniqueName)
-        : m_impl(ImplKeeper::Instance().Get(uniqueName))
+        : m_impl(ImplKeeper::Instance().Get(uniqueName +
+                                            Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix()))
         , m_synchronized(NULL)
     {
 

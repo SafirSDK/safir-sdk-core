@@ -150,17 +150,8 @@ namespace Safir.Dob
         /// </summary>
         public void Close()
         {
-            Close(true);
-        }
-
-        /// <summary>
-        /// Internal Close function that allows for enabling/disabling of the thread check.
-        /// </summary>
-        /// <param name="checkThread">Whether to check which thread the call is being made from.</param>
-        private void Close(bool checkThread)
-        {
             byte success;
-            Interface.DoseC_Disconnect(m_ctrl, Interface.ByteOf(checkThread), out success);
+            Interface.DoseC_Disconnect(m_ctrl, out success);
 
             if (!Interface.BoolOf(success))
             {
@@ -218,12 +209,12 @@ namespace Safir.Dob
             {
                 try
                 {
-                    Close(false);
+                    Close();
                 }
                 catch (System.Exception exc)
                 {
-                    Console.WriteLine("Connection.Dispose: Caught exception: " + exc);
-                    Console.WriteLine("Will return as if nothing has happened!");
+                    Safir.Logging.SendSystemLog(Safir.Logging.Severity.Critical,
+                                                "Connection.Dispose: Caught exception: " + exc);
                 }
                 Interface.DoseC_Destructor(ControllerId);
                 disposed = true;

@@ -150,7 +150,7 @@ namespace Safir.Application
             {
                 if (!cmd.NodeName.IsNull())
                 {
-                    if (!Regex.IsMatch(Safir.Dob.NodeParameters.Nodes(Safir.Dob.ThisNodeParameters.NodeNumber).NodeName.Val,
+                    if (!Regex.IsMatch(Safir.Dob.ThisNodeParameters.Name,
                                        cmd.NodeName.Val,
                                        RegexOptions.IgnoreCase))
                     {
@@ -200,7 +200,7 @@ namespace Safir.Application
                                                 "Ping reply from " 
                                                 + connectionAspectMisc.GetConnectionName()
                                                 + " on node "
-                                                + Safir.Dob.NodeParameters.Nodes(Safir.Dob.ThisNodeParameters.NodeNumber).NodeName.Val);
+                                                + Safir.Dob.ThisNodeParameters.Name);
 
                     return; // *** RETURN ***
                 }

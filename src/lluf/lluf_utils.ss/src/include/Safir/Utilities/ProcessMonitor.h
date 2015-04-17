@@ -54,11 +54,18 @@ namespace Utilities
                        const boost::function<void(const pid_t pid)>& callback,
                        const boost::chrono::steady_clock::duration& pollPeriod);
 
+        /**
+         * Stop monitoring all processes and stop the process monitor.
+         *
+         * This member function is thread safe.
+         */
         void Stop();
 
         /**
          * Start monitor the given PID.
          * Multiple calls with the same pid will give only one callback
+         *
+         * This member function is thread safe.
          *
          * @param [in] pid  The PID which we want to monitor.
          */
@@ -68,6 +75,8 @@ namespace Utilities
          * Stop monitor the given PID.
          * One call to StopMonitorPid will stop monitoring the pid even if StartMonitorPid was
          * called multiple times for that pid.
+         *
+         * This member function is thread safe.
          *
          * @param [in] pid  The PID to stop monitoring.
          */

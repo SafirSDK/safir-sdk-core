@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2014 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Anders Widén / anders.widen@consoden.se
 *
@@ -49,24 +50,55 @@ BOOST_AUTO_TEST_CASE(GetDouDirectories)
 
     std::vector<std::pair<std::string,std::string> > douFilePaths = ConfigHelper::GetDouDirectories(reader);
 
-    BOOST_REQUIRE_EQUAL (douFilePaths.size(), 3U);
-
-    BOOST_REQUIRE_EQUAL(douFilePaths[0].first, "Default");
-    BOOST_REQUIRE_EQUAL(douFilePaths[1].first, "Override");
-    BOOST_REQUIRE_EQUAL(douFilePaths[2].first, "AnotherOverride");
-
-    const std::string curbindir = GetEnv("CMAKE_CURRENT_BINARY_DIR");
-    if (douFilePaths[0].second != "/path/to/default/directory" ||
-        douFilePaths[1].second != "/path/to/some/other/directory" ||
-        (douFilePaths[2].second != curbindir + "/AnotherOverride" &&
-         douFilePaths[2].second != curbindir + "\\AnotherOverride"))
+    if (Safir::Utilities::Internal::Expansion::GetSafirInstance() == 0)
     {
-        std::wcout << "Unexpected path!\n"
-                   << " " << douFilePaths[0].second.c_str() << "\n"
-                   << " " << douFilePaths[1].second.c_str() << "\n"
-                   << " " << douFilePaths[2].second.c_str() << std::endl;
+        BOOST_REQUIRE_EQUAL (douFilePaths.size(), 4U);
 
-        BOOST_FAIL("Unexpected path");
+        BOOST_REQUIRE_EQUAL(douFilePaths[0].first, "Default");
+        BOOST_REQUIRE_EQUAL(douFilePaths[1].first, "Override");
+        BOOST_REQUIRE_EQUAL(douFilePaths[2].first, "AnotherOverride");
+        BOOST_REQUIRE_EQUAL(douFilePaths[3].first, "Instance0Override");
+
+        const std::string curbindir = GetEnv("CMAKE_CURRENT_BINARY_DIR");
+        if (douFilePaths[0].second != "/path/to/default/directory" ||
+            douFilePaths[1].second != "/path/to/some/other/directory" ||
+            (douFilePaths[2].second != curbindir + "/AnotherOverride" &&
+             douFilePaths[2].second != curbindir + "\\AnotherOverride") ||
+             douFilePaths[3].second != "/path/to/an/instance0/override/directory")
+        {
+            std::wcout << "Unexpected path!\n"
+                       << " " << douFilePaths[0].second.c_str() << "\n"
+                       << " " << douFilePaths[1].second.c_str() << "\n"
+                       << " " << douFilePaths[2].second.c_str() << "\n"
+                       << " " << douFilePaths[3].second.c_str() << std::endl;
+
+            BOOST_FAIL("Unexpected path");
+        }
+    }
+    else if (Safir::Utilities::Internal::Expansion::GetSafirInstance() == 1)
+    {
+        BOOST_REQUIRE_EQUAL (douFilePaths.size(), 4U);
+
+        BOOST_REQUIRE_EQUAL(douFilePaths[0].first, "Default");
+        BOOST_REQUIRE_EQUAL(douFilePaths[1].first, "Override");
+        BOOST_REQUIRE_EQUAL(douFilePaths[2].first, "AnotherOverride");
+        BOOST_REQUIRE_EQUAL(douFilePaths[3].first, "Instance1Override");
+
+        const std::string curbindir = GetEnv("CMAKE_CURRENT_BINARY_DIR");
+        if (douFilePaths[0].second != "/path/to/default/directory" ||
+            douFilePaths[1].second != "/path/to/some/other/directory" ||
+            (douFilePaths[2].second != curbindir + "/AnotherOverride" &&
+             douFilePaths[2].second != curbindir + "\\AnotherOverride") ||
+             douFilePaths[3].second != "/path/to/an/instance1/override/directory")
+        {
+            std::wcout << "Unexpected path!\n"
+                       << " " << douFilePaths[0].second.c_str() << "\n"
+                       << " " << douFilePaths[1].second.c_str() << "\n"
+                       << " " << douFilePaths[2].second.c_str() << "\n"
+                       << " " << douFilePaths[3].second.c_str() << std::endl;
+
+            BOOST_FAIL("Unexpected path");
+        }
     }
 }
 

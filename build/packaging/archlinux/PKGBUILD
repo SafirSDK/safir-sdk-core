@@ -11,7 +11,7 @@ groups=()
 depends=('boost' 'unixodbc' 'qt5-base' 'cmake' 'python' 'mono' 'java-environment>=6' 'google-breakpad-svn')
 makedepends=('git' 'subversion' 'doxygen' 'graphviz')
 install=install
-source=("$pkgname"::'git+https://github.com/SafirSDK/safir_sdk_core.git#branch=logan'
+source=("$pkgname"::'git+https://github.com/anderswiden/safir_sdk_core.git'
         'safir-sdk-core.tmpfiles')
 sha1sums=('SKIP'
           'b2ef06ef3614b2f7243556cb8a28e4856e0c9e7b')
@@ -41,7 +41,6 @@ package() {
   make DESTDIR="$pkgdir/" install
 
   #Create directories
-  install -d -m 775 $pkgdir/var/log/safir-sdk-core
   install -d -m 775 $pkgdir/var/lib/safir-sdk-core
   install -Dm644 "$srcdir/safir-sdk-core.tmpfiles" "$pkgdir/usr/lib/tmpfiles.d/safir-sdk-core.conf"
 

@@ -36,7 +36,7 @@
 
 void DumpFunc(const char* const dumpPath)
 {
-    lllog(0) << "Crash! Dump generated at " << dumpPath << std::endl;
+    lllog(1) << "Crash! Dump generated at " << dumpPath << std::endl;
 }
 
 using namespace Safir::Dob::Internal;
@@ -48,10 +48,10 @@ long dispatched = 0;
 void Dispatch(const DistributionData &, bool & exitDispatch, bool & dontRemove)
 {
     ++dispatched;
-    
+
     if (dispatched % 100 == 1)
     {
-        lllog(0) << "Dispatched " << dispatched << std::endl;
+        lllog(1) << "Dispatched " << dispatched << std::endl;
     }
 
     exitDispatch = false;
@@ -65,7 +65,7 @@ void Sender(MessageQueue& queue, long& sent)
     Safir::Dob::Typesystem::Serialization::ToBinary(m,ser);
 
     DistributionData d(message_tag,ConnectionId(100,0,100),Safir::Dob::Typesystem::ChannelId(),&ser[0]);
-    lllog(0) << "Push loop starting (in thread)" << std::endl;
+    lllog(1) << "Push loop starting (in thread)" << std::endl;
     for (;;)
     {
         if (sent == NUM_MSG)
@@ -87,7 +87,7 @@ void Sender(MessageQueue& queue, long& sent)
 
         if (sent % 100 == 1)
         {
-            lllog(0) << sent << " sent" << std::endl;
+            lllog(1) << sent << " sent" << std::endl;
         }
     }
 }
@@ -100,20 +100,20 @@ int main(int, char**)
     Safir::Utilities::CrashReporter::Start();
 
     //ensure call to CrashReporter::Stop at application exit
-    boost::shared_ptr<void> guard(static_cast<void*>(0), 
+    boost::shared_ptr<void> guard(static_cast<void*>(0),
                                   boost::bind(Safir::Utilities::CrashReporter::Stop));
 
-    lllog(0) << "Starting thread" << std::endl;
+    lllog(1) << "Starting thread" << std::endl;
     long sent = 0;
     boost::thread t(boost::bind(Sender,
                                 boost::ref(queue),
                                 boost::ref(sent)));
 
-    lllog(0) << "Dispatch loop starting" << std::endl;
+    lllog(1) << "Dispatch loop starting" << std::endl;
     for(;;)
     {
         const size_t res = queue.Dispatch(Dispatch,NULL);
-        
+
         if (res == 0)
         {
             boost::this_thread::yield();
@@ -125,15 +125,13 @@ int main(int, char**)
             break;
         }
     }
-    lllog(0) << "Joining thread" << std::endl;
+    lllog(1) << "Joining thread" << std::endl;
     t.join();
     if (sent != NUM_MSG)
     {
-        lllog(0) << "unexpected number of sent " << sent << std::endl;
+        lllog(1) << "unexpected number of sent " << sent << std::endl;
         return 1;
     }
-    lllog(0) << "all seems good" << std::endl;
+    lllog(1) << "all seems good" << std::endl;
     return 0;
 }
-
-

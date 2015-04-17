@@ -75,7 +75,7 @@ namespace
     private:
         State();
         ~State();
-        
+
         //Callback functions for writing core dump
 #if defined LLUF_CRASH_REPORTER_LINUX
         static bool callback(const google_breakpad::MinidumpDescriptor& descriptor,
@@ -84,9 +84,9 @@ namespace
         {
             Instance().HandleCallback(descriptor.path());
 #else
-        static bool callback(const wchar_t *dumpPath, 
+        static bool callback(const wchar_t *dumpPath,
                              const wchar_t *id,
-                             void* /*context*/, 
+                             void* /*context*/,
                              EXCEPTION_POINTERS* /*exinfo*/,
                              MDRawAssertionInfo* /*assertion*/,
                              bool /*succeeded*/)
@@ -102,7 +102,7 @@ namespace
         }
 
         void HandleCallback(const char* const dumpPath);
-        
+
         boost::shared_ptr<google_breakpad::ExceptionHandler> m_handler;
 
         boost::mutex m_lock;
@@ -120,16 +120,16 @@ namespace
         DumpCallbackTable m_callbacks;
 
         /**
-         * This class is here to ensure that only the Instance method can get at the 
+         * This class is here to ensure that only the Instance method can get at the
          * instance, so as to be sure that boost call_once is used correctly.
-         * Also makes it easier to grep for singletons in the code, if all 
+         * Also makes it easier to grep for singletons in the code, if all
          * singletons use the same construction and helper-name.
          */
         struct SingletonHelper
         {
         private:
             friend State& State::Instance();
-            
+
             static State& Instance();
             static boost::once_flag m_onceFlag;
         };
@@ -195,14 +195,14 @@ namespace
 
 #if defined LLUF_CRASH_REPORTER_LINUX
             m_handler.reset (new google_breakpad::ExceptionHandler(google_breakpad::MinidumpDescriptor(GetDumpDirectory().string()),
-                                                                   NULL, 
-                                                                   callback, 
-                                                                   NULL, 
+                                                                   NULL,
+                                                                   callback,
+                                                                   NULL,
                                                                    true,
                                                                    -1));
 #else
             //GetErrorMode does not exist in winxp, so we do SetErrorMode twice instead.
-            m_errormode = SetErrorMode(0);     
+            m_errormode = SetErrorMode(0);
             //Set the system to not display the Windows Error Reporting dialog.
             SetErrorMode(m_errormode|SEM_NOGPFAULTERRORBOX);
 
@@ -211,7 +211,7 @@ namespace
                                                                    callback,
                                                                    NULL,
                                                                    google_breakpad::ExceptionHandler::HANDLER_ALL));
-            
+
 #endif
         }
         m_started = true;
@@ -239,10 +239,10 @@ namespace
         {
             throw std::logic_error("CrashReporter must not be started when registering callbacks!");
         }
-        
+
         m_callbacks.push_back(callback);
     }
-        
+
     bool State::Dump()
     {
         boost::lock_guard<boost::mutex> lck(m_lock);
@@ -250,7 +250,7 @@ namespace
         {
             return false;
         }
-        
+
         m_handler->WriteMinidump();
 
         return true;
@@ -278,7 +278,7 @@ namespace Utilities
     {
         State::Instance().RegisterCallback(callback);
     }
-    
+
     bool CrashReporter::Dump()
     {
         return State::Instance().Dump();

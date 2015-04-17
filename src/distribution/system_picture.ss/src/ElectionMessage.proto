@@ -1,0 +1,16 @@
+option optimize_for = LITE_RUNTIME;
+
+package Safir.Dob.Internal.SP;
+
+enum ElectionAction
+ {
+    INQUIRY = 0;
+    ALIVE = 1;
+    VICTORY = 2;
+}
+
+message ElectionMessage
+{
+    required ElectionAction action = 1;
+    required sfixed64 election_id = 2;
+}

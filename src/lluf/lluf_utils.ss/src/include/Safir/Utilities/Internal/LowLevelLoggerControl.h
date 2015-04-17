@@ -21,12 +21,10 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __LLUF_LOW_LEVEL_LOGGER_CONTROL_H__
-#define __LLUF_LOW_LEVEL_LOGGER_CONTROL_H__
+#pragma once
 
 #include <Safir/Utilities/Internal/UtilsExportDefs.h>
 #include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/filesystem/path.hpp>
 
 namespace Safir
@@ -44,33 +42,24 @@ namespace Internal
         private boost::noncopyable
     {
     public:
-        LowLevelLoggerControl(const bool openOnly, bool readWrite);
+        LowLevelLoggerControl();
 
-        //If this returns true all other methods yield undefined results
-        bool Disabled() const;
-        
+        //returns nullptr if LogDirectory is not set
         const int* GetLogLevelPointer() const;
 
-        const boost::filesystem::path LogDirectory() const;
+        const boost::filesystem::path LogDirectory() const
+        {return m_logDirectory;}
 
+        //returns 0 if LogDirectory is not set
         int LogLevel() const;
-        void LogLevel(const int level);
-        
-        bool UseTimestamps() const;
-        void UseTimestamps(const bool enabled);
-        
-        bool LogToStdout() const;
-        void LogToStdout(const bool enabled);
 
-        bool LogToFile() const;
-        void LogToFile(const bool enabled);
-
-        bool IgnoreFlush() const;
-        void IgnoreFlush(const bool enabled);
-
+        bool UseTimestamps() const {return m_timestamps;}
+        bool IgnoreFlush() const {return m_ignoreFlush;}
     private:
-        class Impl;
-        boost::shared_ptr<Impl> m_impl;
+        int m_logLevel {0};
+        bool m_timestamps {true};
+        bool m_ignoreFlush {false};
+        std::string m_logDirectory;
     };
 
 #ifdef _MSC_VER
@@ -80,6 +69,4 @@ namespace Internal
 }
 }
 }
-
-#endif
 

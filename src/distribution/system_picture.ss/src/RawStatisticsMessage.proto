@@ -1,0 +1,46 @@
+option optimize_for = LITE_RUNTIME;
+
+package Safir.Dob.Internal.SP;
+
+message RawStatisticsMessage
+{
+    message NodeInfo
+    {
+        //This info is about other nodes that this node talks to
+        required string name = 1;
+        required sfixed64 id = 2;
+        required sfixed64 node_type_id = 3; //node type id of the node
+        required string control_address = 4; //The address and port of the node's control socket
+        required string data_address = 5; //The address and port of the node's data socket
+
+        required bool is_dead = 6;
+        required uint32 control_receive_count = 7;
+        required uint32 control_retransmit_count = 8;
+        required uint32 data_receive_count = 9;
+        required uint32 data_retransmit_count = 10;
+
+        //if this message is a node-local SP to SP message (e.g. between control and dose_main and dobexplorer)
+        //it will contain all the node statistics received from other nodes.
+        optional RawStatisticsMessage remote_statistics = 11;
+    }
+
+    //information about myself
+    required string name = 1;
+    required sfixed64 id = 2;
+    required sfixed64 node_type_id = 3; //node type id of the node
+    required string control_address = 4; //The address of the node's control socket
+    required string data_address = 5; //The address of the node's data socket
+
+    //which, if any, election_id was sent out by the elected coordinator in his VICTORY message
+    optional sfixed64 election_id = 6;
+
+    optional sfixed64 incarnation_id = 7;
+
+    repeated NodeInfo node_info = 8;
+
+    //This list contains dead nodes that we have removed from the node_info list
+    //and that we have been told about by other nodes.
+    repeated sfixed64 more_dead_nodes = 9;
+
+    //TODO: Add some support for clearing the more_dead_nodes list
+}

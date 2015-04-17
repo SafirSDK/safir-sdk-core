@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -24,8 +25,16 @@
 
 #include <Safir/Dob/Internal/SharedMemoryObject.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/ConfigReader.h>
 #include <Safir/Dob/NodeParameters.h>
 #include <boost/bind.hpp>
+
+namespace //anonymous namespace for internal stuff
+{
+    const std::string shmName("SAFIR_DOSE_SHARED_MEMORY" +
+                              Safir::Utilities::Internal::Expansion::GetSafirInstanceSuffix());
+    const char * SHARED_MEMORY_NAME = shmName.c_str();
+}
 
 namespace Safir
 {
@@ -39,8 +48,6 @@ namespace Internal
      */
 
     /** @{ */
-
-    static const char * SHARED_MEMORY_NAME = "DOSE_SHARED_MEMORY";
 
     boost::once_flag SharedMemoryObject::SharedMemoryHolder::SingletonHelper::m_onceFlag = BOOST_ONCE_INIT;
 
@@ -57,7 +64,7 @@ namespace Internal
     }
 
     SharedMemoryObject::SharedMemoryHolder::SharedMemoryHolder():
-        m_startupSynchronizer("DOSE_INITIALIZATION")
+        m_startupSynchronizer("SAFIR_DOSE_INITIALIZATION")
     {
         m_startupSynchronizer.Start(this);
     }

@@ -33,7 +33,7 @@
 #include <Safir/Dob/Internal/LamportClocks.h>
 #include <Safir/Dob/Internal/PendingRegistration.h>
 #include <Safir/Dob/Internal/SubscriptionOptions.h>
-#include <Safir/Dob/Internal/Atomic.h>
+#include <Safir/Utilities/Internal/Atomic.h>
 
 namespace Safir
 {
@@ -50,8 +50,7 @@ namespace Internal
         //itself has to be public (limitation of boost::interprocess)
         struct private_constructor_t {};
     public:
-        static void Initialize(const bool iAmDoseMain = false);
-        static bool IsInitialized();
+        static void Initialize(const bool iAmDoseMain, const int64_t nodeId);
 
         static ServiceTypes& Instance();
 
@@ -139,7 +138,7 @@ namespace Internal
 
         //The constructor and destructor have to be public for the boost::interprocess internals to be able to call
         //them, but we can make the constructor "fake-private" by making it require a private type as argument.
-        explicit ServiceTypes(private_constructor_t);
+        explicit ServiceTypes(private_constructor_t, const int64_t nodeId);
 
     private:
 
@@ -151,9 +150,7 @@ namespace Internal
         typedef PairContainers<Typesystem::TypeId, ServiceTypePtr>::map ServiceTypeTable;
         ServiceTypeTable m_serviceTypes;
 
-        bool m_iAmDoseMain;
         static ServiceTypes* m_instance;
-        static AtomicUint32  m_isInitialized;
 
         LamportClock m_registrationClock;
     };

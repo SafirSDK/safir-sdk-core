@@ -35,7 +35,6 @@ namespace Dob
 namespace Internal
 {
     ServiceTypes* ServiceTypes::m_instance = NULL;
-    AtomicUint32 ServiceTypes::m_isInitialized(0);
 
     ServiceTypes& ServiceTypes::Instance()
     {
@@ -43,19 +42,18 @@ namespace Internal
         return *m_instance;
     }
 
-    ServiceTypes::ServiceTypes(private_constructor_t):
-        m_iAmDoseMain(false)
+    ServiceTypes::ServiceTypes(private_constructor_t, const int64_t nodeId)
+        : m_registrationClock(nodeId)
     {
-
+        ENSURE(nodeId != 0, << "ServiceTypes must be constructed with valid nodeId");
     }
 
-    void ServiceTypes::Initialize(const bool iAmDoseMain)
+    void ServiceTypes::Initialize(const bool iAmDoseMain, const int64_t nodeId)
     {
-        m_instance = GetSharedMemory().find_or_construct<ServiceTypes>("SERVICETYPES")(private_constructor_t());
+        m_instance = GetSharedMemory().find_or_construct<ServiceTypes>("ServiceTypes")(private_constructor_t(), nodeId);
 
         if (iAmDoseMain)
         {
-            m_instance->m_iAmDoseMain = iAmDoseMain;
             ENSURE (m_instance->m_serviceTypes.empty(),
                     << "Can't start dose_main. An application or another dose_main "
                     "instance is already started!");
@@ -69,19 +67,13 @@ namespace Internal
                 {
                     if (Dob::Typesystem::Operations::IsOfType(*it, Safir::Dob::Service::ClassTypeId))
                     {
-                        ServiceTypePtr serviceType = GetSharedMemory().construct<ServiceType>(boost::interprocess::anonymous_instance)(*it);
+                        ServiceTypePtr serviceType = GetSharedMemory().construct<ServiceType>
+                            (boost::interprocess::anonymous_instance)(*it, nodeId);
                         m_instance->m_serviceTypes.insert(std::make_pair(*it, serviceType));
                     }
                 }
             }
         }
-
-        m_isInitialized = 1;
-    }
-
-    bool ServiceTypes::IsInitialized()
-    {
-        return m_isInitialized != 0;
     }
 
     bool ServiceTypes::Register(const ConnectionPtr&                  connection,

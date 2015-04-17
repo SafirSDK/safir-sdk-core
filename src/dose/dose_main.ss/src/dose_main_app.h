@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2007-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -21,29 +22,22 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
+#pragma once
 
-#ifndef _dose_main_app_h
-#define _dose_main_app_h
+#include <memory>
 
-#include "dose_main_blocking_handler.h"
-#include "dose_main_communication.h"
-#include "dose_main_connection_handler.h"
-#include "dose_main_message_handler.h"
-#include "dose_main_node_handler.h"
-#include "dose_main_pending_registration_handler.h"
-#include "dose_main_persist_handler.h"
-#include "dose_main_pool_handler.h"
-#include "dose_main_process_info_handler.h"
-#include "dose_main_response_handler.h"
-#include "dose_main_request_handler.h"
-#include "dose_main_end_states_handler.h"
-#include "dose_main_thread_monitor.h"
-#include "dose_main_lock_monitor.h"
-#include "dose_main_connection_killer.h"
-#include "dose_main_signal_handler.h"
-#include <Safir/Dob/Connection.h>
-#include <Safir/Dob/Internal/Connections.h>
-#include <Safir/Utilities/ProcessMonitor.h>
+#include "ConnectionHandler.h"
+#include "Distribution.h"
+#include "MessageHandler.h"
+#include "NodeInfoHandler.h"
+#include "MemoryMonitor.h"
+#include "PendingRegistrationHandler.h"
+#include "PoolHandler.h"
+#include "RequestHandler.h"
+#include "BlockingHandler.h"
+#include "ConnectionKiller.h"
+#include "LockMonitor.h"
+#include <Safir/Dob/Internal/DoseMainCmd.h>
 
 //disable warnings in boost
 #if defined _MSC_VER
@@ -64,57 +58,37 @@ namespace Dob
 {
 namespace Internal
 {
-    class DoseApp:
-        public Connections::ConnectionConsumer,
-        public Safir::Dob::Dispatcher,
-        public TimeoutHandler,
-        private boost::noncopyable
+    class DoseApp : private boost::noncopyable
     {
     public:
-        DoseApp();
+        explicit DoseApp(boost::asio::io_service& ioService);
 
         ~DoseApp();
 
-        /**
-         * Start the main loop of dose_main
-         */
-        void Run();
+        void Stop();
 
     private:
-        //Handler for dispatching own connection
-        void DispatchOwnConnection();
+        void Start(const std::string& nodeName,
+                   int64_t nodeId,
+                   int64_t nodeTypeId,
+                   const std::string& dataAddress);
 
-        //Handler for all other events in dose_main
-        void HandleEvents();
-        AtomicUint32 m_connectEvent;
-        AtomicUint32 m_connectionOutEvent;
-        AtomicUint32 m_nodeStatusChangedEvent;
+        void InjectNode(const std::string& nodeName,
+                        int64_t nodeId,
+                        int64_t nodeTypeId,
+                        const std::string& dataAddress);
 
-        //Timeout handler
-        virtual void HandleTimeout(const TimerInfoPtr& timer);
+        void ExcludeNode(int64_t nodeId, int64_t nodeTypeId);
 
-        void ConnectionThread();
+        void LogStatus(const std::string& str);
 
-        void OnDoDispatch();
-
-        //implementation of Connections::ConnectionHandler
-        virtual ConnectResult CanAddConnection(const std::string & connectionName, const pid_t pid, const long context);
-        virtual void HandleConnect(const ConnectionPtr & connection);
-        
-        void HandleDisconnect(const ConnectionPtr & connection);
-
-        void AllocateStatic();
-
-        void HandleConnectionOutEvent(const ConnectionPtr & connection, std::vector<ConnectionPtr>& deadConnections);
-
-        void NodeStatusChangedNotifier();
-        void QueueNotFull();
-        void StartPoolDistribution();
-        void RequestPoolDistribution(const int nodeId);
+        void HandleSignal(const boost::system::error_code& error,
+                          const int signalNumber);
 
         void HandleIncomingData(const DistributionData & data, const bool isAckedData);
 
-        void HandleAppEventHelper(const ConnectionPtr & connecction, int & recursionLevel);
+        void OnAppEvent(const ConnectionPtr & connection, bool disconnecting);
+        void HandleAppEventHelper(const ConnectionPtr & connection, int & recursionLevel);
 
         void HandleWaitingConnections(const Identifier blockingApp,
                                       int & recursionLevel);
@@ -123,61 +97,40 @@ namespace Internal
                                       IdentifierSet & waiting,
                                       int & recursionLevel);
 
+        void HandleEvents();
 
-        static void MemoryMonitorThread();
+        std::atomic<bool> m_stopped{false};
+        boost::asio::io_service& m_ioService;
 
-        boost::asio::io_service m_ioService;
-        SignalHandler m_signalHandler;
-        const bool m_timerHandlerInitiated;
+        boost::asio::io_service::strand m_strand;
+        boost::asio::io_service::strand m_wcoutStrand;
+        boost::shared_ptr<boost::asio::io_service::work> m_work;
 
-        EndStatesHandler m_endStates;
+        int64_t m_nodeId{0};
+        std::unique_ptr<Distribution> m_distribution;
 
-        // Shared memory queue message handlers
-        ConnectionHandler   m_connectionHandler;
+        Control::DoseMainCmdReceiver m_cmdReceiver;
+
+        boost::asio::signal_set m_signalSet;
 
         BlockingHandlers    m_blockingHandler;
 
-        MessageHandler      m_messageHandler;
-
-        RequestHandler      m_requestHandler;
-        ResponseHandler     m_responseHandler;
-
-        PoolHandler         m_poolHandler;
+        std::unique_ptr<MessageHandler>      m_messageHandler;
+        std::unique_ptr<RequestHandler>      m_requestHandler;
+        std::unique_ptr<PoolHandler>         m_poolHandler;
+        std::unique_ptr<ConnectionHandler>   m_connectionHandler;
+        std::unique_ptr<NodeInfoHandler>     m_nodeInfoHandler;
 
         //Pending Registrations
-        PendingRegistrationHandler m_pendingRegistrationHandler;
-
-
-        //Persistent data service and state
-        PersistHandler m_persistHandler;
-
-        //Extern node communication
-        ExternNodeCommunication m_ecom;
-
-        // Process info
-        ProcessInfoHandler m_processInfoHandler;
-
-        NodeHandler m_nodeHandler;
-
-        Safir::Dob::Connection m_ownConnection;
-
-        // For monitoring processes
-        Safir::Utilities::ProcessMonitor m_processMonitor;
+        std::unique_ptr<PendingRegistrationHandler> m_pendingRegistrationHandler;
 
         // For monitoring abandoned shared memory locks
-        LockMonitor m_lockMonitor;
+        std::unique_ptr<LockMonitor> m_lockMonitor;
 
-        // For monitoring dose_main:s own threads
-        ThreadMonitor m_threadMonitor;
-        boost::thread::id m_mainThreadId;
+        // For monitoring memory usage
+        std::unique_ptr<MemoryMonitor> m_memoryMonitor;
 
-        AtomicUint32 m_HandleEvents_notified;
-        AtomicUint32 m_DispatchOwnConnection_notified;
-
-        boost::thread m_connectionThread;
-        boost::thread m_memoryMonitorThread;
-
-        //this class should be declared last, so that when the app 
+        //this class should be declared last, so that when the app
         //is destroyed all connections will be marked as dead and stop
         //orders sent before any more destruction is done.
         ConnectionKiller m_connectionKiller;
@@ -186,6 +139,3 @@ namespace Internal
 }
 }
 }
-
-#endif
-

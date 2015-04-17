@@ -183,7 +183,7 @@ void ConvertDb()
                 object = Safir::Dob::Typesystem::ObjectFactory::Instance().CreateObject(data);
             }
         }
-        if (object != NULL)
+        if (object != nullptr)
         {
             std::wstring xml = Safir::Dob::Typesystem::Serialization::ToXml(object);
             
@@ -238,7 +238,7 @@ boost::filesystem::path GetStorageDirectory()
     catch (const boost::filesystem::filesystem_error & e)
     {
         throw Safir::Dob::Typesystem::SoftwareViolationException
-            (L"Failed to get hold of the directory for file persistance. Got this info from boost::filesystem::filesystem_error" +
+            (L"Failed to get hold of the directory for file persistence. Got this info from boost::filesystem::filesystem_error" +
             Safir::Dob::Typesystem::Utilities::ToWstring(e.what()),__WFILE__,__LINE__);
     }
 }

@@ -49,7 +49,7 @@ namespace Dob
 {
 namespace Internal
 {
-    typedef boost::interprocess::offset_ptr<AtomicUint32> SignalPtr;
+    typedef boost::interprocess::offset_ptr<Safir::Utilities::Internal::AtomicUint32> SignalPtr;
     typedef std::pair<Dob::Typesystem::TypeId, Dob::Typesystem::HandlerId> TypeHandlerPair;
 
     class DOSE_INTERNAL_API Connection:
@@ -59,9 +59,10 @@ namespace Internal
     public:
         Connection(const std::string & name,
                    const Typesystem::Int32 counter,
-                   const NodeNumber node,
+                   const int64_t node,
                    const ContextId contextId,
-                   const pid_t pid);
+                   const pid_t pid,
+                   const bool local);
 
         ~Connection();
 
@@ -267,10 +268,10 @@ namespace Internal
         // One common out queue for all consumers.
         RequestOutQueue m_requestOutQueue; //requestOut - responseIn
 
-        AtomicUint32 m_stopOrderPending;
-        AtomicUint32 m_died;
+        Safir::Utilities::Internal::AtomicUint32 m_stopOrderPending;
+        Safir::Utilities::Internal::AtomicUint32 m_died;
 
-        AtomicUint32 m_nodeDown;
+        Safir::Utilities::Internal::AtomicUint32 m_nodeDown;
 
         const bool m_isLocal;
 

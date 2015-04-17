@@ -73,20 +73,16 @@ namespace Internal
 
         static Path UserConfigDirectory()
         {
-            try
+            const auto xdgPath = GetEnv("XDG_CONFIG_HOME", std::nothrow);
+            if (!xdgPath.empty())
             {
-                return Path(GetEnv("XDG_CONFIG_HOME")) / "safir-sdk-core";
-            }
-            catch (const std::logic_error&)
-            {
+                return Path(xdgPath) / "safir-sdk-core";
             }
 
-            try
+            const auto homePath = GetEnv("HOME", std::nothrow);
+            if (!homePath.empty())
             {
-                return Path(GetEnv("HOME")) / ".config" / "safir-sdk-core";
-            }
-            catch (const std::logic_error&)
-            {
+                return Path(homePath) / ".config" / "safir-sdk-core";
             }
 
             throw std::logic_error("Could not find either HOME or XDG_CONFIG_HOME environment variables.");

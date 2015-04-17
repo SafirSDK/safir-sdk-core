@@ -47,8 +47,7 @@ namespace Internal
         public SharedMemoryObject
     {
     public:
-
-        explicit ServiceType(const Typesystem::TypeId typeId);
+        ServiceType(const Typesystem::TypeId typeId, const int64_t nodeId);
 
         Dob::Typesystem::TypeId GetTypeId() const {return m_typeId;}
 

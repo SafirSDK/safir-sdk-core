@@ -1,0 +1,15 @@
+INCLUDE_DIRECTORIES(../../src/include)
+
+ADD_EXECUTABLE(IpcPublisher ipc_publisher.cpp)
+ADD_EXECUTABLE(IpcSubscriber ipc_subscriber.cpp)
+
+TARGET_LINK_LIBRARIES(IpcPublisher PRIVATE
+  lluf_utils
+  ${Boost_PROGRAM_OPTIONS_LIBRARY})
+
+TARGET_LINK_LIBRARIES(IpcSubscriber PRIVATE
+  lluf_utils
+  ${Boost_PROGRAM_OPTIONS_LIBRARY})
+
+ADD_TEST(NAME Ipc COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/run_test.py)
+SET_SAFIR_TEST_PROPERTIES(TEST Ipc TIMEOUT 240)

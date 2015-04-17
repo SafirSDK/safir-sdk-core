@@ -33,12 +33,14 @@ from testenv import TestEnv, TestEnvStopper
 parser = argparse.ArgumentParser("test script")
 parser.add_argument("--sender", required=True)
 parser.add_argument("--backdoor", required=True)
+parser.add_argument("--safir-control", required=True)
 parser.add_argument("--dose-main", required=True)
+parser.add_argument("--dope-main", required=True)
 parser.add_argument("--safir-show-config", required=True)
 parser.add_argument("--safir-generated-paths", required=True)
 
 arguments = parser.parse_args()
-    
+
 sender_path = arguments.sender
 
 backdoor = arguments.backdoor
@@ -48,7 +50,7 @@ for pair in arguments.safir_generated_paths.split(";"):
     (name,value) = pair.split("=")
     print("Setting environment variable", name, "to", value)
     os.environ[name] = value
-    
+
 #in this test we dont check syslog output at all, we trust that it works, since we've tested
 #that elsewhere.
 
@@ -59,7 +61,10 @@ def fail(message, output):
     sys.exit(1)
 
 
-env = TestEnv(dose_main = arguments.dose_main, safir_show_config = arguments.safir_show_config, dope_main = None)
+env = TestEnv(safir_control = arguments.safir_control,
+              dose_main = arguments.dose_main,
+              safir_show_config = arguments.safir_show_config,
+              dope_main = arguments.dope_main)
 with TestEnvStopper(env):
     env.launchProcess("sender", sender_path)
     output = env.WaitForOutput("sender", "Have logged 10 times")
@@ -72,7 +77,7 @@ with TestEnvStopper(env):
     env.WaitForOutput("sender", "foobar")
     #if these outputs don't arrive we'll time out.
 
-    
+
     subprocess.call((backdoor, "all", "off"))
 
     #reset the output so we don't trigger on the output from the start of the test
@@ -82,7 +87,10 @@ with TestEnvStopper(env):
 
 
 #test turning individual prefix on
-env = TestEnv(dose_main = arguments.dose_main, safir_show_config = arguments.safir_show_config, dope_main = None)
+env = TestEnv(safir_control = arguments.safir_control,
+              dose_main = arguments.dose_main,
+              safir_show_config = arguments.safir_show_config,
+              dope_main = arguments.dope_main)
 with TestEnvStopper(env):
     env.launchProcess("sender", sender_path)
     output = env.WaitForOutput("sender", "Have logged 10 times")
@@ -100,7 +108,7 @@ with TestEnvStopper(env):
     #check that we don't have any Rymdbörje output
     if output.count("blahonga") != 0:
         fail("unexpected got logs that should not be on", output)
-    
+
     subprocess.call((backdoor, "Razor", "off"))
 
     #no need to reset, since we did it already.
@@ -108,6 +116,6 @@ with TestEnvStopper(env):
     env.WaitForOutput("sender","times.\nHave")
 
 
-    
+
 print("success")
 sys.exit(0)

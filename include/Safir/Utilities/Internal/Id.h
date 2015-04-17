@@ -48,8 +48,9 @@ extern "C"
 
     /**
      * Generates a 64 bits long integer randomly.
+     * This function will never return 0, 1, -1, int64_t max or int64_t min.
      *
-     * @return A 64 bit hash.
+     * @return A 64 bit randon number.
      */
     LLUF_ID_API boost::int64_t LlufId_GenerateRandom64();
 }

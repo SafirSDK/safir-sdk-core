@@ -5,10 +5,42 @@
     <baseClass>Safir.Dob.Parametrization</baseClass>
     <parameters>
         <parameter>
-            <summary>The node number of this node.</summary>
-            <name>NodeNumber</name>
-            <type>Int32</type>
-            <value>0</value>
+            <summary>Address and port of the control channel</summary>
+            <name>ControlAddress</name>
+            <type>String</type>
+            <value>127.0.0.1:30000</value>
         </parameter>
+
+        <parameter>
+            <summary>Address and port of the data channel</summary>
+            <name>DataAddress</name>
+            <type>String</type>
+            <value>127.0.0.1:40000</value>
+        </parameter>
+
+        <parameter>
+            <summary>Address and port of seed nodes control channel</summary>
+            <name>Seeds</name>
+            <type>String</type>
+            <array>
+                <value>192.168.1.11:40000</value>
+                <value>192.168.1.15:30000</value>
+            </array>
+        </parameter>
+
+        <parameter>
+            <summary>A nice name for this node</summary>
+            <name>Name</name>
+            <type>String</type>
+            <value>MyNode</value>
+        </parameter>
+
+        <parameter>
+            <summary>Node type for this node</summary>
+            <name>NodeType</name>
+            <type>String</type>
+            <value>Server</value>
+        </parameter>
+
     </parameters>
 </class>

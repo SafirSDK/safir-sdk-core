@@ -36,7 +36,6 @@
 #include <Safir/Dob/Internal/ServiceTypes.h>
 #include <Safir/Dob/Internal/EntityTypes.h>
 #include <Safir/Dob/Internal/InjectionKindTable.h>
-#include <Safir/Dob/ThisNodeParameters.h>
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
@@ -70,9 +69,10 @@ namespace Internal
 
     Connection::Connection(const std::string & name,
                            const Typesystem::Int32 counter,
-                           const NodeNumber node,
+                           const int64_t node,
                            const ContextId contextId,
-                           const pid_t pid):
+                           const pid_t pid,
+                           const bool local):
         m_nameWithoutCounter(name.begin(),name.end()),
         m_counter(counter),
         m_id(),
@@ -87,7 +87,7 @@ namespace Internal
         m_stopOrderPending(0),
         m_died(0),
         m_nodeDown(0),
-        m_isLocal(node == Dob::ThisNodeParameters::NodeNumber())
+        m_isLocal(local)
     {
         const std::wstring wNameWithCounter = Typesystem::Utilities::ToWstring(name) + L"#" + boost::lexical_cast<std::wstring>(counter);
         const std::string nameWithCounter = Typesystem::Utilities::ToUtf8(wNameWithCounter);

@@ -25,8 +25,8 @@
 #ifndef _dose_main_request_timers_h
 #define _dose_main_request_timers_h
 
-#include "dose_main_timers.h"
 #include <Safir/Dob/Internal/InternalDefs.h>
+#include <Safir/Dob/Internal/ConnectionId.h>
 
 namespace Safir
 {

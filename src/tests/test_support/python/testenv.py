@@ -68,50 +68,45 @@ class TestEnvStopper:
 
 class TestEnv:
     """
+    safir_control: full path to safir_control
     dose_main: full path to dose_main
-    dope_main: full path to dope_main (pass None if you dont want dope to start)
+    dope_main: full path to dope_main
     safir_show_config: full path to safir_show_config
 
     If the exes are in the PATH, its okay to just use exe names.
     """
-    def __init__(self, dose_main, dope_main, safir_show_config):
+    def __init__(self, safir_control, dose_main, dope_main, safir_show_config):
         self.__procs = dict()
         self.__creationflags = 0
         if sys.platform == "win32":
             self.__creationflags= subprocess.CREATE_NEW_PROCESS_GROUP
-        self.dose_main = self.launchProcess("dose_main", (dose_main,))
-        self.have_dope = dope_main is not None
-        if self.have_dope:
-            self.launchProcess("dope_main", (dope_main,))
+        self.safir_control = self.launchProcess("safir_control", (safir_control, "--dose-main-path", dose_main))
+        self.launchProcess("dope_main", (dope_main,))
         self.syslog = syslog_server.SyslogServer(safir_show_config)
         self.syslog_output = list()
 
         start_time = time.time()
-        print("Waiting for dose_main to be ready")
+        print("Waiting for safir_control to be ready")
 
-        if self.have_dope:
-            phrase="persistence data is ready"
-        else:
-            phrase="dose_main running"
+        phrase="persistence data is ready"
 
         while True:
             time.sleep(0.2)
-            if self.Output("dose_main").find(phrase) != -1:
+            if self.Output("safir_control").find(phrase) != -1:
                 print(" dose_main seems to be ready")
                 break
-            if self.dose_main.poll() is not None:
-                raise Exception(" dose_main appears to have failed to start!\n" +
+            if self.safir_control.poll() is not None:
+                raise Exception(" safir_control appears to have failed to start dose_main!\n" +
                                 "----- Output so far ----\n" +
-                                self.Output("dose_main") +
+                                self.Output("safir_control") +
                                 "\n---------------------")
             if time.time() - start_time > 90:
                 start_time = time.time()
-                print("dose_main seems slow to start. Here is some output:")
-                print("----- dose_main output -----")
-                print(self.Output("dose_main"))
-                if self.have_dope:
-                    print("----- dope_main output -----")
-                    print(self.Output("dope_main"))
+                print("safir_control and/or dose_main seems slow to start. Here is some output:")
+                print("----- safir_control output -----")
+                print(self.Output("safir_control"))
+                print("----- dope_main output -----")
+                print(self.Output("dope_main"))
                 print("---- syslog output ----")
                 print(self.syslog.get_data(0))
                 print("----------------------------")
@@ -132,7 +127,7 @@ class TestEnv:
         self.__procs[name] = (proc,queue,list())
         return proc
 
-    def __kill(self, name, proc):
+    def __kill(self, name, proc, timeout):
         try:
             print(" Terminating", name)
             if sys.platform == "win32":
@@ -141,7 +136,7 @@ class TestEnv:
             else:
                 proc.terminate()
             #let it have a minute to die...
-            for i in range (600):
+            for i in range (timeout * 10):
                 if proc.poll() is not None:
                     print("   Terminate successful")
                     return
@@ -155,13 +150,16 @@ class TestEnv:
 
     def killprocs(self):
         print("Terminating all processes")
-        self.__kill("dose_main", self.dose_main)
+        self.__kill("safir_control", self.safir_control, timeout = 120)
 
         polls = 0
         for name, (proc,queue,output) in self.__procs.items():
             while polls < 600 and proc.poll() is None:
                 time.sleep(0.1)
                 polls += 1
+
+            if proc.returncode is None:
+                self.__kill(name,proc, timeout = 30)
 
             if proc.returncode != 0:
                 print("--", name, "returncode is", proc.returncode, " -----")
@@ -187,6 +185,7 @@ class TestEnv:
     def WaitForOutput(self, name, expected_output):
         while True:
             output = self.Output(name)
+            #print(output)
             if output.find(expected_output) != -1:
                 return output
             if not self.ProcessDied(): #reversed return value

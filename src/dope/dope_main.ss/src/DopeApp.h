@@ -21,8 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#ifndef __DOPE_APP_H__
-#define __DOPE_APP_H__
+#pragma once
 
 #include <Safir/Application/Backdoor.h>
 #include <Safir/Application/BackdoorKeeper.h>
@@ -30,7 +29,6 @@
 #include <Safir/Dob/ResponseSender.h>
 #include "PersistenceHandler.h"
 #include <Safir/Application/Tracer.h>
-#include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
 #include <Safir/Utilities/AsioDispatcher.h>
@@ -57,39 +55,41 @@ public:
 
 private:
     /** Implements Safir::Dob::StopHandler. */
-    virtual void  OnStopOrder();
+    virtual void  OnStopOrder() override;
 
     /** Implements Safir::Application::Backdoor. */
-    virtual void HandleCommand(const std::vector<std::wstring>& cmdTokens);
+    virtual void HandleCommand(const std::vector<std::wstring>& cmdTokens) override;
 
     /** Implements Safir::Application::Backdoor. */
-    virtual std::wstring GetHelpText();
+    virtual std::wstring GetHelpText() override;
 
     /** Implements Safir::Dob::EntityHandler. */
     virtual void OnRevokedRegistration(const Safir::Dob::Typesystem::TypeId     typeId,
-        const Safir::Dob::Typesystem::HandlerId& handlerId);
+        const Safir::Dob::Typesystem::HandlerId& handlerId) override;
 
     virtual void OnCompletedRegistration(const Safir::Dob::Typesystem::TypeId     typeId,
-        const Safir::Dob::Typesystem::HandlerId& handlerId);
+        const Safir::Dob::Typesystem::HandlerId& handlerId) override;
 
     virtual void OnCreateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
-        Safir::Dob::ResponseSenderPtr        responseSender);
+        Safir::Dob::ResponseSenderPtr        responseSender) override;
 
     virtual void OnUpdateRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
-        Safir::Dob::ResponseSenderPtr        responseSender);
+        Safir::Dob::ResponseSenderPtr        responseSender) override;
 
     virtual void OnDeleteRequest(const Safir::Dob::EntityRequestProxy entityRequestProxy,
-        Safir::Dob::ResponseSenderPtr        responseSender);
+        Safir::Dob::ResponseSenderPtr        responseSender) override;
 
 
     /** Implements Safir::Dob::EntitySubscriber. */
-    virtual void OnNewEntity(const Safir::Dob::EntityProxy entityProxy);
-    virtual void OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy){};
-    virtual void OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy, const bool ){};
+    virtual void OnNewEntity(const Safir::Dob::EntityProxy entityProxy) override;
+    virtual void OnUpdatedEntity(const Safir::Dob::EntityProxy entityProxy) override{};
+    virtual void OnDeletedEntity(const Safir::Dob::EntityProxy entityProxy, const bool ) override{};
 
 
     void StartUp(bool restore);
     void Start(bool restore);
+
+    boost::asio::io_service m_ioService;
 
     Safir::Utilities::AsioDispatcher m_dispatcher;
     Safir::Dob::Connection m_dobConnection;
@@ -106,8 +106,7 @@ private:
     void ConnectionThread();
     //Handler when ok to connect for applications.
     void SignalOkToConnect(bool ok);
-    
-    boost::asio::io_service m_ioService;
+
     boost::thread m_thread;
 
     bool m_persistenceStarted; // Any dope has started successfully and loaded persistent data into the system.
@@ -119,5 +118,3 @@ private:
 
     Safir::Application::Tracer m_debug;
 };
-
-#endif

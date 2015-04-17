@@ -1,0 +1,35 @@
+SYSTEM_PICTURE_LISTENER(1)
+==========================
+:doctype: manpage
+
+
+NAME
+----
+system_picture_listener - show system picture internal data
+
+
+SYNOPSIS
+--------
+*system_picture_listener* ['OPTIONS']
+
+DESCRIPTION
+-----------
+system_picture_listener can be used to display internal state and statistics information
+about the current system picture in a Safir system.
+
+
+OPTIONS
+-------
+Please check system_picture_listener --help for information on options.
+
+
+RESOURCES
+---------
+Web site: <http://www.safirsdkcore.com/>
+
+
+COPYING
+-------
+Copyright \(C) 2004-2015 Saab AB. Free use of this software is granted under
+the terms of the GNU General Public License Version 3 (GPL-3).
+

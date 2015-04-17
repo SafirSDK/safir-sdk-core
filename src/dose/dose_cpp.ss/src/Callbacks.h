@@ -35,8 +35,6 @@ namespace Dob
 {
 namespace Internal
 {
-    //const long DOSE_LANGUAGE_CPP = 0; //defines C++ to dose_dll
-
     class Callbacks
     {
     public:
@@ -70,27 +68,27 @@ namespace Internal
 
         static void OnCreateRequest(const char* const requestBlob,
                                     const char* const state,
-                                    const long ctrl,
+                                    const DotsC_Int32 ctrl,
                                     const Safir::Dob::Typesystem::Int32 responseId,
                                     void* const consumer,
                                     bool& success);
 
         static void OnUpdateRequest(const char* const requestBlob,
                                     const char* const state,
-                                    const long ctrl,
+                                    const DotsC_Int32 ctrl,
                                     const Safir::Dob::Typesystem::Int32 responseId,
                                     void* const consumer,
                                     bool& success);
 
         static void OnDeleteRequest(const char* const state,
-                                    const long ctrl,
+                                    const DotsC_Int32 ctrl,
                                     const Safir::Dob::Typesystem::Int32 responseId,
                                     void* const consumer,
                                     bool& success);
 
         static void OnServiceRequest(const char* const requestBlob,
                                      const char* const state,
-                                     const long ctrl,
+                                     const DotsC_Int32 ctrl,
                                      const Safir::Dob::Typesystem::Int32 responseId,
                                      void* const consumer,
                                      bool& success);

@@ -279,7 +279,6 @@ namespace Safir.Dob
         //DoseC_Disconnect
         [DllImport(DOSE_DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void DoseC_Disconnect(System.Int32 ctrl,
-                                                     byte checkThread,
                                                      out byte success);
 
         //DoseC_GetConnectionName
@@ -713,6 +712,11 @@ namespace Safir.Dob
         internal static extern void DoseC_GetContext(System.Int32 ctrl,
                                                      out System.Int32 context,
                                                      out byte success);
+
+        //DoseC_GetNodeId
+        [DllImport(DOSE_DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void DoseC_GetNodeId(out System.Int64 nodeId,
+                                                    out byte success);
 
         //DoseC_SetAlwaysOverflowFlag
         [DllImport(DOSE_DLL_NAME, CallingConvention = CallingConvention.Cdecl)]

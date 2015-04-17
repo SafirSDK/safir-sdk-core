@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Defines the node number of this node. This file must be different in all nodes.</summary>
+    <name>Safir.Dob.ThisNodeParameters</name>
+    <baseClass>Safir.Dob.Parametrization</baseClass>
+    <parameters>
+
+        <parameter>
+            <summary>Address and port of the control channel</summary>
+            <name>ControlAddress</name>
+            <type>String</type>
+            <value>0.0.0.0:30000</value>
+        </parameter>
+
+        <parameter>
+            <summary>Address and port of the data channel</summary>
+            <name>DataAddress</name>
+            <type>String</type>
+            <value>0.0.0.0:40000</value>
+        </parameter>
+
+        <parameter>
+            <summary>Address and port of seed nodes control channel</summary>
+            <name>Seeds</name>
+            <type>String</type>
+            <arrayElements>
+                <arrayElement>
+                    <value>192.168.1.11:40000</value>
+                </arrayElement>
+                <arrayElement>
+                    <value>192.168.1.15:30000</value>
+                </arrayElement>
+            </arrayElements>
+        </parameter>
+
+        <parameter>
+            <summary>A nice name for this node</summary>
+            <name>Name</name>
+            <type>String</type>
+            <value>MyNode</value>
+        </parameter>
+
+        <parameter>
+            <summary>Node type for this node</summary>
+            <name>NodeType</name>
+            <type>String</type>
+            <value>Server</value>
+        </parameter>
+
+    </parameters>
+</class>

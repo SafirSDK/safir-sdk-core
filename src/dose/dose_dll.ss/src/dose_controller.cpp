@@ -28,6 +28,7 @@
 #include <boost/bind.hpp>
 #include <Safir/Dob/AccessDeniedException.h>
 #include <Safir/Dob/Entity.h>
+#include <Safir/Dob/Internal/Initialize.h>
 #include <Safir/Dob/Internal/Connection.h>
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Dob/Internal/InternalDefs.h>
@@ -41,7 +42,6 @@
 #include <Safir/Dob/Internal/TimestampOperations.h>
 #include <Safir/Dob/Internal/ContextSharedTable.h>
 #include <Safir/Dob/Internal/ContextIdComposer.h>
-#include <Safir/Dob/Internal/NodeStatuses.h>
 #include <Safir/Dob/Message.h>
 #include <Safir/Dob/NodeParameters.h>
 #include <Safir/Dob/QueueParameters.h>
@@ -99,7 +99,6 @@ namespace Internal
           m_originalInjectionState(no_state_tag),
           m_consumerReferences()
     {
-
     }
 
     void Controller::SetInstanceId(long id)
@@ -233,6 +232,8 @@ namespace Internal
         m_connectionNameCommonPart = connectionNameCommonPart;
         m_connectionNameInstancePart = connectionNameInstancePart;
 
+        InitializeDoseInternalFromApp();
+
         m_connectionName = ComposeName(m_contextId, m_connectionNameCommonPart, m_connectionNameInstancePart);
 
         ConnectResult result;
@@ -246,42 +247,6 @@ namespace Internal
             {
                 m_isConnected = true;
                 m_connection = connection;
-
-                MessageTypes::Initialize();
-                EndStates::Initialize();
-                ServiceTypes::Initialize();
-                InjectionKindTable::Initialize();
-                NodeStatuses::Initialize();
-                EntityTypes::Initialize();
-                ContextSharedTable::Initialize();
-            }
-            break;
-        case TooManyProcesses:
-            {
-                m_isConnected = false;
-                std::wostringstream ostr;
-                ostr << "Failed to open connection! There are too many processes connected to the Dob, please increase "
-                     << "the parameter Safir.Dob.ProcessInfo.MaxNumberOfInstances. " << std::endl
-                     << "While opening connection with name " << m_connectionName.c_str();
-                m_consumerReferences.DropAllReferences(boost::bind(&Dispatcher::InvokeDropReferenceCb,
-                                                                   m_dispatcher,
-                                                                   _1,
-                                                                   _2));
-                throw Safir::Dob::NotOpenException(ostr.str(), __WFILE__,__LINE__);
-            }
-            break;
-        case TooManyConnectionsInProcess:
-            {
-                m_isConnected = false;
-                std::wostringstream ostr;
-                ostr << "Failed to open connection! This process has too many connections, "
-                     << "please increase the size of the ConnectionNames array in class Safir.Dob.ProcessInfo. " << std::endl
-                     << "While opening Process pid = " << Safir::Utilities::ProcessInfo::GetPid() << ", ConnectionName = " << m_connectionName.c_str();
-                m_consumerReferences.DropAllReferences(boost::bind(&Dispatcher::InvokeDropReferenceCb,
-                                                                   m_dispatcher,
-                                                                   _1,
-                                                                   _2));
-                throw Safir::Dob::NotOpenException(ostr.str(), __WFILE__,__LINE__);
             }
             break;
 
@@ -1477,7 +1442,10 @@ namespace Internal
                                               const std::string& commonPart,
                                               const std::string& instancePart)
     {
-        std::string name(Dob::Typesystem::Utilities::ToUtf8(NodeParameters::Nodes(Dob::ThisNodeParameters::NodeNumber())->NodeName().GetVal()));
+        std::string name(Dob::Typesystem::Utilities::ToUtf8
+                         (Dob::ThisNodeParameters::Name()));
+        name.append(".");
+        name.append(boost::lexical_cast<std::string>(Connections::Instance().NodeId()));
         name.append(";");
         name.append(boost::lexical_cast<std::string>(contextId));
         name.append(";");
@@ -1988,7 +1956,7 @@ namespace Internal
         if (lastKind == Real && currKind == Real && subscriptionOptions.includeUpdates)
         {
             if (lastState.GetCreationTime() != currState.GetCreationTime() ||
-                lastState.GetVersion() != currState.GetUndecrementedVersion())
+                lastState.GetVersion() != currState.GetVersion())
             {
                 updated = true;
             }
@@ -2035,7 +2003,7 @@ namespace Internal
             if (subscriptionOptions.wantsLastState && subscriptionOptions.includeUpdates)
             {
                 if (lastState.GetCreationTime() != currState.GetCreationTime() ||
-                    lastState.GetVersion().IsDiffGreaterThanOne(currState.GetUndecrementedVersion()))
+                    lastState.GetVersion().IsDiffGreaterThanOne(currState.GetVersion()))
                 {
                     updated = true;
                 }
@@ -2355,7 +2323,6 @@ namespace Internal
 
         // Update the header
         dispatchedInjection.SetEntityStateKind(DistributionData::Real);
-        dispatchedInjection.ResetDecrementedFlag();
         if (dispatchedInjection.HasBlob())
         {
             dispatchedInjection.SetSenderId(connection->Id());
@@ -2364,7 +2331,9 @@ namespace Internal
         else
         {
             // Correct node number and context, but no connection id for delete states
-            dispatchedInjection.SetSenderId(ConnectionId(ThisNodeParameters::NodeNumber(), connection->Id().m_contextId, -1));
+            dispatchedInjection.SetSenderId(ConnectionId(Connections::Instance().NodeId(),
+                                                         connection->Id().m_contextId,
+                                                         -1));
             dispatchedInjection.SetExplicitlyDeleted(true);
         }
 
@@ -2570,15 +2539,6 @@ namespace Internal
                                     entityId.GetTypeId(),
                                     entityId.GetInstanceId());
                 return true; // Remove from queue and reset dirty flag
-            }
-
-            if (NodeStatuses::Instance().AnyNodeHasStatus(NodeStatus::Starting))
-            {
-                // We won't start to inject ghosts as long as there are one or more nodes that are
-                // in state 'Starting'. This minimize the risk that we will signal OnInitialInjectionsDone
-                // before all ghosts are received from remote nodes.
-                dontRemove = true;
-                return false;  // Don't remove from queue and don't reset dirty flag
             }
         }
 

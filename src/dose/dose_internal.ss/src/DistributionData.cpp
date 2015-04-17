@@ -52,17 +52,13 @@ namespace Internal
         BOOST_STATIC_ASSERT(sizeof(bool) == 1);
         BOOST_STATIC_ASSERT(sizeof(VersionNumber) == sizeof(boost::uint16_t));
         BOOST_STATIC_ASSERT(sizeof(ResponseId) == 4);
-        BOOST_STATIC_ASSERT(sizeof(LamportTimestamp) == 8);
+        BOOST_STATIC_ASSERT(sizeof(LamportTimestamp) == 16);
         BOOST_STATIC_ASSERT(sizeof(InternalRequestId) == 4);
         BOOST_STATIC_ASSERT(sizeof(Identifier) == 8);
-        BOOST_STATIC_ASSERT(sizeof(NodeNumber) == 4);
+        BOOST_STATIC_ASSERT(sizeof(int64_t) == 8); //NodeId
         BOOST_STATIC_ASSERT(sizeof(ContextId) == 4);
-        BOOST_STATIC_ASSERT(sizeof(ConnectionId) == 16);
-#ifdef REGISTER_TIMES
-        BOOST_STATIC_ASSERT(sizeof(Header) == 4 + sizeof(ConnectionId) + 4);
-#else
+        BOOST_STATIC_ASSERT(sizeof(ConnectionId) == 24);
         BOOST_STATIC_ASSERT(sizeof(Header) == 4 + sizeof(ConnectionId));
-#endif
 
         BOOST_STATIC_ASSERT(sizeof(ConnectHeader) == sizeof(Header) + 4);
 
@@ -72,7 +68,7 @@ namespace Internal
         BOOST_STATIC_ASSERT(sizeof(StateHeader) == sizeof(Header)
                             + 8   //m_typeId
                             + 8   //handlerid
-                            + 8); //m_regTime
+                            + 16); //m_regTime
 
         BOOST_STATIC_ASSERT(sizeof(InstanceIdPolicy::Enumeration) == 4);
 
@@ -89,7 +85,7 @@ namespace Internal
 
         BOOST_STATIC_ASSERT(sizeof(EntityStateHeader) == sizeof(StateHeader)
                             + 8  //m_instanceId
-                            + 8  //m_creationTime
+                            + 16  //m_creationTime
                             + 2  //m_version
                             + 2  //padding
                             + 4  //m_kind
@@ -132,12 +128,12 @@ namespace Internal
                             + sizeof(ConnectionId)
                             + sizeof(InternalRequestId)
                             + 4); //padding
-        BOOST_STATIC_ASSERT(sizeof(ResponseHeader) == 44);
+        BOOST_STATIC_ASSERT(sizeof(ResponseHeader) == 60);
 
 
         BOOST_STATIC_ASSERT(sizeof (unsigned int) == sizeof(boost::uint32_t));
 
-        BOOST_STATIC_ASSERT(sizeof(AtomicUint32) == 4);
+        BOOST_STATIC_ASSERT(sizeof(Safir::Utilities::Internal::AtomicUint32) == 4);
     }
     
 
@@ -463,7 +459,6 @@ namespace Internal
         entityStateHeader.m_explicitlyDeleted = explicitlyDeleted;
         entityStateHeader.m_sourceIsPermanentStore = sourceIsPermanentStore;
         entityStateHeader.m_hasBlob = blob != NULL;
-        entityStateHeader.m_versionIsDecremented = false;
         entityStateHeader.m_numTimestamps = numTimestamps;
 
         if (numTimestamps > 0)
@@ -1104,23 +1099,6 @@ namespace Internal
         Typesystem::Internal::SetChanged(blob, changed);
     }
 
-    void DistributionData::DecrementVersion()
-    {
-        ENSURE(!GetEntityStateHeader().m_versionIsDecremented, << "Can't decrement an already decremented version!");
-        --GetEntityStateHeader().m_version;
-        GetEntityStateHeader().m_versionIsDecremented = true;
-    }
-
-    const VersionNumber DistributionData::GetUndecrementedVersion() const
-    {
-        VersionNumber ver = GetEntityStateHeader().m_version;
-        if (GetEntityStateHeader().m_versionIsDecremented)
-        {
-            ++ver;
-        }
-        return ver;
-    }
-
     char * DistributionData::GetBlobCopy() const
     {
         return Dob::Typesystem::Internal::CreateCopy(GetBlob());
@@ -1247,7 +1225,6 @@ namespace Internal
                      << "\tExplicitlyDeleted: " << std::boolalpha << IsExplicitlyDeleted() << std::endl
                      << "\tSourceIsPermanentStore: " << SourceIsPermanentStore() << std::endl
                      << "\tHasBlob: " << HasBlob() << std::endl
-                     << "\tVersionIsDecremented: " << GetEntityStateHeader().m_versionIsDecremented << std::endl
                      << "\tNumTimestamps: " << GetEntityStateHeader().m_numTimestamps <<std::endl;
                 if (GetEntityStateHeader().m_numTimestamps != 0)
                 {
