@@ -51,7 +51,7 @@ namespace
           m_processInfoHandler(ioService, distribution)
     {
         distribution.SubscribeNodeEvents(
-            [](const std::string&, int64_t id, int64_t nt, const std::string&)
+            [](const std::string&, int64_t /*id*/, int64_t /*nt*/, const std::string&)
             {
                 Connections::Instance().ForEachConnectionPtr([=](const ConnectionPtr& con){con->SignalIn();});
             },

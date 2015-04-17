@@ -264,8 +264,7 @@ namespace Internal
 
     void DoseApp::OnAppEvent(const ConnectionPtr & connection, bool disconnecting)
     {
-        int recLevel=0;
-        HandleAppEventHelper(connection, recLevel);
+        HandleAppEventHelper(connection);
         if (disconnecting)
         {
             m_pendingRegistrationHandler->RemovePendingRegistrations(connection->Id());
@@ -273,9 +272,10 @@ namespace Internal
         }
     }
 
-    void DoseApp::HandleAppEventHelper(const ConnectionPtr & connection, int & recursionLevel)
+    void DoseApp::HandleAppEventHelper(const ConnectionPtr & connection)
     {
-        lllout << "HandleAppEventHelper for connection " << connection->NameWithCounter() << ", id = " << connection->Id() << std::endl;
+        lllout << "HandleAppEventHelper for connection " << connection->NameWithCounter()
+               << ", id = " << connection->Id() << std::endl;
 
         //Handle queued requests
         m_requestHandler->HandleRequests(connection);

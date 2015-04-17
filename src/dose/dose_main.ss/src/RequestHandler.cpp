@@ -619,8 +619,8 @@ namespace
         sender->SignalIn();
     }
 
-    void RequestHandler::HandleMessageFromRemoteNode(int64_t        fromNodeId,
-                                                     int64_t        fromNodeType,
+    void RequestHandler::HandleMessageFromRemoteNode(int64_t        /*fromNodeId*/,
+                                                     int64_t        /*fromNodeType*/,
                                                      const char*    data)
     {
         const DistributionData request =
