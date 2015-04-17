@@ -139,6 +139,8 @@ namespace Internal
 
             m_poolHandler->Stop();
 
+            m_requestHandler->Stop();
+
             m_pendingRegistrationHandler->Stop();
 
             m_signalSet.cancel();

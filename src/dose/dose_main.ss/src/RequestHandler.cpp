@@ -204,6 +204,16 @@ namespace
         });
     }
 
+    void RequestHandler::Stop()
+    {
+        m_strand.post([this]()
+                      {
+                          // Clear structures that hold timers
+                          m_outReqTimers.clear();
+                          m_pendingRequests.clear();
+                      });
+    }
+
     void RequestHandler::DispatchRequest(DistributionData request,
                                          bool& handled,
                                          const ConnectionPtr& sender,

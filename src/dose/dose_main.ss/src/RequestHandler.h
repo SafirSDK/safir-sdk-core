@@ -70,6 +70,8 @@ namespace Internal
 
         void HandleDisconnect(const ConnectionPtr& deletedConnection);
 
+        void Stop();
+
     private:
 
         void DispatchRequest(DistributionData request,
