@@ -95,14 +95,14 @@ namespace
           m_communication(distribution.GetCommunication()),
           m_dataTypeIdentifier(LlufId_Generate64("RequestHandler")),
           m_communicationVirtualConnectionId(LlufId_Generate64("CommunicationVirtualConnectionId")),
-          m_responseHandler(ioService,
+          m_responseHandler(m_strand,
                             distribution,
                             [this]
                             (const ConnectionId& connectionId,
                              const InternalRequestId requestId)
-                             {
+                            {
                                 m_outReqTimers.erase(std::make_pair(connectionId.m_id, requestId));
-                             })
+                            })
 
     {
         m_distribution.SubscribeNodeEvents(
@@ -609,7 +609,6 @@ namespace
                                   sender->Id(),
                                   reqId,
                                   &bin[0]);
-
         //Post the response
         m_responseHandler.SendLocalResponse(response);
 

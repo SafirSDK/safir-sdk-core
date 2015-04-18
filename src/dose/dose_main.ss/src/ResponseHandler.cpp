@@ -34,11 +34,11 @@ namespace Dob
 {
 namespace Internal
 {
-    ResponseHandler::ResponseHandler(boost::asio::io_service& ioService,
+    ResponseHandler::ResponseHandler(boost::asio::strand& strand,
                                      Distribution& distribution,
                                      const std::function<void(const ConnectionId& connectionId,
                                                               const InternalRequestId requestId)>& responsePostedCallback)
-        : m_strand(ioService)
+        : m_strand(strand)
         , m_distribution(distribution)
         , m_dataTypeIdentifier(LlufId_Generate64("ResponseHandler"))
         , m_responsePostedCallback(responsePostedCallback)
@@ -59,19 +59,18 @@ namespace Internal
                                                        {
                                                            m_liveNodes.erase(nodeId);
                                                        }));
-        m_distribution.GetCommunication().SetDataReceiver([this]
-                                                          (const int64_t /*fromNodeId*/,
-                                                           int64_t /*fromNodeType*/,
-                                                           const char* data,
-                                                           size_t /*size*/)
-                                                          {
-                                                              const DistributionData msg =
-                                                                  DistributionData::ConstConstructor(new_data_tag, data);
+        m_distribution.GetCommunication().SetDataReceiver(m_strand.wrap([this] (const int64_t /*fromNodeId*/,
+                                                                                int64_t /*fromNodeType*/,
+                                                                                const char* data,
+                                                                                size_t /*size*/)
+        {
+            const DistributionData msg =
+                DistributionData::ConstConstructor(new_data_tag, data);
 
-                                                              DistributionData::DropReference(data);
+            DistributionData::DropReference(data);
 
-                                                              SendLocalResponse(msg);
-                                                          },
+            SendLocalResponse(msg);
+        }),
                                                           m_dataTypeIdentifier,
                                                           DistributionData::NewData);
         for (const auto nodeTypeId : m_distribution.GetNodeTypeIds())
@@ -121,7 +120,7 @@ namespace Internal
     }
 
 
-    //Even though this is not executing in the strand it is thread safe.
+    //must be called in strand
     void ResponseHandler::SendLocalResponse(const DistributionData& response)
     {
         const ConnectionId toConnection=response.GetReceiverId();
@@ -142,7 +141,7 @@ namespace Internal
 
     }
 
-    //can be called inside or outside the strand
+    //must be called in strand
     bool ResponseHandler::SendResponseInternal(const DistributionData& response)
     {
        lllout << "HandleResponse: " << Typesystem::Operations::GetName(response.GetTypeId()) << std::endl;
