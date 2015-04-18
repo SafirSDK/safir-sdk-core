@@ -221,13 +221,9 @@ namespace Internal
         if (m_currentlyDispatchingRequest != NULL && (*m_currentlyDispatchingRequest)->GetRequestId() == requestId)
         {
             //Move request and response to the handled requests list.
+            m_handledRequests.push_back(std::make_pair(**m_currentlyDispatchingRequest,response));
 
-            // workaround for VS2010            
-            //m_handledRequests.push_back(std::make_pair(**m_currentlyDispatchingRequest,response));
-            RequestsAndResponsesPair x1 =  std::make_pair(**m_currentlyDispatchingRequest,response);
-            m_handledRequests.push_back(x1);
-
-             m_currentlyDispatchingRequest = NULL;
+            m_currentlyDispatchingRequest = NULL;
         }
         else
         {
@@ -249,12 +245,9 @@ namespace Internal
                        << ". Assuming that it timed out and was given an auto-response by dose_main." << std::endl;
                 return;
             }
-            //Move request and response to the handled requests list.            
+            //Move request and response to the handled requests list.
 
-            // workaround for VS2010            
-            // m_handledRequests.push_back(std::make_pair(*findIt,response));
-            RequestsAndResponsesPair x1 =  std::make_pair(*findIt,response);
-            m_handledRequests.push_back(x1);
+            m_handledRequests.push_back(std::make_pair(*findIt,response));
 
             m_dispatchedRequests.erase(findIt);
         }
@@ -318,4 +311,3 @@ namespace Internal
 }
 }
 }
-
