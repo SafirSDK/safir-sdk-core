@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include <boost/static_assert.hpp>
 #include <boost/type_traits.hpp>
-
+#include <atomic>
 
 namespace
 {
@@ -52,7 +52,7 @@ int main()
     {
         Safir::Utilities::Internal::AtomicUint32 atomic;
         check(atomic.value() == 0);
-        
+
         atomic = 10;
         check(atomic.value() == 10);
 
@@ -73,7 +73,7 @@ int main()
         check(atomic == 20);
         check(atomic != 10);
     }
-    
+
     {
         Safir::Utilities::Internal::AtomicUint32 atomic2(100);
         check(atomic2.value() == 100);
@@ -83,5 +83,3 @@ int main()
 
     return 0;
 }
-
-
