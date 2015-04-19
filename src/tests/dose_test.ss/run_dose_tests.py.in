@@ -198,9 +198,6 @@ class Parameters:
                                                  "dose",
                                                  "output_multinode" if self.multinode else "output_standalone")
 
-        self.tempdir = tempfile.mkdtemp(prefix="dose_test_backup")
-
-
 class Results:
     def __init__(self):
         self.num_tc_failed = 0
