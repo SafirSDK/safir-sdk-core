@@ -27,7 +27,6 @@
 
 #include <boost/cstdint.hpp>
 #include <boost/noncopyable.hpp>
-#include <atomic>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -102,7 +101,7 @@ namespace Internal
         }
 
     private:
-        std::atomic<boost::uint32_t> m_value;
+        boost::atomic<boost::uint32_t> m_value;
     };
 }
 }

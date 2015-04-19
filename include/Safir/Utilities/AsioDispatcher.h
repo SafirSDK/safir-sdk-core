@@ -71,7 +71,7 @@ namespace Utilities
         AsioDispatcher(const Safir::Dob::Connection & connection,
                        boost::asio::io_service& ioService)
             : m_connection(connection)
-            , m_strand(boost::make_shared<boost::asio::strand>(ioService))
+            , m_strand(new boost::asio::strand(ioService))
             , m_isNotified()
         {
 
@@ -121,7 +121,7 @@ namespace Utilities
          * OnDoDispatch notifies the dob connection thread that it's time to perform a dispatch.
          * Overrides Safir::Dob::Dispatcher.
          */
-        void OnDoDispatch() override
+        void OnDoDispatch()
         {
             if (!m_isNotified.test_and_set())
             {
