@@ -49,10 +49,9 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
   if (SAFIR_EXTERNAL_BUILD)
     #load compiler settings, csharp and java!
     include(${SAFIR_SDK_CORE_CMAKE_DIR}/SafirCompilerSettings.cmake)
-    INCLUDE(${SAFIR_SDK_CORE_CMAKE_DIR}/PrecompiledHeader.cmake)
+    include(${SAFIR_SDK_CORE_CMAKE_DIR}/PrecompiledHeader.cmake)
     include(${SAFIR_SDK_CORE_DOTNET_SETTINGS})
     include(${SAFIR_SDK_CORE_JAVA_SETTINGS})
-
     #We need boost headers.
     set(Boost_FIND_QUIETLY True)
     find_package(Boost COMPONENTS system thread REQUIRED)
@@ -66,7 +65,7 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
       SET(CMAKE_DEBUG_POSTFIX "d")
     endif()
   else()
-    INCLUDE(PrecompiledHeader)
+    include(PrecompiledHeader)
   endif()
 
   #

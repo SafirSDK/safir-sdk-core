@@ -96,7 +96,7 @@ function(ADD_PRECOMPILED_HEADER _targetName _input)
       DEPENDS ${_source} )
     ADD_CUSTOM_TARGET(${_targetName}_gch DEPENDS ${_output})
     ADD_DEPENDENCIES(${_targetName} ${_targetName}_gch)
-    SET_TARGET_PROPERTIES(${_targetName} PROPERTIES COMPILE_FLAGS "-include ${_name} -Winvalid-pch")
+    SET_TARGET_PROPERTIES(${_targetName} PROPERTIES COMPILE_FLAGS "-include ${_name} -Winvalid-pch -std=c++11")
   ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
   UNSET(FORCEINCLUDE)
