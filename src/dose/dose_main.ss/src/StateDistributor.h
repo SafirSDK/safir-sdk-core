@@ -129,20 +129,24 @@ namespace Internal
                         {
                             dontRemove=false;
                             DistributionData realState = subscription->GetState()->GetRealState();
-                            if (!realState.IsNoState() && !m_distribution.IsLocal(realState.GetTypeId()))
+                            if (!realState.IsNoState() && realState.GetType()==DistributionData::RegistrationState)
                             {
-                                if (realState.GetType()==DistributionData::RegistrationState)
+                                // Registration state
+                                dontRemove=!subscription->DirtyFlag().Process([this, &subscription]
                                 {
-                                    // Registration state
-                                    dontRemove=!subscription->DirtyFlag().Process([this, &subscription]{return ProcessRegistrationState(subscription);});
-                                }
-                                else
-                                {
-                                    // Entity state
-                                    dontRemove=!subscription->DirtyFlag().Process([this, &subscription]{return ProcessEntityState(subscription);});
-                                }
+                                    return ProcessRegistrationState(subscription);
+                                });
                             }
-                            //dontRemove is true if we got an overflow, and if we did we dont want to keep sending anything to dose_com.
+                            else
+                            {
+                                // Entity state
+                                dontRemove=!subscription->DirtyFlag().Process([this, &subscription]
+                                {
+                                    return ProcessEntityState(subscription);
+                                });
+                            }
+                            //dontRemove is true if we got an overflow, and if we did we
+                            //dont want to keep sending anything to dose_com.
                             exitDispatch = dontRemove;
                         });
                     }
