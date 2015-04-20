@@ -134,6 +134,7 @@ def delete_binary(parameters):
 #This relies on the fact that we're installed in the bin directory on both linux and windows.
 install_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),"..")
 
+dose_main_path = os.path.join(install_dir,"dose_main" + (".exe" if sys.platform == "win32" else ""))
 #Get the default dou directory and set it as an environment variable that can be
 #picked up by the typesystem.ini that belongs to the test suite.
 #Note: The last part of this path is set by cmake during configuration/installation.
@@ -162,7 +163,7 @@ try:
     delete_all_rows(parameters)
 
     print("== Set a bunch of entities")
-    env = TestEnv("safir_control", "dose_main", "dope_main", "safir_show_config")
+    env = TestEnv("safir_control", dose_main_path, "dope_main", "safir_show_config")
     with TestEnvStopper(env):
         env.launchProcess("entity_owner", ("entity_owner","set")).wait()
         print("waiting for 110 entities in db")
@@ -180,7 +181,7 @@ try:
 
 
     print("== See if dope loads them at startup")
-    env = TestEnv("safir_control", "dose_main", "dope_main", "safir_show_config")
+    env = TestEnv("safir_control", dose_main_path, "dope_main", "safir_show_config")
     with TestEnvStopper(env):
         env.launchProcess("entity_owner", ("entity_owner","accept")).wait()
 
@@ -236,7 +237,7 @@ try:
 
     print("== Check that dope can load xml")
 
-    env = TestEnv("safir_control", "dose_main", "dope_main", "safir_show_config")
+    env = TestEnv("safir_control", dose_main_path, "dope_main", "safir_show_config")
     with TestEnvStopper(env):
         env.launchProcess("entity_owner", ("entity_owner","accept")).wait()
 
@@ -274,7 +275,7 @@ try:
     print("== update the entities")
 
 
-    env = TestEnv("safir_control", "dose_main", "dope_main", "safir_show_config")
+    env = TestEnv("safir_control", dose_main_path, "dope_main", "safir_show_config")
     with TestEnvStopper(env):
         #remove all bin binaries (that have been loaded by dope by now), so
         #that we can wait for all entities to be written again
@@ -299,7 +300,7 @@ try:
         sys.exit(1)
 
     print("== Load them again and check output")
-    env = TestEnv("safir_control", "dose_main", "dope_main", "safir_show_config")
+    env = TestEnv("safir_control", dose_main_path, "dope_main", "safir_show_config")
     with TestEnvStopper(env):
         env.launchProcess("entity_owner", ("entity_owner","accept")).wait()
 
