@@ -15,7 +15,7 @@
   <TestActions>
     <DoseTest.Action index="0">
       <ActionKind>SendMessage</ActionKind>
-      <Partner>2</Partner>
+      <Partner>1</Partner> <!-- Message not sent over network, since deliver is not guaranteed, and fragmentation causes a very high probability of failure.-->
       <Consumer>0</Consumer>
       <Channel>DEFAULT_CHANNEL</Channel>
       <Object type="DoseTest.ComplexGlobalMessage">
