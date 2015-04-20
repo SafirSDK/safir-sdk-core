@@ -57,12 +57,12 @@ namespace Dob
 {
 namespace Internal
 {
-    class DoseApp : private boost::noncopyable
+    class DoseMainApp : private boost::noncopyable
     {
     public:
-        explicit DoseApp(boost::asio::io_service& ioService);
+        explicit DoseMainApp(boost::asio::io_service& ioService);
 
-        ~DoseApp();
+        ~DoseMainApp();
 
         void Stop();
 

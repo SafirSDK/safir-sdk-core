@@ -22,7 +22,7 @@
 *
 ******************************************************************************/
 
-#include "dose_main_app.h"
+#include "DoseMainApp.h"
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/CrashReporter.h>
@@ -80,7 +80,7 @@ int main()
     lllog(1) << "dose_main entering main()" << std::endl;
 
     //ensure call to CrashReporter::Stop at application exit
-    //Start is called in DoseApp
+    //Start is called in DoseMainApp
     boost::shared_ptr<void> crGuard(static_cast<void*>(0),
                                     [](void*){Safir::Utilities::CrashReporter::Stop();});
 
@@ -90,7 +90,7 @@ int main()
 
     try
     {
-        Safir::Dob::Internal::DoseApp theApp(ioService);
+        Safir::Dob::Internal::DoseMainApp theApp(ioService);
 
         //Set number of threads to at least 2, or the number of cpu kernels
         auto nbrOfThreads = std::max<size_t>(10, boost::thread::hardware_concurrency());

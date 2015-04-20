@@ -22,7 +22,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-#include "dose_main_app.h"
+#include "DoseMainApp.h"
 #include <Safir/Dob/Internal/ControlConfig.h>
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Dob/Internal/InternalDefs.h>
@@ -55,7 +55,7 @@ namespace Internal
         }
     }
 
-    DoseApp::DoseApp(boost::asio::io_service& ioService):
+    DoseMainApp::DoseMainApp(boost::asio::io_service& ioService):
         m_ioService(ioService),
         m_strand(ioService),
         m_wcoutStrand(ioService),
@@ -118,12 +118,12 @@ namespace Internal
         m_cmdReceiver.Start();
     }
 
-    DoseApp::~DoseApp()
+    DoseMainApp::~DoseMainApp()
     {
         Stop();
     }
 
-    void DoseApp::Stop()
+    void DoseMainApp::Stop()
     {
         const bool wasStopped = m_stopped.exchange(true);
         if (!wasStopped)
@@ -149,10 +149,10 @@ namespace Internal
     }
 
 
-    void DoseApp::Start(const std::string& nodeName,
-                        int64_t nodeId,
-                        int64_t nodeTypeId,
-                        const std::string& dataAddress)
+    void DoseMainApp::Start(const std::string& nodeName,
+                            int64_t nodeId,
+                            int64_t nodeTypeId,
+                            const std::string& dataAddress)
     {
         m_nodeId = nodeId;
 
@@ -185,10 +185,10 @@ namespace Internal
         m_nodeInfoHandler.reset(new NodeInfoHandler(m_ioService, *m_distribution));
     }
 
-    void DoseApp::InjectNode(const std::string& nodeName,
-                             int64_t nodeId,
-                             int64_t nodeTypeId,
-                             const std::string& dataAddress)
+    void DoseMainApp::InjectNode(const std::string& nodeName,
+                                 int64_t nodeId,
+                                 int64_t nodeTypeId,
+                                 const std::string& dataAddress)
     {
         lllog(1) << "DOSE_MAIN: InjectNode cmd received."<<
                   " NodeName=" << nodeName.c_str() <<
@@ -224,7 +224,7 @@ namespace Internal
         }
     }
 
-    void DoseApp::ExcludeNode(int64_t nodeId, int64_t nodeTypeId)
+    void DoseMainApp::ExcludeNode(int64_t nodeId, int64_t nodeTypeId)
     {
         lllog(1) << "DOSE_MAIN: ExcludeNode cmd received."<<
                     " NodeId=" <<  nodeId <<
@@ -234,8 +234,8 @@ namespace Internal
     }
 
 
-    void DoseApp::HandleSignal(const boost::system::error_code& error,
-                               const int signalNumber)
+    void DoseMainApp::HandleSignal(const boost::system::error_code& error,
+                                   const int signalNumber)
     {
         if (error)
         {
@@ -256,7 +256,7 @@ namespace Internal
         Stop();
     }
 
-    void DoseApp::OnAppEvent(const ConnectionPtr & connection, bool disconnecting)
+    void DoseMainApp::OnAppEvent(const ConnectionPtr & connection, bool disconnecting)
     {
         HandleAppEventHelper(connection);
         if (disconnecting)
@@ -266,7 +266,7 @@ namespace Internal
         }
     }
 
-    void DoseApp::HandleAppEventHelper(const ConnectionPtr & connection)
+    void DoseMainApp::HandleAppEventHelper(const ConnectionPtr & connection)
     {
         lllout << "HandleAppEventHelper for connection " << connection->NameWithCounter()
                << ", id = " << connection->Id() << std::endl;
@@ -281,7 +281,7 @@ namespace Internal
         m_pendingRegistrationHandler->CheckForNewOrRemovedPendingRegistration(connection);
     }
 
-    void DoseApp::LogStatus(const std::string& str)
+    void DoseMainApp::LogStatus(const std::string& str)
     {
         lllog(1) << str.c_str() << std::endl;
         m_wcoutStrand.dispatch([str]
