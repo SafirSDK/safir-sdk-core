@@ -41,16 +41,16 @@ namespace Dob
 {
 namespace Internal
 {
-    PoolHandler::PoolHandler(boost::asio::io_service& io,
+    PoolHandler::PoolHandler(boost::asio::io_service::strand& strand,
                              Distribution& distribution,
                              const std::function<void(int64_t)>& checkPendingReg,
                              const std::function<void(const std::string& str)>& logStatus)
-        :m_strand(io)
-        ,m_endStatesTimer(io)
+        :m_strand(strand)
+        ,m_endStatesTimer(m_strand.get_io_service())
         ,m_distribution(distribution)
-        ,m_poolDistributor(io, m_distribution)
-        ,m_poolDistributionRequests(io, m_distribution.GetCommunication())
-        ,m_persistHandler(io, distribution, logStatus, [=]{OnPersistenceReady();}, // persistentDataReadyCb
+        ,m_poolDistributor(m_strand.get_io_service(), m_distribution)
+        ,m_poolDistributionRequests(m_strand.get_io_service(), m_distribution.GetCommunication())
+        ,m_persistHandler(m_strand.get_io_service(), distribution, logStatus, [=]{OnPersistenceReady();}, // persistentDataReadyCb
                                                        [=]{Connections::Instance().AllowConnect(-1);}) // persistentDataAllowedCb
     {
         auto injectNode=[=](const std::string&, int64_t id, int64_t nt, const std::string&)
@@ -220,128 +220,138 @@ namespace Internal
 
     void PoolHandler::OnRegistrationState(int64_t fromNodeId, int64_t fromNodeType, const char* data, size_t /*size*/)
     {
-        const auto state=DistributionData::ConstConstructor(new_data_tag, data);
-        DistributionData::DropReference(data);
-
-        ENSURE(!m_distribution.IsLocal(state.GetTypeId()),
-               << "Received Local RegistrationState of type " << state.GetTypeId()
-               << " from node " << fromNodeId << ", system configuration is bad!");
-
-        ENSURE (state.GetType() == DistributionData::RegistrationState, <<
-                "PoolHandler::OnRegistrationState received DistributionData that is not a RegistrationState!");
-
-        if (state.IsRegistered()) //is a registration state
+        m_strand.post([=]
         {
-            const ConnectionId senderId=state.GetSenderId();
+            const auto state=DistributionData::ConstConstructor(new_data_tag, data);
+            DistributionData::DropReference(data);
 
-            ENSURE(senderId.m_id != -1, << "Registration states are expected to have ConnectionId != -1! Reg for type "
-                   << Safir::Dob::Typesystem::Operations::GetName(state.GetTypeId()));
+            ENSURE(!m_distribution.IsLocal(state.GetTypeId()),
+                   << "Received Local RegistrationState of type " << state.GetTypeId()
+                   << " from node " << fromNodeId << ", system configuration is bad!");
 
-            const ConnectionPtr connection = Connections::Instance().GetConnection(senderId, std::nothrow);
+            ENSURE (state.GetType() == DistributionData::RegistrationState, <<
+                    "PoolHandler::OnRegistrationState received DistributionData that is not a RegistrationState!");
 
-            if (connection!=nullptr)
+            if (state.IsRegistered()) //is a registration state
             {
+                lllog(1)<<"OnRegistrationState - "<<Safir::Dob::Typesystem::Operations::GetName(state.GetTypeId())<<", handler "<<state.GetHandlerId()<<std::endl;
+                const ConnectionId senderId=state.GetSenderId();
+
+                ENSURE(senderId.m_id != -1, << "Registration states are expected to have ConnectionId != -1! Reg for type "
+                       << Safir::Dob::Typesystem::Operations::GetName(state.GetTypeId()));
+
+                const ConnectionPtr connection = Connections::Instance().GetConnection(senderId, std::nothrow);
+
+                if (connection!=nullptr)
+                {
+                    if (Typesystem::Operations::IsOfType(state.GetTypeId(),Safir::Dob::Service::ClassTypeId))
+                    {
+                        ServiceTypes::Instance().RemoteSetRegistrationState(connection,state);
+                    }
+                    else
+                    {
+                        EntityTypes::Instance().RemoteSetRegistrationState(connection,state);
+                    }
+                }
+            }
+            else //is an unregistration state
+            {
+                ENSURE(state.GetSenderId().m_id == -1, << "Unregistration states are expected to have ConnectionId == -1! Unreg for type "
+                       << Safir::Dob::Typesystem::Operations::GetName(state.GetTypeId()));
+
+                //unregistration states bypass all waitingstates handling and go straight
+                //into shared memory
                 if (Typesystem::Operations::IsOfType(state.GetTypeId(),Safir::Dob::Service::ClassTypeId))
                 {
-                    ServiceTypes::Instance().RemoteSetRegistrationState(connection,state);
+                    ServiceTypes::Instance().RemoteSetRegistrationState(ConnectionPtr(), state);
                 }
                 else
                 {
-                    EntityTypes::Instance().RemoteSetRegistrationState(connection,state);
+                    EntityTypes::Instance().RemoteSetRegistrationState(ConnectionPtr(), state);
+                }
+
+                auto sdIt=m_stateDistributors.find(fromNodeType);
+                if (sdIt!=m_stateDistributors.end())
+                {
+                    sdIt->second->CheckForPending(state.GetTypeId());
                 }
             }
-        }
-        else //is an unregistration state
-        {
-            ENSURE(state.GetSenderId().m_id == -1, << "Unregistration states are expected to have ConnectionId == -1! Unreg for type "
-                   << Safir::Dob::Typesystem::Operations::GetName(state.GetTypeId()));
-
-            //unregistration states bypass all waitingstates handling and go straight
-            //into shared memory
-            if (Typesystem::Operations::IsOfType(state.GetTypeId(),Safir::Dob::Service::ClassTypeId))
-            {
-                ServiceTypes::Instance().RemoteSetRegistrationState(ConnectionPtr(), state);
-            }
-            else
-            {
-                EntityTypes::Instance().RemoteSetRegistrationState(ConnectionPtr(), state);
-            }
-
-            auto sdIt=m_stateDistributors.find(fromNodeType);
-            if (sdIt!=m_stateDistributors.end())
-            {
-                sdIt->second->CheckForPending(state.GetTypeId());
-            }
-        }
+        });
     }
 
     void PoolHandler::OnEntityState(int64_t fromNodeId, int64_t /*fromNodeType*/, const char* data, size_t /*size*/)
     {
-        const auto state=DistributionData::ConstConstructor(new_data_tag, data);
-        DistributionData::DropReference(data);
-
-        ENSURE (state.GetType() == DistributionData::EntityState, <<
-                "PoolHandler::OnEntityState received DistributionData that is not a EntityState!");
-
-        ENSURE(!m_distribution.IsLocal(state.GetTypeId()),
-               << "Received Local EntityState of type " << state.GetTypeId()
-               << " from node " << fromNodeId << ", system configuration is bad!");
-
-        switch (state.GetEntityStateKind())
+        m_strand.post([=]
         {
-        case DistributionData::Ghost:
-        {
-            ENSURE(state.GetSenderId().m_id == -1, << "Ghost states are expected to have ConnectionId == -1! Ghost for "
-                   << state.GetEntityId());
+            const auto state=DistributionData::ConstConstructor(new_data_tag, data);
+            DistributionData::DropReference(data);
 
-            EntityTypes::Instance().RemoteSetRealEntityState(ConnectionPtr(), // Null connection for ghosts
-                                                             state);
-        }
-            break;
-        case DistributionData::Injection:
-        {
-            ENSURE(state.GetSenderId().m_id == -1, << "Injection states are expected to have ConnectionId == -1! Injection for "
-                   << state.GetEntityId());
-            EntityTypes::Instance().RemoteSetInjectionEntityState(state);
-        }
-            break;
-        case DistributionData::Real:
-        {
-            if (state.IsCreated()) //handle created and delete states differently
+            ENSURE (state.GetType() == DistributionData::EntityState, <<
+                    "PoolHandler::OnEntityState received DistributionData that is not a EntityState!");
+
+            ENSURE(!m_distribution.IsLocal(state.GetTypeId()),
+                   << "Received Local EntityState of type " << state.GetTypeId()
+                   << " from node " << fromNodeId << ", system configuration is bad!");
+
+            switch (state.GetEntityStateKind())
             {
-                const ConnectionId senderId=state.GetSenderId();
-
-                ENSURE(senderId.m_id != -1, << "Entity states are expected to have ConnectionId != -1! State for "
+            case DistributionData::Ghost:
+            {
+                ENSURE(state.GetSenderId().m_id == -1, << "Ghost states are expected to have ConnectionId == -1! Ghost for "
                        << state.GetEntityId());
 
-                const ConnectionPtr connection = Connections::Instance().GetConnection(senderId, std::nothrow);
-                if (connection!=nullptr)
+                EntityTypes::Instance().RemoteSetRealEntityState(ConnectionPtr(), // Null connection for ghosts
+                                                                 state);
+            }
+                break;
+            case DistributionData::Injection:
+            {
+                ENSURE(state.GetSenderId().m_id == -1, << "Injection states are expected to have ConnectionId == -1! Injection for "
+                       << state.GetEntityId());
+                EntityTypes::Instance().RemoteSetInjectionEntityState(state);
+            }
+                break;
+            case DistributionData::Real:
+            {
+                lllog(1)<<"OnEntityState - "<<state.GetEntityId().ToString()<<", handler "<<state.GetHandlerId()<<std::endl;
+                if (state.IsCreated()) //handle created and delete states differently
                 {
-                    EntityTypes::Instance().RemoteSetRealEntityState(connection, state);
+                    const ConnectionId senderId=state.GetSenderId();
+
+                    ENSURE(senderId.m_id != -1, << "Entity states are expected to have ConnectionId != -1! State for "
+                           << state.GetEntityId());
+
+                    const ConnectionPtr connection = Connections::Instance().GetConnection(senderId, std::nothrow);
+                    if (connection!=nullptr)
+                    {
+                        EntityTypes::Instance().RemoteSetRealEntityState(connection, state);
+                    }
+                    else
+                    {
+                        //auto name=Safir::Dob::Typesystem::Operations::GetName(state.GetTypeId());
+                        //throw std::logic_error(Safir::Dob::Typesystem::Utilities::ToUtf8(name)+", unknown con");
+                        //throw std::logic_error("Received acked entity with an unknown connection ");
+                    }
                 }
                 else
                 {
-                    //auto name=Safir::Dob::Typesystem::Operations::GetName(state.GetTypeId());
-                    //throw std::logic_error(Safir::Dob::Typesystem::Utilities::ToUtf8(name)+", unknown con");
-                    //throw std::logic_error("Received acked entity with an unknown connection ");
+                    ENSURE(state.GetSenderId().m_id == -1, << "Delete states are expected to have ConnectionId == -1! Delete for "
+                           << state.GetEntityId());
+
+                    EntityTypes::Instance().RemoteSetDeleteEntityState(state);
                 }
             }
-            else
-            {
-                ENSURE(state.GetSenderId().m_id == -1, << "Delete states are expected to have ConnectionId == -1! Delete for "
-                       << state.GetEntityId());
-
-                EntityTypes::Instance().RemoteSetDeleteEntityState(state);
+                break;
             }
-        }
-            break;
-        }
+        });
     }
 
     void PoolHandler::SignalPdComplete()
     {
-        if (m_persistensReady && m_poolDistributionComplete)
+        if (m_persistensReady && m_poolDistributionComplete && !m_pdCompleteSignaled)
         {
+            lllog(1)<<"PD complete"<<std::endl;
+            m_pdCompleteSignaled=true;
             m_poolDistributor.Start();
             Connections::Instance().AllowConnect(-1);
             Connections::Instance().AllowConnect(0);

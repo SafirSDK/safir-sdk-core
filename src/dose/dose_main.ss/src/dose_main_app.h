@@ -32,7 +32,6 @@
 #include "NodeInfoHandler.h"
 #include "MemoryMonitor.h"
 #include "PendingRegistrationHandler.h"
-#include "PoolHandler.h"
 #include "RequestHandler.h"
 #include "BlockingHandler.h"
 #include "ConnectionKiller.h"
@@ -110,7 +109,6 @@ namespace Internal
 
         std::unique_ptr<MessageHandler>      m_messageHandler;
         std::unique_ptr<RequestHandler>      m_requestHandler;
-        std::unique_ptr<PoolHandler>         m_poolHandler;
         std::unique_ptr<ConnectionHandler>   m_connectionHandler;
         std::unique_ptr<NodeInfoHandler>     m_nodeInfoHandler;
 

@@ -41,6 +41,7 @@
 #include <Safir/Dob/Connection.h>
 #include <Safir/Dob/Internal/Connections.h>
 #include "ProcessInfoHandler.h"
+#include "PoolHandler.h"
 
 namespace Safir
 {
@@ -63,8 +64,11 @@ namespace Internal
     public:
         ConnectionHandler(boost::asio::io_service& ioService,
                           Distribution& distribution,
-                          const std::function<void(const ConnectionPtr& connection, bool disconnecting)>& onAppEvent);
+                          const std::function<void(const ConnectionPtr& connection, bool disconnecting)>& onAppEvent,
+                          const std::function<void(int64_t)>& checkPendingReg,
+                          const std::function<void(const std::string& str)>& logStatus);
 
+        void Start();
         void Stop();
 
     private:
@@ -80,6 +84,7 @@ namespace Internal
         std::atomic_bool m_handleEventsNotified;
 
         // Process info
+        PoolHandler m_poolHandler;
         ProcessInfoHandler m_processInfoHandler;
 
         void SendAll(const std::pair<boost::shared_ptr<const char[]>, size_t>& data);

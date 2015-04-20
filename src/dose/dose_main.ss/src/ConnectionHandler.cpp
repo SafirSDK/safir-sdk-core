@@ -44,10 +44,13 @@ namespace
 
     ConnectionHandler::ConnectionHandler(boost::asio::io_service& ioService,
                                          Distribution& distribution,
-                                         const std::function<void(const ConnectionPtr& connection, bool disconnecting)>& onAppEvent)
+                                         const std::function<void(const ConnectionPtr& connection, bool disconnecting)>& onAppEvent,
+                                         const std::function<void(int64_t)>& checkPendingReg,
+                                         const std::function<void(const std::string& str)>& logStatus)
         : m_strand(ioService),
           m_communication(distribution.GetCommunication()),
           m_onAppEvent(onAppEvent),
+          m_poolHandler(m_strand, distribution, checkPendingReg, logStatus),
           m_processInfoHandler(ioService, distribution)
     {
         distribution.SubscribeNodeEvents(
@@ -79,10 +82,12 @@ namespace
                 DistributionData::DropReference(data);
                 if (state.GetType()==DistributionData::Action_Connect)
                 {
+                    lllog(1)<<"ConnectionHandler - AddConnection "<<state.GetConnectionName()<<std::endl;
                     Connections::Instance().AddConnection(state.GetConnectionName(), state.GetCounter(), state.GetSenderId().m_contextId, state.GetSenderId());
                 }
                 else if (state.GetType()==DistributionData::Action_Disconnect)
                 {
+                    lllog(1)<<"ConnectionHandler - RemoveConnection "<<state.GetConnectionName()<<std::endl;
                     const ConnectionPtr connection = Connections::Instance().GetConnection(state.GetSenderId(), std::nothrow);
                     m_onAppEvent(connection, true);
                     Connections::Instance().RemoveConnection(connection);
@@ -94,7 +99,15 @@ namespace
         m_connectEvent=false;
         m_connectionOutEvent=false;
         m_handleEventsNotified=false;
-        m_connectionThread = boost::thread([this]() {ConnectionThread();});
+    }
+
+    void ConnectionHandler::Start()
+    {
+        m_strand.dispatch([=]
+        {
+            m_connectionThread = boost::thread([this]() {ConnectionThread();});
+            m_poolHandler.Start();
+        });
     }
 
     void ConnectionHandler::Stop()
@@ -110,6 +123,7 @@ namespace
 
                 m_connectionThread.join();
                 m_connectionThread = boost::thread();
+                m_poolHandler.Stop();
                 m_processInfoHandler.Stop();
             }
         });
@@ -134,10 +148,12 @@ namespace
 
                 if (m_communication.Send(0, ntQ.first, msg.first, msg.second, ConnectionMessageDataTypeId, true))
                 {
+                    lllog(1)<<"ConnectionHandler - Send to to nodeType "<<ntQ.first<<std::endl;
                     ntQ.second.pop();
                 }
                 else
                 {
+                    lllog(1)<<"ConnectionHandler - Failed Send to to nodeType "<<ntQ.first<<std::endl;
                     break;
                 }
             }
@@ -159,15 +175,18 @@ namespace
                 //have not been handled yet.
                 if (connect)
                 {
+                    lllog(1) << "ConnectionThread - CONNECT "<< std::endl;
                     m_connectEvent=true;
                 }
                 if (connectionOut)
                 {
+                    lllog(1) << "ConnectionThread - CONNECT_OUT "<< std::endl;
                     m_connectionOutEvent=true;
                 }
 
                 if (m_handleEventsNotified==false)
                 {
+                    lllog(1) << "ConnectionThread - NOTIFY "<< std::endl;
                     m_handleEventsNotified=true;
                     m_strand.post([this]{HandleEvents();});
                 }
@@ -181,6 +200,9 @@ namespace
 
     void ConnectionHandler::HandleEvents()
     {
+        lllog(1) << "ConnectionHandler::HandleEvents "<< std::endl;
+
+
         m_handleEventsNotified=false;
 
         bool gotConnectEvent = false;
@@ -227,6 +249,9 @@ namespace
                 lllout << "ConnectionHandler::HandleConnect: New connection from "
                        << connection->NameWithCounter() << " id = " << connection->Id() << std::endl;
 
+                lllog(1) << "ConnectionHandler::HandleConnect: New connection from "
+                       << connection->NameWithCounter() << " id = " << connection->Id() << std::endl;
+
                 SendAll(ConnectDataPtr(connection->Id(), connection->NameWithoutCounter(), connection->Counter()));
 
                 m_processInfoHandler.ConnectionAdded(connection);
@@ -261,6 +286,9 @@ namespace
             {
                 return;
             }
+
+            lllog(1) << "ConnectionHandler::HandleDisconnect: New connection from "
+                   << connection->NameWithCounter() << " id = " << connection->Id() << std::endl;
 
             SendAll(DisconnectDataPtr(connection->Id()));
         }

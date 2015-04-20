@@ -22,7 +22,6 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-
 #include "dose_main_app.h"
 #include <Safir/Dob/Internal/ControlConfig.h>
 #include <Safir/Dob/Internal/Connections.h>
@@ -137,8 +136,6 @@ namespace Internal
 
             m_distribution->Stop();
 
-            m_poolHandler->Stop();
-
             m_requestHandler->Stop();
 
             m_pendingRegistrationHandler->Stop();
@@ -179,14 +176,11 @@ namespace Internal
         m_pendingRegistrationHandler.reset(new PendingRegistrationHandler(m_ioService,
                                                                           *m_distribution));
 
-        m_poolHandler.reset(new PoolHandler(m_ioService,
-                                            *m_distribution,
-                                            [this](int64_t tid){m_pendingRegistrationHandler->CheckForPending(tid);},
-                                            [this](const std::string& str){LogStatus(str);}));
-
         m_connectionHandler.reset(new ConnectionHandler(m_ioService,
                                                         *m_distribution,
-                                                        [this](const ConnectionPtr& connection, bool disconnecting){OnAppEvent(connection, disconnecting);}));
+                                                        [this](const ConnectionPtr& connection, bool disconnecting){OnAppEvent(connection, disconnecting);},
+                                                        [this](int64_t tid){m_pendingRegistrationHandler->CheckForPending(tid);},
+                                                        [this](const std::string& str){LogStatus(str);}));
 
         m_nodeInfoHandler.reset(new NodeInfoHandler(m_ioService, *m_distribution));
     }
@@ -211,7 +205,7 @@ namespace Internal
             // Own node has been included in the system state, now its time to start
             // the distribution mechanism.
             m_distribution->Start();
-            m_poolHandler->Start();
+            m_connectionHandler->Start();
 
             LogStatus("dose_main running...");
         }
