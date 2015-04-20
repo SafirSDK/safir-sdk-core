@@ -8778,103 +8778,128 @@ void TestSequences()
     PrintSequences(clone);
 }
 
+
 void PrintDictionaries(DotsTest::MemberDictionariesPtr md)
 {
     std::wcout<<L"--- Int32StringMember ---"<<std::endl;
     std::wcout<<L"size: "<<md->Int32StringMember().size()<<std::endl;
     std::wcout<<L"isChanged: "<<md->Int32StringMember().IsChanged()<<std::endl;
-    for (ts::DictionaryContainer<ts::Int32, ts::StringContainer>::const_iterator it=md->Int32StringMember().begin();
-         it!=md->Int32StringMember().end(); ++it)
     {
-        if (it->second.IsNull())
-            std::wcout<<it->first<<L" = NULL, changed: "<<it->second.IsChanged()<<std::endl;
-        else
-            std::wcout<<it->first<<L" = "<<it->second.GetVal()<<L", changed: "<<it->second.IsChanged()<<std::endl;
+        typedef std::map<ts::Int32, ts::StringContainer> Sorted;
+        Sorted sorted(md->Int32StringMember().begin(), md->Int32StringMember().end());
+        for (Sorted::const_iterator it=sorted.begin(); it!=sorted.end(); ++it)
+        {
+            if (it->second.IsNull())
+                std::wcout<<it->first<<L" = NULL, changed: "<<it->second.IsChanged()<<std::endl;
+            else
+                std::wcout<<it->first<<L" = "<<it->second.GetVal()<<L", changed: "<<it->second.IsChanged()<<std::endl;
+        }
     }
 
     std::wcout<<L"--- Int64BinaryMember ---"<<std::endl;
     std::wcout<<L"size: "<<md->Int64BinaryMember().size()<<std::endl;
     std::wcout<<L"isChanged: "<<md->Int64BinaryMember().IsChanged()<<std::endl;
-    for (ts::DictionaryContainer<ts::Int64, ts::BinaryContainer>::const_iterator it=md->Int64BinaryMember().begin();
-         it!=md->Int64BinaryMember().end(); ++it)
     {
-        if (it->second.IsNull())
-            std::wcout<<it->first<<L" = NULL, changed: "<<it->second.IsChanged()<<std::endl;
-        else
-            std::wcout<<it->first<<L" = "<<ts::Utilities::ToWstring(std::string(it->second.GetVal().begin(), it->second.GetVal().end()))<<L", changed: "<<it->second.IsChanged()<<std::endl;
+        typedef std::map<ts::Int64, ts::BinaryContainer> Sorted;
+        Sorted sorted(md->Int64BinaryMember().begin(), md->Int64BinaryMember().end());
+        for (Sorted::const_iterator it=sorted.begin(); it!=sorted.end(); ++it)
+        {
+            if (it->second.IsNull())
+                std::wcout<<it->first<<L" = NULL, changed: "<<it->second.IsChanged()<<std::endl;
+            else
+                std::wcout<<it->first<<L" = "<<ts::Utilities::ToWstring(std::string(it->second.GetVal().begin(), it->second.GetVal().end()))<<L", changed: "<<it->second.IsChanged()<<std::endl;
+        }
     }
 
 
     std::wcout<<L"--- TypeIdEnumMember ---"<<std::endl;
     std::wcout<<L"size: "<<md->TypeIdEnumMember().size()<<std::endl;
     std::wcout<<L"isChanged: "<<md->TypeIdEnumMember().IsChanged()<<std::endl;
-    for (ts::DictionaryContainer<ts::TypeId, DotsTest::TestEnum::EnumerationContainer>::const_iterator it=md->TypeIdEnumMember().begin();
-         it!=md->TypeIdEnumMember().end(); ++it)
     {
-        if (it->second.IsNull())
-            std::wcout<<ts::Operations::GetName(it->first)<<L" = NULL, changed: "<<it->second.IsChanged()<<std::endl;
-        else
-            std::wcout<<ts::Operations::GetName(it->first)<<L" = "<<DotsTest::TestEnum::ToString(it->second.GetVal())<<L", changed: "<<it->second.IsChanged()<<std::endl;
+        typedef std::map<ts::TypeId, DotsTest::TestEnum::EnumerationContainer> Sorted;
+        Sorted sorted(md->TypeIdEnumMember().begin(), md->TypeIdEnumMember().end());
+        for (Sorted::const_iterator it=sorted.begin(); it!=sorted.end(); ++it)
+        {
+            if (it->second.IsNull())
+                std::wcout<<ts::Operations::GetName(it->first)<<L" = NULL, changed: "<<it->second.IsChanged()<<std::endl;
+            else
+                std::wcout<<ts::Operations::GetName(it->first)<<L" = "<<DotsTest::TestEnum::ToString(it->second.GetVal())<<L", changed: "<<it->second.IsChanged()<<std::endl;
+        }
     }
 
     std::wcout<<L"--- EnumInstanceIdMember ---"<<std::endl;
     std::wcout<<L"size: "<<md->EnumInstanceIdMember().size()<<std::endl;
     std::wcout<<L"isChanged: "<<md->EnumInstanceIdMember().IsChanged()<<std::endl;
-    for (ts::DictionaryContainer<DotsTest::TestEnum::Enumeration, ts::InstanceIdContainer>::const_iterator it=md->EnumInstanceIdMember().begin();
-         it!=md->EnumInstanceIdMember().end(); ++it)
     {
-        if (it->second.IsNull())
-            std::wcout<<DotsTest::TestEnum::ToString(it->first)<<L" = NULL, changed: "<<it->second.IsChanged()<<std::endl;
-        else
-            std::wcout<<DotsTest::TestEnum::ToString(it->first)<<L" = "<<it->second.GetVal().ToString()<<L", changed: "<<it->second.IsChanged()<<std::endl;
+        typedef std::map<DotsTest::TestEnum::Enumeration, ts::InstanceIdContainer> Sorted;
+        Sorted sorted(md->EnumInstanceIdMember().begin(), md->EnumInstanceIdMember().end());
+        for (Sorted::const_iterator it=sorted.begin(); it!=sorted.end(); ++it)
+        {
+            if (it->second.IsNull())
+                std::wcout<<DotsTest::TestEnum::ToString(it->first)<<L" = NULL, changed: "<<it->second.IsChanged()<<std::endl;
+            else
+                std::wcout<<DotsTest::TestEnum::ToString(it->first)<<L" = "<<it->second.GetVal().ToString()<<L", changed: "<<it->second.IsChanged()<<std::endl;
+        }
     }
 
     std::wcout<<L"--- InstanceIdEntityIdMember ---"<<std::endl;
     std::wcout<<L"size: "<<md->InstanceIdEntityIdMember().size()<<std::endl;
     std::wcout<<L"isChanged: "<<md->InstanceIdEntityIdMember().IsChanged()<<std::endl;
-    for (ts::DictionaryContainer<ts::InstanceId, ts::EntityIdContainer>::const_iterator it=md->InstanceIdEntityIdMember().begin();
-         it!=md->InstanceIdEntityIdMember().end(); ++it)
     {
-        if (it->second.IsNull())
-            std::wcout<<it->first.ToString()<<L" = NULL, changed: "<<it->second.IsChanged()<<std::endl;
-        else
-            std::wcout<<it->first.ToString()<<L" = "<<it->second.GetVal().ToString()<<L", changed: "<<it->second.IsChanged()<<std::endl;
+        typedef std::map<ts::InstanceId, ts::EntityIdContainer> Sorted;
+        Sorted sorted(md->InstanceIdEntityIdMember().begin(), md->InstanceIdEntityIdMember().end());
+        for (Sorted::const_iterator it=sorted.begin(); it!=sorted.end(); ++it)
+        {
+            if (it->second.IsNull())
+                std::wcout<<it->first.ToString()<<L" = NULL, changed: "<<it->second.IsChanged()<<std::endl;
+            else
+                std::wcout<<it->first.ToString()<<L" = "<<it->second.GetVal().ToString()<<L", changed: "<<it->second.IsChanged()<<std::endl;
+        }
     }
 
     std::wcout<<L"--- EntityIdHandlerIdMember ---"<<std::endl;
     std::wcout<<L"size: "<<md->EntityIdHandlerIdMember().size()<<std::endl;
     std::wcout<<L"isChanged: "<<md->EntityIdHandlerIdMember().IsChanged()<<std::endl;
-    for (ts::DictionaryContainer<ts::EntityId, ts::HandlerIdContainer>::const_iterator it=md->EntityIdHandlerIdMember().begin();
-         it!=md->EntityIdHandlerIdMember().end(); ++it)
     {
-        if (it->second.IsNull())
-            std::wcout<<it->first.ToString()<<L" = NULL, changed: "<<it->second.IsChanged()<<std::endl;
-        else
-            std::wcout<<it->first.ToString()<<L" = "<<it->second.GetVal().ToString()<<L", changed: "<<it->second.IsChanged()<<std::endl;
+        typedef std::map<ts::EntityId, ts::HandlerIdContainer> Sorted;
+        Sorted sorted(md->EntityIdHandlerIdMember().begin(), md->EntityIdHandlerIdMember().end());
+        for (Sorted::const_iterator it=sorted.begin(); it!=sorted.end(); ++it)
+        {
+            if (it->second.IsNull())
+                std::wcout<<it->first.ToString()<<L" = NULL, changed: "<<it->second.IsChanged()<<std::endl;
+            else
+                std::wcout<<it->first.ToString()<<L" = "<<it->second.GetVal().ToString()<<L", changed: "<<it->second.IsChanged()<<std::endl;
+        }
     }
 
     std::wcout<<L"--- StringItemMember ---"<<std::endl;
     std::wcout<<L"size: "<<md->StringItemMember().size()<<std::endl;
     std::wcout<<L"isChanged: "<<md->StringItemMember().IsChanged()<<std::endl;
-    for (ts::DictionaryContainer<std::wstring, DotsTest::MemberDictionariesContainer>::const_iterator it=md->StringItemMember().begin();
-         it!=md->StringItemMember().end(); ++it)
     {
-        if (it->second.IsNull())
-            std::wcout<<it->first<<L" = NULL, changed: "<<it->second.IsChanged()<<std::endl;
-        else
-            std::wcout<<it->first<<L" = "<<ts::Serialization::ToJson(it->second.GetPtr())<<L", changed: "<<it->second.IsChanged()<<std::endl;
+        typedef std::map<std::wstring, DotsTest::MemberDictionariesContainer> Sorted;
+        Sorted sorted(md->StringItemMember().begin(), md->StringItemMember().end());
+        for (Sorted::const_iterator it=sorted.begin(); it!=sorted.end(); ++it)
+        {
+            if (it->second.IsNull())
+                std::wcout<<it->first<<L" = NULL, changed: "<<it->second.IsChanged()<<std::endl;
+            else
+                std::wcout<<it->first<<L" = "<<ts::Serialization::ToJson(it->second.GetPtr())<<L", changed: "<<it->second.IsChanged()<<std::endl;
+        }
     }
 
     std::wcout<<L"--- StringObjectMember ---"<<std::endl;
     std::wcout<<L"size: "<<md->StringObjectMember().size()<<std::endl;
     std::wcout<<L"isChanged: "<<md->StringObjectMember().IsChanged()<<std::endl;
-    for (ts::DictionaryContainer<std::wstring, ts::ObjectContainer>::const_iterator it=md->StringObjectMember().begin();
-         it!=md->StringObjectMember().end(); ++it)
     {
-        if (it->second.IsNull())
-            std::wcout<<it->first<<L" = NULL, changed: "<<it->second.IsChanged()<<std::endl;
-        else
-            std::wcout<<it->first<<L" = "<<ts::Serialization::ToJson(it->second.GetPtr())<<L", changed: "<<it->second.IsChanged()<<std::endl;
+        typedef std::map<std::wstring, ts::ObjectContainer> Sorted;
+        Sorted sorted(md->StringObjectMember().begin(), md->StringObjectMember().end());
+        for (Sorted::const_iterator it=sorted.begin(); it!=sorted.end(); ++it)
+        {
+            if (it->second.IsNull())
+                std::wcout<<it->first<<L" = NULL, changed: "<<it->second.IsChanged()<<std::endl;
+            else
+                std::wcout<<it->first<<L" = "<<ts::Serialization::ToJson(it->second.GetPtr())<<L", changed: "<<it->second.IsChanged()<<std::endl;
+        }
     }
 }
 

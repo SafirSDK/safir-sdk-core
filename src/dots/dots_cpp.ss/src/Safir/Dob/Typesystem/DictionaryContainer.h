@@ -25,7 +25,7 @@
 
 #include <typeinfo>
 #include <vector>
-#include <boost/unordered_map.hpp>
+#include <map>
 #include <Safir/Dob/Typesystem/ContainerBase.h>
 
 #include <map>
@@ -49,7 +49,7 @@ namespace Typesystem
         typedef KeyT KeyType;
         typedef ValT ValueContainerType;
         typedef typename ValueContainerType::ContainedType ContainedType;
-        typedef boost::unordered_map<KeyType, ValueContainerType> StorageType;  //we use boost version instead of std because we want to be able to use vector<bool> without warnings and errors.
+        typedef std::map<KeyType, ValueContainerType> StorageType;  //we use boost version instead of std because we want to be able to use vector<bool> without warnings and errors.
         typedef typename StorageType::const_iterator const_iterator;
         typedef typename StorageType::iterator iterator;
         typedef typename StorageType::value_type value_type;
@@ -195,7 +195,7 @@ namespace Typesystem
         }
 
     private:
-        boost::unordered_map<KeyT, ValT> m_values;
+        std::map<KeyT, ValT> m_values;
     };
 }
 }

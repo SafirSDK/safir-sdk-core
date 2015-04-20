@@ -33,7 +33,7 @@ namespace Safir.Dob.Typesystem
     /// <para/>
     /// This class represents the identity of a DOB-entity. It consists of a type identifier (TypeId) and an instance number.
     /// </summary>
-    public class EntityId
+    public class EntityId : IComparable
     {
         /// <summary>
         /// Default constructor.
@@ -210,6 +210,27 @@ namespace Safir.Dob.Typesystem
         {
             return m_instanceId.GetHashCode() ^ m_typeId.GetHashCode();
         }
+
+        #region IComparable implementation
+
+        public int CompareTo (object obj)
+        {
+            EntityId other = obj as EntityId;
+            if (other == null)
+                throw new ArgumentException ("Can't compare EntityId to object of another type");
+
+            if (m_typeId < other.m_typeId) {
+                return -1;
+            }
+            else if (m_typeId > other.m_typeId) {
+                return 1;
+            }
+            else {
+                return m_instanceId.CompareTo (other.m_instanceId);
+            } 
+        }
+
+        #endregion
 
         private System.Int64 m_typeId;
         private InstanceId m_instanceId;

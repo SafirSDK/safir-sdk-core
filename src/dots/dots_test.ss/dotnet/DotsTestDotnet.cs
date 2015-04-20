@@ -7941,7 +7941,7 @@ class DotsTestDotnet
 
         Console.WriteLine("--- StringObjectMember ---");
         Console.WriteLine("size: "+md.StringObjectMember.Count);
-        Console.WriteLine("isChanged: "+md.StringObjectMember.IsChanged());
+        Console.WriteLine("isChanged: "+md.StringObjectMember.IsChanged().ToString().ToLower());
         foreach (var kv in md.StringObjectMember)
         {
             if (kv.Value.IsNull ())

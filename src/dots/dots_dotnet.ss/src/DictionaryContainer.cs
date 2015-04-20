@@ -9,14 +9,15 @@ namespace Safir.Dob.Typesystem
     public class DictionaryContainer<KeyT, ValT> : ContainerBase, IDictionary<KeyT, ValT> 
         where ValT : ContainerBase, new()
     {
-        private Dictionary<KeyT, ValT> values;
+        private SortedDictionary<KeyT, ValT> values;
+        //private Dictionary<KeyT, ValT> values;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Safir.Dob.Typesystem.DictionaryContainer`2"/> class.
         /// </summary>
         public DictionaryContainer() : base()
         {
-            values = new Dictionary<KeyT, ValT> ();
+            values = new SortedDictionary<KeyT, ValT> ();
         }
 
         #region IDictionary implementation
