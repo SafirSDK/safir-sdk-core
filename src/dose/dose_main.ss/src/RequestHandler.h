@@ -58,6 +58,11 @@ namespace Internal
         class Communication;
     }
 
+    /**
+     * This class handles distribution of requests within local and remote nodes.
+     *
+     * All methods are thread safe.
+     */
     class RequestHandler
     {
     public:
