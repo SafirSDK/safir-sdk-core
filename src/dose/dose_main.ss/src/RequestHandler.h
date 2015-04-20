@@ -74,6 +74,8 @@ namespace Internal
 
     private:
 
+        void DispatchRequests(const ConnectionPtr& connection);
+
         void DispatchRequest(DistributionData request,
                              bool& handled,
                              const ConnectionPtr& sender,

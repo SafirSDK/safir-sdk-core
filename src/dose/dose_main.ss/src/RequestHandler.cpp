@@ -159,16 +159,7 @@ namespace
             lllog(8) << "DOSE_MAIN: Distributing requests (out) for connection "
                      << connection->Id() << "." << std::endl;
 
-            ConnectionIdSet skipList;
-            connection->GetRequestOutQueue().DispatchRequests([this, connection, &skipList]
-                                                              (const DistributionData& request,
-                                                               bool& handled)
-                                                              {
-                                                                  DispatchRequest(request,
-                                                                                  handled,
-                                                                                  connection,
-                                                                                  skipList);
-                                                              });
+            DispatchRequests(connection);
 
             // Third, it could be that this connection now has empty slots on its in queue
             // Get any connection blocking on this connection and try to distribute its requests.
@@ -212,6 +203,20 @@ namespace
                           m_outReqTimers.clear();
                           m_pendingRequests.clear();
                       });
+    }
+
+    void RequestHandler::DispatchRequests(const ConnectionPtr& connection)
+    {
+        ConnectionIdSet skipList;
+        connection->GetRequestOutQueue().DispatchRequests([this, connection, &skipList]
+                                                          (const DistributionData& request,
+                                                           bool& handled)
+                                                          {
+                                                              DispatchRequest(request,
+                                                                              handled,
+                                                                              connection,
+                                                                              skipList);
+                                                          });
     }
 
     void RequestHandler::DispatchRequest(DistributionData request,
@@ -664,8 +669,7 @@ namespace
             }
             else
             {
-                //TODO Need to have recursionLevel?
-                HandleRequests(Connections::Instance().GetConnection(tmpConnectionId));
+                DispatchRequests(Connections::Instance().GetConnection(tmpConnectionId));
             }
         }
     }
