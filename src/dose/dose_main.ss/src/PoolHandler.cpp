@@ -48,6 +48,7 @@ namespace Internal
         :m_strand(strand)
         ,m_endStatesTimer(m_strand.get_io_service())
         ,m_distribution(distribution)
+        ,m_log(logStatus)
         ,m_poolDistributor(m_strand.get_io_service(), m_distribution)
         ,m_poolDistributionRequests(m_strand.get_io_service(), m_distribution.GetCommunication())
         ,m_persistHandler(m_strand.get_io_service(), distribution, logStatus, [=]{OnPersistenceReady();}, // persistentDataReadyCb
@@ -59,8 +60,9 @@ namespace Internal
             {
                 if (m_nodes.insert(std::make_pair(id, nt)).second)
                 {
-                    if (!m_poolDistributionComplete)
+                    if (!m_poolDistributionComplete || !m_persistensReady)
                     {
+                        m_poolDistributionComplete=false;
                         m_poolDistributionRequests.RequestPoolDistribution(id, nt);
                     }
                 }
@@ -193,6 +195,7 @@ namespace Internal
             {
             case PoolDistributionInfo::PdRequest:
             {
+                lllog(5)<<"PoolHandler: got PdRequest from "<<fromNodeId<<std::endl;
                 //start new pool distribution to node
                 m_poolDistributor.AddPoolDistribution(fromNodeId, fromNodeType);
             }
@@ -200,6 +203,7 @@ namespace Internal
 
             case PoolDistributionInfo::PdComplete:
             {
+                lllog(5)<<"PoolHandler: got PdComplete from "<<fromNodeId<<std::endl;
                 ++m_numReceivedPdComplete;
                 m_persistHandler.SetPersistentDataReady(); //persistens is ready as soon as we have received one pdComplete
                 m_poolDistributionRequests.PoolDistributionFinished(fromNodeId);
@@ -208,6 +212,7 @@ namespace Internal
 
             case PoolDistributionInfo::PdHaveNothing:
             {
+                lllog(5)<<"PoolHandler: got PdHaveNothing from "<<fromNodeId<<std::endl;
                 m_poolDistributionRequests.PoolDistributionFinished(fromNodeId);
             }
                 break;
@@ -350,6 +355,7 @@ namespace Internal
     {
         if (m_persistensReady && m_poolDistributionComplete && !m_pdCompleteSignaled)
         {
+            m_log("PD Complete");
             lllog(1)<<"PD complete"<<std::endl;
             m_pdCompleteSignaled=true;
             m_poolDistributor.Start();
