@@ -134,7 +134,7 @@ def delete_binary(parameters):
 #This relies on the fact that we're installed in the bin directory on both linux and windows.
 install_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),"..")
 
-dose_main_path = os.path.join(install_dir,"dose_main" + (".exe" if sys.platform == "win32" else ""))
+dose_main_path = os.path.join(install_dir,"bin","dose_main" + (".exe" if sys.platform == "win32" else ""))
 #Get the default dou directory and set it as an environment variable that can be
 #picked up by the typesystem.ini that belongs to the test suite.
 #Note: The last part of this path is set by cmake during configuration/installation.
