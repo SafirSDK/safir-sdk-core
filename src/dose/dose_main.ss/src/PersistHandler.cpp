@@ -51,6 +51,7 @@ namespace Internal
                                    const std::function<void()>& persistentDataReadyCb,
                                    const std::function<void()>& persistentDataAllowedCb)
         : m_strand(ioService),
+          m_logStatus(logStatus),
           m_systemFormed(false),
           m_distribution(distribution),
           m_communication(distribution.GetCommunication()),
@@ -174,8 +175,7 @@ namespace Internal
                 return; //persist data was already ready
             }
 
-            lllog(1) << "dose_main persistence data is ready!" << std::endl;
-            std::wcout << "dose_main persistence data is ready!" << std::endl;
+            m_logStatus("dose_main persistence data is ready!");
 
             m_persistentDataReady = true;
 
