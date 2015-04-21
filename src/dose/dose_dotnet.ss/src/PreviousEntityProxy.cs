@@ -52,7 +52,7 @@ namespace Safir.Dob
                 }
                 else
                 {
-                    return Typesystem.BlobOperations.GetTypeId(m_currentBlob);
+                    return Typesystem.Internal.BlobOperations.GetTypeId(m_currentBlob);
                 }
             }
         }
@@ -126,9 +126,7 @@ namespace Safir.Dob
                 if (m_previousBlobWithChangeInfo == System.IntPtr.Zero)
                 {
                     byte success;
-#if FUNC_PTR_WORKAROUND
-                    System.IntPtr m_blobDeleter;
-#endif
+
                     Interface.DoseC_Diff(m_previousState,
                                          m_currentState,
                                          Interface.ByteOf(false), //wantCurrent
@@ -140,9 +138,9 @@ namespace Safir.Dob
                     if (!Interface.BoolOf(success))
                     {
                         m_previousBlobWithChangeInfo = System.IntPtr.Zero;
-#if ! FUNC_PTR_WORKAROUND
+
                         m_blobDeleter = null;
-#endif
+
                         Typesystem.LibraryExceptions.Instance.Throw();
                     }
                 }
@@ -180,11 +178,9 @@ namespace Safir.Dob
             {
                 CheckNotDisposed();
                 System.IntPtr blob;
-#if FUNC_PTR_WORKAROUND
-                System.IntPtr blobDeleter;
-#else
+
                 Interface.DoseC_BlobDeleter blobDeleter;
-#endif
+
                 byte success;
                 Interface.DoseC_GetConnectionInfo(m_previousState, out blob, out blobDeleter, out success);
 

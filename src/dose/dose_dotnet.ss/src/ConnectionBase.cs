@@ -783,11 +783,7 @@ namespace Safir.Dob
             byte success;
 
             //TODO: serialize directly to shared memory
-            System.Int32 blobSize = message.CalculateBlobSize();
-            System.IntPtr blob = Marshal.AllocHGlobal(blobSize); //allocate blob
-            System.IntPtr beginningOfUnused;
-            Typesystem.Internal.InternalOperations.FormatBlob(blob, blobSize, message.GetTypeId(), out beginningOfUnused);
-            message.WriteToBlob(blob, ref beginningOfUnused);
+            IntPtr blob = Typesystem.Internal.BlobOperations.WriteToBlob (message);
 
             IntPtr cons = ConsumerHandler.Instance.AddReference(messageSender);
 
@@ -801,7 +797,7 @@ namespace Safir.Dob
                                         cons,
                                         out success);
 
-            Marshal.FreeHGlobal(blob); //delete blob
+            Typesystem.Internal.BlobOperations.DeleteBlob (blob);
             Marshal.FreeHGlobal(channelIdStr);
 
             if (!Interface.BoolOf(success))
@@ -848,11 +844,7 @@ namespace Safir.Dob
             System.Int32 requestId = -1;
 
             //TODO: serialize directly to shared memory
-            System.Int32 blobSize = entity.CalculateBlobSize();
-            System.IntPtr blob = Marshal.AllocHGlobal(blobSize); //allocate blob
-            System.IntPtr beginningOfUnused;
-            Typesystem.Internal.InternalOperations.FormatBlob(blob, blobSize, entity.GetTypeId(), out beginningOfUnused);
-            entity.WriteToBlob(blob, ref beginningOfUnused);
+            IntPtr blob = Typesystem.Internal.BlobOperations.WriteToBlob (entity);
 
             IntPtr cons = ConsumerHandler.Instance.AddReference(requestor);
 
@@ -872,7 +864,7 @@ namespace Safir.Dob
                  out requestId,
                  out success);
 
-            Marshal.FreeHGlobal(blob); //delete blob
+            Typesystem.Internal.BlobOperations.DeleteBlob (blob);
             Marshal.FreeHGlobal(handlerIdStr);
             Marshal.FreeHGlobal(instanceIdStr);
 
@@ -921,11 +913,7 @@ namespace Safir.Dob
             System.Int32 requestId = -1;
 
             //TODO: serialize directly to shared memory
-            System.Int32 blobSize = entity.CalculateBlobSize();
-            System.IntPtr blob = Marshal.AllocHGlobal(blobSize); //allocate blob
-            System.IntPtr beginningOfUnused;
-            Typesystem.Internal.InternalOperations.FormatBlob(blob, blobSize, entity.GetTypeId(), out beginningOfUnused);
-            entity.WriteToBlob(blob, ref beginningOfUnused);
+            IntPtr blob = Typesystem.Internal.BlobOperations.WriteToBlob (entity);
 
             IntPtr cons = ConsumerHandler.Instance.AddReference(requestor);
 
@@ -945,7 +933,7 @@ namespace Safir.Dob
                  out requestId,
                  out success);
 
-            Marshal.FreeHGlobal(blob); //delete blob
+            Typesystem.Internal.BlobOperations.DeleteBlob (blob);
             Marshal.FreeHGlobal(instanceIdStr);
             Marshal.FreeHGlobal(handlerIdStr);
 
@@ -985,11 +973,7 @@ namespace Safir.Dob
             System.Int32 requestId = -1;
 
             //TODO: serialize directly to shared memory
-            System.Int32 blobSize = entity.CalculateBlobSize();
-            System.IntPtr blob = Marshal.AllocHGlobal(blobSize); //allocate blob
-            System.IntPtr beginningOfUnused;
-            Typesystem.Internal.InternalOperations.FormatBlob(blob, blobSize, entity.GetTypeId(), out beginningOfUnused);
-            entity.WriteToBlob(blob, ref beginningOfUnused);
+            IntPtr blob = Typesystem.Internal.BlobOperations.WriteToBlob (entity);
 
             IntPtr cons = ConsumerHandler.Instance.AddReference(requestor);
 
@@ -1005,7 +989,7 @@ namespace Safir.Dob
                  out requestId,
                  out success);
 
-            Marshal.FreeHGlobal(blob); //delete blob
+            Typesystem.Internal.BlobOperations.DeleteBlob (blob);
             Marshal.FreeHGlobal(instanceIdStr);
 
             if (!Interface.BoolOf(success))
@@ -1089,11 +1073,7 @@ namespace Safir.Dob
             System.Int32 requestId = -1;
 
             //TODO: serialize directly to shared memory
-            System.Int32 blobSize = service.CalculateBlobSize();
-            System.IntPtr blob = Marshal.AllocHGlobal(blobSize); //allocate blob
-            System.IntPtr beginningOfUnused;
-            Typesystem.Internal.InternalOperations.FormatBlob(blob, blobSize, service.GetTypeId(), out beginningOfUnused);
-            service.WriteToBlob(blob, ref beginningOfUnused);
+            IntPtr blob = Typesystem.Internal.BlobOperations.WriteToBlob (service);
 
             IntPtr cons = ConsumerHandler.Instance.AddReference(requestor);
 
@@ -1109,7 +1089,7 @@ namespace Safir.Dob
                  out requestId,
                  out success);
 
-            Marshal.FreeHGlobal(blob); //delete blob
+            Typesystem.Internal.BlobOperations.DeleteBlob (blob);
             Marshal.FreeHGlobal(handlerIdStr);
 
             if (!Interface.BoolOf(success))
@@ -1203,11 +1183,7 @@ namespace Safir.Dob
             byte success;
 
             //TODO: serialize directly to shared memory
-            System.Int32 blobSize = entity.CalculateBlobSize();
-            System.IntPtr blob = Marshal.AllocHGlobal(blobSize); //allocate blob
-            System.IntPtr beginningOfUnused;
-            Typesystem.Internal.InternalOperations.FormatBlob(blob, blobSize, entity.GetTypeId(), out beginningOfUnused);
-            entity.WriteToBlob(blob, ref beginningOfUnused);
+            IntPtr blob = Typesystem.Internal.BlobOperations.WriteToBlob (entity);
 
             System.IntPtr instanceIdStr = Dob.Typesystem.Internal.InternalOperations.CStringOf(instanceId.RawString);
             System.IntPtr handlerIdStr = Dob.Typesystem.Internal.InternalOperations.CStringOf(handlerId.RawString);
@@ -1222,7 +1198,7 @@ namespace Safir.Dob
                                       Interface.ByteOf(false),   // false => this is not an initial injection
                                       out success);
 
-            Marshal.FreeHGlobal(blob); //delete blob
+            Typesystem.Internal.BlobOperations.DeleteBlob (blob);
             Marshal.FreeHGlobal(instanceIdStr);
             Marshal.FreeHGlobal(handlerIdStr);
 

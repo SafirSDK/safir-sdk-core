@@ -42,6 +42,30 @@ namespace Safir.Dob.Typesystem.Internal
     /// </summary>
     public class BlobOperations
     {
+        /// <summary>
+        /// Writes to BLOB.
+        /// </summary>
+        /// <returns>The to BLOB.</returns>
+        /// <param name="obj">Object.</param>
+        public static IntPtr WriteToBlob(Dob.Typesystem.Object obj)
+        {
+            Int64 objHandle=Kernel.DotsC_CreateBlobWriter(obj.GetTypeId());
+            obj.WriteToBlob(objHandle);
+            Int32 size=Kernel.DotsC_CalculateBlobSize (objHandle);
+            IntPtr blob = Marshal.AllocHGlobal(size);
+            Kernel.DotsC_WriteBlob (objHandle, blob);
+            Kernel.DotsC_DeleteBlobWriter (objHandle);
+            return blob;
+        }
+
+        /// <summary>
+        /// Deletes the BLOB created with BlobOperations.WriteToBlob
+        /// </summary>
+        /// <param name="blob">BLOB.</param>
+        public static void DeleteBlob(IntPtr blob)
+        {
+            Marshal.FreeHGlobal (blob);
+        }
 
         /// <summary>
         /// Extract the TypeId from a blob.

@@ -1,4 +1,5 @@
-﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <ProjectType>Local</ProjectType>
     <ProductVersion>8.0.50727</ProductVersion>
@@ -26,8 +27,6 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>Sate</RootNamespace>
     <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
-    <StartupObject>
-    </StartupObject>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <UpgradeBackupLocation>
@@ -37,9 +36,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <OutputPath>bin\Debug\</OutputPath>
-    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
     <BaseAddress>285212672</BaseAddress>
-    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
     <ConfigurationOverrideFile>
     </ConfigurationOverrideFile>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
@@ -47,13 +44,9 @@
     </DocumentationFile>
     <DebugSymbols>true</DebugSymbols>
     <FileAlignment>4096</FileAlignment>
-    <NoStdLib>false</NoStdLib>
-    <NoWarn>
-    </NoWarn>
     <Optimize>false</Optimize>
     <RegisterForComInterop>false</RegisterForComInterop>
     <RemoveIntegerChecks>false</RemoveIntegerChecks>
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <WarningLevel>4</WarningLevel>
     <DebugType>full</DebugType>
     <ErrorReport>prompt</ErrorReport>
@@ -61,40 +54,21 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <OutputPath>bin\Release\</OutputPath>
-    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
     <BaseAddress>285212672</BaseAddress>
-    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
     <ConfigurationOverrideFile>
     </ConfigurationOverrideFile>
     <DefineConstants>TRACE</DefineConstants>
     <DocumentationFile>
     </DocumentationFile>
-    <DebugSymbols>false</DebugSymbols>
     <FileAlignment>4096</FileAlignment>
-    <NoStdLib>false</NoStdLib>
-    <NoWarn>
-    </NoWarn>
     <Optimize>true</Optimize>
     <RegisterForComInterop>false</RegisterForComInterop>
     <RemoveIntegerChecks>false</RemoveIntegerChecks>
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <WarningLevel>4</WarningLevel>
     <DebugType>none</DebugType>
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="dots_generated-dotnet, Version=1.0.0.0, Culture=neutral, PublicKeyToken=40df165d3a3cadbc, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>K:\dots_generated-dotnet.dll</HintPath>
-    </Reference>
-    <Reference Include="Safir.Dob, Version=1.0.0.0, Culture=neutral, PublicKeyToken=fef88a5dbbc2e7c6, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>K:\\Safir.Dob.dll</HintPath>
-    </Reference>
-    <Reference Include="Safir.Dob.Typesystem, Version=1.0.0.0, Culture=neutral, PublicKeyToken=fef88a5dbbc2e7c6, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>K:\\Safir.Dob.Typesystem.dll</HintPath>
-    </Reference>
     <Reference Include="System">
       <Name>System</Name>
     </Reference>
@@ -109,6 +83,15 @@
     </Reference>
     <Reference Include="System.Xml">
       <Name>System.XML</Name>
+    </Reference>
+    <Reference Include="dots_generated-dotnet">
+      <HintPath>..\..\..\..\..\..\safir-rockefeller\runtime\bin\dots_generated-dotnet.dll</HintPath>
+    </Reference>
+    <Reference Include="Safir.Dob">
+      <HintPath>..\..\..\..\..\..\safir-rockefeller\runtime\bin\Safir.Dob.dll</HintPath>
+    </Reference>
+    <Reference Include="Safir.Dob.Typesystem">
+      <HintPath>..\..\..\..\..\..\safir-rockefeller\runtime\bin\Safir.Dob.Typesystem.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -236,9 +219,6 @@
     </Compile>
     <Compile Include="SubscribeRegistrationForm.cs">
       <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SubscribeRegistrationForm.designer.cs">
-      <DependentUpon>SubscribeRegistrationForm.cs</DependentUpon>
     </Compile>
     <Compile Include="TimestampCalculator.cs">
       <SubType>Form</SubType>
@@ -370,6 +350,9 @@
     </EmbeddedResource>
     <Content Include="sate_logo.ico" />
     <None Include="TYPEIDCALC.bmp" />
+    <Compile Include="SubscribeRegistrationForm.Designer.cs">
+      <DependentUpon>SubscribeRegistrationForm.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram1.cd" />

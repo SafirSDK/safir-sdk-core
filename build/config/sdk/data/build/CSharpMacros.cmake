@@ -71,11 +71,6 @@ ENDMACRO(MAKE_PROPER_FILE_LIST)
 
 MACRO(ADD_CS_LIBRARY target source)
     GET_CS_LIBRARY_TARGET_DIR()
-
-    #TODO: check versions to see if workaround is needed?
-    IF(CSHARP_IS_MONO)
-        SET(CS_FLAGS ${CS_FLAGS} -define:FUNC_PTR_WORKAROUND)
-    ENDIF()
     
     IF(CUSTOM_BUILD_TYPE STREQUAL "Debug")
         SET(CS_FLAGS ${CS_FLAGS} -debug)
@@ -107,11 +102,6 @@ ENDMACRO(ADD_CS_LIBRARY)
 
 MACRO(ADD_CS_MODULE target source)
     GET_CS_LIBRARY_TARGET_DIR()
-
-    #TODO: check versions to see if workaround is needed?
-    IF(CSHARP_IS_MONO)
-        SET(CS_FLAGS ${CS_FLAGS} -define:FUNC_PTR_WORKAROUND)
-    ENDIF()
     
     IF(CUSTOM_BUILD_TYPE STREQUAL "Debug")
         SET(CS_FLAGS ${CS_FLAGS} -debug)
@@ -176,11 +166,6 @@ ENDMACRO(MERGE_CS_LIBRARY)
 MACRO(ADD_CS_EXECUTABLE target source)
     GET_CS_EXECUTABLE_TARGET_DIR()
     
-    #TODO: check versions to see if workaround is needed?
-    IF(CSHARP_IS_MONO)
-        SET(CS_FLAGS ${CS_FLAGS} -define:FUNC_PTR_WORKAROUND)
-    ENDIF()
-    
     # FIXME:
     # Seems like cmake doesn't like the ".exe" ending for custom commands.
     # If we call it ${target}.exe, 'make' will later complain about a missing rule.
@@ -218,11 +203,6 @@ ENDMACRO(ADD_CS_EXECUTABLE)
 
 MACRO(ADD_CS_GUI_EXECUTABLE target source)
     GET_CS_EXECUTABLE_TARGET_DIR()
-    
-    #TODO: check versions to see if workaround is needed?
-    IF(CSHARP_IS_MONO)
-        SET(CS_FLAGS ${CS_FLAGS} -define:FUNC_PTR_WORKAROUND)
-    ENDIF()
     
     # FIXME:
     # Seems like cmake doesn't like the ".exe" ending for custom commands.

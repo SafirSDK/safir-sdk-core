@@ -51,7 +51,7 @@ namespace Safir.Dob
             get
             {
                 CheckNotDisposed();
-                return Typesystem.BlobOperations.GetTypeId(m_responseBlob);
+                return Typesystem.Internal.BlobOperations.GetTypeId(m_responseBlob);
             }
         }
 
