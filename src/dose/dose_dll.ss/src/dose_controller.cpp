@@ -95,7 +95,6 @@ namespace Internal
           m_ctrlId(0),
           m_contextId(0),
           m_exitDispatch(false),
-          m_dispatchedInjection(no_state_tag),
           m_originalInjectionState(no_state_tag),
           m_consumerReferences()
     {
@@ -2356,7 +2355,12 @@ namespace Internal
         m_incompleteInjection = false;
         m_setInjectedEntity = false;
         m_deleteInjectedEntity = false;
-        m_dispatchedInjection = injection.second;
+
+        if (!injection.second.IsNoState())
+        {
+            m_dispatchedInjection = injection.second.GetEntityId();
+        }
+
         m_originalInjectionState = injectionState;
 
         switch (action)
@@ -2592,8 +2596,9 @@ namespace Internal
 
         exitDispatch = m_exitDispatch;
 
-        // Release references
-        m_dispatchedInjection = DistributionData(no_state_tag);
+        m_dispatchedInjection = Dob::Typesystem::EntityId();
+
+        // Release reference
         m_originalInjectionState = DistributionData(no_state_tag);
 
         if (!dontRemove && !m_incompleteInjection)

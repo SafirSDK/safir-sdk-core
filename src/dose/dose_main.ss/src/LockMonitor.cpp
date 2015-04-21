@@ -2,7 +2,7 @@
 *
 * Copyright Saab AB, 2012-2013 (http://safir.sourceforge.net)
 *
-* Created by: Anders Widén / aiwi
+* Created by: Anders Widén / anders.widen@consoden.se
 *
 *******************************************************************************
 *

@@ -659,8 +659,7 @@ DotsC_Int32 DotsC_GetStringMemberMaxLengthProperty(const DotsC_TypeId classId, c
     }
 
     case MappedToParameter:
-        // AWI: Vad göra här? I daxläget finns inte informationen för parameterar
-        //return mm->GetParameter()->ArrayLength();
+        // String max length not available.
         break;
     }
 

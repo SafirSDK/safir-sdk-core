@@ -285,14 +285,6 @@ void EntityStats::UpdateStatistics()
     arg._this = this;
     StatisticsCollector(Safir::Dob::Internal::EntityTypes::Instance(), &arg);
 
-    /* AWI now displayed for each context
-    numStates->setText(boost::lexical_cast<std::string>(arg.numStates).c_str());
-    numDowngraded->setText(boost::lexical_cast<std::string>(arg.downgraded).c_str());
-    numReal->setText(boost::lexical_cast<std::string>(arg.realStates).c_str());
-    numGhost->setText(boost::lexical_cast<std::string>(arg.ghostStates).c_str());
-    numInjections->setText(boost::lexical_cast<std::string>(arg.injectionStates).c_str());
-    */
-
     instances->resizeColumnsToContents();
     instances->setSortingEnabled(true);
     instances->setAlternatingRowColors(true);

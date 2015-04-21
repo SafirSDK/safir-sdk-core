@@ -321,7 +321,7 @@ namespace Sate
             this.Width = X_DEFAULT_WIDTH;
 
             typeLabel=new Label();
-            typeLabel.AutoSize=false; //AWI
+            typeLabel.AutoSize=false;
             typeLabel.Text=typeName;
             fieldNameLabel=new System.Windows.Forms.Label[arraySize];
             isNullCheckBox=new System.Windows.Forms.CheckBox[arraySize];
@@ -341,7 +341,7 @@ namespace Sate
                 fieldNameLabel[i]=new Label();
                 fieldNameLabel[i].ForeColor=Color.Blue;
                 fieldNameLabel[i].Font=font;
-                fieldNameLabel[i].AutoSize=false;  // AWI
+                fieldNameLabel[i].AutoSize=false;
                 if (arraySize > 1)
                 {
                     fieldNameLabel[i].Text = fieldName + "[" + i + "]";
