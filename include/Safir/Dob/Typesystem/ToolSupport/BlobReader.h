@@ -166,9 +166,11 @@ namespace ToolSupport
         }
 
         /**
-         * @brief Reads the value element of a member value.
+         * Read the value element of a member value.
+         *
          * @param member [in] - Member index of the member to read.
          * @param valueIndex [in] - The value to read. Must be in range 0 to NumberOfValues()-1.
+         * @param val [out] - The value that was read.
          * @param isNull [out] - True if value is null.
          * @param isChanged [out] - True if value has changed.
          */

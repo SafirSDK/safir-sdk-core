@@ -84,17 +84,17 @@ namespace Typesystem
          * @return The name of the parameter.
          */
         DOTS_CPP_API const std::wstring GetName(const Dob::Typesystem::TypeId typeId,
-                                            const Dob::Typesystem::ParameterIndex parameter);
+                                                const Dob::Typesystem::ParameterIndex parameter);
 
         /**
          * Get the type name of the specified member as it was defined in the xml description.
          *
          * @param typeId [in] - TypeId of class.
-         * @param member [in] - Index of parameter.
+         * @param parameter [in] - Index of parameter.
          * @return Parameter type name.
          */
-        DOTS_CPP_API std::wstring GetTypeName(  const Dob::Typesystem::TypeId typeId,
-                                                const Dob::Typesystem::ParameterIndex parameter);
+        DOTS_CPP_API std::wstring GetTypeName(const Dob::Typesystem::TypeId typeId,
+                                              const Dob::Typesystem::ParameterIndex parameter);
 
         /**
          * Get the type of a parameter.

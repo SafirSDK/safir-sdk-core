@@ -817,7 +817,7 @@ namespace dose_test_dotnet
                     //Get pointer to data
                     System.IntPtr blobPointer = Marshal.AllocHGlobal(m_bufferHeader.Length);
                     Marshal.Copy(m_bufferHeader, 0, blobPointer, m_bufferHeader.Length);
-                    System.Int32 blobSize = Safir.Dob.Typesystem.BlobOperations.GetSize(blobPointer);
+                    System.Int32 blobSize = Safir.Dob.Typesystem.Internal.BlobOperations.GetSize(blobPointer);
 
                     //Free memory
                     Marshal.FreeHGlobal(blobPointer);

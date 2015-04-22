@@ -52,7 +52,7 @@ Requestor::Requestor():
 
     m_service->SequenceNumber().SetVal(-1);
 
-    std::wcout << "Using a ServiceRequest of size " << m_service->CalculateBlobSize() << " bytes" << std::endl;
+    std::wcout << "Using a ServiceRequest of size " << CalculateBlobSize(m_service) << " bytes" << std::endl;
 }
 
 void Requestor::SendSome()

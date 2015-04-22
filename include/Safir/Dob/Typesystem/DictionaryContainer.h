@@ -27,6 +27,7 @@
 #include <vector>
 #include <map>
 #include <Safir/Dob/Typesystem/ContainerBase.h>
+#include <Safir/Dob/Typesystem/Exceptions.h>
 
 #include <map>
 

@@ -45,7 +45,7 @@ Owner::Owner():
         m_entity->Payload().SetPtr(DoseStressTest::RootEntity::DefaultPayload());
     }
 
-    std::wcout << "Using an entity of size " << m_entity->CalculateBlobSize() << " bytes" << std::endl;
+    std::wcout << "Using an entity of size " << CalculateBlobSize(m_entity) << " bytes" << std::endl;
     std::wcout << "Using instances 0 .. " << CommandLine::Instance().NumInstances() -1 << std::endl;
 
     m_connection.RegisterEntityHandler(m_entity->GetTypeId(),
@@ -76,5 +76,3 @@ void Owner::Set()
                         Safir::Dob::Typesystem::HandlerId());
     m_setStat->Tick();
 }
-
-

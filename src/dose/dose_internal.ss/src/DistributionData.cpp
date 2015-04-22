@@ -134,7 +134,7 @@ namespace Internal
 
         BOOST_STATIC_ASSERT(sizeof(Safir::Utilities::Internal::AtomicUint32) == 4);
     }
-    
+
 
 #ifdef REGISTER_TIMES
     Typesystem::Int32 GenerateId()
@@ -466,14 +466,6 @@ namespace Internal
             for (int i = 0; i < numTimestamps;++i)
             {
                 timestamps[i] = 0;
-
-//There is some odd compiler bug on 64 bit gcc (at least version 4.3.2-1ubuntu11) when
-//release compiling this code, so we add some junk code so that the failing
-//optimization doesnt kick in.
-#if defined (__GNUC__) && defined (__amd64) && defined(__OPTIMIZE__)
-                volatile Typesystem::Int64 j = timestamps[i];
-                j=j;
-#endif
             }
         }
 
@@ -524,7 +516,6 @@ namespace Internal
         entityStateHeader.m_explicitlyDeleted = explicitlyDeleted;
         entityStateHeader.m_sourceIsPermanentStore = sourceIsPermanentStore;
         entityStateHeader.m_hasBlob = true;
-        entityStateHeader.m_versionIsDecremented = false;
         entityStateHeader.m_numTimestamps = numTimestamps;
 
         if (numTimestamps > 0)
@@ -533,14 +524,6 @@ namespace Internal
             for (int i = 0; i < numTimestamps;++i)
             {
                 timestamps[i] = 0;
-
-//There is some odd compiler bug on 64 bit gcc (at least version 4.3.2-1ubuntu11) when
-//release compiling this code, so we add some junk code so that the failing
-//optimization doesnt kick in.
-#if defined (__GNUC__) && defined (__amd64) && defined(__OPTIMIZE__)
-                volatile Typesystem::Int64 j = timestamps[i];
-                j=j;
-#endif
             }
         }
 

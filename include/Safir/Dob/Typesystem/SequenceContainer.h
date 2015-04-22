@@ -32,7 +32,6 @@
 #include <Safir/Dob/Typesystem/HandlerId.h>
 #include <Safir/Dob/Typesystem/ContainerBase.h>
 #include <Safir/Dob/Typesystem/Object.h>
-#include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 
 namespace Safir
 {
@@ -212,12 +211,22 @@ namespace Typesystem
                 m_bIsChanged=other.m_bIsChanged;
                 for (typename StorageType::const_iterator it=other.m_values.begin(); it!=other.m_values.end(); ++it)
                 {
-                    m_values.push_back(Internal::SequenceCopyHelper<ContainedType>::Copy(*it));
+                    m_values.push_back(SequenceCopyHelper<ContainedType>::Copy(*it));
                 }
             }
         }
 
     private:
+        template <class U> struct SequenceCopyHelper
+        {
+            static U Copy(const U& val) {return val;}
+        };
+
+        template <class U> struct SequenceCopyHelper< boost::shared_ptr<U> >
+        {
+            static boost::shared_ptr<U> Copy(const boost::shared_ptr<U> & val) {return boost::static_pointer_cast<U>(val->Clone());}
+        };
+
         StorageType m_values;
     };
 

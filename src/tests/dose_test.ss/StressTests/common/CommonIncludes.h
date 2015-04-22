@@ -43,6 +43,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
+#include <Safir/Dob/Typesystem/Serialization.h>
 
 #ifdef _MSC_VER
   #pragma warning(pop)
@@ -56,6 +57,12 @@ static inline std::wostream& operator<<(std::wostream& out, const boost::program
 }
 
 
+inline size_t CalculateBlobSize(const Safir::Dob::Typesystem::ObjectPtr& obj)
+{
+    Safir::Dob::Typesystem::BinarySerialization bin;
+    Safir::Dob::Typesystem::Serialization::ToBinary(obj, bin);
+    return bin.size();
+}
 
 #endif
 

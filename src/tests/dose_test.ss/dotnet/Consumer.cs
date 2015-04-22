@@ -79,8 +79,8 @@ namespace dose_test_dotnet
                 obj.GetTypeId() == DoseTest.ComplexGlobalService.ClassTypeId;
         }
 
-        //returns true if the blob needs to be modified.
-        static bool CheckBinaryMemberInternal(Safir.Dob.Typesystem.BinaryContainer cont)
+        //sets container to null after verification
+        static void CheckBinaryMemberInternal(Safir.Dob.Typesystem.BinaryContainer cont)
         {
             if (!cont.IsNull() && cont.Val.Length > 10000) //only check for large sizes
             {
@@ -105,100 +105,31 @@ namespace dose_test_dotnet
                 }
                 //we do NOT want to print all this out to stdout, so we set it to null once we've checked it.
                 cont.SetNull();
-                return true;
-            }
-            else
-            {
-                return false;
             }
         }
 
-        static String CheckBinaryMember(Safir.Dob.Typesystem.Object obj, System.IntPtr blob)
+        static String CheckBinaryMember(Safir.Dob.Typesystem.Object obj)
         {
             if (obj.GetTypeId() == DoseTest.ComplexGlobalMessage.ClassTypeId)
             {
-                if (CheckBinaryMemberInternal(((DoseTest.ComplexGlobalMessage)obj).BinaryMember))
-                {
-                    System.Int32 blobSize = Safir.Dob.Typesystem.BlobOperations.GetSize(blob);
-                    System.IntPtr b = Marshal.AllocHGlobal(blobSize);
-                    //copy the blob
-                    for (System.Int32 index = 0; index < blobSize; ++index)
-                    {
-                        Marshal.WriteByte(b,index,Marshal.ReadByte(blob,index));
-                    }
-                    Safir.Dob.Typesystem.BlobOperations.SetNull
-                        (b,DoseTest.ComplexGlobalMessage.BinaryMemberMemberIndex,0);
-                    String xml = Safir.Dob.Typesystem.Serialization.ToXml(b);
-                    Marshal.FreeHGlobal(b);
-                    return xml;
-                }
+                CheckBinaryMemberInternal(((DoseTest.ComplexGlobalMessage)obj).BinaryMember);
             }
             else if (obj.GetTypeId() == DoseTest.ComplexGlobalEntity.ClassTypeId)
             {
-                System.IntPtr b = System.IntPtr.Zero;
-                if (CheckBinaryMemberInternal(((DoseTest.ComplexGlobalEntity)obj).BinaryMember))
-                {
-                    System.Int32 blobSize = Safir.Dob.Typesystem.BlobOperations.GetSize(blob);
-                    b = Marshal.AllocHGlobal(blobSize);
-                    //copy the blob
-                    for (System.Int32 index = 0; index < blobSize; ++index)
-                    {
-                        Marshal.WriteByte(b,index,Marshal.ReadByte(blob,index));
-                    }
-                    Safir.Dob.Typesystem.BlobOperations.SetNull
-                        (b,DoseTest.ComplexGlobalEntity.BinaryMemberMemberIndex,0);
-
-                }
+                CheckBinaryMemberInternal(((DoseTest.ComplexGlobalEntity)obj).BinaryMember);
 
                 //in the entity we use the binary array as well
                 for (int i = 0; i < DoseTest.ComplexGlobalEntity.BinaryArrayMemberArraySize; ++i)
                 {
-                    if (CheckBinaryMemberInternal(((DoseTest.ComplexGlobalEntity)obj).BinaryArrayMember[i]))
-                    {
-                        if (b == System.IntPtr.Zero)
-                        {
-                            System.Int32 blobSize = Safir.Dob.Typesystem.BlobOperations.GetSize(blob);
-                            b = Marshal.AllocHGlobal(blobSize);
-                            //copy the blob
-                            for (System.Int32 index = 0; index < blobSize; ++index)
-                            {
-                                Marshal.WriteByte(b,index,Marshal.ReadByte(blob,index));
-                            }
-                        }
-                        Safir.Dob.Typesystem.BlobOperations.SetNull
-                            (b,DoseTest.ComplexGlobalEntity.BinaryArrayMemberMemberIndex,i);
-                    }
+                    CheckBinaryMemberInternal(((DoseTest.ComplexGlobalEntity)obj).BinaryArrayMember[i]);
                 }
-
-                if (b != System.IntPtr.Zero)
-                {
-                    String xml = Safir.Dob.Typesystem.Serialization.ToXml(b);
-                    Marshal.FreeHGlobal(b);
-                    return xml;
-                }
-
-
             }
             else if (obj.GetTypeId() == DoseTest.ComplexGlobalService.ClassTypeId)
             {
-                if (CheckBinaryMemberInternal(((DoseTest.ComplexGlobalService)obj).BinaryMember))
-                {
-                    System.Int32 blobSize = Safir.Dob.Typesystem.BlobOperations.GetSize(blob);
-                    System.IntPtr b = Marshal.AllocHGlobal(blobSize);
-                    //copy the blob
-                    for (System.Int32 index = 0; index < blobSize; ++index)
-                    {
-                        Marshal.WriteByte(b,index,Marshal.ReadByte(blob,index));
-                    }
-                    Safir.Dob.Typesystem.BlobOperations.SetNull
-                        (b,DoseTest.ComplexGlobalService.BinaryMemberMemberIndex,0);
-                    String xml = Safir.Dob.Typesystem.Serialization.ToXml(b);
-                    Marshal.FreeHGlobal(b);
-                    return xml;
-                }
+                CheckBinaryMemberInternal(((DoseTest.ComplexGlobalService)obj).BinaryMember);
             }
 
-            return Safir.Dob.Typesystem.Serialization.ToXml(blob);
+            return Safir.Dob.Typesystem.Serialization.ToXml(obj);
         }
 
 
@@ -765,7 +696,7 @@ namespace dose_test_dotnet
 
             if (NeedBinaryCheck(msg))
             {
-                xml = CheckBinaryMember(msg,messageProxy.Blob);
+                xml = CheckBinaryMember(msg);
             }
             else
             {
@@ -795,7 +726,7 @@ namespace dose_test_dotnet
 
             if (NeedBinaryCheck(entity))
             {
-                xml = CheckBinaryMember(entity,entityProxy.Blob);
+                xml = CheckBinaryMember(entity);
             }
             else
             {
@@ -834,7 +765,7 @@ namespace dose_test_dotnet
 
             if (NeedBinaryCheck(entity))
             {
-                xml = CheckBinaryMember(entity,entityProxy.Blob);
+                xml = CheckBinaryMember(entity);
             }
             else
             {
@@ -846,7 +777,7 @@ namespace dose_test_dotnet
 
             if (NeedBinaryCheck(prevEntity))
             {
-                prevXml = CheckBinaryMember(prevEntity,entityProxy.Previous.Blob);
+                prevXml = CheckBinaryMember(prevEntity);
             }
             else
             {
@@ -886,7 +817,7 @@ namespace dose_test_dotnet
 
             if (NeedBinaryCheck(prevEntity))
             {
-                prevXml = CheckBinaryMember(prevEntity,entityProxy.Previous.Blob);
+                prevXml = CheckBinaryMember(prevEntity);
             }
             else
             {
@@ -981,7 +912,7 @@ namespace dose_test_dotnet
 
             if (NeedBinaryCheck(svc))
             {
-                xml = CheckBinaryMember(svc,serviceRequestProxy.Blob);
+                xml = CheckBinaryMember(svc);
             }
             else
             {
@@ -1040,7 +971,7 @@ namespace dose_test_dotnet
 
             if (NeedBinaryCheck(req))
             {
-                xml = CheckBinaryMember(req,entityRequestProxy.Blob);
+                xml = CheckBinaryMember(req);
             }
             else
             {
@@ -1157,7 +1088,7 @@ namespace dose_test_dotnet
 
             if (NeedBinaryCheck(req))
             {
-                xml = CheckBinaryMember(req,entityRequestProxy.Blob);
+                xml = CheckBinaryMember(req);
             }
             else
             {
@@ -1302,7 +1233,7 @@ namespace dose_test_dotnet
 
                 if (NeedBinaryCheck(req))
                 {
-                    Logger.Instance.WriteLine(CheckBinaryMember(req,responseProxy.RequestBlob));
+                    Logger.Instance.WriteLine(CheckBinaryMember(req));
                 }
                 else
                 {

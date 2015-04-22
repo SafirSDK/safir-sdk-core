@@ -122,7 +122,8 @@ namespace ToolSupport
 
         /**
          * @brief Set the top level isChanged flag. Useful for empty collectons that still may have isChanged=true.
-         * @param member[in] - Member index of the member.
+         *
+         * @param member [in] - Member index of the member.
          * @param isChanged [in] - Indicates if the member value is changed at top level.
          */
         void SetChangedTopLevel(DotsC_MemberIndex member, bool isChanged)
