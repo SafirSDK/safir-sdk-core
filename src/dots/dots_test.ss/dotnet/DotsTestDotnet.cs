@@ -103,10 +103,10 @@ class DotsTestDotnet
             Test_IsProperty();
             Test_IsEnumeration();
             Test_IsException();
-            Test_DeserializeUnlinkedObject();
             Test_GetDouFilePath();
             TestSequences();
             TestDictionaries();
+            Test_DeserializeUnlinkedObject();
         }
         finally
         {
