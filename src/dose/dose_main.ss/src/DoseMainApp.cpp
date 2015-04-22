@@ -129,6 +129,7 @@ namespace Internal
         if (!wasStopped)
         {
             m_cmdReceiver.Stop();
+
             m_nodeInfoHandler->Stop();
             m_lockMonitor->Stop();
 
@@ -251,7 +252,7 @@ namespace Internal
             }
         }
 
-        LogStatus("dose_main got signal " + boost::lexical_cast<std::string>(signalNumber) + ", shutting down.");
+        lllog(1) << "DOSE_MAIN: Got signal " << signalNumber << ", shutting down." << std::endl;
 
         Stop();
     }
