@@ -355,7 +355,6 @@ namespace Internal
     {
         if (m_persistensReady && m_poolDistributionComplete && !m_pdCompleteSignaled)
         {
-            m_log("PD Complete");
             lllog(1)<<"PD complete"<<std::endl;
             m_pdCompleteSignaled=true;
             m_poolDistributor.Start();
