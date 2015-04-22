@@ -107,6 +107,7 @@ DopeApp::~DopeApp()
 void DopeApp::OnStopOrder()
 {
     m_debug << "Got Stop order, will terminate"<< std::endl;
+    m_persistenceHandler->Stop();
     m_ioService.stop();
 }
 
