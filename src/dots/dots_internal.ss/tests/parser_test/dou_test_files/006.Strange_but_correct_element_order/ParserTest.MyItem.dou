@@ -5,7 +5,9 @@
         <createRoutine>
             <values>
                 <value>
-                    <parameter><name>ParserTest.MyItem.kalle</name></parameter>
+                    <parameter>
+                        <name>ParserTest.MyItem.kalle</name>
+                    </parameter>
                     <member>Obj</member>
                 </value>
                 <value>

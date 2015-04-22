@@ -74,7 +74,7 @@ MemberId: 0
 MemberId (arr): 0
 Array Size Ok: true
 ----Members---- 
-GetInfo: INT32MEMBERTYPE,Int32Member,-1,-1,true,2
+GetInfo: INT32MEMBERTYPE,Int32Member,-1,-1,Array,2
 GetName: Int32Member
 GetTypeName: Int32
 ----Parameters---- 
@@ -106,7 +106,7 @@ MemberId: 1
 MemberId (arr): 1
 Array Size Ok: true
 ----Members---- 
-GetInfo: INT64MEMBERTYPE,Int64Member,-1,-1,true,2
+GetInfo: INT64MEMBERTYPE,Int64Member,-1,-1,Array,2
 GetName: Int64Member
 GetTypeName: Int64
 ----Parameters---- 
@@ -138,7 +138,7 @@ MemberId: 2
 MemberId (arr): 2
 Array Size Ok: true
 ----Members---- 
-GetInfo: FLOAT32MEMBERTYPE,Float32Member,-1,-1,true,2
+GetInfo: FLOAT32MEMBERTYPE,Float32Member,-1,-1,Array,2
 GetName: Float32Member
 GetTypeName: Float32
 ----Parameters---- 
@@ -170,7 +170,7 @@ MemberId: 3
 MemberId (arr): 3
 Array Size Ok: true
 ----Members---- 
-GetInfo: FLOAT64MEMBERTYPE,Float64Member,-1,-1,true,2
+GetInfo: FLOAT64MEMBERTYPE,Float64Member,-1,-1,Array,2
 GetName: Float64Member
 GetTypeName: Float64
 ----Parameters---- 
@@ -202,7 +202,7 @@ MemberId: 4
 MemberId (arr): 4
 Array Size Ok: true
 ----Members---- 
-GetInfo: BOOLEANMEMBERTYPE,BooleanMember,-1,-1,true,2
+GetInfo: BOOLEANMEMBERTYPE,BooleanMember,-1,-1,Array,2
 GetName: BooleanMember
 GetTypeName: Boolean
 ----Parameters---- 
@@ -239,9 +239,9 @@ Size: 3
 Test ToString (0): MyFirst
 Test ToValue (MySecond): 1
 ----Members---- 
-GetInfo: ENUMERATIONMEMBERTYPE,EnumerationMember,7765043459684641017,-1,true,2
+GetInfo: ENUMERATIONMEMBERTYPE,EnumerationMember,7765043459684641017,-1,Array,2
 GetName: EnumerationMember
-GetTypeName: Enumeration
+GetTypeName: DotsTest.TestEnum
 GetTypeId: 7765043459684641017
 ----Parameters---- 
 GetName: EnumerationParameter
@@ -273,7 +273,7 @@ MemberId (arr): 6
 Array Size Ok: true
 MaxStringLength Size Ok (10): true
 ----Members---- 
-GetInfo: STRINGMEMBERTYPE,StringMember,-1,10,true,2
+GetInfo: STRINGMEMBERTYPE,StringMember,-1,10,Array,2
 GetName: StringMember
 GetTypeName: String
 ----Parameters---- 
@@ -305,7 +305,7 @@ MemberId: 7
 MemberId (arr): 7
 Array Size Ok: true
 ----Members---- 
-GetInfo: ENTITYIDMEMBERTYPE,EntityIdMember,-1,-1,true,2
+GetInfo: ENTITYIDMEMBERTYPE,EntityIdMember,-1,-1,Array,2
 GetName: EntityIdMember
 GetTypeName: EntityId
 ----Parameters---- 
@@ -337,7 +337,7 @@ MemberId: 10
 MemberId (arr): 9
 Array Size Ok: true
 ----Members---- 
-GetInfo: INSTANCEIDMEMBERTYPE,InstanceIdMember,-1,-1,true,2
+GetInfo: INSTANCEIDMEMBERTYPE,InstanceIdMember,-1,-1,Array,2
 GetName: InstanceIdMember
 GetTypeName: InstanceId
 ----Parameters---- 
@@ -369,7 +369,7 @@ MemberId: 9
 MemberId (arr): 8
 Array Size Ok: true
 ----Members---- 
-GetInfo: TYPEIDMEMBERTYPE,TypeIdMember,-1,-1,true,2
+GetInfo: TYPEIDMEMBERTYPE,TypeIdMember,-1,-1,Array,2
 GetName: TypeIdMember
 GetTypeName: TypeId
 ----Parameters---- 
@@ -401,7 +401,7 @@ MemberId: 12
 MemberId (arr): 10
 Array Size Ok: true
 ----Members---- 
-GetInfo: CHANNELIDMEMBERTYPE,ChannelIdMember,-1,-1,true,2
+GetInfo: CHANNELIDMEMBERTYPE,ChannelIdMember,-1,-1,Array,2
 GetName: ChannelIdMember
 GetTypeName: ChannelId
 ----Parameters---- 
@@ -433,7 +433,7 @@ MemberId: 14
 MemberId (arr): 11
 Array Size Ok: true
 ----Members---- 
-GetInfo: HANDLERIDMEMBERTYPE,HandlerIdMember,-1,-1,true,2
+GetInfo: HANDLERIDMEMBERTYPE,HandlerIdMember,-1,-1,Array,2
 GetName: HandlerIdMember
 GetTypeName: HandlerId
 ----Parameters---- 
@@ -465,7 +465,7 @@ MemberId: 16
 MemberId (arr): 12
 Array Size Ok: true
 ----Members---- 
-GetInfo: OBJECTMEMBERTYPE,ObjectMember,5955188366590963785,-1,true,2
+GetInfo: OBJECTMEMBERTYPE,ObjectMember,5955188366590963785,-1,Array,2
 GetName: ObjectMember
 GetTypeName: Object
 GetTypeId: 5955188366590963785
@@ -498,7 +498,7 @@ MemberId: 17
 MemberId (arr): 13
 Array Size Ok: true
 ----Members---- 
-GetInfo: BINARYMEMBERTYPE,BinaryMember,-1,-1,true,2
+GetInfo: BINARYMEMBERTYPE,BinaryMember,-1,-1,Array,2
 GetName: BinaryMember
 GetTypeName: Binary
 ----Parameters---- 
@@ -530,9 +530,9 @@ MemberId: 18
 MemberId (arr): 14
 Array Size Ok: true
 ----Members---- 
-GetInfo: OBJECTMEMBERTYPE,TestClassMember,6091706122362893070,-1,true,2
+GetInfo: OBJECTMEMBERTYPE,TestClassMember,6091706122362893070,-1,Array,2
 GetName: TestClassMember
-GetTypeName: Object
+GetTypeName: DotsTest.TestItem
 GetTypeId: 6091706122362893070
 ----Parameters---- 
 GetName: TestClassParameter
@@ -563,7 +563,7 @@ MemberId: 19
 MemberId (arr): 15
 Array Size Ok: true
 ----Members---- 
-GetInfo: AMPERE32MEMBERTYPE,Ampere32Member,-1,-1,true,2
+GetInfo: AMPERE32MEMBERTYPE,Ampere32Member,-1,-1,Array,2
 GetName: Ampere32Member
 GetTypeName: Ampere32
 ----Parameters---- 
@@ -595,7 +595,7 @@ MemberId: 20
 MemberId (arr): 16
 Array Size Ok: true
 ----Members---- 
-GetInfo: CUBICMETER32MEMBERTYPE,CubicMeter32Member,-1,-1,true,2
+GetInfo: CUBICMETER32MEMBERTYPE,CubicMeter32Member,-1,-1,Array,2
 GetName: CubicMeter32Member
 GetTypeName: CubicMeter32
 ----Parameters---- 
@@ -627,7 +627,7 @@ MemberId: 21
 MemberId (arr): 17
 Array Size Ok: true
 ----Members---- 
-GetInfo: HERTZ32MEMBERTYPE,Hertz32Member,-1,-1,true,2
+GetInfo: HERTZ32MEMBERTYPE,Hertz32Member,-1,-1,Array,2
 GetName: Hertz32Member
 GetTypeName: Hertz32
 ----Parameters---- 
@@ -659,7 +659,7 @@ MemberId: 22
 MemberId (arr): 18
 Array Size Ok: true
 ----Members---- 
-GetInfo: JOULE32MEMBERTYPE,Joule32Member,-1,-1,true,2
+GetInfo: JOULE32MEMBERTYPE,Joule32Member,-1,-1,Array,2
 GetName: Joule32Member
 GetTypeName: Joule32
 ----Parameters---- 
@@ -691,7 +691,7 @@ MemberId: 23
 MemberId (arr): 19
 Array Size Ok: true
 ----Members---- 
-GetInfo: KELVIN32MEMBERTYPE,Kelvin32Member,-1,-1,true,2
+GetInfo: KELVIN32MEMBERTYPE,Kelvin32Member,-1,-1,Array,2
 GetName: Kelvin32Member
 GetTypeName: Kelvin32
 ----Parameters---- 
@@ -723,7 +723,7 @@ MemberId: 24
 MemberId (arr): 20
 Array Size Ok: true
 ----Members---- 
-GetInfo: KILOGRAM32MEMBERTYPE,Kilogram32Member,-1,-1,true,2
+GetInfo: KILOGRAM32MEMBERTYPE,Kilogram32Member,-1,-1,Array,2
 GetName: Kilogram32Member
 GetTypeName: Kilogram32
 ----Parameters---- 
@@ -755,7 +755,7 @@ MemberId: 25
 MemberId (arr): 21
 Array Size Ok: true
 ----Members---- 
-GetInfo: METER32MEMBERTYPE,Meter32Member,-1,-1,true,2
+GetInfo: METER32MEMBERTYPE,Meter32Member,-1,-1,Array,2
 GetName: Meter32Member
 GetTypeName: Meter32
 ----Parameters---- 
@@ -787,7 +787,7 @@ MemberId: 26
 MemberId (arr): 22
 Array Size Ok: true
 ----Members---- 
-GetInfo: METERPERSECOND32MEMBERTYPE,MeterPerSecond32Member,-1,-1,true,2
+GetInfo: METERPERSECOND32MEMBERTYPE,MeterPerSecond32Member,-1,-1,Array,2
 GetName: MeterPerSecond32Member
 GetTypeName: MeterPerSecond32
 ----Parameters---- 
@@ -819,7 +819,7 @@ MemberId: 27
 MemberId (arr): 23
 Array Size Ok: true
 ----Members---- 
-GetInfo: METERPERSECONDSQUARED32MEMBERTYPE,MeterPerSecondSquared32Member,-1,-1,true,2
+GetInfo: METERPERSECONDSQUARED32MEMBERTYPE,MeterPerSecondSquared32Member,-1,-1,Array,2
 GetName: MeterPerSecondSquared32Member
 GetTypeName: MeterPerSecondSquared32
 ----Parameters---- 
@@ -851,7 +851,7 @@ MemberId: 28
 MemberId (arr): 24
 Array Size Ok: true
 ----Members---- 
-GetInfo: NEWTON32MEMBERTYPE,Newton32Member,-1,-1,true,2
+GetInfo: NEWTON32MEMBERTYPE,Newton32Member,-1,-1,Array,2
 GetName: Newton32Member
 GetTypeName: Newton32
 ----Parameters---- 
@@ -883,7 +883,7 @@ MemberId: 29
 MemberId (arr): 25
 Array Size Ok: true
 ----Members---- 
-GetInfo: PASCAL32MEMBERTYPE,Pascal32Member,-1,-1,true,2
+GetInfo: PASCAL32MEMBERTYPE,Pascal32Member,-1,-1,Array,2
 GetName: Pascal32Member
 GetTypeName: Pascal32
 ----Parameters---- 
@@ -915,7 +915,7 @@ MemberId: 30
 MemberId (arr): 26
 Array Size Ok: true
 ----Members---- 
-GetInfo: RADIAN32MEMBERTYPE,Radian32Member,-1,-1,true,2
+GetInfo: RADIAN32MEMBERTYPE,Radian32Member,-1,-1,Array,2
 GetName: Radian32Member
 GetTypeName: Radian32
 ----Parameters---- 
@@ -947,7 +947,7 @@ MemberId: 31
 MemberId (arr): 27
 Array Size Ok: true
 ----Members---- 
-GetInfo: RADIANPERSECOND32MEMBERTYPE,RadianPerSecond32Member,-1,-1,true,2
+GetInfo: RADIANPERSECOND32MEMBERTYPE,RadianPerSecond32Member,-1,-1,Array,2
 GetName: RadianPerSecond32Member
 GetTypeName: RadianPerSecond32
 ----Parameters---- 
@@ -979,7 +979,7 @@ MemberId: 32
 MemberId (arr): 28
 Array Size Ok: true
 ----Members---- 
-GetInfo: RADIANPERSECONDSQUARED32MEMBERTYPE,RadianPerSecondSquared32Member,-1,-1,true,2
+GetInfo: RADIANPERSECONDSQUARED32MEMBERTYPE,RadianPerSecondSquared32Member,-1,-1,Array,2
 GetName: RadianPerSecondSquared32Member
 GetTypeName: RadianPerSecondSquared32
 ----Parameters---- 
@@ -1011,7 +1011,7 @@ MemberId: 33
 MemberId (arr): 29
 Array Size Ok: true
 ----Members---- 
-GetInfo: SECOND32MEMBERTYPE,Second32Member,-1,-1,true,2
+GetInfo: SECOND32MEMBERTYPE,Second32Member,-1,-1,Array,2
 GetName: Second32Member
 GetTypeName: Second32
 ----Parameters---- 
@@ -1043,7 +1043,7 @@ MemberId: 34
 MemberId (arr): 30
 Array Size Ok: true
 ----Members---- 
-GetInfo: SQUAREMETER32MEMBERTYPE,SquareMeter32Member,-1,-1,true,2
+GetInfo: SQUAREMETER32MEMBERTYPE,SquareMeter32Member,-1,-1,Array,2
 GetName: SquareMeter32Member
 GetTypeName: SquareMeter32
 ----Parameters---- 
@@ -1075,7 +1075,7 @@ MemberId: 35
 MemberId (arr): 31
 Array Size Ok: true
 ----Members---- 
-GetInfo: STERADIAN32MEMBERTYPE,Steradian32Member,-1,-1,true,2
+GetInfo: STERADIAN32MEMBERTYPE,Steradian32Member,-1,-1,Array,2
 GetName: Steradian32Member
 GetTypeName: Steradian32
 ----Parameters---- 
@@ -1107,7 +1107,7 @@ MemberId: 36
 MemberId (arr): 32
 Array Size Ok: true
 ----Members---- 
-GetInfo: VOLT32MEMBERTYPE,Volt32Member,-1,-1,true,2
+GetInfo: VOLT32MEMBERTYPE,Volt32Member,-1,-1,Array,2
 GetName: Volt32Member
 GetTypeName: Volt32
 ----Parameters---- 
@@ -1139,7 +1139,7 @@ MemberId: 37
 MemberId (arr): 33
 Array Size Ok: true
 ----Members---- 
-GetInfo: WATT32MEMBERTYPE,Watt32Member,-1,-1,true,2
+GetInfo: WATT32MEMBERTYPE,Watt32Member,-1,-1,Array,2
 GetName: Watt32Member
 GetTypeName: Watt32
 ----Parameters---- 
@@ -1171,7 +1171,7 @@ MemberId: 38
 MemberId (arr): 34
 Array Size Ok: true
 ----Members---- 
-GetInfo: AMPERE64MEMBERTYPE,Ampere64Member,-1,-1,true,2
+GetInfo: AMPERE64MEMBERTYPE,Ampere64Member,-1,-1,Array,2
 GetName: Ampere64Member
 GetTypeName: Ampere64
 ----Parameters---- 
@@ -1203,7 +1203,7 @@ MemberId: 39
 MemberId (arr): 35
 Array Size Ok: true
 ----Members---- 
-GetInfo: CUBICMETER64MEMBERTYPE,CubicMeter64Member,-1,-1,true,2
+GetInfo: CUBICMETER64MEMBERTYPE,CubicMeter64Member,-1,-1,Array,2
 GetName: CubicMeter64Member
 GetTypeName: CubicMeter64
 ----Parameters---- 
@@ -1235,7 +1235,7 @@ MemberId: 40
 MemberId (arr): 36
 Array Size Ok: true
 ----Members---- 
-GetInfo: HERTZ64MEMBERTYPE,Hertz64Member,-1,-1,true,2
+GetInfo: HERTZ64MEMBERTYPE,Hertz64Member,-1,-1,Array,2
 GetName: Hertz64Member
 GetTypeName: Hertz64
 ----Parameters---- 
@@ -1267,7 +1267,7 @@ MemberId: 41
 MemberId (arr): 37
 Array Size Ok: true
 ----Members---- 
-GetInfo: JOULE64MEMBERTYPE,Joule64Member,-1,-1,true,2
+GetInfo: JOULE64MEMBERTYPE,Joule64Member,-1,-1,Array,2
 GetName: Joule64Member
 GetTypeName: Joule64
 ----Parameters---- 
@@ -1299,7 +1299,7 @@ MemberId: 42
 MemberId (arr): 38
 Array Size Ok: true
 ----Members---- 
-GetInfo: KELVIN64MEMBERTYPE,Kelvin64Member,-1,-1,true,2
+GetInfo: KELVIN64MEMBERTYPE,Kelvin64Member,-1,-1,Array,2
 GetName: Kelvin64Member
 GetTypeName: Kelvin64
 ----Parameters---- 
@@ -1331,7 +1331,7 @@ MemberId: 43
 MemberId (arr): 39
 Array Size Ok: true
 ----Members---- 
-GetInfo: KILOGRAM64MEMBERTYPE,Kilogram64Member,-1,-1,true,2
+GetInfo: KILOGRAM64MEMBERTYPE,Kilogram64Member,-1,-1,Array,2
 GetName: Kilogram64Member
 GetTypeName: Kilogram64
 ----Parameters---- 
@@ -1363,7 +1363,7 @@ MemberId: 44
 MemberId (arr): 40
 Array Size Ok: true
 ----Members---- 
-GetInfo: METER64MEMBERTYPE,Meter64Member,-1,-1,true,2
+GetInfo: METER64MEMBERTYPE,Meter64Member,-1,-1,Array,2
 GetName: Meter64Member
 GetTypeName: Meter64
 ----Parameters---- 
@@ -1395,7 +1395,7 @@ MemberId: 45
 MemberId (arr): 41
 Array Size Ok: true
 ----Members---- 
-GetInfo: METERPERSECOND64MEMBERTYPE,MeterPerSecond64Member,-1,-1,true,2
+GetInfo: METERPERSECOND64MEMBERTYPE,MeterPerSecond64Member,-1,-1,Array,2
 GetName: MeterPerSecond64Member
 GetTypeName: MeterPerSecond64
 ----Parameters---- 
@@ -1427,7 +1427,7 @@ MemberId: 46
 MemberId (arr): 42
 Array Size Ok: true
 ----Members---- 
-GetInfo: METERPERSECONDSQUARED64MEMBERTYPE,MeterPerSecondSquared64Member,-1,-1,true,2
+GetInfo: METERPERSECONDSQUARED64MEMBERTYPE,MeterPerSecondSquared64Member,-1,-1,Array,2
 GetName: MeterPerSecondSquared64Member
 GetTypeName: MeterPerSecondSquared64
 ----Parameters---- 
@@ -1459,7 +1459,7 @@ MemberId: 47
 MemberId (arr): 43
 Array Size Ok: true
 ----Members---- 
-GetInfo: NEWTON64MEMBERTYPE,Newton64Member,-1,-1,true,2
+GetInfo: NEWTON64MEMBERTYPE,Newton64Member,-1,-1,Array,2
 GetName: Newton64Member
 GetTypeName: Newton64
 ----Parameters---- 
@@ -1491,7 +1491,7 @@ MemberId: 48
 MemberId (arr): 44
 Array Size Ok: true
 ----Members---- 
-GetInfo: PASCAL64MEMBERTYPE,Pascal64Member,-1,-1,true,2
+GetInfo: PASCAL64MEMBERTYPE,Pascal64Member,-1,-1,Array,2
 GetName: Pascal64Member
 GetTypeName: Pascal64
 ----Parameters---- 
@@ -1523,7 +1523,7 @@ MemberId: 49
 MemberId (arr): 45
 Array Size Ok: true
 ----Members---- 
-GetInfo: RADIAN64MEMBERTYPE,Radian64Member,-1,-1,true,2
+GetInfo: RADIAN64MEMBERTYPE,Radian64Member,-1,-1,Array,2
 GetName: Radian64Member
 GetTypeName: Radian64
 ----Parameters---- 
@@ -1555,7 +1555,7 @@ MemberId: 50
 MemberId (arr): 46
 Array Size Ok: true
 ----Members---- 
-GetInfo: RADIANPERSECOND64MEMBERTYPE,RadianPerSecond64Member,-1,-1,true,2
+GetInfo: RADIANPERSECOND64MEMBERTYPE,RadianPerSecond64Member,-1,-1,Array,2
 GetName: RadianPerSecond64Member
 GetTypeName: RadianPerSecond64
 ----Parameters---- 
@@ -1587,7 +1587,7 @@ MemberId: 51
 MemberId (arr): 47
 Array Size Ok: true
 ----Members---- 
-GetInfo: RADIANPERSECONDSQUARED64MEMBERTYPE,RadianPerSecondSquared64Member,-1,-1,true,2
+GetInfo: RADIANPERSECONDSQUARED64MEMBERTYPE,RadianPerSecondSquared64Member,-1,-1,Array,2
 GetName: RadianPerSecondSquared64Member
 GetTypeName: RadianPerSecondSquared64
 ----Parameters---- 
@@ -1619,7 +1619,7 @@ MemberId: 52
 MemberId (arr): 48
 Array Size Ok: true
 ----Members---- 
-GetInfo: SECOND64MEMBERTYPE,Second64Member,-1,-1,true,2
+GetInfo: SECOND64MEMBERTYPE,Second64Member,-1,-1,Array,2
 GetName: Second64Member
 GetTypeName: Second64
 ----Parameters---- 
@@ -1651,7 +1651,7 @@ MemberId: 53
 MemberId (arr): 49
 Array Size Ok: true
 ----Members---- 
-GetInfo: SQUAREMETER64MEMBERTYPE,SquareMeter64Member,-1,-1,true,2
+GetInfo: SQUAREMETER64MEMBERTYPE,SquareMeter64Member,-1,-1,Array,2
 GetName: SquareMeter64Member
 GetTypeName: SquareMeter64
 ----Parameters---- 
@@ -1683,7 +1683,7 @@ MemberId: 54
 MemberId (arr): 50
 Array Size Ok: true
 ----Members---- 
-GetInfo: STERADIAN64MEMBERTYPE,Steradian64Member,-1,-1,true,2
+GetInfo: STERADIAN64MEMBERTYPE,Steradian64Member,-1,-1,Array,2
 GetName: Steradian64Member
 GetTypeName: Steradian64
 ----Parameters---- 
@@ -1715,7 +1715,7 @@ MemberId: 55
 MemberId (arr): 51
 Array Size Ok: true
 ----Members---- 
-GetInfo: VOLT64MEMBERTYPE,Volt64Member,-1,-1,true,2
+GetInfo: VOLT64MEMBERTYPE,Volt64Member,-1,-1,Array,2
 GetName: Volt64Member
 GetTypeName: Volt64
 ----Parameters---- 
@@ -1747,7 +1747,7 @@ MemberId: 56
 MemberId (arr): 52
 Array Size Ok: true
 ----Members---- 
-GetInfo: WATT64MEMBERTYPE,Watt64Member,-1,-1,true,2
+GetInfo: WATT64MEMBERTYPE,Watt64Member,-1,-1,Array,2
 GetName: Watt64Member
 GetTypeName: Watt64
 ----Parameters---- 
@@ -1806,6 +1806,360 @@ DotsTest.TestEnum
 Testing: IsException
 =====================================================
 DotsTest.TestException
+
+
+
+=====================================================
+Testing: Sequences
+=====================================================
+--- Int32Member ---
+size: 2
+isChanged: true
+val[0]: 10
+val[1]: 20
+--- Int64Member ---
+size: 2
+isChanged: true
+val[0]: 100
+val[1]: 200
+--- Float32Member ---
+size: 2
+isChanged: true
+val[0]: 1.1
+val[1]: 2.2
+--- Float64Member ---
+size: 2
+isChanged: true
+val[0]: 11.11
+val[1]: 22.22
+--- BooleanMember ---
+size: 2
+isChanged: true
+val[0]: true
+val[1]: false
+--- EnumerationMember ---
+size: 2
+isChanged: true
+val[0]: MyFirst
+val[1]: MySecond
+--- StringMember ---
+size: 2
+isChanged: true
+val[0]: Aa
+val[1]: Bb
+--- TypeIdMember ---
+size: 2
+isChanged: true
+val[0]: DotsTest.MemberDictionaries
+val[1]: DotsTest.MemberSequences
+--- HandlerIdMember ---
+size: 0
+isChanged: false
+------ To Xml -----
+<?xml version="1.0" encoding="utf-8"?><DotsTest.MemberSequences><Int32Member><Int32>10</Int32><Int32>20</Int32></Int32Member><Int64Member><Int64>100</Int64><Int64>200</Int64></Int64Member><Float32Member><Float32>1.1</Float32><Float32>2.2</Float32></Float32Member><Float64Member><Float64>11.1099996566772</Float64><Float64>22.2199993133545</Float64></Float64Member><BooleanMember><Boolean>true</Boolean><Boolean>false</Boolean></BooleanMember><EnumerationMember><DotsTest.TestEnum>MyFirst</DotsTest.TestEnum><DotsTest.TestEnum>MySecond</DotsTest.TestEnum></EnumerationMember><StringMember><String xml:space="preserve">Aa</String><String xml:space="preserve">Bb</String></StringMember><TypeIdMember><TypeId>DotsTest.MemberDictionaries</TypeId><TypeId>DotsTest.MemberSequences</TypeId></TypeIdMember></DotsTest.MemberSequences>
+------ From Xml -----
+--- Int32Member ---
+size: 2
+isChanged: true
+val[0]: 10
+val[1]: 20
+--- Int64Member ---
+size: 2
+isChanged: true
+val[0]: 100
+val[1]: 200
+--- Float32Member ---
+size: 2
+isChanged: true
+val[0]: 1.1
+val[1]: 2.2
+--- Float64Member ---
+size: 2
+isChanged: true
+val[0]: 11.11
+val[1]: 22.22
+--- BooleanMember ---
+size: 2
+isChanged: true
+val[0]: true
+val[1]: false
+--- EnumerationMember ---
+size: 2
+isChanged: true
+val[0]: MyFirst
+val[1]: MySecond
+--- StringMember ---
+size: 2
+isChanged: true
+val[0]: Aa
+val[1]: Bb
+--- TypeIdMember ---
+size: 2
+isChanged: true
+val[0]: DotsTest.MemberDictionaries
+val[1]: DotsTest.MemberSequences
+--- HandlerIdMember ---
+size: 0
+isChanged: false
+------ To Json -----
+{"DotsTest.MemberSequences": {"_DouType": "DotsTest.MemberSequences", "Int32Member": [10, 20], "Int64Member": [100, 200], "Float32Member": [1.1, 2.2], "Float64Member": [11.1099996566772, 22.2199993133545], "BooleanMember": [true, false], "EnumerationMember": ["MyFirst", "MySecond"], "StringMember": ["Aa", "Bb"], "TypeIdMember": ["DotsTest.MemberDictionaries", "DotsTest.MemberSequences"]}}
+------ From Json -----
+--- Int32Member ---
+size: 2
+isChanged: true
+val[0]: 10
+val[1]: 20
+--- Int64Member ---
+size: 2
+isChanged: true
+val[0]: 100
+val[1]: 200
+--- Float32Member ---
+size: 2
+isChanged: true
+val[0]: 1.1
+val[1]: 2.2
+--- Float64Member ---
+size: 2
+isChanged: true
+val[0]: 11.11
+val[1]: 22.22
+--- BooleanMember ---
+size: 2
+isChanged: true
+val[0]: true
+val[1]: false
+--- EnumerationMember ---
+size: 2
+isChanged: true
+val[0]: MyFirst
+val[1]: MySecond
+--- StringMember ---
+size: 2
+isChanged: true
+val[0]: Aa
+val[1]: Bb
+--- TypeIdMember ---
+size: 2
+isChanged: true
+val[0]: DotsTest.MemberDictionaries
+val[1]: DotsTest.MemberSequences
+--- HandlerIdMember ---
+size: 0
+isChanged: false
+------ Clone -----
+--- Int32Member ---
+size: 2
+isChanged: true
+val[0]: 10
+val[1]: 20
+--- Int64Member ---
+size: 2
+isChanged: true
+val[0]: 100
+val[1]: 200
+--- Float32Member ---
+size: 2
+isChanged: true
+val[0]: 1.1
+val[1]: 2.2
+--- Float64Member ---
+size: 2
+isChanged: true
+val[0]: 11.11
+val[1]: 22.22
+--- BooleanMember ---
+size: 2
+isChanged: true
+val[0]: true
+val[1]: false
+--- EnumerationMember ---
+size: 2
+isChanged: true
+val[0]: MyFirst
+val[1]: MySecond
+--- StringMember ---
+size: 2
+isChanged: true
+val[0]: Aa
+val[1]: Bb
+--- TypeIdMember ---
+size: 2
+isChanged: true
+val[0]: DotsTest.MemberDictionaries
+val[1]: DotsTest.MemberSequences
+--- HandlerIdMember ---
+size: 0
+isChanged: false
+
+
+
+=====================================================
+Testing: Dictionaries
+=====================================================
+--- Int32StringMember ---
+size: 2
+isChanged: true
+10 = Safir, changed: true
+20 = rifaS, changed: true
+--- Int64BinaryMember ---
+size: 2
+isChanged: true
+100 = I am a Rockefeller!, changed: true
+200 = Safir rules the world, changed: true
+--- TypeIdEnumMember ---
+size: 2
+isChanged: true
+DotsTest.MemberSequences = MySecond, changed: true
+DotsTest.MemberDictionaries = MyFirst, changed: true
+--- EnumInstanceIdMember ---
+size: 2
+isChanged: true
+MyFirst = first, changed: true
+MySecond = 2, changed: true
+--- InstanceIdEntityIdMember ---
+size: 2
+isChanged: true
+FirstInstance = (Safir.Dob.Entity, first), changed: true
+SecondInstance = (Safir.Dob.Entity, 2), changed: true
+--- EntityIdHandlerIdMember ---
+size: 0
+isChanged: false
+--- StringItemMember ---
+size: 3
+isChanged: true
+Gustav = {"DotsTest.MemberDictionaries": {"_DouType": "DotsTest.MemberDictionaries", "EntityIdHandlerIdMember": [{"key": {"name": "Safir.Dob.Entity", "instanceId": "first"}, "value": "first"}, {"key": {"name": "Safir.Dob.Entity", "instanceId": 2}, "value": 2}]}}, changed: true
+Karl = {"DotsTest.MemberDictionaries": {"_DouType": "DotsTest.MemberDictionaries", "EntityIdHandlerIdMember": [{"key": {"name": "Safir.Dob.Entity", "instanceId": "first"}, "value": "first"}, {"key": {"name": "Safir.Dob.Entity", "instanceId": 2}, "value": 2}]}}, changed: true
+Philip = NULL, changed: true
+--- StringObjectMember ---
+size: 2
+isChanged: true
+Dilbert = {"Object": {"_DouType": "Object"}}, changed: true
+Wally = {"DotsTest.MemberDictionaries": {"_DouType": "DotsTest.MemberDictionaries", "TypeIdStringMember": [{"key": "DotsTest.MemberDictionaries", "value": "World"}, {"key": "DotsTest.TestEnum", "value": "Hello"}]}}, changed: true
+------ To Xml -----
+<?xml version="1.0" encoding="utf-8"?><DotsTest.MemberDictionaries><Int32StringMember><entry><key>10</key><value xml:space="preserve">Safir</value></entry><entry><key>20</key><value xml:space="preserve">rifaS</value></entry></Int32StringMember><Int64BinaryMember><entry><key>100</key><value>SSBhbSBhIFJvY2tlZmVsbGVyIQ==</value></entry><entry><key>200</key><value>U2FmaXIgcnVsZXMgdGhlIHdvcmxk</value></entry></Int64BinaryMember><StringObjectMember><entry><key>Dilbert</key><Object></Object></entry><entry><key>Wally</key><Object type="DotsTest.MemberDictionaries"><TypeIdStringMember><entry><key>DotsTest.MemberDictionaries</key><value xml:space="preserve">World</value></entry><entry><key>DotsTest.TestEnum</key><value xml:space="preserve">Hello</value></entry></TypeIdStringMember></Object></entry></StringObjectMember><StringItemMember><entry><key>Gustav</key><DotsTest.MemberDictionaries><EntityIdHandlerIdMember><entry><key><name>Safir.Dob.Entity</name><instanceId>first</instanceId></key><value>first</value></entry><entry><key><name>Safir.Dob.Entity</name><instanceId>2</instanceId></key><value>2</value></entry></EntityIdHandlerIdMember></DotsTest.MemberDictionaries></entry><entry><key>Karl</key><DotsTest.MemberDictionaries><EntityIdHandlerIdMember><entry><key><name>Safir.Dob.Entity</name><instanceId>first</instanceId></key><value>first</value></entry><entry><key><name>Safir.Dob.Entity</name><instanceId>2</instanceId></key><value>2</value></entry></EntityIdHandlerIdMember></DotsTest.MemberDictionaries></entry><entry><key>Philip</key></entry></StringItemMember><TypeIdEnumMember><entry><key>DotsTest.MemberSequences</key><value>MySecond</value></entry><entry><key>DotsTest.MemberDictionaries</key><value>MyFirst</value></entry></TypeIdEnumMember><EnumInstanceIdMember><entry><key>MyFirst</key><value>first</value></entry><entry><key>MySecond</key><value>2</value></entry></EnumInstanceIdMember><InstanceIdEntityIdMember><entry><key>FirstInstance</key><value><name>Safir.Dob.Entity</name><instanceId>first</instanceId></value></entry><entry><key>SecondInstance</key><value><name>Safir.Dob.Entity</name><instanceId>2</instanceId></value></entry></InstanceIdEntityIdMember></DotsTest.MemberDictionaries>
+------ From Xml -----
+--- Int32StringMember ---
+size: 2
+isChanged: true
+10 = Safir, changed: true
+20 = rifaS, changed: true
+--- Int64BinaryMember ---
+size: 2
+isChanged: true
+100 = I am a Rockefeller!, changed: true
+200 = Safir rules the world, changed: true
+--- TypeIdEnumMember ---
+size: 2
+isChanged: true
+DotsTest.MemberSequences = MySecond, changed: true
+DotsTest.MemberDictionaries = MyFirst, changed: true
+--- EnumInstanceIdMember ---
+size: 2
+isChanged: true
+MyFirst = first, changed: true
+MySecond = 2, changed: true
+--- InstanceIdEntityIdMember ---
+size: 2
+isChanged: true
+FirstInstance = (Safir.Dob.Entity, first), changed: true
+SecondInstance = (Safir.Dob.Entity, 2), changed: true
+--- EntityIdHandlerIdMember ---
+size: 0
+isChanged: false
+--- StringItemMember ---
+size: 3
+isChanged: true
+Gustav = {"DotsTest.MemberDictionaries": {"_DouType": "DotsTest.MemberDictionaries", "EntityIdHandlerIdMember": [{"key": {"name": "Safir.Dob.Entity", "instanceId": "first"}, "value": "first"}, {"key": {"name": "Safir.Dob.Entity", "instanceId": 2}, "value": 2}]}}, changed: true
+Karl = {"DotsTest.MemberDictionaries": {"_DouType": "DotsTest.MemberDictionaries", "EntityIdHandlerIdMember": [{"key": {"name": "Safir.Dob.Entity", "instanceId": "first"}, "value": "first"}, {"key": {"name": "Safir.Dob.Entity", "instanceId": 2}, "value": 2}]}}, changed: true
+Philip = NULL, changed: true
+--- StringObjectMember ---
+size: 2
+isChanged: true
+Dilbert = {"Object": {"_DouType": "Object"}}, changed: true
+Wally = {"DotsTest.MemberDictionaries": {"_DouType": "DotsTest.MemberDictionaries", "TypeIdStringMember": [{"key": "DotsTest.MemberDictionaries", "value": "World"}, {"key": "DotsTest.TestEnum", "value": "Hello"}]}}, changed: true
+------ To Json -----
+{"DotsTest.MemberDictionaries": {"_DouType": "DotsTest.MemberDictionaries", "Int32StringMember": [{"key": 10, "value": "Safir"}, {"key": 20, "value": "rifaS"}], "Int64BinaryMember": [{"key": 100, "value": "SSBhbSBhIFJvY2tlZmVsbGVyIQ=="}, {"key": 200, "value": "U2FmaXIgcnVsZXMgdGhlIHdvcmxk"}], "StringObjectMember": [{"key": "Dilbert", "value": {"_DouType": "Object"}}, {"key": "Wally", "value": {"_DouType": "DotsTest.MemberDictionaries", "TypeIdStringMember": [{"key": "DotsTest.MemberDictionaries", "value": "World"}, {"key": "DotsTest.TestEnum", "value": "Hello"}]}}], "StringItemMember": [{"key": "Gustav", "value": {"_DouType": "DotsTest.MemberDictionaries", "EntityIdHandlerIdMember": [{"key": {"name": "Safir.Dob.Entity", "instanceId": "first"}, "value": "first"}, {"key": {"name": "Safir.Dob.Entity", "instanceId": 2}, "value": 2}]}}, {"key": "Karl", "value": {"_DouType": "DotsTest.MemberDictionaries", "EntityIdHandlerIdMember": [{"key": {"name": "Safir.Dob.Entity", "instanceId": "first"}, "value": "first"}, {"key": {"name": "Safir.Dob.Entity", "instanceId": 2}, "value": 2}]}}, {"key": "Philip", "value": null}], "TypeIdEnumMember": [{"key": "DotsTest.MemberSequences", "value": "MySecond"}, {"key": "DotsTest.MemberDictionaries", "value": "MyFirst"}], "EnumInstanceIdMember": [{"key": "MyFirst", "value": "first"}, {"key": "MySecond", "value": 2}], "InstanceIdEntityIdMember": [{"key": "FirstInstance", "value": {"name": "Safir.Dob.Entity", "instanceId": "first"}}, {"key": "SecondInstance", "value": {"name": "Safir.Dob.Entity", "instanceId": 2}}]}}
+------ From Json -----
+--- Int32StringMember ---
+size: 2
+isChanged: true
+10 = Safir, changed: true
+20 = rifaS, changed: true
+--- Int64BinaryMember ---
+size: 2
+isChanged: true
+100 = I am a Rockefeller!, changed: true
+200 = Safir rules the world, changed: true
+--- TypeIdEnumMember ---
+size: 2
+isChanged: true
+DotsTest.MemberSequences = MySecond, changed: true
+DotsTest.MemberDictionaries = MyFirst, changed: true
+--- EnumInstanceIdMember ---
+size: 2
+isChanged: true
+MyFirst = first, changed: true
+MySecond = 2, changed: true
+--- InstanceIdEntityIdMember ---
+size: 2
+isChanged: true
+FirstInstance = (Safir.Dob.Entity, first), changed: true
+SecondInstance = (Safir.Dob.Entity, 2), changed: true
+--- EntityIdHandlerIdMember ---
+size: 0
+isChanged: false
+--- StringItemMember ---
+size: 3
+isChanged: true
+Gustav = {"DotsTest.MemberDictionaries": {"_DouType": "DotsTest.MemberDictionaries", "EntityIdHandlerIdMember": [{"key": {"name": "Safir.Dob.Entity", "instanceId": "first"}, "value": "first"}, {"key": {"name": "Safir.Dob.Entity", "instanceId": 2}, "value": 2}]}}, changed: true
+Karl = {"DotsTest.MemberDictionaries": {"_DouType": "DotsTest.MemberDictionaries", "EntityIdHandlerIdMember": [{"key": {"name": "Safir.Dob.Entity", "instanceId": "first"}, "value": "first"}, {"key": {"name": "Safir.Dob.Entity", "instanceId": 2}, "value": 2}]}}, changed: true
+Philip = NULL, changed: true
+--- StringObjectMember ---
+size: 2
+isChanged: true
+Dilbert = {"Object": {"_DouType": "Object"}}, changed: true
+Wally = {"DotsTest.MemberDictionaries": {"_DouType": "DotsTest.MemberDictionaries", "TypeIdStringMember": [{"key": "DotsTest.MemberDictionaries", "value": "World"}, {"key": "DotsTest.TestEnum", "value": "Hello"}]}}, changed: true
+------ Clone -----
+--- Int32StringMember ---
+size: 2
+isChanged: true
+10 = Safir, changed: true
+20 = rifaS, changed: true
+--- Int64BinaryMember ---
+size: 2
+isChanged: true
+100 = I am a Rockefeller!, changed: true
+200 = Safir rules the world, changed: true
+--- TypeIdEnumMember ---
+size: 2
+isChanged: true
+DotsTest.MemberSequences = MySecond, changed: true
+DotsTest.MemberDictionaries = MyFirst, changed: true
+--- EnumInstanceIdMember ---
+size: 2
+isChanged: true
+MyFirst = first, changed: true
+MySecond = 2, changed: true
+--- InstanceIdEntityIdMember ---
+size: 2
+isChanged: true
+FirstInstance = (Safir.Dob.Entity, first), changed: true
+SecondInstance = (Safir.Dob.Entity, 2), changed: true
+--- EntityIdHandlerIdMember ---
+size: 0
+isChanged: false
+--- StringItemMember ---
+size: 3
+isChanged: true
+Gustav = {"DotsTest.MemberDictionaries": {"_DouType": "DotsTest.MemberDictionaries", "EntityIdHandlerIdMember": [{"key": {"name": "Safir.Dob.Entity", "instanceId": "first"}, "value": "first"}, {"key": {"name": "Safir.Dob.Entity", "instanceId": 2}, "value": 2}]}}, changed: true
+Karl = {"DotsTest.MemberDictionaries": {"_DouType": "DotsTest.MemberDictionaries", "EntityIdHandlerIdMember": [{"key": {"name": "Safir.Dob.Entity", "instanceId": "first"}, "value": "first"}, {"key": {"name": "Safir.Dob.Entity", "instanceId": 2}, "value": 2}]}}, changed: true
+Philip = NULL, changed: true
+--- StringObjectMember ---
+size: 2
+isChanged: true
+Dilbert = {"Object": {"_DouType": "Object"}}, changed: true
+Wally = {"DotsTest.MemberDictionaries": {"_DouType": "DotsTest.MemberDictionaries", "TypeIdStringMember": [{"key": "DotsTest.MemberDictionaries", "value": "World"}, {"key": "DotsTest.TestEnum", "value": "Hello"}]}}, changed: true
 
 
 

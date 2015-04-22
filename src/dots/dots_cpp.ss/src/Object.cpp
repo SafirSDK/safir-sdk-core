@@ -25,7 +25,6 @@
 #include "Safir/Dob/Typesystem/Exceptions.h"
 #include "Safir/Dob/Typesystem/Object.h"
 #include "Safir/Dob/Typesystem/ObjectFactory.h"
-#include "Safir/Dob/Typesystem/BlobOperations.h"
 #include "Safir/Dob/Typesystem/ContainerProxies.h"
 #include <iostream>
 
@@ -43,15 +42,15 @@ namespace Typesystem
 
     namespace
     {
-        ObjectPtr CreateObject(char const * const blob)
+        ObjectPtr CreateObject(Safir::Dob::Typesystem::Int64 handle)
         {
-            if (blob == NULL)
+            if (handle == 0)
             {
                 return ObjectPtr(new Object());
             }
             else
             {
-                return ObjectPtr(new Object(blob));
+                return ObjectPtr(new Object(handle));
             }
         }
 
@@ -117,25 +116,10 @@ namespace Typesystem
     }
 
     //
-    // CalculateBlobSize
-    //
-    Int32
-    Object::CalculateBlobSize() const
-    {
-        static Int32 initialSize = -1;
-        if (initialSize == -1)
-        {
-            initialSize = BlobOperations::GetInitialSize(ClassTypeId);
-        }
-
-        return initialSize;
-    }
-
-    //
     // WriteToBlob
     //
     void
-    Object::WriteToBlob(char * /*blob*/, char * & /*beginningOfUnused*/) const
+    Object::WriteToBlob(Safir::Dob::Typesystem::Int64 /*handle*/) const
     {
 
     }
@@ -143,7 +127,7 @@ namespace Typesystem
     //
     // Construct from blob
     //
-    Object::Object(char const * const /*blob*/)
+    Object::Object(Safir::Dob::Typesystem::Int64 /*handle*/)
     {
 
     }

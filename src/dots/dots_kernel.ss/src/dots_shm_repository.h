@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2004-2015 (http://safir.sourceforge.net)
 *
 * Created by: Joel Ottosson / joot
 *
@@ -33,7 +33,6 @@
 #include <boost/interprocess/offset_ptr.hpp>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeParser.h>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeUtilities.h>
-#include <Safir/Dob/Typesystem/ToolSupport/BlobLayout.h>
 
 using namespace Safir::Dob::Typesystem::ToolSupport;
 
@@ -62,7 +61,7 @@ namespace Internal
     //-------------------------------------------
     //MapShm
     //-------------------------------------------
-    template <class Val, class Key=DotsC_TypeId>
+    template <class Val, class Key=DotsC_Int64>
     struct MapShm
     {
         typedef std::pair<const Key, Val> ValueType;
@@ -86,20 +85,24 @@ namespace Internal
         MemberDescriptionShm(const MemberDescription* md, boost::interprocess::managed_shared_memory* shm)
             :m_name(md->GetName(), shm->get_segment_manager())
             ,m_memberType(md->GetMemberType())
-            ,m_isArray(md->IsArray())
+            ,m_collectionType(md->GetCollectionType())
+            ,m_keyType(md->GetKeyType())
             ,m_arraySize(md->GetArraySize())
             ,m_maxLength(md->GetMaxLength())
             ,m_typeId(md->GetTypeId())
+            ,m_keyTypeId(md->GetKeyTypeId())
         {
         }
 
         MemberDescriptionShm(const MemberDescriptionShm& other)
             :m_name(other.m_name)
             ,m_memberType(other.m_memberType)
-            ,m_isArray(other.m_isArray)
+            ,m_collectionType(other.m_collectionType)
+            ,m_keyType(other.m_keyType)
             ,m_arraySize(other.m_arraySize)
             ,m_maxLength(other.m_maxLength)
             ,m_typeId(other.m_typeId)
+            ,m_keyTypeId(other.m_keyTypeId)
         {
         }
 
@@ -107,10 +110,12 @@ namespace Internal
         {
             m_name=other.m_name;
             m_memberType=other.m_memberType;
-            m_isArray=other.m_isArray;
+            m_collectionType=other.m_collectionType;
+            m_keyType=other.m_keyType;
             m_arraySize=other.m_arraySize;
             m_maxLength=other.m_maxLength;
             m_typeId=other.m_typeId;
+            m_keyTypeId=other.m_keyTypeId;
             return *this;
         }
 
@@ -118,7 +123,9 @@ namespace Internal
         DotsC_TypeId GetTypeId() const {return m_typeId;} //only valid if MemberType is object or enum
         const char* GetName() const {return m_name.c_str();}
         DotsC_MemberType GetMemberType() const {return m_memberType;}
-        const bool IsArray() const {return m_isArray;}
+        DotsC_CollectionType GetCollectionType() const {return m_collectionType;}
+        DotsC_MemberType GetKeyType() const {return m_keyType;}
+        DotsC_TypeId GetKeyTypeId() const {return m_keyTypeId;}
         int GetArraySize() const {return m_arraySize;}
         int GetMaxLength() const {return m_maxLength;} //only valid if memberType is String
 
@@ -126,11 +133,13 @@ namespace Internal
         //Fields
         StringShm m_name;
         DotsC_MemberType m_memberType;
-        bool m_isArray;
+        DotsC_CollectionType m_collectionType;
+        DotsC_MemberType m_keyType;
         int m_arraySize; //If isArray
         int m_maxLength; //Max string length. Only applicable if typeName is 'String'.
 
         DotsC_TypeId m_typeId; //TypeId belonging to the type of this member. Only valid if memberType is object or enum.
+        DotsC_TypeId m_keyTypeId; //TypeId belonging to the type of this member. Only valid if memberType is object or enum.
     };
     typedef VectorShm<MemberDescriptionShm>::Type MemberDescriptionVectorShm;
 
@@ -240,44 +249,68 @@ namespace Internal
     //-------------------------------------------
     struct ValueDefinitionShm
     {
+        StringShm stringKey;
         StringShm stringVal;
-        DotsC_Int64 hashedVal;
-        union
+
+        struct
         {
-            DotsC_Int32 int32Val;
-            DotsC_Int64 int64Val;
-            DotsC_Float32 float32Val;
-            DotsC_Float64 float64Val;
-            bool boolVal;
-        };
+            DotsC_Int64 hash;
+            union
+            {
+                DotsC_Int32 int32;
+                DotsC_Int64 int64;
+            };
+        } key;
+
+        struct
+        {
+            DotsC_Int64 hash;
+            union
+            {
+                DotsC_Int32 int32;
+                DotsC_Int64 int64;
+                DotsC_Float32 float32;
+                DotsC_Float64 float64;
+                bool boolean;
+            };
+        } val;
 
         ValueDefinitionShm(boost::interprocess::managed_shared_memory* shm)
-            :stringVal(shm->get_segment_manager())
+            :stringKey(shm->get_segment_manager())
+            ,stringVal(shm->get_segment_manager())
         {
         }
 
         ValueDefinitionShm(const char* strVal, boost::interprocess::managed_shared_memory* shm)
-            :stringVal(strVal, shm->get_segment_manager())
+            :stringKey(shm->get_segment_manager())
+            ,stringVal(strVal, shm->get_segment_manager())
         {
         }
 
         ValueDefinitionShm(const char* strVal, size_t size, boost::interprocess::managed_shared_memory* shm)
-            :stringVal(strVal, size, shm->get_segment_manager())
+            :stringKey(shm->get_segment_manager())
+            ,stringVal(strVal, size, shm->get_segment_manager())
         {
         }
 
         ValueDefinitionShm(const ValueDefinitionShm& other)
-            :stringVal(other.stringVal)
-            ,hashedVal(other.hashedVal)
-            ,int64Val(other.int64Val)
+            :stringKey(other.stringKey)
+            ,stringVal(other.stringVal)
         {
+            key.hash=other.key.hash;
+            key.int64=other.key.int64;
+            val.hash=other.val.hash;
+            val.int64=other.val.int64;
         }
 
         ValueDefinitionShm& operator=(const ValueDefinitionShm& other)
         {
+            stringKey=other.stringKey;
+            key.hash=other.key.hash;
+            key.int64=other.key.int64;
             stringVal=other.stringVal;
-            hashedVal=other.hashedVal;
-            int64Val=other.int64Val;
+            val.hash=other.val.hash;
+            val.int64=other.val.int64;
             return *this;
         }
     };
@@ -293,42 +326,76 @@ namespace Internal
         const char* GetQualifiedName() const {return m_qualifiedName.c_str();}
         DotsC_MemberType GetMemberType() const {return m_memberType;}
         DotsC_TypeId GetTypeId() const {return m_typeId;}
-        bool IsArray() const {return m_isArray;}
-        int GetArraySize() const {return static_cast<int>(m_values.size());}
+        DotsC_CollectionType GetCollectionType() const {return m_collectionType;}
+        DotsC_MemberType GetKeyType() const {return m_keyType;} //only valid if collectionType is Dictionary
+        DotsC_TypeId GetKeyTypeId() const {return m_keyTypeId;}
+        int GetNumberOfValues() const {return static_cast<int>(m_values.size());}
         bool IsHidden() const {return m_hidden;}
 
         //Get parameter values - depending on actual type of the parameter
         //For entityId use GetInt64Value for typeId and GetHashedValue for instanceId
-        boost::int32_t GetInt32Value(int index) const {return m_values[static_cast<size_t>(index)].int32Val;}
-        boost::int64_t GetInt64Value(int index) const {return m_values[static_cast<size_t>(index)].int64Val;}
-        float GetFloat32Value(int index) const {return m_values[static_cast<size_t>(index)].float32Val;}
-        double GetFloat64Value(int index) const {return m_values[static_cast<size_t>(index)].float64Val;}
-        bool GetBoolValue(int index) const {return m_values[static_cast<size_t>(index)].boolVal;}
+        boost::int32_t GetInt32Value(int index) const {return m_values[static_cast<size_t>(index)].val.int32;}
+        boost::int64_t GetInt64Value(int index) const {return m_values[static_cast<size_t>(index)].val.int64;}
+        float GetFloat32Value(int index) const {return m_values[static_cast<size_t>(index)].val.float32;}
+        double GetFloat64Value(int index) const {return m_values[static_cast<size_t>(index)].val.float64;}
+        bool GetBoolValue(int index) const {return m_values[static_cast<size_t>(index)].val.boolean;}
         const char* GetStringValue(int index) const {return m_values[static_cast<size_t>(index)].stringVal.c_str();}
-        std::pair<const char*, size_t> GetObjectValue(int index) const
+        std::pair<const char*, DotsC_Int32> GetObjectValue(int index) const
         {
             const ValueDefinitionShm& v=m_values[static_cast<size_t>(index)];
-            return std::make_pair(v.stringVal.c_str(), v.stringVal.size());
+            return std::make_pair(v.stringVal.c_str(), static_cast<DotsC_Int32>(v.stringVal.size()));
         }
-        std::pair<const char*, size_t> GetBinaryValue(int index) const
+        std::pair<const char*, DotsC_Int32> GetBinaryValue(int index) const
         {
             const ValueDefinitionShm& v=m_values[static_cast<size_t>(index)];
-            return std::make_pair(v.stringVal.c_str(), v.stringVal.size());
+            return std::make_pair(v.stringVal.c_str(), static_cast<DotsC_Int32>(v.stringVal.size()));
         }
-        std::pair<boost::int64_t, const char*> GetHashedValue(int index) const
+        std::pair<DotsC_Int64, const char*> GetHashedValue(int index) const
         {
             const ValueDefinitionShm& v=m_values[static_cast<size_t>(index)];
-            return std::make_pair(v.hashedVal, v.stringVal.empty() ? NULL : v.stringVal.c_str());
+            return std::make_pair(v.val.hash, v.stringVal.empty() ? NULL : v.stringVal.c_str());
+        }
+
+        //keys
+        virtual const char* GetStringKey(int index) const
+        {
+            return m_values[static_cast<size_t>(index)].stringKey.c_str();
+        }
+        virtual DotsC_Int32 GetInt32Key(int index) const
+        {
+            return m_values[static_cast<size_t>(index)].key.int32;
+        }
+        virtual DotsC_Int64 GetInt64Key(int index) const
+        {
+            return m_values[static_cast<size_t>(index)].key.int64;
+        }
+        virtual std::pair<DotsC_Int64, const char*> GetHashedKey(int index) const
+        {
+            const ValueDefinitionShm& v=m_values[static_cast<size_t>(index)];
+            return std::make_pair(v.key.hash, v.stringKey.empty() ? NULL : v.stringKey.c_str());
+        }
+
+        virtual int GetIndexByUnifiedKey(DotsC_Int64 unifiedKey) const
+        {
+            MapShm<int>::Type::const_iterator it=m_unifiedKeyToIndex.find(unifiedKey);
+            if (it!=m_unifiedKeyToIndex.end())
+            {
+                return it->second;
+            }
+            return -1;
         }
 
     private:
         StringShm m_name;
         StringShm m_qualifiedName;
         DotsC_MemberType m_memberType;
-        bool m_isArray;
+        DotsC_CollectionType m_collectionType;
+        DotsC_MemberType m_keyType;
         bool m_hidden;
         DotsC_TypeId m_typeId; //enum or objects type
+        DotsC_TypeId m_keyTypeId;
         ParameterValuesShm m_values;
+        MapShm<int>::Type m_unifiedKeyToIndex;
     };
     typedef MapShm<ParameterDescriptionShm, StringShm>::Type ParameterMapShm;
     typedef boost::interprocess::offset_ptr<const ParameterDescriptionShm> ParameterDescriptionShmPtr;
@@ -347,7 +414,7 @@ namespace Internal
         {
             for (int i=0; i<md->MemberReferenceDepth(); ++i)
             {
-                std::pair<DotsC_MemberIndex, DotsC_ArrayIndex> mref=md->GetMemberReference(i);
+                std::pair<DotsC_MemberIndex, DotsC_Int32> mref=md->GetMemberReference(i);
                 m_memberRefs.push_back(mref.first); //memberIndex
                 m_memberRefs.push_back(mref.second); //arrayIndex
             }
@@ -372,7 +439,7 @@ namespace Internal
 
         int MemberReferenceDepth() const {return static_cast<int>(m_memberRefs.size())/2;}
 
-        std::pair<DotsC_MemberIndex, DotsC_ArrayIndex> GetMemberReference(int depth) const
+        std::pair<DotsC_MemberIndex, DotsC_Int32> GetMemberReference(int depth) const
         {
             size_t index=static_cast<size_t>(depth*2);
             return std::make_pair(m_memberRefs[index], m_memberRefs[index+1]);
@@ -477,8 +544,6 @@ namespace Internal
             :m_typeId(cd->GetTypeId())
             ,m_file(cd->FileName(), shm->get_segment_manager())
             ,m_name(cd->GetName(), shm->get_segment_manager())
-            ,m_initialSize(cd->InitialSize())
-            ,m_ownSize(cd->OwnSize())
             ,m_descendants(shm->get_segment_manager())
             ,m_members(shm->get_segment_manager())
             ,m_properties(shm->get_segment_manager())
@@ -584,8 +649,6 @@ namespace Internal
 
         int GetNumberOfCreateRoutines() const {return 0;}
         const CreateRoutineDescriptionShm* GetCreateRoutine(int /*index*/) const {return NULL;}
-        int InitialSize() const {return m_initialSize;}
-        int OwnSize() const {return m_ownSize;}
 
         void SetBaseClass(const ClassDescriptionShm* base) {m_base=base;}
         void AddDescendant(const ClassDescriptionShm* descendant) {m_descendants.push_back(ClassDescriptionShmPtr(descendant));}
@@ -596,8 +659,6 @@ namespace Internal
         DotsC_TypeId m_typeId;
         StringShm m_file;
         StringShm m_name;
-        int m_initialSize;
-        int m_ownSize;
 
         ClassDescriptionShmPtr m_base;
         ClassPtrVectorShm m_descendants;

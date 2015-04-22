@@ -1,6 +1,7 @@
 /******************************************************************************
 *
 * Copyright Saab AB, 2006-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -25,14 +26,14 @@
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
 #include <Safir/Dob/Typesystem/BlobOperations.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
+#include <Safir/Dob/Typesystem/Internal/InternalOperations.h>
 #include <Safir/Dob/Typesystem/Internal/Kernel.h>
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Utilities/DynamicLibraryLoader.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
-#include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
-#include <boost/thread/mutex.hpp>
 #include <boost/bind.hpp>
+#include <boost/thread/mutex.hpp>
 #include <sstream>
 
 namespace Safir
@@ -139,7 +140,7 @@ namespace Typesystem
         {
             throw SoftwareViolationException(L"Cannot create object from NULL blob!",__WFILE__,__LINE__);
         }
-        const TypeId typeId = BlobOperations::GetTypeId(blob);
+        const TypeId typeId = DotsC_GetTypeId(blob);
         CallbackMap::const_iterator it = m_CallbackMap.find(typeId);
         if (it == m_CallbackMap.end())
         {
@@ -157,7 +158,10 @@ namespace Typesystem
         }
 
         //invoke the function
-        return it->second(blob);
+        Int64 handle=DotsC_CreateBlobReader(blob);
+        ObjectPtr obj=it->second(handle);
+        DotsC_DeleteBlobReader(handle);
+        return obj;
     }
 
     ObjectPtr
@@ -180,7 +184,7 @@ namespace Typesystem
         }
 
         //invoke the function
-        return it->second(NULL);
+        return it->second(0);
     }
 
     bool

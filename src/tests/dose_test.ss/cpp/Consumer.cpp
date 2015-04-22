@@ -40,7 +40,7 @@
 #include <DoseTest/SuccessfulService.h>
 #include <DoseTest/LastInjectionTimestamp.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
-#include <Safir/Dob/Typesystem/BlobOperations.h>
+#include <Safir/Dob/Typesystem/Internal/BlobOperations.h>
 #include "Consumer.h"
 #include <iostream>
 #include <Safir/Dob/OverflowException.h>
@@ -143,59 +143,80 @@ const std::wstring CheckBinaryMember(const Safir::Dob::Typesystem::ObjectPtr & o
 {
     if (object->GetTypeId() == DoseTest::ComplexGlobalMessage::ClassTypeId)
     {
-        if (CheckBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalMessage>(object)->BinaryMember().GetContainer()))
-        {
-            Safir::Dob::Typesystem::BinarySerialization b
-                (blob,blob + Safir::Dob::Typesystem::BlobOperations::GetSize(blob));
-            Safir::Dob::Typesystem::BlobOperations::SetNull
-                (&b[0],DoseTest::ComplexGlobalMessage::BinaryMemberMemberIndex(),0);
-            return Safir::Dob::Typesystem::Serialization::ToXml(b);
-        }
+        CheckBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalMessage>(object)->BinaryMember().GetContainer());
     }
     else if (object->GetTypeId() == DoseTest::ComplexGlobalEntity::ClassTypeId)
     {
-        Safir::Dob::Typesystem::BinarySerialization b;
-        if (CheckBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalEntity>(object)->BinaryMember().GetContainer()))
-        {
-            b = Safir::Dob::Typesystem::BinarySerialization
-                (blob,blob + Safir::Dob::Typesystem::BlobOperations::GetSize(blob));
-            Safir::Dob::Typesystem::BlobOperations::SetNull
-                (&b[0],DoseTest::ComplexGlobalEntity::BinaryMemberMemberIndex(),0);
-        }
+        CheckBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalEntity>(object)->BinaryMember().GetContainer());
 
         //in the entity we use the binary array as well
         for (int i = 0; i < DoseTest::ComplexGlobalEntity::BinaryArrayMemberArraySize(); ++i)
         {
-            if (CheckBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalEntity>(object)->BinaryArrayMember()[i]))
-            {
-                if (b.empty())
-                {
-                    b = Safir::Dob::Typesystem::BinarySerialization
-                        (blob,blob + Safir::Dob::Typesystem::BlobOperations::GetSize(blob));
-                }
-                Safir::Dob::Typesystem::BlobOperations::SetNull
-                    (&b[0],DoseTest::ComplexGlobalEntity::BinaryArrayMemberMemberIndex(),i);
-            }
-        }
-
-        if (!b.empty())
-        {
-            return Safir::Dob::Typesystem::Serialization::ToXml(b);
+            CheckBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalEntity>(object)->BinaryArrayMember()[i]);
         }
     }
     else if (object->GetTypeId() == DoseTest::ComplexGlobalService::ClassTypeId)
     {
-        if (CheckBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalService>(object)->BinaryMember().GetContainer()))
-        {
-            Safir::Dob::Typesystem::BinarySerialization b
-                (blob,blob + Safir::Dob::Typesystem::BlobOperations::GetSize(blob));
-            Safir::Dob::Typesystem::BlobOperations::SetNull
-                (&b[0],DoseTest::ComplexGlobalService::BinaryMemberMemberIndex(),0);
-            return Safir::Dob::Typesystem::Serialization::ToXml(b);
-        }
+        CheckBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalService>(object)->BinaryMember().GetContainer());
     }
 
-    return Safir::Dob::Typesystem::Serialization::ToXml(blob);
+    return Safir::Dob::Typesystem::Serialization::ToXml(object);
+
+//    if (object->GetTypeId() == DoseTest::ComplexGlobalMessage::ClassTypeId)
+//    {
+//        if (CheckBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalMessage>(object)->BinaryMember().GetContainer()))
+//        {
+//            Safir::Dob::Typesystem::BinarySerialization b
+//                (blob,blob + Safir::Dob::Typesystem::Internal::BlobOperations::GetSize(blob));
+//            Safir::Dob::Typesystem::BlobOperations::SetNull
+//                (&b[0],DoseTest::ComplexGlobalMessage::BinaryMemberMemberIndex(),0);
+//            return Safir::Dob::Typesystem::Serialization::ToXml(b);
+//        }
+//    }
+//    else if (object->GetTypeId() == DoseTest::ComplexGlobalEntity::ClassTypeId)
+//    {
+//        Safir::Dob::Typesystem::BinarySerialization b;
+//        if (CheckBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalEntity>(object)->BinaryMember().GetContainer()))
+//        {
+//            b = Safir::Dob::Typesystem::BinarySerialization
+//                (blob,blob + Safir::Dob::Typesystem::Internal::BlobOperations::GetSize(blob));
+//            Safir::Dob::Typesystem::BlobOperations::SetNull
+//                (&b[0],DoseTest::ComplexGlobalEntity::BinaryMemberMemberIndex(),0);
+//        }
+
+//        //in the entity we use the binary array as well
+//        for (int i = 0; i < DoseTest::ComplexGlobalEntity::BinaryArrayMemberArraySize(); ++i)
+//        {
+//            if (CheckBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalEntity>(object)->BinaryArrayMember()[i]))
+//            {
+//                if (b.empty())
+//                {
+//                    b = Safir::Dob::Typesystem::BinarySerialization
+//                        (blob,blob + Safir::Dob::Typesystem::Internal::BlobOperations::GetSize(blob));
+//                }
+//                Safir::Dob::Typesystem::BlobOperations::SetNull
+//                    (&b[0],DoseTest::ComplexGlobalEntity::BinaryArrayMemberMemberIndex(),i);
+//            }
+//        }
+
+//        if (!b.empty())
+//        {
+//            return Safir::Dob::Typesystem::Serialization::ToXml(b);
+//        }
+//    }
+//    else if (object->GetTypeId() == DoseTest::ComplexGlobalService::ClassTypeId)
+//    {
+//        if (CheckBinaryMemberInternal(boost::static_pointer_cast<DoseTest::ComplexGlobalService>(object)->BinaryMember().GetContainer()))
+//        {
+//            Safir::Dob::Typesystem::BinarySerialization b
+//                (blob,blob + Safir::Dob::Typesystem::Internal::BlobOperations::GetSize(blob));
+//            Safir::Dob::Typesystem::BlobOperations::SetNull
+//                (&b[0],DoseTest::ComplexGlobalService::BinaryMemberMemberIndex(),0);
+//            return Safir::Dob::Typesystem::Serialization::ToXml(b);
+//        }
+//    }
+
+//    return Safir::Dob::Typesystem::Serialization::ToXml(blob);
 }
 
 const std::wstring

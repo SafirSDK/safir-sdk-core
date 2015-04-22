@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<propertyMapping xmlns="urn:safir-dots-unit" xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance">
+
+    <class>ParserTest.MyEntity</class>
+    <property>ParserTest.MyProperty</property>
+
+    <memberMapping>
+       
+        <member>
+            <propertyMember>ArrayPropertyValue</propertyMember>
+            <array>
+                <ParserTest.MyEntity>
+                    <MyColorEnum>Grey</MyColorEnum>
+                    <MyInt>1</MyInt>
+                </ParserTest.MyEntity>
+                
+              
+                <ParserTest.MyEntity>
+                    <MyColorEnum>Black</MyColorEnum>
+                    <MyInt>2</MyInt>
+                </ParserTest.MyEntity>
+            </array>
+        </member>
+      
+        
+    </memberMapping>
+
+</propertyMapping>

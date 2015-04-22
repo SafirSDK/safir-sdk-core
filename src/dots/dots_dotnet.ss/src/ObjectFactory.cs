@@ -1,6 +1,6 @@
 /* ****************************************************************************
 *
-* Copyright Saab AB, 2005-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2005-2015 (http://safir.sourceforge.net)
 * 
 * Created by: Lars Hagström / stlrha
 *
@@ -87,7 +87,9 @@ namespace Safir.Dob.Typesystem
             {
                 throw new IllegalValueException("Could not create type " + Operations.GetName(typeId));
             }
-            Object obj = System.Activator.CreateInstance(type, blob) as Object;
+            Int64 handle = Internal.Kernel.DotsC_CreateBlobReader (blob);
+            Object obj = System.Activator.CreateInstance(type, handle) as Object;
+            Internal.Kernel.DotsC_DeleteBlobReader (handle);
             if (obj == null)
             {
                 throw new IllegalValueException("Could not create type " + Operations.GetName(typeId));

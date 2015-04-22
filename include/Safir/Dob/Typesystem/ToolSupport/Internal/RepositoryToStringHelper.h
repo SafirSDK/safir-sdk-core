@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2004-2015 (http://safir.sourceforge.net)
 *
 * Created by: Joel Ottosson / joot
 *
@@ -54,14 +54,16 @@ namespace Internal
         typedef typename Traits::PropertyMappingDescriptionType PropertyMappingDescriptionType;
         typedef typename Traits::CreateRoutineDescriptionType CreateRoutineDescriptionType;
 
-        ToStringHelper(const RepositoryType* rep, bool includeCreateRoutines) //since createRoutines are not stored in shm, this enables possibility to compare output from local and shm repos.
+        ToStringHelper(const RepositoryType* rep, bool includeCreateRoutines=false) //since createRoutines are not stored in shm, this enables possibility to compare output from local and shm repos.
             :m_rep(rep)
             ,m_includeCreateRoutines(includeCreateRoutines)
         {
         }
 
         void RepositoryToString(std::ostream& os) const {DumpRepository(os);}
-        void TypeToString(DotsC_TypeId typeId, std::ostream& os) const;
+        void TypeInfoToString(DotsC_TypeId typeId, std::ostream& os) const;
+        void ParameterKeyToString(const ParameterDescriptionType* c, int index, std::ostream& os) const;
+        void ParameterValueToString(const ParameterDescriptionType* c, int index, std::ostream& os) const;
 
     private:
         const RepositoryType* m_rep;
@@ -81,7 +83,7 @@ namespace Internal
     };
 
     template <class RepT, class Traits>
-    void ToStringHelper<RepT, Traits>::TypeToString(DotsC_TypeId typeId, std::ostream& os) const
+    void ToStringHelper<RepT, Traits>::TypeInfoToString(DotsC_TypeId typeId, std::ostream& os) const
     {
         const ClassDescriptionType* cd=m_rep->GetClass(typeId);
         if (cd)
@@ -131,8 +133,189 @@ namespace Internal
         os<<hv.first;
         if (hv.second)
         {
-            os<<" ("<<hv.second<<")"<<std::endl;
+            os<<" ("<<hv.second<<")";
         }
+    }
+
+    template <class RepT, class Traits>
+    void ToStringHelper<RepT, Traits>::ParameterKeyToString(const ParameterDescriptionType* c, int index, std::ostream& os) const
+    {
+        switch(c->GetKeyType())
+        {
+        case Int32MemberType:
+        {
+            os<<c->GetInt32Key(index);
+        }
+            break;
+        case Int64MemberType:
+        {
+            os<<c->GetInt64Key(index);
+        }
+            break;
+
+        case EntityIdMemberType:
+        {
+            TypeIdToString(c->GetInt64Key(index), os);
+            os<<" : ";
+            HashedValToString(c->GetHashedKey(index), os);
+        }
+            break;
+        case TypeIdMemberType:
+        {
+            TypeIdToString(c->GetInt64Key(index), os);
+        }
+            break;
+        case InstanceIdMemberType:
+        case ChannelIdMemberType:
+        case HandlerIdMemberType:
+        {
+            HashedValToString(c->GetHashedKey(index), os);
+        }
+            break;
+
+        case StringMemberType:
+        {
+            os<<c->GetStringKey(index);
+        }
+            break;
+
+        case EnumerationMemberType:
+        {
+            os<<m_rep->GetEnum(c->GetKeyTypeId())->GetValueName(c->GetInt32Key(index));
+        }
+            break;
+
+        default:
+            break;
+        }
+    }
+
+    template <class RepT, class Traits>
+    void ToStringHelper<RepT, Traits>::ParameterValueToString(const ParameterDescriptionType* c, int i, std::ostream& os) const
+    {
+        switch(c->GetMemberType())
+        {
+        case BooleanMemberType:
+        {
+            os<<std::boolalpha<<c->GetBoolValue(i)<<std::dec;
+
+        }
+            break;
+
+        case Int32MemberType:
+        {
+            os<<c->GetInt32Value(i);
+        }
+            break;
+        case Int64MemberType:
+        {
+            os<<c->GetInt64Value(i);
+        }
+            break;
+
+        case EntityIdMemberType:
+        {
+            TypeIdToString(c->GetInt64Value(i), os);
+            os<<" : ";
+            HashedValToString(c->GetHashedValue(i), os);
+        }
+            break;
+        case TypeIdMemberType:
+        {
+            TypeIdToString(c->GetInt64Value(i), os);
+        }
+            break;
+        case InstanceIdMemberType:
+        case ChannelIdMemberType:
+        case HandlerIdMemberType:
+        {
+            HashedValToString(c->GetHashedValue(i), os);
+        }
+            break;
+
+        case StringMemberType:
+        {
+            os<<c->GetStringValue(i)<<std::endl;
+        }
+            break;
+
+        case ObjectMemberType:
+        {
+            const char* objParam=c->GetObjectValue(i).first;
+            std::ostringstream json;
+            (BlobToJsonSerializer<RepositoryType>(m_rep))(objParam, json);
+            os<<std::endl<<json.str();
+        }
+            break;
+
+        case EnumerationMemberType:
+        {
+            os<<m_rep->GetEnum(c->GetTypeId())->GetValueName(c->GetInt32Value(i));
+        }
+            break;
+
+        case BinaryMemberType:
+        {
+            std::pair<const char*, size_t> bin=c->GetBinaryValue(i);
+            if (bin.second>0)
+            {
+                std::string tmp(bin.first, bin.first+bin.second);
+                os<<Safir::Dob::Typesystem::ToolSupport::Internal::SerializationUtils::ToBase64(tmp);
+            }
+        }
+            break;
+
+        case Float32MemberType:
+        case Ampere32MemberType:
+        case CubicMeter32MemberType:
+        case Hertz32MemberType:
+        case Joule32MemberType:
+        case Kelvin32MemberType:
+        case Kilogram32MemberType:
+        case Meter32MemberType:
+        case MeterPerSecond32MemberType:
+        case MeterPerSecondSquared32MemberType:
+        case Newton32MemberType:
+        case Pascal32MemberType:
+        case Radian32MemberType:
+        case RadianPerSecond32MemberType:
+        case RadianPerSecondSquared32MemberType:
+        case Second32MemberType:
+        case SquareMeter32MemberType:
+        case Steradian32MemberType:
+        case Volt32MemberType:
+        case Watt32MemberType:
+        {
+            os<<c->GetFloat32Value(i);
+        }
+            break;
+
+        case Float64MemberType:
+        case Ampere64MemberType:
+        case CubicMeter64MemberType:
+        case Hertz64MemberType:
+        case Joule64MemberType:
+        case Kelvin64MemberType:
+        case Kilogram64MemberType:
+        case Meter64MemberType:
+        case MeterPerSecond64MemberType:
+        case MeterPerSecondSquared64MemberType:
+        case Newton64MemberType:
+        case Pascal64MemberType:
+        case Radian64MemberType:
+        case RadianPerSecond64MemberType:
+        case RadianPerSecondSquared64MemberType:
+        case Second64MemberType:
+        case SquareMeter64MemberType:
+        case Steradian64MemberType:
+        case Volt64MemberType:
+        case Watt64MemberType:
+        {
+            os<<c->GetFloat64Value(i);
+        }
+            break;
+        }
+
     }
 
     template <class RepT, class Traits>
@@ -265,13 +448,20 @@ namespace Internal
             break;
         }
 
-        if (c->IsArray())
+        switch (c->GetCollectionType())
         {
-            os<<", isArray=true, arraySize="<<c->GetArraySize()<<std::endl;
-        }
-        else
-        {
-            os<<", isArray=false"<<std::endl;
+        case ArrayCollectionType:
+            os<<", Array, arraySize="<<c->GetArraySize()<<std::endl;
+            break;
+        case SequenceCollectionType:
+            os<<", Sequence"<<std::endl;
+            break;
+        case DictionaryCollectionType:
+            os<<", Dictionary"<<std::endl;
+            break;
+        default:
+            os<<std::endl;
+            break;
         }
     }
 
@@ -298,273 +488,51 @@ namespace Internal
             break;
         }
 
-        if (c->IsArray())
+        switch (c->GetCollectionType())
         {
-            os<<", isArray=true, arraySize="<<c->GetArraySize()<<std::endl;
-        }
-        else
+        case SingleValueCollectionType:
         {
-            os<<", isArray=false"<<std::endl;
-        }
-
-
-
-        //Values
-        switch(c->GetMemberType())
-        {
-        case BooleanMemberType:
-        {
-            for (int i=0; i<c->GetArraySize(); ++i)
+            os<<std::endl;
+            for (int i=0; i<c->GetNumberOfValues(); ++i)
             {
-                if (c->IsArray())
-                {
-                    os<<"      value["<<i<<"]=";
-                }
-                else
-                {
-                    os<<"      value=";
-                }
-                os<<std::boolalpha<<c->GetBoolValue(i)<<std::dec<<std::endl;
-            }
-        }
-            break;
-
-        case Int32MemberType:
-        {
-            for (int i=0; i<c->GetArraySize(); ++i)
-            {
-                if (c->IsArray())
-                {
-                    os<<"      value["<<i<<"]=";
-                }
-                else
-                {
-                    os<<"      value=";
-                }
-                os<<c->GetInt32Value(i)<<std::endl;
-            }
-        }
-            break;
-        case Int64MemberType:
-        {
-            for (int i=0; i<c->GetArraySize(); ++i)
-            {
-                if (c->IsArray())
-                {
-                    os<<"      value["<<i<<"]=";
-                }
-                else
-                {
-                    os<<"      value=";
-                }
-                os<<c->GetInt64Value(i)<<std::endl;
-            }
-        }
-            break;
-
-        case EntityIdMemberType:
-        {
-            for (int i=0; i<c->GetArraySize(); ++i)
-            {
-                if (c->IsArray())
-                {
-                    os<<"      value["<<i<<"]=";
-                }
-                else
-                {
-                    os<<"      value=";
-                }
-                TypeIdToString(c->GetInt64Value(i), os);
-                os<<" : ";
-                HashedValToString(c->GetHashedValue(i), os);
+                os<<"      value=";
+                ParameterValueToString(c, i, os);
                 os<<std::endl;
             }
         }
             break;
-        case TypeIdMemberType:
+        case ArrayCollectionType:
         {
-            for (int i=0; i<c->GetArraySize(); ++i)
+            os<<", Array, size="<<c->GetNumberOfValues()<<std::endl;
+            for (int i=0; i<c->GetNumberOfValues(); ++i)
             {
-                if (c->IsArray())
-                {
-                    os<<"      value["<<i<<"]=";
-                }
-                else
-                {
-                    os<<"      value=";
-                }
-                TypeIdToString(c->GetInt64Value(i), os);
+                os<<"      value["<<i<<"]=";
+                ParameterValueToString(c, i, os);
                 os<<std::endl;
             }
         }
             break;
-        case InstanceIdMemberType:
-        case ChannelIdMemberType:
-        case HandlerIdMemberType:
+        case SequenceCollectionType:
         {
-            for (int i=0; i<c->GetArraySize(); ++i)
+            os<<", Sequence, size="<<c->GetNumberOfValues()<<std::endl;
+            for (int i=0; i<c->GetNumberOfValues(); ++i)
             {
-                if (c->IsArray())
-                {
-                    os<<"      value["<<i<<"]=";
-                }
-                else
-                {
-                    os<<"      value=";
-                }
-                HashedValToString(c->GetHashedValue(i), os);
+                os<<"      value["<<i<<"]=";
+                ParameterValueToString(c, i, os);
                 os<<std::endl;
             }
         }
             break;
-
-        case StringMemberType:
+        case DictionaryCollectionType:
         {
-            for (int i=0; i<c->GetArraySize(); ++i)
+            os<<", Dictionary<"<<(c->GetKeyType()==EnumerationMemberType ? m_rep->GetEnum(c->GetKeyTypeId())->GetName() : BasicTypeOperations::MemberTypeToString(c->GetKeyType()))<<">, size="<<c->GetNumberOfValues()<<std::endl;
+            for (int i=0; i<c->GetNumberOfValues(); ++i)
             {
-                if (c->IsArray())
-                {
-                    os<<"      value["<<i<<"]=";
-                }
-                else
-                {
-                    os<<"      value=";
-                }
-                os<<c->GetStringValue(i)<<std::endl;
-            }
-        }
-            break;
-
-        case ObjectMemberType:
-        {
-            for (int i=0; i<c->GetArraySize(); ++i)
-            {
-                if (c->IsArray())
-                {
-                    os<<"      value["<<i<<"]="<<std::endl;
-                }
-                else
-                {
-                    os<<"      value="<<std::endl;
-                }
-                const char* objParam=c->GetObjectValue(i).first;
-                std::ostringstream json;
-                (BlobToJsonSerializer<RepositoryType>(m_rep))(objParam, json);
-                os<<json.str()<<std::endl;
-            }
-        }
-            break;
-
-        case EnumerationMemberType:
-        {
-            for (int i=0; i<c->GetArraySize(); ++i)
-            {
-                if (c->IsArray())
-                {
-                    os<<"      value["<<i<<"]=";
-                }
-                else
-                {
-                    os<<"      value=";
-                }
-                os<<m_rep->GetEnum(c->GetTypeId())->GetValueName(c->GetInt32Value(i))<<std::endl;
-            }
-        }
-            break;
-
-        case BinaryMemberType:
-        {
-            for (int i=0; i<c->GetArraySize(); ++i)
-            {
-                //TODO: change to hex or base64 output, this assumes binary is an ascii string
-                if (c->IsArray())
-                {
-                    os<<"      value["<<i<<"]=";
-                }
-                else
-                {
-                    os<<"      value=";
-                }
-
-                std::pair<const char*, size_t> bin=c->GetBinaryValue(i);
-                if (bin.second>0)
-                {
-                    std::vector<char> tmp(bin.first, bin.first+bin.second);
-                    os<<Safir::Dob::Typesystem::ToolSupport::Internal::SerializationUtils::ToBase64(tmp)<<std::endl;
-                }
-            }
-
-        }
-            break;
-
-        case Float32MemberType:
-        case Ampere32MemberType:
-        case CubicMeter32MemberType:
-        case Hertz32MemberType:
-        case Joule32MemberType:
-        case Kelvin32MemberType:
-        case Kilogram32MemberType:
-        case Meter32MemberType:
-        case MeterPerSecond32MemberType:
-        case MeterPerSecondSquared32MemberType:
-        case Newton32MemberType:
-        case Pascal32MemberType:
-        case Radian32MemberType:
-        case RadianPerSecond32MemberType:
-        case RadianPerSecondSquared32MemberType:
-        case Second32MemberType:
-        case SquareMeter32MemberType:
-        case Steradian32MemberType:
-        case Volt32MemberType:
-        case Watt32MemberType:
-        {
-            for (int i=0; i<c->GetArraySize(); ++i)
-            {
-                if (c->IsArray())
-                {
-                    os<<"      value["<<i<<"]=";
-                }
-                else
-                {
-                    os<<"      value=";
-                }
-                os<<c->GetFloat32Value(i)<<std::endl;
-            }
-        }
-            break;
-
-        case Float64MemberType:
-        case Ampere64MemberType:
-        case CubicMeter64MemberType:
-        case Hertz64MemberType:
-        case Joule64MemberType:
-        case Kelvin64MemberType:
-        case Kilogram64MemberType:
-        case Meter64MemberType:
-        case MeterPerSecond64MemberType:
-        case MeterPerSecondSquared64MemberType:
-        case Newton64MemberType:
-        case Pascal64MemberType:
-        case Radian64MemberType:
-        case RadianPerSecond64MemberType:
-        case RadianPerSecondSquared64MemberType:
-        case Second64MemberType:
-        case SquareMeter64MemberType:
-        case Steradian64MemberType:
-        case Volt64MemberType:
-        case Watt64MemberType:
-        {
-            for (int i=0; i<c->GetArraySize(); ++i)
-            {
-                if (c->IsArray())
-                {
-                    os<<"      value["<<i<<"]=";
-                }
-                else
-                {
-                    os<<"      value=";
-                }
-                os<<c->GetFloat64Value(i)<<std::endl;
+                os<<"      value[";
+                ParameterKeyToString(c, i, os);
+                os<<"]=";
+                ParameterValueToString(c, i, os);
+                os<<std::endl;
             }
         }
             break;
@@ -592,9 +560,18 @@ namespace Internal
                 std::pair<const ParameterDescriptionType*, int> par=md->GetParameter();
                 os<<"        MappingKind:     ValueMapping"<<std::endl;
                 os<<"        MappedParam:       "<<par.first->GetName();
-                if (!propertyMember->IsArray())
+                if (propertyMember->GetCollectionType()==SingleValueCollectionType)
                 {
-                    os<<"["<<par.second<<"]";
+                    if (par.first->GetCollectionType()==ArrayCollectionType)
+                    {
+                        os<<"["<<par.second<<"]";
+                    }
+                    else if (par.first->GetCollectionType()==DictionaryCollectionType)
+                    {
+                        os<<"[";
+                        ParameterKeyToString(par.first, par.second, os);
+                        os<<"]";
+                    }
                 }
                 os<<std::endl;
             }
@@ -606,10 +583,10 @@ namespace Internal
                 const ClassDescriptionType* currentClass=c;
                 for (int memRef=0; memRef<md->MemberReferenceDepth(); ++memRef)
                 {
-                    std::pair<DotsC_MemberIndex, DotsC_ArrayIndex> ref=md->GetMemberReference(memRef);
+                    std::pair<DotsC_MemberIndex, DotsC_Int32> ref=md->GetMemberReference(memRef);
                     const MemberDescriptionType* member=currentClass->GetMember(ref.first);
                     os<<"->"<<member->GetName();
-                    if (member->IsArray() && !propertyMember->IsArray())
+                    if (member->GetCollectionType()==ArrayCollectionType && propertyMember->GetCollectionType()!=ArrayCollectionType)
                     {
                         os<<"["<<ref.second<<"]";
                     }
@@ -656,6 +633,6 @@ namespace Internal
 }
 }
 }
-} //end namespace Safir::Dob::Typesystem::Internal::Internal
+} //end namespace Safir::Dob::Typesystem::ToolSupport::Internal
 
 #endif

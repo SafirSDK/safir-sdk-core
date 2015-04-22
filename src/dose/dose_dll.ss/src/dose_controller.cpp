@@ -54,7 +54,7 @@
 #include <Safir/Dob/EntityIdResponse.h>
 #include <Safir/Dob/CallbackId.h>
 #include <Safir/Dob/ThisNodeParameters.h>
-#include <Safir/Dob/Typesystem/BlobOperations.h>
+#include <Safir/Dob/Typesystem/Internal/BlobOperations.h>
 #include <Safir/Dob/Typesystem/Internal/InternalOperations.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Dob/Typesystem/Operations.h>
@@ -865,7 +865,7 @@ namespace Internal
                                const bool                       considerChangeFlags,
                                const bool                       initialInjection)
     {
-        Dob::Typesystem::TypeId typeId = Dob::Typesystem::BlobOperations::GetTypeId(blob);
+        Dob::Typesystem::TypeId typeId = Dob::Typesystem::Internal::BlobOperations::GetTypeId(blob);
 
         Dob::Typesystem::EntityId entityId(typeId, instanceId);
 
@@ -896,31 +896,6 @@ namespace Internal
             if (typeId == m_dispatchedInjection.GetTypeId() &&
                 instanceId == m_dispatchedInjection.GetInstanceId())
             {
-                if (onInjNewCb || onInjUpdCb)
-                {
-                    if (!Dob::Typesystem::BlobOperations::IsChanged(blob))
-                    {
-                        // The app is calling Set in an OnInjectedNew or OnInjectedUpdate callback.
-                        // In this case we check that the app really has changed some member and isn't
-                        // just setting the same entity as received in the callback.
-                        std::wostringstream ostr;
-                        ostr << "Calling SetAll or SetChanges in an";
-                        if (onInjNewCb)
-                        {
-                            ostr << " OnInjectedNewEntity";
-                        }
-                        else
-                        {
-                            ostr << " OnInjectedUpdatedEntity";
-                        }
-                        ostr << " callback with hasn't been changed!"
-                             << " The app has probably not been modified to the new way of accepting"
-                             << " an injected entity (the new way is to do nothing). (Type = "
-                             << Typesystem::Operations::GetName(typeId) << " and instance = " << instanceId
-                             << " and handler = " << handlerId << ")";
-                        throw Safir::Dob::Typesystem::SoftwareViolationException(ostr.str(),__WFILE__,__LINE__);
-                    }
-                }
                 // The app is calling set in an OnInject callback.
                 m_setInjectedEntity = true;
 
@@ -990,7 +965,7 @@ namespace Internal
                                   const Dob::Typesystem::Int64     timestamp)
     {
 
-        Dob::Typesystem::TypeId typeId = Dob::Typesystem::BlobOperations::GetTypeId(blob);
+        Dob::Typesystem::TypeId typeId = Dob::Typesystem::Internal::BlobOperations::GetTypeId(blob);
 
         if (!m_isConnected)
         {
@@ -1152,7 +1127,7 @@ namespace Internal
                                  const Typesystem::ChannelId & channel,
                                  const ConsumerId & consumer)
     {
-        const Dob::Typesystem::TypeId typeId = Dob::Typesystem::BlobOperations::GetTypeId(blob);
+        const Dob::Typesystem::TypeId typeId = Dob::Typesystem::Internal::BlobOperations::GetTypeId(blob);
         if (!m_isConnected)
         {
             std::wostringstream ostr;
@@ -1210,7 +1185,7 @@ namespace Internal
                                     const ConsumerId& consumer,
                                     RequestId & requestId)
     {
-        const Typesystem::TypeId typeId=Dob::Typesystem::BlobOperations::GetTypeId(blob);
+        const Typesystem::TypeId typeId=Dob::Typesystem::Internal::BlobOperations::GetTypeId(blob);
 
         if (!m_isConnected)
         {
@@ -1248,7 +1223,7 @@ namespace Internal
                                    RequestId& requestId)
     {
 
-        const Typesystem::TypeId typeId = Dob::Typesystem::BlobOperations::GetTypeId(blob);
+        const Typesystem::TypeId typeId = Dob::Typesystem::Internal::BlobOperations::GetTypeId(blob);
 
         if (!m_isConnected)
         {
@@ -1321,7 +1296,7 @@ namespace Internal
                                    const ConsumerId& consumer,
                                    RequestId& requestId)
     {
-        const Typesystem::TypeId typeId=Dob::Typesystem::BlobOperations::GetTypeId(blob);
+        const Typesystem::TypeId typeId=Dob::Typesystem::Internal::BlobOperations::GetTypeId(blob);
 
         if (!m_isConnected)
         {
@@ -1411,7 +1386,7 @@ namespace Internal
                                   const ConsumerId & consumer,
                                   const ResponseId responseId)
     {
-        const Dob::Typesystem::TypeId typeId = Dob::Typesystem::BlobOperations::GetTypeId(blob);
+        const Dob::Typesystem::TypeId typeId = Dob::Typesystem::Internal::BlobOperations::GetTypeId(blob);
         if (!m_isConnected)
         {
             std::wostringstream ostr;

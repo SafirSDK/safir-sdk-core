@@ -39,7 +39,7 @@ namespace Safir.Dob
             get
             {
                 CheckNotDisposed();
-                return Typesystem.BlobOperations.GetTypeId(m_messageBlob);
+                return Typesystem.Internal.BlobOperations.GetTypeId(m_messageBlob);
             }
         }
 
@@ -65,6 +65,7 @@ namespace Safir.Dob
                 CheckNotDisposed();
                 System.IntPtr blob;
                 Interface.DoseC_BlobDeleter blobDeleter;
+
                 byte success;
                 Interface.DoseC_GetConnectionInfo(m_state, out blob, out blobDeleter, out success);
 

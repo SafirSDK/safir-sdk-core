@@ -54,7 +54,7 @@ namespace Safir.Dob
                 }
                 else
                 {
-                    return Typesystem.BlobOperations.GetTypeId(m_requestBlob);
+                    return Typesystem.Internal.BlobOperations.GetTypeId(m_requestBlob);
                 }
             }
         }

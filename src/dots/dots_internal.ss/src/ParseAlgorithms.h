@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2004-2015 (http://safir.sourceforge.net)
 *
 * Created by: Joel Ottosson / joot
 *
@@ -53,10 +53,20 @@ namespace ToolSupport
     bool ValidName(const std::string& name);
     void CheckNameAndFilenameConsistency(const std::string& filename, const std::string name);
     //Resolves references on the form <...><name>param</name>123<index></index></...>
-    void GetReferencedParameter(boost::property_tree::ptree& pt, std::string& paramName, int& paramIndex);
+    void GetReferencedParameter(boost::property_tree::ptree& pt, std::string& paramName, std::string& paramKey);
     int GetReferencedIndex(boost::property_tree::ptree& pt, ParseState& state);
+    int ReferencedKeyToIndex(const RepositoryLocal* rep, const ParameterDescriptionLocal* pd, const std::string& key);
     std::string GetEntityIdParameterAsString(boost::property_tree::ptree& pt);
     bool ParseValue(DotsC_MemberType memberType, const std::string& val, ValueDefinition& result);
+    bool ParseKey(DotsC_MemberType memberType, const std::string& val, ValueDefinition& result);
+    void VerifyParameterValue(const ParseState& state, ParameterDescriptionLocal* pd);
+    void VerifyParameterKey(const ParseState& state, ParameterDescriptionLocal* pd);
+    inline bool ValidKeyType(DotsC_MemberType memberType)
+    {
+        return  memberType==Int32MemberType || memberType==Int64MemberType || memberType==StringMemberType || memberType==TypeIdMemberType ||
+                memberType==InstanceIdMemberType || memberType==HandlerIdMemberType || memberType==ChannelIdMemberType ||
+                memberType==EntityIdMemberType || memberType==EnumerationMemberType || memberType==ObjectMemberType; //objectMemberType only allowed since it may be resolved to an enum later.
+    }
 
     template <class Ptr>
     bool NameComparerPtr(const Ptr& obj, const std::string& name) {return obj->name==name;}
@@ -70,7 +80,7 @@ namespace ToolSupport
     {
         try
         {
-            boost::shared_ptr<Descr> val(new Descr);
+            boost::shared_ptr<Descr> val=boost::make_shared<Descr>();
             val->fileName=currentPath;
             val->name=pt.get<std::string>(elementName);
             val->typeId=LlufId_Generate64(val->name.c_str());
@@ -88,7 +98,7 @@ namespace ToolSupport
             {
                 std::ostringstream ss;
                 ss<<"The type '"<<val->name<<"' is already defined. ";
-                throw ParseError("Duplicated type definition", ss.str(), currentPath, 10);
+                throw ParseError("Duplicated type definition", ss.str(), currentPath, 108);
             }
         }
         catch (const boost::property_tree::ptree_error&)
@@ -110,7 +120,7 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            ParameterDescriptionBasicPtr& def=state.lastInsertedClass->ownParameters.back();
+            ParameterDescriptionLocalPtr& def=state.lastInsertedClass->ownParameters.back();
             if (def->memberType!=ObjectMemberType)
             {
                 std::ostringstream os;
@@ -118,9 +128,13 @@ namespace ToolSupport
                 throw ParseError("Invalid parameter value", os.str(), state.currentPath, 35);
             }
 
-            state.objectParameters.push_back(ParseState::ObjectParameter(state.lastInsertedClass, def, def->values.size(), &pt, state.propertyTree));
+            if (def->collectionType!=DictionaryCollectionType) //dictionaries have ValueDef inserted at dictionaryEntry
+            {
+                def->values.push_back(ValueDefinition()); //placeholder
+            }
+
+            state.objectParameters.push_back(ParseState::ObjectParameter(state.lastInsertedClass, def, def->values.size()-1, &pt, state.propertyTree));
             state.objectParameters.back().deprecatedXmlFormat=true;
-            def->values.push_back(ValueDefinition()); //placeholder
         }
     };
 
@@ -128,7 +142,7 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            ParameterDescriptionBasicPtr& def=state.lastInsertedClass->ownParameters.back();
+            ParameterDescriptionLocalPtr& def=state.lastInsertedClass->ownParameters.back();
             if (def->memberType!=ObjectMemberType)
             {
                 std::ostringstream os;
@@ -136,8 +150,12 @@ namespace ToolSupport
                 throw ParseError("Invalid parameter value", os.str(), state.currentPath, 38);
             }
 
-            state.objectParameters.push_back(ParseState::ObjectParameter(state.lastInsertedClass, def, def->values.size(), &pt, state.propertyTree));
-            def->values.push_back(ValueDefinition()); //placeholder
+            if (def->collectionType!=DictionaryCollectionType) //dictionaries have ValueDef inserted at dictionaryEntry
+            {
+                def->values.push_back(ValueDefinition()); //placeholder
+            }
+
+            state.objectParameters.push_back(ParseState::ObjectParameter(state.lastInsertedClass, def, def->values.size()-1, &pt, state.propertyTree));
         }
     };
 
@@ -145,7 +163,7 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            ParameterDescriptionBasicPtr& def=state.lastInsertedClass->ownParameters.back();
+            ParameterDescriptionLocalPtr& def=state.lastInsertedClass->ownParameters.back();
             if (def->memberType!=EntityIdMemberType)
             {
                 std::ostringstream os;
@@ -155,15 +173,15 @@ namespace ToolSupport
 
             try
             {
-                ValueDefinition val;
-                if (ParseValue(def->memberType, GetEntityIdParameterAsString(pt), val))
+                if (def->collectionType!=DictionaryCollectionType) //dictionaries have ValueDef inserted at dictionaryEntry
                 {
-                    def->values.push_back(val);
+                    def->values.push_back(ValueDefinition()); //placeholder
                 }
-                else
+                ValueDefinition& v=def->values.back();
+                if (!ParseValue(def->memberType, GetEntityIdParameterAsString(pt), v))
                 {
                     std::ostringstream os;
-                    os<<"The value '"<<val.stringVal<<"' doesn't match the type "<<def->typeName<<" for parameter "<<def->name<<" in class "<<state.lastInsertedClass->name;
+                    os<<"The value '"<<v.val.str<<"' doesn't match the type "<<def->typeName<<" for parameter "<<def->name<<" in class "<<state.lastInsertedClass->name;
                     throw ParseError("Invalid parameter value", os.str(), state.currentPath, 34);
                 }
             }
@@ -171,9 +189,9 @@ namespace ToolSupport
             {
                 throw ParseError("Incomplete EntityId XML", "Missing 'name' and/or 'instanceId' element in EntityId parameter", state.currentPath, 5);
             }
-            catch(const std::string& var)
+            catch(const std::exception& var)
             {
-                throw ParseError("Incomplete EntityId XML", "Failed to expand environment variable '"+var+"' in EntityId parameter", state.currentPath, 139);
+                throw ParseError("Incomplete EntityId XML", "Failed to expand environment variable '"+std::string(var.what())+"' in EntityId parameter", state.currentPath, 139);
             }
         }
     };
@@ -182,23 +200,28 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
+            ParameterDescriptionLocalPtr& def=state.lastInsertedClass->ownParameters.back();
             try
             {
+                if (def->collectionType!=DictionaryCollectionType) //dictionaries have ValueDef inserted at dictionaryEntry
+                {
+                    def->values.push_back(ValueDefinition()); //placeholder
+                }
+                ValueDefinition& val=def->values.back();
+                val.kind=RefKind;
+
                 std::string paramName;
-                int paramIx;
-                GetReferencedParameter(pt, paramName, paramIx);
-                ParseState::ParameterReference<ParameterDescriptionBasic> ref(state.lastInsertedClass,
-                                                                              state.lastInsertedClass->ownParameters.back(),
-                                                                              state.lastInsertedClass->ownParameters.back()->values.size(),
-                                                                              paramName, paramIx);
-                ref.referee.referencingItem->values.push_back(ValueDefinition(RefKind)); //add placeholder for the value when it's resolved later
+                std::string paramKey;
+                GetReferencedParameter(pt, paramName, paramKey);
+                ParseState::ParameterReference<ParameterDescriptionLocal> ref(state.lastInsertedClass,
+                                                                              def, def->values.size()-1,
+                                                                              paramName, paramKey);
                 state.paramToParamReferences.push_back(ref);
             }
             catch (...)
             {
                 std::ostringstream os;
-                os<<"Missing <name> element in parameter reference. In parameter "<<state.lastInsertedClass->ownParameters.back()->name<<
-                    " in class "<<state.lastInsertedClass->name;
+                os<<"Something is wrong with the parameter reference. In parameter "<<def->name<<" in class "<<state.lastInsertedClass->name<<". It can be that the <name> element is missing or that both a <key> and an <index> element is specified.";
                 throw ParseError("Invalid parameter reference syntax", os.str(), state.currentPath, 31);
             }
         }
@@ -211,9 +234,9 @@ namespace ToolSupport
             try
             {
                 std::string paramName;
-                int paramIx;
+                std::string paramIx;
                 GetReferencedParameter(pt, paramName, paramIx);
-                ParseState::ParameterReference<MemberDescriptionBasic> ref(state.lastInsertedClass,
+                ParseState::ParameterReference<MemberDescriptionLocal> ref(state.lastInsertedClass,
                                                                            state.lastInsertedClass->members.back(),
                                                                            0,
                                                                            paramName, paramIx);
@@ -222,8 +245,7 @@ namespace ToolSupport
             catch (...)
             {
                 std::ostringstream os;
-                os<<"Missing <name> element in maxLengthRef. In member "<<state.lastInsertedClass->members.back()->name<<
-                    " in class "<<state.lastInsertedClass->name;
+                os<<"Something is wrong with the maxLengthRef. In member "<<state.lastInsertedClass->members.back()->name<<" in class "<<state.lastInsertedClass->name<<". It can be that the <name> element is missing or that both a <key> and an <index> element is specified.";
                 throw ParseError("Invalid parameter reference syntax", os.str(), state.currentPath, 32);
             }
         }
@@ -233,13 +255,13 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            state.lastInsertedClass->members.back()->isArray=true;
+            state.lastInsertedClass->members.back()->collectionType=ArrayCollectionType;
             try
             {
                 std::string paramName;
-                int paramIx;
+                std::string paramIx;
                 GetReferencedParameter(pt, paramName, paramIx);
-                ParseState::ParameterReference<MemberDescriptionBasic> ref(state.lastInsertedClass,
+                ParseState::ParameterReference<MemberDescriptionLocal> ref(state.lastInsertedClass,
                                                                            state.lastInsertedClass->members.back(),
                                                                            0,
                                                                            paramName, paramIx);
@@ -248,8 +270,7 @@ namespace ToolSupport
             catch (...)
             {
                 std::ostringstream os;
-                os<<"Missing <name> element in arraySizeRef. In member "<<state.lastInsertedClass->members.back()->name<<
-                    " in class "<<state.lastInsertedClass->name;
+                os<<"Something is wrong with the arraySizeRef. In member "<<state.lastInsertedClass->members.back()->name<<" in class "<<state.lastInsertedClass->name<<". It can be that the <name> element is missing or that both a <key> and an <index> element is specified.";
                 throw ParseError("Invalid parameter reference syntax", os.str(), state.currentPath, 33);
             }
         }
@@ -260,7 +281,7 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            boost::function< bool(const ClassDescriptionBasicPtr&) > insert=boost::bind(&RepositoryBasic::InsertClass, state.repository, _1);
+            boost::function< bool(const ClassDescriptionLocalPtr&) > insert=boost::bind(&RepositoryLocal::InsertClass, state.repository, _1);
             CreateTopLevelDefinition(pt,
                                      state.currentPath,
                                      Elements::ClassName::Name(),
@@ -274,7 +295,7 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            boost::function< bool(const EnumDescriptionBasicPtr&) > insert=boost::bind(&RepositoryBasic::InsertEnum, state.repository, _1);
+            boost::function< bool(const EnumDescriptionLocalPtr&) > insert=boost::bind(&RepositoryLocal::InsertEnum, state.repository, _1);
             CreateTopLevelDefinition(pt,
                                      state.currentPath,
                                      Elements::EnumerationName::Name(),
@@ -287,7 +308,7 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            boost::function< bool(const ExceptionDescriptionBasicPtr&) > insert=boost::bind(&RepositoryBasic::InsertException, state.repository, _1);
+            boost::function< bool(const ExceptionDescriptionLocalPtr&) > insert=boost::bind(&RepositoryLocal::InsertException, state.repository, _1);
             CreateTopLevelDefinition(pt,
                                      state.currentPath,
                                      Elements::ExceptionName::Name(),
@@ -300,7 +321,7 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            boost::function< bool(const PropertyDescriptionBasicPtr&) > insert=boost::bind(&RepositoryBasic::InsertProperty, state.repository, _1);
+            boost::function< bool(const PropertyDescriptionLocalPtr&) > insert=boost::bind(&RepositoryLocal::InsertProperty, state.repository, _1);
             CreateTopLevelDefinition(pt,
                                      state.currentPath,
                                      Elements::PropertyName::Name(),
@@ -313,7 +334,7 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            MemberDescriptionBasicPtr def(new MemberDescriptionBasic);
+            MemberDescriptionLocalPtr def=boost::make_shared<MemberDescriptionLocal>();
             try
             {
                  def->name=pt.get<std::string>(Elements::MemberName::Name());
@@ -331,28 +352,30 @@ namespace ToolSupport
 
             //check for duplicates
             if (std::find_if(state.lastInsertedClass->members.begin(), state.lastInsertedClass->members.end(),
-                             boost::bind(NameComparerPtr<MemberDescriptionBasicPtr>, _1, def->name))!=state.lastInsertedClass->members.end())
+                             boost::bind(NameComparerPtr<MemberDescriptionLocalPtr>, _1, def->name))!=state.lastInsertedClass->members.end())
             {
                 std::ostringstream os;
                 os<<"A member with name '"<<def->name<<"' is defined more than one time in class "<<state.lastInsertedClass->name;
                 throw ParseError("Duplicated member", os.str(), state.currentPath, 175);
             }
 
-            state.lastInsertedClass->members.push_back(def);
-        }
-    };
-
-    template<> struct ParseAlgorithm<Elements::MemberType>
-    {
-        void operator()(boost::property_tree::ptree& pt, ParseState& state) const
-        {
-            SerializationUtils::Trim(pt.data());
-            state.lastInsertedClass->members.back()->typeName=pt.data();
-            if (!BasicTypeOperations::IsBasicTypeName(pt.data(), state.lastInsertedClass->members.back()->memberType))
+            //get type
+            try
             {
-                //not a basic type, we have to check later if its an enum or class type, for now we assume class
-                state.lastInsertedClass->members.back()->memberType=ObjectMemberType;
+                 def->typeName=pt.get<std::string>(Elements::MemberType::Name());
+                 SerializationUtils::Trim(def->typeName);
+                 if (!BasicTypeOperations::IsBasicTypeName(def->typeName, def->memberType))
+                 {
+                     //not a basic type, we have to check later if its an enum or class type, for now we assume class
+                     def->memberType=ObjectMemberType;
+                 }
             }
+            catch (const boost::property_tree::ptree_error&)
+            {
+                throw ParseError("Missing element", "Element 'type' is missing for member '"+def->name+"'' in class '"+state.lastInsertedClass->name+"'.", state.currentPath, 180);
+            }
+
+            state.lastInsertedClass->members.push_back(def);
         }
     };
 
@@ -360,7 +383,7 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            CreateRoutineDescriptionBasicPtr def(new CreateRoutineDescriptionBasic(state.lastInsertedClass.get()));
+            CreateRoutineDescriptionLocalPtr def=boost::make_shared<CreateRoutineDescriptionLocal>(state.lastInsertedClass.get());
             try
             {
                 def->name=pt.get<std::string>(Elements::CreateRoutineName::Name());
@@ -405,7 +428,7 @@ namespace ToolSupport
             def->signature=signature.str();
 
             //Check for createRoutines with same signature
-            for (std::vector<CreateRoutineDescriptionBasicPtr>::const_iterator crIt=state.lastInsertedClass->createRoutines.begin(); crIt!=state.lastInsertedClass->createRoutines.end(); ++crIt)
+            for (std::vector<CreateRoutineDescriptionLocalPtr>::const_iterator crIt=state.lastInsertedClass->createRoutines.begin(); crIt!=state.lastInsertedClass->createRoutines.end(); ++crIt)
             {
                 if ((*crIt)->signature==def->signature)
                 {
@@ -424,7 +447,7 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            CreateRoutineDescriptionBasicPtr& def=state.lastInsertedClass->createRoutines.back();
+            CreateRoutineDescriptionLocalPtr& def=state.lastInsertedClass->createRoutines.back();
             //We get the member here to since it is mandatory and it simplifies the parsing of CreateRoutineValueXXX if we are sure we alredy know the member name.
             try
             {
@@ -468,25 +491,22 @@ namespace ToolSupport
         {
             try
             {
-                MemberValue& memVal=state.lastInsertedClass->createRoutines.back()->memberValues.back();
-                GetReferencedParameter(pt, memVal.second.first, memVal.second.second);
+                CreateRoutineDescriptionLocalPtr& def=state.lastInsertedClass->createRoutines.back();
+                std::string paramName, paramKey;
+                GetReferencedParameter(pt, paramName, paramKey);
+
+                ParseState::ParameterReference<CreateRoutineDescriptionLocal> ref(state.lastInsertedClass,
+                                                                                  def,
+                                                                                  def->memberValues.size()-1,
+                                                                                  paramName, paramKey);
+
+                state.createRoutineIncompleteHiddenParameters.push_back(ref);
             }
             catch (...)
             {
                 std::ostringstream os;
-                os<<"Missing <name> element in parameter reference. In createRoutine "<<state.lastInsertedClass->createRoutines.back()->name<<
-                    " in class "<<state.lastInsertedClass->name;
+                os<<"Can't understand the parameter reference. In createRoutine "<<state.lastInsertedClass->createRoutines.back()->name<<" in class "<<state.lastInsertedClass->name;
                 throw ParseError("Invalid parameter reference syntax", os.str(), state.currentPath, 29);
-
-                //This is for backward compatibility. If it ok to change syntax throw exception above instead.
-                //Reason for change is that CreateRoutine.Values only allow to specify a parameter name and no index
-                //Instead we should use the same sytax as for maxLenghtRef and arraySizeRef: <...><name>MyParam</name><index>123</index></...>
-                //and remove the code here:
-                // --- BEGIN to be removed ----
-//                MemberValue& memVal=state.lastInsertedClass->createRoutines.back()->memberValues.back();
-//                memVal.second.first=pt.data();
-//                memVal.second.second=0;
-                // --- END to be removed ----
             }
         }
     };
@@ -499,31 +519,32 @@ namespace ToolSupport
 
             //Add hidden parameter
             //member@signature -> MyClassMember@MyNamespace.MyClass.MyCreateRoutine#param1#...#paramN
-            CreateRoutineDescriptionBasicPtr& def=state.lastInsertedClass->createRoutines.back();
+            CreateRoutineDescriptionLocalPtr& def=state.lastInsertedClass->createRoutines.back();
             MemberValue& memVal=def->memberValues.back();
             std::ostringstream paramName;
             paramName<<memVal.first<<"@"<<def->signature;
             memVal.second.first=paramName.str();
             memVal.second.second=0;
 
-            ParameterDescriptionBasicPtr par(new ParameterDescriptionBasic);
+            ParameterDescriptionLocalPtr par=boost::make_shared<ParameterDescriptionLocal>();
             par->qualifiedName=paramName.str();
             par->name=par->qualifiedName;
             par->hidden=true;
-            par->isArray=false;
+            par->collectionType=SingleValueCollectionType;
             par->memberType=Int32MemberType; //just to indicate that type is not object or entityId, it is a basicType or enum
-            ValueDefinition val;
-            val.kind=ValueKind;
-            val.stringVal=pt.data();
-            par->values.push_back(val);
+            ValueDefinition v;
+            v.kind=ValueKind;
+            v.val.str=pt.data();
+            par->values.push_back(v);
             state.lastInsertedClass->ownParameters.push_back(par);
             state.repository->InsertParameter(par);
 
             //type is still missing, add for later processing
-            ParseState::ParameterReference<CreateRoutineDescriptionBasic> ref(state.lastInsertedClass,
+            ParseState::ParameterReference<CreateRoutineDescriptionLocal> ref(state.lastInsertedClass,
                                                                               def,
                                                                               def->memberValues.size()-1,
-                                                                              par->GetName(), 0);
+                                                                              par->GetName(), "");
+
             state.createRoutineIncompleteHiddenParameters.push_back(ref);
         }
     };
@@ -534,23 +555,23 @@ namespace ToolSupport
         {
             //Add hidden parameter
             //member@signature -> MyClassMember@MyNamespace.MyClass.MyCreateRoutine#param1#...#paramN
-            CreateRoutineDescriptionBasicPtr& def=state.lastInsertedClass->createRoutines.back();
+            CreateRoutineDescriptionLocalPtr& def=state.lastInsertedClass->createRoutines.back();
             MemberValue& memVal=def->memberValues.back();
             std::ostringstream paramName;
             paramName<<memVal.first<<"@"<<def->signature;
             memVal.second.first=paramName.str();
             memVal.second.second=0;
 
-            ValueDefinition val;
-            val.kind=ValueKind;
+            ValueDefinition v;
+            v.kind=ValueKind;
             try
             {
                 if (!ParseValue(EntityIdMemberType,
                                 GetEntityIdParameterAsString(pt),
-                                val))
+                                v))
                 {
                     std::ostringstream os;
-                    os<<"The value '"<<val.stringVal<<"' doesn't match the type entityId for createRoutine "<<def->name<<" in class "<<state.lastInsertedClass->name;
+                    os<<"The value '"<<v.val.str<<"' doesn't match the type entityId for createRoutine "<<def->name<<" in class "<<state.lastInsertedClass->name;
                     throw ParseError("Invalid create routine value", os.str(), state.currentPath, 62);
                 }
             }
@@ -558,19 +579,19 @@ namespace ToolSupport
             {
                 throw ParseError("Incomplete EntityId XML", "Missing 'name' and/or 'instanceId' element in EntityId value in createRoutine "+def->name, state.currentPath, 4);
             }
-            catch(const std::string& envVar)
+            catch(const std::exception& envVar)
             {
-                throw ParseError("Incomplete EntityId XML", "Failed to expand environment variable '"+envVar+"' in CreateRoutine "+def->GetName()+" member "+memVal.first, state.currentPath, 140);
+                throw ParseError("Incomplete EntityId XML", "Failed to expand environment variable '"+std::string(envVar.what())+"' in CreateRoutine "+def->GetName()+" member "+memVal.first, state.currentPath, 140);
             }
 
-            ParameterDescriptionBasicPtr par(new ParameterDescriptionBasic);
+            ParameterDescriptionLocalPtr par=boost::make_shared<ParameterDescriptionLocal>();
             par->qualifiedName=paramName.str();
             par->name=par->qualifiedName;
             par->hidden=true;
-            par->isArray=false;
+            par->collectionType=SingleValueCollectionType;
             par->memberType=EntityIdMemberType;
             par->typeName=BasicTypeOperations::MemberTypeToString(EntityIdMemberType);
-            par->values.push_back(val);
+            par->values.push_back(v);
             state.lastInsertedClass->ownParameters.push_back(par);
             state.repository->InsertParameter(par);
         }
@@ -582,23 +603,23 @@ namespace ToolSupport
         {
             //Add hidden parameter
             //member@signature -> MyClassMember@MyNamespace.MyClass.MyCreateRoutine#param1#...#paramN
-            CreateRoutineDescriptionBasicPtr& def=state.lastInsertedClass->createRoutines.back();
+            CreateRoutineDescriptionLocalPtr& def=state.lastInsertedClass->createRoutines.back();
             MemberValue& memVal=def->memberValues.back();
             std::ostringstream paramName;
             paramName<<memVal.first<<"@"<<def->signature;
             memVal.second.first=paramName.str();
             memVal.second.second=0;
 
-            ParameterDescriptionBasicPtr par(new ParameterDescriptionBasic);
+            ParameterDescriptionLocalPtr par=boost::make_shared<ParameterDescriptionLocal>();
             par->qualifiedName=paramName.str();
             par->name=par->qualifiedName;
             par->hidden=true;
-            par->isArray=false;
+            par->collectionType=SingleValueCollectionType;
             par->memberType=ObjectMemberType;
-            ValueDefinition val;
-            val.kind=ValueKind;
-            val.stringVal=pt.data();
-            par->values.push_back(val);
+            ValueDefinition v;
+            v.kind=ValueKind;
+            v.val.str=pt.data();
+            par->values.push_back(v);
             state.lastInsertedClass->ownParameters.push_back(par);
             state.objectParameters.push_back(ParseState::ObjectParameter(state.lastInsertedClass,
                                                                          par,
@@ -607,10 +628,10 @@ namespace ToolSupport
             state.repository->InsertParameter(par);
 
             //type is still missing, add for later processing
-            ParseState::ParameterReference<CreateRoutineDescriptionBasic> ref(state.lastInsertedClass,
+            ParseState::ParameterReference<CreateRoutineDescriptionLocal> ref(state.lastInsertedClass,
                                                                               def,
                                                                               def->memberValues.size()-1,
-                                                                              par->GetName(), 0);
+                                                                              par->GetName(), "");
             state.createRoutineIncompleteHiddenParameters.push_back(ref);
         }
     };
@@ -621,23 +642,23 @@ namespace ToolSupport
         {
             //Add hidden parameter
             //member@signature -> MyClassMember@MyNamespace.MyClass.MyCreateRoutine#param1#...#paramN
-            CreateRoutineDescriptionBasicPtr& def=state.lastInsertedClass->createRoutines.back();
+            CreateRoutineDescriptionLocalPtr& def=state.lastInsertedClass->createRoutines.back();
             MemberValue& memVal=def->memberValues.back();
             std::ostringstream paramName;
             paramName<<memVal.first<<"@"<<def->signature;
             memVal.second.first=paramName.str();
             memVal.second.second=0;
 
-            ParameterDescriptionBasicPtr par(new ParameterDescriptionBasic);
+            ParameterDescriptionLocalPtr par=boost::make_shared<ParameterDescriptionLocal>();
             par->qualifiedName=paramName.str();
             par->name=par->qualifiedName;
             par->hidden=true;
-            par->isArray=false;
+            par->collectionType=SingleValueCollectionType;
             par->memberType=ObjectMemberType;
-            ValueDefinition val;
-            val.kind=ValueKind;
-            val.stringVal=pt.data();
-            par->values.push_back(val);
+            ValueDefinition v;
+            v.kind=ValueKind;
+            v.val.str=pt.data();
+            par->values.push_back(v);
             state.lastInsertedClass->ownParameters.push_back(par);
             state.objectParameters.push_back(ParseState::ObjectParameter(state.lastInsertedClass,
                                                                          par,
@@ -647,10 +668,10 @@ namespace ToolSupport
             state.repository->InsertParameter(par);
 
             //type is still missing, add for later processing
-            ParseState::ParameterReference<CreateRoutineDescriptionBasic> ref(state.lastInsertedClass,
+            ParseState::ParameterReference<CreateRoutineDescriptionLocal> ref(state.lastInsertedClass,
                                                                               def,
                                                                               def->memberValues.size()-1,
-                                                                              par->GetName(), 0);
+                                                                              par->GetName(), "");
             state.createRoutineIncompleteHiddenParameters.push_back(ref);
         }
     };
@@ -659,16 +680,16 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            ParameterDescriptionBasicPtr def(new ParameterDescriptionBasic);
+            ParameterDescriptionLocalPtr def=boost::make_shared<ParameterDescriptionLocal>();
 
             //Check parameter name
             try
             {
                 def->name=pt.get<std::string>(Elements::ParameterName::Name());
                 SerializationUtils::Trim(def->name);
-                std::vector<ParameterDescriptionBasicPtr>::const_iterator found=std::find_if(state.lastInsertedClass->ownParameters.begin(),
+                std::vector<ParameterDescriptionLocalPtr>::const_iterator found=std::find_if(state.lastInsertedClass->ownParameters.begin(),
                                                                                              state.lastInsertedClass->ownParameters.end(),
-                                                                                             boost::bind(NameComparerPtr<ParameterDescriptionBasicPtr>, _1, def->name));
+                                                                                             boost::bind(NameComparerPtr<ParameterDescriptionLocalPtr>, _1, def->name));
                 if (found!=state.lastInsertedClass->ownParameters.end())
                 {
                     std::ostringstream os;
@@ -718,12 +739,12 @@ namespace ToolSupport
 
     template<> struct ParseAlgorithm<Elements::ParameterArrayElements>
     {
-        void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const {state.lastInsertedClass->ownParameters.back()->isArray=true;}
+        void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const {state.lastInsertedClass->ownParameters.back()->collectionType=ArrayCollectionType;}
     };
 
     template<> struct ParseAlgorithm<Elements::ParameterArray>
     {
-        void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const {state.lastInsertedClass->ownParameters.back()->isArray=true;}
+        void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const {state.lastInsertedClass->ownParameters.back()->collectionType=ArrayCollectionType;}
     };
 
     template<> struct ParseAlgorithm<Elements::ParameterValue>
@@ -732,37 +753,188 @@ namespace ToolSupport
         {
             SerializationUtils::Trim(pt.data());
 
-            ParameterDescriptionBasicPtr& def=state.lastInsertedClass->ownParameters.back();
-            ValueDefinition val;
+            ParameterDescriptionLocalPtr& def=state.lastInsertedClass->ownParameters.back();
+
+            if (def->memberType==EntityIdMemberType) //entityId shall not use <value>-element
+            {
+                std::ostringstream os;
+                os<<"The parameter '"<<def->qualifiedName<<"' has type=EntityId and is not allowed to use the <value>-element. Use <entityId>-element instead.";
+                throw ParseError("Invalid parameter value", os.str(), state.currentPath, 214);
+            }
+
+            if (def->collectionType!=DictionaryCollectionType) //dictionaries have ValueDef inserted at dictionaryEntry
+            {
+                def->values.push_back(ValueDefinition()); //placeholder
+            }
+            ValueDefinition& v=def->values.back();
+
+            if (def->memberType==ObjectMemberType)
+            {
+                def->memberType=EnumerationMemberType; //Handled later, should be an enum otherwise <value>-element is not valid
+            }
+
             try
             {
-                if (def->memberType==ObjectMemberType)
-                {
-                    def->memberType=EnumerationMemberType; //Handled later, should be an enum otherwise <value>-element is not valid
-                }
-
                 if (def->memberType==EnumerationMemberType)
                 {
-                    val.stringVal=SerializationUtils::ExpandEnvironmentVariables(pt.data());
-                    def->values.push_back(val);
+                    v.val.str=SerializationUtils::ExpandEnvironmentVariables(pt.data());
                 }
-                else if (ParseValue(def->memberType, SerializationUtils::ExpandEnvironmentVariables(pt.data()), val))
-                {
-                    def->values.push_back(val);
-                }
-                else
+                else if (!ParseValue(def->memberType, SerializationUtils::ExpandEnvironmentVariables(pt.data()), v))
                 {
                     std::ostringstream os;
                     os<<"The value '"<<pt.data()<<"' doesn't match the type "<<def->typeName<<" for parameter "<<def->name<<" in class "<<state.lastInsertedClass->name;
                     throw ParseError("Invalid parameter value", os.str(), state.currentPath, 30);
                 }
             }
-            catch(const std::string& envVar)
+            catch (const ParseError&)
+            {
+                throw; //rethrow parse error, this is to prevent ParseError to be caught by next catch that is intended for envVar errors
+            }
+            catch(const std::exception& envVar)
             {
                 std::ostringstream os;
-                os<<"Failed to expand environment variable '"<<envVar<<"' in parameter "<<def->name<<" in class "<<state.lastInsertedClass->name;
+                os<<"Failed to expand environment variable in parameter "<<def->name<<" in class "<<state.lastInsertedClass->name<<". "<<envVar.what();
                 throw ParseError("Invalid parameter value", os.str(), state.currentPath, 142);
             }
+        }
+    };
+
+    template<> struct ParseAlgorithm<Elements::ParameterSequence>
+    {
+        //void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const {state.lastInsertedClass->ownParameters.back()->collectionType=SequenceCollectionType;}
+
+        void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const
+        {
+            ParameterDescriptionLocalPtr& def=state.lastInsertedClass->ownParameters.back();
+            std::ostringstream os;
+            os<<"The parameter '"<<def->qualifiedName<<"' has collectionType=Sequence. It is not supported, use array instead. (Same syntax but <array> instead of <sequence>)";
+            throw ParseError("Sequence parameters not supported", os.str(), state.currentPath, 210);
+        }
+    };
+
+    template<> struct ParseAlgorithm<Elements::ParameterDictionary>
+    {
+        void operator()(boost::property_tree::ptree& pt, ParseState& state) const
+        {
+            ParameterDescriptionLocalPtr& pd=state.lastInsertedClass->ownParameters.back();
+            pd->collectionType=DictionaryCollectionType;
+
+            try
+            {
+                std::string keyType=pt.get<std::string>("<xmlattr>.keyType");
+                SerializationUtils::Trim(keyType);
+
+                if (!BasicTypeOperations::IsBasicTypeName(keyType, pd->keyType))
+                {
+                    //Assume enumeration, check type later
+                    pd->keyType=EnumerationMemberType;
+                    pd->keyTypeId=TypeUtilities::CalculateTypeId(keyType);
+                }
+
+                if (!ValidKeyType(pd->keyType))
+                {
+                    std::ostringstream ss;
+                    ss<<"The specified type '"<<keyType<<"' is not valid as key in a dictionary. On member '"<<pd->name<<"' in class '"<<state.lastInsertedClass->name<<"'"<<std::endl;
+                    throw ParseError("Invalid dictionary key type", ss.str(), state.currentPath, 184);
+                }
+            }
+            catch (const boost::property_tree::ptree_error&)
+            {
+                std::ostringstream ss;
+                ss<<"The dictionary parameter '"<<pd->name<<"' in class '"<<state.lastInsertedClass->name<<"' has no key type specification. Add the keyType attribute"<<std::endl;
+                throw ParseError("Missing keyType attribute", ss.str(), state.currentPath, 185);
+            }
+        }
+    };
+
+    template<> struct ParseAlgorithm<Elements::ParameterValueCollection>
+    {
+        void operator()(boost::property_tree::ptree& pt, ParseState& state) const
+        {
+            ParseAlgorithm<Elements::ParameterValue>()(pt, state);
+        }
+    };
+
+    template<> struct ParseAlgorithm<Elements::ParameterValueRefCollection>
+    {
+        void operator()(boost::property_tree::ptree& pt, ParseState& state) const
+        {
+            ParseAlgorithm<Elements::ParameterValueRef>()(pt, state);
+        }
+    };
+
+    template<> struct ParseAlgorithm<Elements::ParameterEntityIdCollection>
+    {
+        void operator()(boost::property_tree::ptree& pt, ParseState& state) const
+        {
+            ParseAlgorithm<Elements::ParameterEntityId>()(pt, state);
+        }
+    };
+
+    template<> struct ParseAlgorithm<Elements::ParameterObjectCollection>
+    {
+        void operator()(boost::property_tree::ptree& pt, ParseState& state) const
+        {
+            ParseAlgorithm<Elements::ParameterObject>()(pt, state);
+        }
+    };
+
+    template<> struct ParseAlgorithm<Elements::ParameterObjectDeprecatedCollection>
+    {
+        void operator()(boost::property_tree::ptree& pt, ParseState& state) const
+        {
+            ParseAlgorithm<Elements::ParameterObjectDeprecated>()(pt, state);
+        }
+    };
+
+    template<> struct ParseAlgorithm<Elements::ParameterDictionaryEntry>
+    {
+        void operator()(boost::property_tree::ptree& pt, ParseState& state) const
+        {
+            ParameterDescriptionLocalPtr& def=state.lastInsertedClass->ownParameters.back();
+            ValueDefinition val;
+            std::string key;
+
+            //get key
+            try
+            {
+                if (def->GetKeyType()==EntityIdMemberType)
+                {
+                    key=GetEntityIdParameterAsString(pt.get_child(Elements::ParameterDictionaryKey::Name()));
+                }
+                else
+                {
+                    key=pt.get<std::string>(Elements::ParameterDictionaryKey::Name());
+                    SerializationUtils::Trim(key);
+                    key=SerializationUtils::ExpandEnvironmentVariables(key);
+                }
+            }
+            catch (const boost::property_tree::ptree_error&)
+            {
+                std::ostringstream ss;
+                ss<<"The dictionary parameter '"<<def->name<<"' in class '"<<state.lastInsertedClass->name<<"' has no key specified."<<std::endl;
+                throw ParseError("Missing key", ss.str(), state.currentPath, 186);
+            }
+            catch (const std::exception& envVar)
+            {
+                std::ostringstream os;
+                os<<"Failed to expand environment variable in parameter "<<def->name<<" in class "<<state.lastInsertedClass->name<<". "<<envVar.what();
+                throw ParseError("Invalid dictionary key", os.str(), state.currentPath, 187);
+            }
+
+            //parse key
+            if (def->keyType==EnumerationMemberType) //enums have to wait until all types are known
+            {
+                val.key.str=key;
+            }
+            else if (!ParseKey(def->keyType, key, val))
+            {
+                std::ostringstream os;
+                os<<"The key '"<<key<<"' doesn't match the type "<<TypeUtilities::GetTypeName(def->keyType)<<" for parameter "<<def->name<<" in class "<<state.lastInsertedClass->name;
+                throw ParseError("Invalid dictionary key", os.str(), state.currentPath, 188);
+            }
+
+            def->values.push_back(val);
         }
     };
 
@@ -826,7 +998,8 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            MemberDescriptionBasicPtr def(new MemberDescriptionBasic);
+            MemberDescriptionLocalPtr def=boost::make_shared<MemberDescriptionLocal>();
+
             try
             {
                  def->name=pt.get<std::string>(Elements::PropertyMemberName::Name());
@@ -844,10 +1017,26 @@ namespace ToolSupport
                 throw ParseError("Invalid name", os.str(), state.currentPath, 68);
             }
 
-            if (std::find_if(state.lastInsertedProperty->members.begin(), state.lastInsertedProperty->members.end(), boost::bind(NameComparerPtr<MemberDescriptionBasicPtr>, _1, def->name))!=
+            if (std::find_if(state.lastInsertedProperty->members.begin(), state.lastInsertedProperty->members.end(), boost::bind(NameComparerPtr<MemberDescriptionLocalPtr>, _1, def->name))!=
                 state.lastInsertedProperty->members.end())
             {
                 throw ParseError("Duplicated property member", def->name+" is defined more than one time in property "+state.lastInsertedProperty->name, state.currentPath, 69);
+            }
+
+            //get type
+            try
+            {
+                 def->typeName=pt.get<std::string>(Elements::PropertyMemberType::Name());
+                 SerializationUtils::Trim(def->typeName);
+                 if (!BasicTypeOperations::IsBasicTypeName(def->typeName, def->memberType))
+                 {
+                     //not a basic type, we have to check later if its an enum or class type, for now we assume class
+                     def->memberType=ObjectMemberType;
+                 }
+            }
+            catch (const boost::property_tree::ptree_error&)
+            {
+                throw ParseError("Missing element", "Element 'type' is missing for member '"+def->name+"'' in property '"+state.lastInsertedProperty->name+"'.", state.currentPath, 181);
             }
 
             state.lastInsertedProperty->members.push_back(def);
@@ -859,23 +1048,51 @@ namespace ToolSupport
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const {state.lastInsertedProperty->members.back()->summary=pt.data();}
     };
 
-    template<> struct ParseAlgorithm<Elements::PropertyMemberType>
+    template<> struct ParseAlgorithm<Elements::PropertyMemberisArray>
     {
-        void operator()(boost::property_tree::ptree& pt, ParseState& state) const
+        void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const {state.lastInsertedProperty->members.back()->collectionType=ArrayCollectionType;}
+    };
+
+    template<> struct ParseAlgorithm<Elements::PropertyMemberIsSequence>
+    {
+        //void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const {state.lastInsertedProperty->members.back()->collectionType=SequenceCollectionType;}
+
+        void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const
         {
-            SerializationUtils::Trim(pt.data());
-            state.lastInsertedProperty->members.back()->typeName=pt.data();
-            if (!BasicTypeOperations::IsBasicTypeName(pt.data(), state.lastInsertedProperty->members.back()->memberType))
-            {
-                //not a basic type, we have to check later if its an enum or class type, for now we assume class
-                state.lastInsertedProperty->members.back()->memberType=ObjectMemberType;
-            }
+            std::ostringstream os;
+            os<<"The member '"<<state.lastInsertedProperty->members.back()->GetName()<<"' in property '"<<state.lastInsertedProperty->GetName()<<"' has collectionType=Sequence wich is currently not supported.";
+            throw ParseError("Sequence propertyMembers not supported", os.str(), state.currentPath, 211);
         }
     };
 
-    template<> struct ParseAlgorithm<Elements::PropertyMemberisArray>
+    template<> struct ParseAlgorithm<Elements::PropertyMemberIsDictionary>
     {
-        void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const {state.lastInsertedProperty->members.back()->isArray=true;}
+//        void operator()(boost::property_tree::ptree& pt, ParseState& state) const
+//        {
+//            state.lastInsertedProperty->members.back()->collectionType=DictionaryCollectionType;
+//            SerializationUtils::Trim(pt.data());
+
+//            if (!BasicTypeOperations::IsBasicTypeName(pt.data(), state.lastInsertedProperty->members.back()->keyType))
+//            {
+//                //Assume enumeration, check type later
+//                state.lastInsertedProperty->members.back()->keyType=EnumerationMemberType;
+//                state.lastInsertedProperty->members.back()->keyTypeId=TypeUtilities::CalculateTypeId(pt.data());
+//            }
+
+//            if (!ValidKeyType(state.lastInsertedProperty->members.back()->keyType))
+//            {
+//                std::ostringstream ss;
+//                ss<<"The specified type '"<<pt.data()<<"' is not valid as key in a dictionary. On member '"<<state.lastInsertedProperty->members.back()->name<<"' in class '"<<state.lastInsertedProperty->name<<"'"<<std::endl;
+//                throw ParseError("Invalid dictionary key type", ss.str(), state.currentPath, 192);
+//            }
+//        }
+
+        void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const
+        {
+            std::ostringstream os;
+            os<<"The member '"<<state.lastInsertedProperty->members.back()->GetName()<<"' in property '"<<state.lastInsertedProperty->GetName()<<"' has collectionType=Dictionary wich is currently not supported.";
+            throw ParseError("Dictionary propertyMembers not supported", os.str(), state.currentPath, 212);
+        }
     };
 
     template<> struct ParseAlgorithm<Elements::Membersummary>
@@ -918,7 +1135,7 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            state.lastInsertedClass->members.back()->isArray=true;
+            state.lastInsertedClass->members.back()->collectionType=ArrayCollectionType;
             try
             {
                 SerializationUtils::Trim(pt.data());
@@ -941,38 +1158,140 @@ namespace ToolSupport
         }
     };
 
+    template<> struct ParseAlgorithm<Elements::Sequence>
+    {
+        void operator()(boost::property_tree::ptree& pt, ParseState& state) const {state.lastInsertedClass->members.back()->collectionType=SequenceCollectionType;}
+    };
+
+    template<> struct ParseAlgorithm<Elements::Dictionary>
+    {
+        void operator()(boost::property_tree::ptree& pt, ParseState& state) const
+        {
+            state.lastInsertedClass->members.back()->collectionType=DictionaryCollectionType;
+
+            try
+            {
+                std::string keyType=pt.get<std::string>("<xmlattr>.keyType");
+                SerializationUtils::Trim(keyType);
+
+                if (!BasicTypeOperations::IsBasicTypeName(keyType, state.lastInsertedClass->members.back()->keyType))
+                {
+                    //Assume enumeration, check type later
+                    state.lastInsertedClass->members.back()->keyType=EnumerationMemberType;
+                    state.lastInsertedClass->members.back()->keyTypeId=TypeUtilities::CalculateTypeId(keyType);
+                }
+
+                if (!ValidKeyType(state.lastInsertedClass->members.back()->keyType))
+                {
+                    std::ostringstream ss;
+                    ss<<"The specified type '"<<keyType<<"' is not valid as key in a dictionary. On member '"<<state.lastInsertedClass->members.back()->name<<"' in class '"<<state.lastInsertedClass->name<<"'"<<std::endl;
+                    throw ParseError("Invalid dictionary key type", ss.str(), state.currentPath, 182);
+                }
+            }
+            catch (const boost::property_tree::ptree_error&)
+            {
+                std::ostringstream ss;
+                ss<<"The dictionary member '"<<state.lastInsertedClass->name<<"."<<state.lastInsertedClass->members.back()->name<<"' is missing the keyType-attribute."<<std::endl;
+                throw ParseError("Missing keyType attribute", ss.str(), state.currentPath, 213);
+            }
+        }
+    };
+
     //-----------------------------------------------
     // DOM file algorithms
     //-----------------------------------------------
-    inline void InsertInlineParameter(ParseState& state, bool isArray)
+    inline void InsertInlineParameter(ParseState& state, DotsC_CollectionType collectionType)
     {
-        const PropertyDescriptionBasic* pd=state.lastInsertedPropertyMapping->property;
-        const MemberDescriptionBasic* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
+        const PropertyDescriptionLocal* pd=state.lastInsertedPropertyMapping->property;
+        const MemberDescriptionLocal* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
 
-        ParameterDescriptionBasicPtr param(new ParameterDescriptionBasic);
+        ParameterDescriptionLocalPtr param=boost::make_shared<ParameterDescriptionLocal>();
         std::ostringstream paramName;
         //MyPropNamespace.MyProperty.PropMember@MyClassNamespace.MyClass#pm
         paramName<<pd->GetName()<<"."<<propMem->GetName()<<"@"<<state.lastInsertedPropertyMapping->class_->GetName();
         param->qualifiedName=paramName.str();
         param->name=param->qualifiedName;
         param->hidden=true;
-        param->isArray=isArray;
+        param->collectionType=collectionType;
         param->memberType=propMem->memberType;
         param->typeId=propMem->typeId;
         param->typeName=propMem->typeName;
+        if (collectionType==DictionaryCollectionType)
+        {
+            param->keyType=propMem->keyType;
+            param->keyTypeId=propMem->keyTypeId;
+        }
 
         state.lastInsertedMemberMapping->paramRef=param.get();
         state.lastInsertedMemberMapping->paramIndex=0;
         state.notInsertedParameters.push_back(std::make_pair(state.lastInsertedPropertyMapping->class_, param));
     }
 
+    template<> struct ParseAlgorithm<Elements::MapDictionaryEntry>
+    {
+        void operator()(boost::property_tree::ptree& pt, ParseState& state) const
+        {
+            ParameterDescriptionLocal* def=state.lastInsertedMemberMapping->paramRef;
+            ValueDefinition val;
+            std::string key;
+
+            //get key
+            try
+            {
+                if (def->GetKeyType()==EntityIdMemberType)
+                {
+                    key=GetEntityIdParameterAsString(pt.get_child(Elements::MapDictionaryKey::Name()));
+                }
+                else
+                {
+                    key=pt.get<std::string>(Elements::MapDictionaryKey::Name());
+                    SerializationUtils::Trim(key);
+                    key=SerializationUtils::ExpandEnvironmentVariables(key);
+                }
+            }
+            catch (const boost::property_tree::ptree_error&)
+            {
+                const PropertyMappingDescriptionLocal* pdm=state.lastInsertedPropertyMapping.get();
+                const MemberDescriptionLocal* propMem=pdm->property->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
+                std::ostringstream ss;
+                ss<<"The propertyMapping of the dictionary property member '"<<pdm->property->name<<"."<<propMem->name<<"' for class  '"<<pdm->class_->name<<"' has no key specified.";
+                throw ParseError("Missing key", ss.str(), state.currentPath, 189); //Cant happen until we support dictionary propertyMembers
+            }
+            catch (const std::exception& envVar)
+            {
+                const PropertyMappingDescriptionLocal* pdm=state.lastInsertedPropertyMapping.get();
+                const MemberDescriptionLocal* propMem=pdm->property->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
+                std::ostringstream os;
+                os<<"Failed to expand environment variable in propertyMapping of '"<<pdm->property->name<<"."<<propMem->name<<"' for class  '"<<pdm->class_->name<<". "<<envVar.what();
+                throw ParseError("Invalid dictionary key", os.str(), state.currentPath, 190); //Cant happen until we support dictionary propertyMembers
+            }
+
+            //parse key
+            if (def->keyType==EnumerationMemberType) //enums have to wait until all types are known
+            {
+                val.key.str=key;
+            }
+            else if (!ParseKey(def->keyType, key, val))
+            {
+                const PropertyMappingDescriptionLocal* pdm=state.lastInsertedPropertyMapping.get();
+                const MemberDescriptionLocal* propMem=pdm->property->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
+                std::ostringstream os;
+                os<<"The key '"<<key<<"' doesn't match the type "<<TypeUtilities::GetTypeName(def->keyType)<<" for propertyMapping of '"<<pdm->property->name<<"."<<propMem->name<<"' for class  '"<<pdm->class_->name<<"' has no key specified.";
+                throw ParseError("Invalid dictionary key", os.str(), state.currentPath, 191); //Cant happen until we support dictionary propertyMembers
+            }
+
+            def->values.push_back(val);
+            VerifyParameterKey(state, def);
+        }
+    };
+
     template<> struct ParseAlgorithm<Elements::MapObject>
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
             state.lastInsertedMemberMapping->kind=MappedToParameter;
-            const PropertyDescriptionBasic* pd=state.lastInsertedPropertyMapping->property;
-            const MemberDescriptionBasic* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
+            const PropertyDescriptionLocal* pd=state.lastInsertedPropertyMapping->property;
+            const MemberDescriptionLocal* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
 
             if (propMem->memberType!=ObjectMemberType)
             {
@@ -981,7 +1300,7 @@ namespace ToolSupport
                 throw ParseError("Type missmatch", os.str(), state.currentPath, 98);
             }
 
-            ParameterDescriptionBasic* param=state.lastInsertedMemberMapping->paramRef;
+            ParameterDescriptionLocal* param=state.lastInsertedMemberMapping->paramRef;
 
             //Get the correct type name of the serialized object
             boost::optional<std::string> typeAttr=pt.get_optional<std::string>("<xmlattr>.type");
@@ -1007,12 +1326,16 @@ namespace ToolSupport
             }
 
             //do the serialization to the expected type
-            ValueDefinition vd;
-            vd.kind=ValueKind;
+            if (param->collectionType!=DictionaryCollectionType) //dictionaries have ValueDef inserted at dictionaryEntry
+            {
+                param->values.push_back(ValueDefinition()); //placeholder
+            }
+            ValueDefinition& vd=param->values.back();
+
             try
             {
                 XmlToBlobSerializer<TypeRepository> serializer(state.repository.get());
-                serializer.SerializeObjectContent(typeName, vd.binaryVal, pt); //since pt does not include the root element we have to use method SerializeObjectContent
+                serializer.SerializeObjectContent(typeName, vd.val.bin, pt); //since pt does not include the root element we have to use method SerializeObjectContent
             }
             catch (const ParseError& err)
             {
@@ -1021,7 +1344,6 @@ namespace ToolSupport
                  <<"' cant be deserialized. "<<err.Description();
                 throw ParseError("Invalid Object", os.str(), state.currentPath, err.ErrorId());
             }
-            param->values.push_back(vd);
         }
     };
 
@@ -1032,8 +1354,8 @@ namespace ToolSupport
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
             state.lastInsertedMemberMapping->kind=MappedToParameter;
-            const PropertyDescriptionBasic* pd=state.lastInsertedPropertyMapping->property;
-            const MemberDescriptionBasic* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
+            const PropertyDescriptionLocal* pd=state.lastInsertedPropertyMapping->property;
+            const MemberDescriptionLocal* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
 
             if (propMem->memberType!=ObjectMemberType)
             {
@@ -1042,16 +1364,20 @@ namespace ToolSupport
                 throw ParseError("Type missmatch", os.str(), state.currentPath, 99);
             }
 
-            ParameterDescriptionBasic* param=state.lastInsertedMemberMapping->paramRef;
+            ParameterDescriptionLocal* param=state.lastInsertedMemberMapping->paramRef;
 
             //do the serialization to the expected type
-            ValueDefinition vd;
-            vd.kind=ValueKind;
+            if (param->collectionType!=DictionaryCollectionType) //dictionaries have ValueDef inserted at dictionaryEntry
+            {
+                param->values.push_back(ValueDefinition()); //placeholder
+            }
+            ValueDefinition& vd=param->values.back();
+
             DotsC_TypeId tid;
             try
             {
                 UglyXmlToBlobSerializer<TypeRepository> serializer(state.repository.get());
-                tid=serializer.SerializeObjectContent(vd.binaryVal, pt); //since pt does not include the root element we have to use method SerializeObjectContent
+                tid=serializer.SerializeObjectContent(vd.val.bin, pt); //since pt does not include the root element we have to use method SerializeObjectContent
             }
             catch (const ParseError& err)
             {
@@ -1068,8 +1394,6 @@ namespace ToolSupport
                  <<"' is not compatible with the expected type "<<propMem->typeName;
                 throw ParseError("Type missmatch", os.str(), state.currentPath, 113);
             }
-
-            param->values.push_back(vd);
         }
     };
 
@@ -1078,8 +1402,8 @@ namespace ToolSupport
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
             state.lastInsertedMemberMapping->kind=MappedToParameter;
-            const PropertyDescriptionBasic* pd=state.lastInsertedPropertyMapping->property;
-            const MemberDescriptionBasic* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
+            const PropertyDescriptionLocal* pd=state.lastInsertedPropertyMapping->property;
+            const MemberDescriptionLocal* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
 
             if (propMem->memberType!=EntityIdMemberType)
             {
@@ -1088,20 +1412,20 @@ namespace ToolSupport
                 throw ParseError("Type missmatch", os.str(), state.currentPath, 103);
             }
 
-            ParameterDescriptionBasic* param=state.lastInsertedMemberMapping->paramRef;
+            ParameterDescriptionLocal* param=state.lastInsertedMemberMapping->paramRef;
 
             try
             {
-                ValueDefinition vd;
-                vd.kind=ValueKind;
-                if (ParseValue(param->memberType, GetEntityIdParameterAsString(pt), vd))
+                if (param->collectionType!=DictionaryCollectionType) //dictionaries have ValueDef inserted at dictionaryEntry
                 {
-                    param->values.push_back(vd);
+                    param->values.push_back(ValueDefinition()); //placeholder
                 }
-                else
+                ValueDefinition& vd=param->values.back();
+
+                if (!ParseValue(param->memberType, GetEntityIdParameterAsString(pt), vd))
                 {
                     std::ostringstream os;
-                    os<<"The value '"<<vd.stringVal<<"' doesn't match the type "<<param->typeName<<" for property mapping of member "<<propMem->name;
+                    os<<"The value '"<<vd.val.str<<"' doesn't match the type "<<param->typeName<<" for property mapping of member "<<propMem->name;
                     throw ParseError("Invalid value", os.str(), state.currentPath, 97);
                 }
             }
@@ -1109,10 +1433,12 @@ namespace ToolSupport
             {
                 throw ParseError("Incomplete EntityId XML", "Missing 'name' and/or 'instanceId' element in EntityId parameter", state.currentPath, 40);
             }
-            catch(const std::string& envVar)
+            catch(const std::exception& envVar)
             {
-                throw ParseError("Incomplete EntityId XML", "Failed to expand environment variable '"+envVar+"' in propertyMapping for member "+propMem->GetName(), state.currentPath, 141);
+                throw ParseError("Incomplete EntityId XML", "Failed to expand environment variable '"+std::string(envVar.what())+"' in propertyMapping for member "+propMem->GetName(), state.currentPath, 141);
             }
+
+            VerifyParameterValue(state, param);
         }
     };
 
@@ -1120,42 +1446,52 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
+            ParameterDescriptionLocal* param=state.lastInsertedMemberMapping->paramRef;
+
             SerializationUtils::Trim(pt.data());
+            try
+            {
+                pt.data()=SerializationUtils::ExpandEnvironmentVariables(pt.data());
+            }
+            catch(const std::exception& envVar)
+            {
+                std::ostringstream os;
+                os<<"Failed to expand environment variable in property value "<<param->name<<". "<<envVar.what();
+                throw ParseError("Invalid propertyMapping value", os.str(), state.currentPath, 197);
+            }
+
+            if (param->collectionType!=DictionaryCollectionType) //dictionaries have ValueDef inserted at dictionaryEntry
+            {
+                param->values.push_back(ValueDefinition()); //placeholder
+            }
+            ValueDefinition& vd=param->values.back();
 
             state.lastInsertedMemberMapping->kind=MappedToParameter;
-            const PropertyDescriptionBasic* pd=state.lastInsertedPropertyMapping->property;
-            const MemberDescriptionBasic* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
-
-            ParameterDescriptionBasic* param=state.lastInsertedMemberMapping->paramRef;
-
-            ValueDefinition vd;
-            vd.kind=ValueKind;
+            const PropertyDescriptionLocal* pd=state.lastInsertedPropertyMapping->property;
+            const MemberDescriptionLocal* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
             if (param->memberType==EnumerationMemberType)
             {
                 const EnumDescription* ed=state.repository->GetEnum(param->typeId);
-                vd.int32Val=ed->GetIndexOfValue(pt.data());
-                if (vd.int32Val<0)
+                vd.val.int32=ed->GetIndexOfValue(pt.data());
+                if (vd.val.int32<0)
                 {
                     std::ostringstream os;
                     os<<"The value '"<<pt.data()<<"' doesn't match the type "<<param->typeName<<" for property mapping of member "<<propMem->name;
                     throw ParseError("Invalid value", os.str(), state.currentPath, 111);
                 }
-                vd.stringVal=pt.data();
-                param->values.push_back(vd);
+                vd.val.str=pt.data();
             }
             else
             {
-                if (ParseValue(param->memberType, pt.data(), vd))
-                {
-                    param->values.push_back(vd);
-                }
-                else
+                if (!ParseValue(param->memberType, pt.data(), vd))
                 {
                     std::ostringstream os;
                     os<<"The value '"<<pt.data()<<"' doesn't match the type "<<param->typeName<<" for property mapping of member "<<propMem->name;
                     throw ParseError("Invalid value", os.str(), state.currentPath, 112);
                 }
             }
+
+            VerifyParameterValue(state, param);
         }
     };
 
@@ -1164,8 +1500,8 @@ namespace ToolSupport
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
             state.lastInsertedMemberMapping->kind=MappedToParameter;
-            const PropertyDescriptionBasic* pd=state.lastInsertedPropertyMapping->property;
-            const MemberDescriptionBasic* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
+            const PropertyDescriptionLocal* pd=state.lastInsertedPropertyMapping->property;
+            const MemberDescriptionLocal* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
             std::string paramName;
             int paramIndex=-1;
 
@@ -1194,7 +1530,7 @@ namespace ToolSupport
                 paramIndex=pt.get(Elements::ReferenceIndex::Name(), -1);
             }
 
-            ParameterDescriptionBasic* param=state.repository->GetParameterBasic(paramName);
+            ParameterDescriptionLocal* param=state.repository->GetParameterLocal(paramName);
             if (!param)
             {
                 //parameter does not exist
@@ -1203,7 +1539,7 @@ namespace ToolSupport
                 throw ParseError("Invalid parameter reference", os.str(), state.currentPath, 90);
             }
 
-            if (propMem->IsArray())
+            if (propMem->GetCollectionType()==ArrayCollectionType)
             {
                 if (paramIndex>=0)
                 {
@@ -1212,7 +1548,7 @@ namespace ToolSupport
                     os<<"Referenced parameter '"<<paramName<<"' is an array, index is not expected. In propertyMapping for member "<<state.lastInsertedPropertyMapping->property->name<<"."<<propMem->GetName()<<".";
                     throw ParseError("Index not expected", os.str(), state.currentPath, 91);
                 }
-                if (!param->IsArray())
+                if (param->GetCollectionType()!=ArrayCollectionType)
                 {
                     std::ostringstream os;
                     os<<"Referenced parameter '"<<paramName<<"' is not an array. Property member "<<state.lastInsertedPropertyMapping->property->name<<"."<<propMem->GetName()
@@ -1222,7 +1558,7 @@ namespace ToolSupport
             }
             else //property member not array
             {
-                if (param->IsArray())
+                if (param->GetCollectionType()==ArrayCollectionType)
                 {
                     if (paramIndex<0)
                     {
@@ -1231,11 +1567,11 @@ namespace ToolSupport
                         os<<"Referenced parameter '"<<paramName<<"' is an array and an index must be specified when mapping property member "<<state.lastInsertedPropertyMapping->property->name<<"."<<propMem->GetName();
                         throw ParseError("Index expected", os.str(), state.currentPath, 93);
                     }
-                    if (paramIndex>=param->GetArraySize())
+                    if (paramIndex>=param->GetNumberOfValues())
                     {
                         //index out of range
                         std::ostringstream os;
-                        os<<"Referenced parameter '"<<paramName<<"' has arraySize="<<param->GetArraySize()<<". Index out of range in mapping of property member "<<state.lastInsertedPropertyMapping->property->name<<"."<<propMem->GetName();
+                        os<<"Referenced parameter '"<<paramName<<"' has arraySize="<<param->GetNumberOfValues()<<". Index out of range in mapping of property member "<<state.lastInsertedPropertyMapping->property->name<<"."<<propMem->GetName();
                         throw ParseError("Index out of range", os.str(), state.currentPath, 94);
                     }
                 }
@@ -1255,23 +1591,88 @@ namespace ToolSupport
         }
     };
 
+    template<> struct ParseAlgorithm<Elements::MapValueRefCollection>
+    {
+        void operator()(boost::property_tree::ptree& pt, ParseState& state) const
+        {
+            state.lastInsertedMemberMapping->kind=MappedToParameter;
+            const PropertyDescriptionLocal* pd=state.lastInsertedPropertyMapping->property;
+            const MemberDescriptionLocal* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
+            std::string paramName;
+            std::string paramKey;
+
+            //Get parameterName
+            try
+            {
+                GetReferencedParameter(pt, paramName, paramKey);
+            }
+            catch (const boost::property_tree::ptree_error&)
+            {
+                std::ostringstream os;
+                os<<"Something is wrong with the <valueRef> in propertyMapping for member "<<state.lastInsertedPropertyMapping->property->name<<"."<<
+                    propMem->GetName()<<" in class "<<state.lastInsertedPropertyMapping->class_->GetName()<<". It can be that the <name> element is missing or that both a <key> and an <index> element is specified.";
+                throw ParseError("Invalid parameter reference syntax", os.str(), state.currentPath, 199);
+            }
+
+            ParameterDescriptionLocal* srcParam=state.repository->GetParameterLocal(paramName);
+            if (!srcParam)
+            {
+                //parameter does not exist
+                std::ostringstream os;
+                os<<"Referenced parameter '"<<paramName<<"' does not exist. In propertyMapping for member "<<state.lastInsertedPropertyMapping->property->name<<"."<<propMem->GetName()<<".";
+                throw ParseError("Invalid parameter reference", os.str(), state.currentPath, 200);
+            }
+
+            if (!BasicTypeOperations::IsOfType<TypeRepository>(state.repository.get(), srcParam->GetMemberType(), srcParam->GetTypeId(), propMem->GetMemberType(), propMem->GetTypeId()))
+            {
+                //Types does not match
+                std::ostringstream os;
+                os<<"PropertyMapping is mapping property member "<<propMem->GetName()<<" that has type "<<propMem->typeName
+                    <<" to parameter '"<<srcParam->GetName()<<"' that has type "<<srcParam->typeName<<". The types are not compatible.";
+                throw ParseError("Type missmatch", os.str(), state.currentPath, 201);
+            }
+
+            int paramIndex=-1;
+            try
+            {
+                paramIndex=ReferencedKeyToIndex(state.repository.get(), srcParam, paramKey);
+            }
+            catch (const std::exception& err)
+            {
+                std::ostringstream os;
+                os<<"Failed to resolve parameter reference in propertyMapping for "<<state.lastInsertedPropertyMapping->property->name<<"."<<propMem->GetName()<<". "<<err.what();
+                throw ParseError("Invalid parameter reference", os.str(), state.currentPath, 205);
+            }
+
+            ParameterDescriptionLocal* destParam=state.lastInsertedMemberMapping->paramRef;
+            if (destParam->collectionType!=DictionaryCollectionType) //dictionaries have ValueDef inserted at dictionaryEntry
+            {
+                destParam->values.push_back(ValueDefinition()); //placeholder
+            }
+            ValueDefinition& vd=destParam->values.back();
+
+            vd.kind=RefKind;
+            vd.val.referenced=&(srcParam->values[static_cast<size_t>(paramIndex)]);
+        }
+    };
+
     template<> struct ParseAlgorithm<Elements::ClassMemberReference>
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
             state.lastInsertedMemberMapping->kind=MappedToMember;
-            const PropertyDescriptionBasic* pd=state.lastInsertedPropertyMapping->property;
-            const MemberDescriptionBasic* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
-            const ClassDescriptionBasic* cd=state.lastInsertedPropertyMapping->class_;
-            const MemberDescriptionBasic* classMem=NULL;
+            const PropertyDescriptionLocal* pd=state.lastInsertedPropertyMapping->property;
+            const MemberDescriptionLocal* propMem=pd->members[state.lastInsertedMemberMapping->propertyMemberIndex].get();
+            const ClassDescriptionLocal* cd=state.lastInsertedPropertyMapping->class_;
+            const MemberDescriptionLocal* classMem=NULL;
             int memberArrayIndex=-1;
 
             //Step into nested member refs if any
-            for (std::vector< std::pair<DotsC_MemberIndex, DotsC_ArrayIndex> >::const_iterator it=state.lastInsertedMemberMapping->memberRef.begin();
+            for (std::vector< std::pair<DotsC_MemberIndex, DotsC_Int32> >::const_iterator it=state.lastInsertedMemberMapping->memberRef.begin();
                  it!=state.lastInsertedMemberMapping->memberRef.end(); ++it)
             {
                 DotsC_TypeId tid=cd->GetMember(it->first)->GetTypeId();
-                cd=state.repository->GetClassBasic(tid);
+                cd=state.repository->GetClassLocal(tid);
             }
 
             //Get class description
@@ -1298,7 +1699,7 @@ namespace ToolSupport
                     os<<"PropertyMapping is mapping the property member '"<<propMem->GetName()<<"' to class member '"<<memberName<<"'. But the class member does not exist in class "<<cd->GetName();
                     throw ParseError("Invalid class member", os.str(), state.currentPath, 77);
                 }
-                classMem=static_cast<const MemberDescriptionBasic*>(cd->GetMember(classMemberIx));
+                classMem=static_cast<const MemberDescriptionLocal*>(cd->GetMember(classMemberIx));
                 int arrIx=memberArrayIndex<0 ? 0 : memberArrayIndex;
                 state.lastInsertedMemberMapping->memberRef.push_back(std::make_pair(classMemberIx, arrIx));
             }
@@ -1315,7 +1716,7 @@ namespace ToolSupport
             {
                 //since this is not the leaf, we just care that a valid member is pointed out. And that it is an object so it's possible to step into
                 //Types does not have to be compatible.
-                if (classMem->IsArray())
+                if (classMem->GetCollectionType()==ArrayCollectionType)
                 {
                     if (memberArrayIndex<0)
                     {
@@ -1356,9 +1757,9 @@ namespace ToolSupport
             }
             else //This is the leaf, then the types must be compliant
             {
-                if (propMem->IsArray())
+                if (propMem->GetCollectionType()==ArrayCollectionType)
                 {
-                    if (!classMem->IsArray())
+                    if (classMem->GetCollectionType()!=ArrayCollectionType)
                     {
                         //propery is array but not classMember
                         std::ostringstream os;
@@ -1382,7 +1783,7 @@ namespace ToolSupport
                 }
                 else //propertyMember not array
                 {
-                    if (classMem->IsArray())
+                    if (classMem->GetCollectionType()==ArrayCollectionType)
                     {
                         if (memberArrayIndex<0)
                         {
@@ -1436,11 +1837,11 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            const PropertyDescriptionBasic* pd=state.lastInsertedPropertyMapping->property;
-            MemberMappingBasicPtr md(new MemberMappingBasic);
+            const PropertyDescriptionLocal* pd=state.lastInsertedPropertyMapping->property;
+            MemberMappingLocalPtr md=boost::make_shared<MemberMappingLocal>();
             md->kind=MappedToNull;
             bool inlineParam=false;
-            bool isArray=false;
+            DotsC_CollectionType collectionType=SingleValueCollectionType;
 
             //get property member
             try
@@ -1493,16 +1894,31 @@ namespace ToolSupport
                     //inline array value, new format
                     md->kind=MappedToParameter;
                     inlineParam=true;
-                    isArray=true;
+                    collectionType=ArrayCollectionType;
                     break;
-
                 }
                 else if (it->first==Elements::MapArrayElements::Name())
                 {
                     //inline array value, old format
                     md->kind=MappedToParameter;
                     inlineParam=true;
-                    isArray=true;
+                    collectionType=ArrayCollectionType;
+                    break;
+                }
+                else if (it->first==Elements::MapSequence::Name())
+                {
+                    //inline array value, new format
+                    md->kind=MappedToParameter;
+                    inlineParam=true;
+                    collectionType=SequenceCollectionType;
+                    break;
+                }
+                else if (it->first==Elements::MapDictionary::Name())
+                {
+                    //inline array value, new format
+                    md->kind=MappedToParameter;
+                    inlineParam=true;
+                    collectionType=DictionaryCollectionType;
                     break;
                 }
                 else
@@ -1519,21 +1935,15 @@ namespace ToolSupport
 
             if (inlineParam)
             {
-                const MemberDescriptionBasic* propMem=pd->members[md->propertyMemberIndex].get();
-                if (isArray && !propMem->IsArray())
+                const MemberDescriptionLocal* propMem=pd->members[md->propertyMemberIndex].get();
+                if (propMem->GetCollectionType()!=collectionType)
                 {
                     std::ostringstream os;
-                    os<<"PropertyMember '"<<pd->GetName()<<"."<<propMem->GetName()<<"' is not an array. Element <arrayElements> is not allowed.";
-                    throw ParseError("Property member not array", os.str(), state.currentPath, 96);
-                }
-                else if (!isArray && propMem->IsArray())
-                {
-                    std::ostringstream os;
-                    os<<"PropertyMember '"<<pd->GetName()<<"."<<propMem->GetName()<<"' is an array but the specified value is not an array.";
-                    throw ParseError("Property member is array", os.str(), state.currentPath, 108);
+                    os<<"PropertyMember '"<<pd->GetName()<<"."<<propMem->GetName()<<"' has collection type '"<<BasicTypeOperations::CollectionTypeToString(propMem->GetCollectionType())<<"' and can't be mapped to a value with collection type '"<<BasicTypeOperations::CollectionTypeToString(collectionType)<<"'";
+                    throw ParseError("Property member wrong collection type", os.str(), state.currentPath, 96);
                 }
 
-                InsertInlineParameter(state, isArray);
+                InsertInlineParameter(state, collectionType);
             }
         }
     };
@@ -1542,7 +1952,7 @@ namespace ToolSupport
     {
         void operator()(boost::property_tree::ptree& pt, ParseState& state) const
         {
-            PropertyMappingDescriptionBasicPtr def(new PropertyMappingDescriptionBasic);
+            PropertyMappingDescriptionLocalPtr def=boost::make_shared<PropertyMappingDescriptionLocal>();
             state.notInsertedPropertyMappings.push_back(def);
             state.lastInsertedPropertyMapping=def;
             def->fileName=state.currentPath;
@@ -1553,7 +1963,7 @@ namespace ToolSupport
                 std::string className=pt.get<std::string>(Elements::MappedClass::Name());
                 SerializationUtils::Trim(className);
                 DotsC_TypeId classTypeId=LlufId_Generate64(className.c_str());
-                def->class_=state.repository->GetClassBasic(classTypeId);
+                def->class_=state.repository->GetClassLocal(classTypeId);
                 if (!def->class_)
                 {
                     throw ParseError("Class does not exist", "PropertyMapping is specifying a class that does not exist '"+className+"'.", state.currentPath, 70);
@@ -1570,7 +1980,7 @@ namespace ToolSupport
                 std::string propName=pt.get<std::string>(Elements::MappedProperty::Name());
                 SerializationUtils::Trim(propName);
                 DotsC_TypeId propTypeId=LlufId_Generate64(propName.c_str());
-                def->property=state.repository->GetPropertyBasic(propTypeId);
+                def->property=state.repository->GetPropertyLocal(propTypeId);
                 if (!def->property)
                 {
                     throw ParseError("Property does not exist", "PropertyMapping is specifying a property that does not exist '"+propName+"'.", state.currentPath, 72);
@@ -1601,14 +2011,15 @@ namespace ToolSupport
         void DeserializeObjects(const ParseState& state);
         void ResolveReferences(const ParseState& state);
         void ResolveParamToParamRefs(const ParseState& state);
-        bool ResolveParamToParamRef(const ParseState& state, const ParseState::ParameterReference<ParameterDescriptionBasic>& ref);
-        void ResolveArraySizeRef(const ParseState& state, const ParseState::ParameterReference<MemberDescriptionBasic>& ref);
-        void ResolveMaxLengthRef(const ParseState& state, const ParseState::ParameterReference<MemberDescriptionBasic>& ref);
-        void ResolveHiddenCreateRoutineParams(const ParseState& state, const ParseState::ParameterReference<CreateRoutineDescriptionBasic>& ref);
-        void HandleCreateRoutines(const ParseState& state, ClassDescriptionBasic* cd);
+        bool ResolveParamToParamRef(const ParseState& state, const ParseState::ParameterReference<ParameterDescriptionLocal>& ref);
+        void ResolveArraySizeRef(const ParseState& state, const ParseState::ParameterReference<MemberDescriptionLocal>& ref);
+        void ResolveMaxLengthRef(const ParseState& state, const ParseState::ParameterReference<MemberDescriptionLocal>& ref);
+        void ResolveCreateRoutineParams(const ParseState& state, const ParseState::ParameterReference<CreateRoutineDescriptionLocal>& ref);
+        void HandleCreateRoutines(const ParseState& state, ClassDescriptionLocal* cd);
         void CalculateEnumChecksums(const ParseState& state);
-        void VerifyParameterTypes(const ParseState& state);
-        void CalculateClassSize(const ParseState& state, ClassDescriptionBasic* cd);
+        void VerifyParameterKeys(const ParseState& state);
+        void VerifyParameterValues(const ParseState& state);
+        void CalculateClassSize(const ParseState& state, ClassDescriptionLocal* cd);
     };
 
     class DomCompletionAlgorithm
@@ -1617,7 +2028,7 @@ namespace ToolSupport
         void operator()(const ParseState& state);
 
     private:
-        void InsertPropertyMapping(const PropertyMappingDescriptionBasicPtr& pm);
+        void InsertPropertyMapping(const PropertyMappingDescriptionLocalPtr& pm);
     };
 }
 }

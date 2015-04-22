@@ -47,6 +47,7 @@
         <member>
             <array>
                 <value>1</value>
+                <valueRef><name>ParserTest.Params.Int32Param</name></valueRef>
                 <value>2</value>
                 <value>3</value>
             </array>

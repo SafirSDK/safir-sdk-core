@@ -66,16 +66,12 @@ namespace Safir.Dob
             }
             byte success;
 
-            System.Int32 blobSize = response.CalculateBlobSize();
-            System.IntPtr blob = Marshal.AllocHGlobal(blobSize); //allocate blob
-            System.IntPtr beginningOfUnused;
-            Typesystem.Internal.InternalOperations.FormatBlob(blob, blobSize, response.GetTypeId(), out beginningOfUnused);
-            response.WriteToBlob(blob, ref beginningOfUnused);
+            IntPtr blob = Typesystem.Internal.BlobOperations.WriteToBlob (response);
 
             Interface.DoseC_SendResponse(m_ctrl, blob, m_consumer, 
                 Interface.DOSE_LANGUAGE_DOTNET, m_responseId, out success);
 
-            Marshal.FreeHGlobal(blob); //delete blob
+            Typesystem.Internal.BlobOperations.DeleteBlob (blob);
 
             if (!Interface.BoolOf(success))
             {

@@ -52,7 +52,7 @@ namespace Safir.Dob
                 }
                 else
                 {
-                    return Typesystem.BlobOperations.GetTypeId(m_injectionBlob);
+                    return Typesystem.Internal.BlobOperations.GetTypeId(m_injectionBlob);
                 }
             }
         }

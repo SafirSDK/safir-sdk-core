@@ -1,6 +1,6 @@
 /* ****************************************************************************
 *
-* Copyright Saab AB, 2005-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2005-2015 (http://safir.sourceforge.net)
 * 
 * Created by: Lars Hagström / stlrha
 *
@@ -32,22 +32,6 @@ namespace Safir.Dob.Typesystem.Internal
     /// </summary>    
     public class InternalOperations
     {
-        /// <summary>
-        /// format a piece of blank memory to be a blob of a desired type
-        /// does not check that the size of the blob is correct.
-        /// </summary>
-        /// <param name="blob">Blob to format.</param>
-        /// <param name="blobSize">Size of blob to format.</param>
-        /// <param name="typeId">Type id.</param>
-        /// <param name="beginningOfUnused">Pointer to unused part.</param>
-        public static void FormatBlob(System.IntPtr blob,
-                        System.Int32 blobSize,
-                        System.Int64 typeId,
-                        out System.IntPtr beginningOfUnused)
-        {
-            Kernel.DotsC_FormatBlob(blob, blobSize, typeId, out beginningOfUnused);
-        }
-    
         /// <summary>
         /// byte to bool conversion.
         /// </summary>
@@ -139,45 +123,6 @@ namespace Safir.Dob.Typesystem.Internal
         }
 
         /// <summary>
-        /// Delete a blob.
-        /// <para>
-        /// Internal blobs can be deleted w8ith this function. Beware that you may call the wrong runtime!
-        /// </para>
-        /// </summary>
-        /// <param name="blob">The blob to delete.</param>
-        public static void Delete(ref System.IntPtr blob)
-        {
-            Kernel.DotsC_DeleteBlob(ref blob);
-        }
-
-        /// <summary>
-        /// Sets all changed flags in the blob.
-        /// </summary>
-        /// <param name="blob">The blob to modify.</param>
-        /// <param name="changed">The value to set the change flags to.</param>
-        public static void SetChanged(System.IntPtr blob, bool changed)
-        {
-            Kernel.DotsC_SetChanged(blob, changed);
-        }
-
-        //Compare the two blobs and set the change flags in "mine" on all members that have
-        //changed between "base" and "mine".
-        /// <summary>
-        /// Compare two blobs and set the change flags.
-        /// <para>
-        /// Change flags are set in "mine" on all members that have changed between "base" and "mine".
-        /// </para>
-        /// </summary>
-        /// <param name="_base">Original to compare.</param>
-        /// <param name="_mine">Compare to this and set change flags.</param>
-        public static void Diff(System.IntPtr _base,
-                                System.IntPtr _mine)
-        {
-            Kernel.DotsC_SetChangedSinceLastRead(_base, _mine);
-            //TODO: rename the function in DOTS.
-        }
-
-        /// <summary>
         /// Get the full path to the dou file that the type id represents
         /// <para/>
         /// Note that this function looks at the disk every time it is called. No caching
@@ -188,31 +133,12 @@ namespace Safir.Dob.Typesystem.Internal
         /// <returns>The full path to the dou file</returns>
         public static String GetDouFilePath(System.Int64 typeId)
         {
-            int BUF_SIZE = 512;
-            IntPtr buf = Marshal.AllocHGlobal(BUF_SIZE);
-            System.Int32 resultSize = 0;
-            Internal.Kernel.DotsC_GetDouFilePathForType(typeId, buf, BUF_SIZE, out resultSize);
-            if (resultSize == -1)
-            {
-                Marshal.FreeHGlobal(buf);
-                throw new IllegalValueException("There is no such type defined");
+            IntPtr p = Kernel.DotsC_GetDouFilePath (typeId);
+            if (p == IntPtr.Zero) {
+                throw new IllegalValueException ("There is no such type defined");
             }
-            if (resultSize > BUF_SIZE)
-            {
-                BUF_SIZE = resultSize;
-                Marshal.FreeHGlobal(buf);
-                buf = Marshal.AllocHGlobal(BUF_SIZE);
-                Internal.Kernel.DotsC_GetDouFilePathForType(typeId, buf, BUF_SIZE, out resultSize);
-                if (resultSize != BUF_SIZE)
-                {
-                    Marshal.FreeHGlobal(buf);
-                    throw new SoftwareViolationException("Error in GetDouFilePathForType!");
-                }
-            }
-            string str = Internal.InternalOperations.StringOf(buf,resultSize - 1); //remove null char
-            Marshal.FreeHGlobal(buf);
 
-            return str;
+            return InternalOperations.StringOf (p);
         }
     }
 }

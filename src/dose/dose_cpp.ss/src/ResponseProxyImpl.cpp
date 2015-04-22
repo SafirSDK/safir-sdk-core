@@ -25,7 +25,7 @@
 #include "ResponseProxyImpl.h"
 
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
-#include <Safir/Dob/Typesystem/BlobOperations.h>
+#include <Safir/Dob/Typesystem/Internal/BlobOperations.h>
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/SuccessResponse.h>
 #include <Safir/Dob/Typesystem/LibraryExceptions.h>
@@ -59,7 +59,7 @@ namespace Internal
 
     const Dob::Typesystem::TypeId ResponseProxyImpl::GetTypeId() const
     {
-        return Typesystem::BlobOperations::GetTypeId(m_responseBlob);
+        return Typesystem::Internal::BlobOperations::GetTypeId(m_responseBlob);
     }
 
 

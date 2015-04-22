@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2006-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2006-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -21,10 +21,8 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-
 #ifndef __DOTS_OBJECT_CONTAINER_H__
 #define __DOTS_OBJECT_CONTAINER_H__
-
 
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Typesystem/ContainerBase.h>
@@ -159,6 +157,8 @@ namespace Typesystem
 
         /** @} */
     protected:
+        friend class Safir::Dob::Typesystem::Internal::BlobOperations;
+
         /**
          * Copy assignment operator.
          *
@@ -187,6 +187,7 @@ namespace Typesystem
     public:
         /** Typedef for the contained smart pointer. */
         typedef boost::shared_ptr<T> T_Ptr;
+        typedef T_Ptr ContainedType;
 
         /**
          * Default constructor.
@@ -367,7 +368,6 @@ namespace Typesystem
         }
         virtual void ResetObjectPointer(){m_pObject.reset();}
     private:
-
         T_Ptr m_pObject;
     };
 
@@ -383,6 +383,7 @@ namespace Typesystem
     public:
         /** Typedef for the contained smart pointer. */
         typedef boost::shared_ptr<Object> T_Ptr;
+        typedef T_Ptr ContainedType;
 
         /**
          * Default constructor.
@@ -506,21 +507,6 @@ namespace Typesystem
         virtual const ContainerBase & GetMember(const int member, const int index) const
         {if (IsNull()) throw NullException(L"Object is null",__WFILE__,__LINE__); return m_pObject->GetMember(member,index);}
 
-        /**
-         * @name Blob serialization/deserialization part.
-         * These functions are for internal use only!
-         * Their names and functionality are likely to change in the near future!
-         */
-        /** @{ */
-
-        /**
-         * Calculate the size of the blob-serialized form of the contained object.
-         *
-         * @return The needed size in bytes. 0 if the container is null.
-         */
-        Int32 CalculateBlobSize() const {if (IsNull()) return 0; else return m_pObject->CalculateBlobSize();}
-
-        /** @} */
     private:
         virtual const ObjectPtr GetObjectPointer() const {return boost::static_pointer_cast<Object>(m_pObject);}
         virtual void SetObjectPointer(const ObjectPtr ptr)

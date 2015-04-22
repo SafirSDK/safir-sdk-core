@@ -25,7 +25,7 @@
 #include "EntityRequestProxyImpl.h"
 
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
-#include <Safir/Dob/Typesystem/BlobOperations.h>
+#include <Safir/Dob/Typesystem/Internal/BlobOperations.h>
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Typesystem/LibraryExceptions.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
@@ -60,7 +60,7 @@ namespace Internal
         }
         else
         {
-            return Safir::Dob::Typesystem::BlobOperations::GetTypeId(m_requestBlob);
+            return Safir::Dob::Typesystem::Internal::BlobOperations::GetTypeId(m_requestBlob);
         }
     }
 

@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2004-2015 (http://safir.sourceforge.net)
 *
 * Created by: Joel Ottosson / joot
 *
@@ -119,6 +119,6 @@ template<typename Target> inline Target classic_string_cast(const wchar_t* src)
     return classic_string_cast< Target, std::wstring>(src);
 }
 
-}}}}} //Safir::Dob::Typesystem::Internal
+}}}}} //Safir::Dob::Typesystem::ToolSupport::Internal
 
 #endif // CLASSIC_STRING_CAST_H

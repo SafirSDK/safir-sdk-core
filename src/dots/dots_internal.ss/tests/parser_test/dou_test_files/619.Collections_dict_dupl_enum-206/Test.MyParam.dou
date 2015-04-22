@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>Test.MyParam</name>
+    <baseClass>Object</baseClass>
+    <parameters>
+        
+        <parameter>
+            <name>ObjDict</name>
+            <type>ParserTest.MyEntity</type>
+            <dictionary keyType="ParserTest.MyColorEnum">
+                <entry>
+                    <key>Black</key>
+                    <ParserTest.MyEntity>
+                        <MySequence>
+                            <ParserTest.MyEntity>
+                                <MyColorEnum>Black</MyColorEnum>
+                                <MyInt>1</MyInt>
+                            </ParserTest.MyEntity>
+                            <ParserTest.MyEntity>
+                                <MyColorEnum>White</MyColorEnum>
+                                <MyInt>2</MyInt>
+                            </ParserTest.MyEntity>
+                        </MySequence>
+                    </ParserTest.MyEntity>
+                </entry>
+                <entry>
+                    <key>Black</key>
+                    <ParserTest.MyEntity>
+                         <MyColorEnum>Grey</MyColorEnum>
+                        <MyInt>123</MyInt>
+                    </ParserTest.MyEntity>
+                </entry>
+            </dictionary>
+        </parameter>        
+     
+    </parameters>
+
+</class>

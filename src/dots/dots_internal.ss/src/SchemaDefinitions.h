@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2004-2015 (http://safir.sourceforge.net)
 *
 * Created by: Joel Ottosson / joot
 *
@@ -60,12 +60,16 @@ namespace ToolSupport
         typedef Element<Elements::PropertyMembersummary, OptionalOne> PropertyMembersummary;
         typedef Element<Elements::PropertyMemberName, One> PropertyMemberName;
         typedef Element<Elements::PropertyMemberisArray, OptionalOne> PropertyMemberisArray;
+        typedef Element<Elements::PropertyMemberIsSequence, OptionalOne> PropertyMemberIsSequence;
+        typedef Element<Elements::PropertyMemberIsDictionary, OptionalOne> PropertyMemberIsDictionary;
         typedef Element<Elements::PropertyMemberType, One> PropertyMemberType;
-        typedef Element<Elements::PropertyMember, AtLeastOne, boost::mpl::vector<PropertyMembersummary, PropertyMemberName, PropertyMemberType, PropertyMemberisArray> > PropertyMember;
+        typedef Element<Elements::PropertyMember, AtLeastOne, boost::mpl::vector<PropertyMembersummary, PropertyMemberName, PropertyMemberType, ELEMENT_CHOICE_3(PropertyMemberisArray, PropertyMemberIsSequence, PropertyMemberIsDictionary, OptionalOne) > > PropertyMember;
         typedef Element<Elements::PropertyMembers, OptionalOne, boost::mpl::vector<PropertyMember> > PropertyMembers;
 
         typedef Element<Elements::ArraySize, OptionalOne > ArraySize;
         typedef Element<Elements::ArraySizeRef, OptionalOne, boost::mpl::vector<IgnoreAny> > ArraySizeRef;
+        typedef Element<Elements::Dictionary, OptionalOne, boost::mpl::vector<Ignore<Elements::XmlAttribute> > > Dictionary;
+        typedef Element<Elements::Sequence, OptionalOne > Sequence;
 
         typedef Element<Elements::MaxLength, OptionalOne > MaxLength;
         typedef Element<Elements::MaxLengthRef, OptionalOne, boost::mpl::vector<IgnoreAny> > MaxLengthRef;
@@ -73,7 +77,7 @@ namespace ToolSupport
         typedef Element<Elements::Membersummary, OptionalOne> Membersummary;
         typedef Element<Elements::MemberName, One> MemberName;
         typedef Element<Elements::MemberType, One > MemberType;
-        typedef Element<Elements::Member, AtLeastOne, boost::mpl::vector<Membersummary, MemberName, MemberType, ELEMENT_CHOICE_2(ArraySize, ArraySizeRef, OptionalOne), ELEMENT_CHOICE_2(MaxLength, MaxLengthRef, OptionalOne) > > Member;
+        typedef Element<Elements::Member, AtLeastOne, boost::mpl::vector<Membersummary, MemberName, MemberType, ELEMENT_CHOICE_4(ArraySize, ArraySizeRef, Dictionary, Sequence, OptionalOne), ELEMENT_CHOICE_2(MaxLength, MaxLengthRef, OptionalOne) > > Member;
         typedef Element<Elements::ClassMembers, OptionalOne, boost::mpl::vector<Member> > Members;
 
         typedef Element<Elements::Parametersummary, OptionalOne> Parametersummary;
@@ -92,7 +96,12 @@ namespace ToolSupport
         typedef Element<Elements::ParameterArray, One, boost::mpl::vector<ParameterObjectCollection, ParameterValueRefCollection, ELEMENT_CHOICE_3(ParameterValueCollection, ParameterEntityIdCollection, ParameterObjectDeprecatedCollection, OptionalOne) > > ParameterArray;
         typedef Element<Elements::ParameterArrayElement, AtLeastOne, boost::mpl::vector< ELEMENT_CHOICE_5(ParameterValue, ParameterValueRef, ParameterEntityId, ParameterObjectDeprecated, ParameterObject, OptionalOne), Ignore<Elements::ParameterArrayIndex> > > ParameterArrayElement;
         typedef Element<Elements::ParameterArrayElements, One, boost::mpl::vector<ParameterArrayElement> > ParameterArrayElements;
-        typedef Element<Elements::Parameter, AtLeastOne, boost::mpl::vector<ELEMENT_CHOICE_7(ParameterValue, ParameterEntityId, ParameterValueRef, ParameterArray, ParameterArrayElements, ParameterObjectDeprecated, ParameterObject, One), Parametersummary, ParameterName, ParameterType > > Parameter;
+        typedef Element<Elements::ParameterDictionaryKey, One, boost::mpl::vector< Ignore<Elements::ClassName>, Ignore<Elements::InstanceId> > > ParameterDictionaryKey;
+        typedef Element<Elements::ParameterDictionaryEntry, OptionalMany, boost::mpl::vector<ELEMENT_CHOICE_5(ParameterValue, ParameterValueRef, ParameterEntityId, ParameterObjectDeprecated, ParameterObject, One), ParameterDictionaryKey> > ParameterDictionaryEntry;
+        typedef Element<Elements::ParameterSequence, One> ParameterSequence;
+        //typedef Element<Elements::ParameterSequence, One, boost::mpl::vector<ParameterObjectCollection, ParameterValueRefCollection, ELEMENT_CHOICE_3(ParameterValueCollection, ParameterEntityIdCollection, ParameterObjectDeprecatedCollection, OptionalOne) > > ParameterSequence;
+        typedef Element<Elements::ParameterDictionary, One, boost::mpl::vector<Ignore<Elements::XmlAttribute>, ParameterDictionaryEntry > > ParameterDictionary;
+        typedef Element<Elements::Parameter, AtLeastOne, boost::mpl::vector<ELEMENT_CHOICE_9(ParameterValue, ParameterEntityId, ParameterValueRef, ParameterArray, ParameterArrayElements, ParameterSequence, ParameterDictionary, ParameterObjectDeprecated, ParameterObject, One), Parametersummary, ParameterName, ParameterType > > Parameter;
         typedef Element<Elements::Parameters, OptionalOne, boost::mpl::vector<Parameter> > Parameters;
 
         typedef Element<Elements::CreateRoutinesummary, OptionalOne> CreateRoutinesummary;
@@ -122,14 +131,19 @@ namespace ToolSupport
         typedef Element<Elements::MapObjectDeprecated, One, boost::mpl::vector<IgnoreAny> > MapObjectDeprecated;
         typedef Element<Elements::MapValue, OptionalMany > MapValueCollection;
         typedef Element<Elements::MapEntityId, OptionalMany, boost::mpl::vector< Ignore<Elements::ClassName>, Ignore<Elements::InstanceId> > > MapEntityIdCollection;
-        typedef Element<Elements::MapValueRef, OptionalMany, boost::mpl::vector<IgnoreAny> > MapValueRefCollection;
+        typedef Element<Elements::MapValueRefCollection, OptionalMany, boost::mpl::vector<IgnoreAny> > MapValueRefCollection;
         typedef Element<Elements::MapObjectDeprecated, OptionalMany, boost::mpl::vector<IgnoreAny> > MapObjectDeprecatedCollection;
         typedef Element<Elements::Any, OptionalMany, boost::mpl::vector<IgnoreAny>, ParseAlgorithm<Elements::MapObject>, AnyMatcher > MapObjectCollection;
         typedef Element<Elements::MapArray, One, boost::mpl::vector<MapObjectCollection, MapValueRefCollection, ELEMENT_CHOICE_3(MapValueCollection, MapEntityIdCollection, MapObjectDeprecatedCollection, OptionalOne) > > MapArray;
+        typedef Element<Elements::MapSequence, One, boost::mpl::vector<MapObjectCollection, MapValueRefCollection, ELEMENT_CHOICE_3(MapValueCollection, MapEntityIdCollection, MapObjectDeprecatedCollection, OptionalOne) > > MapSequence;
+        typedef Element<Elements::MapDictionaryKey, One, boost::mpl::vector< Ignore<Elements::ClassName>, Ignore<Elements::InstanceId> > > MapDictionaryKey;
+        typedef Element<Elements::MapDictionaryEntry, OptionalMany, boost::mpl::vector<ELEMENT_CHOICE_5(MapValue, MapValueRef, MapEntityId, MapObjectDeprecated, MapObject, OptionalOne), MapDictionaryKey> > MapDictionaryEntry;
+        typedef Element<Elements::MapDictionary, One, boost::mpl::vector<MapDictionaryEntry > > MapDictionary;
+
         typedef Element<Elements::MapArrayElement, AtLeastOne, boost::mpl::vector< ELEMENT_CHOICE_5(MapValue, MapValueRef, MapEntityId, MapObjectDeprecated, MapObject, OptionalOne), Ignore<Elements::ParameterArrayIndex> > > MapArrayElement;
         typedef Element<Elements::MapArrayElements, One, boost::mpl::vector<MapArrayElement> > MapArrayElements;
         typedef Element<Elements::ClassMemberReference, One, boost::mpl::vector<IgnoreAny> > ClassMemberReference;
-        typedef Element<Elements::MemberMapping, AtLeastOne, boost::mpl::vector< ELEMENT_CHOICE_8(MapValue, MapValueRef, MapEntityId, MapArray, MapArrayElements, ClassMemberReference, MapObjectDeprecated, MapObject, OptionalOne), MapPropertyMember > > MemberMapping;
+        typedef Element<Elements::MemberMapping, AtLeastOne, boost::mpl::vector< ELEMENT_CHOICE_10(MapValue, MapEntityId, MapValueRef, MapArray, MapArrayElements, MapSequence, MapDictionary, ClassMemberReference, MapObjectDeprecated, MapObject, OptionalOne), MapPropertyMember > > MemberMapping;
         typedef Element<Elements::MemberMappings, OptionalOne, boost::mpl::vector<MemberMapping> > MemberMappings;
 
         //Top level

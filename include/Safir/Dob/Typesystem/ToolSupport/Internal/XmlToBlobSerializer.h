@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2004-2015 (http://safir.sourceforge.net)
 *
 * Created by: Joel Ottosson / joot
 *
@@ -35,7 +35,7 @@
 #include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeRepository.h>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeUtilities.h>
-#include <Safir/Dob/Typesystem/ToolSupport/Internal/BlobLayoutImpl.h>
+#include <Safir/Dob/Typesystem/ToolSupport/BlobWriter.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Internal/UglyXmlToBlobSerializer.h>
 
 namespace Safir
@@ -59,7 +59,6 @@ namespace Internal
 
         XmlToBlobSerializer(const RepositoryType* repository)
             :m_repository(repository)
-            ,m_blobLayout(repository)
         {
         }
 
@@ -114,12 +113,7 @@ namespace Internal
                 throw ParseError("XmlToBinary serialization error", "Xml does not contain a known type. Typename: "+typeName, "", 151);
             }
 
-            char* beginningOfUnused=NULL;
-
-            size_t blobInitSize=std::max(size_t(1000), static_cast<size_t>(2*cd->InitialSize()));
-            blob.reserve(blobInitSize); //Note: maybe xmlSize/2 would be enogh in almost all cases
-            blob.resize(cd->InitialSize(), 0);
-            m_blobLayout.FormatBlob(&blob[0], static_cast<Size>(blob.size()), typeId, beginningOfUnused);
+            BlobWriter<RepositoryType> writer(m_repository, typeId);
 
             for (boost::property_tree::ptree::iterator memIt=members.begin(); memIt!=members.end(); ++memIt)
             {
@@ -139,21 +133,25 @@ namespace Internal
 
                 const MemberDescriptionType* md=cd->GetMember(memIx);
 
-                if (!md->IsArray())
+                switch (md->GetCollectionType())
+                {
+                case SingleValueCollectionType:
                 {
                     //non-array, then the inner propertyTree contains the content, i.e <myInt>123</myInt>
                     try
                     {
-                        SetMember(md, memIx, 0, memIt->second, blob, beginningOfUnused);
+                        SetMember(md, memIx, 0, memIt->second, 0, writer);
                     }
-                    catch (const boost::property_tree::ptree_error&)
+                    catch (boost::property_tree::ptree_error&)
                     {
                         std::ostringstream os;
                         os<<"Failed to serialize member '"<<cd->GetName()<<"."<<md->GetName()<<"' from xml to binary. Type is incorrect.";
                         throw ParseError("XmlToBinary serialization error", os.str(), "", 153);
                     }
                 }
-                else
+                    break;
+
+                case ArrayCollectionType:
                 {
                     //array, then the inner propertyTree contains array element and the array elements contains the content
                     //i.e <myIntArray><Int32 index=0>1</Int32><Int32 index=5>2</Int32></myIntArray>
@@ -194,9 +192,9 @@ namespace Internal
 
                         try
                         {
-                            SetMember(md, memIx, arrayIndex, arrIt->second, blob, beginningOfUnused);
+                            SetMember(md, memIx, arrayIndex, arrIt->second, 0, writer);
                         }
-                        catch (const boost::property_tree::ptree_error&)
+                        catch (boost::property_tree::ptree_error&)
                         {
                             std::ostringstream os;
                             os<<"Failed to serialize array member '"<<cd->GetName()<<"."<<md->GetName()<<"' with index="<<arrayIndex<<" from xml to binary. Type is incorrect.";
@@ -206,19 +204,226 @@ namespace Internal
                         ++arrayIndex;
                     }
                 }
+                    break;
+
+                case SequenceCollectionType:
+                {
+                    int count=0;
+                    for (boost::property_tree::ptree::iterator seqIt=memIt->second.begin(); seqIt!=memIt->second.end(); ++seqIt)
+                    {
+                        try
+                        {
+                            SetMember(md, memIx, 0, seqIt->second, 0, writer);
+                        }
+                        catch (const ParseError&)
+                        {
+                            throw;
+                        }
+                        catch (...)
+                        {
+                            std::ostringstream os;
+                            os<<"Failed to serialize sequence member '"<<cd->GetName()<<"."<<md->GetName()<<"' with index="<<count<<" from xml to binary. Type is incorrect.";
+                            throw ParseError("XmlToBinary serialization error", os.str(), "", 193);
+                        }
+
+                        ++count;
+                    }
+                }
+                    break;
+
+                case DictionaryCollectionType:
+                {
+                    int entryCount=0;
+                    for (boost::property_tree::ptree::iterator entryIt=memIt->second.begin(); entryIt!=memIt->second.end(); ++entryIt)
+                    {
+                        ++entryCount;
+
+                        if (entryIt->second.size()>2) //there shall at most 2 subelements, key and value. If no value, key->NULL
+                        {
+                            throw "Wrong number of subelements";
+                        }
+                        boost::property_tree::ptree* keyTree=NULL;
+                        boost::property_tree::ptree* valTree=NULL;
+
+                        for (boost::property_tree::ptree::iterator entryContentIt=entryIt->second.begin(); entryContentIt!=entryIt->second.end(); ++entryContentIt)
+                        {
+                            if (entryContentIt->first=="key")
+                            {
+                                keyTree=&(entryContentIt->second);
+                            }
+                            else
+                            {
+                                valTree=&(entryContentIt->second);
+                            }
+                        }
+
+                        if (keyTree==NULL)
+                        {
+                            throw "No key element";
+                        }
+
+                        try
+                        {
+                            if (valTree!=NULL)
+                            {
+                                SetMember(md, memIx, 0, *valTree, *keyTree, writer);
+                            }
+                            else
+                            {
+                                SetKeyWithNullValue(md, memIx, *keyTree, writer);
+                            }
+                        }
+                        catch (boost::property_tree::ptree_error&)
+                        {
+                            std::ostringstream os;
+                            os<<"Failed to serialize dictionary member '"<<cd->GetName()<<"."<<md->GetName()<<"'. Key or value is incorrect. (Hint it's the "<<entryCount<<":th dictionary entry).";
+                            throw ParseError("XmlToBinary serialization error", os.str(), "", 207);
+                        }
+                    }
+                }
+                    break;
+                }
             }
+
+            DotsC_Int32 blobSize=writer.CalculateBlobSize();
+            blob.resize(static_cast<size_t>(blobSize));
+            writer.CopyRawBlob(&blob[0]);
         }
 
     private:
         const RepositoryType* m_repository;
-        const BlobLayoutImpl<RepositoryType> m_blobLayout;
+
+        void SetKeyWithNullValue(const MemberDescriptionType* md,
+                                 DotsC_MemberIndex memIx,
+                                 boost::property_tree::ptree& keyContent,
+                                 BlobWriter<RepositoryType>& writer) const
+        {
+            switch(md->GetKeyType())
+            {
+            case Int32MemberType:
+            {
+                SerializationUtils::SetKeyWithNullValue(memIx, boost::lexical_cast<DotsC_Int32>(keyContent.data()), writer);
+            }
+                break;
+
+            case Int64MemberType:
+            {
+                SerializationUtils::SetKeyWithNullValue(memIx, boost::lexical_cast<DotsC_Int64>(keyContent.data()), writer);
+            }
+                break;
+
+            case TypeIdMemberType:
+            {
+                DotsC_TypeId tid=SerializationUtils::StringToTypeId(keyContent.data());
+                SerializationUtils::SetKeyWithNullValue(memIx, tid, writer);
+            }
+                break;
+
+            case StringMemberType:
+            {
+                SerializationUtils::SetKeyWithNullValue(memIx, keyContent.data().c_str(), writer);
+            }
+                break;
+
+            case EntityIdMemberType:
+            {
+                std::pair<DotsC_EntityId, const char*> eid=SerializationUtils::StringToEntityId(keyContent.get<std::string>("name"), keyContent.get<std::string>("instanceId"));
+                SerializationUtils::SetKeyWithNullValue(memIx, eid, writer);
+            }
+                break;
+
+            case InstanceIdMemberType:
+            case HandlerIdMemberType:
+            case ChannelIdMemberType:
+            {
+                std::pair<DotsC_Int64, const char*> hash=SerializationUtils::StringToHash(keyContent.data());
+                SerializationUtils::SetKeyWithNullValue(memIx, hash, writer);
+            }
+                break;
+
+            case EnumerationMemberType:
+            {
+                const EnumDescriptionType* ed=m_repository->GetEnum(md->GetKeyTypeId());
+                DotsC_EnumerationValue enumVal=TypeUtilities::GetIndexOfEnumValue(ed, keyContent.data());
+                SerializationUtils::SetKeyWithNullValue(memIx, enumVal, writer);
+            }
+                break;
+
+            default:
+                break;
+            }
+        }
 
         void SetMember(const MemberDescriptionType* md,
                        DotsC_MemberIndex memIx,
-                       DotsC_ArrayIndex arrIx,
+                       DotsC_Int32 arrIx,
                        boost::property_tree::ptree& memberContent,
-                       std::vector<char>& blob,
-                       char* &beginningOfUnused) const
+                       boost::property_tree::ptree& keyContent,
+                       BlobWriter<RepositoryType>& writer) const
+        {
+            switch(md->GetKeyType())
+            {
+            case Int32MemberType:
+            {
+                SetMember(md, memIx, arrIx, memberContent, boost::lexical_cast<DotsC_Int32>(keyContent.data()), writer);
+            }
+                break;
+
+            case Int64MemberType:
+            {
+                SetMember(md, memIx, arrIx, memberContent, boost::lexical_cast<DotsC_Int64>(keyContent.data()), writer);
+            }
+                break;
+
+            case TypeIdMemberType:
+            {
+                DotsC_TypeId tid=SerializationUtils::StringToTypeId(keyContent.data());
+                SetMember(md, memIx, arrIx, memberContent, tid, writer);
+            }
+                break;
+
+            case StringMemberType:
+            {
+                SetMember(md, memIx, arrIx, memberContent, keyContent.data().c_str(), writer);
+            }
+                break;
+
+            case EntityIdMemberType:
+            {
+                std::pair<DotsC_EntityId, const char*> eid=SerializationUtils::StringToEntityId(keyContent.get<std::string>("name"), keyContent.get<std::string>("instanceId"));
+                SetMember(md, memIx, arrIx, memberContent, eid, writer);
+            }
+                break;
+
+            case InstanceIdMemberType:
+            case HandlerIdMemberType:
+            case ChannelIdMemberType:
+            {
+                std::pair<DotsC_Int64, const char*> hash=SerializationUtils::StringToHash(keyContent.data());
+                SetMember(md, memIx, arrIx, memberContent, hash, writer);
+            }
+                break;
+
+            case EnumerationMemberType:
+            {
+                const EnumDescriptionType* ed=m_repository->GetEnum(md->GetKeyTypeId());
+                DotsC_EnumerationValue enumVal=TypeUtilities::GetIndexOfEnumValue(ed, keyContent.data());
+                SetMember(md, memIx, arrIx, memberContent, enumVal, writer);
+            }
+                break;
+
+            default:
+                break;
+            }
+        }
+
+        template <class KeyT>
+        void SetMember(const MemberDescriptionType* md,
+                       DotsC_MemberIndex memIx,
+                       DotsC_Int32 arrIx,
+                       boost::property_tree::ptree& memberContent,
+                       const KeyT& key,
+                       BlobWriter<RepositoryType>& writer) const
         {
             boost::optional<std::string> valueRef=memberContent.get_optional<std::string>("<xmlattr>.valueRef");
             int valueRefIndex=memberContent.get<int>("<xmlattr>.valueRefIndex", 0);
@@ -238,7 +443,7 @@ namespace Internal
                     os<<"Only members of non-object types can use the valueRef mechanism. Member '"<<md->GetName()<<"' has type "<<m_repository->GetClass(md->GetTypeId())->GetName();
                     throw ParseError("XmlToBinary serialization error", os.str(), "", 110);
                 }
-                SerializationUtils::SetMemberFromParameter(m_repository, m_blobLayout, md, memIx, arrIx, *valueRef, valueRefIndex, blob, beginningOfUnused);
+                SerializationUtils::SetMemberFromParameter(m_repository, md, memIx, arrIx, *valueRef, valueRefIndex, key, writer);
             }
             else if (md->GetMemberType()==ObjectMemberType)
             {
@@ -269,16 +474,16 @@ namespace Internal
 
                 std::vector<char> insideBlob;
                 SerializeObjectContent(cd->GetName(), insideBlob, memberContent);
-                SerializationUtils::CreateSpaceForDynamicMember(m_blobLayout, blob, beginningOfUnused, insideBlob.size());
-                char* writeObj=beginningOfUnused;
-                m_blobLayout.CreateObjectMember(&blob[0], static_cast<Size>(insideBlob.size()), cd->GetTypeId(), memIx, arrIx, false, beginningOfUnused);
-                beginningOfUnused=writeObj+insideBlob.size(); //This is a hack. BlobLayout is not moving beginningOfUnused by the blobSize but instead only by the initialSize. Has to do with genated code.
-                memcpy(writeObj, &insideBlob[0], insideBlob.size());
-                m_blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
+                if (md->GetCollectionType()==DictionaryCollectionType)
+                {
+                    //if dictionary, first write the key
+                    writer.WriteKey(memIx, key);
+                }
+                writer.WriteValue(memIx, arrIx, std::pair<char*, DotsC_Int32>(&insideBlob[0], static_cast<DotsC_Int32>(insideBlob.size())), false, true);
             }
             else
             {
-                SerializationUtils::SetMemberValue(m_repository, m_blobLayout, md, memIx, arrIx, memberContent, blob, beginningOfUnused);
+                SerializationUtils::SetMemberValue(m_repository, md, memIx, arrIx, memberContent, key, writer);
             }
 
         }
@@ -287,6 +492,6 @@ namespace Internal
 }
 }
 }
-} //end namespace Safir::Dob::Typesystem::Internal:Internal
+} //end namespace Safir::Dob::Typesystem::ToolSupport::Internal
 
 #endif

@@ -20,7 +20,7 @@ void access()
     DotsC_XmlToBlob(blob,deleter,&xml[0]);
     std::vector<char> xml2(100000);
     DotsC_Int32 resultsize = 0;
-    DotsC_BetterBlobToXml(&xml2[0],blob,100000,resultsize);
+    DotsC_BlobToXml(&xml2[0],blob,100000,resultsize);
     deleter(blob);
 }
 

@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2004-2015 (http://safir.sourceforge.net)
 *
 * Created by: Joel Ottosson / joot
 *
@@ -56,4 +56,4 @@ namespace ToolSupport
 }
 }
 }
-} //end namespace Safir::Dob::Typesystem::Internal
+} //end namespace Safir::Dob::Typesystem::ToolSupport

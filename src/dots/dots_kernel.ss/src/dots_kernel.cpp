@@ -38,18 +38,16 @@
 #include <Safir/Utilities/Internal/ConfigReader.h>
 
 #include <Safir/Dob/Typesystem/Internal/Kernel.h>
-#include <Safir/Dob/Typesystem/ToolSupport/BlobLayout.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Serialization.h>
 
 #include "dots_init_helper.h"
 #include "dots_exception_keeper.h"
 
 using namespace Safir::Dob::Typesystem::Internal;
+namespace ts = Safir::Dob::Typesystem::ToolSupport;
 
 namespace
 {
-    typedef Safir::Dob::Typesystem::ToolSupport::MemberStatus Status;
-
     void DeleteBytePointer(char* & ptr)
     {
         delete [] ptr;
@@ -94,7 +92,7 @@ namespace
     bool GetPropertyParameterInternal(const DotsC_TypeId typeId,
                                       const DotsC_TypeId propertyId,
                                       const DotsC_MemberIndex member,
-                                      const DotsC_ArrayIndex index, //memberIndex
+                                      const DotsC_Int32 index, //memberIndex
                                       const ParameterDescriptionShm*& parameter,
                                       int& parameterIndex)
     {
@@ -116,7 +114,7 @@ namespace
         std::pair<const ParameterDescriptionShm*, int> param=mm->GetParameter();
         parameter=param.first;
 
-        if (pmd->GetProperty()->GetMember(member)->IsArray())
+        if (pmd->GetProperty()->GetMember(member)->GetCollectionType()!=SingleValueCollectionType)
         {
             //if the member is an array we use the specified index.
             parameterIndex=index;
@@ -129,6 +127,11 @@ namespace
 
         return true;
     }
+
+    typedef ts::BlobReader<RepositoryShm> Reader;
+    typedef ts::BlobWriter<RepositoryShm> Writer;
+    Reader* ReaderFromHandle(DotsC_Handle handle) {return (Reader*)handle;}
+    Writer* WriterFromHandle(DotsC_Handle handle) {return (Writer*)handle;}
 
     char* CopyStringToNew(const std::string& str)
     {
@@ -252,13 +255,19 @@ bool DotsC_IsException(const DotsC_TypeId typeId)
 DotsC_TypeId DotsC_TypeIdFromName(const char* typeName)
 {
     Init();
-    return Safir::Dob::Typesystem::ToolSupport::TypeUtilities::CalculateTypeId(typeName);
+    return ts::TypeUtilities::CalculateTypeId(typeName);
 }
 
 const char* DotsC_GetTypeName(const DotsC_TypeId typeId)
 {
     Init();
     return TypeUtilities::GetTypeName(RepositoryKeeper::GetRepository(), typeId);
+}
+
+const char* DotsC_MemberTypeName(DotsC_MemberType memberType)
+{
+    Init();
+    return TypeUtilities::GetTypeName(memberType);
 }
 
 
@@ -290,95 +299,24 @@ DotsC_EnumerationValue DotsC_EnumerationValueFromName(const DotsC_TypeId enumId,
     const EnumDescriptionShm* ed=RepositoryKeeper::GetRepository()->GetEnum(enumId);
     if (ed!=NULL)
     {
-        return Safir::Dob::Typesystem::ToolSupport::TypeUtilities::GetIndexOfEnumValue(ed, enumValueName);
+        return ts::TypeUtilities::GetIndexOfEnumValue(ed, enumValueName);
     }
     return -1;
 }
 
-//********************************************************
-//* Base operations on blobs
-//********************************************************
-//create default blob
-void DotsC_CreateBlob(const DotsC_TypeId typeId,
-                      char* & blob)
+void DotsC_GetEnumerationChecksum(const DotsC_TypeId typeId,
+                                  DotsC_TypeId & checksum)
 {
     Init();
-    RepositoryKeeper::GetBlobLayout()->CreateBlob(typeId, blob);
-}
-
-void DotsC_DeleteBlob(char* & blob)
-{
-    Init();
-    RepositoryKeeper::GetBlobLayout()->DeleteBlob(blob);
-}
-
-void DotsC_CreateCopyOfBlob(char* & to,
-                            const char* const from)
-{
-    Init();
-    const size_t size=static_cast<size_t>(RepositoryKeeper::GetBlobLayout()->GetSize(from));
-    to=new char[size];
-    memcpy(to, from, size);
-}
-
-DotsC_TypeId DotsC_GetTypeId(const char* const blob)
-{
-    Init();
-    return RepositoryKeeper::GetBlobLayout()->GetTypeId(blob);
-}
-
-//Gives the total size of the blob
-DotsC_Int32 DotsC_GetSize(const char* const blob)
-{
-    Init();
-    return RepositoryKeeper::GetBlobLayout()->GetSize(blob);
-}
-
-// IsAnythingChanged
-bool DotsC_IsAnythingChanged(const char* const blob)
-{
-    Init();
-    return RepositoryKeeper::GetBlobLayout()->IsAnythingChanged(blob);
-}
-
-
-//Reset changed flags for the members
-void DotsC_ResetChanged(char* const blob)
-{
-    Init();
-    RepositoryKeeper::GetBlobLayout()->ResetChanged(blob);
-}
-
-//Reset changed flags for the members
-void DotsC_SetChanged(char* const blob,
-                      const bool changed)
-{
-    Init();
-    RepositoryKeeper::GetBlobLayout()->SetChanged(blob,changed);
-}
-
-void DotsC_SetChangedHere(char* const blob,
-                          const DotsC_MemberIndex member,
-                          const DotsC_ArrayIndex index,
-                          const bool changed)
-{
-    Init();
-    const Status status=RepositoryKeeper::GetBlobLayout()->GetMemberStatus(blob, member, index);
-    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(status.IsNull(), changed, blob, member, index);
-}
-
-void DotsC_SetChangedMembers(const char* const val, char* & blob)
-{
-    Init();
-    RepositoryKeeper::GetBlobLayout()->MergeChanges(val, blob);
-}
-
-
-void DotsC_SetChangedSinceLastRead(const char* const lastRead,
-                                   char* const current)
-{
-    Init();
-    RepositoryKeeper::GetBlobLayout()->SetChangedSinceLastRead(lastRead, current);
+    const EnumDescriptionShm* ed=RepositoryKeeper::GetRepository()->GetEnum(typeId);
+    if (ed==NULL)
+    {
+        checksum=0;
+    }
+    else
+    {
+        checksum=ed->GetCheckSum();
+    }
 }
 
 //***********************************************************
@@ -406,8 +344,7 @@ DotsC_Int32 DotsC_GetNumberOfMembers(const DotsC_TypeId typeId)
     return -1;
 }
 
-DotsC_MemberIndex DotsC_GetMemberId(const DotsC_TypeId typeId,
-                              const char* const memberName)
+DotsC_MemberIndex DotsC_GetMemberId(const DotsC_TypeId typeId, const char* const memberName)
 {
     Init();
     {
@@ -428,68 +365,14 @@ DotsC_MemberIndex DotsC_GetMemberId(const DotsC_TypeId typeId,
     return -1;
 }
 
-const char* DotsC_GetMemberName(const DotsC_TypeId typeId, const DotsC_MemberIndex member)
-{
-    Init();
-    {
-        const ClassDescriptionShm* cd=RepositoryKeeper::GetRepository()->GetClass(typeId);
-        if (cd!=NULL)
-        {
-            return cd->GetMember(member)->GetName();
-        }
-    }
-
-    {
-        const PropertyDescriptionShm* pd=RepositoryKeeper::GetRepository()->GetProperty(typeId);
-        if (pd!=NULL)
-        {
-            return pd->GetMember(member)->GetName();
-        }
-    }
-    return NULL;
-}
-
-DotsC_TypeId DotsC_GetComplexMemberTypeId(const DotsC_TypeId typeId, const DotsC_MemberIndex member)
-{
-    Init();
-    const ClassDescriptionShm* cd=RepositoryKeeper::GetRepository()->GetClass(typeId);
-    const MemberDescriptionShm* md=NULL;
-    if (cd!=NULL)
-    {
-        md=cd->GetMember(member);
-    }
-    else
-    {
-        const PropertyDescriptionShm* pd=RepositoryKeeper::GetRepository()->GetProperty(typeId);
-        if (pd!=NULL)
-        {
-            md=pd->GetMember(member);
-        }
-        else
-        {
-            return -1; //the type was not a property either
-        }
-    }
-
-    if (md->GetMemberType()==ObjectMemberType)
-    {
-        return md->GetTypeId();
-    }
-    else if (md->GetMemberType()==EnumerationMemberType)
-    {
-        return md->GetTypeId();
-    }
-    return -1;
-}
-
-void DotsC_GetMemberInfo(const DotsC_TypeId typeId,  //in
-                         const DotsC_MemberIndex member,  //in
+void DotsC_GetMemberInfo(DotsC_TypeId typeId,  //in
+                         DotsC_MemberIndex member,  //in
                          DotsC_MemberType& memberType,//out
-                         const char* & memberName,           //out
-                         DotsC_TypeId & complexType,   //out
-                         DotsC_Int32 & stringLength,   //out
-                         bool & isArray,                      //out
-                         DotsC_Int32 & arrayLength)    //out
+                         const char*& memberName,           //out
+                         DotsC_TypeId& complexType,   //out
+                         DotsC_Int32& stringLength,   //out
+                         DotsC_CollectionType& collectionType, //out
+                         DotsC_Int32& arraySize)   //out
 {
     Init();
     const MemberDescriptionShm* memberDesc;
@@ -504,7 +387,7 @@ void DotsC_GetMemberInfo(const DotsC_TypeId typeId,  //in
             // there is no error code, so set all out fields to invalid (-1 or null)
             memberName=NULL;
             complexType=-1;
-            arrayLength=-1;
+            arraySize=-1;
             return;
         }
     }
@@ -516,7 +399,7 @@ void DotsC_GetMemberInfo(const DotsC_TypeId typeId,  //in
             // there is no error code, so set all out fields to invalid (-1 or null)
             memberName=NULL;
             complexType=-1;
-            arrayLength=-1;
+            arraySize=-1;
             return;
         }
         memberDesc=pd->GetMember(member);
@@ -529,42 +412,11 @@ void DotsC_GetMemberInfo(const DotsC_TypeId typeId,  //in
 
     memberType=memberDesc->GetMemberType();
     memberName=memberDesc->GetName();
-    isArray=memberDesc->IsArray();
-    arrayLength=memberDesc->GetArraySize();
+    collectionType=memberDesc->GetCollectionType();
+    arraySize=memberDesc->GetArraySize();
     if (memberType==ObjectMemberType || memberType==EnumerationMemberType)
     {
         complexType=memberDesc->GetTypeId();
-    }
-}
-
-DotsC_Int32 DotsC_GetMemberArraySize(const DotsC_TypeId typeId, const DotsC_MemberIndex member)
-{
-    Init();
-    const ClassDescriptionShm* cd=RepositoryKeeper::GetRepository()->GetClass(typeId);
-    if (cd!=NULL)
-    {
-        return cd->GetMember(member)->GetArraySize();
-    }
-    return -1;
-}
-
-DotsC_Int32 DotsC_GetStringMemberMaxLength(const DotsC_TypeId typeId, const DotsC_MemberIndex member)
-{
-    Init();
-    const ClassDescriptionShm* cd=RepositoryKeeper::GetRepository()->GetClass(typeId);
-    if (cd==NULL)
-    {
-        return -1;
-    }
-
-    const MemberDescriptionShm* const memberDesc= cd->GetMember(member);
-    if (memberDesc->GetMemberType()==StringMemberType)
-    {
-        return memberDesc->GetMaxLength();
-    }
-    else
-    {
-        return -1;
     }
 }
 
@@ -602,15 +454,15 @@ DotsC_Int32 DotsC_GetMemberArraySizeProperty(const DotsC_TypeId classId, const D
         int refDepth=mm->MemberReferenceDepth();
         for (int i=0; i<refDepth-1; ++i)
         {
-            std::pair<DotsC_MemberIndex, DotsC_ArrayIndex> ref=mm->GetMemberReference(i);
-            parent=DotsC_GetComplexMemberTypeId(parent, ref.first);
+            std::pair<DotsC_MemberIndex, DotsC_Int32> ref=mm->GetMemberReference(i);
+            parent=RepositoryKeeper::GetRepository()->GetClass(parent)->GetMember(ref.first)->GetTypeId();
         }
-        return DotsC_GetMemberArraySize(parent, mm->GetMemberReference(refDepth-1).first);
+        return RepositoryKeeper::GetRepository()->GetClass(parent)->GetMember(mm->GetMemberReference(refDepth-1).first)->GetArraySize();
     }
 
     case MappedToParameter:
     {
-        return mm->GetParameter().first->GetArraySize();
+        return mm->GetParameter().first->GetNumberOfValues();
     }
     }
     //will never get here!
@@ -652,10 +504,10 @@ DotsC_Int32 DotsC_GetStringMemberMaxLengthProperty(const DotsC_TypeId classId, c
         int refDepth=mm->MemberReferenceDepth();
         for (int i=0; i<refDepth-1; ++i)
         {
-            std::pair<DotsC_MemberIndex, DotsC_ArrayIndex> ref=mm->GetMemberReference(i);
-            parent=DotsC_GetComplexMemberTypeId(parent, ref.first);
+            std::pair<DotsC_MemberIndex, DotsC_Int32> ref=mm->GetMemberReference(i);
+            parent=RepositoryKeeper::GetRepository()->GetClass(parent)->GetMember(ref.first)->GetTypeId();
         }
-        return DotsC_GetStringMemberMaxLength(parent, mm->GetMemberReference(refDepth-1).first);
+        return RepositoryKeeper::GetRepository()->GetClass(parent)->GetMember(mm->GetMemberReference(refDepth-1).first)->GetMaxLength();
     }
 
     case MappedToParameter:
@@ -665,26 +517,6 @@ DotsC_Int32 DotsC_GetStringMemberMaxLengthProperty(const DotsC_TypeId classId, c
 
     //will never get here!
     return -1;
-}
-
-const char* DotsC_GetMemberTypeName(const DotsC_TypeId typeId, const DotsC_MemberIndex member)
-{
-    Init();
-    const ClassDescriptionShm* cd=RepositoryKeeper::GetRepository()->GetClass(typeId);
-    if (cd!=NULL)
-    {
-        return Safir::Dob::Typesystem::ToolSupport::TypeUtilities::GetTypeName(cd->GetMember(member)->GetMemberType());
-    }
-    else
-    {
-        const PropertyDescriptionShm* pd=RepositoryKeeper::GetRepository()->GetProperty(typeId);
-        if (pd!=NULL)
-        {
-            return Safir::Dob::Typesystem::ToolSupport::TypeUtilities::GetTypeName(pd->GetMember(member)->GetMemberType());
-        }
-    }
-
-    return NULL;
 }
 
  //***********************************************************************
@@ -725,366 +557,22 @@ DotsC_ParameterIndex DotsC_GetParameterId(const DotsC_TypeId typeId, const char*
     return -1;
 }
 
-const char* DotsC_GetParameterName(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter)
+void DotsC_GetParameterInfo(DotsC_TypeId typeId,
+                            DotsC_ParameterIndex parameter,
+                            DotsC_MemberType& memberType,
+                            const char*& parameterName,
+                            DotsC_TypeId& complexTypeId,
+                            DotsC_CollectionType& collectionType,
+                            DotsC_Int32& numberOfValues)
 {
     Init();
-    return RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter)->GetName();
-}
-
-DotsC_MemberType DotsC_GetParameterType(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter)
-{
-    Init();
-    return RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter)->GetMemberType();
-}
-
-const char* DotsC_GetParameterTypeName(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter)
-{
-    Init();
-    const ParameterDescriptionShm* pd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
-    if (pd->GetMemberType()==ObjectMemberType || pd->GetMemberType()==EnumerationMemberType)
-    {
-        return Safir::Dob::Typesystem::ToolSupport::TypeUtilities::GetTypeName(RepositoryKeeper::GetRepository(), pd->GetTypeId());
-    }
-    else
-    {
-        return Safir::Dob::Typesystem::ToolSupport::TypeUtilities::GetTypeName(pd->GetMemberType());
-    }
-}
-
-DotsC_Int32 DotsC_GetParameterArraySize(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter)
-{
-    Init();
-    return RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter)->GetArraySize();
-}
-
-//************************************************************************************
-//* Functions for retrieving member values
-//************************************************************************************
-
-bool DotsC_IsNullMember(const char* const blob, const DotsC_MemberIndex member, const DotsC_ArrayIndex index)
-{
-    Init();
-    Status status=RepositoryKeeper::GetBlobLayout()->GetMemberStatus(blob, member, index);
-    return status.IsNull();
-}
-
-bool DotsC_IsChangedMember(const char* const blob, const DotsC_MemberIndex member, const DotsC_ArrayIndex index)
-{
-    Init();
-    Status status=RepositoryKeeper::GetBlobLayout()->GetMemberStatus(blob, member, index);
-    if (status.HasChanged())
-    {
-        return true;
-    }
-
-    const ClassDescriptionShm* cd=RepositoryKeeper::GetRepository()->GetClass(RepositoryKeeper::GetBlobLayout()->GetTypeId(blob));
-    if (cd==NULL)
-    {
-        return false;
-    }
-
-    const MemberDescriptionShm* md= cd->GetMember(member);
-
-    if (md->GetMemberType()==ObjectMemberType && !status.IsNull())
-    {
-        DotsC_Int32 dummy=0;
-        const char* childBlob;
-        RepositoryKeeper::GetBlobLayout()->GetDynamicMember(blob, member, index, childBlob, dummy);
-        return RepositoryKeeper::GetBlobLayout()->IsAnythingChanged(childBlob);
-    }
-    else
-    {
-        return false;
-    }
-}
-
-
-void DotsC_GetBooleanMember(const char* const blob, const DotsC_MemberIndex member, const DotsC_ArrayIndex index, bool& val, bool& isNull, bool& isChanged)
-{
-    Init();
-    Status status=RepositoryKeeper::GetBlobLayout()->GetBoolMember(blob, member, index, val);
-    isNull=status.IsNull();
-    isChanged=status.HasChanged();
-}
-
-void DotsC_GetEnumerationMember(const char* const blob,
-                                const DotsC_MemberIndex member,
-                                const DotsC_ArrayIndex index,
-                                DotsC_EnumerationValue & val,
-                                bool& isNull,
-                                bool& isChanged)
-{
-    Init();
-    Status status=RepositoryKeeper::GetBlobLayout()->GetEnumMember(blob, member, index, val);
-    isNull=status.IsNull();
-    isChanged=status.HasChanged();
-}
-
-void DotsC_GetInt32Member(const char* const blob, const DotsC_MemberIndex member, const DotsC_ArrayIndex index, DotsC_Int32& val, bool& isNull, bool& isChanged)
-{
-    Init();
-    Status status=RepositoryKeeper::GetBlobLayout()->GetInt32Member(blob, member, index, val);
-    isNull=status.IsNull();
-    isChanged=status.HasChanged();
-}
-
-
-void DotsC_GetInt64Member(const char* const blob, const DotsC_MemberIndex member, const DotsC_ArrayIndex index, DotsC_Int64& val, bool& isNull, bool& isChanged)
-{
-    Init();
-    Status status=RepositoryKeeper::GetBlobLayout()->GetInt64Member(blob, member, index, val);
-    isNull=status.IsNull();
-    isChanged=status.HasChanged();
-}
-
-void DotsC_GetFloat32Member(const char* const blob, const DotsC_MemberIndex member, const DotsC_ArrayIndex index, DotsC_Float32& val, bool& isNull, bool& isChanged)
-{
-    Init();
-    Status status=RepositoryKeeper::GetBlobLayout()->GetFloat32Member(blob, member, index, val);
-    isNull=status.IsNull();
-    isChanged=status.HasChanged();
-    if (isNull)
-    {
-        //we have to set a proper value, since an unitialized value may cause
-        //FP errors, e.g. in Ada
-        val=0.0f;
-    }
-}
-
-void DotsC_GetFloat64Member(const char* const blob, const DotsC_MemberIndex member, const DotsC_ArrayIndex index, DotsC_Float64& val, bool& isNull, bool& isChanged)
-{
-    Init();
-    Status status=RepositoryKeeper::GetBlobLayout()->GetFloat64Member(blob, member, index, val);
-    isNull=status.IsNull();
-    isChanged=status.HasChanged();
-    if (isNull)
-    {
-        //we have to set a proper value, since an unitialized value may cause
-        //FP errors, e.g. in Ada
-        val=0.0;
-    }
-}
-
-void DotsC_GetStringMember(const char* const blob, const DotsC_MemberIndex member, const DotsC_ArrayIndex index, const char* &val, bool& isNull, bool& isChanged)
-{
-    Init();
-    DotsC_Int32 dummy=0;
-    Status status=RepositoryKeeper::GetBlobLayout()->GetDynamicMember(blob, member, index, val, dummy);
-    isNull=status.IsNull();
-    isChanged=status.HasChanged();
-}
-
-void DotsC_GetObjectMember(const char* const blob,
-                           const DotsC_MemberIndex member,
-                           const DotsC_ArrayIndex index,
-                           const char* & val,
-                           bool & isNull,
-                           bool & isChanged)
-{
-    Init();
-    DotsC_Int32 dummy=0;
-    Status status=RepositoryKeeper::GetBlobLayout()->GetDynamicMember(blob, member, index, val, dummy);
-    isNull=status.IsNull();
-    isChanged=status.HasChanged();
-}
-
-void DotsC_GetWriteableObjectMember(char* const blob,
-                                    const DotsC_MemberIndex member,
-                                    const DotsC_ArrayIndex index,
-                                    char* & val,
-                                    bool & isNull,
-                                    bool & isChanged)
-{
-    Init();
-    DotsC_Int32 dummy=0;
-    Status status=RepositoryKeeper::GetBlobLayout()->GetWritableDynamicMember(blob, member, index, val, dummy);
-    isNull=status.IsNull();
-    isChanged=status.HasChanged();
-}
-
-
-void DotsC_GetBinaryMember(const char* const blob,
-                           const DotsC_MemberIndex member,
-                           const DotsC_ArrayIndex index,
-                           const char* &val,
-                           DotsC_Int32& size,
-                           bool & isNull,
-                           bool & isChanged)
-{
-    Init();
-    Status status=RepositoryKeeper::GetBlobLayout()->GetDynamicMember(blob, member, index, val, size);
-    isNull=status.IsNull();
-    isChanged=status.HasChanged();
-}
-
-void DotsC_GetTypeIdMember(const char* const blob, const DotsC_MemberIndex member, const DotsC_ArrayIndex index, DotsC_TypeId& val, bool & isNull, bool & isChanged)
-{
-    Init();
-    Status status=RepositoryKeeper::GetBlobLayout()->GetInt64Member(blob, member, index, val);
-    isNull=status.IsNull();
-    isChanged=status.HasChanged();
-}
-
-void DotsC_GetHashedIdMember(const char* const blob,
-                             const DotsC_MemberIndex member,
-                             const DotsC_ArrayIndex index,
-                             DotsC_Int64 & hashVal,
-                             const char* & strVal,
-                             bool & isNull,
-                             bool & isChanged)
-{
-    Init();
-    Status status=RepositoryKeeper::GetBlobLayout()->GetHashedMember(blob, member, index, hashVal, strVal);
-    isNull=status.IsNull();
-    isChanged=status.HasChanged();
-}
-
-void DotsC_GetEntityIdMember(const char* const blob,
-                             const DotsC_MemberIndex member,
-                             const DotsC_ArrayIndex index,
-                             DotsC_EntityId & entityId,
-                             const char* & instanceIdStr,
-                             bool & isNull,
-                             bool & isChanged)
-{
-    Init();
-    Status status=RepositoryKeeper::GetBlobLayout()->GetEntityIdMember(blob, member, index, entityId, instanceIdStr);
-    isNull=status.IsNull();
-    isChanged=status.HasChanged();
-}
-
-//************************************************************************************
-//* Functions for setting member values
-//************************************************************************************
-void DotsC_SetNullMember(char* const blob,
-                         const DotsC_MemberIndex member,
-                         const DotsC_ArrayIndex index)
-{
-    Init();
-    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(true, true, blob, member, index);
-}
-
-void DotsC_SetBooleanMember(const bool val,
-                            char* & blob,
-                            const DotsC_MemberIndex member,
-                            const DotsC_ArrayIndex index)
-{
-    Init();
-    RepositoryKeeper::GetBlobLayout()->SetBoolMember(val, blob, member, index);
-    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(false, true, blob, member, index);
-}
-
-void DotsC_SetEnumerationMember(const DotsC_EnumerationValue val,
-                                char* & blob,
-                                const DotsC_MemberIndex member,
-                                const DotsC_ArrayIndex index)
-{
-    Init();
-    RepositoryKeeper::GetBlobLayout()->SetEnumMember(val, blob, member, index);
-    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(false, true, blob, member, index);
-}
-
-
-void DotsC_SetInt32Member(const DotsC_Int32 val,
-                          char* & blob,
-                          const DotsC_MemberIndex member,
-                          const DotsC_ArrayIndex index)
-{
-    Init();
-    RepositoryKeeper::GetBlobLayout()->SetInt32Member(val, blob, member, index);
-    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(false, true, blob, member, index);
-}
-
-void DotsC_SetInt64Member(const DotsC_Int64 val,
-                          char* & blob,
-                          const DotsC_MemberIndex member,
-                          const DotsC_ArrayIndex index)
-{
-    Init();
-    RepositoryKeeper::GetBlobLayout()->SetInt64Member(val, blob, member, index);
-    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(false, true, blob, member, index);
-}
-
-void DotsC_SetFloat32Member(const DotsC_Float32 val,
-                            char* & blob,
-                            const DotsC_MemberIndex member,
-                            const DotsC_ArrayIndex index)
-{
-    Init();
-    RepositoryKeeper::GetBlobLayout()->SetFloat32Member(val, blob, member, index);
-    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(false, true, blob, member, index);
-}
-
-void DotsC_SetFloat64Member(const DotsC_Float64 val,
-                            char* & blob,
-                            const DotsC_MemberIndex member,
-                            const DotsC_ArrayIndex index)
-{
-    Init();
-    RepositoryKeeper::GetBlobLayout()->SetFloat64Member(val, blob, member, index);
-    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(false, true, blob, member, index);
-}
-
-void DotsC_SetStringMember(const char* const val,
-                           char* & blob,
-                           const DotsC_MemberIndex member,
-                           const DotsC_ArrayIndex index)
-{
-    Init();
-    DotsC_Int32 dummy=0;
-    RepositoryKeeper::GetBlobLayout()->SetDynamicMember(val, dummy, blob, member, index);
-    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(false, true, blob, member, index);
-}
-
-void DotsC_SetTypeIdMember(const DotsC_TypeId val,
-                           char* & blob,
-                           const DotsC_MemberIndex member,
-                           const DotsC_ArrayIndex index)
-{
-    Init();
-    RepositoryKeeper::GetBlobLayout()->SetInt64Member(val, blob, member, index);
-    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(false, true, blob, member, index);
-}
-
-void DotsC_SetHashedIdMember(const DotsC_Int64 hashVal,
-                             const char* const strVal,
-                             char* & blob,
-                             const DotsC_MemberIndex member,
-                             const DotsC_ArrayIndex index)
-{
-    Init();
-    RepositoryKeeper::GetBlobLayout()->SetHashedMember(hashVal, strVal, blob, member, index);
-    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(false, true, blob, member, index);
-}
-
-void DotsC_SetEntityIdMember(const DotsC_EntityId& entityId,
-                             const char* const instanceIdStr,
-                             char* & blob,
-                             const DotsC_MemberIndex member,
-                             const DotsC_ArrayIndex index)
-{
-    Init();
-    RepositoryKeeper::GetBlobLayout()->SetEntityIdMember(entityId, instanceIdStr, blob, member, index);
-    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(false, true, blob, member, index);
-}
-
-void DotsC_SetObjectMember(const char* const val, char* & blob, const DotsC_MemberIndex member, const DotsC_ArrayIndex index)
-{
-    Init();
-    DotsC_Int32 dummy=0;
-    RepositoryKeeper::GetBlobLayout()->SetDynamicMember(val, dummy, blob, member, index);
-    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(false, true, blob, member, index);
-}
-
-void DotsC_SetBinaryMember(const char* val,
-                           DotsC_Int32 numberOfBytes,
-                           char* & blob,
-                           const DotsC_MemberIndex member,
-                           const DotsC_ArrayIndex index)
-{
-    Init();
-    RepositoryKeeper::GetBlobLayout()->SetDynamicMember(val, numberOfBytes, blob, member, index);
-    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(false, true, blob, member, index);
+    const ParameterDescriptionShm* par=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
+    memberType=par->GetMemberType();
+    complexTypeId=par->GetTypeId();
+    parameterName=par->GetName();
+    collectionType=par->GetCollectionType();
+    numberOfValues=par->GetNumberOfValues();
+    memberType=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter)->GetMemberType();
 }
 
 //************************************************************************************
@@ -1094,7 +582,7 @@ void DotsC_SetBinaryMember(const char* val,
 bool DotsC_IsOfType(const DotsC_TypeId type, const DotsC_TypeId ofType)
 {
     Init();
-    return Safir::Dob::Typesystem::ToolSupport::TypeUtilities::IsOfType(RepositoryKeeper::GetRepository(), type, ofType);
+    return ts::TypeUtilities::IsOfType(RepositoryKeeper::GetRepository(), type, ofType);
 }
 
 void DotsC_GetCompleteType(const DotsC_TypeId type,
@@ -1137,14 +625,87 @@ void DotsC_HasProperty(const DotsC_TypeId classTypeId, const DotsC_TypeId proper
     }
 }
 
-//************************************************************************************
-//* Serialization
-//************************************************************************************
-void DotsC_BetterBlobToXml(char* const xmlDest, const char* const blobSource, const DotsC_Int32 bufSize, DotsC_Int32 & resultSize)
+bool DotsC_GetPropertyMappingKind(const DotsC_TypeId typeId,
+                                  const DotsC_TypeId propertyId,
+                                  const DotsC_MemberIndex member,
+                                  DotsC_PropertyMappingKind & mappingKind)
+{
+    Init();   
+
+    bool isInherited;
+    const PropertyMappingDescriptionShm* pmd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetPropertyMapping(propertyId, isInherited);
+    if (pmd==NULL)
+    {
+        //class not mapped to that property
+        return false;
+    }
+    const MemberMappingDescriptionShm* mm=pmd->GetMemberMapping(member);
+    mappingKind=mm->GetMappingKind();
+    return true;
+}
+
+
+void DotsC_GetClassMemberReference(const DotsC_TypeId classTypeId,
+                                   const DotsC_TypeId propertyTypeId,
+                                   const DotsC_MemberIndex propertyMember,
+                                   const DotsC_Int32* & classMemberReference,
+                                   DotsC_Int32 & classMemberReferenceSize)
+{
+    Init();
+    classMemberReference=NULL;
+    classMemberReferenceSize=0;
+
+    bool isInherited;
+    const PropertyMappingDescriptionShm* pmd=RepositoryKeeper::GetRepository()->GetClass(classTypeId)->GetPropertyMapping(propertyTypeId, isInherited);
+
+    if (pmd==NULL)
+    {
+        return;
+    }
+
+    const MemberMappingDescriptionShm* mm=pmd->GetMemberMapping(propertyMember);
+
+    if (mm==NULL || mm->GetMappingKind()!=MappedToMember)
+    {
+        return;
+    }
+
+    classMemberReference=mm->GetRawMemberRef();
+    classMemberReferenceSize=mm->MemberReferenceDepth()*2;
+}
+
+void DotsC_GetPropertyParameterReference(const DotsC_TypeId classTypeId,
+                                         const DotsC_TypeId propertyTypeId,
+                                         const DotsC_MemberIndex propertyMember,
+                                         const DotsC_Int32 index,
+                                         DotsC_ParameterIndex& paramId, //out
+                                         DotsC_Int32& paramValueIndex) //out
+{
+    bool isInherited;
+    const ClassDescriptionShm* cd=RepositoryKeeper::GetRepository()->GetClass(classTypeId);
+    const PropertyMappingDescriptionShm* pmd=cd->GetPropertyMapping(propertyTypeId, isInherited);
+    const MemberMappingDescriptionShm* mm=pmd->GetMemberMapping(propertyMember);
+    std::pair<const ParameterDescriptionShm*, int> param=mm->GetParameter();
+
+    for (DotsC_ParameterIndex pix=0; pix<cd->GetNumberOfParameters(); ++pix)
+    {
+        if (cd->GetParameter(pix)==param.first)
+        {
+            DotsC_CollectionType collectionType=pmd->GetProperty()->GetMember(propertyMember)->GetCollectionType();
+            paramId=pix;
+            paramValueIndex=collectionType==SingleValueCollectionType ? param.second : index;
+        }
+    }
+}
+
+////************************************************************************************
+////* Serialization
+////************************************************************************************
+void DotsC_BlobToXml(char* const xmlDest, const char* const blobSource, const DotsC_Int32 bufSize, DotsC_Int32 & resultSize)
 {
     Init();
     std::ostringstream xmlStream;
-    Safir::Dob::Typesystem::ToolSupport::BinaryToXml(RepositoryKeeper::GetRepository(), blobSource, xmlStream);
+    ts::BinaryToXml(RepositoryKeeper::GetRepository(), blobSource, xmlStream);
     std::string xml=xmlStream.str();
     resultSize=static_cast<DotsC_Int32>(xml.size())+1; //add one char for null termination
     if (resultSize <= bufSize)
@@ -1162,7 +723,7 @@ void DotsC_XmlToBlob(char* & blobDest,
     Init();
     deleter=DeleteBytePointer;
     std::vector<char> blob;
-    Safir::Dob::Typesystem::ToolSupport::XmlToBinary(RepositoryKeeper::GetRepository(), xmlSource, blob);
+    ts::XmlToBinary(RepositoryKeeper::GetRepository(), xmlSource, blob);
     if (!blob.empty())
     {
         blobDest=new char[blob.size()];
@@ -1181,14 +742,13 @@ void DotsC_BlobToJson(char * const jsonDest,
 {
     Init();
     std::ostringstream jsonStream;
-    Safir::Dob::Typesystem::ToolSupport::BinaryToJson(RepositoryKeeper::GetRepository(), blobSource, jsonStream);
+    ts::BinaryToJson(RepositoryKeeper::GetRepository(), blobSource, jsonStream);
     std::string json=jsonStream.str();
     resultSize=static_cast<DotsC_Int32>(json.size())+1; //add one char for null termination
     if (resultSize <= bufSize)
     {
         strncpy(jsonDest, json.c_str(), resultSize);
     }
-
 }
 
 void DotsC_JsonToBlob(char * & blobDest,
@@ -1198,7 +758,7 @@ void DotsC_JsonToBlob(char * & blobDest,
     Init();
     deleter=DeleteBytePointer;
     std::vector<char> blob;
-    Safir::Dob::Typesystem::ToolSupport::JsonToBinary(RepositoryKeeper::GetRepository(), jsonSource, blob);
+    ts::JsonToBinary(RepositoryKeeper::GetRepository(), jsonSource, blob);
     if (!blob.empty())
     {
         blobDest=new char[blob.size()];
@@ -1228,7 +788,7 @@ void DotsC_BinaryToBase64(char* base64Dest,
 {
     Init();
     std::ostringstream b64Stream;
-    Safir::Dob::Typesystem::ToolSupport::BinaryToBase64(binarySource, sourceSize, b64Stream);
+    ts::BinaryToBase64(binarySource, sourceSize, b64Stream);
     std::string base64=b64Stream.str();
     resultSize=static_cast<DotsC_Int32>(base64.size())+1; //add one char for null termination
     strncpy(base64Dest, base64.c_str(), std::min(resultSize, destSize));
@@ -1250,7 +810,7 @@ void DotsC_Base64ToBinary(char* binaryDest,
     Init();
     std::vector<char> bin;
     std::string base64(base64Source, base64Source+static_cast<size_t>(sourceSize));
-    Safir::Dob::Typesystem::ToolSupport::Base64ToBinary(base64, bin);
+    ts::Base64ToBinary(base64, bin);
     resultSize=static_cast<DotsC_Int32>(bin.size());
     if (resultSize<=destSize)
     {
@@ -1261,95 +821,140 @@ void DotsC_Base64ToBinary(char* binaryDest,
 //************************************************************************************
 //* Functions for retrieval of parameters
 //************************************************************************************
-void DotsC_GetBooleanParameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_ArrayIndex index, bool & val)
+void DotsC_GetBooleanParameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_Int32 index, bool & val)
 {
     Init();
     const ParameterDescriptionShm* const pd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
     val=pd->GetBoolValue(index);
 }
 
-void DotsC_GetEnumerationParameter(const DotsC_TypeId typeId,
-                                   const DotsC_ParameterIndex parameter,
-                                   const DotsC_ArrayIndex index,
-                                   DotsC_EnumerationValue& val)
+void DotsC_GetEnumerationParameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_Int32 index, const DotsC_KeyValMode keyValMode, DotsC_EnumerationValue& val)
 {
     Init();
     const ParameterDescriptionShm* const pd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
-    val=pd->GetInt32Value(index);
+    if (keyValMode==DotsC_ValueMode)
+    {
+        val=pd->GetInt32Value(index);
+    }
+    else
+    {
+        val=pd->GetInt32Key(index);
+    }
 }
 
-void DotsC_GetInt32Parameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_ArrayIndex index, DotsC_Int32& val)
+void DotsC_GetInt32Parameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_Int32 index, const DotsC_KeyValMode keyValMode, DotsC_Int32& val)
 {
     Init();
     const ParameterDescriptionShm* const pd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
-    val=pd->GetInt32Value(index);
+    if (keyValMode==DotsC_ValueMode)
+    {
+        val=pd->GetInt32Value(index);
+    }
+    else
+    {
+        val=pd->GetInt32Key(index);
+    }
 }
 
-void DotsC_GetInt64Parameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_ArrayIndex index, DotsC_Int64& val)
+void DotsC_GetInt64Parameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_Int32 index, const DotsC_KeyValMode keyValMode, DotsC_Int64& val)
 {
     Init();
     const ParameterDescriptionShm* const pd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
-    val=pd->GetInt64Value(index);
+    if (keyValMode==DotsC_ValueMode)
+    {
+        val=pd->GetInt64Value(index);
+    }
+    else
+    {
+        val=pd->GetInt64Key(index);
+    }
 }
 
-void DotsC_GetFloat32Parameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_ArrayIndex index, DotsC_Float32& val)
+void DotsC_GetFloat32Parameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_Int32 index, DotsC_Float32& val)
 {
     Init();
     const ParameterDescriptionShm* const pd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
     val=pd->GetFloat32Value(index);
 }
 
-void DotsC_GetFloat64Parameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_ArrayIndex index, DotsC_Float64& val)
+void DotsC_GetFloat64Parameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_Int32 index, DotsC_Float64& val)
 {
     Init();
     const ParameterDescriptionShm* const pd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
     val=pd->GetFloat64Value(index);
 }
 
-void DotsC_GetStringParameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_ArrayIndex index, const char* &val)
+void DotsC_GetStringParameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_Int32 index, const DotsC_KeyValMode keyValMode, const char* &val)
 {
     Init();
     const ParameterDescriptionShm* const pd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
-    val=pd->GetStringValue(index);
+    if (keyValMode==DotsC_ValueMode)
+    {
+        val=pd->GetStringValue(index);
+    }
+    else
+    {
+        val=pd->GetStringKey(index);
+    }
 }
 
-void DotsC_GetTypeIdParameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_ArrayIndex index, DotsC_TypeId& val)
+void DotsC_GetTypeIdParameter(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_Int32 index, const DotsC_KeyValMode keyValMode, DotsC_TypeId& val)
 {
     Init();
     const ParameterDescriptionShm* const pd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
     val=pd->GetInt64Value(index);
+    if (keyValMode==DotsC_ValueMode)
+    {
+        val=pd->GetInt64Value(index);
+    }
+    else
+    {
+        val=pd->GetInt64Key(index);
+    }
 }
 
 void DotsC_GetHashedIdParameter(const DotsC_TypeId typeId,
                                 const DotsC_ParameterIndex parameter,
-                                const DotsC_ArrayIndex index,
+                                const DotsC_Int32 index,
+                                const DotsC_KeyValMode keyValMode,
                                 DotsC_Int64 & hashVal,
                                 const char* & strVal)
 {
     Init();
     const ParameterDescriptionShm* const pd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
-    std::pair<DotsC_Int64, const char*> val=pd->GetHashedValue(index);
+    std::pair<DotsC_Int64, const char*> val=(keyValMode==DotsC_ValueMode) ? pd->GetHashedValue(index) : pd->GetHashedKey(index);
     hashVal=val.first;
     strVal=val.second;
 }
 
 void DotsC_GetEntityIdParameter(const DotsC_TypeId typeId,
                                 const DotsC_ParameterIndex parameter,
-                                const DotsC_ArrayIndex index,
+                                const DotsC_Int32 index,
+                                const DotsC_KeyValMode keyValMode,
                                 DotsC_EntityId & entityId,
                                 const char* & instanceIdStr)
 {
     Init();
     const ParameterDescriptionShm* const pd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
-    entityId.typeId=pd->GetInt64Value(index);
-    std::pair<DotsC_Int64, const char*> hashVal=pd->GetHashedValue(index);
-    entityId.instanceId=hashVal.first;
-    instanceIdStr=hashVal.second;
+    if (keyValMode==DotsC_ValueMode)
+    {
+        entityId.typeId=pd->GetInt64Value(index);
+        std::pair<DotsC_Int64, const char*> hashVal=pd->GetHashedValue(index);
+        entityId.instanceId=hashVal.first;
+        instanceIdStr=hashVal.second;
+    }
+    else
+    {
+        entityId.typeId=pd->GetInt64Key(index);
+        std::pair<DotsC_Int64, const char*> hashVal=pd->GetHashedKey(index);
+        entityId.instanceId=hashVal.first;
+        instanceIdStr=hashVal.second;
+    }
 }
 
 void DotsC_GetObjectParameter(const DotsC_TypeId typeId,
                               const DotsC_ParameterIndex parameter,
-                              const DotsC_ArrayIndex index,
+                              const DotsC_Int32 index,
                               const char* & val)
 {
     Init();
@@ -1359,7 +964,7 @@ void DotsC_GetObjectParameter(const DotsC_TypeId typeId,
 
 void DotsC_GetBinaryParameter(const DotsC_TypeId typeId,
                               const DotsC_ParameterIndex parameter,
-                              const DotsC_ArrayIndex index,
+                              const DotsC_Int32 index,
                               const char* &val,
                               DotsC_Int32& size)
 {
@@ -1370,465 +975,466 @@ void DotsC_GetBinaryParameter(const DotsC_TypeId typeId,
     size=static_cast<DotsC_Int32>(binary.second);
 }
 
-//*********************************
-//* For "real classes"
-//*********************************
-DotsC_Int32 DotsC_GetInitialSize(const DotsC_TypeId typeId)
+DotsC_Int32 DotsC_DictionaryInt32KeyToIndex(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_Int32 key)
 {
     Init();
-    const ClassDescriptionShm* cd=RepositoryKeeper::GetRepository()->GetClass(typeId);
-    if (cd!=NULL)
+    const ParameterDescriptionShm* const pd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
+    return ts::TypeUtilities::GetDictionaryIndexFromKey(pd, key);
+}
+
+DotsC_Int32 DotsC_DictionaryInt64KeyToIndex(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_Int64 key)
+{
+    Init();
+    const ParameterDescriptionShm* const pd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
+    return ts::TypeUtilities::GetDictionaryIndexFromKey(pd, key);
+}
+
+DotsC_Int32 DotsC_DictionaryStringKeyToIndex(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const char* key)
+{
+    Init();
+    const ParameterDescriptionShm* const pd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
+    return ts::TypeUtilities::GetDictionaryIndexFromKey(pd, key);
+}
+
+DotsC_Int32 DotsC_DictionaryEntityIdKeyToIndex(const DotsC_TypeId typeId, const DotsC_ParameterIndex parameter, const DotsC_EntityId key)
+{
+    Init();
+    const ParameterDescriptionShm* const pd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetParameter(parameter);
+    return ts::TypeUtilities::GetDictionaryIndexFromKey(pd, key);
+}
+
+
+//********************************************************
+//* Base operations on blobs
+//********************************************************
+
+char* DotsC_AllocateBlob(DotsC_Int32 size)
+{
+    Init();
+    char* blob=new char[static_cast<size_t>(size)];
+    return blob;
+}
+
+void DotsC_CreateCopyOfBlob(char* & to, const char* from)
+{
+    Init();
+    size_t size=static_cast<size_t>(Reader::GetSize(from));
+    to=new char[size];
+    memcpy(to, from, size);
+}
+
+void DotsC_DeleteBlob(char* & blob)
+{
+    Init();
+    if (blob!=NULL)
     {
-        return cd->OwnSize();
+        delete[] blob;
+        blob=NULL;
+    }
+}
+
+//Read operations
+DotsC_TypeId DotsC_GetTypeId(const char* blob)
+{
+    Init();
+    return Reader::GetTypeId(blob);
+}
+
+DotsC_Int32 DotsC_GetSize(const char* blob)
+{
+    Init();
+    return Reader::GetSize(blob);
+}
+
+DotsC_Handle DotsC_CreateBlobReader(const char* blob)
+{
+    Init();
+    Reader* reader=new Reader(RepositoryKeeper::GetRepository(), blob);
+    DotsC_Handle address=(DotsC_Handle)reader;
+    return address;
+}
+
+void DotsC_DeleteBlobReader(DotsC_Handle readerHandle)
+{
+    Init();
+    Reader* reader=ReaderFromHandle(readerHandle);
+    delete reader;
+}
+
+DotsC_Int32 DotsC_GetNumberOfMemberValues(DotsC_Handle readerHandle, DotsC_MemberIndex member)
+{
+    Init();
+    Reader* reader=ReaderFromHandle(readerHandle);
+    return reader->NumberOfValues(member);
+}
+
+void DotsC_ReadMemberStatus(DotsC_Handle readerHandle, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex)
+{
+    Init();
+    Reader* reader=ReaderFromHandle(readerHandle);
+    reader->ReadStatus(member, arrayIndex, isNull, isChanged);
+}
+
+void DotsC_ReadInt32Member(DotsC_Handle readerHandle, DotsC_Int32& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode)
+{
+    Init();
+    Reader* reader=ReaderFromHandle(readerHandle);
+    if (keyValMode==DotsC_ValueMode)
+    {
+        reader->ReadValue(member, arrayIndex, val, isNull, isChanged);
     }
     else
     {
-        return -1;
+        isChanged=false;
+        isNull=false;
+        val=reader->ReadKey<DotsC_Int32>(member, arrayIndex);
     }
 }
 
-void DotsC_FormatBlob(char* const blob,
-                      const DotsC_Int32 blobSize,
-                      const DotsC_TypeId typeId,
-                      char* & beginningOfUnused)
+void DotsC_ReadInt64Member(DotsC_Handle readerHandle, DotsC_Int64& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode)
 {
     Init();
-    RepositoryKeeper::GetBlobLayout()->FormatBlob(blob, blobSize, typeId, beginningOfUnused);
-}
-
-
-void DotsC_CreateObjectMember(char* const insideBlob,
-                              const DotsC_Int32 blobSize,
-                              const DotsC_TypeId typeId,
-                              const DotsC_MemberIndex member,
-                              const DotsC_ArrayIndex index,
-                              const bool isChanged,
-                              char* & beginningOfUnused)
-{
-    Init();
-    RepositoryKeeper::GetBlobLayout()->CreateObjectMember(insideBlob,blobSize, typeId, member, index, isChanged, beginningOfUnused);
-}
-
-void DotsC_CreateStringMember(char* const insideBlob,
-                              const DotsC_Int32 stringLength, //remember the null-termination!
-                              const DotsC_MemberIndex member,
-                              const DotsC_ArrayIndex index,
-                              const bool isChanged,
-                              char* & beginningOfUnused)
-{
-    Init();
-    RepositoryKeeper::GetBlobLayout()->CreateStringMember(insideBlob,stringLength,member,index,isChanged,beginningOfUnused);
-}
-
-void DotsC_CreateBinaryMember(char* const insideBlob,
-                              const DotsC_Int32 binarySize,
-                              const DotsC_MemberIndex member,
-                              const DotsC_ArrayIndex index,
-                              const bool isChanged,
-                              char* & beginningOfUnused)
-{
-    Init();
-    RepositoryKeeper::GetBlobLayout()->CreateBinaryMember(insideBlob,binarySize,member,index,isChanged,beginningOfUnused);
-}
-
-void DotsC_SetBooleanMemberInPreallocated(const bool val,
-                                          const bool isNull,
-                                          const bool isChanged,
-                                          char* const blob,
-                                          const DotsC_MemberIndex member,
-                                          const DotsC_ArrayIndex index)
-{
-    Init();
-    if (!isNull)
+    Reader* reader=ReaderFromHandle(readerHandle);
+    if (keyValMode==DotsC_ValueMode)
     {
-        RepositoryKeeper::GetBlobLayout()->SetBoolMember(val, blob, member, index);
-    }
-    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(isNull, isChanged, blob, member, index);
-}
-
-
-
-void DotsC_SetInt32MemberInPreallocated(const DotsC_Int32 val,
-                                        const bool isNull,
-                                        const bool isChanged,
-                                        char* const blob,
-                                        const DotsC_MemberIndex member,
-                                        const DotsC_ArrayIndex index)
-{
-    Init();
-    if (!isNull)
-    {
-        RepositoryKeeper::GetBlobLayout()->SetInt32Member(val, blob, member, index);
-    }
-    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(isNull, isChanged, blob, member, index);
-}
-
-
-void DotsC_SetInt64MemberInPreallocated(const DotsC_Int64 val,
-                                        const bool isNull,
-                                        const bool isChanged,
-                                        char* const blob,
-                                        const DotsC_MemberIndex member,
-                                        const DotsC_ArrayIndex index)
-{
-    Init();
-    if (!isNull)
-    {
-        RepositoryKeeper::GetBlobLayout()->SetInt64Member(val, blob, member, index);
-    }
-    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(isNull, isChanged, blob, member, index);
-
-}
-
-void DotsC_SetFloat32MemberInPreallocated(const DotsC_Float32 val,
-                                          const bool isNull,
-                                          const bool isChanged,
-                                          char* const blob,
-                                          const DotsC_MemberIndex member,
-                                          const DotsC_ArrayIndex index)
-{
-    Init();
-    if (!isNull)
-    {
-        RepositoryKeeper::GetBlobLayout()->SetFloat32Member(val, blob, member, index);
-    }
-    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(isNull, isChanged, blob, member, index);
-
-}
-
-void DotsC_SetFloat64MemberInPreallocated(const DotsC_Float64 val,
-                                          const bool isNull,
-                                          const bool isChanged,
-                                          char* const blob,
-                                          const DotsC_MemberIndex member,
-                                          const DotsC_ArrayIndex index)
-{
-    Init();
-    if (!isNull)
-    {
-        RepositoryKeeper::GetBlobLayout()->SetFloat64Member(val, blob, member, index);
-    }
-    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(isNull, isChanged, blob, member, index);
-
-}
-
-void DotsC_SetHashedIdMemberInPreallocated(const DotsC_Int64 hashVal,
-                                           const char* const strVal,
-                                           const DotsC_Int32 stringLength,
-                                           const bool isNull,
-                                           const bool isChanged,
-                                           char* const blob,
-                                           const DotsC_MemberIndex member,
-                                           const DotsC_ArrayIndex index,
-                                           char* & beginningOfUnused)
-{
-    Init();
-    if (!isNull)
-    {
-        RepositoryKeeper::GetBlobLayout()->CreateAndSetMemberWithOptionalString(blob,
-                                                         hashVal,
-                                                         strVal,
-                                                         stringLength,
-                                                         member,
-                                                         index,
-                                                         isChanged,
-                                                         beginningOfUnused);
-    }
-    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(isNull, isChanged, blob, member, index);
-}
-
-void DotsC_SetEntityIdMemberInPreallocated(const DotsC_EntityId & entityId,
-                                           const char* const instanceIdStr,
-                                           const DotsC_Int32 stringLength,
-                                           const bool isNull,
-                                           const bool isChanged,
-                                           char* const blob,
-                                           const DotsC_MemberIndex member,
-                                           const DotsC_ArrayIndex index,
-                                           char* & beginningOfUnused)
-{
-    Init();
-    if (!isNull)
-    {
-        RepositoryKeeper::GetBlobLayout()->CreateAndSetMemberWithOptionalString(blob,
-                                                         entityId,
-                                                         instanceIdStr,
-                                                         stringLength,
-                                                         member,
-                                                         index,
-                                                         isChanged,
-                                                         beginningOfUnused);
-    }
-    RepositoryKeeper::GetBlobLayout()->SetMemberStatus(isNull, isChanged, blob, member, index);
-}
-
-void DotsC_GetPropertyMappingKind(const DotsC_TypeId typeId,
-                                  const DotsC_TypeId propertyId,
-                                  const DotsC_MemberIndex member,
-                                  DotsC_PropertyMappingKind & mappingKind,
-                                  DotsC_ErrorCode & errorCode)
-{
-    Init();
-    errorCode=NoError;
-
-    bool isInherited;
-    const PropertyMappingDescriptionShm* pmd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetPropertyMapping(propertyId, isInherited);
-
-    if (pmd==NULL)
-    {
-        errorCode=IllegalValue;
-        return;
-    }
-
-    const MemberMappingDescriptionShm* mm=pmd->GetMemberMapping(member);
-
-    if (mm==NULL)
-    {
-        errorCode=IllegalValue;
+        reader->ReadValue(member, arrayIndex, val, isNull, isChanged);
     }
     else
     {
-        mappingKind=mm->GetMappingKind();
+        isChanged=false;
+        isNull=false;
+        val=reader->ReadKey<DotsC_Int64>(member, arrayIndex);
     }
 }
 
-
-void DotsC_GetClassMemberReference(const DotsC_TypeId typeId,
-                                   const DotsC_TypeId propertyId,
-                                   const DotsC_MemberIndex member,
-                                   const DotsC_Int32* & classMemberReference,
-                                   DotsC_Int32 & classMemberReferenceSize)
+void DotsC_ReadFloat32Member(DotsC_Handle readerHandle, DotsC_Float32& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode)
 {
     Init();
-    classMemberReference=NULL;
-    classMemberReferenceSize=0;
-
-    bool isInherited;
-    const PropertyMappingDescriptionShm* pmd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetPropertyMapping(propertyId, isInherited);
-
-    if (pmd==NULL)
-    {
-        return;
-    }
-
-    const MemberMappingDescriptionShm* mm=pmd->GetMemberMapping(member);
-
-    if (mm==NULL || mm->GetMappingKind()!=MappedToMember)
-    {
-        return;
-    }
-
-    classMemberReference=mm->GetRawMemberRef();
-    classMemberReferenceSize=mm->MemberReferenceDepth()*2;
+    Reader* reader=ReaderFromHandle(readerHandle);
+    reader->ReadValue(member, arrayIndex, val, isNull, isChanged);
 }
 
-
-void DotsC_GetEnumerationChecksum(const DotsC_TypeId typeId,
-                                  DotsC_TypeId & checksum)
+void DotsC_ReadFloat64Member(DotsC_Handle readerHandle, DotsC_Float64& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode)
 {
     Init();
-    const EnumDescriptionShm* ed=RepositoryKeeper::GetRepository()->GetEnum(typeId);
-    if (ed==NULL)
+    Reader* reader=ReaderFromHandle(readerHandle);
+    reader->ReadValue(member, arrayIndex, val, isNull, isChanged);
+}
+
+void DotsC_ReadBooleanMember(DotsC_Handle readerHandle, bool& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode)
+{
+    Init();
+    Reader* reader=ReaderFromHandle(readerHandle);
+    reader->ReadValue(member, arrayIndex, val, isNull, isChanged);
+}
+
+void DotsC_ReadStringMember(DotsC_Handle readerHandle, const char*& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode)
+{
+    Init();
+    Reader* reader=ReaderFromHandle(readerHandle);
+    if (keyValMode==DotsC_ValueMode)
     {
-        checksum=0;
+        reader->ReadValue(member, arrayIndex, val, isNull, isChanged);
     }
     else
     {
-        checksum=ed->GetCheckSum();
+        isChanged=false;
+        isNull=false;
+        val=reader->ReadKey<const char*>(member, arrayIndex);
     }
 }
 
-void DotsC_GetBooleanPropertyParameter(const DotsC_TypeId typeId,
-                                       const DotsC_TypeId propertyId,
-                                       const DotsC_MemberIndex member,
-                                       const DotsC_ArrayIndex index,
-                                       bool & val)
+void DotsC_ReadHashedMember(DotsC_Handle readerHandle, DotsC_Int64& val, const char*& optionalStr, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode)
 {
     Init();
-    const ParameterDescriptionShm* parameter;
-    int paramIndex;
-    if (GetPropertyParameterInternal(typeId, propertyId, member, index, parameter, paramIndex))
+    Reader* reader=ReaderFromHandle(readerHandle);
+    std::pair<DotsC_Int64, const char*> hash;
+    if (keyValMode==DotsC_ValueMode)
     {
-        val=parameter->GetBoolValue(paramIndex);
+        reader->ReadValue(member, arrayIndex, hash, isNull, isChanged);
     }
+    else
+    {
+        isChanged=false;
+        isNull=false;
+        hash=reader->ReadKey< std::pair<DotsC_Int64, const char*> >(member, arrayIndex);
+    }
+
+    val=hash.first;
+    optionalStr=hash.second;
 }
 
-void DotsC_GetEnumerationPropertyParameter( const DotsC_TypeId typeId,
-                                            const DotsC_TypeId propertyId,
-                                            const DotsC_MemberIndex member,
-                                            const DotsC_ArrayIndex index,
-                                            DotsC_EnumerationValue & val)
+void DotsC_ReadEntityIdMember(DotsC_Handle readerHandle, DotsC_EntityId& val, const char*& optionalStr, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode)
 {
     Init();
-    const ParameterDescriptionShm* parameter;
-    int paramIndex;
-    if (GetPropertyParameterInternal(typeId, propertyId, member, index, parameter, paramIndex))
+    Reader* reader=ReaderFromHandle(readerHandle);
+    std::pair<DotsC_EntityId, const char*> eid;
+    if (keyValMode==DotsC_ValueMode)
     {
-        val=parameter->GetInt32Value(paramIndex);
+        reader->ReadValue(member, arrayIndex, eid, isNull, isChanged);
     }
+    else
+    {
+        isChanged=false;
+        isNull=false;
+        eid=reader->ReadKey< std::pair<DotsC_EntityId, const char*> >(member, arrayIndex);
+    }
+
+    val=eid.first;
+    optionalStr=eid.second;
 }
 
-void DotsC_GetInt32PropertyParameter(const DotsC_TypeId typeId,
-                                     const DotsC_TypeId propertyId,
-                                     const DotsC_MemberIndex member,
-                                     const DotsC_ArrayIndex index,
-                                     DotsC_Int32 & val)
+void DotsC_ReadBinaryMember(DotsC_Handle readerHandle, const char*& val, DotsC_Int32& size, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode)
 {
     Init();
-    const ParameterDescriptionShm* parameter;
-    int paramIndex;
-    if (GetPropertyParameterInternal(typeId, propertyId, member, index, parameter, paramIndex))
-    {
-        val=parameter->GetInt32Value(paramIndex);
-    }
+    Reader* reader=ReaderFromHandle(readerHandle);
+    std::pair<const char*, DotsC_Int32> bin;
+    reader->ReadValue(member, arrayIndex, bin, isNull, isChanged);
+    val=bin.first;
+    size=bin.second;
 }
 
-void DotsC_GetInt64PropertyParameter(const DotsC_TypeId typeId,
-                                     const DotsC_TypeId propertyId,
-                                     const DotsC_MemberIndex member,
-                                     const DotsC_ArrayIndex index,
-                                     DotsC_Int64 & val)
+void DotsC_ReadObjectMember(DotsC_Handle readerHandle, const char*& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode)
 {
     Init();
-    const ParameterDescriptionShm* parameter;
-    int paramIndex;
-    if (GetPropertyParameterInternal(typeId, propertyId, member, index, parameter, paramIndex))
-    {
-        val=parameter->GetInt64Value(paramIndex);
-    }
+    Reader* reader=ReaderFromHandle(readerHandle);
+    std::pair<const char*, DotsC_Int32> bin;
+    reader->ReadValue(member, arrayIndex, bin, isNull, isChanged);
+    val=bin.first;
 }
 
-void DotsC_GetFloat32PropertyParameter(const DotsC_TypeId typeId,
-                                       const DotsC_TypeId propertyId,
-                                       const DotsC_MemberIndex member,
-                                       const DotsC_ArrayIndex index,
-                                       DotsC_Float32 & val)
+//Write operations
+DotsC_Handle DotsC_CreateBlobWriter(DotsC_TypeId typeId)
 {
     Init();
-    const ParameterDescriptionShm* parameter;
-    int paramIndex;
-    if (GetPropertyParameterInternal(typeId, propertyId, member, index, parameter, paramIndex))
-    {
-        val=parameter->GetFloat32Value(paramIndex);
-    }
+    Writer* writer=new Writer(RepositoryKeeper::GetRepository(), typeId);
+    DotsC_Handle address=(DotsC_Handle)writer;
+    return address;
 }
 
-void DotsC_GetFloat64PropertyParameter(const DotsC_TypeId typeId,
-                                       const DotsC_TypeId propertyId,
-                                       const DotsC_MemberIndex member,
-                                       const DotsC_ArrayIndex index,
-                                       DotsC_Float64 & val)
+DotsC_Handle DotsC_CreateBlobWriterFromBlob(const char* blob)
 {
     Init();
-    const ParameterDescriptionShm* parameter;
-    int paramIndex;
-    if (GetPropertyParameterInternal(typeId, propertyId, member, index, parameter, paramIndex))
-    {
-        val=parameter->GetFloat64Value(paramIndex);
-    }
+    Writer* writer=new Writer(Reader(RepositoryKeeper::GetRepository(), blob));
+    DotsC_Handle address=(DotsC_Handle)writer;
+    return address;
 }
 
-void DotsC_GetStringPropertyParameter(const DotsC_TypeId typeId,
-                                      const DotsC_TypeId propertyId,
-                                      const DotsC_MemberIndex member,
-                                      const DotsC_ArrayIndex index,
-                                      const char* & val)
+DotsC_Handle DotsC_CreateBlobWriterFromReader(DotsC_Handle readerHandle)
 {
     Init();
-    const ParameterDescriptionShm* parameter;
-    int paramIndex;
-    if (GetPropertyParameterInternal(typeId, propertyId, member, index, parameter, paramIndex))
-    {
-        val=parameter->GetStringValue(paramIndex);
-    }
+    Writer* writer=new Writer(*ReaderFromHandle(readerHandle));
+    DotsC_Handle address=(DotsC_Handle)writer;
+    return address;
+
 }
 
-void DotsC_GetTypeIdPropertyParameter(const DotsC_TypeId typeId,
-                                      const DotsC_TypeId propertyId,
-                                      const DotsC_MemberIndex member,
-                                      const DotsC_ArrayIndex index,
-                                      DotsC_TypeId & val)
+void DotsC_DeleteBlobWriter(DotsC_Handle writerHandle)
 {
     Init();
-    const ParameterDescriptionShm* parameter;
-    int paramIndex;
-    if (GetPropertyParameterInternal(typeId, propertyId, member, index, parameter, paramIndex))
-    {
-        val=parameter->GetInt64Value(paramIndex);
-    }
+    Writer* writer=WriterFromHandle(writerHandle);
+    delete writer;
 }
 
-void DotsC_GetHashedIdPropertyParameter(const DotsC_TypeId typeId,
-                                        const DotsC_TypeId propertyId,
-                                        const DotsC_MemberIndex member,
-                                        const DotsC_ArrayIndex index,
-                                        DotsC_Int64 & hashVal,
-                                        const char* & strVal)
+DotsC_Int32 DotsC_CalculateBlobSize(DotsC_Handle writerHandle)
 {
     Init();
-    const ParameterDescriptionShm* parameter;
-    int paramIndex;
-    if (GetPropertyParameterInternal(typeId, propertyId, member, index, parameter, paramIndex))
-    {
-        std::pair<DotsC_Int64, const char*> val=parameter->GetHashedValue(paramIndex);
-        hashVal=val.first;
-        strVal=val.second;
-    }
+    Writer* writer=WriterFromHandle(writerHandle);
+    return writer->CalculateBlobSize();
 }
 
-
-void DotsC_GetEntityIdPropertyParameter(const DotsC_TypeId typeId,
-                                        const DotsC_TypeId propertyId,
-                                        const DotsC_MemberIndex member,
-                                        const DotsC_ArrayIndex index,
-                                        DotsC_EntityId & entityId,
-                                        const char* & instanceIdStr)
+void DotsC_WriteBlob(DotsC_Handle writerHandle, char* blobDest)
 {
     Init();
-    const ParameterDescriptionShm* parameter;
-    int paramIndex;
-    if (GetPropertyParameterInternal(typeId, propertyId, member, index, parameter, paramIndex))
-    {
-        entityId.typeId=parameter->GetInt64Value(paramIndex);
-        std::pair<DotsC_Int64, const char*> val=parameter->GetHashedValue(paramIndex);
-        entityId.instanceId=val.first;
-        instanceIdStr=val.second;
-    }
+    Writer* writer=WriterFromHandle(writerHandle);
+    writer->CopyRawBlob(blobDest);
 }
 
-void DotsC_GetObjectPropertyParameter(const DotsC_TypeId typeId,
-                                      const DotsC_TypeId propertyId,
-                                      const DotsC_MemberIndex member,
-                                      const DotsC_ArrayIndex index,
-                                      const char* & val)
+void DotsC_WriteAllChangeFlags(DotsC_Handle writerHandle, bool changed)
 {
     Init();
-    const ParameterDescriptionShm* parameter;
-    int paramIndex;
-    if (GetPropertyParameterInternal(typeId, propertyId, member, index, parameter, paramIndex))
-    {
-        val=parameter->GetObjectValue(paramIndex).first;
-    }
+    Writer* writer=WriterFromHandle(writerHandle);
+    writer->SetAllChangeFlags(changed);
 }
 
-void DotsC_GetBinaryPropertyParameter(const DotsC_TypeId typeId,
-                                      const DotsC_TypeId propertyId,
-                                      const DotsC_MemberIndex member,
-                                      const DotsC_ArrayIndex index,
-                                      const char* & val,
-                                      DotsC_Int32& size)
+void DotsC_WriteChangeFlag(DotsC_Handle writerHandle,
+                           DotsC_MemberIndex member,
+                           DotsC_ArrayIndex index,
+                           bool changed)
 {
     Init();
-    const ParameterDescriptionShm* parameter;
-    int paramIndex;
-    if (GetPropertyParameterInternal(typeId, propertyId, member, index, parameter, paramIndex))
+    Writer* writer=WriterFromHandle(writerHandle);
+    writer->SetChanged(member, index, changed);
+}
+
+bool DotsC_MarkChanges(DotsC_Handle originalReader, DotsC_Handle currentWriter)
+{
+    Init();
+    const Reader* original=ReaderFromHandle(originalReader);
+    Writer* current=WriterFromHandle(currentWriter);
+    bool anythingChanged=current->MarkChanges(*original);
+    return anythingChanged;
+}
+
+void DotsC_WriteInt32Member(DotsC_Handle writerHandle, DotsC_Int32 val,
+                            bool isNull,
+                            bool isChanged,
+                            DotsC_MemberIndex member,
+                            DotsC_Int32 arrayIndex,
+                            DotsC_KeyValMode keyValMode)
+{
+    Init();
+    Writer* writer=WriterFromHandle(writerHandle);
+    if (keyValMode==DotsC_ValueMode)
     {
-        std::pair<const char*, size_t> bin=parameter->GetBinaryValue(paramIndex);
-        val=bin.first;
-        size=static_cast<DotsC_Int32>(bin.second);
+        writer->WriteValue(member, arrayIndex, val, isNull, isChanged);
+    }
+    else
+    {
+        writer->WriteKey(member, val);
     }
 }
 
+void DotsC_WriteInt64Member(DotsC_Handle writerHandle, DotsC_Int64 val,
+                            bool isNull,
+                            bool isChanged,
+                            DotsC_MemberIndex member,
+                            DotsC_Int32 arrayIndex,
+                            DotsC_KeyValMode keyValMode)
+{
+    Init();
+    Writer* writer=WriterFromHandle(writerHandle);
+    if (keyValMode==DotsC_ValueMode)
+    {
+        writer->WriteValue(member, arrayIndex, val, isNull, isChanged);
+    }
+    else
+    {
+        writer->WriteKey(member, val);
+    }
+}
+
+void DotsC_WriteFloat32Member(DotsC_Handle writerHandle, DotsC_Float32 val,
+                              bool isNull,
+                              bool isChanged,
+                              DotsC_MemberIndex member,
+                              DotsC_Int32 arrayIndex,
+                              DotsC_KeyValMode)
+{
+    Init();
+    Writer* writer=WriterFromHandle(writerHandle);
+    writer->WriteValue(member, arrayIndex, val, isNull, isChanged);
+}
+
+void DotsC_WriteFloat64Member(DotsC_Handle writerHandle, DotsC_Float64 val,
+                              bool isNull,
+                              bool isChanged,
+                              DotsC_MemberIndex member,
+                              DotsC_Int32 arrayIndex,
+                              DotsC_KeyValMode)
+{
+    Init();
+    Writer* writer=WriterFromHandle(writerHandle);
+    writer->WriteValue(member, arrayIndex, val, isNull, isChanged);
+}
+
+void DotsC_WriteBooleanMember(DotsC_Handle writerHandle, bool val,
+                              bool isNull,
+                              bool isChanged,
+                              DotsC_MemberIndex member,
+                              DotsC_Int32 arrayIndex,
+                              DotsC_KeyValMode)
+{
+    Init();
+    Writer* writer=WriterFromHandle(writerHandle);
+    writer->WriteValue(member, arrayIndex, val, isNull, isChanged);
+}
+
+void DotsC_WriteStringMember(DotsC_Handle writerHandle, const char* val,
+                             bool isNull,
+                             bool isChanged,
+                             DotsC_MemberIndex member,
+                             DotsC_Int32 arrayIndex,
+                             DotsC_KeyValMode keyValMode)
+{
+    Init();
+    Writer* writer=WriterFromHandle(writerHandle);
+    if (keyValMode==DotsC_ValueMode)
+    {
+        writer->WriteValue(member, arrayIndex, val, isNull, isChanged);
+    }
+    else
+    {
+        writer->WriteKey(member, val);
+    }
+}
+
+void DotsC_WriteHashedMember(DotsC_Handle writerHandle, DotsC_Int64 hash, const char* str,
+                             bool isNull,
+                             bool isChanged,
+                             DotsC_MemberIndex member,
+                             DotsC_Int32 arrayIndex,
+                             DotsC_KeyValMode keyValMode)
+{
+    Init();
+    Writer* writer=WriterFromHandle(writerHandle);
+    if (keyValMode==DotsC_ValueMode)
+    {
+        writer->WriteValue(member, arrayIndex, std::make_pair(hash, str), isNull, isChanged);
+    }
+    else
+    {
+        writer->WriteKey(member, std::make_pair(hash, str));
+    }
+}
+
+void DotsC_WriteEntityIdMember(DotsC_Handle writerHandle, DotsC_EntityId val, const char* instanceString,
+                               bool isNull,
+                               bool isChanged,
+                               DotsC_MemberIndex member,
+                               DotsC_Int32 arrayIndex,
+                               DotsC_KeyValMode keyValMode)
+{
+    Init();
+    Writer* writer=WriterFromHandle(writerHandle);
+    if (keyValMode==DotsC_ValueMode)
+    {
+        writer->WriteValue(member, arrayIndex, std::make_pair(val, instanceString), isNull, isChanged);
+    }
+    else
+    {
+        writer->WriteKey(member, std::make_pair(val, instanceString));
+    }
+}
+
+void DotsC_WriteBinaryMember(DotsC_Handle writerHandle, const char* val, DotsC_Int32 size,
+                             bool isNull,
+                             bool isChanged,
+                             DotsC_MemberIndex member,
+                             DotsC_Int32 arrayIndex,
+                             DotsC_KeyValMode)
+{
+    Init();
+    Writer* writer=WriterFromHandle(writerHandle);
+    writer->WriteValue(member, arrayIndex, std::make_pair(val, size), isNull, isChanged);
+}
+
+void DotsC_WriteObjectMember(DotsC_Handle writerHandle, const char* blob,
+                             bool isNull,
+                             bool isChanged,
+                             DotsC_MemberIndex member,
+                             DotsC_Int32 arrayIndex,
+                             DotsC_KeyValMode)
+{
+    Init();
+    Writer* writer=WriterFromHandle(writerHandle);
+    DotsC_Int32 size=isNull ? 0 : DotsC_GetSize(blob);
+    writer->WriteValue(member, arrayIndex, std::make_pair(blob, size), isNull, isChanged);
+}
+
+//************************************************************************************
+//* Library exception handling
+//************************************************************************************
 void DotsC_SetException(const DotsC_TypeId exceptionId, const char* const description)
 {
     Init();
@@ -1865,60 +1471,9 @@ void DotsC_PeekAtException(DotsC_TypeId & exceptionId)
     ExceptionKeeper::Instance().Peek(exceptionId,desc);
 }
 
-
-void DotsC_GetDouFilePathForType(const DotsC_TypeId typeId,
-                                 char* const buf,
-                                 const DotsC_Int32 bufSize,
-                                 DotsC_Int32 & resultSize)
-{
-    Init();
-
-    const char* file=NULL;
-
-    const ClassDescriptionShm* cd=RepositoryKeeper::GetRepository()->GetClass(typeId);
-    if (cd!=NULL)
-    {
-        file=cd->FileName();
-    }
-    else
-    {
-        const EnumDescriptionShm* ed=RepositoryKeeper::GetRepository()->GetEnum(typeId);
-        if (ed!=NULL)
-        {
-            file=ed->FileName();
-        }
-        else
-        {
-            const PropertyDescriptionShm* pd=RepositoryKeeper::GetRepository()->GetProperty(typeId);
-            if (pd!=NULL)
-            {
-                file=pd->FileName();
-            }
-            else
-            {
-                const ExceptionDescriptionShm* ex=RepositoryKeeper::GetRepository()->GetException(typeId);
-                if (ex!=NULL)
-                {
-                    file=ex->FileName();
-                }
-            }
-        }
-    }
-
-    if (file==NULL)
-    {
-        //not found
-        resultSize=-1;
-        return;
-    }
-
-    resultSize=static_cast<DotsC_Int32>(strlen(file))+1; //add one for null termination
-    if (resultSize<=bufSize)
-    {
-        strncpy(buf, file, resultSize);
-    }
-}
-
+//************************************************************************************
+//* Functions mostly indended for debugging
+//************************************************************************************
 const char* DotsC_GetDouFilePath(const DotsC_TypeId typeId)
 {
     const ClassDescriptionShm* cd=RepositoryKeeper::GetRepository()->GetClass(typeId);
@@ -1969,11 +1524,11 @@ void DotsC_GetTypeDescription(const DotsC_TypeId typeId,
     std::ostringstream os;
     if (typeId==0)
     {
-        Safir::Dob::Typesystem::ToolSupport::RepositoryToString(RepositoryKeeper::GetRepository(), false, os);
+        ts::RepositoryToString(RepositoryKeeper::GetRepository(), false, os);
     }
     else
     {
-        Safir::Dob::Typesystem::ToolSupport::TypeToString(RepositoryKeeper::GetRepository(), typeId, os);
+        ts::TypeToString(RepositoryKeeper::GetRepository(), typeId, os);
     }
 
     std::string text=os.str();

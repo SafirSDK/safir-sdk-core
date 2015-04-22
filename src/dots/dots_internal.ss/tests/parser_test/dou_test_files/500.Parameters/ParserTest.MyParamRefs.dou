@@ -128,10 +128,11 @@
                     </valueRef>
                 </arrayElement>
                 <arrayElement>
-                    <valueRef>
+                    <value>9876</value>
+                    <!--valueRef>
                         <name>ParserTest.MyParam1.IntArray</name>
                         <index>4</index>                        
-                    </valueRef>
+                    </valueRef-->
                 </arrayElement>
                 <arrayElement>
                     <valueRef>
@@ -140,6 +141,37 @@
                     </valueRef>
                 </arrayElement>
             </arrayElements>            
+        </parameter>
+        
+        <parameter>
+            <name>IntArrayNew</name>
+            <type>Int32</type>
+            <array>                
+                <valueRef>
+                    <name>ParserTest.MyParam1.IntArray</name>
+                    <index>0</index>                        
+                </valueRef>
+            
+                <valueRef>
+                    <name>ParserTest.MyParamRefs.Two</name>
+                </valueRef>
+            
+                <valueRef>
+                    <name>ParserTest.MyParamRefs.Three</name>
+                </valueRef>
+            
+                <valueRef>
+                    <name>ParserTest.MyParam1.IntArray</name>
+                    <index>3</index>                        
+                </valueRef>
+            
+                <value>9876</value>
+                                    
+                <valueRef>
+                    <name>ParserTest.MyParam1.IntArray</name>
+                    <index>1</index>                        
+                </valueRef>                
+            </array>            
         </parameter>
 
     </parameters>

@@ -126,34 +126,17 @@ namespace Safir.Dob.Typesystem
         /// <summary>
         /// Create an Object from a blob.
         /// </summary>
-        /// <param name="blob">The blob to deserialize.</param>
-        public Object(System.IntPtr blob)
+        /// <param name="handle">Handle to a blobReader to deserialize.</param>
+        public Object(System.Int64 handle)
         {
 
-        }
-
-        /// <summary>
-        /// Calculate the size of the blob-serialized form of this object.
-        /// </summary>
-        /// <returns>The needed size in bytes.</returns>
-        virtual public System.Int32 CalculateBlobSize()
-        {
-            if (m_InitialSize == -1)
-            {
-                m_InitialSize = BlobOperations.GetInitialSize(ClassTypeId);
-            }
-            return m_InitialSize;
         }
 
         /// <summary>
         /// Write the object to a blob.
-        /// <para>
-        /// Note that the size of the blob is assumed to be correct! No checks are made!
-        /// </para>
         /// </summary>
-        /// <param name="blob">The blob to write to.</param>
-        /// <param name="beginningOfUnused">The beginning of unused dynamic blob space.</param>
-        virtual public void WriteToBlob(System.IntPtr blob, ref System.IntPtr beginningOfUnused)
+        /// <param name="handle">Handle to a blobWriter that is the destination of the serialized object.</param>
+        virtual public void WriteToBlob(System.Int64 handle)
         {
 
         }
@@ -181,12 +164,6 @@ namespace Safir.Dob.Typesystem
         {
             throw new SoftwareViolationException("Object does not have any members!");
         }
-
-        #endregion
-
-        #region Private Data
-
-        private static System.Int32 m_InitialSize = -1;
 
         #endregion
 

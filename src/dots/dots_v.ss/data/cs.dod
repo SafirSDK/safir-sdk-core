@@ -160,7 +160,7 @@ namespace @_NAMESPACE_@
         public static System.Int32 @_MEMBER_@ArraySize(Safir.Dob.Typesystem.Object obj)
         {
             Init();
-            return Safir.Dob.Typesystem.Properties.GetArraySize(obj.GetTypeId(), ClassTypeId, @_LOWER:MEMBER_@MemberIndex);
+            return Safir.Dob.Typesystem.Properties.GetArraySize(obj.GetTypeId(), ClassTypeId, m_@_LOWER:MEMBER_@MemberIndex);
         }
 
         /// <summary>
@@ -174,7 +174,7 @@ namespace @_NAMESPACE_@
         public static void Set@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index, @_MEMBERTYPE_@.Enumeration val)
         {
             Init();
-            Safir.Dob.Typesystem.Properties.SetEnum(obj, ClassTypeId, (System.Int32) val, @_LOWER:MEMBER_@MemberIndex, index);
+            Safir.Dob.Typesystem.Properties.SetEnum(obj, ClassTypeId, (System.Int32) val, m_@_LOWER:MEMBER_@MemberIndex, index);
         }
 
         /// <summary>
@@ -187,13 +187,13 @@ namespace @_NAMESPACE_@
         public static void SetOrdinal@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index, System.Int32 ordinal)
         {
             Init();
-            Safir.Dob.Typesystem.Properties.SetEnum(obj, ClassTypeId, ordinal, @_LOWER:MEMBER_@MemberIndex, index);
+            Safir.Dob.Typesystem.Properties.SetEnum(obj, ClassTypeId, ordinal, m_@_LOWER:MEMBER_@MemberIndex, index);
         }
 @@ELSE@@
         public static void Set@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index, @_MEMBERTYPE_@ val)
         {
             Init();
-            Safir.Dob.Typesystem.Properties.Set(obj, ClassTypeId, val, @_LOWER:MEMBER_@MemberIndex, index);
+            Safir.Dob.Typesystem.Properties.Set(obj, ClassTypeId, val, m_@_LOWER:MEMBER_@MemberIndex, index);
         }
 @@END_IF@@
 
@@ -207,7 +207,7 @@ namespace @_NAMESPACE_@
         public static void SetNull@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index)
         {
             Init();
-            Safir.Dob.Typesystem.Properties.SetNull(obj, ClassTypeId, @_LOWER:MEMBER_@MemberIndex, index);
+            Safir.Dob.Typesystem.Properties.SetNull(obj, ClassTypeId, m_@_LOWER:MEMBER_@MemberIndex, index);
         }
 
         /// <summary>
@@ -220,7 +220,7 @@ namespace @_NAMESPACE_@
         public static bool IsNull@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index)
         {
             Init();
-            return Safir.Dob.Typesystem.Properties.IsNull(obj, ClassTypeId, @_LOWER:MEMBER_@MemberIndex, index);
+            return Safir.Dob.Typesystem.Properties.IsNull(obj, ClassTypeId, m_@_LOWER:MEMBER_@MemberIndex, index);
         }
 
         /// <summary>
@@ -233,7 +233,7 @@ namespace @_NAMESPACE_@
         public static bool IsChanged@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index)
         {
             Init();
-            return Safir.Dob.Typesystem.Properties.IsChanged(obj, ClassTypeId, @_LOWER:MEMBER_@MemberIndex, index);
+            return Safir.Dob.Typesystem.Properties.IsChanged(obj, ClassTypeId, m_@_LOWER:MEMBER_@MemberIndex, index);
         }
 
         /// <summary>
@@ -246,7 +246,7 @@ namespace @_NAMESPACE_@
         public static bool IsReadOnly@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index)
         {
             Init();
-            return Safir.Dob.Typesystem.Properties.IsReadOnly(obj, ClassTypeId, @_LOWER:MEMBER_@MemberIndex, index);
+            return Safir.Dob.Typesystem.Properties.IsReadOnly(obj, ClassTypeId, m_@_LOWER:MEMBER_@MemberIndex, index);
         }
 
         /// <summary>
@@ -260,7 +260,7 @@ namespace @_NAMESPACE_@
         {
             Safir.Dob.Typesystem.Object val;
             Init();
-            Safir.Dob.Typesystem.Properties.Get(obj, ClassTypeId, out val, @_LOWER:MEMBER_@MemberIndex, index);
+            Safir.Dob.Typesystem.Properties.Get(obj, ClassTypeId, out val, m_@_LOWER:MEMBER_@MemberIndex, index);
 @@IF@@ @_MEMBERTYPE_@="Safir.Dob.Typesystem.Object"
             return val;
 @@ELSE@@
@@ -272,7 +272,7 @@ namespace @_NAMESPACE_@
         {
             System.Int32 val;
             Init();
-            Safir.Dob.Typesystem.Properties.GetEnum(obj, ClassTypeId, out val, @_LOWER:MEMBER_@MemberIndex, index);
+            Safir.Dob.Typesystem.Properties.GetEnum(obj, ClassTypeId, out val, m_@_LOWER:MEMBER_@MemberIndex, index);
             return (@_MEMBERTYPE_@.Enumeration) val;
         }
 
@@ -286,7 +286,7 @@ namespace @_NAMESPACE_@
         {
             System.Int32 val;
             Init();
-            Safir.Dob.Typesystem.Properties.GetEnum(obj, ClassTypeId, out val, @_LOWER:MEMBER_@MemberIndex, index);
+            Safir.Dob.Typesystem.Properties.GetEnum(obj, ClassTypeId, out val, m_@_LOWER:MEMBER_@MemberIndex, index);
             return val;
         }
 @@ELSE@@
@@ -294,7 +294,7 @@ namespace @_NAMESPACE_@
         {
             @_MEMBERTYPE_@ val;
             Init();
-            Safir.Dob.Typesystem.Properties.Get(obj, ClassTypeId, out val, @_LOWER:MEMBER_@MemberIndex, index);
+            Safir.Dob.Typesystem.Properties.Get(obj, ClassTypeId, out val, m_@_LOWER:MEMBER_@MemberIndex, index);
             return val;
         }
 @@END_IF@@
@@ -312,7 +312,7 @@ namespace @_NAMESPACE_@
         public static void Set@_MEMBER_@(Safir.Dob.Typesystem.Object obj, @_MEMBERTYPE_@.Enumeration val)
         {
             Init();
-            Safir.Dob.Typesystem.Properties.SetEnum(obj, ClassTypeId, (System.Int32) val, @_LOWER:MEMBER_@MemberIndex, 0);
+            Safir.Dob.Typesystem.Properties.SetEnum(obj, ClassTypeId, (System.Int32) val, m_@_LOWER:MEMBER_@MemberIndex, 0);
         }
 
         /// <summary>
@@ -325,13 +325,13 @@ namespace @_NAMESPACE_@
         public static void SetOrdinal@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 ordinal)
         {
             Init();
-            Safir.Dob.Typesystem.Properties.SetEnum(obj, ClassTypeId, ordinal, @_LOWER:MEMBER_@MemberIndex, 0);
+            Safir.Dob.Typesystem.Properties.SetEnum(obj, ClassTypeId, ordinal, m_@_LOWER:MEMBER_@MemberIndex, 0);
         }
 @@ELSE@@
         public static void Set@_MEMBER_@(Safir.Dob.Typesystem.Object obj, @_MEMBERTYPE_@ val)
         {
             Init();
-            Safir.Dob.Typesystem.Properties.Set(obj, ClassTypeId, val, @_LOWER:MEMBER_@MemberIndex, 0);
+            Safir.Dob.Typesystem.Properties.Set(obj, ClassTypeId, val, m_@_LOWER:MEMBER_@MemberIndex, 0);
         }
 @@END_IF@@
 
@@ -345,7 +345,7 @@ namespace @_NAMESPACE_@
         public static void SetNull@_MEMBER_@(Safir.Dob.Typesystem.Object obj)
         {
             Init();
-            Safir.Dob.Typesystem.Properties.SetNull(obj, ClassTypeId, @_LOWER:MEMBER_@MemberIndex, 0);
+            Safir.Dob.Typesystem.Properties.SetNull(obj, ClassTypeId, m_@_LOWER:MEMBER_@MemberIndex, 0);
         }
 
         /// <summary>
@@ -358,7 +358,7 @@ namespace @_NAMESPACE_@
         public static bool IsNull@_MEMBER_@(Safir.Dob.Typesystem.Object obj)
         {
             Init();
-            return Safir.Dob.Typesystem.Properties.IsNull(obj, ClassTypeId, @_LOWER:MEMBER_@MemberIndex, 0);
+            return Safir.Dob.Typesystem.Properties.IsNull(obj, ClassTypeId, m_@_LOWER:MEMBER_@MemberIndex, 0);
         }
 
         /// <summary>
@@ -371,7 +371,7 @@ namespace @_NAMESPACE_@
         public static bool IsChanged@_MEMBER_@(Safir.Dob.Typesystem.Object obj)
         {
             Init();
-            return Safir.Dob.Typesystem.Properties.IsChanged(obj, ClassTypeId, @_LOWER:MEMBER_@MemberIndex, 0);
+            return Safir.Dob.Typesystem.Properties.IsChanged(obj, ClassTypeId, m_@_LOWER:MEMBER_@MemberIndex, 0);
         }
 
         /// <summary>
@@ -384,7 +384,7 @@ namespace @_NAMESPACE_@
         public static bool IsReadOnly@_MEMBER_@(Safir.Dob.Typesystem.Object obj)
         {
             Init();
-            return Safir.Dob.Typesystem.Properties.IsReadOnly(obj, ClassTypeId, @_LOWER:MEMBER_@MemberIndex, 0);
+            return Safir.Dob.Typesystem.Properties.IsReadOnly(obj, ClassTypeId, m_@_LOWER:MEMBER_@MemberIndex, 0);
         }
 
         /// <summary>
@@ -399,7 +399,7 @@ namespace @_NAMESPACE_@
         {
             Safir.Dob.Typesystem.Object val;
             Init();
-            Safir.Dob.Typesystem.Properties.Get(obj, ClassTypeId, out val, @_LOWER:MEMBER_@MemberIndex, 0);
+            Safir.Dob.Typesystem.Properties.Get(obj, ClassTypeId, out val, m_@_LOWER:MEMBER_@MemberIndex, 0);
 @@IF@@ @_MEMBERTYPE_@="Safir.Dob.Typesystem.Object"
             return val;
 @@ELSE@@
@@ -411,7 +411,7 @@ namespace @_NAMESPACE_@
         {
             System.Int32 val;
             Init();
-            Safir.Dob.Typesystem.Properties.GetEnum(obj, ClassTypeId, out val, @_LOWER:MEMBER_@MemberIndex, 0);
+            Safir.Dob.Typesystem.Properties.GetEnum(obj, ClassTypeId, out val, m_@_LOWER:MEMBER_@MemberIndex, 0);
             return (@_MEMBERTYPE_@.Enumeration) val;
         }
 
@@ -426,7 +426,7 @@ namespace @_NAMESPACE_@
         {
             System.Int32 val;
             Init();
-            Safir.Dob.Typesystem.Properties.GetEnum(obj, ClassTypeId, out val, @_LOWER:MEMBER_@MemberIndex, 0);
+            Safir.Dob.Typesystem.Properties.GetEnum(obj, ClassTypeId, out val, m_@_LOWER:MEMBER_@MemberIndex, 0);
             return val;
         }
 @@ELSE@@
@@ -434,7 +434,7 @@ namespace @_NAMESPACE_@
         {
             @_MEMBERTYPE_@ val;
             Init();
-            Safir.Dob.Typesystem.Properties.Get(obj, ClassTypeId, out val, @_LOWER:MEMBER_@MemberIndex, 0);
+            Safir.Dob.Typesystem.Properties.Get(obj, ClassTypeId, out val, m_@_LOWER:MEMBER_@MemberIndex, 0);
             return val;
         }
 @@END_IF@@
@@ -453,23 +453,23 @@ namespace @_NAMESPACE_@
 
         private static void Init()
         {
-            if (!isInit)
+            if (!m_isInit)
             {
 @@TABLE@@
 @@IF@@ @_EXIST:MEMBER_@
-                @_LOWER:MEMBER_@MemberIndex=Safir.Dob.Typesystem.Members.GetIndex(ClassTypeId, "@_MEMBER_@");
+                m_@_LOWER:MEMBER_@MemberIndex=Safir.Dob.Typesystem.Members.GetIndex(ClassTypeId, "@_MEMBER_@");
 @@END_IF@@
 @@END_TABLE@@
-                isInit=true;
+                m_isInit=true;
             }
         }
 
 
-        private static bool isInit = false;
+        private static bool m_isInit = false;
 
 @@TABLE@@
 @@IF@@ @_EXIST:MEMBER_@
-        private static System.Int32 @_LOWER:MEMBER_@MemberIndex = -1;
+        private static System.Int32 m_@_LOWER:MEMBER_@MemberIndex = -1;
 @@END_IF@@
 @@END_TABLE@@
         #endregion
@@ -496,27 +496,6 @@ namespace @_NAMESPACE_@
         public @_CLASS_@()
             : base()
         {
-@@TABLE@@
-@@IF@@ @_EXIST:MEMBER_@
-@@IF@@ @_EXIST:MEMBERISARRAY_@
-@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
-            m_@_MEMBER_@Member = new @_MEMBERTYPE_@.EnumerationContainerArray(@_MEMBER_@ArraySize);
-@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
-            m_@_MEMBER_@Member = new @_MEMBERTYPE_@ContainerArray(@_MEMBER_@ArraySize);
-@@ELSE@@
-            m_@_MEMBER_@Member = new Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@ContainerArray(@_MEMBER_@ArraySize);
-@@END_IF@@
-@@ELSE@@
-@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
-            m_@_MEMBER_@Member = new @_MEMBERTYPE_@.EnumerationContainer();
-@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
-            m_@_MEMBER_@Member = new @_MEMBERTYPE_@Container();
-@@ELSE@@
-            m_@_MEMBER_@Member = new Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container();
-@@END_IF@@
-@@END_IF@@
-@@END_IF@@
-@@END_TABLE@@
         }
 
         #endregion
@@ -645,6 +624,7 @@ namespace @_NAMESPACE_@
         {
 @@TABLE@@
 @@IF@@ @_EXIST:MEMBER_@
+@@----- Array --------
 @@IF@@ @_EXIST:MEMBERISARRAY_@
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
             m_@_MEMBER_@Member = (@_MEMBERTYPE_@.EnumerationContainerArray)other.m_@_MEMBER_@Member.Clone();
@@ -653,6 +633,35 @@ namespace @_NAMESPACE_@
 @@ELSE@@
             m_@_MEMBER_@Member = (Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@ContainerArray)other.m_@_MEMBER_@Member.Clone();
 @@END_IF@@
+@@----- Sequence --------
+@@ELSIF@@ @_EXIST:MEMBERISSEQUENCE_@
+@@IF@@ (@_UNIFORM_MEMBERTYPE_@ = Enumeration)
+            m_@_MEMBER_@Member = (@_MEMBERTYPE_@.EnumerationSequenceContainer)other.m_@_MEMBER_@Member.Clone();
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+            m_@_MEMBER_@Member = (@_MEMBERTYPE_@SequenceContainer)other.m_@_MEMBER_@Member.Clone();
+@@ELSE@@
+            m_@_MEMBER_@Member = (Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@SequenceContainer)other.m_@_MEMBER_@Member.Clone();
+@@END_IF@@
+@@----- Dictionary --------
+@@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
+@@IF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@=Enumeration
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+            m_@_MEMBER_@Member =  (Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, @_MEMBERTYPE_@.EnumerationContainer>)other.m_@_MEMBER_@Member.Clone();
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+            m_@_MEMBER_@Member =  (Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, @_MEMBERTYPE_@Container>)other.m_@_MEMBER_@Member.Clone();
+@@ELSE@@
+            m_@_MEMBER_@Member =  (Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container>)other.m_@_MEMBER_@Member.Clone();
+@@END_IF@@
+@@ELSE@@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+            m_@_MEMBER_@Member =  (Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@.EnumerationContainer>)other.m_@_MEMBER_@Member.Clone();
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+            m_@_MEMBER_@Member =  (Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@Container>)other.m_@_MEMBER_@Member.Clone();
+@@ELSE@@
+            m_@_MEMBER_@Member =  (Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container>)other.m_@_MEMBER_@Member.Clone();
+@@END_IF@@
+@@END_IF@@
+@@----- Single --------
 @@ELSE@@
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
             m_@_MEMBER_@Member = (@_MEMBERTYPE_@.EnumerationContainer)other.m_@_MEMBER_@Member.Clone();
@@ -670,6 +679,7 @@ namespace @_NAMESPACE_@
 
         #region Members
 
+@@----- PARAMETERS --------
 @@TABLE@@
 @@IF@@ @_EXIST:PARAMETER_@
 @@IF@@ @_EXIST:PARAMETERISARRAY_@
@@ -681,7 +691,7 @@ namespace @_NAMESPACE_@
             get
             {
                 Init();
-                return Safir.Dob.Typesystem.Parameters.GetArraySize(ClassTypeId, @_LOWER:PARAMETER_@ParameterIndex);
+                return Safir.Dob.Typesystem.Parameters.GetArraySize(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex);
             }
         }
 
@@ -696,48 +706,169 @@ namespace @_NAMESPACE_@
         public static @_PARAMETERTYPE_@ @_PARAMETER_@ (System.Int32 index)
         {
             Init();
-            return (@_PARAMETERTYPE_@)Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, @_LOWER:PARAMETER_@ParameterIndex, index);
+            return (@_PARAMETERTYPE_@)Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
         }
 @@ELSIF@@ @_UNIFORM_PARAMETERTYPE_@=Enumeration
         public static @_PARAMETERTYPE_@.Enumeration @_PARAMETER_@ (System.Int32 index)
         {
             Init();
-            return (@_PARAMETERTYPE_@.Enumeration) Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, @_LOWER:PARAMETER_@ParameterIndex, index);
+            return (@_PARAMETERTYPE_@.Enumeration) Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
         }
 @@ELSIF@@ @_PARAMETERTYPE_@=System.Single
         public static @_PARAMETERTYPE_@ @_PARAMETER_@ (System.Int32 index)
         {
             Init();
-            return Safir.Dob.Typesystem.Parameters.GetFloat32(ClassTypeId, @_LOWER:PARAMETER_@ParameterIndex, index);
+            return Safir.Dob.Typesystem.Parameters.GetFloat32(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
         }
 @@ELSIF@@ @_PARAMETERTYPE_@=System.Double
         public static @_PARAMETERTYPE_@ @_PARAMETER_@ (System.Int32 index)
         {
             Init();
-            return Safir.Dob.Typesystem.Parameters.GetFloat64(ClassTypeId, @_LOWER:PARAMETER_@ParameterIndex, index);
+            return Safir.Dob.Typesystem.Parameters.GetFloat64(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
         }
 @@ELSE@@
         public static @_PARAMETERTYPE_@ @_PARAMETER_@ (System.Int32 index)
         {
             Init();
-            return Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, @_LOWER:PARAMETER_@ParameterIndex, index);
+            return Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
+        }
+@@END_IF@@
+@-------- dictionary parameter -----------
+@@ELSIF@@ @_EXIST:PARAMETERISDICTIONARY_@
+@@IF@@ @_EXIST:PARAMETERSUMMARY_@
+        /**
+         * @_REPLACE_ALL(\n/\n         * ):PARAMETERSUMMARY_@
+         */
+@@END_IF@@
+@@IF@@ @_UNIFORM_PARAMETERDICTIONARYTYPE_@=Enumeration
+@@IF@@ @_UNIFORM_PARAMETERTYPE_@=Enumeration
+        public static @_PARAMETERTYPE_@.Enumeration @_PARAMETER_@ (@_PARAMETERDICTIONARYTYPE_@.Enumeration key)
+        {
+            Init();
+            var index = Safir.Dob.Typesystem.Parameters.DictionaryKeyToIndex(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, (Int32)key);
+            if (index<0)
+            {
+                throw new System.Collections.Generic.KeyNotFoundException ();
+            }
+            return (@_PARAMETERTYPE_@.Enumeration) Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
+        }
+@@ELSIF@@ (@_UNIFORM_PARAMETERTYPE_@ = Object)
+        public static @_PARAMETERTYPE_@ @_PARAMETER_@ (@_PARAMETERDICTIONARYTYPE_@.Enumeration key)
+        {
+            Init();
+            var index = Safir.Dob.Typesystem.Parameters.DictionaryKeyToIndex(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, (Int32)key);
+            if (index<0)
+            {
+                throw new System.Collections.Generic.KeyNotFoundException ();
+            }
+            return (@_PARAMETERTYPE_@)Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
+        }
+@@ELSIF@@ @_PARAMETERTYPE_@=System.Single
+        public static @_PARAMETERTYPE_@ @_PARAMETER_@ (@_PARAMETERDICTIONARYTYPE_@.Enumeration key)
+        {
+            Init();
+            var index = Safir.Dob.Typesystem.Parameters.DictionaryKeyToIndex(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, (Int32)key);
+            if (index<0)
+            {
+                throw new System.Collections.Generic.KeyNotFoundException ();
+            }
+            return Safir.Dob.Typesystem.Parameters.GetFloat32(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
+        }
+@@ELSIF@@ @_PARAMETERTYPE_@=System.Double
+        public static @_PARAMETERTYPE_@ @_PARAMETER_@ (@_PARAMETERDICTIONARYTYPE_@.Enumeration key)
+        {
+            Init();
+            var index = Safir.Dob.Typesystem.Parameters.DictionaryKeyToIndex(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, (Int32)key);
+            if (index<0)
+            {
+                throw new System.Collections.Generic.KeyNotFoundException ();
+            }
+            return Safir.Dob.Typesystem.Parameters.GetFloat64(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
+        }
+@@ELSE@@
+        public static @_PARAMETERTYPE_@ @_PARAMETER_@ (@_PARAMETERDICTIONARYTYPE_@.Enumeration key)
+        {
+            Init();
+            var index = Safir.Dob.Typesystem.Parameters.DictionaryKeyToIndex(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, (Int32)key);
+            if (index<0)
+            {
+                throw new System.Collections.Generic.KeyNotFoundException ();
+            }
+            return Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
         }
 @@END_IF@@
 @@ELSE@@
-        /// <summary>
-        /// Get the value of the @_PARAMETER_@ parameter.
-@@IF@@ @_EXIST:PARAMETERSUMMARY_@
-        /// <para/>
-        /// @_REPLACE_ALL(\n/\n        /// ):PARAMETERSUMMARY_@
+@@IF@@ @_UNIFORM_PARAMETERTYPE_@=Enumeration
+        public static @_PARAMETERTYPE_@.Enumeration @_PARAMETER_@ (@_PARAMETERDICTIONARYTYPE_@ key)
+        {
+            Init();
+            var index = Safir.Dob.Typesystem.Parameters.DictionaryKeyToIndex(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, key);
+            if (index<0)
+            {
+                throw new System.Collections.Generic.KeyNotFoundException ();
+            }
+            return (@_PARAMETERTYPE_@.Enumeration) Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
+        }
+@@ELSIF@@ (@_UNIFORM_PARAMETERTYPE_@ = Object)
+        public static @_PARAMETERTYPE_@ @_PARAMETER_@ (@_PARAMETERDICTIONARYTYPE_@ key)
+        {
+            Init();
+            var index = Safir.Dob.Typesystem.Parameters.DictionaryKeyToIndex(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, key);
+            if (index<0)
+            {
+                throw new System.Collections.Generic.KeyNotFoundException ();
+            }
+            return (@_PARAMETERTYPE_@)Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
+        }
+@@ELSIF@@ @_PARAMETERTYPE_@=System.Single
+        public static @_PARAMETERTYPE_@ @_PARAMETER_@ (@_PARAMETERDICTIONARYTYPE_@ key)
+        {
+            Init();
+            var index = Safir.Dob.Typesystem.Parameters.DictionaryKeyToIndex(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, key);
+            if (index<0)
+            {
+                throw new System.Collections.Generic.KeyNotFoundException ();
+            }
+            return Safir.Dob.Typesystem.Parameters.GetFloat32(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
+        }
+@@ELSIF@@ @_PARAMETERTYPE_@=System.Double
+        public static @_PARAMETERTYPE_@ @_PARAMETER_@ (@_PARAMETERDICTIONARYTYPE_@ key)
+        {
+            Init();
+            var index = Safir.Dob.Typesystem.Parameters.DictionaryKeyToIndex(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, key);
+            if (index<0)
+            {
+                throw new System.Collections.Generic.KeyNotFoundException ();
+            }
+            return Safir.Dob.Typesystem.Parameters.GetFloat64(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
+        }
+@@ELSE@@
+        public static @_PARAMETERTYPE_@ @_PARAMETER_@ (@_PARAMETERDICTIONARYTYPE_@ key)
+        {
+            Init();
+            var index = Safir.Dob.Typesystem.Parameters.DictionaryKeyToIndex(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, key);
+            if (index<0)
+            {
+                throw new System.Collections.Generic.KeyNotFoundException ();
+            }
+            return Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
+        }
 @@END_IF@@
+@@END_IF@@
+@-------- single parameter -----------
+@@ELSE@@
+@@IF@@ @_EXIST:PARAMETERSUMMARY_@
+        /// <summary>
+        /// @_REPLACE_ALL(\n/\n        /// ):PARAMETERSUMMARY_@
         /// </summary>
+@@END_IF@@
 @@IF@@ @_UNIFORM_PARAMETERTYPE_@=Object
         public static @_PARAMETERTYPE_@ @_PARAMETER_@
         {
             get
             {
                 Init();
-                return (@_PARAMETERTYPE_@)Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, @_LOWER:PARAMETER_@ParameterIndex, 0);
+                return (@_PARAMETERTYPE_@)Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, 0);
             }
         }
 @@ELSIF@@ @_UNIFORM_PARAMETERTYPE_@=Enumeration
@@ -746,7 +877,7 @@ namespace @_NAMESPACE_@
             get
             {
                 Init();
-                return (@_PARAMETERTYPE_@.Enumeration) Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, @_LOWER:PARAMETER_@ParameterIndex, 0);
+                return (@_PARAMETERTYPE_@.Enumeration) Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, 0);
             }
         }
 @@ELSIF@@ @_PARAMETERTYPE_@=System.Single
@@ -755,7 +886,7 @@ namespace @_NAMESPACE_@
             get
             {
                 Init();
-                return Safir.Dob.Typesystem.Parameters.GetFloat32(ClassTypeId, @_LOWER:PARAMETER_@ParameterIndex, 0);
+                return Safir.Dob.Typesystem.Parameters.GetFloat32(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, 0);
             }
         }
 @@ELSIF@@ @_PARAMETERTYPE_@=System.Double
@@ -764,7 +895,7 @@ namespace @_NAMESPACE_@
             get
             {
                 Init();
-                return Safir.Dob.Typesystem.Parameters.GetFloat64(ClassTypeId, @_LOWER:PARAMETER_@ParameterIndex, 0);
+                return Safir.Dob.Typesystem.Parameters.GetFloat64(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, 0);
             }
         }
 @@ELSE@@
@@ -773,7 +904,7 @@ namespace @_NAMESPACE_@
             get
             {
                 Init();
-                return Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, @_LOWER:PARAMETER_@ParameterIndex, 0);
+                return Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, 0);
             }
         }
 @@END_IF@@
@@ -796,7 +927,7 @@ namespace @_NAMESPACE_@
             get
             {
                 Init();
-                return @_LOWER:MEMBER_@MemberIndex;
+                return m_@_LOWER:MEMBER_@MemberIndex;
             }
         }
 
@@ -813,7 +944,7 @@ namespace @_NAMESPACE_@
             get
             {
                 Init();
-                return @_LOWER:MEMBER_@Length;
+                return m_@_LOWER:MEMBER_@Length;
             }
         }
 
@@ -831,7 +962,7 @@ namespace @_NAMESPACE_@
             get
             {
                 Init();
-                return @_LOWER:MEMBER_@Size;
+                return m_@_LOWER:MEMBER_@Size;
             }
         }
 
@@ -843,6 +974,7 @@ namespace @_NAMESPACE_@
         /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
 @@END_IF@@
         /// </summary>        
+@@----------array member ---------------
 @@IF@@ @_EXIST:MEMBERISARRAY_@
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
         public @_MEMBERTYPE_@.EnumerationContainerArray @_MEMBER_@
@@ -851,6 +983,35 @@ namespace @_NAMESPACE_@
 @@ELSE@@
         public Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@ContainerArray @_MEMBER_@
 @@END_IF@@
+@@----------sequence member ---------------
+@@ELSIF@@ @_EXIST:MEMBERISSEQUENCE_@
+@@IF@@ (@_UNIFORM_MEMBERTYPE_@ = Enumeration)
+        public @_MEMBERTYPE_@.EnumerationSequenceContainer @_MEMBER_@
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+        public @_MEMBERTYPE_@SequenceContainer @_MEMBER_@
+@@ELSE@@
+        public Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@SequenceContainer @_MEMBER_@
+@@END_IF@@
+@@----------dictionary member ---------------
+@@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
+@@IF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@=Enumeration
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+        public Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, @_MEMBERTYPE_@.EnumerationContainer> @_MEMBER_@
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+        public Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, @_MEMBERTYPE_@Container> @_MEMBER_@
+@@ELSE@@
+        public Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container> @_MEMBER_@
+@@END_IF@@
+@@ELSE@@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+        public Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@.EnumerationContainer> @_MEMBER_@
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+        public Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@Container> @_MEMBER_@
+@@ELSE@@
+        public Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container> @_MEMBER_@
+@@END_IF@@
+@@END_IF@@
+@@----------single member ---------------
 @@ELSE@@
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
         public @_MEMBERTYPE_@.EnumerationContainer @_MEMBER_@
@@ -925,16 +1086,17 @@ namespace @_NAMESPACE_@
         #region Blob serialization and deserialization
 
         /// <summary>
-        /// Create a(n) @_CLASS_@ from a blob.
+        /// Create a(n) @_CLASS_@ from a blob reader handle.
         /// </summary>
-        /// <param name="blob">The blob to deserialize.</param>
-        public @_CLASS_@(System.IntPtr blob)
-            : base(blob)
+        /// <param name="handle">Handle to blob reader.</param>
+        public @_CLASS_@(System.Int64 handle)
         {
             Init();
 
 @@TABLE@@
 @@IF@@ @_EXIST:MEMBER_@
+
+@@ --- Array member ---
 @@IF@@ @_EXIST:MEMBERISARRAY_@
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
             m_@_MEMBER_@Member = new @_MEMBERTYPE_@.EnumerationContainerArray(@_MEMBER_@ArraySize);
@@ -945,9 +1107,54 @@ namespace @_NAMESPACE_@
 @@END_IF@@
             for (System.Int32 i = 0; i < @_MEMBER_@ArraySize; ++i)
             {
-                Safir.Dob.Typesystem.BlobOperations.Get(m_@_MEMBER_@Member[i], blob, @_LOWER:MEMBER_@MemberIndex, i);
+                Safir.Dob.Typesystem.Internal.BlobOperations.Get(m_@_MEMBER_@Member[i], handle, m_@_LOWER:MEMBER_@MemberIndex, i);
             }
+@@ --- Sequence member ---
+@@ELSIF@@ @_EXIST:MEMBERISSEQUENCE_@
+            for (int valueIndex=0; valueIndex<Safir.Dob.Typesystem.Internal.BlobOperations.NumerOfMemberValues(handle, m_@_LOWER:MEMBER_@MemberIndex); valueIndex++)
+            {
+                bool isNull, isChanged;
+@@IF@@ (@_UNIFORM_MEMBERTYPE_@ = Enumeration)
+                Int32 ordinal;
+                Safir.Dob.Typesystem.Internal.BlobOperations.Get(out ordinal, out isNull, out isChanged, handle, m_@_LOWER:MEMBER_@MemberIndex, valueIndex, Safir.Dob.Typesystem.KeyValMode.ValueMode);
+                m_@_MEMBER_@Member.Add((@_MEMBERTYPE_@.Enumeration)ordinal);
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+                Safir.Dob.Typesystem.Object seqVal;
+                Safir.Dob.Typesystem.Internal.BlobOperations.Get(out seqVal, out isNull, out isChanged, handle, m_@_LOWER:MEMBER_@MemberIndex, valueIndex, Safir.Dob.Typesystem.KeyValMode.ValueMode);
+                m_@_MEMBER_@Member.Add((@_MEMBERTYPE_@)seqVal);
+@@ELSE@@
+                @_MEMBERTYPE_@ seqVal;
+                Safir.Dob.Typesystem.Internal.BlobOperations.Get(out seqVal, out isNull, out isChanged, handle, m_@_LOWER:MEMBER_@MemberIndex, valueIndex, Safir.Dob.Typesystem.KeyValMode.ValueMode);
+                m_@_MEMBER_@Member.Add(seqVal);
+@@END_IF@@
+            }
+@@----------dictionary member ---------------
+@@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
+            for (int valueIndex=0; valueIndex<Safir.Dob.Typesystem.Internal.BlobOperations.NumerOfMemberValues(handle, m_@_LOWER:MEMBER_@MemberIndex); valueIndex++)
+            {
+                bool isNull, isChanged;
+@@--              -- KEY ---
+@@IF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@=Enumeration
+                Int32 ordinal;
+                Safir.Dob.Typesystem.Internal.BlobOperations.Get(out ordinal, out isNull, out isChanged, handle, m_@_LOWER:MEMBER_@MemberIndex, valueIndex, Safir.Dob.Typesystem.KeyValMode.KeyMode);
+                @_MEMBERDICTIONARYTYPE_@.Enumeration key = (@_MEMBERDICTIONARYTYPE_@.Enumeration)ordinal;
+@@ELSE@@
+                @_MEMBERDICTIONARYTYPE_@ key;
+                Safir.Dob.Typesystem.Internal.BlobOperations.Get(out key, out isNull, out isChanged, handle, m_@_LOWER:MEMBER_@MemberIndex, valueIndex, Safir.Dob.Typesystem.KeyValMode.KeyMode);
+@@END_IF@@
 
+@@--              -- VAL ---
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+                @_MEMBERTYPE_@.EnumerationContainer val = new @_MEMBERTYPE_@.EnumerationContainer();
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+                @_MEMBERTYPE_@Container val = new @_MEMBERTYPE_@Container();
+@@ELSE@@
+                Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container val = new Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container();
+@@END_IF@@
+                Safir.Dob.Typesystem.Internal.BlobOperations.Get(val, handle, m_@_LOWER:MEMBER_@MemberIndex, valueIndex);
+                m_@_MEMBER_@Member.Add(key, val);
+            }
+@@ --- Single member ---
 @@ELSE@@
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
             m_@_MEMBER_@Member = new @_MEMBERTYPE_@.EnumerationContainer();
@@ -956,99 +1163,24 @@ namespace @_NAMESPACE_@
 @@ELSE@@
             m_@_MEMBER_@Member = new Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container();
 @@END_IF@@
-            Safir.Dob.Typesystem.BlobOperations.Get(m_@_MEMBER_@Member, blob, @_LOWER:MEMBER_@MemberIndex, 0);
+            Safir.Dob.Typesystem.Internal.BlobOperations.Get(m_@_MEMBER_@Member, handle, m_@_LOWER:MEMBER_@MemberIndex, 0);
 @@END_IF@@
 @@END_IF@@
 @@END_TABLE@@
         }
 
         /// <summary>
-        /// <see cref="Safir.Dob.Typesystem.Object.CalculateBlobSize()"/>
+        /// <see cref="Safir.Dob.Typesystem.Object.WriteToBlob(System.Int64 handle)"/>
         /// </summary>
-        override public System.Int32 CalculateBlobSize()
+        override public void WriteToBlob(System.Int64 handle)
         {
             Init();
-
-            System.Int32 size = base.CalculateBlobSize() + initialSize;
-@@TABLE@@
-@@IF@@ @_EXIST:MEMBER_@
-            //@_MEMBER_@
-@@IF@@ @_EXIST:MEMBERISARRAY_@
-@@IF@@ @_UNIFORM_MEMBERTYPE_@=String
-            for (int i = 0; i < @_MEMBER_@ArraySize; ++i)
-            {
-                size += m_@_MEMBER_@Member[i].Utf8StringLength();
-            }
-@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
-            for (int i = 0; i < @_MEMBER_@ArraySize; ++i)
-            {
-                size += m_@_MEMBER_@Member[i].CalculateBlobSize();
-            }
-@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Binary
-            for (int i = 0; i < @_MEMBER_@ArraySize; ++i)
-            {
-                if (!m_@_MEMBER_@Member[i].IsNull())
-                {
-                    size += m_@_MEMBER_@Member[i].Val.Length;
-                }
-            }
-@@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = InstanceId or @_UNIFORM_MEMBERTYPE_@ = ChannelId or @_UNIFORM_MEMBERTYPE_@ = HandlerId)
-            for (int i = 0; i < @_MEMBER_@ArraySize; ++i)
-            {
-                if (!m_@_MEMBER_@Member[i].IsNull() && m_@_MEMBER_@Member[i].Val.RawString.Length != 0)
-                {
-                    size += 8 + 4 + m_@_MEMBER_@Member[i].Val.Utf8StringLength();
-                }
-            }
-@@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = EntityId)
-            for (int i = 0; i < @_MEMBER_@ArraySize; ++i)
-            {
-                if (!m_@_MEMBER_@Member[i].IsNull() && m_@_MEMBER_@Member[i].Val.InstanceId.RawString.Length != 0)
-                {
-                    size += 16 + 4 + m_@_MEMBER_@Member[i].Val.InstanceId.Utf8StringLength();
-                }
-            }
-@@END_IF@@
-@@ELSE@@
-@@IF@@ @_UNIFORM_MEMBERTYPE_@=String
-            size += m_@_MEMBER_@Member.Utf8StringLength();
-@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
-            size += m_@_MEMBER_@Member.CalculateBlobSize();
-@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Binary
-            if (!m_@_MEMBER_@Member.IsNull())
-            {
-                size += m_@_MEMBER_@Member.Val.Length;
-            }
-@@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = InstanceId or @_UNIFORM_MEMBERTYPE_@ = ChannelId or @_UNIFORM_MEMBERTYPE_@ = HandlerId)
-            if (!m_@_MEMBER_@Member.IsNull() && m_@_MEMBER_@Member.Val.RawString.Length != 0)
-            {
-                size += 8 + 4 + m_@_MEMBER_@Member.Val.Utf8StringLength();
-            }
-@@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = EntityId)
-            if (!m_@_MEMBER_@Member.IsNull() && m_@_MEMBER_@Member.Val.InstanceId.RawString.Length != 0)
-            {
-                size += 16 + 4 + m_@_MEMBER_@Member.Val.InstanceId.Utf8StringLength();
-            }
-@@END_IF@@
-@@END_IF@@
-@@END_IF@@
-
-@@END_TABLE@@
-            return size;
-        }
-
-        /// <summary>
-        /// <see cref="Safir.Dob.Typesystem.Object.WriteToBlob(System.IntPtr, ref System.IntPtr)"/>
-        /// </summary>
-        override public void WriteToBlob(System.IntPtr blob, ref System.IntPtr beginningOfUnused)
-        {
-            Init();
-
-            base.WriteToBlob(blob,ref beginningOfUnused);
+            base.WriteToBlob(handle);
 
 @@TABLE@@
 @@IF@@ @_EXIST:MEMBER_@
             //@_MEMBER_@
+@@ --- Array member ---
 @@IF@@ @_EXIST:MEMBERISARRAY_@
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=String
             for (int i = 0; i < @_MEMBER_@ArraySize; ++i)
@@ -1057,31 +1189,52 @@ namespace @_NAMESPACE_@
                 {
                     throw new Safir.Dob.Typesystem.IllegalValueException("The string member is longer than what is specified in the dou file");
                 }
-                Safir.Dob.Typesystem.BlobOperations.Set(m_@_MEMBER_@Member[i],blob, ref beginningOfUnused, @_LOWER:MEMBER_@MemberIndex,i);
+                Safir.Dob.Typesystem.Internal.BlobOperations.Set(m_@_MEMBER_@Member[i], handle, m_@_LOWER:MEMBER_@MemberIndex,i);
             }
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object or @_UNIFORM_MEMBERTYPE_@=Binary or @_UNIFORM_MEMBERTYPE_@=InstanceId or @_UNIFORM_MEMBERTYPE_@=EntityId or @_UNIFORM_MEMBERTYPE_@=ChannelId or @_UNIFORM_MEMBERTYPE_@=HandlerId
             for (int i = 0; i < @_MEMBER_@ArraySize; ++i)
             {
-                Safir.Dob.Typesystem.BlobOperations.Set(m_@_MEMBER_@Member[i],blob, ref beginningOfUnused, @_LOWER:MEMBER_@MemberIndex,i);
+                Safir.Dob.Typesystem.Internal.BlobOperations.Set(m_@_MEMBER_@Member[i], handle, m_@_LOWER:MEMBER_@MemberIndex,i);
             }
 @@ELSE@@
             for (int i = 0; i < @_MEMBER_@ArraySize; ++i)
             {
-                Safir.Dob.Typesystem.BlobOperations.Set(m_@_MEMBER_@Member[i],blob,@_LOWER:MEMBER_@MemberIndex,i);
+                Safir.Dob.Typesystem.Internal.BlobOperations.Set(m_@_MEMBER_@Member[i],handle,m_@_LOWER:MEMBER_@MemberIndex,i);
             }
 @@END_IF@@
+@@ --- Sequence member ---
+@@ELSIF@@ @_EXIST:MEMBERISSEQUENCE_@
+            for (int i=0; i<m_@_MEMBER_@Member.Count; ++i)
+            {
+@@IF@@ (@_UNIFORM_MEMBERTYPE_@ = Enumeration)
+                Safir.Dob.Typesystem.Internal.BlobOperations.Set((Int32)m_@_MEMBER_@Member[i], false, false, handle, m_@_LOWER:MEMBER_@MemberIndex, i, Safir.Dob.Typesystem.KeyValMode.ValueMode);
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+                Safir.Dob.Typesystem.Internal.BlobOperations.Set((Safir.Dob.Typesystem.Object)m_@_MEMBER_@Member[i], false, false, handle, m_@_LOWER:MEMBER_@MemberIndex, i, Safir.Dob.Typesystem.KeyValMode.ValueMode);
+@@ELSE@@
+                Safir.Dob.Typesystem.Internal.BlobOperations.Set(m_@_MEMBER_@Member[i], false, false, handle, m_@_LOWER:MEMBER_@MemberIndex, i, Safir.Dob.Typesystem.KeyValMode.ValueMode);
+@@END_IF@@
+            }
+@@ --- Dictionary member ---
+@@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
+            foreach (var kv in m_@_MEMBER_@Member)
+            {
+@@IF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@=Enumeration
+                Int32 ordinal = (Int32)kv.Key;
+                Safir.Dob.Typesystem.Internal.BlobOperations.Set(ordinal, false, false, handle, m_@_LOWER:MEMBER_@MemberIndex, 0, Safir.Dob.Typesystem.KeyValMode.KeyMode);
+@@ELSE@@
+                Safir.Dob.Typesystem.Internal.BlobOperations.Set(kv.Key, false, false, handle, m_@_LOWER:MEMBER_@MemberIndex, 0, Safir.Dob.Typesystem.KeyValMode.KeyMode);
+@@END_IF@@
+                Safir.Dob.Typesystem.Internal.BlobOperations.Set(kv.Value, handle, m_@_LOWER:MEMBER_@MemberIndex, 0);
+            }
+@@ --- Single member ---
 @@ELSE@@
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=String
             if (!m_@_MEMBER_@Member.IsNull() && m_@_MEMBER_@Member.Val.Length > @_MEMBER_@MaxStringLength)
             {
                 throw new Safir.Dob.Typesystem.IllegalValueException("The string member is longer than what is specified in the dou file");
             }
-            Safir.Dob.Typesystem.BlobOperations.Set(m_@_MEMBER_@Member,blob, ref beginningOfUnused,@_LOWER:MEMBER_@MemberIndex,0);
-@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object or @_UNIFORM_MEMBERTYPE_@=Binary or @_UNIFORM_MEMBERTYPE_@=InstanceId or @_UNIFORM_MEMBERTYPE_@=EntityId or @_UNIFORM_MEMBERTYPE_@=ChannelId or @_UNIFORM_MEMBERTYPE_@=HandlerId
-            Safir.Dob.Typesystem.BlobOperations.Set(m_@_MEMBER_@Member,blob,ref beginningOfUnused,@_LOWER:MEMBER_@MemberIndex,0);
-@@ELSE@@
-            Safir.Dob.Typesystem.BlobOperations.Set(m_@_MEMBER_@Member,blob,@_LOWER:MEMBER_@MemberIndex,0);
 @@END_IF@@
+            Safir.Dob.Typesystem.Internal.BlobOperations.Set(m_@_MEMBER_@Member,handle,m_@_LOWER:MEMBER_@MemberIndex,0);
 @@END_IF@@
 @@END_IF@@
 
@@ -1106,14 +1259,14 @@ namespace @_NAMESPACE_@
 @@TABLE@@
 @@IF@@ @_EXIST:MEMBER_@
 @@IF@@ @_TABLE_LINE_@=1
-            if (member == @_LOWER:MEMBER_@MemberIndex)
+            if (member == m_@_LOWER:MEMBER_@MemberIndex)
 @@ELSE@@
 
-            else if (member == @_LOWER:MEMBER_@MemberIndex)
+            else if (member == m_@_LOWER:MEMBER_@MemberIndex)
 @@END_IF@@
             {
 @@IF@@ @_EXIST:MEMBERISARRAY_@
-                if (index < 0 || index >= @_LOWER:MEMBER_@Size)
+                if (index < 0 || index >= m_@_LOWER:MEMBER_@Size)
                 {
                     throw new Safir.Dob.Typesystem.IllegalValueException("Invalid index");
                 }
@@ -1143,21 +1296,52 @@ namespace @_NAMESPACE_@
 
 @@TABLE@@
 @@IF@@ @_EXIST:MEMBER_@
+
+@@------ array
 @@IF@@ @_EXIST:MEMBERISARRAY_@
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
-        private @_MEMBERTYPE_@.EnumerationContainerArray m_@_MEMBER_@Member;
+        private @_MEMBERTYPE_@.EnumerationContainerArray m_@_MEMBER_@Member = new @_MEMBERTYPE_@.EnumerationContainerArray(@_MEMBER_@ArraySize);
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
-        private @_MEMBERTYPE_@ContainerArray m_@_MEMBER_@Member;
+        private @_MEMBERTYPE_@ContainerArray m_@_MEMBER_@Member = new @_MEMBERTYPE_@ContainerArray(@_MEMBER_@ArraySize);
 @@ELSE@@
-        private Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@ContainerArray m_@_MEMBER_@Member;
+        private Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@ContainerArray m_@_MEMBER_@Member = new Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@ContainerArray(@_MEMBER_@ArraySize);
+@@END_IF@@
+@@------ sequence
+@@ELSIF@@ @_EXIST:MEMBERISSEQUENCE_@
+@@IF@@ (@_UNIFORM_MEMBERTYPE_@ = Enumeration)
+        private @_MEMBERTYPE_@.EnumerationSequenceContainer m_@_MEMBER_@Member = new @_MEMBERTYPE_@.EnumerationSequenceContainer();
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+        private @_MEMBERTYPE_@SequenceContainer m_@_MEMBER_@Member = new @_MEMBERTYPE_@SequenceContainer();
+@@ELSE@@
+        private Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@SequenceContainer m_@_MEMBER_@Member = new Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@SequenceContainer();
+@@END_IF@@
+@@-------dictionary
+@@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
+@@IF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@=Enumeration
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+        private Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, @_MEMBERTYPE_@.EnumerationContainer> m_@_MEMBER_@Member = new Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, @_MEMBERTYPE_@.EnumerationContainer>();
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+        private Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, @_MEMBERTYPE_@Container> m_@_MEMBER_@Member = new Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, @_MEMBERTYPE_@Container>();
+@@ELSE@@
+        private Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container> m_@_MEMBER_@Member = new Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container>();
 @@END_IF@@
 @@ELSE@@
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
-        private @_MEMBERTYPE_@.EnumerationContainer m_@_MEMBER_@Member;
+        private Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@.EnumerationContainer> m_@_MEMBER_@Member = new Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@.EnumerationContainer>();
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
-        private @_MEMBERTYPE_@Container m_@_MEMBER_@Member;
+        private Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@Container> m_@_MEMBER_@Member = new Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@Container>();
 @@ELSE@@
-        private Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container m_@_MEMBER_@Member;
+        private Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container> m_@_MEMBER_@Member = new Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container>();
+@@END_IF@@
+@@END_IF@@
+@@------ single
+@@ELSE@@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+        private @_MEMBERTYPE_@.EnumerationContainer m_@_MEMBER_@Member = new @_MEMBERTYPE_@.EnumerationContainer();
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+        private @_MEMBERTYPE_@Container m_@_MEMBER_@Member = new @_MEMBERTYPE_@Container();
+@@ELSE@@
+        private Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container m_@_MEMBER_@Member = new Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container();
 @@END_IF@@
 @@END_IF@@
 @@END_IF@@
@@ -1168,50 +1352,47 @@ namespace @_NAMESPACE_@
 
         private static void Init()
         {
-            if (!isInit)
+            if (!m_isInit)
             {
 @@TABLE@@
 @@IF@@ @_EXIST:PARAMETER_@
-                @_LOWER:PARAMETER_@ParameterIndex=Safir.Dob.Typesystem.Parameters.GetIndex(ClassTypeId, "@_PARAMETER_@");
+                m_@_LOWER:PARAMETER_@ParameterIndex=Safir.Dob.Typesystem.Parameters.GetIndex(ClassTypeId, "@_PARAMETER_@");
 @@END_IF@@
 @@END_TABLE@@
 @@TABLE@@
 @@IF@@ @_EXIST:MEMBER_@
-                @_LOWER:MEMBER_@MemberIndex = Safir.Dob.Typesystem.Members.GetIndex(ClassTypeId, "@_MEMBER_@");
+                m_@_LOWER:MEMBER_@MemberIndex = Safir.Dob.Typesystem.Members.GetIndex(ClassTypeId, "@_MEMBER_@");
 @@IF@@ @_EXIST:MEMBERISARRAY_@
-                @_LOWER:MEMBER_@Size = Safir.Dob.Typesystem.Members.GetArraySize(ClassTypeId, @_LOWER:MEMBER_@MemberIndex);
+                m_@_LOWER:MEMBER_@Size = Safir.Dob.Typesystem.Members.GetArraySize(ClassTypeId, m_@_LOWER:MEMBER_@MemberIndex);
 @@END_IF@@
 @@IF@@ @_EXIST:MEMBERISSTRING_@
-                @_LOWER:MEMBER_@Length=Safir.Dob.Typesystem.Members.GetMaxStringLength(ClassTypeId, @_LOWER:MEMBER_@MemberIndex);
+                m_@_LOWER:MEMBER_@Length=Safir.Dob.Typesystem.Members.GetMaxStringLength(ClassTypeId, m_@_LOWER:MEMBER_@MemberIndex);
 @@END_IF@@
 @@END_IF@@
 @@END_TABLE@@
-                initialSize = Safir.Dob.Typesystem.BlobOperations.GetInitialSize(ClassTypeId);
-                isInit=true;
+                m_isInit=true;
             }
         }
 
 
-        private static bool isInit = false;
+        private static bool m_isInit = false;
 
 @@TABLE@@
 @@IF@@ @_EXIST:PARAMETER_@
-        private static System.Int32 @_LOWER:PARAMETER_@ParameterIndex = -1;
+        private static System.Int32 m_@_LOWER:PARAMETER_@ParameterIndex = -1;
 @@END_IF@@
 @@END_TABLE@@
 @@TABLE@@
 @@IF@@ @_EXIST:MEMBER_@
-        private static System.Int32 @_LOWER:MEMBER_@MemberIndex = -1;
+        private static System.Int32 m_@_LOWER:MEMBER_@MemberIndex = -1;
 @@IF@@ @_EXIST:MEMBERISARRAY_@
-        private static System.Int32 @_LOWER:MEMBER_@Size = -1;
+        private static System.Int32 m_@_LOWER:MEMBER_@Size = -1;
 @@END_IF@@
 @@IF@@ @_EXIST:MEMBERISSTRING_@
-        private static System.Int32 @_LOWER:MEMBER_@Length = -1;
+        private static System.Int32 m_@_LOWER:MEMBER_@Length = -1;
 @@END_IF@@
 @@END_IF@@
-@@END_TABLE@@
-
-        private static System.Int32 initialSize = -1;
+@@END_TABLE@@        
 
         #endregion
     }
@@ -1281,6 +1462,32 @@ namespace @_NAMESPACE_@
 
         #endregion
     }
+
+    //
+    // @_CLASS_@SequenceContainer
+    //
+    public class @_CLASS_@SequenceContainer : Safir.Dob.Typesystem.GenericObjectSequenceContainer<@_CLASS_@>, ICloneable
+    {
+        public @_CLASS_@SequenceContainer() : base() { }
+
+        #region Cloning
+
+        object ICloneable.Clone()
+        {
+            return new @_CLASS_@SequenceContainer(this);
+        }
+
+        public new @_CLASS_@SequenceContainer Clone()
+        {
+            return (@_CLASS_@SequenceContainer)(((ICloneable)this).Clone());
+        }
+
+        //Copy constructor for use by Clone
+        protected @_CLASS_@SequenceContainer(@_CLASS_@SequenceContainer other) : base(other) { }
+
+        #endregion
+    }
+
 @@ELSIF@@ @_UNITTYPE_@=enumeration
 @@--
 @@-- ENUMERATION
@@ -1493,6 +1700,28 @@ namespace @_NAMESPACE_@
             /// Copy constructor for use by Clone.
             /// </summary>
             protected EnumerationContainerArray(EnumerationContainerArray other) : base(other) { }
+
+            #endregion
+        }
+
+        public class EnumerationSequenceContainer : Safir.Dob.Typesystem.MemberSequenceContainer<Enumeration>, ICloneable
+        {
+             public EnumerationSequenceContainer() : base() { }
+
+            #region Cloning
+
+            object ICloneable.Clone()
+            {
+                return new EnumerationSequenceContainer(this);
+            }
+
+            public new EnumerationSequenceContainer Clone()
+            {
+                return (EnumerationSequenceContainer)(((ICloneable)this).Clone());
+            }
+
+            //Copy constructor for use by Clone
+            protected EnumerationSequenceContainer(EnumerationSequenceContainer other) : base(other) { }
 
             #endregion
         }

@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2008-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2008-2013 (http://safir.sourceforge.net)
 *
 * Created by: Lars Hagström / stlrha
 *
@@ -25,6 +25,7 @@
 #ifndef __DOTS_ENTITY_ID_H__
 #define __DOTS_ENTITY_ID_H__
 
+#include <boost/functional/hash.hpp>
 #include <Safir/Dob/Typesystem/Defs.h>
 #include <Safir/Dob/Typesystem/InstanceId.h>
 
@@ -173,8 +174,17 @@ namespace Typesystem
 
     static inline std::wostream & operator << (std::wostream & out, const EntityId & entityId)
     {return out << entityId.ToString();}
-}
-}
-}
-#endif
 
+    //Make it possible to use EntityId as key in a dictionaries.
+    inline std::size_t hash_value(const Safir::Dob::Typesystem::EntityId& eid)
+    {
+        size_t seed;
+        boost::hash_combine(seed, boost::hash_value(eid.GetTypeId()));
+        boost::hash_combine(seed, boost::hash_value(eid.GetInstanceId().GetRawValue()));
+        return seed;
+    }
+}
+}
+}
+
+#endif

@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2004-2015 (http://safir.sourceforge.net)
 *
 * Created by: Joel Ottosson / joot
 *
@@ -32,6 +32,8 @@ namespace Dob
 {
 namespace Typesystem
 {
+namespace ToolSupport
+{
     //-----------------------------------------------------------------------------------------
     //Keeps track of the number of occurrences a xml-element is exists at a specific location
     //Used in ElementParsers to implement the schema validaton.
@@ -57,6 +59,7 @@ namespace Typesystem
     typedef Occurrences<0, 1> OptionalOne;
     typedef Occurrences<1, INT_MAX> AtLeastOne;
     typedef Occurrences<0, INT_MAX> OptionalMany;
+}
 }
 }
 }

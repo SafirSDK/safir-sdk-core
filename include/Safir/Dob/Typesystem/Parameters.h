@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2006-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2006-2013 (http://safir.sourceforge.net)
 * 
 * Created by: Lars Hagström / stlrha
 *
@@ -87,6 +87,16 @@ namespace Typesystem
                                             const Dob::Typesystem::ParameterIndex parameter);
 
         /**
+         * Get the type name of the specified member as it was defined in the xml description.
+         *
+         * @param typeId [in] - TypeId of class.
+         * @param member [in] - Index of parameter.
+         * @return Parameter type name.
+         */
+        DOTS_CPP_API std::wstring GetTypeName(  const Dob::Typesystem::TypeId typeId,
+                                                const Dob::Typesystem::ParameterIndex parameter);
+
+        /**
          * Get the type of a parameter.
          *
          * If the parameter does not exist the returned value is undefined. Use
@@ -98,21 +108,6 @@ namespace Typesystem
          */
         DOTS_CPP_API MemberType GetType(const Dob::Typesystem::TypeId typeId,
                                     const Dob::Typesystem::ParameterIndex parameter);
-
-        /**
-         * Gets a string representation of the type of a parameter.
-         *
-         * If the parameter is not an object or enumeration the result is undefined.
-         *
-         * If the parameter does not exist the returned value is undefined. Use
-         * #GetIndex to get a valid ParameterIndex, which is guaranteed to exist.
-         *
-         * @param typeId [in] - TypeId of class.
-         * @param parameter [in] - Index of parameter.
-         * @return Name of the parameter type.
-         */
-        DOTS_CPP_API const std::wstring GetTypeName(const Dob::Typesystem::TypeId typeId,
-                                                const Dob::Typesystem::ParameterIndex parameter);
 
         /**
          * Get the array size of a parameter.
@@ -305,6 +300,97 @@ namespace Typesystem
         DOTS_CPP_API const Dob::Typesystem::Binary GetBinary(const Dob::Typesystem::TypeId typeId,
                                                          const Dob::Typesystem::ParameterIndex parameter,
                                                          const Dob::Typesystem::ArrayIndex index);
+
+        /**
+         * Get the index of a Int32 dictionary key. The index can then be used with the Get-mehtods above to
+         * retrieve the parameter value.
+         *
+         * @param typeId [in] - TypeId of class.
+         * @param parameter [in] - Index of parameter.
+         * @param key [in] - Dictionary key.
+         * @return Index or -1 if key does not exist.
+         */
+        DOTS_CPP_API const Int32 DictionaryKeyToIndex(const TypeId typeId,
+                                                      const ParameterIndex parameter,
+                                                       const Int32 key);
+
+        /**
+         * Get the index of a Int32 dictionary key. The index can then be used with the Get-mehtods above to
+         * retrieve the parameter value.
+         *
+         * @param typeId [in] - TypeId of class.
+         * @param parameter [in] - Index of parameter.
+         * @param key [in] - Dictionary key.
+         * @return Index or -1 if key does not exist.
+         */
+        DOTS_CPP_API const Int32 DictionaryKeyToIndex(const TypeId typeId,
+                                                      const ParameterIndex parameter,
+                                                      const Int64 key);
+
+        /**
+         * Get the index of a Int32 dictionary key. The index can then be used with the Get-mehtods above to
+         * retrieve the parameter value.
+         *
+         * @param typeId [in] - TypeId of class.
+         * @param parameter [in] - Index of parameter.
+         * @param key [in] - Dictionary key.
+         * @return Index or -1 if key does not exist.
+         */
+        DOTS_CPP_API const Int32 DictionaryKeyToIndex(const TypeId typeId,
+                                                      const ParameterIndex parameter,
+                                                      const std::wstring& key);
+
+        /**
+         * Get the index of a Int32 dictionary key. The index can then be used with the Get-mehtods above to
+         * retrieve the parameter value.
+         *
+         * @param typeId [in] - TypeId of class.
+         * @param parameter [in] - Index of parameter.
+         * @param key [in] - Dictionary key.
+         * @return Index or -1 if key does not exist.
+         */
+        DOTS_CPP_API const Int32 DictionaryKeyToIndex(const TypeId typeId,
+                                                      const ParameterIndex parameter,
+                                                      const EntityId& key);
+
+        /**
+         * Get the index of a Int32 dictionary key. The index can then be used with the Get-mehtods above to
+         * retrieve the parameter value.
+         *
+         * @param typeId [in] - TypeId of class.
+         * @param parameter [in] - Index of parameter.
+         * @param key [in] - Dictionary key.
+         * @return Index or -1 if key does not exist.
+         */
+        DOTS_CPP_API const Int32 DictionaryKeyToIndex(const TypeId typeId,
+                                                      const ParameterIndex parameter,
+                                                      const InstanceId& key);
+
+        /**
+         * Get the index of a Int32 dictionary key. The index can then be used with the Get-mehtods above to
+         * retrieve the parameter value.
+         *
+         * @param typeId [in] - TypeId of class.
+         * @param parameter [in] - Index of parameter.
+         * @param key [in] - Dictionary key.
+         * @return Index or -1 if key does not exist.
+         */
+        DOTS_CPP_API const Int32 DictionaryKeyToIndex(const TypeId typeId,
+                                                      const ParameterIndex parameter,
+                                                      const HandlerId& key);
+
+        /**
+         * Get the index of a Int32 dictionary key. The index can then be used with the Get-mehtods above to
+         * retrieve the parameter value.
+         *
+         * @param typeId [in] - TypeId of class.
+         * @param parameter [in] - Index of parameter.
+         * @param key [in] - Dictionary key.
+         * @return Index or -1 if key does not exist.
+         */
+        DOTS_CPP_API const Int32 DictionaryKeyToIndex(const TypeId typeId,
+                                                      const ParameterIndex parameter,
+                                                      const ChannelId& key);
 
 
         /** @} */

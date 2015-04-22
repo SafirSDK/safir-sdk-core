@@ -359,12 +359,12 @@ namespace Safir.Dob.Typesystem
 
             case Internal.DotsC_PropertyMappingKind.MappedToParameter:
                 {
+                    Int32 paramIndex;
+                    Int32 valueIndex;
+                    Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId (), propertyId, member, index, out paramIndex, out valueIndex);
+                    
                     byte tmpVal;
-                    Internal.Kernel.DotsC_GetBooleanPropertyParameter(obj.GetTypeId(),
-                                                                      propertyId,
-                                                                      member,
-                                                                      index,
-                                                                      out tmpVal);
+                    Internal.Kernel.DotsC_GetBooleanParameter (obj.GetTypeId (), paramIndex, valueIndex, out tmpVal);
                     val = Internal.InternalOperations.BoolOf(tmpVal);
                 }
                 break;
@@ -476,11 +476,10 @@ namespace Safir.Dob.Typesystem
 
             case Internal.DotsC_PropertyMappingKind.MappedToParameter:
             {
-                Internal.Kernel.DotsC_GetInt32PropertyParameter(obj.GetTypeId(),
-                                                                      propertyId,
-                                                                      member,
-                                                                      index,
-                                                                      out val); 
+                Int32 paramIndex;
+                Int32 valueIndex;
+                Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId (), propertyId, member, index, out paramIndex, out valueIndex);
+                Internal.Kernel.DotsC_GetInt32Parameter(obj.GetTypeId (), paramIndex, valueIndex, KeyValMode.ValueMode, out val);
             }
             break;
 
@@ -593,11 +592,10 @@ namespace Safir.Dob.Typesystem
 
             case Internal.DotsC_PropertyMappingKind.MappedToParameter:
             {
-                Internal.Kernel.DotsC_GetInt32PropertyParameter(obj.GetTypeId(),
-                                                                propertyId,
-                                                                member,
-                                                                index,
-                                                                out val);
+                Int32 paramIndex;
+                Int32 valueIndex;
+                Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId (), propertyId, member, index, out paramIndex, out valueIndex);
+                Internal.Kernel.DotsC_GetInt32Parameter(obj.GetTypeId (), paramIndex, valueIndex, KeyValMode.ValueMode, out val);
             }
             break;
 
@@ -710,11 +708,10 @@ namespace Safir.Dob.Typesystem
 
             case Internal.DotsC_PropertyMappingKind.MappedToParameter:
             {
-                Internal.Kernel.DotsC_GetInt64PropertyParameter(obj.GetTypeId(),
-                                                                propertyId,
-                                                                member,
-                                                                index,
-                                                                out val);
+                Int32 paramIndex;
+                Int32 valueIndex;
+                Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId (), propertyId, member, index, out paramIndex, out valueIndex);
+                Internal.Kernel.DotsC_GetInt64Parameter(obj.GetTypeId (), paramIndex, valueIndex, KeyValMode.ValueMode, out val);
             }
             break;
 
@@ -827,11 +824,10 @@ namespace Safir.Dob.Typesystem
 
             case Internal.DotsC_PropertyMappingKind.MappedToParameter:
             {
-                Internal.Kernel.DotsC_GetFloat32PropertyParameter(obj.GetTypeId(),
-                                                                  propertyId,
-                                                                  member,
-                                                                  index,
-                                                                  out val);
+                Int32 paramIndex;
+                Int32 valueIndex;
+                Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId (), propertyId, member, index, out paramIndex, out valueIndex);
+                Internal.Kernel.DotsC_GetFloat32Parameter(obj.GetTypeId (), paramIndex, valueIndex, out val);
             }
             break;
 
@@ -944,11 +940,10 @@ namespace Safir.Dob.Typesystem
 
             case Internal.DotsC_PropertyMappingKind.MappedToParameter:
             {
-                Internal.Kernel.DotsC_GetFloat64PropertyParameter(obj.GetTypeId(),
-                                                                  propertyId,
-                                                                  member,
-                                                                  index,
-                                                                  out val);
+                Int32 paramIndex;
+                Int32 valueIndex;
+                Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId (), propertyId, member, index, out paramIndex, out valueIndex);
+                Internal.Kernel.DotsC_GetFloat64Parameter(obj.GetTypeId (), paramIndex, valueIndex, out val);
             }
             break;
 
@@ -1063,12 +1058,12 @@ namespace Safir.Dob.Typesystem
             {
                 Int64 hashVal;
                 System.IntPtr strVal;
-                Internal.Kernel.DotsC_GetHashedIdPropertyParameter(obj.GetTypeId(),
-                                                                   propertyId,
-                                                                   member,
-                                                                   index,
-                                                                   out hashVal,
-                                                                   out strVal);
+
+                Int32 paramIndex;
+                Int32 valueIndex;
+                Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId (), propertyId, member, index, out paramIndex, out valueIndex);
+                Internal.Kernel.DotsC_GetHashedIdParameter(obj.GetTypeId (), paramIndex, valueIndex, KeyValMode.ValueMode, out hashVal, out strVal);
+             
                 val = new InstanceId
                        (hashVal,
                         strVal != System.IntPtr.Zero ? Internal.InternalOperations.StringOf(strVal) : "");
@@ -1184,19 +1179,18 @@ namespace Safir.Dob.Typesystem
 
             case Internal.DotsC_PropertyMappingKind.MappedToParameter:
             {
-                Internal.DotsC_EntityId oid;
-                System.IntPtr InstanceIdStr;
-                Internal.Kernel.DotsC_GetEntityIdPropertyParameter(obj.GetTypeId(),
-                                                                   propertyId,
-                                                                   member,
-                                                                   index,
-                                                                   out oid,
-                                                                   out InstanceIdStr);
+                Internal.DotsC_EntityId eid;
+                System.IntPtr instanceIdStr;
+                Int32 paramIndex;
+                Int32 valueIndex;
+                Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId (), propertyId, member, index, out paramIndex, out valueIndex);
+                Internal.Kernel.DotsC_GetEntityIdParameter(obj.GetTypeId (), paramIndex, valueIndex, KeyValMode.ValueMode, out eid, out instanceIdStr);
+
                 val = new EntityId
-                    (oid.TypeId,
+                    (eid.TypeId,
                      new Dob.Typesystem.InstanceId
-                        (oid.InstanceId,
-                        InstanceIdStr != System.IntPtr.Zero ? Internal.InternalOperations.StringOf(InstanceIdStr) : ""));
+                        (eid.InstanceId,
+                        instanceIdStr != System.IntPtr.Zero ? Internal.InternalOperations.StringOf(instanceIdStr) : ""));
             }
             break;
 
@@ -1312,15 +1306,13 @@ namespace Safir.Dob.Typesystem
                     {
                         Int64 hashVal;
                         System.IntPtr strVal;
-                        Internal.Kernel.DotsC_GetHashedIdPropertyParameter(obj.GetTypeId(),
-                                                                           propertyId,
-                                                                           member,
-                                                                           index,
-                                                                           out hashVal,
-                                                                           out strVal);
-                        val = new ChannelId
-                               (hashVal,
-                                strVal != System.IntPtr.Zero ? Internal.InternalOperations.StringOf(strVal) : "");
+                        Int32 paramIndex;
+                        Int32 valueIndex;
+                        Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId (), propertyId, member, index, out paramIndex, out valueIndex);
+                        Internal.Kernel.DotsC_GetHashedIdParameter(obj.GetTypeId (), paramIndex, valueIndex, KeyValMode.ValueMode, out hashVal, out strVal);
+                                
+                        val = new ChannelId(hashVal,
+                                        strVal != System.IntPtr.Zero ? Internal.InternalOperations.StringOf(strVal) : "");
                     }
                     break;
 
@@ -1435,12 +1427,11 @@ namespace Safir.Dob.Typesystem
                     {
                         Int64 hashVal;
                         System.IntPtr strVal;
-                        Internal.Kernel.DotsC_GetHashedIdPropertyParameter(obj.GetTypeId(),
-                                                                           propertyId,
-                                                                           member,
-                                                                           index,
-                                                                           out hashVal,
-                                                                           out strVal);
+                        Int32 paramIndex;
+                        Int32 valueIndex;
+                        Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId (), propertyId, member, index, out paramIndex, out valueIndex);
+                        Internal.Kernel.DotsC_GetHashedIdParameter(obj.GetTypeId (), paramIndex, valueIndex, KeyValMode.ValueMode, out hashVal, out strVal);
+                        
                         val = new HandlerId
                                (hashVal,
                                 strVal != System.IntPtr.Zero ? Internal.InternalOperations.StringOf(strVal) : "");
@@ -1557,11 +1548,12 @@ namespace Safir.Dob.Typesystem
             case Internal.DotsC_PropertyMappingKind.MappedToParameter:
             {
                 System.IntPtr str;
-                Internal.Kernel.DotsC_GetStringPropertyParameter(obj.GetTypeId(),
-                                                                 propertyId,
-                                                                 member,
-                                                                 index,
-                                                                 out str);
+
+                Int32 paramIndex;
+                Int32 valueIndex;
+                Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId (), propertyId, member, index, out paramIndex, out valueIndex);
+                Internal.Kernel.DotsC_GetStringParameter(obj.GetTypeId (), paramIndex, valueIndex, KeyValMode.ValueMode, out str);
+               
                 val = Internal.InternalOperations.StringOf(str);
             }
             break;
@@ -1678,11 +1670,12 @@ namespace Safir.Dob.Typesystem
             case Internal.DotsC_PropertyMappingKind.MappedToParameter:
             {
                 System.IntPtr blob;
-                Internal.Kernel.DotsC_GetObjectPropertyParameter(obj.GetTypeId(),
-                                                                 propertyId,
-                                                                 member,
-                                                                 index,
-                                                                 out blob);
+
+                Int32 paramIndex;
+                Int32 valueIndex;
+                Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId (), propertyId, member, index, out paramIndex, out valueIndex);
+                Internal.Kernel.DotsC_GetObjectParameter(obj.GetTypeId (), paramIndex, valueIndex, out blob);
+
                 val = ObjectFactory.Instance.CreateObject(blob);
                 val.SetChanged(false);
             }
@@ -1806,12 +1799,11 @@ namespace Safir.Dob.Typesystem
                     {
                         System.IntPtr bin;
                         int size;
-                        Internal.Kernel.DotsC_GetBinaryPropertyParameter(obj.GetTypeId(),
-                                                                         propertyId,
-                                                                         member,
-                                                                         index,
-                                                                         out bin,
-                                                                         out size);
+                        Int32 paramIndex;
+                        Int32 valueIndex;
+                        Internal.Kernel.DotsC_GetPropertyParameterReference (obj.GetTypeId (), propertyId, member, index, out paramIndex, out valueIndex);
+                        Internal.Kernel.DotsC_GetBinaryParameter(obj.GetTypeId (), paramIndex, valueIndex, out bin, out size);
+
                         val = new byte[size];
                         Marshal.Copy(bin, val, 0, size);                        
                     }
@@ -1877,22 +1869,12 @@ namespace Safir.Dob.Typesystem
                                                                                  System.Int32 member)
         {
             Internal.DotsC_PropertyMappingKind kind;
-            Internal.DotsC_ErrorCode errorCode;
-            Internal.Kernel.DotsC_GetPropertyMappingKind(typeId,
-                                                         propertyId,
-                                                         member,
-                                                         out kind,
-                                                         out errorCode);
-            switch (errorCode)
-            {
-            case Safir.Dob.Typesystem.Internal.DotsC_ErrorCode.NoError:
-                break;
-            case Internal.DotsC_ErrorCode.IllegalValue:
-                throw new IllegalValueException("That obj is not mapped to that property!");
-            default:
-                throw new SoftwareViolationException("Got unexpected error code from dots_kernel: " + errorCode);
+            byte okByte=Internal.Kernel.DotsC_GetPropertyMappingKind (typeId, propertyId, member, out kind);
+            if (Internal.InternalOperations.BoolOf (okByte)) {
+                return kind;
             }
-            return kind;
+
+            throw new IllegalValueException("That obj is not mapped to that property!");
         }
 
         

@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2004-2015 (http://safir.sourceforge.net)
 *
 * Created by: Joel Ottosson / joot
 *
@@ -91,13 +91,13 @@ namespace ToolSupport
         template <class ParserT, class CompletionAlg>
         struct ParseWorker
         {
-            void operator()(const boost::shared_ptr<RepositoryBasic>& repository, const std::map<boost::filesystem::path, boost::filesystem::path>& paths)
+            void operator()(const boost::shared_ptr<RepositoryLocal>& repository, const std::map<boost::filesystem::path, boost::filesystem::path>& paths)
             {
                 ParseState state(repository);
 
                 for (std::map<boost::filesystem::path, boost::filesystem::path>::const_iterator pathIt=paths.begin(); pathIt!=paths.end(); ++pathIt)
                 {
-                    boost::shared_ptr<boost::property_tree::ptree> pt(new boost::property_tree::ptree);
+                    boost::shared_ptr<boost::property_tree::ptree> pt=boost::make_shared<boost::property_tree::ptree>();
                     try
                     {
                         boost::property_tree::read_xml(pathIt->second.string(), *pt, boost::property_tree::xml_parser::no_comments);
@@ -140,7 +140,7 @@ namespace ToolSupport
     }
 
     ParseJob::ParseJob(const std::vector<boost::filesystem::path>& roots)
-        :m_result(boost::make_shared<RepositoryBasic>())
+        :m_result(boost::make_shared<RepositoryLocal>())
     {
         std::map<boost::filesystem::path, boost::filesystem::path> douFiles;
         std::map<boost::filesystem::path, boost::filesystem::path> domFiles;
@@ -159,4 +159,4 @@ namespace ToolSupport
 }
 }
 }
-} //end namespace Safir::Dob::Typesystem
+} //end namespace Safir::Dob::Typesystem::ToolSupport

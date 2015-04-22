@@ -1,8 +1,8 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2006-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2004-2015 (http://safir.sourceforge.net)
 *
-* Created by: Lars Hagström / stlrha
+* Created by: Joel Ottosson / joot
 *
 *******************************************************************************
 *
@@ -15,14 +15,13 @@
 * Safir SDK Core is distributed in the hope that it will be useful,
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
+* GNU General Public License for more Internals.
 *
 * You should have received a copy of the GNU General Public License
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
-
-#include <Safir/Dob/Typesystem/BlobOperations.h>
+#include <Safir/Dob/Typesystem/Internal/BlobOperations.h>
 #include <Safir/Dob/Typesystem/Internal/Kernel.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Dob/Typesystem/Exceptions.h>
@@ -35,8 +34,23 @@ namespace Dob
 {
 namespace Typesystem
 {
-    TypeId
-    BlobOperations::GetTypeId(char const * const blob)
+namespace Internal
+{
+namespace
+{
+    DotsC_KeyValMode Conv(BlobOperations::KeyValueMode m)
+    {
+        return m==BlobOperations::ValueMode ? DotsC_ValueMode : DotsC_KeyMode;
+    }
+
+    template <class T>
+    T ToHashedType(DotsC_Int64 hash, const char* optionalStr)
+    {
+        return (optionalStr==NULL) ? T(hash) : T(Safir::Dob::Typesystem::Utilities::ToWstring(optionalStr));
+    }
+}
+
+    TypeId BlobOperations::GetTypeId(char const * const blob)
     {
         assert(blob != NULL);
         return DotsC_GetTypeId(blob);
@@ -48,394 +62,18 @@ namespace Typesystem
         return DotsC_GetSize(blob);
     }
 
-    bool BlobOperations::IsChanged(char const * const blob)
+    char* BlobOperations::CreateCopy(const char* blob)
     {
-        assert(blob != NULL);
-        return DotsC_IsAnythingChanged(blob);
+        char* copy;
+        DotsC_CreateCopyOfBlob(copy, blob);
+        return copy;
     }
 
-    Int32
-    BlobOperations::GetInitialSize(const TypeId typeId)
+    void BlobOperations::Delete(char* & blob)
     {
-        return DotsC_GetInitialSize(typeId);
+        DotsC_DeleteBlob(blob);
+        blob=NULL;
     }
-
-    //
-    // Bool
-    //
-    void BlobOperations::Set(char * const blob,
-                             const Dob::Typesystem::MemberIndex member,
-                             const Dob::Typesystem::ArrayIndex index,
-                             const bool value,
-                             const bool isNull,
-                             const bool isChanged)
-    {
-        assert(blob != NULL);
-        DotsC_SetBooleanMemberInPreallocated(value,
-                                             isNull,
-                                             isChanged,
-                                             blob,
-                                             member,
-                                             index);
-    }
-
-    void BlobOperations::Get(char const * const blob,
-                             const Dob::Typesystem::MemberIndex member,
-                             const Dob::Typesystem::ArrayIndex index,
-                             bool & value,
-                             bool & isNull,
-                             bool & isChanged)
-    {
-        assert(blob != NULL);
-        DotsC_GetBooleanMember(blob,
-                               member,
-                               index,
-                               value,
-                               isNull,
-                               isChanged);
-    }
-
-    //
-    // Int32
-    //
-    void BlobOperations::Set(char * const blob,
-                             const Dob::Typesystem::MemberIndex member,
-                             const Dob::Typesystem::ArrayIndex index,
-                             const Int32 value,
-                             const bool isNull,
-                             const bool isChanged)
-    {
-        assert(blob != NULL);
-        DotsC_SetInt32MemberInPreallocated(value,
-                                           isNull,
-                                           isChanged,
-                                           blob,
-                                           member,
-                                           index);
-    }
-
-    void BlobOperations::Get(char const * const blob,
-                             const Dob::Typesystem::MemberIndex member,
-                             const Dob::Typesystem::ArrayIndex index,
-                             Int32 & value,
-                             bool & isNull,
-                             bool & isChanged)
-    {
-        assert(blob != NULL);
-        DotsC_GetInt32Member(blob,
-                             member,
-                             index,
-                             value,
-                             isNull,
-                             isChanged);
-    }
-
-    //
-    // Int64
-    //
-    void BlobOperations::Set(char * const blob,
-                             const Dob::Typesystem::MemberIndex member,
-                             const Dob::Typesystem::ArrayIndex index,
-                             const Int64 value,
-                             const bool isNull,
-                             const bool isChanged)
-    {
-        assert(blob != NULL);
-        DotsC_SetInt64MemberInPreallocated(value,
-                                             isNull,
-                                             isChanged,
-                                             blob,
-                                             member,
-                                             index);
-    }
-
-    void BlobOperations::Get(char const * const blob,
-                             const Dob::Typesystem::MemberIndex member,
-                             const Dob::Typesystem::ArrayIndex index,
-                             Int64 & value,
-                             bool & isNull,
-                             bool & isChanged)
-    {
-        assert(blob != NULL);
-        DotsC_GetInt64Member(blob,
-                             member,
-                             index,
-                             value,
-                             isNull,
-                             isChanged);
-    }
-
-    //
-    // Float32
-    //
-    void BlobOperations::Set(char * const blob,
-                             const Dob::Typesystem::MemberIndex member,
-                             const Dob::Typesystem::ArrayIndex index,
-                             const Float32 value,
-                             const bool isNull,
-                             const bool isChanged)
-    {
-        assert(blob != NULL);
-        DotsC_SetFloat32MemberInPreallocated(value,
-                                             isNull,
-                                             isChanged,
-                                             blob,
-                                             member,
-                                             index);
-    }
-
-    void BlobOperations::Get(char const * const blob,
-                             const Dob::Typesystem::MemberIndex member,
-                             const Dob::Typesystem::ArrayIndex index,
-                             Float32 & value,
-                             bool & isNull,
-                             bool & isChanged)
-    {
-        assert(blob != NULL);
-        DotsC_GetFloat32Member(blob,
-                             member,
-                             index,
-                             value,
-                             isNull,
-                             isChanged);
-    }
-
-    //
-    // Float64
-    //
-    void BlobOperations::Set(char * const blob,
-                             const Dob::Typesystem::MemberIndex member,
-                             const Dob::Typesystem::ArrayIndex index,
-                             const Float64 value,
-                             const bool isNull,
-                             const bool isChanged)
-    {
-        assert(blob != NULL);
-        DotsC_SetFloat64MemberInPreallocated(value,
-                                             isNull,
-                                             isChanged,
-                                             blob,
-                                             member,
-                                             index);
-    }
-
-    void BlobOperations::Get(char const * const blob,
-                             const Dob::Typesystem::MemberIndex member,
-                             const Dob::Typesystem::ArrayIndex index,
-                             Float64 & value,
-                             bool & isNull,
-                             bool & isChanged)
-    {
-        assert(blob != NULL);
-        DotsC_GetFloat64Member(blob,
-                             member,
-                             index,
-                             value,
-                             isNull,
-                             isChanged);
-    }
-
-    //
-    // InstanceId
-    //
-    void BlobOperations::Get(char const * const blob,
-                             const Dob::Typesystem::MemberIndex member,
-                             const Dob::Typesystem::ArrayIndex index,
-                             InstanceId & value,
-                             bool & isNull,
-                             bool & isChanged)
-    {
-        assert(blob != NULL);
-        Int64 hashVal;
-        const char * strVal = NULL;
-        DotsC_GetHashedIdMember(blob,
-                                member,
-                                index,
-                                hashVal,
-                                strVal,
-                                isNull,
-                                isChanged);
-        if (!isNull)
-        {
-            if (strVal != NULL)
-            {
-                value = InstanceId(hashVal,Utilities::ToWstring(strVal));
-            }
-            else
-            {
-                value = InstanceId(hashVal);
-            }
-        }
-    }
-
-    //
-    // EntityId
-    //
-    void BlobOperations::Get(char const * const blob,
-                             const Dob::Typesystem::MemberIndex member,
-                             const Dob::Typesystem::ArrayIndex index,
-                             EntityId & value,
-                             bool & isNull,
-                             bool & isChanged)
-    {
-        assert(blob != NULL);
-        DotsC_EntityId eid;
-        const char * strVal = NULL;
-        DotsC_GetEntityIdMember(blob,
-                                member,
-                                index,
-                                eid,
-                                strVal,
-                                isNull,
-                                isChanged);
-        if (!isNull)
-        {
-            if (strVal != NULL)
-            {
-                value = EntityId(eid.typeId,InstanceId(eid.instanceId,Utilities::ToWstring(strVal)));
-            }
-            else
-            {
-                value = EntityId(eid.typeId,InstanceId(eid.instanceId));
-            }
-        }
-    }
-
-    //
-    // ChannelId
-    //
-    void BlobOperations::Get(char const * const blob,
-                             const Dob::Typesystem::MemberIndex member,
-                             const Dob::Typesystem::ArrayIndex index,
-                             ChannelId & value,
-                             bool & isNull,
-                             bool & isChanged)
-    {
-        assert(blob != NULL);
-        Int64 hashVal;
-        const char * strVal = NULL;
-        DotsC_GetHashedIdMember(blob,
-                                member,
-                                index,
-                                hashVal,
-                                strVal,
-                                isNull,
-                                isChanged);
-        if (!isNull)
-        {
-            if (strVal != NULL)
-            {
-                value = ChannelId(hashVal, Utilities::ToWstring(strVal));
-            }
-            else
-            {
-                value = ChannelId(hashVal);
-            }
-        }
-    }
-
-    //
-    // HandlerId
-    //
-    void BlobOperations::Get(char const * const blob,
-                             const Dob::Typesystem::MemberIndex member,
-                             const Dob::Typesystem::ArrayIndex index,
-                             HandlerId & value,
-                             bool & isNull,
-                             bool & isChanged)
-    {
-        assert(blob != NULL);
-        Int64 hashVal;
-        const char * strVal = NULL;
-        DotsC_GetHashedIdMember(blob,
-                                member,
-                                index,
-                                hashVal,
-                                strVal,
-                                isNull,
-                                isChanged);
-        if (!isNull)
-        {
-            if (strVal != NULL)
-            {
-                value = HandlerId(hashVal,Utilities::ToWstring(strVal));
-            }
-            else
-            {
-                value = HandlerId(hashVal);
-            }
-        }
-    }
-    //
-    // String
-    //
-    void BlobOperations::Get(char const * const blob,
-                             const Dob::Typesystem::MemberIndex member,
-                             const Dob::Typesystem::ArrayIndex index,
-                             std::wstring & value,
-                             bool & isNull,
-                             bool & isChanged)
-    {
-        assert(blob != NULL);
-        const char * str;
-        DotsC_GetStringMember(blob,
-                              member,
-                              index,
-                              str,
-                              isNull,
-                              isChanged);
-        if (!isNull)
-        {
-            value = Utilities::ToWstring(str);
-        }
-    }
-
-    //
-    // Object
-    //
-    void BlobOperations::Get(char * const blob,
-                             const Dob::Typesystem::MemberIndex member,
-                             const Dob::Typesystem::ArrayIndex index,
-                             const char * & childBlob,
-                             bool & isNull,
-                             bool & isChanged)
-    {
-        assert(blob != NULL);
-        DotsC_GetObjectMember(blob,
-                              member,
-                              index,
-                              childBlob,
-                              isNull,
-                              isChanged);
-    }
-
-    //
-    // Binary
-    //
-    void BlobOperations::Get(char const * const blob,
-                             const Dob::Typesystem::MemberIndex member,
-                             const Dob::Typesystem::ArrayIndex index,
-                             Dob::Typesystem::Binary & value,
-                             bool & isNull,
-                             bool & isChanged)
-    {
-        assert(blob != NULL);
-        const char* bin;
-        DotsC_Int32 size;
-        DotsC_GetBinaryMember(blob,
-                              member,
-                              index,
-                              bin,
-                              size,
-                              isNull,
-                              isChanged);
-        if (!isNull)
-        {
-            value.reserve(size);
-            value.assign(bin,bin+size);
-        }
-    }
-
 
     /**********************************************************************
      *
@@ -443,488 +81,705 @@ namespace Typesystem
      *
      **********************************************************************/
 
-    void
-    BlobOperations::Set(const BooleanContainer & value,
-                        char * const blob,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index)
+    void BlobOperations::Set(const BooleanContainer& value,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex index)
     {
-        Set(blob,
-            member,
-            index,
-            value.m_Value,
-            value.m_bIsNull,
-            value.m_bIsChanged);
+        Set(value.m_Value, value.IsNull(), value.IsChanged(), handle, member, index, ValueMode);
     }
 
-    void
-    BlobOperations::Get(BooleanContainer & value,
-                        char const * const blob,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index)
+    void BlobOperations::Get(BooleanContainer& value,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex index)
     {
-        Get(blob,
-            member,
-            index,
-            value.m_Value,
-            value.m_bIsNull,
-            value.m_bIsChanged);
+        Get(value.m_Value, value.m_bIsNull, value.m_bIsChanged, handle, member, index, ValueMode);
     }
 
-    void
-    BlobOperations::Set(const EnumerationContainerBase & value,
-                        char * const blob,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index)
+    void BlobOperations::Set(const EnumerationContainerBase& value,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex index)
     {
-        Set(blob,
-            member,
-            index,
-            value.m_Value,
-            value.m_bIsNull,
-            value.m_bIsChanged);
+        Set(value.m_Value, value.IsNull(), value.IsChanged(), handle, member, index, ValueMode);
     }
 
-    void
-    BlobOperations::Get(EnumerationContainerBase & value,
-                        char const * const blob,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index)
+    void BlobOperations::Get(EnumerationContainerBase& value,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex index)
     {
-        Get(blob,
-            member,
-            index,
-            value.m_Value,
-            value.m_bIsNull,
-            value.m_bIsChanged);
+        Get(value.m_Value, value.m_bIsNull, value.m_bIsChanged, handle, member, index, ValueMode);
     }
 
-    void
-    BlobOperations::Set(const Int32Container & value,
-                        char * const blob,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index)
+    void BlobOperations::Set(const Int32Container& value,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex index)
     {
-        Set(blob,
-            member,
-            index,
-            value.m_Value,
-            value.m_bIsNull,
-            value.m_bIsChanged);
+        Set(value.m_Value, value.IsNull(), value.IsChanged(), handle, member, index, ValueMode);
     }
 
-    void
-    BlobOperations::Get(Int32Container & value,
-                        char const * const blob,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index)
+    void BlobOperations::Get(Int32Container& value,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex index)
     {
-        Get(blob,
-            member,
-            index,
-            value.m_Value,
-            value.m_bIsNull,
-            value.m_bIsChanged);
+        Get(value.m_Value, value.m_bIsNull, value.m_bIsChanged, handle, member, index, ValueMode);
     }
 
-    void
-    BlobOperations::Set(const Int64Container & value,
-                        char * const blob,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index)
+    void BlobOperations::Set(const Int64Container& value,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex index)
     {
-        Set(blob,
-            member,
-            index,
-            value.m_Value,
-            value.m_bIsNull,
-            value.m_bIsChanged);
+        Set(value.m_Value, value.IsNull(), value.IsChanged(), handle, member, index, ValueMode);
     }
 
-    void
-    BlobOperations::Get(Int64Container & value,
-                        char const * const blob,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index)
+    void BlobOperations::Get(Int64Container& value,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex index)
     {
-        Get(blob,
-            member,
-            index,
-            value.m_Value,
-            value.m_bIsNull,
-            value.m_bIsChanged);
+        Get(value.m_Value, value.m_bIsNull, value.m_bIsChanged, handle, member, index, ValueMode);
     }
 
-    void
-    BlobOperations::Set(const Float32Container & value,
-                        char * const blob,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index)
+    void BlobOperations::Set(const Float32Container& value,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex index)
     {
-        Set(blob,
-            member,
-            index,
-            value.m_Value,
-            value.m_bIsNull,
-            value.m_bIsChanged);
+        Set(value.m_Value, value.IsNull(), value.IsChanged(), handle, member, index, ValueMode);
     }
 
-    void
-    BlobOperations::Get(Float32Container & value,
-                        char const * const blob,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index)
+    void BlobOperations::Get(Float32Container& value,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex index)
     {
-        Get(blob,
-            member,
-            index,
-            value.m_Value,
-            value.m_bIsNull,
-            value.m_bIsChanged);
+        Get(value.m_Value, value.m_bIsNull, value.m_bIsChanged, handle, member, index, ValueMode);
     }
 
-    void
-    BlobOperations::Set(const Float64Container & value,
-                        char * const blob,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index)
+    void BlobOperations::Set(const Float64Container& value,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex index)
     {
-        Set(blob,
-            member,
-            index,
-            value.m_Value,
-            value.m_bIsNull,
-            value.m_bIsChanged);
+       Set(value.m_Value, value.IsNull(), value.IsChanged(), handle, member, index, ValueMode);
     }
 
-    void
-    BlobOperations::Get(Float64Container & value,
-                        char const * const blob,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index)
+    void BlobOperations::Get(Float64Container& value,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex index)
     {
-        Get(blob,
-            member,
-            index,
-            value.m_Value,
-            value.m_bIsNull,
-            value.m_bIsChanged);
+        Get(value.m_Value, value.m_bIsNull, value.m_bIsChanged, handle, member, index, ValueMode);
+    }
+
+    void BlobOperations::Set(const EntityIdContainer& value,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex index)
+    {
+        Set(value.m_Value, value.IsNull(), value.IsChanged(), handle, member, index, ValueMode);
+    }
+
+    void BlobOperations::Get(EntityIdContainer& value,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex index)
+    {
+        Get(value.m_Value, value.m_bIsNull, value.m_bIsChanged, handle, member, index, ValueMode);
+    }
+
+    void BlobOperations::Set(const InstanceIdContainer& value,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex index)
+    {
+       Set(value.m_Value, value.IsNull(), value.IsChanged(), handle, member, index, ValueMode);
+    }
+
+    void BlobOperations::Get(InstanceIdContainer& value,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex index)
+    {
+        Get(value.m_Value, value.m_bIsNull, value.m_bIsChanged, handle, member, index, ValueMode);
+    }
+
+    void BlobOperations::Set(const ChannelIdContainer& value,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex index)
+    {
+        Set(value.m_Value, value.IsNull(), value.IsChanged(), handle, member, index, ValueMode);
+    }
+
+    void BlobOperations::Get(ChannelIdContainer& value,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex index)
+    {
+        Get(value.m_Value, value.m_bIsNull, value.m_bIsChanged, handle, member, index, ValueMode);
     }
 
 
-    void
-    BlobOperations::Set(const InstanceIdContainer & value,
-                        char * const blob,
-                        char * & beginningOfUnused,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index)
+
+    void BlobOperations::Set(const HandlerIdContainer& value,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex index)
     {
-        if (!value.IsNull())
+        Set(value.m_Value, value.IsNull(), value.IsChanged(), handle, member, index, ValueMode);
+    }
+
+    void BlobOperations::Get(HandlerIdContainer& value,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex index)
+    {
+        Get(value.m_Value, value.m_bIsNull, value.m_bIsChanged, handle, member, index, ValueMode);
+    }
+
+    void BlobOperations::Set(const StringContainer& value,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex index)
+    {
+        Set(value.m_Value, value.IsNull(), value.IsChanged(), handle, member, index, ValueMode);
+    }
+
+    void BlobOperations::Get(StringContainer& value,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex index)
+    {
+        Get(value.m_Value, value.m_bIsNull, value.m_bIsChanged, handle, member, index, ValueMode);
+    }
+
+
+
+    void BlobOperations::Set(const ObjectContainerBase& value,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex index)
+    {
+        Set(value.GetObjectPointer(), value.IsNull(), value.IsChanged(), handle, member, index, ValueMode);
+    }
+
+    void BlobOperations::Get(ObjectContainerBase& object,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex index)
+    {
+        bool isNull;
+        ObjectPtr p;
+        Get(p, isNull, object.m_bIsChanged, handle, member, index, ValueMode);
+        if (!isNull)
         {
-            const Int32 stringLength = value.m_Value.Utf8StringLength();
-            DotsC_SetHashedIdMemberInPreallocated
-                (value.m_Value.GetRawValue(),
-                (stringLength == 0 ? NULL : value.m_Value.Utf8String().c_str()),
-                stringLength,
-                value.IsNull(),
-                value.IsChanged(),
-                blob,
-                member,
-                index,
-                beginningOfUnused);
+            object.SetObjectPointer(p);
         }
-        else if(value.IsChanged())
-        {
-            DotsC_SetNullMember(blob, member, index);
-        }
-    }
-
-    void
-    BlobOperations::Get(InstanceIdContainer & value,
-                        char const * const blob,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index)
-    {
-        Get(blob, member, index, value.m_Value,value.m_bIsNull,value.m_bIsChanged);
-    }
-
-
-
-    void
-    BlobOperations::Set(const EntityIdContainer & value,
-                        char * const blob,
-                        char * & beginningOfUnused,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index)
-    {
-        if (!value.IsNull())
-        {
-            const Int32 stringLength = value.m_Value.GetInstanceId().Utf8StringLength();
-            DotsC_EntityId eid;
-            eid.instanceId = value.m_Value.GetInstanceId().GetRawValue();
-            eid.typeId = value.m_Value.GetTypeId();
-            DotsC_SetEntityIdMemberInPreallocated(eid,
-                (stringLength == 0 ? NULL : value.m_Value.GetInstanceId().Utf8String().c_str()),
-                stringLength,
-                value.IsNull(),
-                value.IsChanged(),
-                blob,
-                member,
-                index,
-                beginningOfUnused);
-        }
-        else if(value.IsChanged())
-        {
-            DotsC_SetNullMember(blob, member, index);
-        }
-    }
-
-    void
-    BlobOperations::Get(EntityIdContainer & value,
-                        char const * const blob,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index)
-    {
-        Get(blob, member, index, value.m_Value,value.m_bIsNull,value.m_bIsChanged);
-    }
-
-
-
-    void
-    BlobOperations::Set(const ChannelIdContainer & value,
-                        char * const blob,
-                        char * & beginningOfUnused,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index)
-    {
-        if (!value.IsNull())
-        {
-            const Int32 stringLength = value.m_Value.Utf8StringLength();
-            DotsC_SetHashedIdMemberInPreallocated(value.m_Value.GetRawValue(),
-                (stringLength == 0 ? NULL : value.m_Value.Utf8String().c_str()),
-                stringLength,
-                value.IsNull(),
-                value.IsChanged(),
-                blob,
-                member,
-                index,
-                beginningOfUnused);
-        }
-        else if(value.IsChanged())
-        {
-            DotsC_SetNullMember(blob, member, index);
-        }
-    }
-
-    void
-    BlobOperations::Get(ChannelIdContainer & value,
-                        char const * const blob,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index)
-    {
-        Get(blob, member, index, value.m_Value,value.m_bIsNull,value.m_bIsChanged);
-    }
-
-
-
-    void
-    BlobOperations::Set(const HandlerIdContainer & value,
-                        char * const blob,
-                        char * & beginningOfUnused,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index)
-    {
-        if (!value.IsNull())
-        {
-            const Int32 stringLength = value.m_Value.Utf8StringLength();
-            DotsC_SetHashedIdMemberInPreallocated(value.m_Value.GetRawValue(),
-                (stringLength == 0 ? NULL : value.m_Value.Utf8String().c_str()),
-                stringLength,
-                value.IsNull(),
-                value.IsChanged(),
-                blob,
-                member,
-                index,
-                beginningOfUnused);
-        }
-        else if(value.IsChanged())
-        {
-            DotsC_SetNullMember(blob, member, index);
-        }
-    }
-
-    void
-    BlobOperations::Get(HandlerIdContainer & value,
-                        char const * const blob,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index)
-    {
-        Get(blob, member, index, value.m_Value,value.m_bIsNull,value.m_bIsChanged);
-    }
-
-    void
-    BlobOperations::Set(const StringContainer & value,
-                        char * const blob,
-                        char * & beginningOfUnused,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index)
-    {
-        if (!value.IsNull())
-        {
-            char * const stringStart = beginningOfUnused;
-            const Int32 stringLength = value.Utf8StringLength();
-            DotsC_CreateStringMember(blob,
-                                     stringLength,
-                                     member,
-                                     index,
-                                     value.IsChanged(),
-                                     beginningOfUnused);
-
-            strncpy(stringStart,value.Utf8String().c_str(),stringLength);
-        }
-        else if(value.IsChanged())
-        {
-            DotsC_SetNullMember(blob, member, index);
-        }
-    }
-
-    void
-    BlobOperations::Get(StringContainer & value,
-                        char const * const blob,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index)
-    {
-        assert(blob != NULL);
-        const char * str;
-        DotsC_GetStringMember(blob,
-                              member,
-                              index,
-                              str,
-                              value.m_bIsNull,
-                              value.m_bIsChanged);
-        if (!value.m_bIsNull)
-        {
-            value.m_CachedUtf8String = str;
-            value.m_Value = Utilities::ToWstring(value.m_CachedUtf8String);
-        }
-    }
-
-
-
-    void
-    BlobOperations::Set(const ObjectContainerBase & object,
-                        char * const blob,
-                        char * & beginningOfUnused,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index)
-    {
-        if (!object.IsNull())
-        {
-            char * const childBlob = beginningOfUnused;
-            DotsC_CreateObjectMember(blob,
-                                     object.GetObjectPointer()->CalculateBlobSize(), //can we cache this value from the last call?
-                                     object.GetObjectPointer()->GetTypeId(),
-                                     member,
-                                     index,
-                                     object.IsChangedHere(),
-                                     beginningOfUnused);
-            object.GetObjectPointer()->WriteToBlob(childBlob,beginningOfUnused);
-        }
-        else if(object.IsChangedHere())
-        {
-            DotsC_SetNullMember(blob, member, index);
-        }
-    }
-
-    void
-    BlobOperations::Get(ObjectContainerBase & object,
-                        char const * const blob,
-                        const Dob::Typesystem::MemberIndex member,
-                        const Dob::Typesystem::ArrayIndex index)
-    {
-        const char * childBlob = NULL;
-        bool childIsNull = true;
-        DotsC_GetObjectMember(blob,
-                              member,
-                              index,
-                              childBlob,
-                              childIsNull,
-                              object.m_bIsChanged);
-        if (childIsNull)
+        else
         {
             object.ResetObjectPointer();
         }
+    }
+
+    void BlobOperations::Set(const BinaryContainer& value,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex index)
+    {
+       Set(value.m_Value, value.IsNull(), value.IsChanged(), handle, member, index, ValueMode);
+    }
+
+
+    void BlobOperations::Get(BinaryContainer& value,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex index)
+    {
+        Get(value.m_Value, value.m_bIsNull, value.m_bIsChanged, handle, member, index, ValueMode);
+    }
+
+    //-------------------------------------------------------------
+    // Get value operations
+    //-------------------------------------------------------------
+    void BlobOperations::Get(bool& val,
+                             bool& isNull,
+                             bool& isChanged,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex valueIndex,
+                             KeyValueMode mode)
+    {
+        if (mode==KeyMode)
+        {
+            throw std::logic_error("BlobOperation.GetBoolean called with mode=KeyMode. Only ValueMode is allowed for this type!");
+        }
+
+        DotsC_ReadBooleanMember(handle, val, isNull, isChanged, member, valueIndex, Conv(mode));
+    }
+
+    void BlobOperations::Get(Safir::Dob::Typesystem::Int32& val,
+                             bool& isNull,
+                             bool& isChanged,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex valueIndex,
+                             KeyValueMode mode)
+    {
+        DotsC_ReadInt32Member(handle, val, isNull, isChanged, member, valueIndex, Conv(mode));
+    }
+
+    void BlobOperations::Get(Safir::Dob::Typesystem::Int64& val,
+                             bool& isNull,
+                             bool& isChanged,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex valueIndex,
+                             KeyValueMode mode)
+    {
+        DotsC_ReadInt64Member(handle, val, isNull, isChanged, member, valueIndex, Conv(mode));
+    }
+
+    void BlobOperations::Get(Safir::Dob::Typesystem::Float32& val,
+                             bool& isNull,
+                             bool& isChanged,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex valueIndex,
+                             KeyValueMode mode)
+    {
+        if (mode==KeyMode)
+        {
+            throw std::logic_error("BlobOperation.GetFloat32 called with mode=KeyMode. Only ValueMode is allowed for this type!");
+        }
+
+        DotsC_ReadFloat32Member(handle, val, isNull, isChanged, member, valueIndex, Conv(mode));
+    }
+
+    void BlobOperations::Get(Safir::Dob::Typesystem::Float64& val,
+                             bool& isNull,
+                             bool& isChanged,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex valueIndex,
+                             KeyValueMode mode)
+    {
+        if (mode==KeyMode)
+        {
+            throw std::logic_error("BlobOperation.GetFloat64 called with mode=KeyMode. Only ValueMode is allowed for this type!");
+        }
+
+        DotsC_ReadFloat64Member(handle, val, isNull, isChanged, member, valueIndex, Conv(mode));
+    }
+
+    void BlobOperations::Get(std::wstring& val,
+                             bool& isNull,
+                             bool& isChanged,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex valueIndex,
+                             KeyValueMode mode)
+    {
+        const char* str;
+        DotsC_ReadStringMember(handle, str, isNull, isChanged, member, valueIndex, Conv(mode));
+        if (!isNull)
+        {
+            val=Safir::Dob::Typesystem::Utilities::ToWstring(str);
+        }
+    }
+
+    void BlobOperations::Get(Safir::Dob::Typesystem::InstanceId& val,
+                             bool& isNull,
+                             bool& isChanged,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex valueIndex,
+                             KeyValueMode mode)
+    {
+        DotsC_Int64 hash;
+        const char* optionalStr;
+        DotsC_ReadHashedMember(handle, hash, optionalStr, isNull, isChanged, member, valueIndex, Conv(mode));
+        if (!isNull)
+        {
+            val=ToHashedType<Safir::Dob::Typesystem::InstanceId>(hash, optionalStr);
+        }
+    }
+
+    void BlobOperations::Get(Safir::Dob::Typesystem::HandlerId& val,
+                             bool& isNull,
+                             bool& isChanged,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex valueIndex,
+                             KeyValueMode mode)
+    {
+        DotsC_Int64 hash;
+        const char* optionalStr;
+        DotsC_ReadHashedMember(handle, hash, optionalStr, isNull, isChanged, member, valueIndex, Conv(mode));
+        if (!isNull)
+        {
+            val=ToHashedType<Safir::Dob::Typesystem::HandlerId>(hash, optionalStr);
+        }
+    }
+
+    void BlobOperations::Get(Safir::Dob::Typesystem::ChannelId& val,
+                             bool& isNull,
+                             bool& isChanged,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex valueIndex,
+                             KeyValueMode mode)
+    {
+        DotsC_Int64 hash;
+        const char* optionalStr;
+        DotsC_ReadHashedMember(handle, hash, optionalStr, isNull, isChanged, member, valueIndex, Conv(mode));
+        if (!isNull)
+        {
+            val=ToHashedType<Safir::Dob::Typesystem::ChannelId>(hash, optionalStr);
+        }
+    }
+
+    void BlobOperations::Get(Safir::Dob::Typesystem::EntityId& val,
+                             bool& isNull,
+                             bool& isChanged,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex valueIndex,
+                             KeyValueMode mode)
+    {
+        DotsC_EntityId eid;
+        const char* optionalStr;
+        DotsC_ReadEntityIdMember(handle, eid, optionalStr, isNull, isChanged, member, valueIndex, Conv(mode));
+        if (!isNull)
+        {
+            val=Safir::Dob::Typesystem::EntityId(eid.typeId, ToHashedType<Safir::Dob::Typesystem::InstanceId>(eid.instanceId, optionalStr));
+        }
+    }
+
+    void BlobOperations::Get(Safir::Dob::Typesystem::ObjectPtr& val,
+                             bool& isNull,
+                             bool& isChanged,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex valueIndex,
+                             KeyValueMode mode)
+    {
+        if (mode==KeyMode)
+        {
+            throw std::logic_error("BlobOperation.GetObject called with mode=KeyMode. Only ValueMode is allowed for this type!");
+        }
+
+        const char* blob;
+        DotsC_ReadObjectMember(handle, blob, isNull, isChanged, member, valueIndex, Conv(mode));
+        if (!isNull)
+        {
+            val=Dob::Typesystem::ObjectFactory::Instance().CreateObject(blob);
+        }
         else
         {
-            object.SetObjectPointer(Dob::Typesystem::ObjectFactory::Instance().CreateObject(childBlob));
+            val.reset();
         }
     }
 
-    void BlobOperations::Set(const BinaryContainer & binary,
-                            char * const blob,
-                            char * & beginningOfUnused,
-                            const Dob::Typesystem::MemberIndex member,
-                            const Dob::Typesystem::ArrayIndex index)
+    void BlobOperations::Get(Safir::Dob::Typesystem::Binary& val,
+                             bool& isNull,
+                             bool& isChanged,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex valueIndex,
+                             KeyValueMode mode)
     {
-        if (!binary.IsNull())
+        if (mode==KeyMode)
         {
-            char * const binaryStart = beginningOfUnused;
-            const Int32 binarySize = static_cast<Int32>(binary.GetVal().size());
-            DotsC_CreateBinaryMember(blob,
-                                     binarySize,
-                                     member,
-                                     index,
-                                     binary.IsChanged(),
-                                     beginningOfUnused);
-            if (binarySize != 0)
-            {
-                memcpy(binaryStart, &binary.GetVal()[0], binarySize);
-            }
+            throw std::logic_error("BlobOperation.GetBinary called with mode=KeyMode. Only ValueMode is allowed for this type!");
         }
-        else if(binary.IsChanged())
+
+        val.clear();
+        const char* bin;
+        DotsC_Int32 size;
+        DotsC_ReadBinaryMember(handle, bin, size, isNull, isChanged, member, valueIndex, Conv(mode));
+        if (!isNull)
         {
-            DotsC_SetNullMember(blob, member, index);
+            val.resize(static_cast<size_t>(size));
+            memcpy(&(val[0]), bin, val.size());
         }
     }
 
-
-    void BlobOperations::Get(BinaryContainer & binary,
-                            char const * const blob,
-                            const Dob::Typesystem::MemberIndex member,
-                            const Dob::Typesystem::ArrayIndex index)
+    //---------------------------------------------------------
+    // Set values
+    //--------------------------------------------------------
+    void BlobOperations::Set(bool val,
+                             bool isNull,
+                             bool isChanged,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex valueIndex,
+                             KeyValueMode mode)
     {
-        bool isChanged, isNull;
-        Binary bin;
-        Get(blob, member, index, bin, isNull, isChanged);
+        if (mode==KeyMode)
+        {
+            throw std::logic_error("BlobOperation.Set(bool) called with mode=KeyMode. Only ValueMode is allowed for this type!");
+        }
+
+        DotsC_WriteBooleanMember(handle, val, isNull, isChanged, member, valueIndex, Conv(mode));
+    }
+
+    void BlobOperations::Set(Safir::Dob::Typesystem::Int32 val,
+                             bool isNull,
+                             bool isChanged,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex valueIndex,
+                             KeyValueMode mode)
+    {
+        DotsC_WriteInt32Member(handle, val, isNull, isChanged, member, valueIndex, Conv(mode));
+    }
+
+    void BlobOperations::Set(Safir::Dob::Typesystem::Int64 val,
+                             bool isNull,
+                             bool isChanged,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex valueIndex,
+                             KeyValueMode mode)
+    {
+        DotsC_WriteInt64Member(handle, val, isNull, isChanged, member, valueIndex, Conv(mode));
+    }
+
+    void BlobOperations::Set(Safir::Dob::Typesystem::Float32 val,
+                             bool isNull,
+                             bool isChanged,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex valueIndex,
+                             KeyValueMode mode)
+    {
+        if (mode==KeyMode)
+        {
+            throw std::logic_error("BlobOperation.Set(Float32) called with mode=KeyMode. Only ValueMode is allowed for this type!");
+        }
+
+        DotsC_WriteFloat32Member(handle, val, isNull, isChanged, member, valueIndex, Conv(mode));
+    }
+
+    void BlobOperations::Set(Safir::Dob::Typesystem::Float64 val,
+                             bool isNull,
+                             bool isChanged,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex valueIndex,
+                             KeyValueMode mode)
+    {
+        if (mode==KeyMode)
+        {
+            throw std::logic_error("BlobOperation.Set(Float64) called with mode=KeyMode. Only ValueMode is allowed for this type!");
+        }
+
+        DotsC_WriteFloat64Member(handle, val, isNull, isChanged, member, valueIndex, Conv(mode));
+    }
+
+    void BlobOperations::Set(const std::wstring& val,
+                             bool isNull,
+                             bool isChanged,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex valueIndex,
+                             KeyValueMode mode)
+    {
+        std::string utf8=Safir::Dob::Typesystem::Utilities::ToUtf8(val);
+        DotsC_WriteStringMember(handle, utf8.c_str(),
+                                isNull, isChanged, member, valueIndex, Conv(mode));
+    }
+
+    void BlobOperations::Set(const Safir::Dob::Typesystem::InstanceId& val,
+                             bool isNull,
+                             bool isChanged,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex valueIndex,
+                             KeyValueMode mode)
+    {
+        std::string utf8=Safir::Dob::Typesystem::Utilities::ToUtf8(val.GetRawString());
+        const char* str=utf8.empty() ? NULL : utf8.c_str();
+        DotsC_WriteHashedMember(handle, val.GetRawValue(), str, isNull, isChanged, member, valueIndex, Conv(mode));
+    }
+
+    void BlobOperations::Set(const Safir::Dob::Typesystem::HandlerId& val,
+                             bool isNull,
+                             bool isChanged,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex valueIndex,
+                             KeyValueMode mode)
+    {
+        std::string utf8=Safir::Dob::Typesystem::Utilities::ToUtf8(val.GetRawString());
+        const char* str=utf8.empty() ? NULL : utf8.c_str();
+        DotsC_WriteHashedMember(handle, val.GetRawValue(), str, isNull, isChanged, member, valueIndex, Conv(mode));
+    }
+
+    void BlobOperations::Set(const Safir::Dob::Typesystem::ChannelId& val,
+                             bool isNull,
+                             bool isChanged,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex valueIndex,
+                             KeyValueMode mode)
+    {
+        std::string utf8=Safir::Dob::Typesystem::Utilities::ToUtf8(val.GetRawString());
+        const char* str=utf8.empty() ? NULL : utf8.c_str();
+        DotsC_WriteHashedMember(handle, val.GetRawValue(), str, isNull, isChanged, member, valueIndex, Conv(mode));
+    }
+
+    void BlobOperations::Set(const Safir::Dob::Typesystem::EntityId& val,
+                             bool isNull,
+                             bool isChanged,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex valueIndex,
+                             KeyValueMode mode)
+    {
+        std::string utf8=Safir::Dob::Typesystem::Utilities::ToUtf8(val.GetInstanceId().GetRawString());
+        const char* str=utf8.empty() ? NULL : utf8.c_str();
+        DotsC_EntityId eid;
+        eid.instanceId = val.GetInstanceId().GetRawValue();
+        eid.typeId = val.GetTypeId();
+        DotsC_WriteEntityIdMember(handle, eid, str, isNull, isChanged, member, valueIndex, Conv(mode));
+    }
+
+    void BlobOperations::Set(const Safir::Dob::Typesystem::ObjectPtr& val,
+                             bool isNull,
+                             bool isChanged,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex valueIndex,
+                             KeyValueMode mode)
+    {
+        if (mode==KeyMode)
+        {
+            throw std::logic_error("BlobOperation.Set(Object) called with mode=KeyMode. Only ValueMode is allowed for this type!");
+        }
+
         if (isNull)
-            binary.SetNull();
+        {
+            DotsC_WriteObjectMember(handle, NULL, isNull, isChanged, member, valueIndex, Conv(mode));
+        }
         else
-            binary.SetVal(bin);
-
-        binary.SetChanged(isChanged);
+        {
+            Safir::Dob::Typesystem::Int64 objHandle=DotsC_CreateBlobWriter(val->GetTypeId());
+            val->WriteToBlob(objHandle);
+            Binary blob(static_cast<size_t>(DotsC_CalculateBlobSize(objHandle)));
+            DotsC_WriteBlob(objHandle,&blob[0]);
+            DotsC_DeleteBlobWriter(objHandle);
+            DotsC_WriteObjectMember(handle, &blob[0], isNull, isChanged, member, valueIndex, Conv(mode));
+        }
     }
 
-    //
-    // SetNull
-    //
-    void
-    BlobOperations::SetNull(char * const blob,
-                            const Dob::Typesystem::MemberIndex member,
-                            const Dob::Typesystem::ArrayIndex index)
+    void BlobOperations::Set(const Safir::Dob::Typesystem::Binary& val,
+                             bool isNull,
+                             bool isChanged,
+                             Safir::Dob::Typesystem::Int64 handle,
+                             const Dob::Typesystem::MemberIndex member,
+                             const Dob::Typesystem::ArrayIndex valueIndex,
+                             KeyValueMode mode)
     {
-        DotsC_SetNullMember(blob, member, index);
+        if (mode==KeyMode)
+        {
+            throw std::logic_error("BlobOperation.Set(Binary) called with mode=KeyMode. Only ValueMode is allowed for this type!");
+        }
+
+        if (isNull)
+        {
+            DotsC_WriteBinaryMember(handle, NULL, 0, isNull, isChanged, member, valueIndex, Conv(mode));
+        }
+        else
+        {
+            DotsC_WriteBinaryMember(handle, &(val[0]), static_cast<DotsC_Int32>(val.size()), isNull, isChanged, member, valueIndex, Conv(mode));
+        }
     }
 
-    //
-    // IsChanged
-    //
-    bool
-    BlobOperations::IsChanged(const char * const blob,
-                              const Dob::Typesystem::MemberIndex member,
-                              const Dob::Typesystem::ArrayIndex index)
+
+    /**********************************************************************
+     *
+     *  Helper class for reading change flags
+     *
+     **********************************************************************/
+    BlobReadHelper::BlobReadHelper(const char* blob)
+        :m_handle(DotsC_CreateBlobReader(blob))
     {
-        return DotsC_IsChangedMember(blob, member, index);
     }
+
+    BlobReadHelper::~BlobReadHelper()
+    {
+        DotsC_DeleteBlobReader(m_handle);
+    }
+
+    bool BlobReadHelper::IsChanged(const Dob::Typesystem::MemberIndex member,
+                                         const Dob::Typesystem::ArrayIndex index) const
+    {
+        bool isNull, isChanged;
+        DotsC_ReadMemberStatus(m_handle, isNull, isChanged, member, index);
+        return isChanged;
+    }
+
+    /**********************************************************************
+     *
+     *  Helper class for writing change flags and diff blobs
+     *
+     **********************************************************************/
+    BlobWriteHelper::BlobWriteHelper(const char* blob)
+        :m_handle(DotsC_CreateBlobWriterFromBlob(blob))
+    {
+    }
+
+    BlobWriteHelper::~BlobWriteHelper()
+    {
+        DotsC_DeleteBlobWriter(m_handle);
+    }
+
+    void BlobWriteHelper::SetChangedHere(const Dob::Typesystem::MemberIndex member,
+                                        Dob::Typesystem::ArrayIndex index,
+                                        bool val)
+    {
+        DotsC_WriteChangeFlag(m_handle, member, index, val);
+    }
+
+    void BlobWriteHelper::SetAllChanged(bool val)
+    {
+        DotsC_WriteAllChangeFlags(m_handle, val);
+    }
+
+    bool BlobWriteHelper::Diff(const char* otherBlob)
+    {
+        DotsC_Handle reader=DotsC_CreateBlobReader(otherBlob);
+        bool hadDiffs=DotsC_MarkChanges(reader, m_handle);
+        DotsC_DeleteBlobReader(reader);
+        return hadDiffs;
+    }
+
+    char* BlobWriteHelper::ToBlob() const
+    {
+        DotsC_Int32 size=DotsC_CalculateBlobSize(m_handle);
+        char* blob=DotsC_AllocateBlob(size);
+        DotsC_WriteBlob(m_handle, blob);
+        return blob;
+    }
+
+    //Copy blob to preallocated memory
+    DotsC_Int32 BlobWriteHelper::CalculatedSize() const
+    {
+        return DotsC_CalculateBlobSize(m_handle);
+    }
+
+    void BlobWriteHelper::ToBlob(char* blobBuffer) const
+    {
+        DotsC_WriteBlob(m_handle, blobBuffer);
+    }
+}
 }
 }
 }

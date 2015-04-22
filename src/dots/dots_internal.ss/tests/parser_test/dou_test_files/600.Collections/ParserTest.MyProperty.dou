@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<property xmlns="urn:safir-dots-unit" xmlns:xsd="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Defines property.</summary>
+    <name>ParserTest.MyProperty</name>
+    <members>
+        
+        <member>
+            <name>TypeIdVal</name>
+            <type>TypeId</type>            
+        </member>
+        
+        <member>
+            <name>EntityIdVal</name>
+            <type>EntityId</type>            
+        </member>
+        
+        <member>
+            <name>MyColorEnumVal</name>
+            <type>ParserTest.MyColorEnum</type>            
+        </member>
+        
+        <member>
+            <name>MyEntityVal</name>
+            <type>ParserTest.MyEntity</type>            
+        </member>
+        
+        <member>
+            <name>MyIntVal</name>
+            <type>Int32</type>            
+        </member>
+
+        <member>
+            <name>ArrayPropertyValue</name>
+            <type>ParserTest.MyEntity</type>
+            <array/>
+        </member>
+        
+        <member>
+            <name>ArrayIntPropertyValue</name>
+            <type>Int32</type>
+            <array/>
+        </member>
+        
+    </members>
+</property>

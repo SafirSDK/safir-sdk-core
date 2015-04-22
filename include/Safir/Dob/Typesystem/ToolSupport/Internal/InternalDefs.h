@@ -86,5 +86,6 @@ namespace Internal
 }
 }
 }
-}
+} //end namespace Safir::Dob::Typesystem::ToolSupport::Internal
+
 #endif

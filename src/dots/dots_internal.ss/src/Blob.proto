@@ -1,0 +1,65 @@
+option optimize_for = LITE_RUNTIME;
+
+package Safir.Dob.Typesystem.ToolSupport.Internal;
+
+message Blob {
+
+  message AnyType {
+      optional int32 Int32 = 1;
+      optional int64 Int64 = 2;
+      optional float Float32 = 3;
+      optional double Float64 = 4;
+      optional string String = 5;
+      optional bool Boolean = 6;
+      optional bytes Binary = 7;
+      optional Blob Object = 8;
+      optional sint64 HashVal = 9;
+  }
+
+  message Value {
+      optional bool is_changed = 1;
+      optional AnyType key = 2;
+      optional AnyType value = 3;
+  }
+
+  message Member {
+
+      enum Type {
+          TypeInt32 = 1;
+          TypeInt64 = 2;
+          TypeFloat32 = 3;
+          TypeFloat64 = 4;
+          TypeString = 5;
+          TypeBoolean = 6;
+          TypeBinary = 6;
+          TypeObject = 7;
+          TypeInstanceId = 8; //uses both hash and String field
+          TypeChannelId = 9; //uses both hash and String field
+          TypeHandlerId = 10; //uses both hash and String field
+          TypeEntityId = 11; //uses both Int64 and String field and hash
+      }
+
+      message ContainerInfo {
+
+          enum ContainerType {
+              SingleValueContainer = 1;
+              ArrayContainer = 2;
+              VectorContainer = 3;
+              SetContainer = 4;
+              MapContainer = 5;
+          }
+
+        optional ContainerType container_type = 1;
+        optional bool is_changed = 2;
+        optional Type key_type = 3;
+        optional Type value_type = 4;
+      }
+
+      optional int32 member_id = 1;
+      optional ContainerInfo container_info = 2;
+      repeated Value values = 5;
+  }
+
+  required sint64 type_identifier = 1;
+  repeated Member members = 2;
+}

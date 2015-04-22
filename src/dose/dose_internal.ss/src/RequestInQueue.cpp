@@ -25,7 +25,7 @@
 
 #include <Safir/Dob/Internal/StateDeleter.h>
 #include <Safir/Dob/Typesystem/Operations.h>
-#include <Safir/Dob/Typesystem/BlobOperations.h>
+#include <Safir/Dob/Typesystem/Internal/BlobOperations.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Dob/Internal/ScopeExit.h>
@@ -197,7 +197,7 @@ namespace Internal
             ENSURE(findIt != m_dispatchedRequests.end(),
                 << "RequestInQueue::AttachResponse: There was no request with responseId "
                 << responseId << " when trying to attach response of type "
-                << Safir::Dob::Typesystem::Operations::GetName(Safir::Dob::Typesystem::BlobOperations::GetTypeId(blob)));
+                << Safir::Dob::Typesystem::Operations::GetName(Safir::Dob::Typesystem::Internal::BlobOperations::GetTypeId(blob)));
 
             DistributionData response(response_tag,sender,findIt->GetSenderId(),findIt->GetRequestId(),blob);
 

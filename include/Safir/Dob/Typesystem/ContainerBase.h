@@ -31,6 +31,8 @@ namespace Dob
 {
 namespace Typesystem
 {
+    namespace Internal {class BlobOperations;} //forward declaration of internal stuff
+
     /**
      * Base class for all Containers.
      *
@@ -103,9 +105,6 @@ namespace Typesystem
          */
         virtual void Copy(const ContainerBase & that) = 0;
     protected:
-        friend class BlobOperations;
-        //BlobOperations is allowed to access the m_bIsChanged field directly
-
         /**
         * Copy assignment operator.
         *
