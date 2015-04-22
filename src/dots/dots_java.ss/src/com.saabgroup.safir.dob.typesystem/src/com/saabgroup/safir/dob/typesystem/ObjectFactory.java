@@ -69,11 +69,14 @@ public class ObjectFactory {
             throw new SoftwareViolationException("blob ByteBuffer passed to createObject must be direct");
         }
 
-        long typeId = BlobOperations.getTypeId(blob);
-
+        long typeId = BlobOperations.getTypeId(blob);                        
+        
         try {
+        	long handle=Kernel.CreateBlobReader(blob);
             Class<?> theClass = Class.forName(getClassName(typeId));
-            return (Object) theClass.getConstructor(java.nio.ByteBuffer.class).newInstance(blob);
+            Object obj = (Object) theClass.getConstructor(long.class).newInstance(handle);
+            Kernel.DeleteBlobReader(handle);
+            return obj;
         } catch (java.lang.Exception e) {
             e.printStackTrace();
             throw new SoftwareViolationException("Failed to create object (from blob) of type " + typeId + ". Got exception " + e.toString());

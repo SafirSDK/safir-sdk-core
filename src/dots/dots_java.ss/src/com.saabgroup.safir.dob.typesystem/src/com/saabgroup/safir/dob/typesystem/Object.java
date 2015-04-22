@@ -93,46 +93,27 @@ public class Object implements Cloneable
     }
 
     /**
-     * Create an Object from a blob.
+     * Create an Object from a blob reader handle.
      *
-     * @param blob The blob to deserialize.
+     * @param handle A handle to a blob reader.
      */
-    public Object(java.nio.ByteBuffer blob)
+    public Object(long handle)
     {
-        if (! blob.isDirect()){
-            throw new SoftwareViolationException("blob ByteBuffer must be a 'direct' java.nio.ByteBuffer");
-        }
     }
 
-    /**
-     * Calculate the size of the blob-serialized form of this object.
-     *
-     * @return The needed size in bytes.
-     */
-    public int calculateBlobSize()
-    {
-        if (m_initialSize == -1)
-        {
-            m_initialSize = BlobOperations.getInitialSize(ClassTypeId);
-        }
-        return m_initialSize;
-    }
+   
 
     /**
      * Write the object to a blob.
-     * Note that the size of the blob is assumed to be correct! No checks are made!
      *
-     * @param blob The blob to write to.
-     * @param beginningOfUnused The beginning of unused dynamic blob space.
+     * @param handle A handle to a blob writer
      * @return beginningOfUnused after the object has been written to the blob.
      */
-    public int writeToBlob(java.nio.ByteBuffer blob, int beginningOfUnused)
+    public void writeToBlob(long handle)
     {
-        if (! blob.isDirect()){
+        /*if (! blob.isDirect()){
             throw new SoftwareViolationException("blob ByteBuffer must be a 'direct' java.nio.ByteBuffer");
-        }
-
-        return beginningOfUnused;
+        }*/
     }
 
     /**
@@ -153,9 +134,6 @@ public class Object implements Cloneable
     {
         throw new SoftwareViolationException("Object does not have any members!");
     }
-
-    private static int m_initialSize = -1;
-
 
     /**
      * Array for ObjectContainers

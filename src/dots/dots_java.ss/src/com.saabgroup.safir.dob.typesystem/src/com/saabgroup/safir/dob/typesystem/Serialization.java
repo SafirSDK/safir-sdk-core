@@ -39,12 +39,38 @@ public class Serialization {
      */
     public static String toXml(com.saabgroup.safir.dob.typesystem.Object obj)
     {
-        int blobSize = obj.calculateBlobSize();
-
-        java.nio.ByteBuffer blob = java.nio.ByteBuffer.allocateDirect(blobSize);
-        int beginningOfUnused = InternalOperations.formatBlob(blob, blobSize, obj.getTypeId());
-        beginningOfUnused = obj.writeToBlob(blob, beginningOfUnused);
+    	byte[] bin=toBinary(obj);
+    	return toXml(bin);
+    }
+    
+    /**
+     * Convert a binary serialization to XML.
+     *
+     * @param binary The binary serialization to convert to xml.
+     * @return The xml of the binary serialization.
+     */
+    public static String toXml(byte [] binary) {
+        java.nio.ByteBuffer blob = java.nio.ByteBuffer.allocateDirect(binary.length);
+        blob.put(binary);
         return toXml(blob);
+    }
+    
+    /**
+     * Convert a blob to XML.
+     *
+     * @param blob - the blob to convert to xml.
+     * @return The xml of the blob.
+     */
+    public static String toXml(java.nio.ByteBuffer blob) {
+        if (! blob.isDirect()){
+            throw new SoftwareViolationException("blob ByteBuffer must be a 'direct' java.nio.ByteBuffer");
+        }
+
+        String res = Kernel.BlobToXml(blob);
+        if (res == null) {
+            throw new SoftwareViolationException("Error in serialization buffer sizes!!!");
+        }
+        return res;
     }
 
 
@@ -71,35 +97,9 @@ public class Serialization {
         return obj;
     }
 
-    /**
-     * Convert a binary serialization to XML.
-     *
-     * @param binary The binary serialization to convert to xml.
-     * @return The xml of the binary serialization.
-     */
-    public static String toXml(byte [] binary) {
-        java.nio.ByteBuffer blob = java.nio.ByteBuffer.allocateDirect(binary.length);
-        blob.put(binary);
-        return toXml(blob);
-    }
+    
 
-    /**
-     * Convert a blob to XML.
-     *
-     * @param blob - the blob to convert to xml.
-     * @return The xml of the blob.
-     */
-    public static String toXml(java.nio.ByteBuffer blob) {
-        if (! blob.isDirect()){
-            throw new SoftwareViolationException("blob ByteBuffer must be a 'direct' java.nio.ByteBuffer");
-        }
-
-        String res = Kernel.BlobToXml(blob);
-        if (res == null) {
-            throw new SoftwareViolationException("Error in serialization buffer sizes!!!");
-        }
-        return res;
-    }
+    
 
     /**
      * Serialize an object to JSON.
@@ -110,38 +110,10 @@ public class Serialization {
      */
     public static String toJson(com.saabgroup.safir.dob.typesystem.Object obj)
     {
-        int blobSize = obj.calculateBlobSize();
-
-        java.nio.ByteBuffer blob = java.nio.ByteBuffer.allocateDirect(blobSize);
-        int beginningOfUnused = InternalOperations.formatBlob(blob, blobSize, obj.getTypeId());
-        beginningOfUnused = obj.writeToBlob(blob, beginningOfUnused);
-        return toJson(blob);
+    	byte[] bin=toBinary(obj);
+    	return toJson(bin);
     }
-
-
-    /**
-     * Deserialize an JSON serialization.
-     *
-     * This method creates a new object from a given json serialization.
-     * It uses the ObjectFactory to accomplish this.
-     *
-     * @param json The json to convert.
-     * @return A boost::shared_ptr to the new object
-     * @exception IllegalValueException If the type represented by the serialization isn't found
-     *                                   in the ObjectFactory.
-     */
-    public static com.saabgroup.safir.dob.typesystem.Object toObjectFromJson(String json) {
-        java.nio.ByteBuffer blob [] = new java.nio.ByteBuffer[1];
-        java.nio.ByteBuffer deleter [] = new java.nio.ByteBuffer[1];
-        Kernel.JsonToBlob(blob, deleter, json);
-        if (blob[0] == null) {
-            throw new IllegalValueException("Something is wrong with the JSON-formated object");
-        }
-        com.saabgroup.safir.dob.typesystem.Object obj = ObjectFactory.getInstance().createObject(blob[0]);
-        Kernel.InvokeDeleter(deleter[0],blob[0]);
-        return obj;
-    }
-
+    
     /**
      * Convert a binary serialization to JSON.
      *
@@ -172,6 +144,32 @@ public class Serialization {
         return res;
     }
 
+
+    /**
+     * Deserialize an JSON serialization.
+     *
+     * This method creates a new object from a given json serialization.
+     * It uses the ObjectFactory to accomplish this.
+     *
+     * @param json The json to convert.
+     * @return A boost::shared_ptr to the new object
+     * @exception IllegalValueException If the type represented by the serialization isn't found
+     *                                   in the ObjectFactory.
+     */
+    public static com.saabgroup.safir.dob.typesystem.Object toObjectFromJson(String json) {
+        java.nio.ByteBuffer blob [] = new java.nio.ByteBuffer[1];
+        java.nio.ByteBuffer deleter [] = new java.nio.ByteBuffer[1];
+        Kernel.JsonToBlob(blob, deleter, json);
+        if (blob[0] == null) {
+            throw new IllegalValueException("Something is wrong with the JSON-formated object");
+        }
+        com.saabgroup.safir.dob.typesystem.Object obj = ObjectFactory.getInstance().createObject(blob[0]);
+        Kernel.InvokeDeleter(deleter[0],blob[0]);
+        return obj;
+    }
+
+    
+
     /**
      * Serialize an object to binary form.
      *
@@ -184,16 +182,17 @@ public class Serialization {
      * @exception IllegalValueException - There is something wrong with the object.
      */
     public static byte[] toBinary(com.saabgroup.safir.dob.typesystem.Object obj){
-        int blobSize = obj.calculateBlobSize();
-
-        java.nio.ByteBuffer blob = java.nio.ByteBuffer.allocateDirect(blobSize);
-        int beginningOfUnused = InternalOperations.formatBlob(blob, blobSize, obj.getTypeId());
-        beginningOfUnused = obj.writeToBlob(blob, beginningOfUnused);
-
-        blob.clear(); //reset read position
-        byte [] binary = new byte[blobSize];
-        blob.get(binary,0,binary.length);
-
+        
+    	long handle = Kernel.CreateBlobWriter(obj.getTypeId());
+        obj.writeToBlob (handle);
+        int size = Kernel.CalculateBlobSize (handle);
+        java.nio.ByteBuffer[] blob=new java.nio.ByteBuffer[1];
+        blob[0]=java.nio.ByteBuffer.allocateDirect(size);
+        Kernel.WriteBlob(handle, blob);
+        Kernel.DeleteBlobWriter(handle);
+        blob[0].clear(); //reset read position
+        byte [] binary = new byte[size];
+        blob[0].get(binary, 0, binary.length);
         return binary;
     }
 

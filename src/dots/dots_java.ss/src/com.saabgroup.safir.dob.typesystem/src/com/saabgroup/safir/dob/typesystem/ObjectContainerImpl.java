@@ -126,15 +126,6 @@ public class ObjectContainerImpl<T extends Object>
     }
 
     /**
-     * Calculate the size of the blob-serialized form of the contained object.
-     *
-     * @return The needed size in bytes. 0 if the container is null.
-     */
-    public int calculateBlobSize(){
-        if (isNull()) return 0; else return m_object.calculateBlobSize();
-    }
-
-    /**
      * @see com.saabgroup.safir.dob.typesystem.ObjectContainerBase#getMember(int, int)
      */
     @Override

@@ -120,6 +120,6 @@ public class BinaryContainer
         return new BinaryContainer(this);
     }
 
-    private byte [] m_value;
-    private boolean m_isNull;
+    protected byte [] m_value;
+    protected boolean m_isNull;
 }
