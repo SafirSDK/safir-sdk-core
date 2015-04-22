@@ -187,8 +187,8 @@ class Parameters:
                                         #"--no-timeout",
                                         #"--context", "-1", #random context
                                         "-l", self.lang0, self.lang1, self.lang2,
-                                        #"--first", "1",
-                                        #"--last", "1"
+                                        "--first", "815",
+                                        "--last", "815"
                                         )
 
         if self.multinode:
@@ -227,7 +227,8 @@ class Results:
                 continue
             chunk_lines = chunk.splitlines(True)
             number = int(chunk_lines[0].replace("TESTCASE ",""))
-            result[number] = chunk_lines
+            if number == 815:
+                result[number] = chunk_lines
         return result
 
     def create_tc_dict(self,parameters):
@@ -593,46 +594,47 @@ class JenkinsController:
 
 
 def main():
-    rmdir("dose_test_output")
-    mkdir("dose_test_output")
-    os.chdir("dose_test_output")
+    while (True):
+        rmdir("dose_test_output")
+        mkdir("dose_test_output")
+        os.chdir("dose_test_output")
 
-    parameters = Parameters()
+        parameters = Parameters()
 
-    #if parameters.autostart_jenkins_slave:
-    #    jenkinsController = JenkinsController(parameters)
-    #    jenkinsController.start_slave()
+        #if parameters.autostart_jenkins_slave:
+        #    jenkinsController = JenkinsController(parameters)
+        #    jenkinsController.start_slave()
 
-    runner = Runner()
-    results = Results()
+        runner = Runner()
+        results = Results()
 
-    completed = False
-    try:
-        runner.initialize(parameters)
-        #if parameters.slave:
-        #    runner.wait_for_safir_control()
-        #else:
-        runner.run_sequencer(parameters)
-        completed = True
-    except:
-        log("exception occurred!")
-        traceback.print_exc()
+        completed = False
+        try:
+            runner.initialize(parameters)
+            #if parameters.slave:
+            #    runner.wait_for_safir_control()
+            #else:
+            runner.run_sequencer(parameters)
+            completed = True
+        except:
+            log("exception occurred!")
+            traceback.print_exc()
 
-    runner.killprocs(results)
-    #if parameters.autostart_jenkins_slave:
-    #    jenkinsController.stop_slave()
+        runner.killprocs(results)
+        #if parameters.autostart_jenkins_slave:
+        #    jenkinsController.stop_slave()
 
-    if completed:
-        results.check_output(parameters)
+        if completed:
+            results.check_output(parameters)
 
-        if results.num_tc_failed == 0:
-            log("== All tests were successful!!")
-        else:
-            log("!!",results.num_tc_failed, "testcases appear to have failed!")
+            if results.num_tc_failed == 0:
+                log("== All tests were successful!!")
+            else:
+                log("!!",results.num_tc_failed, "testcases appear to have failed!")
 
-        if results.num_tc_performed<20:
-            log("!! Less than 20 testcases seem to have been performed, this is a sign of trouble!")
-            return 1
+            #if results.num_tc_performed<20:
+            #    log("!! Less than 20 testcases seem to have been performed, this is a sign of trouble!")
+            #    return 1
 
     return 0
 
