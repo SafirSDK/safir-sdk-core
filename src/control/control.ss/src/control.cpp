@@ -247,18 +247,18 @@ int main(int argc, char * argv[])
 
                             // Node included callback
                             [&doseMainCmdSender](const Control::Node& node)
-        {
-            doseMainCmdSender->InjectNode(node.name,
-                                          node.nodeId,
-                                          node.nodeTypeId,
-                                          node.dataAddress);
-        },
+                            {
+                                doseMainCmdSender->InjectNode(node.name,
+                                                              node.nodeId,
+                                                              node.nodeTypeId,
+                                                              node.dataAddress);
+                            },
 
-        // Node down callback
-        [](const int64_t /*nodeId*/)
-        {
-            // TODO: What to do here?'
-        }));
+                            // Node down callback
+                            [&doseMainCmdSender](const int64_t nodeId, const int64_t nodeTypeId)
+                            {
+                                doseMainCmdSender->ExcludeNode(nodeId, nodeTypeId);
+                            }));
 
 #if defined(linux) || defined(__linux) || defined(__linux__)
         boost::asio::signal_set sigchldSet(ioService, SIGCHLD);

@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_CASE( callback_order )
 
                              },
                              [&nodeDownCbCounter]
-                             (const int64_t /*nodeId*/)
+                             (const int64_t /*nodeId*/, int64_t /*nodetypeId*/)
                              {
                                 ++nodeDownCbCounter;
                              });
@@ -171,7 +171,8 @@ BOOST_AUTO_TEST_CASE( add_delete_node )
 
     int64_t latestOwnNode;
     int64_t latestIncludedNode;
-    int64_t latestDownNode;
+    int64_t latestDownNodeId;
+    int64_t latestDownNodeTypeId;
 
     TestSystemStateHandler ssh(99999,
                              [&ownNodeIncludedCbCounter,
@@ -191,10 +192,11 @@ BOOST_AUTO_TEST_CASE( add_delete_node )
                                      ++nodeIncludedCbCounter;
                                 }
                              },
-                             [&nodeDownCbCounter, &latestDownNode]
-                             (const int64_t nodeId)
+                             [&nodeDownCbCounter, &latestDownNodeId, &latestDownNodeTypeId]
+                             (const int64_t nodeId, const int64_t nodeTypeId)
                              {
-                                latestDownNode = nodeId;
+                                latestDownNodeId = nodeId;
+                                latestDownNodeTypeId = nodeTypeId;
                                 ++nodeDownCbCounter;
                              });
 
@@ -225,6 +227,7 @@ BOOST_AUTO_TEST_CASE( add_delete_node )
     ssh.SetNewState(ss);
 
     BOOST_CHECK(nodeDownCbCounter == 1);
-    BOOST_CHECK(latestDownNode == 11111);
+    BOOST_CHECK(latestDownNodeId == 11111);
+    BOOST_CHECK(latestDownNodeTypeId == 1010);
 
 }

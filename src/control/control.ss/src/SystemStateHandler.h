@@ -85,7 +85,7 @@ namespace Control
 
         using NodeIncludedCb = boost::function<void(const Node& node)>;
 
-        using NodeDownCb = boost::function<void(const int64_t nodeId)>;
+        using NodeDownCb = boost::function<void(const int64_t nodeId, const int64_t nodeTypeId)>;
 
         SystemStateHandlerBasic(const int64_t                    ownNodeId,
                                 const NodeIncludedCb&            nodeIncludedCb,
@@ -168,7 +168,7 @@ namespace Control
 
                     // Node is dead
                     m_systemState.erase(nodeId);
-                    m_nodeDownCb(nodeId);
+                    m_nodeDownCb(nodeId, newState.NodeTypeId(ix));
                 }
             }
 
@@ -182,7 +182,7 @@ namespace Control
             {
                 if (existingNodeIds.find(pos->first) == existingNodeIds.end())
                 {
-                    m_nodeDownCb(pos->first);
+                    m_nodeDownCb(pos->first, pos->second.nodeTypeId);
                     pos = m_systemState.erase(pos);
                 }
                 else
