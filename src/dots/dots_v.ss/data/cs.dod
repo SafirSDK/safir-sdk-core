@@ -735,11 +735,13 @@ namespace @_NAMESPACE_@
 @@END_IF@@
 @-------- dictionary parameter -----------
 @@ELSIF@@ @_EXIST:PARAMETERISDICTIONARY_@
+        /// <summary>
+        /// Get the value of the @_PARAMETER_@ dictionary parameter.
 @@IF@@ @_EXIST:PARAMETERSUMMARY_@
-        /**
-         * @_REPLACE_ALL(\n/\n         * ):PARAMETERSUMMARY_@
-         */
+        /// <para/>
+        /// @_REPLACE_ALL(\n/\n        /// ):PARAMETERSUMMARY_@
 @@END_IF@@
+        /// </summary>
 @@IF@@ @_UNIFORM_PARAMETERDICTIONARYTYPE_@=Enumeration
 @@IF@@ @_UNIFORM_PARAMETERTYPE_@=Enumeration
         public static @_PARAMETERTYPE_@.Enumeration @_PARAMETER_@ (@_PARAMETERDICTIONARYTYPE_@.Enumeration key)
@@ -857,11 +859,13 @@ namespace @_NAMESPACE_@
 @@END_IF@@
 @-------- single parameter -----------
 @@ELSE@@
-@@IF@@ @_EXIST:PARAMETERSUMMARY_@
         /// <summary>
+        /// Get the value of the @_PARAMETER_@ parameter.
+@@IF@@ @_EXIST:PARAMETERSUMMARY_@
+        /// <para/>
         /// @_REPLACE_ALL(\n/\n        /// ):PARAMETERSUMMARY_@
-        /// </summary>
 @@END_IF@@
+        /// </summary>
 @@IF@@ @_UNIFORM_PARAMETERTYPE_@=Object
         public static @_PARAMETERTYPE_@ @_PARAMETER_@
         {
