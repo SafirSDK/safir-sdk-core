@@ -159,7 +159,7 @@ namespace Safir.Dob.Typesystem
         /// <param name="item">Item.</param>
         public void Add (KeyValuePair<KeyT, ValT> item)
         {
-            item.Value.SetChanged (true);
+            m_bIsChanged = true;
             values.Add (item.Key, item.Value);
         }
 
@@ -168,6 +168,7 @@ namespace Safir.Dob.Typesystem
         /// </summary>
         public void Clear ()
         {
+            m_bIsChanged = true;
             values.Clear ();
         }
 
@@ -200,6 +201,7 @@ namespace Safir.Dob.Typesystem
         /// <param name="item">Item.</param>
         public bool Remove (KeyValuePair<KeyT, ValT> item)
         {
+            m_bIsChanged = true;
             return Remove(item.Key);
         }
 

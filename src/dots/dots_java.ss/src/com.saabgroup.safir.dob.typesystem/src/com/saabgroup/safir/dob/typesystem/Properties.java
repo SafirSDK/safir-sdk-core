@@ -425,7 +425,6 @@ public class Properties {
      * @param index Array index.
      * @throws ReadOnlyException If the property member is read-only.
      */
-    @SuppressWarnings("unchecked")
     public static void setEnum(Object obj,
                                long propertyId,
                                int val,
@@ -465,7 +464,7 @@ public class Properties {
                 }
                 else
                 {
-                    ((EnumerationContainerBase)container[0]).setOrdinal(val);
+                    ((EnumerationContainerBase<?>)container[0]).setOrdinal(val);
                 }
             }
             break;
@@ -485,7 +484,6 @@ public class Properties {
      * @throws ReadOnlyException The member is inaccessible. Some "parent" item is null.
      * @throws NullException The member is null.
      */
-    @SuppressWarnings("unchecked")
     public static int getEnum(Object obj,
                               long propertyId,
                               int member,
@@ -533,7 +531,7 @@ public class Properties {
                 }
                 else
                 {
-                    return ((EnumerationContainerBase)container[0]).getOrdinal();
+                    return ((EnumerationContainerBase<?>)container[0]).getOrdinal();
                 }
             }
         }
@@ -1654,13 +1652,13 @@ public class Properties {
 
         case MappedToParameter:
             {
-                String str [] = new String [1];
-                Kernel.GetStringPropertyParameter(obj.getTypeId(),
-                                                                 propertyId,
-                                                                 member,
-                                                                 index,
-                                                                 str);
-                return str[0];
+                int[] paramIndex=new int[1];
+                int[] valueIndex=new int[1];
+            	Kernel.GetPropertyParameterReference(obj.getTypeId(), propertyId, member, index, paramIndex, valueIndex);
+            	
+            	String val [] = new String [1];
+            	Kernel.GetStringParameter(obj.getTypeId(), paramIndex[0], valueIndex[0], BlobOperations.VALUE_MODE, val);
+            	return val[0];
             }
 
         case MappedToMember:

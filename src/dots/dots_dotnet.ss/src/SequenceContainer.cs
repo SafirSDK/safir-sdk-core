@@ -320,9 +320,9 @@ namespace Safir.Dob.Typesystem
         #endregion
     }
 
-    public class MemberSequenceContainer<T> : SequenceContainer<T>, ICloneable
+    public class ValueSequenceContainer<T> : SequenceContainer<T>, ICloneable
     {
-        public MemberSequenceContainer(): base()
+        public ValueSequenceContainer(): base()
         {
         }
 
@@ -334,7 +334,7 @@ namespace Safir.Dob.Typesystem
         {
             base.Copy(other);
             this.values.Clear ();
-            MemberSequenceContainer<T> that = other as MemberSequenceContainer<T>;
+            ValueSequenceContainer<T> that = other as ValueSequenceContainer<T>;
             foreach (var val in that.values) {
                 this.values.Add(val);
             }
@@ -347,23 +347,23 @@ namespace Safir.Dob.Typesystem
         /// </summary>
         object ICloneable.Clone()
         {
-            return new MemberSequenceContainer<T>(this);
+            return new ValueSequenceContainer<T>(this);
         }
 
         /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
-        public new MemberSequenceContainer<T> Clone()
+        public new ValueSequenceContainer<T> Clone()
         {
-            return (MemberSequenceContainer<T>)((ICloneable)this).Clone(); 
+            return (ValueSequenceContainer<T>)((ICloneable)this).Clone(); 
         }
 
         /// <summary>
         /// Copy constructor for use by Clone
         /// </summary>
         /// <param name="other"></param>
-        protected MemberSequenceContainer(MemberSequenceContainer<T> other):
+        protected ValueSequenceContainer(ValueSequenceContainer<T> other):
             base(other)
         {
             foreach (var val in other.values) {
@@ -374,18 +374,18 @@ namespace Safir.Dob.Typesystem
         #endregion
     }
 
-    public class StringSequenceContainer : MemberSequenceContainer<string> {}
-    public class BooleanSequenceContainer : MemberSequenceContainer<bool> {}
-    public class Int32SequenceContainer : MemberSequenceContainer<Int32> {}
-    public class Int64SequenceContainer : MemberSequenceContainer<Int64> {}
-    public class Float32SequenceContainer : MemberSequenceContainer<float> {}
-    public class Float64SequenceContainer : MemberSequenceContainer<double> {}
-    public class TypeIdSequenceContainer : MemberSequenceContainer<Int64> {}
-    public class InstanceIdSequenceContainer : MemberSequenceContainer<InstanceId> {}
-    public class ChannelIdSequenceContainer : MemberSequenceContainer<ChannelId> {}
-    public class HandlerIdSequenceContainer : MemberSequenceContainer<HandlerId> {}
-    public class EntityIdSequenceContainer : MemberSequenceContainer<EntityId> {}
-    public class BinarySequenceContainer : MemberSequenceContainer<byte[]> {}
+    public class StringSequenceContainer : ValueSequenceContainer<string> {}
+    public class BooleanSequenceContainer : ValueSequenceContainer<bool> {}
+    public class Int32SequenceContainer : ValueSequenceContainer<Int32> {}
+    public class Int64SequenceContainer : ValueSequenceContainer<Int64> {}
+    public class Float32SequenceContainer : ValueSequenceContainer<float> {}
+    public class Float64SequenceContainer : ValueSequenceContainer<double> {}
+    public class TypeIdSequenceContainer : ValueSequenceContainer<Int64> {}
+    public class InstanceIdSequenceContainer : ValueSequenceContainer<InstanceId> {}
+    public class ChannelIdSequenceContainer : ValueSequenceContainer<ChannelId> {}
+    public class HandlerIdSequenceContainer : ValueSequenceContainer<HandlerId> {}
+    public class EntityIdSequenceContainer : ValueSequenceContainer<EntityId> {}
+    public class BinarySequenceContainer : ValueSequenceContainer<byte[]> {}
     public class ObjectSequenceContainer : GenericObjectSequenceContainer<Safir.Dob.Typesystem.Object> {}
 
     //SI32

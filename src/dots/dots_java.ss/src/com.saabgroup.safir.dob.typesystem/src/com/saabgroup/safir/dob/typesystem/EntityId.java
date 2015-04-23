@@ -29,7 +29,7 @@ package com.saabgroup.safir.dob.typesystem;
  * Class containing the identity of an entity.
  * This class represents the identity of a DOB-entity. It consists of a type identifier (TypeId) and an instance number.
  */
-public class EntityId {
+public class EntityId implements Comparable<EntityId> {
 
     /**
      * Default constructor.
@@ -166,6 +166,21 @@ public class EntityId {
     public int hashCode(){
         return (int)m_typeId ^ m_instanceId.hashCode();
     }
+    
+    /**
+     * Compares two instances
+     * @param other The object to compare to.
+     * @return -1 if this instance is less than other, 1 if this is bigger, else 0.
+     */
+    @Override
+	public int compareTo(EntityId other) {
+    	if (m_typeId<other.m_typeId)
+    		return -1;
+    	else if (m_typeId>other.m_typeId)
+    		return 1;
+    	else
+    		return m_instanceId.compareTo(other.m_instanceId);
+	}
 
     private long m_typeId = 0;
     private InstanceId m_instanceId;

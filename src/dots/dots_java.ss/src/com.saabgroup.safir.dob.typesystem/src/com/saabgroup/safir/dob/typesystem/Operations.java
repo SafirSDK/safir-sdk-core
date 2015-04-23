@@ -241,7 +241,7 @@ public class Operations {
      */
     public static int getEnumerationValue(long enumId, String enumValueName)
     {
-        int result = Kernel.GetEnumerationValueFromName(enumId, enumValueName);
+        int result = Kernel.EnumerationValueFromName(enumId, enumValueName);
         if (result == -1)
         {
             throw new IllegalValueException("There is no such enumeration or value defined");
