@@ -751,6 +751,7 @@ public class Properties {
             	
             	long val [] = new long [1];
             	Kernel.GetInt64Parameter(obj.getTypeId(), paramIndex[0], valueIndex[0], BlobOperations.VALUE_MODE, val);
+            	return val[0];
             }
 
         case MappedToMember:

@@ -425,12 +425,6 @@ jint JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetMemberId
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
  * Method:    GetMemberInfo
- * Signature: (JI[I[Ljava/lang/String;[J[I[Z[I)V
- */
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetMemberInfo
  * Signature: (JI[I[Ljava/lang/String;[J[I[I[I)V
  */
 void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetMemberInfo
@@ -440,7 +434,7 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetMemberInfo
     const char * memberName;
     DotsC_TypeId complexType;
     DotsC_Int32 stringLength;
-    DotsC_Int32 collectionType;
+    DotsC_CollectionType collectionType;
     DotsC_Int32 arrayLength;
 
     DotsC_GetMemberInfo(_typeId,
@@ -526,7 +520,6 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetParameterInfo
     SetJArray(env,_memberType, memberType);
     SetJArray(env,_parameterName, env->NewStringUTF(parameterName));
     SetJArray(env,_complexType, complexTypeId);
-    SetJArray(env,_stringLength, stringLength);
     SetJArray(env,_collectionType, collectionType);
     SetJArray(env,_numberOfValues, numberOfValues);
 }
@@ -647,12 +640,12 @@ jstring JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_BlobToXml
     int BUF_SIZE = 100000;
     std::vector<char> xml8(BUF_SIZE);
     DotsC_Int32 resultSize;
-    DotsC_BetterBlobToXml(&xml8[0], blob, BUF_SIZE, resultSize);
+    DotsC_BlobToXml(&xml8[0], blob, BUF_SIZE, resultSize);
     if (resultSize> BUF_SIZE)
     {
         BUF_SIZE = resultSize;
         xml8.resize(BUF_SIZE);
-        DotsC_BetterBlobToXml(&xml8[0], blob, BUF_SIZE, resultSize);
+        DotsC_BlobToXml(&xml8[0], blob, BUF_SIZE, resultSize);
         if (resultSize != BUF_SIZE)
         {
             return NULL;
@@ -891,207 +884,17 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetTypeIdParameter
     SetJArray(env,_val,val);
 }
 
-public static native void GetHashedIdParameter(long id,
-            int parameter,
-            int index,
-            int keyValMode,
-            long[] hashVal,
-            String[] strVal);
-
-    public static native void GetEntityIdParameter(long id,
-            int parameter,
-            int index,
-            int keyValMode,
-            long[] typeIdOut, long[] instanceId, String[] strVal);
-
-    public static native void GetObjectParameter(long id,
-            int parameter,
-            int index,
-            ByteBuffer blob []);
-
-    public static native void GetBinaryParameter(long id,
-            int parameter,
-            int index,
-            ByteBuffer blob []);
-
-
-JOOT
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetTypeId
- * Signature: (Ljava/nio/ByteBuffer;)J
- */
-jlong JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetTypeId
-  (JNIEnv * env, jclass, jobject _blob)
-{
-    char * blob = static_cast<char*>(env->GetDirectBufferAddress(_blob));
-    return DotsC_GetTypeId(blob);
-}
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetSize
- * Signature: (Ljava/nio/ByteBuffer;)I
- */
-jint JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetSize
-  (JNIEnv * env, jclass, jobject _blob)
-{
-    char * blob = static_cast<char*>(env->GetDirectBufferAddress(_blob));
-    return DotsC_GetSize(blob);
-}
-
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetMemberName
- * Signature: (JI)Ljava/lang/String;
- */
-jstring JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetMemberName
-  (JNIEnv * env, jclass, jlong _typeId, jint _member)
-{
-    const char* name=DotsC_GetMemberName(_typeId, _member);
-    if (name != NULL)
-    {
-        return env->NewStringUTF(name);
-    }
-    else
-    {
-        return NULL;
-    }
-}
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetComplexMemberTypeId
- * Signature: (JI)J
- */
-jlong JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetComplexMemberTypeId
-  (JNIEnv *, jclass, jlong _typeId, jint _member)
-{
-    return DotsC_GetComplexMemberTypeId(_typeId, _member);
-}
-
-
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetMemberArraySize
- * Signature: (JI)I
- */
-jint JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetMemberArraySize
-  (JNIEnv *, jclass, jlong _typeId, jint _member)
-{
-    return DotsC_GetMemberArraySize(_typeId,_member);
-}
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetStringMemberMaxLength
- * Signature: (JI)I
- */
-jint JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetStringMemberMaxLength
-  (JNIEnv *, jclass, jlong _typeId, jint _member)
-{
-    return DotsC_GetStringMemberMaxLength(_typeId,_member);
-}
-
-
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetMemberTypeName
- * Signature: (JI)Ljava/lang/String;
- */
-jstring JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetMemberTypeName
-  (JNIEnv * env, jclass, jlong _typeId, jint _member)
-{
-    const char* name=DotsC_GetMemberTypeName(_typeId, _member);
-    if (name != NULL)
-    {
-        return env->NewStringUTF(name);
-    }
-    else
-    {
-        return NULL;
-    }
-}
-
-
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetParameterName
- * Signature: (JI)Ljava/lang/String;
- */
-jstring JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetParameterName
-  (JNIEnv * env, jclass, jlong _typeId, jint _parameter)
-{
-    const char* name=DotsC_GetParameterName(_typeId, _parameter);
-    if (name != NULL)
-    {
-        return env->NewStringUTF(name);
-    }
-    else
-    {
-        return NULL;
-    }
-}
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetParameterType
- * Signature: (JI)I
- */
-jint JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetParameterType
-  (JNIEnv *, jclass, jlong _typeId, jint _parameter)
-{
-    return DotsC_GetParameterType(_typeId, _parameter);
-}
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetParameterTypeName
- * Signature: (JI)Ljava/lang/String;
- */
-jstring JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetParameterTypeName
-  (JNIEnv * env, jclass, jlong _typeId, jint _parameter)
-{
-    const char* name=DotsC_GetParameterTypeName(_typeId, _parameter);
-    if (name != NULL)
-    {
-        return env->NewStringUTF(name);
-    }
-    else
-    {
-        return NULL;
-    }
-}
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetParameterArraySize
- * Signature: (JI)I
- */
-jint JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetParameterArraySize
-  (JNIEnv *, jclass, jlong _typeId, jint _parameter)
-{
-    return DotsC_GetParameterArraySize(_typeId, _parameter);
-}
-
-
-
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
  * Method:    GetHashedIdParameter
- * Signature: (JII[J[Ljava/lang/String;)V
+ * Signature: (JIII[J[Ljava/lang/String;)V
  */
 void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetHashedIdParameter
-  (JNIEnv * env, jclass, jlong _typeId, jint _parameter, jint _index, jlongArray _hashVal, jobjectArray _strVal)
+  (JNIEnv * env, jclass, jlong _typeId, jint _parameter, jint _index, jint _keyValMode, jlongArray _hashVal, jobjectArray _strVal)
 {
     DotsC_Int64 hashVal;
     const char * strVal;
-    DotsC_GetHashedIdParameter(_typeId,_parameter,_index,hashVal,strVal);
+    DotsC_GetHashedIdParameter(_typeId, _parameter, _index, static_cast<DotsC_KeyValMode>(_keyValMode), hashVal, strVal);
     SetJArray(env,_hashVal,hashVal);
     SetJArray(env,_strVal,env->NewStringUTF(strVal));
 }
@@ -1099,14 +902,14 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetHashedIdParameter
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
  * Method:    GetEntityIdParameter
- * Signature: (JII[J[J[Ljava/lang/String;)V
+ * Signature: (JIII[J[J[Ljava/lang/String;)V
  */
 void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetEntityIdParameter
-  (JNIEnv * env, jclass, jlong _typeId, jint _parameter, jint _index, jlongArray _typeIdOut, jlongArray _instanceId, jobjectArray _strVal)
+  (JNIEnv * env, jclass, jlong _typeId, jint _parameter, jint _index, jint _keyValMode, jlongArray _typeIdOut, jlongArray _instanceId, jobjectArray _strVal)
 {
     DotsC_EntityId eid;
     const char * str;
-    DotsC_GetEntityIdParameter(_typeId,_parameter,_index,eid,str);
+    DotsC_GetEntityIdParameter(_typeId, _parameter, _index, static_cast<DotsC_KeyValMode>(_keyValMode), eid, str);
     SetJArray(env,_typeIdOut, eid.typeId);
     SetJArray(env,_instanceId, eid.instanceId);
     SetJArray(env,_strVal,env->NewStringUTF(str));
@@ -1141,486 +944,519 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetBinaryParameter
 
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    IsChangedMember
- * Signature: (Ljava/nio/ByteBuffer;II)Z
+ * Method:    DictionaryInt32KeyToIndex
+ * Signature: (JII)I
  */
-jboolean JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_IsChangedMember
-  (JNIEnv * env, jclass, jobject _blob, jint _member, jint _index)
+jint JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_DictionaryInt32KeyToIndex
+  (JNIEnv *, jclass, jlong _typeId, jint _parameter, jint _key)
 {
-    char * blob = static_cast<char*>(env->GetDirectBufferAddress(_blob));
-    return DotsC_IsChangedMember(blob,_member,_index);
+    return DotsC_DictionaryInt32KeyToIndex(_typeId, _parameter, _key);
 }
 
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetBooleanMember
- * Signature: (Ljava/nio/ByteBuffer;II[Z[Z[Z)V
+ * Method:    DictionaryInt64KeyToIndex
+ * Signature: (JIJ)I
  */
-void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetBooleanMember
-(JNIEnv * env, jclass, jobject _blob, jint _member, jint _index, jbooleanArray _val, jbooleanArray _isNull, jbooleanArray _isChanged)
+jint JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_DictionaryInt64KeyToIndex
+  (JNIEnv *, jclass, jlong _typeId, jint _parameter, jlong _key)
+{
+    return DotsC_DictionaryInt64KeyToIndex(_typeId, _parameter, _key);
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    DictionaryStringKeyToIndex
+ * Signature: (JILjava/lang/String;)I
+ */
+jint JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_DictionaryStringKeyToIndex
+  (JNIEnv * env, jclass, jlong _typeId, jint _parameter, jstring _key)
+{
+    return DotsC_DictionaryStringKeyToIndex(_typeId, _parameter, GetUtf8(env, _key).get());
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    DictionaryEntityIdKeyToIndex
+ * Signature: (JIJJ)I
+ */
+jint JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_DictionaryEntityIdKeyToIndex
+  (JNIEnv *, jclass, jlong _typeId, jint _parameter, jlong _keyTypeId, jlong _keyInstId)
+{
+    DotsC_EntityId eid={_keyTypeId, _keyInstId};
+    return DotsC_DictionaryEntityIdKeyToIndex(_typeId, _parameter, eid);
+}
+
+//********************************************************
+//* Operations on blobs
+//********************************************************
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    GetTypeId
+ * Signature: (Ljava/nio/ByteBuffer;)J
+ */
+jlong JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetTypeId
+  (JNIEnv * env, jclass, jobject _blob)
 {
     char * blob = static_cast<char*>(env->GetDirectBufferAddress(_blob));
-    bool val;
+    return DotsC_GetTypeId(blob);
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    GetSize
+ * Signature: (Ljava/nio/ByteBuffer;)I
+ */
+jint JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetSize
+  (JNIEnv * env, jclass, jobject _blob)
+{
+    char * blob = static_cast<char*>(env->GetDirectBufferAddress(_blob));
+    return DotsC_GetSize(blob);
+}
+
+//************************************************************************************
+//* Read operations
+//************************************************************************************
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    CreateBlobReader
+ * Signature: (Ljava/nio/ByteBuffer;)J
+ */
+jlong JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_CreateBlobReader
+  (JNIEnv * env, jclass, jobject _blob)
+{
+    const char* blob = static_cast<char*>(env->GetDirectBufferAddress(_blob));
+    return DotsC_CreateBlobReader(blob);
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    DeleteBlobReader
+ * Signature: (J)V
+ */
+void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_DeleteBlobReader
+  (JNIEnv *, jclass, jlong _handle)
+{
+    DotsC_DeleteBlobReader(_handle);
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    GetNumberOfMemberValues
+ * Signature: (JI)I
+ */
+jint JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetNumberOfMemberValues
+  (JNIEnv *, jclass, jlong _readerHandle, jint _member)
+{
+    return DotsC_GetNumberOfMemberValues(_readerHandle, _member);
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    ReadMemberStatus
+ * Signature: (J[Z[ZII)V
+ */
+void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_ReadMemberStatus
+  (JNIEnv * env, jclass, jlong _readerHandle, jbooleanArray _isNull, jbooleanArray _isChanged, jint _member, jint _valueIndex)
+{
     bool isNull, isChanged;
-    DotsC_GetBooleanMember(blob,_member,_index,val,isNull,isChanged);
-    if (!isNull)
-    {
-        SetJArray(env,_val,val);
-    }
-    SetJArray(env,_isNull,isNull);
-    SetJArray(env,_isChanged,isChanged);
+    DotsC_ReadMemberStatus(_readerHandle, isNull, isChanged, _member, _valueIndex);
+    SetJArray(env, _isNull, isNull);
+    SetJArray(env, _isChanged, isChanged);
 }
 
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetInt32Member
- * Signature: (Ljava/nio/ByteBuffer;II[I[Z[Z)V
+ * Method:    ReadInt32Member
+ * Signature: (J[I[Z[ZIII)V
  */
-void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetInt32Member
-  (JNIEnv * env, jclass, jobject _blob, jint _member, jint _index, jintArray _val, jbooleanArray _isNull, jbooleanArray _isChanged)
+void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_ReadInt32Member
+  (JNIEnv * env, jclass, jlong _readHandle, jintArray _val, jbooleanArray _isNull, jbooleanArray _isChanged, jint _member, jint _index, jint _keyValMode)
 {
-    char * blob = static_cast<char*>(env->GetDirectBufferAddress(_blob));
     DotsC_Int32 val;
     bool isNull, isChanged;
-    DotsC_GetInt32Member(blob,_member,_index,val,isNull,isChanged);
-    if (!isNull)
-    {
-        SetJArray(env,_val,val);
-    }
-    SetJArray(env,_isNull,isNull);
-    SetJArray(env,_isChanged,isChanged);
+    DotsC_ReadInt32Member(_readHandle, val, isNull, isChanged, _member, _index, static_cast<DotsC_KeyValMode>(_keyValMode));
+
+    SetJArray(env, _val, val);
+    SetJArray(env, _isNull, isNull);
+    SetJArray(env, _isChanged, isChanged);
 }
 
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetInt64Member
- * Signature: (Ljava/nio/ByteBuffer;II[J[Z[Z)V
+ * Method:    ReadInt64Member
+ * Signature: (J[J[Z[ZIII)V
  */
-void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetInt64Member
-  (JNIEnv * env, jclass, jobject _blob, jint _member, jint _index, jlongArray _val, jbooleanArray _isNull, jbooleanArray _isChanged)
+void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_ReadInt64Member
+    (JNIEnv * env, jclass, jlong _readHandle, jlongArray _val, jbooleanArray _isNull, jbooleanArray _isChanged, jint _member, jint _index, jint _keyValMode)
 {
-    char * blob = static_cast<char*>(env->GetDirectBufferAddress(_blob));
     DotsC_Int64 val;
     bool isNull, isChanged;
-    DotsC_GetInt64Member(blob,_member,_index,val,isNull,isChanged);
-    if (!isNull)
-    {
-        SetJArray(env,_val,val);
-    }
-    SetJArray(env,_isNull,isNull);
-    SetJArray(env,_isChanged,isChanged);
+    DotsC_ReadInt64Member(_readHandle, val, isNull, isChanged, _member, _index, static_cast<DotsC_KeyValMode>(_keyValMode));
+
+    SetJArray(env, _val, val);
+    SetJArray(env, _isNull, isNull);
+    SetJArray(env, _isChanged, isChanged);
 }
 
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetFloat32Member
- * Signature: (Ljava/nio/ByteBuffer;II[F[Z[Z)V
+ * Method:    ReadFloat32Member
+ * Signature: (J[F[Z[ZIII)V
  */
-void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetFloat32Member
-  (JNIEnv * env, jclass, jobject _blob, jint _member, jint _index, jfloatArray _val, jbooleanArray _isNull, jbooleanArray _isChanged)
+void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_ReadFloat32Member
+    (JNIEnv * env, jclass, jlong _readHandle, jfloatArray _val, jbooleanArray _isNull, jbooleanArray _isChanged, jint _member, jint _index, jint _keyValMode)
 {
-    char * blob = static_cast<char*>(env->GetDirectBufferAddress(_blob));
     DotsC_Float32 val;
     bool isNull, isChanged;
-    DotsC_GetFloat32Member(blob,_member,_index,val,isNull,isChanged);
-    if (!isNull)
-    {
-        SetJArray(env,_val,val);
-    }
-    SetJArray(env,_isNull,isNull);
-    SetJArray(env,_isChanged,isChanged);
+    DotsC_ReadFloat32Member(_readHandle, val, isNull, isChanged, _member, _index, static_cast<DotsC_KeyValMode>(_keyValMode));
+
+    SetJArray(env, _val, val);
+    SetJArray(env, _isNull, isNull);
+    SetJArray(env, _isChanged, isChanged);
 }
 
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetFloat64Member
- * Signature: (Ljava/nio/ByteBuffer;II[D[Z[Z)V
+ * Method:    ReadFloat64Member
+ * Signature: (J[D[Z[ZIII)V
  */
-void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetFloat64Member
-  (JNIEnv * env, jclass, jobject _blob, jint _member, jint _index, jdoubleArray _val, jbooleanArray _isNull, jbooleanArray _isChanged)
+void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_ReadFloat64Member
+    (JNIEnv * env, jclass, jlong _readHandle, jdoubleArray _val, jbooleanArray _isNull, jbooleanArray _isChanged, jint _member, jint _index, jint _keyValMode)
 {
-    char * blob = static_cast<char*>(env->GetDirectBufferAddress(_blob));
     DotsC_Float64 val;
     bool isNull, isChanged;
-    DotsC_GetFloat64Member(blob,_member,_index,val,isNull,isChanged);
-    if (!isNull)
-    {
-        SetJArray(env,_val,val);
-    }
-    SetJArray(env,_isNull,isNull);
-    SetJArray(env,_isChanged,isChanged);
+    DotsC_ReadFloat64Member(_readHandle, val, isNull, isChanged, _member, _index, static_cast<DotsC_KeyValMode>(_keyValMode));
+
+    SetJArray(env, _val, val);
+    SetJArray(env, _isNull, isNull);
+    SetJArray(env, _isChanged, isChanged);
 }
 
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetStringMember
- * Signature: (Ljava/nio/ByteBuffer;II[Ljava/lang/String;[Z[Z)V
+ * Method:    ReadBooleanMember
+ * Signature: (J[Z[Z[ZIII)V
  */
-void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetStringMember
-  (JNIEnv * env, jclass, jobject _blob, jint _member, jint _index, jobjectArray _val, jbooleanArray _isNull, jbooleanArray _isChanged)
-{
-    char * blob = static_cast<char*>(env->GetDirectBufferAddress(_blob));
-    const char * val;
-    bool isNull, isChanged;
-    DotsC_GetStringMember(blob,_member,_index,val,isNull,isChanged);
-    if (!isNull) {
-        SetJArray(env,_val,env->NewStringUTF(val));
-    }
-    SetJArray(env,_isNull,isNull);
-    SetJArray(env,_isChanged,isChanged);
-}
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetBinaryMember
- * Signature: (Ljava/nio/ByteBuffer;II[Ljava/nio/ByteBuffer;[Z[Z)V
- */
-void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetBinaryMember
-  (JNIEnv * env, jclass, jobject _blob, jint _member, jint _index, jobjectArray _val, jbooleanArray _isNull, jbooleanArray _isChanged)
-{
-    char * blob = static_cast<char*>(env->GetDirectBufferAddress(_blob));
-    const char * val;
-    DotsC_Int32 size;
-    bool isNull, isChanged;
-    DotsC_GetBinaryMember(blob, _member, _index, val, size, isNull, isChanged);
-    if (!isNull) {
-        SetJArray(env,_val,env->NewDirectByteBuffer((void*)val,size));
-    }
-    SetJArray(env,_isNull,isNull);
-    SetJArray(env,_isChanged,isChanged);
-}
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetHashedIdMember
- * Signature: (Ljava/nio/ByteBuffer;II[J[Ljava/lang/String;[Z[Z)V
- */
-void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetHashedIdMember
-  (JNIEnv * env, jclass, jobject _blob, jint _member, jint _index, jlongArray _hashVal, jobjectArray _hashStr, jbooleanArray _isNull, jbooleanArray _isChanged)
-{
-    char * blob = static_cast<char*>(env->GetDirectBufferAddress(_blob));
-    DotsC_Int64 val;
-    const char * str;
-    bool isNull, isChanged;
-    DotsC_GetHashedIdMember(blob,_member,_index,val,str,isNull,isChanged);
-    if (!isNull)
-    {
-        SetJArray(env,_hashVal, val);
-        SetJArray(env,_hashStr,env->NewStringUTF(str));
-    }
-    SetJArray(env,_isNull,isNull);
-    SetJArray(env,_isChanged,isChanged);
-}
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetEntityIdMember
- * Signature: (Ljava/nio/ByteBuffer;II[J[J[Ljava/lang/String;[Z[Z)V
- */
-void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetEntityIdMember
-  (JNIEnv * env, jclass, jobject _blob, jint _member, jint _index, jlongArray _typeId, jlongArray _instanceId, jobjectArray _instanceIdStr, jbooleanArray _isNull, jbooleanArray _isChanged)
-{
-    char * blob = static_cast<char*>(env->GetDirectBufferAddress(_blob));
-    DotsC_EntityId val;
-    const char * instanceIdStr;
-    bool isNull, isChanged;
-    DotsC_GetEntityIdMember(blob,_member,_index,val,instanceIdStr,isNull,isChanged);
-    if (!isNull)
-    {
-        SetJArray(env,_typeId, val.typeId);
-        SetJArray(env,_instanceId, val.instanceId);
-        SetJArray(env,_instanceIdStr,env->NewStringUTF(instanceIdStr));
-    }
-    SetJArray(env,_isNull,isNull);
-    SetJArray(env,_isChanged,isChanged);
-}
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetObjectMember
- * Signature: (Ljava/nio/ByteBuffer;II[Ljava/nio/ByteBuffer;[Z[Z)V
- */
-void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetObjectMember
-  (JNIEnv * env, jclass, jobject _blob, jint _member, jint _index, jobjectArray _childBlob, jbooleanArray _isNull, jbooleanArray _isChanged)
-{
-    char * blob = static_cast<char*>(env->GetDirectBufferAddress(_blob));
-    const char * childBlob;
-    bool isNull, isChanged;
-    DotsC_GetObjectMember(blob,
-                          _member,
-                          _index,
-                          childBlob,
-                          isNull,
-                          isChanged);
-    if (!isNull)
-    {
-        SetJArray(env,_childBlob,env->NewDirectByteBuffer((void*)childBlob,DotsC_GetSize(childBlob)));
-    }
-    SetJArray(env,_isNull,isNull);
-    SetJArray(env,_isChanged,isChanged);
-}
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    SetNullMember
- * Signature: (Ljava/nio/ByteBuffer;II)V
- */
-void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_SetNullMember
-  (JNIEnv * env, jclass, jobject _blob, jint _member, jint _index)
-{
-    char * blob = static_cast<char*>(env->GetDirectBufferAddress(_blob));
-    DotsC_SetNullMember(blob,_member,_index);
-}
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    SetBooleanMemberInPreallocated
- * Signature: (ZZZLjava/nio/ByteBuffer;II)V
- */
-void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_SetBooleanMemberInPreallocated
-  (JNIEnv * env, jclass, jboolean _val, jboolean _isNull, jboolean _isChanged, jobject _blob, jint _member, jint _index)
-{
-    char * blob = static_cast<char*>(env->GetDirectBufferAddress(_blob));
-    DotsC_SetBooleanMemberInPreallocated(_val == JNI_TRUE,_isNull == JNI_TRUE,_isChanged == JNI_TRUE, blob,_member,_index);
-}
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    SetInt32MemberInPreallocated
- * Signature: (IZZLjava/nio/ByteBuffer;II)V
- */
-void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_SetInt32MemberInPreallocated
-  (JNIEnv * env, jclass, jint _val, jboolean _isNull, jboolean _isChanged, jobject _blob, jint _member, jint _index)
-{
-    char * blob = static_cast<char*>(env->GetDirectBufferAddress(_blob));
-    DotsC_SetInt32MemberInPreallocated(_val, _isNull == JNI_TRUE, _isChanged == JNI_TRUE, blob,_member,_index);
-}
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    SetInt64MemberInPreallocated
- * Signature: (JZZLjava/nio/ByteBuffer;II)V
- */
-void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_SetInt64MemberInPreallocated
-  (JNIEnv * env, jclass, jlong _val, jboolean _isNull, jboolean _isChanged, jobject _blob, jint _member, jint _index)
-{
-    char * blob = static_cast<char*>(env->GetDirectBufferAddress(_blob));
-    DotsC_SetInt64MemberInPreallocated(_val, _isNull == JNI_TRUE, _isChanged == JNI_TRUE, blob,_member,_index);
-}
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    SetFloat32MemberInPreallocated
- * Signature: (FZZLjava/nio/ByteBuffer;II)V
- */
-void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_SetFloat32MemberInPreallocated
-  (JNIEnv * env, jclass, jfloat _val, jboolean _isNull, jboolean _isChanged, jobject _blob, jint _member, jint _index)
-{
-    char * blob = static_cast<char*>(env->GetDirectBufferAddress(_blob));
-    DotsC_SetFloat32MemberInPreallocated(_val, _isNull == JNI_TRUE, _isChanged == JNI_TRUE, blob,_member,_index);
-}
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    SetFloat64MemberInPreallocated
- * Signature: (DZZLjava/nio/ByteBuffer;II)V
- */
-void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_SetFloat64MemberInPreallocated
-  (JNIEnv * env, jclass, jdouble _val, jboolean _isNull, jboolean _isChanged, jobject _blob, jint _member, jint _index)
-{
-    char * blob = static_cast<char*>(env->GetDirectBufferAddress(_blob));
-    DotsC_SetFloat64MemberInPreallocated(_val, _isNull == JNI_TRUE, _isChanged == JNI_TRUE, blob,_member,_index);
-}
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    SetHashedIdMemberInPreallocated
- * Signature: (JLjava/lang/String;IZZLjava/nio/ByteBuffer;II[I)V
- */
-void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_SetHashedIdMemberInPreallocated
-  (JNIEnv * env, jclass, jlong _hashVal, jstring _strVal, jint _stringLength, jboolean _isNull, jboolean _isChanged, jobject _blob, jint _member, jint _index, jintArray _beginningOfUnused)
-{
-    char * blob = static_cast<char*>(env->GetDirectBufferAddress(_blob));
-    char * beginningOfUnused = blob + GetJArrayInt32(env,_beginningOfUnused);
-    DotsC_SetHashedIdMemberInPreallocated(_hashVal,
-                                          _stringLength == 0 ? NULL: GetUtf8(env,_strVal).get(),
-                                          _stringLength,
-                                          _isNull == JNI_TRUE,
-                                          _isChanged == JNI_TRUE,
-                                          blob,
-                                          _member,
-                                          _index,
-                                          beginningOfUnused);
-    SetJArray(env,_beginningOfUnused,static_cast<DotsC_Int32>(beginningOfUnused - blob));
-    assert(_stringLength == 0 || *(beginningOfUnused - 1) == 0); //check that we got null terminated correctly
-}
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    SetEntityIdMemberInPreallocated
- * Signature: (JJLjava/lang/String;IZZLjava/nio/ByteBuffer;II[I)V
- */
-void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_SetEntityIdMemberInPreallocated
-(JNIEnv * env, jclass, jlong _typeId, jlong _instanceId, jstring _strVal, jint _stringLength, jboolean _isNull, jboolean _isChanged, jobject _blob, jint _member, jint _index, jintArray _beginningOfUnused)
-{
-    char * blob = static_cast<char*>(env->GetDirectBufferAddress(_blob));
-    char * beginningOfUnused = blob + GetJArrayInt32(env,_beginningOfUnused);
-    DotsC_EntityId eid;
-    eid.typeId = _typeId;
-    eid.instanceId = _instanceId;
-    DotsC_SetEntityIdMemberInPreallocated(eid,
-                                          _stringLength == 0 ? NULL: GetUtf8(env,_strVal).get(),
-                                          _stringLength,
-                                          _isNull == JNI_TRUE,
-                                          _isChanged == JNI_TRUE,
-                                          blob,
-                                          _member,
-                                          _index,
-                                          beginningOfUnused);
-    SetJArray(env,_beginningOfUnused,static_cast<DotsC_Int32>(beginningOfUnused - blob));
-    
-    assert(_stringLength == 0 || *(beginningOfUnused - 1) == 0); //check that we got null terminated correctly
-}
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetBooleanPropertyParameter
- * Signature: (JJII[Z)V
- */
-void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetBooleanPropertyParameter
-  (JNIEnv * env, jclass, jlong _typeId, jlong _propertyId, jint _member, jint _index, jbooleanArray _val)
+void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_ReadBooleanMember
+    (JNIEnv * env, jclass, jlong _readHandle, jbooleanArray _val, jbooleanArray _isNull, jbooleanArray _isChanged, jint _member, jint _index, jint _keyValMode)
 {
     bool val;
-    DotsC_GetBooleanPropertyParameter(_typeId,_propertyId,_member,_index,val);
-    SetJArray(env,_val,val);
+    bool isNull, isChanged;
+    DotsC_ReadBooleanMember(_readHandle, val, isNull, isChanged, _member, _index, static_cast<DotsC_KeyValMode>(_keyValMode));
+
+    SetJArray(env, _val, val);
+    SetJArray(env, _isNull, isNull);
+    SetJArray(env, _isChanged, isChanged);
 }
 
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetInt32PropertyParameter
- * Signature: (JJII[I)V
+ * Method:    ReadStringMember
+ * Signature: (J[Ljava/lang/String;[Z[ZIII)V
  */
-void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetInt32PropertyParameter
-  (JNIEnv * env, jclass, jlong _typeId, jlong _propertyId, jint _member, jint _index, jintArray _val)
+void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_ReadStringMember
+    (JNIEnv * env, jclass, jlong _readHandle, jobjectArray _val, jbooleanArray _isNull, jbooleanArray _isChanged, jint _member, jint _index, jint _keyValMode)
 {
-    DotsC_Int32 val;
-    DotsC_GetInt32PropertyParameter(_typeId,_propertyId,_member,_index,val);
-    SetJArray(env,_val,val);
+    const char* val;
+    bool isNull, isChanged;
+    DotsC_ReadStringMember(_readHandle, val, isNull, isChanged, _member, _index, static_cast<DotsC_KeyValMode>(_keyValMode));
+
+    SetJArray(env,_val, env->NewStringUTF(val));
+    SetJArray(env, _isNull, isNull);
+    SetJArray(env, _isChanged, isChanged);
 }
 
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetInt64PropertyParameter
- * Signature: (JJII[J)V
+ * Method:    ReadHashedMember
+ * Signature: (J[J[Ljava/lang/String;[Z[ZIII)V
  */
-void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetInt64PropertyParameter
-  (JNIEnv * env, jclass, jlong _typeId, jlong _propertyId, jint _member, jint _index, jlongArray _val)
+void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_ReadHashedMember
+    (JNIEnv * env, jclass, jlong _readHandle, jlongArray _valHash, jobjectArray _valStr, jbooleanArray _isNull, jbooleanArray _isChanged, jint _member, jint _index, jint _keyValMode)
 {
-    DotsC_Int64 val;
-    DotsC_GetInt64PropertyParameter(_typeId,_propertyId,_member,_index,val);
-    SetJArray(env,_val,val);
+    DotsC_Int64 hash;
+    const char* str;
+    bool isNull, isChanged;
+    DotsC_ReadHashedMember(_readHandle, hash, str, isNull, isChanged, _member, _index, static_cast<DotsC_KeyValMode>(_keyValMode));
+
+    SetJArray(env,_valHash, hash);
+    SetJArray(env,_valStr, env->NewStringUTF(str));
+    SetJArray(env, _isNull, isNull);
+    SetJArray(env, _isChanged, isChanged);
 }
 
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetFloat32PropertyParameter
- * Signature: (JJII[F)V
+ * Method:    ReadEntityIdMember
+ * Signature: (J[J[J[Ljava/lang/String;[Z[ZIII)V
  */
-void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetFloat32PropertyParameter
-  (JNIEnv * env, jclass, jlong _typeId, jlong _propertyId, jint _member, jint _index, jfloatArray _val)
-{
-    DotsC_Float32 val;
-    DotsC_GetFloat32PropertyParameter(_typeId,_propertyId,_member,_index,val);
-    SetJArray(env,_val,val);
-}
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetFloat64PropertyParameter
- * Signature: (JJII[D)V
- */
-void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetFloat64PropertyParameter
-  (JNIEnv * env, jclass, jlong _typeId, jlong _propertyId, jint _member, jint _index, jdoubleArray _val)
-{
-    DotsC_Float64 val;
-    DotsC_GetFloat64PropertyParameter(_typeId,_propertyId,_member,_index,val);
-    SetJArray(env,_val,val);
-}
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetStringPropertyParameter
- * Signature: (JJII[Ljava/lang/String;)V
- */
-void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetStringPropertyParameter
-  (JNIEnv * env, jclass, jlong _typeId, jlong _propertyId, jint _member, jint _index, jobjectArray _val)
-{
-    const char * val;
-    DotsC_GetStringPropertyParameter(_typeId,_propertyId,_member,_index,val);
-    SetJArray(env,_val,env->NewStringUTF(val));
-}
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetHashedIdPropertyParameter
- * Signature: (JJII[J[Ljava/lang/String;)V
- */
-void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetHashedIdPropertyParameter
-  (JNIEnv * env, jclass, jlong _typeId, jlong _propertyId, jint _member, jint _index, jlongArray _hashVal, jobjectArray _strVal)
-{
-    DotsC_Int64 hashVal;
-    const char * strVal;
-    DotsC_GetHashedIdPropertyParameter(_typeId,_propertyId,_member,_index,hashVal,strVal);
-    SetJArray(env,_hashVal,hashVal);
-    SetJArray(env,_strVal,env->NewStringUTF(strVal));
-}
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetEntityIdPropertyParameter
- * Signature: (JJII[J[J[Ljava/lang/String;)V
- */
-void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetEntityIdPropertyParameter
-  (JNIEnv * env, jclass, jlong _typeId, jlong _propertyId, jint _member, jint _index, jlongArray _typeIdOut, jlongArray _instanceId, jobjectArray _strVal)
+void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_ReadEntityIdMember
+    (JNIEnv * env, jclass, jlong _readHandle, jlongArray _valTypeId, jlongArray _valHash, jobjectArray _valStr, jbooleanArray _isNull, jbooleanArray _isChanged, jint _member, jint _index, jint _keyValMode)
 {
     DotsC_EntityId eid;
-    const char * str;
-    DotsC_GetEntityIdPropertyParameter(_typeId,_propertyId,_member,_index,eid,str);
-    SetJArray(env,_typeIdOut, eid.typeId);
-    SetJArray(env,_instanceId, eid.instanceId);
-    SetJArray(env,_strVal,env->NewStringUTF(str));
+    const char* str;
+    bool isNull, isChanged;
+    DotsC_ReadEntityIdMember(_readHandle, eid, str, isNull, isChanged, _member, _index, static_cast<DotsC_KeyValMode>(_keyValMode));
+
+    SetJArray(env,_valTypeId, eid.typeId);
+    SetJArray(env,_valHash, eid.instanceId);
+    SetJArray(env,_valStr, env->NewStringUTF(str));
+    SetJArray(env, _isNull, isNull);
+    SetJArray(env, _isChanged, isChanged);
 }
 
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetObjectPropertyParameter
- * Signature: (JJII[Ljava/nio/ByteBuffer;)V
+ * Method:    ReadBinaryMember
+ * Signature: (J[Ljava/nio/ByteBuffer;[Z[ZIII)V
  */
-void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetObjectPropertyParameter
-  (JNIEnv * env, jclass, jlong _typeId, jlong _propertyId, jint _member, jint _index, jobjectArray _blob)
+void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_ReadBinaryMember
+    (JNIEnv * env, jclass, jlong _readHandle, jobjectArray _val, jbooleanArray _isNull, jbooleanArray _isChanged, jint _member, jint _index, jint _keyValMode)
 {
-    const char * blob;
-    DotsC_GetObjectPropertyParameter(_typeId,_propertyId,_member,_index,blob);
-    SetJArray(env,_blob,env->NewDirectByteBuffer((void*)blob,DotsC_GetSize(blob)));
-}
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetBinaryPropertyParameter
- * Signature: (JJII[Ljava/nio/ByteBuffer;)V
- */
-void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetBinaryPropertyParameter
-  (JNIEnv * env, jclass, jlong _typeId, jlong _propertyId, jint _member, jint _index, jobjectArray _val)
-{
-    const char * val;
+    const char* val;
     DotsC_Int32 size;
-    DotsC_GetBinaryPropertyParameter(_typeId,_propertyId,_member,_index,val,size);
-    SetJArray(env,_val,env->NewDirectByteBuffer((void*)val,size));
+    bool isNull, isChanged;
+    DotsC_ReadBinaryMember(_readHandle, val, size, isNull, isChanged, _member, _index, static_cast<DotsC_KeyValMode>(_keyValMode));
+
+    SetJArray(env, _val, env->NewDirectByteBuffer((void*)val, size));
+    SetJArray(env, _isNull, isNull);
+    SetJArray(env, _isChanged, isChanged);
 }
 
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    ReadObjectMember
+ * Signature: (J[Ljava/nio/ByteBuffer;[Z[ZIII)V
+ */
+void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_ReadObjectMember
+    (JNIEnv * env, jclass, jlong _readHandle, jobjectArray _blob, jbooleanArray _isNull, jbooleanArray _isChanged, jint _member, jint _index, jint _keyValMode)
+{
+    const char* blob;
+    bool isNull, isChanged;
+    DotsC_ReadObjectMember(_readHandle, blob, isNull, isChanged, _member, _index, static_cast<DotsC_KeyValMode>(_keyValMode));
 
+    SetJArray(env, _blob, env->NewDirectByteBuffer((void*)blob, DotsC_GetSize(blob)));
+    SetJArray(env, _isNull, isNull);
+    SetJArray(env, _isChanged, isChanged);
+}
 
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    CreateBlobWriter
+ * Signature: (J)J
+ */
+jlong JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_CreateBlobWriter
+  (JNIEnv *, jclass, jlong _typeId)
+{
+    return DotsC_CreateBlobWriter(_typeId);
+}
 
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    CreateBlobWriterFromBlob
+ * Signature: (Ljava/nio/ByteBuffer;)J
+ */
+jlong JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_CreateBlobWriterFromBlob
+  (JNIEnv * env, jclass, jobject _blob)
+{
+    const char * blob = static_cast<char*>(env->GetDirectBufferAddress(_blob));
+    return DotsC_CreateBlobWriterFromBlob(blob);
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    CreateBlobWriterFromReader
+ * Signature: (J)J
+ */
+jlong JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_CreateBlobWriterFromReader
+  (JNIEnv *, jclass, jlong _readerHandle)
+{
+    return DotsC_CreateBlobWriterFromReader(_readerHandle);
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    DeleteBlobWriter
+ * Signature: (J)V
+ */
+void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_DeleteBlobWriter
+  (JNIEnv *, jclass, jlong _writerHandle)
+{
+    DotsC_DeleteBlobWriter(_writerHandle);
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    CalculateBlobSize
+ * Signature: (J)I
+ */
+jint JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_CalculateBlobSize
+  (JNIEnv *, jclass, jlong _writerHandle)
+{
+    return DotsC_CalculateBlobSize(_writerHandle);
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    WriteBlob
+ * Signature: (J[Ljava/nio/ByteBuffer;)V
+ */
+void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteBlob
+  (JNIEnv * env, jclass, jlong _writerHandle, jobjectArray _blob)
+{
+    char * blob = static_cast<char*>(env->GetDirectBufferAddress(_blob));
+    DotsC_WriteBlob(_writerHandle, blob);
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    WriteAllChangeFlags
+ * Signature: (JZ)V
+ */
+void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteAllChangeFlags
+  (JNIEnv *, jclass, jlong _writerHandle, jboolean _changed)
+{
+    DotsC_WriteAllChangeFlags(_writerHandle, _changed);
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    WriteChangeFlag
+ * Signature: (JIIZ)V
+ */
+void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteChangeFlag
+  (JNIEnv *, jclass, jlong _writerHandle, jint _member, jint _index, jboolean _changed)
+{
+    DotsC_WriteChangeFlag(_writerHandle, _member, _index, _changed);
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    MarkChanges
+ * Signature: (JJ)Z
+ */
+jboolean JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_MarkChanges
+  (JNIEnv *, jclass, jlong _originalWriter, jlong _currentWriter)
+{
+    return DotsC_MarkChanges(_originalWriter, _currentWriter);
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    WriteInt32Member
+ * Signature: (JIZZIII)V
+ */
+void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteInt32Member
+  (JNIEnv *, jclass, jlong _writerHandle, jint _val, jboolean _isNull, jboolean _isChanged, jint _member, jint _arrayIndex, jint _keyValMode)
+{
+    DotsC_WriteInt32Member(_writerHandle, _val, _isNull, _isChanged, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    WriteInt64Member
+ * Signature: (JJZZIII)V
+ */
+void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteInt64Member
+    (JNIEnv *, jclass, jlong _writerHandle, jlong _val, jboolean _isNull, jboolean _isChanged, jint _member, jint _arrayIndex, jint _keyValMode)
+{
+  DotsC_WriteInt64Member(_writerHandle, _val, _isNull, _isChanged, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    WriteFloat32Member
+ * Signature: (JFZZIII)V
+ */
+void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteFloat32Member
+    (JNIEnv *, jclass, jlong _writerHandle, jfloat _val, jboolean _isNull, jboolean _isChanged, jint _member, jint _arrayIndex, jint _keyValMode)
+{
+    DotsC_WriteFloat32Member(_writerHandle, _val, _isNull, _isChanged, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    WriteFloat64Member
+ * Signature: (JDZZIII)V
+ */
+void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteFloat64Member
+    (JNIEnv *, jclass, jlong _writerHandle, jdouble _val, jboolean _isNull, jboolean _isChanged, jint _member, jint _arrayIndex, jint _keyValMode)
+{
+    DotsC_WriteFloat64Member(_writerHandle, _val, _isNull, _isChanged, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    WriteBooleanMember
+ * Signature: (JZZZIII)V
+ */
+void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteBooleanMember
+    (JNIEnv *, jclass, jlong _writerHandle, jboolean _val, jboolean _isNull, jboolean _isChanged, jint _member, jint _arrayIndex, jint _keyValMode)
+{
+    DotsC_WriteBooleanMember(_writerHandle, _val, _isNull, _isChanged, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    WriteStringMember
+ * Signature: (JLjava/lang/String;ZZIII)V
+ */
+void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteStringMember
+    (JNIEnv * env, jclass, jlong _writerHandle, jstring _val, jboolean _isNull, jboolean _isChanged, jint _member, jint _arrayIndex, jint _keyValMode)
+{
+    StringHolder str=GetUtf8(env, _val);
+    DotsC_WriteStringMember(_writerHandle, str.get(), _isNull, _isChanged, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    WriteHashedMember
+ * Signature: (JJLjava/lang/String;ZZIII)V
+ */
+void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteHashedMember
+    (JNIEnv * env, jclass, jlong _writerHandle, jlong _valHash, jstring _valStr, jboolean _isNull, jboolean _isChanged, jint _member, jint _arrayIndex, jint _keyValMode)
+{
+    StringHolder str=GetUtf8(env, _valStr);
+    DotsC_WriteHashedMember(_writerHandle, _valHash, str.get(), _isNull, _isChanged, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    WriteEntityIdMember
+ * Signature: (JJJLjava/lang/String;ZZIII)V
+ */
+void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteEntityIdMember
+    (JNIEnv * env, jclass, jlong _writerHandle, jlong _valTypeId, jlong _valInst, jstring _valStr, jboolean _isNull, jboolean _isChanged, jint _member, jint _arrayIndex, jint _keyValMode)
+{
+    DotsC_EntityId eid={_valTypeId, _valInst};
+    StringHolder str=GetUtf8(env, _valStr);
+    DotsC_WriteEntityIdMember(_writerHandle, eid, str.get(), _isNull, _isChanged, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    WriteBinaryMember
+ * Signature: (JLjava/nio/ByteBuffer;IZZIII)V
+ */
+void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteBinaryMember
+    (JNIEnv * env, jclass, jlong _writerHandle, jobject _val, jint _size, jboolean _isNull, jboolean _isChanged, jint _member, jint _arrayIndex, jint _keyValMode)
+{
+    const char * bin = static_cast<char*>(env->GetDirectBufferAddress(_val));
+    DotsC_WriteBinaryMember(_writerHandle, bin, _size, _isNull, _isChanged, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    WriteObjectMember
+ * Signature: (JLjava/nio/ByteBuffer;ZZIII)V
+ */
+void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteObjectMember
+(JNIEnv * env, jclass, jlong _writerHandle, jobject _blob, jboolean _isNull, jboolean _isChanged, jint _member, jint _arrayIndex, jint _keyValMode)
+{
+    const char * blob = static_cast<char*>(env->GetDirectBufferAddress(_blob));
+    DotsC_WriteObjectMember(_writerHandle, blob, _isNull, _isChanged, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
+}
 
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
@@ -1657,77 +1493,6 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_SetException
 
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetInitialSize
- * Signature: (J)I
- */
-jint JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetInitialSize
-  (JNIEnv *, jclass, jlong _typeId)
-{
-    return DotsC_GetInitialSize(_typeId);
-}
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    FormatBlob
- * Signature: (Ljava/nio/ByteBuffer;IJ[I)V
- */
-void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_FormatBlob
-(JNIEnv * env, jclass, jobject _blob, jint _blobSize, jlong _typeId, jintArray _beginningOfUnused)
-{
-    char * blob = static_cast<char*>(env->GetDirectBufferAddress(_blob));
-    char * beginningOfUnused;
-    DotsC_FormatBlob(blob,_blobSize,_typeId,beginningOfUnused);
-    SetJArray(env,_beginningOfUnused, static_cast<DotsC_Int32>(beginningOfUnused - blob));
-}
-
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    CreateObjectMember
- * Signature: (Ljava/nio/ByteBuffer;IJIIZ[I)V
- */
-void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_CreateObjectMember
-  (JNIEnv * env, jclass, jobject _insideBlob, jint _blobSize, jlong _typeId, jint _member, jint _index, jboolean _isChanged, jintArray _beginningOfUnused)
-{
-    char * insideBlob = static_cast<char*>(env->GetDirectBufferAddress(_insideBlob));
-    char * beginningOfUnused = insideBlob + GetJArrayInt32(env,_beginningOfUnused);
-    DotsC_CreateObjectMember(insideBlob,_blobSize,_typeId,_member,_index,_isChanged == JNI_TRUE, beginningOfUnused);
-    SetJArray(env,_beginningOfUnused,static_cast<DotsC_Int32>(beginningOfUnused - insideBlob));
-}
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    CreateStringMember
- * Signature: (Ljava/nio/ByteBuffer;IIIZ[I)V
- */
-void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_CreateStringMember
-  (JNIEnv * env, jclass, jobject _insideBlob, jint _strLength, jint _member, jint _index, jboolean _isChanged, jintArray _beginningOfUnused)
-{
-    char * insideBlob = static_cast<char*>(env->GetDirectBufferAddress(_insideBlob));
-    char * beginningOfUnused = insideBlob + GetJArrayInt32(env,_beginningOfUnused);
-    DotsC_CreateStringMember(insideBlob,_strLength,_member,_index,_isChanged == JNI_TRUE, beginningOfUnused);
-    SetJArray(env,_beginningOfUnused,static_cast<DotsC_Int32>(beginningOfUnused - insideBlob));
-}
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    CreateBinaryMember
- * Signature: (Ljava/nio/ByteBuffer;IIIZ[I)V
- */
-void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_CreateBinaryMember
-  (JNIEnv * env, jclass, jobject _insideBlob, jint _binaryLength, jint _member, jint _index, jboolean _isChanged, jintArray _beginningOfUnused)
-{
-    char * insideBlob = static_cast<char*>(env->GetDirectBufferAddress(_insideBlob));
-    char * beginningOfUnused = insideBlob + GetJArrayInt32(env,_beginningOfUnused);
-    DotsC_CreateBinaryMember(insideBlob,_binaryLength,_member,_index,_isChanged == JNI_TRUE, beginningOfUnused);
-    SetJArray(env,_beginningOfUnused,static_cast<DotsC_Int32>(beginningOfUnused - insideBlob));
-}
-
-
-
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
  * Method:    GetDouDirectories
  * Signature: ()[Ljava/lang/String;
  */
@@ -1749,22 +1514,19 @@ JNIEXPORT jobjectArray JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_Ge
     }
     catch (const std::exception& e)
     {
-        std::wcerr << "Failed to read ini files!\nException:" << 
+        std::wcerr << "Failed to read ini files!\nException:" <<
             e.what() << std::endl;
         exit(1);
     }
-    
+
     jobjectArray stringArray = env->NewObjectArray(static_cast<jsize>(directories.size()),
-                                                   env->FindClass("java/lang/String"),  
+                                                   env->FindClass("java/lang/String"),
                                                    env->NewStringUTF(""));
-    for(size_t i = 0; i < directories.size(); ++i) 
-    {  
+    for(size_t i = 0; i < directories.size(); ++i)
+    {
         env->SetObjectArrayElement(stringArray,
                                    static_cast<jsize>(i),
                                    env->NewStringUTF(directories[i].c_str()));
     }
     return stringArray;
 }
-
-
-

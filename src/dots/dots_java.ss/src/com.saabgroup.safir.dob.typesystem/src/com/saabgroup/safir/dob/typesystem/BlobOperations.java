@@ -520,7 +520,7 @@ public class BlobOperations {
     public static void get(BinaryContainer container, long handle, int member, int index)
     {
     	java.nio.ByteBuffer value[] = new java.nio.ByteBuffer[1];
-        boolean isNull[] = new boolean[1];
+    	boolean isNull[] = new boolean[1];
         boolean isChanged[] = new boolean[1];
         
         Kernel.ReadBinaryMember(handle, value, isNull, isChanged, member, index, VALUE_MODE);
