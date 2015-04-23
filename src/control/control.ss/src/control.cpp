@@ -47,6 +47,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 #include <boost/asio.hpp>
+#include <boost/asio/steady_timer.hpp>
 #include "boost/process.hpp"
 #include "boost/process/mitigate.hpp"
 
@@ -165,8 +166,14 @@ int main(int argc, char * argv[])
 
         boost::asio::signal_set signalSet(ioService);
 
+        boost::asio::io_service::strand ctrlStrand(ioService);
+
+        bool doseMainStarted = false;
+
         // Make some work to stop io_service from exiting.
         auto work = Safir::make_unique<boost::asio::io_service::work>(ioService);
+
+        boost::asio::steady_timer terminationTimer(ioService);
 
         std::vector<Com::NodeTypeDefinition> commNodeTypes;
 
@@ -225,8 +232,16 @@ int main(int argc, char * argv[])
         doseMainCmdSender.reset(new Control::DoseMainCmdSender
                                 (ioService,
                                  // This is what we do when dose_main is ready to receive commands
-                                 [&sp, &communication, &stateHandler, &doseMainCmdSender, &conf, &options]()
+                                 [&sp,
+                                  &communication,
+                                  &stateHandler,
+                                  &doseMainCmdSender,
+                                  &conf,
+                                  &options,
+                                  &doseMainStarted]()
         {
+            doseMainStarted = true;
+
             doseMainCmdSender->StartDoseMain(conf.thisNodeParam.name,
                                              options.id,
                                              conf.thisNodeParam.nodeTypeId,
@@ -262,8 +277,14 @@ int main(int argc, char * argv[])
 
 #if defined(linux) || defined(__linux) || defined(__linux__)
         boost::asio::signal_set sigchldSet(ioService, SIGCHLD);
-        sigchldSet.async_wait(
-                    [&sp, &communication, &doseMainCmdSender, &work, &signalSet]
+        sigchldSet.async_wait(ctrlStrand.wrap(
+                    [&sp,
+                     &communication,
+                     &doseMainCmdSender,
+                     &work,
+                     &signalSet,
+                     &terminationTimer,
+                     &doseMainStarted]
                     (const boost::system::error_code& error, int signalNumber)
         {
             lllog(1) << "CTRL: Got signal " << signalNumber << " ... dose_main has exited" << std::endl;
@@ -272,6 +293,11 @@ int main(int argc, char * argv[])
                 SEND_SYSTEM_LOG(Error,
                                 << "CTRL: Got a signals error: " << error);
             }
+
+            doseMainStarted = false;
+
+            // dose_main has exited, we can stop our timer that will slay dose_main
+            terminationTimer.cancel();
 
             int statusCode;
             ::wait(&statusCode);
@@ -298,7 +324,7 @@ int main(int argc, char * argv[])
             signalSet.cancel();
             work.reset();
         }
-        );
+        ));
 #endif
 
         // Locate and start dose_main
@@ -380,7 +406,14 @@ int main(int argc, char * argv[])
         signalSet.add(SIGTERM);
 #endif
 
-        signalSet.async_wait([&sp,&work,&communication, &doseMainCmdSender]
+        signalSet.async_wait(ctrlStrand.wrap(
+                             [&sp,
+                              &work,
+                              &communication,
+                              &doseMainCmdSender,
+                              &terminationTimer,
+                              &dose_main,
+                              &doseMainStarted]
                              (const boost::system::error_code& error,
                              const int signalNumber)
         {
@@ -393,15 +426,33 @@ int main(int argc, char * argv[])
             sp.Stop();
             communication.Stop();
 
-            // Send stop order to dose_main
-            doseMainCmdSender->StopDoseMain();
+            if (doseMainStarted)
+            {
+                // Send stop order to dose_main
+                doseMainCmdSender->StopDoseMain();
+
+                // Give dose_main some time to stop in a controlled fashion
+                terminationTimer.expires_from_now(boost::chrono::seconds(10));
+
+                terminationTimer.async_wait([&dose_main]
+                                            (const boost::system::error_code& error)
+                                            {
+                                                if (error == boost::asio::error::operation_aborted)
+                                                {
+                                                    return;
+                                                }
+
+                                                // Kill dose_main the hard way
+                                                boost::process::terminate(dose_main);
+                                            });
+            }
 
             // Stop the doseMainCmdSender itself
             doseMainCmdSender->Stop();
 
             work.reset();
         }
-        );
+        ));
 
         Safir::Utilities::CrashReporter::RegisterCallback(DumpFunc);
         Safir::Utilities::CrashReporter::Start();
