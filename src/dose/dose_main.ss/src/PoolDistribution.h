@@ -73,6 +73,8 @@ namespace Internal
                 if (m_running)
                     return;
 
+                lllog(5)<<"Start PoolDistribution to "<<m_nodeId<<std::endl;
+
                 m_running=true;
                 //collect all connections on this node
                 Connections::Instance().ForEachConnection([=](const Connection& connection)
@@ -262,6 +264,7 @@ namespace Internal
 
             if (m_distribution.GetCommunication().Send(m_nodeId, m_nodeType, req, sizeof(PoolDistributionInfo), PoolDistributionInfoDataTypeId, true))
             {
+                lllog(5)<<"Completed PoolDistribution to "<<m_nodeId<<std::endl;
                 m_completionHandler(m_nodeId);
             }
             else

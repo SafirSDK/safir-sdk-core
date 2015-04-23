@@ -87,10 +87,6 @@ expected_lines = set(["dose_main running...",
                       "DOSE_MAIN: Exiting...",
                       "CTRL: Exiting..."])
 
-if sys.platform == "win32":
-    expected_lines.add("dose_main got signal 21, shutting down.")
-
-
 if set(lines) - expected_lines:
     log("Got unexpected output:")
     log (set(lines) - expected_lines)

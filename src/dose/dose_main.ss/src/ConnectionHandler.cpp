@@ -114,6 +114,9 @@ namespace
     {
         m_strand.post([=]
         {
+            m_poolHandler.Stop();
+            m_processInfoHandler.Stop();
+
             if (m_connectionThread.get_id() != boost::thread::id())
             {
                 //set the interrupt state so that when we generate the spurious signal
@@ -123,8 +126,6 @@ namespace
 
                 m_connectionThread.join();
                 m_connectionThread = boost::thread();
-                m_poolHandler.Stop();
-                m_processInfoHandler.Stop();
             }
         });
     }

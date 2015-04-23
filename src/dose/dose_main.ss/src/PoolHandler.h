@@ -61,6 +61,7 @@ namespace Internal
         boost::asio::io_service::strand& m_strand;
         boost::asio::steady_timer m_endStatesTimer;
         Distribution& m_distribution;
+        std::function<void(const std::string& str)> m_log;
         PoolDistributionHandlerType m_poolDistributor;
         PoolDistributionRequestSenderType m_poolDistributionRequests;
         PersistHandler m_persistHandler;

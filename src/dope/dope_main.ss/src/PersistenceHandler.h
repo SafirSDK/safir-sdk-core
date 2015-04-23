@@ -78,7 +78,7 @@ public:
 protected:
 
     const TypeIdSet & GetPersistentTypes() const {return m_persistentTypes;}
-    Safir::Dob::Connection  m_dobConnection;
+    Safir::Dob::Connection m_dobConnection;
 
 
 private:

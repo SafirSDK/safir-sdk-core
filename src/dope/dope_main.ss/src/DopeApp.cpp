@@ -248,6 +248,11 @@ DopeApp::Run()
 {
     boost::asio::io_service::work keepRunning(m_ioService);
     m_ioService.run();
+
+    if (m_persistenceHandler != nullptr)
+    {
+        m_persistenceHandler->Stop();
+    }
 }
 //-------------------------------------------------------
 /*

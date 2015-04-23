@@ -129,14 +129,14 @@ namespace Internal
 
             auto selfHandle(this->shared_from_this());
 
-            m_strand.dispatch(
-                        [this, selfHandle]()
-                        {
-                            m_sessions.clear();
-                            m_acceptor->Stop();
+            m_strand.post(
+                         [this, selfHandle]()
+                         {
+                             m_sessions.clear();
+                             m_acceptor->Stop();
 
-                            TestPolicy::StopListeningEvent();
-                        });
+                             TestPolicy::StopListeningEvent();
+                         });
         }
 
         void Send(std::unique_ptr<char[]> msg, uint32_t msgSize)

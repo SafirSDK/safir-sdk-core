@@ -105,6 +105,8 @@ namespace Internal
 
 
         boost::asio::io_service::strand         m_strand;
+        const std::function<void(const std::string& str)> m_logStatus;
+
         bool                                    m_systemFormed;
         std::set<std::pair<int64_t, int64_t> >  m_nodes; // pair<nodeId, nodeTypeId>
         std::set<std::pair<int64_t, int64_t> >  m_unsentRequests;
