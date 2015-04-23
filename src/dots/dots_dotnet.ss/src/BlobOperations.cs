@@ -1,7 +1,7 @@
-/******************************************************************************
+/* ****************************************************************************
 *
 * Copyright Saab AB, 2005-2015 (http://safir.sourceforge.net)
-* 
+*
 * Created by: Joel Ottosson / joot
 *
 *******************************************************************************
@@ -99,7 +99,7 @@ namespace Safir.Dob.Typesystem.Internal
         {
             return Kernel.DotsC_GetNumberOfMemberValues (handle, member);
         }
-       
+
 
         #region Container operations on Blobs
 
@@ -110,7 +110,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(BooleanContainer container,
@@ -132,7 +132,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(BooleanContainer container,
@@ -150,7 +150,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(EnumerationContainerBase container,
@@ -172,7 +172,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(EnumerationContainerBase container,
@@ -190,7 +190,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Int32Container container,
@@ -212,7 +212,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Int32Container container,
@@ -230,7 +230,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Int64Container container,
@@ -252,7 +252,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Int64Container container,
@@ -270,7 +270,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Float32Container container,
@@ -292,7 +292,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Float32Container container,
@@ -310,7 +310,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Float64Container container,
@@ -332,7 +332,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Float64Container container,
@@ -350,7 +350,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(TypeIdContainer container,
@@ -372,7 +372,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(TypeIdContainer container,
@@ -390,7 +390,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(InstanceIdContainer container,
@@ -412,7 +412,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(InstanceIdContainer container,
@@ -430,7 +430,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(EntityIdContainer container,
@@ -452,7 +452,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>       
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(EntityIdContainer container,
@@ -470,7 +470,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(ChannelIdContainer container,
@@ -492,7 +492,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(ChannelIdContainer container,
@@ -510,7 +510,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(HandlerIdContainer container,
@@ -532,7 +532,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(HandlerIdContainer container,
@@ -550,7 +550,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(StringContainer container,
@@ -572,7 +572,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(StringContainer container,
@@ -590,7 +590,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(ObjectContainerBase container,
@@ -618,7 +618,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(ObjectContainerBase container,
@@ -636,7 +636,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(BinaryContainer container,
@@ -658,7 +658,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(BinaryContainer container,
@@ -678,7 +678,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si32.AmpereContainer container,
@@ -700,7 +700,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si32.AmpereContainer container,
@@ -718,7 +718,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si32.CubicMeterContainer container,
@@ -740,7 +740,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si32.CubicMeterContainer container,
@@ -758,7 +758,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si32.HertzContainer container,
@@ -780,7 +780,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si32.HertzContainer container,
@@ -798,7 +798,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si32.JouleContainer container,
@@ -820,7 +820,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si32.JouleContainer container,
@@ -838,7 +838,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si32.KelvinContainer container,
@@ -860,7 +860,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si32.KelvinContainer container,
@@ -878,7 +878,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si32.KilogramContainer container,
@@ -900,7 +900,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si32.KilogramContainer container,
@@ -918,7 +918,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si32.MeterContainer container,
@@ -940,7 +940,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si32.MeterContainer container,
@@ -958,7 +958,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si32.MeterPerSecondContainer container,
@@ -980,7 +980,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si32.MeterPerSecondContainer container,
@@ -998,7 +998,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si32.MeterPerSecondSquaredContainer container,
@@ -1020,7 +1020,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si32.MeterPerSecondSquaredContainer container,
@@ -1038,7 +1038,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si32.NewtonContainer container,
@@ -1060,7 +1060,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si32.NewtonContainer container,
@@ -1078,7 +1078,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si32.PascalContainer container,
@@ -1100,7 +1100,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si32.PascalContainer container,
@@ -1118,7 +1118,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si32.RadianContainer container,
@@ -1140,7 +1140,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si32.RadianContainer container,
@@ -1158,7 +1158,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si32.RadianPerSecondContainer container,
@@ -1180,7 +1180,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si32.RadianPerSecondContainer container,
@@ -1198,7 +1198,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si32.RadianPerSecondSquaredContainer container,
@@ -1220,7 +1220,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si32.RadianPerSecondSquaredContainer container,
@@ -1238,7 +1238,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si32.SecondContainer container,
@@ -1260,7 +1260,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si32.SecondContainer container,
@@ -1278,7 +1278,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si32.SquareMeterContainer container,
@@ -1300,7 +1300,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si32.SquareMeterContainer container,
@@ -1318,7 +1318,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si32.SteradianContainer container,
@@ -1340,7 +1340,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si32.SteradianContainer container,
@@ -1358,7 +1358,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si32.VoltContainer container,
@@ -1380,7 +1380,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si32.VoltContainer container,
@@ -1398,7 +1398,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si32.WattContainer container,
@@ -1420,7 +1420,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si32.WattContainer container,
@@ -1438,7 +1438,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si64.AmpereContainer container,
@@ -1460,7 +1460,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si64.AmpereContainer container,
@@ -1478,7 +1478,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si64.CubicMeterContainer container,
@@ -1500,7 +1500,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si64.CubicMeterContainer container,
@@ -1518,7 +1518,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si64.HertzContainer container,
@@ -1540,7 +1540,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si64.HertzContainer container,
@@ -1558,7 +1558,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si64.JouleContainer container,
@@ -1580,7 +1580,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si64.JouleContainer container,
@@ -1598,7 +1598,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si64.KelvinContainer container,
@@ -1620,7 +1620,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si64.KelvinContainer container,
@@ -1638,7 +1638,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si64.KilogramContainer container,
@@ -1660,7 +1660,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si64.KilogramContainer container,
@@ -1678,7 +1678,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si64.MeterContainer container,
@@ -1700,7 +1700,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si64.MeterContainer container,
@@ -1718,7 +1718,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si64.MeterPerSecondContainer container,
@@ -1740,7 +1740,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si64.MeterPerSecondContainer container,
@@ -1758,7 +1758,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si64.MeterPerSecondSquaredContainer container,
@@ -1780,7 +1780,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si64.MeterPerSecondSquaredContainer container,
@@ -1798,7 +1798,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si64.NewtonContainer container,
@@ -1820,7 +1820,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si64.NewtonContainer container,
@@ -1838,7 +1838,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si64.PascalContainer container,
@@ -1860,7 +1860,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si64.PascalContainer container,
@@ -1878,7 +1878,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si64.RadianContainer container,
@@ -1900,7 +1900,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si64.RadianContainer container,
@@ -1918,7 +1918,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si64.RadianPerSecondContainer container,
@@ -1940,7 +1940,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si64.RadianPerSecondContainer container,
@@ -1958,7 +1958,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si64.RadianPerSecondSquaredContainer container,
@@ -1980,7 +1980,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si64.RadianPerSecondSquaredContainer container,
@@ -1998,7 +1998,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si64.SecondContainer container,
@@ -2020,7 +2020,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si64.SecondContainer container,
@@ -2038,7 +2038,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si64.SquareMeterContainer container,
@@ -2060,7 +2060,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si64.SquareMeterContainer container,
@@ -2078,7 +2078,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si64.SteradianContainer container,
@@ -2100,7 +2100,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si64.SteradianContainer container,
@@ -2118,7 +2118,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si64.VoltContainer container,
@@ -2140,7 +2140,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si64.VoltContainer container,
@@ -2158,7 +2158,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// put them in the container.
         /// </summary>
         /// <param name="container">The container in which to put the values.</param>
-        /// <param name="blob">Blob to get the member from.</param>
+        /// <param name="handle">Handle to BlobReader to get the member from.</param>
         /// <param name="member">The member to get.</param>
         /// <param name="index">Array index in member to get. Shall be 0 if the member is not an array.</param>
         public static void Get(Si64.WattContainer container,
@@ -2180,7 +2180,7 @@ namespace Safir.Dob.Typesystem.Internal
         /// The change flag from the container will be set in the blob.
         /// </summary>
         /// <param name="container">The container whose values to use.</param>
-        /// <param name="blob">Blob to set the member in.</param>
+        /// <param name="handle">Handle to BlobWriter to set the member in.</param>
         /// <param name="member">The member to be set.</param>
         /// <param name="index">Array index in member to set. Shall be 0 if the member is not an array.</param>
         public static void Set(Si64.WattContainer container,
@@ -2273,7 +2273,7 @@ namespace Safir.Dob.Typesystem.Internal
             isNull = InternalOperations.BoolOf (n);
             isChanged = InternalOperations.BoolOf (c);
         }
-		
+
         /// <summary>
         /// Get the specified val, isNull, isChanged, handle, member, valueIndex and mode.
         /// </summary>
@@ -3001,14 +3001,14 @@ namespace Safir.Dob.Typesystem.Internal
                 throw new SoftwareViolationException("BlobOperation.Set(object) called with mode=KeyMode. Only ValueMode is allowed for this type!");
             }
 
-            if (isNull) 
+            if (isNull)
             {
                 Kernel.DotsC_WriteObjectMember (handle, IntPtr.Zero,
                                                 InternalOperations.ByteOf(isNull),
                                                 InternalOperations.ByteOf(isChanged),
                                                 member, valueIndex, mode);
             }
-            else 
+            else
             {
                 if (val == null)
                 {
@@ -3052,7 +3052,7 @@ namespace Safir.Dob.Typesystem.Internal
                 throw new SoftwareViolationException("BlobOperation.Set(binary) called with mode=KeyMode. Only ValueMode is allowed for this type!");
             }
 
-            if (isNull) 
+            if (isNull)
             {
                 Kernel.DotsC_WriteBinaryMember (handle, IntPtr.Zero, 0,
                                                 InternalOperations.ByteOf(isNull),

@@ -1,7 +1,8 @@
-/******************************************************************************
+/*
+****************************************************************************
 *
 * Copyright Saab AB, 2005-2015 (http://safir.sourceforge.net)
-* 
+*
 * Created by: Joel Ottosson / joot
 *
 *******************************************************************************
@@ -30,12 +31,12 @@ namespace Safir.Dob.Typesystem
 {
     /// <summary>
     /// Container for base types.
-    /// 
+    ///
     /// <para/>
     /// This class holds a value of the template argument type and a null flag.
     /// The operations that modify the value update the null flag and the change flag
     /// (which is inherited from ContainerBase).
-    /// 
+    ///
     /// <para/>
     /// This container is intended for the simple types of the DOB typesystem.
     /// </summary>
@@ -78,7 +79,7 @@ namespace Safir.Dob.Typesystem
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="Safir.Dob.Typesystem.SequenceContainer`1"/> at the specified index.
+        /// Gets or sets the value at the specified index.
         /// </summary>
         /// <param name="index">Index.</param>
         public T this [int index] {
@@ -241,7 +242,11 @@ namespace Safir.Dob.Typesystem
 
         #endregion
 
+        /// <summary>
+        /// The internal storage for the values in the sequence.
+        /// </summary>
         protected internal List<T> values;
+
         /// <summary>
         /// Default constructor
         /// <para/>
@@ -253,7 +258,7 @@ namespace Safir.Dob.Typesystem
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Safir.Dob.Typesystem.SequenceContainer`1"/> class.
+        /// Initializes a new instance.
         /// </summary>
         /// <param name="other">Other.</param>
         protected SequenceContainer(SequenceContainer<T> other):
@@ -262,10 +267,13 @@ namespace Safir.Dob.Typesystem
         }
     }
 
+    /// <summary>
+    /// Generic SequenceContainer for Objects.
+    /// </summary>
     public class GenericObjectSequenceContainer<T> : SequenceContainer<T>, ICloneable where T : Safir.Dob.Typesystem.Object
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Safir.Dob.Typesystem.ObjectSequenceContainer`1"/> class.
+        /// Initializes a new instance.
         /// </summary>
         public GenericObjectSequenceContainer(): base()
         {
@@ -297,12 +305,12 @@ namespace Safir.Dob.Typesystem
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <returns></returns>
         public new GenericObjectSequenceContainer<T> Clone()
         {
-            return (GenericObjectSequenceContainer<T>)((ICloneable)this).Clone(); 
+            return (GenericObjectSequenceContainer<T>)((ICloneable)this).Clone();
         }
 
         /// <summary>
@@ -320,6 +328,9 @@ namespace Safir.Dob.Typesystem
         #endregion
     }
 
+    /// <summary>
+    /// Generic SequenceContainer for non-Object members.
+    /// </summary>
     public class MemberSequenceContainer<T> : SequenceContainer<T>, ICloneable
     {
         public MemberSequenceContainer(): base()
@@ -351,12 +362,12 @@ namespace Safir.Dob.Typesystem
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <returns></returns>
         public new MemberSequenceContainer<T> Clone()
         {
-            return (MemberSequenceContainer<T>)((ICloneable)this).Clone(); 
+            return (MemberSequenceContainer<T>)((ICloneable)this).Clone();
         }
 
         /// <summary>
@@ -374,65 +385,164 @@ namespace Safir.Dob.Typesystem
         #endregion
     }
 
+    /// <summary>SequenceContainer for String.</summary>
     public class StringSequenceContainer : MemberSequenceContainer<string> {}
+
+    /// <summary>SequenceContainer for Boolean.</summary>
     public class BooleanSequenceContainer : MemberSequenceContainer<bool> {}
+
+    /// <summary>SequenceContainer for Int32.</summary>
     public class Int32SequenceContainer : MemberSequenceContainer<Int32> {}
+
+    /// <summary>SequenceContainer for Int64.</summary>
     public class Int64SequenceContainer : MemberSequenceContainer<Int64> {}
+
+    /// <summary>SequenceContainer for Float32.</summary>
     public class Float32SequenceContainer : MemberSequenceContainer<float> {}
+
+    /// <summary>SequenceContainer for Float64.</summary>
     public class Float64SequenceContainer : MemberSequenceContainer<double> {}
+
+    /// <summary>SequenceContainer for TypeId.</summary>
     public class TypeIdSequenceContainer : MemberSequenceContainer<Int64> {}
+
+    /// <summary>SequenceContainer for InstanceId.</summary>
     public class InstanceIdSequenceContainer : MemberSequenceContainer<InstanceId> {}
+
+    /// <summary>SequenceContainer for ChannelId.</summary>
     public class ChannelIdSequenceContainer : MemberSequenceContainer<ChannelId> {}
+
+    /// <summary>SequenceContainer for HandlerId.</summary>
     public class HandlerIdSequenceContainer : MemberSequenceContainer<HandlerId> {}
+
+    /// <summary>SequenceContainer for EntityId.</summary>
     public class EntityIdSequenceContainer : MemberSequenceContainer<EntityId> {}
+
+    /// <summary>SequenceContainer for Binary.</summary>
     public class BinarySequenceContainer : MemberSequenceContainer<byte[]> {}
+
+    /// <summary>SequenceContainer for Object.</summary>
     public class ObjectSequenceContainer : GenericObjectSequenceContainer<Safir.Dob.Typesystem.Object> {}
 
     //SI32
     namespace Si32
     {
+        /// <summary>SequenceContainer for Ampere.</summary>
         public class AmpereSequenceContainer : Float32SequenceContainer {}
+
+        /// <summary>SequenceContainer for CubicMeter.</summary>
         public class CubicMeterSequenceContainer : Float32SequenceContainer {}
+
+        /// <summary>SequenceContainer for Hertz.</summary>
         public class HertzSequenceContainer : Float32SequenceContainer {}
+
+        /// <summary>SequenceContainer for Joule.</summary>
         public class JouleSequenceContainer : Float32SequenceContainer {}
+
+        /// <summary>SequenceContainer for Kelvin.</summary>
         public class KelvinSequenceContainer : Float32SequenceContainer {}
+
+        /// <summary>SequenceContainer for Kilogram.</summary>
         public class KilogramSequenceContainer : Float32SequenceContainer {}
+
+        /// <summary>SequenceContainer for Meter.</summary>
         public class MeterSequenceContainer : Float32SequenceContainer {}
+
+        /// <summary>SequenceContainer for MeterPerSecond.</summary>
         public class MeterPerSecondSequenceContainer : Float32SequenceContainer {}
+
+        /// <summary>SequenceContainer for MeterPerSecondSquared.</summary>
         public class MeterPerSecondSquaredSequenceContainer : Float32SequenceContainer {}
+
+        /// <summary>SequenceContainer for Newton.</summary>
         public class NewtonSequenceContainer : Float32SequenceContainer {}
+
+        /// <summary>SequenceContainer for Pascal.</summary>
         public class PascalSequenceContainer : Float32SequenceContainer {}
+
+        /// <summary>SequenceContainer for Radian.</summary>
         public class RadianSequenceContainer : Float32SequenceContainer {}
+
+        /// <summary>SequenceContainer for RadianPerSecond.</summary>
         public class RadianPerSecondSequenceContainer : Float32SequenceContainer {}
+
+        /// <summary>SequenceContainer for RadianPerSecondSquared.</summary>
         public class RadianPerSecondSquaredSequenceContainer : Float32SequenceContainer {}
+
+        /// <summary>SequenceContainer for Second.</summary>
         public class SecondSequenceContainer : Float32SequenceContainer {}
+
+        /// <summary>SequenceContainer for SquareMeter.</summary>
         public class SquareMeterSequenceContainer : Float32SequenceContainer {}
+
+        /// <summary>SequenceContainer for Steradian.</summary>
         public class SteradianSequenceContainer : Float32SequenceContainer {}
+
+        /// <summary>SequenceContainer for Volt.</summary>
         public class VoltSequenceContainer : Float32SequenceContainer {}
+
+        /// <summary>SequenceContainer for Watt.</summary>
         public class WattSequenceContainer : Float32SequenceContainer {}
     }
 
     //SI64
     namespace Si64
     {
+        /// <summary>SequenceContainer for Ampere.</summary>
         public class AmpereSequenceContainer : Float64SequenceContainer {}
+
+        /// <summary>SequenceContainer for CubicMeter.</summary>
         public class CubicMeterSequenceContainer : Float64SequenceContainer {}
+
+        /// <summary>SequenceContainer for Hertz.</summary>
         public class HertzSequenceContainer : Float64SequenceContainer {}
+
+        /// <summary>SequenceContainer for Joule.</summary>
         public class JouleSequenceContainer : Float64SequenceContainer {}
+
+        /// <summary>SequenceContainer for Kelvin.</summary>
         public class KelvinSequenceContainer : Float64SequenceContainer {}
+
+        /// <summary>SequenceContainer for Kilogram.</summary>
         public class KilogramSequenceContainer : Float64SequenceContainer {}
+
+        /// <summary>SequenceContainer for Meter.</summary>
         public class MeterSequenceContainer : Float64SequenceContainer {}
+
+        /// <summary>SequenceContainer for MeterPerSecond.</summary>
         public class MeterPerSecondSequenceContainer : Float64SequenceContainer {}
+
+        /// <summary>SequenceContainer for MeterPerSecondSquared.</summary>
         public class MeterPerSecondSquaredSequenceContainer : Float64SequenceContainer {}
+
+        /// <summary>SequenceContainer for Newton.</summary>
         public class NewtonSequenceContainer : Float64SequenceContainer {}
+
+        /// <summary>SequenceContainer for Pascal.</summary>
         public class PascalSequenceContainer : Float64SequenceContainer {}
+
+        /// <summary>SequenceContainer for Radian.</summary>
         public class RadianSequenceContainer : Float64SequenceContainer {}
+
+        /// <summary>SequenceContainer for RadianPerSecond.</summary>
         public class RadianPerSecondSequenceContainer : Float64SequenceContainer {}
+
+        /// <summary>SequenceContainer for RadianPerSecondSquared.</summary>
         public class RadianPerSecondSquaredSequenceContainer : Float64SequenceContainer {}
+
+        /// <summary>SequenceContainer for Second.</summary>
         public class SecondSequenceContainer : Float64SequenceContainer {}
+
+        /// <summary>SequenceContainer for SquareMeter.</summary>
         public class SquareMeterSequenceContainer : Float64SequenceContainer {}
+
+        /// <summary>SequenceContainer for Steradian.</summary>
         public class SteradianSequenceContainer : Float64SequenceContainer {}
+
+        /// <summary>SequenceContainer for Volt.</summary>
         public class VoltSequenceContainer : Float64SequenceContainer {}
+
+        /// <summary>SequenceContainer for Watt.</summary>
         public class WattSequenceContainer : Float64SequenceContainer {}
     }
 

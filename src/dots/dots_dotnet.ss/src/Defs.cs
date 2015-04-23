@@ -1,7 +1,7 @@
 /* ****************************************************************************
 *
 * Copyright Saab AB, 2005-2013 (http://safir.sourceforge.net)
-* 
+*
 * Created by: Lars Hagström / stlrha
 *
 *******************************************************************************
@@ -188,17 +188,33 @@ namespace Safir.Dob.Typesystem
         Watt64MemberType
     }
 
+    /// <summary>
+    /// Types of collections that a member can be.
+    /// </summary>
 	public enum CollectionType
 	{
+        /// <summary>Member is a single member, i.e not a collection at all.</summary>
 		SingleValueCollectionType = 0,
+
+        /// <summary>Member is an array.</summary>
 		ArrayCollectionType,
+
+        /// <summary>Member is a Sequence.</summary>
 		SequenceCollectionType,
+
+        /// <summary>Member is a Dictionary.</summary>
 		DictionaryCollectionType
 	}
 
+    /// <summary>
+    /// Used to control whether an operation controls value or key elements.
+    /// </summary>
     public enum KeyValMode
     {
-        KeyMode=0, 
+        /// <summary>Operation wants to manipulate a key.</summary>
+        KeyMode = 0,
+
+        /// <summary>Operation wants to manipulate a value.</summary>
         ValueMode
     }
 }

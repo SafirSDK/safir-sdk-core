@@ -190,12 +190,11 @@ namespace Safir.Dob.Typesystem
         /// <param name="theMemberType">The type of the member.</param>
         /// <param name="memberTypeId">If memberType is object or enumeration, this is the typeId of that type.
         /// If memberType is something else the value is -1.</param>
-        /// <param name="theTypeSize">If theMemberType is string and the type is a class (not property) then this is the length of the string.</param>
-        /// <param name="isArray">True if member is an array. Not applicable if type id is a property.</param>
+        /// <param name="stringLength">Length of the string</param>
+        /// <param name="collectionType">Member collection type.</param>
         /// <param name="arrayLength">Maximum capacity of array if the member is an array (1 if not an array). Not applicable if type id is a property.</param>
         /// <returns>The name of the member.</returns>
-        /// <exception cref="Safir.Dob.Typesystem.IllegalValueException">There is no such type defined or there is no such member in the type.</exception>       
-
+        /// <exception cref="Safir.Dob.Typesystem.IllegalValueException">There is no such type defined or there is no such member in the type.</exception>
         public static string GetInfo(System.Int64 typeId,
                                      int member,
                                      out MemberType theMemberType,
@@ -206,7 +205,7 @@ namespace Safir.Dob.Typesystem
         {
             IntPtr name;
             Kernel.DotsC_GetMemberInfo(typeId, member, out theMemberType, out name, out memberTypeId, out stringLength, out collectionType, out arrayLength);
-           
+
             if (name == IntPtr.Zero)
             {
                 throw new IllegalValueException("There is no such type or member defined");

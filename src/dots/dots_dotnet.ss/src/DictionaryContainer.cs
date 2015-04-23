@@ -1,7 +1,7 @@
-/******************************************************************************
+/* ****************************************************************************
 *
 * Copyright Saab AB, 2005-2015 (http://safir.sourceforge.net)
-* 
+*
 * Created by: Joel Ottosson / joot
 *
 *******************************************************************************
@@ -21,6 +21,7 @@
 * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
 *
 ******************************************************************************/
+
 using System;
 using System.Collections.Generic;
 
@@ -29,14 +30,14 @@ namespace Safir.Dob.Typesystem
     /// <summary>
     /// Dictionary container.
     /// </summary>
-    public class DictionaryContainer<KeyT, ValT> : ContainerBase, IDictionary<KeyT, ValT> 
+    public class DictionaryContainer<KeyT, ValT> : ContainerBase, IDictionary<KeyT, ValT>
         where ValT : ContainerBase, new()
     {
         private SortedDictionary<KeyT, ValT> values;
         //private Dictionary<KeyT, ValT> values;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Safir.Dob.Typesystem.DictionaryContainer`2"/> class.
+        /// Initializes a new instance of the class.
         /// </summary>
         public DictionaryContainer() : base()
         {
@@ -112,6 +113,9 @@ namespace Safir.Dob.Typesystem
             return values.TryGetValue (key, out value);
         }
 
+        /// <summary>
+        /// Set or get the value at the specified index.
+        /// </summary>
         public ValT this [KeyT index] {
             get {
                 return values [index];
@@ -312,4 +316,3 @@ namespace Safir.Dob.Typesystem
 
     }
 }
-

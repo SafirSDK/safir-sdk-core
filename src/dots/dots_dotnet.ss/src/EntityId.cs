@@ -213,6 +213,9 @@ namespace Safir.Dob.Typesystem
 
         #region IComparable implementation
 
+        /// <summary>
+        /// Compare entity ids.
+        /// </summary>
         public int CompareTo (object obj)
         {
             EntityId other = obj as EntityId;
@@ -227,7 +230,7 @@ namespace Safir.Dob.Typesystem
             }
             else {
                 return m_instanceId.CompareTo (other.m_instanceId);
-            } 
+            }
         }
 
         #endregion
