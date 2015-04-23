@@ -141,42 +141,34 @@ const StringHolder GetUtf8(JNIEnv * env, const jstring & jstr)
     return holder;
 }
 
+//************************************************************************************
+//* Functions for hash numbers
+//************************************************************************************
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetTypeId
- * Signature: (Ljava/nio/ByteBuffer;)J
+ * Method:    GenerateRandom64
+ * Signature: ()J
  */
-jlong JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetTypeId
-  (JNIEnv * env, jclass, jobject _blob)
+jlong JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GenerateRandom64
+  (JNIEnv *, jclass)
 {
-    char * blob = static_cast<char*>(env->GetDirectBufferAddress(_blob));
-    return DotsC_GetTypeId(blob);
+    return LlufId_GenerateRandom64();
 }
 
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetSize
- * Signature: (Ljava/nio/ByteBuffer;)I
+ * Method:    Generate64
+ * Signature: (Ljava/lang/String;)J
  */
-jint JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetSize
-  (JNIEnv * env, jclass, jobject _blob)
+jlong JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_Generate64
+  (JNIEnv * env, jclass, jstring _str)
 {
-    char * blob = static_cast<char*>(env->GetDirectBufferAddress(_blob));
-    return DotsC_GetSize(blob);
+    return LlufId_Generate64(GetUtf8(env,_str).get());
 }
 
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    IsAnythingChanged
- * Signature: (Ljava/nio/ByteBuffer;)Z
- */
-jboolean JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_IsAnythingChanged
-  (JNIEnv * env, jclass, jobject _blob)
-{
-    char * blob = static_cast<char*>(env->GetDirectBufferAddress(_blob));
-    return DotsC_IsAnythingChanged(blob);
-}
-
+//********************************************************
+//* Static type information operations
+//********************************************************
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
  * Method:    NumberOfTypeIds
@@ -219,6 +211,17 @@ jint JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_NumberOfEnumerations
   (JNIEnv *, jclass)
 {
     return DotsC_NumberOfEnumerations();
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    NumberOfExceptions
+ * Signature: ()I
+ */
+jint JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_NumberOfExceptions
+  (JNIEnv *, jclass)
+{
+    return DotsC_NumberOfExceptions();
 }
 
 /*
@@ -323,6 +326,25 @@ jstring JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetTypeName
 
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    MemberTypeName
+ * Signature: (I)Ljava/lang/String;
+ */
+jstring JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_MemberTypeName
+  (JNIEnv * env, jclass, jint memberType)
+{
+    const char* name=DotsC_MemberTypeName(static_cast<DotsC_MemberType>(memberType));
+    if (name != NULL)
+    {
+        return env->NewStringUTF(name);
+    }
+    else
+    {
+        return NULL;
+    }
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
  * Method:    GetNumberOfEnumerationValues
  * Signature: (J)I
  */
@@ -353,15 +375,31 @@ jstring JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetEnumerationVal
 
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetEnumerationValueFromName
+ * Method:    EnumerationValueFromName
  * Signature: (JLjava/lang/String;)I
  */
-jint JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetEnumerationValueFromName
+jint JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_EnumerationValueFromName
   (JNIEnv * env, jclass, jlong _enumId, jstring _enumValueName)
 {
     return DotsC_EnumerationValueFromName(_enumId,GetUtf8(env,_enumValueName).get());
 }
 
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    GetEnumerationChecksum
+ * Signature: (J)J
+ */
+jlong JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetEnumerationChecksum
+  (JNIEnv *, jclass, jlong _typeId)
+{
+    DotsC_TypeId checksum;
+    DotsC_GetEnumerationChecksum(_typeId,checksum);
+    return checksum;
+}
+
+//********************************************************
+//* Functions for retrieving member info about object types
+//********************************************************
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
  * Method:    GetNumberOfMembers
@@ -386,47 +424,23 @@ jint JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetMemberId
 
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetMemberName
- * Signature: (JI)Ljava/lang/String;
+ * Method:    GetMemberInfo
+ * Signature: (JI[I[Ljava/lang/String;[J[I[Z[I)V
  */
-jstring JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetMemberName
-  (JNIEnv * env, jclass, jlong _typeId, jint _member)
-{
-    const char* name=DotsC_GetMemberName(_typeId, _member);
-    if (name != NULL)
-    {
-        return env->NewStringUTF(name);
-    }
-    else
-    {
-        return NULL;
-    }
-}
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetComplexMemberTypeId
- * Signature: (JI)J
- */
-jlong JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetComplexMemberTypeId
-  (JNIEnv *, jclass, jlong _typeId, jint _member)
-{
-    return DotsC_GetComplexMemberTypeId(_typeId, _member);
-}
 
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
  * Method:    GetMemberInfo
- * Signature: (JI[I[Ljava/lang/String;[J[I[Z[I)V
+ * Signature: (JI[I[Ljava/lang/String;[J[I[I[I)V
  */
 void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetMemberInfo
-  (JNIEnv * env, jclass, jlong _typeId, jint _member, jintArray _memberType, jobjectArray _memberName, jlongArray _memberTypeId, jintArray _stringLength, jbooleanArray _isArray, jintArray _arrayLength)
+  (JNIEnv * env, jclass, jlong _typeId, jint _member, jintArray _memberType, jobjectArray _memberName, jlongArray _complexType, jintArray _stringLength, jintArray _collectionType, jintArray _arrayLength)
 {
     DotsC_MemberType memberType;
     const char * memberName;
     DotsC_TypeId complexType;
     DotsC_Int32 stringLength;
-    bool isArray;
+    DotsC_Int32 collectionType;
     DotsC_Int32 arrayLength;
 
     DotsC_GetMemberInfo(_typeId,
@@ -435,36 +449,15 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetMemberInfo
                         memberName,
                         complexType,
                         stringLength,
-                        isArray,
+                        collectionType,
                         arrayLength);
+
     SetJArray(env,_memberType, memberType);
     SetJArray(env,_memberName, env->NewStringUTF(memberName));
-    SetJArray(env,_memberTypeId, complexType);
+    SetJArray(env,_complexType, complexType);
     SetJArray(env,_stringLength, stringLength);
-    SetJArray(env,_isArray, isArray);
+    SetJArray(env,_collectionType, collectionType);
     SetJArray(env,_arrayLength, arrayLength);
-}
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetMemberArraySize
- * Signature: (JI)I
- */
-jint JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetMemberArraySize
-  (JNIEnv *, jclass, jlong _typeId, jint _member)
-{
-    return DotsC_GetMemberArraySize(_typeId,_member);
-}
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetStringMemberMaxLength
- * Signature: (JI)I
- */
-jint JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetStringMemberMaxLength
-  (JNIEnv *, jclass, jlong _typeId, jint _member)
-{
-    return DotsC_GetStringMemberMaxLength(_typeId,_member);
 }
 
 /*
@@ -480,23 +473,18 @@ jint JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetMemberArraySizePr
 
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetMemberTypeName
- * Signature: (JI)Ljava/lang/String;
+ * Method:    GetStringMemberMaxLengthProperty
+ * Signature: (JJI)I
  */
-jstring JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetMemberTypeName
-  (JNIEnv * env, jclass, jlong _typeId, jint _member)
+jint JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetStringMemberMaxLengthProperty
+  (JNIEnv *, jclass, jlong _classId, jlong _propertyId, jint _propertyMember)
 {
-    const char* name=DotsC_GetMemberTypeName(_typeId, _member);
-    if (name != NULL)
-    {
-        return env->NewStringUTF(name);
-    }
-    else
-    {
-        return NULL;
-    }
+    return DotsC_GetStringMemberMaxLengthProperty(_classId, _propertyId, _propertyMember);
 }
 
+//********************************************************
+//* Functions handling parameters
+//********************************************************
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
  * Method:    GetNumberOfParameters
@@ -521,64 +509,31 @@ jint JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetParameterId
 
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetParameterName
- * Signature: (JI)Ljava/lang/String;
+ * Method:    GetParameterInfo
+ * Signature: (JI[I[Ljava/lang/String;[J[I[I)V
  */
-jstring JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetParameterName
-  (JNIEnv * env, jclass, jlong _typeId, jint _parameter)
+void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetParameterInfo
+  (JNIEnv * env, jclass, jlong _typeId, jint _parameter, jintArray _memberType, jobjectArray _parameterName, jlongArray _complexType, jintArray _collectionType, jintArray _numberOfValues)
 {
-    const char* name=DotsC_GetParameterName(_typeId, _parameter);
-    if (name != NULL)
-    {
-        return env->NewStringUTF(name);
-    }
-    else
-    {
-        return NULL;
-    }
+    DotsC_MemberType memberType;
+    const char* parameterName;
+    DotsC_TypeId complexTypeId;
+    DotsC_CollectionType collectionType;
+    DotsC_Int32 numberOfValues;
+
+    DotsC_GetParameterInfo(_typeId, _parameter, memberType, parameterName, complexTypeId, collectionType, numberOfValues);
+
+    SetJArray(env,_memberType, memberType);
+    SetJArray(env,_parameterName, env->NewStringUTF(parameterName));
+    SetJArray(env,_complexType, complexTypeId);
+    SetJArray(env,_stringLength, stringLength);
+    SetJArray(env,_collectionType, collectionType);
+    SetJArray(env,_numberOfValues, numberOfValues);
 }
 
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetParameterType
- * Signature: (JI)I
- */
-jint JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetParameterType
-  (JNIEnv *, jclass, jlong _typeId, jint _parameter)
-{
-    return DotsC_GetParameterType(_typeId, _parameter);
-}
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetParameterTypeName
- * Signature: (JI)Ljava/lang/String;
- */
-jstring JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetParameterTypeName
-  (JNIEnv * env, jclass, jlong _typeId, jint _parameter)
-{
-    const char* name=DotsC_GetParameterTypeName(_typeId, _parameter);
-    if (name != NULL)
-    {
-        return env->NewStringUTF(name);
-    }
-    else
-    {
-        return NULL;
-    }
-}
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetParameterArraySize
- * Signature: (JI)I
- */
-jint JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetParameterArraySize
-  (JNIEnv *, jclass, jlong _typeId, jint _parameter)
-{
-    return DotsC_GetParameterArraySize(_typeId, _parameter);
-}
-
+//************************************************************************************
+//* Type compatibility
+//************************************************************************************
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
  * Method:    IsOfType
@@ -632,6 +587,53 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_HasProperty
     SetJArray(env,_isInherited,isInherited);
 }
 
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    GetPropertyMappingKind
+ * Signature: (JJI)I
+ */
+jint JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetPropertyMappingKind
+  (JNIEnv *, jclass, jlong _classTypeId, jlong _propertyTypeId, jint _propertyMember)
+{
+    DotsC_PropertyMappingKind mappingKind;
+    DotsC_GetPropertyMappingKind(_classTypeId, _propertyTypeId, _propertyMember, mappingKind);
+    return static_cast<jint>(mappingKind);
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    GetClassMemberReference
+ * Signature: (JJI[Ljava/nio/ByteBuffer;)V
+ */
+void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetClassMemberReference
+  (JNIEnv * env, jclass, jlong _typeId, jlong _propertyId, jint _member, jobjectArray _classMemberReference)
+{
+    const DotsC_Int32 * classMemberReference;
+    DotsC_Int32 classMemberReferenceSize;
+    DotsC_GetClassMemberReference(_typeId,_propertyId,_member,classMemberReference, classMemberReferenceSize);
+    SetJArray(env,_classMemberReference, env->NewDirectByteBuffer((void*)classMemberReference,classMemberReferenceSize*sizeof(DotsC_Int32)));
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    GetPropertyParameterReference
+ * Signature: (JJII[I[I)V
+ */
+void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetPropertyParameterReference
+  (JNIEnv * env, jclass, jlong _typeId, jlong _propertyId, jint _member, jint _index, jintArray _paramId, jintArray _paramValueIndex)
+{
+    DotsC_ParameterIndex paramId;
+    DotsC_Int32 paramValueIndex;
+
+    DotsC_GetPropertyParameterReference(_typeId, _propertyId, _member, _index, paramId, paramValueIndex);
+
+    SetJArray(env,_paramId, paramId);
+    SetJArray(env,_paramValueIndex, paramValueIndex);
+}
+
+//************************************************************************************
+//* Serialization
+//************************************************************************************
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
  * Method:    BlobToXml
@@ -782,7 +784,9 @@ jbyteArray JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_Base64ToBinary
     return result;
 }
 
-
+//************************************************************************************
+//* Functions for retrieval of parameters
+//************************************************************************************
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
  * Method:    GetBooleanParameter
@@ -798,27 +802,40 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetBooleanParameter
 
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetInt32Parameter
- * Signature: (JII[I)V
+ * Method:    GetEnumerationParameter
+ * Signature: (JIII[I)V
  */
-void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetInt32Parameter
-  (JNIEnv * env, jclass, jlong _typeId, jint _parameter , jint _index, jintArray _val)
+void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetEnumerationParameter
+  (JNIEnv * env, jclass, jlong _typeId, jint _parameter, jint _index, jint _keyValMode, jintArray _val)
 {
     DotsC_Int32 val;
-    DotsC_GetInt32Parameter(_typeId,_parameter,_index,val);
+    DotsC_GetEnumerationParameter(_typeId,_parameter,_index, static_cast<DotsC_KeyValMode>(_keyValMode), val);
+    SetJArray(env,_val,val);
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    GetInt32Parameter
+ * Signature: (JIII[I)V
+ */
+void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetInt32Parameter
+  (JNIEnv * env, jclass, jlong _typeId, jint _parameter, jint _index, jint _keyValMode, jintArray _val)
+{
+    DotsC_Int32 val;
+    DotsC_GetInt32Parameter(_typeId,_parameter,_index, static_cast<DotsC_KeyValMode>(_keyValMode), val);
     SetJArray(env,_val,val);
 }
 
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
  * Method:    GetInt64Parameter
- * Signature: (JII[J)V
+ * Signature: (JIII[J)V
  */
 void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetInt64Parameter
-  (JNIEnv * env, jclass, jlong _typeId, jint _parameter, jint _index, jlongArray _val)
+    (JNIEnv * env, jclass, jlong _typeId, jint _parameter, jint _index, jint _keyValMode, jlongArray _val)
 {
     DotsC_Int64 val;
-    DotsC_GetInt64Parameter(_typeId,_parameter,_index,val);
+    DotsC_GetInt64Parameter(_typeId,_parameter,_index, static_cast<DotsC_KeyValMode>(_keyValMode), val);
     SetJArray(env,_val,val);
 }
 
@@ -851,15 +868,218 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetFloat64Parameter
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
  * Method:    GetStringParameter
- * Signature: (JII[Ljava/lang/String;)V
+ * Signature: (JIII[Ljava/lang/String;)V
  */
 void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetStringParameter
-  (JNIEnv * env, jclass, jlong _typeId, jint _parameter, jint _index, jobjectArray _val)
+  (JNIEnv * env, jclass, jlong _typeId, jint _parameter, jint _index, jint _keyValMode, jobjectArray _val)
 {
     const char * val;
-    DotsC_GetStringParameter(_typeId,_parameter,_index,val);
+    DotsC_GetStringParameter(_typeId,_parameter,_index, static_cast<DotsC_KeyValMode>(_keyValMode), val);
     SetJArray(env,_val,env->NewStringUTF(val));
 }
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    GetTypeIdParameter
+ * Signature: (JIII[J)V
+ */
+void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetTypeIdParameter
+  (JNIEnv * env, jclass, jlong _typeId, jint _parameter, jint _index, jint _keyValMode, jlongArray _val)
+{
+    DotsC_Int64 val;
+    DotsC_GetTypeIdParameter(_typeId,_parameter,_index, static_cast<DotsC_KeyValMode>(_keyValMode), val);
+    SetJArray(env,_val,val);
+}
+
+public static native void GetHashedIdParameter(long id,
+            int parameter,
+            int index,
+            int keyValMode,
+            long[] hashVal,
+            String[] strVal);
+
+    public static native void GetEntityIdParameter(long id,
+            int parameter,
+            int index,
+            int keyValMode,
+            long[] typeIdOut, long[] instanceId, String[] strVal);
+
+    public static native void GetObjectParameter(long id,
+            int parameter,
+            int index,
+            ByteBuffer blob []);
+
+    public static native void GetBinaryParameter(long id,
+            int parameter,
+            int index,
+            ByteBuffer blob []);
+
+
+JOOT
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    GetTypeId
+ * Signature: (Ljava/nio/ByteBuffer;)J
+ */
+jlong JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetTypeId
+  (JNIEnv * env, jclass, jobject _blob)
+{
+    char * blob = static_cast<char*>(env->GetDirectBufferAddress(_blob));
+    return DotsC_GetTypeId(blob);
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    GetSize
+ * Signature: (Ljava/nio/ByteBuffer;)I
+ */
+jint JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetSize
+  (JNIEnv * env, jclass, jobject _blob)
+{
+    char * blob = static_cast<char*>(env->GetDirectBufferAddress(_blob));
+    return DotsC_GetSize(blob);
+}
+
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    GetMemberName
+ * Signature: (JI)Ljava/lang/String;
+ */
+jstring JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetMemberName
+  (JNIEnv * env, jclass, jlong _typeId, jint _member)
+{
+    const char* name=DotsC_GetMemberName(_typeId, _member);
+    if (name != NULL)
+    {
+        return env->NewStringUTF(name);
+    }
+    else
+    {
+        return NULL;
+    }
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    GetComplexMemberTypeId
+ * Signature: (JI)J
+ */
+jlong JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetComplexMemberTypeId
+  (JNIEnv *, jclass, jlong _typeId, jint _member)
+{
+    return DotsC_GetComplexMemberTypeId(_typeId, _member);
+}
+
+
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    GetMemberArraySize
+ * Signature: (JI)I
+ */
+jint JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetMemberArraySize
+  (JNIEnv *, jclass, jlong _typeId, jint _member)
+{
+    return DotsC_GetMemberArraySize(_typeId,_member);
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    GetStringMemberMaxLength
+ * Signature: (JI)I
+ */
+jint JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetStringMemberMaxLength
+  (JNIEnv *, jclass, jlong _typeId, jint _member)
+{
+    return DotsC_GetStringMemberMaxLength(_typeId,_member);
+}
+
+
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    GetMemberTypeName
+ * Signature: (JI)Ljava/lang/String;
+ */
+jstring JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetMemberTypeName
+  (JNIEnv * env, jclass, jlong _typeId, jint _member)
+{
+    const char* name=DotsC_GetMemberTypeName(_typeId, _member);
+    if (name != NULL)
+    {
+        return env->NewStringUTF(name);
+    }
+    else
+    {
+        return NULL;
+    }
+}
+
+
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    GetParameterName
+ * Signature: (JI)Ljava/lang/String;
+ */
+jstring JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetParameterName
+  (JNIEnv * env, jclass, jlong _typeId, jint _parameter)
+{
+    const char* name=DotsC_GetParameterName(_typeId, _parameter);
+    if (name != NULL)
+    {
+        return env->NewStringUTF(name);
+    }
+    else
+    {
+        return NULL;
+    }
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    GetParameterType
+ * Signature: (JI)I
+ */
+jint JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetParameterType
+  (JNIEnv *, jclass, jlong _typeId, jint _parameter)
+{
+    return DotsC_GetParameterType(_typeId, _parameter);
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    GetParameterTypeName
+ * Signature: (JI)Ljava/lang/String;
+ */
+jstring JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetParameterTypeName
+  (JNIEnv * env, jclass, jlong _typeId, jint _parameter)
+{
+    const char* name=DotsC_GetParameterTypeName(_typeId, _parameter);
+    if (name != NULL)
+    {
+        return env->NewStringUTF(name);
+    }
+    else
+    {
+        return NULL;
+    }
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    GetParameterArraySize
+ * Signature: (JI)I
+ */
+jint JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetParameterArraySize
+  (JNIEnv *, jclass, jlong _typeId, jint _parameter)
+{
+    return DotsC_GetParameterArraySize(_typeId, _parameter);
+}
+
+
 
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
@@ -1398,34 +1618,9 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetBinaryPropertyPar
     SetJArray(env,_val,env->NewDirectByteBuffer((void*)val,size));
 }
 
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetPropertyMappingKind
- * Signature: (JJI[I[I)V
- */
-void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetPropertyMappingKind
-  (JNIEnv * env, jclass, jlong _typeId, jlong _propertyId, jint _member, jintArray _mappingKind, jintArray _errorCode)
-{
-    DotsC_PropertyMappingKind mappingKind;
-    DotsC_ErrorCode errorCode;
-    DotsC_GetPropertyMappingKind(_typeId,_propertyId,_member,mappingKind,errorCode);
-    SetJArray(env,_mappingKind,mappingKind);
-    SetJArray(env,_errorCode,errorCode);
-}
 
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetClassMemberReference
- * Signature: (JJI[Ljava/nio/ByteBuffer;)V
- */
-void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetClassMemberReference
-  (JNIEnv * env, jclass, jlong _typeId, jlong _propertyId, jint _member, jobjectArray _classMemberReference)
-{
-    const DotsC_Int32 * classMemberReference;
-    DotsC_Int32 classMemberReferenceSize;
-    DotsC_GetClassMemberReference(_typeId,_propertyId,_member,classMemberReference, classMemberReferenceSize);
-    SetJArray(env,_classMemberReference, env->NewDirectByteBuffer((void*)classMemberReference,classMemberReferenceSize*sizeof(DotsC_Int32)));
-}
+
+
 
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
@@ -1528,40 +1723,7 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_CreateBinaryMember
     SetJArray(env,_beginningOfUnused,static_cast<DotsC_Int32>(beginningOfUnused - insideBlob));
 }
 
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GetEnumerationChecksum
- * Signature: (J)J
- */
-jlong JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetEnumerationChecksum
-  (JNIEnv *, jclass, jlong _typeId)
-{
-    DotsC_TypeId checksum;
-    DotsC_GetEnumerationChecksum(_typeId,checksum);
-    return checksum;
-}
 
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    GenerateRandom64
- * Signature: ()J
- */
-jlong JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GenerateRandom64
-  (JNIEnv *, jclass)
-{
-    return LlufId_GenerateRandom64();
-}
-
-/*
- * Class:     com_saabgroup_safir_dob_typesystem_Kernel
- * Method:    Generate64
- * Signature: (Ljava/lang/String;)J
- */
-jlong JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_Generate64
-  (JNIEnv * env, jclass, jstring _str)
-{
-    return LlufId_Generate64(GetUtf8(env,_str).get());
-}
 
 
 /*
