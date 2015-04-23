@@ -183,7 +183,7 @@ namespace @_NAMESPACE_@
         /// <para/>
         /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
 @@END_IF@@
-        /// </summary>        
+        /// </summary>
         public static void SetOrdinal@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index, System.Int32 ordinal)
         {
             Init();
@@ -203,7 +203,7 @@ namespace @_NAMESPACE_@
         /// <para/>
         /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
 @@END_IF@@
-        /// </summary>        
+        /// </summary>
         public static void SetNull@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index)
         {
             Init();
@@ -216,7 +216,7 @@ namespace @_NAMESPACE_@
         /// <para/>
         /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
 @@END_IF@@
-        /// </summary>        
+        /// </summary>
         public static bool IsNull@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index)
         {
             Init();
@@ -229,7 +229,7 @@ namespace @_NAMESPACE_@
         /// <para/>
         /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
 @@END_IF@@
-        /// </summary>        
+        /// </summary>
         public static bool IsChanged@_MEMBER_@(Safir.Dob.Typesystem.Object obj, System.Int32 index)
         {
             Init();
@@ -446,7 +446,7 @@ namespace @_NAMESPACE_@
 
         /// <summary>
         /// Type id for @_CLASS_@
-        /// </summary>        
+        /// </summary>
         public static System.Int64 ClassTypeId = @_TYPEID_@;
 
         #region Indices
@@ -559,13 +559,13 @@ namespace @_NAMESPACE_@
 @@ELSIF@@ @_EXIST:CREATEVALUEPARAMETERINDEX_@
 @@IF@@ @_UNIFORM_CREATEVALUETYPE_@=Object
 @@IF@@ @_EXIST:CREATEVALUEISINLINE_@
-# error Inline values in CreateRoutines with index not supported!        
+# error Inline values in CreateRoutines with index not supported!
 @@ELSE@@
             val.@_CREATEVALUE_@.Obj = @_CREATEVALUEPARAMETERCLASS_@.@_CREATEVALUEPARAMETER_@(@_CREATEVALUEPARAMETERINDEX_@);
 @@END_IF@@
 @@ELSE@@
 @@IF@@ @_EXIST:CREATEVALUEISINLINE_@
-# error Inline values in CreateRoutines with index not supported!        
+# error Inline values in CreateRoutines with index not supported!
 @@ELSE@@
             val.@_CREATEVALUE_@.Val = @_CREATEVALUEPARAMETERCLASS_@.@_CREATEVALUEPARAMETER_@(@_CREATEVALUEPARAMETERINDEX_@);
 @@END_IF@@
@@ -575,7 +575,7 @@ namespace @_NAMESPACE_@
 @@IF@@ @_EXIST:CREATEVALUEISINLINE_@
 
             // Inline set of object member @_CREATEVALUE_@ value
-            System.Int32 tmp@_CREATEVALUE_@Index = 
+            System.Int32 tmp@_CREATEVALUE_@Index =
                 Safir.Dob.Typesystem.Parameters.GetIndex(ClassTypeId, "@_CREATEVALUEPARAMETERRAW_@");
             val.@_CREATEVALUE_@.Obj = (@_CREATEVALUEMEMBERTYPE_@)Safir.Dob.Typesystem.Parameters.GetObject(ClassTypeId, tmp@_CREATEVALUE_@Index, 0);
 @@ELSE@@
@@ -585,7 +585,7 @@ namespace @_NAMESPACE_@
 @@IF@@ @_EXIST:CREATEVALUEISINLINE_@
 
             // Inline set of member @_CREATEVALUE_@ value
-            System.Int32 tmp@_CREATEVALUE_@Index = 
+            System.Int32 tmp@_CREATEVALUE_@Index =
                 Safir.Dob.Typesystem.Parameters.GetIndex(ClassTypeId, "@_CREATEVALUEPARAMETERRAW_@");
             val.@_CREATEVALUE_@.Val = Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_CREATEVALUETYPE_@(ClassTypeId, tmp@_CREATEVALUE_@Index, 0);
 @@ELSE@@
@@ -701,7 +701,7 @@ namespace @_NAMESPACE_@
         /// <para/>
         /// @_REPLACE_ALL(\n/\n        /// ):PARAMETERSUMMARY_@
 @@END_IF@@
-        /// </summary>        
+        /// </summary>
 @@IF@@ @_UNIFORM_PARAMETERTYPE_@=Object
         public static @_PARAMETERTYPE_@ @_PARAMETER_@ (System.Int32 index)
         {
@@ -921,7 +921,7 @@ namespace @_NAMESPACE_@
         /// <para/>
         /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
 @@END_IF@@
-        /// </summary>        
+        /// </summary>
         public static System.Int32 @_MEMBER_@MemberIndex
         {
             get
@@ -938,7 +938,7 @@ namespace @_NAMESPACE_@
         /// <para/>
         /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
 @@END_IF@@
-        /// </summary>        
+        /// </summary>
         public static System.Int32 @_MEMBER_@MaxStringLength
         {
             get
@@ -956,7 +956,7 @@ namespace @_NAMESPACE_@
         /// <para/>
         /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
 @@END_IF@@
-        /// </summary>        
+        /// </summary>
         public static System.Int32 @_MEMBER_@ArraySize
         {
             get
@@ -973,7 +973,7 @@ namespace @_NAMESPACE_@
         /// <para/>
         /// @_REPLACE_ALL(\n/\n        /// ):MEMBERSUMMARY_@
 @@END_IF@@
-        /// </summary>        
+        /// </summary>
 @@----------array member ---------------
 @@IF@@ @_EXIST:MEMBERISARRAY_@
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
@@ -1170,7 +1170,7 @@ namespace @_NAMESPACE_@
         }
 
         /// <summary>
-        /// <see cref="Safir.Dob.Typesystem.Object.WriteToBlob(System.Int64 handle)"/>
+        /// <see cref="Safir.Dob.Typesystem.Object.WriteToBlob(System.Int64)"/>
         /// </summary>
         override public void WriteToBlob(System.Int64 handle)
         {
@@ -1392,7 +1392,7 @@ namespace @_NAMESPACE_@
         private static System.Int32 m_@_LOWER:MEMBER_@Length = -1;
 @@END_IF@@
 @@END_IF@@
-@@END_TABLE@@        
+@@END_TABLE@@
 
         #endregion
     }
@@ -1463,9 +1463,9 @@ namespace @_NAMESPACE_@
         #endregion
     }
 
-    //
-    // @_CLASS_@SequenceContainer
-    //
+    /// <summary>
+    /// Container for sequence members of type @_CLASS_@
+    /// </summary>
     public class @_CLASS_@SequenceContainer : Safir.Dob.Typesystem.GenericObjectSequenceContainer<@_CLASS_@>, ICloneable
     {
         public @_CLASS_@SequenceContainer() : base() { }
@@ -1477,12 +1477,17 @@ namespace @_NAMESPACE_@
             return new @_CLASS_@SequenceContainer(this);
         }
 
+        /// <summary>
+        /// <see cref="Safir.Dob.Typesystem.ContainerBase.Clone()"/>
+        /// </summary>
         public new @_CLASS_@SequenceContainer Clone()
         {
             return (@_CLASS_@SequenceContainer)(((ICloneable)this).Clone());
         }
 
-        //Copy constructor for use by Clone
+        /// <summary>
+        /// Copy constructor for use by Clone
+        /// </summary>
         protected @_CLASS_@SequenceContainer(@_CLASS_@SequenceContainer other) : base(other) { }
 
         #endregion
@@ -1544,7 +1549,7 @@ namespace @_NAMESPACE_@
         /// <summary>
         /// Check that there is no enumeration mismatch that would require a recompilation of your application.
         /// <para/>
-        /// This is useful for detecting that an enumeration has changed, e.g. values have been added or removed, 
+        /// This is useful for detecting that an enumeration has changed, e.g. values have been added or removed,
         /// or values have changed order. By calling this method you will get an exception if your application
         /// needs to be recompiled.
         /// <para/>
@@ -1566,12 +1571,12 @@ namespace @_NAMESPACE_@
 
         /// <summary>
         /// Container for members of type @_CLASS_@
-        /// </summary>        
+        /// </summary>
         public class EnumerationContainer : Safir.Dob.Typesystem.EnumerationContainerBase, ICloneable
         {
             /// <summary>
             /// Constructor.
-            /// </summary>        
+            /// </summary>
             public EnumerationContainer() : base() { }
 
             #region Cloning
@@ -1598,7 +1603,7 @@ namespace @_NAMESPACE_@
 
             /// <summary>
             /// Get or set the enumeration value by ordinal integer value.
-            /// </summary>        
+            /// </summary>
             public override int Ordinal
             {
                 get
@@ -1623,7 +1628,7 @@ namespace @_NAMESPACE_@
 
             /// <summary>
             /// Get or set the enumeration value.
-            /// </summary>        
+            /// </summary>
             public Enumeration Val
             {
                 get { return (Enumeration)Ordinal; }
@@ -1678,7 +1683,7 @@ namespace @_NAMESPACE_@
         {
             /// <summary>
             /// Constructor for array container.
-            /// </summary>        
+            /// </summary>
             public EnumerationContainerArray(System.Int32 size) : base(size) { }
 
             #region Cloning
@@ -1704,9 +1709,12 @@ namespace @_NAMESPACE_@
             #endregion
         }
 
+        /// <summary>
+        /// Container for sequence members of type @_CLASS_@
+        /// </summary>
         public class EnumerationSequenceContainer : Safir.Dob.Typesystem.MemberSequenceContainer<Enumeration>, ICloneable
         {
-             public EnumerationSequenceContainer() : base() { }
+            public EnumerationSequenceContainer() : base() { }
 
             #region Cloning
 
@@ -1715,12 +1723,17 @@ namespace @_NAMESPACE_@
                 return new EnumerationSequenceContainer(this);
             }
 
+            /// <summary>
+            /// <see cref="Safir.Dob.Typesystem.ContainerBase.Clone()"/>
+            /// </summary>
             public new EnumerationSequenceContainer Clone()
             {
                 return (EnumerationSequenceContainer)(((ICloneable)this).Clone());
             }
 
-            //Copy constructor for use by Clone
+            /// <summary>
+            /// Copy constructor for use by Clone.
+            /// </summary>
             protected EnumerationSequenceContainer(EnumerationSequenceContainer other) : base(other) { }
 
             #endregion
@@ -1742,14 +1755,14 @@ namespace @_NAMESPACE_@
     {
         /// <summary>
         /// Construct a @_CLASS_@ exception with string as the message.
-        /// </summary>        
+        /// </summary>
         public @_CLASS_@(string message) : base(message)
         {
         }
 
         /// <summary>
         /// Type id for @_CLASS_@
-        /// </summary>        
+        /// </summary>
         public new const System.Int64 ExceptionTypeId = @_TYPEID_@;
 
         /// <summary>
