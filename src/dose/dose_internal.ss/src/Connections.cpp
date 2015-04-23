@@ -24,7 +24,7 @@
 #include <Safir/Dob/Internal/Connections.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Dob/Typesystem/Operations.h>
-#include <Safir/Dob/ProcessInfo.h>
+#include <Safir/Dob/NodeParameters.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
 #include <Safir/Utilities/ProcessInfo.h>
 #include <Safir/Utilities/Internal/SystemLog.h>
@@ -55,8 +55,7 @@ namespace Internal
 
     Connections::Connections(private_constructor_t, const int64_t nodeId):
         m_nodeId(nodeId),
-        m_maxNumConnections(Safir::Dob::ProcessInfo::MaxNumberOfInstances() *
-                            Safir::Dob::ProcessInfo::ConnectionNamesArraySize()),
+        m_maxNumConnections(Safir::Dob::NodeParameters::MaxNumberOfConnections()),
         m_connectionOutIds(m_maxNumConnections), //default constructed (-1,-1)
         m_lastUsedSlot(0),
         m_connectSignal(0),

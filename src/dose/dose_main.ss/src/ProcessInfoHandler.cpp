@@ -119,7 +119,7 @@ namespace Internal
                     Safir::Utilities::ProcessInfo pi(connection->Pid());
                     processInfo->Name().SetVal(Typesystem::Utilities::ToWstring(pi.GetProcessName()));
                     processInfo->Pid().SetVal(connection->Pid());
-                    processInfo->ConnectionNames()[0].SetVal
+                    processInfo->ConnectionNames().push_back
                         (Typesystem::Utilities::ToWstring(connection->NameWithCounter()));
 
                     m_connection.SetAll(processInfo, eid.GetInstanceId(), Typesystem::HandlerId());
@@ -129,31 +129,10 @@ namespace Internal
                     //we have an instance for the pid, add the connection to it.
                     ProcessInfoPtr processInfo = boost::static_pointer_cast<ProcessInfo>
                         (m_connection.Read(eid).GetEntity());
+                    processInfo->ConnectionNames().push_back
+                        (Typesystem::Utilities::ToWstring(connection->NameWithCounter()));
 
-                    bool connectionAdded = false;
-                    for (int i = 0; i< ProcessInfo::ConnectionNamesArraySize(); ++i)
-                    {
-                        if (processInfo->ConnectionNames()[i].IsNull())
-                        {
-                            processInfo->ConnectionNames()[i].SetVal
-                                (Typesystem::Utilities::ToWstring(connection->NameWithCounter()));
-                            connectionAdded = true;
-                            break;
-                        }
-                    }
-                    if (connectionAdded)
-                    {
-                        m_connection.SetAll(processInfo, eid.GetInstanceId(), Typesystem::HandlerId());
-                    }
-                    else
-                    {
-                        //TODO stewart: when Rockefeller is merged, use a sequence instead.
-                        SEND_SYSTEM_LOG(Critical,
-                                        << "Could not display new connection '" << connection->NameWithCounter()
-                                        << "' from process with pid = " << connection->Pid()
-                                        << " in the Safir.Dob.ProcessInfo entity since there are too many connections from that process. "
-                                        << "Increase length of Safir.Dob.ProcessInfo.ConnectionNames.");
-                    }
+                    m_connection.SetAll(processInfo, eid.GetInstanceId(), Typesystem::HandlerId());
                 }
             }
             catch (const Safir::Dob::AccessDeniedException &)
@@ -207,30 +186,26 @@ namespace Internal
                 bool processHasConnection = false;
                 bool processInfoUpdated = false;
 
-                ProcessInfoPtr processInfo =
-                    boost::static_pointer_cast<ProcessInfo>(m_connection.Read(eid).GetEntity());
+                auto processInfo = boost::static_pointer_cast<ProcessInfo>(m_connection.Read(eid).GetEntity());
 
-                for (int i = 0; i< ProcessInfo::ConnectionNamesArraySize(); ++i)
+                for (size_t i = 0; i < processInfo->ConnectionNames().size(); ++i)
                 {
-                    if (!processInfo->ConnectionNames()[i].IsNull())
+                    // Found a connection. Is it the one we are looking for ...?
+                    if (connection->NameWithCounter() == Typesystem::Utilities::ToUtf8
+                        (processInfo->ConnectionNames()[i]))
                     {
-                        // Found a connection. Is it the one we are looking for ...?
-                        if (connection->NameWithCounter() == Typesystem::Utilities::ToUtf8
-                            (processInfo->ConnectionNames()[i].GetVal()))
-                        {
-                            // Yes, it was. Set it to NULL.
-                            processInfo->ConnectionNames()[i].SetNull();
-                            processInfoUpdated = true;
-                        }
-                        else
-                        {
-                            processHasConnection = true;
-                            // No, it wasn't. Indicate that this process has other connections
-                            // and that the entity should not be deleted
-                        }
+                        // Yes, it was. Set it to NULL.
+                        processInfo->ConnectionNames().EraseAt(i);
+                        processInfoUpdated = true;
+                        break;
+                    }
+                    else
+                    {
+                        processHasConnection = true;
+                        // No, it wasn't. Indicate that this process has other connections
+                        // and that the entity should not be deleted
                     }
                 }
-
                 if (processInfoUpdated)
                 {
                     if (!processHasConnection)
@@ -292,18 +267,15 @@ namespace Internal
             ProcessInfoPtr procInfo = boost::static_pointer_cast<ProcessInfo>
                 (m_connection.Read(entityRequestProxy.GetEntityId()).GetEntity());
 
-            for (int i = 0; i < ProcessInfo::ConnectionNamesArraySize(); ++i)
+            for (const auto& name : procInfo->ConnectionNames())
             {
-                if (!procInfo->ConnectionNames()[i].IsNull())
-                {
-                    const ConnectionId id(Connections::Instance().NodeId(),
-                                          -1,  // dummy context (context is part of the connection name)
-                                          (Connection::CalculateIdentifier
-                                           (Typesystem::Utilities::ToUtf8(procInfo->ConnectionNames()[i].GetVal()))));
-                    ConnectionPtr connection = Connections::Instance().GetConnection(id);
+                const ConnectionId id(Connections::Instance().NodeId(),
+                    -1,  // dummy context (context is part of the connection name)
+                    (Connection::CalculateIdentifier
+                    (Typesystem::Utilities::ToUtf8(name))));
+                ConnectionPtr connection = Connections::Instance().GetConnection(id);
 
-                    connection->SendStopOrder();
-                }
+                connection->SendStopOrder();
             }
         }
 
