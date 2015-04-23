@@ -137,7 +137,13 @@ namespace Internal
         {
             m_strand.post([this, nodeId]
             {
+                if (m_pendingPoolDistributions.empty())
+                {
+                    return;
+                }
+
                 auto it=++m_pendingPoolDistributions.begin(); //start at second element since the first one is probably already running
+
                 for (; it!=m_pendingPoolDistributions.end(); ++it)
                 {
                     if ((*it)->NodeId()==nodeId)
