@@ -111,9 +111,6 @@ public class Object implements Cloneable
      */
     public void writeToBlob(long handle)
     {
-        /*if (! blob.isDirect()){
-            throw new SoftwareViolationException("blob ByteBuffer must be a 'direct' java.nio.ByteBuffer");
-        }*/
     }
 
     /**
