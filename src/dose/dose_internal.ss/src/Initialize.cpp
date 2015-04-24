@@ -65,7 +65,17 @@ void InitializeDoseInternalFromApp()
 
     lllog(1) << "Waiting for dose_main to initialize dose_internal" << std::endl;
 
-    sem->wait();
+    for(;;)
+    {
+        if (sem->try_wait())
+        {
+            break;
+        }
+
+        //sleep_for contains an interruption point, which makes it possible to interrupt the thread
+        //if it is hanging in here. Useful in dobexplorer, for example.
+        boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
+    }
     sem->post();
 
     lllog(1) << "Connecting to dose_internal from app" << std::endl;
