@@ -26,7 +26,7 @@
 package com.saabgroup.safir.dob.typesystem;
 
 public class InstanceIdSequenceContainer
-extends ValueContainer<InstanceId> 
+extends ValueSequenceContainer<InstanceId>
 implements Cloneable {
 
 	public InstanceIdSequenceContainer() {
@@ -38,7 +38,7 @@ implements Cloneable {
 	}
 	
 	/**
-     * @see com.saabgroup.safir.dob.typesystem.ValueContainer#clone()
+     * @see com.saabgroup.safir.dob.typesystem.ValueSequenceContainer#clone()
      */
     @Override
     public InstanceIdSequenceContainer clone() {

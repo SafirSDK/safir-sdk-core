@@ -26,7 +26,7 @@
 package com.saabgroup.safir.dob.typesystem;
 
 public class BinarySequenceContainer
-extends ValueContainer<Integer> 
+extends ValueSequenceContainer<Byte[]>
 implements Cloneable {
 
     public BinarySequenceContainer() {
@@ -37,11 +37,28 @@ implements Cloneable {
 		super(other);
 	}
 	
+	public boolean add(byte[] binary) {
+		return add(toByteArray(binary));
+	}
+	
+	public void add(int index, byte[] binary) {
+		add(index, toByteArray(binary));
+	}
+	
 	/**
-     * @see com.saabgroup.safir.dob.typesystem.ValueContainer#clone()
+     * @see com.saabgroup.safir.dob.typesystem.ValueSequenceContainer#clone()
      */
     @Override
     public BinarySequenceContainer clone() {
         return new BinarySequenceContainer(this);
     }
+    
+    private Byte[] toByteArray(byte[] bytes) {
+        Byte[] byteObjects = new Byte[bytes.length];
+        for (int i=0; i<bytes.length; i++) {
+            byteObjects[i++] = bytes[i];
+        }
+        return byteObjects;
+    }
+    
 }

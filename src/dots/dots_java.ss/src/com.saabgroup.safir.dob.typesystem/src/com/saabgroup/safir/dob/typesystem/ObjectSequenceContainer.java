@@ -4,12 +4,16 @@ public class ObjectSequenceContainer
 extends GenericObjectSequenceContainer<com.saabgroup.safir.dob.typesystem.Object>
 implements Cloneable {
 	
-	ObjectSequenceContainer(ObjectSequenceContainer other) {
+	public ObjectSequenceContainer() {
+		super();
+	}
+	
+	public ObjectSequenceContainer(ObjectSequenceContainer other) {
 		super(other);
 	}
 	
 	/**
-     * @see com.saabgroup.safir.dob.typesystem.ValueContainer#clone()
+     * @see com.saabgroup.safir.dob.typesystem.ValueSequenceContainer#clone()
      */
     @Override
     public ObjectSequenceContainer clone() {

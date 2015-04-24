@@ -26,7 +26,7 @@
 package com.saabgroup.safir.dob.typesystem;
 
 public class Float64SequenceContainer
-extends ValueContainer<Double> 
+extends ValueSequenceContainer<Double>
 implements Cloneable {
 
 	public Float64SequenceContainer() {
@@ -38,7 +38,7 @@ implements Cloneable {
 	}
 	
 	/**
-     * @see com.saabgroup.safir.dob.typesystem.ValueContainer#clone()
+     * @see com.saabgroup.safir.dob.typesystem.ValueSequenceContainer#clone()
      */
     @Override
     public Float64SequenceContainer clone() {

@@ -26,7 +26,7 @@
 package com.saabgroup.safir.dob.typesystem;
 
 public class BooleanSequenceContainer
-extends ValueContainer<Boolean> 
+extends ValueSequenceContainer<Boolean>
 implements Cloneable {
 
 	public BooleanSequenceContainer() {
@@ -38,7 +38,7 @@ implements Cloneable {
 	}
 	
 	/**
-     * @see com.saabgroup.safir.dob.typesystem.ValueContainer#clone()
+     * @see com.saabgroup.safir.dob.typesystem.ValueSequenceContainer#clone()
      */
     @Override
     public BooleanSequenceContainer clone() {
