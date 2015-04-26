@@ -181,5 +181,26 @@ public class Object implements Cloneable
         }
 
     }
+
+    /**
+     * Sequence container
+     */
+    static public class SequenceContainer
+        extends com.saabgroup.safir.dob.typesystem.GenericObjectSequenceContainer<Object>
+        implements Cloneable {
+
+        public SequenceContainer() {
+            super();
+        }
+
+        public SequenceContainer(SequenceContainer other) {
+            super(other);
+        }
+
+         @Override
+         public SequenceContainer clone() {
+             return new SequenceContainer(this);
+         }
+    }
 }
 

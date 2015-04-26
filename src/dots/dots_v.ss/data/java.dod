@@ -679,56 +679,70 @@ public class @_CLASS_@
 @@END_IF@@
 @-------- dictionary parameter -----------
 @@ELSIF@@ @_EXIST:PARAMETERISDICTIONARY_@
+    /**
+     * Get a value from the @_PARAMETER_@ parameter dictionary.
+     *
+     * @_PARAMETER_@ summary:
 @@IF@@ @_EXIST:PARAMETERSUMMARY_@
-        /**
-         * @_REPLACE_ALL(\n/\n         * ):PARAMETERSUMMARY_@
-         */
-@@END_IF@@
-@@IF@@ (@_UNIFORM_PARAMETERTYPE_@ = Object)
-        public static @_PARAMETERTYPE_@ @_PARAMETER_@ (@_PARAMETERDICTIONARYTYPE_@ key)
-        {
-            Init();
-            var index = Safir.Dob.Typesystem.Parameters.DictionaryKeyToIndex(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, key);
-            if (index<0)
-            {
-                throw new System.Collections.Generic.KeyNotFoundException ();
-            }
-            return (@_PARAMETERTYPE_@)Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
-        }
-@@ELSIF@@ @_PARAMETERTYPE_@=System.Single
-        public static @_PARAMETERTYPE_@ @_PARAMETER_@ (@_PARAMETERDICTIONARYTYPE_@ key)
-        {
-            Init();
-            var index = Safir.Dob.Typesystem.Parameters.DictionaryKeyToIndex(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, key);
-            if (index<0)
-            {
-                throw new System.Collections.Generic.KeyNotFoundException ();
-            }
-            return Safir.Dob.Typesystem.Parameters.GetFloat32(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
-        }
-@@ELSIF@@ @_PARAMETERTYPE_@=System.Double
-        public static @_PARAMETERTYPE_@ @_PARAMETER_@ (@_PARAMETERDICTIONARYTYPE_@ key)
-        {
-            Init();
-            var index = Safir.Dob.Typesystem.Parameters.DictionaryKeyToIndex(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, key);
-            if (index<0)
-            {
-                throw new System.Collections.Generic.KeyNotFoundException ();
-            }
-            return Safir.Dob.Typesystem.Parameters.GetFloat64(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
-        }
+     *     @_REPLACE_ALL(\n/\n     *     ):PARAMETERSUMMARY_@
 @@ELSE@@
-        public static @_PARAMETERTYPE_@ @_PARAMETER_@ (@_PARAMETERDICTIONARYTYPE_@ key)
-        {
-            Init();
-            var index = Safir.Dob.Typesystem.Parameters.DictionaryKeyToIndex(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, key);
-            if (index<0)
-            {
-                throw new System.Collections.Generic.KeyNotFoundException ();
-            }
-            return Safir.Dob.Typesystem.Parameters.Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_LOWER:PARAMETER_@ParameterIndex, index);
-        }
+     *     This parameter has no summary.
 @@END_IF@@
+     *
+     * @param key Key of parameter to get.
+     * @return The parameter value.
+     */
+@@IF@@ @_PARAMETERTYPE_@=com.saabgroup.safir.dob.typesystem.Object
+    public static @_PARAMETERTYPE_@ get@_PARAMETER_@(@_PARAMETERDICTIONARYTYPE_@ key)
+    {
+        init();
+@@IF@@ @_UNIFORM_PARAMETERDICTIONARYTYPE_@=Enumeration
+        int index = com.saabgroup.safir.dob.typesystem.Parameters.dictionaryKeyToIndex(ClassTypeId, m_@_PARAMETER_@Parameter, key.ordinal());
+@@ELSE@@
+        int index = com.saabgroup.safir.dob.typesystem.Parameters.dictionaryKeyToIndex(ClassTypeId, m_@_PARAMETER_@Parameter, key);
+@@END_IF@@
+        return com.saabgroup.safir.dob.typesystem.Parameters.get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_PARAMETER_@Parameter, index);
+    }
+@@ELSIF@@ @_UNIFORM_PARAMETERTYPE_@=Object
+    public static @_PARAMETERTYPE_@ get@_PARAMETER_@(@_PARAMETERDICTIONARYTYPE_@ key)
+    {
+        init();
+@@IF@@ @_UNIFORM_PARAMETERDICTIONARYTYPE_@=Enumeration
+        int index = com.saabgroup.safir.dob.typesystem.Parameters.dictionaryKeyToIndex(ClassTypeId, m_@_PARAMETER_@Parameter, key.ordinal());
+@@ELSE@@
+        int index = com.saabgroup.safir.dob.typesystem.Parameters.dictionaryKeyToIndex(ClassTypeId, m_@_PARAMETER_@Parameter, key);
+@@END_IF@@
+        return (@_PARAMETERTYPE_@)com.saabgroup.safir.dob.typesystem.Parameters.get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_PARAMETER_@Parameter, index);
+    }
+@@ELSIF@@ @_UNIFORM_PARAMETERTYPE_@=Enumeration
+    public static @_PARAMETERTYPE_@ get@_PARAMETER_@(@_PARAMETERDICTIONARYTYPE_@ key)
+    {
+        init();
+@@IF@@ @_UNIFORM_PARAMETERDICTIONARYTYPE_@=Enumeration
+        int index = com.saabgroup.safir.dob.typesystem.Parameters.dictionaryKeyToIndex(ClassTypeId, m_@_PARAMETER_@Parameter, key.ordinal());
+@@ELSE@@
+        int index = com.saabgroup.safir.dob.typesystem.Parameters.dictionaryKeyToIndex(ClassTypeId, m_@_PARAMETER_@Parameter, key);
+@@END_IF@@
+        int enumVal = com.saabgroup.safir.dob.typesystem.Parameters.getEnumeration
+            (ClassTypeId,
+             m_@_PARAMETER_@Parameter,
+             index);
+
+        return @_PARAMETERTYPE_@.values()[enumVal];
+    }
+@@ELSE@@
+    public static @_PARAMETERTYPE_@ get@_PARAMETER_@(@_PARAMETERDICTIONARYTYPE_@ key)
+    {
+        init();
+@@IF@@ @_UNIFORM_PARAMETERDICTIONARYTYPE_@=Enumeration
+        int index = com.saabgroup.safir.dob.typesystem.Parameters.dictionaryKeyToIndex(ClassTypeId, m_@_PARAMETER_@Parameter, key.ordinal());
+@@ELSE@@
+        int index = com.saabgroup.safir.dob.typesystem.Parameters.dictionaryKeyToIndex(ClassTypeId, m_@_PARAMETER_@Parameter, key);
+@@END_IF@@
+        return com.saabgroup.safir.dob.typesystem.Parameters.get@_REPLACE(^si(..)\..*/Float\1):UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_PARAMETER_@Parameter, index);
+    }
+@@END_IF@@
+
 @-------- single parameter -----------
 @@ELSE@@
     /**
@@ -1100,7 +1114,15 @@ public class @_CLASS_@
             m_@_MEMBER_@Member.add(@_MEMBERTYPE_@.values()[ordinal]);
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
             com.saabgroup.safir.dob.typesystem.Object seqVal=com.saabgroup.safir.dob.typesystem.BlobOperations.get@_UNIFORM_MEMBERTYPE_@(handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.VALUE_MODE);
+@@IF@@ @_MEMBERTYPE_@="com.saabgroup.safir.dob.typesystem.Object"
+            m_@_MEMBER_@Member.add(seqVal);
+@@ELSE@@
             m_@_MEMBER_@Member.add((@_MEMBERTYPE_@)seqVal);
+@@END_IF@@
+@@ELSIF@@ @_MEMBERTYPE_@="float"
+            m_@_MEMBER_@Member.add(com.saabgroup.safir.dob.typesystem.BlobOperations.getFloat32(handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.VALUE_MODE));
+@@ELSIF@@ @_MEMBERTYPE_@="double"
+            m_@_MEMBER_@Member.add(com.saabgroup.safir.dob.typesystem.BlobOperations.getFloat64(handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.VALUE_MODE));
 @@ELSE@@
             m_@_MEMBER_@Member.add(com.saabgroup.safir.dob.typesystem.BlobOperations.get@_UNIFORM_MEMBERTYPE_@(handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.VALUE_MODE));
 @@END_IF@@

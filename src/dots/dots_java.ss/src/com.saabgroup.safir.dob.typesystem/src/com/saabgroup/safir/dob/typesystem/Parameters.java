@@ -426,4 +426,32 @@ public class Parameters {
         val[0].get(result);
         return result;
     }
+    
+    public static int dictionaryKeyToIndex(long typeId, int parameter, int key) {
+        return Kernel.DictionaryInt32KeyToIndex(typeId, parameter, key);
+    }
+    
+    public static int dictionaryKeyToIndex(long typeId, int parameter, long key) {
+        return Kernel.DictionaryInt64KeyToIndex(typeId, parameter, key);
+    }
+    
+    public static int dictionaryKeyToIndex(long typeId, int parameter, String key) {
+        return Kernel.DictionaryStringKeyToIndex(typeId, parameter, key);
+    }
+    
+    public static int dictionaryKeyToIndex(long typeId, int parameter, EntityId key) {
+        return Kernel.DictionaryEntityIdKeyToIndex(typeId, parameter, key.getTypeId(), key.getInstanceId().getRawValue());
+    }
+    
+    public static int dictionaryKeyToIndex(long typeId, int parameter, InstanceId key) {
+        return Kernel.DictionaryInt64KeyToIndex(typeId, parameter, key.getRawValue());
+    }
+    
+    public static int dictionaryKeyToIndex(long typeId, int parameter, HandlerId key) {
+        return Kernel.DictionaryInt64KeyToIndex(typeId, parameter, key.getRawValue());
+    }
+    
+    public static int dictionaryKeyToIndex(long typeId, int parameter, ChannelId key) {
+        return Kernel.DictionaryInt64KeyToIndex(typeId, parameter, key.getRawValue());
+    }
 }
