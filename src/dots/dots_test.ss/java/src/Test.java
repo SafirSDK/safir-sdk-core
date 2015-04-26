@@ -27,7 +27,6 @@ import com.saabgroup.dotstest.*;
 import com.saabgroup.safir.dob.typesystem.*;
 import com.saabgroup.safir.dob.typesystem.Object;
 
-import java.lang.reflect.Constructor;
 import java.util.Locale;
 /**
  * Mait test class
@@ -37,39 +36,8 @@ public class Test {
      * @param args
      */
     public static void main(String[] args) throws java.lang.Exception {
-    	        	
-    	System.out.println("Hello start");
-    	
-    	TestItem test=new TestItem();
-    	test.myInt().setVal(123);
-    	byte[] bin=Serialization.toBinary(test);
-    	TestItem bajs=(TestItem)Serialization.toObject(bin);
-    	System.out.println("NOT NULL, val="+bajs.myInt().getVal());
-    	
-    	ObjB b=new ObjB();
-    	b.stringMember().setVal("abc");
-    	byte[] bin2=Serialization.toBinary(b);
-    	ObjB b2=(ObjB)Serialization.toObject(bin2);
-    	System.out.println("NOT NULL, val="+b2.stringMember().getVal());
-    	
-    	MemberTypes mt=new MemberTypes();
-    	mt.int32Member().setVal(123);
-    	byte[] tmp=Serialization.toBinary(mt);
-    	MemberTypes mt2=(MemberTypes)Serialization.toObject(tmp);
-    	if (mt2.int32Member().isNull())
-    		System.out.println("int null");
-    	else
-    		System.out.println("int="+mt2.int32Member().getVal());
-    	
-    	
-    	
-    	
-    	/*String j=Serialization.toJson(bin);
-    	System.out.println("JSON: "+j);
-    	
-    	System.out.println("Hello end");*/
-    	    	
-        /*test_Has_Property();
+    	 
+        test_Has_Property();
         test_GetName();
         test_GetNumberOfMembers();
         test_GetNumberOfParameters();
@@ -136,14 +104,13 @@ public class Test {
         Test_IsEnumeration();
         Test_IsException();
                 
-        testSequences();
-        testDictionaries();
+        //testSequences();
+        //testDictionaries();
 
         MiscTests misc_tests = new MiscTests();
-        misc_tests.test_Containers();*/
+        //misc_tests.test_Containers();
     }
-
-    /*
+    
     private static void Header(String label) {
         System.out.println();
         System.out.println();
@@ -11338,7 +11305,7 @@ public class Test {
         }
     }
         
-    private static void PrintSequences(DotsTest.MemberSequences ms)
+    /*private static void PrintSequences(DotsTest.MemberSequences ms)
     {
         Console.WriteLine("--- Int32Member ---");
         Console.WriteLine("size: "+ms.Int32Member.Count);
@@ -11461,6 +11428,5 @@ public class Test {
         Console.WriteLine("------ Clone -----");
         DotsTest.MemberSequences clone=ms as DotsTest.MemberSequences;
         PrintSequences(clone);
-    }
-    */
+    }*/
 }
