@@ -52,12 +52,11 @@ public class BlobOperations {
     	long handle = Kernel.CreateBlobWriter(obj.getTypeId());
         obj.writeToBlob (handle);
         int size = Kernel.CalculateBlobSize (handle);
-        java.nio.ByteBuffer[] blob=new java.nio.ByteBuffer[1];
-        blob[0]=java.nio.ByteBuffer.allocateDirect(size);
+        java.nio.ByteBuffer blob=java.nio.ByteBuffer.allocateDirect(size);
         Kernel.WriteBlob(handle, blob);
         Kernel.DeleteBlobWriter(handle);
-        blob[0].clear(); //reset read position
-        return blob[0];
+        blob.clear(); //reset read position
+        return blob;
     }
 
     /**
@@ -631,9 +630,12 @@ public class BlobOperations {
         boolean isChanged[] = new boolean[1];
         
         Kernel.ReadStringMember(handle, value, isNull, isChanged, member, index, VALUE_MODE);
-        container.m_value=value[0];
         container.m_isNull=isNull[0];
         container.m_isChanged=isChanged[0];
+        if (!container.m_isNull)
+            container.m_value=value[0];
+        else
+            container.m_value=null;
     }
     
     public static String getString(long handle, int member, int index, int keyValMode)
@@ -677,7 +679,7 @@ public class BlobOperations {
         else {
         	container.setObjInternal(null);
         }
-        	        
+        
         container.m_isChanged=isChanged[0];
     }
     

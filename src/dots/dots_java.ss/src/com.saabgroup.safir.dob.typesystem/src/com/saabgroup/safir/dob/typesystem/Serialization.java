@@ -186,13 +186,12 @@ public class Serialization {
     	long handle = Kernel.CreateBlobWriter(obj.getTypeId());
         obj.writeToBlob (handle);
         int size = Kernel.CalculateBlobSize (handle);
-        java.nio.ByteBuffer[] blob=new java.nio.ByteBuffer[1];
-        blob[0]=java.nio.ByteBuffer.allocateDirect(size);
+        java.nio.ByteBuffer blob=java.nio.ByteBuffer.allocateDirect(size);
         Kernel.WriteBlob(handle, blob);
         Kernel.DeleteBlobWriter(handle);
-        blob[0].clear(); //reset read position
+        blob.clear(); //reset read position
         byte [] binary = new byte[size];
-        blob[0].get(binary, 0, binary.length);
+        blob.get(binary, 0, binary.length);
         return binary;
     }
 

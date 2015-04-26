@@ -25,6 +25,9 @@
 
 import com.saabgroup.dotstest.*;
 import com.saabgroup.safir.dob.typesystem.*;
+import com.saabgroup.safir.dob.typesystem.Object;
+
+import java.lang.reflect.Constructor;
 import java.util.Locale;
 /**
  * Mait test class
@@ -33,8 +36,40 @@ public class Test {
     /**
      * @param args
      */
-    public static void main(String[] args) {
-        test_Has_Property();
+    public static void main(String[] args) throws java.lang.Exception {
+    	        	
+    	System.out.println("Hello start");
+    	
+    	TestItem test=new TestItem();
+    	test.myInt().setVal(123);
+    	byte[] bin=Serialization.toBinary(test);
+    	TestItem bajs=(TestItem)Serialization.toObject(bin);
+    	System.out.println("NOT NULL, val="+bajs.myInt().getVal());
+    	
+    	ObjB b=new ObjB();
+    	b.stringMember().setVal("abc");
+    	byte[] bin2=Serialization.toBinary(b);
+    	ObjB b2=(ObjB)Serialization.toObject(bin2);
+    	System.out.println("NOT NULL, val="+b2.stringMember().getVal());
+    	
+    	MemberTypes mt=new MemberTypes();
+    	mt.int32Member().setVal(123);
+    	byte[] tmp=Serialization.toBinary(mt);
+    	MemberTypes mt2=(MemberTypes)Serialization.toObject(tmp);
+    	if (mt2.int32Member().isNull())
+    		System.out.println("int null");
+    	else
+    		System.out.println("int="+mt2.int32Member().getVal());
+    	
+    	
+    	
+    	
+    	/*String j=Serialization.toJson(bin);
+    	System.out.println("JSON: "+j);
+    	
+    	System.out.println("Hello end");*/
+    	    	
+        /*test_Has_Property();
         test_GetName();
         test_GetNumberOfMembers();
         test_GetNumberOfParameters();
@@ -100,11 +135,15 @@ public class Test {
         Test_IsProperty();
         Test_IsEnumeration();
         Test_IsException();
+                
+        testSequences();
+        testDictionaries();
 
         MiscTests misc_tests = new MiscTests();
-        misc_tests.test_Containers();
+        misc_tests.test_Containers();*/
     }
 
+    /*
     private static void Header(String label) {
         System.out.println();
         System.out.println();
@@ -263,7 +302,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -439,7 +478,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -613,7 +652,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -791,7 +830,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -969,7 +1008,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -1163,7 +1202,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -1381,7 +1420,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -1555,7 +1594,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -1738,7 +1777,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -1925,7 +1964,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -2109,7 +2148,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -2292,7 +2331,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -2475,7 +2514,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -2666,7 +2705,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -2866,7 +2905,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -3079,7 +3118,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -3264,7 +3303,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -3455,7 +3494,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -3633,7 +3672,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -3811,7 +3850,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -3994,7 +4033,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -4178,7 +4217,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -4359,7 +4398,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -4569,7 +4608,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -4792,7 +4831,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -4975,7 +5014,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -5158,7 +5197,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -5344,7 +5383,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -5555,7 +5594,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -5785,7 +5824,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -5970,7 +6009,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -6165,7 +6204,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -6352,7 +6391,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -6526,7 +6565,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -6700,7 +6739,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -6885,7 +6924,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -7076,7 +7115,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -7254,7 +7293,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -7432,7 +7471,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -7615,7 +7654,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -7799,7 +7838,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -7980,7 +8019,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -8190,7 +8229,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -8413,7 +8452,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -8596,7 +8635,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -8779,7 +8818,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -8965,7 +9004,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -9176,7 +9215,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -9406,7 +9445,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -9591,7 +9630,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -9786,7 +9825,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -9973,7 +10012,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -10147,7 +10186,7 @@ public class Test {
         System.out.println("GetInfo: "
                 + toStringNoUnderscore(mi.getMemberType()) + ","
                 + mi.getMemberName() + "," + mi.getMemberTypeId() + ","
-                + mi.getStringLength() + "," + mi.getIsArray() + ","
+                + mi.getStringLength() + "," + ctStr(mi.getCollectionType()) + ","
                 + mi.getArrayLength());
         System.out.println("GetName: "
                 + Members.getName(MemberTypes.ClassTypeId, MemberTypes
@@ -10316,6 +10355,20 @@ public class Test {
         }
         LibraryExceptions.getInstance();
     }
+    
+    private static String ctStr(CollectionType ct)
+    {
+    	if (ct==CollectionType.ARRAY)
+    		return "Array";
+    	else if (ct==CollectionType.DICTIONARY)        
+            return "Dictionary";
+    	else if (ct==CollectionType.SEQUENCE)
+            return "Sequence";
+    	else if (ct==CollectionType.SINGLE_VALUE)
+            return "Single";
+    	else
+            return "Unknown";
+    }
 
     private static void Test_IsProperty() {
         Header("IsProperty");
@@ -10377,21 +10430,7 @@ public class Test {
             }
         }
 
-        public void test_Containers() {
-            {
-                int blobSize = 100000;
-                java.nio.ByteBuffer blob = java.nio.ByteBuffer
-                        .allocateDirect(blobSize);
-                check(blob != null);
-                check(blob.capacity() == blobSize);
-                int beginningOfUnused = InternalOperations.formatBlob(blob,
-                        blobSize, -2925416069731213711L);
-                check(BlobOperations.getTypeId(blob) == -2925416069731213711L);
-                check(beginningOfUnused == 674);
-
-                MemberTypes mt = new MemberTypes();
-                check(mt.calculateBlobSize() == 674);
-            }
+        public void test_Containers() {            
 
             // int32 container testing
             {
@@ -10923,41 +10962,7 @@ public class Test {
 
             }
 
-            // test null changed string based types
-            {
-                MemberTypes t = new com.saabgroup.dotstest.MemberTypes();
-
-                t.stringMember().setChanged(true);
-                check(t.stringMember().isNull());
-                check(t.stringMember().isChanged());
-
-                t.entityIdMember().setChanged(true);
-                check(t.entityIdMember().isNull());
-                check(t.entityIdMember().isChanged());
-
-                t.instanceIdMember().setChanged(true);
-                check(t.instanceIdMember().isNull());
-                check(t.instanceIdMember().isChanged());
-
-                int blobSize = t.calculateBlobSize();
-                java.nio.ByteBuffer blob = java.nio.ByteBuffer
-                        .allocateDirect(blobSize);
-                int beginningOfUnused = InternalOperations.formatBlob(blob,
-                        blobSize, t.getTypeId());
-                beginningOfUnused = t.writeToBlob(blob, beginningOfUnused);
-
-                MemberTypes t2 = new MemberTypes(blob);
-
-                check(t2.stringMember().isNull());
-                check(t2.stringMember().isChanged());
-
-                check(t2.entityIdMember().isNull());
-                check(t2.entityIdMember().isChanged());
-
-                check(t2.instanceIdMember().isNull());
-                check(t2.instanceIdMember().isChanged());
-
-            }
+            
 
             // library exceptions
             {
@@ -11164,19 +11169,13 @@ public class Test {
                     Operations.getEnumerationValueName(0, 0);
                 } catch (IllegalValueException exc) {
                     check(true);
-                }
-
-                int blobSize = t.calculateBlobSize();
-                java.nio.ByteBuffer blob = java.nio.ByteBuffer
-                        .allocateDirect(blobSize);
-                int beginningOfUnused = InternalOperations.formatBlob(blob,
-                        blobSize, t.getTypeId());
-                beginningOfUnused = t.writeToBlob(blob, beginningOfUnused);
-
-                check(BlobOperations.getTypeId(blob) == com.saabgroup.dotstest.MemberArrays.ClassTypeId);
+                }              
+               
+                
+                byte[] blob=Serialization.toBinary(t);
 
                 t = null;
-                MemberArrays t2 = new MemberArrays(blob);
+                MemberArrays t2 = (MemberArrays)Serialization.toObject(blob);
                 check(!t2.int32Member().get(1).isNull());
                 check(t2.int32Member().get(1).isChanged());
                 check(t2.int32Member().get(1).getVal() == 10);
@@ -11338,4 +11337,130 @@ public class Test {
             }
         }
     }
+        
+    private static void PrintSequences(DotsTest.MemberSequences ms)
+    {
+        Console.WriteLine("--- Int32Member ---");
+        Console.WriteLine("size: "+ms.Int32Member.Count);
+        Console.WriteLine("isChanged: "+ms.Int32Member.IsChanged().ToString().ToLower());
+        Console.WriteLine("val[0]: "+ms.Int32Member[0]);
+        Console.WriteLine("val[1]: "+ms.Int32Member[1]);
+
+        Console.WriteLine("--- Int64Member ---");
+        Console.WriteLine("size: "+ms.Int64Member.Count);
+        Console.WriteLine("isChanged: "+ms.Int64Member.IsChanged().ToString().ToLower());
+        Console.WriteLine("val[0]: "+ms.Int64Member[0]);
+        Console.WriteLine("val[1]: "+ms.Int64Member[1]);
+
+        Console.WriteLine("--- Float32Member ---");
+        Console.WriteLine("size: "+ms.Float32Member.Count);
+        Console.WriteLine("isChanged: "+ms.Float32Member.IsChanged().ToString().ToLower());
+        Console.WriteLine("val[0]: "+ms.Float32Member[0].ToString("0.0"));
+        Console.WriteLine("val[1]: "+ms.Float32Member[1].ToString("0.0"));
+
+        Console.WriteLine("--- Float64Member ---");
+        Console.WriteLine("size: "+ms.Float64Member.Count);
+        Console.WriteLine("isChanged: "+ms.Float64Member.IsChanged().ToString().ToLower());
+        Console.WriteLine("val[0]: "+ms.Float64Member[0].ToString("0.00"));
+        Console.WriteLine("val[1]: "+ms.Float64Member[1].ToString("0.00"));
+
+        Console.WriteLine("--- BooleanMember ---");
+        Console.WriteLine("size: "+ms.BooleanMember.Count);
+        Console.WriteLine("isChanged: "+ms.BooleanMember.IsChanged().ToString().ToLower());
+        Console.WriteLine("val[0]: "+ms.BooleanMember[0].ToString().ToLower());
+        Console.WriteLine("val[1]: "+ms.BooleanMember[1].ToString().ToLower());
+
+        Console.WriteLine("--- EnumerationMember ---");
+        Console.WriteLine("size: "+ms.EnumerationMember.Count);
+        Console.WriteLine("isChanged: "+ms.EnumerationMember.IsChanged().ToString().ToLower());
+        Console.WriteLine("val[0]: "+ms.EnumerationMember[0].ToString());
+        Console.WriteLine("val[1]: "+ms.EnumerationMember[1].ToString());
+
+        Console.WriteLine("--- StringMember ---");
+        Console.WriteLine("size: "+ms.StringMember.Count);
+        Console.WriteLine("isChanged: "+ms.StringMember.IsChanged().ToString().ToLower());
+        Console.WriteLine("val[0]: "+ms.StringMember[0]);
+        Console.WriteLine("val[1]: "+ms.StringMember[1]);
+
+        Console.WriteLine("--- TypeIdMember ---");
+        Console.WriteLine("size: "+ms.TypeIdMember.Count);
+        Console.WriteLine("isChanged: "+ms.TypeIdMember.IsChanged().ToString().ToLower());
+        Console.WriteLine("val[0]: "+Safir.Dob.Typesystem.Operations.GetName(ms.TypeIdMember[0]));
+        Console.WriteLine("val[1]: "+Safir.Dob.Typesystem.Operations.GetName(ms.TypeIdMember[1]));
+
+        Console.WriteLine("--- HandlerIdMember ---");
+        Console.WriteLine("size: "+ms.HandlerIdMember.Count);
+        Console.WriteLine("isChanged: "+ms.HandlerIdMember.IsChanged().ToString().ToLower());
+    }
+
+    private static void TestSequences()
+    {
+        Header("Sequences");
+
+        DotsTest.MemberSequences ms = new DotsTest.MemberSequences ();
+
+        ms.Int32Member.Add(20);
+        ms.Int32Member.Add(30);
+        ms.Int32Member.Insert(0, 10);
+        ms.Int32Member.RemoveAt(2);
+
+        ms.Int64Member.Add(200);
+        ms.Int64Member.Add(300);
+        ms.Int64Member.Insert(0, 100);
+        ms.Int64Member.RemoveAt(2);
+
+        ms.Float32Member.Add(2.2f);
+        ms.Float32Member.Add(3.3f);
+        ms.Float32Member.Insert(0, 1.1f);
+        ms.Float32Member.RemoveAt(2);
+
+        ms.Float64Member.Add(22.22f);
+        ms.Float64Member.Add(33.33f);
+        ms.Float64Member.Insert(0, 11.11f);
+        ms.Float64Member.RemoveAt(2);
+
+        ms.BooleanMember.Add(false);
+        ms.BooleanMember.Add(false);
+        ms.BooleanMember.Insert(0, true);
+        ms.BooleanMember.RemoveAt(2);
+
+        ms.EnumerationMember.Add(DotsTest.TestEnum.Enumeration.MySecond);
+        ms.EnumerationMember.Add(DotsTest.TestEnum.Enumeration.MyThird);
+        ms.EnumerationMember.Insert(0, DotsTest.TestEnum.Enumeration.MyFirst);
+        ms.EnumerationMember.RemoveAt(2);
+
+        ms.StringMember.Add("Bb");
+        ms.StringMember.Add("Cc");
+        ms.StringMember.Insert(0, "Aa");
+        ms.StringMember.RemoveAt(2);
+
+        ms.TypeIdMember.Add(DotsTest.MemberSequences.ClassTypeId);
+        ms.TypeIdMember.Add(DotsTest.TestEnum.EnumerationId);
+        ms.TypeIdMember.Insert(0, DotsTest.MemberDictionaries.ClassTypeId);
+        ms.TypeIdMember.RemoveAt(2);
+
+        PrintSequences(ms);
+
+        Console.WriteLine("------ To Xml -----");
+        var xml=Safir.Dob.Typesystem.Serialization.ToXml(ms);
+        Console.WriteLine (xml);
+
+        Console.WriteLine("------ From Xml -----");
+        DotsTest.MemberSequences fromXml = Safir.Dob.Typesystem.Serialization.ToObject (xml) as DotsTest.MemberSequences;
+        PrintSequences(fromXml);
+
+
+        Console.WriteLine("------ To Json -----");
+        var json=Safir.Dob.Typesystem.Serialization.ToJson(ms);
+        Console.WriteLine (json);
+
+        Console.WriteLine("------ From Json -----");
+        DotsTest.MemberSequences fromJson=Safir.Dob.Typesystem.Serialization.ToObjectFromJson(json) as DotsTest.MemberSequences;
+        PrintSequences(fromJson);
+
+        Console.WriteLine("------ Clone -----");
+        DotsTest.MemberSequences clone=ms as DotsTest.MemberSequences;
+        PrintSequences(clone);
+    }
+    */
 }

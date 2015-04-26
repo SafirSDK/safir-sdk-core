@@ -1219,7 +1219,10 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_ReadBinaryMember
     bool isNull, isChanged;
     DotsC_ReadBinaryMember(_readHandle, val, size, isNull, isChanged, _member, _index, static_cast<DotsC_KeyValMode>(_keyValMode));
 
-    SetJArray(env, _val, env->NewDirectByteBuffer((void*)val, size));
+    if (!isNull)
+    {
+        SetJArray(env, _val, env->NewDirectByteBuffer((void*)val, size));
+    }
     SetJArray(env, _isNull, isNull);
     SetJArray(env, _isChanged, isChanged);
 }
@@ -1236,7 +1239,10 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_ReadObjectMember
     bool isNull, isChanged;
     DotsC_ReadObjectMember(_readHandle, blob, isNull, isChanged, _member, _index, static_cast<DotsC_KeyValMode>(_keyValMode));
 
-    SetJArray(env, _blob, env->NewDirectByteBuffer((void*)blob, DotsC_GetSize(blob)));
+    if (!isNull)
+    {
+        SetJArray(env, _blob, env->NewDirectByteBuffer((void*)blob, DotsC_GetSize(blob)));
+    }
     SetJArray(env, _isNull, isNull);
     SetJArray(env, _isChanged, isChanged);
 }
@@ -1249,7 +1255,11 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_ReadObjectMember
 jlong JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_CreateBlobWriter
   (JNIEnv *, jclass, jlong _typeId)
 {
-    return DotsC_CreateBlobWriter(_typeId);
+    DotsC_Int64 handle=DotsC_CreateBlobWriter(_typeId);
+    return handle;
+
+
+    //return DotsC_CreateBlobWriter(_typeId);
 }
 
 /*
@@ -1300,10 +1310,10 @@ jint JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_CalculateBlobSize
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
  * Method:    WriteBlob
- * Signature: (J[Ljava/nio/ByteBuffer;)V
+ * Signature: (JLjava/nio/ByteBuffer;)V
  */
 void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteBlob
-  (JNIEnv * env, jclass, jlong _writerHandle, jobjectArray _blob)
+  (JNIEnv * env, jclass, jlong _writerHandle, jobject _blob)
 {
     char * blob = static_cast<char*>(env->GetDirectBufferAddress(_blob));
     DotsC_WriteBlob(_writerHandle, blob);
@@ -1405,8 +1415,15 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteBooleanMember
 void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteStringMember
     (JNIEnv * env, jclass, jlong _writerHandle, jstring _val, jboolean _isNull, jboolean _isChanged, jint _member, jint _arrayIndex, jint _keyValMode)
 {
-    StringHolder str=GetUtf8(env, _val);
-    DotsC_WriteStringMember(_writerHandle, str.get(), _isNull, _isChanged, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
+    if (!_isNull)
+    {
+        StringHolder str=GetUtf8(env, _val);
+        DotsC_WriteStringMember(_writerHandle, str.get(), _isNull, _isChanged, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
+    }
+    else
+    {
+        DotsC_WriteStringMember(_writerHandle, NULL, _isNull, _isChanged, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
+    }
 }
 
 /*
@@ -1442,7 +1459,7 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteEntityIdMember
 void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteBinaryMember
     (JNIEnv * env, jclass, jlong _writerHandle, jobject _val, jint _size, jboolean _isNull, jboolean _isChanged, jint _member, jint _arrayIndex, jint _keyValMode)
 {
-    const char * bin = static_cast<char*>(env->GetDirectBufferAddress(_val));
+    const char * bin = _isNull ? NULL : static_cast<char*>(env->GetDirectBufferAddress(_val));
     DotsC_WriteBinaryMember(_writerHandle, bin, _size, _isNull, _isChanged, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
 }
 
@@ -1454,7 +1471,7 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteBinaryMember
 void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteObjectMember
 (JNIEnv * env, jclass, jlong _writerHandle, jobject _blob, jboolean _isNull, jboolean _isChanged, jint _member, jint _arrayIndex, jint _keyValMode)
 {
-    const char * blob = static_cast<char*>(env->GetDirectBufferAddress(_blob));
+    const char * blob = _isNull ? NULL : static_cast<char*>(env->GetDirectBufferAddress(_blob));
     DotsC_WriteObjectMember(_writerHandle, blob, _isNull, _isChanged, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
 }
 

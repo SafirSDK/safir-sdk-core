@@ -31,7 +31,7 @@ import java.nio.ByteBuffer;
  * Java interface to dots_kernel.
  * The dots Kernel class is the raw interface to the C-world.
  */
-final class Kernel {
+public final class Kernel {
 	/** dots_kernel enum */
 	static public enum DotsC_PropertyMappingKind {
 		MappedToNull,
@@ -351,7 +351,7 @@ final class Kernel {
 	public static native long CreateBlobWriterFromReader(long readerHandle);
 	public static native void DeleteBlobWriter(long writerHandle);
 	public static native int CalculateBlobSize(long writerHandle);
-	public static native void WriteBlob(long writerHandle, ByteBuffer[] blob);
+	public static native void WriteBlob(long writerHandle, ByteBuffer blob);
 	public static native void WriteAllChangeFlags(long writerHandle, boolean changed);
 	public static native void WriteChangeFlag(long writerHandle, int member, int index, boolean changed);
 	public static native boolean MarkChanges(long originalReader, long currentWriter);
