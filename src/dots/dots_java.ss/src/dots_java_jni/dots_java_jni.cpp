@@ -1181,7 +1181,8 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_ReadHashedMember
     DotsC_ReadHashedMember(_readHandle, hash, str, isNull, isChanged, _member, _index, static_cast<DotsC_KeyValMode>(_keyValMode));
 
     SetJArray(env,_valHash, hash);
-    SetJArray(env,_valStr, env->NewStringUTF(str));
+    if (str!=NULL)
+        SetJArray(env,_valStr, env->NewStringUTF(str));
     SetJArray(env, _isNull, isNull);
     SetJArray(env, _isChanged, isChanged);
 }
@@ -1201,7 +1202,8 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_ReadEntityIdMember
 
     SetJArray(env,_valTypeId, eid.typeId);
     SetJArray(env,_valHash, eid.instanceId);
-    SetJArray(env,_valStr, env->NewStringUTF(str));
+    if (str!=NULL)
+        SetJArray(env,_valStr, env->NewStringUTF(str));
     SetJArray(env, _isNull, isNull);
     SetJArray(env, _isChanged, isChanged);
 }

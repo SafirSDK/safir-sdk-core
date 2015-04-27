@@ -351,9 +351,9 @@ public class BlobOperations {
         
         container.m_isNull=isNull[0];
         container.m_isChanged=isChanged[0];
-        
+               
         if (!container.m_isNull) {
-        	if (strVal[0] != null) {
+            if (!isNullOrEmpty(strVal[0])) {
                 container.m_value=new InstanceId(hashVal[0],strVal[0]);
             }
             else {
@@ -371,11 +371,11 @@ public class BlobOperations {
         
         Kernel.ReadHashedMember(handle, hashVal, strVal, isNull, isChanged, member, index, keyValMode);
         
-        if (strVal[0] != null) {
-        	return new InstanceId(hashVal[0],strVal[0]);
+        if (!isNullOrEmpty(strVal[0])) {
+            return new InstanceId(hashVal[0],strVal[0]);
         }
         else {
-        	return new InstanceId(hashVal[0]);
+            return new InstanceId(hashVal[0]);
         }
     }
     
@@ -423,7 +423,7 @@ public class BlobOperations {
         container.m_isChanged=isChanged[0];
         
         if (!container.m_isNull) {
-        	if (strVal[0] != null) {
+            if (!isNullOrEmpty(strVal[0])) {
                 container.m_value=new HandlerId(hashVal[0],strVal[0]);
             }
             else {
@@ -441,11 +441,11 @@ public class BlobOperations {
         
         Kernel.ReadHashedMember(handle, hashVal, strVal, isNull, isChanged, member, index, keyValMode);
         
-        if (strVal[0] != null) {
-        	return new HandlerId(hashVal[0],strVal[0]);
+        if (!isNullOrEmpty(strVal[0])) {
+            return new HandlerId(hashVal[0],strVal[0]);
         }
         else {
-        	return new HandlerId(hashVal[0]);
+            return new HandlerId(hashVal[0]);
         }
     }
     
@@ -493,7 +493,7 @@ public class BlobOperations {
         container.m_isChanged=isChanged[0];
         
         if (!container.m_isNull) {
-        	if (strVal[0] != null) {
+            if (!isNullOrEmpty(strVal[0])) {
                 container.m_value=new ChannelId(hashVal[0],strVal[0]);
             }
             else {
@@ -511,11 +511,11 @@ public class BlobOperations {
         
         Kernel.ReadHashedMember(handle, hashVal, strVal, isNull, isChanged, member, index, keyValMode);
         
-        if (strVal[0] != null) {
-        	return new ChannelId(hashVal[0],strVal[0]);
+        if (!isNullOrEmpty(strVal[0])) {
+            return new ChannelId(hashVal[0],strVal[0]);
         }
         else {
-        	return new ChannelId(hashVal[0]);
+            return new ChannelId(hashVal[0]);
         }
     }
     
@@ -564,7 +564,7 @@ public class BlobOperations {
         container.m_isChanged=isChanged[0];
         
         if (!container.m_isNull) {        	
-        	if (strVal[0] != null) {
+            if (!isNullOrEmpty(strVal[0])) {
                 container.m_value=new EntityId(typeVal[0], new InstanceId(hashVal[0],strVal[0]));
             }
             else {
@@ -583,11 +583,11 @@ public class BlobOperations {
         
         Kernel.ReadEntityIdMember(handle, typeVal, hashVal, strVal, isNull, isChanged, member, index, keyValMode);
        
-        if (strVal[0] != null) {
-        	return new EntityId(typeVal[0], new InstanceId(hashVal[0],strVal[0]));
+       if (!isNullOrEmpty(strVal[0])) {
+            return new EntityId(typeVal[0], new InstanceId(hashVal[0],strVal[0]));
         }
         else {
-        	return new EntityId(typeVal[0], new InstanceId(hashVal[0]));
+            return new EntityId(typeVal[0], new InstanceId(hashVal[0]));
         }
     }
     
@@ -1659,6 +1659,11 @@ public class BlobOperations {
                         index,
                         VALUE_MODE);
     }
+
+    private static boolean isNullOrEmpty(String str) {
+        return str == null || str.isEmpty();
+    }
+
     
     //**************************************************
     // Getters for Si-types

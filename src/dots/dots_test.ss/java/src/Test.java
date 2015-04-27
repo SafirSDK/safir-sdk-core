@@ -11482,7 +11482,7 @@ public class Test {
             if (kv.getValue().isNull ())
                 System.out.println (TestEnumStr(kv.getKey()) + " = NULL, changed: " + kv.getValue().isChanged ());
             else
-                System.out.println (TestEnumStr(kv.getKey()) + " = "+kv.getValue().getVal()+", changed: " + kv.getValue().isChanged()); //TODO: binary to utf8String
+                System.out.println (TestEnumStr(kv.getKey()) + " = "+kv.getValue().getVal().toString()+", changed: " + kv.getValue().isChanged()); //TODO: binary to utf8String
         }
 
         System.out.println("--- InstanceIdEntityIdMember ---");
@@ -11491,9 +11491,9 @@ public class Test {
         for (Map.Entry<InstanceId, EntityIdContainer> kv : md.instanceIdEntityIdMember().entrySet())
         {
             if (kv.getValue().isNull ())
-                System.out.println (kv.getKey() + " = NULL, changed: " + kv.getValue().isChanged ());
+                System.out.println (kv.getKey().toString() + " = NULL, changed: " + kv.getValue().isChanged ());
             else
-                System.out.println (kv.getKey() + " = "+kv.getValue().getVal()+", changed: " + kv.getValue().isChanged()); //TODO: binary to utf8String
+                System.out.println (kv.getKey().toString() + " = "+kv.getValue().getVal()+", changed: " + kv.getValue().isChanged()); //TODO: binary to utf8String
         }
 
         System.out.println("--- EntityIdHandlerIdMember ---");
