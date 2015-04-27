@@ -127,12 +127,9 @@ namespace Dob
          *
          * No change flags will be set in the returned entity.
          *
-         * @return Previous entity.
+         * @return Current entity.
          */
         const Dob::EntityPtr GetCurrent() const;
-
-        //TODO: does anyone need a GetCurrentWithChangeInfo? Please tell your nearest
-        //Dob developer if so.
 
         // The constructor is for internal usage only!
         explicit InjectedEntityProxy(Internal::InjectedEntityProxyImpl* pImpl);
