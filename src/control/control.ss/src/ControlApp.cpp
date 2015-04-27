@@ -252,14 +252,22 @@ ControlApp::ControlApp(boost::asio::io_service& ioService,
         DWORD statusCode;
         ::GetExitCodeProcess(m_handle.native(), &statusCode);
 
+        m_doseMainStarted = false;
+
+        // dose_main has exited, we can stop our timer that will slay dose_main
+        m_terminationTimer.cancel();
+
         if (statusCode != 0)
         {
             // dose_main has exited unexpectedly
 
             SEND_SYSTEM_LOG(Critical, << "CTRL: dose_main has exited with status code "  << statusCode);
             std::wcout << "CTRL: dose_main has exited with status code "  << statusCode  << std::endl;
+        }
 
-            StopCtrl();
+        if (!m_ctrlStopped)
+        {
+            StopControl();
         }
     }
     );
