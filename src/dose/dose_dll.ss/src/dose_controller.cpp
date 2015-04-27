@@ -364,9 +364,6 @@ namespace Internal
 
         //shared queues are deleted by dose_main.
 
-        //AWI:? Can be removed?
-        //m_contextId = 0;
-
         m_connection.reset();
 
         // Drop any reference corresponding to a saved consumer (will be saved for
