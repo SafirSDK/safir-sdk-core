@@ -225,8 +225,6 @@ void OdbcPersistor::Store(const Safir::Dob::Typesystem::EntityId& entityId,
                 m_storeTypeIdParam.SetValue(entityId.GetTypeId());
                 m_storeInstanceParam.SetValue(entityId.GetInstanceId().GetRawValue());
                 m_storeHandlerParam.SetValue(handlerId.GetRawValue() );
-                //TODO: check that the size fits inside an int!
-                //TODO: Check that the data will fit in the column
                 paramSet = true;
             }
 
