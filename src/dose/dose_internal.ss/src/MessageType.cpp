@@ -167,12 +167,6 @@ namespace Internal
         return m_subscriptions.find(key) != m_subscriptions.end();
     }
 
-    void MessageType::DumpSubscriptions() const
-    {
-    }
-
-
-
 }
 }
 }
