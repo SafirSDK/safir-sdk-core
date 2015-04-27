@@ -172,6 +172,15 @@ namespace SP
                               });
         }
 
+        /** This can be used to force an election outside of node changes.*/
+        void ForceElection()
+        {
+            m_strand.dispatch([this]
+                              {
+                                  lllog(5) << "SP: ElectionHandler is forcing an election" << std::endl;
+                                  StartElection();
+                              });
+        }
     private:
         /** Calculate the time to wait for other nodes to come up before assuming that
          * we're alone and proclaiming victory. */

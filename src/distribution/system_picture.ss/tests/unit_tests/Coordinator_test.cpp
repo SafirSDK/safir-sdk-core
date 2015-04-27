@@ -391,6 +391,11 @@ public:
         nodesChangedCalled = true;
     }
 
+    void ForceElection()
+    {
+
+    }
+
     void Stop()
     {
         stopped = true;
