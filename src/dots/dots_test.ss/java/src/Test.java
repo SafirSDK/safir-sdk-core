@@ -104,10 +104,10 @@ public class Test {
         Test_IsEnumeration();
         Test_IsException();
                 
-        //testSequences();
-        //testDictionaries();
+        testSequences();
+        testDictionaries();
 
-        MiscTests misc_tests = new MiscTests();
+        //MiscTests misc_tests = new MiscTests();
         //misc_tests.test_Containers();
     }
     
@@ -10337,6 +10337,14 @@ public class Test {
             return "Unknown";
     }
 
+    private static String TestEnumStr(TestEnum e) {
+        if (e==TestEnum.MY_FIRST) return "MyFirst";
+        else if (e==TestEnum.MY_SECOND) return "MySecond";
+        else if (e==TestEnum.MY_THIRD) return "MyThird";
+        else return "Unknown";
+    }
+
+
     private static void Test_IsProperty() {
         Header("IsProperty");
         long[] ids = Operations.getAllTypeIds();
@@ -11305,128 +11313,289 @@ public class Test {
         }
     }
         
-    /*private static void PrintSequences(DotsTest.MemberSequences ms)
-    {
-        Console.WriteLine("--- Int32Member ---");
-        Console.WriteLine("size: "+ms.Int32Member.Count);
-        Console.WriteLine("isChanged: "+ms.Int32Member.IsChanged().ToString().ToLower());
-        Console.WriteLine("val[0]: "+ms.Int32Member[0]);
-        Console.WriteLine("val[1]: "+ms.Int32Member[1]);
+    private static void printSequences(MemberSequences ms)
+    {   
+        System.out.println("--- Int32Member ---");
+        System.out.println("size: "+ms.int32Member().size());
+        System.out.println("isChanged: "+ms.int32Member().isChanged());
+        System.out.println("val[0]: "+ms.int32Member().get(0));
+        System.out.println("val[1]: "+ms.int32Member().get(1));
 
-        Console.WriteLine("--- Int64Member ---");
-        Console.WriteLine("size: "+ms.Int64Member.Count);
-        Console.WriteLine("isChanged: "+ms.Int64Member.IsChanged().ToString().ToLower());
-        Console.WriteLine("val[0]: "+ms.Int64Member[0]);
-        Console.WriteLine("val[1]: "+ms.Int64Member[1]);
+        System.out.println("--- Int64Member ---");
+        System.out.println("size: "+ms.int64Member().size());
+        System.out.println("isChanged: "+ms.int64Member().isChanged());
+        System.out.println("val[0]: "+ms.int64Member().get(0));
+        System.out.println("val[1]: "+ms.int64Member().get(1));
 
-        Console.WriteLine("--- Float32Member ---");
-        Console.WriteLine("size: "+ms.Float32Member.Count);
-        Console.WriteLine("isChanged: "+ms.Float32Member.IsChanged().ToString().ToLower());
-        Console.WriteLine("val[0]: "+ms.Float32Member[0].ToString("0.0"));
-        Console.WriteLine("val[1]: "+ms.Float32Member[1].ToString("0.0"));
+        System.out.println("--- Float32Member ---");
+        System.out.println("size: "+ms.float32Member().size());
+        System.out.println("isChanged: "+ms.float32Member().isChanged());
+        System.out.println("val[0]: "+String.format("%.01f", ms.float32Member().get(0)));
+        System.out.println("val[1]: "+String.format("%.01f", ms.float32Member().get(1)));
 
-        Console.WriteLine("--- Float64Member ---");
-        Console.WriteLine("size: "+ms.Float64Member.Count);
-        Console.WriteLine("isChanged: "+ms.Float64Member.IsChanged().ToString().ToLower());
-        Console.WriteLine("val[0]: "+ms.Float64Member[0].ToString("0.00"));
-        Console.WriteLine("val[1]: "+ms.Float64Member[1].ToString("0.00"));
+        System.out.println("--- Float64Member ---");
+        System.out.println("size: "+ms.float64Member().size());
+        System.out.println("isChanged: "+ms.float64Member().isChanged());
+        System.out.println("val[0]: "+String.format("%.02f", ms.float64Member().get(0)));
+        System.out.println("val[1]: "+String.format("%.02f", ms.float64Member().get(1)));
 
-        Console.WriteLine("--- BooleanMember ---");
-        Console.WriteLine("size: "+ms.BooleanMember.Count);
-        Console.WriteLine("isChanged: "+ms.BooleanMember.IsChanged().ToString().ToLower());
-        Console.WriteLine("val[0]: "+ms.BooleanMember[0].ToString().ToLower());
-        Console.WriteLine("val[1]: "+ms.BooleanMember[1].ToString().ToLower());
+        System.out.println("--- BooleanMember ---");
+        System.out.println("size: "+ms.booleanMember().size());
+        System.out.println("isChanged: "+ms.booleanMember().isChanged());
+        System.out.println("val[0]: "+ms.booleanMember().get(0));
+        System.out.println("val[1]: "+ms.booleanMember().get(1));
 
-        Console.WriteLine("--- EnumerationMember ---");
-        Console.WriteLine("size: "+ms.EnumerationMember.Count);
-        Console.WriteLine("isChanged: "+ms.EnumerationMember.IsChanged().ToString().ToLower());
-        Console.WriteLine("val[0]: "+ms.EnumerationMember[0].ToString());
-        Console.WriteLine("val[1]: "+ms.EnumerationMember[1].ToString());
+        System.out.println("--- EnumerationMember ---");
+        System.out.println("size: "+ms.enumerationMember().size());
+        System.out.println("isChanged: "+ms.enumerationMember().isChanged());
+        System.out.println("val[0]: "+TestEnumStr(ms.enumerationMember().get(0)));
+        System.out.println("val[1]: "+TestEnumStr(ms.enumerationMember().get(1)));
 
-        Console.WriteLine("--- StringMember ---");
-        Console.WriteLine("size: "+ms.StringMember.Count);
-        Console.WriteLine("isChanged: "+ms.StringMember.IsChanged().ToString().ToLower());
-        Console.WriteLine("val[0]: "+ms.StringMember[0]);
-        Console.WriteLine("val[1]: "+ms.StringMember[1]);
+        System.out.println("--- StringMember ---");
+        System.out.println("size: "+ms.stringMember().size());
+        System.out.println("isChanged: "+ms.stringMember().isChanged());
+        System.out.println("val[0]: "+ms.stringMember().get(0));
+        System.out.println("val[1]: "+ms.stringMember().get(1));
 
-        Console.WriteLine("--- TypeIdMember ---");
-        Console.WriteLine("size: "+ms.TypeIdMember.Count);
-        Console.WriteLine("isChanged: "+ms.TypeIdMember.IsChanged().ToString().ToLower());
-        Console.WriteLine("val[0]: "+Safir.Dob.Typesystem.Operations.GetName(ms.TypeIdMember[0]));
-        Console.WriteLine("val[1]: "+Safir.Dob.Typesystem.Operations.GetName(ms.TypeIdMember[1]));
+        System.out.println("--- TypeIdMember ---");
+        System.out.println("size: "+ms.typeIdMember().size());
+        System.out.println("isChanged: "+ms.typeIdMember().isChanged());
+        System.out.println("val[0]: "+Operations.getName(ms.typeIdMember().get(0)));
+        System.out.println("val[1]: "+Operations.getName(ms.typeIdMember().get(1)));
 
-        Console.WriteLine("--- HandlerIdMember ---");
-        Console.WriteLine("size: "+ms.HandlerIdMember.Count);
-        Console.WriteLine("isChanged: "+ms.HandlerIdMember.IsChanged().ToString().ToLower());
+        System.out.println("--- HandlerIdMember ---");
+        System.out.println("size: "+ms.handlerIdMember().size());
+        System.out.println("isChanged: "+ms.handlerIdMember().isChanged());
     }
 
-    private static void TestSequences()
+    private static void testSequences()
     {
         Header("Sequences");
 
-        DotsTest.MemberSequences ms = new DotsTest.MemberSequences ();
+        MemberSequences ms = new MemberSequences ();
 
-        ms.Int32Member.Add(20);
-        ms.Int32Member.Add(30);
-        ms.Int32Member.Insert(0, 10);
-        ms.Int32Member.RemoveAt(2);
+        ms.int32Member().add(20);
+        ms.int32Member().add(30);
+        ms.int32Member().add(0, 10);
+        ms.int32Member().remove(2);
 
-        ms.Int64Member.Add(200);
-        ms.Int64Member.Add(300);
-        ms.Int64Member.Insert(0, 100);
-        ms.Int64Member.RemoveAt(2);
+        ms.int64Member().add(200L);
+        ms.int64Member().add(300L);
+        ms.int64Member().add(0, 100L);
+        ms.int64Member().remove(2);
 
-        ms.Float32Member.Add(2.2f);
-        ms.Float32Member.Add(3.3f);
-        ms.Float32Member.Insert(0, 1.1f);
-        ms.Float32Member.RemoveAt(2);
+        ms.float32Member().add(2.2f);
+        ms.float32Member().add(3.3f);
+        ms.float32Member().add(0, 1.1f);
+        ms.float32Member().remove(2);
 
-        ms.Float64Member.Add(22.22f);
-        ms.Float64Member.Add(33.33f);
-        ms.Float64Member.Insert(0, 11.11f);
-        ms.Float64Member.RemoveAt(2);
+        ms.float64Member().add(22.22);
+        ms.float64Member().add(33.33);
+        ms.float64Member().add(0, 11.11);
+        ms.float64Member().remove(2);
 
-        ms.BooleanMember.Add(false);
-        ms.BooleanMember.Add(false);
-        ms.BooleanMember.Insert(0, true);
-        ms.BooleanMember.RemoveAt(2);
+        ms.booleanMember().add(false);
+        ms.booleanMember().add(false);
+        ms.booleanMember().add(0, true);
+        ms.booleanMember().remove(2);
 
-        ms.EnumerationMember.Add(DotsTest.TestEnum.Enumeration.MySecond);
-        ms.EnumerationMember.Add(DotsTest.TestEnum.Enumeration.MyThird);
-        ms.EnumerationMember.Insert(0, DotsTest.TestEnum.Enumeration.MyFirst);
-        ms.EnumerationMember.RemoveAt(2);
+        ms.enumerationMember().add(TestEnum.MY_SECOND);
+        ms.enumerationMember().add(TestEnum.MY_THIRD);
+        ms.enumerationMember().add(0, TestEnum.MY_FIRST);
+        ms.enumerationMember().remove(2);
 
-        ms.StringMember.Add("Bb");
-        ms.StringMember.Add("Cc");
-        ms.StringMember.Insert(0, "Aa");
-        ms.StringMember.RemoveAt(2);
+        ms.stringMember().add("Bb");
+        ms.stringMember().add("Cc");
+        ms.stringMember().add(0, "Aa");
+        ms.stringMember().remove(2);
 
-        ms.TypeIdMember.Add(DotsTest.MemberSequences.ClassTypeId);
-        ms.TypeIdMember.Add(DotsTest.TestEnum.EnumerationId);
-        ms.TypeIdMember.Insert(0, DotsTest.MemberDictionaries.ClassTypeId);
-        ms.TypeIdMember.RemoveAt(2);
+        ms.typeIdMember().add(MemberSequences.ClassTypeId);
+        ms.typeIdMember().add(TestEnum.EnumerationId);
+        ms.typeIdMember().add(0, MemberDictionaries.ClassTypeId);
+        ms.typeIdMember().remove(2);
 
-        PrintSequences(ms);
+        printSequences(ms);
 
-        Console.WriteLine("------ To Xml -----");
-        var xml=Safir.Dob.Typesystem.Serialization.ToXml(ms);
-        Console.WriteLine (xml);
+        System.out.println("------ To Xml -----");
+        String xml=Serialization.toXml(ms);
+        System.out.println (xml);
 
-        Console.WriteLine("------ From Xml -----");
-        DotsTest.MemberSequences fromXml = Safir.Dob.Typesystem.Serialization.ToObject (xml) as DotsTest.MemberSequences;
-        PrintSequences(fromXml);
+        System.out.println("------ From Xml -----");
+        MemberSequences fromXml = (MemberSequences)Serialization.toObject (xml);
+        printSequences(fromXml);
 
 
-        Console.WriteLine("------ To Json -----");
-        var json=Safir.Dob.Typesystem.Serialization.ToJson(ms);
-        Console.WriteLine (json);
+        System.out.println("------ To Json -----");
+        String json=Serialization.toJson(ms);
+        System.out.println (json);
 
-        Console.WriteLine("------ From Json -----");
-        DotsTest.MemberSequences fromJson=Safir.Dob.Typesystem.Serialization.ToObjectFromJson(json) as DotsTest.MemberSequences;
-        PrintSequences(fromJson);
+        System.out.println("------ From Json -----");
+        MemberSequences fromJson=(MemberSequences)Serialization.toObjectFromJson(json);
+        printSequences(fromJson);
 
-        Console.WriteLine("------ Clone -----");
-        DotsTest.MemberSequences clone=ms as DotsTest.MemberSequences;
-        PrintSequences(clone);
-    }*/
+        System.out.println("------ Clone -----");
+        MemberSequences clone=ms.clone();
+        printSequences(clone);
+    }
+    
+    private static void printDictionaries(MemberDictionaries md)
+    {
+    	/*
+        System.out.println("--- Int32StringMember ---");
+        System.out.println("size: "+md.Int32StringMember().size());
+        System.out.println("isChanged: "+md.Int32StringMember().isChanged());
+        for (MapEntry<Integer, String> kv : md.int32StringMember().entrySet())
+        {
+            if (kv.getValue().isNull ())
+                System.out.println (kv.Key + " = NULL, changed: " + kv.Value.IsChanged ());
+            else
+                System.out.println (kv.Key + " = "+kv.Value.Val.ToString()+", changed: " + kv.Value.IsChanged ());
+        }
+
+        System.out.println("--- Int64BinaryMember ---");
+        System.out.println("size: "+md.Int64BinaryMember().size());
+        System.out.println("isChanged: "+md.Int64BinaryMember().isChanged());
+        foreach (var kv in md.Int64BinaryMember)
+        {
+            if (kv.Value.IsNull ())
+                System.out.println (kv.Key + " = NULL, changed: " + kv.Value.IsChanged ());
+            else
+                System.out.println (kv.Key + " = "+System.Text.Encoding.UTF8.GetString(kv.Value.Val)+", changed: " + kv.Value.IsChanged ());
+        }
+
+        System.out.println("--- TypeIdEnumMember ---");
+        System.out.println("size: "+md.TypeIdEnumMember().size());
+        System.out.println("isChanged: "+md.TypeIdEnumMember().isChanged());
+        foreach (var kv in md.TypeIdEnumMember)
+        {
+            string name = Safir.Dob.Typesystem.Operations.GetName (kv.Key);
+            if (kv.Value.IsNull ())
+                System.out.println (name + " = NULL, changed: " + kv.Value.IsChanged ());
+            else
+                System.out.println (name + " = "+kv.Value.Val.ToString()+", changed: " + kv.Value.IsChanged ());
+        }
+
+        System.out.println("--- EnumInstanceIdMember ---");
+        System.out.println("size: "+md.EnumInstanceIdMember().size());
+        System.out.println("isChanged: "+md.EnumInstanceIdMember().isChanged());
+        foreach (var kv in md.EnumInstanceIdMember)
+        {
+            if (kv.Value.IsNull ())
+                System.out.println (kv.Key.ToString() + " = NULL, changed: " + kv.Value.IsChanged ());
+            else
+                System.out.println (kv.Key.ToString() + " = "+kv.Value.Val.ToString()+", changed: " + kv.Value.IsChanged ());
+        }
+
+        System.out.println("--- InstanceIdEntityIdMember ---");
+        System.out.println("size: "+md.InstanceIdEntityIdMember().size());
+        System.out.println("isChanged: "+md.InstanceIdEntityIdMember().isChanged());
+        foreach (var kv in md.InstanceIdEntityIdMember)
+        {
+            if (kv.Value.IsNull ())
+                System.out.println (kv.Key.ToString() + " = NULL, changed: " + kv.Value.IsChanged ());
+            else
+                System.out.println (kv.Key.ToString() + " = "+kv.Value.Val.ToString()+", changed: " + kv.Value.IsChanged ());
+        }
+
+        System.out.println("--- EntityIdHandlerIdMember ---");
+        System.out.println("size: "+md.EntityIdHandlerIdMember().size());
+        System.out.println("isChanged: "+md.EntityIdHandlerIdMember().isChanged());
+        foreach (var kv in md.EntityIdHandlerIdMember)
+        {
+            if (kv.Value.IsNull ())
+                System.out.println (kv.Key.ToString() + " = NULL, changed: " + kv.Value.IsChanged ());
+            else
+                System.out.println (kv.Key.ToString() + " = "+kv.Value.Val.ToString()+", changed: " + kv.Value.IsChanged ());
+        }
+
+        System.out.println("--- StringItemMember ---");
+        System.out.println("size: "+md.StringItemMember().size());
+        System.out.println("isChanged: "+md.StringItemMember().isChanged());
+        foreach (var kv in md.StringItemMember)
+        {
+            if (kv.Value.IsNull ())
+                System.out.println (kv.Key.ToString() + " = NULL, changed: " + kv.Value.IsChanged ());
+            else
+                System.out.println (kv.Key.ToString() + " = "+Safir.Dob.Typesystem.Serialization.ToJson(kv.Value.Obj)+", changed: " + kv.Value.IsChanged ());
+        }
+
+
+     
+
+        System.out.println("--- StringObjectMember ---");
+        System.out.println("size: "+md.StringObjectMember().size());
+        System.out.println("isChanged: "+md.StringObjectMember().isChanged().ToString().ToLower());
+        foreach (var kv in md.StringObjectMember)
+        {
+            if (kv.Value.IsNull ())
+                System.out.println (kv.Key.ToString() + " = NULL, changed: " + kv.Value.IsChanged ());
+            else
+                System.out.println (kv.Key.ToString() + " = "+Safir.Dob.Typesystem.Serialization.ToJson(kv.Value.Obj)+", changed: " + kv.Value.IsChanged ());
+        }
+        */
+    }
+
+    private static void testDictionaries()
+    {
+        Header("Dictionaries");
+
+        MemberDictionaries md=new MemberDictionaries();
+        md.int32StringMember().put(10,  new StringContainer()).setVal(ParameterDictionaries.getInt32StringParameter(10));
+        md.int32StringMember().put(20,  new StringContainer()).setVal(ParameterDictionaries.getInt32StringParameter(20));
+        
+        md.int64BinaryMember().put(100L, new BinaryContainer()).setVal(ParameterDictionaries.getInt32BinaryParameter(100));
+        md.int64BinaryMember().put(100L, new BinaryContainer()).setVal(ParameterDictionaries.getInt32BinaryParameter(200));        
+        
+        md.typeIdEnumMember().put(MemberDictionaries.ClassTypeId, new TestEnum.Container()).setVal(ParameterDictionaries.getStringEnumParameter ("Billy"));
+        md.typeIdEnumMember().put(MemberSequences.ClassTypeId, new TestEnum.Container()).setVal(ParameterDictionaries.getStringEnumParameter ("Svarre"));        
+
+        md.enumInstanceIdMember().put(TestEnum.MY_FIRST,  new InstanceIdContainer()).setVal(ParameterDictionaries.getEnumInstanceIdParameter (TestEnum.MY_FIRST));
+        md.enumInstanceIdMember().put(TestEnum.MY_SECOND,  new InstanceIdContainer()).setVal(ParameterDictionaries.getEnumInstanceIdParameter (TestEnum.MY_SECOND));
+
+        md.instanceIdEntityIdMember().put(new InstanceId("FirstInstance"),  new EntityIdContainer()).setVal(ParameterDictionaries.getHandlerIdEntityIdParameter (new HandlerId("handlerOne")));
+        md.instanceIdEntityIdMember().put(new InstanceId("SecondInstance"),  new EntityIdContainer()).setVal(ParameterDictionaries.getHandlerIdEntityIdParameter (new HandlerId(2)));
+
+        MemberDictionaries item1=new MemberDictionaries();
+        item1.entityIdHandlerIdMember().put (
+        		new EntityId(com.saabgroup.safir.dob.Entity.ClassTypeId, new InstanceId("first")),
+				new HandlerIdContainer()).setVal(
+				ParameterDictionaries.getEntityIdHandlerIdParameter(new EntityId(com.saabgroup.safir.dob.Entity.ClassTypeId, new InstanceId("first"))));
+        item1.entityIdHandlerIdMember().put (
+        		new EntityId(com.saabgroup.safir.dob.Entity.ClassTypeId, new InstanceId(2)),
+				new HandlerIdContainer()).setVal(
+				ParameterDictionaries.getEntityIdHandlerIdParameter(new EntityId(com.saabgroup.safir.dob.Entity.ClassTypeId, new InstanceId("second"))));
+        
+
+        //new Safir.Dob.Typesystem.EntityId(Safir.Dob.Entity.ClassTypeId, new Safir.Dob.Typesystem.InstanceId("first"))
+        //---------
+        md.stringItemMember().put ("Karl", new ObjectContainerImpl<com.saabgroup.dotstest.MemberDictionaries>()).setObj(item1);
+        md.stringItemMember().put ("Philip", new ObjectContainerImpl<com.saabgroup.dotstest.MemberDictionaries>()).setNull();
+        md.stringItemMember().put ("Gustav", new ObjectContainerImpl<com.saabgroup.dotstest.MemberDictionaries>()).setObj(item1);
+        
+        md.stringObjectMember().put ("Dilbert", new ObjectContainerImpl<Object>()).setObj(ParameterDictionaries.getInt32ObjectParameter(10));
+        md.stringObjectMember().put ("Wally", new ObjectContainerImpl<Object>()).setObj(ParameterDictionaries.getInt32ObjectParameter(20));
+     
+        printDictionaries(md);
+
+        System.out.println("------ To Xml -----");
+        String xml=Serialization.toXml(md);
+        System.out.println (xml);
+
+        System.out.println("------ From Xml -----");
+        MemberDictionaries fromXml = (MemberDictionaries)Serialization.toObject (xml);
+        printDictionaries(fromXml);
+
+        System.out.println("------ To Json -----");
+        String json=Serialization.toJson(md);
+        System.out.println (json);
+
+       
+        System.out.println("------ From Json -----");
+        MemberDictionaries fromJson = (MemberDictionaries)Serialization.toObjectFromJson (json);
+        printDictionaries(fromJson);
+
+        System.out.println("------ Clone -----");
+        MemberDictionaries clone = md.clone();
+        printDictionaries(clone);
+    }
 }
