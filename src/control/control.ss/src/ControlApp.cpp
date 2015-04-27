@@ -53,9 +53,9 @@ ControlApp::ControlApp(boost::asio::io_service& ioService,
       m_strand(ioService),
       m_terminationTimer(ioService),
       m_ctrlStopped(false),
-      m_doseMainStarted(false),
+      m_doseMainStarted(false)
 #if defined(linux) || defined(__linux) || defined(__linux__)
-      m_sigchldSet(ioService, SIGCHLD)
+      ,m_sigchldSet(ioService, SIGCHLD)
 #endif
 
 {

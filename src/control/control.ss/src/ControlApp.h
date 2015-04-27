@@ -83,7 +83,7 @@ private:
 #if defined(linux) || defined(__linux) || defined(__linux__)
     boost::asio::signal_set m_sigchldSet;
 #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-    boost::asio::windows::object_handle handle m_handle;
+    boost::asio::windows::object_handle m_handle;
 #endif
 
 };
