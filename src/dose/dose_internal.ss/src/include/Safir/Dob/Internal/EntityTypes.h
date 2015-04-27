@@ -297,15 +297,13 @@ namespace Internal
         class DOSE_INTERNAL_API EntityIterator
         {
         public:
-            /** Construct an "end" iterator.*/
-            //Iterator();
-//TODO: this class must be possible to copy correctly!
             void Dereference(const char*& entityBlob, const char*& entityState) const;
             bool operator== (const EntityIterator& other) const
             {return m_stateContainerIterator==other.m_stateContainerIterator;}
 
         private:
             friend class EntityTypes;
+            EntityIterator() = default;
 
             ContextId m_connectionContext;  // The context of the connection that initiated the iteration
             TypeIdVector m_remainingTypes;
