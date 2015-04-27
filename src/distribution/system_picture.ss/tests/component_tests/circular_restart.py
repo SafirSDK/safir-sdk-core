@@ -194,22 +194,23 @@ try:
     for i in range (args.start, args.start + args.nodes):
         nodes.append(launch_node(i,args))
 
-    log("Waiting for nodes to start up")
-    while True:
-        log("Counting nodes")
-        output = subprocess.check_output(("system_picture_listener","--one")).decode("utf-8").splitlines()
-        count = 0
-        for line in output:
-            if " Node_" in line and " D  Node_" not in line:
-                count += 1
-        log(" found", count,"nodes")
-        if count == args.total_nodes + 1:
-            break
-
     #we need to kill the first node manually, after which the circle will start running...
     if args.start == 0:
+        log("Waiting for nodes to start up")
+        while True:
+            log("Counting nodes")
+            output = subprocess.check_output(("system_picture_listener","--one")).decode("utf-8").splitlines()
+            count = 0
+            for line in output:
+                if " Node_" in line and " D  Node_" not in line:
+                    count += 1
+            log(" found", count,"nodes")
+            if count == args.total_nodes + 1:
+                break
+
         log("Stopping node 0")
         stop_node(*nodes[0])
+
     expected = args.start
     revolution = 0
     log("Expected is", expected)
