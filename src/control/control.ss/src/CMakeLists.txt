@@ -18,8 +18,8 @@ else()
   set(BOOST_PROCESS_INCLUDE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/boost-process/src)
 endif()
 
-FILE(GLOB headers *.h)
-FILE(GLOB sources *.cpp)
+FILE(GLOB headers ControlApp.h SystemStateHandler.h)
+FILE(GLOB sources safir_control.cpp ControlApp.cpp)
 
 ADD_EXECUTABLE(safir_control ${sources} ${headers})
 
