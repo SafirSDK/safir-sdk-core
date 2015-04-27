@@ -41,9 +41,6 @@ namespace Dob
 {
 namespace Internal
 {
-    //TODO: this whole operation should be rewritten to work directly on blobs.
-    //To do this we need to export the blob-operations that can cause blob reallocations
-    //in dots_kernel so that they're usable from dots_cpp (and other languages??)
 
     TimestampOperations::MergeMemberResult
     TimestampOperations::MergeMember(const Typesystem::TypeId typeId,
@@ -53,10 +50,7 @@ namespace Internal
                                      const Typesystem::ObjectPtr & intoObject,
                                      const Typesystem::ObjectConstPtr & fromObject)
     {
-        //TODO: need to look at data too!!!!
-        //change flag must only be set in merge result if the data differs!
-
-        if (fromTimestamp > intoTimestamp) //TODO: handle the = case by looking at the member data!
+        if (fromTimestamp > intoTimestamp)
         {
             Safir::Dob::Typesystem::MemberType memberType;
             const char * memberName;
@@ -226,7 +220,6 @@ namespace Internal
     {
         //we implement this function using the other functions in this class.
         //This is probably not the optimal way of implementing it, but it is easy.
-        //TODO: optimize this!
         DistributionData from(no_state_tag);
 
         if (blob == NULL)
@@ -392,7 +385,6 @@ namespace Internal
 
         for (int member = 0; member < numberOfMembers; ++member)
         {
-            //TODO: handle the == case. look at member data!
             if (realStateTimestamps[member] < injectionTimestamps[member])
             {
                 return false;
