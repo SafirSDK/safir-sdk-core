@@ -56,8 +56,6 @@ ControlApp::ControlApp(boost::asio::io_service& ioService,
       m_doseMainStarted(false),
 #if defined(linux) || defined(__linux) || defined(__linux__)
       m_sigchldSet(ioService, SIGCHLD)
-#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-
 #endif
 
 {
