@@ -40,11 +40,11 @@
 #include <set>
 
 /* A tip to anyone trying to understand this code:
- * Read up on the boost interprocess file locks, and understand their 
+ * Read up on the boost interprocess file locks, and understand their
  * limitations. Also understand the posix lifetime of locking primitives.
  * Some recommended reading:
  * http://en.wikipedia.org/wiki/File_locking
- * http://www.boost.org/doc/libs/ (select interprocess and read *all* you 
+ * http://www.boost.org/doc/libs/ (select interprocess and read *all* you
  * can find about file locks, in particular the "Caution: synchronization
  * limitations" section.
  * A lot of the complexity stems from the lack of threading guarantees
@@ -84,8 +84,8 @@ namespace
         return dir;
     }
 
-    /** 
-     * Construct a full path to a lock file to use for a particular resource name 
+    /**
+     * Construct a full path to a lock file to use for a particular resource name
      * Also do some sanity checks that will check if it can be used.
      */
     const boost::filesystem::path GetLockFile(const std::string& name)
@@ -180,7 +180,7 @@ namespace Utilities
 
                     //invoke the user callback
                     synchronized->Create();
-                
+
                     //Create a new semaphore so that users know if we succeeded or not.
                     boost::interprocess::named_semaphore sem(boost::interprocess::create_only,m_name.c_str(),1);
                 }
@@ -205,10 +205,10 @@ namespace Utilities
             catch (const boost::interprocess::interprocess_exception& exc)
             {
                 std::ostringstream ostr;
-                ostr << "It appears that Create failed in some other process for '" 
+                ostr << "It appears that Create failed in some other process for '"
                      << m_name << "'." << std::endl;
-                ostr << "The exception I got was " << exc.what() 
-                     << " and strerror(errno) returned this info: " 
+                ostr << "The exception I got was " << exc.what()
+                     << " and strerror(errno) returned this info: "
                      << strerror(errno) << std::endl;
                 std::wcerr << ostr.str().c_str() << std::flush;
                 throw std::logic_error(ostr.str());
@@ -226,7 +226,7 @@ namespace Utilities
             {
                 throw std::logic_error("Unexpectedly failed to find synchronized in m_synchronized");
             }
-            
+
             m_synchronized.erase(findIt);
 
             if (!m_synchronized.empty())
@@ -234,9 +234,9 @@ namespace Utilities
                 return;
             }
 
-            //synchronized is now a candidate for calling Destroy on (if we're the last process)                
+            //synchronized is now a candidate for calling Destroy on (if we're the last process)
 
-                
+
             //Try to get the inner lock, if we do not already have it
             if (!m_secondExclusiveLock.owns())
             {
@@ -250,7 +250,8 @@ namespace Utilities
                 return;
             }
 
-            //TODO: what happens after here is not analyzed
+            //Note: What happens after here is not analyzed properly. So if any bug occurs
+            //it might pay off to look at this code.
 
             //try to upgrade the first lock (no explicit upgrade path, which is why we have the second lock)
             m_firstSharableLock.unlock();
@@ -263,9 +264,8 @@ namespace Utilities
                 synchronized->Destroy();
 
                 boost::interprocess::named_semaphore::remove(m_name.c_str());
-                //TODO: can we do these?
-                //boost::filesystem::remove(m_firstLockFilePath);
-                //boost::filesystem::remove(m_secondLockFilePath);
+                boost::filesystem::remove(m_firstLockFilePath);
+                boost::filesystem::remove(m_secondLockFilePath);
             }
         }
 
@@ -299,12 +299,12 @@ namespace Utilities
     };
 
 
-    /** 
+    /**
      * A singleton that holds all the impl:s
      * Note that all instances for the same name in the same process
-     * shares the same impl! This is to make it possible to have 
+     * shares the same impl! This is to make it possible to have
      * thread (as opposed to process) guarantees!
-     * The kept references are weak pointers! So this singleton will 
+     * The kept references are weak pointers! So this singleton will
      * never keep an impl "alive" on its own.
      */
     class ImplKeeper
@@ -315,7 +315,7 @@ namespace Utilities
             boost::call_once(SingletonHelper::m_onceFlag,boost::bind(SingletonHelper::Instance));
             return SingletonHelper::Instance();
         }
-            
+
         const boost::shared_ptr<StartupSynchronizerImpl> Get(const std::string& uniqueName)
         {
             boost::lock_guard<boost::mutex> lck(m_lock);
@@ -339,18 +339,18 @@ namespace Utilities
             m_table.insert(std::make_pair(uniqueName,boost::weak_ptr<StartupSynchronizerImpl>(newImpl)));
             return newImpl;
         }
-            
+
     private:
         /** Constructor*/
         ImplKeeper()
         {
-                    
+
         }
-            
+
         /** Destructor */
         ~ImplKeeper()
         {
-                    
+
         }
 
         void Deleter(StartupSynchronizerImpl* impl)
@@ -367,7 +367,7 @@ namespace Utilities
             delete impl;
         }
 
-            
+
         boost::mutex m_lock;
 
         typedef std::map<std::string,boost::weak_ptr<StartupSynchronizerImpl> > Table;
@@ -376,24 +376,24 @@ namespace Utilities
 
     private:
         /**
-         * This class is here to ensure that only the Instance method can get at the 
+         * This class is here to ensure that only the Instance method can get at the
          * instance, so as to be sure that boost call_once is used correctly.
-         * Also makes it easier to grep for singletons in the code, if all 
+         * Also makes it easier to grep for singletons in the code, if all
          * singletons use the same construction and helper-name.
          */
         struct SingletonHelper
         {
         private:
             friend ImplKeeper& ImplKeeper::Instance();
-            
+
             static ImplKeeper& Instance()
             {
                 static ImplKeeper instance;
                 return instance;
             }
             static boost::once_flag m_onceFlag;
-        };        
-            
+        };
+
     };
 
     //mandatory static initialization
@@ -428,6 +428,3 @@ namespace Utilities
 
 }
 }
-
-
-
