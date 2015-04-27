@@ -28,7 +28,6 @@
 #include <Safir/Utilities/Internal/SystemLog.h>
 #include <Safir/Utilities/Internal/Id.h>
 #include <iostream>
-#include <boost/thread.hpp>
 #include <boost/regex.hpp>
 #include <atomic>
 
@@ -40,6 +39,7 @@
 
 #include <boost/program_options.hpp>
 #include <boost/asio.hpp>
+#include <boost/thread.hpp>
 
 #if defined _MSC_VER
 #  pragma warning (pop)

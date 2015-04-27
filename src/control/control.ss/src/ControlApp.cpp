@@ -48,16 +48,17 @@
 ControlApp::ControlApp(boost::asio::io_service& ioService,
                        const std::string&       doseMainPath,
                        const boost::int64_t     id)
-    : m_ioService(ioService),
-      m_signalSet(ioService),
-      m_strand(ioService),
-      m_terminationTimer(ioService),
-      m_ctrlStopped(false),
-      m_doseMainStarted(false)
+    : m_ioService(ioService)
+    , m_signalSet(ioService)
+    , m_strand(ioService)
+    , m_terminationTimer(ioService)
+    , m_ctrlStopped(false)
+    , m_doseMainStarted(false)
 #if defined(linux) || defined(__linux) || defined(__linux__)
-      ,m_sigchldSet(ioService, SIGCHLD)
+    , m_sigchldSet(ioService, SIGCHLD)
+#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+    , m_handle(ioService)
 #endif
-
 {
     // Make some work to stop io_service from exiting.
     m_work = Safir::make_unique<boost::asio::io_service::work>(ioService);
@@ -242,7 +243,7 @@ ControlApp::ControlApp(boost::asio::io_service& ioService,
 
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-    m_handle(m_ioService, m_doseMain->process_handle());
+    m_handle.assign(m_doseMain->process_handle());
 
     m_handle.async_wait(
                 [this](const boost::system::error_code&)
