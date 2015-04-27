@@ -950,7 +950,6 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetBinaryParameter
 jint JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_DictionaryInt32KeyToIndex
   (JNIEnv *, jclass, jlong _typeId, jint _parameter, jint _key)
 {
-    std::cout<<"DotsC_DictionaryInt32KeyToIndex key "<<_key<<", TypeId="<<DotsC_GetTypeName(_typeId)<<", param="<<_parameter<<std::endl;
     return DotsC_DictionaryInt32KeyToIndex(_typeId, _parameter, _key);
 }
 

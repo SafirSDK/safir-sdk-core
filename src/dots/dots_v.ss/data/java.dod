@@ -701,6 +701,7 @@ public class @_CLASS_@
 @@ELSE@@
         int index = com.saabgroup.safir.dob.typesystem.Parameters.dictionaryKeyToIndex(ClassTypeId, m_@_PARAMETER_@Parameter, key);
 @@END_IF@@
+        if (index<0) throw new com.saabgroup.safir.dob.typesystem.SoftwareViolationException("dictionary entry not found");
         return com.saabgroup.safir.dob.typesystem.Parameters.get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_PARAMETER_@Parameter, index);
     }
 @@ELSIF@@ @_UNIFORM_PARAMETERTYPE_@=Object
@@ -712,6 +713,7 @@ public class @_CLASS_@
 @@ELSE@@
         int index = com.saabgroup.safir.dob.typesystem.Parameters.dictionaryKeyToIndex(ClassTypeId, m_@_PARAMETER_@Parameter, key);
 @@END_IF@@
+        if (index<0) throw new com.saabgroup.safir.dob.typesystem.SoftwareViolationException("dictionary entry not found");
         return (@_PARAMETERTYPE_@)com.saabgroup.safir.dob.typesystem.Parameters.get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_PARAMETER_@Parameter, index);
     }
 @@ELSIF@@ @_UNIFORM_PARAMETERTYPE_@=Enumeration
@@ -723,6 +725,7 @@ public class @_CLASS_@
 @@ELSE@@
         int index = com.saabgroup.safir.dob.typesystem.Parameters.dictionaryKeyToIndex(ClassTypeId, m_@_PARAMETER_@Parameter, key);
 @@END_IF@@
+        if (index<0) throw new com.saabgroup.safir.dob.typesystem.SoftwareViolationException("dictionary entry not found");
         int enumVal = com.saabgroup.safir.dob.typesystem.Parameters.getEnumeration
             (ClassTypeId,
              m_@_PARAMETER_@Parameter,
@@ -739,6 +742,7 @@ public class @_CLASS_@
 @@ELSE@@
         int index = com.saabgroup.safir.dob.typesystem.Parameters.dictionaryKeyToIndex(ClassTypeId, m_@_PARAMETER_@Parameter, key);
 @@END_IF@@
+        if (index<0) throw new com.saabgroup.safir.dob.typesystem.SoftwareViolationException("dictionary entry not found");
         return com.saabgroup.safir.dob.typesystem.Parameters.get@_REPLACE(^si(..)\..*/Float\1):UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_PARAMETER_@Parameter, index);
     }
 @@END_IF@@

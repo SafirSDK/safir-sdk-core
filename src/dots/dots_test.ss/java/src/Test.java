@@ -26,7 +26,7 @@
 import com.saabgroup.dotstest.*;
 import com.saabgroup.safir.dob.typesystem.*;
 import com.saabgroup.safir.dob.typesystem.Object;
-
+import java.util.Map;
 import java.util.Locale;
 /**
  * Mait test class
@@ -11440,99 +11440,94 @@ public class Test {
     
     private static void printDictionaries(MemberDictionaries md)
     {
-    	/*
+    	
         System.out.println("--- Int32StringMember ---");
-        System.out.println("size: "+md.Int32StringMember().size());
-        System.out.println("isChanged: "+md.Int32StringMember().isChanged());
-        for (MapEntry<Integer, String> kv : md.int32StringMember().entrySet())
+        System.out.println("size: "+md.int32StringMember().size());
+        System.out.println("isChanged: "+md.int32StringMember().isChanged());
+        for (Map.Entry<Integer, StringContainer> kv : md.int32StringMember().entrySet())
         {
             if (kv.getValue().isNull ())
-                System.out.println (kv.Key + " = NULL, changed: " + kv.Value.IsChanged ());
+                System.out.println (kv.getKey() + " = NULL, changed: " + kv.getValue().isChanged ());
             else
-                System.out.println (kv.Key + " = "+kv.Value.Val.ToString()+", changed: " + kv.Value.IsChanged ());
+                System.out.println (kv.getKey() + " = "+kv.getValue().getVal()+", changed: " + kv.getValue().isChanged());
         }
-
+        
         System.out.println("--- Int64BinaryMember ---");
-        System.out.println("size: "+md.Int64BinaryMember().size());
-        System.out.println("isChanged: "+md.Int64BinaryMember().isChanged());
-        foreach (var kv in md.Int64BinaryMember)
+        System.out.println("size: "+md.int64BinaryMember().size());
+        System.out.println("isChanged: "+md.int64BinaryMember().isChanged());
+        for (Map.Entry<Long, BinaryContainer> kv : md.int64BinaryMember().entrySet())
         {
-            if (kv.Value.IsNull ())
-                System.out.println (kv.Key + " = NULL, changed: " + kv.Value.IsChanged ());
+            if (kv.getValue().isNull ())
+                System.out.println (kv.getKey() + " = NULL, changed: " + kv.getValue().isChanged ());
             else
-                System.out.println (kv.Key + " = "+System.Text.Encoding.UTF8.GetString(kv.Value.Val)+", changed: " + kv.Value.IsChanged ());
+                System.out.println (kv.getKey() + " = "+(new String(kv.getValue().getVal()))+", changed: " + kv.getValue().isChanged()); //TODO: binary to utf8String
         }
 
         System.out.println("--- TypeIdEnumMember ---");
-        System.out.println("size: "+md.TypeIdEnumMember().size());
-        System.out.println("isChanged: "+md.TypeIdEnumMember().isChanged());
-        foreach (var kv in md.TypeIdEnumMember)
+        System.out.println("size: "+md.typeIdEnumMember().size());
+        System.out.println("isChanged: "+md.typeIdEnumMember().isChanged());
+        for (Map.Entry<Long, TestEnum.Container> kv : md.typeIdEnumMember().entrySet())
         {
-            string name = Safir.Dob.Typesystem.Operations.GetName (kv.Key);
-            if (kv.Value.IsNull ())
-                System.out.println (name + " = NULL, changed: " + kv.Value.IsChanged ());
+            if (kv.getValue().isNull ())
+                System.out.println (Operations.getName(kv.getKey()) + " = NULL, changed: " + kv.getValue().isChanged ());
             else
-                System.out.println (name + " = "+kv.Value.Val.ToString()+", changed: " + kv.Value.IsChanged ());
+                System.out.println (Operations.getName(kv.getKey()) + " = "+TestEnumStr(kv.getValue().getVal())+", changed: " + kv.getValue().isChanged()); //TODO: binary to utf8String
         }
 
         System.out.println("--- EnumInstanceIdMember ---");
-        System.out.println("size: "+md.EnumInstanceIdMember().size());
-        System.out.println("isChanged: "+md.EnumInstanceIdMember().isChanged());
-        foreach (var kv in md.EnumInstanceIdMember)
+        System.out.println("size: "+md.enumInstanceIdMember().size());
+        System.out.println("isChanged: "+md.enumInstanceIdMember().isChanged());
+        for (Map.Entry<TestEnum, InstanceIdContainer> kv : md.enumInstanceIdMember().entrySet())
         {
-            if (kv.Value.IsNull ())
-                System.out.println (kv.Key.ToString() + " = NULL, changed: " + kv.Value.IsChanged ());
+            if (kv.getValue().isNull ())
+                System.out.println (TestEnumStr(kv.getKey()) + " = NULL, changed: " + kv.getValue().isChanged ());
             else
-                System.out.println (kv.Key.ToString() + " = "+kv.Value.Val.ToString()+", changed: " + kv.Value.IsChanged ());
+                System.out.println (TestEnumStr(kv.getKey()) + " = "+kv.getValue().getVal()+", changed: " + kv.getValue().isChanged()); //TODO: binary to utf8String
         }
 
         System.out.println("--- InstanceIdEntityIdMember ---");
-        System.out.println("size: "+md.InstanceIdEntityIdMember().size());
-        System.out.println("isChanged: "+md.InstanceIdEntityIdMember().isChanged());
-        foreach (var kv in md.InstanceIdEntityIdMember)
+        System.out.println("size: "+md.instanceIdEntityIdMember().size());
+        System.out.println("isChanged: "+md.instanceIdEntityIdMember().isChanged());
+        for (Map.Entry<InstanceId, EntityIdContainer> kv : md.instanceIdEntityIdMember().entrySet())
         {
-            if (kv.Value.IsNull ())
-                System.out.println (kv.Key.ToString() + " = NULL, changed: " + kv.Value.IsChanged ());
+            if (kv.getValue().isNull ())
+                System.out.println (kv.getKey() + " = NULL, changed: " + kv.getValue().isChanged ());
             else
-                System.out.println (kv.Key.ToString() + " = "+kv.Value.Val.ToString()+", changed: " + kv.Value.IsChanged ());
+                System.out.println (kv.getKey() + " = "+kv.getValue().getVal()+", changed: " + kv.getValue().isChanged()); //TODO: binary to utf8String
         }
 
         System.out.println("--- EntityIdHandlerIdMember ---");
-        System.out.println("size: "+md.EntityIdHandlerIdMember().size());
-        System.out.println("isChanged: "+md.EntityIdHandlerIdMember().isChanged());
-        foreach (var kv in md.EntityIdHandlerIdMember)
+        System.out.println("size: "+md.entityIdHandlerIdMember().size());
+        System.out.println("isChanged: "+md.entityIdHandlerIdMember().isChanged());
+        for (Map.Entry<EntityId, HandlerIdContainer> kv : md.entityIdHandlerIdMember().entrySet())
         {
-            if (kv.Value.IsNull ())
-                System.out.println (kv.Key.ToString() + " = NULL, changed: " + kv.Value.IsChanged ());
+            if (kv.getValue().isNull ())
+                System.out.println (kv.getKey() + " = NULL, changed: " + kv.getValue().isChanged ());
             else
-                System.out.println (kv.Key.ToString() + " = "+kv.Value.Val.ToString()+", changed: " + kv.Value.IsChanged ());
+                System.out.println (kv.getKey() + " = "+kv.getValue().getVal()+", changed: " + kv.getValue().isChanged()); //TODO: binary to utf8String
         }
 
         System.out.println("--- StringItemMember ---");
-        System.out.println("size: "+md.StringItemMember().size());
-        System.out.println("isChanged: "+md.StringItemMember().isChanged());
-        foreach (var kv in md.StringItemMember)
+        System.out.println("size: "+md.stringItemMember().size());
+        System.out.println("isChanged: "+md.stringItemMember().isChanged());
+        for (Map.Entry<String, ObjectContainerImpl<com.saabgroup.dotstest.MemberDictionaries>> kv : md.stringItemMember().entrySet())
         {
-            if (kv.Value.IsNull ())
-                System.out.println (kv.Key.ToString() + " = NULL, changed: " + kv.Value.IsChanged ());
+            if (kv.getValue().isNull ())
+                System.out.println (kv.getKey() + " = NULL, changed: " + kv.getValue().isChanged ());
             else
-                System.out.println (kv.Key.ToString() + " = "+Safir.Dob.Typesystem.Serialization.ToJson(kv.Value.Obj)+", changed: " + kv.Value.IsChanged ());
+                System.out.println (kv.getKey() + " = "+Serialization.toJson(kv.getValue().getObj())+", changed: " + kv.getValue().isChanged()); //TODO: binary to utf8String
         }
-
-
-     
-
+       
         System.out.println("--- StringObjectMember ---");
-        System.out.println("size: "+md.StringObjectMember().size());
-        System.out.println("isChanged: "+md.StringObjectMember().isChanged().ToString().ToLower());
-        foreach (var kv in md.StringObjectMember)
+        System.out.println("size: "+md.stringObjectMember().size());
+        System.out.println("isChanged: "+md.stringObjectMember().isChanged());
+        for (Map.Entry<String, ObjectContainerImpl<Object>> kv : md.stringObjectMember().entrySet())
         {
-            if (kv.Value.IsNull ())
-                System.out.println (kv.Key.ToString() + " = NULL, changed: " + kv.Value.IsChanged ());
+            if (kv.getValue().isNull ())
+                System.out.println (kv.getKey() + " = NULL, changed: " + kv.getValue().isChanged ());
             else
-                System.out.println (kv.Key.ToString() + " = "+Safir.Dob.Typesystem.Serialization.ToJson(kv.Value.Obj)+", changed: " + kv.Value.IsChanged ());
-        }
-        */
+                System.out.println (kv.getKey() + " = "+Serialization.toJson(kv.getValue().getObj())+", changed: " + kv.getValue().isChanged()); //TODO: binary to utf8String
+        }  
     }
 
     private static void testDictionaries()
@@ -11540,41 +11535,112 @@ public class Test {
         Header("Dictionaries");
 
         MemberDictionaries md=new MemberDictionaries();
-        md.int32StringMember().put(10,  new StringContainer()).setVal(ParameterDictionaries.getInt32StringParameter(10));
-        md.int32StringMember().put(20,  new StringContainer()).setVal(ParameterDictionaries.getInt32StringParameter(20));
         
-        md.int64BinaryMember().put(100L, new BinaryContainer()).setVal(ParameterDictionaries.getInt32BinaryParameter(100));
-        md.int64BinaryMember().put(100L, new BinaryContainer()).setVal(ParameterDictionaries.getInt32BinaryParameter(200));        
+        //int32String
+        {
+        	StringContainer c=new StringContainer();
+        	c.setVal(ParameterDictionaries.getInt32StringParameter(10));
+        	md.int32StringMember().put(10,  c);
+        }
+        {
+        	StringContainer c=new StringContainer();
+        	c.setVal(ParameterDictionaries.getInt32StringParameter(20));
+        	md.int32StringMember().put(20,  c);
+        }
         
-        md.typeIdEnumMember().put(MemberDictionaries.ClassTypeId, new TestEnum.Container()).setVal(ParameterDictionaries.getStringEnumParameter ("Billy"));
-        md.typeIdEnumMember().put(MemberSequences.ClassTypeId, new TestEnum.Container()).setVal(ParameterDictionaries.getStringEnumParameter ("Svarre"));        
+        //int64Binary
+        {
+        	BinaryContainer c=new BinaryContainer();
+        	c.setVal(ParameterDictionaries.getInt32BinaryParameter(10));
+        	md.int64BinaryMember().put(100L,  c);
+        }
+        {
+        	BinaryContainer c=new BinaryContainer();
+        	c.setVal(ParameterDictionaries.getInt32BinaryParameter(20));
+        	md.int64BinaryMember().put(200L,  c);
+        }
+        
+        //typeIdEnum
+        {
+        	TestEnum.Container c=new TestEnum.Container();
+        	c.setVal(ParameterDictionaries.getStringEnumParameter ("Billy"));
+        	md.typeIdEnumMember().put(MemberDictionaries.ClassTypeId,  c);
+        }
+        {
+        	TestEnum.Container c=new TestEnum.Container();
+        	c.setVal(ParameterDictionaries.getStringEnumParameter ("Svarre"));
+        	md.typeIdEnumMember().put(MemberSequences.ClassTypeId,  c);
+        }
+        
+        //enumInstanceId
+        {
+        	InstanceIdContainer c=new InstanceIdContainer();
+        	c.setVal(ParameterDictionaries.getEnumInstanceIdParameter (TestEnum.MY_FIRST));
+        	md.enumInstanceIdMember().put(TestEnum.MY_FIRST,  c);
+        }
+        {
+        	InstanceIdContainer c=new InstanceIdContainer();
+        	c.setVal(ParameterDictionaries.getEnumInstanceIdParameter (TestEnum.MY_SECOND));
+        	md.enumInstanceIdMember().put(TestEnum.MY_SECOND,  c);
+        }
 
-        md.enumInstanceIdMember().put(TestEnum.MY_FIRST,  new InstanceIdContainer()).setVal(ParameterDictionaries.getEnumInstanceIdParameter (TestEnum.MY_FIRST));
-        md.enumInstanceIdMember().put(TestEnum.MY_SECOND,  new InstanceIdContainer()).setVal(ParameterDictionaries.getEnumInstanceIdParameter (TestEnum.MY_SECOND));
-
-        md.instanceIdEntityIdMember().put(new InstanceId("FirstInstance"),  new EntityIdContainer()).setVal(ParameterDictionaries.getHandlerIdEntityIdParameter (new HandlerId("handlerOne")));
-        md.instanceIdEntityIdMember().put(new InstanceId("SecondInstance"),  new EntityIdContainer()).setVal(ParameterDictionaries.getHandlerIdEntityIdParameter (new HandlerId(2)));
+        //instanceIdEntityId
+        {
+        	EntityIdContainer c=new EntityIdContainer();
+        	c.setVal(ParameterDictionaries.getHandlerIdEntityIdParameter (new HandlerId("handlerOne")));
+        	md.instanceIdEntityIdMember().put(new InstanceId("FirstInstance"),  c);
+        }
+        {
+        	EntityIdContainer c=new EntityIdContainer();
+        	c.setVal(ParameterDictionaries.getHandlerIdEntityIdParameter (new HandlerId(2)));
+        	md.instanceIdEntityIdMember().put(new InstanceId("SecondInstance"),  c);
+        }
 
         MemberDictionaries item1=new MemberDictionaries();
-        item1.entityIdHandlerIdMember().put (
-        		new EntityId(com.saabgroup.safir.dob.Entity.ClassTypeId, new InstanceId("first")),
-				new HandlerIdContainer()).setVal(
-				ParameterDictionaries.getEntityIdHandlerIdParameter(new EntityId(com.saabgroup.safir.dob.Entity.ClassTypeId, new InstanceId("first"))));
-        item1.entityIdHandlerIdMember().put (
-        		new EntityId(com.saabgroup.safir.dob.Entity.ClassTypeId, new InstanceId(2)),
-				new HandlerIdContainer()).setVal(
-				ParameterDictionaries.getEntityIdHandlerIdParameter(new EntityId(com.saabgroup.safir.dob.Entity.ClassTypeId, new InstanceId("second"))));
-        
+                
+        //entityIdHandlerId
+        {
+        	HandlerIdContainer c=new HandlerIdContainer();
+        	c.setVal(ParameterDictionaries.getEntityIdHandlerIdParameter(new EntityId(com.saabgroup.safir.dob.Entity.ClassTypeId, new InstanceId("first"))));
+        	EntityId key=new EntityId(com.saabgroup.safir.dob.Entity.ClassTypeId, new InstanceId("first"));
+        	item1.entityIdHandlerIdMember().put(key,  c);
+        }
+        {
+        	HandlerIdContainer c=new HandlerIdContainer();
+        	c.setVal(ParameterDictionaries.getEntityIdHandlerIdParameter(new EntityId(com.saabgroup.safir.dob.Entity.ClassTypeId, new InstanceId("second"))));
+        	EntityId key=new EntityId(com.saabgroup.safir.dob.Entity.ClassTypeId, new InstanceId(2));
+        	item1.entityIdHandlerIdMember().put(key,  c);
+        }
 
-        //new Safir.Dob.Typesystem.EntityId(Safir.Dob.Entity.ClassTypeId, new Safir.Dob.Typesystem.InstanceId("first"))
-        //---------
-        md.stringItemMember().put ("Karl", new ObjectContainerImpl<com.saabgroup.dotstest.MemberDictionaries>()).setObj(item1);
-        md.stringItemMember().put ("Philip", new ObjectContainerImpl<com.saabgroup.dotstest.MemberDictionaries>()).setNull();
-        md.stringItemMember().put ("Gustav", new ObjectContainerImpl<com.saabgroup.dotstest.MemberDictionaries>()).setObj(item1);
-        
-        md.stringObjectMember().put ("Dilbert", new ObjectContainerImpl<Object>()).setObj(ParameterDictionaries.getInt32ObjectParameter(10));
-        md.stringObjectMember().put ("Wally", new ObjectContainerImpl<Object>()).setObj(ParameterDictionaries.getInt32ObjectParameter(20));
-     
+        //stringItem
+        {
+        	ObjectContainerImpl<com.saabgroup.dotstest.MemberDictionaries> c=new ObjectContainerImpl<com.saabgroup.dotstest.MemberDictionaries>();
+        	c.setObj(item1);
+        	md.stringItemMember().put("Karl",  c);
+        }
+        {
+        	ObjectContainerImpl<com.saabgroup.dotstest.MemberDictionaries> c=new ObjectContainerImpl<com.saabgroup.dotstest.MemberDictionaries>();
+        	c.setNull();
+        	md.stringItemMember().put("Philip",  c);
+        }
+        {
+        	ObjectContainerImpl<com.saabgroup.dotstest.MemberDictionaries> c=new ObjectContainerImpl<com.saabgroup.dotstest.MemberDictionaries>();
+        	c.setObj(item1);
+        	md.stringItemMember().put("Gustav",  c);
+        }
+
+        //stringObject
+        {
+        	ObjectContainerImpl<Object> c=new ObjectContainerImpl<Object>();
+        	c.setObj(ParameterDictionaries.getInt32ObjectParameter(10));
+        	md.stringObjectMember().put("Dilbert",  c);
+        }
+        {
+        	ObjectContainerImpl<Object> c=new ObjectContainerImpl<Object>();
+        	c.setObj(ParameterDictionaries.getInt32ObjectParameter(20));
+        	md.stringObjectMember().put("Wally",  c);
+        }
+    
         printDictionaries(md);
 
         System.out.println("------ To Xml -----");
