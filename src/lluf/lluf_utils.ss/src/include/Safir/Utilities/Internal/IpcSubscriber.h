@@ -143,7 +143,7 @@ namespace Internal
                             HANDLE pipe = ::CreateFileA(m_streamId.c_str(),
                                                         GENERIC_READ,
                                                         0,                      // no sharing
-                                                        nullptr,                // default security attributes TODO: Is this good enough?
+                                                        nullptr,                // default security attributes
                                                         OPEN_EXISTING,          // open existing pipe
                                                         FILE_FLAG_OVERLAPPED,   // asynchronous mode
                                                         nullptr);               // no template file

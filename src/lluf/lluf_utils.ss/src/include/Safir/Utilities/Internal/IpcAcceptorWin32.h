@@ -123,7 +123,7 @@ namespace Internal
                                                              localBufferSize,            // output buffer size (advisory)
                                                              localBufferSize,            // input buffer size (advisory)
                                                              0,                          // defult time-out
-                                                             nullptr);                   // default security attributes TODO: Is this good enough?
+                                                             nullptr);                   // default security attributes
 
                             // Throw if we got an error creating the pipe.
                             if (pipe == INVALID_HANDLE_VALUE)
