@@ -1,7 +1,6 @@
 add_subdirectory(tracer_cpp)
 
-# TODO Uncomment when dose_main is back on track
-#add_subdirectory(tracer_backdoor)
+add_subdirectory(tracer_backdoor)
 
 add_subdirectory(swreport_cpp)
 
