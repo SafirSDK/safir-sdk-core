@@ -44,7 +44,7 @@ namespace Safir
 namespace Utilities
 {
     /**
-     * This class provides a simple wrapper around dynamic loading 
+     * This class provides a simple wrapper around dynamic loading
      * functionality of the operating system. E.g. dlopen/dlsym
      * of *nix and LoadLibrary/GetProcAddress of Win32.
      */
@@ -61,7 +61,7 @@ namespace Utilities
          * Load a library.
          *
          * Attempt to load the specified library dynamically.
-         * 
+         *
          * @param [in] libraryName The name of the library to load. On linux "lib" and ".so" are added
          *                         to the beginning and end of the name, and on windows ".dll" is appended.
          * @param [in] unloadOnDestruction If this is true the library will be unloaded when the object
@@ -78,7 +78,7 @@ namespace Utilities
          * Load a library from a given location.
          *
          * Attempt to load the specified library dynamically.
-         * 
+         *
          * @param [in] libraryName The name of the library to load. On linux "lib" and ".so" are added
          *                         to the beginning and end of the name, and on windows ".dll" is appended.
          * @param [in] path Location to load the library from.
@@ -92,9 +92,7 @@ namespace Utilities
                   const bool unloadOnDestruction,
                   const bool global = false);
 
-        //TODO: add test for this function!
-
-        /** 
+        /**
          * Unload the library.
          */
         void Unload();
@@ -105,17 +103,17 @@ namespace Utilities
          * Attempt to load the specified function and return it as a function
          * pointer with the specified signature.
          * The return type is a raw function pointer rather than a boost::function
-         * object since otherwise things get very messy if you have to specify 
+         * object since otherwise things get very messy if you have to specify
          * calling convention.
          * But it easy to put the result into a boost function object.
-         * For example: 
-         * boost::function<double(int,int)> func = 
+         * For example:
+         * boost::function<double(int,int)> func =
          *     lib.GetFunction<double(int,int)>("myfunc")
          * And with specified calling convention on ms visual c++:
-         * boost::function<double(int,int)> func = 
+         * boost::function<double(int,int)> func =
          *     lib.GetFunction<double __stdcall (int,int)>("myfunc")
          * And with specified calling convention on gcc:
-         * boost::function<double(int,int)> func = 
+         * boost::function<double(int,int)> func =
          *     lib.GetFunction<double __attribute__(stdcall) (int,int)>("myfunc")
          *
          * @param [in] functionName Name of the function to load
@@ -148,4 +146,3 @@ namespace Utilities
 
 
 #endif
-
