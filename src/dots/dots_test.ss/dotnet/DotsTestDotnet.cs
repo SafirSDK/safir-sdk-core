@@ -7748,8 +7748,8 @@ class DotsTestDotnet
         Console.WriteLine("--- Float32Member ---");
         Console.WriteLine("size: "+ms.Float32Member.Count);
         Console.WriteLine("isChanged: "+ms.Float32Member.IsChanged().ToString().ToLower());
-        Console.WriteLine("val[0]: "+ms.Float32Member[0].ToString("0.0"));
-        Console.WriteLine("val[1]: "+ms.Float32Member[1].ToString("0.0"));
+        Console.WriteLine("val[0]: "+ms.Float32Member[0].ToString("0.00"));
+        Console.WriteLine("val[1]: "+ms.Float32Member[1].ToString("0.00"));
 
         Console.WriteLine("--- Float64Member ---");
         Console.WriteLine("size: "+ms.Float64Member.Count);

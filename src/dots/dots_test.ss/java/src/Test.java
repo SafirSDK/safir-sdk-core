@@ -11330,8 +11330,8 @@ public class Test {
         System.out.println("--- Float32Member ---");
         System.out.println("size: "+ms.float32Member().size());
         System.out.println("isChanged: "+ms.float32Member().isChanged());
-        System.out.println("val[0]: "+String.format("%.01f", ms.float32Member().get(0)));
-        System.out.println("val[1]: "+String.format("%.01f", ms.float32Member().get(1)));
+        System.out.println("val[0]: "+String.format("%.02f", ms.float32Member().get(0)));
+        System.out.println("val[1]: "+String.format("%.02f", ms.float32Member().get(1)));
 
         System.out.println("--- Float64Member ---");
         System.out.println("size: "+ms.float64Member().size());
