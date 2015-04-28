@@ -36,7 +36,7 @@ public class Test {
      * @param args
      */
     public static void main(String[] args) throws java.lang.Exception {
-    	
+
         test_Has_Property();
         test_GetName();
         test_GetNumberOfMembers();
@@ -103,17 +103,16 @@ public class Test {
         Test_IsProperty();
         Test_IsEnumeration();
         Test_IsException();
-        Test_DeserializeUnlinkedObject();
-                
+
         testSequences();
         testDictionaries();
 
+        Test_DeserializeUnlinkedObject();
+
         MiscTests misc_tests = new MiscTests();
         misc_tests.test_Containers();
-        
-        System.out.println();
     }
-    
+
     private static void Header(String label) {
         System.out.println();
         System.out.println();
@@ -10325,12 +10324,12 @@ public class Test {
         }
         LibraryExceptions.getInstance();
     }
-    
+
     private static String ctStr(CollectionType ct)
     {
     	if (ct==CollectionType.ARRAY)
     		return "Array";
-    	else if (ct==CollectionType.DICTIONARY)        
+    	else if (ct==CollectionType.DICTIONARY)
             return "Dictionary";
     	else if (ct==CollectionType.SEQUENCE)
             return "Sequence";
@@ -10384,10 +10383,10 @@ public class Test {
                     System.out.println(Operations.getName(ids[i]));
                 }
             }
-        }        
+        }
     }
 
-    /* This test attempts to deserialize a piece of xml that represents a class 
+    /* This test attempts to deserialize a piece of xml that represents a class
      * that is part of a dou library whose jar is *not* in the classpath of this test.
      * The idea being that this test will succeed if dots_cpp has loaded all the
      * required jars as specified by typesystem.ini
@@ -10421,7 +10420,7 @@ public class Test {
             }
         }
 
-        public void test_Containers() {            
+        public void test_Containers() {
 
             // int32 container testing
             {
@@ -10953,7 +10952,7 @@ public class Test {
 
             }
 
-            
+
 
             // library exceptions
             {
@@ -11160,9 +11159,9 @@ public class Test {
                     Operations.getEnumerationValueName(0, 0);
                 } catch (IllegalValueException exc) {
                     check(true);
-                }              
-               
-                
+                }
+
+
                 byte[] blob=Serialization.toBinary(t);
 
                 t = null;
@@ -11328,9 +11327,9 @@ public class Test {
             }
         }
     }
-        
+
     private static void printSequences(MemberSequences ms)
-    {   
+    {
         System.out.println("--- Int32Member ---");
         System.out.println("size: "+ms.int32Member().size());
         System.out.println("isChanged: "+ms.int32Member().isChanged());
@@ -11453,10 +11452,10 @@ public class Test {
         MemberSequences clone=ms.clone();
         printSequences(clone);
     }
-    
+
     private static void printDictionaries(MemberDictionaries md)
     {
-    	
+
         System.out.println("--- Int32StringMember ---");
         System.out.println("size: "+md.int32StringMember().size());
         System.out.println("isChanged: "+md.int32StringMember().isChanged());
@@ -11467,7 +11466,7 @@ public class Test {
             else
                 System.out.println (kv.getKey() + " = "+kv.getValue().getVal()+", changed: " + kv.getValue().isChanged());
         }
-        
+
         System.out.println("--- Int64BinaryMember ---");
         System.out.println("size: "+md.int64BinaryMember().size());
         System.out.println("isChanged: "+md.int64BinaryMember().isChanged());
@@ -11533,7 +11532,7 @@ public class Test {
             else
                 System.out.println (kv.getKey() + " = "+Serialization.toJson(kv.getValue().getObj())+", changed: " + kv.getValue().isChanged()); //TODO: binary to utf8String
         }
-       
+
         System.out.println("--- StringObjectMember ---");
         System.out.println("size: "+md.stringObjectMember().size());
         System.out.println("isChanged: "+md.stringObjectMember().isChanged());
@@ -11543,7 +11542,7 @@ public class Test {
                 System.out.println (kv.getKey() + " = NULL, changed: " + kv.getValue().isChanged ());
             else
                 System.out.println (kv.getKey() + " = "+Serialization.toJson(kv.getValue().getObj())+", changed: " + kv.getValue().isChanged()); //TODO: binary to utf8String
-        }  
+        }
     }
 
     private static void testDictionaries()
@@ -11551,7 +11550,7 @@ public class Test {
         Header("Dictionaries");
 
         MemberDictionaries md=new MemberDictionaries();
-        
+
         //int32String
         {
         	StringContainer c=new StringContainer();
@@ -11563,7 +11562,7 @@ public class Test {
         	c.setVal(ParameterDictionaries.getInt32StringParameter(20));
         	md.int32StringMember().put(20,  c);
         }
-        
+
         //int64Binary
         {
         	BinaryContainer c=new BinaryContainer();
@@ -11575,7 +11574,7 @@ public class Test {
         	c.setVal(ParameterDictionaries.getInt32BinaryParameter(20));
         	md.int64BinaryMember().put(200L,  c);
         }
-        
+
         //typeIdEnum
         {
         	TestEnum.Container c=new TestEnum.Container();
@@ -11587,7 +11586,7 @@ public class Test {
         	c.setVal(ParameterDictionaries.getStringEnumParameter ("Svarre"));
         	md.typeIdEnumMember().put(MemberSequences.ClassTypeId,  c);
         }
-        
+
         //enumInstanceId
         {
         	InstanceIdContainer c=new InstanceIdContainer();
@@ -11613,7 +11612,7 @@ public class Test {
         }
 
         MemberDictionaries item1=new MemberDictionaries();
-                
+
         //entityIdHandlerId
         {
         	HandlerIdContainer c=new HandlerIdContainer();
@@ -11656,7 +11655,7 @@ public class Test {
         	c.setObj(ParameterDictionaries.getInt32ObjectParameter(20));
         	md.stringObjectMember().put("Wally",  c);
         }
-    
+
         printDictionaries(md);
 
         System.out.println("------ To Xml -----");
@@ -11671,7 +11670,7 @@ public class Test {
         String json=Serialization.toJson(md);
         System.out.println (json);
 
-       
+
         System.out.println("------ From Json -----");
         MemberDictionaries fromJson = (MemberDictionaries)Serialization.toObjectFromJson (json);
         printDictionaries(fromJson);

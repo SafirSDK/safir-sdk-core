@@ -9505,7 +9505,7 @@ int main(int /*argc*/, char* /*argv*/[])
     {
         std::wcout << "Caught ... exception in _tmain: "<<std::endl;
     }
-    std::wcout<<std::endl<<std::endl;
+
     return 0;
 }
 
