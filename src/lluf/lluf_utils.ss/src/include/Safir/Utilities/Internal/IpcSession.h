@@ -63,11 +63,11 @@ namespace Internal
     {
     public:
         Session(const StreamPtr&                    streamPtr,
-                boost::asio::io_service::strand&    strand,
+                boost::asio::io_service&            ioService,
                 std::function<void()>               sessionClosedCb)
             : m_streamPtr(streamPtr),
+              m_strand(ioService),
               m_msgQueue(),
-              m_strand(strand),
               m_sessionClosedCb(sessionClosedCb)
         {
         }
@@ -82,12 +82,15 @@ namespace Internal
 
         void Send(boost::shared_ptr<char[]> msg, uint32_t msgSize)
         {
-            bool writeInProgress = !m_msgQueue.empty();
-            m_msgQueue.push_back({msg, msgSize});
-            if (!writeInProgress)
-            {
-              Write();
-            }
+            m_strand.post([this, msg, msgSize]
+                          {
+                              bool writeInProgress = !m_msgQueue.empty();
+                              m_msgQueue.push_back({msg, msgSize});
+                              if (!writeInProgress)
+                              {
+                                  Write();
+                              }
+                          });
         }
 
         bool IsOpen() const
@@ -139,8 +142,8 @@ namespace Internal
         }
 
         StreamPtr                           m_streamPtr;
+        boost::asio::io_service::strand     m_strand;
         std::deque<Msg>                     m_msgQueue;
-        boost::asio::io_service::strand&    m_strand;
         std::function<void()>               m_sessionClosedCb;
     };
 
