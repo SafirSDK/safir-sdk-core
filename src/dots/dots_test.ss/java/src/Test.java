@@ -109,6 +109,8 @@ public class Test {
 
         MiscTests misc_tests = new MiscTests();
         misc_tests.test_Containers();
+        
+        System.out.println();
     }
     
     private static void Header(String label) {
@@ -11330,14 +11332,14 @@ public class Test {
         System.out.println("--- Float32Member ---");
         System.out.println("size: "+ms.float32Member().size());
         System.out.println("isChanged: "+ms.float32Member().isChanged());
-        System.out.println("val[0]: "+String.format("%.02f", ms.float32Member().get(0)));
-        System.out.println("val[1]: "+String.format("%.02f", ms.float32Member().get(1)));
+        System.out.println("val[0]: "+String.format("%.1f", ms.float32Member().get(0)));
+        System.out.println("val[1]: "+String.format("%.1f", ms.float32Member().get(1)));
 
         System.out.println("--- Float64Member ---");
         System.out.println("size: "+ms.float64Member().size());
         System.out.println("isChanged: "+ms.float64Member().isChanged());
-        System.out.println("val[0]: "+String.format("%.02f", ms.float64Member().get(0)));
-        System.out.println("val[1]: "+String.format("%.02f", ms.float64Member().get(1)));
+        System.out.println("val[0]: "+String.format("%.1f", ms.float64Member().get(0)));
+        System.out.println("val[1]: "+String.format("%.1f", ms.float64Member().get(1)));
 
         System.out.println("--- BooleanMember ---");
         System.out.println("size: "+ms.booleanMember().size());
@@ -11389,9 +11391,9 @@ public class Test {
         ms.float32Member().add(0, 1.1f);
         ms.float32Member().remove(2);
 
-        ms.float64Member().add(22.22);
-        ms.float64Member().add(33.33);
-        ms.float64Member().add(0, 11.11);
+        ms.float64Member().add(22.2);
+        ms.float64Member().add(33.3);
+        ms.float64Member().add(0, 11.1);
         ms.float64Member().remove(2);
 
         ms.booleanMember().add(false);

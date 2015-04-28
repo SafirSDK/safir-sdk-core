@@ -1830,8 +1830,8 @@ val[1]: 2.2
 --- Float64Member ---
 size: 2
 isChanged: true
-val[0]: 11.11
-val[1]: 22.22
+val[0]: 11.1
+val[1]: 22.2
 --- BooleanMember ---
 size: 2
 isChanged: true
@@ -1856,7 +1856,7 @@ val[1]: DotsTest.MemberSequences
 size: 0
 isChanged: false
 ------ To Xml -----
-<?xml version="1.0" encoding="utf-8"?><DotsTest.MemberSequences><Int32Member><Int32>10</Int32><Int32>20</Int32></Int32Member><Int64Member><Int64>100</Int64><Int64>200</Int64></Int64Member><Float32Member><Float32>1.1</Float32><Float32>2.2</Float32></Float32Member><Float64Member><Float64>11.1099996566772</Float64><Float64>22.2199993133545</Float64></Float64Member><BooleanMember><Boolean>true</Boolean><Boolean>false</Boolean></BooleanMember><EnumerationMember><DotsTest.TestEnum>MyFirst</DotsTest.TestEnum><DotsTest.TestEnum>MySecond</DotsTest.TestEnum></EnumerationMember><StringMember><String xml:space="preserve">Aa</String><String xml:space="preserve">Bb</String></StringMember><TypeIdMember><TypeId>DotsTest.MemberDictionaries</TypeId><TypeId>DotsTest.MemberSequences</TypeId></TypeIdMember></DotsTest.MemberSequences>
+<?xml version="1.0" encoding="utf-8"?><DotsTest.MemberSequences><Int32Member><Int32>10</Int32><Int32>20</Int32></Int32Member><Int64Member><Int64>100</Int64><Int64>200</Int64></Int64Member><Float32Member><Float32>1.1</Float32><Float32>2.2</Float32></Float32Member><Float64Member><Float64>11.1</Float64><Float64>22.2</Float64></Float64Member><BooleanMember><Boolean>true</Boolean><Boolean>false</Boolean></BooleanMember><EnumerationMember><DotsTest.TestEnum>MyFirst</DotsTest.TestEnum><DotsTest.TestEnum>MySecond</DotsTest.TestEnum></EnumerationMember><StringMember><String xml:space="preserve">Aa</String><String xml:space="preserve">Bb</String></StringMember><TypeIdMember><TypeId>DotsTest.MemberDictionaries</TypeId><TypeId>DotsTest.MemberSequences</TypeId></TypeIdMember></DotsTest.MemberSequences>
 ------ From Xml -----
 --- Int32Member ---
 size: 2
@@ -1876,8 +1876,8 @@ val[1]: 2.2
 --- Float64Member ---
 size: 2
 isChanged: true
-val[0]: 11.11
-val[1]: 22.22
+val[0]: 11.1
+val[1]: 22.2
 --- BooleanMember ---
 size: 2
 isChanged: true
@@ -1902,7 +1902,7 @@ val[1]: DotsTest.MemberSequences
 size: 0
 isChanged: false
 ------ To Json -----
-{"DotsTest.MemberSequences": {"_DouType": "DotsTest.MemberSequences", "Int32Member": [10, 20], "Int64Member": [100, 200], "Float32Member": [1.1, 2.2], "Float64Member": [11.1099996566772, 22.2199993133545], "BooleanMember": [true, false], "EnumerationMember": ["MyFirst", "MySecond"], "StringMember": ["Aa", "Bb"], "TypeIdMember": ["DotsTest.MemberDictionaries", "DotsTest.MemberSequences"]}}
+{"DotsTest.MemberSequences": {"_DouType": "DotsTest.MemberSequences", "Int32Member": [10, 20], "Int64Member": [100, 200], "Float32Member": [1.1, 2.2], "Float64Member": [11.1, 22.2], "BooleanMember": [true, false], "EnumerationMember": ["MyFirst", "MySecond"], "StringMember": ["Aa", "Bb"], "TypeIdMember": ["DotsTest.MemberDictionaries", "DotsTest.MemberSequences"]}}
 ------ From Json -----
 --- Int32Member ---
 size: 2
@@ -1922,8 +1922,8 @@ val[1]: 2.2
 --- Float64Member ---
 size: 2
 isChanged: true
-val[0]: 11.11
-val[1]: 22.22
+val[0]: 11.1
+val[1]: 22.2
 --- BooleanMember ---
 size: 2
 isChanged: true
@@ -1966,8 +1966,8 @@ val[1]: 2.2
 --- Float64Member ---
 size: 2
 isChanged: true
-val[0]: 11.11
-val[1]: 22.22
+val[0]: 11.1
+val[1]: 22.2
 --- BooleanMember ---
 size: 2
 isChanged: true
@@ -2114,7 +2114,7 @@ size: 3
 isChanged: true
 Gustav = {"DotsTest.MemberDictionaries": {"_DouType": "DotsTest.MemberDictionaries", "EntityIdHandlerIdMember": [{"key": {"name": "Safir.Dob.Entity", "instanceId": "first"}, "value": "first"}, {"key": {"name": "Safir.Dob.Entity", "instanceId": 2}, "value": 2}]}}, changed: true
 Karl = {"DotsTest.MemberDictionaries": {"_DouType": "DotsTest.MemberDictionaries", "EntityIdHandlerIdMember": [{"key": {"name": "Safir.Dob.Entity", "instanceId": "first"}, "value": "first"}, {"key": {"name": "Safir.Dob.Entity", "instanceId": 2}, "value": 2}]}}, changed: true
-Philip = NULL, changed: true
+Philip = NULL, changed: false
 --- StringObjectMember ---
 size: 2
 isChanged: true
@@ -2160,3 +2160,5 @@ size: 2
 isChanged: true
 Dilbert = {"Object": {"_DouType": "Object"}}, changed: true
 Wally = {"DotsTest.MemberDictionaries": {"_DouType": "DotsTest.MemberDictionaries", "TypeIdStringMember": [{"key": "DotsTest.MemberDictionaries", "value": "World"}, {"key": "DotsTest.TestEnum", "value": "Hello"}]}}, changed: true
+
+

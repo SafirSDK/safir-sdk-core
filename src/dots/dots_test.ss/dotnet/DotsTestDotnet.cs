@@ -7748,14 +7748,14 @@ class DotsTestDotnet
         Console.WriteLine("--- Float32Member ---");
         Console.WriteLine("size: "+ms.Float32Member.Count);
         Console.WriteLine("isChanged: "+ms.Float32Member.IsChanged().ToString().ToLower());
-        Console.WriteLine("val[0]: "+ms.Float32Member[0].ToString("0.00"));
-        Console.WriteLine("val[1]: "+ms.Float32Member[1].ToString("0.00"));
+        Console.WriteLine("val[0]: "+ms.Float32Member[0].ToString("0.0"));
+        Console.WriteLine("val[1]: "+ms.Float32Member[1].ToString("0.0"));
 
         Console.WriteLine("--- Float64Member ---");
         Console.WriteLine("size: "+ms.Float64Member.Count);
         Console.WriteLine("isChanged: "+ms.Float64Member.IsChanged().ToString().ToLower());
-        Console.WriteLine("val[0]: "+ms.Float64Member[0].ToString("0.00"));
-        Console.WriteLine("val[1]: "+ms.Float64Member[1].ToString("0.00"));
+        Console.WriteLine("val[0]: "+ms.Float64Member[0].ToString("0.0"));
+        Console.WriteLine("val[1]: "+ms.Float64Member[1].ToString("0.0"));
 
         Console.WriteLine("--- BooleanMember ---");
         Console.WriteLine("size: "+ms.BooleanMember.Count);
@@ -7807,9 +7807,9 @@ class DotsTestDotnet
         ms.Float32Member.Insert(0, 1.1f);
         ms.Float32Member.RemoveAt(2);
 
-        ms.Float64Member.Add(22.22f);
-        ms.Float64Member.Add(33.33f);
-        ms.Float64Member.Insert(0, 11.11f);
+        ms.Float64Member.Add(22.2);
+        ms.Float64Member.Add(33.3);
+        ms.Float64Member.Insert(0, 11.1);
         ms.Float64Member.RemoveAt(2);
 
         ms.BooleanMember.Add(false);
