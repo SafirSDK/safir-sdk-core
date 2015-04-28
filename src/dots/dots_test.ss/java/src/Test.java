@@ -107,8 +107,8 @@ public class Test {
         testSequences();
         testDictionaries();
 
-        //MiscTests misc_tests = new MiscTests();
-        //misc_tests.test_Containers();
+        MiscTests misc_tests = new MiscTests();
+        misc_tests.test_Containers();
     }
     
     private static void Header(String label) {
