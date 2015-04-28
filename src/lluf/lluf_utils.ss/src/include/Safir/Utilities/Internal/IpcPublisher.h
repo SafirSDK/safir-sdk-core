@@ -78,17 +78,18 @@ namespace Internal
                          const std::function<void()>    subscriberDisconnectedCb)
             : m_running(false),
               m_strand(ioService),
-              m_acceptor(boost::make_shared<Acceptor>(m_strand,
-                                                      name,
-                                                      [this](typename Acceptor::StreamPtr streamPtr)
-                                                      {
-                                                          m_sessions.insert(boost::make_shared<SessionType>
-                                                                            (streamPtr, m_strand, m_subscriberDisconnectedCb));
-                                                          if (m_subscriberConnectedCb != nullptr)
-                                                          {
-                                                              m_subscriberConnectedCb();
-                                                          }
-                                                      })),
+              m_acceptor(boost::make_shared<Acceptor>(
+                             m_strand,
+                             name,
+                             [this](typename Acceptor::StreamPtr streamPtr)
+                             {
+                                 m_sessions.insert(boost::make_shared<SessionType>
+                                                   (streamPtr, m_strand.get_io_service(), m_subscriberDisconnectedCb));
+                                 if (m_subscriberConnectedCb != nullptr)
+                                 {
+                                     m_subscriberConnectedCb();
+                                 }
+                             })),
               m_sessions(),
               m_subscriberConnectedCb(subscriberConnectedCb),
               m_subscriberDisconnectedCb(subscriberDisconnectedCb)
@@ -150,7 +151,7 @@ namespace Internal
 
             boost::shared_ptr<char[]> msgSharedPtr(std::move(msg));
 
-            m_strand.dispatch(
+            m_strand.post(
                         [this, selfHandle, msgSharedPtr, msgSize]()
                         {
                             for (auto it = m_sessions.begin(); it != m_sessions.end(); /* it incremented in loop */)
@@ -203,10 +204,6 @@ namespace Internal
      *
      * The Ipc "channel" is identified by a name that the subscriber and publisher has
      * to somehow agree on.
-     *
-     * TODO: Currently, the send queues (one for each subscriber) have no upper limits and
-     *       there is no concept of overflow when sending a message. We have to decide if this
-     *       is ok, or if a more elaborated mechanism is needed.
      */
     class IpcPublisher
             : private boost::noncopyable

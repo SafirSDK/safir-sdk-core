@@ -6,7 +6,7 @@ FILE(GLOB sources *.cs)
 FILE(GLOB resx_files *.resx)
 
 ADD_CSHARP_ASSEMBLY(sate WINEXE
-  SIGN ${safir-sdk-core_SOURCE_DIR}/build/config/sdk/data/build/safirkey.snk
+  SIGN ${safir-sdk-core_SOURCE_DIR}/src/cmake/safirkey.snk
   ICON sate_logo.ico
   SOURCES ${sources}
   RESOURCES PREFIX Sate. ${resx_files}
