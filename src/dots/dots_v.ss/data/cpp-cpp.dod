@@ -603,6 +603,7 @@ namespace @_NAMESPACEV_@
             Safir::Dob::Typesystem::Internal::BlobOperations::Get(key, isNull, isChanged, handle, g_@_LOWER:MEMBER_@MemberIndex, valueIndex, Safir::Dob::Typesystem::Internal::BlobOperations::KeyMode);
 @@END_IF@@
             Safir::Dob::Typesystem::Internal::BlobOperations::Get(m_@_MEMBER_@Member[key], handle, g_@_LOWER:MEMBER_@MemberIndex, valueIndex);
+            m_@_MEMBER_@Member[key].SetChanged(true);
         }
 @@ --- Single member ---
 @@ELSE@@

@@ -2114,7 +2114,7 @@ size: 3
 isChanged: true
 Gustav = {"DotsTest.MemberDictionaries": {"_DouType": "DotsTest.MemberDictionaries", "EntityIdHandlerIdMember": [{"key": {"name": "Safir.Dob.Entity", "instanceId": "first"}, "value": "first"}, {"key": {"name": "Safir.Dob.Entity", "instanceId": 2}, "value": 2}]}}, changed: true
 Karl = {"DotsTest.MemberDictionaries": {"_DouType": "DotsTest.MemberDictionaries", "EntityIdHandlerIdMember": [{"key": {"name": "Safir.Dob.Entity", "instanceId": "first"}, "value": "first"}, {"key": {"name": "Safir.Dob.Entity", "instanceId": 2}, "value": 2}]}}, changed: true
-Philip = NULL, changed: false
+Philip = NULL, changed: true
 --- StringObjectMember ---
 size: 2
 isChanged: true

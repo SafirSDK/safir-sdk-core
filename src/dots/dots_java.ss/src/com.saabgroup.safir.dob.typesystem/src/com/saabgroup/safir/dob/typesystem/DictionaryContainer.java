@@ -91,12 +91,16 @@ implements java.util.Map<K, V>, Cloneable {
 	@Override
 	public V put(K key, V value) {
 		m_isChanged=true;
+		value.setChanged(true);
 		return m_values.put(key, value);
 	}
 
 	@Override
 	public void putAll(Map<? extends K, ? extends V> m) {
 		m_isChanged=true;
+		for (V v : m.values()) {
+		    v.setChanged(true);
+	    }
 		m_values.putAll(m);
 	}
 
