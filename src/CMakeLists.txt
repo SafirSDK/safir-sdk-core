@@ -365,7 +365,7 @@ include(SafirLoadCSharp)
 #
 # Set up Java compilation
 #
-#TODO include(SafirLoadJava)
+include(SafirLoadJava)
 
 
 #
