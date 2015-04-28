@@ -173,7 +173,7 @@ public class StringContainer extends ContainerBase implements Cloneable {
 
 
     //variables are accessible internally.
-    private String m_value;
-    private byte [] m_cachedUtf8String;
-    private boolean m_isNull;
+    protected String m_value;
+    protected byte [] m_cachedUtf8String;
+    protected boolean m_isNull;
 }

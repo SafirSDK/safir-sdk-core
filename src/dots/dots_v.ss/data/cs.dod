@@ -1716,7 +1716,7 @@ namespace @_NAMESPACE_@
         /// <summary>
         /// Container for sequence members of type @_CLASS_@
         /// </summary>
-        public class EnumerationSequenceContainer : Safir.Dob.Typesystem.MemberSequenceContainer<Enumeration>, ICloneable
+        public class EnumerationSequenceContainer : Safir.Dob.Typesystem.ValueSequenceContainer<Enumeration>, ICloneable
         {
             public EnumerationSequenceContainer() : base() { }
 

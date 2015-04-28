@@ -30,7 +30,7 @@ import java.io.UnsupportedEncodingException;
 /**
  * Class containing the identity of a channel.
  */
-public class ChannelId {
+public class ChannelId implements Comparable<ChannelId> {
 
     /** Constant representing all channels. */
     public static final ChannelId ALL_CHANNELS = new ChannelId("ALL_CHANNELS");
@@ -204,6 +204,21 @@ public class ChannelId {
         }
         return m_cachedUtf8String;
     }
+    
+    /**
+     * Compares two instances
+     * @param other The object to compare to.
+     * @return -1 if this instance is less than other, 1 if this is bigger, else 0.
+     */
+    @Override
+	public int compareTo(ChannelId other) {
+		if (getRawValue()<other.getRawValue())
+			return -1;
+		else if (getRawValue()>other.getRawValue())
+			return 1;
+		else
+			return 0;
+	}
 
     private long m_channelId = -1;
     private String m_channelIdStr;

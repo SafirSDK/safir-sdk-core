@@ -9181,9 +9181,9 @@ void TestSequences()
     ms->Float32Member().InsertAt(0, 1.1f);
     ms->Float32Member().EraseAt(2);
 
-    ms->Float64Member().push_back(22.22f);
-    ms->Float64Member().push_back(33.33f);
-    ms->Float64Member().InsertAt(0, 11.11f);
+    ms->Float64Member().push_back(22.2);
+    ms->Float64Member().push_back(33.3);
+    ms->Float64Member().InsertAt(0, 11.1);
     ms->Float64Member().EraseAt(2);
 
     ms->BooleanMember().push_back(false);
@@ -9505,6 +9505,7 @@ int main(int /*argc*/, char* /*argv*/[])
     {
         std::wcout << "Caught ... exception in _tmain: "<<std::endl;
     }
+    std::wcout<<std::endl<<std::endl;
     return 0;
 }
 

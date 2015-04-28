@@ -331,9 +331,9 @@ namespace Safir.Dob.Typesystem
     /// <summary>
     /// Generic SequenceContainer for non-Object members.
     /// </summary>
-    public class MemberSequenceContainer<T> : SequenceContainer<T>, ICloneable
+    public class ValueSequenceContainer<T> : SequenceContainer<T>, ICloneable
     {
-        public MemberSequenceContainer(): base()
+        public ValueSequenceContainer(): base()
         {
         }
 
@@ -345,7 +345,7 @@ namespace Safir.Dob.Typesystem
         {
             base.Copy(other);
             this.values.Clear ();
-            MemberSequenceContainer<T> that = other as MemberSequenceContainer<T>;
+            ValueSequenceContainer<T> that = other as ValueSequenceContainer<T>;
             foreach (var val in that.values) {
                 this.values.Add(val);
             }
@@ -358,23 +358,23 @@ namespace Safir.Dob.Typesystem
         /// </summary>
         object ICloneable.Clone()
         {
-            return new MemberSequenceContainer<T>(this);
+            return new ValueSequenceContainer<T>(this);
         }
 
         /// <summary>
         ///
         /// </summary>
         /// <returns></returns>
-        public new MemberSequenceContainer<T> Clone()
+        public new ValueSequenceContainer<T> Clone()
         {
-            return (MemberSequenceContainer<T>)((ICloneable)this).Clone();
+            return (ValueSequenceContainer<T>)((ICloneable)this).Clone();
         }
 
         /// <summary>
         /// Copy constructor for use by Clone
         /// </summary>
         /// <param name="other"></param>
-        protected MemberSequenceContainer(MemberSequenceContainer<T> other):
+        protected ValueSequenceContainer(ValueSequenceContainer<T> other):
             base(other)
         {
             foreach (var val in other.values) {
@@ -386,40 +386,40 @@ namespace Safir.Dob.Typesystem
     }
 
     /// <summary>SequenceContainer for String.</summary>
-    public class StringSequenceContainer : MemberSequenceContainer<string> {}
+    public class StringSequenceContainer : ValueSequenceContainer<string> {}
 
     /// <summary>SequenceContainer for Boolean.</summary>
-    public class BooleanSequenceContainer : MemberSequenceContainer<bool> {}
+    public class BooleanSequenceContainer : ValueSequenceContainer<bool> {}
 
     /// <summary>SequenceContainer for Int32.</summary>
-    public class Int32SequenceContainer : MemberSequenceContainer<Int32> {}
+    public class Int32SequenceContainer : ValueSequenceContainer<Int32> {}
 
     /// <summary>SequenceContainer for Int64.</summary>
-    public class Int64SequenceContainer : MemberSequenceContainer<Int64> {}
+    public class Int64SequenceContainer : ValueSequenceContainer<Int64> {}
 
     /// <summary>SequenceContainer for Float32.</summary>
-    public class Float32SequenceContainer : MemberSequenceContainer<float> {}
+    public class Float32SequenceContainer : ValueSequenceContainer<float> {}
 
     /// <summary>SequenceContainer for Float64.</summary>
-    public class Float64SequenceContainer : MemberSequenceContainer<double> {}
+    public class Float64SequenceContainer : ValueSequenceContainer<double> {}
 
     /// <summary>SequenceContainer for TypeId.</summary>
-    public class TypeIdSequenceContainer : MemberSequenceContainer<Int64> {}
+    public class TypeIdSequenceContainer : ValueSequenceContainer<Int64> {}
 
     /// <summary>SequenceContainer for InstanceId.</summary>
-    public class InstanceIdSequenceContainer : MemberSequenceContainer<InstanceId> {}
+    public class InstanceIdSequenceContainer : ValueSequenceContainer<InstanceId> {}
 
     /// <summary>SequenceContainer for ChannelId.</summary>
-    public class ChannelIdSequenceContainer : MemberSequenceContainer<ChannelId> {}
+    public class ChannelIdSequenceContainer : ValueSequenceContainer<ChannelId> {}
 
     /// <summary>SequenceContainer for HandlerId.</summary>
-    public class HandlerIdSequenceContainer : MemberSequenceContainer<HandlerId> {}
+    public class HandlerIdSequenceContainer : ValueSequenceContainer<HandlerId> {}
 
     /// <summary>SequenceContainer for EntityId.</summary>
-    public class EntityIdSequenceContainer : MemberSequenceContainer<EntityId> {}
+    public class EntityIdSequenceContainer : ValueSequenceContainer<EntityId> {}
 
     /// <summary>SequenceContainer for Binary.</summary>
-    public class BinarySequenceContainer : MemberSequenceContainer<byte[]> {}
+    public class BinarySequenceContainer : ValueSequenceContainer<byte[]> {}
 
     /// <summary>SequenceContainer for Object.</summary>
     public class ObjectSequenceContainer : GenericObjectSequenceContainer<Safir.Dob.Typesystem.Object> {}
