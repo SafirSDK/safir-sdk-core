@@ -28,6 +28,7 @@
 #include <set>
 #include <Safir/Dob/Internal/InternalFwd.h>
 #include <Safir/Dob/Internal/StateDeleter.h>
+#include <atomic>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -35,6 +36,7 @@
 #endif
 
 #include <boost/asio.hpp>
+#include <boost/thread.hpp>
 
 #ifdef _MSC_VER
 #pragma warning (pop)
@@ -62,6 +64,8 @@ private:
     void AddEntitesToTreeWidget();
 
     QTimer m_updateTimer;
+    boost::thread m_doseInternalInitializer;
+    std::atomic<bool> m_doseInternalInitialized{false};
 };
 
 

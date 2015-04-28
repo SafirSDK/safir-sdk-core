@@ -934,7 +934,6 @@ namespace Sate
                     if (srf.ShowDialog() == DialogResult.OK)
                     {
                         Safir.Dob.Typesystem.HandlerId handlerId;
-                        //TODO: add support for " " to force string representation
                         // try to parse as an long. O/w use the string representation
                         try
                         {
@@ -1059,7 +1058,6 @@ namespace Sate
                 if (rf.ShowDialog() == DialogResult.OK)
                 {
                     Safir.Dob.Typesystem.HandlerId handlerId;
-                    // TODO: " " representation support to add
                     /* try to parse as an long. O/w use the string representation */
                     try
                     {

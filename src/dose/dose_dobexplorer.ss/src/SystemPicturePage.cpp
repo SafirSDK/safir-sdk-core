@@ -200,7 +200,7 @@ void SystemPicturePage::UpdateSystemTable(const Safir::Dob::Internal::SP::System
         systemTable->item(row,COLUMN_ID)->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
         systemTable->setItem(row,
                              COLUMN_NODE_TYPE,
-                             new QTableWidgetItem(QString::number(statistics.NodeTypeId(it->second)))); //TODO: use name instead of id
+                             new QTableWidgetItem(QString::number(statistics.NodeTypeId(it->second))));
         systemTable->setItem(row,
                              COLUMN_CONTROL_ADDRESS,
                              new QTableWidgetItem(QString::fromUtf8(statistics.ControlAddress(it->second).c_str())));

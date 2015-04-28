@@ -65,7 +65,9 @@ public:
         options.add_options()
             ("help,h", "show help message")
             ("raw",
-             "Subscribe to the Raw data instead of the SystemState data");
+             "Subscribe to the Raw data instead of the SystemState data.")
+            ("one",
+             "Exit after one subscription response.");
 
         variables_map vm;
 
@@ -89,13 +91,14 @@ public:
         }
 
         raw = vm.count("raw") != 0;
+        one = vm.count("one") != 0;
 
         parseOk = true;
     }
     bool parseOk;
 
     bool raw;
-
+    bool one;
 private:
     static void ShowHelp(const boost::program_options::options_description& desc)
     {
@@ -134,30 +137,48 @@ int main(int argc, char * argv[])
 
     Safir::Dob::Internal::SP::SystemPicture sp(Safir::Dob::Internal::SP::subscriber_tag, ioService);
 
+    auto stopFcn = [&ioService, &sp, &wk, &signals]
+    {
+        ioService.post([&sp, &wk, &signals]
+        {
+            signals.cancel();
+            sp.Stop();
+            wk.reset();
+        });
+    };
+
     if (options.raw)
     {
-        sp.StartRawSubscription([](const Safir::Dob::Internal::SP::RawStatistics& data)
+        sp.StartRawSubscription([&options, &stopFcn](const Safir::Dob::Internal::SP::RawStatistics& data)
                                 {
                                     std::wcout << data << std::endl;
+                                    if (options.one)
+                                    {
+                                        stopFcn();
+                                    }
                                 });
     }
     else
     {
-        sp.StartStateSubscription([](const Safir::Dob::Internal::SP::SystemState& data)
+        sp.StartStateSubscription([&options, &stopFcn](const Safir::Dob::Internal::SP::SystemState& data)
                                   {
                                       std::wcout << data << std::endl;
+                                      if (options.one)
+                                      {
+                                          stopFcn();
+                                      }
                                   });
     }
 
-    signals.async_wait([&](const boost::system::error_code& error,
+    signals.async_wait([&stopFcn](const boost::system::error_code& error,
                            const int /*signal_number*/)
                        {
                            if (error)
                            {
                                return;
                            }
-                           sp.Stop();
-                           wk.reset();
+
+                           stopFcn();
                        });
 
     ioService.run();

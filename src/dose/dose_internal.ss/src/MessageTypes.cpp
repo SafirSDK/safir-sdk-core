@@ -145,12 +145,6 @@ namespace Internal
         return GetType(typeId).HasSubscription(connection, consumer);
     }
 
-    void MessageTypes::DumpSubscriptions() const
-    {
-        //AWI:todo
-    }
-
-
     MessageType& MessageTypes::GetType(const Typesystem::TypeId& typeId)
     {
         MessageTypeTable::iterator findIt = m_messageTypes.find(typeId);

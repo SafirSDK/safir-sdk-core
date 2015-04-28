@@ -106,14 +106,13 @@ with TestEnvStopper(env):
             log("Some process exited with an unexpected value")
             sys.exit(1)
 
-
-if not env.ReturnCodesOk():
-    log("Some process exited with an unexpected value")
-    sys.exit(1)
-
 syslog_output = env.Syslog()
 if len(syslog_output) != 0:
     log("Unexpected syslog output:\n" + syslog_output)
+    sys.exit(1)
+    
+if not env.ReturnCodesOk():
+    log("Some process exited with an unexpected value")
     sys.exit(1)
 
 log("See if dope loads them at startup")
@@ -124,13 +123,13 @@ env = TestEnv(arguments.safir_control,
 with TestEnvStopper(env):
     env.launchProcess("entity_owner", (arguments.entity_owner,"accept")).wait()
 
-if not env.ReturnCodesOk():
-    log("Some process exited with an unexpected value")
-    sys.exit(1)
-
 syslog_output = env.Syslog()
 if len(syslog_output) != 0:
     log("Unexpected syslog output:\n" + syslog_output)
+    sys.exit(1)
+    
+if not env.ReturnCodesOk():
+    log("Some process exited with an unexpected value")
     sys.exit(1)
 
 output = env.Output("entity_owner")
@@ -172,13 +171,13 @@ env = TestEnv(arguments.safir_control,
 with TestEnvStopper(env):
     env.launchProcess("entity_owner", (arguments.entity_owner,"accept")).wait()
 
-if not env.ReturnCodesOk():
-    log("Some process exited with an unexpected value")
-    sys.exit(1)
-
 syslog_output = env.Syslog()
 if len(syslog_output) != 0:
     log("Unexpected syslog output:\n" + syslog_output)
+    sys.exit(1)
+    
+if not env.ReturnCodesOk():
+    log("Some process exited with an unexpected value")
     sys.exit(1)
 
 output = env.Output("entity_owner")
@@ -219,15 +218,15 @@ with TestEnvStopper(env):
     while(len(glob.glob(os.path.join(file_storage_path,"DopeTest.*.bin"))) != NUM_SMALL + NUM_BIG):
         time.sleep(0.1)
 
-if not env.ReturnCodesOk():
-    log("Some process exited with an unexpected value")
-    sys.exit(1)
-
 syslog_output = env.Syslog()
 if len(syslog_output) != 0:
     log("Unexpected syslog output:\n" + syslog_output)
     sys.exit(1)
-
+    
+if not env.ReturnCodesOk():
+    log("Some process exited with an unexpected value")
+    sys.exit(1)
+    
 log("Load them again and check output")
 env = TestEnv(arguments.safir_control,
               arguments.dose_main,
@@ -236,13 +235,13 @@ env = TestEnv(arguments.safir_control,
 with TestEnvStopper(env):
     env.launchProcess("entity_owner", (arguments.entity_owner,"accept")).wait()
 
-if not env.ReturnCodesOk():
-    log("Some process exited with an unexpected value")
-    sys.exit(1)
-
 syslog_output = env.Syslog()
 if len(syslog_output) != 0:
     log("Unexpected syslog output:\n" + syslog_output)
+    sys.exit(1)
+    
+if not env.ReturnCodesOk():
+    log("Some process exited with an unexpected value")
     sys.exit(1)
 
 output = env.Output("entity_owner")

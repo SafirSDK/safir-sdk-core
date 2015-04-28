@@ -170,28 +170,27 @@ try:
         while count_rows(parameters) != 110:
             time.sleep(1)
 
-    if not env.ReturnCodesOk():
-        print("Some process exited with an unexpected value")
-        sys.exit(1)
-
     syslog_output = env.Syslog()
     if len(syslog_output) != 0:
         print("Unexpected syslog output:\n" + syslog_output)
         sys.exit(1)
-
+        
+    if not env.ReturnCodesOk():
+        print("Some process exited with an unexpected value")
+        sys.exit(1)
 
     print("== See if dope loads them at startup")
     env = TestEnv("safir_control", dose_main_path, "dope_main", "safir_show_config")
     with TestEnvStopper(env):
         env.launchProcess("entity_owner", ("entity_owner","accept")).wait()
 
-    if not env.ReturnCodesOk():
-        print("Some process exited with an unexpected value")
-        sys.exit(1)
-
     syslog_output = env.Syslog()
     if len(syslog_output) != 0:
         print("Unexpected syslog output:\n" + syslog_output)
+        sys.exit(1)
+        
+    if not env.ReturnCodesOk():
+        print("Some process exited with an unexpected value")
         sys.exit(1)
 
     output = env.Output("entity_owner")
@@ -241,13 +240,13 @@ try:
     with TestEnvStopper(env):
         env.launchProcess("entity_owner", ("entity_owner","accept")).wait()
 
-    if not env.ReturnCodesOk():
-        print("Some process exited with an unexpected value")
-        sys.exit(1)
-
     syslog_output = env.Syslog()
     if len(syslog_output) != 0:
         print("Unexpected syslog output:\n" + syslog_output)
+        sys.exit(1)
+        
+    if not env.ReturnCodesOk():
+        print("Some process exited with an unexpected value")
         sys.exit(1)
 
     output = env.Output("entity_owner")
@@ -290,13 +289,13 @@ try:
         while count_binares(parameters) != 110:
             time.sleep(1)
 
-    if not env.ReturnCodesOk():
-        print("Some process exited with an unexpected value")
-        sys.exit(1)
-
     syslog_output = env.Syslog()
     if len(syslog_output) != 0:
         print("Unexpected syslog output:\n" + syslog_output)
+        sys.exit(1)
+        
+    if not env.ReturnCodesOk():
+        print("Some process exited with an unexpected value")
         sys.exit(1)
 
     print("== Load them again and check output")
@@ -304,13 +303,13 @@ try:
     with TestEnvStopper(env):
         env.launchProcess("entity_owner", ("entity_owner","accept")).wait()
 
-    if not env.ReturnCodesOk():
-        print("Some process exited with an unexpected value")
-        sys.exit(1)
-
     syslog_output = env.Syslog()
     if len(syslog_output) != 0:
         print("Unexpected syslog output:\n" + syslog_output)
+        sys.exit(1)
+        
+    if not env.ReturnCodesOk():
+        print("Some process exited with an unexpected value")
         sys.exit(1)
 
     output = env.Output("entity_owner")

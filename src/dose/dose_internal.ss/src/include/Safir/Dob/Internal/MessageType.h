@@ -67,9 +67,6 @@ namespace Internal
         bool HasSubscription(const ConnectionPtr&    connection,
                              const ConsumerId&       consumer) const;
 
-        //Debug and statistics
-        void DumpSubscriptions() const;
-
     private:
         Typesystem::TypeId m_typeId;
 

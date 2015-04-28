@@ -590,10 +590,10 @@ namespace Internal
         }
         else
         {
-            //TODO: verify that this is the case! See ticket #13
-            lllout << "Connection::RemoveAcceptedPendingOwnership: Could not find the accepted pending ownership in connection! "
-                   << "Assuming that it belongs to a previous incarnation of this connection, so I'll ignore it" << std::endl;
-            //        ENSURE(false, << "Connection::RemovePendingOwnership: Could not find pending registration in connection!");
+            lllog(1) << "Connection::RemoveAcceptedPendingOwnership: "
+                     << "Could not find the accepted pending ownership in connection! "
+                     << "Assuming that it belongs to a previous incarnation of this "
+                     << "connection, so I'll ignore it" << std::endl;
         }
     }
 

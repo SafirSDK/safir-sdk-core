@@ -35,9 +35,8 @@
 
 #include <string>
 
-//Undefine stupid macro that windows.h defines. Just in case someone has included it 
+//Undefine stupid macro that windows.h defines. Just in case someone has included it
 //before including us.
-//TODO: Get rid of this, but when can we do it without potentially upsetting someone?
 #ifdef GetMessage
 #undef GetMessage
 #endif

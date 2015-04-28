@@ -64,9 +64,10 @@ def launch_control(number, previous, id, env, ownip, seedip):
     command = ("sp_test_ctrl",) + ("--name",    "Node_{0:03d}".format(number),
                                    "--control-address", ownip + ":33{0:03d}".format(number),
                                    "--data-address", ownip + ":43{0:03d}".format(number),
-                                   "--seed", seedip + ":33{0:03d}".format(previous),
                                    "--force-id", str(id),
                                    "--check-incarnation")
+    if previous is not None:
+        command += ("--seed", seedip + ":33999")
 
     output = open("control_{0:03d}.output.txt".format(number),"w")
     proc = subprocess.Popen(command,
@@ -79,8 +80,9 @@ def launch_control(number, previous, id, env, ownip, seedip):
 def launch_dose_main(number, previous, id, env, ownip):
     command = ("sp_test_dm",) + ("--name", "Node_{0:03d}".format(number),
                                  "--data-address", ownip + ":43{0:03d}".format(number),
-                                 "--force-id", str(id),
-                                 "--suicide-trigger", "Node_{0:03d}".format(previous))
+                                 "--force-id", str(id))
+    if previous is not None:
+        command += ("--suicide-trigger", "Node_{0:03d}".format(previous))
 
     output = open("main_{0:03d}.output.txt".format(number),"w")
     proc = subprocess.Popen(command,
@@ -95,7 +97,7 @@ def launch_node(number, args):
     id = random.getrandbits(63)
 
     previous = (number - 1) % args.total_nodes
-    seed = args.prev_ip if number == args.start else args.own_ip
+    seed = args.seed_ip
     log("Launching node", number, "with previous set to", previous)
     env = os.environ.copy()
     env["SAFIR_INSTANCE"] = str(number+1000)
@@ -103,6 +105,15 @@ def launch_node(number, args):
     control = launch_control(number, previous, id, env, args.own_ip, seed)
     main = launch_dose_main(number, previous, id, env, args.own_ip)
     return (number,control,main)
+
+def launch_seeder(args):
+    id = random.getrandbits(63)
+
+    log("Launching seeder node")
+
+    control = launch_control(999, previous = None, id = id, env = None, ownip = args.own_ip, seedip = None)
+    main = launch_dose_main(999, previous = None, id = id, env = None, ownip = args.own_ip)
+    return (control,main)
 
 
 def stop(proc):
@@ -151,9 +162,9 @@ parser.add_argument("--revolutions", type=int,
 parser.add_argument("--own-ip",
                     default="127.0.0.1",
                     help="Ip adress to bind to")
-parser.add_argument("--prev-ip",
+parser.add_argument("--seed-ip",
                     default="127.0.0.1",
-                    help="Ip address of 'previous' set of nodes, used for seeding")
+                    help="Ip address of seed node")
 
 args = parser.parse_args()
 
@@ -172,6 +183,8 @@ os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(testdatadir,
 
 os.environ["LLL_LOGDIR"] = os.path.join(os.getcwd(),"lll")
 
+seeder = launch_seeder(args) if args.start == 0 else None
+
 nodes = list()
 
 success = False
@@ -181,13 +194,23 @@ try:
     for i in range (args.start, args.start + args.nodes):
         nodes.append(launch_node(i,args))
 
-    log("Sleeping for one minute while other nodes start up")
-    time.sleep(60)
-
     #we need to kill the first node manually, after which the circle will start running...
     if args.start == 0:
+        log("Waiting for nodes to start up")
+        while True:
+            log("Counting nodes")
+            output = subprocess.check_output(("system_picture_listener","--one")).decode("utf-8").splitlines()
+            count = 0
+            for line in output:
+                if " Node_" in line and " D  Node_" not in line:
+                    count += 1
+            log(" found", count,"nodes")
+            if count == args.total_nodes + 1:
+                break
+
         log("Stopping node 0")
         stop_node(*nodes[0])
+
     expected = args.start
     revolution = 0
     log("Expected is", expected)
@@ -239,6 +262,16 @@ except:
 if len(nodes) > 0:
     log ("Killing", len(nodes), "nodes")
 for i, control, main in nodes:
+    try:
+        stop(main)
+    except ProcessLookupError:
+        pass
+    try:
+        stop(control)
+    except ProcessLookupError:
+        pass
+if seeder is not None:
+    (control,main) = seeder
     try:
         stop(main)
     except ProcessLookupError:

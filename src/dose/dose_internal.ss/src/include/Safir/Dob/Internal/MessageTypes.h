@@ -74,9 +74,6 @@ namespace Internal
                              const ConsumerId&              consumer,
                              const Dob::Typesystem::TypeId  typeId);
 
-        //Debug and statistics
-        void DumpSubscriptions() const;
-
         //The constructor and destructor have to be public for the boost::interprocess internals to be able to call
         //them, but we can make the constructor "fake-private" by making it require a private type as argument.
         explicit MessageTypes(private_constructor_t);

@@ -61,7 +61,11 @@ DoseMon::DoseMon(QWidget * /*parent*/)
 {
     setupUi(this); // this sets up GUI
 
-    Safir::Dob::Internal::InitializeDoseInternalFromApp();
+    m_doseInternalInitializer = boost::thread([this]
+                                              {
+                                                  Safir::Dob::Internal::InitializeDoseInternalFromApp();
+                                                  m_doseInternalInitialized = true;
+                                              });
 
     while (tabWidget->currentIndex() != -1)
     {
@@ -92,6 +96,12 @@ DoseMon::DoseMon(QWidget * /*parent*/)
 
 void DoseMon::closeEvent(QCloseEvent* event)
 {
+    if (m_doseInternalInitializer != boost::thread())
+    {
+        m_doseInternalInitializer.interrupt();
+        m_doseInternalInitializer.join();
+    }
+
     while (tabWidget->count() != 0)
     {
         QWidget* w = tabWidget->widget(0);
@@ -153,7 +163,14 @@ void DoseMon::TreeItemActivated ( QTreeWidgetItem * item, int /*column*/ )
     }
     else if (item->text(0) == "Entity Statistics")
     {
-        newTab = tabWidget->addTab(new NumberOfEntities(this),"Entity Statistics");
+        if (m_doseInternalInitialized)
+        {
+            newTab = tabWidget->addTab(new NumberOfEntities(this),"Entity Statistics");
+        }
+        else
+        {
+            QMessageBox::information(this,"Not initialized","dose_internal not yet initialized, cannot open.");
+        }
     }
     else if (item->parent() == NULL)
     {
@@ -200,6 +217,11 @@ void DoseMon::CloseTab(int index)
 
 void DoseMon::AddEntitesToTreeWidget()
 {
+    if (!m_doseInternalInitialized)
+    {
+        return;
+    }
+
     using namespace Safir::Dob::Typesystem;
     using namespace Safir::Dob::Typesystem::Operations;
     using namespace Safir::Dob::Typesystem::Utilities;
@@ -279,6 +301,11 @@ void DoseMon::AddConnection(const Safir::Dob::Internal::Connection & connection,
 
 void DoseMon::UpdateTreeWidget()
 {
+    if (!m_doseInternalInitialized)
+    {
+        return;
+    }
+
     using namespace Safir::Dob::Internal;
 
 

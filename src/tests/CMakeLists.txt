@@ -1,5 +1,4 @@
-# TODO Add when dose_main is back on track
-#add_subdirectory(stop_orders_at_exit)
+add_subdirectory(stop_orders_at_exit)
 
 add_subdirectory(header_check)
 add_subdirectory(test_support)

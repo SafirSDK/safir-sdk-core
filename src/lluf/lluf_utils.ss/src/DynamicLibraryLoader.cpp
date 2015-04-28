@@ -37,7 +37,7 @@ namespace Safir
 {
 namespace Utilities
 {
-    class DynamicLibraryLoader::Impl 
+    class DynamicLibraryLoader::Impl
     {
     public:
         Impl()
@@ -45,7 +45,7 @@ namespace Utilities
         {
 
         }
-        
+
         bool Loaded() const {return m_handle != NULL;}
 
         void Load(const std::string& libraryName, const bool global)
@@ -157,14 +157,14 @@ namespace Utilities
         HMODULE m_handle;
 #endif
     };
-    
+
     DynamicLibraryLoader::DynamicLibraryLoader()
         : m_impl(new Impl())
         , m_unloadOnDestruction(false)
     {
-        
+
     }
-    
+
     DynamicLibraryLoader::~DynamicLibraryLoader()
     {
         if (m_unloadOnDestruction)
@@ -198,7 +198,7 @@ namespace Utilities
         m_impl->Load(libraryName, path, global);
         m_unloadOnDestruction = unloadOnDestruction;
     }
-    
+
     void DynamicLibraryLoader::Unload()
     {
         if (m_impl->Loaded())
@@ -213,11 +213,8 @@ namespace Utilities
         {
             throw std::logic_error("No library has been loaded!");
         }
-        return m_impl->GetFunctionAddress(functionName);        
+        return m_impl->GetFunctionAddress(functionName);
     }
 
 }
 }
-
-
-

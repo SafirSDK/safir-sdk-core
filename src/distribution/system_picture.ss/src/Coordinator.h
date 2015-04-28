@@ -379,12 +379,6 @@ namespace SP
 
         bool CheckPrerequisites() const
         {
-            if (!m_electionHandler.IsElected())
-            {
-                lllog(9) << "SP: We're not elected, not updating my state." << std::endl;
-                return false;
-            }
-
             if (!m_lastStatisticsDirty)
             {
                 lllog(9) << "SP: Last statistics is not dirty, no need to update." << std::endl;
@@ -469,11 +463,26 @@ namespace SP
             //This function attempts to not flush the logger until the end of the function
             lllog(9) << "SP: Entering UpdateMyState\n";
 
+            if (!m_electionHandler.IsElected())
+            {
+                lllog(9) << "SP: We're not elected, not updating my state." << std::endl;
+                m_failedStateUpdates = 0;
+                return false;
+            }
+
             //Check a bunch of prerequisites that must be passed before we are allowed to
             //produce a system state.
             if (!CheckPrerequisites())
             {
                 lllog(9) << std::flush;
+                ++m_failedStateUpdates;
+
+                if (m_failedStateUpdates > 60)
+                {
+                    m_failedStateUpdates = 0;
+                    lllog(1) << "SP: Have failed at 60 state updates, forcing reelection." << std::endl;
+                    m_electionHandler.ForceElection();
+                }
                 return false;
             }
 
@@ -816,6 +825,8 @@ namespace SP
         const std::string m_dataAddress;
         int64_t m_ownElectionId;
         RawHandlerT& m_rawHandler;
+
+        int m_failedStateUpdates = 0;
     };
 
     //forward declarations
