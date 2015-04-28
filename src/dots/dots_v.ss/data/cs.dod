@@ -1448,7 +1448,7 @@ namespace @_NAMESPACE_@
             #endregion
         }
 
-        public class EnumerationSequenceContainer : Safir.Dob.Typesystem.MemberSequenceContainer<Enumeration>, ICloneable
+        public class EnumerationSequenceContainer : Safir.Dob.Typesystem.ValueSequenceContainer<Enumeration>, ICloneable
         {
              public EnumerationSequenceContainer() : base() { }
 
