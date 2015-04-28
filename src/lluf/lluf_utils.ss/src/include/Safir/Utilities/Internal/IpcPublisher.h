@@ -204,10 +204,6 @@ namespace Internal
      *
      * The Ipc "channel" is identified by a name that the subscriber and publisher has
      * to somehow agree on.
-     *
-     * TODO: Currently, the send queues (one for each subscriber) have no upper limits and
-     *       there is no concept of overflow when sending a message. We have to decide if this
-     *       is ok, or if a more elaborated mechanism is needed.
      */
     class IpcPublisher
             : private boost::noncopyable
