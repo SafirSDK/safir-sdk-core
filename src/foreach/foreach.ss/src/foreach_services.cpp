@@ -603,22 +603,9 @@ namespace ForEach
                     m_debug << "We got overflow... Add requestSpecificData to sendQueue for later retry" << std::endl;
                     m_sendQueue.push_back(requestSpecificData);
                 }
-                /*
-                  catch (const Safir::Dob::IllegalObjectIdException &e)
-                  {
-                  m_debug << "IllegalObjectIdException: " << e.GetExceptionInfo() << std::endl;
-                */
-                /* TODO: fix better handling. Should set to errorresponse and go to next.
-                   Pay attention if this was the last element.
-                   Probably breakout onresponse() handling to seperate function and call it from here and onresponse.
-                   Should really send a reply back.
-                */
-
-                /* } */
-
-                /* It's allowed to update a non-existing object. This exception will not be thrown for that reason. */
                 catch (const Safir::Dob::NotFoundException &e)
                 {
+                    //It's allowed to update a non-existing object. This exception will not be thrown for that reason.
                     m_debug << "Couldn't find object in DOB! - " << e.GetExceptionInfo() << std::endl;
                 }
                 m_debug << "Only send out one request. Breaking out!" << std::endl;
@@ -776,24 +763,15 @@ namespace ForEach
     }
 
     /* Problems testing Overflow so a bit messy */
-    void Services::OnNotRequestOverflow(void)
+    void Services::OnNotRequestOverflow()
     {
         m_debug << "in OnNotRequestOverflow()" << std::endl;
         m_debug << "overflow is set to: " << m_backdoorOverflow << std::endl;
 
-        /**************************************************
-                WRONG - must at least loop!!!
-        ***************************************************/
-        /* TODO: find first entry in map and send next request. Unfair??? */
         RequestMap::iterator iter;
         iter = m_requestData.begin();
         Safir::Dob::ResponseSenderPtr replySender = iter->first;
         RequestSpecificDataPtr data = iter->second;
-        /*
-          m_backdoorOverflow = false;
-          m_connection.SetAlwaysOverflowFlag(m_backdoorOverflow);
-          m_debug << "Force overflow is: " << m_backdoorOverflow << std::endl;
-        */
 
         ScheduleNextRequest(data, true);
     }
