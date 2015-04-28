@@ -72,7 +72,7 @@ public class ObjectFactory {
         long typeId = BlobOperations.getTypeId(blob);                        
         
         try {
-        	long handle=Kernel.CreateBlobReader(blob);
+            long handle=Kernel.CreateBlobReader(blob);
             Class<?> theClass = Class.forName(getClassName(typeId));
             Object obj = (Object) theClass.getConstructor(long.class).newInstance(handle);
             Kernel.DeleteBlobReader(handle);

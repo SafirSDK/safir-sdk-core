@@ -381,32 +381,27 @@ public class BlobOperations {
     
     public static void set(InstanceIdContainer container, long handle, int member, int index)
     {
-    	if (!container.m_isNull) {
-    		Kernel.WriteHashedMember(handle,
-        			container.m_value.getRawValue(),
-        			container.m_value.getRawString(),
-        			container.m_isNull,
-        			container.m_isChanged,
-        			member,
-        			index,
-        			VALUE_MODE);
-    	}
-    	else {
-    		Kernel.WriteHashedMember(handle,
-        			0,
-        			"",
-        			container.m_isNull,
-        			container.m_isChanged,
-        			member,
-        			index,
-        			VALUE_MODE);
-    		
-    	}
+        if (container.m_isNull) {
+            Kernel.WriteHashedMember(handle, 0, null, container.m_isNull, container.m_isChanged, member, index, VALUE_MODE);
+            return;
+        }
+
+        if (isNullOrEmpty(container.m_value.getRawString())){
+            Kernel.WriteHashedMember(handle, container.m_value.getRawValue(), null, container.m_isNull, container.m_isChanged, member, index, VALUE_MODE);
+        }
+        else{
+            Kernel.WriteHashedMember(handle, container.m_value.getRawValue(), container.m_value.getRawString(), container.m_isNull, container.m_isChanged, member, index, VALUE_MODE);
+        }
     }
     
     public static void set(InstanceId val, long handle, int member, int index, int keyValMode)
     {
-    	Kernel.WriteHashedMember(handle, val.getRawValue(), val.getRawString(), false, false, member, index, keyValMode);
+        if (isNullOrEmpty(val.getRawString())){
+            Kernel.WriteHashedMember(handle, val.getRawValue(), null, false, false, member, index, keyValMode);
+        }
+        else{
+            Kernel.WriteHashedMember(handle, val.getRawValue(), val.getRawString(), false, false, member, index, keyValMode);
+        }
     }
     
     //handlerId
@@ -451,32 +446,27 @@ public class BlobOperations {
     
     public static void set(HandlerIdContainer container, long handle, int member, int index)
     {
-    	if (!container.m_isNull) {
-    		Kernel.WriteHashedMember(handle,
-        			container.m_value.getRawValue(),
-        			container.m_value.getRawString(),
-        			container.m_isNull,
-        			container.m_isChanged,
-        			member,
-        			index,
-        			VALUE_MODE);
-    	}
-    	else {
-    		Kernel.WriteHashedMember(handle,
-        			0,
-        			"",
-        			container.m_isNull,
-        			container.m_isChanged,
-        			member,
-        			index,
-        			VALUE_MODE);
-    		
-    	}
+        if (container.m_isNull) {
+            Kernel.WriteHashedMember(handle, 0, null, container.m_isNull, container.m_isChanged, member, index, VALUE_MODE);
+            return;
+        }
+
+        if (isNullOrEmpty(container.m_value.getRawString())){
+            Kernel.WriteHashedMember(handle, container.m_value.getRawValue(), null, container.m_isNull, container.m_isChanged, member, index, VALUE_MODE);
+        }
+        else{
+            Kernel.WriteHashedMember(handle, container.m_value.getRawValue(), container.m_value.getRawString(), container.m_isNull, container.m_isChanged, member, index, VALUE_MODE);
+        }
     }
-    
+
     public static void set(HandlerId val, long handle, int member, int index, int keyValMode)
     {
-    	Kernel.WriteHashedMember(handle, val.getRawValue(), val.getRawString(), false, false, member, index, keyValMode);
+        if (isNullOrEmpty(val.getRawString())){
+            Kernel.WriteHashedMember(handle, val.getRawValue(), null, false, false, member, index, keyValMode);
+        }
+        else{
+            Kernel.WriteHashedMember(handle, val.getRawValue(), val.getRawString(), false, false, member, index, keyValMode);
+        }
     }
     
     //channelId
@@ -518,35 +508,30 @@ public class BlobOperations {
             return new ChannelId(hashVal[0]);
         }
     }
-    
+
     public static void set(ChannelIdContainer container, long handle, int member, int index)
     {
-    	if (!container.m_isNull) {
-    		Kernel.WriteHashedMember(handle,
-        			container.m_value.getRawValue(),
-        			container.m_value.getRawString(),
-        			container.m_isNull,
-        			container.m_isChanged,
-        			member,
-        			index,
-        			VALUE_MODE);
-    	}
-    	else {
-    		Kernel.WriteHashedMember(handle,
-        			0,
-        			"",
-        			container.m_isNull,
-        			container.m_isChanged,
-        			member,
-        			index,
-        			VALUE_MODE);
-    		
-    	}
+        if (container.m_isNull) {
+            Kernel.WriteHashedMember(handle, 0, null, container.m_isNull, container.m_isChanged, member, index, VALUE_MODE);
+            return;
+        }
+
+        if (isNullOrEmpty(container.m_value.getRawString())){
+            Kernel.WriteHashedMember(handle, container.m_value.getRawValue(), null, container.m_isNull, container.m_isChanged, member, index, VALUE_MODE);
+        }
+        else{
+            Kernel.WriteHashedMember(handle, container.m_value.getRawValue(), container.m_value.getRawString(), container.m_isNull, container.m_isChanged, member, index, VALUE_MODE);
+        }
     }
-    
+
     public static void set(ChannelId val, long handle, int member, int index, int keyValMode)
     {
-    	Kernel.WriteHashedMember(handle, val.getRawValue(), val.getRawString(), false, false, member, index, keyValMode);
+        if (isNullOrEmpty(val.getRawString())){
+            Kernel.WriteHashedMember(handle, val.getRawValue(), null, false, false, member, index, keyValMode);
+        }
+        else{
+            Kernel.WriteHashedMember(handle, val.getRawValue(), val.getRawString(), false, false, member, index, keyValMode);
+        }
     }
     
     //entityId
@@ -593,33 +578,59 @@ public class BlobOperations {
     
     public static void set(EntityIdContainer container, long handle, int member, int index)
     {
-    	if (!container.m_isNull) {
-    		Kernel.WriteEntityIdMember(handle,
-        			container.m_value.getTypeId(),
-        			container.m_value.getInstanceId().getRawValue(),
-        			container.m_value.getInstanceId().getRawString(),
-        			container.m_isNull,
-        			container.m_isChanged,
-        			member,
-        			index,
-        			VALUE_MODE);
-    	}
-    	else {
-    		Kernel.WriteEntityIdMember(handle,
-        			0, 0, "",
-        			container.m_isNull,
-        			container.m_isChanged,
-        			member,
-        			index,
-        			VALUE_MODE);
-    		
-    	}
+        if (container.m_isNull) {
+            Kernel.WriteEntityIdMember(handle, 0, 0, null, container.m_isNull, container.m_isChanged, member, index, VALUE_MODE);
+            return;
+        }
+
+        if (isNullOrEmpty(container.m_value.getInstanceId().getRawString())){
+            Kernel.WriteEntityIdMember(handle,
+                            container.m_value.getTypeId(),
+                            container.m_value.getInstanceId().getRawValue(),
+                            null,
+                            container.m_isNull,
+                            container.m_isChanged,
+                            member,
+                            index,
+                            VALUE_MODE);
+        }
+        else{
+            Kernel.WriteEntityIdMember(handle,
+                            container.m_value.getTypeId(),
+                            container.m_value.getInstanceId().getRawValue(),
+                            container.m_value.getInstanceId().getRawString(),
+                            container.m_isNull,
+                            container.m_isChanged,
+                            member,
+                            index,
+                            VALUE_MODE);
+        }
     }
     
     public static void set(EntityId val, long handle, int member, int index, int keyValMode)
     {
-    	Kernel.WriteEntityIdMember(handle, val.getTypeId(), val.getInstanceId().getRawValue(), 
-    			val.getInstanceId().getRawString(), false, false, member, index, keyValMode);
+        if (isNullOrEmpty(val.getInstanceId().getRawString())){
+            Kernel.WriteEntityIdMember(handle,
+                            val.getTypeId(),
+                            val.getInstanceId().getRawValue(),
+                            null,
+                            false,
+                            false,
+                            member,
+                            index,
+                            keyValMode);
+        }
+        else{
+            Kernel.WriteEntityIdMember(handle,
+                            val.getTypeId(),
+                            val.getInstanceId().getRawValue(),
+                            val.getInstanceId().getRawString(),
+                            false,
+                            false,
+                            member,
+                            index,
+                            keyValMode);
+        }
     }
     
     //string
@@ -674,10 +685,10 @@ public class BlobOperations {
         Kernel.ReadObjectMember(handle, value, isNull, isChanged, member, index, VALUE_MODE);
         
         if (!isNull[0]) {
-        	container.setObjInternal(ObjectFactory.getInstance().createObject(value[0]));
+            container.setObjInternal(ObjectFactory.getInstance().createObject(value[0]));
         }
         else {
-        	container.setObjInternal(null);
+            container.setObjInternal(null);
         }
         
         container.m_isChanged=isChanged[0];
@@ -692,33 +703,33 @@ public class BlobOperations {
         Kernel.ReadObjectMember(handle, value, isNull, isChanged, member, index, keyValMode);
         
         if (!isNull[0]) {
-        	return ObjectFactory.getInstance().createObject(value[0]);
+            return ObjectFactory.getInstance().createObject(value[0]);
         }
         else {
-        	return null;
+            return null;
         }
     }
     
     public static void set(ObjectContainerImpl<?> container, long handle, int member, int index)
     {
     	if (container.isNull()) {
-    		Kernel.WriteObjectMember(handle,
-        			null,
-        			true,
-        			container.m_isChanged,
-        			member,
-        			index,
-        			VALUE_MODE);
+            Kernel.WriteObjectMember(handle,
+                            null,
+                            true,
+                            container.m_isChanged,
+                            member,
+                            index,
+                            VALUE_MODE);
     	}
     	else {
-    		java.nio.ByteBuffer blob=writeToBlob(container.getObjInternal());
-    		Kernel.WriteObjectMember(handle,
-        			blob,
-        			false,
-        			container.m_isChanged,
-        			member,
-        			index,
-        			VALUE_MODE);
+            java.nio.ByteBuffer blob=writeToBlob(container.getObjInternal());
+            Kernel.WriteObjectMember(handle,
+                            blob,
+                            false,
+                            container.m_isChanged,
+                            member,
+                            index,
+                            VALUE_MODE);
     	}
     }
     
@@ -729,7 +740,7 @@ public class BlobOperations {
     	}
     	
     	java.nio.ByteBuffer blob=writeToBlob(obj);
-		Kernel.WriteObjectMember(handle, blob, false, false, member, index, keyValMode);
+        Kernel.WriteObjectMember(handle, blob, false, false, member, index, keyValMode);
     }
     
     
@@ -741,17 +752,19 @@ public class BlobOperations {
         boolean isChanged[] = new boolean[1];
         
         Kernel.ReadBinaryMember(handle, value, isNull, isChanged, member, index, VALUE_MODE);
+        container.m_isNull=isNull[0];
+        container.m_isChanged=isChanged[0];
         
-        if (!isNull[0]) {
-        	container.m_value = new byte[value[0].capacity()];
-    		value[0].clear(); //reset position
-    		value[0].get(container.m_value);
+        if (!container.m_isNull) {
+            container.m_value = new byte[value[0].capacity()];
+            value[0].clear(); //reset position
+            value[0].get(container.m_value);
         }
         else {
-        	container.m_isNull=true;
+            container.m_value = null;
         }
-        	        
-        container.m_isChanged=isChanged[0];
+
+
     }
     
     public static Byte[] getBinary(long handle, int member, int index, int keyValMode)
@@ -763,63 +776,63 @@ public class BlobOperations {
         Kernel.ReadBinaryMember(handle, value, isNull, isChanged, member, index, keyValMode);
         
         byte[] bytes = new byte[value[0].capacity()];
-		value[0].clear(); //reset position
-		value[0].get(bytes);
+        value[0].clear(); //reset position
+        value[0].get(bytes);
 		
-		Byte[] byteObjects = new Byte[bytes.length];
+        Byte[] byteObjects = new Byte[bytes.length];
         for (int i=0; i<bytes.length; i++) {
             byteObjects[i++] = bytes[i];
         }
 
-		return byteObjects;
+        return byteObjects;
     }
     
     public static void set(BinaryContainer container, long handle, int member, int index)
     {
     	if (container.m_isNull) {
-    		Kernel.WriteBinaryMember(handle,
-        			null, 0,
-        			container.m_isNull,
-        			container.m_isChanged,
-        			member,
-        			index,
-        			VALUE_MODE);
+            Kernel.WriteBinaryMember(handle,
+                            null, 0,
+                            container.m_isNull,
+                            container.m_isChanged,
+                            member,
+                            index,
+                            VALUE_MODE);
     	}
     	else {
-    		java.nio.ByteBuffer bin=java.nio.ByteBuffer.allocateDirect(container.m_value.length);
-    		bin.put(container.m_value);
-    		Kernel.WriteBinaryMember(handle,
-        			bin,
-        			container.m_value.length,
-        			container.m_isNull,
-        			container.m_isChanged,
-        			member,
-        			index,
-        			VALUE_MODE);
+            java.nio.ByteBuffer bin=java.nio.ByteBuffer.allocateDirect(container.m_value.length);
+            bin.put(container.m_value);
+            Kernel.WriteBinaryMember(handle,
+                            bin,
+                            container.m_value.length,
+                            container.m_isNull,
+                            container.m_isChanged,
+                            member,
+                            index,
+                            VALUE_MODE);
     	}
     }
     
     public static void set(byte[] val, long handle, int member, int index, int keyValMode)
     {
     	if (val==null)
-    		throw new SoftwareViolationException("Value not allowed to be null");
+            throw new SoftwareViolationException("Value not allowed to be null");
     	
     	java.nio.ByteBuffer bin=java.nio.ByteBuffer.allocateDirect(val.length);
-		bin.put(val);
-		Kernel.WriteBinaryMember(handle, bin, val.length, false, false, member, index, keyValMode);
+            bin.put(val);
+            Kernel.WriteBinaryMember(handle, bin, val.length, false, false, member, index, keyValMode);
     }
     
     public static void set(Byte[] val, long handle, int member, int index, int keyValMode)
     {
     	if (val==null)
-    		throw new SoftwareViolationException("Value not allowed to be null");
+            throw new SoftwareViolationException("Value not allowed to be null");
     	
     	java.nio.ByteBuffer bin=java.nio.ByteBuffer.allocateDirect(val.length);
         for (Byte b : val) {
             bin.put(b.byteValue());
         }
     	
-		Kernel.WriteBinaryMember(handle, bin, val.length, false, false, member, index, keyValMode);
+        Kernel.WriteBinaryMember(handle, bin, val.length, false, false, member, index, keyValMode);
     }
     
     //si32
@@ -1662,128 +1675,6 @@ public class BlobOperations {
 
     private static boolean isNullOrEmpty(String str) {
         return str == null || str.isEmpty();
-    }
-
-    
-    //**************************************************
-    // Getters for Si-types
-    //**************************************************
-    //--- Si32 ---
-    public static float getAmpere32(long handle, int member, int index, int keyValMode) {
-    	return getFloat32(handle, member, index, keyValMode);
-    }
-    public static float getCubicMeter32(long handle, int member, int index, int keyValMode) {
-    	return getFloat32(handle, member, index, keyValMode);
-    }
-    public static float getHertz32(long handle, int member, int index, int keyValMode) {
-    	return getFloat32(handle, member, index, keyValMode);
-    }
-    public static float getJoule32(long handle, int member, int index, int keyValMode) {
-    	return getFloat32(handle, member, index, keyValMode);
-    }
-    public static float getKelvin32(long handle, int member, int index, int keyValMode) {
-    	return getFloat32(handle, member, index, keyValMode);
-    }
-    public static float getKilogram32(long handle, int member, int index, int keyValMode) {
-    	return getFloat32(handle, member, index, keyValMode);
-    }
-    public static float getMeter32(long handle, int member, int index, int keyValMode) {
-    	return getFloat32(handle, member, index, keyValMode);
-    }
-    public static float getMeterPerSecond32(long handle, int member, int index, int keyValMode) {
-    	return getFloat32(handle, member, index, keyValMode);
-    }
-    public static float getMeterPerSecondSquared32(long handle, int member, int index, int keyValMode) {
-    	return getFloat32(handle, member, index, keyValMode);
-    }
-    public static float getNewton32(long handle, int member, int index, int keyValMode) {
-    	return getFloat32(handle, member, index, keyValMode);
-    }
-    public static float getPascal32(long handle, int member, int index, int keyValMode) {
-    	return getFloat32(handle, member, index, keyValMode);
-    }
-    public static float getRadian32(long handle, int member, int index, int keyValMode) {
-    	return getFloat32(handle, member, index, keyValMode);
-    }
-    public static float getRadianPerSecond32(long handle, int member, int index, int keyValMode) {
-    	return getFloat32(handle, member, index, keyValMode);
-    }
-    public static float getRadianPerSecondSquared32(long handle, int member, int index, int keyValMode) {
-    	return getFloat32(handle, member, index, keyValMode);
-    }
-    public static float getSecond32(long handle, int member, int index, int keyValMode) {
-    	return getFloat32(handle, member, index, keyValMode);
-    }
-    public static float getSquareMeter32(long handle, int member, int index, int keyValMode) {
-    	return getFloat32(handle, member, index, keyValMode);
-    }
-    public static float getSteradian32(long handle, int member, int index, int keyValMode) {
-    	return getFloat32(handle, member, index, keyValMode);
-    }
-    public static float getVolt32(long handle, int member, int index, int keyValMode) {
-    	return getFloat32(handle, member, index, keyValMode);
-    }
-    public static float getWatt32(long handle, int member, int index, int keyValMode) {
-    	return getFloat32(handle, member, index, keyValMode);
-    }
-
-    //        //--- Si64 ---
-    public static double getAmpere64(long handle, int member, int index, int keyValMode) {
-    	return getFloat64(handle, member, index, keyValMode);
-    }
-    public static double getCubicMeter64(long handle, int member, int index, int keyValMode) {
-    	return getFloat64(handle, member, index, keyValMode);
-    }
-    public static double getHertz64(long handle, int member, int index, int keyValMode) {
-    	return getFloat64(handle, member, index, keyValMode);
-    }
-    public static double getJoule64(long handle, int member, int index, int keyValMode) {
-    	return getFloat64(handle, member, index, keyValMode);
-    }
-    public static double getKelvin64(long handle, int member, int index, int keyValMode) {
-    	return getFloat64(handle, member, index, keyValMode);
-    }
-    public static double getKilogram64(long handle, int member, int index, int keyValMode) {
-    	return getFloat64(handle, member, index, keyValMode);
-    }
-    public static double getMeter64(long handle, int member, int index, int keyValMode) {
-    	return getFloat64(handle, member, index, keyValMode);
-    }
-    public static double getMeterPerSecond64(long handle, int member, int index, int keyValMode) {
-    	return getFloat64(handle, member, index, keyValMode);
-    }
-    public static double getMeterPerSecondSquared64(long handle, int member, int index, int keyValMode) {
-    	return getFloat64(handle, member, index, keyValMode);
-    }
-    public static double getNewton64(long handle, int member, int index, int keyValMode) {
-    	return getFloat64(handle, member, index, keyValMode);
-    }
-    public static double getPascal64(long handle, int member, int index, int keyValMode) {
-    	return getFloat64(handle, member, index, keyValMode);
-    }
-    public static double getRadian64(long handle, int member, int index, int keyValMode) {
-    	return getFloat64(handle, member, index, keyValMode);
-    }
-    public static double getRadianPerSecond64(long handle, int member, int index, int keyValMode) {
-    	return getFloat64(handle, member, index, keyValMode);
-    }
-    public static double getRadianPerSecondSquared64(long handle, int member, int index, int keyValMode) {
-    	return getFloat64(handle, member, index, keyValMode);
-    }
-    public static double getSecond64(long handle, int member, int index, int keyValMode) {
-    	return getFloat64(handle, member, index, keyValMode);
-    }
-    public static double getSquareMeter64(long handle, int member, int index, int keyValMode) {
-    	return getFloat64(handle, member, index, keyValMode);
-    }
-    public static double getSteradian64(long handle, int member, int index, int keyValMode) {
-    	return getFloat64(handle, member, index, keyValMode);
-    }
-    public static double getVolt64(long handle, int member, int index, int keyValMode) {
-    	return getFloat64(handle, member, index, keyValMode);
-    }
-    public static double getWatt64(long handle, int member, int index, int keyValMode) {
-    	return getFloat64(handle, member, index, keyValMode);
     }
 
 }

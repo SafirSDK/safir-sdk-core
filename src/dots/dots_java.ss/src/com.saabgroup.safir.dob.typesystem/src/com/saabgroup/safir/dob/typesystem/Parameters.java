@@ -122,11 +122,11 @@ public class Parameters {
     	MemberType mt=MemberType.values()[memberType[0]];
     	if (mt==MemberType.OBJECT_MEMBER_TYPE || mt==MemberType.ENUMERATION_MEMBER_TYPE)
     	{
-    		return Kernel.GetTypeName(complexType[0]);
+            return Kernel.GetTypeName(complexType[0]);
     	}
     	else
     	{
-    		return Kernel.MemberTypeName(memberType[0]);
+            return Kernel.MemberTypeName(memberType[0]);
     	}
     }
     
@@ -313,7 +313,7 @@ public class Parameters {
         String strVal[] = new String[1];
 
         Kernel.GetHashedIdParameter(typeId, parameter, index, BlobOperations.VALUE_MODE, hashVal, strVal);
-        if (strVal[0] != null) {
+        if (!isNullOrEmpty(strVal[0])) {
             return new InstanceId(hashVal[0], strVal[0]);
         }
         else {
@@ -335,7 +335,7 @@ public class Parameters {
         long instanceId[] = new long [1];
         String strVal[] = new String[1];
         Kernel.GetEntityIdParameter(typeId, parameter, index, BlobOperations.VALUE_MODE, typeIdOut, instanceId , strVal);
-        if (strVal[0] != null) {
+        if (!isNullOrEmpty(strVal[0])) {
             return new EntityId(typeIdOut[0], new InstanceId(instanceId[0], strVal[0]));
         }
         else {
@@ -357,7 +357,7 @@ public class Parameters {
         String strVal[] = new String[1];
 
         Kernel.GetHashedIdParameter(typeId, parameter, index, BlobOperations.VALUE_MODE, hashVal, strVal);
-        if (strVal[0] != null) {
+        if (!isNullOrEmpty(strVal[0])) {
             return new ChannelId(hashVal[0], strVal[0]);
         }
         else {
@@ -379,7 +379,7 @@ public class Parameters {
         String strVal[] = new String[1];
 
         Kernel.GetHashedIdParameter(typeId, parameter, index, BlobOperations.VALUE_MODE, hashVal, strVal);
-        if (strVal[0] != null) {
+        if (!isNullOrEmpty(strVal[0])) {
             return new HandlerId(hashVal[0], strVal[0]);
         }
         else {
@@ -453,5 +453,9 @@ public class Parameters {
     
     public static int dictionaryKeyToIndex(long typeId, int parameter, ChannelId key) {
         return Kernel.DictionaryInt64KeyToIndex(typeId, parameter, key.getRawValue());
+    }
+
+    private static boolean isNullOrEmpty(String str) {
+        return str == null || str.isEmpty();
     }
 }

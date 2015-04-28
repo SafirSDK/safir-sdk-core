@@ -29,14 +29,14 @@ import com.saabgroup.safir.dob.typesystem.Object;
 import java.util.Map;
 import java.util.Locale;
 /**
- * Mait test class
+ * Main test class
  */
 public class Test {
     /**
      * @param args
      */
     public static void main(String[] args) throws java.lang.Exception {
-    	 
+    	
         test_Has_Property();
         test_GetName();
         test_GetNumberOfMembers();

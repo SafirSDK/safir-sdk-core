@@ -868,7 +868,10 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetStringParameter
 {
     const char * val;
     DotsC_GetStringParameter(_typeId,_parameter,_index, static_cast<DotsC_KeyValMode>(_keyValMode), val);
-    SetJArray(env,_val,env->NewStringUTF(val));
+    if (val!=NULL)
+    {
+        SetJArray(env,_val,env->NewStringUTF(val));
+    }
 }
 
 /*
@@ -896,7 +899,10 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetHashedIdParameter
     const char * strVal;
     DotsC_GetHashedIdParameter(_typeId, _parameter, _index, static_cast<DotsC_KeyValMode>(_keyValMode), hashVal, strVal);
     SetJArray(env,_hashVal,hashVal);
-    SetJArray(env,_strVal,env->NewStringUTF(strVal));
+    if (strVal!=NULL)
+    {
+        SetJArray(env,_strVal,env->NewStringUTF(strVal));
+    }
 }
 
 /*
@@ -912,7 +918,10 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_GetEntityIdParameter
     DotsC_GetEntityIdParameter(_typeId, _parameter, _index, static_cast<DotsC_KeyValMode>(_keyValMode), eid, str);
     SetJArray(env,_typeIdOut, eid.typeId);
     SetJArray(env,_instanceId, eid.instanceId);
-    SetJArray(env,_strVal,env->NewStringUTF(str));
+    if (str!=NULL)
+    {
+        SetJArray(env,_strVal,env->NewStringUTF(str));
+    }
 }
 
 /*
@@ -1182,7 +1191,9 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_ReadHashedMember
 
     SetJArray(env,_valHash, hash);
     if (str!=NULL)
+    {
         SetJArray(env,_valStr, env->NewStringUTF(str));
+    }
     SetJArray(env, _isNull, isNull);
     SetJArray(env, _isChanged, isChanged);
 }
@@ -1203,7 +1214,9 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_ReadEntityIdMember
     SetJArray(env,_valTypeId, eid.typeId);
     SetJArray(env,_valHash, eid.instanceId);
     if (str!=NULL)
+    {
         SetJArray(env,_valStr, env->NewStringUTF(str));
+    }
     SetJArray(env, _isNull, isNull);
     SetJArray(env, _isChanged, isChanged);
 }
@@ -1436,8 +1449,15 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteStringMember
 void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteHashedMember
     (JNIEnv * env, jclass, jlong _writerHandle, jlong _valHash, jstring _valStr, jboolean _isNull, jboolean _isChanged, jint _member, jint _arrayIndex, jint _keyValMode)
 {
-    StringHolder str=GetUtf8(env, _valStr);
-    DotsC_WriteHashedMember(_writerHandle, _valHash, str.get(), _isNull, _isChanged, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
+    if (_valStr)
+    {
+        StringHolder str=GetUtf8(env, _valStr);
+        DotsC_WriteHashedMember(_writerHandle, _valHash, str.get(), _isNull, _isChanged, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
+    }
+    else
+    {
+        DotsC_WriteHashedMember(_writerHandle, _valHash, NULL, _isNull, _isChanged, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
+    }
 }
 
 /*
@@ -1449,8 +1469,15 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteEntityIdMember
     (JNIEnv * env, jclass, jlong _writerHandle, jlong _valTypeId, jlong _valInst, jstring _valStr, jboolean _isNull, jboolean _isChanged, jint _member, jint _arrayIndex, jint _keyValMode)
 {
     DotsC_EntityId eid={_valTypeId, _valInst};
-    StringHolder str=GetUtf8(env, _valStr);
-    DotsC_WriteEntityIdMember(_writerHandle, eid, str.get(), _isNull, _isChanged, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
+    if (_valStr)
+    {
+        StringHolder str=GetUtf8(env, _valStr);
+        DotsC_WriteEntityIdMember(_writerHandle, eid, str.get(), _isNull, _isChanged, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
+    }
+    else
+    {
+        DotsC_WriteEntityIdMember(_writerHandle, eid, NULL, _isNull, _isChanged, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
+    }
 }
 
 /*
