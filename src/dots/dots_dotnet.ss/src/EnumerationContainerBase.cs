@@ -124,4 +124,21 @@ namespace Safir.Dob.Typesystem
         /// <summary></summary>
         protected internal bool m_bIsNull;
     }
+
+    abstract public class EnumerationContainerImpl<EnumT>: EnumerationContainerBase
+        where EnumT : struct
+    {
+        public EnumerationContainerImpl() : base()
+        {
+        }
+
+        protected EnumerationContainerImpl(EnumerationContainerImpl<EnumT> other) :base(other)
+        {
+        }
+
+        abstract public EnumT Val {
+            get;
+            set;
+        }
+    }
 }

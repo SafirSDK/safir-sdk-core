@@ -7957,35 +7957,35 @@ class DotsTestDotnet
 
         DotsTest.MemberDictionaries md=new DotsTest.MemberDictionaries();
 
-        md.Int32StringMember.Add (10).Val = DotsTest.ParameterDictionaries.Int32StringParameter (10);
-        md.Int32StringMember.Add (20).Val = DotsTest.ParameterDictionaries.Int32StringParameter (20);
+        md.Int32StringMember.Add (10, DotsTest.ParameterDictionaries.Int32StringParameter (10));
+        md.Int32StringMember.Add (20, DotsTest.ParameterDictionaries.Int32StringParameter (20));
 
-        md.Int64BinaryMember.Add (100).Val = DotsTest.ParameterDictionaries.Int32BinaryParameter (10);
-        md.Int64BinaryMember.Add (200).Val = DotsTest.ParameterDictionaries.Int32BinaryParameter (20);
+        md.Int64BinaryMember.Add (100, DotsTest.ParameterDictionaries.Int32BinaryParameter (10));
+        md.Int64BinaryMember.Add (200, DotsTest.ParameterDictionaries.Int32BinaryParameter (20));
 
-        md.TypeIdEnumMember.Add (DotsTest.MemberDictionaries.ClassTypeId).Val = DotsTest.ParameterDictionaries.StringEnumParameter ("Billy");
-        md.TypeIdEnumMember.Add (DotsTest.MemberSequences.ClassTypeId).Val = DotsTest.ParameterDictionaries.StringEnumParameter ("Svarre");
+        md.TypeIdEnumMember.Add (DotsTest.MemberDictionaries.ClassTypeId, DotsTest.ParameterDictionaries.StringEnumParameter ("Billy"));
+        md.TypeIdEnumMember.Add (DotsTest.MemberSequences.ClassTypeId, DotsTest.ParameterDictionaries.StringEnumParameter ("Svarre"));
 
-        md.EnumInstanceIdMember.Add (DotsTest.TestEnum.Enumeration.MyFirst).Val = DotsTest.ParameterDictionaries.EnumInstanceIdParameter (DotsTest.TestEnum.Enumeration.MyFirst);
-        md.EnumInstanceIdMember.Add (DotsTest.TestEnum.Enumeration.MySecond).Val = DotsTest.ParameterDictionaries.EnumInstanceIdParameter (DotsTest.TestEnum.Enumeration.MySecond);
+        md.EnumInstanceIdMember.Add (DotsTest.TestEnum.Enumeration.MyFirst, DotsTest.ParameterDictionaries.EnumInstanceIdParameter (DotsTest.TestEnum.Enumeration.MyFirst));
+        md.EnumInstanceIdMember.Add (DotsTest.TestEnum.Enumeration.MySecond, DotsTest.ParameterDictionaries.EnumInstanceIdParameter (DotsTest.TestEnum.Enumeration.MySecond));
      
-        md.InstanceIdEntityIdMember.Add (new Safir.Dob.Typesystem.InstanceId("FirstInstance")).Val = DotsTest.ParameterDictionaries.HandlerIdEntityIdParameter (new Safir.Dob.Typesystem.HandlerId("handlerOne"));
-        md.InstanceIdEntityIdMember.Add (new Safir.Dob.Typesystem.InstanceId("SecondInstance")).Val = DotsTest.ParameterDictionaries.HandlerIdEntityIdParameter (new Safir.Dob.Typesystem.HandlerId(2));
+        md.InstanceIdEntityIdMember.Add (new Safir.Dob.Typesystem.InstanceId("FirstInstance"), DotsTest.ParameterDictionaries.HandlerIdEntityIdParameter (new Safir.Dob.Typesystem.HandlerId("handlerOne")));
+        md.InstanceIdEntityIdMember.Add (new Safir.Dob.Typesystem.InstanceId("SecondInstance"), DotsTest.ParameterDictionaries.HandlerIdEntityIdParameter (new Safir.Dob.Typesystem.HandlerId(2)));
 
         DotsTest.MemberDictionaries item1=new DotsTest.MemberDictionaries();
-        item1.EntityIdHandlerIdMember.Add (new Safir.Dob.Typesystem.EntityId(Safir.Dob.Entity.ClassTypeId, new Safir.Dob.Typesystem.InstanceId("first"))).Val = 
-                                        DotsTest.ParameterDictionaries.EntityIdHandlerIdParameter (new Safir.Dob.Typesystem.EntityId(Safir.Dob.Entity.ClassTypeId, new Safir.Dob.Typesystem.InstanceId("first")));
-        item1.EntityIdHandlerIdMember.Add (new Safir.Dob.Typesystem.EntityId(Safir.Dob.Entity.ClassTypeId, new Safir.Dob.Typesystem.InstanceId(2))).Val = 
-                                        DotsTest.ParameterDictionaries.EntityIdHandlerIdParameter (new Safir.Dob.Typesystem.EntityId(Safir.Dob.Entity.ClassTypeId, new Safir.Dob.Typesystem.InstanceId("second")));
+        item1.EntityIdHandlerIdMember.Add (new Safir.Dob.Typesystem.EntityId(Safir.Dob.Entity.ClassTypeId, new Safir.Dob.Typesystem.InstanceId("first")),
+                                        DotsTest.ParameterDictionaries.EntityIdHandlerIdParameter (new Safir.Dob.Typesystem.EntityId(Safir.Dob.Entity.ClassTypeId, new Safir.Dob.Typesystem.InstanceId("first"))));
+        item1.EntityIdHandlerIdMember.Add (new Safir.Dob.Typesystem.EntityId(Safir.Dob.Entity.ClassTypeId, new Safir.Dob.Typesystem.InstanceId(2)),
+                                        DotsTest.ParameterDictionaries.EntityIdHandlerIdParameter (new Safir.Dob.Typesystem.EntityId(Safir.Dob.Entity.ClassTypeId, new Safir.Dob.Typesystem.InstanceId("second"))));
 
         //new Safir.Dob.Typesystem.EntityId(Safir.Dob.Entity.ClassTypeId, new Safir.Dob.Typesystem.InstanceId("first"))
         //---------
-        md.StringItemMember.Add ("Karl").Obj = item1;
+        md.StringItemMember.Add ("Karl", item1);
         md.StringItemMember.Add ("Philip").SetNull();
-        md.StringItemMember.Add ("Gustav").Obj = item1;
+        md.StringItemMember.Add ("Gustav", item1);
 
-        md.StringObjectMember.Add ("Dilbert").Obj = DotsTest.ParameterDictionaries.Int32ObjectParameter(10);
-        md.StringObjectMember.Add ("Wally").Obj = DotsTest.ParameterDictionaries.Int32ObjectParameter(20);
+        md.StringObjectMember.Add ("Dilbert", DotsTest.ParameterDictionaries.Int32ObjectParameter(10));
+        md.StringObjectMember.Add ("Wally", DotsTest.ParameterDictionaries.Int32ObjectParameter(20));
 
         PrintDictionaries(md);
 
