@@ -104,16 +104,16 @@ namespace Internal
 
             auto selfHandle(this->shared_from_this());
 
-            m_strand.post([this, selfHandle]()
-                          {
-                              if (m_stream.is_open())
+            m_strand.dispatch([this, selfHandle]()
                               {
-                                  m_stream.close();
-                              }
-                              m_connectRetryTimer.cancel();
+                                  if (m_stream.is_open())
+                                  {
+                                      m_stream.close();
+                                  }
+                                  m_connectRetryTimer.cancel();
 
-                              TestPolicy::DisconnectEvent();
-                          });
+                                  TestPolicy::DisconnectEvent();
+                              });
         }
 
     private:

@@ -151,7 +151,7 @@ namespace Internal
 
             boost::shared_ptr<char[]> msgSharedPtr(std::move(msg));
 
-            m_strand.post(
+            m_strand.dispatch(
                         [this, selfHandle, msgSharedPtr, msgSize]()
                         {
                             for (auto it = m_sessions.begin(); it != m_sessions.end(); /* it incremented in loop */)
