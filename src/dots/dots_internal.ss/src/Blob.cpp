@@ -22,7 +22,17 @@
 *
 ******************************************************************************/
 #include <Safir/Dob/Typesystem/ToolSupport/Internal/Blob.h>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4127)
+#endif
+
 #include "AnyObject.pb.h"
+
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
 
 namespace Safir
 {
