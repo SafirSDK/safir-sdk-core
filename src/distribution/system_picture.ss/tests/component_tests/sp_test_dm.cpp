@@ -453,11 +453,12 @@ int main(int argc, char * argv[])
 
 
     boost::asio::steady_timer sendTimer(ioService);
+    bool timerStopped = false;
 
     const std::function<void(const boost::system::error_code& error)> send =
-        [&communication, &sendTimer, &send](const boost::system::error_code& error)
+        [&communication, &sendTimer, &timerStopped, &send](const boost::system::error_code& error)
         {
-            if (error)
+            if (error || timerStopped)
             {
                 return;
             }
@@ -490,7 +491,7 @@ int main(int argc, char * argv[])
     signalSet.add(SIGTERM);
 #endif
 
-    const auto stopFcn = [&sp, &communication, &sendTimer, &work, &signalSet, &m_stop]
+    const auto stopFcn = [&sp, &communication, &sendTimer, &timerStopped, &work, &signalSet, &m_stop]
     {
         m_stop = true;
         std::wcout << "Stopping SystemPicture" << std::endl;
@@ -498,6 +499,7 @@ int main(int argc, char * argv[])
         std::wcout << "Stopping Communication" << std::endl;
         communication.Stop();
         std::wcout << "Stopping sendTimer" << std::endl;
+        timerStopped = true;
         sendTimer.cancel();
         std::wcout << "resetting work" << std::endl;
         work.reset();
