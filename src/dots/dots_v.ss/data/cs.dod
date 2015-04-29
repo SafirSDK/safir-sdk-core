@@ -1733,6 +1733,9 @@ namespace @_NAMESPACE_@
         /// </summary>
         public class EnumerationSequenceContainer : Safir.Dob.Typesystem.ValueSequenceContainer<Enumeration>, ICloneable
         {
+            /// <summary>
+            /// Constructor.
+            /// </summary>
             public EnumerationSequenceContainer() : base() { }
 
             #region Cloning
