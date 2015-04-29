@@ -43,6 +43,9 @@ namespace Safir.Dob.Typesystem
     /// <typeparam name="T">The type to contain.</typeparam>
     public abstract class SequenceContainer<T> : ContainerBase, IList<T>, ICloneable
     {
+        /// <summary>
+        /// The internal list holding the values.
+        /// </summary>
         protected internal List<T> values = new List<T> ();
 
         /// <summary>
@@ -55,7 +58,7 @@ namespace Safir.Dob.Typesystem
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Safir.Dob.Typesystem.SequenceContainer`1"/> class.
+        /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="other">Other.</param>
         protected SequenceContainer(SequenceContainer<T> other):
@@ -329,6 +332,9 @@ namespace Safir.Dob.Typesystem
     /// </summary>
     public class ValueSequenceContainer<T> : SequenceContainer<T>, ICloneable
     {
+        /// <summary>
+        /// Constructor.
+        /// </summary>
         public ValueSequenceContainer(): base()
         {
         }
@@ -706,6 +712,10 @@ namespace Safir.Dob.Typesystem
         protected BinarySequenceContainer(BinarySequenceContainer other) : base(other) { }
     }
 
+
+    /// <summary>
+    /// Object sequence container.
+    /// </summary>
     public class ObjectSequenceContainer : GenericObjectSequenceContainer<Safir.Dob.Typesystem.Object>, ICloneable
     {
         /// <summary>
