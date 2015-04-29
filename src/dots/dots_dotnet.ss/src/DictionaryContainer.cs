@@ -33,7 +33,7 @@ namespace Safir.Dob.Typesystem
     public class DictionaryContainer<KeyT, ValT> : ContainerBase, ICloneable, IDictionary<KeyT, ValT>
         where ValT : ContainerBase, new()
     {
-        private SortedDictionary<KeyT, ValT> values;
+        private SortedDictionary<KeyT, ValT> values = new SortedDictionary<KeyT, ValT> ();
         //private Dictionary<KeyT, ValT> values;
 
         /// <summary>
@@ -41,7 +41,6 @@ namespace Safir.Dob.Typesystem
         /// </summary>
         public DictionaryContainer() : base()
         {
-            values = new SortedDictionary<KeyT, ValT> ();
         }
 
         #region IDictionary implementation
