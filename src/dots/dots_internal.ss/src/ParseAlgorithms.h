@@ -1160,7 +1160,7 @@ namespace ToolSupport
 
     template<> struct ParseAlgorithm<Elements::Sequence>
     {
-        void operator()(boost::property_tree::ptree& pt, ParseState& state) const {state.lastInsertedClass->members.back()->collectionType=SequenceCollectionType;}
+        void operator()(boost::property_tree::ptree& /*pt*/, ParseState& state) const {state.lastInsertedClass->members.back()->collectionType=SequenceCollectionType;}
     };
 
     template<> struct ParseAlgorithm<Elements::Dictionary>

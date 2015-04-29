@@ -599,7 +599,7 @@ namespace ToolSupport
             assert(m_memberDescription->GetMemberType()==ObjectMemberType);
             std::vector<char> bin(static_cast<size_t>(val.CalculateBlobSize()));
             val.CopyRawBlob(&bin[0]);
-            m_blob.SetValueBinary(m_memberIndex, m_valueIndex, &bin[0], bin.size());
+            m_blob.SetValueBinary(m_memberIndex, m_valueIndex, &bin[0], static_cast<boost::int32_t>(bin.size()));
         }
 
         bool Diff(const Internal::Blob& other, const MemberDescriptionType* md, int memberIndex, int myValueIndex, int otherValueIndex)

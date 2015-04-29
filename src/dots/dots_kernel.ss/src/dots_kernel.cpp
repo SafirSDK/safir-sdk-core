@@ -1107,21 +1107,21 @@ void DotsC_ReadInt64Member(DotsC_Handle readerHandle, DotsC_Int64& val, bool& is
     }
 }
 
-void DotsC_ReadFloat32Member(DotsC_Handle readerHandle, DotsC_Float32& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode)
+void DotsC_ReadFloat32Member(DotsC_Handle readerHandle, DotsC_Float32& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode /*keyValMode*/)
 {
     Init();
     Reader* reader=ReaderFromHandle(readerHandle);
     reader->ReadValue(member, arrayIndex, val, isNull, isChanged);
 }
 
-void DotsC_ReadFloat64Member(DotsC_Handle readerHandle, DotsC_Float64& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode)
+void DotsC_ReadFloat64Member(DotsC_Handle readerHandle, DotsC_Float64& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode /*keyValMode*/)
 {
     Init();
     Reader* reader=ReaderFromHandle(readerHandle);
     reader->ReadValue(member, arrayIndex, val, isNull, isChanged);
 }
 
-void DotsC_ReadBooleanMember(DotsC_Handle readerHandle, bool& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode)
+void DotsC_ReadBooleanMember(DotsC_Handle readerHandle, bool& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode /*keyValMode*/)
 {
     Init();
     Reader* reader=ReaderFromHandle(readerHandle);
@@ -1184,7 +1184,7 @@ void DotsC_ReadEntityIdMember(DotsC_Handle readerHandle, DotsC_EntityId& val, co
     optionalStr=eid.second;
 }
 
-void DotsC_ReadBinaryMember(DotsC_Handle readerHandle, const char*& val, DotsC_Int32& size, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode)
+void DotsC_ReadBinaryMember(DotsC_Handle readerHandle, const char*& val, DotsC_Int32& size, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode /*keyValMode*/)
 {
     Init();
     Reader* reader=ReaderFromHandle(readerHandle);
@@ -1194,7 +1194,7 @@ void DotsC_ReadBinaryMember(DotsC_Handle readerHandle, const char*& val, DotsC_I
     size=bin.second;
 }
 
-void DotsC_ReadObjectMember(DotsC_Handle readerHandle, const char*& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode keyValMode)
+void DotsC_ReadObjectMember(DotsC_Handle readerHandle, const char*& val, bool& isNull, bool& isChanged, DotsC_MemberIndex member, DotsC_Int32 arrayIndex, DotsC_KeyValMode /*keyValMode*/)
 {
     Init();
     Reader* reader=ReaderFromHandle(readerHandle);

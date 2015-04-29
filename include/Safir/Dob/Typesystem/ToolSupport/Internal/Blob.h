@@ -131,7 +131,15 @@ namespace Internal
 
         boost::int32_t m_blobSize;
         boost::int64_t m_typeId;
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable: 4251)
+#endif
         boost::shared_ptr<AnyObject> m_object;
+#ifdef _MSC_VER
+#pragma warning (pop)
+#endif
     };
 
     namespace BlobUtils

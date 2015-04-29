@@ -598,8 +598,6 @@ int main(int argc, char* argv[])
     BlobChangeTest(repository);
     BlobDiffTest(repository);
 
-    return 0;
-
     std::cout<<"========= Repository ========"<<std::endl;
 
     Safir::Dob::Typesystem::ToolSupport::RepositoryToString(repository.get(), true, std::cout);

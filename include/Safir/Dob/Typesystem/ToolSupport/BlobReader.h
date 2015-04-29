@@ -208,7 +208,7 @@ namespace ToolSupport
             throw std::logic_error(os.str());
         }
 
-        friend class Internal::BlobUtils::BlobAccess;
+        friend struct Internal::BlobUtils::BlobAccess;
     };
 }
 }

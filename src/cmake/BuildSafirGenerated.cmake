@@ -68,6 +68,11 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
     include(PrecompiledHeader)
   endif()
 
+  #generated libraries sometimes get very large, so we need to use bigobj compiler flag
+  if(MSVC)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
+  endif()
+
   #
   # Dependency resolution
   #
@@ -289,6 +294,8 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
   #On Windows external builds autolinking is used.
   if (NOT (MSVC AND SAFIR_EXTERNAL_BUILD))
     target_link_libraries(safir_generated-${_gen_NAME}-cpp PRIVATE
+    dots_kernel
+
     PUBLIC
     dots_cpp)
   endif()

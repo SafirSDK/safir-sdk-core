@@ -659,7 +659,7 @@ namespace @_NAMESPACEV_@
                                                                   false,
                                                                   handle,
                                                                   g_@_LOWER:MEMBER_@MemberIndex,
-                                                                  valueIndex,
+                                                                  static_cast<Safir::Dob::Typesystem::ArrayIndex>(valueIndex),
                                                                   Safir::Dob::Typesystem::Internal::BlobOperations::ValueMode);
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
             Safir::Dob::Typesystem::Internal::BlobOperations::Set(boost::static_pointer_cast<Safir::Dob::Typesystem::Object>(m_@_MEMBER_@Member[valueIndex]),
@@ -667,7 +667,7 @@ namespace @_NAMESPACEV_@
                                                                   false,
                                                                   handle,
                                                                   g_@_LOWER:MEMBER_@MemberIndex,
-                                                                  valueIndex,
+                                                                  static_cast<Safir::Dob::Typesystem::ArrayIndex>(valueIndex),
                                                                   Safir::Dob::Typesystem::Internal::BlobOperations::ValueMode);
 @@ELSE@@
             Safir::Dob::Typesystem::Internal::BlobOperations::Set(m_@_MEMBER_@Member[valueIndex],
@@ -675,7 +675,7 @@ namespace @_NAMESPACEV_@
                                                                   false,
                                                                   handle,
                                                                   g_@_LOWER:MEMBER_@MemberIndex,
-                                                                  valueIndex,
+                                                                  static_cast<Safir::Dob::Typesystem::ArrayIndex>(valueIndex),
                                                                   Safir::Dob::Typesystem::Internal::BlobOperations::ValueMode);
 @@END_IF@@
         }
