@@ -105,7 +105,7 @@ class DotsTestDotnet
             Test_IsException();
             Test_GetDouFilePath();
             TestSequences();
-            //TestDictionaries();
+            TestDictionaries();
         }
         finally
         {
@@ -7854,6 +7854,7 @@ class DotsTestDotnet
         Console.WriteLine("------ Clone -----");
         var clone = ms.Clone ();
         PrintSequences(clone);
+
     }
 
     private static void PrintDictionaries(DotsTest.MemberDictionaries md)

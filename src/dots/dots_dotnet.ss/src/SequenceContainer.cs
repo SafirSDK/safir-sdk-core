@@ -312,7 +312,6 @@ namespace Safir.Dob.Typesystem
         protected GenericObjectSequenceContainer(GenericObjectSequenceContainer<T> other):
             base(other)
         {
-            Console.WriteLine ("copy ctor GenericObjectSequenceContainer");
             foreach (var val in other.values) {
                 this.values.Add(val.Clone() as T);
             }
@@ -367,12 +366,9 @@ namespace Safir.Dob.Typesystem
         protected ValueSequenceContainer(ValueSequenceContainer<T> other):
             base(other)
         {
-            Console.WriteLine ("ENTER: copy ctor ValueSequenceContainer "+typeof(T).ToString());
             foreach (var val in other.values) {
-                Console.WriteLine ("   val=" + val);
                 this.values.Add(val);
             }
-            Console.WriteLine ("LEAVE: copy ctor ValueSequenceContainer");
         }
 
         #endregion
@@ -703,7 +699,29 @@ namespace Safir.Dob.Typesystem
         protected BinarySequenceContainer(BinarySequenceContainer other) : base(other) { }
     }
 
-    public class ObjectSequenceContainer : GenericObjectSequenceContainer<Safir.Dob.Typesystem.Object> {}
+    public class ObjectSequenceContainer : GenericObjectSequenceContainer<Safir.Dob.Typesystem.Object>, ICloneable
+    {
+        /// <summary>
+        /// Initializes a new instance.
+        /// </summary>
+        public ObjectSequenceContainer() : base() { }
+
+        /// <summary>
+        /// Clone this instance.
+        /// </summary>
+        object ICloneable.Clone() {return new ObjectSequenceContainer(this);}
+
+        /// <summary>
+        /// Clone this instance.
+        /// </summary>
+        public new ObjectSequenceContainer Clone() {return new ObjectSequenceContainer(this);}
+
+        /// <summary>
+        /// Initializes a new copy.
+        /// </summary>
+        /// <param name="other">Other.</param>
+        protected ObjectSequenceContainer(ObjectSequenceContainer other) : base(other) { }
+    }
 
     //SI32
     namespace Si32
