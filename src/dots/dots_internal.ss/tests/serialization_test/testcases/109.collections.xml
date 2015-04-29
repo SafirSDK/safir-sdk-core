@@ -1,31 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <BlobTest.MyCollections type="BlobTest.MyCollections">
-  
+
   <SeqInt32>
     <Int32>1</Int32>
     <Int32>2</Int32>
   </SeqInt32>
-  
+
   <SeqInt64>
     <Int64>123456789</Int64>
     <Int64>987654321</Int64>
   </SeqInt64>
-  
+
   <SeqBool>
     <Boolean>true</Boolean>
     <Boolean>false</Boolean>
   </SeqBool>
-  
+
   <SeqTypeId>
     <TypeId>BlobTest.MyItem</TypeId>
     <TypeId>BlobTest.MyColorEnum</TypeId>
   </SeqTypeId>
-  
+
   <SeqChannelId>
     <ChannelId>Channel one</ChannelId>
     <ChannelId>2</ChannelId>
   </SeqChannelId>
-  
+
   <SeqEntityId>
     <entityId>
       <name>BlobTest.MyEntity</name>
@@ -36,12 +36,12 @@
       <instanceId>second</instanceId>
     </entityId>
   </SeqEntityId>
-  
+
   <SeqEnum>
     <BlobTest.MyColorEnum>White</BlobTest.MyColorEnum>
     <BlobTest.MyColorEnum>Black</BlobTest.MyColorEnum>
   </SeqEnum>
-  
+
   <SeqObject>
     <BlobTest.MyItem type="BlobTest.MyItem">
       <MyNumber>666</MyNumber>
@@ -53,7 +53,7 @@
 	  <String xml:space="preserve" index="4"> &lt;, &gt; &amp; </String>
       </MyStrings>
     </BlobTest.MyItem>
-    
+
     <BlobTest.MyItem type="BlobTest.MySpecialItem">
       <MyNumber>76</MyNumber>
       <MyStrings>
@@ -66,7 +66,7 @@
       </Child>
       <ChildName>Senior Bob</ChildName>
     </BlobTest.MyItem>
-    
+
     <BlobTest.MyItem type="BlobTest.MySpecialItem">
       <MyNumber>5</MyNumber>
       <MyStrings>
@@ -84,9 +84,9 @@
 	  <value>456</value>
 	</entry>
       </DictStringInt32>
-    </BlobTest.MyItem>    
+    </BlobTest.MyItem>
   </SeqObject>
-  
+
   <!-- Dictonaries -->
   <DictStringInt32>
     <entry>
@@ -94,11 +94,11 @@
       <value>123</value>
     </entry>
     <entry>
-      <key>Åberg</key>
+      <key>Aaberg</key>
       <value>321</value>
     </entry>
   </DictStringInt32>
-  
+
   <DictInt64TypeId>
     <entry>
       <key>123456789</key>
@@ -109,7 +109,7 @@
       <value>BlobTest.MyItem</value>
     </entry>
   </DictInt64TypeId>
-  
+
   <DictEnumEntityId>
     <entry>
       <key>White</key>
@@ -126,7 +126,7 @@
       </value>
     </entry>
   </DictEnumEntityId>
-  
+
   <DictEntityIdObject>
     <entry>
       <key>
@@ -171,7 +171,7 @@
       </BlobTest.MyItem>
     </entry>
   </DictEntityIdObject>
-  
+
   <DictHandlerIdBool>
     <entry>
       <key>MyHandler</key>
@@ -182,7 +182,7 @@
       <value>false</value>
     </entry>
   </DictHandlerIdBool>
-  
+
   <DictTypeIdEnum>
     <entry>
       <key>BlobTest.MyColorEnum</key>
@@ -193,5 +193,5 @@
       <value>Black</value>
     </entry>
   </DictTypeIdEnum>
-  
-</BlobTest.MyEntity>
+
+</BlobTest.MyCollections>
