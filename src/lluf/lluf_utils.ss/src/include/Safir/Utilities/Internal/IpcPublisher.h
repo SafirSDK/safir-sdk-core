@@ -84,7 +84,7 @@ namespace Internal
                              [this](typename Acceptor::StreamPtr streamPtr)
                              {
                                  m_sessions.insert(boost::make_shared<SessionType>
-                                                   (streamPtr, m_strand.get_io_service(), m_subscriberDisconnectedCb));
+                                                   (streamPtr, m_strand, m_subscriberDisconnectedCb));
                                  if (m_subscriberConnectedCb != nullptr)
                                  {
                                      m_subscriberConnectedCb();
