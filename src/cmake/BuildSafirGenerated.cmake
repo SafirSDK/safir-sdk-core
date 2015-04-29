@@ -68,11 +68,6 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
     include(PrecompiledHeader)
   endif()
 
-  #generated libraries sometimes get very large, so we need to use bigobj compiler flag
-  if(MSVC)
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
-  endif()
-
   #
   # Dependency resolution
   #

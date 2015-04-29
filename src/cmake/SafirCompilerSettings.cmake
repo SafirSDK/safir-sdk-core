@@ -39,13 +39,17 @@ if (MSVC)
 
    # increase warning level
    # Use the highest warning level for visual studio.
-   SET(CMAKE_CXX_WARNING_LEVEL 4)
    IF(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
      STRING(REGEX REPLACE "/W[0-4]" "/W4"
        CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
    ELSE()
      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
    ENDIF()
+
+   #generated libraries sometimes get very large, so we need to use bigobj compiler flag
+   if(MSVC)
+     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
+   endif()
 
    #Set linker flag /OPT:REF (eliminates functions and/or data that are never referenced)
    #reduces size of executable to approx the same size as in Release mode.
