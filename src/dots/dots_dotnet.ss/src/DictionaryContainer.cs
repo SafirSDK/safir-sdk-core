@@ -302,7 +302,7 @@ namespace Safir.Dob.Typesystem
         }
 
         /// <summary>
-        /// Sets the changed.
+        /// Sets the container changed.
         /// </summary>
         /// <param name="changed">If set to <c>true</c> changed.</param>
         public override void SetChanged (bool changed)
@@ -316,17 +316,6 @@ namespace Safir.Dob.Typesystem
 
         #endregion
 
-        public override void Copy(ContainerBase other)
-        {
-            base.Copy(other);
-            this.values.Clear ();
-            DictionaryContainer<KeyT, ValT> that = other as DictionaryContainer<KeyT, ValT>;
-            foreach (var kv in that.values)
-            {
-                Add (kv.Key, (ValT)kv.Value.Clone ());
-            }
-        }
-
         #region Cloning
 
         /// <summary>
@@ -338,12 +327,26 @@ namespace Safir.Dob.Typesystem
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <returns></returns>
         public new DictionaryContainer<KeyT, ValT> Clone()
         {
-            return (DictionaryContainer<KeyT, ValT>)((ICloneable)this).Clone(); 
+            return (DictionaryContainer<KeyT, ValT>)((ICloneable)this).Clone();
+        }
+
+        /// <summary>
+        /// Copy the container.
+        /// </summary>
+        public override void Copy(ContainerBase other)
+        {
+            base.Copy(other);
+            this.values.Clear ();
+            DictionaryContainer<KeyT, ValT> that = other as DictionaryContainer<KeyT, ValT>;
+            foreach (var kv in that.values)
+            {
+                Add (kv.Key, (ValT)kv.Value.Clone ());
+            }
         }
 
         /// <summary>
@@ -368,14 +371,14 @@ namespace Safir.Dob.Typesystem
         where ContainerT : ValueContainer<ValueT>, new()
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Safir.Dob.Typesystem.ValueDictionaryContainer`3"/> class.
+        /// Initializes a new instance of the class.
         /// </summary>
         public ValueDictionaryContainer() :base()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Safir.Dob.Typesystem.ValueDictionaryContainer`3"/> class.
+        /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="other">Other.</param>
         protected ValueDictionaryContainer(ValueDictionaryContainer<KeyT, ContainerT, ValueT> other) : base(other)
@@ -419,14 +422,14 @@ namespace Safir.Dob.Typesystem
             where ContainerT : ObjectContainerImpl<ValueT>, new()
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Safir.Dob.Typesystem.ObjectDictionaryContainer`3"/> class.
+        /// Initializes a new instance of the class.
         /// </summary>
         public ObjectDictionaryContainer() :base()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Safir.Dob.Typesystem.ObjectDictionaryContainer`3"/> class.
+        /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="other">Other.</param>
         protected ObjectDictionaryContainer(ObjectDictionaryContainer<KeyT, ContainerT, ValueT> other) : base(other)
@@ -470,14 +473,14 @@ namespace Safir.Dob.Typesystem
         where ContainerT : EnumerationContainerImpl<ValueT>, new()
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Safir.Dob.Typesystem.EnumDictionaryContainer`3"/> class.
+        /// Initializes a new instance of the class.
         /// </summary>
         public EnumDictionaryContainer() :base()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Safir.Dob.Typesystem.EnumDictionaryContainer`3"/> class.
+        /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="other">Other.</param>
         protected EnumDictionaryContainer(EnumDictionaryContainer<KeyT, ContainerT, ValueT> other) : base(other)
@@ -519,14 +522,14 @@ namespace Safir.Dob.Typesystem
     public class StringDictionaryContainer<KeyT> : DictionaryContainer<KeyT, StringContainer>, ICloneable
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Safir.Dob.Typesystem.EnumDictionaryContainer`3"/> class.
+        /// Initializes a new instance of the class.
         /// </summary>
         public StringDictionaryContainer() :base()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Safir.Dob.Typesystem.EnumDictionaryContainer`3"/> class.
+        /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="other">Other.</param>
         protected StringDictionaryContainer(StringDictionaryContainer<KeyT> other) : base(other)
