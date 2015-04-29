@@ -89,6 +89,7 @@ namespace
         }
     }
 
+    /* This is work in progress for dictionary properties
     bool GetPropertyParameterInternal(const DotsC_TypeId typeId,
                                       const DotsC_TypeId propertyId,
                                       const DotsC_MemberIndex member,
@@ -97,7 +98,8 @@ namespace
                                       int& parameterIndex)
     {
         bool isInherited;
-        const PropertyMappingDescriptionShm* pmd=RepositoryKeeper::GetRepository()->GetClass(typeId)->GetPropertyMapping(propertyId, isInherited);
+        const PropertyMappingDescriptionShm* pmd=RepositoryKeeper::GetRepository()->
+            GetClass(typeId)->GetPropertyMapping(propertyId, isInherited);
 
         if (pmd==NULL)
         {
@@ -127,6 +129,7 @@ namespace
 
         return true;
     }
+    */
 
     typedef ts::BlobReader<RepositoryShm> Reader;
     typedef ts::BlobWriter<RepositoryShm> Writer;
