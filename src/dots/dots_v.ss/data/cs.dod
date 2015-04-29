@@ -646,19 +646,23 @@ namespace @_NAMESPACE_@
 @@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
 @@IF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@=Enumeration
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
-            m_@_MEMBER_@Member =  (Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, @_MEMBERTYPE_@.EnumerationContainer>)other.m_@_MEMBER_@Member.Clone();
+            m_@_MEMBER_@Member =  (Safir.Dob.Typesystem.EnumDictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, @_MEMBERTYPE_@.EnumerationContainer, @_MEMBERTYPE_@.Enumeration>)other.m_@_MEMBER_@Member.Clone();
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
-            m_@_MEMBER_@Member =  (Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, @_MEMBERTYPE_@Container>)other.m_@_MEMBER_@Member.Clone();
+            m_@_MEMBER_@Member =  (Safir.Dob.Typesystem.ObjectDictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, @_MEMBERTYPE_@Container, @_MEMBERTYPE_@>)other.m_@_MEMBER_@Member.Clone();
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=String
+            m_@_MEMBER_@Member =  (Safir.Dob.Typesystem.StringDictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration>)other.m_@_MEMBER_@Member.Clone();
 @@ELSE@@
-            m_@_MEMBER_@Member =  (Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container>)other.m_@_MEMBER_@Member.Clone();
+            m_@_MEMBER_@Member =  (Safir.Dob.Typesystem.ValueDictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container, @_MEMBERTYPE_@>)other.m_@_MEMBER_@Member.Clone();
 @@END_IF@@
 @@ELSE@@
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
-            m_@_MEMBER_@Member =  (Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@.EnumerationContainer>)other.m_@_MEMBER_@Member.Clone();
+            m_@_MEMBER_@Member =  (Safir.Dob.Typesystem.EnumDictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@.EnumerationContainer, @_MEMBERTYPE_@.Enumeration>)other.m_@_MEMBER_@Member.Clone();
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
-            m_@_MEMBER_@Member =  (Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@Container>)other.m_@_MEMBER_@Member.Clone();
+            m_@_MEMBER_@Member =  (Safir.Dob.Typesystem.ObjectDictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@Container, @_MEMBERTYPE_@>)other.m_@_MEMBER_@Member.Clone();
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=String
+            m_@_MEMBER_@Member =  (Safir.Dob.Typesystem.StringDictionaryContainer<@_MEMBERDICTIONARYTYPE_@>)other.m_@_MEMBER_@Member.Clone();
 @@ELSE@@
-            m_@_MEMBER_@Member =  (Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container>)other.m_@_MEMBER_@Member.Clone();
+            m_@_MEMBER_@Member =  (Safir.Dob.Typesystem.ValueDictionaryContainer<@_MEMBERDICTIONARYTYPE_@, Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container, @_MEMBERTYPE_@>)other.m_@_MEMBER_@Member.Clone();
 @@END_IF@@
 @@END_IF@@
 @@----- Single --------
@@ -1000,19 +1004,23 @@ namespace @_NAMESPACE_@
 @@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
 @@IF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@=Enumeration
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
-        public Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, @_MEMBERTYPE_@.EnumerationContainer> @_MEMBER_@
+        public Safir.Dob.Typesystem.EnumDictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, @_MEMBERTYPE_@.EnumerationContainer, @_MEMBERTYPE_@.Enumeration> @_MEMBER_@
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
-        public Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, @_MEMBERTYPE_@Container> @_MEMBER_@
+        public Safir.Dob.Typesystem.ObjectDictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, @_MEMBERTYPE_@Container, @_MEMBERTYPE_@> @_MEMBER_@
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=String
+        public Safir.Dob.Typesystem.StringDictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration> @_MEMBER_@
 @@ELSE@@
-        public Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container> @_MEMBER_@
+        public Safir.Dob.Typesystem.ValueDictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container, @_MEMBERTYPE_@> @_MEMBER_@
 @@END_IF@@
 @@ELSE@@
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
-        public Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@.EnumerationContainer> @_MEMBER_@
+        public Safir.Dob.Typesystem.EnumDictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@.EnumerationContainer, @_MEMBERTYPE_@.Enumeration> @_MEMBER_@
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
-        public Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@Container> @_MEMBER_@
+        public Safir.Dob.Typesystem.ObjectDictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@Container, @_MEMBERTYPE_@> @_MEMBER_@
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=String
+        public Safir.Dob.Typesystem.StringDictionaryContainer<@_MEMBERDICTIONARYTYPE_@> @_MEMBER_@
 @@ELSE@@
-        public Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container> @_MEMBER_@
+        public Safir.Dob.Typesystem.ValueDictionaryContainer<@_MEMBERDICTIONARYTYPE_@, Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container, @_MEMBERTYPE_@> @_MEMBER_@
 @@END_IF@@
 @@END_IF@@
 @@----------single member ---------------
@@ -1323,19 +1331,23 @@ namespace @_NAMESPACE_@
 @@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
 @@IF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@=Enumeration
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
-        private Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, @_MEMBERTYPE_@.EnumerationContainer> m_@_MEMBER_@Member = new Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, @_MEMBERTYPE_@.EnumerationContainer>();
+        private Safir.Dob.Typesystem.EnumDictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, @_MEMBERTYPE_@.EnumerationContainer, @_MEMBERTYPE_@.Enumeration> m_@_MEMBER_@Member = new Safir.Dob.Typesystem.EnumDictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, @_MEMBERTYPE_@.EnumerationContainer, @_MEMBERTYPE_@.Enumeration>();
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
-        private Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, @_MEMBERTYPE_@Container> m_@_MEMBER_@Member = new Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, @_MEMBERTYPE_@Container>();
+        private Safir.Dob.Typesystem.ObjectDictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, @_MEMBERTYPE_@Container, @_MEMBERTYPE_@> m_@_MEMBER_@Member = new Safir.Dob.Typesystem.ObjectDictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, @_MEMBERTYPE_@Container, @_MEMBERTYPE_@>();
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=String
+        private Safir.Dob.Typesystem.StringDictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration> m_@_MEMBER_@Member = new Safir.Dob.Typesystem.StringDictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration>();
 @@ELSE@@
-        private Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container> m_@_MEMBER_@Member = new Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container>();
+        private Safir.Dob.Typesystem.ValueDictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container, @_MEMBERTYPE_@> m_@_MEMBER_@Member = new Safir.Dob.Typesystem.ValueDictionaryContainer<@_MEMBERDICTIONARYTYPE_@.Enumeration, Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container, @_MEMBERTYPE_@>();
 @@END_IF@@
 @@ELSE@@
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
-        private Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@.EnumerationContainer> m_@_MEMBER_@Member = new Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@.EnumerationContainer>();
+        private Safir.Dob.Typesystem.EnumDictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@.EnumerationContainer, @_MEMBERTYPE_@.Enumeration> m_@_MEMBER_@Member = new Safir.Dob.Typesystem.EnumDictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@.EnumerationContainer, @_MEMBERTYPE_@.Enumeration>();
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
-        private Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@Container> m_@_MEMBER_@Member = new Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@Container>();
+        private Safir.Dob.Typesystem.ObjectDictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@Container, @_MEMBERTYPE_@> m_@_MEMBER_@Member = new Safir.Dob.Typesystem.ObjectDictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@Container, @_MEMBERTYPE_@>();
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=String
+        private Safir.Dob.Typesystem.StringDictionaryContainer<@_MEMBERDICTIONARYTYPE_@> m_@_MEMBER_@Member = new Safir.Dob.Typesystem.StringDictionaryContainer<@_MEMBERDICTIONARYTYPE_@>();
 @@ELSE@@
-        private Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container> m_@_MEMBER_@Member = new Safir.Dob.Typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container>();
+        private Safir.Dob.Typesystem.ValueDictionaryContainer<@_MEMBERDICTIONARYTYPE_@, Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container, @_MEMBERTYPE_@> m_@_MEMBER_@Member = new Safir.Dob.Typesystem.ValueDictionaryContainer<@_MEMBERDICTIONARYTYPE_@, Safir.Dob.Typesystem.@_UNIFORM_MEMBERTYPE_@Container, @_MEMBERTYPE_@>();
 @@END_IF@@
 @@END_IF@@
 @@------ single
@@ -1576,7 +1588,7 @@ namespace @_NAMESPACE_@
         /// <summary>
         /// Container for members of type @_CLASS_@
         /// </summary>
-        public class EnumerationContainer : Safir.Dob.Typesystem.EnumerationContainerBase, ICloneable
+        public class EnumerationContainer : Safir.Dob.Typesystem.EnumerationContainerImpl<Enumeration>, ICloneable
         {
             /// <summary>
             /// Constructor.
@@ -1633,7 +1645,7 @@ namespace @_NAMESPACE_@
             /// <summary>
             /// Get or set the enumeration value.
             /// </summary>
-            public Enumeration Val
+            public override Enumeration Val
             {
                 get { return (Enumeration)Ordinal; }
                 set { Ordinal = (int)value; }

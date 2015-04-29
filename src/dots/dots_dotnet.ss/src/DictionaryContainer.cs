@@ -30,7 +30,7 @@ namespace Safir.Dob.Typesystem
     /// <summary>
     /// Dictionary container.
     /// </summary>
-    public class DictionaryContainer<KeyT, ValT> : ContainerBase, IDictionary<KeyT, ValT>
+    public class DictionaryContainer<KeyT, ValT> : ContainerBase, ICloneable, IDictionary<KeyT, ValT>
         where ValT : ContainerBase, new()
     {
         private SortedDictionary<KeyT, ValT> values;
@@ -316,5 +316,250 @@ namespace Safir.Dob.Typesystem
 
         #endregion
 
+        public override void Copy(ContainerBase other)
+        {
+            base.Copy(other);
+            this.values.Clear ();
+            DictionaryContainer<KeyT, ValT> that = other as DictionaryContainer<KeyT, ValT>;
+            foreach (var kv in that.values)
+            {
+                Add (kv.Key, (ValT)kv.Value.Clone ());
+            }
+        }
+
+        #region Cloning
+
+        /// <summary>
+        /// Clone this instance.
+        /// </summary>
+        object ICloneable.Clone()
+        {
+            return new DictionaryContainer<KeyT, ValT> (this);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public new DictionaryContainer<KeyT, ValT> Clone()
+        {
+            return (DictionaryContainer<KeyT, ValT>)((ICloneable)this).Clone(); 
+        }
+
+        /// <summary>
+        /// Copy constructor for use by Clone
+        /// </summary>
+        /// <param name="other"></param>
+        protected DictionaryContainer(DictionaryContainer<KeyT, ValT> other):
+            base(other)
+        {
+            foreach (var kv in other.values) {
+                values.Add (kv.Key, (ValT)kv.Value.Clone ());
+            }
+        }
+
+        #endregion
     }
+
+    /// <summary>
+    /// Value dictionary container.
+    /// </summary>
+    public class ValueDictionaryContainer<KeyT, ContainerT, ValueT> : DictionaryContainer<KeyT, ContainerT>, ICloneable
+        where ContainerT : ValueContainer<ValueT>, new()
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Safir.Dob.Typesystem.ValueDictionaryContainer`3"/> class.
+        /// </summary>
+        public ValueDictionaryContainer() :base()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Safir.Dob.Typesystem.ValueDictionaryContainer`3"/> class.
+        /// </summary>
+        /// <param name="other">Other.</param>
+        protected ValueDictionaryContainer(ValueDictionaryContainer<KeyT, ContainerT, ValueT> other) : base(other)
+        {
+        }
+
+        /// <summary>
+        /// Clone this instance.
+        /// </summary>
+        public new ValueDictionaryContainer<KeyT, ContainerT, ValueT> Clone()
+        {
+            return new ValueDictionaryContainer<KeyT, ContainerT, ValueT> (this);
+        }
+
+        /// <summary>
+        /// Clone this instance.
+        /// </summary>
+        object ICloneable.Clone()
+        {
+            return new ValueDictionaryContainer<KeyT, ContainerT, ValueT> (this);
+        }
+
+        /// <summary>
+        /// Add the specified key and value.
+        /// </summary>
+        /// <param name="key">Key.</param>
+        /// <param name="value">Value.</param>
+        public void Add (KeyT key, ValueT value)
+        {
+            var container = new ContainerT ();
+            container.Val = value;
+            base.Add (key, container);
+        }
+    }
+
+    /// <summary>
+    /// Object dictionary container.
+    /// </summary>
+    public class ObjectDictionaryContainer<KeyT, ContainerT, ValueT> : DictionaryContainer<KeyT, ContainerT>, ICloneable
+            where ValueT : Object
+            where ContainerT : ObjectContainerImpl<ValueT>, new()
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Safir.Dob.Typesystem.ObjectDictionaryContainer`3"/> class.
+        /// </summary>
+        public ObjectDictionaryContainer() :base()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Safir.Dob.Typesystem.ObjectDictionaryContainer`3"/> class.
+        /// </summary>
+        /// <param name="other">Other.</param>
+        protected ObjectDictionaryContainer(ObjectDictionaryContainer<KeyT, ContainerT, ValueT> other) : base(other)
+        {
+        }
+
+        /// <summary>
+        /// Clone this instance.
+        /// </summary>
+        public new ObjectDictionaryContainer<KeyT, ContainerT, ValueT> Clone()
+        {
+            return new ObjectDictionaryContainer<KeyT, ContainerT, ValueT> (this);
+        }
+
+        /// <summary>
+        /// Clone this instance.
+        /// </summary>
+        object ICloneable.Clone()
+        {
+            return new ObjectDictionaryContainer<KeyT, ContainerT, ValueT> (this);
+        }
+
+        /// <summary>
+        /// Add the specified key and value.
+        /// </summary>
+        /// <param name="key">Key.</param>
+        /// <param name="value">Value.</param>
+        public void Add (KeyT key, ValueT value)
+        {
+            var container = new ContainerT ();
+            container.Obj = value;
+            base.Add (key, container);
+        }
+    }
+
+    /// <summary>
+    /// Enum dictionary container.
+    /// </summary>
+    public class EnumDictionaryContainer<KeyT, ContainerT, ValueT> : DictionaryContainer<KeyT, ContainerT>, ICloneable
+        where ValueT : struct
+        where ContainerT : EnumerationContainerImpl<ValueT>, new()
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Safir.Dob.Typesystem.EnumDictionaryContainer`3"/> class.
+        /// </summary>
+        public EnumDictionaryContainer() :base()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Safir.Dob.Typesystem.EnumDictionaryContainer`3"/> class.
+        /// </summary>
+        /// <param name="other">Other.</param>
+        protected EnumDictionaryContainer(EnumDictionaryContainer<KeyT, ContainerT, ValueT> other) : base(other)
+        {
+        }
+
+        /// <summary>
+        /// Clone this instance.
+        /// </summary>
+        public new EnumDictionaryContainer<KeyT, ContainerT, ValueT> Clone()
+        {
+            return new EnumDictionaryContainer<KeyT, ContainerT, ValueT> (this);
+        }
+
+        /// <summary>
+        /// Clone this instance.
+        /// </summary>
+        object ICloneable.Clone()
+        {
+            return new EnumDictionaryContainer<KeyT, ContainerT, ValueT> (this);
+        }
+
+        /// <summary>
+        /// Add the specified key and value.
+        /// </summary>
+        /// <param name="key">Key.</param>
+        /// <param name="value">Value.</param>
+        public void Add (KeyT key, ValueT value)
+        {
+            var container = new ContainerT ();
+            container.Val = value;
+            base.Add (key, container);
+        }
+    }
+
+    /// <summary>
+    /// Enum dictionary container.
+    /// </summary>
+    public class StringDictionaryContainer<KeyT> : DictionaryContainer<KeyT, StringContainer>, ICloneable
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Safir.Dob.Typesystem.EnumDictionaryContainer`3"/> class.
+        /// </summary>
+        public StringDictionaryContainer() :base()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Safir.Dob.Typesystem.EnumDictionaryContainer`3"/> class.
+        /// </summary>
+        /// <param name="other">Other.</param>
+        protected StringDictionaryContainer(StringDictionaryContainer<KeyT> other) : base(other)
+        {
+        }
+
+        /// <summary>
+        /// Clone this instance.
+        /// </summary>
+        public new StringDictionaryContainer<KeyT> Clone()
+        {
+            return new StringDictionaryContainer<KeyT> (this);
+        }
+
+        /// <summary>
+        /// Clone this instance.
+        /// </summary>
+        object ICloneable.Clone()
+        {
+            return new StringDictionaryContainer<KeyT> (this);
+        }
+
+        /// <summary>
+        /// Add the specified key and value.
+        /// </summary>
+        /// <param name="key">Key.</param>
+        /// <param name="value">Value.</param>
+        public void Add (KeyT key, String value)
+        {
+            var container = new StringContainer ();
+            container.Val = value;
+            base.Add (key, container);
+        }
+    }
+
 }
