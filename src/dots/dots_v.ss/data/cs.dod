@@ -1484,6 +1484,9 @@ namespace @_NAMESPACE_@
     /// </summary>
     public class @_CLASS_@SequenceContainer : Safir.Dob.Typesystem.GenericObjectSequenceContainer<@_CLASS_@>, ICloneable
     {
+        /// <summary>
+        /// Constructor.
+        /// </summary>
         public @_CLASS_@SequenceContainer() : base() { }
 
         #region Cloning
