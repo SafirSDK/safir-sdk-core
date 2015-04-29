@@ -42,6 +42,26 @@ namespace Safir.Dob.Typesystem
     /// <typeparam name="T">The type to contain.</typeparam>
     public abstract class SequenceContainer<T> : ContainerBase, IList<T>, ICloneable
     {
+        protected internal List<T> values = new List<T> ();
+
+        /// <summary>
+        /// Default constructor
+        /// <para/>
+        /// Creates a null and not changed container.
+        /// </summary>
+        public SequenceContainer(): base()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Safir.Dob.Typesystem.SequenceContainer`1"/> class.
+        /// </summary>
+        /// <param name="other">Other.</param>
+        protected SequenceContainer(SequenceContainer<T> other):
+            base(other)
+        {
+        }
+
         #region IList implementation
 
         /// <Docs>To be added.</Docs>
@@ -240,26 +260,6 @@ namespace Safir.Dob.Typesystem
         }
 
         #endregion
-
-        protected internal List<T> values;
-        /// <summary>
-        /// Default constructor
-        /// <para/>
-        /// Creates a null and not changed container.
-        /// </summary>
-        public SequenceContainer(): base()
-        {
-            values = new List<T> ();
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Safir.Dob.Typesystem.SequenceContainer`1"/> class.
-        /// </summary>
-        /// <param name="other">Other.</param>
-        protected SequenceContainer(SequenceContainer<T> other):
-            base(other)
-        {
-        }
     }
 
     public class GenericObjectSequenceContainer<T> : SequenceContainer<T>, ICloneable where T : Safir.Dob.Typesystem.Object
@@ -302,7 +302,7 @@ namespace Safir.Dob.Typesystem
         /// <returns></returns>
         public new GenericObjectSequenceContainer<T> Clone()
         {
-            return (GenericObjectSequenceContainer<T>)((ICloneable)this).Clone(); 
+            return new GenericObjectSequenceContainer<T>(this);
         }
 
         /// <summary>
@@ -312,6 +312,7 @@ namespace Safir.Dob.Typesystem
         protected GenericObjectSequenceContainer(GenericObjectSequenceContainer<T> other):
             base(other)
         {
+            Console.WriteLine ("copy ctor GenericObjectSequenceContainer");
             foreach (var val in other.values) {
                 this.values.Add(val.Clone() as T);
             }
@@ -356,7 +357,7 @@ namespace Safir.Dob.Typesystem
         /// <returns></returns>
         public new ValueSequenceContainer<T> Clone()
         {
-            return (ValueSequenceContainer<T>)((ICloneable)this).Clone(); 
+            return new ValueSequenceContainer<T>(this);
         }
 
         /// <summary>
@@ -366,17 +367,98 @@ namespace Safir.Dob.Typesystem
         protected ValueSequenceContainer(ValueSequenceContainer<T> other):
             base(other)
         {
+            Console.WriteLine ("ENTER: copy ctor ValueSequenceContainer "+typeof(T).ToString());
             foreach (var val in other.values) {
+                Console.WriteLine ("   val=" + val);
                 this.values.Add(val);
             }
+            Console.WriteLine ("LEAVE: copy ctor ValueSequenceContainer");
         }
 
         #endregion
     }
 
-    public class StringSequenceContainer : ValueSequenceContainer<string> {}
-    public class BooleanSequenceContainer : ValueSequenceContainer<bool> {}
-    public class Int32SequenceContainer : ValueSequenceContainer<Int32> {}
+    /// <summary>
+    /// String sequence container.
+    /// </summary>
+    public class StringSequenceContainer : ValueSequenceContainer<string>, ICloneable
+    {
+        /// <summary>
+        /// Initializes a new instance.
+        /// </summary>
+        public StringSequenceContainer() : base() { }
+
+        /// <summary>
+        /// Clone this instance.
+        /// </summary>
+        object ICloneable.Clone() {return new StringSequenceContainer(this);}
+
+        /// <summary>
+        /// Clone this instance.
+        /// </summary>
+        public new StringSequenceContainer Clone() {return new StringSequenceContainer(this);}
+
+        /// <summary>
+        /// Initializes a new copy.
+        /// </summary>
+        /// <param name="other">Other.</param>
+        protected StringSequenceContainer(StringSequenceContainer other) : base(other) { }
+    }
+
+    /// <summary>
+    /// Boolean sequence container.
+    /// </summary>
+    public class BooleanSequenceContainer : ValueSequenceContainer<bool>, ICloneable
+    {
+        /// <summary>
+        /// Initializes a new instance.
+        /// </summary>
+        public BooleanSequenceContainer() : base() { }
+
+        /// <summary>
+        /// Clone this instance.
+        /// </summary>
+        object ICloneable.Clone() {return new BooleanSequenceContainer(this);}
+
+        /// <summary>
+        /// Clone this instance.
+        /// </summary>
+        public new BooleanSequenceContainer Clone() {return new BooleanSequenceContainer(this);}
+
+        /// <summary>
+        /// Initializes a new copy.
+        /// </summary>
+        /// <param name="other">Other.</param>
+        protected BooleanSequenceContainer(BooleanSequenceContainer other) : base(other) { }
+    }
+
+    /// <summary>
+    /// Int32 sequence container.
+    /// </summary>
+    public class Int32SequenceContainer : ValueSequenceContainer<Int32>, ICloneable
+    {
+        /// <summary>
+        /// Initializes a new instance.
+        /// </summary>
+        public Int32SequenceContainer() : base() { }
+
+        /// <summary>
+        /// Clone this instance.
+        /// </summary>
+        object ICloneable.Clone() {return new Int32SequenceContainer(this);}
+
+        /// <summary>
+        /// Clone this instance.
+        /// </summary>
+        public new Int32SequenceContainer Clone() {return new Int32SequenceContainer(this);}
+
+        /// <summary>
+        /// Initializes a new copy.
+        /// </summary>
+        /// <param name="other">Other.</param>
+        protected Int32SequenceContainer(Int32SequenceContainer other) : base(other) { }
+    }
+
     public class Int64SequenceContainer : ValueSequenceContainer<Int64> {}
     public class Float32SequenceContainer : ValueSequenceContainer<float> {}
     public class Float64SequenceContainer : ValueSequenceContainer<double> {}

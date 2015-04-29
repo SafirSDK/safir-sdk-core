@@ -1308,7 +1308,7 @@ namespace @_NAMESPACE_@
 
         public new @_CLASS_@SequenceContainer Clone()
         {
-            return (@_CLASS_@SequenceContainer)(((ICloneable)this).Clone());
+            return new @_CLASS_@SequenceContainer(this);
         }
 
         //Copy constructor for use by Clone
@@ -1473,7 +1473,7 @@ namespace @_NAMESPACE_@
 
             public new EnumerationSequenceContainer Clone()
             {
-                return (EnumerationSequenceContainer)(((ICloneable)this).Clone());
+                return new EnumerationSequenceContainer(this);
             }
 
             //Copy constructor for use by Clone

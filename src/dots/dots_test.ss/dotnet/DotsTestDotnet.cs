@@ -105,7 +105,7 @@ class DotsTestDotnet
             Test_IsException();
             Test_GetDouFilePath();
             TestSequences();
-            TestDictionaries();
+            //TestDictionaries();
         }
         finally
         {
@@ -7852,7 +7852,7 @@ class DotsTestDotnet
         PrintSequences(fromJson);
 
         Console.WriteLine("------ Clone -----");
-        DotsTest.MemberSequences clone=ms as DotsTest.MemberSequences;
+        var clone = ms.Clone ();
         PrintSequences(clone);
     }
 
@@ -7994,6 +7994,7 @@ class DotsTestDotnet
         Console.WriteLine (xml);
 
         Console.WriteLine("------ From Xml -----");
+
         var fromXml = Safir.Dob.Typesystem.Serialization.ToObject (xml) as DotsTest.MemberDictionaries;
         PrintDictionaries(fromXml);
 
@@ -8006,8 +8007,8 @@ class DotsTestDotnet
         var fromJson = Safir.Dob.Typesystem.Serialization.ToObjectFromJson (json) as DotsTest.MemberDictionaries;
         PrintDictionaries(fromJson);
 
-        Console.WriteLine("------ Clone -----");
-        DotsTest.MemberDictionaries clone = md as DotsTest.MemberDictionaries;
+        Console.WriteLine("------ Clone -----");       
+        DotsTest.MemberDictionaries clone = md.Clone() as DotsTest.MemberDictionaries;
         PrintDictionaries(clone);
     }
 }
