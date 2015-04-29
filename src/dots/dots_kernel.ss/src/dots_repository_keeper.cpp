@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2004-2015 (http://safir.sourceforge.net)
 * Copyright Consoden AB, 2015 (http://www.consoden.se)
 *
 * Created by: Joel Ottosson / joot
@@ -64,7 +64,7 @@ namespace Internal
             instance->m_startupSynchronizer.Start(instance);
             if (instance->m_repository!=NULL)
             {
-                instance->m_blobLayout.reset(new Safir::Dob::Typesystem::ToolSupport::BlobLayout<RepositoryShm>(instance->m_repository));
+                //instance->m_blobLayout.reset(new Safir::Dob::Typesystem::ToolSupport::BlobLayout<RepositoryShm>(instance->m_repository));
                 return; //loaded ok
             }
         }
@@ -87,11 +87,6 @@ namespace Internal
     const RepositoryShm* RepositoryKeeper::GetRepository()
     {
         return Instance().m_repository;
-    }
-
-    const Safir::Dob::Typesystem::ToolSupport::BlobLayout<RepositoryShm>* RepositoryKeeper::GetBlobLayout()
-    {
-        return Instance().m_blobLayout.get();
     }
 
     RepositoryKeeper::RepositoryKeeper()

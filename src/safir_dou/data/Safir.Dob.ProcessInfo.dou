@@ -3,14 +3,6 @@
   <summary>Displays one entity per process that is connected to the DOB.</summary>
   <name>Safir.Dob.ProcessInfo</name>
   <baseClass>Safir.Dob.Entity</baseClass>
-  <parameters>
-    <parameter>
-      <summary>This controls how many processes can connect to the local Dob instance.</summary>
-      <name>MaxNumberOfInstances</name>
-      <type>Int32</type>
-      <value>100</value>
-    </parameter>
-  </parameters>
   <members>
     <member>
       <summary>The process name.</summary>
@@ -26,7 +18,7 @@
     <member>
       <summary>The names of all Dob connections opened by the process.</summary>
       <name>ConnectionNames</name>
-      <arraySize>20</arraySize>
+      <sequence/>
       <type>String</type>
       <maxLength>255</maxLength>
     </member>

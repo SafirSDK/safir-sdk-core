@@ -28,7 +28,6 @@
 #include <Safir/Databases/Odbc/RetryException.h>
 #include <Safir/Databases/Odbc/Defs.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
-#include <Safir/Dob/Typesystem/BlobOperations.h>
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
 #include <boost/shared_ptr.hpp>
 

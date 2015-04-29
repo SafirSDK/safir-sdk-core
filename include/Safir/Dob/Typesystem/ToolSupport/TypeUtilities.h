@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2004-2015 (http://safir.sourceforge.net)
 *
 * Created by: Joel Ottosson / joot
 *
@@ -40,18 +40,10 @@ namespace ToolSupport
 namespace TypeUtilities
 {
     /**
-     * Finds corresponding type name to a typeId. If no type exists with given typeId NULL is returned.
-     *
-     * @param repository [in] - Type repository containing all type information
-     * @param typeId [in] - TypeId to lookup and find name for.
-     * @return The type name or NULL if type doesn't exist in the repository.
+     * Calculates a typeId from a string. Does not check that the type exists.
+     * @param name [in] - Name of the type
+     * @return The typeId
      */
-    template <class RepositoryT>
-    const char* GetTypeName(const RepositoryT* repository, DotsC_TypeId typeId)
-    {
-        return Safir::Dob::Typesystem::ToolSupport::Internal::BasicTypeOperations::TypeIdToTypeName(repository, typeId);
-    }
-
     inline DotsC_TypeId CalculateTypeId(const std::string& name)
     {
         return LlufId_Generate64(name.c_str());
@@ -66,6 +58,37 @@ namespace TypeUtilities
     inline const char* GetTypeName(DotsC_MemberType memberType)
     {
         return Safir::Dob::Typesystem::ToolSupport::Internal::BasicTypeOperations::MemberTypeToString(memberType).c_str();
+    }
+
+    /**
+     * Finds corresponding type name to a typeId. If no type exists with given typeId NULL is returned.
+     *
+     * @param repository [in] - Type repository containing all type information
+     * @param typeId [in] - TypeId to lookup and find name for.
+     * @return The type name or NULL if type doesn't exist in the repository.
+     */
+    template <class RepositoryT>
+    const char* GetTypeName(const RepositoryT* repository, DotsC_TypeId typeId)
+    {
+        return Safir::Dob::Typesystem::ToolSupport::Internal::BasicTypeOperations::TypeIdToTypeName(repository, typeId);
+    }
+
+    /**
+     * Finds corresponding type name to a member description.
+     *
+     * @param repository [in] - Type repository containing all type information
+     * @param member [in] - Member description.
+     * @return The type name of the type.
+     */
+    template <class RepositoryT, class MemberDescriptionT>
+    const char* GetTypeName(const RepositoryT* repository, const MemberDescriptionT* member)
+    {
+        DotsC_MemberType mt=member->GetMemberType();
+        if (mt==EnumerationMemberType || mt==ObjectMemberType)
+        {
+            return GetTypeName(repository, member->GetTypeId());
+        }
+        return GetTypeName(mt);
     }
 
     /**
@@ -214,10 +237,33 @@ namespace TypeUtilities
             return GetParameterByName<ClassDescriptionType, ParameterDescriptionType>(cd, parameterName.substr(pos+1));
         }
     };
+
+    /**
+     * @brief ToUnifiedDictionaryKey - Convert all keys to an int64 that is the internal key format.
+     * @param key
+     * @return Int64 representation of a dictionary key
+     */
+    inline DotsC_Int64 ToUnifiedDictionaryKey(DotsC_Int64 key) {return key;}
+    inline DotsC_Int64 ToUnifiedDictionaryKey(DotsC_Int32 key) {return static_cast<DotsC_Int64>(key);}
+    inline DotsC_Int64 ToUnifiedDictionaryKey(const std::string& key) {return LlufId_Generate64(key.c_str());}
+    inline DotsC_Int64 ToUnifiedDictionaryKey(const DotsC_EntityId& key)
+    {
+        std::ostringstream os;
+        os<<key.typeId<<key.instanceId;
+        return LlufId_Generate64(os.str().c_str());
+    }
+
+    template <class ParameterDescriptionT, class KeyT>
+    int GetDictionaryIndexFromKey(const ParameterDescriptionT* pd, const KeyT& key)
+    {
+        assert(pd->GetCollectionType()==DictionaryCollectionType);
+        return pd->GetIndexByUnifiedKey(ToUnifiedDictionaryKey(key));
+    }
+
 }
 }
 }
 }
-} //end namespace Safir::Dob::Typesystem::Internal::TypeUtilities
+} //end namespace Safir::Dob::Typesystem::ToolSupport::TypeUtilities
 
 #endif

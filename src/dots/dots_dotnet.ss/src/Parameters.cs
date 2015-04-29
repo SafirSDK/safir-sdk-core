@@ -1,6 +1,6 @@
 /* ****************************************************************************
 *
-* Copyright Saab AB, 2005-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2005-2015 (http://safir.sourceforge.net)
 * 
 * Created by: Lars Hagström / stlrha
 *
@@ -90,7 +90,47 @@ namespace Safir.Dob.Typesystem
         public static string GetName(System.Int64 typeId,
                                               int parameter)
         {
-            return Internal.InternalOperations.StringOf(Kernel.DotsC_GetParameterName(typeId, parameter));
+            MemberType memberType;
+            IntPtr parameterName;
+            Int64 complexTypeId;
+            CollectionType collectionType;
+            Int32 numberOfValues;
+            Kernel.DotsC_GetParameterInfo (typeId, parameter, out memberType, out parameterName, out complexTypeId, out collectionType, out numberOfValues);
+
+            return InternalOperations.StringOf (parameterName);
+        }
+
+        /// <summary>
+        /// Gets a string representation of the type of a parameter.
+        /// <para>
+        /// If the parameter is not an object or enumeration the result is undefined.
+        /// If the parameter does not exist the returned value is undefined. Use
+        /// #GetIndex to get a valid ParameterIndex, which is guaranteed to exist.
+        /// </para>
+        /// </summary>
+        /// <param name="typeId">TypeId of class.</param>
+        /// <param name="parameter">Index of parameter.</param>
+        /// <returns>Name of the parameter type.</returns>
+        public static string GetTypeName(System.Int64 typeId,
+                                         int parameter)
+        {
+            MemberType memberType;
+            IntPtr parameterName;
+            Int64 complexTypeId;
+            CollectionType collectionType;
+            Int32 numberOfValues;
+            Kernel.DotsC_GetParameterInfo (typeId, parameter, out memberType, out parameterName, out complexTypeId, out collectionType, out numberOfValues);
+
+            if (memberType==MemberType.ObjectMemberType || memberType==MemberType.EnumerationMemberType)
+            {
+                IntPtr typeName=Kernel.DotsC_GetTypeName (complexTypeId);
+                return InternalOperations.StringOf (typeName);
+            }
+            else
+            {
+                IntPtr typeName = Kernel.DotsC_MemberTypeName (memberType);
+                return InternalOperations.StringOf (typeName);
+            }
         }
 
         /// <summary>
@@ -106,25 +146,17 @@ namespace Safir.Dob.Typesystem
         public static MemberType GetType(System.Int64 typeId,
                                                              int parameter)
         {
-            return Kernel.DotsC_GetParameterType(typeId, parameter);
+            MemberType memberType;
+            IntPtr parameterName;
+            Int64 complexTypeId;
+            CollectionType collectionType;
+            Int32 numberOfValues;
+            Kernel.DotsC_GetParameterInfo (typeId, parameter, out memberType, out parameterName, out complexTypeId, out collectionType, out numberOfValues);
+
+            return memberType;
         }
 
-        /// <summary>
-        /// Gets a string representation of the type of a parameter.
-        /// <para>
-        /// If the parameter is not an object or enumeration the result is undefined.
-        /// If the parameter does not exist the returned value is undefined. Use
-        /// #GetIndex to get a valid ParameterIndex, which is guaranteed to exist.
-        /// </para>
-        /// </summary>
-        /// <param name="typeId">TypeId of class.</param>
-        /// <param name="parameter">Index of parameter.</param>
-        /// <returns>Name of the parameter type.</returns>
-        public static string GetTypeName(System.Int64 typeId,
-                                                  int parameter)
-        {
-            return Internal.InternalOperations.StringOf(Kernel.DotsC_GetParameterTypeName(typeId, parameter));
-        }
+
 
         /// <summary>
         /// Get the array size of a parameter.
@@ -139,7 +171,14 @@ namespace Safir.Dob.Typesystem
         public static int GetArraySize(System.Int64 typeId,
                                                 int parameter)
         {
-            return Kernel.DotsC_GetParameterArraySize(typeId, parameter);
+            MemberType memberType;
+            IntPtr parameterName;
+            Int64 complexTypeId;
+            CollectionType collectionType;
+            Int32 numberOfValues;
+            Kernel.DotsC_GetParameterInfo (typeId, parameter, out memberType, out parameterName, out complexTypeId, out collectionType, out numberOfValues);
+
+            return numberOfValues;
         }
 
         #endregion
@@ -177,7 +216,7 @@ namespace Safir.Dob.Typesystem
                                          int index)
         {
             System.Int32 val;
-            Kernel.DotsC_GetEnumerationParameter(typeId, parameter, index, out val);
+            Kernel.DotsC_GetEnumerationParameter (typeId, parameter, index, KeyValMode.ValueMode, out val);
 
             return val;
         }
@@ -194,7 +233,7 @@ namespace Safir.Dob.Typesystem
                                    int index)
         {
             System.Int32 val;
-            Kernel.DotsC_GetInt32Parameter(typeId, parameter, index, out val);
+            Kernel.DotsC_GetInt32Parameter(typeId, parameter, index, KeyValMode.ValueMode, out val);
             return val;
         }
 
@@ -210,7 +249,7 @@ namespace Safir.Dob.Typesystem
                                              int index)
         {
             System.Int64 val;
-            Kernel.DotsC_GetInt64Parameter(typeId, parameter, index, out val);
+            Kernel.DotsC_GetInt64Parameter(typeId, parameter, index, KeyValMode.ValueMode, out val);
             return val;
         }
 
@@ -259,7 +298,7 @@ namespace Safir.Dob.Typesystem
                                                 int index)
         {
             System.IntPtr sp;
-            Kernel.DotsC_GetStringParameter(typeId, parameter, index, out sp);
+            Kernel.DotsC_GetStringParameter(typeId, parameter, index, KeyValMode.ValueMode, out sp);
             return Internal.InternalOperations.StringOf(sp);
         }
 
@@ -275,7 +314,7 @@ namespace Safir.Dob.Typesystem
                                                       int index)
         {
             System.Int64 val;
-            Kernel.DotsC_GetTypeIdParameter(typeId, parameter, index, out val);
+            Kernel.DotsC_GetTypeIdParameter(typeId, parameter, index, KeyValMode.ValueMode, out val);
             return val;
         }
 
@@ -292,7 +331,7 @@ namespace Safir.Dob.Typesystem
         {
             System.Int64 hashVal;
             System.IntPtr strVal;
-            Kernel.DotsC_GetHashedIdParameter(typeId, parameter, index, out hashVal, out strVal);
+            Kernel.DotsC_GetHashedIdParameter(typeId, parameter, index, KeyValMode.ValueMode, out hashVal, out strVal);
             if (strVal == System.IntPtr.Zero)
             {
                 return new InstanceId(hashVal);
@@ -316,7 +355,7 @@ namespace Safir.Dob.Typesystem
         {
             Dob.Typesystem.Internal.DotsC_EntityId eid;
             System.IntPtr strVal;
-            Kernel.DotsC_GetEntityIdParameter(typeId, parameter, index, out eid, out strVal);
+            Kernel.DotsC_GetEntityIdParameter(typeId, parameter, index, KeyValMode.ValueMode, out eid, out strVal);
             if (strVal == System.IntPtr.Zero)
             {
                 return new EntityId(eid.TypeId, new Dob.Typesystem.InstanceId(eid.InstanceId));
@@ -341,7 +380,7 @@ namespace Safir.Dob.Typesystem
         {
             System.Int64 hashVal;
             System.IntPtr strVal;
-            Kernel.DotsC_GetHashedIdParameter(typeId, parameter, index, out hashVal, out strVal);
+            Kernel.DotsC_GetHashedIdParameter(typeId, parameter, index, KeyValMode.ValueMode, out hashVal, out strVal);
             if (strVal == System.IntPtr.Zero)
             {
                 return new ChannelId(hashVal);
@@ -365,7 +404,7 @@ namespace Safir.Dob.Typesystem
         {
             System.Int64 hashVal;
             System.IntPtr strVal;
-            Kernel.DotsC_GetHashedIdParameter(typeId, parameter, index, out hashVal, out strVal);
+            Kernel.DotsC_GetHashedIdParameter(typeId, parameter, index, KeyValMode.ValueMode, out hashVal, out strVal);
             if (strVal == System.IntPtr.Zero)
             {
                 return new HandlerId(hashVal);
@@ -411,6 +450,96 @@ namespace Safir.Dob.Typesystem
             byte[] binary = new byte[size];
             Marshal.Copy(binPtr, binary, 0, size);
             return binary;
+        }
+
+        /// <summary>
+        /// Dictionaries the index of the key to.
+        /// </summary>
+        /// <returns>The key to index.</returns>
+        /// <param name="typeId">Type identifier.</param>
+        /// <param name="parameter">Parameter.</param>
+        /// <param name="key">Key.</param>
+        public static Int32 DictionaryKeyToIndex(Int64 typeId, Int32 parameter, Int32 key)
+        {
+            return Kernel.DotsC_DictionaryInt32KeyToIndex (typeId, parameter, key);
+        }
+
+        /// <summary>
+        /// Dictionaries the index of the key to.
+        /// </summary>
+        /// <returns>The key to index.</returns>
+        /// <param name="typeId">Type identifier.</param>
+        /// <param name="parameter">Parameter.</param>
+        /// <param name="key">Key.</param>
+        public static Int32 DictionaryKeyToIndex(Int64 typeId, Int32 parameter, Int64 key)
+        {
+            return Kernel.DotsC_DictionaryInt64KeyToIndex (typeId, parameter, key);
+        }
+
+        /// <summary>
+        /// Dictionaries the index of the key to.
+        /// </summary>
+        /// <returns>The key to index.</returns>
+        /// <param name="typeId">Type identifier.</param>
+        /// <param name="parameter">Parameter.</param>
+        /// <param name="key">Key.</param>
+        public static Int32 DictionaryKeyToIndex(Int64 typeId, Int32 parameter, string key)
+        {
+            System.IntPtr sp = Internal.InternalOperations.CStringOf(key);
+            int index = Kernel.DotsC_DictionaryStringKeyToIndex (typeId, parameter, sp);
+            Marshal.FreeHGlobal(sp);
+            return index;
+        }
+
+        /// <summary>
+        /// Dictionaries the index of the key to.
+        /// </summary>
+        /// <returns>The key to index.</returns>
+        /// <param name="typeId">Type identifier.</param>
+        /// <param name="parameter">Parameter.</param>
+        /// <param name="key">Key.</param>
+        public static Int32 DictionaryKeyToIndex(Int64 typeId, Int32 parameter, EntityId key)
+        {
+            Internal.DotsC_EntityId eid;
+            eid.TypeId = key.TypeId;
+            eid.InstanceId = key.InstanceId.RawValue;
+            return Kernel.DotsC_DictionaryEntityIdKeyToIndex (typeId, parameter, eid);
+        }
+
+        /// <summary>
+        /// Dictionaries the index of the key to.
+        /// </summary>
+        /// <returns>The key to index.</returns>
+        /// <param name="typeId">Type identifier.</param>
+        /// <param name="parameter">Parameter.</param>
+        /// <param name="key">Key.</param>
+        public static Int32 DictionaryKeyToIndex(Int64 typeId, Int32 parameter, InstanceId key)
+        {
+            return Kernel.DotsC_DictionaryInt64KeyToIndex (typeId, parameter, key.RawValue);
+        }
+
+        /// <summary>
+        /// Dictionaries the index of the key to.
+        /// </summary>
+        /// <returns>The key to index.</returns>
+        /// <param name="typeId">Type identifier.</param>
+        /// <param name="parameter">Parameter.</param>
+        /// <param name="key">Key.</param>
+        public static Int32 DictionaryKeyToIndex(Int64 typeId, Int32 parameter, HandlerId key)
+        {
+            return Kernel.DotsC_DictionaryInt64KeyToIndex (typeId, parameter, key.RawValue);
+        }
+
+        /// <summary>
+        /// Dictionaries the index of the key to.
+        /// </summary>
+        /// <returns>The key to index.</returns>
+        /// <param name="typeId">Type identifier.</param>
+        /// <param name="parameter">Parameter.</param>
+        /// <param name="key">Key.</param>
+        public static Int32 DictionaryKeyToIndex(Int64 typeId, Int32 parameter, ChannelId key)
+        {
+            return Kernel.DotsC_DictionaryInt64KeyToIndex (typeId, parameter, key.RawValue);
         }
 
         #endregion

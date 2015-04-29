@@ -1,6 +1,6 @@
 /* ****************************************************************************
 *
-* Copyright Saab AB, 2005-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2005-2015 (http://safir.sourceforge.net)
 * 
 * Created by: Lars Hagström / stlrha
 *
@@ -41,32 +41,12 @@ namespace Safir.Dob.Typesystem
         /// <exception cref="Safir.Dob.Typesystem.IllegalValueException">There is something wrong with the object.</exception>
         public static string ToXml(Dob.Typesystem.Object obj)
         {
-            System.Int32 blobSize = obj.CalculateBlobSize();
-            System.IntPtr blob = Marshal.AllocHGlobal(blobSize);
-            System.IntPtr beginningOfUnused;
-            Internal.Kernel.DotsC_FormatBlob(blob, blobSize, obj.GetTypeId(), out beginningOfUnused);
-            obj.WriteToBlob(blob, ref beginningOfUnused);
-
-            int BUF_SIZE = 100000;
-            IntPtr buf = Marshal.AllocHGlobal(BUF_SIZE);
-            System.Int32 resultSize = 0;
-            Internal.Kernel.DotsC_BetterBlobToXml(buf, blob, BUF_SIZE, out resultSize);
-            if (resultSize > BUF_SIZE)
-            {
-                BUF_SIZE = resultSize;
-                Marshal.FreeHGlobal(buf);
-                buf = Marshal.AllocHGlobal(BUF_SIZE);
-                Internal.Kernel.DotsC_BetterBlobToXml(buf, blob, BUF_SIZE, out resultSize);
-                if (resultSize != BUF_SIZE)
-                {
-                    throw new SoftwareViolationException("Error in serialization buffer sizes!!!");
-                }
+            if (obj == null) {
+                throw new SoftwareViolationException("Attempt to serialize a null object to xml!");
             }
-            string str = Internal.InternalOperations.StringOf(buf, resultSize - 1); //remove null
-            Marshal.FreeHGlobal(buf);
-            Marshal.FreeHGlobal(blob);
 
-            return str;
+            byte[] bin = ToBinary (obj);
+            return ToXml (bin);
         }
 
         /// <summary>
@@ -98,13 +78,13 @@ namespace Safir.Dob.Typesystem
             int BUF_SIZE = 100000;
             IntPtr buf = Marshal.AllocHGlobal(BUF_SIZE);
             System.Int32 resultSize = 0;
-            Internal.Kernel.DotsC_BetterBlobToXml(buf, blob, BUF_SIZE, out resultSize);
+            Internal.Kernel.DotsC_BlobToXml(buf, blob, BUF_SIZE, out resultSize);
             if (resultSize > BUF_SIZE)
             {
                 BUF_SIZE = resultSize;
                 Marshal.FreeHGlobal(buf);
                 buf = Marshal.AllocHGlobal(BUF_SIZE);
-                Internal.Kernel.DotsC_BetterBlobToXml(buf, blob, BUF_SIZE, out resultSize);
+                Internal.Kernel.DotsC_BlobToXml(buf, blob, BUF_SIZE, out resultSize);
                 if (resultSize != BUF_SIZE)
                 {
                     throw new SoftwareViolationException("Error in serialization buffer sizes!!!");
@@ -153,32 +133,12 @@ namespace Safir.Dob.Typesystem
         /// <exception cref="Safir.Dob.Typesystem.IllegalValueException">There is something wrong with the object.</exception>
         public static string ToJson(Dob.Typesystem.Object obj)
         {
-            System.Int32 blobSize = obj.CalculateBlobSize();
-            System.IntPtr blob = Marshal.AllocHGlobal(blobSize);
-            System.IntPtr beginningOfUnused;
-            Internal.Kernel.DotsC_FormatBlob(blob, blobSize, obj.GetTypeId(), out beginningOfUnused);
-            obj.WriteToBlob(blob, ref beginningOfUnused);
-
-            int BUF_SIZE = 100000;
-            IntPtr buf = Marshal.AllocHGlobal(BUF_SIZE);
-            System.Int32 resultSize = 0;
-            Internal.Kernel.DotsC_BlobToJson(buf, blob, BUF_SIZE, out resultSize);
-            if (resultSize > BUF_SIZE)
-            {
-                BUF_SIZE = resultSize;
-                Marshal.FreeHGlobal(buf);
-                buf = Marshal.AllocHGlobal(BUF_SIZE);
-                Internal.Kernel.DotsC_BlobToJson(buf, blob, BUF_SIZE, out resultSize);
-                if (resultSize != BUF_SIZE)
-                {
-                    throw new SoftwareViolationException("Error in serialization buffer sizes!!!");
-                }
+            if (obj == null) {
+                throw new SoftwareViolationException("Attempt to serialize a null object to json!");
             }
-            string str = Internal.InternalOperations.StringOf(buf, resultSize - 1); //remove null
-            Marshal.FreeHGlobal(buf);
-            Marshal.FreeHGlobal(blob);
 
-            return str;
+            byte[] bin = ToBinary (obj);
+            return ToJson (bin);
         }
 
         /// <summary>
@@ -264,18 +224,19 @@ namespace Safir.Dob.Typesystem
         /// <exception cref="Safir.Dob.Typesystem.IllegalValueException">There is something wrong with the object.</exception>
         public static byte[] ToBinary(Dob.Typesystem.Object obj)
         {
-            System.Int32 blobSize = obj.CalculateBlobSize();
-            if (blobSize == 0)
-            {
-                return new byte[0];
+            if (obj == null) {
+                throw new SoftwareViolationException("Attempt to serialize a null object to binary!");
             }
-            System.IntPtr blob = Marshal.AllocHGlobal(blobSize);
-            System.IntPtr beginningOfUnused;
-            Internal.Kernel.DotsC_FormatBlob(blob, blobSize, obj.GetTypeId(), out beginningOfUnused);
-            obj.WriteToBlob(blob, ref beginningOfUnused);
-            byte[] result = new byte[blobSize];
-            Marshal.Copy(blob, result, 0, blobSize);
-            Marshal.FreeHGlobal(blob);
+
+            Int64 handle = Kernel.DotsC_CreateBlobWriter (obj.GetTypeId ());
+            obj.WriteToBlob (handle);
+            Int32 size = Kernel.DotsC_CalculateBlobSize (handle);
+            System.IntPtr blob = Marshal.AllocHGlobal(size);
+            Kernel.DotsC_WriteBlob (handle, blob);
+            byte[] result=new byte[size];
+            Marshal.Copy(blob, result, 0, size);
+            Marshal.FreeHGlobal (blob);
+            Kernel.DotsC_DeleteBlobWriter (handle);
             return result;
         }
 

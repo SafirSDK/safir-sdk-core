@@ -30,7 +30,7 @@ import java.io.UnsupportedEncodingException;
 /**
  * Class containing the identity of an instance.
  */
-public class InstanceId {
+public class InstanceId implements Comparable<InstanceId> {
 
     /**
      * Returns a random instance id.
@@ -209,6 +209,21 @@ public class InstanceId {
         }
         return m_cachedUtf8String;
     }
+    
+    /**
+     * Compares two instances
+     * @param other The object to compare to.
+     * @return -1 if this instance is less than other, 1 if this is bigger, else 0.
+     */
+    @Override
+	public int compareTo(InstanceId other) {
+		if (getRawValue()<other.getRawValue())
+			return -1;
+		else if (getRawValue()>other.getRawValue())
+			return 1;
+		else
+			return 0;
+	}
 
     private long m_instanceId = -1;
     private String m_instanceIdStr;

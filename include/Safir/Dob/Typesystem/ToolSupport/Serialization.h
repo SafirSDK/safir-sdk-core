@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2004-2015 (http://safir.sourceforge.net)
 *
 * Created by: Joel Ottosson / joot
 *
@@ -55,7 +55,7 @@ namespace ToolSupport
      */
     inline void BinaryToBase64(const char* binary, size_t size, std::ostringstream& base64)
     {
-        std::vector<char> bin(binary, binary + size); //Improvement: fix implementation to accept 'const char*' and avoid this copying
+        std::string bin(binary, size); //Improvement: fix implementation to accept 'const char*' and avoid this copying
         base64<<Internal::SerializationUtils::ToBase64(bin);
     }
 
@@ -68,11 +68,9 @@ namespace ToolSupport
      */
     inline void Base64ToBinary(const std::string& base64Str, std::vector<char>& binary)
     {
-        const bool ret = Internal::SerializationUtils::FromBase64(base64Str, binary);
-        if (!ret)
-        {
-            throw Safir::Dob::Typesystem::ToolSupport::ParseError("Failed to decode the Base64 data","","",100101);
-        }
+        std::string bin;
+        Internal::SerializationUtils::FromBase64(base64Str, bin); //Improvement: fix implementation to accept vector and avoid this copying
+        binary.insert(binary.begin(), bin.begin(), bin.end());
     }
 
     /**
@@ -160,11 +158,11 @@ namespace ToolSupport
     template <class RepositoryT>
     void TypeToString(const RepositoryT* repository, DotsC_TypeId typeId, std::ostream &os)
     {
-        (Internal::ToStringHelper<RepositoryT>(repository, false)).TypeToString(typeId, os);
+        (Internal::ToStringHelper<RepositoryT>(repository, false)).TypeInfoToString(typeId, os);
     }
 }
 }
 }
-} //end namespace Safir::Dob::Typesystem::Internal
+} //end namespace Safir::Dob::Typesystem::ToolSupport
 
 #endif

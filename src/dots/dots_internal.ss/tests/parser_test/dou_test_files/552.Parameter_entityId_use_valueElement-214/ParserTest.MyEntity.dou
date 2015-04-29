@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Contains the definition of a distribution channel name.</summary>
+    <name>ParserTest.MyEntity</name>
+    <baseClass>Safir.Dob.Entity</baseClass>
+    <parameters>
+     
+        <parameter>
+            <name>DictInt32EntityId</name>
+            <type>EntityId</type>
+            <dictionary keyType="Int32">
+                <entry>
+                    <key>10</key>
+                    <entityId>
+                        <name>ParserTest.MyEntity</name>
+                        <instanceId>first</instanceId>
+                    </entityId>
+                </entry>
+                <entry>
+                    <key>20</key>
+                    <value>
+                        <name>ParserTest.MyEntity</name>
+                        <instanceId>second</instanceId>
+                    </value>
+                </entry>                
+            </dictionary>
+        </parameter>
+        
+      
+    </parameters>
+</class>

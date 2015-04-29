@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2004-2015 (http://safir.sourceforge.net)
 *
 * Created by: Joel Ottosson / joot
 *
@@ -25,6 +25,7 @@
 #define __DOTS_INTERNAL_TYPE_REPOSITORY_H__
 
 #include <set>
+#include <map>
 #include <string>
 #include <Safir/Dob/Typesystem/LanguageInterfaceDefs.h>
 #include <Safir/Utilities/Internal/Id.h>
@@ -155,7 +156,7 @@ namespace ToolSupport
         virtual const char* GetQualifiedName() const=0;
 
         /**
-         * @brief Get member type of this parameter value. If member type is Enumeration or Object, use GetTypeId() to determin specific type.
+         * @brief Get member type of this parameter value. If member type is Enumeration or Object, use GetTypeId() to determine specific type.
          * @return Parameter value member type.
          */
         virtual DotsC_MemberType GetMemberType() const=0;
@@ -168,16 +169,29 @@ namespace ToolSupport
         virtual DotsC_TypeId GetTypeId() const=0;
 
         /**
-         * @brief Check if this parameter is an array.
-         * @return True if parameter is array, else false.
+         * @brief Get the collection type of this parameter.
+         * @return Collection type.
          */
-        virtual bool IsArray() const=0;
+        virtual DotsC_CollectionType GetCollectionType() const=0;
 
         /**
-         * @brief Get the array size of this parameter.
-         * @return Array size. If parameter is not an array, 1 is returned.
+         * @brief Get key type of this parameter. Only valid if CollectionType=DictionaryCollectionType, use GetCollectionType() method.
+         * @return Key member type.
          */
-        virtual int GetArraySize() const=0;
+        virtual DotsC_MemberType GetKeyType() const=0; //only valid if collectionType is Dictionary
+
+        /**
+         * @brief If this parameter has CollectionType Dictionary and KeyType Enumeration, the specific typeId of that enumeration can be retrieved by this method.
+         * If KeyType is not Enum the result of this method is undefined. Hence always use this in conjunction with GetKeyType().
+         * @return TypeId of the enumeration type that is key type for this dictionary parameter.
+         */
+        virtual DotsC_TypeId GetKeyTypeId() const=0;
+
+        /**
+         * @brief Get the number of values this parameter holds. If collectionType is SingelValueCollectionType 1 is returned.
+         * @return Number of values.
+         */
+        virtual int GetNumberOfValues() const=0;
 
         /**
          * @brief Check if this is a normal parameter defined explicitly in a dou-file or if it is a special hidden parameter that has been
@@ -194,28 +208,28 @@ namespace ToolSupport
          * @param index [in] - Parameter index.
          * @return Parameter value.
          */
-        virtual boost::int32_t GetInt32Value(int index) const=0; //int32, enum
+        virtual DotsC_Int32 GetInt32Value(int index) const=0; //int32, enum
 
         /**
          * @brief Get int64 parameter value. Only valid if MemberType is Int64 or TypeId
          * @param index [in] - Parameter index.
          * @return Parameter value.
          */
-        virtual boost::int64_t GetInt64Value(int index) const=0; //int64, typeId
+        virtual DotsC_Int64 GetInt64Value(int index) const=0; //int64, typeId
 
         /**
          * @brief Get float32 parameter value. Only valid if MemberType is Float32 or any Si32 type.
          * @param index [in] - Parameter index.
          * @return Parameter value.
          */
-        virtual float GetFloat32Value(int index) const=0; //float32, si32
+        virtual DotsC_Float32 GetFloat32Value(int index) const=0; //float32, si32
 
         /**
          * @brief Get float64 parameter value. Only valid if MemberType is Float64 or any Si64 type.
          * @param index [in] - Parameter index.
          * @return Parameter value.
          */
-        virtual double GetFloat64Value(int index) const=0; //float64, si64
+        virtual DotsC_Float64 GetFloat64Value(int index) const=0; //float64, si64
 
         /**
          * @brief Get bool parameter value. Only valid if MemberType is Boolean.
@@ -236,21 +250,63 @@ namespace ToolSupport
          * @param index [in] - Parameter index.
          * @return Parameter value as a pair containing a blob and a blob size.
          */
-        virtual std::pair<const char*, size_t> GetObjectValue(int index) const=0;
+        virtual std::pair<const char*, DotsC_Int32> GetObjectValue(int index) const=0;
 
         /**
          * @brief Get binary parameter value. Only valid if MemberType is Binary.
          * @param index [in] - Parameter index.
          * @return Parameter value as a pair containing a binary and a binary size.
          */
-        virtual std::pair<const char*, size_t> GetBinaryValue(int index) const=0;
+        virtual std::pair<const char*, DotsC_Int32> GetBinaryValue(int index) const=0;
 
         /**
          * @brief Get hashed parameter value. Only valid if MemberType is InstanceId, ChannelId, HandlerId
          * @param index [in] - Parameter index.
          * @return Parameter value as a pair containing a hash value and optionally a string that can be NULL.
          */
-        virtual std::pair<boost::int64_t, const char*> GetHashedValue(int index) const=0; //instanceId, channelId, handlerId
+        virtual std::pair<DotsC_Int64, const char*> GetHashedValue(int index) const=0; //instanceId, channelId, handlerId
+
+        /**
+         * @brief Get int32 or enum key. Only valid if memer is DictionaryCollectionType and has keyType Int32MemberType or EnumerationMemberType.
+         * @param index [in] - Parameter index.
+         * @return Parameter key for specified dictionary entry.
+         */
+        virtual DotsC_Int32 GetInt32Key(int index) const=0;
+
+        /**
+         * @brief Get int64 or typeId key. Only valid if memer is DictionaryCollectionType and has keyType Int64MemberType or TypeIdMemberType.
+         * @param index [in] - Parameter index.
+         * @return Parameter key for specified dictionary entry.
+         */
+        virtual DotsC_Int64 GetInt64Key(int index) const=0;
+
+        /**
+         * @brief Get string key. Only valid if memer is DictionaryCollectionType and has keyType StringMemberType.
+         * @param index [in] - Parameter index.
+         * @return Parameter key for specified dictionary entry.
+         */
+        virtual const char* GetStringKey(int index) const=0;
+
+        /**
+         * @brief Get hashed key. Only valid if memer is DictionaryCollectionType and has keyType InstanceId, ChannelId, HandlerId
+         * @param index [in] - Parameter index.
+         * @return Parameter key as a pair containing a hash and optionally a string that can be NULL.
+         */
+        virtual std::pair<DotsC_Int64, const char*> GetHashedKey(int index) const=0; //instanceId, channelId, handlerId
+
+        /**
+         * @brief GetIndexByUnifiedKey - Get corresponding index to a dictionary key. Only applicable when collectionType is Dictionary.
+         * @param unifiedKey [in] - Dictionary key on unified format. See TypeUtilities::ToUnifiedDictionaryKey for conversion.
+         * @return Index of the parameter key/val. If key does not exist -1 is returned.
+         */
+        virtual int GetIndexByUnifiedKey(DotsC_Int64 unifiedKey) const=0;
+
+        /**
+         * @brief UnifiedKeyToIndexMap - FOR INTERNAL USAGE ONLY. Only needed by dots_kernel when copying localRepo to sharem memory.
+         * A dummy implementation should do if the repository is not going to be copied by dots_kernel. Normal usage should use GetIndexByUnifiedKey.
+         * @return Map from unified key to index.
+         */
+        virtual const std::map<DotsC_Int64, int>& UnifiedKeyToIndexMap() const=0;
     };
 
     /**
@@ -297,7 +353,7 @@ namespace ToolSupport
 
         /**
          * @brief Get name of a enumeration value.
-         * @param val [in] - The ordinal of the requested value. Valid is 0 to GetNumberOfValues()-1.
+         * @param val [in] - The ordinal of the requested value. Valid is 0 to GetArraySize()-1.
          * @return Name of enumeration value.
          */
         virtual const char* GetValueName(DotsC_EnumerationValue val) const=0;
@@ -336,20 +392,33 @@ namespace ToolSupport
         virtual const char* GetName() const=0;
 
         /**
-         * @brief Get type of this member. If member type is Enumeration or Object, use GetTypeId() to determin specific type.
+         * @brief Get type of this member. If member type is Enumeration or Object, use GetTypeId() to determine specific type.
          * @return Parameter value member type.
          */
         virtual DotsC_MemberType GetMemberType() const=0;
 
         /**
-         * @brief Check if this member is an array.
-         * @return True if member is array, else false.
+         * @brief Get the collection type of this member.
+         * @return Collection type.
          */
-        virtual const bool IsArray() const=0;
+        virtual DotsC_CollectionType GetCollectionType() const=0;
+
+        /**
+         * @brief Get key type of this member. Only valid if CollectionType=DictionaryCollectionType, use GetCollectionType() method.
+         * @return Key member type.
+         */
+        virtual DotsC_MemberType GetKeyType() const=0; //only valid if collectionType is Dictionary
+
+        /**
+         * @brief If this member has CollectionType Dictionary and KeyType Enumeration, the specific typeId of that enumeration can be retrieved by this method.
+         * If KeyType is not Enum the result of this method is undefined. Hence always use this in conjunction with GetKeyType().
+         * @return TypeId of the enumeration type that is key type for this dictionary member.
+         */
+        virtual DotsC_TypeId GetKeyTypeId() const=0;
 
         /**
          * @brief Get the array size of this member.
-         * @return Array size. If member is not an array, 1 is returned.
+         * @return Array size. If member is not an array, 1 is returned. Use GetCollectionType() method to determine if member is an array.
          */
         virtual int GetArraySize() const=0;
 
@@ -375,7 +444,7 @@ namespace ToolSupport
 
         /**
          * @brief If this property mapping is of type MappedToParameter, use GetMappingKind() to check that, this method returns a pair containing
-         * parameter description and parameter index. If member is mapped to a whole array, parameterIndex is set to -1.
+         * parameter description and parameter index. If member is mapped to a whole array the parameterIndex is not valid.
          * @return
          */
         virtual std::pair<const ParameterDescription*, int /*paramIndex*/> GetParameter() const=0;
@@ -395,7 +464,7 @@ namespace ToolSupport
          * @param depth [in] - The depth of the member mappping that is requested.
          * @return Pair containing member index and array index.
          */
-        virtual std::pair<DotsC_MemberIndex, DotsC_ArrayIndex> GetMemberReference(int depth) const=0;
+        virtual std::pair<DotsC_MemberIndex, DotsC_Int32> GetMemberReference(int depth) const=0;
     };
 
     /**
@@ -523,7 +592,18 @@ namespace ToolSupport
          * @return Base class description.
          */
         virtual const ClassDescription* GetBaseClass() const=0;
+
+        /**
+         * @brief Get the number of classes that inherits from this class.
+         * @return Number of descendant classes.
+         */
         virtual int GetNumberOfDescendants() const=0;
+
+        /**
+         * @brief Get descendant class.
+         * @param index [in] - Index of descendant class. Valid range is 0 to GetNumberOfDescendants()-1.
+         * @return Descendant class description.
+         */
         virtual const ClassDescription* GetDescendant(int index) const=0;
 
         /**
@@ -609,18 +689,6 @@ namespace ToolSupport
          * @return
          */
         virtual const CreateRoutineDescription* GetCreateRoutine(int index) const=0;
-
-        /**
-         * @brief Get the minimum size that a blob of this class can be. This method will most likely be removed in later versions.
-         * @return Initial blob size.
-         */
-        virtual int InitialSize() const=0;
-
-        /**
-         * @brief Get size needed by members defined in this class, not including inherited members. This method will most likely be removed in later versions.
-         * @return Size.
-         */
-        virtual int OwnSize() const=0;
     };
 
     /**

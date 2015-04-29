@@ -57,11 +57,7 @@ namespace Safir.Dob
         {
             byte success;
 
-            System.Int32 blobSize = entity.CalculateBlobSize();
-            System.IntPtr blob = Marshal.AllocHGlobal(blobSize); //allocate blob
-            System.IntPtr beginningOfUnused;
-            Typesystem.Internal.InternalOperations.FormatBlob(blob, blobSize, entity.GetTypeId(), out beginningOfUnused);
-            entity.WriteToBlob(blob, ref beginningOfUnused);
+            IntPtr blob = Typesystem.Internal.BlobOperations.WriteToBlob (entity);
 
             System.IntPtr instanceIdStr = Dob.Typesystem.Internal.InternalOperations.CStringOf(instanceId.RawString);
             System.IntPtr handlerIdStr = Dob.Typesystem.Internal.InternalOperations.CStringOf(handlerId.RawString);
@@ -75,6 +71,7 @@ namespace Safir.Dob
                                          timestamp,
                                          out success);
 
+            Typesystem.Internal.BlobOperations.DeleteBlob (blob);
             Marshal.FreeHGlobal(instanceIdStr);
             Marshal.FreeHGlobal(handlerIdStr);
 
@@ -132,11 +129,7 @@ namespace Safir.Dob
         {
             byte success;
 
-            System.Int32 blobSize = entity.CalculateBlobSize();
-            System.IntPtr blob = Marshal.AllocHGlobal(blobSize); //allocate blob
-            System.IntPtr beginningOfUnused;
-            Typesystem.Internal.InternalOperations.FormatBlob(blob, blobSize, entity.GetTypeId(), out beginningOfUnused);
-            entity.WriteToBlob(blob, ref beginningOfUnused);
+            IntPtr blob = Typesystem.Internal.BlobOperations.WriteToBlob (entity);
 
             System.IntPtr instanceIdStr = Dob.Typesystem.Internal.InternalOperations.CStringOf(instanceId.RawString);
             System.IntPtr handlerIdStr = Dob.Typesystem.Internal.InternalOperations.CStringOf(handlerId.RawString);
@@ -151,6 +144,7 @@ namespace Safir.Dob
                                       Interface.ByteOf(true),    // true => this is an initial injection
                                       out success);
 
+            Typesystem.Internal.BlobOperations.DeleteBlob (blob);
             Marshal.FreeHGlobal(instanceIdStr);
             Marshal.FreeHGlobal(handlerIdStr);
 

@@ -39,7 +39,7 @@ namespace Safir.Dob
             get
             {
                 CheckNotDisposed();
-                return Typesystem.BlobOperations.GetTypeId(m_requestBlob);
+                return Typesystem.Internal.BlobOperations.GetTypeId(m_requestBlob);
             }
         }
 

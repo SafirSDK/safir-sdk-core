@@ -610,30 +610,9 @@ public class @_CLASS_@
      */
     public @_CLASS_@() {
         super();
-@@TABLE@@
-
-@@IF@@ @_EXIST:MEMBERISARRAY_@
-@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration or @_UNIFORM_MEMBERTYPE_@=Object
-        m_@_MEMBER_@Member = new @_MEMBERTYPE_@.ContainerArray(get@_MEMBER_@ArraySize());
-@@ELSIF@@ @_MEMBERTYPE_@=float or @_MEMBERTYPE_@=double or not @_MATCH(.*\..*):UNIFORM_MEMBERTYPE_@
-        m_@_MEMBER_@Member = new com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@ContainerArray(get@_MEMBER_@ArraySize());
-@@ELSE@@
-        m_@_MEMBER_@Member = new @_MEMBERTYPE_@ContainerArray(get@_MEMBER_@ArraySize());
-@@END_IF@@
-@@ELSE@@
-@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
-        m_@_MEMBER_@Member = new @_MEMBERTYPE_@.Container();
-@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
-        m_@_MEMBER_@Member = new com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>();
-@@ELSIF@@ @_MEMBERTYPE_@=float or @_MEMBERTYPE_@=double or not @_MATCH(.*\..*):UNIFORM_MEMBERTYPE_@
-        m_@_MEMBER_@Member = new com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container();
-@@ELSE@@
-        m_@_MEMBER_@Member = new @_UNIFORM_MEMBERTYPE_@Container();
-@@END_IF@@
-@@END_IF@@
-@@END_TABLE@@
     }
 
+@@----- PARAMETERS --------
 @@TABLE@@
 @@IF@@ @_EXIST:PARAMETER_@
 @@IF@@ @_EXIST:PARAMETERISARRAY_@
@@ -698,6 +677,77 @@ public class @_CLASS_@
         return com.saabgroup.safir.dob.typesystem.Parameters.get@_REPLACE(^si(..)\..*/Float\1):UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_PARAMETER_@Parameter, index);
     }
 @@END_IF@@
+@-------- dictionary parameter -----------
+@@ELSIF@@ @_EXIST:PARAMETERISDICTIONARY_@
+    /**
+     * Get a value from the @_PARAMETER_@ parameter dictionary.
+     *
+     * @_PARAMETER_@ summary:
+@@IF@@ @_EXIST:PARAMETERSUMMARY_@
+     *     @_REPLACE_ALL(\n/\n     *     ):PARAMETERSUMMARY_@
+@@ELSE@@
+     *     This parameter has no summary.
+@@END_IF@@
+     *
+     * @param key Key of parameter to get.
+     * @return The parameter value.
+     */
+@@IF@@ @_PARAMETERTYPE_@=com.saabgroup.safir.dob.typesystem.Object
+    public static @_PARAMETERTYPE_@ get@_PARAMETER_@(@_PARAMETERDICTIONARYTYPE_@ key)
+    {
+        init();
+@@IF@@ @_UNIFORM_PARAMETERDICTIONARYTYPE_@=Enumeration
+        int index = com.saabgroup.safir.dob.typesystem.Parameters.dictionaryKeyToIndex(ClassTypeId, m_@_PARAMETER_@Parameter, key.ordinal());
+@@ELSE@@
+        int index = com.saabgroup.safir.dob.typesystem.Parameters.dictionaryKeyToIndex(ClassTypeId, m_@_PARAMETER_@Parameter, key);
+@@END_IF@@
+        if (index<0) throw new com.saabgroup.safir.dob.typesystem.SoftwareViolationException("dictionary entry not found");
+        return com.saabgroup.safir.dob.typesystem.Parameters.get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_PARAMETER_@Parameter, index);
+    }
+@@ELSIF@@ @_UNIFORM_PARAMETERTYPE_@=Object
+    public static @_PARAMETERTYPE_@ get@_PARAMETER_@(@_PARAMETERDICTIONARYTYPE_@ key)
+    {
+        init();
+@@IF@@ @_UNIFORM_PARAMETERDICTIONARYTYPE_@=Enumeration
+        int index = com.saabgroup.safir.dob.typesystem.Parameters.dictionaryKeyToIndex(ClassTypeId, m_@_PARAMETER_@Parameter, key.ordinal());
+@@ELSE@@
+        int index = com.saabgroup.safir.dob.typesystem.Parameters.dictionaryKeyToIndex(ClassTypeId, m_@_PARAMETER_@Parameter, key);
+@@END_IF@@
+        if (index<0) throw new com.saabgroup.safir.dob.typesystem.SoftwareViolationException("dictionary entry not found");
+        return (@_PARAMETERTYPE_@)com.saabgroup.safir.dob.typesystem.Parameters.get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_PARAMETER_@Parameter, index);
+    }
+@@ELSIF@@ @_UNIFORM_PARAMETERTYPE_@=Enumeration
+    public static @_PARAMETERTYPE_@ get@_PARAMETER_@(@_PARAMETERDICTIONARYTYPE_@ key)
+    {
+        init();
+@@IF@@ @_UNIFORM_PARAMETERDICTIONARYTYPE_@=Enumeration
+        int index = com.saabgroup.safir.dob.typesystem.Parameters.dictionaryKeyToIndex(ClassTypeId, m_@_PARAMETER_@Parameter, key.ordinal());
+@@ELSE@@
+        int index = com.saabgroup.safir.dob.typesystem.Parameters.dictionaryKeyToIndex(ClassTypeId, m_@_PARAMETER_@Parameter, key);
+@@END_IF@@
+        if (index<0) throw new com.saabgroup.safir.dob.typesystem.SoftwareViolationException("dictionary entry not found");
+        int enumVal = com.saabgroup.safir.dob.typesystem.Parameters.getEnumeration
+            (ClassTypeId,
+             m_@_PARAMETER_@Parameter,
+             index);
+
+        return @_PARAMETERTYPE_@.values()[enumVal];
+    }
+@@ELSE@@
+    public static @_PARAMETERTYPE_@ get@_PARAMETER_@(@_PARAMETERDICTIONARYTYPE_@ key)
+    {
+        init();
+@@IF@@ @_UNIFORM_PARAMETERDICTIONARYTYPE_@=Enumeration
+        int index = com.saabgroup.safir.dob.typesystem.Parameters.dictionaryKeyToIndex(ClassTypeId, m_@_PARAMETER_@Parameter, key.ordinal());
+@@ELSE@@
+        int index = com.saabgroup.safir.dob.typesystem.Parameters.dictionaryKeyToIndex(ClassTypeId, m_@_PARAMETER_@Parameter, key);
+@@END_IF@@
+        if (index<0) throw new com.saabgroup.safir.dob.typesystem.SoftwareViolationException("dictionary entry not found");
+        return com.saabgroup.safir.dob.typesystem.Parameters.get@_REPLACE(^si(..)\..*/Float\1):UNIFORM_PARAMETERTYPE_@(ClassTypeId, m_@_PARAMETER_@Parameter, index);
+    }
+@@END_IF@@
+
+@-------- single parameter -----------
 @@ELSE@@
     /**
      * Get the value of the @_PARAMETER_@ parameter.
@@ -815,6 +865,7 @@ public class @_CLASS_@
      *
      * @return The member container for @_MEMBER_@.
      */
+@@----- Array -------
 @@IF@@ @_EXIST:MEMBERISARRAY_@
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
     public @_MEMBERTYPE_@.ContainerArray @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
@@ -826,6 +877,45 @@ public class @_CLASS_@
     public @_UNIFORM_MEMBERTYPE_@Container @_LOWER:SLICE(1..1):MEMBER_@@_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
         m_@_MEMBER_@Member = new @_UNIFORM_MEMBERTYPE_@ContainerArray();
 @@END_IF@@
+
+@@----- Sequence member
+@@ELSIF@@ @_EXIST:MEMBERISSEQUENCE_@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration or @_UNIFORM_MEMBERTYPE_@=Object
+    public @_MEMBERTYPE_@.SequenceContainer @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
+@@ELSE@@
+    public com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@SequenceContainer @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
+@@END_IF@@
+@@----------dictionary member ---------------
+@@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
+@@---------- key: Int32
+@@IF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@="Int32"
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+    public com.saabgroup.safir.dob.typesystem.DictionaryContainer<Integer, @_MEMBERTYPE_@.Container> @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+    public com.saabgroup.safir.dob.typesystem.DictionaryContainer<Integer, com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>> @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
+@@ELSE@@
+    public com.saabgroup.safir.dob.typesystem.DictionaryContainer<Integer, com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container> @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
+@@END_IF@@
+@@---------- key: Int32, TypeId
+@@ELSIF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@="Int64" or @_UNIFORM_MEMBERDICTIONARYTYPE_@="TypeId"
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+    public com.saabgroup.safir.dob.typesystem.DictionaryContainer<Long, @_MEMBERTYPE_@.Container> @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+    public com.saabgroup.safir.dob.typesystem.DictionaryContainer<Long, com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>> @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
+@@ELSE@@
+    public com.saabgroup.safir.dob.typesystem.DictionaryContainer<Long, com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container> @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
+@@END_IF@@
+@@---------- key: all other
+@@ELSE@@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+    public com.saabgroup.safir.dob.typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@.Container> @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+    public com.saabgroup.safir.dob.typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>> @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
+@@ELSE@@
+    public com.saabgroup.safir.dob.typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container> @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
+@@END_IF@@
+@@END_IF@@
+@@------ Single value -------
 @@ELSE@@
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
     public @_MEMBERTYPE_@.Container @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@() {
@@ -1006,142 +1096,156 @@ public class @_CLASS_@
      * Create @_CLASS_@ object from blob.
      * @param blob the blob to deserialize.
      */
-    public @_CLASS_@(java.nio.ByteBuffer blob) {
-        super(blob);
+    public @_CLASS_@(long handle) {
+        super(handle);
 
         init();
 @@TABLE@@
 
+@@ --- Array member ---
 @@IF@@ @_EXIST:MEMBERISARRAY_@
-@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
-        m_@_MEMBER_@Member = new @_MEMBERTYPE_@.ContainerArray(m_@_MEMBER_@Size);
+        //Array
         for (int i = 0; i < m_@_MEMBER_@Size; ++i) {
-            com.saabgroup.safir.dob.typesystem.BlobOperations.getEnumeration(m_@_MEMBER_@Member.get(i), blob, m_@_MEMBER_@MemberIndex, i);
+            com.saabgroup.safir.dob.typesystem.BlobOperations.get(m_@_MEMBER_@Member.get(i), handle, m_@_MEMBER_@MemberIndex, i);
         }
+
+@@ --- Sequence member ---
+@@ELSIF@@ @_EXIST:MEMBERISSEQUENCE_@
+        //Sequence
+        for (int i=0; i<com.saabgroup.safir.dob.typesystem.BlobOperations.numberOfMemberValues(handle, m_@_MEMBER_@MemberIndex); i++) {
+@@IF@@ (@_UNIFORM_MEMBERTYPE_@ = Enumeration)
+            int ordinal=com.saabgroup.safir.dob.typesystem.BlobOperations.getInt32(handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.VALUE_MODE);
+            m_@_MEMBER_@Member.add(@_MEMBERTYPE_@.values()[ordinal]);
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
-        m_@_MEMBER_@Member = new @_MEMBERTYPE_@.ContainerArray(m_@_MEMBER_@Size);
-        for (int i = 0; i < m_@_MEMBER_@Size; ++i) {
-            com.saabgroup.safir.dob.typesystem.BlobOperations.getObject(m_@_MEMBER_@Member.get(i), blob, m_@_MEMBER_@MemberIndex, i);
-        }
+            com.saabgroup.safir.dob.typesystem.Object seqVal=com.saabgroup.safir.dob.typesystem.BlobOperations.get@_UNIFORM_MEMBERTYPE_@(handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.VALUE_MODE);
+@@IF@@ @_MEMBERTYPE_@="com.saabgroup.safir.dob.typesystem.Object"
+            m_@_MEMBER_@Member.add(seqVal);
 @@ELSE@@
-        java.util.ArrayList<com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container> @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@Tmp = new java.util.ArrayList<com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container>(m_@_MEMBER_@Size);
-        for (int i = 0; i < m_@_MEMBER_@Size; ++i) {
-            @_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@Tmp.add(com.saabgroup.safir.dob.typesystem.BlobOperations.get@_REPLACE(^si(..)\.(.*)/\2\1):UNIFORM_MEMBERTYPE_@(blob, m_@_MEMBER_@MemberIndex, i));
-        }
-        m_@_MEMBER_@Member = new com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@ContainerArray(@_LOWER:SLICE(1..1):MEMBER_@@_REPLACE(./):MEMBER_@Tmp);
+            m_@_MEMBER_@Member.add((@_MEMBERTYPE_@)seqVal);
 @@END_IF@@
+@@ELSIF@@ @_MEMBERTYPE_@="float"
+            m_@_MEMBER_@Member.add(com.saabgroup.safir.dob.typesystem.BlobOperations.getFloat32(handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.VALUE_MODE));
+@@ELSIF@@ @_MEMBERTYPE_@="double"
+            m_@_MEMBER_@Member.add(com.saabgroup.safir.dob.typesystem.BlobOperations.getFloat64(handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.VALUE_MODE));
 @@ELSE@@
-@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
-        m_@_MEMBER_@Member = new @_MEMBERTYPE_@.Container();
-        com.saabgroup.safir.dob.typesystem.BlobOperations.getEnumeration(m_@_MEMBER_@Member, blob, m_@_MEMBER_@MemberIndex, 0);
+            m_@_MEMBER_@Member.add(com.saabgroup.safir.dob.typesystem.BlobOperations.get@_UNIFORM_MEMBERTYPE_@(handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.VALUE_MODE));
+@@END_IF@@
+        }
+@@----------dictionary member ---------------
+@@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
+        //dictemember m_@_MEMBER_@Member
+    for (int i=0; i<com.saabgroup.safir.dob.typesystem.BlobOperations.numberOfMemberValues(handle, m_@_MEMBER_@MemberIndex); i++) {
+@@---- Get key
+@@IF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@="Int32"
+        int key=com.saabgroup.safir.dob.typesystem.BlobOperations.getInt32(handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.KEY_MODE);
+@@ELSIF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@="Int64" or @_UNIFORM_MEMBERDICTIONARYTYPE_@="TypeId"
+        long key=com.saabgroup.safir.dob.typesystem.BlobOperations.getInt64(handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.KEY_MODE);
+@@ELSIF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@="InstanceId"
+        com.saabgroup.safir.dob.typesystem.InstanceId key=com.saabgroup.safir.dob.typesystem.BlobOperations.getInstanceId(handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.KEY_MODE);
+@@ELSIF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@="HandlerId"
+        com.saabgroup.safir.dob.typesystem.HandlerId key=com.saabgroup.safir.dob.typesystem.BlobOperations.getHandlerId(handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.KEY_MODE);
+@@ELSIF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@="ChannelId"
+        com.saabgroup.safir.dob.typesystem.HandlerId key=com.saabgroup.safir.dob.typesystem.BlobOperations.getChannelId(handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.KEY_MODE);
+@@ELSIF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@="EntityId"
+        com.saabgroup.safir.dob.typesystem.EntityId key=com.saabgroup.safir.dob.typesystem.BlobOperations.getEntityId(handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.KEY_MODE);
+@@ELSIF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@="String"
+        String key=com.saabgroup.safir.dob.typesystem.BlobOperations.getString(handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.KEY_MODE);
+@@ELSIF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@="Enumeration"
+        int ordinal=com.saabgroup.safir.dob.typesystem.BlobOperations.getInt32(handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.KEY_MODE);
+        @_MEMBERDICTIONARYTYPE_@ key=@_MEMBERDICTIONARYTYPE_@.values()[ordinal];
+@@ELSE@@
+        //not supported as key @_UNIFORM_MEMBERDICTIONARYTYPE_@
+@@END_IF@@
+@@---- Get val
+@@IF@@ (@_UNIFORM_MEMBERTYPE_@ = Enumeration)
+        @_MEMBERTYPE_@.Container value = new @_MEMBERTYPE_@.Container();
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
-        m_@_MEMBER_@Member = new com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>();
-        com.saabgroup.safir.dob.typesystem.BlobOperations.getObject(m_@_MEMBER_@Member, blob, m_@_MEMBER_@MemberIndex, 0);
+        com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@> value = new com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>();
 @@ELSE@@
-        m_@_MEMBER_@Member = com.saabgroup.safir.dob.typesystem.BlobOperations.get@_REPLACE(^si(..)\.(.*)/\2\1):UNIFORM_MEMBERTYPE_@(blob, m_@_MEMBER_@MemberIndex, 0);
+        com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container value = new com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container();
 @@END_IF@@
+        com.saabgroup.safir.dob.typesystem.BlobOperations.get(value, handle, m_@_MEMBER_@MemberIndex, i);
+        m_@_MEMBER_@Member.put(key, value);
+    } //end dictionary loop
+
+
+@@ --- Single member ---
+@@ELSE@@
+        com.saabgroup.safir.dob.typesystem.BlobOperations.get(m_@_MEMBER_@Member, handle, m_@_MEMBER_@MemberIndex, 0);
 @@END_IF@@
 @@END_TABLE@@
     }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.Object#calculateBlobSize()
-     */
-    @Override
-    public int calculateBlobSize() {
-        init();
-
-        int size = super.calculateBlobSize() + m_initialSize;
-@@TABLE@@
-
-        //@_MEMBER_@
-@@IF@@ @_EXIST:MEMBERISARRAY_@
-@@IF@@ @_UNIFORM_MEMBERTYPE_@=String
-        for (com.saabgroup.safir.dob.typesystem.StringContainer cont: m_@_MEMBER_@Member) {
-            size += cont.utf8StringLength();
-        }
-@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=EntityId
-        for (@_MEMBERTYPE_@Container cont: m_@_MEMBER_@Member) {
-            if (!cont.isNull() && !cont.getVal().getInstanceId().getRawString().isEmpty()){
-                size += 16 + 4 + cont.getVal().getInstanceId().utf8StringLength();
-            }
-        }
-@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=InstanceId or @_UNIFORM_MEMBERTYPE_@=ChannelId or @_UNIFORM_MEMBERTYPE_@=HandlerId
-        for (@_MEMBERTYPE_@Container cont: m_@_MEMBER_@Member){
-            if (!cont.isNull() && !cont.getVal().getRawString().isEmpty()){
-                size += 8 + 4 + cont.getVal().utf8StringLength();
-            }
-        }
-@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
-        for (com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@> cont: m_@_MEMBER_@Member) {
-             size += cont.calculateBlobSize();
-        }
-@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Binary
-        for (com.saabgroup.safir.dob.typesystem.BinaryContainer cont: m_@_MEMBER_@Member){
-            if (!cont.isNull())
-            {
-                size += cont.getVal().length;
-            }
-        }
-@@END_IF@@
-@@ELSE@@
-@@IF@@ @_UNIFORM_MEMBERTYPE_@=String
-        size += m_@_MEMBER_@Member.utf8StringLength();
-@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=EntityId
-        if (!m_@_MEMBER_@Member.isNull() && !m_@_MEMBER_@Member.getVal().getInstanceId().getRawString().isEmpty()){
-            size += 16 + 4 + m_@_MEMBER_@Member.getVal().getInstanceId().utf8StringLength();
-        }
-@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=InstanceId or @_UNIFORM_MEMBERTYPE_@=ChannelId or @_UNIFORM_MEMBERTYPE_@=HandlerId
-        if (!m_@_MEMBER_@Member.isNull() && !m_@_MEMBER_@Member.getVal().getRawString().isEmpty()){
-            size += 8 + 4 + m_@_MEMBER_@Member.getVal().utf8StringLength();
-        }
-@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
-        size += m_@_MEMBER_@Member.calculateBlobSize();
-@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Binary
-        if (!m_@_MEMBER_@Member.isNull())
-        {
-            size += m_@_MEMBER_@Member.getVal().length;
-        }
-@@END_IF@@
-@@END_IF@@
-@@END_TABLE@@
-
-        return size;
-    }
-
 
     /**
      * @see com.saabgroup.safir.dob.typesystem.Object#writeToBlob(java.nio.ByteBuffer, int)
      */
     @Override
-    public int writeToBlob(java.nio.ByteBuffer blob, int beginningOfUnused)
+    public void writeToBlob(long handle)
     {
         init();
-
-        beginningOfUnused = super.writeToBlob(blob, beginningOfUnused);
+        super.writeToBlob(handle);
 @@TABLE@@
 
         //@_MEMBER_@
+@@ --- Array member ---
 @@IF@@ @_EXIST:MEMBERISARRAY_@
-@@IF@@ @_UNIFORM_MEMBERTYPE_@=String or @_UNIFORM_MEMBERTYPE_@=EntityId or @_UNIFORM_MEMBERTYPE_@=InstanceId or @_UNIFORM_MEMBERTYPE_@=ChannelId or @_UNIFORM_MEMBERTYPE_@=HandlerId or @_UNIFORM_MEMBERTYPE_@=Object or @_UNIFORM_MEMBERTYPE_@=Binary
         for (int i = 0; i < m_@_MEMBER_@Size; ++i) {
-            beginningOfUnused = com.saabgroup.safir.dob.typesystem.BlobOperations.set@_UNIFORM_MEMBERTYPE_@(m_@_MEMBER_@Member.get(i),blob,beginningOfUnused,m_@_MEMBER_@MemberIndex,i);
+            com.saabgroup.safir.dob.typesystem.BlobOperations.set(m_@_MEMBER_@Member.get(i), handle, m_@_MEMBER_@MemberIndex, i);
         }
+@@ --- Sequence member ---
+@@ELSIF@@ @_EXIST:MEMBERISSEQUENCE_@
+        for (int i=0; i<m_@_MEMBER_@Member.size(); ++i) {
+@@IF@@ (@_UNIFORM_MEMBERTYPE_@ = Enumeration)
+            com.saabgroup.safir.dob.typesystem.BlobOperations.set(m_@_MEMBER_@Member.get(i).ordinal(), handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.VALUE_MODE);
 @@ELSE@@
-        for (int i = 0; i < m_@_MEMBER_@Size; ++i) {
-            com.saabgroup.safir.dob.typesystem.BlobOperations.set@_REPLACE(^si(..)\.(.*)/\2\1):UNIFORM_MEMBERTYPE_@(m_@_MEMBER_@Member.get(i),blob,m_@_MEMBER_@MemberIndex,i);
+            com.saabgroup.safir.dob.typesystem.BlobOperations.set(m_@_MEMBER_@Member.get(i), handle, m_@_MEMBER_@MemberIndex, i, com.saabgroup.safir.dob.typesystem.BlobOperations.VALUE_MODE);
+@@END_IF@@
+            }
+@@----------dictionary member ---------------
+@@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
+@@---------- key: Int32
+@@IF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@="Int32"
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+        for(java.util.Map.Entry<Integer, @_MEMBERTYPE_@.Container> entry : m_@_MEMBER_@Member.entrySet()) {
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+        for(java.util.Map.Entry<Integer, com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>> entry : m_@_MEMBER_@Member.entrySet()) {
+@@ELSE@@
+        for(java.util.Map.Entry<Integer, com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container> entry : m_@_MEMBER_@Member.entrySet()) {
+@@END_IF@@
+@@---------- key: Int64, TypeId
+@@ELSIF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@="Int64" or @_UNIFORM_MEMBERDICTIONARYTYPE_@="TypeId"
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+        for(java.util.Map.Entry<Long, @_MEMBERTYPE_@.Container> entry : m_@_MEMBER_@Member.entrySet()) {
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+        for(java.util.Map.Entry<Long, com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>> entry : m_@_MEMBER_@Member.entrySet()) {
+@@ELSE@@
+        for(java.util.Map.Entry<Long, com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container> entry : m_@_MEMBER_@Member.entrySet()) {
+@@END_IF@@
+@@---------- key: all other
+@@ELSE@@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+        for(java.util.Map.Entry<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@.Container> entry : m_@_MEMBER_@Member.entrySet()) {
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+        for(java.util.Map.Entry<@_MEMBERDICTIONARYTYPE_@, com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>> entry : m_@_MEMBER_@Member.entrySet()) {
+@@ELSE@@
+        for(java.util.Map.Entry<@_MEMBERDICTIONARYTYPE_@, com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container> entry : m_@_MEMBER_@Member.entrySet()) {
+@@END_IF@@
+@@END_IF@@
+@@----- set the key
+@@IF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@=Enumeration
+            com.saabgroup.safir.dob.typesystem.BlobOperations.set(entry.getKey().ordinal(), handle, m_@_MEMBER_@MemberIndex, 0, com.saabgroup.safir.dob.typesystem.BlobOperations.KEY_MODE);
+@@ELSE@@
+            com.saabgroup.safir.dob.typesystem.BlobOperations.set(entry.getKey(), handle, m_@_MEMBER_@MemberIndex, 0, com.saabgroup.safir.dob.typesystem.BlobOperations.KEY_MODE);
+@@END_IF@@
+@@----- set the value
+            com.saabgroup.safir.dob.typesystem.BlobOperations.set(entry.getValue(), handle, m_@_MEMBER_@MemberIndex, 0);
         }
-@@END_IF@@
+@@ --- Single member ---
 @@ELSE@@
-@@IF@@ @_UNIFORM_MEMBERTYPE_@=String or @_UNIFORM_MEMBERTYPE_@=EntityId or @_UNIFORM_MEMBERTYPE_@=InstanceId or @_UNIFORM_MEMBERTYPE_@=ChannelId or @_UNIFORM_MEMBERTYPE_@=HandlerId or @_UNIFORM_MEMBERTYPE_@=Object or @_UNIFORM_MEMBERTYPE_@=Binary
-        beginningOfUnused = com.saabgroup.safir.dob.typesystem.BlobOperations.set@_UNIFORM_MEMBERTYPE_@(m_@_MEMBER_@Member,blob,beginningOfUnused,m_@_MEMBER_@MemberIndex,0);
-@@ELSE@@
-        com.saabgroup.safir.dob.typesystem.BlobOperations.set@_REPLACE(^si(..)\.(.*)/\2\1):UNIFORM_MEMBERTYPE_@(m_@_MEMBER_@Member,blob,m_@_MEMBER_@MemberIndex,0);
-@@END_IF@@
+        com.saabgroup.safir.dob.typesystem.BlobOperations.set(m_@_MEMBER_@Member, handle, m_@_MEMBER_@MemberIndex, 0);
 @@END_IF@@
 @@END_TABLE@@
 
-        return beginningOfUnused;
     }
 
 
@@ -1178,25 +1282,69 @@ public class @_CLASS_@
 @@END_IF@@
     }
 
+
+@@---------- Start of private member declaration ------------
+    // private member declaration
 @@TABLE@@
+@@----- Array member
 @@IF@@ @_EXIST:MEMBERISARRAY_@
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
-    private @_MEMBERTYPE_@.ContainerArray m_@_MEMBER_@Member;
+    private @_MEMBERTYPE_@.ContainerArray m_@_MEMBER_@Member = new @_MEMBERTYPE_@.ContainerArray(get@_MEMBER_@ArraySize());
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
-    private com.saabgroup.safir.dob.typesystem.ArrayContainer<com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>> m_@_MEMBER_@Member;
+    private @_MEMBERTYPE_@.ContainerArray m_@_MEMBER_@Member = new @_MEMBERTYPE_@.ContainerArray(get@_MEMBER_@ArraySize());
 @@ELSE@@
-    private com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@ContainerArray m_@_MEMBER_@Member;
+    private com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@ContainerArray m_@_MEMBER_@Member = new com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@ContainerArray(get@_MEMBER_@ArraySize());
 @@END_IF@@
+@@----- Sequence member
+@@ELSIF@@ @_EXIST:MEMBERISSEQUENCE_@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration or @_UNIFORM_MEMBERTYPE_@=Object
+    private @_MEMBERTYPE_@.SequenceContainer m_@_MEMBER_@Member = new @_MEMBERTYPE_@.SequenceContainer();
+@@ELSE@@
+    private com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@SequenceContainer m_@_MEMBER_@Member = new com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@SequenceContainer();
+@@END_IF@@
+@@----- Dictionary member
+@@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
+@@---------- key: Int32
+@@IF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@="Int32"
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+    private com.saabgroup.safir.dob.typesystem.DictionaryContainer<Integer, @_MEMBERTYPE_@.Container> m_@_MEMBER_@Member = new com.saabgroup.safir.dob.typesystem.DictionaryContainer<Integer, @_MEMBERTYPE_@.Container>();
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+    private com.saabgroup.safir.dob.typesystem.DictionaryContainer<Integer, com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>> m_@_MEMBER_@Member = new com.saabgroup.safir.dob.typesystem.DictionaryContainer<Integer, com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>>();
+@@ELSE@@
+    private com.saabgroup.safir.dob.typesystem.DictionaryContainer<Integer, com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container> m_@_MEMBER_@Member = new com.saabgroup.safir.dob.typesystem.DictionaryContainer<Integer, com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container>();
+@@END_IF@@
+@@---------- key: Int32, TypeId
+@@ELSIF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@="Int64" or @_UNIFORM_MEMBERDICTIONARYTYPE_@="TypeId"
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+    private com.saabgroup.safir.dob.typesystem.DictionaryContainer<Long, @_MEMBERTYPE_@.Container> m_@_MEMBER_@Member = new com.saabgroup.safir.dob.typesystem.DictionaryContainer<Long, @_MEMBERTYPE_@.Container>();
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+    private com.saabgroup.safir.dob.typesystem.DictionaryContainer<Long, com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>> m_@_MEMBER_@Member = new com.saabgroup.safir.dob.typesystem.DictionaryContainer<Long, com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>>();
+@@ELSE@@
+    private com.saabgroup.safir.dob.typesystem.DictionaryContainer<Long, com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container> m_@_MEMBER_@Member = new com.saabgroup.safir.dob.typesystem.DictionaryContainer<Long, com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container>();
+@@END_IF@@
+@@---------- key: all other
 @@ELSE@@
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
-    private @_MEMBERTYPE_@.Container m_@_MEMBER_@Member;
+    private com.saabgroup.safir.dob.typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@.Container> m_@_MEMBER_@Member = new com.saabgroup.safir.dob.typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@.Container>();
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
-    private com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@> m_@_MEMBER_@Member;
+    private com.saabgroup.safir.dob.typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>> m_@_MEMBER_@Member = new com.saabgroup.safir.dob.typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>>();
 @@ELSE@@
-    private com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container m_@_MEMBER_@Member;
+    private com.saabgroup.safir.dob.typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container> m_@_MEMBER_@Member = new com.saabgroup.safir.dob.typesystem.DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container>();
 @@END_IF@@
+@@END_IF@@
+@@----- Single member
+@@ELSE@@
+@@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+    private @_MEMBERTYPE_@.Container m_@_MEMBER_@Member = new @_MEMBERTYPE_@.Container();
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
+    private com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@> m_@_MEMBER_@Member = new com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_MEMBERTYPE_@>();
+@@ELSE@@
+    private com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container m_@_MEMBER_@Member = new com.saabgroup.safir.dob.typesystem.@_UNIFORM_MEMBERTYPE_@Container();
+@@END_IF@@
+
 @@END_IF@@
 @@END_TABLE@@
+@@---------- End of private member declaration ------------
 
     private static void init() {
         if(!m_isInitialized)
@@ -1217,7 +1365,6 @@ public class @_CLASS_@
 @@END_IF@@
 @@END_IF@@
 @@END_TABLE@@
-            m_initialSize = com.saabgroup.safir.dob.typesystem.BlobOperations.getInitialSize(ClassTypeId);
 
             m_isInitialized = true;
         }
@@ -1241,8 +1388,6 @@ public class @_CLASS_@
 @@END_IF@@
 @@END_IF@@
 @@END_TABLE@@
-
-    private static int m_initialSize = -1;
 
     /**
      * Array for ObjectContainers
@@ -1292,6 +1437,27 @@ public class @_CLASS_@
             return new ContainerArray(this);
         }
 
+    }
+
+    /**
+     * Sequence container
+     */
+    static public class SequenceContainer
+        extends com.saabgroup.safir.dob.typesystem.GenericObjectSequenceContainer<@_CLASS_@>
+        implements Cloneable {
+
+        public SequenceContainer() {
+            super();
+        }
+
+        public SequenceContainer(SequenceContainer other) {
+            super(other);
+        }
+
+         @Override
+         public SequenceContainer clone() {
+             return new SequenceContainer(this);
+         }
     }
 
 }
@@ -1450,6 +1616,31 @@ public enum @_CLASS_@
         @Override
             public ContainerArray clone() {
             return new ContainerArray(this);
+        }
+    }
+        
+    /**
+     * Sequence for @_CLASS_@
+     */
+    static public class SequenceContainer
+        extends com.saabgroup.safir.dob.typesystem.ValueSequenceContainer<@_CLASS_@>
+        implements Cloneable {
+
+
+        public SequenceContainer() {
+		    super();
+	    }
+	
+	    public SequenceContainer(SequenceContainer other) {
+		    super(other);
+	    }
+	
+	    /**
+         * @see com.saabgroup.safir.dob.typesystem.ValueContainer#clone()
+         */
+        @Override
+        public SequenceContainer clone() {
+            return new SequenceContainer(this);
         }
     }
 }

@@ -1,6 +1,6 @@
 /* ****************************************************************************
 *
-* Copyright Saab AB, 2005-2013 (http://safir.sourceforge.net)
+* Copyright Saab AB, 2005-2015 (http://safir.sourceforge.net)
 * 
 * Created by: Lars Hagström / stlrha
 *
@@ -228,12 +228,6 @@ namespace Safir.Dob.Typesystem
             m_bIsChanged = true;
         }
         
-        /// <summary>
-        /// Calculate the size of the blob-serialized form of the contained object.
-        /// </summary>
-        /// <returns>The needed size in bytes. 0 if the container is null.</returns>
-        public System.Int32 CalculateBlobSize() {if (IsNull()) return 0; else return m_Object.CalculateBlobSize();}
-
         /// <summary>
         /// Access the contained object directly, without any checks.
         /// No checks are made of the isNull flag, and the isChanged flag is not updated

@@ -1,6 +1,6 @@
 <object>
      <name>
-          ParserTest.MySpecialItem
+          BlobTest.MySpecialItem
      </name>
      <members>
           <member>
@@ -42,7 +42,7 @@
                </name>
                <object>
                     <name>
-                         ParserTest.MySpecialItem
+                         BlobTest.MySpecialItem
                     </name>
                     <members>
                          <member>
@@ -74,7 +74,7 @@
                               </name>
                               <object>
                                    <name>
-                                        ParserTest.MyItem
+                                        BlobTest.MyItem
                                    </name>
                                    <members>
                                         <member>

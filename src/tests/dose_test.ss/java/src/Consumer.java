@@ -75,8 +75,8 @@ class Consumer implements
             obj.getTypeId() == com.saabgroup.dosetest.ComplexGlobalService.ClassTypeId;
     }
 
-    //returns true if the blob needs to be modified.
-    static boolean checkBinaryMemberInternal(com.saabgroup.safir.dob.typesystem.BinaryContainer cont)
+    //sets container to null after verification
+    static void checkBinaryMemberInternal(com.saabgroup.safir.dob.typesystem.BinaryContainer cont)
     {
         if (!cont.isNull() && cont.getVal().length > 10000) //only check for large sizes
         {
@@ -99,11 +99,6 @@ class Consumer implements
             }
             //we do NOT want to print all this out to stdout, so we set it to null once we've checked it.
             cont.setNull();
-            return true;
-        }
-        else
-        {
-            return false;
         }
     }
 
@@ -111,90 +106,23 @@ class Consumer implements
     {
         if (obj.getTypeId() == com.saabgroup.dosetest.ComplexGlobalMessage.ClassTypeId)
         {
-            if (checkBinaryMemberInternal(((com.saabgroup.dosetest.ComplexGlobalMessage)obj).binaryMember()))
-            {
-                int blobSize = com.saabgroup.safir.dob.typesystem.BlobOperations.getSize(blob);
-                java.nio.ByteBuffer b = java.nio.ByteBuffer.allocateDirect(blobSize);
-
-                //copy the blob
-                for (int index = 0; index < blobSize; ++index)
-                {
-                    b.put(index,blob.get(index));
-
-                }
-                com.saabgroup.safir.dob.typesystem.BlobOperations.setNull
-                    (b,com.saabgroup.dosetest.ComplexGlobalMessage.getBinaryMemberMemberIndex(),0);
-                String xml = com.saabgroup.safir.dob.typesystem.Serialization.toXml(b);
-                return xml;
-            }
+            checkBinaryMemberInternal(((com.saabgroup.dosetest.ComplexGlobalMessage)obj).binaryMember());
         }
         else if (obj.getTypeId() == com.saabgroup.dosetest.ComplexGlobalEntity.ClassTypeId)
         {
-            java.nio.ByteBuffer b = null;
-            if (checkBinaryMemberInternal(((com.saabgroup.dosetest.ComplexGlobalEntity)obj).binaryMember()))
-            {
-                int blobSize = com.saabgroup.safir.dob.typesystem.BlobOperations.getSize(blob);
-                b = java.nio.ByteBuffer.allocateDirect(blobSize);
-
-                //copy the blob
-                for (int index = 0; index < blobSize; ++index)
-                {
-                    b.put(index,blob.get(index));
-
-                }
-                com.saabgroup.safir.dob.typesystem.BlobOperations.setNull
-                    (b,com.saabgroup.dosetest.ComplexGlobalEntity.getBinaryMemberMemberIndex(),0);
-
-            }
-
+            checkBinaryMemberInternal(((com.saabgroup.dosetest.ComplexGlobalEntity)obj).binaryMember());
 
             //in the entity we use the binary array as well
             for (int i = 0; i < com.saabgroup.dosetest.ComplexGlobalEntity.getBinaryArrayMemberArraySize(); ++i)
             {
-                if (checkBinaryMemberInternal(((com.saabgroup.dosetest.ComplexGlobalEntity)obj).binaryArrayMember().get(i)))
-                {
-                    if (b == null)
-                    {
-                        int blobSize = com.saabgroup.safir.dob.typesystem.BlobOperations.getSize(blob);
-                        b = java.nio.ByteBuffer.allocateDirect(blobSize);
-
-                        //copy the blob
-                        for (int index = 0; index < blobSize; ++index)
-                        {
-                            b.put(index,blob.get(index));
-
-                        }
-                    }
-                    com.saabgroup.safir.dob.typesystem.BlobOperations.setNull
-                        (b,com.saabgroup.dosetest.ComplexGlobalEntity.getBinaryArrayMemberMemberIndex(),i);
-                }
-            }
-
-            if (b != null)
-            {
-                String xml = com.saabgroup.safir.dob.typesystem.Serialization.toXml(b);
-                return xml;
+                checkBinaryMemberInternal(((com.saabgroup.dosetest.ComplexGlobalEntity)obj).binaryArrayMember().get(i));
             }
         }
         else if (obj.getTypeId() == com.saabgroup.dosetest.ComplexGlobalService.ClassTypeId)
         {
-            if (checkBinaryMemberInternal(((com.saabgroup.dosetest.ComplexGlobalService)obj).binaryMember()))
-            {
-                int blobSize = com.saabgroup.safir.dob.typesystem.BlobOperations.getSize(blob);
-                java.nio.ByteBuffer b = java.nio.ByteBuffer.allocateDirect(blobSize);
-
-                //copy the blob
-                for (int index = 0; index < blobSize; ++index)
-                {
-                    b.put(index,blob.get(index));
-
-                }
-                com.saabgroup.safir.dob.typesystem.BlobOperations.setNull
-                    (b,com.saabgroup.dosetest.ComplexGlobalService.getBinaryMemberMemberIndex(),0);
-                String xml = com.saabgroup.safir.dob.typesystem.Serialization.toXml(b);
-                return xml;
-            }
+            checkBinaryMemberInternal(((com.saabgroup.dosetest.ComplexGlobalService)obj).binaryMember());
         }
+
         return com.saabgroup.safir.dob.typesystem.Serialization.toXml(blob);
 
     }

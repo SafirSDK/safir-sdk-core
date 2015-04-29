@@ -271,6 +271,8 @@ namespace @_NAMESPACEV_@
 #include <Safir/Dob/Typesystem/Object.h>
 #include <Safir/Dob/Typesystem/ObjectContainer.h>
 #include <Safir/Dob/Typesystem/ArrayContainer.h>
+#include <Safir/Dob/Typesystem/SequenceContainer.h>
+#include <Safir/Dob/Typesystem/DictionaryContainer.h>
 #include <Safir/Dob/Typesystem/ContainerProxies.h>
 
 @@TABLE@@
@@ -302,6 +304,7 @@ namespace @_NAMESPACEV_@
 
     typedef Safir::Dob::Typesystem::ObjectContainerImpl<@_CLASS_@> @_CLASS_@Container;
     typedef Safir::Dob::Typesystem::ArrayContainer<@_CLASS_@Container> @_CLASS_@ContainerArray;
+    typedef Safir::Dob::Typesystem::SequenceContainer<@_CLASS_@Ptr> @_CLASS_@SequenceContainer;
 
 @@IF@@ @_EXIST:CLASSSUMMARY_@
     /**
@@ -363,6 +366,7 @@ namespace @_NAMESPACEV_@
 @@TABLE@@
 @@IF@@ @_EXIST:PARAMETER_@
         //@_PARAMETER_@
+@@ --- Array parameter ---
 @@IF@@ @_EXIST:PARAMETERISARRAY_@
         static Safir::Dob::Typesystem::ArrayIndex @_PARAMETER_@ArraySize();
 @@IF@@ @_EXIST:PARAMETERSUMMARY_@
@@ -381,6 +385,31 @@ namespace @_NAMESPACEV_@
 @@ELSE@@
         static @_PARAMETERTYPE_@ @_PARAMETER_@(const Safir::Dob::Typesystem::ArrayIndex index);
 @@END_IF@@
+@@ --- Dictionary parameter ---
+@@ELSIF@@ @_EXIST:PARAMETERISDICTIONARY_@
+@@IF@@ @_EXIST:PARAMETERSUMMARY_@
+        /**
+         * @_REPLACE_ALL(\n/\n         * ):PARAMETERSUMMARY_@
+         */
+@@END_IF@@
+@@IF@@ @_UNIFORM_PARAMETERDICTIONARYTYPE_@=Enumeration
+@@IF@@ @_UNIFORM_PARAMETERTYPE_@=Enumeration
+        static @_PARAMETERTYPE_@::Enumeration @_PARAMETER_@(const @_PARAMETERDICTIONARYTYPE_@::Enumeration& key);
+@@ELSIF@@ (@_UNIFORM_PARAMETERTYPE_@ = Object)
+        static @_PARAMETERTYPE_@Ptr @_PARAMETER_@(const @_PARAMETERDICTIONARYTYPE_@::Enumeration& key);
+@@ELSE@@
+        static @_PARAMETERTYPE_@ @_PARAMETER_@(const @_PARAMETERDICTIONARYTYPE_@::Enumeration& key);
+@@END_IF@@
+@@ELSE@@    
+@@IF@@ @_UNIFORM_PARAMETERTYPE_@=Enumeration
+        static @_PARAMETERTYPE_@::Enumeration @_PARAMETER_@(const @_PARAMETERDICTIONARYTYPE_@& key);
+@@ELSIF@@ (@_UNIFORM_PARAMETERTYPE_@ = Object)
+        static @_PARAMETERTYPE_@Ptr @_PARAMETER_@(const @_PARAMETERDICTIONARYTYPE_@& key);
+@@ELSE@@
+        static @_PARAMETERTYPE_@ @_PARAMETER_@(const @_PARAMETERDICTIONARYTYPE_@& key);
+@@END_IF@@
+@@END_IF@@
+@@ --- Single parameter ---
 @@ELSE@@
 @@IF@@ @_EXIST:PARAMETERSUMMARY_@
         /**
@@ -422,6 +451,49 @@ namespace @_NAMESPACEV_@
         const @_MEMBERTYPE_@ContainerArray & @_MEMBER_@() const;
         @_MEMBERTYPE_@ContainerArray & @_MEMBER_@();
 @@END_IF@@
+@@ --- Sequence ---
+@@ELSIF@@ @_EXIST:MEMBERISSEQUENCE_@
+@@IF@@ @_EXIST:MEMBERSUMMARY_@
+        /**
+         * @_REPLACE_ALL(\n/\n         * ):MEMBERSUMMARY_@
+         */
+@@END_IF@@
+@@IF@@ (@_UNIFORM_MEMBERTYPE_@ = String) or (@_UNIFORM_MEMBERTYPE_@ = Boolean)
+        const Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@SequenceContainer & @_MEMBER_@() const;
+        Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@SequenceContainer & @_MEMBER_@();
+@@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = Enumeration)
+        const @_MEMBERTYPE_@::EnumerationSequenceContainer & @_MEMBER_@() const;
+        @_MEMBERTYPE_@::EnumerationSequenceContainer & @_MEMBER_@();
+@@ELSE@@
+        const @_MEMBERTYPE_@SequenceContainer & @_MEMBER_@() const;
+        @_MEMBERTYPE_@SequenceContainer & @_MEMBER_@();
+@@END_IF@@
+@@ --- Dictionary value ---
+@@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
+@@IF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@=Enumeration
+@@IF@@ (@_UNIFORM_MEMBERTYPE_@ = String) or (@_UNIFORM_MEMBERTYPE_@ = Boolean)
+        const Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@::Enumeration, Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@Container>& @_MEMBER_@() const;
+        Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@::Enumeration, Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@Container>& @_MEMBER_@();
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+        const Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@::Enumeration, @_MEMBERTYPE_@::EnumerationContainer>& @_MEMBER_@() const;
+        Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@::Enumeration, @_MEMBERTYPE_@::EnumerationContainer>& @_MEMBER_@();
+@@ELSE@@
+        const Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@::Enumeration, @_MEMBERTYPE_@Container>& @_MEMBER_@() const;
+        Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@::Enumeration, @_MEMBERTYPE_@Container>& @_MEMBER_@();
+@@END_IF@@
+@@ELSE@@
+@@IF@@ (@_UNIFORM_MEMBERTYPE_@ = String) or (@_UNIFORM_MEMBERTYPE_@ = Boolean)
+        const Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@Container>& @_MEMBER_@() const;
+        Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@Container>& @_MEMBER_@();
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+        const Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@::EnumerationContainer>& @_MEMBER_@() const;
+        Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@::EnumerationContainer>& @_MEMBER_@();
+@@ELSE@@
+        const Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@Container>& @_MEMBER_@() const;
+        Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@Container>& @_MEMBER_@();
+@@END_IF@@
+@@END_IF@@
+@@ --- Singel value ---
 @@ELSE@@
 @@IF@@ @_EXIST:MEMBERSUMMARY_@
         /**
@@ -461,10 +533,9 @@ namespace @_NAMESPACEV_@
                                                                         const Safir::Dob::Typesystem::ArrayIndex index);
         virtual const Safir::Dob::Typesystem::ContainerBase & GetMember(const Safir::Dob::Typesystem::MemberIndex member,
                                                                         const Safir::Dob::Typesystem::ArrayIndex index) const;
-
-        virtual Safir::Dob::Typesystem::Int32 CalculateBlobSize() const;
-        virtual void WriteToBlob(char * blob, char * & beginningOfUnused) const;
-        explicit @_CLASS_@(char const * const blob);
+       
+        virtual void WriteToBlob(Safir::Dob::Typesystem::Int64 handle) const;
+        explicit @_CLASS_@(Safir::Dob::Typesystem::Int64 handle);
 
     private:
 
@@ -482,6 +553,32 @@ namespace @_NAMESPACEV_@
         @_MEMBERTYPE_@::EnumerationContainerArray m_@_MEMBER_@Member;
 @@ELSE@@
         @_MEMBERTYPE_@ContainerArray m_@_MEMBER_@Member;
+@@END_IF@@
+@@ELSIF@@ @_EXIST:MEMBERISSEQUENCE_@
+@@IF@@ (@_UNIFORM_MEMBERTYPE_@ = String) or (@_UNIFORM_MEMBERTYPE_@ = Boolean)
+        Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@SequenceContainer m_@_MEMBER_@Member;
+@@ELSIF@@ (@_UNIFORM_MEMBERTYPE_@ = Enumeration)
+        @_MEMBERTYPE_@::EnumerationSequenceContainer m_@_MEMBER_@Member;
+@@ELSE@@
+        @_MEMBERTYPE_@SequenceContainer m_@_MEMBER_@Member;
+@@END_IF@@
+@@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
+@@IF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@=Enumeration
+@@IF@@ (@_UNIFORM_MEMBERTYPE_@ = String) or (@_UNIFORM_MEMBERTYPE_@ = Boolean)
+        Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@::Enumeration, Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@Container> m_@_MEMBER_@Member;
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+        Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@::Enumeration, @_MEMBERTYPE_@::EnumerationContainer> m_@_MEMBER_@Member;
+@@ELSE@@
+        Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@::Enumeration, @_MEMBERTYPE_@Container> m_@_MEMBER_@Member;
+@@END_IF@@
+@@ELSE@@
+@@IF@@ (@_UNIFORM_MEMBERTYPE_@ = String) or (@_UNIFORM_MEMBERTYPE_@ = Boolean)
+        Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@Container> m_@_MEMBER_@Member;
+@@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
+        Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@::EnumerationContainer> m_@_MEMBER_@Member;
+@@ELSE@@
+        Safir::Dob::Typesystem::DictionaryContainer<@_MEMBERDICTIONARYTYPE_@, @_MEMBERTYPE_@Container> m_@_MEMBER_@Member;
+@@END_IF@@
 @@END_IF@@
 @@ELSE@@
 @@IF@@ (@_UNIFORM_MEMBERTYPE_@ = String) or (@_UNIFORM_MEMBERTYPE_@ = Boolean)
@@ -508,7 +605,7 @@ namespace @_NAMESPACEV_@
 #include <Safir/Dob/Typesystem/Operations.h>
 #include <Safir/Dob/Typesystem/EnumerationContainerBase.h>
 #include <Safir/Dob/Typesystem/ArrayContainer.h>
-
+#include <Safir/Dob/Typesystem/SequenceContainer.h>
 #include <Safir/Utilities/Internal/VisibilityHelpers.h>
 
 #ifdef safir_generated_@_LIBRARY_NAME_@_cpp_EXPORTS
@@ -624,6 +721,7 @@ namespace @_NAMESPACEV_@
         };
 
         typedef Safir::Dob::Typesystem::ArrayContainer<EnumerationContainer> EnumerationContainerArray;
+        typedef Safir::Dob::Typesystem::SequenceContainer<Enumeration> EnumerationSequenceContainer;
 
     };
     static inline bool operator==(const @_CLASS_@::Enumeration first, const @_CLASS_@::EnumerationContainer second)

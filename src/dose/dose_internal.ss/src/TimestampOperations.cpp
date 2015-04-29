@@ -28,7 +28,7 @@
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/Typesystem/Operations.h>
-#include <Safir/Dob/Typesystem/BlobOperations.h>
+#include <Safir/Dob/Typesystem/Internal/BlobOperations.h>
 #include <Safir/Dob/Typesystem/ObjectFactory.h>
 #include <Safir/Dob/Typesystem/Internal/InternalOperations.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
@@ -56,7 +56,7 @@ namespace Internal
             const char * memberName;
             Typesystem::TypeId memberTypeId;
             Typesystem::Int32 stringLength;
-            bool isArray;
+            Typesystem::CollectionType collectionType;
             Typesystem::Int32 arrayLength;
 
             Safir::Dob::Typesystem::Members::GetInfo(typeId,
@@ -65,7 +65,7 @@ namespace Internal
                                                      memberName,
                                                      memberTypeId,
                                                      stringLength,
-                                                     isArray,
+                                                     collectionType,
                                                      arrayLength);
 
             bool fromIsChanged = false;
@@ -124,7 +124,7 @@ namespace Internal
 
                 if (from.HasBlob())
                 {
-                    result = into.GetEntityStateCopy(from.GetBlob());
+                    result = into.GetEntityStateCopy(from.GetBlob(), false);
 
                     Dob::Typesystem::Int32 numberOfMembers = Safir::Dob::Typesystem::Members::GetNumberOfMembers(typeId);
                     Typesystem::Int64* resultTimestamps = result.GetMemberTimestamps();
@@ -186,7 +186,7 @@ namespace Internal
 
         Typesystem::BinarySerialization bin;
         Typesystem::Serialization::ToBinary(intoObject,bin);
-        DistributionData result = into.GetEntityStateCopy(&bin[0]);
+        DistributionData result = into.GetEntityStateCopy(&bin[0], false);
 
         if (from.GetTopTimestamp() > into.GetTopTimestamp())
         {
@@ -228,7 +228,7 @@ namespace Internal
         }
         else
         {
-            from = into.GetEntityStateCopy(blob);
+            from = into.GetEntityStateCopy(blob, false);
         }
         SetTimestampForChangedMembers(from,timestamp,true);
         return Merge(into,from);
@@ -251,7 +251,7 @@ namespace Internal
             return;
         }
 
-        const char * const blob = entityState.GetBlob();
+        Typesystem::Internal::BlobReadHelper reader(entityState.GetBlob());
 
         const Typesystem::MemberIndex numberOfMembers =
             Safir::Dob::Typesystem::Members::GetNumberOfMembers(typeId);
@@ -262,7 +262,7 @@ namespace Internal
             bool isChanged = false;
             for (Typesystem::ArrayIndex index = 0; index < arraySize; ++index)
             {
-                if (Typesystem::BlobOperations::IsChanged(blob,member,index))
+                if (reader.IsChanged(member, index))
                 {
                     isChanged = true;
                     break;
@@ -278,7 +278,6 @@ namespace Internal
                 entityState.GetMemberTimestamps()[member] = 0;
             }
         }
-
     }
 
 
@@ -311,7 +310,7 @@ namespace Internal
     void
     TimestampOperations::SetChangeFlags(const DistributionData& previous,
                                         const DistributionData& current,
-                                        char* const inBlob)
+                                        Typesystem::Internal::BlobWriteHelper& writer)
     {
         const Typesystem::TypeId typeId = current.GetTypeId();
         ENSURE(InjectionKindTable::Instance().IsInjectable(typeId),
@@ -334,7 +333,7 @@ namespace Internal
                 const Typesystem::Int32 arraySize = Typesystem::Members::GetArraySize(typeId,member);
                 for (Typesystem::ArrayIndex index = 0; index < arraySize; ++index)
                 {
-                    Typesystem::Internal::SetChangedHere(inBlob,member,index,true);
+                    writer.SetChangedHere(member, index, true);
                 }
             }
         }

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Contains parameters in both new nice xml and the old deprecated ugly xml</summary>
+    <name>BlobTest.MixedParameterFormats</name>
+    <baseClass>Safir.Dob.Parametrization</baseClass>
+    <parameters>        
+        <parameter>
+            <summary>old xml format</summary>
+            <name>Ugly</name>
+            <type>BlobTest.MySpecialItem</type>
+            <object>
+                <name>BlobTest.MySpecialItem</name>
+                <members>
+                    <member>
+                        <name>ChildName</name>
+                        <value>I'm so ugly, but that's okay, 'cause so are you</value>
+                    </member>
+                </members>
+            </object>
+        </parameter>
+        <parameter>
+            <summary>new xml format</summary>
+            <name>Nice</name>
+            <type>BlobTest.MySpecialItem</type>
+            <BlobTest.MySpecialItem>
+                <ChildName>I'm so happy, 'cause today I've found my friends</ChildName>
+            </BlobTest.MySpecialItem>
+        </parameter>
+    </parameters>
+</class>
+

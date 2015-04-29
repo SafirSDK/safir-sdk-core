@@ -1637,7 +1637,6 @@ Consumer 0: OnInitialInjectionsDone:
   HandlerId = DEFAULT_HANDLER
 
 --------- Test  -----------
-Caught FundamentalException in ExecuteAction: Safir.Dob.Typesystem.SoftwareViolationException
 Consumer 0: OnInjectedNewEntity:
   EntityId  = (DoseTest.InjectableEntity, 654321)
   Injection = <?xml version="1.0" encoding="utf-8"?><DoseTest.InjectableEntity><Int64Member>99999999</Int64Member></DoseTest.InjectableEntity>

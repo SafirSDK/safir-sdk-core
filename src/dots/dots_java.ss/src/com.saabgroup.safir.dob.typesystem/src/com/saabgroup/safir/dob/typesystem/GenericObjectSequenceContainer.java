@@ -1,0 +1,52 @@
+//------------
+//-*- coding: utf-8 -*-
+/******************************************************************************
+ *
+ * Copyright Consoden AB, 2009-2015 (http://safir.sourceforge.net)
+ *
+ * Created by: Joel Ottosson / joot
+ *
+ *******************************************************************************
+ *
+ * This file is part of Safir SDK Core.
+ *
+ * Safir SDK Core is free software: you can redistribute it and/or modify
+ * it under the terms of version 3 of the GNU General Public License as
+ * published by the Free Software Foundation.
+ *
+ * Safir SDK Core is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Safir SDK Core.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ ******************************************************************************/
+package com.saabgroup.safir.dob.typesystem;
+
+public class GenericObjectSequenceContainer<T extends com.saabgroup.safir.dob.typesystem.Object>
+extends SequenceContainer<T> 
+implements Cloneable {
+
+	public GenericObjectSequenceContainer() {
+		super();
+	}
+	
+	@SuppressWarnings("unchecked")
+	public GenericObjectSequenceContainer(GenericObjectSequenceContainer<T> other) {
+		super();
+		m_isChanged=other.m_isChanged;
+		for (T v : other.m_values) {
+			m_values.add((T)(v.clone()));
+		}
+	}
+	
+	/**
+     * @see com.saabgroup.safir.dob.typesystem.ValueSequenceContainer#clone()
+     */
+    @Override
+    public GenericObjectSequenceContainer<T> clone() {
+        return new GenericObjectSequenceContainer<T>(this);
+    } 
+}

@@ -289,6 +289,8 @@ FUNCTION(ADD_SAFIR_GENERATED_LIBRARY)
   #On Windows external builds autolinking is used.
   if (NOT (MSVC AND SAFIR_EXTERNAL_BUILD))
     target_link_libraries(safir_generated-${_gen_NAME}-cpp PRIVATE
+    dots_kernel
+
     PUBLIC
     dots_cpp)
   endif()

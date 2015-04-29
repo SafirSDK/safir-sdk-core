@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2014 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2004-2015 (http://safir.sourceforge.net)
 *
 * Created by: Joel Ottosson / joot
 *
@@ -113,12 +113,11 @@ typedef enum
 
 typedef enum
 {
-    NoError=0,
-    ReadOnlyProperty,           //when reading properties straight from blobs
-    UnableToDereferenceProperty, //when reading properties straight from blobs
-    IllegalValue
-} DotsC_ErrorCode;
-
+    SingleValueCollectionType,
+    ArrayCollectionType,
+    SequenceCollectionType,
+    DictionaryCollectionType
+} DotsC_CollectionType;
 
 typedef enum
 {

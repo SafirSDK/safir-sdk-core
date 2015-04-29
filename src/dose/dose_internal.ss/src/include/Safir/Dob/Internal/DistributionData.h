@@ -37,6 +37,7 @@ void intrusive_ptr_release(const char * p);
 #include <Safir/Dob/Typesystem/EntityId.h>
 #include <Safir/Dob/Typesystem/HandlerId.h>
 #include <Safir/Dob/Typesystem/ChannelId.h>
+#include <Safir/Dob/Typesystem/Internal/BlobOperations.h>
 #include <Safir/Dob/Internal/VersionNumber.h>
 
 //#define REGISTER_TIMES
@@ -233,6 +234,18 @@ namespace Internal
                          const bool explicitlyDeleted,
                          const bool sourceIsPermanentStore,
                          const char* const blob);
+
+        DistributionData(entity_state_tag_t,
+                         const ConnectionId& sender,
+                         const Typesystem::TypeId typeId,
+                         const Typesystem::HandlerId& handlerId,
+                         const LamportTimestamp& regTime,
+                         const Typesystem::InstanceId& instanceId,
+                         const LamportTimestamp& creationTime,
+                         const EntityStateKind kind,
+                         const bool explicitlyDeleted,
+                         const bool sourceIsPermanentStore,
+                         Dob::Typesystem::Internal::BlobWriteHelper& blobWriter);
 
         //Create an Action_PendingRegistrationRequest
         DistributionData(pending_registration_request_tag_t,
@@ -464,9 +477,6 @@ namespace Internal
          */
         /** @{ */
 
-        //Set change flags in blob
-        void SetChangeFlags(const bool changed);
-
         //Reads and writes creation time
         const LamportTimestamp GetCreationTime() const {return GetEntityStateHeader().m_creationTime;}
         void SetCreationTime(const LamportTimestamp& creationTime) {GetEntityStateHeader().m_creationTime = creationTime;}
@@ -503,7 +513,11 @@ namespace Internal
         // Makes a copy of the given EntityState msg. Any blob in
         // the given msg is substituted with the given blob.
         //all timestamps are initialized to 0
-        const DistributionData GetEntityStateCopy(const char * const blob) const;
+        const DistributionData GetEntityStateCopy(const char * const blob, bool resetChangeFlags) const;
+
+        //Make copy with identical header and timestamp but a new blob where all change flags
+        //are updated to given value.
+        const DistributionData SetChangeFlags(bool changed) const;
 
         char* GetBlobCopy() const;
 

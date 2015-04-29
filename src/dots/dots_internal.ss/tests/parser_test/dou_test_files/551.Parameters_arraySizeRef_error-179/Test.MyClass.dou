@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>Test.MyClass</name>
+    <baseClass>Object</baseClass>
+    <parameters>        
+        <parameter>
+            <type>Int32</int32>
+            <name>MyPar</name>
+            <dictionary keyType="String">
+                <entry>
+                    <key>Svarre</key>
+                    <value>5</value>
+                </entry>
+            </dictionary>
+        </parameter>
+    </parameters>
+    
+    <members>
+        <member>
+            <name>MyInt</name>
+            <type>Int32</type>
+        </member>                
+    </members> 
+    
+    <createRoutines>
+        <createRoutine>
+            <name>Mumbo</name>
+            <values>
+                <value>
+                    <member>MyInt</member>
+                    <parameter>
+                        <name>Test.MyClass.MyPar</name>
+                        <key>Bröli</key>
+                    </parameter>
+                </value>
+            </values>
+        </createRoutine>
+    </createRoutines>
+            
+</class>

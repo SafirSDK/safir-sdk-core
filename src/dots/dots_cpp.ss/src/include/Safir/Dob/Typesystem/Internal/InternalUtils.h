@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2006-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2006-2013 (http://safir.sourceforge.net)
 * 
 * Created by: Lars Hagström / stlrha
 *
@@ -27,7 +27,7 @@
 
 #include <string>
 #include <sstream>
-
+#include <boost/shared_ptr.hpp>
 #include <Safir/Dob/Typesystem/Defs.h>
 
 //Usage: ENSURE(foo == 10, << "foo had wrong value: " << foo);

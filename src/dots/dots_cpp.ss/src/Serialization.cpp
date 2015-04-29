@@ -48,23 +48,7 @@ namespace Typesystem
 
         BinarySerialization bin;
         ToBinary(object, bin);
-
-        int BUF_SIZE = 100000;
-        std::vector<char> xml8(BUF_SIZE);
-        Int32 resultSize;
-        DotsC_BetterBlobToXml(&xml8[0], &bin[0], BUF_SIZE, resultSize);
-        if (resultSize> BUF_SIZE)
-        {
-            BUF_SIZE = resultSize;
-            xml8.resize(BUF_SIZE);
-            DotsC_BetterBlobToXml(&xml8[0], &bin[0], BUF_SIZE, resultSize);
-            if (resultSize != BUF_SIZE)
-            {
-                throw SoftwareViolationException(L"Error in serialization buffer sizes",__WFILE__,__LINE__);
-            }
-        }
-        return Utilities::ToWstring(std::string(xml8.begin(),
-                                                xml8.begin() + resultSize - 1)); //remove null
+        return ToXml(bin);
     }
 
     const std::wstring
@@ -77,23 +61,7 @@ namespace Typesystem
 
         BinarySerialization bin;
         ToBinary(object, bin);
-
-        int BUF_SIZE = 100000;
-        std::vector<char> json8(BUF_SIZE);
-        Int32 resultSize;
-        DotsC_BlobToJson(&json8[0], &bin[0], BUF_SIZE, resultSize);
-        if (resultSize> BUF_SIZE)
-        {
-            BUF_SIZE = resultSize;
-            json8.resize(BUF_SIZE);
-            DotsC_BlobToJson(&json8[0], &bin[0], BUF_SIZE, resultSize);
-            if (resultSize != BUF_SIZE)
-            {
-                throw SoftwareViolationException(L"Error in serialization buffer sizes",__WFILE__,__LINE__);
-            }
-        }
-        return Utilities::ToWstring(std::string(json8.begin(),
-                                                json8.begin() + resultSize - 1)); //remove null
+        return ToJson(bin);
     }
 
     const std::wstring 
@@ -115,12 +83,12 @@ namespace Typesystem
         int BUF_SIZE = 100000;
         std::vector<char> xml8(BUF_SIZE);
         Int32 resultSize;
-        DotsC_BetterBlobToXml(&xml8[0], blob, BUF_SIZE, resultSize);
+        DotsC_BlobToXml(&xml8[0], blob, BUF_SIZE, resultSize);
         if (resultSize> BUF_SIZE)
         {
             BUF_SIZE = resultSize;
             xml8.resize(BUF_SIZE);
-            DotsC_BetterBlobToXml(&xml8[0], blob, BUF_SIZE, resultSize);
+            DotsC_BlobToXml(&xml8[0], blob, BUF_SIZE, resultSize);
             if (resultSize != BUF_SIZE)
             {
                 throw SoftwareViolationException(L"Error in serialization buffer sizes",__WFILE__,__LINE__);
@@ -199,12 +167,13 @@ namespace Typesystem
             throw SoftwareViolationException(L"Attempt to serialize a null pointer to binary!", __WFILE__,__LINE__);
         }
 
-        const Safir::Dob::Typesystem::Int32 blobSize = object->CalculateBlobSize();
-        binary.resize(blobSize);
-        
-        char * beginningOfUnused = 0;
-        DotsC_FormatBlob(&binary[0], blobSize, object->GetTypeId(),beginningOfUnused);
-        object->WriteToBlob(&binary[0], beginningOfUnused);
+
+        DotsC_Handle handle=DotsC_CreateBlobWriter(object->GetTypeId());
+        object->WriteToBlob(handle);
+        DotsC_Int32 size=DotsC_CalculateBlobSize(handle);
+        binary.resize(static_cast<size_t>(size));
+        DotsC_WriteBlob(handle, &binary[0]);
+        DotsC_DeleteBlobWriter(handle);
     }
 
     Dob::Typesystem::ObjectPtr 

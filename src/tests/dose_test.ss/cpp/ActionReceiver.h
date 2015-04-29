@@ -28,7 +28,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <boost/bind.hpp>
-#include <Safir/Dob/Typesystem/BlobOperations.h>
+#include <Safir/Dob/Typesystem/Internal/BlobOperations.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <DoseTest/Action.h>
 
@@ -141,7 +141,7 @@ private:
     {
         if (!error)
         {
-            const Safir::Dob::Typesystem::Int32 blobSize = Safir::Dob::Typesystem::BlobOperations::GetSize(&m_data[0]);
+            const Safir::Dob::Typesystem::Int32 blobSize = Safir::Dob::Typesystem::Internal::BlobOperations::GetSize(&m_data[0]);
             if (m_data.size() < static_cast<size_t>(blobSize))
             {
                 m_data.resize(blobSize);

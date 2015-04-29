@@ -1205,7 +1205,7 @@ namespace Sate
             entityInfo.Obj = entityRequestProxy.Request;
             entityInfo.setInstanceId(instanceId);
             entityInfo.setHandlerId(entityRequestProxy.ReceivingHandlerId);
-            entityInfo.Blobsize = Safir.Dob.Typesystem.BlobOperations.GetSize(entityRequestProxy.Blob);
+            entityInfo.Blobsize = Safir.Dob.Typesystem.Internal.BlobOperations.GetSize(entityRequestProxy.Blob);
 
             InboxPanel.Instance.AddResponse(entityInfo, "Create request");
             if (Settings.Sate.AutoCreate)
@@ -1275,7 +1275,7 @@ namespace Sate
             entityInfo.Obj = entityRequestProxy.Request;
             entityInfo.setInstanceId(entityRequestProxy.InstanceId);
             entityInfo.setHandlerId(entityRequestProxy.ReceivingHandlerId);
-            entityInfo.Blobsize = Safir.Dob.Typesystem.BlobOperations.GetSize(entityRequestProxy.Blob);
+            entityInfo.Blobsize = Safir.Dob.Typesystem.Internal.BlobOperations.GetSize(entityRequestProxy.Blob);
             InboxPanel.Instance.AddResponse(entityInfo, "Update request");
 
             if (Settings.Sate.AutoUpdate)
@@ -1339,7 +1339,7 @@ namespace Sate
             ServiceHandlerInfo serviceHandlerInfo = new ServiceHandlerInfo();
             serviceHandlerInfo.setHandlerId(serviceRequestProxy.ReceivingHandlerId);
             serviceHandlerInfo.Obj = serviceRequestProxy.Request;
-            serviceHandlerInfo.Blobsize = Safir.Dob.Typesystem.BlobOperations.GetSize(serviceRequestProxy.Blob);
+            serviceHandlerInfo.Blobsize = Safir.Dob.Typesystem.Internal.BlobOperations.GetSize(serviceRequestProxy.Blob);
 
             UpdateLiveData(serviceHandlerInfo);
 
@@ -2223,7 +2223,7 @@ namespace Sate
             entityInfo.setHandlerId(entityProxy.OwnerWithStringRepresentation);
             entityInfo.Obj = entityProxy.Entity;
 
-            entityInfo.Blobsize = Safir.Dob.Typesystem.BlobOperations.GetSize(entityProxy.Blob);
+            entityInfo.Blobsize = Safir.Dob.Typesystem.Internal.BlobOperations.GetSize(entityProxy.Blob);
 
             OutputPanel.Instance.LogEvent("- Received new entity: '" + entityProxy.EntityId.ToString()
                 + "' for handler '" + entityProxy.OwnerWithStringRepresentation.ToString() + "'"
@@ -2241,7 +2241,7 @@ namespace Sate
             entityInfo.setHandlerId(entityProxy.OwnerWithStringRepresentation);
             entityInfo.Obj = entityProxy.Entity;
 
-            entityInfo.Blobsize = Safir.Dob.Typesystem.BlobOperations.GetSize(entityProxy.Blob);
+            entityInfo.Blobsize = Safir.Dob.Typesystem.Internal.BlobOperations.GetSize(entityProxy.Blob);
 
             OutputPanel.Instance.LogEvent("- Received updated entity: '" + entityProxy.EntityId.ToString()
                + "' for handler '" + entityProxy.OwnerWithStringRepresentation.ToString() + "'"

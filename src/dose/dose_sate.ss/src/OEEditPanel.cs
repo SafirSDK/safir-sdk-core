@@ -319,9 +319,14 @@ namespace Sate
             Safir.Dob.Typesystem.MemberType memberType;
             long complexType;
             int typeSize;
-            bool isArray;
+            Safir.Dob.Typesystem.CollectionType ct;
             int arrLength;
-            string memberName = Safir.Dob.Typesystem.Members.GetInfo(typeId, member, out memberType, out complexType, out typeSize, out isArray, out arrLength);
+            string memberName = Safir.Dob.Typesystem.Members.GetInfo(typeId, member, out memberType, out complexType, out typeSize, out ct, out arrLength);
+
+            if (ct!=Safir.Dob.Typesystem.CollectionType.ArrayCollectionType)
+            {
+                arrLength = 1;
+            }
 
             switch (memberType)
             {

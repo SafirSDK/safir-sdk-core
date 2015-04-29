@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2004-2015 (http://safir.sourceforge.net)
 * 
 * Created by: Joel Ottosson / stjoot
 *
@@ -35,61 +35,6 @@ namespace Typesystem
 {
 namespace Internal
 {
-    /**
-     * Create an exact copy of a blob.
-     *
-     * Be aware that you _MUST_ call BlobOperations::Delete on the blob you received when you are done with it.
-     * otherwise memory will leak!
-     *
-     * @param blob [in] - the blob to copy.
-     * @return The copied blob.
-     */
-    DOTS_CPP_API char * CreateCopy(char const * const blob);
-
-    /**
-     * Delete a blob.
-     *
-     * Blobs created with CreateCopy must be deleted with this method method
-     *
-     * @param blob [in,out] - the blob to delete.
-     */
-    DOTS_CPP_API void Delete(char * & blob);
-
-    /**
-     * Set all changed flags in the blob.
-     *
-     * @param blob [in] - The blob to modify.
-     * @param changed [in] - The value to set the change flags to.
-     */
-    DOTS_CPP_API void SetChanged(char * const blob, const bool changed);
-
-    /**
-     * Set the change flag on a member in blob. 
-     *
-     * This operation is not recursive (hence the "Here" bit).
-     *
-     * @param blob [in] - The blob to modify.
-     * @param [in] member - The member to be set.
-     * @param [in] index - Array index in member to set. Shall be 0 if the member is not an array.
-     * @param changed [in] - The value to set the change flag to.
-     */
-    DOTS_CPP_API void SetChangedHere(char* const blob,
-                                 const Dob::Typesystem::MemberIndex member,
-                                 const Dob::Typesystem::ArrayIndex index,
-                                 const bool changed);
-
-    /**
-     * Compare two blobs and set the change flags.
-     *
-     * Change flags are set in "mine" on all members that have
-     * changed between "base" and "mine".
-     *
-     * @param base [in] - Original to compare.
-     * @param mine [in,out] - Compare to this and set change flags.
-     */
-    DOTS_CPP_API void Diff(char const * const base,
-                       char * const mine);
-
     /**
      * Generate a 64 bit hash from a string.
      */

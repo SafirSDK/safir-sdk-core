@@ -27,7 +27,7 @@
 #include <Safir/Dob/Internal/Interface.h>
 #include <Safir/Dob/Internal/Subscription.h>
 #include <Safir/Dob/Internal/LeveledLockHelper.h>
-#include <Safir/Dob/Typesystem/BlobOperations.h>
+#include <Safir/Dob/Typesystem/Internal/BlobOperations.h>
 #include <Safir/Dob/Typesystem/Serialization.h>
 #include <Safir/Dob/Typesystem/Internal/InternalOperations.h>
 #include <Safir/Dob/Typesystem/Internal/InternalUtils.h>
@@ -541,8 +541,10 @@ namespace Internal
 
         bool success;
         boost::shared_ptr<const char> refHolder (injectionState.GetReference(), &DistributionData::DropReference);
-        boost::shared_ptr<char> blobHolder(injectionState.GetBlobCopy(), Typesystem::Internal::Delete);
-        Typesystem::Internal::SetChanged(blobHolder.get(), true);
+
+        Typesystem::Internal::BlobWriteHelper writer(injectionState.GetBlob());
+        writer.SetAllChanged(true);
+        boost::shared_ptr<char> blobHolder(writer.ToBlob(), Typesystem::Internal::BlobOperations::Delete);
 
         CheckLocks();
 

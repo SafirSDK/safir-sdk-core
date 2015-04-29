@@ -1,7 +1,7 @@
 /* ****************************************************************************
 *
 * Copyright Saab AB, 2005-2013 (http://safir.sourceforge.net)
-* 
+*
 * Created by: Lars Hagström / stlrha
 *
 *******************************************************************************
@@ -67,7 +67,7 @@ namespace Safir.Dob.Typesystem
         /// <returns></returns>
         public new EnumerationContainerBase Clone()
         {
-            return (EnumerationContainerBase)((ICloneable)this).Clone(); 
+            return (EnumerationContainerBase)((ICloneable)this).Clone();
         }
 
         /// <summary>
@@ -103,7 +103,7 @@ namespace Safir.Dob.Typesystem
         /// Overrides method in ContainerBase.
         /// </summary>
         /// <returns>True if null.</returns>
-        public override bool IsNull() 
+        public override bool IsNull()
         {
             return m_bIsNull;
         }
@@ -117,11 +117,40 @@ namespace Safir.Dob.Typesystem
             m_bIsChanged = true;
         }
 
-       
-        /// <summary></summary>
+
+        /// <summary>The stored value</summary>
         protected internal int m_Value;
 
-        /// <summary></summary>
+        /// <summary>The null flag.</summary>
         protected internal bool m_bIsNull;
+    }
+
+    /// <summary>
+    /// Abstract class to allow dictionary containers to manipulate enum values.
+    /// </summary>
+    abstract public class EnumerationContainerImpl<EnumT>: EnumerationContainerBase
+        where EnumT : struct
+    {
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        public EnumerationContainerImpl() : base()
+        {
+        }
+
+        /// <summary>
+        /// Copy constructor.
+        /// </summary>
+        protected EnumerationContainerImpl(EnumerationContainerImpl<EnumT> other) :base(other)
+        {
+        }
+
+        /// <summary>
+        /// Abstract property.
+        /// </summary>
+        abstract public EnumT Val {
+            get;
+            set;
+        }
     }
 }

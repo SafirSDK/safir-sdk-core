@@ -176,26 +176,16 @@ namespace Typesystem
         /**
          * Create an Object from a blob.
          *
-         * @param blob [in] - The blob to deserialize.
+         * @param handle [in] - Handle to a blobReader to deserialize.
          */
-        explicit Object(char const * const blob);
-
-        /**
-         * Calculate the size of the blob-serialized form of this object.
-         *
-         * @return The needed size in bytes.
-         */
-        virtual Dob::Typesystem::Int32 CalculateBlobSize() const;
+        explicit Object(Safir::Dob::Typesystem::Int64 handle);
 
         /**
          * Write the object to a blob.
          *
-         * Note that the size of the blob is assumed to be correct! No checks are made!
-         *
-         * @param blob [in,out] - The blob to write to.
-         * @param beginningOfUnused [in,out] - The beginning of unused dynamic blob space.
+         * @param handle [in] - Handle to a blobWriter that is the destination of the serialized object.
          */
-        virtual void WriteToBlob(char * blob, char * & beginningOfUnused) const;
+        virtual void WriteToBlob(Safir::Dob::Typesystem::Int64 handle) const;
 
         /** @} */
     };

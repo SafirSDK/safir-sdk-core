@@ -725,10 +725,7 @@ public abstract class ConnectionBase
     {
         boolean [] success = new boolean [1];
 
-        int blobSize = message.calculateBlobSize();
-        java.nio.ByteBuffer blob = java.nio.ByteBuffer.allocateDirect(blobSize); //allocate blob
-        int beginningOfUnused = com.saabgroup.safir.dob.typesystem.InternalOperations.formatBlob(blob, blobSize, message.getTypeId());
-        beginningOfUnused = message.writeToBlob(blob, beginningOfUnused);
+        java.nio.ByteBuffer blob = com.saabgroup.safir.dob.typesystem.BlobOperations.writeToBlob(message);
 
         Interface.SendMessage(getControllerId(),
                               blob,
@@ -786,10 +783,7 @@ public abstract class ConnectionBase
         boolean [] success = new boolean [1];
         int [] requestId = new int[1];
 
-        int blobSize = request.calculateBlobSize();
-        java.nio.ByteBuffer blob = java.nio.ByteBuffer.allocateDirect(blobSize); //allocate blob
-        int beginningOfUnused = com.saabgroup.safir.dob.typesystem.InternalOperations.formatBlob(blob, blobSize, request.getTypeId());
-        beginningOfUnused = request.writeToBlob(blob, beginningOfUnused);
+        java.nio.ByteBuffer blob = com.saabgroup.safir.dob.typesystem.BlobOperations.writeToBlob(request);
 
         Interface.CreateRequest(getControllerId(),
                                 blob,
@@ -853,10 +847,7 @@ public abstract class ConnectionBase
         boolean [] success = new boolean [1];
         int [] requestId = new int[1];
 
-        int blobSize = request.calculateBlobSize();
-        java.nio.ByteBuffer blob = java.nio.ByteBuffer.allocateDirect(blobSize); //allocate blob
-        int beginningOfUnused = com.saabgroup.safir.dob.typesystem.InternalOperations.formatBlob(blob, blobSize, request.getTypeId());
-        beginningOfUnused = request.writeToBlob(blob, beginningOfUnused);
+        java.nio.ByteBuffer blob = com.saabgroup.safir.dob.typesystem.BlobOperations.writeToBlob(request);
 
         Interface.CreateRequest(getControllerId(),
                                 blob,
@@ -910,10 +901,7 @@ public abstract class ConnectionBase
         boolean [] success = new boolean [1];
         int [] requestId = new int [1];
 
-        int blobSize = request.calculateBlobSize();
-        java.nio.ByteBuffer blob = java.nio.ByteBuffer.allocateDirect(blobSize); //allocate blob
-        int beginningOfUnused = com.saabgroup.safir.dob.typesystem.InternalOperations.formatBlob(blob, blobSize, request.getTypeId());
-        beginningOfUnused = request.writeToBlob(blob, beginningOfUnused);
+        java.nio.ByteBuffer blob = com.saabgroup.safir.dob.typesystem.BlobOperations.writeToBlob(request);
 
         Interface.UpdateRequest(getControllerId(),
                                 blob,
@@ -1010,10 +998,7 @@ public abstract class ConnectionBase
         boolean [] success = new boolean [1];
         int [] requestId = new int[1];
 
-        int blobSize = request.calculateBlobSize();
-        java.nio.ByteBuffer blob = java.nio.ByteBuffer.allocateDirect(blobSize); //allocate blob
-        int beginningOfUnused = com.saabgroup.safir.dob.typesystem.InternalOperations.formatBlob(blob, blobSize, request.getTypeId());
-        beginningOfUnused = request.writeToBlob(blob, beginningOfUnused);
+        java.nio.ByteBuffer blob = com.saabgroup.safir.dob.typesystem.BlobOperations.writeToBlob(request);
 
         Interface.ServiceRequest(getControllerId(),
                                  blob,
@@ -1130,10 +1115,7 @@ public abstract class ConnectionBase
     {
         boolean [] success = new boolean [1];
 
-        int blobSize = entity.calculateBlobSize();
-        java.nio.ByteBuffer blob = java.nio.ByteBuffer.allocateDirect(blobSize); //allocate blob
-        int beginningOfUnused = com.saabgroup.safir.dob.typesystem.InternalOperations.formatBlob(blob, blobSize, entity.getTypeId());
-        beginningOfUnused = entity.writeToBlob(blob, beginningOfUnused);
+        java.nio.ByteBuffer blob = com.saabgroup.safir.dob.typesystem.BlobOperations.writeToBlob(entity);
 
         Interface.SetEntity(getControllerId(),
                             blob,

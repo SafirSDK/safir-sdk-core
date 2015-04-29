@@ -88,23 +88,15 @@ public class Parameters {
      */
     public static String getName(long typeId, int parameter)
     {
-        return Kernel.GetParameterName(typeId, parameter);
-    }
-
-    /**
-     * Get the type of a parameter.
-     *
-     * If the parameter does not exist the returned value is undefined. Use
-     * #GetIndex to get a valid ParameterIndex, which is guaranteed to exist.
-     *
-     * @param typeId [in] - TypeId of class.
-     * @param parameter [in] - Index of parameter.
-     * @return The type of the parameter.
-     */
-    public static MemberType getType(long typeId, int parameter)
-    {
-        return MemberType.values()[Kernel.GetParameterType(typeId, parameter)];
-    }
+    	int[] memberType=new int[1];
+        String[] parameterName=new String[1];    	
+    	long[] complexType=new long[1];
+    	int[] collectionType=new int[1];
+    	int[] numberOfValues=new int[1];
+    	Kernel.GetParameterInfo(typeId, parameter, memberType, parameterName, complexType, collectionType, numberOfValues);
+    	
+        return parameterName[0];
+    }    
 
     /**
      * Gets a string representation of the type of a parameter.
@@ -120,7 +112,44 @@ public class Parameters {
      */
     public static String getTypeName(long typeId, int parameter)
     {
-        return Kernel.GetParameterTypeName(typeId, parameter);
+    	int[] memberType=new int[1];
+        String[] parameterName=new String[1];    	
+    	long[] complexType=new long[1];
+    	int[] collectionType=new int[1];
+    	int[] numberOfValues=new int[1];
+    	Kernel.GetParameterInfo(typeId, parameter, memberType, parameterName, complexType, collectionType, numberOfValues);
+    	
+    	MemberType mt=MemberType.values()[memberType[0]];
+    	if (mt==MemberType.OBJECT_MEMBER_TYPE || mt==MemberType.ENUMERATION_MEMBER_TYPE)
+    	{
+            return Kernel.GetTypeName(complexType[0]);
+    	}
+    	else
+    	{
+            return Kernel.MemberTypeName(memberType[0]);
+    	}
+    }
+    
+    /**
+     * Get the type of a parameter.
+     *
+     * If the parameter does not exist the returned value is undefined. Use
+     * #GetIndex to get a valid ParameterIndex, which is guaranteed to exist.
+     *
+     * @param typeId [in] - TypeId of class.
+     * @param parameter [in] - Index of parameter.
+     * @return The type of the parameter.
+     */
+    public static MemberType getType(long typeId, int parameter)
+    {
+    	int[] memberType=new int[1];
+        String[] parameterName=new String[1];    	
+    	long[] complexType=new long[1];
+    	int[] collectionType=new int[1];
+    	int[] numberOfValues=new int[1];
+    	Kernel.GetParameterInfo(typeId, parameter, memberType, parameterName, complexType, collectionType, numberOfValues);
+    	
+    	return MemberType.values()[memberType[0]];
     }
 
     /**
@@ -135,7 +164,14 @@ public class Parameters {
      */
     public static int getArraySize(long typeId, int parameter)
     {
-        return Kernel.GetParameterArraySize(typeId, parameter);
+    	int[] memberType=new int[1];
+        String[] parameterName=new String[1];    	
+    	long[] complexType=new long[1];
+    	int[] collectionType=new int[1];
+    	int[] numberOfValues=new int[1];
+    	Kernel.GetParameterInfo(typeId, parameter, memberType, parameterName, complexType, collectionType, numberOfValues);
+    	
+    	return numberOfValues[0];
     }
 
 
@@ -169,7 +205,7 @@ public class Parameters {
     public static int getEnumeration(long typeId, int parameter, int index)
     {
         int val[] = new int[1];
-        Kernel.GetInt32Parameter(typeId, parameter, index, val);
+        Kernel.GetEnumerationParameter(typeId, parameter, index, BlobOperations.VALUE_MODE, val);
         return val[0];
     }
 
@@ -184,7 +220,7 @@ public class Parameters {
     public static int getInt32(long typeId, int parameter, int index)
     {
         int val [] = new int [1];
-        Kernel.GetInt32Parameter(typeId, parameter, index, val);
+        Kernel.GetInt32Parameter(typeId, parameter, index, BlobOperations.VALUE_MODE, val);
         return val[0];
     }
 
@@ -199,7 +235,7 @@ public class Parameters {
     public static long getInt64(long typeId, int parameter, int index)
     {
         long val [] = new long [1];
-        Kernel.GetInt64Parameter(typeId, parameter, index, val);
+        Kernel.GetInt64Parameter(typeId, parameter, index, BlobOperations.VALUE_MODE, val);
         return val[0];
     }
 
@@ -244,7 +280,7 @@ public class Parameters {
     public static String getString(long typeId, int parameter, int index)
     {
         String val [] = new String [1];
-        Kernel.GetStringParameter(typeId, parameter, index, val);
+        Kernel.GetStringParameter(typeId, parameter, index, BlobOperations.VALUE_MODE, val);
         return val[0];
     }
 
@@ -259,7 +295,7 @@ public class Parameters {
     public static long getTypeId(long typeId, int parameter, int index)
     {
         long val [] = new long [1];
-        Kernel.GetInt64Parameter(typeId, parameter, index, val);
+        Kernel.GetTypeIdParameter(typeId, parameter, index, BlobOperations.VALUE_MODE, val);
         return val[0];
     }
 
@@ -276,8 +312,8 @@ public class Parameters {
         long hashVal[] = new long[1];
         String strVal[] = new String[1];
 
-        Kernel.GetHashedIdParameter(typeId, parameter, index, hashVal, strVal);
-        if (strVal[0] != null) {
+        Kernel.GetHashedIdParameter(typeId, parameter, index, BlobOperations.VALUE_MODE, hashVal, strVal);
+        if (!isNullOrEmpty(strVal[0])) {
             return new InstanceId(hashVal[0], strVal[0]);
         }
         else {
@@ -298,8 +334,8 @@ public class Parameters {
         long typeIdOut[] = new long [1];
         long instanceId[] = new long [1];
         String strVal[] = new String[1];
-        Kernel.GetEntityIdParameter(typeId, parameter, index, typeIdOut, instanceId , strVal);
-        if (strVal[0] != null) {
+        Kernel.GetEntityIdParameter(typeId, parameter, index, BlobOperations.VALUE_MODE, typeIdOut, instanceId , strVal);
+        if (!isNullOrEmpty(strVal[0])) {
             return new EntityId(typeIdOut[0], new InstanceId(instanceId[0], strVal[0]));
         }
         else {
@@ -320,8 +356,8 @@ public class Parameters {
         long hashVal[] = new long[1];
         String strVal[] = new String[1];
 
-        Kernel.GetHashedIdParameter(typeId, parameter, index, hashVal, strVal);
-        if (strVal[0] != null) {
+        Kernel.GetHashedIdParameter(typeId, parameter, index, BlobOperations.VALUE_MODE, hashVal, strVal);
+        if (!isNullOrEmpty(strVal[0])) {
             return new ChannelId(hashVal[0], strVal[0]);
         }
         else {
@@ -342,8 +378,8 @@ public class Parameters {
         long hashVal[] = new long[1];
         String strVal[] = new String[1];
 
-        Kernel.GetHashedIdParameter(typeId, parameter, index, hashVal, strVal);
-        if (strVal[0] != null) {
+        Kernel.GetHashedIdParameter(typeId, parameter, index, BlobOperations.VALUE_MODE, hashVal, strVal);
+        if (!isNullOrEmpty(strVal[0])) {
             return new HandlerId(hashVal[0], strVal[0]);
         }
         else {
@@ -366,7 +402,9 @@ public class Parameters {
     {
         java.nio.ByteBuffer blob [] = new java.nio.ByteBuffer[1];
         Kernel.GetObjectParameter(typeId, parameter, index, blob);
-        return ObjectFactory.getInstance().createObject(blob[0]);
+        com.saabgroup.safir.dob.typesystem.Object obj=ObjectFactory.getInstance().createObject(blob[0]);
+        obj.setChanged(false);
+        return obj;
     }
 
     /**
@@ -387,5 +425,37 @@ public class Parameters {
         val[0].clear(); //reset position
         val[0].get(result);
         return result;
+    }
+    
+    public static int dictionaryKeyToIndex(long typeId, int parameter, int key) {
+        return Kernel.DictionaryInt32KeyToIndex(typeId, parameter, key);
+    }
+    
+    public static int dictionaryKeyToIndex(long typeId, int parameter, long key) {
+        return Kernel.DictionaryInt64KeyToIndex(typeId, parameter, key);
+    }
+    
+    public static int dictionaryKeyToIndex(long typeId, int parameter, String key) {
+        return Kernel.DictionaryStringKeyToIndex(typeId, parameter, key);
+    }
+    
+    public static int dictionaryKeyToIndex(long typeId, int parameter, EntityId key) {
+        return Kernel.DictionaryEntityIdKeyToIndex(typeId, parameter, key.getTypeId(), key.getInstanceId().getRawValue());
+    }
+    
+    public static int dictionaryKeyToIndex(long typeId, int parameter, InstanceId key) {
+        return Kernel.DictionaryInt64KeyToIndex(typeId, parameter, key.getRawValue());
+    }
+    
+    public static int dictionaryKeyToIndex(long typeId, int parameter, HandlerId key) {
+        return Kernel.DictionaryInt64KeyToIndex(typeId, parameter, key.getRawValue());
+    }
+    
+    public static int dictionaryKeyToIndex(long typeId, int parameter, ChannelId key) {
+        return Kernel.DictionaryInt64KeyToIndex(typeId, parameter, key.getRawValue());
+    }
+
+    private static boolean isNullOrEmpty(String str) {
+        return str == null || str.isEmpty();
     }
 }

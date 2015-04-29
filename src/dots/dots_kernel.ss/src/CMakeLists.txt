@@ -4,7 +4,7 @@ SET(CMAKE_DEBUG_POSTFIX "")
 
 FILE(GLOB sources *.cpp)
 
-ADD_LIBRARY(dots_kernel SHARED ${sources} include/Safir/Dob/Typesystem/Internal/Kernel.h)
+ADD_LIBRARY(dots_kernel SHARED ${sources})
 
 #Make our INTERNAL headers available to other parts of Core.
 target_include_directories(dots_kernel PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)

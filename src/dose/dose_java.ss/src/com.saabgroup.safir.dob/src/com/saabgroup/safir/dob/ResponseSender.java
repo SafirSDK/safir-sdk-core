@@ -73,10 +73,7 @@ public class ResponseSender
 
         boolean [] success = new boolean [1];
 
-        int blobSize = response.calculateBlobSize();
-        java.nio.ByteBuffer blob = java.nio.ByteBuffer.allocateDirect(blobSize); //allocate blob
-        int beginningOfUnused = com.saabgroup.safir.dob.typesystem.InternalOperations.formatBlob(blob, blobSize, response.getTypeId());
-        beginningOfUnused = response.writeToBlob(blob, beginningOfUnused);
+        java.nio.ByteBuffer blob = com.saabgroup.safir.dob.typesystem.BlobOperations.writeToBlob(response);
 
         Interface.SendResponse(m_ctrl,
                                blob,

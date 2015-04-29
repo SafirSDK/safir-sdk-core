@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2004-2015 (http://safir.sourceforge.net)
 *
 * Created by: Joel Ottosson / joot
 *
@@ -170,19 +170,22 @@ namespace Internal
         :m_name(pd->GetName(), shm->get_segment_manager())
         ,m_qualifiedName(pd->GetQualifiedName(), shm->get_segment_manager())
         ,m_memberType(pd->GetMemberType())
-        ,m_isArray(pd->IsArray())
+        ,m_collectionType(pd->GetCollectionType())
+        ,m_keyType(pd->GetKeyType())
         ,m_hidden(pd->IsHidden())
         ,m_typeId(pd->GetTypeId())
+        ,m_keyTypeId(pd->GetKeyTypeId())
         ,m_values(shm->get_segment_manager())
+        ,m_unifiedKeyToIndex(std::less<const DotsC_Int64>(), shm->get_segment_manager())
     {
         switch(m_memberType)
         {
         case BooleanMemberType:
         {
-            for (int i=0; i<pd->GetArraySize(); ++i)
+            for (int i=0; i<pd->GetNumberOfValues(); ++i)
             {
                 ValueDefinitionShm vd(shm);
-                vd.boolVal=pd->GetBoolValue(i);
+                vd.val.boolean=pd->GetBoolValue(i);
                 m_values.push_back(vd);
             }
         }
@@ -190,20 +193,20 @@ namespace Internal
 
         case Int32MemberType:
         {
-            for (int i=0; i<pd->GetArraySize(); ++i)
+            for (int i=0; i<pd->GetNumberOfValues(); ++i)
             {
                 ValueDefinitionShm vd(shm);
-                vd.int32Val=pd->GetInt32Value(i);
+                vd.val.int32=pd->GetInt32Value(i);
                 m_values.push_back(vd);
             }
         }
             break;
         case Int64MemberType:
         {
-            for (int i=0; i<pd->GetArraySize(); ++i)
+            for (int i=0; i<pd->GetNumberOfValues(); ++i)
             {
                 ValueDefinitionShm vd(shm);
-                vd.int64Val=pd->GetInt64Value(i);
+                vd.val.int64=pd->GetInt64Value(i);
                 m_values.push_back(vd);
             }
         }
@@ -211,7 +214,7 @@ namespace Internal
 
         case EntityIdMemberType:
         {
-            for (int i=0; i<pd->GetArraySize(); ++i)
+            for (int i=0; i<pd->GetNumberOfValues(); ++i)
             {
                 std::pair<boost::int64_t, const char*> hashed=pd->GetHashedValue(i);
                 if (hashed.second==NULL)
@@ -219,18 +222,18 @@ namespace Internal
                     hashed.second="";
                 }
                 ValueDefinitionShm vd(hashed.second, shm);
-                vd.hashedVal=hashed.first;
-                vd.int64Val=pd->GetInt64Value(i);
+                vd.val.hash=hashed.first;
+                vd.val.int64=pd->GetInt64Value(i);
                 m_values.push_back(vd);
             }
         }
             break;
         case TypeIdMemberType:
         {
-            for (int i=0; i<pd->GetArraySize(); ++i)
+            for (int i=0; i<pd->GetNumberOfValues(); ++i)
             {
                 ValueDefinitionShm vd(shm);
-                vd.int64Val=pd->GetInt64Value(i);
+                vd.val.int64=pd->GetInt64Value(i);
                 m_values.push_back(vd);
             }
         }
@@ -239,7 +242,7 @@ namespace Internal
         case ChannelIdMemberType:
         case HandlerIdMemberType:
         {
-            for (int i=0; i<pd->GetArraySize(); ++i)
+            for (int i=0; i<pd->GetNumberOfValues(); ++i)
             {
                 std::pair<boost::int64_t, const char*> hashed=pd->GetHashedValue(i);
                 if (hashed.second==NULL)
@@ -247,7 +250,7 @@ namespace Internal
                     hashed.second="";
                 }
                 ValueDefinitionShm vd(hashed.second, shm);
-                vd.hashedVal=hashed.first;
+                vd.val.hash=hashed.first;
                 m_values.push_back(vd);
             }
         }
@@ -255,7 +258,7 @@ namespace Internal
 
         case StringMemberType:
         {
-            for (int i=0; i<pd->GetArraySize(); ++i)
+            for (int i=0; i<pd->GetNumberOfValues(); ++i)
             {
                 const char* str=pd->GetStringValue(i);
                 ValueDefinitionShm vd(str, shm);
@@ -266,7 +269,7 @@ namespace Internal
 
         case ObjectMemberType:
         {
-            for (int i=0; i<pd->GetArraySize(); ++i)
+            for (int i=0; i<pd->GetNumberOfValues(); ++i)
             {
                 std::pair<const char*, size_t> bin=pd->GetObjectValue(i);
                 ValueDefinitionShm vd(bin.first, bin.second, shm);
@@ -277,10 +280,10 @@ namespace Internal
 
         case EnumerationMemberType:
         {
-            for (int i=0; i<pd->GetArraySize(); ++i)
+            for (int i=0; i<pd->GetNumberOfValues(); ++i)
             {
                 ValueDefinitionShm vd(shm);
-                vd.int32Val=pd->GetInt32Value(i);
+                vd.val.int32=pd->GetInt32Value(i);
                 m_values.push_back(vd);
             }
         }
@@ -288,7 +291,7 @@ namespace Internal
 
         case BinaryMemberType:
         {
-            for (int i=0; i<pd->GetArraySize(); ++i)
+            for (int i=0; i<pd->GetNumberOfValues(); ++i)
             {
                 std::pair<const char*, size_t> bin=pd->GetBinaryValue(i);
                 ValueDefinitionShm vd(bin.first, bin.second, shm);
@@ -318,10 +321,10 @@ namespace Internal
         case Volt32MemberType:
         case Watt32MemberType:
         {
-            for (int i=0; i<pd->GetArraySize(); ++i)
+            for (int i=0; i<pd->GetNumberOfValues(); ++i)
             {
                 ValueDefinitionShm vd(shm);
-                vd.float32Val=pd->GetFloat32Value(i);
+                vd.val.float32=pd->GetFloat32Value(i);
                 m_values.push_back(vd);
             }
         }
@@ -348,14 +351,109 @@ namespace Internal
         case Volt64MemberType:
         case Watt64MemberType:
         {
-            for (int i=0; i<pd->GetArraySize(); ++i)
+            for (int i=0; i<pd->GetNumberOfValues(); ++i)
             {
                 ValueDefinitionShm vd(shm);
-                vd.float64Val=pd->GetFloat64Value(i);
+                vd.val.float64=pd->GetFloat64Value(i);
                 m_values.push_back(vd);
             }
         }
             break;
+        }
+
+        if (m_collectionType==DictionaryCollectionType)
+        {
+            switch (m_keyType)
+            {
+            case Int32MemberType:
+            {
+                for (int i=0; i<pd->GetNumberOfValues(); ++i)
+                {
+                    ValueDefinitionShm& vd=m_values[static_cast<size_t>(i)];
+                    vd.key.int32=pd->GetInt32Key(i);
+                }
+            }
+                break;
+            case Int64MemberType:
+            {
+                for (int i=0; i<pd->GetNumberOfValues(); ++i)
+                {
+                    ValueDefinitionShm& vd=m_values[static_cast<size_t>(i)];
+                    vd.key.int64=pd->GetInt64Key(i);
+                }
+            }
+                break;
+
+            case EnumerationMemberType:
+            {
+                for (int i=0; i<pd->GetNumberOfValues(); ++i)
+                {
+                    ValueDefinitionShm& vd=m_values[static_cast<size_t>(i)];
+                    vd.key.int32=pd->GetInt32Key(i);
+                }
+            }
+                break;
+
+            case EntityIdMemberType:
+            {
+                for (int i=0; i<pd->GetNumberOfValues(); ++i)
+                {
+                    std::pair<boost::int64_t, const char*> hashed=pd->GetHashedKey(i);
+                    if (hashed.second==NULL)
+                    {
+                        hashed.second="";
+                    }
+                    ValueDefinitionShm& vd=m_values[static_cast<size_t>(i)];
+                    vd.stringKey=StringShm(hashed.second, shm->get_segment_manager());
+                    vd.key.hash=hashed.first;
+                    vd.key.int64=pd->GetInt64Key(i);
+                }
+            }
+                break;
+            case TypeIdMemberType:
+            {
+                for (int i=0; i<pd->GetNumberOfValues(); ++i)
+                {
+                    ValueDefinitionShm& vd=m_values[static_cast<size_t>(i)];
+                    vd.key.int64=pd->GetInt64Key(i);
+                }
+            }
+                break;
+            case InstanceIdMemberType:
+            case ChannelIdMemberType:
+            case HandlerIdMemberType:
+            {
+                for (int i=0; i<pd->GetNumberOfValues(); ++i)
+                {
+                    std::pair<boost::int64_t, const char*> hashed=pd->GetHashedKey(i);
+                    if (hashed.second==NULL)
+                    {
+                        hashed.second="";
+                    }
+                    ValueDefinitionShm& vd=m_values[static_cast<size_t>(i)];
+                    vd.stringKey=StringShm(hashed.second, shm->get_segment_manager());
+                    vd.key.hash=hashed.first;
+                }
+            }
+                break;
+
+            case StringMemberType:
+            {
+                for (int i=0; i<pd->GetNumberOfValues(); ++i)
+                {
+                    const char* str=pd->GetStringKey(i);
+                    ValueDefinitionShm& vd=m_values[static_cast<size_t>(i)];
+                    vd.stringKey=StringShm(str, shm->get_segment_manager());
+                }
+            }
+                break;
+
+            default:
+                break;
+            }
+
+            //copy unified key to index map
+            m_unifiedKeyToIndex.insert(pd->UnifiedKeyToIndexMap().begin(), pd->UnifiedKeyToIndexMap().end());
         }
     }
 }

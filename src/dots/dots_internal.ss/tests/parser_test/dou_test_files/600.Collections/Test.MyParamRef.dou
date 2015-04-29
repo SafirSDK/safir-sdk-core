@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>Test.MyParamRef</name>
+    <baseClass>Object</baseClass>
+    <parameters>
+        <parameter>
+            <name>IntArrayParam</name>
+            <type>Int32</type>
+            <array>
+                <value>1</value>
+                <value>2</value>
+                <value>3</value>
+                <valueRef>
+                    <name>Test.MyParam.DictionaryParam1</name>
+                    <key>Svarre</key>
+                </valueRef>                
+                <value>4</value>
+            </array>            
+        </parameter>
+
+        <parameter>
+            <name>IntRefParam</name>
+            <type>Int32</type>
+            <valueRef>
+                <name>Test.MyParam.DictionaryParam1</name>
+                <key>Kalle</key>
+            </valueRef>
+        </parameter>
+
+        <parameter>
+            <name>ArrayParam</name>
+            <type>Int32</type>
+            <array>
+                <value>1</value>
+                <value>2</value>
+                <valueRef>
+                    <name>Test.MyParamRef.IntArrayParam</name>
+                    <index>2</index>
+                </valueRef>           
+                <value>4</value>
+            </array>
+        </parameter>
+
+        <parameter>
+            <name>IntRefIntoArray</name>
+            <type>Int32</type>
+            <valueRef>
+                <name>Test.MyParamRef.ArrayParam</name>
+                <index>2</index>
+            </valueRef>
+        </parameter>
+
+        <parameter>
+            <name>ArrayParamEntityId</name>
+            <type>EntityId</type>
+            <array>
+                <entityId>
+                    <name>Safir.Dob.Entity</name>
+                    <instanceId>first</instanceId>
+                </entityId>
+                <entityId>
+                    <name>ParserTest.MyEntity</name>
+                    <instanceId>2</instanceId>
+                </entityId>
+            </array>
+        </parameter>
+
+        <parameter>
+            <name>ArrayParamObj</name>
+            <type>ParserTest.MyEntity</type>
+            <array>
+                <ParserTest.MyEntity>
+                    <MySequence>
+                        <ParserTest.MyEntity>
+                            <MyColorEnum>Black</MyColorEnum>
+                            <MyInt>1</MyInt>
+                        </ParserTest.MyEntity>
+                        <ParserTest.MyEntity>
+                            <MyColorEnum>White</MyColorEnum>
+                            <MyInt>2</MyInt>
+                        </ParserTest.MyEntity>
+                    </MySequence>
+                </ParserTest.MyEntity>
+                <ParserTest.MyEntity>
+                    <MyColorEnum>Grey</MyColorEnum>
+                    <MyInt>123</MyInt>
+                </ParserTest.MyEntity>
+            </array>
+        </parameter>
+
+
+        <parameter>
+            <name>DictionaryParam1</name>
+            <type>Int32</type>
+            <dictionary keyType="String">
+                <entry>
+                    <key>Kalle</key>
+                    <value>1</value>
+                </entry>
+                <entry>
+                    <key>Pelle</key>
+                    <value>12</value>
+                </entry>
+                <entry>
+                    <key>Svarre</key>
+                    <value>5</value>
+                </entry>
+            </dictionary>
+        </parameter>
+        
+        <parameter>
+            <name>DictionaryParam2</name>
+            <type>InstanceId</type>
+            <dictionary keyType="InstanceId">
+                <entry>
+                    <key>first</key>
+                    <value>MyInstance</value>
+                </entry>
+                <entry>
+                    <key>2</key>
+                    <value>AnotherInstance</value>
+                </entry>
+                <entry>
+                    <key>third</key>
+                    <value>12345</value>
+                </entry>
+            </dictionary>
+        </parameter>
+        
+        <parameter>
+            <name>DictionaryParam3</name>
+            <type>EntityId</type>
+            <dictionary keyType="ParserTest.MyColorEnum">
+                <entry>
+                    <key>White</key>
+                    <entityId>
+                        <name>ParserTest.MyEntity</name>
+                        <instanceId>2</instanceId>
+                    </entityId>
+                </entry>
+                <entry>
+                    <key>Grey</key>
+                    <entityId>
+                        <name>ParserTest.MyEntity</name>
+                        <instanceId>2</instanceId>
+                    </entityId>
+                </entry>
+                <entry>
+                    <key>Black</key>
+                    <entityId>
+                        <name>Safir.Dob.Entity</name>
+                        <instanceId>lastInstance</instanceId>
+                    </entityId>
+                </entry>
+            </dictionary>
+        </parameter>
+  
+       <parameter>
+            <name>DictionaryParam4</name>
+            <type>ParserTest.MyEntity</type>
+            <dictionary keyType="EntityId">
+                <entry>
+                    <key>
+                        <name>ParserTest.MyEntity</name>
+                        <instanceId>2</instanceId>
+                    </key>
+                    <ParserTest.MyEntity>
+                        <MyColorEnum>Grey</MyColorEnum>
+                        <MyInt>123</MyInt>
+                    </ParserTest.MyEntity>
+                </entry>
+                <entry>
+                    <key>
+                        <name>Safir.Dob.Entity</name>
+                        <instanceId>lastInstance</instanceId>
+                    </key>
+                    <ParserTest.MyEntity>
+                        <MySequence>
+                            <ParserTest.MyEntity>
+                                <MyColorEnum>Black</MyColorEnum>
+                                <MyInt>1</MyInt>
+                            </ParserTest.MyEntity>
+                            <ParserTest.MyEntity>
+                                <MyColorEnum>White</MyColorEnum>
+                                <MyInt>2</MyInt>
+                            </ParserTest.MyEntity>
+                        </MySequence>
+                    </ParserTest.MyEntity>
+                </entry>
+            </dictionary>
+        </parameter>
+     
+    </parameters>
+
+</class>

@@ -13,5 +13,45 @@
             <type>String</type>
             <maxLength>20</maxLength>
         </member>
+        <member>
+	        <name>SeqInt32</name>
+	        <type>Int32</type>
+	        <sequence/>
+	    </member>
+	    <member>
+	        <name>SeqInt64</name>
+	        <type>Int64</type>
+	        <sequence/>
+	    </member>
+	    <member>
+	        <name>SeqBool</name>
+	        <type>Boolean</type>
+	        <sequence/>
+	    </member>
+	    <member>
+	        <name>DictInt32Int32</name>
+	        <type>Int32</type>
+	        <dictionary keyType="Int32"/>
+	    </member>
+	    <member>
+	        <name>DictInt32Bool</name>
+	        <type>Boolean</type>
+	        <dictionary keyType="Int32"/>
+	    </member>
+	    <member>
+	        <name>DictStringInt32</name>
+	        <type>Int32</type>
+	        <dictionary keyType="String"/>
+	    </member>
+	    <member>
+	        <name>DictStringString</name>
+	        <type>String</type>
+	        <dictionary keyType="String"/>
+	    </member>
+	    <member>
+	        <name>DictAdvanced</name>
+	        <type>BlobTest.MyCollections</type>
+	        <dictionary keyType="BlobTest.MyColorEnum"/>
+	    </member>
     </members>
 </class>

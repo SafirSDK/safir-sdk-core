@@ -101,8 +101,6 @@ namespace Typesystem
             }
         }
     protected:
-        friend class BlobOperations;
-
          /**
          * Copy assignment operator.
          *
@@ -122,6 +120,8 @@ namespace Typesystem
          * This is the ordinal value. Needs to be cast to the correct type in the derived classes.
          */
         EnumerationValue m_Value;
+
+        friend class Safir::Dob::Typesystem::Internal::BlobOperations;
     };
 
 

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <summary>Contains the definition of a distribution channel name.</summary>
+    <name>ParserTest.MyEntity</name>
+    <baseClass>Object</baseClass>
+    <members>
+        <member>
+            <name>MyDictionary</name>
+            <type>Int32</type>
+            <dictionary keyType="Binary"/>
+        </member>
+    </members>
+</class>

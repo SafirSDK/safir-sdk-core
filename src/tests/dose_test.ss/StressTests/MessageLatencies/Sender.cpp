@@ -74,7 +74,7 @@ Sender::Sender():
 
     m_message->SequenceNumber().SetVal(-1);
 
-    std::wcout << "Using a message of size " << m_message->CalculateBlobSize() << " bytes" << std::endl;
+    std::wcout << "Using a message of size " << CalculateBlobSize(m_message) << " bytes" << std::endl;
 }
 
 void Sender::SendSome()

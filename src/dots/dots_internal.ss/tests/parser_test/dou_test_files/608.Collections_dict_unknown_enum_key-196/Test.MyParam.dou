@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class xmlns="urn:safir-dots-unit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>Test.MyParam</name>
+    <baseClass>Object</baseClass>
+    <parameters>
+       
+        <parameter>
+            <name>DictionaryParam1</name>
+            <type>Int32</type>
+            <dictionary keyType="ParserTest.MyColorEnum">
+                <entry>
+                    <key>White</key>
+                    <value>1</value>
+                </entry>
+                <entry>
+                    <key>Black</key>
+                    <value>12</value>
+                </entry>
+                <entry>
+                    <key>Svarre</key>
+                    <value>5</value>
+                </entry>
+            </dictionary>
+        </parameter>
+     
+    </parameters>
+
+</class>

@@ -59,11 +59,11 @@ public class MemberInfo
     public int getStringLength() {return m_stringLength;}
 
     /**
-     * True if member is an array. Not applicable if type id is a property.
+     * Get the collection type of the member.
      *
-     * @return Is the member an array.
+     * @return Collection type.
      */
-    public boolean getIsArray() {return m_isArray;};
+    public CollectionType getCollectionType() {return m_collectionType;};
 
     /**
      * Maximum capacity of array if the member is an array (1 if not an array).
@@ -77,14 +77,14 @@ public class MemberInfo
                String memberName,
                long memberTypeId,
                int stringLength,
-               boolean isArray,
+               CollectionType collectionType,
                int arrayLength)
     {
         m_memberType = memberType;
         m_memberName = memberName;
         m_memberTypeId = memberTypeId;
         m_stringLength = stringLength;
-        m_isArray = isArray;
+        m_collectionType = collectionType;
         m_arrayLength = arrayLength;
     }
 
@@ -92,7 +92,7 @@ public class MemberInfo
     private String m_memberName;
     private long m_memberTypeId;
     private int m_stringLength;
-    private boolean m_isArray;
+    private CollectionType m_collectionType;
     private int m_arrayLength;
 }
 

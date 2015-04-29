@@ -105,7 +105,7 @@ namespace Dob
          * to a database or pass it over a C-interface to a library or plugin.
          *
          * As an example, if you want to copy the bytes into a std::vector<char> you could do it
-         * like this "v = std::vector<char>(blob,blob+Safir::Dob::Typesystem::BlobOperations.GetSize())"
+         * like this "v = std::vector<char>(blob,blob+Safir::Dob::Typesystem::Internal::BlobOperations.GetSize())"
          *
          * @return Binary blob of the received message.
          */

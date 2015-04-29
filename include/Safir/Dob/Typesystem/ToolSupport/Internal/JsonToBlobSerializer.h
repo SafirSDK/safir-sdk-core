@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2004-2015 (http://safir.sourceforge.net)
 *
 * Created by: Joel Ottosson / joot
 *
@@ -39,7 +39,7 @@
 #include <boost/iostreams/device/array.hpp>
 #include <Safir/Utilities/Internal/Id.h>
 #include <Safir/Dob/Typesystem/ToolSupport/TypeRepository.h>
-#include <Safir/Dob/Typesystem/ToolSupport/Internal/BlobLayoutImpl.h>
+#include <Safir/Dob/Typesystem/ToolSupport/BlobWriter.h>
 #include <Safir/Dob/Typesystem/ToolSupport/Internal/SerializationUtils.h>
 
 namespace Safir
@@ -63,7 +63,6 @@ namespace Internal
 
         JsonToBlobSerializer(const RepositoryType* repository)
             :m_repository(repository)
-            ,m_blobLayout(repository)
         {
         }
 
@@ -98,12 +97,7 @@ namespace Internal
                 throw ParseError("JsonToBinary serialization error", "Json does not contain a known type. Typename: "+typeName, "", 144);
             }
 
-            char* beginningOfUnused=NULL;
-
-            size_t blobInitSize=std::max(size_t(1000), static_cast<size_t>(2*cd->InitialSize()));
-            blob.reserve(blobInitSize); //Note: maybe JsonSize/2 would be enogh in almost all cases
-            blob.resize(cd->InitialSize(), 0);
-            m_blobLayout.FormatBlob(&blob[0], static_cast<Size>(blob.size()), typeId, beginningOfUnused);
+            BlobWriter<RepositoryType> writer(m_repository, typeId);
 
             for (boost::property_tree::ptree::const_iterator memIt=members.begin(); memIt!=members.end(); ++memIt)
             {
@@ -122,12 +116,15 @@ namespace Internal
                 }
 
                 const MemberDescriptionType* md=cd->GetMember(memIx);
-                if (!md->IsArray())
+
+                switch (md->GetCollectionType())
+                {
+                case SingleValueCollectionType:
                 {
                     //non-array, then the inner propertyTree contains the content, i.e <myInt>123</myInt>
                     try
                     {
-                        SetMember(md, memIx, 0, memIt->second, blob, beginningOfUnused);
+                        SetMember(md, memIx, 0, memIt->second, 0, writer);
                     }
                     catch (const boost::property_tree::ptree_error&)
                     {
@@ -136,9 +133,11 @@ namespace Internal
                         throw ParseError("JsonToBinary serialization error", os.str(), "", 146);
                     }
                 }
-                else
+                    break;
+
+                case ArrayCollectionType:
                 {
-                    DotsC_ArrayIndex arrayIndex=0;
+                    DotsC_Int32 arrayIndex=0;
                     for (boost::property_tree::ptree::const_iterator arrIt=memIt->second.begin(); arrIt!=memIt->second.end(); ++arrIt)
                     {
                         if (md->GetArraySize()<=arrayIndex)
@@ -150,7 +149,7 @@ namespace Internal
 
                         try
                         {
-                            SetMember(md, memIx, arrayIndex++, arrIt->second, blob, beginningOfUnused);
+                            SetMember(md, memIx, arrayIndex++, arrIt->second, 0, writer);
                         }
                         catch (const boost::property_tree::ptree_error&)
                         {
@@ -160,24 +159,142 @@ namespace Internal
                         }
                     }
                 }
+                    break;
+
+                case SequenceCollectionType:
+                {
+                    DotsC_Int32 valueIndex=0;
+                    for (boost::property_tree::ptree::const_iterator seqIt=memIt->second.begin(); seqIt!=memIt->second.end(); ++seqIt)
+                    {
+                        try
+                        {
+                            SetMember(md, memIx, 0, seqIt->second, 0, writer);
+                        }
+                        catch (const boost::property_tree::ptree_error&)
+                        {
+                            std::ostringstream os;
+                            os<<"Failed to serialize sequence member '"<<cd->GetName()<<"."<<md->GetName()<<"' with index="<<valueIndex<<" from Json to binary. Type is incorrect.";
+                            throw ParseError("JsonToBinary serialization error", os.str(), "", 195);
+                        }
+                        ++valueIndex;
+                    }
+                }
+                    break;
+
+                case DictionaryCollectionType:
+                {
+                    DotsC_Int32 valueIndex=0;
+                    for (boost::property_tree::ptree::const_iterator entryIt=memIt->second.begin(); entryIt!=memIt->second.end(); ++entryIt)
+                    {
+                        try
+                        {
+                            const boost::property_tree::ptree& keyTree=entryIt->second.get_child("key");
+                            const boost::property_tree::ptree& valTree=entryIt->second.get_child("value");
+                            SetMember(md, memIx, 0, valTree, keyTree, writer);
+                        }
+                        catch (const boost::property_tree::ptree_error&)
+                        {
+                            std::ostringstream os;
+                            os<<"Failed to serialize dictionary member '"<<cd->GetName()<<"."<<md->GetName()<<"' with index="<<valueIndex<<" from Json to binary. Type is incorrect.";
+                            throw ParseError("JsonToBinary serialization error", os.str(), "", 209);
+                        }
+                        ++valueIndex;
+                    }
+
+                }
+                    break;
+                }
             }
+
+            DotsC_Int32 blobSize=writer.CalculateBlobSize();
+            blob.resize(static_cast<size_t>(blobSize));
+            writer.CopyRawBlob(&blob[0]);
         }
 
     private:
         const RepositoryType* m_repository;
-        const BlobLayoutImpl<RepositoryType> m_blobLayout;
 
         void SetMember(const MemberDescriptionType* md,
                        DotsC_MemberIndex memIx,
-                       DotsC_ArrayIndex arrIx,
+                       DotsC_Int32 arrIx,
                        const boost::property_tree::ptree& memberContent,
-                       std::vector<char>& blob,
-                       char* &beginningOfUnused) const
+                       const boost::property_tree::ptree& keyContent,
+                       BlobWriter<RepositoryType>& writer) const
         {
+            switch(md->GetKeyType())
+            {
+            case Int32MemberType:
+            {
+                SetMember(md, memIx, arrIx, memberContent, boost::lexical_cast<DotsC_Int32>(keyContent.data()), writer);
+            }
+                break;
+
+            case Int64MemberType:
+            {
+                SetMember(md, memIx, arrIx, memberContent, boost::lexical_cast<DotsC_Int64>(keyContent.data()), writer);
+            }
+                break;
+
+            case TypeIdMemberType:
+            {
+                DotsC_TypeId tid=SerializationUtils::StringToTypeId(keyContent.data());
+                SetMember(md, memIx, arrIx, memberContent, tid, writer);
+            }
+                break;
+
+            case StringMemberType:
+            {
+                SetMember(md, memIx, arrIx, memberContent, keyContent.data().c_str(), writer);
+            }
+                break;
+
+            case EntityIdMemberType:
+            {
+                std::pair<DotsC_EntityId, const char*> eid=SerializationUtils::StringToEntityId(keyContent.get<std::string>("name"), keyContent.get<std::string>("instanceId"));
+                SetMember(md, memIx, arrIx, memberContent, eid, writer);
+            }
+                break;
+
+            case InstanceIdMemberType:
+            case HandlerIdMemberType:
+            case ChannelIdMemberType:
+            {
+                std::pair<DotsC_Int64, const char*> hash=SerializationUtils::StringToHash(keyContent.data());
+                SetMember(md, memIx, arrIx, memberContent, hash, writer);
+            }
+                break;
+
+            case EnumerationMemberType:
+            {
+                const EnumDescriptionType* ed=m_repository->GetEnum(md->GetKeyTypeId());
+                DotsC_EnumerationValue enumVal=TypeUtilities::GetIndexOfEnumValue(ed, keyContent.data());
+                SetMember(md, memIx, arrIx, memberContent, enumVal, writer);
+            }
+                break;
+
+            default:
+                break;
+            }
+        }
+
+        template <class KeyT>
+        void SetMember(const MemberDescriptionType* md,
+                       DotsC_MemberIndex memIx,
+                       DotsC_Int32 arrIx,
+                       const boost::property_tree::ptree& memberContent,
+                       const KeyT& key,
+                       BlobWriter<RepositoryType>& writer) const
+        {
+            //if dictionary first write the key
+            if (md->GetCollectionType()==DictionaryCollectionType)
+            {
+                writer.WriteKey(memIx, key);
+            }
+
             //first check if value is set to null in json, in that case just set status to null and return.
             if (memberContent.data()=="null")
             {
-                m_blobLayout.SetStatus(true, false, &blob[0], memIx, arrIx);
+                writer.WriteValue(memIx, arrIx, 0, true, false);
                 return;
             }
 
@@ -186,8 +303,7 @@ namespace Internal
             case BooleanMemberType:
             {
                 bool val=memberContent.get_value<bool>();
-                m_blobLayout.template SetMember<bool>(val, &blob[0], memIx, arrIx);
-                m_blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
+                writer.WriteValue(memIx, arrIx, val, false, true);
             }
                 break;
 
@@ -201,32 +317,28 @@ namespace Internal
                     os<<"Enumeration member '"<<md->GetName()<<"' contains an invalid value. Value="<<memberContent.data()<<" is not a value of enum type "<<ed->GetName();
                     throw ParseError("JsonToBinary serialization error", os.str(), "", 158);
                 }
-                m_blobLayout.template SetMember<DotsC_Int32>(enumOrdinal, &blob[0], memIx, arrIx);
-                m_blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
+                writer.WriteValue(memIx, arrIx, enumOrdinal, false, true);
             }
                 break;
 
             case Int32MemberType:
             {
                 DotsC_Int32 val=memberContent.get_value<DotsC_Int32>();
-                m_blobLayout.template SetMember<DotsC_Int32>(val, &blob[0], memIx, arrIx);
-                m_blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
+                writer.WriteValue(memIx, arrIx, val, false, true);
             }
                 break;
 
             case Int64MemberType:
             {
                 DotsC_Int64 val=memberContent.get_value<DotsC_Int64>();
-                m_blobLayout.template SetMember<DotsC_Int64>(val, &blob[0], memIx, arrIx);
-                m_blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
+                writer.WriteValue(memIx, arrIx, val, false, true);
             }
                 break;
 
             case TypeIdMemberType:
             {
-                DotsC_TypeId tid=StringToTypeId(memberContent.data());
-                m_blobLayout.template SetMember<DotsC_TypeId>(tid, &blob[0], memIx, arrIx);
-                m_blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
+                DotsC_TypeId tid=SerializationUtils::StringToTypeId(memberContent.data());
+                writer.WriteValue(memIx, arrIx, tid, false, true);
             }
                 break;
 
@@ -234,14 +346,8 @@ namespace Internal
             case ChannelIdMemberType:
             case HandlerIdMemberType:
             {
-                std::pair<DotsC_TypeId, const char*> hash=StringToHash(memberContent.data());
-                if (hash.second!=NULL)
-                {
-                    size_t numBytesNeeded=memberContent.data().size()+1+sizeof(DotsC_Int64)+sizeof(DotsC_Int32); //hash+stringLength+string
-                    SerializationUtils::CreateSpaceForDynamicMember(m_blobLayout, blob, beginningOfUnused, numBytesNeeded);
-                }
-                m_blobLayout.CreateAndSetMemberWithOptionalString(&blob[0], hash.first, hash.second, static_cast<Size>(memberContent.data().size())+1, memIx, arrIx, false, beginningOfUnused);
-                m_blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
+                std::pair<DotsC_TypeId, const char*> hash=SerializationUtils::StringToHash(memberContent.data());
+                writer.WriteValue(memIx, arrIx, hash, false, true);
             }
                 break;
 
@@ -261,27 +367,18 @@ namespace Internal
                     os<<"EntityId member '"<<md->GetName()<<"' is missing the instanceId-element that specifies the instance.";
                     throw ParseError("JsonToBinary serialization error", os.str(), "", 160);
                 }
-                DotsC_TypeId tid=StringToTypeId(*typeIdString);
-                std::pair<DotsC_TypeId, const char*> instanceId=StringToHash(*instanceIdString);
-                if (instanceId.second!=NULL)
-                {
-                    size_t numBytesNeeded=instanceIdString->size()+1+sizeof(DotsC_EntityId)+sizeof(DotsC_Int32); //(typeId+hash)+stringLength+string
-                    SerializationUtils::CreateSpaceForDynamicMember(m_blobLayout, blob, beginningOfUnused, numBytesNeeded);
-                }
-                DotsC_EntityId eid={tid, instanceId.first};
-                m_blobLayout.CreateAndSetMemberWithOptionalString(&blob[0], eid, instanceId.second, static_cast<Size>(instanceIdString->size())+1, memIx, arrIx, false, beginningOfUnused);
-                m_blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
+                std::pair<DotsC_EntityId, const char*> entId;
+                entId.first.typeId=SerializationUtils::StringToTypeId(*typeIdString);
+                std::pair<DotsC_TypeId, const char*> instanceId=SerializationUtils::StringToHash(*instanceIdString);
+                entId.first.instanceId=instanceId.first;
+                entId.second=instanceId.second;
+                writer.WriteValue(memIx, arrIx, entId, false, true);
             }
                 break;
 
             case StringMemberType:
             {
-                size_t numBytesNeeded=std::min(memberContent.data().size(), static_cast<size_t>(md->GetMaxLength()))+1; //add one for '\0'
-                SerializationUtils::CreateSpaceForDynamicMember(m_blobLayout, blob, beginningOfUnused, numBytesNeeded);
-                char* writeString=beginningOfUnused;
-                m_blobLayout.CreateStringMember(&blob[0], static_cast<Size>(numBytesNeeded), memIx, arrIx, false, beginningOfUnused);
-                strncpy(writeString, memberContent.data().c_str(), numBytesNeeded);
-                m_blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
+                writer.WriteValue(memIx, arrIx, memberContent.data().c_str(), false, true);
             }
                 break;
 
@@ -311,32 +408,20 @@ namespace Internal
 
                 std::vector<char> insideBlob;
                 SerializeObjectContent(*xsiType, insideBlob, memberContent);
-                SerializationUtils::CreateSpaceForDynamicMember(m_blobLayout, blob, beginningOfUnused, insideBlob.size());
-                char* writeObj=beginningOfUnused;
-                m_blobLayout.CreateObjectMember(&blob[0], static_cast<Size>(insideBlob.size()), LlufId_Generate64(xsiType->c_str()), memIx, arrIx, false, beginningOfUnused);
-                beginningOfUnused=writeObj+insideBlob.size(); //This is a hack. BlobLayout is not moving beginningOfUnused by the blobSize but instead only by the initialSize. Has to do with genated code.
-                memcpy(writeObj, &insideBlob[0], insideBlob.size());
-                m_blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
+                writer.WriteValue(memIx, arrIx, std::make_pair(static_cast<const char*>(&insideBlob[0]), static_cast<DotsC_Int32>(insideBlob.size())), false, true);
             }
                 break;
 
             case BinaryMemberType:
             {
-                std::vector<char> bin;
+                std::string bin;
                 if (!SerializationUtils::FromBase64(memberContent.data(), bin))
                 {
                     std::ostringstream os;
                     os<<"Member "<<md->GetName()<<" of type binary containes invalid base64 data";
                     throw ParseError("JsonToBinary serialization error", os.str(), "", 164);
                 }
-                SerializationUtils::CreateSpaceForDynamicMember(m_blobLayout, blob, beginningOfUnused, bin.size());
-                char* writeBinary=beginningOfUnused;
-                m_blobLayout.CreateBinaryMember(&blob[0], static_cast<Size>(bin.size()), memIx, arrIx, false, beginningOfUnused);
-                if (!bin.empty())
-                {
-                    memcpy(writeBinary, &bin[0], bin.size());
-                }
-                m_blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
+                writer.WriteValue(memIx, arrIx, std::make_pair(static_cast<const char*>(&bin[0]), static_cast<DotsC_Int32>(bin.size())), false, true);
             }
                 break;
 
@@ -365,8 +450,7 @@ namespace Internal
                 try
                 {
                     DotsC_Float32 val=classic_string_cast<DotsC_Float32>(memberContent.data());
-                    m_blobLayout.template SetMember<DotsC_Float32>(val, &blob[0], memIx, arrIx);
-                    m_blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
+                    writer.WriteValue(memIx, arrIx, val, false, true);
                 }
                 catch (const boost::bad_lexical_cast&)
                 {
@@ -402,8 +486,7 @@ namespace Internal
                 try
                 {
                     DotsC_Float64 val=classic_string_cast<DotsC_Float64>(memberContent.data());
-                    m_blobLayout.template SetMember<DotsC_Float64>(val, &blob[0], memIx, arrIx);
-                    m_blobLayout.SetStatus(false, true, &blob[0], memIx, arrIx);
+                    writer.WriteValue(memIx, arrIx, val, false, true);
                 }
                 catch (const boost::bad_lexical_cast&)
                 {
@@ -415,42 +498,13 @@ namespace Internal
                 break;
             }
         }
-
-        DotsC_TypeId StringToTypeId(const std::string& str) const
-        {
-            DotsC_TypeId tid=0;
-            try
-            {
-                tid=boost::lexical_cast<DotsC_TypeId>(str);
-            }
-            catch (const boost::bad_lexical_cast&)
-            {
-                tid=LlufId_Generate64(str.c_str());
-            }
-            return tid;
-        }
-
-        std::pair<DotsC_TypeId, const char*> StringToHash(const std::string& str) const
-        {
-            std::pair<DotsC_TypeId, const char*> result(0, static_cast<const char*>(NULL));
-            try
-            {
-                result.first=boost::lexical_cast<boost::int64_t>(str);
-            }
-            catch (const boost::bad_lexical_cast&)
-            {
-                result.first=LlufId_Generate64(str.c_str());
-                result.second=str.c_str();
-            }
-            return result;
-        }
     };
 
 }
 }
 }
 }
-} //end namespace Safir::Dob::Typesystem::Internal::Internal
+} //end namespace Safir::Dob::Typesystem::ToolSupport::Internal
 
 #ifdef _MSC_VER
 #pragma warning( pop )

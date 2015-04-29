@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2004-2015 (http://safir.sourceforge.net)
 *
 * Created by: Joel Ottosson / stjoot
 *
@@ -276,6 +276,14 @@ namespace Typesystem
      * @see Safir/Dob/Typesystem/LanguageInterfaceDefs.h
      */
     typedef DotsC_MemberType MemberType;
+
+    /**
+     * An enumeration of all possible collection types of an object member.
+     *
+     * The values of this enumeration is defined in the file Safir/Dob/Typesystem/LanguageInterfaceDefs.h.
+     * @see Safir/Dob/Typesystem/LanguageInterfaceDefs.h
+     */
+    typedef DotsC_CollectionType CollectionType;
 
     /**
      * A type to contain binary serializations of DOB objects.

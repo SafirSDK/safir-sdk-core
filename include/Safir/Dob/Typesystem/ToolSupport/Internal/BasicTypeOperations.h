@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright Saab AB, 2004-2013 (http://safir.sourceforge.net)
+* Copyright Consoden AB, 2004-2015 (http://safir.sourceforge.net)
 *
 * Created by: Joel Ottosson / joot
 *
@@ -156,7 +156,7 @@ namespace BasicTypeOperations
         case Watt64MemberType: return Watt64MemberTypeName::Get();
         }
 
-        throw "ENSURE";
+        throw std::invalid_argument("BasicTypeOperations::MemberTypeToString. The MemberType does not exist");
     }
 
     /**
@@ -243,88 +243,6 @@ namespace BasicTypeOperations
     {
         memberType=StringToMemberType(typeName);
         return IsBasicMemberType(memberType);
-    }
-
-    inline Size SizeOfType(DotsC_MemberType type)
-    {
-        switch(type)
-        {
-        case BooleanMemberType:
-            return sizeof(bool);
-
-        case EnumerationMemberType:
-            return sizeof(EnumInternal);
-
-        case Int32MemberType:
-            return sizeof(DotsC_Int32);
-
-        case Int64MemberType:
-            return sizeof(DotsC_Int64);
-
-        case TypeIdMemberType:
-            return sizeof(DotsC_Int64);
-
-        case InstanceIdMemberType:
-        case ChannelIdMemberType:
-        case HandlerIdMemberType:
-            return sizeof(DotsC_Int64); //semidynamic member!
-
-        case EntityIdMemberType:
-            return sizeof(DotsC_EntityId); //semidynamic member!
-
-        case StringMemberType:
-        case ObjectMemberType:
-        case BinaryMemberType:
-            return DYNAMIC_MEMBER_SIZE;
-
-            //  32 bit floats
-        case Float32MemberType:
-        case Ampere32MemberType:
-        case CubicMeter32MemberType:
-        case Hertz32MemberType:
-        case Joule32MemberType:
-        case Kelvin32MemberType:
-        case Kilogram32MemberType:
-        case Meter32MemberType:
-        case MeterPerSecond32MemberType:
-        case MeterPerSecondSquared32MemberType:
-        case Newton32MemberType:
-        case Pascal32MemberType:
-        case Radian32MemberType:
-        case RadianPerSecond32MemberType:
-        case RadianPerSecondSquared32MemberType:
-        case Second32MemberType:
-        case SquareMeter32MemberType:
-        case Steradian32MemberType:
-        case Volt32MemberType:
-        case Watt32MemberType:
-            return sizeof(DotsC_Float32);
-
-            //  64 bit floats
-        case Float64MemberType:
-        case Ampere64MemberType:
-        case CubicMeter64MemberType:
-        case Hertz64MemberType:
-        case Joule64MemberType:
-        case Kelvin64MemberType:
-        case Kilogram64MemberType:
-        case Meter64MemberType:
-        case MeterPerSecond64MemberType:
-        case MeterPerSecondSquared64MemberType:
-        case Newton64MemberType:
-        case Pascal64MemberType:
-        case Radian64MemberType:
-        case RadianPerSecond64MemberType:
-        case RadianPerSecondSquared64MemberType:
-        case Second64MemberType:
-        case SquareMeter64MemberType:
-        case Steradian64MemberType:
-        case Volt64MemberType:
-        case Watt64MemberType:
-            return sizeof(DotsC_Float64);
-        }
-
-        throw "ENSURE";
     }
 
     template <class RepositoryT>
@@ -414,6 +332,18 @@ namespace BasicTypeOperations
         return helper.TypeIdToTypeName(repository, tid);
     }
 
+    inline std::string CollectionTypeToString(DotsC_CollectionType collectionType)
+    {
+        switch (collectionType)
+        {
+        case SingleValueCollectionType: return "single_value";
+        case ArrayCollectionType: return "array";
+        case SequenceCollectionType: return "sequence";
+        case DictionaryCollectionType: return "dictionary";
+        }
+        return "";
+    }
+
     struct PredefindedClassNames
     {
         static const std::string& ObjectName() {static const std::string s("Object"); return s;}
@@ -426,12 +356,79 @@ namespace BasicTypeOperations
         static const std::string& SoftwareViolationExceptionName() {static const std::string s("Safir.Dob.Typesystem.SoftwareViolationException"); return s;}
         static const std::string& ConfigurationErrorExceptionName() {static const std::string s("Safir.Dob.Typesystem.ConfigurationErrorException"); return s;}
     };
+
+//    /**
+//     * Helper class for getting index corresponiding to a specific key. Only applicable on dictionaries.
+//     */
+//    template <class ParameterDescriptionT, class KeyT> struct DictionaryKeyToIndexHelper;
+//    template <class ParameterDescriptionT> struct DictionaryKeyToIndexHelper<ParameterDescriptionT, std::string>
+//    {
+//        static int Index(const ParameterDescriptionT* pd, const std::string& key)
+//        {
+//            for (int i=0; i<pd->GetNumberOfValues(); ++i)
+//            {
+//                if (key==pd->GetStringKey(i))
+//                    return i;
+//            }
+//            return -1;
+//        }
+//    };
+//    template <class ParameterDescriptionT> struct DictionaryKeyToIndexHelper<ParameterDescriptionT, DotsC_Int32>
+//    {
+//        static int Index(const ParameterDescriptionT* pd, DotsC_Int32 key)
+//        {
+//            for (int i=0; i<pd->GetNumberOfValues(); ++i)
+//            {
+//                if (key==pd->GetInt32Key(i))
+//                    return i;
+//            }
+//            return -1;
+//        }
+
+//    };
+//    template <class ParameterDescriptionT> struct DictionaryKeyToIndexHelper<ParameterDescriptionT, DotsC_Int64>
+//    {
+//        static int Index(const ParameterDescriptionT* pd, DotsC_Int64 key)
+//        {
+//            for (int i=0; i<pd->GetNumberOfValues(); ++i)
+//            {
+//                if (key==pd->GetInt64Key(i))
+//                    return i;
+//            }
+//            return -1;
+//        }
+
+//    };
+//    template <class ParameterDescriptionT> struct DictionaryKeyToIndexHelper<ParameterDescriptionT, std::pair<DotsC_TypeId, DotsC_Int64> >
+//    {
+//        static int Index(const ParameterDescriptionT* pd, std::pair<DotsC_TypeId, DotsC_Int64> key)
+//        {
+//            for (int i=0; i<pd->GetNumberOfValues(); ++i)
+//            {
+//                if (key.first==pd->GetInt64Key(i) && key.second==pd->GetHashedKey(i).first)
+//                    return i;
+//            }
+//            return -1;
+//        }
+//    };
+//    template <class ParameterDescriptionT> struct DictionaryKeyToIndexHelper<ParameterDescriptionT, std::pair<DotsC_Int64, const char*> >
+//    {
+//        static int Index(const ParameterDescriptionT* pd, std::pair<DotsC_Int64, const char*> key)
+//        {
+//            for (int i=0; i<pd->GetNumberOfValues(); ++i)
+//            {
+//                if (key.first==pd->GetHashedKey(i).first)
+//                    return i;
+//            }
+//            return -1;
+//        }
+//    };
 }
 }
 }
 }
 }
-} //end namespace Safir::Dob::Typesystem::Internal
+} //end namespace Safir::Dob::Typesystem::ToolSupport::Internal::BasicTypeOperations
 
 #endif
 
