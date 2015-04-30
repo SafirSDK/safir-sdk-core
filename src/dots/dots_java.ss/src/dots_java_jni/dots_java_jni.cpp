@@ -1377,7 +1377,7 @@ jboolean JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_MarkChanges
 void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteInt32Member
   (JNIEnv *, jclass, jlong _writerHandle, jint _val, jboolean _isNull, jboolean _isChanged, jint _member, jint _arrayIndex, jint _keyValMode)
 {
-    DotsC_WriteInt32Member(_writerHandle, _val, _isNull, _isChanged == JNI_TRUE, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
+    DotsC_WriteInt32Member(_writerHandle, _val, _isNull == JNI_TRUE, _isChanged == JNI_TRUE, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
 }
 
 /*
@@ -1388,7 +1388,7 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteInt32Member
 void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteInt64Member
     (JNIEnv *, jclass, jlong _writerHandle, jlong _val, jboolean _isNull, jboolean _isChanged, jint _member, jint _arrayIndex, jint _keyValMode)
 {
-  DotsC_WriteInt64Member(_writerHandle, _val, _isNull, _isChanged == JNI_TRUE, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
+  DotsC_WriteInt64Member(_writerHandle, _val, _isNull == JNI_TRUE, _isChanged == JNI_TRUE, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
 }
 
 /*
@@ -1399,7 +1399,7 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteInt64Member
 void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteFloat32Member
     (JNIEnv *, jclass, jlong _writerHandle, jfloat _val, jboolean _isNull, jboolean _isChanged, jint _member, jint _arrayIndex, jint _keyValMode)
 {
-    DotsC_WriteFloat32Member(_writerHandle, _val, _isNull, _isChanged == JNI_TRUE, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
+    DotsC_WriteFloat32Member(_writerHandle, _val, _isNull == JNI_TRUE, _isChanged == JNI_TRUE, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
 }
 
 /*
@@ -1410,7 +1410,7 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteFloat32Member
 void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteFloat64Member
     (JNIEnv *, jclass, jlong _writerHandle, jdouble _val, jboolean _isNull, jboolean _isChanged, jint _member, jint _arrayIndex, jint _keyValMode)
 {
-    DotsC_WriteFloat64Member(_writerHandle, _val, _isNull, _isChanged == JNI_TRUE, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
+    DotsC_WriteFloat64Member(_writerHandle, _val, _isNull == JNI_TRUE, _isChanged == JNI_TRUE, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
 }
 
 /*
@@ -1421,7 +1421,7 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteFloat64Member
 void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteBooleanMember
     (JNIEnv *, jclass, jlong _writerHandle, jboolean _val, jboolean _isNull, jboolean _isChanged, jint _member, jint _arrayIndex, jint _keyValMode)
 {
-    DotsC_WriteBooleanMember(_writerHandle, _val, _isNull, _isChanged == JNI_TRUE, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
+    DotsC_WriteBooleanMember(_writerHandle, _val, _isNull == JNI_TRUE, _isChanged == JNI_TRUE, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
 }
 
 /*
@@ -1435,11 +1435,11 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteStringMember
     if (!_isNull)
     {
         StringHolder str=GetUtf8(env, _val);
-        DotsC_WriteStringMember(_writerHandle, str.get(), _isNull, _isChanged == JNI_TRUE, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
+        DotsC_WriteStringMember(_writerHandle, str.get(), _isNull == JNI_TRUE, _isChanged == JNI_TRUE, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
     }
     else
     {
-        DotsC_WriteStringMember(_writerHandle, NULL, _isNull, _isChanged == JNI_TRUE, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
+        DotsC_WriteStringMember(_writerHandle, NULL, _isNull == JNI_TRUE, _isChanged == JNI_TRUE, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
     }
 }
 
@@ -1454,11 +1454,11 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteHashedMember
     if (_valStr)
     {
         StringHolder str=GetUtf8(env, _valStr);
-        DotsC_WriteHashedMember(_writerHandle, _valHash, str.get(), _isNull, _isChanged == JNI_TRUE, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
+        DotsC_WriteHashedMember(_writerHandle, _valHash, str.get(), _isNull == JNI_TRUE, _isChanged == JNI_TRUE, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
     }
     else
     {
-        DotsC_WriteHashedMember(_writerHandle, _valHash, NULL, _isNull, _isChanged == JNI_TRUE, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
+        DotsC_WriteHashedMember(_writerHandle, _valHash, NULL, _isNull == JNI_TRUE, _isChanged == JNI_TRUE, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
     }
 }
 
@@ -1474,11 +1474,11 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteEntityIdMember
     if (_valStr)
     {
         StringHolder str=GetUtf8(env, _valStr);
-        DotsC_WriteEntityIdMember(_writerHandle, eid, str.get(), _isNull, _isChanged == JNI_TRUE, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
+        DotsC_WriteEntityIdMember(_writerHandle, eid, str.get(), _isNull == JNI_TRUE, _isChanged == JNI_TRUE, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
     }
     else
     {
-        DotsC_WriteEntityIdMember(_writerHandle, eid, NULL, _isNull, _isChanged == JNI_TRUE, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
+        DotsC_WriteEntityIdMember(_writerHandle, eid, NULL, _isNull == JNI_TRUE, _isChanged == JNI_TRUE, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
     }
 }
 
@@ -1491,7 +1491,7 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteBinaryMember
     (JNIEnv * env, jclass, jlong _writerHandle, jobject _val, jint _size, jboolean _isNull, jboolean _isChanged, jint _member, jint _arrayIndex, jint _keyValMode)
 {
     const char * bin = _isNull ? NULL : static_cast<char*>(env->GetDirectBufferAddress(_val));
-    DotsC_WriteBinaryMember(_writerHandle, bin, _size, _isNull, _isChanged == JNI_TRUE, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
+    DotsC_WriteBinaryMember(_writerHandle, bin, _size, _isNull == JNI_TRUE, _isChanged == JNI_TRUE, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
 }
 
 /*
@@ -1503,7 +1503,7 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteObjectMember
 (JNIEnv * env, jclass, jlong _writerHandle, jobject _blob, jboolean _isNull, jboolean _isChanged, jint _member, jint _arrayIndex, jint _keyValMode)
 {
     const char * blob = _isNull ? NULL : static_cast<char*>(env->GetDirectBufferAddress(_blob));
-    DotsC_WriteObjectMember(_writerHandle, blob, _isNull, _isChanged == JNI_TRUE, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
+    DotsC_WriteObjectMember(_writerHandle, blob, _isNull == JNI_TRUE, _isChanged == JNI_TRUE, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
 }
 
 /*
