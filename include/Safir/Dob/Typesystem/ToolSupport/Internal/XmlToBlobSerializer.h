@@ -327,7 +327,7 @@ namespace Internal
 
             case EntityIdMemberType:
             {
-                const auto inst = keyContent.get<std::string>("instanceId");
+                const std::string inst = keyContent.get<std::string>("instanceId");
                 std::pair<DotsC_EntityId, const char*> eid=SerializationUtils::StringToEntityId(keyContent.get<std::string>("name"), inst);
                 SerializationUtils::SetKeyWithNullValue(memIx, eid, writer);
             }
@@ -391,7 +391,7 @@ namespace Internal
 
             case EntityIdMemberType:
             {
-                const auto inst = keyContent.get<std::string>("instanceId");
+                const std::string inst = keyContent.get<std::string>("instanceId");
                 std::pair<DotsC_EntityId, const char*> eid=SerializationUtils::StringToEntityId(keyContent.get<std::string>("name"), inst);
                 SetMember(md, memIx, arrIx, memberContent, eid, writer);
             }
