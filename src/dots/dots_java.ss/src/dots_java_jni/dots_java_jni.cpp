@@ -1421,7 +1421,7 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteFloat64Member
 void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteBooleanMember
     (JNIEnv *, jclass, jlong _writerHandle, jboolean _val, jboolean _isNull, jboolean _isChanged, jint _member, jint _arrayIndex, jint _keyValMode)
 {
-    DotsC_WriteBooleanMember(_writerHandle, _val, _isNull == JNI_TRUE, _isChanged == JNI_TRUE, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
+    DotsC_WriteBooleanMember(_writerHandle, _val == JNI_TRUE, _isNull == JNI_TRUE, _isChanged == JNI_TRUE, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
 }
 
 /*
