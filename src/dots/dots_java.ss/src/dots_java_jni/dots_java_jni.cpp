@@ -1173,7 +1173,10 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_ReadStringMember
     bool isNull, isChanged;
     DotsC_ReadStringMember(_readHandle, val, isNull, isChanged, _member, _index, static_cast<DotsC_KeyValMode>(_keyValMode));
 
-    SetJArray(env,_val, env->NewStringUTF(val));
+    if (!isNull)
+    {
+        SetJArray(env,_val, env->NewStringUTF(val));
+    }
     SetJArray(env, _isNull, isNull);
     SetJArray(env, _isChanged, isChanged);
 }
