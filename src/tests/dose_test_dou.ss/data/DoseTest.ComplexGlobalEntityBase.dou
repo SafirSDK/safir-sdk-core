@@ -33,6 +33,11 @@
             <maxLength>10</maxLength>
         </member>
         <member>
+            <name>EmptyStringMember</name>
+            <type>String</type>
+            <maxLength>10</maxLength>
+        </member>
+        <member>
             <name>EntityIdMember</name>
             <type>EntityId</type>
         </member>
@@ -74,6 +79,10 @@
         </member>
         <member>
             <name>BinaryMember</name>
+            <type>Binary</type>
+        </member>
+        <member>
+            <name>EmptyBinaryMember</name>
             <type>Binary</type>
         </member>
         <member>

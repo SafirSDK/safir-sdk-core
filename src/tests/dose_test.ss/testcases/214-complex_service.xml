@@ -25,6 +25,7 @@
         <BooleanMember>true</BooleanMember>
         <EnumerationMember>MyFirst</EnumerationMember>
         <StringMember xml:space="preserve">Safir</StringMember>
+        <EmptyStringMember></EmptyStringMember>
         <EntityIdMember>
           <name>DoseTest.RootEntity</name>
           <instanceId>0</instanceId>
@@ -35,6 +36,7 @@
         <HandlerIdMember>SomeHandler</HandlerIdMember>
         <ObjectMember/>
         <BinaryMember/>
+        <EmptyBinaryMember/>
         <TestClassMember>
           <MyInt>-32</MyInt>
         </TestClassMember>
