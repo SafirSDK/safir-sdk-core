@@ -1273,9 +1273,9 @@ class Consumer implements
         Logger.instance().println();
     }
 
-///
-/// Backdoor
-///
+    ///
+    /// Backdoor
+    ///
     public void handleCommand(String[] cmdTokens)
     {
         Logger.instance().println(PREFIX + m_consumerNumber +
@@ -1355,10 +1355,6 @@ class Consumer implements
 
     public class Pair
     {
-        /*        public Pair()
-                  {
-                  }
-        */
         public Pair(com.saabgroup.safir.dob.InstanceIdPolicy first, long second)
         {
             policy = first;
