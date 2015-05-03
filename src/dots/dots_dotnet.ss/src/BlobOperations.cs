@@ -3052,7 +3052,7 @@ namespace Safir.Dob.Typesystem.Internal
                 throw new SoftwareViolationException("BlobOperation.Set(binary) called with mode=KeyMode. Only ValueMode is allowed for this type!");
             }
 
-            if (isNull)
+            if (isNull || val.Length == 0)
             {
                 Kernel.DotsC_WriteBinaryMember (handle, IntPtr.Zero, 0,
                                                 InternalOperations.ByteOf(isNull),

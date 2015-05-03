@@ -506,7 +506,7 @@ namespace
         if (!isNull)
         {
             val.resize(static_cast<size_t>(size));
-            memcpy(&(val[0]), bin, val.size());
+            val.assign(bin,bin+size);
         }
     }
 
@@ -692,7 +692,7 @@ namespace
             throw std::logic_error("BlobOperation.Set(Binary) called with mode=KeyMode. Only ValueMode is allowed for this type!");
         }
 
-        if (isNull)
+        if (isNull || val.empty())
         {
             DotsC_WriteBinaryMember(handle, NULL, 0, isNull, isChanged, member, valueIndex, Conv(mode));
         }
