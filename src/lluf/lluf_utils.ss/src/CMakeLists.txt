@@ -46,8 +46,3 @@ endif()
 
 SAFIR_INSTALL(
   TARGETS lluf_utils)
-
-if (WIN32)
-  INSTALL(FILES ../data/safir_event_log_registration.reg
-    DESTINATION ${SAFIR_INSTALL_DESTINATION_DOC}/utilities/)
-endif()
