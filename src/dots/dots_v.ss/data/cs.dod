@@ -1102,6 +1102,7 @@ namespace @_NAMESPACE_@
         /// </summary>
         /// <param name="handle">Handle to blob reader.</param>
         public @_CLASS_@(System.Int64 handle)
+            : base(handle)
         {
             Init();
 
