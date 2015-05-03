@@ -102,7 +102,7 @@ class Consumer implements
         }
     }
 
-    static String checkBinaryMember(com.saabgroup.safir.dob.typesystem.Object obj, java.nio.ByteBuffer blob)
+    static String checkBinaryMember(com.saabgroup.safir.dob.typesystem.Object obj)
     {
         if (obj.getTypeId() == com.saabgroup.dosetest.ComplexGlobalMessage.ClassTypeId)
         {
@@ -123,7 +123,7 @@ class Consumer implements
             checkBinaryMemberInternal(((com.saabgroup.dosetest.ComplexGlobalService)obj).binaryMember());
         }
 
-        return com.saabgroup.safir.dob.typesystem.Serialization.toXml(blob);
+        return com.saabgroup.safir.dob.typesystem.Serialization.toXml(obj);
 
     }
 
@@ -715,7 +715,7 @@ class Consumer implements
 
         if (needBinaryCheck(msg))
         {
-            xml = checkBinaryMember(msg,messageProxy.getBlob());
+            xml = checkBinaryMember(msg);
         }
         else
         {
@@ -748,7 +748,7 @@ class Consumer implements
 
         if (needBinaryCheck(entity))
         {
-            xml = checkBinaryMember(entity,entityProxy.getBlob());
+            xml = checkBinaryMember(entity);
         }
         else
         {
@@ -789,7 +789,7 @@ class Consumer implements
 
         if (needBinaryCheck(entity))
         {
-            xml = checkBinaryMember(entity,entityProxy.getBlob());
+            xml = checkBinaryMember(entity);
         }
         else
         {
@@ -801,7 +801,7 @@ class Consumer implements
 
         if (needBinaryCheck(prevEntity))
         {
-            prevXml = checkBinaryMember(prevEntity,entityProxy.getPrevious().getBlob());
+            prevXml = checkBinaryMember(prevEntity);
         }
         else
         {
@@ -935,7 +935,7 @@ class Consumer implements
 
         if (needBinaryCheck(svc))
         {
-            xml = checkBinaryMember(svc,serviceRequestProxy.getBlob());
+            xml = checkBinaryMember(svc);
         }
         else
         {
@@ -997,7 +997,7 @@ class Consumer implements
 
         if (needBinaryCheck(req))
         {
-            xml = checkBinaryMember(req,entityRequestProxy.getBlob());
+            xml = checkBinaryMember(req);
         }
         else
         {
@@ -1108,7 +1108,7 @@ class Consumer implements
 
         if (needBinaryCheck(req))
         {
-            xml = checkBinaryMember(req,entityRequestProxy.getBlob());
+            xml = checkBinaryMember(req);
         }
         else
         {
@@ -1256,7 +1256,7 @@ class Consumer implements
             com.saabgroup.safir.dob.typesystem.Object req = responseProxy.getRequest();
             if (needBinaryCheck(req))
             {
-                Logger.instance().println(checkBinaryMember(req,responseProxy.getRequestBlob()));
+                Logger.instance().println(checkBinaryMember(req));
             }
             else
             {

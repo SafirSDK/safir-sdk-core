@@ -92,8 +92,6 @@ namespace dose_test_dotnet
                 {
                     byte val = 0;
                     foreach (byte b in cont.Val)
-                        //                    for (Safir.Dob.Typesystem.Binary.const_iterator it = cont.Val.begin();
-                        //                         it != cont.GetVal().end(); ++it)
                     {
                         if (b != val)
                         {
