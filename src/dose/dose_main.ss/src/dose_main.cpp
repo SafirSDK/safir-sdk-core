@@ -30,6 +30,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/asio.hpp>
 #include <atomic>
+#include <boost/filesystem/fstream.hpp>
 
 //This is a sanity check to make sure we've taken down all the threads in dose_main
 //before exiting. It is only implemented in Linux at the moment, which is okay since it
