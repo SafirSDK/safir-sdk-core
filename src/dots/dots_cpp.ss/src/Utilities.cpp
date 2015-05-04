@@ -32,6 +32,7 @@
 #include <Safir/Dob/Typesystem/Internal/Kernel.h>
 #include <Safir/Utilities/Internal/StringEncoding.h>
 #include <Safir/Utilities/Internal/LowLevelLogger.h>
+#include <Safir/Utilities/Internal/SystemLog.h>
 #include <iostream>
 #include <boost/shared_array.hpp>
 #include <Safir/Dob/Typesystem/ValueContainers.h>
@@ -119,10 +120,7 @@ namespace Utilities
                                 //If the type is changing we write a warning
                                 if (!intoContainerOB.IsNull())
                                 {
-                                    std::wcerr << "Warning (Contact a DOB developer if you do not understand it):" <<std::endl;
-                                    std::wcerr << "The type of a member has changed without the change flag being set in 'from'." << std::endl;
-
-                                    lllout << "MergeChanges Warning: TypeId of member has changed without the change flag being set in 'from'!" <<std::endl;
+                                    SEND_SYSTEM_LOG(Warning, << "The type of a member has changed without the change flag being set in 'from'.")
                                 }
 
                                 //if it was null we don't warn (even if it is a little bit suspicious to do that...)
