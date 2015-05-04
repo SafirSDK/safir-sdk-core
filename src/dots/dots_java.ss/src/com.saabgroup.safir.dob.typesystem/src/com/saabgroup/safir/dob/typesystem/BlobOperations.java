@@ -789,7 +789,7 @@ public class BlobOperations {
 
     public static void set(BinaryContainer container, long handle, int member, int index)
     {
-    	if (container.m_isNull || container.m_value.length == 0) {
+        if (container.m_isNull {
             Kernel.WriteBinaryMember(handle,
                             null, 0,
                             container.m_isNull,
