@@ -183,6 +183,8 @@ os.environ["SAFIR_TEST_CONFIG_OVERRIDE"] = os.path.join(testdatadir,
 
 os.environ["LLL_LOGDIR"] = os.path.join(os.getcwd(),"lll")
 
+subprocess.call(("safir_show_config","--logging"))
+
 seeder = launch_seeder(args) if args.start == 0 else None
 
 nodes = list()
