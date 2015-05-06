@@ -31,8 +31,7 @@ import com.saabgroup.safir.dob.typesystem.Float64Container;
  * Container for Hertz64 members.
  */
 public class HertzContainer
-    extends Float64Container
-    implements Cloneable {
+    extends Float64Container {
 
     /**
      * Default constructor.
@@ -53,18 +52,4 @@ public class HertzContainer
     public HertzContainer(double value, boolean isNull, boolean isChanged) {
         super(value,isNull,isChanged);
     }
-
-
-    protected HertzContainer(HertzContainer other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.Float64Container#clone()
-     */
-    @Override
-    public HertzContainer clone() {
-        return new HertzContainer(this);
-    }
-
 }

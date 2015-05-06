@@ -26,8 +26,7 @@
 package com.saabgroup.safir.dob.typesystem;
 
 public class Int64SequenceContainer
-extends ValueSequenceContainer<Long>
-implements Cloneable {
+extends ValueSequenceContainer<Long> {
 
 	public Int64SequenceContainer() {
 		super();

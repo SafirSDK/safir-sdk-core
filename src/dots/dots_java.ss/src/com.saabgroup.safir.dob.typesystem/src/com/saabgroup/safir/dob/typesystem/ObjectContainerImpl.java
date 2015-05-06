@@ -38,8 +38,7 @@ package com.saabgroup.safir.dob.typesystem;
  * @param <T> The type to contain. Must inherit from Dob::Typesystem::Object.
  */
 public class ObjectContainerImpl<T extends Object>
-    extends ObjectContainerBase
-    implements Cloneable {
+    extends ObjectContainerBase {
 
     /**
      * Default constructor.
@@ -137,8 +136,6 @@ public class ObjectContainerImpl<T extends Object>
         return m_object.getMember(member,index);
     }
 
-    private T m_object;
-
     /**
      * @see com.saabgroup.safir.dob.typesystem.ObjectContainerBase#getObjInternal()
      */
@@ -157,42 +154,14 @@ public class ObjectContainerImpl<T extends Object>
     }
 
 
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#copy(com.saabgroup.safir.dob.typesystem.ContainerBase)
-     */
-    @SuppressWarnings("unchecked")
     @Override
-    public void copy(ContainerBase other) {
-        super.copy(other);
+    @SuppressWarnings("unchecked")
+    void shallowCopy(ContainerBase other)
+    {
+        super.shallowCopy(other);
         ObjectContainerImpl<T> that = (ObjectContainerImpl<T>)other;
-        if (that.isNull())
-        {
-            m_object = null;
-        }
-        else
-        {
-            m_object = (T)that.m_object.clone();
-        }
+        m_object = that.m_object;
     }
 
-    @SuppressWarnings("unchecked")
-    protected ObjectContainerImpl(ObjectContainerImpl<T> other) {
-        super(other);
-        if (other.isNull()){
-            m_object = null;
-        }
-        else {
-            m_object = (T)other.m_object.clone();
-        }
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#clone()
-     */
-    @Override
-    public ObjectContainerImpl<T> clone() {
-        return new ObjectContainerImpl<T>(this);
-    }
-
-
+    private T m_object;
 }

@@ -29,8 +29,7 @@ package com.saabgroup.safir.dob.typesystem;
  * Container for Float64 members.
  */
 public class Float64Container
-    extends ValueContainer<Double>
-    implements Cloneable {
+    extends ValueContainer<Double> {
 
     /**
      * Default constructor.
@@ -44,18 +43,4 @@ public class Float64Container
         super(isNull,isChanged);
         m_value = value;
     }
-
-
-    protected Float64Container(Float64Container other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ValueContainer#clone()
-     */
-    @Override
-    public Float64Container clone() {
-        return new Float64Container(this);
-    }
-
 }

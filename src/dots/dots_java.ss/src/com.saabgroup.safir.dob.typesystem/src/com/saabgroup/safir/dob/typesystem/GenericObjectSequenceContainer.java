@@ -26,27 +26,9 @@
 package com.saabgroup.safir.dob.typesystem;
 
 public class GenericObjectSequenceContainer<T extends com.saabgroup.safir.dob.typesystem.Object>
-extends SequenceContainer<T> 
-implements Cloneable {
+    extends SequenceContainer<T>  {
 
 	public GenericObjectSequenceContainer() {
 		super();
 	}
-	
-	@SuppressWarnings("unchecked")
-	public GenericObjectSequenceContainer(GenericObjectSequenceContainer<T> other) {
-		super();
-		m_isChanged=other.m_isChanged;
-		for (T v : other.m_values) {
-			m_values.add((T)(v.clone()));
-		}
-	}
-	
-	/**
-     * @see com.saabgroup.safir.dob.typesystem.ValueSequenceContainer#clone()
-     */
-    @Override
-    public GenericObjectSequenceContainer<T> clone() {
-        return new GenericObjectSequenceContainer<T>(this);
-    } 
 }

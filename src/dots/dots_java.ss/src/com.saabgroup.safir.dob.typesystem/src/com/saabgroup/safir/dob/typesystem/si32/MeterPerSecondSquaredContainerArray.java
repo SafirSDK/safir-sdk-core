@@ -29,8 +29,7 @@ package com.saabgroup.safir.dob.typesystem.si32;
  * Array for MeterPerSecondSquaredContainers
  */
 public class MeterPerSecondSquaredContainerArray
-    extends com.saabgroup.safir.dob.typesystem.ArrayContainer<MeterPerSecondSquaredContainer>
-    implements Cloneable {
+    extends com.saabgroup.safir.dob.typesystem.ArrayContainer<MeterPerSecondSquaredContainer> {
 
     private static java.util.ArrayList<MeterPerSecondSquaredContainer> createBlankArray(int size){
         java.util.ArrayList<MeterPerSecondSquaredContainer> initializedArray = new java.util.ArrayList<MeterPerSecondSquaredContainer>(size);
@@ -58,17 +57,4 @@ public class MeterPerSecondSquaredContainerArray
      */
     public MeterPerSecondSquaredContainerArray(java.util.ArrayList<MeterPerSecondSquaredContainer> initializedArray) {
         super(initializedArray);
-    }
-
-    protected MeterPerSecondSquaredContainerArray(MeterPerSecondSquaredContainerArray other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#clone()
-     */
-    @Override
-    public MeterPerSecondSquaredContainerArray clone() {
-        return new MeterPerSecondSquaredContainerArray(this);
-    }
-}
+    }}

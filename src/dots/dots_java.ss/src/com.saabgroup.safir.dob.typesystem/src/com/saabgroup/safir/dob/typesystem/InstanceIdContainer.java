@@ -29,8 +29,7 @@ package com.saabgroup.safir.dob.typesystem;
  * Container for InstanceId members.
  */
 public class InstanceIdContainer
-    extends ValueContainer<InstanceId>
-    implements Cloneable {
+    extends ValueContainer<InstanceId> {
 
     /**
      * Default constructor.
@@ -43,19 +42,6 @@ public class InstanceIdContainer
     InstanceIdContainer(InstanceId value, boolean isNull, boolean isChanged) {
         super(isNull,isChanged);
         m_value = value;
-    }
-
-
-    protected InstanceIdContainer(InstanceIdContainer other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ValueContainer#clone()
-     */
-    @Override
-    public InstanceIdContainer clone() {
-        return new InstanceIdContainer(this);
     }
 
 }

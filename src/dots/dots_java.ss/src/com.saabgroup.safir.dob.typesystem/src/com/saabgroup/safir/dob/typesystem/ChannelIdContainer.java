@@ -29,8 +29,7 @@ package com.saabgroup.safir.dob.typesystem;
  * Container for ChannelId members.
  */
 public class ChannelIdContainer
-    extends ValueContainer<ChannelId>
-    implements Cloneable {
+    extends ValueContainer<ChannelId> {
 
     /**
      * Default constructor.
@@ -44,17 +43,4 @@ public class ChannelIdContainer
         super(isNull,isChanged);
         m_value = value;
     }
-
-    protected ChannelIdContainer(ChannelIdContainer other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ValueContainer#clone()
-     */
-    @Override
-    public ChannelIdContainer clone() {
-        return new ChannelIdContainer(this);
-    }
-
 }

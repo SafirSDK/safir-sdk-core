@@ -29,8 +29,7 @@ package com.saabgroup.safir.dob.typesystem.si64;
  * Array for RadianPerSecondSquaredContainers
  */
 public class RadianPerSecondSquaredContainerArray
-    extends com.saabgroup.safir.dob.typesystem.ArrayContainer<RadianPerSecondSquaredContainer>
-    implements Cloneable {
+    extends com.saabgroup.safir.dob.typesystem.ArrayContainer<RadianPerSecondSquaredContainer> {
 
     private static java.util.ArrayList<RadianPerSecondSquaredContainer> createBlankArray(int size){
         java.util.ArrayList<RadianPerSecondSquaredContainer> initializedArray = new java.util.ArrayList<RadianPerSecondSquaredContainer>(size);
@@ -58,17 +57,5 @@ public class RadianPerSecondSquaredContainerArray
      */
     public RadianPerSecondSquaredContainerArray(java.util.ArrayList<RadianPerSecondSquaredContainer> initializedArray) {
         super(initializedArray);
-    }
-
-    protected RadianPerSecondSquaredContainerArray(RadianPerSecondSquaredContainerArray other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#clone()
-     */
-    @Override
-    public RadianPerSecondSquaredContainerArray clone() {
-        return new RadianPerSecondSquaredContainerArray(this);
     }
 }

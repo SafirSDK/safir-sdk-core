@@ -28,8 +28,7 @@ package com.saabgroup.safir.dob.typesystem;
  * Array for Int32Containers
  */
 public class Int32ContainerArray
-    extends ArrayContainer<Int32Container>
-    implements Cloneable {
+    extends ArrayContainer<Int32Container> {
 
     private static java.util.ArrayList<Int32Container> createBlankArray(int size){
         java.util.ArrayList<Int32Container> initializedArray = new java.util.ArrayList<Int32Container>(size);
@@ -58,17 +57,4 @@ public class Int32ContainerArray
     public Int32ContainerArray(java.util.ArrayList<Int32Container> initializedArray) {
         super(initializedArray);
     }
-
-    protected Int32ContainerArray(Int32ContainerArray other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#clone()
-     */
-    @Override
-    public Int32ContainerArray clone() {
-        return new Int32ContainerArray(this);
-    }
-
 }

@@ -28,8 +28,7 @@ package com.saabgroup.safir.dob.typesystem;
  * Array for Float64Containers
  */
 public class Float64ContainerArray
-    extends ArrayContainer<Float64Container>
-    implements Cloneable {
+    extends ArrayContainer<Float64Container> {
 
     private static java.util.ArrayList<Float64Container> createBlankArray(int size){
         java.util.ArrayList<Float64Container> initializedArray = new java.util.ArrayList<Float64Container>(size);
@@ -58,17 +57,4 @@ public class Float64ContainerArray
     public Float64ContainerArray(java.util.ArrayList<Float64Container> initializedArray) {
         super(initializedArray);
     }
-
-    protected Float64ContainerArray(Float64ContainerArray other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#clone()
-     */
-    @Override
-    public Float64ContainerArray clone() {
-        return new Float64ContainerArray(this);
-    }
-
 }

@@ -31,8 +31,7 @@ import com.saabgroup.safir.dob.typesystem.Float64Container;
  * Container for Volt64 members.
  */
 public class VoltContainer
-    extends Float64Container
-    implements Cloneable {
+    extends Float64Container {
 
     /**
      * Default constructor.
@@ -52,19 +51,6 @@ public class VoltContainer
      */
     public VoltContainer(double value, boolean isNull, boolean isChanged) {
         super(value,isNull,isChanged);
-    }
-
-
-    protected VoltContainer(VoltContainer other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.Float64Container#clone()
-     */
-    @Override
-    public VoltContainer clone() {
-        return new VoltContainer(this);
     }
 
 }

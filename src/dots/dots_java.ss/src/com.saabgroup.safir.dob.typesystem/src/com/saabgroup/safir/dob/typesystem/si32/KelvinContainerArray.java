@@ -29,8 +29,7 @@ package com.saabgroup.safir.dob.typesystem.si32;
  * Array for KelvinContainers
  */
 public class KelvinContainerArray
-    extends com.saabgroup.safir.dob.typesystem.ArrayContainer<KelvinContainer>
-    implements Cloneable {
+    extends com.saabgroup.safir.dob.typesystem.ArrayContainer<KelvinContainer> {
 
     private static java.util.ArrayList<KelvinContainer> createBlankArray(int size){
         java.util.ArrayList<KelvinContainer> initializedArray = new java.util.ArrayList<KelvinContainer>(size);
@@ -58,17 +57,4 @@ public class KelvinContainerArray
      */
     public KelvinContainerArray(java.util.ArrayList<KelvinContainer> initializedArray) {
         super(initializedArray);
-    }
-
-    protected KelvinContainerArray(KelvinContainerArray other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#clone()
-     */
-    @Override
-    public KelvinContainerArray clone() {
-        return new KelvinContainerArray(this);
-    }
-}
+    }}

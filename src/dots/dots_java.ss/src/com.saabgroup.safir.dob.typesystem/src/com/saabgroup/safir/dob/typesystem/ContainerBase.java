@@ -32,7 +32,7 @@ package com.saabgroup.safir.dob.typesystem;
  * Basically this amounts to the interface for "nullability" and
  * the change flag.
  */
-public abstract class ContainerBase implements Cloneable
+public abstract class ContainerBase
 {
     /**
      * Default Constructor.
@@ -94,27 +94,9 @@ public abstract class ContainerBase implements Cloneable
         m_isChanged = changed;
     }
 
-    protected ContainerBase(ContainerBase other) {
+    void shallowCopy(ContainerBase other)
+    {
         m_isChanged = other.m_isChanged;
-    }
-
-    /**
-     * Member wise deep copy (like an assignment operator in c++).
-     * @param other
-     */
-    public void copy(ContainerBase other) {
-        if (!this.getClass().equals(other.getClass())) {
-            throw new SoftwareViolationException("Invalid call to copy, containers are not of same type");
-        }
-        m_isChanged = other.m_isChanged;
-    }
-
-    /**
-     * Deep clone the object
-     * @return A complete copy of the object.
-     */
-    public ContainerBase clone(){
-        throw new SoftwareViolationException("Cannot clone ContainerBase");
     }
 
     /** Flag must be accessible internally. */

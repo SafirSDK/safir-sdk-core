@@ -31,8 +31,7 @@ import com.saabgroup.safir.dob.typesystem.Float32Container;
  * Container for Volt32 members.
  */
 public class VoltContainer
-    extends Float32Container
-    implements Cloneable {
+    extends Float32Container {
 
     /**
      * Default constructor.
@@ -52,19 +51,6 @@ public class VoltContainer
      */
     public VoltContainer(float value, boolean isNull, boolean isChanged) {
         super(value,isNull,isChanged);
-    }
-
-
-    protected VoltContainer(VoltContainer other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.Float32Container#clone()
-     */
-    @Override
-    public VoltContainer clone() {
-        return new VoltContainer(this);
     }
 
 }

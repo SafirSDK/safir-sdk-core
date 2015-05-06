@@ -29,8 +29,7 @@ package com.saabgroup.safir.dob.typesystem;
  * Container for Binary members.
  */
 public class BinaryContainer
-    extends ContainerBase
-    implements Cloneable {
+    extends ContainerBase {
 
     /**
      * Default constructor.
@@ -95,30 +94,15 @@ public class BinaryContainer
         m_value = null;
     }
 
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#copy(com.saabgroup.safir.dob.typesystem.ContainerBase)
-     */
     @Override
-    public void copy(ContainerBase other) {
-        super.copy(other);
+    void shallowCopy(ContainerBase other)
+    {
+        super.shallowCopy(other);
         BinaryContainer that = (BinaryContainer)other;
-        m_isNull = that.m_isNull;
         m_value = that.m_value;
+        m_isNull = that.m_isNull;
     }
 
-    protected BinaryContainer(BinaryContainer other) {
-        super(other);
-        m_isNull = other.m_isNull;
-        m_value = other.m_value;
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#clone()
-     */
-    @Override
-    public BinaryContainer clone() {
-        return new BinaryContainer(this);
-    }
 
     protected byte [] m_value;
     protected boolean m_isNull;

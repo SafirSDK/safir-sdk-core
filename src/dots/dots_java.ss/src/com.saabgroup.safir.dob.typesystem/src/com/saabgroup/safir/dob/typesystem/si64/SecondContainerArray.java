@@ -29,8 +29,7 @@ package com.saabgroup.safir.dob.typesystem.si64;
  * Array for SecondContainers
  */
 public class SecondContainerArray
-    extends com.saabgroup.safir.dob.typesystem.ArrayContainer<SecondContainer>
-    implements Cloneable {
+    extends com.saabgroup.safir.dob.typesystem.ArrayContainer<SecondContainer> {
 
     private static java.util.ArrayList<SecondContainer> createBlankArray(int size){
         java.util.ArrayList<SecondContainer> initializedArray = new java.util.ArrayList<SecondContainer>(size);
@@ -58,17 +57,4 @@ public class SecondContainerArray
      */
     public SecondContainerArray(java.util.ArrayList<SecondContainer> initializedArray) {
         super(initializedArray);
-    }
-
-    protected SecondContainerArray(SecondContainerArray other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#clone()
-     */
-    @Override
-    public SecondContainerArray clone() {
-        return new SecondContainerArray(this);
-    }
-}
+    }}

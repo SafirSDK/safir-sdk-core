@@ -31,8 +31,7 @@ import com.saabgroup.safir.dob.typesystem.Float32Container;
  * Container for Radian32 members.
  */
 public class RadianContainer
-    extends Float32Container
-    implements Cloneable {
+    extends Float32Container {
 
     /**
      * Default constructor.
@@ -52,19 +51,6 @@ public class RadianContainer
      */
     public RadianContainer(float value, boolean isNull, boolean isChanged) {
         super(value,isNull,isChanged);
-    }
-
-
-    protected RadianContainer(RadianContainer other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.Float32Container#clone()
-     */
-    @Override
-    public RadianContainer clone() {
-        return new RadianContainer(this);
     }
 
 }

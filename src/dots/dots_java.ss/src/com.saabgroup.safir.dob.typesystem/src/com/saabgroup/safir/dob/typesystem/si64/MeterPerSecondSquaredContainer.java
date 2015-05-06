@@ -31,8 +31,7 @@ import com.saabgroup.safir.dob.typesystem.Float64Container;
  * Container for MeterPerSecondSquared64 members.
  */
 public class MeterPerSecondSquaredContainer
-    extends Float64Container
-    implements Cloneable {
+    extends Float64Container {
 
     /**
      * Default constructor.
@@ -52,19 +51,6 @@ public class MeterPerSecondSquaredContainer
      */
     public MeterPerSecondSquaredContainer(double value, boolean isNull, boolean isChanged) {
         super(value,isNull,isChanged);
-    }
-
-
-    protected MeterPerSecondSquaredContainer(MeterPerSecondSquaredContainer other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.Float64Container#clone()
-     */
-    @Override
-    public MeterPerSecondSquaredContainer clone() {
-        return new MeterPerSecondSquaredContainer(this);
     }
 
 }

@@ -29,8 +29,7 @@ package com.saabgroup.safir.dob.typesystem;
  * Container for Int32 members.
  */
 public class Int32Container
-    extends ValueContainer<Integer>
-    implements Cloneable {
+    extends ValueContainer<Integer> {
 
     /**
      * Default constructor.
@@ -43,17 +42,5 @@ public class Int32Container
     Int32Container(int value, boolean isNull, boolean isChanged) {
         super(isNull,isChanged);
         m_value = value;
-    }
-
-    protected Int32Container(Int32Container other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ValueContainer#clone()
-     */
-    @Override
-    public Int32Container clone() {
-        return new Int32Container(this);
     }
 }

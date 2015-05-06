@@ -29,8 +29,7 @@ package com.saabgroup.safir.dob.typesystem.si32;
  * Array for SquareMeterContainers
  */
 public class SquareMeterContainerArray
-    extends com.saabgroup.safir.dob.typesystem.ArrayContainer<SquareMeterContainer>
-    implements Cloneable {
+    extends com.saabgroup.safir.dob.typesystem.ArrayContainer<SquareMeterContainer> {
 
     private static java.util.ArrayList<SquareMeterContainer> createBlankArray(int size){
         java.util.ArrayList<SquareMeterContainer> initializedArray = new java.util.ArrayList<SquareMeterContainer>(size);
@@ -58,17 +57,4 @@ public class SquareMeterContainerArray
      */
     public SquareMeterContainerArray(java.util.ArrayList<SquareMeterContainer> initializedArray) {
         super(initializedArray);
-    }
-
-    protected SquareMeterContainerArray(SquareMeterContainerArray other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#clone()
-     */
-    @Override
-    public SquareMeterContainerArray clone() {
-        return new SquareMeterContainerArray(this);
-    }
-}
+    }}

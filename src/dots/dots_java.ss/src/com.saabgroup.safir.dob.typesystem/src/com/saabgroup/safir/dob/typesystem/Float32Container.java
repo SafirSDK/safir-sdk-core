@@ -30,8 +30,7 @@ package com.saabgroup.safir.dob.typesystem;
  * Container for Float32 members.
  */
 public class Float32Container
-    extends ValueContainer<Float>
-    implements Cloneable {
+    extends ValueContainer<Float> {
 
     /**
      * Default constructor.
@@ -44,19 +43,6 @@ public class Float32Container
     protected Float32Container(float value, boolean isNull, boolean isChanged) {
         super(isNull,isChanged);
         m_value = value;
-    }
-
-
-    protected Float32Container(Float32Container other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ValueContainer#clone()
-     */
-    @Override
-    public Float32Container clone() {
-        return new Float32Container(this);
     }
 
 }

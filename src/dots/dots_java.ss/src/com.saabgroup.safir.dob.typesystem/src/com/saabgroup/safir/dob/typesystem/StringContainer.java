@@ -30,7 +30,7 @@ import java.io.UnsupportedEncodingException;
 /**
  * Container for String members.
  */
-public class StringContainer extends ContainerBase implements Cloneable {
+public class StringContainer extends ContainerBase {
 
     /**
      * Default constructor.
@@ -144,33 +144,15 @@ public class StringContainer extends ContainerBase implements Cloneable {
         return m_cachedUtf8String;
     }
 
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#copy(com.saabgroup.safir.dob.typesystem.ContainerBase)
-     */
     @Override
-    public void copy(ContainerBase other) {
-        super.copy(other);
+    void shallowCopy(ContainerBase other)
+    {
+        super.shallowCopy(other);
         StringContainer that = (StringContainer)other;
-        m_isNull = that.m_isNull;
         m_value = that.m_value;
+        m_cachedUtf8String = that.m_cachedUtf8String;
+        m_isNull = that.m_isNull;
     }
-
-    protected StringContainer(StringContainer other) {
-        super(other);
-        m_isNull = other.m_isNull;
-        m_value = other.m_value;
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#clone()
-     */
-    @Override
-    public StringContainer clone() {
-        return new StringContainer(this);
-    }
-
-
 
     //variables are accessible internally.
     protected String m_value;

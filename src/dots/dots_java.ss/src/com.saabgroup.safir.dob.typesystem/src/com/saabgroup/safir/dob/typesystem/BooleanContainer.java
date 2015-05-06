@@ -29,8 +29,7 @@ package com.saabgroup.safir.dob.typesystem;
  * Container for Boolean members.
  */
 public class BooleanContainer
-    extends ValueContainer<Boolean>
-    implements Cloneable {
+    extends ValueContainer<Boolean> {
 
     /**
      * Default constructor.
@@ -43,19 +42,6 @@ public class BooleanContainer
     BooleanContainer(boolean value, boolean isNull, boolean isChanged) {
         super(isNull,isChanged);
         m_value = value;
-    }
-
-
-    protected BooleanContainer(BooleanContainer other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ValueContainer#clone()
-     */
-    @Override
-    public BooleanContainer clone() {
-        return new BooleanContainer(this);
     }
 
 }

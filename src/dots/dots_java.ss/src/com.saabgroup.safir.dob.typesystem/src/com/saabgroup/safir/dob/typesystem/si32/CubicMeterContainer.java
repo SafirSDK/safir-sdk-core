@@ -31,8 +31,7 @@ import com.saabgroup.safir.dob.typesystem.Float32Container;
  * Container for CubicMeter32 members.
  */
 public class CubicMeterContainer
-    extends Float32Container
-    implements Cloneable {
+    extends Float32Container {
 
     /**
      * Default constructor.
@@ -52,19 +51,6 @@ public class CubicMeterContainer
      */
     public CubicMeterContainer(float value, boolean isNull, boolean isChanged) {
         super(value,isNull,isChanged);
-    }
-
-
-    protected CubicMeterContainer(CubicMeterContainer other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.Float32Container#clone()
-     */
-    @Override
-    public CubicMeterContainer clone() {
-        return new CubicMeterContainer(this);
     }
 
 }

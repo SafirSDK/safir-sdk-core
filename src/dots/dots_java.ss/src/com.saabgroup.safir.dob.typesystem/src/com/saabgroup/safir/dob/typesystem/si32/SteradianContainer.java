@@ -31,8 +31,7 @@ import com.saabgroup.safir.dob.typesystem.Float32Container;
  * Container for Steradian32 members.
  */
 public class SteradianContainer
-    extends Float32Container
-    implements Cloneable {
+    extends Float32Container {
 
     /**
      * Default constructor.
@@ -53,18 +52,4 @@ public class SteradianContainer
     public SteradianContainer(float value, boolean isNull, boolean isChanged) {
         super(value,isNull,isChanged);
     }
-
-
-    protected SteradianContainer(SteradianContainer other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.Float32Container#clone()
-     */
-    @Override
-    public SteradianContainer clone() {
-        return new SteradianContainer(this);
-    }
-
 }

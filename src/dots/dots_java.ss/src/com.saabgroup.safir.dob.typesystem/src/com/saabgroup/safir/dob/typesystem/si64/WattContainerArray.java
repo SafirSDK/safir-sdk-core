@@ -29,8 +29,7 @@ package com.saabgroup.safir.dob.typesystem.si64;
  * Array for WattContainers
  */
 public class WattContainerArray
-    extends com.saabgroup.safir.dob.typesystem.ArrayContainer<WattContainer>
-    implements Cloneable {
+    extends com.saabgroup.safir.dob.typesystem.ArrayContainer<WattContainer> {
 
     private static java.util.ArrayList<WattContainer> createBlankArray(int size){
         java.util.ArrayList<WattContainer> initializedArray = new java.util.ArrayList<WattContainer>(size);
@@ -58,17 +57,5 @@ public class WattContainerArray
      */
     public WattContainerArray(java.util.ArrayList<WattContainer> initializedArray) {
         super(initializedArray);
-    }
-
-    protected WattContainerArray(WattContainerArray other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#clone()
-     */
-    @Override
-    public WattContainerArray clone() {
-        return new WattContainerArray(this);
     }
 }

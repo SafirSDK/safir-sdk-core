@@ -31,8 +31,7 @@ package com.saabgroup.safir.dob.typesystem;
  * functionality must be able to get hold of members of items.
  */
 public abstract class ObjectContainerBase
-    extends ContainerBase
-    implements Cloneable {
+    extends ContainerBase {
 
     /** Default constructor. */
     ObjectContainerBase() { super();}
@@ -103,13 +102,4 @@ public abstract class ObjectContainerBase
      * @return The contained object.
     */
     abstract public Object getObjInternal();
-
-    protected ObjectContainerBase(ObjectContainerBase other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#clone()
-     */
-    abstract public ObjectContainerBase clone();
 }

@@ -28,8 +28,7 @@ package com.saabgroup.safir.dob.typesystem;
  * Array for ChannelIdContainers
  */
 public class ChannelIdContainerArray
-    extends ArrayContainer<ChannelIdContainer>
-    implements Cloneable {
+    extends ArrayContainer<ChannelIdContainer> {
 
     private static java.util.ArrayList<ChannelIdContainer> createBlankArray(int size){
         java.util.ArrayList<ChannelIdContainer> initializedArray = new java.util.ArrayList<ChannelIdContainer>(size);
@@ -58,17 +57,4 @@ public class ChannelIdContainerArray
     public ChannelIdContainerArray(java.util.ArrayList<ChannelIdContainer> initializedArray) {
         super(initializedArray);
     }
-
-    protected ChannelIdContainerArray(ChannelIdContainerArray other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#clone()
-     */
-    @Override
-    public ChannelIdContainerArray clone() {
-        return new ChannelIdContainerArray(this);
-    }
-
 }

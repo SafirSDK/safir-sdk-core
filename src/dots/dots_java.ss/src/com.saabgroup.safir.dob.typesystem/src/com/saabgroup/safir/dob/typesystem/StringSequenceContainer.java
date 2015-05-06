@@ -26,8 +26,7 @@
 package com.saabgroup.safir.dob.typesystem;
 
 public class StringSequenceContainer
-extends ValueSequenceContainer<String>
-implements Cloneable {
+extends ValueSequenceContainer<String> {
 
 	public StringSequenceContainer() {
 		super();

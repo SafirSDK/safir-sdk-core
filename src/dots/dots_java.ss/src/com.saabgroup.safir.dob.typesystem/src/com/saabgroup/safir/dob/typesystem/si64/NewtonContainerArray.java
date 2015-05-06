@@ -29,8 +29,7 @@ package com.saabgroup.safir.dob.typesystem.si64;
  * Array for NewtonContainers
  */
 public class NewtonContainerArray
-    extends com.saabgroup.safir.dob.typesystem.ArrayContainer<NewtonContainer>
-    implements Cloneable {
+    extends com.saabgroup.safir.dob.typesystem.ArrayContainer<NewtonContainer> {
 
     private static java.util.ArrayList<NewtonContainer> createBlankArray(int size){
         java.util.ArrayList<NewtonContainer> initializedArray = new java.util.ArrayList<NewtonContainer>(size);
@@ -58,17 +57,5 @@ public class NewtonContainerArray
      */
     public NewtonContainerArray(java.util.ArrayList<NewtonContainer> initializedArray) {
         super(initializedArray);
-    }
-
-    protected NewtonContainerArray(NewtonContainerArray other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#clone()
-     */
-    @Override
-    public NewtonContainerArray clone() {
-        return new NewtonContainerArray(this);
     }
 }

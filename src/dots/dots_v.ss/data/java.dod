@@ -1,6 +1,7 @@
 @@-------------------------------------------------------------------------------
 @@--
-@@--  Copyright Saab AB, 2005-2013 (http://safir.sourceforge.net)
+@@--  Copyright Saab AB, 2005-2015 (http://safir.sourceforge.net)
+@@--  Copyright Consoden AB, 2015 (http://www.consoden.se)
 @@--
 @@--  Created by: Henrik Sundberg / sthesu
 @@--
@@ -603,8 +604,7 @@ public class @_CLASS_@
  */
 @@END_IF@@
 public class @_CLASS_@
-    extends @_BASECLASS_@
-    implements Cloneable {
+    extends @_BASECLASS_@ {
     /**
      * Default constructor.
      */
@@ -1077,21 +1077,6 @@ public class @_CLASS_@
 @@END_TABLE@@
     }
 
-    protected @_CLASS_@(@_CLASS_@ other){
-        super(other);
-@@TABLE@@
-        m_@_MEMBER_@Member = other.m_@_MEMBER_@Member.clone();
-@@END_TABLE@@
-    }
-
-    /**
-     * Member wise deep clone of object.
-     */
-    @Override
-    public @_CLASS_@ clone(){
-        return new @_CLASS_@(this);
-    }
-
     /**
      * Create @_CLASS_@ object from blob.
      * @param blob the blob to deserialize.
@@ -1399,8 +1384,7 @@ public class @_CLASS_@
      * Array for ObjectContainers
      */
     static public class ContainerArray
-        extends com.saabgroup.safir.dob.typesystem.ArrayContainer<com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_CLASS_@>>
-        implements Cloneable {
+        extends com.saabgroup.safir.dob.typesystem.ArrayContainer<com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_CLASS_@>> {
 
         private static java.util.ArrayList<com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_CLASS_@>> createBlankArray(int size){
             java.util.ArrayList<com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_CLASS_@>> initializedArray =
@@ -1430,40 +1414,17 @@ public class @_CLASS_@
         public ContainerArray(java.util.ArrayList<com.saabgroup.safir.dob.typesystem.ObjectContainerImpl<@_CLASS_@>> initializedArray) {
             super(initializedArray);
         }
-
-        protected ContainerArray(ContainerArray other) {
-            super(other);
-        }
-
-        /**
-         * @see com.saabgroup.safir.dob.typesystem.ContainerBase#clone()
-         */
-        @Override
-        public ContainerArray clone() {
-            return new ContainerArray(this);
-        }
-
     }
 
     /**
      * Sequence container
      */
     static public class SequenceContainer
-        extends com.saabgroup.safir.dob.typesystem.GenericObjectSequenceContainer<@_CLASS_@>
-        implements Cloneable {
+        extends com.saabgroup.safir.dob.typesystem.GenericObjectSequenceContainer<@_CLASS_@> {
 
         public SequenceContainer() {
             super();
         }
-
-        public SequenceContainer(SequenceContainer other) {
-            super(other);
-        }
-
-         @Override
-         public SequenceContainer clone() {
-             return new SequenceContainer(this);
-         }
     }
 
 }
@@ -1542,8 +1503,7 @@ public enum @_CLASS_@
      * Container for the enumeration @_CLASS_@
      */
     static public class Container
-        extends com.saabgroup.safir.dob.typesystem.EnumerationContainerBase<@_UNIT_@>
-        implements Cloneable {
+        extends com.saabgroup.safir.dob.typesystem.EnumerationContainerBase<@_UNIT_@> {
         /**
          * Default constructor (constructs a null and not changed container).
          */
@@ -1563,26 +1523,13 @@ public enum @_CLASS_@
        public @_CLASS_@ getVal() {
            return @_UNIT_@.values()[getOrdinal()];
        }
-
-       protected Container(Container other) {
-           super(other);
-       }
-
-       /**
-        * @see com.saabgroup.safir.dob.typesystem.ValueContainer#clone()
-        */
-       @Override
-           public Container clone() {
-           return new Container(this);
-       }
     }
 
     /**
      * Array for @_CLASS_@Containers
      */
     static public class ContainerArray
-        extends com.saabgroup.safir.dob.typesystem.ArrayContainer<Container>
-        implements Cloneable {
+        extends com.saabgroup.safir.dob.typesystem.ArrayContainer<Container> {
 
         private static java.util.ArrayList<Container> createBlankArray(int size){
             java.util.ArrayList<Container> initializedArray = new java.util.ArrayList<Container>(size);
@@ -1611,43 +1558,18 @@ public enum @_CLASS_@
         public ContainerArray(java.util.ArrayList<Container> initializedArray) {
             super(initializedArray);
         }
-
-        protected ContainerArray(ContainerArray other) {
-            super(other);
-        }
-
-        /**
-         * @see com.saabgroup.safir.dob.typesystem.ContainerBase#clone()
-         */
-        @Override
-            public ContainerArray clone() {
-            return new ContainerArray(this);
-        }
     }
-        
+
     /**
      * Sequence for @_CLASS_@
      */
     static public class SequenceContainer
-        extends com.saabgroup.safir.dob.typesystem.ValueSequenceContainer<@_CLASS_@>
-        implements Cloneable {
+        extends com.saabgroup.safir.dob.typesystem.ValueSequenceContainer<@_CLASS_@> {
 
 
         public SequenceContainer() {
 		    super();
 	    }
-	
-	    public SequenceContainer(SequenceContainer other) {
-		    super(other);
-	    }
-	
-	    /**
-         * @see com.saabgroup.safir.dob.typesystem.ValueContainer#clone()
-         */
-        @Override
-        public SequenceContainer clone() {
-            return new SequenceContainer(this);
-        }
     }
 }
 @@ELSIF@@ @_UNITTYPE_@=exception

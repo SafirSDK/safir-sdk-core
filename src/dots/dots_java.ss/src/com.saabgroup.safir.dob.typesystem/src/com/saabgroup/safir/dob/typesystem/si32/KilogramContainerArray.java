@@ -29,8 +29,7 @@ package com.saabgroup.safir.dob.typesystem.si32;
  * Array for KilogramContainers
  */
 public class KilogramContainerArray
-    extends com.saabgroup.safir.dob.typesystem.ArrayContainer<KilogramContainer>
-    implements Cloneable {
+    extends com.saabgroup.safir.dob.typesystem.ArrayContainer<KilogramContainer> {
 
     private static java.util.ArrayList<KilogramContainer> createBlankArray(int size){
         java.util.ArrayList<KilogramContainer> initializedArray = new java.util.ArrayList<KilogramContainer>(size);
@@ -58,17 +57,4 @@ public class KilogramContainerArray
      */
     public KilogramContainerArray(java.util.ArrayList<KilogramContainer> initializedArray) {
         super(initializedArray);
-    }
-
-    protected KilogramContainerArray(KilogramContainerArray other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#clone()
-     */
-    @Override
-    public KilogramContainerArray clone() {
-        return new KilogramContainerArray(this);
-    }
-}
+    }}

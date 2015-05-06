@@ -27,8 +27,7 @@ package com.saabgroup.safir.dob.typesystem.si64;
 import com.saabgroup.safir.dob.typesystem.Float64SequenceContainer;
 
 public class JouleSequenceContainer
-extends Float64SequenceContainer
-implements Cloneable {
+extends Float64SequenceContainer {
 
 	public JouleSequenceContainer() {
 		super();

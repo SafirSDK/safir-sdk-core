@@ -28,8 +28,7 @@ package com.saabgroup.safir.dob.typesystem;
  * Array for StringContainers
  */
 public class StringContainerArray
-    extends ArrayContainer<StringContainer>
-    implements Cloneable {
+    extends ArrayContainer<StringContainer> {
 
     private static java.util.ArrayList<StringContainer> createBlankArray(int size){
         java.util.ArrayList<StringContainer> initializedArray = new java.util.ArrayList<StringContainer>(size);
@@ -58,17 +57,4 @@ public class StringContainerArray
     public StringContainerArray(java.util.ArrayList<StringContainer> initializedArray) {
         super(initializedArray);
     }
-
-    protected StringContainerArray(StringContainerArray other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#clone()
-     */
-    @Override
-    public StringContainerArray clone() {
-        return new StringContainerArray(this);
-    }
-
 }

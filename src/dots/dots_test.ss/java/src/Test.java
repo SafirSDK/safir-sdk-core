@@ -11447,10 +11447,6 @@ public class Test {
         System.out.println("------ From Json -----");
         MemberSequences fromJson=(MemberSequences)Serialization.toObjectFromJson(json);
         printSequences(fromJson);
-
-        System.out.println("------ Clone -----");
-        MemberSequences clone=ms.clone();
-        printSequences(clone);
     }
 
     private static void printDictionaries(MemberDictionaries md)
@@ -11674,9 +11670,5 @@ public class Test {
         System.out.println("------ From Json -----");
         MemberDictionaries fromJson = (MemberDictionaries)Serialization.toObjectFromJson (json);
         printDictionaries(fromJson);
-
-        System.out.println("------ Clone -----");
-        MemberDictionaries clone = md.clone();
-        printDictionaries(clone);
     }
 }

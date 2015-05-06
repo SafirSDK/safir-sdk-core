@@ -29,8 +29,7 @@ package com.saabgroup.safir.dob.typesystem.si32;
  * Array for AmpereContainers
  */
 public class AmpereContainerArray
-    extends com.saabgroup.safir.dob.typesystem.ArrayContainer<AmpereContainer>
-    implements Cloneable {
+    extends com.saabgroup.safir.dob.typesystem.ArrayContainer<AmpereContainer> {
 
     private static java.util.ArrayList<AmpereContainer> createBlankArray(int size){
         java.util.ArrayList<AmpereContainer> initializedArray = new java.util.ArrayList<AmpereContainer>(size);
@@ -58,17 +57,4 @@ public class AmpereContainerArray
      */
     public AmpereContainerArray(java.util.ArrayList<AmpereContainer> initializedArray) {
         super(initializedArray);
-    }
-
-    protected AmpereContainerArray(AmpereContainerArray other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#clone()
-     */
-    @Override
-    public AmpereContainerArray clone() {
-        return new AmpereContainerArray(this);
-    }
-}
+    }}

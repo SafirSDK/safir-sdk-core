@@ -29,8 +29,7 @@ package com.saabgroup.safir.dob.typesystem.si64;
  * Array for PascalContainers
  */
 public class PascalContainerArray
-    extends com.saabgroup.safir.dob.typesystem.ArrayContainer<PascalContainer>
-    implements Cloneable {
+    extends com.saabgroup.safir.dob.typesystem.ArrayContainer<PascalContainer> {
 
     private static java.util.ArrayList<PascalContainer> createBlankArray(int size){
         java.util.ArrayList<PascalContainer> initializedArray = new java.util.ArrayList<PascalContainer>(size);
@@ -58,17 +57,5 @@ public class PascalContainerArray
      */
     public PascalContainerArray(java.util.ArrayList<PascalContainer> initializedArray) {
         super(initializedArray);
-    }
-
-    protected PascalContainerArray(PascalContainerArray other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#clone()
-     */
-    @Override
-    public PascalContainerArray clone() {
-        return new PascalContainerArray(this);
     }
 }

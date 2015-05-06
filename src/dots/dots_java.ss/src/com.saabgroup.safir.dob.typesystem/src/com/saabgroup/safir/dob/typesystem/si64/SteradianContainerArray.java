@@ -29,8 +29,7 @@ package com.saabgroup.safir.dob.typesystem.si64;
  * Array for SteradianContainers
  */
 public class SteradianContainerArray
-    extends com.saabgroup.safir.dob.typesystem.ArrayContainer<SteradianContainer>
-    implements Cloneable {
+    extends com.saabgroup.safir.dob.typesystem.ArrayContainer<SteradianContainer> {
 
     private static java.util.ArrayList<SteradianContainer> createBlankArray(int size){
         java.util.ArrayList<SteradianContainer> initializedArray = new java.util.ArrayList<SteradianContainer>(size);
@@ -58,17 +57,4 @@ public class SteradianContainerArray
      */
     public SteradianContainerArray(java.util.ArrayList<SteradianContainer> initializedArray) {
         super(initializedArray);
-    }
-
-    protected SteradianContainerArray(SteradianContainerArray other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#clone()
-     */
-    @Override
-    public SteradianContainerArray clone() {
-        return new SteradianContainerArray(this);
-    }
-}
+    }}

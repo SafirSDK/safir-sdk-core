@@ -29,8 +29,7 @@ package com.saabgroup.safir.dob.typesystem.si64;
  * Array for VoltContainers
  */
 public class VoltContainerArray
-    extends com.saabgroup.safir.dob.typesystem.ArrayContainer<VoltContainer>
-    implements Cloneable {
+    extends com.saabgroup.safir.dob.typesystem.ArrayContainer<VoltContainer> {
 
     private static java.util.ArrayList<VoltContainer> createBlankArray(int size){
         java.util.ArrayList<VoltContainer> initializedArray = new java.util.ArrayList<VoltContainer>(size);
@@ -58,17 +57,4 @@ public class VoltContainerArray
      */
     public VoltContainerArray(java.util.ArrayList<VoltContainer> initializedArray) {
         super(initializedArray);
-    }
-
-    protected VoltContainerArray(VoltContainerArray other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#clone()
-     */
-    @Override
-    public VoltContainerArray clone() {
-        return new VoltContainerArray(this);
-    }
-}
+    }}

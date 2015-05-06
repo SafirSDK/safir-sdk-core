@@ -26,8 +26,7 @@
 package com.saabgroup.safir.dob.typesystem;
 
 public class BinarySequenceContainer
-extends ValueSequenceContainer<Byte[]>
-implements Cloneable {
+extends ValueSequenceContainer<Byte[]> {
 
     public BinarySequenceContainer() {
 		super();

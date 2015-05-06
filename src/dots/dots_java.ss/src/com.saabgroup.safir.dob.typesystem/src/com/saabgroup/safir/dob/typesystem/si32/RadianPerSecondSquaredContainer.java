@@ -31,8 +31,7 @@ import com.saabgroup.safir.dob.typesystem.Float32Container;
  * Container for RadianPerSecondSquared32 members.
  */
 public class RadianPerSecondSquaredContainer
-    extends Float32Container
-    implements Cloneable {
+    extends Float32Container {
 
     /**
      * Default constructor.
@@ -52,19 +51,6 @@ public class RadianPerSecondSquaredContainer
      */
     public RadianPerSecondSquaredContainer(float value, boolean isNull, boolean isChanged) {
         super(value,isNull,isChanged);
-    }
-
-
-    protected RadianPerSecondSquaredContainer(RadianPerSecondSquaredContainer other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.Float32Container#clone()
-     */
-    @Override
-    public RadianPerSecondSquaredContainer clone() {
-        return new RadianPerSecondSquaredContainer(this);
     }
 
 }

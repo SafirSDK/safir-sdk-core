@@ -31,8 +31,7 @@ import com.saabgroup.safir.dob.typesystem.Float64Container;
  * Container for Kilogram64 members.
  */
 public class KilogramContainer
-    extends Float64Container
-    implements Cloneable {
+    extends Float64Container {
 
     /**
      * Default constructor.
@@ -52,19 +51,6 @@ public class KilogramContainer
      */
     public KilogramContainer(double value, boolean isNull, boolean isChanged) {
         super(value,isNull,isChanged);
-    }
-
-
-    protected KilogramContainer(KilogramContainer other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.Float64Container#clone()
-     */
-    @Override
-    public KilogramContainer clone() {
-        return new KilogramContainer(this);
     }
 
 }

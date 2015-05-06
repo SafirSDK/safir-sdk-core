@@ -28,8 +28,7 @@ package com.saabgroup.safir.dob.typesystem;
  * Array for HandlerIdContainers
  */
 public class HandlerIdContainerArray
-    extends ArrayContainer<HandlerIdContainer>
-    implements Cloneable {
+    extends ArrayContainer<HandlerIdContainer> {
 
     private static java.util.ArrayList<HandlerIdContainer> createBlankArray(int size){
         java.util.ArrayList<HandlerIdContainer> initializedArray = new java.util.ArrayList<HandlerIdContainer>(size);
@@ -58,17 +57,4 @@ public class HandlerIdContainerArray
     public HandlerIdContainerArray(java.util.ArrayList<HandlerIdContainer> initializedArray) {
         super(initializedArray);
     }
-
-    protected HandlerIdContainerArray(HandlerIdContainerArray other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#clone()
-     */
-    @Override
-    public HandlerIdContainerArray clone() {
-        return new HandlerIdContainerArray(this);
-    }
-
 }

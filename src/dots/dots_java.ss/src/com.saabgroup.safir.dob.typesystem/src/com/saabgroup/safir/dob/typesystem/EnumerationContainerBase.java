@@ -40,8 +40,7 @@ package com.saabgroup.safir.dob.typesystem;
  * @param <E> Enumeration type
  */
 public abstract class EnumerationContainerBase<E extends Enum<E>>
-    extends ContainerBase
-    implements Cloneable {
+    extends ContainerBase {
 
     /**
      * Default constructor that constructs a null and not changed enumeration container.
@@ -135,31 +134,14 @@ public abstract class EnumerationContainerBase<E extends Enum<E>>
         m_Value = value.ordinal();
     }
 
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#copy(com.saabgroup.safir.dob.typesystem.ContainerBase)
-     */
-    @SuppressWarnings("unchecked")
     @Override
-    public void copy(ContainerBase other) {
-        super.copy(other);
-        EnumerationContainerBase<E> that = (EnumerationContainerBase<E>)other;
+    void shallowCopy(ContainerBase other)
+    {
+        super.shallowCopy(other);
+        EnumerationContainerBase that = (EnumerationContainerBase)other;
         m_bIsNull = that.m_bIsNull;
         m_Value = that.m_Value;
     }
-
-    protected EnumerationContainerBase(EnumerationContainerBase<E> other) {
-        super(other);
-        m_bIsNull = other.m_bIsNull;
-        m_Value = other.m_Value;
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#clone()
-     */
-    @Override
-    abstract public EnumerationContainerBase<E> clone();
-
 
     //variables are accessible internally.
     protected int m_Value;

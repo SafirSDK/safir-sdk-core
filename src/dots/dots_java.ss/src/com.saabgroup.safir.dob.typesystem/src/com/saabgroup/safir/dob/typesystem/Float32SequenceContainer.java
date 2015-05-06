@@ -26,8 +26,7 @@
 package com.saabgroup.safir.dob.typesystem;
 
 public class Float32SequenceContainer
-extends ValueSequenceContainer<Float>
-implements Cloneable {
+extends ValueSequenceContainer<Float> {
 
 	public Float32SequenceContainer() {
 		super();

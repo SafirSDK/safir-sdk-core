@@ -36,8 +36,7 @@ import java.util.ArrayList;
  * @param <T> type to contain.
  */
 public abstract class ArrayContainer<T extends ContainerBase>
-    extends java.util.AbstractList<T>
-    implements Cloneable {
+    extends java.util.AbstractList<T> {
 
     protected ArrayContainer(java.util.ArrayList<T> initializedArray) {
         m_array = initializedArray;
@@ -88,24 +87,6 @@ public abstract class ArrayContainer<T extends ContainerBase>
             cont.setChanged(true);
         }
     }
-
-
-    @SuppressWarnings("unchecked")
-    protected ArrayContainer(ArrayContainer<T> other) {
-        m_array = (ArrayList<T>) other.m_array.clone();
-        //need to clone the elements, currently we've just got two arrays
-        //pointing to the same elements
-        for (int i = 0; i < m_array.size(); ++i) {
-            m_array.set(i, (T)m_array.get(i).clone());
-        }
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#clone()
-     */
-    @Override
-    public abstract ArrayContainer<T> clone();
-
 
     private java.util.ArrayList<T> m_array;
 }

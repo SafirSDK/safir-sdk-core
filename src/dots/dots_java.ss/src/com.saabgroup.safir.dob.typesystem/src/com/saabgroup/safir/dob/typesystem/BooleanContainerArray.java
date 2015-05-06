@@ -28,8 +28,7 @@ package com.saabgroup.safir.dob.typesystem;
  * Array for BooleanContainers
  */
 public class BooleanContainerArray
-    extends ArrayContainer<BooleanContainer>
-    implements Cloneable {
+    extends ArrayContainer<BooleanContainer> {
 
     private static java.util.ArrayList<BooleanContainer> createBlankArray(int size){
         java.util.ArrayList<BooleanContainer> initializedArray = new java.util.ArrayList<BooleanContainer>(size);
@@ -58,17 +57,4 @@ public class BooleanContainerArray
     public BooleanContainerArray(java.util.ArrayList<BooleanContainer> initializedArray) {
         super(initializedArray);
     }
-
-    protected BooleanContainerArray(BooleanContainerArray other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#clone()
-     */
-    @Override
-    public BooleanContainerArray clone() {
-        return new BooleanContainerArray(this);
-    }
-
 }

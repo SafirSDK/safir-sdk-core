@@ -29,8 +29,7 @@ package com.saabgroup.safir.dob.typesystem;
  * Container for EntityId members.
  */
 public class EntityIdContainer
-    extends ValueContainer<EntityId>
-    implements Cloneable {
+    extends ValueContainer<EntityId> {
 
     /**
      * Default constructor.
@@ -43,19 +42,6 @@ public class EntityIdContainer
     EntityIdContainer(EntityId value, boolean isNull, boolean isChanged) {
         super(isNull,isChanged);
         m_value = value;
-    }
-
-
-    protected EntityIdContainer(EntityIdContainer other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ValueContainer#clone()
-     */
-    @Override
-    public EntityIdContainer clone() {
-        return new EntityIdContainer(this);
     }
 
 }

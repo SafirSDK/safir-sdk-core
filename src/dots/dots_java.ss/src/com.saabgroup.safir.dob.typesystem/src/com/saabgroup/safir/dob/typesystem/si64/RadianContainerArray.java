@@ -29,8 +29,7 @@ package com.saabgroup.safir.dob.typesystem.si64;
  * Array for RadianContainers
  */
 public class RadianContainerArray
-    extends com.saabgroup.safir.dob.typesystem.ArrayContainer<RadianContainer>
-    implements Cloneable {
+    extends com.saabgroup.safir.dob.typesystem.ArrayContainer<RadianContainer> {
 
     private static java.util.ArrayList<RadianContainer> createBlankArray(int size){
         java.util.ArrayList<RadianContainer> initializedArray = new java.util.ArrayList<RadianContainer>(size);
@@ -58,17 +57,5 @@ public class RadianContainerArray
      */
     public RadianContainerArray(java.util.ArrayList<RadianContainer> initializedArray) {
         super(initializedArray);
-    }
-
-    protected RadianContainerArray(RadianContainerArray other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#clone()
-     */
-    @Override
-    public RadianContainerArray clone() {
-        return new RadianContainerArray(this);
     }
 }

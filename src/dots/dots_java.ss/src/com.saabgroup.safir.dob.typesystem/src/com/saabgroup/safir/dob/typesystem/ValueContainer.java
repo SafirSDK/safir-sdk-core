@@ -36,7 +36,7 @@ package com.saabgroup.safir.dob.typesystem;
  *
  * @param <T> The type to contain.
  */
-public abstract class ValueContainer<T> extends ContainerBase implements Cloneable {
+public abstract class ValueContainer<T> extends ContainerBase {
 
     /**
      * Default constructor
@@ -99,33 +99,15 @@ public abstract class ValueContainer<T> extends ContainerBase implements Cloneab
         m_isChanged = true;
     }
 
-
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#copy(com.saabgroup.safir.dob.typesystem.ContainerBase)
-     */
-    @SuppressWarnings("unchecked")
     @Override
-    public void copy(ContainerBase other) {
-        super.copy(other);
+    @SuppressWarnings("unchecked")
+    void shallowCopy(ContainerBase other)
+    {
+        super.shallowCopy(other);
         ValueContainer<T> that = (ValueContainer<T>)other;
         m_isNull = that.m_isNull;
         m_value = that.m_value;
     }
-
-    protected ValueContainer(ValueContainer<T> other) {
-        super(other);
-        m_isNull = other.m_isNull;
-        m_value = other.m_value;
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#clone()
-     */
-    @Override
-    abstract public ValueContainer<T> clone();
-
-
 
     //variables are accessible internally.
     protected T m_value;

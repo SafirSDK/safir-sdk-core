@@ -29,8 +29,7 @@ package com.saabgroup.safir.dob.typesystem.si64;
  * Array for MeterContainers
  */
 public class MeterContainerArray
-    extends com.saabgroup.safir.dob.typesystem.ArrayContainer<MeterContainer>
-    implements Cloneable {
+    extends com.saabgroup.safir.dob.typesystem.ArrayContainer<MeterContainer> {
 
     private static java.util.ArrayList<MeterContainer> createBlankArray(int size){
         java.util.ArrayList<MeterContainer> initializedArray = new java.util.ArrayList<MeterContainer>(size);
@@ -58,17 +57,4 @@ public class MeterContainerArray
      */
     public MeterContainerArray(java.util.ArrayList<MeterContainer> initializedArray) {
         super(initializedArray);
-    }
-
-    protected MeterContainerArray(MeterContainerArray other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#clone()
-     */
-    @Override
-    public MeterContainerArray clone() {
-        return new MeterContainerArray(this);
-    }
-}
+    }}

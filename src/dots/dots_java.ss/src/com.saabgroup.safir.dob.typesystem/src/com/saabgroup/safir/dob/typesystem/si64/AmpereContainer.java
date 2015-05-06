@@ -31,8 +31,7 @@ import com.saabgroup.safir.dob.typesystem.Float64Container;
  * Container for Ampere64 members.
  */
 public class AmpereContainer
-    extends Float64Container
-    implements Cloneable {
+    extends Float64Container {
 
     /**
      * Default constructor.
@@ -53,18 +52,4 @@ public class AmpereContainer
     public AmpereContainer(double value, boolean isNull, boolean isChanged) {
         super(value,isNull,isChanged);
     }
-
-
-    protected AmpereContainer(AmpereContainer other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.Float64Container#clone()
-     */
-    @Override
-    public AmpereContainer clone() {
-        return new AmpereContainer(this);
-    }
-
 }

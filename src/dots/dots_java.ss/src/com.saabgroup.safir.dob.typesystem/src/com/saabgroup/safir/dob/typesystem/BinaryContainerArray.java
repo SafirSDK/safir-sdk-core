@@ -28,8 +28,7 @@ package com.saabgroup.safir.dob.typesystem;
  * Array for BinaryContainers
  */
 public class BinaryContainerArray
-    extends ArrayContainer<BinaryContainer>
-    implements Cloneable {
+    extends ArrayContainer<BinaryContainer> {
 
     private static java.util.ArrayList<BinaryContainer> createBlankArray(int size){
         java.util.ArrayList<BinaryContainer> initializedArray = new java.util.ArrayList<BinaryContainer>(size);
@@ -58,17 +57,4 @@ public class BinaryContainerArray
     public BinaryContainerArray(java.util.ArrayList<BinaryContainer> initializedArray) {
         super(initializedArray);
     }
-
-    protected BinaryContainerArray(BinaryContainerArray other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#clone()
-     */
-    @Override
-    public BinaryContainerArray clone() {
-        return new BinaryContainerArray(this);
-    }
-
 }

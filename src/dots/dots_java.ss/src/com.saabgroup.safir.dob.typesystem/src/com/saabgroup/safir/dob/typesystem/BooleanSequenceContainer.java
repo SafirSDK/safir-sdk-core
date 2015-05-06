@@ -26,8 +26,7 @@
 package com.saabgroup.safir.dob.typesystem;
 
 public class BooleanSequenceContainer
-extends ValueSequenceContainer<Boolean>
-implements Cloneable {
+extends ValueSequenceContainer<Boolean> {
 
 	public BooleanSequenceContainer() {
 		super();

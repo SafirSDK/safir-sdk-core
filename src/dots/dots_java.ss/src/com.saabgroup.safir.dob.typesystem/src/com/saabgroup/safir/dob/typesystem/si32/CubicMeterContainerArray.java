@@ -29,8 +29,7 @@ package com.saabgroup.safir.dob.typesystem.si32;
  * Array for CubicMeterContainers
  */
 public class CubicMeterContainerArray
-    extends com.saabgroup.safir.dob.typesystem.ArrayContainer<CubicMeterContainer>
-    implements Cloneable {
+    extends com.saabgroup.safir.dob.typesystem.ArrayContainer<CubicMeterContainer> {
 
     private static java.util.ArrayList<CubicMeterContainer> createBlankArray(int size){
         java.util.ArrayList<CubicMeterContainer> initializedArray = new java.util.ArrayList<CubicMeterContainer>(size);
@@ -58,17 +57,4 @@ public class CubicMeterContainerArray
      */
     public CubicMeterContainerArray(java.util.ArrayList<CubicMeterContainer> initializedArray) {
         super(initializedArray);
-    }
-
-    protected CubicMeterContainerArray(CubicMeterContainerArray other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#clone()
-     */
-    @Override
-    public CubicMeterContainerArray clone() {
-        return new CubicMeterContainerArray(this);
-    }
-}
+    }}

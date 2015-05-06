@@ -29,8 +29,7 @@ package com.saabgroup.safir.dob.typesystem.si64;
  * Array for JouleContainers
  */
 public class JouleContainerArray
-    extends com.saabgroup.safir.dob.typesystem.ArrayContainer<JouleContainer>
-    implements Cloneable {
+    extends com.saabgroup.safir.dob.typesystem.ArrayContainer<JouleContainer> {
 
     private static java.util.ArrayList<JouleContainer> createBlankArray(int size){
         java.util.ArrayList<JouleContainer> initializedArray = new java.util.ArrayList<JouleContainer>(size);
@@ -58,17 +57,4 @@ public class JouleContainerArray
      */
     public JouleContainerArray(java.util.ArrayList<JouleContainer> initializedArray) {
         super(initializedArray);
-    }
-
-    protected JouleContainerArray(JouleContainerArray other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#clone()
-     */
-    @Override
-    public JouleContainerArray clone() {
-        return new JouleContainerArray(this);
-    }
-}
+    }}

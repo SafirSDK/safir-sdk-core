@@ -26,8 +26,7 @@
 package com.saabgroup.safir.dob.typesystem;
 
 public class ChannelIdSequenceContainer
-extends ValueSequenceContainer<ChannelId>
-implements Cloneable {
+extends ValueSequenceContainer<ChannelId> {
 
 	public ChannelIdSequenceContainer() {
 		super();

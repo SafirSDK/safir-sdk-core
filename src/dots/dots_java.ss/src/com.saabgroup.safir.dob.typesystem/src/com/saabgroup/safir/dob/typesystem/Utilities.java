@@ -38,6 +38,9 @@ public class Utilities {
      * take all the members that have a change flag set and copy them into the "into"
      * object.
      *
+     * Note that this uses shallow copying, so the two objects may end up
+     * using the same objects internally.
+     *
      * @param into Object to merge into.
      * @param from Object whose changes shall be merged into "into".
      */
@@ -72,15 +75,7 @@ public class Utilities {
 
                         if (fromContainerOB.isChangedHere()) //this specific member has changed
                         {
-                            if (fromContainerOB.isNull())
-                            {
-                                intoContainerOB.setNull();
-                            }
-                            else
-                            {
-                                intoContainerOB.setObjInternal(fromContainerOB.getObjInternal().clone());
-                                intoContainerOB.setChangedHere(true);
-                            }
+                            intoContainerOB.shallowCopy(fromContainerOB);
                         }
                         else if (fromContainerOB.isChanged()) //some child has changed we need to recurse
                         {
@@ -90,14 +85,14 @@ public class Utilities {
                                 //If the type is changing we write a warning
                                 if (!intoContainerOB.isNull())
                                 {
+                                    //TODO write to syslog
                                     System.out.println("Warning (Contact a DOB developer if you do not understand it):");
                                     System.out.println("The type of a member has changed without the change flag being set in 'from'.");
                                 }
 
                                 //if it was null we don't warn (even if it is a little bit suspicious to do that...)
 
-                                intoContainerOB.setObjInternal(fromContainerOB.getObjInternal().clone());
-                                intoContainerOB.setChangedHere(true);
+                                intoContainerOB.shallowCopy(fromContainerOB);
                             }
                             else
                             {
@@ -110,7 +105,7 @@ public class Utilities {
                     {
                         if (fromContainerB.isChanged())
                         {
-                            intoContainerB.copy(fromContainerB);
+                            intoContainerB.shallowCopy(fromContainerB);
                         }
                     }
                 }

@@ -30,7 +30,7 @@ package com.saabgroup.safir.dob.typesystem;
  *
  * This class is the base class for all automatically generated DOB classes.
  */
-public class Object implements Cloneable
+public class Object
 {
 
 
@@ -80,18 +80,6 @@ public class Object implements Cloneable
     public void setChanged(boolean changed) { }
 
 
-    protected Object(Object other){
-
-    }
-
-    /**
-     * Member wise deep clone of object.
-     */
-    @Override
-    public Object clone(){
-        return new Object(this);
-    }
-
     /**
      * Create an Object from a blob reader handle.
      *
@@ -136,8 +124,7 @@ public class Object implements Cloneable
      * Array for ObjectContainers
      */
     static public class ContainerArray
-        extends ArrayContainer<ObjectContainerImpl<Object>>
-        implements Cloneable {
+        extends ArrayContainer<ObjectContainerImpl<Object>> {
 
         private static java.util.ArrayList<ObjectContainerImpl<Object>> createBlankArray(int size){
             java.util.ArrayList<ObjectContainerImpl<Object>> initializedArray = new java.util.ArrayList<ObjectContainerImpl<Object>>(size);
@@ -166,41 +153,17 @@ public class Object implements Cloneable
         public ContainerArray(java.util.ArrayList<ObjectContainerImpl<Object>> initializedArray) {
             super(initializedArray);
         }
-
-
-        protected ContainerArray(ContainerArray other) {
-            super(other);
-        }
-
-        /**
-         * @see com.saabgroup.safir.dob.typesystem.ContainerBase#clone()
-         */
-        @Override
-        public ContainerArray clone() {
-            return new ContainerArray(this);
-        }
-
     }
 
     /**
      * Sequence container
      */
     static public class SequenceContainer
-        extends com.saabgroup.safir.dob.typesystem.GenericObjectSequenceContainer<Object>
-        implements Cloneable {
+        extends com.saabgroup.safir.dob.typesystem.GenericObjectSequenceContainer<Object> {
 
         public SequenceContainer() {
             super();
         }
-
-        public SequenceContainer(SequenceContainer other) {
-            super(other);
-        }
-
-         @Override
-         public SequenceContainer clone() {
-             return new SequenceContainer(this);
-         }
     }
 }
 

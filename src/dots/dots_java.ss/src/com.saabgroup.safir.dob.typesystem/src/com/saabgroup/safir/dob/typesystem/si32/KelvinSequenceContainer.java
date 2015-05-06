@@ -27,8 +27,7 @@ package com.saabgroup.safir.dob.typesystem.si32;
 import com.saabgroup.safir.dob.typesystem.Float32SequenceContainer;
 
 public class KelvinSequenceContainer
-extends Float32SequenceContainer
-implements Cloneable {
+extends Float32SequenceContainer {
 
 	public KelvinSequenceContainer() {
 		super();

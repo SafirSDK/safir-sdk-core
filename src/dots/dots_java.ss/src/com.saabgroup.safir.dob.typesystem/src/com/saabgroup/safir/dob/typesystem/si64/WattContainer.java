@@ -31,8 +31,7 @@ import com.saabgroup.safir.dob.typesystem.Float64Container;
  * Container for Watt64 members.
  */
 public class WattContainer
-    extends Float64Container
-    implements Cloneable {
+    extends Float64Container {
 
     /**
      * Default constructor.
@@ -53,18 +52,4 @@ public class WattContainer
     public WattContainer(double value, boolean isNull, boolean isChanged) {
         super(value,isNull,isChanged);
     }
-
-
-    protected WattContainer(WattContainer other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.Float64Container#clone()
-     */
-    @Override
-    public WattContainer clone() {
-        return new WattContainer(this);
-    }
-
 }

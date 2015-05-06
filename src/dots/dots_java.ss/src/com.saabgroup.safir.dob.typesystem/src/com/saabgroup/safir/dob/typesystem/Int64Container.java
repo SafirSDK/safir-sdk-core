@@ -29,8 +29,7 @@ package com.saabgroup.safir.dob.typesystem;
  * Container for Int64 members.
  */
 public class Int64Container
-    extends ValueContainer<Long>
-    implements Cloneable {
+    extends ValueContainer<Long> {
 
     /**
      * Default constructor.
@@ -44,17 +43,4 @@ public class Int64Container
         super(isNull,isChanged);
         m_value = value;
     }
-
-    protected Int64Container(Int64Container other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ValueContainer#clone()
-     */
-    @Override
-    public Int64Container clone() {
-        return new Int64Container(this);
-    }
-
 }

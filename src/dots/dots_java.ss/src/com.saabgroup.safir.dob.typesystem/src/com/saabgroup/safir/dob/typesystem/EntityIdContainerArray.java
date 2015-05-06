@@ -28,8 +28,7 @@ package com.saabgroup.safir.dob.typesystem;
  * Array for EntityIdContainers
  */
 public class EntityIdContainerArray
-    extends ArrayContainer<EntityIdContainer>
-    implements Cloneable {
+    extends ArrayContainer<EntityIdContainer> {
 
     private static java.util.ArrayList<EntityIdContainer> createBlankArray(int size){
         java.util.ArrayList<EntityIdContainer> initializedArray = new java.util.ArrayList<EntityIdContainer>(size);
@@ -58,17 +57,4 @@ public class EntityIdContainerArray
     public EntityIdContainerArray(java.util.ArrayList<EntityIdContainer> initializedArray) {
         super(initializedArray);
     }
-
-    protected EntityIdContainerArray(EntityIdContainerArray other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#clone()
-     */
-    @Override
-    public EntityIdContainerArray clone() {
-        return new EntityIdContainerArray(this);
-    }
-
 }

@@ -29,8 +29,7 @@ package com.saabgroup.safir.dob.typesystem;
  * Container for HandlerId members.
  */
 public class HandlerIdContainer
-    extends ValueContainer<HandlerId>
-    implements Cloneable {
+    extends ValueContainer<HandlerId> {
 
     /**
      * Default constructor.
@@ -43,19 +42,6 @@ public class HandlerIdContainer
     HandlerIdContainer(HandlerId value, boolean isNull, boolean isChanged) {
         super(isNull,isChanged);
         m_value = value;
-    }
-
-
-    protected HandlerIdContainer(HandlerIdContainer other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ValueContainer#clone()
-     */
-    @Override
-    public HandlerIdContainer clone() {
-        return new HandlerIdContainer(this);
     }
 
 }

@@ -29,8 +29,7 @@ package com.saabgroup.safir.dob.typesystem.si32;
  * Array for HertzContainers
  */
 public class HertzContainerArray
-    extends com.saabgroup.safir.dob.typesystem.ArrayContainer<HertzContainer>
-    implements Cloneable {
+    extends com.saabgroup.safir.dob.typesystem.ArrayContainer<HertzContainer> {
 
     private static java.util.ArrayList<HertzContainer> createBlankArray(int size){
         java.util.ArrayList<HertzContainer> initializedArray = new java.util.ArrayList<HertzContainer>(size);
@@ -58,17 +57,4 @@ public class HertzContainerArray
      */
     public HertzContainerArray(java.util.ArrayList<HertzContainer> initializedArray) {
         super(initializedArray);
-    }
-
-    protected HertzContainerArray(HertzContainerArray other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#clone()
-     */
-    @Override
-    public HertzContainerArray clone() {
-        return new HertzContainerArray(this);
-    }
-}
+    }}

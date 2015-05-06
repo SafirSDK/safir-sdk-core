@@ -6,23 +6,14 @@ import java.util.Set;
 
 public class DictionaryContainer<K, V extends ContainerBase>
 extends ContainerBase
-implements java.util.Map<K, V>, Cloneable {
+implements java.util.Map<K, V> {
 
 	public DictionaryContainer() {
 		super();
 	}
 
-	@SuppressWarnings("unchecked")
-	public DictionaryContainer(DictionaryContainer<K, V> other) {
-		super(other);
-
-		for(Map.Entry<K, V> entry : other.m_values.entrySet()) {
-			m_values.put(entry.getKey(), (V)(entry.getValue().clone()));
-		}
-	}
-	
 	@Override
-	public boolean isNull() {		
+	public boolean isNull() {
 		return false;
 	}
 
@@ -30,7 +21,7 @@ implements java.util.Map<K, V>, Cloneable {
 	public void setNull() {
 		throw new SoftwareViolationException("Dictionaries cannot be null!");
 	}
-	
+
 	@Override
 	public boolean isChanged() {
 		if (m_isChanged)
@@ -43,7 +34,7 @@ implements java.util.Map<K, V>, Cloneable {
 
         return false;
     }
-	
+
 	@Override
 	public void setChanged(boolean changed) {
         m_isChanged = changed;
@@ -119,11 +110,15 @@ implements java.util.Map<K, V>, Cloneable {
 	public Collection<V> values() {
 		return m_values.values();
 	}
-	
-	@Override
-	public DictionaryContainer<K, V> clone() {
-		return new DictionaryContainer<K, V>(this);
-	}
-	
+
+    @Override
+    @SuppressWarnings("unchecked")
+    void shallowCopy(ContainerBase other)
+    {
+        super.shallowCopy(other);
+        DictionaryContainer that = (DictionaryContainer)other;
+        m_values = that.m_values;
+    }
+
 	protected java.util.TreeMap<K, V> m_values = new java.util.TreeMap<K, V>();
 }

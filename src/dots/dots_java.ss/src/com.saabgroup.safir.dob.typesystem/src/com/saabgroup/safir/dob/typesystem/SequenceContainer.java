@@ -33,7 +33,7 @@ import java.util.ListIterator;
 /**
  * Sequence container.
  *
- * This generic class is used for sequences of all types supported 
+ * This generic class is used for sequences of all types supported
  * by the Dob. The sequenceContainer does not contain containers but
  * only the raw values of the contained type. That means that individual
  * items does not have change flags and can't be null.
@@ -43,8 +43,8 @@ import java.util.ListIterator;
  */
 public abstract class SequenceContainer<T>
 extends ContainerBase
-implements java.util.List<T>, Cloneable {
-		
+implements java.util.List<T>{
+
 	@Override
 	public boolean isNull() {
 		return false;
@@ -53,7 +53,7 @@ implements java.util.List<T>, Cloneable {
 	@Override
 	public void setNull() {
 		throw new SoftwareViolationException("Sequences cannot be null!");
-	}		
+	}
 
 	@Override
 	public boolean add(T e) {
@@ -186,6 +186,16 @@ implements java.util.List<T>, Cloneable {
 	public <T> T[] toArray(T[] a) {
 		return m_values.toArray(a);
 	}
-	
+
+    @Override
+    @SuppressWarnings("unchecked")
+    void shallowCopy(ContainerBase other)
+    {
+        super.shallowCopy(other);
+        SequenceContainer that = (SequenceContainer)other;
+        m_values = that.m_values;
+    }
+
+
 	protected java.util.ArrayList<T> m_values = new java.util.ArrayList<T>();
 }

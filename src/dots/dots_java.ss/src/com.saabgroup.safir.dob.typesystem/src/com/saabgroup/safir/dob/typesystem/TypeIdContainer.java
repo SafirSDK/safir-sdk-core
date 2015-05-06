@@ -29,8 +29,7 @@ package com.saabgroup.safir.dob.typesystem;
  * Container for TypeId members.
  */
 public class TypeIdContainer
-    extends Int64Container
-    implements Cloneable {
+    extends Int64Container {
 
     /**
      * Default constructor.
@@ -42,18 +41,5 @@ public class TypeIdContainer
     TypeIdContainer(long value, boolean isNull, boolean isChanged) {
         super(value, isNull,isChanged);
     }
-
-    protected TypeIdContainer(TypeIdContainer other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.Float32Container#clone()
-     */
-    @Override
-    public TypeIdContainer clone() {
-        return new TypeIdContainer(this);
-    }
-
 
 }

@@ -26,8 +26,7 @@
 package com.saabgroup.safir.dob.typesystem;
 
 public class HandlerIdSequenceContainer
-extends ValueSequenceContainer<HandlerId> 
-implements Cloneable {
+extends ValueSequenceContainer<HandlerId>  {
 
 	public HandlerIdSequenceContainer() {
 		super();

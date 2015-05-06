@@ -26,22 +26,9 @@
 package com.saabgroup.safir.dob.typesystem;
 
 public class Int32SequenceContainer
-extends ValueSequenceContainer<Integer>
-implements Cloneable {
+extends ValueSequenceContainer<Integer> {
 
     public Int32SequenceContainer() {
 		super();
 	}
-	
-	public Int32SequenceContainer(Int32SequenceContainer other) {
-		super(other);
-	}
-	
-	/**
-     * @see com.saabgroup.safir.dob.typesystem.ValueSequenceContainer#clone()
-     */
-    @Override
-    public Int32SequenceContainer clone() {
-        return new Int32SequenceContainer(this);
-    }
 }

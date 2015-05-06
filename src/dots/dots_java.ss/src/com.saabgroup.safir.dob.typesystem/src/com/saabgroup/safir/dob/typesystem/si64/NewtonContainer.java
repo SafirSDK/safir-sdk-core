@@ -31,8 +31,7 @@ import com.saabgroup.safir.dob.typesystem.Float64Container;
  * Container for Newton64 members.
  */
 public class NewtonContainer
-    extends Float64Container
-    implements Cloneable {
+    extends Float64Container {
 
     /**
      * Default constructor.
@@ -53,18 +52,4 @@ public class NewtonContainer
     public NewtonContainer(double value, boolean isNull, boolean isChanged) {
         super(value,isNull,isChanged);
     }
-
-
-    protected NewtonContainer(NewtonContainer other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.Float64Container#clone()
-     */
-    @Override
-    public NewtonContainer clone() {
-        return new NewtonContainer(this);
-    }
-
 }

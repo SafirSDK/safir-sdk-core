@@ -28,8 +28,7 @@ package com.saabgroup.safir.dob.typesystem;
  * Array for Int64Containers
  */
 public class Int64ContainerArray
-    extends ArrayContainer<Int64Container>
-    implements Cloneable {
+    extends ArrayContainer<Int64Container> {
 
     private static java.util.ArrayList<Int64Container> createBlankArray(int size){
         java.util.ArrayList<Int64Container> initializedArray = new java.util.ArrayList<Int64Container>(size);
@@ -58,17 +57,4 @@ public class Int64ContainerArray
     public Int64ContainerArray(java.util.ArrayList<Int64Container> initializedArray) {
         super(initializedArray);
     }
-
-    protected Int64ContainerArray(Int64ContainerArray other) {
-        super(other);
-    }
-
-    /**
-     * @see com.saabgroup.safir.dob.typesystem.ContainerBase#clone()
-     */
-    @Override
-    public Int64ContainerArray clone() {
-        return new Int64ContainerArray(this);
-    }
-
 }
