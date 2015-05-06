@@ -112,21 +112,16 @@ namespace Internal
 
                     AcceptConnection();
                 }
+                else if (ec == boost::asio::error::operation_aborted)
+                {
+                    // The operation is aborted. This is most likely caused by a normal Disconnect.
+                }
                 else
                 {
-                    // Accept returned with some error
-
-                    if (!m_acceptor.is_open())
-                    {
-                        // The acceptor is closed. This is most likely caused by a normal Disconnect.
-                    }
-                    else
-                    {
-                        std::ostringstream ostr;
-                        ostr << "async_accept completed with fatal error " << ec.message().c_str()
-                             << ". Endpoint: " << m_endpoint.path().c_str() << std::endl;
-                        throw std::logic_error(ostr.str());
-                    }
+                    std::ostringstream ostr;
+                    ostr << "async_accept completed with fatal error " << ec.message().c_str()
+                         << ". Endpoint: " << m_endpoint.path().c_str() << std::endl;
+                    throw std::logic_error(ostr.str());
                 }
             }));
         }
