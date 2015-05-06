@@ -228,6 +228,7 @@ namespace Internal
 
                         ++count;
                     }
+                    writer.SetChangedTopLevel(memIx,true);
                 }
                     break;
 

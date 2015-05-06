@@ -3703,14 +3703,9 @@ Consumer 0: OnUpdatedEntity:
     Watt64ArrayMember
     Int32SequenceMember
     Float32SequenceMember
-    BooleanSequenceMember
-    EnumerationSequenceMember
     StringSequenceMember
-    EntityIdSequenceMember
-    TypeIdSequenceMember
     InstanceIdSequenceMember
     ChannelIdSequenceMember
-    HandlerIdSequenceMember
     ObjectSequenceMember
     BinarySequenceMember
     TestClassSequenceMember
