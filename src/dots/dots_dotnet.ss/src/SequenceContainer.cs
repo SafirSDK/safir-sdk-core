@@ -287,8 +287,8 @@ namespace Safir.Dob.Typesystem
             base.Copy(other);
             this.values.Clear ();
             GenericObjectSequenceContainer<T> that = other as GenericObjectSequenceContainer<T>;
-            foreach (var val in that.values) {
-
+            foreach (var val in that.values)
+            {
                 this.values.Add(val.Clone() as T);
             }
         }

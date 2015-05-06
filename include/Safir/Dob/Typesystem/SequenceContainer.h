@@ -209,6 +209,8 @@ namespace Typesystem
                 const SequenceContainer<ContainedType>& other=static_cast<const SequenceContainer<ContainedType>& >(that);
 
                 m_bIsChanged=other.m_bIsChanged;
+                m_values.clear();
+                m_values.reserve(other.m_values.size());
                 for (typename StorageType::const_iterator it=other.m_values.begin(); it!=other.m_values.end(); ++it)
                 {
                     m_values.push_back(SequenceCopyHelper<ContainedType>::Copy(*it));
