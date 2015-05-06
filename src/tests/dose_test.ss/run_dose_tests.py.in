@@ -102,7 +102,9 @@ class Parameters:
         parser.add_option("--lang2", action="store",dest="lang2",default="cpp",
                           help="Which partner 2 to run. [default: %default]. "
                           "If --jenkins is specified the Languages environment variable will override this.")
-
+        parser.add_option("--single-testcase", action="store",
+                          help="Run only a single testcase. Note that using this option will cause the script "
+                          "to print some other errors, since not all tests are run")
         (options,args) = parser.parse_args()
 
         self.lang0 = options.lang0
@@ -184,12 +186,12 @@ class Parameters:
         self.dose_test_sequencer_cmd = ("dose_test_sequencer",
                                         "-d",
                                         self.testcases_path,
-                                        #"--no-timeout",
                                         #"--context", "-1", #random context
-                                        "-l", self.lang0, self.lang1, self.lang2,
-                                        #"--first", "1",
-                                        #"--last", "1"
-                                        )
+                                        "-l", self.lang0, self.lang1, self.lang2)
+        self.single_testcase = options.single_testcase
+        if options.single_testcase is not None:
+            self.dose_test_sequencer_cmd += ("--first", options.single_testcase,
+                                             "--last", options.single_testcase)
 
         if self.multinode:
             self.dose_test_sequencer_cmd += ("--multinode",)
@@ -293,6 +295,8 @@ class Results:
                                str(sorted(list(set(output[0].keys())- set(tcnos)))))
 
         for tc in tcnos:
+            if parameters.single_testcase is not None and tc != int(parameters.single_testcase):
+                continue
             if tc not in output[0]:
                 self.write_test_result(False,
                                        tcnames[tc],

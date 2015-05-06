@@ -1143,10 +1143,7 @@ namespace @_NAMESPACE_@
                     m_@_MEMBER_@Member.Add(seqVal);
 @@END_IF@@
                 }
-                if (Safir.Dob.Typesystem.Internal.BlobOperations.ReadTopLevelChangeFlag(handle,m_@_LOWER:MEMBER_@MemberIndex))
-                {
-                    m_@_MEMBER_@Member.SetChanged(true);
-                }
+                m_@_MEMBER_@Member.SetChanged(Safir.Dob.Typesystem.Internal.BlobOperations.ReadTopLevelChangeFlag(handle,m_@_LOWER:MEMBER_@MemberIndex));
             }
 @@----------dictionary member ---------------
 @@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
@@ -1234,10 +1231,7 @@ namespace @_NAMESPACE_@
                 Safir.Dob.Typesystem.Internal.BlobOperations.Set(m_@_MEMBER_@Member[i], false, false, handle, m_@_LOWER:MEMBER_@MemberIndex, i, Safir.Dob.Typesystem.KeyValMode.ValueMode);
 @@END_IF@@
             }
-            if (m_@_MEMBER_@Member.IsChanged())
-            {
-                Safir.Dob.Typesystem.Internal.BlobOperations.WriteTopLevelChangeFlag(handle, m_@_LOWER:MEMBER_@MemberIndex, true);
-            }
+            Safir.Dob.Typesystem.Internal.BlobOperations.WriteTopLevelChangeFlag(handle, m_@_LOWER:MEMBER_@MemberIndex, m_@_MEMBER_@Member.IsChanged());
 @@ --- Dictionary member ---
 @@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
             foreach (var kv in m_@_MEMBER_@Member)

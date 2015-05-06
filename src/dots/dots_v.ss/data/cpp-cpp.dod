@@ -592,10 +592,7 @@ namespace @_NAMESPACEV_@
                 m_@_MEMBER_@Member.push_back(seqVal);
 @@END_IF@@
             }
-            if (DotsC_ReadTopLevelChangeFlag(handle, g_@_LOWER:MEMBER_@MemberIndex))
-            {
-                m_@_MEMBER_@Member.SetChanged(true);
-            }
+            m_@_MEMBER_@Member.SetChanged(DotsC_ReadTopLevelChangeFlag(handle, g_@_LOWER:MEMBER_@MemberIndex));
         }
 @@ --- Dictionary member ---
 @@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
@@ -686,6 +683,7 @@ namespace @_NAMESPACEV_@
                                                                   Safir::Dob::Typesystem::Internal::BlobOperations::ValueMode);
 @@END_IF@@
         }
+        DotsC_WriteTopLevelChangeFlag(handle, g_@_LOWER:MEMBER_@MemberIndex, m_@_MEMBER_@Member.IsChanged());
 @@ --- Dictionary member ---
 @@ELSIF@@ @_EXIST:MEMBERISDICTIONARY_@
 @@IF@@ @_UNIFORM_MEMBERDICTIONARYTYPE_@=Enumeration

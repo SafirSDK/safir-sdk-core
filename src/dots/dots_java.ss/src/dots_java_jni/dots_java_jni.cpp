@@ -1078,6 +1078,17 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_ReadMemberStatus
 
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    ReadTopLevelChangeFlag
+ * Signature: (JI)Z
+ */
+JNIEXPORT jboolean JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_ReadTopLevelChangeFlag
+  (JNIEnv *, jclass, jlong _readerHandle, jint _member)
+{
+    return DotsC_ReadTopLevelChangeFlag(_readerHandle, _member);
+}
+
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
  * Method:    ReadInt32Member
  * Signature: (J[I[Z[ZIII)V
  */
@@ -1361,6 +1372,16 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteChangeFlag
     DotsC_WriteChangeFlag(_writerHandle, _member, _index, _changed == JNI_TRUE);
 }
 
+/*
+ * Class:     com_saabgroup_safir_dob_typesystem_Kernel
+ * Method:    WriteTopLevelChangeFlag
+ * Signature: (JIZ)V
+ */
+JNIEXPORT void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteTopLevelChangeFlag
+  (JNIEnv *, jclass, jlong _writerHandle, jint _member, jboolean _changed)
+{
+    DotsC_WriteTopLevelChangeFlag(_writerHandle,_member,_changed);
+}
 /*
  * Class:     com_saabgroup_safir_dob_typesystem_Kernel
  * Method:    MarkChanges

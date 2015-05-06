@@ -264,6 +264,9 @@ public final class Kernel {
 			int member,
 			int valueIndex);
 
+	public static native boolean ReadTopLevelChangeFlag(long readerHandle,
+                                                        int member);
+
 	public static native void ReadInt32Member(long readerHandle,
 			int[] val,
 			boolean[] isNull,
@@ -357,6 +360,7 @@ public final class Kernel {
 	public static native void WriteBlob(long writerHandle, ByteBuffer blob);
 	public static native void WriteAllChangeFlags(long writerHandle, boolean changed);
 	public static native void WriteChangeFlag(long writerHandle, int member, int index, boolean changed);
+    public static native void WriteTopLevelChangeFlag(long writerHandle, int member, boolean changed);
 	public static native boolean MarkChanges(long originalReader, long currentWriter);
 
 	public static native void WriteInt32Member(long writerHandle, int val, boolean isNull, boolean isChanged,

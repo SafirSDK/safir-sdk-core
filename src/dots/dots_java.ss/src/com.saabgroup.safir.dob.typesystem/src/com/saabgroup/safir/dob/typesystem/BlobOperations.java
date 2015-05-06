@@ -80,9 +80,24 @@ public class BlobOperations {
         return Kernel.GetSize(blob);
     }
 
+    /**
+     * Get the number of values contained in a member.
+     *
+     * @return The number of member values.
+     */
     public static int numberOfMemberValues(long handle, int member)
     {
         return Kernel.GetNumberOfMemberValues (handle, member);
+    }
+
+    public static boolean readTopLevelChangeFlag(long handle, int member)
+    {
+        return Kernel.ReadTopLevelChangeFlag(handle,member);
+    }
+
+    public static void writeTopLevelChangeFlag(long handle, int member, boolean isChanged)
+    {
+        Kernel.WriteTopLevelChangeFlag(handle,member,isChanged);
     }
 
     //**********************************************************************
