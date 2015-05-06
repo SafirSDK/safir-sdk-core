@@ -150,6 +150,10 @@ namespace @_NAMESPACEV_@
 
     static void Init()
     {
+        if (isInitialised)
+        {
+            return;
+        }
 @@TABLE@@
 @@IF@@ @_EXIST:MEMBER_@
         g_@_LOWER:MEMBER_@MemberIndex=Safir::Dob::Typesystem::Members::GetIndex(@_CLASS_@::ClassTypeId, L"@_MEMBER_@");
@@ -171,49 +175,49 @@ namespace @_NAMESPACEV_@
 @@IF@@ @_EXIST:MEMBERISARRAY_@
     Safir::Dob::Typesystem::ArrayIndex @_MEMBERCLASS_@::@_MEMBER_@ArraySize(const Safir::Dob::Typesystem::ObjectPtr object)
     {
-        if (!isInitialised) Init();
+        Init();
         return Safir::Dob::Typesystem::Properties::GetArraySize(object->GetTypeId(), ClassTypeId, g_@_LOWER:MEMBER_@MemberIndex);
     }
 
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
     void @_MEMBERCLASS_@::Set@_MEMBER_@(Safir::Dob::Typesystem::ObjectPtr object, const Safir::Dob::Typesystem::ArrayIndex index, const @_MEMBERTYPE_@::Enumeration value, const Safir::Dob::Typesystem::TypeId checksum)
     {
-        if (!isInitialised) Init();
+        Init();
         @_MEMBERTYPE_@::CheckForMismatch(checksum);
         Safir::Dob::Typesystem::Properties::SetEnum(object,ClassTypeId,value,g_@_LOWER:MEMBER_@MemberIndex,index);
     }
 
     void @_MEMBERCLASS_@::SetOrdinal@_MEMBER_@(Safir::Dob::Typesystem::ObjectPtr object, const Safir::Dob::Typesystem::ArrayIndex index, const Safir::Dob::Typesystem::EnumerationValue value)
     {
-        if (!isInitialised) Init();
+        Init();
         Safir::Dob::Typesystem::Properties::SetEnum(object,ClassTypeId,value,g_@_LOWER:MEMBER_@MemberIndex,index);
     }
 
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
     void @_MEMBERCLASS_@::Set@_MEMBER_@(Safir::Dob::Typesystem::ObjectPtr object, const Safir::Dob::Typesystem::ArrayIndex index, const @_MEMBERTYPE_@Ptr ptr)
     {
-        if (!isInitialised) Init();
+        Init();
         Safir::Dob::Typesystem::Properties::Set(object,ClassTypeId,boost::static_pointer_cast<Safir::Dob::Typesystem::Object>(ptr),g_@_LOWER:MEMBER_@MemberIndex,index);
     }
 
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=String
     void @_MEMBERCLASS_@::Set@_MEMBER_@(Safir::Dob::Typesystem::ObjectPtr object, const Safir::Dob::Typesystem::ArrayIndex index, const @_MEMBERTYPE_@& value)
     {
-        if (!isInitialised) Init();
+        Init();
         Safir::Dob::Typesystem::Properties::Set(object,ClassTypeId,value,g_@_LOWER:MEMBER_@MemberIndex,index);
     }
 
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Binary
     void @_MEMBERCLASS_@::Set@_MEMBER_@(Safir::Dob::Typesystem::ObjectPtr object, const Safir::Dob::Typesystem::ArrayIndex index, const @_MEMBERTYPE_@& value)
     {
-        if (!isInitialised) Init();
+        Init();
         Safir::Dob::Typesystem::Properties::Set(object,ClassTypeId,value,g_@_LOWER:MEMBER_@MemberIndex,index);
     }
 
 @@ELSE@@
     void @_MEMBERCLASS_@::Set@_MEMBER_@(Safir::Dob::Typesystem::ObjectPtr object, const Safir::Dob::Typesystem::ArrayIndex index, const @_MEMBERTYPE_@ value)
     {
-        if (!isInitialised) Init();
+        Init();
         Safir::Dob::Typesystem::Properties::Set(object,ClassTypeId,value,g_@_LOWER:MEMBER_@MemberIndex,index);
     }
 
@@ -221,25 +225,25 @@ namespace @_NAMESPACEV_@
 
     void @_MEMBERCLASS_@::SetNull@_MEMBER_@(Safir::Dob::Typesystem::ObjectPtr object, const Safir::Dob::Typesystem::ArrayIndex index)
     {
-        if (!isInitialised) Init();
+        Init();
         Safir::Dob::Typesystem::Properties::SetNull(object, ClassTypeId, g_@_LOWER:MEMBER_@MemberIndex, index);
     }
 
     bool @_MEMBERCLASS_@::IsNull@_MEMBER_@(const Safir::Dob::Typesystem::ObjectPtr object, const Safir::Dob::Typesystem::ArrayIndex index)
     {
-        if (!isInitialised) Init();
+        Init();
         return Safir::Dob::Typesystem::Properties::IsNull(object,ClassTypeId,g_@_LOWER:MEMBER_@MemberIndex,index);
     }
 
     bool @_MEMBERCLASS_@::IsChanged@_MEMBER_@(const Safir::Dob::Typesystem::ObjectPtr object, const Safir::Dob::Typesystem::ArrayIndex index)
     {
-        if (!isInitialised) Init();
+        Init();
         return Safir::Dob::Typesystem::Properties::IsChanged(object, ClassTypeId, g_@_LOWER:MEMBER_@MemberIndex, index);
     }
 
     bool @_MEMBERCLASS_@::IsReadOnly@_MEMBER_@(const Safir::Dob::Typesystem::ObjectPtr object, const Safir::Dob::Typesystem::ArrayIndex index)
     {
-        if (!isInitialised) Init();
+        Init();
         return Safir::Dob::Typesystem::Properties::IsReadOnly(object, ClassTypeId, g_@_LOWER:MEMBER_@MemberIndex, index);
     }
 
@@ -247,7 +251,7 @@ namespace @_NAMESPACEV_@
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
     @_MEMBERTYPE_@::Enumeration @_MEMBERCLASS_@::Get@_MEMBER_@(const Safir::Dob::Typesystem::ObjectPtr object, const Safir::Dob::Typesystem::ArrayIndex index, const Safir::Dob::Typesystem::TypeId checksum)
     {
-        if (!isInitialised) Init();
+        Init();
         @_MEMBERTYPE_@::CheckForMismatch(checksum);
         Safir::Dob::Typesystem::EnumerationValue value;
         Safir::Dob::Typesystem::Properties::GetEnum(object,ClassTypeId,value,g_@_LOWER:MEMBER_@MemberIndex,index);
@@ -264,7 +268,7 @@ namespace @_NAMESPACEV_@
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
     @_MEMBERTYPE_@Ptr @_MEMBERCLASS_@::Get@_MEMBER_@(const Safir::Dob::Typesystem::ObjectPtr object, const Safir::Dob::Typesystem::ArrayIndex index)
     {
-        if (!isInitialised) Init();
+        Init();
         Safir::Dob::Typesystem::ObjectPtr ptr;
         Safir::Dob::Typesystem::Properties::Get(object,ClassTypeId,ptr,g_@_LOWER:MEMBER_@MemberIndex,index);
         return boost::static_pointer_cast<@_MEMBERTYPE_@>(ptr);
@@ -273,7 +277,7 @@ namespace @_NAMESPACEV_@
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=EntityId
     const @_MEMBERTYPE_@ @_MEMBERCLASS_@::Get@_MEMBER_@(const Safir::Dob::Typesystem::ObjectPtr object, const Safir::Dob::Typesystem::ArrayIndex index)
     {
-        if (!isInitialised) Init();
+        Init();
         @_MEMBERTYPE_@ value;
         Safir::Dob::Typesystem::Properties::Get(object,ClassTypeId,value,g_@_LOWER:MEMBER_@MemberIndex,index);
         return value;
@@ -282,7 +286,7 @@ namespace @_NAMESPACEV_@
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=String
     const @_MEMBERTYPE_@ @_MEMBERCLASS_@::Get@_MEMBER_@(const Safir::Dob::Typesystem::ObjectPtr object, const Safir::Dob::Typesystem::ArrayIndex index)
     {
-        if (!isInitialised) Init();
+        Init();
         @_MEMBERTYPE_@ value;
         Safir::Dob::Typesystem::Properties::Get(object,ClassTypeId,value,g_@_LOWER:MEMBER_@MemberIndex,index);
         return value;
@@ -291,7 +295,7 @@ namespace @_NAMESPACEV_@
 @@ELSE@@
     @_MEMBERTYPE_@ @_MEMBERCLASS_@::Get@_MEMBER_@(const Safir::Dob::Typesystem::ObjectPtr object, const Safir::Dob::Typesystem::ArrayIndex index)
     {
-        if (!isInitialised) Init();
+        Init();
         @_MEMBERTYPE_@ value;
         Safir::Dob::Typesystem::Properties::Get(object,ClassTypeId,value,g_@_LOWER:MEMBER_@MemberIndex,index);
         return value;
@@ -302,42 +306,42 @@ namespace @_NAMESPACEV_@
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
     void @_MEMBERCLASS_@::Set@_MEMBER_@(Safir::Dob::Typesystem::ObjectPtr object, const @_MEMBERTYPE_@::Enumeration value, const Safir::Dob::Typesystem::TypeId checksum)
     {
-        if (!isInitialised) Init();
+        Init();
         @_MEMBERTYPE_@::CheckForMismatch(checksum);
         Safir::Dob::Typesystem::Properties::SetEnum(object,ClassTypeId,value,g_@_LOWER:MEMBER_@MemberIndex,0);
     }
 
     void @_MEMBERCLASS_@::SetOrdinal@_MEMBER_@(Safir::Dob::Typesystem::ObjectPtr object, const Safir::Dob::Typesystem::EnumerationValue value)
     {
-        if (!isInitialised) Init();
+        Init();
         Safir::Dob::Typesystem::Properties::SetEnum(object,ClassTypeId,value,g_@_LOWER:MEMBER_@MemberIndex,0);
     }
 
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
     void @_MEMBERCLASS_@::Set@_MEMBER_@(Safir::Dob::Typesystem::ObjectPtr object, const @_MEMBERTYPE_@Ptr ptr)
     {
-        if (!isInitialised) Init();
+        Init();
         Safir::Dob::Typesystem::Properties::Set(object,ClassTypeId,boost::static_pointer_cast<Safir::Dob::Typesystem::Object>(ptr),g_@_LOWER:MEMBER_@MemberIndex, 0);
     }
 
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=String
     void @_MEMBERCLASS_@::Set@_MEMBER_@(Safir::Dob::Typesystem::ObjectPtr object, const @_MEMBERTYPE_@& value)
     {
-        if (!isInitialised) Init();
+        Init();
         Safir::Dob::Typesystem::Properties::Set(object,ClassTypeId,value,g_@_LOWER:MEMBER_@MemberIndex,0);
     }
 
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Binary
     void @_MEMBERCLASS_@::Set@_MEMBER_@(Safir::Dob::Typesystem::ObjectPtr object, const @_MEMBERTYPE_@& value)
     {
-        if (!isInitialised) Init();
+        Init();
         Safir::Dob::Typesystem::Properties::Set(object,ClassTypeId,value,g_@_LOWER:MEMBER_@MemberIndex,0);
     }
 
 @@ELSE@@
     void @_MEMBERCLASS_@::Set@_MEMBER_@(Safir::Dob::Typesystem::ObjectPtr object, const @_MEMBERTYPE_@ value)
     {
-        if (!isInitialised) Init();
+        Init();
         Safir::Dob::Typesystem::Properties::Set(object,ClassTypeId,value,g_@_LOWER:MEMBER_@MemberIndex,0);
     }
 
@@ -345,25 +349,25 @@ namespace @_NAMESPACEV_@
 
     void @_MEMBERCLASS_@::SetNull@_MEMBER_@(Safir::Dob::Typesystem::ObjectPtr object)
     {
-        if (!isInitialised) Init();
+        Init();
         Safir::Dob::Typesystem::Properties::SetNull(object, ClassTypeId, g_@_LOWER:MEMBER_@MemberIndex, 0);
     }
 
     bool @_MEMBERCLASS_@::IsNull@_MEMBER_@(const Safir::Dob::Typesystem::ObjectPtr object)
     {
-        if (!isInitialised) Init();
+        Init();
         return Safir::Dob::Typesystem::Properties::IsNull(object,ClassTypeId,g_@_LOWER:MEMBER_@MemberIndex,0);
     }
 
     bool @_MEMBERCLASS_@::IsChanged@_MEMBER_@(const Safir::Dob::Typesystem::ObjectPtr object)
     {
-        if (!isInitialised) Init();
+        Init();
         return Safir::Dob::Typesystem::Properties::IsChanged(object, ClassTypeId, g_@_LOWER:MEMBER_@MemberIndex, 0);
     }
 
     bool @_MEMBERCLASS_@::IsReadOnly@_MEMBER_@(const Safir::Dob::Typesystem::ObjectPtr object)
     {
-        if (!isInitialised) Init();
+        Init();
         return Safir::Dob::Typesystem::Properties::IsReadOnly(object, ClassTypeId, g_@_LOWER:MEMBER_@MemberIndex, 0);
     }
 
@@ -371,7 +375,7 @@ namespace @_NAMESPACEV_@
 @@IF@@ @_UNIFORM_MEMBERTYPE_@=Enumeration
     @_MEMBERTYPE_@::Enumeration @_MEMBERCLASS_@::Get@_MEMBER_@(const Safir::Dob::Typesystem::ObjectPtr object, const Safir::Dob::Typesystem::TypeId checksum)
     {
-        if (!isInitialised) Init();
+        Init();
         @_MEMBERTYPE_@::CheckForMismatch(checksum);
         Safir::Dob::Typesystem::EnumerationValue value;
         Safir::Dob::Typesystem::Properties::GetEnum(object,ClassTypeId,value,g_@_LOWER:MEMBER_@MemberIndex,0);
@@ -388,7 +392,7 @@ namespace @_NAMESPACEV_@
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=Object
     @_MEMBERTYPE_@Ptr @_MEMBERCLASS_@::Get@_MEMBER_@(const Safir::Dob::Typesystem::ObjectPtr object)
     {
-        if (!isInitialised) Init();
+        Init();
         Safir::Dob::Typesystem::ObjectPtr ptr;
         Safir::Dob::Typesystem::Properties::Get(object,ClassTypeId,ptr,g_@_LOWER:MEMBER_@MemberIndex,0);
         return boost::static_pointer_cast<@_MEMBERTYPE_@>(ptr);
@@ -397,7 +401,7 @@ namespace @_NAMESPACEV_@
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=EntityId
     const @_MEMBERTYPE_@ @_MEMBERCLASS_@::Get@_MEMBER_@(const Safir::Dob::Typesystem::ObjectPtr object)
     {
-        if (!isInitialised) Init();
+        Init();
         @_MEMBERTYPE_@ value;
         Safir::Dob::Typesystem::Properties::Get(object,ClassTypeId,value,g_@_LOWER:MEMBER_@MemberIndex,0);
         return value;
@@ -406,7 +410,7 @@ namespace @_NAMESPACEV_@
 @@ELSIF@@ @_UNIFORM_MEMBERTYPE_@=String
     const @_MEMBERTYPE_@ @_MEMBERCLASS_@::Get@_MEMBER_@(const Safir::Dob::Typesystem::ObjectPtr object)
     {
-        if (!isInitialised) Init();
+        Init();
         @_MEMBERTYPE_@ value;
         Safir::Dob::Typesystem::Properties::Get(object,ClassTypeId,value,g_@_LOWER:MEMBER_@MemberIndex,0);
         return value;
@@ -415,7 +419,7 @@ namespace @_NAMESPACEV_@
 @@ELSE@@
     @_MEMBERTYPE_@ @_MEMBERCLASS_@::Get@_MEMBER_@(const Safir::Dob::Typesystem::ObjectPtr object)
     {
-        if (!isInitialised) Init();
+        Init();
         @_MEMBERTYPE_@ value;
         Safir::Dob::Typesystem::Properties::Get(object,ClassTypeId,value,g_@_LOWER:MEMBER_@MemberIndex,0);
         return value;
@@ -520,7 +524,7 @@ namespace @_NAMESPACEV_@
 @@END_IF@@
 @@END_TABLE@@
     {
-        if (!isInitialised) Init();
+        Init();
     }
 
     bool @_CLASS_@::IsChanged()
@@ -554,7 +558,7 @@ namespace @_NAMESPACEV_@
 @@END_IF@@
 @@END_TABLE@@
     {
-        if (!isInitialised) Init();
+        Init();
 @@TABLE@@
 @@IF@@ @_EXIST:MEMBER_@
 
@@ -621,7 +625,7 @@ namespace @_NAMESPACEV_@
     void
     @_CLASS_@::WriteToBlob(Safir::Dob::Typesystem::Int64 handle) const
     {
-        if (!isInitialised) Init();
+        Init();
 
         @_BASECLASS_@::WriteToBlob(handle);
 @@TABLE@@
@@ -732,37 +736,7 @@ namespace @_NAMESPACEV_@
     @_CLASS_@::GetMember(const Safir::Dob::Typesystem::MemberIndex member,
                          const Safir::Dob::Typesystem::ArrayIndex index) const
     {
-        if (!isInitialised) Init();
-
-        if (false)
-        {
-            //dummy placeholder
-        }
-@@TABLE@@
-@@IF@@ @_EXIST:MEMBER_@
-
-        else if (member == g_@_LOWER:MEMBER_@MemberIndex)
-        {
-@@IF@@ @_EXIST:MEMBERISARRAY_@
-            if (index < 0 || index >= g_@_LOWER:MEMBER_@Size)
-            {
-                throw Safir::Dob::Typesystem::IllegalValueException(L"Invalid index",__WFILE__,__LINE__);
-            }
-            return m_@_MEMBER_@Member[index];
-@@ELSE@@
-            if (index != 0)
-            {
-                throw Safir::Dob::Typesystem::SoftwareViolationException(L"Member is not an array",__WFILE__,__LINE__);
-            }
-            return m_@_MEMBER_@Member;
-@@END_IF@@
-        }
-@@END_IF@@
-@@END_TABLE@@
-        else
-        {
-            return @_BASECLASS_@::GetMember(member,index);
-        }
+        return const_cast<@_CLASS_@&>(*this).GetMember(member,index);
     }
 
 
@@ -770,16 +744,12 @@ namespace @_NAMESPACEV_@
     @_CLASS_@::GetMember(const Safir::Dob::Typesystem::MemberIndex member,
                          const Safir::Dob::Typesystem::ArrayIndex index)
     {
-        if (!isInitialised) Init();
+        Init();
 
-        if (false)
-        {
-            //dummy placeholder
-        }
 @@TABLE@@
 @@IF@@ @_EXIST:MEMBER_@
 
-        else if (member == g_@_LOWER:MEMBER_@MemberIndex)
+        if (member == g_@_LOWER:MEMBER_@MemberIndex)
         {
 @@IF@@ @_EXIST:MEMBERISARRAY_@
             if (index < 0 || index >= g_@_LOWER:MEMBER_@Size)
@@ -797,10 +767,8 @@ namespace @_NAMESPACEV_@
         }
 @@END_IF@@
 @@END_TABLE@@
-        else
-        {
-            return @_BASECLASS_@::GetMember(member,index);
-        }
+
+        return @_BASECLASS_@::GetMember(member,index);
     }
 
     Safir::Dob::Typesystem::ObjectPtr
@@ -822,12 +790,12 @@ namespace @_NAMESPACEV_@
 @@TABLE@@
 @@IF@@ @_EXIST:MEMBER_@
 
-    Safir::Dob::Typesystem::MemberIndex @_MEMBERCLASS_@::@_MEMBER_@MemberIndex() {if (!isInitialised) Init(); return g_@_LOWER:MEMBER_@MemberIndex;}
+    Safir::Dob::Typesystem::MemberIndex @_MEMBERCLASS_@::@_MEMBER_@MemberIndex() {Init(); return g_@_LOWER:MEMBER_@MemberIndex;}
 @@IF@@ @_EXIST:MEMBERISSTRING_@
-    Safir::Dob::Typesystem::Int32 @_MEMBERCLASS_@::@_MEMBER_@MaxStringLength() {if (!isInitialised) Init(); return g_@_LOWER:MEMBER_@Length;}
+    Safir::Dob::Typesystem::Int32 @_MEMBERCLASS_@::@_MEMBER_@MaxStringLength() {Init(); return g_@_LOWER:MEMBER_@Length;}
 @@END_IF@@
 @@IF@@ @_EXIST:MEMBERISARRAY_@
-    Safir::Dob::Typesystem::ArrayIndex @_MEMBERCLASS_@::@_MEMBER_@ArraySize() {if (!isInitialised) Init(); return g_@_LOWER:MEMBER_@Size;}
+    Safir::Dob::Typesystem::ArrayIndex @_MEMBERCLASS_@::@_MEMBER_@ArraySize() {Init(); return g_@_LOWER:MEMBER_@Size;}
 @@IF@@ (@_UNIFORM_MEMBERTYPE_@ = String) or (@_UNIFORM_MEMBERTYPE_@ = Boolean)
     const Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@ContainerArray & @_MEMBERCLASS_@::@_MEMBER_@() const {return m_@_MEMBER_@Member;}
     Safir::Dob::Typesystem::@_UNIFORM_MEMBERTYPE_@ContainerArray & @_MEMBERCLASS_@::@_MEMBER_@(){return m_@_MEMBER_@Member;}
@@ -941,14 +909,14 @@ namespace @_NAMESPACEV_@
 @@IF@@ @_EXIST:PARAMETERISARRAY_@
     Safir::Dob::Typesystem::ArrayIndex @_PARAMETERCLASS_@::@_PARAMETER_@ArraySize()
     {
-        if (!isInitialised) Init();
+        Init();
         return Safir::Dob::Typesystem::Parameters::GetArraySize(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex);
     }
 
 @@IF@@ @_UNIFORM_PARAMETERTYPE_@=Object
     @_PARAMETERTYPE_@Ptr @_PARAMETERCLASS_@::@_PARAMETER_@(const Safir::Dob::Typesystem::ArrayIndex index)
     {
-        if (!isInitialised) Init();
+        Init();
 
         return boost::static_pointer_cast<@_PARAMETERTYPE_@>
             (Safir::Dob::Typesystem::Parameters::GetObject(ClassTypeId,
@@ -966,7 +934,7 @@ namespace @_NAMESPACEV_@
     @_PARAMETERTYPE_@ @_PARAMETERCLASS_@::@_PARAMETER_@(const Safir::Dob::Typesystem::ArrayIndex index)
 @@END_IF@@
     {
-        if (!isInitialised) Init();
+        Init();
 @@IF@@ @_UNIFORM_PARAMETERTYPE_@=Enumeration
         @_PARAMETERTYPE_@::CheckForMismatch(enumId);
         Safir::Dob::Typesystem::Int32 evalue=Safir::Dob::Typesystem::Parameters::Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, index);
@@ -984,7 +952,7 @@ namespace @_NAMESPACEV_@
 @@IF@@ @_UNIFORM_PARAMETERTYPE_@=Enumeration
     @_PARAMETERTYPE_@::Enumeration @_PARAMETERCLASS_@::@_PARAMETER_@(const @_PARAMETERDICTIONARYTYPE_@::Enumeration& key)
     {
-        if (!isInitialised) Init();
+        Init();
         Safir::Dob::Typesystem::Int32 index=Safir::Dob::Typesystem::Parameters::DictionaryKeyToIndex(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, static_cast<Safir::Dob::Typesystem::Int32>(key));
         if (index<0)
         {
@@ -995,7 +963,7 @@ namespace @_NAMESPACEV_@
 @@ELSIF@@ (@_UNIFORM_PARAMETERTYPE_@ = Object)
     @_PARAMETERTYPE_@Ptr @_PARAMETERCLASS_@::@_PARAMETER_@(const @_PARAMETERDICTIONARYTYPE_@::Enumeration& key)
     {
-        if (!isInitialised) Init();
+        Init();
         Safir::Dob::Typesystem::Int32 index=Safir::Dob::Typesystem::Parameters::DictionaryKeyToIndex(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, static_cast<Safir::Dob::Typesystem::Int32>(key));
         if (index<0)
         {
@@ -1006,7 +974,7 @@ namespace @_NAMESPACEV_@
 @@ELSE@@
     @_PARAMETERTYPE_@ @_PARAMETERCLASS_@::@_PARAMETER_@(const @_PARAMETERDICTIONARYTYPE_@::Enumeration& key)
     {
-        if (!isInitialised) Init();
+        Init();
         Safir::Dob::Typesystem::Int32 index=Safir::Dob::Typesystem::Parameters::DictionaryKeyToIndex(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, static_cast<Safir::Dob::Typesystem::Int32>(key));
         if (index<0)
         {
@@ -1019,7 +987,7 @@ namespace @_NAMESPACEV_@
 @@IF@@ @_UNIFORM_PARAMETERTYPE_@=Enumeration
     @_PARAMETERTYPE_@::Enumeration @_PARAMETERCLASS_@::@_PARAMETER_@(const @_PARAMETERDICTIONARYTYPE_@& key)
     {
-        if (!isInitialised) Init();
+        Init();
         Safir::Dob::Typesystem::Int32 index=Safir::Dob::Typesystem::Parameters::DictionaryKeyToIndex(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, key);
         if (index<0)
         {
@@ -1030,7 +998,7 @@ namespace @_NAMESPACEV_@
 @@ELSIF@@ (@_UNIFORM_PARAMETERTYPE_@ = Object)
     @_PARAMETERTYPE_@Ptr @_PARAMETERCLASS_@::@_PARAMETER_@(const @_PARAMETERDICTIONARYTYPE_@& key)
     {
-        if (!isInitialised) Init();
+        Init();
         Safir::Dob::Typesystem::Int32 index=Safir::Dob::Typesystem::Parameters::DictionaryKeyToIndex(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, key);
         if (index<0)
         {
@@ -1041,7 +1009,7 @@ namespace @_NAMESPACEV_@
 @@ELSE@@
     @_PARAMETERTYPE_@ @_PARAMETERCLASS_@::@_PARAMETER_@(const @_PARAMETERDICTIONARYTYPE_@& key)
     {
-        if (!isInitialised) Init();
+        Init();
         Safir::Dob::Typesystem::Int32 index=Safir::Dob::Typesystem::Parameters::DictionaryKeyToIndex(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, key);
         if (index<0)
         {
@@ -1059,7 +1027,7 @@ namespace @_NAMESPACEV_@
 @@IF@@ @_UNIFORM_PARAMETERTYPE_@=Object
     @_PARAMETERTYPE_@Ptr @_PARAMETERCLASS_@::@_PARAMETER_@()
     {
-        if (!isInitialised) Init();
+        Init();
 
         return boost::static_pointer_cast<@_PARAMETERTYPE_@>
             (Safir::Dob::Typesystem::Parameters::GetObject(ClassTypeId,
@@ -1073,7 +1041,7 @@ namespace @_NAMESPACEV_@
     @_PARAMETERTYPE_@ @_PARAMETERCLASS_@::@_PARAMETER_@()
 @@END_IF@@
     {
-        if (!isInitialised) Init();
+        Init();
 @@IF@@ @_UNIFORM_PARAMETERTYPE_@=Enumeration
         @_PARAMETERTYPE_@::CheckForMismatch(enumId);
         Safir::Dob::Typesystem::Int32 evalue=Safir::Dob::Typesystem::Parameters::Get@_UNIFORM_PARAMETERTYPE_@(ClassTypeId, g_@_LOWER:PARAMETER_@ParameterIndex, 0);
@@ -1118,7 +1086,7 @@ namespace @_NAMESPACEV_@
 @@END_IF@@
 @@END_TABLE@@
     {
-        if (!isInitialised) Init();
+        Init();
         @_CLASS_@Ptr object = Create();
 @@TABLE@@
 @@IF@@ @_EXIST:CREATEPARAMETER_@
