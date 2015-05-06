@@ -1947,50 +1947,6 @@ val[1]: DotsTest.MemberSequences
 --- HandlerIdMember ---
 size: 0
 isChanged: false
------- Clone -----
---- Int32Member ---
-size: 2
-isChanged: true
-val[0]: 10
-val[1]: 20
---- Int64Member ---
-size: 2
-isChanged: true
-val[0]: 100
-val[1]: 200
---- Float32Member ---
-size: 2
-isChanged: true
-val[0]: 1.1
-val[1]: 2.2
---- Float64Member ---
-size: 2
-isChanged: true
-val[0]: 11.1
-val[1]: 22.2
---- BooleanMember ---
-size: 2
-isChanged: true
-val[0]: true
-val[1]: false
---- EnumerationMember ---
-size: 2
-isChanged: true
-val[0]: MyFirst
-val[1]: MySecond
---- StringMember ---
-size: 2
-isChanged: true
-val[0]: Aa
-val[1]: Bb
---- TypeIdMember ---
-size: 2
-isChanged: true
-val[0]: DotsTest.MemberDictionaries
-val[1]: DotsTest.MemberSequences
---- HandlerIdMember ---
-size: 0
-isChanged: false
 
 
 
@@ -2081,46 +2037,6 @@ Wally = {"DotsTest.MemberDictionaries": {"_DouType": "DotsTest.MemberDictionarie
 ------ To Json -----
 {"DotsTest.MemberDictionaries": {"_DouType": "DotsTest.MemberDictionaries", "Int32StringMember": [{"key": 10, "value": "Safir"}, {"key": 20, "value": "rifaS"}], "Int64BinaryMember": [{"key": 100, "value": "SSBhbSBhIFJvY2tlZmVsbGVyIQ=="}, {"key": 200, "value": "U2FmaXIgcnVsZXMgdGhlIHdvcmxk"}], "StringObjectMember": [{"key": "Dilbert", "value": {"_DouType": "Object"}}, {"key": "Wally", "value": {"_DouType": "DotsTest.MemberDictionaries", "TypeIdStringMember": [{"key": "DotsTest.MemberDictionaries", "value": "World"}, {"key": "DotsTest.TestEnum", "value": "Hello"}]}}], "StringItemMember": [{"key": "Gustav", "value": {"_DouType": "DotsTest.MemberDictionaries", "EntityIdHandlerIdMember": [{"key": {"name": "Safir.Dob.Entity", "instanceId": "first"}, "value": "first"}, {"key": {"name": "Safir.Dob.Entity", "instanceId": 2}, "value": 2}]}}, {"key": "Karl", "value": {"_DouType": "DotsTest.MemberDictionaries", "EntityIdHandlerIdMember": [{"key": {"name": "Safir.Dob.Entity", "instanceId": "first"}, "value": "first"}, {"key": {"name": "Safir.Dob.Entity", "instanceId": 2}, "value": 2}]}}, {"key": "Philip", "value": null}], "TypeIdEnumMember": [{"key": "DotsTest.MemberSequences", "value": "MySecond"}, {"key": "DotsTest.MemberDictionaries", "value": "MyFirst"}], "EnumInstanceIdMember": [{"key": "MyFirst", "value": "first"}, {"key": "MySecond", "value": 2}], "InstanceIdEntityIdMember": [{"key": "FirstInstance", "value": {"name": "Safir.Dob.Entity", "instanceId": "first"}}, {"key": "SecondInstance", "value": {"name": "Safir.Dob.Entity", "instanceId": 2}}]}}
 ------ From Json -----
---- Int32StringMember ---
-size: 2
-isChanged: true
-10 = Safir, changed: true
-20 = rifaS, changed: true
---- Int64BinaryMember ---
-size: 2
-isChanged: true
-100 = I am a Rockefeller!, changed: true
-200 = Safir rules the world, changed: true
---- TypeIdEnumMember ---
-size: 2
-isChanged: true
-DotsTest.MemberSequences = MySecond, changed: true
-DotsTest.MemberDictionaries = MyFirst, changed: true
---- EnumInstanceIdMember ---
-size: 2
-isChanged: true
-MyFirst = first, changed: true
-MySecond = 2, changed: true
---- InstanceIdEntityIdMember ---
-size: 2
-isChanged: true
-FirstInstance = (Safir.Dob.Entity, first), changed: true
-SecondInstance = (Safir.Dob.Entity, 2), changed: true
---- EntityIdHandlerIdMember ---
-size: 0
-isChanged: false
---- StringItemMember ---
-size: 3
-isChanged: true
-Gustav = {"DotsTest.MemberDictionaries": {"_DouType": "DotsTest.MemberDictionaries", "EntityIdHandlerIdMember": [{"key": {"name": "Safir.Dob.Entity", "instanceId": "first"}, "value": "first"}, {"key": {"name": "Safir.Dob.Entity", "instanceId": 2}, "value": 2}]}}, changed: true
-Karl = {"DotsTest.MemberDictionaries": {"_DouType": "DotsTest.MemberDictionaries", "EntityIdHandlerIdMember": [{"key": {"name": "Safir.Dob.Entity", "instanceId": "first"}, "value": "first"}, {"key": {"name": "Safir.Dob.Entity", "instanceId": 2}, "value": 2}]}}, changed: true
-Philip = NULL, changed: true
---- StringObjectMember ---
-size: 2
-isChanged: true
-Dilbert = {"Object": {"_DouType": "Object"}}, changed: true
-Wally = {"DotsTest.MemberDictionaries": {"_DouType": "DotsTest.MemberDictionaries", "TypeIdStringMember": [{"key": "DotsTest.MemberDictionaries", "value": "World"}, {"key": "DotsTest.TestEnum", "value": "Hello"}]}}, changed: true
------- Clone -----
 --- Int32StringMember ---
 size: 2
 isChanged: true

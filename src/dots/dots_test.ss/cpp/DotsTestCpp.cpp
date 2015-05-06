@@ -9225,9 +9225,9 @@ void TestSequences()
     DotsTest::MemberSequencesPtr fromJson=boost::dynamic_pointer_cast<DotsTest::MemberSequences>(ts::Serialization::ToObjectFromJson(json));
     PrintSequences(fromJson);
 
-    std::wcout<<L"------ Clone -----"<<std::endl;
-    DotsTest::MemberSequencesPtr clone=boost::dynamic_pointer_cast<DotsTest::MemberSequences>(ms);
-    PrintSequences(clone);
+    //std::wcout<<L"------ Clone -----"<<std::endl;
+    //DotsTest::MemberSequencesPtr clone=boost::dynamic_pointer_cast<DotsTest::MemberSequences>(ms);
+    //PrintSequences(clone);
 }
 
 
@@ -9406,9 +9406,10 @@ void TestDictionaries()
     DotsTest::MemberDictionariesPtr fromJson=boost::dynamic_pointer_cast<DotsTest::MemberDictionaries>(ts::Serialization::ToObjectFromJson(json));
     PrintDictionaries(fromJson);
 
-    std::wcout<<L"------ Clone -----"<<std::endl;
-    DotsTest::MemberDictionariesPtr clone=boost::dynamic_pointer_cast<DotsTest::MemberDictionaries>(md);
-    PrintDictionaries(clone);
+    // std::wcout<<L"------ Clone -----"<<std::endl;
+    // DotsTest::MemberDictionariesPtr clone=boost::dynamic_pointer_cast<DotsTest::MemberDictionaries>(md);
+    // PrintDictionaries(clone);
+    //TODO: test clone somehow
 }
 
 int main(int /*argc*/, char* /*argv*/[])

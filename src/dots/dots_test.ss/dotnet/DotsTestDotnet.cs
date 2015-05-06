@@ -280,7 +280,7 @@ class DotsTestDotnet
         long lCT;
         int lTS;
         Safir.Dob.Typesystem.CollectionType liA;
-        int lAL;       
+        int lAL;
 
         string name = Safir.Dob.Typesystem.Members.GetInfo(DotsTest.MemberArrays.ClassTypeId, DotsTest.MemberArrays.Int32MemberMemberIndex,
                                              out lMT, out lCT, out lTS, out liA, out lAL);
@@ -7692,7 +7692,7 @@ class DotsTestDotnet
         {
             Console.WriteLine("Failed to find {0}", expectedName);
         }
-        
+
         if (!System.IO.File.Exists(path))
         {
             Console.WriteLine("Dou file does not exist: {0}", path);
@@ -7705,18 +7705,18 @@ class DotsTestDotnet
         FileCheck(Safir.Dob.Typesystem.Internal.InternalOperations.GetDouFilePath
                   (DotsTest.MemberTypes.ClassTypeId),
                   "DotsTest.MemberTypes.dou");
-        
+
         FileCheck(Safir.Dob.Typesystem.Internal.InternalOperations.GetDouFilePath
                   (DotsTest.TestException.ExceptionTypeId),
                   "DotsTest.TestException.dou");
-        
+
         FileCheck(Safir.Dob.Typesystem.Internal.InternalOperations.GetDouFilePath
                   (DotsTest.MemberTypesProperty.ClassTypeId),
                   "DotsTest.MemberTypesProperty.dou");
     }
 
 
-    /* This test attempts to deserialize a piece of xml that represents a class 
+    /* This test attempts to deserialize a piece of xml that represents a class
      * that is part of a dou library whose jar is *not* in the classpath of this test.
      * The idea being that this test will succeed if dots_cpp has loaded all the
      * required jars as specified by typesystem.ini
@@ -7864,9 +7864,9 @@ class DotsTestDotnet
         DotsTest.MemberSequences fromJson=Safir.Dob.Typesystem.Serialization.ToObjectFromJson(json) as DotsTest.MemberSequences;
         PrintSequences(fromJson);
 
-        Console.WriteLine("------ Clone -----");
-        var clone = ms.Clone ();
-        PrintSequences(clone);
+        //Console.WriteLine("------ Clone -----");
+        //var clone = ms.Clone ();
+        //PrintSequences(clone);
 
     }
 
@@ -7951,7 +7951,7 @@ class DotsTestDotnet
         }
 
 
-     
+
 
         Console.WriteLine("--- StringObjectMember ---");
         Console.WriteLine("size: "+md.StringObjectMember.Count);
@@ -7982,7 +7982,7 @@ class DotsTestDotnet
 
         md.EnumInstanceIdMember.Add (DotsTest.TestEnum.Enumeration.MyFirst, DotsTest.ParameterDictionaries.EnumInstanceIdParameter (DotsTest.TestEnum.Enumeration.MyFirst));
         md.EnumInstanceIdMember.Add (DotsTest.TestEnum.Enumeration.MySecond, DotsTest.ParameterDictionaries.EnumInstanceIdParameter (DotsTest.TestEnum.Enumeration.MySecond));
-     
+
         md.InstanceIdEntityIdMember.Add (new Safir.Dob.Typesystem.InstanceId("FirstInstance"), DotsTest.ParameterDictionaries.HandlerIdEntityIdParameter (new Safir.Dob.Typesystem.HandlerId("handlerOne")));
         md.InstanceIdEntityIdMember.Add (new Safir.Dob.Typesystem.InstanceId("SecondInstance"), DotsTest.ParameterDictionaries.HandlerIdEntityIdParameter (new Safir.Dob.Typesystem.HandlerId(2)));
 
@@ -8016,13 +8016,14 @@ class DotsTestDotnet
         var json=Safir.Dob.Typesystem.Serialization.ToJson(md);
         Console.WriteLine (json);
 
-       
+
         Console.WriteLine("------ From Json -----");
         var fromJson = Safir.Dob.Typesystem.Serialization.ToObjectFromJson (json) as DotsTest.MemberDictionaries;
         PrintDictionaries(fromJson);
 
-        Console.WriteLine("------ Clone -----");       
-        DotsTest.MemberDictionaries clone = md.Clone() as DotsTest.MemberDictionaries;
-        PrintDictionaries(clone);
+        //Console.WriteLine("------ Clone -----");
+        //DotsTest.MemberDictionaries clone = md.Clone() as DotsTest.MemberDictionaries;
+        //PrintDictionaries(clone);
+        //TODO: test clone somehow
     }
 }
