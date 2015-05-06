@@ -3886,6 +3886,63 @@ Consumer 0: OnNewEntity:
     Steradian64ArrayMember
     Volt64ArrayMember
     Watt64ArrayMember
+    Int32SequenceMember
+    Int64SequenceMember
+    Float32SequenceMember
+    Float64SequenceMember
+    BooleanSequenceMember
+    EnumerationSequenceMember
+    StringSequenceMember
+    EntityIdSequenceMember
+    EntityIdSequenceMember2
+    TypeIdSequenceMember
+    InstanceIdSequenceMember
+    InstanceIdSequenceMember2
+    ChannelIdSequenceMember
+    ChannelIdSequenceMember2
+    HandlerIdSequenceMember
+    HandlerIdSequenceMember2
+    ObjectSequenceMember
+    BinarySequenceMember
+    TestClassSequenceMember
+    Ampere32SequenceMember
+    CubicMeter32SequenceMember
+    Hertz32SequenceMember
+    Joule32SequenceMember
+    Kelvin32SequenceMember
+    Kilogram32SequenceMember
+    Meter32SequenceMember
+    MeterPerSecond32SequenceMember
+    MeterPerSecondSquared32SequenceMember
+    Newton32SequenceMember
+    Pascal32SequenceMember
+    Radian32SequenceMember
+    RadianPerSecond32SequenceMember
+    RadianPerSecondSquared32SequenceMember
+    Second32SequenceMember
+    SquareMeter32SequenceMember
+    Steradian32SequenceMember
+    Volt32SequenceMember
+    Watt32SequenceMember
+    Ampere64SequenceMember
+    CubicMeter64SequenceMember
+    Hertz64SequenceMember
+    Joule64SequenceMember
+    Kelvin64SequenceMember
+    Kilogram64SequenceMember
+    Meter64SequenceMember
+    MeterPerSecond64SequenceMember
+    MeterPerSecondSquared64SequenceMember
+    Newton64SequenceMember
+    Pascal64SequenceMember
+    Radian64SequenceMember
+    RadianPerSecond64SequenceMember
+    RadianPerSecondSquared64SequenceMember
+    Second64SequenceMember
+    SquareMeter64SequenceMember
+    Steradian64SequenceMember
+    Volt64SequenceMember
+    Watt64SequenceMember
 
 Consumer 0: OnUpdatedEntity:
   EntityId  = (DoseTest.ComplexGlobalEntity, 0)
