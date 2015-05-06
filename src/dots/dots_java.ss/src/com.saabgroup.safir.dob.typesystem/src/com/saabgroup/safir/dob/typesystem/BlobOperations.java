@@ -796,7 +796,7 @@ public class BlobOperations {
 
         Byte[] byteObjects = new Byte[bytes.length];
         for (int i=0; i<bytes.length; i++) {
-            byteObjects[i++] = bytes[i];
+            byteObjects[i] = bytes[i];
         }
 
         return byteObjects;
@@ -804,7 +804,7 @@ public class BlobOperations {
 
     public static void set(BinaryContainer container, long handle, int member, int index)
     {
-        if (container.m_isNull) {
+        if (container.m_isNull || container.m_value.length == 0) {
             Kernel.WriteBinaryMember(handle,
                             null, 0,
                             container.m_isNull,
@@ -824,7 +824,7 @@ public class BlobOperations {
                             member,
                             index,
                             VALUE_MODE);
-    	}
+        }
     }
 
     public static void set(byte[] val, long handle, int member, int index, int keyValMode)

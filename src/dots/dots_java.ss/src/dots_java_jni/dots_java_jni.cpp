@@ -1249,7 +1249,6 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_ReadBinaryMember
     DotsC_Int32 size;
     bool isNull, isChanged;
     DotsC_ReadBinaryMember(_readHandle, val, size, isNull, isChanged, _member, _index, static_cast<DotsC_KeyValMode>(_keyValMode));
-
     if (!isNull)
     {
         SetJArray(env, _val, env->NewDirectByteBuffer((void*)val, size));
@@ -1514,8 +1513,15 @@ void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteEntityIdMember
 void JNICALL Java_com_saabgroup_safir_dob_typesystem_Kernel_WriteBinaryMember
     (JNIEnv * env, jclass, jlong _writerHandle, jobject _val, jint _size, jboolean _isNull, jboolean _isChanged, jint _member, jint _arrayIndex, jint _keyValMode)
 {
-    const char * bin = _isNull ? NULL : static_cast<char*>(env->GetDirectBufferAddress(_val));
-    DotsC_WriteBinaryMember(_writerHandle, bin, _size, _isNull == JNI_TRUE, _isChanged == JNI_TRUE, _member, _arrayIndex, static_cast<DotsC_KeyValMode>(_keyValMode));
+    const char * bin = (_isNull || _size == 0)? NULL : static_cast<char*>(env->GetDirectBufferAddress(_val));
+    DotsC_WriteBinaryMember(_writerHandle,
+                            bin,
+                            _size,
+                            _isNull == JNI_TRUE,
+                            _isChanged == JNI_TRUE,
+                            _member,
+                            _arrayIndex,
+                            static_cast<DotsC_KeyValMode>(_keyValMode));
 }
 
 /*
