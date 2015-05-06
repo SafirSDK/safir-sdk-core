@@ -178,6 +178,7 @@ namespace Internal
                         }
                         ++valueIndex;
                     }
+                    writer.SetChangedTopLevel(memIx,true);
                 }
                     break;
 
