@@ -836,10 +836,7 @@
           <Float32>320</Float32>
           <Float32>-320</Float32>
         </Float32SequenceMember>
-        <BooleanSequenceMember>
-          <Boolean>true</Boolean>
-          <Boolean>false</Boolean>
-        </BooleanSequenceMember>
+        <BooleanSequenceMember/>
         <EnumerationSequenceMember>
           <DoseTest.TestEnum>MyFirst</DoseTest.TestEnum>
           <DoseTest.TestEnum>MySecond</DoseTest.TestEnum>
@@ -848,16 +845,17 @@
           <String>rifaS</String>
           <String/>
         </StringSequenceMember>
-        <EntityIdSequenceMember>
-          <EntityId>
-            <name>DoseTest.RootEntity</name>
-            <instanceId>0</instanceId>
-          </EntityId>
+        <EntityIdSequenceMember/>
+        <EntityIdSequenceMember2>
           <EntityId>
             <name>DoseTest.RootEntity</name>
             <instanceId>SomeInstance</instanceId>
           </EntityId>
-        </EntityIdSequenceMember>
+          <EntityId>
+            <name>DoseTest.RootEntity</name>
+            <instanceId>0</instanceId>
+          </EntityId>
+        </EntityIdSequenceMember2>
         <TypeIdSequenceMember>
           <TypeId>DoseTest.TestItem</TypeId>
           <TypeId>DoseTest.TestEnum</TypeId>
